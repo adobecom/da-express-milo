@@ -191,10 +191,14 @@ function sanitizeTintInputValue(value) {
 }
 
 function tintInputValueToNormalizedValue(value) {
+  if (!value) {
+    return null;
+  }
+
   const parsedValue = Number.parseFloat(value);
 
   if (Number.isNaN(parsedValue)) {
-    return 0;
+    return null;
   }
 
   if (value.includes('.')) {
@@ -281,7 +285,13 @@ function createTintSlider(hex, onInput, onCommit, strings, label = '') {
 
   tintInput.addEventListener('change', () => {
     const sanitizedValue = sanitizeTintInputValue(tintInput.value);
-    const normalizedValue = tintInputValueToNormalizedValue(sanitizedValue || '0');
+    const normalizedValue = tintInputValueToNormalizedValue(sanitizedValue);
+
+    if (normalizedValue === null) {
+      syncTintValue(slider.value);
+      return;
+    }
+
     const val = tintNormalizedValueToIndex(normalizedValue);
     slider.value = val;
     syncTintValue(val);

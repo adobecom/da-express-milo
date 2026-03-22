@@ -239,6 +239,13 @@ describe('createCheckerRenderer', () => {
     tintInputs[1].dispatchEvent(new Event('change'));
     expect(tintInputs[1].value).to.equal('0.5');
     expect(sliders[1].value).to.equal(10);
+
+    tintInputs[1].value = 'abc';
+    tintInputs[1].dispatchEvent(new Event('input'));
+    expect(tintInputs[1].value).to.equal('');
+    tintInputs[1].dispatchEvent(new Event('change'));
+    expect(tintInputs[1].value).to.equal('0.5');
+    expect(sliders[1].value).to.equal(10);
   });
 
   it('syncs the tint slider when color-edit updates to a non-exact tint value', async () => {
