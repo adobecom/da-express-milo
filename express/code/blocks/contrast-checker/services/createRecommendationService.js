@@ -14,6 +14,13 @@ const D65_Y = 0.329;
 const Y_STEP = 0.01;
 const CHROMA_STEP = 0.005;
 const MAX_ITERATIONS = 1000;
+const WCAG_SUGGESTION_TARGETS = Object.freeze([3, 4.5, 7]);
+
+export function getSuggestionTargets(currentRatio) {
+  return WCAG_SUGGESTION_TARGETS
+    .filter((targetRatio) => targetRatio > currentRatio)
+    .slice(0, MAX_RECOMMENDATION);
+}
 
 export default function createRecommendationService() {
   const dataService = createContrastDataService();
@@ -100,9 +107,9 @@ export default function createRecommendationService() {
 
   function getSuggestedColors(currentRatio, bgHex, fgHex) {
     const suggestions = [];
-    const startRatio = Math.ceil(currentRatio) + 1;
+    const targetRatios = getSuggestionTargets(currentRatio);
 
-    for (let targetRatio = startRatio; targetRatio <= startRatio + 3; targetRatio += 1) {
+    for (const targetRatio of targetRatios) {
       if (suggestions.length >= MAX_RECOMMENDATION) break;
 
       const fgResult = findContrastingColor(fgHex, bgHex, targetRatio);

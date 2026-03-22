@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import createRecommendationService from '../../../../express/code/blocks/contrast-checker/services/createRecommendationService.js';
+import createRecommendationService, { getSuggestionTargets } from '../../../../express/code/blocks/contrast-checker/services/createRecommendationService.js';
 import createContrastDataService from '../../../../express/code/blocks/contrast-checker/services/createContrastDataService.js';
 
 describe('createRecommendationService', () => {
@@ -80,12 +80,13 @@ describe('createRecommendationService', () => {
       });
     });
 
-    it('all suggestion ratios meet or exceed their target thresholds', () => {
-      const currentRatio = 3;
-      const suggestions = service.getSuggestedColors(currentRatio, '#FFFFFF', '#999999');
-      const startRatio = Math.ceil(currentRatio) + 1;
-      suggestions.forEach((s, i) => {
-        expect(s.ratio).to.be.at.least(startRatio + i);
+    it('all suggestion ratios meet or exceed the next WCAG targets', () => {
+      const currentRatio = 2.5;
+      const suggestions = service.getSuggestedColors(currentRatio, '#DDDDDD', '#AAAAAA');
+      const targetRatios = getSuggestionTargets(currentRatio);
+
+      suggestions.forEach((s) => {
+        expect(targetRatios.some((targetRatio) => s.ratio >= targetRatio)).to.be.true;
       });
     });
 
@@ -99,6 +100,21 @@ describe('createRecommendationService', () => {
       const suggestions = service.getSuggestedColors(2.5, '#DDDDDD', '#AAAAAA');
       expect(suggestions).to.be.an('array');
       expect(suggestions.length).to.be.greaterThan(0);
+    });
+  });
+
+  describe('getSuggestionTargets', () => {
+    it('uses WCAG thresholds above the current ratio', () => {
+      expect(getSuggestionTargets(2.5)).to.deep.equal([3, 4.5, 7]);
+    });
+
+    it('starts at 7 for ratios between 4.5 and 7', () => {
+      expect(getSuggestionTargets(6.1)).to.deep.equal([7]);
+    });
+
+    it('returns no targets at or above 7', () => {
+      expect(getSuggestionTargets(7)).to.deep.equal([]);
+      expect(getSuggestionTargets(21)).to.deep.equal([]);
     });
   });
 
