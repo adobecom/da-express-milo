@@ -2,7 +2,7 @@ import { createTag } from '../../../scripts/utils.js';
 import { createBaseRenderer } from '../../../scripts/color-shared/renderers/createBaseRenderer.js';
 import { announceToScreenReader } from '../../../scripts/color-shared/spectrum/index.js';
 import { ensureHash, isMobileOrTabletViewport } from '../../../scripts/color-shared/utils/utilities.js';
-import { generateTints } from '../utils/contrastUtils.js';
+import { generateTints, hexToRgb, rgbToHsv } from '../utils/contrastUtils.js';
 import createSuggestionsTab from './components/createSuggestionsTab.js';
 import createSetRatioTab from './components/createSetRatioTab.js';
 import { createColorInput } from './components/createColorInput.js';
@@ -18,7 +18,7 @@ import '../../../scripts/color-shared/components/color-channel-slider/index.js';
 const regionMap = { largeText: 'heading', smallText: 'body', graphicsAndUi: 'ui' };
 const ACTION_MENU_HISTORY_IDS = ['contrast-checker-menu', 'contrast-checker-controls-only'];
 const HISTORY_DEBOUNCE_MS = 300;
-const TINT_COUNT = 20;
+const TINT_COUNT = 21;
 const MAX_TINT_INDEX = TINT_COUNT - 1;
 
 async function loadSwapIcon() {
@@ -147,7 +147,7 @@ function buildResultCell(pass, strings) {
 }
 
 function buildTintGradient(hex) {
-  const tints = generateTints(hex, TINT_COUNT);
+  const tints = generateTintScale(hex);
   const stops = tints.map((t, i) => {
     const percent = (i / (tints.length - 1)) * 100;
     return `${t} ${percent}%`;
@@ -155,59 +155,142 @@ function buildTintGradient(hex) {
   return `linear-gradient(to right, ${stops.join(', ')})`;
 }
 
-function findTintIndex(hex) {
-  const tints = generateTints(hex, TINT_COUNT);
-  const idx = tints.findIndex((t) => t.toLowerCase() === hex.toLowerCase());
-  return Math.max(idx, 0);
+function generateTintScale(hex) {
+  return ['#000000', ...generateTints(hex, TINT_COUNT - 1)];
 }
 
-function createTintSlider(hex, onInput, onCommit, strings) {
+function findTintIndex(hex) {
+  const { r, g, b } = hexToRgb(hex);
+  const { v } = rgbToHsv(r, g, b);
+  return clampTintIndex(Math.round(v * MAX_TINT_INDEX));
+}
+
+function clampTintIndex(index) {
+  return Math.max(0, Math.min(MAX_TINT_INDEX, Number(index) || 0));
+}
+
+function tintIndexToPercentValue(index) {
+  return Math.round((clampTintIndex(index) / MAX_TINT_INDEX) * 100);
+}
+
+function formatTintDisplayValue(index) {
+  return (Math.floor((tintIndexToPercentValue(index) / 10)) / 10).toString();
+}
+
+function sanitizeTintInputValue(value) {
+  const numericValue = value.replaceAll(/[^\d.]/g, '');
+  const decimalIndex = numericValue.indexOf('.');
+
+  if (decimalIndex === -1) {
+    return numericValue.slice(0, 3);
+  }
+
+  const integerPart = numericValue.slice(0, decimalIndex + 1);
+  const fractionalPart = numericValue.slice(decimalIndex + 1).replaceAll('.', '').slice(0, 2);
+  return `${integerPart}${fractionalPart}`.slice(0, 5);
+}
+
+function tintInputValueToNormalizedValue(value) {
+  const parsedValue = Number.parseFloat(value);
+
+  if (Number.isNaN(parsedValue)) {
+    return 0;
+  }
+
+  if (value.includes('.')) {
+    return Math.max(0, Math.min(1, parsedValue));
+  }
+
+  return Math.max(0, Math.min(100, parsedValue)) / 100;
+}
+
+function tintNormalizedValueToIndex(value) {
+  return clampTintIndex(Math.round(value * MAX_TINT_INDEX));
+}
+
+function createTintControlName(label) {
+  return `${label.toLowerCase().replaceAll(/\s+/g, '-').replaceAll(/[^a-z0-9-]/g, '')}-tint-value`;
+}
+
+function createTintAccessibleLabel(label, description) {
+  return label ? `${label}: ${description}` : description;
+}
+
+function createTintSlider(hex, onInput, onCommit, strings, label = '') {
   const container = createTag('div', { class: 'cc-slider-container' });
   const sliderRow = createTag('div', { class: 'cc-tint-slider-row' });
   const sliderWrapper = createTag('div', { class: 'cc-tint-slider-wrapper' });
   const slider = createTag('color-channel-slider');
+  const tintInputAriaLabel = createTintAccessibleLabel(label, strings.tintValueAriaLabel);
+  const tintSliderAriaLabel = createTintAccessibleLabel(label, strings.tintAdjustmentLabel);
 
   const tintInput = createTag('input', {
     type: 'text',
     class: 'cc-tint-value-input',
     value: '0',
-    'aria-label': strings.tintValueAriaLabel,
-    maxlength: '3',
+    name: createTintControlName(label || 'tint'),
+    'aria-label': tintInputAriaLabel,
+    inputmode: 'decimal',
+    autocomplete: 'off',
+    spellcheck: 'false',
+    maxlength: '5',
   });
 
-  let tints = generateTints(hex, TINT_COUNT);
+  let tints = generateTintScale(hex);
+
+  function syncTintValue(index) {
+    const displayValue = formatTintDisplayValue(index);
+    tintInput.value = displayValue;
+    slider.valuetext = displayValue;
+  }
 
   slider.min = 0;
   slider.max = MAX_TINT_INDEX;
   slider.value = findTintIndex(hex);
-  slider.label = strings.tintAdjustmentLabel;
+  slider.label = tintSliderAriaLabel;
   slider.gradient = buildTintGradient(hex);
-  tintInput.value = slider.value;
+  syncTintValue(slider.value);
 
   slider.addEventListener('input', (e) => {
-    const val = e.detail?.value ?? e.target.value;
-    const newHex = tints[Number(val)];
+    const val = clampTintIndex(e.detail?.value ?? e.target.value);
+    const newHex = tints[val];
     if (newHex) {
-      tintInput.value = val;
+      slider.value = val;
+      syncTintValue(val);
       onInput(newHex);
     }
   });
 
   slider.addEventListener('change', (e) => {
-    const val = e.detail?.value ?? e.target.value;
-    const newHex = tints[Number(val)];
+    const val = clampTintIndex(e.detail?.value ?? e.target.value);
+    const newHex = tints[val];
     if (newHex) {
-      tintInput.value = val;
+      slider.value = val;
+      syncTintValue(val);
       onCommit(newHex);
     }
   });
 
+  tintInput.addEventListener('input', () => {
+    const sanitizedValue = sanitizeTintInputValue(tintInput.value);
+
+    if (tintInput.value !== sanitizedValue) {
+      tintInput.value = sanitizedValue;
+    }
+  });
+
   tintInput.addEventListener('change', () => {
-    const val = Math.max(0, Math.min(MAX_TINT_INDEX, Number.parseInt(tintInput.value, 10) || 0));
-    tintInput.value = val;
+    const sanitizedValue = sanitizeTintInputValue(tintInput.value);
+    const normalizedValue = tintInputValueToNormalizedValue(sanitizedValue || '0');
+    const val = tintNormalizedValueToIndex(normalizedValue);
     slider.value = val;
+    syncTintValue(val);
     const newHex = tints[val];
     if (newHex) onCommit(newHex);
+  });
+
+  tintInput.addEventListener('blur', () => {
+    syncTintValue(slider.value);
   });
 
   sliderWrapper.appendChild(slider);
@@ -220,13 +303,13 @@ function createTintSlider(hex, onInput, onCommit, strings) {
     slider,
     tintInput,
     refreshTints(newHex) {
-      tints = generateTints(newHex, TINT_COUNT);
+      tints = generateTintScale(newHex);
       slider.gradient = buildTintGradient(newHex);
     },
     updatePosition(newHex) {
       const idx = findTintIndex(newHex);
       slider.value = idx;
-      tintInput.value = idx;
+      syncTintValue(idx);
     },
   };
 }
@@ -546,6 +629,7 @@ export function createCheckerRenderer(options) {
 
   function createSliderFor(type, inputControl) {
     const initialHex = type === 'fg' ? foreground : background;
+    const label = type === 'fg' ? strings.foregroundColor : strings.backgroundColor;
 
     return createTintSlider(
       initialHex,
@@ -565,6 +649,7 @@ export function createCheckerRenderer(options) {
         }
       },
       strings,
+      label,
     );
   }
 

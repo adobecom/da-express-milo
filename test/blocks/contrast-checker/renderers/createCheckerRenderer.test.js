@@ -4,6 +4,23 @@ import { createCheckerRenderer } from '../../../../express/code/blocks/contrast-
 import createContrastDataService from '../../../../express/code/blocks/contrast-checker/services/createContrastDataService.js';
 import createHistoryService from '../../../../express/code/blocks/contrast-checker/services/createHistoryService.js';
 import createRecommendationService from '../../../../express/code/blocks/contrast-checker/services/createRecommendationService.js';
+import { generateTints } from '../../../../express/code/blocks/contrast-checker/utils/contrastUtils.js';
+
+function waitForFrame() {
+  return new Promise((resolve) => {
+    requestAnimationFrame(resolve);
+  });
+}
+
+async function waitForElement(selector, attempts = 10) {
+  for (let index = 0; index < attempts; index += 1) {
+    const element = document.body.querySelector(selector);
+    if (element) return element;
+    await waitForFrame();
+  }
+
+  return null;
+}
 
 function createFakeActionMenu(target, { id }) {
   const element = document.createElement('div');
@@ -144,5 +161,121 @@ describe('createCheckerRenderer', () => {
       'Must meet a ratio of 3:1',
       'Must meet a ratio of 4.5:1',
     ]);
+  });
+
+  it('shows normalized tint display values and distinct accessible names for each tint input', async () => {
+    const container = document.createElement('div');
+    const backgroundTint = generateTints('#336699', 20)[9];
+    document.body.appendChild(container);
+
+    renderer = createCheckerRenderer({
+      container,
+      dataService: createContrastDataService(),
+      config: {
+        initialForeground: '#FFFFFF',
+        initialBackground: backgroundTint,
+      },
+      services: {
+        history: createHistoryService(),
+        recommendation: createRecommendationService(),
+      },
+    });
+
+    await renderer.render();
+
+    const tintInputs = [...container.querySelectorAll('.cc-tint-value-input')];
+    const sliders = [...container.querySelectorAll('color-channel-slider')];
+
+    expect(tintInputs).to.have.lengthOf(2);
+    expect(sliders).to.have.lengthOf(2);
+
+    expect(tintInputs[0].value).to.equal('1');
+    expect(tintInputs[0].getAttribute('aria-label')).to.equal('Foreground color: Tint value');
+    expect(tintInputs[0].getAttribute('name')).to.equal('foreground-color-tint-value');
+
+    expect(tintInputs[1].value).to.equal('0.5');
+    expect(tintInputs[1].getAttribute('aria-label')).to.equal('Background color: Tint value');
+    expect(tintInputs[1].getAttribute('name')).to.equal('background-color-tint-value');
+    expect(tintInputs[1].getAttribute('inputmode')).to.equal('decimal');
+
+    sliders[1].dispatchEvent(new CustomEvent('input', {
+      detail: { value: 20 },
+      bubbles: true,
+      composed: true,
+    }));
+    expect(tintInputs[1].value).to.equal('1');
+
+    sliders[1].dispatchEvent(new CustomEvent('input', {
+      detail: { value: 19 },
+      bubbles: true,
+      composed: true,
+    }));
+    expect(tintInputs[1].value).to.equal('0.9');
+
+    sliders[1].dispatchEvent(new CustomEvent('input', {
+      detail: { value: 0 },
+      bubbles: true,
+      composed: true,
+    }));
+    expect(tintInputs[1].value).to.equal('0');
+
+    tintInputs[1].dispatchEvent(new Event('focus'));
+    expect(tintInputs[1].value).to.equal('0');
+
+    tintInputs[1].value = '0.5a';
+    tintInputs[1].dispatchEvent(new Event('input'));
+    expect(tintInputs[1].value).to.equal('0.5');
+
+    tintInputs[1].dispatchEvent(new Event('change'));
+    expect(tintInputs[1].value).to.equal('0.5');
+    expect(sliders[1].value).to.equal(10);
+
+    tintInputs[1].value = '124';
+    tintInputs[1].dispatchEvent(new Event('change'));
+    expect(tintInputs[1].value).to.equal('1');
+    expect(sliders[1].value).to.equal(20);
+
+    tintInputs[1].value = '50';
+    tintInputs[1].dispatchEvent(new Event('change'));
+    expect(tintInputs[1].value).to.equal('0.5');
+    expect(sliders[1].value).to.equal(10);
+  });
+
+  it('syncs the tint slider when color-edit updates to a non-exact tint value', async () => {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+
+    renderer = createCheckerRenderer({
+      container,
+      dataService: createContrastDataService(),
+      config: {
+        initialForeground: '#FFFFFF',
+        initialBackground: '#336699',
+      },
+      services: {
+        history: createHistoryService(),
+        recommendation: createRecommendationService(),
+      },
+    });
+
+    await renderer.render();
+
+    const backgroundField = container.querySelectorAll('.ax-color-input__field')[1];
+    const tintInputs = [...container.querySelectorAll('.cc-tint-value-input')];
+    const sliders = [...container.querySelectorAll('color-channel-slider')];
+
+    backgroundField.click();
+
+    const editor = await waitForElement('color-edit');
+    expect(editor).to.exist;
+
+    editor.dispatchEvent(new CustomEvent('color-change', {
+      detail: { hex: '#7A7A7A' },
+      bubbles: true,
+      composed: true,
+    }));
+
+    expect(tintInputs[1].value).to.equal('0.5');
+    expect(sliders[1].value).to.equal(10);
   });
 });
