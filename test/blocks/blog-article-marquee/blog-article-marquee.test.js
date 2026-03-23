@@ -84,7 +84,7 @@ describe('Blog Article Marquee block', () => {
     const expectedProductName = META_FIXTURES.author;
     const expectedProductDate = META_FIXTURES['publication-date'];
     const expectedEyebrow = META_FIXTURES.category;
-    const expectedSubcopy = META_FIXTURES['sub-heading'];
+    const expectedSubcopy = META_FIXTURES.subheading;
     const expectedHeadline = META_FIXTURES.headline;
 
     const eyebrow = contentColumn.querySelector('.blog-article-marquee-eyebrow');
