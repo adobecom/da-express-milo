@@ -5,12 +5,9 @@ import {
   normalizeHex,
   createColorPaletteParamApi,
   PARAM_NAME,
-} from '../../../../express/code/scripts/color-shared/utils/colorPaletteParam.js';
-
-import {
   PALETTE_PRESETS,
   pickRandomPalette,
-} from '../../../../express/code/scripts/color-shared/utils/colorPaletteDefaults.js';
+} from '../../../../express/code/scripts/color-shared/utils/utilities.js';
 
 describe('normalizeHex', () => {
   it('normalizes a 6-digit hex string', () => {

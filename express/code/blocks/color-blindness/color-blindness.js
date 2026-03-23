@@ -1,6 +1,5 @@
 import { createSwatchesRenderer } from '../../scripts/color-shared/renderers/createSwatchesRenderer.js';
-import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/colorPaletteParam.js';
-import { PALETTE_PRESETS } from '../../scripts/color-shared/utils/colorPaletteDefaults.js';
+import { createColorPaletteParamApi, PALETTE_PRESETS } from '../../scripts/color-shared/utils/utilities.js';
 
 const api = createColorPaletteParamApi();
 const renderers = [];
