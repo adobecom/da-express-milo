@@ -8,7 +8,7 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createPalettesReviewDemo } from './demo/palettesDemo.js';
-import loadCSS from '../../scripts/color-shared/utils/loadCss.js';
+import { loadComponentStyles } from '../../libs/utils/loadComponentStyles.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
@@ -27,14 +27,14 @@ const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-containe
 const EVENTS = { PALETTE_CLICK: 'palette-click', GRADIENT_CLICK: 'gradient-click', SEARCH: 'search', FILTER: 'filter', LOAD_MORE: 'load-more' };
 
 const STRIP_SHARED_STYLES = [
-  '/express/code/scripts/color-shared/components/strips/color-strip.css',
+  '../../scripts/color-shared/components/strips/color-strip.css',
 ];
 
 async function loadStripSharedStyles() {
   await Promise.all(
     STRIP_SHARED_STYLES.map(async (href) => {
       try {
-        await loadCSS(href);
+        await loadComponentStyles(href, import.meta.url);
       } catch (error) {
         window.lana?.log(`[ColorExplore] Failed loading shared style ${href}: ${error?.message}`, {
           tags: 'color-explore,css',
