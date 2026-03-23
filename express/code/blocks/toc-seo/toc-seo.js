@@ -769,7 +769,7 @@ export default async function decorate(block) {
 
     // Phase 3: Create DOM structure
     const container = createContainer();
-    const rawMetaStop = getMetadata('stopElement') || getMetadata('stop-element');
+    const rawMetaStop = getMetadata('stopelement');
     const metaStop = rawMetaStop && !rawMetaStop.startsWith('.') ? `.${rawMetaStop}` : rawMetaStop;
     const stopSelector = config.stopElement || metaStop || CONFIG.selectors.stopElement || '';
     container.dataset.stopSelector = stopSelector;
