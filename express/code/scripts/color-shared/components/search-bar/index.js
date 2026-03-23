@@ -1,2 +1,2 @@
-export * from './helpers/index.js';
+export * from './helpers.js';
 export * from './styles/index.js';
