@@ -325,9 +325,6 @@ export default async function decorate(block) {
         mobile: false,
         embedded: true,
         title: 'Base color',
-        titleDetailStyle: true,
-        hideHexSectionLabel: true,
-        showHexLock: true,
       },
       {
         onColorChange: (detail) => {
@@ -428,8 +425,17 @@ export default async function decorate(block) {
         swatchFeatures: {
           copy: true,
           hexCode: true,
+          // colorPicker: true,
+          // lock: true,
+          // trash: true,
+          // drag: true,
+          // addLeft: true,
+          // addRight: true,
+          // editTint: true,
+          // baseColor: true,
+          // emptyStrip: true,
         },
-        swatchVerticalMaxPerRow: 6,
+        swatchVerticalMaxPerRow: 5,
       },
     });
     await stripRenderer.render(stripHost);

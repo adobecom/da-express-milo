@@ -27,9 +27,6 @@ class ColorEdit extends LitElement {
       open: { type: Boolean, reflect: true },
       embedded: { type: Boolean, reflect: true, attribute: 'embedded' },
       title: { type: String, attribute: 'title' },
-      titleDetailStyle: { type: Boolean, reflect: true, attribute: 'title-detail-style' },
-      hideHexSectionLabel: { type: Boolean, reflect: true, attribute: 'hide-hex-section-label' },
-      showHexLock: { type: Boolean, reflect: true, attribute: 'show-hex-lock' },
       _hue: { type: Number, state: true },
       _saturation: { type: Number, state: true },
       _brightness: { type: Number, state: true },
@@ -54,9 +51,6 @@ class ColorEdit extends LitElement {
     this._liveRegionText = '';
     this.embedded = false;
     this.title = '';
-    this.titleDetailStyle = false;
-    this.hideHexSectionLabel = false;
-    this.showHexLock = false;
     this._hexRowLocked = false;
   }
 
@@ -123,7 +117,7 @@ class ColorEdit extends LitElement {
 
   _emitColorChange() {
     const rgb = this._rgb;
-    if (this.showHexLock) {
+    if (this.embedded) {
       this._hexRowLocked = true;
       const lockIdx = 0;
       if (this.palette?.length && lockIdx < this.palette.length) {
@@ -158,7 +152,7 @@ class ColorEdit extends LitElement {
 
   _onSwatchClick(index) {
     if (index === this.selectedIndex) return;
-    if (this.showHexLock) {
+    if (this.embedded) {
       this._hexRowLocked = false;
     }
     this.selectedIndex = index;
@@ -309,10 +303,9 @@ class ColorEdit extends LitElement {
 
   _renderHeader() {
     const titleText = this.title || 'Edit color';
-    const titleClass = this.titleDetailStyle ? 'ce-title ce-title--as-label' : 'ce-title';
     return html`
       <div class="ce-header">
-        <span class=${titleClass}>${titleText}</span>
+        <span class="ce-title">${titleText}</span>
         <div class="ce-mode-wrap">
           <button
             type="button"
@@ -370,7 +363,7 @@ class ColorEdit extends LitElement {
   _renderPaletteSwatches() {
     if (!this.showPalette || !this.palette?.length) return nothing;
     const lockIdx = 0;
-    const showLocked = this.showHexLock && this._hexRowLocked;
+    const showLocked = this.embedded && this._hexRowLocked;
     return html`
       <div class="ce-palette-section">
         <span class="ce-palette-label">Palette colors</span>
@@ -449,11 +442,10 @@ class ColorEdit extends LitElement {
   }
 
   _renderHexInput() {
-    if (this.showHexLock) {
+    if (this.embedded) {
       const locked = this._hexRowLocked;
       return html`
         <div class="ce-hex-section ce-hex-section--inline">
-          ${this.hideHexSectionLabel ? nothing : html`<span class="ce-hex-label">HEX</span>`}
           <div class="ce-hex-inline-row">
             <div
               class="ce-hex-preview-dot"
@@ -488,7 +480,7 @@ class ColorEdit extends LitElement {
     }
     return html`
       <div class="ce-hex-section">
-        ${this.hideHexSectionLabel ? nothing : html`<span class="ce-hex-label">HEX</span>`}
+        <span class="ce-hex-label">HEX</span>
         <sp-textfield
           class="ce-hex-field"
           size="m"

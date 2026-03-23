@@ -32,9 +32,16 @@ export const style = css`
         width: 100%;
         max-width: none;
         box-shadow: none;
+        padding: 0;
+        gap: 0;
     }
 
-    .ce-title.ce-title--as-label {
+    :host([embedded]) .ce-title-dropdown-colors {
+        box-shadow: none;
+        padding-block: var(--spacing-80);
+    }
+
+    :host([embedded]) .ce-title {
         font-family: var(--body-font-family);
         font-size: var(--body-font-size-s);
         font-weight: var(--heading-font-weight-regular);
@@ -291,6 +298,10 @@ export const style = css`
         clip: rect(0, 0, 0, 0);
         white-space: nowrap;
         border: 0;
+    }
+
+    :host([embedded]) .ce-hex-section {
+        padding-block-end: 8px;
     }
 
     @media (prefers-reduced-motion: reduce) {
