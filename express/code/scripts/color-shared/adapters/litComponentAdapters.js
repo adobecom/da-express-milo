@@ -256,6 +256,11 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
     colorMode = 'RGB',
     showPalette = true,
     mobile = false,
+    embedded = false,
+    title = '',
+    titleDetailStyle = false,
+    hideHexSectionLabel = false,
+    showHexLock = false,
   } = options;
 
   element.palette = palette.slice(0, 10);
@@ -263,6 +268,11 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
   element.colorMode = colorMode;
   element.showPalette = showPalette;
   element.mobile = mobile;
+  element.embedded = embedded;
+  element.title = title;
+  element.titleDetailStyle = titleDetailStyle;
+  element.hideHexSectionLabel = hideHexSectionLabel;
+  element.showHexLock = showHexLock;
 
   element.addEventListener('color-change', (e) => {
     callbacks.onColorChange?.(e.detail);

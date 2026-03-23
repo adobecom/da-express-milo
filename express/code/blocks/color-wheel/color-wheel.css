@@ -184,6 +184,19 @@
   position: fixed;
 }
 
+/* Base color tab (color-edit embedded layout) */
+
+.color-wheel .base-color-content {
+  width: 100%;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.color-wheel .base-color-content color-edit {
+  display: block;
+  width: 100%;
+}
+
 /* Color wheel panel */
 
 color-wheel-express {

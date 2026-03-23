@@ -28,6 +28,21 @@ export const style = css`
         box-shadow: var(--Elevation-Dialog);
     }
 
+    :host([embedded]) .color-edit-panel {
+        width: 100%;
+        max-width: none;
+        box-shadow: none;
+    }
+
+    .ce-title.ce-title--as-label {
+        font-family: var(--body-font-family);
+        font-size: var(--body-font-size-s);
+        font-weight: var(--heading-font-weight-regular);
+        line-height: var(--ax-detail-l-lh);
+        letter-spacing: 0;
+        color: var(--color-gray-950);
+    }
+
     /* ---- Mobile overlay + bottom sheet ---- */
 
     .ce-overlay {
@@ -226,6 +241,44 @@ export const style = css`
         --mod-textfield-border-color: var(--color-gray-300-variant);
         --mod-textfield-background-color: var(--color-white);
         --mod-textfield-border-color-hover: var(--color-gray-400-variant);
+    }
+
+    .ce-hex-section--inline .ce-hex-inline-row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: var(--spacing-100);
+        width: 100%;
+    }
+
+    .ce-hex-preview-dot {
+        flex-shrink: 0;
+        width: var(--spacing-300);
+        height: var(--spacing-300);
+        border-radius: 50%;
+        border: 1px solid rgba(31, 31, 31, 0.2);
+        box-sizing: border-box;
+    }
+
+    .ce-hex-section--inline .ce-hex-field {
+        flex: 1;
+        min-width: 0;
+        width: auto;
+    }
+
+    .ce-hex-lock-icon {
+        display: flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .ce-hex-lock-icon img {
+        display: block;
+    }
+
+    sp-swatch.ce-swatch--locked {
+        box-shadow: inset 0 0 0 2px var(--color-gray-900);
     }
 
     .ce-sr-only {

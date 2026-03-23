@@ -25,11 +25,17 @@ class ColorEdit extends LitElement {
       showPalette: { type: Boolean, attribute: 'show-palette' },
       mobile: { type: Boolean, reflect: true },
       open: { type: Boolean, reflect: true },
+      embedded: { type: Boolean, reflect: true, attribute: 'embedded' },
+      title: { type: String, attribute: 'title' },
+      titleDetailStyle: { type: Boolean, reflect: true, attribute: 'title-detail-style' },
+      hideHexSectionLabel: { type: Boolean, reflect: true, attribute: 'hide-hex-section-label' },
+      showHexLock: { type: Boolean, reflect: true, attribute: 'show-hex-lock' },
       _hue: { type: Number, state: true },
       _saturation: { type: Number, state: true },
       _brightness: { type: Number, state: true },
       _modeMenuOpen: { type: Boolean, state: true },
       _liveRegionText: { type: String, state: true },
+      _hexRowLocked: { type: Boolean, state: true },
     };
   }
 
@@ -46,6 +52,12 @@ class ColorEdit extends LitElement {
     this._brightness = 100;
     this._modeMenuOpen = false;
     this._liveRegionText = '';
+    this.embedded = false;
+    this.title = '';
+    this.titleDetailStyle = false;
+    this.hideHexSectionLabel = false;
+    this.showHexLock = false;
+    this._hexRowLocked = false;
   }
 
   get _rgb() {
@@ -111,6 +123,15 @@ class ColorEdit extends LitElement {
 
   _emitColorChange() {
     const rgb = this._rgb;
+    if (this.showHexLock) {
+      this._hexRowLocked = true;
+      const lockIdx = 0;
+      if (this.palette?.length && lockIdx < this.palette.length) {
+        const newPalette = [...this.palette];
+        newPalette[lockIdx] = this._hex;
+        this.palette = newPalette;
+      }
+    }
     this.dispatchEvent(new CustomEvent('color-change', {
       bubbles: true,
       composed: true,
@@ -137,6 +158,9 @@ class ColorEdit extends LitElement {
 
   _onSwatchClick(index) {
     if (index === this.selectedIndex) return;
+    if (this.showHexLock) {
+      this._hexRowLocked = false;
+    }
     this.selectedIndex = index;
     this._syncFromPalette();
     this.shadowRoot.querySelector('base-color')?.resetOriginalColor();
@@ -284,9 +308,11 @@ class ColorEdit extends LitElement {
   }
 
   _renderHeader() {
+    const titleText = this.title || 'Edit color';
+    const titleClass = this.titleDetailStyle ? 'ce-title ce-title--as-label' : 'ce-title';
     return html`
       <div class="ce-header">
-        <span class="ce-title">Edit color</span>
+        <span class=${titleClass}>${titleText}</span>
         <div class="ce-mode-wrap">
           <button
             type="button"
@@ -323,8 +349,28 @@ class ColorEdit extends LitElement {
     `;
   }
 
+  _paletteSwatchItem(hex, i, lockIdx, showLocked) {
+    const validHex = hex.startsWith('#') ? hex : `#${hex}`;
+    const isLockedSlot = showLocked && i === lockIdx;
+    const label = isLockedSlot ? `Color ${validHex}, locked` : `Color ${validHex}`;
+    return html`
+      <sp-swatch
+        class=${isLockedSlot ? 'ce-swatch--locked' : ''}
+        border="light"
+        cornerRounding="partial"
+        color=${validHex}
+        value=${String(i)}
+        ?selected=${i === this.selectedIndex}
+        @click=${() => this._onSwatchClick(i)}
+        aria-label=${label}
+      ></sp-swatch>
+    `;
+  }
+
   _renderPaletteSwatches() {
     if (!this.showPalette || !this.palette?.length) return nothing;
+    const lockIdx = 0;
+    const showLocked = this.showHexLock && this._hexRowLocked;
     return html`
       <div class="ce-palette-section">
         <span class="ce-palette-label">Palette colors</span>
@@ -332,20 +378,7 @@ class ColorEdit extends LitElement {
           size="s"
           cornerRadius="partial"
         >
-          ${this.palette.map((hex, i) => {
-            const validHex = hex.startsWith('#') ? hex : `#${hex}`;
-            return html`
-              <sp-swatch
-                border="light"
-                cornerRounding="partial"
-                color=${validHex}
-                value=${String(i)}
-                ?selected=${i === this.selectedIndex}
-                @click=${() => this._onSwatchClick(i)}
-                aria-label="Color ${validHex}"
-              ></sp-swatch>
-            `;
-          })}
+          ${this.palette.map((hex, i) => this._paletteSwatchItem(hex, i, lockIdx, showLocked))}
         </sp-swatch-group>
       </div>
     `;
@@ -365,8 +398,8 @@ class ColorEdit extends LitElement {
   }
 
   _onHexInput(e) {
-    const field = e.target;
-    const value = field.value;
+    const { target: field } = e;
+    const { value } = field;
 
     const hex = value.replace(/#/g, '');
     const normalized = `#${hex}`;
@@ -396,7 +429,8 @@ class ColorEdit extends LitElement {
     const stripped = pasted.replace(/#/g, '');
     if (stripped === pasted) return;
     e.preventDefault();
-    const input = e.composedPath().find((el) => el instanceof HTMLInputElement) || document.activeElement;
+    const path = e.composedPath();
+    const input = path.find((el) => el instanceof HTMLInputElement) || document.activeElement;
     if (!input || !(input instanceof HTMLInputElement)) return;
     const start = input.selectionStart ?? input.value.length;
     const end = input.selectionEnd ?? input.value.length;
@@ -415,9 +449,46 @@ class ColorEdit extends LitElement {
   }
 
   _renderHexInput() {
+    if (this.showHexLock) {
+      const locked = this._hexRowLocked;
+      return html`
+        <div class="ce-hex-section ce-hex-section--inline">
+          ${this.hideHexSectionLabel ? nothing : html`<span class="ce-hex-label">HEX</span>`}
+          <div class="ce-hex-inline-row">
+            <div
+              class="ce-hex-preview-dot"
+              style=${`background-color: ${this._hex}`}
+              aria-hidden="true"
+            ></div>
+            <sp-textfield
+              class="ce-hex-field"
+              size="m"
+              maxlength="7"
+              .value=${this._hex}
+              label=""
+              label-visibility="none"
+              @input=${this._onHexInput}
+              @paste=${this._onHexPaste}
+              @change=${this._onHexCommit}
+            ></sp-textfield>
+            <span
+              class="ce-hex-lock-icon"
+              aria-label=${locked ? 'Color locked' : 'Color unlocked'}
+            >
+              <img
+                src="/express/code/icons/${locked ? 'S2_Icon_Lock_20_N.svg' : 'S2_Icon_LockOpen_20_N.svg'}"
+                alt=""
+                width="20"
+                height="20"
+              />
+            </span>
+          </div>
+        </div>
+      `;
+    }
     return html`
       <div class="ce-hex-section">
-        <span class="ce-hex-label">HEX</span>
+        ${this.hideHexSectionLabel ? nothing : html`<span class="ce-hex-label">HEX</span>`}
         <sp-textfield
           class="ce-hex-field"
           size="m"

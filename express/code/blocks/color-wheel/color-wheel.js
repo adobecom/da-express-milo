@@ -2,7 +2,7 @@ import { createTag } from '../../scripts/utils.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createExpressTabs } from '../../scripts/color-shared/spectrum/components/express-tabs.js';
 import createColorWheelExpressAdapter from '../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js';
-import { createBaseColorAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
+import { createColorEditAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
@@ -62,7 +62,18 @@ let layoutInstance = null;
 let stripRenderer = null;
 let paletteUnsubscribe = null;
 let imagePanelDestroy = null;
-let baseColorAdapter = null;
+let colorEditAdapter = null;
+
+function swatchHexListFromState(state) {
+  const swatches = state?.swatches || [];
+  if (!swatches.length) return ['#FF0000'];
+  return swatches.map((s) => s.hex).slice(0, 10);
+}
+
+function palettesEqual(a, b) {
+  if (!a?.length || !b?.length || a.length !== b.length) return false;
+  return a.every((c, i) => String(c).toUpperCase() === String(b[i]).toUpperCase());
+}
 
 function countThemeSwatches(state) {
   return (state?.swatches || []).filter((s) => s?.hex).length;
@@ -279,8 +290,8 @@ function cleanup() {
   paletteUnsubscribe = null;
   imagePanelDestroy?.();
   imagePanelDestroy = null;
-  baseColorAdapter?.destroy?.();
-  baseColorAdapter = null;
+  colorEditAdapter?.destroy?.();
+  colorEditAdapter = null;
   stripRenderer?.destroy?.();
   stripRenderer = null;
   layoutInstance?.destroy();
@@ -295,30 +306,41 @@ export default async function decorate(block) {
   block.className = 'color-wheel';
 
   function buildBaseColorContent(controller) {
-    baseColorAdapter?.destroy?.();
-    baseColorAdapter = null;
+    colorEditAdapter?.destroy?.();
+    colorEditAdapter = null;
 
     const state = controller.getState();
-    const baseHex = state.swatches?.[state.baseColorIndex]?.hex || '#FF0000';
+    const palette = swatchHexListFromState(state);
+    const baseIdx = Math.min(
+      Math.max(0, state.baseColorIndex ?? 0),
+      Math.max(0, palette.length - 1),
+    );
 
-    const adapter = createBaseColorAdapter(
+    const adapter = createColorEditAdapter(
       {
-        color: baseHex,
-        showHeader: false,
-        showBrightnessControl: true,
+        palette,
+        selectedIndex: baseIdx,
+        colorMode: 'HEX',
+        showPalette: false,
+        mobile: false,
+        embedded: true,
+        title: 'Base color',
+        titleDetailStyle: true,
+        hideHexSectionLabel: true,
+        showHexLock: true,
       },
       {
         onColorChange: (detail) => {
-          if (detail?.hex) controller.setBaseColor(detail.hex);
+          if (!detail?.hex) return;
+          controller.setBaseColor(detail.hex);
+          controller.setSwatchHex(0, detail.hex);
         },
-        onLockChange: (detail) => {
-          if (detail && typeof detail.locked === 'boolean') {
-            controller.setMetadata({ isLocked: detail.locked });
-          }
+        onSwatchSelect: (detail) => {
+          if (typeof detail?.index === 'number') controller.setBaseColorIndex(detail.index);
         },
       },
     );
-    baseColorAdapter = adapter;
+    colorEditAdapter = adapter;
 
     const wrapper = createTag('div', { class: 'base-color-content' });
     wrapper.appendChild(adapter.element);
@@ -414,15 +436,18 @@ export default async function decorate(block) {
 
     paletteUnsubscribe = controller.subscribe((state) => {
       layoutInstance?.context?.set('palette', paletteFromThemeState(state));
-      if (!baseColorAdapter?.setColor) return;
-      const idx = state.baseColorIndex ?? 0;
-      const hex = state.swatches?.[idx]?.hex;
-      if (!hex) return;
-      const normalized = hex.toUpperCase();
-      const el = baseColorAdapter.getElement?.();
-      const current = typeof el?.color === 'string' ? el.color.toUpperCase() : '';
-      if (current !== normalized) {
-        baseColorAdapter.setColor(normalized);
+      if (!colorEditAdapter?.setPalette) return;
+      const pal = swatchHexListFromState(state);
+      const el = colorEditAdapter.getElement?.();
+      const nextIdx = Math.min(
+        Math.max(0, state.baseColorIndex ?? 0),
+        Math.max(0, pal.length - 1),
+      );
+      if (!palettesEqual(el?.palette, pal)) {
+        colorEditAdapter.setPalette(pal);
+      }
+      if (el && el.selectedIndex !== nextIdx) {
+        colorEditAdapter.setSelectedIndex(nextIdx);
       }
     });
 
