@@ -278,19 +278,8 @@ export function announceToScreenReader(message, priority = 'polite', options = {
   }, delay);
 }
 
-// ── Roving Tabindex ──────────────────────────────────────────────────
-
 const ROVING_INDEX_ATTR = 'data-roving-index';
 
-/**
- * Attach roving tabindex keyboard navigation to a container.
- * Arrow keys (Left/Right/Up/Down) cycle through elements; Home/End jump
- * to the first/last element. Only the active element has tabindex="0".
- *
- * @param {HTMLElement} container — the parent element to listen on
- * @param {HTMLElement[]} elements — the focusable children
- * @param {number} [initialFocusIndex=0] — which element starts with tabindex="0"
- */
 export function attachRovingTabIndex(container, elements, initialFocusIndex = 0) {
   if (!elements.length) return;
   const focusIndex = Math.max(0, Math.min(initialFocusIndex, elements.length - 1));
