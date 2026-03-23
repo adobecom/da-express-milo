@@ -68,7 +68,10 @@ function buildBlockConfig(block) {
   // Validate and set defaults
   const title = config['toc-title'] || 'Table of Contents';
   const ariaLabel = config['toc-aria-label'] || 'Table of Contents Navigation';
-  const stopElement = config['stop-element'] || config['toc-stop-element'];
+  const rawStopElement = config.stopElement || config['stop-element'] || config['toc-stop-element'];
+  const stopElement = rawStopElement && !rawStopElement.startsWith('.')
+    ? `.${rawStopElement}`
+    : rawStopElement;
   const contents = [];
 
   // Build content array with validation
@@ -574,18 +577,19 @@ function updateDesktopPosition(tocContainer) {
 
   // Check if there's a stop element we shouldn't scroll past
   const stopSelector = tocContainer.dataset.stopSelector || CONFIG.selectors.stopElement;
-  const stopElement = stopSelector ? document.querySelector(stopSelector) : null;
+  const stopElement = stopSelector
+    ? Array.from(document.querySelectorAll(stopSelector)).find((el) => el.offsetHeight > 0)
+    : null;
   if (stopElement && scrollY > 0) {
     const stopRect = stopElement.getBoundingClientRect();
     const stopTop = stopRect.top; // Position relative to viewport
     const tocHeight = tocContainer.offsetHeight;
-
     // If the TOC would overlap with the stop element, limit its position
     // We want: topPosition + tocHeight <= stopTop
     // So: topPosition <= stopTop - tocHeight
     const maxTopPosition = stopTop - tocHeight - 20; // 20px buffer
 
-    if (topPosition > maxTopPosition) {
+    if (topPosition > maxTopPosition && stopRect.height > 0) {
       topPosition = maxTopPosition;
     }
   }
@@ -765,7 +769,9 @@ export default async function decorate(block) {
 
     // Phase 3: Create DOM structure
     const container = createContainer();
-    const stopSelector = config.stopElement || CONFIG.selectors.stopElement || '';
+    const rawMetaStop = getMetadata('stopElement') || getMetadata('stop-element');
+    const metaStop = rawMetaStop && !rawMetaStop.startsWith('.') ? `.${rawMetaStop}` : rawMetaStop;
+    const stopSelector = config.stopElement || metaStop || CONFIG.selectors.stopElement || '';
     container.dataset.stopSelector = stopSelector;
     const titleBar = createTitleBar(config.title);
     const content = createContentList(config);
