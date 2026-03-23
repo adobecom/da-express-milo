@@ -499,7 +499,7 @@ export function createDeepLinkManager(config = {}) {
     const { replace = true } = options;
     const url = new URL(window.location.href);
 
-    if (query && query.trim()) {
+    if (query?.trim()) {
       url.searchParams.set(queryParam, query.trim());
     } else {
       url.searchParams.delete(queryParam);

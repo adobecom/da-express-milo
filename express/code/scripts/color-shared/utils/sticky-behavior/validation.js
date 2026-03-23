@@ -1,9 +1,4 @@
-/**
- * Validates required options and throws descriptive errors
- * @param {import('./constants.js').StickyBehaviorOptions} options - Options to validate
- * @throws {Error} If required options are missing or invalid
- */
-export function validateOptions(options) {
+function validateOptions(options) {
   if (!options) {
     throw new Error('stickyBehavior: options object is required');
   }
@@ -26,3 +21,4 @@ export function validateOptions(options) {
   }
 }
 
+export default validateOptions;

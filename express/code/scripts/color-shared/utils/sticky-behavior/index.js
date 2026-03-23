@@ -1,4 +1,4 @@
-export { createStickyBehavior } from './createStickyBehavior.js';
-export { createAutoStickyBehavior } from './createAutoStickyBehavior.js';
-export { DEFAULT_CONFIG } from './constants.js';
+export { default as createStickyBehavior } from './createStickyBehavior.js';
+export { default as createAutoStickyBehavior } from './createAutoStickyBehavior.js';
+export { default as DEFAULT_CONFIG } from './constants.js';
 
