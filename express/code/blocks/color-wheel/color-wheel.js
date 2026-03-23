@@ -2,6 +2,7 @@ import { createTag } from '../../scripts/utils.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createExpressTabs } from '../../scripts/color-shared/spectrum/components/express-tabs.js';
 import createColorWheelExpressAdapter from '../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js';
+import { createBaseColorAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
@@ -61,6 +62,7 @@ let layoutInstance = null;
 let stripRenderer = null;
 let paletteUnsubscribe = null;
 let imagePanelDestroy = null;
+let baseColorAdapter = null;
 
 function countThemeSwatches(state) {
   return (state?.swatches || []).filter((s) => s?.hex).length;
@@ -277,6 +279,8 @@ function cleanup() {
   paletteUnsubscribe = null;
   imagePanelDestroy?.();
   imagePanelDestroy = null;
+  baseColorAdapter?.destroy?.();
+  baseColorAdapter = null;
   stripRenderer?.destroy?.();
   stripRenderer = null;
   layoutInstance?.destroy();
@@ -290,9 +294,35 @@ export default async function decorate(block) {
   block.innerHTML = '';
   block.className = 'color-wheel';
 
-  function buildBaseColorContent() {
-    const baseColor = createTag('div', { class: 'base-color-content' }, '<h1>Base Color</h1>');
-    return baseColor;
+  function buildBaseColorContent(controller) {
+    baseColorAdapter?.destroy?.();
+    baseColorAdapter = null;
+
+    const state = controller.getState();
+    const baseHex = state.swatches?.[state.baseColorIndex]?.hex || '#FF0000';
+
+    const adapter = createBaseColorAdapter(
+      {
+        color: baseHex,
+        showHeader: false,
+        showBrightnessControl: true,
+      },
+      {
+        onColorChange: (detail) => {
+          if (detail?.hex) controller.setBaseColor(detail.hex);
+        },
+        onLockChange: (detail) => {
+          if (detail && typeof detail.locked === 'boolean') {
+            controller.setMetadata({ isLocked: detail.locked });
+          }
+        },
+      },
+    );
+    baseColorAdapter = adapter;
+
+    const wrapper = createTag('div', { class: 'base-color-content' });
+    wrapper.appendChild(adapter.element);
+    return wrapper;
   }
 
   function buildImageContent(controller) {
@@ -314,14 +344,7 @@ export default async function decorate(block) {
     const colorWheel = createTag('div', { class: 'color-wheel-content' });
 
     const baseHex = controller.getState().swatches?.[controller.getState().baseColorIndex]?.hex || '#FF0000';
-    const adapter = createColorWheelExpressAdapter(baseHex, {
-      onChange: (colorDetail) => {
-        console.log(colorDetail);
-      },
-      onChangeEnd: (colorDetail) => {
-        console.log(colorDetail);
-      },
-    }, { controller });
+    const adapter = createColorWheelExpressAdapter(baseHex, {}, { controller });
     const harmonySelector = await buildHarmonySelector(controller);
 
     colorWheel.append(adapter.element, harmonySelector);
@@ -339,14 +362,11 @@ export default async function decorate(block) {
         { label: 'Image', value: 'image', spIcon: 'sp-icon-image' },
         { label: 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
       ],
-      onSelectionChange: ({ selected }) => {
-        console.log(selected);
-      },
     });
 
     tabsInstance.addPanel('color-wheel', await buildColorWheelContent(controller));
     tabsInstance.addPanel('image', buildImageContent(controller));
-    tabsInstance.addPanel('base-color', buildBaseColorContent());
+    tabsInstance.addPanel('base-color', buildBaseColorContent(controller));
 
     return tabsInstance;
   }
@@ -394,6 +414,16 @@ export default async function decorate(block) {
 
     paletteUnsubscribe = controller.subscribe((state) => {
       layoutInstance?.context?.set('palette', paletteFromThemeState(state));
+      if (!baseColorAdapter?.setColor) return;
+      const idx = state.baseColorIndex ?? 0;
+      const hex = state.swatches?.[idx]?.hex;
+      if (!hex) return;
+      const normalized = hex.toUpperCase();
+      const el = baseColorAdapter.getElement?.();
+      const current = typeof el?.color === 'string' ? el.color.toUpperCase() : '';
+      if (current !== normalized) {
+        baseColorAdapter.setColor(normalized);
+      }
     });
 
     block.dataset.shellState = 'ready';

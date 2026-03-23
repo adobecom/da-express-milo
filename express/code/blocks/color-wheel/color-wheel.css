@@ -4,8 +4,8 @@
 
 .color-wheel .ax-color-tool-layout {
   box-sizing: border-box;
-  max-width: 100%;
-  margin: 0;
+  max-width: var(--block-wd-max-width);
+  margin: 0 auto;
   padding: 0 var(--spacing-300) var(--spacing-300);
 }
 
