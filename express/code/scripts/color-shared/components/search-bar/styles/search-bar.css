@@ -7,7 +7,10 @@
   pointer-events: none;
 }
 
-.search-bar-outer {
+/* The sticky wrapper is mounted under document.body, so it must carry the same
+   component-level custom properties as the inline search bar host. */
+.search-bar-outer,
+.search-bar-sticky-wrapper.is-sticky-clone {
   --search-bar-height: 40px;
   --search-bar-height-tablet: 48px;
   --search-bar-max-width: 700px;
@@ -21,7 +24,9 @@
   --search-bar-focus-outline-offset: 2px;
   --search-bar-sticky-inset-block-end: 5%;
   --search-bar-slide-distance: 20px;
+}
 
+.search-bar-outer {
   display: flex;
   flex-direction: column;
   align-items: center;
