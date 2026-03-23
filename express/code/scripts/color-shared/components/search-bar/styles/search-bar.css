@@ -14,13 +14,20 @@
   --search-bar-sticky-z-index: 100;
   --search-bar-transition-fast: 130ms;
   --search-bar-transition-normal: 200ms;
+  --search-bar-icon-size: 20px;
+  --search-bar-clear-button-size: 32px;
+  --search-bar-input-border-width: 1px;
+  --search-bar-focus-ring-width: 1px;
+  --search-bar-focus-outline-offset: 2px;
+  --search-bar-sticky-inset-block-end: 5%;
+  --search-bar-slide-distance: 20px;
 
   display: flex;
   flex-direction: column;
   align-items: center;
   inline-size: 100%;
   max-inline-size: 100%;
-  padding-inline: var(--spacing-300, 16px);
+  padding-inline: var(--spacing-300);
   position: relative;
 }
 
@@ -29,7 +36,7 @@
   flex-direction: column;
   align-items: center;
   padding: 0;
-  gap: var(--spacing-200, 12px);
+  gap: var(--spacing-200);
   inline-size: 100%;
   max-inline-size: 100%;
   position: relative;
@@ -57,15 +64,15 @@
 .search-bar-input {
   inline-size: 100%;
   block-size: var(--search-bar-height);
-  border-radius: var(--Corner-radius-corner-radius-500, 100px);
-  border: 1px solid var(--color-gray-325, #d5d5d5);
-  padding-inline: var(--spacing-500, 32px);
-  font-family: var(--body-font-family, 'Adobe Clean', adobe-clean, sans-serif);
-  font-size: var(--body-font-size-s, 14px);
+  border-radius: var(--Corner-radius-corner-radius-500);
+  border: var(--search-bar-input-border-width) solid var(--color-gray-325);
+  padding-inline: var(--spacing-500);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
   font-weight: 400;
   line-height: 1.3;
-  color: var(--color-gray-950, #131313);
-  background: var(--color-white, #fff);
+  color: var(--color-gray-950);
+  background: var(--color-white);
   outline: none;
   transition:
     border-color var(--search-bar-transition-fast) ease,
@@ -73,18 +80,18 @@
 }
 
 .search-bar-input:hover {
-  border-color: var(--color-gray-350-variant, #b1b1b1);
+  border-color: var(--color-gray-350-variant);
 }
 
 .search-bar-input:focus,
 .search-bar-input:focus-visible {
-  border-color: var(--color-gray-800-variant, #292929);
-  box-shadow: 0 0 0 1px var(--color-gray-800-variant, #292929);
+  border-color: var(--color-gray-800-variant);
+  box-shadow: 0 0 0 var(--search-bar-focus-ring-width) var(--color-gray-800-variant);
   outline: none;
 }
 
 .search-bar-input::placeholder {
-  color: var(--text-color-secondary, #6e6e6e);
+  color: var(--text-color-secondary);
 }
 
 .search-bar-input::-webkit-search-cancel-button,
@@ -95,51 +102,51 @@
 
 .search-icon {
   position: absolute;
-  inset-inline-start: var(--spacing-300, 16px);
+  inset-inline-start: var(--spacing-300);
   display: flex;
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  color: var(--color-dark-gray, #505050);
+  color: var(--color-dark-gray);
 }
 
 .search-icon svg {
-  inline-size: 20px;
-  block-size: 20px;
+  inline-size: var(--search-bar-icon-size);
+  block-size: var(--search-bar-icon-size);
 }
 
 .search-clear-btn {
   position: absolute;
-  inset-inline-end: var(--spacing-200, 12px);
+  inset-inline-end: var(--spacing-200);
   display: flex;
   align-items: center;
   justify-content: center;
-  inline-size: 32px;
-  block-size: 32px;
+  inline-size: var(--search-bar-clear-button-size);
+  block-size: var(--search-bar-clear-button-size);
   background: transparent;
   border: none;
   padding: 0;
   cursor: pointer;
-  color: var(--color-dark-gray, #505050);
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+  color: var(--color-dark-gray);
+  border-radius: var(--Corner-radius-corner-radius-100);
   transition:
     background-color var(--search-bar-transition-fast) ease,
     color var(--search-bar-transition-fast) ease;
 }
 
 .search-clear-btn:hover {
-  background-color: var(--Palette-gray-200, #e1e1e1);
-  color: var(--color-gray-950, #131313);
+  background-color: var(--Palette-gray-200);
+  color: var(--color-gray-950);
 }
 
 .search-clear-btn:focus-visible {
-  outline: var(--border-width-2, 2px) solid var(--Alias-focus-indicator-default, #4b75ff);
-  outline-offset: 2px;
+  outline: var(--border-width-2) solid var(--Alias-focus-indicator-default);
+  outline-offset: var(--search-bar-focus-outline-offset);
 }
 
 .search-clear-btn svg {
-  inline-size: 20px;
-  block-size: 20px;
+  inline-size: var(--search-bar-icon-size);
+  block-size: var(--search-bar-icon-size);
 }
 
 .search-clear-btn.hidden {
@@ -166,15 +173,15 @@
 
 .search-bar-sticky-wrapper.is-sticky-clone {
   position: fixed;
-  inset-block-end: 5%;
-  inset-inline-start: var(--spacing-300, 16px);
-  inset-inline-end: var(--spacing-300, 16px);
+  inset-block-end: var(--search-bar-sticky-inset-block-end);
+  inset-inline-start: var(--spacing-300);
+  inset-inline-end: var(--spacing-300);
   inline-size: auto;
   z-index: var(--search-bar-sticky-z-index);
-  box-shadow: var(--Elevation-Dialog, 0 4px 16px rgba(0, 0, 0, 0.16));
-  background: var(--color-white, #fff);
-  border-radius: var(--Corner-radius-corner-radius-500, 100px);
-  padding: var(--spacing-100, 8px);
+  box-shadow: var(--Elevation-Dialog);
+  background: var(--color-white);
+  border-radius: var(--Corner-radius-corner-radius-500);
+  padding: var(--spacing-100);
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
@@ -194,7 +201,7 @@
 @keyframes searchBarSlideUpMobile {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(var(--search-bar-slide-distance));
   }
 
   to {
@@ -211,7 +218,7 @@
 
   to {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(var(--search-bar-slide-distance));
   }
 }
 
@@ -224,8 +231,8 @@
 
   .search-bar-input {
     block-size: var(--search-bar-height-tablet);
-    padding-inline: var(--spacing-600, 40px);
-    font-size: var(--body-font-size-m, 16px);
+    padding-inline: var(--spacing-600);
+    font-size: var(--body-font-size-m);
   }
 
   .search-bar-sticky-wrapper.is-sticky-clone {
@@ -233,7 +240,7 @@
     inset-inline-end: auto;
     transform: translateX(-50%);
     inline-size: var(--search-bar-max-width);
-    max-inline-size: calc(100% - var(--spacing-400, 24px) * 2);
+    max-inline-size: calc(100% - var(--spacing-400) * 2);
   }
 
   .search-bar-sticky-wrapper.is-sticky-clone.is-visible {
@@ -247,7 +254,7 @@
   @keyframes searchBarSlideUp {
     from {
       opacity: 0;
-      transform: translateX(-50%) translateY(20px);
+      transform: translateX(-50%) translateY(var(--search-bar-slide-distance));
     }
 
     to {
@@ -264,7 +271,7 @@
 
     to {
       opacity: 0;
-      transform: translateX(-50%) translateY(20px);
+      transform: translateX(-50%) translateY(var(--search-bar-slide-distance));
     }
   }
 }

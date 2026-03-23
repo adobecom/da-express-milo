@@ -1,16 +1,17 @@
 .search-suggestions-dropdown {
   --search-bar-thumbnail-size: 40px;
   --search-bar-thumbnail-size-tablet: 48px;
+  --search-bar-suggestion-icon-size: 20px;
 
   inline-size: 100%;
   position: absolute;
   inset-block-start: 100%;
-  background: var(--color-white, #fff);
-  border: 1px solid var(--Palette-gray-200, #e1e1e1);
-  border-radius: var(--Corner-radius-corner-radius-200, 16px);
-  box-shadow: var(--Elevation-Dialog, 0 4px 16px rgba(0, 0, 0, 0.16));
+  background: var(--color-white);
+  border: 1px solid var(--Palette-gray-200);
+  border-radius: var(--Corner-radius-corner-radius-200);
+  box-shadow: var(--Elevation-Dialog);
   overflow: hidden;
-  margin-block-start: var(--spacing-75, 4px);
+  margin-block-start: var(--spacing-75);
 }
 
 .search-suggestions-dropdown.hidden,
@@ -19,11 +20,11 @@
 }
 
 .suggestions-header {
-  padding-block: var(--spacing-200, 12px);
-  padding-inline: var(--spacing-300, 16px);
-  font-size: var(--body-font-size-s, 14px);
+  padding-block: var(--spacing-200);
+  padding-inline: var(--spacing-300);
+  font-size: var(--body-font-size-s);
   font-weight: 700;
-  color: var(--color-gray-950, #131313);
+  color: var(--color-gray-950);
 }
 
 .suggestions-list {
@@ -35,17 +36,17 @@
 .suggestion-item {
   display: flex;
   align-items: center;
-  gap: var(--spacing-200, 12px);
-  padding-block: var(--spacing-200, 12px);
-  padding-inline: var(--spacing-300, 16px);
+  gap: var(--spacing-200);
+  padding-block: var(--spacing-200);
+  padding-inline: var(--spacing-300);
   cursor: pointer;
-  transition: background-color var(--search-bar-transition-fast, 130ms) ease;
+  transition: background-color var(--search-bar-transition-fast) ease;
 }
 
 .suggestion-item:hover,
 .suggestion-item.is-selected,
 .suggestion-item:focus {
-  background-color: var(--color-gray-100, #f8f8f8);
+  background-color: var(--color-gray-100);
 }
 
 .suggestion-item:focus {
@@ -53,13 +54,13 @@
 }
 
 .suggestion-item:focus-visible {
-  outline: var(--border-width-2, 2px) solid var(--Alias-focus-indicator-default, #4b75ff);
-  outline-offset: calc(-1 * var(--border-width-2, 2px));
+  outline: var(--border-width-2) solid var(--Alias-focus-indicator-default);
+  outline-offset: calc(-1 * var(--border-width-2));
 }
 
 .suggestion-item:last-child {
-  border-end-start-radius: var(--Corner-radius-corner-radius-200, 16px);
-  border-end-end-radius: var(--Corner-radius-corner-radius-200, 16px);
+  border-end-start-radius: var(--Corner-radius-corner-radius-200);
+  border-end-end-radius: var(--Corner-radius-corner-radius-200);
 }
 
 .suggestion-icon {
@@ -67,9 +68,9 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  inline-size: 20px;
-  block-size: 20px;
-  color: var(--color-dark-gray, #505050);
+  inline-size: var(--search-bar-suggestion-icon-size);
+  block-size: var(--search-bar-suggestion-icon-size);
+  color: var(--color-dark-gray);
 }
 
 .suggestion-icon svg {
@@ -80,29 +81,29 @@
 .suggestion-text {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-50, 2px);
+  gap: var(--spacing-50);
   min-inline-size: 0;
 }
 
 .suggestion-label {
-  font-size: var(--body-font-size-m, 16px);
+  font-size: var(--body-font-size-m);
   font-weight: 400;
   line-height: 1.3;
-  color: var(--color-gray-950, #131313);
+  color: var(--color-gray-950);
 }
 
 .suggestion-type {
-  font-size: var(--body-font-size-xs, 12px);
+  font-size: var(--body-font-size-xs);
   font-weight: 400;
   line-height: 1.3;
-  color: var(--text-color-secondary, #6e6e6e);
+  color: var(--text-color-secondary);
 }
 
 .suggestion-subtext {
-  font-size: var(--body-font-size-xs, 12px);
+  font-size: var(--body-font-size-xs);
   font-weight: 400;
   line-height: 1.3;
-  color: var(--color-dark-gray, #505050);
+  color: var(--color-dark-gray);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -112,9 +113,9 @@
   flex-shrink: 0;
   inline-size: var(--search-bar-thumbnail-size);
   block-size: var(--search-bar-thumbnail-size);
-  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+  border-radius: var(--Corner-radius-corner-radius-100);
   overflow: hidden;
-  background-color: var(--Palette-gray-200, #e1e1e1);
+  background-color: var(--Palette-gray-200);
 }
 
 .suggestion-thumbnail img {
@@ -124,11 +125,11 @@
 }
 
 .suggestions-empty {
-  padding-block: var(--spacing-400, 24px);
-  padding-inline: var(--spacing-300, 16px);
+  padding-block: var(--spacing-400);
+  padding-inline: var(--spacing-300);
   text-align: center;
-  font-size: var(--body-font-size-s, 14px);
-  color: var(--text-color-secondary, #6e6e6e);
+  font-size: var(--body-font-size-s);
+  color: var(--text-color-secondary);
 }
 
 .suggestions-empty.hidden {
@@ -139,19 +140,19 @@
   inset-block-start: auto;
   inset-block-end: 100%;
   margin-block-start: 0;
-  margin-block-end: var(--spacing-75, 4px);
+  margin-block-end: var(--spacing-75);
 }
 
 @media (min-width: 768px) {
   .suggestions-header {
-    padding-block: var(--spacing-300, 16px);
-    padding-inline: var(--spacing-400, 24px);
+    padding-block: var(--spacing-300);
+    padding-inline: var(--spacing-400);
   }
 
   .suggestion-item {
-    padding-block: var(--spacing-300, 16px);
-    padding-inline: var(--spacing-400, 24px);
-    gap: var(--spacing-300, 16px);
+    padding-block: var(--spacing-300);
+    padding-inline: var(--spacing-400);
+    gap: var(--spacing-300);
   }
 
   .suggestion-thumbnail {
@@ -160,7 +161,7 @@
   }
 
   .suggestions-empty {
-    padding-block: var(--spacing-500, 32px);
-    padding-inline: var(--spacing-400, 24px);
+    padding-block: var(--spacing-500);
+    padding-inline: var(--spacing-400);
   }
 }
