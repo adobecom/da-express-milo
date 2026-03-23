@@ -392,7 +392,7 @@ export default async function decorate(block) {
 
   try {
     const controller = new ColorThemeExpressController({
-      swatches: ['#FFFF00', '#FF0000', '#FF7F00', '#00A8FF', '#7F00FF'],
+      swatches: ['#FFFF00', '#FF0000', '#FF7F00', '#00A8FF', '#7F00FF', '#A495FF', '#7DFEFF'],
       harmonyRule: 'CUSTOM',
       baseColorIndex: 0,
     });
@@ -425,17 +425,17 @@ export default async function decorate(block) {
         swatchFeatures: {
           copy: true,
           hexCode: true,
-          // colorPicker: true,
-          // lock: true,
-          // trash: true,
-          // drag: true,
-          // addLeft: true,
-          // addRight: true,
-          // editTint: true,
-          // baseColor: true,
-          // emptyStrip: true,
+          colorPicker: true,
+          lock: true,
+          trash: true,
+          drag: true,
+          addLeft: true,
+          addRight: true,
+          editTint: true,
+          baseColor: true,
+          emptyStrip: false,
         },
-        swatchVerticalMaxPerRow: 5,
+        swatchVerticalMaxPerRow: 6,
       },
     });
     await stripRenderer.render(stripHost);
