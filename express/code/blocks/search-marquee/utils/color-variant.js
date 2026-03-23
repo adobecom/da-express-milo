@@ -1,9 +1,8 @@
-import { createExploreSearchBar } from '../../search-bar/helpers/searchBar.js';
-import { createDeepLinkManager } from '../../search-bar/helpers/deepLink.js';
-import { loadComponentStyles } from '../../../libs/utils/loadComponentStyles.js';
+import {
+  createExploreSearchBar,
+  createDeepLinkManager,
+} from '../../../scripts/color-shared/components/search-bar/index.js';
 import { addTempWrapperDeprecated } from '../../../scripts/utils.js';
-
-const SEARCH_BAR_CSS = '../../search-bar/search-bar.css';
 
 function parseTagsRow(row) {
   const text = row?.textContent?.trim();
@@ -12,23 +11,10 @@ function parseTagsRow(row) {
   return text.split(',').map((tag) => tag.trim()).filter(Boolean);
 }
 
-async function loadSharedSearchBarStyles() {
-  try {
-    await loadComponentStyles(SEARCH_BAR_CSS, import.meta.url);
-  } catch (error) {
-    window.lana?.log(`[search-marquee] Failed to load color variant styles: ${error?.message}`, {
-      tags: 'search-marquee,color-variant',
-      severity: 'error',
-    });
-  }
-}
-
 export default async function decorateColorSearchMarquee(block) {
   if (!block.parentElement?.classList.contains('search-marquee-wrapper')) {
     addTempWrapperDeprecated(block, 'search-marquee');
   }
-
-  await loadSharedSearchBarStyles();
 
   const rows = [...block.children];
   const tags = parseTagsRow(rows[1]);

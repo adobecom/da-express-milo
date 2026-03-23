@@ -1,57 +1,17 @@
-import { createTag } from '../../../scripts/utils.js';
-import { createKeyboardNavigation, attachItemNavigation } from '../../../libs/utils/keyboardNavigation.js';
-import { loadComponentStyles } from '../../../libs/utils/loadComponentStyles.js';
+import { createTag } from '../../../../utils.js';
+import {
+  createKeyboardNavigation,
+  attachItemNavigation,
+} from '../../../../../libs/utils/keyboardNavigation.js';
+import { loadSearchBarSuggestionStyles } from '../styles/index.js';
 import { SUGGESTION_ICONS } from './icons.js';
 import { DEFAULT_ITEM_CONFIG, DEFAULT_SUGGESTIONS_CONFIG } from './constants.js';
 
-// ==============================================
-// Suggestions Dropdown Component
-// ==============================================
-
-let cssLoaded = false;
-
-/**
- * @typedef {Object} Suggestion
- * @property {string} label - Display text for the suggestion
- * @property {string} type - Suggestion type (term, tag, hex, etc.)
- * @property {string} [typeLabel] - Human-readable type label
- * @property {*} [data] - Additional data associated with the suggestion
- */
-
-/**
- * @typedef {Object} SuggestionsDropdownOptions
- * @property {string} [id='suggestions-dropdown'] - Unique ID for the dropdown
- * @property {string} [headerText='Suggestions'] - Header text
- * @property {Object} [icons] - Icon SVG strings keyed by suggestion type
- * @property {Object} [itemConfig] - Configuration for suggestion item rendering
- */
-
-/**
- * @typedef {Object} SuggestionsDropdownCallbacks
- * @property {Function} [onSelect] - Called when a suggestion is selected
- * @property {Function} [onHover] - Called when a suggestion is hovered
- */
-
-/**
- * Gets a nested value from an object using dot notation
- * @param {Object} obj - Source object
- * @param {string} path - Dot-notation path (e.g., 'data.title')
- * @returns {*} Value at path or undefined
- */
 function getNestedValue(obj, path) {
   if (!path) return undefined;
   return path.split('.').reduce((acc, part) => acc?.[part], obj);
 }
 
-/**
- * Creates a suggestion item element with configurable structure
- * @param {Suggestion} suggestion - Suggestion data
- * @param {number} index - Item index
- * @param {Object} icons - Icon SVG strings
- * @param {Object} itemConfig - Item configuration
- * @param {SuggestionsDropdownCallbacks} callbacks - Event callbacks
- * @returns {HTMLElement}
- */
 function createSuggestionItem(suggestion, index, icons, itemConfig, callbacks) {
   const config = { ...DEFAULT_ITEM_CONFIG, ...itemConfig };
   const {
@@ -71,7 +31,6 @@ function createSuggestionItem(suggestion, index, icons, itemConfig, callbacks) {
     tabindex: 0,
   });
 
-  // Add image/thumbnail if configured
   if (imageField) {
     const imageUrl = getNestedValue(suggestion, imageField);
     if (imageUrl) {
@@ -86,7 +45,6 @@ function createSuggestionItem(suggestion, index, icons, itemConfig, callbacks) {
     }
   }
 
-  // Add icon if configured
   if (showIcon && !imageField) {
     const icon = createTag('span', { class: 'suggestion-icon', 'aria-hidden': 'true' });
     const iconKey = suggestion.type || iconType;
@@ -94,15 +52,11 @@ function createSuggestionItem(suggestion, index, icons, itemConfig, callbacks) {
     item.appendChild(icon);
   }
 
-  // Create text content wrapper
   const textWrapper = createTag('div', { class: 'suggestion-text' });
-
-  // Primary label
   const labelText = getNestedValue(suggestion, labelField) || suggestion.label || '';
   const label = createTag('span', { class: 'suggestion-label' }, labelText);
   textWrapper.appendChild(label);
 
-  // Subtext (if configured)
   if (subtextField) {
     const subtextValue = getNestedValue(suggestion, subtextField);
     if (subtextValue) {
@@ -111,7 +65,6 @@ function createSuggestionItem(suggestion, index, icons, itemConfig, callbacks) {
     }
   }
 
-  // Type label (if configured to show)
   if (showType && typeField) {
     const typeValue = getNestedValue(suggestion, typeField);
     if (typeValue) {
@@ -122,7 +75,6 @@ function createSuggestionItem(suggestion, index, icons, itemConfig, callbacks) {
 
   item.appendChild(textWrapper);
 
-  // Event handlers
   item.addEventListener('click', () => {
     callbacks.onSelect?.(suggestion, index);
   }, { passive: true });
@@ -134,18 +86,8 @@ function createSuggestionItem(suggestion, index, icons, itemConfig, callbacks) {
   return item;
 }
 
-/**
- * Creates a suggestions dropdown component
- *
- * @param {SuggestionsDropdownOptions} [options] - Configuration options
- * @param {SuggestionsDropdownCallbacks} [callbacks] - Event callbacks
- * @returns {Promise<Object>} Public API
- */
 export async function createSuggestionsDropdown(options = {}, callbacks = {}) {
-  if (!cssLoaded) {
-    await loadComponentStyles('../styles/suggestions.css', import.meta.url);
-    cssLoaded = true;
-  }
+  await loadSearchBarSuggestionStyles();
 
   const {
     id = 'suggestions',
@@ -178,10 +120,6 @@ export async function createSuggestionsDropdown(options = {}, callbacks = {}) {
     dropdown.append(list, emptyEl);
   }
 
-  /**
-   * Updates the visual selection state
-   * @param {number} selectedIndex - Current selected index
-   */
   function updateSelectionState(selectedIndex) {
     const items = list.querySelectorAll('.suggestion-item');
     items.forEach((item, index) => {
@@ -191,18 +129,12 @@ export async function createSuggestionsDropdown(options = {}, callbacks = {}) {
     });
   }
 
-  /**
-   * Shows the dropdown
-   */
   function show() {
     if (suggestions.length === 0) return;
     isVisible = true;
     dropdown.classList.remove('hidden');
   }
 
-  /**
-   * Hides the dropdown
-   */
   function hide() {
     isVisible = false;
     dropdown.classList.add('hidden');
@@ -211,11 +143,6 @@ export async function createSuggestionsDropdown(options = {}, callbacks = {}) {
     }
   }
 
-  /**
-   * Renders suggestions to the list
-   * @param {Object} [renderOptions] - Optional render-time options
-   * @param {boolean} [renderOptions.showEmpty=false] - Show empty message if no results
-   */
   function renderSuggestions(renderOptions = {}) {
     const { showEmpty = false } = renderOptions;
     list.innerHTML = '';
@@ -234,7 +161,6 @@ export async function createSuggestionsDropdown(options = {}, callbacks = {}) {
 
     emptyEl.classList.add('hidden');
 
-    // Limit to maxItems
     const limitedSuggestions = maxItems ? suggestions.slice(0, maxItems) : suggestions;
 
     limitedSuggestions.forEach((suggestion, index) => {
@@ -265,12 +191,6 @@ export async function createSuggestionsDropdown(options = {}, callbacks = {}) {
     show();
   }
 
-  /**
-   * Sets suggestions and renders them
-   * @param {Suggestion[]} newSuggestions - Array of suggestions
-   * @param {Object} [renderOptions] - Render options
-   * @param {boolean} [renderOptions.showEmpty=false] - Show empty message
-   */
   function setSuggestions(newSuggestions, renderOptions = {}) {
     suggestions = newSuggestions;
     if (keyboardNav) {
@@ -279,11 +199,6 @@ export async function createSuggestionsDropdown(options = {}, callbacks = {}) {
     renderSuggestions(renderOptions);
   }
 
-  /**
-   * Attaches keyboard navigation to an input element
-   * @param {HTMLElement} inputElement - Input element to attach to
-   * @param {Object} [navOptions] - Additional navigation options
-   */
   function attachKeyboardNavigation(inputElement, navOptions = {}) {
     if (keyboardNav) {
       keyboardNav.detach();
@@ -308,18 +223,12 @@ export async function createSuggestionsDropdown(options = {}, callbacks = {}) {
     keyboardNav.attach(inputElement);
   }
 
-  /**
-   * Resets the dropdown state
-   */
   function reset() {
     suggestions = [];
     list.innerHTML = '';
     hide();
   }
 
-  /**
-   * Cleans up event listeners and resources
-   */
   function destroy() {
     if (keyboardNav) {
       keyboardNav.detach();
@@ -357,3 +266,5 @@ export async function createSuggestionsDropdown(options = {}, callbacks = {}) {
     destroy,
   });
 }
+
+export default createSuggestionsDropdown;

@@ -1,17 +1,5 @@
 import { CSS_CLASSES, ARIA } from './constants.js';
 
-// ==============================================
-// Visibility Manager
-// ==============================================
-
-/**
- * Creates a visibility manager for the suggestions dropdown
- * @param {Object} dropdown - Suggestions dropdown instance
- * @param {HTMLInputElement} input - Search input element
- * @param {HTMLElement} container - Container element
- * @param {Object} state - Shared state object
- * @returns {{ show: Function, hide: Function }}
- */
 export function createVisibilityManager(dropdown, input, container, state) {
   return {
     show() {
@@ -30,10 +18,6 @@ export function createVisibilityManager(dropdown, input, container, state) {
   };
 }
 
-/**
- * Creates a no-op visibility manager for when suggestions are disabled
- * @returns {{ show: Function, hide: Function }}
- */
 export function createNoopVisibilityManager() {
   return {
     show() {},

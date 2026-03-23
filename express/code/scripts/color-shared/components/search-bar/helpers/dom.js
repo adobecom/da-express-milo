@@ -1,16 +1,7 @@
-import { createTag } from '../../../scripts/utils.js';
+import { createTag } from '../../../../utils.js';
 import { CSS_CLASSES } from './constants.js';
 import { ICONS } from './icons.js';
 
-// ==============================================
-// DOM Creation Helpers
-// ==============================================
-
-/**
- * Creates the search bar wrapper with form, input, and buttons
- * @param {string} placeholder - Input placeholder text
- * @returns {{ wrapper: HTMLElement, form: HTMLElement, input: HTMLInputElement, clearBtn: HTMLButtonElement }}
- */
 export function createSearchBarWrapper(placeholder) {
   const wrapper = createTag('div', { class: CSS_CLASSES.WRAPPER });
   const form = createTag('form', { class: CSS_CLASSES.FORM, role: 'search' });
@@ -44,20 +35,11 @@ export function createSearchBarWrapper(placeholder) {
   return { wrapper, form, input, clearBtn };
 }
 
-/**
- * Updates the visibility of the clear button
- * @param {HTMLButtonElement} btn - Clear button element
- * @param {boolean} hasValue - Whether input has a value
- */
 export function updateClearButtonVisibility(btn, hasValue) {
   btn.style.display = hasValue ? 'inline-block' : 'none';
   btn.classList.toggle(CSS_CLASSES.HIDDEN, !hasValue);
 }
 
-/**
- * Creates sticky wrapper element for the search bar
- * @returns {HTMLElement} Sticky wrapper element
- */
 export function createStickyWrapper() {
   return createTag('div', { class: 'search-bar-sticky-wrapper' });
 }

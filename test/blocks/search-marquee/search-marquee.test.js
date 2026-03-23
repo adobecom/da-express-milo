@@ -326,6 +326,6 @@ describe('Search Marquee - color variant', () => {
     expect(block.querySelector('.search-bar-outer')).to.exist;
     expect(block.querySelector('.search-bar-input')).to.exist;
     expect(block.children).to.have.length(2);
-    expect(document.head.querySelector('link[href*="/blocks/search-bar/search-bar.css"]')).to.exist;
+    expect(document.head.querySelector('link[href*="/scripts/color-shared/components/search-bar/styles/search-bar.css"]')).to.exist;
   });
 });

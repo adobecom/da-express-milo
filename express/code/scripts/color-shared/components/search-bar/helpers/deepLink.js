@@ -1,18 +1,5 @@
 import { DEFAULT_DEEP_LINK_CONFIG } from './constants.js';
 
-// ==============================================
-// Deep Link Manager
-// ==============================================
-
-/**
- * Creates a deep link manager for search query params
- * @param {Object} config - Deep link configuration
- * @param {boolean} [config.enabled=true] - Whether deep linking is enabled
- * @param {string} [config.queryParam='q'] - URL query parameter name
- * @param {boolean} [config.updateOnSearch=true] - Update URL on search
- * @param {boolean} [config.autoPopulate=true] - Auto-populate from URL on load
- * @returns {Object} Deep link manager API
- */
 export function createDeepLinkManager(config = {}) {
   const mergedConfig = { ...DEFAULT_DEEP_LINK_CONFIG, ...config };
   const {
@@ -21,10 +8,6 @@ export function createDeepLinkManager(config = {}) {
     updateOnSearch,
   } = mergedConfig;
 
-  /**
-   * Gets the search query from URL
-   * @returns {string|null} Query value or null
-   */
   function getQueryFromUrl() {
     if (!enabled) return null;
 
@@ -32,12 +15,6 @@ export function createDeepLinkManager(config = {}) {
     return urlParams.get(queryParam);
   }
 
-  /**
-   * Updates the URL with the search query
-   * @param {string} query - Search query to set
-   * @param {Object} [options] - Update options
-   * @param {boolean} [options.replace=true] - Use replaceState instead of pushState
-   */
   function updateUrl(query, options = {}) {
     if (!enabled || !updateOnSearch) return;
 
@@ -61,18 +38,10 @@ export function createDeepLinkManager(config = {}) {
     }
   }
 
-  /**
-   * Clears the search query from URL
-   */
   function clearUrl() {
     updateUrl('');
   }
 
-  /**
-   * Listens for popstate events (back/forward navigation)
-   * @param {Function} callback - Called with query value on navigation
-   * @returns {Function} Cleanup function
-   */
   function onPopState(callback) {
     if (!enabled) return () => {};
 
@@ -93,3 +62,5 @@ export function createDeepLinkManager(config = {}) {
     isEnabled: () => enabled,
   };
 }
+
+export default createDeepLinkManager;

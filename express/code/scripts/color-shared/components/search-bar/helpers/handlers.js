@@ -1,21 +1,5 @@
 import { updateClearButtonVisibility } from './dom.js';
 
-// ==============================================
-// Event Handlers
-// ==============================================
-
-/**
- * Initializes search input event handlers
- * @param {Object} elements - DOM elements
- * @param {HTMLElement} elements.container - Search container element
- * @param {HTMLInputElement} elements.input - Search input element
- * @param {HTMLButtonElement} elements.clearBtn - Clear button element
- * @param {HTMLFormElement} elements.form - Search form element
- * @param {Object} state - Component state
- * @param {Object} callbacks - Event callbacks
- * @param {Object} actions - Internal actions
- * @returns {Function} Cleanup function to remove all event listeners
- */
 export function initSearchHandlers(elements, state, callbacks, actions) {
   const { container, input, clearBtn, form } = elements;
   const { hideSuggestions } = actions;
@@ -79,3 +63,5 @@ export function initSearchHandlers(elements, state, callbacks, actions) {
 
   return () => cleanupFns.forEach((fn) => fn());
 }
+
+export default initSearchHandlers;

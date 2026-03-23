@@ -1,31 +1,20 @@
-import { createTag } from '../../../scripts/utils.js';
-import { createAutoStickyBehavior } from '../../../libs/utils/sticky-behavior/index.js';
-import { createAutocomplete } from '../../../libs/utils/autocomplete.js';
+import { createTag } from '../../../../utils.js';
+import { createAutoStickyBehavior } from '../../../../../libs/utils/sticky-behavior/index.js';
+import { createAutocomplete } from '../../../../../libs/utils/autocomplete.js';
+import { loadSearchBarStyles } from '../styles/index.js';
 import { CSS_CLASSES, DEFAULTS } from './constants.js';
-import { createSearchBarWrapper, updateClearButtonVisibility, createStickyWrapper } from './dom.js';
+import {
+  createSearchBarWrapper,
+  updateClearButtonVisibility,
+  createStickyWrapper,
+} from './dom.js';
 import { initSearchHandlers } from './handlers.js';
 import { createVisibilityManager, createNoopVisibilityManager } from './visibility.js';
 import { createSuggestionsDropdown } from './searchResults.js';
 
-// ==============================================
-// Search Bar Factory
-// ==============================================
-
-/**
- * Create Explore Search Bar component
- * @param {Object} props - Component properties
- * @param {string} [props.placeholder] - Search placeholder text
- * @param {boolean} [props.enableSuggestions=true] - Whether to enable suggestions dropdown
- * @param {boolean} [props.enableStickyBehavior=false] - Whether to enable sticky behavior
- * @param {Object} [props.suggestionsConfig] - Configuration for suggestions dropdown
- * @param {Object} callbacks - Event callbacks
- * @param {Function} [callbacks.onInput] - Input change handler: ({ value: string }) => void
- * @param {Function} [callbacks.onSubmit] - Search submit handler: ({ query: string, suggestion?: Object }) => void
- * @param {Function} [callbacks.onClear] - Search cleared handler: () => void
- * @param {Function} [callbacks.onSuggestionSelect] - Suggestion selected handler: ({ suggestion: Object }) => void
- * @returns {Promise<Object>} Component API
- */
 export async function createExploreSearchBar(props = {}, callbacks = {}) {
+  await loadSearchBarStyles();
+
   const {
     placeholder = DEFAULTS.PLACEHOLDER,
     enableSuggestions = true,
@@ -42,17 +31,17 @@ export async function createExploreSearchBar(props = {}, callbacks = {}) {
   };
 
   const outerWrapper = createTag('div', { class: CSS_CLASSES.OUTER_WRAPPER });
-
   const sentinel = createTag('div', {
     class: CSS_CLASSES.SENTINEL,
     'aria-hidden': 'true',
   });
-
   const container = createTag('div', { class: CSS_CLASSES.CONTAINER });
   const { wrapper, form, input, clearBtn } = createSearchBarWrapper(placeholder);
 
   let suggestionsDropdown = null;
   let visibility;
+  let cleanupHandlers = () => {};
+  let cleanupAutocomplete = () => {};
 
   if (enableSuggestions) {
     const labelField = suggestionsConfig.itemConfig?.labelField || 'label';
@@ -87,12 +76,16 @@ export async function createExploreSearchBar(props = {}, callbacks = {}) {
       onEscape: visibility.hide,
     });
 
-    input.addEventListener('click', (e) => {
+    const inputClickHandler = (e) => {
       e.stopPropagation();
       if (!suggestionsDropdown.isVisible() && state.query) {
         visibility.show();
       }
-    }, { passive: true });
+    };
+    input.addEventListener('click', inputClickHandler, { passive: true });
+    cleanupHandlers = () => {
+      input.removeEventListener('click', inputClickHandler);
+    };
   } else {
     container.append(wrapper);
     visibility = createNoopVisibilityManager();
@@ -100,12 +93,17 @@ export async function createExploreSearchBar(props = {}, callbacks = {}) {
 
   outerWrapper.append(sentinel, container);
 
-  initSearchHandlers(
+  const cleanupSearchHandlers = initSearchHandlers(
     { container, input, clearBtn, form },
     state,
     callbacks,
     { hideSuggestions: visibility.hide },
   );
+  const originalCleanupHandlers = cleanupHandlers;
+  cleanupHandlers = () => {
+    originalCleanupHandlers();
+    cleanupSearchHandlers();
+  };
 
   let stickyBehavior = null;
 
@@ -151,6 +149,11 @@ export async function createExploreSearchBar(props = {}, callbacks = {}) {
       autocomplete.clear();
       originalClear?.();
     };
+
+    cleanupAutocomplete = () => {
+      input.removeEventListener('input', autocomplete.inputHandler);
+      autocomplete.clear();
+    };
   }
 
   return {
@@ -159,9 +162,7 @@ export async function createExploreSearchBar(props = {}, callbacks = {}) {
     setQuery(query) {
       state.query = query;
       input.value = query;
-      const hasValue = Boolean(query);
-      clearBtn.style.display = hasValue ? 'inline-block' : 'none';
-      clearBtn.classList.toggle(CSS_CLASSES.HIDDEN, !hasValue);
+      updateClearButtonVisibility(clearBtn, Boolean(query));
     },
 
     setSuggestions(suggestions) {
@@ -200,6 +201,8 @@ export async function createExploreSearchBar(props = {}, callbacks = {}) {
     destroyStickyBehavior: () => stickyBehavior?.destroy(),
 
     destroy() {
+      cleanupAutocomplete();
+      cleanupHandlers();
       stickyBehavior?.destroy();
       if (suggestionsDropdown) {
         suggestionsDropdown.destroy();
@@ -207,3 +210,5 @@ export async function createExploreSearchBar(props = {}, callbacks = {}) {
     },
   };
 }
+
+export const createSearchBar = createExploreSearchBar;

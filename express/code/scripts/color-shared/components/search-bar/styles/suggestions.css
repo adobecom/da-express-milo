@@ -1,0 +1,166 @@
+.search-suggestions-dropdown {
+  --search-bar-thumbnail-size: 40px;
+  --search-bar-thumbnail-size-tablet: 48px;
+
+  inline-size: 100%;
+  position: absolute;
+  inset-block-start: 100%;
+  background: var(--color-white, #fff);
+  border: 1px solid var(--Palette-gray-200, #e1e1e1);
+  border-radius: var(--Corner-radius-corner-radius-200, 16px);
+  box-shadow: var(--Elevation-Dialog, 0 4px 16px rgba(0, 0, 0, 0.16));
+  overflow: hidden;
+  margin-block-start: var(--spacing-75, 4px);
+}
+
+.search-suggestions-dropdown.hidden,
+.search-suggestions-dropdown[hidden] {
+  display: none;
+}
+
+.suggestions-header {
+  padding-block: var(--spacing-200, 12px);
+  padding-inline: var(--spacing-300, 16px);
+  font-size: var(--body-font-size-s, 14px);
+  font-weight: 700;
+  color: var(--color-gray-950, #131313);
+}
+
+.suggestions-list {
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.suggestion-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-200, 12px);
+  padding-block: var(--spacing-200, 12px);
+  padding-inline: var(--spacing-300, 16px);
+  cursor: pointer;
+  transition: background-color var(--search-bar-transition-fast, 130ms) ease;
+}
+
+.suggestion-item:hover,
+.suggestion-item.is-selected,
+.suggestion-item:focus {
+  background-color: var(--color-gray-100, #f8f8f8);
+}
+
+.suggestion-item:focus {
+  outline: none;
+}
+
+.suggestion-item:focus-visible {
+  outline: var(--border-width-2, 2px) solid var(--Alias-focus-indicator-default, #4b75ff);
+  outline-offset: calc(-1 * var(--border-width-2, 2px));
+}
+
+.suggestion-item:last-child {
+  border-end-start-radius: var(--Corner-radius-corner-radius-200, 16px);
+  border-end-end-radius: var(--Corner-radius-corner-radius-200, 16px);
+}
+
+.suggestion-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  inline-size: 20px;
+  block-size: 20px;
+  color: var(--color-dark-gray, #505050);
+}
+
+.suggestion-icon svg {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.suggestion-text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-50, 2px);
+  min-inline-size: 0;
+}
+
+.suggestion-label {
+  font-size: var(--body-font-size-m, 16px);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--color-gray-950, #131313);
+}
+
+.suggestion-type {
+  font-size: var(--body-font-size-xs, 12px);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-color-secondary, #6e6e6e);
+}
+
+.suggestion-subtext {
+  font-size: var(--body-font-size-xs, 12px);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--color-dark-gray, #505050);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.suggestion-thumbnail {
+  flex-shrink: 0;
+  inline-size: var(--search-bar-thumbnail-size);
+  block-size: var(--search-bar-thumbnail-size);
+  border-radius: var(--Corner-radius-corner-radius-100, 8px);
+  overflow: hidden;
+  background-color: var(--Palette-gray-200, #e1e1e1);
+}
+
+.suggestion-thumbnail img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+
+.suggestions-empty {
+  padding-block: var(--spacing-400, 24px);
+  padding-inline: var(--spacing-300, 16px);
+  text-align: center;
+  font-size: var(--body-font-size-s, 14px);
+  color: var(--text-color-secondary, #6e6e6e);
+}
+
+.suggestions-empty.hidden {
+  display: none;
+}
+
+.is-sticky-clone .search-suggestions-dropdown {
+  inset-block-start: auto;
+  inset-block-end: 100%;
+  margin-block-start: 0;
+  margin-block-end: var(--spacing-75, 4px);
+}
+
+@media (min-width: 768px) {
+  .suggestions-header {
+    padding-block: var(--spacing-300, 16px);
+    padding-inline: var(--spacing-400, 24px);
+  }
+
+  .suggestion-item {
+    padding-block: var(--spacing-300, 16px);
+    padding-inline: var(--spacing-400, 24px);
+    gap: var(--spacing-300, 16px);
+  }
+
+  .suggestion-thumbnail {
+    inline-size: var(--search-bar-thumbnail-size-tablet);
+    block-size: var(--search-bar-thumbnail-size-tablet);
+  }
+
+  .suggestions-empty {
+    padding-block: var(--spacing-500, 32px);
+    padding-inline: var(--spacing-400, 24px);
+  }
+}
