@@ -187,7 +187,7 @@ async function formatDynamicCartLink(a) {
     const newTrialHref = buildUrl(url, country, language, getConfig, offerId);
     a.href = newTrialHref;
   } catch (error) {
-    window.lana.log(`Failed to fetch prices for page plan: ${error}`, { clientId: 'express', tags: 'grid-marquee', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log(`Failed to fetch prices for page plan: ${error}`, { tags: 'grid-marquee', errorType: 'e', severity: 'error', sampleRate: '1' });
   }
   a.style.visibility = 'visible';
   return a;

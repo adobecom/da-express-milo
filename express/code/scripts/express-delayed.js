@@ -76,7 +76,7 @@ export default async function loadDelayed() {
     preloadSUSILight();
     return null;
   } catch (error) {
-    window.lana?.log(`Express-Delayed Error: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'express-delayed', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log(`Express-Delayed Error: ${error?.message || error?.detail || error}`, { tags: 'express-delayed', errorType: 'e', severity: 'error', sampleRate: '1' });
     return null;
   }
 }

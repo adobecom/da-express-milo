@@ -79,7 +79,7 @@ export default async function getData() {
 
     return filtered || null;
   } catch (error) {
-    window.lana?.log(`error fetching sdc browse api: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'utils, browse-api-controller, getData', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log(`error fetching sdc browse api: ${error?.message || error?.detail || error}`, { tags: 'utils, browse-api-controller, getData', errorType: 'e', severity: 'error', sampleRate: '1' });
     return null;
   }
 }

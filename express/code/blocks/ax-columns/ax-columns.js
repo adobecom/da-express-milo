@@ -727,7 +727,7 @@ export default async function decorate(block) {
     try {
       await formatSalesPhoneNumber(phoneNumberTags);
     } catch (error) {
-      window.lana?.log(`Error fetching sales phones numbers: ${error.message}`, { clientId: 'express', tags: 'ax-columns', errorType: 'e', severity: 'error', sampleRate: '1' });
+      window.lana?.log(`Error fetching sales phones numbers: ${error.message}`, { tags: 'ax-columns', errorType: 'e', severity: 'error', sampleRate: '1' });
     }
   }
 

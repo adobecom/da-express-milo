@@ -360,7 +360,7 @@ export async function decorateButtonsDeprecated(el, size) {
         }
       }
     } catch (error) {
-      window.lana?.log(`Ignoring button due to error: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'utils', errorType: 'e', severity: 'error', sampleRate: '1' });
+      window.lana?.log(`Ignoring button due to error: ${error?.message || error?.detail || error}`, { tags: 'utils', errorType: 'e', severity: 'error', sampleRate: '1' });
     }
   });
 }
@@ -472,7 +472,7 @@ export function preDecorateSections(area) {
       try {
         linkToTargetURL = new URL(linkToTarget);
       } catch (error) {
-        window.lana?.log(`${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'utils', errorType: 'e', severity: 'error', sampleRate: '1' });
+        window.lana?.log(`${error?.message || error?.detail || error}`, { tags: 'utils', errorType: 'e', severity: 'error', sampleRate: '1' });
       }
       const sameUrlCTAs = Array.from(area.querySelectorAll('a:any-link'))
         .filter((a) => {
@@ -487,7 +487,7 @@ export function preDecorateSections(area) {
             return (sameText || (samePathname && sameHash))
               && isNotInFloatingCta && notFloatingCtaIgnore;
           } catch (error) {
-            window.lana?.log(`${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'utils', errorType: 'e', severity: 'error', sampleRate: '1' });
+            window.lana?.log(`${error?.message || error?.detail || error}`, { tags: 'utils', errorType: 'e', severity: 'error', sampleRate: '1' });
             return false;
           }
         });
@@ -764,7 +764,7 @@ export async function formatDynamicCartLink(a) {
     const newTrialHref = buildUrl(url, country, language, getConfig, offerId);
     a.href = newTrialHref;
   } catch (error) {
-    window.lana.log(`Failed to fetch prices for page plan: ${error}`, { clientId: 'express', tags: 'utils', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log(`Failed to fetch prices for page plan: ${error}`, { tags: 'utils', errorType: 'e', severity: 'error', sampleRate: '1' });
   }
   a.style.visibility = 'visible';
   return a;
@@ -832,7 +832,7 @@ export async function convertToInlineSVG(img) {
     const svgElement = svgDoc.querySelector('svg');
 
     if (!svgElement) {
-      window.lana?.log(`No SVG element found in file ${img.src}`, { clientId: 'express', tags: 'utils, convertToInlineSVG', errorType: 'e', severity: 'error', sampleRate: '1' });
+      window.lana?.log(`No SVG element found in file ${img.src}`, { tags: 'utils, convertToInlineSVG', errorType: 'e', severity: 'error', sampleRate: '1' });
       return img;
     }
 
@@ -859,7 +859,7 @@ export async function convertToInlineSVG(img) {
 
     return svgElement;
   } catch (error) {
-    window.lana?.log(`Error converting SVG: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'utils, convertToInlineSVG', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log(`Error converting SVG: ${error?.message || error?.detail || error}`, { tags: 'utils, convertToInlineSVG', errorType: 'e', severity: 'error', sampleRate: '1' });
     return img;
   }
 }

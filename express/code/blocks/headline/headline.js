@@ -15,7 +15,7 @@ export default async function init(el) {
     });
     cfg?.remove();
   } catch (error) {
-    window.lana?.log(`${error?.message || error}`, { clientId: 'express', tags: 'headline', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log(`${error?.message || error}`, { tags: 'headline', errorType: 'e', severity: 'error', sampleRate: '1' });
   }
   if (document.querySelector('.headline:first-of-type') === el && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
     const logo = getIconElementDeprecated('adobe-express-logo');

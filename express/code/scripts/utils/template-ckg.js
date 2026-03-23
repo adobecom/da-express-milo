@@ -283,16 +283,16 @@ async function lazyLoadSearchMarqueeLinklist() {
           });
         });
       } else {
-        window.lana?.log('template-ckg: Missing ckgData or short-title metadata - pills will not be populated', { clientId: 'express', tags: 'template-ckg, lazyLoadSearchMarqueeLinklist', errorType: 'i', severity: 'info', sampleRate: '1' });
+        window.lana?.log('template-ckg: Missing ckgData or short-title metadata - pills will not be populated', { tags: 'template-ckg, lazyLoadSearchMarqueeLinklist', errorType: 'i', severity: 'info', sampleRate: '1' });
       }
 
       await updateLinkList(linkListContainer, linkListTemplate, linkListData);
       linkListContainer.parentElement.classList.add('appear');
     } else {
-      window.lana?.log('template-ckg: No carousel container found in search-marquee', { clientId: 'express', tags: 'template-ckg, lazyLoadSearchMarqueeLinklist', errorType: 'i', severity: 'info', sampleRate: '1' });
+      window.lana?.log('template-ckg: No carousel container found in search-marquee', { tags: 'template-ckg, lazyLoadSearchMarqueeLinklist', errorType: 'i', severity: 'info', sampleRate: '1' });
     }
   } else {
-    window.lana?.log('template-ckg: No .search-marquee element found on page', { clientId: 'express', tags: 'template-ckg, lazyLoadSearchMarqueeLinklist', errorType: 'i', severity: 'info', sampleRate: '1' });
+    window.lana?.log('template-ckg: No .search-marquee element found on page', { tags: 'template-ckg, lazyLoadSearchMarqueeLinklist', errorType: 'i', severity: 'info', sampleRate: '1' });
   }
 }
 

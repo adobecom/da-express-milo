@@ -744,7 +744,7 @@ async function initializeDependencies() {
       getMetadata: utils.getMetadata,
     };
   } catch (error) {
-    window.lana?.log(`TOC: Failed to initialize dependencies: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'toc-seo', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log(`TOC: Failed to initialize dependencies: ${error?.message || error?.detail || error}`, { tags: 'toc-seo', errorType: 'e', severity: 'error', sampleRate: '1' });
     throw new Error('Failed to load required utilities');
   }
 }
@@ -804,7 +804,7 @@ export default async function decorate(block) {
     if (startElement) {
       startElement.insertAdjacentElement('afterend', container);
     } else {
-      window.lana?.log('TOC: No start element found', { clientId: 'express', tags: 'toc-seo', errorType: 'e', severity: 'error', sampleRate: '1' });
+      window.lana?.log('TOC: No start element found', { tags: 'toc-seo', errorType: 'e', severity: 'error', sampleRate: '1' });
     }
 
     // Phase 7: Insert floating button and setup behavior (mobile/tablet only)
@@ -847,7 +847,7 @@ export default async function decorate(block) {
     // Hide original block
     block.style.display = 'none';
   } catch (error) {
-    window.lana?.log(`TOC: Error during decoration: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'toc-seo', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log(`TOC: Error during decoration: ${error?.message || error?.detail || error}`, { tags: 'toc-seo', errorType: 'e', severity: 'error', sampleRate: '1' });
     block.style.display = 'none';
   }
 }

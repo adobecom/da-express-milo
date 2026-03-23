@@ -103,7 +103,7 @@ async function renderTemplates(el, recipe, toolbar, isPanel = false, queryParams
 
     el.append(templatesContainer);
   } catch (error) {
-    window.lana?.log(`Error in template-x-carousel: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'template-x-carousel', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log(`Error in template-x-carousel: ${error?.message || error?.detail || error}`, { tags: 'template-x-carousel', errorType: 'e', severity: 'error', sampleRate: '1' });
     if (getConfig().env.name === 'prod') {
       el.remove();
     } else {

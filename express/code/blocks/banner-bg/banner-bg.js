@@ -121,7 +121,7 @@ async function formatPhoneNumbers(block) {
   try {
     await formatSalesPhoneNumber(phoneTags);
   } catch (error) {
-    window.lana?.log(`Error formatting phone numbers: ${error.message}`, { clientId: 'express', tags: 'banner-bg', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log(`Error formatting phone numbers: ${error.message}`, { tags: 'banner-bg', errorType: 'e', severity: 'error', sampleRate: '1' });
   }
 }
 

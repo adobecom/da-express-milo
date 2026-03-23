@@ -149,7 +149,7 @@ function getSafeHrefFromText(text) {
       return url.href;
     }
   } catch (error) {
-    window.lana.log(`Failed to get href from text: ${error}`, { clientId: 'express', tags: 'blog-posts-v2', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log(`Failed to get href from text: ${error}`, { tags: 'blog-posts-v2', errorType: 'e', severity: 'error', sampleRate: '1' });
     return null;
   }
   return null;
@@ -285,7 +285,7 @@ async function filterAllBlogPostsOnPage() {
             locales.push(blogLocale);
           }
         } catch (error) {
-          window.lana?.log(`Invalid blog post URL: ${l.href}: ${error}`, { clientId: 'express', tags: 'blog-posts-v2', errorType: 'e', severity: 'error', sampleRate: '1' });
+          window.lana?.log(`Invalid blog post URL: ${l.href}: ${error}`, { tags: 'blog-posts-v2', errorType: 'e', severity: 'error', sampleRate: '1' });
         }
       });
 

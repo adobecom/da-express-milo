@@ -29,11 +29,11 @@ const onRedirect = (e) => {
   }, 100);
 };
 const onError = (error) => {
-  window.lana?.log(`on error: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'susi-light', errorType: 'e', severity: 'error', sampleRate: '1' });
+  window.lana?.log(`on error: ${error?.message || error?.detail || error}`, { tags: 'susi-light', errorType: 'e', severity: 'error', sampleRate: '1' });
 };
 
 const onAuthFailed = (error) => {
-  window.lana?.log(`on auth failed: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'susi-light, susi-auth-failed', errorType: 'e', severity: 'error', sampleRate: '1' });
+  window.lana?.log(`on auth failed: ${error?.message || error?.detail || error}`, { tags: 'susi-light, susi-auth-failed', errorType: 'e', severity: 'error', sampleRate: '1' });
 };
 // easier to mock in unit test
 export const SUSIUtils = {
@@ -52,7 +52,7 @@ async function getDestURL(url) {
     const appended = await getTrackingAppendedURL(url);
     destURL = new URL(appended);
   } catch (error) {
-    window.lana?.log(`invalid redirect uri for susi-light: ${url}: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'susi-light, susi-invalid-redirect-uri', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log(`invalid redirect uri for susi-light: ${url}: ${error?.message || error?.detail || error}`, { tags: 'susi-light, susi-invalid-redirect-uri', errorType: 'e', severity: 'error', sampleRate: '1' });
     destURL = new URL('https://new.express.adobe.com');
   }
   if (isStage) {
@@ -149,7 +149,7 @@ function redirectIfLoggedIn(destURL) {
         window.adobeIMS?.isSignedInUser() && goDest();
       })
       .catch((error) => {
-        window.lana?.log(`Unable to load IMS in susi-light: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'susi-light, susi-load-ims-failed', errorType: 'e', severity: 'error', sampleRate: '1' });
+        window.lana?.log(`Unable to load IMS in susi-light: ${error?.message || error?.detail || error}`, { tags: 'susi-light, susi-load-ims-failed', errorType: 'e', severity: 'error', sampleRate: '1' });
       });
   }
 }

@@ -350,7 +350,7 @@ async function startAssetDecoding(file, controller) {
   }).catch((error) => {
     window.lana?.log(
       `Asset decode failed error:${error.message || error}`,
-      { clientId: 'express', tags: 'frictionless-asset-decode-failed, frictionless-quick-action', errorType: 'e', severity: 'error', sampleRate: '1' },
+      { tags: 'frictionless-asset-decode-failed, frictionless-quick-action', errorType: 'e', severity: 'error', sampleRate: '1' },
     );
     return null;
   }), 5000);
@@ -675,7 +675,7 @@ export default async function decorate(block) {
   // Load IMS if not already loaded
   if (!window.adobeIMS) {
     try { await utils.loadIms(); } catch (error) {
-      window.lana?.log(`Unable to load IMS in frictionless-quick-action: ${error?.message || error}`, { clientId: 'express', tags: 'frictionless-quick-action', errorType: 'e', severity: 'error', sampleRate: '1' });
+      window.lana?.log(`Unable to load IMS in frictionless-quick-action: ${error?.message || error}`, { tags: 'frictionless-quick-action', errorType: 'e', severity: 'error', sampleRate: '1' });
     }
   }
   setupFrictionlessTargetBaseUrl(quickAction);
