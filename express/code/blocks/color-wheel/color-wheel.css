@@ -140,10 +140,6 @@
   display: none;
 }
 
-.color-wheel .color-extract-mood-row {
-  margin-bottom: var(--spacing-100);
-}
-
 .color-wheel .image-extract.has-image .color-extract-edit-stage,
 .color-wheel .image-extract.is-loading .color-extract-edit-stage {
   width: 100%;
@@ -154,11 +150,20 @@
   gap: var(--spacing-200);
 }
 
+.color-wheel .color-extract-edit-left {
+  gap: 0;
+}
+
+.color-wheel .color-extract-mood {
+  flex-direction: column;
+  height: auto;
+  align-items: stretch;
+}
+
 .color-wheel .image-extract.has-image .color-extract-edit-bg {
   min-height: 160px;
   height: auto;
-  max-height: min(320px, 45vh);
-  padding: var(--spacing-100);
+  order: 1;
 }
 
 .color-wheel .image-extract.has-image .color-extract-edit-bg picture,
@@ -172,6 +177,7 @@
 .color-wheel .color-extract-toolbar {
   flex-wrap: wrap;
   gap: var(--spacing-100);
+  padding-block: var(--spacing-300) var(--spacing-100);
 }
 
 .color-wheel .color-extract-drag-overlay {
@@ -384,16 +390,25 @@ color-wheel-express {
 
   .color-wheel sp-tab-panel[selected] .image-extract,
   .color-wheel sp-tab-panel[selected] .color-extract-landing,
-  .color-wheel sp-tab-panel[selected] .color-extract-landing-content {
-    flex: 1 1 0;
-    min-height: 0;
+  .color-wheel sp-tab-panel[selected] .color-extract-landing-content,
+  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-edit,
+  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-edit-stage,
+  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-edit-left {
+    flex: 1;
     display: flex;
     flex-direction: column;
+    align-items: stretch;
   }
 
-  .color-wheel sp-tab-panel[selected] .image-upload-dropzone-container {
-    flex: 1 1 0;
+  .color-wheel sp-tab-panel[selected] .image-upload-dropzone-container,
+  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-edit-bg {
+    flex: 1;
+    display: flex;
     justify-content: center;
+  }
+
+  .color-wheel sp-tab-panel[selected] .image-extract.has-image .color-extract-landing {
+    display: none;
   }
 
   .color-wheel .color-extract-landing-content {
@@ -402,6 +417,27 @@ color-wheel-express {
 
   .color-wheel .color-extract-suggestions {
     max-width: none;
+  }
+
+  .color-wheel .color-extract-edit-left {
+    gap: 16px;
+  }
+
+  .color-wheel .color-extract-mood {
+    flex-direction: row;
+    width: 250px;
+  }
+
+  .color-wheel .color-extract-mood-dropdown {
+    flex: 1;
+  }
+
+  .color-wheel .color-extract-edit-bg {
+    order: 0;
+  }
+
+  .color-wheel .color-extract-toolbar {
+    padding-block: 0;
   }
 
   .color-wheel .color-explorer-strip-container color-swatch-rail[orientation="vertical"] {

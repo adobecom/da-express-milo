@@ -367,13 +367,14 @@
   align-items: center;
   height: 32px;
   flex-shrink: 0;
+  column-gap: 12px;
 }
 
 .color-extract-mood-label {
   font-size: 14px;
   font-weight: 400;
   color: var(--color-extract-subtle);
-  padding-right: 12px;
+  padding-block: 7px;
   white-space: nowrap;
   line-height: 18px;
 }
