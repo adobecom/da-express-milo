@@ -1155,6 +1155,8 @@ export class EasyUpload {
      * @returns {Promise<void>}
      */
   async cleanup() {
+    window.removeEventListener('beforeunload', this.handleBeforeUnload);
+
     // Clear refresh interval
     if (this.qrRefreshInterval) {
       clearTimeout(this.qrRefreshInterval);
