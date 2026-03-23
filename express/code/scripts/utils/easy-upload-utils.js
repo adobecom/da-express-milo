@@ -646,35 +646,35 @@ export class EasyUpload {
      * @throws {Error} If URL generation fails or times out
      */
   async generateUploadUrl() {
-    if (this.isGeneratingUrl) return;
+    if (this.isGeneratingUrl) return null;
     this.isGeneratingUrl = true;
     try {
     // Create timeout promise
-    const timeoutPromise = new Promise((_, reject) => {
-      setTimeout(() => {
-        console.error('[EasyUpload] URL generation timed out');
-        reject(new Error(`QR code generation timed out after ${QR_CODE_CONFIG.GENERATION_TIMEOUT / 1000} seconds`));
-      }, QR_CODE_CONFIG.GENERATION_TIMEOUT);
-    });
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => {
+          console.error('[EasyUpload] URL generation timed out');
+          reject(new Error(`QR code generation timed out after ${QR_CODE_CONFIG.GENERATION_TIMEOUT / 1000} seconds`));
+        }, QR_CODE_CONFIG.GENERATION_TIMEOUT);
+      });
 
-    // Create the actual URL generation promise
-    const urlGenerationPromise = (async () => {
-      try {
+      // Create the actual URL generation promise
+      const urlGenerationPromise = (async () => {
+        try {
         // Generate presigned upload URL
-        const presignedUrl = await this.generatePresignedUploadUrl();
+          const presignedUrl = await this.generatePresignedUploadUrl();
 
-        // Build mobile upload URL
-        const mobileUrl = this.buildMobileUploadUrl(presignedUrl);
+          // Build mobile upload URL
+          const mobileUrl = this.buildMobileUploadUrl(presignedUrl);
 
-        return this.shortenUrl(mobileUrl);
-      } catch (error) {
-        console.error('[EasyUpload] Failed in URL generation promise:', error);
-        throw error;
-      }
-    })();
+          return this.shortenUrl(mobileUrl);
+        } catch (error) {
+          console.error('[EasyUpload] Failed in URL generation promise:', error);
+          throw error;
+        }
+      })();
 
-    // Race between URL generation and timeout
-    return await Promise.race([urlGenerationPromise, timeoutPromise]);
+      // Race between URL generation and timeout
+      return await Promise.race([urlGenerationPromise, timeoutPromise]);
     } finally {
       this.isGeneratingUrl = false;
     }
@@ -938,6 +938,7 @@ export class EasyUpload {
       }
 
       const uploadUrl = await this.generateUploadUrl();
+      if (!uploadUrl) return;
       await this.displayQRCode(uploadUrl);
 
       // Set up refresh interval
