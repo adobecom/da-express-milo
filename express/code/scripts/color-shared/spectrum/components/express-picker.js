@@ -76,6 +76,10 @@ async function withRetry(task, attempts = 3) {
  * @param {Object}    config
  * @param {string}    config.label    — visible label / aria-label
  * @param {string}    [config.value]  — initially selected value
+ * @param {string}    [config.placement='bottom-start']
+ *   preferred overlay placement (Spectrum may still flip to avoid collisions)
+ * @param {boolean}   [config.forcePopover=false]
+ *   force dropdown/popover mode instead of Spectrum mobile tray mode
  * @param {Array<{value:string, label:string}>} config.options
  * @param {Function}  [config.onChange]   — called with { value }
  * @param {string}    [config.id]        — optional DOM id suffix
@@ -89,6 +93,8 @@ export async function createExpressPicker(config) {
   const {
     label,
     value: initialValue,
+    placement = 'bottom-start',
+    forcePopover = false,
     options = [],
     onChange,
     id,
@@ -115,6 +121,11 @@ export async function createExpressPicker(config) {
   if (id) picker.id = `express-picker-${id}`;
   picker.setAttribute('label', label);
   picker.setAttribute('aria-label', `Filter by ${label}`);
+  picker.setAttribute('size', 'm');
+  picker.setAttribute('placement', placement);
+  picker.placement = placement;
+  if (forcePopover) picker.setAttribute('force-popover', '');
+  picker.forcePopover = Boolean(forcePopover);
   picker.classList.add('filter-picker');
   if (disabled) picker.setAttribute('disabled', '');
 

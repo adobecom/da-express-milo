@@ -28,6 +28,9 @@ export const FILTER_IDS = {
   TIME_RANGE: 'timeRange',
 };
 const ANALYTICS_TEXT_LIMIT = 20;
+const PICKER_MIN_WIDTH_FALLBACK_PX = 144;
+const PICKER_MAX_WIDTH_FALLBACK_PX = 180;
+const PICKER_HORIZONTAL_CHROME_PX = 40;
 
 /**
  * Create filters component
@@ -53,6 +56,7 @@ export async function createFiltersComponent(options = {}) {
   let contentTypeMenuController = null;
   let desktopInitPromise = null;
   let interactionRoot = null;
+  let pickerMeasureCanvas = null;
 
   function waitForAnimationFrame() {
     return new Promise((resolve) => {
@@ -110,8 +114,8 @@ export async function createFiltersComponent(options = {}) {
       },
       {
         id: FILTER_IDS.SORT,
-        label: 'All',
-        defaultValue: 'all',
+        label: 'Most popular',
+        defaultValue: 'most-popular',
         options: [
           { label: 'Most popular', value: 'most-popular' },
           { label: 'All', value: 'all' },
@@ -178,6 +182,76 @@ export async function createFiltersComponent(options = {}) {
     if (!filter) return 'all';
     if (filter.defaultValue) return filter.defaultValue;
     return filter.options?.[0]?.value ?? 'all';
+  }
+
+  function clampNumber(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function getPickerLabelFont() {
+    const rootStyles = window.getComputedStyle(document.documentElement);
+    const bodyStyles = window.getComputedStyle(document.body || document.documentElement);
+    const fontSize = rootStyles.getPropertyValue('--body-font-size-s').trim() || '14px';
+    const fontFamily = rootStyles.getPropertyValue('--body-font-family').trim()
+      || bodyStyles.fontFamily
+      || 'sans-serif';
+    return `400 ${fontSize} ${fontFamily}`;
+  }
+
+  function getPickerWidthTokenValue(tokenName, fallback) {
+    const tokenValue = window
+      .getComputedStyle(document.documentElement)
+      .getPropertyValue(tokenName)
+      .trim();
+    const parsed = Number.parseFloat(tokenValue);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  }
+
+  function getLocalizedPickerWidth(filter) {
+    const minWidth = getPickerWidthTokenValue(
+      '--color-explore-filter-picker-width',
+      PICKER_MIN_WIDTH_FALLBACK_PX,
+    );
+    const maxWidth = Math.max(
+      minWidth,
+      getPickerWidthTokenValue(
+        '--color-explore-filter-picker-max-width',
+        PICKER_MAX_WIDTH_FALLBACK_PX,
+      ),
+    );
+
+    const labels = [
+      filter?.label,
+      ...(Array.isArray(filter?.options) ? filter.options.map((option) => option?.label) : []),
+    ]
+      .filter(Boolean)
+      .map((label) => String(label));
+
+    if (labels.length === 0) return minWidth;
+
+    if (!pickerMeasureCanvas && typeof document !== 'undefined') {
+      pickerMeasureCanvas = document.createElement('canvas');
+    }
+    const context = pickerMeasureCanvas?.getContext?.('2d');
+    if (!context) return minWidth;
+
+    context.font = getPickerLabelFont();
+    const widestLabel = labels.reduce((currentMaxWidth, text) => {
+      const measuredWidth = Math.ceil(context.measureText(text).width);
+      return Math.max(currentMaxWidth, measuredWidth);
+    }, 0);
+
+    const computedWidth = widestLabel + PICKER_HORIZONTAL_CHROME_PX;
+    return clampNumber(computedWidth, minWidth, maxWidth);
+  }
+
+  function applyDesktopPickerWidth(slot, filter) {
+    if (!slot) return;
+    const widthPx = getLocalizedPickerWidth(filter);
+    const widthValue = `${widthPx}px`;
+    slot.style.setProperty('--express-picker-width', widthValue);
+    slot.style.setProperty('--express-picker-min-width', widthValue);
+    slot.style.setProperty('--express-picker-max-width', widthValue);
   }
 
   function syncPickerValue(id, value) {
@@ -378,6 +452,8 @@ export async function createFiltersComponent(options = {}) {
       let picker = null;
       let lastError = null;
 
+      applyDesktopPickerWidth(dropdownSlots[i], filter);
+
       for (let attempt = 1; attempt <= 4; attempt += 1) {
         try {
           // Retry a few times in case Spectrum custom elements are still settling.
@@ -387,6 +463,7 @@ export async function createFiltersComponent(options = {}) {
             value: stableInitialValue,
             options: filter.options,
             id: filterId,
+            forcePopover: true,
             onChange: ({ value }) => handleDesktopPickerChange(filterId, value),
           });
           break;
@@ -489,6 +566,9 @@ export async function createFiltersComponent(options = {}) {
 
   const sortPanel = createTag('div', { class: 'filters-mobile__panel filters-mobile__panel--sort', hidden: '' });
   const filterPanel = createTag('div', { class: 'filters-mobile__panel filters-mobile__panel--filter', hidden: '' });
+  const desktopMq = typeof window !== 'undefined'
+    ? window.matchMedia('(min-width: 600px)')
+    : null;
 
   sortMenuController = createSpectrumMenu(
     sortFilter?.options ?? [],
@@ -566,6 +646,12 @@ export async function createFiltersComponent(options = {}) {
   }
 
   function togglePanel(targetPanel, targetButton, onOpen) {
+    // In desktop/dropdown layout (600px+), mobile panels must never open.
+    if (desktopMq?.matches) {
+      closePanels();
+      return;
+    }
+
     const isOpen = !targetPanel.hasAttribute('hidden');
     closePanels();
     const shouldOpen = !isOpen;
@@ -667,11 +753,9 @@ export async function createFiltersComponent(options = {}) {
   mobileCurtain.addEventListener('click', onCurtainClick);
 
   // Close any open mobile panel when crossing into dropdown layout (600px+).
-  const desktopMq = typeof window !== 'undefined'
-    ? window.matchMedia('(min-width: 600px)')
-    : null;
   const onBreakpointChange = () => closePanels();
   desktopMq?.addEventListener('change', onBreakpointChange);
+  if (desktopMq?.matches) closePanels();
 
   cleanupFns.push(() => sortButton.removeEventListener('click', onSortButtonClick));
   cleanupFns.push(() => filterButton.removeEventListener('click', onFilterButtonClick));

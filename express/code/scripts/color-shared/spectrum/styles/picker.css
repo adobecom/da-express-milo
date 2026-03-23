@@ -9,9 +9,11 @@
 
 /* ---- Host: geometry, background, border, text via --mod tokens ---- */
 sp-picker.filter-picker {
-  --mod-picker-min-height: 40px;
+  --mod-picker-min-height: var(--spacing-600);
   --mod-picker-border-radius: 9px;
-  --mod-picker-min-width: var(--express-picker-min-width, 200px);
+  --mod-picker-min-width: var(--express-picker-min-width, 144px);
+  --mod-picker-spacing-top-to-text: 0;
+  --mod-picker-spacing-bottom-to-text: 0;
   --mod-picker-focus-indicator-color: var(--color-blue-800);
   --mod-picker-focus-indicator-thickness: var(--border-width-2);
   --mod-picker-focus-indicator-border-radius: var(--mod-picker-border-radius);
@@ -61,29 +63,35 @@ sp-picker.filter-picker[disabled] {
 
 /* ---- Shadow parts: layout detail not covered by --mod tokens ---- */
 sp-picker.filter-picker::part(button) {
-  min-height: 40px;
+  display: flex;
+  align-items: center;
+  min-height: var(--spacing-600);
   padding: 10px 15px;
   border-radius: 9px;
   font-family: var(--body-font-family);
-  font-size: 16px;
-  line-height: 20px;
+  font-size: var(--body-font-size-m);
+  line-height: var(--spacing-350);
   box-sizing: border-box;
   outline: none; /* focus ring comes from Spectrum picker internals */
 }
 
 sp-picker.filter-picker::part(label) {
+  display: flex;
+  align-items: center;
+  padding-block-start: 0;
+  padding-block-end: 0;
   flex: 1 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 16px;
-  line-height: 20px;
+  font-size: var(--body-font-size-m);
+  line-height: var(--spacing-350);
 }
 
 sp-picker.filter-picker::part(icon),
 sp-picker.filter-picker::part(chevron) {
-  width: 12px;
-  height: 12px;
+  width: var(--spacing-200);
+  height: var(--spacing-200);
   margin-left: 7px;
   flex-shrink: 0;
 }
@@ -91,19 +99,19 @@ sp-picker.filter-picker::part(chevron) {
 /* ---- Popover / menu — global defaults for light-DOM menus (non-picker uses) ---- */
 sp-menu {
   --mod-menu-background-color: var(--color-white);
-  --mod-menu-item-corner-radius: 8px;
-  --mod-menu-item-focus-indicator-border-radius: 8px;
+  --mod-menu-item-corner-radius: var(--Corner-radius-corner-radius-100);
+  --mod-menu-item-focus-indicator-border-radius: var(--Corner-radius-corner-radius-100);
   max-height: 300px;
   overflow-y: auto;
 }
 
 sp-menu-item {
-  --mod-menu-item-min-height: 32px;
+  --mod-menu-item-min-height: var(--spacing-500);
   --mod-menu-item-font-color: var(--color-gray-800-variant);
   --mod-menu-item-background-color-hover: var(--color-gray-150);
   --mod-menu-item-background-color-key-focus: var(--color-gray-150);
-  --mod-menu-item-corner-radius: 8px;
-  --mod-menu-item-focus-indicator-border-radius: 8px;
+  --mod-menu-item-corner-radius: var(--Corner-radius-corner-radius-100);
+  --mod-menu-item-focus-indicator-border-radius: var(--Corner-radius-corner-radius-100);
   font-family: var(--body-font-family);
   white-space: nowrap;
   cursor: pointer;
@@ -120,39 +128,31 @@ sp-menu-item[disabled] {
   cursor: not-allowed;
 }
 
-/* ---- Tablet (768px+) ---- */
-@media (min-width: 768px) {
+/* ---- Tablet (600px+) ---- */
+@media (min-width: 600px) {
   sp-picker.filter-picker {
-    --mod-picker-min-height: 32px;
-    --mod-picker-border-radius: 8px;
-    --mod-picker-min-width: 160px;
+    --mod-picker-min-height: var(--spacing-500);
+    --mod-picker-border-radius: var(--Corner-radius-corner-radius-100);
   }
 
   sp-picker.filter-picker::part(button) {
-    min-height: 32px;
+    min-height: var(--spacing-500);
     padding: 0 11px 0 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    line-height: 18px;
+    border-radius: var(--Corner-radius-corner-radius-100);
+    font-size: var(--body-font-size-s);
+    line-height: var(--spacing-325);
   }
 
   sp-picker.filter-picker::part(label) {
-    font-size: 14px;
-    line-height: 18px;
+    font-size: var(--body-font-size-s);
+    line-height: var(--spacing-325);
   }
 
   sp-picker.filter-picker::part(icon),
   sp-picker.filter-picker::part(chevron) {
     width: 10px;
     height: 10px;
-    margin-left: 6px;
-  }
-}
-
-/* ---- Desktop (1200px+) ---- */
-@media (min-width: 1200px) {
-  sp-picker.filter-picker {
-    --mod-picker-min-width: 180px;
+    margin-left: var(--spacing-80);
   }
 }
 
