@@ -238,6 +238,15 @@
     text-align: center;
 }
 
+.search-marquee.color .search-bar-wrapper {
+    max-width: none;
+    margin: 0;
+}
+
+.search-marquee.color .search-bar-outer {
+    padding-inline: 0;
+}
+
 /* =============================================
    Manual link-list integration
    ============================================= */
@@ -280,14 +289,6 @@
 
 .search-marquee-wrapper.search-marquee-manual-links .carousel-container.manual-link-list {
     margin-top: var(--spacing-500);
-}
-
-.search-marquee-wrapper.search-marquee-manual-links .search-marquee .icon.icon-adobe-express-logo {
-  padding-top: 0;
-}
-
-.search-marquee-wrapper.search-marquee-manual-links .search-marquee > div:first-of-type h1 {
-  margin-bottom: var(--spacing-400);
 }
 
 @media (min-width: 900px) {

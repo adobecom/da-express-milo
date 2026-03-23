@@ -293,3 +293,39 @@ describe('Search Marquee - manual links', () => {
     expect(carousel).to.exist;
   });
 });
+
+describe('Search Marquee - color variant', () => {
+  it('uses the shared floating search bar for color pages', async () => {
+    document.body.innerHTML = `
+      <main>
+        <div class="section">
+          <div class="search-marquee color">
+            <div>
+              <div>
+                <h1 id="hero-title">Explore color palettes</h1>
+                <p>Search for moods, themes, and colors</p>
+              </div>
+            </div>
+            <div>
+              <div>blue, bold, calm</div>
+            </div>
+            <div>
+              <div>Unused row</div>
+            </div>
+          </div>
+        </div>
+      </main>
+    `;
+
+    const block = document.querySelector('.search-marquee.color');
+    await decorate(block);
+
+    expect(block.parentElement?.classList.contains('search-marquee-wrapper')).to.be.true;
+    expect(block.colorTags).to.deep.equal(['blue', 'bold', 'calm']);
+    expect(block.dataset.tags).to.equal('blue,bold,calm');
+    expect(block.querySelector('.search-bar-outer')).to.exist;
+    expect(block.querySelector('.search-bar-input')).to.exist;
+    expect(block.children).to.have.length(2);
+    expect(document.head.querySelector('link[href*="/blocks/search-bar/search-bar.css"]')).to.exist;
+  });
+});
