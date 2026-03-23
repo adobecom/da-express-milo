@@ -34,20 +34,20 @@ export const EasyUploadControls = {
 };
 
 export const EasyUploadVariantsPromoidMap = {
-  [EasyUploadVariants.removeBackgroundEasyUploadVariant]: '<To be added>',
-  [EasyUploadVariants.resizeImageEasyUploadVariant]: '<To be added>',
-  [EasyUploadVariants.cropImageEasyUploadVariant]: '<To be added>',
-  [EasyUploadControls.removeBackgroundEasyUploadControl]: '<To be added>',
-  [EasyUploadControls.resizeImageEasyUploadControl]: '<To be added>',
-  [EasyUploadControls.cropImageEasyUploadControl]: '<To be added>',
-  [EasyUploadControls.convertToJPEGEasyUploadControl]: '<To be added>',
-  [EasyUploadControls.convertToPNGEasyUploadControl]: '<To be added>',
-  [EasyUploadControls.convertToSVGEasyUploadControl]: '<To be added>',
-  [EasyUploadVariants.convertToJPEGEasyUploadVariant]: '<To be added>',
-  [EasyUploadVariants.convertToPNGEasyUploadVariant]: '<To be added>',
-  [EasyUploadVariants.convertToSVGEasyUploadVariant]: '<To be added>',
-  [EasyUploadControls.editImageEasyUploadControl]: '<To be added>',
-  [EasyUploadVariants.editImageEasyUploadVariant]: '<To be added>',
+  [EasyUploadVariants.removeBackgroundEasyUploadVariant]: 'P3KMQHCX&mv=other',
+  [EasyUploadVariants.resizeImageEasyUploadVariant]: 'P3KMQHCX&mv=other',
+  [EasyUploadVariants.cropImageEasyUploadVariant]: 'P3KMQHCX&mv=other',
+  [EasyUploadControls.removeBackgroundEasyUploadControl]: 'NYTLQM3Y&mv=other',
+  [EasyUploadControls.resizeImageEasyUploadControl]: 'NYTLQM3Y&mv=other',
+  [EasyUploadControls.cropImageEasyUploadControl]: 'NYTLQM3Y&mv=other',
+  [EasyUploadControls.convertToJPEGEasyUploadControl]: 'NYTLQM3Y&mv=other',
+  [EasyUploadControls.convertToPNGEasyUploadControl]: 'NYTLQM3Y&mv=other',
+  [EasyUploadControls.convertToSVGEasyUploadControl]: 'NYTLQM3Y&mv=other',
+  [EasyUploadVariants.convertToJPEGEasyUploadVariant]: 'P3KMQHCX&mv=other',
+  [EasyUploadVariants.convertToPNGEasyUploadVariant]: 'P3KMQHCX&mv=other',
+  [EasyUploadVariants.convertToSVGEasyUploadVariant]: 'P3KMQHCX&mv=other',
+  [EasyUploadControls.editImageEasyUploadControl]: 'NYTLQM3Y&mv=other',
+  [EasyUploadVariants.editImageEasyUploadVariant]: 'P3KMQHCX&mv=other',
 };
 
 const QR_CODE_CDN_URL = 'https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js';
