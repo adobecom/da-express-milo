@@ -233,7 +233,7 @@ export async function trackViewTemplatePage(
             },
             template: {
               templateInfo: {
-                templateId,
+                templateId: templateId || undefined,
                 templateTask: templateTask || undefined,
               },
             },
