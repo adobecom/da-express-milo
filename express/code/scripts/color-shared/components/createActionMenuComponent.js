@@ -2,6 +2,7 @@
 import { createTag, getLibs } from '../../utils.js';
 import { createExpressButton, createExpressTooltip } from '../spectrum/index.js';
 import { createActionMenuState } from './createActionMenuState.js';
+import { attachRovingTabIndex } from '../spectrum/utils/a11y.js';
 import {
   COLOR_ICON,
   ACCESSIBILITY_ICON,
@@ -26,7 +27,6 @@ const ICON_MAP = {
     minimize: MINIMIZE_ICON,
   },
 };
-const ROVING_INDEX_ATTR = 'data-roving-index';
 const LANA_TAGS = 'color,color-action-menu';
 
 function isValidActionMenuItem(item, requiredField) {
@@ -38,40 +38,6 @@ function isValidActionMenuItem(item, requiredField) {
     severity: 'error',
   });
   return false;
-}
-
-function attachRovingTabIndex(container, elements, initialFocusIndex = 0) {
-  if (!elements.length) return;
-  const focusIndex = Math.max(0, Math.min(initialFocusIndex, elements.length - 1));
-  elements.forEach((el, index) => {
-    el.setAttribute('tabindex', index === focusIndex ? '0' : '-1');
-    el.setAttribute(ROVING_INDEX_ATTR, index.toString());
-  });
-  container.addEventListener('keydown', (e) => {
-    const target = e.target.closest(`[${ROVING_INDEX_ATTR}]`);
-    if (!target || !elements.includes(target)) return;
-    const currentIndex = parseInt(target.getAttribute(ROVING_INDEX_ATTR), 10);
-    if (Number.isNaN(currentIndex) || currentIndex < 0 || currentIndex >= elements.length) return;
-    let targetIndex = -1;
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-      e.preventDefault();
-      targetIndex = (currentIndex + 1) % elements.length;
-    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-      e.preventDefault();
-      targetIndex = (currentIndex - 1 + elements.length) % elements.length;
-    } else if (e.key === 'Home') {
-      e.preventDefault();
-      targetIndex = 0;
-    } else if (e.key === 'End') {
-      e.preventDefault();
-      targetIndex = elements.length - 1;
-    }
-    if (targetIndex !== -1 && targetIndex !== currentIndex) {
-      elements[currentIndex].setAttribute('tabindex', '-1');
-      elements[targetIndex].setAttribute('tabindex', '0');
-      elements[targetIndex].focus();
-    }
-  });
 }
 
 export async function loadStyles() {
