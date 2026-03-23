@@ -371,6 +371,7 @@ export class EasyUpload {
     this.uploadAsset = null;
     this.pollingInterval = null;
     this.versionReadyPromise = null;
+    this.isGeneratingUrl = false;
 
     // Toast state
     this.toastTimeoutId = null;
@@ -645,6 +646,9 @@ export class EasyUpload {
      * @throws {Error} If URL generation fails or times out
      */
   async generateUploadUrl() {
+    if (this.isGeneratingUrl) return;
+    this.isGeneratingUrl = true;
+    try {
     // Create timeout promise
     const timeoutPromise = new Promise((_, reject) => {
       setTimeout(() => {
@@ -670,7 +674,10 @@ export class EasyUpload {
     })();
 
     // Race between URL generation and timeout
-    return Promise.race([urlGenerationPromise, timeoutPromise]);
+    return await Promise.race([urlGenerationPromise, timeoutPromise]);
+    } finally {
+      this.isGeneratingUrl = false;
+    }
   }
 
   /**
