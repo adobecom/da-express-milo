@@ -842,27 +842,25 @@ export class EasyUpload {
       this.loaderContainer.classList.add('hidden');
     }
 
-    // Create the error state HTML
-    const errorStateHtml = `
-            <div class="qr-error-state">
-                <div class="qr-error-icon-container">
-                    <img src="/express/code/blocks/frictionless-quick-action/easy-upload-files/placeholder.png" class="qr-error-bg-icon" alt="" />
-                    <img src="/express/code/icons/error.svg" class="qr-error-caution-icon" alt="Error" />
-                    <p class="qr-error-message">${this.qrErrorText || 'Failed to generate QR code'}</p>
-                </div>
-            </div>
-        `;
+    // Build error state DOM safely (avoids XSS via innerHTML)
+    const bgIcon = this.createTag('img', { src: '/express/code/blocks/frictionless-quick-action/easy-upload-files/placeholder.png', class: 'qr-error-bg-icon', alt: '' });
+    const cautionIcon = this.createTag('img', { src: '/express/code/icons/error.svg', class: 'qr-error-caution-icon', alt: 'Error' });
+    const errorMsg = this.createTag('p', { class: 'qr-error-message' }, this.qrErrorText || 'Failed to generate QR code');
+    const iconContainer = this.createTag('div', { class: 'qr-error-icon-container' });
+    iconContainer.append(bgIcon, cautionIcon, errorMsg);
+    const errorState = this.createTag('div', { class: 'qr-error-state' });
+    errorState.appendChild(iconContainer);
 
     // Show QR code container with failed state
     if (this.qrCodeContainer) {
-      this.qrCodeContainer.innerHTML = errorStateHtml;
+      this.qrCodeContainer.replaceChildren(errorState);
       this.qrCodeContainer.classList.remove('hidden');
     } else {
       // Create QR code container if it doesn't exist
       const buttonContainer = this.getQrButtonContainer();
       if (buttonContainer) {
         this.qrCodeContainer = this.createTag('div', { class: 'qr-code-container' });
-        this.qrCodeContainer.innerHTML = errorStateHtml;
+        this.qrCodeContainer.appendChild(errorState);
         buttonContainer.appendChild(this.qrCodeContainer);
       }
     }
@@ -1137,7 +1135,7 @@ export class EasyUpload {
           this.uploadDetectionInterval = null;
         }
       } catch (error) {
-        // Swallow transient polling errors and retry on the next interval.
+        window.lana?.log(`[EasyUpload] Polling error: ${error?.message || error}`);
       }
     }, POLL_INTERVAL_MS);
   }

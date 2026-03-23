@@ -560,7 +560,8 @@ export async function setupEasyUploadUI({
 
         await easyUploadInstance.setupQRCodeInterface();
       } catch (error) {
-        console.error('[EasyUpload-UI] Autoload initialization failed:', error);
+        window.lana?.log(`[EasyUpload-UI] Autoload initialization failed: ${error?.message || error}`);
+        easyUploadInstance?.showFailedQR();
       }
     }, 100); // 100ms delay to allow IMS to initialize
   }
