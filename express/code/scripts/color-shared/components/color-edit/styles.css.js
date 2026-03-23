@@ -42,12 +42,11 @@ export const style = css`
     }
 
     :host([embedded]) .ce-title {
-        font-family: var(--body-font-family);
-        font-size: var(--body-font-size-s);
-        font-weight: var(--heading-font-weight-regular);
-        line-height: var(--ax-detail-l-lh);
-        letter-spacing: 0;
-        color: var(--color-gray-950);
+        color: var(--color-dark-gray);
+        font-size: var(--ax-body-s-size);
+        font-style: normal;
+        font-weight: 400;
+        line-height: 20px;
     }
 
     /* ---- Mobile overlay + bottom sheet ---- */
@@ -256,15 +255,17 @@ export const style = css`
         align-items: center;
         gap: var(--spacing-100);
         width: 100%;
+        position: relative;
     }
 
     .ce-hex-preview-dot {
-        flex-shrink: 0;
-        width: var(--spacing-300);
-        height: var(--spacing-300);
+        position: absolute;
+        width: 18px;
+        height: 18px;
         border-radius: 50%;
-        border: 1px solid rgba(31, 31, 31, 0.2);
-        box-sizing: border-box;
+        top: 11px;
+        left: 15px;
+        z-index: 1;
     }
 
     .ce-hex-section--inline .ce-hex-field {
@@ -275,13 +276,10 @@ export const style = css`
 
     .ce-hex-lock-icon {
         display: flex;
-        flex-shrink: 0;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .ce-hex-lock-icon img {
-        display: block;
+        position: absolute;
+        top: 10px;
+        right: 15px;
+        color: var(--Alias-content-disabled-default);
     }
 
     sp-swatch.ce-swatch--locked {
@@ -302,6 +300,13 @@ export const style = css`
 
     :host([embedded]) .ce-hex-section {
         padding-block-end: 8px;
+    }
+
+    :host([embedded]) .ce-hex-inline-row {
+      --mod-textfield-spacing-inline: 38px;
+    }
+
+    :host([embedded]) {
     }
 
     @media (prefers-reduced-motion: reduce) {

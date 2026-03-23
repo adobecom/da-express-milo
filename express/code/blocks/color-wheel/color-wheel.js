@@ -373,7 +373,8 @@ export default async function decorate(block) {
 
   async function buildTabs(controller) {
     const tabsInstance = await createExpressTabs({
-      selected: 'color-wheel',
+      // selected: 'color-wheel',
+      selected: 'base-color',
       size: 'm',
       quiet: true,
       tabs: [

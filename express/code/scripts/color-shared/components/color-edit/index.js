@@ -454,7 +454,7 @@ class ColorEdit extends LitElement {
             ></div>
             <sp-textfield
               class="ce-hex-field"
-              size="m"
+              size="l"
               maxlength="7"
               .value=${this._hex}
               label=""
@@ -467,12 +467,7 @@ class ColorEdit extends LitElement {
               class="ce-hex-lock-icon"
               aria-label=${locked ? 'Color locked' : 'Color unlocked'}
             >
-              <img
-                src="/express/code/icons/${locked ? 'S2_Icon_Lock_20_N.svg' : 'S2_Icon_LockOpen_20_N.svg'}"
-                alt=""
-                width="20"
-                height="20"
-              />
+              ${locked ? html`<sp-icon-lock>` : html`<sp-icon-lock-open>`}
             </span>
           </div>
         </div>
