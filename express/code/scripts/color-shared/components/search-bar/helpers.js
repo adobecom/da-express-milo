@@ -1,10 +1,10 @@
 import { createTag } from '../../../utils.js';
-import { createAutoStickyBehavior } from '../../../../libs/utils/sticky-behavior/index.js';
-import { createAutocomplete } from '../../../../libs/utils/autocomplete.js';
+import { createAutoStickyBehavior } from '../../utils/sticky-behavior/index.js';
+import { createAutocomplete } from '../../utils/autocomplete.js';
 import {
   createKeyboardNavigation,
   attachItemNavigation,
-} from '../../../../libs/utils/keyboardNavigation.js';
+} from '../../utils/keyboardNavigation.js';
 import {
   loadSearchBarStyles,
   loadSearchBarSuggestionStyles,

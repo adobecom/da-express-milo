@@ -8,7 +8,7 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createPalettesReviewDemo } from './demo/palettesDemo.js';
-import { loadComponentStyles } from '../../libs/utils/loadComponentStyles.js';
+import { loadComponentStyles } from '../../scripts/color-shared/utils/loadComponentStyles.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };

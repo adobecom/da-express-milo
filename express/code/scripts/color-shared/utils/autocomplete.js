@@ -1,4 +1,4 @@
-import { throttle, debounce } from '../../scripts/utils/hofs.js';
+import { throttle, debounce } from '../../utils/hofs.js';
 
 const HEX_PATTERN = /^#?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
 

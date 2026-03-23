@@ -1,3 +1,5 @@
+import { handleEscapeClose } from '../spectrum/utils/a11y.js';
+
 /**
  * @typedef {Object} KeyboardNavigationOptions
  * @property {string} [itemSelector='.list-item'] - CSS selector for navigable items
@@ -69,6 +71,7 @@ export function createKeyboardNavigation(container, options = {}) {
   let selectedIndex = -1;
   let attachedElement = null;
   let keydownHandler = null;
+  let escapeHandler = null;
 
   /**
    * Gets all navigable items in the container
@@ -177,9 +180,6 @@ export function createKeyboardNavigation(container, options = {}) {
       return;
     }
 
-    if (matchesKey(event, KEYS.ESCAPE)) {
-      config.onEscape?.();
-    }
   }
 
   /**
@@ -193,6 +193,7 @@ export function createKeyboardNavigation(container, options = {}) {
 
     keydownHandler = handleKeydown;
     element.addEventListener('keydown', keydownHandler);
+    escapeHandler = config.onEscape ? handleEscapeClose(element, config.onEscape) : null;
     attachedElement = element;
   }
 
@@ -204,6 +205,10 @@ export function createKeyboardNavigation(container, options = {}) {
       attachedElement.removeEventListener('keydown', keydownHandler);
       attachedElement = null;
       keydownHandler = null;
+    }
+    if (escapeHandler) {
+      escapeHandler.release();
+      escapeHandler = null;
     }
   }
 
@@ -278,4 +283,3 @@ export function attachItemNavigation(container, options) {
     container.removeEventListener('keydown', handleItemKeydown);
   };
 }
-
