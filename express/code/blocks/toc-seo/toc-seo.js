@@ -10,7 +10,7 @@ const CONFIG = {
     section: 'main .section',
     headers: ['main .section.long-form .content h2', 'main .section.long-form .content h3', 'main .section.long-form .content h4'],
     navigation: '.global-navigation, header',
-    stopElement: '.faqv2, .ax-link-list-v2-container, .ax-blog-posts-container, footer',
+    stopElement: '.faqv2, .ax-link-list-v2-container, .ax-blog-posts-container, .banner-bg, footer',
   },
   scrollOffset: {
     mobile: 75,
