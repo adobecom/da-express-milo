@@ -15,7 +15,7 @@ const META_FIXTURES = {
   category: 'Enterprise',
   headline: 'Test title',
   'og:title': 'Test title fallback',
-  'subheading': 'Lorem ipsum dolor sit amet consectetur. Mauris elementum ullamcorper dignissim sodales tempus. A a nam ut facilisi nunc. Convallis morbi faucibus vulputate proin cras lectus interdum risus diam. Lacus semper sit magnis pellentesque.',
+  subheading: 'Lorem ipsum dolor sit amet consectetur. Mauris elementum ullamcorper dignissim sodales tempus. A a nam ut facilisi nunc. Convallis morbi faucibus vulputate proin cras lectus interdum risus diam. Lacus semper sit magnis pellentesque.',
   author: 'Adobe Express',
   'publication-date': '10/20/2025',
   description: 'Get the lowdown on the hottest graphic design trends predicted for 2025.',
