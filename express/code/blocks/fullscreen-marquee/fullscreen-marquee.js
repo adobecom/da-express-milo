@@ -121,16 +121,18 @@ async function buildApp(block, content) {
     variant = 'image';
   }
 
-  await import(`${getLibs()}/features/placeholders.js`).then(async (mod) => {
-    const imgSrc = await mod.replaceKey(`fullscreen-marquee-desktop-${variant}-app`, getConfig());
-    appImage = createOptimizedPicture(imgSrc);
+  // await import(`${getLibs()}/features/placeholders.js`).then(async (mod) => {
+  //   const imgSrc = await mod.replaceKey(`fullscreen-marquee-desktop-${variant}-app`, getConfig());
+  //   // "https://main--da-express-milo--adobecom.em.page/express/media_11ffe376e21cc1f2437a2c5c9c875a2c478b51d9a.png"
+    appImage = createOptimizedPicture("https://main--da-express-milo--adobecom.em.page/express/media_11ffe376e21cc1f2437a2c5c9c875a2c478b51d9a.png");
 
-    const editorSrc = await mod.replaceKey(`fullscreen-marquee-desktop-${variant}-editor`, getConfig());
-    editor = createOptimizedPicture(editorSrc);
+  //   const editorSrc = await mod.replaceKey(`fullscreen-marquee-desktop-${variant}-editor`, getConfig());
+  //   // "https://main--da-express-milo--adobecom.aem.page/express/media_11e5c3128ea43f271fd2a565c1e4d68cd1d62c985.png"
+    editor = createOptimizedPicture("https://main--da-express-milo--adobecom.aem.page/express/media_11e5c3128ea43f271fd2a565c1e4d68cd1d62c985.png");
 
-    appImage.classList.add('fullscreen-marquee-app-image');
-    return mod.replaceKey();
-  });
+      appImage.classList.add('fullscreen-marquee-app-image');
+  //   return mod.replaceKey();
+  // });
 
   editor.classList.add('fullscreen-marquee-app-editor');
   content.classList.add('fullscreen-marquee-app-content');
