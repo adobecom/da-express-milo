@@ -284,8 +284,8 @@ async function filterAllBlogPostsOnPage() {
           if (!locales.includes(blogLocale)) {
             locales.push(blogLocale);
           }
-        } catch (e) {
-          window.lana?.log(`Invalid blog post URL: ${l.href}`, { tags: 'blog-posts-v2', errorType: 'e' });
+        } catch (error) {
+          window.lana?.log(`Invalid blog post URL: ${l.href}: ${error}`, { clientId: 'express', tags: 'blog-posts-v2', errorType: 'e', severity: 'error', sampleRate: '1' });
         }
       });
 

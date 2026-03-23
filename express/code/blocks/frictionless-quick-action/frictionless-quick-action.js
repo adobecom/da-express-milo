@@ -287,7 +287,11 @@ async function uploadAssetToStorage(file, quickAction, uploadStartTime) {
         + `uploadDuration:${uploadDuration}`,
       {
         clientId: 'express',
-        tags: 'frictionless-video-upload-success',
+        tags: 'frictionless-quick-action, frictionless-video-upload-success',
+        errorType: 'i',
+        severity: 'info',
+        sampleRate: '1',
+
       },
     );
   }
@@ -326,14 +330,14 @@ async function performStorageUpload(files, block, quickAction) {
           + `errorMessage:${error.message}`,
         {
           clientId: 'express',
-          tags: 'frictionless-video-upload-failed',
+          tags: 'frictionless-video-upload-failed, frictionless-quick-action',
+          errorType: 'e',
+          severity: 'error',
+          sampleRate: '1',
         },
       );
     }
-
-    // Clear upload state on failure
     uploadInProgress = null;
-
     return null;
   }
 }
@@ -346,7 +350,7 @@ async function startAssetDecoding(file, controller) {
   }).catch((error) => {
     window.lana?.log(
       `Asset decode failed error:${error.message || error}`,
-      { clientId: 'express', tags: 'frictionless-asset-decode-failed' },
+      { clientId: 'express', tags: 'frictionless-asset-decode-failed, frictionless-quick-action', errorType: 'e', severity: 'error', sampleRate: '1' },
     );
     return null;
   }), 5000);
@@ -670,8 +674,8 @@ export default async function decorate(block) {
 
   // Load IMS if not already loaded
   if (!window.adobeIMS) {
-    try { await utils.loadIms(); } catch (e) {
-      window.lana?.log(`Unable to load IMS in frictionless-quick-action: ${e}`);
+    try { await utils.loadIms(); } catch (error) {
+      window.lana?.log(`Unable to load IMS in frictionless-quick-action: ${error?.message || error}`, { clientId: 'express', tags: 'frictionless-quick-action', errorType: 'e', severity: 'error', sampleRate: '1' });
     }
   }
   setupFrictionlessTargetBaseUrl(quickAction);
@@ -807,7 +811,10 @@ export default async function decorate(block) {
           + `uploadDuration:${uploadDuration}`,
         {
           clientId: 'express',
-          tags: 'frictionless-video-upload-cancelled',
+          tags: 'frictionless-quick-action, frictionless-video-upload-cancelled',
+          errorType: 'i',
+          severity: 'info',
+          sampleRate: '1',
         },
       );
       uploadInProgress = null;

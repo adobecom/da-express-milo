@@ -102,8 +102,8 @@ async function renderTemplates(el, recipe, toolbar, isPanel = false, queryParams
     toolbar.append(controlsContainer);
 
     el.append(templatesContainer);
-  } catch (err) {
-    window.lana?.log(`Error in template-x-carousel: ${err}`);
+  } catch (error) {
+    window.lana?.log(`Error in template-x-carousel: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'template-x-carousel', errorType: 'e', severity: 'error', sampleRate: '1' });
     if (getConfig().env.name === 'prod') {
       el.remove();
     } else {

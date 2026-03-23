@@ -314,8 +314,8 @@ async function autoUpdatePage(main) {
         a.href = getMetadata(url.hash.replace('#', ''));
         url = new URL(a.href);
       }
-    } catch (e) {
-      window.lana?.log(`Error while attempting to replace link ${a.href}: ${e}`);
+    } catch (error) {
+      window.lana?.log(`Error while attempting to replace link ${a.href}: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'utils, content-replace, autoUpdatePage', errorType: 'e', severity: 'error', sampleRate: '1' });
     }
   });
 }

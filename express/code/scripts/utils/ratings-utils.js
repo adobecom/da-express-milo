@@ -33,12 +33,6 @@ function isNalaTestRatings() {
   return isPreviewHost && params.get('nala') === 'ratings';
 }
 
-// Errors & Logging
-const lanaOptions = {
-  sampleRate: 1,
-  tags: 'Express_Milo, RnR Block',
-};
-
 // Initialize required dependencies
 async function initDependencies() {
   if (!createTag || !getConfig || !getMetadata) {
@@ -178,10 +172,7 @@ export async function fetchRatingsData(sheet) {
       segments: null, // RNR API doesn't provide segments in the same way
     };
   } catch (error) {
-    window.lana?.log(
-      `RnR: Could not load review data for sheet '${sheet}': ${error?.message}`,
-      lanaOptions,
-    );
+    window.lana?.log(`RnR: Could not load review data for sheet '${sheet}': ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'ratings-utils, Express_Milo, RnR Block, fetchRatingsData', errorType: 'e', severity: 'error', sampleRate: '1' });
     return null;
   }
 }
@@ -406,10 +397,7 @@ export async function submitRating(sheet, rating, comment) {
     }
     localStorage.setItem('ccxActionRatings', ccxActionRatings);
   } catch (error) {
-    window.lana?.log(
-      `RnR: Could not post review for sheet '${sheet}': ${error?.message}`,
-      lanaOptions,
-    );
+    window.lana?.log(`RnR: Could not post review for sheet '${sheet}': ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'ratings-utils, Express_Milo, RnR Block, submitRating', errorType: 'e', severity: 'error', sampleRate: '1' });
   }
 }
 

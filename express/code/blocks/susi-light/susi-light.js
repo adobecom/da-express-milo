@@ -28,12 +28,12 @@ const onRedirect = (e) => {
     window.location.assign(e.detail);
   }, 100);
 };
-const onError = (e) => {
-  window.lana?.log('on error:', e);
+const onError = (error) => {
+  window.lana?.log(`on error: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'susi-light', errorType: 'e', severity: 'error', sampleRate: '1' });
 };
 
-const onAuthFailed = (e) => {
-  window.lana?.log(`on auth failed: ${e.detail}`);
+const onAuthFailed = (error) => {
+  window.lana?.log(`on auth failed: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'susi-light, susi-auth-failed', errorType: 'e', severity: 'error', sampleRate: '1' });
 };
 // easier to mock in unit test
 export const SUSIUtils = {
@@ -51,8 +51,8 @@ async function getDestURL(url) {
   try {
     const appended = await getTrackingAppendedURL(url);
     destURL = new URL(appended);
-  } catch (err) {
-    window.lana?.log(`invalid redirect uri for susi-light: ${url}`);
+  } catch (error) {
+    window.lana?.log(`invalid redirect uri for susi-light: ${url}: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'susi-light, susi-invalid-redirect-uri', errorType: 'e', severity: 'error', sampleRate: '1' });
     destURL = new URL('https://new.express.adobe.com');
   }
   if (isStage) {
@@ -148,7 +148,9 @@ function redirectIfLoggedIn(destURL) {
         /* c8 ignore next */
         window.adobeIMS?.isSignedInUser() && goDest();
       })
-      .catch((e) => { window.lana?.log(`Unable to load IMS in susi-light: ${e}`); });
+      .catch((error) => {
+        window.lana?.log(`Unable to load IMS in susi-light: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'susi-light, susi-load-ims-failed', errorType: 'e', severity: 'error', sampleRate: '1' });
+      });
   }
 }
 

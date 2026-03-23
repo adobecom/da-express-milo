@@ -100,8 +100,8 @@ export default async function init(el, { premiumTagsElements, imageElements, tem
 
     el.append(templatesContainer);
     el.append(galleryControl);
-  } catch (err) {
-    window.lana?.log(`Error in template-x-carousel-toolbar: ${err}`);
+  } catch (error) {
+    window.lana?.log(`Error in template-x-carousel-toolbar: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'template-promo-carousel', errorType: 'e', severity: 'error', sampleRate: '1' });
     if (getConfig().env.name === 'prod') {
       el.remove();
     } else {

@@ -359,8 +359,8 @@ export async function decorateButtonsDeprecated(el, size) {
           }
         }
       }
-    } catch (e) {
-      window.lana?.log(`Ignoring button due to error: ${e}`);
+    } catch (error) {
+      window.lana?.log(`Ignoring button due to error: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'utils', errorType: 'e', severity: 'error', sampleRate: '1' });
     }
   });
 }
@@ -471,8 +471,8 @@ export function preDecorateSections(area) {
       let linkToTargetURL = null;
       try {
         linkToTargetURL = new URL(linkToTarget);
-      } catch (err) {
-        window.lana?.log(err);
+      } catch (error) {
+        window.lana?.log(`${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'utils', errorType: 'e', severity: 'error', sampleRate: '1' });
       }
       const sameUrlCTAs = Array.from(area.querySelectorAll('a:any-link'))
         .filter((a) => {
@@ -486,8 +486,8 @@ export function preDecorateSections(area) {
 
             return (sameText || (samePathname && sameHash))
               && isNotInFloatingCta && notFloatingCtaIgnore;
-          } catch (err) {
-            window.lana?.log(err);
+          } catch (error) {
+            window.lana?.log(`${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'utils', errorType: 'e', severity: 'error', sampleRate: '1' });
             return false;
           }
         });
@@ -832,7 +832,7 @@ export async function convertToInlineSVG(img) {
     const svgElement = svgDoc.querySelector('svg');
 
     if (!svgElement) {
-      window.lana?.log(`No SVG element found in file ${img.src}`);
+      window.lana?.log(`No SVG element found in file ${img.src}`, { clientId: 'express', tags: 'utils, convertToInlineSVG', errorType: 'e', severity: 'error', sampleRate: '1' });
       return img;
     }
 
@@ -859,7 +859,7 @@ export async function convertToInlineSVG(img) {
 
     return svgElement;
   } catch (error) {
-    window.lana?.log(`Error converting SVG: ${error}`);
+    window.lana?.log(`Error converting SVG: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'utils, convertToInlineSVG', errorType: 'e', severity: 'error', sampleRate: '1' });
     return img;
   }
 }

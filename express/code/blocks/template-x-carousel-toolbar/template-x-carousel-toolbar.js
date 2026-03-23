@@ -266,8 +266,8 @@ export default async function init(el) {
     toolbar.append(controlsContainer);
 
     el.append(templatesContainer);
-  } catch (err) {
-    window.lana?.log(`Error in template-x-carousel-toolbar: ${err}`);
+  } catch (error) {
+    window.lana?.log(`Error in template-x-carousel-toolbar: ${error?.message || error?.detail || error}`, { clientId: 'express', tags: 'template-x-carousel-toolbar', errorType: 'e', severity: 'error', sampleRate: '1' });
     if (getConfig().env.name === 'prod') {
       el.remove();
     } else {
