@@ -122,6 +122,15 @@ export function createColorInput(config) {
     }
   }
 
+  function syncEditorHexValue(hex) {
+    if (!isValidHex(hex)) return false;
+
+    lastValidHex = hex;
+    input.value = hex;
+    swatch.style.background = hex;
+    return true;
+  }
+
   function beginOpenRequest() {
     pendingOpen = true;
     openRequestId += 1;
@@ -195,20 +204,13 @@ export function createColorInput(config) {
 
     colorEdit.addEventListener('color-change', (e) => {
       const { hex } = e.detail;
-      if (isValidHex(hex)) {
-        lastValidHex = hex;
-        input.value = hex;
-        swatch.style.background = hex;
+      if (syncEditorHexValue(hex)) {
         runWithEditorSync(() => onInput?.({ value: hex }));
       }
     });
     colorEdit.addEventListener('color-change-end', (e) => {
       const { hex } = e.detail;
-      if (isValidHex(hex)) {
-        lastValidHex = hex;
-        input.value = hex;
-        swatch.style.background = hex;
-      }
+      syncEditorHexValue(hex);
       runWithEditorSync(() => commitEditorValueIfChanged());
     });
 
