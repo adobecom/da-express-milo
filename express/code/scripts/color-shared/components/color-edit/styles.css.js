@@ -28,27 +28,6 @@ export const style = css`
         box-shadow: var(--Elevation-Dialog);
     }
 
-    :host([embedded]) .color-edit-panel {
-        width: 100%;
-        max-width: none;
-        box-shadow: none;
-        padding: 0;
-        gap: 0;
-    }
-
-    :host([embedded]) .ce-title-dropdown-colors {
-        box-shadow: none;
-        padding-block: var(--spacing-80);
-    }
-
-    :host([embedded]) .ce-title {
-        color: var(--color-dark-gray);
-        font-size: var(--ax-body-s-size);
-        font-style: normal;
-        font-weight: 400;
-        line-height: 20px;
-    }
-
     /* ---- Mobile overlay + bottom sheet ---- */
 
     .ce-overlay {
@@ -249,43 +228,6 @@ export const style = css`
         --mod-textfield-border-color-hover: var(--color-gray-400-variant);
     }
 
-    .ce-hex-section--inline .ce-hex-inline-row {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: var(--spacing-100);
-        width: 100%;
-        position: relative;
-    }
-
-    .ce-hex-preview-dot {
-        position: absolute;
-        width: 18px;
-        height: 18px;
-        border-radius: 50%;
-        top: 11px;
-        left: 15px;
-        z-index: 1;
-    }
-
-    .ce-hex-section--inline .ce-hex-field {
-        flex: 1;
-        min-width: 0;
-        width: auto;
-    }
-
-    .ce-hex-lock-icon {
-        display: flex;
-        position: absolute;
-        top: 10px;
-        right: 15px;
-        color: var(--Alias-content-disabled-default);
-    }
-
-    sp-swatch.ce-swatch--locked {
-        box-shadow: inset 0 0 0 2px var(--color-gray-900);
-    }
-
     .ce-sr-only {
         position: absolute;
         width: 1px;
@@ -296,14 +238,6 @@ export const style = css`
         clip: rect(0, 0, 0, 0);
         white-space: nowrap;
         border: 0;
-    }
-
-    :host([embedded]) .ce-hex-section {
-        padding-block-end: 8px;
-    }
-
-    :host([embedded]) .ce-hex-inline-row {
-      --mod-textfield-spacing-inline: 38px;
     }
 
     @media (prefers-reduced-motion: reduce) {
