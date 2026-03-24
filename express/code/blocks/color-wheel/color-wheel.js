@@ -381,19 +381,41 @@ export default async function decorate(block) {
       baseColorIndex: 0,
     });
 
+    const navLinks = [
+      { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
+      { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/contrast-checker' },
+      { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/express/colors/color-blindness-simulator' },
+    ];
+    const controls = [
+      { id: 'undo', label: 'Undo' },
+      { id: 'redo', label: 'Redo' },
+    ];
+    const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
+
     layoutInstance = await createColorToolLayout(block, {
       palette: paletteFromThemeState(controller.getState()),
+      toolbar: {
+        variant: 'standalone',
+        showEdit: false,
+        showPalette: isDesktop,
+        showPaletteName: true,
+        editPaletteName: false,
+      },
+      actionMenu: {
+        id: 'color-wheel-action-menu',
+        type: 'full',
+        activeId: 'palette',
+        navLinks,
+        controls,
+      },
+      content: {
+        heading: createTag('h1', null, 'My heading'),
+        paragraph: createTag('p', null, 'My paragraph'),
+        icon: true,
+      },
     });
 
     block.classList.add('ax-shell-host');
-
-    // Temporary placeholder content
-    const sidebarPlaceholder = createTag('div', { class: 'text-content-placeholder' }, 'Text content placeholder');
-    layoutInstance.slots.sidebar.appendChild(sidebarPlaceholder);
-    const topbarPlaceholder = createTag('div', { class: 'topbar-placeholder' }, 'Action menu placeholder');
-    layoutInstance.slots.topbar.appendChild(topbarPlaceholder);
-    const footerPlaceholder = createTag('div', { class: 'footer-placeholder' }, 'Toolbar placeholder');
-    layoutInstance.slots.footer.appendChild(footerPlaceholder);
 
     const tabs = await buildTabs(controller);
     layoutInstance.slots.sidebar.appendChild(tabs.element);
