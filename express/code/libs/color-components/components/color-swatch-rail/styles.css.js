@@ -447,10 +447,20 @@ export const style = css`
   .top-actions--right {
     flex-direction: column;
     align-items: flex-end;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
   }
 
   .top-actions--right .color-blindness-badge {
     position: static;
+  }
+
+  .swatch-column:hover .top-actions--right,
+  .swatch-column:focus-visible .top-actions--right,
+  .swatch-column:has(.swatch-column-focusable:focus-visible) .top-actions--right {
+    opacity: 1;
+    pointer-events: auto;
   }
 
   
