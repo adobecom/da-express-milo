@@ -267,6 +267,9 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
   element.addEventListener('color-change', (e) => {
     callbacks.onColorChange?.(e.detail);
   });
+  element.addEventListener('color-change-end', (e) => {
+    callbacks.onColorChangeEnd?.(e.detail);
+  });
   element.addEventListener('swatch-select', (e) => {
     callbacks.onSwatchSelect?.(e.detail);
   });

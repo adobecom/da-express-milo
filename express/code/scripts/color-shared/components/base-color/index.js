@@ -270,6 +270,19 @@ class BaseColor extends LitElement {
     this._announceColorChange();
   }
 
+  _emitColorChangeEnd() {
+    this.dispatchEvent(new CustomEvent('color-change-end', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        hex: this._hex,
+        hue: this._hue,
+        saturation: this._saturation,
+        brightness: this._brightness,
+      },
+    }));
+  }
+
   _announceColorChange() {
     clearTimeout(this._announceTimer);
     this._announceTimer = setTimeout(() => {
@@ -382,6 +395,8 @@ class BaseColor extends LitElement {
       } else {
         this._hexError = true;
       }
+    } else {
+      this._emitColorChangeEnd();
     }
   }
 
@@ -432,6 +447,7 @@ class BaseColor extends LitElement {
   _onColorAreaChange(e) {
     this._onColorAreaInput(e);
     this._blurOnTouch(e.target);
+    this._emitColorChangeEnd();
   }
 
   // --- Hue slider ---
@@ -454,6 +470,7 @@ class BaseColor extends LitElement {
     this._emitColorChange();
     if (e.type === 'change') {
       this._blurOnTouch(slider);
+      this._emitColorChangeEnd();
     }
   }
 
@@ -742,6 +759,7 @@ class BaseColor extends LitElement {
             valuetext=${`Brightness: ${value}%`}
             gradient=${gradient}
             @input=${(e) => this._onHSBChannelSliderInput(e, 'b')}
+            @change=${() => this._emitColorChangeEnd()}
           ></color-channel-slider>
         </div>
         <sp-textfield
@@ -754,6 +772,7 @@ class BaseColor extends LitElement {
           label-visibility="none"
           @keydown=${(e) => this._onChannelKeyDown(e)}
           @input=${(e) => this._onHSBChannelTextInput(e, 'b')}
+          @change=${() => this._emitColorChangeEnd()}
         ></sp-textfield>
       </div>
     `;
@@ -797,6 +816,7 @@ class BaseColor extends LitElement {
                 valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
+                @change=${() => this._emitColorChangeEnd()}
               ></color-channel-slider>
             </div>
             <sp-textfield
@@ -809,6 +829,7 @@ class BaseColor extends LitElement {
               label-visibility="none"
               @keydown=${(e) => this._onChannelKeyDown(e)}
               @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
+              @change=${() => this._emitColorChangeEnd()}
             ></sp-textfield>
           </div>
         `)}
@@ -835,6 +856,7 @@ class BaseColor extends LitElement {
                 valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
                 @input=${(e) => this._onHSBChannelSliderInput(e, ch.key)}
+                @change=${() => this._emitColorChangeEnd()}
               ></color-channel-slider>
             </div>
             <sp-textfield
@@ -847,6 +869,7 @@ class BaseColor extends LitElement {
               label-visibility="none"
               @keydown=${(e) => this._onChannelKeyDown(e)}
               @input=${(e) => this._onHSBChannelTextInput(e, ch.key)}
+              @change=${() => this._emitColorChangeEnd()}
             ></sp-textfield>
           </div>
         `)}
@@ -874,6 +897,7 @@ class BaseColor extends LitElement {
                 valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
                 @input=${(e) => this._onLabChannelSliderInput(e, ch.key)}
+                @change=${() => this._emitColorChangeEnd()}
               ></color-channel-slider>
             </div>
             <sp-textfield
@@ -886,6 +910,7 @@ class BaseColor extends LitElement {
               label-visibility="none"
               @keydown=${(e) => this._onChannelKeyDown(e, ch.allowNegative)}
               @input=${(e) => this._onLabChannelTextInput(e, ch.key)}
+              @change=${() => this._emitColorChangeEnd()}
             ></sp-textfield>
           </div>
         `)}
