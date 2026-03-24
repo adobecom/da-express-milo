@@ -611,18 +611,24 @@ export class EasyUpload {
         }, QR_CODE_CONFIG.GENERATION_TIMEOUT);
       });
 
-      const urlGenerationPromise = (async () => {
-        try {
+      const TIMEOUT_MS = 10000;
+
+      const urlGenerationPromise = Promise.race([
+        (async () => {
           const presignedUrl = await this.generatePresignedUploadUrl();
-
           const mobileUrl = this.buildMobileUploadUrl(presignedUrl);
-
           return this.shortenUrl(mobileUrl);
-        } catch (error) {
-          window.lana?.log(`[EasyUpload] Failed in URL generation promise: ${error?.message || error}`, { severity: 'error' });
-          throw error;
-        }
-      })();
+        })(),
+        new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('[EasyUpload] URL generation timed out')), TIMEOUT_MS);
+        }),
+      ]).catch((error) => {
+        window.lana?.log(`[EasyUpload] Failed in URL generation promise: ${error?.message || error}`, {
+          severity: 'error',
+          error,
+        });
+        throw error;
+      });
 
       const result = await Promise.race([urlGenerationPromise, timeoutPromise]);
       clearTimeout(timeoutId);
