@@ -46,10 +46,6 @@ export class ColorWheelExpress extends ColorWheel {
     this.generateColorWheel();
   }
 
-  /**
-   * Size the wheel to the host width (parent slot), not an inflated intrinsic width.
-   * Padding leaves room for markers/spokes that extend past the circle edge.
-   */
   updateRadius() {
     if (!this.container) return;
     const hostW = this.getBoundingClientRect().width;

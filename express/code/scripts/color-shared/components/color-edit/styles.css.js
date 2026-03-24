@@ -306,9 +306,6 @@ export const style = css`
       --mod-textfield-spacing-inline: 38px;
     }
 
-    :host([embedded]) {
-    }
-
     @media (prefers-reduced-motion: reduce) {
         .ce-overlay {
             transition: none;
