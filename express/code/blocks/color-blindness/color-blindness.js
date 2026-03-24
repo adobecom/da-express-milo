@@ -93,12 +93,11 @@ export default async function decorate(block) {
       { id: 'redo', label: 'Redo' },
     ];
 
-    const isSingleStack = window.matchMedia('(max-width: 887px)').matches;
     const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
     layoutInstance = await createColorToolLayout(section, {
       palette: initialPalette,
       toolbar: {
-        variant: isSingleStack ? 'sticky' : 'standalone',
+        variant: 'standalone',
         showEdit: false,
         showPalette: isDesktop,
         showPaletteName: true,
