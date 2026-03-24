@@ -1096,19 +1096,29 @@ export class ColorSwatchRail extends LitElement {
 
     
     if (orientation === 'vertical') {
-      const showEmpty = f.emptyStrip && swatches.length < MAX_SWATCHES;
-      const totalSlots = swatches.length + (showEmpty ? 1 : 0);
       const rawVerticalMax = Number(this.verticalMaxPerRow);
       const verticalMaxPerRow = Number.isFinite(rawVerticalMax)
         ? Math.max(1, Math.min(MAX_SWATCHES, Math.floor(rawVerticalMax)))
         : DEFAULT_VERTICAL_MAX_PER_ROW;
+      const isColorWheelVerticalLayout = verticalMaxPerRow === 6;
+      const showStandardEmpty = f.emptyStrip && swatches.length < MAX_SWATCHES;
+      const showColorWheelOddEmpty = isColorWheelVerticalLayout
+        && swatches.length < MAX_SWATCHES
+        && swatches.length % 2 === 1;
+      const shouldWrapToTwoRows = isColorWheelVerticalLayout
+        ? swatches.length > verticalMaxPerRow
+        : (swatches.length + (showStandardEmpty ? 1 : 0)) > verticalMaxPerRow;
 
-      if (totalSlots > verticalMaxPerRow) {
-        const row1Swatches = swatches.slice(0, verticalMaxPerRow);
-        const row2Swatches = swatches.slice(verticalMaxPerRow);
+      if (shouldWrapToTwoRows) {
+        const rowSize = isColorWheelVerticalLayout
+          ? Math.ceil(swatches.length / 2)
+          : verticalMaxPerRow;
+        const row1Swatches = swatches.slice(0, rowSize);
+        const row2Swatches = swatches.slice(rowSize);
         const row1Items = row1Swatches.map((swatch, i) => renderSwatch(swatch, i));
-        const row2Items = row2Swatches.map((swatch, i) => renderSwatch(swatch, verticalMaxPerRow + i));
-        if (showEmpty) {
+        const row2Items = row2Swatches.map((swatch, i) => renderSwatch(swatch, rowSize + i));
+        const showTwoRowEmpty = isColorWheelVerticalLayout ? showColorWheelOddEmpty : showStandardEmpty;
+        if (showTwoRowEmpty) {
           row2Items.push(html`
             <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
               @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
@@ -1118,7 +1128,7 @@ export class ColorSwatchRail extends LitElement {
           `);
         }
         return html`
-          <div class="swatch-rail vertical--two-rows" data-orientation="vertical" style="--vertical-max-per-row: ${verticalMaxPerRow}">
+          <div class="swatch-rail vertical--two-rows" data-orientation="vertical" style="--vertical-max-per-row: ${rowSize}">
             ${row1Items}
             ${row2Items}
           </div>
@@ -1126,10 +1136,13 @@ export class ColorSwatchRail extends LitElement {
       }
 
       const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
+      const oneRowSlots = isColorWheelVerticalLayout
+        ? swatches.length
+        : swatches.length + (showStandardEmpty ? 1 : 0);
       return html`
-        <div class="swatch-rail" data-orientation="vertical" style="--rail-columns: ${totalSlots}">
+        <div class="swatch-rail" data-orientation="vertical" style="--rail-columns: ${oneRowSlots}">
           ${railItems}
-          ${renderEmptyStrip()}
+          ${isColorWheelVerticalLayout ? '' : renderEmptyStrip()}
         </div>
       `;
     }
