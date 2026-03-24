@@ -667,14 +667,11 @@ export const style = css`
     width: 20px;
     height: 20px;
   }
+  .base-color-icon--target {
+    display: inline-flex;
+  }
   .base-color-icon--circle {
     display: none;
-  }
-  .swatch-column.base-color:hover .base-color-badge--active .base-color-icon--target {
-    display: none;
-  }
-  .swatch-column.base-color:hover .base-color-badge--active .base-color-icon--circle {
-    display: inline-flex;
   }
 
   .base-color-badge .icon-fallback {
