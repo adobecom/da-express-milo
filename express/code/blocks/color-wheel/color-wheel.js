@@ -557,7 +557,7 @@ export default async function decorate(block) {
           addRight: true,
           editTint: true,
           baseColor: true,
-          emptyStrip: false,
+          emptyStrip: true,
         },
         swatchVerticalMaxPerRow: 6,
       },
