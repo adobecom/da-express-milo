@@ -320,14 +320,13 @@ function createLayoutAPI(
   stickyToolbarHandle,
   stickyObserver,
   cleanupToolbarMount,
-  actionMenuCreator,
   actionMenuHandle,
   onPaletteChange,
 ) {
   return {
     slots,
     context: shell.context,
-    actionMenu: actionMenuCreator,
+    actionMenu: actionMenuHandle,
     toolbar: toolbarHandle,
     stickyToolbar: stickyToolbarHandle,
 
@@ -336,11 +335,11 @@ function createLayoutAPI(
     },
 
     getSlotNames() {
-      return [...SLOT_NAMES];
+      return [...DEFAULT_SLOT_RENDER_ORDER];
     },
 
     hasSlot(name) {
-      return SLOT_NAMES.includes(name);
+      return DEFAULT_SLOT_RENDER_ORDER.includes(name);
     },
 
     clearSlot(name) {
@@ -408,7 +407,6 @@ export default async function createColorToolLayout(container, config = {}) {
     stickyToolbarHandle,
     stickyObserver,
     cleanupToolbarMount,
-    mountActionMenu,
     actionMenuHandle,
     onPaletteChange,
   );

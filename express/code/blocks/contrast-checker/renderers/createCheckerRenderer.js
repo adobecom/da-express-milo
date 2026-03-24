@@ -9,14 +9,14 @@ import { createColorInput } from './components/createColorInput.js';
 import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
 import { loadActionButton, loadBadge, loadTooltip } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../../../scripts/color-shared/spectrum/utils/theme.js';
+import { createActionMenuState } from '../../../scripts/color-shared/components/createActionMenuState.js';
 import { createContrastCheckerPlaceholders } from '../utils/placeholders.js';
 import { FAIL, createDefaultActionMenuConfig } from '../utils/contrastConstants.js';
-import createHistoryCommitController from '../utils/createHistoryCommitController.js';
-import syncActionMenuHistoryState from '../utils/syncActionMenuHistoryState.js';
 import '../../../scripts/color-shared/components/color-channel-slider/index.js';
 
 const regionMap = { largeText: 'heading', smallText: 'body', graphicsAndUi: 'ui' };
-const ACTION_MENU_HISTORY_IDS = ['contrast-checker-menu', 'contrast-checker-controls-only'];
+const ACTION_MENU_ID = 'contrast-checker-menu';
+const HISTORY_EVENT = `${ACTION_MENU_ID}:history-index-changed`;
 const HISTORY_DEBOUNCE_MS = 300;
 const TINT_COUNT = 21;
 const MAX_TINT_INDEX = TINT_COUNT - 1;
@@ -332,16 +332,19 @@ function syncColorControl(input, slider, hex) {
 
 // eslint-disable-next-line import/prefer-default-export
 export function createCheckerRenderer(options) {
-  const { container, dataService, config = {}, services = {} } = options;
+  const {
+    container,
+    dataService,
+    config = {},
+    services = {},
+    actionMenu: actionMenuApi,
+  } = options;
   const base = createBaseRenderer({ ...options, data: [] });
   const { emit } = base;
-  const { history: historyService, recommendation: recommendationService } = services;
+  const { recommendation: recommendationService } = services;
   const strings = createContrastCheckerPlaceholders(config.strings);
   const tabs = config.tabs || strings.tabs;
-  const historyController = createHistoryCommitController(historyService, {
-    debounceMs: HISTORY_DEBOUNCE_MS,
-    onUpdate: () => syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService),
-  });
+  const actionMenuState = createActionMenuState(ACTION_MENU_ID);
 
   let foreground = config.initialForeground;
   let background = config.initialBackground;
@@ -359,6 +362,11 @@ export function createCheckerRenderer(options) {
   let setRatioTab;
   let mobileActionMenu;
   let mobilePreviewHost;
+  let historyTimerId = null;
+  let pendingHistoryState = null;
+  let restoringFromHistory = false;
+  let pushingState = false;
+  let historyHandler = null;
 
   function recalculate() {
     results = dataService.checkWCAG(foreground, background);
@@ -366,20 +374,62 @@ export function createCheckerRenderer(options) {
   }
 
   function getHistoryState() {
-    return { fg: foreground, bg: background };
+    return [foreground, background];
+  }
+
+  function isSameHistoryState(a, b) {
+    return a?.[0]?.toUpperCase() === b?.[0]?.toUpperCase()
+      && a?.[1]?.toUpperCase() === b?.[1]?.toUpperCase();
+  }
+
+  function clearHistoryTimer() {
+    if (historyTimerId !== null) {
+      clearTimeout(historyTimerId);
+      historyTimerId = null;
+    }
+  }
+
+  function commitHistoryState(state) {
+    if (restoringFromHistory || !state || !actionMenuApi?.pushState) {
+      return false;
+    }
+
+    if (isSameHistoryState(state, actionMenuApi.getCurrentPalette?.())) {
+      return false;
+    }
+
+    pushingState = true;
+    actionMenuApi.pushState(state);
+    pushingState = false;
+    return true;
   }
 
   function pushHistory({ debounced = false } = {}) {
+    const nextState = getHistoryState();
     if (debounced) {
-      historyController.schedule(getHistoryState());
+      pendingHistoryState = nextState;
+      clearHistoryTimer();
+      historyTimerId = setTimeout(() => {
+        historyTimerId = null;
+        const stateToCommit = pendingHistoryState;
+        pendingHistoryState = null;
+        commitHistoryState(stateToCommit);
+      }, HISTORY_DEBOUNCE_MS);
       return;
     }
 
-    historyController.commit(getHistoryState());
+    clearHistoryTimer();
+    pendingHistoryState = null;
+    commitHistoryState(nextState);
   }
 
   function flushPendingHistory() {
-    historyController.flush();
+    if (historyTimerId === null) return false;
+
+    clearHistoryTimer();
+    const stateToCommit = pendingHistoryState;
+    pendingHistoryState = null;
+    return commitHistoryState(stateToCommit);
   }
 
   function updateContrastBadge() {
@@ -493,7 +543,7 @@ export function createCheckerRenderer(options) {
           onChange(hex, false);
         }
       },
-      onChange: ({ value: v }) => {
+      onColorChangeEnd: ({ value: v }) => {
         const hex = ensureHash(v.trim());
         if (dataService.isValidHex(hex)) {
           onChange(hex, true);
@@ -508,26 +558,24 @@ export function createCheckerRenderer(options) {
     setColorPair(fg, bg, { historyMode: 'immediate' });
   }
 
-  function handleUndo() {
+  function clickHistoryButton(className) {
     flushPendingHistory();
-    const state = historyService.undo();
-    syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService);
-    if (!state) return;
-    setColorPair(state.fg, state.bg);
+    const button = mobileActionMenu?.element?.querySelector(className)
+      || actionMenuApi?.element?.querySelector(className);
+    button?.click();
+  }
+
+  function handleUndo() {
+    clickHistoryButton('.undo-btn');
   }
 
   function handleRedo() {
-    flushPendingHistory();
-    const state = historyService.redo();
-    syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService);
-    if (!state) return;
-    setColorPair(state.fg, state.bg);
+    clickHistoryButton('.redo-btn');
   }
 
   async function buildRatioBar() {
     const bar = createTag('div', { class: 'cc-ratio-bar' });
     const top = createTag('div', { class: 'cc-ratio-bar-top' });
-    const createActionMenu = options.actionMenu;
 
     const ratioLabelContainer = createTag('div', { class: 'cc-ratio-label-container' });
     const labelText = createTag('span', { class: 'cc-ratio-label-text' }, strings.contrastRatioLabel);
@@ -550,14 +598,21 @@ export function createCheckerRenderer(options) {
       top.appendChild(compareLink);
     }
 
-    if (createActionMenu && isMobileOrTabletViewport()) {
-      mobileActionMenu = await createActionMenu(top, {
+    if (isMobileOrTabletViewport()) {
+      const { createActionMenuComponent } = await import(
+        '../../../scripts/color-shared/components/createActionMenuComponent.js'
+      );
+      mobileActionMenu = await createActionMenuComponent({
         ...createDefaultActionMenuConfig(strings),
-        id: 'contrast-checker-controls-only',
+        id: ACTION_MENU_ID,
         type: 'controls-only',
-        onUndo: handleUndo,
-        onRedo: handleRedo,
+        enableState: true,
+        onUndo: () => actionMenuState.onUndo(),
+        onRedo: () => actionMenuState.onRedo(),
       });
+      if (mobileActionMenu?.element) {
+        top.appendChild(mobileActionMenu.element);
+      }
     }
 
     const bottom = createTag('div', { class: 'cc-ratio-bar-bottom' });
@@ -741,8 +796,22 @@ export function createCheckerRenderer(options) {
     }
     container.appendChild(tabsElement.element);
 
+    if (historyHandler) {
+      document.removeEventListener(HISTORY_EVENT, historyHandler);
+    }
+    historyHandler = () => {
+      if (pushingState) return;
+      const [nextForeground, nextBackground] = actionMenuApi?.getCurrentPalette?.() || [];
+      if (!nextForeground || !nextBackground) return;
+      if (isSameHistoryState([nextForeground, nextBackground], getHistoryState())) return;
+
+      restoringFromHistory = true;
+      setColorPair(nextForeground, nextBackground);
+      restoringFromHistory = false;
+    };
+    document.addEventListener(HISTORY_EVENT, historyHandler);
+
     pushHistory();
-    syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService);
     updateUI();
   }
 
@@ -753,9 +822,12 @@ export function createCheckerRenderer(options) {
     tabsElement?.destroy();
     suggestionsTab?.destroy();
     setRatioTab?.destroy();
-    historyController.cancel();
-    historyService.clear();
-    syncActionMenuHistoryState(ACTION_MENU_HISTORY_IDS, historyService);
+    clearHistoryTimer();
+    pendingHistoryState = null;
+    if (historyHandler) {
+      document.removeEventListener(HISTORY_EVENT, historyHandler);
+      historyHandler = null;
+    }
     container.replaceChildren();
     mobileActionMenu?.destroy();
   }

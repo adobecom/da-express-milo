@@ -313,11 +313,15 @@ export async function createActionMenuComponent(options = {}) {
   let handleUndoState = null;
   let handleRedoState = null;
   let handleGenerateRandomState = null;
+  let pushStateFn = null;
+  let getCurrentPaletteFn = null;
   if (enableState) {
     const state = createActionMenuState(stateKey, onUndo, onRedo, onGenerateRandom);
     handleUndoState = state.onUndo;
     handleRedoState = state.onRedo;
     handleGenerateRandomState = state.onGenerateRandom;
+    pushStateFn = state.addOnePaletteToHistory;
+    getCurrentPaletteFn = state.getCurrentPalette;
     state.init();
   }
 
@@ -371,6 +375,8 @@ export async function createActionMenuComponent(options = {}) {
 
   return {
     element: container,
+    pushState: pushStateFn,
+    getCurrentPalette: getCurrentPaletteFn,
     destroy() {
       document.removeEventListener(eventName, handleHistoryIndexChanged);
       container.remove();

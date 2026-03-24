@@ -36,6 +36,6 @@ export function createDefaultActionMenuConfig(placeholders = {}) {
       { id: 'undo', label: placeholders.undoLabel || 'Undo' },
       { id: 'redo', label: placeholders.redoLabel || 'Redo' },
     ],
-    enableState: false,
+    enableState: true,
   };
 }

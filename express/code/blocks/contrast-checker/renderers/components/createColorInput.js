@@ -44,7 +44,9 @@ export function createColorInput(config) {
     value = '#FFFFFF',
     onInput,
     onChange,
+    onColorChangeEnd,
   } = config;
+  const commitCallback = onColorChangeEnd || onChange;
 
   let lastValidHex = value;
   let activePopover = null;
@@ -53,6 +55,7 @@ export function createColorInput(config) {
   let focusTrap = null;
   let pendingOpen = false;
   let openRequestId = 0;
+  let syncingFromEditor = false;
   const dismissHandlers = [];
   const controllerRef = {};
 
@@ -103,9 +106,18 @@ export function createColorInput(config) {
     dismissHandlers.push([evt, fn, opts]);
   }
 
+  function runWithEditorSync(fn) {
+    syncingFromEditor = true;
+    try {
+      return fn();
+    } finally {
+      syncingFromEditor = false;
+    }
+  }
+
   function commitEditorValueIfChanged() {
     if (lastValidHex !== editorOpenValue) {
-      onChange?.({ value: lastValidHex });
+      commitCallback?.({ value: lastValidHex });
       editorOpenValue = lastValidHex;
     }
   }
@@ -187,8 +199,17 @@ export function createColorInput(config) {
         lastValidHex = hex;
         input.value = hex;
         swatch.style.background = hex;
-        onInput?.({ value: hex });
+        runWithEditorSync(() => onInput?.({ value: hex }));
       }
+    });
+    colorEdit.addEventListener('color-change-end', (e) => {
+      const { hex } = e.detail;
+      if (isValidHex(hex)) {
+        lastValidHex = hex;
+        input.value = hex;
+        swatch.style.background = hex;
+      }
+      runWithEditorSync(() => commitEditorValueIfChanged());
     });
 
     colorEdit.addEventListener('panel-close', () => closeEditor());
@@ -296,9 +317,11 @@ export function createColorInput(config) {
       return input.value;
     },
 
-    setValue(hex) {
+    setValue(hex, { resetCommitBaseline = !syncingFromEditor } = {}) {
       lastValidHex = hex;
-      editorOpenValue = hex;
+      if (resetCommitBaseline) {
+        editorOpenValue = hex;
+      }
       input.value = hex;
       swatch.style.background = hex;
       if (activeEditor) {

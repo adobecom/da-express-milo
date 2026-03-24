@@ -1,6 +1,5 @@
 import { createCheckerRenderer } from '../renderers/createCheckerRenderer.js';
 import { createContrastCheckerPlaceholders } from '../utils/placeholders.js';
-import createHistoryService from '../services/createHistoryService.js';
 import createRecommendationService from '../services/createRecommendationService.js';
 
 const DEFAULT_RENDERER_CONFIG = {
@@ -12,7 +11,6 @@ const DEFAULT_RENDERER_CONFIG = {
     strings: createContrastCheckerPlaceholders(),
   },
   services: {
-    history: () => createHistoryService(),
     recommendation: () => createRecommendationService(),
   },
 };

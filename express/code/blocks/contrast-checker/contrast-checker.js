@@ -182,8 +182,6 @@ export default async function decorate(block) {
         id: 'contrast-checker-menu',
         type: isMobileOrTabletViewport() ? 'nav-only' : 'full',
         activeId: 'contrast',
-        onUndo: () => checkerInstance?.renderer?.handleUndo?.(),
-        onRedo: () => checkerInstance?.renderer?.handleRedo?.(),
       },
     });
 
