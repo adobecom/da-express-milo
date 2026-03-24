@@ -60,21 +60,6 @@ Computes candidate color pairs that meet a target contrast ratio using xyY color
 
 ---
 
-## createKulerPaletteService
-
-```js
-import createKulerPaletteService from './createKulerPaletteService.js';
-
-const kuler = createKulerPaletteService();
-
-const palette = await kuler.fetchRandomPalette();
-// → { id, name, colors: string[], source: 'kuler' } | null
-```
-
-Thin wrapper for fetching a random Kuler palette. Designed to be removable when no longer needed.
-
----
-
 ## contrastConversions
 
 Pure conversion utilities (no factory) used internally by `createRecommendationService`:

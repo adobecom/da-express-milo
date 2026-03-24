@@ -4,7 +4,6 @@ import { createContrastRenderer } from './factory/createContrastRenderer.js';
 import loadContrastCheckerPlaceholders from './utils/placeholders.js';
 import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
-import createKulerPaletteService from './services/createKulerPaletteService.js';
 import { CONTRAST_PRESETS, createDefaultActionMenuConfig } from './utils/contrastConstants.js';
 import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
 import parseContent from './utils/parseContent.js';
@@ -30,7 +29,7 @@ function pickRandomPreset(strings) {
   return { foreground: colors[0], background: colors[1], colors, name: strings.randomPresetName };
 }
 
-async function getPalette(config, strings) {
+function getPalette(config, strings) {
   if (config.foreground && config.background) {
     const colors = [config.foreground, config.background];
     return {
@@ -38,19 +37,6 @@ async function getPalette(config, strings) {
       background: colors[1],
       colors,
       name: strings.customPaletteName,
-    };
-  }
-
-  const kulerService = createKulerPaletteService();
-  const palette = await kulerService.fetchRandomPalette();
-  if (palette) {
-    const dataService = createContrastDataService();
-    const { brightest, darkest } = dataService.findBrightestAndDarkest(palette.colors);
-    return {
-      foreground: brightest,
-      background: darkest,
-      colors: palette.colors,
-      name: palette.name,
     };
   }
 
@@ -168,11 +154,8 @@ export default async function decorate(block) {
     };
     block.replaceChildren();
 
-    const initialPalette = await getPalette(config, strings);
+    const initialPalette = getPalette(config, strings);
     layoutInstance = await createColorToolLayout(block, {
-      dependencies: {
-        services: ['kuler'],
-      },
       layoutSpans: {
         tablet: { sidebar: 6, canvas: 6 },
         desktop: { sidebar: 4, canvas: 8 },
@@ -210,7 +193,8 @@ export default async function decorate(block) {
       initialPalette,
     });
 
-    const previewSlot = checkerInstance.renderer.getPreviewMountPoint?.() || layoutInstance.slots.canvas;
+    const previewSlot = checkerInstance.renderer.getPreviewMountPoint?.()
+      || layoutInstance.slots.canvas;
 
     previewInstance = mountPreviewPanel(previewSlot, {
       context: layoutInstance.context,
