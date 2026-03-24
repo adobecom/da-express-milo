@@ -57,8 +57,8 @@ function replaceLinkPill(linkPill, data) {
   const clone = linkPill.cloneNode(true);
   if (data) {
     const a = clone.querySelector('a');
-    a.textContent = a.textContent.replaceAll('Default', data['short-title']);
-    a.title = a.textContent.replaceAll('Default', data['short-title']);
+    a.innerHTML = a.innerHTML.replaceAll('Default', data['short-title']);
+    a.title = a.textContent;
     a.href = a.href.replace('/express/templates/default', data.url);
   }
   if (data?.url && isSearch(data.url)) {
@@ -137,13 +137,11 @@ async function updateLinkList(container, linkPill, list) {
     if (!isSearch(d.pathname)) {
       const pageData = {
         url: sanitizeHTML(`${prefix}${d.pathname}`),
-        'short-title': sanitizeHTML(d.displayValue),
+        'short-title': d.displayValue,
       };
 
       clone = replaceLinkPill(linkPill, pageData);
       const innerLink = clone.querySelector('a');
-      innerLink.textContent = innerLink.textContent.replaceAll('Default', sanitizeHTML(d.displayValue));
-      innerLink.title = innerLink.textContent.replaceAll('Default', sanitizeHTML(d.displayValue));
       innerLink.href = innerLink.href.replace('/express/templates/default', sanitizeHTML(d.pathname));
       if (innerLink) {
         const url = new URL(innerLink.href, window.location.href);
@@ -161,12 +159,12 @@ async function updateLinkList(container, linkPill, list) {
       searchParams.set('tasksx', currentTasksX);
       searchParams.set('phformat', sanitizeHTML(getMetadata('placeholder-format') || ''));
       searchParams.set('topics', topicsQuery);
-      searchParams.set('q', sanitizeHTML(d.displayValue));
+      searchParams.set('q', d.displayValue);
       searchParams.set('ckgid', sanitizeHTML(d.ckgID));
       searchParams.set('searchId', generateSearchId());
       const pageData = {
         url: `${prefix}/express/templates/search?${searchParams.toString()}`,
-        'short-title': sanitizeHTML(d.displayValue),
+        'short-title': d.displayValue,
       };
 
       clone = replaceLinkPill(linkPill, pageData);
