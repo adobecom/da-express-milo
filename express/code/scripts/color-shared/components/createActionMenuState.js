@@ -104,6 +104,8 @@ export function createActionMenuState(stateKey = 'action-menu') {
     onUndo,
     onRedo,
     onGenerateRandom,
+    addOnePaletteToHistory,
+    getCurrentPalette,
   };
 }
 

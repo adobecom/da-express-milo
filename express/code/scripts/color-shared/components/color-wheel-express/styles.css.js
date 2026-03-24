@@ -105,6 +105,17 @@ export const style = css`
         border-radius: 15px;
     }
 
+    /* Conflict / confusion line overlay canvases */
+    .conflict-lines-canvas,
+    .confusion-lines-canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 3;
+    }
+
     /* Spoke lines */
     .wheel-spoke {
         position: absolute;

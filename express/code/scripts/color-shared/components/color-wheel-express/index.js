@@ -17,54 +17,51 @@ import {
   preventDefault,
 } from '../../../../libs/color-components/utils/util.js';
 import { drawColorwheel, scientificToArtisticSmooth } from '../../../../libs/color-components/components/color-wheel/ColorWheelUtils.js';
+import {
+  hsvToWheelXY,
+  computeConfusionLinePoints,
+  drawConfusionLinesCurve,
+  drawConflictLinesOnCanvas,
+} from '../../utils/confusionLineUtils.js';
 
 export class ColorWheelExpress extends ColorWheel {
   static get styles() {
     return [style];
   }
 
+  static get properties() {
+    return {
+      ...super.properties,
+      showLines: { type: Boolean },
+      conflictPairs: { type: Array },
+      isMarkerUp: { type: Boolean },
+    };
+  }
+
   constructor() {
     super();
     this.activeSwatchIndex = 0;
     this.harmonyRule = 'ANALOGOUS';
+    this.showLines = false;
+    this.conflictPairs = [];
+    this.isMarkerUp = true;
+    this._dragIndex = -1;
   }
 
   firstUpdated() {
     this.container = this.shadowRoot.querySelector('.canvas-container');
-    this.canvas = this.shadowRoot.querySelector('canvas');
+    this.canvas = this.shadowRoot.querySelector('canvas.wheel');
+    this.conflictCanvas = this.shadowRoot.querySelector('.conflict-lines-canvas');
+    this.confusionCanvas = this.shadowRoot.querySelector('.confusion-lines-canvas');
 
-    if (typeof ResizeObserver !== 'undefined') {
-      this._resizeObserver = new ResizeObserver(() => {
-        requestAnimationFrame(() => this.updateRadius());
-      });
-      this._resizeObserver.observe(this);
-    }
+    this._resizeObserver = new ResizeObserver(() => this.updateRadius());
+    this._resizeObserver.observe(this.container);
 
-    this.updateRadius();
-    window.addEventListener('resize', () => this.updateRadius());
-
-    this.generateColorWheel();
-  }
-
-  updateRadius() {
-    if (!this.container) return;
-    const hostW = this.getBoundingClientRect().width;
-    if (hostW < 48) return;
-    const edgePad = 16;
-    const diameter = Math.max(96, Math.floor(hostW - edgePad * 2));
-    const nextR = Math.floor(diameter / 2);
-    if (this.wheelRadius === nextR) {
-      this.generateColorWheel();
-      return;
-    }
-    this.wheelRadius = nextR;
-    this.requestUpdate();
     this.generateColorWheel();
   }
 
   disconnectedCallback() {
     this._resizeObserver?.disconnect();
-    this._resizeObserver = null;
     super.disconnectedCallback();
   }
 
@@ -87,6 +84,11 @@ export class ColorWheelExpress extends ColorWheel {
     }
     if (changedProperties.has('wheelBrightness')) {
       this.generateColorWheel();
+    }
+    if (changedProperties.has('showLines')
+      || changedProperties.has('conflictPairs')
+      || changedProperties.has('isMarkerUp')) {
+      this.drawLines();
     }
   }
 
@@ -141,6 +143,37 @@ export class ColorWheelExpress extends ColorWheel {
     const markerLayer = this.shadowRoot.querySelector('.marker-layer');
     if (!markerLayer || !this.swatches.length) return;
 
+    // Fast path: during drag, only update the dragged marker's position
+    if (this._dragIndex >= 0) {
+      const swatch = this.swatches[this._dragIndex];
+      if (!swatch?.hsv) return;
+
+      const { h, s } = swatch.hsv;
+      const smoothH = scientificToArtisticSmooth(h);
+      const radius = (this.wheelRadius * s) / 100;
+      const phi = degToRad(180 - smoothH);
+      const [x, y] = polarToXy(radius, phi);
+
+      const marker = markerLayer.querySelector(`[data-index="${this._dragIndex}"]`);
+      if (marker) {
+        marker.style.left = `calc(50% + ${x}px)`;
+        marker.style.top = `calc(50% + ${y}px)`;
+        marker.style.setProperty('--wheel-marker-color', swatch.hex);
+      }
+
+      const spoke = markerLayer.querySelector(`.wheel-spoke[data-spoke="${this._dragIndex}"]`);
+      if (spoke) {
+        const showSpokes = this.harmonyRule !== 'CUSTOM';
+        if (radius > 0 && showSpokes) {
+          spoke.style.width = `${radius}px`;
+          spoke.style.transform = `rotate(${-smoothH}deg)`;
+        }
+      }
+
+      this.drawLines();
+      return;
+    }
+
     markerLayer.innerHTML = '';
 
     this.swatches.forEach((swatch, index) => {
@@ -154,6 +187,7 @@ export class ColorWheelExpress extends ColorWheel {
       if (radius > 0 && showSpokes) {
         const spoke = document.createElement('div');
         spoke.className = 'wheel-spoke';
+        spoke.dataset.spoke = index;
         spoke.style.width = `${radius}px`;
         spoke.style.transform = `rotate(${-smoothH}deg)`;
         markerLayer.appendChild(spoke);
@@ -172,6 +206,8 @@ export class ColorWheelExpress extends ColorWheel {
 
       markerLayer.appendChild(marker);
     });
+
+    this.drawLines();
   }
 
   updateMarkerPosition(event) {
@@ -226,6 +262,10 @@ export class ColorWheelExpress extends ColorWheel {
       this.getCanvasPosition();
 
       if (event.target === this.canvas) {
+        if (this.showLines && !this.isMarkerUp) {
+          this.isMarkerUp = true;
+          this.dispatchEvent(new CustomEvent('marker-deselect'));
+        }
         const hex = this.updateMarkerPosition(event);
         if (this.controller) {
           this.controller.setSwatchHex(this.activeSwatchIndex, hex);
@@ -265,7 +305,13 @@ export class ColorWheelExpress extends ColorWheel {
       this.controller.setActiveSwatchIndex(index);
     }
 
+    if (this.showLines && this.isMarkerUp) {
+      this.isMarkerUp = false;
+      this.dispatchEvent(new CustomEvent('marker-select', { detail: { index } }));
+    }
+
     this.getCanvasPosition();
+    this._dragIndex = index;
 
     const markerV = this.swatches[index]?.hsv?.v != null
       ? Number(this.swatches[index].hsv.v)
@@ -280,7 +326,16 @@ export class ColorWheelExpress extends ColorWheel {
     };
 
     const upHandler = () => {
+      this._dragIndex = -1;
       this._dragFixedBrightness = null;
+      if (this.showLines && !this.isMarkerUp) {
+        this.isMarkerUp = true;
+        this.dispatchEvent(new CustomEvent('marker-deselect'));
+      }
+      const { red, green, blue } = hexToRGB(this.color);
+      this.dispatchEvent(new CustomEvent('change-end', {
+        detail: rgbToHSL(red / 255, green / 255, blue / 255),
+      }));
       window.removeEventListener('pointermove', moveHandler);
       window.removeEventListener('pointerup', upHandler);
       window.removeEventListener('pointercancel', upHandler);
@@ -323,6 +378,88 @@ export class ColorWheelExpress extends ColorWheel {
     }
   }
 
+  drawLines() {
+    if (!this.showLines) {
+      this.clearConflictCanvas();
+      this.clearConfusionCanvas();
+      return;
+    }
+
+    if (this.isMarkerUp) {
+      this.clearConfusionCanvas();
+      this._drawConflictLines();
+    } else {
+      this.clearConflictCanvas();
+      this._drawConfusionLines();
+    }
+  }
+
+  _drawConflictLines() {
+    if (!this.conflictCanvas) return;
+
+    const ctx = this.conflictCanvas.getContext('2d');
+    const size = this.wheelRadius * 2;
+    ctx.clearRect(0, 0, size, size);
+
+    if (!this.conflictPairs?.length || !this.swatches?.length) return;
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(this.wheelRadius, this.wheelRadius, this.wheelRadius, 0, Math.PI * 2);
+    ctx.clip();
+
+    drawConflictLinesOnCanvas(ctx, this.swatches, this.conflictPairs, this.wheelRadius);
+
+    ctx.restore();
+  }
+
+  _drawConfusionLines() {
+    if (!this.confusionCanvas) return;
+
+    const swatch = this.swatches[this.activeSwatchIndex];
+    if (!swatch?.hsv) return;
+
+    const { h, s } = swatch.hsv;
+    const brightness = this.wheelBrightness ?? 100;
+
+    const linesPoints = computeConfusionLinePoints([h, s], brightness);
+
+    const ctx = this.confusionCanvas.getContext('2d');
+    const size = this.wheelRadius * 2;
+    ctx.clearRect(0, 0, size, size);
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.arc(this.wheelRadius, this.wheelRadius, this.wheelRadius, 0, Math.PI * 2);
+    ctx.clip();
+
+    for (const type of Object.keys(linesPoints)) {
+      const hsvPoints = linesPoints[type];
+      if (!hsvPoints?.length) continue;
+
+      const xyPoints = hsvPoints.map(([pH, pS]) => hsvToWheelXY(pH, pS, this.wheelRadius));
+
+      drawConfusionLinesCurve(ctx, xyPoints, {
+        lineWidth: 4,
+        wheelRadius: this.wheelRadius,
+      });
+    }
+
+    ctx.restore();
+  }
+
+  clearConflictCanvas() {
+    if (!this.conflictCanvas) return;
+    const size = this.wheelRadius * 2;
+    this.conflictCanvas.getContext('2d').clearRect(0, 0, size, size);
+  }
+
+  clearConfusionCanvas() {
+    if (!this.confusionCanvas) return;
+    const size = this.wheelRadius * 2;
+    this.confusionCanvas.getContext('2d').clearRect(0, 0, size, size);
+  }
+
   render() {
     const size = this.wheelRadius * 2;
     return html`
@@ -337,6 +474,8 @@ export class ColorWheelExpress extends ColorWheel {
                         height=${size}
                         @pointerdown=${this.handlePointerDown}
                     ></canvas>
+                    <canvas class="conflict-lines-canvas" width=${size} height=${size}></canvas>
+                    <canvas class="confusion-lines-canvas" width=${size} height=${size}></canvas>
                     <div class="marker-layer" style="width: ${size}px; height: ${size}px;"></div>
                 </div>
             </div>

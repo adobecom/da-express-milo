@@ -154,7 +154,7 @@
   outline-offset: var(--ax-focus-outline-offset);
 }
 
-@media (min-width: 600px) {
+@media (min-width: 888px) {
   .ax-color-tool-layout {
     --ax-layout-outer-margin-inline: var(--spacing-500);
     --ax-layout-outer-margin-block: var(--spacing-500);
@@ -283,6 +283,10 @@
 .ax-text-content__logo-icon {
   block-size: var(--ax-logo-icon-size);
   inline-size: auto;
+}
+
+.icon.icon-adobe-express-logo {
+  padding: 0;
 }
 
 .ax-text-content__body {
