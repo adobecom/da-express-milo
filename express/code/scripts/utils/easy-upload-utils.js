@@ -495,13 +495,7 @@ export class EasyUpload {
 
       return uploadUrl;
     } catch (error) {
-      console.error('[EasyUpload] Failed to generate upload URL:', {
-        errorName: error?.name,
-        errorMessage: error?.message,
-        errorCode: error?.code,
-        statusCode: error?.statusCode,
-        fullError: error,
-      });
+      window.lana?.log(`[EasyUpload] Failed to generate upload URL: ${error?.name} ${error?.message} code=${error?.code} status=${error?.statusCode}`, { severity: 'error' });
       throw error;
     }
   }
@@ -546,7 +540,7 @@ export class EasyUpload {
         } catch (error) {
           clearInterval(this.pollingInterval);
           clearTimeout(timeoutId);
-          console.error('Error during version polling:', error);
+          window.lana?.log(`[EasyUpload] Error during version polling: ${error?.message || error}`, { severity: 'warning' });
           reject(error);
         }
       }, ACP_STORAGE_CONFIG.SECOND_IN_MS);
@@ -614,7 +608,7 @@ export class EasyUpload {
 
       return file;
     } catch (error) {
-      console.error('Failed to retrieve uploaded file:', error);
+      window.lana?.log(`[EasyUpload] Failed to retrieve uploaded file: ${error?.message || error}`, { severity: 'error' });
       throw error;
     }
   }
@@ -636,7 +630,7 @@ export class EasyUpload {
       this.asset = null;
       this.uploadAsset = null;
     } catch (error) {
-      console.error('Error during ACP Storage cleanup:', error);
+      window.lana?.log(`[EasyUpload] Error during ACP Storage cleanup: ${error?.message || error}`, { severity: 'warning' });
     }
   }
 
@@ -652,7 +646,7 @@ export class EasyUpload {
     // Create timeout promise
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => {
-          console.error('[EasyUpload] URL generation timed out');
+          window.lana?.log('[EasyUpload] URL generation timed out', { severity: 'error' });
           reject(new Error(`QR code generation timed out after ${QR_CODE_CONFIG.GENERATION_TIMEOUT / 1000} seconds`));
         }, QR_CODE_CONFIG.GENERATION_TIMEOUT);
       });
@@ -668,7 +662,7 @@ export class EasyUpload {
 
           return this.shortenUrl(mobileUrl);
         } catch (error) {
-          console.error('[EasyUpload] Failed in URL generation promise:', error);
+          window.lana?.log(`[EasyUpload] Failed in URL generation promise: ${error?.message || error}`, { severity: 'error' });
           throw error;
         }
       })();
@@ -742,10 +736,7 @@ export class EasyUpload {
       });
 
       if (!response.ok) {
-        console.warn('Failed to shorten URL (HTTP error), using original', {
-          status: response.status,
-          statusText: response.statusText,
-        });
+        window.lana?.log(`[EasyUpload] Failed to shorten URL (HTTP error), using original: ${response.status} ${response.statusText}`, { severity: 'warning' });
         return longUrl;
       }
 
@@ -754,14 +745,10 @@ export class EasyUpload {
         return data.data;
       }
 
-      console.warn('Failed to shorten URL (unexpected response), using original', {
-        responseData: data,
-      });
+      window.lana?.log(`[EasyUpload] Failed to shorten URL (unexpected response), using original: ${JSON.stringify(data)}`, { severity: 'warning' });
       return longUrl;
     } catch (error) {
-      console.error('Error shortening URL, using original', {
-        error: error instanceof Error ? error.message : String(error),
-      });
+      window.lana?.log(`[EasyUpload] Error shortening URL, using original: ${error instanceof Error ? error.message : String(error)}`, { severity: 'warning' });
       return longUrl;
     }
   }
@@ -944,13 +931,7 @@ export class EasyUpload {
       // Set up refresh interval
       this.scheduleQRRefresh();
     } catch (error) {
-      console.error('[EasyUpload] Failed to initialize QR code:', {
-        errorName: error?.name,
-        errorMessage: error?.message,
-        errorCode: error?.code,
-        statusCode: error?.statusCode,
-        stack: error?.stack,
-      });
+      window.lana?.log(`[EasyUpload] Failed to initialize QR code: ${error?.name} ${error?.message} code=${error?.code} status=${error?.statusCode}`, { severity: 'error' });
       // Show failed QR state
       this.showFailedQR();
       // Show error toast
@@ -982,7 +963,7 @@ export class EasyUpload {
       await this.cleanup();
       await this.initializeQRCode();
     } catch (error) {
-      console.error('Failed to refresh QR code:', error);
+      window.lana?.log(`[EasyUpload] Failed to refresh QR code: ${error?.message || error}`, { severity: 'error' });
     }
   }
 
@@ -1005,7 +986,7 @@ export class EasyUpload {
         await this.finalizeUpload();
       }
     } catch (error) {
-      console.error('Failed to finalize upload:', error);
+      window.lana?.log(`[EasyUpload] Failed to finalize upload: ${error?.message || error}`, { severity: 'error' });
       this.showConfirmTooltip('pending');
       // Re-enable button to allow retry on error
       this.updateConfirmButtonState(false);
@@ -1023,7 +1004,7 @@ export class EasyUpload {
         throw new Error('No file was uploaded');
       }
     } catch (error) {
-      console.error('Failed to confirm import:', error);
+      window.lana?.log(`[EasyUpload] Failed to confirm import: ${error?.message || error}`, { severity: 'error' });
       this.showConfirmTooltip('failed');
       this.refreshQRCode();
     }
@@ -1085,7 +1066,7 @@ export class EasyUpload {
         buttonContainer.appendChild(confirmButton);
       }
     } catch (error) {
-      console.error('Failed to setup QR code interface:', error);
+      window.lana?.log(`[EasyUpload] Failed to setup QR code interface: ${error?.message || error}`, { severity: 'error' });
       throw error;
     }
   }
@@ -1143,7 +1124,7 @@ export class EasyUpload {
           this.uploadDetectionInterval = null;
         }
       } catch (error) {
-        window.lana?.log(`[EasyUpload] Polling error: ${error?.message || error}`);
+        window.lana?.log(`[EasyUpload] Polling error: ${error?.message || error}`, { severity: 'warning' });
       }
     }, POLL_INTERVAL_MS);
   }

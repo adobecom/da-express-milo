@@ -185,7 +185,7 @@ async function maybeHandleEasyUploadQuickAction(
       return true;
     }
   } catch (error) {
-    console.error('[FrictionlessQA] Failed to route Easy Upload quick action:', error);
+    window.lana?.log(`[FrictionlessQA] Failed to route Easy Upload quick action: ${error?.message || error}`, { severity: 'error' });
     const fallbackHandled = runLegacyEasyUploadFallback(
       quickActionId,
       docConfig,
@@ -947,7 +947,7 @@ export default async function decorate(block) {
       document.body.dataset.suppressfloatingcta = 'false';
       if (easyUploadModulePromise) {
         easyUploadModulePromise.then(({ cleanupEasyUpload }) => cleanupEasyUpload?.())
-          .catch((err) => console.error('[FrictionlessQA] Failed to cleanup Easy Upload:', err));
+          .catch((err) => window.lana?.log(`[FrictionlessQA] Failed to cleanup Easy Upload: ${err?.message || err}`, { severity: 'warning' }));
       }
     }
   }, { passive: true });
