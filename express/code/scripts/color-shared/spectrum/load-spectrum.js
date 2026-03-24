@@ -280,7 +280,8 @@ export function loadDialog() {
 }
 
 /**
- * Load icons for color-swatch-rail (copy, add, delete, lock, accessibility, open-in). Tint and drag use Figma SVGs only — not Spectrum sp-icon-edit.
+ * Load icons for color-swatch-rail (copy, add, delete, lock, accessibility, open-in).
+ * Tint keeps the static SVG asset; drag uses Spectrum `sp-icon-drag-handle` with a fallback.
  */
 export async function loadIconsRail() {
   if (componentLoaded.iconsRail) return;
@@ -292,6 +293,7 @@ export async function loadIconsRail() {
     'sp-icon-circle',
     'sp-icon-copy',
     'sp-icon-delete',
+    'sp-icon-drag-handle',
     'sp-icon-edit',
     'sp-icon-filter',
     'sp-icon-open-in',
