@@ -81,6 +81,11 @@ export const style = css`
         cursor: grabbing;
     }
 
+    .wheel-marker-overlay--locked,
+    .wheel-marker-overlay--locked:active {
+        cursor: not-allowed;
+    }
+
     /* Spoke lines */
     .wheel-spoke {
         position: absolute;

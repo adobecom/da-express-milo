@@ -27,6 +27,7 @@ export class ColorWheelExpress extends ColorWheel {
     super();
     this.activeSwatchIndex = 0;
     this.harmonyRule = 'ANALOGOUS';
+    this.lockedByIndex = new Set();
   }
 
   firstUpdated() {
@@ -171,6 +172,10 @@ export class ColorWheelExpress extends ColorWheel {
       marker.style.transform = 'translate(-50%, -50%)';
       marker.style.setProperty('--wheel-marker-color', swatch.hex);
       marker.style.zIndex = index === this.baseColorIndex ? 10 : 5;
+      if (this.isSwatchLocked(index)) {
+        marker.classList.add('wheel-marker-overlay--locked');
+        marker.setAttribute('aria-disabled', 'true');
+      }
       marker.dataset.index = index;
       marker.addEventListener('pointerdown', (e) => this.handleMarkerDown(e, index));
 
@@ -230,6 +235,7 @@ export class ColorWheelExpress extends ColorWheel {
       this.getCanvasPosition();
 
       if (event.target === this.canvas) {
+        if (this.isSwatchLocked(this.activeSwatchIndex)) return;
         const hex = this.updateMarkerPosition(event);
         if (this.controller) {
           this.controller.setSwatchHex(this.activeSwatchIndex, hex);
@@ -269,6 +275,8 @@ export class ColorWheelExpress extends ColorWheel {
       this.controller.setActiveSwatchIndex(index);
     }
 
+    if (this.isSwatchLocked(index)) return;
+
     this.getCanvasPosition();
 
     const markerV = this.swatches[index]?.hsv?.v != null
@@ -307,6 +315,11 @@ export class ColorWheelExpress extends ColorWheel {
         this.baseColorIndex = state?.baseColorIndex ?? 0;
         this.activeSwatchIndex = state?.activeSwatchIndex ?? state?.baseColorIndex ?? 0;
         this.harmonyRule = state?.harmonyRule || 'ANALOGOUS';
+        this.lockedByIndex = state?.lockedByIndex instanceof Set
+          ? new Set([...state.lockedByIndex].filter((index) => Number.isInteger(index) && index >= 0))
+          : Array.isArray(state?.lockedByIndex)
+            ? new Set(state.lockedByIndex.filter((index) => Number.isInteger(index) && index >= 0))
+            : new Set();
 
         const active = state?.swatches?.[this.activeSwatchIndex];
         if (active?.hex && active.hex !== this.color) {
@@ -325,6 +338,11 @@ export class ColorWheelExpress extends ColorWheel {
         }
       });
     }
+  }
+
+  isSwatchLocked(index) {
+    if (!Number.isInteger(index) || index < 0) return false;
+    return index === this.baseColorIndex || this.lockedByIndex.has(index);
   }
 
   render() {
