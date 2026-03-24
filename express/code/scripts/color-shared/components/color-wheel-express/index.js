@@ -312,8 +312,12 @@ export class ColorWheelExpress extends ColorWheel {
     if (this.controller && typeof this.controller.subscribe === 'function') {
       this._controllerUnsubscribe = this.controller.subscribe((state) => {
         this.swatches = state?.swatches || [];
-        this.baseColorIndex = state?.baseColorIndex ?? 0;
-        this.activeSwatchIndex = state?.activeSwatchIndex ?? state?.baseColorIndex ?? 0;
+        this.baseColorIndex = Number.isInteger(state?.baseColorIndex) ? state.baseColorIndex : null;
+        this.activeSwatchIndex = Number.isInteger(state?.activeSwatchIndex)
+          ? state.activeSwatchIndex
+          : Number.isInteger(state?.baseColorIndex)
+            ? state.baseColorIndex
+            : 0;
         this.harmonyRule = state?.harmonyRule || 'ANALOGOUS';
         this.lockedByIndex = state?.lockedByIndex instanceof Set
           ? new Set([...state.lockedByIndex].filter((index) => Number.isInteger(index) && index >= 0))
