@@ -1,8 +1,8 @@
 import {
   createExploreSearchBar,
   createDeepLinkManager,
-} from '../../../scripts/color-shared/components/search-bar/index.js';
-import { addTempWrapperDeprecated } from '../../../scripts/utils.js';
+} from '../../scripts/color-shared/components/search-bar/index.js';
+import { addTempWrapperDeprecated } from '../../scripts/utils.js';
 
 function parseTagsRow(row) {
   const text = row?.textContent?.trim();
@@ -11,7 +11,7 @@ function parseTagsRow(row) {
   return text.split(',').map((tag) => tag.trim()).filter(Boolean);
 }
 
-export default async function decorateColorSearchMarquee(block) {
+export default async function decorate(block) {
   if (!block.parentElement?.classList.contains('search-marquee-wrapper')) {
     addTempWrapperDeprecated(block, 'search-marquee');
   }

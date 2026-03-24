@@ -556,12 +556,6 @@ async function decorateLinkList(block) {
 }
 
 export default async function decorate(block) {
-  if (block.classList.contains('color')) {
-    const { default: decorateColorSearchMarquee } = await import('./utils/color-variant.js');
-    await decorateColorSearchMarquee(block);
-    return;
-  }
-
   addTempWrapperDeprecated(block, 'search-marquee');
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`), decorateButtonsDeprecated(block)]).then(([utils, placeholders]) => {
     ({ createTag, getConfig, getMetadata } = utils);
