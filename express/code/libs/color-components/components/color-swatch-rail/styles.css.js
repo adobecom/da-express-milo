@@ -852,8 +852,6 @@ export const style = css`
   .icon-button .icon-tint,
   .icon-button .icon-drag {
     display: inline-block;
-    width: 20px;
-    height: 20px;
     filter: var(--swatch-icon-filter);
   }
 
