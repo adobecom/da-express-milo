@@ -5,6 +5,8 @@ import { loadBadge, loadTooltip } from '../../spectrum/load-spectrum.js';
 const TOOLTIP_CSS_PATH = '/express/code/scripts/color-shared/spectrum/styles/tooltip.css';
 
 class ColorConflicts extends LitElement {
+  static shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true };
+
   static get styles() {
     return [style];
   }

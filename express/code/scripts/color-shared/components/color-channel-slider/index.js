@@ -40,6 +40,15 @@ class ColorChannelSlider extends LitElement {
     }));
   }
 
+  _onChange(e) {
+    this.value = Number(e.target.value);
+    this.dispatchEvent(new CustomEvent('change', {
+      detail: { value: this.value },
+      bubbles: true,
+      composed: true,
+    }));
+  }
+
   render() {
     const gradientStyle = this.gradient
       ? `--channel-gradient: ${this.gradient}`
@@ -56,6 +65,7 @@ class ColorChannelSlider extends LitElement {
         ?disabled=${this.disabled}
         style=${gradientStyle}
         @input=${this._onInput}
+        @change=${this._onChange}
       />
     `;
   }

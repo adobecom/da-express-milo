@@ -7,6 +7,14 @@ export function isMobileViewport() {
   return window.matchMedia('(max-width: 599px)').matches;
 }
 
+export function isTabletViewport() {
+  return window.matchMedia('(min-width: 600px) and (max-width: 1199px)').matches;
+}
+
+export function isMobileOrTabletViewport() {
+  return isMobileViewport() || isTabletViewport();
+}
+
 /**
  * @param {string} className
  * @param {Function|null} onClose
@@ -125,6 +133,7 @@ export function pickRandomPalette() {
 }
 
 export const PARAM_NAME = 'color-palette';
+export const PARAM_PALETTE_NAME = 'color-palette-name';
 
 const HEX_3 = /^[0-9a-f]{3}$/i;
 const HEX_6 = /^[0-9a-f]{6}$/i;
@@ -162,7 +171,18 @@ export function createColorPaletteParamApi() {
     return normalized;
   }
 
-  function setOnUrl(url, colors, { merge = 'replace' } = {}) {
+  function getResolvedPaletteName(urlOrString) {
+    let url;
+    try {
+      url = new URL(urlOrString || window.location.href);
+    } catch {
+      return undefined;
+    }
+    const raw = url.searchParams.get(PARAM_PALETTE_NAME);
+    return (raw && raw.trim()) || undefined;
+  }
+
+  function setOnUrl(url, colors, { merge = 'replace', name } = {}) {
     const normalized = colors
       .map((c) => normalizeHex(c))
       .filter(Boolean)
@@ -179,12 +199,18 @@ export function createColorPaletteParamApi() {
     }
 
     url.searchParams.set(PARAM_NAME, normalized.join(','));
+
+    if (name) {
+      url.searchParams.set(PARAM_PALETTE_NAME, name);
+    }
   }
 
   return {
     getResolvedPalette,
+    getResolvedPaletteName,
     setOnUrl,
     PARAM_NAME,
+    PARAM_PALETTE_NAME,
   };
 }
 

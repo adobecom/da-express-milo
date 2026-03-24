@@ -1,6 +1,5 @@
 import { serviceManager } from '../../../libs/services/index.js';
 import { createToolbar } from './createToolbarComponent.js';
-import loadCSS from '../utils/loadCss.js';
 import { createTag, getLibs } from '../../utils.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
 
@@ -128,10 +127,29 @@ async function getLibraryContext() {
   }
 }
 
+const TOOLBAR_CSS_PATH = 'scripts/color-shared/toolbar/toolbar.css';
+
+let miloStyleLoaderPromise = null;
+
+async function loadMiloStyle(path) {
+  if (!miloStyleLoaderPromise) {
+    miloStyleLoaderPromise = import(`${getLibs()}/utils/utils.js`)
+      .then(({ loadStyle, getConfig }) => ({ loadStyle, getConfig }));
+  }
+
+  const { loadStyle, getConfig } = await miloStyleLoaderPromise;
+  const codeRoot = getConfig?.()?.codeRoot || '/express/code';
+  const href = path.startsWith('/') ? path : `${codeRoot}/${path}`;
+
+  return new Promise((resolve) => {
+    loadStyle(href, () => resolve());
+  });
+}
+
 async function loadToolbarDependencies(providedPalette, deps = {}) {
   const {
     initServices = () => ensureServices(),
-    loadStyles = () => loadCSS(new URL('./toolbar.css', import.meta.url).pathname),
+    loadStyles = () => loadMiloStyle(TOOLBAR_CSS_PATH),
   } = deps;
 
   await Promise.all([initServices(), loadStyles()]);
@@ -139,13 +157,31 @@ async function loadToolbarDependencies(providedPalette, deps = {}) {
   return providedPalette;
 }
 
-function setupStickyBehavior(container, wrapper) {
-  container.classList.add('ax-toolbar-sticky-host');
+function clearStickyBehavior(wrapper, reserveContainer, resizeObserver) {
+  resizeObserver?.disconnect();
+  wrapper.classList.remove('ax-toolbar-sticky-wrapper');
+
+  if (!reserveContainer) return;
+
+  reserveContainer.classList.remove('ax-toolbar-sticky-host');
+  reserveContainer.style.removeProperty('--ax-toolbar-h');
+}
+
+function setupStickyBehavior(wrapper, options = {}) {
+  const {
+    reserveContainer = null,
+    reserveSpace = true,
+  } = options;
+
   wrapper.classList.add('ax-toolbar-sticky-wrapper');
+
+  if (!reserveSpace || !reserveContainer) return null;
+
+  reserveContainer.classList.add('ax-toolbar-sticky-host');
 
   const updateToolbarHeight = () => {
     const h = wrapper.getBoundingClientRect().height;
-    container.style.setProperty('--ax-toolbar-h', `${h}px`);
+    reserveContainer.style.setProperty('--ax-toolbar-h', `${h}px`);
   };
 
   requestAnimationFrame(updateToolbarHeight);
@@ -175,6 +211,7 @@ export async function initFloatingToolbar(container, options = {}) {
   const {
     type = 'palette',
     variant = 'standalone',
+    reserveSpace = true,
     ctaText,
     mobileCTAText,
     showEdit = true,
@@ -213,17 +250,47 @@ export async function initFloatingToolbar(container, options = {}) {
   container.appendChild(wrapper);
 
   let stickyRo = null;
-  if (variant === 'sticky') {
-    stickyRo = setupStickyBehavior(container, wrapper);
-  }
+  let stickyReserveContainer = null;
+  let currentContainer = container;
+
+  const mount = (nextContainer) => {
+    if (!nextContainer || nextContainer === currentContainer) return;
+    nextContainer.appendChild(wrapper);
+    currentContainer = nextContainer;
+  };
+
+  const setVariant = (nextVariant, variantOptions = {}) => {
+    clearStickyBehavior(wrapper, stickyReserveContainer, stickyRo);
+    stickyRo = null;
+    stickyReserveContainer = null;
+
+    toolbar.setVariant?.(nextVariant);
+
+    if (nextVariant !== 'sticky') return;
+
+    stickyReserveContainer = variantOptions.reserveContainer || currentContainer;
+    stickyRo = setupStickyBehavior(wrapper, {
+      reserveContainer: stickyReserveContainer,
+      reserveSpace: variantOptions.reserveSpace ?? reserveSpace,
+    });
+  };
+
+  setVariant(variant, {
+    reserveContainer: container,
+    reserveSpace,
+  });
 
   return {
     toolbar,
     palette: finalPalette,
     getLibraryContext,
+    wrapper,
+    mount,
+    setVariant,
     destroy() {
-      stickyRo?.disconnect();
+      clearStickyBehavior(wrapper, stickyReserveContainer, stickyRo);
       toolbar.destroy();
+      wrapper.remove();
     },
   };
 }
