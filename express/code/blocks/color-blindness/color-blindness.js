@@ -4,6 +4,7 @@ import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
 import { getConflictPairs, TYPE_ORDER } from '../../scripts/color-shared/services/createColorBlindnessService.js';
+import { announceToScreenReader } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import '../../scripts/color-shared/components/color-wheel-express/index.js';
 
 const PALETTE_PRESETS = [
@@ -90,6 +91,9 @@ export default async function decorate(block) {
     const { layout } = parseContent(block);
     block.innerHTML = '';
 
+    const section = createTag('section', { 'aria-label': 'Color blindness simulator' });
+    block.appendChild(section);
+
     const initialPalette = pickRandomPalette();
 
     const navLinks = [
@@ -104,7 +108,7 @@ export default async function decorate(block) {
 
     const isSingleStack = window.matchMedia('(max-width: 887px)').matches;
     const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
-    layoutInstance = await createColorToolLayout(block, {
+    layoutInstance = await createColorToolLayout(section, {
       palette: initialPalette,
       toolbar: {
         variant: isSingleStack ? 'sticky' : 'standalone',
@@ -131,11 +135,19 @@ export default async function decorate(block) {
       },
     });
 
-    const { sidebar, canvas } = layoutInstance.slots;
+    const { sidebar, canvas, topbar } = layoutInstance.slots;
+    const layoutRoot = sidebar.parentElement;
+    if (layoutRoot && topbar) {
+      layoutRoot.insertBefore(sidebar, topbar);
+    }
     const actionMenuApi = layoutInstance.actionMenu;
     const conflicts = createColorConflictsAdapter({
       conflictsFound: true,
       label: 'Potential color blind conflicts',
+    });
+    conflicts.element.setAttribute('tabindex', '0');
+    conflicts.element.addEventListener('focus', () => {
+      announceToScreenReader('The conflicts between colors are shown with a caution symbol.');
     });
     sidebar.appendChild(conflicts.element);
 
@@ -162,6 +174,10 @@ export default async function decorate(block) {
     const wheelEl = createTag('color-wheel-express', {
       'aria-label': 'Color wheel',
       color: initialPalette.colors[0],
+      tabindex: '0',
+    });
+    wheelEl.addEventListener('focus', () => {
+      announceToScreenReader('Color wheel');
     });
     wheelEl.showLines = true;
 

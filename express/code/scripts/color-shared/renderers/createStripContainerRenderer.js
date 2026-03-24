@@ -12,6 +12,7 @@ import {
   simulateHex,
 } from '../services/createColorBlindnessService.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
+import { announceToScreenReader } from '../spectrum/utils/a11y.js';
 
 const COLORS_PER_ROW_TWO_ROWS = 5;
 
@@ -117,10 +118,13 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
       const titleCell = createTag('div', {
         class: `strip-color-blindness-row__title-cell strip-color-blindness-row--${type} ${pairs.length > 0 ? 'fail' : 'pass'}`,
       });
-      const label = createTag('span', { class: 'strip-color-blindness-row__label' });
+      const label = createTag('span', { class: 'strip-color-blindness-row__label', tabindex: '0' });
       label.textContent = TYPE_LABELS[type];
       label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-      label.setAttribute('aria-label', DEFECT_DEFINITIONS[type]);
+      label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      label.addEventListener('focus', () => {
+        announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      });
       titleCell.appendChild(label);
       titleCell.style.gridColumn = '1';
       titleCell.style.gridRow = String(gridRow);
@@ -136,6 +140,8 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
         const swatch = createTag('div', {
           class: `strip-color-blindness-swatch${conflicting.has(i) ? ' conflict' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
+          role: 'img',
+          'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
         });
         if (conflicting.has(i)) swatch.appendChild(createConflictIcon());
         swatchesWrap.appendChild(swatch);
@@ -170,10 +176,13 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
     const titleCell = createTag('div', {
       class: `strip-four-rows-cb-title strip-four-rows-cb-title--${type}`,
     });
-    const label = createTag('span', { class: 'strip-four-rows-cb-title__label' });
+    const label = createTag('span', { class: 'strip-four-rows-cb-title__label', tabindex: '0' });
     label.textContent = TYPE_LABELS[type];
     label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-    label.setAttribute('aria-label', DEFECT_DEFINITIONS[type]);
+    label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+    label.addEventListener('focus', () => {
+      announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+    });
     titleCell.style.gridColumn = '1';
     titleCell.style.gridRow = String(gridRow);
     titleCell.appendChild(label);
@@ -208,10 +217,13 @@ function createMobileCBLayout(controller, maxColumns = FOUR_ROWS_CB_COLS) {
 
   TYPE_ORDER.forEach((type) => {
     const wrap = createTag('div', { class: 'strip-cb-mobile-header__label-wrap' });
-    const label = createTag('span', { class: 'strip-cb-mobile-header__label' });
+    const label = createTag('span', { class: 'strip-cb-mobile-header__label', tabindex: '0' });
     label.textContent = TYPE_LABELS[type];
     label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-    label.setAttribute('aria-label', DEFECT_DEFINITIONS[type]);
+    label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+    label.addEventListener('focus', () => {
+      announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+    });
     wrap.appendChild(label);
     header.appendChild(wrap);
   });
@@ -271,6 +283,8 @@ function createMobileCBLayout(controller, maxColumns = FOUR_ROWS_CB_COLS) {
         const simCell = createTag('div', {
           class: `strip-cb-mobile-row__sim${conflicting.has(colorIndex) ? ' conflict' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
+          role: 'img',
+          'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
         });
         if (conflicting.has(colorIndex)) simCell.appendChild(createConflictIcon());
         row.appendChild(simCell);
@@ -340,10 +354,13 @@ function createColorBlindnessRows(controller, orientation) {
         class: `strip-color-blindness-row strip-color-blindness-row--${type} ${rowFails ? 'fail' : 'pass'} strip-color-blindness-row--two-rows`,
       });
       const header = createTag('div', { class: 'strip-color-blindness-row__header' });
-      const label = createTag('span', { class: 'strip-color-blindness-row__label' });
+      const label = createTag('span', { class: 'strip-color-blindness-row__label', tabindex: '0' });
       label.textContent = TYPE_LABELS[type];
       label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-      label.setAttribute('aria-label', DEFECT_DEFINITIONS[type]);
+      label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      label.addEventListener('focus', () => {
+        announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      });
       header.appendChild(label);
       const swatchesContainer = createTag('div', { class: 'strip-color-blindness-row__grid' });
       const rowColors = colors.slice(0, COLORS_PER_ROW_TWO_ROWS);
@@ -357,6 +374,8 @@ function createColorBlindnessRows(controller, orientation) {
         const swatch = createTag('div', {
           class: `strip-color-blindness-swatch${conflicting.has(colIndex) ? ' conflict' : ''}${isPlaceholder ? ' strip-color-blindness-swatch--placeholder' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
+          role: 'img',
+          'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
         });
         if (conflicting.has(colIndex)) swatch.appendChild(createConflictIcon());
         swatchesContainer.appendChild(swatch);
