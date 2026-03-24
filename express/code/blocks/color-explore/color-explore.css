@@ -614,17 +614,6 @@
   .color-explore .color-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-
-  .color-explore.color-explore--gradients .explore-main-section .gradients-grid,
-  .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
-    grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-tablet)));
-    gap: var(--spacing-300);
-    /* max-width: 100%; */
-  }
-
-  .color-explore.color-explore--gradients .gradients-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 
 @media (min-width: 680px) {
@@ -647,6 +636,17 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--spacing-300);
     /* max-width: 100% */
+  }
+
+  .color-explore.color-explore--gradients .explore-main-section .gradients-grid,
+  .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
+    grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-tablet)));
+    gap: var(--spacing-300);
+    /* max-width: 100%; */
+  }
+
+  .color-explore.color-explore--gradients .gradients-grid {
+    grid-template-columns: repeat(2, 1fr);
   }
 
 }
