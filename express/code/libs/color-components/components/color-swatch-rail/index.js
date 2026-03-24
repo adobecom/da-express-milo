@@ -847,7 +847,8 @@ export class ColorSwatchRail extends LitElement {
       
       const effectiveLocked = isLocked || isBase;
       const textColor = getContrastTextColor(swatch.hex);
-      const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
+      const useLightIcons = textColor.toUpperCase() === '#FFFFFF';
+      const shadow = useLightIcons ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
       const showEdit = (f.colorPicker || f.editTint) && !editDisabled && !effectiveLocked;
       
       
@@ -921,8 +922,8 @@ export class ColorSwatchRail extends LitElement {
 
       return html`
         <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''}"
-          data-contrast="${textColor === '#ffffff' ? 'dark' : 'light'}"
-          style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${textColor === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
+          data-contrast="${useLightIcons ? 'dark' : 'light'}"
+          style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${useLightIcons ? 'brightness(0) invert(1)' : 'brightness(0)'}"
           data-swatch-index="${index}"
           tabindex="0"
           role="group"
