@@ -367,7 +367,6 @@ export function createImageExtractComponent(options = {}) {
       }
     },
     onReplace: () => {
-      container.classList.remove('has-image');
       dropzone.input.value = '';
       dropzone.input.click();
     },
