@@ -40,7 +40,7 @@ async function fetchLinkList() {
       return {
         parent: formattedTasks,
         ckgID: ckgItem.metadata.ckgId,
-        displayValue: sanitizeHTML(ckgItem.canonicalName),
+        displayValue: ckgItem.canonicalName,
         value: sanitizeHTML(ckgItem.metadata.link),
       };
     });
@@ -53,11 +53,21 @@ function isSearch(pathname) {
   return searchRegex.test(pathname);
 }
 
+function replaceTextInNode(node, search, replacement) {
+  if (node.nodeType === Node.TEXT_NODE) {
+    if (node.textContent.includes(search)) {
+      node.textContent = node.textContent.replaceAll(search, replacement);
+    }
+  } else {
+    node.childNodes.forEach((child) => replaceTextInNode(child, search, replacement));
+  }
+}
+
 function replaceLinkPill(linkPill, data) {
   const clone = linkPill.cloneNode(true);
   if (data) {
     const a = clone.querySelector('a');
-    a.innerHTML = a.innerHTML.replaceAll('Default', data['short-title']);
+    replaceTextInNode(a, 'Default', data['short-title']);
     a.title = a.textContent;
     a.href = a.href.replace('/express/templates/default', data.url);
   }
