@@ -17,6 +17,12 @@ export const style = css`
         border-radius: var(--spectrum-corner-radius-100);
     }
 
+    :host(:focus-visible) {
+        outline: 2px solid var(--color-blue-800);
+        outline-offset: 2px;
+        border-radius: var(--spectrum-corner-radius-100);
+    }
+
     .cc-label-wrap {
         display: inline-flex;
         align-items: center;
