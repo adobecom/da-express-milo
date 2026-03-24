@@ -658,7 +658,19 @@ export const style = css`
   }
 
   .swatch-column:hover .base-color-badge--hover-only,
+  .swatch-column:focus-within .base-color-badge--hover-only,
   .base-color-badge--hover-only:focus-visible {
+    opacity: 1;
+  }
+
+  .action-hover-only {
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  .swatch-column:hover .action-hover-only,
+  .swatch-column:focus-within .action-hover-only,
+  .action-hover-only:focus-visible {
     opacity: 1;
   }
 

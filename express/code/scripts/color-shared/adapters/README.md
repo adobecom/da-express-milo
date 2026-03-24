@@ -4,6 +4,41 @@ Thin wrappers around Lit-based color components. Each adapter lazily imports its
 
 ---
 
+## `createSwatchRailAdapter(paletteOrController, options)`
+
+Adapter for `<color-swatch-rail>`. Used by strips/swatches flows to render palette rails with shared behavior.
+
+### Input
+
+| Name | Type | Default | Description |
+|------|------|---------|-------------|
+| `paletteOrController` | `object` | required | Palette data (`{ colors: string[] }`) or a controller with `subscribe/getState/setState`. |
+| `options.orientation` | `string` | `'vertical'` | Orientation: `horizontal`, `vertical`, `stacked`, `two-rows`, `four-rows`, `vertical-responsive`. |
+| `options.variant` | `string` | `undefined` | Optional variant marker set as `data-variant`. |
+| `options.verticalMaxPerRow` | `number` | `5` | Max columns per row for vertical wrapping. |
+| `options.hexCopyFirstRowOnly` | `boolean` | `false` | In four-rows variants, limits editable/copyable hex controls to first row. |
+| `options.swatchFeatures` | `object\|string[]\|'all'` | `undefined` | Feature set passed to the rail. |
+| `options.swatchFeaturesByOrientation` | `object` | `undefined` | Orientation keyed feature overrides. |
+| `options.hoverOnlyActions` | `string[]\|string` | `undefined` | Feature-name map for hover-only top-right actions. Supported keys: `drag`, `lock`, `editTint`, `trash`. |
+| `options.hoverOnlyActionCount` | `number` | `0` | Fallback count mode for hover-only actions when `hoverOnlyActions` is not set. |
+
+### Returns
+
+```js
+{
+  element: HTMLElement, // themed wrapper
+  rail: HTMLElement,    // color-swatch-rail element
+  destroy: () => void,
+  setOrientation: (orientation: string) => void,
+  setSwatchFeatures: (features: object | string[] | 'all') => void,
+  // Present only when input was palette data:
+  controller?: object,
+  update?: (newPaletteData: object) => void,
+}
+```
+
+---
+
 ## `createColorEditAdapter(options, callbacks)`
 
 Adapter for `<color-edit>`. Use from strips, color wheel, contrast checker, or modal content. Loads the Lit component and returns a wrapper with the element and API.

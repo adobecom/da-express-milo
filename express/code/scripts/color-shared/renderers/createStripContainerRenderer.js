@@ -405,6 +405,14 @@ export function createStripContainerRenderer(options) {
   const verticalMaxPerRow = Number.isFinite(config?.swatchVerticalMaxPerRow)
     ? Math.max(1, Math.min(10, Math.floor(config.swatchVerticalMaxPerRow)))
     : null;
+  const hoverOnlyActionCount = Number.isFinite(config?.swatchHoverOnlyActionCount)
+    ? Math.max(0, Math.floor(config.swatchHoverOnlyActionCount))
+    : null;
+  const hoverOnlyActions = Array.isArray(config?.swatchHoverOnlyActions)
+    ? config.swatchHoverOnlyActions
+    : typeof config?.swatchHoverOnlyActions === 'string'
+      ? config.swatchHoverOnlyActions.split(/[\s,]+/g)
+      : null;
 
   const colorBlindness = config?.colorBlindness === true;
 
@@ -568,6 +576,8 @@ export function createStripContainerRenderer(options) {
   function railOptions(orientation) {
     const opts = { orientation };
     if (verticalMaxPerRow != null) opts.verticalMaxPerRow = verticalMaxPerRow;
+    if (hoverOnlyActions != null) opts.hoverOnlyActions = hoverOnlyActions;
+    if (hoverOnlyActionCount != null) opts.hoverOnlyActionCount = hoverOnlyActionCount;
     if (colorBlindness) {
       opts.swatchFeatures = getColorBlindnessCoreFeatures(swatchFeatures);
       if (orientation === 'four-rows') {

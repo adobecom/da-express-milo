@@ -57,6 +57,13 @@ const ALL_FEATURES = {
   editColorDisabled: false,
 };
 
+const HOVER_ONLY_ACTION_KEYS = new Set([
+  'drag',
+  'lock',
+  'editTint',
+  'trash',
+]);
+
 function normalizeFeatures(features) {
   if (!features) return { ...DEFAULT_FEATURES };
   if (features === 'all') return { ...ALL_FEATURES };
@@ -164,6 +171,8 @@ export class ColorSwatchRail extends LitElement {
       verticalMaxPerRow: { type: Number, attribute: 'vertical-max-per-row' },
       
       hexCopyFirstRowOnly: { type: Boolean, reflect: true, attribute: 'hex-copy-first-row-only' },
+      hoverOnlyActionCount: { type: Number, attribute: 'hover-only-action-count' },
+      hoverOnlyActions: { attribute: 'hover-only-actions' },
     };
   }
 
@@ -179,6 +188,8 @@ export class ColorSwatchRail extends LitElement {
     this.swatchFeatures = null;
     this.verticalMaxPerRow = DEFAULT_VERTICAL_MAX_PER_ROW;
     this.hexCopyFirstRowOnly = false;
+    this.hoverOnlyActionCount = 0;
+    this.hoverOnlyActions = null;
     this._controllerUnsubscribe = null;
     this.swatches = [];
     this.baseColorIndex = 0;
@@ -210,6 +221,26 @@ export class ColorSwatchRail extends LitElement {
       f.colorBlindness = true;
     }
     return f;
+  }
+
+  get _hoverOnlyActionCount() {
+    const value = Number(this.hoverOnlyActionCount);
+    if (!Number.isFinite(value)) return 0;
+    return Math.max(0, Math.floor(value));
+  }
+
+  get _hoverOnlyActionSet() {
+    let values = [];
+    if (Array.isArray(this.hoverOnlyActions)) {
+      values = this.hoverOnlyActions;
+    } else if (typeof this.hoverOnlyActions === 'string') {
+      values = this.hoverOnlyActions.split(/[\s,]+/g);
+    }
+    return new Set(
+      values
+        .map((value) => String(value).trim())
+        .filter((value) => value && HOVER_ONLY_ACTION_KEYS.has(value)),
+    );
   }
 
   connectedCallback() {
@@ -272,6 +303,8 @@ export class ColorSwatchRail extends LitElement {
     const tooltipRelevantChange = changedProperties.has('orientation')
       || changedProperties.has('swatchFeatures')
       || changedProperties.has('hexCopyFirstRowOnly')
+      || changedProperties.has('hoverOnlyActionCount')
+      || changedProperties.has('hoverOnlyActions')
       || changedProperties.has('embedded');
     if (this._tooltipsInitialized && tooltipRelevantChange) {
       this._scheduleTooltipsRefresh();
@@ -849,6 +882,22 @@ export class ColorSwatchRail extends LitElement {
       const textColor = getContrastTextColor(swatch.hex);
       const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
       const showEdit = (f.colorPicker || f.editTint) && !editDisabled && !effectiveLocked;
+      const hoverOnlyActionSet = !isStacked ? this._hoverOnlyActionSet : new Set();
+      const useHoverOnlyActionMap = hoverOnlyActionSet.size > 0;
+      const shouldApplyHoverOnlyCount = !isStacked
+        && !useHoverOnlyActionMap
+        && this._hoverOnlyActionCount > 0;
+      let hoverOnlyIconsAssigned = 0;
+      const getHoverOnlyActionClass = (actionName) => {
+        if (isStacked) return '';
+        if (useHoverOnlyActionMap) {
+          return hoverOnlyActionSet.has(actionName) ? ' action-hover-only' : '';
+        }
+        if (!shouldApplyHoverOnlyCount) return '';
+        if (hoverOnlyIconsAssigned >= this._hoverOnlyActionCount) return '';
+        hoverOnlyIconsAssigned += 1;
+        return ' action-hover-only';
+      };
       
       
       const showHexCopyForThisSwatch = !(orientation === 'four-rows' && this.hexCopyFirstRowOnly && index >= FOUR_ROWS_COLS);
@@ -875,7 +924,7 @@ export class ColorSwatchRail extends LitElement {
           ${f.drag && !effectiveLocked ? html`
             <button
               type="button"
-              class="icon-button icon-button--drag swatch-column-focusable"
+              class="icon-button icon-button--drag swatch-column-focusable${getHoverOnlyActionClass('drag')}"
               tabindex="-1"
               aria-label="Drag to reorder"
               title="Drag to reorder"
@@ -884,9 +933,9 @@ export class ColorSwatchRail extends LitElement {
               @dragend=${this._handleDragEnd}
             >${icon('drag')}</button>
           ` : ''}
-          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${effectiveLocked ? 'Unlock color' : 'Lock color'} title=${effectiveLocked ? 'Unlock color' : 'Lock color'}>${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
-          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${(ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
-          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
+          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable${getHoverOnlyActionClass('lock')}" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${effectiveLocked ? 'Unlock color' : 'Lock color'} title=${effectiveLocked ? 'Unlock color' : 'Lock color'}>${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable${getHoverOnlyActionClass('editTint')}" tabindex="-1" @click=${(ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable${getHoverOnlyActionClass('trash')}" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
         </div>
       `;
       

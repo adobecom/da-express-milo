@@ -80,6 +80,23 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
     element.hexCopyFirstRowOnly = true;
     element.setAttribute('hex-copy-first-row-only', '');
   }
+  if (options.hoverOnlyActions != null) {
+    const hoverOnlyActions = Array.isArray(options.hoverOnlyActions)
+      ? options.hoverOnlyActions
+      : String(options.hoverOnlyActions).split(/[\s,]+/g);
+    const normalizedHoverOnlyActions = hoverOnlyActions
+      .map((action) => String(action).trim())
+      .filter(Boolean);
+    if (normalizedHoverOnlyActions.length > 0) {
+      element.hoverOnlyActions = normalizedHoverOnlyActions;
+      element.setAttribute('hover-only-actions', normalizedHoverOnlyActions.join(','));
+    }
+  }
+  if (Number.isFinite(options.hoverOnlyActionCount)) {
+    const hoverOnlyActionCount = Math.max(0, Math.floor(options.hoverOnlyActionCount));
+    element.hoverOnlyActionCount = hoverOnlyActionCount;
+    element.setAttribute('hover-only-action-count', String(hoverOnlyActionCount));
+  }
   if (options.swatchFeatures != null && !byOrientation) {
     element.swatchFeatures = options.swatchFeatures;
   }
