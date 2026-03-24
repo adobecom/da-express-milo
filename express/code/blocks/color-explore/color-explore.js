@@ -22,7 +22,7 @@ const DEFAULTS = {
   enableSearch: true,
   useMockData: false,
   useMockFallback: true,
-  loadingScreenDemo: false,
+  loadingScreenDemo: false, // [DEMO] remove when loading screen ships
   apiEndpoint: '',
 };
 const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
@@ -40,6 +40,7 @@ const STRIP_SHARED_STYLES = [
   '/express/code/scripts/color-shared/components/gradients/gradient-strip.css',
 ];
 const LOAD_MORE_CLICK_HANDLERS = new WeakMap();
+// [DEMO] remove block below when loading screen ships
 const LOADING_DEMO_QUERY_PARAM = 'colorExploreLoadingDemo';
 
 function isLoadingDemoMode(config = {}) {
@@ -64,6 +65,7 @@ async function mountLoadingScreenDemo(container, config) {
   container.append(loading.element);
   await loading.show();
 }
+// [DEMO] end
 
 async function loadStripSharedStyles() {
   try {
@@ -238,7 +240,7 @@ export default async function decorate(block) {
     container.className = CSS_CLASSES.CONTAINER;
     themeHost.appendChild(container);
 
-    if (isLoadingDemoMode(config)) {
+    if (isLoadingDemoMode(config)) { // [DEMO] remove when loading screen ships
       await mountLoadingScreenDemo(container, config);
       block.dataset.blockStatus = 'loaded';
       return;
