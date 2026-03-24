@@ -1047,12 +1047,56 @@ export class ColorSwatchRail extends LitElement {
 
     
     if (orientation === 'vertical') {
-      const showEmpty = f.emptyStrip && swatches.length < MAX_SWATCHES;
-      const totalSlots = swatches.length + (showEmpty ? 1 : 0);
       const rawVerticalMax = Number(this.verticalMaxPerRow);
       const verticalMaxPerRow = Number.isFinite(rawVerticalMax)
         ? Math.max(1, Math.min(MAX_SWATCHES, Math.floor(rawVerticalMax)))
         : DEFAULT_VERTICAL_MAX_PER_ROW;
+      const totalSwatches = swatches.length;
+      const showEmpty = f.emptyStrip && totalSwatches < MAX_SWATCHES;
+      const isColorWheelVerticalLayout = verticalMaxPerRow === 6;
+
+      if (isColorWheelVerticalLayout) {
+        const useTwoRows = totalSwatches > verticalMaxPerRow;
+
+        if (useTwoRows) {
+          const rowSize = Math.ceil(totalSwatches / 2);
+          const row1Swatches = swatches.slice(0, rowSize);
+          const row2Swatches = swatches.slice(rowSize);
+          const row1Items = row1Swatches.map((swatch, i) => renderSwatch(swatch, i));
+          const row2Items = row2Swatches.map((swatch, i) => renderSwatch(swatch, rowSize + i));
+          const shouldRenderEmptyStrip = showEmpty && (totalSwatches % 2 === 1);
+
+          if (shouldRenderEmptyStrip) {
+            row2Items.push(html`
+              <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
+                @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
+                @focusout=${(ev) => this._handleColumnFocusout(ev)}>
+                <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="Add color" title="Add color">${icon('add')}</button>
+              </div>
+            `);
+          }
+
+          return html`
+            <div class="swatch-rail vertical--two-rows" data-orientation="vertical" style="--vertical-max-per-row: ${rowSize}">
+              ${row1Items}
+              ${row2Items}
+            </div>
+          `;
+        }
+
+        const showSingleRowEmpty = showEmpty && totalSwatches === 0;
+        const railColumns = totalSwatches + (showSingleRowEmpty ? 1 : 0);
+        const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
+
+        return html`
+          <div class="swatch-rail" data-orientation="vertical" style="--rail-columns: ${railColumns}">
+            ${railItems}
+            ${showSingleRowEmpty ? renderEmptyStrip() : ''}
+          </div>
+        `;
+      }
+
+      const totalSlots = totalSwatches + (showEmpty ? 1 : 0);
 
       if (totalSlots > verticalMaxPerRow) {
         const row1Swatches = swatches.slice(0, verticalMaxPerRow);
