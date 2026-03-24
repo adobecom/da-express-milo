@@ -178,42 +178,7 @@ import{html as xt}from"./base.js";import{html as pt,SpectrumElement as gt}from".
     <path
       d="M31.5 6H24V4a2 2 0 0 0-2-2H12a2 2 0 0 0-2 2v2H2.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h2l2.413 25.1a1 1 0 0 0 1 .9h18.179a1 1 0 0 0 1-.9L29.5 8h2a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5ZM11.065 29A1 1 0 0 1 10 28.068l-1.071-16a1 1 0 1 1 2-.134l1.071 16A1 1 0 0 1 11.065 29ZM18 28a1 1 0 0 1-2 0V12a1 1 0 0 1 2 0Zm4-22H12V4h10Zm2 22.068a1 1 0 1 1-2-.134l1.071-16a1 1 0 1 1 2 .134Z"
     />
-  </svg>`;var g=class extends s{render(){return l(Lt),this.spectrumVersion===2?S({hidden:!this.label,title:this.label}):j({hidden:!this.label,title:this.label})}};import{defineElement as Zt}from"./base.js";Zt("sp-icon-delete",g);import{html as Bt}from"./base.js";var R=({width:t=24,height:e=24,hidden:r=!1,title:i="Drag Handle"}={})=>o`<svg
-    xmlns="http://www.w3.org/2000/svg"
-    width="${t}"
-    height="${e}"
-    viewBox="0 0 36 36"
-    aria-hidden=${r?"true":"false"}
-    role="img"
-    fill="currentColor"
-    aria-label="${i}"
-  >
-    <circle cx="14" cy="26" r="2" />
-    <circle cx="14" cy="20" r="2" />
-    <circle cx="14" cy="14" r="2" />
-    <circle cx="14" cy="8" r="2" />
-    <circle cx="20" cy="26" r="2" />
-    <circle cx="20" cy="20" r="2" />
-    <circle cx="20" cy="14" r="2" />
-    <circle cx="20" cy="8" r="2" />
-  </svg>`;var F=({width:t=24,height:e=24,hidden:r=!1,title:i="Default"}={})=>o`
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            role="img"
-            fill="currentColor"
-            width=${t}
-            height=${e}
-            aria-hidden=${r?"true":"false"}
-            aria-label=${r?void 0:i}
-        >
-            <path
-                d="m10,18.75c-4.82471,0-8.75-3.9248-8.75-8.75S5.17529,1.25,10,1.25s8.75,3.9248,8.75,8.75-3.92529,8.75-8.75,8.75Zm0-16c-3.99756,0-7.25,3.25195-7.25,7.25s3.25244,7.25,7.25,7.25,7.25-3.25195,7.25-7.25-3.25244-7.25-7.25-7.25Z"
-                fill="currentColor"
-                stroke-width="0"
-            ></path>
-        </svg>
-    `;var f=class extends s{render(){return l(Bt),this.spectrumVersion===1?R({hidden:!this.label,title:this.label}):F({hidden:!this.label,title:this.label})}};import{defineElement as Vt}from"./base.js";Vt("sp-icon-drag-handle",f);import{html as kt}from"./base.js";var O=({width:t=24,height:e=24,hidden:r=!1,title:i="Edit"}={})=>o`<svg
+  </svg>`;var g=class extends s{render(){return l(Lt),this.spectrumVersion===2?S({hidden:!this.label,title:this.label}):j({hidden:!this.label,title:this.label})}};import{defineElement as Zt}from"./base.js";Zt("sp-icon-delete",g);import{html as kt}from"./base.js";var O=({width:t=24,height:e=24,hidden:r=!1,title:i="Edit"}={})=>o`<svg
     xmlns="http://www.w3.org/2000/svg"
     width="${t}"
     height="${e}"
