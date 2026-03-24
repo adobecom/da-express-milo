@@ -1,0 +1,136 @@
+.ax-color-loading {
+  width: 100%;
+}
+
+.ax-color-loading__grid {
+  display: grid;
+  width: 100%;
+}
+
+.ax-color-loading-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+.ax-color-loading-card__visual {
+  width: 100%;
+  height: 56px;
+  border-radius: var(--spacing-100);
+  background-color: var(--Palette-gray-200);
+}
+
+.ax-color-loading-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  height: var(--spacing-400);
+}
+
+.ax-color-loading-card__text {
+  width: min(300px, calc(100% - 34px));
+  height: 18px;
+  border-radius: 100px;
+  background-color: var(--Palette-gray-200);
+}
+
+.ax-color-loading-card__icon {
+  width: var(--spacing-400);
+  height: var(--spacing-400);
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: var(--Palette-gray-200);
+}
+
+.ax-color-loading-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--Palette-gray-100) 0%,
+    var(--Palette-gray-200) 50%,
+    var(--Palette-gray-100) 100%
+  );
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+}
+
+.ax-color-loading-card__visual.ax-color-loading-shimmer {
+  animation: ax-color-loading-part-1 1000ms ease-out 1ms infinite;
+}
+
+.ax-color-loading-card__text.ax-color-loading-shimmer {
+  animation: ax-color-loading-part-2 1000ms ease-out 1ms infinite;
+}
+
+.ax-color-loading-card__icon.ax-color-loading-shimmer {
+  animation: ax-color-loading-part-3 1000ms ease-out 1ms infinite;
+}
+
+@keyframes ax-color-loading-part-1 {
+  from {
+    background-image: linear-gradient(
+      90deg,
+      var(--Palette-gray-100) 0%,
+      var(--Palette-gray-200) 0%,
+      var(--Palette-gray-100) 100%
+    );
+  }
+
+  to {
+    background-image: linear-gradient(
+      90deg,
+      var(--Palette-gray-100) 0%,
+      var(--Palette-gray-200) 50%,
+      var(--Palette-gray-100) 100%
+    );
+  }
+}
+
+@keyframes ax-color-loading-part-2 {
+  from {
+    background-image: linear-gradient(
+      90deg,
+      var(--Palette-gray-100) 0%,
+      var(--Palette-gray-200) 50%,
+      var(--Palette-gray-100) 100%
+    );
+  }
+
+  to {
+    background-image: linear-gradient(
+      90deg,
+      var(--Palette-gray-100) 0%,
+      var(--Palette-gray-200) 100%,
+      var(--Palette-gray-100) 100%
+    );
+  }
+}
+
+@keyframes ax-color-loading-part-3 {
+  from {
+    background-image: linear-gradient(
+      90deg,
+      var(--Palette-gray-100) 0%,
+      var(--Palette-gray-200) 100%,
+      var(--Palette-gray-100) 100%
+    );
+  }
+
+  to {
+    background-image: linear-gradient(
+      90deg,
+      var(--Palette-gray-100) 0%,
+      var(--Palette-gray-200) 0%,
+      var(--Palette-gray-100) 100%
+    );
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-color-loading-card__visual.ax-color-loading-shimmer,
+  .ax-color-loading-card__text.ax-color-loading-shimmer,
+  .ax-color-loading-card__icon.ax-color-loading-shimmer {
+    animation: none;
+  }
+}

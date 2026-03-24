@@ -7,7 +7,7 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
-import loadCSS from '../../scripts/color-shared/utils/loadCss.js';
+import { getLibs } from '../../scripts/utils.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
@@ -40,18 +40,30 @@ const STRIP_SHARED_STYLES = [
 const LOAD_MORE_CLICK_HANDLERS = new WeakMap();
 
 async function loadStripSharedStyles() {
-  await Promise.all(
-    STRIP_SHARED_STYLES.map(async (href) => {
-      try {
-        await loadCSS(href);
-      } catch (error) {
-        window.lana?.log(`[ColorExplore] Failed loading shared style ${href}: ${error?.message}`, {
-          tags: 'color-explore,css',
-          severity: 'error',
-        });
-      }
-    }),
-  );
+  try {
+    const { loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`);
+    const codeRoot = getConfig?.()?.codeRoot || '/express/code';
+    await Promise.all(
+      STRIP_SHARED_STYLES.map(async (href) => {
+        const resolvedHref = href.startsWith('/express/code/')
+          ? href.replace('/express/code', codeRoot)
+          : href;
+        try {
+          await loadStyle(resolvedHref);
+        } catch (error) {
+          window.lana?.log(`[ColorExplore] Failed loading shared style ${resolvedHref}: ${error?.message}`, {
+            tags: 'color-explore,css',
+            severity: 'error',
+          });
+        }
+      }),
+    );
+  } catch (error) {
+    window.lana?.log(`[ColorExplore] Failed to initialize style loader: ${error?.message}`, {
+      tags: 'color-explore,css',
+      severity: 'error',
+    });
+  }
 }
 
 function getVariantFromBlock(block) {
@@ -150,8 +162,17 @@ async function createBlockFilterControl(container, variant, onFilterChange) {
   });
 
   if (!(filters?.element instanceof Node)) return null;
+  filters.element.setAttribute('data-owner', 'color-explore-filters');
+  header.querySelectorAll(':scope > .filters-container').forEach((node) => node.remove());
   header.appendChild(filters.element);
-  await filters.waitForReady?.();
+  try {
+    await filters.waitForReady?.();
+  } catch (error) {
+    window.lana?.log(`[ColorExplore] Filters waitForReady failed: ${error?.message}`, {
+      tags: 'color-explore,filters',
+      severity: 'warning',
+    });
+  }
 
   return {
     destroy() {
@@ -165,12 +186,12 @@ export default async function decorate(block) {
   if (block.dataset.blockStatus === 'loaded' || block.dataset.blockStatus === 'loading') return;
 
   try {
-    await loadStripSharedStyles();
-
     const variantFromClass = getVariantFromBlock(block);
     const rows = [...block.children];
     const config = parseBlockConfig(rows, DEFAULTS);
     if (variantFromClass) config.variant = variantFromClass;
+
+    await loadStripSharedStyles();
 
     block.dataset.blockStatus = 'loading';
     block.innerHTML = '';
