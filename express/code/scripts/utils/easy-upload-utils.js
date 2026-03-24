@@ -411,26 +411,13 @@ export class EasyUpload {
   }
 
   /**
-   * Extract link href from asset links by relation type
-   * @param {object} links - Asset links object
-   * @param {string} relation - Link relation type
-   * @returns {string|null} Link href or null if not found
-   */
-  extractLinkHref(links, relation) {
-    if (!links || !links[relation]) {
-      return null;
-    }
-    return links[relation].href;
-  }
-
-  /**
    * Extract upload URL from transfer document
    * @param {object} uploadAsset - Upload asset with links
    * @returns {string} Upload URL
    * @throws {Error} If block transfer URL not found
    */
   extractUploadUrl(uploadAsset) {
-    const uploadUrl = this.extractLinkHref(uploadAsset._links, LINK_REL.BLOCK_TRANSFER);
+    const uploadUrl = extractLinkHref(uploadAsset._links, LINK_REL.BLOCK_TRANSFER);
     if (!uploadUrl) {
       throw new Error('Block transfer URL not found in upload asset links');
     }
@@ -992,7 +979,9 @@ export class EasyUpload {
     this.handleConfirmClick = (e) => {
       e.preventDefault();
       e.stopPropagation();
-      this.handleConfirmImport();
+      this.handleConfirmImport().catch((error) => {
+        window.lana?.log(`[EasyUpload] Unhandled error in handleConfirmImport: ${error?.message || error}`, { severity: 'error' });
+      });
     };
     confirmButton.addEventListener('click', this.handleConfirmClick);
 

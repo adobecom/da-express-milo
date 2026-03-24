@@ -598,7 +598,7 @@ export class UploadService {
   async createAsset(contentType: string) {
     const path = `temp/${this.generateUUID()}/${this.generateUUID()}`;
     try {
-      var createAssetResult: { result: RepoResponseResult<AdobeAsset> };
+      let createAssetResult: { result: RepoResponseResult<AdobeAsset> };
       const uploadOptions: UploadOptions = {
         contentType,
         path,
