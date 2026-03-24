@@ -91,9 +91,7 @@ async function buildHarmonySelector(controller) {
   const uid = `cw-h-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const headingId = `${uid}-heading`;
   const currentNameId = `${uid}-current`;
-
   const section = createTag('div', { class: 'color-wheel-harmony-section' });
-
   const titleRow = createTag('div', { class: 'color-wheel-harmony-title-row' });
   const titleStatic = createTag('span', {
     class: 'color-wheel-harmony-title-static',
@@ -111,12 +109,10 @@ async function buildHarmonySelector(controller) {
     class: 'color-wheel-sr-only',
   });
   kbdHint.textContent = 'Use Left and Right arrow keys to choose a color harmony. Home and End jump to the first or last option.';
-
   titleRow.append(titleStatic, currentName);
   section.appendChild(titleRow);
 
   const carouselHost = createTag('div', { class: 'color-wheel-harmony-carousel-host' });
-
   let harmonyButtons = [];
   let lastRulesSig = '';
   let mountGeneration = 0;
@@ -425,15 +421,6 @@ export default async function decorate(block) {
         swatchFeatures: {
           copy: true,
           hexCode: true,
-          // colorPicker: true,
-          // lock: true,
-          // trash: true,
-          // drag: true,
-          // addLeft: true,
-          // addRight: true,
-          // editTint: true,
-          // baseColor: true,
-          // emptyStrip: true,
         },
         swatchVerticalMaxPerRow: 5,
       },

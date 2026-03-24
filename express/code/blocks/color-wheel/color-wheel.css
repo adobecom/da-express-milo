@@ -218,15 +218,16 @@ color-wheel-express {
 }
 
 .color-wheel-harmony-title-static {
-  font-weight: 600;
-  font-size: 1rem;
-  color: var(--spectrum-gray-800, #2c2c2c);
+  color: var(--Alias-content-typography-Heading);
+  font-size: var(--Global-Typography-Size-Label-Label-L);
+  font-weight: 700;
+  line-height: var(--Global-Typography-Line-height-Label-Label-L);
 }
 
 .color-wheel-harmony-current-name {
-  font-weight: 500;
-  font-size: 1rem;
-  color: var(--spectrum-gray-700, #464646);
+  color: var(--Alias-content-typography-Body, #505050);
+  font-size: var(--Global-Typography-Size-Label-Label-L);
+  line-height: var(--Global-Typography-Line-height-Label-Label-L);
 }
 
 .color-wheel-sr-only {
