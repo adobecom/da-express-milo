@@ -2,7 +2,7 @@
 
 This utility provides a shared contract for reading/writing a palette from URL query params.
 
-- Source: [utilities.js](/Users/cano/Adobe/da-express-milo/express/code/scripts/color-shared/utils/utilities.js)
+- Source: [utilities.js](./utilities.js)
 - Param name: `color-palette`
 - Public API: `createColorPaletteParamApi()`
 
@@ -35,7 +35,7 @@ This API is used for deep-linkable color flows (for example, palette edit/open l
 
 ## API
 
-## `createColorPaletteParamApi()`
+### `createColorPaletteParamApi()`
 
 Returns:
 
@@ -66,13 +66,13 @@ Merge modes:
 
 ## Defaults (Design source of truth)
 
-Defaults are stored in `PALETTE_PRESETS` in [utilities.js](/Users/cano/Adobe/da-express-milo/express/code/scripts/color-shared/utils/utilities.js).
+Defaults are stored in `PALETTE_PRESETS` in [utilities.js](./utilities.js).
 `getResolvedPalette()` falls back to one of these presets through `pickRandomPalette()`.
 
 ## Integration points
 
 - Color Explore edit/open URL builder uses `setOnUrl(...)`:
-  - [color-explore.js](/Users/cano/Adobe/da-express-milo/express/code/blocks/color-explore/color-explore.js:101)
+  - [color-explore.js](../../../blocks/color-explore/color-explore.js)
 
 ## Examples
 
@@ -95,7 +95,7 @@ url.toString();
 
 Coverage lives in:
 
-- [colorPaletteParam.test.js](/Users/cano/Adobe/da-express-milo/test/scripts/color-shared/utils/colorPaletteParam.test.js)
+- [colorPaletteParam.test.js](../../../../../test/scripts/color-shared/utils/colorPaletteParam.test.js)
 
 Includes:
 

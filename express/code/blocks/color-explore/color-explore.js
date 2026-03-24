@@ -9,7 +9,7 @@ import { createColorDataService as createSharedColorDataService } from '../../sc
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
 import loadCSS from '../../scripts/color-shared/utils/loadCss.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
-import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
+import { createColorPaletteParamApi, normalizeHex } from '../../scripts/color-shared/utils/utilities.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
@@ -78,6 +78,35 @@ function resolvePaletteEditorBaseUrl(currentUrl) {
   return PALETTE_EDITOR_DEFAULT_URL;
 }
 
+function resolvePaletteHexesForUrl(paletteData = {}) {
+  const fromColors = Array.isArray(paletteData?.colors) ? paletteData.colors : [];
+  const fromCoreColors = Array.isArray(paletteData?.coreColors) ? paletteData.coreColors : [];
+  const fromSwatches = Array.isArray(paletteData?.swatches) ? paletteData.swatches : [];
+
+  let source = fromSwatches;
+  if (fromColors.length) {
+    source = fromColors;
+  } else if (fromCoreColors.length) {
+    source = fromCoreColors;
+  }
+
+  return source.flatMap((entry) => {
+    let candidate = '';
+    if (typeof entry === 'string') {
+      candidate = entry;
+    } else if (entry && typeof entry === 'object') {
+      candidate = entry.hex || entry.color || entry.value || '';
+    }
+
+    return String(candidate)
+      .split(',')
+      .map((segment) => segment.trim())
+      .filter(Boolean)
+      .map((segment) => normalizeHex(segment))
+      .filter(Boolean);
+  });
+}
+
 function buildPaletteEditorUrl(palette, sourceHref) {
   const paletteData = palette || {};
   const fallbackHref = sourceHref
@@ -97,7 +126,7 @@ function buildPaletteEditorUrl(palette, sourceHref) {
     targetUrl = new URL(PALETTE_EDITOR_DEFAULT_URL, currentUrl);
   }
 
-  const paletteColors = Array.isArray(paletteData?.colors) ? paletteData.colors : [];
+  const paletteColors = resolvePaletteHexesForUrl(paletteData);
   colorPaletteParamApi.setOnUrl(targetUrl, paletteColors);
 
   if (!targetUrl.searchParams.has('martech') && currentUrl.searchParams.has('martech')) {
