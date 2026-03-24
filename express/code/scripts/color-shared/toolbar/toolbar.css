@@ -76,7 +76,7 @@
 .ax-toolbar {
   /* ── Scoped vars ── */
   --ax-toolbar-max-width-mobile: 599px;
-  --ax-toolbar-min-width: var(--Global-Device-Widths-device-min-width-S, 320px);
+  --ax-toolbar-min-width: var(--Global-Device-Widths-device-min-width-S);
   --ax-toolbar-max-width-tablet: 1135px;
   --ax-toolbar-presentation-max-width: var(--ax-color-tool-presentation-max-width, 1920px);
   --ax-toolbar-inline-margin: var(--ax-color-tool-outer-margin, var(--spacing-300));
