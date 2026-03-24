@@ -80,8 +80,8 @@ export default async function decorate(block) {
     const section = createTag('section', { 'aria-label': 'Color blindness simulator' });
     block.appendChild(section);
 
-    const { getResolvedPalette } = createColorPaletteParamApi();
-    const initialPalette = { colors: getResolvedPalette() };
+    const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
+    const initialPalette = { name: getResolvedPaletteName() || 'My Color Theme', colors: getResolvedPalette() };
 
     const navLinks = [
       { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
