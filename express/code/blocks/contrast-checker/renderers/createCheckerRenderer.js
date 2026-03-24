@@ -338,6 +338,7 @@ export function createCheckerRenderer(options) {
     config = {},
     services = {},
     actionMenu: actionMenuApi,
+    context,
   } = options;
   const base = createBaseRenderer({ ...options, data: [] });
   const { emit } = base;
@@ -367,6 +368,27 @@ export function createCheckerRenderer(options) {
   let restoringFromHistory = false;
   let pushingState = false;
   let historyHandler = null;
+  let handlePaletteChange = null;
+
+  function getColorEditPalette(type, currentValue) {
+    const palette = context?.get('palette');
+    const colors = Array.isArray(palette?.colors)
+      ? palette.colors.filter((hex) => dataService.isValidHex(hex))
+      : [];
+    const selectedColor = type === 'fg'
+      ? palette?.selectedForeground ?? currentValue
+      : palette?.selectedBackground ?? currentValue;
+    const selectedIndex = colors.findIndex((hex) => hex?.toUpperCase() === selectedColor?.toUpperCase());
+
+    if (!colors.length || selectedIndex === -1) {
+      return {
+        palette: [currentValue],
+        selectedIndex: 0,
+      };
+    }
+
+    return { palette: colors, selectedIndex };
+  }
 
   function recalculate() {
     results = dataService.checkWCAG(foreground, background);
@@ -532,11 +554,12 @@ export function createCheckerRenderer(options) {
     }
   }
 
-  function createCheckerColorInput(label, initialValue, onChange) {
+  function createCheckerColorInput(type, label, initialValue, onChange) {
     const input = createColorInput({
       label,
       ariaLabel: strings.colorValueAriaLabel,
       value: initialValue,
+      getColorEditPalette: ({ value }) => getColorEditPalette(type, value),
       onInput: ({ value: v }) => {
         const hex = ensureHash(v.trim());
         if (dataService.isValidHex(hex)) {
@@ -751,13 +774,22 @@ export function createCheckerRenderer(options) {
 
     await Promise.all([loadBadge(), loadActionButton(), loadTooltip()]);
 
-    fgInput = createCheckerColorInput(strings.foregroundColor, foreground, (hex, commit) => {
+    fgInput = createCheckerColorInput('fg', strings.foregroundColor, foreground, (hex, commit) => {
       handleColorChange('fg', hex, commit);
     });
 
-    bgInput = createCheckerColorInput(strings.backgroundColor, background, (hex, commit) => {
+    bgInput = createCheckerColorInput('bg', strings.backgroundColor, background, (hex, commit) => {
       handleColorChange('bg', hex, commit);
     });
+
+    if (handlePaletteChange) {
+      context?.off?.('palette', handlePaletteChange);
+    }
+    handlePaletteChange = () => {
+      fgInput?.refreshColorEditPalette?.();
+      bgInput?.refreshColorEditPalette?.();
+    };
+    context?.on?.('palette', handlePaletteChange);
 
     swapButtonInstance = await createSwapButton();
 
@@ -827,6 +859,10 @@ export function createCheckerRenderer(options) {
     if (historyHandler) {
       document.removeEventListener(HISTORY_EVENT, historyHandler);
       historyHandler = null;
+    }
+    if (handlePaletteChange) {
+      context?.off?.('palette', handlePaletteChange);
+      handlePaletteChange = null;
     }
     container.replaceChildren();
     mobileActionMenu?.destroy();

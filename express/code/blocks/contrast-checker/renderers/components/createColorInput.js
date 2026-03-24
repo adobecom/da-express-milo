@@ -45,6 +45,7 @@ export function createColorInput(config) {
     onInput,
     onChange,
     onColorChangeEnd,
+    getColorEditPalette,
   } = config;
   const commitCallback = onColorChangeEnd || onChange;
 
@@ -131,6 +132,39 @@ export function createColorInput(config) {
     return true;
   }
 
+  function resolveColorEditPalette() {
+    const paletteConfig = getColorEditPalette?.({ value: lastValidHex }) || {};
+    const palette = Array.isArray(paletteConfig.palette)
+      ? paletteConfig.palette.filter(isValidHex)
+      : [];
+
+    if (!palette.length) {
+      return {
+        palette: [lastValidHex],
+        selectedIndex: 0,
+      };
+    }
+
+    let selectedIndex = Number.isInteger(paletteConfig.selectedIndex)
+      ? paletteConfig.selectedIndex
+      : palette.findIndex((hex) => hex.toUpperCase() === lastValidHex.toUpperCase());
+
+    if (selectedIndex < 0 || selectedIndex >= palette.length) {
+      selectedIndex = 0;
+    }
+
+    return { palette, selectedIndex };
+  }
+
+  function syncActiveEditorPalette(editor = activeEditor) {
+    if (!editor) return;
+
+    const { palette, selectedIndex } = resolveColorEditPalette();
+    editor.palette = palette;
+    editor.selectedIndex = selectedIndex;
+    editor.showPalette = palette.length > 1;
+  }
+
   function beginOpenRequest() {
     pendingOpen = true;
     openRequestId += 1;
@@ -196,9 +230,7 @@ export function createColorInput(config) {
   function createColorEdit() {
     const colorEdit = createTag('color-edit');
     editorOpenValue = lastValidHex;
-    colorEdit.palette = [lastValidHex];
-    colorEdit.selectedIndex = 0;
-    colorEdit.showPalette = false;
+    syncActiveEditorPalette(colorEdit);
     colorEdit.colorMode = 'HEX';
     colorEdit.mobile = isMobileViewport();
 
@@ -326,9 +358,11 @@ export function createColorInput(config) {
       }
       input.value = hex;
       swatch.style.background = hex;
-      if (activeEditor) {
-        activeEditor.palette = [hex];
-      }
+      syncActiveEditorPalette();
+    },
+
+    refreshColorEditPalette() {
+      syncActiveEditorPalette();
     },
 
     destroy() {

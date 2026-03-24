@@ -5,6 +5,7 @@ import createContrastDataService from '../../../../express/code/blocks/contrast-
 import createHistoryService from '../../../../express/code/blocks/contrast-checker/services/createHistoryService.js';
 import createRecommendationService from '../../../../express/code/blocks/contrast-checker/services/createRecommendationService.js';
 import { generateTints } from '../../../../express/code/blocks/contrast-checker/utils/contrastUtils.js';
+import createContextProvider from '../../../../express/code/scripts/color-shared/shell/contextProvider.js';
 
 function waitForFrame() {
   return new Promise((resolve) => {
@@ -284,5 +285,43 @@ describe('createCheckerRenderer', () => {
 
     expect(tintInputs[1].value).to.equal('0.5');
     expect(sliders[1].value).to.equal(10);
+  });
+
+  it('passes the active palette from context into color-edit', async () => {
+    const container = document.createElement('div');
+    const context = createContextProvider();
+    const colors = ['#101010', '#202020', '#303030'];
+    document.body.appendChild(container);
+
+    context.set('palette', {
+      colors,
+      selectedForeground: '#101010',
+      selectedBackground: '#202020',
+    });
+
+    renderer = createCheckerRenderer({
+      container,
+      context,
+      dataService: createContrastDataService(),
+      config: {
+        initialForeground: '#101010',
+        initialBackground: '#202020',
+      },
+      services: {
+        history: createHistoryService(),
+        recommendation: createRecommendationService(),
+      },
+    });
+
+    await renderer.render();
+
+    const backgroundField = container.querySelectorAll('.ax-color-input__field')[1];
+    backgroundField.click();
+
+    const editor = await waitForElement('color-edit');
+    expect(editor).to.exist;
+    expect(editor.palette).to.deep.equal(colors);
+    expect(editor.selectedIndex).to.equal(1);
+    expect(editor.showPalette).to.equal(true);
   });
 });

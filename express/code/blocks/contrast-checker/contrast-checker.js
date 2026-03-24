@@ -60,6 +60,7 @@ async function mountContrastChecker(slot, { config, layout, initialPalette }) {
     data: [],
     config: rendererConfig,
     dataService,
+    context,
     actionMenu,
   });
 
