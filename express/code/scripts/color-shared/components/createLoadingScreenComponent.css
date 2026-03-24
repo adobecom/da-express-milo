@@ -64,11 +64,15 @@
 }
 
 @keyframes ax-color-loading-shimmer-slide {
-  from {
+  0% {
     --ax-shimmer-pos: 0%;
   }
 
-  to {
+  50% {
+    --ax-shimmer-pos: 50%;
+  }
+
+  100% {
     --ax-shimmer-pos: 100%;
   }
 }
