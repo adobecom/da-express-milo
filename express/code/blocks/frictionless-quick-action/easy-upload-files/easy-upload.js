@@ -11,6 +11,12 @@ import {
   renderDebugPlaceholderVariant,
 } from './easy-upload-debug.js';
 
+const registeredListeners = [];
+function trackListener(el, type, fn) {
+  el.addEventListener(type, fn);
+  registeredListeners.push({ el, type, fn });
+}
+
 const EASY_UPLOAD_CSS_PATH = '/blocks/frictionless-quick-action/easy-upload-files/easy-upload.css';
 const TOOLTIP_CSS_PATH = '/scripts/widgets/tooltip.css';
 const AUTOLOAD_QR_CODE = false;
@@ -205,10 +211,22 @@ function attachTooltipHandlers(tooltipTrigger, tooltipPopup) {
     }, 200);
   };
 
-  const onTriggerEnter = () => { isMouseOverTrigger = true; showTooltip(); };
-  const onTriggerLeave = () => { isMouseOverTrigger = false; checkAndHideTooltip(); };
-  const onPopupEnter = () => { isMouseOverTooltip = true; clearTimeout(hideTimeout); };
-  const onPopupLeave = () => { isMouseOverTooltip = false; checkAndHideTooltip(); };
+  const onTriggerEnter = () => {
+    isMouseOverTrigger = true;
+    showTooltip();
+  };
+  const onTriggerLeave = () => {
+    isMouseOverTrigger = false;
+    checkAndHideTooltip();
+  };
+  const onPopupEnter = () => {
+    isMouseOverTooltip = true;
+    clearTimeout(hideTimeout);
+  };
+  const onPopupLeave = () => {
+    isMouseOverTooltip = false;
+    checkAndHideTooltip();
+  };
 
   trackListener(tooltipTrigger, 'mouseenter', onTriggerEnter);
   trackListener(tooltipTrigger, 'mouseleave', onTriggerLeave);
@@ -233,7 +251,10 @@ function buildQrPaneContent(createTag, onBack) {
   );
   primary.append(backButton);
   if (onBack) {
-    const handleBack = (event) => { event.preventDefault(); onBack(); };
+    const handleBack = (event) => {
+      event.preventDefault();
+      onBack();
+    };
     trackListener(backButton, 'click', handleBack);
   }
 
@@ -312,7 +333,6 @@ function setupEasyUploadFirstPane(block, createTag) {
   dropzone.insertBefore(orDivider, firstButton);
   dropzone.insertBefore(ctaRow, orDivider.nextSibling);
 
-  // Add icons to buttons
   const buttons = buttonContainers.map((container) => container.querySelector('a.button'));
   if (buttons[0]) {
     const uploadIcon = getIconElementDeprecated('easy-upload-files-upload', 22);
@@ -328,14 +348,6 @@ function setupEasyUploadFirstPane(block, createTag) {
   });
 }
 
-// Track all event listeners so cleanupEasyUpload() can remove them
-const registeredListeners = [];
-function trackListener(el, type, fn) {
-  el.addEventListener(type, fn);
-  registeredListeners.push({ el, type, fn });
-}
-
-// Store deferred initialization context
 let deferredInitContext = null;
 
 function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
@@ -416,8 +428,6 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
       return;
     }
 
-    // Initialize EasyUpload instance on-demand (deferred until user clicks QR button)
-    // This ensures IMS has time to initialize before we create the upload service
     if (!easyUploadInstance && deferredInitContext) {
       try {
         const { EasyUpload } = await import('../../../scripts/utils/easy-upload-utils.js');
@@ -456,13 +466,10 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
 
         await easyUploadInstance.initializeQRCode();
 
-        // Wire up the confirm button to the EasyUpload instance
         const confirmButton = qrPane.querySelector('.confirm-import-button');
         if (confirmButton && easyUploadInstance) {
-          // Store reference in the EasyUpload instance
           easyUploadInstance.confirmButton = confirmButton;
 
-          // Start disabled and enable once upload detection polling confirms readiness.
           easyUploadInstance.updateConfirmButtonState(true);
 
           const confirmTooltipElement = confirmButton
@@ -475,7 +482,6 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
             },
           });
 
-          // Attach click handler
           const handleConfirmClick = async (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -483,7 +489,6 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
           };
           trackListener(confirmButton, 'click', handleConfirmClick);
 
-          // Start polling for upload completion.
           easyUploadInstance.startUploadDetectionPolling();
         } else {
           window.lana?.log('[EasyUpload-UI] Could not find confirm button or EasyUpload instance', { severity: 'warning' });
@@ -515,8 +520,6 @@ export async function setupEasyUploadUI({
   extractEasyUploadPaneContent(block);
   setupEasyUploadFirstPane(block, createTag);
 
-  // Store deferred initialization context - upload service will be initialized
-  // when user clicks the QR button, giving IMS time to fully initialize
   deferredInitContext = (PLACEHOLDER_DEBUG_MODES.has(activeDebugMode)
     || activeDebugMode === DEBUG_MODES.LOADER) ? null : {
       quickAction,
@@ -526,9 +529,7 @@ export async function setupEasyUploadUI({
     };
   attachSecondaryCtaHandler(block, createTag, showErrorToast);
 
-  // If AUTOLOAD_QR_CODE is enabled, initialize immediately (with slight delay for IMS)
   if (AUTOLOAD_QR_CODE && activeDebugMode === DEBUG_MODES.NONE) {
-    // Use setTimeout to give IMS time to initialize (similar to old seo-easy-upload branch)
     setTimeout(async () => {
       try {
         const { EasyUpload } = await import('../../../scripts/utils/easy-upload-utils.js');
@@ -555,7 +556,7 @@ export async function setupEasyUploadUI({
         window.lana?.log(`[EasyUpload-UI] Autoload initialization failed: ${error?.message || error}`, { severity: 'error' });
         easyUploadInstance?.showFailedQR();
       }
-    }, 100); // 100ms delay to allow IMS to initialize
+    }, 100);
   }
 
   return easyUploadInstance;

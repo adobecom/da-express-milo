@@ -1,6 +1,5 @@
 /* eslint-disable no-underscore-dangle -- _links is Adobe HAL API property, not our naming */
 /* eslint-disable class-methods-use-this -- this is a utility class */
-// Constants
 
 export const EasyUploadVariants = {
   removeBackgroundEasyUploadVariant: 'remove-background-easy-upload-variant',
@@ -12,7 +11,6 @@ export const EasyUploadVariants = {
   editImageEasyUploadVariant: 'edit-image-easy-upload-variant',
 };
 
-// Link Relation Constants (must match Adobe ACP API / upload-service LinkRelation)
 const LINK_REL = {
   BLOCK_UPLOAD_INIT: 'http://ns.adobe.com/adobecloud/rel/block/init',
   BLOCK_TRANSFER: 'http://ns.adobe.com/adobecloud/rel/block/transfer',
@@ -53,7 +51,6 @@ export const EasyUploadVariantsPromoidMap = {
 const QR_CODE_CDN_URL = 'https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js';
 const CONFIRM_TOOLTIP_AUTO_HIDE_DELAY = 4000;
 
-// URL Shortener Service Configuration
 const URL_SHORTENER_CONFIGS = {
   prod: {
     serviceUrl: 'https://go.adobe.io',
@@ -69,18 +66,14 @@ const URL_SHORTENER_CONFIGS = {
   },
 };
 
-// ACP Storage Constants
 const ACP_STORAGE_CONFIG = {
-  MAX_FILE_SIZE: 60000000, // 60 MB
+  MAX_FILE_SIZE: 60000000,
   TRANSFER_DOCUMENT: 'application/vnd.adobecloud.bulk-transfer+json',
   CONTENT_TYPE: 'application/octet-stream',
   SECOND_IN_MS: 1000,
   MAX_POLLING_ATTEMPTS: 100,
   POLLING_TIMEOUT_MS: 100000,
 };
-
-// Fallback implementations for missing UploadService methods
-// These are needed because deployed dist may be missing newer methods
 
 /**
  * Fallback: Create asset using createAssetForUser/createAssetForGuest
@@ -231,7 +224,6 @@ async function fallbackDownloadAssetContent(asset) {
   const renditionUrl = asset?.links?.[LINK_REL.RENDITION]?.href
         || asset?._links?.[LINK_REL.RENDITION]?.href;
 
-  // Try to get the primary content URL
   const contentUrl = renditionUrl
         || asset?.links?.[LINK_REL.SELF]?.href
         || asset?._links?.[LINK_REL.SELF]?.href;
@@ -269,10 +261,9 @@ function isAssetVersionReady(version) {
   return String(version).trim() !== '' && String(version).trim() !== '0';
 }
 
-// QR Code Configuration Constants
 const QR_CODE_CONFIG = {
-  REFRESH_INTERVAL: 30 * 1000 * 60, // 30 minutes
-  GENERATION_TIMEOUT: 10 * 1000, // 10 seconds timeout for QR code generation
+  REFRESH_INTERVAL: 30 * 1000 * 60,
+  GENERATION_TIMEOUT: 10 * 1000,
   DISPLAY_CONFIG: {
     width: 200,
     height: 200,
@@ -291,9 +282,7 @@ const QR_CODE_CONFIG = {
   },
 };
 
-// File Type Detection Patterns
 const FILE_TYPE_PATTERNS = {
-  // Image types
   'image/png': ['png'],
   'image/jpeg': ['jpg', 'jpeg', 'jfif', 'exif'],
   'image/gif': ['gif'],
@@ -301,7 +290,6 @@ const FILE_TYPE_PATTERNS = {
   'image/svg+xml': ['svg'],
   'image/bmp': ['bmp'],
   'image/heic': ['heic'],
-  // Video types
   'video/mp4': ['mp4'],
   'video/quicktime': ['mov'],
   'video/x-msvideo': ['avi'],
@@ -342,7 +330,6 @@ export class EasyUpload {
      * @param {string} qrErrorText - Error text to display when QR code fails
      */
   constructor(uploadService, envName, quickAction, block, startSDKWithUnconvertedFiles, createTag, showErrorToast, qrErrorText = '') {
-    // Core dependencies
     this.uploadService = uploadService;
     this.envName = envName;
     this.quickAction = quickAction;
@@ -351,22 +338,18 @@ export class EasyUpload {
     this.createTag = createTag;
     this.showErrorToast = showErrorToast;
     this.qrErrorText = qrErrorText;
-    // QR Code state
     this.qrCode = null;
     this.qrCodeContainer = null;
     this.qrRefreshInterval = null;
     this.loaderContainer = null;
-    // Start loading QR Code library immediately (non-blocking)
     this.qrCodeLibraryPromise = this.loadQRCodeLibrary();
 
-    // Upload state
     this.confirmButton = null;
     this.confirmTooltipElement = null;
     this.confirmTooltipMessages = {};
     this.confirmTooltipHideTimeout = null;
     this.uploadFinalized = false;
 
-    // ACP Storage state
     this.asset = null;
     this.uploadAsset = null;
     this.pollingInterval = null;
@@ -374,10 +357,8 @@ export class EasyUpload {
     this.isGeneratingUrl = false;
     this.handleConfirmClick = null;
 
-    // Toast state
     this.toastTimeoutId = null;
 
-    // Bind cleanup to window unload
     this.handleBeforeUnload = () => this.cleanup();
     window.addEventListener('beforeunload', this.handleBeforeUnload);
   }
@@ -464,18 +445,15 @@ export class EasyUpload {
   async generatePresignedUploadUrl() {
     this.uploadFinalized = false;
     try {
-      // Check if native createAsset method exists, otherwise use fallback
       const hasNativeCreateAsset = typeof this.uploadService?.createAsset === 'function';
       const hasNativeInitializeBlockUpload = typeof this.uploadService?.initializeBlockUpload === 'function';
 
-      // Create asset (use native or fallback)
       if (hasNativeCreateAsset) {
         this.asset = await this.uploadService.createAsset(ACP_STORAGE_CONFIG.CONTENT_TYPE);
       } else {
         this.asset = await fallbackCreateAsset(this.uploadService, ACP_STORAGE_CONFIG.CONTENT_TYPE);
       }
 
-      // Initialize block upload (use native or fallback)
       if (hasNativeInitializeBlockUpload) {
         this.uploadAsset = await this.uploadService.initializeBlockUpload(
           this.asset,
@@ -522,7 +500,6 @@ export class EasyUpload {
         try {
           pollAttempts += 1;
 
-          // Use native or fallback getAssetVersion
           const hasNativeGetAssetVersion = typeof this.uploadService?.getAssetVersion === 'function';
           const version = hasNativeGetAssetVersion
             ? await this.uploadService.getAssetVersion(this.asset)
@@ -553,7 +530,6 @@ export class EasyUpload {
      * @returns {Promise<void>}
      */
   async finalizeUpload() {
-    // Use native or fallback finalizeUpload
     const hasNativeFinalizeUpload = typeof this.uploadService?.finalizeUpload === 'function';
     if (hasNativeFinalizeUpload) {
       await this.uploadService.finalizeUpload(this.uploadAsset);
@@ -572,14 +548,12 @@ export class EasyUpload {
   detectFileType(typeString) {
     const lowerTypeString = typeString.toLowerCase();
 
-    // Check against known patterns
     for (const [mimeType, patterns] of Object.entries(FILE_TYPE_PATTERNS)) {
       if (patterns.some((pattern) => lowerTypeString.includes(pattern))) {
         return mimeType;
       }
     }
 
-    // Default to JPEG for images
     return 'image/jpeg';
   }
 
@@ -596,7 +570,6 @@ export class EasyUpload {
         throw new Error('Asset version not ready');
       }
 
-      // Use native or fallback downloadAssetContent
       const hasNativeDownloadAssetContent = typeof this.uploadService?.downloadAssetContent === 'function';
       const blob = hasNativeDownloadAssetContent
         ? await this.uploadService.downloadAssetContent(this.asset)
@@ -621,7 +594,6 @@ export class EasyUpload {
   async cleanupAcpStorage() {
     try {
       if (this.uploadService && this.asset) {
-        // Use native deleteAsset if available, otherwise skip cleanup
         const hasNativeDeleteAsset = typeof this.uploadService?.deleteAsset === 'function';
         if (hasNativeDeleteAsset) {
           await this.uploadService.deleteAsset(this.asset);
@@ -644,7 +616,6 @@ export class EasyUpload {
     if (this.isGeneratingUrl) return null;
     this.isGeneratingUrl = true;
     try {
-    // Create timeout promise
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => {
           window.lana?.log('[EasyUpload] URL generation timed out', { severity: 'error' });
@@ -652,13 +623,10 @@ export class EasyUpload {
         }, QR_CODE_CONFIG.GENERATION_TIMEOUT);
       });
 
-      // Create the actual URL generation promise
       const urlGenerationPromise = (async () => {
         try {
-        // Generate presigned upload URL
           const presignedUrl = await this.generatePresignedUploadUrl();
 
-          // Build mobile upload URL
           const mobileUrl = this.buildMobileUploadUrl(presignedUrl);
 
           return this.shortenUrl(mobileUrl);
@@ -668,7 +636,6 @@ export class EasyUpload {
         }
       })();
 
-      // Race between URL generation and timeout
       return await Promise.race([urlGenerationPromise, timeoutPromise]);
     } finally {
       this.isGeneratingUrl = false;
@@ -702,9 +669,7 @@ export class EasyUpload {
   async shortenUrl(longUrl) {
     const accessToken = window?.adobeIMS?.getAccessToken?.()?.token;
 
-    // URL shortening requires auth - skip and return full URL when not logged in
-    // QR codes work fine with long URLs, they're just slightly more dense
-    const ENABLE_URL_SHORTENING = true; // Set to true when URL shortener access is configured
+    const ENABLE_URL_SHORTENING = true;
 
     if (!ENABLE_URL_SHORTENING || !accessToken) {
       return longUrl;
@@ -715,7 +680,6 @@ export class EasyUpload {
       const { timeZone } = Intl.DateTimeFormat().resolvedOptions();
       const metaData = 'easy-upload-qr-code';
 
-      // Build headers - include Authorization only if we have a token
       const headers = {
         'Content-Type': 'application/json',
         'x-api-key': urlShortenerConfig.apiKey,
@@ -802,18 +766,15 @@ export class EasyUpload {
     if (!this.loaderContainer) {
       this.createLoader();
     }
-    // Hide QR code container if it exists
     if (this.qrCodeContainer) {
       this.qrCodeContainer.classList.add('hidden');
     }
 
-    // Show loader
     if (this.loaderContainer) {
       this.loaderContainer.classList.remove('hidden');
       this.loaderContainer.setAttribute('aria-busy', 'true');
     }
 
-    // Disable confirm import button
     this.updateConfirmButtonState(true);
   }
 
@@ -826,12 +787,10 @@ export class EasyUpload {
       this.loaderContainer.setAttribute('aria-busy', 'false');
     }
 
-    // Show QR code container
     if (this.qrCodeContainer) {
       this.qrCodeContainer.classList.remove('hidden');
     }
 
-    // Enable confirm import button
     this.updateConfirmButtonState(false);
   }
 
@@ -839,12 +798,10 @@ export class EasyUpload {
      * Show failed QR code state with grayed out QR icon, caution icon, and error message
      */
   showFailedQR() {
-    // Hide loader
     if (this.loaderContainer) {
       this.loaderContainer.classList.add('hidden');
     }
 
-    // Build error state DOM safely (avoids XSS via innerHTML)
     const bgIcon = this.createTag('img', { src: '/express/code/blocks/frictionless-quick-action/easy-upload-files/placeholder.png', class: 'qr-error-bg-icon', alt: '' });
     const cautionIcon = this.createTag('img', { src: '/express/code/icons/error.svg', class: 'qr-error-caution-icon', alt: 'Error' });
     const errorMsg = this.createTag('p', { class: 'qr-error-message' }, this.qrErrorText || 'Failed to generate QR code');
@@ -853,12 +810,10 @@ export class EasyUpload {
     const errorState = this.createTag('div', { class: 'qr-error-state', role: 'alert', 'aria-live': 'assertive' });
     errorState.appendChild(iconContainer);
 
-    // Show QR code container with failed state
     if (this.qrCodeContainer) {
       this.qrCodeContainer.replaceChildren(errorState);
       this.qrCodeContainer.classList.remove('hidden');
     } else {
-      // Create QR code container if it doesn't exist
       const buttonContainer = this.getQrButtonContainer();
       if (buttonContainer) {
         this.qrCodeContainer = this.createTag('div', { class: 'qr-code-container' });
@@ -867,7 +822,6 @@ export class EasyUpload {
       }
     }
 
-    // Keep confirm button disabled in failed state
     this.updateConfirmButtonState(true);
   }
 
@@ -877,7 +831,6 @@ export class EasyUpload {
      * @returns {Promise<void>}
      */
   async displayQRCode(uploadUrl) {
-    // Await the library promise that started loading in constructor
     const QRCodeStyling = await this.qrCodeLibraryPromise;
 
     if (!this.qrCode) {
@@ -892,17 +845,14 @@ export class EasyUpload {
       });
     }
 
-    // Create containers for QR code and loader
     const buttonContainer = this.getQrButtonContainer();
 
     if (buttonContainer) {
-      // Create QR code container if it doesn't exist
       if (!this.qrCodeContainer) {
         this.qrCodeContainer = this.createTag('div', { class: 'qr-code-container' });
         buttonContainer.appendChild(this.qrCodeContainer);
       }
 
-      // Create and insert loader container parallel to QR code container
       if (!this.loaderContainer) {
         this.createLoader();
         this.loaderContainer.classList.add('hidden');
@@ -916,7 +866,6 @@ export class EasyUpload {
       this.qrCode.append(this.qrCodeContainer);
     }
 
-    // Hide loader and show QR code
     this.hideLoader();
   }
 
@@ -927,7 +876,6 @@ export class EasyUpload {
      */
   async initializeQRCode() {
     try {
-      // Show loader while generating QR code
       this.showLoader();
       if (shouldForceQrFailure()) {
         throw new Error('Forced QR failure for testing');
@@ -937,13 +885,10 @@ export class EasyUpload {
       if (!uploadUrl) return;
       await this.displayQRCode(uploadUrl);
 
-      // Set up refresh interval
       this.scheduleQRRefresh();
     } catch (error) {
       window.lana?.log(`[EasyUpload] Failed to initialize QR code: ${error?.name} ${error?.message} code=${error?.code} status=${error?.statusCode}`, { severity: 'error' });
-      // Show failed QR state
       this.showFailedQR();
-      // Show error toast
       this.showErrorToast(this.block, 'Failed to generate QR code.');
     }
   }
@@ -952,12 +897,10 @@ export class EasyUpload {
      * Schedule QR code refresh after configured interval
      */
   scheduleQRRefresh() {
-    // Clear existing interval
     if (this.qrRefreshInterval) {
       clearTimeout(this.qrRefreshInterval);
     }
 
-    // Schedule next refresh
     this.qrRefreshInterval = setTimeout(() => {
       this.refreshQRCode();
     }, QR_CODE_CONFIG.REFRESH_INTERVAL);
@@ -991,24 +934,19 @@ export class EasyUpload {
       }
 
       if (!this.uploadFinalized) {
-        // Finalize the upload first
         await this.finalizeUpload();
       }
     } catch (error) {
       window.lana?.log(`[EasyUpload] Failed to finalize upload: ${error?.message || error}`, { severity: 'error' });
       this.showConfirmTooltip('pending');
-      // Re-enable button to allow retry on error
       this.updateConfirmButtonState(false);
       return;
     }
     try {
-      // Retrieve the uploaded file
       const file = await this.retrieveUploadedFile();
 
       if (file) {
-        // Process the file (trigger the standard upload flow)
         await this.startSDKWithUnconvertedFiles([file], this.quickAction, this.block, true);
-        // Keep button disabled on success (operation complete)
       } else {
         throw new Error('No file was uploaded');
       }
@@ -1067,7 +1005,6 @@ export class EasyUpload {
      */
   async setupQRCodeInterface() {
     try {
-      // Add Confirm Import button
       const dropzone = document.querySelector('.dropzone');
       const buttonContainer = dropzone?.querySelector('.button-container');
       await this.initializeQRCode();
@@ -1086,18 +1023,16 @@ export class EasyUpload {
      * Enables the confirm button when upload is detected
      */
   startUploadDetectionPolling() {
-    // Clear any existing detection polling
     if (this.uploadDetectionInterval) {
       clearInterval(this.uploadDetectionInterval);
     }
 
     this.uploadDetected = false;
-    const POLL_INTERVAL_MS = 2000; // Check every 2 seconds
-    const MAX_POLL_TIME_MS = 30 * 60 * 1000; // 30 minutes max
+    const POLL_INTERVAL_MS = 2000;
+    const MAX_POLL_TIME_MS = 30 * 60 * 1000;
     const startTime = Date.now();
 
     this.uploadDetectionInterval = setInterval(async () => {
-      // Check if we've exceeded max poll time
       if (Date.now() - startTime > MAX_POLL_TIME_MS) {
         clearInterval(this.uploadDetectionInterval);
         this.uploadDetectionInterval = null;
@@ -1126,10 +1061,8 @@ export class EasyUpload {
         if (this.uploadFinalized && !this.uploadDetected) {
           this.uploadDetected = true;
 
-          // Enable the confirm button
           this.updateConfirmButtonState(false);
 
-          // Stop polling since upload is detected
           clearInterval(this.uploadDetectionInterval);
           this.uploadDetectionInterval = null;
         }
@@ -1161,7 +1094,6 @@ export class EasyUpload {
       this.handleConfirmClick = null;
     }
 
-    // Clear refresh interval
     if (this.qrRefreshInterval) {
       clearTimeout(this.qrRefreshInterval);
       this.qrRefreshInterval = null;
@@ -1177,7 +1109,6 @@ export class EasyUpload {
       this.confirmTooltipHideTimeout = null;
     }
 
-    // Stop upload detection polling
     this.stopUploadDetectionPolling();
 
     if (this.versionReadyPromise) {
@@ -1185,7 +1116,6 @@ export class EasyUpload {
       this.versionReadyPromise = null;
     }
 
-    // Cleanup ACP Storage resources
     await this.cleanupAcpStorage();
   }
 }
