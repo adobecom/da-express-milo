@@ -616,8 +616,9 @@ export class EasyUpload {
     if (this.isGeneratingUrl) return null;
     this.isGeneratingUrl = true;
     try {
+      let timeoutId;
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => {
+        timeoutId = setTimeout(() => {
           window.lana?.log('[EasyUpload] URL generation timed out', { severity: 'error' });
           reject(new Error(`QR code generation timed out after ${QR_CODE_CONFIG.GENERATION_TIMEOUT / 1000} seconds`));
         }, QR_CODE_CONFIG.GENERATION_TIMEOUT);
@@ -636,7 +637,9 @@ export class EasyUpload {
         }
       })();
 
-      return await Promise.race([urlGenerationPromise, timeoutPromise]);
+      const result = await Promise.race([urlGenerationPromise, timeoutPromise]);
+      clearTimeout(timeoutId);
+      return result;
     } finally {
       this.isGeneratingUrl = false;
     }
