@@ -37,6 +37,7 @@ const DEFAULT_FEATURES = {
   colorBlindness: false,
   baseColor: false,
   emptyStrip: false,
+  rightActionsHoverOnly: false,
   editColorDisabled: false,
 };
 
@@ -54,6 +55,7 @@ const ALL_FEATURES = {
   colorBlindness: true,
   baseColor: true,
   emptyStrip: true,
+  rightActionsHoverOnly: false,
   editColorDisabled: false,
 };
 
@@ -75,6 +77,7 @@ function normalizeFeatures(features) {
       colorBlindness: set.has('colorBlindness'),
       baseColor: set.has('baseColor'),
       emptyStrip: set.has('emptyStrip'),
+      rightActionsHoverOnly: set.has('rightActionsHoverOnly'),
       editColorDisabled: set.has('editColorDisabled'),
     };
   }
@@ -921,7 +924,7 @@ export class ColorSwatchRail extends LitElement {
       `;
 
       return html`
-        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''}"
+        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''} ${f.rightActionsHoverOnly ? 'swatch-column--right-actions-hover-only' : ''}"
           data-contrast="${useLightIcons ? 'dark' : 'light'}"
           style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${useLightIcons ? 'brightness(0) invert(1)' : 'brightness(0)'}"
           data-swatch-index="${index}"

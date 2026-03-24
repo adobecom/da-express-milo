@@ -558,6 +558,7 @@ export default async function decorate(block) {
           editTint: true,
           baseColor: true,
           emptyStrip: true,
+          rightActionsHoverOnly: true,
         },
         swatchVerticalMaxPerRow: 6,
       },
