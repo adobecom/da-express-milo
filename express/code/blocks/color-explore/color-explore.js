@@ -9,6 +9,7 @@ import { createColorDataService as createSharedColorDataService } from '../../sc
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
 import loadCSS from '../../scripts/color-shared/utils/loadCss.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
+import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
@@ -32,6 +33,10 @@ const EVENTS = {
   FILTER: 'filter',
   LOAD_MORE: 'load-more',
 };
+const PALETTE_EDITOR_DEFAULT_URL = '/color-wheel';
+const PALETTE_EDITOR_DEMO_HOST = 'methomas-sidebar-with-fixes--da-express-milo--adobecom.aem.live';
+const PALETTE_EDITOR_DEMO_URL = 'https://methomas-sidebar-with-fixes--da-express-milo--adobecom.aem.live/drafts/methomas/color/color-palette-sidebar';
+const colorPaletteParamApi = createColorPaletteParamApi();
 
 const STRIP_SHARED_STYLES = [
   '/express/code/scripts/color-shared/components/strips/color-strip.css',
@@ -64,6 +69,48 @@ function isSwatchesMode(config) {
   return config?.swatchesOnly === true
     || config?.contentMode === 'swatches'
     || config?.renderMode === 'swatches';
+}
+
+function resolvePaletteEditorBaseUrl(currentUrl) {
+  if (currentUrl?.hostname === PALETTE_EDITOR_DEMO_HOST) {
+    return PALETTE_EDITOR_DEMO_URL;
+  }
+  return PALETTE_EDITOR_DEFAULT_URL;
+}
+
+function buildPaletteEditorUrl(palette, sourceHref) {
+  const paletteData = palette || {};
+  const fallbackHref = sourceHref
+    || (typeof window !== 'undefined' ? window.location.href : PALETTE_EDITOR_DEFAULT_URL);
+  let currentUrl;
+  try {
+    currentUrl = new URL(fallbackHref);
+  } catch {
+    return PALETTE_EDITOR_DEFAULT_URL;
+  }
+
+  const baseUrl = resolvePaletteEditorBaseUrl(currentUrl);
+  let targetUrl;
+  try {
+    targetUrl = new URL(baseUrl, currentUrl);
+  } catch {
+    targetUrl = new URL(PALETTE_EDITOR_DEFAULT_URL, currentUrl);
+  }
+
+  const paletteColors = Array.isArray(paletteData?.colors) ? paletteData.colors : [];
+  colorPaletteParamApi.setOnUrl(targetUrl, paletteColors);
+
+  if (!targetUrl.searchParams.has('martech') && currentUrl.searchParams.has('martech')) {
+    targetUrl.searchParams.set('martech', currentUrl.searchParams.get('martech'));
+  }
+
+  return targetUrl.toString();
+}
+
+function navigateToPaletteEditor(palette = {}) {
+  if (typeof window === 'undefined') return;
+  const destination = buildPaletteEditorUrl(palette);
+  window.location.assign(destination);
 }
 
 async function createBlockLoadMoreControl(container, onClick, options = {}) {
@@ -445,8 +492,8 @@ export default async function decorate(block) {
           }, { iconSize: config.loadMoreIconSize || 'xl' });
           updateLoadMoreState();
 
-          activeRenderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-            await modalManager.openPaletteSwatchesModal(palette || {});
+          activeRenderer.on(EVENTS.PALETTE_CLICK, (palette) => {
+            navigateToPaletteEditor(palette || {});
           });
           activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
             await modalManager.openPaletteSwatchesModal(palette || {});
@@ -530,8 +577,8 @@ export default async function decorate(block) {
 
       const modalManager = createModalManager();
 
-      renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-        await modalManager.openPaletteSwatchesModal(palette || {});
+      renderer.on(EVENTS.PALETTE_CLICK, (palette) => {
+        navigateToPaletteEditor(palette || {});
       });
       renderer.on(EVENTS.SHARE, async ({ palette }) => {
         await modalManager.openPaletteSwatchesModal(palette || {});

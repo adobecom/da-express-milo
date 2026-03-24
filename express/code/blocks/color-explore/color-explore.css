@@ -245,9 +245,9 @@
   min-width: var(--express-picker-min-width);
   max-width: var(--express-picker-max-width);
   border-radius: var(--Corner-radius-corner-radius-100);
-  --express-picker-width: var(--color-explore-filter-picker-width, 144px);
-  --express-picker-min-width: var(--color-explore-filter-picker-width, 144px);
-  --express-picker-max-width: var(--color-explore-filter-picker-width, 144px);
+  --express-picker-width: var(--color-explore-filter-picker-width);
+  --express-picker-min-width: var(--color-explore-filter-picker-width);
+  --express-picker-max-width: var(--color-explore-filter-picker-width);
 }
 
 .color-explore .filters-desktop .filter-picker-fallback {
@@ -593,9 +593,9 @@
     min-width: var(--express-picker-min-width);
     max-width: var(--express-picker-max-width);
     flex: 0 0 auto;
-    --express-picker-width: var(--color-explore-filter-picker-width, 144px);
-    --express-picker-min-width: var(--color-explore-filter-picker-width, 144px);
-    --express-picker-max-width: var(--color-explore-filter-picker-width, 144px);
+    --express-picker-width: var(--color-explore-filter-picker-width);
+    --express-picker-min-width: var(--color-explore-filter-picker-width);
+    --express-picker-max-width: var(--color-explore-filter-picker-width);
   }
 
   .color-explore .filters-desktop .filter-picker-fallback {
