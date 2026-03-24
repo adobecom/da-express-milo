@@ -28,11 +28,11 @@ export function loadLoadingScreenStyles() {
 }
 
 function createCard() {
-  const card = createTag('div', { class: 'ax-color-loading-card color-explore-loading-card' });
-  const visual = createTag('div', { class: 'ax-color-loading-shimmer color-explore-loading-shimmer ax-color-loading-card__visual color-explore-loading-card__visual' });
-  const meta = createTag('div', { class: 'ax-color-loading-card__meta color-explore-loading-card__meta' });
-  const text = createTag('div', { class: 'ax-color-loading-shimmer color-explore-loading-shimmer ax-color-loading-card__text color-explore-loading-card__text' });
-  const icon = createTag('div', { class: 'ax-color-loading-shimmer color-explore-loading-shimmer ax-color-loading-card__icon color-explore-loading-card__icon' });
+  const card = createTag('div', { class: 'ax-color-loading-card' });
+  const visual = createTag('div', { class: 'ax-color-loading-shimmer ax-color-loading-card__visual' });
+  const meta = createTag('div', { class: 'ax-color-loading-card__meta' });
+  const text = createTag('div', { class: 'ax-color-loading-shimmer ax-color-loading-card__text' });
+  const icon = createTag('div', { class: 'ax-color-loading-shimmer ax-color-loading-card__icon' });
 
   meta.append(text, icon);
   card.append(visual, meta);
@@ -47,15 +47,12 @@ export function createLoadingScreenComponent(options = {}) {
   const getNormalizedVariant = (nextVariant) => (nextVariant === 'gradients' ? 'gradients' : 'strips');
 
   const root = createTag('div', {
-    class: 'ax-color-loading color-explore-loading',
+    class: 'ax-color-loading',
     'aria-hidden': 'true',
     role: 'presentation',
   });
   const grid = createTag('div', {
-    class: [
-      'ax-color-loading__grid',
-      'color-explore-loading__grid',
-    ].join(' '),
+    class: 'ax-color-loading__grid',
   });
 
   loadLoadingScreenStyles();
@@ -73,11 +70,12 @@ export function createLoadingScreenComponent(options = {}) {
   };
 
   const setCardCount = (nextCount) => {
-    grid.innerHTML = '';
     const count = Number.isFinite(nextCount) && nextCount > 0 ? nextCount : DEFAULT_CARD_COUNT;
+    const fragment = document.createDocumentFragment();
     for (let i = 0; i < count; i += 1) {
-      grid.appendChild(createCard());
+      fragment.appendChild(createCard());
     }
+    grid.replaceChildren(fragment);
   };
 
   setVariant(variant);

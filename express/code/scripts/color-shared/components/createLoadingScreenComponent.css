@@ -56,9 +56,9 @@
 .ax-color-loading-shimmer {
   background-image: linear-gradient(
     90deg,
-    var(--Palette-gray-100, #F8F8F8) 0%,
-    var(--Palette-gray-200, #E6E6E6) var(--ax-shimmer-pos),
-    var(--Palette-gray-100, #F8F8F8) 100%
+    var(--ax-color-loading-gray-100) 0%,
+    var(--ax-color-loading-gray-200) var(--ax-shimmer-pos),
+    var(--ax-color-loading-gray-100) 100%
   );
   animation: ax-color-loading-shimmer-slide 1000ms ease-out 1ms infinite;
 }

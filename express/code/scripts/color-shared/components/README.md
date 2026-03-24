@@ -20,7 +20,7 @@ import { createLoadingScreenComponent } from './createLoadingScreenComponent.js'
 
 ```js
 const loading = createLoadingScreenComponent({
-  variant: 'palettes',
+  variant: 'strips',
   cardCount: 24,
 });
 ```

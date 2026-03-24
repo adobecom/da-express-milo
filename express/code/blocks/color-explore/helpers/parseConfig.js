@@ -39,7 +39,7 @@ function applyConfigKey(config, defaults, key, value) {
       return { ...config, enableGradientEditor: parseBoolean(value) || value === '1' };
     case 'enablesizesdemo':
       return { ...config, enableSizesDemo: parseBoolean(value) || value === '1' };
-    case 'loadingscreendemo': // [DEMO] remove when loading screen ships
+    case 'loadingscreendemo': // [DEMO ONLY][MWPW-186947] remove after loading-screen PR lands
       return { ...config, loadingScreenDemo: parseBoolean(value) || value === '1' };
     default:
       return config;

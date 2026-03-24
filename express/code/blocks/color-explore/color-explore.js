@@ -22,7 +22,8 @@ const DEFAULTS = {
   enableSearch: true,
   useMockData: false,
   useMockFallback: true,
-  loadingScreenDemo: false, // [DEMO] remove when loading screen ships
+  // [DEMO ONLY][MWPW-186947] remove after loading-screen PR lands
+  loadingScreenDemo: false,
   apiEndpoint: '',
 };
 const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
@@ -40,7 +41,7 @@ const STRIP_SHARED_STYLES = [
   '/express/code/scripts/color-shared/components/gradients/gradient-strip.css',
 ];
 const LOAD_MORE_CLICK_HANDLERS = new WeakMap();
-// [DEMO] remove block below when loading screen ships
+// [DEMO ONLY][MWPW-186947] remove block below after loading-screen PR lands
 const LOADING_DEMO_QUERY_PARAM = 'colorExploreLoadingDemo';
 
 function isLoadingDemoMode(config = {}) {
@@ -61,11 +62,10 @@ async function mountLoadingScreenDemo(container, config) {
     cardCount: config.initialLoad,
   });
 
-  container.innerHTML = '';
-  container.append(loading.element);
+  container.replaceChildren(loading.element);
   await loading.show();
 }
-// [DEMO] end
+// [DEMO ONLY] end
 
 async function loadStripSharedStyles() {
   try {
@@ -222,7 +222,7 @@ export default async function decorate(block) {
     await loadStripSharedStyles();
 
     block.dataset.blockStatus = 'loading';
-    block.innerHTML = '';
+    block.replaceChildren();
     block.className = CSS_CLASSES.BLOCK;
     const variantClass = config.variant === VARIANTS.GRADIENTS
       ? VARIANT_CLASSES.GRADIENTS
@@ -240,7 +240,8 @@ export default async function decorate(block) {
     container.className = CSS_CLASSES.CONTAINER;
     themeHost.appendChild(container);
 
-    if (isLoadingDemoMode(config)) { // [DEMO] remove when loading screen ships
+    // [DEMO ONLY][MWPW-186947] remove after loading-screen PR lands.
+    if (isLoadingDemoMode(config)) {
       await mountLoadingScreenDemo(container, config);
       block.dataset.blockStatus = 'loaded';
       return;
