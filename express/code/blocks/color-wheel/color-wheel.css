@@ -291,19 +291,9 @@ color-wheel-express {
   background: none;
 }
 
-.color-wheel-harmony-option:hover:not([aria-checked='true']) {
-  border-color: var(--color-black);
-}
-
 .color-wheel-harmony-option[aria-checked='true'],
 .color-wheel-harmony-option.color-wheel-harmony-option--selected {
-  border-color: var(--Background-accent-default);
-}
-
-.color-wheel-harmony-option:focus-visible {
-  outline: 3px solid var(--spectrum-blue-900, #0265dc);
-  outline-offset: 2px;
-  z-index: 1;
+  border-color: var(--color-black);
 }
 
 .color-wheel-harmony-option img {
@@ -312,6 +302,11 @@ color-wheel-express {
   height: 46px;
   border-radius: 4px;
   pointer-events: none;
+}
+
+.color-wheel .icon.simple-carousel-arrow-icon {
+  height: 18px;
+  width: 18px;
 }
 
 .mobile-container {

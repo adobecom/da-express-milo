@@ -81,6 +81,30 @@ export const style = css`
         cursor: grabbing;
     }
 
+    .wheel-marker-overlay[data-index="0"]::before {
+        content: '';
+        height: 4px;
+        width: 4px;
+        position: absolute;
+        top: 12.5px;
+        left: 12.5px;
+        background: #fff;
+        box-shadow: 0 0 0 1px rgba(31, 31, 31, 0.40);
+        border-radius: 15px;
+    }
+
+    .wheel-marker-overlay[data-index="0"]::after {
+        content: '';
+        height: 15px;
+        width: 15px;
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        border: 2px solid #fff;
+        box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.40);
+        border-radius: 15px;
+    }
+
     /* Spoke lines */
     .wheel-spoke {
         position: absolute;
