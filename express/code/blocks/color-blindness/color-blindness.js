@@ -5,22 +5,8 @@ import ColorThemeExpressController from '../../scripts/color-shared/controllers/
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
 import { getConflictPairs, TYPE_ORDER } from '../../scripts/color-shared/services/createColorBlindnessService.js';
 import { announceToScreenReader } from '../../scripts/color-shared/spectrum/utils/a11y.js';
+import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
 import '../../scripts/color-shared/components/color-wheel-express/index.js';
-
-const PALETTE_PRESETS = [
-  { colors: ['#264653', '#2A9D8F', '#E9C46A', '#F4A261', '#E76F51'], name: 'Coastal Sunset' },
-  { colors: ['#606C38', '#283618', '#FEFAE0', '#DDA15E', '#BC6C25'], name: 'Earthy Tones' },
-  { colors: ['#003049', '#D62828', '#F77F00', '#FCBF49', '#EAE2B7'], name: 'Bold Primary' },
-  { colors: ['#5F0F40', '#9A031E', '#FB8B24', '#E36414', '#0F4C5C'], name: 'Autumn Flame' },
-  { colors: ['#0B132B', '#1C2541', '#3A506B', '#5BC0BE', '#6FFFE9'], name: 'Ocean Depth' },
-  { colors: ['#FFBE0B', '#FB5607', '#FF006E', '#8338EC', '#3A86FF'], name: 'Vivid Spectrum' },
-  { colors: ['#CDB4DB', '#FFC8DD', '#FFAFCC', '#BDE0FE', '#A2D2FF'], name: 'Pastel Dream' },
-  { colors: ['#10002B', '#240046', '#3C096C', '#5A189A', '#9D4EDD'], name: 'Purple Haze' },
-];
-
-function pickRandomPalette() {
-  return PALETTE_PRESETS[Math.floor(Math.random() * PALETTE_PRESETS.length)];
-}
 
 const ACTION_MENU_ID = 'action-menu-color-blindness';
 const HISTORY_EVENT = `${ACTION_MENU_ID}:history-index-changed`;
@@ -94,7 +80,8 @@ export default async function decorate(block) {
     const section = createTag('section', { 'aria-label': 'Color blindness simulator' });
     block.appendChild(section);
 
-    const initialPalette = pickRandomPalette();
+    const { getResolvedPalette } = createColorPaletteParamApi();
+    const initialPalette = { colors: getResolvedPalette() };
 
     const navLinks = [
       { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
