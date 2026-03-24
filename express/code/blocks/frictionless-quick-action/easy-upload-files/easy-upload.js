@@ -205,25 +205,15 @@ function attachTooltipHandlers(tooltipTrigger, tooltipPopup) {
     }, 200);
   };
 
-  tooltipTrigger.addEventListener('mouseenter', () => {
-    isMouseOverTrigger = true;
-    showTooltip();
-  });
+  const onTriggerEnter = () => { isMouseOverTrigger = true; showTooltip(); };
+  const onTriggerLeave = () => { isMouseOverTrigger = false; checkAndHideTooltip(); };
+  const onPopupEnter = () => { isMouseOverTooltip = true; clearTimeout(hideTimeout); };
+  const onPopupLeave = () => { isMouseOverTooltip = false; checkAndHideTooltip(); };
 
-  tooltipTrigger.addEventListener('mouseleave', () => {
-    isMouseOverTrigger = false;
-    checkAndHideTooltip();
-  });
-
-  tooltipPopup.addEventListener('mouseenter', () => {
-    isMouseOverTooltip = true;
-    clearTimeout(hideTimeout);
-  });
-
-  tooltipPopup.addEventListener('mouseleave', () => {
-    isMouseOverTooltip = false;
-    checkAndHideTooltip();
-  });
+  trackListener(tooltipTrigger, 'mouseenter', onTriggerEnter);
+  trackListener(tooltipTrigger, 'mouseleave', onTriggerLeave);
+  trackListener(tooltipPopup, 'mouseenter', onPopupEnter);
+  trackListener(tooltipPopup, 'mouseleave', onPopupLeave);
 }
 
 function buildQrPaneContent(createTag, onBack) {
@@ -243,10 +233,8 @@ function buildQrPaneContent(createTag, onBack) {
   );
   primary.append(backButton);
   if (onBack) {
-    backButton.addEventListener('click', (event) => {
-      event.preventDefault();
-      onBack();
-    });
+    const handleBack = (event) => { event.preventDefault(); onBack(); };
+    trackListener(backButton, 'click', handleBack);
   }
 
   if (easyUploadPaneContent.primary.heading) {
@@ -340,6 +328,13 @@ function setupEasyUploadFirstPane(block, createTag) {
   });
 }
 
+// Track all event listeners so cleanupEasyUpload() can remove them
+const registeredListeners = [];
+function trackListener(el, type, fn) {
+  el.addEventListener(type, fn);
+  registeredListeners.push({ el, type, fn });
+}
+
 // Store deferred initialization context
 let deferredInitContext = null;
 
@@ -360,7 +355,7 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
     return;
   }
 
-  secondaryCta.addEventListener('click', async (event) => {
+  const handleSecondaryCta = async (event) => {
     event.preventDefault();
     event.stopPropagation();
 
@@ -481,11 +476,12 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
           });
 
           // Attach click handler
-          confirmButton.addEventListener('click', async (e) => {
+          const handleConfirmClick = async (e) => {
             e.preventDefault();
             e.stopPropagation();
             await easyUploadInstance.handleConfirmImport();
-          });
+          };
+          trackListener(confirmButton, 'click', handleConfirmClick);
 
           // Start polling for upload completion.
           easyUploadInstance.startUploadDetectionPolling();
@@ -497,7 +493,8 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
         showErrorToast?.(block, 'Failed to load QR code.');
       }
     }
-  });
+  };
+  trackListener(secondaryCta, 'click', handleSecondaryCta);
 }
 
 export async function setupEasyUploadUI({
@@ -565,6 +562,8 @@ export async function setupEasyUploadUI({
 }
 
 export function cleanupEasyUpload() {
+  registeredListeners.forEach(({ el, type, fn }) => el.removeEventListener(type, fn));
+  registeredListeners.length = 0;
   if (easyUploadInstance) {
     easyUploadInstance.cleanup();
     easyUploadInstance = null;

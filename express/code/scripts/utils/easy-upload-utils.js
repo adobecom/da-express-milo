@@ -372,6 +372,7 @@ export class EasyUpload {
     this.pollingInterval = null;
     this.versionReadyPromise = null;
     this.isGeneratingUrl = false;
+    this.handleConfirmClick = null;
 
     // Toast state
     this.toastTimeoutId = null;
@@ -1047,11 +1048,12 @@ export class EasyUpload {
       title: 'Confirm Import',
     }, 'Confirm Import');
 
-    confirmButton.addEventListener('click', (e) => {
+    this.handleConfirmClick = (e) => {
       e.preventDefault();
       e.stopPropagation();
       this.handleConfirmImport();
-    });
+    };
+    confirmButton.addEventListener('click', this.handleConfirmClick);
 
     this.confirmButton = confirmButton;
     return confirmButton;
@@ -1153,6 +1155,11 @@ export class EasyUpload {
      */
   async cleanup() {
     window.removeEventListener('beforeunload', this.handleBeforeUnload);
+
+    if (this.confirmButton && this.handleConfirmClick) {
+      this.confirmButton.removeEventListener('click', this.handleConfirmClick);
+      this.handleConfirmClick = null;
+    }
 
     // Clear refresh interval
     if (this.qrRefreshInterval) {
