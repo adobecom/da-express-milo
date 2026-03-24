@@ -514,6 +514,19 @@
   width: 100%;
 }
 
+.color-explore .ax-color-loading__grid,
+.color-explore .color-explore-loading__grid {
+  grid-template-columns: 1fr;
+  gap: var(--spacing-300);
+}
+
+.color-explore.color-explore--strips .ax-color-loading-card__visual,
+.color-explore.color-explore--strips .color-explore-loading-card__visual,
+.color-explore.color-explore--gradients .ax-color-loading-card__visual,
+.color-explore.color-explore--gradients .color-explore-loading-card__visual {
+  height: 56px;
+}
+
 .load-more-container {
   display: flex;
   align-items: center;
@@ -638,6 +651,11 @@
     /* max-width: 100% */
   }
 
+  .color-explore.color-explore--strips .ax-color-loading__grid,
+  .color-explore.color-explore--strips .color-explore-loading__grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .color-explore.color-explore--gradients .explore-main-section .gradients-grid,
   .color-explore.color-explore--gradients .gradients-main-section .gradients-grid {
     grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-tablet)));
@@ -649,6 +667,12 @@
     grid-template-columns: repeat(2, 1fr);
   }
 
+  .color-explore.color-explore--gradients .ax-color-loading__grid,
+  .color-explore.color-explore--gradients .color-explore-loading__grid {
+    grid-template-columns: repeat(2, minmax(var(--explore-gradients-column-min), var(--explore-gradients-column-max-tablet)));
+    gap: var(--spacing-300);
+  }
+
 }
 
 @media (min-width: 1200px) {
@@ -657,11 +681,43 @@
     max-width: var(--block-wd-content-max-width);
   }
 
+  .color-explore .ax-color-loading-card,
+  .color-explore .color-explore-loading-card {
+    gap: var(--spacing-75);
+  }
+
+  .color-explore .ax-color-loading-card__icon,
+  .color-explore .color-explore-loading-card__icon {
+    width: var(--spacing-500);
+    height: var(--spacing-500);
+  }
+
+  .color-explore .ax-color-loading-card__text,
+  .color-explore .color-explore-loading-card__text {
+    width: min(300px, calc(100% - 42px));
+  }
+
+  .color-explore.color-explore--strips .ax-color-loading-card__visual,
+  .color-explore.color-explore--strips .color-explore-loading-card__visual {
+    height: 80px;
+  }
+
+  .color-explore.color-explore--gradients .ax-color-loading-card__visual,
+  .color-explore.color-explore--gradients .color-explore-loading-card__visual {
+    height: var(--spacing-900);
+  }
+
   .color-explore.color-explore--strips .palettes-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--spacing-400);
     width: 100%;
     max-width: min(var(--block-wd-content-max-width), 100%);
+  }
+
+  .color-explore.color-explore--strips .ax-color-loading__grid,
+  .color-explore.color-explore--strips .color-explore-loading__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-400);
   }
 
   .color-explore.color-explore--strips .palettes-grid .color-card {
@@ -675,6 +731,12 @@
     gap: var(--spacing-400);
     width: 100%;
     max-width: min(var(--block-wd-content-max-width), 100%);
+  }
+
+  .color-explore.color-explore--gradients .ax-color-loading__grid,
+  .color-explore.color-explore--gradients .color-explore-loading__grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--spacing-400);
   }
 
   .color-explore--gradients .gradients-grid .gradient-strip {

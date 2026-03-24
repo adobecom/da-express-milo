@@ -7,6 +7,7 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
+import { createLoadingScreenComponent } from '../../scripts/color-shared/components/createLoadingScreenComponent.js';
 import { getLibs } from '../../scripts/utils.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 
@@ -21,6 +22,7 @@ const DEFAULTS = {
   enableSearch: true,
   useMockData: false,
   useMockFallback: true,
+  loadingScreenDemo: false,
   apiEndpoint: '',
 };
 const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
@@ -38,6 +40,30 @@ const STRIP_SHARED_STYLES = [
   '/express/code/scripts/color-shared/components/gradients/gradient-strip.css',
 ];
 const LOAD_MORE_CLICK_HANDLERS = new WeakMap();
+const LOADING_DEMO_QUERY_PARAM = 'colorExploreLoadingDemo';
+
+function isLoadingDemoMode(config = {}) {
+  if (config?.loadingScreenDemo === true) return true;
+
+  try {
+    const params = new URLSearchParams(window.location.search || '');
+    const value = (params.get(LOADING_DEMO_QUERY_PARAM) || '').trim().toLowerCase();
+    return value === '1' || value === 'true';
+  } catch (error) {
+    return false;
+  }
+}
+
+async function mountLoadingScreenDemo(container, config) {
+  const loading = createLoadingScreenComponent({
+    variant: config.variant === VARIANTS.GRADIENTS ? VARIANTS.GRADIENTS : VARIANTS.STRIPS,
+    cardCount: config.initialLoad,
+  });
+
+  container.innerHTML = '';
+  container.append(loading.element);
+  await loading.show();
+}
 
 async function loadStripSharedStyles() {
   try {
@@ -211,6 +237,12 @@ export default async function decorate(block) {
     const container = document.createElement('div');
     container.className = CSS_CLASSES.CONTAINER;
     themeHost.appendChild(container);
+
+    if (isLoadingDemoMode(config)) {
+      await mountLoadingScreenDemo(container, config);
+      block.dataset.blockStatus = 'loaded';
+      return;
+    }
 
     if (config.variant === VARIANTS.GRADIENTS || config.variant === VARIANTS.STRIPS) {
       const gradientsDataService = createSharedColorDataService({
