@@ -860,7 +860,6 @@ export const style = css`
   }
 
   
-  .icon-button sp-icon-drag-handle,
   .icon-button .icon-drag {
     display: inline-block;
     width: 20px;

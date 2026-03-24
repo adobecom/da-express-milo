@@ -98,9 +98,7 @@ const ICON_MAP = {
   trash: () => (hasIcon('sp-icon-delete')
     ? html`<sp-icon-delete size="m" aria-hidden="true"></sp-icon-delete>`
     : iconFallback('M7 3h6l1 2h3v2H3V5h3l1-2zm-1 6h2v7H6V9zm6 0h2v7h-2V9zM9 9h2v7H9V9z')),
-  drag: () => (hasIcon('sp-icon-drag-handle')
-    ? html`<sp-icon-drag-handle size="m" aria-hidden="true"></sp-icon-drag-handle>`
-    : iconFallback('M7 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM7 8.5A1.5 1.5 0 1 0 7 11a1.5 1.5 0 0 0 0-2.5zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM7 13a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z')),
+  drag: () => html`<img class="icon-asset icon-drag" src="/express/code/icons/S2_Icon_DragHandle_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
   add: () => (hasIcon('sp-icon-add')
     ? html`<sp-icon-add size="m" aria-hidden="true"></sp-icon-add>`
     : iconFallback('M9 3h2v6h6v2h-6v6H9v-6H3V9h6V3z')),

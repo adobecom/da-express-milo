@@ -220,7 +220,7 @@ export function loadDialog() {
 
 /**
  * Load icons for color-swatch-rail (copy, add, delete, lock, accessibility, open-in).
- * Tint keeps the static SVG asset; drag uses Spectrum `sp-icon-drag-handle` with a fallback.
+ * Tint and drag keep static SVG assets from /express/code/icons.
  */
 export async function loadIconsRail() {
   if (componentLoaded.iconsRail) return;
@@ -232,7 +232,6 @@ export async function loadIconsRail() {
     'sp-icon-circle',
     'sp-icon-copy',
     'sp-icon-delete',
-    'sp-icon-drag-handle',
     'sp-icon-target',
   ]);
   componentLoaded.iconsRail = true;
