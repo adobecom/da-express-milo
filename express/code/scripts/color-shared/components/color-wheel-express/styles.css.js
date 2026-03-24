@@ -89,7 +89,7 @@ export const style = css`
         top: 12.5px;
         left: 12.5px;
         background: #fff;
-        box-shadow: 0 0 0 1px rgba(31, 31, 31, 0.40);
+        box-shadow: 0 0 0 1px rgba(31, 31, 31, 0.30);
         border-radius: 15px;
     }
 
@@ -101,7 +101,7 @@ export const style = css`
         top: 5px;
         left: 5px;
         border: 2px solid #fff;
-        box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.40);
+        box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.30);
         border-radius: 15px;
     }
 
