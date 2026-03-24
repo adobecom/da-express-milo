@@ -766,7 +766,12 @@ export class EasyUpload {
 
   createLoader() {
     if (!this.loaderContainer) {
-      this.loaderContainer = this.createTag('div', { class: 'qr-code-loader' });
+      this.loaderContainer = this.createTag('div', {
+        class: 'qr-code-loader',
+        role: 'status',
+        'aria-label': 'Generating QR code',
+        'aria-busy': 'true',
+      });
 
       const loaderContent = this.createTag('div', { class: 'qr-code-loader-content' });
       const preview = this.createTag('img', {
@@ -804,6 +809,7 @@ export class EasyUpload {
     // Show loader
     if (this.loaderContainer) {
       this.loaderContainer.classList.remove('hidden');
+      this.loaderContainer.setAttribute('aria-busy', 'true');
     }
 
     // Disable confirm import button
@@ -816,6 +822,7 @@ export class EasyUpload {
   hideLoader() {
     if (this.loaderContainer) {
       this.loaderContainer.classList.add('hidden');
+      this.loaderContainer.setAttribute('aria-busy', 'false');
     }
 
     // Show QR code container
@@ -842,7 +849,7 @@ export class EasyUpload {
     const errorMsg = this.createTag('p', { class: 'qr-error-message' }, this.qrErrorText || 'Failed to generate QR code');
     const iconContainer = this.createTag('div', { class: 'qr-error-icon-container' });
     iconContainer.append(bgIcon, cautionIcon, errorMsg);
-    const errorState = this.createTag('div', { class: 'qr-error-state' });
+    const errorState = this.createTag('div', { class: 'qr-error-state', role: 'alert', 'aria-live': 'assertive' });
     errorState.appendChild(iconContainer);
 
     // Show QR code container with failed state
@@ -904,6 +911,7 @@ export class EasyUpload {
 
     if (this.qrCodeContainer) {
       this.qrCodeContainer.innerHTML = '';
+      this.qrCodeContainer.setAttribute('aria-label', 'QR code — scan with your phone to upload a file');
       this.qrCode.append(this.qrCodeContainer);
     }
 
