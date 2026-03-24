@@ -2,7 +2,7 @@ import { createTag } from '../../scripts/utils.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createExpressTabs } from '../../scripts/color-shared/spectrum/components/express-tabs.js';
 import createColorWheelExpressAdapter from '../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js';
-import { createColorEditAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
+import createBaseColorAdapter from '../../scripts/color-shared/adapters/createBaseColorAdapter.js';
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
@@ -62,7 +62,7 @@ let layoutInstance = null;
 let stripRenderer = null;
 let paletteUnsubscribe = null;
 let imagePanelDestroy = null;
-let colorEditAdapter = null;
+let baseColorAdapter = null;
 
 function swatchHexListFromState(state) {
   const swatches = state?.swatches || [];
@@ -286,8 +286,8 @@ function cleanup() {
   paletteUnsubscribe = null;
   imagePanelDestroy?.();
   imagePanelDestroy = null;
-  colorEditAdapter?.destroy?.();
-  colorEditAdapter = null;
+  baseColorAdapter?.destroy?.();
+  baseColorAdapter = null;
   stripRenderer?.destroy?.();
   stripRenderer = null;
   layoutInstance?.destroy();
@@ -302,38 +302,26 @@ export default async function decorate(block) {
   block.className = 'color-wheel';
 
   function buildBaseColorContent(controller) {
-    colorEditAdapter?.destroy?.();
-    colorEditAdapter = null;
+    baseColorAdapter?.destroy?.();
+    baseColorAdapter = null;
 
     const state = controller.getState();
-    const palette = swatchHexListFromState(state);
-    const baseIdx = Math.min(
-      Math.max(0, state.baseColorIndex ?? 0),
-      Math.max(0, palette.length - 1),
-    );
-
-    const adapter = createColorEditAdapter(
-      {
-        palette,
-        selectedIndex: baseIdx,
-        colorMode: 'HEX',
-        showPalette: false,
-        mobile: false,
-        embedded: true,
-        title: 'Base color',
-      },
+    const baseColor = swatchHexListFromState(state)[0];
+    const adapter = createBaseColorAdapter(
+      baseColor,
+      'HEX',
       {
         onColorChange: (detail) => {
           if (!detail?.hex) return;
           controller.setBaseColor(detail.hex);
           controller.setSwatchHex(0, detail.hex);
         },
-        onSwatchSelect: (detail) => {
-          if (typeof detail?.index === 'number') controller.setBaseColorIndex(detail.index);
+        onLockChange: () => {
+          // TODO
         },
       },
     );
-    colorEditAdapter = adapter;
+    baseColorAdapter = adapter;
 
     const wrapper = createTag('div', { class: 'base-color-content' });
     wrapper.appendChild(adapter.element);
@@ -429,18 +417,18 @@ export default async function decorate(block) {
 
     paletteUnsubscribe = controller.subscribe((state) => {
       layoutInstance?.context?.set('palette', paletteFromThemeState(state));
-      if (!colorEditAdapter?.setPalette) return;
+      if (!baseColorAdapter?.setPalette) return;
       const pal = swatchHexListFromState(state);
-      const el = colorEditAdapter.getElement?.();
+      const el = baseColorAdapter.getElement?.();
       const nextIdx = Math.min(
         Math.max(0, state.baseColorIndex ?? 0),
         Math.max(0, pal.length - 1),
       );
       if (!palettesEqual(el?.palette, pal)) {
-        colorEditAdapter.setPalette(pal);
+        baseColorAdapter.setPalette(pal);
       }
       if (el && el.selectedIndex !== nextIdx) {
-        colorEditAdapter.setSelectedIndex(nextIdx);
+        baseColorAdapter.setSelectedIndex(nextIdx);
       }
     });
 
