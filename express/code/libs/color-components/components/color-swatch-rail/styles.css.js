@@ -567,7 +567,8 @@ export const style = css`
     opacity: 1;
     pointer-events: auto;
   }
-  .swatch-column:focus-within .add-slot--column {
+  .swatch-column:focus-visible .add-slot--column,
+  .swatch-column:has(.swatch-column-focusable:focus-visible) .add-slot--column {
     opacity: 1;
     pointer-events: auto;
   }
