@@ -52,6 +52,8 @@
   max-width: 100%;
   min-width: 0;
   overflow: hidden;
+  padding-block: 6px;
+  margin-block: -6px;
 }
 
 .color-search-marquee .tags-container {
@@ -97,7 +99,14 @@
 }
 
 .color-search-marquee .tag-pill:hover {
+  background: var(--color-gray-250);
+}
+
+.color-search-marquee .tag-pill:focus-visible {
   background: var(--color-gray-200);
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+  border-radius: var(--Corner-radius-corner-radius-100);
 }
 
 .color-search-marquee .tags-scroll-fade {
