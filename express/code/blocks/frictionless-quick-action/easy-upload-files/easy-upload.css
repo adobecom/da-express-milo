@@ -4,6 +4,7 @@
   justify-content: center;
   margin: 0 auto;
   background-color: #8080804a;
+  --qr-code-width: 149px;
 }
 
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .free-plan-widget {
@@ -206,8 +207,8 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
 }
 
 .qr-code-loader-preview {
-  width: 149px;
-  height: 149px;
+  width: var(--qr-code-width);
+  height: var(--qr-code-width);
   border-radius: 12px;
   object-fit: cover;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
@@ -220,8 +221,8 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
 }
 
 .qr-error-icon-container {
-  width: 149px;
-  height: 149px;
+  width: var(--qr-code-width);
+  height: var(--qr-code-width);
   border-radius: 12px;
   object-fit: cover;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
@@ -514,8 +515,8 @@ main .section p.qr-error-message {
 .confirm-import-button.disabled {
   opacity: 0.5;
   cursor: not-allowed;
-  background-color: #d3d3d3;
-  color: #888;
+  background-color: var(--color-gray-200);
+  color: var(--color-gray-500);
 }
 
 @keyframes rotate-loader {
