@@ -183,10 +183,13 @@
   inset-inline-end: var(--spacing-300);
   inline-size: auto;
   z-index: var(--search-bar-sticky-z-index);
-  box-shadow: var(--Elevation-Dialog);
-  background: var(--color-white);
-  border-radius: var(--Corner-radius-corner-radius-500);
-  padding: var(--spacing-100);
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 48px;
+  padding: var(--spacing-200);
   opacity: 0;
   pointer-events: none;
   visibility: hidden;
