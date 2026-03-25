@@ -457,7 +457,6 @@ export class EasyUpload {
         );
       }
 
-
       return extractLinkHref(this.uploadAsset._links, LINK_REL.BLOCK_TRANSFER);
     } catch (error) {
       window.lana?.log(`[EasyUpload] Failed to generate upload URL: ${error?.name} ${error?.message} code=${error?.code} status=${error?.statusCode}`, { severity: 'error' });
