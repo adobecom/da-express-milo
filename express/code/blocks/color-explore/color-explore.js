@@ -7,7 +7,7 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
-import loadCSS from '../../scripts/color-shared/utils/loadCss.js';
+import { loadComponentStyles } from '../../scripts/color-shared/utils/loadComponentStyles.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createColorPaletteParamApi, normalizeHex } from '../../scripts/color-shared/utils/utilities.js';
 
@@ -48,7 +48,7 @@ async function loadStripSharedStyles() {
   await Promise.all(
     STRIP_SHARED_STYLES.map(async (href) => {
       try {
-        await loadCSS(href);
+        await loadComponentStyles(href, import.meta.url);
       } catch (error) {
         window.lana?.log(`[ColorExplore] Failed loading shared style ${href}: ${error?.message}`, {
           tags: 'color-explore,css',
