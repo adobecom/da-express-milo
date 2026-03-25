@@ -195,11 +195,13 @@ function attachTooltipHandlers(tooltipTrigger, tooltipPopup) {
 
   const showTooltip = () => {
     tooltipPopup.classList.add('hover');
+    tooltipTrigger.setAttribute('aria-expanded', 'true');
     adjustElementPosition();
   };
 
   const hideTooltip = () => {
     tooltipPopup.classList.remove('hover');
+    tooltipTrigger.setAttribute('aria-expanded', 'false');
   };
 
   const checkAndHideTooltip = () => {
@@ -227,11 +229,33 @@ function attachTooltipHandlers(tooltipTrigger, tooltipPopup) {
     isMouseOverTooltip = false;
     checkAndHideTooltip();
   };
+  const onTriggerFocus = () => {
+    showTooltip();
+  };
+  const onTriggerBlur = () => {
+    checkAndHideTooltip();
+  };
+  const onTriggerKeydown = (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      if (tooltipPopup.classList.contains('hover')) {
+        hideTooltip();
+      } else {
+        showTooltip();
+      }
+    }
+    if (e.key === 'Escape') {
+      hideTooltip();
+    }
+  };
 
   trackListener(tooltipTrigger, 'mouseenter', onTriggerEnter);
   trackListener(tooltipTrigger, 'mouseleave', onTriggerLeave);
   trackListener(tooltipPopup, 'mouseenter', onPopupEnter);
   trackListener(tooltipPopup, 'mouseleave', onPopupLeave);
+  trackListener(tooltipTrigger, 'focus', onTriggerFocus);
+  trackListener(tooltipTrigger, 'blur', onTriggerBlur);
+  trackListener(tooltipTrigger, 'keydown', onTriggerKeydown);
 }
 
 function buildQrPaneContent(createTag, onBack) {
@@ -267,12 +291,14 @@ function buildQrPaneContent(createTag, onBack) {
   });
 
   if (easyUploadPaneContent.primary.confirmLabel) {
+    const confirmTooltipId = 'easy-upload-confirm-tooltip';
     const tooltipContainer = createTag('div', { class: 'tooltip easy-upload-confirm' });
     const confirmButton = createTag('a', {
       href: easyUploadPaneContent.primary.confirmHref || '#',
       class: 'button accent xlarge confirm-import-button disabled',
+      'aria-describedby': confirmTooltipId,
     }, easyUploadPaneContent.primary.confirmLabel);
-    const tooltipPopup = createTag('div', { class: 'tooltip-text' }, easyUploadPaneContent.primary.tooltipText);
+    const tooltipPopup = createTag('div', { class: 'tooltip-text', id: confirmTooltipId, role: 'tooltip' }, easyUploadPaneContent.primary.tooltipText);
     tooltipContainer.append(confirmButton, tooltipPopup);
     if (easyUploadPaneContent.primary.tooltipText) {
       attachTooltipHandlers(confirmButton, tooltipPopup);
@@ -290,14 +316,21 @@ function buildQrPaneContent(createTag, onBack) {
 
   if (easyUploadPaneContent.secondary.question) {
     const tooltipContainer = createTag('p', { class: 'tooltip security' });
+    const tooltipId = 'easy-upload-security-tooltip';
     const tooltipTrigger = createTag(
       'span',
-      { class: 'easy-upload-tooltip-trigger' },
+      {
+        class: 'easy-upload-tooltip-trigger',
+        tabindex: '0',
+        role: 'button',
+        'aria-expanded': 'false',
+        'aria-describedby': tooltipId,
+      },
       easyUploadPaneContent.secondary.question,
     );
     const tooltipPopup = createTag(
       'div',
-      { class: 'tooltip-text' },
+      { class: 'tooltip-text', id: tooltipId, role: 'tooltip' },
       easyUploadPaneContent.secondary.tooltipText,
     );
     tooltipContainer.append(tooltipTrigger, tooltipPopup);
