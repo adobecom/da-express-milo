@@ -292,15 +292,9 @@ function decorateBackground(block) {
   const mediaRow = block.querySelector('div:nth-of-type(2)');
   if (mediaRow) {
     let media = mediaRow.querySelector('picture img');
-    const fallbackSrc = mediaRow.querySelector('a')?.getAttribute('href');
-    const mediaSrc = media?.getAttribute('src') || fallbackSrc;
-    if (!mediaSrc) {
-      mediaRow.remove();
-      return;
-    }
     if (!media) {
       media = createTag('img');
-      media.src = fallbackSrc;
+      media.src = mediaRow.querySelector('a')?.href;
     }
     media.classList.add('backgroundimg');
     media.loading = 'eager';
