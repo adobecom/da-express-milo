@@ -171,7 +171,7 @@ main .section .discover-cards {
 
 @media (min-width: 600px) {
   .discover-cards .center-title {
-        font-size: var(--heading-font-size-xl);
+        font-size: var(--heading-font-size-l);
     }
 
     .discover-cards.v2 .center-title {
