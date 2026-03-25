@@ -3,7 +3,7 @@
   --ax-layout-gap: var(--spacing-300);
   --ax-layout-row-gap: var(--ax-layout-gap);
   --ax-layout-column-gap: var(--ax-layout-gap);
-  --ax-color-tool-presentation-max-width: var(--block-wd-grid-max-width);
+  --ax-color-tool-presentation-max-width: var(--block-wd-max-width);
   --ax-layout-outer-margin-inline: var(--spacing-300);
   --ax-layout-outer-margin-block: var(--spacing-300);
   --ax-layout-presentation-max-width: var(--ax-color-tool-presentation-max-width);
@@ -14,7 +14,7 @@
   --ax-layout-inline-size: 100%;
 
   /* Grid configuration (desktop) */
-  --ax-grid-columns: 1fr 2fr;
+  --ax-grid-columns: 1fr auto;
   --ax-grid-areas:
     "sidebar  topbar"
     "sidebar canvas"
@@ -25,6 +25,9 @@
   --ax-area-sidebar: sidebar;
   --ax-area-canvas: canvas;
   --ax-area-footer: footer;
+
+  /* Sidebar width */
+  --ax-layout-sidebar-width: auto;
 
   /* Slot backgrounds */
   --ax-bg-topbar: var(--color-white);
@@ -112,10 +115,10 @@
 }
 
 .ax-shell-slot--sidebar {
+  inline-size: var(--ax-layout-sidebar-width);
   grid-area: var(--ax-area-sidebar);
   background-color: var(--ax-bg-sidebar);
   padding: var(--ax-padding-sidebar-mobile);
-  overflow-y: auto;
 }
 
 .ax-shell-slot--canvas {

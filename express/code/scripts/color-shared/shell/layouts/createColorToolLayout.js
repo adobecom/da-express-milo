@@ -1,9 +1,10 @@
 import { createTag, getIconElementDeprecated } from '../../../utils.js';
 import createShell from '../createShell.js';
+import { isMobileOrTabletViewport } from '../../utils/utilities.js';
 
 const LAYOUT_TYPE = 'color-tool';
-const SLOT_NAMES = ['topbar', 'sidebar', 'canvas', 'footer'];
-const DEFAULT_MOBILE_ORDER = ['topbar', 'sidebar', 'canvas', 'footer'];
+const DEFAULT_SLOT_RENDER_ORDER = ['topbar', 'sidebar', 'canvas', 'footer'];
+const DESKTOP_SLOT_RENDER_ORDER = ['sidebar', 'topbar', 'canvas', 'footer'];
 const DEFAULT_LAYOUT_VARIANT = 'default';
 const DEFAULT_TOOLBAR_MODE = 'sticky';
 const DEFAULT_LAYOUT_SPANS = {
@@ -81,6 +82,10 @@ function normalizeToolbarMode(toolbarMode, fallback = DEFAULT_TOOLBAR_MODE) {
   return TOOLBAR_MODES.has(toolbarMode) ? toolbarMode : fallback;
 }
 
+function getSlotRenderOrder() {
+  return isMobileOrTabletViewport() ? DEFAULT_SLOT_RENDER_ORDER : DESKTOP_SLOT_RENDER_ORDER;
+}
+
 function buildGridColumnValue(start, span) {
   return `${start} / span ${span}`;
 }
@@ -142,7 +147,7 @@ function buildSlotElements(
   );
 
   const slots = {};
-  SLOT_NAMES.forEach((name) => {
+  getSlotRenderOrder().forEach((name) => {
     const semantics = SLOT_SEMANTICS[name] || {};
     const el = createTag('div', {
       class: `ax-shell-slot ax-shell-slot--${name}`,
@@ -330,11 +335,11 @@ function createLayoutAPI(
     },
 
     getSlotNames() {
-      return [...SLOT_NAMES];
+      return [...DEFAULT_SLOT_RENDER_ORDER];
     },
 
     hasSlot(name) {
-      return SLOT_NAMES.includes(name);
+      return DEFAULT_SLOT_RENDER_ORDER.includes(name);
     },
 
     clearSlot(name) {
@@ -359,7 +364,7 @@ function createLayoutAPI(
 
 export default async function createColorToolLayout(container, config = {}) {
   const {
-    mobileOrder = DEFAULT_MOBILE_ORDER,
+    mobileOrder = DEFAULT_SLOT_RENDER_ORDER,
     layoutVariant = DEFAULT_LAYOUT_VARIANT,
     toolbar: toolbarConfig = {},
     actionMenu: actionMenuConfig,
