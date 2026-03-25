@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s https://raw.githubusercontent.com/adobe-rnd/da-mcp/refs/heads/main/src/mcp/handlers.ts)",
+      "Bash(curl -s https://raw.githubusercontent.com/adobe-rnd/da-mcp/refs/heads/main/src/mcp/server.ts)",
+      "Bash(curl -s https://raw.githubusercontent.com/adobe-rnd/da-mcp/refs/heads/main/src/da-admin/client.ts)",
+      "Bash(npm install:*)",
+      "Bash(npm run:*)",
+      "Bash(kill 3095 94096)"
+    ]
+  }
+}
