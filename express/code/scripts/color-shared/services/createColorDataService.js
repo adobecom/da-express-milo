@@ -76,6 +76,9 @@ export function createColorDataService(config) {
   let fetchPromise = null;
   const useMockData = config?.useMockData === true;
   const useMockFallback = config?.useMockFallback !== false;
+  const useLocalMockData = config?.useLocalMockData !== false
+    && typeof window !== 'undefined'
+    && ['localhost', '127.0.0.1', '[::1]'].includes(window.location?.hostname);
   const DAY_MS = 24 * 60 * 60 * 1000;
   const MOCK_AGE_DAY_CYCLE = [1, 3, 6, 10, 15, 24, 38, 62, 95];
 
@@ -257,7 +260,7 @@ export function createColorDataService(config) {
 
     fetchPromise = (async () => {
       try {
-        if (useMockData) {
+        if (useMockData || useLocalMockData) {
           const data = withDerivedMeta(getMockData(config.variant));
           cache = data;
           return data;
