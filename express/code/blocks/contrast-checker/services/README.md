@@ -20,24 +20,7 @@ svc.clearCache();
 
 WCAG 2.1 contrast-ratio calculation with a per-instance LRU cache. `checkWCAG` returns pass/fail for all five WCAG criteria.
 
----
-
-## createHistoryService
-
-```js
-import createHistoryService from './createHistoryService.js';
-
-const history = createHistoryService(/* limit = 200 */);
-
-history.push({ foreground, background });
-history.undo();   // → previous state | null
-history.redo();   // → next state | null
-history.canUndo(); // → boolean
-history.canRedo(); // → boolean
-history.getStatus(); // → { past: number, future: number }
-```
-
-Three-stack history (past / current / future) capped at `limit` entries (default `HISTORY_LIMIT` from `contrastConstants`).
+History for the contrast checker is now managed through the shared action-menu state instead of a dedicated service factory in this directory.
 
 ---
 

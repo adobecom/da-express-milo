@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import createHistoryService from '../../../../express/code/blocks/contrast-checker/services/createHistoryService.js';
 import createHistoryCommitController from '../../../../express/code/blocks/contrast-checker/utils/createHistoryCommitController.js';
+import createTestHistoryService from '../helpers/createTestHistoryService.js';
 
 describe('createHistoryCommitController', () => {
   let history;
@@ -10,7 +10,7 @@ describe('createHistoryCommitController', () => {
   let updates;
 
   beforeEach(() => {
-    history = createHistoryService();
+    history = createTestHistoryService();
     updates = [];
     clock = sinon.useFakeTimers();
     controller = createHistoryCommitController(history, {

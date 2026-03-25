@@ -1,19 +1,14 @@
 import { expect } from '@esm-bundle/chai';
-import createHistoryService from '../../../../express/code/blocks/contrast-checker/services/createHistoryService.js';
-import { DEFAULT_ACTION_MENU_CONFIG } from '../../../../express/code/blocks/contrast-checker/utils/contrastConstants.js';
 import syncActionMenuHistoryState, {
   getActionMenuHistoryDetail,
 } from '../../../../express/code/blocks/contrast-checker/utils/syncActionMenuHistoryState.js';
+import createTestHistoryService from '../helpers/createTestHistoryService.js';
 
 describe('syncActionMenuHistoryState', () => {
   let history;
 
   beforeEach(() => {
-    history = createHistoryService();
-  });
-
-  it('disables separate action menu state for the contrast checker', () => {
-    expect(DEFAULT_ACTION_MENU_CONFIG.enableState).to.equal(false);
+    history = createTestHistoryService();
   });
 
   it('returns empty history details before any state is pushed', () => {
