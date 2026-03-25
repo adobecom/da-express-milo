@@ -452,6 +452,17 @@ export default async function decorate(block) {
             await openModalForItem(item, 'Gradient');
           });
 
+          floatingSearchHandler = async (e) => {
+            const { query } = e.detail;
+            block.classList.add(CSS_CLASSES.LOADING);
+            allData = await activeDataService.search(query);
+            visibleCount = Math.min(config.initialLoad, allData.length);
+            await activeRenderer.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+            block.classList.remove(CSS_CLASSES.LOADING);
+          };
+          document.addEventListener('floating-search:submit', floatingSearchHandler);
+
           publishInstances();
         } finally {
           isMounting = false;
