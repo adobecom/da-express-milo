@@ -1,9 +1,7 @@
 /* Component-specific layout tokens (strip only). */
 .gradient-strip {
   --Gradient-strip-min-width: 300px;
-  --Gradient-strip-min-width-l: 834px;
-  --Gradient-strip-max-width-l: 834px;
-  --Gradient-strip-height-s-m: 80px;
+  --Gradient-strip-height-s-m: var(--spacing-900);
   display: flex;
   flex-direction: column;
   align-items: flex-end;
@@ -22,8 +20,8 @@
 
 /* Strip is focusable (role=gridcell, roving tabindex from grid). Tokens from styles.css (loaded by Express). */
 .gradient-strip:focus-visible {
-  outline: var(--modal-focus-outline-width, 2px) solid var(--color-blue-800) !important;
-  outline-offset: var(--modal-focus-outline-width, 2px) !important;
+  outline: var(--modal-focus-outline-width, 2px) solid var(--color-blue-800);
+  outline-offset: var(--modal-focus-outline-width, 2px);
   border-radius: var(--spacing-75);
 }
 
@@ -33,7 +31,6 @@
   height: var(--Gradient-strip-height-s-m);
   flex-shrink: 0;
   border-radius: var(--Corner-radius-corner-radius-100);
-  border: 0.5px solid var(--color-light-gray);
   box-sizing: border-box;
 }
 
@@ -71,14 +68,12 @@
 .gradient-strip .gradient-strip-action-btn {
   background: transparent;
   border: none;
-  border-radius: var(--Corner-radius-bar);
+  border-radius: var(--Corner-radius-corner-radius-100);
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: var(--spacing-500);
-  height: var(--spacing-500);
-  padding: var(--spacing-100);
+  padding: var(--spacing-80);
   padding-right: 0;
   flex-shrink: 0;
   visibility: visible;
@@ -88,29 +83,17 @@
 }
 
 .gradient-strip .gradient-strip-action-btn:focus-visible {
-  outline: var(--modal-focus-outline-width, 2px) solid var(--color-blue-800) !important;
-  outline-offset: var(--modal-focus-outline-width, 2px) !important;
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: var(--color-light-gray);
 }
 
 .gradient-strip .gradient-strip-action-btn .action-icon {
   font-size: var(--spacing-300);
-  width: var(--spacing-300);
-  height: var(--spacing-300);
   line-height: var(--spacing-300);
-  color: var(--color-dark-gray);
+  color: var(--color-gray-800-variant);
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-/* Figma L (Desktop) */
-@media (min-width: 1200px) {
-  .gradient-strip {
-    min-width: var(--Gradient-strip-min-width-l);
-    max-width: var(--Gradient-strip-max-width-l);
-  }
-
-  .gradient-strip .gradient-strip-visual {
-    height: var(--gradient-editor-height);
-  }
 }

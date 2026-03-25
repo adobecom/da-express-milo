@@ -1,4 +1,11 @@
 import { createTag, getLibs } from '../../utils.js';
+import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
+import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
+import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
+
+const CREATOR_PLACEHOLDER_PATH = '/express/code/scripts/color-shared/modal/images/creator-placeholder.png';
+const DEFAULT_LIKES_COUNT = '1.2K';
+const DEFAULT_CREATOR_NAME = 'nicolagilroy';
 
 let contentStylesLoaded = false;
 export async function ensurePaletteContentStyles() {
@@ -6,11 +13,42 @@ export async function ensurePaletteContentStyles() {
   try {
     const { loadStyle, getConfig } = (await import(`${getLibs()}/utils/utils.js`));
     const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-    await loadStyle(`${codeRoot}/scripts/color-shared/modal/modal-palette-content.css`);
+    await Promise.all([
+      loadStyle(`${codeRoot}/scripts/color-shared/modal/modal-palette-content.css`),
+      loadStyle(`${codeRoot}/scripts/color-shared/components/strips/color-strip.css`),
+    ]);
     contentStylesLoaded = true;
   } catch {
     contentStylesLoaded = true;
   }
+}
+
+function getPaletteColors(palette = {}) {
+  if (Array.isArray(palette.colors) && palette.colors.length) {
+    return palette.colors
+      .map((c) => String(c || '').trim())
+      .filter(Boolean)
+      .map((c) => (c.startsWith('#') ? c : `#${c}`));
+  }
+  if (Array.isArray(palette.colorStops) && palette.colorStops.length) {
+    return palette.colorStops
+      .map((s) => String(s?.color || '').trim())
+      .filter(Boolean)
+      .map((c) => (c.startsWith('#') ? c : `#${c}`));
+  }
+  return [];
+}
+
+function normalizeLikesCount(rawValue) {
+  if (rawValue == null) return DEFAULT_LIKES_COUNT;
+  const value = typeof rawValue === 'string' ? rawValue.trim() : rawValue;
+  if (value === '' || value === 0 || value === '0') return DEFAULT_LIKES_COUNT;
+  return String(value);
+}
+
+function normalizeCreatorName(rawValue) {
+  if (typeof rawValue === 'string' && rawValue.trim()) return rawValue.trim();
+  return DEFAULT_CREATOR_NAME;
 }
 
 export function createSimplePaletteContent(palette) {
@@ -148,4 +186,206 @@ export function createFullPaletteModalContent(palette, options = {}) {
   container.appendChild(saveSection);
 
   return container;
+}
+
+function createPaletteMetaSection(palette = {}, options = {}) {
+  const likesCount = normalizeLikesCount(
+    options.likesCount ?? palette?.likes ?? palette?.likesCount,
+  );
+  const creatorName = normalizeCreatorName(
+    options.creatorName ?? palette?.creator?.name ?? palette?.creatorName,
+  );
+  const creatorImageUrl = options.creatorImageUrl
+    ?? palette?.creator?.imageUrl
+    ?? palette?.creatorImageUrl
+    ?? CREATOR_PLACEHOLDER_PATH;
+  const hasOptionTags = Array.isArray(options.tags) && options.tags.length;
+  const hasItemTags = Array.isArray(palette?.tags) && palette.tags.length;
+  let tags = ['Color', 'Palette'];
+  if (hasOptionTags) tags = options.tags;
+  else if (hasItemTags) tags = palette.tags;
+
+  const section = createTag('section', { class: 'modal-palette-name-tags' });
+
+  const nameLikesRow = createTag('div', { class: 'modal-palette-name-likes' });
+  const nameEl = createTag('h1', { class: 'modal-palette-name' });
+  nameEl.textContent = palette?.name || 'Palette';
+  nameLikesRow.appendChild(nameEl);
+
+  const likesWrap = createTag('div', { class: 'modal-palette-likes' });
+  const likeBtn = createTag('button', { type: 'button', class: 'like-icon', 'aria-label': 'Like palette' });
+  const likeTheme = createTag('sp-theme', { system: 'spectrum-two', color: 'light', scale: 'medium' });
+  let liked = options.liked ?? palette?.liked ?? false;
+  likeTheme.appendChild(createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' }));
+  likeBtn.setAttribute('aria-label', liked ? 'Unlike palette' : 'Like palette');
+  likeBtn.classList.toggle('is-liked', liked);
+  likeBtn.appendChild(likeTheme);
+  let likeTooltip = null;
+  createExpressTooltip({ targetEl: likeBtn, content: liked ? 'Unlike palette' : 'Like palette', placement: 'bottom' })
+    .then((t) => { likeTooltip = t; })
+    .catch(() => {});
+  likeBtn.addEventListener('click', () => {
+    liked = !liked;
+    likeTheme.replaceChildren();
+    likeTheme.appendChild(createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' }));
+    likeBtn.setAttribute('aria-label', liked ? 'Unlike palette' : 'Like palette');
+    likeBtn.classList.toggle('is-liked', liked);
+    likeTooltip?.setContent(liked ? 'Unlike palette' : 'Like palette');
+  });
+  const likesText = createTag('p', { class: 'modal-likes-count' });
+  likesText.textContent = String(likesCount);
+  likesWrap.appendChild(likeBtn);
+  likesWrap.appendChild(likesText);
+  nameLikesRow.appendChild(likesWrap);
+  section.appendChild(nameLikesRow);
+
+  const thumbTagsRow = createTag('div', { class: 'modal-palette-thumb-tags' });
+
+  const thumbnailContainer = createTag('div', { class: 'modal-thumbnail-container' });
+  const thumbnailWrap = createTag('div', { class: 'modal-thumbnail' });
+  const thumbnailImg = createTag('img', { class: 'thumbnail-image', alt: creatorName, src: creatorImageUrl });
+  thumbnailWrap.appendChild(thumbnailImg);
+  const creatorNameEl = createTag('p', { class: 'modal-creator-name' });
+  creatorNameEl.textContent = creatorName;
+  thumbnailContainer.appendChild(thumbnailWrap);
+  thumbnailContainer.appendChild(creatorNameEl);
+  thumbTagsRow.appendChild(thumbnailContainer);
+
+  const tagsContainer = createTag('div', { class: 'modal-tags-container', 'aria-label': 'Tags', role: 'list' });
+  tags.forEach((tag) => {
+    const tagEl = createTag('span', { class: 'modal-tag', role: 'listitem' });
+    tagEl.textContent = String(tag);
+    tagsContainer.appendChild(tagEl);
+  });
+  thumbTagsRow.appendChild(tagsContainer);
+  section.appendChild(thumbTagsRow);
+
+  return section;
+}
+
+function setupSwatchColumnNav(container) {
+  let colCache = [];
+
+  function initTabIndexes() {
+    colCache = Array.from(container.querySelectorAll('.swatch-column'));
+    if (!colCache.length) {
+      requestAnimationFrame(initTabIndexes);
+      return;
+    }
+    // Only the first column is in tab order; component owns Enter/Escape/Tab-in-action-mode
+    colCache.forEach((col, i) => col.setAttribute('tabindex', i === 0 ? '0' : '-1'));
+  }
+
+  // CAPTURE: ArrowDown/Up navigates between columns from anywhere inside them
+  // (including action-mode buttons). Fires before the component's own handlers.
+  container.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const cols = colCache;
+    const activeEl = document.activeElement;
+    const ctxIdx = cols.findIndex((c) => c === activeEl || c.contains(activeEl));
+    if (ctxIdx < 0) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+
+    const next = e.key === 'ArrowDown' ? ctxIdx + 1 : ctxIdx - 1;
+    if (next >= 0 && next < cols.length) {
+      // If in action mode, reset the button tabindexes before leaving
+      if (cols[ctxIdx] !== activeEl) {
+        cols[ctxIdx].querySelectorAll('.swatch-column-focusable')
+          .forEach((btn) => btn.setAttribute('tabindex', '-1'));
+      }
+      cols.forEach((c, i) => c.setAttribute('tabindex', i === next ? '0' : '-1'));
+      cols[next].focus();
+    }
+  }, true); // capture — fires before component handlers
+
+  // CAPTURE: Tab when focus is directly on a column (not action mode)
+  // → ensure only this column is tabindex=0 so Tab exits the rail instead of
+  //   moving to the next swatch-column (which the component leaves at tabindex=0).
+  container.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab') return;
+    const cols = colCache;
+    const idx = cols.indexOf(document.activeElement);
+    if (idx < 0) return; // in action mode — let component's Tab trap handle cycling
+    cols.forEach((c, i) => c.setAttribute('tabindex', i === idx ? '0' : '-1'));
+    // no preventDefault: Tab exits the rail to the next focusable section
+  }, true); // capture
+
+  // FOCUSIN: keep roving tabindex correct whenever focus lands on a column.
+  // This repairs any tabindex=0 reset the Lit component does on re-render.
+  container.addEventListener('focusin', (e) => {
+    const cols = colCache;
+    const idx = cols.indexOf(e.target);
+    if (idx < 0) return;
+    cols.forEach((c, i) => c.setAttribute('tabindex', i === idx ? '0' : '-1'));
+  });
+
+  return { initTabIndexes };
+}
+
+export function createPaletteSwatchesModalContent(palette, options = {}) {
+  const {
+    ctaText = 'Open in Adobe Express',
+    swatchFeatures: inputSwatchFeatures = {},
+    verticalMaxPerRow,
+  } = options;
+  // Modal strips are read-only by contract: do not enable in-place color editing.
+  const swatchFeatures = {
+    copy: true,
+    colorPicker: false,
+    hexCode: true,
+    baseColor: true,
+    ...inputSwatchFeatures,
+  };
+  swatchFeatures.colorPicker = false;
+
+  const normalizedPalette = {
+    ...palette,
+    colors: getPaletteColors(palette),
+  };
+
+  const colorCount = normalizedPalette.colors.length;
+  const root = createTag('main', { class: 'modal-content' });
+
+  const railSection = createTag('section', {
+    class: 'modal-palette-container modal-palette-container--color-rail',
+    'aria-label': `Selected color palette, ${colorCount} color${colorCount !== 1 ? 's' : ''}`,
+  });
+  const railWrap = createTag('div', { class: 'modal-color-rail-wrap strip-container' });
+  const railAdapter = createSwatchRailAdapter(normalizedPalette, {
+    orientation: 'vertical-responsive',
+    swatchFeatures,
+    ...(Number.isFinite(verticalMaxPerRow) ? { verticalMaxPerRow } : {}),
+  });
+  railWrap.appendChild(railAdapter.element);
+  railSection.appendChild(railWrap);
+  root.appendChild(railSection);
+
+  const { initTabIndexes } = setupSwatchColumnNav(railWrap);
+
+  root.appendChild(createPaletteMetaSection(normalizedPalette, options));
+
+  const toolbarMount = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': 'Palette actions' });
+  root.appendChild(toolbarMount);
+
+  initFloatingToolbar(toolbarMount, {
+    palette: { id: palette?.id ?? '', name: palette?.name ?? 'Palette', colors: normalizedPalette.colors },
+    type: 'palette',
+    ctaText,
+    showPaletteName: false,
+  }).catch((error) => {
+    window.lana?.log(`Palette modal toolbar init failed: ${error?.message}`, {
+      tags: 'color-modal,toolbar',
+      severity: 'error',
+    });
+  });
+
+  return {
+    element: root,
+    initNav: initTabIndexes,
+    destroy: () => {
+      railAdapter.destroy?.();
+    },
+  };
 }

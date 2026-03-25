@@ -16,7 +16,8 @@
     "lint:fix": "npm run lint:js -- --fix && npm run lint:css --fix",
     "lint:js": "eslint .",
     "lint:css": "stylelint 'blocks/**/*.css' 'express/code/styles/*.css'",
-    "build:spectrum": "node express/code/scripts/widgets/spectrum/build.mjs"
+    "build:spectrum": "node express/code/scripts/widgets/spectrum/build.mjs",
+    "build:spectrum:icons-catalog": "ICONS_CATALOG=1 node express/code/scripts/widgets/spectrum/build.mjs"
   },
   "repository": {
     "type": "git",
