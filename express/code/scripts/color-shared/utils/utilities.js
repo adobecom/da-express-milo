@@ -168,6 +168,10 @@ export function normalizeHex(segment) {
   return null;
 }
 
+export function isValidHex(hex) {
+  return normalizeHex(hex) !== null;
+}
+
 export function createColorPaletteParamApi() {
   function getResolvedPalette(urlOrString) {
     let url;

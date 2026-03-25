@@ -1,7 +1,14 @@
 import { FAIL, WCAG_THRESHOLDS } from '../utils/contrastConstants.js';
+import {
+  isValidHex,
+  normalizeHex,
+} from '../../../scripts/color-shared/utils/utilities.js';
 
 function hexToRGB(hex) {
-  const cleaned = hex.replace('#', '');
+  const normalizedHex = normalizeHex(hex);
+  if (!normalizedHex) return null;
+
+  const cleaned = normalizedHex.slice(1);
   const num = Number.parseInt(cleaned, 16);
   return {
     r: (num >> 16) & 255, // eslint-disable-line no-bitwise
@@ -19,19 +26,19 @@ function getRelativeLuminance({ r, g, b }) {
   return 0.2126 * linearize(r) + 0.7152 * linearize(g) + 0.0722 * linearize(b);
 }
 
-function isValidHex(hex) {
-  return /^#?[0-9A-Fa-f]{6}$/.test(hex);
-}
-
 export default function createContrastDataService() {
   let cache = new Map();
 
   function calculateRatio(foreground, background) {
-    const cacheKey = `${foreground}-${background}`;
+    const normalizedForeground = normalizeHex(foreground);
+    const normalizedBackground = normalizeHex(background);
+    if (!normalizedForeground || !normalizedBackground) return 0;
+
+    const cacheKey = `${normalizedForeground}-${normalizedBackground}`;
     if (cache.has(cacheKey)) return cache.get(cacheKey);
 
-    const lum1 = getRelativeLuminance(hexToRGB(foreground));
-    const lum2 = getRelativeLuminance(hexToRGB(background));
+    const lum1 = getRelativeLuminance(hexToRGB(normalizedForeground));
+    const lum2 = getRelativeLuminance(hexToRGB(normalizedBackground));
 
     const lighter = Math.max(lum1, lum2);
     const darker = Math.min(lum1, lum2);
@@ -67,8 +74,12 @@ export default function createContrastDataService() {
   }
 
   function calculateRatioDirectional(foreground, background) {
-    const lumFg = getRelativeLuminance(hexToRGB(foreground));
-    const lumBg = getRelativeLuminance(hexToRGB(background));
+    const normalizedForeground = normalizeHex(foreground);
+    const normalizedBackground = normalizeHex(background);
+    if (!normalizedForeground || !normalizedBackground) return 0;
+
+    const lumFg = getRelativeLuminance(hexToRGB(normalizedForeground));
+    const lumBg = getRelativeLuminance(hexToRGB(normalizedBackground));
     const ratio = (lumBg + 0.05) / (lumFg + 0.05);
     return Math.round(ratio * 100) / 100;
   }
@@ -87,7 +98,7 @@ export default function createContrastDataService() {
       return { brightest: null, darkest: null };
     }
 
-    const validColors = colors.filter(isValidHex);
+    const validColors = colors.map((hex) => normalizeHex(hex)).filter(Boolean);
     if (validColors.length < 2) {
       return { brightest: null, darkest: null };
     }

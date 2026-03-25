@@ -32,6 +32,11 @@ describe('createContrastDataService', () => {
     it('handles hex without hash prefix', () => {
       expect(service.hexToRGB('FF0000')).to.deep.equal({ r: 255, g: 0, b: 0 });
     });
+
+    it('expands 3-digit shorthand hex before conversion', () => {
+      expect(service.hexToRGB('#0f0')).to.deep.equal({ r: 0, g: 255, b: 0 });
+      expect(service.hexToRGB('abc')).to.deep.equal({ r: 170, g: 187, b: 204 });
+    });
   });
 
   describe('linearize', () => {
@@ -83,12 +88,13 @@ describe('createContrastDataService', () => {
       expect(service.isValidHex('#aabbcc')).to.be.true;
     });
 
-    it('rejects invalid hex characters', () => {
-      expect(service.isValidHex('#GGGGGG')).to.be.false;
+    it('accepts 3-digit shorthand hex', () => {
+      expect(service.isValidHex('#ABC')).to.be.true;
+      expect(service.isValidHex('def')).to.be.true;
     });
 
-    it('rejects 3-digit shorthand hex', () => {
-      expect(service.isValidHex('#ABC')).to.be.false;
+    it('rejects invalid hex characters', () => {
+      expect(service.isValidHex('#GGGGGG')).to.be.false;
     });
 
     it('rejects empty string', () => {
@@ -117,6 +123,17 @@ describe('createContrastDataService', () => {
       const ratio = service.calculateRatio('#FFFFFF', '#000000');
       expect(ratio).to.be.at.least(1);
     });
+
+    it('normalizes 3-digit shorthand before calculating ratio', () => {
+      const shorthandRatio = service.calculateRatio('#000', '#fff');
+      const fullRatio = service.calculateRatio('#000000', '#FFFFFF');
+      expect(shorthandRatio).to.equal(fullRatio);
+    });
+
+    it('returns 0 when either color is invalid', () => {
+      expect(service.calculateRatio('not-a-color', '#FFFFFF')).to.equal(0);
+      expect(service.calculateRatio('#000000', 'xyz')).to.equal(0);
+    });
   });
 
   describe('calculateRatioDirectional', () => {
@@ -141,6 +158,11 @@ describe('createContrastDataService', () => {
       const ratio = service.calculateRatioDirectional('#888888', '#888888');
       expect(ratio).to.equal(1);
     });
+
+    it('returns 0 when either directional input is invalid', () => {
+      expect(service.calculateRatioDirectional('oops', '#FFFFFF')).to.equal(0);
+      expect(service.calculateRatioDirectional('#000000', 'oops')).to.equal(0);
+    });
   });
 
   describe('checkWCAG', () => {
@@ -157,6 +179,16 @@ describe('createContrastDataService', () => {
     it('fails all thresholds for identical colors (1:1)', () => {
       const result = service.checkWCAG('#FFFFFF', '#FFFFFF');
       expect(result.ratio).to.equal(1);
+      expect(result.normalAA).to.be.false;
+      expect(result.largeAA).to.be.false;
+      expect(result.normalAAA).to.be.false;
+      expect(result.largeAAA).to.be.false;
+      expect(result.uiComponents).to.be.false;
+    });
+
+    it('fails cleanly for invalid colors', () => {
+      const result = service.checkWCAG('invalid', '#FFFFFF');
+      expect(result.ratio).to.equal(0);
       expect(result.normalAA).to.be.false;
       expect(result.largeAA).to.be.false;
       expect(result.normalAAA).to.be.false;

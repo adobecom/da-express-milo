@@ -2,10 +2,11 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 
 import {
-  normalizeHex,
   createColorPaletteParamApi,
-  PARAM_NAME,
   PALETTE_PRESETS,
+  PARAM_NAME,
+  isValidHex,
+  normalizeHex,
   pickRandomPalette,
 } from '../../../../express/code/scripts/color-shared/utils/utilities.js';
 
@@ -59,6 +60,23 @@ describe('normalizeHex', () => {
   it('returns null for null and undefined', () => {
     expect(normalizeHex(null)).to.equal(null);
     expect(normalizeHex(undefined)).to.equal(null);
+  });
+});
+
+describe('isValidHex', () => {
+  it('accepts 6-digit hex values', () => {
+    expect(isValidHex('#AABBCC')).to.equal(true);
+    expect(isValidHex('aabbcc')).to.equal(true);
+  });
+
+  it('accepts 3-digit shorthand hex values', () => {
+    expect(isValidHex('#ABC')).to.equal(true);
+    expect(isValidHex('def')).to.equal(true);
+  });
+
+  it('rejects invalid hex values', () => {
+    expect(isValidHex('xyz123')).to.equal(false);
+    expect(isValidHex('')).to.equal(false);
   });
 });
 
