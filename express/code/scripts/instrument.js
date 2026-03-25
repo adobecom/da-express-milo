@@ -98,9 +98,6 @@ function getPageName() {
 
 function setDataAnalyticsAttributesForMartech() {
   if (!window.alloy_all) window.alloy_all = {};
-  const locale = getConfig().locale.prefix;
-  const pathSegments = pathname.substr(1).split('/');
-  if (locale !== '') pathSegments.shift();
   const pageName = getPageName();
 
   let category;
@@ -258,10 +255,7 @@ export async function trackViewTemplatePage(
   try {
     safelyFireAnalyticsEvent(fireEvent);
   } catch (error) {
-    window.lana.log(`Failed to track pageload using _satellite.track: ${error}`, {
-      severity: 'warning',
-      tags: 'template-page, analytics',
-    });
+    window.lana?.log(`Failed to track PDP pageload using _satellite.track: ${error}`, { tags: `${pageType}-page, analytics`, errorType: 'e', severity: 'warning', sampleRate: '1' });
   }
 }
 
