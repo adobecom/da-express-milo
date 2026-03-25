@@ -8,7 +8,7 @@
 
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .free-plan-widget {
   color: var(--color-black);
-  font-family: 'Adobe Clean', var(--body-font-family);
+  font-family: var(--body-font-family);
   font-size: 12px;
   font-style: normal;
   font-weight: 400;
@@ -17,7 +17,7 @@
 
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .dropzone-container {
   border-radius: 32px;
-  border: 2px solid var(--white, #FFF);
+  border: 2px solid var(--color-white);
   background: var(--transparent-white-700, rgba(255, 255, 255, 0.66));
   box-shadow: 0 0 1px 0 var(--Alias-drop-shadow-emphasized-key-color, rgba(0, 0, 0, 0.08)),
     0 1px 4px 0 var(--Alias-drop-shadow-transition-color, rgba(0, 0, 0, 0.04)),
@@ -26,25 +26,25 @@
 }
 
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .dropzone-container:hover {
-  background: var(--white, #FFF);
+  background: var(--color-white);
 }
 
 .frictionless-quick-action .qr-code-container.dropzone-container {
-  padding: 0px
-
+  padding: 0;
 }
 
 .frictionless-quick-action .qr-code-container.dropzone-container:hover {
   background-color: var(--color-white);
 }
 
-.qr-code-widget-container .qr-code-loader.hidden  {
+.qr-code-widget-container .qr-code-loader.hidden {
   display: none;
 }
 
-.frictionless-quick-action .qr-code-container .dropzone{
-background: none;
+.frictionless-quick-action .qr-code-container .dropzone {
+  background: none;
 }
+
 main .section .qr-code-dropzone-content {
   padding: var(--spacing-500);
   margin: 0 auto;
@@ -57,16 +57,14 @@ main .section .qr-code-dropzone-content p {
 
 main .section .qr-code-dropzone-content .easy-upload-heading {
   margin-bottom: var(--spacing-100);
-} 
+}
 
 main .section .qr-code-dropzone-content .easy-upload-step {
   margin-left: var(--spacing-100);
 }
 
 main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
-
   margin-top: var(--spacing-100);
-
 }
 
 .frictionless-quick-action .qr-code-loader svg {
@@ -128,10 +126,10 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
   color: var(--color-gray-800);
   text-align: center;
    
-  font-size: var(--Global-Typography-Size-Title-Title-XS, 18px);
+  font-size: 18px;
   font-style: normal;
   font-weight: 700;
-  line-height: var(--Global-Typography-Line-height-Title-Title-XS, var(--spacing-400));
+  line-height: var(--spacing-400);
   border-radius: 999px;
 }
 
@@ -195,7 +193,7 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
 
 .qr-code-widget-container .qr-code-loader {
   width: 100%;
-  border-radius: var(--Corner-radius-corner-radius-200, 16px);
+  border-radius: 16px;
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(1.5px);
   display: flex;
@@ -285,8 +283,8 @@ main  .easy-upload-confirm a.button:any-link {
   height: var(--spacing-500);
   padding: 0;
   margin: 0;
-  border: 2px solid var(--Transparent-white-100, rgba(255, 255, 255, 0.00));
-  background: var(--Background-sx-extra-subdued-default, #E6E6E6);
+  border: 2px solid transparent;
+  background: var(--color-gray-200);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -296,7 +294,7 @@ main  .easy-upload-confirm a.button:any-link {
 }
 
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .easy-upload-back-button:hover {
-  background: var(--Palette-gray-200, #E1E1E1);
+  background: var(--color-gray-250);
 }
 
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .easy-upload-back-button:focus,
@@ -312,7 +310,7 @@ main  .easy-upload-confirm a.button:any-link {
 }
 
 .easy-upload-heading {
-  font-family: 'Adobe Clean', var(--body-font-family);
+  font-family: var(--body-font-family);
   font-weight: 900;
   font-style: normal;
   font-size: 22px;
@@ -322,7 +320,7 @@ main  .easy-upload-confirm a.button:any-link {
 }
 
 .easy-upload-step {
-  font-family: 'Adobe Clean', var(--body-font-family);
+  font-family: var(--body-font-family);
   font-weight: 400;
   font-style: normal;
   font-size: 16px;
@@ -334,7 +332,7 @@ main  .easy-upload-confirm a.button:any-link {
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .easy-upload-step strong,
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .easy-upload-step b {
   color: var(--color-gray-800);
-  font-family: 'Adobe Clean', var(--body-font-family);
+  font-family: var(--body-font-family);
   font-size: 16px;
   font-style: normal;
   font-weight: 700;
@@ -349,13 +347,13 @@ main  .easy-upload-confirm a.button:any-link {
 
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .security.tooltip .tooltip-text,
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .tooltip.easy-upload-confirm .tooltip-text {
-  color: var(--Palette-gray-25, #FFF);
+  color: var(--color-white);
   font-family: var(--body-font-family);
-  font-size: var(--Font-size-75, 12px);
+  font-size: 12px;
   font-style: normal;
   font-weight: 400;
-  line-height: var(--Line-height-75, var(--spacing-300));
-  letter-spacing: var(--Letter-spacing, 0);
+  line-height: var(--spacing-300);
+  letter-spacing: 0;
 }
 
 .easy-upload-confirm {
@@ -367,7 +365,7 @@ main  .easy-upload-confirm a.button:any-link {
 
 .confirm-import-button {
   height: var(--spacing-500);
-  font-family: 'Adobe Clean', var(--body-font-family);
+  font-family: var(--body-font-family);
   font-weight: 700;
   font-style: normal;
   font-size: 14px;
@@ -388,9 +386,11 @@ main  .easy-upload-confirm a.button:any-link {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--Corner-radius-corner-radius-200, 16px);
-  background: var(--white, #FFF);
-  box-shadow: 0 0 1px 0 var(--Alias-drop-shadow-emphasized-key-color, rgba(0, 0, 0, 0.08)), 0 1px 4px 0 var(--Alias-drop-shadow-transition-color, rgba(0, 0, 0, 0.04)), 0 2px 8px 0 var(--Alias-drop-shadow-ambient-color, rgba(0, 0, 0, 0.08));
+  border-radius: 16px;
+  background: var(--color-white);
+  box-shadow: 0 0 1px 0 var(--Alias-drop-shadow-emphasized-key-color, rgba(0, 0, 0, 0.08)),
+    0 1px 4px 0 var(--Alias-drop-shadow-transition-color, rgba(0, 0, 0, 0.04)),
+    0 2px 8px 0 var(--Alias-drop-shadow-ambient-color, rgba(0, 0, 0, 0.08));
 }
 
 .easy-upload-secondary {
@@ -449,7 +449,7 @@ main  .easy-upload-confirm a.button:any-link {
 }
 
 .easy-upload-tooltip-trigger {
-  font-family: 'Adobe Clean', var(--body-font-family);
+  font-family: var(--body-font-family);
   font-weight: 600;
   font-style: normal;
   font-size: 14px;
@@ -542,6 +542,4 @@ main .section p.qr-error-message {
   .frictionless-quick-action .fqa-container .button-container.hero-animation-overlay {
     min-height: var(--frictionless-quick-action-video-height);
   }
-  
-
 }
