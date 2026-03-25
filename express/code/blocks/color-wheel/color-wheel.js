@@ -409,8 +409,8 @@ export default async function decorate(block) {
         controls,
       },
       content: {
-        heading: createTag('h1', null, 'My heading'),
-        paragraph: createTag('p', null, 'My paragraph'),
+        heading: createTag('h1', null, 'Color palette generator and color wheel tool.'),
+        paragraph: createTag('p', null, 'Use the color palette generator to create harmonious color schemes for any project. Choose a base color, apply a color harmony, and generate a balanced palette instantly.'),
         icon: true,
       },
     });
