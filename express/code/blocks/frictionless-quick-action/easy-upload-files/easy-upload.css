@@ -9,7 +9,7 @@
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .free-plan-widget {
   color: var(--color-black);
   font-family: var(--body-font-family);
-  font-size: 12px;
+  font-size: var(--body-font-size-xs);
   font-style: normal;
   font-weight: 400;
   line-height: 130%;
@@ -110,7 +110,6 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
   height: var(--spacing-400);
   gap: var(--spacing-100);
   margin: 0;
-  
   padding: var(--spacing-200) 0 var(--spacing-75) 0;
 }
 
@@ -125,8 +124,7 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
 .easy-upload-initial .easy-upload-or span {
   color: var(--color-gray-800);
   text-align: center;
-   
-  font-size: 18px;
+  font-size: var(--body-font-size-l);
   font-style: normal;
   font-weight: 700;
   line-height: var(--spacing-400);
@@ -151,7 +149,6 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
 .easy-upload-initial .easy-upload-cta-row .button-container .button {
     padding: var(--spacing-200) var(--spacing-300) 13px;
     border: none;
-    box-sizing: content-box;
     display: flex;
     align-items: center;
     margin: 0;
@@ -323,7 +320,7 @@ main  .easy-upload-confirm a.button:any-link {
   font-family: var(--body-font-family);
   font-weight: 400;
   font-style: normal;
-  font-size: 16px;
+  font-size: var(--body-font-size-m);
   line-height: 130%;
   letter-spacing: 0;
   margin: 0;
@@ -333,7 +330,7 @@ main  .easy-upload-confirm a.button:any-link {
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .easy-upload-step b {
   color: var(--color-gray-800);
   font-family: var(--body-font-family);
-  font-size: 16px;
+  font-size: var(--body-font-size-m);
   font-style: normal;
   font-weight: 700;
   line-height: 130%;
@@ -349,7 +346,7 @@ main  .easy-upload-confirm a.button:any-link {
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .tooltip.easy-upload-confirm .tooltip-text {
   color: var(--color-white);
   font-family: var(--body-font-family);
-  font-size: 12px;
+  font-size: var(--body-font-size-xs);
   font-style: normal;
   font-weight: 400;
   line-height: var(--spacing-300);
@@ -368,7 +365,7 @@ main  .easy-upload-confirm a.button:any-link {
   font-family: var(--body-font-family);
   font-weight: 700;
   font-style: normal;
-  font-size: 14px;
+  font-size: var(--body-font-size-s);
   line-height: 130%;
   letter-spacing: 0;
   margin: 0;
@@ -452,7 +449,7 @@ main  .easy-upload-confirm a.button:any-link {
   font-family: var(--body-font-family);
   font-weight: 600;
   font-style: normal;
-  font-size: 14px;
+  font-size: var(--body-font-size-s);
   line-height: 130%;
   letter-spacing: 0;
   text-align: center;
@@ -503,8 +500,8 @@ main .section p.qr-error-message {
   position: relative;
   z-index: 1;
   color: var(--Content-negative-default, #D31510);
-  font-family: "Adobe Clean", var(--body-font-family);
-  font-size: 12px;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-xs);
   font-style: normal;
   font-weight: 700;
   line-height: 130%;
