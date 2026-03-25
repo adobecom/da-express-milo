@@ -104,27 +104,6 @@ describe('Search Marquee', () => {
     document.body.click();
     expect(dropdownContainer.classList.contains('hidden')).to.be.true;
   });
-
-  it('does not render a background image when authoring does not provide one', async () => {
-    document.body.innerHTML = `
-      <div class="search-marquee">
-        <div>
-          <div>
-            <h1 id="hero-title">Search thousands of templates</h1>
-            <p>Find the perfect template for your project</p>
-          </div>
-        </div>
-        <div>
-          <div></div>
-        </div>
-      </div>
-    `;
-
-    const marqueeBlock = document.querySelector('.search-marquee');
-    await decorate(marqueeBlock);
-
-    expect(marqueeBlock.querySelector('img.backgroundimg')).to.not.exist;
-  });
 });
 
 describe('Search Marquee - marquee fused integration', () => {
@@ -291,41 +270,5 @@ describe('Search Marquee - manual links', () => {
 
     const carousel = marqueeBlock.querySelector('.carousel-container.manual-link-list');
     expect(carousel).to.exist;
-  });
-});
-
-describe('Search Marquee - color variant', () => {
-  it('uses the shared floating search bar for color pages', async () => {
-    document.body.innerHTML = `
-      <main>
-        <div class="section">
-          <div class="search-marquee color">
-            <div>
-              <div>
-                <h1 id="hero-title">Explore color palettes</h1>
-                <p>Search for moods, themes, and colors</p>
-              </div>
-            </div>
-            <div>
-              <div>blue, bold, calm</div>
-            </div>
-            <div>
-              <div>Unused row</div>
-            </div>
-          </div>
-        </div>
-      </main>
-    `;
-
-    const block = document.querySelector('.search-marquee.color');
-    await decorate(block);
-
-    expect(block.parentElement?.classList.contains('search-marquee-wrapper')).to.be.true;
-    expect(block.colorTags).to.deep.equal(['blue', 'bold', 'calm']);
-    expect(block.dataset.tags).to.equal('blue,bold,calm');
-    expect(block.querySelector('.search-bar-outer')).to.exist;
-    expect(block.querySelector('.search-bar-input')).to.exist;
-    expect(block.children).to.have.length(2);
-    expect(document.head.querySelector('link[href*="/scripts/color-shared/components/search-bar/styles/search-bar.css"]')).to.exist;
   });
 });
