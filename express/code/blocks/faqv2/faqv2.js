@@ -435,7 +435,7 @@ export default async function decorate(block) {
               });
             }
           } catch (error) {
-            window.lana?.log(`faqv2 schema merge error: ${error?.message || error}`, { tags: 'faqv2', errorType: 'e', severity: 'error', sampleRate: '1' });
+            window.lana?.log(`faqv2 schema merge error: ${error?.message || error}`, { tags: 'faqv2', severity: 'error' });
           }
         } else {
           const script = document.createElement('script');
@@ -450,7 +450,7 @@ export default async function decorate(block) {
         }
       }
     } catch (error) {
-      window.lana?.log(`faqv2 schema error: ${error?.message || error}`, { tags: 'faqv2', errorType: 'e', severity: 'error', sampleRate: '1' });
+      window.lana?.log(`faqv2 schema error: ${error?.message || error}`, { tags: 'faqv2', severity: 'error' });
     }
   }
 }

@@ -356,10 +356,10 @@ export default async function decorate(block) {
       if (stars && stars instanceof Node) {
         headingWrapper.appendChild(stars);
       } else {
-        window.lana?.log('Invalid stars element returned from getCurrentRatingStars', { tags: 'ratings', errorType: 'e', severity: 'error', sampleRate: '1' });
+        window.lana?.log('Invalid stars element returned from getCurrentRatingStars', { tags: 'ratings', severity: 'error' });
       }
     } catch (error) {
-      window.lana?.log(`Error creating rating stars: ${error?.message || error}`, { tags: 'ratings', errorType: 'e', severity: 'error', sampleRate: '1' });
+      window.lana?.log(`Error creating rating stars: ${error?.message || error}`, { tags: 'ratings', severity: 'error' });
     }
     block.appendChild(headingWrapper);
     const textAndCTA = createTag('div', { class: 'no-slider' });

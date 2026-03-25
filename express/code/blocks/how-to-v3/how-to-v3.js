@@ -156,7 +156,7 @@ export default function decorate(block) {
         }
       }
     } catch (error) {
-      window.lana?.log(`how-to-v3 schema error: ${error?.message || error}`, { tags: 'how-to-v3', errorType: 'e', severity: 'error', sampleRate: '1' });
+      window.lana?.log(`how-to-v3 schema error: ${error?.message || error}`, { tags: 'how-to-v3', severity: 'error' });
     }
   }
 }

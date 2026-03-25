@@ -248,7 +248,7 @@ export async function trackViewTemplatePage(
   try {
     safelyFireAnalyticsEvent(fireEvent);
   } catch (error) {
-    window.lana?.log(`Failed to track PDP pageload using _satellite.track: ${error}`, { tags: 'print-product-detail', errorType: 'e', severity: 'warning', sampleRate: '1' });
+    window.lana?.log(`Failed to track PDP pageload using _satellite.track: ${error}`, { tags: 'print-product-detail', severity: 'warning', });
   }
 }
 

@@ -40,7 +40,7 @@ export async function getCountry(ignoreCookie = false) {
       return normalized;
     }
   } catch (error) {
-    window.lana?.log(`Could not fetch geo2 data from geo2 service: ${error}`, { tags: 'location-utils', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log(`Could not fetch geo2 data from geo2 service: ${error}`, { tags: 'location-utils', severity: 'error' });
   }
 
   const configCountry = getConfig().locale.region;

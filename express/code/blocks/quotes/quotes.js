@@ -23,7 +23,7 @@ try {
   utils = await import(`${getLibs()}/utils/utils.js`);
   ({ createTag, getConfig, loadStyle } = utils);
 } catch (error) {
-  window.lana?.log('Failed to load utils:', error, { tags: 'quotes', errorType: 'e', severity: 'error', sampleRate: '1' });
+  window.lana?.log('Failed to load utils:', error, { tags: 'quotes', severity: 'error' });
   throw error;
 }
 

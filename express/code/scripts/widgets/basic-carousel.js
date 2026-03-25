@@ -313,7 +313,7 @@ function initializeCarousel(selector, parent) {
             setTimeout(() => tooltip.classList.remove('display-tooltip'), 2000);
           }
         }).catch((error) => {
-          window.lana?.log(`Failed to copy link: ${error?.message || error?.detail || error}`, { tags: 'basic-carousel, copyLink', errorType: 'e', severity: 'error', sampleRate: '1' });
+          window.lana?.log(`Failed to copy link: ${error?.message || error?.detail || error}`, { tags: 'basic-carousel, copyLink', severity: 'error' });
         });
         return;
       }

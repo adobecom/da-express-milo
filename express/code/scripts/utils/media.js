@@ -145,7 +145,7 @@ export function transformLinkToAnimation($a, $videoLooping = true, hasControls =
       params = new URL($a.href).searchParams;
       videoUrl = new URL($a.href);
     } catch (error) {
-      window.lana?.log('Invalid video URL in transformLinkToAnimation:', error?.message || error?.detail || error, { tags: 'utils, media, transformLinkToAnimation', errorType: 'e', severity: 'error', sampleRate: '1' });
+      window.lana?.log('Invalid video URL in transformLinkToAnimation:', error?.message || error?.detail || error, { tags: 'utils, media, transformLinkToAnimation', severity: 'error' });
       return null;
     }
 
@@ -201,7 +201,7 @@ export function transformLinkToAnimation($a, $videoLooping = true, hasControls =
     if (hasControls) createAccessibilityVideoControls($video);
     return $video;
   } catch (error) {
-    window.lana?.log('Error in transformLinkToAnimation:', error?.message || error?.detail || error, { tags: 'utils, media, transformLinkToAnimation', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log('Error in transformLinkToAnimation:', error?.message || error?.detail || error, { tags: 'utils, media, transformLinkToAnimation', severity: 'error' });
     return null;
   }
 }

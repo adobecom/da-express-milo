@@ -180,7 +180,7 @@ function interactiveInit(el) {
 
 export default async function init(el) {
   if (!el.classList.contains('horizontal-masonry')) {
-    window.lana?.log('Using interactive-marquee on Express requires using the horizontal-masonry class.', { tags: 'interactive-marquee', errorType: 'e', severity: 'error', sampleRate: '1' });
+    window.lana?.log('Using interactive-marquee on Express requires using the horizontal-masonry class.', { tags: 'interactive-marquee', severity: 'error' });
     return;
   }
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`), import(`${getLibs()}/utils/decorate.js`)]).then(([utils, placeholders, decorate]) => {

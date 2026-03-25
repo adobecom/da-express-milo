@@ -315,7 +315,7 @@ async function autoUpdatePage(main) {
         url = new URL(a.href);
       }
     } catch (error) {
-      window.lana?.log(`Error while attempting to replace link ${a.href}: ${error?.message || error?.detail || error}`, { tags: 'utils, content-replace, autoUpdatePage', errorType: 'e', severity: 'error', sampleRate: '1' });
+      window.lana?.log(`Error while attempting to replace link ${a.href}: ${error?.message || error?.detail || error}`, { tags: 'utils, content-replace, autoUpdatePage', severity: 'error' });
     }
   });
 }

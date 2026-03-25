@@ -62,7 +62,7 @@ export default async function decorate(block) {
     try {
       await formatSalesPhoneNumber(phoneNumberTags);
     } catch (error) {
-      window.lana?.log(`Error fetching sales phones numbers: ${error.message}`, { tags: 'banner', errorType: 'e', severity: 'error', sampleRate: '1' });
+      window.lana?.log(`Error fetching sales phones numbers: ${error.message}`, { tags: 'banner', severity: 'error' });
     }
   }
   fixIcons(block);
