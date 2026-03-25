@@ -101,6 +101,8 @@ export default class BaseApiService extends BasePlugin {
       if (body instanceof FormData) {
         delete fetchOptions.headers['Content-Type'];
       }
+    } else if (method === 'GET') {
+      delete fetchOptions.headers['Content-Type'];
     }
 
     let response;

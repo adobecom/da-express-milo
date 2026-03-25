@@ -359,7 +359,7 @@
   padding-inline: 0;
   flex: 1 1 0;
   overflow-y: auto;
-  min-block-size: fit-content !important;
+  min-block-size: fit-content;
 }
 
 .ax-lib-picker-divider {
@@ -473,7 +473,7 @@
 
 .ax-lib-picker-popover sp-menu-item[selected],
 .ax-lib-picker-popover sp-menu-item[aria-selected="true"] {
-  display: flex !important;
+  display: flex;
 }
 
 /* ── Tablet / Desktop (600px+) ───────────────────────────────── */
@@ -523,8 +523,8 @@
   }
 
   .ax-drawer-panel .ax-lib-picker-popover sp-menu {
-    min-height: fit-content !important;
-    max-height: none !important;
+    min-height: fit-content;
+    max-height: none;
   }
 
   .ax-drawer-field-label,
