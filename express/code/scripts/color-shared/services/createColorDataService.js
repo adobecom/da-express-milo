@@ -69,7 +69,20 @@ const DEMO_PALETTE_GRID_EXTENDED = [
   { id: 'palette-34', name: 'Sage and olive', colors: ['#9DC183', '#A8C98E', '#B3D199', '#BED9A4', '#C9E1AF'], category: 'nature', tags: ['sage', 'olive'] },
   { id: 'palette-35', name: 'Electric neon', colors: ['#FF00FF', '#FF14A3', '#FF69B4', '#FF85C1', '#FFA1CE'], category: 'vibrant', tags: ['neon', 'pink'] },
   { id: 'palette-36', name: 'Charcoal and gold', colors: ['#36454F', '#4A5F6F', '#5E7A8F', '#7295AF', '#D4AF37'], category: 'neutral', tags: ['charcoal', 'gold'] },
+  { id: 'palette-37', name: 'Poolside Summer Pop', colors: ['#FF9A3C', '#FFD166', '#06D6A0', '#118AB2', '#EF476F'], category: 'warm', tags: ['Summer', 'Travel'] },
+  { id: 'palette-38', name: 'Gallery Neutrals', colors: ['#F5F1EA', '#DCD5C8', '#BFB5A7', '#8C8276', '#5A524A'], category: 'neutral', tags: ['Neutral Palette', 'Luxury'] },
+  { id: 'palette-39', name: 'Primary Playground', colors: ['#EF233C', '#FFD60A', '#0057FF', '#FFFFFF', '#1A1A1A'], category: 'vibrant', tags: ['Primary colors', 'Happy'] },
+  { id: 'palette-40', name: 'Vaporwave Sunset Grid', colors: ['#FF6AD5', '#C774E8', '#7D7DFF', '#5EEAD4', '#2D1B69'], category: 'vibrant', tags: ['Vaporwave', 'Synthwave'] },
+  { id: 'palette-41', name: 'Spring Orchard', colors: ['#F8FFC1', '#C6F69D', '#8ED1A5', '#6CC4C1', '#B8E1FF'], category: 'nature', tags: ['Spring', 'Happy'] },
+  { id: 'palette-42', name: 'Vintage Linen Study', colors: ['#EFE6D7', '#D8C6A8', '#B8A487', '#8E7C66', '#5F5548'], category: 'neutral', tags: ['Neutral Vintage', 'Travel'] },
+  { id: 'palette-43', name: 'Neon Drive Night', colors: ['#120458', '#4D1D95', '#7E22CE', '#EC4899', '#22D3EE'], category: 'cool', tags: ['Synthwave', 'Travel'] },
+  { id: 'palette-44', name: 'Happy Citrus Lounge', colors: ['#FFF275', '#FFB627', '#FF7B00', '#FF3C38', '#2EC4B6'], category: 'warm', tags: ['Happy', 'Summer'] },
+  { id: 'palette-45', name: 'Luxury Midnight Suite', colors: ['#0F172A', '#1E293B', '#334155', '#CBA135', '#F8F3E8'], category: 'neutral', tags: ['Luxury', 'Neutral Palette'] },
+  { id: 'palette-46', name: 'Postcard Voyage', colors: ['#4CC9F0', '#4895EF', '#4361EE', '#F72585', '#FFD166'], category: 'cool', tags: ['Travel', 'Spring'] },
 ];
+
+const MOCK_STRIP_COUNT = 24;
+const MOCK_EXPLORE_COUNT = 46;
 
 export function createColorDataService(config) {
   let cache = null;
@@ -210,17 +223,17 @@ export function createColorDataService(config) {
 
   function getMockData(variant) {
     if (variant === 'strips') {
-      return getMockPaletteList(24);
+      return getMockPaletteList(MOCK_STRIP_COUNT);
     }
 
     if (variant === 'palettes') {
-      return getMockPaletteList(36);
+      return getMockPaletteList(MOCK_EXPLORE_COUNT);
     }
 
     if (variant === 'gradients') {
       // Keep gradients aligned with palettes so filter/sort visual behavior
       // is comparable between modes during exploration/testing.
-      const source = getMockPaletteList(36);
+      const source = getMockPaletteList(MOCK_EXPLORE_COUNT);
       return source.map((palette, i) => {
         const colors = Array.isArray(palette.colors) ? palette.colors.filter(Boolean) : [];
         const colorStops = colors.map((color, index, arr) => ({

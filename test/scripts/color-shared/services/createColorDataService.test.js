@@ -55,4 +55,30 @@ describe('createColorDataService', () => {
     expect(PALETTE_10_COLORS_MODAL).to.have.property('colors');
     expect(PALETTE_10_COLORS_MODAL.colors).to.have.length(10);
   });
+
+  it('includes requested marquee tags in mock palette and gradient datasets', async () => {
+    const expectedTags = [
+      'Summer',
+      'Neutral Palette',
+      'Primary colors',
+      'Vaporwave',
+      'Spring',
+      'Neutral Vintage',
+      'Synthwave',
+      'Happy',
+      'Luxury',
+      'Travel',
+    ];
+
+    const paletteService = createColorDataService({ variant: 'palettes', initialLoad: 24, maxItems: 100 });
+    const gradientService = createColorDataService({ variant: 'gradients', initialLoad: 24, maxItems: 100 });
+
+    const palettes = await paletteService.fetchData();
+    const gradients = await gradientService.fetchData();
+
+    expectedTags.forEach((tag) => {
+      expect(palettes.some((item) => item.tags?.includes(tag))).to.equal(true);
+      expect(gradients.some((item) => item.tags?.includes(tag))).to.equal(true);
+    });
+  });
 });
