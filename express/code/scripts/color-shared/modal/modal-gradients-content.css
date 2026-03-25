@@ -134,7 +134,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 32px;
+  height: var(--spacing-500);
   max-width: 224px;
   min-width: 27px;
   padding: 0 var(--spacing-200);
