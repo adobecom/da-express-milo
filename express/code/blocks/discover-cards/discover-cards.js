@@ -28,16 +28,16 @@ const prevSVGHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none"
 </svg>`;
 const scrollPadding = 16;
 
-function createControl(items, container) {
+function createControl(items, container, sectionLabel = 'cards') {
   const control = createTag('div', { class: 'gallery-control loading' });
   const status = createTag('div', { class: 'status' });
   const prevButton = createTag('button', {
     class: 'prev',
-    'aria-label': 'Next',
+    'aria-label': `Previous ${sectionLabel}`,
   }, prevSVGHTML);
   const nextButton = createTag('button', {
     class: 'next',
-    'aria-label': 'Previous',
+    'aria-label': `Next ${sectionLabel}`,
   }, nextSVGHTML);
 
   const intersecting = Array.from(items).fill(false);
@@ -159,7 +159,9 @@ export async function buildGallery(
   root = container?.parentNode,
 ) {
   if (!root) throw new Error('Invalid Gallery input');
-  const control = createControl([...items], container);
+  const heading = root.querySelector('h2, h3, h4, h5, h6');
+  const sectionLabel = heading ? heading.textContent.trim() : 'cards';
+  const control = createControl([...items], container, sectionLabel);
   container.classList.add('gallery');
   [...items].forEach((item) => {
     item.classList.add('gallery--item');
