@@ -46,6 +46,14 @@ describe('Libs', () => {
     const libs = setLibs('/libs', location);
     expect(libs).to.equal('https://awesome--milo--forkedowner.aem.live/libs');
   });
+
+  it('Uses stage libs on stage', () => {
+    const location = {
+      hostname: 'www.stage.adobe.com',
+    };
+    const libs = setLibs('/libs', location);
+    expect(libs).to.equal('/libs');
+  });
 });
 
 describe('Label Metadata for Frictionless Legacy', () => {
