@@ -139,12 +139,20 @@ export class ColorWheelExpress extends ColorWheel {
     markerLayer.appendChild(marker);
   }
 
+  updateMarker(swatch) {
+    if (!swatch?.hsv) return;
+    const { h, s } = swatch.hsv;
+    const smoothH = scientificToArtisticSmooth(h);
+    const radius = (this.wheelRadius * s) / 100;
+    const phi = degToRad(180 - smoothH);
+    const [x, y] = polarToXy(radius, phi);
+  }
+
   updateMarkers() {
     const markerLayer = this.shadowRoot.querySelector('.marker-layer');
     if (!markerLayer || !this.swatches.length) return;
 
-    // Fast path: during drag, only update the dragged marker's position
-    if (this._dragIndex >= 0) {
+    if (this.harmonyRule === 'CUSTOM' && this._dragIndex >= 0) {
       const swatch = this.swatches[this._dragIndex];
       if (!swatch?.hsv) return;
 
@@ -159,15 +167,6 @@ export class ColorWheelExpress extends ColorWheel {
         marker.style.left = `calc(50% + ${x}px)`;
         marker.style.top = `calc(50% + ${y}px)`;
         marker.style.setProperty('--wheel-marker-color', swatch.hex);
-      }
-
-      const spoke = markerLayer.querySelector(`.wheel-spoke[data-spoke="${this._dragIndex}"]`);
-      if (spoke) {
-        const showSpokes = this.harmonyRule !== 'CUSTOM';
-        if (radius > 0 && showSpokes) {
-          spoke.style.width = `${radius}px`;
-          spoke.style.transform = `rotate(${-smoothH}deg)`;
-        }
       }
 
       this.drawLines();
@@ -269,7 +268,6 @@ export class ColorWheelExpress extends ColorWheel {
           this.isMarkerUp = true;
           this.dispatchEvent(new CustomEvent('marker-deselect'));
         }
-        if (this.isSwatchLocked(this.activeSwatchIndex)) return;
         const hex = this.updateMarkerPosition(event);
         if (this.controller) {
           this.controller.setSwatchHex(this.activeSwatchIndex, hex);
@@ -359,12 +357,8 @@ export class ColorWheelExpress extends ColorWheel {
     if (this.controller && typeof this.controller.subscribe === 'function') {
       this._controllerUnsubscribe = this.controller.subscribe((state) => {
         this.swatches = state?.swatches || [];
-        this.baseColorIndex = Number.isInteger(state?.baseColorIndex) ? state.baseColorIndex : null;
-        this.activeSwatchIndex = Number.isInteger(state?.activeSwatchIndex)
-          ? state.activeSwatchIndex
-          : Number.isInteger(state?.baseColorIndex)
-            ? state.baseColorIndex
-            : 0;
+        this.baseColorIndex = state?.baseColorIndex ?? 0;
+        this.activeSwatchIndex = state?.activeSwatchIndex ?? state?.baseColorIndex ?? 0;
         this.harmonyRule = state?.harmonyRule || 'ANALOGOUS';
 
         const active = state?.swatches?.[this.activeSwatchIndex];
