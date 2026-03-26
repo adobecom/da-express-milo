@@ -14,7 +14,7 @@
   --search-bar-height: 40px;
   --search-bar-height-tablet: 48px;
   --search-bar-max-width: 700px;
-  --search-bar-sticky-z-index: 100;
+  --search-bar-sticky-z-index: 1;
   --search-bar-transition-fast: 130ms;
   --search-bar-transition-normal: 200ms;
   --search-bar-icon-size: 20px;
