@@ -37,6 +37,7 @@ const DEFAULT_FEATURES = {
   colorBlindness: false,
   baseColor: false,
   emptyStrip: false,
+  rightActionsHoverOnly: false,
   editColorDisabled: false,
 };
 
@@ -54,6 +55,7 @@ const ALL_FEATURES = {
   colorBlindness: true,
   baseColor: true,
   emptyStrip: true,
+  rightActionsHoverOnly: false,
   editColorDisabled: false,
 };
 
@@ -75,6 +77,7 @@ function normalizeFeatures(features) {
       colorBlindness: set.has('colorBlindness'),
       baseColor: set.has('baseColor'),
       emptyStrip: set.has('emptyStrip'),
+      rightActionsHoverOnly: set.has('rightActionsHoverOnly'),
       editColorDisabled: set.has('editColorDisabled'),
     };
   }
@@ -94,18 +97,18 @@ const ICON_MAP = {
   copy: () => (hasIcon('sp-icon-copy')
     ? html`<sp-icon-copy size="m" aria-hidden="true"></sp-icon-copy>`
     : iconFallback('m11.75,18h-7.5c-1.24023,0-2.25-1.00977-2.25-2.25v-7.5c0-1.24023,1.00977-2.25,2.25-2.25.41406,0,.75.33594.75.75s-.33594.75-.75.75c-.41309,0-.75.33691-.75.75v7.5c0,.41309.33691.75.75.75h7.5c.41309,0,.75-.33691.75-.75,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,1.24023-1.00977,2.25-2.25,2.25Zm-5-13c-.41406,0-.75-.33594-.75-.75,0-1.24023,1.00977-2.25,2.25-2.25.41406,0,.75.33594.75.75s-.33594.75-.75.75c-.41309,0-.75.33691-.75.75,0,.41406-.33594.75-.75.75Zm6.25-1.5h-2c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h2c.41406,0,.75.33594.75.75s-.33594.75-.75.75Zm0,10.5h-2c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h2c.41406,0,.75.33594.75.75s-.33594.75-.75.75Zm2.75,0c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75c.41309,0,.75-.33691.75-.75,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,1.24023-1.00977,2.25-2.25,2.25Zm1.5-9c-.41406,0-.75-.33594-.75-.75,0-.41309-.33691-.75-.75-.75-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75c1.24023,0,2.25,1.00977,2.25,2.25,0,.41406-.33594.75-.75.75Zm0,4.75c-.41406,0-.75-.33594-.75-.75v-2c0-.41406.33594-.75.75-.75s.75.33594.75.75v2c0,.41406-.33594.75-.75.75Zm-10.5,0c-.41406,0-.75-.33594-.75-.75v-2c0-.41406.33594-.75.75-.75s.75.33594.75.75v2c0,.41406-.33594.75-.75.75Zm1.5,4.25c-1.24023,0-2.25-1.00977-2.25-2.25,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,.41309.33691.75.75.75.41406,0,.75.33594.75.75s-.33594.75-.75.75Z')),
-  editTint: () => html`<img class="icon-asset icon-tint" src="/express/code/icons/S2_Icon_BrightnessContrast_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
+  editTint: () => html`<img class="icon-tint" src="/express/code/icons/S2_Icon_Tint_20_N.svg" alt="" aria-hidden="true">`,
   trash: () => (hasIcon('sp-icon-delete')
     ? html`<sp-icon-delete size="m" aria-hidden="true"></sp-icon-delete>`
     : iconFallback('M7 3h6l1 2h3v2H3V5h3l1-2zm-1 6h2v7H6V9zm6 0h2v7h-2V9zM9 9h2v7H9V9z')),
-  drag: () => iconFallback('M7 4a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM7 8.5A1.5 1.5 0 1 0 7 11a1.5 1.5 0 0 0 0-2.5zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zM7 13a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3zm6 0a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3z'),
+  drag: () => html`<img class="icon-drag" src="/express/code/icons/S2_Icon_Drag_20_N.svg" alt="" aria-hidden="true">`,
   add: () => (hasIcon('sp-icon-add')
     ? html`<sp-icon-add size="m" aria-hidden="true"></sp-icon-add>`
     : iconFallback('M9 3h2v6h6v2h-6v6H9v-6H3V9h6V3z')),
 
   colorBlindness: () => html`<span class="color-blindness-placeholder" aria-hidden="true">A11y</span>`,
-  lockOpen: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_LockOpen_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
-  lockClosed: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_Lock_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
+  lockOpen: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_LockOpen_20_N.svg" alt="" aria-hidden="true">`,
+  lockClosed: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_Lock_20_N.svg" alt="" aria-hidden="true">`,
   baseColorCircle: () => (hasIcon('sp-icon-circle')
     ? html`<sp-icon-circle size="m" aria-hidden="true"></sp-icon-circle>`
     : html`<svg class="icon-fallback" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="6.25" fill="none" stroke="currentColor" stroke-width="1.8"></circle></svg>`),
@@ -847,7 +850,8 @@ export class ColorSwatchRail extends LitElement {
       
       const effectiveLocked = isLocked || isBase;
       const textColor = getContrastTextColor(swatch.hex);
-      const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
+      const useLightIcons = textColor.toUpperCase() === '#FFFFFF';
+      const shadow = useLightIcons ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
       const showEdit = (f.colorPicker || f.editTint) && !editDisabled && !effectiveLocked;
       
       
@@ -920,9 +924,9 @@ export class ColorSwatchRail extends LitElement {
       `;
 
       return html`
-        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''}"
-          data-contrast="${textColor === '#ffffff' ? 'dark' : 'light'}"
-          style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${textColor === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
+        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''} ${f.rightActionsHoverOnly ? 'swatch-column--right-actions-hover-only' : ''}"
+          data-contrast="${useLightIcons ? 'dark' : 'light'}"
+          style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${useLightIcons ? 'brightness(0) invert(1)' : 'brightness(0)'}"
           data-swatch-index="${index}"
           tabindex="0"
           role="group"
@@ -1045,12 +1049,56 @@ export class ColorSwatchRail extends LitElement {
 
     
     if (orientation === 'vertical') {
-      const showEmpty = f.emptyStrip && swatches.length < MAX_SWATCHES;
-      const totalSlots = swatches.length + (showEmpty ? 1 : 0);
       const rawVerticalMax = Number(this.verticalMaxPerRow);
       const verticalMaxPerRow = Number.isFinite(rawVerticalMax)
         ? Math.max(1, Math.min(MAX_SWATCHES, Math.floor(rawVerticalMax)))
         : DEFAULT_VERTICAL_MAX_PER_ROW;
+      const totalSwatches = swatches.length;
+      const showEmpty = f.emptyStrip && totalSwatches < MAX_SWATCHES;
+      const isColorWheelVerticalLayout = verticalMaxPerRow === 6;
+
+      if (isColorWheelVerticalLayout) {
+        const useTwoRows = totalSwatches > verticalMaxPerRow;
+
+        if (useTwoRows) {
+          const rowSize = Math.ceil(totalSwatches / 2);
+          const row1Swatches = swatches.slice(0, rowSize);
+          const row2Swatches = swatches.slice(rowSize);
+          const row1Items = row1Swatches.map((swatch, i) => renderSwatch(swatch, i));
+          const row2Items = row2Swatches.map((swatch, i) => renderSwatch(swatch, rowSize + i));
+          const shouldRenderEmptyStrip = showEmpty && (totalSwatches % 2 === 1);
+
+          if (shouldRenderEmptyStrip) {
+            row2Items.push(html`
+              <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
+                @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
+                @focusout=${(ev) => this._handleColumnFocusout(ev)}>
+                <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="Add color" title="Add color">${icon('add')}</button>
+              </div>
+            `);
+          }
+
+          return html`
+            <div class="swatch-rail vertical--two-rows" data-orientation="vertical" style="--vertical-max-per-row: ${rowSize}">
+              ${row1Items}
+              ${row2Items}
+            </div>
+          `;
+        }
+
+        const showSingleRowEmpty = showEmpty && totalSwatches === 0;
+        const railColumns = totalSwatches + (showSingleRowEmpty ? 1 : 0);
+        const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
+
+        return html`
+          <div class="swatch-rail" data-orientation="vertical" style="--rail-columns: ${railColumns}">
+            ${railItems}
+            ${showSingleRowEmpty ? renderEmptyStrip() : ''}
+          </div>
+        `;
+      }
+
+      const totalSlots = totalSwatches + (showEmpty ? 1 : 0);
 
       if (totalSlots > verticalMaxPerRow) {
         const row1Swatches = swatches.slice(0, verticalMaxPerRow);

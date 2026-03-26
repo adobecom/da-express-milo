@@ -61,6 +61,7 @@ let harmonyStateUnsubscribe = null;
 let layoutInstance = null;
 let stripRenderer = null;
 let paletteUnsubscribe = null;
+let swatchRailController = null;
 let imagePanelDestroy = null;
 let baseColorAdapter = null;
 
@@ -346,6 +347,126 @@ async function buildTabs(controller, suggestionsRow) {
   return tabsInstance;
 }
 
+function normalizeSwatchHexes(swatches = []) {
+  return swatches
+    .map((swatch) => swatch?.hex)
+    .filter(Boolean)
+    .map((hex) => (hex.startsWith('#') ? hex.toUpperCase() : `#${hex}`.toUpperCase()));
+}
+
+function createSwatchRailControllerBridge(controller) {
+  let lockedByIndex = new Set();
+  const subscribers = new Set();
+
+  const emit = () => {
+    const snapshot = {
+      ...controller.getState(),
+      lockedByIndex: new Set(lockedByIndex),
+    };
+    subscribers.forEach((callback) => callback(snapshot));
+  };
+
+  const controllerUnsubscribe = controller.subscribe(() => {
+    emit();
+  });
+
+  return {
+    subscribe(callback) {
+      if (typeof callback !== 'function') return () => {};
+      subscribers.add(callback);
+      callback({
+        ...controller.getState(),
+        lockedByIndex: new Set(lockedByIndex),
+      });
+      return () => {
+        subscribers.delete(callback);
+      };
+    },
+    getState() {
+      return {
+        ...controller.getState(),
+        lockedByIndex: new Set(lockedByIndex),
+      };
+    },
+    setState(next = {}) {
+      if (!next || typeof next !== 'object') return;
+
+      if (Object.prototype.hasOwnProperty.call(next, 'lockedByIndex')) {
+        const incoming = next.lockedByIndex instanceof Set
+          ? [...next.lockedByIndex]
+          : Array.isArray(next.lockedByIndex)
+            ? next.lockedByIndex
+            : [];
+        lockedByIndex = new Set(incoming.filter((index) => Number.isInteger(index) && index >= 0));
+      }
+
+      const current = controller.getState();
+
+      if (Array.isArray(next.swatches)) {
+        const nextHexes = normalizeSwatchHexes(next.swatches);
+        if (!nextHexes.length) {
+          emit();
+          return;
+        }
+
+        const requestedBase = Object.prototype.hasOwnProperty.call(next, 'baseColorIndex')
+          ? next.baseColorIndex
+          : current.baseColorIndex;
+        const clampedBase = Number.isInteger(requestedBase)
+          ? Math.min(Math.max(0, requestedBase), nextHexes.length - 1)
+          : 0;
+
+        controller.replaceSwatchesFromHexes(nextHexes, {
+          baseIndex: clampedBase,
+          harmonyRule: current.harmonyRule || 'CUSTOM',
+        });
+
+        if (requestedBase == null) {
+          controller.setBaseColorIndex(null);
+        }
+
+        const requestedActive = Number.isInteger(next.activeSwatchIndex)
+          ? next.activeSwatchIndex
+          : current.activeSwatchIndex;
+        if (Number.isInteger(requestedActive)) {
+          const clampedActive = Math.min(Math.max(0, requestedActive), nextHexes.length - 1);
+          controller.setActiveSwatchIndex(clampedActive);
+        }
+
+        emit();
+        return;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(next, 'baseColorIndex')) {
+        const count = current.swatches?.length || 0;
+        const requestedBase = next.baseColorIndex;
+        if (requestedBase == null) {
+          controller.setBaseColorIndex(null);
+        } else if (Number.isInteger(requestedBase) && count > 0) {
+          controller.setBaseColorIndex(Math.min(Math.max(0, requestedBase), count - 1));
+        }
+      }
+
+      if (Number.isInteger(next.activeSwatchIndex)) {
+        const count = current.swatches?.length || 0;
+        if (count > 0) {
+          controller.setActiveSwatchIndex(Math.min(Math.max(0, next.activeSwatchIndex), count - 1));
+        }
+      }
+
+      if (typeof next.harmonyRule === 'string' && next.harmonyRule !== current.harmonyRule) {
+        controller.setHarmonyRule(next.harmonyRule);
+      }
+
+      emit();
+    },
+    destroy() {
+      controllerUnsubscribe?.();
+      subscribers.clear();
+    },
+  };
+}
+
 function cleanup() {
   harmonyStateUnsubscribe?.();
   harmonyStateUnsubscribe = null;
@@ -353,6 +474,8 @@ function cleanup() {
   harmonyCarouselCleanup = null;
   paletteUnsubscribe?.();
   paletteUnsubscribe = null;
+  swatchRailController?.destroy?.();
+  swatchRailController = null;
   imagePanelDestroy?.();
   imagePanelDestroy = null;
   baseColorAdapter?.destroy?.();
@@ -376,6 +499,7 @@ export default async function decorate(block) {
       harmonyRule: 'CUSTOM',
       baseColorIndex: 0,
     });
+    swatchRailController = createSwatchRailControllerBridge(controller);
 
     const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
 
@@ -417,14 +541,24 @@ export default async function decorate(block) {
 
     stripRenderer = createStripContainerRenderer({
       container: stripHost,
-      data: [controller],
+      data: [swatchRailController],
       config: {
         stripContainerOrientations: ['vertical-responsive'],
         swatchFeatures: {
           copy: true,
           hexCode: true,
+          colorPicker: true,
+          lock: true,
+          trash: true,
+          drag: true,
+          addLeft: true,
+          addRight: true,
+          editTint: true,
+          baseColor: true,
+          emptyStrip: true,
+          rightActionsHoverOnly: true,
         },
-        swatchVerticalMaxPerRow: 5,
+        swatchVerticalMaxPerRow: 6,
       },
     });
     await stripRenderer.render(stripHost);

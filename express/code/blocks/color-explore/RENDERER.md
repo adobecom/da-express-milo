@@ -54,8 +54,23 @@ Swatches config keys used by demo:
 - `swatchOrientation: 'stacked' | 'vertical' | 'two-rows'`
 - `swatchVerticalMaxPerRow: number` (clamped to `1..10`)
 - `swatchFeatures: object` (example demo uses `{ drag: true, trash: true }` on stacked)
+  - Supported flags include:
+    - `copy`, `colorPicker`, `lock`, `hexCode`, `trash`, `drag`, `addLeft`, `addRight`, `editTint`, `colorBlindness`, `baseColor`, `emptyStrip`, `editColorDisabled`
+    - `rightActionsHoverOnly` — when `true`, the right-side top action column is hidden by default and shown on hover/focus
 - `colorBlindness: boolean` (color-blindness matrix mode)
 - `stripContainerOrientations: ['four-rows']` (color-blindness matrix)
+
+Example:
+
+```js
+swatchFeatures: {
+  copy: true,
+  lock: true,
+  drag: true,
+  editTint: true,
+  rightActionsHoverOnly: true,
+}
+```
 
 ## Shared CSS Loading
 
