@@ -7,7 +7,7 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
-import loadCSS from '../../scripts/color-shared/utils/loadCss.js';
+import { getLibs } from '../../scripts/utils.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createColorPaletteParamApi, normalizeHex } from '../../scripts/color-shared/utils/utilities.js';
 
@@ -38,9 +38,26 @@ const PALETTE_EDITOR_DEMO_HOST = 'methomas-sidebar-with-fixes--da-express-milo--
 const PALETTE_EDITOR_DEMO_URL = 'https://methomas-sidebar-with-fixes--da-express-milo--adobecom.aem.live/drafts/methomas/color/color-palette-sidebar';
 const colorPaletteParamApi = createColorPaletteParamApi();
 
+let miloStyleLoaderPromise = null;
+
+async function loadMiloStyle(path) {
+  if (!miloStyleLoaderPromise) {
+    miloStyleLoaderPromise = import(`${getLibs()}/utils/utils.js`)
+      .then(({ loadStyle, getConfig }) => ({ loadStyle, getConfig }));
+  }
+
+  const { loadStyle, getConfig } = await miloStyleLoaderPromise;
+  const codeRoot = getConfig?.()?.codeRoot || '/express/code';
+  const href = path.startsWith('/') ? path : `${codeRoot}/${path}`;
+
+  return new Promise((resolve) => {
+    loadStyle(href, () => resolve());
+  });
+}
+
 const STRIP_SHARED_STYLES = [
-  '/express/code/scripts/color-shared/components/strips/color-strip.css',
-  '/express/code/scripts/color-shared/components/gradients/gradient-strip.css',
+  'scripts/color-shared/components/strips/color-strip.css',
+  'scripts/color-shared/components/gradients/gradient-strip.css',
 ];
 const LOAD_MORE_CLICK_HANDLERS = new WeakMap();
 
@@ -48,7 +65,7 @@ async function loadStripSharedStyles() {
   await Promise.all(
     STRIP_SHARED_STYLES.map(async (href) => {
       try {
-        await loadComponentStyles(href, import.meta.url);
+        await loadMiloStyle(href);
       } catch (error) {
         window.lana?.log(`[ColorExplore] Failed loading shared style ${href}: ${error?.message}`, {
           tags: 'color-explore,css',
