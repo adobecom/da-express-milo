@@ -163,6 +163,7 @@ test.describe('BlogPostsV2Block Test Suite', () => {
       }
 
       await page.waitForLoadState('domcontentloaded');
+      await page.waitForLoadState('load');
       await expect(page).toHaveURL(testUrl);
     });
 
@@ -178,7 +179,9 @@ test.describe('BlogPostsV2Block Test Suite', () => {
 
       // Verify first card has expected structure
       await expect(block.blogCard.first()).toBeVisible();
-      await expect(block.blogCardImage.first()).toBeVisible();
+      // Scroll into view to trigger lazy-loaded images before asserting visibility
+      await block.blogCardImage.first().scrollIntoViewIfNeeded();
+      await expect(block.blogCardImage.first()).toBeVisible({ timeout: 10000 });
       await expect(block.blogCardTitle.first()).toBeVisible();
       await expect(block.blogCardTeaser.first()).toBeVisible();
       await expect(block.blogCardDate.first()).toBeVisible();
@@ -196,9 +199,10 @@ test.describe('BlogPostsV2Block Test Suite', () => {
       const imageCount = await block.blogCardImage.count();
       expect(imageCount).toBeGreaterThan(0);
 
-      // Verify first card image has an img tag
+      // Verify first card image has an img tag (scroll to trigger lazy loading)
       const img = block.blogCardImage.first().locator('img');
-      await expect(img).toBeVisible();
+      await img.scrollIntoViewIfNeeded();
+      await expect(img).toBeVisible({ timeout: 10000 });
     });
 
     await test.step('step-5: Verify blog tags on cards', async () => {

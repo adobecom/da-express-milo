@@ -533,7 +533,6 @@ export class UploadService {
     }), {
       clientId: 'express',
       sampleRate: 100,
-      errorType: 'e',
       severity: 'error',
       tags: 'upload-service',
     });
