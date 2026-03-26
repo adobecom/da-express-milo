@@ -502,6 +502,12 @@ export default async function decorate(block) {
     swatchRailController = createSwatchRailControllerBridge(controller);
 
     const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
+    const isMobile = window.matchMedia('(max-width: 888px)').matches;
+
+    let actionMenuType;
+    if (isDesktop) actionMenuType = 'full';
+    if (isMobile) actionMenuType = 'nav-only';
+    if (!isDesktop && !isMobile) actionMenuType = 'controls-only';
 
     layoutInstance = await createColorToolLayout(block, {
       palette: paletteFromThemeState(controller.getState()),
@@ -514,7 +520,7 @@ export default async function decorate(block) {
       },
       actionMenu: {
         id: 'color-wheel-action-menu',
-        type: 'full',
+        type: actionMenuType,
         activeId: 'palette',
         navLinks: [
           { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
@@ -524,7 +530,16 @@ export default async function decorate(block) {
         controls: [
           { id: 'undo', label: 'Undo' },
           { id: 'redo', label: 'Redo' },
+          { id: 'generate-random', label: 'Generate random' },
+          { id: 'expand', label: 'Maximize' },
         ],
+        onExpand: (expanded) => {
+          if (expanded) {
+            block.dataset.sidebarCollapsed = '';
+          } else {
+            delete block.dataset.sidebarCollapsed;
+          }
+        },
       },
       content: {
         heading: createTag('h1', null, 'Color palette generator and color wheel tool.'),
