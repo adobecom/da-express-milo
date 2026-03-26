@@ -4,7 +4,7 @@
  * Applies Express design system styling to <sp-tabs>.
  */
 
- sp-tabs {
+sp-tabs {
   --spectrum-tabs-font-family: var(--body-font-family);
 }
 

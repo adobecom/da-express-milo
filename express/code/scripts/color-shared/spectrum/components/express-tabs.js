@@ -22,6 +22,10 @@
 import { loadTabs } from '../load-spectrum.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
+<<<<<<< HEAD
+=======
+import { createTag } from '../../../utils.js';
+>>>>>>> color
 
 const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/tabs.css';
 
@@ -33,7 +37,11 @@ const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/tabs.css
  * @param {'s'|'m'|'l'|'xl'} [config.size='m']
  * @param {boolean} [config.quiet=false]
  * @param {'auto'|'compact'} [config.direction='auto']
+<<<<<<< HEAD
  * @param {Array<{label: string, value: string, disabled?: boolean, spIcon?: string, iconSlotHtml?: string}>} [config.tabs=[]]
+=======
+ * @param {Array<{label: string, value: string, disabled?: boolean}>} [config.tabs=[]]
+>>>>>>> color
  * @param {Function} [config.onSelectionChange] — ({ selected }) when tab changes
  * @returns {Promise<{
  *   element: HTMLElement,
@@ -60,6 +68,7 @@ export async function createExpressTabs(config = {}) {
   await loadOverrideStyles('tabs', STYLES_PATH);
 
   const theme = createThemeWrapper();
+<<<<<<< HEAD
   const tabsEl = document.createElement('sp-tabs');
 
   tabsEl.setAttribute('size', size);
@@ -84,6 +93,21 @@ export async function createExpressTabs(config = {}) {
       iconWrapper.innerHTML = iconSlotHtml;
       tab.prepend(iconWrapper);
     }
+=======
+  const tabsEl = createTag('sp-tabs', {
+    size,
+    ...(selected ? { selected } : {}),
+    ...(quiet ? { quiet: '' } : {}),
+    ...(direction !== 'auto' ? { direction } : {}),
+  });
+
+  tabConfigs.forEach(({ label, value, disabled }) => {
+    const tab = createTag('sp-tab', {
+      label,
+      value,
+      ...(disabled ? { disabled: '' } : {}),
+    });
+>>>>>>> color
     tabsEl.appendChild(tab);
   });
 
@@ -113,12 +137,20 @@ export async function createExpressTabs(config = {}) {
     /**
      * Add a tab panel for a given tab value.
      * @param {string} value — matches the tab's value attribute
+<<<<<<< HEAD
      * @param {HTMLElement} content — content to place inside the panel
      * @returns {HTMLElement} — the created sp-tab-panel
      */
     addPanel(value, content) {
       const panel = document.createElement('sp-tab-panel');
       panel.setAttribute('value', value);
+=======
+    * @param {HTMLElement} content — content to place inside the panel
+    * @returns {HTMLElement} — the created sp-tab-panel
+     */
+    addPanel(value, content) {
+      const panel = createTag('sp-tab-panel', { value });
+>>>>>>> color
       if (content) panel.appendChild(content);
       tabsEl.appendChild(panel);
       return panel;

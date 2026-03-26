@@ -1,7 +1,13 @@
 /* ============================================================================
+<<<<<<< HEAD
   Express Action Button Override Styles
   Matches Express design tokens for Spectrum action buttons.
   ============================================================================ */
+=======
+   Express Action Button Override Styles
+   Matches Express design tokens for Spectrum action buttons.
+   ============================================================================ */
+>>>>>>> color
 
 sp-action-button {
   --mod-button-border-radius: var(--corner-radius-100, 8px);

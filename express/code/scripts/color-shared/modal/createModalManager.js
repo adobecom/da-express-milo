@@ -156,12 +156,12 @@ export function createModalManager() {
     const body = createBody();
 
     const closeBtn = createCloseButton();
-    container.appendChild(closeBtn);
     container.appendChild(createHandle());
     if (showTitle) {
       container.appendChild(createTitleEl(title));
     }
     container.appendChild(body);
+    container.appendChild(closeBtn);
 
     if (content !== undefined && content !== null) {
       const node = typeof content === 'function' ? content() : content;
@@ -198,7 +198,9 @@ export function createModalManager() {
       requestAnimationFrame(() => {
         container.classList.add('ax-color-modal-open');
         let focusTarget = null;
-        if (initialFocusSelector && typeof initialFocusSelector === 'string') {
+        if (typeof initialFocusSelector === 'function') {
+          focusTarget = initialFocusSelector(body) || null;
+        } else if (typeof initialFocusSelector === 'string') {
           const el = body.querySelector(initialFocusSelector);
           if (el && typeof el.focus === 'function') focusTarget = el;
         }
@@ -241,20 +243,54 @@ export function createModalManager() {
     });
   }
 
+  async function openPaletteSwatchesModal(palette = {}, options = {}) {
+    const {
+      createPaletteSwatchesModalContent,
+      ensurePaletteContentStyles,
+    } = await import('./createPaletteModalContent.js');
+    await ensurePaletteContentStyles();
+
+    const contentView = createPaletteSwatchesModalContent(palette, options);
+    open({
+      title: (palette?.name && String(palette.name)) || 'Palette',
+      showTitle: false,
+      content: contentView.element,
+      initialFocusSelector: (body) => {
+        contentView.initNav?.();
+        return body.querySelector('.swatch-column');
+      },
+      onClose: () => {
+        contentView.destroy?.();
+      },
+    });
+  }
+
   async function openGradientModal(gradient = {}) {
-    const { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } = await import('./createGradientPickerRebuildContent.js');
+    const {
+      createGradientPickerRebuildContent,
+      loadGradientPickerRebuildStyles,
+    } = await import('./createGradientPickerRebuildContent.js');
     await loadGradientPickerRebuildStyles();
+
+    const likesCount = gradient?.likesCount ?? gradient?.likes ?? '1.2K';
+    const creatorName = gradient?.creator?.name ?? gradient?.creatorName ?? 'nicolagilroy';
+    const creatorImageUrl = gradient?.creator?.imageUrl ?? gradient?.creatorImageUrl;
     open({
       title: (gradient?.name && String(gradient.name)) || 'Gradient',
       showTitle: false,
-      content: () => createGradientPickerRebuildContent(gradient || {}, {}),
-      initialFocusSelector: '.gradient-editor',
+      content: () => createGradientPickerRebuildContent(gradient || {}, {
+        likesCount,
+        creatorName,
+        creatorImageUrl,
+      }),
+      initialFocusSelector: '.gradient-editor-handle',
     });
   }
 
   return {
     open,
     openPaletteModal,
+    openPaletteSwatchesModal,
     openGradientModal,
     close,
     destroy,

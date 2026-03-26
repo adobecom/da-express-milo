@@ -5,9 +5,16 @@
  * multiple Spectrum loaders can coexist without "already registered" errors.
  */
 
+let guardDepth = 0;
+let originalDefine = null;
+
 /**
  * Install a temporary guard that silently skips duplicate custom-element
  * registrations.  Call `restore()` on the returned object when done.
+ *
+ * This guard is re-entrant: concurrent/nested installs share one patched
+ * `customElements.define` and only restore the original when the last guard
+ * is released.
  *
  * Usage:
  *   const guard = installRegistryGuard();
@@ -20,16 +27,40 @@
  * @returns {{ restore: () => void }}
  */
 export function installRegistryGuard() {
-  const original = window.customElements.define.bind(window.customElements);
+  if (!originalDefine) {
+    originalDefine = window.customElements.define.bind(window.customElements);
+  }
 
-  window.customElements.define = function safeDefine(name, ctor, opts) {
-    if (window.customElements.get(name)) return;
-    return original(name, ctor, opts);
-  };
+  if (guardDepth === 0) {
+    window.customElements.define = function safeDefine(name, ctor, opts) {
+      if (window.customElements.get(name)) return;
+
+      try {
+        return originalDefine(name, ctor, opts);
+      } catch (error) {
+        const message = String(error?.message || '');
+        // In async module races the element may have been defined after our
+        // `get()` check; treat this as non-fatal and continue.
+        if (message.includes('has already been used with this registry')) {
+          return;
+        }
+        throw error;
+      }
+    };
+  }
+
+  guardDepth += 1;
+  let restored = false;
 
   return {
     restore() {
-      window.customElements.define = original;
+      if (restored) return;
+      restored = true;
+
+      guardDepth = Math.max(0, guardDepth - 1);
+      if (guardDepth === 0 && originalDefine) {
+        window.customElements.define = originalDefine;
+      }
     },
   };
 }
