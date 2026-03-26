@@ -68,7 +68,7 @@ In addition, `color-explore.js` calls `loadStripSharedStyles()` to ensure that s
 ## Block Init Helpers
 
 `color-explore.js` includes `loadStripSharedStyles()`:
-  - Loads each URL in `STRIP_SHARED_STYLES` via `loadComponentStyles(..., import.meta.url)`
+  - Loads each URL in `STRIP_SHARED_STYLES` via `loadMiloStyle()`
   - Logs non-fatal failures to LANA and continues
 
 ## Where the logic lives

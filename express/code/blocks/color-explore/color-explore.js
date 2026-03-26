@@ -7,7 +7,7 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
-import { getLibs } from '../../scripts/utils.js';
+import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createColorPaletteParamApi, normalizeHex } from '../../scripts/color-shared/utils/utilities.js';
 
@@ -37,23 +37,6 @@ const PALETTE_EDITOR_DEFAULT_URL = '/color-wheel';
 const PALETTE_EDITOR_DEMO_HOST = 'methomas-sidebar-with-fixes--da-express-milo--adobecom.aem.live';
 const PALETTE_EDITOR_DEMO_URL = 'https://methomas-sidebar-with-fixes--da-express-milo--adobecom.aem.live/drafts/methomas/color/color-palette-sidebar';
 const colorPaletteParamApi = createColorPaletteParamApi();
-
-let miloStyleLoaderPromise = null;
-
-async function loadMiloStyle(path) {
-  if (!miloStyleLoaderPromise) {
-    miloStyleLoaderPromise = import(`${getLibs()}/utils/utils.js`)
-      .then(({ loadStyle, getConfig }) => ({ loadStyle, getConfig }));
-  }
-
-  const { loadStyle, getConfig } = await miloStyleLoaderPromise;
-  const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-  const href = path.startsWith('/') ? path : `${codeRoot}/${path}`;
-
-  return new Promise((resolve) => {
-    loadStyle(href, () => resolve());
-  });
-}
 
 const STRIP_SHARED_STYLES = [
   'scripts/color-shared/components/strips/color-strip.css',
