@@ -24,6 +24,7 @@ export const style = css`
     overflow: hidden;
   }
   
+  // TODO: This causes a problem on desktop with 5 colors (adds a scroll)
   .swatch-rail:has(.add-slot--column-left),
   .swatch-rail:has(.add-slot--column-right) {
     overflow: visible;
