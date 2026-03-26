@@ -12,9 +12,6 @@ import { createUploadDropzone } from '../../scripts/color-shared/components/imag
 
 const EXTRACT_CANVAS_MAX = 320;
 
-const DEFAULT_SUGGESTIONS_EMPTY_HINT =
-  'No sample images yet. Add sample <picture> elements where your page or block defines suggestions (see your authoring documentation).';
-
 function preventDefaults(event) {
   event.preventDefault();
   event.stopPropagation();
@@ -98,10 +95,8 @@ function getPictureSource(picture) {
  * Suggested images strip (same structure as color-extract block suggestions row).
  * @param {HTMLElement | null} row - Row with label cell + list cell with <picture> nodes, or null
  * @param {(url: string) => void} onSelect
- * @param {{ showEmptyHint?: boolean, emptyHintText?: string }} [options] - If showEmptyHint, append authoring hint when there are no pictures
  */
-export function buildSuggestedImages(row, onSelect, options = {}) {
-  const { showEmptyHint = false, emptyHintText } = options;
+export function buildSuggestedImages(row, onSelect) {
   const wrapper = createTag('div', { class: 'color-extract-suggestions' });
   const label = row?.children?.[0]
     || createTag('div', {}, 'Don\u2019t have an image? Try one of ours:');
@@ -159,14 +154,6 @@ export function buildSuggestedImages(row, onSelect, options = {}) {
 
   wrapper.append(list);
 
-  if (!pictures.length && showEmptyHint) {
-    const hint = createTag('p', {
-      class: 'color-extract-suggestions-hint',
-    }, emptyHintText || DEFAULT_SUGGESTIONS_EMPTY_HINT);
-    hint.setAttribute('role', 'note');
-    wrapper.append(hint);
-  }
-
   return wrapper;
 }
 
@@ -188,8 +175,6 @@ function setBackground(bgWrapper, src) {
  * @param {object} options.controller - ColorThemeExpressController instance
  * @param {number} [options.maxColors]
  * @param {HTMLElement | null} [options.suggestionsRowEl]
- * @param {boolean} [options.suggestionsShowEmptyHint] - When true and there are no pictures, show an authoring hint
- * @param {string} [options.suggestionsEmptyHintText] - Overrides default empty-suggestions copy
  * @returns {{ element: HTMLElement, destroy: Function }}
  */
 export function createImageExtractComponent(options = {}) {
@@ -380,10 +365,6 @@ export function createImageExtractComponent(options = {}) {
     options.suggestionsRowEl || null,
     (url) => {
       dropzone.handleUrl(url);
-    },
-    {
-      showEmptyHint: options.suggestionsShowEmptyHint === true,
-      emptyHintText: options.suggestionsEmptyHintText,
     },
   );
 

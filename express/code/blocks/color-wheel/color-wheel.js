@@ -277,6 +277,75 @@ function paletteFromThemeState(state) {
   };
 }
 
+function buildBaseColorContent(controller) {
+  baseColorAdapter?.destroy?.();
+  baseColorAdapter = null;
+
+  const state = controller.getState();
+  const baseColor = swatchHexListFromState(state)[0];
+  const adapter = createBaseColorAdapter(
+    baseColor,
+    'HEX',
+    {
+      onColorChange: (detail) => {
+        if (!detail?.hex) return;
+        controller.setBaseColor(detail.hex);
+        controller.setSwatchHex(0, detail.hex);
+      },
+      onLockChange: () => {
+        // TODO
+      },
+    },
+  );
+  baseColorAdapter = adapter;
+
+  const wrapper = createTag('div', { class: 'base-color-content' });
+  wrapper.appendChild(adapter.element);
+  return wrapper;
+}
+
+function buildImageContent(controller, suggestionsRow) {
+  const image = createTag('div', { class: 'image-content' });
+  const panel = createImageExtractComponent({
+    controller,
+    maxColors: Math.max(1, controller.getState().swatches?.length || 5),
+    suggestionsRowEl: suggestionsRow,
+  });
+  imagePanelDestroy = panel.destroy;
+  image.appendChild(panel.element);
+  return image;
+}
+
+async function buildColorWheelContent(controller) {
+  const colorWheel = createTag('div', { class: 'color-wheel-content' });
+  const baseHex = controller.getState().swatches?.[controller.getState().baseColorIndex]?.hex || '#FF0000';
+  const adapter = createColorWheelExpressAdapter(baseHex, {}, { controller });
+  const harmonySelector = await buildHarmonySelector(controller);
+
+  colorWheel.append(adapter.element, harmonySelector);
+
+  return colorWheel;
+}
+
+async function buildTabs(controller, suggestionsRow) {
+  const tabsInstance = await createExpressTabs({
+    selected: 'color-wheel',
+    size: 'm',
+    quiet: true,
+    tabs: [
+      { label: 'Base color', value: 'base-color', iconSlotHtml: BASE_COLOR_ICON },
+      { label: 'Image', value: 'image', spIcon: 'sp-icon-image' },
+      { label: 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
+    ],
+  });
+
+  tabsInstance.addPanel('color-wheel', await buildColorWheelContent(controller));
+  tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow));
+  tabsInstance.addPanel('base-color', buildBaseColorContent(controller));
+
+  return tabsInstance;
+}
+
 function cleanup() {
   harmonyStateUnsubscribe?.();
   harmonyStateUnsubscribe = null;
@@ -301,95 +370,13 @@ export default async function decorate(block) {
   block.innerHTML = '';
   block.className = 'color-wheel';
 
-  function buildBaseColorContent(controller) {
-    baseColorAdapter?.destroy?.();
-    baseColorAdapter = null;
-
-    const state = controller.getState();
-    const baseColor = swatchHexListFromState(state)[0];
-    const adapter = createBaseColorAdapter(
-      baseColor,
-      'HEX',
-      {
-        onColorChange: (detail) => {
-          if (!detail?.hex) return;
-          controller.setBaseColor(detail.hex);
-          controller.setSwatchHex(0, detail.hex);
-        },
-        onLockChange: () => {
-          // TODO
-        },
-      },
-    );
-    baseColorAdapter = adapter;
-
-    const wrapper = createTag('div', { class: 'base-color-content' });
-    wrapper.appendChild(adapter.element);
-    return wrapper;
-  }
-
-  function buildImageContent(controller) {
-    const image = createTag('div', { class: 'image-content' });
-    const panel = createImageExtractComponent({
-      controller,
-      maxColors: Math.max(1, controller.getState().swatches?.length || 5),
-      suggestionsRowEl: suggestionsRow,
-      suggestionsShowEmptyHint: true,
-      suggestionsEmptyHintText:
-        'No sample images yet. Add a table row to this block: first column "Suggestions", second column with one or more <picture> elements. See express/code/blocks/color-wheel/IMAGE-SUGGESTIONS.md.',
-    });
-    imagePanelDestroy = panel.destroy;
-    image.appendChild(panel.element);
-    return image;
-  }
-
-  async function buildColorWheelContent(controller) {
-    const colorWheel = createTag('div', { class: 'color-wheel-content' });
-
-    const baseHex = controller.getState().swatches?.[controller.getState().baseColorIndex]?.hex || '#FF0000';
-    const adapter = createColorWheelExpressAdapter(baseHex, {}, { controller });
-    const harmonySelector = await buildHarmonySelector(controller);
-
-    colorWheel.append(adapter.element, harmonySelector);
-
-    return colorWheel;
-  }
-
-  async function buildTabs(controller) {
-    const tabsInstance = await createExpressTabs({
-      selected: 'color-wheel',
-      size: 'm',
-      quiet: true,
-      tabs: [
-        { label: 'Base color', value: 'base-color', iconSlotHtml: BASE_COLOR_ICON },
-        { label: 'Image', value: 'image', spIcon: 'sp-icon-image' },
-        { label: 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
-      ],
-    });
-
-    tabsInstance.addPanel('color-wheel', await buildColorWheelContent(controller));
-    tabsInstance.addPanel('image', buildImageContent(controller));
-    tabsInstance.addPanel('base-color', buildBaseColorContent(controller));
-
-    return tabsInstance;
-  }
-
   try {
     const controller = new ColorThemeExpressController({
-      swatches: ['#FFFF00', '#FF0000', '#FF7F00', '#00A8FF', '#7F00FF'],
+      swatches: ['#FFFF00', '#FF0000', '#FF7F00', '#00A8FF', '#7F00FF'], //  Replace with palette from query param or design's list
       harmonyRule: 'CUSTOM',
       baseColorIndex: 0,
     });
 
-    const navLinks = [
-      { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
-      { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/contrast-checker' },
-      { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/express/colors/color-blindness-simulator' },
-    ];
-    const controls = [
-      { id: 'undo', label: 'Undo' },
-      { id: 'redo', label: 'Redo' },
-    ];
     const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
 
     layoutInstance = await createColorToolLayout(block, {
@@ -405,8 +392,15 @@ export default async function decorate(block) {
         id: 'color-wheel-action-menu',
         type: 'full',
         activeId: 'palette',
-        navLinks,
-        controls,
+        navLinks: [
+          { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
+          { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/contrast-checker' },
+          { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/express/colors/color-blindness-simulator' },
+        ],
+        controls: [
+          { id: 'undo', label: 'Undo' },
+          { id: 'redo', label: 'Redo' },
+        ],
       },
       content: {
         heading: createTag('h1', null, 'Color palette generator and color wheel tool.'),
@@ -415,9 +409,7 @@ export default async function decorate(block) {
       },
     });
 
-    block.classList.add('ax-shell-host');
-
-    const tabs = await buildTabs(controller);
+    const tabs = await buildTabs(controller, suggestionsRow);
     layoutInstance.slots.sidebar.appendChild(tabs.element);
 
     const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
@@ -437,6 +429,7 @@ export default async function decorate(block) {
     });
     await stripRenderer.render(stripHost);
 
+    // What is this?
     paletteUnsubscribe = controller.subscribe((state) => {
       layoutInstance?.context?.set('palette', paletteFromThemeState(state));
       if (!baseColorAdapter?.setPalette) return;
@@ -454,6 +447,7 @@ export default async function decorate(block) {
       }
     });
 
+    block.classList.add('ax-shell-host');
     block.dataset.shellState = 'ready';
   } catch (error) {
     window.lana?.log(`Color Wheel init error: ${error.message}`, {
