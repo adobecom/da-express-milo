@@ -178,6 +178,10 @@ export default async function decorate(block) {
         block.dispatchEvent(new CustomEvent('floating-search:clear', {
           bubbles: true,
         }));
+        block.dispatchEvent(new CustomEvent('floating-search:submit', {
+          detail: { query: '' },
+          bubbles: true,
+        }));
       },
       onSuggestionSelect: ({ suggestion }) => {
         const query = suggestion.label || '';

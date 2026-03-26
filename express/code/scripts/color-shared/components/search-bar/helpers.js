@@ -449,10 +449,8 @@ function initSearchHandlers(elements, state, callbacks, actions) {
   cleanupRegistry.addEventListener(input, 'keydown', (event) => {
     if ((event.key === 'Enter' || event.keyCode === 13) && !state.showSuggestions) {
       event.preventDefault();
-      if (state.query.trim()) {
-        callbacks.onSubmit?.({ query: state.query.trim() });
-        hideSuggestions();
-      }
+      callbacks.onSubmit?.({ query: state.query.trim() });
+      hideSuggestions();
     }
   });
 
@@ -469,10 +467,8 @@ function initSearchHandlers(elements, state, callbacks, actions) {
 
   cleanupRegistry.addEventListener(form, 'submit', (event) => {
     event.preventDefault();
-    if (state.query.trim()) {
-      callbacks.onSubmit?.({ query: state.query.trim() });
-      hideSuggestions();
-    }
+    callbacks.onSubmit?.({ query: state.query.trim() });
+    hideSuggestions();
   });
 
   return () => cleanupRegistry.cleanup();
