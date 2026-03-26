@@ -231,6 +231,7 @@ main .blog-posts-v2 .blog-hero-card .blog-card-image {
 }
 
 main .blog-posts-v2 .blog-card .blog-card-image img {
+  display: block;
   object-fit: cover;
   height: auto;
   width: 100%;

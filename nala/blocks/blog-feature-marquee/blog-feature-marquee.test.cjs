@@ -31,6 +31,8 @@ test.describe('BlogFeatureMarqueeBlock Test Suite', () => {
         return;
       }
 
+      // Wait for async decoration (blog index fetch) to complete
+      await expect(block.block).toHaveClass(/blog-feature-marquee-ready/, { timeout: 15000 });
       await expect(block.block).toBeVisible();
       const sem = data.semantic;
 
