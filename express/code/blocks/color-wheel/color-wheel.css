@@ -264,13 +264,13 @@ color-wheel-express {
 }
 
 .color-wheel-harmony-carousel-host .simple-carousel-fader-left {
-  background: linear-gradient(90deg, #FFF 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
+  background: linear-gradient(90deg, #FFFFFF 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
   padding-inline-start: var(--spacing-100);
   justify-content: flex-start;
 }
 
 .color-wheel-harmony-carousel-host .simple-carousel-fader-right {
-  background: linear-gradient(270deg, #FFF 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
+  background: linear-gradient(270deg, #FFFFFF 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
   padding-inline-end: var(--spacing-100);
   justify-content: flex-end;
 }
