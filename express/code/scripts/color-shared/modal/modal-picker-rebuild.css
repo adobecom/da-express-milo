@@ -258,6 +258,27 @@
   margin-top: var(--spacing-200);
 }
 
+.ax-color-modal-content .modal-palette-toolbar .color-floating-toolbar-container {
+  width: 100%;
+  min-width: 0;
+}
+
+.ax-color-modal-content .modal-palette-toolbar .color-floating-toolbar-container > sp-theme {
+  display: block;
+  width: 100%;
+  min-width: 0;
+}
+
+.ax-color-modal-content .modal-palette-toolbar .ax-toolbar {
+  inline-size: 100%;
+  max-inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.ax-color-modal-content .modal-palette-toolbar .ax-toolbar-main {
+  width: 100%;
+}
+
 .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal {
   display: flex;
   flex-direction: column;
@@ -351,6 +372,14 @@
   display: flex;
   align-items: center;
   gap: var(--spacing-100);
+}
+
+.ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal sp-action-button[quiet] {
+  --mod-actionbutton-content-color-default: var(--color-gray-800-variant);
+  --mod-actionbutton-content-color-hover: var(--color-gray-800-variant);
+  --mod-actionbutton-content-color-down: var(--color-gray-800-variant);
+  --mod-actionbutton-content-color-focus: var(--color-gray-800-variant);
+  color: var(--color-gray-800-variant);
 }
 
 .ax-color-modal-content .ax-action-btn {
@@ -572,6 +601,12 @@
     flex-wrap: nowrap;
   }
 
+  .ax-color-modal-content .modal-palette-toolbar .ax-toolbar-main {
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--spacing-200);
+  }
+
   .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal {
     flex-direction: row;
     align-items: center;
@@ -689,6 +724,6 @@
 
 @media (prefers-reduced-motion: reduce) {
   .ax-color-modal-content .color-handle-fill {
-    transition: none !important;
+    transition: none;
   }
 }

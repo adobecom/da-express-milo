@@ -46,6 +46,7 @@ describe('createColorToolLayout', () => {
       const layout = await createColorToolLayout(container);
       expect(layout.slots).to.be.an('object');
       expect(layout.context).to.be.an('object');
+      expect(layout.actionMenu).to.be.a('function');
       expect(layout.getSlot).to.be.a('function');
       expect(layout.getSlotNames).to.be.a('function');
       expect(layout.hasSlot).to.be.a('function');

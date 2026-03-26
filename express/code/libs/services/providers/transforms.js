@@ -95,6 +95,8 @@ export function themeToGradient(theme) {
     position: colors.length > 1 ? index / (colors.length - 1) : 0,
   }));
 
+  const tags = (theme.tags || []).map((t) => (typeof t === 'string' ? t : t?.value)).filter(Boolean);
+
   return {
     id: theme.id,
     name: theme.name || 'Unnamed Theme',
@@ -102,9 +104,15 @@ export function themeToGradient(theme) {
     angle: 90,
     colorStops,
     coreColors: colors,
-    likes: theme.likes ?? theme.appreciations ?? 0,
-    creator: theme.author?.name || '',
-    tags: theme.tags || [],
+    likes: theme.likeCount ?? theme.like?.count ?? 0,
+    liked: theme.like?.user ?? false,
+    creator: {
+      name: theme.author?.name || '',
+      guid: theme.author?.guid || '',
+      imageUrl: null, // avatar not in API; UI falls back to placeholder
+    },
+    tags,
+    href: theme.href || null,
     _source: 'kuler',
     _theme: theme,
   };
@@ -163,6 +171,8 @@ export function gradientApiResponseToGradient(apiData) {
 
   const coreColors = colorStops.map((s) => s.color);
 
+  const tags = (apiData.tags || []).map((t) => (typeof t === 'string' ? t : t?.value)).filter(Boolean);
+
   return {
     id: apiData.id,
     name: apiData.name || 'Unnamed Gradient',
@@ -172,9 +182,15 @@ export function gradientApiResponseToGradient(apiData) {
     interpolation: rendition.interpolation || 'linear',
     colorStops,
     coreColors,
-    likes: apiData.likes ?? apiData.appreciations ?? 0,
-    creator: apiData.author?.name || '',
-    tags: apiData.tags || [],
+    likes: apiData.likeCount ?? apiData.like?.count ?? 0,
+    liked: apiData.like?.user ?? false,
+    creator: {
+      name: apiData.author?.name || '',
+      guid: apiData.author?.guid || '',
+      imageUrl: null, // avatar not in API; UI falls back to placeholder
+    },
+    tags,
+    href: apiData.href || null,
     hasNextPage: apiData.hasNextPage,
     _source: 'kuler-gradient',
     _theme: apiData,

@@ -125,6 +125,20 @@ class ColorEdit extends LitElement {
     }));
   }
 
+  _emitColorChangeEnd() {
+    this.dispatchEvent(new CustomEvent('color-change-end', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        hex: this._hex,
+        index: this.selectedIndex,
+        hue: this._hue,
+        saturation: this._saturation,
+        brightness: this._brightness,
+      },
+    }));
+  }
+
   _announceColorChange() {
     clearTimeout(this._announceTimer);
     this._announceTimer = setTimeout(() => {
@@ -195,6 +209,21 @@ class ColorEdit extends LitElement {
       const focusable = sheet?.querySelector('input, button, [tabindex]:not([tabindex="-1"]), sp-button');
       if (focusable) focusable.focus();
       if (sheet) this._focusTrap = trapFocus(sheet);
+    });
+  }
+
+  async focusInput() {
+    await this.updateComplete;
+    await customElements.whenDefined('sp-textfield');
+    const hexField = this.shadowRoot?.querySelector('.ce-hex-field');
+    if (!hexField) return;
+    await hexField.updateComplete;
+    requestAnimationFrame(() => {
+      const input = hexField.focusElement || hexField.shadowRoot?.querySelector('input');
+      if (input) {
+        input.focus();
+        input.select();
+      }
     });
   }
 
@@ -301,22 +330,24 @@ class ColorEdit extends LitElement {
             <span class="ce-mode-chevron"><img src="/express/code/icons/S2_Icon_ChevronDown_20_N.svg" alt="" width="14" height="14" aria-hidden="true" /></span>
           </button>
           ${this._modeMenuOpen ? html`
-            <sp-menu
-              id="ce-mode-menu"
-              role="listbox"
-              selects="single"
-              size="s"
-              label="Color mode"
-              @change=${this._onModeMenuChange}
-              @keydown=${this._onModeMenuKeyDown}
-            >
-              ${COLOR_MODES.map((m) => html`
-                <sp-menu-item
-                  value=${m}
-                  ?selected=${m === this.colorMode}
-                >${m}</sp-menu-item>
-              `)}
-            </sp-menu>
+            <sp-theme system="spectrum-two" color="light" scale="medium">
+              <sp-menu
+                id="ce-mode-menu"
+                role="listbox"
+                selects="single"
+                size="s"
+                label="Color mode"
+                @change=${this._onModeMenuChange}
+                @keydown=${this._onModeMenuKeyDown}
+              >
+                ${COLOR_MODES.map((m) => html`
+                  <sp-menu-item
+                    value=${m}
+                    ?selected=${m === this.colorMode}
+                  >${m}</sp-menu-item>
+                `)}
+              </sp-menu>
+            </sp-theme>
           ` : nothing}
         </div>
       </div>
@@ -328,30 +359,33 @@ class ColorEdit extends LitElement {
     return html`
       <div class="ce-palette-section">
         <span class="ce-palette-label">Palette colors</span>
-        <sp-swatch-group
-          size="s"
-          cornerRadius="partial"
-        >
-          ${this.palette.map((hex, i) => {
-            const validHex = hex.startsWith('#') ? hex : `#${hex}`;
-            return html`
-              <sp-swatch
-                border="light"
-                cornerRounding="partial"
-                color=${validHex}
-                value=${String(i)}
-                ?selected=${i === this.selectedIndex}
-                @click=${() => this._onSwatchClick(i)}
-                aria-label="Color ${validHex}"
-              ></sp-swatch>
-            `;
-          })}
-        </sp-swatch-group>
+        <sp-theme system="spectrum-two" color="light" scale="medium">
+          <sp-swatch-group
+            size="s"
+            cornerRadius="partial"
+          >
+            ${this.palette.map((hex, i) => {
+              const validHex = hex.startsWith('#') ? hex : `#${hex}`;
+              return html`
+                <sp-swatch
+                  border="light"
+                  cornerRounding="partial"
+                  color=${validHex}
+                  value=${String(i)}
+                  ?selected=${i === this.selectedIndex}
+                  @click=${() => this._onSwatchClick(i)}
+                  aria-label="Color ${validHex}"
+                ></sp-swatch>
+              `;
+            })}
+          </sp-swatch-group>
+        </sp-theme>
       </div>
     `;
   }
 
   _onBaseColorChange(e) {
+    e.stopPropagation();
     const { hue, saturation, brightness } = e.detail;
     this._hue = hue;
     this._saturation = saturation;
@@ -411,6 +445,8 @@ class ColorEdit extends LitElement {
     if (!hex.match(/^[0-9A-Fa-f]{6}$/)) {
       e.target.value = this._hex;
       this.requestUpdate();
+    } else {
+      this._emitColorChangeEnd();
     }
   }
 

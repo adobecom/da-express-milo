@@ -1,7 +1,5 @@
 import { createEventBus } from '../utils/createEventBus.js';
 
-const callbackMeta = new WeakMap();
-
 function parseSelector(selector) {
   return selector.split('.');
 }
@@ -9,6 +7,7 @@ function parseSelector(selector) {
 export default function createContextProvider(host = document) {
   const store = new Map();
   const listeners = new Map();
+  const callbackMeta = new WeakMap();
   const bus = createEventBus(host, 'context');
 
   function get(key) {

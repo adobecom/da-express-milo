@@ -12,6 +12,7 @@ import {
   simulateHex,
 } from '../services/createColorBlindnessService.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
+import { announceToScreenReader } from '../spectrum/utils/a11y.js';
 
 const COLORS_PER_ROW_TWO_ROWS = 5;
 
@@ -117,10 +118,13 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
       const titleCell = createTag('div', {
         class: `strip-color-blindness-row__title-cell strip-color-blindness-row--${type} ${pairs.length > 0 ? 'fail' : 'pass'}`,
       });
-      const label = createTag('span', { class: 'strip-color-blindness-row__label' });
+      const label = createTag('span', { class: 'strip-color-blindness-row__label', tabindex: '0' });
       label.textContent = TYPE_LABELS[type];
       label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-      label.setAttribute('aria-label', DEFECT_DEFINITIONS[type]);
+      label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      label.addEventListener('focus', () => {
+        announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      });
       titleCell.appendChild(label);
       titleCell.style.gridColumn = '1';
       titleCell.style.gridRow = String(gridRow);
@@ -136,6 +140,8 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
         const swatch = createTag('div', {
           class: `strip-color-blindness-swatch${conflicting.has(i) ? ' conflict' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
+          role: 'img',
+          'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
         });
         if (conflicting.has(i)) swatch.appendChild(createConflictIcon());
         swatchesWrap.appendChild(swatch);
@@ -170,10 +176,13 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
     const titleCell = createTag('div', {
       class: `strip-four-rows-cb-title strip-four-rows-cb-title--${type}`,
     });
-    const label = createTag('span', { class: 'strip-four-rows-cb-title__label' });
+    const label = createTag('span', { class: 'strip-four-rows-cb-title__label', tabindex: '0' });
     label.textContent = TYPE_LABELS[type];
     label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-    label.setAttribute('aria-label', DEFECT_DEFINITIONS[type]);
+    label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+    label.addEventListener('focus', () => {
+      announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+    });
     titleCell.style.gridColumn = '1';
     titleCell.style.gridRow = String(gridRow);
     titleCell.appendChild(label);
@@ -196,25 +205,134 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
   };
 }
 
+function createMobileCBLayout(controller, maxColumns = FOUR_ROWS_CB_COLS) {
+  const container = createTag('div', { class: 'strip-cb-mobile-layout' });
+
+  const header = createTag('div', { class: 'strip-cb-mobile-header' });
+  const paletteLabel = createTag('span', {
+    class: 'strip-cb-mobile-header__label--palette',
+  });
+  paletteLabel.textContent = 'Palette';
+  header.appendChild(paletteLabel);
+
+  TYPE_ORDER.forEach((type) => {
+    const wrap = createTag('div', { class: 'strip-cb-mobile-header__label-wrap' });
+    const label = createTag('span', { class: 'strip-cb-mobile-header__label', tabindex: '0' });
+    label.textContent = TYPE_LABELS[type];
+    label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
+    label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+    label.addEventListener('focus', () => {
+      announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+    });
+    wrap.appendChild(label);
+    header.appendChild(wrap);
+  });
+  container.appendChild(header);
+
+  const rowsWrap = createTag('div', { class: 'strip-cb-mobile-rows' });
+  container.appendChild(rowsWrap);
+
+  const unsub = controller?.subscribe?.((state) => {
+    const allColors = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
+    if (!allColors.length) return;
+    const colors = allColors.slice(0, maxColumns);
+    rowsWrap.innerHTML = '';
+
+    const conflictsByType = {};
+    TYPE_ORDER.forEach((type) => {
+      conflictsByType[type] = getConflictingIndices(getConflictPairs(colors, type));
+    });
+
+    colors.forEach((hex, colorIndex) => {
+      const row = createTag('div', { class: 'strip-cb-mobile-row' });
+
+      const textColor = getContrastTextColor(hex);
+      const paletteCell = createTag('div', {
+        class: 'strip-cb-mobile-row__palette',
+        style: `background-color: ${hex};`,
+        role: 'button',
+        tabindex: '0',
+        'aria-label': `Edit color ${hex.toUpperCase()}`,
+      });
+      const hexLabel = createTag('span', {
+        class: 'strip-cb-mobile-row__hex',
+        style: `color: ${textColor};`,
+      });
+      hexLabel.textContent = hex.toUpperCase();
+      paletteCell.appendChild(hexLabel);
+      const editSwatch = (e) => {
+        e.preventDefault();
+        paletteCell.dispatchEvent(new CustomEvent('mobile-cb-swatch-edit', {
+          bubbles: true,
+          detail: {
+            index: colorIndex,
+            anchorEl: paletteCell,
+            anchorRect: hexLabel.getBoundingClientRect(),
+          },
+        }));
+      };
+      paletteCell.addEventListener('click', editSwatch);
+      paletteCell.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') editSwatch(e);
+      });
+      row.appendChild(paletteCell);
+
+      TYPE_ORDER.forEach((type) => {
+        const sim = simulateHex(hex, type);
+        const conflicting = conflictsByType[type];
+        const simCell = createTag('div', {
+          class: `strip-cb-mobile-row__sim${conflicting.has(colorIndex) ? ' conflict' : ''}`,
+          style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
+          role: 'img',
+          'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
+        });
+        if (conflicting.has(colorIndex)) simCell.appendChild(createConflictIcon());
+        row.appendChild(simCell);
+      });
+
+      rowsWrap.appendChild(row);
+    });
+
+    refreshColorBlindnessLabelTooltips(container);
+  });
+
+  container.cleanup = () => {
+    clearTooltipDestroys(container);
+    unsub?.();
+  };
+
+  return container;
+}
+
 export function createFourRowsColorBlindnessLayout(adapter) {
+  const controller = getAdapterController(adapter);
+  // eslint-disable-next-line no-use-before-define
+  const summary = createConflictSummaryBlock(controller, FOUR_ROWS_CB_COLS);
+  const outer = createTag('div', { class: 'strip-with-color-blindness strip-with-color-blindness--four-rows' });
+
+  const desktopLayout = createTag('div', { class: 'strip-cb-desktop-layout' });
   const rootClass = 'strip-with-color-blindness strip-with-color-blindness--matrix strip-with-color-blindness--four-rows';
   const gridContainer = createTag('div', { class: rootClass });
   const railContainer = createTag('div', { class: 'strip-variant--four-rows__rail-container' });
   railContainer.appendChild(adapter.element);
   gridContainer.appendChild(railContainer);
-  const controller = getAdapterController(adapter);
-  // eslint-disable-next-line no-use-before-define
-  const summary = createConflictSummaryBlock(controller, FOUR_ROWS_CB_COLS);
-  const outer = createTag('div', { class: 'strip-with-color-blindness strip-with-color-blindness--four-rows' });
-  outer.appendChild(gridContainer);
-  outer.appendChild(summary);
+  desktopLayout.appendChild(gridContainer);
+  outer.appendChild(desktopLayout);
+
+  let mobileLayout = null;
   if (controller) {
+    mobileLayout = createMobileCBLayout(controller, FOUR_ROWS_CB_COLS);
+    outer.appendChild(mobileLayout);
+
     createFourRowsColorBlindnessTitlesOnly(controller, gridContainer, railContainer);
     outer.cleanup = () => {
       gridContainer.unsubFourRowsTitles?.();
+      mobileLayout.cleanup?.();
       summary.cleanup?.();
     };
   }
+
+  outer.appendChild(summary);
   return outer;
 }
 
@@ -236,10 +354,13 @@ function createColorBlindnessRows(controller, orientation) {
         class: `strip-color-blindness-row strip-color-blindness-row--${type} ${rowFails ? 'fail' : 'pass'} strip-color-blindness-row--two-rows`,
       });
       const header = createTag('div', { class: 'strip-color-blindness-row__header' });
-      const label = createTag('span', { class: 'strip-color-blindness-row__label' });
+      const label = createTag('span', { class: 'strip-color-blindness-row__label', tabindex: '0' });
       label.textContent = TYPE_LABELS[type];
       label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-      label.setAttribute('aria-label', DEFECT_DEFINITIONS[type]);
+      label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      label.addEventListener('focus', () => {
+        announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      });
       header.appendChild(label);
       const swatchesContainer = createTag('div', { class: 'strip-color-blindness-row__grid' });
       const rowColors = colors.slice(0, COLORS_PER_ROW_TWO_ROWS);
@@ -253,6 +374,8 @@ function createColorBlindnessRows(controller, orientation) {
         const swatch = createTag('div', {
           class: `strip-color-blindness-swatch${conflicting.has(colIndex) ? ' conflict' : ''}${isPlaceholder ? ' strip-color-blindness-swatch--placeholder' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
+          role: 'img',
+          'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
         });
         if (conflicting.has(colIndex)) swatch.appendChild(createConflictIcon());
         swatchesContainer.appendChild(swatch);
@@ -407,6 +530,7 @@ export function createStripContainerRenderer(options) {
     : null;
 
   const colorBlindness = config?.colorBlindness === true;
+  const { onColorChangeEnd } = options;
 
   let listElement = null;
   let activeColorEditor = null;
@@ -493,6 +617,9 @@ export function createStripContainerRenderer(options) {
         };
         controller.setState({ swatches: nextSwatches });
       },
+      onColorChangeEnd: () => {
+        onColorChangeEnd?.();
+      },
       onClose: () => {
         closeActiveColorEditor();
       },
@@ -501,8 +628,8 @@ export function createStripContainerRenderer(options) {
     const editorElement = adapter.getElement?.() || adapter.element;
     if (mobile) {
       document.body.appendChild(editorElement);
-      adapter.show?.();
       activeColorEditor = { adapter, mobile: true };
+      requestAnimationFrame(() => adapter.show?.());
       return;
     }
 
@@ -587,6 +714,16 @@ export function createStripContainerRenderer(options) {
       el = orientation === 'four-rows'
         ? createFourRowsColorBlindnessLayout(adapter)
         : createStripWithColorBlindness(adapter, orientation);
+
+      const controller = getAdapterController(adapter);
+      if (controller) {
+        const onMobileCBEdit = (event) => {
+          const { index, anchorEl, anchorRect } = event.detail;
+          openColorEditorForRail(el, controller, index, anchorEl, anchorRect);
+        };
+        el.addEventListener('mobile-cb-swatch-edit', onMobileCBEdit);
+        cleanupHandlers.push(() => el.removeEventListener('mobile-cb-swatch-edit', onMobileCBEdit));
+      }
     }
     listElement.appendChild(el);
   }
