@@ -116,7 +116,7 @@ main .section .discover-cards {
 }
 .discover-cards .center-title {
     text-align: center;
-    font-size: var(--heading-font-size-s);
+    font-size: var(--heading-font-size-m);
     padding: 0 var(--spacing-300) var(--spacing-300);
 }
 .discover-cards .gallery-control {
