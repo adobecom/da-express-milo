@@ -224,6 +224,7 @@
 
   --color-dark-gray: #505050;
   --color-error-red: #d7373f;
+  --color-negative: var(--color-error-red);
   --color-default-font: #131313;
   --font-weight-medium: 500;
   --color-light-gray-2: #e1e1e1;
