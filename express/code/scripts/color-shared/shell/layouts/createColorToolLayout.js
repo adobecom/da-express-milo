@@ -15,8 +15,8 @@ const DEFAULT_LAYOUT_SPANS = {
 const TOOLBAR_MODES = new Set(['inline', 'sticky', 'sticky-on-scroll']);
 
 const LAYOUT_DEPS = {
-  base: ['scripts/color-shared/shell/layouts/styles/color-tool-layout.css'],
-  actionMenu: ['scripts/color-shared/action-menu.css'],
+  critical: ['scripts/color-shared/shell/layouts/styles/color-tool-layout.css'],
+  deferred: ['scripts/color-shared/action-menu.css'],
 };
 
 const SLOT_SEMANTICS = {
@@ -90,33 +90,36 @@ function buildGridColumnValue(start, span) {
   return `${start} / span ${span}`;
 }
 
-function collectLayoutDeps(config) {
-  const css = [...LAYOUT_DEPS.base];
-
-  if (config.actionMenu) {
-    css.push(...LAYOUT_DEPS.actionMenu);
-  }
-
-  if (config.dependencies?.css) {
-    css.push(...config.dependencies.css);
-  }
-
+function collectCriticalDeps(config) {
   return {
-    css,
+    css: [...LAYOUT_DEPS.critical, ...(config.dependencies?.css || [])],
     services: config.dependencies?.services,
   };
 }
 
-async function initializeShell(config, host) {
+function collectDeferredDeps(config) {
+  const css = [];
+  if (config.actionMenu) {
+    css.push(...LAYOUT_DEPS.deferred);
+  }
+  return { css };
+}
+
+function initializeShell(config, host) {
   const shell = createShell(host);
 
-  const layoutDeps = collectLayoutDeps(config);
-  await shell.preload(layoutDeps);
+  const criticalDeps = collectCriticalDeps(config);
+  const criticalCssReady = shell.preload(criticalDeps);
+
+  const deferredDeps = collectDeferredDeps(config);
+  if (deferredDeps.css.length > 0) {
+    shell.preload(deferredDeps);
+  }
 
   if (config.palette) {
     shell.context.set('palette', config.palette);
   }
-  return shell;
+  return { shell, criticalCssReady };
 }
 
 function buildSlotElements(
@@ -180,10 +183,10 @@ function buildSlotElements(
   return { root, slots };
 }
 
-async function mountActionMenu(topbarSlot, actionMenuConfig) {
+async function mountActionMenu(topbarSlot, actionMenuConfig, modulePromise) {
   if (!actionMenuConfig) return null;
 
-  const { createActionMenuComponent } = await import('../../components/createActionMenuComponent.js');
+  const { createActionMenuComponent } = await modulePromise;
 
   const actionMenu = await createActionMenuComponent({
     id: actionMenuConfig.id || 'color-tool-action-menu',
@@ -222,7 +225,7 @@ function createStickyVisibilityObserver(target, onVisibilityChange) {
   return observer;
 }
 
-async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
+async function mountToolbarCore(shell, root, footerSlot, toolbarConfig, modulePromise) {
   let toolbarHandle = null;
   let stickyToolbarHandle = null;
   let stickyObserver = null;
@@ -230,7 +233,8 @@ async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
 
   const palette = shell.context.get('palette');
   if (palette) {
-    const { initFloatingToolbar } = await import('../../toolbar/createFloatingToolbar.js');
+    const mod = modulePromise || import('../../toolbar/createFloatingToolbar.js');
+    const { initFloatingToolbar } = await mod;
     const {
       mode = DEFAULT_TOOLBAR_MODE,
       variant = 'standalone',
@@ -312,6 +316,32 @@ async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
   };
 }
 
+function deferToViewport(target, callback, rootMargin) {
+  if (typeof IntersectionObserver === 'undefined') return callback();
+
+  const opts = rootMargin ? { rootMargin } : {};
+  return new Promise((resolve) => {
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        io.disconnect();
+        resolve(callback());
+      }
+    }, opts);
+    io.observe(target);
+  });
+}
+
+function mountToolbar(shell, root, footerSlot, toolbarConfig, modulePromise) {
+  if (isMobileOrTabletViewport()) {
+    return deferToViewport(
+      footerSlot,
+      () => mountToolbarCore(shell, root, footerSlot, toolbarConfig, modulePromise),
+      toolbarConfig.viewportMargin,
+    );
+  }
+  return mountToolbarCore(shell, root, footerSlot, toolbarConfig, modulePromise);
+}
+
 function createLayoutAPI(
   slots,
   shell,
@@ -329,6 +359,7 @@ function createLayoutAPI(
     actionMenu: actionMenuHandle,
     toolbar: toolbarHandle,
     stickyToolbar: stickyToolbarHandle,
+    toolbarState: { stickyObserver, cleanupToolbarMount, onPaletteChange },
 
     getSlot(name) {
       return slots[name] || null;
@@ -348,14 +379,15 @@ function createLayoutAPI(
     },
 
     destroy() {
-      shell.context.off('palette', onPaletteChange);
-      stickyObserver?.disconnect();
-      cleanupToolbarMount();
-      actionMenuHandle?.destroy();
-      if (stickyToolbarHandle && stickyToolbarHandle !== toolbarHandle) {
-        stickyToolbarHandle.destroy();
+      const ts = this.toolbarState || {};
+      if (ts.onPaletteChange) shell.context.off('palette', ts.onPaletteChange);
+      ts.stickyObserver?.disconnect();
+      ts.cleanupToolbarMount?.();
+      this.actionMenu?.destroy();
+      if (this.stickyToolbar && this.stickyToolbar !== this.toolbar) {
+        this.stickyToolbar.destroy();
       }
-      toolbarHandle?.destroy();
+      this.toolbar?.destroy();
       root.remove();
       shell.destroy();
     },
@@ -371,6 +403,12 @@ export default async function createColorToolLayout(container, config = {}) {
     content,
     layoutSpans,
   } = config;
+
+  // Eagerly warm module cache — imports start downloading immediately
+  const actionMenuModulePromise = actionMenuConfig
+    ? import('../../components/createActionMenuComponent.js') : null;
+  const toolbarModulePromise = config.palette
+    ? import('../../toolbar/createFloatingToolbar.js') : null;
 
   const resolvedToolbarMode = normalizeToolbarMode(toolbarConfig.mode);
   const resolvedLayoutSpans = normalizeLayoutSpans(layoutSpans);
@@ -388,26 +426,46 @@ export default async function createColorToolLayout(container, config = {}) {
   );
   container.appendChild(root);
 
-  const shell = await initializeShell(config, root);
+  // Shell init: critical CSS fires non-blocking, deferred CSS fire-and-forget
+  const { shell, criticalCssReady } = initializeShell(config, root);
 
-  const actionMenuHandle = await mountActionMenu(slots.topbar, actionMenuConfig);
-  const {
-    toolbarHandle,
-    stickyToolbarHandle,
-    stickyObserver,
-    cleanupToolbarMount,
-    onPaletteChange,
-  } = await mountToolbar(shell, root, slots.footer, resolvedToolbarConfig);
+  // Wait only for critical CSS — then return layout immediately.
+  // Both action menu and toolbar mount non-blocking in parallel.
+  await criticalCssReady;
 
-  return createLayoutAPI(
+  const layout = createLayoutAPI(
     slots,
     shell,
     root,
+    null,
+    null,
+    null,
+    () => {},
+    null,
+    () => {},
+  );
+
+  // Both components mount simultaneously and hydrate the layout when ready
+  const actionMenuReady = mountActionMenu(slots.topbar, actionMenuConfig, actionMenuModulePromise)
+    .then((handle) => { layout.actionMenu = handle; });
+
+  const toolbarReady = mountToolbar(
+    shell, root, slots.footer, resolvedToolbarConfig, toolbarModulePromise,
+  ).then(({
     toolbarHandle,
     stickyToolbarHandle,
     stickyObserver,
     cleanupToolbarMount,
-    actionMenuHandle,
     onPaletteChange,
-  );
+  }) => {
+    layout.toolbar = toolbarHandle;
+    layout.stickyToolbar = stickyToolbarHandle;
+    layout.toolbarState = {
+      stickyObserver, cleanupToolbarMount, onPaletteChange,
+    };
+  });
+
+  layout.ready = Promise.all([actionMenuReady, toolbarReady]).then(() => layout);
+
+  return layout;
 }

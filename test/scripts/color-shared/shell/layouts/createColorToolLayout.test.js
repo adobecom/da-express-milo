@@ -327,19 +327,19 @@ describe('createColorToolLayout', () => {
     });
 
     it('should reuse one toolbar instance when toolbar.mode is sticky-on-scroll', async () => {
-      const observe = sinon.stub();
-      const disconnect = sinon.stub();
       const OriginalIntersectionObserver = window.IntersectionObserver;
-      let observerInstance = null;
-      window.IntersectionObserver = function MockIntersectionObserver(cb) {
-        observerInstance = {
-          observe,
-          disconnect,
+      const observers = [];
+      window.IntersectionObserver = function MockIntersectionObserver(cb, opts) {
+        const instance = {
+          observe: sinon.stub(),
+          disconnect: sinon.stub(),
+          opts,
           trigger(entry) {
             cb([entry]);
           },
         };
-        return observerInstance;
+        observers.push(instance);
+        return instance;
       };
 
       const layout = await createColorToolLayout(container, {
@@ -351,6 +351,13 @@ describe('createColorToolLayout', () => {
         },
       });
 
+      // If a viewport-deferred IO was created (mobile/tablet), trigger it to unblock toolbar
+      const viewportObserver = observers.find((o) => o.opts?.threshold === undefined);
+      if (viewportObserver) {
+        viewportObserver.trigger({ isIntersecting: true });
+      }
+
+      await layout.ready;
       expect(layout.toolbar).to.exist;
       expect(layout.stickyToolbar).to.exist;
       expect(layout.stickyToolbar).to.equal(layout.toolbar);
@@ -362,9 +369,13 @@ describe('createColorToolLayout', () => {
 
       expect(toolbarWrapper).to.exist;
       expect(floatingHost.hidden).to.be.true;
-      expect(observe.calledOnce).to.be.true;
 
-      observerInstance.trigger({
+      // The sticky observer uses { threshold: 0 }
+      const stickyObserver = observers.find((o) => o.opts?.threshold === 0);
+      expect(stickyObserver).to.exist;
+      expect(stickyObserver.observe.calledOnce).to.be.true;
+
+      stickyObserver.trigger({
         isIntersecting: false,
         boundingClientRect: { top: -1 },
       });
@@ -373,7 +384,7 @@ describe('createColorToolLayout', () => {
       expect(layout.slots.footer.querySelector('.color-floating-toolbar-container')).to.not.exist;
       expect(toolbarWrapper.querySelector('.ax-toolbar')?.classList.contains('ax-toolbar-sticky')).to.be.true;
 
-      observerInstance.trigger({
+      stickyObserver.trigger({
         isIntersecting: true,
         boundingClientRect: { top: 12 },
       });
@@ -382,7 +393,7 @@ describe('createColorToolLayout', () => {
       expect(toolbarWrapper.querySelector('.ax-toolbar')?.classList.contains('ax-toolbar-sticky')).to.be.false;
 
       layout.destroy();
-      expect(disconnect.calledOnce).to.be.true;
+      expect(stickyObserver.disconnect.calledOnce).to.be.true;
       window.IntersectionObserver = OriginalIntersectionObserver;
     });
   });
