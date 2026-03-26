@@ -28,7 +28,10 @@ const RNR_API_URL = isProd ? 'https://rnr.adobe.io/v1' : 'https://rnr-stage.adob
  */
 function isNalaTestRatings() {
   if (typeof window === 'undefined' || !window.location?.hostname) return false;
-  const isPreviewHost = window.location.hostname.includes('aem.live') || window.location.hostname.includes('aem.page');
+  const { hostname } = window.location;
+  const isPreviewHost = hostname === 'localhost'
+    || hostname.includes('aem.live')
+    || hostname.includes('aem.page');
   const params = new URLSearchParams(window.location.search);
   return isPreviewHost && params.get('nala') === 'ratings';
 }

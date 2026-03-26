@@ -232,7 +232,7 @@ main .blog-posts-v2 .blog-hero-card .blog-card-image {
 
 main .blog-posts-v2 .blog-card .blog-card-image img {
   object-fit: cover;
-  height: 100%;
+  height: auto;
   width: 100%;
   border-radius: var(--spacing-300) var(--spacing-300) 0 0;
   aspect-ratio: 16 / 9;
