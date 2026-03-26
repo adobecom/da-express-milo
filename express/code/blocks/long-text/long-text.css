@@ -18,6 +18,9 @@ main .long-text {
     padding: var(--spacing-500);
     background-color: var(--color-gray-100);
     border-radius: 20px;
+    hyphens: none;
+    overflow-wrap: normal;
+    word-break: normal;
 }
 
 main .long-text.plain {

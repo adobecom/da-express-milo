@@ -24,6 +24,7 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-banner/
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/banner-bg/banner-bg
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/blog-article-marquee/default
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/blog-feature-marquee/default
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/blog-posts/blog-posts
 
@@ -123,6 +124,8 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/link-list/
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/list/list
 
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/login-page/login-page
+
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/make-a-project/make-a-project
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/make-a-project/make-a-project-centered
 
@@ -140,8 +143,7 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ai-credits
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/quick-action-hub/quick-action-hub
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ratings/ratings2
-
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ratings/ratings
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ratings/ratings-show-average
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-ribbon-banner/ribbon-banner

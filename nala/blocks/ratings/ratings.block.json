@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@ratings-ratings_received",
       "selector": "div.ratings.ratings_received",
-      "path": "/drafts/nala/test-gen/ratings/ratings2",
+      "path": "/drafts/nala/test-gen/ratings/ratings",
       "data": {
         "semantic": {
           "texts": [

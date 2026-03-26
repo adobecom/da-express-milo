@@ -3,6 +3,10 @@
   min-width: 320px;
   box-sizing: border-box;
   text-align: left;
+
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 main .ax-marquee-dynamic-hero p.button-container {
@@ -114,6 +118,9 @@ main .ax-marquee-dynamic-hero p.button-container {
 .ax-marquee-dynamic-hero [class*="heading"]:first-of-type {
   font-size: var(--heading-font-size-l);
   text-align: left;
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .ax-marquee-dynamic-hero [class*="heading"]:first-of-type + p {
