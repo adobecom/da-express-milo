@@ -314,6 +314,10 @@ color-wheel-express {
   max-width: 343px;
 }
 
+.color-wheel .action-menu-controls-only .expand-btn {
+  display: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .color-wheel-harmony-carousel-host .simple-carousel-platform {
     scroll-behavior: auto;
@@ -343,6 +347,20 @@ color-wheel-express {
 
   .color-wheel .color-extract-suggestions {
     align-self: start;
+  }
+}
+
+@media (min-width: 888px) and (max-width: 1199px) {
+  .color-wheel .ax-shell-slot--topbar {
+    grid-column: 1 / span 6;
+  }
+
+  .color-wheel .ax-shell-slot--sidebar {
+    grid-row: 2 / span 2;
+  }
+
+  .color-wheel .ax-shell-slot--canvas {
+    grid-row: 1 / span 2;
   }
 }
 

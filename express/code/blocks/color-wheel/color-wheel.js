@@ -56,6 +56,21 @@ const HARMONY_ALLOWED_FOR_THREE = new Set([
   'SPLIT_COMPLEMENTARY', 'SHADES',
 ]);
 const HARMONY_CAROUSEL_ACTIVE_CLASS = 'color-wheel-harmony-option--selected';
+const DEFAULT_ACTION_MENU_CONFIG = {
+  id: 'color-wheel-action-menu',
+  activeId: 'palette',
+  navLinks: [
+    { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
+    { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/contrast-checker' },
+    { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/express/colors/color-blindness-simulator' },
+  ],
+  controls: [
+    { id: 'undo', label: 'Undo' },
+    { id: 'redo', label: 'Redo' },
+    { id: 'generate-random', label: 'Generate random' },
+    { id: 'expand', label: 'Maximize' },
+  ],
+};
 let harmonyCarouselCleanup = null;
 let harmonyStateUnsubscribe = null;
 let layoutInstance = null;
@@ -502,12 +517,6 @@ export default async function decorate(block) {
     swatchRailController = createSwatchRailControllerBridge(controller);
 
     const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
-    const isMobile = window.matchMedia('(max-width: 888px)').matches;
-
-    let actionMenuType;
-    if (isDesktop) actionMenuType = 'full';
-    if (isMobile) actionMenuType = 'nav-only';
-    if (!isDesktop && !isMobile) actionMenuType = 'controls-only';
 
     layoutInstance = await createColorToolLayout(block, {
       palette: paletteFromThemeState(controller.getState()),
@@ -519,20 +528,8 @@ export default async function decorate(block) {
         editPaletteName: false,
       },
       actionMenu: {
-        id: 'color-wheel-action-menu',
-        type: actionMenuType,
-        activeId: 'palette',
-        navLinks: [
-          { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
-          { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/contrast-checker' },
-          { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/express/colors/color-blindness-simulator' },
-        ],
-        controls: [
-          { id: 'undo', label: 'Undo' },
-          { id: 'redo', label: 'Redo' },
-          { id: 'generate-random', label: 'Generate random' },
-          { id: 'expand', label: 'Maximize' },
-        ],
+        ...DEFAULT_ACTION_MENU_CONFIG,
+        type: isDesktop ? 'full' : 'nav-only',
         onExpand: (expanded) => {
           if (expanded) {
             block.dataset.sidebarCollapsed = '';
@@ -551,6 +548,20 @@ export default async function decorate(block) {
     const tabs = await buildTabs(controller, suggestionsRow);
     layoutInstance.slots.sidebar.appendChild(tabs.element);
 
+    if (!isDesktop) {
+      const { createActionMenuComponent } = await import('../../scripts/color-shared/components/createActionMenuComponent.js');
+
+      const actionMenu = await createActionMenuComponent({
+        ...DEFAULT_ACTION_MENU_CONFIG,
+        type: 'controls-only',
+        controls: [
+          { id: 'undo', label: 'Undo' },
+          { id: 'redo', label: 'Redo' },
+          { id: 'generate-random', label: 'Generate random' },
+        ],
+      });
+      layoutInstance.slots.canvas.appendChild(actionMenu.element);
+    }
     const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
     layoutInstance.slots.canvas.appendChild(stripHost);
 
