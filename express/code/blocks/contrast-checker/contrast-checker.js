@@ -1,133 +1,225 @@
 import { createTag } from '../../scripts/utils.js';
+import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createContrastRenderer } from './factory/createContrastRenderer.js';
+import loadContrastCheckerPlaceholders from './utils/placeholders.js';
+import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
-import { initFloatingToolbar } from '../../scripts/color-shared/toolbar/createFloatingToolbar.js';
-import BlockMediator from '../../scripts/block-mediator.min.js';
+import { CONTRAST_PRESETS, createDefaultActionMenuConfig } from './utils/contrastConstants.js';
+import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
+import parseContent from './utils/parseContent.js';
+import syncPaletteSelections from './utils/paletteState.js';
+import { isMobileOrTabletViewport } from '../../scripts/color-shared/utils/utilities.js';
 
-let currentToolbarInstance = null;
+const blockInstances = new WeakMap();
 
-function parseConfig(block) {
-  const config = {
+function getDefaultConfig() {
+  return {
     variant: 'checker',
     showEdit: true,
   };
-
-  const rows = Array.from(block.children);
-  rows.forEach((row) => {
-    const cols = Array.from(row.children);
-    if (cols.length >= 2) {
-      const key = cols[0].textContent.trim().toLowerCase().replaceAll(/\s+/g, '');
-      const value = cols[1].textContent.trim();
-      if (key === 'variant') config.variant = value;
-      else if (key === 'foreground') config.foreground = value;
-      else if (key === 'background') config.background = value;
-      else if (key === 'ctatext') config.ctaText = value;
-      else if (key === 'mobilectatext') config.mobileCTAText = value;
-      else if (key === 'showedit') config.showEdit = value.toLowerCase() === 'true';
-      else if (key === 'showpalettename') config.showPaletteName = value.toLowerCase() === 'true';
-      else if (key === 'editpalettename') config.editPaletteName = value.toLowerCase() === 'true';
-      else if (key === 'editpalettelink') config.editPaletteLink = value;
-    }
-  });
-
-  return config;
 }
 
-function buildContrastPalette(fg, bg) {
+function pickRandomPreset(strings) {
+  const preset = CONTRAST_PRESETS[Math.floor(Math.random() * CONTRAST_PRESETS.length)];
+  const toHex = ([h, s, v]) => {
+    const { r, g, b } = hsvToRgb(h, s / 100, v / 100);
+    return rgbToHex(r, g, b);
+  };
+  const colors = [toHex(preset.fg), toHex(preset.bg)];
+  return { foreground: colors[0], background: colors[1], colors, name: strings.randomPresetName };
+}
+
+function getPalette(config, strings) {
+  if (config.foreground && config.background) {
+    const colors = [config.foreground, config.background];
+    return {
+      foreground: colors[0],
+      background: colors[1],
+      colors,
+      name: strings.customPaletteName,
+    };
+  }
+
+  return pickRandomPreset(strings);
+}
+
+async function mountContrastChecker(slot, { config, layout, initialPalette }) {
+  const container = createTag('div', { class: 'contrast-checker-container' });
+  const dataService = createContrastDataService();
+  const { foreground, background, name, colors } = initialPalette;
+  const { context, actionMenu } = layout;
+
+  const rendererConfig = {
+    ...config,
+    initialForeground: foreground,
+    initialBackground: background,
+  };
+
+  const renderer = createContrastRenderer('checker', {
+    container,
+    data: [],
+    config: rendererConfig,
+    dataService,
+    context,
+    actionMenu,
+  });
+
+  renderer.on('contrast-change', (detail) => {
+    const currentPalette = context.get('palette');
+    const previousForeground = currentPalette?.selectedForeground ?? foreground;
+    const previousBackground = currentPalette?.selectedBackground ?? background;
+    const nextColors = syncPaletteSelections(
+      currentPalette?.colors || colors,
+      previousForeground,
+      previousBackground,
+      detail.foreground,
+      detail.background,
+    );
+
+    context.set('palette', {
+      colors: nextColors,
+      selectedForeground: detail.foreground,
+      selectedBackground: detail.background,
+      name,
+      accessibilityData: { wcagLevel: dataService.getWCAGLevel(detail) },
+    });
+  });
+
+  await renderer.render();
+
+  slot.appendChild(container);
+
   return {
-    id: 'contrast-pair',
-    name: 'Contrast Pair',
-    colors: [fg, bg],
-    tags: [],
+    renderer,
+    destroy() {
+      renderer.destroy();
+      container.remove();
+    },
   };
 }
 
+function mountPreviewPanel(slot, { context, preview, strings }) {
+  const container = createTag('div', { class: 'cc-preview-container' });
+
+  const renderer = createPreviewRenderer({
+    container,
+    context,
+    preview,
+    strings,
+  });
+
+  renderer.render();
+  slot.appendChild(container);
+
+  return {
+    renderer,
+    destroy() {
+      renderer.destroy();
+      container.remove();
+    },
+  };
+}
+
+function cleanup(block) {
+  const instance = blockInstances.get(block);
+  if (!instance) return;
+
+  instance.destroy();
+  blockInstances.delete(block);
+}
+
 export default async function decorate(block) {
-  if (block.dataset.blockStatus === 'loaded') {
-    currentToolbarInstance?.destroy();
-  }
+  cleanup(block);
+
+  let layoutInstance = null;
+  let checkerInstance = null;
+  let previewInstance = null;
+  block.dataset.blockStatus = 'loading';
+
+  const { layout, preview } = parseContent(block);
+  const strings = await loadContrastCheckerPlaceholders();
+
+  const destroyInstance = () => {
+    checkerInstance?.destroy();
+    checkerInstance = null;
+    previewInstance?.destroy();
+    previewInstance = null;
+    layoutInstance?.destroy();
+    layoutInstance = null;
+  };
 
   try {
-    block.dataset.blockStatus = 'loading';
-    block.innerHTML = '';
+    const config = {
+      ...getDefaultConfig(),
+      strings,
+    };
+    block.replaceChildren();
 
-    const config = parseConfig(block);
-    const dataService = createContrastDataService();
-
-    const fg = config.foreground ?? '#1B1B1B';
-    const bg = config.background ?? '#FFFFFF';
-
-    const stateKey = `contrast-checker-${config.variant}`;
-    BlockMediator.set(stateKey, {
-      foreground: fg,
-      background: bg,
-      ratio: null,
-      wcagResults: null,
-    });
-
-    const container = createTag('div', { class: 'contrast-checker-container' });
-    block.appendChild(container);
-
-    const renderer = createContrastRenderer(config.variant, {
-      container,
-      data: [],
-      config,
-      dataService,
-      stateKey,
-    });
-
-    renderer.render();
-
-    const toolbarContainer = createTag('div', { class: 'cc-toolbar-wrapper' });
-    block.appendChild(toolbarContainer);
-
-    const { toolbar, destroy: destroyToolbar } = await initFloatingToolbar(
-      toolbarContainer,
-      {
-        type: 'palette',
-        variant: 'sticky',
-        ctaText: config.ctaText ?? 'Create with my color palette',
-        mobileCTAText: config.mobileCTAText ?? 'Create with my color palette',
-        showEdit: config.showEdit ?? true,
-        showPalette: config.showPalette ?? true,
-        showPaletteName: config.showPaletteName ?? true,
-        editPaletteName: config.editPaletteName ?? true,
-        editPaletteLink: config.editPaletteLink ?? null,
-        palette: buildContrastPalette(fg, bg),
+    const initialPalette = getPalette(config, strings);
+    layoutInstance = await createColorToolLayout(block, {
+      layoutSpans: {
+        tablet: { sidebar: 6, canvas: 6 },
+        desktop: { sidebar: 4, canvas: 8 },
       },
-    );
-
-    currentToolbarInstance = { toolbar, destroy: destroyToolbar };
-
-    renderer.on('contrast-change', (detail) => {
-      const currentState = BlockMediator.get(stateKey);
-      BlockMediator.set(stateKey, {
-        ...currentState,
-        foreground: detail.foreground,
-        background: detail.background,
-        ratio: detail.ratio,
-        wcagResults: {
-          normalAA: detail.normalAA,
-          largeAA: detail.largeAA,
-          normalAAA: detail.normalAAA,
-          largeAAA: detail.largeAAA,
-          uiComponents: detail.uiComponents,
-        },
-      });
-
-      toolbar.updateSwatches([detail.foreground, detail.background]);
+      palette: {
+        colors: initialPalette.colors,
+        name: initialPalette.name,
+      },
+      toolbar: {
+        mode: 'inline',
+        variant: 'standalone',
+        showEdit: false,
+        showPalette: !isMobileOrTabletViewport(),
+        showPaletteName: true,
+        editPaletteName: false,
+      },
+      content: {
+        heading: layout.heading,
+        paragraph: layout.paragraph,
+        icon: true,
+      },
+      actionMenu: {
+        ...createDefaultActionMenuConfig(strings),
+        id: 'contrast-checker-menu',
+        type: isMobileOrTabletViewport() ? 'nav-only' : 'full',
+        activeId: 'contrast',
+      },
     });
 
-    block.classList.add(`contrast-checker-${config.variant}`);
+    checkerInstance = await mountContrastChecker(layoutInstance.slots.sidebar, {
+      config,
+      layout: layoutInstance,
+      initialPalette,
+    });
+
+    const previewSlot = checkerInstance.renderer.getPreviewMountPoint?.()
+      || layoutInstance.slots.canvas;
+
+    previewInstance = mountPreviewPanel(previewSlot, {
+      context: layoutInstance.context,
+      preview,
+      strings,
+    });
+
+    checkerInstance.renderer.on('contrast-highlight', (detail) => {
+      previewInstance.renderer.highlightRegion?.(detail.region);
+    });
+
+    blockInstances.set(block, {
+      destroy: destroyInstance,
+    });
+
+    block.classList.add('ax-shell-host', `contrast-checker-${config.variant}`);
+    block.dataset.shellState = 'ready';
     block.dataset.blockStatus = 'loaded';
   } catch (error) {
     window.lana?.log(`Contrast Checker init error: ${error.message}`, {
       tags: 'contrast-checker,init',
+      severity: 'error',
     });
     block.dataset.blockStatus = 'error';
-    currentToolbarInstance?.destroy();
-    currentToolbarInstance = null;
+    destroyInstance();
     block.replaceChildren();
-    block.append(createTag('p', { class: 'cc-error-message' }, 'Failed to load Contrast Checker.'));
+    block.append(createTag('p', { class: 'cc-error-message' }, strings.errorMessage));
   }
 }

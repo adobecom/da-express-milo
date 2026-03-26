@@ -35,6 +35,8 @@ const TOOLBAR_DEFAULTS = {
   ctaText: 'Create with my color palette',
 };
 
+let toolbarInstanceCounter = 0;
+
 /* ── Default Handlers ────────────────────────────────────────── */
 
 async function handleShare({ name, colors, type }, t) {
@@ -137,7 +139,7 @@ async function handleSave(
 function attachTooltip(actionBtn, text) {
   const tooltip = document.createElement('sp-tooltip');
   tooltip.setAttribute('self-managed', '');
-  tooltip.setAttribute('placement', 'bottom');
+  tooltip.setAttribute('placement', 'top');
   tooltip.textContent = text;
   actionBtn.appendChild(tooltip);
 }
@@ -253,15 +255,15 @@ function buildCTAButton(getCTAText, onClick) {
   return ctaBtn;
 }
 
-function buildPaletteNameField(name, editPaletteName, t) {
+function buildPaletteNameField(name, editPaletteName, t, inputId) {
   const nameField = createTag('div', { class: 'ax-palette-name' });
   const nameLabel = createTag('label', {
     class: 'ax-palette-name-label',
-    for: 'ax-palette-name-input',
+    for: inputId,
   }, t.paletteName);
   const inputAttrs = {
     type: 'text',
-    id: 'ax-palette-name-input',
+    id: inputId,
     class: 'ax-palette-name-input',
     value: name,
     placeholder: t.paletteNamePlaceholder,
@@ -325,6 +327,7 @@ export function createToolbar(options) {
   } = options;
 
   const t = { ...TOOLBAR_DEFAULTS, ...i18n };
+  let currentVariant = variant;
 
   const effectiveShowEdit = showPalette && showEdit;
 
@@ -335,7 +338,9 @@ export function createToolbar(options) {
   }
 
   const { name = '', colors = [] } = palette;
+  const nameInputId = `ax-palette-name-input-${toolbarInstanceCounter += 1}`;
   let nameInput = null;
+  let handleNameInput = null;
 
   const toolbar = createTag('div', {
     class: `ax-toolbar ax-toolbar-${variant}`,
@@ -419,12 +424,18 @@ export function createToolbar(options) {
 
   if (showPaletteName) {
     let nameField;
-    ({ nameField, nameInput } = buildPaletteNameField(name, editPaletteName, t));
+    ({ nameField, nameInput } = buildPaletteNameField(name, editPaletteName, t, nameInputId));
     ({ desktopMql, repositionNameField } = setupResponsiveLayout(
       nameField,
       ctaBtn,
       paletteSummary,
     ));
+
+    handleNameInput = () => {
+      palette.name = nameInput.value;
+      emit('namechange', { name: nameInput.value, palette: getPaletteWithName() });
+    };
+    nameInput.addEventListener('input', handleNameInput);
   }
 
   toolbar.appendChild(main);
@@ -439,14 +450,14 @@ export function createToolbar(options) {
   const mqlHandler = () => { ctaBtn.textContent = getCTAText(); };
   mql.addEventListener('change', mqlHandler);
 
-  return {
+  const api = {
     element: theme,
     paletteSlot,
     on,
     emit,
     sticky: variant === 'sticky',
     getState: () => ({ palette: getPaletteWithName() }),
-    updateSwatches(newColors) {
+    updateSwatches(newColors, paletteData) {
       const oldStrip = paletteSummary.querySelector('.ax-swatch-strip');
       if (oldStrip) {
         oldStrip.replaceWith(createColorStrip(newColors, type, palette.angle, t));
@@ -456,13 +467,38 @@ export function createToolbar(options) {
         oldBand.replaceWith(createSwatchBand(newColors, type, palette.angle));
       }
       palette.colors = newColors;
+      if (paletteData?.accessibilityData) {
+        palette.accessibilityData = paletteData.accessibilityData;
+      }
+    },
+    updateName(newName) {
+      palette.name = newName;
+      if (nameInput && nameInput.value !== newName) {
+        nameInput.value = newName;
+      }
+    },
+    setVariant(nextVariant = 'standalone') {
+      const resolvedVariant = nextVariant === 'sticky' ? 'sticky' : 'standalone';
+      if (resolvedVariant === currentVariant) return;
+
+      toolbar.classList.remove(`ax-toolbar-${currentVariant}`);
+      toolbar.classList.add(`ax-toolbar-${resolvedVariant}`);
+      toolbar.classList.toggle('ax-toolbar-sticky', resolvedVariant === 'sticky');
+
+      currentVariant = resolvedVariant;
+      api.sticky = resolvedVariant === 'sticky';
     },
     destroy: () => {
       mql.removeEventListener('change', mqlHandler);
+      if (nameInput && handleNameInput) {
+        nameInput.removeEventListener('input', handleNameInput);
+      }
       if (desktopMql && repositionNameField) {
         desktopMql.removeEventListener('change', repositionNameField);
       }
       theme.remove();
     },
   };
+
+  return api;
 }

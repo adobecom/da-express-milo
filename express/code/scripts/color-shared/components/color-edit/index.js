@@ -125,6 +125,20 @@ class ColorEdit extends LitElement {
     }));
   }
 
+  _emitColorChangeEnd() {
+    this.dispatchEvent(new CustomEvent('color-change-end', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        hex: this._hex,
+        index: this.selectedIndex,
+        hue: this._hue,
+        saturation: this._saturation,
+        brightness: this._brightness,
+      },
+    }));
+  }
+
   _announceColorChange() {
     clearTimeout(this._announceTimer);
     this._announceTimer = setTimeout(() => {
@@ -195,6 +209,21 @@ class ColorEdit extends LitElement {
       const focusable = sheet?.querySelector('input, button, [tabindex]:not([tabindex="-1"]), sp-button');
       if (focusable) focusable.focus();
       if (sheet) this._focusTrap = trapFocus(sheet);
+    });
+  }
+
+  async focusInput() {
+    await this.updateComplete;
+    await customElements.whenDefined('sp-textfield');
+    const hexField = this.shadowRoot?.querySelector('.ce-hex-field');
+    if (!hexField) return;
+    await hexField.updateComplete;
+    requestAnimationFrame(() => {
+      const input = hexField.focusElement || hexField.shadowRoot?.querySelector('input');
+      if (input) {
+        input.focus();
+        input.select();
+      }
     });
   }
 
@@ -356,6 +385,7 @@ class ColorEdit extends LitElement {
   }
 
   _onBaseColorChange(e) {
+    e.stopPropagation();
     const { hue, saturation, brightness } = e.detail;
     this._hue = hue;
     this._saturation = saturation;
@@ -415,6 +445,8 @@ class ColorEdit extends LitElement {
     if (!hex.match(/^[0-9A-Fa-f]{6}$/)) {
       e.target.value = this._hex;
       this.requestUpdate();
+    } else {
+      this._emitColorChangeEnd();
     }
   }
 

@@ -194,10 +194,49 @@ export function createStripsRenderer(options) {
   let gridNavReinit = null;
   const paletteStrips = [];
   const tooltipControllers = new Map();
+  const titleGuardCleanups = new Map();
   let tooltipInitToken = 0;
+
+  function clearNativeTitle(targetEl) {
+    if (targetEl?.hasAttribute('title')) targetEl.removeAttribute('title');
+  }
+
+  function destroyTitleGuardForTarget(targetEl) {
+    if (!targetEl) return;
+    const cleanup = titleGuardCleanups.get(targetEl);
+    if (!cleanup) return;
+    cleanup();
+    titleGuardCleanups.delete(targetEl);
+  }
+
+  function ensureTitleGuardForTarget(targetEl) {
+    if (!targetEl) return;
+    clearNativeTitle(targetEl);
+    if (titleGuardCleanups.has(targetEl)) return;
+
+    const scrubTitle = () => clearNativeTitle(targetEl);
+    targetEl.addEventListener('pointerenter', scrubTitle);
+    targetEl.addEventListener('focusin', scrubTitle);
+
+    let observer = null;
+    if (typeof MutationObserver !== 'undefined') {
+      observer = new MutationObserver(() => {
+        scrubTitle();
+      });
+      observer.observe(targetEl, { attributes: true, attributeFilter: ['title'] });
+    }
+
+    titleGuardCleanups.set(targetEl, () => {
+      targetEl.removeEventListener('pointerenter', scrubTitle);
+      targetEl.removeEventListener('focusin', scrubTitle);
+      observer?.disconnect();
+      observer = null;
+    });
+  }
 
   function destroyTooltipForTarget(targetEl) {
     if (!targetEl) return;
+    destroyTitleGuardForTarget(targetEl);
     const controller = tooltipControllers.get(targetEl);
     if (!controller) return;
     controller.destroy?.();
@@ -205,6 +244,8 @@ export function createStripsRenderer(options) {
   }
 
   function clearGridTooltips() {
+    titleGuardCleanups.forEach((cleanup) => cleanup?.());
+    titleGuardCleanups.clear();
     tooltipControllers.forEach((controller) => controller?.destroy?.());
     tooltipControllers.clear();
   }
@@ -286,8 +327,8 @@ export function createStripsRenderer(options) {
 
       const content = button.getAttribute('data-tooltip-content') || '';
       if (content) {
-        button.removeAttribute('title');
         destroyTooltipForTarget(button);
+        ensureTitleGuardForTarget(button);
         try {
           // eslint-disable-next-line no-await-in-loop
           const tip = await createExpressTooltip({ targetEl: button, content, placement: 'top' });

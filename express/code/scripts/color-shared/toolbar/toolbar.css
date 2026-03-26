@@ -76,12 +76,14 @@
 .ax-toolbar {
   /* ── Scoped vars ── */
   --ax-toolbar-max-width-mobile: 599px;
-  --ax-toolbar-min-width: var(--Global-Device-Widths-device-min-width-S, 320px);
+  --ax-toolbar-min-width: var(--Global-Device-Widths-device-min-width-S);
   --ax-toolbar-max-width-tablet: 1135px;
-  --ax-toolbar-max-width-desktop: var(--Global-Container-container-max-width, 1440px);
+  --ax-toolbar-presentation-max-width: var(--ax-color-tool-presentation-max-width, 1920px);
+  --ax-toolbar-inline-margin: var(--ax-color-tool-outer-margin, var(--spacing-300));
+  --ax-toolbar-max-width-desktop: calc(var(--ax-toolbar-presentation-max-width) - var(--ax-toolbar-inline-margin) * 2);
   --ax-toolbar-cta-min-width: 108px;
   --ax-toolbar-action-min-width: 300px;
-  --ax-swatch-band-height: 24px;
+  --ax-swatch-band-height: var(--spacing-400);
   --ax-swatch-border: 1px solid rgba(31, 31, 31, 0.2);
   --ax-swatch-strip-width: 180px;
   --ax-swatch-strip-height: 36px;
@@ -92,18 +94,19 @@
   --ax-toolbar-focus-ring-width: 2px;
   --ax-toolbar-focus-ring-offset: 2px;
   --ax-toolbar-summary-gap-desktop: 10px;
+  --ax-toolbar-input-height: var(--spacing-600);
+  --ax-toolbar-input-border-radius: 9px;
+  --ax-toolbar-floating-bottom-offset: var(--spacing-200);
 
   display: flex;
   flex-direction: column;
   inline-size: 100%;
   max-inline-size: var(--ax-toolbar-max-width-mobile);
-  min-inline-size: var(--ax-toolbar-min-width);
+  min-inline-size: min(var(--ax-toolbar-min-width), 100%);
   margin-block: 0;
   margin-inline: auto;
-  border-radius: var(--Corner-radius-corner-radius-200);
   background: var(--color-white);
   box-shadow: none;
-  overflow: hidden;
 }
 
 /* Sticky mode overrides */
@@ -124,6 +127,7 @@
   flex-wrap: wrap;
   align-items: center;
   gap: var(--spacing-200);
+  min-inline-size: 0;
 }
 
 /* Border-top only when sticky (divides swatch band from content) */
@@ -139,7 +143,7 @@
   display: flex;
   gap: var(--spacing-80);
   align-items: center;
-  min-inline-size: var(--ax-toolbar-action-min-width);
+  min-inline-size: min(var(--ax-toolbar-action-min-width), 100%);
   flex: 1;
 }
 
@@ -150,6 +154,7 @@
   gap: var(--spacing-80);
   align-items: center;
   flex: 1;
+  min-inline-size: 0;
 }
 
 /* ── Toolbar actions ─────────────────────────────────────────── */
@@ -185,10 +190,10 @@
   flex-direction: column;
   justify-content: center;
   min-inline-size: var(--ax-palette-name-min-width);
-  block-size: var(--Input-height-default);
+  block-size: var(--ax-toolbar-input-height);
   background: var(--color-white);
   border: var(--border-width-2) solid var(--color-gray-300-variant);
-  border-radius: var(--Input-border-radius);
+  border-radius: var(--ax-toolbar-input-border-radius);
   padding-block: var(--ax-palette-name-padding-block);
   padding-inline: var(--spacing-300);
   box-sizing: border-box;
@@ -246,9 +251,11 @@
   --ax-toolbar-sticky-z: 80;
 
   position: fixed;
-  inset-block-end: 0;
+  inline-size: min(calc(100% - var(--ax-toolbar-inline-margin) * 2), var(--ax-toolbar-max-width-desktop));
+  inset-block-end: var(--ax-toolbar-floating-bottom-offset);
   inset-inline-start: 0;
   inset-inline-end: 0;
+  margin-inline: auto;
   z-index: var(--ax-toolbar-sticky-z);
 }
 
@@ -260,10 +267,7 @@
   }
 
   .ax-toolbar-sticky-wrapper {
-    inline-size: calc(100% - var(--spacing-300) * 2);
-    margin-block: 0;
-    margin-inline: auto;
-    inset-block-end: var(--spacing-200);
+    inset-block-end: var(--ax-toolbar-floating-bottom-offset);
   }
 
   .ax-toolbar.ax-toolbar-sticky {
@@ -276,10 +280,12 @@
 @media (min-width: 1200px) {
   .ax-toolbar {
     max-inline-size: var(--ax-toolbar-max-width-desktop);
+    --ax-toolbar-floating-bottom-offset: var(--spacing-300);
   }
 
   .ax-toolbar-sticky-wrapper {
-    inset-block-end: var(--spacing-300);
+    inline-size: min(calc(100% - var(--ax-toolbar-inline-margin) * 2), var(--ax-toolbar-max-width-desktop));
+    inset-block-end: var(--ax-toolbar-floating-bottom-offset);
   }
 
   /* Desktop: always hide band, always show strip (even sticky) */
@@ -328,9 +334,9 @@
 
 }
 
-/* ── Widescreen (1600px+) ────────────────────────────────────── */
+/* ── Widescreen (1681px+) ────────────────────────────────────── */
 
-@media (min-width: 1600px) {
+@media (min-width: 1681px) {
   .ax-toolbar {
     max-inline-size: var(--ax-toolbar-max-width-desktop);
   }

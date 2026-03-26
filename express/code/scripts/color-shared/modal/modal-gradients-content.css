@@ -134,7 +134,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  height: 32px;
+  height: var(--spacing-500);
   max-width: 224px;
   min-width: 27px;
   padding: 0 var(--spacing-200);
@@ -176,7 +176,7 @@
   }
 
   .ax-color-modal-content .gradients-modal-content__preview {
-    padding: 4px 4px 0;
+    padding: var(--spacing-75) var(--spacing-75) 0;
   }
 
 }
