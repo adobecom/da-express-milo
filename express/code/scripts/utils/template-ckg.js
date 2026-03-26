@@ -283,16 +283,16 @@ async function lazyLoadSearchMarqueeLinklist() {
           });
         });
       } else {
-        window.lana?.log('template-ckg: Missing ckgData or short-title metadata - pills will not be populated');
+        window.lana?.log('template-ckg: Missing ckgData or short-title metadata - pills will not be populated', { tags: 'template-ckg, lazyLoadSearchMarqueeLinklist', errorType: 'i', severity: 'info' });
       }
 
       await updateLinkList(linkListContainer, linkListTemplate, linkListData);
       linkListContainer.parentElement.classList.add('appear');
     } else {
-      window.lana?.log('template-ckg: No carousel container found in search-marquee');
+      window.lana?.log('template-ckg: No carousel container found in search-marquee', { tags: 'template-ckg, lazyLoadSearchMarqueeLinklist', errorType: 'i', severity: 'info' });
     }
   } else {
-    window.lana?.log('template-ckg: No .search-marquee element found on page');
+    window.lana?.log('template-ckg: No .search-marquee element found on page', { tags: 'template-ckg, lazyLoadSearchMarqueeLinklist', errorType: 'i', severity: 'info' });
   }
 }
 

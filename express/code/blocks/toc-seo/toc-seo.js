@@ -748,7 +748,7 @@ async function initializeDependencies() {
       getMetadata: utils.getMetadata,
     };
   } catch (error) {
-    window.lana?.log(`TOC: Failed to initialize dependencies: ${error}`, { tags: 'toc-seo', severity: 'error' });
+    window.lana?.log(`TOC: Failed to initialize dependencies: ${error?.message || error?.detail || error}`, { tags: 'toc-seo', severity: 'error' });
     throw new Error('Failed to load required utilities');
   }
 }
@@ -853,7 +853,7 @@ export default async function decorate(block) {
     // Hide original block
     block.style.display = 'none';
   } catch (error) {
-    window.lana?.log(`TOC: Error during decoration: ${error}`, { tags: 'toc-seo', severity: 'error' });
+    window.lana?.log(`TOC: Error during decoration: ${error?.message || error?.detail || error}`, { tags: 'toc-seo', severity: 'error' });
     block.style.display = 'none';
   }
 }
