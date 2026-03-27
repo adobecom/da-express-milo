@@ -72,7 +72,11 @@ class ColorPalette extends LitElement {
       return null;
     }
 
-    const classes = { 'color-palette': true, 'custom-outline': true, wrap: this.wrap && this.palette.colors.length > WRAP_COLORS_IN_ROW };
+    const classes = {
+      'color-palette': true,
+      'custom-outline': true,
+      wrap: this.wrap && this.palette.colors.length > WRAP_COLORS_IN_ROW,
+    };
 
     if (this.showNameTooltip && this.palette.name) {
       return html`
