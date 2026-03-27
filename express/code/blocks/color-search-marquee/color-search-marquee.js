@@ -85,7 +85,7 @@ function renderTagPills(block, tags, searchBar, deepLinkManager) {
   requestAnimationFrame(() => updateScrollFades(container, fadeRight, fadeLeft));
 }
 
-function createEmptyResultElements(block) {
+function createEmptyResultElements(block, afterElement) {
   const container = document.createElement('div');
   container.className = 'empty-result-container';
 
@@ -97,9 +97,8 @@ function createEmptyResultElements(block) {
 
   container.append(heading, description);
 
-  const textRow = block.querySelector(':scope > div:first-of-type');
-  if (textRow) {
-    textRow.after(container);
+  if (afterElement) {
+    afterElement.after(container);
   } else {
     block.append(container);
   }
@@ -191,7 +190,7 @@ export default async function decorate(block) {
 
   block.append(searchBar.element);
 
-  const emptyResult = createEmptyResultElements(block);
+  const emptyResult = createEmptyResultElements(block, searchBar.element);
 
   renderTagPills(block, tags, searchBar, deepLinkManager);
 
