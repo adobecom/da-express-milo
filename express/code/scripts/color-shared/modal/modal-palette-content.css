@@ -331,9 +331,10 @@
 }
 
 .ax-color-modal-content .modal-palette-likes {
-  display: flex;
+  display: inline-flex;
   gap: 4px;
   align-items: center;
+  justify-content: center;
 }
 
 .ax-color-modal-content .like-icon {
@@ -341,9 +342,19 @@
   background: transparent;
   padding: 0;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
+  width: var(--spacing-500);
+  height: var(--spacing-500);
+  line-height: 0;
   color: var(--color-gray-800-variant);
+}
+
+.ax-color-modal-content .like-icon sp-theme {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .ax-color-modal-content .like-icon.is-liked {
@@ -361,10 +372,12 @@
 }
 
 .ax-color-modal-content .modal-likes-count {
+  display: inline-flex;
+  align-items: center;
   font-family: 'Adobe Clean Spectrum VF', sans-serif;
   font-weight: 700;
   font-size: 14px;
-  line-height: 18px;
+  line-height: 1;
   color: var(--color-gray-800-variant);
   margin: 0;
   flex-shrink: 0;
