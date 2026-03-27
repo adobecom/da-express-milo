@@ -335,10 +335,11 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
     copy: true,
     colorPicker: false,
     hexCode: true,
-    baseColor: true,
+    baseColor: false,
     ...inputSwatchFeatures,
   };
   swatchFeatures.colorPicker = false;
+  swatchFeatures.baseColor = false;
 
   const normalizedPalette = {
     ...palette,
