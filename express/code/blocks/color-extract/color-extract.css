@@ -1,5 +1,3 @@
-@import url('../../scripts/color-shared/components/image-upload/image-upload.css');
-@import url('../../scripts/color-shared/components/gradients/gradient-editor.css');
 
 /* Express theme fallbacks for floating toolbar (overridden when full theme loads) */
 :where(.color-extract) {

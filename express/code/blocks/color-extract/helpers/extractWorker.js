@@ -1,10 +1,10 @@
-/* eslint-disable */
 /**
  * Inline Web Worker for intelligent color extraction from images.
  * Ported from colorweb's imageExtraction.js — uses HSV histogram binning,
  * mood-weighted normalization, and energy-minimization color selection.
  */
 
+/* eslint-disable no-var, prefer-arrow-callback, func-style, no-use-before-define */
 const WORKER_SOURCE = `
 var NUM_BINS_H = 64;
 var NUM_BINS_S = 64;
@@ -372,7 +372,7 @@ self.addEventListener('message', function(e) {
 
   self.postMessage({ id: d.id, colors: colors, points: points });
 });
-`;
+`; /* eslint-enable no-var, prefer-arrow-callback, func-style, no-use-before-define */
 
 let _worker = null;
 let _pendingRequests = {};

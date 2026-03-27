@@ -1,17 +1,18 @@
 import { createTag, getIconElementDeprecated, getLibs } from '../../scripts/utils.js';
-import { rgbToHex } from '../../libs/color-components/utils/ColorConversions.js';
-import { createSwatchRailAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
 import {
-  CSS_CLASSES, DEFAULTS, EVENTS, VARIANTS,
+  CSS_CLASSES, DEFAULTS, EVENTS, MOODS, VARIANTS,
 } from './helpers/constants.js';
 import { parseBlockConfig } from './helpers/parseConfig.js';
-import { extractColorsFromImage } from './helpers/extractWorker.js';
-import { createImageMarkers } from './helpers/imageMarkers.js';
-import { createMoodSelector } from './helpers/moodSelector.js';
-import { createToolbar } from './helpers/toolbar.js';
 import { createHistoryManager } from './helpers/historyManager.js';
-import { createGradientEditor } from '../../scripts/color-shared/components/gradients/gradient-editor.js';
 import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
+
+function injectStylesheet(href) {
+  if (document.querySelector(`link[href="${href}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = href;
+  document.head.appendChild(link);
+}
 
 const LOGO = 'adobe-express-logo';
 const EXTRACT_CANVAS_MAX = 320;
@@ -193,6 +194,10 @@ function drawImageToCanvas(image) {
   return canvas;
 }
 
+function toHex(r, g, b) {
+  return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1).toUpperCase()}`;
+}
+
 function samplePalette(context, width, height, count) {
   const imageData = context.getImageData(0, 0, width, height).data;
   const pixels = imageData.length / 4;
@@ -200,11 +205,7 @@ function samplePalette(context, width, height, count) {
   const colors = [];
   for (let i = 0; i < count; i += 1) {
     const offset = Math.min(i * step * 4, imageData.length - 4);
-    colors.push(rgbToHex({
-      red: imageData[offset],
-      green: imageData[offset + 1],
-      blue: imageData[offset + 2],
-    }));
+    colors.push(toHex(imageData[offset], imageData[offset + 1], imageData[offset + 2]));
   }
   return colors;
 }
@@ -315,7 +316,7 @@ function buildSuggestedImages(row, onSelect) {
   list.classList.add('color-extract-suggestions-list');
 
   const pictures = [...(row?.querySelectorAll('picture') || [])];
-  list.innerHTML = '';
+  list.replaceChildren();
   pictures.forEach((picture) => {
     const button = createTag('button', {
       class: 'color-extract-suggestion',
@@ -347,6 +348,7 @@ function buildSuggestedImages(row, onSelect) {
       c.height = h;
       c.getContext('2d').drawImage(imgEl, 0, 0, w, h);
       const imageData = c.getContext('2d').getImageData(0, 0, w, h);
+      const { extractColorsFromImage } = await import('./helpers/extractWorker.js');
       const result = await extractColorsFromImage(imageData, w, h, chips.length, DEFAULTS.MOOD);
       return result.colors;
     };
@@ -369,9 +371,16 @@ function buildSuggestedImages(row, onSelect) {
         applyPaletteToChips(await runMoodExtract(img), chips);
       } catch { /* silent — chips stay default */ }
     };
-    if (previewImage?.complete && previewImage.naturalWidth) hydratePalette();
-    else if (previewImage) previewImage.addEventListener('load', hydratePalette, { once: true });
-    else hydratePalette();
+    const scheduleHydrate = () => {
+      if (window.requestIdleCallback) {
+        requestIdleCallback(() => hydratePalette(), { timeout: 3000 });
+      } else {
+        setTimeout(() => hydratePalette(), 0);
+      }
+    };
+    if (previewImage?.complete && previewImage.naturalWidth) scheduleHydrate();
+    else if (previewImage) previewImage.addEventListener('load', scheduleHydrate, { once: true });
+    else scheduleHydrate();
 
     button.addEventListener('click', () => {
       list.querySelectorAll('.color-extract-suggestion.is-selected').forEach((item) => {
@@ -396,7 +405,7 @@ function buildSuggestedImages(row, onSelect) {
 
 /* ---------- Edit stage (palette) ---------- */
 
-function buildEditStage(copyRow, imageRow, controller) {
+function buildEditStage(copyRow, imageRow) {
   const wrapper = createTag('div', { class: 'color-extract-edit' });
 
   const copyWrapper = createTag('div', { class: 'color-extract-edit-copy' });
@@ -413,13 +422,8 @@ function buildEditStage(copyRow, imageRow, controller) {
 
   leftCol.append(bgWrapper);
 
-  const railAdapter = createSwatchRailAdapter(controller, {
-    orientation: 'stacked',
-    swatchFeatures: ['copy', 'colorPicker', 'hexCode', 'trash'],
-  });
-  railAdapter.element.classList.add('color-extract-swatch-rail');
-
-  stage.append(leftCol, railAdapter.element);
+  const railSlot = createTag('div', { class: 'color-extract-swatch-rail' });
+  stage.append(leftCol, railSlot);
   wrapper.append(copyWrapper, stage);
 
   return {
@@ -427,8 +431,7 @@ function buildEditStage(copyRow, imageRow, controller) {
     stage,
     leftCol,
     bgWrapper,
-    rail: railAdapter.rail,
-    railAdapter,
+    railSlot,
     setBackground(src) {
       const pic = bgWrapper.querySelector('picture');
       if (pic) pic.querySelectorAll('source').forEach((s) => s.setAttribute('srcset', src));
@@ -490,8 +493,8 @@ function createFloatingToolbarMount(controller, variant) {
       container.appendChild(tb.element);
       controller.subscribe(() => sync());
     } catch (err) {
-      // eslint-disable-next-line no-console
-      console.error('color-extract: floating toolbar load failed:', err);
+      const { default: lana } = await import(`${getLibs()}/utils/lana.js`);
+      lana.log(`color-extract: floating toolbar load failed: ${err.message}`, { tags: 'color-extract' });
     }
   }
 
@@ -538,9 +541,29 @@ function buildLoadingOverlay() {
   return overlay;
 }
 
+/* ---------- Shared drag wiring ---------- */
+
+function attachWindowDragHandlers(block, dropzone) {
+  const ac = new AbortController();
+  const { signal } = ac;
+  const isBlockInViewport = () => {
+    const rect = block.getBoundingClientRect();
+    return rect.bottom > 0 && rect.top < window.innerHeight;
+  };
+  window.addEventListener('dragenter', (e) => { if (isBlockInViewport() && isFileDrag(e)) { preventDefaults(e); block.classList.add('is-dragging'); } }, { signal });
+  window.addEventListener('dragover', (e) => { if (isBlockInViewport() && isFileDrag(e)) { preventDefaults(e); block.classList.add('is-dragging'); } }, { signal });
+  window.addEventListener('dragleave', (e) => { preventDefaults(e); if (!e.relatedTarget && !document.elementFromPoint(e.clientX, e.clientY)) block.classList.remove('is-dragging'); }, { signal });
+  window.addEventListener('dragend', (e) => { preventDefaults(e); block.classList.remove('is-dragging'); }, { signal });
+  window.addEventListener('drop', (e) => { if (!isBlockInViewport() || !isFileDrag(e)) return; preventDefaults(e); dropzone.handleFile(e.dataTransfer.files[0]); setTimeout(() => block.classList.remove('is-dragging'), 200); }, { signal });
+  const detach = () => ac.abort();
+  const observer = new MutationObserver(() => { if (!block.isConnected) { detach(); observer.disconnect(); } });
+  observer.observe(block.parentElement || document.body, { childList: true });
+  return detach;
+}
+
 /* ---------- Palette variant ---------- */
 
-async function renderColorVariant(block, rows, config) {
+function renderColorVariant(block, rows, config) {
   const maxColors = Math.max(1, Math.min(10, Number(config.maxColors) || DEFAULTS.MAX_COLORS));
   const resolvedConfig = {
     ...config,
@@ -561,21 +584,7 @@ async function renderColorVariant(block, rows, config) {
     },
   });
 
-  const edit = buildEditStage(rows[1], rows[2], controller);
-
-  edit.rail.addEventListener('color-swatch-rail-delete', (e) => {
-    historySnapshot();
-    const deletedIndex = e.detail?.index ?? -1;
-    const oldPositions = markers ? markers.getPositions() : [];
-    // Defer to after the rail's setState call (event fires before setState)
-    queueMicrotask(() => {
-      if (!markers) return;
-      const state = controller.getState();
-      const newPositions = oldPositions.filter((_, i) => i !== deletedIndex);
-      const points = newPositions.map((p) => ({ x: p.pctX, y: p.pctY }));
-      markers.setPositions(state.swatches.map((s) => s.hex), points);
-    });
-  });
+  const edit = buildEditStage(rows[1], rows[2]);
 
   function getHistoryState() {
     const state = controller.getState();
@@ -585,6 +594,8 @@ async function renderColorVariant(block, rows, config) {
       mood: currentMood,
     };
   }
+
+  let moodSelectorRef = null;
 
   function restoreFromHistory(snapshot) {
     if (snapshot.swatches) {
@@ -599,16 +610,18 @@ async function renderColorVariant(block, rows, config) {
     }
     if (snapshot.mood) {
       currentMood = snapshot.mood;
-      moodSelector.setMood(snapshot.mood);
+      moodSelectorRef?.setMood(snapshot.mood);
       controller.setMetadata({ mood: snapshot.mood });
     }
   }
 
+  let toolbarRef = null;
+
   const history = createHistoryManager(
     restoreFromHistory,
     (canUndo, canRedo) => {
-      toolbar.setUndoEnabled(canUndo);
-      toolbar.setRedoEnabled(canRedo);
+      toolbarRef?.setUndoEnabled(canUndo);
+      toolbarRef?.setRedoEnabled(canRedo);
     },
   );
 
@@ -621,6 +634,7 @@ async function renderColorVariant(block, rows, config) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     try {
+      const { extractColorsFromImage } = await import('./helpers/extractWorker.js');
       const result = await extractColorsFromImage(
         imageData,
         canvas.width,
@@ -654,24 +668,17 @@ async function renderColorVariant(block, rows, config) {
     }
   }
 
-  const moodSelector = createMoodSelector(currentMood, (mood) => {
-    historySnapshot();
-    currentMood = mood;
-    controller.setMetadata({ mood });
-    emitBlockEvent(block, EVENTS.MOOD_CHANGE, { mood });
-    if (currentCanvas) runExtraction(currentCanvas, mood);
-  });
-
   function onMoodOverride(mood) {
     currentMood = mood;
-    moodSelector.setMood(mood);
+    moodSelectorRef?.setMood(mood);
     controller.setMetadata({ mood });
   }
 
   let resizeHandler = null;
   let imgLoadHandler = null;
 
-  function setupMarkers(canvas) {
+  async function setupMarkers(canvas) {
+    const { createImageMarkers } = await import('./helpers/imageMarkers.js');
     markers = createImageMarkers(edit.bgWrapper, canvas, controller, {
       onMoodOverride,
       onDragStart: () => historySnapshot(),
@@ -680,16 +687,12 @@ async function renderColorVariant(block, rows, config) {
     edit.bgWrapper.style.position = 'relative';
     edit.bgWrapper.append(markers.container);
 
-    // Sync overlay to rendered image area (handles object-fit: contain offset)
     const doSync = () => syncMarkersToImage(markers.container, edit.bgWrapper);
 
-    // The bgWrapper <img> src was just changed by setBackground — it may still
-    // be loading. Re-sync when it finishes so overlay dimensions are correct.
     const bgImg = edit.bgWrapper.querySelector('img');
     if (bgImg) {
       imgLoadHandler = doSync;
       bgImg.addEventListener('load', doSync);
-      // If image already loaded (e.g. data-URL or cached), sync immediately
       if (bgImg.complete && bgImg.naturalWidth) doSync();
     }
 
@@ -702,7 +705,7 @@ async function renderColorVariant(block, rows, config) {
 
   const floatingToolbar = createFloatingToolbarMount(controller, VARIANTS.PALETTE);
 
-  function onImageReady(image, src) {
+  async function onImageReady(image, src) {
     currentSrc = src;
     edit.setBackground(src);
     history.clear();
@@ -714,7 +717,7 @@ async function renderColorVariant(block, rows, config) {
     if (markers) markers.destroy();
 
     currentCanvas = drawImageToCanvas(image);
-    setupMarkers(currentCanvas);
+    await setupMarkers(currentCanvas);
 
     runExtraction(currentCanvas, currentMood);
     floatingToolbar.mount();
@@ -722,49 +725,27 @@ async function renderColorVariant(block, rows, config) {
 
   const dropzone = createColorExtractDropzone(block, resolvedConfig, onImageReady);
 
-  function addColorToImage() {
+  async function addColorToImage() {
     if (!currentCanvas || !markers) return;
     const totalLimit = DEFAULTS.MAX_TOTAL_COLORS;
     if (markers.markerCount >= totalLimit) return;
 
     historySnapshot();
 
-    // Place new marker at center of image, sample the pixel color there
     const pctX = 0.5;
     const pctY = 0.5;
     const cx = Math.round(pctX * currentCanvas.width);
     const cy = Math.round(pctY * currentCanvas.height);
     const ctx = currentCanvas.getContext('2d');
     const [r, g, b] = ctx.getImageData(cx, cy, 1, 1).data;
+    const { rgbToHex } = await import('../../libs/color-components/utils/ColorConversions.js');
     const hex = rgbToHex({ red: r, green: g, blue: b });
 
-    // Add new swatch to the controller (updates the swatch rail)
     const newIndex = controller.addSwatch(hex);
-
-    // Add new draggable marker on the image
     markers.addMarker(hex, pctX, pctY);
-
-    // Set it as the active/selected marker
     controller.setBaseColorIndex(newIndex);
     onMoodOverride(MOODS.CUSTOM);
   }
-
-  const toolbar = await createToolbar({
-    moodElement: moodSelector.element,
-    onAddColor: addColorToImage,
-    onReset: () => {
-      if (currentCanvas) {
-        historySnapshot();
-        runExtraction(currentCanvas, currentMood, resolvedConfig.maxColors);
-      }
-    },
-    onReplace: () => {
-      dropzone.input.value = '';
-      dropzone.input.click();
-    },
-    onUndo: () => history.undo(getHistoryState()),
-    onRedo: () => history.redo(getHistoryState()),
-  });
 
   function handleSuggestionClick(imgEl, src) {
     block.classList.add('has-image');
@@ -783,36 +764,81 @@ async function renderColorVariant(block, rows, config) {
   if (suggestions) landing.content.append(suggestions);
   landing.stage.append(dragOverlay, loadingOverlay);
 
-  edit.leftCol.prepend(toolbar.element);
+  // Fire-and-forget: load swatch rail, mood selector, and toolbar in parallel
+  const toolbarPlaceholder = createTag('div', { class: 'color-extract-toolbar-slot' });
+  edit.leftCol.prepend(toolbarPlaceholder);
   edit.wrapper.append(floatingToolbar.element);
+
+  Promise.all([
+    import('../../scripts/color-shared/adapters/litComponentAdapters.js'),
+    import('./helpers/moodSelector.js'),
+    import('./helpers/toolbar.js'),
+  ]).then(([
+    { createSwatchRailAdapter },
+    { createMoodSelector },
+    { createToolbar },
+  ]) => {
+    const railAdapter = createSwatchRailAdapter(controller, {
+      orientation: 'stacked',
+      swatchFeatures: ['copy', 'colorPicker', 'hexCode', 'trash'],
+    });
+    railAdapter.element.classList.add('color-extract-swatch-rail');
+    edit.railSlot.replaceWith(railAdapter.element);
+
+    railAdapter.rail.addEventListener('color-swatch-rail-delete', (e) => {
+      historySnapshot();
+      const deletedIndex = e.detail?.index ?? -1;
+      const oldPositions = markers ? markers.getPositions() : [];
+      queueMicrotask(() => {
+        if (!markers) return;
+        const state = controller.getState();
+        const newPositions = oldPositions.filter((_, i) => i !== deletedIndex);
+        const points = newPositions.map((p) => ({ x: p.pctX, y: p.pctY }));
+        markers.setPositions(state.swatches.map((s) => s.hex), points);
+      });
+    });
+
+    moodSelectorRef = createMoodSelector(currentMood, (mood) => {
+      historySnapshot();
+      currentMood = mood;
+      controller.setMetadata({ mood });
+      emitBlockEvent(block, EVENTS.MOOD_CHANGE, { mood });
+      if (currentCanvas) runExtraction(currentCanvas, mood);
+    });
+
+    createToolbar({
+      moodElement: moodSelectorRef.element,
+      onAddColor: addColorToImage,
+      onReset: () => {
+        if (currentCanvas) {
+          historySnapshot();
+          runExtraction(currentCanvas, currentMood, resolvedConfig.maxColors);
+        }
+      },
+      onReplace: () => {
+        dropzone.input.value = '';
+        dropzone.input.click();
+      },
+      onUndo: () => history.undo(getHistoryState()),
+      onRedo: () => history.redo(getHistoryState()),
+    }).then((toolbar) => {
+      toolbarRef = toolbar;
+      toolbarPlaceholder.replaceWith(toolbar.element);
+    });
+  });
 
   innerContainer.append(landing.stage, edit.wrapper);
 
-  block.innerHTML = '';
-  block.append(innerContainer);
-
-  const isBlockInViewport = () => {
-    const rect = block.getBoundingClientRect();
-    return rect.bottom > 0 && rect.top < window.innerHeight;
-  };
+  block.replaceChildren(innerContainer);
 
   if (resolvedConfig.enableImageUpload) {
-    window.addEventListener('dragenter', (e) => { if (isBlockInViewport() && isFileDrag(e)) { preventDefaults(e); block.classList.add('is-dragging'); } });
-    window.addEventListener('dragover', (e) => { if (isBlockInViewport() && isFileDrag(e)) { preventDefaults(e); block.classList.add('is-dragging'); } });
-    window.addEventListener('dragleave', (e) => { preventDefaults(e); if (!e.relatedTarget && !document.elementFromPoint(e.clientX, e.clientY)) block.classList.remove('is-dragging'); });
-    window.addEventListener('dragend', (e) => { preventDefaults(e); block.classList.remove('is-dragging'); });
-    window.addEventListener('drop', (e) => {
-      if (!isBlockInViewport() || !isFileDrag(e)) return;
-      preventDefaults(e);
-      dropzone.handleFile(e.dataTransfer.files[0]);
-      setTimeout(() => block.classList.remove('is-dragging'), 200);
-    });
+    attachWindowDragHandlers(block, dropzone);
   }
 }
 
 /* ---------- Gradient edit stage ---------- */
 
-function buildGradientEditStage(copyRow, imageRow, controller) {
+function buildGradientEditStage(copyRow, imageRow) {
   const wrapper = createTag('div', { class: 'color-extract-edit' });
 
   const copyWrapper = createTag('div', { class: 'color-extract-edit-copy' });
@@ -831,13 +857,8 @@ function buildGradientEditStage(copyRow, imageRow, controller) {
   const rightCol = createTag('div', { class: 'color-extract-gradient-right-col' });
   const editorCol = createTag('div', { class: 'color-extract-gradient-editor-col' });
 
-  const railAdapter = createSwatchRailAdapter(controller, {
-    orientation: 'stacked',
-    swatchFeatures: ['copy', 'hexCode', 'trash'],
-  });
-  railAdapter.element.classList.add('color-extract-swatch-rail', 'color-extract-swatch-rail--gradient');
-
-  rightCol.append(editorCol, railAdapter.element);
+  const railSlot = createTag('div', { class: 'color-extract-swatch-rail color-extract-swatch-rail--gradient' });
+  rightCol.append(editorCol, railSlot);
   stage.append(leftCol, rightCol);
   wrapper.append(copyWrapper, stage);
 
@@ -848,8 +869,7 @@ function buildGradientEditStage(copyRow, imageRow, controller) {
     bgWrapper,
     editorCol,
     rightCol,
-    rail: railAdapter.rail,
-    railAdapter,
+    railSlot,
     setBackground(src) {
       const pic = bgWrapper.querySelector('picture');
       if (pic) pic.querySelectorAll('source').forEach((s) => s.setAttribute('srcset', src));
@@ -882,6 +902,8 @@ function createGradientControllerProxy(editor) {
 /* ---------- Gradient variant renderer ---------- */
 
 async function renderGradientVariant(block, rows, config) {
+  injectStylesheet(new URL('../../scripts/color-shared/components/gradients/gradient-editor.css', import.meta.url).href);
+  const { createGradientEditor } = await import('../../scripts/color-shared/components/gradients/gradient-editor.js');
   const maxColors = Math.max(2, Math.min(10, Number(config.maxColors) || DEFAULTS.MAX_COLORS));
   const resolvedConfig = {
     ...config,
@@ -934,32 +956,11 @@ async function renderGradientVariant(block, rows, config) {
 
   const controllerProxy = createGradientControllerProxy(gradientEditor);
 
-  const edit = buildGradientEditStage(rows[1], rows[2], swatchController);
+  const edit = buildGradientEditStage(rows[1], rows[2]);
   edit.editorCol.append(gradientEditor.element);
 
-  edit.rail.addEventListener('color-swatch-rail-delete', (e) => {
-    historySnapshot();
-    const deletedIndex = e.detail?.index ?? -1;
-    const oldPositions = markers ? markers.getPositions() : [];
-    // Defer to after the rail's setState call (event fires before setState)
-    queueMicrotask(() => {
-      // Remove the corresponding gradient stop and rebuild the gradient
-      const grad = gradientEditor.getGradient();
-      if (deletedIndex >= 0 && deletedIndex < grad.colorStops.length && grad.colorStops.length > 2) {
-        grad.colorStops.splice(deletedIndex, 1);
-        // Recalculate midpoints for the new stop count
-        delete grad.midpoints;
-        gradientEditor.setGradient(grad);
-      }
-      // Rebuild markers minus the deleted one — setPositions redraws connectors sequentially
-      if (markers) {
-        const state = swatchController.getState();
-        const newPositions = oldPositions.filter((_, i) => i !== deletedIndex);
-        const points = newPositions.map((p) => ({ x: p.pctX, y: p.pctY }));
-        markers.setPositions(state.swatches.map((s) => s.hex), points);
-      }
-    });
-  });
+  // Swatch rail loaded lazily — wired up in Promise.all below
+
 
   gradientEditor.element.addEventListener('pointerdown', () => {
     if (!gradientInteracting) {
@@ -998,11 +999,13 @@ async function renderGradientVariant(block, rows, config) {
     }
   }
 
+  let toolbarRef = null;
+
   const history = createHistoryManager(
     restoreFromHistory,
     (canUndo, canRedo) => {
-      toolbar.setUndoEnabled(canUndo);
-      toolbar.setRedoEnabled(canRedo);
+      toolbarRef?.setUndoEnabled(canUndo);
+      toolbarRef?.setRedoEnabled(canRedo);
     },
   );
 
@@ -1014,6 +1017,7 @@ async function renderGradientVariant(block, rows, config) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     try {
+      const { extractColorsFromImage } = await import('./helpers/extractWorker.js');
       const result = await extractColorsFromImage(
         imageData,
         canvas.width,
@@ -1063,7 +1067,8 @@ async function renderGradientVariant(block, rows, config) {
   let resizeHandler = null;
   let imgLoadHandler = null;
 
-  function setupMarkers(canvas) {
+  async function setupMarkers(canvas) {
+    const { createImageMarkers } = await import('./helpers/imageMarkers.js');
     markers = createImageMarkers(edit.bgWrapper, canvas, controllerProxy, {
       showConnectors: true,
       onMoodOverride: () => {},
@@ -1091,7 +1096,7 @@ async function renderGradientVariant(block, rows, config) {
 
   const floatingToolbar = createFloatingToolbarMount(swatchController, VARIANTS.GRADIENT);
 
-  function onImageReady(image, src) {
+  async function onImageReady(image, src) {
     currentSrc = src;
     edit.setBackground(src);
     history.clear();
@@ -1103,27 +1108,27 @@ async function renderGradientVariant(block, rows, config) {
     if (markers) markers.destroy();
 
     currentCanvas = drawImageToCanvas(image);
-    setupMarkers(currentCanvas);
+    await setupMarkers(currentCanvas);
     runGradientExtraction(currentCanvas);
     floatingToolbar.mount();
   }
 
   const dropzone = createColorExtractDropzone(block, resolvedConfig, onImageReady);
 
-  function addColorToImage() {
+  async function addColorToImage() {
     if (!currentCanvas || !markers || !gradientEditor) return;
     const totalLimit = DEFAULTS.MAX_TOTAL_COLORS;
     if (markers.markerCount >= totalLimit) return;
 
     historySnapshot();
 
-    // Place new marker at center of image, sample the pixel color there
     const pctX = 0.5;
     const pctY = 0.5;
     const cx = Math.round(pctX * currentCanvas.width);
     const cy = Math.round(pctY * currentCanvas.height);
     const ctx = currentCanvas.getContext('2d');
     const [r, g, b] = ctx.getImageData(cx, cy, 1, 1).data;
+    const { rgbToHex } = await import('../../libs/color-components/utils/ColorConversions.js');
     const hex = rgbToHex({ red: r, green: g, blue: b });
 
     // Add a new color stop to the gradient editor
@@ -1144,23 +1149,6 @@ async function renderGradientVariant(block, rows, config) {
     swatchController.setBaseColorIndex(newIndex);
   }
 
-  const toolbar = await createToolbar({
-    moodElement: null,
-    onAddColor: addColorToImage,
-    onReset: () => {
-      if (currentCanvas) {
-        historySnapshot();
-        runGradientExtraction(currentCanvas);
-      }
-    },
-    onReplace: () => {
-      dropzone.input.value = '';
-      dropzone.input.click();
-    },
-    onUndo: () => history.undo(getHistoryState()),
-    onRedo: () => history.redo(getHistoryState()),
-  });
-
   function handleSuggestionClick(imgEl, src) {
     block.classList.add('has-image');
     onImageReady(imgEl, src);
@@ -1178,34 +1166,77 @@ async function renderGradientVariant(block, rows, config) {
   if (suggestions) landing.content.append(suggestions);
   landing.stage.append(dragOverlay, loadingOverlay);
 
-  edit.leftCol.prepend(toolbar.element);
+  const toolbarPlaceholder = createTag('div', { class: 'color-extract-toolbar-slot' });
+  edit.leftCol.prepend(toolbarPlaceholder);
   edit.wrapper.append(floatingToolbar.element);
+
+  // Fire-and-forget: load swatch rail and toolbar in parallel
+  Promise.all([
+    import('../../scripts/color-shared/adapters/litComponentAdapters.js'),
+    import('./helpers/toolbar.js'),
+  ]).then(([
+    { createSwatchRailAdapter },
+    { createToolbar },
+  ]) => {
+    const railAdapter = createSwatchRailAdapter(swatchController, {
+      orientation: 'stacked',
+      swatchFeatures: ['copy', 'hexCode', 'trash'],
+    });
+    railAdapter.element.classList.add('color-extract-swatch-rail', 'color-extract-swatch-rail--gradient');
+    edit.railSlot.replaceWith(railAdapter.element);
+
+    railAdapter.rail.addEventListener('color-swatch-rail-delete', (e) => {
+      historySnapshot();
+      const deletedIndex = e.detail?.index ?? -1;
+      const oldPositions = markers ? markers.getPositions() : [];
+      queueMicrotask(() => {
+        const grad = gradientEditor.getGradient();
+        if (deletedIndex >= 0 && deletedIndex < grad.colorStops.length && grad.colorStops.length > 2) {
+          grad.colorStops.splice(deletedIndex, 1);
+          delete grad.midpoints;
+          gradientEditor.setGradient(grad);
+        }
+        if (markers) {
+          const state = swatchController.getState();
+          const newPositions = oldPositions.filter((_, i) => i !== deletedIndex);
+          const points = newPositions.map((p) => ({ x: p.pctX, y: p.pctY }));
+          markers.setPositions(state.swatches.map((s) => s.hex), points);
+        }
+      });
+    });
+
+    createToolbar({
+      moodElement: null,
+      onAddColor: addColorToImage,
+      onReset: () => {
+        if (currentCanvas) {
+          historySnapshot();
+          runGradientExtraction(currentCanvas);
+        }
+      },
+      onReplace: () => {
+        dropzone.input.value = '';
+        dropzone.input.click();
+      },
+      onUndo: () => history.undo(getHistoryState()),
+      onRedo: () => history.redo(getHistoryState()),
+    }).then((toolbar) => {
+      toolbarRef = toolbar;
+      toolbarPlaceholder.replaceWith(toolbar.element);
+    });
+  });
 
   innerContainer.append(landing.stage, edit.wrapper);
 
-  block.innerHTML = '';
-  block.append(innerContainer);
-
-  const isBlockInViewport = () => {
-    const rect = block.getBoundingClientRect();
-    return rect.bottom > 0 && rect.top < window.innerHeight;
-  };
+  block.replaceChildren(innerContainer);
 
   if (resolvedConfig.enableImageUpload) {
-    window.addEventListener('dragenter', (e) => { if (isBlockInViewport() && isFileDrag(e)) { preventDefaults(e); block.classList.add('is-dragging'); } });
-    window.addEventListener('dragover', (e) => { if (isBlockInViewport() && isFileDrag(e)) { preventDefaults(e); block.classList.add('is-dragging'); } });
-    window.addEventListener('dragleave', (e) => { preventDefaults(e); if (!e.relatedTarget && !document.elementFromPoint(e.clientX, e.clientY)) block.classList.remove('is-dragging'); });
-    window.addEventListener('dragend', (e) => { preventDefaults(e); block.classList.remove('is-dragging'); });
-    window.addEventListener('drop', (e) => {
-      if (!isBlockInViewport() || !isFileDrag(e)) return;
-      preventDefaults(e);
-      dropzone.handleFile(e.dataTransfer.files[0]);
-      setTimeout(() => block.classList.remove('is-dragging'), 200);
-    });
+    attachWindowDragHandlers(block, dropzone);
   }
 }
 
 export default async function decorate(block) {
+  injectStylesheet(new URL('../../scripts/color-shared/components/image-upload/image-upload.css', import.meta.url).href);
   const rows = [...block.children];
   const config = parseBlockConfig(rows);
   const contentRows = getContentRows(rows);
@@ -1221,7 +1252,7 @@ export default async function decorate(block) {
   block.classList.add(variant);
 
   if (variant === VARIANTS.PALETTE) {
-    await renderColorVariant(block, contentRows, config);
+    renderColorVariant(block, contentRows, config);
   } else {
     await renderGradientVariant(block, contentRows, config);
   }

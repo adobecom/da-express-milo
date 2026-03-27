@@ -1,4 +1,5 @@
 import { getResolvedConfig } from '../config.js';
+import { getLibs } from '../../../scripts/utils.js';
 import { guardMiddleware, matchTopic } from '../middlewares/guard.js';
 import { getPluginManifest, getPluginManifests } from '../plugins/index.js';
 import {
@@ -154,8 +155,8 @@ class ServiceManager {
       const spec = typeof entry === 'string' ? { name: entry } : entry;
 
       if (!spec?.name) {
-        // eslint-disable-next-line no-console
-        console.warn('Invalid middleware entry (missing name):', entry);
+        const { default: lana } = await import(`${getLibs()}/utils/lana.js`);
+        lana.log(`ServiceManager: invalid middleware entry (missing name): ${JSON.stringify(entry)}`, { tags: 'services' });
         return;
       }
 
@@ -163,8 +164,8 @@ class ServiceManager {
         try {
           const loader = this.#middlewareLoaders[spec.name];
           if (!loader) {
-            // eslint-disable-next-line no-console
-            console.warn(`Middleware loader not found for "${spec.name}"`);
+            const { default: lana } = await import(`${getLibs()}/utils/lana.js`);
+            lana.log(`ServiceManager: middleware loader not found for "${spec.name}"`, { tags: 'services' });
             return;
           }
           const { default: mw } = await loader();
@@ -173,8 +174,8 @@ class ServiceManager {
             plugin.use(finalMw);
           }
         } catch (error) {
-          // eslint-disable-next-line no-console
-          console.error(`Failed to load middleware "${spec.name}":`, error);
+          const { default: lana } = await import(`${getLibs()}/utils/lana.js`);
+          lana.log(`ServiceManager: failed to load middleware "${spec.name}": ${error.message}`, { tags: 'services' });
         }
       }
     });
@@ -249,8 +250,8 @@ class ServiceManager {
 
       return plugin;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(`Failed to load plugin "${name}":`, error);
+      const { default: lana } = await import(`${getLibs()}/utils/lana.js`);
+      lana.log(`ServiceManager: failed to load plugin "${name}": ${error.message}`, { tags: 'services' });
       return null;
     }
   }
@@ -334,8 +335,8 @@ class ServiceManager {
       this.#providers.set(name, provider);
       return provider;
     } catch (error) {
-      // eslint-disable-next-line no-console
-      console.error(`Failed to load provider "${name}":`, error);
+      const { default: lana } = await import(`${getLibs()}/utils/lana.js`);
+      lana.log(`ServiceManager: failed to load provider "${name}": ${error.message}`, { tags: 'services' });
       return null;
     }
   }
