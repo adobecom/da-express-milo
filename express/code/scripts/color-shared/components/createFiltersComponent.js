@@ -425,7 +425,22 @@ export async function createFiltersComponent(options = {}) {
   mobileThemeWrapper.classList.add('filters-mobile-theme');
   interactionRoot = container;
 
-  const filtersToUse = filters.length > 0 ? filters : getDefaultFilters();
+  const sourceFilters = filters.length > 0 ? filters : getDefaultFilters();
+  const seenFilterIds = new Set();
+  const filtersToUse = sourceFilters.filter((filter) => {
+    const id = filter?.id;
+    if (!id || seenFilterIds.has(id)) {
+      if (id && seenFilterIds.has(id)) {
+        window.lana?.log(`Duplicate filter id removed: ${id}`, {
+          tags: 'color-explorer,filters',
+          severity: 'warning',
+        });
+      }
+      return false;
+    }
+    seenFilterIds.add(id);
+    return true;
+  });
   filtersToUse.forEach((filter) => {
     filterValues[filter.id] = getDefaultValue(filter);
   });

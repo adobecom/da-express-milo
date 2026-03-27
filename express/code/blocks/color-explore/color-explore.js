@@ -7,9 +7,9 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
+import { createLoadingScreenComponent } from '../../scripts/color-shared/components/createLoadingScreenComponent.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
-import { createColorPaletteParamApi, normalizeHex } from '../../scripts/color-shared/utils/utilities.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
@@ -22,6 +22,8 @@ const DEFAULTS = {
   enableSearch: true,
   useMockData: false,
   useMockFallback: true,
+  // [DEMO ONLY][MWPW-186947] remove after loading-screen PR lands
+  loadingScreenDemo: false,
   apiEndpoint: '',
 };
 const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
@@ -33,16 +35,37 @@ const EVENTS = {
   FILTER: 'filter',
   LOAD_MORE: 'load-more',
 };
-const PALETTE_EDITOR_DEFAULT_URL = '/color-wheel';
-const PALETTE_EDITOR_DEMO_HOST = 'methomas-sidebar-with-fixes--da-express-milo--adobecom.aem.live';
-const PALETTE_EDITOR_DEMO_URL = 'https://methomas-sidebar-with-fixes--da-express-milo--adobecom.aem.live/drafts/methomas/color/color-palette-sidebar';
-const colorPaletteParamApi = createColorPaletteParamApi();
 
 const STRIP_SHARED_STYLES = [
   'scripts/color-shared/components/strips/color-strip.css',
   'scripts/color-shared/components/gradients/gradient-strip.css',
 ];
 const LOAD_MORE_CLICK_HANDLERS = new WeakMap();
+// [DEMO ONLY][MWPW-186947] remove block below after loading-screen PR lands
+const LOADING_DEMO_QUERY_PARAM = 'colorExploreLoadingDemo';
+
+function isLoadingDemoMode(config = {}) {
+  if (config?.loadingScreenDemo === true) return true;
+
+  try {
+    const params = new URLSearchParams(window.location.search || '');
+    const value = (params.get(LOADING_DEMO_QUERY_PARAM) || '').trim().toLowerCase();
+    return value === '1' || value === 'true';
+  } catch (error) {
+    return false;
+  }
+}
+
+async function mountLoadingScreenDemo(container, config) {
+  const loading = createLoadingScreenComponent({
+    variant: config.variant === VARIANTS.GRADIENTS ? VARIANTS.GRADIENTS : VARIANTS.STRIPS,
+    cardCount: config.initialLoad,
+  });
+
+  container.replaceChildren(loading.element);
+  await loading.show();
+}
+// [DEMO ONLY] end
 
 async function loadStripSharedStyles() {
   await Promise.all(
@@ -69,77 +92,6 @@ function isSwatchesMode(config) {
   return config?.swatchesOnly === true
     || config?.contentMode === 'swatches'
     || config?.renderMode === 'swatches';
-}
-
-function resolvePaletteEditorBaseUrl(currentUrl) {
-  if (currentUrl?.hostname === PALETTE_EDITOR_DEMO_HOST) {
-    return PALETTE_EDITOR_DEMO_URL;
-  }
-  return PALETTE_EDITOR_DEFAULT_URL;
-}
-
-function resolvePaletteHexesForUrl(paletteData = {}) {
-  const fromColors = Array.isArray(paletteData?.colors) ? paletteData.colors : [];
-  const fromCoreColors = Array.isArray(paletteData?.coreColors) ? paletteData.coreColors : [];
-  const fromSwatches = Array.isArray(paletteData?.swatches) ? paletteData.swatches : [];
-
-  let source = fromSwatches;
-  if (fromColors.length) {
-    source = fromColors;
-  } else if (fromCoreColors.length) {
-    source = fromCoreColors;
-  }
-
-  return source.flatMap((entry) => {
-    let candidate = '';
-    if (typeof entry === 'string') {
-      candidate = entry;
-    } else if (entry && typeof entry === 'object') {
-      candidate = entry.hex || entry.color || entry.value || '';
-    }
-
-    return String(candidate)
-      .split(',')
-      .map((segment) => segment.trim())
-      .filter(Boolean)
-      .map((segment) => normalizeHex(segment))
-      .filter(Boolean);
-  });
-}
-
-function buildPaletteEditorUrl(palette, sourceHref) {
-  const paletteData = palette || {};
-  const fallbackHref = sourceHref
-    || (typeof window !== 'undefined' ? window.location.href : PALETTE_EDITOR_DEFAULT_URL);
-  let currentUrl;
-  try {
-    currentUrl = new URL(fallbackHref);
-  } catch {
-    return PALETTE_EDITOR_DEFAULT_URL;
-  }
-
-  const baseUrl = resolvePaletteEditorBaseUrl(currentUrl);
-  let targetUrl;
-  try {
-    targetUrl = new URL(baseUrl, currentUrl);
-  } catch {
-    targetUrl = new URL(PALETTE_EDITOR_DEFAULT_URL, currentUrl);
-  }
-
-  const paletteColors = resolvePaletteHexesForUrl(paletteData);
-  colorPaletteParamApi.setOnUrl(targetUrl, paletteColors);
-
-  if (!targetUrl.searchParams.has('martech') && currentUrl.searchParams.has('martech')) {
-    targetUrl.searchParams.set('martech', currentUrl.searchParams.get('martech'));
-  }
-
-  return targetUrl.toString();
-}
-
-function navigateToPaletteEditor(palette = {}) {
-  if (typeof window === 'undefined') return;
-  const destination = buildPaletteEditorUrl(palette);
-  window.location.assign(destination);
 }
 
 async function createBlockLoadMoreControl(container, onClick, options = {}) {
@@ -226,8 +178,17 @@ async function createBlockFilterControl(container, variant, onFilterChange) {
   });
 
   if (!(filters?.element instanceof Node)) return null;
+  filters.element.setAttribute('data-owner', 'color-explore-filters');
+  header.querySelectorAll(':scope > .filters-container').forEach((node) => node.remove());
   header.appendChild(filters.element);
-  await filters.waitForReady?.();
+  try {
+    await filters.waitForReady?.();
+  } catch (error) {
+    window.lana?.log(`[ColorExplore] Filters waitForReady failed: ${error?.message}`, {
+      tags: 'color-explore,filters',
+      severity: 'warning',
+    });
+  }
 
   return {
     destroy() {
@@ -241,15 +202,15 @@ export default async function decorate(block) {
   if (block.dataset.blockStatus === 'loaded' || block.dataset.blockStatus === 'loading') return;
 
   try {
-    await loadStripSharedStyles();
-
     const variantFromClass = getVariantFromBlock(block);
     const rows = [...block.children];
     const config = parseBlockConfig(rows, DEFAULTS);
     if (variantFromClass) config.variant = variantFromClass;
 
+    await loadStripSharedStyles();
+
     block.dataset.blockStatus = 'loading';
-    block.innerHTML = '';
+    block.replaceChildren();
     block.className = CSS_CLASSES.BLOCK;
     const variantClass = config.variant === VARIANTS.GRADIENTS
       ? VARIANT_CLASSES.GRADIENTS
@@ -266,6 +227,13 @@ export default async function decorate(block) {
     const container = document.createElement('div');
     container.className = CSS_CLASSES.CONTAINER;
     themeHost.appendChild(container);
+
+    // [DEMO ONLY][MWPW-186947] remove after loading-screen PR lands.
+    if (isLoadingDemoMode(config)) {
+      await mountLoadingScreenDemo(container, config);
+      block.dataset.blockStatus = 'loaded';
+      return;
+    }
 
     if (config.variant === VARIANTS.GRADIENTS || config.variant === VARIANTS.STRIPS) {
       const gradientsDataService = createSharedColorDataService({
@@ -544,8 +512,8 @@ export default async function decorate(block) {
           }, { iconSize: config.loadMoreIconSize || 'xl' });
           updateLoadMoreState();
 
-          activeRenderer.on(EVENTS.PALETTE_CLICK, (palette) => {
-            navigateToPaletteEditor(palette || {});
+          activeRenderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
+            await modalManager.openPaletteSwatchesModal(palette || {});
           });
           activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
             await modalManager.openPaletteSwatchesModal(palette || {});
@@ -639,8 +607,8 @@ export default async function decorate(block) {
 
       const modalManager = createModalManager();
 
-      renderer.on(EVENTS.PALETTE_CLICK, (palette) => {
-        navigateToPaletteEditor(palette || {});
+      renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
+        await modalManager.openPaletteSwatchesModal(palette || {});
       });
       renderer.on(EVENTS.SHARE, async ({ palette }) => {
         await modalManager.openPaletteSwatchesModal(palette || {});
