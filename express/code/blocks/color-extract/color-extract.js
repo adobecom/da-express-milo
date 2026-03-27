@@ -338,44 +338,22 @@ function buildSuggestedImages(row, onSelect) {
     const chips = [...palette.querySelectorAll('.color-extract-suggestion-chip')];
     const previewImage = preview.querySelector('img');
     if (previewImage) previewImage.draggable = false;
-    const runMoodExtract = async (imgEl) => {
-      const maxWidth = 160;
-      const ratio = imgEl.naturalHeight / imgEl.naturalWidth || 1;
-      const w = Math.min(maxWidth, imgEl.naturalWidth);
-      const h = Math.round(w * ratio);
-      const c = document.createElement('canvas');
-      c.width = w;
-      c.height = h;
-      c.getContext('2d').drawImage(imgEl, 0, 0, w, h);
-      const imageData = c.getContext('2d').getImageData(0, 0, w, h);
-      const { extractColorsFromImage } = await import('./helpers/extractWorker.js');
-      const result = await extractColorsFromImage(imageData, w, h, chips.length, DEFAULTS.MOOD);
-      return result.colors;
-    };
-    const hydratePalette = async () => {
+    const hydratePalette = () => {
       try {
         if (previewImage?.naturalWidth) {
-          applyPaletteToChips(await runMoodExtract(previewImage), chips);
+          applyPaletteToChips(extractPaletteFromImageElement(previewImage, chips.length), chips);
           return;
         }
       } catch { /* canvas tainted — fall through to crossOrigin load */ }
       if (!src) return;
-      try {
-        const img = await new Promise((res, rej) => {
-          const i = new Image();
-          i.crossOrigin = 'anonymous';
-          i.onload = () => res(i);
-          i.onerror = rej;
-          i.src = src;
-        });
-        applyPaletteToChips(await runMoodExtract(img), chips);
-      } catch { /* silent — chips stay default */ }
+      extractPaletteFromSrc(src, chips.length)
+        .then((colors) => applyPaletteToChips(colors, chips));
     };
     const scheduleHydrate = () => {
       if (window.requestIdleCallback) {
-        requestIdleCallback(() => hydratePalette(), { timeout: 3000 });
+        requestIdleCallback(hydratePalette, { timeout: 8000 });
       } else {
-        setTimeout(() => hydratePalette(), 0);
+        setTimeout(hydratePalette, 100);
       }
     };
     if (previewImage?.complete && previewImage.naturalWidth) scheduleHydrate();
@@ -514,7 +492,15 @@ function buildLandingStage(imageRow) {
   const stage = createTag('div', { class: 'color-extract-landing', role: 'region', 'aria-label': 'Upload an image for color extraction' });
   const bgWrapper = createTag('div', { class: 'color-extract-landing-bg' });
   const picture = imageRow?.querySelector('picture') || imageRow?.querySelector('img');
-  if (picture) bgWrapper.append(picture.cloneNode(true));
+  if (picture) {
+    bgWrapper.append(picture.cloneNode(true));
+    const img = bgWrapper.querySelector('img');
+    if (img) {
+      img.loading = 'eager';
+      img.fetchpriority = 'high';
+      img.decoding = 'async';
+    }
+  }
   const fade = createTag('div', { class: 'color-extract-landing-fade' });
   const content = createTag('div', { class: 'color-extract-landing-content' });
   stage.append(bgWrapper, content, fade);
@@ -764,68 +750,70 @@ function renderColorVariant(block, rows, config) {
   if (suggestions) landing.content.append(suggestions);
   landing.stage.append(dragOverlay, loadingOverlay);
 
-  // Fire-and-forget: load swatch rail, mood selector, and toolbar in parallel
+  // Defer UI component imports until after LCP paint settles
   const toolbarPlaceholder = createTag('div', { class: 'color-extract-toolbar-slot' });
   edit.leftCol.prepend(toolbarPlaceholder);
   edit.wrapper.append(floatingToolbar.element);
 
-  Promise.all([
-    import('../../scripts/color-shared/adapters/litComponentAdapters.js'),
-    import('./helpers/moodSelector.js'),
-    import('./helpers/toolbar.js'),
-  ]).then(([
-    { createSwatchRailAdapter },
-    { createMoodSelector },
-    { createToolbar },
-  ]) => {
-    const railAdapter = createSwatchRailAdapter(controller, {
-      orientation: 'stacked',
-      swatchFeatures: ['copy', 'colorPicker', 'hexCode', 'trash'],
-    });
-    railAdapter.element.classList.add('color-extract-swatch-rail');
-    edit.railSlot.replaceWith(railAdapter.element);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    Promise.all([
+      import('../../scripts/color-shared/adapters/litComponentAdapters.js'),
+      import('./helpers/moodSelector.js'),
+      import('./helpers/toolbar.js'),
+    ]).then(([
+      { createSwatchRailAdapter },
+      { createMoodSelector },
+      { createToolbar },
+    ]) => {
+      const railAdapter = createSwatchRailAdapter(controller, {
+        orientation: 'stacked',
+        swatchFeatures: ['copy', 'colorPicker', 'hexCode', 'trash'],
+      });
+      railAdapter.element.classList.add('color-extract-swatch-rail');
+      edit.railSlot.replaceWith(railAdapter.element);
 
-    railAdapter.rail.addEventListener('color-swatch-rail-delete', (e) => {
-      historySnapshot();
-      const deletedIndex = e.detail?.index ?? -1;
-      const oldPositions = markers ? markers.getPositions() : [];
-      queueMicrotask(() => {
-        if (!markers) return;
-        const state = controller.getState();
-        const newPositions = oldPositions.filter((_, i) => i !== deletedIndex);
-        const points = newPositions.map((p) => ({ x: p.pctX, y: p.pctY }));
-        markers.setPositions(state.swatches.map((s) => s.hex), points);
+      railAdapter.rail.addEventListener('color-swatch-rail-delete', (e) => {
+        historySnapshot();
+        const deletedIndex = e.detail?.index ?? -1;
+        const oldPositions = markers ? markers.getPositions() : [];
+        queueMicrotask(() => {
+          if (!markers) return;
+          const state = controller.getState();
+          const newPositions = oldPositions.filter((_, i) => i !== deletedIndex);
+          const points = newPositions.map((p) => ({ x: p.pctX, y: p.pctY }));
+          markers.setPositions(state.swatches.map((s) => s.hex), points);
+        });
+      });
+
+      moodSelectorRef = createMoodSelector(currentMood, (mood) => {
+        historySnapshot();
+        currentMood = mood;
+        controller.setMetadata({ mood });
+        emitBlockEvent(block, EVENTS.MOOD_CHANGE, { mood });
+        if (currentCanvas) runExtraction(currentCanvas, mood);
+      });
+
+      createToolbar({
+        moodElement: moodSelectorRef.element,
+        onAddColor: addColorToImage,
+        onReset: () => {
+          if (currentCanvas) {
+            historySnapshot();
+            runExtraction(currentCanvas, currentMood, resolvedConfig.maxColors);
+          }
+        },
+        onReplace: () => {
+          dropzone.input.value = '';
+          dropzone.input.click();
+        },
+        onUndo: () => history.undo(getHistoryState()),
+        onRedo: () => history.redo(getHistoryState()),
+      }).then((toolbar) => {
+        toolbarRef = toolbar;
+        toolbarPlaceholder.replaceWith(toolbar.element);
       });
     });
-
-    moodSelectorRef = createMoodSelector(currentMood, (mood) => {
-      historySnapshot();
-      currentMood = mood;
-      controller.setMetadata({ mood });
-      emitBlockEvent(block, EVENTS.MOOD_CHANGE, { mood });
-      if (currentCanvas) runExtraction(currentCanvas, mood);
-    });
-
-    createToolbar({
-      moodElement: moodSelectorRef.element,
-      onAddColor: addColorToImage,
-      onReset: () => {
-        if (currentCanvas) {
-          historySnapshot();
-          runExtraction(currentCanvas, currentMood, resolvedConfig.maxColors);
-        }
-      },
-      onReplace: () => {
-        dropzone.input.value = '';
-        dropzone.input.click();
-      },
-      onUndo: () => history.undo(getHistoryState()),
-      onRedo: () => history.redo(getHistoryState()),
-    }).then((toolbar) => {
-      toolbarRef = toolbar;
-      toolbarPlaceholder.replaceWith(toolbar.element);
-    });
-  });
+  }));
 
   innerContainer.append(landing.stage, edit.wrapper);
 
@@ -1170,61 +1158,63 @@ async function renderGradientVariant(block, rows, config) {
   edit.leftCol.prepend(toolbarPlaceholder);
   edit.wrapper.append(floatingToolbar.element);
 
-  // Fire-and-forget: load swatch rail and toolbar in parallel
-  Promise.all([
-    import('../../scripts/color-shared/adapters/litComponentAdapters.js'),
-    import('./helpers/toolbar.js'),
-  ]).then(([
-    { createSwatchRailAdapter },
-    { createToolbar },
-  ]) => {
-    const railAdapter = createSwatchRailAdapter(swatchController, {
-      orientation: 'stacked',
-      swatchFeatures: ['copy', 'hexCode', 'trash'],
-    });
-    railAdapter.element.classList.add('color-extract-swatch-rail', 'color-extract-swatch-rail--gradient');
-    edit.railSlot.replaceWith(railAdapter.element);
+  // Defer UI component imports until after LCP paint settles
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    Promise.all([
+      import('../../scripts/color-shared/adapters/litComponentAdapters.js'),
+      import('./helpers/toolbar.js'),
+    ]).then(([
+      { createSwatchRailAdapter },
+      { createToolbar },
+    ]) => {
+      const railAdapter = createSwatchRailAdapter(swatchController, {
+        orientation: 'stacked',
+        swatchFeatures: ['copy', 'hexCode', 'trash'],
+      });
+      railAdapter.element.classList.add('color-extract-swatch-rail', 'color-extract-swatch-rail--gradient');
+      edit.railSlot.replaceWith(railAdapter.element);
 
-    railAdapter.rail.addEventListener('color-swatch-rail-delete', (e) => {
-      historySnapshot();
-      const deletedIndex = e.detail?.index ?? -1;
-      const oldPositions = markers ? markers.getPositions() : [];
-      queueMicrotask(() => {
-        const grad = gradientEditor.getGradient();
-        if (deletedIndex >= 0 && deletedIndex < grad.colorStops.length && grad.colorStops.length > 2) {
-          grad.colorStops.splice(deletedIndex, 1);
-          delete grad.midpoints;
-          gradientEditor.setGradient(grad);
-        }
-        if (markers) {
-          const state = swatchController.getState();
-          const newPositions = oldPositions.filter((_, i) => i !== deletedIndex);
-          const points = newPositions.map((p) => ({ x: p.pctX, y: p.pctY }));
-          markers.setPositions(state.swatches.map((s) => s.hex), points);
-        }
+      railAdapter.rail.addEventListener('color-swatch-rail-delete', (e) => {
+        historySnapshot();
+        const deletedIndex = e.detail?.index ?? -1;
+        const oldPositions = markers ? markers.getPositions() : [];
+        queueMicrotask(() => {
+          const grad = gradientEditor.getGradient();
+          if (deletedIndex >= 0 && deletedIndex < grad.colorStops.length && grad.colorStops.length > 2) {
+            grad.colorStops.splice(deletedIndex, 1);
+            delete grad.midpoints;
+            gradientEditor.setGradient(grad);
+          }
+          if (markers) {
+            const state = swatchController.getState();
+            const newPositions = oldPositions.filter((_, i) => i !== deletedIndex);
+            const points = newPositions.map((p) => ({ x: p.pctX, y: p.pctY }));
+            markers.setPositions(state.swatches.map((s) => s.hex), points);
+          }
+        });
+      });
+
+      createToolbar({
+        moodElement: null,
+        onAddColor: addColorToImage,
+        onReset: () => {
+          if (currentCanvas) {
+            historySnapshot();
+            runGradientExtraction(currentCanvas);
+          }
+        },
+        onReplace: () => {
+          dropzone.input.value = '';
+          dropzone.input.click();
+        },
+        onUndo: () => history.undo(getHistoryState()),
+        onRedo: () => history.redo(getHistoryState()),
+      }).then((toolbar) => {
+        toolbarRef = toolbar;
+        toolbarPlaceholder.replaceWith(toolbar.element);
       });
     });
-
-    createToolbar({
-      moodElement: null,
-      onAddColor: addColorToImage,
-      onReset: () => {
-        if (currentCanvas) {
-          historySnapshot();
-          runGradientExtraction(currentCanvas);
-        }
-      },
-      onReplace: () => {
-        dropzone.input.value = '';
-        dropzone.input.click();
-      },
-      onUndo: () => history.undo(getHistoryState()),
-      onRedo: () => history.redo(getHistoryState()),
-    }).then((toolbar) => {
-      toolbarRef = toolbar;
-      toolbarPlaceholder.replaceWith(toolbar.element);
-    });
-  });
+  }));
 
   innerContainer.append(landing.stage, edit.wrapper);
 
