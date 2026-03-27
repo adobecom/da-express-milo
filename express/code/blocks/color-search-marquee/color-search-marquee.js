@@ -2,7 +2,7 @@ import {
   createExploreSearchBar,
   createDeepLinkManager,
 } from '../../scripts/color-shared/components/search-bar/index.js';
-import { getIconElementDeprecated, addTempWrapperDeprecated, readBlockConfig } from '../../scripts/utils.js';
+import { getIconElementDeprecated, addTempWrapperDeprecated, getMetadata } from '../../scripts/utils.js';
 
 const CHEVRON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" fill="none">
   <path d="M8.5 4.5L15 11L8.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -124,17 +124,12 @@ export default async function decorate(block) {
     if (index > 0) row.remove();
   });
 
-  const section = block.closest('.section');
-  const sectionMeta = section?.querySelector('.section-metadata');
-  if (sectionMeta) {
-    const config = readBlockConfig(sectionMeta);
-    if (['on', 'yes'].includes(config['marquee-inject-logo']?.toLowerCase())) {
-      const logo = getIconElementDeprecated('adobe-express-logo');
-      logo.classList.add('express-logo');
-      const textContainer = block.querySelector(':scope > div:first-of-type');
-      if (textContainer) {
-        textContainer.prepend(logo);
-      }
+  if (['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
+    const logo = getIconElementDeprecated('adobe-express-logo');
+    logo.classList.add('express-logo');
+    const textContainer = block.querySelector(':scope > div:first-of-type');
+    if (textContainer) {
+      textContainer.prepend(logo);
     }
   }
 
