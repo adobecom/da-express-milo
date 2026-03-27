@@ -286,7 +286,7 @@ main .section .grid-marquee h1 {
   flex-wrap: wrap;
   align-items: center;
   padding-top: var(--spacing-600);
-  gap: var(--spacing-200) var(--spacing-650);
+  gap: var(--spacing-200) var(--spacing-700);
   min-height: 39px;
 }
 

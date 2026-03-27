@@ -91,14 +91,27 @@ const setupTest = async (htmlFile) => {
   const tocBlock = document.createElement('div');
   tocBlock.classList.add('toc-seo');
 
-  // Add mock configuration rows
-  const configRows = [
-    ['toc-title', 'Table of Contents'],
-    ['toc-aria-label', 'Table of Contents Links'],
-    ['content-1', 'First Section'],
-    ['content-2', 'Second Section'],
-    ['content-3', 'Third Section'],
-  ];
+  // Read configuration from meta tags in the HTML
+  const configRows = [];
+  const metaTags = document.querySelectorAll('meta[name]');
+  metaTags.forEach((meta) => {
+    const name = meta.getAttribute('name');
+    const content = meta.getAttribute('content');
+    if (name && content) {
+      configRows.push([name, content]);
+    }
+  });
+
+  // Fallback to default config if no meta tags found
+  if (configRows.length === 0) {
+    configRows.push(
+      ['toc-title', 'Table of Contents'],
+      ['toc-aria-label', 'Table of Contents Links'],
+      ['content-1', 'First Section'],
+      ['content-2', 'Second Section'],
+      ['content-3', 'Third Section'],
+    );
+  }
 
   configRows.forEach(([key, value]) => {
     const row = document.createElement('div');
@@ -119,23 +132,26 @@ const setupTest = async (htmlFile) => {
   highlight.appendChild(highlightDiv);
   document.body.appendChild(highlight);
 
-  // Add main section with long-form content
-  const mainSection = document.createElement('main');
-  const section = document.createElement('div');
-  section.classList.add('section', 'long-form');
-  const content = document.createElement('div');
-  content.classList.add('content');
+  // Check if main section already exists in the HTML, if not create it
+  let mainSection = document.querySelector('main');
+  if (!mainSection) {
+    mainSection = document.createElement('main');
+    const section = document.createElement('div');
+    section.classList.add('section', 'long-form');
+    const content = document.createElement('div');
+    content.classList.add('content');
 
-  // Add test headers
-  ['First Section', 'Second Section', 'Third Section'].forEach((text) => {
-    const header = document.createElement('h2');
-    header.textContent = text;
-    content.appendChild(header);
-  });
+    // Add test headers
+    ['First Section', 'Second Section', 'Third Section'].forEach((text) => {
+      const header = document.createElement('h2');
+      header.textContent = text;
+      content.appendChild(header);
+    });
 
-  section.appendChild(content);
-  mainSection.appendChild(section);
-  document.body.appendChild(mainSection);
+    section.appendChild(content);
+    mainSection.appendChild(section);
+    document.body.appendChild(mainSection);
+  }
 
   await decorate(tocBlock);
   return document.querySelector('.toc-container');
@@ -209,6 +225,16 @@ describe('Table of Contents SEO - Links Test', () => {
       expect(link.textContent).to.equal(expectedTexts[index]);
       expect(link.getAttribute('href')).to.equal(`#content-${index + 1}`);
     });
+
+    cleanupTest();
+  });
+
+  it('should render all TOC links correctly with 40 links', async () => {
+    const toc = await setupTest('./mocks/body-40.html');
+    const content = toc.querySelector('.toc-content');
+    const links = content.querySelectorAll('a');
+
+    expect(links.length).to.equal(40);
 
     cleanupTest();
   });

@@ -4,6 +4,7 @@ set -e
 TAGS=""
 REPORTER=""
 EXCLUDE_TAGS="--grep-invert nopr"
+EXCLUDE_MONITORING="--grep-invert @monitoring"
 EXIT_STATUS=0
 
 echo "GITHUB_REF: $GITHUB_REF"
@@ -79,7 +80,7 @@ REPORTER=$reporter
 
 echo "Running Nala on branch: $FEATURE_BRANCH"
 echo "Tags: ${TAGS:-"No @tags or annotations on this PR"}"
-echo "Run Command: npx playwright test ${TAGS} ${EXCLUDE_TAGS} ${REPORTER}"
+echo "Run Command: npx playwright test ${TAGS} ${EXCLUDE_TAGS} ${EXCLUDE_MONITORING} ${REPORTER}"
 echo -e "\n"
 echo "*******************************"
 
@@ -92,9 +93,10 @@ npx playwright install --with-deps
 
 # Run Playwright tests on all browsers
 echo "*** Running tests on Chromium + Firefox + WebKit ***"
+echo "*** Excluding monitoring tests (@monitoring) ***"
 npx playwright test \
   --config=./playwright.config.cjs \
-  ${TAGS} ${EXCLUDE_TAGS} ${REPORTER} \
+  ${TAGS} ${EXCLUDE_TAGS} ${EXCLUDE_MONITORING} ${REPORTER} \
   --project=express-live-chromium \
   --project=express-live-firefox \
   --project=express-live-webkit || EXIT_STATUS=$?

@@ -28,7 +28,9 @@ jobs:
         run: chmod +x ./nala/utils/pr.run.sh
 
       - name: Run Nala Tests
+        id: nala-tests
         run: ./nala/utils/pr.run.sh
+        continue-on-error: true
         env:
           labels: ${{ join(github.event.pull_request.labels.*.name, ' ') }}
           branch: ${{ github.event.pull_request.head.ref }}
@@ -41,3 +43,18 @@ jobs:
           GITHUB_ACTION_PATH: ${{ github.workspace }}
           IMS_EMAIL: ${{ secrets.IMS_EMAIL }}
           IMS_PASS: ${{ secrets.IMS_PASS }}
+
+      - name: Upload test results and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nala-test-results-${{ github.run_number }}
+          path: |
+            test-results/
+            test-html-results/
+            playwright-report/
+          retention-days: 30
+
+      - name: Fail workflow if tests failed
+        if: steps.nala-tests.outcome == 'failure'
+        run: exit 1

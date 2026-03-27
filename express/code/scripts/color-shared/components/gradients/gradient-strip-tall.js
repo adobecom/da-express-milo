@@ -70,6 +70,7 @@ export function createGradientDetailSection(data, options = {}) {
     class: `gradient-strip-tall gradient-strip-tall--${size}`,
     'data-size': size,
   });
+  /* responsive: mobile S, tablet M, desktop L per MWPW-185800 modal picker */
 
   wrapper.appendChild(buildBar(data, true));
   return wrapper;

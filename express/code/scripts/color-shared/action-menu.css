@@ -1,14 +1,3 @@
-/* ---- Fallback tokens (provided by Express theme when available) ---- */
-:where(.color-extract, .color-explore) {
-  --Palette-gray-100: #f3f3f3;
-  --Palette-gray-200: #e9e9e9;
-  --Palette-gray-400: #d4d4d4;
-  --Alias-content-neutral-default: #292929;
-  --Alias-content-neutral-hover: #1a1a1a;
-  --Alias-content-disabled-default: #c6c6c6;
-  --Alias-focus-indicator-default: #4b75ff;
-}
-
 .action-menu-full {
   display: flex;
   flex-flow: row nowrap;

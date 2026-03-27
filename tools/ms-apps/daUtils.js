@@ -23,6 +23,8 @@ import DA_SDK from 'https://da.live/nx/utils/sdk.js';
       `${appHost}/tools/da-apps/ms-apps.html?path=${redirectPath}&tenant=${repo}&ref=${ref}&token=${token}`,
     );
   } catch (error) {
+    // Intentional: surface SDK init issues in console for troubleshooting
+    // eslint-disable-next-line no-console
     console.error('Error initializing DA_SDK:', error);
   }
 })();

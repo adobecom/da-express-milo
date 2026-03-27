@@ -4,6 +4,17 @@ Briefly describe the features or fixes introduced in this PR.
 
 ---
 
+## Pre-merge checklist
+
+- [ ] Imports: no illegal or circular imports; prod/shared do not import from dev-only paths
+- [ ] Contract & scope: public APIs and block contracts unchanged unless intended
+- [ ] Shared vs page: shared code in appropriate place; no page-specific logic in shared
+- [ ] Deployability: no hardcoded env URLs; config via sheet or env
+- [ ] Testing: manual or automated verification steps documented or run
+- [ ] Hygiene: lint and tests pass; no stray console or debug code
+
+---
+
 ## Jira Ticket
 
 Resolves: [MWPW-NUMBER](https://jira.corp.adobe.com/browse/MWPW-NUMBER)

@@ -1,4 +1,4 @@
-import { createTag } from '../../../scripts/utils.js';
+import { createTag } from '../../utils.js';
 import { createPaletteAdapter } from '../adapters/litComponentAdapters.js';
 
 export function createPaletteModal(palette, options = {}) {
@@ -7,11 +7,10 @@ export function createPaletteModal(palette, options = {}) {
     onColorEdit,
   } = options;
 
-
-  let currentPalette = { ...palette };
+  const currentPalette = { ...palette };
 
   function createPaletteDisplay() {
-    const section = createTag('div', { class: 'palette-display-section' });
+    const section = createTag('section', { class: 'palette-display-section' });
 
     const adapter = createPaletteAdapter(currentPalette, {
       onSelect: (selectedPalette) => {
@@ -24,7 +23,7 @@ export function createPaletteModal(palette, options = {}) {
   }
 
   function createColorSwatches() {
-    const section = createTag('div', { class: 'color-swatches-section' });
+    const section = createTag('section', { class: 'color-swatches-section' });
 
     const title = createTag('h3', {});
     title.textContent = 'Colors';
@@ -85,7 +84,7 @@ export function createPaletteModal(palette, options = {}) {
   }
 
   function createPaletteInfo() {
-    const section = createTag('div', { class: 'palette-info-section' });
+    const section = createTag('section', { class: 'palette-info-section' });
 
     const nameLabel = createTag('label', { for: 'palette-name' });
     nameLabel.textContent = 'Palette Name';
@@ -117,7 +116,7 @@ export function createPaletteModal(palette, options = {}) {
   }
 
   function createSaveSection() {
-    const section = createTag('div', { class: 'save-section' });
+    const section = createTag('section', { class: 'save-section' });
 
     const saveBtn = createTag('button', {
       type: 'button',
@@ -147,9 +146,7 @@ export function createPaletteModal(palette, options = {}) {
   return {
     element: container,
 
-    getPalette: () => {
-      return { ...currentPalette };
-    },
+    getPalette: () => ({ ...currentPalette }),
 
     updateColor: (index, newColor) => {
       currentPalette.colors[index] = newColor;

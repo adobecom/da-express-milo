@@ -20,6 +20,25 @@ import { loadOverrideStyles } from './style-loader.js';
 
 const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/textfield.css';
 
+function createLeadingSlotElement(leadingSlot) {
+  if (!leadingSlot) return null;
+
+  const container = document.createElement('span');
+  container.className = 'ax-spectrum-textfield__leading';
+
+  if (leadingSlot instanceof Element) {
+    container.appendChild(leadingSlot.cloneNode(true));
+    return container;
+  }
+
+  if (typeof leadingSlot === 'string') {
+    container.innerHTML = leadingSlot;
+    return container;
+  }
+
+  return null;
+}
+
 /**
  * Create an Express text field.
  *
@@ -35,6 +54,7 @@ const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/textfiel
  * @param {'s'|'m'|'l'|'xl'} [config.size='m']
  * @param {string}   [config.pattern]         — validation regex pattern
  * @param {number}   [config.maxlength]       — max character count
+ * @param {HTMLElement|string} [config.leadingSlot] — decorative leading adornment
  * @param {Function} [config.onInput]   — ({ value }) on every keystroke
  * @param {Function} [config.onChange]  — ({ value }) on blur / commit
  * @returns {Promise<{element: HTMLElement, getValue: ()=>string, setValue: (s:string)=>void, setDisabled: (b:boolean)=>void, destroy: ()=>void}>}
@@ -52,6 +72,7 @@ export async function createExpressTextfield(config) {
     size = 'm',
     pattern,
     maxlength,
+    leadingSlot,
     onInput,
     onChange,
   } = config;
@@ -61,7 +82,10 @@ export async function createExpressTextfield(config) {
   await customElements.whenDefined('sp-textfield');
 
   const theme = createThemeWrapper();
+  const wrapper = document.createElement('div');
+  wrapper.className = 'ax-spectrum-textfield';
   const field = document.createElement('sp-textfield');
+  const leadingElement = createLeadingSlotElement(leadingSlot);
 
   if (label) field.setAttribute('label', label);
   if (placeholder) field.setAttribute('placeholder', placeholder);
@@ -75,7 +99,14 @@ export async function createExpressTextfield(config) {
   if (maxlength != null) field.setAttribute('maxlength', String(maxlength));
   field.setAttribute('size', size);
 
-  theme.appendChild(field);
+  wrapper.appendChild(field);
+
+  if (leadingElement) {
+    wrapper.classList.add('ax-spectrum-textfield--with-leading');
+    wrapper.appendChild(leadingElement);
+  }
+
+  theme.appendChild(wrapper);
 
   const controller = new AbortController();
   const { signal } = controller;
@@ -103,9 +134,8 @@ export async function createExpressTextfield(config) {
       field.value = text;
     },
 
-    setDisabled(val) {
-      if (val) field.setAttribute('disabled', '');
-      else field.removeAttribute('disabled');
+    setDisabled(disabledState) {
+      field.toggleAttribute('disabled', Boolean(disabledState));
     },
 
     destroy() {

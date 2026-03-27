@@ -1,4 +1,11 @@
-@import url('../../color-tokens.css');
+:root {
+  --Gradient-strip-tall-width-s: 343px;
+  --Gradient-strip-tall-height-s: 200px;
+  --Gradient-strip-tall-width-m: 488px;
+  --Gradient-strip-tall-height-m: 300px;
+  --Gradient-strip-tall-width-l: 834px;
+  --Gradient-strip-tall-height-l: 400px;
+}
 
 .gradient-strip-tall-bar-wrap .gradient-strip-bar {
   position: relative;
@@ -6,11 +13,12 @@
   width: 100%;
   padding: 0;
   border-radius: var(--Corner-radius-detail);
-  border: 0.5px solid var(--Palette-gray-100);
+  border: 0.5px solid var(--color-light-gray);
   box-sizing: border-box;
   overflow: visible;
 }
 
+/* Full width so first/last circles align with bar edges (Figma) */
 .gradient-strip-tall-bar-wrap .gradient-strip-bar-stops {
   position: absolute;
   top: 0;
@@ -20,6 +28,7 @@
   pointer-events: none;
 }
 
+/* Gradient stop circles — size/border/shadow from color-tokens; inset ring for visibility (matches gradient-editor handles) */
 .gradient-strip-tall-bar-wrap .gradient-strip-bar-stop {
   position: absolute;
   top: 50%;
@@ -30,12 +39,13 @@
   border-radius: 50%;
   aspect-ratio: 1 / 1;
   box-sizing: border-box;
-  border: var(--gradient-stop-border-width) solid var(--gradient-stop-border-color);
+  border: var(--border-width-2) solid var(--color-white);
   box-shadow:
     var(--gradient-stop-shadow),
     inset 0 0 0 1px rgba(31, 31, 31, 0.3);
 }
 
+/* First/last: keep inside strip (like modal content handles) */
 .gradient-strip-tall-bar-wrap .gradient-strip-bar-stop:first-child {
   transform: translate(0, -50%);
 }
@@ -52,8 +62,8 @@
   display: flex;
   flex-direction: column;
   border-radius: var(--Corner-radius-detail);
-  background: var(--Palette-white);
-  border: 1px solid var(--Palette-gray-100);
+  background: var(--color-white);
+  border: 1px solid var(--color-light-gray);
   box-sizing: border-box;
   overflow: visible;
 }
@@ -98,6 +108,7 @@
   border-radius: var(--Corner-radius-bar);
 }
 
+/* Responsive: S <680, M 680–1199, L 1200+ */
 .gradient-strip-tall--responsive {
   width: var(--Gradient-strip-tall-width-s);
   max-width: 100%;
@@ -110,6 +121,7 @@
   border-radius: var(--Corner-radius-bar);
 }
 
+/* Size M (Tablet) — Figma M (600–1199px) */
 @media (min-width: 600px) {
   .gradient-strip-tall--responsive {
     width: var(--Gradient-strip-tall-width-m);
@@ -122,6 +134,7 @@
   }
 }
 
+/* Size L (Desktop) — Figma L (1200px+) */
 @media (min-width: 1200px) {
   .gradient-strip-tall--responsive {
     width: var(--Gradient-strip-tall-width-l);
@@ -134,8 +147,9 @@
   }
 }
 
+/* Wrapper for gradient strip in modal (MWPW-185800) — from modal-picker-rebuild */
 .gradient-strip-tall-wrap,
 .ax-color-modal-gradient-strip-wrap {
   width: 100%;
-  margin: 0 0 var(--Spacing-Spacing-400);
+  margin: 0 0 var(--spacing-400);
 }
