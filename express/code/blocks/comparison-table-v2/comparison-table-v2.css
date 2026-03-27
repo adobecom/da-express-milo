@@ -83,6 +83,7 @@ main .section .comparison-table-v2 p {
   display: flex;
   gap: var(--spacing-200);
   justify-content: space-between;
+  padding: 0 var(--spacing-200);
   flex-wrap: wrap;
   
   /* Smooth wrapper transitions */
