@@ -81,7 +81,7 @@ export const style = css`
         cursor: grabbing;
     }
 
-    .wheel-marker-overlay[data-index="0"]::before {
+    .wheel-marker-overlay--base::before {
         content: '';
         height: 4px;
         width: 4px;
@@ -93,7 +93,7 @@ export const style = css`
         border-radius: 15px;
     }
 
-    .wheel-marker-overlay[data-index="0"]::after {
+    .wheel-marker-overlay--base::after {
         content: '';
         height: 15px;
         width: 15px;
@@ -103,6 +103,11 @@ export const style = css`
         border: 2px solid #fff;
         box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.30);
         border-radius: 15px;
+    }
+
+    .wheel-marker-overlay--locked,
+    .wheel-marker-overlay--locked:active {
+        cursor: not-allowed;
     }
 
     /* Conflict / confusion line overlay canvases */
