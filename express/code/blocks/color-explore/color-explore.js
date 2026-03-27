@@ -41,8 +41,8 @@ const PALETTE_EDITOR_DEMO_URL = 'https://methomas-sidebar-with-fixes--da-express
 const colorPaletteParamApi = createColorPaletteParamApi();
 
 const STRIP_SHARED_STYLES = [
-  'scripts/color-shared/components/strips/color-strip.css',
-  'scripts/color-shared/components/gradients/gradient-strip.css',
+  '../../scripts/color-shared/components/strips/color-strip.css',
+  '../../scripts/color-shared/components/gradients/gradient-strip.css',
 ];
 const LOAD_MORE_CLICK_HANDLERS = new WeakMap();
 const LOADING_DEMO_QUERY_PARAM = 'colorExploreLoadingDemo';
