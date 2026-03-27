@@ -1025,6 +1025,7 @@ color: var(--color-gray-700-variant);
       text-align: left;
       padding: 0; 
       margin-right: var(--spacing-100);
+      margin-left: 0;
       box-sizing: border-box;
       width: var(--header-cell-width);
     }
@@ -1035,8 +1036,8 @@ color: var(--color-gray-700-variant);
 
 
   .comparison-table-v2 .sticky-header-wrapper {
-      padding-left: var(--spacing-600);
-      padding-right: var(--spacing-600);
+      padding-left: var(--spacing-400);
+      padding-right: var(--spacing-400);
       flex-wrap: nowrap;
       max-width: 1300px; 
       text-align: left;
@@ -1105,23 +1106,23 @@ color: var(--color-gray-700-variant);
 
   .comparison-table-v2 .plan-cell.left-plan {
       margin-left: 0;
-  }
-
-  .comparison-table-v2 .sticky-header .first-cell { 
-      flex-basis: var(--header-cell-width);
-      width: var(--header-cell-width);
-      padding-right: var(--spacing-400);
-      justify-content: flex-end;
-      align-items: flex-start;
-      text-align: left;
-      padding-bottom: var(--spacing-100);
-      margin-right: var(--spacing-100);
-      font-style: normal;
-      font-weight: var(--ax-heading-weight);
-      line-height: var(--heading-line-height);
-      display: flex;
-      box-sizing: border-box; 
   } 
+    .comparison-table-v2 .sticky-header .first-cell {
+        flex-basis: var(--header-cell-width);
+        width: var(--header-cell-width);
+        /* padding-right: var(--spacing-400); */
+        justify-content: flex-end;
+        align-items: flex-start;
+        text-align: left;
+        padding-bottom: var(--spacing-100);
+        /* margin-right: var(--spacing-100); */
+        font-style: normal;
+        font-weight: var(--ax-heading-weight);
+        line-height: var(--heading-line-height);
+        display: flex;
+        box-sizing: border-box;
+        margin-right: var(--spacing-200);
+    }
   .comparison-table-v2 .sticky-header .plan-cell {
       width: var(--cell-width);
       flex-grow: 0;
@@ -1169,7 +1170,7 @@ color: var(--color-gray-700-variant);
       border-collapse: collapse; 
       height: 100%;
       width: 100%;
-      padding: var(--spacing-300);
+      padding: 0;
       transition: ease-in 300ms;
       
   }
