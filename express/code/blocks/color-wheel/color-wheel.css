@@ -521,6 +521,10 @@ color-wheel-express {
     display: none;
   }
 
+  .color-wheel .image-upload-dropzone-title {
+    display: block;
+  }
+
   .color-wheel .color-extract-landing-content {
     gap: var(--spacing-400);
   }
