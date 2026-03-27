@@ -204,6 +204,19 @@ export default async function decorate(block) {
     }));
   }
 
+  document.addEventListener('color-explore:empty-result', (e) => {
+    const { query } = e.detail;
+    block.classList.add('empty-result');
+    emptyResult.heading.textContent = `'${query}' color palettes`;
+    emptyResult.description.textContent = `Sorry, no color gradients found for "${query}." See other gradients you might like...`;
+  });
+
+  document.addEventListener('color-explore:results-found', () => {
+    block.classList.remove('empty-result');
+    emptyResult.heading.textContent = '';
+    emptyResult.description.textContent = '';
+  });
+
   const cleanupPopState = deepLinkManager.onPopState((query) => {
     if (query) {
       searchBar.setQuery(query);

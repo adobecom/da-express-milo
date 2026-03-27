@@ -547,6 +547,11 @@ export default async function decorate(block) {
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
+            if (query && allData.length === 0) {
+              document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+            } else {
+              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+            }
           };
           document.addEventListener('floating-search:submit', floatingSearchHandler);
 
@@ -641,6 +646,11 @@ export default async function decorate(block) {
         renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);
+        if (query && allData.length === 0) {
+          document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+        } else {
+          document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+        }
       };
       document.addEventListener('floating-search:submit', floatingHandler);
       block.addEventListener('block-unload', () => document.removeEventListener('floating-search:submit', floatingHandler), { once: true });
