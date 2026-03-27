@@ -105,6 +105,11 @@ export const style = css`
         border-radius: 15px;
     }
 
+    .wheel-marker-overlay--locked,
+    .wheel-marker-overlay--locked:active {
+        cursor: not-allowed;
+    }
+
     /* Conflict / confusion line overlay canvases */
     .conflict-lines-canvas,
     .confusion-lines-canvas {
