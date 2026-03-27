@@ -341,6 +341,7 @@ export default async function decorate(block) {
           activeMode = VARIANTS.GRADIENTS;
           activeDataService = gradientsDataService;
           setModeClasses(VARIANTS.GRADIENTS);
+          block.dispatchEvent(new CustomEvent('color-explore:mode-change', { detail: { mode: VARIANTS.GRADIENTS }, bubbles: true }));
 
           block.classList.add(CSS_CLASSES.LOADING);
           try {
@@ -420,6 +421,27 @@ export default async function decorate(block) {
             await openModalForItem(item, 'Gradient');
           });
 
+          floatingSearchHandler = async (e) => {
+            const { query } = e.detail;
+            block.classList.add(CSS_CLASSES.LOADING);
+            allData = await activeDataService.search(query);
+            visibleCount = Math.min(config.initialLoad, allData.length);
+            await activeRenderer.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+            block.classList.remove(CSS_CLASSES.LOADING);
+            if (query && allData.length === 0) {
+              document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+            } else {
+              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+            }
+          };
+          document.addEventListener('floating-search:submit', floatingSearchHandler);
+
+          const urlQuery = new URLSearchParams(window.location.search).get('q');
+          if (urlQuery) {
+            await floatingSearchHandler({ detail: { query: urlQuery } });
+          }
+
           publishInstances();
         } finally {
           isMounting = false;
@@ -434,6 +456,7 @@ export default async function decorate(block) {
           activeMode = VARIANTS.STRIPS;
           activeDataService = palettesDataService;
           setModeClasses(VARIANTS.STRIPS);
+          block.dispatchEvent(new CustomEvent('color-explore:mode-change', { detail: { mode: VARIANTS.STRIPS }, bubbles: true }));
 
           block.classList.add(CSS_CLASSES.LOADING);
           try {
@@ -513,8 +536,18 @@ export default async function decorate(block) {
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
+            if (query && allData.length === 0) {
+              document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+            } else {
+              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+            }
           };
           document.addEventListener('floating-search:submit', floatingSearchHandler);
+
+          const urlQuery = new URLSearchParams(window.location.search).get('q');
+          if (urlQuery) {
+            await floatingSearchHandler({ detail: { query: urlQuery } });
+          }
 
           publishInstances();
         } finally {
@@ -607,8 +640,19 @@ export default async function decorate(block) {
         renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);
+        if (query && allData.length === 0) {
+          document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+        } else {
+          document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+        }
       };
       document.addEventListener('floating-search:submit', floatingHandler);
+
+      const urlQuery = new URLSearchParams(window.location.search).get('q');
+      if (urlQuery) {
+        await floatingHandler({ detail: { query: urlQuery } });
+      }
+
       block.addEventListener('block-unload', () => document.removeEventListener('floating-search:submit', floatingHandler), { once: true });
 
       block.rendererInstance = renderer;

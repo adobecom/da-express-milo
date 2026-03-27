@@ -1,4 +1,5 @@
-import { createTag, getLibs } from '../../utils.js';
+import { createTag } from '../../utils.js';
+import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
 import { createSpectrumIcon } from '../utils/icons.js';
 import { addSwipeToClose, saveFocusedElement, restoreFocusedElement, getNextOverlayZIndex } from '../utils/utilities.js';
@@ -9,12 +10,7 @@ let stylesLoadPromise = null;
 
 function ensureModalStyles() {
   if (stylesLoadPromise) return stylesLoadPromise;
-  stylesLoadPromise = import(`${getLibs()}/utils/utils.js`)
-    .then(({ loadStyle, getConfig }) => {
-      const config = getConfig?.();
-      const codeRoot = config?.codeRoot || '/express/code';
-      return loadStyle(`${codeRoot}/scripts/color-shared/modal/modal-styles.css`);
-    })
+  stylesLoadPromise = loadMiloStyle('scripts/color-shared/modal/modal-styles.css')
     .then(() => {
       document.documentElement.dataset[MODAL_STYLES_LOADED] = 'true';
     })

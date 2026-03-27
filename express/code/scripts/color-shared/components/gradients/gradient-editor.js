@@ -1,5 +1,6 @@
 /** Gradient editor — contract, API, a11y: see README.md (same folder). */
-import { createTag, getLibs } from '../../../utils.js';
+import { createTag } from '../../../utils.js';
+import loadMiloStyle from '../../utils/loadMiloStyle.js';
 import { announceToScreenReader } from '../../spectrum/utils/a11y.js';
 
 const DEFAULT_HEX = '#808080';
@@ -943,9 +944,7 @@ let gradientEditorStylesLoaded = false;
 export async function loadGradientEditorStyles() {
   if (gradientEditorStylesLoaded) return;
   try {
-    const { loadStyle, getConfig } = (await import(`${getLibs()}/utils/utils.js`));
-    const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-    await loadStyle(`${codeRoot}/scripts/color-shared/components/gradients/gradient-editor.css`);
+    await loadMiloStyle('scripts/color-shared/components/gradients/gradient-editor.css');
     gradientEditorStylesLoaded = true;
   } catch {
     gradientEditorStylesLoaded = true;
