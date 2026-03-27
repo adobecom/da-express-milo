@@ -139,6 +139,15 @@ export class ColorWheelExpress extends ColorWheel {
     markerLayer.appendChild(marker);
   }
 
+  updateMarker(swatch) {
+    if (!swatch?.hsv) return;
+    const { h, s } = swatch.hsv;
+    const smoothH = scientificToArtisticSmooth(h);
+    const radius = (this.wheelRadius * s) / 100;
+    const phi = degToRad(180 - smoothH);
+    const [x, y] = polarToXy(radius, phi);
+  }
+
   updateMarkers() {
     const markerLayer = this.shadowRoot.querySelector('.marker-layer');
     if (!markerLayer || !this.swatches.length) return;
