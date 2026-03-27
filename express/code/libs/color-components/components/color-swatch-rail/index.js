@@ -182,6 +182,7 @@ export class ColorSwatchRail extends LitElement {
     this._controllerUnsubscribe = null;
     this.swatches = [];
     this.baseColorIndex = 0;
+    this.tintIndex = null;
     this.lockedByIndex = new Set();
     this._dragFromIndex = -1;
     this._touchDragFromIndex = -1;
@@ -402,6 +403,7 @@ export class ColorSwatchRail extends LitElement {
       this._controllerUnsubscribe = this.controller.subscribe((state) => {
         this.swatches = state.swatches || [];
         this.baseColorIndex = state.baseColorIndex ?? null;
+        this.tintIndex = Number.isInteger(state.tintIndex) ? state.tintIndex : null;
         this.lockedByIndex = state.lockedByIndex ?? new Set();
         this.requestUpdate();
         if (this._tooltipsInitialized) {
@@ -509,7 +511,14 @@ export class ColorSwatchRail extends LitElement {
     const e = new CustomEvent('color-swatch-rail-delete', { bubbles: true, composed: true, detail: { index } });
     if (this.dispatchEvent(e) && !e.defaultPrevented && this.controller?.setState) {
       const swatches = this.swatches.filter((_, i) => i !== index);
-      this.controller.setState({ swatches });
+      const currentTintIndex = Number.isInteger(this.tintIndex) ? this.tintIndex : null;
+      let nextTintIndex = currentTintIndex;
+      if (currentTintIndex != null) {
+        if (swatches.length === 0) nextTintIndex = null;
+        else if (index < currentTintIndex) nextTintIndex = currentTintIndex - 1;
+        else if (index === currentTintIndex) nextTintIndex = Math.min(currentTintIndex, swatches.length - 1);
+      }
+      this.controller.setState({ swatches, tintIndex: nextTintIndex });
       showExpressToast({ message: 'Color removed', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
@@ -521,9 +530,44 @@ export class ColorSwatchRail extends LitElement {
     if (this.dispatchEvent(e) && !e.defaultPrevented && this.controller?.setState) {
       const swatches = [...this.swatches];
       swatches.splice(insertIndex, 0, { hex: '#808080' });
-      this.controller.setState({ swatches });
+      const currentTintIndex = Number.isInteger(this.tintIndex) ? this.tintIndex : null;
+      const nextTintIndex = currentTintIndex != null && insertIndex <= currentTintIndex
+        ? currentTintIndex + 1
+        : currentTintIndex;
+      this.controller.setState({ swatches, tintIndex: nextTintIndex });
       showExpressToast({ message: 'Color added', variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
+  }
+
+  _resolveTintIndex() {
+    if (Number.isInteger(this.tintIndex) && this.tintIndex >= 0 && this.tintIndex < this.swatches.length) {
+      return this.tintIndex;
+    }
+    return this.swatches.length > 0 ? 0 : null;
+  }
+
+  _handleTintSelect(index, anchorEl = null) {
+    if ((this.lockedByIndex || new Set()).has(index)) return;
+    const hex = this.swatches[index]?.hex;
+    const rect = anchorEl?.getBoundingClientRect?.();
+    const anchorRect = rect
+      ? {
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      }
+      : null;
+    if (this.controller?.setState) {
+      this.controller.setState({ tintIndex: index });
+    }
+    this.dispatchEvent(new CustomEvent('color-swatch-rail-tint-select', {
+      bubbles: true,
+      composed: true,
+      detail: { index, hex, anchorRect },
+    }));
   }
 
   _handleColorPicker(index, anchorEl = null) {
@@ -647,6 +691,9 @@ export class ColorSwatchRail extends LitElement {
     if (this.baseColorIndex != null) {
       stateUpdate.baseColorIndex = this._reorderSingleIndex(this.baseColorIndex, fromIndex, toIndex);
     }
+    if (this.tintIndex != null) {
+      stateUpdate.tintIndex = this._reorderSingleIndex(this.tintIndex, fromIndex, toIndex);
+    }
     const e2 = new CustomEvent('color-swatch-rail-reorder', { bubbles: true, composed: true, detail: { fromIndex, toIndex, swatches } });
     if (this.dispatchEvent(e2) && !e2.defaultPrevented) {
       this.controller.setState(stateUpdate);
@@ -707,6 +754,9 @@ export class ColorSwatchRail extends LitElement {
     const stateUpdate = { swatches, lockedByIndex: nextLocked };
     if (this.baseColorIndex != null) {
       stateUpdate.baseColorIndex = this._reorderSingleIndex(this.baseColorIndex, fromIndex, toIndex);
+    }
+    if (this.tintIndex != null) {
+      stateUpdate.tintIndex = this._reorderSingleIndex(this.tintIndex, fromIndex, toIndex);
     }
     const ev = new CustomEvent('color-swatch-rail-reorder', { bubbles: true, composed: true, detail: { fromIndex, toIndex, swatches } });
     if (this.dispatchEvent(ev) && !ev.defaultPrevented) {
@@ -879,7 +929,11 @@ export class ColorSwatchRail extends LitElement {
       const effectiveLocked = isLocked || isBase;
       const textColor = getContrastTextColor(swatch.hex);
       const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
-      const showEdit = (f.colorPicker || f.editTint) && !editDisabled && !effectiveLocked;
+      const showColorEdit = f.colorPicker && !editDisabled && !effectiveLocked;
+      const tintMode = f.editTint && !f.colorPicker;
+      const showTintSelect = tintMode && !editDisabled && !effectiveLocked;
+      const resolvedTintIndex = this._resolveTintIndex();
+      const isTintSelected = tintMode && resolvedTintIndex != null && index === resolvedTintIndex;
       
       
       const showHexCopyForThisSwatch = !(orientation === 'four-rows' && this.hexCopyFirstRowOnly && index >= FOUR_ROWS_COLS);
@@ -916,7 +970,7 @@ export class ColorSwatchRail extends LitElement {
             >${icon('drag')}</button>
           ` : ''}
           ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${effectiveLocked ? 'Unlock color' : 'Lock color'} title=${effectiveLocked ? 'Unlock color' : 'Lock color'}>${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
-          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${(ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
+          ${showTintSelect ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${(ev) => this._handleTintSelect(index, ev.currentTarget)} aria-label=${isTintSelected ? 'Tint selected' : 'Select tint'} title=${isTintSelected ? 'Tint selected' : 'Select tint'} aria-pressed=${isTintSelected ? 'true' : 'false'}>${icon('editTint')}</button>` : ''}
           ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
         </div>
       `;
@@ -938,20 +992,20 @@ export class ColorSwatchRail extends LitElement {
             >${icon('drag')}</button>
           ` : ''}
           ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${effectiveLocked ? 'Unlock color' : 'Lock color'} title=${effectiveLocked ? 'Unlock color' : 'Lock color'}>${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
-          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${(ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
+          ${showTintSelect ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${(ev) => this._handleTintSelect(index, ev.currentTarget)} aria-label=${isTintSelected ? 'Tint selected' : 'Select tint'} title=${isTintSelected ? 'Tint selected' : 'Select tint'} aria-pressed=${isTintSelected ? 'true' : 'false'}>${icon('editTint')}</button>` : ''}
           ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
         </div>
       `;
       const stackedContent = html`
         <div class="bottom-info bottom-info--stacked" part="bottom-info">
-          ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-          ${f.hexCode ? (showEdit || (f.copy && !isBase) ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+          ${showColorEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
+          ${f.hexCode ? (showColorEdit || (f.copy && !isBase) ? html`<button type="button" class="hex-code hex-code--${showColorEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showColorEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showColorEdit ? 'Edit color' : 'Copy hex'} title=${showColorEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
         </div>
         ${stackedIcons}
       `;
 
       return html`
-        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''}"
+        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${tintMode ? 'swatch-column--tint-mode' : ''} ${isTintSelected ? 'swatch-column--tint-selected' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''}"
           data-contrast="${textColor === '#ffffff' ? 'dark' : 'light'}"
           style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${textColor === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
           data-swatch-index="${index}"
@@ -973,8 +1027,8 @@ export class ColorSwatchRail extends LitElement {
             </div>
           ` : html`<div class="stacked-row">${stackedContent}</div>`}
           ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
-            ${showEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-            ${f.hexCode && showHexCopyForThisSwatch ? (showEdit || (f.copy && !isBase) ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+            ${showColorEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
+            ${f.hexCode && showHexCopyForThisSwatch ? (showColorEdit || (f.copy && !isBase) ? html`<button type="button" class="hex-code hex-code--${showColorEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showColorEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showColorEdit ? 'Edit color' : 'Copy hex'} title=${showColorEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
             <div class="bottom-info__actions">
               ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="Copy hex" title="Copy hex">${icon('copy')}</button>` : ''}
             </div>

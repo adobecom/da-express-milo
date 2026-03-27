@@ -42,6 +42,10 @@ export const style = css`
     box-sizing: border-box;
   }
 
+  .swatch-column--tint-selected {
+    box-shadow: inset 0 0 0 2px var(--Palette-gray-1000), inset 0 0 0 4px var(--Palette-gray-25);
+  }
+
   .swatch-column:first-child {
     border-radius: var(--swatch-column-first-radius);
   }
