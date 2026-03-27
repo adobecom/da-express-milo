@@ -82,6 +82,7 @@ let harmonyStateUnsubscribe = null;
 let layoutInstance = null;
 let stripRenderer = null;
 let paletteUnsubscribe = null;
+let swatchRailController = null;
 let imagePanelDestroy = null;
 let primaryColorAdapter = null;
 let sidebarNaturalWidth = 0;
@@ -112,7 +113,7 @@ function harmonyRulesForSwatchCount(n) {
 }
 
 async function buildHarmonySelector(controller) {
-  const uid = `cw-h-${Date.now()}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
+  const uid = `cw-h-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const headingId = `${uid}-heading`;
   const currentNameId = `${uid}-current`;
   const section = createTag('div', { class: 'color-wheel-harmony-section' });
@@ -520,6 +521,8 @@ function cleanup() {
   harmonyCarouselCleanup = null;
   paletteUnsubscribe?.();
   paletteUnsubscribe = null;
+  swatchRailController?.destroy?.();
+  swatchRailController = null;
   imagePanelDestroy?.();
   imagePanelDestroy = null;
   primaryColorAdapter?.destroy?.();
@@ -543,118 +546,9 @@ export default async function decorate(block) {
   // Preserved across breakpoint re-inits so the user's palette survives resize
   let currentPalette = null;
 
-  try {
-    const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
-    const initialPalette = {
-      name: getResolvedPaletteName() || THEME_NAME,
-      colors: getResolvedPalette(),
-    };
-
-    const controller = new ColorThemeExpressController({
-      swatches: initialPalette.colors,
-      harmonyRule: 'CUSTOM',
-      baseColorIndex: 0,
-    });
-    swatchRailController = createSwatchRailControllerBridge(controller);
-
-    const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
-
-    layoutInstance = await createColorToolLayout(block, {
-      palette: initialPalette,
-      toolbar: {
-        variant: 'standalone',
-        showEdit: false,
-        showPalette: isDesktop,
-        showPaletteName: true,
-        editPaletteName: false,
-      },
-      actionMenu: {
-        ...DEFAULT_ACTION_MENU_CONFIG,
-        type: isDesktop ? 'full' : 'nav-only',
-        onExpand: (expanded) => {
-          if (expanded) {
-            block.dataset.sidebarCollapsed = '';
-          } else {
-            delete block.dataset.sidebarCollapsed;
-          }
-        },
-      },
-      content: {
-        heading: createTag('h1', null, 'Color palette generator and color wheel tool.'),
-        paragraph: createTag('p', null, 'Use the color palette generator to create harmonious color schemes for any project. Choose a base color, apply a color harmony, and generate a balanced palette instantly.'),
-        icon: true,
-      },
-    });
-
-    const tabs = await buildTabs(controller, suggestionsRow);
-    layoutInstance.slots.sidebar.appendChild(tabs.element);
-
-    if (!isDesktop) {
-      const { createActionMenuComponent } = await import('../../scripts/color-shared/components/createActionMenuComponent.js');
-
-      const actionMenu = await createActionMenuComponent({
-        ...DEFAULT_ACTION_MENU_CONFIG,
-        type: 'controls-only',
-        controls: [
-          { id: 'undo', label: 'Undo' },
-          { id: 'redo', label: 'Redo' },
-          { id: 'generate-random', label: 'Generate random' },
-        ],
-      });
-      layoutInstance.slots.canvas.appendChild(actionMenu.element);
-    }
-    const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
-    layoutInstance.slots.canvas.appendChild(stripHost);
-
-    stripRenderer = createStripContainerRenderer({
-      container: stripHost,
-      data: [swatchRailController],
-      config: {
-        stripContainerOrientations: ['vertical-responsive'],
-        swatchFeatures: {
-          copy: true,
-          hexCode: true,
-          colorPicker: true,
-          lock: true,
-          trash: true,
-          drag: true,
-          addLeft: true,
-          addRight: true,
-          editTint: true,
-          baseColor: true,
-          emptyStrip: true,
-          rightActionsHoverOnly: true,
-        },
-        swatchVerticalMaxPerRow: 6,
-      },
-    });
-    await stripRenderer.render(stripHost);
-
-    // What is this?
-    paletteUnsubscribe = controller.subscribe((state) => {
-      layoutInstance?.context?.set('palette', paletteFromThemeState(state));
-      if (!baseColorAdapter?.setPalette) return;
-      const pal = swatchHexListFromState(state);
-      const el = baseColorAdapter.getElement?.();
-      const nextIdx = Math.min(
-        Math.max(0, state.baseColorIndex ?? 0),
-        Math.max(0, pal.length - 1),
-      );
-      if (!palettesEqual(el?.palette, pal)) {
-        baseColorAdapter.setPalette(pal);
-      }
-      if (el && el.selectedIndex !== nextIdx) {
-        baseColorAdapter.setSelectedIndex(nextIdx);
-      }
-    });
-
-    block.classList.add('ax-shell-host');
-    block.dataset.shellState = 'ready';
-  } catch (error) {
-    window.lana?.log(`Color Wheel init error: ${error.message}`, {
-      tags: 'color-wheel,init',
-    });
-    block.dataset.blockStatus = 'error';
+  async function init() {
+    // Save before clearing — adoptHeadline uses document.querySelector and would lose it otherwise
+    const headline = document.querySelector('.color-headline.tools');
     cleanup();
     block.innerHTML = '';
     block.className = 'color-wheel';

@@ -219,14 +219,6 @@
   position: fixed;
 }
 
-/* Base color tab */
-
-.color-wheel .base-color-content {
-  width: 100%;
-  min-width: 0;
-  align-self: stretch;
-}
-
 /* Color wheel panel */
 
 color-wheel-express {
@@ -346,24 +338,7 @@ color-wheel-express {
   max-width: 343px;
 }
 
-/* Temporary styles for sidebar handoff */
-.text-content-placeholder {
-  height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-gray-200);
-}
-
-.topbar-placeholder,
-.footer-placeholder {
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-gray-200);
-}
-.color-floating-toolbar-container {
+.color-wheel .action-menu-controls-only .expand-btn {
   display: none;
 }
 
@@ -426,18 +401,6 @@ color-wheel-express {
     padding-block-end: var(--spacing-200);
   }
 
-  .color-wheel .ax-shell-slot--topbar {
-    padding-block-end: var(--spacing-100);
-  }
-
-  .color-wheel .ax-shell-slot--sidebar {
-    padding-block-end: 0;
-  }
-
-  .color-wheel .ax-shell-slot--canvas {
-    padding-block-end: var(--spacing-200);
-  }
-
   .color-wheel .color-extract-suggestions {
     align-self: start;
   }
@@ -475,16 +438,13 @@ color-wheel-express {
   .color-wheel .ax-color-tool-layout {
     padding: var(--spacing-600);
     grid-template-rows: auto;
+    grid-template-columns: minmax(0, var(--cw-sidebar-fr, 4fr)) minmax(0, 8fr);
+    transition: grid-template-columns 0.35s ease, column-gap 0.35s ease;
   }
 
   .color-wheel .color-wheel-strip-host.color-explorer-strip-container {
     height: 600px;
     min-height: 600px;
-  }
-
-  .color-wheel .ax-shell-slot--topbar,
-  .color-wheel .ax-shell-slot--canvas {
-    padding-block-end: var(--spacing-300);
   }
 
   .color-wheel .ax-shell-slot--sidebar {
@@ -520,6 +480,10 @@ color-wheel-express {
 
   .color-wheel-content {
     gap: var(--spacing-100);
+  }
+
+  .color-wheel .action-menu-controls-only {
+    padding-bottom: 0;
   }
 
   .color-wheel color-wheel-express {

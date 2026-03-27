@@ -143,8 +143,7 @@ function syncMarkersToImage(overlay, container) {
  * @param {HTMLElement | null} row - Row with label cell + list cell with <picture> nodes, or null
  * @param {(img: HTMLImageElement, url: string) => void} onSelect
  */
-export function buildSuggestedImages(row, onSelect, options = {}) {
-  const { showEmptyHint = false, emptyHintText } = options;
+export function buildSuggestedImages(row, onSelect) {
   const wrapper = createTag('div', { class: 'color-extract-suggestions' });
   const label = row?.children?.[0]
     || createTag('div', {}, 'Don\u2019t have an image? Try one of ours:');
@@ -259,8 +258,6 @@ function attachWindowDragHandlers(container, dropzone) {
  * @param {object} options.controller - ColorThemeExpressController instance
  * @param {number} [options.maxColors]
  * @param {HTMLElement | null} [options.suggestionsRowEl]
- * @param {boolean} [options.suggestionsShowEmptyHint] - When true and there are no pictures, show an authoring hint
- * @param {string} [options.suggestionsEmptyHintText] - Overrides default empty-suggestions copy
  * @returns {{ element: HTMLElement, destroy: Function }}
  */
 export default function createImageExtractComponent(options = {}) {
@@ -392,10 +389,6 @@ export default function createImageExtractComponent(options = {}) {
     (img, src) => {
       container.classList.add('has-image');
       onImageReady(img, src);
-    },
-    {
-      showEmptyHint: options.suggestionsShowEmptyHint === true,
-      emptyHintText: options.suggestionsEmptyHintText,
     },
   );
 
