@@ -181,7 +181,7 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-of
   overflow-x: auto;
   justify-content: center;
   display: flex;
-  padding: 0 var(--spacing-300);
+  padding: 0 var(--spacing-400);
   width: 100vw;
 }
 
