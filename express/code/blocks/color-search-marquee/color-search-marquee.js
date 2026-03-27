@@ -2,7 +2,7 @@ import {
   createExploreSearchBar,
   createDeepLinkManager,
 } from '../../scripts/color-shared/components/search-bar/index.js';
-import { getIconElementDeprecated, addTempWrapperDeprecated, readBlockConfig } from '../../scripts/utils.js';
+import { getIconElementDeprecated, addTempWrapperDeprecated, getMetadata } from '../../scripts/utils.js';
 
 const CHEVRON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" fill="none">
   <path d="M8.5 4.5L15 11L8.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -85,7 +85,7 @@ function renderTagPills(block, tags, searchBar, deepLinkManager) {
   requestAnimationFrame(() => updateScrollFades(container, fadeRight, fadeLeft));
 }
 
-function createEmptyResultElements(block) {
+function createEmptyResultElements(block, afterElement) {
   const container = document.createElement('div');
   container.className = 'empty-result-container';
 
@@ -97,9 +97,8 @@ function createEmptyResultElements(block) {
 
   container.append(heading, description);
 
-  const textRow = block.querySelector(':scope > div:first-of-type');
-  if (textRow) {
-    textRow.after(container);
+  if (afterElement) {
+    afterElement.after(container);
   } else {
     block.append(container);
   }
@@ -124,17 +123,12 @@ export default async function decorate(block) {
     if (index > 0) row.remove();
   });
 
-  const section = block.closest('.section');
-  const sectionMeta = section?.querySelector('.section-metadata');
-  if (sectionMeta) {
-    const config = readBlockConfig(sectionMeta);
-    if (['on', 'yes'].includes(config['marquee-inject-logo']?.toLowerCase())) {
-      const logo = getIconElementDeprecated('adobe-express-logo');
-      logo.classList.add('express-logo');
-      const textContainer = block.querySelector(':scope > div:first-of-type');
-      if (textContainer) {
-        textContainer.prepend(logo);
-      }
+  if (['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
+    const logo = getIconElementDeprecated('adobe-express-logo');
+    logo.classList.add('express-logo');
+    const textContainer = block.querySelector(':scope > div:first-of-type');
+    if (textContainer) {
+      textContainer.prepend(logo);
     }
   }
 
@@ -178,6 +172,10 @@ export default async function decorate(block) {
         block.dispatchEvent(new CustomEvent('floating-search:clear', {
           bubbles: true,
         }));
+        block.dispatchEvent(new CustomEvent('floating-search:submit', {
+          detail: { query: '' },
+          bubbles: true,
+        }));
       },
       onSuggestionSelect: ({ suggestion }) => {
         const query = suggestion.label || '';
@@ -192,7 +190,7 @@ export default async function decorate(block) {
 
   block.append(searchBar.element);
 
-  const emptyResult = createEmptyResultElements(block);
+  const emptyResult = createEmptyResultElements(block, searchBar.element);
 
   renderTagPills(block, tags, searchBar, deepLinkManager);
 
@@ -204,6 +202,19 @@ export default async function decorate(block) {
       bubbles: true,
     }));
   }
+
+  document.addEventListener('color-explore:empty-result', (e) => {
+    const { query } = e.detail;
+    block.classList.add('empty-result');
+    emptyResult.heading.textContent = `'${query}' color palettes`;
+    emptyResult.description.textContent = `Sorry, no color gradients found for "${query}." See other gradients you might like...`;
+  });
+
+  document.addEventListener('color-explore:results-found', () => {
+    block.classList.remove('empty-result');
+    emptyResult.heading.textContent = '';
+    emptyResult.description.textContent = '';
+  });
 
   const cleanupPopState = deepLinkManager.onPopState((query) => {
     if (query) {
