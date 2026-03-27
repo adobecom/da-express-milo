@@ -1,4 +1,5 @@
-import { createTag, getLibs } from '../../utils.js';
+import { createTag } from '../../utils.js';
+import loadMiloStyle from '../utils/loadMiloStyle.js';
 
 const DEFAULT_CARD_COUNT = 6;
 const LANA_TAGS = 'color-explore,loading-screen';
@@ -10,11 +11,7 @@ let stylesLoadPromise = null;
 
 export function loadLoadingScreenStyles() {
   if (stylesLoadPromise) return stylesLoadPromise;
-  stylesLoadPromise = import(`${getLibs()}/utils/utils.js`)
-    .then(({ loadStyle, getConfig }) => {
-      const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-      return loadStyle(`${codeRoot}/scripts/color-shared/components/createLoadingScreenComponent.css`);
-    })
+  stylesLoadPromise = loadMiloStyle('scripts/color-shared/components/createLoadingScreenComponent.css')
     .catch((error) => {
       stylesLoadPromise = null;
       window.lana?.log(`Failed to load loading screen styles: ${error?.message}`, {

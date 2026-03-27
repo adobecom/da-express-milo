@@ -8,7 +8,7 @@ import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } f
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
 import { createLoadingScreenComponent } from '../../scripts/color-shared/components/createLoadingScreenComponent.js';
-import { getLibs } from '../../scripts/utils.js';
+import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
@@ -37,8 +37,8 @@ const EVENTS = {
 };
 
 const STRIP_SHARED_STYLES = [
-  '/express/code/scripts/color-shared/components/strips/color-strip.css',
-  '/express/code/scripts/color-shared/components/gradients/gradient-strip.css',
+  'scripts/color-shared/components/strips/color-strip.css',
+  'scripts/color-shared/components/gradients/gradient-strip.css',
 ];
 const LOAD_MORE_CLICK_HANDLERS = new WeakMap();
 // [DEMO ONLY][MWPW-186947] remove block below after loading-screen PR lands
@@ -68,30 +68,18 @@ async function mountLoadingScreenDemo(container, config) {
 // [DEMO ONLY] end
 
 async function loadStripSharedStyles() {
-  try {
-    const { loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`);
-    const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-    await Promise.all(
-      STRIP_SHARED_STYLES.map(async (href) => {
-        const resolvedHref = href.startsWith('/express/code/')
-          ? href.replace('/express/code', codeRoot)
-          : href;
-        try {
-          await loadStyle(resolvedHref);
-        } catch (error) {
-          window.lana?.log(`[ColorExplore] Failed loading shared style ${resolvedHref}: ${error?.message}`, {
-            tags: 'color-explore,css',
-            severity: 'error',
-          });
-        }
-      }),
-    );
-  } catch (error) {
-    window.lana?.log(`[ColorExplore] Failed to initialize style loader: ${error?.message}`, {
-      tags: 'color-explore,css',
-      severity: 'error',
-    });
-  }
+  await Promise.all(
+    STRIP_SHARED_STYLES.map(async (href) => {
+      try {
+        await loadMiloStyle(href);
+      } catch (error) {
+        window.lana?.log(`[ColorExplore] Failed loading shared style ${href}: ${error?.message}`, {
+          tags: 'color-explore,css',
+          severity: 'error',
+        });
+      }
+    }),
+  );
 }
 
 function getVariantFromBlock(block) {
