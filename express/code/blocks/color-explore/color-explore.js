@@ -469,6 +469,11 @@ export default async function decorate(block) {
           };
           document.addEventListener('floating-search:submit', floatingSearchHandler);
 
+          const urlQuery = new URLSearchParams(window.location.search).get('q');
+          if (urlQuery) {
+            await floatingSearchHandler({ detail: { query: urlQuery } });
+          }
+
           publishInstances();
         } finally {
           isMounting = false;
@@ -571,6 +576,11 @@ export default async function decorate(block) {
           };
           document.addEventListener('floating-search:submit', floatingSearchHandler);
 
+          const urlQuery = new URLSearchParams(window.location.search).get('q');
+          if (urlQuery) {
+            await floatingSearchHandler({ detail: { query: urlQuery } });
+          }
+
           publishInstances();
         } finally {
           isMounting = false;
@@ -669,6 +679,12 @@ export default async function decorate(block) {
         }
       };
       document.addEventListener('floating-search:submit', floatingHandler);
+
+      const urlQuery = new URLSearchParams(window.location.search).get('q');
+      if (urlQuery) {
+        await floatingHandler({ detail: { query: urlQuery } });
+      }
+
       block.addEventListener('block-unload', () => document.removeEventListener('floating-search:submit', floatingHandler), { once: true });
 
       block.rendererInstance = renderer;
