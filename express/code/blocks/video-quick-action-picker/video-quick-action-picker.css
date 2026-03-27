@@ -196,14 +196,11 @@
 .vqap-badge {
   display: flex;
   align-items: center;
-  box-sizing: border-box;
   min-height: 26px;
   border: 1px solid transparent;
   border-radius: 4px;
   background: rgb(229, 240, 254);
   flex-shrink: 0;
-  cursor: pointer;
-  text-align: center;
 }
 
 .vqap-badge strong {

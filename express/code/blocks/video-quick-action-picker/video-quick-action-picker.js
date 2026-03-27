@@ -177,8 +177,8 @@ export async function showVideoQuickActionPicker(videoFile, block, sdkHandlers) 
     src: `${ICONS_BASE}/close-white.svg`,
     alt: '',
     'aria-hidden': 'true',
-    width: '24',
-    height: '24',
+    width: '18',
+    height: '18',
   });
   closeBtn.append(closeIcon);
 
