@@ -1077,7 +1077,7 @@ color: var(--color-gray-700-variant);
       max-width: 1300px;
       width: 100%;
       margin: auto;
-      padding: 0 var(--spacing-400);
+      padding: 0 var(--spacing-600);
       
       /* Enhanced wrapper transitions for desktop */
       transition: 
