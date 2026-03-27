@@ -17,6 +17,9 @@ function createStickyBehavior(options) {
     originalNextSibling: null,
     intersectionObserver: null,
     leaveAnimationTimeout: null,
+    sentinelInView: true,
+    boundaryElement: null,
+    boundaryScrollHandler: null,
   };
 
   function clearLeaveAnimation() {
@@ -156,14 +159,70 @@ function createStickyBehavior(options) {
     config.onShow?.(isRelocateMode ? config.element : stickyEl);
   }
 
+  function isBoundaryInView() {
+    if (!state.boundaryElement) {
+      console.log('[sticky] boundary element is null, returning true');
+      return true;
+    }
+    const rect = state.boundaryElement.getBoundingClientRect();
+    const inView = rect.bottom > 0;
+    console.log('[sticky] boundary rect.bottom:', rect.bottom, 'inView:', inView);
+    return inView;
+  }
+
+  function updateVisibility() {
+    const boundaryInView = isBoundaryInView();
+    console.log('[sticky] sentinelInView:', state.sentinelInView, 'boundaryInView:', boundaryInView);
+    if (!state.sentinelInView && boundaryInView) {
+      show();
+    } else {
+      hide();
+    }
+  }
+
   function handleIntersection(entries) {
     entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        hide();
-      } else {
-        show();
-      }
+      state.sentinelInView = entry.isIntersecting;
     });
+    updateVisibility();
+  }
+
+  function resolveBoundary() {
+    return typeof config.boundaryElement === 'function'
+      ? config.boundaryElement()
+      : config.boundaryElement;
+  }
+
+  function onScroll() {
+    updateVisibility();
+  }
+
+  function initBoundaryScroll() {
+    if (!config.boundaryElement) {
+      console.log('[sticky] no config.boundaryElement, skipping boundary');
+      return;
+    }
+
+    state.boundaryElement = resolveBoundary();
+    console.log('[sticky] resolved boundary:', state.boundaryElement);
+
+    if (!(state.boundaryElement instanceof HTMLElement)) {
+      state.boundaryElement = null;
+      const poll = setInterval(() => {
+        const el = resolveBoundary();
+        if (el instanceof HTMLElement) {
+          clearInterval(poll);
+          state.boundaryElement = el;
+          state.boundaryScrollHandler = onScroll;
+          window.addEventListener('scroll', state.boundaryScrollHandler, { passive: true });
+          updateVisibility();
+        }
+      }, 200);
+      return;
+    }
+
+    state.boundaryScrollHandler = onScroll;
+    window.addEventListener('scroll', state.boundaryScrollHandler, { passive: true });
   }
 
   function destroy() {
@@ -172,6 +231,11 @@ function createStickyBehavior(options) {
     if (state.intersectionObserver) {
       state.intersectionObserver.disconnect();
       state.intersectionObserver = null;
+    }
+
+    if (state.boundaryScrollHandler) {
+      window.removeEventListener('scroll', state.boundaryScrollHandler);
+      state.boundaryScrollHandler = null;
     }
 
     if (isRelocateMode) {
@@ -190,6 +254,7 @@ function createStickyBehavior(options) {
     }
 
     state.stickyElement = null;
+    state.boundaryElement = null;
     state.isVisible = false;
     state.isTransitioning = false;
     state.isInitialized = false;
@@ -207,6 +272,9 @@ function createStickyBehavior(options) {
     });
 
     state.intersectionObserver.observe(config.sentinel);
+
+    initBoundaryScroll();
+
     state.isInitialized = true;
   }
 

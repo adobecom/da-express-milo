@@ -544,6 +544,7 @@ export async function createExploreSearchBar(props = {}, callbacks = {}) {
     placeholder = DEFAULTS.PLACEHOLDER,
     enableSuggestions = true,
     enableStickyBehavior = false,
+    stickyBoundaryElement = null,
     suggestionsConfig = {},
     autocompleteConfig = {},
     enableAutocomplete = false,
@@ -642,6 +643,7 @@ export async function createExploreSearchBar(props = {}, callbacks = {}) {
     stickyBehavior = createAutoStickyBehavior({
       sentinel,
       element: container,
+      boundaryElement: stickyBoundaryElement,
       createWrapper: createStickyWrapper,
       animation: { duration: 200 },
       observer: {

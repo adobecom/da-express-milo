@@ -142,6 +142,7 @@ export default async function decorate(block) {
       placeholder: 'Search for colors, moods, themes, etc.',
       enableSuggestions: true,
       enableStickyBehavior: true,
+      stickyBoundaryElement: () => document.querySelector('.color-explore'),
       enableAutocomplete: true,
       suggestionsConfig: {
         headerText: 'Suggestions',
