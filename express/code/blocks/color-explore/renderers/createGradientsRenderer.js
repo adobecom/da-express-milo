@@ -3,6 +3,7 @@ import { createBaseRenderer } from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
 import { createLoadMoreComponent } from '../../../scripts/color-shared/components/createLoadMoreComponent.js';
 import { loadIconsRail } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { createExpressTooltip } from '../../../scripts/color-shared/spectrum/components/express-tooltip.js';
 
 function getHardcodedGradients() {
   return [
@@ -93,6 +94,9 @@ export function createGradientsRenderer(options) {
   let blurTimeout = null;
   let resizeTimeout = null;
   let resizeHandler = null;
+  const tooltipControllers = new Map();
+  const titleGuardCleanups = new Set();
+  let tooltipInitToken = 0;
 
   const ARROW_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp']);
   const NAVIGATION_KEYS = new Set([...ARROW_KEYS, 'Home', 'End', 'PageUp', 'PageDown']);
@@ -152,6 +156,72 @@ export function createGradientsRenderer(options) {
     return (Array.isArray(items) ? items : [])
       .map(normalizeGradient)
       .filter(Boolean);
+  }
+
+  function destroyTooltipForTarget(targetEl) {
+    const controller = tooltipControllers.get(targetEl);
+    if (!controller) return;
+    controller.destroy?.();
+    tooltipControllers.delete(targetEl);
+  }
+
+  function ensureTitleGuardForTarget(targetEl) {
+    if (!targetEl || targetEl.dataset?.spectrumTooltipTitleGuard === 'true') return;
+    const clearNativeTitle = () => targetEl.removeAttribute('title');
+    targetEl.addEventListener('mouseenter', clearNativeTitle);
+    targetEl.addEventListener('focusin', clearNativeTitle);
+    targetEl.dataset.spectrumTooltipTitleGuard = 'true';
+    clearNativeTitle();
+    titleGuardCleanups.add(() => {
+      targetEl.removeEventListener('mouseenter', clearNativeTitle);
+      targetEl.removeEventListener('focusin', clearNativeTitle);
+      delete targetEl.dataset.spectrumTooltipTitleGuard;
+    });
+  }
+
+  function clearGridTooltips() {
+    titleGuardCleanups.forEach((cleanup) => cleanup?.());
+    titleGuardCleanups.clear();
+    tooltipControllers.forEach((controller) => controller?.destroy?.());
+    tooltipControllers.clear();
+  }
+
+  async function initGradientCardTooltips(gridEl, token) {
+    const buttons = gridEl?.querySelectorAll?.('.gradient-strip-action-btn[data-tooltip-content]') || [];
+    for (const button of buttons) {
+      if (token !== tooltipInitToken) return;
+      const content = button.getAttribute('data-tooltip-content') || '';
+      if (content) {
+        destroyTooltipForTarget(button);
+        ensureTitleGuardForTarget(button);
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          const tip = await createExpressTooltip({ targetEl: button, content, placement: 'top' });
+          if (token !== tooltipInitToken || !button.isConnected || !gridEl?.isConnected) {
+            tip?.destroy?.();
+            return;
+          }
+          tooltipControllers.set(button, tip);
+        } catch {
+          // Non-blocking: card interactions must work even if tooltip setup fails.
+        }
+      }
+    }
+  }
+
+  function scheduleGridTooltips(gridEl) {
+    tooltipInitToken += 1;
+    const token = tooltipInitToken;
+    clearGridTooltips();
+    if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(() => {
+        initGradientCardTooltips(gridEl, token).catch(() => {});
+      });
+      return;
+    }
+    setTimeout(() => {
+      initGradientCardTooltips(gridEl, token).catch(() => {});
+    }, 0);
   }
 
   function loadGradients(sourceData = data) {
@@ -621,6 +691,7 @@ export function createGradientsRenderer(options) {
 
     updateCardTabIndexes();
     updateCardAriaAttributes();
+    scheduleGridTooltips(gridElement);
   }
 
   function updateTitle() {
@@ -759,6 +830,8 @@ export function createGradientsRenderer(options) {
 
   function destroy() {
     container?.removeEventListener?.('color-explore:filter-interaction', onFilterInteraction);
+    tooltipInitToken += 1;
+    clearGridTooltips();
 
     if (resizeHandler) {
       window.removeEventListener('resize', resizeHandler);

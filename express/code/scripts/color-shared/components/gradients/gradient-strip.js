@@ -67,7 +67,7 @@ function createGradientStrip(gradient, options = {}) {
     type: 'button',
     class: 'gradient-strip-action-btn',
     'aria-label': actionLabel,
-    title: actionLabel,
+    'data-tooltip-content': actionLabel,
     tabindex: '-1',
   });
   const daaLl = buildDaaLl(analytics);
