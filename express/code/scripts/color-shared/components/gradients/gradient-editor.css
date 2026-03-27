@@ -1,0 +1,253 @@
+@import url('../../color-tokens.css');
+
+.gradient-editor {
+  position: relative;
+  width: 100%;
+  min-height: var(--gradient-editor-height);
+  max-width: var(--Gradient-editor-max-width-l);
+  border-radius: var(--Corner-radius-bar);
+  border: 1px solid var(--Palette-gray-200);
+  overflow: visible;
+}
+
+.gradient-editor--size-s {
+  max-width: var(--Gradient-editor-max-width-s);
+}
+
+.gradient-editor--size-m {
+  max-width: var(--Gradient-editor-max-width-m);
+}
+
+.gradient-editor--fluid-width {
+  max-width: 100%;
+}
+
+.gradient-editor--size-responsive .gradient-editor-midpoint {
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .gradient-editor--size-responsive .gradient-editor-midpoint {
+    display: block;
+  }
+}
+
+.gradient-editor--layout-responsive {
+  min-height: 0;
+  height: auto;
+  box-sizing: border-box;
+}
+
+.gradient-editor--layout-responsive .gradient-editor-handle:first-child {
+  transform: translateX(11px);
+}
+
+.gradient-editor--layout-responsive .gradient-editor-handle:last-child {
+  transform: translateX(-11px);
+}
+
+.gradient-editor--layout-responsive .gradient-editor-handle:first-child::before,
+.gradient-editor--layout-responsive .gradient-editor-handle:last-child::before {
+  content: '';
+  position: absolute;
+  inset: calc(-1 * var(--modal-focus-outline-width) * 2);
+  border-radius: 50%;
+  border: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
+  pointer-events: none;
+  opacity: 0;
+}
+
+.gradient-editor--layout-responsive .gradient-editor-handle:first-child:focus::before,
+.gradient-editor--layout-responsive .gradient-editor-handle:first-child:focus-visible::before,
+.gradient-editor--layout-responsive .gradient-editor-handle:last-child:focus::before,
+.gradient-editor--layout-responsive .gradient-editor-handle:last-child:focus-visible::before {
+  opacity: 1;
+}
+
+.gradient-editor--layout-responsive .gradient-editor-handle:first-child:focus,
+.gradient-editor--layout-responsive .gradient-editor-handle:first-child:focus-visible,
+.gradient-editor--layout-responsive .gradient-editor-handle:last-child:focus,
+.gradient-editor--layout-responsive .gradient-editor-handle:last-child:focus-visible {
+  outline: none;
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-s {
+  width: var(--Gradient-strip-tall-width-s);
+  max-width: 100%;
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-s .gradient-editor-bar-wrap {
+  height: var(--Gradient-strip-tall-height-s);
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-m {
+  width: var(--Gradient-strip-tall-width-m);
+  max-width: 100%;
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-m .gradient-editor-bar-wrap {
+  height: var(--Gradient-strip-tall-height-m);
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-l {
+  width: var(--Gradient-strip-tall-width-l);
+  max-width: 100%;
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-l .gradient-editor-bar-wrap {
+  height: var(--Gradient-strip-tall-height-l);
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-responsive {
+  width: var(--Gradient-strip-tall-width-s);
+  max-width: 100%;
+}
+
+.gradient-editor--layout-responsive.gradient-editor--size-strip-responsive .gradient-editor-bar-wrap {
+  height: var(--Gradient-strip-tall-height-s);
+}
+
+@media (min-width: 600px) {
+  .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive {
+    width: var(--Gradient-strip-tall-width-m);
+  }
+
+  .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive .gradient-editor-bar-wrap {
+    height: var(--Gradient-strip-tall-height-m);
+  }
+}
+
+@media (min-width: 1200px) {
+  .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive {
+    width: var(--Gradient-strip-tall-width-l);
+  }
+
+  .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive .gradient-editor-bar-wrap {
+    height: var(--Gradient-strip-tall-height-l);
+  }
+}
+
+.gradient-editor-bar-wrap {
+  position: relative;
+  height: var(--gradient-editor-height);
+  border-radius: var(--Corner-radius-bar);
+  overflow: visible;
+}
+
+.gradient-editor-bar {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--Corner-radius-bar);
+  overflow: visible;
+}
+
+.gradient-editor-bar::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: var(--Spacing-Spacing-50);
+  background: var(--Palette-white);
+}
+
+.gradient-editor[data-show-bar-track="false"] .gradient-editor-bar::after {
+  display: none;
+}
+
+.gradient-editor-handles {
+  position: absolute;
+  inset: 0;
+  left: var(--border-width-2, 2px);
+  right: var(--border-width-2, 2px);
+  pointer-events: none;
+}
+
+.gradient-editor--size-m .gradient-editor-handles {
+  display: none;
+}
+
+.gradient-editor--size-s .gradient-editor-midpoint {
+  display: none;
+}
+
+.gradient-editor-handle {
+  --handle-position-pct: 0;
+  --handle-color: #808080;
+  position: absolute;
+  width: var(--gradient-stop-size);
+  height: var(--gradient-stop-size);
+  top: calc(50% - (var(--gradient-stop-size) / 2));
+  left: calc(var(--handle-position-pct) * 1% - (var(--gradient-stop-size) / 2));
+  padding: 0;
+  margin: 0;
+  border: var(--gradient-editor-handle-stroke-width) solid var(--gradient-stop-border-color);
+  border-radius: 50%;
+  box-shadow:
+    var(--Elevation-floating-button),
+    inset 0 0 0 1px rgba(31, 31, 31, 0.3);
+  cursor: pointer;
+  pointer-events: auto;
+  box-sizing: border-box;
+  appearance: none;
+  background-clip: padding-box;
+  background-color: var(--handle-color);
+}
+
+.gradient-editor--draggable .gradient-editor-handle {
+  cursor: grab;
+}
+
+.gradient-editor--draggable .gradient-editor-handle:active {
+  cursor: grabbing;
+}
+
+.gradient-editor--copyable .gradient-editor-handle,
+.gradient-editor--copyable .gradient-editor-handle:active,
+.gradient-editor--layout-responsive .gradient-editor-handle,
+.gradient-editor--layout-responsive .gradient-editor-handle:active {
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.gradient-editor-handle:focus,
+.gradient-editor-handle:focus-visible {
+  outline: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: var(--modal-focus-outline-width);
+}
+
+.gradient-editor--size-l .gradient-editor-midpoint,
+.gradient-editor--size-responsive .gradient-editor-midpoint {
+  --gradient-editor-midpoint-half: 4.25px;
+  position: absolute;
+  width: 8.5px;
+  height: 8.5px;
+  top: calc(50% - var(--gradient-editor-midpoint-half));
+  left: 0;
+  cursor: grab;
+  pointer-events: auto;
+}
+
+.gradient-editor--size-l .gradient-editor-midpoint:active,
+.gradient-editor--size-responsive .gradient-editor-midpoint:active {
+  cursor: grabbing;
+}
+
+.gradient-editor--size-l .gradient-editor-midpoint:focus,
+.gradient-editor--size-l .gradient-editor-midpoint:focus-visible,
+.gradient-editor--size-responsive .gradient-editor-midpoint:focus,
+.gradient-editor--size-responsive .gradient-editor-midpoint:focus-visible {
+  outline: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: var(--modal-focus-outline-width);
+}
+
+.gradient-editor--size-l .gradient-editor-midpoint img,
+.gradient-editor--size-responsive .gradient-editor-midpoint img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+}

@@ -1,0 +1,100 @@
+@import url('../../color-tokens.css');
+
+.gradient-strip {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--Spacing-Spacing-75);
+  width: 100%;
+  min-width: var(--Gradient-strip-min-width);
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  outline: none;
+  position: relative;
+  border-radius: var(--Corner-radius-bar);
+  overflow: visible;
+}
+
+.gradient-strip:focus-visible {
+  outline: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: var(--modal-focus-outline-width);
+  border-radius: var(--Focus-radius-focus-radius-80);
+}
+
+.gradient-strip .gradient-strip-visual {
+  width: 100%;
+  min-width: 0;
+  height: var(--Gradient-strip-height-s-m);
+  flex-shrink: 0;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  border: 0.5px solid var(--Palette-gray-100);
+  box-sizing: border-box;
+}
+
+.gradient-strip .gradient-strip-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--Spacing-Spacing-125);
+  width: 100%;
+  min-width: 0;
+}
+
+.gradient-strip .gradient-strip-name {
+  flex: 1 1 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-style: normal;
+  font-weight: 500;
+  font-size: var(--Global-Typography-Size-Label-Label-M);
+  line-height: var(--Global-Typography-Line-height-Label-Label-M);
+  color: var(--Alias-content-typography-Title);
+  margin: 0;
+  text-align: left;
+}
+
+.gradient-strip .gradient-strip-actions {
+  display: flex;
+  gap: var(--Spacing-Spacing-100);
+  align-items: center;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+
+.gradient-strip .gradient-strip-action-btn {
+  background: transparent;
+  border: none;
+  border-radius: var(--Corner-radius-bar);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--Spacing-Spacing-500);
+  height: var(--Spacing-Spacing-500);
+  padding: var(--Spacing-Spacing-100);
+  padding-right: 0;
+  flex-shrink: 0;
+  visibility: visible;
+  opacity: 1;
+  position: relative;
+  z-index: 1;
+}
+
+.gradient-strip .gradient-strip-action-btn:focus-visible {
+  outline: var(--modal-focus-outline-width) solid var(--S2A-Color-border-focus-indicator);
+  outline-offset: var(--modal-focus-outline-width);
+}
+
+.gradient-strip .gradient-strip-action-btn .action-icon {
+  font-size: var(--Spacing-Spacing-300);
+  width: var(--Spacing-Spacing-300);
+  height: var(--Spacing-Spacing-300);
+  line-height: var(--Spacing-Spacing-300);
+  color: var(--Palette-gray-800);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

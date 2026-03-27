@@ -388,6 +388,7 @@ async function loadPage() {
   });
 
   decorateArea();
+  document.body.classList.add('appear');
 
   loadLana({ clientId: 'express' });
 

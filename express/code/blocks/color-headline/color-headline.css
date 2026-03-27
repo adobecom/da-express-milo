@@ -1,0 +1,61 @@
+.color-headline *,
+.color-headline *::before,
+.color-headline *::after {
+  box-sizing: border-box;
+}
+
+.color-headline.extract {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 80px 16px 0;
+  /* Sit above the color-extract landing background images */
+  position: relative;
+  z-index: 1;
+  /* Collapse any default bottom margin so the landing pulls up cleanly */
+  margin-bottom: 0;
+}
+
+/* Hide when the adjacent color-extract switches to the edit/results view */
+body:has(.color-extract.has-image) .color-headline.extract {
+  display: none;
+}
+
+.color-headline.extract > div > div {
+  width: 100%;
+  max-width: 640px;
+}
+
+.color-headline .express-logo {
+  display: block;
+  width: unset;
+  height: 30px;
+  padding: 0;
+  margin-inline: auto;
+  margin-bottom: 12px;
+}
+
+.color-headline.extract h1 {
+  font-size: 45px;
+  line-height: 1.04;
+  margin: 0 0 16px;
+}
+
+.color-headline.extract p {
+  margin: 0;
+  color: #505050;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+@media (max-width: 1199px) {
+  .color-headline.extract h1 {
+    font-size: 32px;
+  }
+
+  .color-headline.extract p {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+}
