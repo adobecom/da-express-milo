@@ -65,9 +65,17 @@
   transition: background 0.15s ease, color 0.15s ease;
 }
 
+.ax-color-modal-content .gradients-modal-content__like-btn.is-liked {
+  color: var(--color-error-red);
+}
+
 .ax-color-modal-content .gradients-modal-content__like-btn:hover {
   background: var(--color-light-gray);
   color: var(--color-content-neutral);
+}
+
+.ax-color-modal-content .gradients-modal-content__like-btn.is-liked:hover {
+  color: var(--color-error-red);
 }
 
 .ax-color-modal-content .gradients-modal-content__like-btn:focus-visible {

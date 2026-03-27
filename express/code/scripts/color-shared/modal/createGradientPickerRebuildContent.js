@@ -144,7 +144,7 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
       size: 'm',
       'aria-hidden': 'true',
     }));
-    likeBtn.setAttribute('aria-label', liked ? 'Unlike gradient' : 'Like gradient');
+    likeBtn.setAttribute('aria-label', liked ? 'Remove from favorites' : 'Add to favorites');
     likeBtn.classList.toggle('is-liked', liked);
   };
   updateLikeState();
@@ -152,7 +152,7 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   let likeTooltip = null;
   createExpressTooltip({
     targetEl: likeBtn,
-    content: liked ? 'Unlike gradient' : 'Like gradient',
+    content: liked ? 'Remove from favorites' : 'Add to favorites',
     placement: 'bottom',
   }).then((tooltipController) => {
     likeTooltip = tooltipController;
@@ -160,7 +160,7 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   likeBtn.addEventListener('click', () => {
     liked = !liked;
     updateLikeState();
-    likeTooltip?.setContent(liked ? 'Unlike gradient' : 'Like gradient');
+    likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
   });
   const likesCountEl = createTag('p', { class: 'modal-likes-count' });
   likesCountEl.textContent = likesCount;

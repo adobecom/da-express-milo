@@ -346,6 +346,10 @@
   color: var(--color-gray-800-variant);
 }
 
+.ax-color-modal-content .like-icon.is-liked {
+  color: var(--color-error-red);
+}
+
 .ax-color-modal-content .like-icon:hover {
   opacity: 0.8;
 }

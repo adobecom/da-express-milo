@@ -87,7 +87,7 @@ function createMetadataSection(gradient = {}, options = {}) {
   const likeBtn = createTag('button', {
     type: 'button',
     class: 'gradients-modal-content__like-btn',
-    'aria-label': 'Like gradient',
+    'aria-label': 'Add to favorites',
   });
   const likeIconTheme = createTag('sp-theme', {
     system: 'spectrum-two',
@@ -97,11 +97,11 @@ function createMetadataSection(gradient = {}, options = {}) {
   let liked = options.liked ?? gradient?.liked ?? false;
   const likeIcon = createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' });
   likeIconTheme.appendChild(likeIcon);
-  likeBtn.setAttribute('aria-label', liked ? 'Unlike gradient' : 'Like gradient');
+  likeBtn.setAttribute('aria-label', liked ? 'Remove from favorites' : 'Add to favorites');
   likeBtn.classList.toggle('is-liked', liked);
   likeBtn.appendChild(likeIconTheme);
   let likeTooltip = null;
-  createExpressTooltip({ targetEl: likeBtn, content: liked ? 'Unlike gradient' : 'Like gradient', placement: 'bottom' })
+  createExpressTooltip({ targetEl: likeBtn, content: liked ? 'Remove from favorites' : 'Add to favorites', placement: 'bottom' })
     .then((t) => { likeTooltip = t; })
     .catch(() => {});
   likeBtn.addEventListener('click', () => {
@@ -109,9 +109,9 @@ function createMetadataSection(gradient = {}, options = {}) {
     likeIconTheme.replaceChildren();
     const icon = createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' });
     likeIconTheme.appendChild(icon);
-    likeBtn.setAttribute('aria-label', liked ? 'Unlike gradient' : 'Like gradient');
+    likeBtn.setAttribute('aria-label', liked ? 'Remove from favorites' : 'Add to favorites');
     likeBtn.classList.toggle('is-liked', liked);
-    likeTooltip?.setContent(liked ? 'Unlike gradient' : 'Like gradient');
+    likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
   });
   const likesText = createTag('p', { class: 'gradients-modal-content__likes-count' });
   likesText.textContent = likesCount;

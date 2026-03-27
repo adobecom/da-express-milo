@@ -213,24 +213,24 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   nameLikesRow.appendChild(nameEl);
 
   const likesWrap = createTag('div', { class: 'modal-palette-likes' });
-  const likeBtn = createTag('button', { type: 'button', class: 'like-icon', 'aria-label': 'Like palette' });
+  const likeBtn = createTag('button', { type: 'button', class: 'like-icon', 'aria-label': 'Add to favorites' });
   const likeTheme = createTag('sp-theme', { system: 'spectrum-two', color: 'light', scale: 'medium' });
   let liked = options.liked ?? palette?.liked ?? false;
   likeTheme.appendChild(createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' }));
-  likeBtn.setAttribute('aria-label', liked ? 'Unlike palette' : 'Like palette');
+  likeBtn.setAttribute('aria-label', liked ? 'Remove from favorites' : 'Add to favorites');
   likeBtn.classList.toggle('is-liked', liked);
   likeBtn.appendChild(likeTheme);
   let likeTooltip = null;
-  createExpressTooltip({ targetEl: likeBtn, content: liked ? 'Unlike palette' : 'Like palette', placement: 'bottom' })
+  createExpressTooltip({ targetEl: likeBtn, content: liked ? 'Remove from favorites' : 'Add to favorites', placement: 'bottom' })
     .then((t) => { likeTooltip = t; })
     .catch(() => {});
   likeBtn.addEventListener('click', () => {
     liked = !liked;
     likeTheme.replaceChildren();
     likeTheme.appendChild(createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' }));
-    likeBtn.setAttribute('aria-label', liked ? 'Unlike palette' : 'Like palette');
+    likeBtn.setAttribute('aria-label', liked ? 'Remove from favorites' : 'Add to favorites');
     likeBtn.classList.toggle('is-liked', liked);
-    likeTooltip?.setContent(liked ? 'Unlike palette' : 'Like palette');
+    likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
   });
   const likesText = createTag('p', { class: 'modal-likes-count' });
   likesText.textContent = String(likesCount);
