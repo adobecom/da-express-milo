@@ -1059,7 +1059,7 @@ color: var(--color-gray-700-variant);
 
   .comparison-table-v2 .sticky-header.is-stuck {
       max-width: 100%; 
-      padding: var(--spacing-100) var(--spacing-400) var(--spacing-400) var(--spacing-400);
+      padding: var(--spacing-100) var(--spacing-600) var(--spacing-400) var(--spacing-600);
       margin: 0;
       display: flex;
       
