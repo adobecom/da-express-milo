@@ -1,4 +1,5 @@
-import { createTag, getLibs } from '../../utils.js';
+import { createTag } from '../../utils.js';
+import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createGradientEditor } from '../components/gradients/gradient-editor.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
@@ -155,11 +156,9 @@ function createMetadataSection(gradient = {}, options = {}) {
 export async function ensureGradientsModalContentStyles() {
   if (gradientsModalContentStylesLoaded) return;
   try {
-    const { loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`);
-    const codeRoot = getConfig?.()?.codeRoot || '/express/code';
     await Promise.all([
-      loadStyle(`${codeRoot}/scripts/color-shared/components/gradients/gradient-editor.css`),
-      loadStyle(`${codeRoot}/scripts/color-shared/modal/modal-gradients-content.css`),
+      loadMiloStyle('scripts/color-shared/components/gradients/gradient-editor.css'),
+      loadMiloStyle('scripts/color-shared/modal/modal-gradients-content.css'),
     ]);
     gradientsModalContentStylesLoaded = true;
   } catch {
