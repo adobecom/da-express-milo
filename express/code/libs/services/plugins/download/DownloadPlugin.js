@@ -29,7 +29,13 @@ export default class DownloadPlugin extends BasePlugin {
 
   /** @returns {void} */
   registerActionGroups() {
-    this.registerActionGroup(DownloadActionGroups.FILE, new FileDownloadActions(this));
-    this.registerActionGroup(DownloadActionGroups.EXPORT, new ExportActions(this));
+    this.registerActionGroup(
+      DownloadActionGroups.FILE,
+      new FileDownloadActions(this),
+    );
+    this.registerActionGroup(
+      DownloadActionGroups.EXPORT,
+      new ExportActions(this),
+    );
   }
 }

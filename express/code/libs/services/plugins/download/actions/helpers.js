@@ -113,7 +113,10 @@ export function rgbToHsl(rgb) {
  * @returns {string}
  */
 export function getClassName(name) {
-  return name?.replaceAll(' ', '-') || 'colortheme-color';
+  return (
+    name?.replaceAll(' ', '-')
+    || 'colortheme-color'
+  );
 }
 
 /**
