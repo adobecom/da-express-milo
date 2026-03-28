@@ -27,9 +27,15 @@
 }
 
 .gradient-editor:focus-visible {
+  outline: none;
+}
+
+.gradient-editor:focus-visible .gradient-editor-bar,
+.gradient-editor:focus-within .gradient-editor-bar,
+.gradient-editor-bar:focus-visible {
   outline: var(--border-width-2) solid var(--color-blue-800);
-  outline-offset: var(--border-width-2);
-  border-radius: var(--spacing-75);
+  outline-offset: 1px;
+  border-radius: var(--Corner-radius-bar);
 }
 
 .gradient-editor--size-s {

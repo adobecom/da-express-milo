@@ -49,8 +49,8 @@
 .ax-color-modal-content .modal-palette-colors.modal-gradient-preview:has(.gradient-editor--layout-responsive) {
   height: auto;
   min-height: 0;
-  padding-left: 0;
-  padding-right: 0;
+  /* Keep room for gradient-editor focus outline so it doesn't clip at container edges. */
+  padding: var(--border-width-2);
 }
 
 .ax-color-modal-content .gradient-color-handles {

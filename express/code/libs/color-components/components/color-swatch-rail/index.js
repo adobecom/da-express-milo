@@ -26,6 +26,7 @@ const DEFAULT_VERTICAL_MAX_PER_ROW = 5;
 
 const DEFAULT_FEATURES = {
   copy: true,
+  copyFromHex: true,
   colorPicker: true,
   lock: false,
   hexCode: true,
@@ -43,6 +44,7 @@ const DEFAULT_FEATURES = {
 
 const ALL_FEATURES = {
   copy: true,
+  copyFromHex: true,
   colorPicker: true,
   lock: true,
   hexCode: true,
@@ -64,6 +66,7 @@ function normalizeFeatures(features) {
     const set = new Set(features);
     return {
       copy: set.has('copy'),
+      copyFromHex: true,
       colorPicker: set.has('colorPicker'),
       lock: set.has('lock'),
       hexCode: set.has('hexCode') !== false,
@@ -930,6 +933,7 @@ export class ColorSwatchRail extends LitElement {
       const textColor = getContrastTextColor(swatch.hex);
       const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
       const showColorEdit = f.colorPicker && !editDisabled && !effectiveLocked;
+      const showHexCopyButton = f.copy && f.copyFromHex !== false && !isBase;
       const tintMode = f.editTint && !f.colorPicker;
       const showTintSelect = tintMode && !editDisabled && !effectiveLocked;
       const resolvedTintIndex = this._resolveTintIndex();
@@ -999,7 +1003,7 @@ export class ColorSwatchRail extends LitElement {
       const stackedContent = html`
         <div class="bottom-info bottom-info--stacked" part="bottom-info">
           ${showColorEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-          ${f.hexCode ? (showColorEdit || (f.copy && !isBase) ? html`<button type="button" class="hex-code hex-code--${showColorEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showColorEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showColorEdit ? 'Edit color' : 'Copy hex'} title=${showColorEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+          ${f.hexCode ? (showColorEdit || showHexCopyButton ? html`<button type="button" class="hex-code hex-code--${showColorEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showColorEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showColorEdit ? 'Edit color' : 'Copy hex'} title=${showColorEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
         </div>
         ${stackedIcons}
       `;
@@ -1028,7 +1032,7 @@ export class ColorSwatchRail extends LitElement {
           ` : html`<div class="stacked-row">${stackedContent}</div>`}
           ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
             ${showColorEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-            ${f.hexCode && showHexCopyForThisSwatch ? (showColorEdit || (f.copy && !isBase) ? html`<button type="button" class="hex-code hex-code--${showColorEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showColorEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showColorEdit ? 'Edit color' : 'Copy hex'} title=${showColorEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+            ${f.hexCode && showHexCopyForThisSwatch ? (showColorEdit || showHexCopyButton ? html`<button type="button" class="hex-code hex-code--${showColorEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showColorEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showColorEdit ? 'Edit color' : 'Copy hex'} title=${showColorEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
             <div class="bottom-info__actions">
               ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="Copy hex" title="Copy hex">${icon('copy')}</button>` : ''}
             </div>

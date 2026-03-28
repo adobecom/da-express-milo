@@ -333,6 +333,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   // Modal strips are read-only by contract: do not enable in-place color editing.
   const swatchFeatures = {
     copy: true,
+    copyFromHex: false,
     colorPicker: false,
     hexCode: true,
     baseColor: false,

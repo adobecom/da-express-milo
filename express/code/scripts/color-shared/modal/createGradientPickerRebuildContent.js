@@ -117,11 +117,6 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
     copyable: true,
     ariaLabel: `Gradient preview, ${colorStops.length} colors`,
   });
-  // In modal context, the gradient preview should fill the available tray width
-  // instead of clamping to the component's strip width tokens.
-  gradientEditor.element.style.width = '100%';
-  gradientEditor.element.style.maxWidth = '100%';
-  gradientEditor.element.style.minWidth = '0';
   previewWrap.appendChild(gradientEditor.element);
   containerSection.appendChild(previewWrap);
   main.appendChild(containerSection);
