@@ -38,54 +38,12 @@ function setupPaletteGridNav(gridEl) {
   let cardCache = [];
   const getCards = () => cardCache;
   const getCardBtns = (card) => Array.from(card.querySelectorAll('.color-card-action-btn'));
-  const gridScope = gridEl.closest('.color-explore-container') || gridEl.parentElement || gridEl;
 
   let focusedIdx = 0;
   let gridNavEnabled = true;
   let blurTimer = null;
-  let actionReturnFocusEl = null;
 
   const ARROW_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End']);
-  const FOCUSABLE_SELECTOR = [
-    'a[href]',
-    'button:not([disabled])',
-    'input:not([disabled]):not([type="hidden"])',
-    'select:not([disabled])',
-    'textarea:not([disabled])',
-    '[tabindex]:not([tabindex="-1"])',
-  ].join(', ');
-
-  function isFocusableVisible(el) {
-    if (!el || el.hidden) return false;
-    const style = window.getComputedStyle(el);
-    if (style.display === 'none' || style.visibility === 'hidden') return false;
-    const rect = el.getBoundingClientRect();
-    return rect.width > 0 || rect.height > 0;
-  }
-
-  function focusOutsideGrid(fromEl, direction = 1) {
-    const all = Array.from(document.querySelectorAll(FOCUSABLE_SELECTOR))
-      .filter((el) => isFocusableVisible(el));
-    const start = Math.max(0, all.indexOf(fromEl));
-
-    if (direction > 0) {
-      for (let i = start + 1; i < all.length; i += 1) {
-        const candidate = all[i];
-        if (gridEl.contains(candidate)) continue;
-        candidate.focus();
-        return true;
-      }
-      return false;
-    }
-
-    for (let i = start - 1; i >= 0; i -= 1) {
-      const candidate = all[i];
-      if (gridEl.contains(candidate)) continue;
-      candidate.focus();
-      return true;
-    }
-    return false;
-  }
 
   function initTabIndexes() {
     cardCache = Array.from(gridEl.querySelectorAll('.color-card'));
@@ -95,22 +53,6 @@ function setupPaletteGridNav(gridEl) {
       card.setAttribute('tabindex', i === focusedIdx ? '0' : '-1');
       getCardBtns(card).forEach((btn) => btn.setAttribute('tabindex', '-1'));
     });
-  }
-
-  function handleScopeKeydown(e) {
-    const loadMoreBtn = e.target?.closest?.('.load-more-container[data-owner="color-explore"] .load-more-btn');
-    if (!loadMoreBtn) return;
-    if (!(e.key === 'Tab' && e.shiftKey)) return;
-
-    const cards = getCards();
-    if (!cards.length) return;
-    const safeIndex = Math.max(0, Math.min(focusedIdx, cards.length - 1));
-    const targetCard = cards[safeIndex];
-    if (!targetCard) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-    targetCard.focus();
   }
 
   function moveTo(index) {
@@ -175,19 +117,9 @@ function setupPaletteGridNav(gridEl) {
       const btns = getCardBtns(e.target);
       if (btns.length) {
         gridNavEnabled = false;
-        actionReturnFocusEl = e.target;
         btns.forEach((b) => b.setAttribute('tabindex', '-1'));
         btns[0].setAttribute('tabindex', '0');
         btns[0].focus();
-      }
-      return;
-    }
-
-    if (e.key === 'Tab' && isCard && gridNavEnabled) {
-      const moved = focusOutsideGrid(e.target, e.shiftKey ? -1 : 1);
-      if (moved) {
-        e.preventDefault();
-        e.stopPropagation();
       }
       return;
     }
@@ -213,11 +145,7 @@ function setupPaletteGridNav(gridEl) {
       gridNavEnabled = true;
       const btns = getCardBtns(parentCard);
       btns.forEach((b) => b.setAttribute('tabindex', '-1'));
-      const focusTarget = actionReturnFocusEl && parentCard.contains(actionReturnFocusEl)
-        ? actionReturnFocusEl
-        : parentCard;
-      actionReturnFocusEl = null;
-      focusTarget.focus();
+      parentCard.focus();
     }
   });
 
@@ -231,7 +159,6 @@ function setupPaletteGridNav(gridEl) {
     }
     focusedIdx = idx;
     gridNavEnabled = true;
-    actionReturnFocusEl = null;
     cards.forEach((c, i) => c.setAttribute('tabindex', i === idx ? '0' : '-1'));
   });
 
@@ -246,14 +173,10 @@ function setupPaletteGridNav(gridEl) {
     }, 0);
   });
 
-  gridScope.addEventListener('keydown', handleScopeKeydown, true);
-
   initTabIndexes();
   return {
     reinit: initTabIndexes,
-    destroy: () => {
-      gridScope.removeEventListener('keydown', handleScopeKeydown, true);
-    },
+    destroy: () => {},
   };
 }
 

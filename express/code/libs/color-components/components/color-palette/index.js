@@ -16,6 +16,13 @@ class ColorPalette extends LitElement {
       searchQuery: { type: String },
       showNameTooltip: { type: Boolean, attribute: 'show-name-tooltip' },
       selectionSource: { type: String, attribute: 'selection-source' },
+      focusable: {
+        reflect: true,
+        converter: {
+          fromAttribute: (value) => value !== 'false',
+          toAttribute: (value) => (value ? '' : 'false'),
+        },
+      },
     };
   }
 
@@ -26,6 +33,7 @@ class ColorPalette extends LitElement {
     this.searchQuery = '';
     this.showNameTooltip = false;
     this.selectionSource = 'default-palette';
+    this.focusable = true;
 
     this.addEventListener('click', this.handleClick);
     this.addEventListener('keydown', this.handleKeyDown);
@@ -71,6 +79,7 @@ class ColorPalette extends LitElement {
     if (typeof this.palette === 'undefined' || this.palette.colors.length === 0) {
       return null;
     }
+    const triggerTabIndex = this.focusable ? '0' : '-1';
 
     const classes = {
       'color-palette': true,
@@ -81,7 +90,7 @@ class ColorPalette extends LitElement {
     if (this.showNameTooltip && this.palette.name) {
       return html`
                 <sp-overlay-trigger class="icon-button-libraries" placement="top" id="trigger" offset="0">
-                    <div class=${classMap(classes)} tabindex="0" slot="trigger">
+                    <div class=${classMap(classes)} tabindex=${triggerTabIndex} slot="trigger">
                         ${this.palettesTemplate()}
                         <slot class="mobile-btn-slot" name='mobile-color-picker-button'></slot>
                     </div>
@@ -93,7 +102,7 @@ class ColorPalette extends LitElement {
     }
 
     return html`
-            <div class=${classMap(classes)} tabindex="0">
+            <div class=${classMap(classes)} tabindex=${triggerTabIndex}>
                 ${this.palettesTemplate()}
                 <slot class="mobile-btn-slot" name='mobile-color-picker-button'></slot>
             </div>
