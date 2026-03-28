@@ -24,7 +24,11 @@ function ensureModalStyles() {
 
 // eslint-disable-next-line import/prefer-default-export -- named export for createModalManager
 export function createModalManager() {
-  let currentModal = null;
+  // Persistent shell — created once, never removed until destroy().
+  let overlay = null;
+  let container = null;
+  let bodyEl = null;
+
   let isOpen = false;
   let onCloseCallback = null;
   let openOptions = null;
@@ -32,20 +36,19 @@ export function createModalManager() {
   let previousActiveElement = null;
   let escHandler = null;
   let focusTrap = null;
+  let closeTimeoutId = null;
 
   function close() {
     if (!isOpen) return;
     isOpen = false;
 
-    const closingTitle = currentModal?.querySelector('.ax-color-modal-title')?.textContent
-      || openOptions?.title
-      || 'Modal';
+    const closingTitle = overlay.getAttribute('aria-label') || openOptions?.title || 'Modal';
     announceToScreenReader(`${closingTitle} modal closed`);
 
-    const container = currentModal?.querySelector('.ax-color-modal-container');
-    container?.classList.remove('ax-color-modal-open');
-    container?.classList.add('ax-color-modal-closing');
-    currentModal?.classList.add('ax-color-modal-closing');
+    clearTimeout(closeTimeoutId);
+    container.classList.remove('ax-color-modal-open');
+    container.classList.add('ax-color-modal-closing');
+    overlay.classList.add('ax-color-modal-closing');
 
     document.body.classList.remove('ax-color-modal-open');
     escHandler?.release();
@@ -53,56 +56,20 @@ export function createModalManager() {
     focusTrap?.release();
     focusTrap = null;
 
-    const duration = 300;
     const elementToFocus = previousActiveElement;
-    const modalToRemove = currentModal;
     const callback = onCloseCallback;
     previousActiveElement = null;
     onCloseCallback = null;
     openOptions = null;
-    currentModal = null;
 
-    setTimeout(() => {
-      modalToRemove?.remove();
+    closeTimeoutId = setTimeout(() => {
+      container.classList.remove('ax-color-modal-closing');
+      overlay.classList.remove('ax-color-modal-closing');
+      overlay.setAttribute('aria-hidden', 'true');
+      while (bodyEl.firstChild) bodyEl.removeChild(bodyEl.firstChild);
       restoreFocusedElement(elementToFocus);
       callback?.();
-    }, duration);
-  }
-
-  function createOverlay(a11y = {}) {
-    const attrs = {
-      class: 'ax-color-modal-curtain',
-      role: 'dialog',
-      'aria-modal': 'true',
-      tabindex: '-1',
-    };
-    if (a11y.labelledById) attrs['aria-labelledby'] = a11y.labelledById;
-    else if (a11y.ariaLabel) attrs['aria-label'] = a11y.ariaLabel;
-    const overlay = createTag('div', attrs);
-
-    overlay.addEventListener('click', (e) => {
-      if (e.target !== overlay) return;
-      if (Date.now() - openedAt < 500) return;
-      close();
-    });
-
-    return overlay;
-  }
-
-  function createContainer() {
-    return createTag('div', { class: 'ax-color-modal-container' });
-  }
-
-  function createHandle() {
-    return createTag('div', { class: 'ax-color-modal-handle' });
-  }
-
-  function attachSwipeToClose(container) {
-    return addSwipeToClose(container, {
-      contentSelector: '.ax-color-modal-content',
-      draggingClass: 'ax-color-modal-dragging',
-      onClose: close,
-    });
+    }, 300);
   }
 
   function createCloseButton() {
@@ -128,101 +95,131 @@ export function createModalManager() {
     return titleEl;
   }
 
-  function createBody() {
-    return createTag('div', { class: 'ax-color-modal-content' });
+  function initShell() {
+    overlay = createTag('div', {
+      class: 'ax-color-modal-curtain',
+      role: 'dialog',
+      'aria-modal': 'true',
+      tabindex: '-1',
+      'aria-hidden': 'true',
+    });
+    overlay.addEventListener('click', (e) => {
+      if (e.target !== overlay) return;
+      if (Date.now() - openedAt < 500) return;
+      close();
+    });
+
+    container = createTag('div', { class: 'ax-color-modal-container' });
+    bodyEl = createTag('div', { class: 'ax-color-modal-content' });
+
+    container.appendChild(createTag('div', { class: 'ax-color-modal-handle' }));
+    container.appendChild(bodyEl);
+    container.appendChild(createCloseButton());
+    overlay.appendChild(container);
+
+    addSwipeToClose(container, {
+      contentSelector: '.ax-color-modal-content',
+      draggingClass: 'ax-color-modal-dragging',
+      onClose: close,
+    });
+
+    document.body.appendChild(overlay);
   }
 
   async function open(options = {}) {
     await ensureModalStyles();
 
-    if (isOpen) close();
+    if (!overlay) initShell();
+
+    // Cancel any in-progress close animation and reset state.
+    clearTimeout(closeTimeoutId);
+    closeTimeoutId = null;
+    container.classList.remove('ax-color-modal-closing');
+    overlay.classList.remove('ax-color-modal-closing');
+
+    if (isOpen) {
+      isOpen = false;
+      container.classList.remove('ax-color-modal-open');
+      document.body.classList.remove('ax-color-modal-open');
+      escHandler?.release();
+      escHandler = null;
+      focusTrap?.release();
+      focusTrap = null;
+      onCloseCallback?.();
+      onCloseCallback = null;
+    }
+
+    // Clear previous content.
+    while (bodyEl.firstChild) bodyEl.removeChild(bodyEl.firstChild);
 
     const {
       content,
       title = 'Modal',
       showTitle = false,
       onClose,
-      initialFocusSelector,
     } = options;
 
     onCloseCallback = onClose;
-    openOptions = { title, showTitle, content, onClose, initialFocusSelector };
+    openOptions = { title, showTitle, content, onClose };
     openedAt = Date.now();
 
-    const overlay = createOverlay(showTitle
-      ? { labelledById: 'ax-color-modal-title' }
-      : { ariaLabel: title });
-    const container = createContainer();
-    const body = createBody();
-
-    const closeBtn = createCloseButton();
-    container.appendChild(createHandle());
+    // Update a11y attributes and optional title element.
     if (showTitle) {
-      container.appendChild(createTitleEl(title));
+      overlay.setAttribute('aria-labelledby', 'ax-color-modal-title');
+      overlay.removeAttribute('aria-label');
+      let titleEl = container.querySelector('.ax-color-modal-title');
+      if (!titleEl) {
+        titleEl = createTitleEl(title);
+        container.insertBefore(titleEl, bodyEl);
+      } else {
+        titleEl.textContent = title;
+      }
+    } else {
+      overlay.setAttribute('aria-label', title);
+      overlay.removeAttribute('aria-labelledby');
+      container.querySelector('.ax-color-modal-title')?.remove();
     }
-    container.appendChild(body);
-    container.appendChild(closeBtn);
+
+    overlay.style.zIndex = getNextOverlayZIndex();
+    overlay.removeAttribute('aria-hidden');
 
     if (content !== undefined && content !== null) {
       const node = typeof content === 'function' ? content() : content;
       if (typeof node === 'string') {
-        body.textContent = node;
+        bodyEl.textContent = node;
       } else if (node && typeof node.nodeType === 'number') {
-        body.appendChild(node);
+        bodyEl.appendChild(node);
       }
     }
-    if (body.children.length === 0) {
+    if (bodyEl.children.length === 0) {
       const fallback = document.createElement('div');
       fallback.className = 'ax-color-modal-content-fallback';
       fallback.textContent = 'No content provided';
       fallback.setAttribute('role', 'status');
-      body.appendChild(fallback);
+      bodyEl.appendChild(fallback);
     }
 
-    overlay.appendChild(container);
-    overlay.style.zIndex = getNextOverlayZIndex();
     previousActiveElement = saveFocusedElement();
-    document.body.appendChild(overlay);
     document.body.classList.add('ax-color-modal-open');
-
-    currentModal = overlay;
     isOpen = true;
     announceToScreenReader(`${title} modal opened`, 'assertive');
 
-    attachSwipeToClose(container);
     escHandler = handleEscapeClose(overlay, close);
     focusTrap = trapFocus(overlay);
 
-    /* Double rAF: paint at translateY(100%) before .open so slide-up transition runs every time. */
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        container.classList.add('ax-color-modal-open');
-        let focusTarget = null;
-        if (typeof initialFocusSelector === 'function') {
-          focusTarget = initialFocusSelector(body) || null;
-        } else if (typeof initialFocusSelector === 'string') {
-          const el = body.querySelector(initialFocusSelector);
-          if (el && typeof el.focus === 'function') focusTarget = el;
-        }
-        if (!focusTarget) {
-          focusTarget = showTitle
-            ? container.querySelector('#ax-color-modal-title')
-            : overlay;
-        }
-        (focusTarget || overlay).focus();
-      });
-    });
+    /* Force reflow so the browser records translateY(100%) before the open class fires. */
+    // eslint-disable-next-line no-unused-expressions
+    container.getBoundingClientRect();
+    container.classList.add('ax-color-modal-open');
   }
 
   function updateTitle(newTitle) {
-    const titleEl = currentModal?.querySelector('.ax-color-modal-title');
-    if (titleEl) {
-      titleEl.textContent = newTitle;
-    }
+    const titleEl = container?.querySelector('.ax-color-modal-title');
+    if (titleEl) titleEl.textContent = newTitle;
   }
 
   function getBody() {
-    return currentModal?.querySelector('.ax-color-modal-content');
+    return bodyEl;
   }
 
   function checkIsOpen() {
@@ -230,7 +227,19 @@ export function createModalManager() {
   }
 
   function destroy() {
-    if (isOpen) close();
+    clearTimeout(closeTimeoutId);
+    if (isOpen) {
+      isOpen = false;
+      document.body.classList.remove('ax-color-modal-open');
+      escHandler?.release();
+      escHandler = null;
+      focusTrap?.release();
+      focusTrap = null;
+    }
+    overlay?.remove();
+    overlay = null;
+    container = null;
+    bodyEl = null;
   }
 
   async function openPaletteModal(palette = {}) {
@@ -255,14 +264,11 @@ export function createModalManager() {
       title: (palette?.name && String(palette.name)) || 'Palette',
       showTitle: false,
       content: contentView.element,
-      initialFocusSelector: (body) => {
-        contentView.initNav?.();
-        return body.querySelector('.swatch-column');
-      },
       onClose: () => {
         contentView.destroy?.();
       },
     });
+    contentView.initNav?.();
   }
 
   async function openGradientModal(gradient = {}) {
@@ -283,7 +289,6 @@ export function createModalManager() {
         creatorName,
         creatorImageUrl,
       }),
-      initialFocusSelector: '.gradient-editor-handle',
     });
   }
 

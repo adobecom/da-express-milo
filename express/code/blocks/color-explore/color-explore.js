@@ -194,6 +194,32 @@ function navigateToPaletteEditor(palette = {}) {
   window.location.assign(destination);
 }
 
+function mergeLoadMoreData(currentData, moreData) {
+  if (!Array.isArray(moreData) || moreData.length === 0) {
+    return currentData;
+  }
+  if (!Array.isArray(currentData) || currentData.length === 0) {
+    return moreData;
+  }
+  if (moreData.length >= currentData.length) {
+    return moreData;
+  }
+
+  const knownIds = new Set(
+    currentData
+      .map((item) => item?.id)
+      .filter(Boolean),
+  );
+  const delta = moreData.filter((item) => {
+    const id = item?.id;
+    if (!id || knownIds.has(id)) return false;
+    knownIds.add(id);
+    return true;
+  });
+
+  return delta.length > 0 ? [...currentData, ...delta] : currentData;
+}
+
 async function createBlockLoadMoreControl(container, onClick, options = {}) {
   const { iconSize = 'xl' } = options;
   await loadIconsRail();
@@ -492,15 +518,10 @@ export default async function decorate(block) {
           );
 
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
-            const nextTarget = Math.min(
-              visibleCount + config.loadMoreIncrement,
-              config.maxItems || Number.POSITIVE_INFINITY,
-            );
+            const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
             if (nextTarget > allData.length) {
               const moreData = await activeDataService.loadMore();
-              if (Array.isArray(moreData)) {
-                allData = moreData;
-              }
+              allData = mergeLoadMoreData(allData, moreData);
             }
             visibleCount = Math.min(nextTarget, allData.length);
             await activeRenderer.update(allData.slice(0, visibleCount));
@@ -579,15 +600,10 @@ export default async function decorate(block) {
           );
 
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
-            const nextTarget = Math.min(
-              visibleCount + config.loadMoreIncrement,
-              config.maxItems || Number.POSITIVE_INFINITY,
-            );
+            const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
             if (nextTarget > allData.length) {
               const moreData = await activeDataService.loadMore();
-              if (Array.isArray(moreData)) {
-                allData = moreData;
-              }
+              allData = mergeLoadMoreData(allData, moreData);
             }
             visibleCount = Math.min(nextTarget, allData.length);
             activeRenderer.update(allData.slice(0, visibleCount));
@@ -661,15 +677,10 @@ export default async function decorate(block) {
       await renderer.render?.(container);
       const loadMoreControl = !isSwatchesMode(config)
         ? await createBlockLoadMoreControl(container, async () => {
-          const nextTarget = Math.min(
-            visibleCount + config.loadMoreIncrement,
-            config.maxItems || Number.POSITIVE_INFINITY,
-          );
+          const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
           if (nextTarget > allData.length) {
             const moreData = await dataService.loadMore();
-            if (Array.isArray(moreData)) {
-              allData = moreData;
-            }
+            allData = mergeLoadMoreData(allData, moreData);
           }
           visibleCount = Math.min(nextTarget, allData.length);
           renderer.update(allData.slice(0, visibleCount));
