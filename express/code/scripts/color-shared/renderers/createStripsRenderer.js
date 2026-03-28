@@ -116,17 +116,7 @@ function setupPaletteGridNav(gridEl) {
       const btns = getCardBtns(e.target);
       if (btns.length) {
         gridNavEnabled = false;
-        btns[0].setAttribute('tabindex', '0');
-        btns[0].focus();
-      }
-      return;
-    }
-
-    if (e.key === 'Tab' && !e.shiftKey && isCard && gridNavEnabled) {
-      const btns = getCardBtns(e.target);
-      if (btns.length) {
-        e.preventDefault();
-        gridNavEnabled = false;
+        btns.forEach((b) => b.setAttribute('tabindex', '-1'));
         btns[0].setAttribute('tabindex', '0');
         btns[0].focus();
       }
@@ -135,16 +125,39 @@ function setupPaletteGridNav(gridEl) {
 
     if (e.key === 'Tab' && btn && parentCard) {
       const btns = getCardBtns(parentCard);
-      if (btns.length > 1) {
+      if (!btns.length) return;
+      const cur = btns.indexOf(btn);
+      if (cur < 0) return;
+
+      if (!e.shiftKey && cur < btns.length - 1) {
         e.preventDefault();
-        const cur = btns.indexOf(btn);
-        const next = e.shiftKey
-          ? (cur - 1 + btns.length) % btns.length
-          : (cur + 1) % btns.length;
         btns[cur].setAttribute('tabindex', '-1');
+        const next = cur + 1;
         btns[next].setAttribute('tabindex', '0');
         btns[next].focus();
+        return;
       }
+
+      if (e.shiftKey && cur > 0) {
+        e.preventDefault();
+        btns[cur].setAttribute('tabindex', '-1');
+        const prev = cur - 1;
+        btns[prev].setAttribute('tabindex', '0');
+        btns[prev].focus();
+        return;
+      }
+
+      if (e.shiftKey && cur === 0) {
+        e.preventDefault();
+        gridNavEnabled = true;
+        btns.forEach((b) => b.setAttribute('tabindex', '-1'));
+        parentCard.focus();
+        return;
+      }
+
+      // Forward Tab on the last action button exits card actions and continues normal tab order.
+      gridNavEnabled = true;
+      btns.forEach((b) => b.setAttribute('tabindex', '-1'));
       return;
     }
 
