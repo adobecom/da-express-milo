@@ -38,6 +38,7 @@ function setupPaletteGridNav(gridEl) {
   let cardCache = [];
   const getCards = () => cardCache;
   const getCardBtns = (card) => Array.from(card.querySelectorAll('.color-card-action-btn'));
+  const gridScope = gridEl.closest('.color-explore-container') || gridEl.parentElement || gridEl;
 
   let focusedIdx = 0;
   let gridNavEnabled = true;
@@ -94,6 +95,22 @@ function setupPaletteGridNav(gridEl) {
       card.setAttribute('tabindex', i === focusedIdx ? '0' : '-1');
       getCardBtns(card).forEach((btn) => btn.setAttribute('tabindex', '-1'));
     });
+  }
+
+  function handleScopeKeydown(e) {
+    const loadMoreBtn = e.target?.closest?.('.load-more-container[data-owner="color-explore"] .load-more-btn');
+    if (!loadMoreBtn) return;
+    if (!(e.key === 'Tab' && e.shiftKey)) return;
+
+    const cards = getCards();
+    if (!cards.length) return;
+    const safeIndex = Math.max(0, Math.min(focusedIdx, cards.length - 1));
+    const targetCard = cards[safeIndex];
+    if (!targetCard) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    targetCard.focus();
   }
 
   function moveTo(index) {
@@ -229,8 +246,15 @@ function setupPaletteGridNav(gridEl) {
     }, 0);
   });
 
+  gridScope.addEventListener('keydown', handleScopeKeydown, true);
+
   initTabIndexes();
-  return { reinit: initTabIndexes };
+  return {
+    reinit: initTabIndexes,
+    destroy: () => {
+      gridScope.removeEventListener('keydown', handleScopeKeydown, true);
+    },
+  };
 }
 
 export function createStripsRenderer(options) {
@@ -242,6 +266,7 @@ export function createStripsRenderer(options) {
   let searchAdapter = null;
   let resultsCountEl = null;
   let gridNavReinit = null;
+  let gridNavDestroy = null;
   const paletteStrips = [];
   const tooltipControllers = new Map();
   const titleGuardCleanups = new Map();
@@ -337,7 +362,10 @@ export function createStripsRenderer(options) {
       grid.appendChild(card);
     });
 
-    gridNavReinit = setupPaletteGridNav(grid).reinit;
+    gridNavDestroy?.();
+    const gridNav = setupPaletteGridNav(grid);
+    gridNavReinit = gridNav.reinit;
+    gridNavDestroy = gridNav.destroy;
     return grid;
   }
 
@@ -478,6 +506,9 @@ export function createStripsRenderer(options) {
   function destroy() {
     tooltipInitToken += 1;
     clearGridTooltips();
+    gridNavDestroy?.();
+    gridNavDestroy = null;
+    gridNavReinit = null;
     searchAdapter?.destroy();
     paletteStrips.forEach((strip) => strip.destroy?.());
     paletteStrips.length = 0;
