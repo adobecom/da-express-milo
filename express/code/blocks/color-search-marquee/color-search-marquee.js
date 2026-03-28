@@ -7,6 +7,7 @@ import { getIconElementDeprecated, addTempWrapperDeprecated, getMetadata } from 
 const CHEVRON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" fill="none">
   <path d="M8.5 4.5L15 11L8.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
+const STICKY_HIDE_DELAY_PX = 100;
 
 function parseTagsRow(row) {
   const text = row?.textContent?.trim();
@@ -106,6 +107,79 @@ function createEmptyResultElements(block, afterElement) {
   return { container, heading, description };
 }
 
+export function findRelatedColorExploreBlock(marqueeBlock) {
+  const section = marqueeBlock.closest('.section');
+  let cursor = section?.nextElementSibling;
+
+  while (cursor) {
+    const colorExplore = cursor.querySelector('.color-explore');
+    if (colorExplore) return colorExplore;
+    cursor = cursor.nextElementSibling;
+  }
+
+  return document.querySelector('.color-explore');
+}
+
+export function setupStickyBounds(block, searchBar) {
+  if (
+    typeof searchBar?.initStickyBehavior !== 'function'
+    || typeof searchBar?.destroyStickyBehavior !== 'function'
+  ) {
+    return () => {};
+  }
+
+  const colorExploreBlock = findRelatedColorExploreBlock(block);
+  if (!colorExploreBlock) return () => {};
+
+  const endSentinel = document.createElement('span');
+  endSentinel.dataset.searchBarEndSentinel = 'true';
+  endSentinel.setAttribute('aria-hidden', 'true');
+  endSentinel.style.cssText = 'display:block;inline-size:1px;block-size:1px;';
+  colorExploreBlock.after(endSentinel);
+
+  let stickyEnabled = true;
+
+  const setStickyEnabled = (nextEnabled) => {
+    if (nextEnabled === stickyEnabled) return;
+    stickyEnabled = nextEnabled;
+
+    if (stickyEnabled) {
+      searchBar.initStickyBehavior();
+      return;
+    }
+
+    searchBar.hideSuggestions?.();
+    searchBar.destroyStickyBehavior();
+  };
+
+  const evaluateStickyGate = () => {
+    const endRect = endSentinel.getBoundingClientRect();
+    const hideThreshold = Math.max(0, window.innerHeight - STICKY_HIDE_DELAY_PX);
+    const shouldDisableSticky = endRect.top <= hideThreshold;
+    setStickyEnabled(!shouldDisableSticky);
+  };
+
+  const endObserver = new IntersectionObserver(() => {
+    evaluateStickyGate();
+  }, {
+    root: null,
+    rootMargin: `0px 0px -${STICKY_HIDE_DELAY_PX}px 0px`,
+    threshold: 0,
+  });
+
+  endObserver.observe(endSentinel);
+  window.addEventListener('resize', evaluateStickyGate, { passive: true });
+
+  evaluateStickyGate();
+
+  return () => {
+    endObserver.disconnect();
+    window.removeEventListener('resize', evaluateStickyGate);
+    endSentinel.remove();
+    setStickyEnabled(true);
+  };
+}
+
 export default async function decorate(block) {
   if (!block.parentElement?.classList.contains('search-marquee-wrapper')) {
     addTempWrapperDeprecated(block, 'search-marquee');
@@ -189,6 +263,7 @@ export default async function decorate(block) {
   );
 
   block.append(searchBar.element);
+  const cleanupStickyBounds = setupStickyBounds(block, searchBar);
 
   const emptyResult = createEmptyResultElements(block, searchBar.element);
 
@@ -242,6 +317,7 @@ export default async function decorate(block) {
       emptyResult.description.textContent = '';
     },
     destroy: () => {
+      cleanupStickyBounds();
       cleanupPopState();
       searchBar.destroy();
     },
