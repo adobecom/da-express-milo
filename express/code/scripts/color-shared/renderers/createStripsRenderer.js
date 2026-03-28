@@ -45,6 +45,46 @@ function setupPaletteGridNav(gridEl) {
   let actionReturnFocusEl = null;
 
   const ARROW_KEYS = new Set(['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End']);
+  const FOCUSABLE_SELECTOR = [
+    'a[href]',
+    'button:not([disabled])',
+    'input:not([disabled]):not([type="hidden"])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])',
+  ].join(', ');
+
+  function isFocusableVisible(el) {
+    if (!el || el.hidden) return false;
+    const style = window.getComputedStyle(el);
+    if (style.display === 'none' || style.visibility === 'hidden') return false;
+    const rect = el.getBoundingClientRect();
+    return rect.width > 0 || rect.height > 0;
+  }
+
+  function focusOutsideGrid(fromEl, direction = 1) {
+    const all = Array.from(document.querySelectorAll(FOCUSABLE_SELECTOR))
+      .filter((el) => isFocusableVisible(el));
+    const start = Math.max(0, all.indexOf(fromEl));
+
+    if (direction > 0) {
+      for (let i = start + 1; i < all.length; i += 1) {
+        const candidate = all[i];
+        if (gridEl.contains(candidate)) continue;
+        candidate.focus();
+        return true;
+      }
+      return false;
+    }
+
+    for (let i = start - 1; i >= 0; i -= 1) {
+      const candidate = all[i];
+      if (gridEl.contains(candidate)) continue;
+      candidate.focus();
+      return true;
+    }
+    return false;
+  }
 
   function initTabIndexes() {
     cardCache = Array.from(gridEl.querySelectorAll('.color-card'));
@@ -122,6 +162,15 @@ function setupPaletteGridNav(gridEl) {
         btns.forEach((b) => b.setAttribute('tabindex', '-1'));
         btns[0].setAttribute('tabindex', '0');
         btns[0].focus();
+      }
+      return;
+    }
+
+    if (e.key === 'Tab' && isCard && gridNavEnabled) {
+      const moved = focusOutsideGrid(e.target, e.shiftKey ? -1 : 1);
+      if (moved) {
+        e.preventDefault();
+        e.stopPropagation();
       }
       return;
     }
