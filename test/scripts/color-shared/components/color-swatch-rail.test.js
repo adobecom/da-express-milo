@@ -90,4 +90,93 @@ describe('color-swatch-rail tint bands', () => {
     rail.tintIndex = null;
     expect(rail._resolveTintIndex()).to.equal(null);
   });
+
+  it('builds accessible tint band labels with tone and position', () => {
+    const rail = createRail();
+    expect(rail._getTintBandA11yLabel({ id: 'base', hex: '#1900AB' }, 3, 7))
+      .to.equal('Base color, 4 of 7, #1900AB');
+    expect(rail._getTintBandA11yLabel({ id: 'tint-2', hex: '#7A75D5' }, 1, 7))
+      .to.equal('Tint 2, 2 of 7, #7A75D5');
+    expect(rail._getTintBandA11yLabel({ id: 'shade-3', hex: '#0A0044' }, 6, 7))
+      .to.equal('Shade 3, 7 of 7, #0A0044');
+  });
+
+  it('traps tab focus within tint bands', () => {
+    const rail = createRail();
+    const tintBands = document.createElement('div');
+    tintBands.className = 'tint-bands';
+
+    const buttons = Array.from({ length: 3 }).map(() => {
+      const btn = document.createElement('button');
+      btn.className = 'tint-band-btn swatch-column-focusable';
+      tintBands.appendChild(btn);
+      return btn;
+    });
+
+    let focusedIndex = -1;
+    buttons.forEach((btn, idx) => {
+      btn.focus = () => { focusedIndex = idx; };
+    });
+
+    let prevented = false;
+    const trapped = rail._trapTabInRail({
+      key: 'Tab',
+      target: buttons[1],
+      shiftKey: false,
+      preventDefault: () => { prevented = true; },
+    });
+
+    expect(trapped).to.equal(true);
+    expect(prevented).to.equal(true);
+    expect(focusedIndex).to.equal(2);
+
+    prevented = false;
+    const trappedShift = rail._trapTabInRail({
+      key: 'Tab',
+      target: buttons[0],
+      shiftKey: true,
+      preventDefault: () => { prevented = true; },
+    });
+
+    expect(trappedShift).to.equal(true);
+    expect(prevented).to.equal(true);
+    expect(focusedIndex).to.equal(2);
+  });
+
+  it('starts tint focus trap on first band even when another is active', () => {
+    const rail = createRail();
+    const column = document.createElement('div');
+
+    const iconBtn = document.createElement('button');
+    iconBtn.className = 'icon-button swatch-column-focusable';
+    iconBtn.setAttribute('tabindex', '0');
+    column.appendChild(iconBtn);
+
+    const tintBands = document.createElement('div');
+    tintBands.className = 'tint-bands';
+    column.appendChild(tintBands);
+
+    const buttons = Array.from({ length: 7 }).map((_, idx) => {
+      const btn = document.createElement('button');
+      btn.className = 'tint-band-btn swatch-column-focusable';
+      btn.setAttribute('tabindex', '-1');
+      btn.setAttribute('aria-checked', idx === 4 ? 'true' : 'false');
+      tintBands.appendChild(btn);
+      return btn;
+    });
+
+    let focusedIndex = -1;
+    buttons.forEach((btn, idx) => {
+      btn.focus = () => { focusedIndex = idx; };
+    });
+
+    const activated = rail._activateTintBandFocusTrap(column);
+
+    expect(activated).to.equal(true);
+    expect(focusedIndex).to.equal(0);
+    expect(iconBtn.getAttribute('tabindex')).to.equal('-1');
+    buttons.forEach((btn) => {
+      expect(btn.getAttribute('tabindex')).to.equal('0');
+    });
+  });
 });

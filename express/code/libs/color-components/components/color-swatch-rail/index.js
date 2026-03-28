@@ -613,6 +613,65 @@ export class ColorSwatchRail extends LitElement {
     });
   }
 
+  _getTintBandA11yLabel(band, bandIndex, totalBands) {
+    const hex = this._normalizeHex(band?.hex) || '#808080';
+    const id = String(band?.id || '');
+    let toneLabel = 'Tone';
+    if (id === 'base') {
+      toneLabel = 'Base color';
+    } else if (id.startsWith('tint-')) {
+      toneLabel = `Tint ${id.split('-')[1] || ''}`.trim();
+    } else if (id.startsWith('shade-')) {
+      toneLabel = `Shade ${id.split('-')[1] || ''}`.trim();
+    }
+    return `${toneLabel}, ${bandIndex + 1} of ${totalBands}, ${hex}`;
+  }
+
+  _getTintBandButtons(scope) {
+    return [...(scope?.querySelectorAll?.('.tint-band-btn.swatch-column-focusable') || [])];
+  }
+
+  _activateTintBandFocusTrap(column) {
+    const tintButtons = this._getTintBandButtons(column);
+    if (!tintButtons.length) return false;
+
+    const allFocusables = [...column.querySelectorAll('.swatch-column-focusable')];
+    allFocusables.forEach((el) => el.setAttribute('tabindex', '-1'));
+    tintButtons.forEach((el) => el.setAttribute('tabindex', '0'));
+
+    const firstTintButton = tintButtons.find((el) => !el.disabled) || tintButtons[0];
+    firstTintButton?.focus();
+    return true;
+  }
+
+  _handleTintBandKeydown(index, bandIndex, event) {
+    const key = event?.key;
+    if (!key) return;
+    const navKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Home', 'End'];
+    if (!navKeys.includes(key)) return;
+
+    const container = event.currentTarget?.closest?.('.tint-bands');
+    if (!container) return;
+    const buttons = [...container.querySelectorAll('.tint-band-btn.swatch-column-focusable')];
+    if (!buttons.length) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    let nextIndex = bandIndex;
+    if (key === 'Home') {
+      nextIndex = 0;
+    } else if (key === 'End') {
+      nextIndex = buttons.length - 1;
+    } else if (key === 'ArrowRight' || key === 'ArrowDown') {
+      nextIndex = (bandIndex + 1) % buttons.length;
+    } else if (key === 'ArrowLeft' || key === 'ArrowUp') {
+      nextIndex = (bandIndex - 1 + buttons.length) % buttons.length;
+    }
+
+    buttons[nextIndex]?.focus();
+  }
+
   _handleTintBandSelect(index, band, event) {
     event?.stopPropagation?.();
     if (!band?.hex || !this.controller?.setState) return;
@@ -623,6 +682,14 @@ export class ColorSwatchRail extends LitElement {
     if (!nextHex) return;
     swatches[index] = { ...swatches[index], hex: nextHex };
     this.controller.setState({ swatches, tintIndex: null });
+    requestAnimationFrame(() => {
+      const column = this.shadowRoot?.querySelector?.(`.swatch-column[data-swatch-index="${index}"]`);
+      if (!column) return;
+      column.querySelectorAll('.swatch-column-focusable').forEach((el) => el.setAttribute('tabindex', '-1'));
+      column.setAttribute('tabindex', '0');
+      column.focus();
+    });
+    announceToScreenReader(`Tint applied. Color ${index + 1} set to ${nextHex}.`, 'assertive', { immediate: true });
     this.dispatchEvent(new CustomEvent('color-swatch-rail-tint-apply', {
       bubbles: true,
       composed: true,
@@ -651,6 +718,12 @@ export class ColorSwatchRail extends LitElement {
     if (this.controller?.setState) {
       this.controller.setState({ tintIndex: index });
     }
+    requestAnimationFrame(() => {
+      const column = this.shadowRoot?.querySelector?.(`.swatch-column[data-swatch-index="${index}"]`);
+      if (!column) return;
+      this._activateTintBandFocusTrap(column);
+      announceToScreenReader(`Tint options opened for color ${index + 1}.`, 'assertive', { immediate: true });
+    });
     this.dispatchEvent(new CustomEvent('color-swatch-rail-tint-select', {
       bubbles: true,
       composed: true,
@@ -881,6 +954,7 @@ export class ColorSwatchRail extends LitElement {
       const focusables = [...column.querySelectorAll('.swatch-column-focusable')];
       if (!focusables.length) return;
       column.setAttribute('tabindex', '-1');
+      if (this._activateTintBandFocusTrap(column)) return;
       focusables.forEach((el) => el.setAttribute('tabindex', '0'));
       const firstVisible = getFirstFocusableInGroup(column, '.swatch-column-focusable') || focusables[0];
       firstVisible.focus();
@@ -901,6 +975,23 @@ export class ColorSwatchRail extends LitElement {
     if (e.key !== 'Tab') return false;
     const isFocusable = e.target?.classList?.contains('swatch-column-focusable');
     if (!isFocusable) return false;
+
+    const tintContainer = e.target?.closest?.('.tint-bands');
+    const isTintBand = e.target?.classList?.contains('tint-band-btn');
+    if (tintContainer && isTintBand) {
+      const tintButtons = this._getTintBandButtons(tintContainer);
+      if (tintButtons.length) {
+        e.preventDefault();
+        const currentIndex = tintButtons.indexOf(e.target);
+        const step = e.shiftKey ? -1 : 1;
+        const fallbackIndex = e.shiftKey ? tintButtons.length - 1 : 0;
+        const startIndex = currentIndex === -1 ? fallbackIndex : currentIndex;
+        const nextIndex = (startIndex + step + tintButtons.length) % tintButtons.length;
+        tintButtons[nextIndex]?.focus();
+        return true;
+      }
+    }
+
     e.preventDefault();
     return true;
   }
@@ -959,7 +1050,11 @@ export class ColorSwatchRail extends LitElement {
     }
 
     if (!['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'].includes(e.key) || !col || !isFocusable) return;
-    const focusables = [...col.querySelectorAll('.swatch-column-focusable')];
+    const tintContainer = e.target?.closest?.('.tint-bands');
+    const isTintBand = e.target?.classList?.contains('tint-band-btn');
+    const focusables = (tintContainer && isTintBand)
+      ? this._getTintBandButtons(tintContainer)
+      : [...col.querySelectorAll('.swatch-column-focusable')];
     const curr = focusables.indexOf(e.target);
     if (curr === -1) return;
     e.preventDefault();
@@ -1111,8 +1206,12 @@ export class ColorSwatchRail extends LitElement {
           @dragleave=${this._handleDragLeave}
           @drop=${this._handleDrop}>
           ${isTintSelected ? html`
-            <div class="tint-bands" role="group" aria-label="Tint and shade options">
-              ${tintBands.map((band) => {
+            <div
+              class="tint-bands"
+              role="radiogroup"
+              aria-label="Tint and shade options for color ${index + 1}"
+              aria-orientation=${isStacked ? 'horizontal' : 'vertical'}>
+              ${tintBands.map((band, bandIndex) => {
                 const isActiveTone = this._normalizeHex(band.hex) === this._normalizeHex(swatch.hex);
                 return html`
                   <button
@@ -1120,9 +1219,12 @@ export class ColorSwatchRail extends LitElement {
                     class="tint-band-btn swatch-column-focusable ${isActiveTone ? 'is-active' : ''}"
                     tabindex="-1"
                     style="--tint-band-color: ${band.hex}"
+                    role="radio"
+                    aria-checked=${isActiveTone ? 'true' : 'false'}
+                    @keydown=${(ev) => this._handleTintBandKeydown(index, bandIndex, ev)}
                     @click=${(ev) => this._handleTintBandSelect(index, band, ev)}
-                    aria-label="Set tint ${band.hex}"
-                    title="Set tint ${band.hex}"
+                    aria-label=${this._getTintBandA11yLabel(band, bandIndex, tintBands.length)}
+                    title=${this._getTintBandA11yLabel(band, bandIndex, tintBands.length)}
                   ></button>
                 `;
               })}

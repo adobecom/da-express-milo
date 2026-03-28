@@ -92,6 +92,7 @@ export const style = css`
     inset: 0;
     display: flex;
     flex-direction: column;
+    gap: 0;
     z-index: 5;
     overflow: hidden;
     pointer-events: none;
@@ -109,20 +110,12 @@ export const style = css`
     pointer-events: auto;
   }
 
-  .tint-band-btn + .tint-band-btn {
-    border-top: 1px solid rgba(0, 0, 0, 0.14);
-  }
-
-  .swatch-column[data-contrast="dark"] .tint-band-btn + .tint-band-btn {
-    border-top: 1px solid rgba(255, 255, 255, 0.24);
-  }
-
   .tint-band-btn.is-active {
-    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.85);
+    box-shadow: inset 0 0 0 999px rgba(255, 255, 255, 0.14);
   }
 
   .swatch-column[data-contrast="dark"] .tint-band-btn.is-active {
-    box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.55);
+    box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.2);
   }
 
   .tint-band-btn:focus-visible {
@@ -130,6 +123,16 @@ export const style = css`
     outline-offset: -2px;
     position: relative;
     z-index: 1;
+  }
+
+  .swatch-rail[data-orientation="stacked"] .tint-bands {
+    flex-direction: row;
+    border-radius: inherit;
+  }
+
+  .swatch-rail[data-orientation="stacked"] .tint-band-btn {
+    width: auto;
+    height: 100%;
   }
 
   .swatch-column:first-child {
