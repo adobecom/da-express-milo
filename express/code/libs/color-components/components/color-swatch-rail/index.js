@@ -22,6 +22,15 @@ const MAX_SWATCHES_FOUR_ROWS = 20;
 const FOUR_ROWS_COLS = 5;
 const FOUR_ROWS_ROWS = 4;
 const DEFAULT_VERTICAL_MAX_PER_ROW = 5;
+const TINT_BAND_STOPS = [
+  { id: 'tint-1', mode: 'white', baseWeight: 0.2 },
+  { id: 'tint-2', mode: 'white', baseWeight: 0.4 },
+  { id: 'tint-3', mode: 'white', baseWeight: 0.7 },
+  { id: 'base', mode: 'base', baseWeight: 1 },
+  { id: 'shade-1', mode: 'black', baseWeight: 0.75 },
+  { id: 'shade-2', mode: 'black', baseWeight: 0.55 },
+  { id: 'shade-3', mode: 'black', baseWeight: 0.35 },
+];
 
 
 const DEFAULT_FEATURES = {
@@ -546,7 +555,83 @@ export class ColorSwatchRail extends LitElement {
     if (Number.isInteger(this.tintIndex) && this.tintIndex >= 0 && this.tintIndex < this.swatches.length) {
       return this.tintIndex;
     }
-    return this.swatches.length > 0 ? 0 : null;
+    return null;
+  }
+
+  _normalizeHex(hex) {
+    const raw = String(hex || '').trim().replace(/^#/, '');
+    const expanded = raw.length === 3 ? raw.split('').map((c) => c + c).join('') : raw;
+    if (!/^[0-9a-fA-F]{6}$/.test(expanded)) return null;
+    return `#${expanded.toUpperCase()}`;
+  }
+
+  _hexToRgb(hex) {
+    const normalized = this._normalizeHex(hex);
+    if (!normalized) return null;
+    return [
+      Number.parseInt(normalized.slice(1, 3), 16),
+      Number.parseInt(normalized.slice(3, 5), 16),
+      Number.parseInt(normalized.slice(5, 7), 16),
+    ];
+  }
+
+  _rgbToHex(r, g, b) {
+    const clamp = (v) => Math.max(0, Math.min(255, Math.round(v)));
+    const toHex = (v) => clamp(v).toString(16).toUpperCase().padStart(2, '0');
+    return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+  }
+
+  _mixHex(baseHex, mixHex, mixWeight = 0.5) {
+    const base = this._hexToRgb(baseHex);
+    const mix = this._hexToRgb(mixHex);
+    if (!base || !mix) return this._normalizeHex(baseHex) || '#808080';
+    const w = Math.max(0, Math.min(1, mixWeight));
+    const inv = 1 - w;
+    return this._rgbToHex(
+      (base[0] * inv) + (mix[0] * w),
+      (base[1] * inv) + (mix[1] * w),
+      (base[2] * inv) + (mix[2] * w),
+    );
+  }
+
+  _buildTintBands(baseHex) {
+    const normalized = this._normalizeHex(baseHex) || '#808080';
+    return TINT_BAND_STOPS.map((stop) => {
+      if (stop.mode === 'base') {
+        return { ...stop, hex: normalized };
+      }
+      if (stop.mode === 'white') {
+        return {
+          ...stop,
+          hex: this._mixHex(normalized, '#FFFFFF', 1 - stop.baseWeight),
+        };
+      }
+      return {
+        ...stop,
+        hex: this._mixHex(normalized, '#000000', 1 - stop.baseWeight),
+      };
+    });
+  }
+
+  _handleTintBandSelect(index, band, event) {
+    event?.stopPropagation?.();
+    if (!band?.hex || !this.controller?.setState) return;
+    if ((this.lockedByIndex || new Set()).has(index)) return;
+    const swatches = [...this.swatches];
+    if (!swatches[index]) return;
+    const nextHex = this._normalizeHex(band.hex);
+    if (!nextHex) return;
+    swatches[index] = { ...swatches[index], hex: nextHex };
+    this.controller.setState({ swatches, tintIndex: null });
+    this.dispatchEvent(new CustomEvent('color-swatch-rail-tint-apply', {
+      bubbles: true,
+      composed: true,
+      detail: {
+        index,
+        tone: band.id,
+        hex: nextHex,
+      },
+    }));
   }
 
   _handleTintSelect(index, anchorEl = null) {
@@ -646,7 +731,7 @@ export class ColorSwatchRail extends LitElement {
   _handleDragStart(index, e) {
     if (!this._features.drag) return;
     if ((this.lockedByIndex || new Set()).has(index)) return;
-    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge')) return;
+    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge, .tint-band-btn')) return;
     this._dragFromIndex = index;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', String(index));
@@ -712,7 +797,7 @@ export class ColorSwatchRail extends LitElement {
     const idx = col.getAttribute('data-swatch-index');
     if (idx === null || idx === '') return;
     if ((this.lockedByIndex || new Set()).has(Number(idx))) return;
-    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge')) return;
+    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge, .tint-band-btn')) return;
     e.preventDefault();
     this._touchDragFromIndex = Number(idx);
     col.classList.add('swatch-column--dragging');
@@ -938,6 +1023,7 @@ export class ColorSwatchRail extends LitElement {
       const showTintSelect = tintMode && !editDisabled && !effectiveLocked;
       const resolvedTintIndex = this._resolveTintIndex();
       const isTintSelected = tintMode && resolvedTintIndex != null && index === resolvedTintIndex;
+      const tintBands = isTintSelected ? this._buildTintBands(swatch.hex) : [];
       
       
       const showHexCopyForThisSwatch = !(orientation === 'four-rows' && this.hexCopyFirstRowOnly && index >= FOUR_ROWS_COLS);
@@ -1011,7 +1097,7 @@ export class ColorSwatchRail extends LitElement {
       return html`
         <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${tintMode ? 'swatch-column--tint-mode' : ''} ${isTintSelected ? 'swatch-column--tint-selected' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''}"
           data-contrast="${textColor === '#ffffff' ? 'dark' : 'light'}"
-          style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${textColor === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
+          style="background-color: ${swatch.hex}; --swatch-base-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${textColor === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
           data-swatch-index="${index}"
           tabindex="0"
           role="group"
@@ -1024,6 +1110,24 @@ export class ColorSwatchRail extends LitElement {
           @dragover=${this._handleDragOver}
           @dragleave=${this._handleDragLeave}
           @drop=${this._handleDrop}>
+          ${isTintSelected ? html`
+            <div class="tint-bands" role="group" aria-label="Tint and shade options">
+              ${tintBands.map((band) => {
+                const isActiveTone = this._normalizeHex(band.hex) === this._normalizeHex(swatch.hex);
+                return html`
+                  <button
+                    type="button"
+                    class="tint-band-btn swatch-column-focusable ${isActiveTone ? 'is-active' : ''}"
+                    tabindex="-1"
+                    style="--tint-band-color: ${band.hex}"
+                    @click=${(ev) => this._handleTintBandSelect(index, band, ev)}
+                    aria-label="Set tint ${band.hex}"
+                    title="Set tint ${band.hex}"
+                  ></button>
+                `;
+              })}
+            </div>
+          ` : ''}
           ${!isStacked ? html`
             <div class="top-actions-row">
               ${topLeftIcons}

@@ -38,12 +38,98 @@ export const style = css`
     flex-direction: column;
     padding: var(--spacing-200);
     position: relative;
+    isolation: isolate;
     transition: flex-grow 0.2s ease;
     box-sizing: border-box;
   }
 
+  .swatch-column--tint-mode {
+    --swatch-base-color: #808080;
+    --swatch-tint-overlay: rgba(0, 0, 0, 0.18);
+  }
+
+  .swatch-column--tint-mode[data-contrast="dark"] {
+    --swatch-tint-overlay: rgba(255, 255, 255, 0.24);
+  }
+
   .swatch-column--tint-selected {
+    background-image: linear-gradient(var(--swatch-tint-overlay), var(--swatch-tint-overlay));
     box-shadow: inset 0 0 0 2px var(--Palette-gray-1000), inset 0 0 0 4px var(--Palette-gray-25);
+  }
+
+  @supports (background: color-mix(in srgb, black, white)) {
+    .swatch-column--tint-selected {
+      background-image: linear-gradient(
+        to bottom,
+        color-mix(in srgb, var(--swatch-base-color) 20%, white) 0%,
+        color-mix(in srgb, var(--swatch-base-color) 20%, white) 14.29%,
+        color-mix(in srgb, var(--swatch-base-color) 40%, white) 14.29%,
+        color-mix(in srgb, var(--swatch-base-color) 40%, white) 28.57%,
+        color-mix(in srgb, var(--swatch-base-color) 70%, white) 28.57%,
+        color-mix(in srgb, var(--swatch-base-color) 70%, white) 42.86%,
+        var(--swatch-base-color) 42.86%,
+        var(--swatch-base-color) 57.14%,
+        color-mix(in srgb, var(--swatch-base-color) 75%, black) 57.14%,
+        color-mix(in srgb, var(--swatch-base-color) 75%, black) 71.43%,
+        color-mix(in srgb, var(--swatch-base-color) 55%, black) 71.43%,
+        color-mix(in srgb, var(--swatch-base-color) 55%, black) 85.71%,
+        color-mix(in srgb, var(--swatch-base-color) 35%, black) 85.71%,
+        color-mix(in srgb, var(--swatch-base-color) 35%, black) 100%
+      );
+    }
+  }
+
+  .swatch-column--tint-selected .icon-button--edit-tint {
+    background-color: rgba(255, 255, 255, 0.28);
+  }
+
+  .swatch-column--tint-selected[data-contrast="dark"] .icon-button--edit-tint {
+    background-color: rgba(0, 0, 0, 0.25);
+  }
+
+  .tint-bands {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 5;
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .tint-band-btn {
+    flex: 1 1 0;
+    min-height: 0;
+    border: 0;
+    padding: 0;
+    margin: 0;
+    width: 100%;
+    background-color: var(--tint-band-color);
+    cursor: pointer;
+    pointer-events: auto;
+  }
+
+  .tint-band-btn + .tint-band-btn {
+    border-top: 1px solid rgba(0, 0, 0, 0.14);
+  }
+
+  .swatch-column[data-contrast="dark"] .tint-band-btn + .tint-band-btn {
+    border-top: 1px solid rgba(255, 255, 255, 0.24);
+  }
+
+  .tint-band-btn.is-active {
+    box-shadow: inset 0 0 0 2px rgba(255, 255, 255, 0.85);
+  }
+
+  .swatch-column[data-contrast="dark"] .tint-band-btn.is-active {
+    box-shadow: inset 0 0 0 2px rgba(0, 0, 0, 0.55);
+  }
+
+  .tint-band-btn:focus-visible {
+    outline: 2px solid var(--color-blue-800);
+    outline-offset: -2px;
+    position: relative;
+    z-index: 1;
   }
 
   .swatch-column:first-child {
@@ -379,6 +465,8 @@ export const style = css`
     justify-content: space-between;
     width: 100%;
     gap: 8px;
+    position: relative;
+    z-index: 2;
   }
 
   .swatch-rail[data-orientation="stacked"] .bottom-info--stacked {
@@ -434,6 +522,7 @@ export const style = css`
     justify-content: space-between;
     align-items: flex-start;
     pointer-events: none;
+    z-index: 2;
   }
 
   .top-actions {
@@ -761,6 +850,8 @@ export const style = css`
     backdrop-filter: none;
     padding: 4px 8px;
     gap: 8px;
+    position: relative;
+    z-index: 2;
   }
 
   .bottom-info__actions {
