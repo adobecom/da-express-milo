@@ -1,5 +1,5 @@
 /* eslint-disable */
-import HarmonyAdapter from '../../../libs/color-components/utils/harmony/HarmonyEngine.js';
+import HarmonyAdapter from '../utils/harmony/HarmonyEngineExpress.js';
 import { hexToHSB } from '../../../libs/color-components/utils/ColorConversions.js';
 
 const DEFAULT_COLORS = ['#FF0000', '#FF7F00', '#FFFF00', '#00A8FF', '#7F00FF'];
@@ -133,6 +133,33 @@ export default class ColorThemeExpressController {
       this.harmonyAdapter.onColorChange(index);
     }
     this._notify({ source: 'swatch' });
+  }
+
+  /**
+   * Replace all swatches (e.g. after image extraction). Resizes the theme to match hex count.
+   * @param {string[]} hexList
+   * @param {{ baseIndex?: number, harmonyRule?: string }} [options]
+   */
+  replaceSwatchesFromHexes(hexList, options = {}) {
+    const { baseIndex = 0, harmonyRule = 'CUSTOM' } = options;
+    const normalized = (hexList || [])
+      .map((h) => ensureHex(typeof h === 'string' ? h : ''))
+      .filter(Boolean)
+      .slice(0, NUMBER_SWATCHES);
+    if (!normalized.length) return;
+
+    this.theme.swatches = normalized.map((hex) => createSwatch(hex));
+    this.theme.harmonyRule = harmonyRule;
+    const bi = Math.min(Math.max(0, baseIndex), this.theme.swatches.length - 1);
+    this.theme.baseColorIndex = bi;
+    this.theme.activeSwatchIndex = bi;
+
+    this.harmonyAdapter.setNewTheme({
+      harmonyRule: this.theme.harmonyRule,
+      baseColorIndex: bi,
+      swatches: this.theme.swatches,
+    });
+    this._notify({ source: 'palette-replace' });
   }
 
   randomizePalette() {

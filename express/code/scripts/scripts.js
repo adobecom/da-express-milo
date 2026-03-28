@@ -410,7 +410,6 @@ async function loadPage() {
   }
   // Decorate the page with site specific needs.
   decorateArea();
-  document.body.classList.add('appear');
 
   loadLana({ clientId: 'express' });
 
