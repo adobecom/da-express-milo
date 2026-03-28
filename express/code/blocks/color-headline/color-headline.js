@@ -3,11 +3,11 @@ import { getIconElementDeprecated, getLibs } from '../../scripts/utils.js';
 const LOGO = 'adobe-express-logo';
 const PHOTO_LOGO = 'adobe-express-logo-photos';
 
-export default async function init(el) {
+export default function init(el) {
   const heading = el.querySelector('h1, h2, h3, h4, h5, h6');
 
-  // extract variant always injects the logo — do this synchronously so it
-  // is guaranteed to render even if the async metadata import below fails.
+  // extract variant always injects the logo synchronously so it
+  // is guaranteed to render without blocking on the async import below.
   if (el.classList.contains('extract') && heading) {
     const logo = getIconElementDeprecated(LOGO);
     logo.classList.add('express-logo');
@@ -16,8 +16,8 @@ export default async function init(el) {
 
   // Metadata-driven injection for non-extract variants (marquee-inject-logo /
   // marquee-inject-photo-logo), matching the pattern used by ax-columns et al.
-  try {
-    const { getMetadata } = await import(`${getLibs()}/utils/utils.js`);
+  // Fire-and-forget — never blocks the decorator return.
+  import(`${getLibs()}/utils/utils.js`).then(({ getMetadata }) => {
     const injectPhotoLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-photo-logo')?.toLowerCase());
     const injectViaMetadata = !el.classList.contains('extract')
       && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase());
@@ -27,7 +27,7 @@ export default async function init(el) {
       logo.classList.add('express-logo');
       heading.before(logo);
     }
-  } catch { /* milo utils unavailable — extract logo already injected above */ }
+  }).catch(() => { /* milo utils unavailable — extract logo already injected above */ });
 
   return el;
 }
