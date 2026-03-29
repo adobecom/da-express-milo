@@ -401,7 +401,6 @@ export default async function createColorToolLayout(container, config = {}) {
     toolbar: toolbarConfig = {},
     actionMenu: actionMenuConfig,
     content,
-    headlineEl,
     layoutSpans,
   } = config;
 
@@ -425,10 +424,6 @@ export default async function createColorToolLayout(container, config = {}) {
     resolvedToolbarMode,
     resolvedLayoutSpans,
   );
-
-  if (headlineEl) {
-    slots.sidebar.prepend(headlineEl);
-  }
 
   container.appendChild(root);
 

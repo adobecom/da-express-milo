@@ -9,13 +9,11 @@ function ensureLogo(headline) {
   heading.before(logo);
 }
 
-export default function findHeadline(toolBlock) {
+export default function adoptHeadline(toolBlock, layout) {
   const section = toolBlock.closest('.section');
-  const headline = section?.querySelector('.color-headline.tools') || null;
-  if (headline) ensureLogo(headline);
-  return headline;
-}
-
-export function markAdopted(headline) {
-  if (headline) headline.dataset.adopted = 'true';
+  const headline = section?.querySelector('.color-headline.tools');
+  if (!headline) return;
+  ensureLogo(headline);
+  layout.slots.sidebar.prepend(headline);
+  headline.dataset.adopted = 'true';
 }

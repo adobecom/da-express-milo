@@ -6,7 +6,7 @@ import { createStripContainerRenderer } from '../../scripts/color-shared/rendere
 import { getConflictPairs, TYPE_ORDER } from '../../scripts/color-shared/services/createColorBlindnessService.js';
 import { announceToScreenReader } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
-import findHeadline, { markAdopted } from '../../scripts/color-shared/utils/adoptHeadline.js';
+import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 import '../../scripts/color-shared/components/color-wheel-express/index.js';
 
 const ACTION_MENU_ID = 'action-menu-color-blindness';
@@ -42,7 +42,6 @@ export default async function decorate(block) {
   try {
     block.dataset.blockStatus = 'loading';
 
-    const headlineEl = findHeadline(block);
     block.innerHTML = '';
 
     const section = createTag('section', { 'aria-label': 'Color blindness simulator' });
@@ -63,7 +62,6 @@ export default async function decorate(block) {
 
     const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
     layoutInstance = await createColorToolLayout(section, {
-      headlineEl,
       palette: initialPalette,
       toolbar: {
         variant: 'standalone',
@@ -85,7 +83,7 @@ export default async function decorate(block) {
       },
     });
 
-    markAdopted(headlineEl);
+    adoptHeadline(block, layoutInstance);
 
     const { sidebar, canvas, topbar } = layoutInstance.slots;
     const layoutRoot = sidebar.parentElement;
