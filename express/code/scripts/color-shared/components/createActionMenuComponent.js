@@ -1,5 +1,6 @@
 /* eslint-disable import/prefer-default-export */
-import { createTag, getLibs } from '../../utils.js';
+import { createTag } from '../../utils.js';
+import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createExpressButton, createExpressTooltip } from '../spectrum/index.js';
 import { createActionMenuState } from './createActionMenuState.js';
 import { attachRovingTabIndex } from '../spectrum/utils/a11y.js';
@@ -42,9 +43,7 @@ function isValidActionMenuItem(item, requiredField) {
 
 export async function loadStyles() {
   try {
-    const { loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`);
-    const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-    await loadStyle(`${codeRoot}/scripts/color-shared/action-menu.css`);
+    await loadMiloStyle('scripts/color-shared/action-menu.css');
   } catch {
     window.lana?.log('Failed to load action menu styles', { tags: LANA_TAGS, severity: 'error' });
   }
