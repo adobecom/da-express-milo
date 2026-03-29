@@ -9,6 +9,7 @@ import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
 import parseContent from './utils/parseContent.js';
 import syncPaletteSelections from './utils/paletteState.js';
 import { isMobileOrTabletViewport } from '../../scripts/color-shared/utils/utilities.js';
+import findHeadline, { markAdopted } from '../../scripts/color-shared/utils/adoptHeadline.js';
 
 const blockInstances = new WeakMap();
 
@@ -136,7 +137,7 @@ export default async function decorate(block) {
   let previewInstance = null;
   block.dataset.blockStatus = 'loading';
 
-  const { layout, preview } = parseContent(block);
+  const { preview } = parseContent(block);
   const strings = await loadContrastCheckerPlaceholders();
 
   const destroyInstance = () => {
@@ -153,10 +154,12 @@ export default async function decorate(block) {
       ...getDefaultConfig(),
       strings,
     };
+    const headlineEl = findHeadline(block);
     block.replaceChildren();
 
     const initialPalette = getPalette(config, strings);
     layoutInstance = await createColorToolLayout(block, {
+      headlineEl,
       layoutSpans: {
         tablet: { sidebar: 6, canvas: 6 },
         desktop: { sidebar: 4, canvas: 8 },
@@ -173,11 +176,6 @@ export default async function decorate(block) {
         showPaletteName: true,
         editPaletteName: false,
       },
-      content: {
-        heading: layout.heading,
-        paragraph: layout.paragraph,
-        icon: true,
-      },
       actionMenu: {
         ...createDefaultActionMenuConfig(strings),
         id: 'contrast-checker-menu',
@@ -185,6 +183,8 @@ export default async function decorate(block) {
         activeId: 'contrast',
       },
     });
+
+    markAdopted(headlineEl);
 
     checkerInstance = await mountContrastChecker(layoutInstance.slots.sidebar, {
       config,

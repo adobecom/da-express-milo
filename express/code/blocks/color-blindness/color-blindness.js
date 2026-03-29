@@ -6,6 +6,7 @@ import { createStripContainerRenderer } from '../../scripts/color-shared/rendere
 import { getConflictPairs, TYPE_ORDER } from '../../scripts/color-shared/services/createColorBlindnessService.js';
 import { announceToScreenReader } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
+import findHeadline, { markAdopted } from '../../scripts/color-shared/utils/adoptHeadline.js';
 import '../../scripts/color-shared/components/color-wheel-express/index.js';
 
 const ACTION_MENU_ID = 'action-menu-color-blindness';
@@ -17,39 +18,6 @@ let stripRenderer = null;
 let railUnsub = null;
 let controllerUnsubscribe = null;
 let historyHandler = null;
-
-function parseContent(block) {
-  const layout = {};
-  const rows = Array.from(block.children);
-
-  rows.forEach((row) => {
-    const cols = Array.from(row.children);
-    if (cols.length < 2) return;
-
-    const key = cols[0].textContent.trim().toLowerCase().replaceAll(/[-_\s]+/g, '');
-    const valueCol = cols[1];
-
-    switch (key) {
-      case 'pageheading': {
-        const h = valueCol.querySelector('h1, h2, h3, h4, h5, h6');
-        if (h) layout.heading = h.cloneNode(true);
-        break;
-      }
-      case 'pagesubheading': {
-        const p = valueCol.querySelector('p') || valueCol;
-        const textContent = p.textContent?.trim();
-        if (textContent) {
-          layout.paragraph = createTag('p', {}, textContent);
-        }
-        break;
-      }
-      default:
-        break;
-    }
-  });
-
-  return { layout };
-}
 
 function cleanup() {
   if (historyHandler) {
@@ -74,7 +42,7 @@ export default async function decorate(block) {
   try {
     block.dataset.blockStatus = 'loading';
 
-    const { layout } = parseContent(block);
+    const headlineEl = findHeadline(block);
     block.innerHTML = '';
 
     const section = createTag('section', { 'aria-label': 'Color blindness simulator' });
@@ -95,6 +63,7 @@ export default async function decorate(block) {
 
     const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
     layoutInstance = await createColorToolLayout(section, {
+      headlineEl,
       palette: initialPalette,
       toolbar: {
         variant: 'standalone',
@@ -114,12 +83,9 @@ export default async function decorate(block) {
         navLinks,
         controls,
       },
-      content: {
-        heading: layout.heading,
-        paragraph: layout.paragraph,
-        icon: true,
-      },
     });
+
+    markAdopted(headlineEl);
 
     const { sidebar, canvas, topbar } = layoutInstance.slots;
     const layoutRoot = sidebar.parentElement;

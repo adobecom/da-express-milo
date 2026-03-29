@@ -11,6 +11,7 @@ const { default: init } = imports[1];
 
 const basic = await readFile({ path: './mocks/basic.html' });
 const extract = await readFile({ path: './mocks/extract.html' });
+const tools = await readFile({ path: './mocks/tools.html' });
 
 function addMeta(name, content) {
   const meta = document.createElement('meta');
@@ -145,6 +146,23 @@ describe('Color Headline', () => {
       await init(block);
       const logo = block.querySelector('.express-logo');
       expect(logo.classList.contains('icon-adobe-express-logo-photos')).to.be.true;
+    });
+  });
+
+  describe('tools variant', () => {
+    it('injects logo', async () => {
+      document.body.innerHTML = tools;
+      const block = document.querySelector('.color-headline');
+      await init(block);
+      expect(block.querySelector('.express-logo')).to.exist;
+    });
+
+    it('heading and paragraph are present', async () => {
+      document.body.innerHTML = tools;
+      const block = document.querySelector('.color-headline');
+      await init(block);
+      expect(block.querySelector('h2')).to.exist;
+      expect(block.querySelector('p')).to.exist;
     });
   });
 });
