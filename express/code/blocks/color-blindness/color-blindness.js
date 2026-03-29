@@ -61,7 +61,7 @@ export default async function decorate(block) {
     ];
 
     const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
-    layoutInstance = createColorToolLayout(section, {
+    layoutInstance = await createColorToolLayout(section, {
       palette: initialPalette,
       toolbar: {
         variant: 'standalone',
@@ -84,7 +84,6 @@ export default async function decorate(block) {
     });
 
     adoptHeadline(block, layoutInstance);
-    await layoutInstance.actionMenuReady;
 
     const { sidebar, canvas, topbar } = layoutInstance.slots;
     const layoutRoot = sidebar.parentElement;
