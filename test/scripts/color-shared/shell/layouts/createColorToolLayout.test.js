@@ -2,6 +2,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../../express/code/scripts/utils.js';
 import createColorToolLayout from '../../../../../express/code/scripts/color-shared/shell/layouts/createColorToolLayout.js';
+import { globalDependencyTracker } from '../../../../../express/code/scripts/color-shared/shell/dependencyTracker.js';
 
 setLibs('/libs');
 
@@ -46,7 +47,11 @@ describe('createColorToolLayout', () => {
       const layout = await createColorToolLayout(container);
       expect(layout.slots).to.be.an('object');
       expect(layout.context).to.be.an('object');
-      expect(layout.actionMenu).to.be.a('function');
+      expect(layout).to.have.property('actionMenu');
+      expect(layout.cssReady?.then).to.be.a('function');
+      expect(layout.actionMenuReady?.then).to.be.a('function');
+      expect(layout.toolbarReady?.then).to.be.a('function');
+      expect(layout.ready?.then).to.be.a('function');
       expect(layout.getSlot).to.be.a('function');
       expect(layout.getSlotNames).to.be.a('function');
       expect(layout.hasSlot).to.be.a('function');
@@ -292,6 +297,29 @@ describe('createColorToolLayout', () => {
   });
 
   describe('Test 10: Supports canvas-footer layout variant and hybrid toolbar mounting', () => {
+    it('should return layout before critical CSS finishes loading', async () => {
+      let resolveCriticalCss;
+      const preloadStub = sinon.stub(globalDependencyTracker, 'preload');
+      preloadStub.callsFake(() => new Promise((resolve) => {
+        resolveCriticalCss = resolve;
+      }));
+
+      const layout = createColorToolLayout(container);
+
+      expect(layout.slots.sidebar).to.exist;
+      expect(container.querySelector('.ax-color-tool-layout')).to.exist;
+
+      let cssResolved = false;
+      layout.cssReady.then(() => { cssResolved = true; });
+
+      await Promise.resolve();
+      expect(cssResolved).to.be.false;
+
+      resolveCriticalCss();
+      await layout.cssReady;
+      expect(cssResolved).to.be.true;
+    });
+
     it('should hide topbar and sidebar slots in canvas-footer layout variant', async () => {
       const layout = await createColorToolLayout(container, {
         layoutVariant: 'canvas-footer',

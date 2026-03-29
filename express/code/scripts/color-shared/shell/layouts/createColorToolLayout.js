@@ -356,6 +356,10 @@ function createLayoutAPI(
   return {
     slots,
     context: shell.context,
+    cssReady: Promise.resolve(),
+    actionMenuReady: Promise.resolve(),
+    toolbarReady: Promise.resolve(),
+    ready: Promise.resolve(),
     actionMenu: actionMenuHandle,
     toolbar: toolbarHandle,
     stickyToolbar: stickyToolbarHandle,
@@ -394,7 +398,7 @@ function createLayoutAPI(
   };
 }
 
-export default async function createColorToolLayout(container, config = {}) {
+export default function createColorToolLayout(container, config = {}) {
   const {
     mobileOrder = DEFAULT_SLOT_RENDER_ORDER,
     layoutVariant = DEFAULT_LAYOUT_VARIANT,
@@ -430,10 +434,6 @@ export default async function createColorToolLayout(container, config = {}) {
   // Shell init: critical CSS fires non-blocking, deferred CSS fire-and-forget
   const { shell, criticalCssReady } = initializeShell(config, root);
 
-  // Wait only for critical CSS — then return layout immediately.
-  // Both action menu and toolbar mount non-blocking in parallel.
-  await criticalCssReady;
-
   const layout = createLayoutAPI(
     slots,
     shell,
@@ -446,27 +446,72 @@ export default async function createColorToolLayout(container, config = {}) {
     () => {},
   );
 
-  // Both components mount simultaneously and hydrate the layout when ready
-  const actionMenuReady = mountActionMenu(slots.topbar, actionMenuConfig, actionMenuModulePromise)
-    .then((handle) => { layout.actionMenu = handle; });
+  let destroyed = false;
+  const originalDestroy = layout.destroy.bind(layout);
+  layout.destroy = () => {
+    destroyed = true;
+    originalDestroy();
+  };
 
-  const toolbarReady = mountToolbar(
-    shell, root, slots.footer, resolvedToolbarConfig, toolbarModulePromise,
-  ).then(({
-    toolbarHandle,
-    stickyToolbarHandle,
-    stickyObserver,
-    cleanupToolbarMount,
-    onPaletteChange,
-  }) => {
-    layout.toolbar = toolbarHandle;
-    layout.stickyToolbar = stickyToolbarHandle;
-    layout.toolbarState = {
-      stickyObserver, cleanupToolbarMount, onPaletteChange,
-    };
-  });
+  layout.cssReady = Promise.resolve(criticalCssReady).then(() => layout);
 
-  layout.ready = Promise.all([actionMenuReady, toolbarReady]).then(() => layout);
+  // Both components mount simultaneously and hydrate the layout when ready.
+  // CSS remains on their critical path, but not on the caller's.
+  const actionMenuReady = layout.cssReady
+    .then(() => (destroyed ? null : mountActionMenu(
+      slots.topbar,
+      actionMenuConfig,
+      actionMenuModulePromise,
+    )))
+    .then((handle) => {
+      if (!handle) return;
+      if (destroyed) {
+        handle.destroy?.();
+        return;
+      }
+      layout.actionMenu = handle;
+    });
+
+  const toolbarReady = layout.cssReady
+    .then(() => (destroyed ? null : mountToolbar(
+      shell,
+      root,
+      slots.footer,
+      resolvedToolbarConfig,
+      toolbarModulePromise,
+    )))
+    .then((toolbarState) => {
+      if (!toolbarState) return;
+
+      const {
+        toolbarHandle,
+        stickyToolbarHandle,
+        stickyObserver,
+        cleanupToolbarMount,
+        onPaletteChange,
+      } = toolbarState;
+
+      if (destroyed) {
+        shell.context.off('palette', onPaletteChange);
+        stickyObserver?.disconnect();
+        cleanupToolbarMount?.();
+        if (stickyToolbarHandle && stickyToolbarHandle !== toolbarHandle) {
+          stickyToolbarHandle.destroy?.();
+        }
+        toolbarHandle?.destroy?.();
+        return;
+      }
+
+      layout.toolbar = toolbarHandle;
+      layout.stickyToolbar = stickyToolbarHandle;
+      layout.toolbarState = {
+        stickyObserver, cleanupToolbarMount, onPaletteChange,
+      };
+    });
+
+  layout.actionMenuReady = Promise.resolve(actionMenuReady).then(() => layout);
+  layout.toolbarReady = Promise.resolve(toolbarReady).then(() => layout);
+  layout.ready = Promise.all([layout.cssReady, actionMenuReady, toolbarReady]).then(() => layout);
 
   return layout;
 }

@@ -157,7 +157,7 @@ export default async function decorate(block) {
     block.replaceChildren();
 
     const initialPalette = getPalette(config, strings);
-    layoutInstance = await createColorToolLayout(block, {
+    layoutInstance = createColorToolLayout(block, {
       layoutSpans: {
         tablet: { sidebar: 6, canvas: 6 },
         desktop: { sidebar: 4, canvas: 8 },
@@ -183,6 +183,7 @@ export default async function decorate(block) {
     });
 
     adoptHeadline(block, layoutInstance);
+    await layoutInstance.actionMenuReady;
 
     checkerInstance = await mountContrastChecker(layoutInstance.slots.sidebar, {
       config,
