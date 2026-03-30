@@ -1050,9 +1050,10 @@ color: var(--color-gray-700-variant);
 
   .comparison-table-v2 .sticky-header.is-stuck .first-cell {
       opacity: 0;
-      display: block;
       flex-grow: 1;
-      
+      display: flex;
+      margin-right: var(--spacing-100);
+      width: var(--header-cell-width);
       /* Enhanced smooth first cell transitions for desktop */
       transition: 
           opacity var(--transition-fade),
@@ -1078,7 +1079,8 @@ color: var(--color-gray-700-variant);
       max-width: 1300px;
       width: 100%;
       margin: auto;
-      padding: 0 var(--spacing-600);
+      gap: var(--spacing-400);
+      padding: 0 var(--spacing-400);
       
       /* Enhanced wrapper transitions for desktop */
       transition: 
@@ -1167,7 +1169,8 @@ color: var(--color-gray-700-variant);
   /* Table styles - Desktop */
   .comparison-table-v2 table {
       display: table;
-      border-collapse: collapse; 
+      border-collapse: separate;
+      border-spacing: 0;
       height: 100%;
       width: 100%;
       padding: 0;
