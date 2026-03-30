@@ -22,10 +22,16 @@ export async function loadOverrideStyles(key, href) {
   link.dataset.spectrumOverride = key;
   document.head.appendChild(link);
 
-  await new Promise((resolve) => {
-    link.onload = resolve;
-    link.onerror = resolve; // resolve even on error to avoid blocking
+  const didLoad = await new Promise((resolve) => {
+    link.onload = () => resolve(true);
+    link.onerror = () => resolve(false);
   });
 
-  loaded.add(key);
+  if (didLoad) {
+    loaded.add(key);
+    return;
+  }
+
+  // Leave key uncached on failure so future calls can retry.
+  link.remove();
 }

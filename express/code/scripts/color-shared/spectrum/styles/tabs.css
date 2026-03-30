@@ -4,7 +4,7 @@
  * Applies Express design system styling to <sp-tabs>.
  */
 
- sp-tabs {
+sp-tabs {
   --spectrum-tabs-font-family: var(--body-font-family);
 }
 
@@ -32,6 +32,8 @@ sp-tabs[size="s"] {
 sp-tabs[size="m"] {
   --spectrum-tabs-item-height: 32px;
   --spectrum-tabs-font-size: 14px;
+  --mod-tabs-icon-size: 20px;
+  --mod-tabs-top-to-icon: 13px;
 }
 
 sp-tabs[size="l"] {
@@ -46,4 +48,9 @@ sp-tabs[size="xl"] {
 
 sp-tabs .ax-custom-icon {
   display: inline-block;
+}
+
+sp-tabs .ax-custom-icon svg {
+  max-width: 100%;
+  max-height: 100%;
 }

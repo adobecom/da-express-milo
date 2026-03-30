@@ -33,6 +33,25 @@ export function createCurtain(className, onClose, { debounceMs = 0 } = {}) {
   return curtain;
 }
 
+export function createIconSlot(icon, slotName = 'icon') {
+  if (!icon) return null;
+
+  const slot = createTag('span', { slot: slotName });
+
+  if (icon instanceof Element || icon instanceof DocumentFragment) {
+    slot.replaceChildren(icon.cloneNode(true));
+    return slot;
+  }
+
+  if (typeof icon === 'string') {
+    const fragment = document.createRange().createContextualFragment(icon);
+    slot.replaceChildren(fragment);
+    return slot;
+  }
+
+  return null;
+}
+
 /**
  * Adds touch-based swipe-to-close for mobile bottom-sheet drawers.
  * Only activates when viewport width < 600px and content is scrolled to top.
@@ -147,6 +166,10 @@ export function normalizeHex(segment) {
     return `#${(r + r + g + g + b + b).toUpperCase()}`;
   }
   return null;
+}
+
+export function isValidHex(hex) {
+  return normalizeHex(hex) !== null;
 }
 
 export function createColorPaletteParamApi() {

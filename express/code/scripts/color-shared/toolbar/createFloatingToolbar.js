@@ -1,6 +1,7 @@
 import { serviceManager } from '../../../libs/services/index.js';
 import { createToolbar } from './createToolbarComponent.js';
 import { createTag, getLibs } from '../../utils.js';
+import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
 
 const NETWORK_ERROR_CODE = 'NETWORK_ERROR';
@@ -128,23 +129,6 @@ async function getLibraryContext() {
 }
 
 const TOOLBAR_CSS_PATH = 'scripts/color-shared/toolbar/toolbar.css';
-
-let miloStyleLoaderPromise = null;
-
-async function loadMiloStyle(path) {
-  if (!miloStyleLoaderPromise) {
-    miloStyleLoaderPromise = import(`${getLibs()}/utils/utils.js`)
-      .then(({ loadStyle, getConfig }) => ({ loadStyle, getConfig }));
-  }
-
-  const { loadStyle, getConfig } = await miloStyleLoaderPromise;
-  const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-  const href = path.startsWith('/') ? path : `${codeRoot}/${path}`;
-
-  return new Promise((resolve) => {
-    loadStyle(href, () => resolve());
-  });
-}
 
 async function loadToolbarDependencies(providedPalette, deps = {}) {
   const {

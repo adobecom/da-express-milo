@@ -1,5 +1,6 @@
 /* eslint-disable import/prefer-default-export */
-import { createTag, getLibs } from '../../utils.js';
+import { createTag } from '../../utils.js';
+import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createExpressButton, createExpressTooltip } from '../spectrum/index.js';
 import { createActionMenuState } from './createActionMenuState.js';
 import { attachRovingTabIndex } from '../spectrum/utils/a11y.js';
@@ -42,9 +43,7 @@ function isValidActionMenuItem(item, requiredField) {
 
 export async function loadStyles() {
   try {
-    const { loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`);
-    const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-    await loadStyle(`${codeRoot}/scripts/color-shared/action-menu.css`);
+    await loadMiloStyle('scripts/color-shared/action-menu.css');
   } catch {
     window.lana?.log('Failed to load action menu styles', { tags: LANA_TAGS, severity: 'error' });
   }
@@ -112,6 +111,7 @@ async function createHistoryButton(
       class: `${control.id}-btn color-action-button`,
       'aria-label': control.label,
       'aria-disabled': 'true',
+      disabled: true,
       tabindex: '0',
     },
     ICON_MAP[control.id],
@@ -119,7 +119,7 @@ async function createHistoryButton(
   historyContainer.append(btn);
   if (!historyContainer.parentNode) controlContainer.append(historyContainer);
   btn.addEventListener('click', () => {
-    if (btn.getAttribute('aria-disabled') === 'true') return;
+    if (btn.getAttribute('aria-disabled') === 'true' || btn.disabled) return;
     onClick();
   });
   buttonRefs[control.id] = btn;
@@ -323,8 +323,16 @@ export async function createActionMenuComponent(options = {}) {
 
   function handleHistoryIndexChanged(event) {
     const { historyIndex, historyLength } = event.detail;
-    if (buttonRefs.undo) buttonRefs.undo.setAttribute('aria-disabled', historyIndex === 0 ? 'true' : 'false');
-    if (buttonRefs.redo) buttonRefs.redo.setAttribute('aria-disabled', historyIndex === historyLength - 1 ? 'true' : 'false');
+    if (buttonRefs.undo) {
+      const isDisabled = historyIndex === 0;
+      buttonRefs.undo.disabled = isDisabled;
+      buttonRefs.undo.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+    }
+    if (buttonRefs.redo) {
+      const isDisabled = historyIndex === historyLength - 1;
+      buttonRefs.redo.disabled = isDisabled;
+      buttonRefs.redo.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
+    }
   }
 
   const eventName = `${id}:history-index-changed`;

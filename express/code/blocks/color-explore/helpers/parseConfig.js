@@ -17,6 +17,12 @@ function applyConfigKey(config, defaults, key, value) {
       return { ...config, loadMoreIncrement: parseInteger(value, defaults.loadMoreIncrement) };
     case 'maxitems':
       return { ...config, maxItems: parseInteger(value, defaults.maxItems) };
+    case 'apiendpoint':
+      return { ...config, apiEndpoint: value };
+    case 'usemockdata':
+      return { ...config, useMockData: parseBoolean(value) || value === '1' };
+    case 'usemockfallback':
+      return { ...config, useMockFallback: parseBoolean(value) || value === '1' };
     case 'swatchverticalmaxperrow':
     case 'verticalmaxperrow': {
       const parsed = parseInt(value, 10);
@@ -27,13 +33,14 @@ function applyConfigKey(config, defaults, key, value) {
       return { ...config, enableFilters: parseBoolean(value) };
     case 'enablesearch':
       return { ...config, enableSearch: parseBoolean(value) };
-    case 'review':
     case 'showreviewsection':
       return { ...config, showReviewSection: parseBoolean(value) || value === '1' };
     case 'enablegradienteditor':
-      return { ...config, enableGradientEditor: parseBoolean(value) };
+      return { ...config, enableGradientEditor: parseBoolean(value) || value === '1' };
     case 'enablesizesdemo':
-      return { ...config, enableSizesDemo: parseBoolean(value) };
+      return { ...config, enableSizesDemo: parseBoolean(value) || value === '1' };
+    case 'loadingscreendemo': // [DEMO ONLY][MWPW-186947] remove after loading-screen PR lands
+      return { ...config, loadingScreenDemo: parseBoolean(value) || value === '1' };
     default:
       return config;
   }

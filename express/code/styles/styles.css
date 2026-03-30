@@ -30,7 +30,10 @@
   --color-gray-900: #222;
   --color-gray-950: #131313;
   --color-green-800: #079355;
+  --color-green-900: #05834E;
+  --color-green-1000: #036E45;
   --color-blue-600: #0066CC;
+  --color-blue-700: #005ECB;
   --color-blue-800: #4B75FF;
   --color-black: #000;
   --color-content-neutral: #222222;
@@ -135,6 +138,10 @@
   --spacing-900: 80px;
   --spacing-1000: 96px;
 
+  /* Color Explore */
+  --color-explore-filter-picker-width: 144px;
+  --color-explore-filter-picker-max-width: 180px;
+
   --S2-Buttons-Accent-Color-Default: #3B63FB;
   --S2-Buttons-Accent-Color-Hover: #274DEA;
 
@@ -218,6 +225,7 @@
   --color-dark-gray: #505050;
   --color-error-red: #d7373f;
   --color-default-font: #131313;
+  --font-weight-medium: 500;
   --color-light-gray-2: #e1e1e1;
 
   --border-radius-10: 10px;
@@ -257,6 +265,7 @@
   --Palette-gray-100: #E9E9E9;
   --Palette-gray-200: #E1E1E1;
   --Palette-gray-400: #C6C6C6;
+  --Palette-gray-700: #505050;
   --Palette-gray-900: #131313;
   --Alias-focus-indicator-default: #4b75ff;
   --Alias-content-neutral-default: #292929;
@@ -264,6 +273,7 @@
   --Alias-content-disabled-default: #C6C6C6;
   --Alias-content-typography-Title: var(--Palette-gray-900);
   --Alias-content-typography-Heading: var(--Palette-gray-900);
+  --Alias-content-typography-Body: var(--Palette-gray-700);
   --Radius-corner-radius-75: 4px;
   --corner-radius-80: 6px;
   --Background-accent-default: var(--color-background-accent-default);

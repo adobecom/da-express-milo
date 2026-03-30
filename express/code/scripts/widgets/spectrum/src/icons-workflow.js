@@ -5,6 +5,7 @@ import '@spectrum-web-components/icons-workflow/icons/sp-icon-circle.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-copy.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-delete.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-edit.js';
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-open-in.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-share-android.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-target.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-download.js';
@@ -15,3 +16,10 @@ import '@spectrum-web-components/icons-workflow/icons/sp-icon-checkmark-circle.j
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-image.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-lock.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-lock-open.js';
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-heart.js';
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-heart-filled.js';
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-chevron-right.js';
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-close-circle.js';
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-switch.js';
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-add.js';
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-close.js';

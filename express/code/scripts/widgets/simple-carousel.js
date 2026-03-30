@@ -233,8 +233,9 @@ export default async function createSimpleCarousel(selector, parent, options) {
   const miloLibs = getLibs();
   const cssLoaded = new Promise((resolve) => {
     (async () => {
-      const { loadStyle } = await import(`${miloLibs}/utils/utils.js`);
-      await loadStyle('/express/code/scripts/widgets/simple-carousel.css');
+      const { loadStyle, getConfig } = await import(`${miloLibs}/utils/utils.js`);
+      const config = getConfig();
+      await loadStyle(`${config.codeRoot}/scripts/widgets/simple-carousel.css`);
       resolve();
     })();
   });

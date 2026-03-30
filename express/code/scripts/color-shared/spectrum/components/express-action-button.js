@@ -7,27 +7,9 @@
 import { loadActionButton } from '../load-spectrum.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
+import { createIconSlot } from '../../utils/utilities.js';
 
 const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/action-button.css';
-
-function createIconSlot(icon) {
-  if (!icon) return null;
-
-  if (icon instanceof Element) {
-    const iconElement = icon.cloneNode(true);
-    iconElement.setAttribute('slot', 'icon');
-    return iconElement;
-  }
-
-  if (typeof icon === 'string') {
-    const iconWrapper = document.createElement('span');
-    iconWrapper.setAttribute('slot', 'icon');
-    iconWrapper.innerHTML = icon;
-    return iconWrapper;
-  }
-
-  return null;
-}
 
 /**
  * Create an Express action button.

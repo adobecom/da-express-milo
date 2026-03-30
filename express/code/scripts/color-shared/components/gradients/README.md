@@ -11,7 +11,6 @@ Sizes are documented in the tables below (no separate sizes file in this folder)
 | Component | Variants | Interactive | Use case |
 |-----------|----------|--------------|----------|
 | **gradient-editor** | s, m, l | Yes (L only) | Draggable editor, renderable anywhere |
-| **gradient-extract** | s, l | Yes | Extract-style bar with stops + midpoints |
 | **gradient-strip-tall** | s, m, l, responsive | Copy (click handle → copy color) | Static display, modal picker; copy is correct and supported |
 | **gradient-strip** | — | Click | Card in gradients grid (explore page) |
 
@@ -153,20 +152,7 @@ Stops get `id` if missing. Positions normalized 0–1. Display uses design token
 
 ---
 
-## 3. Gradient extract (standalone bar)
-
-Same as gradient editor for S and L: **S 343×80**, **L 668×80**.
-
-| Size | Width | Height |
-|------|-------|--------|
-| **s** | 343px | 80px |
-| **l** | 668px | 80px |
-
-**API:** `createGradientExtract({ stops, size: 's' | 'l', onChange })`.
-
----
-
-## 4. Gradient card (explore grid)
+## 3. Gradient card (explore grid)
 
 Bar 400×80; card min 400 / max 518, height 116, gap 4px.
 
@@ -202,7 +188,6 @@ Bar 400×80; card min 400 / max 518, height 116, gap 4px.
 |----------|---------|
 | color-explore | gradient-strip.css, gradient-editor.css |
 | modal | gradient-strip-tall.css |
-| gradient-extract | gradient-extract.css (when used) |
 
 ---
 

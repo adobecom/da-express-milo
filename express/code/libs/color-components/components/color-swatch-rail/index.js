@@ -446,10 +446,41 @@ export class ColorSwatchRail extends LitElement {
     }, 1200);
   }
 
-  async _handleCopy(hex, target = null) {
-    if (!navigator.clipboard?.writeText || !hex) return;
+  _copyTextFallback(text) {
     try {
-      await navigator.clipboard.writeText(hex);
+      const textarea = document.createElement('textarea');
+      textarea.value = text;
+      textarea.setAttribute('readonly', '');
+      textarea.style.position = 'absolute';
+      textarea.style.left = '-9999px';
+      document.body.appendChild(textarea);
+      textarea.select();
+      textarea.setSelectionRange(0, text.length);
+      const copied = document.execCommand('copy');
+      textarea.remove();
+      return Boolean(copied);
+    } catch {
+      return false;
+    }
+  }
+
+  async _copyText(text) {
+    if (navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(text);
+        return true;
+      } catch {
+        // Fallback supports environments where Clipboard API is unavailable/blocked.
+      }
+    }
+    return this._copyTextFallback(text);
+  }
+
+  async _handleCopy(hex, target = null) {
+    if (!hex) return;
+    try {
+      const copied = await this._copyText(hex);
+      if (!copied) throw new Error('clipboard_copy_failed');
       this._showCopyFeedback(target);
       announceToScreenReader('Copied to clipboard');
     } catch (error) {
