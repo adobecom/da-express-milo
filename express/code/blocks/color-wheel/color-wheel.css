@@ -214,8 +214,6 @@
   position: fixed;
 }
 
-<<<<<<< HEAD
-=======
 /* Base color tab */
 
 .color-wheel .base-color-content {
@@ -224,7 +222,6 @@
   align-self: stretch;
 }
 
->>>>>>> 83378bde1 (color wheel tab design qa)
 /* Color wheel panel */
 
 color-wheel-express {
