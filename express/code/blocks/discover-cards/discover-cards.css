@@ -14,6 +14,11 @@ main .section .discover-cards {
     background-repeat: no-repeat;
 }
 
+.discover-cards .subtitle {
+    padding-bottom: var(--spacing-500);
+    margin: 0;
+}
+
 .discover-cards .sub-header {
     font-weight: 400;
     font-size: var(--ax-body-s-size);
@@ -171,6 +176,7 @@ main .section .discover-cards {
 
 @media (min-width: 600px) {
   .discover-cards .center-title {
+        padding-bottom: var(--spacing-100);
         font-size: var(--heading-font-size-l);
     }
 
