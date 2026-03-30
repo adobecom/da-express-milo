@@ -157,6 +157,12 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
     liked = !liked;
     updateLikeState();
     likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
+    opts.onLikeToggle?.({ id: gradient?.id, liked })?.catch?.((err) => {
+      window.lana?.log(`[GradientPicker] Like toggle error: ${err?.message}`, {
+        tags: 'color-modal,like',
+        severity: 'warning',
+      });
+    });
   });
   const likesCountEl = createTag('p', { class: 'modal-likes-count' });
   likesCountEl.textContent = likesCount;

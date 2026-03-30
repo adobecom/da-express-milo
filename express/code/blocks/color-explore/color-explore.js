@@ -392,6 +392,7 @@ export default async function decorate(block) {
       let floatingSearchHandler = null;
       let isMounting = false;
       let filterInteractionSuppressUntil = 0;
+      let isSearchActive = false;
 
       const setModeClasses = (variant) => {
         block.classList.remove(VARIANT_CLASSES.GRADIENTS, VARIANT_CLASSES.PALETTES);
@@ -416,6 +417,7 @@ export default async function decorate(block) {
         loadMoreControl = null;
         activeRenderer?.destroy?.();
         activeRenderer = null;
+        isSearchActive = false;
         container.classList.remove('color-explorer-strips');
         if (floatingSearchHandler) {
           document.removeEventListener('floating-search:submit', floatingSearchHandler);
@@ -441,10 +443,12 @@ export default async function decorate(block) {
           title: content.name || fallbackTitle,
           showTitle: false,
           content: () => createGradientPickerRebuildContent(content, {
-            likesCount: '1.2K',
+            likesCount: content.likes ?? content.likesCount ?? 0,
+            liked: content.liked ?? false,
             creatorName: content.creator?.name ?? 'nicolagilroy',
             creatorImageUrl: content.creator?.imageUrl ?? content.creatorImageUrl,
             tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+            onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
           }),
         });
       };
@@ -509,6 +513,7 @@ export default async function decorate(block) {
             VARIANTS.GRADIENTS,
             async (filters) => {
               filterInteractionSuppressUntil = Date.now() + 350;
+              isSearchActive = false;
               if (filters?.contentType === 'color-palettes') {
                 await mountStripsMode();
                 return;
@@ -525,7 +530,9 @@ export default async function decorate(block) {
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
             const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
             if (nextTarget > allData.length) {
-              const moreData = await activeDataService.loadMore();
+              const moreData = isSearchActive
+                ? await activeDataService.searchMore()
+                : await activeDataService.loadMore();
               allData = mergeLoadMoreData(allData, moreData);
             }
             visibleCount = Math.min(nextTarget, allData.length);
@@ -543,6 +550,7 @@ export default async function decorate(block) {
 
           floatingSearchHandler = async (e) => {
             const { query } = e.detail;
+            isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.search(query);
             visibleCount = Math.min(config.initialLoad, allData.length);
@@ -602,6 +610,7 @@ export default async function decorate(block) {
             VARIANTS.STRIPS,
             async (filters) => {
               filterInteractionSuppressUntil = Date.now() + 350;
+              isSearchActive = false;
               if (filters?.contentType === 'color-gradients') {
                 await mountGradientsMode();
                 return;
@@ -618,7 +627,9 @@ export default async function decorate(block) {
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
             const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
             if (nextTarget > allData.length) {
-              const moreData = await activeDataService.loadMore();
+              const moreData = isSearchActive
+                ? await activeDataService.searchMore()
+                : await activeDataService.loadMore();
               allData = mergeLoadMoreData(allData, moreData);
             }
             visibleCount = Math.min(nextTarget, allData.length);
@@ -637,6 +648,7 @@ export default async function decorate(block) {
           });
 
           activeRenderer.on(EVENTS.SEARCH, async ({ query }) => {
+            isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.search(query);
             visibleCount = Math.min(config.initialLoad, allData.length);
@@ -647,6 +659,7 @@ export default async function decorate(block) {
 
           floatingSearchHandler = async (e) => {
             const { query } = e.detail;
+            isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.search(query);
             visibleCount = Math.min(config.initialLoad, allData.length);
@@ -690,6 +703,7 @@ export default async function decorate(block) {
       block.classList.add(CSS_CLASSES.LOADING);
       let allData = await dataService.fetchData();
       let visibleCount = Math.min(config.initialLoad, allData.length);
+      let isSearchActive = false;
       block.classList.remove(CSS_CLASSES.LOADING);
 
       let renderer;
@@ -707,7 +721,9 @@ export default async function decorate(block) {
         ? await createBlockLoadMoreControl(container, async () => {
           const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
           if (nextTarget > allData.length) {
-            const moreData = await dataService.loadMore();
+            const moreData = isSearchActive
+              ? await dataService.searchMore()
+              : await dataService.loadMore();
             allData = mergeLoadMoreData(allData, moreData);
           }
           visibleCount = Math.min(nextTarget, allData.length);
@@ -729,6 +745,7 @@ export default async function decorate(block) {
       });
 
       renderer.on(EVENTS.SEARCH, async ({ query }) => {
+        isSearchActive = !!query;
         block.classList.add(CSS_CLASSES.LOADING);
         allData = await dataService.search(query);
         visibleCount = Math.min(config.initialLoad, allData.length);
@@ -738,6 +755,7 @@ export default async function decorate(block) {
       });
 
       renderer.on(EVENTS.FILTER, async (filters) => {
+        isSearchActive = false;
         block.classList.add(CSS_CLASSES.LOADING);
         allData = await dataService.filter(filters);
         visibleCount = Math.min(config.initialLoad, allData.length);
@@ -748,6 +766,7 @@ export default async function decorate(block) {
 
       const floatingHandler = async (e) => {
         const { query } = e.detail;
+        isSearchActive = !!query;
         block.classList.add(CSS_CLASSES.LOADING);
         allData = await dataService.search(query);
         visibleCount = Math.min(config.initialLoad, allData.length);

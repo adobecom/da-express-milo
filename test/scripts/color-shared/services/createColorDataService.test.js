@@ -180,6 +180,185 @@ describe('createColorDataService', () => {
     expect(PALETTE_10_COLORS_MODAL.colors).to.have.length(10);
   });
 
+  it('searchMore fetches next page when hasNextPage is true', async () => {
+    const page1Themes = [
+      {
+        id: 'theme-p1',
+        name: 'Page 1 Theme',
+        swatches: [{ values: [0.1, 0.5, 0.9] }],
+        tags: [{ value: 'test' }],
+      },
+    ];
+    const page2Themes = [
+      {
+        id: 'theme-p2',
+        name: 'Page 2 Theme',
+        swatches: [{ values: [0.2, 0.6, 0.8] }],
+        tags: [{ value: 'test' }],
+      },
+    ];
+    const fakeKuler = {
+      searchThemes: sinon.stub()
+        .onFirstCall().resolves({ themes: page1Themes, hasNextPage: true })
+        .onSecondCall().resolves({ themes: page2Themes, hasNextPage: false }),
+    };
+    sinon.stub(serviceManager, 'getProvider').resolves(fakeKuler);
+
+    const service = createColorDataService({
+      variant: 'strips',
+      useMockData: false,
+      useMockFallback: false,
+    });
+
+    const firstPage = await service.search('test');
+    expect(firstPage).to.have.length(1);
+    expect(firstPage[0].name).to.equal('Page 1 Theme');
+
+    const accumulated = await service.searchMore();
+    expect(accumulated).to.have.length(2);
+    expect(accumulated[0].name).to.equal('Page 1 Theme');
+    expect(accumulated[1].name).to.equal('Page 2 Theme');
+    expect(fakeKuler.searchThemes.calledTwice).to.equal(true);
+    expect(fakeKuler.searchThemes.secondCall.args[1]).to.have.property('page', 2);
+  });
+
+  it('searchMore returns current results when hasNextPage is false', async () => {
+    const themes = [
+      {
+        id: 'theme-only',
+        name: 'Only Theme',
+        swatches: [{ values: [0.3, 0.5, 0.7] }],
+        tags: [{ value: 'single' }],
+      },
+    ];
+    const fakeKuler = {
+      searchThemes: sinon.stub().resolves({ themes, hasNextPage: false }),
+    };
+    sinon.stub(serviceManager, 'getProvider').resolves(fakeKuler);
+
+    const service = createColorDataService({
+      variant: 'strips',
+      useMockData: false,
+      useMockFallback: false,
+    });
+
+    await service.search('single');
+    const result = await service.searchMore();
+    expect(result).to.have.length(1);
+    expect(fakeKuler.searchThemes.calledOnce).to.equal(true);
+  });
+
+  it('searchMore paginates gradients with searchGradients', async () => {
+    const page1 = [
+      {
+        id: 'grad-p1',
+        name: 'Gradient Page 1',
+        gradientSecondaryRepresentation: {
+          rendition: {
+            type: 'linear',
+            angle: 90,
+            stops: [
+              { color: [{ mode: 'rgb', value: { r: 255, g: 0, b: 0 } }], offset: 0 },
+              { color: [{ mode: 'rgb', value: { r: 0, g: 0, b: 255 } }], offset: 1 },
+            ],
+          },
+        },
+        tags: [{ value: 'grad' }],
+      },
+    ];
+    const page2 = [
+      {
+        id: 'grad-p2',
+        name: 'Gradient Page 2',
+        gradientSecondaryRepresentation: {
+          rendition: {
+            type: 'linear',
+            angle: 45,
+            stops: [
+              { color: [{ mode: 'rgb', value: { r: 0, g: 255, b: 0 } }], offset: 0 },
+              { color: [{ mode: 'rgb', value: { r: 255, g: 255, b: 0 } }], offset: 1 },
+            ],
+          },
+        },
+        tags: [{ value: 'grad' }],
+      },
+    ];
+    const fakeKuler = {
+      searchGradients: sinon.stub()
+        .onFirstCall().resolves({ gradients: page1, hasNextPage: true })
+        .onSecondCall().resolves({ gradients: page2, hasNextPage: false }),
+    };
+    sinon.stub(serviceManager, 'getProvider').resolves(fakeKuler);
+
+    const service = createColorDataService({
+      variant: 'gradients',
+      useMockData: false,
+      useMockFallback: false,
+    });
+
+    const firstPage = await service.search('grad');
+    expect(firstPage).to.have.length(1);
+
+    const accumulated = await service.searchMore();
+    expect(accumulated).to.have.length(2);
+    expect(accumulated[1].name).to.equal('Gradient Page 2');
+    expect(fakeKuler.searchGradients.calledTwice).to.equal(true);
+    expect(fakeKuler.searchGradients.secondCall.args[1]).to.have.property('page', 2);
+  });
+
+  it('toggleLike calls kuler.updateLike to like an item', async () => {
+    const fakeKuler = { updateLike: sinon.stub().resolves() };
+    sinon.stub(serviceManager, 'getProvider').resolves(fakeKuler);
+
+    const service = createColorDataService({
+      variant: 'gradients',
+      useMockData: false,
+      useMockFallback: false,
+    });
+
+    const result = await service.toggleLike({ id: 'grad-1', liked: true });
+    expect(result).to.equal(true);
+    expect(fakeKuler.updateLike.calledOnce).to.equal(true);
+    expect(fakeKuler.updateLike.firstCall.args[0]).to.deep.equal({
+      id: 'grad-1',
+      like: { user: true },
+      source: 'color-explore',
+    });
+  });
+
+  it('toggleLike calls kuler.updateLike to unlike an item', async () => {
+    const fakeKuler = { updateLike: sinon.stub().resolves() };
+    sinon.stub(serviceManager, 'getProvider').resolves(fakeKuler);
+
+    const service = createColorDataService({
+      variant: 'gradients',
+      useMockData: false,
+      useMockFallback: false,
+    });
+
+    const result = await service.toggleLike({ id: 'grad-1', liked: false });
+    expect(result).to.equal(false);
+    expect(fakeKuler.updateLike.calledOnce).to.equal(true);
+    expect(fakeKuler.updateLike.firstCall.args[0]).to.deep.equal({
+      id: 'grad-1',
+      like: null,
+      source: 'color-explore',
+    });
+  });
+
+  it('toggleLike returns liked state when kuler is unavailable', async () => {
+    sinon.stub(serviceManager, 'getProvider').resolves(null);
+
+    const service = createColorDataService({
+      variant: 'gradients',
+      useMockData: false,
+      useMockFallback: false,
+    });
+
+    const result = await service.toggleLike({ id: 'grad-1', liked: true });
+    expect(result).to.equal(true);
+  });
+
   it('includes requested marquee tags in mock palette and gradient datasets', async () => {
     const expectedTags = [
       'Summer',

@@ -87,6 +87,11 @@ const MOCK_EXPLORE_COUNT = 46;
 export function createColorDataService(config) {
   let cache = null;
   let fetchPromise = null;
+  let _searchQuery = '';
+  let _searchOpts = {};
+  let _searchPage = 0;
+  let _searchHasNextPage = false;
+  let _searchResults = [];
   const useMockData = config?.useMockData === true;
   const useMockFallback = config?.useMockFallback !== false;
   const useLocalMockData = config?.useLocalMockData !== false
@@ -360,30 +365,44 @@ export function createColorDataService(config) {
     ));
   }
 
-  async function search(query) {
+  async function search(query, options = {}) {
+    _searchQuery = query || '';
+    _searchPage = 1;
+    _searchHasNextPage = false;
+    _searchResults = [];
+
     if (!query) return cache || [];
 
     if (!useApiSearch && (useMockData || useLocalMockData)) {
-      return localSearch(query);
+      _searchResults = localSearch(query);
+      return _searchResults;
     }
+
+    const searchOptions = {};
+    if (options.typeOfQuery) searchOptions.typeOfQuery = options.typeOfQuery;
+    _searchOpts = searchOptions;
 
     try {
       const kuler = await serviceManager.getProvider('kuler');
       if (kuler) {
         let raw = null;
         if (config.variant === 'gradients') {
-          raw = await kuler.searchGradients(query);
+          raw = await kuler.searchGradients(query, { ...searchOptions, page: 1 });
+          _searchHasNextPage = !!raw?.hasNextPage;
           const items = raw?.gradients || raw?.themes || raw?.items
             || (Array.isArray(raw) ? raw : null);
           if (Array.isArray(items) && items.length > 0) {
-            return withDerivedMeta(gradientApiResponsesToGradients(items));
+            _searchResults = withDerivedMeta(gradientApiResponsesToGradients(items));
+            return _searchResults;
           }
         } else {
-          raw = await kuler.searchThemes(query);
+          raw = await kuler.searchThemes(query, { ...searchOptions, page: 1 });
+          _searchHasNextPage = !!raw?.hasNextPage;
           const items = raw?.themes || raw?.items
             || (Array.isArray(raw) ? raw : null);
           if (Array.isArray(items) && items.length > 0) {
-            return ensurePaletteColors(withDerivedMeta(themesToGradients(items)));
+            _searchResults = ensurePaletteColors(withDerivedMeta(themesToGradients(items)));
+            return _searchResults;
           }
         }
       }
@@ -394,8 +413,68 @@ export function createColorDataService(config) {
       });
     }
 
-    if (useMockFallback) return localSearch(query);
+    if (useMockFallback) {
+      _searchResults = localSearch(query);
+      return _searchResults;
+    }
     return [];
+  }
+
+  async function searchMore() {
+    if (!_searchHasNextPage || !_searchQuery) return _searchResults;
+
+    _searchPage += 1;
+    try {
+      const kuler = await serviceManager.getProvider('kuler');
+      if (!kuler) return _searchResults;
+
+      let raw = null;
+      if (config.variant === 'gradients') {
+        raw = await kuler.searchGradients(_searchQuery, { ..._searchOpts, page: _searchPage });
+        _searchHasNextPage = !!raw?.hasNextPage;
+        const items = raw?.gradients || raw?.themes || raw?.items
+          || (Array.isArray(raw) ? raw : null);
+        if (Array.isArray(items) && items.length > 0) {
+          const newItems = withDerivedMeta(gradientApiResponsesToGradients(items));
+          _searchResults = [..._searchResults, ...newItems];
+        }
+      } else {
+        raw = await kuler.searchThemes(_searchQuery, { ..._searchOpts, page: _searchPage });
+        _searchHasNextPage = !!raw?.hasNextPage;
+        const items = raw?.themes || raw?.items
+          || (Array.isArray(raw) ? raw : null);
+        if (Array.isArray(items) && items.length > 0) {
+          const newItems = ensurePaletteColors(withDerivedMeta(themesToGradients(items)));
+          _searchResults = [..._searchResults, ...newItems];
+        }
+      }
+    } catch (error) {
+      window.lana?.log(`[DataService] Search pagination error: ${error?.message}`, {
+        tags: 'color-explore,data-service',
+        severity: 'warning',
+      });
+    }
+
+    return _searchResults;
+  }
+
+  async function toggleLike(item) {
+    try {
+      const kuler = await serviceManager.getProvider('kuler');
+      if (!kuler) return item?.liked ?? false;
+      await kuler.updateLike({
+        id: item?.id,
+        like: item?.liked ? { user: true } : null,
+        source: 'color-explore',
+      });
+      return item?.liked ?? false;
+    } catch (error) {
+      window.lana?.log(`[DataService] Toggle like error: ${error?.message}`, {
+        tags: 'color-explore,data-service',
+        severity: 'warning',
+      });
+      return item?.liked ?? false;
+    }
   }
 
   function filter(criteria) {
@@ -431,8 +510,10 @@ export function createColorDataService(config) {
     fetchData: fetch,
     fetch,
     search,
+    searchMore,
     filter,
     clearCache,
     loadMore,
+    toggleLike,
   };
 }
