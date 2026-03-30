@@ -1,8 +1,8 @@
 import { expect } from '@esm-bundle/chai';
 
-import syncPaletteSelections from '../../../../express/code/blocks/contrast-checker/utils/paletteState.js';
+import syncPaletteSelections from '../../../../express/code/blocks/color-contrast-checker/utils/paletteState.js';
 
-describe('contrast-checker paletteState', () => {
+describe('color-contrast-checker paletteState', () => {
   it('replaces the previously selected foreground and background colors in the palette', () => {
     const colors = ['#FFFFFF', '#999999', '#111111', '#333333'];
 

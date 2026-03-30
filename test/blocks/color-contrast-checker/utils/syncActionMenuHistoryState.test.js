@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import syncActionMenuHistoryState, {
   getActionMenuHistoryDetail,
-} from '../../../../express/code/blocks/contrast-checker/utils/syncActionMenuHistoryState.js';
+} from '../../../../express/code/blocks/color-contrast-checker/utils/syncActionMenuHistoryState.js';
 import createTestHistoryService from '../helpers/createTestHistoryService.js';
 
 describe('syncActionMenuHistoryState', () => {
@@ -48,13 +48,13 @@ describe('syncActionMenuHistoryState', () => {
     const handleTopbar = (event) => received.push(['topbar', event.detail]);
     const handleMobile = (event) => received.push(['mobile', event.detail]);
 
-    document.addEventListener('contrast-checker-menu:history-index-changed', handleTopbar);
-    document.addEventListener('contrast-checker-controls-only:history-index-changed', handleMobile);
+    document.addEventListener('color-contrast-checker-menu:history-index-changed', handleTopbar);
+    document.addEventListener('color-contrast-checker-controls-only:history-index-changed', handleMobile);
 
-    syncActionMenuHistoryState(['contrast-checker-menu', 'contrast-checker-controls-only'], history);
+    syncActionMenuHistoryState(['color-contrast-checker-menu', 'color-contrast-checker-controls-only'], history);
 
-    document.removeEventListener('contrast-checker-menu:history-index-changed', handleTopbar);
-    document.removeEventListener('contrast-checker-controls-only:history-index-changed', handleMobile);
+    document.removeEventListener('color-contrast-checker-menu:history-index-changed', handleTopbar);
+    document.removeEventListener('color-contrast-checker-controls-only:history-index-changed', handleMobile);
 
     expect(received).to.deep.equal([
       ['topbar', { historyIndex: 1, historyLength: 2 }],

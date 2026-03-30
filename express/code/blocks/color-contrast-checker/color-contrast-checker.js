@@ -45,7 +45,7 @@ function getPalette(config, strings) {
 }
 
 async function mountContrastChecker(slot, { config, layout, initialPalette }) {
-  const container = createTag('div', { class: 'contrast-checker-container' });
+  const container = createTag('div', { class: 'color-contrast-checker-container' });
   const dataService = createContrastDataService();
   const { foreground, background, name, colors } = initialPalette;
   const { context, actionMenu } = layout;
@@ -176,7 +176,7 @@ export default async function decorate(block) {
       },
       actionMenu: {
         ...createDefaultActionMenuConfig(strings),
-        id: 'contrast-checker-menu',
+        id: 'color-contrast-checker-menu',
         type: isMobileOrTabletViewport() ? 'nav-only' : 'full',
         activeId: 'contrast',
       },
@@ -208,12 +208,12 @@ export default async function decorate(block) {
       destroy: destroyInstance,
     });
 
-    block.classList.add('ax-shell-host', `contrast-checker-${config.variant}`);
+    block.classList.add('ax-shell-host', `color-contrast-checker-${config.variant}`);
     block.dataset.shellState = 'ready';
     block.dataset.blockStatus = 'loaded';
   } catch (error) {
     window.lana?.log(`Contrast Checker init error: ${error.message}`, {
-      tags: 'contrast-checker,init',
+      tags: 'color-contrast-checker,init',
       severity: 'error',
     });
     block.dataset.blockStatus = 'error';

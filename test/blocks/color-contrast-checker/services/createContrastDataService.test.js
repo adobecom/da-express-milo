@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import createContrastDataService from '../../../../express/code/blocks/contrast-checker/services/createContrastDataService.js';
+import createContrastDataService from '../../../../express/code/blocks/color-contrast-checker/services/createContrastDataService.js';
 
 describe('createContrastDataService', () => {
   let service;

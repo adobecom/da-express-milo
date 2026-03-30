@@ -7,7 +7,7 @@ import {
   HISTORY_LIMIT,
   WCAG_THRESHOLDS,
   CONTRAST_PRESETS,
-} from '../../../../express/code/blocks/contrast-checker/utils/contrastConstants.js';
+} from '../../../../express/code/blocks/color-contrast-checker/utils/contrastConstants.js';
 
 describe('contrastConstants', () => {
   describe('PASS and FAIL', () => {

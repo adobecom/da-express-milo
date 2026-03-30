@@ -10,7 +10,7 @@ import {
   convertxyYtosRGB,
   deNormalizeRGB,
   isInRGBGamut,
-} from '../../../../express/code/blocks/contrast-checker/services/contrastConversions.js';
+} from '../../../../express/code/blocks/color-contrast-checker/services/contrastConversions.js';
 
 describe('contrastConversions', () => {
   describe('convertsRGBToLinearRGB', () => {
