@@ -63,7 +63,7 @@ async function handleOpenInExpress({ id, name, colors }) {
 
   const { getTrackingAppendedURL } = await import('../../branchlinks.js');
 
-  const baseUrl = 'https://new.express.adobe.com/new';
+  const baseUrl = 'https://localhost.adobe.com:8080/new';
   const url = new URL(await getTrackingAppendedURL(baseUrl, {
     placement: 'color-explorer',
   }));
@@ -72,8 +72,9 @@ async function handleOpenInExpress({ id, name, colors }) {
   if (name) colorPaletteData.name = name;
 
   url.searchParams.set('colorPalette', JSON.stringify(colorPaletteData));
-  url.searchParams.set('selected-prop', 'theme');
+  url.searchParams.set('referrer', 'express-colors');
   url.searchParams.set('entryPoint', 'color-explorer');
+  url.searchParams.set('feature-enable', 'colors-product-entry-enabled');
 
   window.open(url.toString(), '_blank');
 }

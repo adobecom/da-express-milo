@@ -1,4 +1,4 @@
-import { createTag, getIconElementDeprecated } from '../../../utils.js';
+import { createTag } from '../../../utils.js';
 import createShell from '../createShell.js';
 import { isMobileOrTabletViewport } from '../../utils/utilities.js';
 
@@ -25,39 +25,6 @@ const SLOT_SEMANTICS = {
   canvas: { role: 'region', label: 'Main content' },
   footer: { role: 'region', label: 'Toolbar' },
 };
-
-function buildTextContent(content) {
-  if (!content?.heading && !content?.paragraph) return null;
-
-  const wrapper = createTag('div', { class: 'ax-text-content' });
-
-  const showIcon = content.icon !== false;
-  if (showIcon) {
-    const logoContainer = createTag('div', { class: 'ax-text-content__logo' });
-    const logo = getIconElementDeprecated('adobe-express-logo');
-    logo.classList.add('ax-text-content__logo-icon');
-    logoContainer.appendChild(logo);
-    wrapper.appendChild(logoContainer);
-  }
-
-  const bodyContainer = createTag('div', { class: 'ax-text-content__body' });
-
-  if (content.heading) {
-    content.heading.classList.add('ax-text-content__heading');
-    bodyContainer.appendChild(content.heading);
-  }
-
-  if (content.paragraph) {
-    content.paragraph.classList.add('ax-text-content__paragraph');
-    bodyContainer.appendChild(content.paragraph);
-  }
-
-  if (bodyContainer.children.length > 0) {
-    wrapper.appendChild(bodyContainer);
-  }
-
-  return wrapper;
-}
 
 function clampSpan(value, fallback) {
   const parsed = Number.parseInt(value, 10);
@@ -124,7 +91,6 @@ function initializeShell(config, host) {
 
 function buildSlotElements(
   mobileOrder,
-  content,
   layoutVariant,
   toolbarMode,
   layoutSpans,
@@ -162,13 +128,6 @@ function buildSlotElements(
     const mobileOrderIndex = mobileOrder.indexOf(name);
     if (mobileOrderIndex !== -1) {
       el.style.setProperty('--mobile-order', mobileOrderIndex.toString());
-    }
-
-    if (name === 'sidebar' && content) {
-      const textContent = buildTextContent(content);
-      if (textContent) {
-        el.appendChild(textContent);
-      }
     }
 
     if (layoutVariant === 'canvas-footer' && ['topbar', 'sidebar'].includes(name)) {
@@ -321,13 +280,18 @@ function deferToViewport(target, callback, rootMargin) {
 
   const opts = rootMargin ? { rootMargin } : {};
   return new Promise((resolve) => {
+    let resolved = false;
+    const complete = () => {
+      if (resolved) return;
+      resolved = true;
+      io.disconnect();
+      resolve(callback());
+    };
     const io = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        io.disconnect();
-        resolve(callback());
-      }
+      if (entry.isIntersecting) complete();
     }, opts);
     io.observe(target);
+    setTimeout(complete, 10000);
   });
 }
 
@@ -400,7 +364,6 @@ export default async function createColorToolLayout(container, config = {}) {
     layoutVariant = DEFAULT_LAYOUT_VARIANT,
     toolbar: toolbarConfig = {},
     actionMenu: actionMenuConfig,
-    content,
     layoutSpans,
   } = config;
 
@@ -419,7 +382,6 @@ export default async function createColorToolLayout(container, config = {}) {
 
   const { root, slots } = buildSlotElements(
     mobileOrder,
-    content,
     layoutVariant,
     resolvedToolbarMode,
     resolvedLayoutSpans,
@@ -447,8 +409,9 @@ export default async function createColorToolLayout(container, config = {}) {
   );
 
   // Both components mount simultaneously and hydrate the layout when ready
-  const actionMenuReady = mountActionMenu(slots.topbar, actionMenuConfig, actionMenuModulePromise)
-    .then((handle) => { layout.actionMenu = handle; });
+  layout.actionMenuReady = mountActionMenu(slots.topbar, actionMenuConfig, actionMenuModulePromise)
+    .then((handle) => { layout.actionMenu = handle; return handle; })
+    .catch(() => null);
 
   const toolbarReady = mountToolbar(
     shell, root, slots.footer, resolvedToolbarConfig, toolbarModulePromise,
@@ -464,9 +427,11 @@ export default async function createColorToolLayout(container, config = {}) {
     layout.toolbarState = {
       stickyObserver, cleanupToolbarMount, onPaletteChange,
     };
-  });
+  }).catch(() => {});
 
-  layout.ready = Promise.all([actionMenuReady, toolbarReady]).then(() => layout);
+  layout.ready = Promise.all([layout.actionMenuReady, toolbarReady])
+    .then(() => layout)
+    .catch(() => layout);
 
   return layout;
 }

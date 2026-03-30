@@ -183,6 +183,7 @@ export default async function decorate(block) {
     });
 
     adoptHeadline(block, layoutInstance);
+    await layoutInstance.actionMenuReady;
 
     checkerInstance = await mountContrastChecker(layoutInstance.slots.sidebar, {
       config,

@@ -84,6 +84,7 @@ export default async function decorate(block) {
     });
 
     adoptHeadline(block, layoutInstance);
+    await layoutInstance.actionMenuReady;
 
     const { sidebar, canvas, topbar } = layoutInstance.slots;
     const layoutRoot = sidebar.parentElement;
