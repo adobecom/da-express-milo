@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
-import { createContrastCheckerPlaceholders, DEFAULT_PLACEHOLDERS } from '../../../express/code/blocks/contrast-checker/utils/placeholders.js';
+import { createContrastCheckerPlaceholders, DEFAULT_PLACEHOLDERS } from '../../../express/code/blocks/color-contrast-checker/utils/placeholders.js';
 
-describe('contrast-checker placeholders', () => {
+describe('color-contrast-checker placeholders', () => {
   it('returns default tabs from the shared placeholder source', () => {
     const placeholders = createContrastCheckerPlaceholders();
 

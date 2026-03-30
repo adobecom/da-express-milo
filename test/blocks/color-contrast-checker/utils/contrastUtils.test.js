@@ -1,5 +1,5 @@
 import { expect } from '@esm-bundle/chai';
-import { generateTints, rgbToHex } from '../../../../express/code/blocks/contrast-checker/utils/contrastUtils.js';
+import { generateTints, rgbToHex } from '../../../../express/code/blocks/color-contrast-checker/utils/contrastUtils.js';
 
 const HEX_REGEX = /^#[0-9a-f]{6}$/i;
 

@@ -1,6 +1,6 @@
 import { expect } from '@esm-bundle/chai';
-import createRecommendationService, { getSuggestionTargets } from '../../../../express/code/blocks/contrast-checker/services/createRecommendationService.js';
-import createContrastDataService from '../../../../express/code/blocks/contrast-checker/services/createContrastDataService.js';
+import createRecommendationService, { getSuggestionTargets } from '../../../../express/code/blocks/color-contrast-checker/services/createRecommendationService.js';
+import createContrastDataService from '../../../../express/code/blocks/color-contrast-checker/services/createContrastDataService.js';
 
 describe('createRecommendationService', () => {
   let service;

@@ -15,7 +15,7 @@ import { FAIL, createDefaultActionMenuConfig } from '../utils/contrastConstants.
 import '../../../scripts/color-shared/components/color-channel-slider/index.js';
 
 const regionMap = { largeText: 'heading', smallText: 'body', graphicsAndUi: 'ui' };
-const ACTION_MENU_ID = 'contrast-checker-menu';
+const ACTION_MENU_ID = 'color-contrast-checker-menu';
 const HISTORY_EVENT = `${ACTION_MENU_ID}:history-index-changed`;
 const HISTORY_DEBOUNCE_MS = 300;
 const TINT_COUNT = 21;
@@ -769,7 +769,7 @@ export function createCheckerRenderer(options) {
 
   async function render() {
     container.replaceChildren();
-    container.classList.add('contrast-checker-layout');
+    container.classList.add('color-contrast-checker-layout');
     mobilePreviewHost = null;
 
     await Promise.all([loadBadge(), loadActionButton(), loadTooltip()]);

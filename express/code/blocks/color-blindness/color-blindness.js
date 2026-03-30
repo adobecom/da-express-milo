@@ -52,7 +52,7 @@ export default async function decorate(block) {
 
     const navLinks = [
       { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
-      { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/contrast-checker' },
+      { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/color-contrast-checker' },
       { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/express/colors/color-blindness-simulator' },
     ];
     const controls = [

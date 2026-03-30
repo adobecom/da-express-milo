@@ -1,6 +1,6 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import createHistoryCommitController from '../../../../express/code/blocks/contrast-checker/utils/createHistoryCommitController.js';
+import createHistoryCommitController from '../../../../express/code/blocks/color-contrast-checker/utils/createHistoryCommitController.js';
 import createTestHistoryService from '../helpers/createTestHistoryService.js';
 
 describe('createHistoryCommitController', () => {
