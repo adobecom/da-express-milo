@@ -115,23 +115,12 @@ dropdown.setSuggestions([
 
 ## CSS Lazy Loading
 
-### `loadComponentStyles(cssPath, baseUrl)`
+### `loadMiloStyle(path)`
 
-Lazily loads a CSS file for a component. Ensures each CSS file is only loaded once.
-
-```javascript
-await loadComponentStyles('./component.css', import.meta.url);
-```
-
-### `preloadCSS(cssFiles)`
-
-Preload multiple CSS files in parallel.
+Lazily loads a CSS file via Milo's `loadStyle` utility. The path is relative to `codeRoot`.
 
 ```javascript
-await preloadCSS([
-  { path: './header.css', baseUrl: import.meta.url },
-  { path: './footer.css', baseUrl: import.meta.url },
-]);
+await loadMiloStyle('scripts/color-shared/components/search-bar/styles/search-bar.css');
 ```
 
 ---

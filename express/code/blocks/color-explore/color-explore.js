@@ -7,7 +7,7 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
-import { loadComponentStyles } from '../../scripts/color-shared/utils/loadComponentStyles.js';
+import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import { createLoadingScreenComponent } from '../../scripts/color-shared/components/createLoadingScreenComponent.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 
@@ -36,8 +36,8 @@ const EVENTS = {
 };
 
 const STRIP_SHARED_STYLES = [
-  '../../scripts/color-shared/components/strips/color-strip.css',
-  '../../scripts/color-shared/components/gradients/gradient-strip.css',
+  'scripts/color-shared/components/strips/color-strip.css',
+  'scripts/color-shared/components/gradients/gradient-strip.css',
 ];
 const LOAD_MORE_CLICK_HANDLERS = new WeakMap();
 const LOADING_DEMO_QUERY_PARAM = 'colorExploreLoadingDemo';
@@ -46,7 +46,7 @@ async function loadStripSharedStyles() {
   await Promise.all(
     STRIP_SHARED_STYLES.map(async (href) => {
       try {
-        await loadComponentStyles(href, import.meta.url);
+        await loadMiloStyle(href);
       } catch (error) {
         window.lana?.log(`[ColorExplore] Failed loading shared style ${href}: ${error?.message}`, {
           tags: 'color-explore,css',
