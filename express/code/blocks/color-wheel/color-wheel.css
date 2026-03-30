@@ -329,6 +329,20 @@ color-wheel-express {
   display: none;
 }
 
+.color-wheel[data-sidebar-collapsed] {
+  --cw-sidebar-fr: 0fr;
+}
+
+.color-wheel[data-sidebar-collapsed] .ax-color-tool-layout {
+  column-gap: 0;
+}
+
+.color-wheel[data-sidebar-collapsed] .ax-shell-slot--sidebar {
+  pointer-events: none;
+  align-self: start;
+  height: 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .color-wheel-harmony-carousel-host .simple-carousel-platform {
     scroll-behavior: auto;
@@ -412,7 +426,6 @@ color-wheel-express {
     min-height: 0;
     overflow: hidden;
     grid-column: 1;
-    transition: opacity 0.35s ease;
   }
 
   .color-wheel .ax-shell-slot--topbar,
@@ -506,19 +519,4 @@ color-wheel-express {
   .color-wheel .color-explorer-strip-container color-swatch-rail[orientation="vertical"] {
     height: 600px;
   }
-}
-
-.color-wheel[data-sidebar-collapsed] {
-  --cw-sidebar-fr: 0fr;
-}
-
-.color-wheel[data-sidebar-collapsed] .ax-color-tool-layout {
-  column-gap: 0;
-}
-
-.color-wheel[data-sidebar-collapsed] .ax-shell-slot--sidebar {
-  opacity: 0;
-  pointer-events: none;
-  align-self: start;
-  height: 0;
 }

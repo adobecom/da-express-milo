@@ -1,13 +1,8 @@
-.action-menu-full {
-  display: flex;
-  flex-flow: row nowrap;
-  justify-content: space-between;
-}
-
+.action-menu-full,
 .action-menu-nav-only {
   display: flex;
   padding-block: var(--spacing-100);
-  border-bottom: var(--Palette-gray-100);
+  border-bottom: 1px solid var(--Palette-gray-100);
 }
 
 .action-menu-nav {
@@ -69,6 +64,7 @@
 .color-action-button svg {
   width: 20px;
   height: 20px;
+  display: flex;
 }
 
 .color-action-button svg :is(path, rect) {
@@ -121,4 +117,14 @@
 .action-menu-full.expanded .contrast-link,
 .action-menu-full.expanded .color-blindness-link {
   display: none;
+}
+
+@media (min-width: 1200px) {
+  .action-menu-full {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    padding-block: 0;
+    border-bottom: none;
+  }
 }

@@ -83,6 +83,8 @@ let paletteUnsubscribe = null;
 let swatchRailController = null;
 let imagePanelDestroy = null;
 let baseColorAdapter = null;
+let sidebarNaturalWidth = 0;
+let sidebarTransitionCleanup = null;
 
 function swatchHexListFromState(state) {
   const swatches = state?.swatches || [];
@@ -524,6 +526,9 @@ function cleanup() {
   stripRenderer = null;
   layoutInstance?.destroy();
   layoutInstance = null;
+  sidebarTransitionCleanup?.();
+  sidebarTransitionCleanup = null;
+  sidebarNaturalWidth = 0;
 }
 
 export default async function decorate(block) {
@@ -562,11 +567,43 @@ export default async function decorate(block) {
         ...DEFAULT_ACTION_MENU_CONFIG,
         type: isDesktop ? 'full' : 'nav-only',
         onExpand: (expanded) => {
+          const sidebarSlot = block.querySelector('.ax-shell-slot--sidebar');
+          const layout = block.querySelector('.ax-color-tool-layout');
+
+          sidebarTransitionCleanup?.();
+          sidebarTransitionCleanup = null;
+
+          if (!sidebarSlot || !layout) {
+            if (expanded) block.dataset.sidebarCollapsed = '';
+            else delete block.dataset.sidebarCollapsed;
+            return;
+          }
+
           if (expanded) {
+            const rect = sidebarSlot.getBoundingClientRect();
+            sidebarNaturalWidth = rect.width;
+            sidebarSlot.style.minWidth = `${sidebarNaturalWidth}px`;
+            // Pin height to current pixel value so flex children (sp-theme) don't collapse
+            sidebarSlot.style.height = `${rect.height}px`;
             block.dataset.sidebarCollapsed = '';
           } else {
+            sidebarSlot.style.minWidth = `${sidebarNaturalWidth || 300}px`;
             delete block.dataset.sidebarCollapsed;
           }
+
+          const onTransitionEnd = (e) => {
+            if (e.propertyName !== 'grid-template-columns') return;
+            sidebarSlot.style.minWidth = '';
+            sidebarSlot.style.height = '';
+            layout.removeEventListener('transitionend', onTransitionEnd);
+            sidebarTransitionCleanup = null;
+          };
+          layout.addEventListener('transitionend', onTransitionEnd);
+          sidebarTransitionCleanup = () => {
+            sidebarSlot.style.minWidth = '';
+            sidebarSlot.style.height = '';
+            layout.removeEventListener('transitionend', onTransitionEnd);
+          };
         },
       },
       content: {
