@@ -7,7 +7,6 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
-import { createLoadingScreenComponent } from '../../scripts/color-shared/components/createLoadingScreenComponent.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 
@@ -20,10 +19,6 @@ const DEFAULTS = {
   maxItems: 100,
   enableFilters: true,
   enableSearch: true,
-  useMockData: false,
-  useMockFallback: true,
-  // [DEMO ONLY][MWPW-186947] remove after loading-screen PR lands
-  loadingScreenDemo: false,
   apiEndpoint: '',
 };
 const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
@@ -41,31 +36,6 @@ const STRIP_SHARED_STYLES = [
   'scripts/color-shared/components/gradients/gradient-strip.css',
 ];
 const LOAD_MORE_CLICK_HANDLERS = new WeakMap();
-// [DEMO ONLY][MWPW-186947] remove block below after loading-screen PR lands
-const LOADING_DEMO_QUERY_PARAM = 'colorExploreLoadingDemo';
-
-function isLoadingDemoMode(config = {}) {
-  if (config?.loadingScreenDemo === true) return true;
-
-  try {
-    const params = new URLSearchParams(window.location.search || '');
-    const value = (params.get(LOADING_DEMO_QUERY_PARAM) || '').trim().toLowerCase();
-    return value === '1' || value === 'true';
-  } catch (error) {
-    return false;
-  }
-}
-
-async function mountLoadingScreenDemo(container, config) {
-  const loading = createLoadingScreenComponent({
-    variant: config.variant === VARIANTS.GRADIENTS ? VARIANTS.GRADIENTS : VARIANTS.STRIPS,
-    cardCount: config.initialLoad,
-  });
-
-  container.replaceChildren(loading.element);
-  await loading.show();
-}
-// [DEMO ONLY] end
 
 async function loadStripSharedStyles() {
   await Promise.all(
@@ -228,29 +198,18 @@ export default async function decorate(block) {
     container.className = CSS_CLASSES.CONTAINER;
     themeHost.appendChild(container);
 
-    // [DEMO ONLY][MWPW-186947] remove after loading-screen PR lands.
-    if (isLoadingDemoMode(config)) {
-      await mountLoadingScreenDemo(container, config);
-      block.dataset.blockStatus = 'loaded';
-      return;
-    }
-
     if (config.variant === VARIANTS.GRADIENTS || config.variant === VARIANTS.STRIPS) {
       const gradientsDataService = createSharedColorDataService({
         variant: VARIANTS.GRADIENTS,
         initialLoad: config.initialLoad,
         maxItems: config.maxItems,
         apiEndpoint: config.apiEndpoint,
-        useMockData: config.useMockData,
-        useMockFallback: config.useMockFallback,
       });
       const palettesDataService = createSharedColorDataService({
         variant: 'palettes',
         initialLoad: config.initialLoad,
         maxItems: config.maxItems,
         apiEndpoint: config.apiEndpoint,
-        useMockData: config.useMockData,
-        useMockFallback: config.useMockFallback,
       });
       const modalManager = createModalManager();
       const stateKey = `color-explore-${VARIANTS.GRADIENTS}`;
@@ -566,8 +525,6 @@ export default async function decorate(block) {
         initialLoad: config.initialLoad,
         maxItems: config.maxItems,
         apiEndpoint: config.apiEndpoint,
-        useMockData: config.useMockData,
-        useMockFallback: config.useMockFallback,
       });
 
       block.classList.add(CSS_CLASSES.LOADING);
