@@ -116,13 +116,18 @@
  */
 body:has(.color-headline.extract) .color-extract .color-extract-landing {
   overflow: visible;
-  padding-top: 32px;
+  padding-top: 0;
   min-height: 580px;
 }
 
 body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
-  --ce-bg-extend: 320px;
+  --ce-bg-extend: 344px;
   top: calc(-1 * var(--ce-bg-extend));
+  /* Break out of the 640px marquee wrapper so bg images span the full viewport */
+  width: 100vw;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
 }
 
 body:has(.color-headline.extract) .color-extract .color-extract-landing-bg picture,
