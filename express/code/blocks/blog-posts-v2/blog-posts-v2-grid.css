@@ -1,0 +1,159 @@
+.section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
+  padding-left: var(--ax-grid-margin);
+  padding-right: var(--ax-grid-margin);
+}
+
+main .blog-posts-v2.grid {
+  position: relative;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+main .blog-posts-v2.grid .blog-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-300);
+  width: 100%;
+}
+
+main .blog-posts-v2.grid .blog-posts-header {
+  margin-bottom: var(--spacing-500);
+  gap: var(--spacing-300);
+}
+
+main .blog-posts-v2.grid .blog-posts-header :is(h1, h2, h3, h4, h5, h6) {
+  font-size: var(--ax-heading-l-size);
+  line-height: var(--heading-line-height);
+}
+
+main .blog-posts-v2.grid .blog-card {
+  width: 100%;
+  min-width: 0;
+  border-radius: var(--spacing-300);
+}
+
+main .blog-posts-v2.grid .blog-card .blog-card-body {
+  border-color: var(--color-gray-300);
+}
+
+main .blog-posts-v2.grid > .load-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-100);
+  margin-top: var(--spacing-500);
+  border-radius: var(--border-radius-max);
+  padding: var(--button-padding-top) var(--spacing-300) var(--button-padding-bottom) var(--spacing-300);
+  border: var(--border-width-2) solid var(--color-info-secondary);
+  background-color: var(--color-info-secondary);
+  color: var(--color-black);
+  font-size: var(--body-font-size-s);
+  font-weight: 600;
+  line-height: 130%;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background-color 0.3s, color 0.3s, border 0.3s;
+}
+
+main .blog-posts-v2.grid > .load-more:hover {
+  background-color: var(--color-info-secondary-hover);
+  border-color: var(--color-info-secondary-hover);
+}
+
+main .blog-posts-v2.grid > .load-more:active {
+  background-color: var(--color-info-secondary-down);
+  border-color: var(--color-info-secondary-down);
+}
+
+main .blog-posts-v2.grid > .load-more:focus-visible {
+  background-color: var(--color-gray-700);
+  border-color: var(--color-gray-500);
+  color: var(--color-white);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-gray-500);
+}
+
+main .blog-posts-v2.grid > .load-more .load-more-icon {
+  display: inline-flex;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  background-color: currentColor;
+  mask-image: url('/express/code/icons/plus-icon.svg');
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-image: url('/express/code/icons/plus-icon.svg');
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+}
+
+main .blog-posts-v2.grid > .load-more .load-more-text {
+  font-weight: 700;
+  font-size: var(--body-font-size-m);
+}
+
+main .blog-posts-v2.grid > .load-more.disabled {
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
+  line-height: var(--body-line-height);
+}
+
+@media (min-width: 600px) {
+  .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
+    padding-left: var(--ax-grid-margin);
+    padding-right: var(--ax-grid-margin);
+    max-width: var(--block-wd-grid-max-width);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  main .blog-posts-v2.grid .blog-cards {
+    grid-template-columns: repeat(auto-fill, minmax(267px, 1fr));
+    gap: var(--spacing-300) var(--ax-grid-gutter);
+  }
+
+  main .blog-posts-v2.grid .blog-card {
+    width: 100%;
+  }
+}
+
+@media (min-width: 1024px) {
+  .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
+    padding-top: var(--spacing-900);
+    padding-bottom: var(--spacing-900);
+    max-width: var(--block-wd-grid-max-width);
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  main .blog-posts-v2.grid .blog-cards {
+    width: 100%;
+  }
+
+  main .blog-posts-v2.grid .blog-posts-header :is(h1, h2, h3, h4, h5, h6) {
+    font-size: var(--ax-heading-l-size);
+    line-height: var(--heading-line-height);
+  }
+}
+
+@media (min-width: 1200px) {
+  .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
+    padding-left: var(--ax-grid-margin);
+    padding-right: var(--ax-grid-margin);
+  }
+
+  main .blog-posts-v2.grid {
+    max-width: var(--block-wd-grid-max-width);
+  }
+
+  main .blog-posts-v2.grid .blog-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-400) var(--ax-grid-gutter);
+  }
+}

@@ -7,6 +7,15 @@ import { serviceManager } from '../../../express/code/libs/services/index.js';
 
 setLibs('/libs');
 
+// Suppress benign ResizeObserver loop notifications that the test runner
+// would otherwise report as unhandled errors.
+window.addEventListener('error', (event) => {
+  if (event?.message?.includes('ResizeObserver loop')) {
+    event.preventDefault();
+    event.stopImmediatePropagation();
+  }
+}, true);
+
 sinon.stub(serviceManager, 'init').resolves(serviceManager);
 sinon.stub(serviceManager, 'getProvider').resolves(null);
 
@@ -53,14 +62,21 @@ describe('color-blindness block', () => {
       });
     });
 
-    it('renders heading text content in sidebar', () => {
-      const heading = block.querySelector('.ax-text-content__heading');
+    it('adopts headline into sidebar', () => {
+      const sidebar = block.querySelector('[data-shell-slot="sidebar"]');
+      const headline = sidebar.querySelector('.color-headline.tools');
+      expect(headline).to.exist;
+      expect(headline.dataset.adopted).to.equal('true');
+    });
+
+    it('renders heading text in adopted headline', () => {
+      const heading = block.querySelector('.color-headline.tools h2');
       expect(heading).to.exist;
       expect(heading.textContent).to.equal('Color Blindness Simulator');
     });
 
-    it('renders paragraph text content in sidebar', () => {
-      const paragraph = block.querySelector('.ax-text-content__paragraph');
+    it('renders paragraph text in adopted headline', () => {
+      const paragraph = block.querySelector('.color-headline.tools p');
       expect(paragraph).to.exist;
       expect(paragraph.textContent).to.equal('Check your palette for color blind conflicts');
     });
@@ -131,15 +147,15 @@ describe('color-blindness block', () => {
     });
   });
 
-  describe('decoration with empty content', () => {
+  describe('decoration without headline sibling', () => {
     let block;
 
     before(async () => {
-      block = document.querySelector('#cb-no-content');
+      block = document.querySelector('#cb-no-headline');
       await decorate(block);
     });
 
-    it('sets data-block-status to loaded even without content', () => {
+    it('sets data-block-status to loaded even without headline', () => {
       expect(block.dataset.blockStatus).to.equal('loaded');
     });
 
@@ -148,15 +164,13 @@ describe('color-blindness block', () => {
       expect(block.querySelector('[data-shell-slot="canvas"]')).to.exist;
     });
 
-    it('does not render text content when block has no rows', () => {
-      const heading = block.querySelector('.ax-text-content__heading');
-      const paragraph = block.querySelector('.ax-text-content__paragraph');
-      expect(heading).to.be.null;
-      expect(paragraph).to.be.null;
+    it('does not adopt a headline when none exists', () => {
+      const headline = block.querySelector('.color-headline');
+      expect(headline).to.be.null;
     });
   });
 
-  describe('decoration with heading only', () => {
+  describe('decoration with heading-only headline', () => {
     let block;
 
     before(async () => {
@@ -164,12 +178,12 @@ describe('color-blindness block', () => {
       await decorate(block);
     });
 
-    it('renders heading without paragraph', () => {
-      const heading = block.querySelector('.ax-text-content__heading');
+    it('adopts headline with heading but no paragraph', () => {
+      const heading = block.querySelector('.color-headline.tools h2');
       expect(heading).to.exist;
       expect(heading.textContent).to.equal('Only a heading');
 
-      const paragraph = block.querySelector('.ax-text-content__paragraph');
+      const paragraph = block.querySelector('.color-headline.tools p');
       expect(paragraph).to.be.null;
     });
   });
@@ -178,22 +192,16 @@ describe('color-blindness block', () => {
     it('cleans up and re-decorates without errors', async () => {
       const block = document.createElement('div');
       block.className = 'color-blindness';
-      block.innerHTML = '<div><div>pageheading</div><div><h2>Test</h2></div></div>';
       document.body.appendChild(block);
 
       await decorate(block);
       expect(block.dataset.blockStatus).to.equal('loaded');
 
-      block.innerHTML = '<div><div>pageheading</div><div><h2>Re-test</h2></div></div>';
       await decorate(block);
       expect(block.dataset.blockStatus).to.equal('loaded');
 
       const layouts = block.querySelectorAll('.ax-color-tool-layout');
       expect(layouts.length).to.equal(1);
-
-      const heading = block.querySelector('.ax-text-content__heading');
-      expect(heading).to.exist;
-      expect(heading.textContent).to.equal('Re-test');
 
       block.remove();
     });
@@ -209,28 +217,32 @@ describe('color-blindness block', () => {
       await decorate(block);
       expect(block.dataset.blockStatus).to.equal('loaded');
 
-      const heading = block.querySelector('.ax-text-content__heading');
-      const paragraph = block.querySelector('.ax-text-content__paragraph');
-      expect(heading).to.be.null;
-      expect(paragraph).to.be.null;
+      const headline = block.querySelector('.color-headline');
+      expect(headline).to.be.null;
 
       block.remove();
     });
   });
 
   describe('error handling', () => {
-    // serviceManager.init is called internally by createColorToolLayout
     it('sets data-block-status to error when decoration fails', async () => {
-      serviceManager.init.rejects(new Error('service unavailable'));
-
       const block = document.createElement('div');
       block.className = 'color-blindness';
       document.body.appendChild(block);
 
+      // Force a failure inside the try block by breaking appendChild
+      // after the initial status is set
+      const origAppendChild = block.appendChild.bind(block);
+      let callCount = 0;
+      block.appendChild = (child) => {
+        callCount += 1;
+        if (callCount > 0) throw new Error('simulated DOM failure');
+        return origAppendChild(child);
+      };
+
       await decorate(block);
       expect(block.dataset.blockStatus).to.equal('error');
 
-      serviceManager.init.resolves(serviceManager);
       block.remove();
     });
   });

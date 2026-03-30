@@ -36,6 +36,7 @@
   --color-blue-700: #005ECB;
   --color-blue-800: #4B75FF;
   --color-black: #000;
+  --color-focus-ring-strong: #4B75FF;
   --color-content-neutral: #222222;
   --color-brand-title: #000b1d;
   --color-info-accent: #5c5ce0;
@@ -56,9 +57,17 @@
   --gradient-highlight-vertical: linear-gradient(15deg, #7c84fc, #ff4dd2);
   --gradient-highlight-horizontal: linear-gradient(90deg, #ff4dd2, #7c84fc);
   --gradient-highlight-diagonal: linear-gradient(45deg, #7c84fc, #ff4dd2);
+  --cyan-1600: #000E14;
+  --cyan-1500: #001F2B;
+  --transparent-white-400: rgba(255, 255, 255, 0.21);
+  --transparent-white-500: rgba(255, 255, 255, 0.39);
   --palette-indigo-200: #E0E2FF;
   --palette-indigo-1000: #4046CA;
+  --carwash-blue: var(--palette-indigo-1000);
   --palette-gray-200: #E6E6E6;
+  --palette-gray-600: #717171;
+  --palette-gray-700: #505050;
+  --palette-gray-900: #131313;
   --background-positive-default: #007A4D;
 
   /* new styles with similar names and shades */
@@ -70,7 +79,7 @@
   /* body */
   --body-background-color: var(--color-white);
   --body-alt-background-color: var(--color-gray-200);
-  --body-font-family: 'adobe-clean', 'Adobe Clean', 'Trebuchet MS', sans-serif;
+  --body-font-family: 'adobe-clean', 'Adobe Clean', 'adobe-clean-fallback', 'Trebuchet MS', sans-serif;
   --body-serif-font-family: 'adobe-clean-serif', 'Adobe Clean Serif', serif;
   --body-font-weight: normal;
   --body-color: var(--color-gray-800);
@@ -103,6 +112,7 @@
   /* 45px */
   --heading-font-size-l: 2.25rem;
   /* 36px */
+  --heading-font-size-2xl: 45px;
   --heading-font-size-m: 1.75rem;
   /* 28px */
   --heading-font-size-s: 1.375rem;
@@ -137,6 +147,9 @@
   --spacing-800: 64px;
   --spacing-900: 80px;
   --spacing-1000: 96px;
+  --Spacing-spacing-300: var(--spacing-300);
+  --Radius-corner-radius-200: var(--spacing-300);
+  --SN-Radius-corner-radius-full: 2000px;
 
   /* Color Explore */
   --color-explore-filter-picker-width: 144px;
@@ -150,6 +163,15 @@
   --S2-Buttons-Premium: linear-gradient(95.85deg, #b539c8, #7155fa 66%, #3b63fb);
   --S2-Buttons-Premium-Hover: linear-gradient(96deg, #9C28AF 0%, #6338EE 66%, #274DEA 100%);
   --S2-Buttons-Premium-Down: linear-gradient(96deg, #871B9A 0%, #5424DB 66%, #1D3ECF 100%);
+  --Alias-background-app-frame-layer-2: var(--color-white);
+  --Alias-drop-shadow-elevated-key: rgba(0, 0, 0, 0.12);
+  --Alias-drop-shadow-transition: rgba(0, 0, 0, 0.04);
+  --Alias-drop-shadow-ambient: rgba(0, 0, 0, 0.08);
+  --Alias-drop-shadow-emphasized-hover-key: rgba(0, 0, 0, 0.12);
+  --Alias-drop-shadow-emphasized-key: rgba(0, 0, 0, 0.08);
+  --Background-sx-extra-subdued-hover: var(--color-gray-325);
+  --Background-sx-extra-subdued-down: var(--color-gray-350-variant);
+  --Content-disabled-default: var(--color-gray-350-variant);
   /* current ax-grid system */
   --ax-grid-margin: 20px;
   --ax-grid-gutter: 8px;
@@ -229,13 +251,16 @@
   --color-light-gray-2: #e1e1e1;
 
   --border-radius-10: 10px;
+  --border-radius-max: 999px;
+
+  --button-padding-top: 13px;
+  --button-padding-bottom: 13px;
 
   --border-width-2: 2px;
 
   --Corner-radius-corner-radius-100: 8px;
   --Corner-radius-corner-radius-200: 16px;
   --Corner-radius-corner-radius-500: 100px;
-  --Global-Typography-Size-Title-Title-XS: 18px;
 
   --mod-swatch-border-radius: 3px;
 
@@ -256,6 +281,13 @@
   --Alias-drop-shadow-elevated-key: 0 0 2px 0 rgba(0, 0, 0, 0.12);
   --Modal-close-shadow-tablet: 0 0 12px rgba(0, 0, 0, 0.16);
   --Modal-close-shadow-desktop: 0 0 2px rgba(0, 0, 0, 0.12), 0 2px 6px rgba(0, 0, 0, 0.04), 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  --Global-Typography-Size-Headings-Heading-2XL: 32px;
+  --Global-Typography-Size-Headings-Heading-XL: 28px;
+  --Global-Typography-Size-Headings-Heading-L: 24px;
+  --Global-Typography-Size-Title-Title-XS: 16px;
+  --Global-Typography-Line-height-Title-Title-XS: 20px;
+  --Global-Typography-Size-Body-Body-M: 16px;
 
   --Global-Typography-Size-Label-Label-L: 16px;
   --Global-Typography-Line-height-Label-Label-L: 22px;
@@ -288,6 +320,7 @@
   }
 }
 
+
 @media (min-width: 1200px) {
   :root {
     --ax-grid-margin: 40px;
@@ -309,6 +342,12 @@
     --ax-heading-xs-size: 18px;
     --ax-heading-xs-lh: 22.5px;
 
+    --Global-Typography-Size-Headings-Heading-2XL: 44px;
+    --Global-Typography-Size-Headings-Heading-XL: 36px;
+    --Global-Typography-Size-Headings-Heading-L: 28px;
+    --Global-Typography-Size-Title-Title-XS: 18px;
+    --Global-Typography-Line-height-Title-Title-XS: 22px;
+    --Global-Typography-Size-Body-Body-M: 18px;
     --typography-title-2xs: 16px;
     --typography-line-height-Title-2xs: 22px;
   }
@@ -1345,13 +1384,17 @@ main .section.long-form.narrow {
   margin: 0 auto;
 }
 
-main .section.long-form .content {
+main .section.long-form .content,
+main .section.long-form .text .foreground {
   box-sizing: border-box;
   padding-left: 20px;
   padding-right: 20px;
   max-width: unset;
   width: var(--ax-grid-12-col-width);
   margin: 0 auto;
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 main .section.long-form .content h1 {
@@ -1362,6 +1405,11 @@ main .section.long-form .content h2 {
   font-size: var(--heading-font-size-m);
 }
 
+main .section.long-form.long-form-blog .content h2 {
+  font-size: var(--Global-Typography-Size-Headings-Heading-XL);
+  line-height: 104%;
+}
+
 main .section.long-form .content h3,
 main .section.long-form .content h4,
 main .section.long-form .content h5,
@@ -1369,16 +1417,24 @@ main .section.long-form .content h6 {
   font-size: var(--heading-font-size-s);
 }
 
+main .section.long-form.long-form-blog .content :is(h3, h4, h5, h6) {
+  font-size: var(--Global-Typography-Size-Headings-Heading-L);
+  line-height: 104%;
+}
+
 main .section.long-form .content,
-main .section.long-form .content p:not(.button-container, :has(.con-button)),
-main .section.long-form .content h1,
-main .section.long-form .content h2,
-main .section.long-form .content h3,
-main .section.long-form .content h4,
-main .section.long-form .content h5,
-main .section.long-form .content h6 {
+main .section.long-form .content :is(p:not(.button-container, :has(.con-button)), h1, h2, h3, h4, h5, h6) {
   text-align: left;
   color: var(--color-gray-700);
+}
+
+main .section.long-form .content,
+main .section.long-form .content p:not(.button-container, :has(.con-button)) {
+  color: var(--palette-gray-700);
+}
+
+main .section.long-form .content :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--palette-gray-900);
 }
 
 main .section.long-form .content h1,
@@ -1386,14 +1442,32 @@ main .section.long-form .content h2,
 main .section.long-form .content h3,
 main .section.long-form .content h4 {
   margin-top: 0;
+  color: var(--color-gray-950);
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 main .section.long-form .content p {
   margin-top: 16px;
 }
 
+main .section.long-form .content :is(p, ul, ol) {
+  font-size: var(--Global-Typography-Size-Body-Body-M);
+  line-height: 130%;
+}
+
+main .section.long-form-blog .content .button-container a {
+  margin-bottom: 8px;
+}
+
+main .section.long-form-blog .milo-video {
+  margin-bottom: var(--spacing-400);
+}
+
 @media (min-width: 768px) {
-  main .section.long-form .content {
+  main .section.long-form .content,
+  main .section.long-form .text .foreground {
     padding: 0 40px 0;
     width: var(--ax-grid-8-col-width);
     margin: 0 auto;
@@ -1402,7 +1476,8 @@ main .section.long-form .content p {
 }
 
 @media (min-width: 1024px) {
-  main .section.long-form .content {
+  main .section.long-form .content,
+  main .section.long-form .text .foreground {
     /* Desktop: 7 columns, shifted right to accommodate fixed TOC */
     max-width: var(--ax-grid-7-col-width);
     margin-left: calc(var(--ax-grid-3-col-width) + var(--spacing-600) + var(--ax-grid-gutter));
@@ -1411,7 +1486,8 @@ main .section.long-form .content p {
 }
 
 @media (min-width: 1680px) {
-  main .section.long-form .content {
+  main .section.long-form .content,
+  main .section.long-form .text .foreground {
     margin: 0 auto;
   }
 }
@@ -1660,6 +1736,13 @@ main .section.zero-margin:not([data-padding='none']) .content:first-child {
 main .section.no-h2-margin h2,
 main .section.no-h2-margin .content h2 {
   margin: 0;
+}
+
+.text.ax-eyebrow :is([class^="heading-"]:only-child, [class^="body-"]:only-child, [class^="detail-"]) {
+  color: var(--palette-gray-600);
+  font-size: var(--Global-Typography-Size-Title-Title-XS);
+  line-height: var(--Global-Typography-Line-height-Title-Title-XS);
+  font-weight: 700;
 }
 
 /* ===== EXPRESS TYPOGRAPHY CLASSES (ax- namespace) ===== */

@@ -54,6 +54,7 @@ function preloadBackgroundImage(imagePath) {
 
   const preloadLink = document.createElement('link');
   preloadLink.rel = 'preload';
+  preloadLink.fetchPriority = 'high';
   preloadLink.as = 'image';
   preloadLink.href = imagePath;
   document.head.appendChild(preloadLink);
@@ -134,7 +135,7 @@ async function formatPhoneNumbers(block) {
   try {
     await formatSalesPhoneNumber(phoneTags);
   } catch (error) {
-    window.lana?.log('banner-bg.js - error formatting phone numbers:', error.message);
+    window.lana?.log(`Error formatting phone numbers: ${error.message}`, { tags: 'banner-bg', severity: 'error' });
   }
 }
 

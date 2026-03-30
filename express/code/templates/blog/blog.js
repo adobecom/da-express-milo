@@ -165,4 +165,9 @@ export default async function decorateBlogPage() {
   });
 }
 
-await decorateBlogPage();
+/* Don't use blog template with redesign */
+if (document.querySelector('.blog-article-marquee')) {
+  document.body.classList.remove('blog');
+} else {
+  await decorateBlogPage();
+}

@@ -33,7 +33,7 @@ main .section:has(.blog-posts-wrapper) div.blog-posts-decoration {
 
 main .section:has(.blog-posts) div.blog-posts-decoration p {
     margin: 0;
-    font-family: var(--body-serif-font-family);
+    font-family: var(--body-font-family);
 }
 
 main .section:has(.blog-posts) div.blog-posts-decoration p a {
@@ -135,7 +135,7 @@ main .blog-posts .blog-card p.blog-card-teaser {
     font-size: var(--body-font-size-m);
     line-height: var(--body-line-height);
     font-weight: normal;
-    font-family: var(--body-serif-font-family);
+    font-family: var(--body-font-family);
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
@@ -145,7 +145,7 @@ main .blog-posts .blog-card p.blog-card-teaser {
 
 
 main .blog-posts .blog-hero-card p.blog-card-teaser {
-    font-family: var(--body-serif-font-family);
+    font-family: var(--body-font-family);
     font-size: var(--body-font-size-l);
     text-align: left;
     grid-area: teaser;
@@ -156,7 +156,7 @@ main .blog-posts .blog-hero-card p.blog-card-teaser {
 main .blog-posts p.blog-card-date {
     font-size: var(--body-font-size-s);
     line-height: var(--body-line-height);
-    font-family: var(--body-serif-font-family);
+    font-family: var(--body-font-family);
     font-weight: var(--heading-font-weight);
     grid-area: date;
 }

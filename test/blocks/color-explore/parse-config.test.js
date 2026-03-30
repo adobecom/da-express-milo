@@ -23,7 +23,6 @@ describe('parseBlockConfig', () => {
     showReviewSection: false,
     enableGradientEditor: false,
     enableSizesDemo: false,
-    loadingScreenDemo: false,
   };
 
   it('parses supported keys and preserves defaults for invalid numbers', () => {
@@ -37,7 +36,6 @@ describe('parseBlockConfig', () => {
       createRow('show review section', '1'),
       createRow('enable gradient editor', 'true'),
       createRow('enable sizes demo', 'true'),
-      createRow('loading screen demo', '1'),
     ];
 
     const config = parseBlockConfig(rows, defaults);
@@ -51,7 +49,6 @@ describe('parseBlockConfig', () => {
     expect(config.showReviewSection).to.equal(true);
     expect(config.enableGradientEditor).to.equal(true);
     expect(config.enableSizesDemo).to.equal(true);
-    expect(config.loadingScreenDemo).to.equal(true);
   });
 
   it('clamps swatchVerticalMaxPerRow to 1..10 for both key aliases', () => {

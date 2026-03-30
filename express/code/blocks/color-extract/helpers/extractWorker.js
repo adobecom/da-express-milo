@@ -1,10 +1,10 @@
-/* eslint-disable */
 /**
  * Inline Web Worker for intelligent color extraction from images.
  * Ported from colorweb's imageExtraction.js — uses HSV histogram binning,
  * mood-weighted normalization, and energy-minimization color selection.
  */
 
+/* eslint-disable no-var, prefer-arrow-callback, func-style, no-use-before-define */
 const WORKER_SOURCE = `
 var NUM_BINS_H = 64;
 var NUM_BINS_S = 64;
@@ -370,16 +370,33 @@ self.addEventListener('message', function(e) {
     return { x: p.x / d.width, y: p.y / d.height };
   });
 
-  self.postMessage({ colors: colors, points: points });
+  self.postMessage({ id: d.id, colors: colors, points: points });
 });
-`;
+`; /* eslint-enable no-var, prefer-arrow-callback, func-style, no-use-before-define */
 
 let _worker = null;
+let _pendingRequests = {};
+let _nextId = 0;
 
 function getWorker() {
   if (!_worker) {
     const blob = new Blob([WORKER_SOURCE], { type: 'application/javascript' });
     _worker = new Worker(URL.createObjectURL(blob));
+    _worker.addEventListener('message', (e) => {
+      const { id, ...data } = e.data;
+      const pending = _pendingRequests[id];
+      if (pending) {
+        delete _pendingRequests[id];
+        pending.resolve(data);
+      }
+    });
+    _worker.addEventListener('error', (err) => {
+      const ids = Object.keys(_pendingRequests);
+      ids.forEach((id) => {
+        _pendingRequests[id].reject(err);
+        delete _pendingRequests[id];
+      });
+    });
   }
   return _worker;
 }
@@ -397,22 +414,9 @@ function getWorker() {
 export function extractColorsFromImage(imageData, width, height, swatchCount, mood = 'colorful') {
   return new Promise((resolve, reject) => {
     const worker = getWorker();
-
-    const onMessage = (e) => {
-      worker.removeEventListener('message', onMessage);
-      worker.removeEventListener('error', onError);
-      resolve(e.data);
-    };
-
-    const onError = (err) => {
-      worker.removeEventListener('message', onMessage);
-      worker.removeEventListener('error', onError);
-      reject(err);
-    };
-
-    worker.addEventListener('message', onMessage);
-    worker.addEventListener('error', onError);
-    worker.postMessage({ imageData, width, height, swatchCount, mood });
+    const id = _nextId++;
+    _pendingRequests[id] = { resolve, reject };
+    worker.postMessage({ id, imageData, width, height, swatchCount, mood });
   });
 }
 
@@ -420,5 +424,6 @@ export function terminateWorker() {
   if (_worker) {
     _worker.terminate();
     _worker = null;
+    _pendingRequests = {};
   }
 }

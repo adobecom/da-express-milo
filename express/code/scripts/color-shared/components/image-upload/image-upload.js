@@ -3,9 +3,9 @@ import { createTag } from '../../../utils.js';
 const SUPPORTED_TYPES = ['image/'];
 const CLS = 'image-upload-dropzone';
 
-const UPLOAD_SVG = `<svg viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-  <path d="M10 3l4 4-1.4 1.4L11 6.8V14H9V6.8L7.4 8.4 6 7z" fill="currentColor"/>
-  <path d="M4 16h12v-2H4z" fill="currentColor"/>
+const UPLOAD_SVG = `<svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+  <path d="M17.5856 13.6386L13.6824 9.74109C13.3015 9.36023 12.6852 9.36023 12.3043 9.74109L8.40747 13.6386C8.02661 14.0194 8.02661 14.6364 8.40747 15.0173C8.5979 15.2077 8.84737 15.3029 9.09682 15.3029C9.34628 15.3029 9.59575 15.2077 9.78617 15.0173L12.025 12.7784V23.4127C12.025 23.951 12.4617 24.3877 13 24.3877C13.5383 24.3877 13.975 23.951 13.975 23.4127V12.788L16.2081 15.0173C16.589 15.3981 17.206 15.3981 17.5868 15.0173C17.967 14.6364 17.967 14.0182 17.5856 13.6386Z" fill="white"/>
+  <path d="M20.4751 22.1H16.8366C16.2983 22.1 15.8616 21.6633 15.8616 21.125C15.8616 20.5867 16.2983 20.15 16.8366 20.15H20.4751C21.0127 20.15 21.4501 19.712 21.4501 19.175V5.52498C21.4501 4.98796 21.0127 4.54998 20.4751 4.54998H5.5251C4.98746 4.54998 4.5501 4.98796 4.5501 5.52498V19.175C4.5501 19.712 4.98746 20.15 5.5251 20.15H9.06836C9.60664 20.15 10.0434 20.5867 10.0434 21.125C10.0434 21.6633 9.60664 22.1 9.06836 22.1H5.5251C3.91216 22.1 2.6001 20.7873 2.6001 19.175V5.52498C2.6001 3.91268 3.91216 2.59998 5.5251 2.59998H20.4751C22.088 2.59998 23.4001 3.91268 23.4001 5.52498V19.175C23.4001 20.7873 22.088 22.1 20.4751 22.1Z" fill="white"/>
 </svg>`;
 
 function preventDefaults(e) {
@@ -52,6 +52,22 @@ export function createUploadDropzone(options = {}) {
   };
 
   const container = createTag('div', { class: `${CLS}-container` });
+  const borderSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  borderSvg.setAttribute('class', `${CLS}-border-svg`);
+  borderSvg.setAttribute('width', '100%');
+  borderSvg.setAttribute('height', '100%');
+  borderSvg.setAttribute('aria-hidden', 'true');
+  borderSvg.setAttribute('focusable', 'false');
+  const borderRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+  borderRect.setAttribute('x', '0.5');
+  borderRect.setAttribute('y', '0.5');
+  borderRect.setAttribute('width', 'calc(100% - 1px)');
+  borderRect.setAttribute('height', 'calc(100% - 1px)');
+  borderRect.setAttribute('rx', '16');
+  borderRect.setAttribute('ry', '16');
+  borderRect.setAttribute('fill', 'none');
+  borderSvg.appendChild(borderRect);
+
   const dropzone = createTag('div', {
     class: CLS,
     role: 'button',
@@ -114,7 +130,7 @@ export function createUploadDropzone(options = {}) {
     setTimeout(() => {
       setLoading(false);
       if (typeof opts.onImageReady === 'function') opts.onImageReady(image, src);
-    }, 120);
+    }, 1000);
   };
 
   const handleFile = (file) => {
@@ -150,7 +166,7 @@ export function createUploadDropzone(options = {}) {
     image.src = url;
   };
 
-  container.append(dropzone, input, loading);
+  container.append(borderSvg, dropzone, input, loading);
 
   if (opts.enabled) {
     dropzone.addEventListener('click', () => input.click());
