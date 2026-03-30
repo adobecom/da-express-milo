@@ -461,10 +461,16 @@ export function createColorDataService(config) {
   async function toggleLike(item) {
     try {
       const kuler = await serviceManager.getProvider('kuler');
-      if (!kuler) return item?.liked ?? false;
+      if (!kuler) {
+        window.lana?.log('[DataService] Kuler provider unavailable for like toggle', {
+          tags: 'color-explore,data-service',
+          severity: 'warning',
+        });
+        return item?.liked ?? false;
+      }
       await kuler.updateLike({
         id: item?.id,
-        like: item?.liked ? { user: true } : null,
+        like: item?.liked ? null : { user: true },
         source: 'color-explore',
       });
       return item?.liked ?? false;

@@ -321,7 +321,7 @@ describe('createColorDataService', () => {
     expect(fakeKuler.updateLike.calledOnce).to.equal(true);
     expect(fakeKuler.updateLike.firstCall.args[0]).to.deep.equal({
       id: 'grad-1',
-      like: { user: true },
+      like: null,
       source: 'color-explore',
     });
   });
@@ -341,7 +341,7 @@ describe('createColorDataService', () => {
     expect(fakeKuler.updateLike.calledOnce).to.equal(true);
     expect(fakeKuler.updateLike.firstCall.args[0]).to.deep.equal({
       id: 'grad-1',
-      like: null,
+      like: { user: true },
       source: 'color-explore',
     });
   });
