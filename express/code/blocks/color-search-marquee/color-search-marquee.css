@@ -231,3 +231,9 @@
   }
 }
 
+.search-bar-sticky-wrapper.is-sticky-clone.is-past-boundary {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  visibility: hidden !important;
+}
+
