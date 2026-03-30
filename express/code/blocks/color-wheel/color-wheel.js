@@ -576,7 +576,7 @@ export default async function decorate(block) {
       },
     });
 
-    adoptHeadline(block, layoutInstance);
+    adoptHeadline(layoutInstance);
     await layoutInstance.actionMenuReady;
 
     const tabs = await buildTabs(controller, suggestionsRow);
