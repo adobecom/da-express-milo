@@ -8,6 +8,44 @@ const CHEVRON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22"
   <path d="M8.5 4.5L15 11L8.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
+function setupExploreBoundary() {
+  const getExploreBlock = () => document.querySelector('.color-explore');
+  const getStickyWrapper = () => document.querySelector('.search-bar-sticky-wrapper.is-sticky-clone');
+  let resizeObserver = null;
+  let observedExplore = null;
+
+  const update = () => {
+    const wrapper = getStickyWrapper();
+    const explore = getExploreBlock();
+    if (!wrapper || !explore) return;
+
+    if (explore !== observedExplore) {
+      resizeObserver?.disconnect();
+      resizeObserver = new ResizeObserver(update);
+      resizeObserver.observe(explore);
+      observedExplore = explore;
+    }
+
+    const exploreBottom = explore.getBoundingClientRect().bottom;
+    const viewportHeight = window.innerHeight;
+    const barAreaTop = viewportHeight - wrapper.offsetHeight - (viewportHeight * 0.05);
+    wrapper.classList.toggle('is-past-boundary', exploreBottom < barAreaTop);
+  };
+
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update, { passive: true });
+
+  return () => {
+    window.removeEventListener('scroll', update);
+    window.removeEventListener('resize', update);
+    resizeObserver?.disconnect();
+    resizeObserver = null;
+    observedExplore = null;
+    const wrapper = getStickyWrapper();
+    if (wrapper) wrapper.classList.remove('is-past-boundary');
+  };
+}
+
 function parseTagsRow(row) {
   const text = row?.textContent?.trim();
   if (!text) return [];
@@ -189,6 +227,7 @@ export default async function decorate(block) {
   );
 
   block.append(searchBar.element);
+  const cleanupBoundary = setupExploreBoundary();
 
   const emptyResult = createEmptyResultElements(block, searchBar.element);
 
@@ -242,6 +281,7 @@ export default async function decorate(block) {
       emptyResult.description.textContent = '';
     },
     destroy: () => {
+      cleanupBoundary();
       cleanupPopState();
       searchBar.destroy();
     },

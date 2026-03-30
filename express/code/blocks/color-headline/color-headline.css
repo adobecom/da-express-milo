@@ -28,11 +28,9 @@
   /* Sit above the color-extract landing background images */
   position: relative;
   z-index: 1;
-  /* Collapse any default bottom margin so the landing pulls up cleanly */
   margin-bottom: 0;
 }
 
-/* Hide when the adjacent color-extract switches to the edit/results view */
 body:has(.color-extract.has-image) .color-headline.extract {
   display: none;
 }
@@ -73,4 +71,37 @@ body:has(.color-extract.has-image) .color-headline.extract {
     font-size: 16px;
     line-height: 1.4;
   }
+}
+
+.color-headline.tools {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+}
+
+.color-headline.tools .express-logo {
+  display: block;
+  width: unset;
+  height: 29px;
+  padding: 0;
+}
+
+.color-headline.tools h1,
+.color-headline.tools h2,
+.color-headline.tools h3 {
+  font-family: var(--body-font-family);
+  font-size: var(--ax-heading-xl-size);
+  font-weight: var(--heading-font-weight-extra);
+  line-height: 1.04;
+  color: var(--color-default-font);
+  margin: 0;
+}
+
+.color-headline.tools p {
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
+  line-height: 1.3;
+  color: var(--color-dark-gray);
+  margin: 0;
 }

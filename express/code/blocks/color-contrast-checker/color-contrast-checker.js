@@ -9,6 +9,7 @@ import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
 import parseContent from './utils/parseContent.js';
 import syncPaletteSelections from './utils/paletteState.js';
 import { isMobileOrTabletViewport } from '../../scripts/color-shared/utils/utilities.js';
+import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 
 const blockInstances = new WeakMap();
 
@@ -44,7 +45,7 @@ function getPalette(config, strings) {
 }
 
 async function mountContrastChecker(slot, { config, layout, initialPalette }) {
-  const container = createTag('div', { class: 'contrast-checker-container' });
+  const container = createTag('div', { class: 'color-contrast-checker-container' });
   const dataService = createContrastDataService();
   const { foreground, background, name, colors } = initialPalette;
   const { context, actionMenu } = layout;
@@ -136,7 +137,7 @@ export default async function decorate(block) {
   let previewInstance = null;
   block.dataset.blockStatus = 'loading';
 
-  const { layout, preview } = parseContent(block);
+  const { preview } = parseContent(block);
   const strings = await loadContrastCheckerPlaceholders();
 
   const destroyInstance = () => {
@@ -173,18 +174,16 @@ export default async function decorate(block) {
         showPaletteName: true,
         editPaletteName: false,
       },
-      content: {
-        heading: layout.heading,
-        paragraph: layout.paragraph,
-        icon: true,
-      },
       actionMenu: {
         ...createDefaultActionMenuConfig(strings),
-        id: 'contrast-checker-menu',
+        id: 'color-contrast-checker-menu',
         type: isMobileOrTabletViewport() ? 'nav-only' : 'full',
         activeId: 'contrast',
       },
     });
+
+    adoptHeadline(block, layoutInstance);
+    await layoutInstance.actionMenuReady;
 
     checkerInstance = await mountContrastChecker(layoutInstance.slots.sidebar, {
       config,
@@ -209,12 +208,12 @@ export default async function decorate(block) {
       destroy: destroyInstance,
     });
 
-    block.classList.add('ax-shell-host', `contrast-checker-${config.variant}`);
+    block.classList.add('ax-shell-host', `color-contrast-checker-${config.variant}`);
     block.dataset.shellState = 'ready';
     block.dataset.blockStatus = 'loaded';
   } catch (error) {
     window.lana?.log(`Contrast Checker init error: ${error.message}`, {
-      tags: 'contrast-checker,init',
+      tags: 'color-contrast-checker,init',
       severity: 'error',
     });
     block.dataset.blockStatus = 'error';

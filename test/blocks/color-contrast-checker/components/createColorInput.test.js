@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import {
   createColorInput,
   shouldAutoFocusColorEditInput,
-} from '../../../../express/code/blocks/contrast-checker/renderers/components/createColorInput.js';
+} from '../../../../express/code/blocks/color-contrast-checker/renderers/components/createColorInput.js';
 
 function waitForFrame() {
   return new Promise((resolve) => {

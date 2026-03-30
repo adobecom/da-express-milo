@@ -1,4 +1,4 @@
-import { createTag, getIconElementDeprecated } from '../../../utils.js';
+import { createTag } from '../../../utils.js';
 import createShell from '../createShell.js';
 import { isMobileOrTabletViewport } from '../../utils/utilities.js';
 
@@ -15,8 +15,8 @@ const DEFAULT_LAYOUT_SPANS = {
 const TOOLBAR_MODES = new Set(['inline', 'sticky', 'sticky-on-scroll']);
 
 const LAYOUT_DEPS = {
-  base: ['scripts/color-shared/shell/layouts/styles/color-tool-layout.css'],
-  actionMenu: ['scripts/color-shared/action-menu.css'],
+  critical: ['scripts/color-shared/shell/layouts/styles/color-tool-layout.css'],
+  deferred: ['scripts/color-shared/action-menu.css'],
 };
 
 const SLOT_SEMANTICS = {
@@ -25,39 +25,6 @@ const SLOT_SEMANTICS = {
   canvas: { role: 'region', label: 'Main content' },
   footer: { role: 'region', label: 'Toolbar' },
 };
-
-function buildTextContent(content) {
-  if (!content?.heading && !content?.paragraph) return null;
-
-  const wrapper = createTag('div', { class: 'ax-text-content' });
-
-  const showIcon = content.icon !== false;
-  if (showIcon) {
-    const logoContainer = createTag('div', { class: 'ax-text-content__logo' });
-    const logo = getIconElementDeprecated('adobe-express-logo');
-    logo.classList.add('ax-text-content__logo-icon');
-    logoContainer.appendChild(logo);
-    wrapper.appendChild(logoContainer);
-  }
-
-  const bodyContainer = createTag('div', { class: 'ax-text-content__body' });
-
-  if (content.heading) {
-    content.heading.classList.add('ax-text-content__heading');
-    bodyContainer.appendChild(content.heading);
-  }
-
-  if (content.paragraph) {
-    content.paragraph.classList.add('ax-text-content__paragraph');
-    bodyContainer.appendChild(content.paragraph);
-  }
-
-  if (bodyContainer.children.length > 0) {
-    wrapper.appendChild(bodyContainer);
-  }
-
-  return wrapper;
-}
 
 function clampSpan(value, fallback) {
   const parsed = Number.parseInt(value, 10);
@@ -90,38 +57,40 @@ function buildGridColumnValue(start, span) {
   return `${start} / span ${span}`;
 }
 
-function collectLayoutDeps(config) {
-  const css = [...LAYOUT_DEPS.base];
-
-  if (config.actionMenu) {
-    css.push(...LAYOUT_DEPS.actionMenu);
-  }
-
-  if (config.dependencies?.css) {
-    css.push(...config.dependencies.css);
-  }
-
+function collectCriticalDeps(config) {
   return {
-    css,
+    css: [...LAYOUT_DEPS.critical, ...(config.dependencies?.css || [])],
     services: config.dependencies?.services,
   };
 }
 
-async function initializeShell(config, host) {
+function collectDeferredDeps(config) {
+  const css = [];
+  if (config.actionMenu) {
+    css.push(...LAYOUT_DEPS.deferred);
+  }
+  return { css };
+}
+
+function initializeShell(config, host) {
   const shell = createShell(host);
 
-  const layoutDeps = collectLayoutDeps(config);
-  await shell.preload(layoutDeps);
+  const criticalDeps = collectCriticalDeps(config);
+  const criticalCssReady = shell.preload(criticalDeps);
+
+  const deferredDeps = collectDeferredDeps(config);
+  if (deferredDeps.css.length > 0) {
+    shell.preload(deferredDeps).catch(() => {});
+  }
 
   if (config.palette) {
     shell.context.set('palette', config.palette);
   }
-  return shell;
+  return { shell, criticalCssReady };
 }
 
 function buildSlotElements(
   mobileOrder,
-  content,
   layoutVariant,
   toolbarMode,
   layoutSpans,
@@ -161,13 +130,6 @@ function buildSlotElements(
       el.style.setProperty('--mobile-order', mobileOrderIndex.toString());
     }
 
-    if (name === 'sidebar' && content) {
-      const textContent = buildTextContent(content);
-      if (textContent) {
-        el.appendChild(textContent);
-      }
-    }
-
     if (layoutVariant === 'canvas-footer' && ['topbar', 'sidebar'].includes(name)) {
       el.hidden = true;
       el.setAttribute('aria-hidden', 'true');
@@ -180,10 +142,10 @@ function buildSlotElements(
   return { root, slots };
 }
 
-async function mountActionMenu(topbarSlot, actionMenuConfig) {
+async function mountActionMenu(topbarSlot, actionMenuConfig, modulePromise) {
   if (!actionMenuConfig) return null;
 
-  const { createActionMenuComponent } = await import('../../components/createActionMenuComponent.js');
+  const { createActionMenuComponent } = await modulePromise;
 
   const actionMenu = await createActionMenuComponent({
     id: actionMenuConfig.id || 'color-tool-action-menu',
@@ -222,7 +184,7 @@ function createStickyVisibilityObserver(target, onVisibilityChange) {
   return observer;
 }
 
-async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
+async function mountToolbarCore(shell, root, footerSlot, toolbarConfig, modulePromise) {
   let toolbarHandle = null;
   let stickyToolbarHandle = null;
   let stickyObserver = null;
@@ -230,7 +192,8 @@ async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
 
   const palette = shell.context.get('palette');
   if (palette) {
-    const { initFloatingToolbar } = await import('../../toolbar/createFloatingToolbar.js');
+    const mod = modulePromise || import('../../toolbar/createFloatingToolbar.js');
+    const { initFloatingToolbar } = await mod;
     const {
       mode = DEFAULT_TOOLBAR_MODE,
       variant = 'standalone',
@@ -312,23 +275,65 @@ async function mountToolbar(shell, root, footerSlot, toolbarConfig) {
   };
 }
 
-function createLayoutAPI(
-  slots,
-  shell,
-  root,
-  toolbarHandle,
-  stickyToolbarHandle,
-  stickyObserver,
-  cleanupToolbarMount,
-  actionMenuHandle,
-  onPaletteChange,
-) {
-  return {
+function deferToViewport(target, callback, rootMargin) {
+  if (typeof IntersectionObserver === 'undefined') return callback();
+
+  const opts = rootMargin ? { rootMargin } : {};
+  return new Promise((resolve) => {
+    let resolved = false;
+    const complete = () => {
+      if (resolved) return;
+      resolved = true;
+      io.disconnect();
+      resolve(callback());
+    };
+    const io = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) complete();
+    }, opts);
+    io.observe(target);
+    setTimeout(complete, 10000);
+  });
+}
+
+function mountToolbar(shell, root, footerSlot, toolbarConfig, modulePromise) {
+  if (isMobileOrTabletViewport()) {
+    return deferToViewport(
+      footerSlot,
+      () => mountToolbarCore(shell, root, footerSlot, toolbarConfig, modulePromise),
+      toolbarConfig.viewportMargin,
+    );
+  }
+  return mountToolbarCore(shell, root, footerSlot, toolbarConfig, modulePromise);
+}
+
+function createLayoutAPI(slots, shell, root) {
+  // Mutable state shared between the public API and async hydration callbacks.
+  // Using a closure object (rather than `this`) so destroy() works even when
+  // destructured: `const { destroy } = layout; destroy();`
+  const state = {
+    destroyed: false,
+    actionMenu: null,
+    toolbar: null,
+    stickyToolbar: null,
+    stickyObserver: null,
+    cleanupToolbarMount: () => {},
+    onPaletteChange: () => {},
+  };
+
+  const layout = {
     slots,
     context: shell.context,
-    actionMenu: actionMenuHandle,
-    toolbar: toolbarHandle,
-    stickyToolbar: stickyToolbarHandle,
+
+    get actionMenu() { return state.actionMenu; },
+    set actionMenu(v) { state.actionMenu = v; },
+
+    get toolbar() { return state.toolbar; },
+    set toolbar(v) { state.toolbar = v; },
+
+    get stickyToolbar() { return state.stickyToolbar; },
+    set stickyToolbar(v) { state.stickyToolbar = v; },
+
+    get destroyed() { return state.destroyed; },
 
     getSlot(name) {
       return slots[name] || null;
@@ -348,18 +353,21 @@ function createLayoutAPI(
     },
 
     destroy() {
-      shell.context.off('palette', onPaletteChange);
-      stickyObserver?.disconnect();
-      cleanupToolbarMount();
-      actionMenuHandle?.destroy();
-      if (stickyToolbarHandle && stickyToolbarHandle !== toolbarHandle) {
-        stickyToolbarHandle.destroy();
+      state.destroyed = true;
+      if (state.onPaletteChange) shell.context.off('palette', state.onPaletteChange);
+      state.stickyObserver?.disconnect();
+      state.cleanupToolbarMount?.();
+      state.actionMenu?.destroy();
+      if (state.stickyToolbar && state.stickyToolbar !== state.toolbar) {
+        state.stickyToolbar.destroy();
       }
-      toolbarHandle?.destroy();
+      state.toolbar?.destroy();
       root.remove();
       shell.destroy();
     },
   };
+
+  return { layout, state };
 }
 
 export default async function createColorToolLayout(container, config = {}) {
@@ -368,9 +376,14 @@ export default async function createColorToolLayout(container, config = {}) {
     layoutVariant = DEFAULT_LAYOUT_VARIANT,
     toolbar: toolbarConfig = {},
     actionMenu: actionMenuConfig,
-    content,
     layoutSpans,
   } = config;
+
+  // Eagerly warm module cache — imports start downloading immediately
+  const actionMenuModulePromise = actionMenuConfig
+    ? import('../../components/createActionMenuComponent.js') : null;
+  const toolbarModulePromise = config.palette
+    ? import('../../toolbar/createFloatingToolbar.js') : null;
 
   const resolvedToolbarMode = normalizeToolbarMode(toolbarConfig.mode);
   const resolvedLayoutSpans = normalizeLayoutSpans(layoutSpans);
@@ -381,33 +394,51 @@ export default async function createColorToolLayout(container, config = {}) {
 
   const { root, slots } = buildSlotElements(
     mobileOrder,
-    content,
     layoutVariant,
     resolvedToolbarMode,
     resolvedLayoutSpans,
   );
+
   container.appendChild(root);
 
-  const shell = await initializeShell(config, root);
+  // Shell init: critical CSS fires non-blocking, deferred CSS fire-and-forget
+  const { shell, criticalCssReady } = initializeShell(config, root);
 
-  const actionMenuHandle = await mountActionMenu(slots.topbar, actionMenuConfig);
-  const {
+  // Wait only for critical CSS — then return layout immediately.
+  // Both action menu and toolbar mount non-blocking in parallel.
+  await criticalCssReady;
+
+  const { layout, state } = createLayoutAPI(slots, shell, root);
+
+  // Both components mount simultaneously and hydrate the layout when ready.
+  // Each callback guards against early destroy so it never mutates a torn-down layout.
+  layout.actionMenuReady = mountActionMenu(slots.topbar, actionMenuConfig, actionMenuModulePromise)
+    .then((handle) => {
+      if (!state.destroyed) state.actionMenu = handle;
+      return handle;
+    })
+    .catch(() => null);
+
+  const toolbarReady = mountToolbar(
+    shell, root, slots.footer, resolvedToolbarConfig, toolbarModulePromise,
+  ).then(({
     toolbarHandle,
     stickyToolbarHandle,
     stickyObserver,
     cleanupToolbarMount,
     onPaletteChange,
-  } = await mountToolbar(shell, root, slots.footer, resolvedToolbarConfig);
+  }) => {
+    if (state.destroyed) return;
+    state.toolbar = toolbarHandle;
+    state.stickyToolbar = stickyToolbarHandle;
+    state.stickyObserver = stickyObserver;
+    state.cleanupToolbarMount = cleanupToolbarMount;
+    state.onPaletteChange = onPaletteChange;
+  }).catch(() => {});
 
-  return createLayoutAPI(
-    slots,
-    shell,
-    root,
-    toolbarHandle,
-    stickyToolbarHandle,
-    stickyObserver,
-    cleanupToolbarMount,
-    actionMenuHandle,
-    onPaletteChange,
-  );
+  layout.ready = Promise.all([layout.actionMenuReady, toolbarReady])
+    .then(() => layout)
+    .catch(() => layout);
+
+  return layout;
 }

@@ -1,9 +1,9 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { createCheckerRenderer } from '../../../../express/code/blocks/contrast-checker/renderers/createCheckerRenderer.js';
-import createContrastDataService from '../../../../express/code/blocks/contrast-checker/services/createContrastDataService.js';
-import createRecommendationService from '../../../../express/code/blocks/contrast-checker/services/createRecommendationService.js';
-import { generateTints } from '../../../../express/code/blocks/contrast-checker/utils/contrastUtils.js';
+import { createCheckerRenderer } from '../../../../express/code/blocks/color-contrast-checker/renderers/createCheckerRenderer.js';
+import createContrastDataService from '../../../../express/code/blocks/color-contrast-checker/services/createContrastDataService.js';
+import createRecommendationService from '../../../../express/code/blocks/color-contrast-checker/services/createRecommendationService.js';
+import { generateTints } from '../../../../express/code/blocks/color-contrast-checker/utils/contrastUtils.js';
 import createContextProvider from '../../../../express/code/scripts/color-shared/shell/contextProvider.js';
 
 function waitForFrame() {

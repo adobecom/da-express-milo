@@ -1,4 +1,4 @@
-.contrast-checker {
+.color-contrast-checker {
   --cc-swatch-size: 40px;
   --cc-swatch-wrapper-padding: 2px;
   --cc-swatch-inner-radius: 4px;
@@ -133,17 +133,17 @@
   background: var(--color-white);
 }
 
-.contrast-checker-container {
+.color-contrast-checker-container {
   inline-size: 100%;
   box-sizing: border-box;
 }
 
-.contrast-checker .ax-color-tool-layout {
+.color-contrast-checker .ax-color-tool-layout {
   --ax-layout-inline-size: auto;
 }
 
 
-.contrast-checker-layout {
+.color-contrast-checker-layout {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-400);
@@ -1333,7 +1333,7 @@
 }
 
 @media (max-width: 599px) {
-  .contrast-checker .ax-shell-slot--footer .ax-toolbar-standalone .ax-palette-name {
+  .color-contrast-checker .ax-shell-slot--footer .ax-toolbar-standalone .ax-palette-name {
     display: flex;
   }
 }
