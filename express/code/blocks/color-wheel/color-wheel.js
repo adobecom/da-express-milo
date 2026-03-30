@@ -8,6 +8,7 @@ import ColorThemeExpressController from '../../scripts/color-shared/controllers/
 import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
 import { createImageExtractComponent } from './createImageExtractComponent.js';
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
+import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
 
 const BASE_COLOR_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <mask id="mask0_13766_5780" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
@@ -72,6 +73,7 @@ const DEFAULT_ACTION_MENU_CONFIG = {
     { id: 'expand', label: 'Maximize' },
   ],
 };
+const THEME_NAME = 'Color Wheel Theme';
 let harmonyCarouselCleanup = null;
 let harmonyStateUnsubscribe = null;
 let layoutInstance = null;
@@ -311,7 +313,7 @@ function paletteFromThemeState(state) {
   const colors = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
   return {
     colors: colors.length ? colors : ['#FF0000'],
-    name: state?.name || 'Harmony Theme',
+    name: state?.name || THEME_NAME,
   };
 }
 
@@ -531,8 +533,14 @@ export default async function decorate(block) {
   block.className = 'color-wheel';
 
   try {
+    const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
+    const initialPalette = {
+      name: getResolvedPaletteName() || THEME_NAME,
+      colors: getResolvedPalette(),
+    };
+
     const controller = new ColorThemeExpressController({
-      swatches: ['#FFFF00', '#FF0000', '#FF7F00', '#00A8FF', '#7F00FF'], //  Replace with palette from query param or design's list
+      swatches: initialPalette.colors,
       harmonyRule: 'CUSTOM',
       baseColorIndex: 0,
     });
@@ -541,7 +549,7 @@ export default async function decorate(block) {
     const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
 
     layoutInstance = await createColorToolLayout(block, {
-      palette: paletteFromThemeState(controller.getState()),
+      palette: initialPalette,
       toolbar: {
         variant: 'standalone',
         showEdit: false,
