@@ -7,6 +7,7 @@ import { createStripContainerRenderer } from '../../scripts/color-shared/rendere
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
 import { createImageExtractComponent } from './createImageExtractComponent.js';
+import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
 
 const BASE_COLOR_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <mask id="mask0_13766_5780" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
@@ -242,6 +243,27 @@ async function buildHarmonySelector(controller) {
     });
 
     updateRovingTabindex(controller.getState().harmonyRule || 'CUSTOM');
+
+    if (window.matchMedia('(min-width: 1200px)').matches) {
+      const tooltips = await Promise.all(
+        harmonyButtons.map((btn, i) => createExpressTooltip({
+          targetEl: btn,
+          content: rules[i].label,
+          placement: 'top',
+        })),
+      );
+
+      if (gen !== mountGeneration) {
+        tooltips.forEach((t) => t.destroy());
+        return;
+      }
+
+      const prevCleanup = harmonyCarouselCleanup;
+      harmonyCarouselCleanup = () => {
+        prevCleanup?.();
+        tooltips.forEach((t) => t.destroy());
+      };
+    }
   }
 
   const state0 = controller.getState();
