@@ -6,7 +6,7 @@ import createBaseColorAdapter from '../../scripts/color-shared/adapters/createBa
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
-import { createImageExtractComponent } from './createImageExtractComponent.js';
+import createImageExtractComponent from './createImageExtractComponent.js';
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
 
