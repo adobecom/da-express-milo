@@ -9,9 +9,8 @@ function ensureLogo(headline) {
   heading.before(logo);
 }
 
-export default function adoptHeadline(toolBlock, layout) {
-  const section = toolBlock.closest('.section');
-  const headline = section?.querySelector('.color-headline.tools');
+export default function adoptHeadline(layout) {
+  const headline = document.querySelector('.color-headline.tools');
   if (!headline) return;
   ensureLogo(headline);
   layout.slots.sidebar.prepend(headline);

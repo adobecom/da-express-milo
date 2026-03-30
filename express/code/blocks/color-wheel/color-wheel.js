@@ -9,6 +9,7 @@ import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
 import createImageExtractComponent from './createImageExtractComponent.js';
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
+import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 
 const BASE_COLOR_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <mask id="mask0_13766_5780" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
@@ -574,6 +575,9 @@ export default async function decorate(block) {
         icon: true,
       },
     });
+
+    adoptHeadline(block, layoutInstance);
+    await layoutInstance.actionMenuReady;
 
     const tabs = await buildTabs(controller, suggestionsRow);
     layoutInstance.slots.sidebar.appendChild(tabs.element);
