@@ -1042,6 +1042,7 @@ color: var(--color-gray-700-variant);
       max-width: 1300px; 
       text-align: left;
       display: flex;
+      margin-left: -var(--spacing-50);
      border: 0.25px solid transparent;
   }
 
