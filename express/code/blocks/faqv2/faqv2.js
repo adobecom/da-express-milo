@@ -382,7 +382,7 @@ export default async function decorate(block) {
   if (isExpandableVariant) {
     buildTableLayout(block);
   } else {
-    buildOriginalLayout(block);
+    await buildOriginalLayout(block);
   }
 
   const hideSchemaPageLevel = getMetadata('show-faq-schema') === 'no';
