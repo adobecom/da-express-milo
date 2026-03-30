@@ -1,4 +1,3 @@
-/* Mobile-first approach - Base styles for mobile */
 .comparison-table-v2 {
   margin: auto;
   padding: var(--spacing-0) var(--spacing-300) var(--spacing-300) var(--spacing-300);
@@ -11,16 +10,12 @@
   --gnav-offset-height: var(--spacing-800);
   --plan-cell-height: 65px;
   --header-cell-width: var(--ax-grid-12-col-width);
-  
-  /* Component-specific measurements */
   --dropdown-height: 22px;
   --dropdown-width: 188px;
   --min-button-height: 30px;
   --chevron-size: 24px;
   --selected-icon-size: 12px;
   --transition-standard: 0.3s ease-in-out;
-  
-  /* Enhanced transition timing variables for smoother animations */
   --transition-smooth: 0.55s cubic-bezier(0.4, 0, 0.2, 1);
   --transition-bounce: 0.65s cubic-bezier(0.68, -0.55, 0.265, 1.55);
   --transition-fade: 0.4s ease-in-out;
@@ -37,7 +32,7 @@
 
 .comparison-table-v2.padding-top {
   padding-top: var(--spacing-500);
-} 
+}
 
 .comparison-table-v2>* {
   box-sizing: border-box;
@@ -61,7 +56,7 @@ main .section .comparison-table-v2 p {
   position: relative;
   text-align: center;
   padding-bottom: var(--spacing-300);
-   
+
   opacity: 1;
   /* Promote to its own layer to reduce Safari flicker during state changes */
   transform: translateZ(0);
@@ -69,13 +64,13 @@ main .section .comparison-table-v2 p {
   -webkit-backface-visibility: hidden;
   /* Ensure dropdown menus can layer above the table when header is not stuck */
   z-index: 1;
-  
+
   /* Base transition for all state changes */
-  transition: 
-      transform var(--transition-smooth),
-      opacity var(--transition-fade),
-      top var(--transition-smooth),
-      padding var(--transition-standard);
+  transition:
+    transform var(--transition-smooth),
+    opacity var(--transition-fade),
+    top var(--transition-smooth),
+    padding var(--transition-standard);
 }
 
 .comparison-table-v2 .sticky-header-wrapper {
@@ -85,22 +80,23 @@ main .section .comparison-table-v2 p {
   justify-content: space-between;
   padding: 0 var(--spacing-200);
   flex-wrap: wrap;
-  
+
   /* Smooth wrapper transitions */
-  transition: 
-      transform var(--transition-smooth),
-      opacity var(--transition-fade);
+  transition:
+    transform var(--transition-smooth),
+    opacity var(--transition-fade);
 }
 
 /* Enhanced animations for entering stuck state */
 @keyframes slideInDown {
   from {
-      transform: translateY(-100%);
-      opacity: 0;
+    transform: translateY(-100%);
+    opacity: 0;
   }
+
   to {
-      transform: translateY(0);
-      opacity: 1;
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
@@ -131,6 +127,7 @@ main .section .comparison-table-v2 p {
 body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck {
   top: var(--spacing-0);
 }
+
 body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-offset {
   top: var(--gnav-offset-height);
 }
@@ -145,12 +142,13 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-of
 /* Enhanced animations for leaving stuck state */
 @keyframes slideOutUp {
   from {
-      transform: translateY(0);
-      opacity: 1;
+    transform: translateY(0);
+    opacity: 1;
   }
+
   to {
-      transform: translateY(-100%);
-      opacity: 0;
+    transform: translateY(-100%);
+    opacity: 0;
   }
 }
 
@@ -163,9 +161,9 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-of
   opacity: 0;
   transform: translateY(-100%);
   pointer-events: none;
-  transition: 
-      transform 0.3s cubic-bezier(0.4, 0, 1, 1),
-      opacity 0.2s ease-out;
+  transition:
+    transform 0.3s cubic-bezier(0.4, 0, 1, 1),
+    opacity 0.2s ease-out;
 }
 
 /* Performance optimization - reduce paint areas during transitions */
@@ -174,7 +172,8 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-of
 }
 
 .comparison-table-v2 .sticky-header.is-stuck * {
-  will-change: auto; /* Reset will-change for child elements */
+  will-change: auto;
+  /* Reset will-change for child elements */
 }
 
 .comparison-table-v2 .sticky-header.is-stuck .sticky-header-wrapper {
@@ -235,10 +234,10 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-of
   transform: translateY(0);
   max-height: 100px;
   transition:
-      opacity var(--transition-fade),
-      transform var(--transition-smooth),
-      max-height var(--transition-smooth),
-      margin var(--transition-standard);
+    opacity var(--transition-fade),
+    transform var(--transition-smooth),
+    max-height var(--transition-smooth),
+    margin var(--transition-standard);
 }
 
 .comparison-table-v2 .icon-wrapper {
@@ -252,14 +251,12 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-of
 }
 
 .comparison-table-v2 .feature-cell.no-icon-offset {
-padding-bottom: 0;
+  padding-bottom: 0;
 }
-
-
 
 @media (min-width: 1024px) {
   .comparison-table-v2 .feature-cell.no-icon-offset {
-      padding-bottom: 0;
+    padding-bottom: 0;
   }
 }
 
@@ -313,12 +310,10 @@ padding-bottom: 0;
   font-style: normal;
   font-weight: var(--ax-body-weight-bold);
   line-height: normal;
-  
-  /* Smooth button transitions */
-  transition: 
-      margin-top var(--transition-smooth),
-      opacity var(--transition-fade),
-      transform var(--transition-standard);
+  transition:
+    margin-top var(--transition-smooth),
+    opacity var(--transition-fade),
+    transform var(--transition-standard);
 }
 
 .comparison-table-v2 .sticky-header.is-stuck .plan-cell a.con-button {
@@ -326,7 +321,7 @@ padding-bottom: 0;
 }
 
 .comparison-table-v2 .sticky-header .premium .plan-cell-wrapper {
-min-height: calc(var(--plan-cell-height) - var(--spacing-75));
+  min-height: calc(var(--plan-cell-height) - var(--spacing-75));
 }
 
 
@@ -348,12 +343,12 @@ min-height: calc(var(--plan-cell-height) - var(--spacing-75));
   min-height: var(--plan-cell-height);
   padding-bottom: var(--spacing-400);
   -webkit-tap-highlight-color: transparent;
-  
+
   /* Enhanced smooth transitions for cell wrapper */
-  transition: 
-      background var(--transition-fade),
-      border-color var(--transition-fade),
-      padding var(--transition-smooth);
+  transition:
+    background var(--transition-fade),
+    border-color var(--transition-fade),
+    padding var(--transition-smooth);
 }
 
 .comparison-table-v2 .sticky-header.is-stuck .plan-cell-wrapper {
@@ -463,7 +458,7 @@ main .comparison-table-v2 .sticky-header .plan-cell p {
   margin-bottom: var(--spacing-100);
 }
 
-main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p)) > :is(h2, h3, h4, h5, h6, .sticky-header-title) {
+main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2, h3, h4, h5, h6, .sticky-header-title) {
   margin-bottom: var(--spacing-100);
 }
 
@@ -537,24 +532,24 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p)) > :is(h
 
 .comparison-table-v2 .feature-cell-header {
 
-display: block; 
+  display: block;
 
-width: var(--header-cell-width);
-align-items: flex-start;
-gap: var(--Spacing-spacing-50, var(--spacing-50));
-align-self: stretch;
-box-sizing: content-box;
-text-align: center;
-padding: var(--spacing-200) var(--spacing-300) 0 var(--spacing-300);
+  width: var(--header-cell-width);
+  align-items: flex-start;
+  gap: var(--Spacing-spacing-50, var(--spacing-50));
+  align-self: stretch;
+  box-sizing: content-box;
+  text-align: center;
+  padding: var(--spacing-200) var(--spacing-300) 0 var(--spacing-300);
 }
 
 .comparison-table-v2 .feature-cell {
-display: flex;
-flex-direction: column;
-padding: 0;
-box-sizing: border-box;
-width: var(--cell-width);
-flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  box-sizing: border-box;
+  width: var(--cell-width);
+  flex-grow: 1;
 }
 
 
@@ -612,7 +607,7 @@ flex-grow: 1;
 
 .comparison-table-v2 .ctv2-th {
   flex-wrap: wrap;
-  margin : auto;
+  margin: auto;
 }
 
 .comparison-table-v2 .ctv2-th .ctv2-th-header {
@@ -638,7 +633,7 @@ flex-grow: 1;
 
 .comparison-table-v2 .plan-cell.invisible-content,
 .comparison-table-v2 .invisible-content {
-  display: none; 
+  display: none;
 }
 
 
@@ -663,20 +658,20 @@ flex-grow: 1;
   padding: 0;
 }
 
-.comparison-table-v2.accordion .table-container table > * {
+.comparison-table-v2.accordion .table-container table>* {
   min-height: 0;
   overflow: hidden;
 }
-/* Plan selector */
+
 .comparison-table-v2 .plan-selector-wrapper {
   bottom: 0;
   left: 0;
   right: 0;
   width: 100%;
   position: absolute;
-  transition: 
-      opacity var(--transition-fade),
-      transform var(--transition-smooth);
+  transition:
+    opacity var(--transition-fade),
+    transform var(--transition-smooth);
 }
 
 .comparison-table-v2 .plan-selector {
@@ -708,7 +703,7 @@ flex-grow: 1;
   position: absolute;
   top: var(--spacing-400);
   width: var(--dropdown-width);
-  z-index: 100; /* ensure it overlays table content on mobile */
+  z-index: 100;
   left: 0;
   text-align: left;
   border-radius: var(--border-radius-10);
@@ -733,31 +728,33 @@ flex-grow: 1;
 
 @media (max-width: 360px) {
   .comparison-table-v2 .sticky-header .plan-cell a.con-button {
-      font-size: 10px;
+    font-size: 10px;
   }
+
   .comparison-table-v2 table tbody th {
-      font-size: var(--ax-body-xs-size);
+    font-size: var(--ax-body-xs-size);
   }
 
   .comparison-table-v2 .plan-cell-wrapper :is(h2, h3, h4, h5, h6) {
-      padding-bottom: var(--spacing-100);
+    padding-bottom: var(--spacing-100);
   }
 }
 
 @media (max-width: 599px) {
   .comparison-table-v2 .sticky-header .plan-cell.left-plan .plan-selector-choices {
-      right: unset;
-      left: 0;
+    right: unset;
+    left: 0;
   }
+
   .comparison-table-v2.padding-top {
     padding-top: var(--spacing-600);
-  } 
+  }
 }
 
 @media (max-width: 767px) {
   .comparison-table-v2 .plan-selector-choices.right-aligned {
-      right: var(--spacing-0);
-      left: auto;
+    right: var(--spacing-0);
+    left: auto;
   }
 }
 
@@ -802,7 +799,7 @@ flex-grow: 1;
 
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:focus .plan-selector-choice-text {
   outline: var(--border-width-2) solid var(--Background-Accent-key-focus, #D3D5FF);
-  outline-offset: var(--spacing-50); /* keep focus ring inside container to avoid clipping */
+  outline-offset: var(--spacing-50);
 }
 
 .comparison-table-v2 .plan-selector-choices .plan-selector-choice:first-of-type.highlighted,
@@ -820,8 +817,6 @@ flex-grow: 1;
   border-radius: var(--border-radius-10);
 }
 
-
-/* Icons */
 .comparison-table-v2 .toggle-button {
   background: transparent;
   border: none;
@@ -895,17 +890,14 @@ flex-grow: 1;
   font-size: var(--ax-body-xxs-size);
   line-height: var(--heading-line-height);
   letter-spacing: 0%;
- 
+
   text-align: center;
 }
 
 .comparison-table-v2 .feature-cell .icon-wrapper-text {
-color: var(--color-gray-700-variant);
+  color: var(--color-gray-700-variant);
 }
 
-
-
-/* Feature cell colors */
 .comparison-table-v2 .feature-cell p {
   color: var(--icon-color, #05834E);
   margin-top: var(--spacing-75);
@@ -930,37 +922,37 @@ color: var(--color-gray-700-variant);
 
 @media (min-width: 768px) {
   .comparison-table-v2 {
-      max-width: 600px;
-      --cell-width: var(--ax-grid-6-col-width);
-      --footer-width: 600px;
+    max-width: 600px;
+    --cell-width: var(--ax-grid-6-col-width);
+    --footer-width: 600px;
   }
 
   .comparison-table-v2 .plan-cell.left-plan {
-      margin-left: auto;
-  } 
+    margin-left: auto;
+  }
 
   .comparison-table-v2 .sticky-header.is-stuck .sticky-header-wrapper {
     margin: auto;
-  
+
   }
 
-  .comparison-table-v2 .sticky-header-wrapper  {
-      max-width: 600px;
-      gap: var(--spacing-300);
+  .comparison-table-v2 .sticky-header-wrapper {
+    max-width: 600px;
+    gap: var(--spacing-300);
   }
 
   main .comparison-table-v2 .sticky-header .plan-cell p {
-      font-size: var(--ax-body-xs-size);
+    font-size: var(--ax-body-xs-size);
   }
 
   .comparison-table-v2 .footer a:not(.con-button):any-link {
-      font-size: var(--ax-body-xs-size);
+    font-size: var(--ax-body-xs-size);
   }
 
   .comparison-table-v2 .footer {
-      padding: var(--spacing-400) 0 0;
-      max-width: var(--footer-width);
-      margin: auto;
+    padding: var(--spacing-400) 0 0;
+    max-width: var(--footer-width);
+    margin: auto;
   }
 
   .comparison-table-v2 .plan-selector-choices {
@@ -972,18 +964,16 @@ color: var(--color-gray-700-variant);
 
 
 @media (min-width: 1024px) {
-
   .comparison-table-v2 {
-      max-width: 1300px;
-      padding: var(--spacing-0) var(--spacing-400) var(--spacing-900) var(--spacing-400);
-      /* width: fit-content; */
-      gap: var(--spacing-300);
-      display: flex;
-      flex-direction: column;
-      --header-cell-width: var(--ax-grid-3-col-width);
-      --cell-width: var(--ax-grid-3-col-width);
-      --plan-cell-height: 73px;
-      --footer-width: 945px; 
+    max-width: 1300px;
+    padding: var(--spacing-0) var(--spacing-400) var(--spacing-900) var(--spacing-400);
+    gap: var(--spacing-300);
+    display: flex;
+    flex-direction: column;
+    --header-cell-width: var(--ax-grid-3-col-width);
+    --cell-width: var(--ax-grid-3-col-width);
+    --plan-cell-height: 73px;
+    --footer-width: 945px;
   }
 
   .comparison-table-v2 .sticky-header .plan-cell a.con-button {
@@ -1010,274 +1000,266 @@ color: var(--color-gray-700-variant);
   .comparison-table-v2 .ctv2-th .ctv2-th-header {
     text-align: left
   }
-  
+
 
   .comparison-table-v2 .table-container {
-      box-sizing: border-box;
-      max-width: 1300px;
-      border-radius: 8px;
-      border: 1px solid var(--color-gray-325);
-      background: var(--color-white); 
+    box-sizing: border-box;
+    max-width: 1300px;
+    border-radius: 8px;
+    border: 1px solid var(--color-gray-325);
+    background: var(--color-white);
   }
 
 
-    .comparison-table-v2 .feature-cell-header { 
-      text-align: left;
-      padding: 0; 
-      margin-right: var(--spacing-100);
-      margin-left: 0;
-      box-sizing: border-box;
-      width: var(--header-cell-width);
-    }
+  .comparison-table-v2 .feature-cell-header {
+    text-align: left;
+    padding: 0;
+    margin-right: var(--spacing-100);
+    margin-left: 0;
+    box-sizing: border-box;
+    width: var(--header-cell-width);
+  }
 
   .comparison-table-v2 .sticky-header {
-      padding-bottom: var(--spacing-100);
+    padding-bottom: var(--spacing-100);
   }
 
 
   .comparison-table-v2 .sticky-header-wrapper {
-      padding-left: var(--spacing-400);
-      padding-right: var(--spacing-400);
-      flex-wrap: nowrap;
-      max-width: 1300px; 
-      text-align: left;
-      display: flex;
-      margin-left: calc(var(--spacing-50) * -1);
-     border: 0.25px solid transparent;
+    padding-left: var(--spacing-400);
+    padding-right: var(--spacing-400);
+    flex-wrap: nowrap;
+    max-width: 1300px;
+    text-align: left;
+    display: flex;
+    margin-left: calc(var(--spacing-50) * -1);
+    border: 0.25px solid transparent;
   }
 
   .comparison-table-v2 .table-container .button-row {
-      width: var(--cell-width);
+    width: var(--cell-width);
   }
 
   .comparison-table-v2 .sticky-header.is-stuck .first-cell {
-      opacity: 0;
-      flex-grow: 1;
-      display: flex;
-      margin-right: var(--spacing-100);
-      width: var(--header-cell-width);
-      /* Enhanced smooth first cell transitions for desktop */
-      transition: 
-          opacity var(--transition-fade),
-          transform var(--transition-smooth);
+    opacity: 0;
+    flex-grow: 1;
+    display: flex;
+    margin-right: var(--spacing-100);
+    width: var(--header-cell-width);
+    transition:
+      opacity var(--transition-fade),
+      transform var(--transition-smooth);
   }
 
   .comparison-table-v2 .sticky-header.is-stuck {
-      max-width: 100%; 
-      padding: var(--spacing-100) var(--spacing-600) var(--spacing-400) var(--spacing-600);
-      margin: 0;
-      display: flex;
-      
-      /* Enhanced desktop stuck state transitions */
-      transition: 
-          padding var(--transition-smooth),
-          top var(--transition-smooth),
-          transform var(--transition-smooth),
-          opacity var(--transition-fade),
-          box-shadow var(--transition-fade);
+    max-width: 100%;
+    padding: var(--spacing-100) var(--spacing-600) var(--spacing-400) var(--spacing-600);
+    margin: 0;
+    display: flex;
+    transition:
+      padding var(--transition-smooth),
+      top var(--transition-smooth),
+      transform var(--transition-smooth),
+      opacity var(--transition-fade),
+      box-shadow var(--transition-fade);
   }
-  
-  .comparison-table-v2 .sticky-header.is-stuck .sticky-header-wrapper {
-      max-width: 1300px;
-      width: 100%;
-      margin: auto;
-      gap: var(--spacing-400);
-      padding: 0 var(--spacing-400);
-      
-      /* Enhanced wrapper transitions for desktop */
-      transition: 
-          max-width var(--transition-smooth),
-          padding var(--transition-smooth),
-          transform var(--transition-smooth);
-  } 
 
-  .comparison-table-v2.columns-3 .sticky-header.is-stuck .sticky-header-wrapper{
-      max-width: 1100px;
-      width: var(--ax-grid-9-col-width);
+  .comparison-table-v2 .sticky-header.is-stuck .sticky-header-wrapper {
+    max-width: 1300px;
+    width: 100%;
+    margin: auto;
+    gap: var(--spacing-400);
+    padding: 0 var(--spacing-400);
+    transition:
+      max-width var(--transition-smooth),
+      padding var(--transition-smooth),
+      transform var(--transition-smooth);
+  }
+
+  .comparison-table-v2.columns-3 .sticky-header.is-stuck .sticky-header-wrapper {
+    max-width: 1100px;
+    width: var(--ax-grid-9-col-width);
   }
 
   .comparison-table-v2 .feature-cell {
-      display: flex;
-      flex-direction: column;
-      padding: 0;
-      box-sizing: border-box;
-      flex-grow: 0;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    box-sizing: border-box;
+    flex-grow: 0;
   }
 
   .comparison-table-v2 .feature-cell.no-text {
-      justify-content: center;
+    justify-content: center;
   }
 
   .comparison-table-v2 .plan-cell.left-plan {
-      margin-left: 0;
-  } 
-    .comparison-table-v2 .sticky-header .first-cell {
-        flex-basis: var(--header-cell-width);
-        width: var(--header-cell-width);
-        /* padding-right: var(--spacing-400); */
-        justify-content: flex-end;
-        align-items: flex-start;
-        text-align: left;
-        padding-bottom: var(--spacing-100);
-        /* margin-right: var(--spacing-100); */
-        font-style: normal;
-        font-weight: var(--ax-heading-weight);
-        line-height: var(--heading-line-height);
-        display: flex;
-        box-sizing: border-box;
-        margin-right: var(--spacing-200);
-    }
+    margin-left: 0;
+  }
+
+  .comparison-table-v2 .sticky-header .first-cell {
+    flex-basis: var(--header-cell-width);
+    width: var(--header-cell-width);
+    justify-content: flex-end;
+    align-items: flex-start;
+    text-align: left;
+    padding-bottom: var(--spacing-100);
+    font-style: normal;
+    font-weight: var(--ax-heading-weight);
+    line-height: var(--heading-line-height);
+    display: flex;
+    box-sizing: border-box;
+    margin-right: var(--spacing-200);
+  }
+
   .comparison-table-v2 .sticky-header .plan-cell {
-      width: var(--cell-width);
-      flex-grow: 0;
+    width: var(--cell-width);
+    flex-grow: 0;
 
   }
 
   .comparison-table-v2 .sticky-header .plan-cell-wrapper {
-       padding-top: var(--spacing-300);
-      padding-bottom: var(--spacing-300); 
-      pointer-events: none;
+    padding-top: var(--spacing-300);
+    padding-bottom: var(--spacing-300);
+    pointer-events: none;
 
   }
 
   .comparison-table-v2 .sticky-header .plan-cell-wrapper:focus {
-      outline: none;
+    outline: none;
   }
 
   .comparison-table-v2 .table-container .toggle-button {
-      margin-bottom: 0;
-      padding: var(--spacing-400);
+    margin-bottom: 0;
+    padding: var(--spacing-400);
   }
 
 
 
   .comparison-table-v2 .table-container .button-row .toggle-button {
-      position: absolute;
-      right: 0;
-      margin-left: 0;
-      padding-right: var(--spacing-400)
+    position: absolute;
+    right: 0;
+    margin-left: 0;
+    padding-right: var(--spacing-400)
   }
 
-  /* First row content - Desktop left align */
   .comparison-table-v2 .table-container .toggle-button h2,
   .comparison-table-v2 .table-container .toggle-button h3,
   .comparison-table-v2 .table-container .toggle-button h4,
   .comparison-table-v2 .table-container .toggle-button h5,
   .comparison-table-v2 .table-container .toggle-button h6 {
-      text-align: left;
-      padding-left: 0;
+    text-align: left;
+    padding-left: 0;
   }
 
-  /* Table styles - Desktop */
   .comparison-table-v2 table {
-      display: table;
-      border-collapse: separate;
-      border-spacing: 0;
-      height: 100%;
-      width: 100%;
-      padding: 0;
-      transition: ease-in 300ms;
-      
+    display: table;
+    border-collapse: separate;
+    border-spacing: 0;
+    height: 100%;
+    width: 100%;
+    padding: 0;
+    transition: ease-in 300ms;
+
   }
 
   .comparison-table-v2 table tbody th,
   .comparison-table-v2 table td {
-      display: table-cell;
-      width: 256px;
+    display: table-cell;
+    width: 256px;
   }
 
   .comparison-table-v2 table th {
-      display: table-cell;
+    display: table-cell;
   }
 
   .comparison-table-v2 table tbody {
-      display: table-row-group;
+    display: table-row-group;
   }
 
   .comparison-table-v2 table thead {
-      display: table-header-group;
+    display: table-header-group;
   }
 
   .comparison-table-v2 tbody tr {
-      flex-wrap: nowrap;
-      gap: var(--spacing-300);
-      padding: var(--spacing-400);
+    flex-wrap: nowrap;
+    gap: var(--spacing-300);
+    padding: var(--spacing-400);
   }
 
   .comparison-table-v2 tbody tr td,
   .comparison-table-v2 tr td:first-child {
-      width: var(--ax-grid-2-col-width);
+    width: var(--ax-grid-2-col-width);
   }
 
   .comparison-table-v2 table td:first-child {
-      width: var(--header-cell-width);
+    width: var(--header-cell-width);
   }
 
   .comparison-table-v2 p {
-      word-wrap: normal;
-      overflow-wrap: normal;
+    word-wrap: normal;
+    overflow-wrap: normal;
   }
 
-  /* Table cell content - Desktop */
   .comparison-table-v2 table td {
-      vertical-align: middle;
-      padding: var(--spacing-400) 0;
-      position: relative;
+    vertical-align: middle;
+    padding: var(--spacing-400) 0;
+    position: relative;
   }
 
   .comparison-table-v2 table td .icon-wrapper {
-      box-sizing: border-box;
-      width: 100%;
-      display: flex;
-      align-items: center;
+    box-sizing: border-box;
+    width: 100%;
+    display: flex;
+    align-items: center;
   }
 
 
   .comparison-table-v2 table td .icon-wrapper-text {
-      width: 100%;
-      height: 100%;
+    width: 100%;
+    height: 100%;
   }
 
   .comparison-table-v2 table td.no-text .icon-wrapper {
-      margin: 0;
+    margin: 0;
   }
 
   .comparison-table-v2 table tr:last-child {
-      border-bottom: none;
+    border-bottom: none;
   }
 
   .comparison-table-v2 table td p {
-      font-size: var(--ax-body-xs-size);
-      line-height: inherit;
-      padding-bottom: 0;
+    font-size: var(--ax-body-xs-size);
+    line-height: inherit;
+    padding-bottom: 0;
   }
 
 
   /* Invisible content - Desktop */
   .comparison-table-v2 .plan-cell.invisible-content,
   .comparison-table-v2 .invisible-content {
-      display: revert; 
+    display: revert;
   }
 
   .comparison-table-v2 .invisible-content.plan-cell,
   .comparison-table-v2 .invisible-content.feature-cell {
-      display: flex;
+    display: flex;
   }
 
   /* Hide plan selector on desktop */
   .comparison-table-v2 .plan-selector-wrapper,
   .comparison-table-v2 .plan-selector,
   .comparison-table-v2 .plan-selector-choices {
-      display: none;
-  } 
+    display: none;
+  }
 
 
   .comparison-table-v2 .footer {
-      font-size: var(--body-font-size-m);
+    font-size: var(--body-font-size-m);
   }
 
   .comparison-table-v2 .footer a:not(.con-button):any-link {
-      font-size: var(--body-font-size-m);
+    font-size: var(--body-font-size-m);
   }
 
 }
@@ -1295,8 +1277,6 @@ color: var(--color-gray-700-variant);
     transition: none;
   }
 }
-
-/* removed empty media queries to reduce CSS size */
 
 .comparison-table-v2 .tooltip {
   gap: var(--spacing-0);
@@ -1354,20 +1334,15 @@ color: var(--color-gray-700-variant);
   background-color: var(--color-gray-700);
 }
 
-/* ============================================
- ENHANCED ANIMATION KEYFRAMES
- Optional scale animations for premium feel
- ============================================ */
-
-/* Optional: Scale animation on enter (add 'scale-transition' class to header for this effect) */
 @keyframes scaleSlideIn {
   from {
-      transform: translateY(-100%) scaleY(0.8);
-      opacity: 0;
+    transform: translateY(-100%) scaleY(0.8);
+    opacity: 0;
   }
+
   to {
-      transform: translateY(0) scaleY(1);
-      opacity: 1;
+    transform: translateY(0) scaleY(1);
+    opacity: 1;
   }
 }
 
@@ -1378,12 +1353,13 @@ color: var(--color-gray-700-variant);
 /* Optional: Scale animation on exit */
 @keyframes scaleSlideOut {
   from {
-      transform: translateY(0) scaleY(1);
-      opacity: 1;
+    transform: translateY(0) scaleY(1);
+    opacity: 1;
   }
+
   to {
-      transform: translateY(-100%) scaleY(0.8);
-      opacity: 0;
+    transform: translateY(-100%) scaleY(0.8);
+    opacity: 0;
   }
 }
 
@@ -1393,7 +1369,7 @@ color: var(--color-gray-700-variant);
 
 /* Placeholder element to prevent content jumping */
 .comparison-table-v2 .sticky-header-placeholder {
-  display: none; 
+  display: none;
 }
 
 
