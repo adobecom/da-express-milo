@@ -41,16 +41,11 @@ main .section:has(.blog-posts-wrapper)>div:not:first-child {
   padding: 0;
 }
 
-main .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) > .blog-posts-wrapper .blog-posts-v2:not(.v2) {
-  padding-top: var(--spacing-700);
-}
-
 main .section .blog-posts-wrapper:has(.blog-posts-v2.no-top-padding) {
   padding-top: 0;
 }
 
-main .section:has(.blog-posts-wrapper) div>h3:first-child {
+main .section:has(.blog-posts-wrapper) .blog-posts-header .header {
   margin-top: 0;
   text-align: left;
   width: 66%;
@@ -68,13 +63,34 @@ main .section:has(.blog-posts-wrapper) div.blog-posts-decoration {
 
 main .section:has(.blog-posts-v2) div.blog-posts-decoration p {
   margin: 0;
-  font-family: var(--body-serif-font-family);
+  font-family: var(--body-font-family);
 }
 
 main .section:has(.blog-posts-v2) div.blog-posts-decoration p a {
   margin: 0;
   font-family: var(--body-font-family);
 }
+
+
+main .blog-posts-v2 .blog-posts-header {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: start;
+  gap: var(--spacing-400);
+  margin-bottom: var(--spacing-500);
+}
+
+main .blog-posts-v2 .blog-posts-header :is(h1, h2, h3, h4, h5, h6) {
+  font-size: var(--ax-heading-xl-size);
+  margin: 0;
+}
+
+main .blog-posts-v2 .blog-posts-header p {
+  margin: 0;
+  white-space: nowrap;
+}
+
 
 main .blog-posts-v2 .blog-cards {
   display: flex;
@@ -149,7 +165,6 @@ main .blog-posts-v2 .blog-card .blog-card-image {
   position: relative;
 }
 
-/* Blog post tags */
 .blog-posts-v2 .blog-card-image .image-wrapper {
   position: relative;
   display: block;
@@ -185,7 +200,6 @@ main .blog-posts-v2 .blog-hero-card .blog-card-image {
   position: relative;
 }
 
-/* Hero card image wrapper and tags */
 .blog-posts-v2 .blog-hero-card .blog-card-image .image-wrapper {
   position: relative;
   display: block;
@@ -215,8 +229,9 @@ main .blog-posts-v2 .blog-hero-card .blog-card-image {
 }
 
 main .blog-posts-v2 .blog-card .blog-card-image img {
+  display: block;
   object-fit: cover;
-  height: 100%;
+  height: auto;
   width: 100%;
   border-radius: var(--spacing-300) var(--spacing-300) 0 0;
   aspect-ratio: 16 / 9;
@@ -275,12 +290,11 @@ main .blog-posts-v2 p.blog-card-date {
   font-style: normal;
   font-weight: 400;
   line-height: var(--body-line-height);
-  font-family: var(--body-serif-font-family);
   grid-area: date;
 }
 
 main .blog-posts-v2 .blog-hero-card p.blog-card-teaser {
-  font-family: var(--body-serif-font-family);
+  font-family: var(--body-font-family);
   font-size: var(--body-font-size-l);
   text-align: left;
   grid-area: teaser;
@@ -374,11 +388,16 @@ main .section:has(.blog-posts-v2)>.content>h3 {
 }
 
 @media (min-width: 768px) {
-    .section.ax-blog-posts-container {
-        padding-right: var(--spacing-500);
-        padding-left: var(--spacing-500);
-        max-width: 1199px;
-    }
+  .section.ax-blog-posts-container {
+    padding-right: var(--spacing-500);
+    padding-left: var(--spacing-500);
+    max-width: 1199px;
+  }
+
+  main .blog-posts-v2 .blog-posts-header {
+    flex-direction: row;
+    align-items: baseline;
+  }
 
   main .blog-posts-v2 .blog-cards {
     width: var(--ax-grid-12-col-width);
@@ -466,7 +485,6 @@ main .section:has(.blog-posts-v2)>.content>h3 {
     }
 }
 
-/* Japanese font styles */
 :lang(ja) main .section:has(.blog-posts-v2) div.blog-posts-decoration p {
   font-family: var(--body-font-family);
 }

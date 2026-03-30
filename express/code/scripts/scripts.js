@@ -249,7 +249,7 @@ const eagerLoad = (img) => {
       link.rel = 'preload';
       link.as = 'image';
       link.href = firstImg.currentSrc;
-      link.fetchpriority = 'high';
+      link.fetchPriority = 'high';
       document.head.appendChild(link);
     }
   } else {
@@ -262,7 +262,7 @@ const eagerLoad = (img) => {
         link.rel = 'preload';
         link.as = 'image';
         link.href = lcpImg.currentSrc;
-        link.fetchpriority = 'high';
+        link.fetchPriority = 'high';
         document.head.appendChild(link);
       }
     }

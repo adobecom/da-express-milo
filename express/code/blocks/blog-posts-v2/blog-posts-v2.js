@@ -65,6 +65,38 @@ function isDuplicate(path) {
   return blogPosts.includes(path);
 }
 
+function getFiltersFromConfig(config) {
+  const filters = {};
+  const filterNames = ['tags', 'author', 'category'];
+  for (const name of Object.keys(config)) {
+    if (filterNames.includes(name)) {
+      const vals = config[name];
+      const valuesArray = Array.isArray(vals) ? vals : [vals];
+      filters[name] = valuesArray.map((e) => e.toLowerCase().trim());
+    }
+  }
+  return filters;
+}
+
+function evaluatePostFilters(post, filters) {
+  let matchedAll = true;
+  const failedFilters = [];
+  Object.keys(filters).forEach((name) => {
+    const values = filters[name];
+    const postValue = String(post[name] || '').toLowerCase();
+    const matched = values.some((val) => postValue.includes(val));
+    if (!matched) {
+      matchedAll = false;
+      failedFilters.push(name);
+    }
+  });
+
+  return {
+    matchedAll,
+    failedFilters,
+  };
+}
+
 function filterBlogPosts(config, index) {
   const result = [];
 
@@ -78,36 +110,12 @@ function filterBlogPosts(config, index) {
   }
 
   if (!config.featuredOnly) {
-    /* filter posts by tag and author */
-    const f = {};
-    for (const name of Object.keys(config)) {
-      const filterNames = ['tags', 'author', 'category'];
-      if (filterNames.includes(name)) {
-        const vals = config[name];
-        let v = vals;
-        if (!Array.isArray(vals)) {
-          v = [vals];
-        }
-        f[name] = v.map((e) => e.toLowerCase().trim());
-      }
-    }
+    const filters = getFiltersFromConfig(config);
     const limit = config['page-size'] || 12;
     let numMatched = 0;
     /* filter and ignore if already in result */
     const feed = index.data.filter((post) => {
-      let matchedAll = true;
-      for (const name of Object.keys(f)) {
-        let matched = false;
-        f[name].forEach((val) => {
-          if (post[name] && post[name].toLowerCase().includes(val)) {
-            matched = true;
-          }
-        });
-        if (!matched) {
-          matchedAll = false;
-          break;
-        }
-      }
+      let { matchedAll } = evaluatePostFilters(post, filters);
       if (matchedAll && numMatched < limit) {
         if (!isDuplicate(post.path)) {
           blogPosts.push(post.path);
@@ -136,8 +144,8 @@ function getSafeHrefFromText(text) {
     if (url.protocol === 'http:' || url.protocol === 'https:') {
       return url.href;
     }
-  } catch (e) {
-    window.lana.log('Invalid URL', e);
+  } catch (error) {
+    window.lana?.log(`Failed to get href from text: ${error}`, { tags: 'blog-posts-v2', severity: 'error' });
     return null;
   }
 
@@ -213,6 +221,13 @@ function extractHeadingContent(block) {
       }
     }
   }
+
+  if (headingContent.headingElement) {
+    headingContent.headingElement.classList.add('header');
+    if (!headingContent.viewAllParagraph) {
+      headingContent.headingElement.classList.add('no-view-all');
+    }
+  }
   firstRow.remove();
 
   return headingContent;
@@ -231,9 +246,14 @@ async function filterAllBlogPostsOnPage() {
       const locales = [getConfig().locale.prefix];
       const allBlogLinks = document.querySelectorAll('.blog-posts-v2 a');
       allBlogLinks.forEach((l) => {
-        const blogLocale = getLocale(getConfig().locales, new URL(l).pathname).prefix;
-        if (!locales.includes(blogLocale)) {
-          locales.push(blogLocale);
+        try {
+          const pathname = l.pathname || new URL(l.href).pathname;
+          const blogLocale = getLocale(getConfig().locales, pathname).prefix;
+          if (!locales.includes(blogLocale)) {
+            locales.push(blogLocale);
+          }
+        } catch (error) {
+          window.lana?.log(`Invalid blog post URL: ${l.href}: ${error}`, { tags: 'blog-posts-v2', severity: 'error' });
         }
       });
 
@@ -266,7 +286,6 @@ async function getFilteredResults(config) {
   return (matchingResult);
 }
 
-// Translates the Read More string into the local language
 async function getReadMoreString() {
   let readMoreString = await replaceKey('read-more', getConfig());
   if (readMoreString === 'read more') {
@@ -309,7 +328,6 @@ async function getHeroCard(post, dateFormatter, blogTag) {
     href: path,
   });
 
-  // Create image wrapper and tag
   const imageWrapper = createTag('div', { class: 'image-wrapper' });
   imageWrapper.appendChild(heroPicture);
 
@@ -327,7 +345,6 @@ async function getHeroCard(post, dateFormatter, blogTag) {
     </div>`;
   return card;
 }
-// For configs with more than one post, get regular cards
 function getCard(post, dateFormatter, blogTag) {
   const {
     path, title, teaser, dateString, filteredTitle, imagePath,
@@ -338,7 +355,6 @@ function getCard(post, dateFormatter, blogTag) {
     href: path,
   });
 
-  // Create image wrapper and tag
   const imageWrapper = createTag('div', { class: 'image-wrapper' });
   imageWrapper.appendChild(cardPicture);
 
@@ -354,7 +370,6 @@ function getCard(post, dateFormatter, blogTag) {
         </section>`;
   return card;
 }
-// Cached language and dateFormatter since creating a Dateformatter is an expensive operation
 let language;
 let dateFormatter;
 
@@ -416,13 +431,15 @@ function observeContentToggleChanges(block) {
   observer.observe(section, { attributes: true, attributeFilter: ['class'] });
 }
 
-// Given a blog post element and a config, append all posts defined in the config to blogPosts
-async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
-  const posts = await getFilteredResults(config);
-  // If a blog config has only one featured item, then build the item as a hero card.
-  const isHero = config.featured && config.featured.length === 1;
+let createLoadMoreElement;
 
-  const limit = config['page-size'] || 12;
+async function decorateBlogPosts(blogPostsElements, config, offset = 0, gridModule = null) {
+  const posts = await getFilteredResults(config);
+  posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const isHero = config.featured && config.featured.length === 1;
+  const isGrid = blogPostsElements.classList.contains('grid');
+
+  const limit = isGrid ? gridModule.GRID_PAGE_SIZE : (config['page-size'] || 12);
 
   let cards = blogPostsElements.querySelector('.blog-cards');
   if (!cards) {
@@ -457,19 +474,53 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
     }
   }
 
-  if (posts.length > pageEnd && config['load-more']) {
-    const loadMore = createTag('a', { class: 'load-more button secondary', href: '#' });
-    loadMore.innerHTML = config['load-more'];
-    blogPostsElements.append(loadMore);
-    loadMore.addEventListener('click', (event) => {
-      event.preventDefault();
-      loadMore.remove();
-      decorateBlogPosts(blogPostsElements, config, pageEnd);
+  if (posts.length > pageEnd) {
+    const loadMore = await createLoadMoreElement({
+      isGrid,
+      gridModule,
+      config,
+      blogPostsElements,
+      pageEnd,
     });
+
+    if (loadMore) {
+      blogPostsElements.append(loadMore);
+    }
   }
 
   return posts.length > 0;
 }
+
+createLoadMoreElement = async ({
+  isGrid,
+  gridModule,
+  config,
+  blogPostsElements,
+  pageEnd,
+}) => {
+  if (isGrid && gridModule) {
+    return gridModule.createGridLoadMore({
+      createTag,
+      replaceKey,
+      getConfig,
+      onLoadMore: () => decorateBlogPosts(blogPostsElements, config, pageEnd, gridModule),
+    });
+  }
+
+  if (!config['load-more']) {
+    return null;
+  }
+
+  const loadMore = createTag('a', { class: 'load-more button secondary', href: '#' });
+  loadMore.innerHTML = config['load-more'];
+  loadMore.addEventListener('click', (event) => {
+    event.preventDefault();
+    loadMore.remove();
+    decorateBlogPosts(blogPostsElements, config, pageEnd);
+  });
+
+  return loadMore;
+};
 
 function checkStructure(element, querySelectors) {
   let matched = false;
@@ -507,7 +558,6 @@ export default async function decorate(block) {
         viewAllLink.textContent = `${translation.charAt(0).toUpperCase()}${translation.slice(1)}`;
       }
     } else if (linkText.toLowerCase().includes('view')) {
-      // Plain text like "view all" - translate it
       const viewAll = await replaceKey('view all', getConfig());
 
       if (viewAll) {
@@ -517,6 +567,14 @@ export default async function decorate(block) {
   }
 
   addTempWrapperDeprecated(block, 'blog-posts');
+
+  const isGrid = block.classList.contains('grid');
+  let gridModule;
+  if (isGrid) {
+    gridModule = await import('./blog-posts-v2-grid.js');
+    await gridModule.loadGridStyles();
+  }
+
   const config = getBlogPostsConfig(block);
 
   // wrap p in parent section
@@ -531,7 +589,7 @@ export default async function decorate(block) {
 
   addRightChevronToViewAll(block);
 
-  const hasPosts = await decorateBlogPosts(block, config);
+  const hasPosts = await decorateBlogPosts(block, config, 0, gridModule);
 
   // Handle include-heading variant
   if (headingContent) {

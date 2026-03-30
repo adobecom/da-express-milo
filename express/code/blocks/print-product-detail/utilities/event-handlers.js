@@ -134,7 +134,7 @@ function createUpdatedSelectedValuesObject(
 }
 
 export default async function updateAllDynamicElements(productId) {
-  const containerElement = document.querySelector('.print-product-detail');
+  const containerElement = document.querySelector('.pdpx-global-container');
   const { templateId } = containerElement.dataset;
   const form = document.querySelector('#pdpx-customization-inputs-form');
   const formData = new FormData(form);
