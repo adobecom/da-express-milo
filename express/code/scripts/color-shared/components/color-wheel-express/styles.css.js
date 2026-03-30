@@ -81,7 +81,7 @@ export const style = css`
         cursor: grabbing;
     }
 
-    .wheel-marker-overlay[data-index="0"]::before {
+    .wheel-marker-overlay--base::before {
         content: '';
         height: 4px;
         width: 4px;
@@ -93,7 +93,7 @@ export const style = css`
         border-radius: 15px;
     }
 
-    .wheel-marker-overlay[data-index="0"]::after {
+    .wheel-marker-overlay--base::after {
         content: '';
         height: 15px;
         width: 15px;
