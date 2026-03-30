@@ -182,7 +182,7 @@ body[data-device="desktop"] .comparison-table-v2 .sticky-header.is-stuck.gnav-of
   overflow-x: auto;
   justify-content: center;
   display: flex;
-  padding: 0 var(--spacing-400);
+  padding: 0 28px;
   width: 100vw;
 }
 
@@ -1042,6 +1042,7 @@ color: var(--color-gray-700-variant);
       max-width: 1300px; 
       text-align: left;
       display: flex;
+     border: 0.25px solid transparent;
   }
 
   .comparison-table-v2 .table-container .button-row {
