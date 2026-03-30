@@ -80,7 +80,7 @@ function initializeShell(config, host) {
 
   const deferredDeps = collectDeferredDeps(config);
   if (deferredDeps.css.length > 0) {
-    shell.preload(deferredDeps);
+    shell.preload(deferredDeps).catch(() => {});
   }
 
   if (config.palette) {
@@ -306,24 +306,34 @@ function mountToolbar(shell, root, footerSlot, toolbarConfig, modulePromise) {
   return mountToolbarCore(shell, root, footerSlot, toolbarConfig, modulePromise);
 }
 
-function createLayoutAPI(
-  slots,
-  shell,
-  root,
-  toolbarHandle,
-  stickyToolbarHandle,
-  stickyObserver,
-  cleanupToolbarMount,
-  actionMenuHandle,
-  onPaletteChange,
-) {
-  return {
+function createLayoutAPI(slots, shell, root) {
+  // Mutable state shared between the public API and async hydration callbacks.
+  // Using a closure object (rather than `this`) so destroy() works even when
+  // destructured: `const { destroy } = layout; destroy();`
+  const state = {
+    destroyed: false,
+    actionMenu: null,
+    toolbar: null,
+    stickyToolbar: null,
+    stickyObserver: null,
+    cleanupToolbarMount: () => {},
+    onPaletteChange: () => {},
+  };
+
+  const layout = {
     slots,
     context: shell.context,
-    actionMenu: actionMenuHandle,
-    toolbar: toolbarHandle,
-    stickyToolbar: stickyToolbarHandle,
-    toolbarState: { stickyObserver, cleanupToolbarMount, onPaletteChange },
+
+    get actionMenu() { return state.actionMenu; },
+    set actionMenu(v) { state.actionMenu = v; },
+
+    get toolbar() { return state.toolbar; },
+    set toolbar(v) { state.toolbar = v; },
+
+    get stickyToolbar() { return state.stickyToolbar; },
+    set stickyToolbar(v) { state.stickyToolbar = v; },
+
+    get destroyed() { return state.destroyed; },
 
     getSlot(name) {
       return slots[name] || null;
@@ -343,19 +353,21 @@ function createLayoutAPI(
     },
 
     destroy() {
-      const ts = this.toolbarState || {};
-      if (ts.onPaletteChange) shell.context.off('palette', ts.onPaletteChange);
-      ts.stickyObserver?.disconnect();
-      ts.cleanupToolbarMount?.();
-      this.actionMenu?.destroy();
-      if (this.stickyToolbar && this.stickyToolbar !== this.toolbar) {
-        this.stickyToolbar.destroy();
+      state.destroyed = true;
+      if (state.onPaletteChange) shell.context.off('palette', state.onPaletteChange);
+      state.stickyObserver?.disconnect();
+      state.cleanupToolbarMount?.();
+      state.actionMenu?.destroy();
+      if (state.stickyToolbar && state.stickyToolbar !== state.toolbar) {
+        state.stickyToolbar.destroy();
       }
-      this.toolbar?.destroy();
+      state.toolbar?.destroy();
       root.remove();
       shell.destroy();
     },
   };
+
+  return { layout, state };
 }
 
 export default async function createColorToolLayout(container, config = {}) {
@@ -396,21 +408,15 @@ export default async function createColorToolLayout(container, config = {}) {
   // Both action menu and toolbar mount non-blocking in parallel.
   await criticalCssReady;
 
-  const layout = createLayoutAPI(
-    slots,
-    shell,
-    root,
-    null,
-    null,
-    null,
-    () => {},
-    null,
-    () => {},
-  );
+  const { layout, state } = createLayoutAPI(slots, shell, root);
 
-  // Both components mount simultaneously and hydrate the layout when ready
+  // Both components mount simultaneously and hydrate the layout when ready.
+  // Each callback guards against early destroy so it never mutates a torn-down layout.
   layout.actionMenuReady = mountActionMenu(slots.topbar, actionMenuConfig, actionMenuModulePromise)
-    .then((handle) => { layout.actionMenu = handle; return handle; })
+    .then((handle) => {
+      if (!state.destroyed) state.actionMenu = handle;
+      return handle;
+    })
     .catch(() => null);
 
   const toolbarReady = mountToolbar(
@@ -422,11 +428,12 @@ export default async function createColorToolLayout(container, config = {}) {
     cleanupToolbarMount,
     onPaletteChange,
   }) => {
-    layout.toolbar = toolbarHandle;
-    layout.stickyToolbar = stickyToolbarHandle;
-    layout.toolbarState = {
-      stickyObserver, cleanupToolbarMount, onPaletteChange,
-    };
+    if (state.destroyed) return;
+    state.toolbar = toolbarHandle;
+    state.stickyToolbar = stickyToolbarHandle;
+    state.stickyObserver = stickyObserver;
+    state.cleanupToolbarMount = cleanupToolbarMount;
+    state.onPaletteChange = onPaletteChange;
   }).catch(() => {});
 
   layout.ready = Promise.all([layout.actionMenuReady, toolbarReady])

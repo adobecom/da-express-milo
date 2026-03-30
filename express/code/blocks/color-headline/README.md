@@ -11,11 +11,9 @@ Renders the page heading, subheading, and Adobe Express logo for color tool page
 
 ## Adoption contract
 
-The tool block uses `findHeadline` (`scripts/color-shared/utils/adoptHeadline.js`) to locate `.color-headline.tools` in the same section before layout creation. Discovery does not depend on color-headline's `init()` having run. `findHeadline` also ensures the logo is injected if `init()` hasn't executed yet.
+After `createColorToolLayout` returns, the tool block calls `adoptHeadline(block, layout)` from `scripts/color-shared/utils/adoptHeadline.js`. This function locates `.color-headline.tools` in the same `.section` as the tool block, ensures the Adobe Express logo is injected (in case `init()` hasn't run yet), prepends the element into the layout's sidebar slot, and sets `data-adopted="true"` on it.
 
-The found element is passed as `headlineEl` to `createColorToolLayout`, which places it in the sidebar slot synchronously during slot construction — before CSS loads and before the layout is appended to the DOM.
-
-After layout creation, `markAdopted` sets `data-adopted="true"` on the element.
+Discovery does not depend on color-headline's `init()` having run.
 
 ## CSS alignment
 
