@@ -14,7 +14,7 @@
   --search-bar-height: 40px;
   --search-bar-height-tablet: 48px;
   --search-bar-max-width: 700px;
-  --search-bar-sticky-z-index: 100;
+  --search-bar-sticky-z-index: 1;
   --search-bar-transition-fast: 130ms;
   --search-bar-transition-normal: 200ms;
   --search-bar-icon-size: 20px;
@@ -71,7 +71,8 @@
   block-size: var(--search-bar-height);
   border-radius: var(--Corner-radius-corner-radius-500);
   border: var(--search-bar-input-border-width) solid var(--color-gray-325);
-  padding-inline: var(--spacing-500);
+  padding-inline-start: calc(var(--spacing-300) + var(--search-bar-icon-size) + var(--spacing-100));
+  padding-inline-end: var(--spacing-500);
   font-family: var(--body-font-family);
   font-size: var(--body-font-size-s);
   font-weight: 400;
@@ -239,7 +240,8 @@
 
   .search-bar-input {
     block-size: var(--search-bar-height-tablet);
-    padding-inline: var(--spacing-600);
+    padding-inline-start: calc(var(--spacing-300) + var(--search-bar-icon-size) + var(--spacing-200));
+    padding-inline-end: var(--spacing-600);
     font-size: var(--body-font-size-m);
   }
 

@@ -5,6 +5,9 @@ export const style = css`
     :host {
         display: block;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
     }
 
     .canvas-container {
@@ -12,6 +15,9 @@ export const style = css`
         position: relative;
         display: flex;
         width: 100%;
+        max-width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
         justify-content: center;
         touch-action: none; /* Prevent scrolling while dragging on wheel */
     }
@@ -54,8 +60,8 @@ export const style = css`
     }
 
     .wheel-marker-overlay {
-        --wheel-marker-size: 22px;
-        --wheel-marker-stroke: 1px;
+        --wheel-marker-size: 33px;
+        --wheel-marker-stroke: 2px;
         --wheel-marker-color: #808080;
         position: absolute;
         transform: translate(-50%, -50%);
@@ -63,7 +69,7 @@ export const style = css`
         height: var(--wheel-marker-size);
         border: var(--wheel-marker-stroke) solid #fff;
         border-radius: 50%;
-        box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16), inset 0 0 0 1px rgba(31, 31, 31, 0.3);
+        box-shadow: 0 0 12px 0 rgba(0, 0, 0, 0.16), inset 0 0 0 1px rgba(31, 31, 31, 0.40);
         background-color: var(--wheel-marker-color);
         box-sizing: border-box;
         cursor: grab;
@@ -73,6 +79,30 @@ export const style = css`
 
     .wheel-marker-overlay:active {
         cursor: grabbing;
+    }
+
+    .wheel-marker-overlay[data-index="0"]::before {
+        content: '';
+        height: 4px;
+        width: 4px;
+        position: absolute;
+        top: 12.5px;
+        left: 12.5px;
+        background: #fff;
+        box-shadow: 0 0 0 1px rgba(31, 31, 31, 0.30);
+        border-radius: 15px;
+    }
+
+    .wheel-marker-overlay[data-index="0"]::after {
+        content: '';
+        height: 15px;
+        width: 15px;
+        position: absolute;
+        top: 5px;
+        left: 5px;
+        border: 2px solid #fff;
+        box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.30);
+        border-radius: 15px;
     }
 
     /* Conflict / confusion line overlay canvases */
@@ -92,7 +122,8 @@ export const style = css`
         top: 50%;
         left: 50%;
         height: 2px;
-        background-color: rgba(255, 255, 255, 0.8);
+        background-color: #ffffff;
+        box-shadow: 1px 0 8.1px 0 rgba(0, 0, 0, 0.39);
         transform-origin: 0 50%;
         pointer-events: none;
         z-index: 4;

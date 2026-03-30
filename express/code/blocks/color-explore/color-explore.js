@@ -10,7 +10,6 @@ import { createFiltersComponent } from '../../scripts/color-shared/components/cr
 import { loadComponentStyles } from '../../scripts/color-shared/utils/loadComponentStyles.js';
 import { createLoadingScreenComponent } from '../../scripts/color-shared/components/createLoadingScreenComponent.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
-import { createColorPaletteParamApi, normalizeHex } from '../../scripts/color-shared/utils/utilities.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
@@ -35,10 +34,6 @@ const EVENTS = {
   FILTER: 'filter',
   LOAD_MORE: 'load-more',
 };
-const PALETTE_EDITOR_DEFAULT_URL = '/color-wheel';
-const PALETTE_EDITOR_DEMO_HOST = 'methomas-sidebar-with-fixes--da-express-milo--adobecom.aem.live';
-const PALETTE_EDITOR_DEMO_URL = 'https://methomas-sidebar-with-fixes--da-express-milo--adobecom.aem.live/drafts/methomas/color/color-palette-sidebar';
-const colorPaletteParamApi = createColorPaletteParamApi();
 
 const STRIP_SHARED_STYLES = [
   '../../scripts/color-shared/components/strips/color-strip.css',
@@ -304,8 +299,17 @@ async function createBlockFilterControl(container, variant, onFilterChange) {
   });
 
   if (!(filters?.element instanceof Node)) return null;
+  filters.element.setAttribute('data-owner', 'color-explore-filters');
+  header.querySelectorAll(':scope > .filters-container').forEach((node) => node.remove());
   header.appendChild(filters.element);
-  await filters.waitForReady?.();
+  try {
+    await filters.waitForReady?.();
+  } catch (error) {
+    window.lana?.log(`[ColorExplore] Filters waitForReady failed: ${error?.message}`, {
+      tags: 'color-explore,filters',
+      severity: 'warning',
+    });
+  }
 
   return {
     destroy() {
@@ -319,15 +323,15 @@ export default async function decorate(block) {
   if (block.dataset.blockStatus === 'loaded' || block.dataset.blockStatus === 'loading') return;
 
   try {
-    await loadStripSharedStyles();
-
     const variantFromClass = getVariantFromBlock(block);
     const rows = [...block.children];
     const config = parseBlockConfig(rows, DEFAULTS);
     if (variantFromClass) config.variant = variantFromClass;
 
+    await loadStripSharedStyles();
+
     block.dataset.blockStatus = 'loading';
-    block.innerHTML = '';
+    block.replaceChildren();
     block.className = CSS_CLASSES.BLOCK;
     const variantClass = config.variant === VARIANTS.GRADIENTS
       ? VARIANT_CLASSES.GRADIENTS
@@ -462,6 +466,7 @@ export default async function decorate(block) {
           activeMode = VARIANTS.GRADIENTS;
           activeDataService = gradientsDataService;
           setModeClasses(VARIANTS.GRADIENTS);
+          block.dispatchEvent(new CustomEvent('color-explore:mode-change', { detail: { mode: VARIANTS.GRADIENTS }, bubbles: true }));
 
           block.classList.add(CSS_CLASSES.LOADING);
           try {
@@ -544,8 +549,18 @@ export default async function decorate(block) {
             await activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
+            if (query && allData.length === 0) {
+              document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+            } else {
+              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+            }
           };
           document.addEventListener('floating-search:submit', floatingSearchHandler);
+
+          const urlQuery = new URLSearchParams(window.location.search).get('q');
+          if (urlQuery) {
+            await floatingSearchHandler({ detail: { query: urlQuery } });
+          }
 
           publishInstances();
         } finally {
@@ -561,6 +576,7 @@ export default async function decorate(block) {
           activeMode = VARIANTS.STRIPS;
           activeDataService = palettesDataService;
           setModeClasses(VARIANTS.STRIPS);
+          block.dispatchEvent(new CustomEvent('color-explore:mode-change', { detail: { mode: VARIANTS.STRIPS }, bubbles: true }));
 
           block.classList.add(CSS_CLASSES.LOADING);
           try {
@@ -611,8 +627,8 @@ export default async function decorate(block) {
           }, { iconSize: config.loadMoreIconSize || 'xl' });
           updateLoadMoreState();
 
-          activeRenderer.on(EVENTS.PALETTE_CLICK, (palette) => {
-            navigateToPaletteEditor(palette || {});
+          activeRenderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
+            await modalManager.openPaletteSwatchesModal(palette || {});
           });
           activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
             await modalManager.openPaletteSwatchesModal(palette || {}, {
@@ -637,8 +653,18 @@ export default async function decorate(block) {
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
+            if (query && allData.length === 0) {
+              document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+            } else {
+              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+            }
           };
           document.addEventListener('floating-search:submit', floatingSearchHandler);
+
+          const urlQuery = new URLSearchParams(window.location.search).get('q');
+          if (urlQuery) {
+            await floatingSearchHandler({ detail: { query: urlQuery } });
+          }
 
           publishInstances();
         } finally {
@@ -693,8 +719,8 @@ export default async function decorate(block) {
 
       const modalManager = createModalManager();
 
-      renderer.on(EVENTS.PALETTE_CLICK, (palette) => {
-        navigateToPaletteEditor(palette || {});
+      renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
+        await modalManager.openPaletteSwatchesModal(palette || {});
       });
       renderer.on(EVENTS.SHARE, async ({ palette }) => {
         await modalManager.openPaletteSwatchesModal(palette || {}, {
@@ -728,8 +754,19 @@ export default async function decorate(block) {
         renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);
+        if (query && allData.length === 0) {
+          document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+        } else {
+          document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+        }
       };
       document.addEventListener('floating-search:submit', floatingHandler);
+
+      const urlQuery = new URLSearchParams(window.location.search).get('q');
+      if (urlQuery) {
+        await floatingHandler({ detail: { query: urlQuery } });
+      }
+
       block.addEventListener('block-unload', () => document.removeEventListener('floating-search:submit', floatingHandler), { once: true });
 
       block.rendererInstance = renderer;

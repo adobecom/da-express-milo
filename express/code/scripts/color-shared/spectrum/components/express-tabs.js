@@ -34,7 +34,7 @@ const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/tabs.css
  * @param {'s'|'m'|'l'|'xl'} [config.size='m']
  * @param {boolean} [config.quiet=false]
  * @param {'auto'|'compact'} [config.direction='auto']
- * @param {Array<{label: string, value: string, disabled?: boolean}>} [config.tabs=[]]
+ * @param {Array<{label: string, value: string, disabled?: boolean, spIcon?: string, iconSlotHtml?: string}>} [config.tabs=[]]
  * @param {Function} [config.onSelectionChange] — ({ selected }) when tab changes
  * @returns {Promise<{
  *   element: HTMLElement,
@@ -61,6 +61,7 @@ export async function createExpressTabs(config = {}) {
   await loadOverrideStyles('tabs', STYLES_PATH);
 
   const theme = createThemeWrapper();
+
   const tabsEl = createTag('sp-tabs', {
     size,
     ...(selected ? { selected } : {}),
@@ -68,12 +69,20 @@ export async function createExpressTabs(config = {}) {
     ...(direction !== 'auto' ? { direction } : {}),
   });
 
-  tabConfigs.forEach(({ label, value, disabled }) => {
+  tabConfigs.forEach(({ label, value, disabled, spIcon, iconSlotHtml }) => {
     const tab = createTag('sp-tab', {
       label,
       value,
       ...(disabled ? { disabled: '' } : {}),
     });
+    if (spIcon?.startsWith('sp-icon-')) {
+      const iconEl = createTag(spIcon, { 'slot': 'icon' });
+      tab.appendChild(iconEl);
+    }
+    if (iconSlotHtml) {
+      const iconWrapper = createTag('span', { 'slot': 'icon', class: 'ax-custom-icon' }, iconSlotHtml);
+      tab.prepend(iconWrapper);
+    }
     tabsEl.appendChild(tab);
   });
 

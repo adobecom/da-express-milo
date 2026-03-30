@@ -1,4 +1,5 @@
-import { createTag, getLibs } from '../../utils.js';
+import { createTag } from '../../utils.js';
+import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
@@ -11,11 +12,9 @@ let contentStylesLoaded = false;
 export async function ensurePaletteContentStyles() {
   if (contentStylesLoaded) return;
   try {
-    const { loadStyle, getConfig } = (await import(`${getLibs()}/utils/utils.js`));
-    const codeRoot = getConfig?.()?.codeRoot || '/express/code';
     await Promise.all([
-      loadStyle(`${codeRoot}/scripts/color-shared/modal/modal-palette-content.css`),
-      loadStyle(`${codeRoot}/scripts/color-shared/components/strips/color-strip.css`),
+      loadMiloStyle('scripts/color-shared/modal/modal-palette-content.css'),
+      loadMiloStyle('scripts/color-shared/components/strips/color-strip.css'),
     ]);
     contentStylesLoaded = true;
   } catch {
