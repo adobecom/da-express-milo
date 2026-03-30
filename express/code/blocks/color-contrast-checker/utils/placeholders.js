@@ -57,7 +57,7 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   suggestionsTabLabel: 'color-contrast-checker-suggestions-tab-label',
   setRatioTabLabel: 'color-contrast-checker-set-ratio-tab-label',
   colorPaletteLabel: 'color-contrast-checker-color-palette-label',
-  contrastCheckerLabel: 'color-contrast-checker-color-contrast-checker-label',
+  contrastCheckerLabel: 'color-contrast-checker-label',
   colorBlindnessLabel: 'color-contrast-checker-color-blindness-label',
   undoLabel: 'color-contrast-checker-undo-label',
   redoLabel: 'color-contrast-checker-redo-label',
