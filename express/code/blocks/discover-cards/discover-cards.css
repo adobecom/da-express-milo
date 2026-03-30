@@ -186,7 +186,7 @@ main .section .discover-cards {
     .discover-cards .cards-container .card {
         min-width: 399px;
         max-width: 399px;
-        margin: 9px -5px 10px auto;
+        margin: var(--spacing-0) -5px 10px auto;
     }
 
     .discover-cards .cards-container .card .text-content .header {
