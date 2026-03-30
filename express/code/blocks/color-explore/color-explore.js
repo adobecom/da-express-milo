@@ -642,9 +642,7 @@ export default async function decorate(block) {
             await modalManager.openPaletteSwatchesModal(palette || {});
           });
           activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
-            await modalManager.openPaletteSwatchesModal(palette || {}, {
-              swatchFeatures: { editTint: true },
-            });
+            await modalManager.openPaletteSwatchesModal(palette || {});
           });
 
           activeRenderer.on(EVENTS.SEARCH, async ({ query }) => {
@@ -739,9 +737,7 @@ export default async function decorate(block) {
         await modalManager.openPaletteSwatchesModal(palette || {});
       });
       renderer.on(EVENTS.SHARE, async ({ palette }) => {
-        await modalManager.openPaletteSwatchesModal(palette || {}, {
-          swatchFeatures: { editTint: true },
-        });
+        await modalManager.openPaletteSwatchesModal(palette || {});
       });
 
       renderer.on(EVENTS.SEARCH, async ({ query }) => {
