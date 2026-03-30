@@ -1,3 +1,18 @@
+/* Wrapper injected by color-headline.js when the extract variant is present.
+   Matches the Figma Content-container spec: 640px centered flex column. */
+.color-extract-marquee-wrapper {
+  display: flex;
+  width: min(640px, 100%);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-500, 32px);
+  margin: 0 auto;
+}
+
+.color-extract-marquee-wrapper > * {
+  width: 100%;
+}
+
 .color-headline *,
 .color-headline *::before,
 .color-headline *::after {
@@ -9,7 +24,8 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 32px 16px 0;
+  padding: 56px 16px 0;
+  /* Sit above the color-extract landing background images */
   position: relative;
   z-index: 1;
   margin-bottom: 0;
@@ -30,12 +46,13 @@ body:has(.color-extract.has-image) .color-headline.extract {
   height: 30px;
   padding: 0;
   margin-bottom: 12px;
+  margin-inline: auto;
 }
 
 .color-headline.extract h1 {
   font-size: 45px;
   line-height: 1.04;
-  margin: 0 0 12px;
+  margin: 0 0 16px;
 }
 
 .color-headline.extract p {

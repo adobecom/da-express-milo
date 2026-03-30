@@ -1,4 +1,4 @@
-import { getIconElementDeprecated, getLibs } from '../../scripts/utils.js';
+import { createTag, getIconElementDeprecated, getLibs } from '../../scripts/utils.js';
 
 const LOGO = 'adobe-express-logo';
 const PHOTO_LOGO = 'adobe-express-logo-photos';
@@ -15,6 +15,16 @@ export default async function init(el) {
 
   if (el.classList.contains('extract') && heading) {
     injectLogo(el, heading);
+
+    // Wrap this block and the sibling color-extract in a shared container so
+    // the Figma Content-container layout (640px centered flex column) is applied.
+    const section = el.closest('.section');
+    const colorExtract = section?.querySelector('.color-extract');
+    if (colorExtract) {
+      const wrapper = createTag('div', { class: 'color-extract-marquee-wrapper' });
+      el.before(wrapper);
+      wrapper.append(el, colorExtract);
+    }
   }
 
   if (el.classList.contains('tools')) {
