@@ -9,10 +9,7 @@ import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
 import createImageExtractComponent from './createImageExtractComponent.js';
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
-<<<<<<< HEAD
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
-=======
->>>>>>> e9f40e5ad (incorporate palatte param api)
 
 const PRIMARY_COLOR_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <mask id="mask0_13766_5780" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
@@ -78,11 +75,8 @@ const DEFAULT_ACTION_MENU_CONFIG = {
   ],
 };
 const THEME_NAME = 'Color Wheel Theme';
-<<<<<<< HEAD
 const HISTORY_EVENT = `${DEFAULT_ACTION_MENU_CONFIG.id}:history-index-changed`;
 const HISTORY_SKIP_SOURCES = new Set(['active-index', 'metadata', 'base-index']);
-=======
->>>>>>> e9f40e5ad (incorporate palatte param api)
 let harmonyCarouselCleanup = null;
 let harmonyStateUnsubscribe = null;
 let layoutInstance = null;
@@ -256,6 +250,27 @@ async function buildHarmonySelector(controller) {
     });
 
     updateRovingTabindex(controller.getState().harmonyRule || 'CUSTOM');
+
+    if (window.matchMedia('(min-width: 1200px)').matches) {
+      const tooltips = await Promise.all(
+        harmonyButtons.map((btn, i) => createExpressTooltip({
+          targetEl: btn,
+          content: rules[i].label,
+          placement: 'top',
+        })),
+      );
+
+      if (gen !== mountGeneration) {
+        tooltips.forEach((t) => t.destroy());
+        return;
+      }
+
+      const prevCleanup = harmonyCarouselCleanup;
+      harmonyCarouselCleanup = () => {
+        prevCleanup?.();
+        tooltips.forEach((t) => t.destroy());
+      };
+    }
   }
 
   const state0 = controller.getState();
