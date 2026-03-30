@@ -434,9 +434,8 @@ export default async function decorate(block) {
                 mainEntity: [...current, ...entities],
               });
             }
-          } catch (e2) {
-            // eslint-disable-next-line no-unused-expressions
-            window.lana?.log(`faqv2 schema merge error: ${e2?.message || e2}`);
+          } catch (error) {
+            window.lana?.log(`faqv2 schema merge error: ${error?.message || error}`, { tags: 'faqv2', severity: 'error' });
           }
         } else {
           const script = document.createElement('script');
@@ -450,9 +449,8 @@ export default async function decorate(block) {
           document.head.appendChild(script);
         }
       }
-    } catch (e) {
-      // eslint-disable-next-line no-unused-expressions
-      window.lana?.log(`faqv2 schema error: ${e?.message || e}`);
+    } catch (error) {
+      window.lana?.log(`faqv2 schema error: ${error?.message || error}`, { tags: 'faqv2', severity: 'error' });
     }
   }
 }

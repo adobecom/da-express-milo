@@ -312,8 +312,8 @@ function initializeCarousel(selector, parent) {
             tooltip.classList.add('display-tooltip');
             setTimeout(() => tooltip.classList.remove('display-tooltip'), 2000);
           }
-        }).catch((err) => {
-          window.lana?.log('Failed to copy link:', err);
+        }).catch((error) => {
+          window.lana?.log(`Failed to copy link: ${error?.message || error?.detail || error}`, { tags: 'basic-carousel, copyLink', severity: 'error' });
         });
         return;
       }

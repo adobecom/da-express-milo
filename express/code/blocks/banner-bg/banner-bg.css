@@ -78,6 +78,9 @@
   line-height: 130%;
   font-size: var(--heading-font-size-l);
   font-weight: var(--heading-font-weight-extra);
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 /* Paragraph styling for background variants */
