@@ -417,9 +417,11 @@ export default function createImageExtractComponent(options = {}) {
     maxColors,
   });
 
-  const toolbarPlaceholder = createTag('div', { class: 'color-extract-toolbar-slot' });
+  const topBar = createTag('div', { class: 'color-extract-top-bar' });
   const moodRow = createTag('div', { class: 'color-extract-mood-row' });
-  leftCol.append(toolbarPlaceholder, moodRow, bgWrapper);
+  const toolbarPlaceholder = createTag('div', { class: 'color-extract-toolbar-slot' });
+  topBar.append(moodRow, toolbarPlaceholder);
+  leftCol.append(topBar, bgWrapper);
 
   const suggestions = buildSuggestedImages(
     options.suggestionsRowEl || null,

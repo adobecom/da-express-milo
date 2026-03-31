@@ -351,7 +351,7 @@ function buildImageContent(controller, suggestionsRow) {
   const image = createTag('div', { class: 'image-content' });
   const panel = createImageExtractComponent({
     controller,
-    maxColors: Math.max(1, controller.getState().swatches?.length || 5),
+    maxColors: 5,
     suggestionsRowEl: suggestionsRow,
   });
   imagePanelDestroy = panel.destroy;

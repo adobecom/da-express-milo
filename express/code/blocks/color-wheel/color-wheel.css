@@ -179,7 +179,12 @@
 }
 
 .color-wheel .color-extract-edit-left {
-  gap: 0;
+  gap: var(--spacing-300);
+}
+
+.color-wheel .color-extract-mood-row {
+  flex: 1;
+  max-width: 200px;
 }
 
 .color-wheel .color-extract-mood {
@@ -513,13 +518,8 @@ color-wheel-express {
     max-width: none;
   }
 
-  .color-wheel .color-extract-edit-left {
-    gap: 16px;
-  }
-
   .color-wheel .color-extract-mood {
-    flex-direction: row;
-    width: 250px;
+    width: 200px;
   }
 
   .color-wheel .color-extract-mood-dropdown {
