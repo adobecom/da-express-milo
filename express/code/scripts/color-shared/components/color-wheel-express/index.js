@@ -143,8 +143,7 @@ export class ColorWheelExpress extends ColorWheel {
     const markerLayer = this.shadowRoot.querySelector('.marker-layer');
     if (!markerLayer || !this.swatches.length) return;
 
-    // Fast path: during drag, only update the dragged marker's position
-    if (this._dragIndex >= 0) {
+    if (this.harmonyRule === 'CUSTOM' && this._dragIndex >= 0) {
       const swatch = this.swatches[this._dragIndex];
       if (!swatch?.hsv) return;
 
@@ -159,15 +158,6 @@ export class ColorWheelExpress extends ColorWheel {
         marker.style.left = `calc(50% + ${x}px)`;
         marker.style.top = `calc(50% + ${y}px)`;
         marker.style.setProperty('--wheel-marker-color', swatch.hex);
-      }
-
-      const spoke = markerLayer.querySelector(`.wheel-spoke[data-spoke="${this._dragIndex}"]`);
-      if (spoke) {
-        const showSpokes = this.harmonyRule !== 'CUSTOM';
-        if (radius > 0 && showSpokes) {
-          spoke.style.width = `${radius}px`;
-          spoke.style.transform = `rotate(${-smoothH}deg)`;
-        }
       }
 
       this.drawLines();
@@ -202,6 +192,9 @@ export class ColorWheelExpress extends ColorWheel {
       marker.style.setProperty('--wheel-marker-color', swatch.hex);
       marker.style.zIndex = index === this.baseColorIndex ? 10 : 5;
       marker.dataset.index = index;
+      if (index === this.baseColorIndex && this.harmonyRule !== 'CUSTOM') {
+        marker.classList.add('wheel-marker-overlay--base');
+      }
       marker.addEventListener('pointerdown', (e) => this.handleMarkerDown(e, index));
 
       markerLayer.appendChild(marker);

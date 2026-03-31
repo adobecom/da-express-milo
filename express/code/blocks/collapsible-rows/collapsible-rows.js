@@ -2,6 +2,8 @@ import { getLibs } from '../../scripts/utils.js';
 import { isExpressTypographyClass, isMiloTypographyClass } from '../../scripts/typography-utils.js';
 
 let createTag;
+let getConfig;
+let replaceKey;
 
 function shouldReuseSingleElement(tempContainer) {
   const childElements = Array.from(tempContainer.children);
@@ -119,7 +121,7 @@ function buildTableLayout(block, typographyClasses = {}) {
   });
 }
 
-function buildOriginalLayout(block, typographyClasses = {}) {
+function buildOriginalLayout(block, typographyClasses = {}, viewMoreText = 'View more', viewLessText = 'View less') {
   const collapsibleRows = [];
   const rows = Array.from(block.children);
 
@@ -170,7 +172,7 @@ function buildOriginalLayout(block, typographyClasses = {}) {
   });
 
   const toggleButton = createTag('a', { class: 'collapsible-row-toggle-btn button' });
-  toggleButton.textContent = 'View more';
+  toggleButton.textContent = viewMoreText;
   // eslint-disable-next-line chai-friendly/no-unused-expressions
   collapsibleRows.length > 4 && block.append(toggleButton);
 
@@ -188,7 +190,7 @@ function buildOriginalLayout(block, typographyClasses = {}) {
       }
     });
     isExpanded = !isExpanded;
-    toggleButton.textContent = isExpanded ? 'View less' : 'View more';
+    toggleButton.textContent = isExpanded ? viewLessText : viewMoreText;
   });
 }
 
@@ -229,7 +231,10 @@ function extractTypographyClasses(block) {
 
 export default async function decorate(block) {
   block.parentElement.classList.add('ax-collapsible-rows');
-  ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
+  [{ createTag, getConfig }, { replaceKey }] = await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
+    import(`${getLibs()}/features/placeholders.js`),
+  ]);
 
   // Convert <strong> tags to <span> for accessibility before any processing
   convertStrongToSpan(block);
@@ -242,6 +247,10 @@ export default async function decorate(block) {
   if (isExpandableVariant) {
     buildTableLayout(block, typographyClasses);
   } else {
-    buildOriginalLayout(block, typographyClasses);
+    const [viewMoreText, viewLessText] = await Promise.all([
+      replaceKey('view-more', getConfig()),
+      replaceKey('view-less', getConfig()),
+    ]);
+    buildOriginalLayout(block, typographyClasses, viewMoreText || 'View more', viewLessText || 'View less');
   }
 }

@@ -6,11 +6,11 @@ const CONFIG = {
     desktop: 1024,
   },
   selectors: {
-    highlight: '.section div.highlight',
+    startElement: '.section div.highlight, .blog-article-marquee',
     section: 'main .section',
     headers: 'main .section.long-form .content h2, main .section.long-form .content h3, main .section.long-form .content h4',
     navigation: '.global-navigation, header',
-    stopElement: '.faqv2, .ax-link-list-v2-container',
+    stopElement: '.faqv2, .ax-link-list-v2-container, .ax-blog-posts-container, .banner-bg, footer',
   },
   scrollOffset: {
     mobile: 75,
@@ -68,7 +68,10 @@ function buildBlockConfig(block) {
   // Validate and set defaults
   const title = config['toc-title'] || 'Table of Contents';
   const ariaLabel = config['toc-aria-label'] || 'Table of Contents Navigation';
-  const stopElement = config['stop-element'] || config['toc-stop-element'];
+  const rawStopElement = config.stopElement || config['stop-element'] || config['toc-stop-element'];
+  const stopElement = rawStopElement && !rawStopElement.startsWith('.')
+    ? `.${rawStopElement}`
+    : rawStopElement;
   const contents = [];
 
   // Build content array with validation
@@ -502,20 +505,20 @@ function setupSocialSharing(socialContainer) {
 // ============================================================================
 
 /**
- * Calculates and sets the desktop TOC position based on highlight element and scroll
+ * Calculates and sets the desktop TOC position based on start element and scroll
  * @param {HTMLElement} tocContainer - TOC container element
  */
 function updateDesktopPosition(tocContainer) {
   if (!isDesktop()) return;
 
-  const highlightElement = document.querySelector(CONFIG.selectors.highlight);
-  if (!highlightElement) return;
+  const startElement = document.querySelector(CONFIG.selectors.startElement);
+  if (!startElement) return;
 
   // Calculate and cache the initial absolute position if not already stored
   if (!tocContainer.dataset.initialTop) {
-    const highlightRect = highlightElement.getBoundingClientRect();
-    const highlightBottom = window.pageYOffset + highlightRect.bottom + 40; // 40px below highlight
-    tocContainer.dataset.initialTop = highlightBottom + 30; // additional 40px buffer
+    const startRect = startElement.getBoundingClientRect();
+    const startBottom = window.pageYOffset + startRect.bottom;
+    tocContainer.dataset.initialTop = startBottom + 34;
   }
 
   const initialTop = parseFloat(tocContainer.dataset.initialTop);
@@ -542,18 +545,19 @@ function updateDesktopPosition(tocContainer) {
 
   // Check if there's a stop element we shouldn't scroll past
   const stopSelector = tocContainer.dataset.stopSelector || CONFIG.selectors.stopElement;
-  const stopElement = stopSelector ? document.querySelector(stopSelector) : null;
-  if (stopElement) {
+  const stopElement = stopSelector
+    ? Array.from(document.querySelectorAll(stopSelector)).find((el) => el.offsetHeight > 0)
+    : null;
+  if (stopElement && scrollY > 0) {
     const stopRect = stopElement.getBoundingClientRect();
     const stopTop = stopRect.top; // Position relative to viewport
     const tocHeight = tocContainer.offsetHeight;
-
     // If the TOC would overlap with the stop element, limit its position
     // We want: topPosition + tocHeight <= stopTop
     // So: topPosition <= stopTop - tocHeight
     const maxTopPosition = stopTop - tocHeight - 20; // 20px buffer
 
-    if (topPosition > maxTopPosition) {
+    if (topPosition > maxTopPosition && stopRect.height > 0) {
       topPosition = maxTopPosition;
     }
   }
@@ -623,7 +627,9 @@ function updateActiveLink(tocContainer) {
 function setupDesktop(tocContainer) {
   // Initial position (only if already on desktop)
   if (isDesktop()) {
+    tocContainer.style.visibility = 'hidden';
     updateDesktopPosition(tocContainer);
+    tocContainer.style.visibility = 'visible';
     updateActiveLink(tocContainer);
   }
 
@@ -713,7 +719,7 @@ async function initializeDependencies() {
       getMetadata: utils.getMetadata,
     };
   } catch (error) {
-    window.lana?.log('TOC: Failed to initialize dependencies:', error);
+    window.lana?.log(`TOC: Failed to initialize dependencies: ${error?.message || error?.detail || error}`, { tags: 'toc-seo', severity: 'error' });
     throw new Error('Failed to load required utilities');
   }
 }
@@ -734,7 +740,9 @@ export default async function decorate(block) {
 
     // Phase 3: Create DOM structure
     const container = createContainer();
-    const stopSelector = config.stopElement || CONFIG.selectors.stopElement || '';
+    const rawMetaStop = getMetadata('stopelement');
+    const metaStop = rawMetaStop && !rawMetaStop.startsWith('.') ? `.${rawMetaStop}` : rawMetaStop;
+    const stopSelector = config.stopElement || metaStop || CONFIG.selectors.stopElement || '';
     container.dataset.stopSelector = stopSelector;
     const titleBar = createTitleBar(config.title);
     const content = createContentList(config);
@@ -768,12 +776,12 @@ export default async function decorate(block) {
     setupNavigation(content);
     setupSocialSharing(socialIcons);
 
-    // Phase 6: Insert TOC after highlight element
-    const highlightElement = document.querySelector(CONFIG.selectors.highlight);
-    if (highlightElement) {
-      highlightElement.insertAdjacentElement('afterend', container);
+    // Phase 6: Insert TOC after start element
+    const startElement = document.querySelector(CONFIG.selectors.startElement);
+    if (startElement) {
+      startElement.insertAdjacentElement('afterend', container);
     } else {
-      window.lana?.log('TOC: No highlight element found');
+      window.lana?.log('TOC: No start element found', { tags: 'toc-seo', severity: 'error' });
     }
 
     // Phase 7: Insert floating button and setup behavior (mobile/tablet only)
@@ -816,7 +824,7 @@ export default async function decorate(block) {
     // Hide original block
     block.style.display = 'none';
   } catch (error) {
-    window.lana?.log('TOC: Error during decoration:', error);
+    window.lana?.log(`TOC: Error during decoration: ${error?.message || error?.detail || error}`, { tags: 'toc-seo', severity: 'error' });
     block.style.display = 'none';
   }
 }

@@ -8,7 +8,6 @@ import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } f
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
-import { createLoadingScreenComponent } from '../../scripts/color-shared/components/createLoadingScreenComponent.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
@@ -20,9 +19,6 @@ const DEFAULTS = {
   maxItems: 100,
   enableFilters: true,
   enableSearch: true,
-  useMockData: false,
-  useMockFallback: true,
-  loadingScreenDemo: false,
   apiEndpoint: '',
 };
 const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
@@ -40,7 +36,6 @@ const STRIP_SHARED_STYLES = [
   'scripts/color-shared/components/gradients/gradient-strip.css',
 ];
 const LOAD_MORE_CLICK_HANDLERS = new WeakMap();
-const LOADING_DEMO_QUERY_PARAM = 'colorExploreLoadingDemo';
 
 async function loadStripSharedStyles() {
   await Promise.all(
@@ -55,55 +50,6 @@ async function loadStripSharedStyles() {
       }
     }),
   );
-}
-
-function isLoadingDemoMode(config = {}) {
-  if (config?.loadingScreenDemo === true) return true;
-  if (typeof window === 'undefined') return false;
-
-  try {
-    const params = new URLSearchParams(window.location.search || '');
-    const value = (params.get(LOADING_DEMO_QUERY_PARAM) || '').trim().toLowerCase();
-    return value === '1' || value === 'true';
-  } catch {
-    return false;
-  }
-}
-
-function normalizeLoadingDemoVariant(variant) {
-  return variant === VARIANTS.GRADIENTS ? VARIANTS.GRADIENTS : VARIANTS.STRIPS;
-}
-
-export function mountLoadingScreenDemo(container, options = {}) {
-  if (!container || typeof container.replaceChildren !== 'function') {
-    return {
-      ready: Promise.resolve(),
-      destroy() {},
-    };
-  }
-
-  const countCandidate = Number(options.cardCount ?? options.initialLoad);
-  const cardCount = Number.isFinite(countCandidate) && countCandidate > 0
-    ? Math.floor(countCandidate)
-    : DEFAULTS.initialLoad;
-
-  const loading = createLoadingScreenComponent({
-    variant: normalizeLoadingDemoVariant(options.variant),
-    cardCount,
-  });
-
-  container.replaceChildren(loading.element);
-  const ready = loading.show();
-
-  return {
-    ready,
-    destroy() {
-      loading.hide?.();
-      if (loading.element?.parentElement === container) {
-        container.replaceChildren();
-      }
-    },
-  };
 }
 
 function getVariantFromBlock(block) {
@@ -349,33 +295,18 @@ export default async function decorate(block) {
     container.className = CSS_CLASSES.CONTAINER;
     themeHost.appendChild(container);
 
-    if (isLoadingDemoMode(config)) {
-      const loadingDemo = mountLoadingScreenDemo(container, {
-        variant: config.variant,
-        cardCount: config.initialLoad,
-      });
-      block.addEventListener('block-unload', () => loadingDemo.destroy(), { once: true });
-      await loadingDemo.ready;
-      block.dataset.blockStatus = 'loaded';
-      return;
-    }
-
     if (config.variant === VARIANTS.GRADIENTS || config.variant === VARIANTS.STRIPS) {
       const gradientsDataService = createSharedColorDataService({
         variant: VARIANTS.GRADIENTS,
         initialLoad: config.initialLoad,
         maxItems: config.maxItems,
         apiEndpoint: config.apiEndpoint,
-        useMockData: config.useMockData,
-        useMockFallback: config.useMockFallback,
       });
       const palettesDataService = createSharedColorDataService({
         variant: 'palettes',
         initialLoad: config.initialLoad,
         maxItems: config.maxItems,
         apiEndpoint: config.apiEndpoint,
-        useMockData: config.useMockData,
-        useMockFallback: config.useMockFallback,
       });
       const modalManager = createModalManager();
       const stateKey = `color-explore-${VARIANTS.GRADIENTS}`;
@@ -694,8 +625,6 @@ export default async function decorate(block) {
         initialLoad: config.initialLoad,
         maxItems: config.maxItems,
         apiEndpoint: config.apiEndpoint,
-        useMockData: config.useMockData,
-        useMockFallback: config.useMockFallback,
       });
 
       block.classList.add(CSS_CLASSES.LOADING);

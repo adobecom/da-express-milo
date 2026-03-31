@@ -67,6 +67,9 @@ function frictionlessQAExperiment(
     case 'qa-in-product-control':
       ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
       break;
+    case 'remove-background-fast-track-control':
+      ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
+      break;
     default:
       break;
   }
@@ -287,7 +290,10 @@ async function uploadAssetToStorage(file, quickAction, uploadStartTime) {
         + `uploadDuration:${uploadDuration}`,
       {
         clientId: 'express',
-        tags: 'frictionless-video-upload-success',
+        tags: 'frictionless-quick-action, frictionless-video-upload-success',
+        errorType: 'i',
+        severity: 'info',
+
       },
     );
   }
@@ -326,14 +332,13 @@ async function performStorageUpload(files, block, quickAction) {
           + `errorMessage:${error.message}`,
         {
           clientId: 'express',
-          tags: 'frictionless-video-upload-failed',
+          tags: 'frictionless-video-upload-failed, frictionless-quick-action',
+          severity: 'error',
+
         },
       );
     }
-
-    // Clear upload state on failure
     uploadInProgress = null;
-
     return null;
   }
 }
@@ -346,7 +351,7 @@ async function startAssetDecoding(file, controller) {
   }).catch((error) => {
     window.lana?.log(
       `Asset decode failed error:${error.message || error}`,
-      { clientId: 'express', tags: 'frictionless-asset-decode-failed' },
+      { tags: 'frictionless-asset-decode-failed, frictionless-quick-action', severity: 'error' },
     );
     return null;
   }), 5000);
@@ -668,10 +673,19 @@ export default async function decorate(block) {
   // Fetch the base url for editor entry from upload cta and save it for later use.
   frictionlessTargetBaseUrl = cta.href;
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlVariant = urlParams.get('variant');
+  const variant = urlVariant || quickAction;
+  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFasttrackVariant) {
+    const isStage = urlParams.get('hzenv') === 'stage';
+    const stageURL = urlParams.get('base') ? urlParams.get('base') : 'https://stage.projectx.corp.adobe.com/new';
+    frictionlessTargetBaseUrl = isStage ? stageURL : 'https://express.adobe.com/new';
+  }
+
   // Load IMS if not already loaded
   if (!window.adobeIMS) {
-    try { await utils.loadIms(); } catch (e) {
-      window.lana?.log(`Unable to load IMS in frictionless-quick-action: ${e}`);
+    try { await utils.loadIms(); } catch (error) {
+      window.lana?.log(`Unable to load IMS in frictionless-quick-action: ${error?.message || error}`, { tags: 'frictionless-quick-action', severity: 'error' });
     }
   }
   setupFrictionlessTargetBaseUrl(quickAction);
@@ -807,7 +821,10 @@ export default async function decorate(block) {
           + `uploadDuration:${uploadDuration}`,
         {
           clientId: 'express',
-          tags: 'frictionless-video-upload-cancelled',
+          tags: 'frictionless-quick-action, frictionless-video-upload-cancelled',
+          errorType: 'i',
+          severity: 'info',
+
         },
       );
       uploadInProgress = null;

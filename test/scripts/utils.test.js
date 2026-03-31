@@ -46,6 +46,14 @@ describe('Libs', () => {
     const libs = setLibs('/libs', location);
     expect(libs).to.equal('https://awesome--milo--forkedowner.aem.live/libs');
   });
+
+  it('Uses stage libs on stage', () => {
+    const location = {
+      hostname: 'www.stage.adobe.com',
+    };
+    const libs = setLibs('/libs', location);
+    expect(libs).to.equal('/libs');
+  });
 });
 
 describe('Label Metadata for Frictionless Legacy', () => {
@@ -218,8 +226,8 @@ describe('transformLinkToAnimation', () => {
 
     const result = transformLinkToAnimation(invalidLink);
     expect(result).to.be.null;
-    expect(window.lana.log.calledOnce).to.be.true;
-    expect(window.lana.log.firstCall.args[0]).to.equal('Invalid video URL in transformLinkToAnimation:');
+    expect(window.lana?.log.calledOnce).to.be.true;
+    expect(window.lana?.log.firstCall.args[0]).to.equal('Invalid video URL in transformLinkToAnimation:');
 
     // Restore original lana and URL
     window.lana = originalLana;
@@ -245,8 +253,8 @@ describe('transformLinkToAnimation', () => {
 
     const result = transformLinkToAnimation(problematicLink);
     expect(result).to.be.null;
-    expect(window.lana.log.calledOnce).to.be.true;
-    expect(window.lana.log.firstCall.args[0]).to.equal('Error in transformLinkToAnimation:');
+    expect(window.lana?.log.calledOnce).to.be.true;
+    expect(window.lana?.log.firstCall.args[0]).to.equal('Error in transformLinkToAnimation:');
 
     // Restore original lana
     window.lana = originalLana;

@@ -78,8 +78,8 @@ export default async function getData() {
     const filtered = buckets?.filter((pill) => pill?.metadata?.status === 'enabled');
 
     return filtered || null;
-  } catch (err) {
-    window.lana?.log('error fetching sdc browse api:', err.message);
+  } catch (error) {
+    window.lana?.log(`error fetching sdc browse api: ${error?.message || error?.detail || error}`, { tags: 'utils, browse-api-controller, getData', severity: 'error' });
     return null;
   }
 }
