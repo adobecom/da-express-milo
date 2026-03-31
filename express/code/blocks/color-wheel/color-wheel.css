@@ -36,6 +36,7 @@
 }
 
 .color-wheel-content {
+  width: 100%;
   max-width: 100%;
   display: flex;
   flex-direction: column;
@@ -216,6 +217,7 @@ color-wheel-express {
 
 .color-wheel-harmony-section {
   padding-right: var(--spacing-300);
+  width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }
