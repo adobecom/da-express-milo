@@ -519,7 +519,7 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
 
 export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
   const { actions } = useStore();
-  const { selector, selectedOptionValue, title } = attribute;
+  const { selector, selectedOptionValue, title, helpLink } = attribute;
   const groupLabelId = `pdpx-pill-label-${toDomIdPart(attribute.name)}`;
   const hiddenInputId = `pdpx-hidden-input-${attribute.name}`;
 
@@ -560,13 +560,33 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
     nextButton?.focus();
   };
 
+  const triggerDrawer = () => {
+    if (helpLink && typeof onRequestDrawer === 'function') {
+      onRequestDrawer({
+        type: helpLink.dialogType,
+        payload: { attribute, helpLink },
+      });
+    }
+  };
+
   if (isMiniPill) {
     return html`<${MiniPillCarousel} attribute=${attribute} onRequestDrawer=${onRequestDrawer} productType=${productType} />`;
   }
 
   return html`
     <div class="pdpx-pill-selector-container">
-      <span id="${groupLabelId}" class="pdpx-pill-selector-label">${title}</span>
+      <div class="pdpx-pill-selector-label-container">
+        <span id="${groupLabelId}" class="pdpx-pill-selector-label">${title}</span>
+        ${helpLink?.type === 'dialog' && helpLink.dialogType && html`
+          <button
+            class="pdpx-pill-selector-label-compare-link"
+            type="button"
+            onClick=${triggerDrawer}
+          >
+            ${helpLink.label}
+          </button>
+        `}
+      </div>
       <div role="radiogroup" aria-orientation="horizontal" aria-labelledby="${groupLabelId}">
         ${selector.optionGroups?.map(
     (group) => html`

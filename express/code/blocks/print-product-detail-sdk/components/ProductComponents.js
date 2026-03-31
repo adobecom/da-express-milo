@@ -377,7 +377,7 @@ export function Drawer() {
   return html`
     <${Fragment}>
       <div
-        class="pdp-curtain ${state.open ? '' : 'hidden'}"
+        class="pdpx-drawer ${state.open ? '' : 'hidden'}"
         onClick=${closeDrawer}
         role="presentation"
       ></div>
