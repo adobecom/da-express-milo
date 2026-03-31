@@ -540,9 +540,12 @@ export default async function decorate(block) {
   let currentPalette = null;
 
   async function init() {
+    // Save before clearing — adoptHeadline uses document.querySelector and would lose it otherwise
+    const headline = document.querySelector('.color-headline.tools');
     cleanup();
     block.innerHTML = '';
     block.className = 'color-wheel';
+    if (headline) block.appendChild(headline);
 
     try {
       const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
