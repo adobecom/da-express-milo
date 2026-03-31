@@ -167,6 +167,7 @@ export async function buildGallery(
   container.classList.add('gallery');
   [...items].forEach((item) => {
     item.classList.add('gallery--item');
+    item.setAttribute('tabindex', '0');
   });
   root.append(control);
 }
