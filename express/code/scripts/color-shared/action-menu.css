@@ -5,6 +5,10 @@
   border-bottom: 1px solid var(--Palette-gray-100);
 }
 
+.action-menu-full .action-menu-controls {
+  display: none;
+}
+
 .action-menu-nav {
   padding-block: var(--spacing-75);
 }
@@ -117,6 +121,27 @@
 .action-menu-full.expanded .contrast-link,
 .action-menu-full.expanded .color-blindness-link {
   display: none;
+}
+
+@media (min-width: 600px) {
+  .action-menu-full,
+  .action-menu-nav-only {
+    padding-block: 0 var(--spacing-100);
+  }
+}
+
+@media (min-width: 888px) {
+  .action-menu-full {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    padding-block: 0;
+    border-bottom: none;
+  }
+
+  .action-menu-full .action-menu-controls {
+    display: unset;
+  }
 }
 
 @media (min-width: 1200px) {
