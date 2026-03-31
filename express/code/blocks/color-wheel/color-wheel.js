@@ -534,154 +534,173 @@ function cleanup() {
 export default async function decorate(block) {
   const layoutRows = [...block.children];
   const suggestionsRow = layoutRows[0] || null;
+  const desktopQuery = window.matchMedia('(min-width: 1200px)');
 
-  block.innerHTML = '';
-  block.className = 'color-wheel';
+  // Preserved across breakpoint re-inits so the user's palette survives resize
+  let currentPalette = null;
 
-  try {
-    const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
-    const initialPalette = {
-      name: getResolvedPaletteName() || THEME_NAME,
-      colors: getResolvedPalette(),
-    };
-
-    const controller = new ColorThemeExpressController({
-      swatches: initialPalette.colors,
-      harmonyRule: 'CUSTOM',
-      baseColorIndex: 0,
-    });
-    swatchRailController = createSwatchRailControllerBridge(controller);
-
-    const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
-
-    layoutInstance = await createColorToolLayout(block, {
-      palette: initialPalette,
-      toolbar: {
-        variant: 'standalone',
-        showEdit: false,
-        showPalette: isDesktop,
-        showPaletteName: true,
-        editPaletteName: false,
-      },
-      actionMenu: {
-        ...DEFAULT_ACTION_MENU_CONFIG,
-        type: isDesktop ? 'full' : 'nav-only',
-        onExpand: (expanded) => {
-          const sidebarSlot = block.querySelector('.ax-shell-slot--sidebar');
-          const layout = block.querySelector('.ax-color-tool-layout');
-
-          sidebarTransitionCleanup?.();
-          sidebarTransitionCleanup = null;
-
-          if (!sidebarSlot || !layout) {
-            if (expanded) block.dataset.sidebarCollapsed = '';
-            else delete block.dataset.sidebarCollapsed;
-            return;
-          }
-
-          if (expanded) {
-            const rect = sidebarSlot.getBoundingClientRect();
-            sidebarNaturalWidth = rect.width;
-            sidebarSlot.style.minWidth = `${sidebarNaturalWidth}px`;
-            // Pin height to current pixel value so flex children (sp-theme) don't collapse
-            sidebarSlot.style.height = `${rect.height}px`;
-            block.dataset.sidebarCollapsed = '';
-          } else {
-            sidebarSlot.style.minWidth = `${sidebarNaturalWidth || 300}px`;
-            delete block.dataset.sidebarCollapsed;
-          }
-
-          const onTransitionEnd = (e) => {
-            if (e.propertyName !== 'grid-template-columns') return;
-            sidebarSlot.style.minWidth = '';
-            sidebarSlot.style.height = '';
-            layout.removeEventListener('transitionend', onTransitionEnd);
-            sidebarTransitionCleanup = null;
-          };
-          layout.addEventListener('transitionend', onTransitionEnd);
-          sidebarTransitionCleanup = () => {
-            sidebarSlot.style.minWidth = '';
-            sidebarSlot.style.height = '';
-            layout.removeEventListener('transitionend', onTransitionEnd);
-          };
-        },
-      },
-    });
-
-    adoptHeadline(layoutInstance);
-    await layoutInstance.actionMenuReady;
-
-    const tabs = await buildTabs(controller, suggestionsRow);
-    layoutInstance.slots.sidebar.appendChild(tabs.element);
-
-    if (!isDesktop) {
-      const { createActionMenuComponent } = await import('../../scripts/color-shared/components/createActionMenuComponent.js');
-
-      const actionMenu = await createActionMenuComponent({
-        ...DEFAULT_ACTION_MENU_CONFIG,
-        type: 'controls-only',
-        controls: [
-          { id: 'undo', label: 'Undo' },
-          { id: 'redo', label: 'Redo' },
-          { id: 'generate-random', label: 'Generate random' },
-        ],
-      });
-      layoutInstance.slots.canvas.appendChild(actionMenu.element);
-    }
-    const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
-    layoutInstance.slots.canvas.appendChild(stripHost);
-
-    stripRenderer = createStripContainerRenderer({
-      container: stripHost,
-      data: [swatchRailController],
-      config: {
-        stripContainerOrientations: ['vertical-responsive'],
-        swatchFeatures: {
-          copy: true,
-          hexCode: true,
-          colorPicker: true,
-          lock: true,
-          trash: true,
-          drag: true,
-          addLeft: true,
-          addRight: true,
-          editTint: true,
-          baseColor: true,
-          emptyStrip: true,
-          rightActionsHoverOnly: true,
-        },
-        swatchVerticalMaxPerRow: 6,
-      },
-    });
-    await stripRenderer.render(stripHost);
-
-    // What is this?
-    paletteUnsubscribe = controller.subscribe((state) => {
-      layoutInstance?.context?.set('palette', paletteFromThemeState(state));
-      if (!baseColorAdapter?.setPalette) return;
-      const pal = swatchHexListFromState(state);
-      const el = baseColorAdapter.getElement?.();
-      const nextIdx = Math.min(
-        Math.max(0, state.baseColorIndex ?? 0),
-        Math.max(0, pal.length - 1),
-      );
-      if (!palettesEqual(el?.palette, pal)) {
-        baseColorAdapter.setPalette(pal);
-      }
-      if (el && el.selectedIndex !== nextIdx) {
-        baseColorAdapter.setSelectedIndex(nextIdx);
-      }
-    });
-
-    block.classList.add('ax-shell-host');
-    block.dataset.shellState = 'ready';
-  } catch (error) {
-    window.lana?.log(`Color Wheel init error: ${error.message}`, {
-      tags: 'color-wheel,init',
-    });
-    block.dataset.blockStatus = 'error';
+  async function init() {
     cleanup();
-    block.replaceChildren();
-    block.append(createTag('p', { class: 'color-wheel-error' }, 'Failed to load Color Wheel.'));
+    block.innerHTML = '';
+    block.className = 'color-wheel';
+
+    try {
+      const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
+      const initialPalette = currentPalette || {
+        name: getResolvedPaletteName() || THEME_NAME,
+        colors: getResolvedPalette(),
+      };
+
+      const controller = new ColorThemeExpressController({
+        swatches: initialPalette.colors,
+        harmonyRule: 'CUSTOM',
+        baseColorIndex: 0,
+      });
+      swatchRailController = createSwatchRailControllerBridge(controller);
+
+      const isDesktop = desktopQuery.matches;
+
+      layoutInstance = await createColorToolLayout(block, {
+        palette: initialPalette,
+        toolbar: {
+          variant: 'standalone',
+          showEdit: false,
+          showPalette: isDesktop,
+          showPaletteName: true,
+          editPaletteName: false,
+        },
+        actionMenu: {
+          ...DEFAULT_ACTION_MENU_CONFIG,
+          type: isDesktop ? 'full' : 'nav-only',
+          onExpand: (expanded) => {
+            const sidebarSlot = block.querySelector('.ax-shell-slot--sidebar');
+            const layout = block.querySelector('.ax-color-tool-layout');
+
+            sidebarTransitionCleanup?.();
+            sidebarTransitionCleanup = null;
+
+            if (!sidebarSlot || !layout) {
+              if (expanded) block.dataset.sidebarCollapsed = '';
+              else delete block.dataset.sidebarCollapsed;
+              return;
+            }
+
+            if (expanded) {
+              const rect = sidebarSlot.getBoundingClientRect();
+              sidebarNaturalWidth = rect.width;
+              sidebarSlot.style.minWidth = `${sidebarNaturalWidth}px`;
+              // Pin height to current pixel value so flex children (sp-theme) don't collapse
+              sidebarSlot.style.height = `${rect.height}px`;
+              block.dataset.sidebarCollapsed = '';
+            } else {
+              sidebarSlot.style.minWidth = `${sidebarNaturalWidth || 300}px`;
+              delete block.dataset.sidebarCollapsed;
+            }
+
+            const onTransitionEnd = (e) => {
+              if (e.propertyName !== 'grid-template-columns') return;
+              sidebarSlot.style.minWidth = '';
+              sidebarSlot.style.height = '';
+              layout.removeEventListener('transitionend', onTransitionEnd);
+              sidebarTransitionCleanup = null;
+            };
+            layout.addEventListener('transitionend', onTransitionEnd);
+            sidebarTransitionCleanup = () => {
+              sidebarSlot.style.minWidth = '';
+              sidebarSlot.style.height = '';
+              layout.removeEventListener('transitionend', onTransitionEnd);
+            };
+          },
+        },
+      });
+
+      adoptHeadline(layoutInstance);
+      await layoutInstance.actionMenuReady;
+
+      const tabs = await buildTabs(controller, suggestionsRow);
+      layoutInstance.slots.sidebar.appendChild(tabs.element);
+
+      if (!isDesktop) {
+        const { createActionMenuComponent } = await import('../../scripts/color-shared/components/createActionMenuComponent.js');
+
+        const actionMenu = await createActionMenuComponent({
+          ...DEFAULT_ACTION_MENU_CONFIG,
+          type: 'controls-only',
+          controls: [
+            { id: 'undo', label: 'Undo' },
+            { id: 'redo', label: 'Redo' },
+            { id: 'generate-random', label: 'Generate random' },
+          ],
+        });
+        layoutInstance.slots.canvas.appendChild(actionMenu.element);
+      }
+      const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
+      layoutInstance.slots.canvas.appendChild(stripHost);
+
+      stripRenderer = createStripContainerRenderer({
+        container: stripHost,
+        data: [swatchRailController],
+        config: {
+          stripContainerOrientations: ['vertical-responsive'],
+          swatchFeatures: {
+            copy: true,
+            hexCode: true,
+            colorPicker: true,
+            lock: true,
+            trash: true,
+            drag: true,
+            addLeft: true,
+            addRight: true,
+            editTint: true,
+            baseColor: true,
+            emptyStrip: true,
+            rightActionsHoverOnly: true,
+          },
+          swatchVerticalMaxPerRow: 6,
+        },
+      });
+      await stripRenderer.render(stripHost);
+
+      // What is this?
+      paletteUnsubscribe = controller.subscribe((state) => {
+        currentPalette = paletteFromThemeState(state);
+        layoutInstance?.context?.set('palette', currentPalette);
+        if (!baseColorAdapter?.setPalette) return;
+        const pal = swatchHexListFromState(state);
+        const el = baseColorAdapter.getElement?.();
+        const nextIdx = Math.min(
+          Math.max(0, state.baseColorIndex ?? 0),
+          Math.max(0, pal.length - 1),
+        );
+        if (!palettesEqual(el?.palette, pal)) {
+          baseColorAdapter.setPalette(pal);
+        }
+        if (el && el.selectedIndex !== nextIdx) {
+          baseColorAdapter.setSelectedIndex(nextIdx);
+        }
+      });
+
+      block.classList.add('ax-shell-host');
+      block.dataset.shellState = 'ready';
+    } catch (error) {
+      window.lana?.log(`Color Wheel init error: ${error.message}`, {
+        tags: 'color-wheel,init',
+      });
+      block.dataset.blockStatus = 'error';
+      cleanup();
+      block.replaceChildren();
+      block.append(createTag('p', { class: 'color-wheel-error' }, 'Failed to load Color Wheel.'));
+    }
   }
+
+  await init();
+
+  const onBreakpointChange = async () => {
+    if (!block.isConnected) {
+      desktopQuery.removeEventListener('change', onBreakpointChange);
+      return;
+    }
+    await init();
+  };
+  desktopQuery.addEventListener('change', onBreakpointChange);
 }
