@@ -344,7 +344,7 @@ function SizeChartContent({ onClose }) {
   }
 
   return html`
-    <div class="pdpx-size-chart-container drawer-body--size-chart">
+    <div class="pdpx-drawer-body pdpx-size-chart-container drawer-body--size-chart">
       ${chart.imageRealViewUrl && html`
         <div class="pdpx-drawer-hero-image-container">
           <img class="pdpx-drawer-hero-image" src="${chart.imageRealViewUrl}" alt="Size chart preview" />
@@ -371,29 +371,138 @@ function SizeChartContent({ onClose }) {
   `;
 }
 
+function flattenOptionGroups(selector) {
+  if (!selector?.optionGroups || !Array.isArray(selector.optionGroups)) {
+    return [];
+  }
+  return selector.optionGroups.flatMap(
+    (group) => (group.options || []).map((option) => ({ ...option, groupTitle: group.title })),
+  );
+}
+
+function PaperTypeContent({ onClose }) {
+  const { state, actions } = useStore();
+  const { state: drawerState } = useDrawer();
+  const attrName = drawerState.payload?.attribute?.name;
+  const attribute = (state?.attributes || []).find((a) => a.name === attrName);
+
+  if (!attribute) return null;
+
+  const { selector, selectedOptionValue } = attribute;
+  const { preview } = selector;
+  const allOptions = flattenOptionGroups(selector);
+  const selectedOption = allOptions.find((o) => o.value === selectedOptionValue) || allOptions[0];
+  const heroImageUrl = preview?.imageUrl ? updateImageUrl(preview.imageUrl, 1000) : '';
+  const isRecommended = selectedOptionValue === '175ptmatte';
+
+  const handlePillClick = (option) => {
+    if (option.value !== selectedOptionValue) {
+      actions.selectOption(attribute.name, option.value);
+    }
+  };
+
+  return html`
+    <${Fragment}>
+      <div class="pdpx-drawer-body">
+        ${heroImageUrl && html`
+          <div class="pdpx-drawer-hero-image-container">
+            <img class="pdpx-drawer-hero-image" src="${heroImageUrl}" alt="${selectedOption?.title || ''}" />
+          </div>
+        `}
+        <div class="pdpx-drawer-title-row">
+          <span class="pdpx-drawer-title">${selectedOption?.title || ''}</span>
+          <span
+            class="pdpx-recommended-badge"
+            style="visibility: ${isRecommended ? 'visible' : 'hidden'}"
+          >Recommended</span>
+        </div>
+        ${preview?.descriptionHTML && html`
+          <div
+            class="pdpx-drawer-description"
+            dangerouslySetInnerHTML=${{ __html: preview.descriptionHTML }}
+          />
+        `}
+        <div class="pdpx-pill-selector-container">
+          <div class="pdpx-pill-selector-label-container">
+            <div class="pdpx-pill-selector-label-name-container">
+              <span class="pdpx-pill-selector-label-label">${attribute.title}: </span>
+              <span class="pdpx-pill-selector-label-name">${selectedOption?.title || ''}</span>
+            </div>
+          </div>
+          <div class="pdpx-mini-pill-selector-options-container" style="display:flex;gap:8px;overflow-x:auto;padding:var(--spacing-100) 0;">
+            ${allOptions.map((option) => {
+    const isSelected = option.value === selectedOptionValue;
+    const thumbUrl = updateImageUrl(option.imageUrl, 48);
+    return html`
+                <div class="pdpx-mini-pill-container" key="${option.value}">
+                  <button
+                    class="pdpx-mini-pill-image-container ${isSelected ? 'selected' : ''}"
+                    type="button"
+                    onClick=${() => handlePillClick(option)}
+                    aria-label="${option.title}"
+                    aria-pressed="${isSelected ? 'true' : 'false'}"
+                  >
+                    <img class="pdpx-mini-pill-image" src="${thumbUrl}" alt="" aria-hidden="true" />
+                  </button>
+                  ${option.priceDelta && html`
+                    <div class="pdpx-mini-pill-text-container">
+                      <span class="pdpx-mini-pill-price">${option.priceDelta}</span>
+                    </div>
+                  `}
+                </div>
+              `;
+  })}
+          </div>
+        </div>
+      </div>
+      <div class="pdpx-drawer-foot">
+        <div class="pdpx-drawer-foot-info-container">
+          <img src="${updateImageUrl(selectedOption?.imageUrl, 48)}" alt="${selectedOption?.title || ''}" />
+          <div class="pdpx-drawer-foot-info-text">
+            <div class="pdpx-drawer-foot-info-name">${selectedOption?.title || ''}</div>
+            ${selectedOption?.priceDelta && html`
+              <div class="pdpx-drawer-foot-info-price">${selectedOption.priceDelta}</div>
+            `}
+          </div>
+        </div>
+        <button class="pdpx-drawer-foot-select-button" type="button" onClick=${onClose}>Select</button>
+      </div>
+    </${Fragment}>
+  `;
+}
+
 export function Drawer() {
   const { state, closeDrawer } = useDrawer();
+
+  useEffect(() => {
+    if (!state.open) return undefined;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') closeDrawer();
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [state.open, closeDrawer]);
+
+  const drawerLabels = {
+    sizeChart: state.payload?.helpLink?.label || 'Size Chart',
+    paperType: 'Select Paper Type',
+  };
+  const drawerLabel = drawerLabels[state.type] || '';
 
   return html`
     <${Fragment}>
       <div
-        class="pdpx-drawer ${state.open ? '' : 'hidden'}"
+        class="pdpx-curtain ${state.open ? '' : 'hidden'}"
         onClick=${closeDrawer}
         role="presentation"
       ></div>
-      <aside class="drawer ${state.open ? '' : 'hidden'}" id="pdp-x-drawer">
-        <div class="drawer-head">
-          <div class="drawer-head-label">
-            ${state.type === 'sizeChart' ? (state.payload?.helpLink?.label || 'Size Chart') : ''}
-          </div>
+      <aside class="pdpx-drawer ${state.open ? '' : 'hidden'}" id="pdp-x-drawer">
+        <div class="pdpx-drawer-head">
+          <div class="pdpx-drawer-head-label">${drawerLabel}</div>
           <button type="button" aria-label="Close" onClick=${closeDrawer}>×</button>
         </div>
-        <div class="drawer-body">
-          ${state.type === 'sizeChart' && html`<${SizeChartContent} onClose=${closeDrawer} payload=${state.payload} />`}
-          ${state.type !== 'sizeChart' && html`
-            <div class="pdpx-drawer-placeholder">Additional information coming soon.</div>
-          `}
-        </div>
+        ${state.type === 'sizeChart' && html`<${SizeChartContent} onClose=${closeDrawer} />`}
+        ${state.type === 'paperType' && html`<${PaperTypeContent} onClose=${closeDrawer} />`}
       </aside>
     </${Fragment}>
   `;
