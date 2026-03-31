@@ -5,7 +5,7 @@ import SimplifiedPricingCards from './simplified-pricing-cards.page.cjs';
 
 let simplifiedPricingCards;
 
-test.describe.skip('simplified-pricing-cards test suite', () => {
+test.describe('simplified-pricing-cards test suite', () => {
   test.beforeEach(async ({ page }) => {
     simplifiedPricingCards = new SimplifiedPricingCards(page);
   });

@@ -5,7 +5,7 @@ import SimplifiedPricingCardsV2 from './simplified-pricing-cards-v2.page.cjs';
 
 let spcv2;
 
-test.describe.skip('simplified-pricing-cards-v2 test suite', () => {
+test.describe('simplified-pricing-cards-v2 test suite', () => {
   test.beforeEach(async ({ page }) => {
     spcv2 = new SimplifiedPricingCardsV2(page);
   });
