@@ -65,8 +65,6 @@
   flex-wrap: nowrap;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding-left: var(--spacing-500);
-  padding-right: var(--spacing-400);
   width: 100%;
   box-sizing: border-box;
 }
@@ -200,6 +198,12 @@
 @media (min-width: 600px) {
   .color-search-marquee {
     padding: var(--spacing-600);
+  }
+
+  .color-search-marquee .tags-scroll-wrapper {
+    margin-inline-end: calc(-1 * var(--spacing-600));
+    width: calc(100% + var(--spacing-600));
+    max-width: none;
   }
 
   .color-search-marquee .tag-pill {
