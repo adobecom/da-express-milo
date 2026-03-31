@@ -28,7 +28,7 @@
 }
 
 .suggestions-list {
-  padding: 0;
+  padding: var(--spacing-100);
   margin: 0;
   list-style: none;
 }
@@ -37,9 +37,10 @@
   display: flex;
   align-items: flex-start;
   gap: var(--spacing-200);
-  padding-block: var(--spacing-200);
-  padding-inline: var(--spacing-300);
+  padding-block: 7px;
+  padding-inline: var(--spacing-200);
   cursor: pointer;
+  border-radius: var(--Corner-radius-corner-radius-100);
   transition: background-color var(--search-bar-transition-fast) ease;
 }
 
@@ -56,11 +57,6 @@
 .suggestion-item:focus-visible {
   outline: var(--border-width-2) solid var(--Alias-focus-indicator-default);
   outline-offset: calc(-1 * var(--border-width-2));
-}
-
-.suggestion-item:last-child {
-  border-end-start-radius: var(--Corner-radius-corner-radius-200);
-  border-end-end-radius: var(--Corner-radius-corner-radius-200);
 }
 
 .suggestion-icon {
@@ -150,8 +146,8 @@
   }
 
   .suggestion-item {
-    padding-block: var(--spacing-300);
-    padding-inline: var(--spacing-400);
+    padding-block: 7px;
+    padding-inline: var(--spacing-200);
     gap: var(--spacing-300);
   }
 
