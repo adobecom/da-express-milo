@@ -154,7 +154,7 @@ function createSearchBarWrapper(
 }
 
 function updateClearButtonVisibility(btn, hasValue) {
-  btn.style.display = hasValue ? 'inline-block' : 'none';
+  btn.style.display = hasValue ? 'flex' : 'none';
   btn.classList.toggle(CSS_CLASSES.HIDDEN, !hasValue);
 }
 
