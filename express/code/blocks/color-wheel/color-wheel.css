@@ -361,6 +361,8 @@ color-wheel-express {
   }
 }
 
+/* Small Tablet */
+
 @media (min-width: 600px) {
   .color-wheel .ax-color-tool-layout {
     padding: var(--spacing-400) var(--spacing-500);
@@ -372,6 +374,8 @@ color-wheel-express {
     padding-block-end: var(--spacing-400);
   }
 }
+
+/* Large Tablet */
 
 @media (min-width: 888px) {
   .color-wheel .ax-color-tool-layout {
@@ -395,6 +399,8 @@ color-wheel-express {
   }
 }
 
+/* Large Tablet */
+
 @media (min-width: 888px) and (max-width: 1199px) {
   .color-wheel .ax-shell-slot--topbar {
     grid-column: 1 / span 6;
@@ -408,6 +414,8 @@ color-wheel-express {
     grid-row: 1 / span 2;
   }
 }
+
+/* Desktop */
 
 @media (min-width: 1200px) {
   .color-wheel .ax-color-tool-layout {
