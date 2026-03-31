@@ -246,7 +246,7 @@ async function getReplacementsFromSearch() {
 const bladeRegex = /\{\{[a-zA-Z_-]+\}\}/g;
 
 function replaceBladesInStr(str, replacements) {
-  if (!replacements) return str;
+  if (!replacements || str === null) return str;
   return str.replaceAll(bladeRegex, (match) => {
     if (match in replacements) {
       return replacements[match];
