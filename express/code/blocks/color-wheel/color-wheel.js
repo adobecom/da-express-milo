@@ -75,6 +75,8 @@ const DEFAULT_ACTION_MENU_CONFIG = {
   ],
 };
 const THEME_NAME = 'Color Wheel Theme';
+const HISTORY_EVENT = `${DEFAULT_ACTION_MENU_CONFIG.id}:history-index-changed`;
+const HISTORY_SKIP_SOURCES = new Set(['active-index', 'metadata', 'base-index']);
 let harmonyCarouselCleanup = null;
 let harmonyStateUnsubscribe = null;
 let layoutInstance = null;
@@ -85,6 +87,7 @@ let imagePanelDestroy = null;
 let primaryColorAdapter = null;
 let sidebarNaturalWidth = 0;
 let sidebarTransitionCleanup = null;
+let historyCleanup = null;
 
 function swatchHexListFromState(state) {
   const swatches = state?.swatches || [];
@@ -529,6 +532,8 @@ function cleanup() {
   sidebarTransitionCleanup?.();
   sidebarTransitionCleanup = null;
   sidebarNaturalWidth = 0;
+  historyCleanup?.();
+  historyCleanup = null;
 }
 
 export default async function decorate(block) {
@@ -619,6 +624,48 @@ export default async function decorate(block) {
 
       adoptHeadline(layoutInstance);
       await layoutInstance.actionMenuReady;
+
+      const actionMenuApi = layoutInstance.actionMenu;
+      let restoringFromHistory = false;
+      let pushingState = false;
+      let historyDebounceTimer = null;
+
+      function pushCurrentPalette() {
+        if (restoringFromHistory) return;
+        const hexes = controller.getState().swatches.map((s) => s.hex);
+        pushingState = true;
+        actionMenuApi?.pushState?.(hexes);
+        pushingState = false;
+      }
+
+      // Push initial palette into history
+      actionMenuApi?.pushState?.(initialPalette.colors);
+
+      // Subscribe to controller — push history on user-facing state changes
+      const historyUnsubscribe = controller.subscribe((_, detail) => {
+        if (restoringFromHistory) return;
+        const { source } = detail || {};
+        if (!source || HISTORY_SKIP_SOURCES.has(source)) return;
+        clearTimeout(historyDebounceTimer);
+        historyDebounceTimer = setTimeout(pushCurrentPalette, 300);
+      });
+
+      // Restore palette when undo/redo or generate-random changes the history index
+      const onHistoryChange = () => {
+        if (pushingState) return;
+        const palette = actionMenuApi?.getCurrentPalette?.();
+        if (!palette?.length) return;
+        restoringFromHistory = true;
+        controller.replaceSwatchesFromHexes(palette, { baseIndex: 0, harmonyRule: 'CUSTOM' });
+        restoringFromHistory = false;
+      };
+      document.addEventListener(HISTORY_EVENT, onHistoryChange);
+
+      historyCleanup = () => {
+        historyUnsubscribe?.();
+        document.removeEventListener(HISTORY_EVENT, onHistoryChange);
+        clearTimeout(historyDebounceTimer);
+      };
 
       const tabs = await buildTabs(controller, suggestionsRow?.cloneNode(true));
       layoutInstance.slots.sidebar.appendChild(tabs.element);
