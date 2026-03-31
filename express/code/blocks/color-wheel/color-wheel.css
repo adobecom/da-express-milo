@@ -48,6 +48,14 @@
   padding-bottom: var(--spacing-100);
 }
 
+/* Primary color panel */
+
+.color-wheel .primary-color-content {
+  width: 100%;
+  min-width: 0;
+  align-self: stretch;
+}
+
 /* Image panel */
 
 .color-wheel .image-content {
@@ -202,14 +210,6 @@
 
 .color-wheel .color-extract-drag-overlay {
   position: fixed;
-}
-
-/* Base color tab */
-
-.color-wheel .base-color-content {
-  width: 100%;
-  min-width: 0;
-  align-self: stretch;
 }
 
 /* Color wheel panel */

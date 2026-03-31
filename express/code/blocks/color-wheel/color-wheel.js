@@ -11,7 +11,7 @@ import { createExpressTooltip } from '../../scripts/color-shared/spectrum/compon
 import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 
-const BASE_COLOR_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+const PRIMARY_COLOR_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <mask id="mask0_13766_5780" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
 <g clip-path="url(#clip0_13766_5780)">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M13.361 1.2644L11.4236 3.20072L10.8403 2.61749C10.4063 2.18347 9.70319 2.18347 9.26917 2.61749C8.83515 3.05152 8.83515 3.75465 9.26917 4.18867L9.85267 4.77217L2.28566 12.3386C2.13809 12.4862 2.03501 12.6717 1.98835 12.8746L1.21035 16.2481C1.03674 17.0001 1.25809 17.7748 1.80388 18.3206C2.22706 18.7438 2.78804 18.9717 3.36855 18.9717C3.53674 18.9717 3.70709 18.9532 3.87527 18.9141L7.24984 18.1361C7.45275 18.0895 7.63829 17.9864 7.78586 17.8388L15.3523 10.2718L15.9358 10.8553C16.1528 11.0723 16.4371 11.1808 16.7214 11.1808C17.0057 11.1808 17.29 11.0723 17.507 10.8553C17.941 10.4213 17.941 9.71817 17.507 9.28415L16.9238 8.70093L18.8601 6.76354C19.6081 6.01553 19.987 5.03578 19.9968 4.05302C20.0068 3.04422 19.6279 2.03224 18.8601 1.2644C18.1116 0.515882 17.1321 0.136716 16.1497 0.126905C15.1411 0.116827 14.1294 0.495993 13.361 1.2644ZM11.2231 11.259C11.1843 11.2546 11.1504 11.2362 11.1105 11.2362H6.53072L11.4238 6.34335L13.7811 8.70066L11.2231 11.259Z" fill="#292929"/>
@@ -82,7 +82,7 @@ let stripRenderer = null;
 let paletteUnsubscribe = null;
 let swatchRailController = null;
 let imagePanelDestroy = null;
-let baseColorAdapter = null;
+let primaryColorAdapter = null;
 let sidebarNaturalWidth = 0;
 let sidebarTransitionCleanup = null;
 
@@ -320,9 +320,9 @@ function paletteFromThemeState(state) {
   };
 }
 
-function buildBaseColorContent(controller) {
-  baseColorAdapter?.destroy?.();
-  baseColorAdapter = null;
+function buildPrimaryColorContent(controller) {
+  primaryColorAdapter?.destroy?.();
+  primaryColorAdapter = null;
 
   const state = controller.getState();
   const baseColor = swatchHexListFromState(state)[0];
@@ -340,9 +340,9 @@ function buildBaseColorContent(controller) {
       },
     },
   );
-  baseColorAdapter = adapter;
+  primaryColorAdapter = adapter;
 
-  const wrapper = createTag('div', { class: 'base-color-content' });
+  const wrapper = createTag('div', { class: 'primary-color-content' });
   wrapper.appendChild(adapter.element);
   return wrapper;
 }
@@ -376,7 +376,7 @@ async function buildTabs(controller, suggestionsRow) {
     size: 'm',
     quiet: true,
     tabs: [
-      { label: 'Base color', value: 'base-color', iconSlotHtml: BASE_COLOR_ICON },
+      { label: 'Primary color', value: 'primary-color', iconSlotHtml: PRIMARY_COLOR_ICON },
       { label: 'Image', value: 'image', spIcon: 'sp-icon-image' },
       { label: 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
     ],
@@ -384,7 +384,7 @@ async function buildTabs(controller, suggestionsRow) {
 
   tabsInstance.addPanel('color-wheel', await buildColorWheelContent(controller));
   tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow));
-  tabsInstance.addPanel('base-color', buildBaseColorContent(controller));
+  tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller));
 
   return tabsInstance;
 }
@@ -520,8 +520,8 @@ function cleanup() {
   swatchRailController = null;
   imagePanelDestroy?.();
   imagePanelDestroy = null;
-  baseColorAdapter?.destroy?.();
-  baseColorAdapter = null;
+  primaryColorAdapter?.destroy?.();
+  primaryColorAdapter = null;
   stripRenderer?.destroy?.();
   stripRenderer = null;
   layoutInstance?.destroy();
@@ -668,18 +668,18 @@ export default async function decorate(block) {
       paletteUnsubscribe = controller.subscribe((state) => {
         currentPalette = paletteFromThemeState(state);
         layoutInstance?.context?.set('palette', currentPalette);
-        if (!baseColorAdapter?.setPalette) return;
+        if (!primaryColorAdapter?.setPalette) return;
         const pal = swatchHexListFromState(state);
-        const el = baseColorAdapter.getElement?.();
+        const el = primaryColorAdapter.getElement?.();
         const nextIdx = Math.min(
           Math.max(0, state.baseColorIndex ?? 0),
           Math.max(0, pal.length - 1),
         );
         if (!palettesEqual(el?.palette, pal)) {
-          baseColorAdapter.setPalette(pal);
+          primaryColorAdapter.setPalette(pal);
         }
         if (el && el.selectedIndex !== nextIdx) {
-          baseColorAdapter.setSelectedIndex(nextIdx);
+          primaryColorAdapter.setSelectedIndex(nextIdx);
         }
       });
 

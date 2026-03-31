@@ -669,7 +669,7 @@ class BaseColor extends LitElement {
     return html`
       <div class="bc-header">
         <div class="bc-header-row">
-          <span class="bc-title">Base color</span>
+          <span class="bc-title">Primary color</span>
           <div class="bc-mode-wrap">
             <button
               type="button"
