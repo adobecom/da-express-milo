@@ -9,9 +9,27 @@ function ensureLogo(headline) {
   heading.before(logo);
 }
 
+function findHeadline(section) {
+  let prev = section?.previousElementSibling;
+  let next = section?.nextElementSibling;
+  while (prev || next) {
+    if (prev) {
+      const h = prev.querySelector('.color-headline.tools');
+      if (h) return h;
+      prev = prev.previousElementSibling;
+    }
+    if (next) {
+      const h = next.querySelector('.color-headline.tools');
+      if (h) return h;
+      next = next.nextElementSibling;
+    }
+  }
+  return null;
+}
+
 export default function adoptHeadline(toolBlock, layout) {
   const section = toolBlock.closest('.section');
-  const headline = section?.querySelector('.color-headline.tools');
+  const headline = findHeadline(section);
   if (!headline) return;
   ensureLogo(headline);
   layout.slots.sidebar.prepend(headline);
