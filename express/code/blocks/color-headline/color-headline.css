@@ -84,6 +84,7 @@ body:has(.color-extract.has-image) .color-headline.extract {
   width: unset;
   height: 29px;
   padding: 0;
+  margin-inline: 0;
 }
 
 .color-headline.tools h1,
