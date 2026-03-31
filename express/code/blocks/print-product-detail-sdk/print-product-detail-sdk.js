@@ -49,9 +49,7 @@ function PDPContent({ templateId }) {
     if (!request) {
       return;
     }
-    if (request.type === 'sizeChart') {
-      openDrawer({ type: 'sizeChart', payload: request.payload });
-    }
+    openDrawer({ type: request.type, payload: request.payload });
   };
 
   if (!state) {
@@ -70,7 +68,7 @@ function PDPContent({ templateId }) {
           <${ProductHeader} />
           <div class="pdpx-product-info-section-container">
             <div class="pdpx-product-info-section" id="pdpx-product-info-section">
-              <${CustomizationInputs} onRequestDrawer=${handleDrawerRequest} />
+              <${CustomizationInputs} onRequestDrawer=${handleDrawerRequest} productType=${state.productType} />
               <${ProductDetails} />
               <${Drawer} />
             </div>

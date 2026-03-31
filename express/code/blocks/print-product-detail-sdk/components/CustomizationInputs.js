@@ -87,26 +87,21 @@ export function DropdownSelector({ attribute }) {
   const optionsSignature = options
     .map((option) => `${option.value}:${option.title}:${option.priceDelta || ''}`)
     .join('|');
-
   useEffect(() => {
     let cancelled = false;
-
     async function mountPicker() {
       if (!pickerHostRef.current) {
         return;
       }
-
       if (pickerRef.current?.destroy) {
         pickerRef.current.destroy();
         pickerRef.current = null;
       }
-
       pickerHostRef.current.innerHTML = '';
       const pickerOptions = options.map((option) => ({
         value: option.value,
         text: `${option.title}${option.priceDelta ? ` ${option.priceDelta}` : ''}`,
       }));
-
       const picker = await createPicker({
         id: pickerIdRef.current,
         name: attribute.name,
@@ -118,18 +113,14 @@ export function DropdownSelector({ attribute }) {
           actions.selectOption(attribute.name, value);
         },
       });
-
       if (cancelled || !pickerHostRef.current) {
         picker?.destroy?.();
         return;
       }
-
       pickerHostRef.current.appendChild(picker);
       pickerRef.current = picker;
     }
-
     mountPicker();
-
     return () => {
       cancelled = true;
       if (pickerRef.current?.destroy) {
@@ -141,7 +132,6 @@ export function DropdownSelector({ attribute }) {
       }
     };
   }, [attribute.name, title, optionsSignature]);
-
   useEffect(() => {
     if (!pickerRef.current?.getPicker || !pickerRef.current?.setPicker) {
       return;
@@ -150,7 +140,6 @@ export function DropdownSelector({ attribute }) {
       pickerRef.current.setPicker(selectedOptionValue);
     }
   }, [selectedOptionValue]);
-
   return html`
     <div class="pdpx-standard-selector-container">
       <div ref=${pickerHostRef} />
@@ -315,11 +304,12 @@ function flattenOptionGroups(selector) {
  * which conflicts with Preact's reconciliation. By building the pills in useEffect
  * and not rendering them via Preact, we avoid reconciliation conflicts.
  */
-function MiniPillCarousel({ attribute, onRequestDrawer }) {
+function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
   const containerRef = useRef(null);
   const carouselCleanupRef = useRef(null);
   const { actions } = useStore();
-  const { selector, selectedOptionValue, title, helpLink } = attribute;
+  const { selector, selectedOptionValue, title } = attribute;
+  let { helpLink } = attribute;
   const allOptions = flattenOptionGroups(selector);
   const selectedOption = allOptions.find((option) => option.value === selectedOptionValue)
     || allOptions[0];
@@ -330,7 +320,14 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
   const hasDrawerLink = typeof onRequestDrawer === 'function'
     && helpLink?.type === 'dialog'
     && helpLink.dialogType;
-
+  const isBusinessCardMediaAttribute = attribute.name === 'media' && productType === 'zazzle_businesscard';
+  if (isBusinessCardMediaAttribute) {
+    helpLink = {
+      type: 'dialog',
+      dialogType: 'paperType',
+      label: 'Compare Paper Types',
+    };
+  }
   const handleOptionClick = (option) => {
     if (option.value !== selectedOptionValue) {
       actions.selectOption(attribute.name, option.value);
@@ -360,7 +357,7 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
   };
 
   const triggerDrawer = () => {
-    if (hasDrawerLink) {
+    if (helpLink) {
       onRequestDrawer({
         type: helpLink.dialogType,
         payload: { attribute, helpLink },
@@ -476,10 +473,10 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
     <div class="pdpx-pill-selector-container">
       <div class="pdpx-pill-selector-label-container">
         <div class="pdpx-pill-selector-label-name-container">
-          <span id="${groupLabelId}" class="pdpx-pill-selector-label-label">${title}:</span>
+          <span id="${groupLabelId}" class="pdpx-pill-selector-label-label">${title}: </span>
           <span id="${groupValueId}" class="pdpx-pill-selector-label-name">${selectedOptionTitle}</span>
         </div>
-        ${hasDrawerLink
+        ${helpLink
     && html`
           <button
             class="pdpx-pill-selector-label-compare-link"
@@ -520,7 +517,7 @@ function MiniPillCarousel({ attribute, onRequestDrawer }) {
   `;
 }
 
-export function ThumbnailSelector({ attribute, onRequestDrawer }) {
+export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
   const { actions } = useStore();
   const { selector, selectedOptionValue, title } = attribute;
   const groupLabelId = `pdpx-pill-label-${toDomIdPart(attribute.name)}`;
@@ -564,7 +561,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
   };
 
   if (isMiniPill) {
-    return html`<${MiniPillCarousel} attribute=${attribute} onRequestDrawer=${onRequestDrawer} />`;
+    return html`<${MiniPillCarousel} attribute=${attribute} onRequestDrawer=${onRequestDrawer} productType=${productType} />`;
   }
 
   return html`
@@ -664,36 +661,34 @@ export function ThumbnailSelector({ attribute, onRequestDrawer }) {
   `;
 }
 
-function renderAttribute(attribute, onRequestDrawer, key) {
+function renderAttribute(attribute, onRequestDrawer, key, productType) {
   switch (attribute.selector.type) {
     case 'thumbnails':
       return html`<${ThumbnailSelector}
         key=${key}
         attribute=${attribute}
         onRequestDrawer=${onRequestDrawer}
+        productType=${productType}
       />`;
     case 'dropdown':
-      return html`<${DropdownSelector} key=${key} attribute=${attribute} />`;
+      return html`<${DropdownSelector} key=${key} attribute=${attribute} productType=${productType} />`;
     case 'radio':
-      return html`<${RadioSelector} key=${key} attribute=${attribute} />`;
+      return html`<${RadioSelector} key=${key} attribute=${attribute} productType=${productType} />`;
     case 'checkbox':
-      return html`<${CheckboxSelector} key=${key} attribute=${attribute} />`;
+      return html`<${CheckboxSelector} key=${key} attribute=${attribute} productType=${productType} />`;
     default:
       return null;
   }
 }
 
-export function CustomizationInputs({ onRequestDrawer }) {
+export function CustomizationInputs({ onRequestDrawer, productType }) {
   const { state } = useStore();
-
   if (!state) {
     return null;
   }
-
   const productAttributes = (state.attributes || []).filter(
     (attribute) => attribute.name !== 'quantity',
   );
-
   return html`
     <div
       class="pdpx-customization-inputs-container"
@@ -708,6 +703,7 @@ export function CustomizationInputs({ onRequestDrawer }) {
     attribute,
     onRequestDrawer,
     attribute.name,
+    productType,
   ))}
         <${QuantitySelector} />
       </form>
