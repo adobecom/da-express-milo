@@ -37,6 +37,28 @@ const STRIP_SHARED_STYLES = [
 ];
 const LOAD_MORE_CLICK_HANDLERS = new WeakMap();
 
+const GRID_BREAKPOINTS = [
+  { minWidth: 1200, columns: 3 },
+  { minWidth: 680, columns: 2 },
+];
+
+function getGridColumnCount() {
+  if (typeof window === 'undefined') return 1;
+  const width = window.innerWidth;
+  for (const bp of GRID_BREAKPOINTS) {
+    if (width >= bp.minWidth) return bp.columns;
+  }
+  return 1;
+}
+
+function alignToFullRow(count, totalAvailable) {
+  if (totalAvailable <= count) return count;
+  const cols = getGridColumnCount();
+  if (cols <= 1) return count;
+  const aligned = Math.floor(count / cols) * cols;
+  return aligned > 0 ? aligned : count;
+}
+
 async function loadStripSharedStyles() {
   await Promise.all(
     STRIP_SHARED_STYLES.map(async (href) => {
@@ -324,6 +346,8 @@ export default async function decorate(block) {
       let isMounting = false;
       let filterInteractionSuppressUntil = 0;
       let isSearchActive = false;
+      let currentColumnCount = getGridColumnCount();
+      let resizeTimer = null;
 
       const setModeClasses = (variant) => {
         block.classList.remove(VARIANT_CLASSES.GRADIENTS, VARIANT_CLASSES.PALETTES);
@@ -341,6 +365,22 @@ export default async function decorate(block) {
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
       };
 
+      const handleGridResize = () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          const newCols = getGridColumnCount();
+          if (newCols === currentColumnCount || isMounting) return;
+          currentColumnCount = newCols;
+          const aligned = alignToFullRow(visibleCount, allData.length);
+          if (aligned !== visibleCount) {
+            visibleCount = aligned;
+            activeRenderer?.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+          }
+        }, 150);
+      };
+      window.addEventListener('resize', handleGridResize);
+
       const cleanupActiveView = () => {
         filtersControl?.destroy?.();
         filtersControl = null;
@@ -357,6 +397,8 @@ export default async function decorate(block) {
       };
 
       const cleanupDualMode = () => {
+        window.removeEventListener('resize', handleGridResize);
+        clearTimeout(resizeTimer);
         cleanupActiveView();
         modalManager.destroy?.();
         block.rendererInstance = null;
@@ -409,7 +451,7 @@ export default async function decorate(block) {
           } finally {
             block.classList.remove(CSS_CLASSES.LOADING);
           }
-          visibleCount = Math.min(config.initialLoad, allData.length);
+          visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
 
           BlockMediator.set(stateKey, {
             selectedItem: null,
@@ -451,7 +493,7 @@ export default async function decorate(block) {
               }
               block.classList.add(CSS_CLASSES.LOADING);
               allData = await activeDataService.filter(filters);
-              visibleCount = Math.min(config.initialLoad, allData.length);
+              visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
               await activeRenderer.update(allData.slice(0, visibleCount));
               updateLoadMoreState();
               block.classList.remove(CSS_CLASSES.LOADING);
@@ -466,7 +508,7 @@ export default async function decorate(block) {
                 : await activeDataService.loadMore();
               allData = mergeLoadMoreData(allData, moreData);
             }
-            visibleCount = Math.min(nextTarget, allData.length);
+            visibleCount = alignToFullRow(Math.min(nextTarget, allData.length), allData.length);
             await activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
           }, { iconSize: config.loadMoreIconSize || 'xl' });
@@ -484,7 +526,7 @@ export default async function decorate(block) {
             isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.search(query);
-            visibleCount = Math.min(config.initialLoad, allData.length);
+            visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
             await activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
@@ -523,7 +565,7 @@ export default async function decorate(block) {
           } finally {
             block.classList.remove(CSS_CLASSES.LOADING);
           }
-          visibleCount = Math.min(config.initialLoad, allData.length);
+          visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
 
           activeRenderer = createStripsRenderer({
             container,
@@ -548,7 +590,7 @@ export default async function decorate(block) {
               }
               block.classList.add(CSS_CLASSES.LOADING);
               allData = await activeDataService.filter(filters);
-              visibleCount = Math.min(config.initialLoad, allData.length);
+              visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
               activeRenderer.update(allData.slice(0, visibleCount));
               updateLoadMoreState();
               block.classList.remove(CSS_CLASSES.LOADING);
@@ -563,7 +605,7 @@ export default async function decorate(block) {
                 : await activeDataService.loadMore();
               allData = mergeLoadMoreData(allData, moreData);
             }
-            visibleCount = Math.min(nextTarget, allData.length);
+            visibleCount = alignToFullRow(Math.min(nextTarget, allData.length), allData.length);
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
           }, { iconSize: config.loadMoreIconSize || 'xl' });
@@ -580,7 +622,7 @@ export default async function decorate(block) {
             isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.search(query);
-            visibleCount = Math.min(config.initialLoad, allData.length);
+            visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
@@ -591,7 +633,7 @@ export default async function decorate(block) {
             isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.search(query);
-            visibleCount = Math.min(config.initialLoad, allData.length);
+            visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
@@ -629,7 +671,7 @@ export default async function decorate(block) {
 
       block.classList.add(CSS_CLASSES.LOADING);
       let allData = await dataService.fetchData();
-      let visibleCount = Math.min(config.initialLoad, allData.length);
+      let visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
       let isSearchActive = false;
       block.classList.remove(CSS_CLASSES.LOADING);
 
@@ -653,12 +695,30 @@ export default async function decorate(block) {
               : await dataService.loadMore();
             allData = mergeLoadMoreData(allData, moreData);
           }
-          visibleCount = Math.min(nextTarget, allData.length);
+          visibleCount = alignToFullRow(Math.min(nextTarget, allData.length), allData.length);
           renderer.update(allData.slice(0, visibleCount));
           loadMoreControl.update(Math.max(0, allData.length - visibleCount));
         }, { iconSize: config.loadMoreIconSize || 'xl' })
         : null;
       loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+
+      let elseCurrentColumnCount = getGridColumnCount();
+      let elseResizeTimer = null;
+      const handleElseGridResize = () => {
+        clearTimeout(elseResizeTimer);
+        elseResizeTimer = setTimeout(() => {
+          const newCols = getGridColumnCount();
+          if (newCols === elseCurrentColumnCount || isSwatchesMode(config)) return;
+          elseCurrentColumnCount = newCols;
+          const aligned = alignToFullRow(visibleCount, allData.length);
+          if (aligned !== visibleCount) {
+            visibleCount = aligned;
+            renderer.update(allData.slice(0, visibleCount));
+            loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+          }
+        }, 150);
+      };
+      window.addEventListener('resize', handleElseGridResize);
 
       const modalManager = createModalManager();
 
@@ -673,7 +733,7 @@ export default async function decorate(block) {
         isSearchActive = !!query;
         block.classList.add(CSS_CLASSES.LOADING);
         allData = await dataService.search(query);
-        visibleCount = Math.min(config.initialLoad, allData.length);
+        visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
         renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);
@@ -683,7 +743,7 @@ export default async function decorate(block) {
         isSearchActive = false;
         block.classList.add(CSS_CLASSES.LOADING);
         allData = await dataService.filter(filters);
-        visibleCount = Math.min(config.initialLoad, allData.length);
+        visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
         renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);
@@ -694,7 +754,7 @@ export default async function decorate(block) {
         isSearchActive = !!query;
         block.classList.add(CSS_CLASSES.LOADING);
         allData = await dataService.search(query);
-        visibleCount = Math.min(config.initialLoad, allData.length);
+        visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
         renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);
@@ -711,7 +771,11 @@ export default async function decorate(block) {
         await floatingHandler({ detail: { query: urlQuery } });
       }
 
-      block.addEventListener('block-unload', () => document.removeEventListener('floating-search:submit', floatingHandler), { once: true });
+      block.addEventListener('block-unload', () => {
+        window.removeEventListener('resize', handleElseGridResize);
+        clearTimeout(elseResizeTimer);
+        document.removeEventListener('floating-search:submit', floatingHandler);
+      }, { once: true });
 
       block.rendererInstance = renderer;
       block.modalManagerInstance = modalManager;
