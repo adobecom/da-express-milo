@@ -35,7 +35,7 @@
 
 .suggestion-item {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--spacing-200);
   padding-block: var(--spacing-200);
   padding-inline: var(--spacing-300);
