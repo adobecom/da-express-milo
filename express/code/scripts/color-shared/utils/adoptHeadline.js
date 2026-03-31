@@ -29,7 +29,7 @@ function findHeadline(section) {
 
 export default function adoptHeadline(toolBlock, layout) {
   const section = toolBlock.closest('.section');
-  const headline = findHeadline(section);
+  const headline = section?.querySelector('.color-headline.tools') || findHeadline(section);
   if (!headline) return;
   ensureLogo(headline);
   layout.slots.sidebar.prepend(headline);

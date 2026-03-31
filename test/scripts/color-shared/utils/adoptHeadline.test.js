@@ -54,6 +54,52 @@ describe('adoptHeadline', () => {
     document.body.innerHTML = '';
   });
 
+  it('finds headline in the same section as the tool block', () => {
+    const wrapper = document.createElement('div');
+    const section = document.createElement('div');
+    section.className = 'section';
+    const headline = document.createElement('div');
+    headline.className = 'color-headline tools';
+    headline.innerHTML = '<div><div><h2>Same Section</h2></div></div>';
+    headline.id = 'same';
+    const block = document.createElement('div');
+    block.className = 'color-blindness block';
+    section.appendChild(headline);
+    section.appendChild(block);
+    wrapper.appendChild(section);
+    document.body.appendChild(wrapper);
+    const layout = createMockLayout();
+
+    adoptHeadline(block, layout);
+
+    const adopted = layout.slots.sidebar.querySelector('.color-headline.tools');
+    expect(adopted).to.exist;
+    expect(adopted.id).to.equal('same');
+  });
+
+  it('prefers headline in same section over sibling sections', () => {
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(createHeadlineSection());
+    const section = document.createElement('div');
+    section.className = 'section';
+    const headline = document.createElement('div');
+    headline.className = 'color-headline tools';
+    headline.innerHTML = '<div><div><h2>Same Section</h2></div></div>';
+    headline.id = 'same';
+    const block = document.createElement('div');
+    block.className = 'color-blindness block';
+    section.appendChild(headline);
+    section.appendChild(block);
+    wrapper.appendChild(section);
+    document.body.appendChild(wrapper);
+    const layout = createMockLayout();
+
+    adoptHeadline(block, layout);
+
+    const adopted = layout.slots.sidebar.querySelector('.color-headline.tools');
+    expect(adopted.id).to.equal('same');
+  });
+
   it('moves .color-headline.tools from preceding section into the sidebar slot', () => {
     const wrapper = document.createElement('div');
     wrapper.appendChild(createHeadlineSection());
