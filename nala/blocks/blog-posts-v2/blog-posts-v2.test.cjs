@@ -43,7 +43,30 @@ test.describe('BlogPostsV2Block Test Suite', () => {
 
       for (const t of sem.texts) {
         const locator = block.block.locator(t.selector).nth(t.nth || 0);
-        await expect(locator).toContainText(t.text);
+        if (t.text) {
+          await expect(locator).toContainText(t.text);
+        } else {
+          const text = (await locator.innerText()).trim();
+          expect(text.length, `Expected non-empty content for ${t.selector}[${t.nth}]`).toBeGreaterThan(0);
+        }
+      }
+
+      // Verify dates are in descending order
+      const dateLocators = block.block.locator('p.blog-card-date');
+      const dateCount = await dateLocators.count();
+      if (dateCount > 1) {
+        const dates = [];
+        for (let i = 0; i < dateCount; i += 1) {
+          const dateText = (await dateLocators.nth(i).innerText()).trim();
+          const [month, day, year] = dateText.split('/');
+          dates.push(new Date(Number(year), Number(month) - 1, Number(day)));
+        }
+        for (let i = 0; i < dates.length - 1; i += 1) {
+          expect(
+            dates[i].getTime(),
+            `Date at card ${i} (${dates[i].toDateString()}) should be >= date at card ${i + 1} (${dates[i + 1].toDateString()})`,
+          ).toBeGreaterThanOrEqual(dates[i + 1].getTime());
+        }
       }
 
       for (const m of sem.media) {
