@@ -620,7 +620,7 @@ export default async function decorate(block) {
       adoptHeadline(layoutInstance);
       await layoutInstance.actionMenuReady;
 
-      const tabs = await buildTabs(controller, suggestionsRow);
+      const tabs = await buildTabs(controller, suggestionsRow?.cloneNode(true));
       layoutInstance.slots.sidebar.appendChild(tabs.element);
 
       if (!isDesktop) {
