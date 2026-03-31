@@ -1,7 +1,6 @@
 /* eslint-disable */
 import { createTag } from '../../scripts/utils.js';
 import { DEFAULTS, MOODS } from '../color-extract/helpers/constants.js';
-import { createHistoryManager } from '../color-extract/helpers/historyManager.js';
 import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
 
 const EXTRACT_CANVAS_MAX = 320;
@@ -294,42 +293,6 @@ export default function createImageExtractComponent(options = {}) {
   stage.append(leftCol);
   edit.append(stage);
 
-  function getHistoryState() {
-    const state = controller.getState();
-    return {
-      swatches: state.swatches.map((s) => s.hex),
-      positions: markers ? markers.getPositions() : [],
-      mood: currentMood,
-    };
-  }
-
-  function restoreFromHistory(snapshot) {
-    if (snapshot.swatches?.length) {
-      controller.replaceSwatchesFromHexes(snapshot.swatches, { baseIndex: 0, harmonyRule: 'CUSTOM' });
-      if (markers && snapshot.positions?.length) {
-        const points = snapshot.positions.map((p) => ({ x: p.pctX, y: p.pctY }));
-        markers.setPositions(snapshot.swatches, points);
-      }
-    }
-    if (snapshot.mood) {
-      currentMood = snapshot.mood;
-      moodSelectorRef?.setMood(snapshot.mood);
-      controller.setMetadata({ mood: snapshot.mood });
-    }
-  }
-
-  const history = createHistoryManager(
-    restoreFromHistory,
-    (canUndo, canRedo) => {
-      toolbarRef?.setUndoEnabled(canUndo);
-      toolbarRef?.setRedoEnabled(canRedo);
-    },
-  );
-
-  function historySnapshot() {
-    history.push(getHistoryState());
-  }
-
   async function runExtraction(canvas, mood) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
@@ -370,7 +333,6 @@ export default function createImageExtractComponent(options = {}) {
     const { createImageMarkers } = await import('../color-extract/helpers/imageMarkers.js');
     markers = createImageMarkers(bgWrapper, canvas, controller, {
       onMoodOverride,
-      onDragStart: () => historySnapshot(),
     });
 
     bgWrapper.style.position = 'relative';
@@ -395,7 +357,6 @@ export default function createImageExtractComponent(options = {}) {
   function onImageReady(image, src) {
     currentSrc = src;
     setBackground(bgWrapper, src);
-    history.clear();
 
     currentCanvas = drawImageToCanvas(image);
     setupMarkers(currentCanvas).then(() => {
@@ -442,7 +403,6 @@ export default function createImageExtractComponent(options = {}) {
       import('../color-extract/helpers/toolbar.js'),
     ]).then(([{ createMoodSelector }, { createToolbar }]) => {
       moodSelectorRef = createMoodSelector(currentMood, (mood) => {
-        historySnapshot();
         currentMood = mood;
         controller.setMetadata({ mood });
         if (currentCanvas) runExtraction(currentCanvas, mood);
@@ -453,18 +413,15 @@ export default function createImageExtractComponent(options = {}) {
         moodElement: null,
         onAddColor: () => {},
         onReset: () => {
-          if (currentCanvas) {
-            historySnapshot();
-            runExtraction(currentCanvas, currentMood);
-          }
+          if (currentCanvas) runExtraction(currentCanvas, currentMood);
         },
         onReplace: () => {
           dropzone.input.value = '';
           dropzone.input.click();
         },
-        onUndo: () => history.undo(getHistoryState()),
-        onRedo: () => history.redo(getHistoryState()),
       }).then((toolbar) => {
+        // Undo/redo is handled by the action menu — remove the toolbar's history buttons
+        toolbar.element.querySelector('.action-menu-history')?.remove();
         toolbar.element.querySelectorAll('svg [id]').forEach((node) => {
           const oldId = node.id;
           const newId = `${oldId}-extract`;
