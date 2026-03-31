@@ -43,7 +43,10 @@ export const GRID_ASSETS = [
   { grid: 1, members: [1] },
   { grid: 2, members: [2] },
   { grid: 3, members: [3, 5, 6, 9] },
-  { grid: 4, members: [4, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20] },
+  {
+    grid: 4,
+    members: [4, 7, 8, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20],
+  },
 ];
 
 export const ROW_ASSETS = [

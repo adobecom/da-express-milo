@@ -46,7 +46,7 @@ function createGradientStrip(gradient, options = {}) {
     iconElement,
     iconSrc,
     analytics,
-    actionLabel = 'Open in modal',
+    actionLabel = 'Open',
   } = options;
   const strip = createTag('article', {
     class: 'gradient-strip',
@@ -67,7 +67,7 @@ function createGradientStrip(gradient, options = {}) {
     type: 'button',
     class: 'gradient-strip-action-btn',
     'aria-label': actionLabel,
-    title: actionLabel,
+    'data-tooltip-content': actionLabel,
     tabindex: '-1',
   });
   const daaLl = buildDaaLl(analytics);
@@ -85,7 +85,7 @@ function createGradientStrip(gradient, options = {}) {
   } else if (iconSrc) {
     const img = createTag('img', {
       src: iconSrc,
-      alt: 'Open in modal',
+      alt: 'Open',
       width: '20',
       height: '20',
       'aria-hidden': 'true',

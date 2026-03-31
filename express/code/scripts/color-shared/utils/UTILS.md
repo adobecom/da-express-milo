@@ -117,9 +117,7 @@ dropdown.setSuggestions([
 
 ### `loadMiloStyle(path)`
 
-Loads a CSS file using milo's `loadStyle` utility. Paths are resolved relative to
-`getConfig().codeRoot` (defaults to `/express/code`). Absolute paths starting with `/`
-are used as-is.
+Lazily loads a CSS file via Milo's `loadStyle` utility. The path is relative to `codeRoot`.
 
 ```javascript
 await loadMiloStyle('scripts/color-shared/components/search-bar/styles/search-bar.css');

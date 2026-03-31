@@ -58,11 +58,12 @@ describe('createGradientStripElements', () => {
       expect(visual.style.backgroundImage).to.include('linear-gradient');
     });
 
-    it('action button has aria-label and title', () => {
+    it('action button has aria-label and tooltip content', () => {
       const elements = createGradientStripElements(SAMPLE_GRADIENTS);
       const btn = elements[0].querySelector('.gradient-strip-action-btn');
       expect(btn.getAttribute('aria-label')).to.include('Open');
-      expect(btn.getAttribute('title')).to.equal('Open in modal');
+      expect(btn.getAttribute('data-tooltip-content')).to.equal('Open in modal');
+      expect(btn.getAttribute('title')).to.be.null;
       expect(btn.getAttribute('tabindex')).to.equal('-1');
     });
   });

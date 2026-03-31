@@ -100,12 +100,13 @@ function setupPaletteGridNav(gridEl) {
     if (cardIdx < 0) return;
 
     if (ARROW_KEYS.has(e.key)) {
+      if (btn && parentCard) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
       e.preventDefault();
       e.stopPropagation();
-      if (btn) {
-        gridNavEnabled = true;
-        getCardBtns(parentCard).forEach((b) => b.setAttribute('tabindex', '-1'));
-      }
       navigate(e.key, cardIdx, e);
       return;
     }
@@ -116,17 +117,7 @@ function setupPaletteGridNav(gridEl) {
       const btns = getCardBtns(e.target);
       if (btns.length) {
         gridNavEnabled = false;
-        btns[0].setAttribute('tabindex', '0');
-        btns[0].focus();
-      }
-      return;
-    }
-
-    if (e.key === 'Tab' && !e.shiftKey && isCard && gridNavEnabled) {
-      const btns = getCardBtns(e.target);
-      if (btns.length) {
-        e.preventDefault();
-        gridNavEnabled = false;
+        btns.forEach((b) => b.setAttribute('tabindex', '-1'));
         btns[0].setAttribute('tabindex', '0');
         btns[0].focus();
       }
@@ -135,23 +126,26 @@ function setupPaletteGridNav(gridEl) {
 
     if (e.key === 'Tab' && btn && parentCard) {
       const btns = getCardBtns(parentCard);
-      if (btns.length > 1) {
-        e.preventDefault();
-        const cur = btns.indexOf(btn);
-        const next = e.shiftKey
-          ? (cur - 1 + btns.length) % btns.length
-          : (cur + 1) % btns.length;
-        btns[cur].setAttribute('tabindex', '-1');
-        btns[next].setAttribute('tabindex', '0');
-        btns[next].focus();
-      }
+      if (!btns.length) return;
+      const cur = btns.indexOf(btn);
+      if (cur < 0) return;
+      e.preventDefault();
+      const next = e.shiftKey
+        ? (cur - 1 + btns.length) % btns.length
+        : (cur + 1) % btns.length;
+      btns[cur].setAttribute('tabindex', '-1');
+      btns[next].setAttribute('tabindex', '0');
+      btns[next].focus();
       return;
     }
 
     if (e.key === 'Escape' && btn && parentCard) {
+      e.preventDefault();
+      e.stopPropagation();
       gridNavEnabled = true;
-      getCardBtns(parentCard).forEach((b) => b.setAttribute('tabindex', '-1'));
-      // factory's capture Escape handler already calls parentCard.focus()
+      const btns = getCardBtns(parentCard);
+      btns.forEach((b) => b.setAttribute('tabindex', '-1'));
+      parentCard.focus();
     }
   });
 
@@ -180,7 +174,10 @@ function setupPaletteGridNav(gridEl) {
   });
 
   initTabIndexes();
-  return { reinit: initTabIndexes };
+  return {
+    reinit: initTabIndexes,
+    destroy: () => {},
+  };
 }
 
 export function createStripsRenderer(options) {
@@ -192,6 +189,7 @@ export function createStripsRenderer(options) {
   let searchAdapter = null;
   let resultsCountEl = null;
   let gridNavReinit = null;
+  let gridNavDestroy = null;
   const paletteStrips = [];
   const tooltipControllers = new Map();
   const titleGuardCleanups = new Map();
@@ -287,7 +285,10 @@ export function createStripsRenderer(options) {
       grid.appendChild(card);
     });
 
-    gridNavReinit = setupPaletteGridNav(grid).reinit;
+    gridNavDestroy?.();
+    const gridNav = setupPaletteGridNav(grid);
+    gridNavReinit = gridNav.reinit;
+    gridNavDestroy = gridNav.destroy;
     return grid;
   }
 
@@ -428,6 +429,9 @@ export function createStripsRenderer(options) {
   function destroy() {
     tooltipInitToken += 1;
     clearGridTooltips();
+    gridNavDestroy?.();
+    gridNavDestroy = null;
+    gridNavReinit = null;
     searchAdapter?.destroy();
     paletteStrips.forEach((strip) => strip.destroy?.());
     paletteStrips.length = 0;

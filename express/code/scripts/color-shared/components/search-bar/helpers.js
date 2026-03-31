@@ -154,7 +154,7 @@ function createSearchBarWrapper(
 }
 
 function updateClearButtonVisibility(btn, hasValue) {
-  btn.style.display = hasValue ? 'inline-block' : 'none';
+  btn.style.display = hasValue ? 'flex' : 'none';
   btn.classList.toggle(CSS_CLASSES.HIDDEN, !hasValue);
 }
 
@@ -449,8 +449,10 @@ function initSearchHandlers(elements, state, callbacks, actions) {
   cleanupRegistry.addEventListener(input, 'keydown', (event) => {
     if ((event.key === 'Enter' || event.keyCode === 13) && !state.showSuggestions) {
       event.preventDefault();
-      callbacks.onSubmit?.({ query: state.query.trim() });
-      hideSuggestions();
+      if (state.query.trim()) {
+        callbacks.onSubmit?.({ query: state.query.trim() });
+        hideSuggestions();
+      }
     }
   });
 
@@ -467,8 +469,10 @@ function initSearchHandlers(elements, state, callbacks, actions) {
 
   cleanupRegistry.addEventListener(form, 'submit', (event) => {
     event.preventDefault();
-    callbacks.onSubmit?.({ query: state.query.trim() });
-    hideSuggestions();
+    if (state.query.trim()) {
+      callbacks.onSubmit?.({ query: state.query.trim() });
+      hideSuggestions();
+    }
   });
 
   return () => cleanupRegistry.cleanup();

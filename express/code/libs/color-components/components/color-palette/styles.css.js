@@ -16,7 +16,6 @@
  *  from Adobe.
  **************************************************************************/
 
-
 import { css } from '../../../deps/lit.js';
 
 export const WRAP_COLORS_IN_ROW = 5;
@@ -119,4 +118,3 @@ export const style = css`
         inset: calc(var(--vertical-color-palette-border-width, 2px) * -2);
     }
 `;
-

@@ -74,7 +74,12 @@ export class FileDownloadActions extends BaseActionGroup {
    * @throws {ValidationError}
    */
   async downloadAsJPEG(themeData) {
-    return this.#downloadJPEGVariant(themeData, DownloadTopics.FILE.JPEG, renderThemeJPEG, 'AdobeColor-');
+    return this.#downloadJPEGVariant(
+      themeData,
+      DownloadTopics.FILE.JPEG,
+      renderThemeJPEG,
+      'AdobeColor-',
+    );
   }
 
   /**
@@ -83,7 +88,12 @@ export class FileDownloadActions extends BaseActionGroup {
    * @throws {ValidationError}
    */
   async downloadAsPantoneJPEG(themeData) {
-    return this.#downloadJPEGVariant(themeData, DownloadTopics.FILE.PANTONE_JPEG, renderPantoneJPEG, 'AdobeColorPantone ');
+    return this.#downloadJPEGVariant(
+      themeData,
+      DownloadTopics.FILE.PANTONE_JPEG,
+      renderPantoneJPEG,
+      'AdobeColorPantone ',
+    );
   }
 
   /**

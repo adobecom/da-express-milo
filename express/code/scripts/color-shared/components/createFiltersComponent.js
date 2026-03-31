@@ -19,6 +19,7 @@
 
 import { createTag } from '../../utils.js';
 import { createExpressPicker } from '../spectrum/components/express-picker.js';
+import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { loadIconsRail, loadPicker } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 
@@ -51,6 +52,7 @@ export async function createFiltersComponent(options = {}) {
   const pickersById = new Map();
   const pickers = [];
   const cleanupFns = [];
+  const mobileTooltipControllers = [];
   let sortMenuController = null;
   let timeMenuController = null;
   let contentTypeMenuController = null;
@@ -579,6 +581,29 @@ export async function createFiltersComponent(options = {}) {
   const sortButton = createMobileIconButton('filters-mobile__btn--sort', 'sp-icon-switch-vertical', 'Sort');
   const filterButton = createMobileIconButton('filters-mobile__btn--filter', 'sp-icon-filter', 'Filter');
 
+  const attachMobileTooltips = async () => {
+    const targets = [
+      { el: filterButton, content: 'Filter' },
+      { el: sortButton, content: 'Sort' },
+    ];
+    await Promise.all(targets.map(async ({ el, content }) => {
+      try {
+        const controller = await createExpressTooltip({
+          targetEl: el,
+          content,
+          placement: 'top',
+        });
+        if (controller) mobileTooltipControllers.push(controller);
+      } catch (error) {
+        window.lana?.log(`Failed loading mobile filter tooltip (${content}): ${error?.message}`, {
+          tags: 'color-explorer,filters',
+          severity: 'warning',
+        });
+      }
+    }));
+  };
+  await attachMobileTooltips();
+
   const sortPanel = createTag('div', { class: 'filters-mobile__panel filters-mobile__panel--sort', hidden: '' });
   const filterPanel = createTag('div', { class: 'filters-mobile__panel filters-mobile__panel--filter', hidden: '' });
   const desktopMq = typeof window !== 'undefined'
@@ -624,9 +649,15 @@ export async function createFiltersComponent(options = {}) {
   function setPanelState(panel, button, isOpen) {
     if (isOpen) {
       panel.removeAttribute('hidden');
+      // eslint-disable-next-line no-unused-expressions
+      panel.getBoundingClientRect(); // force reflow so transition runs from translateY(100%)
+      panel.classList.add('filters-mobile__panel--open');
       button.setAttribute('aria-expanded', 'true');
     } else {
-      panel.setAttribute('hidden', '');
+      panel.classList.remove('filters-mobile__panel--open');
+      setTimeout(() => {
+        if (!panel.classList.contains('filters-mobile__panel--open')) panel.setAttribute('hidden', '');
+      }, 300);
       button.setAttribute('aria-expanded', 'false');
     }
   }
@@ -647,9 +678,15 @@ export async function createFiltersComponent(options = {}) {
   function setCurtainState(isVisible) {
     if (isVisible) {
       mobileCurtain.removeAttribute('hidden');
+      // eslint-disable-next-line no-unused-expressions
+      mobileCurtain.getBoundingClientRect(); // force reflow so opacity transition runs from 0
+      mobileCurtain.classList.add('filters-mobile__curtain--visible');
       document.body.classList.add('color-explore-filters-open');
     } else {
-      mobileCurtain.setAttribute('hidden', '');
+      mobileCurtain.classList.remove('filters-mobile__curtain--visible');
+      setTimeout(() => {
+        if (!mobileCurtain.classList.contains('filters-mobile__curtain--visible')) mobileCurtain.setAttribute('hidden', '');
+      }, 300);
       document.body.classList.remove('color-explore-filters-open');
     }
   }
@@ -781,6 +818,9 @@ export async function createFiltersComponent(options = {}) {
   cleanupFns.push(() => mobileCurtain.removeEventListener('click', onCurtainClick));
   cleanupFns.push(() => desktopMq?.removeEventListener('change', onBreakpointChange));
   cleanupFns.push(() => document.body.classList.remove('color-explore-filters-open'));
+  cleanupFns.push(() => {
+    mobileTooltipControllers.splice(0).forEach((controller) => controller?.destroy?.());
+  });
 
   applyAnalyticsAttributes(filterButton, 'Filter', 1);
   applyAnalyticsAttributes(sortButton, 'Sort', 2);

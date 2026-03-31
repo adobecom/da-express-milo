@@ -28,7 +28,15 @@
 
 .ax-color-modal-curtain {
   background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-out;
+  z-index: 9998;
+}
+
+.ax-color-modal-curtain:has(.ax-color-modal-container.ax-color-modal-open) {
   opacity: 1;
+  pointer-events: auto;
 }
 
 @supports (backdrop-filter: blur(10px)) {
@@ -61,7 +69,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-200);
-  transition: transform 0.3s ease-in;
+  transition: transform 0.3s ease-out;
   height: auto;
   max-height: min(764px, 100vh);
   padding-bottom: calc(var(--spacing-300) + env(safe-area-inset-bottom, 0px));
@@ -270,7 +278,7 @@ body.ax-color-modal-open {
   .ax-color-modal-container {
     border-radius: var(--Corner-radius-corner-radius-200);
     box-shadow: var(--Elevation-Dialog);
-    transition: opacity 0.2s ease-in-out, transform 0.2s ease-in-out;
+    transition: none;
     padding: var(--spacing-500);
     width: clamp(898px, 87.5vw, min(var(--block-wd-grid-max-width), 95vw));
     max-width: 898px;

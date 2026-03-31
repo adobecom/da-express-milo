@@ -104,6 +104,27 @@ describe('Search Marquee', () => {
     document.body.click();
     expect(dropdownContainer.classList.contains('hidden')).to.be.true;
   });
+
+  it('does not render a background image when authoring does not provide one', async () => {
+    document.body.innerHTML = `
+      <div class="search-marquee">
+        <div>
+          <div>
+            <h1 id="hero-title">Search thousands of templates</h1>
+            <p>Find the perfect template for your project</p>
+          </div>
+        </div>
+        <div>
+          <div></div>
+        </div>
+      </div>
+    `;
+
+    const marqueeBlock = document.querySelector('.search-marquee');
+    await decorate(marqueeBlock);
+
+    expect(marqueeBlock.querySelector('img.backgroundimg')).to.not.exist;
+  });
 });
 
 describe('Search Marquee - marquee fused integration', () => {

@@ -150,18 +150,18 @@
   --color-card-palette-min-height: 80px;
   width: 100%;
   max-width: 100%;
-  height: 116px;
-  min-height: 116px;
+  height: calc(116px + var(--color-card-visual-info-gap, 0px));
+  min-height: calc(116px + var(--color-card-visual-info-gap, 0px));
 }
 
- .color-card--size-m {
+.color-card--size-m {
   --color-card-strip-max-width: 100%;
   --color-card-strip-min-height: 56px;
   --color-card-palette-min-height: 56px;
   width: 410px;
   max-width: 100%;
-  height: 88px;
-  min-height: 88px;
+  height: calc(88px + var(--color-card-visual-info-gap, 0px));
+  min-height: calc(88px + var(--color-card-visual-info-gap, 0px));
 }
 
 @media (min-width: 600px) and (max-width: 679px) {
@@ -178,8 +178,15 @@
   --color-card-palette-min-height: 56px;
   width: 100%;
   max-width: 100%;
-  height: 88px;
-  min-height: 88px;
+  height: calc(88px + var(--color-card-visual-info-gap, 0px));
+  min-height: calc(88px + var(--color-card-visual-info-gap, 0px));
+}
+
+.color-explorer-strips .color-card {
+  --color-card-visual-info-gap: var(--spacing-75);
+  gap: var(--color-card-visual-info-gap);
+  height: calc(var(--color-card-height) + var(--color-card-visual-info-gap, 0px));
+  min-height: calc(var(--color-card-height) + var(--color-card-visual-info-gap, 0px));
 }
 
 .color-explorer-strips .color-card-visual {
@@ -266,6 +273,7 @@
   outline-offset: 2px;
   border-radius: var(--Corner-radius-corner-radius-100);
   background: var(--color-light-gray);
+  z-index: 1;
 }
 
 .color-card-dimensions {

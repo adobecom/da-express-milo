@@ -28,7 +28,7 @@
   max-width: var(--block-wd-content-max-width);
   margin: 0 auto;
   box-sizing: border-box;
-  padding: var(--spacing-600) var(--spacing-300);
+  padding: 0 var(--spacing-300) var(--spacing-600);
 }
 
 .color-explore.is-loading {
@@ -321,7 +321,7 @@
   font-size: var(--body-font-size-s);
   line-height: 1;
   white-space: nowrap;
-  display: none;
+  display: inline-flex;
 }
 
 .color-explore .filters-mobile__btn:hover {
@@ -340,7 +340,8 @@
   right: 0;
   top: auto;
   bottom: 0;
-  transform: none;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
   width: 100%;
   max-width: none;
   max-height: calc(100vh - var(--spacing-500));
@@ -354,10 +355,16 @@
   z-index: 1000;
 }
 
+.color-explore .filters-mobile__panel--open {
+  transform: translateY(0);
+}
+
 .color-explore .filters-mobile__curtain {
   position: fixed;
   inset: 0;
   background: var(--Alias-overlay-curtain, rgba(0, 0, 0, 0.5));
+  opacity: 0;
+  transition: opacity 0.3s ease-out;
   z-index: 999;
 }
 
@@ -365,6 +372,10 @@
   .color-explore .filters-mobile__curtain {
     backdrop-filter: blur(10px);
   }
+}
+
+.color-explore .filters-mobile__curtain--visible {
+  opacity: 1;
 }
 
 .color-explore .filters-mobile__curtain[hidden] {
@@ -581,7 +592,7 @@
 
 @media (min-width: 600px) {
   .color-explore .color-explore-container {
-    padding: var(--spacing-600) var(--spacing-500);
+    padding: 0 var(--spacing-500) var(--spacing-600);
   }
 
   .color-explore .filters-container {

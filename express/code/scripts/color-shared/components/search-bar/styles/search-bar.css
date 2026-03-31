@@ -123,7 +123,9 @@
 
 .search-clear-btn {
   position: absolute;
+  inset-block-start: 50%;
   inset-inline-end: var(--spacing-200);
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;

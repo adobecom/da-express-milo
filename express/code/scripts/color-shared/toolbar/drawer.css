@@ -6,6 +6,7 @@
   background: rgba(0, 0, 0, 0.4);
   opacity: 0;
   pointer-events: none;
+  transition: opacity 0.3s ease-out;
 }
 
 @supports (backdrop-filter: blur(10px)) {
@@ -26,7 +27,7 @@
   /* ── Scoped vars ── */
   --ax-drawer-max-height: 90dvh;
   --ax-drawer-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
-  --ax-drawer-transition: transform 200ms ease;
+  --ax-drawer-transition: transform 300ms ease-out;
   --ax-drawer-panel-width-tablet: 307px;
   --ax-drawer-max-height-tablet: 90vh;
   --ax-drawer-transition-tablet: opacity 150ms ease, box-shadow 150ms ease;

@@ -12,6 +12,10 @@ sp-picker.filter-picker {
   --mod-picker-min-height: var(--spacing-600);
   --mod-picker-border-radius: 9px;
   --mod-picker-min-width: var(--express-picker-min-width, 144px);
+  --mod-picker-font-family: var(--body-font-family, var(--spectrum-sans-font-family-stack, sans-serif));
+  --mod-picker-font-size: var(--body-font-size-m, 14px);
+  --mod-picker-line-height: var(--spacing-350, 1.3);
+  --mod-picker-font-weight: 400;
   --mod-picker-spacing-top-to-text: 0;
   --mod-picker-spacing-bottom-to-text: 0;
   --mod-picker-focus-indicator-color: var(--color-blue-800);
@@ -133,6 +137,8 @@ sp-menu-item[disabled] {
   sp-picker.filter-picker {
     --mod-picker-min-height: var(--spacing-500);
     --mod-picker-border-radius: var(--Corner-radius-corner-radius-100);
+    --mod-picker-font-size: var(--body-font-size-s, 13px);
+    --mod-picker-line-height: var(--spacing-325, 1.25);
   }
 
   sp-picker.filter-picker::part(button) {

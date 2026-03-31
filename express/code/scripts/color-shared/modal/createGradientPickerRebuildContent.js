@@ -118,11 +118,6 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
     copyable: true,
     ariaLabel: `Gradient preview, ${colorStops.length} colors`,
   });
-  // In modal context, the gradient preview should fill the available tray width
-  // instead of clamping to the component's strip width tokens.
-  gradientEditor.element.style.width = '100%';
-  gradientEditor.element.style.maxWidth = '100%';
-  gradientEditor.element.style.minWidth = '0';
   previewWrap.appendChild(gradientEditor.element);
   containerSection.appendChild(previewWrap);
   main.appendChild(containerSection);
@@ -145,7 +140,7 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
       size: 'm',
       'aria-hidden': 'true',
     }));
-    likeBtn.setAttribute('aria-label', liked ? 'Unlike gradient' : 'Like gradient');
+    likeBtn.setAttribute('aria-label', liked ? 'Remove from favorites' : 'Add to favorites');
     likeBtn.classList.toggle('is-liked', liked);
   };
   updateLikeState();
@@ -153,7 +148,7 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   let likeTooltip = null;
   createExpressTooltip({
     targetEl: likeBtn,
-    content: liked ? 'Unlike gradient' : 'Like gradient',
+    content: liked ? 'Remove from favorites' : 'Add to favorites',
     placement: 'bottom',
   }).then((tooltipController) => {
     likeTooltip = tooltipController;
@@ -161,7 +156,13 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   likeBtn.addEventListener('click', () => {
     liked = !liked;
     updateLikeState();
-    likeTooltip?.setContent(liked ? 'Unlike gradient' : 'Like gradient');
+    likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
+    opts.onLikeToggle?.({ id: gradient?.id, liked })?.catch?.((err) => {
+      window.lana?.log(`[GradientPicker] Like toggle error: ${err?.message}`, {
+        tags: 'color-modal,like',
+        severity: 'warning',
+      });
+    });
   });
   const likesCountEl = createTag('p', { class: 'modal-likes-count' });
   likesCountEl.textContent = likesCount;

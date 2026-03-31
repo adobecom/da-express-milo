@@ -1,11 +1,12 @@
 import loadMiloStyle from '../../../utils/loadMiloStyle.js';
 
-const STYLES_BASE = 'scripts/color-shared/components/search-bar/styles';
+const SEARCH_BAR_STYLES_PATH = 'scripts/color-shared/components/search-bar/styles/search-bar.css';
+const SEARCH_BAR_SUGGESTIONS_STYLES_PATH = 'scripts/color-shared/components/search-bar/styles/suggestions.css';
 
 export function loadSearchBarStyles() {
-  return loadMiloStyle(`${STYLES_BASE}/search-bar.css`);
+  return loadMiloStyle(SEARCH_BAR_STYLES_PATH);
 }
 
 export function loadSearchBarSuggestionStyles() {
-  return loadMiloStyle(`${STYLES_BASE}/suggestions.css`);
+  return loadMiloStyle(SEARCH_BAR_SUGGESTIONS_STYLES_PATH);
 }

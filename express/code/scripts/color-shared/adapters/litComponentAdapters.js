@@ -28,6 +28,48 @@ function resolveVerticalResponsive() {
   return window.matchMedia(`(min-width: ${VERTICAL_STACKED_BREAKPOINT_PX}px)`).matches ? 'vertical' : 'stacked';
 }
 
+function normalizePaletteColors(paletteData) {
+  return (paletteData?.colors || []).map((color) => (
+    String(color).startsWith('#') ? String(color) : `#${String(color)}`
+  ));
+}
+
+function renderPaletteFallback(
+  hostElement,
+  paletteData,
+  { paletteAriaLabel = 'Palette {hex}, color {index}' } = {},
+) {
+  const colors = normalizePaletteColors(paletteData);
+  hostElement.innerHTML = '';
+
+  const palette = document.createElement('div');
+  palette.className = 'color-palette custom-outline';
+  palette.tabIndex = 0;
+
+  colors.forEach((hex, index) => {
+    const swatch = document.createElement('div');
+    swatch.className = 'palette';
+    swatch.dataset.testid = 'palette-color-pill';
+    swatch.style.backgroundColor = hex;
+    swatch.setAttribute('role', 'button');
+    swatch.setAttribute(
+      'aria-label',
+      paletteAriaLabel
+        .replace('{hex}', hex)
+        .replace('{index}', String(index + 1)),
+    );
+    palette.appendChild(swatch);
+  });
+
+  hostElement.appendChild(palette);
+
+  if (paletteData?.name) {
+    hostElement.setAttribute('title', paletteData.name);
+  } else {
+    hostElement.removeAttribute('title');
+  }
+}
+
 export function createSwatchRailAdapter(paletteOrController, options = {}) {
   import('../../../libs/color-components/components/color-swatch-rail/index.js');
 
@@ -128,23 +170,59 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
 }
 
 export function createPaletteAdapter(paletteData, callbacks = {}) {
-  import('../../../libs/color-components/components/color-palette/index.js');
+  let currentPalette = paletteData;
+  let fallbackMode = false;
 
   const element = document.createElement('color-palette');
-  element.palette = paletteData;
+  element.palette = currentPalette;
   element.setAttribute('show-name-tooltip', 'true');
   element.setAttribute('palette-aria-label', 'Palette {hex}, color {index}');
+
+  const renderFallback = () => {
+    fallbackMode = true;
+    renderPaletteFallback(element, currentPalette, {
+      paletteAriaLabel: 'Palette {hex}, color {index}',
+    });
+  };
+
+  import('../../../libs/color-components/components/color-palette/index.js')
+    .catch((error) => {
+      window.lana?.log(`[ColorExplore] Failed loading color-palette component: ${error?.message || error}`, {
+        tags: 'color-explore,color-palette',
+        severity: 'warn',
+      });
+      if (!window.customElements?.get('color-palette')) {
+        renderFallback();
+      }
+    });
 
   element.addEventListener('ac-palette-select', (e) => {
     callbacks.onSelect?.(e.detail.palette);
   });
 
+  const onFallbackSelect = (event) => {
+    if (!fallbackMode) return;
+    if (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    callbacks.onSelect?.(currentPalette);
+  };
+
+  element.addEventListener('click', onFallbackSelect);
+  element.addEventListener('keydown', onFallbackSelect);
+
   return {
     element,
     update: (newData) => {
-      element.palette = newData;
+      currentPalette = newData;
+      if (fallbackMode) {
+        renderFallback();
+      } else {
+        element.palette = newData;
+      }
     },
     destroy: () => {
+      element.removeEventListener('click', onFallbackSelect);
+      element.removeEventListener('keydown', onFallbackSelect);
       element.remove();
     },
   };

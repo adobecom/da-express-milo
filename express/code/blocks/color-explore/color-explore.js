@@ -64,6 +64,103 @@ function isSwatchesMode(config) {
     || config?.renderMode === 'swatches';
 }
 
+function resolvePaletteEditorBaseUrl(currentUrl) {
+  if (currentUrl?.hostname === PALETTE_EDITOR_DEMO_HOST) {
+    return PALETTE_EDITOR_DEMO_URL;
+  }
+  return PALETTE_EDITOR_DEFAULT_URL;
+}
+
+function resolvePaletteHexesForUrl(paletteData = {}) {
+  const fromColors = Array.isArray(paletteData?.colors) ? paletteData.colors : [];
+  const fromCoreColors = Array.isArray(paletteData?.coreColors) ? paletteData.coreColors : [];
+  const fromSwatches = Array.isArray(paletteData?.swatches) ? paletteData.swatches : [];
+
+  let source = fromSwatches;
+  if (fromColors.length) {
+    source = fromColors;
+  } else if (fromCoreColors.length) {
+    source = fromCoreColors;
+  }
+
+  return source.flatMap((entry) => {
+    let candidate = '';
+    if (typeof entry === 'string') {
+      candidate = entry;
+    } else if (entry && typeof entry === 'object') {
+      candidate = entry.hex || entry.color || entry.value || '';
+    }
+
+    return String(candidate)
+      .split(',')
+      .map((segment) => segment.trim())
+      .filter(Boolean)
+      .map((segment) => normalizeHex(segment))
+      .filter(Boolean);
+  });
+}
+
+function buildPaletteEditorUrl(palette, sourceHref) {
+  const paletteData = palette || {};
+  const fallbackHref = sourceHref
+    || (typeof window !== 'undefined' ? window.location.href : PALETTE_EDITOR_DEFAULT_URL);
+  let currentUrl;
+  try {
+    currentUrl = new URL(fallbackHref);
+  } catch {
+    return PALETTE_EDITOR_DEFAULT_URL;
+  }
+
+  const baseUrl = resolvePaletteEditorBaseUrl(currentUrl);
+  let targetUrl;
+  try {
+    targetUrl = new URL(baseUrl, currentUrl);
+  } catch {
+    targetUrl = new URL(PALETTE_EDITOR_DEFAULT_URL, currentUrl);
+  }
+
+  const paletteColors = resolvePaletteHexesForUrl(paletteData);
+  colorPaletteParamApi.setOnUrl(targetUrl, paletteColors);
+
+  if (!targetUrl.searchParams.has('martech') && currentUrl.searchParams.has('martech')) {
+    targetUrl.searchParams.set('martech', currentUrl.searchParams.get('martech'));
+  }
+
+  return targetUrl.toString();
+}
+
+function navigateToPaletteEditor(palette = {}) {
+  if (typeof window === 'undefined') return;
+  const destination = buildPaletteEditorUrl(palette);
+  window.location.assign(destination);
+}
+
+function mergeLoadMoreData(currentData, moreData) {
+  if (!Array.isArray(moreData) || moreData.length === 0) {
+    return currentData;
+  }
+  if (!Array.isArray(currentData) || currentData.length === 0) {
+    return moreData;
+  }
+  if (moreData.length >= currentData.length) {
+    return moreData;
+  }
+
+  const knownIds = new Set(
+    currentData
+      .map((item) => item?.id)
+      .filter(Boolean),
+  );
+  const delta = moreData.filter((item) => {
+    const id = item?.id;
+    if (!id || knownIds.has(id)) return false;
+    knownIds.add(id);
+    return true;
+  });
+
+  return delta.length > 0 ? [...currentData, ...delta] : currentData;
+}
+
 async function createBlockLoadMoreControl(container, onClick, options = {}) {
   const { iconSize = 'xl' } = options;
   await loadIconsRail();
@@ -226,6 +323,7 @@ export default async function decorate(block) {
       let floatingSearchHandler = null;
       let isMounting = false;
       let filterInteractionSuppressUntil = 0;
+      let isSearchActive = false;
 
       const setModeClasses = (variant) => {
         block.classList.remove(VARIANT_CLASSES.GRADIENTS, VARIANT_CLASSES.PALETTES);
@@ -250,6 +348,7 @@ export default async function decorate(block) {
         loadMoreControl = null;
         activeRenderer?.destroy?.();
         activeRenderer = null;
+        isSearchActive = false;
         container.classList.remove('color-explorer-strips');
         if (floatingSearchHandler) {
           document.removeEventListener('floating-search:submit', floatingSearchHandler);
@@ -275,10 +374,12 @@ export default async function decorate(block) {
           title: content.name || fallbackTitle,
           showTitle: false,
           content: () => createGradientPickerRebuildContent(content, {
-            likesCount: '1.2K',
+            likesCount: content.likes ?? content.likesCount ?? 0,
+            liked: content.liked ?? false,
             creatorName: content.creator?.name ?? 'nicolagilroy',
             creatorImageUrl: content.creator?.imageUrl ?? content.creatorImageUrl,
             tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+            onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
           }),
         });
       };
@@ -343,6 +444,7 @@ export default async function decorate(block) {
             VARIANTS.GRADIENTS,
             async (filters) => {
               filterInteractionSuppressUntil = Date.now() + 350;
+              isSearchActive = false;
               if (filters?.contentType === 'color-palettes') {
                 await mountStripsMode();
                 return;
@@ -357,15 +459,12 @@ export default async function decorate(block) {
           );
 
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
-            const nextTarget = Math.min(
-              visibleCount + config.loadMoreIncrement,
-              config.maxItems || Number.POSITIVE_INFINITY,
-            );
+            const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
             if (nextTarget > allData.length) {
-              const moreData = await activeDataService.loadMore();
-              if (Array.isArray(moreData)) {
-                allData = moreData;
-              }
+              const moreData = isSearchActive
+                ? await activeDataService.searchMore()
+                : await activeDataService.loadMore();
+              allData = mergeLoadMoreData(allData, moreData);
             }
             visibleCount = Math.min(nextTarget, allData.length);
             await activeRenderer.update(allData.slice(0, visibleCount));
@@ -382,6 +481,7 @@ export default async function decorate(block) {
 
           floatingSearchHandler = async (e) => {
             const { query } = e.detail;
+            isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.search(query);
             visibleCount = Math.min(config.initialLoad, allData.length);
@@ -441,6 +541,7 @@ export default async function decorate(block) {
             VARIANTS.STRIPS,
             async (filters) => {
               filterInteractionSuppressUntil = Date.now() + 350;
+              isSearchActive = false;
               if (filters?.contentType === 'color-gradients') {
                 await mountGradientsMode();
                 return;
@@ -455,15 +556,12 @@ export default async function decorate(block) {
           );
 
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
-            const nextTarget = Math.min(
-              visibleCount + config.loadMoreIncrement,
-              config.maxItems || Number.POSITIVE_INFINITY,
-            );
+            const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
             if (nextTarget > allData.length) {
-              const moreData = await activeDataService.loadMore();
-              if (Array.isArray(moreData)) {
-                allData = moreData;
-              }
+              const moreData = isSearchActive
+                ? await activeDataService.searchMore()
+                : await activeDataService.loadMore();
+              allData = mergeLoadMoreData(allData, moreData);
             }
             visibleCount = Math.min(nextTarget, allData.length);
             activeRenderer.update(allData.slice(0, visibleCount));
@@ -479,6 +577,7 @@ export default async function decorate(block) {
           });
 
           activeRenderer.on(EVENTS.SEARCH, async ({ query }) => {
+            isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.search(query);
             visibleCount = Math.min(config.initialLoad, allData.length);
@@ -489,6 +588,7 @@ export default async function decorate(block) {
 
           floatingSearchHandler = async (e) => {
             const { query } = e.detail;
+            isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.search(query);
             visibleCount = Math.min(config.initialLoad, allData.length);
@@ -530,6 +630,7 @@ export default async function decorate(block) {
       block.classList.add(CSS_CLASSES.LOADING);
       let allData = await dataService.fetchData();
       let visibleCount = Math.min(config.initialLoad, allData.length);
+      let isSearchActive = false;
       block.classList.remove(CSS_CLASSES.LOADING);
 
       let renderer;
@@ -545,15 +646,12 @@ export default async function decorate(block) {
       await renderer.render?.(container);
       const loadMoreControl = !isSwatchesMode(config)
         ? await createBlockLoadMoreControl(container, async () => {
-          const nextTarget = Math.min(
-            visibleCount + config.loadMoreIncrement,
-            config.maxItems || Number.POSITIVE_INFINITY,
-          );
+          const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
           if (nextTarget > allData.length) {
-            const moreData = await dataService.loadMore();
-            if (Array.isArray(moreData)) {
-              allData = moreData;
-            }
+            const moreData = isSearchActive
+              ? await dataService.searchMore()
+              : await dataService.loadMore();
+            allData = mergeLoadMoreData(allData, moreData);
           }
           visibleCount = Math.min(nextTarget, allData.length);
           renderer.update(allData.slice(0, visibleCount));
@@ -572,6 +670,7 @@ export default async function decorate(block) {
       });
 
       renderer.on(EVENTS.SEARCH, async ({ query }) => {
+        isSearchActive = !!query;
         block.classList.add(CSS_CLASSES.LOADING);
         allData = await dataService.search(query);
         visibleCount = Math.min(config.initialLoad, allData.length);
@@ -581,6 +680,7 @@ export default async function decorate(block) {
       });
 
       renderer.on(EVENTS.FILTER, async (filters) => {
+        isSearchActive = false;
         block.classList.add(CSS_CLASSES.LOADING);
         allData = await dataService.filter(filters);
         visibleCount = Math.min(config.initialLoad, allData.length);
@@ -591,6 +691,7 @@ export default async function decorate(block) {
 
       const floatingHandler = async (e) => {
         const { query } = e.detail;
+        isSearchActive = !!query;
         block.classList.add(CSS_CLASSES.LOADING);
         allData = await dataService.search(query);
         visibleCount = Math.min(config.initialLoad, allData.length);

@@ -65,8 +65,6 @@
   flex-wrap: nowrap;
   scrollbar-width: none;
   -ms-overflow-style: none;
-  padding-left: var(--spacing-500);
-  padding-right: var(--spacing-400);
   width: 100%;
   box-sizing: border-box;
 }
@@ -199,7 +197,13 @@
 
 @media (min-width: 600px) {
   .color-search-marquee {
-    padding: var(--spacing-600);
+    padding: var(--spacing-600) var(--spacing-500);
+  }
+
+  .color-search-marquee .tags-scroll-wrapper {
+    margin-inline-end: calc(-1 * var(--spacing-500));
+    width: calc(100% + var(--spacing-500));
+    max-width: none;
   }
 
   .color-search-marquee .tag-pill {
@@ -214,6 +218,16 @@
 }
 
 @media (min-width: 1024px) {
+  .color-search-marquee {
+    padding: var(--spacing-600);
+  }
+
+  .color-search-marquee .tags-scroll-wrapper {
+    margin-inline-end: calc(-1 * var(--spacing-600));
+    width: calc(100% + var(--spacing-600));
+    max-width: none;
+  }
+
   .color-search-marquee > div:first-of-type h1 {
     font-size: var(--heading-font-size-xl);
   }
@@ -229,11 +243,5 @@
   .color-search-marquee .empty-result-description {
     font-size: var(--body-font-size-l);
   }
-}
-
-.search-bar-sticky-wrapper.is-sticky-clone.is-past-boundary {
-  opacity: 0 !important;
-  pointer-events: none !important;
-  visibility: hidden !important;
 }
 
