@@ -44,6 +44,10 @@
   align-items: center;
 }
 
+.color-wheel .action-menu-controls-only {
+  padding-bottom: var(--spacing-100);
+}
+
 /* Image panel */
 
 .color-wheel .image-content {
@@ -464,6 +468,10 @@ color-wheel-express {
 
   .color-wheel-content {
     gap: var(--spacing-100);
+  }
+
+  .color-wheel .action-menu-controls-only {
+    padding-bottom: 0;
   }
 
   .color-wheel color-wheel-express {

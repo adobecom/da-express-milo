@@ -140,7 +140,7 @@
   }
 
   .action-menu-full .action-menu-controls {
-    display: unset;
+    display: flex;
   }
 }
 
