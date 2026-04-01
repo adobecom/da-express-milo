@@ -882,7 +882,7 @@ export class ColorSwatchRail extends LitElement {
       const showAddTopHere = isStacked && canAddGlobal && f.addLeft;
       const showAddBottomHere = isStacked && canAddGlobal && f.addRight;
       
-      const effectiveLocked = isBase;
+      const effectiveLocked = isBase && !this.hideBaseColorBadge;
       const textColor = getContrastTextColor(swatch.hex);
       const useLightIcons = textColor.toUpperCase() === '#FFFFFF';
       const shadow = useLightIcons ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
