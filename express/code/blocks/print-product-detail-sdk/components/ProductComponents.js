@@ -9,6 +9,7 @@ import {
 import { useStore, useDrawer } from './Contexts.js';
 import axAccordionDecorate from '../../ax-accordion/ax-accordion.js';
 import { formatLargeNumberToK } from '../utilities/utility-functions.js';
+import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 
 function mapToAccordionFormat(descriptions) {
   if (!descriptions || !Array.isArray(descriptions)) {
@@ -378,6 +379,8 @@ function flattenOptionGroups(selector) {
 function PaperTypeContent({ onClose }) {
   const { state, actions } = useStore();
   const { state: drawerState } = useDrawer();
+  const pillContainerRef = useRef(null);
+  const carouselCleanupRef = useRef(null);
   const attrName = drawerState.payload?.attribute?.name;
   const attribute = (state?.attributes || []).find((a) => a.name === attrName);
   if (!attribute) return null;
@@ -387,11 +390,101 @@ function PaperTypeContent({ onClose }) {
   const selectedOption = allOptions.find((o) => o.value === selectedOptionValue) || allOptions[0];
   const heroImageUrl = preview?.imageUrl ? updateImageUrl(preview.imageUrl, 1000) : '';
   const isRecommended = selectedOptionValue === '175ptmatte';
-  const handlePillClick = (option) => {
-    if (option.value !== selectedOptionValue) {
-      actions.selectOption(attribute.name, option.value);
-    }
-  };
+
+  // Build pills imperatively and initialize carousel (avoids Preact reconciliation conflict)
+  useEffect(() => {
+    if (!pillContainerRef.current || !allOptions.length) return undefined;
+
+    const container = pillContainerRef.current;
+    container.innerHTML = '';
+
+    allOptions.forEach((option) => {
+      const isSelected = option.value === selectedOptionValue;
+      const thumbUrl = updateImageUrl(option.imageUrl, 48);
+
+      const pillContainer = document.createElement('div');
+      pillContainer.className = 'pdpx-mini-pill-container';
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `pdpx-mini-pill-image-container ${isSelected ? 'selected' : ''}`;
+      button.setAttribute('data-name', option.value);
+      button.setAttribute('data-title', option.title);
+      button.setAttribute('aria-label', option.title);
+      button.setAttribute('aria-current', isSelected ? 'true' : 'false');
+      button.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+      button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+      button.addEventListener('click', () => {
+        if (option.value !== selectedOptionValue) {
+          actions.selectOption(attribute.name, option.value);
+        }
+      });
+
+      const img = document.createElement('img');
+      img.className = 'pdpx-mini-pill-image';
+      img.src = thumbUrl;
+      img.alt = '';
+      img.setAttribute('aria-hidden', 'true');
+      button.appendChild(img);
+
+      pillContainer.addEventListener('mouseenter', (event) => {
+        const pill = event.currentTarget.getBoundingClientRect();
+        const tooltipWidth = (option.title.length * 3) + 12;
+        const pillCenter = pill.left + (pill.width / 2);
+        const drawer = event.currentTarget.closest('.pdpx-drawer');
+        const drawerOffsetLeft = drawer ? drawer.getBoundingClientRect().left : 0;
+        event.currentTarget.style.setProperty('--tooltip-top', `${pill.top - 42}px`);
+        event.currentTarget.style.setProperty('--tooltip-left', `${pillCenter - tooltipWidth - drawerOffsetLeft}px`);
+        event.currentTarget.style.setProperty('--arrow-top', `${pill.top - 6}px`);
+        event.currentTarget.style.setProperty('--arrow-left', `${pillCenter - drawerOffsetLeft}px`);
+      });
+
+      const textContainer = document.createElement('div');
+      textContainer.className = 'pdpx-mini-pill-text-container';
+      if (option.priceDelta) {
+        const priceSpan = document.createElement('span');
+        priceSpan.className = 'pdpx-mini-pill-price';
+        priceSpan.textContent = option.priceDelta;
+        textContainer.appendChild(priceSpan);
+      }
+
+      pillContainer.appendChild(button);
+      pillContainer.appendChild(textContainer);
+      container.appendChild(pillContainer);
+    });
+
+    createSimpleCarousel('.pdpx-mini-pill-container', container, {
+      ariaLabel: `${attribute.title} options`,
+      centerActive: true,
+      activeClass: 'selected',
+    }).then((carousel) => {
+      if (carousel) {
+        carouselCleanupRef.current = carousel.cleanup;
+      }
+    });
+
+    return () => {
+      if (carouselCleanupRef.current) {
+        carouselCleanupRef.current();
+        carouselCleanupRef.current = null;
+      }
+    };
+  }, [attribute.name, attribute.title, allOptions.map((o) => o.value).join(',')]);
+
+  // Update selected state when selection changes
+  useEffect(() => {
+    if (!pillContainerRef.current) return;
+    const buttons = pillContainerRef.current.querySelectorAll('.pdpx-mini-pill-image-container');
+    buttons.forEach((btn) => {
+      const value = btn.getAttribute('data-name');
+      const isSelected = value === selectedOptionValue;
+      btn.classList.toggle('selected', isSelected);
+      btn.setAttribute('aria-current', isSelected ? 'true' : 'false');
+      btn.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+      btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+    });
+  }, [selectedOptionValue]);
+
   return html`
     <${Fragment}>
       <div class="pdpx-drawer-body">
@@ -420,30 +513,10 @@ function PaperTypeContent({ onClose }) {
               <span class="pdpx-pill-selector-label-name">${selectedOption?.title || ''}</span>
             </div>
           </div>
-          <div class="pdpx-mini-pill-selector-options-container" style="display:flex;gap:8px;overflow-x:auto;padding:var(--spacing-100) 0;">
-            ${allOptions.map((option) => {
-    const isSelected = option.value === selectedOptionValue;
-    const thumbUrl = updateImageUrl(option.imageUrl, 48);
-    return html`
-                <div class="pdpx-mini-pill-container" key="${option.value}">
-                  <button
-                    class="pdpx-mini-pill-image-container ${isSelected ? 'selected' : ''}"
-                    type="button"
-                    onClick=${() => handlePillClick(option)}
-                    aria-label="${option.title}"
-                    aria-pressed="${isSelected ? 'true' : 'false'}"
-                  >
-                    <img class="pdpx-mini-pill-image" src="${thumbUrl}" alt="" aria-hidden="true" />
-                  </button>
-                  ${option.priceDelta && html`
-                    <div class="pdpx-mini-pill-text-container">
-                      <span class="pdpx-mini-pill-price">${option.priceDelta}</span>
-                    </div>
-                  `}
-                </div>
-              `;
-  })}
-          </div>
+          <div
+            ref=${pillContainerRef}
+            class="pdpx-mini-pill-selector-options-container"
+          />
         </div>
       </div>
       <div class="pdpx-drawer-foot">
