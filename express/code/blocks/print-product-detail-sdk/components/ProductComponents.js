@@ -438,6 +438,60 @@ function SizeChartContent({ onClose }) {
   `;
 }
 
+function PrintingProcessContent({ onClose }) {
+  return html`
+    <div class="pdpx-drawer-body">
+      <div class="pdpx-printing-process-options-container">
+        <div class="pdpx-printing-process-option-container">
+          <div class="pdpx-printing-process-option-image-container">
+            <img
+              class="pdpx-printing-process-option-image"
+              src="https://asset.zcache.com/assets/graphics/pd/productAttributeHelp/underbasePrintProcess/Classic.jpg"
+              alt="Classic Printing"
+            />
+          </div>
+          <div class="pdpx-printing-process-option-info-container">
+            <span class="pdpx-printing-process-option-info-title">Classic printing: no underbase</span>
+            <p class="pdpx-printing-process-option-info-description">
+              Best for lighter colored garments. The design is printed directly onto the garment using CMYK inks only.
+            </p>
+            <div class="pdpx-printing-process-option-color-lockup">
+              <img class="icon icon-cmyk_droplet_cyan" src="/express/code/icons/cmyk_droplet_cyan.svg" alt="cyan" />
+              <img class="icon icon-cmyk_droplet_magenta" src="/express/code/icons/cmyk_droplet_magenta.svg" alt="magenta" />
+              <img class="icon icon-cmyk_droplet_yellow" src="/express/code/icons/cmyk_droplet_yellow.svg" alt="yellow" />
+              <img class="icon icon-cmyk_droplet_black" src="/express/code/icons/cmyk_droplet_black.svg" alt="black" />
+              CMYK
+            </div>
+          </div>
+        </div>
+        <div class="pdpx-printing-process-option-container">
+          <div class="pdpx-printing-process-option-image-container">
+            <img
+              class="pdpx-printing-process-option-image"
+              src="https://asset.zcache.com/assets/graphics/pd/productAttributeHelp/underbasePrintProcess/Vivid.jpg"
+              alt="Vivid Printing"
+            />
+          </div>
+          <div class="pdpx-printing-process-option-info-container">
+            <span class="pdpx-printing-process-option-info-title">Vivid printing: with underbase</span>
+            <p class="pdpx-printing-process-option-info-description">
+              Best for darker colored garments. A white underbase is printed first, then the design is printed on top using CMYK inks for vivid color reproduction.
+            </p>
+            <div class="pdpx-printing-process-option-color-lockup">
+              <img class="icon icon-cmyk_droplet_cyan" src="/express/code/icons/cmyk_droplet_cyan.svg" alt="cyan" />
+              <img class="icon icon-cmyk_droplet_magenta" src="/express/code/icons/cmyk_droplet_magenta.svg" alt="magenta" />
+              <img class="icon icon-cmyk_droplet_yellow" src="/express/code/icons/cmyk_droplet_yellow.svg" alt="yellow" />
+              <img class="icon icon-cmyk_droplet_black" src="/express/code/icons/cmyk_droplet_black.svg" alt="black" />
+              <img class="icon icon-cmyk_droplet_white" src="/express/code/icons/cmyk_droplet_white.svg" alt="white" />
+              CMYK + White
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 function flattenOptionGroups(selector) {
   if (!selector?.optionGroups || !Array.isArray(selector.optionGroups)) {
     return [];
@@ -636,6 +690,7 @@ export function Drawer() {
   const drawerLabels = {
     sizeChart: state.payload?.helpLink?.label || 'Size Chart',
     paperType: 'Select Paper Type',
+    printingProcess: 'Printing Process',
   };
   const drawerLabel = drawerLabels[state.type] || '';
 
@@ -655,6 +710,7 @@ export function Drawer() {
         </div>
         ${state.type === 'sizeChart' && html`<${SizeChartContent} onClose=${closeDrawer} />`}
         ${state.type === 'paperType' && html`<${PaperTypeContent} onClose=${closeDrawer} />`}
+        ${state.type === 'printingProcess' && html`<${PrintingProcessContent} onClose=${closeDrawer} />`}
       </aside>
     </${Fragment}>
   `;

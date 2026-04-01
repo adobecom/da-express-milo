@@ -341,15 +341,21 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
   const groupLabelId = `pdpx-mini-pill-label-${toDomIdPart(attribute.name)}`;
   const groupValueId = `pdpx-mini-pill-selected-value-${toDomIdPart(attribute.name)}`;
   const hiddenInputId = `pdpx-hidden-input-${attribute.name}`;
-  const hasDrawerLink = typeof onRequestDrawer === 'function'
-    && helpLink?.type === 'dialog'
-    && helpLink.dialogType;
   const isBusinessCardMediaAttribute = attribute.name === 'media' && productType === 'zazzle_businesscard';
   if (isBusinessCardMediaAttribute) {
     helpLink = {
       type: 'dialog',
       dialogType: 'paperType',
       label: 'Compare Paper Types',
+    };
+  }
+  const isShirtColorAttribute = attribute.name === 'color'
+    && (productType === 'zazzle_shirt' || productType === 'zazzle_hoodie');
+  if (isShirtColorAttribute) {
+    helpLink = {
+      type: 'dialog',
+      dialogType: 'printingProcess',
+      label: 'Learn More',
     };
   }
   const handleOptionClick = (option) => {
