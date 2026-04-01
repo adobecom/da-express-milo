@@ -1,6 +1,8 @@
 import { createTag } from '../../utils.js';
 import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { announceToScreenReader } from '../spectrum/utils/a11y.js';
+import { loadTooltip } from '../spectrum/load-spectrum.js';
+import { createThemeWrapper } from '../spectrum/utils/theme.js';
 
 const STYLE_PATH = 'scripts/color-shared/modal/modal-contrast-content.css';
 
@@ -86,9 +88,71 @@ function formatRatio(ratio) {
   return `${Number(ratio).toFixed(2)} : 1`;
 }
 
-function attachCellTooltip(cell, text) {
-  const tooltip = createTag('sp-tooltip', { 'self-managed': '', placement: 'top' }, text);
-  cell.appendChild(tooltip);
+function setCellTooltipText(cell, text) {
+  cell.dataset.tooltip = text;
+}
+
+/**
+ * Creates a single shared floating tooltip for the entire matrix grid.
+ * Appends to document.body (outside overflow:hidden cells) and uses
+ * event delegation — the same pattern as express-tooltip.js.
+ * Returns a destroy() to clean up on layout switch or modal close.
+ */
+function setupMatrixTooltip(grid) {
+  const theme = createThemeWrapper();
+  theme.style.cssText = 'position: fixed; pointer-events: none; z-index: 10001; top: 0; left: 0;';
+  const tooltip = document.createElement('sp-tooltip');
+  theme.appendChild(tooltip);
+  document.body.appendChild(theme);
+
+  let showTimer = null;
+
+  function show(cell) {
+    clearTimeout(showTimer);
+    showTimer = setTimeout(() => {
+      const text = cell.dataset.tooltip;
+      if (!text) return;
+      tooltip.textContent = text;
+      const rect = cell.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top - 8;
+      theme.style.transform = `translate(calc(${cx}px - 50%), calc(${cy}px - 100%))`;
+      tooltip.setAttribute('open', '');
+    }, 200);
+  }
+
+  function hide() {
+    clearTimeout(showTimer);
+    tooltip.removeAttribute('open');
+  }
+
+  const ac = new AbortController();
+  const { signal } = ac;
+
+  grid.addEventListener('mouseover', (e) => {
+    const cell = e.target.closest('[data-tooltip]');
+    if (cell) show(cell);
+  }, { signal });
+
+  grid.addEventListener('mouseout', (e) => {
+    const cell = e.target.closest('[data-tooltip]');
+    if (cell && !cell.contains(e.relatedTarget)) hide();
+  }, { signal });
+
+  grid.addEventListener('focusin', (e) => {
+    const cell = e.target.closest('[data-tooltip]');
+    if (cell && e.target.matches(':focus-visible')) show(cell);
+  }, { signal });
+
+  grid.addEventListener('focusout', hide, { signal });
+
+  return {
+    destroy() {
+      ac.abort();
+      clearTimeout(showTimer);
+      theme.remove();
+    },
+  };
 }
 
 // ── Cell Rendering (Desktop Matrix) ───────────────────────────────
@@ -125,7 +189,7 @@ function buildCell(fgIdx, bgIdx, colors, state, matrix, sizeClass, dataService) 
     cell.setAttribute('tabindex', '0');
     cell.setAttribute('aria-label',
       `${fgHex} on ${bgHex}, same color, contrast ratio 1.00 : 1, fails ${state.activeLevel}`);
-    attachCellTooltip(cell, `Low contrast ${formatRatio(1)}`);
+    setCellTooltipText(cell, `Low contrast ${formatRatio(1)}`);
     return cell;
   }
 
@@ -155,7 +219,7 @@ function buildCell(fgIdx, bgIdx, colors, state, matrix, sizeClass, dataService) 
     cell.classList.add('cc-modal-cell--fail');
   }
 
-  attachCellTooltip(cell, pass ? `Pass ${formatRatio(ratio)}` : `Low contrast ${formatRatio(ratio)}`);
+  setCellTooltipText(cell, pass ? `Pass ${formatRatio(ratio)}` : `Low contrast ${formatRatio(ratio)}`);
   return cell;
 }
 
@@ -196,8 +260,7 @@ function updateAllCells(container, colors, state, matrix) {
     cell.setAttribute('aria-label',
       `${fgHex} on ${bgHex}, contrast ratio ${formatRatio(result.ratio)}, ${pass ? 'passes' : 'fails'} ${state.activeLevel} for ${state.activeTab.replace('-', ' ')}`);
 
-    const tooltipEl = cell.querySelector('sp-tooltip');
-    if (tooltipEl) tooltipEl.textContent = pass ? `Pass ${formatRatio(result.ratio)}` : `Low contrast ${formatRatio(result.ratio)}`;
+    setCellTooltipText(cell, pass ? `Pass ${formatRatio(result.ratio)}` : `Low contrast ${formatRatio(result.ratio)}`);
 
     cell.classList.remove('cc-modal-cell--pass', 'cc-modal-cell--fail');
     cell.style.backgroundColor = '';
@@ -293,6 +356,10 @@ function buildMatrixLayout(colors, state, matrix, dataService) {
 
   content.appendChild(grid);
   wrapper.appendChild(content);
+
+  const tooltipManager = setupMatrixTooltip(grid);
+  wrapper._destroyTooltip = () => tooltipManager.destroy();
+
   return wrapper;
 }
 
@@ -570,14 +637,15 @@ export function createContrastCheckerModalContent(palette, options = {}) {
   let contrastMatrix = null;
 
   async function init() {
-    // Lazy-load data service if not provided
-    if (!dataService) {
-      const { default: createContrastDataService } = await import(
-        '../../../blocks/color-contrast-checker/services/createContrastDataService.js'
-      );
-      dataService = createContrastDataService();
-      ownDataService = true;
-    }
+    // Lazy-load data service and tooltip component
+    const serviceLoad = !dataService
+      ? import('../../../blocks/color-contrast-checker/services/createContrastDataService.js')
+        .then(({ default: createContrastDataService }) => {
+          dataService = createContrastDataService();
+          ownDataService = true;
+        })
+      : Promise.resolve();
+    await Promise.all([serviceLoad, loadTooltip()]);
 
     contrastMatrix = computeContrastMatrix(colors, dataService);
 
@@ -604,6 +672,7 @@ export function createContrastCheckerModalContent(palette, options = {}) {
     element.appendChild(contentArea);
 
     function renderDesktop() {
+      matrixLayout?._destroyTooltip?.();
       contentArea.innerHTML = '';
       cardLayout = null;
       matrixLayout = buildMatrixLayout(colors, state, contrastMatrix, dataService);
@@ -611,6 +680,7 @@ export function createContrastCheckerModalContent(palette, options = {}) {
     }
 
     function renderCards() {
+      matrixLayout?._destroyTooltip?.();
       contentArea.innerHTML = '';
       matrixLayout = null;
       cardLayout = buildCardLayout(colors, state, contrastMatrix, dataService);
@@ -648,6 +718,7 @@ export function createContrastCheckerModalContent(palette, options = {}) {
     headerRef?.tabs?.destroy?.();
     headerRef?.levelPicker?.destroy?.();
     if (ownDataService) dataService?.clearCache?.();
+    matrixLayout?._destroyTooltip?.();
     element.innerHTML = '';
     matrixLayout = null;
     cardLayout = null;
