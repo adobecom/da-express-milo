@@ -576,6 +576,10 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   };
   const shareWrapper = renderShareWrapper(templateInfo);
 
+  if (isEligibleForExperimentalCta && (experimentalCta1Url || experimentalCta1Text)) {
+    btnContainer.classList.add('experimental-ctas');
+  }
+
   btnContainer.append(cta);
   if (secondaryCta) btnContainer.append(secondaryCta);
   btnContainer.append(ctaLink);
