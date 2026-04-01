@@ -403,8 +403,11 @@ async function loadPage() {
   }
 
   /* region based redirect to homepage */
-  import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
-    if (country === 'cn') { window.location.href = '/cn'; }
+  import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then(async (country) => {
+    if (country === 'cn' && !window.location.pathname.startsWith('/cn')) {
+      const resp = await fetch('/cn', { method: 'HEAD' });
+      if (resp.ok) window.location.href = '/cn';
+    }
   });
 
   document.head.querySelectorAll('meta').forEach((meta) => {

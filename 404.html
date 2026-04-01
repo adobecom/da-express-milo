@@ -162,7 +162,10 @@
         else {
           [_, userLocale] = pathname.split('/');
           valueInMap = redirectMap.get(userLocale);
-          valueInMap ? win.location.replace( href.replace(`/${userLocale}/`, valueInMap)) : noop;
+          if (valueInMap) {
+            const normalizedHref = href.endsWith('/') ? href : `${href}/`;
+            win.location.replace(normalizedHref.replace(`/${userLocale}/`, valueInMap));
+          }
         }
       }(window));
 
