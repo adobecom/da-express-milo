@@ -88,7 +88,7 @@ function harmonyRulesForSwatchCount(n) {
 }
 
 async function buildHarmonySelector(controller) {
-  const uid = `cw-h-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const uid = `cw-h-${Date.now()}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
   const headingId = `${uid}-heading`;
   const currentNameId = `${uid}-current`;
   const section = createTag('div', { class: 'color-wheel-harmony-section' });
