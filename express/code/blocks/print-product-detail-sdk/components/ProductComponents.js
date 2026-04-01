@@ -234,19 +234,20 @@ const TASK_ID_MAP = {
 
 function buildCheckoutUrl(templateId, expressProductSettings, productType) {
   const taskId = TASK_ID_MAP[productType] || '';
-  const baseUrl = `https://new.express.adobe.com/design/template/${templateId}`;
+  const baseUrl = `https://new.express.adobe.com/design-remix/template/${templateId}`;
   const params = new URLSearchParams({
-    productSettings: expressProductSettings,
     category: 'templates',
     taskId,
     loadPrintAddon: 'true',
     print: 'true',
-    action: 'pdp-cta',
+    action: 'customize-and-print-zazzle-iframe',
     source: 'a.com-print-and-deliver-seo',
+    entryPoint: 'a.com-print-and-deliver-seo',
     mv: 'other',
     url: 'express/print',
   });
-  return `${baseUrl}?${params.toString()}`;
+  const encodedProductSettings = encodeURIComponent(expressProductSettings);
+  return `${baseUrl}?${params.toString()}&productSettings=${encodedProductSettings}`;
 }
 
 export function CheckoutButton({ templateId }) {
