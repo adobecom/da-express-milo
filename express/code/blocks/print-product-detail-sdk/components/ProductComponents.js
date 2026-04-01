@@ -314,35 +314,40 @@ export function CheckoutButton({ templateId }) {
   `;
 }
 
-function SizeChartTable({ sizeChart }) {
-  if (!sizeChart?.sizeChart) {
-    return html`<p class="pdpx-size-chart-empty">Size chart information is unavailable.</p>`;
+function SizeChartTable({ measurementTypes, attributeValues }) {
+  if (!measurementTypes?.length || !attributeValues?.length) {
+    return null;
   }
 
-  const { measurementTypes = [], attributeValues = [] } = sizeChart.sizeChart;
-
-  const rows = attributeValues.map((row) => html`
-    <tr key="${row.attributeValueId}">
-      <td>${row.attributeValueLabel}</td>
-      ${measurementTypes.map((type) => {
-    const measurement = row.measurements?.find((entry) => entry.key === type.key);
-    return html`<td key="${type.key}">${measurement?.displayValue || '—'}</td>`;
-  })}
-    </tr>
-`);
+  const headerLabel = measurementTypes[0]?.key?.startsWith('garment')
+    ? 'Garment (IN)' : 'Body (IN)';
 
   return html`
-    <table class="pdpx-size-chart-table">
-      <thead>
-        <tr>
-          <th class="size-chart-table-header">${sizeChart.title || 'Size'}</th>
-          ${measurementTypes.map((type) => html`<th key="${type.key}">${type.label}</th>`)}
-        </tr>
-      </thead>
-      <tbody>
-        ${rows}
-      </tbody>
-    </table>
+    <div class="size-chart-table-section">
+      <table class="size-chart-table">
+        <thead>
+          <tr>
+            <th class="size-chart-table-header">${headerLabel}</th>
+            ${measurementTypes.map((type) => html`
+              <th key="${type.key}">${type.label}</th>
+            `)}
+          </tr>
+        </thead>
+        <tbody>
+          ${attributeValues.map((row) => html`
+            <tr key="${row.attributeValueLabel}">
+              <td>${row.attributeValueLabel}</td>
+              ${measurementTypes.map((type) => {
+    const measurement = row.measurements?.[type.key];
+    return html`
+                  <td key="${type.key}">${measurement?.imperial || '—'}</td>
+                `;
+  })}
+            </tr>
+          `)}
+        </tbody>
+      </table>
+    </div>
   `;
 }
 
@@ -378,30 +383,57 @@ function SizeChartContent({ onClose }) {
     return html`<div class="pdpx-size-chart-loading" data-skeleton="true" style="height: 200px;"></div>`;
   }
 
+  const { measurementTypes = [], attributeValues = [] } = chart.sizeChart || {};
+  const bodyTypes = measurementTypes.filter((t) => t.key.startsWith('body'));
+  const garmentTypes = measurementTypes.filter((t) => !t.key.startsWith('body'));
+
   return html`
     <div class="pdpx-drawer-body pdpx-size-chart-container drawer-body--size-chart">
-      ${chart.imageRealViewUrl && html`
-        <div class="pdpx-drawer-hero-image-container">
-          <img class="pdpx-drawer-hero-image" src="${chart.imageRealViewUrl}" alt="Size chart preview" />
+      <h2 class="size-chart-product-name">${chart.title || 'Size Chart'}</h2>
+      <div class="size-chart-table-container">
+        <div class="size-chart-tables">
+          ${bodyTypes.length > 0 && html`
+            <${SizeChartTable}
+              measurementTypes=${bodyTypes}
+              attributeValues=${attributeValues}
+            />
+          `}
+          ${garmentTypes.length > 0 && html`
+            <${SizeChartTable}
+              measurementTypes=${garmentTypes}
+              attributeValues=${attributeValues}
+            />
+          `}
         </div>
-      `}
-      <${SizeChartTable} sizeChart=${chart} />
-      ${chart.modelInfo?.length && html`
-        <div class="pdpx-size-chart-model-info">
-          ${chart.modelInfo.map((info, index) => html`
-            <div key="model-${index}" class="pdpx-size-chart-model">
-              <h3>Model ${index + 1}</h3>
-              <ul>
-                ${(info.bodyMeasurements || []).map((measurement) => html`
-                  <li key="body-${measurement.key}">${measurement.label}: ${measurement.displayValue}</li>
-                `)}
-              </ul>
-            </div>
-          `)}
-        </div>
-      `}
-      ${chart.fitStyle && html`<p class="pdpx-size-chart-fit-style">Fit: ${chart.fitStyle}</p>`}
-      <button class="pdpx-drawer-foot-select-button" type="button" onClick=${onClose}>Close</button>
+      </div>
+      <div class="size-chart-instructions">
+        ${bodyTypes.length > 0 && html`
+          <div class="size-chart-instruction-section">
+            <h3>Body</h3>
+            ${bodyTypes.map((type) => html`
+              <p key="${type.key}" class="size-chart-instruction-text">
+                ${type.extraDescription || type.label}
+              </p>
+            `)}
+          </div>
+        `}
+        ${garmentTypes.length > 0 && html`
+          <div class="size-chart-instruction-section">
+            <h3>Garment</h3>
+            ${garmentTypes.map((type) => html`
+              <p key="${type.key}" class="size-chart-instruction-text">
+                ${type.extraDescription || type.label}
+              </p>
+            `)}
+          </div>
+        `}
+        ${chart.fitStyle && html`
+          <div class="size-chart-instruction-section">
+            <h3>Fit</h3>
+            <p class="size-chart-instruction-text">${chart.fitStyle}</p>
+          </div>
+        `}
+      </div>
     </div>
   `;
 }

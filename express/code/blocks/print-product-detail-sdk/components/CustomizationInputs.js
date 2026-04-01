@@ -77,9 +77,9 @@ export function CheckboxSelector({ attribute }) {
   `;
 }
 
-export function DropdownSelector({ attribute }) {
+export function DropdownSelector({ attribute, onRequestDrawer }) {
   const { actions } = useStore();
-  const { selector, selectedOptionValue, title } = attribute;
+  const { selector, selectedOptionValue, title, helpLink } = attribute;
   const pickerHostRef = useRef(null);
   const pickerRef = useRef(null);
   const pickerIdRef = useRef(`pdpx-picker-${attribute.name}`);
@@ -140,9 +140,33 @@ export function DropdownSelector({ attribute }) {
       pickerRef.current.setPicker(selectedOptionValue);
     }
   }, [selectedOptionValue]);
+  const hasDrawerLink = typeof onRequestDrawer === 'function'
+    && helpLink?.type === 'dialog'
+    && helpLink.dialogType;
+
+  const triggerDrawer = () => {
+    if (hasDrawerLink) {
+      onRequestDrawer({
+        type: helpLink.dialogType,
+        payload: { attribute, helpLink },
+      });
+    }
+  };
+
   return html`
     <div class="pdpx-standard-selector-container">
-      <div ref=${pickerHostRef} />
+      <div class="picker-with-link">
+        <div ref=${pickerHostRef} />
+        ${hasDrawerLink && html`
+          <button
+            class="picker-link"
+            type="button"
+            onClick=${triggerDrawer}
+          >
+            ${helpLink.label}
+          </button>
+        `}
+      </div>
       ${selector.message
       && html`
         <div class="pdpx-standard-selector-message">${selector.message}</div>
@@ -689,7 +713,12 @@ function renderAttribute(attribute, onRequestDrawer, key, productType) {
         productType=${productType}
       />`;
     case 'dropdown':
-      return html`<${DropdownSelector} key=${key} attribute=${attribute} productType=${productType} />`;
+      return html`<${DropdownSelector}
+        key=${key}
+        attribute=${attribute}
+        onRequestDrawer=${onRequestDrawer}
+        productType=${productType}
+      />`;
     case 'radio':
       return html`<${RadioSelector} key=${key} attribute=${attribute} productType=${productType} />`;
     case 'checkbox':
