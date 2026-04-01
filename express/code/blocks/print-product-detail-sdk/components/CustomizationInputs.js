@@ -329,9 +329,7 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
     };
   }
   const handleOptionClick = (option) => {
-    if (option.value !== selectedOptionValue) {
-      actions.selectOption(attribute.name, option.value);
-    }
+    actions.selectOption(attribute.name, option.value);
   };
 
   const handleMiniPillKeyDown = (event) => {
