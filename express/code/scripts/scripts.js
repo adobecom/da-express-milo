@@ -406,7 +406,7 @@ async function loadPage() {
   import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then(async (country) => {
     if (country === 'cn' && !window.location.pathname.startsWith('/cn')) {
       const resp = await fetch('/cn', { method: 'HEAD' });
-      if (resp.ok) window.location.href = '/cn';
+      window.location.href = resp.ok ? '/cn' : '/404';
     }
   });
 
