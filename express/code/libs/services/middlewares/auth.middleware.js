@@ -139,7 +139,10 @@ export async function triggerSignInFlow() {
   const susiTarget = getMetadata('susi-target');
   if (susiTarget) {
     const [path, hash] = susiTarget.split('#');
-    const { getModal } = await import(`${getLibs()}/blocks/modal/modal.js`);
+    const libs = getLibs();
+    const { loadStyle } = await import(`${libs}/utils/utils.js`);
+    loadStyle(`${libs}/blocks/modal/modal.css`);
+    const { getModal } = await import(`${libs}/blocks/modal/modal.js`);
     await getModal({ id: hash, path });
   }
   return false;
