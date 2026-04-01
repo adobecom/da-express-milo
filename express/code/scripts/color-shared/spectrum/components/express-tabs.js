@@ -26,6 +26,33 @@ import { createTag } from '../../../utils.js';
 
 const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/tabs.css';
 
+const TABBABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+function getFirstTabbable(root) {
+  return root.querySelector?.(TABBABLE_SELECTOR) || null;
+}
+
+function getTabbableAdjacentTo(el, reverse = false) {
+  const all = [...document.querySelectorAll(TABBABLE_SELECTOR)].filter(
+    (node) => !el.contains(node) && node.offsetParent !== null,
+  );
+  if (reverse) {
+    return [...all].reverse().find(
+      (node) => el.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_PRECEDING,
+    );
+  }
+  return all.find(
+    (node) => el.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING,
+  );
+}
+
 /**
  * Create an Express tabs component.
  *
@@ -88,6 +115,8 @@ export async function createExpressTabs(config = {}) {
 
   theme.appendChild(tabsEl);
 
+  const panelEntryFocusMap = new Map();
+
   const controller = new AbortController();
   const { signal } = controller;
 
@@ -96,6 +125,30 @@ export async function createExpressTabs(config = {}) {
       onSelectionChange({ selected: e.target.selected });
     }, { signal });
   }
+
+  // Tab skips the panel; Enter enters the panel.
+  theme.addEventListener('keydown', (e) => {
+    const path = e.composedPath();
+    const isOnTab = path.some((node) => node.tagName === 'SP-TAB');
+    const isInPanel = path.some((node) => node.tagName === 'SP-TAB-PANEL');
+    if (!isOnTab || isInPanel) return;
+
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      getTabbableAdjacentTo(theme, e.shiftKey)?.focus();
+    } else if (e.key === 'Enter') {
+      requestAnimationFrame(() => {
+        const { selected } = tabsEl;
+        const customFn = panelEntryFocusMap.get(selected);
+        if (customFn) {
+          customFn();
+          return;
+        }
+        const panel = tabsEl.querySelector(`sp-tab-panel[value="${selected}"]`);
+        getFirstTabbable(panel)?.focus();
+      });
+    }
+  }, { capture: true, signal });
 
   return {
     element: theme,
@@ -129,6 +182,16 @@ export async function createExpressTabs(config = {}) {
      */
     getPanel(value) {
       return tabsEl.querySelector(`sp-tab-panel[value="${value}"]`);
+    },
+
+    /**
+     * Register a custom focus function for a tab panel.
+     * Called instead of the default first-tabbable search when Enter is pressed on that tab.
+     * @param {string} value — the tab's value
+     * @param {Function} fn — called with no arguments to move focus into the panel
+     */
+    setPanelEntryFocus(value, fn) {
+      panelEntryFocusMap.set(value, fn);
     },
 
     destroy() {

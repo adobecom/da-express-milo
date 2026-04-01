@@ -26,7 +26,7 @@ const createSwatch = (hex, overrides = {}) => {
   };
 };
 
-const randomHex = () => {
+export const randomHex = () => {
   const value = Math.floor(Math.random() * 0xffffff)
     .toString(16)
     .padStart(6, '0');
@@ -42,7 +42,7 @@ export default class ColorThemeExpressController {
     harmonyRule = 'ANALOGOUS',
     baseColorIndex = 0,
     activeSwatchIndex,
-    name = 'Harmony Theme',
+    name = 'My Color Theme',
     config = {},
   } = {}) {
     this.subscribers = new Set();

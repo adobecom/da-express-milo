@@ -3,7 +3,8 @@ export default function createColorWheelExpressAdapter(initialColor, callbacks =
 
   const element = document.createElement('color-wheel-express');
   element.color = initialColor;
-  element.setAttribute('aria-label', 'Color Wheel');
+  element.setAttribute('aria-label', 'Color Wheel - Press Enter to access color handles');
+  element.setAttribute('tabindex', '0');
   element.setAttribute('wheel-marker-size', '21');
 
   if (options.controller && typeof options.controller.subscribe === 'function') {

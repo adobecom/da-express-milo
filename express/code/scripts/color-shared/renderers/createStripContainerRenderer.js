@@ -528,6 +528,9 @@ export function createStripContainerRenderer(options) {
 
   const colorBlindness = config?.colorBlindness === true;
   const { onColorChangeEnd } = options;
+  const mobileQuery = typeof options.mobileBreakpointQuery === 'string'
+    ? options.mobileBreakpointQuery
+    : MOBILE_BREAKPOINT_QUERY;
 
   let listElement = null;
   let activeColorEditor = null;
@@ -598,7 +601,7 @@ export function createStripContainerRenderer(options) {
 
     const state = controller?.getState?.() || {};
     const palette = (state.swatches || []).map((swatch) => swatch?.hex).filter(Boolean);
-    const mobile = window.matchMedia?.(MOBILE_BREAKPOINT_QUERY)?.matches === true;
+    const mobile = window.matchMedia?.(mobileQuery)?.matches === true;
 
     const adapter = createColorEditAdapter({
       palette,
@@ -654,20 +657,14 @@ export function createStripContainerRenderer(options) {
     popover.appendChild(editorElement);
     document.body.appendChild(popover);
     const anchorRect = resolveAnchorRect(anchorElement, anchorRectFromDetail);
-    positionPopover(popover, anchorRect);
-    requestAnimationFrame(async () => {
-      try {
+    const observer = new ResizeObserver((entries) => {
+      const { height } = entries[0].contentRect;
+      if (height > 0) {
+        observer.disconnect();
         positionPopover(popover, anchorRect);
-        await customElements.whenDefined('color-edit');
-        await editorElement.updateComplete;
-        await adapter.show?.();
-      } catch (e) {
-        window.lana?.log(`[color-editor] desktop show failed: ${e.message}`, { tags: 'color-edit' });
       }
     });
-    Promise.resolve(editorElement.updateComplete)
-      .then(() => positionPopover(popover, anchorRect))
-      .catch(() => {});
+    observer.observe(popover);
 
     const outsideHandler = (evt) => {
       const path = evt.composedPath?.() || [];

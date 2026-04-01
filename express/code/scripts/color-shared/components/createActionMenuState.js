@@ -1,7 +1,7 @@
 import BlockMediator from '../../block-mediator.min.js';
 import { announceToScreenReader } from '../spectrum/utils/a11y.js';
 
-export function createActionMenuState(stateKey = 'action-menu') {
+export function createActionMenuState(stateKey = 'action-menu', { transformPalette } = {}) {
   const eventNamespace = stateKey;
 
   function emit(event, detail) {
@@ -80,12 +80,24 @@ export function createActionMenuState(stateKey = 'action-menu') {
     return hexCodes;
   }
 
+  function normalizeHex(h) {
+    if (typeof h !== 'string') return h;
+    return h.startsWith('#') ? h.toUpperCase() : `#${h}`.toUpperCase();
+  }
+
   function onGenerateRandom() {
     const paletteLength = getCurrentPalette()?.length || 5;
     const hexCodes = generateRandomHexCodes(paletteLength);
-    addOnePaletteToHistory(hexCodes);
+    const rawCodes = typeof transformPalette === 'function' ? transformPalette(hexCodes) : hexCodes;
+    const finalCodes = rawCodes.map(normalizeHex);
+    const current = getCurrentPalette();
+    const unchanged = current
+      && finalCodes.length === current.length
+      && finalCodes.every((h, i) => h === normalizeHex(current[i]));
+    if (unchanged) return finalCodes;
+    addOnePaletteToHistory(finalCodes);
     announceToScreenReader('New random palette generated');
-    return hexCodes;
+    return finalCodes;
   }
 
   function init() {
