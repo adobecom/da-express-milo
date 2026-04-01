@@ -24,19 +24,15 @@ export function ProductDetails() {
   const { state } = useStore();
   const accordionRef = useRef(null);
   const previousDescriptionsRef = useRef(null);
-
   useEffect(() => {
     if (!state || !accordionRef.current) {
       return;
     }
-
     const descriptions = state.descriptionComponents;
     if (!descriptions) {
       return;
     }
-
     const accordionData = mapToAccordionFormat(descriptions);
-
     if (!accordionRef.current.accordionData) {
       accordionRef.current.accordionData = accordionData;
       axAccordionDecorate(accordionRef.current);
@@ -56,7 +52,6 @@ export function ProductDetails() {
         accordionRef.current.updateAccordion(accordionData, forceExpandTitle);
       }
     }
-
     previousDescriptionsRef.current = descriptions;
   }, [state]);
 
@@ -385,22 +380,18 @@ function PaperTypeContent({ onClose }) {
   const { state: drawerState } = useDrawer();
   const attrName = drawerState.payload?.attribute?.name;
   const attribute = (state?.attributes || []).find((a) => a.name === attrName);
-
   if (!attribute) return null;
-
   const { selector, selectedOptionValue } = attribute;
   const { preview } = selector;
   const allOptions = flattenOptionGroups(selector);
   const selectedOption = allOptions.find((o) => o.value === selectedOptionValue) || allOptions[0];
   const heroImageUrl = preview?.imageUrl ? updateImageUrl(preview.imageUrl, 1000) : '';
   const isRecommended = selectedOptionValue === '175ptmatte';
-
   const handlePillClick = (option) => {
     if (option.value !== selectedOptionValue) {
       actions.selectOption(attribute.name, option.value);
     }
   };
-
   return html`
     <${Fragment}>
       <div class="pdpx-drawer-body">
@@ -499,7 +490,9 @@ export function Drawer() {
       <aside class="pdpx-drawer ${state.open ? '' : 'hidden'}" id="pdp-x-drawer">
         <div class="pdpx-drawer-head">
           <div class="pdpx-drawer-head-label">${drawerLabel}</div>
-          <button type="button" aria-label="Close" onClick=${closeDrawer}>×</button>
+          <button type="button" aria-label="Close" onClick=${closeDrawer}>
+          <img class="icon icon-close-black" src="/express/code/icons/close-black.svg" alt="close-black" />
+          </button>
         </div>
         ${state.type === 'sizeChart' && html`<${SizeChartContent} onClose=${closeDrawer} />`}
         ${state.type === 'paperType' && html`<${PaperTypeContent} onClose=${closeDrawer} />`}

@@ -26,15 +26,11 @@ export function StoreProvider({ children, sdkStore }) {
 
 export function useStore() {
   const value = useContext(StoreContext);
-  console.log('StoreContext');
-  window.__pdpState = value;
-
   if (!value) {
     throw new Error('useStore must be used within a StoreProvider');
   }
   return value;
 }
-
 const DrawerContext = createContext(null);
 
 export function DrawerProvider({ children }) {
