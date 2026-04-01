@@ -146,6 +146,14 @@ function buildResultCell(pass, strings) {
   return cell;
 }
 
+function generateTintScale(hex) {
+  return ['#000000', ...generateTints(hex, TINT_COUNT - 1)];
+}
+
+function clampTintIndex(index) {
+  return Math.max(0, Math.min(MAX_TINT_INDEX, Number(index) || 0));
+}
+
 function buildTintGradient(hex) {
   const tints = generateTintScale(hex);
   const stops = tints.map((t, i) => {
@@ -155,18 +163,10 @@ function buildTintGradient(hex) {
   return `linear-gradient(to right, ${stops.join(', ')})`;
 }
 
-function generateTintScale(hex) {
-  return ['#000000', ...generateTints(hex, TINT_COUNT - 1)];
-}
-
 function findTintIndex(hex) {
   const { r, g, b } = hexToRgb(hex);
   const { v } = rgbToHsv(r, g, b);
   return clampTintIndex(Math.round(v * MAX_TINT_INDEX));
-}
-
-function clampTintIndex(index) {
-  return Math.max(0, Math.min(MAX_TINT_INDEX, Number(index) || 0));
 }
 
 function tintIndexToPercentValue(index) {
@@ -330,6 +330,11 @@ function syncColorControl(input, slider, hex) {
   slider?.updatePosition(hex);
 }
 
+function isSameHistoryState(a, b) {
+  return a?.[0]?.toUpperCase() === b?.[0]?.toUpperCase()
+    && a?.[1]?.toUpperCase() === b?.[1]?.toUpperCase();
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export function createCheckerRenderer(options) {
   const {
@@ -378,7 +383,9 @@ export function createCheckerRenderer(options) {
     const selectedColor = type === 'fg'
       ? palette?.selectedForeground ?? currentValue
       : palette?.selectedBackground ?? currentValue;
-    const selectedIndex = colors.findIndex((hex) => hex?.toUpperCase() === selectedColor?.toUpperCase());
+    const selectedIndex = colors.findIndex(
+      (hex) => hex?.toUpperCase() === selectedColor?.toUpperCase(),
+    );
 
     if (!colors.length || selectedIndex === -1) {
       return {
@@ -397,11 +404,6 @@ export function createCheckerRenderer(options) {
 
   function getHistoryState() {
     return [foreground, background];
-  }
-
-  function isSameHistoryState(a, b) {
-    return a?.[0]?.toUpperCase() === b?.[0]?.toUpperCase()
-      && a?.[1]?.toUpperCase() === b?.[1]?.toUpperCase();
   }
 
   function clearHistoryTimer() {
@@ -625,13 +627,15 @@ export function createCheckerRenderer(options) {
       const { createActionMenuComponent } = await import(
         '../../../scripts/color-shared/components/createActionMenuComponent.js'
       );
+      const fullMenuEl = actionMenuApi?.element;
       mobileActionMenu = await createActionMenuComponent({
         ...createDefaultActionMenuConfig(strings),
         id: ACTION_MENU_ID,
         type: 'controls-only',
-        enableState: true,
-        onUndo: () => actionMenuState.onUndo(),
-        onRedo: () => actionMenuState.onRedo(),
+        activeId: 'contrast',
+        enableState: false,
+        onUndo: () => fullMenuEl?.querySelector('.undo-btn')?.click(),
+        onRedo: () => fullMenuEl?.querySelector('.redo-btn')?.click(),
       });
       if (mobileActionMenu?.element) {
         top.appendChild(mobileActionMenu.element);

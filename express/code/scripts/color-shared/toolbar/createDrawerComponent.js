@@ -1,5 +1,11 @@
 import { createSpectrumIcon } from '../utils/icons.js';
 import {
+  createTagField,
+  getTagValues,
+  addTagFromInput as addTagFromInputHelper,
+  createTagPill,
+} from './createTagField.js';
+import {
   isMobileViewport,
   createCurtain,
   addSwipeToClose,
@@ -57,10 +63,11 @@ const DRAWER_DEFAULTS = {
   paletteLabel: 'Color palette',
   keywordSuggestions: 'Blue,Green,Bold,Bright,Beige',
   yourLibrary: 'Your Library',
+  tagFieldHelp: 'Press return \u21B5 to create tag',
+  tagRemove: 'Remove {{tag}}',
 };
 
 const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
-const COLOR_TOKENS_CSS_PATH = 'scripts/color-shared/color-tokens.css';
 
 /* ── Authentication Helpers ──────────────────────────────────── */
 
@@ -76,7 +83,6 @@ async function checkIsSignedIn() {
 /* ── Dependency Loading ───────────────────────────────────────── */
 async function loadDrawerDeps() {
   const results = await Promise.allSettled([
-    loadMiloStyle(COLOR_TOKENS_CSS_PATH),
     loadMiloStyle(DRAWER_CSS_PATH),
     loadButton(),
     loadMenu(),
@@ -345,82 +351,9 @@ function createLibraryPickerField(
   };
 }
 
-/* ── Tag Chips (sp-button variant=primary) ───────────────────── */
+/* ── Keyword suggestion pills ────────────────────────────────── */
 
-function normalizeTagText(t) {
-  if (typeof t === 'string') return t;
-  return t?.tag ?? t?.name ?? '';
-}
-
-/**
- * Create a tag chip using sp-button.
- *
- * @param {string}  text     — visible label
- * @param {Object}  [opts]
- * @param {string}  [opts.size='s']        — Spectrum size token
- * @param {boolean} [opts.deletable=true]  — shows a Close icon; removes on click
- */
-function createTagButton(text, opts = {}) {
-  const { size = 's', deletable = true } = opts;
-  const btn = document.createElement('sp-button');
-  btn.setAttribute('variant', 'primary');
-  btn.setAttribute('size', size);
-  btn.classList.add('ax-drawer-tag-btn');
-  btn.dataset.tagValue = text;
-  btn.textContent = text;
-
-  if (deletable) {
-    const closeIcon = createSpectrumIcon('Cross75');
-    closeIcon.setAttribute('slot', 'icon');
-    closeIcon.setAttribute('aria-hidden', 'true');
-    btn.prepend(closeIcon);
-
-    closeIcon.addEventListener('click', (e) => {
-      e.stopPropagation();
-      btn.remove();
-    });
-  }
-
-  return btn;
-}
-
-function getTagValues(container) {
-  return [...container.querySelectorAll('sp-button.ax-drawer-tag-btn')]
-    .map((el) => el.dataset.tagValue ?? '')
-    .filter(Boolean);
-}
-
-function createTagsField(label, tags, placeholder) {
-  const wrapper = createTag('div', { class: 'ax-drawer-tag-section' });
-
-  const fieldGroup = createTag('div', { class: 'ax-drawer-field' });
-  const labelEl = createTag('label', { class: 'ax-drawer-field-label' }, label);
-  const input = createTag('input', {
-    type: 'text',
-    class: 'ax-drawer-field-input',
-    placeholder,
-    'aria-label': placeholder,
-  });
-  fieldGroup.append(labelEl, input);
-
-  const tagsContainer = createTag('div', { class: 'ax-drawer-added-tags' });
-  (tags ?? []).forEach((t) => {
-    const text = normalizeTagText(t);
-    if (text) tagsContainer.appendChild(createTagButton(text));
-  });
-
-  wrapper.append(fieldGroup, tagsContainer);
-  return { wrapper, container: tagsContainer, input };
-}
-
-function addTagFromInput(tagsInput, tagsContainer, mobile) {
-  const text = tagsInput.value.trim();
-  if (!text) return;
-  tagsInput.value = '';
-  tagsContainer.appendChild(createTagButton(text, { size: mobile ? 'm' : 's' }));
-}
-
-function createKeywordSuggestions(keywords, mobile) {
+function createKeywordSuggestions(keywords, mobile, { onSuggestionClick } = {}) {
   const wrapper = createTag('div', { class: 'ax-drawer-keyword-suggestions' });
   const size = mobile ? 'm' : 's';
   keywords.forEach((keyword) => {
@@ -432,6 +365,9 @@ function createKeywordSuggestions(keywords, mobile) {
     const icon = createSpectrumIcon('Add');
     icon.setAttribute('slot', 'icon');
     btn.prepend(icon);
+    if (onSuggestionClick) {
+      btn.addEventListener('click', () => onSuggestionClick(keyword));
+    }
     wrapper.appendChild(btn);
   });
   return wrapper;
@@ -664,21 +600,40 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   );
   formFields.appendChild(libraryPicker.wrapper);
 
-  const {
-    wrapper: tagsWrapper, container: tagsContainerEl, input: tagsInputEl,
-  } = createTagsField(
+  const tagFieldResult = createTagField(
     t.tags,
     palette?.tags ?? [],
     t.tagsPlaceholder,
+    { helpTextStr: t.tagFieldHelp },
   );
-  tagsWrapper.appendChild(createKeywordSuggestions(t.keywordSuggestions.split(',').map((s) => s.trim()), mobile));
+  const {
+    wrapper: tagsWrapper,
+    tagsContainer: tagsContainerEl,
+    input: tagsInputEl,
+    syncState: syncTagState,
+  } = tagFieldResult;
+
+  const onSuggestionClick = (keyword) => {
+    const existing = getTagValues(tagsContainerEl).map((v) => v.toLowerCase());
+    if (existing.includes(keyword.toLowerCase())) return;
+    const pill = createTagPill(keyword, { onRemove: syncTagState });
+    tagsContainerEl.appendChild(pill);
+    tagsInputEl.focus();
+    syncTagState();
+  };
+
+  tagsWrapper.appendChild(createKeywordSuggestions(
+    t.keywordSuggestions.split(',').map((s) => s.trim()),
+    mobile,
+    { onSuggestionClick },
+  ));
   formFields.appendChild(tagsWrapper);
   content.appendChild(formFields);
 
   tagsInputEl.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
     e.preventDefault();
-    addTagFromInput(tagsInputEl, tagsContainerEl, mobile);
+    addTagFromInputHelper(tagsInputEl, tagsContainerEl, { onStateChange: syncTagState });
   });
 
   const saveBtnEl = document.createElement('sp-button');
