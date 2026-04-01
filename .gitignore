@@ -14,6 +14,8 @@ test-a11y-results/
 *.crt
 *.pfx
 **/build/
+.claude/
+CLAUDE.md
 
 # Development and testing files
 dev/
