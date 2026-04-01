@@ -230,13 +230,17 @@
   width: 100%;
   min-height: 200px;
   height: 200px;
-  border-radius: 8px;
   overflow-x: auto;
   overflow-y: visible;
   flex-shrink: 0;
   /* Padding so first/last column focus ring (inset 2px) isn't clipped by wrap's rounded overflow */
   padding: 2px;
   box-sizing: border-box;
+}
+
+.ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap color-swatch-rail {
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 /* sp-theme wraps color-swatch-rail; must stretch so rail fills vertically */
@@ -837,13 +841,18 @@
     min-height: 200px;
     aspect-ratio: 834 / 400;
     max-height: min(400px, 50vh);
-    border-radius: 16px;
   }
 }
 
 @media (min-width: 1200px) and (max-height: 768px) {
   .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap {
     max-height: min(300px, 40vh);
+  }
+}
+
+@media (min-width: 1200px) {
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap color-swatch-rail {
+    border-radius: 16px;
   }
 }
 
