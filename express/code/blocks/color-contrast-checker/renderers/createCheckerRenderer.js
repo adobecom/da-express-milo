@@ -9,7 +9,6 @@ import { createColorInput } from './components/createColorInput.js';
 import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
 import { loadActionButton, loadBadge, loadTooltip } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../../../scripts/color-shared/spectrum/utils/theme.js';
-import { createActionMenuState } from '../../../scripts/color-shared/components/createActionMenuState.js';
 import { createContrastCheckerPlaceholders } from '../utils/placeholders.js';
 import { FAIL, createDefaultActionMenuConfig } from '../utils/contrastConstants.js';
 import '../../../scripts/color-shared/components/color-channel-slider/index.js';
@@ -350,7 +349,6 @@ export function createCheckerRenderer(options) {
   const { recommendation: recommendationService } = services;
   const strings = createContrastCheckerPlaceholders(config.strings);
   const tabs = config.tabs || strings.tabs;
-  const actionMenuState = createActionMenuState(ACTION_MENU_ID);
 
   let foreground = config.initialForeground;
   let background = config.initialBackground;
