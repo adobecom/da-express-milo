@@ -347,7 +347,6 @@ export default async function decorate(block) {
       let filterInteractionSuppressUntil = 0;
       let isSearchActive = false;
       let currentColumnCount = getGridColumnCount();
-      let resizeTimer = null;
 
       const setModeClasses = (variant) => {
         block.classList.remove(VARIANT_CLASSES.GRADIENTS, VARIANT_CLASSES.PALETTES);
@@ -365,21 +364,18 @@ export default async function decorate(block) {
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
       };
 
-      const handleGridResize = () => {
-        clearTimeout(resizeTimer);
-        resizeTimer = setTimeout(() => {
-          const newCols = getGridColumnCount();
-          if (newCols === currentColumnCount || isMounting) return;
-          currentColumnCount = newCols;
-          const aligned = alignToFullRow(visibleCount, allData.length);
-          if (aligned !== visibleCount) {
-            visibleCount = aligned;
-            activeRenderer?.update(allData.slice(0, visibleCount));
-            updateLoadMoreState();
-          }
-        }, 150);
-      };
-      window.addEventListener('resize', handleGridResize);
+      const gridResizeObserver = new ResizeObserver(() => {
+        const newCols = getGridColumnCount();
+        if (newCols === currentColumnCount || isMounting) return;
+        currentColumnCount = newCols;
+        const aligned = alignToFullRow(visibleCount, allData.length);
+        if (aligned !== visibleCount) {
+          visibleCount = aligned;
+          activeRenderer?.update(allData.slice(0, visibleCount));
+          updateLoadMoreState();
+        }
+      });
+      gridResizeObserver.observe(container);
 
       const cleanupActiveView = () => {
         filtersControl?.destroy?.();
@@ -397,8 +393,7 @@ export default async function decorate(block) {
       };
 
       const cleanupDualMode = () => {
-        window.removeEventListener('resize', handleGridResize);
-        clearTimeout(resizeTimer);
+        gridResizeObserver.disconnect();
         cleanupActiveView();
         modalManager.destroy?.();
         block.rendererInstance = null;
@@ -703,22 +698,18 @@ export default async function decorate(block) {
       loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
 
       let elseCurrentColumnCount = getGridColumnCount();
-      let elseResizeTimer = null;
-      const handleElseGridResize = () => {
-        clearTimeout(elseResizeTimer);
-        elseResizeTimer = setTimeout(() => {
-          const newCols = getGridColumnCount();
-          if (newCols === elseCurrentColumnCount || isSwatchesMode(config)) return;
-          elseCurrentColumnCount = newCols;
-          const aligned = alignToFullRow(visibleCount, allData.length);
-          if (aligned !== visibleCount) {
-            visibleCount = aligned;
-            renderer.update(allData.slice(0, visibleCount));
-            loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
-          }
-        }, 150);
-      };
-      window.addEventListener('resize', handleElseGridResize);
+      const elseResizeObserver = new ResizeObserver(() => {
+        const newCols = getGridColumnCount();
+        if (newCols === elseCurrentColumnCount || isSwatchesMode(config)) return;
+        elseCurrentColumnCount = newCols;
+        const aligned = alignToFullRow(visibleCount, allData.length);
+        if (aligned !== visibleCount) {
+          visibleCount = aligned;
+          renderer.update(allData.slice(0, visibleCount));
+          loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+        }
+      });
+      elseResizeObserver.observe(container);
 
       const modalManager = createModalManager();
 
@@ -772,8 +763,7 @@ export default async function decorate(block) {
       }
 
       block.addEventListener('block-unload', () => {
-        window.removeEventListener('resize', handleElseGridResize);
-        clearTimeout(elseResizeTimer);
+        elseResizeObserver.disconnect();
         document.removeEventListener('floating-search:submit', floatingHandler);
       }, { once: true });
 
