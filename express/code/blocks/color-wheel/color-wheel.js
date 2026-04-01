@@ -746,13 +746,30 @@ export default async function decorate(block) {
         badgeRuleUnsubscribe?.();
       };
 
-      // Use a random vivid color when adding a new swatch
+      // Use a random color when adding a new swatch;
+      // for non-custom harmonies, recompute all positions
       stripHost.addEventListener('color-swatch-rail-add', (e) => {
         e.preventDefault();
         const { insertIndex } = e.detail;
-        const swatches = [...swatchRailController.getState().swatches];
-        swatches.splice(insertIndex, 0, { hex: randomHex() });
-        swatchRailController.setState({ swatches });
+        const state = controller.getState();
+        const hexes = state.swatches.map((s) => s.hex);
+        hexes.splice(insertIndex, 0, randomHex());
+
+        if (state.harmonyRule === 'CUSTOM') {
+          swatchRailController.setState({ swatches: hexes.map((h) => ({ hex: h })) });
+        } else {
+          const newBaseIndex = insertIndex <= state.baseColorIndex
+            ? state.baseColorIndex + 1
+            : state.baseColorIndex;
+          controller.replaceSwatchesFromHexes(
+            hexes,
+            {
+              baseIndex: newBaseIndex,
+              harmonyRule: state.harmonyRule,
+            },
+          );
+          controller.harmonyAdapter.onRuleChange(state.harmonyRule);
+        }
       });
 
       // What is this?

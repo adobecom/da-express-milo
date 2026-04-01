@@ -524,7 +524,7 @@ export class ColorSwatchRail extends LitElement {
   
   _handleAddAt(insertIndex, side) {
     if ((this.swatches?.length ?? 0) >= MAX_SWATCHES) return;
-    const e = new CustomEvent('color-swatch-rail-add', { bubbles: true, composed: true, detail: { side, insertIndex } });
+    const e = new CustomEvent('color-swatch-rail-add', { bubbles: true, composed: true, cancelable: true, detail: { side, insertIndex } });
     if (this.dispatchEvent(e) && !e.defaultPrevented && this.controller?.setState) {
       const swatches = [...this.swatches];
       swatches.splice(insertIndex, 0, { hex: '#808080' });
