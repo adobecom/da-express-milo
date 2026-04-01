@@ -3388,3 +3388,14 @@ main .template-x.tworow .template-2x2-col .template .still-wrapper img:not(.icon
     margin: auto;
   }
  }
+
+
+
+ .template-x .experimental-ctas.button-container a.button { 
+    width: 100%;
+    margin: 10px 0 0; 
+ }
+
+ .template-x .experimental-ctas.button-container a.button:nth-of-type(2) {
+  background-color: var(--color-gray-200);
+}
