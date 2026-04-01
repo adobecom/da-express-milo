@@ -537,6 +537,8 @@ function renderHoverWrapper(template, customUrlConfig = null) {
 
   const experimentalCta1Url = getMetadata('external-template-cta-link-1');
   const experimentalCta2Url = getMetadata('external-template-cta-link-2');
+  const experimentalCta1Text = getMetadata('external-template-cta-link-text-1');
+  const experimentalCta2Text = getMetadata('external-template-cta-link-text-2');
 
   if (isEligibleForExperimentalCta && experimentalCta1Url) {
     const overrideUrl = appendTemplateId(experimentalCta1Url, template);
@@ -544,10 +546,16 @@ function renderHoverWrapper(template, customUrlConfig = null) {
     ctaLink.href = overrideUrl;
   }
 
+  if (isEligibleForExperimentalCta && experimentalCta1Text) {
+    cta.textContent = experimentalCta1Text;
+    cta.title = experimentalCta1Text;
+    cta.setAttribute('aria-label', `${experimentalCta1Text} ${getTemplateTitle(template)}`);
+  }
+
   let secondaryCta = null;
   if (isEligibleForExperimentalCta && experimentalCta2Url) {
     const secondaryHref = appendTemplateId(experimentalCta2Url, template);
-    const btnTitle = editThisTemplate === 'edit this template' ? 'Edit this template' : editThisTemplate;
+    const btnTitle = experimentalCta2Text || (editThisTemplate === 'edit this template' ? 'Edit this template' : editThisTemplate);
     secondaryCta = createTag('a', {
       href: secondaryHref,
       title: btnTitle,
