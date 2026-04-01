@@ -271,6 +271,12 @@ function constructCustomURL(template, customUrlConfig) {
   return `${baseUrl}?${queryParams}${separator}templateId=${urnId}`;
 }
 
+function ensureAbsoluteUrl(url) {
+  if (!url) return url;
+  if (/^https?:\/\/|^\/\/|^\//.test(url)) return url;
+  return `https://${url}`;
+}
+
 function appendTemplateId(url, template) {
   const urnId = extractURNFromTemplate(template);
   if (!urnId) return url;
@@ -541,9 +547,7 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   const experimentalCta2Text = getMetadata('external-template-cta-link-text-2');
 
   if (isEligibleForExperimentalCta && experimentalCta1Url) {
-    const overrideUrl = appendTemplateId(experimentalCta1Url, template);
-    cta.href = overrideUrl;
-    ctaLink.href = overrideUrl;
+    cta.href = ensureAbsoluteUrl(experimentalCta1Url);
   }
 
   if (isEligibleForExperimentalCta && experimentalCta1Text) {
@@ -554,10 +558,9 @@ function renderHoverWrapper(template, customUrlConfig = null) {
 
   let secondaryCta = null;
   if (isEligibleForExperimentalCta && experimentalCta2Url) {
-    const secondaryHref = appendTemplateId(experimentalCta2Url, template);
     const btnTitle = experimentalCta2Text || (editThisTemplate === 'edit this template' ? 'Edit this template' : editThisTemplate);
     secondaryCta = createTag('a', {
-      href: secondaryHref,
+      href: ensureAbsoluteUrl(experimentalCta2Url),
       title: btnTitle,
       class: 'button gray small secondary-template-cta',
       'aria-label': `${btnTitle} ${getTemplateTitle(template)}`,
@@ -580,8 +583,8 @@ function renderHoverWrapper(template, customUrlConfig = null) {
     btnContainer.classList.add('experimental-ctas');
   }
 
-  btnContainer.append(cta);
   if (secondaryCta) btnContainer.append(secondaryCta);
+  btnContainer.append(cta);
   btnContainer.append(ctaLink);
   btnContainer.append(shareWrapper);
 
