@@ -534,30 +534,24 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   cta.setAttribute('aria-label', `${editThisTemplate} ${getTemplateTitle(template)}`);
   ctaLink.append(mediaWrapper);
 
-  // Experimental dual-CTA support: only for free, static (non-animated) templates
-  const isEligibleForExperimentalCta = !variants?.includes('flyer')
-    && !variants?.includes('t-shirt')
-    && !variants?.includes('print')
-    && template.licensingCategory === 'free'
-    && !containsVideo(template.pages);
 
   const experimentalCta1Url = getMetadata('external-template-cta-link-1');
   const experimentalCta2Url = getMetadata('external-template-cta-link-2');
   const experimentalCta1Text = getMetadata('external-template-cta-link-text-1');
   const experimentalCta2Text = getMetadata('external-template-cta-link-text-2');
 
-  if (isEligibleForExperimentalCta && experimentalCta1Url) {
+  if ( experimentalCta1Url) {
     cta.href = ensureAbsoluteUrl(experimentalCta1Url);
   }
 
-  if (isEligibleForExperimentalCta && experimentalCta1Text) {
+  if ( experimentalCta1Text) {
     cta.textContent = experimentalCta1Text;
     cta.title = experimentalCta1Text;
     cta.setAttribute('aria-label', `${experimentalCta1Text} ${getTemplateTitle(template)}`);
   }
 
   let secondaryCta = null;
-  if (isEligibleForExperimentalCta && experimentalCta2Url) {
+  if ( experimentalCta2Url) {
     const btnTitle = experimentalCta2Text || (editThisTemplate === 'edit this template' ? 'Edit this template' : editThisTemplate);
     secondaryCta = createTag('a', {
       href: ensureAbsoluteUrl(experimentalCta2Url),
@@ -579,7 +573,7 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   };
   const shareWrapper = renderShareWrapper(templateInfo);
 
-  if (isEligibleForExperimentalCta && (experimentalCta1Url || experimentalCta1Text)) {
+  if ( (experimentalCta1Url || experimentalCta1Text)) {
     btnContainer.classList.add('experimental-ctas');
   }
 
