@@ -218,8 +218,8 @@ export default async function decorate(block) {
       enableStickyBehavior: true,
       enableAutocomplete: true,
       suggestionsConfig: {
-        headerText: 'Suggestions',
         maxItems: 3,
+        showHeader: false,
       },
       autocompleteConfig: {
         throttleDelay: 300,
