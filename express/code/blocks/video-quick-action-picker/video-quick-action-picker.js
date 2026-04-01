@@ -42,31 +42,6 @@ function unlockBodyScroll() {
   delete document.body.dataset.vqapScrollY;
 }
 
-function setupDialogKeyboard(dialog, onEscape) {
-  const focusableSelector = 'button, [role="link"][tabindex="0"], [tabindex="0"]';
-
-  function handleKeydown(e) {
-    if (e.key === 'Escape') { onEscape(); return; }
-    if (e.key === 'Tab') {
-      const focusable = [...dialog.querySelectorAll(focusableSelector)];
-      if (!focusable.length) return;
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    }
-  }
-
-  document.addEventListener('keydown', handleKeydown);
-  return () => document.removeEventListener('keydown', handleKeydown);
-}
-
 function createVideoPreview(file, strings) {
   const previewContainer = createTag('div', { class: 'vqap-preview-container' });
 
@@ -153,7 +128,7 @@ function buildActionCard(action) {
  * @param {HTMLElement} block - the frictionless-quick-action-mobile block
  * @param {Object} sdkHandlers - { startSDKWithUnconvertedFiles }
  */
-export async function showVideoQuickActionPicker(videoFile, block, sdkHandlers) {
+export default async function showVideoQuickActionPicker(videoFile, block, sdkHandlers) {
   loadStyles();
   await loadPlaceholders();
   const strings = await getLocalizedStrings();
@@ -189,7 +164,6 @@ export async function showVideoQuickActionPicker(videoFile, block, sdkHandlers) 
   const contentContainer = createTag('div', { class: 'vqap-content-container' });
 
   function closeDialog() {
-    removeFocusTrap();
     unlockBodyScroll();
     if (video.src) URL.revokeObjectURL(video.src);
     dialog.remove();
@@ -219,7 +193,7 @@ export async function showVideoQuickActionPicker(videoFile, block, sdkHandlers) 
   document.body.append(dialog);
 
   lockBodyScroll();
-  const removeFocusTrap = setupDialogKeyboard(dialog, closeDialog);
-
-  closeBtn.focus();
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDialog();
+  }, { once: true });
 }

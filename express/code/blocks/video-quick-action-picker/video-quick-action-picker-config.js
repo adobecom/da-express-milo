@@ -3,13 +3,13 @@ import { QA_CONFIGS } from '../../scripts/utils/frictionless-utils.js';
 
 export const ACTION_TYPES = {
   QUICK_ACTION: 'quick-action', // launches SDK inline with the uploaded file
-  APP_INSTALL: 'app-install',   // navigates to app install URL (same tab)
+  APP_INSTALL: 'app-install', // navigates to app install URL (same tab)
 };
 
 // Max duration in seconds per quick action (source: Adobe Express help docs)
 const MAX_DURATION = {
-  'convert-to-gif': 60,    // 1 minute
-  'caption-video': 300,    // 5 minutes
+  'convert-to-gif': 60, // 1 minute
+  'caption-video': 300, // 5 minutes
 };
 
 let replaceKey;
