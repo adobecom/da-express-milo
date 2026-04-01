@@ -205,7 +205,8 @@ function checkFile(filePath, colorVars, spacingVars) {
     const matchIndex = match.index;
 
     // Extract spacing values (numbers with units)
-    const spacingMatches = fullValue.match(/\d+px|\d+rem|\d+em|\d+%|\d+vw|\d+vh/g);
+    const spacingMatches = fullValue.match(/\d+px|\d+rem|\d+em|\d+%|\d+vw|\d+vh/g)
+      ?.filter((v) => parseFloat(v) !== 0);
 
     if (spacingMatches) {
       const replacements = [];
@@ -268,9 +269,11 @@ function applyFixes(filePath, issues) {
 
       issue.replacements.forEach((replacement) => {
         console.log(`  Looking for "${replacement.from}" -> "${replacement.to}"`);
-        if (newLine.includes(replacement.from)) {
+        const safeFrom = replacement.from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const exactMatch = new RegExp(`(?<!\\d)${safeFrom}(?!\\w)`, 'g');
+        if (exactMatch.test(newLine)) {
           console.log('    Found! Replacing...');
-          newLine = newLine.replace(replacement.from, replacement.to);
+          newLine = newLine.replace(exactMatch, replacement.to);
           lineModified = true;
         } else {
           console.log('    Not found in line');
