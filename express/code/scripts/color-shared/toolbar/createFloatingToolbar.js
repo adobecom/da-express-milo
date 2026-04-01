@@ -59,7 +59,6 @@ const DRAWER_I18N_MAP = {
   keywordSuggestions: 'color-drawer-keyword-suggestions',
   yourLibrary: 'color-drawer-your-library',
   tagFieldHelp: 'color-drawer-tag-field-help',
-  tagRemove: 'color-drawer-tag-remove',
 };
 
 async function loadI18nStrings() {

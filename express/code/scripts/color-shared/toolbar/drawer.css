@@ -461,7 +461,7 @@
   padding-inline: 0;
   flex: 1 1 0;
   overflow-y: auto;
-  min-block-size: calc(3 * 40px);
+  min-block-size: calc(3 * var(--ax-drawer-input-height));
 }
 
 .ax-lib-picker-divider {

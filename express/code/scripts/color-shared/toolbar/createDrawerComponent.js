@@ -64,7 +64,6 @@ const DRAWER_DEFAULTS = {
   keywordSuggestions: 'Blue,Green,Bold,Bright,Beige',
   yourLibrary: 'Your Library',
   tagFieldHelp: 'Press return \u21B5 to create tag',
-  tagRemove: 'Remove {{tag}}',
 };
 
 const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
