@@ -501,10 +501,19 @@ function PaperTypeContent({ onClose }) {
           >Recommended</span>
         </div>
         ${preview?.descriptionHTML && html`
-          <div
-            class="pdpx-drawer-description"
-            dangerouslySetInnerHTML=${{ __html: preview.descriptionHTML }}
-          />
+          <div class="pdpx-drawer-pills-container">
+            ${preview.descriptionHTML
+    .split(/<br\s*\/?>/i)[0]
+    .replace(/<[^>]*>/g, '')
+    .split('/')
+    .filter(Boolean)
+    .map((spec) => html`
+              <div class="pdpx-drawer-pill">
+                <img class="icon icon-circle-check-mark" src="/express/code/icons/circle-check-mark.svg" alt="" aria-hidden="true" />
+                <span class="pdpx-drawer-pill-text">${spec.trim()}</span>
+              </div>
+            `)}
+          </div>
         `}
         <div class="pdpx-pill-selector-container">
           <div class="pdpx-pill-selector-label-container">
@@ -518,6 +527,12 @@ function PaperTypeContent({ onClose }) {
             class="pdpx-mini-pill-selector-options-container"
           />
         </div>
+        ${state?.descriptionComponents?.[1]?.descriptionHTML && html`
+          <div
+            class="pdpx-drawer-description"
+            dangerouslySetInnerHTML=${{ __html: state.descriptionComponents[1].descriptionHTML }}
+          />
+        `}
       </div>
       <div class="pdpx-drawer-foot">
         <div class="pdpx-drawer-foot-info-container">
