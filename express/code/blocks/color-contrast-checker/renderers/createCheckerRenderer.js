@@ -625,15 +625,14 @@ export function createCheckerRenderer(options) {
       const { createActionMenuComponent } = await import(
         '../../../scripts/color-shared/components/createActionMenuComponent.js'
       );
-      const fullMenuEl = actionMenuApi?.element;
       mobileActionMenu = await createActionMenuComponent({
         ...createDefaultActionMenuConfig(strings),
         id: ACTION_MENU_ID,
         type: 'controls-only',
         activeId: 'contrast',
         enableState: false,
-        onUndo: () => fullMenuEl?.querySelector('.undo-btn')?.click(),
-        onRedo: () => fullMenuEl?.querySelector('.redo-btn')?.click(),
+        onUndo: () => actionMenuApi?.undo?.(),
+        onRedo: () => actionMenuApi?.redo?.(),
       });
       if (mobileActionMenu?.element) {
         top.appendChild(mobileActionMenu.element);
