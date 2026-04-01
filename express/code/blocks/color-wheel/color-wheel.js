@@ -685,14 +685,21 @@ export default async function decorate(block) {
       const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
       layoutInstance.slots.canvas.appendChild(stripHost);
 
-      const updateBaseColorBadge = (selectedTab) => {
+      let activeTab = 'color-wheel';
+      let activeHarmonyRule = controller.getState().harmonyRule || 'CUSTOM';
+
+      const updateBaseColorBadge = () => {
+        const hide = activeTab !== 'color-wheel' || activeHarmonyRule === 'CUSTOM';
         stripHost.querySelectorAll('color-swatch-rail').forEach((rail) => {
-          rail.hideBaseColorBadge = selectedTab !== 'color-wheel';
+          rail.hideBaseColorBadge = hide;
         });
       };
 
       const tabs = await buildTabs(controller, suggestionsRow?.cloneNode(true), {
-        onSelectionChange: ({ selected }) => updateBaseColorBadge(selected),
+        onSelectionChange: ({ selected }) => {
+          activeTab = selected;
+          updateBaseColorBadge();
+        },
       });
       layoutInstance.slots.sidebar.appendChild(tabs.element);
 
@@ -735,8 +742,22 @@ export default async function decorate(block) {
       });
       await stripRenderer.render(stripHost);
 
-      // Initial base color badge state matches the default selected tab (color-wheel)
-      updateBaseColorBadge(tabs.getSelected());
+      // Initial base color badge state
+      updateBaseColorBadge();
+
+      // Re-evaluate badge visibility when harmony rule changes
+      const badgeRuleUnsubscribe = controller.subscribe((state) => {
+        const rule = state.harmonyRule || 'CUSTOM';
+        if (rule !== activeHarmonyRule) {
+          activeHarmonyRule = rule;
+          updateBaseColorBadge();
+        }
+      });
+      const prevHistoryCleanup = historyCleanup;
+      historyCleanup = () => {
+        prevHistoryCleanup?.();
+        badgeRuleUnsubscribe?.();
+      };
 
       // Use a random vivid color when adding a new swatch
       stripHost.addEventListener('color-swatch-rail-add', (e) => {
