@@ -171,6 +171,8 @@ function updateImageUrl(url, maxDim = 644) {
 
 export function ProductImages() {
   const { state, actions } = useStore();
+  const containerRef = useRef(null);
+  const carouselCleanupRef = useRef(null);
 
   if (!state || !state.selectedRealview) {
     return null;
@@ -180,10 +182,64 @@ export function ProductImages() {
   const heroImageUrl = updateImageUrl(selectedRealview.url, 644);
 
   const handleThumbnailClick = (realview) => {
-    if (realview.id !== selectedRealview.id) {
-      actions.selectRealview(realview.id);
-    }
+    actions.selectRealview(realview.id);
   };
+
+  // Build thumbnails imperatively to work with createSimpleCarousel
+  useEffect(() => {
+    if (!containerRef.current || !realviews.length) return undefined;
+
+    const container = containerRef.current;
+    container.innerHTML = '';
+
+    realviews.forEach((realview) => {
+      const thumbnailUrl = updateImageUrl(realview.url, 76);
+      const isSelected = realview.id === selectedRealview.id;
+
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `pdpx-image-thumbnail-carousel-item ${isSelected ? 'selected' : ''}`;
+      button.setAttribute('data-image-type', realview.id);
+      button.addEventListener('click', () => handleThumbnailClick(realview));
+
+      const img = document.createElement('img');
+      img.className = 'pdpx-image-thumbnail-carousel-item-image';
+      img.src = thumbnailUrl;
+      img.alt = realview.title;
+      img.setAttribute('data-image-type', realview.id);
+      button.appendChild(img);
+
+      container.appendChild(button);
+    });
+
+    createSimpleCarousel('.pdpx-image-thumbnail-carousel-item', container, {
+      ariaLabel: 'Product image thumbnails',
+      centerActive: true,
+      activeClass: 'selected',
+    }).then((carousel) => {
+      if (carousel) {
+        carouselCleanupRef.current = carousel.cleanup;
+      }
+    });
+
+    return () => {
+      if (carouselCleanupRef.current) {
+        carouselCleanupRef.current();
+        carouselCleanupRef.current = null;
+      }
+    };
+  }, [realviews.map((r) => r.id).join(',')]);
+
+  // Update selected state when selection changes
+  useEffect(() => {
+    if (!containerRef.current) return;
+    const buttons = containerRef.current.querySelectorAll('.pdpx-image-thumbnail-carousel-item');
+    buttons.forEach((btn) => {
+      const id = btn.getAttribute('data-image-type');
+      const isSelected = id === selectedRealview.id;
+      btn.classList.toggle('selected', isSelected);
+    });
+  }, [selectedRealview.id]);
 
   return html`
     <div class="pdpx-product-images-container" id="pdpx-product-images-container">
@@ -199,30 +255,12 @@ export function ProductImages() {
           data-image-type="${selectedRealview.id}"
         />
       </div>
-      ${realviews.length > 0 && html`
-        <div class="pdpx-image-thumbnail-carousel-container" id="pdpx-image-thumbnail-carousel-container">
-          ${realviews.map((realview) => {
-    const thumbnailUrl = updateImageUrl(realview.url, 76);
-    const isSelected = realview.id === selectedRealview.id;
-    return html`
-              <button
-                key="${realview.id}"
-                class="pdpx-image-thumbnail-carousel-item ${isSelected ? 'selected' : ''}"
-                type="button"
-                data-image-type="${realview.id}"
-                onClick=${() => handleThumbnailClick(realview)}
-              >
-                <img
-                  class="pdpx-image-thumbnail-carousel-item-image"
-                  src="${thumbnailUrl}"
-                  alt="${realview.title}"
-                  data-image-type="${realview.id}"
-                />
-              </button>
-            `;
-  })}
-        </div>
-      `}
+      <div
+        class="pdpx-image-thumbnail-carousel-container"
+        id="pdpx-image-thumbnail-carousel-container"
+        ref=${containerRef}
+      >
+      </div>
     </div>
   `;
 }
