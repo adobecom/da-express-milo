@@ -264,6 +264,7 @@ export async function createActionMenuComponent(options = {}) {
     onUndo,
     onRedo,
     onGenerateRandom,
+    transformPalette,
     enableState = true,
   } = options;
 
@@ -281,7 +282,7 @@ export async function createActionMenuComponent(options = {}) {
   let pushStateFn = null;
   let getCurrentPaletteFn = null;
   if (enableState) {
-    const state = createActionMenuState(stateKey, onUndo, onRedo, onGenerateRandom);
+    const state = createActionMenuState(stateKey, { transformPalette });
     handleUndoState = state.onUndo;
     handleRedoState = state.onRedo;
     handleGenerateRandomState = state.onGenerateRandom;

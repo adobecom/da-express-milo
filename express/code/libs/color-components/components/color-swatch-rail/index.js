@@ -174,8 +174,10 @@ export class ColorSwatchRail extends LitElement {
       
       swatchFeatures: { attribute: false },
       verticalMaxPerRow: { type: Number, attribute: 'vertical-max-per-row' },
-      
+
       hexCopyFirstRowOnly: { type: Boolean, reflect: true, attribute: 'hex-copy-first-row-only' },
+      hideBaseColorBadge: { type: Boolean, attribute: 'hide-base-color-badge' },
+      hideLock: { type: Boolean, attribute: 'hide-lock' },
     };
   }
 
@@ -191,6 +193,8 @@ export class ColorSwatchRail extends LitElement {
     this.swatchFeatures = null;
     this.verticalMaxPerRow = DEFAULT_VERTICAL_MAX_PER_ROW;
     this.hexCopyFirstRowOnly = false;
+    this.hideBaseColorBadge = false;
+    this.hideLock = false;
     this._controllerUnsubscribe = null;
     this.swatches = [];
     this.baseColorIndex = 0;
@@ -520,6 +524,8 @@ export class ColorSwatchRail extends LitElement {
 
   _handleTrash(index) {
     if ((this.lockedByIndex || new Set()).has(index)) return;
+    const minSwatches = this._features.minSwatches ?? 0;
+    if ((this.swatches?.length ?? 0) <= minSwatches) return;
     const e = new CustomEvent('color-swatch-rail-delete', { bubbles: true, composed: true, detail: { index } });
     if (this.dispatchEvent(e) && !e.defaultPrevented && this.controller?.setState) {
       const swatches = this.swatches.filter((_, i) => i !== index);
@@ -538,7 +544,7 @@ export class ColorSwatchRail extends LitElement {
   
   _handleAddAt(insertIndex, side) {
     if ((this.swatches?.length ?? 0) >= MAX_SWATCHES) return;
-    const e = new CustomEvent('color-swatch-rail-add', { bubbles: true, composed: true, detail: { side, insertIndex } });
+    const e = new CustomEvent('color-swatch-rail-add', { bubbles: true, composed: true, cancelable: true, detail: { side, insertIndex } });
     if (this.dispatchEvent(e) && !e.defaultPrevented && this.controller?.setState) {
       const swatches = [...this.swatches];
       swatches.splice(insertIndex, 0, { hex: '#808080' });
@@ -732,7 +738,6 @@ export class ColorSwatchRail extends LitElement {
   }
 
   _handleColorPicker(index, anchorEl = null) {
-    if ((this.lockedByIndex || new Set()).has(index)) return;
     const hex = this.swatches[index]?.hex;
     const rect = anchorEl?.getBoundingClientRect?.();
     const anchorRect = rect
@@ -1109,9 +1114,9 @@ export class ColorSwatchRail extends LitElement {
       const showAddTopHere = isStacked && canAddGlobal && f.addLeft;
       const showAddBottomHere = isStacked && canAddGlobal && f.addRight;
       
-      const effectiveLocked = isLocked || isBase;
       const textColor = getContrastTextColor(swatch.hex);
-      const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
+      const useLightIcons = textColor.toUpperCase() === '#FFFFFF';
+      const shadow = useLightIcons ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
       const showColorEdit = f.colorPicker && !editDisabled && !effectiveLocked;
       const showHexCopyButton = f.copy && f.copyFromHex !== false && !isBase;
       const tintMode = f.editTint && !f.colorPicker;
@@ -1119,12 +1124,15 @@ export class ColorSwatchRail extends LitElement {
       const resolvedTintIndex = this._resolveTintIndex();
       const isTintSelected = tintMode && resolvedTintIndex != null && index === resolvedTintIndex;
       const tintBands = isTintSelected ? this._buildTintBands(swatch.hex) : [];
+      const showEdit = (f.colorPicker || f.editTint) && !editDisabled;
+      const atMinSwatches = f.minSwatches != null && swatches.length <= f.minSwatches;
       
       
       const showHexCopyForThisSwatch = !(orientation === 'four-rows' && this.hexCopyFirstRowOnly && index >= FOUR_ROWS_COLS);
 
       
-      const baseColorIcon = f.baseColor
+      const showBaseColorBadge = f.baseColor && !this.hideBaseColorBadge;
+      const baseColorIcon = showBaseColorBadge
         ? (
           isBase && !f.colorBlindness
             ? html`
@@ -1135,14 +1143,15 @@ export class ColorSwatchRail extends LitElement {
         )
         : '';
       const baseColorBadgeClass = `base-color-badge${!isBase ? ' base-color-badge--hover-only' : ''}${isBase ? ' base-color-badge--active' : ''}`;
+      const trashDisabled = atMinSwatches;
       const topLeftIcons = html`
         <div class="top-actions top-actions--left">
-          ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+          ${showBaseColorBadge ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
         </div>
       `;
       const topRightIcons = html`
         <div class="top-actions top-actions--right">
-          ${f.drag && !effectiveLocked ? html`
+          ${f.drag ? html`
             <button
               type="button"
               class="icon-button icon-button--drag swatch-column-focusable"
@@ -1154,17 +1163,17 @@ export class ColorSwatchRail extends LitElement {
               @dragend=${this._handleDragEnd}
             >${icon('drag')}</button>
           ` : ''}
-          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${effectiveLocked ? 'Unlock color' : 'Lock color'} title=${effectiveLocked ? 'Unlock color' : 'Lock color'}>${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
-          ${showTintSelect ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${(ev) => this._handleTintSelect(index, ev.currentTarget)} aria-label=${isTintSelected ? 'Tint selected' : 'Select tint'} title=${isTintSelected ? 'Tint selected' : 'Select tint'} aria-pressed=${isTintSelected ? 'true' : 'false'}>${icon('editTint')}</button>` : ''}
-          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
+          ${f.lock && !this.hideLock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${isLocked ? 'Unlock color' : 'Lock color'} title=${isLocked ? 'Unlock color' : 'Lock color'}>${icon(isLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${(ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${trashDisabled} aria-disabled="${trashDisabled}">${icon('trash')}</button>` : ''}
         </div>
       `;
       
       const stackedIcons = html`
         <div class="stacked-row__icons">
-          ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+          ${showBaseColorBadge ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
           ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="Copy hex" title="Copy hex">${icon('copy')}</button>` : ''}
-          ${f.drag && !effectiveLocked ? html`
+          ${f.drag ? html`
             <button
               type="button"
               class="icon-button icon-button--drag swatch-column-focusable"
@@ -1176,31 +1185,31 @@ export class ColorSwatchRail extends LitElement {
               @dragend=${this._handleDragEnd}
             >${icon('drag')}</button>
           ` : ''}
-          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${effectiveLocked ? 'Unlock color' : 'Lock color'} title=${effectiveLocked ? 'Unlock color' : 'Lock color'}>${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
-          ${showTintSelect ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${(ev) => this._handleTintSelect(index, ev.currentTarget)} aria-label=${isTintSelected ? 'Tint selected' : 'Select tint'} title=${isTintSelected ? 'Tint selected' : 'Select tint'} aria-pressed=${isTintSelected ? 'true' : 'false'}>${icon('editTint')}</button>` : ''}
-          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
+          ${f.lock && !this.hideLock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${isLocked ? 'Unlock color' : 'Lock color'} title=${isLocked ? 'Unlock color' : 'Lock color'}>${icon(isLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${(ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${trashDisabled} aria-disabled="${trashDisabled}">${icon('trash')}</button>` : ''}
         </div>
       `;
       const stackedContent = html`
         <div class="bottom-info bottom-info--stacked" part="bottom-info">
-          ${showColorEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-          ${f.hexCode ? (showColorEdit || showHexCopyButton ? html`<button type="button" class="hex-code hex-code--${showColorEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showColorEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showColorEdit ? 'Edit color' : 'Copy hex'} title=${showColorEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+          ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
+          ${f.hexCode ? ((showEdit || f.copy) ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
         </div>
         ${stackedIcons}
       `;
 
       return html`
-        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${tintMode ? 'swatch-column--tint-mode' : ''} ${isTintSelected ? 'swatch-column--tint-selected' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''}"
-          data-contrast="${textColor === '#ffffff' ? 'dark' : 'light'}"
-          style="background-color: ${swatch.hex}; --swatch-base-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${textColor === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
+        <div class="swatch-column ${isLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${tintMode ? 'swatch-column--tint-mode' : ''} ${isTintSelected ? 'swatch-column--tint-selected' : ''} ${f.drag && !isLocked ? 'swatch-column--draggable' : ''} ${f.rightActionsHoverOnly ? 'swatch-column--right-actions-hover-only' : ''} ${opts.cornerClass || ''}"
+          data-contrast="${useLightIcons ? 'dark' : 'light'}"
+          style="background-color: ${swatch.hex}; --swatch-base-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${useLightIcons ? 'brightness(0) invert(1)' : 'brightness(0)'}"
           data-swatch-index="${index}"
           tabindex="0"
           role="group"
           aria-label="Color ${index + 1}, ${swatch.hex}"
           @keydown=${(ev) => this._handleColumnKeydown(ev, index)}
           @focusout=${(ev) => this._handleColumnFocusout(ev)}
-          ?draggable=${f.drag && !effectiveLocked}
-          @dragstart=${(ev) => f.drag && !effectiveLocked && this._handleDragStart(index, ev)}
+          ?draggable=${f.drag}
+          @dragstart=${(ev) => f.drag && this._handleDragStart(index, ev)}
           @dragend=${this._handleDragEnd}
           @dragover=${this._handleDragOver}
           @dragleave=${this._handleDragLeave}
@@ -1237,8 +1246,12 @@ export class ColorSwatchRail extends LitElement {
             </div>
           ` : html`<div class="stacked-row">${stackedContent}</div>`}
           ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
-            ${showColorEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-            ${f.hexCode && showHexCopyForThisSwatch ? (showColorEdit || showHexCopyButton ? html`<button type="button" class="hex-code hex-code--${showColorEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showColorEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showColorEdit ? 'Edit color' : 'Copy hex'} title=${showColorEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+            ${showEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
+            ${f.hexCode && showHexCopyForThisSwatch ? (
+              showEdit || f.copy
+                ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>`
+                : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`
+            ) : ''}
             <div class="bottom-info__actions">
               ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="Copy hex" title="Copy hex">${icon('copy')}</button>` : ''}
             </div>
@@ -1346,12 +1359,58 @@ export class ColorSwatchRail extends LitElement {
       const verticalMaxPerRow = Number.isFinite(rawVerticalMax)
         ? Math.max(1, Math.min(MAX_SWATCHES, Math.floor(rawVerticalMax)))
         : DEFAULT_VERTICAL_MAX_PER_ROW;
+      const totalSwatches = swatches.length;
+      const showEmpty = f.emptyStrip && totalSwatches < MAX_SWATCHES;
+      const isColorWheelVerticalLayout = verticalMaxPerRow === 6;
+
+      if (isColorWheelVerticalLayout) {
+        const useTwoRows = totalSwatches > verticalMaxPerRow;
+
+        if (useTwoRows) {
+          const rowSize = Math.ceil(totalSwatches / 2);
+          const row1Swatches = swatches.slice(0, rowSize);
+          const row2Swatches = swatches.slice(rowSize);
+          const row1Items = row1Swatches.map((swatch, i) => renderSwatch(swatch, i, { cornerClass: i === row1Swatches.length - 1 ? 'corner-top-right' : '' }));
+          const row2Items = row2Swatches.map((swatch, i) => renderSwatch(swatch, rowSize + i, { cornerClass: i === 0 ? 'corner-bottom-left' : '' }));
+          const shouldRenderEmptyStrip = showEmpty && (totalSwatches % 2 === 1);
+
+          if (shouldRenderEmptyStrip) {
+            row2Items.push(html`
+              <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
+                @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
+                @focusout=${(ev) => this._handleColumnFocusout(ev)}>
+                <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="Add color" title="Add color">${icon('add')}</button>
+              </div>
+            `);
+          }
+
+          return html`
+            <div class="swatch-rail vertical--two-rows" data-orientation="vertical" style="--vertical-max-per-row: ${rowSize}">
+              ${row1Items}
+              ${row2Items}
+            </div>
+          `;
+        }
+
+        const showSingleRowEmpty = showEmpty && totalSwatches === 0;
+        const railColumns = totalSwatches + (showSingleRowEmpty ? 1 : 0);
+        const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
+
+        return html`
+          <div class="swatch-rail" data-orientation="vertical" style="--rail-columns: ${railColumns}">
+            ${railItems}
+            ${showSingleRowEmpty ? renderEmptyStrip() : ''}
+          </div>
+        `;
+      }
+
+      const totalSlots = totalSwatches + (showEmpty ? 1 : 0);
 
       if (totalSlots > verticalMaxPerRow) {
         const row1Swatches = swatches.slice(0, verticalMaxPerRow);
         const row2Swatches = swatches.slice(verticalMaxPerRow);
-        const row1Items = row1Swatches.map((swatch, i) => renderSwatch(swatch, i));
-        const row2Items = row2Swatches.map((swatch, i) => renderSwatch(swatch, verticalMaxPerRow + i));
+        const row1Items = row1Swatches.map((swatch, i) => renderSwatch(swatch, i, { cornerClass: i === row1Swatches.length - 1 ? 'corner-top-right' : '' }));
+        const row2Items = row2Swatches.map((swatch, i) => renderSwatch(swatch, verticalMaxPerRow + i, { cornerClass: i === 0 ? 'corner-bottom-left' : '' }));
         if (showEmpty) {
           row2Items.push(html`
             <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"

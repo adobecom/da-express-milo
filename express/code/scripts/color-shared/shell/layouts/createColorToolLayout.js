@@ -157,6 +157,7 @@ async function mountActionMenu(topbarSlot, actionMenuConfig, modulePromise) {
     onUndo: actionMenuConfig.onUndo,
     onRedo: actionMenuConfig.onRedo,
     onGenerateRandom: actionMenuConfig.onGenerateRandom,
+    transformPalette: actionMenuConfig.transformPalette,
     enableState: actionMenuConfig.enableState !== false,
   });
 

@@ -25,7 +25,9 @@ export const style = css`
   }
   
   .swatch-rail:has(.add-slot--column-left),
-  .swatch-rail:has(.add-slot--column-right) {
+  .swatch-rail:has(.add-slot--column-right),
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows:has(.add-slot--column-left),
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows:has(.add-slot--column-right) {
     overflow: visible;
   }
 
@@ -308,11 +310,26 @@ export const style = css`
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column--empty {
     justify-content: center;
     align-items: center;
+    border: 1px solid var(--color-gray-250);
   }
 
   
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column {
     border-radius: 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:nth-child(1) {
+    border-radius: var(--Corner-radius-corner-radius-200) 0 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:last-child {
+    border-radius: 0 0 var(--Corner-radius-corner-radius-200) 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column.corner-top-right {
+    border-radius: 0 var(--Corner-radius-corner-radius-200) 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column.corner-bottom-left {
+    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200);
   }
 
   .swatch-rail[data-orientation="vertical"] .bottom-info {
@@ -443,11 +460,8 @@ export const style = css`
     border-radius: 0 0 var(--figma-strip-radius) var(--figma-strip-radius);
   }
   
-  .swatch-rail[data-orientation="stacked"]:has(.swatch-column--empty:last-child) .swatch-column:nth-last-child(2) {
-    border-radius: 0 0 var(--figma-strip-radius) var(--figma-strip-radius);
-  }
   .swatch-rail[data-orientation="stacked"] .swatch-column:last-child.swatch-column--empty {
-    border-radius: 0;
+    border: 1px solid var(--color-gray-250);
   }
   
   .swatch-rail[data-orientation="stacked"] .swatch-column:not(:first-child):not(:last-child) {
@@ -518,9 +532,9 @@ export const style = css`
   
   .top-actions-row {
     position: absolute;
-    top: 8px;
-    left: 8px;
-    right: 8px;
+    top: 12px;
+    left: 12px;
+    right: 12px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
@@ -977,5 +991,9 @@ export const style = css`
   sp-tooltip,
   sp-tooltip * {
     text-transform: none !important;
+  }
+
+  .swatch-rail[data-orientation="stacked"] .swatch-column--empty {
+    flex: 0;
   }
 `;

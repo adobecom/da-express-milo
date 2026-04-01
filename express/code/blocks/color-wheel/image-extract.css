@@ -1,17 +1,35 @@
 .image-extract {
+  contain: layout style;
+  --color-extract-max-width: 1440px;
+  --color-extract-gap: 32px;
   --color-extract-radius: 16px;
   --color-extract-bg: #ffffff;
   --color-extract-text: #131313;
   --color-extract-subtle: #505050;
   --color-extract-border: #292929;
+  --color-extract-accent: #3b63fb;
   --color-extract-accent-hover: #274dea;
+  --color-extract-accent-soft: rgba(59, 99, 251, 0.08);
   --color-extract-focus: #4b75ff;
-  --color-extract-overlay-image: url("https://www.figma.com/api/mcp/asset/f357085f-091c-46a4-9fae-71ef3adeb0ce");
+  --color-extract-disabled-bg: #e9e9e9;
+  --color-extract-disabled-text: #c6c6c6;
+  --color-extract-gray-50: #f8f8f8;
+  --color-extract-gray-100: #f3f3f3;
+  --color-extract-gray-200: #e9e9e9;
+  --color-extract-gray-300: #e1e1e1;
+  --color-extract-gray-350: #d4d4d4;
+  --color-extract-gray-hover: #f5f5f5;
+  --color-extract-success: #0a8a0a;
+  --color-extract-overlay-image:
+    linear-gradient(45deg, #ccc 25%, transparent 25%),
+    linear-gradient(-45deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(-45deg, transparent 75%, #ccc 75%);
 }
 
 /* ---- Drag overlay ---- */
 
-.color-extract-drag-overlay {
+.image-extract .color-extract-drag-overlay {
   position: fixed;
   inset: 0;
   display: flex;
@@ -31,13 +49,13 @@
   opacity: 1;
 }
 
-.color-extract-drag-icon {
+.image-extract .color-extract-drag-icon {
   width: 24px;
   height: 24px;
   color: #131313;
 }
 
-.color-extract-drag-text {
+.image-extract .color-extract-drag-text {
   margin: 0;
   font-size: 14px;
   font-weight: 700;
@@ -53,10 +71,10 @@
   border-radius: var(--color-extract-radius);
   opacity: 0;
   pointer-events: none;
+  z-index: 0;
   background-image: var(--color-extract-overlay-image);
-  background-size: 140%;
-  background-position: 50% 40%;
-  background-repeat: no-repeat;
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
   transition: opacity 0.15s ease;
 }
 
@@ -77,20 +95,20 @@
 
 /* ---- Suggestions ---- */
 
-.color-extract-suggestions {
+.image-extract .color-extract-suggestions {
   display: flex;
   flex-direction: column;
   gap: 16px;
   align-items: center;
 }
 
-.color-extract-suggestions-label {
+.image-extract .color-extract-suggestions-label {
   font-weight: 700;
   font-size: 16px;
   text-align: center;
 }
 
-.color-extract-suggestions-list {
+.image-extract .color-extract-suggestions-list {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
@@ -98,7 +116,7 @@
   align-items: center;
 }
 
-.color-extract-suggestions-hint {
+.image-extract .color-extract-suggestions-hint {
   margin: 0;
   max-width: 100%;
   font-size: 0.8125rem;
@@ -106,7 +124,7 @@
   color: var(--color-extract-subtle, #505050);
 }
 
-.color-extract-suggestion {
+.image-extract .color-extract-suggestion {
   border: 1px solid #e1e1e1;
   padding: 0;
   border-radius: 10px;
@@ -121,68 +139,68 @@
   transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
 }
 
-.color-extract-suggestion:hover {
+.image-extract .color-extract-suggestion:hover {
   border-color: #131313;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
 }
 
-.color-extract-suggestion:active {
+.image-extract .color-extract-suggestion:active {
   border-color: #131313;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
   transform: translateY(1px);
 }
 
-.color-extract-suggestion:focus-visible {
+.image-extract .color-extract-suggestion:focus-visible {
   outline: none;
   border-color: #131313;
   box-shadow: 0 0 0 2px var(--color-extract-focus);
 }
 
-.color-extract-suggestion.is-selected {
+.image-extract .color-extract-suggestion.is-selected {
   border-color: #131313;
   box-shadow: 0 0 0 2px var(--color-extract-focus);
 }
 
-.color-extract-suggestion:disabled,
-.color-extract-suggestion[aria-disabled='true'] {
+.image-extract .color-extract-suggestion:disabled,
+.image-extract .color-extract-suggestion[aria-disabled='true'] {
   opacity: 0.5;
   cursor: not-allowed;
   box-shadow: none;
 }
 
-.color-extract-suggestion-preview {
+.image-extract .color-extract-suggestion-preview {
   flex: 1;
   width: 100%;
   overflow: hidden;
 }
 
-.color-extract-suggestion img {
+.image-extract .color-extract-suggestion img {
   width: 100%;
   height: 100%;
   display: block;
   object-fit: cover;
 }
 
-.color-extract-suggestion-bar {
+.image-extract .color-extract-suggestion-bar {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
   height: 16px;
 }
 
-.color-extract-suggestion-chip {
+.image-extract .color-extract-suggestion-chip {
   display: block;
   height: 100%;
 }
 
-.color-extract-suggestion-chip.is-1 { background: #ffffff; }
-.color-extract-suggestion-chip.is-2 { background: #f8f8f8; }
-.color-extract-suggestion-chip.is-3 { background: #f3f3f3; }
-.color-extract-suggestion-chip.is-4 { background: #e9e9e9; }
-.color-extract-suggestion-chip.is-5 { background: #e1e1e1; }
+.image-extract .color-extract-suggestion-chip.is-1 { background: #ffffff; }
+.image-extract .color-extract-suggestion-chip.is-2 { background: #f8f8f8; }
+.image-extract .color-extract-suggestion-chip.is-3 { background: #f3f3f3; }
+.image-extract .color-extract-suggestion-chip.is-4 { background: #e9e9e9; }
+.image-extract .color-extract-suggestion-chip.is-5 { background: #e1e1e1; }
 
 /* ---- Edit stage ---- */
 
-.color-extract-edit {
+.image-extract .color-extract-edit {
   display: none;
   flex-direction: column;
   gap: 24px;
@@ -206,7 +224,7 @@
   text-align: left;
 }
 
-.color-extract-edit-stage {
+.image-extract .color-extract-edit-stage {
   position: relative;
   height: 800px;
   width: min(1440px, 100%);
@@ -229,14 +247,14 @@
   align-items: stretch;
 }
 
-.color-extract-edit-left {
+.image-extract .color-extract-edit-left {
   display: flex;
   flex-direction: column;
   gap: 16px;
   min-width: 0;
 }
 
-.color-extract-edit-bg {
+.image-extract .color-extract-edit-bg {
   position: absolute;
   inset: 0;
   overflow: hidden;
@@ -255,8 +273,8 @@
   backdrop-filter: blur(28px);
 }
 
-.color-extract-edit-bg picture,
-.color-extract-edit-bg img {
+.image-extract .color-extract-edit-bg picture,
+.image-extract .color-extract-edit-bg img {
   position: absolute;
   inset: 0;
   margin: auto;
@@ -278,7 +296,7 @@
   inset: auto;
 }
 
-.color-extract-swatch-rail {
+.image-extract .color-extract-swatch-rail {
   width: min(480px, 40%);
   margin: 40px;
   z-index: 1;
@@ -294,17 +312,26 @@
   display: none;
 }
 
-/* ---- Toolbar ---- */
+/* ---- Top bar (mood + toolbar on same row) ---- */
 
-.color-extract-toolbar {
+.image-extract .color-extract-top-bar {
   display: flex;
-  align-items: center;
+  align-items: flex-end;
   justify-content: space-between;
-  width: 100%;
-  min-height: 32px;
+  gap: 16px;
 }
 
-.color-extract-toolbar-left {
+/* ---- Toolbar ---- */
+
+.image-extract .color-extract-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 32px;
+  flex-shrink: 0;
+}
+
+.image-extract .color-extract-toolbar-left {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -312,20 +339,20 @@
   min-width: 0;
 }
 
-.color-extract-toolbar-right {
+.image-extract .color-extract-toolbar-right {
   display: flex;
   align-items: center;
   gap: 6px;
   flex-shrink: 0;
 }
 
-.color-extract-toolbar-actions {
+.image-extract .color-extract-toolbar-actions {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.color-extract-toolbar-btn {
+.image-extract .color-extract-toolbar-btn {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -340,21 +367,21 @@
   transition: background-color 0.15s ease;
 }
 
-.color-extract-toolbar-btn:hover:not(:disabled) {
+.image-extract .color-extract-toolbar-btn:hover:not(:disabled) {
   background: rgba(0, 0, 0, 0.06);
 }
 
-.color-extract-toolbar-btn:focus-visible {
+.image-extract .color-extract-toolbar-btn:focus-visible {
   outline: 2px solid var(--color-extract-focus);
   outline-offset: 1px;
 }
 
-.color-extract-toolbar-btn:disabled {
+.image-extract .color-extract-toolbar-btn:disabled {
   opacity: 0.35;
   cursor: default;
 }
 
-.color-extract-toolbar-btn svg {
+.image-extract .color-extract-toolbar-btn svg {
   display: block;
   width: 20px;
   height: 20px;
@@ -362,29 +389,28 @@
 
 /* ---- Mood selector ---- */
 
-.color-extract-mood {
+.image-extract .color-extract-mood {
   display: flex;
-  align-items: center;
-  height: 32px;
+  flex-direction: column;
+  align-items: flex-start;
   flex-shrink: 0;
-  column-gap: 12px;
+  gap: 7px;
 }
 
-.color-extract-mood-label {
+.image-extract .color-extract-mood-label {
   font-size: 14px;
   font-weight: 400;
   color: var(--color-extract-subtle);
-  padding-block: 7px;
   white-space: nowrap;
   line-height: 18px;
 }
 
-.color-extract-mood-dropdown {
+.image-extract .color-extract-mood-dropdown {
   position: relative;
   min-width: 64px;
 }
 
-.color-extract-mood-trigger {
+.image-extract .color-extract-mood-trigger {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -404,23 +430,23 @@
   transition: background-color 0.15s ease;
 }
 
-.color-extract-mood-trigger:hover {
+.image-extract .color-extract-mood-trigger:hover {
   background: #d4d4d4;
 }
 
-.color-extract-mood-trigger:focus-visible {
+.image-extract .color-extract-mood-trigger:focus-visible {
   outline: 2px solid var(--color-extract-focus);
   outline-offset: 1px;
 }
 
-.color-extract-mood-trigger-text {
+.image-extract .color-extract-mood-trigger-text {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   text-align: left;
 }
 
-.color-extract-mood-chevron {
+.image-extract .color-extract-mood-chevron {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -431,11 +457,11 @@
   transition: transform 0.15s ease;
 }
 
-.color-extract-mood-dropdown.is-open .color-extract-mood-chevron {
+.image-extract .color-extract-mood-dropdown.is-open .color-extract-mood-chevron {
   transform: rotate(180deg);
 }
 
-.color-extract-mood-popover {
+.image-extract .color-extract-mood-popover {
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
@@ -447,11 +473,11 @@
   z-index: 30;
 }
 
-.color-extract-mood-popover[hidden] {
+.image-extract .color-extract-mood-popover[hidden] {
   display: none;
 }
 
-.color-extract-mood-option {
+.image-extract .color-extract-mood-option {
   display: flex;
   align-items: center;
   width: 100%;
@@ -467,29 +493,29 @@
   transition: background-color 0.1s ease;
 }
 
-.color-extract-mood-option:hover {
+.image-extract .color-extract-mood-option:hover {
   background: #f5f5f5;
 }
 
-.color-extract-mood-option.is-selected {
+.image-extract .color-extract-mood-option.is-selected {
   font-weight: 600;
 }
 
-.color-extract-mood-option:focus-visible {
+.image-extract .color-extract-mood-option:focus-visible {
   outline: 2px solid var(--color-extract-focus);
   outline-offset: -2px;
 }
 
 /* ---- Image markers ---- */
 
-.color-extract-markers {
+.image-extract .color-extract-markers {
   position: absolute;
   inset: 0;
   z-index: 2;
   pointer-events: none;
 }
 
-.color-extract-marker {
+.image-extract .color-extract-marker {
   position: absolute;
   width: 33px;
   height: 33px;
@@ -506,39 +532,82 @@
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 17px rgba(0, 0, 0, 0.16);
 }
 
-.color-extract-marker:hover {
+.image-extract .color-extract-marker:hover {
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), 0 0 20px rgba(0, 0, 0, 0.22);
 }
 
-.color-extract-marker.is-active {
+.image-extract .color-extract-marker.is-active {
   width: 56px;
   height: 56px;
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
   z-index: 10;
 }
 
-.color-extract-marker:focus-visible {
+.image-extract .color-extract-marker:focus-visible {
   box-shadow: 0 0 0 3px var(--color-extract-focus), 0 0 17px rgba(0, 0, 0, 0.16);
 }
 
-.color-extract-marker-dot {
+.image-extract .color-extract-marker-zoom {
+  display: none;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  image-rendering: pixelated;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+.image-extract .color-extract-marker-dot {
   display: none;
   width: 8px;
   height: 8px;
   border-radius: 2px;
-  background: #000;
+  background: var(--marker-color, #000);
   border: 0.5px solid #fff;
   box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
   pointer-events: none;
+  position: relative;
+  z-index: 1;
 }
 
-.color-extract-marker.is-active .color-extract-marker-dot {
+.image-extract .color-extract-marker.is-active .color-extract-marker-dot {
   display: block;
+}
+
+/* ---- Magnified state (handle becomes zoom lens on drag) ---- */
+
+.image-extract .color-extract-marker.is-magnified {
+  width: 80px;
+  height: 80px;
+  background: transparent;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
+  z-index: 20;
+  transition: none;
+}
+
+.image-extract .color-extract-marker.is-magnified .color-extract-marker-zoom {
+  display: block;
+}
+
+.image-extract .color-extract-marker.is-magnified .color-extract-marker-dot {
+  display: block;
+}
+
+/* ---- Mobile color loupe ---- */
+
+.image-extract .color-extract-loupe {
+  position: absolute;
+  pointer-events: none;
+  z-index: 25;
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.12))
+          drop-shadow(0 3px 9px rgba(0, 0, 0, 0.04))
+          drop-shadow(0 6px 17px rgba(0, 0, 0, 0.08));
 }
 
 /* ---- Zoom lens ---- */
 
-.color-extract-zoom {
+.image-extract .color-extract-zoom {
   position: absolute;
   width: 120px;
   height: 120px;
@@ -550,11 +619,11 @@
   z-index: 20;
 }
 
-.color-extract-zoom[hidden] {
+.image-extract .color-extract-zoom[hidden] {
   display: none;
 }
 
-.color-extract-zoom canvas {
+.image-extract .color-extract-zoom canvas {
   display: block;
   width: 100%;
   height: 100%;
@@ -563,13 +632,13 @@
 
 /* ---- Action bar (download / copy) ---- */
 
-.color-extract-actions {
+.image-extract .color-extract-actions {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
 }
 
-.color-extract-action-btn {
+.image-extract .color-extract-action-btn {
   border: 1px solid #d4d4d4;
   background: #fff;
   border-radius: 999px;
@@ -582,17 +651,17 @@
   white-space: nowrap;
 }
 
-.color-extract-action-btn:hover {
+.image-extract .color-extract-action-btn:hover {
   border-color: var(--color-extract-border);
   background: #f8f8f8;
 }
 
-.color-extract-action-btn:focus-visible {
+.image-extract .color-extract-action-btn:focus-visible {
   outline: 2px solid var(--color-extract-focus);
   outline-offset: 1px;
 }
 
-.color-extract-action-btn.is-copied {
+.image-extract .color-extract-action-btn.is-copied {
   border-color: #0a8a0a;
   color: #0a8a0a;
 }
@@ -609,7 +678,7 @@
   align-items: stretch;
 }
 
-.color-extract-gradient-editor-col {
+.image-extract .color-extract-gradient-editor-col {
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -617,28 +686,28 @@
   min-width: 0;
 }
 
-.color-extract-gradient-editor-col .gradient-editor {
+.image-extract .color-extract-gradient-editor-col .gradient-editor {
   width: 100%;
   max-width: 100%;
   min-height: 320px;
   border-radius: 16px;
 }
 
-.color-extract-gradient-editor-col .gradient-editor-bar-wrap {
+.image-extract .color-extract-gradient-editor-col .gradient-editor-bar-wrap {
   height: 100%;
   min-height: 320px;
 }
 
-.color-extract-gradient-editor-col .gradient-editor-bar {
+.image-extract .color-extract-gradient-editor-col .gradient-editor-bar {
   border-radius: 16px;
 }
 
-.color-extract-gradient-editor-col .gradient-editor-handles {
+.image-extract .color-extract-gradient-editor-col .gradient-editor-handles {
   left: 12px;
   right: 12px;
 }
 
-.color-extract-actions--gradient {
+.image-extract .color-extract-actions--gradient {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
@@ -651,12 +720,12 @@
     width: 100%;
   }
 
-  .color-extract-edit-stage {
+  .image-extract .color-extract-edit-stage {
     height: 640px;
   }
 
-  .color-extract-edit-bg picture,
-  .color-extract-edit-bg img {
+  .image-extract .color-extract-edit-bg picture,
+  .image-extract .color-extract-edit-bg img {
     width: 1600px;
     height: 640px;
   }
@@ -670,7 +739,7 @@
     height: auto;
   }
 
-  .color-extract-swatch-rail {
+  .image-extract .color-extract-swatch-rail {
     width: 100%;
     margin: 24px;
   }
@@ -679,12 +748,12 @@
     min-height: 200px;
   }
 
-  .color-extract-toolbar {
+  .image-extract .color-extract-top-bar {
     flex-wrap: wrap;
     gap: 8px;
   }
 
-  .color-extract-actions {
+  .image-extract .color-extract-actions {
     justify-content: flex-start;
   }
 
@@ -692,60 +761,60 @@
     grid-template-columns: 1fr;
   }
 
-  .color-extract-gradient-editor-col .gradient-editor {
+  .image-extract .color-extract-gradient-editor-col .gradient-editor {
     min-height: 200px;
   }
 
-  .color-extract-gradient-editor-col .gradient-editor-bar-wrap {
+  .image-extract .color-extract-gradient-editor-col .gradient-editor-bar-wrap {
     min-height: 200px;
   }
 }
 
 @media (max-width: 600px) {
-  .color-extract-marker {
+  .image-extract .color-extract-marker {
     width: 26px;
     height: 26px;
   }
 
-  .color-extract-marker.is-active {
+  .image-extract .color-extract-marker.is-active {
     width: 42px;
     height: 42px;
   }
 
-  .color-extract-zoom {
+  .image-extract .color-extract-zoom {
     width: 90px;
     height: 90px;
   }
 
-  .color-extract-actions {
+  .image-extract .color-extract-actions {
     flex-direction: column;
   }
 
-  .color-extract-action-btn {
+  .image-extract .color-extract-action-btn {
     width: 100%;
     text-align: center;
   }
 
-  .color-extract-gradient-editor-col .gradient-editor {
+  .image-extract .color-extract-gradient-editor-col .gradient-editor {
     min-height: 160px;
   }
 
-  .color-extract-gradient-editor-col .gradient-editor-bar-wrap {
+  .image-extract .color-extract-gradient-editor-col .gradient-editor-bar-wrap {
     min-height: 160px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .color-extract-marker,
-  .color-extract-suggestion,
-  .color-extract-action-btn,
-  .color-extract-toolbar-btn,
-  .color-extract-mood-trigger,
+  .image-extract .color-extract-marker,
+  .image-extract .color-extract-suggestion,
+  .image-extract .color-extract-action-btn,
+  .image-extract .color-extract-toolbar-btn,
+  .image-extract .color-extract-mood-trigger,
   .image-extract .image-upload-dropzone-container {
     transition: none;
   }
 
-  .color-extract-zoom {
+  .image-extract .color-extract-zoom {
     display: none !important;
   }
 }
