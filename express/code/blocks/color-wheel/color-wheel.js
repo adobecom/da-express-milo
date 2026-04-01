@@ -4,7 +4,7 @@ import { createExpressTabs } from '../../scripts/color-shared/spectrum/component
 import createColorWheelExpressAdapter from '../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js';
 import createBaseColorAdapter from '../../scripts/color-shared/adapters/createBaseColorAdapter.js';
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
-import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
+import ColorThemeExpressController, { randomHex } from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
 import createImageExtractComponent from './createImageExtractComponent.js';
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
@@ -393,19 +393,6 @@ async function buildTabs(controller, suggestionsRow, { onSelectionChange } = {})
   return tabsInstance;
 }
 
-function randomVividHex() {
-  const h = Math.floor(Math.random() * 360);
-  const s = 55 + Math.floor(Math.random() * 30); // 55–85%
-  const l = 40 + Math.floor(Math.random() * 20); // 40–60%
-  const a = s / 100;
-  const b = l / 100;
-  const f = (n) => {
-    const k = (n + h / 30) % 12;
-    const color = b - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
-    return Math.round(255 * color).toString(16).padStart(2, '0');
-  };
-  return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
-}
 
 function normalizeSwatchHexes(swatches = []) {
   return swatches
@@ -764,7 +751,7 @@ export default async function decorate(block) {
         e.preventDefault();
         const { insertIndex } = e.detail;
         const swatches = [...swatchRailController.getState().swatches];
-        swatches.splice(insertIndex, 0, { hex: randomVividHex() });
+        swatches.splice(insertIndex, 0, { hex: randomHex() });
         swatchRailController.setState({ swatches });
       });
 
