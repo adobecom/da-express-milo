@@ -25,6 +25,7 @@
 .color-wheel .ax-shell-slot--canvas {
   padding-block-end: var(--spacing-300);
   box-sizing: border-box;
+  overflow-y: visible;
 }
 
 .color-wheel .color-headline .express-logo {
@@ -444,7 +445,6 @@ color-wheel-express {
   .color-wheel .color-wheel-strip-host.color-explorer-strip-container {
     height: 600px;
     min-height: 600px;
-    overflow: auto;
   }
 
   .color-wheel .ax-shell-slot--sidebar {

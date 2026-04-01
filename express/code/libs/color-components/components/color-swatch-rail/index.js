@@ -955,7 +955,7 @@ export class ColorSwatchRail extends LitElement {
       `;
 
       return html`
-        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''} ${f.rightActionsHoverOnly ? 'swatch-column--right-actions-hover-only' : ''}"
+        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''} ${f.rightActionsHoverOnly ? 'swatch-column--right-actions-hover-only' : ''} ${opts.cornerClass || ''}"
           data-contrast="${useLightIcons ? 'dark' : 'light'}"
           style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${useLightIcons ? 'brightness(0) invert(1)' : 'brightness(0)'}"
           data-swatch-index="${index}"
@@ -1095,8 +1095,8 @@ export class ColorSwatchRail extends LitElement {
           const rowSize = Math.ceil(totalSwatches / 2);
           const row1Swatches = swatches.slice(0, rowSize);
           const row2Swatches = swatches.slice(rowSize);
-          const row1Items = row1Swatches.map((swatch, i) => renderSwatch(swatch, i));
-          const row2Items = row2Swatches.map((swatch, i) => renderSwatch(swatch, rowSize + i));
+          const row1Items = row1Swatches.map((swatch, i) => renderSwatch(swatch, i, { cornerClass: i === row1Swatches.length - 1 ? 'corner-top-right' : '' }));
+          const row2Items = row2Swatches.map((swatch, i) => renderSwatch(swatch, rowSize + i, { cornerClass: i === 0 ? 'corner-bottom-left' : '' }));
           const shouldRenderEmptyStrip = showEmpty && (totalSwatches % 2 === 1);
 
           if (shouldRenderEmptyStrip) {
@@ -1134,8 +1134,8 @@ export class ColorSwatchRail extends LitElement {
       if (totalSlots > verticalMaxPerRow) {
         const row1Swatches = swatches.slice(0, verticalMaxPerRow);
         const row2Swatches = swatches.slice(verticalMaxPerRow);
-        const row1Items = row1Swatches.map((swatch, i) => renderSwatch(swatch, i));
-        const row2Items = row2Swatches.map((swatch, i) => renderSwatch(swatch, verticalMaxPerRow + i));
+        const row1Items = row1Swatches.map((swatch, i) => renderSwatch(swatch, i, { cornerClass: i === row1Swatches.length - 1 ? 'corner-top-right' : '' }));
+        const row2Items = row2Swatches.map((swatch, i) => renderSwatch(swatch, verticalMaxPerRow + i, { cornerClass: i === 0 ? 'corner-bottom-left' : '' }));
         if (showEmpty) {
           row2Items.push(html`
             <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
