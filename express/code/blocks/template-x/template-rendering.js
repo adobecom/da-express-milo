@@ -271,6 +271,13 @@ function constructCustomURL(template, customUrlConfig) {
   return `${baseUrl}?${queryParams}${separator}templateId=${urnId}`;
 }
 
+function appendTemplateId(url, template) {
+  const urnId = extractURNFromTemplate(template);
+  if (!urnId) return url;
+  const separator = url.includes('?') ? '&' : '?';
+  return `${url}${separator}templateId=${urnId}`;
+}
+
 function renderCTA(branchUrl, template, customUrlConfig = null) {
   const btnTitle = editThisTemplate === 'edit this template' ? 'Edit this template' : editThisTemplate;
 
@@ -521,6 +528,35 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   cta.setAttribute('aria-label', `${editThisTemplate} ${getTemplateTitle(template)}`);
   ctaLink.append(mediaWrapper);
 
+  // Experimental dual-CTA support: only for free, static (non-animated) templates
+  const isEligibleForExperimentalCta = !variants?.includes('flyer')
+    && !variants?.includes('t-shirt')
+    && !variants?.includes('print')
+    && template.licensingCategory === 'free'
+    && !containsVideo(template.pages);
+
+  const experimentalCta1Url = getMetadata('external-template-cta-link-1');
+  const experimentalCta2Url = getMetadata('external-template-cta-link-2');
+
+  if (isEligibleForExperimentalCta && experimentalCta1Url) {
+    const overrideUrl = appendTemplateId(experimentalCta1Url, template);
+    cta.href = overrideUrl;
+    ctaLink.href = overrideUrl;
+  }
+
+  let secondaryCta = null;
+  if (isEligibleForExperimentalCta && experimentalCta2Url) {
+    const secondaryHref = appendTemplateId(experimentalCta2Url, template);
+    const btnTitle = editThisTemplate === 'edit this template' ? 'Edit this template' : editThisTemplate;
+    secondaryCta = createTag('a', {
+      href: secondaryHref,
+      title: btnTitle,
+      class: 'button gray small secondary-template-cta',
+      'aria-label': `${btnTitle} ${getTemplateTitle(template)}`,
+    });
+    secondaryCta.textContent = btnTitle;
+  }
+
   // Create shareWrapper separately
   const templateTitle = getTemplateTitle(template);
   const { branchUrl } = template.customLinks;
@@ -533,6 +569,7 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   const shareWrapper = renderShareWrapper(templateInfo);
 
   btnContainer.append(cta);
+  if (secondaryCta) btnContainer.append(secondaryCta);
   btnContainer.append(ctaLink);
   btnContainer.append(shareWrapper);
 
@@ -561,6 +598,7 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   };
 
   cta.addEventListener('click', ctaClickHandler, { passive: true });
+  if (secondaryCta) secondaryCta.addEventListener('click', ctaClickHandler, { passive: true });
   ctaLink.addEventListener('click', ctaClickHandler, { passive: true });
   ctaLink.addEventListener('click', ctaClickHandlerTouchDevice);
   return btnContainer;
