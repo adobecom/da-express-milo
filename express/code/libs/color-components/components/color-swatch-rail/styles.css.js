@@ -882,4 +882,8 @@ export const style = css`
   sp-tooltip * {
     text-transform: none !important;
   }
+
+  .swatch-rail[data-orientation="stacked"] .swatch-column--empty {
+    flex: 0;
+  }
 `;
