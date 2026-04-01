@@ -373,7 +373,7 @@ async function buildColorWheelContent(controller) {
   return colorWheel;
 }
 
-async function buildTabs(controller, suggestionsRow) {
+async function buildTabs(controller, suggestionsRow, { onSelectionChange } = {}) {
   const tabsInstance = await createExpressTabs({
     selected: 'color-wheel',
     size: 'm',
@@ -383,6 +383,7 @@ async function buildTabs(controller, suggestionsRow) {
       { label: 'Image', value: 'image', spIcon: 'sp-icon-image' },
       { label: 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
     ],
+    onSelectionChange,
   });
 
   tabsInstance.addPanel('color-wheel', await buildColorWheelContent(controller));
@@ -390,6 +391,20 @@ async function buildTabs(controller, suggestionsRow) {
   tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller));
 
   return tabsInstance;
+}
+
+function randomVividHex() {
+  const h = Math.floor(Math.random() * 360);
+  const s = 55 + Math.floor(Math.random() * 30); // 55–85%
+  const l = 40 + Math.floor(Math.random() * 20); // 40–60%
+  const a = s / 100;
+  const b = l / 100;
+  const f = (n) => {
+    const k = (n + h / 30) % 12;
+    const color = b - a * Math.max(Math.min(k - 3, 9 - k, 1), -1);
+    return Math.round(255 * color).toString(16).padStart(2, '0');
+  };
+  return `#${f(0)}${f(8)}${f(4)}`.toUpperCase();
 }
 
 function normalizeSwatchHexes(swatches = []) {
@@ -667,7 +682,18 @@ export default async function decorate(block) {
         clearTimeout(historyDebounceTimer);
       };
 
-      const tabs = await buildTabs(controller, suggestionsRow?.cloneNode(true));
+      const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
+      layoutInstance.slots.canvas.appendChild(stripHost);
+
+      const updateBaseColorBadge = (selectedTab) => {
+        stripHost.querySelectorAll('color-swatch-rail').forEach((rail) => {
+          rail.hideBaseColorBadge = selectedTab !== 'color-wheel';
+        });
+      };
+
+      const tabs = await buildTabs(controller, suggestionsRow?.cloneNode(true), {
+        onSelectionChange: ({ selected }) => updateBaseColorBadge(selected),
+      });
       layoutInstance.slots.sidebar.appendChild(tabs.element);
 
       if (!isDesktop) {
@@ -684,9 +710,6 @@ export default async function decorate(block) {
         });
         layoutInstance.slots.canvas.appendChild(actionMenu.element);
       }
-      const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
-      layoutInstance.slots.canvas.appendChild(stripHost);
-
       stripRenderer = createStripContainerRenderer({
         container: stripHost,
         data: [swatchRailController],
@@ -705,11 +728,24 @@ export default async function decorate(block) {
             baseColor: true,
             emptyStrip: true,
             rightActionsHoverOnly: true,
+            minSwatches: 2,
           },
           swatchVerticalMaxPerRow: 6,
         },
       });
       await stripRenderer.render(stripHost);
+
+      // Initial base color badge state matches the default selected tab (color-wheel)
+      updateBaseColorBadge(tabs.getSelected());
+
+      // Use a random vivid color when adding a new swatch
+      stripHost.addEventListener('color-swatch-rail-add', (e) => {
+        e.preventDefault();
+        const { insertIndex } = e.detail;
+        const swatches = [...swatchRailController.getState().swatches];
+        swatches.splice(insertIndex, 0, { hex: randomVividHex() });
+        swatchRailController.setState({ swatches });
+      });
 
       // What is this?
       paletteUnsubscribe = controller.subscribe((state) => {

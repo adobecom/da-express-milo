@@ -165,8 +165,9 @@ export class ColorSwatchRail extends LitElement {
       
       swatchFeatures: { attribute: false },
       verticalMaxPerRow: { type: Number, attribute: 'vertical-max-per-row' },
-      
+
       hexCopyFirstRowOnly: { type: Boolean, reflect: true, attribute: 'hex-copy-first-row-only' },
+      hideBaseColorBadge: { type: Boolean, attribute: 'hide-base-color-badge' },
     };
   }
 
@@ -182,6 +183,7 @@ export class ColorSwatchRail extends LitElement {
     this.swatchFeatures = null;
     this.verticalMaxPerRow = DEFAULT_VERTICAL_MAX_PER_ROW;
     this.hexCopyFirstRowOnly = false;
+    this.hideBaseColorBadge = false;
     this._controllerUnsubscribe = null;
     this.swatches = [];
     this.baseColorIndex = 0;
@@ -509,6 +511,8 @@ export class ColorSwatchRail extends LitElement {
 
   _handleTrash(index) {
     if ((this.lockedByIndex || new Set()).has(index)) return;
+    const minSwatches = this._features.minSwatches ?? 0;
+    if ((this.swatches?.length ?? 0) <= minSwatches) return;
     const e = new CustomEvent('color-swatch-rail-delete', { bubbles: true, composed: true, detail: { index } });
     if (this.dispatchEvent(e) && !e.defaultPrevented && this.controller?.setState) {
       const swatches = this.swatches.filter((_, i) => i !== index);
@@ -530,7 +534,6 @@ export class ColorSwatchRail extends LitElement {
   }
 
   _handleColorPicker(index, anchorEl = null) {
-    if ((this.lockedByIndex || new Set()).has(index)) return;
     const hex = this.swatches[index]?.hex;
     const rect = anchorEl?.getBoundingClientRect?.();
     const anchorRect = rect
@@ -879,17 +882,19 @@ export class ColorSwatchRail extends LitElement {
       const showAddTopHere = isStacked && canAddGlobal && f.addLeft;
       const showAddBottomHere = isStacked && canAddGlobal && f.addRight;
       
-      const effectiveLocked = isLocked || isBase;
+      const effectiveLocked = isBase;
       const textColor = getContrastTextColor(swatch.hex);
       const useLightIcons = textColor.toUpperCase() === '#FFFFFF';
       const shadow = useLightIcons ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
       const showEdit = (f.colorPicker || f.editTint) && !editDisabled && !effectiveLocked;
+      const atMinSwatches = f.minSwatches != null && swatches.length <= f.minSwatches;
       
       
       const showHexCopyForThisSwatch = !(orientation === 'four-rows' && this.hexCopyFirstRowOnly && index >= FOUR_ROWS_COLS);
 
       
-      const baseColorIcon = f.baseColor
+      const showBaseColorBadge = f.baseColor && !this.hideBaseColorBadge;
+      const baseColorIcon = showBaseColorBadge
         ? (
           isBase && !f.colorBlindness
             ? html`
@@ -900,14 +905,15 @@ export class ColorSwatchRail extends LitElement {
         )
         : '';
       const baseColorBadgeClass = `base-color-badge${!isBase ? ' base-color-badge--hover-only' : ''}${isBase ? ' base-color-badge--active' : ''}`;
+      const trashDisabled = effectiveLocked || atMinSwatches;
       const topLeftIcons = html`
         <div class="top-actions top-actions--left">
-          ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+          ${showBaseColorBadge ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
         </div>
       `;
       const topRightIcons = html`
         <div class="top-actions top-actions--right">
-          ${f.drag && !effectiveLocked ? html`
+          ${f.drag ? html`
             <button
               type="button"
               class="icon-button icon-button--drag swatch-column-focusable"
@@ -919,17 +925,17 @@ export class ColorSwatchRail extends LitElement {
               @dragend=${this._handleDragEnd}
             >${icon('drag')}</button>
           ` : ''}
-          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${effectiveLocked ? 'Unlock color' : 'Lock color'} title=${effectiveLocked ? 'Unlock color' : 'Lock color'}>${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
+          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${isLocked ? 'Unlock color' : 'Lock color'} title=${isLocked ? 'Unlock color' : 'Lock color'}>${icon(isLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
           ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${(ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
-          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${trashDisabled} aria-disabled="${trashDisabled}">${icon('trash')}</button>` : ''}
         </div>
       `;
       
       const stackedIcons = html`
         <div class="stacked-row__icons">
-          ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+          ${showBaseColorBadge ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
           ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="Copy hex" title="Copy hex">${icon('copy')}</button>` : ''}
-          ${f.drag && !effectiveLocked ? html`
+          ${f.drag ? html`
             <button
               type="button"
               class="icon-button icon-button--drag swatch-column-focusable"
@@ -941,9 +947,9 @@ export class ColorSwatchRail extends LitElement {
               @dragend=${this._handleDragEnd}
             >${icon('drag')}</button>
           ` : ''}
-          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${effectiveLocked ? 'Unlock color' : 'Lock color'} title=${effectiveLocked ? 'Unlock color' : 'Lock color'}>${icon(effectiveLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
+          ${f.lock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${isLocked ? 'Unlock color' : 'Lock color'} title=${isLocked ? 'Unlock color' : 'Lock color'}>${icon(isLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
           ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${(ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
-          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${effectiveLocked} aria-disabled="${effectiveLocked}">${icon('trash')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${trashDisabled} aria-disabled="${trashDisabled}">${icon('trash')}</button>` : ''}
         </div>
       `;
       const stackedContent = html`
@@ -955,7 +961,7 @@ export class ColorSwatchRail extends LitElement {
       `;
 
       return html`
-        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''} ${f.rightActionsHoverOnly ? 'swatch-column--right-actions-hover-only' : ''} ${opts.cornerClass || ''}"
+        <div class="swatch-column ${isLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${f.drag ? 'swatch-column--draggable' : ''} ${f.rightActionsHoverOnly ? 'swatch-column--right-actions-hover-only' : ''} ${opts.cornerClass || ''}"
           data-contrast="${useLightIcons ? 'dark' : 'light'}"
           style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${useLightIcons ? 'brightness(0) invert(1)' : 'brightness(0)'}"
           data-swatch-index="${index}"
@@ -964,8 +970,8 @@ export class ColorSwatchRail extends LitElement {
           aria-label="Color ${index + 1}, ${swatch.hex}"
           @keydown=${(ev) => this._handleColumnKeydown(ev, index)}
           @focusout=${(ev) => this._handleColumnFocusout(ev)}
-          ?draggable=${f.drag && !effectiveLocked}
-          @dragstart=${(ev) => f.drag && !effectiveLocked && this._handleDragStart(index, ev)}
+          ?draggable=${f.drag}
+          @dragstart=${(ev) => f.drag && this._handleDragStart(index, ev)}
           @dragend=${this._handleDragEnd}
           @dragover=${this._handleDragOver}
           @dragleave=${this._handleDragLeave}
