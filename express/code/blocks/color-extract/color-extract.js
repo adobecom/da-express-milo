@@ -343,16 +343,38 @@ function buildSuggestedImages(row, onSelect) {
     const chips = [...palette.querySelectorAll('.color-extract-suggestion-chip')];
     const previewImage = preview.querySelector('img');
     if (previewImage) previewImage.draggable = false;
-    const hydratePalette = () => {
+    const hydratePalette = async () => {
+      const imgEl = previewImage?.naturalWidth ? previewImage : null;
+      const loadImg = () => {
+        if (imgEl) return Promise.resolve(imgEl);
+        if (!src) return Promise.resolve(null);
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = src;
+        });
+      };
+      const img = await loadImg();
+      if (!img) return;
       try {
-        if (previewImage?.naturalWidth) {
-          applyPaletteToChips(extractPaletteFromImageElement(previewImage, chips.length), chips);
-          return;
-        }
-      } catch { /* canvas tainted — fall through to crossOrigin load */ }
-      if (!src) return;
-      extractPaletteFromSrc(src, chips.length)
-        .then((colors) => applyPaletteToChips(colors, chips));
+        const maxWidth = 160;
+        const ratio = img.naturalHeight / img.naturalWidth || 1;
+        const w = Math.min(maxWidth, img.naturalWidth);
+        const h = Math.round(w * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        const imageData = canvas.getContext('2d').getImageData(0, 0, w, h);
+        const { extractColorsFromImage } = await import('./helpers/extractWorker.js');
+        const result = await extractColorsFromImage(imageData, w, h, chips.length);
+        applyPaletteToChips(result.colors, chips);
+      } catch {
+        // Fallback to naive sampling if worker fails
+        applyPaletteToChips(extractPaletteFromImageElement(img, chips.length), chips);
+      }
     };
     const scheduleHydrate = () => {
       if (window.requestIdleCallback) {
@@ -533,48 +555,26 @@ function buildLoadingOverlay() {
 
 /* ---------- Shared drag wiring ---------- */
 
-function attachWindowDragHandlers(block, dropzone) {
+function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) {
   const ac = new AbortController();
   const { signal } = ac;
   const isBlockInViewport = () => {
     const rect = block.getBoundingClientRect();
     return rect.bottom > 0 && rect.top < window.innerHeight;
   };
-  window.addEventListener('dragenter', (e) => {
-    if (isBlockInViewport() && isFileDrag(e)) {
-      preventDefaults(e);
-      block.classList.add('is-dragging');
-    }
-  }, { signal });
-  window.addEventListener('dragover', (e) => {
-    if (isBlockInViewport() && isFileDrag(e)) {
-      preventDefaults(e);
-      block.classList.add('is-dragging');
-    }
-  }, { signal });
-  window.addEventListener('dragleave', (e) => {
-    preventDefaults(e);
-    if (!e.relatedTarget && !document.elementFromPoint(e.clientX, e.clientY)) {
-      block.classList.remove('is-dragging');
-    }
-  }, { signal });
-  window.addEventListener('dragend', (e) => {
-    preventDefaults(e);
-    block.classList.remove('is-dragging');
-  }, { signal });
-  window.addEventListener('drop', (e) => {
-    if (!isBlockInViewport() || !isFileDrag(e)) return;
-    preventDefaults(e);
-    dropzone.handleFile(e.dataTransfer.files[0]);
-    setTimeout(() => block.classList.remove('is-dragging'), 200);
-  }, { signal });
-  const detach = () => ac.abort();
-  const observer = new MutationObserver(() => {
-    if (!block.isConnected) {
-      detach();
-      observer.disconnect();
-    }
+  window.addEventListener('dragenter', (e) => { if (isBlockInViewport() && isFileDrag(e)) { preventDefaults(e); block.classList.add('is-dragging'); } }, { signal });
+  window.addEventListener('dragover', (e) => { if (isBlockInViewport() && isFileDrag(e)) { preventDefaults(e); block.classList.add('is-dragging'); } }, { signal });
+  window.addEventListener('dragleave', (e) => { preventDefaults(e); if (!e.relatedTarget && !document.elementFromPoint(e.clientX, e.clientY)) block.classList.remove('is-dragging'); }, { signal });
+  window.addEventListener('dragend', (e) => { preventDefaults(e); block.classList.remove('is-dragging'); }, { signal });
+  window.addEventListener('drop', (e) => { if (!isBlockInViewport() || !isFileDrag(e)) return; preventDefaults(e); dropzone.handleFile(e.dataTransfer.files[0]); setTimeout(() => block.classList.remove('is-dragging'), 200); }, { signal });
+  const detach = () => { ac.abort(); if (dragOverlay) dragOverlay.remove(); if (loadingOverlay) loadingOverlay.remove(); };
+  // Sync is-dragging and is-loading from block to body-level overlays
+  const syncObserver = new MutationObserver(() => {
+    if (dragOverlay) dragOverlay.classList.toggle('is-dragging', block.classList.contains('is-dragging'));
+    if (loadingOverlay) loadingOverlay.classList.toggle('is-loading', block.classList.contains('is-loading'));
   });
+  syncObserver.observe(block, { attributes: true, attributeFilter: ['class'] });
+  const observer = new MutationObserver(() => { if (!block.isConnected) { detach(); observer.disconnect(); } });
   observer.observe(block.parentElement || document.body, { childList: true });
   return detach;
 }
@@ -780,7 +780,7 @@ function renderColorVariant(block, rows, config) {
   const innerContainer = createTag('div', { class: 'color-extract-inner' });
   landing.content.append(dropzone.container);
   if (suggestions) landing.content.append(suggestions);
-  landing.stage.append(dragOverlay, loadingOverlay);
+  document.body.append(dragOverlay, loadingOverlay);
 
   // Defer UI component imports until after LCP paint settles
   const toolbarPlaceholder = createTag('div', { class: 'color-extract-toolbar-slot' });
@@ -847,12 +847,25 @@ function renderColorVariant(block, rows, config) {
     });
   }));
 
+  // Move decorative full-bleed elements to section level when inside marquee wrapper.
+  // Must happen before innerContainer.append so landing.stage loses bg/fade before mounting.
+  const marqueeWrapper = block.closest('.color-extract-marquee-wrapper');
+  if (marqueeWrapper) {
+    const section = marqueeWrapper.closest('.section');
+    const landingBg = landing.stage.querySelector('.color-extract-landing-bg');
+    const landingFade = landing.stage.querySelector('.color-extract-landing-fade');
+    if (section) {
+      if (landingBg) section.insertBefore(landingBg, marqueeWrapper);
+      if (landingFade) marqueeWrapper.after(landingFade);
+    }
+  }
+
   innerContainer.append(landing.stage, edit.wrapper);
 
   block.replaceChildren(innerContainer);
 
   if (resolvedConfig.enableImageUpload) {
-    attachWindowDragHandlers(block, dropzone);
+    attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay);
   }
 }
 
@@ -1179,7 +1192,7 @@ async function renderGradientVariant(block, rows, config) {
   const innerContainer = createTag('div', { class: 'color-extract-inner' });
   landing.content.append(dropzone.container);
   if (suggestions) landing.content.append(suggestions);
-  landing.stage.append(dragOverlay, loadingOverlay);
+  document.body.append(dragOverlay, loadingOverlay);
 
   const toolbarPlaceholder = createTag('div', { class: 'color-extract-toolbar-slot' });
   edit.leftCol.prepend(toolbarPlaceholder);
@@ -1246,12 +1259,25 @@ async function renderGradientVariant(block, rows, config) {
     });
   }));
 
+  // Move decorative full-bleed elements to section level when inside marquee wrapper.
+  // Must happen before innerContainer.append so landing.stage loses bg/fade before mounting.
+  const marqueeWrapper = block.closest('.color-extract-marquee-wrapper');
+  if (marqueeWrapper) {
+    const section = marqueeWrapper.closest('.section');
+    const landingBg = landing.stage.querySelector('.color-extract-landing-bg');
+    const landingFade = landing.stage.querySelector('.color-extract-landing-fade');
+    if (section) {
+      if (landingBg) section.insertBefore(landingBg, marqueeWrapper);
+      if (landingFade) marqueeWrapper.after(landingFade);
+    }
+  }
+
   innerContainer.append(landing.stage, edit.wrapper);
 
   block.replaceChildren(innerContainer);
 
   if (resolvedConfig.enableImageUpload) {
-    attachWindowDragHandlers(block, dropzone);
+    attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay);
   }
 }
 
