@@ -42,7 +42,7 @@ export default class ColorThemeExpressController {
     harmonyRule = 'ANALOGOUS',
     baseColorIndex = 0,
     activeSwatchIndex,
-    name = 'Harmony Theme',
+    name = 'My Color Theme',
     config = {},
   } = {}) {
     this.subscribers = new Set();
