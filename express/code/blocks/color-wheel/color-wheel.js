@@ -637,7 +637,7 @@ export default async function decorate(block) {
         },
       });
 
-      adoptHeadline(layoutInstance);
+      adoptHeadline(block, layoutInstance);
       await layoutInstance.actionMenuReady;
 
       const actionMenuApi = layoutInstance.actionMenu;

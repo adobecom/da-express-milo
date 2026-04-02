@@ -966,8 +966,6 @@ export const style = css`
   .icon-button .icon-asset,
   .icon-button .icon-tint {
     display: inline-block;
-    width: 20px;
-    height: 20px;
     filter: var(--swatch-icon-filter);
   }
 
