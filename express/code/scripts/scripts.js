@@ -403,12 +403,12 @@ async function loadPage() {
   }
 
   /* region based redirect to homepage */
-  import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then(async (country) => {
-    if (country === 'cn' && !window.location.pathname.startsWith('/cn')) {
-      const resp = await fetch('/cn', { method: 'HEAD' });
+  const isCnParam = new URLSearchParams(window.location.search).get('country') === 'cn';
+  if ((isCnParam) && !window.location.pathname.startsWith('/cn')) {
+    fetch('/cn', { method: 'HEAD' }).then((resp) => {
       window.location.href = resp.ok ? '/cn' : '/404';
-    }
-  });
+    });
+  }
 
   document.head.querySelectorAll('meta').forEach((meta) => {
     if (meta.content && meta.content.includes('--none--')) {
