@@ -734,13 +734,31 @@ function renderAttribute(attribute, onRequestDrawer, key, productType) {
   }
 }
 
+const ATTRIBUTE_ORDER = {
+  zazzle_businesscard: ['style', 'cornerstyle', 'media'],
+  zazzle_shirt: ['style', 'color', 'size'],
+};
+
+function sortAttributes(attributes, productType) {
+  const order = ATTRIBUTE_ORDER[productType];
+  if (!order) return attributes;
+  return [...attributes].sort((a, b) => {
+    const indexA = order.indexOf(a.name);
+    const indexB = order.indexOf(b.name);
+    const posA = indexA >= 0 ? indexA : order.length;
+    const posB = indexB >= 0 ? indexB : order.length;
+    return posA - posB;
+  });
+}
+
 export function CustomizationInputs({ onRequestDrawer, productType }) {
   const { state } = useStore();
   if (!state) {
     return null;
   }
-  const productAttributes = (state.attributes || []).filter(
-    (attribute) => attribute.name !== 'quantity',
+  const productAttributes = sortAttributes(
+    (state.attributes || []).filter((attribute) => attribute.name !== 'quantity'),
+    productType,
   );
   return html`
     <div
