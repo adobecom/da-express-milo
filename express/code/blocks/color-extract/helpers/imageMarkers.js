@@ -60,7 +60,7 @@ function createZoomCanvas() {
 
 function renderMagnification(zoomCanvas, sourceCanvas, cx, cy) {
   const size = MARKER.MAGNIFIED_DIAMETER; // 80
-  const scale = MARKER.ZOOM_SCALE;        // 8
+  const scale = MARKER.ZOOM_SCALE; // 8
   const sampleR = Math.floor(size / scale / 2); // 5
   const ctx = zoomCanvas.getContext('2d');
 
@@ -98,7 +98,7 @@ const LOUPE_PATH = 'M 22 60 C 18.2 56 14.6 51.7 11.3 47.2 '
   + 'C 38.3 39.1 35.7 43.3 32.7 47.3 C 29.4 51.7 25.8 56 22 60 Z';
 
 function createMobileLoupe() {
-  const W = MARKER.LOUPE_WIDTH;  // 70
+  const W = MARKER.LOUPE_WIDTH; // 70
   const H = MARKER.LOUPE_HEIGHT; // 93
   const GAP = 12; // px between loupe tip and handle top edge
 

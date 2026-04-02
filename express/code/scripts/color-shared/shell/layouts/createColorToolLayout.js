@@ -419,9 +419,7 @@ export default async function createColorToolLayout(container, config = {}) {
     })
     .catch(() => null);
 
-  const toolbarReady = mountToolbar(
-    shell, root, slots.footer, resolvedToolbarConfig, toolbarModulePromise,
-  ).then(({
+  const toolbarReady = mountToolbar(shell, root, slots.footer, resolvedToolbarConfig, toolbarModulePromise).then(({
     toolbarHandle,
     stickyToolbarHandle,
     stickyObserver,

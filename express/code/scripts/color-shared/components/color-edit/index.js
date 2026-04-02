@@ -365,8 +365,8 @@ class ColorEdit extends LitElement {
             cornerRadius="partial"
           >
             ${this.palette.map((hex, i) => {
-              const validHex = hex.startsWith('#') ? hex : `#${hex}`;
-              return html`
+    const validHex = hex.startsWith('#') ? hex : `#${hex}`;
+    return html`
                 <sp-swatch
                   border="light"
                   cornerRounding="partial"
@@ -377,7 +377,7 @@ class ColorEdit extends LitElement {
                   aria-label="Color ${validHex}"
                 ></sp-swatch>
               `;
-            })}
+  })}
           </sp-swatch-group>
         </sp-theme>
       </div>
@@ -400,7 +400,7 @@ class ColorEdit extends LitElement {
 
   _onHexInput(e) {
     const field = e.target;
-    const value = field.value;
+    const { value } = field;
 
     const hex = value.replace(/#/g, '');
     const normalized = `#${hex}`;

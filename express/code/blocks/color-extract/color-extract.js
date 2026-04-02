@@ -485,7 +485,6 @@ function createFloatingToolbarMount(controller, variant) {
   return { element: container, mount };
 }
 
-
 /* ---------- Landing ---------- */
 
 function buildLandingStage(imageRow) {
@@ -867,7 +866,6 @@ function buildGradientEditStage(copyRow, imageRow) {
   };
 }
 
-
 /* ---------- Gradient controller proxy ---------- */
 
 function createGradientControllerProxy(editor) {
@@ -948,7 +946,6 @@ async function renderGradientVariant(block, rows, config) {
   edit.editorCol.append(gradientEditor.element);
 
   // Swatch rail loaded lazily — wired up in Promise.all below
-
 
   gradientEditor.element.addEventListener('pointerdown', () => {
     if (!gradientInteracting) {

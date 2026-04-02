@@ -33,8 +33,8 @@ class BaseColor extends LitElement {
             if (value === '' || value === 'true') return true;
             if (value === 'false') return false;
             return Boolean(value);
-          }
-        }
+          },
+        },
       },
       _hue: { type: Number, state: true },
       _saturation: { type: Number, state: true },
@@ -350,7 +350,7 @@ class BaseColor extends LitElement {
 
   _onColorValueInput(e) {
     const field = e.target;
-    const value = field.value;
+    const { value } = field;
     if (this.colorMode !== 'HEX') return;
 
     this._colorUpdatedFromPicker = false;
@@ -815,7 +815,7 @@ class BaseColor extends LitElement {
                 label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
                 valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
-                @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
+                @input=${(e) => (ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key))}
                 @change=${() => this._emitColorChangeEnd()}
               ></color-channel-slider>
             </div>
@@ -828,7 +828,7 @@ class BaseColor extends LitElement {
               label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
               label-visibility="none"
               @keydown=${(e) => this._onChannelKeyDown(e)}
-              @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
+              @input=${(e) => (ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key))}
               @change=${() => this._emitColorChangeEnd()}
             ></sp-textfield>
           </div>

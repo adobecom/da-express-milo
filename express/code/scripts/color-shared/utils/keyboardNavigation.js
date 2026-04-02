@@ -177,9 +177,7 @@ export function createKeyboardNavigation(container, options = {}) {
         event.preventDefault();
         config.onSelect?.(items[selectedIndex], selectedIndex);
       }
-      return;
     }
-
   }
 
   /**

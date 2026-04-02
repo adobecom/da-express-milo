@@ -1,4 +1,4 @@
-import { createTag } from '../../../scripts/utils.js';
+import { createTag } from '../../utils.js';
 
 export function createLoadMoreComponent(options = {}) {
   const {
@@ -6,7 +6,6 @@ export function createLoadMoreComponent(options = {}) {
     remaining = 0,
     label = 'Load more',
   } = options;
-
 
   const container = createTag('div', { class: 'load-more-container' });
 
@@ -17,8 +16,8 @@ export function createLoadMoreComponent(options = {}) {
   });
 
   const buttonText = createTag('span', { class: 'button-text' });
-  buttonText.textContent = remaining > 0 
-    ? `${label} (${remaining})` 
+  buttonText.textContent = remaining > 0
+    ? `${label} (${remaining})`
     : label;
 
   const spinner = createTag('span', { class: 'button-spinner' });
@@ -59,38 +58,37 @@ export function createLoadMoreComponent(options = {}) {
 
   return {
     element: container,
-    
+
     updateRemaining: (count) => {
-      buttonText.textContent = count > 0 
-        ? `${label} (${count})` 
+      buttonText.textContent = count > 0
+        ? `${label} (${count})`
         : label;
       button.setAttribute('aria-label', `Load ${count} more items`);
-      
+
       if (count === 0) {
         container.style.display = 'none';
       } else {
         container.style.display = 'block';
       }
     },
-    
+
     hide: () => {
       container.style.display = 'none';
     },
-    
+
     show: () => {
       container.style.display = 'block';
     },
-    
+
     setLoading: (loading) => {
       isLoading = loading;
       button.disabled = loading;
       spinner.style.display = loading ? 'inline-block' : 'none';
       buttonText.style.opacity = loading ? '0.5' : '1';
     },
-    
+
     destroy: () => {
       container.remove();
     },
   };
 }
-

@@ -49,12 +49,7 @@ export function hsvToRgb(h, s, v) {
   let gP;
   let bP;
 
-  if (h < 60) { rP = c; gP = x; bP = 0; }
-  else if (h < 120) { rP = x; gP = c; bP = 0; }
-  else if (h < 180) { rP = 0; gP = c; bP = x; }
-  else if (h < 240) { rP = 0; gP = x; bP = c; }
-  else if (h < 300) { rP = x; gP = 0; bP = c; }
-  else { rP = c; gP = 0; bP = x; }
+  if (h < 60) { rP = c; gP = x; bP = 0; } else if (h < 120) { rP = x; gP = c; bP = 0; } else if (h < 180) { rP = 0; gP = c; bP = x; } else if (h < 240) { rP = 0; gP = x; bP = c; } else if (h < 300) { rP = x; gP = 0; bP = c; } else { rP = c; gP = 0; bP = x; }
 
   return {
     r: (rP + m) * 255,

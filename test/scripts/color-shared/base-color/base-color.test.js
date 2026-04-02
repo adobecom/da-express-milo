@@ -223,7 +223,6 @@ describe('BaseColor component', () => {
       expect(spy.firstCall.args[0].detail.locked).to.be.true;
       expect(el._isLocked).to.be.true;
     });
-
   });
 
   describe('lock behavior', () => {

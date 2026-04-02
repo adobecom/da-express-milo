@@ -1,4 +1,4 @@
-import { createTag } from '../../../scripts/utils.js';
+import { createTag } from '../../utils.js';
 import { createColorWheelAdapter } from '../adapters/litComponentAdapters.js';
 
 export function createColorWheelModal(options = {}) {
@@ -10,13 +10,12 @@ export function createColorWheelModal(options = {}) {
     onCancel,
   } = options;
 
-
   let wheelAdapter = null;
   let currentColor = initialColor;
   let isOpen = false;
 
   function createOverlay() {
-    const overlay = createTag('div', { 
+    const overlay = createTag('div', {
       class: `color-wheel-modal-overlay ${modalType}`,
     });
 
@@ -35,7 +34,7 @@ export function createColorWheelModal(options = {}) {
     const header = createTag('div', { class: 'modal-header' });
     const title = createTag('h2', {});
     title.textContent = 'Edit Color';
-    const closeBtn = createTag('button', { 
+    const closeBtn = createTag('button', {
       class: 'modal-close-btn',
       type: 'button',
       'aria-label': 'Close',
@@ -47,7 +46,7 @@ export function createColorWheelModal(options = {}) {
     header.appendChild(closeBtn);
 
     const body = createTag('div', { class: 'modal-body' });
-    
+
     wheelAdapter = createColorWheelAdapter(currentColor, {
       onChange: (colorDetail) => {
         currentColor = colorDetail.color || currentColor;
@@ -59,17 +58,16 @@ export function createColorWheelModal(options = {}) {
 
     body.appendChild(wheelAdapter.element);
 
-
     const footer = createTag('div', { class: 'modal-footer' });
-    
-    const cancelBtn = createTag('button', { 
+
+    const cancelBtn = createTag('button', {
       class: 'modal-button cancel',
       type: 'button',
     });
     cancelBtn.textContent = 'Cancel';
     cancelBtn.addEventListener('click', close);
 
-    const saveBtn = createTag('button', { 
+    const saveBtn = createTag('button', {
       class: 'modal-button primary',
       type: 'button',
     });
@@ -125,11 +123,10 @@ export function createColorWheelModal(options = {}) {
     close,
     setColor,
     isOpen: () => isOpen,
-    
+
     destroy: () => {
       close();
       wheelAdapter?.destroy();
     },
   };
 }
-
