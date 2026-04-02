@@ -540,21 +540,27 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   const experimentalCta1Text = getMetadata('external-template-cta-link-text-1');
   const experimentalCta2Text = getMetadata('external-template-cta-link-text-2');
 
-  if ( experimentalCta1Url) {
-    cta.href = ensureAbsoluteUrl(experimentalCta1Url);
+  const isFreeStatic = !variants?.includes('flyer')
+    && !variants?.includes('t-shirt')
+    && !variants?.includes('print')
+    && template.licensingCategory === 'free'
+    && !containsVideo(template.pages);
+
+  if (experimentalCta1Url) {
+    cta.href = appendTemplateId(ensureAbsoluteUrl(experimentalCta1Url), template);
   }
 
-  if ( experimentalCta1Text) {
+  if (experimentalCta1Text) {
     cta.textContent = experimentalCta1Text;
     cta.title = experimentalCta1Text;
     cta.setAttribute('aria-label', `${experimentalCta1Text} ${getTemplateTitle(template)}`);
   }
 
   let secondaryCta = null;
-  if ( experimentalCta2Url) {
+  if (isFreeStatic && experimentalCta2Url) {
     const btnTitle = experimentalCta2Text || (editThisTemplate === 'edit this template' ? 'Edit this template' : editThisTemplate);
     secondaryCta = createTag('a', {
-      href: ensureAbsoluteUrl(experimentalCta2Url),
+      href: appendTemplateId(ensureAbsoluteUrl(experimentalCta2Url), template),
       title: btnTitle,
       class: 'button gray small secondary-template-cta',
       'aria-label': `${btnTitle} ${getTemplateTitle(template)}`,
