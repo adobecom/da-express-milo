@@ -564,7 +564,20 @@ export const style = css`
     position: static;
   }
 
-  
+  .swatch-column--right-actions-hover-only .top-actions--right {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+
+  .swatch-column--right-actions-hover-only:hover .top-actions--right,
+  .swatch-column--right-actions-hover-only:focus-visible .top-actions--right,
+  .swatch-column--right-actions-hover-only:has(.swatch-column-focusable:focus-visible) .top-actions--right {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+
   .add-slots-overlay {
     position: absolute;
     inset: 0;
@@ -678,7 +691,9 @@ export const style = css`
     opacity: 1;
     pointer-events: auto;
   }
-  .swatch-column:focus-within .add-slot--column {
+  .swatch-column:focus-within .add-slot--column,
+  .swatch-column:focus-visible .add-slot--column,
+  .swatch-column:has(.swatch-column-focusable:focus-visible) .add-slot--column {
     opacity: 1;
     pointer-events: auto;
   }
@@ -776,6 +791,9 @@ export const style = css`
   .base-color-badge [class^="sp-icon-"] {
     width: 20px;
     height: 20px;
+  }
+  .base-color-icon--target {
+    display: inline-flex;
   }
   .base-color-icon--circle {
     display: none;
