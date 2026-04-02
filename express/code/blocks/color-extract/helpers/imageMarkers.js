@@ -230,6 +230,7 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
 
   function startMag(marker, cx, cy, touch) {
     // Handle magnification (both desktop and mobile)
+    marker.el.classList.remove('is-active');
     marker.el.classList.add('is-magnified');
     const zc = marker.el.querySelector('.color-extract-marker-zoom');
     if (zc) renderMagnification(zc, canvas, cx, cy);
@@ -251,6 +252,7 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
 
   function endMag(marker) {
     marker.el.classList.remove('is-magnified');
+    marker.el.classList.remove('is-active');
     loupe.hide();
   }
 
@@ -334,9 +336,8 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
   /* ── Marker creation ── */
 
   function createMarker(index, hex, pctX, pctY) {
-    const active = index === activeIndex;
     const el = createTag('div', {
-      class: `color-extract-marker ${active ? 'is-active' : ''}`,
+      class: 'color-extract-marker',
       tabindex: '0',
       role: 'slider',
       'aria-label': `Color ${index + 1} picker handle`,
@@ -347,7 +348,7 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
     el.append(createTag('span', { class: 'color-extract-marker-dot', 'aria-hidden': 'true' }));
 
     el.style.setProperty('--marker-color', hex);
-    el.style.zIndex = active ? 10 : 1;
+    el.style.zIndex = 1;
     positionMarker(el, pctX, pctY);
 
     const marker = { el, pctX, pctY };
@@ -376,7 +377,7 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
     });
     connectorOrder = colors.map((_, i) => i);
     updateConnectors();
-    if (markers.length) setActiveMarker(0);
+    if (markers.length) controller.setBaseColorIndex(0);
   }
 
   /**
