@@ -553,16 +553,17 @@ export function renderThemeJPEG(themeData) {
   const gridCols = getGridForSwatchCount(swatchCount);
   const rowHeight = getRowHeightForSwatchCount(swatchCount);
   const padding = 30;
-  const gap = 20;
-  const swatchWidth = (width - 2 * padding - (gridCols - 1) * gap) / gridCols;
+  const colGap = 20;
+  const rowGap = 100;
+  const swatchWidth = (width - 2 * padding - (gridCols - 1) * colGap) / gridCols;
 
   let col = 0;
   let row = 0;
 
   for (let i = 0; i < swatchCount; i += 1) {
     const swatch = order ? swatches[order[i]] : swatches[i];
-    const x = padding + col * (swatchWidth + gap);
-    const y = padding + row * (rowHeight + gap);
+    const x = padding + col * (swatchWidth + colGap);
+    const y = padding + row * (rowHeight + rowGap);
 
     const r = Math.round(swatch.rgb.r * 255);
     const g = Math.round(swatch.rgb.g * 255);
