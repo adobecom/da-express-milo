@@ -756,6 +756,11 @@ export default async function decorate(comparisonBlock) {
       document.addEventListener('content-toggle:activated', initOnReveal);
       return;
     }
+    const tabMatch = parentSection?.id?.match(/^tab-(\d+)$/);
+    if (tabMatch) {
+      comparisonBlock.id = `pricing-table-${tabMatch[1]}`;
+    }
+
     await initializeComparisonTable(comparisonBlock);
 
     const { contentSections, footer } = processComparisonContent(comparisonBlock);
