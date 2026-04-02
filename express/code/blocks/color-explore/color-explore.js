@@ -20,6 +20,7 @@ const DEFAULTS = {
   enableFilters: true,
   enableSearch: true,
   apiEndpoint: '',
+  swatchVerticalMaxPerRow: 10,
 };
 const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
 const EVENTS = {
@@ -607,10 +608,10 @@ export default async function decorate(block) {
           updateLoadMoreState();
 
           activeRenderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-            await modalManager.openPaletteSwatchesModal(palette || {});
+            await modalManager.openPaletteSwatchesModal(palette || {}, { verticalMaxPerRow: config.swatchVerticalMaxPerRow });
           });
           activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
-            await modalManager.openPaletteSwatchesModal(palette || {});
+            await modalManager.openPaletteSwatchesModal(palette || {}, { verticalMaxPerRow: config.swatchVerticalMaxPerRow });
           });
 
           activeRenderer.on(EVENTS.SEARCH, async ({ query }) => {
@@ -714,10 +715,10 @@ export default async function decorate(block) {
       const modalManager = createModalManager();
 
       renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-        await modalManager.openPaletteSwatchesModal(palette || {});
+        await modalManager.openPaletteSwatchesModal(palette || {}, { verticalMaxPerRow: config.swatchVerticalMaxPerRow });
       });
       renderer.on(EVENTS.SHARE, async ({ palette }) => {
-        await modalManager.openPaletteSwatchesModal(palette || {});
+        await modalManager.openPaletteSwatchesModal(palette || {}, { verticalMaxPerRow: config.swatchVerticalMaxPerRow });
       });
 
       renderer.on(EVENTS.SEARCH, async ({ query }) => {
