@@ -322,6 +322,54 @@ function flattenOptionGroups(selector) {
   })));
 }
 
+function buildPillElement(option, isSelected, index, setSize, activeIndex, handlers) {
+  const { handleOptionClick, handleMiniPillKeyDown } = handlers;
+  const thumbnailUrl = updateImageUrl(option.imageUrl, 48);
+
+  const pillContainer = document.createElement('div');
+  pillContainer.className = 'pdpx-mini-pill-container';
+
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = `pdpx-mini-pill-image-container ${isSelected ? 'selected' : ''}`;
+  button.setAttribute('data-name', option.value);
+  button.setAttribute('data-title', option.title);
+  button.setAttribute('role', 'radio');
+  button.setAttribute('aria-current', isSelected ? 'true' : 'false');
+  button.setAttribute('aria-checked', isSelected ? 'true' : 'false');
+  button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
+  button.setAttribute('aria-posinset', String(index + 1));
+  button.setAttribute('aria-setsize', String(setSize));
+  button.setAttribute('aria-label', option.title);
+  button.setAttribute('tabindex', index === activeIndex ? '0' : '-1');
+  button.addEventListener('click', () => handleOptionClick(option));
+  button.addEventListener('keydown', handleMiniPillKeyDown);
+
+  const img = document.createElement('img');
+  img.className = 'pdpx-mini-pill-image';
+  img.src = thumbnailUrl;
+  img.alt = '';
+  img.setAttribute('aria-hidden', 'true');
+  button.appendChild(img);
+
+  pillContainer.addEventListener('mouseenter', (event) => {
+    positionTooltip(event.currentTarget, option.title);
+  });
+
+  const textContainer = document.createElement('div');
+  textContainer.className = 'pdpx-mini-pill-text-container';
+  if (option.priceDelta) {
+    const priceSpan = document.createElement('span');
+    priceSpan.className = 'pdpx-mini-pill-price';
+    priceSpan.textContent = option.priceDelta;
+    textContainer.appendChild(priceSpan);
+  }
+
+  pillContainer.appendChild(button);
+  pillContainer.appendChild(textContainer);
+  return pillContainer;
+}
+
 /**
  * Mini-pill carousel built imperatively to work with createSimpleCarousel.
  * The carousel mutates the DOM (moves children into a platform, adds faders),
@@ -330,14 +378,17 @@ function flattenOptionGroups(selector) {
  */
 function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
   const containerRef = useRef(null);
-  const carouselCleanupRef = useRef(null);
+  const carouselCleanupsRef = useRef([]);
   const { actions } = useStore();
   const { selector, selectedOptionValue, title } = attribute;
   let { helpLink } = attribute;
   const allOptions = flattenOptionGroups(selector);
+  const isSegmented = selector.optionGroups?.length > 1;
   const selectedOption = allOptions.find((option) => option.value === selectedOptionValue)
     || allOptions[0];
-  const selectedOptionTitle = selectedOption?.title || '';
+  const selectedOptionTitle = isSegmented && selectedOption?.groupTitle
+    ? `${selectedOption.title} (${selectedOption.groupTitle})`
+    : (selectedOption?.title || '');
   const groupLabelId = `pdpx-mini-pill-label-${toDomIdPart(attribute.name)}`;
   const groupValueId = `pdpx-mini-pill-selected-value-${toDomIdPart(attribute.name)}`;
   const hiddenInputId = `pdpx-hidden-input-${attribute.name}`;
@@ -401,78 +452,103 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
 
     const container = containerRef.current;
     container.innerHTML = '';
+    const handlers = { handleOptionClick, handleMiniPillKeyDown };
 
-    const selectedIndex = allOptions.findIndex((option) => option.value === selectedOptionValue);
-    const activeIndex = selectedIndex >= 0 ? selectedIndex : 0;
+    if (isSegmented) {
+      const sectionsWrapper = document.createElement('div');
+      sectionsWrapper.className = 'pdpx-mini-pill-sections-container';
 
-    allOptions.forEach((option, index) => {
-      const thumbnailUrl = updateImageUrl(option.imageUrl, 48);
-      const isSelected = option.value === selectedOptionValue;
+      const carouselTargets = [];
+      selector.optionGroups.forEach((group) => {
+        const sectionContainer = document.createElement('div');
+        sectionContainer.className = 'pdpx-mini-pill-section-container';
 
-      const pillContainer = document.createElement('div');
-      pillContainer.className = 'pdpx-mini-pill-container';
+        if (group.title) {
+          const sectionLabel = document.createElement('span');
+          sectionLabel.className = 'pdpx-pill-selector-section-label';
+          sectionLabel.textContent = group.title;
+          sectionContainer.appendChild(sectionLabel);
+        }
 
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = `pdpx-mini-pill-image-container ${isSelected ? 'selected' : ''}`;
-      button.setAttribute('data-name', option.value);
-      button.setAttribute('data-title', option.title);
-      button.setAttribute('role', 'radio');
-      button.setAttribute('aria-current', isSelected ? 'true' : 'false');
-      button.setAttribute('aria-checked', isSelected ? 'true' : 'false');
-      button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
-      button.setAttribute('aria-posinset', String(index + 1));
-      button.setAttribute('aria-setsize', String(allOptions.length));
-      button.setAttribute('aria-label', option.title);
-      button.setAttribute('tabindex', index === activeIndex ? '0' : '-1');
-      button.addEventListener('click', () => handleOptionClick(option));
-      button.addEventListener('keydown', handleMiniPillKeyDown);
+        const sectionOptions = document.createElement('div');
+        sectionOptions.className = 'pdpx-mini-pill-section-options-container';
+        sectionOptions.setAttribute('role', 'radiogroup');
+        sectionOptions.setAttribute('aria-orientation', 'horizontal');
+        sectionOptions.setAttribute('aria-label', group.title || `${title} options`);
 
-      const img = document.createElement('img');
-      img.className = 'pdpx-mini-pill-image';
-      img.src = thumbnailUrl;
-      img.alt = '';
-      img.setAttribute('aria-hidden', 'true');
-      button.appendChild(img);
+        const groupOptions = group.options || [];
+        const groupSelectedIndex = groupOptions.findIndex(
+          (option) => option.value === selectedOptionValue,
+        );
+        const groupActiveIndex = groupSelectedIndex >= 0 ? groupSelectedIndex : 0;
 
-      pillContainer.addEventListener('mouseenter', (event) => {
-        positionTooltip(event.currentTarget, option.title);
+        groupOptions.forEach((option, index) => {
+          const isSelected = option.value === selectedOptionValue;
+          const pill = buildPillElement(
+            option,
+            isSelected,
+            index,
+            groupOptions.length,
+            groupActiveIndex,
+            handlers,
+          );
+          sectionOptions.appendChild(pill);
+        });
+
+        sectionContainer.appendChild(sectionOptions);
+        sectionsWrapper.appendChild(sectionContainer);
+        carouselTargets.push(sectionOptions);
       });
 
-      const textContainer = document.createElement('div');
-      textContainer.className = 'pdpx-mini-pill-text-container';
-      if (option.priceDelta) {
-        const priceSpan = document.createElement('span');
-        priceSpan.className = 'pdpx-mini-pill-price';
-        priceSpan.textContent = option.priceDelta;
-        textContainer.appendChild(priceSpan);
-      }
+      container.appendChild(sectionsWrapper);
 
-      pillContainer.appendChild(button);
-      pillContainer.appendChild(textContainer);
-      container.appendChild(pillContainer);
-    });
+      Promise.all(
+        carouselTargets.map((target) => createSimpleCarousel(
+          '.pdpx-mini-pill-container',
+          target,
+          { ariaLabel: `${title} options`, centerActive: true, activeClass: 'selected' },
+        )),
+      ).then((carousels) => {
+        carouselCleanupsRef.current = carousels.filter(Boolean).map((c) => c.cleanup);
+      });
+    } else {
+      const selectedIndex = allOptions.findIndex(
+        (option) => option.value === selectedOptionValue,
+      );
+      const activeIndex = selectedIndex >= 0 ? selectedIndex : 0;
 
-    createSimpleCarousel('.pdpx-mini-pill-container', container, {
-      ariaLabel: `${title} options`,
-      centerActive: true,
-      activeClass: 'selected',
-    }).then((carousel) => {
-      if (carousel) {
-        carouselCleanupRef.current = carousel.cleanup;
-      }
-    });
+      allOptions.forEach((option, index) => {
+        const isSelected = option.value === selectedOptionValue;
+        const pill = buildPillElement(
+          option,
+          isSelected,
+          index,
+          allOptions.length,
+          activeIndex,
+          handlers,
+        );
+        container.appendChild(pill);
+      });
+
+      createSimpleCarousel('.pdpx-mini-pill-container', container, {
+        ariaLabel: `${title} options`,
+        centerActive: true,
+        activeClass: 'selected',
+      }).then((carousel) => {
+        if (carousel) {
+          carouselCleanupsRef.current = [carousel.cleanup];
+        }
+      });
+    }
 
     return () => {
-      if (carouselCleanupRef.current) {
-        carouselCleanupRef.current();
-        carouselCleanupRef.current = null;
-      }
+      carouselCleanupsRef.current.forEach((fn) => fn());
+      carouselCleanupsRef.current = [];
     };
   }, [
     attribute.name,
     title,
-    allOptions.map((o) => o.value).join(','),
+    selector.optionGroups?.map((g) => (g.options || []).map((o) => o.value).join(',')).join('|'),
   ]);
 
   // Update selected state when selection changes
