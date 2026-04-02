@@ -66,8 +66,8 @@ export function createDependencyLoader() {
   }
 
   function isLitLoaded(componentName) {
-    return loaded.lit.has(componentName) || 
-           !!window.customElements.get(componentName);
+    return loaded.lit.has(componentName)
+           || !!window.customElements.get(componentName);
   }
 
   return {

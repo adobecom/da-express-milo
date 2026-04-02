@@ -59,6 +59,7 @@ export function downloadAsJPEG(swatches, themeName = 'Color Palette') {
     ctx.fillRect(x, headerHeight, colWidth, swatchHeight);
 
     const { r, g, b } = hexToRgb(hex);
+    // eslint-disable-next-line no-unused-vars
     const tc = textColor(hex);
     const infoY = headerHeight + swatchHeight;
 
@@ -97,6 +98,7 @@ export function downloadAsASE(swatches, themeName = 'Color Palette') {
   const groupName = themeName;
   const enc = new TextEncoder();
 
+  // eslint-disable-next-line no-unused-vars
   function writeString(view, offset, str) {
     const encoded = enc.encode(str);
     for (let i = 0; i < encoded.length; i += 1) {

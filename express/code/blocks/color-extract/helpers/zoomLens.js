@@ -8,7 +8,7 @@ import { MARKER } from './constants.js';
  * @param {HTMLCanvasElement} canvas - The extraction canvas
  * @returns {{ element: HTMLElement, show: Function, move: Function, hide: Function }}
  */
-export function createZoomLens(canvas) {
+export default function createZoomLens(canvas) {
   const size = MARKER.ZOOM_SIZE;
   const scale = MARKER.ZOOM_SCALE;
   const sampleRadius = Math.floor(size / scale / 2);

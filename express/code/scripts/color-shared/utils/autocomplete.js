@@ -92,7 +92,8 @@ export function generateSuggestions(query) {
  * @param {number} [options.throttleDelay=300] - Throttle delay in ms
  * @param {number} [options.debounceDelay=500] - Debounce delay in ms
  * @param {number} [options.minLength=2] - Minimum query length to trigger suggestions
- * @returns {{ handleInput: Function, inputHandler: Function, clear: Function, getLastQuery: Function }}
+ * @returns {{ handleInput: Function, inputHandler: Function, clear: Function,
+ *   getLastQuery: Function }}
  */
 export function createAutocomplete(onSuggestions, options = {}) {
   const {

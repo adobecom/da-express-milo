@@ -374,9 +374,11 @@ self.addEventListener('message', function(e) {
 });
 `; /* eslint-enable no-var, prefer-arrow-callback, func-style, no-use-before-define */
 
+/* eslint-disable no-underscore-dangle */
 let _worker = null;
 let _pendingRequests = {};
 let _nextId = 0;
+/* eslint-enable no-underscore-dangle */
 
 function getWorker() {
   if (!_worker) {
@@ -414,7 +416,8 @@ function getWorker() {
 export function extractColorsFromImage(imageData, width, height, swatchCount, mood = 'colorful') {
   return new Promise((resolve, reject) => {
     const worker = getWorker();
-    const id = _nextId++;
+    const id = _nextId;
+    _nextId += 1;
     _pendingRequests[id] = { resolve, reject };
     worker.postMessage({ id, imageData, width, height, swatchCount, mood });
   });

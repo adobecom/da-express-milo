@@ -8,7 +8,7 @@ const MAX_HISTORY = 50;
  * @param {(canUndo: boolean, canRedo: boolean) => void} onUpdate - Called when stack changes
  * @returns {{ push: Function, undo: Function, redo: Function, clear: Function }}
  */
-export function createHistoryManager(onRestore, onUpdate) {
+export default function createHistoryManager(onRestore, onUpdate) {
   const undoStack = [];
   const redoStack = [];
 

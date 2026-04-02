@@ -723,7 +723,7 @@ describe('createDrawer', function drawerSuite() {
 
       expect(provider.saveTheme.calledOnce).to.be.true;
       const [, payload] = provider.saveTheme.firstCall.args;
-      const swatches = payload.representations[0]['colortheme#data'].swatches;
+      const { swatches } = payload.representations[0]['colortheme#data'];
       expect(swatches.length).to.equal(5);
 
       drawer.close();

@@ -38,7 +38,8 @@ export default class CCLibraryProvider extends BaseProvider {
   /**
    * @param {string} name - Library name
    * @param {Object} [options]
-   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI (e.g. NETWORK_ERROR toast)
+   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI
+   *   (e.g. NETWORK_ERROR toast)
    */
   async createLibrary(name, options = {}) {
     const fn = () => this.#actions.createLibrary(name);
@@ -55,7 +56,8 @@ export default class CCLibraryProvider extends BaseProvider {
   /**
    * @param {Object} [params]
    * @param {Object} [options]
-   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI (e.g. NETWORK_ERROR toast)
+   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI
+   *   (e.g. NETWORK_ERROR toast)
    */
   async fetchUserLibraries(params = {}, options = {}) {
     return this.fetchLibraries(
@@ -70,7 +72,8 @@ export default class CCLibraryProvider extends BaseProvider {
 
   /**
    * @param {Object} [options]
-   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI (e.g. NETWORK_ERROR toast)
+   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI
+   *   (e.g. NETWORK_ERROR toast)
    */
   async saveTheme(libraryId, themeData, options = {}) {
     const fn = () => this.#actions.saveTheme(libraryId, themeData);
@@ -80,7 +83,8 @@ export default class CCLibraryProvider extends BaseProvider {
 
   /**
    * @param {Object} [options]
-   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI (e.g. NETWORK_ERROR toast)
+   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI
+   *   (e.g. NETWORK_ERROR toast)
    */
   async saveGradient(libraryId, gradientData, options = {}) {
     const fn = () => this.#actions.saveGradient(libraryId, gradientData);

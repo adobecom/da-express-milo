@@ -19,7 +19,7 @@ describe('BaseColor component', () => {
     sinon.restore();
     if (el?.parentNode) el.remove();
     el = null;
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise((r) => { setTimeout(r, 50); });
   });
 
   describe('registration and defaults', () => {
@@ -223,7 +223,6 @@ describe('BaseColor component', () => {
       expect(spy.firstCall.args[0].detail.locked).to.be.true;
       expect(el._isLocked).to.be.true;
     });
-
   });
 
   describe('lock behavior', () => {

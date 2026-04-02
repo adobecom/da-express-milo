@@ -111,16 +111,14 @@ export default async function decorate(block) {
     let restoringFromHistory = false;
     let pushingState = false;
 
-    function getCurrentPaletteColors() {
-      return (controller.getState()?.swatches || []).map((s) => s.hex);
-    }
+    const getCurrentPaletteColors = () => (controller.getState()?.swatches || []).map((s) => s.hex);
 
-    function pushCurrentPalette() {
+    const pushCurrentPalette = () => {
       if (restoringFromHistory) return;
       pushingState = true;
       actionMenuApi?.pushState?.(getCurrentPaletteColors());
       pushingState = false;
-    }
+    };
 
     const wheelEl = createTag('color-wheel-express', {
       'aria-label': 'Color wheel',
@@ -132,20 +130,23 @@ export default async function decorate(block) {
     });
     wheelEl.showLines = true;
 
-    function computeAndSetConflictPairs(colors) {
+    const computeAndSetConflictPairs = (colors) => {
       const allPairs = [];
       const seen = new Set();
       TYPE_ORDER.forEach((type) => {
         getConflictPairs(colors, type).forEach(([i, j]) => {
           const key = `${i}:${j}`;
-          if (!seen.has(key)) { seen.add(key); allPairs.push([i, j]); }
+          if (!seen.has(key)) {
+            seen.add(key);
+            allPairs.push([i, j]);
+          }
         });
       });
       conflicts.setConflicts(allPairs.length > 0);
       wheelEl.conflictPairs = allPairs;
-    }
+    };
 
-    function syncRailConflicts() {
+    const syncRailConflicts = () => {
       railUnsub?.();
       const rail = canvas.querySelector('color-swatch-rail');
       if (!rail?.controller?.subscribe) return;
@@ -167,7 +168,7 @@ export default async function decorate(block) {
         }
         syncingFromRail = false;
       });
-    }
+    };
 
     controllerUnsubscribe = controller.subscribe((state) => {
       if (syncingFromRail) return;
