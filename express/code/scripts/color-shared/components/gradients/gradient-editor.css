@@ -73,11 +73,11 @@
 }
 
 .gradient-editor--layout-responsive .gradient-editor-handle:first-child {
-  transform: translateX(11px);
+  transform: translateX(9px);
 }
 
 .gradient-editor--layout-responsive .gradient-editor-handle:last-child {
-  transform: translateX(-11px);
+  transform: translateX(-9px);
 }
 
 .gradient-editor--layout-responsive .gradient-editor-handle:first-child::before,
