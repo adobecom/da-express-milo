@@ -2,6 +2,48 @@
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
 import { gradientApiResponsesToGradients, themesToGradients } from '../../../libs/services/providers/transforms.js';
 
+const MOCK_PALETTES = [
+  {
+    id: 'mock-palette-5',
+    name: 'Eternal Sunshine of the Spotless Mind',
+    colors: ['#FFE0FE', '#EDC3FF', '#BCB2FF', '#ACAAED', '#B3BBED'],
+    coreColors: ['#FFE0FE', '#EDC3FF', '#BCB2FF', '#ACAAED', '#B3BBED'],
+    category: 'neutral',
+    tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+  },
+  {
+    id: 'mock-palette-8',
+    name: 'Misty Terrain',
+    colors: ['#7B9EA6', '#D0ECF2', '#573E2F', '#C3927C', '#EB5733', '#F2EFE8', '#E9E9E9', '#F8F8F8'],
+    coreColors: ['#7B9EA6', '#D0ECF2', '#573E2F', '#C3927C', '#EB5733', '#F2EFE8', '#E9E9E9', '#F8F8F8'],
+    category: 'nature',
+    tags: ['Nature', 'Earth', 'Warm', 'Water'],
+  },
+];
+
+function palettesToGradients(palettes) {
+  return palettes.map((palette) => {
+    const colors = palette.colors || palette.coreColors || [];
+    const colorStops = colors.map((color, index) => ({
+      color,
+      position: colors.length > 1 ? index / (colors.length - 1) : 0,
+    }));
+    return {
+      id: palette.id.replace('palette', 'gradient'),
+      name: palette.name,
+      type: 'linear',
+      angle: 90,
+      colorStops,
+      coreColors: colors,
+      likes: 0,
+      liked: false,
+      creator: { name: '', guid: '', imageUrl: null },
+      tags: palette.tags || [],
+      href: null,
+    };
+  });
+}
+
 export const PALETTE_10_COLORS_MODAL = {
   id: 'palette-1',
   name: 'Eternal Sunshine of the Spotless Mind',
@@ -175,14 +217,20 @@ export function createColorDataService(config) {
           }
         }
 
-        cache = [];
+        const mockData = config.variant === 'gradients'
+          ? withDerivedMeta(palettesToGradients(MOCK_PALETTES))
+          : withDerivedMeta(MOCK_PALETTES);
+        cache = mockData;
         return cache;
       } catch (error) {
         window.lana?.log(`[DataService] Fetch error: ${error?.message}`, {
           tags: 'color-explore,data-service',
           severity: 'error',
         });
-        cache = [];
+        const mockData = config.variant === 'gradients'
+          ? withDerivedMeta(palettesToGradients(MOCK_PALETTES))
+          : withDerivedMeta(MOCK_PALETTES);
+        cache = mockData;
         return cache;
       } finally {
         fetchPromise = null;
