@@ -487,12 +487,12 @@ export class ColorSwatchRail extends LitElement {
     return this._copyTextFallback(text);
   }
 
-  async _handleCopy(hex, target = null) {
+  async _handleCopy(hex) {
     if (!hex) return;
     try {
       const copied = await this._copyText(hex);
       if (!copied) throw new Error('clipboard_copy_failed');
-      this._showCopyFeedback(target);
+      showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 1000000, anchor: this.closest('.strip-container') || undefined });
       announceToScreenReader('Copied to clipboard');
     } catch (error) {
       showExpressToast({ message: 'Failed to copy', variant: 'negative', timeout: 2000 });
