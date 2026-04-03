@@ -40,7 +40,7 @@
 }
 
 .ax-color-modal-content .gradients-modal-content__preview .gradient-editor {
-  width: 100% !important;
+  width: 100%;
 }
 
 .ax-color-modal-content .gradients-modal-content__preview .gradient-editor--layout-responsive .gradient-editor-handle:first-child {
