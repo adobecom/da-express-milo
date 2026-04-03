@@ -646,7 +646,8 @@ export function createStripContainerRenderer(options) {
       .catch(() => {});
 
     const outsideHandler = (evt) => {
-      if (!popover.contains(evt.target) && !anchorElement.contains(evt.target)) {
+      const path = evt.composedPath?.() || [];
+      if (!path.includes(popover)) {
         closeActiveColorEditor();
       }
     };
