@@ -802,9 +802,19 @@ function renderAttribute(attribute, onRequestDrawer, key, productType) {
         productType=${productType}
       />`;
     case 'radio':
-      return html`<${RadioSelector} key=${key} attribute=${attribute} productType=${productType} />`;
+      return html`<${DropdownSelector}
+        key=${key}
+        attribute=${attribute}
+        onRequestDrawer=${onRequestDrawer}
+        productType=${productType}
+      />`;
     case 'checkbox':
-      return html`<${CheckboxSelector} key=${key} attribute=${attribute} productType=${productType} />`;
+      return html`<${DropdownSelector}
+        key=${key}
+        attribute=${attribute}
+        onRequestDrawer=${onRequestDrawer}
+        productType=${productType}
+      />`;
     default:
       return null;
   }
