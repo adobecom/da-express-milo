@@ -35,6 +35,7 @@ const onToken = async (getMetadata, data, getConfig) => {
 };
 
 export default async function initGoogleLogin(loadIms, getMetadata, loadScript, getConfig) {
+  console.log('[local] initGoogleLogin called');
   try {
     await loadIms();
   } catch {
