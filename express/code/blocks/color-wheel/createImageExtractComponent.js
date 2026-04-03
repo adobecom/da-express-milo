@@ -3,7 +3,7 @@ import { createTag } from '../../scripts/utils.js';
 import { rgbToHex } from '../../libs/color-components/utils/ColorConversions.js';
 import { DEFAULTS, MOODS } from '../color-extract/helpers/constants.js';
 import { extractColorsFromImage } from '../color-extract/helpers/extractWorker.js';
-import { createImageMarkers } from '../color-extract/helpers/imageMarkers.js';
+import createImageMarkers from '../color-extract/helpers/imageMarkers.js';
 import createZoomLens from '../color-extract/helpers/zoomLens.js';
 import createMoodSelector from '../color-extract/helpers/moodSelector.js';
 import createToolbar from '../color-extract/helpers/toolbar.js';
