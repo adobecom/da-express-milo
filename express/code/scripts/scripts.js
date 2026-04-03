@@ -405,8 +405,7 @@ async function loadPage() {
   /* region based redirect to CN homepage
      Guards: adobe.com origin only (not AEM preview/live), not already on /cn,
      and not a 404 page (which would create an infinite redirect loop) */
-  const isAdobeOrigin = /^(www\.stage\.|www\.)adobe\.com$/.test(window.location.hostname);
-  if (isAdobeOrigin && !window.location.pathname.startsWith('/cn') && !window.isErrorPage) {
+  if (!window.location.pathname.startsWith('/cn') && !window.isErrorPage) {
     import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
       if (country === 'cn') { window.location.href = '/cn'; }
     });
