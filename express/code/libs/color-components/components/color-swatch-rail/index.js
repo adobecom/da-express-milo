@@ -19,7 +19,7 @@ const MAX_SWATCHES = 10;
 const MAX_SWATCHES_TWO_ROWS = 10;
 const TWO_ROWS_COLORS_PER_ROW = 5;
 const MAX_SWATCHES_FOUR_ROWS = 20;
-const FOUR_ROWS_COLS = 5;
+
 const FOUR_ROWS_ROWS = 4;
 const DEFAULT_VERTICAL_MAX_PER_ROW = 5;
 const TINT_BAND_STOPS = [
@@ -148,16 +148,13 @@ const conflictIcon = () => html`
 
 
 function buildDisplaySwatchesForFourRowsCB(swatches) {
-  const first5 = [];
-  for (let i = 0; i < FOUR_ROWS_COLS; i += 1) {
-    first5.push(swatches[i]?.hex ? { hex: swatches[i].hex } : { hex: '#e5e5e5' });
-  }
-  const out = first5.map((s) => ({ hex: s.hex, conflict: false }));
-  const hexes = first5.map((s) => s.hex);
+  const paletteColors = swatches.map((s) => (s?.hex ? { hex: s.hex } : { hex: '#e5e5e5' }));
+  const out = paletteColors.map((s) => ({ hex: s.hex, conflict: false }));
+  const hexes = paletteColors.map((s) => s.hex);
   TYPE_ORDER.forEach((type) => {
     const pairs = getConflictPairs(hexes, type);
     const conflicting = getConflictingIndices(pairs);
-    first5.forEach((s, i) => {
+    paletteColors.forEach((s, i) => {
       out.push({
         hex: simulateHexService(s.hex, type),
         conflict: conflicting.has(i),
@@ -1089,7 +1086,7 @@ export class ColorSwatchRail extends LitElement {
       const tintBands = isTintSelected ? this._buildTintBands(swatch.hex) : [];
       
       
-      const showHexCopyForThisSwatch = !(orientation === 'four-rows' && this.hexCopyFirstRowOnly && index >= FOUR_ROWS_COLS);
+      const showHexCopyForThisSwatch = !(orientation === 'four-rows' && this.hexCopyFirstRowOnly && index >= swatches.length);
 
       
       const baseColorIcon = f.baseColor
@@ -1246,22 +1243,23 @@ export class ColorSwatchRail extends LitElement {
 
     
     if (orientation === 'four-rows') {
+      const colCount = swatches.length;
       const showEmpty = f.emptyStrip && swatches.length < MAX_SWATCHES_FOUR_ROWS;
       const useCBData = this.hexCopyFirstRowOnly;
       const displaySwatches = useCBData ? buildDisplaySwatchesForFourRowsCB(swatches) : null;
       const allItems = [];
       for (let r = 0; r < FOUR_ROWS_ROWS; r += 1) {
-        const start = r * FOUR_ROWS_COLS;
+        const start = r * colCount;
         const rowSwatches = useCBData && displaySwatches
-          ? displaySwatches.slice(start, start + FOUR_ROWS_COLS)
-          : swatches.slice(start, start + FOUR_ROWS_COLS);
+          ? displaySwatches.slice(start, start + colCount)
+          : swatches.slice(start, start + colCount);
         const isSimulatedRow = useCBData && r >= 1;
         rowSwatches.forEach((swatch, c) => {
           const idx = start + c;
           allItems.push(renderSwatch(swatch, idx, { isSimulatedCell: isSimulatedRow }));
         });
         const isLastRow = r === FOUR_ROWS_ROWS - 1;
-        const showEmptySlot = isLastRow && showEmpty && (useCBData ? swatches.length < MAX_SWATCHES_FOUR_ROWS : rowSwatches.length < FOUR_ROWS_COLS);
+        const showEmptySlot = isLastRow && showEmpty && (useCBData ? swatches.length < MAX_SWATCHES_FOUR_ROWS : rowSwatches.length < colCount);
         if (showEmptySlot) {
           allItems.push(html`
             <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
@@ -1273,7 +1271,7 @@ export class ColorSwatchRail extends LitElement {
         }
       }
       return html`
-        <div class="swatch-rail vertical--four-rows" data-orientation="vertical">
+        <div class="swatch-rail vertical--four-rows" data-orientation="vertical" style="--four-rows-cols: ${colCount}">
           ${allItems}
         </div>
       `;

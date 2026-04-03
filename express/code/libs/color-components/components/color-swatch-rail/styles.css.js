@@ -188,9 +188,11 @@ export const style = css`
   
   .swatch-rail[data-orientation="vertical"].vertical--four-rows {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(var(--four-rows-cols, 5), 1fr);
     grid-template-rows: repeat(4, 1fr);
     gap: var(--swatch-rail-gap, var(--spacing-50));
+    border-radius: var(--Corner-radius-corner-radius-200);
+    overflow: hidden;
   }
   
   :host([hex-copy-first-row-only]) .swatch-rail[data-orientation="vertical"].vertical--four-rows {
@@ -225,18 +227,6 @@ export const style = css`
 
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column {
     border-radius: 0;
-  }
-  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:nth-child(1) {
-    border-radius: var(--Corner-radius-corner-radius-200) 0 0 0;
-  }
-  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:nth-child(5) {
-    border-radius: 0 var(--Corner-radius-corner-radius-200) 0 0;
-  }
-  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:nth-child(16) {
-    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200);
-  }
-  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:last-child {
-    border-radius: 0 0 var(--Corner-radius-corner-radius-200) 0;
   }
 
   

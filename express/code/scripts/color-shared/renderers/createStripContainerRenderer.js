@@ -17,7 +17,6 @@ import { announceToScreenReader } from '../spectrum/utils/a11y.js';
 const COLORS_PER_ROW_TWO_ROWS = 5;
 
 const MAX_CB_COLUMNS = 10;
-const FOUR_ROWS_CB_COLS = 5;
 
 const DEFAULT_ORIENTATIONS = ['horizontal', 'stacked', 'vertical'];
 const MOBILE_BREAKPOINT_QUERY = '(max-width: 599px)';
@@ -164,10 +163,9 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
   railWrapEl.style.gridRow = '1 / -1';
 
   const titleUnsubs = [];
-  const first5Hexes = () => {
+  const getCurrentHexes = () => {
     const state = controller?.getState?.();
-    const all = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
-    return all.slice(0, FOUR_ROWS_CB_COLS);
+    return (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
   };
 
   TYPE_ORDER.forEach((type, rowIndex) => {
@@ -188,7 +186,7 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
     containerEl.appendChild(titleCell);
 
     const updatePassFail = () => {
-      const hexes = first5Hexes();
+      const hexes = getCurrentHexes();
       const pairs = hexes.length ? getConflictPairs(hexes, type) : [];
       titleCell.classList.toggle('pass', pairs.length === 0);
       titleCell.classList.toggle('fail', pairs.length > 0);
@@ -204,7 +202,7 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
   };
 }
 
-function createMobileCBLayout(controller, maxColumns = FOUR_ROWS_CB_COLS) {
+function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
   const container = createTag('div', { class: 'strip-cb-mobile-layout' });
 
   const header = createTag('div', { class: 'strip-cb-mobile-header' });
@@ -306,7 +304,7 @@ function createMobileCBLayout(controller, maxColumns = FOUR_ROWS_CB_COLS) {
 export function createFourRowsColorBlindnessLayout(adapter) {
   const controller = getAdapterController(adapter);
   // eslint-disable-next-line no-use-before-define
-  const summary = createConflictSummaryBlock(controller, FOUR_ROWS_CB_COLS);
+  const summary = createConflictSummaryBlock(controller);
   const outer = createTag('div', { class: 'strip-with-color-blindness strip-with-color-blindness--four-rows' });
 
   const desktopLayout = createTag('div', { class: 'strip-cb-desktop-layout' });
@@ -320,7 +318,7 @@ export function createFourRowsColorBlindnessLayout(adapter) {
 
   let mobileLayout = null;
   if (controller) {
-    mobileLayout = createMobileCBLayout(controller, FOUR_ROWS_CB_COLS);
+    mobileLayout = createMobileCBLayout(controller);
     outer.appendChild(mobileLayout);
 
     createFourRowsColorBlindnessTitlesOnly(controller, gridContainer, railContainer);
