@@ -4,11 +4,10 @@ import { createContrastRenderer } from './factory/createContrastRenderer.js';
 import loadContrastCheckerPlaceholders from './utils/placeholders.js';
 import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
-import { CONTRAST_PRESETS, createDefaultActionMenuConfig } from './utils/contrastConstants.js';
-import { hsvToRgb, rgbToHex } from './utils/contrastUtils.js';
+import { createDefaultActionMenuConfig } from './utils/contrastConstants.js';
 import parseContent from './utils/parseContent.js';
 import syncPaletteSelections from './utils/paletteState.js';
-import { isMobileOrTabletViewport } from '../../scripts/color-shared/utils/utilities.js';
+import { isMobileOrTabletViewport, createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 
 const blockInstances = new WeakMap();
@@ -20,28 +19,20 @@ function getDefaultConfig() {
   };
 }
 
-function pickRandomPreset(strings) {
-  const preset = CONTRAST_PRESETS[Math.floor(Math.random() * CONTRAST_PRESETS.length)];
-  const toHex = ([h, s, v]) => {
-    const { r, g, b } = hsvToRgb(h, s / 100, v / 100);
-    return rgbToHex(r, g, b);
+function getPalette(strings) {
+  const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
+  const colors = getResolvedPalette();
+  const name = getResolvedPaletteName() || strings.randomPresetName;
+
+  const dataService = createContrastDataService();
+  const { brightest, darkest } = dataService.findBrightestAndDarkest(colors);
+
+  return {
+    foreground: brightest || colors[0],
+    background: darkest || colors[1],
+    colors,
+    name,
   };
-  const colors = [toHex(preset.fg), toHex(preset.bg)];
-  return { foreground: colors[0], background: colors[1], colors, name: strings.randomPresetName };
-}
-
-function getPalette(config, strings) {
-  if (config.foreground && config.background) {
-    const colors = [config.foreground, config.background];
-    return {
-      foreground: colors[0],
-      background: colors[1],
-      colors,
-      name: strings.customPaletteName,
-    };
-  }
-
-  return pickRandomPreset(strings);
 }
 
 async function mountContrastChecker(slot, { config, layout, initialPalette }) {
@@ -156,7 +147,7 @@ export default async function decorate(block) {
     };
     block.replaceChildren();
 
-    const initialPalette = getPalette(config, strings);
+    const initialPalette = getPalette(strings);
     layoutInstance = await createColorToolLayout(block, {
       layoutSpans: {
         tablet: { sidebar: 6, canvas: 6 },

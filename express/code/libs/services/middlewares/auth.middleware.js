@@ -1,5 +1,5 @@
 import { AuthenticationError } from '../core/Errors.js';
-import { getMetadata } from '../../../scripts/utils.js';
+import { getMetadata, getLibs } from '../../../scripts/utils.js';
 
 const TOKEN_REFRESH_BUFFER_MS = 5 * 60 * 1000;
 const DEFAULT_IMS_TIMEOUT_MS = 10_000;
@@ -61,7 +61,6 @@ function notifyImsReady() {
  * @returns {Promise<void>}
  */
 async function loadImsFromMilo() {
-  const { getLibs } = await import('../../../scripts/utils.js');
   const { loadIms } = await import(`${getLibs()}/utils/utils.js`);
   return loadIms();
 }
@@ -140,8 +139,10 @@ export async function triggerSignInFlow() {
   const susiTarget = getMetadata('susi-target');
   if (susiTarget) {
     const [path, hash] = susiTarget.split('#');
-    const { getLibs } = await import('../../../scripts/utils.js');
-    const { getModal } = await import(`${getLibs()}/blocks/modal/modal.js`);
+    const libs = getLibs();
+    const { loadStyle } = await import(`${libs}/utils/utils.js`);
+    loadStyle(`${libs}/blocks/modal/modal.css`);
+    const { getModal } = await import(`${libs}/blocks/modal/modal.js`);
     await getModal({ id: hash, path });
   }
   return false;

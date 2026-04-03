@@ -342,6 +342,8 @@ export async function createActionMenuComponent(options = {}) {
     element: container,
     pushState: pushStateFn,
     getCurrentPalette: getCurrentPaletteFn,
+    undo: handleUndoState,
+    redo: handleRedoState,
     destroy() {
       document.removeEventListener(eventName, handleHistoryIndexChanged);
       container.remove();

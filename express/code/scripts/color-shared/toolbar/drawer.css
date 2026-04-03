@@ -6,7 +6,6 @@
   background: rgba(0, 0, 0, 0.4);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.3s ease-out;
 }
 
 @supports (backdrop-filter: blur(10px)) {
@@ -27,7 +26,7 @@
   /* ── Scoped vars ── */
   --ax-drawer-max-height: 90dvh;
   --ax-drawer-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
-  --ax-drawer-transition: transform 300ms ease-out;
+  --ax-drawer-transition: transform 200ms ease;
   --ax-drawer-panel-width-tablet: 307px;
   --ax-drawer-max-height-tablet: 90vh;
   --ax-drawer-transition-tablet: opacity 150ms ease, box-shadow 150ms ease;
@@ -59,6 +58,16 @@
   --ax-drawer-tag-min-width-mobile: 27px;
   --ax-drawer-tag-height-mobile: 32px;
   --ax-drawer-tag-max-inline-size-mobile: 224px;
+  --ax-tag-field-min-height: 56px;
+  --ax-tag-field-gap: 6px;
+  --ax-tag-pill-max-width: 224px;
+  --ax-tag-pill-min-width: 27px;
+  --ax-tag-pill-icon-size: 10px;
+  --ax-drawer-line-height-s: 18px;
+  --ax-drawer-line-height-l: 20px;
+  --ax-drawer-label-padding-block-s: 7px;
+  --ax-drawer-label-padding-block-l: 10px;
+  --ax-drawer-font-weight-medium: 500;
 
   inset-inline-start: 0;
   inline-size: 100%;
@@ -156,9 +165,9 @@
 .ax-drawer-picker-label {
   font-size: var(--ax-body-s-size);
   font-weight: var(--ax-body-weight);
-  line-height: var(--line-height-200);
+  line-height: var(--ax-drawer-line-height-l);
   color: var(--color-dark-gray);
-  padding-block: var(--component-padding-vertical-200);
+  padding-block: var(--ax-drawer-label-padding-block-l);
   padding-inline: 0;
   box-sizing: border-box;
 }
@@ -224,13 +233,105 @@
   gap: var(--spacing-100);
 }
 
-/* ── Tag chip buttons (sp-button.ax-drawer-tag-btn) ──────────── */
+/* ── Tag field (bordered container) ─────────────────────────── */
 
-.ax-drawer-added-tags {
-  display: inline-flex;
+.ax-tag-field {
+  display: flex;
   flex-wrap: wrap;
-  gap: var(--spacing-100);
+  align-items: center;
+  gap: var(--ax-tag-field-gap);
+  min-block-size: var(--ax-tag-field-min-height);
+  padding: var(--spacing-200);
+  background: var(--color-white);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  box-sizing: border-box;
+  cursor: text;
 }
+
+.ax-tag-field.ax-tag-field-active,
+.ax-tag-field.ax-tag-field-has-tags {
+  border-color: var(--color-gray-950);
+}
+
+.ax-tag-field-tags {
+  display: contents;
+}
+
+.ax-tag-field-input {
+  flex: 1;
+  min-inline-size: 80px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
+  line-height: var(--ax-drawer-line-height-l);
+  color: var(--color-gray-800-variant);
+  outline: none;
+}
+
+.ax-tag-field-input::placeholder {
+  color: var(--color-gray-800-variant);
+}
+
+/* ── Tag pills (inside field) ──────────────────────────────────── */
+
+.ax-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-200);
+  block-size: var(--spacing-500);
+  padding-inline: var(--spacing-200);
+  background: var(--color-light-gray);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--ax-drawer-font-weight-medium);
+  color: var(--color-gray-800-variant);
+  max-inline-size: var(--ax-tag-pill-max-width);
+  min-inline-size: var(--ax-tag-pill-min-width);
+  box-sizing: border-box;
+}
+
+.ax-tag-pill-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-tag-pill-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-black);
+  flex-shrink: 0;
+  --mod-icon-inline-size: var(--ax-tag-pill-icon-size);
+  --mod-icon-block-size: var(--ax-tag-pill-icon-size);
+}
+
+/* ── Helper text below field ──────────────────────────────────── */
+
+.ax-tag-field-help {
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
+  line-height: var(--ax-drawer-line-height-l);
+  color: var(--color-dark-gray);
+  padding-block: var(--ax-drawer-label-padding-block-s);
+  padding-inline: 0;
+}
+
+.ax-tag-field-help[hidden] {
+  display: none;
+}
+
+/* ── Tag chip buttons (sp-button.ax-drawer-tag-btn — suggestions) ── */
 
 .ax-drawer-tag-btn {
   --mod-button-border-radius: 7px;
@@ -286,7 +387,7 @@
   padding-inline: var(--ax-drawer-trigger-padding-start) var(--ax-drawer-trigger-padding-end);
   font-family: var(--body-font-family);
   font-size: var(--ax-body-s-size);
-  line-height: var(--line-height-200);
+  line-height: var(--ax-drawer-line-height-l);
   color: var(--color-gray-800-variant);
   background: var(--color-light-gray);
   border: none;
@@ -360,7 +461,7 @@
   padding-inline: 0;
   flex: 1 1 0;
   overflow-y: auto;
-  min-block-size: fit-content;
+  min-block-size: calc(3 * var(--ax-drawer-input-height));
 }
 
 .ax-lib-picker-divider {
@@ -386,7 +487,7 @@
   font-family: var(--body-font-family);
   font-size: var(--ax-body-xs-size);
   font-weight: var(--ax-body-weight);
-  line-height: var(--line-height-100);
+  line-height: var(--ax-drawer-line-height-s);
   color: var(--color-dark-gray);
 }
 
@@ -397,7 +498,7 @@
   padding-inline: var(--spacing-200);
   font-family: var(--body-font-family);
   font-size: var(--ax-body-xs-size);
-  line-height: var(--line-height-100);
+  line-height: var(--ax-drawer-line-height-s);
   color: var(--color-gray-800-variant);
   border: var(--border-width-2) solid var(--color-gray-300-variant);
   border-radius: var(--Corner-radius-corner-radius-100);
@@ -449,7 +550,7 @@
   --mod-icon-size: var(--ax-drawer-tag-icon-size-mobile);
   --mod-button-border-radius: var(--Corner-radius-corner-radius-100);
   --mod-button-edge-to-text: var(--spacing-200);
-  font-weight: var(--Font-weight-medium);
+  font-weight: var(--ax-drawer-font-weight-medium);
 }
 
 .ax-drawer-mobile .ax-lib-picker-create-section {
@@ -492,7 +593,7 @@
     max-block-size: var(--ax-drawer-max-height-tablet);
     overflow-y: auto;
     border-radius: var(--Corner-radius-corner-radius-100);
-    box-shadow: var(--Elevation-handle);
+    box-shadow: var(--Modal-close-shadow-tablet);
     transform: none;
     opacity: 0;
     transition: var(--ax-drawer-transition-tablet);
@@ -523,16 +624,15 @@
     max-height: none;
   }
 
-  .ax-drawer-panel .ax-lib-picker-popover sp-menu {
-    min-height: fit-content;
-    max-height: none;
+  .ax-lib-picker-popover sp-menu {
+    min-block-size: fit-content;
   }
 
   .ax-drawer-field-label,
   .ax-drawer-picker-label {
     font-size: var(--ax-body-xs-size);
-    line-height: var(--line-height-100);
-    padding-block: var(--component-padding-vertical-100);
+    line-height: var(--ax-drawer-line-height-s);
+    padding-block: var(--ax-drawer-label-padding-block-s);
     padding-inline: 0;
   }
 
@@ -556,6 +656,16 @@
     block-size: var(--ax-drawer-input-height-compact);
   }
 
+  .ax-tag-field-input {
+    font-size: var(--ax-body-xs-size);
+    line-height: var(--ax-drawer-line-height-s);
+  }
+
+  .ax-tag-field-help {
+    font-size: var(--ax-body-xs-size);
+    line-height: var(--ax-drawer-line-height-s);
+  }
+
   .ax-drawer-save-btn {
     inline-size: auto;
     min-inline-size: 108px;
@@ -572,6 +682,12 @@
       margin-block-end: var(--spacing-100);
       position-try-fallbacks: flip-block;
     }
+  }
+}
+
+@media (max-width: 1200px) {
+  .ax-drawer-panel {
+    box-shadow: var(--Modal-close-shadow-desktop);
   }
 }
 

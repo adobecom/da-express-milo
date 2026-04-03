@@ -9,7 +9,6 @@ import { createColorInput } from './components/createColorInput.js';
 import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
 import { loadActionButton, loadBadge, loadTooltip } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../../../scripts/color-shared/spectrum/utils/theme.js';
-import { createActionMenuState } from '../../../scripts/color-shared/components/createActionMenuState.js';
 import { createContrastCheckerPlaceholders } from '../utils/placeholders.js';
 import { FAIL, createDefaultActionMenuConfig } from '../utils/contrastConstants.js';
 import '../../../scripts/color-shared/components/color-channel-slider/index.js';
@@ -330,6 +329,11 @@ function syncColorControl(input, slider, hex) {
   slider?.updatePosition(hex);
 }
 
+function isSameHistoryState(a, b) {
+  return a?.[0]?.toUpperCase() === b?.[0]?.toUpperCase()
+    && a?.[1]?.toUpperCase() === b?.[1]?.toUpperCase();
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export function createCheckerRenderer(options) {
   const {
@@ -345,7 +349,6 @@ export function createCheckerRenderer(options) {
   const { recommendation: recommendationService } = services;
   const strings = createContrastCheckerPlaceholders(config.strings);
   const tabs = config.tabs || strings.tabs;
-  const actionMenuState = createActionMenuState(ACTION_MENU_ID);
 
   let foreground = config.initialForeground;
   let background = config.initialBackground;
@@ -399,11 +402,6 @@ export function createCheckerRenderer(options) {
 
   function getHistoryState() {
     return [foreground, background];
-  }
-
-  function isSameHistoryState(a, b) {
-    return a?.[0]?.toUpperCase() === b?.[0]?.toUpperCase()
-      && a?.[1]?.toUpperCase() === b?.[1]?.toUpperCase();
   }
 
   function clearHistoryTimer() {
@@ -631,9 +629,10 @@ export function createCheckerRenderer(options) {
         ...createDefaultActionMenuConfig(strings),
         id: ACTION_MENU_ID,
         type: 'controls-only',
-        enableState: true,
-        onUndo: () => actionMenuState.onUndo(),
-        onRedo: () => actionMenuState.onRedo(),
+        activeId: 'contrast',
+        enableState: false,
+        onUndo: () => actionMenuApi?.undo?.(),
+        onRedo: () => actionMenuApi?.redo?.(),
       });
       if (mobileActionMenu?.element) {
         top.appendChild(mobileActionMenu.element);

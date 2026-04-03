@@ -237,6 +237,13 @@ export function createColorPaletteParamApi() {
   };
 }
 
+export function buildPaletteEditUrl(basePath, colors, name) {
+  const url = new URL(basePath, window.location.origin);
+  const { setOnUrl } = createColorPaletteParamApi();
+  setOnUrl(url, colors, { name });
+  return `${url.pathname}${url.search}`;
+}
+
 export function normalizeTheme(theme) {
   return {
     id: theme.id ?? '',
