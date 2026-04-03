@@ -6,10 +6,10 @@ import { createThemeWrapper } from '../spectrum/utils/theme.js';
 
 const STYLE_PATH = 'scripts/color-shared/modal/modal-contrast-content.css';
 
-// SVG icons for tabs and card states
-const ICON_TEXT_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M3 4.5C3 3.67157 3.67157 3 4.5 3H15.5C16.3284 3 17 3.67157 17 4.5V5.5C17 5.77614 16.7761 6 16.5 6C16.2239 6 16 5.77614 16 5.5V4.5C16 4.22386 15.7761 4 15.5 4H10.5V16H12.5C12.7761 16 13 16.2239 13 16.5C13 16.7761 12.7761 17 12.5 17H7.5C7.22386 17 7 16.7761 7 16.5C7 16.2239 7.22386 16 7.5 16H9.5V4H4.5C4.22386 4 4 4.22386 4 4.5V5.5C4 5.77614 3.77614 6 3.5 6C3.22386 6 3 5.77614 3 5.5V4.5Z"/></svg>';
-const ICON_ALIGN_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M2 4.5C2 4.22386 2.22386 4 2.5 4H17.5C17.7761 4 18 4.22386 18 4.5C18 4.77614 17.7761 5 17.5 5H2.5C2.22386 5 2 4.77614 2 4.5ZM2 8.5C2 8.22386 2.22386 8 2.5 8H13.5C13.7761 8 14 8.22386 14 8.5C14 8.77614 13.7761 9 13.5 9H2.5C2.22386 9 2 8.77614 2 8.5ZM2.5 12C2.22386 12 2 12.2239 2 12.5C2 12.7761 2.22386 13 2.5 13H17.5C17.7761 13 18 12.7761 18 12.5C18 12.2239 17.7761 12 17.5 12H2.5ZM2 16.5C2 16.2239 2.22386 16 2.5 16H10.5C10.7761 16 11 16.2239 11 16.5C11 16.7761 10.7761 17 10.5 17H2.5C2.22386 17 2 16.7761 2 16.5Z"/></svg>';
-const ICON_SHAPES_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M7.134 3.22a.5.5 0 0 1 .866 0l3.897 6.75A.5.5 0 0 1 11.464 10.75H3.67a.5.5 0 0 1-.433-.78L7.134 3.22ZM14.5 11a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Z"/></svg>';
+// SVG icons for tabs — S2 Spectrum icons (Text, TextAlignLeft, Shapes)
+const ICON_TEXT_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="m14.58984,2H5.41016c-1.24072,0-2.25,1.00977-2.25,2.25v1.11035c0,.41406.33594.75.75.75s.75-.33594.75-.75v-1.11035c0-.41309.33643-.75.75-.75h3.83984v13h-1.56982c-.41406,0-.75.33594-.75.75s.33594.75.75.75h4.63965c.41406,0,.75-.33594.75-.75s-.33594-.75-.75-.75h-1.56982V3.5h3.83984c.41357,0,.75.33691.75.75v1.11035c0,.41406.33594.75.75.75s.75-.33594.75-.75v-1.11035c0-1.24023-1.00928-2.25-2.25-2.25Z"/></svg>';
+const ICON_ALIGN_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="m16.25,4.5H3.75c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h12.5c.41406,0,.75.33594.75.75s-.33594.75-.75.75Z"/><path d="m13.75,8.5H3.75c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h10c.41406,0,.75.33594.75.75s-.33594.75-.75.75Z"/><path d="m16.25,12.5H3.75c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h12.5c.41406,0,.75.33594.75.75s-.33594.75-.75.75Z"/><path d="m13.75,16.5H3.75c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h10c.41406,0,.75.33594.75.75s-.33594.75-.75.75Z"/></svg>';
+const ICON_SHAPES_SVG = '<svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M11.83057,13H3.16992c-.81348,0-1.54199-.4209-1.94873-1.125-.40674-.70508-.40625-1.5459.00049-2.25L5.55176,2.125c.40625-.7041,1.13477-1.125,1.94775-1.125h.00049c.81348,0,1.54199.4209,1.94873,1.125l4.33008,7.5c.40674.70508.40674,1.5459,0,2.25s-1.13525,1.125-1.94824,1.125ZM7.5,2.5c-.13037,0-.4541.03613-.64941.375h0l-4.33008,7.5c-.19531.33887-.06543.6377,0,.75.06494.1123.2583.375.64941.375h8.66064c.39062,0,.58398-.26172.64893-.375.06543-.1123.1958-.41113.00049-.75l-4.33008-7.5c-.1958-.33887-.51953-.375-.6499-.375ZM6.20117,2.5h.00977-.00977Z"/><path d="M12.29395,18.92969c-.04395,0-.08838,0-.13281-.00098-2.354-.0459-4.53076-1.35156-5.68066-3.4082-.20215-.36133-.07275-.81836.28906-1.02051.36182-.20312.81787-.07227,1.02051.28809.89062,1.59375,2.57666,2.60547,4.40039,2.64062,1.35986.04004,2.6792-.4834,3.67139-1.4375.9917-.9541,1.55225-2.23828,1.5791-3.61426.04053-2.09375-1.17383-3.9873-3.09277-4.82422-.37988-.16602-.55322-.60742-.3877-.9873s.60791-.55371.9873-.3877c2.47754,1.08105,4.04492,3.52539,3.99316,6.22852-.03467,1.77637-.75879,3.43359-2.03955,4.66602-1.24805,1.2002-2.87988,1.85742-4.60742,1.85742Z"/></svg>';
 const ICON_STAR_SVG = '<svg viewBox="0 0 34 21" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M11.5635 8.77894C12.9832 7.60849 14.4034 6.43477 15.8825 5.32695C16.5934 4.79443 17.6419 3.9847 18.4631 3.64385C19.3226 3.28716 20.2691 4.08029 19.929 4.89756C19.7258 5.38582 19.255 5.4892 18.8277 5.75257C18.2158 6.12989 17.5853 6.61387 17.0109 7.04376C15.6502 8.06203 14.3364 9.13613 13.0406 10.2223C13.1156 10.2374 13.1996 10.2349 13.2761 10.2314C14.7484 10.166 16.2343 9.95341 17.7051 10.1207C18.7952 10.2447 18.8748 11.5017 17.8624 11.7507C16.5891 12.0641 15.0906 12.1207 13.7685 12.1932C13.6769 12.1982 13.5836 12.1899 13.492 12.1934C13.4791 12.2372 13.5032 12.2249 13.518 12.2367C14.4365 12.9599 15.4886 13.6119 16.2608 14.4863C16.8919 15.2007 16.0655 16.1772 15.1327 15.7312C14.8425 15.5923 14.5076 15.3878 14.2322 15.2198C13.164 14.5693 12.2044 13.7774 11.1737 13.0801C11.1707 13.1332 11.1781 13.1873 11.1731 13.2404C11.0459 14.6282 10.9734 16.113 10.7601 17.4827C10.6548 18.1601 10.5642 19.3107 9.52694 19.188C8.61658 19.0803 8.72873 18.1244 8.66937 17.5051C8.71697 16.2408 8.86004 14.9813 8.97766 13.7218L8.89532 13.7686C7.17418 15.2153 5.54275 16.8023 3.62985 18.0389C3.20859 18.3111 2.79745 18.5216 2.33051 18.1463C1.86357 17.771 1.98147 17.327 2.31082 16.9391C2.70609 16.4738 3.17522 16.0227 3.61235 15.5891C4.75248 14.642 5.86937 13.6718 6.98762 12.7033C5.50555 12.8543 4.02485 13.0195 2.54935 13.2157C2.12508 13.2721 1.64583 13.3828 1.23031 13.4177C-0.195129 13.538 -0.494387 11.6994 0.931603 11.4451C1.95193 11.263 3.07319 11.1342 4.10801 11.0079C5.33158 10.8585 6.56089 10.7526 7.78774 10.6276C6.73568 9.83996 5.65627 9.07777 4.64853 8.24138C4.44201 8.06982 4.08339 7.80771 3.96112 7.59063C3.63943 7.01911 4.02895 6.24812 4.72294 6.13995C5.41692 6.03179 5.83271 6.55803 6.31005 6.93962C7.3022 7.7325 8.33319 8.48538 9.36691 9.23147L9.71596 4.93957C9.853 4.18065 9.80978 3.29521 9.99169 2.55188C10.2581 1.46294 12.0211 1.62242 12.1169 2.63716C12.1595 3.08969 12.002 3.76812 11.9522 4.24153C11.793 5.75131 11.671 7.26487 11.5624 8.77868L11.5635 8.77894Z"/></svg>';
 const ICON_CHECK_SVG = '<svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M8.5 2.5L4 7.5L1.5 5" stroke="#05834e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const ICON_CROSS_SVG = '<svg width="8" height="8" viewBox="0 0 8 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1l6 6M7 1L1 7" stroke="#d32f2f" stroke-width="1.2" stroke-linecap="round"/></svg>';
@@ -34,8 +34,8 @@ export async function ensureContrastContentStyles() {
  * @returns {'S'|'M'|'L'}
  */
 function getCellSize(count) {
-  if (count <= 3) return 'L';
-  if (count <= 7) return 'M';
+  if (count <= 5) return 'L';
+  if (count <= 6) return 'M';
   return 'S';
 }
 
@@ -332,6 +332,9 @@ function buildMatrixLayout(colors, state, matrix, dataService) {
       header.textContent = 'Aa';
     }
     header.style.color = hex;
+    if (isLightBackground(hex, dataService)) {
+      header.classList.add('cc-modal-col-header--light');
+    }
     grid.appendChild(header);
   });
 
@@ -455,56 +458,34 @@ function buildBackgroundSelector(colors, state, onSelect) {
   const container = createTag('div', { class: 'cc-modal-bg-selector' });
   container.appendChild(createTag('span', { class: 'cc-modal-bg-label' }, 'Select background color'));
 
-  const swatches = createTag('div', {
-    class: 'cc-modal-bg-swatches',
-    role: 'radiogroup',
-    'aria-label': 'Select background color',
-  });
+  const swatchesContainer = createTag('div', { class: 'cc-modal-bg-swatches' });
+  container.appendChild(swatchesContainer);
 
-  colors.forEach((hex, idx) => {
-    const btn = createTag('button', {
-      class: `cc-modal-bg-swatch${idx === state.selectedBgIndex ? ' cc-modal-bg-swatch--selected' : ''}`,
-      role: 'radio',
-      'aria-checked': idx === state.selectedBgIndex ? 'true' : 'false',
-      'aria-label': hex,
-      type: 'button',
+  (async () => {
+    const { createExpressSwatchGroup } = await import('../spectrum/components/express-swatch-group.js');
+    const swatchGroup = await createExpressSwatchGroup({
+      colors,
+      selects: 'single',
+      size: 's',
+      selected: [String(state.selectedBgIndex)],
+      labels: colors.map((hex) => hex),
+      onChange: ({ index }) => {
+        if (index >= 0 && index !== state.selectedBgIndex) onSelect(index);
+      },
     });
-    btn.style.backgroundColor = hex;
+    swatchesContainer.appendChild(swatchGroup.element);
+    swatchesContainer._swatchGroup = swatchGroup;
+  })();
 
-    btn.addEventListener('click', () => {
-      if (state.selectedBgIndex === idx) return;
-      onSelect(idx);
-    });
-
-    btn.addEventListener('keydown', (e) => {
-      let nextIdx = -1;
-      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
-        nextIdx = (idx + 1) % colors.length;
-      } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
-        nextIdx = (idx - 1 + colors.length) % colors.length;
-      }
-      if (nextIdx >= 0) {
-        e.preventDefault();
-        onSelect(nextIdx);
-        const nextBtn = swatches.children[nextIdx];
-        nextBtn?.focus();
-      }
-    });
-
-    swatches.appendChild(btn);
-  });
-
-  container.appendChild(swatches);
   return container;
 }
 
 function updateBgSwatches(container, selectedIdx) {
-  const swatches = container.querySelectorAll('.cc-modal-bg-swatch');
-  swatches.forEach((btn, idx) => {
-    btn.classList.toggle('cc-modal-bg-swatch--selected', idx === selectedIdx);
-    btn.setAttribute('aria-checked', idx === selectedIdx ? 'true' : 'false');
-    btn.setAttribute('tabindex', idx === selectedIdx ? '0' : '-1');
-  });
+  const swatchesContainer = container.querySelector('.cc-modal-bg-swatches');
+  const swatchGroup = swatchesContainer?._swatchGroup;
+  if (swatchGroup) {
+    swatchGroup.setSelected([String(selectedIdx)]);
+  }
 }
 
 function buildCardLayout(colors, state, matrix, dataService) {
@@ -596,7 +577,7 @@ async function buildHeader(colors, state, onTabChange, onLevelChange) {
     },
   });
 
-  // Controls row: tabs left, WCAG level picker right (same horizontal line)
+  // Controls row: tabs left, level picker right (desktop); level picker floats above tabs (mobile/tablet via CSS order)
   const controls = createTag('div', { class: 'cc-modal-header-controls' });
   const tabBar = createTag('div', { class: 'cc-modal-tab-bar' });
   tabBar.appendChild(tabs.element);
@@ -653,8 +634,11 @@ export function createContrastCheckerModalContent(palette, options = {}) {
 
     contrastMatrix = computeContrastMatrix(colors, dataService);
 
+    element.dataset.tab = state.activeTab;
+
     const onTabChange = (tab) => {
       const tabLabels = { 'large-text': 'large text', 'small-text': 'small text', 'icons-ui': 'icons and UI' };
+      element.dataset.tab = tab;
       if (matrixLayout) updateAllCells(matrixLayout, colors, state, contrastMatrix);
       if (cardLayout) rerenderCardLayout();
       const passCount = countPassing(colors, state, contrastMatrix);
