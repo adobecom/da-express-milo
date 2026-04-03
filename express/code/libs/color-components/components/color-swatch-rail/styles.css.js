@@ -749,6 +749,10 @@ export const style = css`
     cursor: pointer;
   }
 
+  .base-color-badge--readonly {
+    cursor: default;
+  }
+
   .base-color-badge--hover-only {
     opacity: 0;
     transition: opacity 0.15s ease;

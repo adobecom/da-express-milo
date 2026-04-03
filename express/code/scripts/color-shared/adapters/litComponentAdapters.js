@@ -7,7 +7,7 @@ const VERTICAL_STACKED_BREAKPOINT_PX = 1200;
 function createSwatchRailController(paletteData) {
   const colors = paletteData?.colors || [];
   const swatches = colors.map((c) => ({ hex: c.startsWith('#') ? c : `#${c}` }));
-  let state = { swatches, baseColorIndex: 0 };
+  let state = { swatches, baseColorIndex: paletteData?.baseColorIndex ?? 0 };
   const listeners = new Set();
   return {
     subscribe(fn) {

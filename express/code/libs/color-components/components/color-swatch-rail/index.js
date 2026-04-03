@@ -46,6 +46,7 @@ const DEFAULT_FEATURES = {
   editTint: false,
   colorBlindness: false,
   baseColor: false,
+  baseColorReadOnly: false,
   emptyStrip: false,
   editColorDisabled: false,
 };
@@ -64,6 +65,7 @@ const ALL_FEATURES = {
   editTint: true,
   colorBlindness: true,
   baseColor: true,
+  baseColorReadOnly: false,
   emptyStrip: true,
   editColorDisabled: false,
 };
@@ -86,6 +88,7 @@ function normalizeFeatures(features) {
       editTint: set.has('editTint'),
       colorBlindness: set.has('colorBlindness'),
       baseColor: set.has('baseColor'),
+      baseColorReadOnly: set.has('baseColorReadOnly'),
       emptyStrip: set.has('emptyStrip'),
       editColorDisabled: set.has('editColorDisabled'),
     };
@@ -1067,6 +1070,7 @@ export class ColorSwatchRail extends LitElement {
       }
       const isLocked = (this.lockedByIndex || new Set()).has(index);
       const isBase = f.baseColor && index === this.baseColorIndex;
+      const isBaseReadOnly = f.baseColorReadOnly && index === this.baseColorIndex;
       const showAddLeftHere = !isStacked && canAddGlobal && f.addLeft;
       const showAddRightHere = !isStacked && canAddGlobal && f.addRight;
       
@@ -1102,6 +1106,7 @@ export class ColorSwatchRail extends LitElement {
       const topLeftIcons = html`
         <div class="top-actions top-actions--left">
           ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+          ${isBaseReadOnly ? html`<span class="base-color-badge base-color-badge--active base-color-badge--readonly" aria-label="Base color">${icon('baseColorTarget')}</span>` : ''}
         </div>
       `;
       const topRightIcons = html`
@@ -1127,6 +1132,7 @@ export class ColorSwatchRail extends LitElement {
       const stackedIcons = html`
         <div class="stacked-row__icons">
           ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+          ${isBaseReadOnly ? html`<span class="base-color-badge base-color-badge--active base-color-badge--readonly" aria-label="Base color">${icon('baseColorTarget')}</span>` : ''}
           ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="Copy hex" title="Copy hex">${icon('copy')}</button>` : ''}
           ${f.drag && !effectiveLocked ? html`
             <button

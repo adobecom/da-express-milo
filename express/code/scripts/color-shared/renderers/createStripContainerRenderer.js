@@ -26,12 +26,11 @@ const ignoreError = () => {};
 
 function getColorBlindnessCoreFeatures(features = {}) {
   return {
-    ...features,
-    // Core metadata behaviors for color-blindness variant; not consumer-optional.
     colorBlindness: true,
     baseColor: true,
     copy: true,
     hexCode: true,
+    ...features,
   };
 }
 
