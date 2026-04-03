@@ -599,7 +599,7 @@ export function createStripContainerRenderer(options) {
       palette,
       selectedIndex,
       colorMode: 'HEX',
-      showPalette: true,
+      showPalette: mobile || !colorBlindness,
       mobile,
     }, {
       onColorChange: ({ hex, index }) => {
