@@ -601,7 +601,7 @@ describe('createDrawer', function drawerSuite() {
 
       expect(provider.saveTheme.calledOnce).to.be.true;
       const [, payload] = provider.saveTheme.firstCall.args;
-      const tags = payload.representations[0]['colortheme#data'].tags;
+      const { tags } = payload.representations[0]['colortheme#data'];
       expect(tags).to.deep.equal(['bold', 'bright']);
 
       await waitForClose();
@@ -628,7 +628,7 @@ describe('createDrawer', function drawerSuite() {
       await new Promise((r) => setTimeout(r, 50));
 
       const [, payload] = provider.saveTheme.firstCall.args;
-      const tags = payload.representations[0]['colortheme#data'].tags;
+      const { tags } = payload.representations[0]['colortheme#data'];
       expect(tags).to.include('NewTag');
       expect(tags).to.include('bold');
       expect(tags).to.include('bright');
@@ -660,7 +660,7 @@ describe('createDrawer', function drawerSuite() {
       await new Promise((r) => setTimeout(r, 50));
 
       const [, payload] = provider.saveTheme.firstCall.args;
-      const tags = payload.representations[0]['colortheme#data'].tags;
+      const { tags } = payload.representations[0]['colortheme#data'];
       expect(tags).to.deep.equal(['ContrastChecked', 'VisualAccessibility']);
 
       await waitForClose();
@@ -717,7 +717,7 @@ describe('createDrawer', function drawerSuite() {
       await new Promise((r) => setTimeout(r, 50));
 
       const [, payload] = provider.saveTheme.firstCall.args;
-      const tags = payload.representations[0]['colortheme#data'].tags;
+      const { tags } = payload.representations[0]['colortheme#data'];
       expect(tags).to.deep.equal(['bold', 'bright']);
 
       await waitForClose();

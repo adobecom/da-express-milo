@@ -550,10 +550,16 @@ export default async function decorate(block) {
           updateLoadMoreState();
 
           activeRenderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-            await modalManager.openPaletteSwatchesModal(palette || {}, { verticalMaxPerRow: config.swatchVerticalMaxPerRow });
+            await modalManager.openPaletteSwatchesModal(
+              palette || {},
+              { verticalMaxPerRow: config.swatchVerticalMaxPerRow },
+            );
           });
           activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
-            await modalManager.openPaletteSwatchesModal(palette || {}, { verticalMaxPerRow: config.swatchVerticalMaxPerRow });
+            await modalManager.openPaletteSwatchesModal(
+              palette || {},
+              { verticalMaxPerRow: config.swatchVerticalMaxPerRow },
+            );
           });
 
           activeRenderer.on(EVENTS.SEARCH, async ({ query }) => {
@@ -664,10 +670,16 @@ export default async function decorate(block) {
       const modalManager = createModalManager();
 
       renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-        await modalManager.openPaletteSwatchesModal(palette || {}, { verticalMaxPerRow: config.swatchVerticalMaxPerRow });
+        await modalManager.openPaletteSwatchesModal(
+          palette || {},
+          { verticalMaxPerRow: config.swatchVerticalMaxPerRow },
+        );
       });
       renderer.on(EVENTS.SHARE, async ({ palette }) => {
-        await modalManager.openPaletteSwatchesModal(palette || {}, { verticalMaxPerRow: config.swatchVerticalMaxPerRow });
+        await modalManager.openPaletteSwatchesModal(
+          palette || {},
+          { verticalMaxPerRow: config.swatchVerticalMaxPerRow },
+        );
       });
 
       renderer.on(EVENTS.SEARCH, async ({ query }) => {

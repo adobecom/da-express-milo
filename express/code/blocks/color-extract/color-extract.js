@@ -227,19 +227,6 @@ function extractPaletteFromImageElement(image, swatchCount) {
   } catch { return null; }
 }
 
-function extractPaletteFromSrc(src, swatchCount) {
-  return new Promise((resolve) => {
-    if (!src) {
-      resolve(null);
-      return;
-    }
-    const image = new Image();
-    image.onload = () => resolve(extractPaletteFromImageElement(image, swatchCount));
-    image.onerror = () => resolve(null);
-    image.src = src;
-  });
-}
-
 function applyPaletteToChips(colors, chips) {
   if (!colors || !chips?.length) return;
   colors.forEach((hex, i) => { if (chips[i]) chips[i].style.background = hex; });
@@ -563,19 +550,50 @@ function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) 
     const rect = block.getBoundingClientRect();
     return rect.bottom > 0 && rect.top < window.innerHeight;
   };
-  window.addEventListener('dragenter', (e) => { if (isBlockInViewport() && isFileDrag(e)) { preventDefaults(e); block.classList.add('is-dragging'); } }, { signal });
-  window.addEventListener('dragover', (e) => { if (isBlockInViewport() && isFileDrag(e)) { preventDefaults(e); block.classList.add('is-dragging'); } }, { signal });
-  window.addEventListener('dragleave', (e) => { preventDefaults(e); if (!e.relatedTarget && !document.elementFromPoint(e.clientX, e.clientY)) block.classList.remove('is-dragging'); }, { signal });
-  window.addEventListener('dragend', (e) => { preventDefaults(e); block.classList.remove('is-dragging'); }, { signal });
-  window.addEventListener('drop', (e) => { if (!isBlockInViewport() || !isFileDrag(e)) return; preventDefaults(e); dropzone.handleFile(e.dataTransfer.files[0]); setTimeout(() => block.classList.remove('is-dragging'), 200); }, { signal });
-  const detach = () => { ac.abort(); if (dragOverlay) dragOverlay.remove(); if (loadingOverlay) loadingOverlay.remove(); syncObserver.disconnect(); };
+  window.addEventListener('dragenter', (e) => {
+    if (isBlockInViewport() && isFileDrag(e)) {
+      preventDefaults(e);
+      block.classList.add('is-dragging');
+    }
+  }, { signal });
+  window.addEventListener('dragover', (e) => {
+    if (isBlockInViewport() && isFileDrag(e)) {
+      preventDefaults(e);
+      block.classList.add('is-dragging');
+    }
+  }, { signal });
+  window.addEventListener('dragleave', (e) => {
+    preventDefaults(e);
+    if (!e.relatedTarget && !document.elementFromPoint(e.clientX, e.clientY)) block.classList.remove('is-dragging');
+  }, { signal });
+  window.addEventListener('dragend', (e) => {
+    preventDefaults(e);
+    block.classList.remove('is-dragging');
+  }, { signal });
+  window.addEventListener('drop', (e) => {
+    if (!isBlockInViewport() || !isFileDrag(e)) return;
+    preventDefaults(e);
+    dropzone.handleFile(e.dataTransfer.files[0]);
+    setTimeout(() => block.classList.remove('is-dragging'), 200);
+  }, { signal });
   // Sync is-dragging and is-loading from block to body-level overlays
   const syncObserver = new MutationObserver(() => {
     if (dragOverlay) dragOverlay.classList.toggle('is-dragging', block.classList.contains('is-dragging'));
     if (loadingOverlay) loadingOverlay.classList.toggle('is-loading', block.classList.contains('is-loading'));
   });
   syncObserver.observe(block, { attributes: true, attributeFilter: ['class'] });
-  const observer = new MutationObserver(() => { if (!block.isConnected) { detach(); observer.disconnect(); } });
+  const detach = () => {
+    ac.abort();
+    if (dragOverlay) dragOverlay.remove();
+    if (loadingOverlay) loadingOverlay.remove();
+    syncObserver.disconnect();
+  };
+  const observer = new MutationObserver(() => {
+    if (!block.isConnected) {
+      detach();
+      observer.disconnect();
+    }
+  });
   observer.observe(block.parentElement || document.body, { childList: true });
   return detach;
 }
