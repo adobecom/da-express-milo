@@ -211,9 +211,6 @@ export class ColorSwatchRail extends LitElement {
     this._tooltipsInitialized = false;
     this._nativePickerOpen = false;
     this._nativePickerCloseTimer = null;
-    this._copyFeedbackTimer = null;
-    this._copyFeedbackTooltip = null;
-    this._copyFeedbackRestoreText = '';
   }
 
   get _features() {
@@ -263,7 +260,6 @@ export class ColorSwatchRail extends LitElement {
       clearTimeout(this._nativePickerCloseTimer);
       this._nativePickerCloseTimer = null;
     }
-    this._clearCopyFeedback();
     this._clearTooltips();
     super.disconnectedCallback();
   }
@@ -425,38 +421,6 @@ export class ColorSwatchRail extends LitElement {
     }
   }
 
-  _clearCopyFeedback() {
-    if (this._copyFeedbackTimer != null) {
-      clearTimeout(this._copyFeedbackTimer);
-      this._copyFeedbackTimer = null;
-    }
-    if (this._copyFeedbackTooltip) {
-      if (this._copyFeedbackRestoreText) {
-        this._copyFeedbackTooltip.textContent = this._copyFeedbackRestoreText;
-      }
-      this._copyFeedbackTooltip.removeAttribute('open');
-      this._copyFeedbackTooltip = null;
-      this._copyFeedbackRestoreText = '';
-    }
-  }
-
-  _showCopyFeedback(target) {
-    if (!target) return;
-    this._clearCopyFeedback();
-    const describedById = target.getAttribute('aria-describedby');
-    const tooltipEl = describedById ? document.getElementById(describedById) : null;
-    if (!tooltipEl) return;
-    target.blur?.();
-    target.dispatchEvent(new Event('pointerleave', { bubbles: true, composed: true }));
-    this._copyFeedbackRestoreText = tooltipEl.textContent || '';
-    tooltipEl.textContent = 'Copied to clipboard';
-    tooltipEl.setAttribute('open', '');
-    this._copyFeedbackTooltip = tooltipEl;
-    this._copyFeedbackTimer = setTimeout(() => {
-      this._clearCopyFeedback();
-    }, 1200);
-  }
-
   _copyTextFallback(text) {
     try {
       const textarea = document.createElement('textarea');
@@ -492,7 +456,7 @@ export class ColorSwatchRail extends LitElement {
     try {
       const copied = await this._copyText(hex);
       if (!copied) throw new Error('clipboard_copy_failed');
-      showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 1000000, anchor: this.closest('.strip-container') || undefined });
+      showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
       announceToScreenReader('Copied to clipboard');
     } catch (error) {
       showExpressToast({ message: 'Failed to copy', variant: 'negative', timeout: 2000 });
