@@ -104,6 +104,10 @@
     --cb-label-column-width: 100px;
   }
 
+  .color-blindness .ax-shell-slot--canvas {
+    height: 600px;
+  }
+
   .color-blindness .ax-color-tool-layout {
     --ax-layout-column-gap: var(--spacing-400);
     --ax-layout-row-gap: var(--spacing-300);
