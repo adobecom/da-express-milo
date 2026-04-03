@@ -21,10 +21,12 @@ async function createTemplatesContainer(recipe, el, isPanel = false, queryParams
   const templatesContainer = createTag('div', { class: containerClass });
 
   const isIOS = getMobileOperatingSystem() === 'iOS';
+  const { locale: { ietf, region } } = getConfig();
+  const localeParams = `locale=${ietf}&contentRegion=${region === 'uk' ? 'gb' : region}`;
   const customProperties = isIOS ? null : {
     customUrlConfig: {
       baseUrl: 'https://adobesparkpost.app.link/8JaoEy0DrSb',
-      queryParams: ['source=seo-template', queryParams].filter(Boolean).join('&'),
+      queryParams: ['source=seo-template', queryParams, localeParams].filter(Boolean).join('&'),
     },
   };
 
@@ -100,8 +102,8 @@ async function renderTemplates(el, recipe, toolbar, isPanel = false, queryParams
     toolbar.append(controlsContainer);
 
     el.append(templatesContainer);
-  } catch (err) {
-    window.lana?.log(`Error in template-x-carousel: ${err}`);
+  } catch (error) {
+    window.lana?.log(`Error in template-x-carousel: ${error?.message || error?.detail || error}`, { tags: 'template-x-carousel', severity: 'error' });
     if (getConfig().env.name === 'prod') {
       el.remove();
     } else {

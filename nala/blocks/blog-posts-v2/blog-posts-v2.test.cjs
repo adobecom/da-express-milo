@@ -6,7 +6,24 @@ const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
 const miloLibs = process.env.MILO_LIBS || '';
 
-test.describe.skip('BlogPostsV2Block Test Suite', () => {
+/**
+ * Poll until the number of rendered blog cards increases, avoiding flaky network-idle waits.
+ * @param {BlogPostsV2Block} block - Page object model for the block under test.
+ * @param {number} previousCount - Number of cards before the action that should load more.
+ * @param {Object} options - timeout (ms) and pollInterval (ms) controls.
+ */
+async function waitForBlogCardIncrease(block, previousCount, { timeout = 15000, pollInterval = 500 } = {}) {
+  const deadline = Date.now() + timeout;
+  let currentCount = previousCount;
+  while (Date.now() < deadline) {
+    currentCount = await block.blogCard.count();
+    if (currentCount > previousCount) return currentCount;
+    await block.page.waitForTimeout(pollInterval);
+  }
+  throw new Error(`Timed out waiting for blog cards to exceed ${previousCount}. Last observed count: ${currentCount}`);
+}
+
+test.describe('BlogPostsV2Block Test Suite', () => {
   // Test Id : 0 : @blog-posts-v2-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
@@ -26,7 +43,30 @@ test.describe.skip('BlogPostsV2Block Test Suite', () => {
 
       for (const t of sem.texts) {
         const locator = block.block.locator(t.selector).nth(t.nth || 0);
-        await expect(locator).toContainText(t.text);
+        if (t.text) {
+          await expect(locator).toContainText(t.text);
+        } else {
+          const text = (await locator.innerText()).trim();
+          expect(text.length, `Expected non-empty content for ${t.selector}[${t.nth}]`).toBeGreaterThan(0);
+        }
+      }
+
+      // Verify dates are in descending order
+      const dateLocators = block.block.locator('p.blog-card-date');
+      const dateCount = await dateLocators.count();
+      if (dateCount > 1) {
+        const dates = [];
+        for (let i = 0; i < dateCount; i += 1) {
+          const dateText = (await dateLocators.nth(i).innerText()).trim();
+          const [month, day, year] = dateText.split('/');
+          dates.push(new Date(Number(year), Number(month) - 1, Number(day)));
+        }
+        for (let i = 0; i < dates.length - 1; i += 1) {
+          expect(
+            dates[i].getTime(),
+            `Date at card ${i} (${dates[i].toDateString()}) should be >= date at card ${i + 1} (${dates[i + 1].toDateString()})`,
+          ).toBeGreaterThanOrEqual(dates[i + 1].getTime());
+        }
       }
 
       for (const m of sem.media) {
@@ -146,6 +186,7 @@ test.describe.skip('BlogPostsV2Block Test Suite', () => {
       }
 
       await page.waitForLoadState('domcontentloaded');
+      await page.waitForLoadState('load');
       await expect(page).toHaveURL(testUrl);
     });
 
@@ -161,7 +202,9 @@ test.describe.skip('BlogPostsV2Block Test Suite', () => {
 
       // Verify first card has expected structure
       await expect(block.blogCard.first()).toBeVisible();
-      await expect(block.blogCardImage.first()).toBeVisible();
+      // Scroll into view to trigger lazy-loaded images before asserting visibility
+      await block.blogCardImage.first().scrollIntoViewIfNeeded();
+      await expect(block.blogCardImage.first()).toBeVisible({ timeout: 10000 });
       await expect(block.blogCardTitle.first()).toBeVisible();
       await expect(block.blogCardTeaser.first()).toBeVisible();
       await expect(block.blogCardDate.first()).toBeVisible();
@@ -179,9 +222,10 @@ test.describe.skip('BlogPostsV2Block Test Suite', () => {
       const imageCount = await block.blogCardImage.count();
       expect(imageCount).toBeGreaterThan(0);
 
-      // Verify first card image has an img tag
+      // Verify first card image has an img tag (scroll to trigger lazy loading)
       const img = block.blogCardImage.first().locator('img');
-      await expect(img).toBeVisible();
+      await img.scrollIntoViewIfNeeded();
+      await expect(img).toBeVisible({ timeout: 10000 });
     });
 
     await test.step('step-5: Verify blog tags on cards', async () => {
@@ -224,10 +268,7 @@ test.describe.skip('BlogPostsV2Block Test Suite', () => {
         // Click load-more and verify more cards appear
         const cardCountBefore = await block.blogCard.count();
         await block.loadMoreButton.click();
-        await page.waitForLoadState('networkidle');
-        await page.waitForTimeout(2000);
-
-        const cardCountAfter = await block.blogCard.count();
+        const cardCountAfter = await waitForBlogCardIncrease(block, cardCountBefore);
         expect(cardCountAfter).toBeGreaterThan(cardCountBefore);
         console.info(`[Grid] Cards before load-more: ${cardCountBefore}, after: ${cardCountAfter}`);
       } else {

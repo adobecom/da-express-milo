@@ -66,7 +66,7 @@ class TemplateXPromo {
         return firstTemplateImage.complete && firstTemplateImage.naturalHeight > 0;
       },
       null,
-      { timeout: 1000 },
+      { timeout: 5000 },
     );
     return true;
   }
