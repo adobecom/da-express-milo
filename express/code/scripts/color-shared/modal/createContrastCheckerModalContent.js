@@ -16,6 +16,8 @@ const ICON_CROSS_SVG = '<svg width="8" height="8" viewBox="0 0 8 8" fill="none" 
 
 let stylesLoaded = false;
 
+const cellContent = new WeakMap();
+
 export async function ensureContrastContentStyles() {
   if (stylesLoaded) return;
   try {
@@ -213,8 +215,7 @@ function buildCell(fgIdx, bgIdx, colors, state, matrix, sizeClass, dataService) 
     textEl.style.color = fgHex;
     iconEl.style.color = fgHex;
     cell.append(fragment);
-    cell._textEl = textEl;
-    cell._iconEl = iconEl;
+    cellContent.set(cell, { textEl, iconEl });
   } else {
     cell.classList.add('cc-modal-cell--fail');
   }
@@ -269,22 +270,25 @@ function updateAllCells(container, colors, state, matrix) {
       cell.classList.add('cc-modal-cell--pass');
       cell.style.backgroundColor = bgHex;
 
-      if (!cell._textEl) {
+      if (!cellContent.has(cell)) {
         const { fragment, textEl, iconEl } = createCellContent(state.activeTab);
         textEl.style.color = fgHex;
         iconEl.style.color = fgHex;
         cell.append(fragment);
-        cell._textEl = textEl;
-        cell._iconEl = iconEl;
+        cellContent.set(cell, { textEl, iconEl });
       }
-      cell._textEl.style.color = fgHex;
-      cell._iconEl.style.color = fgHex;
-      cell._textEl.classList.toggle('cc-modal-hidden', state.activeTab === 'icons-ui');
-      cell._iconEl.classList.toggle('cc-modal-hidden', state.activeTab !== 'icons-ui');
+      const content = cellContent.get(cell);
+      content.textEl.style.color = fgHex;
+      content.iconEl.style.color = fgHex;
+      content.textEl.classList.toggle('cc-modal-hidden', state.activeTab === 'icons-ui');
+      content.iconEl.classList.toggle('cc-modal-hidden', state.activeTab !== 'icons-ui');
     } else {
       cell.classList.add('cc-modal-cell--fail');
-      if (cell._textEl) cell._textEl.classList.add('cc-modal-hidden');
-      if (cell._iconEl) cell._iconEl.classList.add('cc-modal-hidden');
+      const content = cellContent.get(cell);
+      if (content) {
+        content.textEl.classList.add('cc-modal-hidden');
+        content.iconEl.classList.add('cc-modal-hidden');
+      }
     }
   });
 }
@@ -709,7 +713,12 @@ export function createContrastCheckerModalContent(palette, options = {}) {
     onBreakpointChange();
   }
 
-  init();
+  init().catch((err) => {
+    window.lana?.log(`Contrast checker modal init failed: ${err.message}`, {
+      tags: 'color-contrast-modal,init',
+      severity: 'error',
+    });
+  });
 
   function destroy() {
     if (desktopQuery && onBreakpointChange) {

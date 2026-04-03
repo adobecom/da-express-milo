@@ -616,7 +616,6 @@ export function createCheckerRenderer(options) {
     }, strings.compareEntirePalette);
 
     compareLink.addEventListener('click', async () => {
-      console.log('compareLink clicked');
       const paletteData = context?.get('palette');
       const colors = Array.isArray(paletteData?.colors)
         ? paletteData.colors.filter((hex) => dataService.isValidHex(hex))
