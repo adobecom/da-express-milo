@@ -1,11 +1,13 @@
 export function hexToRgb(hex) {
   const cleaned = hex.replace(/^#/, '');
   const int = Number.parseInt(cleaned, 16);
+  /* eslint-disable no-bitwise */
   return {
     r: (int >> 16) & 255,
     g: (int >> 8) & 255,
     b: int & 255,
   };
+  /* eslint-enable no-bitwise */
 }
 
 export function rgbToHex(r, g, b) {
@@ -49,12 +51,19 @@ export function hsvToRgb(h, s, v) {
   let gP;
   let bP;
 
-  if (h < 60) { rP = c; gP = x; bP = 0; }
-  else if (h < 120) { rP = x; gP = c; bP = 0; }
-  else if (h < 180) { rP = 0; gP = c; bP = x; }
-  else if (h < 240) { rP = 0; gP = x; bP = c; }
-  else if (h < 300) { rP = x; gP = 0; bP = c; }
-  else { rP = c; gP = 0; bP = x; }
+  if (h < 60) {
+    [rP, gP, bP] = [c, x, 0];
+  } else if (h < 120) {
+    [rP, gP, bP] = [x, c, 0];
+  } else if (h < 180) {
+    [rP, gP, bP] = [0, c, x];
+  } else if (h < 240) {
+    [rP, gP, bP] = [0, x, c];
+  } else if (h < 300) {
+    [rP, gP, bP] = [x, 0, c];
+  } else {
+    [rP, gP, bP] = [c, 0, x];
+  }
 
   return {
     r: (rP + m) * 255,

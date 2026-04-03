@@ -281,13 +281,14 @@ function deferToViewport(target, callback, rootMargin) {
   const opts = rootMargin ? { rootMargin } : {};
   return new Promise((resolve) => {
     let resolved = false;
+    let io;
     const complete = () => {
       if (resolved) return;
       resolved = true;
       io.disconnect();
       resolve(callback());
     };
-    const io = new IntersectionObserver(([entry]) => {
+    io = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) complete();
     }, opts);
     io.observe(target);
@@ -419,14 +420,15 @@ export default async function createColorToolLayout(container, config = {}) {
     })
     .catch(() => null);
 
-  const toolbarReady = mountToolbar(
-    shell, root, slots.footer, resolvedToolbarConfig, toolbarModulePromise,
-  ).then(({
-    toolbarHandle,
-    stickyToolbarHandle,
-    stickyObserver,
-    cleanupToolbarMount,
-    onPaletteChange,
+  const toolbarMountPromise = mountToolbar(
+    shell,
+    root,
+    slots.footer,
+    resolvedToolbarConfig,
+    toolbarModulePromise,
+  );
+  const toolbarReady = toolbarMountPromise.then(({
+    toolbarHandle, stickyToolbarHandle, stickyObserver, cleanupToolbarMount, onPaletteChange,
   }) => {
     if (state.destroyed) return;
     state.toolbar = toolbarHandle;

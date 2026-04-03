@@ -1,3 +1,4 @@
+/* global globalThis */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import AuthStateProvider from '../../../express/code/libs/services/providers/AuthStateProvider.js';

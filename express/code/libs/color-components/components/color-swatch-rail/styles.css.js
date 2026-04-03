@@ -41,6 +41,7 @@ export const style = css`
     isolation: isolate;
     transition: flex-grow 0.2s ease;
     box-sizing: border-box;
+    container-type: inline-size;
   }
 
   .swatch-column--tint-mode {
@@ -864,7 +865,21 @@ export const style = css`
     margin-left: 0;
   }
 
-  
+  @container (max-width: 89px) {
+    .bottom-info {
+      flex-direction: column;
+    }
+
+    .bottom-info .hex-code {
+      align-self: flex-end;
+    }
+
+    .bottom-info .bottom-info__actions {
+      align-self: flex-start;
+    }
+  }
+
+
   .hex-code {
     font-size: 16px;
     font-weight: 700;

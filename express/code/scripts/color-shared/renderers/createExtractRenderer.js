@@ -1,4 +1,4 @@
-import { createBaseRenderer } from './createBaseRenderer.js';
+import createBaseRenderer from './createBaseRenderer.js';
 
 export function createExtractRenderer(options) {
   const base = createBaseRenderer(options);

@@ -168,7 +168,7 @@ export async function ensureGradientsModalContentStyles() {
 
 export function createGradientsModalContent(gradient = {}, options = {}) {
   const {
-    ctaText = 'Open gradient in Adobe Express',
+    ctaText = 'Create with color palette',
   } = options;
 
   const root = createTag('main', { class: 'gradients-modal-content' });

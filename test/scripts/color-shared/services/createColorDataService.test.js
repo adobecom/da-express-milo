@@ -181,8 +181,10 @@ describe('createColorDataService', () => {
     ];
     const fakeKuler = {
       searchThemes: sinon.stub()
-        .onFirstCall().resolves({ themes: page1Themes, hasNextPage: true })
-        .onSecondCall().resolves({ themes: page2Themes, hasNextPage: false }),
+        .onFirstCall()
+        .resolves({ themes: page1Themes, hasNextPage: true })
+        .onSecondCall()
+        .resolves({ themes: page2Themes, hasNextPage: false }),
     };
     sinon.stub(serviceManager, 'getProvider').resolves(fakeKuler);
 
@@ -259,8 +261,10 @@ describe('createColorDataService', () => {
     ];
     const fakeKuler = {
       searchGradients: sinon.stub()
-        .onFirstCall().resolves({ gradients: page1, hasNextPage: true })
-        .onSecondCall().resolves({ gradients: page2, hasNextPage: false }),
+        .onFirstCall()
+        .resolves({ gradients: page1, hasNextPage: true })
+        .onSecondCall()
+        .resolves({ gradients: page2, hasNextPage: false }),
     };
     sinon.stub(serviceManager, 'getProvider').resolves(fakeKuler);
 

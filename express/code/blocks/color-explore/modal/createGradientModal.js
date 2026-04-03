@@ -48,6 +48,7 @@ export function createGradientModal(gradient, options = {}) {
       }
     }
 
+    // eslint-disable-next-line no-unused-vars
     const generateGradientCSS = function generateGradientCSSFn() {
       if (currentGradient.gradient && typeof currentGradient.gradient === 'string') {
         return currentGradient.gradient;

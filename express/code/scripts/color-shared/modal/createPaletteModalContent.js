@@ -325,7 +325,7 @@ function setupSwatchColumnNav(container) {
 
 export function createPaletteSwatchesModalContent(palette, options = {}) {
   const {
-    ctaText = 'Open in Adobe Express',
+    ctaText = 'Create with color palette',
     swatchFeatures: inputSwatchFeatures = {},
     verticalMaxPerRow,
   } = options;
@@ -353,7 +353,8 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
     class: 'modal-palette-container modal-palette-container--color-rail',
     'aria-label': `Selected color palette, ${colorCount} color${colorCount !== 1 ? 's' : ''}`,
   });
-  const railWrap = createTag('div', { class: 'modal-color-rail-wrap strip-container' });
+  const colorCountRange = colorCount <= 5 ? 'small' : 'large';
+  const railWrap = createTag('div', { class: 'modal-color-rail-wrap strip-container', 'data-color-count-range': colorCountRange });
   const railAdapter = createSwatchRailAdapter(normalizedPalette, {
     orientation: 'vertical-responsive',
     swatchFeatures,

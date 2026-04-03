@@ -211,9 +211,6 @@ export class ColorSwatchRail extends LitElement {
     this._tooltipsInitialized = false;
     this._nativePickerOpen = false;
     this._nativePickerCloseTimer = null;
-    this._copyFeedbackTimer = null;
-    this._copyFeedbackTooltip = null;
-    this._copyFeedbackRestoreText = '';
   }
 
   get _features() {
@@ -263,7 +260,6 @@ export class ColorSwatchRail extends LitElement {
       clearTimeout(this._nativePickerCloseTimer);
       this._nativePickerCloseTimer = null;
     }
-    this._clearCopyFeedback();
     this._clearTooltips();
     super.disconnectedCallback();
   }
@@ -328,7 +324,7 @@ export class ColorSwatchRail extends LitElement {
       const isInteractiveDemoRail = !!this.closest('.strip-variant--interactive');
       if (isFourRows && isInteractiveDemoRail) continue;
 
-      const targets = root.querySelectorAll?.('button[aria-label], .hex-code[aria-label]') || [];
+      const targets = root.querySelectorAll?.('button[aria-label]') || [];
       for (const targetEl of targets) {
         const content = (targetEl.getAttribute('aria-label') || '').trim();
         if (!content) continue;
@@ -425,38 +421,6 @@ export class ColorSwatchRail extends LitElement {
     }
   }
 
-  _clearCopyFeedback() {
-    if (this._copyFeedbackTimer != null) {
-      clearTimeout(this._copyFeedbackTimer);
-      this._copyFeedbackTimer = null;
-    }
-    if (this._copyFeedbackTooltip) {
-      if (this._copyFeedbackRestoreText) {
-        this._copyFeedbackTooltip.textContent = this._copyFeedbackRestoreText;
-      }
-      this._copyFeedbackTooltip.removeAttribute('open');
-      this._copyFeedbackTooltip = null;
-      this._copyFeedbackRestoreText = '';
-    }
-  }
-
-  _showCopyFeedback(target) {
-    if (!target) return;
-    this._clearCopyFeedback();
-    const describedById = target.getAttribute('aria-describedby');
-    const tooltipEl = describedById ? document.getElementById(describedById) : null;
-    if (!tooltipEl) return;
-    target.blur?.();
-    target.dispatchEvent(new Event('pointerleave', { bubbles: true, composed: true }));
-    this._copyFeedbackRestoreText = tooltipEl.textContent || '';
-    tooltipEl.textContent = 'Copied to clipboard';
-    tooltipEl.setAttribute('open', '');
-    this._copyFeedbackTooltip = tooltipEl;
-    this._copyFeedbackTimer = setTimeout(() => {
-      this._clearCopyFeedback();
-    }, 1200);
-  }
-
   _copyTextFallback(text) {
     try {
       const textarea = document.createElement('textarea');
@@ -487,12 +451,12 @@ export class ColorSwatchRail extends LitElement {
     return this._copyTextFallback(text);
   }
 
-  async _handleCopy(hex, target = null) {
+  async _handleCopy(hex) {
     if (!hex) return;
     try {
       const copied = await this._copyText(hex);
       if (!copied) throw new Error('clipboard_copy_failed');
-      this._showCopyFeedback(target);
+      showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
       announceToScreenReader('Copied to clipboard');
     } catch (error) {
       showExpressToast({ message: 'Failed to copy', variant: 'negative', timeout: 2000 });
@@ -1095,7 +1059,7 @@ export class ColorSwatchRail extends LitElement {
         const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
         return html`
           <div class="swatch-column swatch-column--simulated" tabindex="-1" role="group" aria-label="Simulated color"
-            style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-color: ${textColor};"
+            style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: var(--swatch-text-shadow-override, ${shadow}); --swatch-icon-color: ${textColor};"
             data-swatch-index="${index}">
             ${swatch.conflict ? conflictIcon() : ''}
           </div>
@@ -1192,7 +1156,7 @@ export class ColorSwatchRail extends LitElement {
       return html`
         <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${tintMode ? 'swatch-column--tint-mode' : ''} ${isTintSelected ? 'swatch-column--tint-selected' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''}"
           data-contrast="${textColor === '#ffffff' ? 'dark' : 'light'}"
-          style="background-color: ${swatch.hex}; --swatch-base-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${textColor === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
+          style="background-color: ${swatch.hex}; --swatch-base-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: var(--swatch-text-shadow-override, ${shadow}); --swatch-icon-filter: ${textColor === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
           data-swatch-index="${index}"
           tabindex="0"
           role="group"

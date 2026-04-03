@@ -31,6 +31,11 @@ export default function createSetRatioTab({
     previewContainer?.replaceChildren();
   }
 
+  function updateButtonLabel() {
+    if (!actionBtn) return;
+    actionBtn.textContent = isPreviewState ? strings.refresh : strings.seePreview;
+  }
+
   function resetPreviewState() {
     clearPreview();
     isPreviewState = false;
@@ -60,11 +65,6 @@ export default function createSetRatioTab({
     }
 
     return suggestions;
-  }
-
-  function updateButtonLabel() {
-    if (!actionBtn) return;
-    actionBtn.textContent = isPreviewState ? strings.refresh : strings.seePreview;
   }
 
   function handleAction() {

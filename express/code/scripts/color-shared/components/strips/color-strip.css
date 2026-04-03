@@ -637,6 +637,10 @@
   width: 100%;
 }
 
+color-swatch-rail {
+  --swatch-text-shadow-override: none;
+}
+
 .strip-with-color-blindness__rail-column color-swatch-rail {
   width: 100%;
   min-width: 0;

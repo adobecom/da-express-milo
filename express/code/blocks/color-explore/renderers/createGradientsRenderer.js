@@ -1,5 +1,5 @@
 import { createTag } from '../../../scripts/utils.js';
-import { createBaseRenderer } from './createBaseRenderer.js';
+import createBaseRenderer from './createBaseRenderer.js';
 import { createGradientStripElements } from '../../../scripts/color-shared/components/gradients/gradient-strip.js';
 import { createLoadMoreComponent } from '../../../scripts/color-shared/components/createLoadMoreComponent.js';
 import { loadIconsRail } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
