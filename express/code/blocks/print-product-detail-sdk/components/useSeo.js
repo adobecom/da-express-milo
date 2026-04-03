@@ -37,10 +37,8 @@ export function upsertLdJson(id, data) {
 
 function stripHtml(input) {
   if (!input) return '';
-  const div = document.createElement('div');
-  div.innerHTML = input;
-  const text = div.textContent || div.innerText || '';
-  return text.replace(/\s+/g, ' ').trim();
+  const doc = new DOMParser().parseFromString(input, 'text/html');
+  return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
 }
 
 async function getCurrencyCode() {
@@ -170,9 +168,10 @@ export default function useSeo(templateId) {
 
   useEffect(() => {
     if (!state) {
-      return;
+      return undefined;
     }
 
+    let active = true;
     const payload = mapStateToSeoPayload(state, templateId);
     upsertTitleAndDescriptionRespectingAuthored(payload);
 
@@ -181,7 +180,7 @@ export default function useSeo(templateId) {
 
     buildProductJsonLd(payload, overrides, canonicalUrl)
       .then((json) => {
-        if (json) {
+        if (active && json) {
           upsertLdJson('pdp-product-jsonld', json);
         }
       })
@@ -193,5 +192,7 @@ export default function useSeo(templateId) {
     if (breadcrumbs) {
       upsertLdJson('pdp-breadcrumbs-jsonld', breadcrumbs);
     }
+
+    return () => { active = false; };
   }, [state, templateId]);
 }

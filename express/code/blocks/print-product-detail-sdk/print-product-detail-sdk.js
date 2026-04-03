@@ -77,7 +77,7 @@ function PDPContent({ templateId }) {
         decorateDefaultLinkAnalytics(containerRef.current, getConfig());
       });
     });
-  });
+  }, [state]);
 
   const handleDrawerRequest = (request) => {
     if (!request) {

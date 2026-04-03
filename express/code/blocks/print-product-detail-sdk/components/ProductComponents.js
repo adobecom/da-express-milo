@@ -330,6 +330,8 @@ export function CheckoutButton({ templateId }) {
           stickyPromoBar(promoBar);
         });
       });
+    }).catch((error) => {
+      window.lana?.log(`Failed to load sticky-promo-bar: ${error}`, { tags: 'print-product-detail-sdk', severity: 'warning' });
     });
   }, [outOfRegion]);
 

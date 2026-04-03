@@ -26,8 +26,6 @@ export function StoreProvider({ children, sdkStore }) {
 
 export function useStore() {
   const value = useContext(StoreContext);
-  console.log('storeContext value:');
-  console.log(value);
   if (!value) {
     throw new Error('useStore must be used within a StoreProvider');
   }

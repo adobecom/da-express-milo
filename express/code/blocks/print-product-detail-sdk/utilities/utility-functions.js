@@ -35,7 +35,7 @@ export function formatLargeNumberToK(totalReviews) {
     }
     return `${Math.round(totalReviews / 1000)}.${Math.round((totalReviews % 1000) / 100)}k`;
   }
-  return totalReviews;
+  return String(totalReviews);
 }
 
 export function exchangeRegionForTopLevelDomain(region) {
@@ -49,7 +49,7 @@ export function exchangeRegionForTopLevelDomain(region) {
     'en-AU': 'au',
     'en-NZ': 'nz',
   };
-  const topLevelDomain = regionToTopLevelDomainMap[regionFinal];
+  const topLevelDomain = regionToTopLevelDomainMap[regionFinal] || 'com';
   return topLevelDomain;
 }
 
@@ -104,7 +104,7 @@ export async function addPrefetchLinks() {
   });
   const preconnectLink2 = createTag('link', {
     rel: 'preconnect',
-    href: `https://www.zazzle.${topLevelDomain}`,
+    href: `https://rlv.zcache.${topLevelDomain}`,
   });
   document.head.appendChild(prefetchLink1);
   document.head.appendChild(prefetchLink2);
