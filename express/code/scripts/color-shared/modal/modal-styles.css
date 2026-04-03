@@ -72,7 +72,6 @@
   transition: transform 0.3s ease-out;
   height: auto;
   max-height: min(764px, 100vh);
-  padding-bottom: calc(var(--spacing-300) + env(safe-area-inset-bottom, 0px));
 }
 
 .ax-color-modal-container.ax-color-modal-open {
@@ -97,7 +96,7 @@
   height: 4px;
   background: var(--color-gray-325);
   border-radius: var(--Corner-radius-corner-radius-100);
-  margin: var(--spacing-200) auto var(--spacing-100) auto;
+  margin: var(--spacing-100) auto 0 auto;
   flex-shrink: 0;
 }
 
@@ -170,7 +169,7 @@
 }
 
 .ax-color-modal-content {
-  padding: var(--spacing-100) var(--spacing-300) var(--spacing-300);
+  padding: 0 var(--spacing-300) var(--spacing-300);
   flex: 1 1 auto;
   min-height: 0;
   overflow-x: hidden;
@@ -241,6 +240,7 @@ body.ax-color-modal-open {
     height: auto;
     overflow: visible;
     transition: none;
+    padding-bottom: 0;
   }
 
   .ax-color-modal-container.ax-color-modal-open {

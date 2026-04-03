@@ -13,7 +13,6 @@
   gap: var(--spacing-100);
   width: 100%;
   padding: 0 0 var(--spacing-200);
-  margin: var(--spacing-200) 0 0;
   border-bottom: 1px solid var(--color-gray-150);
 }
 
@@ -42,6 +41,14 @@
 
 .ax-color-modal-content .gradients-modal-content__preview .gradient-editor {
   width: 100%;
+}
+
+.ax-color-modal-content .gradients-modal-content__preview .gradient-editor--layout-responsive .gradient-editor-handle:first-child {
+  transform: translateX(0);
+}
+
+.ax-color-modal-content .gradients-modal-content__preview .gradient-editor--layout-responsive .gradient-editor-handle:last-child {
+  transform: translateX(0);
 }
 
 .ax-color-modal-content .gradients-modal-content__likes {
@@ -171,7 +178,23 @@
   }
 }
 
+.ax-color-modal-content .ax-toolbar {
+  --ax-toolbar-row-gap: var(--spacing-100);
+}
+
+@media (max-width: 1199px) {
+  .ax-color-modal-content sp-button[variant="accent"] {
+    --spectrum-button-height: var(--spacing-700);
+    font-size: var(--ax-body-m-size);
+    padding: 0 var(--spacing-400);
+  }
+}
+
 @media (min-width: 1200px) {
+  .ax-color-modal-content .gradients-modal-content__preview .gradient-editor {
+    border-radius: 16px;
+  }
+
   .ax-color-modal-content .gradients-modal-content__preview,
   .ax-color-modal-content .gradients-modal-content__meta {
     width: 100%;
@@ -179,7 +202,6 @@
   }
 
   .ax-color-modal-content .gradients-modal-content__meta {
-    margin: 0;
     padding: 0 0 var(--spacing-200);
   }
 

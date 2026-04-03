@@ -31,7 +31,7 @@
 }
 
 .gradient-editor:focus-visible .gradient-editor-bar,
-.gradient-editor:focus-within .gradient-editor-bar,
+.gradient-editor:has(:focus-visible) .gradient-editor-bar,
 .gradient-editor-bar:focus-visible {
   outline: var(--border-width-2) solid var(--color-blue-800);
   outline-offset: 1px;
@@ -73,11 +73,11 @@
 }
 
 .gradient-editor--layout-responsive .gradient-editor-handle:first-child {
-  transform: translateX(11px);
+  transform: translateX(9px);
 }
 
 .gradient-editor--layout-responsive .gradient-editor-handle:last-child {
-  transform: translateX(-11px);
+  transform: translateX(-9px);
 }
 
 .gradient-editor--layout-responsive .gradient-editor-handle:first-child::before,
@@ -106,7 +106,6 @@
 }
 
 .gradient-editor--layout-responsive.gradient-editor--size-strip-s {
-  width: var(--Gradient-strip-tall-width-s);
   max-width: 100%;
 }
 
@@ -115,7 +114,6 @@
 }
 
 .gradient-editor--layout-responsive.gradient-editor--size-strip-m {
-  width: var(--Gradient-strip-tall-width-m);
   max-width: 100%;
 }
 
@@ -124,7 +122,6 @@
 }
 
 .gradient-editor--layout-responsive.gradient-editor--size-strip-l {
-  width: var(--Gradient-strip-tall-width-l);
   max-width: 100%;
 }
 
@@ -133,7 +130,6 @@
 }
 
 .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive {
-  width: var(--Gradient-strip-tall-width-s);
   max-width: 100%;
 }
 
@@ -143,7 +139,7 @@
 
 @media (min-width: 600px) {
   .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive {
-    width: var(--Gradient-strip-tall-width-m);
+    max-width: 100%;
   }
 
   .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive .gradient-editor-bar-wrap {
@@ -153,7 +149,7 @@
 
 @media (min-width: 1200px) {
   .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive {
-    width: var(--Gradient-strip-tall-width-l);
+    max-width: 100%;
   }
 
   .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive .gradient-editor-bar-wrap {
@@ -244,7 +240,6 @@
   cursor: pointer;
   user-select: none;
   -webkit-user-drag: none;
-  user-drag: none;
 }
 
 .gradient-editor-handle:focus-visible {
