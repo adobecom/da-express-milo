@@ -288,12 +288,63 @@ function buildCheckoutUrl(templateId, expressProductSettings, productType) {
   return `${baseUrl}?${params.toString()}&productSettings=${encodedProductSettings}`;
 }
 
+const VALID_COUNTRIES = ['us', 'gb'];
+const OUT_OF_REGION_TEXT = 'Print with Adobe Express isn\u2019t available yet in your region. Check back soon!';
+
 export function CheckoutButton({ templateId }) {
   const { state } = useStore();
+  const [outOfRegion, setOutOfRegion] = useState(null);
+  const promoBarRef = useRef(null);
 
+  useEffect(() => {
+    let active = true;
+    import('../../../scripts/utils/location-utils.js')
+      .then(({ getCountry }) => getCountry())
+      .then((country) => {
+        if (active) setOutOfRegion(!VALID_COUNTRIES.includes(country));
+      });
+    return () => { active = false; };
+  }, []);
+
+  useEffect(() => {
+    if (!outOfRegion || !promoBarRef.current) return;
+    const container = promoBarRef.current;
+
+    const promoBar = document.createElement('div');
+    promoBar.className = 'sticky-promo-bar rounded';
+
+    const textWrapper = document.createElement('div');
+    const textSpan = document.createElement('span');
+    textSpan.className = 'pdpx-checkout-button-cta-text-container';
+    textSpan.textContent = OUT_OF_REGION_TEXT;
+    textWrapper.appendChild(textSpan);
+    promoBar.appendChild(textWrapper);
+
+    container.appendChild(promoBar);
+
+    import('../../../scripts/utils.js').then(({ getLibs }) => import(`${getLibs()}/utils/utils.js`)).then(({ loadStyle, getConfig }) => {
+      const { codeRoot } = getConfig();
+      loadStyle(`${codeRoot}/blocks/sticky-promo-bar/sticky-promo-bar.css`, () => {
+        import('../../sticky-promo-bar/sticky-promo-bar.js').then(({ default: stickyPromoBar }) => {
+          stickyPromoBar(promoBar);
+        });
+      });
+    });
+  }, [outOfRegion]);
+
+  if (outOfRegion === null) return null;
+
+  const defaultUrl = `https://new.express.adobe.com/design-remix/template/${templateId}`;
   const checkoutUrl = state?.expressProductSettings
     ? buildCheckoutUrl(templateId, state.expressProductSettings, state.productType)
-    : '#';
+    : defaultUrl;
+
+  if (outOfRegion) {
+    return html`
+      <div class="pdpx-checkout-button-container pdpx-checkout-button-disabled" ref=${promoBarRef}>
+      </div>
+    `;
+  }
 
   return html`
     <div class="pdpx-checkout-button-container">
