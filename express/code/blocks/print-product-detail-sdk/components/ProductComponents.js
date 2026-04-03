@@ -95,16 +95,16 @@ export function ProductHeader() {
           </div>
           ${reviewsRating > 0 && html`
             <div class="pdpx-product-ratings-lockup-container">
-              <div class="pdpx-star-ratings">
+              <div class="pdpx-star-ratings" role="img" aria-label="${formattedRating} out of 5 stars">
                 ${Array.from({ length: 5 }).map(() => html`
-                  <img class="pdpx-product-info-header-ratings-star" src="/express/code/icons/star-sharp.svg" alt="star" />
+                  <img class="pdpx-product-info-header-ratings-star" src="/express/code/icons/star-sharp.svg" alt="" aria-hidden="true" />
                 `)}
               </div>
               <div class="pdpx-ratings-number-container">
-                <span class="pdpx-ratings-number" id="pdpx-ratings-number">${formattedRating}</span>
+                <span class="pdpx-ratings-number" id="pdpx-ratings-number" aria-hidden="true">${formattedRating}</span>
               </div>
               <div class="pdpx-ratings-amount-container">
-                <button class="pdpx-ratings-amount" id="pdpx-ratings-amount" type="button">${formattedCount}</button>
+                <button class="pdpx-ratings-amount" id="pdpx-ratings-amount" type="button" aria-label="${formattedCount} reviews">${formattedCount}</button>
               </div>
             </div>
           `}
@@ -123,11 +123,12 @@ export function ProductHeader() {
                   type="button"
                   aria-label="Compare value information"
                   aria-expanded="${tooltipVisible}"
+                  aria-describedby="${tooltipVisible ? 'pdpx-info-tooltip-content' : undefined}"
                   onMouseEnter=${showTooltip}
                   onMouseLeave=${hideTooltip}
                   onClick=${showTooltip}
                 >
-                  <img class="pdpx-compare-price-info-icon" src="/express/code/icons/info.svg" alt="info" />
+                  <img class="pdpx-compare-price-info-icon" src="/express/code/icons/info.svg" alt="" aria-hidden="true" />
                 </button>
                 ${tooltipVisible && html`
                   <div class="pdpx-info-tooltip-content" id="pdpx-info-tooltip-content" role="tooltip" style="display: block;">
@@ -150,7 +151,7 @@ export function ProductHeader() {
       </div>
       ${shippingEstimate && html`
         <div class="pdpx-delivery-estimate-pill">
-          <img class="pdpx-delivery-estimate-pill-icon" src="/express/code/icons/delivery-truck.svg" alt="delivery" />
+          <img class="pdpx-delivery-estimate-pill-icon" src="/express/code/icons/delivery-truck.svg" alt="" aria-hidden="true" />
           <span class="pdpx-delivery-estimate-pill-text" id="pdpx-delivery-estimate-pill-text">Estimated Delivery</span>
           <span class="pdpx-delivery-estimate-pill-date" id="pdpx-delivery-estimate-pill-date">${shippingEstimate}</span>
         </div>
@@ -353,7 +354,7 @@ export function CheckoutButton({ templateId }) {
         id="pdpx-checkout-button"
         href="${checkoutUrl}"
       >
-        <img class="pdpx-checkout-button-icon" src="/express/code/icons/print-icon.svg" alt="print" />
+        <img class="pdpx-checkout-button-icon" src="/express/code/icons/print-icon.svg" alt="" aria-hidden="true" />
         <span class="pdpx-checkout-button-text">Customize and print it</span>
       </a>
       <div class="pdpx-checkout-button-subhead">
@@ -376,18 +377,19 @@ function SizeChartTable({ measurementTypes, attributeValues }) {
   return html`
     <div class="size-chart-table-section">
       <table class="size-chart-table">
+        <caption class="sr-only">${headerLabel} size chart</caption>
         <thead>
           <tr>
-            <th class="size-chart-table-header">${headerLabel}</th>
+            <th class="size-chart-table-header" scope="col">${headerLabel}</th>
             ${measurementTypes.map((type) => html`
-              <th key="${type.key}">${type.label}</th>
+              <th key="${type.key}" scope="col">${type.label}</th>
             `)}
           </tr>
         </thead>
         <tbody>
           ${attributeValues.map((row) => html`
             <tr key="${row.attributeValueLabel}">
-              <td>${row.attributeValueLabel}</td>
+              <th scope="row">${row.attributeValueLabel}</th>
               ${measurementTypes.map((type) => {
     const measurement = row.measurements?.[type.key];
     return html`
@@ -728,14 +730,55 @@ function PaperTypeContent({ onClose }) {
 
 export function Drawer() {
   const { state, closeDrawer } = useDrawer();
+  const drawerRef = useRef(null);
+  const triggerRef = useRef(null);
 
   useEffect(() => {
     if (!state.open) return undefined;
+
+    // Capture the element that triggered the drawer so we can return focus
+    triggerRef.current = document.activeElement;
+
     const handleKeyDown = (e) => {
-      if (e.key === 'Escape') closeDrawer();
+      if (e.key === 'Escape') {
+        closeDrawer();
+        return;
+      }
+      // Focus trap: keep Tab within the drawer
+      if (e.key === 'Tab' && drawerRef.current) {
+        const focusable = drawerRef.current.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        );
+        if (!focusable.length) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+
+    // Move focus into the drawer
+    requestAnimationFrame(() => {
+      if (drawerRef.current) {
+        const firstFocusable = drawerRef.current.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+        if (firstFocusable) firstFocusable.focus();
+      }
+    });
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      // Return focus to the triggering element
+      if (triggerRef.current?.focus) {
+        triggerRef.current.focus();
+        triggerRef.current = null;
+      }
+    };
   }, [state.open, closeDrawer]);
 
   const drawerLabels = {
@@ -752,11 +795,18 @@ export function Drawer() {
         onClick=${closeDrawer}
         role="presentation"
       ></div>
-      <aside class="pdpx-drawer ${state.open ? '' : 'hidden'}" id="pdp-x-drawer">
+      <aside
+        ref=${drawerRef}
+        class="pdpx-drawer ${state.open ? '' : 'hidden'}"
+        id="pdp-x-drawer"
+        role="dialog"
+        aria-modal="${state.open ? 'true' : 'false'}"
+        aria-label="${drawerLabel}"
+      >
         <div class="pdpx-drawer-head">
           <div class="pdpx-drawer-head-label">${drawerLabel}</div>
           <button type="button" aria-label="Close" onClick=${closeDrawer}>
-          <img class="icon icon-close-black" src="/express/code/icons/close-black.svg" alt="close-black" />
+          <img class="icon icon-close-black" src="/express/code/icons/close-black.svg" alt="" aria-hidden="true" />
           </button>
         </div>
         ${state.type === 'sizeChart' && html`<${SizeChartContent} onClose=${closeDrawer} />`}

@@ -6,6 +6,12 @@ import {
 import { useStore } from './Contexts.js';
 import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 import { createPicker } from '../../../scripts/widgets/picker.js';
+import { trackPrintAddonOptionSelect } from '../../../scripts/instrument.js';
+import { debounce } from '../../../scripts/utils/hofs.js';
+
+const debouncedTrackOptionSelect = debounce((payload) => {
+  trackPrintAddonOptionSelect(payload).catch(() => {});
+}, 250);
 
 function toDomIdPart(value) {
   return String(value || '')
@@ -77,7 +83,7 @@ export function CheckboxSelector({ attribute }) {
   `;
 }
 
-export function DropdownSelector({ attribute, onRequestDrawer }) {
+export function DropdownSelector({ attribute, onRequestDrawer, productType }) {
   const { actions } = useStore();
   const { selector, selectedOptionValue, title, helpLink } = attribute;
   const pickerHostRef = useRef(null);
@@ -111,6 +117,11 @@ export function DropdownSelector({ attribute, onRequestDrawer }) {
         defaultValue: selectedOptionValue,
         onChange: (value) => {
           actions.selectOption(attribute.name, value);
+          debouncedTrackOptionSelect({
+            attributeName: attribute.name,
+            actionValue: value,
+            productType,
+          });
         },
       });
       if (cancelled || !pickerHostRef.current) {
@@ -185,7 +196,7 @@ export function QuantitySelector() {
     return null;
   }
 
-  const { quantity, quantityOptions } = state;
+  const { quantity, quantityOptions, productType } = state;
   const optionsSignature = quantityOptions
     .map((option) => `${option.quantity}:${option.label}:${option.discount || ''}`)
     .join('|');
@@ -220,6 +231,11 @@ export function QuantitySelector() {
           const nextQuantity = parseInt(value, 10);
           if (!Number.isNaN(nextQuantity)) {
             actions.selectQuantity(nextQuantity);
+            debouncedTrackOptionSelect({
+              attributeName: 'qty',
+              actionValue: value,
+              productType,
+            });
           }
         },
       });
@@ -340,7 +356,7 @@ function buildPillElement(option, isSelected, index, setSize, activeIndex, handl
   button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
   button.setAttribute('aria-posinset', String(index + 1));
   button.setAttribute('aria-setsize', String(setSize));
-  button.setAttribute('aria-label', option.title);
+  button.setAttribute('aria-label', `${option.title}${option.priceDelta ? ` ${option.priceDelta}` : ''}`);
   button.setAttribute('tabindex', index === activeIndex ? '0' : '-1');
   button.addEventListener('click', () => handleOptionClick(option));
   button.addEventListener('keydown', handleMiniPillKeyDown);
@@ -410,6 +426,11 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
   }
   const handleOptionClick = (option) => {
     actions.selectOption(attribute.name, option.value);
+    debouncedTrackOptionSelect({
+      attributeName: attribute.name,
+      actionValue: option.value,
+      productType,
+    });
   };
 
   const handleMiniPillKeyDown = (event) => {
@@ -618,6 +639,11 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
   const handleOptionClick = (option) => {
     if (option.value !== selectedOptionValue) {
       actions.selectOption(attribute.name, option.value);
+      debouncedTrackOptionSelect({
+        attributeName: attribute.name,
+        actionValue: option.value,
+        productType,
+      });
     }
   };
 
@@ -695,7 +721,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
                     data-title="${option.title}"
                     data-index="${optionIndex}"
                     role="radio"
-                    aria-label="${option.title}"
+                    aria-label="${option.title}${option.priceDelta ? ` ${option.priceDelta}` : ''}"
                     aria-checked="${isSelected ? 'true' : 'false'}"
                     aria-current="${isSelected ? 'true' : 'false'}"
                     aria-pressed="${isSelected ? 'true' : 'false'}"

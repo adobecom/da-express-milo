@@ -10,11 +10,12 @@ import {
 import { StoreProvider, useStore, DrawerProvider, useDrawer } from './components/Contexts.js';
 import { ProductImages, ProductDetails, ProductHeader, CheckoutButton, Drawer } from './components/ProductComponents.js';
 import { CustomizationInputs } from './components/CustomizationInputs.js';
+import { trackViewTemplatePage } from '../../scripts/instrument.js';
 import useSeo from './components/useSeo.js';
 
 function LoadingSkeleton() {
   return html`
-    <div class="pdpx-global-container" someProp="someValue">
+    <div class="pdpx-global-container" someProp="someValue" aria-busy="true" aria-label="Loading product information">
       <div class="pdpx-product-images-container">
         <div class="pdpx-product-hero-image-container" data-skeleton="true" style="height: 400px;"></div>
       </div>
@@ -37,6 +38,7 @@ function PDPContent({ templateId }) {
   const { openDrawer } = useDrawer();
   const { fetchProduct } = actions;
   const containerRef = useRef(null);
+  const hasTrackedPageView = useRef(false);
 
   useSeo(templateId);
 
@@ -46,6 +48,27 @@ function PDPContent({ templateId }) {
     }
     fetchProduct(templateId);
   }, [templateId, fetchProduct]);
+
+  useEffect(() => {
+    if (!state || hasTrackedPageView.current) return;
+    hasTrackedPageView.current = true;
+    try {
+      const attributeObject = Object.fromEntries(
+        (state.attributes || []).map((attr) => [attr.name, attr.selectedOptionValue]),
+      );
+      trackViewTemplatePage(
+        'pdp',
+        state.productType,
+        templateId,
+        'print',
+        true,
+        attributeObject,
+        true,
+      );
+    } catch (error) {
+      window.lana?.log(`Failed to track PDP pageload: ${error}`, { tags: 'print-product-detail-sdk', severity: 'warning' });
+    }
+  }, [state, templateId]);
 
   useEffect(() => {
     if (!containerRef.current || !state) return;

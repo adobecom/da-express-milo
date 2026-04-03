@@ -1131,3 +1131,56 @@ main .section .ax-accordion-item-description p {
     padding: var(--spacing-200) var(--spacing-600);
   }
 }
+
+/* Accessibility: screen-reader-only utility */
+.print-product-detail-sdk .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Accessibility: focus indicators */
+.print-product-detail-sdk a:focus-visible,
+.print-product-detail-sdk button:focus-visible,
+.print-product-detail-sdk input:focus-visible,
+.print-product-detail-sdk select:focus-visible {
+  outline: 3px solid var(--color-background-accent-default);
+  outline-offset: 2px;
+}
+
+.print-product-detail-sdk .pdpx-mini-pill-image-container:focus-visible {
+  outline: 3px solid var(--color-background-accent-default);
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+
+.print-product-detail-sdk .pdpx-pill-container:focus-visible {
+  outline: 3px solid var(--color-background-accent-default);
+  outline-offset: 2px;
+  border-radius: var(--spacing-100);
+}
+
+.print-product-detail-sdk a.pdpx-checkout-button:focus-visible {
+  outline: 3px solid var(--color-white);
+  outline-offset: -3px;
+}
+
+/* Accessibility: reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .print-product-detail-sdk [data-skeleton='true'] {
+    animation: none;
+  }
+
+  .print-product-detail-sdk .pdpx-curtain,
+  .print-product-detail-sdk .pdpx-drawer,
+  .print-product-detail-sdk .pdpx-mini-pill-image-container::after,
+  .print-product-detail-sdk .pdpx-mini-pill-image-container::before {
+    transition-duration: 0.01ms;
+  }
+}
