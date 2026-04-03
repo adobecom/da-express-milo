@@ -391,7 +391,6 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
     : (selectedOption?.title || '');
   const groupLabelId = `pdpx-mini-pill-label-${toDomIdPart(attribute.name)}`;
   const groupValueId = `pdpx-mini-pill-selected-value-${toDomIdPart(attribute.name)}`;
-  const hiddenInputId = `pdpx-hidden-input-${attribute.name}`;
   const isBusinessCardMediaAttribute = attribute.name === 'media' && productType === 'zazzle_businesscard';
   if (isBusinessCardMediaAttribute) {
     helpLink = {
@@ -599,24 +598,6 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
         aria-labelledby="${groupLabelId}"
         aria-describedby="${groupValueId}"
       />
-      <select
-        class="pdpx-hidden-select-input hidden"
-        name="${attribute.name}"
-        id="${hiddenInputId}"
-        aria-hidden="true"
-      >
-        ${allOptions.map(
-    (option) => html`
-            <option
-              key="${option.value}"
-              value="${option.value}"
-              selected="${option.value === selectedOptionValue}"
-            >
-              ${option.title}
-            </option>
-          `,
-  )}
-      </select>
     </div>
   `;
 }
@@ -625,7 +606,6 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
   const { actions } = useStore();
   const { selector, selectedOptionValue, title, helpLink } = attribute;
   const groupLabelId = `pdpx-pill-label-${toDomIdPart(attribute.name)}`;
-  const hiddenInputId = `pdpx-hidden-input-${attribute.name}`;
 
   const allOptions = flattenOptionGroups(selector);
 
@@ -749,24 +729,6 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
           `,
   )}
       </div>
-      <select
-        class="pdpx-hidden-select-input hidden"
-        name="${attribute.name}"
-        id="${hiddenInputId}"
-        aria-hidden="true"
-      >
-        ${allOptions.map(
-    (option) => html`
-            <option
-              key="${option.value}"
-              value="${option.value}"
-              selected="${option.value === selectedOptionValue}"
-            >
-              ${option.title}
-            </option>
-          `,
-  )}
-      </select>
       ${selector.preview
       && html`
         <div class="pdpx-preview-container">
