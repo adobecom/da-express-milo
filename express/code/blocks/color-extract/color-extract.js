@@ -366,8 +366,9 @@ function buildSuggestedImages(row, onSelect) {
         const canvas = document.createElement('canvas');
         canvas.width = w;
         canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        const imageData = canvas.getContext('2d').getImageData(0, 0, w, h);
+        const context = canvas.getContext('2d');
+        context.drawImage(img, 0, 0, w, h);
+        const imageData = context.getImageData(0, 0, w, h);
         const { extractColorsFromImage } = await import('./helpers/extractWorker.js');
         const result = await extractColorsFromImage(imageData, w, h, chips.length);
         applyPaletteToChips(result.colors, chips);
@@ -567,7 +568,7 @@ function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) 
   window.addEventListener('dragleave', (e) => { preventDefaults(e); if (!e.relatedTarget && !document.elementFromPoint(e.clientX, e.clientY)) block.classList.remove('is-dragging'); }, { signal });
   window.addEventListener('dragend', (e) => { preventDefaults(e); block.classList.remove('is-dragging'); }, { signal });
   window.addEventListener('drop', (e) => { if (!isBlockInViewport() || !isFileDrag(e)) return; preventDefaults(e); dropzone.handleFile(e.dataTransfer.files[0]); setTimeout(() => block.classList.remove('is-dragging'), 200); }, { signal });
-  const detach = () => { ac.abort(); if (dragOverlay) dragOverlay.remove(); if (loadingOverlay) loadingOverlay.remove(); };
+  const detach = () => { ac.abort(); if (dragOverlay) dragOverlay.remove(); if (loadingOverlay) loadingOverlay.remove(); syncObserver.disconnect(); };
   // Sync is-dragging and is-loading from block to body-level overlays
   const syncObserver = new MutationObserver(() => {
     if (dragOverlay) dragOverlay.classList.toggle('is-dragging', block.classList.contains('is-dragging'));
@@ -580,6 +581,17 @@ function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) 
 }
 
 /* ---------- Palette variant ---------- */
+
+function hoistLandingDecorations(block, landing) {
+  const marqueeWrapper = block.closest('.color-extract-marquee-wrapper');
+  if (!marqueeWrapper) return;
+  const section = marqueeWrapper.closest('.section');
+  if (!section) return;
+  const landingBg = landing.stage.querySelector('.color-extract-landing-bg');
+  const landingFade = landing.stage.querySelector('.color-extract-landing-fade');
+  if (landingBg) section.insertBefore(landingBg, marqueeWrapper);
+  if (landingFade) marqueeWrapper.after(landingFade);
+}
 
 function renderColorVariant(block, rows, config) {
   const maxColors = Math.max(1, Math.min(10, Number(config.maxColors) || DEFAULTS.MAX_COLORS));
@@ -849,16 +861,7 @@ function renderColorVariant(block, rows, config) {
 
   // Move decorative full-bleed elements to section level when inside marquee wrapper.
   // Must happen before innerContainer.append so landing.stage loses bg/fade before mounting.
-  const marqueeWrapper = block.closest('.color-extract-marquee-wrapper');
-  if (marqueeWrapper) {
-    const section = marqueeWrapper.closest('.section');
-    const landingBg = landing.stage.querySelector('.color-extract-landing-bg');
-    const landingFade = landing.stage.querySelector('.color-extract-landing-fade');
-    if (section) {
-      if (landingBg) section.insertBefore(landingBg, marqueeWrapper);
-      if (landingFade) marqueeWrapper.after(landingFade);
-    }
-  }
+  hoistLandingDecorations(block, landing);
 
   innerContainer.append(landing.stage, edit.wrapper);
 
@@ -1261,16 +1264,7 @@ async function renderGradientVariant(block, rows, config) {
 
   // Move decorative full-bleed elements to section level when inside marquee wrapper.
   // Must happen before innerContainer.append so landing.stage loses bg/fade before mounting.
-  const marqueeWrapper = block.closest('.color-extract-marquee-wrapper');
-  if (marqueeWrapper) {
-    const section = marqueeWrapper.closest('.section');
-    const landingBg = landing.stage.querySelector('.color-extract-landing-bg');
-    const landingFade = landing.stage.querySelector('.color-extract-landing-fade');
-    if (section) {
-      if (landingBg) section.insertBefore(landingBg, marqueeWrapper);
-      if (landingFade) marqueeWrapper.after(landingFade);
-    }
-  }
+  hoistLandingDecorations(block, landing);
 
   innerContainer.append(landing.stage, edit.wrapper);
 

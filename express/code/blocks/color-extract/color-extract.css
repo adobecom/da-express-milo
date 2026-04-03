@@ -257,7 +257,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 .color-extract-drag-icon {
   width: 65px;
   height: 65px;
-  color: #131313;
+  color: var(--color-extract-text);
 }
 
 .color-extract-drag-icon svg {
@@ -270,7 +270,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   margin: 0;
   font-size: 16px;
   font-weight: 400;
-  color: #131313;
+  color: var(--color-extract-text);
 }
 
 /* ---- Full-screen loading overlay ---- */

@@ -75,16 +75,19 @@ function decorateColors(block) {
   return { secondaryColor };
 }
 
+const SVG_HEIGHT_DESKTOP = '800px';
+const SVG_HEIGHT_MOBILE = '200px';
+
 function resizeSvgOnLoad() {
   const mediaQuery = window.matchMedia('(min-width: 900px)');
   const svg = document.querySelector('.color-svg-img');
   svg.classList.remove('hidden-svg');
-  svg.style.height = mediaQuery.matches ? '800px' : '200px';
+  svg.style.height = mediaQuery.matches ? SVG_HEIGHT_DESKTOP : SVG_HEIGHT_MOBILE;
 }
 
 export function resizeSvg(event) {
   const svg = document.querySelector('.color-svg-img');
-  svg.style.height = event.matches ? '800px' : '200px';
+  svg.style.height = event.matches ? SVG_HEIGHT_DESKTOP : SVG_HEIGHT_MOBILE;
 }
 
 function resizeSvgOnMediaQueryChange() {
