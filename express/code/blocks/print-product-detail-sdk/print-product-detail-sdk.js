@@ -4,6 +4,7 @@ import {
   html,
   render,
   useEffect,
+  useRef,
   Fragment,
 } from '../../scripts/vendors/htm-preact.js';
 import { StoreProvider, useStore, DrawerProvider, useDrawer } from './components/Contexts.js';
@@ -35,6 +36,7 @@ function PDPContent({ templateId }) {
   const { state, actions } = store;
   const { openDrawer } = useDrawer();
   const { fetchProduct } = actions;
+  const containerRef = useRef(null);
 
   useSeo(templateId);
 
@@ -44,6 +46,15 @@ function PDPContent({ templateId }) {
     }
     fetchProduct(templateId);
   }, [templateId, fetchProduct]);
+
+  useEffect(() => {
+    if (!containerRef.current || !state) return;
+    import(`${getLibs()}/martech/attributes.js`).then(({ decorateDefaultLinkAnalytics }) => {
+      import(`${getLibs()}/utils/utils.js`).then(({ getConfig }) => {
+        decorateDefaultLinkAnalytics(containerRef.current, getConfig());
+      });
+    });
+  });
 
   const handleDrawerRequest = (request) => {
     if (!request) {
@@ -62,7 +73,7 @@ function PDPContent({ templateId }) {
   }
 
   return html`
-      <div class="pdpx-global-container" someProp="someValue" data-template-id="${templateId}">
+      <div ref=${containerRef} class="pdpx-global-container" someProp="someValue" data-template-id="${templateId}">
         <${ProductImages} />
         <div class="pdpx-product-info-wrapper">
           <${ProductHeader} />

@@ -434,6 +434,9 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
     }
   }
 }
+.pdpx-standard-selector-container {
+  margin-bottom: 1rem;
+}
 .pdpx-pill-selector-label {
   display: block;
   font-weight: var(--ax-detail-weight);
