@@ -891,8 +891,11 @@ export const style = css`
     height: 32px;
     border-radius: var(--Corner-radius-corner-radius-100);
   }
-  button.hex-code:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+  .swatch-column[data-contrast="dark"] button.hex-code:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+  .swatch-column[data-contrast="light"] button.hex-code:hover {
+    background-color: rgba(0, 0, 0, 0.12);
   }
   button.hex-code:focus-visible {
     outline: 2px solid var(--color-blue-800);
@@ -928,8 +931,11 @@ export const style = css`
   
 
   
-  .icon-button:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+  .swatch-column[data-contrast="dark"] .icon-button:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+  .swatch-column[data-contrast="light"] .icon-button:hover {
+    background-color: rgba(0, 0, 0, 0.12);
   }
 
   
