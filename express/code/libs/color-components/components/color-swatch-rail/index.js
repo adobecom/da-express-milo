@@ -328,7 +328,7 @@ export class ColorSwatchRail extends LitElement {
       const isInteractiveDemoRail = !!this.closest('.strip-variant--interactive');
       if (isFourRows && isInteractiveDemoRail) continue;
 
-      const targets = root.querySelectorAll?.('button[aria-label]:not(.hex-code)') || [];
+      const targets = root.querySelectorAll?.('button[aria-label]') || [];
       for (const targetEl of targets) {
         const content = (targetEl.getAttribute('aria-label') || '').trim();
         if (!content) continue;
