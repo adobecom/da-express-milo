@@ -402,10 +402,13 @@ async function loadPage() {
     import('./instrument.js').then((mod) => { mod.default(); });
   }
 
-  /* region based redirect to homepage */
-  import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
-    if (country === 'cn') { window.location.href = '/cn'; }
-  });
+  /* region based redirect to CN homepage — only on adobe.com origins, not AEM preview/live */
+  const isAdobeOrigin = /^(www\.stage\.|www\.)adobe\.com$/.test(window.location.hostname);
+  if (isAdobeOrigin && !window.location.pathname.startsWith('/cn')) {
+    import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
+      if (country === 'cn') { window.location.href = '/cn'; }
+    });
+  }
 
   document.head.querySelectorAll('meta').forEach((meta) => {
     if (meta.content && meta.content.includes('--none--')) {
