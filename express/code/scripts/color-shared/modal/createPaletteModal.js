@@ -1,8 +1,9 @@
 import { createTag } from '../../utils.js';
 import { createPaletteAdapter } from '../adapters/litComponentAdapters.js';
 
-export function createPaletteModal(palette, options = {}) {
+export default function createPaletteModal(palette, options = {}) {
   const {
+    // eslint-disable-next-line no-unused-vars
     onSave,
     onColorEdit,
   } = options;
@@ -13,6 +14,7 @@ export function createPaletteModal(palette, options = {}) {
     const section = createTag('section', { class: 'palette-display-section' });
 
     const adapter = createPaletteAdapter(currentPalette, {
+      // eslint-disable-next-line no-unused-vars
       onSelect: (selectedPalette) => {
       },
     });

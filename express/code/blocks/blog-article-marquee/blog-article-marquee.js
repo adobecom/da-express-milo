@@ -97,6 +97,7 @@ function addImagePreconnects(imageUrl) {
       });
     }
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Error adding image preconnect:', e);
   }
 }
@@ -113,6 +114,7 @@ function buildOptimizedImageUrl(src, width) {
     const roundedWidth = Math.max(1, Math.round(width));
     return `${url.pathname}?width=${roundedWidth}&format=webply&optimize=medium`;
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Error building optimized image URL:', e);
     return null;
   }

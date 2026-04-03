@@ -2,8 +2,8 @@ import { createTag, getIconElementDeprecated, getLibs } from '../../scripts/util
 import {
   CSS_CLASSES, DEFAULTS, EVENTS, MOODS, VARIANTS,
 } from './helpers/constants.js';
-import { parseBlockConfig } from './helpers/parseConfig.js';
-import { createHistoryManager } from './helpers/historyManager.js';
+import parseBlockConfig from './helpers/parseConfig.js';
+import createHistoryManager from './helpers/historyManager.js';
 import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
 
 function injectStylesheet(href) {
@@ -195,7 +195,9 @@ function drawImageToCanvas(image) {
 }
 
 function toHex(r, g, b) {
+  /* eslint-disable no-bitwise */
   return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1).toUpperCase()}`;
+  /* eslint-enable no-bitwise */
 }
 
 function samplePalette(context, width, height, count) {
@@ -227,7 +229,10 @@ function extractPaletteFromImageElement(image, swatchCount) {
 
 function extractPaletteFromSrc(src, swatchCount) {
   return new Promise((resolve) => {
-    if (!src) { resolve(null); return; }
+    if (!src) {
+      resolve(null);
+      return;
+    }
     const image = new Image();
     image.onload = () => resolve(extractPaletteFromImageElement(image, swatchCount));
     image.onerror = () => resolve(null);
@@ -440,6 +445,12 @@ function createFloatingToolbarMount(controller, variant) {
     } catch { /* best-effort */ }
   }
 
+  function sync() {
+    if (!tb) return;
+    const state = controller.getState();
+    tb.updateSwatches(state.swatches.map((s) => s.hex));
+  }
+
   async function mount() {
     if (mounted) {
       sync();
@@ -476,15 +487,8 @@ function createFloatingToolbarMount(controller, variant) {
     }
   }
 
-  function sync() {
-    if (!tb) return;
-    const state = controller.getState();
-    tb.updateSwatches(state.swatches.map((s) => s.hex));
-  }
-
   return { element: container, mount };
 }
-
 
 /* ---------- Landing ---------- */
 
@@ -536,13 +540,41 @@ function attachWindowDragHandlers(block, dropzone) {
     const rect = block.getBoundingClientRect();
     return rect.bottom > 0 && rect.top < window.innerHeight;
   };
-  window.addEventListener('dragenter', (e) => { if (isBlockInViewport() && isFileDrag(e)) { preventDefaults(e); block.classList.add('is-dragging'); } }, { signal });
-  window.addEventListener('dragover', (e) => { if (isBlockInViewport() && isFileDrag(e)) { preventDefaults(e); block.classList.add('is-dragging'); } }, { signal });
-  window.addEventListener('dragleave', (e) => { preventDefaults(e); if (!e.relatedTarget && !document.elementFromPoint(e.clientX, e.clientY)) block.classList.remove('is-dragging'); }, { signal });
-  window.addEventListener('dragend', (e) => { preventDefaults(e); block.classList.remove('is-dragging'); }, { signal });
-  window.addEventListener('drop', (e) => { if (!isBlockInViewport() || !isFileDrag(e)) return; preventDefaults(e); dropzone.handleFile(e.dataTransfer.files[0]); setTimeout(() => block.classList.remove('is-dragging'), 200); }, { signal });
+  window.addEventListener('dragenter', (e) => {
+    if (isBlockInViewport() && isFileDrag(e)) {
+      preventDefaults(e);
+      block.classList.add('is-dragging');
+    }
+  }, { signal });
+  window.addEventListener('dragover', (e) => {
+    if (isBlockInViewport() && isFileDrag(e)) {
+      preventDefaults(e);
+      block.classList.add('is-dragging');
+    }
+  }, { signal });
+  window.addEventListener('dragleave', (e) => {
+    preventDefaults(e);
+    if (!e.relatedTarget && !document.elementFromPoint(e.clientX, e.clientY)) {
+      block.classList.remove('is-dragging');
+    }
+  }, { signal });
+  window.addEventListener('dragend', (e) => {
+    preventDefaults(e);
+    block.classList.remove('is-dragging');
+  }, { signal });
+  window.addEventListener('drop', (e) => {
+    if (!isBlockInViewport() || !isFileDrag(e)) return;
+    preventDefaults(e);
+    dropzone.handleFile(e.dataTransfer.files[0]);
+    setTimeout(() => block.classList.remove('is-dragging'), 200);
+  }, { signal });
   const detach = () => ac.abort();
-  const observer = new MutationObserver(() => { if (!block.isConnected) { detach(); observer.disconnect(); } });
+  const observer = new MutationObserver(() => {
+    if (!block.isConnected) {
+      detach();
+      observer.disconnect();
+    }
+  });
   observer.observe(block.parentElement || document.body, { childList: true });
   return detach;
 }
@@ -664,7 +696,7 @@ function renderColorVariant(block, rows, config) {
   let imgLoadHandler = null;
 
   async function setupMarkers(canvas) {
-    const { createImageMarkers } = await import('./helpers/imageMarkers.js');
+    const createImageMarkers = (await import('./helpers/imageMarkers.js')).default;
     markers = createImageMarkers(edit.bgWrapper, canvas, controller, {
       onMoodOverride,
       onDragStart: () => historySnapshot(),
@@ -762,8 +794,8 @@ function renderColorVariant(block, rows, config) {
       import('./helpers/toolbar.js'),
     ]).then(([
       { createSwatchRailAdapter },
-      { createMoodSelector },
-      { createToolbar },
+      { default: createMoodSelector },
+      { default: createToolbar },
     ]) => {
       const railAdapter = createSwatchRailAdapter(controller, {
         orientation: 'stacked',
@@ -867,18 +899,14 @@ function buildGradientEditStage(copyRow, imageRow) {
   };
 }
 
-
 /* ---------- Gradient controller proxy ---------- */
 
 function createGradientControllerProxy(editor) {
-  let baseIndex = 0;
   return {
     setSwatchHex(index, hex) {
       editor.updateColorStop(index, hex);
     },
-    setBaseColorIndex(index) {
-      baseIndex = index;
-    },
+    setBaseColorIndex() {},
     getState() {
       return editor.getGradient();
     },
@@ -949,16 +977,6 @@ async function renderGradientVariant(block, rows, config) {
 
   // Swatch rail loaded lazily — wired up in Promise.all below
 
-
-  gradientEditor.element.addEventListener('pointerdown', () => {
-    if (!gradientInteracting) {
-      gradientInteracting = true;
-      historySnapshot();
-    }
-  });
-  gradientEditor.element.addEventListener('pointerup', () => { gradientInteracting = false; });
-  gradientEditor.element.addEventListener('pointercancel', () => { gradientInteracting = false; });
-
   function getHistoryState() {
     const grad = gradientEditor.getGradient();
     return {
@@ -1000,6 +1018,15 @@ async function renderGradientVariant(block, rows, config) {
   function historySnapshot() {
     history.push(getHistoryState());
   }
+
+  gradientEditor.element.addEventListener('pointerdown', () => {
+    if (!gradientInteracting) {
+      gradientInteracting = true;
+      historySnapshot();
+    }
+  });
+  gradientEditor.element.addEventListener('pointerup', () => { gradientInteracting = false; });
+  gradientEditor.element.addEventListener('pointercancel', () => { gradientInteracting = false; });
 
   async function runGradientExtraction(canvas) {
     const ctx = canvas.getContext('2d');
@@ -1056,7 +1083,7 @@ async function renderGradientVariant(block, rows, config) {
   let imgLoadHandler = null;
 
   async function setupMarkers(canvas) {
-    const { createImageMarkers } = await import('./helpers/imageMarkers.js');
+    const createImageMarkers = (await import('./helpers/imageMarkers.js')).default;
     markers = createImageMarkers(edit.bgWrapper, canvas, controllerProxy, {
       showConnectors: true,
       onMoodOverride: () => {},
@@ -1165,7 +1192,7 @@ async function renderGradientVariant(block, rows, config) {
       import('./helpers/toolbar.js'),
     ]).then(([
       { createSwatchRailAdapter },
-      { createToolbar },
+      { default: createToolbar },
     ]) => {
       const railAdapter = createSwatchRailAdapter(swatchController, {
         orientation: 'stacked',
@@ -1180,7 +1207,10 @@ async function renderGradientVariant(block, rows, config) {
         const oldPositions = markers ? markers.getPositions() : [];
         queueMicrotask(() => {
           const grad = gradientEditor.getGradient();
-          if (deletedIndex >= 0 && deletedIndex < grad.colorStops.length && grad.colorStops.length > 2) {
+          const canDelete = deletedIndex >= 0
+            && deletedIndex < grad.colorStops.length
+            && grad.colorStops.length > 2;
+          if (canDelete) {
             grad.colorStops.splice(deletedIndex, 1);
             delete grad.midpoints;
             gradientEditor.setGradient(grad);

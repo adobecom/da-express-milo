@@ -1,5 +1,5 @@
 import { createTag } from '../../utils.js';
-import { createBaseRenderer } from './createBaseRenderer.js';
+import createBaseRenderer from './createBaseRenderer.js';
 import { createSwatchRailAdapter, createColorEditAdapter } from '../adapters/litComponentAdapters.js';
 import { getContrastTextColor } from '../../../libs/color-components/utils/ColorConversions.js';
 import {

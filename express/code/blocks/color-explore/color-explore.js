@@ -86,77 +86,6 @@ function isSwatchesMode(config) {
     || config?.renderMode === 'swatches';
 }
 
-function resolvePaletteEditorBaseUrl(currentUrl) {
-  if (currentUrl?.hostname === PALETTE_EDITOR_DEMO_HOST) {
-    return PALETTE_EDITOR_DEMO_URL;
-  }
-  return PALETTE_EDITOR_DEFAULT_URL;
-}
-
-function resolvePaletteHexesForUrl(paletteData = {}) {
-  const fromColors = Array.isArray(paletteData?.colors) ? paletteData.colors : [];
-  const fromCoreColors = Array.isArray(paletteData?.coreColors) ? paletteData.coreColors : [];
-  const fromSwatches = Array.isArray(paletteData?.swatches) ? paletteData.swatches : [];
-
-  let source = fromSwatches;
-  if (fromColors.length) {
-    source = fromColors;
-  } else if (fromCoreColors.length) {
-    source = fromCoreColors;
-  }
-
-  return source.flatMap((entry) => {
-    let candidate = '';
-    if (typeof entry === 'string') {
-      candidate = entry;
-    } else if (entry && typeof entry === 'object') {
-      candidate = entry.hex || entry.color || entry.value || '';
-    }
-
-    return String(candidate)
-      .split(',')
-      .map((segment) => segment.trim())
-      .filter(Boolean)
-      .map((segment) => normalizeHex(segment))
-      .filter(Boolean);
-  });
-}
-
-function buildPaletteEditorUrl(palette, sourceHref) {
-  const paletteData = palette || {};
-  const fallbackHref = sourceHref
-    || (typeof window !== 'undefined' ? window.location.href : PALETTE_EDITOR_DEFAULT_URL);
-  let currentUrl;
-  try {
-    currentUrl = new URL(fallbackHref);
-  } catch {
-    return PALETTE_EDITOR_DEFAULT_URL;
-  }
-
-  const baseUrl = resolvePaletteEditorBaseUrl(currentUrl);
-  let targetUrl;
-  try {
-    targetUrl = new URL(baseUrl, currentUrl);
-  } catch {
-    targetUrl = new URL(PALETTE_EDITOR_DEFAULT_URL, currentUrl);
-  }
-
-  const paletteColors = resolvePaletteHexesForUrl(paletteData);
-  colorPaletteParamApi.setOnUrl(targetUrl, paletteColors);
-
-  if (!targetUrl.searchParams.has('martech') && currentUrl.searchParams.has('martech')) {
-    targetUrl.searchParams.set('martech', currentUrl.searchParams.get('martech'));
-  }
-
-  return targetUrl.toString();
-}
-
-function navigateToPaletteEditor(palette = {}) {
-  if (typeof window === 'undefined') return;
-  const destination = buildPaletteEditorUrl(palette);
-  window.location.assign(destination);
-}
-
 function mergeLoadMoreData(currentData, moreData) {
   if (!Array.isArray(moreData) || moreData.length === 0) {
     return currentData;
@@ -446,7 +375,10 @@ export default async function decorate(block) {
           } finally {
             block.classList.remove(CSS_CLASSES.LOADING);
           }
-          visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
+          visibleCount = alignToFullRow(
+            Math.min(config.initialLoad, allData.length),
+            allData.length,
+          );
 
           BlockMediator.set(stateKey, {
             selectedItem: null,
@@ -488,7 +420,10 @@ export default async function decorate(block) {
               }
               block.classList.add(CSS_CLASSES.LOADING);
               allData = await activeDataService.filter(filters);
-              visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
+              visibleCount = alignToFullRow(
+                Math.min(config.initialLoad, allData.length),
+                allData.length,
+              );
               await activeRenderer.update(allData.slice(0, visibleCount));
               updateLoadMoreState();
               block.classList.remove(CSS_CLASSES.LOADING);
@@ -521,7 +456,10 @@ export default async function decorate(block) {
             isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.search(query);
-            visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
+            visibleCount = alignToFullRow(
+              Math.min(config.initialLoad, allData.length),
+              allData.length,
+            );
             await activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
@@ -560,7 +498,8 @@ export default async function decorate(block) {
           } finally {
             block.classList.remove(CSS_CLASSES.LOADING);
           }
-          visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
+          const alignedCount = Math.min(config.initialLoad, allData.length);
+          visibleCount = alignToFullRow(alignedCount, allData.length);
 
           activeRenderer = createStripsRenderer({
             container,
@@ -585,7 +524,10 @@ export default async function decorate(block) {
               }
               block.classList.add(CSS_CLASSES.LOADING);
               allData = await activeDataService.filter(filters);
-              visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
+              visibleCount = alignToFullRow(
+                Math.min(config.initialLoad, allData.length),
+                allData.length,
+              );
               activeRenderer.update(allData.slice(0, visibleCount));
               updateLoadMoreState();
               block.classList.remove(CSS_CLASSES.LOADING);
@@ -617,7 +559,10 @@ export default async function decorate(block) {
             isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.search(query);
-            visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
+            visibleCount = alignToFullRow(
+              Math.min(config.initialLoad, allData.length),
+              allData.length,
+            );
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
@@ -628,7 +573,10 @@ export default async function decorate(block) {
             isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
             allData = await activeDataService.search(query);
-            visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
+            visibleCount = alignToFullRow(
+              Math.min(config.initialLoad, allData.length),
+              allData.length,
+            );
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
@@ -666,7 +614,8 @@ export default async function decorate(block) {
 
       block.classList.add(CSS_CLASSES.LOADING);
       let allData = await dataService.fetchData();
-      let visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
+      const alignedCount = Math.min(config.initialLoad, allData.length);
+      let visibleCount = alignToFullRow(alignedCount, allData.length);
       let isSearchActive = false;
       block.classList.remove(CSS_CLASSES.LOADING);
 
@@ -724,7 +673,10 @@ export default async function decorate(block) {
         isSearchActive = !!query;
         block.classList.add(CSS_CLASSES.LOADING);
         allData = await dataService.search(query);
-        visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
+        visibleCount = alignToFullRow(
+          Math.min(config.initialLoad, allData.length),
+          allData.length,
+        );
         renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);
@@ -734,7 +686,10 @@ export default async function decorate(block) {
         isSearchActive = false;
         block.classList.add(CSS_CLASSES.LOADING);
         allData = await dataService.filter(filters);
-        visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
+        visibleCount = alignToFullRow(
+          Math.min(config.initialLoad, allData.length),
+          allData.length,
+        );
         renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);
@@ -745,7 +700,10 @@ export default async function decorate(block) {
         isSearchActive = !!query;
         block.classList.add(CSS_CLASSES.LOADING);
         allData = await dataService.search(query);
-        visibleCount = alignToFullRow(Math.min(config.initialLoad, allData.length), allData.length);
+        visibleCount = alignToFullRow(
+          Math.min(config.initialLoad, allData.length),
+          allData.length,
+        );
         renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);

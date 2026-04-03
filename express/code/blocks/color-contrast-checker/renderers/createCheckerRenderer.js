@@ -1,5 +1,5 @@
 import { createTag } from '../../../scripts/utils.js';
-import { createBaseRenderer } from '../../../scripts/color-shared/renderers/createBaseRenderer.js';
+import createBaseRenderer from '../../../scripts/color-shared/renderers/createBaseRenderer.js';
 import { announceToScreenReader } from '../../../scripts/color-shared/spectrum/index.js';
 import { ensureHash, isMobileOrTabletViewport, isMobileViewport } from '../../../scripts/color-shared/utils/utilities.js';
 import { generateTints, hexToRgb, rgbToHsv } from '../utils/contrastUtils.js';
@@ -146,6 +146,14 @@ function buildResultCell(pass, strings) {
   return cell;
 }
 
+function generateTintScale(hex) {
+  return ['#000000', ...generateTints(hex, TINT_COUNT - 1)];
+}
+
+function clampTintIndex(index) {
+  return Math.max(0, Math.min(MAX_TINT_INDEX, Number(index) || 0));
+}
+
 function buildTintGradient(hex) {
   const tints = generateTintScale(hex);
   const stops = tints.map((t, i) => {
@@ -155,18 +163,10 @@ function buildTintGradient(hex) {
   return `linear-gradient(to right, ${stops.join(', ')})`;
 }
 
-function generateTintScale(hex) {
-  return ['#000000', ...generateTints(hex, TINT_COUNT - 1)];
-}
-
 function findTintIndex(hex) {
   const { r, g, b } = hexToRgb(hex);
   const { v } = rgbToHsv(r, g, b);
   return clampTintIndex(Math.round(v * MAX_TINT_INDEX));
-}
-
-function clampTintIndex(index) {
-  return Math.max(0, Math.min(MAX_TINT_INDEX, Number(index) || 0));
 }
 
 function tintIndexToPercentValue(index) {
@@ -378,7 +378,9 @@ export function createCheckerRenderer(options) {
     const selectedColor = type === 'fg'
       ? palette?.selectedForeground ?? currentValue
       : palette?.selectedBackground ?? currentValue;
-    const selectedIndex = colors.findIndex((hex) => hex?.toUpperCase() === selectedColor?.toUpperCase());
+    const selectedIndex = colors.findIndex(
+      (hex) => hex?.toUpperCase() === selectedColor?.toUpperCase(),
+    );
 
     if (!colors.length || selectedIndex === -1) {
       return {

@@ -21,7 +21,7 @@ describe('ColorEdit component', () => {
     sinon.restore();
     if (el?.parentNode) el.remove();
     el = null;
-    await new Promise((r) => setTimeout(r, 50));
+    await new Promise((r) => { setTimeout(r, 50); });
   });
 
   describe('registration and defaults', () => {

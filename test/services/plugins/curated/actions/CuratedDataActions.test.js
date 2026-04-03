@@ -1,8 +1,11 @@
 /* eslint-env mocha */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
+// eslint-disable-next-line import/no-unresolved
 import CuratedDataActions from '../../../../../../express/code/libs/services/plugins/curated/actions/CuratedDataActions.js';
+// eslint-disable-next-line import/no-unresolved
 import { CuratedSources, CuratedTopics } from '../../../../../../express/code/libs/services/plugins/curated/topics.js';
+// eslint-disable-next-line import/no-unresolved
 import { ValidationError } from '../../../../../../express/code/libs/services/core/Errors.js';
 
 const mockCuratedData = {

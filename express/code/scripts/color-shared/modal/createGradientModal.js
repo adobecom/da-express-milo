@@ -1,8 +1,9 @@
 import { createTag } from '../../utils.js';
 import { createColorSwatchAdapter } from '../adapters/litComponentAdapters.js';
 
-export function createGradientModal(gradient, options = {}) {
+export default function createGradientModal(gradient, options = {}) {
   const {
+    // eslint-disable-next-line no-unused-vars
     onSave,
     onColorEdit,
   } = options;
@@ -29,6 +30,14 @@ export function createGradientModal(gradient, options = {}) {
     }
 
     return `linear-gradient(${angle}deg, ${stops})`;
+  }
+
+  let previewElement;
+
+  function updatePreview() {
+    if (previewElement) {
+      previewElement.style.background = generateGradientCSS();
+    }
   }
 
   function createGradientPreview() {
@@ -174,15 +183,10 @@ export function createGradientModal(gradient, options = {}) {
     return { section };
   }
 
-  function updatePreview() {
-    if (previewElement) {
-      previewElement.style.background = generateGradientCSS();
-    }
-  }
-
   const container = createTag('div', { class: 'gradient-modal-content' });
 
-  const { section: previewSection, preview: previewElement } = createGradientPreview();
+  const { section: previewSection, preview } = createGradientPreview();
+  previewElement = preview;
   const controlsSection = createGradientControls();
   const { section: stopsSection } = createColorStops();
 

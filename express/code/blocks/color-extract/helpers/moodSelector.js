@@ -21,7 +21,7 @@ const CHEVRON_SVG = `<svg width="10" height="10" viewBox="0 0 10 10" aria-hidden
  * @param {(mood: string) => void} onChange
  * @returns {{ element: HTMLElement, setMood: (mood: string) => void }}
  */
-export function createMoodSelector(initialMood, onChange) {
+export default function createMoodSelector(initialMood, onChange) {
   const wrapper = createTag('div', { class: 'color-extract-mood' });
   const label = createTag('span', { class: 'color-extract-mood-label' }, 'Color mood');
 
@@ -46,6 +46,23 @@ export function createMoodSelector(initialMood, onChange) {
     'aria-label': 'Color mood options',
   });
   popover.hidden = true;
+
+  function closePopover() {
+    popover.hidden = true;
+    trigger.setAttribute('aria-expanded', 'false');
+    dropdown.classList.remove('is-open');
+  }
+
+  function setMood(mood) {
+    currentMood = mood;
+    triggerText.textContent = MOOD_LABELS[mood] || mood;
+
+    popover.querySelectorAll('.color-extract-mood-option').forEach((opt) => {
+      const isSelected = opt.dataset.mood === mood;
+      opt.classList.toggle('is-selected', isSelected);
+      opt.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+    });
+  }
 
   MOOD_LIST.forEach((mood) => {
     const option = createTag('button', {
@@ -78,12 +95,6 @@ export function createMoodSelector(initialMood, onChange) {
     dropdown.classList.add('is-open');
   }
 
-  function closePopover() {
-    popover.hidden = true;
-    trigger.setAttribute('aria-expanded', 'false');
-    dropdown.classList.remove('is-open');
-  }
-
   trigger.addEventListener('click', (e) => {
     e.stopPropagation();
     if (popover.hidden) openPopover();
@@ -95,17 +106,6 @@ export function createMoodSelector(initialMood, onChange) {
   trigger.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closePopover();
   });
-
-  function setMood(mood) {
-    currentMood = mood;
-    triggerText.textContent = MOOD_LABELS[mood] || mood;
-
-    popover.querySelectorAll('.color-extract-mood-option').forEach((opt) => {
-      const isSelected = opt.dataset.mood === mood;
-      opt.classList.toggle('is-selected', isSelected);
-      opt.setAttribute('aria-selected', isSelected ? 'true' : 'false');
-    });
-  }
 
   wrapper.append(label, dropdown);
 
