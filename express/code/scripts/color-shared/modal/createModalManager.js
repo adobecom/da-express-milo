@@ -288,11 +288,32 @@ export function createModalManager() {
     });
   }
 
+  async function openContrastCheckerModal(palette = {}, options = {}) {
+    const {
+      createContrastCheckerModalContent,
+      ensureContrastContentStyles,
+    } = await import('./createContrastCheckerModalContent.js');
+
+    ensureContrastContentStyles().catch(() => {});
+
+    const contentView = createContrastCheckerModalContent(palette, options);
+    open({
+      title: 'See contrast for your full palette',
+      showTitle: false,
+      content: contentView.element,
+      initialFocusSelector: (body) => body.querySelector('.cc-modal-tab-bar [role="tab"]'),
+      onClose: () => {
+        contentView.destroy?.();
+      },
+    });
+  }
+
   return {
     open,
     openPaletteModal,
     openPaletteSwatchesModal,
     openGradientModal,
+    openContrastCheckerModal,
     close,
     destroy,
     updateTitle,

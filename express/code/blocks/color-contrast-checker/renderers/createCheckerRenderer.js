@@ -615,6 +615,22 @@ export function createCheckerRenderer(options) {
       class: 'cc-compare-link',
     }, strings.compareEntirePalette);
 
+    compareLink.addEventListener('click', async () => {
+      const paletteData = context?.get('palette');
+      const colors = Array.isArray(paletteData?.colors)
+        ? paletteData.colors.filter((hex) => dataService.isValidHex(hex))
+        : [foreground, background].filter(Boolean);
+      if (colors.length < 2) return;
+      const { createModalManager } = await import(
+        '../../../scripts/color-shared/modal/createModalManager.js'
+      );
+      const modal = createModalManager();
+      modal.openContrastCheckerModal(
+        { colors, name: paletteData?.name },
+        { dataService },
+      );
+    });
+
     top.appendChild(ratioLabelContainer);
 
     if (!isMobileOrTabletViewport()) {
