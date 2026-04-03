@@ -886,7 +886,13 @@ export const style = css`
     border: none;
     padding: 0;
     font: inherit;
-    text-align: left;
+    text-align: center;
+    width: 75px;
+    height: 32px;
+    border-radius: var(--Corner-radius-corner-radius-100);
+  }
+  button.hex-code:hover {
+    background-color: rgba(255, 255, 255, 0.2);
   }
   button.hex-code:focus-visible {
     outline: 2px solid var(--color-blue-800);
