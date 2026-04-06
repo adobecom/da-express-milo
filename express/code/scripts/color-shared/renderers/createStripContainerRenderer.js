@@ -1,7 +1,7 @@
 import { createTag } from '../../utils.js';
 import createBaseRenderer from './createBaseRenderer.js';
 import { createSwatchRailAdapter, createColorEditAdapter } from '../adapters/litComponentAdapters.js';
-import { getContrastTextColor } from '../../../libs/color-components/utils/ColorConversions.js';
+import { getContrastTextColor, isSuperLight } from '../../../libs/color-components/utils/ColorConversions.js';
 import {
   TYPE_ORDER,
   TYPE_LABELS,
@@ -245,7 +245,7 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
 
       const textColor = getContrastTextColor(hex);
       const paletteCell = createTag('div', {
-        class: 'strip-cb-mobile-row__palette',
+        class: `strip-cb-mobile-row__palette${isSuperLight(hex) ? ' super-light' : ''}`,
         style: `background-color: ${hex};`,
         role: 'button',
         tabindex: '0',
@@ -278,7 +278,7 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
         const sim = simulateHex(hex, type);
         const conflicting = conflictsByType[type];
         const simCell = createTag('div', {
-          class: `strip-cb-mobile-row__sim${conflicting.has(colorIndex) ? ' conflict' : ''}`,
+          class: `strip-cb-mobile-row__sim${conflicting.has(colorIndex) ? ' conflict' : ''}${isSuperLight(sim) ? ' super-light' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
           role: 'img',
           'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,

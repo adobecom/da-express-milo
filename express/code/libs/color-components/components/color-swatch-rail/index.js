@@ -1,6 +1,6 @@
 
 import { LitElement, html } from '../../../deps/lit-all.min.js';
-import { getContrastTextColor } from '../../utils/ColorConversions.js';
+import { getContrastTextColor, isSuperLight } from '../../utils/ColorConversions.js';
 import { getFirstFocusableInGroup } from '../../utils/util.js';
 import { style } from './styles.css.js';
 import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
@@ -1063,8 +1063,9 @@ export class ColorSwatchRail extends LitElement {
       if (isSimulatedCell) {
         const textColor = getContrastTextColor(swatch.hex);
         const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
+        const simulatedSuperLight = isSuperLight(swatch.hex);
         return html`
-          <div class="swatch-column swatch-column--simulated" tabindex="-1" role="group" aria-label="Simulated color"
+          <div class="swatch-column swatch-column--simulated ${simulatedSuperLight ? 'swatch-column--super-light' : ''}" tabindex="-1" role="group" aria-label="Simulated color"
             style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: var(--swatch-text-shadow-override, ${shadow}); --swatch-icon-color: ${textColor};"
             data-swatch-index="${index}">
             ${swatch.conflict ? conflictIcon() : ''}
@@ -1083,6 +1084,7 @@ export class ColorSwatchRail extends LitElement {
       const effectiveLocked = isLocked || isBase;
       const textColor = getContrastTextColor(swatch.hex);
       const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
+      const superLight = isSuperLight(swatch.hex);
       const showColorEdit = f.colorPicker && !editDisabled && !effectiveLocked;
       const showHexCopyButton = f.copy && f.copyFromHex !== false && !isBase;
       const tintMode = f.editTint && !f.colorPicker;
@@ -1163,7 +1165,7 @@ export class ColorSwatchRail extends LitElement {
       `;
 
       return html`
-        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${tintMode ? 'swatch-column--tint-mode' : ''} ${isTintSelected ? 'swatch-column--tint-selected' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''}"
+        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${tintMode ? 'swatch-column--tint-mode' : ''} ${isTintSelected ? 'swatch-column--tint-selected' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''} ${superLight ? 'swatch-column--super-light' : ''}"
           data-contrast="${textColor.toLowerCase() === '#ffffff' ? 'dark' : 'light'}"
           style="background-color: ${swatch.hex}; --swatch-base-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: var(--swatch-text-shadow-override, ${shadow}); --swatch-icon-filter: ${textColor.toLowerCase() === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
           data-swatch-index="${index}"

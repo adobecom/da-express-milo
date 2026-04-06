@@ -44,6 +44,10 @@ export const style = css`
     container-type: inline-size;
   }
 
+  .swatch-column--super-light {
+    box-shadow: inset 0 0 0 1px var(--color-gray-300-variant);
+  }
+
   .swatch-column--tint-mode {
     --swatch-base-color: #808080;
     --swatch-tint-overlay: rgba(0, 0, 0, 0.18);
@@ -1008,5 +1012,11 @@ export const style = css`
   sp-tooltip,
   sp-tooltip * {
     text-transform: none !important;
+  }
+
+  @media (max-width: 899px) {
+    .swatch-column--super-light {
+      box-shadow: none;
+    }
   }
 `;
