@@ -74,9 +74,7 @@ export function CheckboxSelector({ attribute }) {
           onChange=${handleChange}
         />
         <span
-          >${selector.title}${selector.priceDelta
-      ? ` ${selector.priceDelta}`
-      : ''}</span
+          >${selector.title}${selector.priceDelta ? ` ${selector.priceDelta}` : ''}</span
         >
       </label>
     </div>
@@ -307,8 +305,8 @@ export function RadioSelector({ attribute }) {
               />
               <span
                 >${option.title}${option.priceDelta
-        ? ` ${option.priceDelta}`
-        : ''}</span
+  ? ` ${option.priceDelta}`
+  : ''}</span
               >
             </label>
           `,
@@ -707,12 +705,12 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
               aria-label="${group.title || `${title} options`}"
             >
               ${group.title
-      && html`<div class="pdpx-option-group-title">${group.title}</div>`}
+      && html`<div class="pdpx-option-group-title">${group.title}</div>`} 
               ${(group.options || []).map((option) => {
-        const thumbnailUrl = updateImageUrl(option.imageUrl);
-        const isSelected = option.value === selectedOptionValue;
-        const optionIndex = allOptions.findIndex((candidate) => candidate.value === option.value);
-        return html`
+    const thumbnailUrl = updateImageUrl(option.imageUrl);
+    const isSelected = option.value === selectedOptionValue;
+    const optionIndex = allOptions.findIndex((candidate) => candidate.value === option.value);
+    return html`
                   <button
                     key="${option.value}"
                     class="pdpx-pill-container ${isSelected ? 'selected' : ''}"
@@ -750,7 +748,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
                     </div>
                   </button>
                 `;
-      })}
+  })}
             </div>
           `,
   )}
@@ -764,8 +762,8 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
           />
           <div
             dangerouslySetInnerHTML=${{
-        __html: selector.preview.descriptionHTML,
-      }}
+    __html: selector.preview.descriptionHTML,
+  }}
           />
         </div>
       `}
