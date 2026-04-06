@@ -407,8 +407,8 @@ async function loadPage() {
      and not a 404 page (which would create an infinite redirect loop) */
   
   const isAdobeOrigin = /^(www\.stage\.|www\.)adobe\.com$/.test(window.location.hostname);
-  import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
-  //  if (country === 'cn' && isAdobeOrigin) { window.location.href = '/cn'; }
+    import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
+      if (country === 'cn' && isAdobeOrigin) { window.location.href = '/cn'; }
   });
 
 
