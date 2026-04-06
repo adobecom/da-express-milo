@@ -547,6 +547,16 @@ function PrintingProcessContent({ onClose }) {
   `;
 }
 
+function stripHtmlTags(str) {
+  let result = str;
+  let prev;
+  do {
+    prev = result;
+    result = result.replace(/<[^>]*>/g, '');
+  } while (result !== prev);
+  return result;
+}
+
 function flattenOptionGroups(selector) {
   if (!selector?.optionGroups || !Array.isArray(selector.optionGroups)) {
     return [];
@@ -683,11 +693,11 @@ function PaperTypeContent({ onClose }) {
         ${preview?.descriptionHTML && html`
           <div class="pdpx-drawer-pills-container">
             ${preview.descriptionHTML
-    .split(/<br\s*\/?>/i)[0]
-    .replace(/[<>]/g, '')
-    .split('/')
-    .filter(Boolean)
-    .map((spec) => html`
+        .split(/<br\s*\/?>/i)[0]
+        .replace(/[<>]/g, '')
+        .split('/')
+        .filter(Boolean)
+        .map((spec) => html`
               <div class="pdpx-drawer-pill">
                 <img class="icon icon-circle-check-mark" src="/express/code/icons/circle-check-mark.svg" alt="" aria-hidden="true" />
                 <span class="pdpx-drawer-pill-text">${spec.trim()}</span>
