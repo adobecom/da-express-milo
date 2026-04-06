@@ -402,9 +402,15 @@ async function loadPage() {
     import('./instrument.js').then((mod) => { mod.default(); });
   }
 
+
+
   /* region based redirect to homepage */
   import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
-    if (country === 'cn') { window.location.href = '/cn'; }
+    if (country === 'cn') {
+      fetch('/cn', { method: 'HEAD' }).then((resp) => {
+        window.location.href = resp.ok ? '/cn' : '/404';
+      });
+    }
   });
 
   document.head.querySelectorAll('meta').forEach((meta) => {
