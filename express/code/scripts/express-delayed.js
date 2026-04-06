@@ -3,7 +3,7 @@ import BlockMediator from './block-mediator.min.js';
 
 let createTag; let getMetadata;
 let getConfig; let loadStyle;
-let loadIMS; let loadScript;
+let loadIms; let loadScript;
 
 export function getDestination() {
   const pepDestinationMeta = getMetadata('pep-destination');
@@ -73,7 +73,7 @@ async function loadGoogleLogin() {
   if (googleLogin === 'desktop' && !desktopViewport) return;
 
   const { default: initGoogleLogin } = await import('../libs/features/google-login.js');
-  initGoogleLogin(loadIMS, getMetadata, loadScript, getConfig);
+  initGoogleLogin(loadIms, getMetadata, loadScript, getConfig);
 };
 
 /**
@@ -82,7 +82,7 @@ async function loadGoogleLogin() {
 export default async function loadDelayed() {
   try {
     await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
-      ({ createTag, getMetadata, getConfig, loadStyle, loadIMS, loadScript } = utils);
+      ({ createTag, getMetadata, getConfig, loadStyle, loadScript, loadIms } = utils);
     });
     addJapaneseSectionHeaderSizing();
     turnContentLinksIntoButtons();
