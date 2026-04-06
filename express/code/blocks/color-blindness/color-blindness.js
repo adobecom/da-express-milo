@@ -47,8 +47,18 @@ export default async function decorate(block) {
     const section = createTag('section', { 'aria-label': 'Color blindness simulator' });
     block.appendChild(section);
 
-    const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
-    const initialPalette = { name: getResolvedPaletteName() || 'My Color Theme', colors: getResolvedPalette() };
+    const { getResolvedPalette, getResolvedPaletteName, getBaseColor } = createColorPaletteParamApi();
+    const paletteColors = getResolvedPalette();
+    const baseColorHex = getBaseColor();
+    const baseColorIndex = baseColorHex
+      ? paletteColors.findIndex((c) => c.toUpperCase() === baseColorHex.toUpperCase())
+      : -1;
+    const hasValidBaseColor = baseColorIndex >= 0;
+    const initialPalette = {
+      name: getResolvedPaletteName() || 'My Color Theme',
+      colors: paletteColors,
+      ...(hasValidBaseColor && { baseColorIndex }),
+    };
 
     const navLinks = [
       { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
@@ -65,6 +75,7 @@ export default async function decorate(block) {
       palette: initialPalette,
       toolbar: {
         variant: 'standalone',
+        mode: 'inline',
         showEdit: false,
         showPalette: isDesktop,
         showPaletteName: true,
@@ -194,6 +205,9 @@ export default async function decorate(block) {
         contentMode: 'swatches',
         colorBlindness: true,
         stripContainerOrientations: ['four-rows'],
+        swatchFeatures: hasValidBaseColor
+          ? { baseColor: false, baseColorReadOnly: true }
+          : { baseColor: false },
       },
       onColorChangeEnd: () => pushCurrentPalette(),
     });

@@ -153,6 +153,7 @@ export function pickRandomPalette() {
 
 export const PARAM_NAME = 'color-palette';
 export const PARAM_PALETTE_NAME = 'color-palette-name';
+export const PARAM_BASE_COLOR = 'base-color';
 
 const HEX_3 = /^[0-9a-f]{3}$/i;
 const HEX_6 = /^[0-9a-f]{6}$/i;
@@ -205,6 +206,18 @@ export function createColorPaletteParamApi() {
     return (raw && raw.trim()) || undefined;
   }
 
+  function getBaseColor(urlOrString) {
+    let url;
+    try {
+      url = new URL(urlOrString || window.location.href);
+    } catch {
+      return null;
+    }
+    const raw = url.searchParams.get(PARAM_BASE_COLOR);
+    if (!raw || !raw.trim()) return null;
+    return normalizeHex(raw.trim());
+  }
+
   function setOnUrl(url, colors, { merge = 'replace', name } = {}) {
     const normalized = colors
       .map((c) => normalizeHex(c))
@@ -231,9 +244,11 @@ export function createColorPaletteParamApi() {
   return {
     getResolvedPalette,
     getResolvedPaletteName,
+    getBaseColor,
     setOnUrl,
     PARAM_NAME,
     PARAM_PALETTE_NAME,
+    PARAM_BASE_COLOR,
   };
 }
 
