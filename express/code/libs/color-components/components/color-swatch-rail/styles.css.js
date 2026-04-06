@@ -1008,7 +1008,7 @@ export const style = css`
     padding: 7px 12px;
     font: inherit;
     text-align: center;
-    width: 75px;
+    min-width: 75px;
     height: 32px;
     border-radius: var(--Corner-radius-corner-radius-100);
   }
