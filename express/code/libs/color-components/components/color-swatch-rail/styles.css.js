@@ -1028,10 +1028,6 @@ export const style = css`
     border: 1px solid var(--color-gray-400-variant);
     background: transparent;
   }
-  button.hex-code:hover {
-    border-radius: var(--Corner-radius-corner-radius-100);
-    background: rgba(0, 0, 0, 0.12);
-  }
   button.hex-code:focus-visible {
     outline: 2px solid var(--color-blue-800);
     outline-offset: 2px;
