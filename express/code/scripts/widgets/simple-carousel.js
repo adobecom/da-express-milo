@@ -1,9 +1,8 @@
-import { getLibs, getIconElementDeprecated } from '../utils.js';
+import { getLibs, getIconElementDeprecated, createTag } from '../utils.js';
 
 let stylesLoaded = false;
 let loadStyle;
 let getConfig;
-let createTag;
 
 async function initUtils() {
   if (!loadStyle) {
@@ -247,7 +246,6 @@ function initializeSimpleCarousel(selector, parent, options = {}) {
 }
 
 export default async function createSimpleCarousel(selector, parent, options) {
-  ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
   await loadSimpleCarouselStyles();
   return initializeSimpleCarousel(selector, parent, options);
 }

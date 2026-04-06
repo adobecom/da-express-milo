@@ -710,7 +710,7 @@ function PaperTypeContent({ onClose }) {
         ${state?.descriptionComponents?.[1]?.descriptionHTML && html`
           <div
             class="pdpx-drawer-description"
-            dangerouslySetInnerHTML=${{ __html: state.descriptionComponents[1].descriptionHTML }}
+            dangerouslySetInnerHTML=${{ __html: sanitizeHtml(state.descriptionComponents[1].descriptionHTML) }}
           />
         `}
       </div>
