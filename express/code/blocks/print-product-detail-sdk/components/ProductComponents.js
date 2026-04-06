@@ -684,7 +684,7 @@ function PaperTypeContent({ onClose }) {
           <div class="pdpx-drawer-pills-container">
             ${preview.descriptionHTML
     .split(/<br\s*\/?>/i)[0]
-    .replace(/<[^>]*>/g, '')
+    .replace(/[<>]/g, '')
     .split('/')
     .filter(Boolean)
     .map((spec) => html`
