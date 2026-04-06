@@ -46,6 +46,8 @@ export async function createExpressTooltip(config) {
   await loadOverrideStyles('tooltip', STYLES_PATH);
   await customElements.whenDefined('sp-tooltip');
 
+  const isTouchDevice = window.matchMedia?.('(hover: none)')?.matches ?? false;
+
   const theme = createThemeWrapper();
   const tooltip = document.createElement('sp-tooltip');
   tooltip.setAttribute('placement', placement);
@@ -71,6 +73,15 @@ export async function createExpressTooltip(config) {
   const { signal } = controller;
   let showTimer = null;
   let visible = false;
+  let removeOutsideClickHandler = null;
+
+  function hide() {
+    clearTimeout(showTimer);
+    tooltip.removeAttribute('open');
+    visible = false;
+    removeOutsideClickHandler?.();
+    removeOutsideClickHandler = null;
+  }
 
   function show() {
     clearTimeout(showTimer);
@@ -80,19 +91,43 @@ export async function createExpressTooltip(config) {
     }, delay);
   }
 
-  function hide() {
-    clearTimeout(showTimer);
-    tooltip.removeAttribute('open');
-    visible = false;
+  if (isTouchDevice) {
+    const blockTouchPointer = (e) => {
+      if (e.pointerType === 'touch') e.stopImmediatePropagation();
+    };
+    targetEl.addEventListener('pointerenter', blockTouchPointer, { capture: true, signal });
+    targetEl.addEventListener('pointerleave', blockTouchPointer, { capture: true, signal });
+
+    const toggleTouch = () => {
+      if (visible) {
+        hide();
+        return;
+      }
+      tooltip.setAttribute('open', '');
+      visible = true;
+      setTimeout(() => {
+        const outsideHandler = (evt) => {
+          const path = evt.composedPath?.() || [];
+          if (!path.includes(targetEl) && !path.includes(theme)) {
+            hide();
+          }
+        };
+        document.addEventListener('click', outsideHandler, true);
+        removeOutsideClickHandler = () => document.removeEventListener('click', outsideHandler, true);
+      }, 0);
+    };
+    targetEl.addEventListener('click', toggleTouch, { signal });
+  } else {
+    targetEl.addEventListener('pointerenter', show, { signal });
+    targetEl.addEventListener('pointerleave', hide, { signal });
   }
 
-  targetEl.addEventListener('pointerenter', show, { signal });
-  targetEl.addEventListener('pointerleave', hide, { signal });
-
-  targetEl.addEventListener('focusin', () => {
-    if (targetEl.matches(':focus-visible')) show();
-  }, { signal });
-  targetEl.addEventListener('focusout', hide, { signal });
+  if (!isTouchDevice) {
+    targetEl.addEventListener('focusin', () => {
+      if (targetEl.matches(':focus-visible')) show();
+    }, { signal });
+    targetEl.addEventListener('focusout', hide, { signal });
+  }
 
   targetEl.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && visible) hide();
@@ -119,6 +154,7 @@ export async function createExpressTooltip(config) {
     destroy() {
       controller.abort();
       clearTimeout(showTimer);
+      removeOutsideClickHandler?.();
       ariaLink?.release();
       theme.remove();
     },

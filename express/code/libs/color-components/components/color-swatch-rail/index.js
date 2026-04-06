@@ -1,6 +1,6 @@
 
 import { LitElement, html } from '../../../deps/lit-all.min.js';
-import { getContrastTextColor } from '../../utils/ColorConversions.js';
+import { getContrastTextColor, isSuperLight } from '../../utils/ColorConversions.js';
 import { getFirstFocusableInGroup } from '../../utils/util.js';
 import { style } from './styles.css.js';
 import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
@@ -211,6 +211,12 @@ export class ColorSwatchRail extends LitElement {
     this._tooltipsInitialized = false;
     this._nativePickerOpen = false;
     this._nativePickerCloseTimer = null;
+    this._activeEditIndex = null;
+  }
+
+  setActiveEditIndex(index) {
+    this._activeEditIndex = index ?? null;
+    this.requestUpdate();
   }
 
   get _features() {
@@ -1057,8 +1063,9 @@ export class ColorSwatchRail extends LitElement {
       if (isSimulatedCell) {
         const textColor = getContrastTextColor(swatch.hex);
         const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
+        const simulatedSuperLight = isSuperLight(swatch.hex);
         return html`
-          <div class="swatch-column swatch-column--simulated" tabindex="-1" role="group" aria-label="Simulated color"
+          <div class="swatch-column swatch-column--simulated ${simulatedSuperLight ? 'swatch-column--super-light' : ''}" tabindex="-1" role="group" aria-label="Simulated color"
             style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: var(--swatch-text-shadow-override, ${shadow}); --swatch-icon-color: ${textColor};"
             data-swatch-index="${index}">
             ${swatch.conflict ? conflictIcon() : ''}
@@ -1077,6 +1084,7 @@ export class ColorSwatchRail extends LitElement {
       const effectiveLocked = isLocked || isBase;
       const textColor = getContrastTextColor(swatch.hex);
       const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
+      const superLight = isSuperLight(swatch.hex);
       const showColorEdit = f.colorPicker && !editDisabled && !effectiveLocked;
       const showHexCopyButton = f.copy && f.copyFromHex !== false && !isBase;
       const tintMode = f.editTint && !f.colorPicker;
@@ -1156,8 +1164,18 @@ export class ColorSwatchRail extends LitElement {
         ${stackedIcons}
       `;
 
+      const swatchClasses = [
+        'swatch-column',
+        effectiveLocked && 'locked',
+        isBase && 'base-color',
+        tintMode && 'swatch-column--tint-mode',
+        isTintSelected && 'swatch-column--tint-selected',
+        f.drag && !effectiveLocked && 'swatch-column--draggable',
+        superLight && 'swatch-column--super-light',
+      ].filter(Boolean).join(' ');
+
       return html`
-        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${tintMode ? 'swatch-column--tint-mode' : ''} ${isTintSelected ? 'swatch-column--tint-selected' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''}"
+        <div class="${swatchClasses}"
           data-contrast="${textColor.toLowerCase() === '#ffffff' ? 'dark' : 'light'}"
           style="background-color: ${swatch.hex}; --swatch-base-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: var(--swatch-text-shadow-override, ${shadow}); --swatch-icon-filter: ${textColor.toLowerCase() === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
           data-swatch-index="${index}"
@@ -1205,7 +1223,7 @@ export class ColorSwatchRail extends LitElement {
           ` : html`<div class="stacked-row">${stackedContent}</div>`}
           ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
             ${showColorEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-            ${f.hexCode && showHexCopyForThisSwatch ? (showColorEdit || showHexCopyButton ? html`<button type="button" class="hex-code hex-code--${showColorEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showColorEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showColorEdit ? 'Edit color' : 'Copy hex'} title=${showColorEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
+            ${f.hexCode && showHexCopyForThisSwatch ? (showColorEdit || showHexCopyButton ? html`<button type="button" class="hex-code hex-code--${showColorEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showColorEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showColorEdit ? 'Edit color' : 'Copy hex'} title=${showColorEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static" aria-label="Hex code" title="Hex code">${swatch.hex}</span>`) : ''}
             <div class="bottom-info__actions">
               ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="Copy hex" title="Copy hex">${icon('copy')}</button>` : ''}
             </div>

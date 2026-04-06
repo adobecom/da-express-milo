@@ -1,7 +1,7 @@
 import { createTag } from '../../utils.js';
 import createBaseRenderer from './createBaseRenderer.js';
 import { createSwatchRailAdapter, createColorEditAdapter } from '../adapters/litComponentAdapters.js';
-import { getContrastTextColor } from '../../../libs/color-components/utils/ColorConversions.js';
+import { getContrastTextColor, isSuperLight } from '../../../libs/color-components/utils/ColorConversions.js';
 import {
   TYPE_ORDER,
   TYPE_LABELS,
@@ -245,7 +245,7 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
 
       const textColor = getContrastTextColor(hex);
       const paletteCell = createTag('div', {
-        class: 'strip-cb-mobile-row__palette',
+        class: `strip-cb-mobile-row__palette${isSuperLight(hex) ? ' super-light' : ''}`,
         style: `background-color: ${hex};`,
         role: 'button',
         tabindex: '0',
@@ -278,7 +278,7 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
         const sim = simulateHex(hex, type);
         const conflicting = conflictsByType[type];
         const simCell = createTag('div', {
-          class: `strip-cb-mobile-row__sim${conflicting.has(colorIndex) ? ' conflict' : ''}`,
+          class: `strip-cb-mobile-row__sim${conflicting.has(colorIndex) ? ' conflict' : ''}${isSuperLight(sim) ? ' super-light' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
           role: 'img',
           'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
@@ -550,7 +550,10 @@ export function createStripContainerRenderer(options) {
     }
     top = Math.max(gap, top);
 
-    let left = anchorRect.left + (anchorRect.width - popRect.width) / 2;
+    let left = anchorRect.left;
+    if (left + popRect.width > window.innerWidth - gap) {
+      left = anchorRect.right - popRect.width;
+    }
     left = Math.max(gap, Math.min(left, window.innerWidth - popRect.width - gap));
 
     popover.style.top = `${top}px`;
@@ -566,6 +569,7 @@ export function createStripContainerRenderer(options) {
       outsideHandler,
       escapeHandler,
       scrollHandler,
+      railElement: activeRailElement,
     } = activeColorEditor;
     if (outsideHandler) document.removeEventListener('click', outsideHandler, true);
     if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
@@ -579,6 +583,7 @@ export function createStripContainerRenderer(options) {
     }
     adapter.destroy?.();
     popover?.remove();
+    activeRailElement?.setActiveEditIndex?.(null);
     activeColorEditor = null;
   }
 
@@ -622,10 +627,12 @@ export function createStripContainerRenderer(options) {
       },
     });
 
+    railElement.setActiveEditIndex?.(selectedIndex);
+
     const editorElement = adapter.getElement?.() || adapter.element;
     if (mobile) {
       document.body.appendChild(editorElement);
-      activeColorEditor = { adapter, mobile: true };
+      activeColorEditor = { adapter, mobile: true, railElement };
       requestAnimationFrame(() => adapter.show?.());
       return;
     }
@@ -669,6 +676,7 @@ export function createStripContainerRenderer(options) {
       outsideHandler,
       escapeHandler,
       scrollHandler,
+      railElement,
     };
   }
 

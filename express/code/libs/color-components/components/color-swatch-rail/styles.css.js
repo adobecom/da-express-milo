@@ -44,6 +44,10 @@ export const style = css`
     container-type: inline-size;
   }
 
+  .swatch-column--super-light {
+    box-shadow: inset 0 0 0 1px var(--color-gray-300-variant);
+  }
+
   .swatch-column--tint-mode {
     --swatch-base-color: #808080;
     --swatch-tint-overlay: rgba(0, 0, 0, 0.18);
@@ -897,6 +901,16 @@ export const style = css`
   .swatch-column[data-contrast="light"] button.hex-code:hover {
     background-color: rgba(0, 0, 0, 0.12);
   }
+  .swatch-column[data-contrast="light"] button.hex-code.hex-code--editor-open {
+    border-radius: 5px;
+    border: 1px solid var(--color-gray-950);
+    background: transparent;
+  }
+  .swatch-column[data-contrast="dark"] button.hex-code.hex-code--editor-open {
+    border-radius: 5px;
+    border: 1px solid var(--color-gray-400-variant);
+    background: transparent;
+  }
   button.hex-code:focus-visible {
     outline: 2px solid var(--color-blue-800);
     outline-offset: 2px;
@@ -998,5 +1012,11 @@ export const style = css`
   sp-tooltip,
   sp-tooltip * {
     text-transform: none !important;
+  }
+
+  @media (max-width: 899px) {
+    .swatch-column--super-light {
+      box-shadow: none;
+    }
   }
 `;

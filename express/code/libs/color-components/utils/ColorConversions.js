@@ -361,3 +361,14 @@ export const getContrastTextColor = (hex) => {
     const luminance = (0.299 * rgb.red + 0.587 * rgb.green + 0.114 * rgb.blue) / 255;
     return luminance > 0.5 ? '#000000' : '#FFFFFF';
 };
+
+export const isSuperLight = (hex) => {
+    const rgb = hexToRGB(hex);
+    if (!rgb) return false;
+    const toLinear = (c) => {
+        const s = c / 255;
+        return s <= 0.04045 ? s / 12.92 : ((s + 0.055) / 1.055) ** 2.4;
+    };
+    const L = 0.2126 * toLinear(rgb.red) + 0.7152 * toLinear(rgb.green) + 0.0722 * toLinear(rgb.blue);
+    return (1.05 / (L + 0.05)) < 1.5;
+};
