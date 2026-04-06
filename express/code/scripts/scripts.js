@@ -408,9 +408,9 @@ async function loadPage() {
   const isAdobeOrigin = /^(www\.stage\.|www\.)adobe\.com$/.test(window.location.hostname);
   console.log('--------------------------------')
   console.log(isAdobeOrigin,  !window.location.pathname.startsWith('/cn') , !window.isErrorPage)
-  import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
-    if (country === 'cn' && isAdobeOrigin) { window.location.href = '/cn'; }
-  });
+  // import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
+  //   if (country === 'cn' && isAdobeOrigin) { window.location.href = '/cn'; }
+  // });
 
   // import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
   //   if (country === 'cn') { window.location.href = '/cn'; }
