@@ -407,12 +407,14 @@ async function loadPage() {
      and not a 404 page (which would create an infinite redirect loop) */
   const isAdobeOrigin = /^(www\.stage\.|www\.)adobe\.com$/.test(window.location.hostname);
   console.log(isAdobeOrigin,  !window.location.pathname.startsWith('/cn') , !window.isErrorPage)
-  if (isAdobeOrigin && !window.location.pathname.startsWith('/cn') && !window.isErrorPage) {
+  import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
+    if (country === 'cn' && isAdobeOrigin) { window.location.href = '/cn'; }
+  });
 
-    import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
-   //  if (country === 'cn') { window.location.href = '/cn'; }
-    });
-  }
+  // import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
+  //   if (country === 'cn') { window.location.href = '/cn'; }
+  // });
+
 
   document.head.querySelectorAll('meta').forEach((meta) => {
     if (meta.content && meta.content.includes('--none--')) {
