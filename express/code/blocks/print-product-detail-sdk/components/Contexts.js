@@ -1,4 +1,4 @@
-import { html, createContext, useContext, useMemo, useSyncExternalStore, useEffect, useCallback, useState } from '../../../scripts/vendors/htm-preact.js';
+import { html, createContext, useContext, useMemo, useSyncExternalStore, useEffect, useCallback, useState } from '../../../scripts/vendors/htm-preact.min.js';
 
 export const StoreContext = createContext(null);
 

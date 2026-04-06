@@ -134,7 +134,7 @@ export async function createZazzleStore() {
   if (storePromise) return storePromise;
   storePromise = (async () => {
     const [{ createZazzlePDPStore }, { getConfig }] = await Promise.all([
-      import('../sdk/index.js'),
+      import('../sdk/index.min.js'),
       import(`${getLibs()}/utils/utils.js`),
     ]);
 

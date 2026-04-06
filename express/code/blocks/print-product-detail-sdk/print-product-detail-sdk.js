@@ -6,7 +6,7 @@ import {
   useEffect,
   useRef,
   Fragment,
-} from '../../scripts/vendors/htm-preact.js';
+} from '../../scripts/vendors/htm-preact.min.js';
 import { StoreProvider, useStore, DrawerProvider, useDrawer } from './components/Contexts.js';
 import { ProductImages, ProductDetails, ProductHeader, CheckoutButton, Drawer } from './components/ProductComponents.js';
 import { CustomizationInputs } from './components/CustomizationInputs.js';

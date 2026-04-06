@@ -2,7 +2,7 @@ import {
   html,
   useEffect,
   useRef,
-} from '../../../scripts/vendors/htm-preact.js';
+} from '../../../scripts/vendors/htm-preact.min.js';
 import { useStore } from './Contexts.js';
 import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 import { createPicker } from '../../../scripts/widgets/picker.js';

@@ -18,7 +18,7 @@
     "lint:css": "stylelint 'blocks/**/*.css' 'express/code/styles/*.css'",
     "build:spectrum": "node express/code/scripts/widgets/spectrum/build.mjs",
     "build:spectrum:icons-catalog": "ICONS_CATALOG=1 node express/code/scripts/widgets/spectrum/build.mjs",
-    "build:htm-preact": "microbundle express/code/scripts/vendors/build-htm-preact.js -o express/code/scripts/vendors/htm-preact.js -f modern --no-sourcemap --target web; mv express/code/scripts/vendors/htm-preact.modern.js express/code/scripts/vendors/htm-preact.js"
+    "build:htm-preact": "microbundle express/code/scripts/vendors/build-htm-preact.js -o express/code/scripts/vendors/htm-preact.min.js -f modern --no-sourcemap --target web; mv express/code/scripts/vendors/htm-preact.min.modern.js express/code/scripts/vendors/htm-preact.min.js"
   },
   "repository": {
     "type": "git",

@@ -5,7 +5,7 @@ import {
   useState,
   Fragment,
   useCallback,
-} from '../../../scripts/vendors/htm-preact.js';
+} from '../../../scripts/vendors/htm-preact.min.js';
 import { useStore, useDrawer } from './Contexts.js';
 import axAccordionDecorate from '../../ax-accordion/ax-accordion.js';
 import { formatLargeNumberToK } from '../utilities/utility-functions.js';

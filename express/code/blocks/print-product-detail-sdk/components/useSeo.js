@@ -1,4 +1,4 @@
-import { useEffect } from '../../../scripts/vendors/htm-preact.js';
+import { useEffect } from '../../../scripts/vendors/htm-preact.min.js';
 import { useStore } from './Contexts.js';
 
 export function getCanonicalUrl() {
