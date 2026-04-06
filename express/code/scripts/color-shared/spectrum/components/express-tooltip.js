@@ -122,10 +122,12 @@ export async function createExpressTooltip(config) {
     targetEl.addEventListener('pointerleave', hide, { signal });
   }
 
-  targetEl.addEventListener('focusin', () => {
-    if (targetEl.matches(':focus-visible')) show();
-  }, { signal });
-  targetEl.addEventListener('focusout', hide, { signal });
+  if (!isTouchDevice) {
+    targetEl.addEventListener('focusin', () => {
+      if (targetEl.matches(':focus-visible')) show();
+    }, { signal });
+    targetEl.addEventListener('focusout', hide, { signal });
+  }
 
   targetEl.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && visible) hide();
