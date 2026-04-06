@@ -360,31 +360,34 @@ class ColorEdit extends LitElement {
       <div class="ce-palette-section">
         <span class="ce-palette-label">Palette colors</span>
         <sp-theme system="spectrum-two" color="light" scale="medium">
-          <sp-swatch-group
+          <div
             role="listbox"
             aria-label="Color palette colors"
-            size="s"
-            cornerRadius="partial"
             @keydown=${this._onSwatchGroupKeyDown}
           >
-            ${this.palette.map((hex, i) => {
-              const validHex = hex.startsWith('#') ? hex : `#${hex}`;
-              return html`
-                <sp-swatch
-                  role="option"
-                  border="light"
-                  cornerRounding="partial"
-                  color=${validHex}
-                  value=${String(i)}
-                  ?selected=${i === this.selectedIndex}
-                  aria-selected=${i === this.selectedIndex ? 'true' : 'false'}
-                  tabindex=${i === this.selectedIndex ? '0' : '-1'}
-                  @click=${() => this._onSwatchClick(i)}
-                  aria-label=${validHex}
-                ></sp-swatch>
-              `;
-            })}
-          </sp-swatch-group>
+            <sp-swatch-group
+              size="s"
+              cornerRadius="partial"
+            >
+              ${this.palette.map((hex, i) => {
+                const validHex = hex.startsWith('#') ? hex : `#${hex}`;
+                return html`
+                  <sp-swatch
+                    role="option"
+                    border="light"
+                    cornerRounding="partial"
+                    color=${validHex}
+                    value=${String(i)}
+                    ?selected=${i === this.selectedIndex}
+                    aria-selected=${i === this.selectedIndex ? 'true' : 'false'}
+                    tabindex=${i === this.selectedIndex ? '0' : '-1'}
+                    @click=${() => this._onSwatchClick(i)}
+                    aria-label=${validHex}
+                  ></sp-swatch>
+                `;
+              })}
+            </sp-swatch-group>
+          </div>
         </sp-theme>
       </div>
     `;
