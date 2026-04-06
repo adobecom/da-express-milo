@@ -19,8 +19,6 @@ module.exports = {
         ],
         confirmLabel: 'Confirm Input',
         confirmTooltip: 'Please wait until the upload is complete on your mobile device before confirming import.',
-        qrError: 'The QR code did not load. This feature is only available to logged in users.',
-        errorToastMessage: 'Failed to generate QR code.',
       },
       tags: '@frictionless-qa-easy-upload @express @smoke @regression @t1',
     },

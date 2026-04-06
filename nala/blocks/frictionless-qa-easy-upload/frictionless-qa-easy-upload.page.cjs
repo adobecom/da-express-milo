@@ -23,8 +23,7 @@ export default class FrictionlessQAEasyUpload {
     this.qrSteps = this.qrContainer.locator('.easy-upload-step');
     this.confirmButton = this.qrContainer.locator('.confirm-import-button');
     this.confirmTooltip = this.qrContainer.locator('.easy-upload-confirm .tooltip-text');
-    this.qrErrorMessage = this.qrContainer.locator('.qr-error-message');
+    this.qrCodeWidget = this.qrContainer.locator('.qr-code-widget-container .qr-code-container');
     this.qrSecurityTooltip = this.qrContainer.locator('.tooltip.security .tooltip-text');
-    this.qrErrorToast = this.block.locator('.error-toast');
   }
 }

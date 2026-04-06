@@ -48,7 +48,7 @@ test.describe('Express Frictionless QA Easy Upload block test suite', () => {
       await expect(easyUploadBlock.qrContainer).toBeVisible();
     });
 
-    await test.step('Validate QR pane content and error state', async () => {
+    await test.step('Validate QR pane content', async () => {
       await expect(easyUploadBlock.qrHiddenDropzone).toHaveClass(/hidden/);
       await expect(easyUploadBlock.qrContainer).toBeVisible();
       await expect(easyUploadBlock.qrHeading).toHaveText(data.qrHeading);
@@ -63,8 +63,8 @@ test.describe('Express Frictionless QA Easy Upload block test suite', () => {
       await expect(easyUploadBlock.confirmButton).toHaveAttribute('aria-disabled', 'true');
       await expect(easyUploadBlock.confirmButton).toHaveClass(/disabled/);
       await expect(easyUploadBlock.confirmTooltip).toContainText(data.confirmTooltip);
-      await expect(easyUploadBlock.qrErrorMessage).toHaveText(data.qrError);
-      await expect(easyUploadBlock.qrErrorToast).toHaveText(data.errorToastMessage);
+      await expect(easyUploadBlock.qrCodeWidget).toBeVisible({ timeout: 10000 });
+      await expect(easyUploadBlock.qrCodeWidget).toHaveAttribute('aria-label', 'QR code — scan with your phone to upload a file');
     });
 
     await test.step('Run accessibility scan on the QR pane', async () => {
