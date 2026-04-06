@@ -1,7 +1,7 @@
 import { createTag } from '../../utils.js';
 import BlockMediator from '../../block-mediator.min.js';
 
-export function createBaseRenderer(options) {
+export default function createBaseRenderer(options) {
   const { data = [], config = {}, stateKey = 'color-explore' } = options;
 
   let currentData = data;
@@ -16,7 +16,7 @@ export function createBaseRenderer(options) {
 
   function emit(event, detail) {
     if (eventListeners[event]) {
-      eventListeners[event].forEach(callback => callback(detail));
+      eventListeners[event].forEach((callback) => callback(detail));
     }
 
     const customEvent = new CustomEvent(`color-explorer:${event}`, {
@@ -33,7 +33,6 @@ export function createBaseRenderer(options) {
 
   function setData(newData) {
     currentData = newData;
-    
     const state = BlockMediator.get(stateKey);
     BlockMediator.set(stateKey, {
       ...state,

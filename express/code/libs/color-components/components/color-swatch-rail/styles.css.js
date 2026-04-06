@@ -41,6 +41,7 @@ export const style = css`
     isolation: isolate;
     transition: flex-grow 0.2s ease;
     box-sizing: border-box;
+    container-type: inline-size;
   }
 
   .swatch-column--tint-mode {
@@ -187,9 +188,11 @@ export const style = css`
   
   .swatch-rail[data-orientation="vertical"].vertical--four-rows {
     display: grid;
-    grid-template-columns: repeat(5, 1fr);
+    grid-template-columns: repeat(var(--four-rows-cols, 5), 1fr);
     grid-template-rows: repeat(4, 1fr);
     gap: var(--swatch-rail-gap, var(--spacing-50));
+    border-radius: var(--Corner-radius-corner-radius-200);
+    overflow: hidden;
   }
   
   :host([hex-copy-first-row-only]) .swatch-rail[data-orientation="vertical"].vertical--four-rows {
@@ -224,18 +227,6 @@ export const style = css`
 
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column {
     border-radius: 0;
-  }
-  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:nth-child(1) {
-    border-radius: var(--Corner-radius-corner-radius-200) 0 0 0;
-  }
-  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:nth-child(5) {
-    border-radius: 0 var(--Corner-radius-corner-radius-200) 0 0;
-  }
-  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:nth-child(16) {
-    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200);
-  }
-  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:last-child {
-    border-radius: 0 0 var(--Corner-radius-corner-radius-200) 0;
   }
 
   
@@ -748,6 +739,10 @@ export const style = css`
     cursor: pointer;
   }
 
+  .base-color-badge--readonly {
+    cursor: default;
+  }
+
   .base-color-badge--hover-only {
     opacity: 0;
     transition: opacity 0.15s ease;
@@ -864,7 +859,21 @@ export const style = css`
     margin-left: 0;
   }
 
-  
+  @container (max-width: 89px) {
+    .bottom-info {
+      flex-direction: column;
+    }
+
+    .bottom-info .hex-code {
+      align-self: flex-end;
+    }
+
+    .bottom-info .bottom-info__actions {
+      align-self: flex-start;
+    }
+  }
+
+
   .hex-code {
     font-size: 16px;
     font-weight: 700;
@@ -877,7 +886,16 @@ export const style = css`
     border: none;
     padding: 0;
     font: inherit;
-    text-align: left;
+    text-align: center;
+    width: 75px;
+    height: 32px;
+    border-radius: var(--Corner-radius-corner-radius-100);
+  }
+  .swatch-column[data-contrast="dark"] button.hex-code:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+  .swatch-column[data-contrast="light"] button.hex-code:hover {
+    background-color: rgba(0, 0, 0, 0.12);
   }
   button.hex-code:focus-visible {
     outline: 2px solid var(--color-blue-800);
@@ -913,8 +931,11 @@ export const style = css`
   
 
   
-  .icon-button:hover {
-    background-color: rgba(255, 255, 255, 0.2);
+  .swatch-column[data-contrast="dark"] .icon-button:hover {
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+  .swatch-column[data-contrast="light"] .icon-button:hover {
+    background-color: rgba(0, 0, 0, 0.12);
   }
 
   

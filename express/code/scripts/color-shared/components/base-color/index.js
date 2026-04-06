@@ -126,7 +126,6 @@ class BaseColor extends LitElement {
     loadColorArea();
     loadColorSlider();
     loadTextfield();
-    this._syncFromColor();
     this._closeMenuOnOutsideClick = (e) => {
       if (this._modeMenuOpen && !e.composedPath().includes(this.shadowRoot.querySelector('.bc-mode-wrap'))) {
         this._modeMenuOpen = false;
@@ -152,7 +151,7 @@ class BaseColor extends LitElement {
   }
 
   updated(changed) {
-    if (changed.has('color')) {
+    if (changed.has('color') || !this._hasOriginal) {
       this._syncFromColor();
     }
     this._updateOriginalDots();

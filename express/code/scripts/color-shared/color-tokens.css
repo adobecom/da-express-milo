@@ -30,6 +30,15 @@
   --line-height-75: 16px;
   --line-height-100: 18px;
   --line-height-200: 20px;
+  --line-height-300: 26px;
+  --line-height-400: 28px;
+
+  --font-size-75: 12px;
+  --font-size-100: 14px;
+  --font-size-400: 20px;
+  --font-size-500: 22px;
+  --font-size-700: 28px;
+  --font-size-900: 45px;
 
   --Font-weight-medium: 500;
 

@@ -34,16 +34,17 @@ function drawConnectorLines(svg, markerList, order) {
   for (let i = 0; i < order.length - 1; i += 1) {
     const from = markerList[order[i]];
     const to = markerList[order[i + 1]];
-    if (!from || !to) continue;
-    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-    line.setAttribute('x1', `${from.pctX * 100}%`);
-    line.setAttribute('y1', `${from.pctY * 100}%`);
-    line.setAttribute('x2', `${to.pctX * 100}%`);
-    line.setAttribute('y2', `${to.pctY * 100}%`);
-    line.setAttribute('stroke', 'rgba(255,255,255,0.9)');
-    line.setAttribute('stroke-width', '2');
-    line.setAttribute('stroke-linecap', 'round');
-    svg.appendChild(line);
+    if (from && to) {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', `${from.pctX * 100}%`);
+      line.setAttribute('y1', `${from.pctY * 100}%`);
+      line.setAttribute('x2', `${to.pctX * 100}%`);
+      line.setAttribute('y2', `${to.pctY * 100}%`);
+      line.setAttribute('stroke', 'rgba(255,255,255,0.9)');
+      line.setAttribute('stroke-width', '2');
+      line.setAttribute('stroke-linecap', 'round');
+      svg.appendChild(line);
+    }
   }
 }
 
@@ -60,7 +61,7 @@ function createZoomCanvas() {
 
 function renderMagnification(zoomCanvas, sourceCanvas, cx, cy) {
   const size = MARKER.MAGNIFIED_DIAMETER; // 80
-  const scale = MARKER.ZOOM_SCALE;        // 8
+  const scale = MARKER.ZOOM_SCALE; // 8
   const sampleR = Math.floor(size / scale / 2); // 5
   const ctx = zoomCanvas.getContext('2d');
 
@@ -98,7 +99,7 @@ const LOUPE_PATH = 'M 22 60 C 18.2 56 14.6 51.7 11.3 47.2 '
   + 'C 38.3 39.1 35.7 43.3 32.7 47.3 C 29.4 51.7 25.8 56 22 60 Z';
 
 function createMobileLoupe() {
-  const W = MARKER.LOUPE_WIDTH;  // 70
+  const W = MARKER.LOUPE_WIDTH; // 70
   const H = MARKER.LOUPE_HEIGHT; // 93
   const GAP = 12; // px between loupe tip and handle top edge
 
@@ -138,6 +139,7 @@ function createMobileLoupe() {
   }
 
   /** Position loupe ABOVE the handle, centered, with GAP px clearance. */
+  // eslint-disable-next-line no-unused-vars
   function position(markerEl, flipped) {
     const mr = markerEl.getBoundingClientRect();
     const pr = markerEl.closest('.color-extract-markers')?.getBoundingClientRect();
@@ -170,7 +172,11 @@ function createMobileLoupe() {
 
   return {
     element: loupe,
-    show(markerEl, hex) { setColor(hex); position(markerEl); loupe.hidden = false; },
+    show(markerEl, hex) {
+      setColor(hex);
+      position(markerEl);
+      loupe.hidden = false;
+    },
     move(markerEl, hex) { setColor(hex); position(markerEl); },
     hide() { loupe.hidden = true; },
   };
@@ -178,7 +184,7 @@ function createMobileLoupe() {
 
 /* ═══════════════ Main factory ═══════════════ */
 
-export function createImageMarkers(imageContainer, canvas, controller, options = {}) {
+export default function createImageMarkers(imageContainer, canvas, controller, options = {}) {
   const overlay = createTag('div', { class: 'color-extract-markers' });
   const markers = [];
   const connectorSvg = options.showConnectors ? createConnectorSVG() : null;
@@ -224,6 +230,7 @@ export function createImageMarkers(imageContainer, canvas, controller, options =
 
   function startMag(marker, cx, cy, touch) {
     // Handle magnification (both desktop and mobile)
+    marker.el.classList.remove('is-active');
     marker.el.classList.add('is-magnified');
     const zc = marker.el.querySelector('.color-extract-marker-zoom');
     if (zc) renderMagnification(zc, canvas, cx, cy);
@@ -245,6 +252,7 @@ export function createImageMarkers(imageContainer, canvas, controller, options =
 
   function endMag(marker) {
     marker.el.classList.remove('is-magnified');
+    marker.el.classList.remove('is-active');
     loupe.hide();
   }
 
@@ -310,7 +318,9 @@ export function createImageMarkers(imageContainer, canvas, controller, options =
     }
     if (!handled) return;
     e.preventDefault();
-    if (keyboardSnapshotPending && options.onDragStart) { options.onDragStart(); keyboardSnapshotPending = false; }
+    if (keyboardSnapshotPending && options.onDragStart) {
+      options.onDragStart(); keyboardSnapshotPending = false;
+    }
     marker.pctX = pctX;
     marker.pctY = pctY;
     positionMarker(marker.el, pctX, pctY);
@@ -326,9 +336,8 @@ export function createImageMarkers(imageContainer, canvas, controller, options =
   /* ── Marker creation ── */
 
   function createMarker(index, hex, pctX, pctY) {
-    const active = index === activeIndex;
     const el = createTag('div', {
-      class: `color-extract-marker ${active ? 'is-active' : ''}`,
+      class: 'color-extract-marker',
       tabindex: '0',
       role: 'slider',
       'aria-label': `Color ${index + 1} picker handle`,
@@ -339,13 +348,16 @@ export function createImageMarkers(imageContainer, canvas, controller, options =
     el.append(createTag('span', { class: 'color-extract-marker-dot', 'aria-hidden': 'true' }));
 
     el.style.setProperty('--marker-color', hex);
-    el.style.zIndex = active ? 10 : 1;
+    el.style.zIndex = 1;
     positionMarker(el, pctX, pctY);
 
     const marker = { el, pctX, pctY };
     el.addEventListener('pointerdown', (e) => handlePointerDown(e, marker, index));
     el.addEventListener('keydown', (e) => handleKeyDown(e, marker, index));
-    el.addEventListener('focus', () => { keyboardSnapshotPending = true; setActiveMarker(index); });
+    el.addEventListener('focus', () => {
+      keyboardSnapshotPending = true;
+      setActiveMarker(index);
+    });
 
     markers.push(marker);
     overlay.append(el);
@@ -365,7 +377,7 @@ export function createImageMarkers(imageContainer, canvas, controller, options =
     });
     connectorOrder = colors.map((_, i) => i);
     updateConnectors();
-    if (markers.length) setActiveMarker(0);
+    if (markers.length) controller.setBaseColorIndex(0);
   }
 
   /**
@@ -393,11 +405,17 @@ export function createImageMarkers(imageContainer, canvas, controller, options =
     addMarker,
     getPositions,
     selectMarker(index) {
-      if (index >= 0 && index < markers.length) { setActiveMarker(index); markers[index].el.focus(); }
+      if (index >= 0 && index < markers.length) {
+        setActiveMarker(index); markers[index].el.focus();
+      }
     },
     setConnectorOrder(order) { connectorOrder = order; updateConnectors(); },
     get isDragging() { return isDragging; },
     get markerCount() { return markers.length; },
-    destroy() { overlay.innerHTML = ''; markers.length = 0; overlay.remove(); },
+    destroy() {
+      overlay.innerHTML = '';
+      markers.length = 0;
+      overlay.remove();
+    },
   };
 }

@@ -177,24 +177,7 @@ export function createKeyboardNavigation(container, options = {}) {
         event.preventDefault();
         config.onSelect?.(items[selectedIndex], selectedIndex);
       }
-      return;
     }
-
-  }
-
-  /**
-   * Attaches keyboard handlers to an element
-   * @param {HTMLElement} element - Element to attach handlers to
-   */
-  function attach(element) {
-    if (attachedElement) {
-      detach();
-    }
-
-    keydownHandler = handleKeydown;
-    element.addEventListener('keydown', keydownHandler);
-    escapeHandler = config.onEscape ? handleEscapeClose(element, config.onEscape) : null;
-    attachedElement = element;
   }
 
   /**
@@ -210,6 +193,21 @@ export function createKeyboardNavigation(container, options = {}) {
       escapeHandler.release();
       escapeHandler = null;
     }
+  }
+
+  /**
+   * Attaches keyboard handlers to an element
+   * @param {HTMLElement} element - Element to attach handlers to
+   */
+  function attach(element) {
+    if (attachedElement) {
+      detach();
+    }
+
+    keydownHandler = handleKeydown;
+    element.addEventListener('keydown', keydownHandler);
+    escapeHandler = config.onEscape ? handleEscapeClose(element, config.onEscape) : null;
+    attachedElement = element;
   }
 
   /**

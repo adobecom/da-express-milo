@@ -217,7 +217,7 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
 
   initFloatingToolbar(toolbarMount, {
     palette: paletteForToolbar,
-    ctaText: 'Open gradient in Adobe Express',
+    ctaText: 'Create with color palette',
     showPaletteName: false,
   }).catch((err) => {
     window.lana?.log(`Floating toolbar init failed: ${err.message}`, {

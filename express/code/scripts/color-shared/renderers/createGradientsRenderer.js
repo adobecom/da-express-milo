@@ -1,4 +1,4 @@
-import { createBaseRenderer } from './createBaseRenderer.js';
+import createBaseRenderer from './createBaseRenderer.js';
 
 export function createGradientsRenderer(options) {
   const { container, data = [], config = {} } = options;

@@ -1,5 +1,5 @@
 import { announceToScreenReader } from '../spectrum/index.js';
-import { isMobileViewport } from '../utils/utilities.js';
+import { isMobileViewport, buildPaletteEditUrl } from '../utils/utilities.js';
 import { createIconButton } from '../utils/icons.js';
 import { createEventBus } from '../utils/createEventBus.js';
 import { createTag } from '../../utils.js';
@@ -57,7 +57,7 @@ async function handleShare({ name, colors, type }, t) {
   }
 }
 
-//const COLOR_PALETTE_TEMPLATE_ID = 'urn:aaid:sc:VA6C2:60d17865-6817-5343-84db-34219e8ec3a4';
+// const COLOR_PALETTE_TEMPLATE_ID = 'urn:aaid:sc:VA6C2:60d17865-6817-5343-84db-34219e8ec3a4';
 const COLOR_PALETTE_LEARN_PARAM = 'exercise:express/how-to/in-app/how-to-apply-your-color-palette-to-the-template:-1';
 
 async function handleOpenInExpress({ id, name, colors }) {
@@ -325,7 +325,6 @@ export function createToolbar(options) {
     editPaletteName = false,
     editPaletteLink = null,
     getLibraryContext,
-    onEdit,
     onCTA,
     i18n = {},
     drawerI18n = {},
@@ -379,13 +378,14 @@ export function createToolbar(options) {
 
   const main = createTag('div', { class: 'ax-toolbar-main' });
 
+  const DEFAULT_EDIT_BASE_PATH = '/express/colors/color-palette-generator';
+
   const paletteSummary = buildPaletteSummary(colors, type, palette.angle, effectiveShowEdit, () => {
-    if (editPaletteLink) {
-      window.location.href = editPaletteLink;
-    } else {
-      onEdit?.(getPaletteWithName());
-    }
-    emit('edit', { palette: getPaletteWithName() });
+    const currentPalette = getPaletteWithName();
+    const editUrl = editPaletteLink
+      || buildPaletteEditUrl(DEFAULT_EDIT_BASE_PATH, currentPalette.colors, currentPalette.name);
+    window.location.href = editUrl;
+    emit('edit', { palette: currentPalette });
   }, t);
 
   const { actions, ccLibBtn } = buildActionButtons({

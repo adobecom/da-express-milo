@@ -502,7 +502,7 @@ describe('createDrawer', function drawerSuite() {
       const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
       await openDrawer(drawer);
 
-      const tags = document.querySelectorAll('.ax-drawer-added-tags sp-button.ax-drawer-tag-btn');
+      const tags = document.querySelectorAll('.ax-tag-field-tags .ax-tag-pill');
       expect(tags.length).to.equal(2);
       expect(tags[0].dataset.tagValue).to.equal('bold');
       expect(tags[1].dataset.tagValue).to.equal('bright');
@@ -516,13 +516,13 @@ describe('createDrawer', function drawerSuite() {
       const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
       await openDrawer(drawer);
 
-      const tagsInput = document.querySelector('.ax-drawer-tag-section .ax-drawer-field-input');
+      const tagsInput = document.querySelector('.ax-drawer-tag-section .ax-tag-field-input');
       expect(tagsInput).to.exist;
 
       tagsInput.value = 'NewTag';
       tagsInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
 
-      const tags = document.querySelectorAll('.ax-drawer-added-tags sp-button.ax-drawer-tag-btn');
+      const tags = document.querySelectorAll('.ax-tag-field-tags .ax-tag-pill');
       expect(tags.length).to.equal(3);
       expect(tags[2].dataset.tagValue).to.equal('NewTag');
       expect(tagsInput.value).to.equal('');
@@ -536,14 +536,14 @@ describe('createDrawer', function drawerSuite() {
       const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
       await openDrawer(drawer);
 
-      let tags = document.querySelectorAll('.ax-drawer-added-tags sp-button.ax-drawer-tag-btn');
+      let tags = document.querySelectorAll('.ax-tag-field-tags .ax-tag-pill');
       expect(tags.length).to.equal(2);
 
-      const closeIcon = tags[0].querySelector('sp-icon-cross75');
-      expect(closeIcon).to.exist;
-      closeIcon.click();
+      const closeBtn = tags[0].querySelector('.ax-tag-pill-close');
+      expect(closeBtn).to.exist;
+      closeBtn.click();
 
-      tags = document.querySelectorAll('.ax-drawer-added-tags sp-button.ax-drawer-tag-btn');
+      tags = document.querySelectorAll('.ax-tag-field-tags .ax-tag-pill');
       expect(tags.length).to.equal(1);
       expect(tags[0].dataset.tagValue).to.equal('bright');
 
@@ -572,6 +572,328 @@ describe('createDrawer', function drawerSuite() {
       expect(labels).to.include('Bold');
       expect(labels).to.include('Bright');
       expect(labels).to.include('Beige');
+
+      drawer.close();
+      await waitForClose();
+    });
+  });
+
+  describe('save payload — tag extraction', () => {
+    beforeEach(() => {
+      Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
+    });
+
+    it('palette save payload includes initial tags from palette data', async () => {
+      anchor = createAnchor();
+      const provider = createMockCCLibraryProvider();
+      const drawer = await createDrawer(defaultOptions({
+        anchorElement: anchor,
+        type: 'palette',
+        libraries: MOCK_LIBRARIES,
+        ccLibraryProvider: provider,
+        deps: signedInDeps,
+      }));
+      await openDrawer(drawer);
+
+      const saveBtn = document.querySelector('.ax-drawer-save-btn');
+      saveBtn.click();
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(provider.saveTheme.calledOnce).to.be.true;
+      const [, payload] = provider.saveTheme.firstCall.args;
+      const { tags } = payload.representations[0]['colortheme#data'];
+      expect(tags).to.deep.equal(['bold', 'bright']);
+
+      await waitForClose();
+    });
+
+    it('palette save payload includes tags added via Enter key', async () => {
+      anchor = createAnchor();
+      const provider = createMockCCLibraryProvider();
+      const drawer = await createDrawer(defaultOptions({
+        anchorElement: anchor,
+        type: 'palette',
+        libraries: MOCK_LIBRARIES,
+        ccLibraryProvider: provider,
+        deps: signedInDeps,
+      }));
+      await openDrawer(drawer);
+
+      const tagsInput = document.querySelector('.ax-drawer-tag-section input');
+      tagsInput.value = 'NewTag';
+      tagsInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+      const saveBtn = document.querySelector('.ax-drawer-save-btn');
+      saveBtn.click();
+      await new Promise((r) => setTimeout(r, 50));
+
+      const [, payload] = provider.saveTheme.firstCall.args;
+      const { tags } = payload.representations[0]['colortheme#data'];
+      expect(tags).to.include('NewTag');
+      expect(tags).to.include('bold');
+      expect(tags).to.include('bright');
+
+      await waitForClose();
+    });
+
+    it('contrast save payload includes tags from contrast palette data', async () => {
+      anchor = createAnchor();
+      const provider = createMockCCLibraryProvider();
+      const contrastPalette = {
+        name: 'Contrast Pair',
+        colors: ['#1B1B1B', '#FFFFFF'],
+        tags: ['ContrastChecked', 'VisualAccessibility'],
+        accessibilityData: { wcagLevel: 'AAA' },
+      };
+      const drawer = await createDrawer(defaultOptions({
+        anchorElement: anchor,
+        type: 'contrast',
+        paletteData: contrastPalette,
+        libraries: MOCK_LIBRARIES,
+        ccLibraryProvider: provider,
+        deps: signedInDeps,
+      }));
+      await openDrawer(drawer);
+
+      const saveBtn = document.querySelector('.ax-drawer-save-btn');
+      saveBtn.click();
+      await new Promise((r) => setTimeout(r, 50));
+
+      const [, payload] = provider.saveTheme.firstCall.args;
+      const { tags } = payload.representations[0]['colortheme#data'];
+      expect(tags).to.deep.equal(['ContrastChecked', 'VisualAccessibility']);
+
+      await waitForClose();
+    });
+
+    it('tag removal is reflected in saved payload', async () => {
+      anchor = createAnchor();
+      const provider = createMockCCLibraryProvider();
+      const drawer = await createDrawer(defaultOptions({
+        anchorElement: anchor,
+        type: 'palette',
+        libraries: MOCK_LIBRARIES,
+        ccLibraryProvider: provider,
+        deps: signedInDeps,
+      }));
+      await openDrawer(drawer);
+
+      // Remove the first tag
+      const tags = document.querySelectorAll('.ax-drawer-tag-section [data-tag-value]');
+      expect(tags.length).to.be.at.least(1);
+      const closeIcon = tags[0].querySelector('sp-icon-cross75') || tags[0].querySelector('.ax-tag-pill-close');
+      if (closeIcon) closeIcon.click();
+
+      const saveBtn = document.querySelector('.ax-drawer-save-btn');
+      saveBtn.click();
+      await new Promise((r) => setTimeout(r, 50));
+
+      const [, payload] = provider.saveTheme.firstCall.args;
+      const savedTags = payload.representations[0]['colortheme#data'].tags;
+      expect(savedTags).to.not.include('bold');
+      expect(savedTags).to.include('bright');
+
+      await waitForClose();
+    });
+
+    it('empty tag input on Enter does not add a tag to the payload', async () => {
+      anchor = createAnchor();
+      const provider = createMockCCLibraryProvider();
+      const drawer = await createDrawer(defaultOptions({
+        anchorElement: anchor,
+        type: 'palette',
+        libraries: MOCK_LIBRARIES,
+        ccLibraryProvider: provider,
+        deps: signedInDeps,
+      }));
+      await openDrawer(drawer);
+
+      const tagsInput = document.querySelector('.ax-drawer-tag-section input');
+      tagsInput.value = '   ';
+      tagsInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+      const saveBtn = document.querySelector('.ax-drawer-save-btn');
+      saveBtn.click();
+      await new Promise((r) => setTimeout(r, 50));
+
+      const [, payload] = provider.saveTheme.firstCall.args;
+      const { tags } = payload.representations[0]['colortheme#data'];
+      expect(tags).to.deep.equal(['bold', 'bright']);
+
+      await waitForClose();
+    });
+  });
+
+  describe('tag field structure', () => {
+    beforeEach(() => {
+      Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
+    });
+
+    it('tags render inside .ax-tag-field-tags within .ax-tag-field', async () => {
+      anchor = createAnchor();
+      const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
+      await openDrawer(drawer);
+
+      const field = document.querySelector('.ax-tag-field');
+      expect(field).to.exist;
+      const tagsContainer = field.querySelector('.ax-tag-field-tags');
+      expect(tagsContainer).to.exist;
+      const pills = tagsContainer.querySelectorAll('.ax-tag-pill');
+      expect(pills.length).to.equal(2);
+
+      drawer.close();
+      await waitForClose();
+    });
+
+    it('input is inside .ax-tag-field as .ax-tag-field-input', async () => {
+      anchor = createAnchor();
+      const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
+      await openDrawer(drawer);
+
+      const field = document.querySelector('.ax-tag-field');
+      const input = field.querySelector('.ax-tag-field-input');
+      expect(input).to.exist;
+      expect(input.type).to.equal('text');
+
+      drawer.close();
+      await waitForClose();
+    });
+
+    it('tag pills have data-tag-value attribute', async () => {
+      anchor = createAnchor();
+      const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
+      await openDrawer(drawer);
+
+      const pills = document.querySelectorAll('.ax-tag-pill');
+      expect(pills[0].dataset.tagValue).to.equal('bold');
+      expect(pills[1].dataset.tagValue).to.equal('bright');
+
+      drawer.close();
+      await waitForClose();
+    });
+
+    it('helper text element exists with ax-tag-field-help class', async () => {
+      anchor = createAnchor();
+      const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
+      await openDrawer(drawer);
+
+      const help = document.querySelector('.ax-tag-field-help');
+      expect(help).to.exist;
+
+      drawer.close();
+      await waitForClose();
+    });
+
+    it('label is associated with input via for/id', async () => {
+      anchor = createAnchor();
+      const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
+      await openDrawer(drawer);
+
+      const label = document.querySelector('.ax-drawer-tag-section .ax-drawer-field-label');
+      const input = document.querySelector('.ax-tag-field-input');
+      expect(label.getAttribute('for')).to.equal(input.id);
+
+      drawer.close();
+      await waitForClose();
+    });
+  });
+
+  describe('tag field interactions', () => {
+    beforeEach(() => {
+      Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
+    });
+
+    it('Enter creates a tag pill and clears input', async () => {
+      anchor = createAnchor();
+      const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
+      await openDrawer(drawer);
+
+      const input = document.querySelector('.ax-tag-field-input');
+      input.value = 'Custom';
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+      const pills = document.querySelectorAll('.ax-tag-pill');
+      expect(pills.length).to.equal(3);
+      expect(pills[2].dataset.tagValue).to.equal('Custom');
+      expect(input.value).to.equal('');
+
+      drawer.close();
+      await waitForClose();
+    });
+
+    it('blank and whitespace-only input does not create tags', async () => {
+      anchor = createAnchor();
+      const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
+      await openDrawer(drawer);
+
+      const input = document.querySelector('.ax-tag-field-input');
+      input.value = '   ';
+      input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+      const pills = document.querySelectorAll('.ax-tag-pill');
+      expect(pills.length).to.equal(2);
+
+      drawer.close();
+      await waitForClose();
+    });
+
+    it('clicking a keyword suggestion adds a tag pill', async () => {
+      anchor = createAnchor();
+      const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
+      await openDrawer(drawer);
+
+      const suggestions = document.querySelectorAll('.ax-drawer-keyword-suggestions .ax-drawer-tag-btn');
+      suggestions[0].click();
+
+      const pills = document.querySelectorAll('.ax-tag-pill');
+      expect(pills.length).to.equal(3);
+      expect(pills[2].dataset.tagValue).to.equal('Blue');
+
+      drawer.close();
+      await waitForClose();
+    });
+
+    it('clicking .ax-tag-pill-close removes the tag', async () => {
+      anchor = createAnchor();
+      const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
+      await openDrawer(drawer);
+
+      let pills = document.querySelectorAll('.ax-tag-pill');
+      expect(pills.length).to.equal(2);
+
+      pills[0].querySelector('.ax-tag-pill-close').click();
+
+      pills = document.querySelectorAll('.ax-tag-pill');
+      expect(pills.length).to.equal(1);
+      expect(pills[0].dataset.tagValue).to.equal('bright');
+
+      drawer.close();
+      await waitForClose();
+    });
+
+    it('tag pill close button is a real <button> with aria-label', async () => {
+      anchor = createAnchor();
+      const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
+      await openDrawer(drawer);
+
+      const closeBtn = document.querySelector('.ax-tag-pill-close');
+      expect(closeBtn).to.exist;
+      expect(closeBtn.tagName.toLowerCase()).to.equal('button');
+      expect(closeBtn.type).to.equal('button');
+      expect(closeBtn.getAttribute('aria-label')).to.be.a('string').and.not.be.empty;
+
+      drawer.close();
+      await waitForClose();
+    });
+
+    it('input has aria-describedby pointing to helper text', async () => {
+      anchor = createAnchor();
+      const drawer = await createDrawer(defaultOptions({ anchorElement: anchor }));
+      await openDrawer(drawer);
+
+      const input = document.querySelector('.ax-tag-field-input');
+      const help = document.querySelector('.ax-tag-field-help');
+      expect(input.getAttribute('aria-describedby')).to.equal(help.id);
 
       drawer.close();
       await waitForClose();
@@ -723,7 +1045,7 @@ describe('createDrawer', function drawerSuite() {
 
       expect(provider.saveTheme.calledOnce).to.be.true;
       const [, payload] = provider.saveTheme.firstCall.args;
-      const swatches = payload.representations[0]['colortheme#data'].swatches;
+      const { swatches } = payload.representations[0]['colortheme#data'];
       expect(swatches.length).to.equal(5);
 
       drawer.close();
@@ -768,7 +1090,7 @@ describe('createDrawer', function drawerSuite() {
       }));
       await openDrawer(drawer);
 
-      const tags = document.querySelectorAll('.ax-drawer-added-tags sp-button.ax-drawer-tag-btn');
+      const tags = document.querySelectorAll('.ax-tag-field-tags .ax-tag-pill');
       expect(tags.length).to.equal(3);
       expect(tags[0].dataset.tagValue).to.equal('ContrastChecked');
       expect(tags[1].dataset.tagValue).to.equal('VisualAccessibility');

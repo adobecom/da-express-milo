@@ -1,4 +1,4 @@
-import { createBaseRenderer } from './createBaseRenderer.js';
+import createBaseRenderer from './createBaseRenderer.js';
 import { createColorEditAdapter, createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 
 const DEFAULT_SWATCH_ORIENTATION = 'stacked';

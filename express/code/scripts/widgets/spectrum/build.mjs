@@ -138,6 +138,17 @@ function createExternalPlugin(skipTargets = []) {
 /* ------------------------------------------------------------------ */
 const newComponents = [
   {
+    name: 'icons-ui',
+    entry: [
+      "import '@spectrum-web-components/icons-ui/icons/sp-icon-chevron100.js';",
+      "import '@spectrum-web-components/icons-ui/icons/sp-icon-checkmark100.js';",
+      "import '@spectrum-web-components/icons-ui/icons/sp-icon-cross200.js';",
+      "import '@spectrum-web-components/icons-ui/icons/sp-icon-cross300.js';",
+      "import '@spectrum-web-components/icons-ui/icons/sp-icon-cross400.js';",
+      "import '@spectrum-web-components/icons-ui/icons/sp-icon-cross500.js';",
+    ].join('\n'),
+  },
+  {
     name: 'button',
     entry: [
       "import '@spectrum-web-components/button/sp-button.js';",

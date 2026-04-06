@@ -75,7 +75,7 @@ function attachRovingTabIndex(container, elements) {
  * Palette variant: [Mood selector] | [Add color] [Reset] [Replace image] | [Undo] [Redo]
  * Gradient variant: [Reset] [Replace image] | [Undo] [Redo]
  */
-export async function createToolbar(options = {}) {
+export default async function createToolbar(options = {}) {
   await loadActionMenuStyles();
 
   const toolbar = createTag('div', {

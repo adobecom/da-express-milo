@@ -58,6 +58,7 @@ const DRAWER_I18N_MAP = {
   paletteLabel: 'color-drawer-palette-label',
   keywordSuggestions: 'color-drawer-keyword-suggestions',
   yourLibrary: 'color-drawer-your-library',
+  tagFieldHelp: 'color-drawer-tag-field-help',
 };
 
 async function loadI18nStrings() {
