@@ -793,9 +793,8 @@ export default async function decorate(block) {
         const isRandom = isGeneratingRandom;
         isGeneratingRandom = false;
         if (isRandom && activeHarmonyRule !== 'CUSTOM') {
-          controller.replaceSwatchesFromHexes(
-            palette, { baseIndex: 0, harmonyRule: activeHarmonyRule },
-          );
+          const opts = { baseIndex: 0, harmonyRule: activeHarmonyRule };
+          controller.replaceSwatchesFromHexes(palette, opts);
           controller.setBaseColor(palette[0]);
         } else {
           controller.replaceSwatchesFromHexes(palette, { baseIndex: 0, harmonyRule: 'CUSTOM' });

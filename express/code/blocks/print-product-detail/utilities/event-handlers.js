@@ -1,3 +1,4 @@
+/* eslint-disable import/no-cycle */
 import { getLibs } from '../../../scripts/utils.js';
 import fetchAPIData, {
   fetchUIStrings,

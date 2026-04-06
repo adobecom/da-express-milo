@@ -63,21 +63,7 @@ function createStubDataService() {
   };
 }
 
-// Stub for Spectrum components used by the header
-const tabsStub = {
-  element: document.createElement('div'),
-  getSelected: () => 'large-text',
-  setSelected: () => {},
-  destroy: () => {},
-};
-
-const pickerStub = {
-  element: document.createElement('div'),
-  destroy: () => {},
-};
-
 // Mock dynamic imports before loading the module
-const originalImport = window.__importShim || null;
 
 describe('createContrastCheckerModalContent', () => {
   let createContrastCheckerModalContent;
@@ -187,7 +173,7 @@ describe('createContrastCheckerModalContent', () => {
       const trackingService = {
         ...dataService,
         checkWCAG(fg, bg) {
-          callCount++;
+          callCount += 1;
           return dataService.checkWCAG(fg, bg);
         },
       };

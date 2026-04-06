@@ -58,7 +58,9 @@ describe('color-wheel utilities', () => {
     });
 
     it('returns fewer rules for 2 than for 3', () => {
-      expect(harmonyRulesForSwatchCount(2).length).to.be.lessThan(harmonyRulesForSwatchCount(3).length);
+      const rules2 = harmonyRulesForSwatchCount(2).length;
+      const rules3 = harmonyRulesForSwatchCount(3).length;
+      expect(rules2).to.be.lessThan(rules3);
     });
   });
 
