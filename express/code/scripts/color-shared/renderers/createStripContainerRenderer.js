@@ -627,9 +627,13 @@ export function createStripContainerRenderer(options) {
       document.body.appendChild(editorElement);
       activeColorEditor = { adapter, mobile: true };
       requestAnimationFrame(async () => {
-        await customElements.whenDefined('color-edit');
-        await editorElement.updateComplete;
-        adapter.show?.();
+        try {
+          await customElements.whenDefined('color-edit');
+          await editorElement.updateComplete;
+          adapter.show?.();
+        } catch (e) {
+          window.lana?.log(`[color-editor] mobile show failed: ${e.message}`, { tags: 'color-edit' });
+        }
       });
       return;
     }
@@ -645,10 +649,14 @@ export function createStripContainerRenderer(options) {
     const anchorRect = resolveAnchorRect(anchorElement, anchorRectFromDetail);
     positionPopover(popover, anchorRect);
     requestAnimationFrame(async () => {
-      positionPopover(popover, anchorRect);
-      await customElements.whenDefined('color-edit');
-      await editorElement.updateComplete;
-      await adapter.show?.();
+      try {
+        positionPopover(popover, anchorRect);
+        await customElements.whenDefined('color-edit');
+        await editorElement.updateComplete;
+        await adapter.show?.();
+      } catch (e) {
+        window.lana?.log(`[color-editor] desktop show failed: ${e.message}`, { tags: 'color-edit' });
+      }
     });
     Promise.resolve(editorElement.updateComplete)
       .then(() => positionPopover(popover, anchorRect))
