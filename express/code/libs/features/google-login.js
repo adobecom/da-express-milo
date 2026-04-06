@@ -38,7 +38,8 @@ export default async function initGoogleLogin(loadIms, getMetadata, loadScript, 
   console.log('[local] initGoogleLogin called');
   try {
     await loadIms();
-  } catch {
+  } catch (error) {
+    console.error('[local] error loading IMS', error);
     return;
   }
   if (window.adobeIMS?.isSignedInUser()) return;
