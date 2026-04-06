@@ -410,7 +410,7 @@ async function loadPage() {
   if (isAdobeOrigin && !window.location.pathname.startsWith('/cn') && !window.isErrorPage) {
 
     import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
-      if (country === 'cn') { window.location.href = '/cn'; }
+   //  if (country === 'cn') { window.location.href = '/cn'; }
     });
   }
 
