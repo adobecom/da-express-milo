@@ -1,6 +1,6 @@
 import { DEFAULTS } from './constants.js';
 
-export function parseBlockConfig(rows) {
+export default function parseBlockConfig(rows) {
   const config = { ...DEFAULTS };
 
   rows.forEach((row) => {

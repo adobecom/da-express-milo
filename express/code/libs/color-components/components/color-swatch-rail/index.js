@@ -19,7 +19,7 @@ const MAX_SWATCHES = 10;
 const MAX_SWATCHES_TWO_ROWS = 10;
 const TWO_ROWS_COLORS_PER_ROW = 5;
 const MAX_SWATCHES_FOUR_ROWS = 20;
-const FOUR_ROWS_COLS = 5;
+
 const FOUR_ROWS_ROWS = 4;
 const DEFAULT_VERTICAL_MAX_PER_ROW = 5;
 const TINT_BAND_STOPS = [
@@ -46,6 +46,7 @@ const DEFAULT_FEATURES = {
   editTint: false,
   colorBlindness: false,
   baseColor: false,
+  baseColorReadOnly: false,
   emptyStrip: false,
   editColorDisabled: false,
 };
@@ -64,6 +65,7 @@ const ALL_FEATURES = {
   editTint: true,
   colorBlindness: true,
   baseColor: true,
+  baseColorReadOnly: false,
   emptyStrip: true,
   editColorDisabled: false,
 };
@@ -86,6 +88,7 @@ function normalizeFeatures(features) {
       editTint: set.has('editTint'),
       colorBlindness: set.has('colorBlindness'),
       baseColor: set.has('baseColor'),
+      baseColorReadOnly: set.has('baseColorReadOnly'),
       emptyStrip: set.has('emptyStrip'),
       editColorDisabled: set.has('editColorDisabled'),
     };
@@ -145,16 +148,13 @@ const conflictIcon = () => html`
 
 
 function buildDisplaySwatchesForFourRowsCB(swatches) {
-  const first5 = [];
-  for (let i = 0; i < FOUR_ROWS_COLS; i += 1) {
-    first5.push(swatches[i]?.hex ? { hex: swatches[i].hex } : { hex: '#e5e5e5' });
-  }
-  const out = first5.map((s) => ({ hex: s.hex, conflict: false }));
-  const hexes = first5.map((s) => s.hex);
+  const paletteColors = swatches.map((s) => (s?.hex ? { hex: s.hex } : { hex: '#e5e5e5' }));
+  const out = paletteColors.map((s) => ({ hex: s.hex, conflict: false }));
+  const hexes = paletteColors.map((s) => s.hex);
   TYPE_ORDER.forEach((type) => {
     const pairs = getConflictPairs(hexes, type);
     const conflicting = getConflictingIndices(pairs);
-    first5.forEach((s, i) => {
+    paletteColors.forEach((s, i) => {
       out.push({
         hex: simulateHexService(s.hex, type),
         conflict: conflicting.has(i),
@@ -211,9 +211,6 @@ export class ColorSwatchRail extends LitElement {
     this._tooltipsInitialized = false;
     this._nativePickerOpen = false;
     this._nativePickerCloseTimer = null;
-    this._copyFeedbackTimer = null;
-    this._copyFeedbackTooltip = null;
-    this._copyFeedbackRestoreText = '';
   }
 
   get _features() {
@@ -263,7 +260,6 @@ export class ColorSwatchRail extends LitElement {
       clearTimeout(this._nativePickerCloseTimer);
       this._nativePickerCloseTimer = null;
     }
-    this._clearCopyFeedback();
     this._clearTooltips();
     super.disconnectedCallback();
   }
@@ -328,7 +324,7 @@ export class ColorSwatchRail extends LitElement {
       const isInteractiveDemoRail = !!this.closest('.strip-variant--interactive');
       if (isFourRows && isInteractiveDemoRail) continue;
 
-      const targets = root.querySelectorAll?.('button[aria-label], .hex-code[aria-label]') || [];
+      const targets = root.querySelectorAll?.('button[aria-label]') || [];
       for (const targetEl of targets) {
         const content = (targetEl.getAttribute('aria-label') || '').trim();
         if (!content) continue;
@@ -425,38 +421,6 @@ export class ColorSwatchRail extends LitElement {
     }
   }
 
-  _clearCopyFeedback() {
-    if (this._copyFeedbackTimer != null) {
-      clearTimeout(this._copyFeedbackTimer);
-      this._copyFeedbackTimer = null;
-    }
-    if (this._copyFeedbackTooltip) {
-      if (this._copyFeedbackRestoreText) {
-        this._copyFeedbackTooltip.textContent = this._copyFeedbackRestoreText;
-      }
-      this._copyFeedbackTooltip.removeAttribute('open');
-      this._copyFeedbackTooltip = null;
-      this._copyFeedbackRestoreText = '';
-    }
-  }
-
-  _showCopyFeedback(target) {
-    if (!target) return;
-    this._clearCopyFeedback();
-    const describedById = target.getAttribute('aria-describedby');
-    const tooltipEl = describedById ? document.getElementById(describedById) : null;
-    if (!tooltipEl) return;
-    target.blur?.();
-    target.dispatchEvent(new Event('pointerleave', { bubbles: true, composed: true }));
-    this._copyFeedbackRestoreText = tooltipEl.textContent || '';
-    tooltipEl.textContent = 'Copied to clipboard';
-    tooltipEl.setAttribute('open', '');
-    this._copyFeedbackTooltip = tooltipEl;
-    this._copyFeedbackTimer = setTimeout(() => {
-      this._clearCopyFeedback();
-    }, 1200);
-  }
-
   _copyTextFallback(text) {
     try {
       const textarea = document.createElement('textarea');
@@ -487,12 +451,12 @@ export class ColorSwatchRail extends LitElement {
     return this._copyTextFallback(text);
   }
 
-  async _handleCopy(hex, target = null) {
+  async _handleCopy(hex) {
     if (!hex) return;
     try {
       const copied = await this._copyText(hex);
       if (!copied) throw new Error('clipboard_copy_failed');
-      this._showCopyFeedback(target);
+      showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
       announceToScreenReader('Copied to clipboard');
     } catch (error) {
       showExpressToast({ message: 'Failed to copy', variant: 'negative', timeout: 2000 });
@@ -1095,7 +1059,7 @@ export class ColorSwatchRail extends LitElement {
         const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
         return html`
           <div class="swatch-column swatch-column--simulated" tabindex="-1" role="group" aria-label="Simulated color"
-            style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-color: ${textColor};"
+            style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: var(--swatch-text-shadow-override, ${shadow}); --swatch-icon-color: ${textColor};"
             data-swatch-index="${index}">
             ${swatch.conflict ? conflictIcon() : ''}
           </div>
@@ -1103,6 +1067,7 @@ export class ColorSwatchRail extends LitElement {
       }
       const isLocked = (this.lockedByIndex || new Set()).has(index);
       const isBase = f.baseColor && index === this.baseColorIndex;
+      const isBaseReadOnly = f.baseColorReadOnly && index === this.baseColorIndex;
       const showAddLeftHere = !isStacked && canAddGlobal && f.addLeft;
       const showAddRightHere = !isStacked && canAddGlobal && f.addRight;
       
@@ -1121,7 +1086,7 @@ export class ColorSwatchRail extends LitElement {
       const tintBands = isTintSelected ? this._buildTintBands(swatch.hex) : [];
       
       
-      const showHexCopyForThisSwatch = !(orientation === 'four-rows' && this.hexCopyFirstRowOnly && index >= FOUR_ROWS_COLS);
+      const showHexCopyForThisSwatch = !(orientation === 'four-rows' && this.hexCopyFirstRowOnly && index >= swatches.length);
 
       
       const baseColorIcon = f.baseColor
@@ -1138,6 +1103,7 @@ export class ColorSwatchRail extends LitElement {
       const topLeftIcons = html`
         <div class="top-actions top-actions--left">
           ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+          ${isBaseReadOnly ? html`<span class="base-color-badge base-color-badge--active base-color-badge--readonly" aria-label="Base color">${icon('baseColorTarget')}</span>` : ''}
         </div>
       `;
       const topRightIcons = html`
@@ -1163,6 +1129,7 @@ export class ColorSwatchRail extends LitElement {
       const stackedIcons = html`
         <div class="stacked-row__icons">
           ${f.baseColor ? html`<button type="button" class="${baseColorBadgeClass} swatch-column-focusable" tabindex="-1" aria-label=${isBase ? 'Clear base color' : 'Set as base color'} title=${isBase ? 'Clear base color' : 'Set as base color'} @click=${(e) => { e.stopPropagation(); this._handleBaseColorToggle(index); }}>${baseColorIcon}</button>` : ''}
+          ${isBaseReadOnly ? html`<span class="base-color-badge base-color-badge--active base-color-badge--readonly" aria-label="Base color">${icon('baseColorTarget')}</span>` : ''}
           ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="Copy hex" title="Copy hex">${icon('copy')}</button>` : ''}
           ${f.drag && !effectiveLocked ? html`
             <button
@@ -1191,8 +1158,8 @@ export class ColorSwatchRail extends LitElement {
 
       return html`
         <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${tintMode ? 'swatch-column--tint-mode' : ''} ${isTintSelected ? 'swatch-column--tint-selected' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''}"
-          data-contrast="${textColor === '#ffffff' ? 'dark' : 'light'}"
-          style="background-color: ${swatch.hex}; --swatch-base-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: ${shadow}; --swatch-icon-filter: ${textColor === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
+          data-contrast="${textColor.toLowerCase() === '#ffffff' ? 'dark' : 'light'}"
+          style="background-color: ${swatch.hex}; --swatch-base-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: var(--swatch-text-shadow-override, ${shadow}); --swatch-icon-filter: ${textColor.toLowerCase() === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
           data-swatch-index="${index}"
           tabindex="0"
           role="group"
@@ -1276,22 +1243,23 @@ export class ColorSwatchRail extends LitElement {
 
     
     if (orientation === 'four-rows') {
+      const colCount = swatches.length;
       const showEmpty = f.emptyStrip && swatches.length < MAX_SWATCHES_FOUR_ROWS;
       const useCBData = this.hexCopyFirstRowOnly;
       const displaySwatches = useCBData ? buildDisplaySwatchesForFourRowsCB(swatches) : null;
       const allItems = [];
       for (let r = 0; r < FOUR_ROWS_ROWS; r += 1) {
-        const start = r * FOUR_ROWS_COLS;
+        const start = r * colCount;
         const rowSwatches = useCBData && displaySwatches
-          ? displaySwatches.slice(start, start + FOUR_ROWS_COLS)
-          : swatches.slice(start, start + FOUR_ROWS_COLS);
+          ? displaySwatches.slice(start, start + colCount)
+          : swatches.slice(start, start + colCount);
         const isSimulatedRow = useCBData && r >= 1;
         rowSwatches.forEach((swatch, c) => {
           const idx = start + c;
           allItems.push(renderSwatch(swatch, idx, { isSimulatedCell: isSimulatedRow }));
         });
         const isLastRow = r === FOUR_ROWS_ROWS - 1;
-        const showEmptySlot = isLastRow && showEmpty && (useCBData ? swatches.length < MAX_SWATCHES_FOUR_ROWS : rowSwatches.length < FOUR_ROWS_COLS);
+        const showEmptySlot = isLastRow && showEmpty && (useCBData ? swatches.length < MAX_SWATCHES_FOUR_ROWS : rowSwatches.length < colCount);
         if (showEmptySlot) {
           allItems.push(html`
             <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
@@ -1303,7 +1271,7 @@ export class ColorSwatchRail extends LitElement {
         }
       }
       return html`
-        <div class="swatch-rail vertical--four-rows" data-orientation="vertical">
+        <div class="swatch-rail vertical--four-rows" data-orientation="vertical" style="--four-rows-cols: ${colCount}">
           ${allItems}
         </div>
       `;

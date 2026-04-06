@@ -209,7 +209,7 @@ describe('CCLibraryProvider - gradient payload', () => {
         ],
       });
 
-      const stops = result.representations[0]['gradient#data'].stops;
+      const { stops } = result.representations[0]['gradient#data'];
       expect(stops).to.have.lengthOf(3);
       expect(stops[0].offset).to.equal(0);
       expect(stops[1].offset).to.equal(0.5);
@@ -222,7 +222,7 @@ describe('CCLibraryProvider - gradient payload', () => {
         stops: [],
       });
 
-      const stops = result.representations[0]['gradient#data'].stops;
+      const { stops } = result.representations[0]['gradient#data'];
       expect(stops).to.deep.equal([]);
     });
   });

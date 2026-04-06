@@ -1,5 +1,5 @@
 import { createTag } from '../../../scripts/utils.js';
-import { createBaseRenderer } from '../../../scripts/color-shared/renderers/createBaseRenderer.js';
+import createBaseRenderer from '../../../scripts/color-shared/renderers/createBaseRenderer.js';
 import { announceToScreenReader } from '../../../scripts/color-shared/spectrum/index.js';
 import { ensureHash, isMobileOrTabletViewport, isMobileViewport } from '../../../scripts/color-shared/utils/utilities.js';
 import { generateTints, hexToRgb, rgbToHsv } from '../utils/contrastUtils.js';
@@ -9,7 +9,6 @@ import { createColorInput } from './components/createColorInput.js';
 import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
 import { loadActionButton, loadBadge, loadTooltip } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../../../scripts/color-shared/spectrum/utils/theme.js';
-import { createActionMenuState } from '../../../scripts/color-shared/components/createActionMenuState.js';
 import { createContrastCheckerPlaceholders } from '../utils/placeholders.js';
 import { FAIL, createDefaultActionMenuConfig } from '../utils/contrastConstants.js';
 import '../../../scripts/color-shared/components/color-channel-slider/index.js';
@@ -146,6 +145,14 @@ function buildResultCell(pass, strings) {
   return cell;
 }
 
+function generateTintScale(hex) {
+  return ['#000000', ...generateTints(hex, TINT_COUNT - 1)];
+}
+
+function clampTintIndex(index) {
+  return Math.max(0, Math.min(MAX_TINT_INDEX, Number(index) || 0));
+}
+
 function buildTintGradient(hex) {
   const tints = generateTintScale(hex);
   const stops = tints.map((t, i) => {
@@ -155,18 +162,10 @@ function buildTintGradient(hex) {
   return `linear-gradient(to right, ${stops.join(', ')})`;
 }
 
-function generateTintScale(hex) {
-  return ['#000000', ...generateTints(hex, TINT_COUNT - 1)];
-}
-
 function findTintIndex(hex) {
   const { r, g, b } = hexToRgb(hex);
   const { v } = rgbToHsv(r, g, b);
   return clampTintIndex(Math.round(v * MAX_TINT_INDEX));
-}
-
-function clampTintIndex(index) {
-  return Math.max(0, Math.min(MAX_TINT_INDEX, Number(index) || 0));
 }
 
 function tintIndexToPercentValue(index) {
@@ -330,6 +329,11 @@ function syncColorControl(input, slider, hex) {
   slider?.updatePosition(hex);
 }
 
+function isSameHistoryState(a, b) {
+  return a?.[0]?.toUpperCase() === b?.[0]?.toUpperCase()
+    && a?.[1]?.toUpperCase() === b?.[1]?.toUpperCase();
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export function createCheckerRenderer(options) {
   const {
@@ -345,7 +349,6 @@ export function createCheckerRenderer(options) {
   const { recommendation: recommendationService } = services;
   const strings = createContrastCheckerPlaceholders(config.strings);
   const tabs = config.tabs || strings.tabs;
-  const actionMenuState = createActionMenuState(ACTION_MENU_ID);
 
   let foreground = config.initialForeground;
   let background = config.initialBackground;
@@ -378,7 +381,9 @@ export function createCheckerRenderer(options) {
     const selectedColor = type === 'fg'
       ? palette?.selectedForeground ?? currentValue
       : palette?.selectedBackground ?? currentValue;
-    const selectedIndex = colors.findIndex((hex) => hex?.toUpperCase() === selectedColor?.toUpperCase());
+    const selectedIndex = colors.findIndex(
+      (hex) => hex?.toUpperCase() === selectedColor?.toUpperCase(),
+    );
 
     if (!colors.length || selectedIndex === -1) {
       return {
@@ -397,11 +402,6 @@ export function createCheckerRenderer(options) {
 
   function getHistoryState() {
     return [foreground, background];
-  }
-
-  function isSameHistoryState(a, b) {
-    return a?.[0]?.toUpperCase() === b?.[0]?.toUpperCase()
-      && a?.[1]?.toUpperCase() === b?.[1]?.toUpperCase();
   }
 
   function clearHistoryTimer() {
@@ -615,6 +615,22 @@ export function createCheckerRenderer(options) {
       class: 'cc-compare-link',
     }, strings.compareEntirePalette);
 
+    compareLink.addEventListener('click', async () => {
+      const paletteData = context?.get('palette');
+      const colors = Array.isArray(paletteData?.colors)
+        ? paletteData.colors.filter((hex) => dataService.isValidHex(hex))
+        : [foreground, background].filter(Boolean);
+      if (colors.length < 2) return;
+      const { createModalManager } = await import(
+        '../../../scripts/color-shared/modal/createModalManager.js'
+      );
+      const modal = createModalManager();
+      modal.openContrastCheckerModal(
+        { colors, name: paletteData?.name },
+        { dataService },
+      );
+    });
+
     top.appendChild(ratioLabelContainer);
 
     if (!isMobileOrTabletViewport()) {
@@ -629,9 +645,10 @@ export function createCheckerRenderer(options) {
         ...createDefaultActionMenuConfig(strings),
         id: ACTION_MENU_ID,
         type: 'controls-only',
-        enableState: true,
-        onUndo: () => actionMenuState.onUndo(),
-        onRedo: () => actionMenuState.onRedo(),
+        activeId: 'contrast',
+        enableState: false,
+        onUndo: () => actionMenuApi?.undo?.(),
+        onRedo: () => actionMenuApi?.redo?.(),
       });
       if (mobileActionMenu?.element) {
         top.appendChild(mobileActionMenu.element);

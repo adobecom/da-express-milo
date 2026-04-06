@@ -11,7 +11,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-400);
-  overflow: hidden;
+  overflow: visible;
 }
 
 .color-blindness color-wheel-express,
@@ -70,6 +70,12 @@
   display: none;
 }
 
+@media (max-width: 599px) {
+  .color-blindness .ax-shell-slot--footer .ax-toolbar-standalone .ax-palette-name {
+    display: flex;
+  }
+}
+
 @media (min-width: 888px) {
   .color-blindness .ax-shell-slot--topbar .action-menu-full .action-menu-controls {
     display: flex;
@@ -102,6 +108,10 @@
 @media (min-width: 1200px) {
   .color-blindness {
     --cb-label-column-width: 100px;
+  }
+
+  .color-blindness .ax-shell-slot--canvas {
+    height: 600px;
   }
 
   .color-blindness .ax-color-tool-layout {

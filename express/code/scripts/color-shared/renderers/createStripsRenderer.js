@@ -1,5 +1,5 @@
 import { createTag } from '../../utils.js';
-import { createBaseRenderer } from './createBaseRenderer.js';
+import createBaseRenderer from './createBaseRenderer.js';
 import {
   createSearchAdapter,
 } from '../adapters/litComponentAdapters.js';

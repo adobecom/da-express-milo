@@ -1,4 +1,4 @@
-/* eslint-disable import/prefer-default-export -- named export for createColorDataService */
+/* eslint-disable import/prefer-default-export, no-underscore-dangle */
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
 import { gradientApiResponsesToGradients, themesToGradients } from '../../../libs/services/providers/transforms.js';
 

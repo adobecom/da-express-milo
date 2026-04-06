@@ -2,6 +2,7 @@
 import { createTag } from '../../../utils.js';
 import loadMiloStyle from '../../utils/loadMiloStyle.js';
 import { announceToScreenReader } from '../../spectrum/utils/a11y.js';
+import { showExpressToast } from '../../spectrum/components/express-toast.js';
 
 const DEFAULT_HEX = '#808080';
 const DEFAULT_STOPS = [
@@ -322,6 +323,7 @@ export function createGradientEditor(initialGradient, options = {}) {
   }
 
   function showCopiedTooltipFeedback(handle) {
+    showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 2000 });
     const info = handleTooltipControllers.get(handle);
     if (!info?.controller) return;
     info.controller.setContent('Copied to clipboard');

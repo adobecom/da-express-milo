@@ -1,7 +1,7 @@
 import { createTag } from '../../../scripts/utils.js';
 import BlockMediator from '../../../scripts/block-mediator.min.js';
 
-export function createBaseRenderer(options) {
+function createBaseRenderer(options) {
   const { data = [], config = {}, stateKey = 'color-explore' } = options;
 
   let currentData = data;

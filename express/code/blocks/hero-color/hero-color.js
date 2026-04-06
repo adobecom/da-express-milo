@@ -75,34 +75,19 @@ function decorateColors(block) {
   return { secondaryColor };
 }
 
-function getContentContainerHeight() {
-  const contentContainer = document.querySelector('.svg-container');
-
-  return contentContainer?.clientHeight;
-}
+const SVG_HEIGHT_DESKTOP = '800px';
+const SVG_HEIGHT_MOBILE = '200px';
 
 function resizeSvgOnLoad() {
-  const interval = setInterval(() => {
-    if (document.readyState === 'complete') {
-      const height = getContentContainerHeight();
-      if (height) {
-        const svg = document.querySelector('.color-svg-img');
-        svg.classList.remove('hidden-svg');
-        svg.style.height = `${height}px`;
-        clearInterval(interval);
-      }
-    }
-  }, 50);
+  const mediaQuery = window.matchMedia('(min-width: 900px)');
+  const svg = document.querySelector('.color-svg-img');
+  svg.classList.remove('hidden-svg');
+  svg.style.height = mediaQuery.matches ? SVG_HEIGHT_DESKTOP : SVG_HEIGHT_MOBILE;
 }
 
 export function resizeSvg(event) {
-  const height = getContentContainerHeight();
   const svg = document.querySelector('.color-svg-img');
-  if (event.matches) {
-    svg.style.height = `${height}px`;
-  } else {
-    svg.style.height = '200px';
-  }
+  svg.style.height = event.matches ? SVG_HEIGHT_DESKTOP : SVG_HEIGHT_MOBILE;
 }
 
 function resizeSvgOnMediaQueryChange() {
