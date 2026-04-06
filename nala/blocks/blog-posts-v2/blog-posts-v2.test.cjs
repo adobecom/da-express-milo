@@ -43,7 +43,30 @@ test.describe('BlogPostsV2Block Test Suite', () => {
 
       for (const t of sem.texts) {
         const locator = block.block.locator(t.selector).nth(t.nth || 0);
-        await expect(locator).toContainText(t.text);
+        if (t.text) {
+          await expect(locator).toContainText(t.text);
+        } else {
+          const text = (await locator.innerText()).trim();
+          expect(text.length, `Expected non-empty content for ${t.selector}[${t.nth}]`).toBeGreaterThan(0);
+        }
+      }
+
+      // Verify dates are in descending order
+      const dateLocators = block.block.locator('p.blog-card-date');
+      const dateCount = await dateLocators.count();
+      if (dateCount > 1) {
+        const dates = [];
+        for (let i = 0; i < dateCount; i += 1) {
+          const dateText = (await dateLocators.nth(i).innerText()).trim();
+          const [month, day, year] = dateText.split('/');
+          dates.push(new Date(Number(year), Number(month) - 1, Number(day)));
+        }
+        for (let i = 0; i < dates.length - 1; i += 1) {
+          expect(
+            dates[i].getTime(),
+            `Date at card ${i} (${dates[i].toDateString()}) should be >= date at card ${i + 1} (${dates[i + 1].toDateString()})`,
+          ).toBeGreaterThanOrEqual(dates[i + 1].getTime());
+        }
       }
 
       for (const m of sem.media) {
@@ -163,6 +186,7 @@ test.describe('BlogPostsV2Block Test Suite', () => {
       }
 
       await page.waitForLoadState('domcontentloaded');
+      await page.waitForLoadState('load');
       await expect(page).toHaveURL(testUrl);
     });
 
@@ -178,7 +202,9 @@ test.describe('BlogPostsV2Block Test Suite', () => {
 
       // Verify first card has expected structure
       await expect(block.blogCard.first()).toBeVisible();
-      await expect(block.blogCardImage.first()).toBeVisible();
+      // Scroll into view to trigger lazy-loaded images before asserting visibility
+      await block.blogCardImage.first().scrollIntoViewIfNeeded();
+      await expect(block.blogCardImage.first()).toBeVisible({ timeout: 10000 });
       await expect(block.blogCardTitle.first()).toBeVisible();
       await expect(block.blogCardTeaser.first()).toBeVisible();
       await expect(block.blogCardDate.first()).toBeVisible();
@@ -196,9 +222,10 @@ test.describe('BlogPostsV2Block Test Suite', () => {
       const imageCount = await block.blogCardImage.count();
       expect(imageCount).toBeGreaterThan(0);
 
-      // Verify first card image has an img tag
+      // Verify first card image has an img tag (scroll to trigger lazy loading)
       const img = block.blogCardImage.first().locator('img');
-      await expect(img).toBeVisible();
+      await img.scrollIntoViewIfNeeded();
+      await expect(img).toBeVisible({ timeout: 10000 });
     });
 
     await test.step('step-5: Verify blog tags on cards', async () => {

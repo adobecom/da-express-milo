@@ -39,8 +39,8 @@ export async function getCountry(ignoreCookie = false) {
       sessionStorage.setItem('visitorCountry', normalized);
       return normalized;
     }
-  } catch (e) {
-    window.lana.log('could not fet geo2 data from geo2 service', e);
+  } catch (error) {
+    window.lana?.log(`Could not fetch geo2 data from geo2 service: ${error}`, { tags: 'location-utils', severity: 'error' });
   }
 
   const configCountry = getConfig().locale.region;

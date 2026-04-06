@@ -18,7 +18,7 @@ export const [setLibs, getLibs] = (() => {
     (prodLibs, location) => {
       libs = (() => {
         const { hostname, search } = location || window.location;
-        if (!['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
+        if (!['.aem.', '.hlx.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
         const branch = new URLSearchParams(search).get('milolibs') || 'main';
         if (branch === 'local') return 'http://localhost:6456/libs';
         return branch.includes('--') ? `https://${branch}.aem.live/libs` : `https://${branch}--milo--adobecom.aem.live/libs`;
@@ -124,7 +124,9 @@ function createSVGWrapper(icon, sheetSize, alt, altSrc) {
   svgWrapper.setAttribute('aria-hidden', 'true');
   svgWrapper.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/1999/xlink');
   if (alt) {
-    svgWrapper.appendChild(createTag('title', { innerText: alt }));
+    const titleEl = createTag('title', {});
+    titleEl.textContent = alt;
+    svgWrapper.appendChild(titleEl);
   }
   const u = document.createElementNS('http://www.w3.org/2000/svg', 'use');
   if (altSrc) {
@@ -359,8 +361,8 @@ export async function decorateButtonsDeprecated(el, size) {
           }
         }
       }
-    } catch (e) {
-      window.lana?.log(`Ignoring button due to error: ${e}`);
+    } catch (error) {
+      window.lana?.log(`Ignoring button due to error: ${error?.message || error?.detail || error}`, { tags: 'utils', severity: 'error' });
     }
   });
 }
@@ -471,8 +473,8 @@ export function preDecorateSections(area) {
       let linkToTargetURL = null;
       try {
         linkToTargetURL = new URL(linkToTarget);
-      } catch (err) {
-        window.lana?.log(err);
+      } catch (error) {
+        window.lana?.log(`${error?.message || error?.detail || error}`, { tags: 'utils', severity: 'error' });
       }
       const sameUrlCTAs = Array.from(area.querySelectorAll('a:any-link'))
         .filter((a) => {
@@ -486,8 +488,8 @@ export function preDecorateSections(area) {
 
             return (sameText || (samePathname && sameHash))
               && isNotInFloatingCta && notFloatingCtaIgnore;
-          } catch (err) {
-            window.lana?.log(err);
+          } catch (error) {
+            window.lana?.log(`${error?.message || error?.detail || error}`, { tags: 'utils', severity: 'error' });
             return false;
           }
         });
@@ -764,7 +766,7 @@ export async function formatDynamicCartLink(a) {
     const newTrialHref = buildUrl(url, country, language, getConfig, offerId);
     a.href = newTrialHref;
   } catch (error) {
-    window.lana.log(`Failed to fetch prices for page plan: ${error}`);
+    window.lana?.log(`Failed to fetch prices for page plan: ${error}`, { tags: 'utils', severity: 'error' });
   }
   a.style.visibility = 'visible';
   return a;
@@ -832,7 +834,7 @@ export async function convertToInlineSVG(img) {
     const svgElement = svgDoc.querySelector('svg');
 
     if (!svgElement) {
-      window.lana?.log(`No SVG element found in file ${img.src}`);
+      window.lana?.log(`No SVG element found in file ${img.src}`, { tags: 'utils, convertToInlineSVG', severity: 'error' });
       return img;
     }
 
@@ -859,7 +861,7 @@ export async function convertToInlineSVG(img) {
 
     return svgElement;
   } catch (error) {
-    window.lana?.log(`Error converting SVG: ${error}`);
+    window.lana?.log(`Error converting SVG: ${error?.message || error?.detail || error}`, { tags: 'utils, convertToInlineSVG', severity: 'error' });
     return img;
   }
 }

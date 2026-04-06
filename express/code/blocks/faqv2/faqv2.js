@@ -64,7 +64,8 @@ function buildTableLayout(block) {
     return;
   }
 
-  collapsibleRows.forEach(({ header, subHeader }, index) => {
+  const filteredRows = collapsibleRows.filter((row) => row.header || row.subHeader);
+  filteredRows.forEach(({ header, subHeader }, index) => {
     const rowWrapper = createTag('div', { class: 'faqv2-wrapper' });
     container.appendChild(rowWrapper);
 
@@ -311,7 +312,8 @@ async function buildOriginalLayout(block) {
   const visibleCount = 3;
   let isExpanded = false;
 
-  collapsibleRows.forEach((row, index) => {
+  const filteredRows = collapsibleRows.filter((row) => row.header || row.subHeader);
+  filteredRows.forEach((row, index) => {
     const { header, subHeader } = row;
 
     const accordion = createTag('div', { class: 'faqv2-accordion' });
@@ -334,7 +336,7 @@ async function buildOriginalLayout(block) {
     }
   });
 
-  const hiddenCount = collapsibleRows.length - visibleCount;
+  const hiddenCount = filteredRows.length - visibleCount;
   const toggleButton = createTag('a', {
     class: 'faqv2-toggle-btn button',
     'aria-expanded': false,
@@ -344,7 +346,7 @@ async function buildOriginalLayout(block) {
   });
 
   toggleButton.textContent = viewMoreText;
-  if (collapsibleRows.length > visibleCount) {
+  if (filteredRows.length > visibleCount) {
     block.append(toggleButton);
   }
 
@@ -380,7 +382,7 @@ export default async function decorate(block) {
   if (isExpandableVariant) {
     buildTableLayout(block);
   } else {
-    buildOriginalLayout(block);
+    await buildOriginalLayout(block);
   }
 
   const hideSchemaPageLevel = getMetadata('show-faq-schema') === 'no';
@@ -434,9 +436,8 @@ export default async function decorate(block) {
                 mainEntity: [...current, ...entities],
               });
             }
-          } catch (e2) {
-            // eslint-disable-next-line no-unused-expressions
-            window.lana?.log(`faqv2 schema merge error: ${e2?.message || e2}`);
+          } catch (error) {
+            window.lana?.log(`faqv2 schema merge error: ${error?.message || error}`, { tags: 'faqv2', severity: 'error' });
           }
         } else {
           const script = document.createElement('script');
@@ -450,9 +451,8 @@ export default async function decorate(block) {
           document.head.appendChild(script);
         }
       }
-    } catch (e) {
-      // eslint-disable-next-line no-unused-expressions
-      window.lana?.log(`faqv2 schema error: ${e?.message || e}`);
+    } catch (error) {
+      window.lana?.log(`faqv2 schema error: ${error?.message || error}`, { tags: 'faqv2', severity: 'error' });
     }
   }
 }

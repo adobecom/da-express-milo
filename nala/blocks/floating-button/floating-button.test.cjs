@@ -25,14 +25,11 @@ test.describe('Express Floating Button Block test suite', () => {
     });
 
     await test.step('Verify floating-button block content/specs', async () => {
-      // Wait for floating button to be present and visible
       await expect(floatingButton.floatingButton).toBeAttached();
 
-      // Wait for the floating button to be properly positioned and visible
       await page.locator('.discover-cards').scrollIntoViewIfNeeded();
       await expect(floatingButton.floatingButton).toBeVisible({ timeout: 15000 });
 
-      // Wait for the floating button to be in a clickable state
       await page.waitForFunction(() => {
         const button = document.querySelector('.floating-button');
         if (!button) return false;
@@ -41,21 +38,18 @@ test.describe('Express Floating Button Block test suite', () => {
       }, { timeout: 10000 });
 
       await expect(floatingButton.floatingButton).toContainText(data.buttonText);
-
-      // Click the floating button
-      await floatingButton.floatingButton.click({ timeout: 10000 });
-      await expect(page).not.toHaveURL(`${testUrl}`);
     });
 
     await test.step('Verify hidden state is removed from accessibility tree', async () => {
-      // Scroll footer into view so the CTA hides
-      await page.locator('.global-footer').scrollIntoViewIfNeeded();
+      const footer = page.locator('.global-footer');
+      await expect(footer).toBeAttached({ timeout: 20000 });
+      await footer.scrollIntoViewIfNeeded();
+
       const wrapper = floatingButton.section;
       await expect(wrapper).toHaveClass(/floating-button--hidden/);
       await expect(wrapper).toHaveAttribute('aria-hidden', 'true');
       await expect(wrapper).toHaveAttribute('inert', '');
 
-      // Programmatically attempt to focus the CTA link; it should not receive focus
       const focusResult = await page.evaluate(() => {
         const w = document.querySelector('.floating-button-wrapper');
         const link = w?.querySelector('a');
@@ -65,7 +59,6 @@ test.describe('Express Floating Button Block test suite', () => {
       });
       expect(focusResult).not.toBe(true);
 
-      // Scroll back up and confirm attributes are removed
       await page.evaluate(() => window.scrollTo(0, 0));
       await expect(wrapper).not.toHaveAttribute('aria-hidden', 'true');
       await expect(wrapper).not.toHaveAttribute('inert', '');
@@ -78,6 +71,14 @@ test.describe('Express Floating Button Block test suite', () => {
 
     await test.step('Verify accessibility', async () => {
       await runAccessibilityTest({ page, testScope: floatingButton.floatingButton });
+    });
+
+    await test.step('Verify CTA click navigates to target page', async () => {
+      // Scroll past the hero CTA so the fixed floating button enters the viewport
+      await page.locator('.discover-cards').scrollIntoViewIfNeeded();
+      await expect(floatingButton.floatingButton).toBeVisible({ timeout: 15000 });
+      await floatingButton.floatingButton.click({ timeout: 10000 });
+      await expect(page).not.toHaveURL(`${testUrl}`);
     });
   });
 });

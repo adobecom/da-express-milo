@@ -46,5 +46,14 @@ module.exports = {
   plugins: [
     'chai-friendly',
   ],
-  ignorePatterns: ['*.min.js', '*.min.es.js', '*.config.js', '**/templates-as-a-service/library/'],
+  ignorePatterns: [
+    '*.min.js',
+    '*.min.es.js',
+    '*.config.js',
+    '**/templates-as-a-service/library/',
+    'express/code/libs/color-components/**',
+    'express/code/scripts/color-shared/spectrum/**',
+    'express/code/scripts/color-shared/components/**',
+    'express/code/scripts/widgets/**',
+  ],
 };

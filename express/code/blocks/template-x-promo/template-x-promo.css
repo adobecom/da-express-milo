@@ -516,10 +516,15 @@
   outline: none;
 }
 
-/* All carousel types use the same track padding */
+/* All carousel types use the same track padding  */
 
 .ax-template-x-promo.multiple-up .promo-carousel-track {
   padding: 0 15%;
+}
+.ax-template-x-promo.two-up .promo-carousel-track {
+  padding: 0;
+  padding-inline-start: var(--ax-grid-margin);
+  justify-content: start;
 }
 
 .ax-template-x-promo .template.prev-template,
