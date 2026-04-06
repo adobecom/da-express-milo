@@ -250,21 +250,18 @@ export function createColorInput(config) {
     return colorEdit;
   }
 
-  function queueMobileEditorOpen(colorEdit, requestId, shouldAutoFocusInput) {
+  function queueMobileEditorOpen(colorEdit, requestId) {
     document.body.appendChild(colorEdit);
     activeEditor = colorEdit;
     completeOpenRequest(requestId);
 
-    requestAnimationFrame(async () => {
+    requestAnimationFrame(() => {
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
       colorEdit.show();
-      if (shouldAutoFocusInput) {
-        await colorEdit.focusInput();
-      }
     });
   }
 
-  async function openDesktopEditor(colorEdit, requestId, shouldAutoFocusInput) {
+  async function openDesktopEditor(colorEdit, requestId) {
     await loadPicker();
     if (!isCurrentOpenRequest(requestId)) return;
 
@@ -291,9 +288,7 @@ export function createColorInput(config) {
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
       await colorEdit.updateComplete;
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
-      if (shouldAutoFocusInput) {
-        await colorEdit.focusInput();
-      }
+      await colorEdit.show();
       focusTrap = trapFocus(overlay);
 
       addDismissListener('keydown', (e) => {
@@ -316,14 +311,13 @@ export function createColorInput(config) {
       if (!isCurrentOpenRequest(requestId)) return;
 
       const colorEdit = createColorEdit();
-      const shouldAutoFocusInput = shouldAutoFocusColorEditInput();
 
       if (colorEdit.mobile) {
-        queueMobileEditorOpen(colorEdit, requestId, shouldAutoFocusInput);
+        queueMobileEditorOpen(colorEdit, requestId);
         return;
       }
 
-      await openDesktopEditor(colorEdit, requestId, shouldAutoFocusInput);
+      await openDesktopEditor(colorEdit, requestId);
     } catch (error) {
       if (isCurrentOpenRequest(requestId)) {
         pendingOpen = false;

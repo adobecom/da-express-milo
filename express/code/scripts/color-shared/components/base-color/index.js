@@ -754,8 +754,8 @@ class BaseColor extends LitElement {
             min="0"
             max="100"
             .value=${value}
-            label="Brightness/Contrast"
-            valuetext=${`Brightness: ${value}%`}
+            label="Lightness control handle"
+            valuetext=${`Lightness: ${value}%`}
             gradient=${gradient}
             @input=${(e) => this._onHSBChannelSliderInput(e, 'b')}
             @change=${() => this._emitColorChangeEnd()}
@@ -767,7 +767,7 @@ class BaseColor extends LitElement {
           size="s"
           maxlength="3"
           .value=${String(value)}
-          label="Brightness/Contrast"
+          label="Lightness amount value"
           label-visibility="none"
           @keydown=${(e) => this._onChannelKeyDown(e)}
           @input=${(e) => this._onHSBChannelTextInput(e, 'b')}
@@ -811,7 +811,7 @@ class BaseColor extends LitElement {
                 min=${ch.min}
                 max=${ch.max}
                 .value=${ch.value}
-                label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
+                label=${ch.isIcon ? 'Lightness control handle' : ch.ariaLabel}
                 valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
@@ -824,7 +824,7 @@ class BaseColor extends LitElement {
               size="s"
               maxlength=${ch.maxlength}
               .value=${String(ch.value)}
-              label=${ch.isIcon ? 'Brightness/Contrast' : ch.ariaLabel}
+              label=${ch.isIcon ? 'Lightness amount value' : ch.ariaLabel}
               label-visibility="none"
               @keydown=${(e) => this._onChannelKeyDown(e)}
               @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
@@ -925,6 +925,7 @@ class BaseColor extends LitElement {
       <div class="bc-color-control">
         <div class="bc-color-area-wrapper ${this.colorMode !== 'HEX' || this.showBrightnessControl ? 'has-sliders' : ''}">
           <sp-color-area
+            aria-label="Color handle"
             .x=${this._saturation / 100}
             .y=${this._brightness / 100}
             .hue=${this._hue}
@@ -933,6 +934,7 @@ class BaseColor extends LitElement {
             @change=${this._onColorAreaChange}
           ></sp-color-area>
           <sp-color-slider
+            label="Hue control handle"
             gradient="hue"
             color=${currentColor}
             @pointerdown=${this._onPointerDown}
