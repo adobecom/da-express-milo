@@ -407,6 +407,8 @@ async function loadPage() {
   /* region based redirect to homepage */
   import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
     if (country === 'cn') {
+      console.log('--------------------------------')
+      console.log(country)
       fetch('/cn', { method: 'HEAD' }).then((resp) => {
         window.location.href = resp.ok ? '/cn' : '/404';
       });
