@@ -550,7 +550,10 @@ export function createStripContainerRenderer(options) {
     }
     top = Math.max(gap, top);
 
-    let left = anchorRect.left + (anchorRect.width - popRect.width) / 2;
+    let left = anchorRect.left;
+    if (left + popRect.width > window.innerWidth - gap) {
+      left = anchorRect.right - popRect.width;
+    }
     left = Math.max(gap, Math.min(left, window.innerWidth - popRect.width - gap));
 
     popover.style.top = `${top}px`;
