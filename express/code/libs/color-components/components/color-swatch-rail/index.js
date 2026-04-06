@@ -1164,8 +1164,18 @@ export class ColorSwatchRail extends LitElement {
         ${stackedIcons}
       `;
 
+      const swatchClasses = [
+        'swatch-column',
+        effectiveLocked && 'locked',
+        isBase && 'base-color',
+        tintMode && 'swatch-column--tint-mode',
+        isTintSelected && 'swatch-column--tint-selected',
+        f.drag && !effectiveLocked && 'swatch-column--draggable',
+        superLight && 'swatch-column--super-light',
+      ].filter(Boolean).join(' ');
+
       return html`
-        <div class="swatch-column ${effectiveLocked ? 'locked' : ''} ${isBase ? 'base-color' : ''} ${tintMode ? 'swatch-column--tint-mode' : ''} ${isTintSelected ? 'swatch-column--tint-selected' : ''} ${f.drag && !effectiveLocked ? 'swatch-column--draggable' : ''} ${superLight ? 'swatch-column--super-light' : ''}"
+        <div class="${swatchClasses}"
           data-contrast="${textColor.toLowerCase() === '#ffffff' ? 'dark' : 'light'}"
           style="background-color: ${swatch.hex}; --swatch-base-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: var(--swatch-text-shadow-override, ${shadow}); --swatch-icon-filter: ${textColor.toLowerCase() === '#ffffff' ? 'brightness(0) invert(1)' : 'brightness(0)'}"
           data-swatch-index="${index}"
