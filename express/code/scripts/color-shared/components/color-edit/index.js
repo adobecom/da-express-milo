@@ -204,11 +204,14 @@ class ColorEdit extends LitElement {
     this._previouslyFocused = document.activeElement;
     this.open = true;
     if (this.mobile) disableBackgroundScroll();
-    this.updateComplete.then(() => {
-      const sheet = this.shadowRoot.querySelector('.ce-sheet');
-      const focusable = sheet?.querySelector('input, button, [tabindex]:not([tabindex="-1"]), sp-button');
-      if (focusable) focusable.focus();
-      if (sheet) this._focusTrap = trapFocus(sheet);
+    return this.updateComplete.then(() => {
+      const container = this.shadowRoot.querySelector('.ce-sheet') || this.shadowRoot.querySelector('.color-edit-panel');
+      if (!container) return;
+      container.focus();
+      this._focusTrap = trapFocus(container);
+      requestAnimationFrame(() => {
+        if (this.open) container.focus();
+      });
     });
   }
 
@@ -361,20 +364,26 @@ class ColorEdit extends LitElement {
         <span class="ce-palette-label">Palette colors</span>
         <sp-theme system="spectrum-two" color="light" scale="medium">
           <sp-swatch-group
+            role="listbox"
+            aria-label="Color palette colors"
             size="s"
             cornerRadius="partial"
+            @keydown=${this._onSwatchGroupKeyDown}
           >
             ${this.palette.map((hex, i) => {
               const validHex = hex.startsWith('#') ? hex : `#${hex}`;
               return html`
                 <sp-swatch
+                  role="option"
                   border="light"
                   cornerRounding="partial"
                   color=${validHex}
                   value=${String(i)}
                   ?selected=${i === this.selectedIndex}
+                  aria-selected=${i === this.selectedIndex ? 'true' : 'false'}
+                  tabindex=${i === this.selectedIndex ? '0' : '-1'}
                   @click=${() => this._onSwatchClick(i)}
-                  aria-label="Color ${validHex}"
+                  aria-label=${validHex}
                 ></sp-swatch>
               `;
             })}
@@ -382,6 +391,40 @@ class ColorEdit extends LitElement {
         </sp-theme>
       </div>
     `;
+  }
+
+  _onSwatchGroupKeyDown(e) {
+    const swatches = [...this.shadowRoot.querySelectorAll('sp-swatch')];
+    if (!swatches.length) return;
+    const idx = swatches.indexOf(e.target);
+    if (idx === -1) return;
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this._onSwatchClick(idx);
+      return;
+    }
+
+    let next = -1;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      next = (idx + 1) % swatches.length;
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      next = (idx - 1 + swatches.length) % swatches.length;
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      next = 0;
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      next = swatches.length - 1;
+    }
+
+    if (next !== -1) {
+      swatches[idx].setAttribute('tabindex', '-1');
+      swatches[next].setAttribute('tabindex', '0');
+      swatches[next].focus();
+    }
   }
 
   _onBaseColorChange(e) {
@@ -459,7 +502,7 @@ class ColorEdit extends LitElement {
           size="m"
           maxlength="7"
           .value=${this._hex}
-          label="HEX color value"
+          label="Color Hex Value"
           label-visibility="none"
           @input=${this._onHexInput}
           @paste=${this._onHexPaste}
@@ -474,7 +517,7 @@ class ColorEdit extends LitElement {
 
     return html`
       ${this._renderDragHandle()}
-      <div class="color-edit-panel">
+      <div class="color-edit-panel" tabindex="-1">
         <div class="ce-title-dropdown-colors">
           ${this._renderHeader()}
           ${this._renderPaletteSwatches()}
@@ -502,6 +545,7 @@ class ColorEdit extends LitElement {
               role="dialog"
               aria-modal="true"
               aria-label="Edit color"
+              tabindex="-1"
               @keydown=${this._onSheetKeyDown}
             >
               ${this._renderPanel()}

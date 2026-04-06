@@ -164,6 +164,12 @@ export const style = css`
         object-fit: contain;
     }
 
+    .ce-mode-trigger:focus-visible {
+        outline: var(--border-width-2) solid var(--color-blue-800);
+        outline-offset: var(--border-width-2);
+        border-radius: 4px;
+    }
+
     .ce-mode-wrap sp-menu {
         position: absolute;
         top: calc(100% - var(--spacing-50));

@@ -626,7 +626,11 @@ export function createStripContainerRenderer(options) {
     if (mobile) {
       document.body.appendChild(editorElement);
       activeColorEditor = { adapter, mobile: true };
-      requestAnimationFrame(() => adapter.show?.());
+      requestAnimationFrame(async () => {
+        await customElements.whenDefined('color-edit');
+        await editorElement.updateComplete;
+        adapter.show?.();
+      });
       return;
     }
 
@@ -640,7 +644,12 @@ export function createStripContainerRenderer(options) {
     document.body.appendChild(popover);
     const anchorRect = resolveAnchorRect(anchorElement, anchorRectFromDetail);
     positionPopover(popover, anchorRect);
-    requestAnimationFrame(() => positionPopover(popover, anchorRect));
+    requestAnimationFrame(async () => {
+      positionPopover(popover, anchorRect);
+      await customElements.whenDefined('color-edit');
+      await editorElement.updateComplete;
+      await adapter.show?.();
+    });
     Promise.resolve(editorElement.updateComplete)
       .then(() => positionPopover(popover, anchorRect))
       .catch(() => {});
