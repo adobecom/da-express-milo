@@ -856,6 +856,7 @@ export class EasyUpload {
 
     if (this.qrCodeContainer) {
       this.qrCodeContainer.innerHTML = '';
+      this.qrCodeContainer.setAttribute('role', 'img');
       this.qrCodeContainer.setAttribute('aria-label', 'QR code — scan with your phone to upload a file');
       this.qrCode.append(this.qrCodeContainer);
     }
