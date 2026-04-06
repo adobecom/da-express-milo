@@ -207,11 +207,8 @@ class ColorEdit extends LitElement {
     return this.updateComplete.then(() => {
       const container = this.shadowRoot.querySelector('.ce-sheet') || this.shadowRoot.querySelector('.color-edit-panel');
       if (!container) return;
-      container.focus();
       this._focusTrap = trapFocus(container);
-      requestAnimationFrame(() => {
-        if (this.open) container.focus();
-      });
+      container.focus();
     });
   }
 
