@@ -408,7 +408,7 @@ async function loadPage() {
   
   const isAdobeOrigin = /^(www\.stage\.|www\.)adobe\.com$/.test(window.location.hostname);
   import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
-    if (country === 'cn' && isAdobeOrigin) { window.location.href = '/cn'; }
+  //  if (country === 'cn' && isAdobeOrigin) { window.location.href = '/cn'; }
   });
 
 
