@@ -22,6 +22,7 @@ function renderHoverContainer(imgElement, row, buttonContainer) {
       shareIcon.addEventListener('click', () => {
         if (templateHref) {
           navigator.clipboard.writeText(templateHref).catch((err) => {
+            // eslint-disable-next-line no-console
             console.error('Failed to copy template-x link: ', err);
           });
         }

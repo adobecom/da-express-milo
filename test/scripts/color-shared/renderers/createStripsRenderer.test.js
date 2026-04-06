@@ -1,3 +1,4 @@
+/* eslint-disable func-names */
 import { expect } from '@esm-bundle/chai';
 import { createStripsRenderer } from '../../../../express/code/scripts/color-shared/renderers/createStripsRenderer.js';
 

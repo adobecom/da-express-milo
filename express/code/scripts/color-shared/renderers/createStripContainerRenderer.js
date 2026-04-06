@@ -553,7 +553,7 @@ export function createStripContainerRenderer(options) {
     }
     top = Math.max(gap, top);
 
-    let left = anchorRect.left;
+    let { left } = anchorRect;
     if (left + popRect.width > window.innerWidth - gap) {
       left = anchorRect.right - popRect.width;
     }

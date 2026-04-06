@@ -543,6 +543,7 @@ export default async function init(el) {
       });
 
       if (displayChanged && parentSection.offsetHeight > 0) {
+        // eslint-disable-next-line no-console
         console.log('Section display changed, equalizing heights');
         equalizeHeights(el);
       }

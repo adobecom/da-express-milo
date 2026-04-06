@@ -47,7 +47,9 @@ export default async function decorate(block) {
     const section = createTag('section', { 'aria-label': 'Color blindness simulator' });
     block.appendChild(section);
 
-    const { getResolvedPalette, getResolvedPaletteName, getBaseColor } = createColorPaletteParamApi();
+    const {
+      getResolvedPalette, getResolvedPaletteName, getBaseColor,
+    } = createColorPaletteParamApi();
     const paletteColors = getResolvedPalette();
     const baseColorHex = getBaseColor();
     const baseColorIndex = baseColorHex

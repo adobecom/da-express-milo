@@ -57,11 +57,12 @@ function doesPass(wcagResult, tab, level) {
  */
 function computeContrastMatrix(colors, dataService) {
   const matrix = new Map();
-  for (let bg = 0; bg < colors.length; bg++) {
-    for (let fg = 0; fg < colors.length; fg++) {
-      if (fg === bg) continue;
-      const key = `${fg}-${bg}`;
-      matrix.set(key, dataService.checkWCAG(colors[fg], colors[bg]));
+  for (let bg = 0; bg < colors.length; bg += 1) {
+    for (let fg = 0; fg < colors.length; fg += 1) {
+      if (fg !== bg) {
+        const key = `${fg}-${bg}`;
+        matrix.set(key, dataService.checkWCAG(colors[fg], colors[bg]));
+      }
     }
   }
   return matrix;
@@ -189,8 +190,10 @@ function buildCell(fgIdx, bgIdx, colors, state, matrix, sizeClass, dataService) 
   if (fgIdx === bgIdx) {
     cell.classList.add('cc-modal-cell--fail');
     cell.setAttribute('tabindex', '0');
-    cell.setAttribute('aria-label',
-      `${fgHex} on ${bgHex}, same color, contrast ratio 1.00 : 1, fails ${state.activeLevel}`);
+    cell.setAttribute(
+      'aria-label',
+      `${fgHex} on ${bgHex}, same color, contrast ratio 1.00 : 1, fails ${state.activeLevel}`,
+    );
     setCellTooltipText(cell, `Low contrast ${formatRatio(1)}`);
     return cell;
   }
@@ -198,11 +201,13 @@ function buildCell(fgIdx, bgIdx, colors, state, matrix, sizeClass, dataService) 
   const key = `${fgIdx}-${bgIdx}`;
   const result = matrix.get(key);
   const pass = doesPass(result, state.activeTab, state.activeLevel);
-  const ratio = result.ratio;
+  const { ratio } = result;
 
   cell.setAttribute('tabindex', '0');
-  cell.setAttribute('aria-label',
-    `${fgHex} on ${bgHex}, contrast ratio ${formatRatio(ratio)}, ${pass ? 'passes' : 'fails'} ${state.activeLevel} for ${state.activeTab.replace('-', ' ')}`);
+  cell.setAttribute(
+    'aria-label',
+    `${fgHex} on ${bgHex}, contrast ratio ${formatRatio(ratio)}, ${pass ? 'passes' : 'fails'} ${state.activeLevel} for ${state.activeTab.replace('-', ' ')}`,
+  );
 
   if (pass) {
     cell.classList.add('cc-modal-cell--pass');
@@ -245,8 +250,10 @@ function updateAllCells(container, colors, state, matrix) {
 
     // Diagonal cells always stay as fail
     if (fgIdx === bgIdx) {
-      cell.setAttribute('aria-label',
-        `${colors[fgIdx]} on ${colors[bgIdx]}, same color, contrast ratio 1.00 : 1, fails ${state.activeLevel}`);
+      cell.setAttribute(
+        'aria-label',
+        `${colors[fgIdx]} on ${colors[bgIdx]}, same color, contrast ratio 1.00 : 1, fails ${state.activeLevel}`,
+      );
       return;
     }
 
@@ -258,8 +265,10 @@ function updateAllCells(container, colors, state, matrix) {
     const fgHex = colors[fgIdx];
     const bgHex = colors[bgIdx];
 
-    cell.setAttribute('aria-label',
-      `${fgHex} on ${bgHex}, contrast ratio ${formatRatio(result.ratio)}, ${pass ? 'passes' : 'fails'} ${state.activeLevel} for ${state.activeTab.replace('-', ' ')}`);
+    cell.setAttribute(
+      'aria-label',
+      `${fgHex} on ${bgHex}, contrast ratio ${formatRatio(result.ratio)}, ${pass ? 'passes' : 'fails'} ${state.activeLevel} for ${state.activeTab.replace('-', ' ')}`,
+    );
 
     setCellTooltipText(cell, pass ? `Pass ${formatRatio(result.ratio)}` : `Low contrast ${formatRatio(result.ratio)}`);
 
@@ -365,7 +374,7 @@ function buildMatrixLayout(colors, state, matrix, dataService) {
   wrapper.appendChild(content);
 
   const tooltipManager = setupMatrixTooltip(grid);
-  wrapper._destroyTooltip = () => tooltipManager.destroy();
+  wrapper.destroyTooltip = () => tooltipManager.destroy();
 
   return wrapper;
 }
@@ -381,7 +390,7 @@ function buildCard(fgIdx, bgIdx, colors, state, matrix, dataService) {
   const key = isDiagonal ? null : `${fgIdx}-${bgIdx}`;
   const result = isDiagonal ? { ratio: 1 } : matrix.get(key);
   const pass = isDiagonal ? false : doesPass(result, state.activeTab, state.activeLevel);
-  const ratio = result.ratio;
+  const { ratio } = result;
 
   const card = createTag('div', {
     class: 'cc-modal-card',
@@ -448,7 +457,7 @@ function buildCardGrid(colors, state, matrix, dataService) {
   });
 
   const bgIdx = state.selectedBgIndex;
-  for (let fgIdx = 0; fgIdx < colors.length; fgIdx++) {
+  for (let fgIdx = 0; fgIdx < colors.length; fgIdx += 1) {
     grid.appendChild(buildCard(fgIdx, bgIdx, colors, state, matrix, dataService));
   }
   return grid;
@@ -474,7 +483,7 @@ function buildBackgroundSelector(colors, state, onSelect) {
       },
     });
     swatchesContainer.appendChild(swatchGroup.element);
-    swatchesContainer._swatchGroup = swatchGroup;
+    swatchesContainer.swatchGroup = swatchGroup;
   })();
 
   return container;
@@ -482,7 +491,7 @@ function buildBackgroundSelector(colors, state, onSelect) {
 
 function updateBgSwatches(container, selectedIdx) {
   const swatchesContainer = container.querySelector('.cc-modal-bg-swatches');
-  const swatchGroup = swatchesContainer?._swatchGroup;
+  const swatchGroup = swatchesContainer?.swatchGroup;
   if (swatchGroup) {
     swatchGroup.setSelected([String(selectedIdx)]);
   }
@@ -577,7 +586,8 @@ async function buildHeader(colors, state, onTabChange, onLevelChange) {
     },
   });
 
-  // Controls row: tabs left, level picker right (desktop); level picker floats above tabs (mobile/tablet via CSS order)
+  // Controls row: tabs left, level picker right (desktop);
+  // level picker floats above tabs (mobile/tablet via CSS order)
   const controls = createTag('div', { class: 'cc-modal-header-controls' });
   const tabBar = createTag('div', { class: 'cc-modal-tab-bar' });
   tabBar.appendChild(tabs.element);
@@ -586,6 +596,19 @@ async function buildHeader(colors, state, onTabChange, onLevelChange) {
   header.appendChild(controls);
 
   return { element: header, tabs, levelPicker };
+}
+
+function countPassing(colors, state, matrix) {
+  let count = 0;
+  for (let bg = 0; bg < colors.length; bg += 1) {
+    for (let fg = 0; fg < colors.length; fg += 1) {
+      if (fg !== bg) {
+        const result = matrix.get(`${fg}-${bg}`);
+        if (result && doesPass(result, state.activeTab, state.activeLevel)) count += 1;
+      }
+    }
+  }
+  return count;
 }
 
 // ── Main Factory ──────────────────────────────────────────────────
@@ -598,7 +621,7 @@ export function createContrastCheckerModalContent(palette, options = {}) {
   }
 
   // Create or reuse data service
-  let dataService = options.dataService;
+  let { dataService } = options;
   let ownDataService = false;
 
   const state = {
@@ -636,6 +659,34 @@ export function createContrastCheckerModalContent(palette, options = {}) {
 
     element.dataset.tab = state.activeTab;
 
+    // Content area
+    const contentArea = createTag('div', { class: 'cc-modal-content-area' });
+
+    function renderDesktop() {
+      matrixLayout?.destroyTooltip?.();
+      contentArea.innerHTML = '';
+      cardLayout = null;
+      matrixLayout = buildMatrixLayout(colors, state, contrastMatrix, dataService);
+      contentArea.appendChild(matrixLayout);
+    }
+
+    function renderCards() {
+      matrixLayout?.destroyTooltip?.();
+      contentArea.innerHTML = '';
+      matrixLayout = null;
+      cardLayout = buildCardLayout(colors, state, contrastMatrix, dataService);
+      contentArea.appendChild(cardLayout);
+    }
+
+    function rerenderCardLayout() {
+      if (!cardLayout) return;
+      const parent = cardLayout.parentNode;
+      if (!parent) return;
+      const newLayout = buildCardLayout(colors, state, contrastMatrix, dataService);
+      parent.replaceChild(newLayout, cardLayout);
+      cardLayout = newLayout;
+    }
+
     const onTabChange = (tab) => {
       const tabLabels = { 'large-text': 'large text', 'small-text': 'small text', 'icons-ui': 'icons and UI' };
       element.dataset.tab = tab;
@@ -654,35 +705,7 @@ export function createContrastCheckerModalContent(palette, options = {}) {
 
     headerRef = await buildHeader(colors, state, onTabChange, onLevelChange);
     element.appendChild(headerRef.element);
-
-    // Content area
-    const contentArea = createTag('div', { class: 'cc-modal-content-area' });
     element.appendChild(contentArea);
-
-    function renderDesktop() {
-      matrixLayout?._destroyTooltip?.();
-      contentArea.innerHTML = '';
-      cardLayout = null;
-      matrixLayout = buildMatrixLayout(colors, state, contrastMatrix, dataService);
-      contentArea.appendChild(matrixLayout);
-    }
-
-    function renderCards() {
-      matrixLayout?._destroyTooltip?.();
-      contentArea.innerHTML = '';
-      matrixLayout = null;
-      cardLayout = buildCardLayout(colors, state, contrastMatrix, dataService);
-      contentArea.appendChild(cardLayout);
-    }
-
-    function rerenderCardLayout() {
-      if (!cardLayout) return;
-      const parent = cardLayout.parentNode;
-      if (!parent) return;
-      const newLayout = buildCardLayout(colors, state, contrastMatrix, dataService);
-      parent.replaceChild(newLayout, cardLayout);
-      cardLayout = newLayout;
-    }
 
     // Responsive layout switching
     desktopQuery = window.matchMedia('(min-width: 1200px)');
@@ -711,7 +734,7 @@ export function createContrastCheckerModalContent(palette, options = {}) {
     headerRef?.tabs?.destroy?.();
     headerRef?.levelPicker?.destroy?.();
     if (ownDataService) dataService?.clearCache?.();
-    matrixLayout?._destroyTooltip?.();
+    matrixLayout?.destroyTooltip?.();
     element.innerHTML = '';
     matrixLayout = null;
     cardLayout = null;
@@ -720,16 +743,4 @@ export function createContrastCheckerModalContent(palette, options = {}) {
   }
 
   return { element, destroy };
-}
-
-function countPassing(colors, state, matrix) {
-  let count = 0;
-  for (let bg = 0; bg < colors.length; bg++) {
-    for (let fg = 0; fg < colors.length; fg++) {
-      if (fg === bg) continue;
-      const result = matrix.get(`${fg}-${bg}`);
-      if (result && doesPass(result, state.activeTab, state.activeLevel)) count++;
-    }
-  }
-  return count;
 }
