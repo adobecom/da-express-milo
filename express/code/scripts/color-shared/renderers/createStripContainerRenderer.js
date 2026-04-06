@@ -566,6 +566,7 @@ export function createStripContainerRenderer(options) {
       outsideHandler,
       escapeHandler,
       scrollHandler,
+      railElement: activeRailElement,
     } = activeColorEditor;
     if (outsideHandler) document.removeEventListener('click', outsideHandler, true);
     if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
@@ -579,6 +580,7 @@ export function createStripContainerRenderer(options) {
     }
     adapter.destroy?.();
     popover?.remove();
+    activeRailElement?.setActiveEditIndex?.(null);
     activeColorEditor = null;
   }
 
@@ -622,10 +624,12 @@ export function createStripContainerRenderer(options) {
       },
     });
 
+    railElement.setActiveEditIndex?.(selectedIndex);
+
     const editorElement = adapter.getElement?.() || adapter.element;
     if (mobile) {
       document.body.appendChild(editorElement);
-      activeColorEditor = { adapter, mobile: true };
+      activeColorEditor = { adapter, mobile: true, railElement };
       requestAnimationFrame(() => adapter.show?.());
       return;
     }
@@ -669,6 +673,7 @@ export function createStripContainerRenderer(options) {
       outsideHandler,
       escapeHandler,
       scrollHandler,
+      railElement,
     };
   }
 

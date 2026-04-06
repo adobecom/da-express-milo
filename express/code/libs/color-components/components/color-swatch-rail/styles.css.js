@@ -897,13 +897,15 @@ export const style = css`
   .swatch-column[data-contrast="light"] button.hex-code:hover {
     background-color: rgba(0, 0, 0, 0.12);
   }
-  .swatch-column[data-contrast="light"] button.hex-code:active {
+  .swatch-column[data-contrast="light"] button.hex-code.hex-code--editor-open {
     border-radius: 5px;
     border: 1px solid var(--color-gray-950);
+    background: transparent;
   }
-  .swatch-column[data-contrast="dark"] button.hex-code:active {
+  .swatch-column[data-contrast="dark"] button.hex-code.hex-code--editor-open {
     border-radius: 5px;
     border: 1px solid var(--color-gray-400-variant);
+    background: transparent;
   }
   button.hex-code:focus-visible {
     outline: 2px solid var(--color-blue-800);
