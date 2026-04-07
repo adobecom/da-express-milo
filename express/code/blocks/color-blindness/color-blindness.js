@@ -73,7 +73,6 @@ export default async function decorate(block) {
       { id: 'redo', label: 'Redo' },
     ];
 
-    const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
     layoutInstance = await createColorToolLayout(section, {
       palette: initialPalette,
       toolbar: {
