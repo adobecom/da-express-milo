@@ -298,6 +298,46 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
   };
 }
 
+export function createColorChannelSliderAdapter(options = {}, callbacks = {}) {
+  import('../components/color-channel-slider/index.js');
+
+  const element = document.createElement('color-channel-slider');
+  const {
+    value = 0,
+    min = 0,
+    max = 100,
+    label = '',
+    valuetext = '',
+    gradient = '',
+    disabled = false,
+  } = options;
+
+  element.value = value;
+  element.min = min;
+  element.max = max;
+  element.label = label;
+  element.valuetext = valuetext;
+  element.gradient = gradient;
+  element.disabled = disabled;
+
+  element.addEventListener('input', (e) => {
+    callbacks.onInput?.(e.detail);
+  });
+  element.addEventListener('change', (e) => {
+    callbacks.onChange?.(e.detail);
+  });
+
+  return {
+    element,
+    setValue: (v) => { element.value = v; },
+    setGradient: (g) => { element.gradient = g; },
+    setValuetext: (v) => { element.valuetext = v; },
+    setDisabled: (d) => { element.disabled = d; },
+    getElement: () => element,
+    destroy: () => element.remove(),
+  };
+}
+
 export function createColorConflictsAdapter(options = {}) {
   import('../components/color-conflicts/index.js');
 
