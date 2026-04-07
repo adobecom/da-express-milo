@@ -1,5 +1,5 @@
 /* eslint-disable import/prefer-default-export */
-import { createTag } from '../../utils.js';
+import { createTag, getLibs } from '../../utils.js';
 import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createExpressButton, createExpressTooltip } from '../spectrum/index.js';
 import { createActionMenuState } from './createActionMenuState.js';
@@ -267,6 +267,17 @@ async function createControls(
   return controlContainer;
 }
 
+async function applyNavLinkParamOverrides(navLinks) {
+  const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+  const { env } = getConfig();
+  if (env.name === 'prod') return navLinks;
+  const params = new URLSearchParams(window.location.search);
+  return navLinks.map((link) => {
+    const override = params.get(`${link.id}-link`);
+    return override ? { ...link, href: override } : link;
+  });
+}
+
 export async function createActionMenuComponent(options = {}) {
   const {
     id = 'action-menu',
@@ -323,7 +334,10 @@ export async function createActionMenuComponent(options = {}) {
   const buttonRefs = {};
   const sections = [];
 
-  if (type !== 'controls-only') sections.push(await createNav(navLinks, activeId, getCurrentPaletteFn, getName));
+  if (type !== 'controls-only') {
+    const processedLinks = await applyNavLinkParamOverrides(navLinks);
+    sections.push(await createNav(processedLinks, activeId, getCurrentPaletteFn, getName));
+  }
   if (type !== 'nav-only') {
     sections.push(await createControls(
       controls,
