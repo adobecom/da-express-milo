@@ -1309,7 +1309,7 @@
 
   .cc-preview-image {
     display: block;
-    flex: 1;
+    flex: 0 0 50%;
     min-width: var(--spacing-0);
     position: relative;
   }
