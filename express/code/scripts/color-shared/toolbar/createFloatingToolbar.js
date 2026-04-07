@@ -146,7 +146,7 @@ async function loadToolbarDependencies(providedPalette, deps = {}) {
 
 function clearStickyBehavior(wrapper, reserveContainer, scrollObserver) {
   scrollObserver?.disconnect();
-  wrapper.classList.remove('ax-toolbar-sticky-wrapper', 'ax-toolbar-exiting');
+  wrapper.classList.remove('ax-toolbar-sticky-wrapper', 'ax-toolbar-exiting', 'ax-toolbar-fade-out', 'ax-toolbar-fade-in');
   wrapper.parentElement?.querySelector('.ax-toolbar-scroll-sentinel')?.remove();
 
   if (!reserveContainer) return;
@@ -260,13 +260,15 @@ export async function initFloatingToolbar(container, options = {}) {
   }
 
   function activateSticky(variantOptions) {
-    wrapper.classList.remove('ax-toolbar-exiting');
+    wrapper.classList.remove('ax-toolbar-exiting', 'ax-toolbar-fade-in');
+    wrapper.classList.add('ax-toolbar-fade-out');
 
     setupStickyBehavior(wrapper, {
       reserveContainer: stickyReserveContainer,
       reserveSpace: variantOptions.reserveSpace ?? reserveSpace,
     });
     toolbar.setVariant?.('sticky');
+    wrapper.classList.remove('ax-toolbar-fade-out');
   }
 
   function clearStickyClasses() {
@@ -274,6 +276,8 @@ export async function initFloatingToolbar(container, options = {}) {
     stickyReserveContainer.classList.remove('ax-toolbar-sticky-host');
     stickyReserveContainer.style.removeProperty('--ax-toolbar-h');
     toolbar.setVariant?.(resolvedStandaloneVariant);
+    wrapper.classList.add('ax-toolbar-fade-in');
+    wrapper.addEventListener('animationend', () => wrapper.classList.remove('ax-toolbar-fade-in'), { once: true });
   }
 
   function deactivateSticky() {
