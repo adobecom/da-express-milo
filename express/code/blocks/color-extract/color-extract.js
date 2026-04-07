@@ -439,28 +439,13 @@ function buildEditStage(copyRow, imageRow) {
 
 function createFloatingToolbarMount(controller, variant) {
   const container = createTag('div', { class: 'color-extract-floating-toolbar-mount' });
-  let tb = null;
+  let toolbarHandle = null;
   let mounted = false;
-  let cssLoaded = false;
-  let stickyObserver = null;
-
-  async function loadToolbarCss() {
-    if (cssLoaded) return;
-    cssLoaded = true;
-    try {
-      const { loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`);
-      const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-      await Promise.all([
-        new Promise((resolve) => { loadStyle(`${codeRoot}/scripts/color-shared/color-tokens.css`, resolve); }),
-        new Promise((resolve) => { loadStyle(`${codeRoot}/scripts/color-shared/toolbar/toolbar.css`, resolve); }),
-      ]);
-    } catch { /* best-effort */ }
-  }
 
   function sync() {
-    if (!tb) return;
+    if (!toolbarHandle) return;
     const state = controller.getState();
-    tb.updateSwatches(state.swatches.map((s) => s.hex));
+    toolbarHandle.toolbar?.updateSwatches(state.swatches.map((s) => s.hex));
   }
 
   async function mount() {
@@ -471,9 +456,7 @@ function createFloatingToolbarMount(controller, variant) {
     mounted = true;
 
     try {
-      await loadToolbarCss();
-
-      const mod = await import('../../scripts/color-shared/toolbar/createToolbarComponent.js');
+      const { initFloatingToolbar } = await import('../../scripts/color-shared/toolbar/createFloatingToolbar.js');
       const state = controller.getState();
       const palette = {
         name: state.name || 'Extracted Palette',
@@ -482,43 +465,15 @@ function createFloatingToolbarMount(controller, variant) {
         ...(variant === VARIANTS.GRADIENT ? { angle: 90 } : {}),
       };
 
-      tb = mod.createToolbar({
-        palette,
+      toolbarHandle = await initFloatingToolbar(container, {
         type: variant === VARIANTS.GRADIENT ? 'gradient' : 'palette',
-        variant: 'sticky',
+        variant: 'sticky-on-scroll',
+        standaloneAppearance: 'raised',
+        palette,
         showEdit: false,
         showPaletteName: true,
         editPaletteName: true,
       });
-
-      const wrapper = createTag('div', { class: 'color-floating-toolbar-container' });
-      wrapper.appendChild(tb.element);
-      container.appendChild(wrapper);
-
-      let isStickyActive = false;
-      const setStickyState = (shouldFloat) => {
-        if (shouldFloat === isStickyActive) return;
-        isStickyActive = shouldFloat;
-
-        if (shouldFloat) {
-          wrapper.classList.add('ax-toolbar-sticky-wrapper');
-          return;
-        }
-
-        wrapper.classList.remove('ax-toolbar-sticky-wrapper');
-      };
-
-      if (typeof IntersectionObserver !== 'undefined') {
-        setStickyState(false);
-        stickyObserver = new IntersectionObserver((entries) => {
-          const entry = entries[0];
-          const shouldFloat = Boolean(entry)
-            && !entry.isIntersecting
-            && entry.boundingClientRect.top < 0;
-          setStickyState(shouldFloat);
-        }, { threshold: 0 });
-        stickyObserver.observe(container);
-      }
 
       controller.subscribe(() => sync());
     } catch (err) {
@@ -527,13 +482,7 @@ function createFloatingToolbarMount(controller, variant) {
     }
   }
 
-  function destroy() {
-    stickyObserver?.disconnect();
-    stickyObserver = null;
-    tb?.destroy();
-  }
-
-  return { element: container, mount, destroy };
+  return { element: container, mount };
 }
 
 /* ---------- Landing ---------- */

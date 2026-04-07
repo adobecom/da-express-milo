@@ -76,8 +76,7 @@ export default async function decorate(block) {
     layoutInstance = await createColorToolLayout(section, {
       palette: initialPalette,
       toolbar: {
-        variant: 'standalone',
-        mode: 'sticky-on-scroll',
+        variant: 'sticky-on-scroll',
         showEdit: false,
         showPaletteName: true,
         editPaletteName: false,

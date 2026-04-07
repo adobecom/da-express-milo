@@ -182,29 +182,29 @@ describe('createColorToolLayout', () => {
       expect(layout.slots.sidebar.hidden).to.be.true;
     });
 
-    it('should derive inline footer behavior from toolbar.mode="inline"', async () => {
+    it('should derive inline footer behavior from toolbar.variant="inline"', async () => {
       await createColorToolLayout(container, {
         toolbar: {
-          mode: 'inline',
+          variant: 'inline',
         },
       });
 
       const root = container.querySelector('.ax-color-tool-layout');
-      expect(root.dataset.toolbarMode).to.equal('inline');
+      expect(root.dataset.toolbarVariant).to.equal('inline');
     });
 
-    it('should derive sticky footer behavior from toolbar.mode="sticky"', async () => {
+    it('should derive sticky footer behavior from toolbar.variant="sticky"', async () => {
       await createColorToolLayout(container, {
         toolbar: {
-          mode: 'sticky',
+          variant: 'sticky',
         },
       });
 
       const root = container.querySelector('.ax-color-tool-layout');
-      expect(root.dataset.toolbarMode).to.equal('sticky');
+      expect(root.dataset.toolbarVariant).to.equal('sticky');
     });
 
-    it('should reuse one toolbar instance when toolbar.mode is sticky-on-scroll', async () => {
+    it('should pass sticky-on-scroll variant to floating toolbar', async () => {
       const OriginalIntersectionObserver = window.IntersectionObserver;
       const observers = [];
       window.IntersectionObserver = function MockIntersectionObserver(cb, opts) {
@@ -224,7 +224,7 @@ describe('createColorToolLayout', () => {
         layoutVariant: 'canvas-footer',
         palette: { colors: ['#111111', '#ffffff'], name: 'Contrast Pair' },
         toolbar: {
-          mode: 'sticky-on-scroll',
+          variant: 'sticky-on-scroll',
           deps: toolbarDeps,
         },
       });
@@ -237,41 +237,17 @@ describe('createColorToolLayout', () => {
 
       await layout.ready;
       expect(layout.toolbar).to.exist;
-      expect(layout.stickyToolbar).to.exist;
-      expect(layout.stickyToolbar).to.equal(layout.toolbar);
-      expect(container.querySelector('.ax-color-tool-layout')?.dataset.toolbarMode).to.equal('sticky-on-scroll');
+      expect(container.querySelector('.ax-color-tool-layout')?.dataset.toolbarVariant).to.equal('sticky-on-scroll');
       expect(container.querySelectorAll('.color-floating-toolbar-container')).to.have.length(1);
 
-      const floatingHost = container.querySelector('.ax-toolbar-floating-host');
       const toolbarWrapper = layout.slots.footer.querySelector('.color-floating-toolbar-container');
-
       expect(toolbarWrapper).to.exist;
-      expect(floatingHost.hidden).to.be.true;
 
-      // The sticky observer uses { threshold: 0 }
+      // Sticky-on-scroll is managed by the floating toolbar itself via IntersectionObserver
       const stickyObserver = observers.find((o) => o.opts?.threshold === 0);
       expect(stickyObserver).to.exist;
-      expect(stickyObserver.observe.calledOnce).to.be.true;
-
-      stickyObserver.trigger({
-        isIntersecting: false,
-        boundingClientRect: { top: -1 },
-      });
-      expect(floatingHost.hidden).to.be.false;
-      expect(floatingHost.querySelector('.color-floating-toolbar-container')).to.equal(toolbarWrapper);
-      expect(layout.slots.footer.querySelector('.color-floating-toolbar-container')).to.not.exist;
-      expect(toolbarWrapper.querySelector('.ax-toolbar')?.classList.contains('ax-toolbar-sticky')).to.be.true;
-
-      stickyObserver.trigger({
-        isIntersecting: true,
-        boundingClientRect: { top: 12 },
-      });
-      expect(floatingHost.hidden).to.be.true;
-      expect(layout.slots.footer.querySelector('.color-floating-toolbar-container')).to.equal(toolbarWrapper);
-      expect(toolbarWrapper.querySelector('.ax-toolbar')?.classList.contains('ax-toolbar-sticky')).to.be.false;
 
       layout.destroy();
-      expect(stickyObserver.disconnect.calledOnce).to.be.true;
       window.IntersectionObserver = OriginalIntersectionObserver;
     });
   });

@@ -144,8 +144,9 @@ async function loadToolbarDependencies(providedPalette, deps = {}) {
   return providedPalette;
 }
 
-function clearStickyBehavior(wrapper, reserveContainer, resizeObserver) {
+function clearStickyBehavior(wrapper, reserveContainer, resizeObserver, scrollObserver) {
   resizeObserver?.disconnect();
+  scrollObserver?.disconnect();
   wrapper.classList.remove('ax-toolbar-sticky-wrapper');
 
   if (!reserveContainer) return;
@@ -184,14 +185,25 @@ function setupStickyBehavior(wrapper, options = {}) {
  *
  * @param {HTMLElement} container - DOM element to mount into
  * @param {Object}  [options]
- * @param {string}  [options.type='palette']
- * @param {string}  [options.variant='standalone']
+ * @param {string}  [options.type='palette']        - 'palette' | 'gradient'
+ * @param {string}  [options.variant='standalone']   - Positioning behavior:
+ *   'standalone' — inline, no sticky positioning
+ *   'sticky'     — always fixed to bottom of viewport
+ *   'sticky-on-scroll' — inline until scrolled past, then fixed
+ * @param {string}  [options.standaloneAppearance='standalone'] - Visual style when
+ *   toolbar is in its inline (non-sticky) state:
+ *   'standalone' — default inline look (swatch strip, no band/shadow)
+ *   'raised'     — sticky visuals (swatch band, shadow) without sticky positioning
+ * @param {boolean} [options.reserveSpace=true]
  * @param {string}  [options.ctaText]
  * @param {string}  [options.mobileCTAText]
  * @param {boolean} [options.showEdit=true]
+ * @param {boolean} [options.showPalette=true]
  * @param {boolean} [options.showPaletteName=true]
+ * @param {boolean} [options.editPaletteName=false]
+ * @param {string}  [options.editPaletteLink=null]
  * @param {Object}  [options.palette] - Pre-built palette; skips Kuler fetch when provided
- * @returns {Promise<{ toolbar: Object, libraries: Array, palette: Object, destroy: Function }>}
+ * @returns {Promise<{ toolbar, palette, getLibraryContext, wrapper, mount, setVariant, destroy }>}
  */
 // eslint-disable-next-line import/prefer-default-export
 export async function initFloatingToolbar(container, options = {}) {
@@ -206,9 +218,13 @@ export async function initFloatingToolbar(container, options = {}) {
     showPaletteName = true,
     editPaletteName = false,
     editPaletteLink = null,
+    standaloneAppearance = 'standalone',
     palette: providedPalette = null,
     deps = {},
   } = options;
+
+  // 'raised' gives sticky visuals (band, shadow) without sticky positioning
+  const resolvedStandaloneVariant = standaloneAppearance === 'raised' ? 'sticky' : 'standalone';
 
   const [finalPalette, { toolbarI18n, drawerI18n }] = await Promise.all([
     loadToolbarDependencies(providedPalette, deps),
@@ -237,6 +253,7 @@ export async function initFloatingToolbar(container, options = {}) {
   container.appendChild(wrapper);
 
   let stickyRo = null;
+  let stickyIo = null;
   let stickyReserveContainer = null;
   let currentContainer = container;
 
@@ -246,20 +263,65 @@ export async function initFloatingToolbar(container, options = {}) {
     currentContainer = nextContainer;
   };
 
-  const setVariant = (nextVariant, variantOptions = {}) => {
-    clearStickyBehavior(wrapper, stickyReserveContainer, stickyRo);
-    stickyRo = null;
-    stickyReserveContainer = null;
+  function resolveReserveContainer(variantOptions) {
+    return variantOptions.reserveContainer || currentContainer;
+  }
 
-    toolbar.setVariant?.(nextVariant);
-
-    if (nextVariant !== 'sticky') return;
-
-    stickyReserveContainer = variantOptions.reserveContainer || currentContainer;
+  function activateSticky(variantOptions) {
+    toolbar.setVariant?.('sticky');
     stickyRo = setupStickyBehavior(wrapper, {
       reserveContainer: stickyReserveContainer,
       reserveSpace: variantOptions.reserveSpace ?? reserveSpace,
     });
+  }
+
+  function deactivateSticky() {
+    stickyRo?.disconnect();
+    stickyRo = null;
+    wrapper.classList.remove('ax-toolbar-sticky-wrapper');
+    stickyReserveContainer.classList.remove('ax-toolbar-sticky-host');
+    stickyReserveContainer.style.removeProperty('--ax-toolbar-h');
+    toolbar.setVariant?.(resolvedStandaloneVariant);
+  }
+
+  function observeStickyOnScroll(sentinel, variantOptions) {
+    if (typeof IntersectionObserver === 'undefined') return;
+
+    stickyIo = new IntersectionObserver((entries) => {
+      const entry = entries[0];
+      const shouldStick = Boolean(entry)
+        && !entry.isIntersecting
+        && entry.boundingClientRect.top < 0;
+
+      if (shouldStick) activateSticky(variantOptions);
+      else deactivateSticky();
+    }, { threshold: 0 });
+    stickyIo.observe(sentinel);
+  }
+
+  function resetStickyState() {
+    clearStickyBehavior(wrapper, stickyReserveContainer, stickyRo, stickyIo);
+    stickyRo = null;
+    stickyIo = null;
+    stickyReserveContainer = null;
+  }
+
+  const setVariant = (nextVariant, variantOptions = {}) => {
+    resetStickyState();
+
+    if (nextVariant === 'sticky-on-scroll') {
+      toolbar.setVariant?.(resolvedStandaloneVariant);
+      stickyReserveContainer = resolveReserveContainer(variantOptions);
+      observeStickyOnScroll(stickyReserveContainer, variantOptions);
+      return;
+    }
+
+    toolbar.setVariant?.(nextVariant === 'standalone' ? resolvedStandaloneVariant : nextVariant);
+
+    if (nextVariant === 'sticky') {
+      stickyReserveContainer = resolveReserveContainer(variantOptions);
+      activateSticky(variantOptions);
+    }
   };
 
   setVariant(variant, {
@@ -275,7 +337,7 @@ export async function initFloatingToolbar(container, options = {}) {
     mount,
     setVariant,
     destroy() {
-      clearStickyBehavior(wrapper, stickyReserveContainer, stickyRo);
+      clearStickyBehavior(wrapper, stickyReserveContainer, stickyRo, stickyIo);
       toolbar.destroy();
       wrapper.remove();
     },
