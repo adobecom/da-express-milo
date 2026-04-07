@@ -1,4 +1,5 @@
 import { createTag } from '../../scripts/utils.js';
+import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
@@ -254,6 +255,7 @@ export default async function decorate(block) {
 
     block.classList.add('ax-shell-host');
     block.dataset.blockStatus = 'loaded';
+    trackColorBlockLoad('color-blindness');
   } catch (error) {
     block.dataset.blockStatus = 'error';
     window.lana?.log(`color-blindness block failed: ${error.message}`, {

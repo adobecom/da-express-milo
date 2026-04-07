@@ -1,4 +1,5 @@
 import { createTag, getLibs } from '../../scripts/utils.js';
+import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createExpressTabs } from '../../scripts/color-shared/spectrum/components/express-tabs.js';
 import createColorWheelExpressAdapter from '../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js';
@@ -950,6 +951,7 @@ export default async function decorate(block) {
 
       block.classList.add('ax-shell-host');
       block.dataset.shellState = 'ready';
+      trackColorBlockLoad('color-wheel');
     } catch (error) {
       window.lana?.log(`Color Wheel init error: ${error.message}`, {
         tags: 'color-wheel,init',

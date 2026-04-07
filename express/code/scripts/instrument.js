@@ -328,6 +328,42 @@ function trackColorPageLoad() {
   safelyFireAnalyticsEvent(fireEvent);
 }
 
+export function trackColorBlockLoad(blockType) {
+  const eventName = 'view-color-block';
+  const fireEvent = () => {
+    _satellite.track('event', {
+      xdm: {},
+      data: {
+        eventType: 'web.webinteraction.linkClicks',
+        web: {
+          webInteraction: {
+            name: eventName,
+            linkClicks: { value: 1 },
+            type: 'other',
+          },
+        },
+        _adobe_corpnew: {
+          sdm: {
+            event: {
+              pagename: eventName,
+              url: loc.href,
+            },
+            custom: {
+              ui: {
+                location: pathname,
+              },
+              block: {
+                type: blockType,
+              },
+            },
+          },
+        },
+      },
+    });
+  };
+  safelyFireAnalyticsEvent(fireEvent);
+}
+
 export function textToName(text) {
   const splits = text.toLowerCase().split(' ');
   const camelCase = splits.map((s, i) => (i ? s.charAt(0).toUpperCase() + s.substr(1) : s)).join('');

@@ -1,3 +1,4 @@
+import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import { parseBlockConfig } from './helpers/parseConfig.js';
 import { createColorRenderer } from './factory/createColorRenderer.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
@@ -744,6 +745,7 @@ export default async function decorate(block) {
     }
 
     block.dataset.blockStatus = 'loaded';
+    trackColorBlockLoad('color-explore');
   } catch (error) {
     window.lana?.log(`[ColorExplore] ❌ Error: ${error}`, { tags: 'color-explore', severity: 'error' });
     block.classList.add(CSS_CLASSES.ERROR);
