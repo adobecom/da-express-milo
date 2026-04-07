@@ -1241,10 +1241,6 @@
     flex: 1;
   }
 
-  .cc-slider-container {
-    display: block;
-  }
-
   .cc-preview-frame {
     border-radius: var(--cc-preview-frame-radius-tablet);
     max-width: none;
@@ -1335,6 +1331,10 @@
 
 
 @media (min-width: 888px) {
+  .cc-slider-container {
+    display: block;
+  }
+
   .color-contrast-checker .ax-color-tool-layout {
     grid-template-rows: auto auto 1fr;
   }
