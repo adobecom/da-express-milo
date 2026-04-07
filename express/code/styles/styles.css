@@ -339,8 +339,12 @@
   --Palette-gray-100: #E9E9E9;
   --Palette-gray-200: #E1E1E1;
   --Palette-gray-400: #C6C6C6;
+  --Palette-gray-600: #717171;
   --Palette-gray-700: #505050;
   --Palette-gray-900: #131313;
+  --Palette-gray-1000: #000000;
+
+  --Palette-blue-1000: #274DEA;
 
   /* Alias tokens */
   --Alias-focus-indicator-default: #4b75ff;
@@ -350,6 +354,7 @@
   --Alias-content-typography-Title: var(--Palette-gray-900);
   --Alias-content-typography-Heading: var(--Palette-gray-900);
   --Alias-content-typography-Body: var(--Palette-gray-700);
+  --Alias-content-semantic-accent-key-focus: var(--Palette-blue-1000);
 
   /* Additional radius tokens */
   --Radius-corner-radius-75: 4px;

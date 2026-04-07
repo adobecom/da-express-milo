@@ -46,6 +46,7 @@ export class ColorWheelExpress extends ColorWheel {
     this.conflictPairs = [];
     this.isMarkerUp = true;
     this._dragIndex = -1;
+    this._kbFocusIndex = -1;
   }
 
   firstUpdated() {
@@ -56,6 +57,17 @@ export class ColorWheelExpress extends ColorWheel {
 
     this._resizeObserver = new ResizeObserver(() => this.updateRadius());
     this._resizeObserver.observe(this.container);
+
+    this.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && this._kbFocusIndex < 0) {
+        e.preventDefault();
+        const firstMarker = this.shadowRoot?.querySelector('.wheel-marker-overlay[data-index="0"]');
+        if (firstMarker) {
+          this._kbFocusIndex = 0;
+          firstMarker.focus({ preventScroll: true });
+        }
+      }
+    });
 
     this.generateColorWheel();
   }
@@ -158,6 +170,7 @@ export class ColorWheelExpress extends ColorWheel {
         marker.style.left = `calc(50% + ${x}px)`;
         marker.style.top = `calc(50% + ${y}px)`;
         marker.style.setProperty('--wheel-marker-color', swatch.hex);
+        marker.setAttribute('aria-label', `${swatch.hex}, use arrow keys to move`);
       }
 
       this.drawLines();
@@ -192,15 +205,84 @@ export class ColorWheelExpress extends ColorWheel {
       marker.style.setProperty('--wheel-marker-color', swatch.hex);
       marker.style.zIndex = index === this.baseColorIndex ? 10 : 5;
       marker.dataset.index = index;
+      marker.setAttribute('role', 'button');
+      marker.setAttribute('tabindex', '-1');
+      marker.setAttribute('aria-label', `${swatch.hex}, use arrow keys to move`);
       if (index === this.baseColorIndex && this.harmonyRule !== 'CUSTOM') {
         marker.classList.add('wheel-marker-overlay--base');
       }
       marker.addEventListener('pointerdown', (e) => this.handleMarkerDown(e, index));
+      marker.addEventListener('keydown', (e) => this._handleMarkerKeydown(e, index));
+      marker.addEventListener('focus', () => {
+        this._kbFocusIndex = index;
+        marker.classList.add('wheel-marker-overlay--kb-focused');
+      });
+      marker.addEventListener('blur', (e) => {
+        marker.classList.remove('wheel-marker-overlay--kb-focused');
+        if (!e.relatedTarget || !this.shadowRoot.contains(e.relatedTarget)) {
+          this._kbFocusIndex = -1;
+        }
+      });
 
       markerLayer.appendChild(marker);
     });
 
+    if (this._kbFocusIndex >= 0 && this._kbFocusIndex < this.swatches.length) {
+      const kbIdx = this._kbFocusIndex;
+      requestAnimationFrame(() => {
+        const m = markerLayer.querySelector(`[data-index="${kbIdx}"]`);
+        if (m) m.focus({ preventScroll: true });
+      });
+    }
+
     this.drawLines();
+  }
+
+  _handleMarkerKeydown(e, index) {
+    const step = 3;
+    switch (e.key) {
+      case 'ArrowRight': e.preventDefault(); this._moveMarkerByKey(index, step, 0); break;
+      case 'ArrowLeft': e.preventDefault(); this._moveMarkerByKey(index, -step, 0); break;
+      case 'ArrowUp': e.preventDefault(); this._moveMarkerByKey(index, 0, step); break;
+      case 'ArrowDown': e.preventDefault(); this._moveMarkerByKey(index, 0, -step); break;
+      case 'Tab': {
+        e.preventDefault();
+        const count = this.swatches.length;
+        const next = e.shiftKey ? (index - 1 + count) % count : (index + 1) % count;
+        const nextMarker = this.shadowRoot?.querySelector(`.wheel-marker-overlay[data-index="${next}"]`);
+        if (nextMarker) {
+          this._kbFocusIndex = next;
+          nextMarker.focus({ preventScroll: true });
+        }
+        break;
+      }
+      case 'Escape':
+        e.preventDefault();
+        this._kbFocusIndex = -1;
+        this.focus({ preventScroll: true });
+        break;
+      default: break;
+    }
+  }
+
+  _moveMarkerByKey(index, dh, ds) {
+    const swatch = this.swatches[index];
+    if (!swatch?.hsv || !this.controller) return;
+    const { h, s, v } = swatch.hsv;
+    const newH = ((h + dh) % 360 + 360) % 360;
+    const newS = Math.min(100, Math.max(0, s + ds));
+    const fixedV = v != null ? Math.min(100, Math.max(0, Number(v))) : this.wheelBrightness;
+    const rgb = hsbToRGB(newH / 360, newS / 100, fixedV / 100);
+    const hex = rgbToHex(rgb);
+    this._dragIndex = index;
+    this._dragFixedBrightness = fixedV;
+    this.controller.setSwatchHex(index, hex);
+    requestAnimationFrame(() => {
+      if (this._dragIndex === index) {
+        this._dragIndex = -1;
+        this._dragFixedBrightness = null;
+      }
+    });
   }
 
   updateMarkerPosition(event) {

@@ -1,4 +1,5 @@
 import { createTag } from '../../scripts/utils.js';
+import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
@@ -47,7 +48,9 @@ export default async function decorate(block) {
     const section = createTag('section', { 'aria-label': 'Color blindness simulator' });
     block.appendChild(section);
 
-    const { getResolvedPalette, getResolvedPaletteName, getBaseColor } = createColorPaletteParamApi();
+    const {
+      getResolvedPalette, getResolvedPaletteName, getBaseColor,
+    } = createColorPaletteParamApi();
     const paletteColors = getResolvedPalette();
     const baseColorHex = getBaseColor();
     const baseColorIndex = baseColorHex
@@ -70,14 +73,12 @@ export default async function decorate(block) {
       { id: 'redo', label: 'Redo' },
     ];
 
-    const isDesktop = window.matchMedia('(min-width: 1200px)').matches;
     layoutInstance = await createColorToolLayout(section, {
       palette: initialPalette,
       toolbar: {
         variant: 'standalone',
-        mode: 'inline',
+        mode: 'sticky-on-scroll',
         showEdit: false,
-        showPalette: isDesktop,
         showPaletteName: true,
         editPaletteName: false,
       },
@@ -252,6 +253,7 @@ export default async function decorate(block) {
 
     block.classList.add('ax-shell-host');
     block.dataset.blockStatus = 'loaded';
+    trackColorBlockLoad('color-blindness');
   } catch (error) {
     block.dataset.blockStatus = 'error';
     window.lana?.log(`color-blindness block failed: ${error.message}`, {

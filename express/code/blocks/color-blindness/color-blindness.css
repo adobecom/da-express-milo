@@ -70,12 +70,6 @@
   display: none;
 }
 
-@media (max-width: 599px) {
-  .color-blindness .ax-shell-slot--footer .ax-toolbar-standalone .ax-palette-name {
-    display: flex;
-  }
-}
-
 @media (min-width: 888px) {
   .color-blindness .ax-shell-slot--topbar .action-menu-full .action-menu-controls {
     display: flex;

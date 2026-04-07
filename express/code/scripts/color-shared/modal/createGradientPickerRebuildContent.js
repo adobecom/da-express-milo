@@ -154,10 +154,11 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
     likeTooltip = tooltipController;
   }).catch(() => {});
   likeBtn.addEventListener('click', () => {
+    const previousLiked = liked;
     liked = !liked;
     updateLikeState();
     likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
-    opts.onLikeToggle?.({ id: gradient?.id, liked })?.catch?.((err) => {
+    opts.onLikeToggle?.({ id: gradient?.id, liked: previousLiked })?.catch?.((err) => {
       window.lana?.log(`[GradientPicker] Like toggle error: ${err?.message}`, {
         tags: 'color-modal,like',
         severity: 'warning',

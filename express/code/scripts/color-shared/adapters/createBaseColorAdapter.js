@@ -26,6 +26,10 @@ export default function createBaseColorAdapter(
     callbacks.onLockChange?.(e.detail);
   });
 
+  element.addEventListener('color-change-end', (e) => {
+    callbacks.onColorChangeEnd?.(e.detail);
+  });
+
   return {
     element,
     setColor: (color) => {

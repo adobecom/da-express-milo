@@ -190,7 +190,6 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
   const connectorSvg = options.showConnectors ? createConnectorSVG() : null;
   const loupe = createMobileLoupe();
   let connectorOrder = null;
-  let activeIndex = 0;
   let isDragging = false;
   let keyboardSnapshotPending = true;
 
@@ -209,7 +208,6 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
   }
 
   function setActiveMarker(index) {
-    activeIndex = index;
     markers.forEach((m, i) => {
       const active = i === index;
       m.el.classList.toggle('is-active', active);

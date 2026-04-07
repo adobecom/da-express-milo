@@ -759,9 +759,11 @@ export async function formatDynamicCartLink(a) {
     const pattern = /.*commerce.*adobe\.com.*/gm;
     if (!pattern.test(a.href)) return a;
     a.style.visibility = 'hidden';
+    /* eslint-disable import/no-cycle */
     const [{ fetchPlanOnePlans, buildUrl }, { getConfig }] = await Promise.all([
       import('./utils/pricing.js'), import(`${getLibs()}/utils/utils.js`),
     ]);
+    /* eslint-enable import/no-cycle */
     const { url, country, language, offerId } = await fetchPlanOnePlans(a.href);
     const newTrialHref = buildUrl(url, country, language, getConfig, offerId);
     a.href = newTrialHref;
@@ -797,8 +799,8 @@ export function decorateArea(area = document) {
   }());
 
   if (area.querySelectorAll(`${selector} a[href*="adobesparkpost.app.link"], ${selector} a[href*="adobesparkpost-web.app.link"]`).length) {
-    // eslint-disable-next-line import/no-cycle
     // select links again to refresh reference
+    // eslint-disable-next-line import/no-cycle
     import('./branchlinks.js').then((mod) => mod.default(area.querySelectorAll(`${selector} a[href*="adobesparkpost.app.link"], ${selector} a[href*="adobesparkpost-web.app.link"]`)));
   }
 

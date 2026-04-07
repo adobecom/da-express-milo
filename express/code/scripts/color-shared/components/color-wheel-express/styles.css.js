@@ -105,6 +105,18 @@ export const style = css`
         border-radius: 15px;
     }
 
+    .wheel-marker-overlay--locked,
+    .wheel-marker-overlay--locked:active {
+        cursor: not-allowed;
+    }
+
+    .wheel-marker-overlay:focus,
+    .wheel-marker-overlay--kb-focused {
+        outline: 2px solid var(--Alias-content-semantic-accent-key-focus);
+        outline-offset: 2px;
+        z-index: 20;
+    }
+
     /* Conflict / confusion line overlay canvases */
     .conflict-lines-canvas,
     .confusion-lines-canvas {

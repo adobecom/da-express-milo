@@ -112,6 +112,12 @@ export function createTagField(label, tags, placeholder, {
     'aria-describedby': helpId,
   });
 
+  const helpText = createTag('span', {
+    class: 'ax-tag-field-help',
+    id: helpId,
+    hidden: '',
+  }, helpTextStr || '');
+
   const doSync = () => syncTagFieldState(field, input, tagsContainer, helpText);
 
   (tags ?? []).forEach((t) => {
@@ -125,12 +131,6 @@ export function createTagField(label, tags, placeholder, {
   });
 
   field.append(tagsContainer, input);
-
-  const helpText = createTag('span', {
-    class: 'ax-tag-field-help',
-    id: helpId,
-    hidden: '',
-  }, helpTextStr || '');
 
   field.addEventListener('click', (e) => {
     if (e.target === field || e.target === tagsContainer) {

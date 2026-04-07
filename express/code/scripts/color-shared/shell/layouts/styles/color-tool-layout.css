@@ -82,7 +82,6 @@
   column-gap: var(--ax-layout-column-gap);
   inline-size: var(--ax-layout-inline-size);
   max-inline-size: var(--ax-color-tool-presentation-max-width);
-  contain: layout style;
 }
 
 .ax-color-tool-layout--canvas-footer {
@@ -91,7 +90,6 @@
 }
 
 .ax-shell-slot {
-  contain: layout style;
   position: relative;
   order: var(--mobile-order);
   min-inline-size: 0;
@@ -142,6 +140,14 @@
   position: sticky;
   bottom: var(--ax-sticky-footer-bottom);
   z-index: var(--ax-z-footer);
+}
+
+.ax-color-tool-layout[data-toolbar-mode="sticky-on-scroll"] .ax-toolbar-standalone .ax-swatch-strip {
+  display: none;
+}
+
+.ax-color-tool-layout[data-toolbar-mode="sticky-on-scroll"] .ax-toolbar-standalone .ax-palette-name {
+  display: flex;
 }
 
 .ax-color-tool-layout[data-layout-variant="canvas-footer"] .ax-shell-slot--footer,

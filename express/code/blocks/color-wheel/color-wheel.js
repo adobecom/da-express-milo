@@ -1,14 +1,77 @@
-import { createTag } from '../../scripts/utils.js';
+import { createTag, getLibs } from '../../scripts/utils.js';
+import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createExpressTabs } from '../../scripts/color-shared/spectrum/components/express-tabs.js';
 import createColorWheelExpressAdapter from '../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js';
 import createBaseColorAdapter from '../../scripts/color-shared/adapters/createBaseColorAdapter.js';
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
-import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
+import ColorThemeExpressController, { randomHex } from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
-import { createImageExtractComponent } from './createImageExtractComponent.js';
+import createImageExtractComponent from './createImageExtractComponent.js';
+import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
+import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
+import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 
-const BASE_COLOR_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+async function loadPlaceholders() {
+  const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
+    import(`${getLibs()}/features/placeholders.js`),
+  ]);
+  const values = await replaceKeyArray([
+    'primary-color',
+    'image',
+    'color-wheel',
+    'custom',
+    'analogous',
+    'complementary',
+    'split-complementary',
+    'triad',
+    'square',
+    'compound',
+    'shades',
+    'monochromatic',
+    'color-harmonies',
+    'undo',
+    'redo',
+    'generate-random',
+    'maximize',
+    'create-palette',
+    'contrast-checker',
+    'color-blindness-simulator',
+    'no-image-try-ours',
+    'use-this-image',
+    'extracting-colors',
+  ], getConfig());
+  return {
+    tabPrimaryColor: values[0] || 'Primary color',
+    tabImage: values[1] || 'Image',
+    tabColorWheel: values[2] || 'Color Wheel',
+    harmonyLabels: {
+      CUSTOM: values[3] || 'Custom',
+      ANALOGOUS: values[4] || 'Analogous',
+      COMPLEMENTARY: values[5] || 'Complementary',
+      SPLIT_COMPLEMENTARY: values[6] || 'Split complementary',
+      TRIAD: values[7] || 'Triad',
+      SQUARE: values[8] || 'Square',
+      COMPOUND: values[9] || 'Compound',
+      SHADES: values[10] || 'Shades',
+      MONOCHROMATIC: values[11] || 'Monochromatic',
+    },
+    colorHarmonies: values[12] || 'Color harmonies:',
+    undo: values[13] || 'Undo',
+    redo: values[14] || 'Redo',
+    generateRandom: values[15] || 'Generate random',
+    maximize: values[16] || 'Maximize',
+    createPalette: values[17] || 'Create palette',
+    contrastChecker: values[18] || 'Contrast Checker',
+    colorBlindnessSimulator: values[19] || 'Color Blindness Simulator',
+    noImageTryOurs: values[20] || 'Don\u2019t have an image? Try one of ours:',
+    useThisImage: values[21] || 'Use this image',
+    extractingColors: values[22] || 'Extracting colors...',
+  };
+}
+
+const PRIMARY_COLOR_ICON = `<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
 <mask id="mask0_13766_5780" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
 <g clip-path="url(#clip0_13766_5780)">
 <path fill-rule="evenodd" clip-rule="evenodd" d="M13.361 1.2644L11.4236 3.20072L10.8403 2.61749C10.4063 2.18347 9.70319 2.18347 9.26917 2.61749C8.83515 3.05152 8.83515 3.75465 9.26917 4.18867L9.85267 4.77217L2.28566 12.3386C2.13809 12.4862 2.03501 12.6717 1.98835 12.8746L1.21035 16.2481C1.03674 17.0001 1.25809 17.7748 1.80388 18.3206C2.22706 18.7438 2.78804 18.9717 3.36855 18.9717C3.53674 18.9717 3.70709 18.9532 3.87527 18.9141L7.24984 18.1361C7.45275 18.0895 7.63829 17.9864 7.78586 17.8388L15.3523 10.2718L15.9358 10.8553C16.1528 11.0723 16.4371 11.1808 16.7214 11.1808C17.0057 11.1808 17.29 11.0723 17.507 10.8553C17.941 10.4213 17.941 9.71817 17.507 9.28415L16.9238 8.70093L18.8601 6.76354C19.6081 6.01553 19.987 5.03578 19.9968 4.05302C20.0068 3.04422 19.6279 2.03224 18.8601 1.2644C18.1116 0.515882 17.1321 0.136716 16.1497 0.126905C15.1411 0.116827 14.1294 0.495993 13.361 1.2644ZM11.2231 11.259C11.1843 11.2546 11.1504 11.2362 11.1105 11.2362H6.53072L11.4238 6.34335L13.7811 8.70066L11.2231 11.259Z" fill="#292929"/>
@@ -56,23 +119,40 @@ const HARMONY_ALLOWED_FOR_THREE = new Set([
   'SPLIT_COMPLEMENTARY', 'SHADES',
 ]);
 const HARMONY_CAROUSEL_ACTIVE_CLASS = 'color-wheel-harmony-option--selected';
+const DEFAULT_ACTION_MENU_CONFIG = {
+  id: 'color-wheel-action-menu',
+  activeId: 'palette',
+  navLinks: [
+    { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
+    { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/contrast-checker' },
+    { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/express/colors/color-blindness-simulator' },
+  ],
+  controls: [
+    { id: 'undo', label: 'Undo' },
+    { id: 'redo', label: 'Redo' },
+    { id: 'generate-random', label: 'Generate random' },
+    { id: 'expand', label: 'Maximize' },
+  ],
+};
+const THEME_NAME = 'My Color Theme';
+const HISTORY_EVENT = `${DEFAULT_ACTION_MENU_CONFIG.id}:history-index-changed`;
+const HISTORY_SKIP_SOURCES = new Set(['active-index', 'metadata', 'base-index']);
 let harmonyCarouselCleanup = null;
 let harmonyStateUnsubscribe = null;
 let layoutInstance = null;
 let stripRenderer = null;
 let paletteUnsubscribe = null;
+let swatchRailController = null;
 let imagePanelDestroy = null;
-let baseColorAdapter = null;
+let primaryColorAdapter = null;
+let sidebarNaturalWidth = 0;
+let sidebarTransitionCleanup = null;
+let historyCleanup = null;
 
 function swatchHexListFromState(state) {
   const swatches = state?.swatches || [];
   if (!swatches.length) return ['#FF0000'];
   return swatches.map((s) => s.hex).slice(0, 10);
-}
-
-function palettesEqual(a, b) {
-  if (!a?.length || !b?.length || a.length !== b.length) return false;
-  return a.every((c, i) => String(c).toUpperCase() === String(b[i]).toUpperCase());
 }
 
 function countThemeSwatches(state) {
@@ -87,8 +167,8 @@ function harmonyRulesForSwatchCount(n) {
   return HARMONY_RULES.filter((r) => HARMONY_ALLOWED_FOR_TWO.has(r.value));
 }
 
-async function buildHarmonySelector(controller) {
-  const uid = `cw-h-${Date.now()}-${crypto.getRandomValues(new Uint32Array(1))[0].toString(36)}`;
+async function buildHarmonySelector(controller, strings = {}) {
+  const uid = `cw-h-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
   const headingId = `${uid}-heading`;
   const currentNameId = `${uid}-current`;
   const section = createTag('div', { class: 'color-wheel-harmony-section' });
@@ -97,7 +177,11 @@ async function buildHarmonySelector(controller) {
     class: 'color-wheel-harmony-title-static',
     id: headingId,
   });
-  titleStatic.textContent = 'Color harmonies:';
+  titleStatic.textContent = strings.colorHarmonies || 'Color harmonies:';
+  function getHarmonyLabel(value) {
+    const rule = HARMONY_RULES.find((r) => r.value === value);
+    return strings.harmonyLabels?.[value] || rule?.label || value;
+  }
   const currentName = createTag('span', {
     class: 'color-wheel-harmony-current-name',
     id: currentNameId,
@@ -118,8 +202,7 @@ async function buildHarmonySelector(controller) {
   let mountGeneration = 0;
 
   function setCurrentNameLabel(rule) {
-    const lbl = HARMONY_RULES.find((r) => r.value === rule)?.label || rule;
-    currentName.textContent = lbl;
+    currentName.textContent = getHarmonyLabel(rule);
   }
 
   function updateRovingTabindex(selectedValue) {
@@ -149,12 +232,12 @@ async function buildHarmonySelector(controller) {
     carouselHost.replaceChildren();
     harmonyButtons = [];
 
-    rules.forEach(({ value, label, thumb }) => {
+    rules.forEach(({ value, thumb }) => {
       const btn = createTag('button', {
         type: 'button',
         role: 'radio',
         class: 'color-wheel-harmony-option',
-        'aria-label': `${label} color harmony`,
+        'aria-label': `${getHarmonyLabel(value)} color harmony`,
         'data-harmony-value': value,
         tabindex: '-1',
       });
@@ -207,6 +290,10 @@ async function buildHarmonySelector(controller) {
       return;
     }
 
+    carouselHost.querySelectorAll('.simple-carousel-arrow').forEach((arrow) => {
+      arrow.setAttribute('tabindex', '-1');
+    });
+
     if (carouselApi?.cleanup) {
       harmonyCarouselCleanup = carouselApi.cleanup;
     }
@@ -220,12 +307,31 @@ async function buildHarmonySelector(controller) {
 
     harmonyButtons.forEach((btn) => {
       btn.setAttribute('role', 'radio');
-      const rule = btn.dataset.harmonyValue;
-      const lbl = HARMONY_RULES.find((r) => r.value === rule)?.label || rule;
-      btn.setAttribute('aria-label', `${lbl} color harmony`);
+      btn.setAttribute('aria-label', `${getHarmonyLabel(btn.dataset.harmonyValue)} color harmony`);
     });
 
     updateRovingTabindex(controller.getState().harmonyRule || 'CUSTOM');
+
+    if (window.matchMedia('(min-width: 1200px)').matches) {
+      const tooltips = await Promise.all(
+        harmonyButtons.map((btn, i) => createExpressTooltip({
+          targetEl: btn,
+          content: getHarmonyLabel(rules[i].value),
+          placement: 'top',
+        })),
+      );
+
+      if (gen !== mountGeneration) {
+        tooltips.forEach((t) => t.destroy());
+        return;
+      }
+
+      const prevCleanup = harmonyCarouselCleanup;
+      harmonyCarouselCleanup = () => {
+        prevCleanup?.();
+        tooltips.forEach((t) => t.destroy());
+      };
+    }
   }
 
   const state0 = controller.getState();
@@ -273,7 +379,235 @@ function paletteFromThemeState(state) {
   const colors = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
   return {
     colors: colors.length ? colors : ['#FF0000'],
-    name: state?.name || 'Harmony Theme',
+    name: state?.name || THEME_NAME,
+  };
+}
+
+function buildPrimaryColorContent(controller) {
+  primaryColorAdapter?.destroy?.();
+  primaryColorAdapter = null;
+
+  const state = controller.getState();
+  const baseColor = swatchHexListFromState(state)[0];
+  const adapter = createBaseColorAdapter(
+    baseColor,
+    'HEX',
+    {
+      onColorChange: (detail) => {
+        if (!detail?.hex) return;
+        controller.setBaseColor(detail.hex);
+        controller.setSwatchHex(0, detail.hex);
+      },
+      onColorChangeEnd: () => {
+        // eslint-disable-next-line no-underscore-dangle
+        adapter.element._setLocked?.(true);
+      },
+      onLockChange: (detail) => {
+        const locked = detail?.locked;
+        const current = swatchRailController?.getState?.()?.lockedByIndex || new Set();
+        const next = new Set(current);
+        if (locked) {
+          next.add(0);
+        } else {
+          next.delete(0);
+        }
+        swatchRailController?.setState?.({ lockedByIndex: next });
+      },
+    },
+  );
+  primaryColorAdapter = adapter;
+
+  const wrapper = createTag('div', { class: 'primary-color-content' });
+  wrapper.appendChild(adapter.element);
+  return wrapper;
+}
+
+function buildImageContent(controller, suggestionsRow, strings) {
+  const image = createTag('div', { class: 'image-content' });
+  const panel = createImageExtractComponent({
+    controller,
+    maxColors: 5,
+    suggestionsRowEl: suggestionsRow,
+    strings,
+  });
+  imagePanelDestroy = panel.destroy;
+  image.appendChild(panel.element);
+  return image;
+}
+
+async function buildColorWheelContent(controller, strings) {
+  const colorWheel = createTag('div', { class: 'color-wheel-content' });
+  const baseHex = controller.getState().swatches?.[controller.getState().baseColorIndex]?.hex || '#FF0000';
+  const adapter = createColorWheelExpressAdapter(baseHex, {}, { controller });
+  const harmonySelector = await buildHarmonySelector(controller, strings);
+
+  colorWheel.append(adapter.element, harmonySelector);
+
+  return colorWheel;
+}
+
+async function buildTabs(controller, suggestionsRow, { onSelectionChange, strings = {} } = {}) {
+  const tabsInstance = await createExpressTabs({
+    selected: 'color-wheel',
+    size: 'm',
+    quiet: true,
+    tabs: [
+      { label: strings.tabPrimaryColor || 'Primary color', value: 'primary-color', iconSlotHtml: PRIMARY_COLOR_ICON },
+      { label: strings.tabImage || 'Image', value: 'image', spIcon: 'sp-icon-image' },
+      { label: strings.tabColorWheel || 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
+    ],
+    onSelectionChange,
+  });
+
+  tabsInstance.addPanel('color-wheel', await buildColorWheelContent(controller, strings));
+  tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings));
+  tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller));
+
+  return tabsInstance;
+}
+
+function normalizeSwatchHexes(swatches = []) {
+  return swatches
+    .map((swatch) => swatch?.hex)
+    .filter(Boolean)
+    .map((hex) => (hex.startsWith('#') ? hex.toUpperCase() : `#${hex}`.toUpperCase()));
+}
+
+function createSwatchRailControllerBridge(controller) {
+  let lockedByIndex = new Set();
+  let tintIndex = null;
+  const subscribers = new Set();
+
+  const emit = () => {
+    const snapshot = {
+      ...controller.getState(),
+      lockedByIndex: new Set(lockedByIndex),
+      tintIndex,
+    };
+    subscribers.forEach((callback) => callback(snapshot));
+  };
+
+  const controllerUnsubscribe = controller.subscribe(() => {
+    emit();
+  });
+
+  return {
+    subscribe(callback) {
+      if (typeof callback !== 'function') return () => {};
+      subscribers.add(callback);
+      callback({
+        ...controller.getState(),
+        lockedByIndex: new Set(lockedByIndex),
+        tintIndex,
+      });
+      return () => {
+        subscribers.delete(callback);
+      };
+    },
+    getState() {
+      return {
+        ...controller.getState(),
+        lockedByIndex: new Set(lockedByIndex),
+        tintIndex,
+      };
+    },
+    setState(next = {}) {
+      if (!next || typeof next !== 'object') return;
+
+      if (Object.prototype.hasOwnProperty.call(next, 'lockedByIndex')) {
+        let incoming;
+        if (next.lockedByIndex instanceof Set) {
+          incoming = [...next.lockedByIndex];
+        } else if (Array.isArray(next.lockedByIndex)) {
+          incoming = next.lockedByIndex;
+        } else {
+          incoming = [];
+        }
+        lockedByIndex = new Set(incoming.filter((index) => Number.isInteger(index) && index >= 0));
+      }
+
+      const current = controller.getState();
+
+      if (Array.isArray(next.swatches)) {
+        const nextHexes = normalizeSwatchHexes(next.swatches);
+        if (!nextHexes.length) {
+          emit();
+          return;
+        }
+
+        const requestedBase = Object.prototype.hasOwnProperty.call(next, 'baseColorIndex')
+          ? next.baseColorIndex
+          : current.baseColorIndex;
+        const clampedBase = Number.isInteger(requestedBase)
+          ? Math.min(Math.max(0, requestedBase), nextHexes.length - 1)
+          : 0;
+
+        controller.replaceSwatchesFromHexes(nextHexes, {
+          baseIndex: clampedBase,
+          harmonyRule: current.harmonyRule || 'CUSTOM',
+        });
+
+        if (requestedBase == null) {
+          controller.setBaseColorIndex(null);
+        }
+
+        const requestedActive = Number.isInteger(next.activeSwatchIndex)
+          ? next.activeSwatchIndex
+          : current.activeSwatchIndex;
+        if (Number.isInteger(requestedActive)) {
+          const clampedActive = Math.min(Math.max(0, requestedActive), nextHexes.length - 1);
+          controller.setActiveSwatchIndex(clampedActive);
+        }
+
+        if (Object.prototype.hasOwnProperty.call(next, 'tintIndex')) {
+          tintIndex = Number.isInteger(next.tintIndex) ? next.tintIndex : null;
+        }
+
+        emit();
+        return;
+      }
+
+      if (Object.prototype.hasOwnProperty.call(next, 'baseColorIndex')) {
+        const count = current.swatches?.length || 0;
+        const requestedBase = next.baseColorIndex;
+        if (requestedBase == null) {
+          controller.setBaseColorIndex(null);
+        } else if (Number.isInteger(requestedBase) && count > 0) {
+          controller.setBaseColorIndex(Math.min(Math.max(0, requestedBase), count - 1));
+        }
+      }
+
+      if (Number.isInteger(next.activeSwatchIndex)) {
+        const count = current.swatches?.length || 0;
+        if (count > 0) {
+          controller.setActiveSwatchIndex(Math.min(Math.max(0, next.activeSwatchIndex), count - 1));
+        }
+      }
+
+      if (typeof next.harmonyRule === 'string' && next.harmonyRule !== current.harmonyRule) {
+        controller.setHarmonyRule(next.harmonyRule);
+      }
+
+      if (Object.prototype.hasOwnProperty.call(next, 'tintIndex')) {
+        tintIndex = Number.isInteger(next.tintIndex) ? next.tintIndex : null;
+      }
+
+      emit();
+    },
+    destroy() {
+      controllerUnsubscribe?.();
+      subscribers.clear();
+    },
+  };
+}
+
+function makeTransformPalette(getActiveHarmonyRule, getSwatchRailController, getControllerState) {
+  return (rawHexes) => {
+    if (getActiveHarmonyRule() !== 'CUSTOM') return rawHexes;
+    const { lockedByIndex } = getSwatchRailController().getState();
+    if (!lockedByIndex?.size) return rawHexes;
+    const currentHexes = getControllerState().swatches.map((s) => s.hex);
+    return rawHexes.map((h, i) => (lockedByIndex.has(i) ? currentHexes[i] : h));
   };
 }
 
@@ -284,162 +618,368 @@ function cleanup() {
   harmonyCarouselCleanup = null;
   paletteUnsubscribe?.();
   paletteUnsubscribe = null;
+  swatchRailController?.destroy?.();
+  swatchRailController = null;
   imagePanelDestroy?.();
   imagePanelDestroy = null;
-  baseColorAdapter?.destroy?.();
-  baseColorAdapter = null;
+  primaryColorAdapter?.destroy?.();
+  primaryColorAdapter = null;
   stripRenderer?.destroy?.();
   stripRenderer = null;
   layoutInstance?.destroy();
   layoutInstance = null;
+  sidebarTransitionCleanup?.();
+  sidebarTransitionCleanup = null;
+  sidebarNaturalWidth = 0;
+  historyCleanup?.();
+  historyCleanup = null;
 }
 
 export default async function decorate(block) {
   const layoutRows = [...block.children];
   const suggestionsRow = layoutRows[0] || null;
+  const desktopQuery = window.matchMedia('(min-width: 1200px)');
 
-  block.innerHTML = '';
-  block.className = 'color-wheel';
+  // Preserved across breakpoint re-inits so the user's palette survives resize
+  let currentPalette = null;
 
-  function buildBaseColorContent(controller) {
-    baseColorAdapter?.destroy?.();
-    baseColorAdapter = null;
-
-    const state = controller.getState();
-    const baseColor = swatchHexListFromState(state)[0];
-    const adapter = createBaseColorAdapter(
-      baseColor,
-      'HEX',
-      {
-        onColorChange: (detail) => {
-          if (!detail?.hex) return;
-          controller.setBaseColor(detail.hex);
-          controller.setSwatchHex(0, detail.hex);
-        },
-        onLockChange: () => {
-          // TODO
-        },
-      },
-    );
-    baseColorAdapter = adapter;
-
-    const wrapper = createTag('div', { class: 'base-color-content' });
-    wrapper.appendChild(adapter.element);
-    return wrapper;
-  }
-
-  function buildImageContent(controller) {
-    const image = createTag('div', { class: 'image-content' });
-    const panel = createImageExtractComponent({
-      controller,
-      maxColors: Math.max(1, controller.getState().swatches?.length || 5),
-      suggestionsRowEl: suggestionsRow,
-      suggestionsShowEmptyHint: true,
-      suggestionsEmptyHintText:
-        'No sample images yet. Add a table row to this block: first column "Suggestions", second column with one or more <picture> elements. See express/code/blocks/color-wheel/IMAGE-SUGGESTIONS.md.',
-    });
-    imagePanelDestroy = panel.destroy;
-    image.appendChild(panel.element);
-    return image;
-  }
-
-  async function buildColorWheelContent(controller) {
-    const colorWheel = createTag('div', { class: 'color-wheel-content' });
-
-    const baseHex = controller.getState().swatches?.[controller.getState().baseColorIndex]?.hex || '#FF0000';
-    const adapter = createColorWheelExpressAdapter(baseHex, {}, { controller });
-    const harmonySelector = await buildHarmonySelector(controller);
-
-    colorWheel.append(adapter.element, harmonySelector);
-
-    return colorWheel;
-  }
-
-  async function buildTabs(controller) {
-    const tabsInstance = await createExpressTabs({
-      selected: 'color-wheel',
-      size: 'm',
-      quiet: true,
-      tabs: [
-        { label: 'Base color', value: 'base-color', iconSlotHtml: BASE_COLOR_ICON },
-        { label: 'Image', value: 'image', spIcon: 'sp-icon-image' },
-        { label: 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
-      ],
-    });
-
-    tabsInstance.addPanel('color-wheel', await buildColorWheelContent(controller));
-    tabsInstance.addPanel('image', buildImageContent(controller));
-    tabsInstance.addPanel('base-color', buildBaseColorContent(controller));
-
-    return tabsInstance;
-  }
-
-  try {
-    const controller = new ColorThemeExpressController({
-      swatches: ['#FFFF00', '#FF0000', '#FF7F00', '#00A8FF', '#7F00FF'],
-      harmonyRule: 'CUSTOM',
-      baseColorIndex: 0,
-    });
-
-    layoutInstance = await createColorToolLayout(block, {
-      palette: paletteFromThemeState(controller.getState()),
-    });
-
-    block.classList.add('ax-shell-host');
-
-    // Temporary placeholder content
-    const sidebarPlaceholder = createTag('div', { class: 'text-content-placeholder' }, 'Text content placeholder');
-    layoutInstance.slots.sidebar.appendChild(sidebarPlaceholder);
-    const topbarPlaceholder = createTag('div', { class: 'topbar-placeholder' }, 'Action menu placeholder');
-    layoutInstance.slots.topbar.appendChild(topbarPlaceholder);
-    const footerPlaceholder = createTag('div', { class: 'footer-placeholder' }, 'Toolbar placeholder');
-    layoutInstance.slots.footer.appendChild(footerPlaceholder);
-
-    const tabs = await buildTabs(controller);
-    layoutInstance.slots.sidebar.appendChild(tabs.element);
-
-    const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
-    layoutInstance.slots.canvas.appendChild(stripHost);
-
-    stripRenderer = createStripContainerRenderer({
-      container: stripHost,
-      data: [controller],
-      config: {
-        stripContainerOrientations: ['vertical-responsive'],
-        swatchFeatures: {
-          copy: true,
-          hexCode: true,
-        },
-        swatchVerticalMaxPerRow: 5,
-      },
-    });
-    await stripRenderer.render(stripHost);
-
-    paletteUnsubscribe = controller.subscribe((state) => {
-      layoutInstance?.context?.set('palette', paletteFromThemeState(state));
-      if (!baseColorAdapter?.setPalette) return;
-      const pal = swatchHexListFromState(state);
-      const el = baseColorAdapter.getElement?.();
-      const nextIdx = Math.min(
-        Math.max(0, state.baseColorIndex ?? 0),
-        Math.max(0, pal.length - 1),
-      );
-      if (!palettesEqual(el?.palette, pal)) {
-        baseColorAdapter.setPalette(pal);
-      }
-      if (el && el.selectedIndex !== nextIdx) {
-        baseColorAdapter.setSelectedIndex(nextIdx);
-      }
-    });
-
-    block.dataset.shellState = 'ready';
-  } catch (error) {
-    window.lana?.log(`Color Wheel init error: ${error.message}`, {
-      tags: 'color-wheel,init',
-    });
-    block.dataset.blockStatus = 'error';
+  async function init() {
+    // Save before clearing — adoptHeadline uses document.querySelector and would lose it otherwise
+    const headline = document.querySelector('.color-headline.tools');
     cleanup();
-    block.replaceChildren();
-    block.append(createTag('p', { class: 'color-wheel-error' }, 'Failed to load Color Wheel.'));
+    block.innerHTML = '';
+    block.className = 'color-wheel';
+    const section = createTag('section');
+    block.appendChild(section);
+    if (headline) section.appendChild(headline);
+
+    try {
+      const [strings, { getResolvedPalette, getResolvedPaletteName }] = await Promise.all([
+        loadPlaceholders(),
+        Promise.resolve(createColorPaletteParamApi()),
+      ]);
+      const initialPalette = currentPalette || {
+        name: getResolvedPaletteName() || THEME_NAME,
+        colors: getResolvedPalette(),
+      };
+
+      const controller = new ColorThemeExpressController({
+        swatches: initialPalette.colors,
+        harmonyRule: 'CUSTOM',
+        baseColorIndex: 0,
+      });
+      swatchRailController = createSwatchRailControllerBridge(controller);
+
+      let isGeneratingRandom = false;
+      let activeHarmonyRule = controller.getState().harmonyRule || 'CUSTOM';
+
+      const isDesktop = desktopQuery.matches;
+
+      layoutInstance = await createColorToolLayout(section, {
+        palette: initialPalette,
+        toolbar: {
+          variant: 'standalone',
+          mode: 'sticky-on-scroll',
+          showEdit: !isDesktop,
+          showPalette: true,
+          showPaletteName: true,
+          editPaletteName: true,
+        },
+        actionMenu: {
+          ...DEFAULT_ACTION_MENU_CONFIG,
+          navLinks: [
+            { id: 'palette', label: strings.createPalette, href: '/express/colors/color-palette-generator' },
+            { id: 'contrast', label: strings.contrastChecker, href: '/express/colors/contrast-checker' },
+            { id: 'color-blindness', label: strings.colorBlindnessSimulator, href: '/express/colors/color-blindness-simulator' },
+          ],
+          controls: [
+            { id: 'undo', label: strings.undo },
+            { id: 'redo', label: strings.redo },
+            { id: 'generate-random', label: strings.generateRandom },
+            { id: 'expand', label: strings.maximize },
+          ],
+          type: isDesktop ? 'full' : 'nav-only',
+          getName: () => currentPalette?.name || initialPalette.name,
+          onGenerateRandom: () => {
+            isGeneratingRandom = true;
+            // If no HISTORY_EVENT fires (e.g. all colors locked, palette unchanged),
+            // reset the flag so it doesn't corrupt the next undo/redo
+            queueMicrotask(() => { isGeneratingRandom = false; });
+          },
+          transformPalette: makeTransformPalette(
+            () => activeHarmonyRule,
+            () => swatchRailController,
+            () => controller.getState(),
+          ),
+          onExpand: (expanded) => {
+            const sidebarSlot = block.querySelector('.ax-shell-slot--sidebar');
+            const layout = block.querySelector('.ax-color-tool-layout');
+
+            sidebarTransitionCleanup?.();
+            sidebarTransitionCleanup = null;
+
+            if (!sidebarSlot || !layout) {
+              if (expanded) block.dataset.sidebarCollapsed = '';
+              else delete block.dataset.sidebarCollapsed;
+              return;
+            }
+
+            if (expanded) {
+              const rect = sidebarSlot.getBoundingClientRect();
+              sidebarNaturalWidth = rect.width;
+              sidebarSlot.style.minWidth = `${sidebarNaturalWidth}px`;
+              // Pin height to current pixel value so flex children (sp-theme) don't collapse
+              sidebarSlot.style.height = `${rect.height}px`;
+              block.dataset.sidebarCollapsed = '';
+            } else {
+              sidebarSlot.style.minWidth = `${sidebarNaturalWidth || 300}px`;
+              delete block.dataset.sidebarCollapsed;
+            }
+
+            const onTransitionEnd = (e) => {
+              if (e.propertyName !== 'grid-template-columns') return;
+              sidebarSlot.style.minWidth = '';
+              sidebarSlot.style.height = '';
+              layout.removeEventListener('transitionend', onTransitionEnd);
+              sidebarTransitionCleanup = null;
+            };
+            layout.addEventListener('transitionend', onTransitionEnd);
+            sidebarTransitionCleanup = () => {
+              sidebarSlot.style.minWidth = '';
+              sidebarSlot.style.height = '';
+              layout.removeEventListener('transitionend', onTransitionEnd);
+            };
+          },
+        },
+      });
+
+      adoptHeadline(section, layoutInstance);
+      await layoutInstance.actionMenuReady;
+
+      const actionMenuApi = layoutInstance.actionMenu;
+      let restoringFromHistory = false;
+      let pushingState = false;
+      let historyDebounceTimer = null;
+
+      const pushCurrentPalette = () => {
+        if (restoringFromHistory) return;
+        const hexes = controller.getState().swatches.map((s) => s.hex);
+        pushingState = true;
+        actionMenuApi?.pushState?.(hexes);
+        pushingState = false;
+      };
+
+      // Push initial palette into history
+      actionMenuApi?.pushState?.(initialPalette.colors);
+
+      // Subscribe to controller — push history on user-facing state changes
+      const historyUnsubscribe = controller.subscribe((_, detail) => {
+        if (restoringFromHistory) return;
+        const { source } = detail || {};
+        if (!source || HISTORY_SKIP_SOURCES.has(source)) return;
+        clearTimeout(historyDebounceTimer);
+        historyDebounceTimer = setTimeout(pushCurrentPalette, 300);
+      });
+
+      // Restore palette when undo/redo or generate-random changes the history index.
+      // For non-custom generate-random, setBaseColor re-applies the harmony from the
+      // new random base (palette[0]). For all other cases the palette is applied as-is
+      // because either the harmony was already applied (non-custom undo/redo restores
+      // pre-computed hexes) or we're on custom harmony where locked colors are already
+      // preserved in the history entry by transformPalette.
+      const onHistoryChange = () => {
+        if (pushingState) return;
+        const palette = actionMenuApi?.getCurrentPalette?.();
+        if (!palette?.length) return;
+        restoringFromHistory = true;
+        const isRandom = isGeneratingRandom;
+        isGeneratingRandom = false;
+        if (isRandom && activeHarmonyRule !== 'CUSTOM') {
+          const opts = { baseIndex: 0, harmonyRule: activeHarmonyRule };
+          controller.replaceSwatchesFromHexes(palette, opts);
+          controller.setBaseColor(palette[0]);
+        } else {
+          controller.replaceSwatchesFromHexes(palette, { baseIndex: 0, harmonyRule: 'CUSTOM' });
+        }
+        // Cancel any pending debounce push — a timer set before this history change
+        // would otherwise push the just-restored palette as a new forward entry
+        clearTimeout(historyDebounceTimer);
+        historyDebounceTimer = null;
+        restoringFromHistory = false;
+      };
+      document.addEventListener(HISTORY_EVENT, onHistoryChange);
+
+      historyCleanup = () => {
+        historyUnsubscribe?.();
+        document.removeEventListener(HISTORY_EVENT, onHistoryChange);
+        clearTimeout(historyDebounceTimer);
+      };
+
+      const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
+      layoutInstance.slots.canvas.appendChild(stripHost);
+
+      let activeTab = 'color-wheel';
+
+      const updateBaseColorBadge = () => {
+        const hide = activeTab !== 'color-wheel' || activeHarmonyRule === 'CUSTOM';
+        const hideLock = activeTab === 'color-wheel' && activeHarmonyRule !== 'CUSTOM';
+        stripHost.querySelectorAll('color-swatch-rail').forEach((rail) => {
+          rail.hideBaseColorBadge = hide;
+          rail.hideLock = hideLock;
+        });
+      };
+
+      const tabs = await buildTabs(controller, suggestionsRow?.cloneNode(true), {
+        onSelectionChange: ({ selected }) => {
+          activeTab = selected;
+          updateBaseColorBadge();
+          if (selected !== 'color-wheel') {
+            controller.setHarmonyRule('CUSTOM');
+          }
+        },
+        strings,
+      });
+      tabs.setPanelEntryFocus('primary-color', () => {
+        primaryColorAdapter?.element?.shadowRoot?.querySelector('.bc-mode-trigger')?.focus();
+      });
+      tabs.setPanelEntryFocus('color-wheel', () => {
+        tabs.getPanel('color-wheel')?.querySelector('color-wheel-express')?.focus();
+      });
+      layoutInstance.slots.sidebar.appendChild(tabs.element);
+
+      if (!isDesktop) {
+        const { createActionMenuComponent } = await import('../../scripts/color-shared/components/createActionMenuComponent.js');
+
+        const actionMenu = await createActionMenuComponent({
+          ...DEFAULT_ACTION_MENU_CONFIG,
+          type: 'controls-only',
+          onGenerateRandom: () => {
+            isGeneratingRandom = true;
+            queueMicrotask(() => { isGeneratingRandom = false; });
+          },
+          transformPalette: makeTransformPalette(
+            () => activeHarmonyRule,
+            () => swatchRailController,
+            () => controller.getState(),
+          ),
+          controls: [
+            { id: 'undo', label: strings.undo },
+            { id: 'redo', label: strings.redo },
+            { id: 'generate-random', label: strings.generateRandom },
+          ],
+        });
+        layoutInstance.slots.canvas.insertAdjacentElement('afterbegin', actionMenu.element);
+      }
+      stripRenderer = createStripContainerRenderer({
+        container: stripHost,
+        data: [swatchRailController],
+        mobileBreakpointQuery: '(max-width: 1199px)',
+        config: {
+          stripContainerOrientations: ['vertical-responsive'],
+          swatchFeatures: {
+            copy: true,
+            hexCode: true,
+            colorPicker: false,
+            lock: true,
+            trash: true,
+            drag: true,
+            addLeft: true,
+            addRight: true,
+            editTint: true,
+            baseColor: true,
+            emptyStrip: true,
+            rightActionsHoverOnly: true,
+            minSwatches: 2,
+          },
+          swatchVerticalMaxPerRow: 6,
+        },
+      });
+      await stripRenderer.render(stripHost);
+
+      // Initial base color badge state
+      updateBaseColorBadge();
+
+      // Re-evaluate badge visibility when harmony rule changes
+      const badgeRuleUnsubscribe = controller.subscribe((state) => {
+        const rule = state.harmonyRule || 'CUSTOM';
+        if (rule !== activeHarmonyRule) {
+          activeHarmonyRule = rule;
+          updateBaseColorBadge();
+        }
+      });
+      const prevHistoryCleanup = historyCleanup;
+      historyCleanup = () => {
+        prevHistoryCleanup?.();
+        badgeRuleUnsubscribe?.();
+      };
+
+      // Use a random color when adding a new swatch;
+      // for non-custom harmonies, recompute all positions
+      stripHost.addEventListener('color-swatch-rail-add', (e) => {
+        e.preventDefault();
+        const { insertIndex } = e.detail;
+        const state = controller.getState();
+        const hexes = state.swatches.map((s) => s.hex);
+        hexes.splice(insertIndex, 0, randomHex());
+
+        if (state.harmonyRule === 'CUSTOM') {
+          swatchRailController.setState({ swatches: hexes.map((h) => ({ hex: h })) });
+        } else {
+          const newBaseIndex = insertIndex <= state.baseColorIndex
+            ? state.baseColorIndex + 1
+            : state.baseColorIndex;
+          controller.replaceSwatchesFromHexes(
+            hexes,
+            {
+              baseIndex: newBaseIndex,
+              harmonyRule: state.harmonyRule,
+            },
+          );
+          controller.harmonyAdapter.onRuleChange(state.harmonyRule);
+        }
+      });
+
+      paletteUnsubscribe = controller.subscribe((state) => {
+        currentPalette = paletteFromThemeState(state);
+        layoutInstance?.context?.set('palette', currentPalette);
+        const firstHex = swatchHexListFromState(state)[0];
+        const currentColor = primaryColorAdapter?.element?.color;
+        if (primaryColorAdapter?.setColor && firstHex
+          && String(currentColor).toUpperCase() !== String(firstHex).toUpperCase()) {
+          primaryColorAdapter.setColor(firstHex);
+        }
+      });
+
+      block.classList.add('ax-shell-host');
+      block.dataset.shellState = 'ready';
+      trackColorBlockLoad('color-wheel');
+    } catch (error) {
+      window.lana?.log(`Color Wheel init error: ${error.message}`, {
+        tags: 'color-wheel,init',
+      });
+      block.dataset.blockStatus = 'error';
+      cleanup();
+      block.replaceChildren();
+      block.append(createTag('p', { class: 'color-wheel-error' }, 'Failed to load Color Wheel.'));
+    }
   }
+
+  await init();
+
+  const onBreakpointChange = async () => {
+    if (!block.isConnected) {
+      desktopQuery.removeEventListener('change', onBreakpointChange);
+      return;
+    }
+    await init();
+  };
+  desktopQuery.addEventListener('change', onBreakpointChange);
 }
+
+export {
+  normalizeSwatchHexes,
+  harmonyRulesForSwatchCount,
+  makeTransformPalette,
+  paletteFromThemeState,
+  swatchHexListFromState,
+};

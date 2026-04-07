@@ -23,13 +23,72 @@ class ColorConflicts extends LitElement {
     this.conflictsFound = false;
     this.label = 'Potential color blind conflicts';
     this._hasRendered = false;
+    this._tooltipOpen = false;
+    this._isTouchDevice = false;
+    this._removeOutsideClickHandler = null;
+    this._cleanupPointerBlockers = null;
   }
 
   async connectedCallback() {
     super.connectedCallback();
+    this._isTouchDevice = window.matchMedia?.('(hover: none)')?.matches ?? false;
     loadBadge();
     loadTooltip();
     await this.#loadTooltipStyles();
+  }
+
+  firstUpdated() {
+    if (!this._isTouchDevice) return;
+    const wrap = this.shadowRoot.querySelector('.cc-label-wrap');
+    if (!wrap) return;
+    const blockTouchPointer = (e) => {
+      if (e.pointerType === 'touch') e.stopImmediatePropagation();
+    };
+    wrap.addEventListener('pointerenter', blockTouchPointer, { capture: true });
+    wrap.addEventListener('pointerleave', blockTouchPointer, { capture: true });
+    this._cleanupPointerBlockers = () => {
+      wrap.removeEventListener('pointerenter', blockTouchPointer, { capture: true });
+      wrap.removeEventListener('pointerleave', blockTouchPointer, { capture: true });
+    };
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.#closeTooltip();
+    this._cleanupPointerBlockers?.();
+  }
+
+  #closeTooltip() {
+    const tooltipEl = this.shadowRoot?.querySelector('sp-tooltip');
+    tooltipEl?.removeAttribute('open');
+    this._tooltipOpen = false;
+    if (this._removeOutsideClickHandler) {
+      this._removeOutsideClickHandler();
+      this._removeOutsideClickHandler = null;
+    }
+  }
+
+  #handleLabelClick() {
+    if (!this._isTouchDevice) return;
+    const tooltipEl = this.shadowRoot?.querySelector('sp-tooltip');
+    if (!tooltipEl) return;
+    if (this._tooltipOpen) {
+      this.#closeTooltip();
+      return;
+    }
+    tooltipEl.setAttribute('open', '');
+    this._tooltipOpen = true;
+    setTimeout(() => {
+      const outsideHandler = (evt) => {
+        const path = evt.composedPath?.() || [];
+        const wrap = this.shadowRoot?.querySelector('.cc-label-wrap');
+        if (wrap && !path.includes(wrap)) {
+          this.#closeTooltip();
+        }
+      };
+      document.addEventListener('click', outsideHandler, true);
+      this._removeOutsideClickHandler = () => document.removeEventListener('click', outsideHandler, true);
+    }, 0);
   }
 
   async #loadTooltipStyles() {
@@ -73,7 +132,8 @@ class ColorConflicts extends LitElement {
       <sp-theme system="spectrum-two" color="light" scale="medium">
         <div class="cc-container" role="group"
           aria-label="${tooltipContent}">
-          <span class="cc-label-wrap" tabindex="0">
+          <span class="cc-label-wrap" tabindex="0"
+            @click="${() => this.#handleLabelClick()}">
             <sp-tooltip self-managed placement="top">${tooltipContent}</sp-tooltip>
             <span class="cc-label">${this.label}</span>
           </span>
