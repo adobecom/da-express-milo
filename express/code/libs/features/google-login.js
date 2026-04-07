@@ -3,13 +3,11 @@ const GOOGLE_ID = '530526366930-l874a90ipfkn26naa71r010u8epp39jt.apps.googleuser
 const PLACEHOLDER = 'feds-googleLogin';
 const WRAPPER = 'feds-profile';
 
-const onToken = async (getMetadata, data, getConfig) => {
+const onToken = async (getMetadata, data) => {
   let destination;
-  const config = getConfig();
   const acceptedTouList = getMetadata('google-login-accepted-tou-list')?.trim();
   try {
-    destination = new URL(typeof config.googleLoginURLCallback === 'function' ? await config.googleLoginURLCallback()
-      : getMetadata('google-login-redirect'))?.href;
+    destination = new URL(getMetadata('google-login-redirect'))?.href;
   } catch {
     // Do nothing
   }
@@ -34,7 +32,7 @@ const onToken = async (getMetadata, data, getConfig) => {
   });
 };
 
-export default async function initGoogleLogin(loadIms, getMetadata, loadScript, getConfig) {
+export default async function initGoogleLogin(loadIms, getMetadata, loadScript) {
   console.log('[local] initGoogleLogin called');
   try {
     await loadIms();
@@ -51,7 +49,7 @@ export default async function initGoogleLogin(loadIms, getMetadata, loadScript, 
 
   window.google?.accounts?.id?.initialize({
     client_id: GOOGLE_ID,
-    callback: (data) => onToken(getMetadata, data, getConfig),
+    callback: (data) => onToken(getMetadata, data),
     prompt_parent_id: PLACEHOLDER,
     cancel_on_tap_outside: false,
     auto_select: getMetadata('google-yolo-zero-tap')?.toLowerCase() === 'on',

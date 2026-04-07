@@ -71,9 +71,10 @@ async function loadGoogleLogin() {
   const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
   if (googleLogin === 'mobile' && desktopViewport) return;
   if (googleLogin === 'desktop' && !desktopViewport) return;
-
+  console.log('[google-login] redirect:', getConfig().googleLoginURLCallback());
+  console.log('[google-login] redirect:', getMetadata('google-login-redirect'));
   const { default: initGoogleLogin } = await import('../libs/features/google-login.js');
-  initGoogleLogin(loadIms, getMetadata, loadScript, getConfig);
+  initGoogleLogin(loadIms, getMetadata, loadScript);
 };
 
 /**

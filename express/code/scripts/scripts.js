@@ -16,7 +16,6 @@ import {
   decorateArea,
   getMetadata,
   preDecorateSections,
-  getRedirectUri,
   getIconElementDeprecated,
 } from './utils.js';
 
@@ -97,7 +96,6 @@ const CONFIG = {
     'eb0dcb78-3e56-4b10-89f9-51831f2cc37f': 'express-pep',
   },
   links: 'on',
-  googleLoginURLCallback: getRedirectUri,
   autoBlocks: [
     { axfaas: '/tools/axfaas' },
   ],
