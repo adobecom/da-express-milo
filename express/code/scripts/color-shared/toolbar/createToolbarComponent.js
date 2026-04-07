@@ -312,7 +312,7 @@ function loadSpectrumDeps() {
 async function applyLinkParamOverride(link) {
   const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
   const { env } = getConfig();
-  if (env === 'prod') return link;
+  if (env.name === 'prod') return link;
   const params = new URLSearchParams(window.location.search);
   const override = params.get('palette-link');
   return override || link;

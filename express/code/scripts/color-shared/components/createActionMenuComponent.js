@@ -269,7 +269,7 @@ async function createControls(
 async function applyNavLinkParamOverrides(navLinks) {
   const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
   const { env } = getConfig();
-  if (env === 'prod') return navLinks;
+  if (env.name === 'prod') return navLinks;
   const params = new URLSearchParams(window.location.search);
   return navLinks.map((link) => {
     const override = params.get(`${link.id}-link`);
