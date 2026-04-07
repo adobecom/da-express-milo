@@ -131,7 +131,6 @@ function createContrastRatioBadgeWrapper(ratio, pass, strings) {
     role: 'status',
     'aria-live': 'polite',
   });
-  attachTooltip(trigger, strings.contrastRatioTooltip, 'top');
   trigger.appendChild(badge);
   theme.appendChild(trigger);
   updateContrastRatioBadge(badge, ratio, pass, strings);
@@ -601,13 +600,15 @@ export function createCheckerRenderer(options) {
     const top = createTag('div', { class: 'cc-ratio-bar-top' });
 
     const ratioLabelContainer = createTag('div', { class: 'cc-ratio-label-container' });
-    const labelText = createTag('span', { class: 'cc-ratio-label-text' }, strings.contrastRatioLabel);
+    const labelTheme = createThemeWrapper();
+    const labelText = createTooltipLabelButton(strings.contrastRatioLabel, strings.contrastRatioTooltip, 'cc-ratio-label-text');
+    labelTheme.appendChild(labelText);
 
     const ratioBadgeComponent = createContrastRatioBadgeWrapper(results?.ratio ?? '', true, strings);
     ratioBadge = ratioBadgeComponent.badge;
     ratioBadge.setAttribute('hidden', '');
 
-    ratioLabelContainer.appendChild(labelText);
+    ratioLabelContainer.appendChild(labelTheme);
     ratioLabelContainer.appendChild(ratioBadgeComponent.element);
 
     const compareLink = createTag('button', {

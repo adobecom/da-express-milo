@@ -428,13 +428,12 @@
 }
 
 .cc-ratio-label-text {
-  font-size: var(--ax-body-xs-size);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-default-font);
+  all: unset;
+  --spectrum-actionbutton-sized-font-size: var(--ax-body-xs-size);
+  cursor: help;
   text-decoration: underline;
   text-decoration-style: dotted;
   text-underline-offset: var(--spacing-75);
-  cursor: help;
 }
 
 .cc-ratio-actions {
@@ -532,12 +531,6 @@
   display: inline-flex;
   align-items: center;
   border-radius: var(--cc-badge-border-radius);
-  cursor: help;
-}
-
-.cc-contrast-ratio-badge-trigger:focus-visible {
-  outline: 2px solid var(--cc-focus-ring-color);
-  outline-offset: 2px;
 }
 
 .cc-contrast-ratio-badge[variant='positive'] {
