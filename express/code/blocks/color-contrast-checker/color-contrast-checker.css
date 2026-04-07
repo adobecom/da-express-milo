@@ -1229,7 +1229,7 @@
   max-width: var(--cc-preview-text-content-max-width);
   position: relative;
   padding: var(--cc-preview-text-padding-mobile);
-  border-inline-end: 1px solid var(--cc-border-preview);
+  border-inline: 1px solid var(--cc-border-preview);
   border-block-end: 1px solid var(--cc-border-preview);
   border-radius: var(--cc-preview-frame-radius-mobile);
 }
@@ -1317,6 +1317,7 @@
   .cc-preview-text-content {
     flex: 1;
     justify-content: center;
+    border-inline-start: none;
     border-radius: 0 0 var(--cc-preview-frame-radius-tablet) 0;
   }
 
