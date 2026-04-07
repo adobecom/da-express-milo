@@ -177,11 +177,14 @@
   --Alias-drop-shadow-ambient: rgba(0, 0, 0, 0.08);
   --Alias-drop-shadow-emphasized-hover-key: rgba(0, 0, 0, 0.12);
   --Alias-drop-shadow-emphasized-key: rgba(0, 0, 0, 0.08);
+  --Alias-drop-shadow-emphasized-key-color: rgba(0, 0, 0, 0.08);
+  --Alias-drop-shadow-transition-color: rgba(0, 0, 0, 0.04);
+  --Alias-drop-shadow-ambient-color: rgba(0, 0, 0, 0.08);
   --Background-sx-extra-subdued-hover: var(--color-gray-325);
   --Background-sx-extra-subdued-down: var(--color-gray-350-variant);
   --Content-disabled-default: var(--color-gray-350-variant);
   /* current ax-grid system */
-  --ax-grid-margin: 20px;
+  --ax-grid-margin: var(--spacing-350);
   --ax-grid-gutter: 8px;
   --ax-grid-container-width: 100%;
   --ax-grid-column-width: calc((var(--ax-grid-container-width) - var(--ax-grid-gutter) * 11) / 12);
@@ -365,14 +368,14 @@
 
 @media (min-width: 600px) {
   :root {
-    --ax-grid-margin: 32px;
+    --ax-grid-margin: var(--spacing-500);
     --ax-grid-gutter: 16px;
   }
 }
 
 @media (min-width: 1200px) {
   :root {
-    --ax-grid-margin: 40px;
+    --ax-grid-margin: var(--spacing-600);
     --ax-grid-gutter: 24px;
     
     /* Express Typography Desktop Overrides */
@@ -467,7 +470,7 @@ body>header {
   background-size: auto 32px;
   background-position: bottom 24px center;
   position: relative;
-  background-color: #fff;
+  background-color: var(--color-white);
 }
 
 main {
@@ -494,7 +497,7 @@ main .section:not([data-padding='none']):not(.xxxl-spacing-static,
 }
 
 main .content h2 {
-  margin-top: 80px;
+  margin-top: var(--spacing-900);
 }
 
 main ol,
@@ -516,7 +519,7 @@ main a.button:any-link,
 main a.con-button:any-link {
   text-decoration: none;
   border-radius: 18px;
-  padding: 5px 1.2em 6px;
+  padding: 5px 1.2em var(--spacing-80);
   text-align: center;
   font-size: var(--body-font-size-s);
   font-style: normal;
@@ -524,7 +527,7 @@ main a.con-button:any-link {
   line-height: var(--body-line-height);
   cursor: pointer;
   transition: background-color 0.3s, color 0.3s, border 0.3s;
-  border-width: 2px;
+  border-width: var(--spacing-50);
   border-style: solid;
   margin: 10px;
   overflow: hidden;
@@ -549,7 +552,7 @@ main a.con-button.l-button:any-link,
 main .button-l a.con-button:any-link,
 main .l-button a.con-button:any-link {
   border-radius: 999px;
-  padding: 5px 1.2em 6px;
+  padding: 5px 1.2em var(--spacing-80);
   font-size: var(--body-font-size-s);
 }
 
@@ -571,7 +574,7 @@ main a.con-button.button-xxl:any-link,
 main a.con-button.xxl-button:any-link,
 main .button-xxl a.con-button:any-link,
 main .xxl-button a.con-button:any-link {
-  padding: 13px 1.5em 14px;
+  padding: 13px 1.5em var(--spacing-250);
   border-radius: 999px;
   font-size: var(--body-font-size-m);
   line-height: var(--body-line-height);
@@ -580,7 +583,7 @@ main .xxl-button a.con-button:any-link {
 main a.button.small:any-link,
 main a.con-button.small:any-link,
 main .small a.con-button:any-link {
-  padding: 4px 1em;
+  padding: var(--spacing-75) 1em;
   border-radius: 15px;
   font-size: var(--body-font-size-xs);
 }
@@ -821,9 +824,9 @@ main a.button.gradient.disabled:any-link {
 main a.button>svg {
   float: left;
   display: inline;
-  width: 20px;
-  height: 20px;
-  margin: 8px 8px 8px 0;
+  width: var(--spacing-350);
+  height: var(--spacing-350);
+  margin: var(--spacing-100) var(--spacing-100) var(--spacing-100) 0;
   fill: currentColor;
   color: currentColor;
 }
@@ -892,14 +895,14 @@ main #hero h1 {
 main #hero h2 {
   font-size: var(--body-font-size-xl);
   font-weight: var(--body-font-weight);
-  margin: 32px;
+  margin: var(--spacing-500);
 }
 
 main #hero h5 {
   font-size: var(--body-font-size-l);
   font-weight: var(--body-font-weight);
   margin: auto;
-  margin-top: 32px;
+  margin-top: var(--spacing-500);
 }
 
 main .icon {
@@ -992,8 +995,8 @@ main .section.panel {
 @media (max-width: 599px) {
   main .section.panel {
     margin: 0 var(--spacing-300) var(--spacing-600) var(--spacing-300);
-    padding-left: 16px;
-    padding-right: 16px;
+    padding-left: var(--spacing-300);
+    padding-right: var(--spacing-300);
   }
 }
 
@@ -1028,7 +1031,7 @@ main .section.panel .link-list-wrapper:has(.link-list.inline) {
 main .section p.button-container,
 main .section .content p.button-container {
   text-align: center;
-  margin-top: 16px;
+  margin-top: var(--spacing-300);
   margin-bottom: 0;
 }
 
@@ -1067,13 +1070,13 @@ main .fullscreen-marquee .free-plan-widget-placeholder {
 
 main .button-container.free-plan-container.fixed {
   position: fixed;
-  top: -8px;
-  margin-top: 16px;
+  top: -var(--spacing-100);
+  margin-top: var(--spacing-300);
   z-index: 10;
 }
 
 main .button-container.free-plan-container a.button {
-  max-height: 24px;
+  max-height: var(--spacing-400);
 }
 
 main .free-plan-widget {
@@ -1081,8 +1084,8 @@ main .free-plan-widget {
   box-sizing: border-box;
   background-color: var(--color-gray-100);
   border-radius: 20px;
-  margin: 32px 0;
-  padding: 16px 24px;
+  margin: var(--spacing-500) 0;
+  padding: var(--spacing-300) var(--spacing-400);
   width: fit-content;
   display: flex;
   flex-direction: column;
@@ -1095,13 +1098,13 @@ main .free-plan-widget .learn-more-button {
   position: absolute;
   display: flex;
   align-items: center;
-  bottom: -32px;
+  bottom: -var(--spacing-500);
   left: 50%;
   transform: translateX(-50%);
 }
 
 main .center .free-plan-widget {
-  margin: 32px auto;
+  margin: var(--spacing-500) auto;
 }
 
 main .free-plan-widget .plan-widget-tag {
@@ -1113,20 +1116,20 @@ main .free-plan-widget .plan-widget-tag img.icon.icon-checkmark {
   background-color: #33ab84;
   display: block;
   border-radius: 50%;
-  height: 8px;
-  width: 8px;
+  height: var(--spacing-100);
+  width: var(--spacing-100);
   padding: 3px;
-  margin-right: 4px;
+  margin-right: var(--spacing-75);
 }
 
 :lang(ja) main .section>.content {
   text-align: left;
-  padding: 60px 20px 0;
+  padding: 60px var(--spacing-350) 0;
 }
 
 :lang(ja) main .section>.content.center {
   text-align: center;
-  padding: 60px 20px 0;
+  padding: 60px var(--spacing-350) 0;
 }
 
 main .section>.content {
@@ -1136,7 +1139,7 @@ main .section>.content {
 
 main .section .content p,
 main .section p {
-  margin: 32px 0;
+  margin: var(--spacing-500) 0;
 }
 
 main .section:not(.xxxl-spacing-static,
@@ -1150,7 +1153,7 @@ main .section:not(.xxxl-spacing-static,
   .s-spacing,
   .xs-spacing,
   .xxs-spacing):last-of-type>.content:not(:has(+ .template-list-wrapper)) {
-  padding-bottom: 40px;
+  padding-bottom: var(--spacing-600);
 }
 
 div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .ribbon-banner, .content, .banner, .text, .hover-cards, .cta-cards, .simplified-pricing-cards-v2) a.button.same-fcta,
@@ -1166,13 +1169,13 @@ main img.icon-galaxy-store,
 main img.icon-microsoft-store {
   height: 70px;
   width: auto;
-  margin: 8px;
+  margin: var(--spacing-100);
 }
 
 /* Lottie player default */
 main .lottie {
-  width: 32px;
-  height: 32px;
+  width: var(--spacing-500);
+  height: var(--spacing-500);
 }
 
 /* Japanese font sizing styles */
@@ -1212,8 +1215,8 @@ main .section.blog-content>.content *:is(h1, h2) {
 
 main .section.blog-content>.content *:is(h1, h2, h3, h4, h5, h6),
 main .section.blog-content>.content>p {
-  margin-left: 20px;
-  margin-right: 20px;
+  margin-left: var(--spacing-350);
+  margin-right: var(--spacing-350);
   text-align: left;
 }
 
@@ -1237,8 +1240,8 @@ main .section.blog-content>.content>p {
   main h1+h5 {
     font-size: var(--body-font-size-xxl);
     font-weight: var(--body-font-weight);
-    margin-top: 32px;
-    margin-bottom: 16px;
+    margin-top: var(--spacing-500);
+    margin-bottom: var(--spacing-300);
   }
 
   main p, main ul, main ol {
@@ -1250,7 +1253,7 @@ main .section.blog-content>.content>p {
     font-weight: 400;
     max-width: 672px;
     margin: auto;
-    margin-top: 32px;
+    margin-top: var(--spacing-500);
   }
 
   main #hero h2,
@@ -1258,7 +1261,7 @@ main .section.blog-content>.content>p {
     font-size: var(--body-font-size-xl);
     line-height: var(--body-line-height);
     text-align: center;
-    margin: 24px 15px 0;
+    margin: var(--spacing-400) 15px 0;
   }
 
   main .section.blog-content>.content {
@@ -1305,7 +1308,7 @@ main .section.blog-content>.content>p {
   main #hero h2,
   main #hero p {
     font-size: var(--body-font-size-xxl);
-    margin: 24px 50px 0;
+    margin: var(--spacing-400) 50px 0;
   }
 
   main .button-container.free-plan-container {
@@ -1373,7 +1376,7 @@ main .section.blog-content>.content>p {
   }
 
   main #hero .columns>div>div {
-    margin: 8px;
+    margin: var(--spacing-100);
   }
 
   main .button-container.free-plan-container {
@@ -1384,7 +1387,7 @@ main .section.blog-content>.content>p {
 
   main .center .button-container.free-plan-container {
     justify-content: unset;
-    margin: 40px auto 0;
+    margin: var(--spacing-600) auto 0;
   }
 
   main .free-plan-widget {
@@ -1392,7 +1395,7 @@ main .section.blog-content>.content>p {
   }
 
   main .button-container.free-plan-container a.button+.free-plan-widget {
-    margin-left: 24px;
+    margin-left: var(--spacing-400);
   }
 
   main .button-container.free-plan-container .free-plan-widget {
@@ -1405,12 +1408,12 @@ main .section.blog-content>.content>p {
   }
 
   main .button-container.free-plan-container.stacked .free-plan-widget {
-    margin-top: 24px;
+    margin-top: var(--spacing-400);
     flex-direction: row;
   }
 
   main .button-container.free-plan-container.stacked .free-plan-widget>div {
-    margin-right: 16px;
+    margin-right: var(--spacing-300);
   }
 
   main .template-list-fourcols-container>div,
@@ -1436,8 +1439,8 @@ main .section.long-form.narrow {
 main .section.long-form .content,
 main .section.long-form .text .foreground {
   box-sizing: border-box;
-  padding-left: 20px;
-  padding-right: 20px;
+  padding-left: var(--spacing-350);
+  padding-right: var(--spacing-350);
   max-width: unset;
   width: var(--ax-grid-12-col-width);
   margin: 0 auto;
@@ -1498,7 +1501,7 @@ main .section.long-form .content h4 {
 }
 
 main .section.long-form .content p {
-  margin-top: 16px;
+  margin-top: var(--spacing-300);
   color: var(--color-dark-gray);
 }
 
@@ -1508,7 +1511,7 @@ main .section.long-form .content :is(p, ul, ol) {
 }
 
 main .section.long-form-blog .content .button-container a {
-  margin-bottom: 8px;
+  margin-bottom: var(--spacing-100);
 }
 
 main .section.long-form-blog .milo-video {
@@ -1518,7 +1521,7 @@ main .section.long-form-blog .milo-video {
 @media (min-width: 768px) {
   main .section.long-form .content,
   main .section.long-form .text .foreground {
-    padding: 0 40px 0;
+    padding: 0 var(--spacing-600) 0;
     width: var(--ax-grid-8-col-width);
     margin: 0 auto;
     box-sizing: border-box;
@@ -1565,7 +1568,7 @@ main .marquee.transpiled .foreground .text h2 {
   font-weight: 700;
   text-transform: none;
   font-size: clamp(var(--heading-font-size-s), 3vw, var(--heading-font-size-l));
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--spacing-100) 0;
 }
 
 @media screen and (min-width: 600px) {
@@ -1588,7 +1591,7 @@ main .marquee.transpiled .foreground .text h2 {
 
 body:not(.blog) main #hero:not(:has(.hero-bg)) {
   color: var(--body-color);
-  padding-top: 64px;
+  padding-top: var(--spacing-800);
   padding-bottom: 0;
 }
 
@@ -1601,11 +1604,11 @@ body:not(.blog) main #hero:not(:has(.hero-bg))>div {
 }
 
 body:not(.blog) main #hero:not(:has(.hero-bg)) a.button:any-link {
-  color: white;
+  color: var(--color-white);
 }
 
 body:not(.blog) main #hero:not(:has(.hero-bg)) a:any-link {
-  color: black;
+  color: var(--color-black);
 }
 
 body:not(.blog) main #hero:not(:has(.hero-bg)) p {
@@ -1721,8 +1724,8 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
   position: absolute;
   bottom: 15px;
   right: 35px;
-  width: 32px;
-  height: 32px;
+  width: var(--spacing-500);
+  height: var(--spacing-500);
   /* Reset button styles */
   border: none;
   padding: 0;
@@ -1747,8 +1750,8 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
 }
 
 .video-controls-wrapper .icon {
-  width: 24px;
-  height: 24px;
+  width: var(--spacing-400);
+  height: var(--spacing-400);
   fill: var(--color-white);
 }
 
@@ -1776,11 +1779,11 @@ body:not(.blog) main #hero:not(:has(.hero-bg)) p {
 
 .section.display-none {
   display: none;
-  height: 0px;
+  height: var(--spacing-0);
 }
 
 main .section.zero-margin:not([data-padding='none']) .content:first-child {
-  padding-top: 0px;
+  padding-top: var(--spacing-0);
 }
 
 main .section.no-h2-margin h2,

@@ -3,7 +3,7 @@ import sinon from 'sinon';
 import { setLibs } from '../../../../../express/code/scripts/utils.js';
 import createColorToolLayout from '../../../../../express/code/scripts/color-shared/shell/layouts/createColorToolLayout.js';
 
-setLibs('/libs');
+setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
 describe('createColorToolLayout', () => {
   let container;
@@ -240,6 +240,7 @@ describe('createColorToolLayout', () => {
       expect(container.querySelector('.ax-color-tool-layout')?.dataset.toolbarVariant).to.equal('sticky-on-scroll');
       expect(container.querySelectorAll('.color-floating-toolbar-container')).to.have.length(1);
 
+      const floatingHost = document.querySelector('.ax-toolbar-floating-host');
       const toolbarWrapper = layout.slots.footer.querySelector('.color-floating-toolbar-container');
       expect(toolbarWrapper).to.exist;
 
