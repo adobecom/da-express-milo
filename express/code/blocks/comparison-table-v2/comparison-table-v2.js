@@ -477,12 +477,9 @@ function createAriaLiveRegion(comparisonBlock) {
 function applyTabAnchorToButtons(comparisonBlock) {
   const closestTab = comparisonBlock.closest('[role="tabpanel"]');
   if (!closestTab) return;
-  try {
-    const tabId = parseInt(closestTab.id.split('-').pop(), 10);
-    comparisonBlock.setAttribute('id', `pricing-table-${tabId}`);
-  } catch (e) {
-    window.lana?.log(`Comparison Table V2 Tab Anchor Error: ${e?.message || e?.detail || e}`, { tags: 'comparison-table-v2', severity: 'error' });
-  }
+  const tabId = parseInt(closestTab.id.split('-').pop(), 10);
+  if (Number.isNaN(tabId)) return;
+  comparisonBlock.setAttribute('id', `pricing-table-${tabId}`);
 }
 
 /**
