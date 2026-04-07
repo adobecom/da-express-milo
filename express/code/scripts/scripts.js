@@ -32,7 +32,14 @@ const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
 if (jarvisVisibleMeta && ['mobile', 'desktop', 'on'].includes(jarvisVisibleMeta) && (
   (jarvisVisibleMeta === 'mobile' && !desktopViewport) || (jarvisVisibleMeta === 'desktop' && desktopViewport))) jarvisImmediatelyVisible = true;
 
-const prodDomains = ['business.adobe.com', 'www.adobe.com'];
+const prodDomains = ['business.adobe.com', 'www.adobe.com', 'color.adobe.com'];
+
+// eslint-disable-next-line import/prefer-default-export
+export function getContentRoot(location) {
+  const { hostname } = location || window.location;
+  if (['--express-color--', 'color.stage.adobe.com', 'color.adobe.com'].some((i) => hostname.includes(i))) return '';
+  return '/express';
+}
 
 // Add any config options.
 const CONFIG = {
@@ -40,16 +47,32 @@ const CONFIG = {
   stage: { express: 'stage.projectx.corp.adobe.com', commerce: 'commerce-stg.adobe.com' },
   prod: { express: 'express.adobe.com', commerce: 'commerce.adobe.com' },
   codeRoot: '/express/code',
-  contentRoot: '/express',
+  contentRoot: getContentRoot(),
   stageDomainsMap: {
     '--da-express-milo--adobecom.(hlx|aem).(page|live)': {
       'www.adobe.com': 'origin',
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'color.adobe.com': 'color.stage.adobe.com',
     },
     'www.stage.adobe.com': {
       'www.adobe.com': 'origin',
+      'commerce.adobe.com': 'commerce-stg.adobe.com',
+      'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'color.adobe.com': 'color.stage.adobe.com',
+    },
+    '--express-color--adobecom.(hlx|aem).(page|live)': {
+      'color.adobe.com': 'origin',
+      'www.adobe.com': 'www.stage.adobe.com',
+      'commerce.adobe.com': 'commerce-stg.adobe.com',
+      'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'express.adobe.com': 'stage.projectx.corp.adobe.com',
+    },
+    'color.stage.adobe.com': {
+      'color.adobe.com': 'origin',
+      'www.adobe.com': 'www.stage.adobe.com',
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
