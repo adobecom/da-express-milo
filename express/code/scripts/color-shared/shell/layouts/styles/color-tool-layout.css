@@ -146,6 +146,16 @@
   z-index: auto;
 }
 
+@media (max-width: 1199px) {
+  .ax-color-tool-layout[data-toolbar-variant="sticky-on-scroll"] .ax-toolbar-standalone .ax-swatch-strip {
+    display: none;
+  }
+
+  .ax-color-tool-layout[data-toolbar-variant="sticky-on-scroll"] .ax-toolbar-standalone .ax-palette-name {
+    display: flex;
+  }
+}
+
 .ax-shell-slot:focus-within {
   outline: var(--ax-focus-outline-width) solid var(--ax-focus-outline-color);
   outline-offset: var(--ax-focus-outline-offset);

@@ -225,17 +225,6 @@
   }
 }
 
-/* ── Standalone variant: hide swatch strip, show palette name (mobile/tablet) ── */
-
-@media (max-width: 1199px) {
-  .ax-toolbar-standalone .ax-swatch-strip {
-    display: none;
-  }
-
-  .ax-toolbar-standalone .ax-palette-name {
-    display: flex;
-  }
-}
 
 .ax-palette-name-input {
   font-family: var(--body-font-family);
