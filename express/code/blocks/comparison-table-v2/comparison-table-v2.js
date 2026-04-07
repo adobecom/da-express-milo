@@ -474,6 +474,17 @@ function createAriaLiveRegion(comparisonBlock) {
   return ariaLiveRegion;
 }
 
+function applyTabAnchorToButtons(comparisonBlock) {
+  const closestTab = comparisonBlock.closest('[role="tabpanel"]');
+  if (!closestTab) return;
+  try {
+    const tabId = parseInt(closestTab.id.split('-').pop(), 10);
+    comparisonBlock.setAttribute('id', `pricing-table-${tabId}`);
+  } catch (e) {
+    window.lana?.log(`Comparison Table V2 Tab Anchor Error: ${e?.message || e?.detail || e}`, { tags: 'comparison-table-v2', severity: 'error' });
+  }
+}
+
 /**
  * Process button styling for fill buttons
  * @param {Array} contentSections - The content sections array
@@ -766,6 +777,7 @@ export default async function decorate(comparisonBlock) {
     const ariaLiveRegion = createAriaLiveRegion(comparisonBlock);
 
     processButtonStyling(contentSections);
+    applyTabAnchorToButtons(comparisonBlock);
 
     const { stickyHeaderEl, colTitles } = createStickyHeader(contentSections[0], comparisonBlock);
     comparisonBlock.appendChild(stickyHeaderEl);
