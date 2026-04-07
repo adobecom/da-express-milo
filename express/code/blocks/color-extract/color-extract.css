@@ -55,7 +55,6 @@
 }
 
 .color-extract {
-  contain: layout style;
   --color-extract-max-width: 1440px;
   --color-extract-gap: 32px;
   --color-extract-radius: 16px;
@@ -498,7 +497,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   display: none;
   flex-direction: column;
   gap: 24px;
-  contain: layout style paint;
 }
 
 .color-extract.has-image .color-extract-edit {

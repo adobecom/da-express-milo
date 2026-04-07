@@ -442,6 +442,7 @@ function createFloatingToolbarMount(controller, variant) {
   let tb = null;
   let mounted = false;
   let cssLoaded = false;
+  let stickyObserver = null;
 
   async function loadToolbarCss() {
     if (cssLoaded) return;
@@ -490,7 +491,35 @@ function createFloatingToolbarMount(controller, variant) {
         editPaletteName: true,
       });
 
-      container.appendChild(tb.element);
+      const wrapper = createTag('div', { class: 'color-floating-toolbar-container' });
+      wrapper.appendChild(tb.element);
+      container.appendChild(wrapper);
+
+      let isStickyActive = false;
+      const setStickyState = (shouldFloat) => {
+        if (shouldFloat === isStickyActive) return;
+        isStickyActive = shouldFloat;
+
+        if (shouldFloat) {
+          wrapper.classList.add('ax-toolbar-sticky-wrapper');
+          return;
+        }
+
+        wrapper.classList.remove('ax-toolbar-sticky-wrapper');
+      };
+
+      if (typeof IntersectionObserver !== 'undefined') {
+        setStickyState(false);
+        stickyObserver = new IntersectionObserver((entries) => {
+          const entry = entries[0];
+          const shouldFloat = Boolean(entry)
+            && !entry.isIntersecting
+            && entry.boundingClientRect.top < 0;
+          setStickyState(shouldFloat);
+        }, { threshold: 0 });
+        stickyObserver.observe(container);
+      }
+
       controller.subscribe(() => sync());
     } catch (err) {
       const { default: lana } = await import(`${getLibs()}/utils/lana.js`);
@@ -498,7 +527,13 @@ function createFloatingToolbarMount(controller, variant) {
     }
   }
 
-  return { element: container, mount };
+  function destroy() {
+    stickyObserver?.disconnect();
+    stickyObserver = null;
+    tb?.destroy();
+  }
+
+  return { element: container, mount, destroy };
 }
 
 /* ---------- Landing ---------- */
