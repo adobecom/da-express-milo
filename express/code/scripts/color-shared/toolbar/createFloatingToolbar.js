@@ -146,7 +146,7 @@ async function loadToolbarDependencies(providedPalette, deps = {}) {
 
 function clearStickyBehavior(wrapper, reserveContainer, scrollObserver) {
   scrollObserver?.disconnect();
-  wrapper.classList.remove('ax-toolbar-sticky-wrapper', 'ax-toolbar-visible');
+  wrapper.classList.remove('ax-toolbar-sticky-wrapper', 'ax-toolbar-exiting');
   wrapper.parentElement?.querySelector('.ax-toolbar-scroll-sentinel')?.remove();
 
   if (!reserveContainer) return;
@@ -260,29 +260,36 @@ export async function initFloatingToolbar(container, options = {}) {
   }
 
   function activateSticky(variantOptions) {
+    wrapper.classList.remove('ax-toolbar-exiting');
+
     setupStickyBehavior(wrapper, {
       reserveContainer: stickyReserveContainer,
       reserveSpace: variantOptions.reserveSpace ?? reserveSpace,
     });
     toolbar.setVariant?.('sticky');
-    requestAnimationFrame(() => wrapper.classList.add('ax-toolbar-visible'));
   }
 
   function clearStickyClasses() {
-    wrapper.classList.remove('ax-toolbar-sticky-wrapper', 'ax-toolbar-visible');
+    wrapper.classList.remove('ax-toolbar-sticky-wrapper', 'ax-toolbar-exiting');
     stickyReserveContainer.classList.remove('ax-toolbar-sticky-host');
     stickyReserveContainer.style.removeProperty('--ax-toolbar-h');
     toolbar.setVariant?.(resolvedStandaloneVariant);
   }
 
   function deactivateSticky() {
-    if (!wrapper.classList.contains('ax-toolbar-visible')) {
+    if (!wrapper.classList.contains('ax-toolbar-sticky-wrapper')) {
       clearStickyClasses();
       return;
     }
 
-    wrapper.classList.remove('ax-toolbar-visible');
-    wrapper.addEventListener('transitionend', () => clearStickyClasses(), { once: true });
+    wrapper.classList.add('ax-toolbar-exiting');
+
+    const { animationDuration } = getComputedStyle(wrapper);
+    if (animationDuration && animationDuration !== '0s') {
+      wrapper.addEventListener('animationend', () => clearStickyClasses(), { once: true });
+    } else {
+      clearStickyClasses();
+    }
   }
 
   function observeStickyOnScroll(variantOptions) {
