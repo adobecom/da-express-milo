@@ -236,6 +236,11 @@ describe('createToolbar', () => {
       const toolbar = createToolbar(defaultOptions({ onEdit }));
       document.body.appendChild(toolbar.element);
 
+      // Prevent the edit link from navigating the page away during tests
+      toolbar.element.addEventListener('click', (e) => {
+        if (e.target.closest('a')) e.preventDefault();
+      });
+
       const cb = sinon.stub();
       toolbar.on('edit', cb);
 
