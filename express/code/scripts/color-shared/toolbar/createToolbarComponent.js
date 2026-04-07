@@ -2,7 +2,7 @@ import { announceToScreenReader } from '../spectrum/index.js';
 import { isMobileViewport, buildPaletteEditUrl } from '../utils/utilities.js';
 import { createIconButton } from '../utils/icons.js';
 import { createEventBus } from '../utils/createEventBus.js';
-import { createTag } from '../../utils.js';
+import { createTag, getLibs } from '../../utils.js';
 import { loadButton, loadActionButton, loadTooltip } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
@@ -80,6 +80,7 @@ async function handleOpenInExpress({ id, name, colors }) {
   url.searchParams.set('referrer', 'express-colors');
   url.searchParams.set('entryPoint', 'color-explorer');
   url.searchParams.set('feature-enable', 'colors-product-entry-enabled');
+  url.searchParams.set('category', 'theme');
 
   window.open(url.toString(), '_blank');
 }
@@ -309,6 +310,15 @@ function loadSpectrumDeps() {
   });
 }
 
+async function applyLinkParamOverride(link) {
+  const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+  const { env } = getConfig();
+  if (env.name === 'prod') return link;
+  const params = new URLSearchParams(window.location.search);
+  const override = params.get('palette-link');
+  return override || link;
+}
+
 /* ── Main Export ──────────────────────────────────────────────── */
 
 // eslint-disable-next-line import/prefer-default-export
@@ -378,15 +388,29 @@ export function createToolbar(options) {
 
   const main = createTag('div', { class: 'ax-toolbar-main' });
 
-  const DEFAULT_EDIT_BASE_PATH = '/express/colors/color-palette-generator';
+  const DEFAULT_EDIT_BASE_PATH = '/express/colors/color-wheel';
 
-  const paletteSummary = buildPaletteSummary(colors, type, palette.angle, effectiveShowEdit, () => {
-    const currentPalette = getPaletteWithName();
-    const editUrl = editPaletteLink
-      || buildPaletteEditUrl(DEFAULT_EDIT_BASE_PATH, currentPalette.colors, currentPalette.name);
-    window.location.href = editUrl;
-    emit('edit', { palette: currentPalette });
-  }, t);
+  const paletteSummary = buildPaletteSummary(
+    colors,
+    type,
+    palette.angle,
+    effectiveShowEdit,
+    async () => {
+      const currentPalette = getPaletteWithName();
+      if (editPaletteLink) {
+        window.location.href = editPaletteLink;
+      } else {
+        const processedLink = await applyLinkParamOverride(DEFAULT_EDIT_BASE_PATH);
+        const editUrl = buildPaletteEditUrl(
+          processedLink,
+          currentPalette.colors,
+          currentPalette.name,
+        );
+        window.location.href = editUrl;
+      }
+    },
+    t,
+  );
 
   const { actions, ccLibBtn } = buildActionButtons({
     onShare: async () => {

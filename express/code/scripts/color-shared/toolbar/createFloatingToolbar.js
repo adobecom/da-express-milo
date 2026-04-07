@@ -100,6 +100,8 @@ async function ensureServices() {
 
 async function getLibraryContext() {
   try {
+    if (!window.adobeIMS?.isSignedInUser()) return { libraries: [], provider: null };
+
     const provider = await serviceManager.getProvider('cclibrary');
     if (!provider) return { libraries: [], provider: null };
 

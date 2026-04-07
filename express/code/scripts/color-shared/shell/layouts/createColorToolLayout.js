@@ -157,6 +157,8 @@ async function mountActionMenu(topbarSlot, actionMenuConfig, modulePromise) {
     onUndo: actionMenuConfig.onUndo,
     onRedo: actionMenuConfig.onRedo,
     onGenerateRandom: actionMenuConfig.onGenerateRandom,
+    transformPalette: actionMenuConfig.transformPalette,
+    getName: actionMenuConfig.getName,
     enableState: actionMenuConfig.enableState !== false,
   });
 
@@ -214,7 +216,7 @@ async function mountToolbarCore(shell, root, footerSlot, toolbarConfig, modulePr
       const stickyContainer = createTag('div', { class: 'ax-toolbar-floating-host' });
       stickyContainer.hidden = true;
       stickyContainer.setAttribute('aria-hidden', 'true');
-      root.appendChild(stickyContainer);
+      document.body.appendChild(stickyContainer);
 
       stickyToolbarHandle = toolbarHandle;
 

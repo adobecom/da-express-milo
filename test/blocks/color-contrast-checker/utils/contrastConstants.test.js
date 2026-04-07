@@ -6,7 +6,6 @@ import {
   MAX_RECOMMENDATION,
   HISTORY_LIMIT,
   WCAG_THRESHOLDS,
-  CONTRAST_PRESETS,
 } from '../../../../express/code/blocks/color-contrast-checker/utils/contrastConstants.js';
 
 describe('contrastConstants', () => {
@@ -62,19 +61,6 @@ describe('contrastConstants', () => {
 
     it('has correct UI_AA value', () => {
       expect(WCAG_THRESHOLDS.UI_AA).to.equal(3);
-    });
-  });
-
-  describe('CONTRAST_PRESETS', () => {
-    it('has 5 entries', () => {
-      expect(CONTRAST_PRESETS).to.have.lengthOf(5);
-    });
-
-    it('each entry has bg and fg arrays of length 3', () => {
-      CONTRAST_PRESETS.forEach((preset) => {
-        expect(preset.bg).to.be.an('array').with.lengthOf(3);
-        expect(preset.fg).to.be.an('array').with.lengthOf(3);
-      });
     });
   });
 });

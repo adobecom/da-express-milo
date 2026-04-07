@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import KulerProvider, { createKulerProvider } from '../../../../express/code/libs/services/providers/KulerProvider.js';
-import KulerPlugin from '../../../../express/code/libs/services/plugins/kuler/KulerPlugin.js';
+import KulerProvider, { createKulerProvider } from '../../../../../express/code/libs/services/providers/KulerProvider.js';
+import KulerPlugin from '../../../../../express/code/libs/services/plugins/kuler/KulerPlugin.js';
 
 function createTestPlugin(overrides = {}) {
   return new KulerPlugin({

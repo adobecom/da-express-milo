@@ -1,7 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { ThemeActions } from '../../../../express/code/libs/services/plugins/kuler/actions/KulerActions.js';
-import { KulerTopics } from '../../../../express/code/libs/services/plugins/kuler/topics.js';
+import { ThemeActions } from '../../../../../express/code/libs/services/plugins/kuler/actions/KulerActions.js';
+import { KulerTopics } from '../../../../../express/code/libs/services/plugins/kuler/topics.js';
 import { expectValidationError, expectConfigError, createMockPlugin, stubFetch } from './helpers.js';
 
 describe('ThemeActions', () => {

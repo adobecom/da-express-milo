@@ -1,7 +1,7 @@
 import { createTag } from '../../utils.js';
 import createBaseRenderer from './createBaseRenderer.js';
 import { createSwatchRailAdapter, createColorEditAdapter } from '../adapters/litComponentAdapters.js';
-import { getContrastTextColor } from '../../../libs/color-components/utils/ColorConversions.js';
+import { getContrastTextColor, isSuperLight } from '../../../libs/color-components/utils/ColorConversions.js';
 import {
   TYPE_ORDER,
   TYPE_LABELS,
@@ -245,7 +245,7 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
 
       const textColor = getContrastTextColor(hex);
       const paletteCell = createTag('div', {
-        class: 'strip-cb-mobile-row__palette',
+        class: `strip-cb-mobile-row__palette${isSuperLight(hex) ? ' super-light' : ''}`,
         style: `background-color: ${hex};`,
         role: 'button',
         tabindex: '0',
@@ -278,7 +278,7 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
         const sim = simulateHex(hex, type);
         const conflicting = conflictsByType[type];
         const simCell = createTag('div', {
-          class: `strip-cb-mobile-row__sim${conflicting.has(colorIndex) ? ' conflict' : ''}`,
+          class: `strip-cb-mobile-row__sim${conflicting.has(colorIndex) ? ' conflict' : ''}${isSuperLight(sim) ? ' super-light' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
           role: 'img',
           'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
@@ -528,6 +528,9 @@ export function createStripContainerRenderer(options) {
 
   const colorBlindness = config?.colorBlindness === true;
   const { onColorChangeEnd } = options;
+  const mobileQuery = typeof options.mobileBreakpointQuery === 'string'
+    ? options.mobileBreakpointQuery
+    : MOBILE_BREAKPOINT_QUERY;
 
   let listElement = null;
   let activeColorEditor = null;
@@ -550,7 +553,10 @@ export function createStripContainerRenderer(options) {
     }
     top = Math.max(gap, top);
 
-    let left = anchorRect.left + (anchorRect.width - popRect.width) / 2;
+    let { left } = anchorRect;
+    if (left + popRect.width > window.innerWidth - gap) {
+      left = anchorRect.right - popRect.width;
+    }
     left = Math.max(gap, Math.min(left, window.innerWidth - popRect.width - gap));
 
     popover.style.top = `${top}px`;
@@ -563,13 +569,16 @@ export function createStripContainerRenderer(options) {
       adapter,
       popover,
       mobile,
+      resizeObserver,
       outsideHandler,
       escapeHandler,
       scrollHandler,
+      railElement: activeRailElement,
     } = activeColorEditor;
     if (outsideHandler) document.removeEventListener('click', outsideHandler, true);
     if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
     if (scrollHandler) window.removeEventListener('scroll', scrollHandler, true);
+    resizeObserver?.disconnect?.();
     if (mobile) {
       try {
         adapter.hide?.();
@@ -579,6 +588,7 @@ export function createStripContainerRenderer(options) {
     }
     adapter.destroy?.();
     popover?.remove();
+    activeRailElement?.setActiveEditIndex?.(null);
     activeColorEditor = null;
   }
 
@@ -593,13 +603,13 @@ export function createStripContainerRenderer(options) {
 
     const state = controller?.getState?.() || {};
     const palette = (state.swatches || []).map((swatch) => swatch?.hex).filter(Boolean);
-    const mobile = window.matchMedia?.(MOBILE_BREAKPOINT_QUERY)?.matches === true;
+    const mobile = window.matchMedia?.(mobileQuery)?.matches === true;
 
     const adapter = createColorEditAdapter({
       palette,
       selectedIndex,
       colorMode: 'HEX',
-      showPalette: mobile || !colorBlindness,
+      showPalette: mobile,
       mobile,
     }, {
       onColorChange: ({ hex, index }) => {
@@ -622,11 +632,21 @@ export function createStripContainerRenderer(options) {
       },
     });
 
+    railElement.setActiveEditIndex?.(selectedIndex);
+
     const editorElement = adapter.getElement?.() || adapter.element;
     if (mobile) {
       document.body.appendChild(editorElement);
-      activeColorEditor = { adapter, mobile: true };
-      requestAnimationFrame(() => adapter.show?.());
+      activeColorEditor = { adapter, mobile: true, railElement };
+      requestAnimationFrame(async () => {
+        try {
+          await customElements.whenDefined('color-edit');
+          await editorElement.updateComplete;
+          adapter.show?.();
+        } catch (e) {
+          window.lana?.log(`[color-editor] mobile show failed: ${e.message}`, { tags: 'color-edit' });
+        }
+      });
       return;
     }
 
@@ -639,11 +659,14 @@ export function createStripContainerRenderer(options) {
     popover.appendChild(editorElement);
     document.body.appendChild(popover);
     const anchorRect = resolveAnchorRect(anchorElement, anchorRectFromDetail);
-    positionPopover(popover, anchorRect);
-    requestAnimationFrame(() => positionPopover(popover, anchorRect));
-    Promise.resolve(editorElement.updateComplete)
-      .then(() => positionPopover(popover, anchorRect))
-      .catch(() => {});
+    const observer = new ResizeObserver((entries) => {
+      const { height } = entries[0].contentRect;
+      if (height > 0) {
+        observer.disconnect();
+        positionPopover(popover, anchorRect);
+      }
+    });
+    observer.observe(popover);
 
     const outsideHandler = (evt) => {
       const path = evt.composedPath?.() || [];
@@ -666,10 +689,23 @@ export function createStripContainerRenderer(options) {
       adapter,
       popover,
       mobile: false,
+      resizeObserver: observer,
       outsideHandler,
       escapeHandler,
       scrollHandler,
+      railElement,
     };
+
+    requestAnimationFrame(async () => {
+      try {
+        await customElements.whenDefined('color-edit');
+        await editorElement.updateComplete;
+        if (activeColorEditor?.adapter !== adapter) return;
+        await adapter.show?.();
+      } catch (e) {
+        window.lana?.log(`[color-editor] desktop show failed: ${e.message}`, { tags: 'color-edit' });
+      }
+    });
   }
 
   function attachRailEditor(railElement) {

@@ -47,6 +47,8 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   ratioInputHelpText: 'Enter a value between 1 and 20',
   noTargetRatioSuggestions: 'Could not find colors meeting the target ratio.',
   colorValueAriaLabel: 'Color value',
+  graphicsAndUiAaaNotApplicable: 'N/A',
+  graphicsAndUiAaaTooltip: 'AAA standards default to AA compliance for graphics and UI',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -96,6 +98,8 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   ratioInputHelpText: 'color-contrast-checker-ratio-input-help-text',
   noTargetRatioSuggestions: 'color-contrast-checker-no-target-ratio-suggestions',
   colorValueAriaLabel: 'color-contrast-checker-color-value-aria-label',
+  graphicsAndUiAaaNotApplicable: 'color-contrast-checker-graphics-ui-aaa-not-applicable',
+  graphicsAndUiAaaTooltip: 'color-contrast-checker-graphics-ui-aaa-tooltip',
 });
 
 function isResolvedPlaceholder(value, key) {

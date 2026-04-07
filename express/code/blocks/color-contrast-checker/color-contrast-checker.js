@@ -1,4 +1,5 @@
 import { createTag } from '../../scripts/utils.js';
+import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createContrastRenderer } from './factory/createContrastRenderer.js';
 import loadContrastCheckerPlaceholders from './utils/placeholders.js';
@@ -158,10 +159,9 @@ export default async function decorate(block) {
         name: initialPalette.name,
       },
       toolbar: {
-        mode: 'inline',
+        mode: 'sticky-on-scroll',
         variant: 'standalone',
         showEdit: false,
-        showPalette: !isMobileOrTabletViewport(),
         showPaletteName: true,
         editPaletteName: false,
       },
@@ -170,11 +170,14 @@ export default async function decorate(block) {
         id: 'color-contrast-checker-menu',
         type: isMobileOrTabletViewport() ? 'nav-only' : 'full',
         activeId: 'contrast',
+        getName: () => initialPalette.name,
       },
     });
 
     adoptHeadline(block, layoutInstance);
     await layoutInstance.actionMenuReady;
+
+    layoutInstance.actionMenu?.pushState?.(initialPalette.colors);
 
     checkerInstance = await mountContrastChecker(layoutInstance.slots.sidebar, {
       config,
@@ -199,9 +202,9 @@ export default async function decorate(block) {
       destroy: destroyInstance,
     });
 
-    block.classList.add('ax-shell-host', `color-contrast-checker-${config.variant}`);
     block.dataset.shellState = 'ready';
     block.dataset.blockStatus = 'loaded';
+    trackColorBlockLoad('color-contrast-checker');
   } catch (error) {
     window.lana?.log(`Contrast Checker init error: ${error.message}`, {
       tags: 'color-contrast-checker,init',

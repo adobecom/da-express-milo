@@ -8,6 +8,7 @@ import {
   isMobileViewport,
   isValidHex,
 } from '../../../../scripts/color-shared/utils/utilities.js';
+import { createColorEditAdapter } from '../../../../scripts/color-shared/adapters/litComponentAdapters.js';
 
 function labelToId(labelText) {
   return `color-input-${labelText.toLowerCase().replaceAll(/\s+/g, '-').replaceAll(/[^a-z0-9-]/g, '')}`;
@@ -52,6 +53,7 @@ export function createColorInput(config) {
   let lastValidHex = value;
   let activePopover = null;
   let activeEditor = null;
+  let activeColorEditAdapter = null;
   let editorOpenValue = value;
   let focusTrap = null;
   let pendingOpen = false;
@@ -156,13 +158,12 @@ export function createColorInput(config) {
     return { palette, selectedIndex };
   }
 
-  function syncActiveEditorPalette(editor = activeEditor) {
-    if (!editor) return;
+  function syncActiveEditorPalette() {
+    if (!activeColorEditAdapter) return;
 
     const { palette, selectedIndex } = resolveColorEditPalette();
-    editor.palette = palette;
-    editor.selectedIndex = selectedIndex;
-    editor.showPalette = palette.length > 1;
+    activeColorEditAdapter.setPalette(palette);
+    activeColorEditAdapter.setSelectedIndex(selectedIndex);
   }
 
   function beginOpenRequest() {
@@ -216,8 +217,11 @@ export function createColorInput(config) {
       activePopover.remove();
       activePopover = null;
     }
+    if (activeColorEditAdapter) {
+      activeColorEditAdapter.destroy();
+      activeColorEditAdapter = null;
+    }
     if (activeEditor) {
-      activeEditor.remove();
       activeEditor = null;
     }
     if (restoreFocus && hadOpenUI) {
@@ -228,43 +232,45 @@ export function createColorInput(config) {
   controllerRef.closeEditor = closeEditor;
 
   function createColorEdit() {
-    const colorEdit = createTag('color-edit');
     editorOpenValue = lastValidHex;
-    syncActiveEditorPalette(colorEdit);
-    colorEdit.colorMode = 'HEX';
-    colorEdit.mobile = isMobileViewport();
+    const { palette, selectedIndex } = resolveColorEditPalette();
+    const mobile = isMobileViewport();
 
-    colorEdit.addEventListener('color-change', (e) => {
-      const { hex } = e.detail;
-      if (syncEditorHexValue(hex)) {
-        runWithEditorSync(() => onInput?.({ value: hex }));
-      }
-    });
-    colorEdit.addEventListener('color-change-end', (e) => {
-      const { hex } = e.detail;
-      syncEditorHexValue(hex);
-      runWithEditorSync(() => commitEditorValueIfChanged());
+    const adapter = createColorEditAdapter({
+      palette,
+      selectedIndex,
+      colorMode: 'HEX',
+      showPalette: palette.length > 1,
+      mobile,
+    }, {
+      onColorChange: ({ hex }) => {
+        if (syncEditorHexValue(hex)) {
+          runWithEditorSync(() => onInput?.({ value: hex }));
+        }
+      },
+      onColorChangeEnd: ({ hex }) => {
+        syncEditorHexValue(hex);
+        runWithEditorSync(() => commitEditorValueIfChanged());
+      },
+      onClose: () => closeEditor(),
     });
 
-    colorEdit.addEventListener('panel-close', () => closeEditor());
-    return colorEdit;
+    activeColorEditAdapter = adapter;
+    return adapter.element;
   }
 
-  function queueMobileEditorOpen(colorEdit, requestId, shouldAutoFocusInput) {
+  function queueMobileEditorOpen(colorEdit, requestId) {
     document.body.appendChild(colorEdit);
     activeEditor = colorEdit;
     completeOpenRequest(requestId);
 
-    requestAnimationFrame(async () => {
+    requestAnimationFrame(() => {
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
       colorEdit.show();
-      if (shouldAutoFocusInput) {
-        await colorEdit.focusInput();
-      }
     });
   }
 
-  async function openDesktopEditor(colorEdit, requestId, shouldAutoFocusInput) {
+  async function openDesktopEditor(colorEdit, requestId) {
     await loadPicker();
     if (!isCurrentOpenRequest(requestId)) return;
 
@@ -291,9 +297,7 @@ export function createColorInput(config) {
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
       await colorEdit.updateComplete;
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
-      if (shouldAutoFocusInput) {
-        await colorEdit.focusInput();
-      }
+      await colorEdit.show();
       focusTrap = trapFocus(overlay);
 
       addDismissListener('keydown', (e) => {
@@ -316,14 +320,13 @@ export function createColorInput(config) {
       if (!isCurrentOpenRequest(requestId)) return;
 
       const colorEdit = createColorEdit();
-      const shouldAutoFocusInput = shouldAutoFocusColorEditInput();
 
       if (colorEdit.mobile) {
-        queueMobileEditorOpen(colorEdit, requestId, shouldAutoFocusInput);
+        queueMobileEditorOpen(colorEdit, requestId);
         return;
       }
 
-      await openDesktopEditor(colorEdit, requestId, shouldAutoFocusInput);
+      await openDesktopEditor(colorEdit, requestId);
     } catch (error) {
       if (isCurrentOpenRequest(requestId)) {
         pendingOpen = false;

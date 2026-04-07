@@ -20,7 +20,8 @@ const PROD_CONFIG = {
     kuler: {
       baseUrl: 'https://search.adobe.io/api/v2',
       exploreBaseUrl: 'https://themesb3.adobe.io',
-      apiKey: 'AdobeExpressWeb',
+      apiKey: 'KulerBackendClientId',
+      middleware: [{ name: 'auth', topics: ['kuler.like.*'] }],
       endpoints: {
         search: '/search',
         api: '/api/v2',
@@ -97,7 +98,7 @@ const STAGE_CONFIG = {
     kuler: {
       ...PROD_CONFIG.services.kuler,
       baseUrl: 'https://search-stage.adobe.io/api/v2',
-      exploreBaseUrl: 'https://themesb3-stage.adobe.io',
+      // exploreBaseUrl: 'https://themesb3-stage.adobe.io', /** Due to issues we are seeing with stage url not loading, we have removed this for now. */
       endpoints: {
         ...PROD_CONFIG.services.kuler.endpoints,
         themeBaseUrl: 'https://themes-stage.adobe.io',

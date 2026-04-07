@@ -85,6 +85,7 @@ body:has(.color-extract.has-image) .color-headline.extract {
   height: 29px;
   padding: 0;
   margin-inline: 0;
+  margin-bottom: var(--spacing-100);
 }
 
 .color-headline.tools h1,
@@ -96,6 +97,7 @@ body:has(.color-extract.has-image) .color-headline.extract {
   line-height: 1.04;
   color: var(--color-default-font);
   margin: 0;
+  padding-block-end: var(--spacing-100);
 }
 
 .color-headline.tools p {
