@@ -501,7 +501,11 @@ export function createCheckerRenderer(options) {
       row.appendChild(createCategoryCell({ label, tooltip }));
       row.appendChild(buildResultCell(aa, strings));
       row.appendChild(aaa === null
-        ? createTag('div', { class: 'cc-summary-cell' }, '—')
+        ? createTooltipLabelCell({
+          label: strings.graphicsAndUiAaaNotApplicable,
+          tooltip: strings.graphicsAndUiAaaTooltip,
+          className: 'cc-summary-cell cc-summary-cell--na',
+        })
         : buildResultCell(aaa, strings));
 
       row.addEventListener('mouseenter', () => {

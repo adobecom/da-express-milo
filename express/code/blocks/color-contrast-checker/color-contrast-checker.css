@@ -678,6 +678,14 @@
   color: var(--color-dark-gray);
 }
 
+.cc-summary-cell--na {
+  font-weight: var(--font-weight-medium);
+  line-height: var(--ax-body-xs-lh);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 12%;
+}
+
 .cc-summary-cell svg {
   width: var(--cc-icon-size-md);
   height: var(--cc-icon-size-md);
