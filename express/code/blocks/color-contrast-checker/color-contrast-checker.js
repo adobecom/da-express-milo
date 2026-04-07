@@ -1,4 +1,5 @@
 import { createTag } from '../../scripts/utils.js';
+import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createContrastRenderer } from './factory/createContrastRenderer.js';
 import loadContrastCheckerPlaceholders from './utils/placeholders.js';
@@ -202,6 +203,7 @@ export default async function decorate(block) {
     block.classList.add('ax-shell-host', `color-contrast-checker-${config.variant}`);
     block.dataset.shellState = 'ready';
     block.dataset.blockStatus = 'loaded';
+    trackColorBlockLoad('color-contrast-checker');
   } catch (error) {
     window.lana?.log(`Contrast Checker init error: ${error.message}`, {
       tags: 'color-contrast-checker,init',

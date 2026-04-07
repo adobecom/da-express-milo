@@ -1,4 +1,5 @@
 import { createTag, getIconElementDeprecated, getLibs } from '../../scripts/utils.js';
+import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import {
   CSS_CLASSES, DEFAULTS, EVENTS, MOODS, VARIANTS,
 } from './helpers/constants.js';
@@ -1314,4 +1315,5 @@ export default async function decorate(block) {
   } else {
     await renderGradientVariant(block, contentRows, config);
   }
+  trackColorBlockLoad('color-extract');
 }
