@@ -343,9 +343,9 @@ export default async function decorate(block) {
           content: () => createGradientPickerRebuildContent(content, {
             likesCount: content.likes ?? content.likesCount ?? 0,
             liked: content.liked ?? false,
-            creatorName: content.creator?.name ?? 'nicolagilroy',
+            creatorName: content.creator?.name ?? '',
             creatorImageUrl: content.creator?.imageUrl ?? content.creatorImageUrl,
-            tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
+            tags: item.tags ?? [],
             onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
           }),
         });
@@ -552,13 +552,19 @@ export default async function decorate(block) {
           activeRenderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
             await modalManager.openPaletteSwatchesModal(
               palette || {},
-              { verticalMaxPerRow: config.swatchVerticalMaxPerRow },
+              {
+                verticalMaxPerRow: config.swatchVerticalMaxPerRow,
+                onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
+              },
             );
           });
           activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
             await modalManager.openPaletteSwatchesModal(
               palette || {},
-              { verticalMaxPerRow: config.swatchVerticalMaxPerRow },
+              {
+                verticalMaxPerRow: config.swatchVerticalMaxPerRow,
+                onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
+              },
             );
           });
 
@@ -672,13 +678,19 @@ export default async function decorate(block) {
       renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
         await modalManager.openPaletteSwatchesModal(
           palette || {},
-          { verticalMaxPerRow: config.swatchVerticalMaxPerRow },
+          {
+            verticalMaxPerRow: config.swatchVerticalMaxPerRow,
+            onLikeToggle: async ({ id, liked }) => dataService.toggleLike({ id, liked }),
+          },
         );
       });
       renderer.on(EVENTS.SHARE, async ({ palette }) => {
         await modalManager.openPaletteSwatchesModal(
           palette || {},
-          { verticalMaxPerRow: config.swatchVerticalMaxPerRow },
+          {
+            verticalMaxPerRow: config.swatchVerticalMaxPerRow,
+            onLikeToggle: async ({ id, liked }) => dataService.toggleLike({ id, liked }),
+          },
         );
       });
 
