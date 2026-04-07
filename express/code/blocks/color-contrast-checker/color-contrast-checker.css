@@ -1120,6 +1120,10 @@
   background: var(--cc-preview-browser-bar-bg);
   display: none;
   align-items: center;
+  border-inline: 1px solid var(--cc-border-preview);
+  border-block-start: 1px solid var(--cc-border-preview);
+  border-top-right-radius: inherit;
+  border-top-left-radius: inherit;
 }
 
 .cc-browser-dots {
@@ -1225,7 +1229,8 @@
   max-width: var(--cc-preview-text-content-max-width);
   position: relative;
   padding: var(--cc-preview-text-padding-mobile);
-  border: 1px solid var(--cc-border-preview);
+  border-inline-end: 1px solid var(--cc-border-preview);
+  border-block-end: 1px solid var(--cc-border-preview);
   border-radius: var(--cc-preview-frame-radius-mobile);
 }
 
