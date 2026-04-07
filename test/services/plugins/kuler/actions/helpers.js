@@ -1,6 +1,6 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { ValidationError, ConfigError } from '../../../../express/code/libs/services/core/Errors.js';
+import { ValidationError, ConfigError } from '../../../../../express/code/libs/services/core/Errors.js';
 
 /**
  * Assert that `fn` throws a ValidationError, then run optional extra checks.
