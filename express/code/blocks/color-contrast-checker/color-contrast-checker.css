@@ -1391,13 +1391,6 @@
   }
 }
 
-@media (max-width: 599px) {
-  .color-contrast-checker .ax-shell-slot--footer .ax-toolbar-standalone .ax-palette-name {
-    display: flex;
-  }
-}
-
-
 @media (prefers-reduced-motion: reduce) {
   .cc-swap-btn {
     transition: none;

@@ -254,8 +254,8 @@
 
 .ax-toolbar-sticky-wrapper {
   --ax-toolbar-sticky-z: 80;
-  --ax-toolbar-floating-bottom-offset: var(--spacing-200);
-  --ax-toolbar-inline-margin: var(--ax-color-tool-outer-margin, var(--spacing-300));
+  --ax-toolbar-floating-bottom-offset: 0;
+  --ax-toolbar-inline-margin: 0;
   --ax-toolbar-presentation-max-width: var(--ax-color-tool-presentation-max-width, 1920px);
   --ax-toolbar-max-width-desktop: calc(var(--ax-toolbar-presentation-max-width) - var(--ax-toolbar-inline-margin) * 2);
 
@@ -276,6 +276,8 @@
   }
 
   .ax-toolbar-sticky-wrapper {
+    --ax-toolbar-floating-bottom-offset: var(--spacing-200);
+    --ax-toolbar-inline-margin: var(--ax-color-tool-outer-margin, var(--spacing-300));
     inset-block-end: var(--ax-toolbar-floating-bottom-offset);
   }
 

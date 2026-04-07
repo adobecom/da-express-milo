@@ -77,9 +77,8 @@ export default async function decorate(block) {
       palette: initialPalette,
       toolbar: {
         variant: 'standalone',
-        mode: 'inline',
+        mode: 'sticky-on-scroll',
         showEdit: false,
-        showPalette: isDesktop,
         showPaletteName: true,
         editPaletteName: false,
       },

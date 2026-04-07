@@ -142,6 +142,14 @@
   z-index: var(--ax-z-footer);
 }
 
+.ax-color-tool-layout[data-toolbar-mode="sticky-on-scroll"] .ax-toolbar-standalone .ax-swatch-strip {
+  display: none;
+}
+
+.ax-color-tool-layout[data-toolbar-mode="sticky-on-scroll"] .ax-toolbar-standalone .ax-palette-name {
+  display: flex;
+}
+
 .ax-color-tool-layout[data-layout-variant="canvas-footer"] .ax-shell-slot--footer,
 .ax-color-tool-layout[data-toolbar-mode="inline"] .ax-shell-slot--footer,
 .ax-color-tool-layout[data-toolbar-mode="sticky-on-scroll"] .ax-shell-slot--footer {

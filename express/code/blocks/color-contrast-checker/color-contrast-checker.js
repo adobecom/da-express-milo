@@ -161,7 +161,6 @@ export default async function decorate(block) {
         mode: 'sticky-on-scroll',
         variant: 'standalone',
         showEdit: false,
-        showPalette: !isMobileOrTabletViewport(),
         showPaletteName: true,
         editPaletteName: false,
       },
