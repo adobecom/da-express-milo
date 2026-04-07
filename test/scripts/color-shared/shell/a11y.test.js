@@ -1,10 +1,9 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
+import createColorToolLayout from '../../../../express/code/scripts/color-shared/shell/layouts/createColorToolLayout.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
-
-import createColorToolLayout from '../../../../express/code/scripts/color-shared/shell/layouts/createColorToolLayout.js';
 
 describe('Shell ARIA & Semantics [H3]', () => {
   let container;

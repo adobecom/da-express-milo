@@ -1,10 +1,9 @@
 /* eslint-disable max-len, no-underscore-dangle, no-promise-executor-return */
 import { expect } from '@esm-bundle/chai';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
+import { createModalManager } from '../../../../express/code/scripts/color-shared/modal/createModalManager.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
-
-import { createModalManager } from '../../../../express/code/scripts/color-shared/modal/createModalManager.js';
 
 function createModalStubContent(opts = {}) {
   const { listItems = 5, strips = 3 } = opts;

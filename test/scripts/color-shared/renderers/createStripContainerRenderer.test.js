@@ -1,10 +1,9 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
+import { createStripContainerRenderer } from '../../../../express/code/scripts/color-shared/renderers/createStripContainerRenderer.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
-
-import { createStripContainerRenderer } from '../../../../express/code/scripts/color-shared/renderers/createStripContainerRenderer.js';
 
 function waitForFrame() {
   return new Promise((resolve) => {
@@ -59,6 +58,9 @@ describe('createStripContainerRenderer', () => {
         this.connected = true;
         this.callback([{ contentRect: { height: 240 } }]);
       }
+
+      // eslint-disable-next-line class-methods-use-this
+      unobserve() {}
 
       disconnect() {
         this.connected = false;

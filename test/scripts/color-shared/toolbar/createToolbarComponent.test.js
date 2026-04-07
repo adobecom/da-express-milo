@@ -2,12 +2,11 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
-
-setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
-
 import { createToolbar } from '../../../../express/code/scripts/color-shared/toolbar/createToolbarComponent.js';
 import { MOCK_PALETTE, MOCK_GRADIENT } from './mocks/palette.js';
 import { createMockGetLibraryContext } from './mocks/stubs.js';
+
+setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
 const noopDeps = { loadDeps: () => {} };
 
