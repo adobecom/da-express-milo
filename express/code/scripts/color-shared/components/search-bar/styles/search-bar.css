@@ -1,4 +1,4 @@
-.search-bar-sentinel {
+.ax-color-search-bar-sentinel {
   position: absolute;
   inset-block-start: 0;
   inset-inline-start: 0;
@@ -9,8 +9,8 @@
 
 /* The sticky wrapper is mounted under document.body, so it must carry the same
    component-level custom properties as the inline search bar host. */
-.search-bar-outer,
-.search-bar-sticky-wrapper.is-sticky-clone {
+.ax-color-search-bar-outer,
+.ax-color-search-bar-sticky-wrapper.is-sticky-clone {
   --search-bar-height: 40px;
   --search-bar-height-tablet: 48px;
   --search-bar-max-width: 700px;
@@ -26,7 +26,7 @@
   --search-bar-slide-distance: 20px;
 }
 
-.search-bar-outer {
+.ax-color-search-bar-outer {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -36,7 +36,7 @@
   position: relative;
 }
 
-.search-bar-container {
+.ax-color-search-bar-container {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -48,25 +48,25 @@
   z-index: 5;
 }
 
-.search-bar-wrapper {
+.ax-color-search-bar-wrapper {
   inline-size: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-.search-bar-form {
+.ax-color-search-bar-form {
   inline-size: 100%;
 }
 
-.search-input-wrapper {
+.ax-color-search-input-wrapper {
   position: relative;
   inline-size: 100%;
   display: flex;
   align-items: center;
 }
 
-.search-bar-input {
+.ax-color-search-bar-input {
   inline-size: 100%;
   block-size: var(--search-bar-height);
   border-radius: var(--Corner-radius-corner-radius-500);
@@ -85,28 +85,28 @@
     box-shadow var(--search-bar-transition-fast) ease;
 }
 
-.search-bar-input:hover {
+.ax-color-search-bar-input:hover {
   border-color: var(--color-gray-350-variant);
 }
 
-.search-bar-input:focus,
-.search-bar-input:focus-visible {
+.ax-color-search-bar-input:focus,
+.ax-color-search-bar-input:focus-visible {
   border-color: var(--color-gray-800-variant);
   box-shadow: 0 0 0 var(--search-bar-focus-ring-width) var(--color-gray-800-variant);
   outline: none;
 }
 
-.search-bar-input::placeholder {
+.ax-color-search-bar-input::placeholder {
   color: var(--text-color-secondary);
 }
 
-.search-bar-input::-webkit-search-cancel-button,
-.search-bar-input::-webkit-search-decoration {
+.ax-color-search-bar-input::-webkit-search-cancel-button,
+.ax-color-search-bar-input::-webkit-search-decoration {
   -webkit-appearance: none;
   appearance: none;
 }
 
-.search-icon {
+.ax-color-search-icon {
   position: absolute;
   inset-inline-start: var(--spacing-300);
   display: flex;
@@ -116,12 +116,12 @@
   color: var(--color-dark-gray);
 }
 
-.search-icon svg {
+.ax-color-search-icon svg {
   inline-size: var(--search-bar-icon-size);
   block-size: var(--search-bar-icon-size);
 }
 
-.search-clear-btn {
+.ax-color-search-clear-btn {
   position: absolute;
   inset-block-start: 50%;
   inset-inline-end: var(--spacing-200);
@@ -142,30 +142,30 @@
     color var(--search-bar-transition-fast) ease;
 }
 
-.search-clear-btn:hover {
+.ax-color-search-clear-btn:hover {
   background-color: var(--Palette-gray-200);
   color: var(--color-gray-950);
 }
 
-.search-clear-btn:focus-visible {
+.ax-color-search-clear-btn:focus-visible {
   outline: var(--border-width-2) solid var(--Alias-focus-indicator-default);
   outline-offset: var(--search-bar-focus-outline-offset);
 }
 
-.search-clear-btn svg {
+.ax-color-search-clear-btn svg {
   inline-size: var(--search-bar-icon-size);
   block-size: var(--search-bar-icon-size);
 }
 
-.search-clear-btn.hidden {
+.ax-color-search-clear-btn.hidden {
   display: none;
 }
 
-.search-bar-container.is-fetching .search-bar-input {
+.ax-color-search-bar-container.is-fetching .ax-color-search-bar-input {
   opacity: 0.7;
 }
 
-.search-bar-container.is-returning {
+.ax-color-search-bar-container.is-returning {
   animation: searchBarFadeIn var(--search-bar-transition-normal) ease-out;
 }
 
@@ -179,7 +179,7 @@
   }
 }
 
-.search-bar-sticky-wrapper.is-sticky-clone {
+.ax-color-search-bar-sticky-wrapper.is-sticky-clone {
   position: fixed;
   inset-block-end: var(--search-bar-sticky-inset-block-end);
   inset-inline-start: var(--spacing-300);
@@ -198,14 +198,14 @@
   visibility: hidden;
 }
 
-.search-bar-sticky-wrapper.is-sticky-clone.is-visible {
+.ax-color-search-bar-sticky-wrapper.is-sticky-clone.is-visible {
   opacity: 1;
   pointer-events: auto;
   visibility: visible;
   animation: searchBarSlideUpMobile var(--search-bar-transition-normal) ease-out;
 }
 
-.search-bar-sticky-wrapper.is-sticky-clone.is-leaving {
+.ax-color-search-bar-sticky-wrapper.is-sticky-clone.is-leaving {
   animation: searchBarSlideDownMobile var(--search-bar-transition-normal) ease-in forwards;
 }
 
@@ -234,20 +234,20 @@
 }
 
 @media (min-width: 768px) {
-  .search-bar-outer {
+  .ax-color-search-bar-outer {
     inline-size: 100%;
     max-inline-size: 600px;
     padding-inline: 0;
   }
 
-  .search-bar-input {
+  .ax-color-search-bar-input {
     block-size: var(--search-bar-height-tablet);
     padding-inline-start: calc(var(--spacing-300) + var(--search-bar-icon-size) + var(--spacing-200));
     padding-inline-end: var(--spacing-600);
     font-size: var(--body-font-size-m);
   }
 
-  .search-bar-sticky-wrapper.is-sticky-clone {
+  .ax-color-search-bar-sticky-wrapper.is-sticky-clone {
     inset-inline-start: 50%;
     inset-inline-end: auto;
     transform: translateX(-50%);
@@ -255,11 +255,11 @@
     max-inline-size: calc(100% - var(--spacing-400) * 2);
   }
 
-  .search-bar-sticky-wrapper.is-sticky-clone.is-visible {
+  .ax-color-search-bar-sticky-wrapper.is-sticky-clone.is-visible {
     animation: searchBarSlideUp var(--search-bar-transition-normal) ease-out;
   }
 
-  .search-bar-sticky-wrapper.is-sticky-clone.is-leaving {
+  .ax-color-search-bar-sticky-wrapper.is-sticky-clone.is-leaving {
     animation: searchBarSlideDown var(--search-bar-transition-normal) ease-in forwards;
   }
 
@@ -289,7 +289,7 @@
 }
 
 @media (min-width: 1024px) {
-  .search-bar-outer {
+  .ax-color-search-bar-outer {
     inline-size: var(--search-bar-max-width);
   }
 }
