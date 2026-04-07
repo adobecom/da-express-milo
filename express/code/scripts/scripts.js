@@ -402,9 +402,7 @@ async function loadPage() {
     import('./instrument.js').then((mod) => { mod.default(); });
   }
 
-  /* region based redirect to CN homepage
-     Guards: adobe.com origin only (not AEM preview/live), not already on /cn,
-     and not a 404 page (which would create an infinite redirect loop) */
+  /* region based redirect to CN homepage */
   const isAdobeOrigin = /^(www\.stage\.|www\.)adobe\.com$/.test(window.location.hostname);
   import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
     if (country === 'cn' && isAdobeOrigin && !window.location.pathname.startsWith('/cn') && !window.isErrorPage) { window.location.href = '/cn'; }
