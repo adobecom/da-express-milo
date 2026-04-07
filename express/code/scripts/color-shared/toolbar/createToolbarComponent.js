@@ -80,6 +80,7 @@ async function handleOpenInExpress({ id, name, colors }) {
   url.searchParams.set('referrer', 'express-colors');
   url.searchParams.set('entryPoint', 'color-explorer');
   url.searchParams.set('feature-enable', 'colors-product-entry-enabled');
+  url.searchParams.set('category', 'theme');
 
   window.open(url.toString(), '_blank');
 }
@@ -378,14 +379,13 @@ export function createToolbar(options) {
 
   const main = createTag('div', { class: 'ax-toolbar-main' });
 
-  const DEFAULT_EDIT_BASE_PATH = '/express/colors/color-palette-generator';
+  const DEFAULT_EDIT_BASE_PATH = 'drafts/methomas/color-wheel'; // TODO: Change this to the correct base path when we have it
 
   const paletteSummary = buildPaletteSummary(colors, type, palette.angle, effectiveShowEdit, () => {
     const currentPalette = getPaletteWithName();
     const editUrl = editPaletteLink
       || buildPaletteEditUrl(DEFAULT_EDIT_BASE_PATH, currentPalette.colors, currentPalette.name);
     window.location.href = editUrl;
-    emit('edit', { palette: currentPalette });
   }, t);
 
   const { actions, ccLibBtn } = buildActionButtons({
