@@ -225,14 +225,16 @@
   }
 }
 
-/* ── Standalone variant: hide swatch strip, show palette name ── */
+/* ── Standalone variant: hide swatch strip, show palette name (mobile/tablet) ── */
 
-.ax-toolbar-standalone .ax-swatch-strip {
-  display: none;
-}
+@media (max-width: 1199px) {
+  .ax-toolbar-standalone .ax-swatch-strip {
+    display: none;
+  }
 
-.ax-toolbar-standalone .ax-palette-name {
-  display: flex;
+  .ax-toolbar-standalone .ax-palette-name {
+    display: flex;
+  }
 }
 
 .ax-palette-name-input {
