@@ -858,7 +858,7 @@
   overflow: hidden;
 }
 
-.cc-suggestion-preview-fg {
+.cc-suggestion-preview-bg {
   flex: 1;
   display: flex;
   align-items: flex-end;
@@ -874,10 +874,9 @@
   font-size: var(--cc-suggestion-letter-size);
   font-weight: var(--ax-body-weight);
   line-height: var(--cc-line-height-badge);
-  color: inherit;
 }
 
-.cc-suggestion-preview-bg {
+.cc-suggestion-preview-fg {
   flex: 1;
   border: 0.5px solid var(--cc-border-preview);
   border-left: none;
