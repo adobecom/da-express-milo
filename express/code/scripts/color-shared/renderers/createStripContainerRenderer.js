@@ -569,6 +569,7 @@ export function createStripContainerRenderer(options) {
       adapter,
       popover,
       mobile,
+      resizeObserver,
       outsideHandler,
       escapeHandler,
       scrollHandler,
@@ -577,6 +578,7 @@ export function createStripContainerRenderer(options) {
     if (outsideHandler) document.removeEventListener('click', outsideHandler, true);
     if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
     if (scrollHandler) window.removeEventListener('scroll', scrollHandler, true);
+    resizeObserver?.disconnect?.();
     if (mobile) {
       try {
         adapter.hide?.();
@@ -687,11 +689,23 @@ export function createStripContainerRenderer(options) {
       adapter,
       popover,
       mobile: false,
+      resizeObserver: observer,
       outsideHandler,
       escapeHandler,
       scrollHandler,
       railElement,
     };
+
+    requestAnimationFrame(async () => {
+      try {
+        await customElements.whenDefined('color-edit');
+        await editorElement.updateComplete;
+        if (activeColorEditor?.adapter !== adapter) return;
+        await adapter.show?.();
+      } catch (e) {
+        window.lana?.log(`[color-editor] desktop show failed: ${e.message}`, { tags: 'color-edit' });
+      }
+    });
   }
 
   function attachRailEditor(railElement) {
