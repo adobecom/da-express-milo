@@ -55,7 +55,7 @@ describe('Frictionless Quick Action Block', () => {
     document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
     const block = document.body.querySelector('.frictionless-quick-action');
 
-    runQuickAction('convert-to-jpg', 'data:image/png;base64,', block);
+    await runQuickAction('convert-to-jpg', ['data:image/png;base64,'], block);
     const qac = block.querySelector('.quick-action-container');
     expect(qac).to.not.be.null;
   });
