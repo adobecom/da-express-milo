@@ -279,6 +279,14 @@
   inset-inline-end: 0;
   margin-inline: auto;
   z-index: var(--ax-toolbar-sticky-z);
+  opacity: 0;
+  transform: translateY(30%);
+  transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+}
+
+.ax-toolbar-sticky-wrapper.ax-toolbar-visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* ── Tablet (600px+) ─────────────────────────────────────────── */

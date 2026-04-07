@@ -144,10 +144,10 @@ async function loadToolbarDependencies(providedPalette, deps = {}) {
   return providedPalette;
 }
 
-function clearStickyBehavior(wrapper, reserveContainer, resizeObserver, scrollObserver) {
-  resizeObserver?.disconnect();
+function clearStickyBehavior(wrapper, reserveContainer, scrollObserver) {
   scrollObserver?.disconnect();
-  wrapper.classList.remove('ax-toolbar-sticky-wrapper');
+  wrapper.classList.remove('ax-toolbar-sticky-wrapper', 'ax-toolbar-visible');
+  wrapper.parentElement?.querySelector('.ax-toolbar-scroll-sentinel')?.remove();
 
   if (!reserveContainer) return;
 
@@ -161,22 +161,15 @@ function setupStickyBehavior(wrapper, options = {}) {
     reserveSpace = true,
   } = options;
 
-  wrapper.classList.add('ax-toolbar-sticky-wrapper');
-
-  if (!reserveSpace || !reserveContainer) return null;
-
-  reserveContainer.classList.add('ax-toolbar-sticky-host');
-
-  const updateToolbarHeight = () => {
+  if (reserveSpace && reserveContainer) {
+    // Lock the reserve height to the standalone layout BEFORE going fixed.
+    // This prevents layout shift — the space left behind matches what was there.
     const h = wrapper.getBoundingClientRect().height;
+    reserveContainer.classList.add('ax-toolbar-sticky-host');
     reserveContainer.style.setProperty('--ax-toolbar-h', `${h}px`);
-  };
+  }
 
-  requestAnimationFrame(updateToolbarHeight);
-
-  const ro = new ResizeObserver(updateToolbarHeight);
-  ro.observe(wrapper);
-  return ro;
+  wrapper.classList.add('ax-toolbar-sticky-wrapper');
 }
 
 /**
@@ -252,7 +245,6 @@ export async function initFloatingToolbar(container, options = {}) {
   wrapper.appendChild(toolbar.element);
   container.appendChild(wrapper);
 
-  let stickyRo = null;
   let stickyIo = null;
   let stickyReserveContainer = null;
   let currentContainer = container;
@@ -268,30 +260,46 @@ export async function initFloatingToolbar(container, options = {}) {
   }
 
   function activateSticky(variantOptions) {
-    toolbar.setVariant?.('sticky');
-    stickyRo = setupStickyBehavior(wrapper, {
+    setupStickyBehavior(wrapper, {
       reserveContainer: stickyReserveContainer,
       reserveSpace: variantOptions.reserveSpace ?? reserveSpace,
     });
+    toolbar.setVariant?.('sticky');
+    requestAnimationFrame(() => wrapper.classList.add('ax-toolbar-visible'));
   }
 
-  function deactivateSticky() {
-    stickyRo?.disconnect();
-    stickyRo = null;
-    wrapper.classList.remove('ax-toolbar-sticky-wrapper');
+  function clearStickyClasses() {
+    wrapper.classList.remove('ax-toolbar-sticky-wrapper', 'ax-toolbar-visible');
     stickyReserveContainer.classList.remove('ax-toolbar-sticky-host');
     stickyReserveContainer.style.removeProperty('--ax-toolbar-h');
     toolbar.setVariant?.(resolvedStandaloneVariant);
   }
 
-  function observeStickyOnScroll(sentinel, variantOptions) {
+  function deactivateSticky() {
+    if (!wrapper.classList.contains('ax-toolbar-visible')) {
+      clearStickyClasses();
+      return;
+    }
+
+    wrapper.classList.remove('ax-toolbar-visible');
+    wrapper.addEventListener('transitionend', () => clearStickyClasses(), { once: true });
+  }
+
+  function observeStickyOnScroll(variantOptions) {
     if (typeof IntersectionObserver === 'undefined') return;
+    const sentinel = createTag('div', { class: 'ax-toolbar-scroll-sentinel', 'aria-hidden': 'true' });
+    wrapper.before(sentinel);
+
+    let isSticky = false;
 
     stickyIo = new IntersectionObserver((entries) => {
       const entry = entries[0];
       const shouldStick = Boolean(entry)
         && !entry.isIntersecting
         && entry.boundingClientRect.top < 0;
+
+      if (shouldStick === isSticky) return;
+      isSticky = shouldStick;
 
       if (shouldStick) activateSticky(variantOptions);
       else deactivateSticky();
@@ -300,8 +308,7 @@ export async function initFloatingToolbar(container, options = {}) {
   }
 
   function resetStickyState() {
-    clearStickyBehavior(wrapper, stickyReserveContainer, stickyRo, stickyIo);
-    stickyRo = null;
+    clearStickyBehavior(wrapper, stickyReserveContainer, stickyIo);
     stickyIo = null;
     stickyReserveContainer = null;
   }
@@ -312,7 +319,7 @@ export async function initFloatingToolbar(container, options = {}) {
     if (nextVariant === 'sticky-on-scroll') {
       toolbar.setVariant?.(resolvedStandaloneVariant);
       stickyReserveContainer = resolveReserveContainer(variantOptions);
-      observeStickyOnScroll(stickyReserveContainer, variantOptions);
+      observeStickyOnScroll(variantOptions);
       return;
     }
 
@@ -337,7 +344,7 @@ export async function initFloatingToolbar(container, options = {}) {
     mount,
     setVariant,
     destroy() {
-      clearStickyBehavior(wrapper, stickyReserveContainer, stickyRo, stickyIo);
+      clearStickyBehavior(wrapper, stickyReserveContainer, stickyIo);
       toolbar.destroy();
       wrapper.remove();
     },
