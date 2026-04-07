@@ -291,7 +291,7 @@
 }
 
 .color-floating-toolbar-container.ax-toolbar-fade-in {
-  animation: ax-toolbar-fade-in 0.25s ease-out both;
+  animation: ax-toolbar-fade-in 0.15s ease-out both;
 }
 
 @keyframes ax-toolbar-fade-in {
