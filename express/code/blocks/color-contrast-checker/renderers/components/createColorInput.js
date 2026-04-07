@@ -240,7 +240,7 @@ export function createColorInput(config) {
       palette,
       selectedIndex,
       colorMode: 'HEX',
-      showPalette: mobile,
+      showPalette: palette.length > 1,
       mobile,
     }, {
       onColorChange: ({ hex }) => {
