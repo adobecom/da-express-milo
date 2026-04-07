@@ -379,7 +379,7 @@ export function createToolbar(options) {
 
   const main = createTag('div', { class: 'ax-toolbar-main' });
 
-  const DEFAULT_EDIT_BASE_PATH = 'drafts/methomas/color-wheel'; // TODO: Change this to the correct base path when we have it
+  const DEFAULT_EDIT_BASE_PATH = '/express/colors/color-wheel';
 
   const paletteSummary = buildPaletteSummary(colors, type, palette.angle, effectiveShowEdit, () => {
     const currentPalette = getPaletteWithName();

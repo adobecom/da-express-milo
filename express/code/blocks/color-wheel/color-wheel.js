@@ -698,6 +698,7 @@ export default async function decorate(block) {
             { id: 'expand', label: strings.maximize },
           ],
           type: isDesktop ? 'full' : 'nav-only',
+          getName: () => currentPalette?.name || initialPalette.name,
           onGenerateRandom: () => {
             isGeneratingRandom = true;
             // If no HISTORY_EVENT fires (e.g. all colors locked, palette unchanged),

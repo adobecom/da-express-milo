@@ -402,7 +402,14 @@ export function createCheckerRenderer(options) {
   }
 
   function getHistoryState() {
-    return [foreground, background];
+    const palette = context?.get('palette');
+    const colors = Array.isArray(palette?.colors) ? palette.colors : [];
+    if (colors.length <= 2) return [foreground, background];
+    const remaining = colors.filter(
+      (c) => c?.toUpperCase() !== foreground?.toUpperCase()
+        && c?.toUpperCase() !== background?.toUpperCase(),
+    );
+    return [foreground, background, ...remaining];
   }
 
   function clearHistoryTimer() {

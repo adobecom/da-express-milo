@@ -18,9 +18,9 @@ export const WCAG_THRESHOLDS = {
 export function createDefaultActionMenuConfig(placeholders = {}) {
   return {
     navLinks: [
-      { id: 'palette', href: '#palette', label: placeholders.colorPaletteLabel || 'Color palette' },
-      { id: 'contrast', href: '#contrast', label: placeholders.contrastCheckerLabel || 'Contrast checker' },
-      { id: 'color-blindness', href: '#color-blindness', label: placeholders.colorBlindnessLabel || 'Color blindness' },
+      { id: 'palette', href: '/express/colors/color-wheel', label: placeholders.colorPaletteLabel || 'Color palette' },
+      { id: 'contrast', href: '/express/colors/contrast-checker', label: placeholders.contrastCheckerLabel || 'Contrast checker' },
+      { id: 'color-blindness', href: '/express/colors/color-blindness', label: placeholders.colorBlindnessLabel || 'Color blindness' },
     ],
     controls: [
       { id: 'undo', label: placeholders.undoLabel || 'Undo' },
