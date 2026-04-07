@@ -80,6 +80,7 @@ async function handleOpenInExpress({ id, name, colors }) {
   url.searchParams.set('referrer', 'express-colors');
   url.searchParams.set('entryPoint', 'color-explorer');
   url.searchParams.set('feature-enable', 'colors-product-entry-enabled');
+  url.searchParams.set('category', 'theme');
 
   window.open(url.toString(), '_blank');
 }
@@ -387,7 +388,7 @@ export function createToolbar(options) {
 
   const main = createTag('div', { class: 'ax-toolbar-main' });
 
-  const DEFAULT_EDIT_BASE_PATH = '/express/colors/color-palette-generator';
+  const DEFAULT_EDIT_BASE_PATH = '/express/colors/color-wheel';
 
   const paletteSummary = buildPaletteSummary(
     colors,
@@ -407,7 +408,6 @@ export function createToolbar(options) {
         );
         window.location.href = editUrl;
       }
-      emit('edit', { palette: currentPalette });
     },
     t,
   );

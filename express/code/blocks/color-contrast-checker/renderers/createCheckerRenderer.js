@@ -11,7 +11,7 @@ import { loadActionButton, loadBadge, loadTooltip } from '../../../scripts/color
 import { createThemeWrapper } from '../../../scripts/color-shared/spectrum/utils/theme.js';
 import { createContrastCheckerPlaceholders } from '../utils/placeholders.js';
 import { FAIL, createDefaultActionMenuConfig } from '../utils/contrastConstants.js';
-import '../../../scripts/color-shared/components/color-channel-slider/index.js';
+import { createColorChannelSliderAdapter } from '../../../scripts/color-shared/adapters/litComponentAdapters.js';
 
 const regionMap = { largeText: 'heading', smallText: 'body', graphicsAndUi: 'ui' };
 const ACTION_MENU_ID = 'color-contrast-checker-menu';
@@ -131,7 +131,6 @@ function createContrastRatioBadgeWrapper(ratio, pass, strings) {
     role: 'status',
     'aria-live': 'polite',
   });
-  attachTooltip(trigger, strings.contrastRatioTooltip, 'top');
   trigger.appendChild(badge);
   theme.appendChild(trigger);
   updateContrastRatioBadge(badge, ratio, pass, strings);
@@ -223,9 +222,9 @@ function createTintSlider(hex, onInput, onCommit, strings, label = '') {
   const container = createTag('div', { class: 'cc-slider-container' });
   const sliderRow = createTag('div', { class: 'cc-tint-slider-row' });
   const sliderWrapper = createTag('div', { class: 'cc-tint-slider-wrapper' });
-  const slider = createTag('color-channel-slider');
   const tintInputAriaLabel = createTintAccessibleLabel(label, strings.tintValueAriaLabel);
   const tintSliderAriaLabel = createTintAccessibleLabel(label, strings.tintAdjustmentLabel);
+  let sliderAdapter;
 
   const tintInput = createTag('input', {
     type: 'text',
@@ -244,35 +243,37 @@ function createTintSlider(hex, onInput, onCommit, strings, label = '') {
   function syncTintValue(index) {
     const displayValue = formatTintDisplayValue(index);
     tintInput.value = displayValue;
-    slider.valuetext = displayValue;
+    sliderAdapter.setValuetext(displayValue);
   }
 
-  slider.min = 0;
-  slider.max = MAX_TINT_INDEX;
-  slider.value = findTintIndex(hex);
-  slider.label = tintSliderAriaLabel;
-  slider.gradient = buildTintGradient(hex);
-  syncTintValue(slider.value);
-
-  slider.addEventListener('input', (e) => {
-    const val = clampTintIndex(e.detail?.value ?? e.target.value);
-    const newHex = tints[val];
-    if (newHex) {
-      slider.value = val;
-      syncTintValue(val);
-      onInput(newHex);
-    }
+  sliderAdapter = createColorChannelSliderAdapter({
+    min: 0,
+    max: MAX_TINT_INDEX,
+    value: findTintIndex(hex),
+    label: tintSliderAriaLabel,
+    gradient: buildTintGradient(hex),
+  }, {
+    onInput: (detail) => {
+      const val = clampTintIndex(detail?.value ?? sliderAdapter.element.value);
+      const newHex = tints[val];
+      if (newHex) {
+        sliderAdapter.setValue(val);
+        syncTintValue(val);
+        onInput(newHex);
+      }
+    },
+    onChange: (detail) => {
+      const val = clampTintIndex(detail?.value ?? sliderAdapter.element.value);
+      const newHex = tints[val];
+      if (newHex) {
+        sliderAdapter.setValue(val);
+        syncTintValue(val);
+        onCommit(newHex);
+      }
+    },
   });
 
-  slider.addEventListener('change', (e) => {
-    const val = clampTintIndex(e.detail?.value ?? e.target.value);
-    const newHex = tints[val];
-    if (newHex) {
-      slider.value = val;
-      syncTintValue(val);
-      onCommit(newHex);
-    }
-  });
+  syncTintValue(sliderAdapter.element.value);
 
   tintInput.addEventListener('input', () => {
     const sanitizedValue = sanitizeTintInputValue(tintInput.value);
@@ -287,37 +288,37 @@ function createTintSlider(hex, onInput, onCommit, strings, label = '') {
     const normalizedValue = tintInputValueToNormalizedValue(sanitizedValue);
 
     if (normalizedValue === null) {
-      syncTintValue(slider.value);
+      syncTintValue(sliderAdapter.element.value);
       return;
     }
 
     const val = tintNormalizedValueToIndex(normalizedValue);
-    slider.value = val;
+    sliderAdapter.setValue(val);
     syncTintValue(val);
     const newHex = tints[val];
     if (newHex) onCommit(newHex);
   });
 
   tintInput.addEventListener('blur', () => {
-    syncTintValue(slider.value);
+    syncTintValue(sliderAdapter.element.value);
   });
 
-  sliderWrapper.appendChild(slider);
+  sliderWrapper.appendChild(sliderAdapter.element);
   sliderRow.appendChild(sliderWrapper);
   sliderRow.appendChild(tintInput);
   container.appendChild(sliderRow);
 
   return {
     element: container,
-    slider,
+    slider: sliderAdapter.element,
     tintInput,
     refreshTints(newHex) {
       tints = generateTintScale(newHex);
-      slider.gradient = buildTintGradient(newHex);
+      sliderAdapter.setGradient(buildTintGradient(newHex));
     },
     updatePosition(newHex) {
       const idx = findTintIndex(newHex);
-      slider.value = idx;
+      sliderAdapter.setValue(idx);
       syncTintValue(idx);
     },
   };
@@ -401,7 +402,14 @@ export function createCheckerRenderer(options) {
   }
 
   function getHistoryState() {
-    return [foreground, background];
+    const palette = context?.get('palette');
+    const colors = Array.isArray(palette?.colors) ? palette.colors : [];
+    if (colors.length <= 2) return [foreground, background];
+    const remaining = colors.filter(
+      (c) => c?.toUpperCase() !== foreground?.toUpperCase()
+        && c?.toUpperCase() !== background?.toUpperCase(),
+    );
+    return [foreground, background, ...remaining];
   }
 
   function clearHistoryTimer() {
@@ -502,7 +510,11 @@ export function createCheckerRenderer(options) {
       row.appendChild(createCategoryCell({ label, tooltip }));
       row.appendChild(buildResultCell(aa, strings));
       row.appendChild(aaa === null
-        ? createTag('div', { class: 'cc-summary-cell' }, '—')
+        ? createTooltipLabelCell({
+          label: strings.graphicsAndUiAaaNotApplicable,
+          tooltip: strings.graphicsAndUiAaaTooltip,
+          className: 'cc-summary-cell cc-summary-cell--na',
+        })
         : buildResultCell(aaa, strings));
 
       row.addEventListener('mouseenter', () => {
@@ -601,13 +613,15 @@ export function createCheckerRenderer(options) {
     const top = createTag('div', { class: 'cc-ratio-bar-top' });
 
     const ratioLabelContainer = createTag('div', { class: 'cc-ratio-label-container' });
-    const labelText = createTag('span', { class: 'cc-ratio-label-text' }, strings.contrastRatioLabel);
+    const labelTheme = createThemeWrapper();
+    const labelText = createTooltipLabelButton(strings.contrastRatioLabel, strings.contrastRatioTooltip, 'cc-ratio-label-text');
+    labelTheme.appendChild(labelText);
 
     const ratioBadgeComponent = createContrastRatioBadgeWrapper(results?.ratio ?? '', true, strings);
     ratioBadge = ratioBadgeComponent.badge;
     ratioBadge.setAttribute('hidden', '');
 
-    ratioLabelContainer.appendChild(labelText);
+    ratioLabelContainer.appendChild(labelTheme);
     ratioLabelContainer.appendChild(ratioBadgeComponent.element);
 
     const compareLink = createTag('button', {

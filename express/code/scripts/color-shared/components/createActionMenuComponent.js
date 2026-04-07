@@ -50,7 +50,7 @@ export async function loadStyles() {
   }
 }
 
-async function createNav(navLinks, activeId, getColors) {
+async function createNav(navLinks, activeId, getColors, getName) {
   const list = Array.isArray(navLinks) ? navLinks : [];
   const nav = createTag('nav', { class: 'action-menu-nav', 'aria-label': 'Color palette tools' });
   const ul = createTag('ul');
@@ -75,7 +75,8 @@ async function createNav(navLinks, activeId, getColors) {
       e.preventDefault();
       try {
         const url = new URL(linkEl.href, window.location.href);
-        paletteApi.setOnUrl(url, colors);
+        const name = typeof getName === 'function' ? getName() : undefined;
+        paletteApi.setOnUrl(url, colors, { name });
         window.location.href = url.toString();
       } catch {
         window.location.href = linkEl.href;
@@ -289,6 +290,7 @@ export async function createActionMenuComponent(options = {}) {
     onRedo,
     onGenerateRandom,
     transformPalette,
+    getName,
     enableState = true,
   } = options;
 
@@ -334,7 +336,7 @@ export async function createActionMenuComponent(options = {}) {
 
   if (type !== 'controls-only') {
     const processedLinks = await applyNavLinkParamOverrides(navLinks);
-    sections.push(await createNav(processedLinks, activeId, getCurrentPaletteFn));
+    sections.push(await createNav(processedLinks, activeId, getCurrentPaletteFn, getName));
   }
   if (type !== 'nav-only') {
     sections.push(await createControls(
