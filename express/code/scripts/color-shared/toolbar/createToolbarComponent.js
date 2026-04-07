@@ -80,7 +80,7 @@ async function handleOpenInExpress({ id, name, colors }) {
   url.searchParams.set('referrer', 'express-colors');
   url.searchParams.set('entryPoint', 'color-explorer');
   url.searchParams.set('feature-enable', 'colors-product-entry-enabled');
-  url.searchParams.set('category', 'theme');
+  url.searchParams.set('category', 'yourStuff');
 
   window.open(url.toString(), '_blank');
 }
