@@ -278,90 +278,98 @@ function trackTemplatePageLoad() {
 }
 
 function trackColorPageLoad() {
-  if (getMetadata('pagetype') !== 'color') return;
-
-  const eventName = 'view-color-page';
-  let refDomain = '';
-  let previousPagename = '';
   try {
-    const referrerUrl = new URL(document.referrer);
-    refDomain = referrerUrl.hostname;
-    previousPagename = referrerUrl.pathname;
-  } catch { /* no referrer or invalid */ }
+    if (getMetadata('pagetype') !== 'color') return;
 
-  const fireEvent = () => {
-    _satellite.track('event', {
-      xdm: {},
-      data: {
-        eventType: 'web.webinteraction.linkClicks',
-        web: {
-          webInteraction: {
-            name: eventName,
-            linkClicks: { value: 1 },
-            type: 'other',
-          },
-        },
-        _adobe_corpnew: {
-          sdm: {
-            event: {
-              pagename: eventName,
-              url: loc.href,
-            },
-            custom: {
-              aa: {
-                page_name: getPageName(),
-                ref_domain: refDomain,
-                previous_pagename: previousPagename,
-              },
-              link: {
-                page_url: loc.href,
-              },
-              ui: {
-                location: pathname,
-              },
+    const eventName = 'view-color-page';
+    let refDomain = '';
+    let previousPagename = '';
+    try {
+      const referrerUrl = new URL(document.referrer);
+      refDomain = referrerUrl.hostname;
+      previousPagename = referrerUrl.pathname;
+    } catch { /* no referrer or invalid */ }
+
+    const fireEvent = () => {
+      _satellite.track('event', {
+        xdm: {},
+        data: {
+          eventType: 'web.webinteraction.linkClicks',
+          web: {
+            webInteraction: {
+              name: eventName,
+              linkClicks: { value: 1 },
+              type: 'other',
             },
           },
+          _adobe_corpnew: {
+            sdm: {
+              event: {
+                pagename: eventName,
+                url: loc.href,
+              },
+              custom: {
+                aa: {
+                  page_name: getPageName(),
+                  ref_domain: refDomain,
+                  previous_pagename: previousPagename,
+                },
+                link: {
+                  page_url: loc.href,
+                },
+                ui: {
+                  location: pathname,
+                },
+              },
+            },
+          },
         },
-      },
-    });
-  };
-  safelyFireAnalyticsEvent(fireEvent);
+      });
+    };
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (error) {
+    window.lana?.log(`Failed to track color page load: ${error}`, { tags: 'color, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
+  }
 }
 
 export function trackColorBlockLoad(blockType) {
-  const eventName = 'view-color-block';
-  const fireEvent = () => {
-    _satellite.track('event', {
-      xdm: {},
-      data: {
-        eventType: 'web.webinteraction.linkClicks',
-        web: {
-          webInteraction: {
-            name: eventName,
-            linkClicks: { value: 1 },
-            type: 'other',
-          },
-        },
-        _adobe_corpnew: {
-          sdm: {
-            event: {
-              pagename: eventName,
-              url: loc.href,
-            },
-            custom: {
-              ui: {
-                location: pathname,
-              },
-              block: {
-                type: blockType,
-              },
+  try {
+    const eventName = 'view-color-block';
+    const fireEvent = () => {
+      _satellite.track('event', {
+        xdm: {},
+        data: {
+          eventType: 'web.webinteraction.linkClicks',
+          web: {
+            webInteraction: {
+              name: eventName,
+              linkClicks: { value: 1 },
+              type: 'other',
             },
           },
+          _adobe_corpnew: {
+            sdm: {
+              event: {
+                pagename: eventName,
+                url: loc.href,
+              },
+              custom: {
+                ui: {
+                  location: pathname,
+                },
+                block: {
+                  type: blockType,
+                },
+              },
+            },
+          },
         },
-      },
-    });
-  };
-  safelyFireAnalyticsEvent(fireEvent);
+      });
+    };
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (error) {
+    window.lana?.log(`Failed to track color block load: ${error}`, { tags: 'color, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
+  }
 }
 
 export function textToName(text) {
