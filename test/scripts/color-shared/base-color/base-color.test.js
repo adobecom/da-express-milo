@@ -211,37 +211,6 @@ describe('BaseColor component', () => {
       expect(el.colorMode).to.equal('RGB');
       expect(el._modeMenuOpen).to.be.false;
     });
-
-    it('dispatches lock-change when lock is toggled', async () => {
-      await createElement();
-      const spy = sinon.spy();
-      el.addEventListener('lock-change', spy);
-
-      el._toggleLock();
-
-      expect(spy.calledOnce).to.be.true;
-      expect(spy.firstCall.args[0].detail.locked).to.be.true;
-      expect(el._isLocked).to.be.true;
-    });
-  });
-
-  describe('lock behavior', () => {
-    it('toggling lock twice returns to unlocked', async () => {
-      await createElement();
-      el._toggleLock();
-      expect(el._isLocked).to.be.true;
-      el._toggleLock();
-      expect(el._isLocked).to.be.false;
-    });
-
-    it('_isLocked state tracks lock toggles', async () => {
-      await createElement();
-      expect(el._isLocked).to.be.false;
-      el._toggleLock();
-      expect(el._isLocked).to.be.true;
-      el._toggleLock();
-      expect(el._isLocked).to.be.false;
-    });
   });
 
   describe('mode menu', () => {

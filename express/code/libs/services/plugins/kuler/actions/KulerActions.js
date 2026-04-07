@@ -500,9 +500,8 @@ export class LikeActions extends BaseActionGroup {
    * @returns {string}
    */
   buildThemeLikeUrl(themeId) {
-    const { serviceConfig, endpoints } = this.plugin;
-    const { likeBaseUrl } = serviceConfig;
-    const { themePath } = endpoints;
+    const { endpoints } = this.plugin;
+    const { themePath, likeBaseUrl } = endpoints;
     BaseActionGroup.requireConfig({ likeBaseUrl, themePath }, 'Kuler');
     return `${likeBaseUrl}${themePath}/${themeId}/likeDuplicate`;
   }
@@ -512,9 +511,8 @@ export class LikeActions extends BaseActionGroup {
    * @returns {string}
    */
   buildThemeUnlikeUrl(themeId) {
-    const { serviceConfig, endpoints } = this.plugin;
-    const { likeBaseUrl } = serviceConfig;
-    const { themePath } = endpoints;
+    const { endpoints } = this.plugin;
+    const { themePath, likeBaseUrl } = endpoints;
     BaseActionGroup.requireConfig({ likeBaseUrl, themePath }, 'Kuler');
     return `${likeBaseUrl}${themePath}/${themeId}/like`;
   }
