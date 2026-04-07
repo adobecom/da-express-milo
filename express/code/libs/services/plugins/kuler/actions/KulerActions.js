@@ -501,8 +501,7 @@ export class LikeActions extends BaseActionGroup {
    */
   buildThemeLikeUrl(themeId) {
     const { serviceConfig, endpoints } = this.plugin;
-    const { likeBaseUrl } = serviceConfig;
-    const { themePath } = endpoints;
+    const { themePath, likeBaseUrl } = endpoints;
     BaseActionGroup.requireConfig({ likeBaseUrl, themePath }, 'Kuler');
     return `${likeBaseUrl}${themePath}/${themeId}/likeDuplicate`;
   }
