@@ -100,6 +100,10 @@ export const QA_CONFIGS = {
     ...getBaseImgCfg(JPG, JPEG, PNG),
     input_check: () => true,
   },
+  'remove-background-easy-upload-variant': {
+    ...getBaseImgCfg(JPG, JPEG, PNG),
+    input_check: () => true,
+  },
   'qa-in-product-variant1': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'qa-in-product-variant2': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'qa-in-product-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
@@ -113,6 +117,8 @@ export const QA_CONFIGS = {
   'caption-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'edit-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
+  'remove-background-fast-track-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'remove-background-fast-track-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'heic-to-jpg': {
     ...getBaseImgCfg(PNG, WEBP, HEIC),
     input_check: (input) => getBaseImgCfg(PNG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
@@ -129,6 +135,8 @@ export const EXPERIMENTAL_VARIANTS = [
   'qa-in-product-variant2',
   'qa-nba',
   'qa-in-product-control',
+  'remove-background-fast-track-variant',
+  'remove-background-fast-track-control',
 ];
 
 export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
@@ -136,6 +144,8 @@ export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
   'qa-in-product-variant2': '9DJJ47N3',
   'qa-nba': '9J8K43X2',
   'qa-in-product-control': '91BF4LV6',
+  'remove-background-fast-track-variant': '6DWQ762R',
+  'remove-background-fast-track-control': '55KD8FF5',
 };
 
 // Quick actions allowed in frictionless upload feature
@@ -144,6 +154,7 @@ export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   imageEditor: 'edit-image',
   removeBackgroundVariant1: 'qa-in-product-variant1',
   removeBackgroundVariant2: 'qa-in-product-variant2',
+  removeBackgroundFasttrackVariant: 'remove-background-fast-track-variant',
 };
 
 export const AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
@@ -506,8 +517,8 @@ export async function loadAndInitializeCCEverywhere(getConfig) {
   if (urlOverride) {
     try {
       if (new URL(urlOverride).host === 'dev.cc-embed.adobe.com') valid = true;
-    } catch (e) {
-      window.lana.log('Invalid SDK URL');
+    } catch (error) {
+      window.lana?.log(`Invalid SDK URL: ${error}`, { tags: 'frictionless-utils', severity: 'error' });
     }
   }
   const CDN_URL = valid

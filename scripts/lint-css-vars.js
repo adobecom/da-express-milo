@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 
 import fs from 'fs';
 import path from 'path';
@@ -305,14 +306,20 @@ function applyFixes(filePath, issues) {
   return false;
 }
 
+// Get the git repo root
+function getRepoRoot() {
+  return execSync('git rev-parse --show-toplevel', { encoding: 'utf8' }).trim();
+}
+
 // Get staged CSS files
 function getStagedCSSFiles() {
   try {
+    const repoRoot = getRepoRoot();
     const stagedFiles = execSync('git diff --cached --name-only --diff-filter=ACM', { encoding: 'utf8' });
     return stagedFiles
       .split('\n')
       .filter((file) => file.trim() && file.endsWith('.css'))
-      .map((file) => path.resolve(file));
+      .map((file) => path.join(repoRoot, file));
   } catch (error) {
     console.error('Error getting staged files:', error.message);
     return [];
@@ -322,7 +329,12 @@ function getStagedCSSFiles() {
 // Main function
 function main() {
   const { colorVars, spacingVars } = getRootVariables();
-  const stagedCSSFiles = getStagedCSSFiles();
+
+  // Allow passing file paths directly as CLI arguments
+  const argFiles = process.argv.slice(2).filter((a) => a !== '--fix' && a.endsWith('.css'));
+  const stagedCSSFiles = argFiles.length > 0
+    ? argFiles.map((f) => path.resolve(f))
+    : getStagedCSSFiles();
 
   if (stagedCSSFiles.length === 0) {
     console.log('✅ No CSS files staged for commit');

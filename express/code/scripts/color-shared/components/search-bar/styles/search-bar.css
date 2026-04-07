@@ -1,0 +1,295 @@
+.ax-color-search-bar-sentinel {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  block-size: 1px;
+  inline-size: 100%;
+  pointer-events: none;
+}
+
+/* The sticky wrapper is mounted under document.body, so it must carry the same
+   component-level custom properties as the inline search bar host. */
+.ax-color-search-bar-outer,
+.ax-color-search-bar-sticky-wrapper.is-sticky-clone {
+  --search-bar-height: 40px;
+  --search-bar-height-tablet: 48px;
+  --search-bar-max-width: 700px;
+  --search-bar-sticky-z-index: 1;
+  --search-bar-transition-fast: 130ms;
+  --search-bar-transition-normal: 200ms;
+  --search-bar-icon-size: 20px;
+  --search-bar-clear-button-size: 32px;
+  --search-bar-input-border-width: 1px;
+  --search-bar-focus-ring-width: 1px;
+  --search-bar-focus-outline-offset: 2px;
+  --search-bar-sticky-inset-block-end: 5%;
+  --search-bar-slide-distance: 20px;
+}
+
+.ax-color-search-bar-outer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  inline-size: 100%;
+  max-inline-size: 100%;
+  padding-inline: var(--spacing-300);
+  position: relative;
+}
+
+.ax-color-search-bar-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0;
+  gap: var(--spacing-200);
+  inline-size: 100%;
+  max-inline-size: 100%;
+  position: relative;
+  z-index: 5;
+}
+
+.ax-color-search-bar-wrapper {
+  inline-size: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ax-color-search-bar-form {
+  inline-size: 100%;
+}
+
+.ax-color-search-input-wrapper {
+  position: relative;
+  inline-size: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.ax-color-search-bar-input {
+  inline-size: 100%;
+  block-size: var(--search-bar-height);
+  border-radius: var(--Corner-radius-corner-radius-500);
+  border: var(--search-bar-input-border-width) solid var(--color-gray-325);
+  padding-inline-start: calc(var(--spacing-300) + var(--search-bar-icon-size) + var(--spacing-100));
+  padding-inline-end: var(--spacing-500);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--color-gray-950);
+  background: var(--color-white);
+  outline: none;
+  transition:
+    border-color var(--search-bar-transition-fast) ease,
+    box-shadow var(--search-bar-transition-fast) ease;
+}
+
+.ax-color-search-bar-input:hover {
+  border-color: var(--color-gray-350-variant);
+}
+
+.ax-color-search-bar-input:focus,
+.ax-color-search-bar-input:focus-visible {
+  border-color: var(--color-gray-800-variant);
+  box-shadow: 0 0 0 var(--search-bar-focus-ring-width) var(--color-gray-800-variant);
+  outline: none;
+}
+
+.ax-color-search-bar-input::placeholder {
+  color: var(--text-color-secondary);
+}
+
+.ax-color-search-bar-input::-webkit-search-cancel-button,
+.ax-color-search-bar-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.ax-color-search-icon {
+  position: absolute;
+  inset-inline-start: var(--spacing-300);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  color: var(--color-dark-gray);
+}
+
+.ax-color-search-icon svg {
+  inline-size: var(--search-bar-icon-size);
+  block-size: var(--search-bar-icon-size);
+}
+
+.ax-color-search-clear-btn {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: var(--spacing-200);
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--search-bar-clear-button-size);
+  block-size: var(--search-bar-clear-button-size);
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  color: var(--color-dark-gray);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  transition:
+    background-color var(--search-bar-transition-fast) ease,
+    color var(--search-bar-transition-fast) ease;
+}
+
+.ax-color-search-clear-btn:hover {
+  background-color: var(--Palette-gray-200);
+  color: var(--color-gray-950);
+}
+
+.ax-color-search-clear-btn:focus-visible {
+  outline: var(--border-width-2) solid var(--Alias-focus-indicator-default);
+  outline-offset: var(--search-bar-focus-outline-offset);
+}
+
+.ax-color-search-clear-btn svg {
+  inline-size: var(--search-bar-icon-size);
+  block-size: var(--search-bar-icon-size);
+}
+
+.ax-color-search-clear-btn.hidden {
+  display: none;
+}
+
+.ax-color-search-bar-container.is-fetching .ax-color-search-bar-input {
+  opacity: 0.7;
+}
+
+.ax-color-search-bar-container.is-returning {
+  animation: searchBarFadeIn var(--search-bar-transition-normal) ease-out;
+}
+
+@keyframes searchBarFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.ax-color-search-bar-sticky-wrapper.is-sticky-clone {
+  position: fixed;
+  inset-block-end: var(--search-bar-sticky-inset-block-end);
+  inset-inline-start: var(--spacing-300);
+  inset-inline-end: var(--spacing-300);
+  inline-size: auto;
+  z-index: var(--search-bar-sticky-z-index);
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  border-radius: 48px;
+  padding: var(--spacing-200);
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.ax-color-search-bar-sticky-wrapper.is-sticky-clone.is-visible {
+  opacity: 1;
+  pointer-events: auto;
+  visibility: visible;
+  animation: searchBarSlideUpMobile var(--search-bar-transition-normal) ease-out;
+}
+
+.ax-color-search-bar-sticky-wrapper.is-sticky-clone.is-leaving {
+  animation: searchBarSlideDownMobile var(--search-bar-transition-normal) ease-in forwards;
+}
+
+@keyframes searchBarSlideUpMobile {
+  from {
+    opacity: 0;
+    transform: translateY(var(--search-bar-slide-distance));
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes searchBarSlideDownMobile {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(var(--search-bar-slide-distance));
+  }
+}
+
+@media (min-width: 768px) {
+  .ax-color-search-bar-outer {
+    inline-size: 100%;
+    max-inline-size: 600px;
+    padding-inline: 0;
+  }
+
+  .ax-color-search-bar-input {
+    block-size: var(--search-bar-height-tablet);
+    padding-inline-start: calc(var(--spacing-300) + var(--search-bar-icon-size) + var(--spacing-200));
+    padding-inline-end: var(--spacing-600);
+    font-size: var(--body-font-size-m);
+  }
+
+  .ax-color-search-bar-sticky-wrapper.is-sticky-clone {
+    inset-inline-start: 50%;
+    inset-inline-end: auto;
+    transform: translateX(-50%);
+    inline-size: var(--search-bar-max-width);
+    max-inline-size: calc(100% - var(--spacing-400) * 2);
+  }
+
+  .ax-color-search-bar-sticky-wrapper.is-sticky-clone.is-visible {
+    animation: searchBarSlideUp var(--search-bar-transition-normal) ease-out;
+  }
+
+  .ax-color-search-bar-sticky-wrapper.is-sticky-clone.is-leaving {
+    animation: searchBarSlideDown var(--search-bar-transition-normal) ease-in forwards;
+  }
+
+  @keyframes searchBarSlideUp {
+    from {
+      opacity: 0;
+      transform: translateX(-50%) translateY(var(--search-bar-slide-distance));
+    }
+
+    to {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  @keyframes searchBarSlideDown {
+    from {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    to {
+      opacity: 0;
+      transform: translateX(-50%) translateY(var(--search-bar-slide-distance));
+    }
+  }
+}
+
+@media (min-width: 1024px) {
+  .ax-color-search-bar-outer {
+    inline-size: var(--search-bar-max-width);
+  }
+}

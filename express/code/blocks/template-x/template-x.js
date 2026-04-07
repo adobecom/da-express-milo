@@ -1358,8 +1358,8 @@ async function decorateToolbar(block, props) {
     const { getGnavHeight } = await import(`${getLibs()}/blocks/global-navigation/utilities/utilities.js`);
     const gnavHeight = getGnavHeight();
     tBarWrapper.style.top = `${gnavHeight}px`;
-  } catch (e) {
-    window.lana?.log(`Error getting gnav height ${e}`);
+  } catch (error) {
+    window.lana?.log(`Error getting gnav height: ${error?.message || error?.detail || error}`, { tags: 'template-x', severity: 'error' });
   }
 
   tBarWrapper.append(tBar);
@@ -1872,8 +1872,7 @@ async function buildTemplateList(block, props, type = []) {
 
     await decorateTemplates(block, props);
   } else {
-    window.lana.log(`failed to load templates with props: ${JSON.stringify(props)}`, { tags: 'templates-api' });
-
+    window.lana?.log(`failed to load templates with props: ${JSON.stringify(props)}`, { tags: 'template-x, templates-api', severity: 'error' });
     if (getConfig().env.name === 'prod') {
       block.remove();
     } else {

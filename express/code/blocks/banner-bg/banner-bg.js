@@ -9,6 +9,7 @@ const CONFIG = {
       'blue-green-pink-bg': '/express/code/blocks/banner-bg/img/blue-green-pink-bg.jpg',
       'blue-bg': '/express/code/blocks/banner-bg/img/blue-bg.jpg',
       'blue-pink-orange-bg': '/express/code/blocks/banner-bg/img/blue-pink-orange-bg.jpg',
+      'cool-dark-bg': 'cool-dark-bg',
       'green-blue-red-bg': '/express/code/blocks/banner-bg/img/green-blue-red-bg.jpg',
       'blue-purple-gray-bg': '/express/code/blocks/banner-bg/img/blue-purple-gray-bg.jpg',
       'yellow-pink-blue-bg': '/express/code/blocks/banner-bg/img/yellow-pink-blue-bg.jpg',
@@ -28,6 +29,7 @@ const CONFIG = {
   headings: ['h2', 'h3', 'h4'],
   logo: {
     icon: 'adobe-express-logo',
+    iconDark: 'adobe-express-logo-white',
     class: 'express-logo',
     target: 'H2',
   },
@@ -45,7 +47,8 @@ function detectBackgroundVariant(block) {
 }
 
 function preloadBackgroundImage(imagePath) {
-  if (!imagePath || document.querySelector(`link[href="${imagePath}"]`)) {
+  // if imagePath is not a valid URL, return
+  if (!imagePath || !imagePath.startsWith('/') || document.querySelector(`link[href="${imagePath}"]`)) {
     return;
   }
 
@@ -68,7 +71,17 @@ function createBackgroundContainer(block) {
   normalizeHeadings(block, CONFIG.headings);
 }
 
-function injectLogo(block, section) {
+// ============================================================================
+// CONTENT ENHANCEMENT
+// ============================================================================
+
+/**
+ * Injects Adobe Express logo if configured
+ * @param {HTMLElement} block - The banner block element
+ * @param {HTMLElement} section - The parent section element
+ * @param {'light'|'dark'} theme - Logo theme variant
+ */
+function injectLogo(block, section, theme = 'light') {
   const metadata = section?.querySelector('.section-metadata');
   if (!metadata) return;
 
@@ -76,7 +89,8 @@ function injectLogo(block, section) {
   const shouldInject = ['on', 'yes'].includes(config['inject-logo']?.toLowerCase());
 
   if (shouldInject) {
-    const logo = getIconElementDeprecated(CONFIG.logo.icon);
+    const iconName = theme === 'dark' ? CONFIG.logo.iconDark : CONFIG.logo.icon;
+    const logo = getIconElementDeprecated(iconName);
     logo.classList.add(CONFIG.logo.class);
     block.querySelector(CONFIG.logo.target)?.parentElement?.prepend(logo);
   }
@@ -121,7 +135,7 @@ async function formatPhoneNumbers(block) {
   try {
     await formatSalesPhoneNumber(phoneTags);
   } catch (error) {
-    window.lana?.log('banner-bg.js - error formatting phone numbers:', error.message);
+    window.lana?.log(`Error formatting phone numbers: ${error.message}`, { tags: 'banner-bg', severity: 'error' });
   }
 }
 
@@ -188,7 +202,8 @@ function handleSectionInheritance(block) {
 }
 
 async function enhanceContent(block, section, variantClass) {
-  injectLogo(block, section);
+  const logoTheme = variantClass === 'cool-dark-bg' ? 'dark' : 'light';
+  injectLogo(block, section, logoTheme);
   styleButtons(block, variantClass);
   await formatPhoneNumbers(block);
   fixIcons(block);

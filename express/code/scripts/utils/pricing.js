@@ -1,4 +1,6 @@
+// eslint-disable-next-line import/no-cycle
 import { getCountry } from './location-utils.js';
+// eslint-disable-next-line import/no-cycle
 import { getLibs } from '../utils.js';
 
 const currencies = {
@@ -388,8 +390,7 @@ export async function formatDynamicCartLink(a, plan) {
       a.href = newTrialHref;
     }
   } catch (error) {
-    window.lana.log('Failed to fetch prices for page plan');
-    window.lana.log(error);
+    window.lana?.log(`Failed to fetch prices for page plan: ${error}`, { tags: 'pricing-js', severity: 'error' });
   }
   return a;
 }

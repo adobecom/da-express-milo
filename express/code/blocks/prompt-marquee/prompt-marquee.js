@@ -60,6 +60,7 @@ function addImagePreconnects(imageUrl) {
       });
     }
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error(e);
   }
 }
@@ -299,6 +300,7 @@ export default async function decorate(block) {
           u.searchParams.set('acom-input', value);
           nextUrlStr = u.toString();
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error(err);
         }
       }

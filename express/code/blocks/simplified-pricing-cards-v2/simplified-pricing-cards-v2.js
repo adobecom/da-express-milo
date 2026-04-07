@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { getLibs, addTempWrapperDeprecated, decorateButtonsDeprecated, getIconElementDeprecated } from '../../scripts/utils.js';
 import {
   fetchPlanOnePlans,
@@ -95,8 +96,8 @@ function handleYear2PricingToken(pricingArea, y2p, priceSuffix) {
     } else {
       year2PricingToken.remove();
     }
-  } catch (e) {
-    window.lana.log(e);
+  } catch (error) {
+    window.lana?.log(`Failed to handle year 2 pricing token: ${error}`, { tags: 'simplified-pricing-cards-v2', severity: 'error' });
   }
 }
 

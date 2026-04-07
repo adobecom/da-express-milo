@@ -28,16 +28,13 @@ const RNR_API_URL = isProd ? 'https://rnr.adobe.io/v1' : 'https://rnr-stage.adob
  */
 function isNalaTestRatings() {
   if (typeof window === 'undefined' || !window.location?.hostname) return false;
-  const isPreviewHost = window.location.hostname.includes('aem.live') || window.location.hostname.includes('aem.page');
+  const { hostname } = window.location;
+  const isPreviewHost = hostname === 'localhost'
+    || hostname.includes('aem.live')
+    || hostname.includes('aem.page');
   const params = new URLSearchParams(window.location.search);
   return isPreviewHost && params.get('nala') === 'ratings';
 }
-
-// Errors & Logging
-const lanaOptions = {
-  sampleRate: 1,
-  tags: 'Express_Milo, RnR Block',
-};
 
 // Initialize required dependencies
 async function initDependencies() {
@@ -178,10 +175,7 @@ export async function fetchRatingsData(sheet) {
       segments: null, // RNR API doesn't provide segments in the same way
     };
   } catch (error) {
-    window.lana?.log(
-      `RnR: Could not load review data for sheet '${sheet}': ${error?.message}`,
-      lanaOptions,
-    );
+    window.lana?.log(`RnR: Could not load review data for sheet '${sheet}': ${error?.message || error?.detail || error}`, { tags: 'ratings-utils, Express_Milo, RnR Block, fetchRatingsData', severity: 'error' });
     return null;
   }
 }
@@ -406,10 +400,7 @@ export async function submitRating(sheet, rating, comment) {
     }
     localStorage.setItem('ccxActionRatings', ccxActionRatings);
   } catch (error) {
-    window.lana?.log(
-      `RnR: Could not post review for sheet '${sheet}': ${error?.message}`,
-      lanaOptions,
-    );
+    window.lana?.log(`RnR: Could not post review for sheet '${sheet}': ${error?.message || error?.detail || error}`, { tags: 'ratings-utils, Express_Milo, RnR Block, submitRating', severity: 'error' });
   }
 }
 

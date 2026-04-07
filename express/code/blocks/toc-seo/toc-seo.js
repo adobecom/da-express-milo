@@ -10,7 +10,7 @@ const CONFIG = {
     section: 'main .section',
     headers: ['main .section.long-form .content h2', 'main .section.long-form .content h3', 'main .section.long-form .content h4'],
     navigation: '.global-navigation, header',
-    stopElement: '.faqv2, .ax-link-list-v2-container, .ax-blog-posts-container, footer',
+    stopElement: '.faqv2, .ax-link-list-v2-container, .ax-blog-posts-container, .banner-bg, footer',
   },
   scrollOffset: {
     mobile: 75,
@@ -68,7 +68,10 @@ function buildBlockConfig(block) {
   // Validate and set defaults
   const title = config['toc-title'] || 'Table of Contents';
   const ariaLabel = config['toc-aria-label'] || 'Table of Contents Navigation';
-  const stopElement = config['stop-element'] || config['toc-stop-element'];
+  const rawStopElement = config.stopElement || config['stop-element'] || config['toc-stop-element'];
+  const stopElement = rawStopElement && !rawStopElement.startsWith('.')
+    ? `.${rawStopElement}`
+    : rawStopElement;
   const contents = [];
 
   // Build content array with validation
@@ -574,18 +577,19 @@ function updateDesktopPosition(tocContainer) {
 
   // Check if there's a stop element we shouldn't scroll past
   const stopSelector = tocContainer.dataset.stopSelector || CONFIG.selectors.stopElement;
-  const stopElement = stopSelector ? document.querySelector(stopSelector) : null;
+  const stopElement = stopSelector
+    ? Array.from(document.querySelectorAll(stopSelector)).find((el) => el.offsetHeight > 0)
+    : null;
   if (stopElement && scrollY > 0) {
     const stopRect = stopElement.getBoundingClientRect();
     const stopTop = stopRect.top; // Position relative to viewport
     const tocHeight = tocContainer.offsetHeight;
-
     // If the TOC would overlap with the stop element, limit its position
     // We want: topPosition + tocHeight <= stopTop
     // So: topPosition <= stopTop - tocHeight
     const maxTopPosition = stopTop - tocHeight - 20; // 20px buffer
 
-    if (topPosition > maxTopPosition) {
+    if (topPosition > maxTopPosition && stopRect.height > 0) {
       topPosition = maxTopPosition;
     }
   }
@@ -744,7 +748,7 @@ async function initializeDependencies() {
       getMetadata: utils.getMetadata,
     };
   } catch (error) {
-    window.lana?.log(`TOC: Failed to initialize dependencies: ${error}`, { tags: 'toc-seo', severity: 'error' });
+    window.lana?.log(`TOC: Failed to initialize dependencies: ${error?.message || error?.detail || error}`, { tags: 'toc-seo', severity: 'error' });
     throw new Error('Failed to load required utilities');
   }
 }
@@ -765,7 +769,9 @@ export default async function decorate(block) {
 
     // Phase 3: Create DOM structure
     const container = createContainer();
-    const stopSelector = config.stopElement || CONFIG.selectors.stopElement || '';
+    const rawMetaStop = getMetadata('stopelement');
+    const metaStop = rawMetaStop && !rawMetaStop.startsWith('.') ? `.${rawMetaStop}` : rawMetaStop;
+    const stopSelector = config.stopElement || metaStop || CONFIG.selectors.stopElement || '';
     container.dataset.stopSelector = stopSelector;
     const titleBar = createTitleBar(config.title);
     const content = createContentList(config);
@@ -847,7 +853,7 @@ export default async function decorate(block) {
     // Hide original block
     block.style.display = 'none';
   } catch (error) {
-    window.lana?.log(`TOC: Error during decoration: ${error}`, { tags: 'toc-seo', severity: 'error' });
+    window.lana?.log(`TOC: Error during decoration: ${error?.message || error?.detail || error}`, { tags: 'toc-seo', severity: 'error' });
     block.style.display = 'none';
   }
 }

@@ -87,6 +87,7 @@ function injectExpressLogo(block, wrapper) {
 async function setHorizontalMasonry(el) {
   const link = el.querySelector(':scope .con-button');
   if (!link) {
+    // eslint-disable-next-line no-console
     console.error('Missing Generate Link');
     return;
   }
@@ -180,7 +181,7 @@ function interactiveInit(el) {
 
 export default async function init(el) {
   if (!el.classList.contains('horizontal-masonry')) {
-    window.lana?.log('Using interactive-marquee on Express requires using the horizontal-masonry class.');
+    window.lana?.log('Using interactive-marquee on Express requires using the horizontal-masonry class.', { tags: 'interactive-marquee', severity: 'error' });
     return;
   }
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`), import(`${getLibs()}/utils/decorate.js`)]).then(([utils, placeholders, decorate]) => {

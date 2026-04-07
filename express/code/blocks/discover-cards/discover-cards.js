@@ -13,14 +13,14 @@ async function syncMinHeights(groups) {
   }));
 }
 
-const nextSVGHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+const nextSVGHTML = `<svg aria-hidden="true" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
   <g id="Slider Button - Arrow - Right">
     <circle id="Ellipse 24477" cx="16" cy="16" r="16" fill="#FFFFFF"/>
     <path id="chevron-right" d="M14.6016 21.1996L19.4016 16.3996L14.6016 11.5996" stroke="#292929" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
   </g>
 </svg>
 `;
-const prevSVGHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+const prevSVGHTML = `<svg aria-hidden="true" width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
   <g id="Slider Button - Arrow - Left">
     <circle id="Ellipse 24477" cx="16" cy="16" r="16" transform="matrix(-1 0 0 1 32 0)" fill="#FFFFFF"/>
     <path id="chevron-right" d="M17.3984 21.1996L12.5984 16.3996L17.3984 11.5996" stroke="#292929" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
@@ -28,16 +28,16 @@ const prevSVGHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none"
 </svg>`;
 const scrollPadding = 16;
 
-function createControl(items, container) {
+function createControl(items, container, sectionLabel = 'cards') {
   const control = createTag('div', { class: 'gallery-control loading' });
   const status = createTag('div', { class: 'status' });
   const prevButton = createTag('button', {
     class: 'prev',
-    'aria-label': 'Next',
+    'aria-label': `Previous ${sectionLabel}`,
   }, prevSVGHTML);
   const nextButton = createTag('button', {
     class: 'next',
-    'aria-label': 'Previous',
+    'aria-label': `Next ${sectionLabel}`,
   }, nextSVGHTML);
 
   const intersecting = Array.from(items).fill(false);
@@ -54,7 +54,7 @@ function createControl(items, container) {
   nextButton.addEventListener('click', () => pageInc(1));
 
   const dots = items.map(() => {
-    const dot = createTag('div', { class: 'dot' });
+    const dot = createTag('div', { class: 'dot', 'aria-hidden': 'true' });
     status.append(dot);
     return dot;
   });
@@ -120,6 +120,7 @@ function decorateFlipCards(card, cardDivs) {
 
     card.setAttribute('tabindex', '0');
     card.setAttribute('role', 'button');
+    card.setAttribute('aria-pressed', 'false');
     card.setAttribute('aria-label', `Learn more about ${card.cardTitleText}`);
 
     const plusIconWrapper = createTag('div', { class: 'plus-icon-wrapper' });
@@ -138,6 +139,7 @@ function decorateFlipCards(card, cardDivs) {
     card.addEventListener('click', () => {
       card.classList.toggle('is-flipped');
       const isFlipped = card.classList.contains('is-flipped');
+      card.setAttribute('aria-pressed', isFlipped ? 'true' : 'false');
       card.setAttribute(
         'aria-label',
         isFlipped ? `Go back to ${card.cardTitleText}` : `Learn more about ${card.cardTitleText}`,
@@ -159,7 +161,9 @@ export async function buildGallery(
   root = container?.parentNode,
 ) {
   if (!root) throw new Error('Invalid Gallery input');
-  const control = createControl([...items], container);
+  const heading = root.querySelector('h2, h3, h4, h5, h6');
+  const sectionLabel = heading ? heading.textContent.trim() : 'cards';
+  const control = createControl([...items], container, sectionLabel);
   container.classList.add('gallery');
   [...items].forEach((item) => {
     item.classList.add('gallery--item');
@@ -174,11 +178,13 @@ export default async function decorate(block) {
     ({ createTag } = utils);
   });
   const firstChild = block.querySelector(':scope > div:first-child');
+  let headerText = '';
 
   if (firstChild && firstChild.querySelector('h2, h3, h4, h5, h6')) {
     const header = firstChild.querySelector('h2, h3, h4, h5, h6');
     header.classList.add('center-title');
-    header.setAttribute('aria-label', `${header.textContent.trim()} cards`);
+    headerText = header.textContent.trim();
+    header.setAttribute('aria-label', `${headerText} cards`);
     const subtitle = firstChild.querySelector('p');
     if (subtitle) subtitle.classList.add('subtitle');
     block.insertBefore(firstChild, block.firstChild);
@@ -188,8 +194,7 @@ export default async function decorate(block) {
   cardsWrapper.setAttribute('role', 'region');
 
   const cards = block.querySelectorAll(':scope > div:not(:first-child)');
-  const numCards = cards.length;
-  cardsWrapper.setAttribute('aria-label', `${numCards} cards in this section`);
+  cardsWrapper.setAttribute('aria-label', headerText || `${cards.length} cards`);
 
   const cardParagraphs = [[]];
   cards.forEach((card) => {
