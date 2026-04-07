@@ -1,9 +1,12 @@
 /* eslint-disable max-len, no-promise-executor-return */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
+import { setLibs } from '../../../../express/code/scripts/utils.js';
 import { createDrawer } from '../../../../express/code/scripts/color-shared/toolbar/createDrawerComponent.js';
 import { MOCK_PALETTE, MOCK_GRADIENT, MOCK_LIBRARIES } from './mocks/palette.js';
 import { createMockCCLibraryProvider } from './mocks/stubs.js';
+
+setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
 const signedOutDeps = { checkAuth: () => false, loadDeps: () => {} };
 const signedInDeps = { checkAuth: () => true, loadDeps: () => {} };

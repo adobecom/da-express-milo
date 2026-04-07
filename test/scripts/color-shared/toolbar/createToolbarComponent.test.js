@@ -1,9 +1,12 @@
 /* eslint-disable max-len, no-promise-executor-return */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
+import { setLibs } from '../../../../express/code/scripts/utils.js';
 import { createToolbar } from '../../../../express/code/scripts/color-shared/toolbar/createToolbarComponent.js';
 import { MOCK_PALETTE, MOCK_GRADIENT } from './mocks/palette.js';
 import { createMockGetLibraryContext } from './mocks/stubs.js';
+
+setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
 const noopDeps = { loadDeps: () => {} };
 
@@ -232,6 +235,11 @@ describe('createToolbar', () => {
       const onEdit = sinon.stub();
       const toolbar = createToolbar(defaultOptions({ onEdit }));
       document.body.appendChild(toolbar.element);
+
+      // Prevent the edit link from navigating the page away during tests
+      toolbar.element.addEventListener('click', (e) => {
+        if (e.target.closest('a')) e.preventDefault();
+      });
 
       const cb = sinon.stub();
       toolbar.on('edit', cb);

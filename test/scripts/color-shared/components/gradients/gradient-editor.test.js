@@ -181,12 +181,12 @@ describe('createGradientEditor', () => {
       wrapper.remove();
     });
 
-    it('copyable handles have title "Copy #HEX"', () => {
+    it('copyable handles have aria-label "Copy #HEX"', () => {
       const handles = wrapper.querySelectorAll('.gradient-editor-handle');
       expect(handles.length).to.be.greaterThan(0);
       handles.forEach((handle, i) => {
-        const title = handle.getAttribute('title');
-        expect(title).to.match(/^Copy #[0-9A-F]{6}$/i, `handle ${i} title should be "Copy #HEX"`);
+        const label = handle.getAttribute('aria-label');
+        expect(label).to.match(/^Copy #[0-9A-F]{6}$/i, `handle ${i} aria-label should be "Copy #HEX"`);
       });
     });
 

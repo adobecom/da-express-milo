@@ -13,7 +13,8 @@ export function normalizeTagText(t) {
 export function createTagPill(text, { onRemove, removeLabel } = {}) {
   const pill = createTag('div', { class: 'ax-tag-pill', 'data-tag-value': text });
 
-  const label = createTag('span', { class: 'ax-tag-pill-label' }, text);
+  const label = createTag('span', { class: 'ax-tag-pill-label' });
+  label.textContent = text;
 
   const closeBtn = createTag('button', {
     type: 'button',

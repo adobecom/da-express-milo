@@ -2,6 +2,9 @@
 
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
+import { setLibs } from '../../../express/code/scripts/utils.js';
+
+setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
 const imports = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),

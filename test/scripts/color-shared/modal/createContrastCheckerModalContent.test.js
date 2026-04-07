@@ -1,5 +1,8 @@
 /* eslint-disable max-len, no-underscore-dangle */
 import { expect } from '@esm-bundle/chai';
+import { setLibs } from '../../../../express/code/scripts/utils.js';
+
+setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
 // Minimal data service stub that mirrors the real createContrastDataService API.
 function createStubDataService() {
@@ -167,7 +170,7 @@ describe('createContrastCheckerModalContent', () => {
   });
 
   describe('data service interaction', () => {
-    it('should call checkWCAG for all non-diagonal pairs', () => {
+    it('should call checkWCAG for all non-diagonal pairs', async () => {
       const colors = ['#FF0000', '#00FF00', '#0000FF'];
       let callCount = 0;
       const trackingService = {
@@ -182,6 +185,9 @@ describe('createContrastCheckerModalContent', () => {
         { colors },
         { dataService: trackingService },
       );
+
+      // init() is async (awaits Spectrum loadTooltip) — wait for it to complete
+      await new Promise((r) => { setTimeout(r, 500); });
 
       // 3 colors: 3*3 - 3 diagonal = 6 non-diagonal pairs
       expect(callCount).to.equal(6);
