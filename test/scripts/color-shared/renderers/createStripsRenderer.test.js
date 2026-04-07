@@ -1,5 +1,9 @@
 /* eslint-disable func-names */
 import { expect } from '@esm-bundle/chai';
+import { setLibs } from '../../../../express/code/scripts/utils.js';
+
+setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
+
 import { createStripsRenderer } from '../../../../express/code/scripts/color-shared/renderers/createStripsRenderer.js';
 
 const TIMEOUT = 10000;

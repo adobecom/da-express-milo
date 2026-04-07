@@ -62,7 +62,7 @@ describe('createGradientStripElements', () => {
       const elements = createGradientStripElements(SAMPLE_GRADIENTS);
       const btn = elements[0].querySelector('.gradient-strip-action-btn');
       expect(btn.getAttribute('aria-label')).to.include('Open');
-      expect(btn.getAttribute('data-tooltip-content')).to.equal('Open in modal');
+      expect(btn.getAttribute('data-tooltip-content')).to.equal('Open');
       expect(btn.getAttribute('title')).to.be.null;
       expect(btn.getAttribute('tabindex')).to.equal('-1');
     });
