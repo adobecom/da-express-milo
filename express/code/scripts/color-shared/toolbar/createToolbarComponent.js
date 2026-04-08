@@ -214,6 +214,7 @@ function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t) {
       size: 'm',
       onClick: onEditClick,
     });
+    editBtn.classList.add('ax-edit-btn');
     attachTooltip(editBtn, t.edit);
     paletteSummary.appendChild(editBtn);
   }
