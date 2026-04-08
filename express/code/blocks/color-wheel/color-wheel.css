@@ -556,3 +556,9 @@ color-wheel-express {
     display: flex;
   }
 }
+
+@media (min-width: 1440px) {
+  .color-wheel .ax-color-tool-layout {
+    box-sizing: content-box;
+  }
+}

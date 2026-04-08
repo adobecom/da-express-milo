@@ -73,7 +73,7 @@ body:has(.color-extract.has-image) .color-headline.extract {
 .color-headline.tools:not([data-adopted="true"]) {
   max-width: var(--block-wd-max-width);
   padding: var(--action-menu-buffer) var(--spacing-300) 0;
-  box-sizing: border-box;
+  margin-inline: auto;
 }
 
 .color-headline.tools .express-logo {
