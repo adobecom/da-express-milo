@@ -34,6 +34,7 @@ const TOOLBAR_DEFAULTS = {
   paletteName: 'Palette name',
   paletteNamePlaceholder: 'My Color Theme',
   ctaText: 'Create with my color palette',
+  shareText: 'Check out this color palette on Adobe.com',
   urlCopiedToClipboard: 'URL copied to clipboard',
   shareFailed: 'Unable to share. Please try again.',
 };
@@ -49,7 +50,7 @@ async function handleShare({ name, colors }, t) {
   const shareUrl = url.toString();
 
   try {
-    await navigator.share({ title: name, url: shareUrl });
+    await navigator.share({ title: name, text: t.shareText, url: shareUrl });
     announceToScreenReader(t.sharedSuccessfully);
     showExpressToast({ message: t.sharedSuccessfully, variant: 'positive' });
     return;
