@@ -5,7 +5,7 @@ import sinon from 'sinon';
 import { setLibs } from '../../../express/code/scripts/utils.js';
 import { serviceManager } from '../../../express/code/libs/services/index.js';
 
-setLibs('/libs');
+setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
 // Suppress benign ResizeObserver loop notifications that the test runner
 // would otherwise report as unhandled errors.

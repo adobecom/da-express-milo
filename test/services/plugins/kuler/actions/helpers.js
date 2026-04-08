@@ -45,6 +45,7 @@ export function createMockPlugin(overrides = {}) {
       api: '/api/v2',
       themePath: '/themes',
       gradientPath: '/gradient',
+      likeBaseUrl: 'https://asset.test.io',
       ...overrides.endpoints,
     },
     getAuthState: sinon.stub().returns({ isLoggedIn: false }),

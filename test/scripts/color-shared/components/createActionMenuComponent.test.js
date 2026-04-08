@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 import { expect } from '@esm-bundle/chai';
+import { setLibs } from '../../../../express/code/scripts/utils.js';
 import { createActionMenuComponent } from '../../../../express/code/scripts/color-shared/components/createActionMenuComponent.js';
+
+setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
 const VALID_NAV_LINKS = [
   { id: 'palette', href: '#palette', label: 'Palette', active: true },
