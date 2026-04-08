@@ -290,6 +290,11 @@ export default async function decorate(block) {
       if (!file) return;
       const blobUrl = URL.createObjectURL(file);
       inputElement.value = '';
+      if (typeof blobUrl !== 'string' || !blobUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(blobUrl);
+        showErrorToast(block, await getErrorMsg('file-type-not-supported'));
+        return;
+      }
       const { default: showVideoQuickActionPicker } = await import(
         '../video-quick-action-picker/video-quick-action-picker.js'
       );

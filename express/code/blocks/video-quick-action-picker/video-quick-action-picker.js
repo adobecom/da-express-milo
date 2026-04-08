@@ -57,11 +57,10 @@ function createVideoPreview(blobUrl, strings) {
     autoplay: '',
     muted: '',
     playsinline: '',
+    src: safeSrc,
     'aria-label': strings.uploadedVideo,
   });
   video.style.display = 'none';
-  if (typeof blobUrl !== 'string' || !blobUrl.startsWith('blob:')) return { previewContainer, durationPromise: Promise.resolve(0) };
-  video.src = blobUrl;
 
   // Resolve duration from the same video element to avoid a separate load
   const durationPromise = new Promise((resolve) => {
@@ -160,10 +159,6 @@ export default async function showVideoQuickActionPicker(videoFile, block, sdkHa
 
   const body = createTag('div', { class: 'vqap-body' });
   const contentContainer = createTag('div', { class: 'vqap-content-container' });
-
-  function handleKeydown(e) {
-    if (e.key === 'Escape') closeDialog();
-  }
 
   function closeDialog() {
     document.removeEventListener('keydown', handleKeydown);
