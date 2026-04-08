@@ -54,12 +54,12 @@ function createVideoPreview(blobUrl, strings) {
   previewContainer.append(loading);
 
   const video = createTag('video', {
-    autoplay: '',
-    muted: '',
+    autoplay: true,
+    muted: true,
     playsinline: '',
-    src: blobUrl,
     'aria-label': strings.uploadedVideo,
   });
+  video.src = blobUrl;
   video.style.display = 'none';
 
   // Resolve duration from the same video element to avoid a separate load
@@ -123,71 +123,97 @@ function buildActionCard(action) {
 /**
  * @param {File} videoFile - the selected video blob
  * @param {HTMLElement} block - the frictionless-quick-action-mobile block
- * @param {Object} sdkHandlers - { startSDKWithUnconvertedFiles, blobUrl }
+ * @param {Object} sdkHandlers - { startSDKWithUnconvertedFiles }
  */
 export default async function showVideoQuickActionPicker(videoFile, block, sdkHandlers) {
   loadStyles();
   await loadPlaceholders();
   const strings = await getLocalizedStrings();
-  const { startSDKWithUnconvertedFiles, blobUrl } = sdkHandlers;
+  const { startSDKWithUnconvertedFiles } = sdkHandlers;
+  const blobUrl = URL.createObjectURL(videoFile);
+  let dialog;
+  let handleKeydown;
 
-  const dialog = createTag('div', {
-    class: 'vqap-dialog',
-    role: 'dialog',
-    'aria-modal': 'true',
-    'aria-label': strings.startFromYourVideo,
-  });
+  try {
+    const parsedBlobUrl = new URL(blobUrl, window.location.href);
+    if (parsedBlobUrl.protocol !== 'blob:') {
+      throw new Error('Invalid video preview URL');
+    }
 
-  const hero = createTag('div', { class: 'vqap-hero' });
-  const headerBar = createTag('div', { class: 'vqap-header-bar' });
-
-  const closeBtn = createTag('button', {
-    class: 'vqap-close-btn',
-    'aria-label': strings.closeDialog,
-  });
-  const closeIcon = createTag('img', {
-    src: CLOSE_ICON_PATH,
-    alt: '',
-    'aria-hidden': 'true',
-    width: '18',
-    height: '18',
-  });
-  closeBtn.append(closeIcon);
-
-  const { previewContainer, durationPromise } = createVideoPreview(blobUrl, strings);
-  hero.append(headerBar, previewContainer);
-
-  const body = createTag('div', { class: 'vqap-body' });
-  const contentContainer = createTag('div', { class: 'vqap-content-container' });
-
-  function closeDialog() {
-    unlockBodyScroll();
-    URL.revokeObjectURL(blobUrl);
-    dialog.remove();
-  }
-
-  const videoDuration = await durationPromise;
-  const videoActions = getVideoActions(strings, videoFile, videoDuration);
-  videoActions.forEach((action) => {
-    const card = buildActionCard(action);
-    card.addEventListener('click', () => {
-      closeDialog();
-      if (action.type === ACTION_TYPES.APP_INSTALL) {
-        const appLink = getAppInstallLink();
-        if (appLink) window.location.href = appLink;
-      } else {
-        startSDKWithUnconvertedFiles([videoFile], action.id, block);
-      }
+    dialog = createTag('div', {
+      class: 'vqap-dialog',
+      role: 'dialog',
+      'aria-modal': 'true',
+      'aria-label': strings.startFromYourVideo,
     });
-    contentContainer.append(card);
-  });
 
-  body.append(contentContainer);
+    const hero = createTag('div', { class: 'vqap-hero' });
+    const headerBar = createTag('div', { class: 'vqap-header-bar' });
 
-  closeBtn.addEventListener('click', closeDialog);
+    const closeBtn = createTag('button', {
+      class: 'vqap-close-btn',
+      'aria-label': strings.closeDialog,
+    });
+    const closeIcon = createTag('img', {
+      src: CLOSE_ICON_PATH,
+      alt: '',
+      'aria-hidden': 'true',
+      width: '18',
+      height: '18',
+    });
+    closeBtn.append(closeIcon);
 
-  dialog.append(closeBtn, hero, body);
-  document.body.append(dialog);
+    // The preview URL is browser-generated from the selected file and restricted to blob:.
+    const { previewContainer, durationPromise } = createVideoPreview(parsedBlobUrl.href, strings);
+    hero.append(headerBar, previewContainer);
 
-  lockBodyScroll();
+    const body = createTag('div', { class: 'vqap-body' });
+    const contentContainer = createTag('div', { class: 'vqap-content-container' });
+
+    function closeDialog() {
+      document.removeEventListener('keydown', handleKeydown);
+      unlockBodyScroll();
+      URL.revokeObjectURL(blobUrl);
+      dialog.remove();
+    }
+
+    handleKeydown = (e) => {
+      if (e.key === 'Escape') {
+        closeDialog();
+      }
+    };
+
+    closeBtn.addEventListener('click', closeDialog);
+    document.addEventListener('keydown', handleKeydown);
+
+    dialog.append(closeBtn, hero, body);
+    document.body.append(dialog);
+    lockBodyScroll();
+    closeBtn.focus();
+
+    const videoDuration = await durationPromise;
+    const videoActions = getVideoActions(strings, videoFile, videoDuration);
+    videoActions.forEach((action) => {
+      const card = buildActionCard(action);
+      card.addEventListener('click', () => {
+        closeDialog();
+        if (action.type === ACTION_TYPES.APP_INSTALL) {
+          const appLink = getAppInstallLink();
+          if (appLink) window.location.href = appLink;
+        } else {
+          startSDKWithUnconvertedFiles([videoFile], action.id, block);
+        }
+      });
+      contentContainer.append(card);
+    });
+
+    body.append(contentContainer);
+  } catch (error) {
+    document.removeEventListener('keydown', handleKeydown);
+    if (dialog?.isConnected) {
+      dialog.remove();
+    }
+    URL.revokeObjectURL(blobUrl);
+    throw error;
+  }
 }
