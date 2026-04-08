@@ -57,7 +57,7 @@ function createVideoPreview(blobUrl, strings) {
     autoplay: '',
     muted: '',
     playsinline: '',
-    src: safeSrc,
+    src: blobUrl,
     'aria-label': strings.uploadedVideo,
   });
   video.style.display = 'none';
@@ -161,15 +161,11 @@ export default async function showVideoQuickActionPicker(videoFile, block, sdkHa
   const contentContainer = createTag('div', { class: 'vqap-content-container' });
 
   function closeDialog() {
-    document.removeEventListener('keydown', handleKeydown);
     unlockBodyScroll();
     URL.revokeObjectURL(blobUrl);
     dialog.remove();
   }
 
-  function handleKeydown(e) {
-    if (e.key === 'Escape') closeDialog();
-  }
   const videoDuration = await durationPromise;
   const videoActions = getVideoActions(strings, videoFile, videoDuration);
   videoActions.forEach((action) => {
@@ -194,5 +190,4 @@ export default async function showVideoQuickActionPicker(videoFile, block, sdkHa
   document.body.append(dialog);
 
   lockBodyScroll();
-  document.addEventListener('keydown', handleKeydown);
 }
