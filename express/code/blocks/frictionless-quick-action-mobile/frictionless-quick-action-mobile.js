@@ -19,6 +19,7 @@ import {
   processFilesForQuickAction,
   loadAndInitializeCCEverywhere,
   getErrorMsg,
+  shouldShowVideoQuickActionPickerForMobile,
 } from '../../scripts/utils/frictionless-utils.js';
 
 let replaceKey; let getConfig;
@@ -283,8 +284,16 @@ export default async function decorate(block) {
     accept: QA_CONFIGS[quickAction].accept,
     ...(quickAction === 'merge-videos' && { multiple: true }),
   });
-  inputElement.onchange = () => {
-    if (quickAction === 'merge-videos' && inputElement.files.length > 1) {
+  inputElement.onchange = async () => {
+    const file = inputElement.files[0];
+    if (shouldShowVideoQuickActionPickerForMobile(quickAction, file)) {
+      if (!file) return;
+      const { default: showVideoQuickActionPicker } = await import(
+        '../video-quick-action-picker/video-quick-action-picker.js'
+      );
+      showVideoQuickActionPicker(file, block, { startSDKWithUnconvertedFiles });
+      inputElement.value = '';
+    } else if (quickAction === 'merge-videos' && inputElement.files.length > 1) {
       startSDKWithUnconvertedFiles(inputElement.files, quickAction, block);
     } else {
       const file = inputElement.files[0];

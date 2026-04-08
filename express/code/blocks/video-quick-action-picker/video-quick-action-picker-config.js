@@ -1,6 +1,8 @@
 import { getLibs } from '../../scripts/utils.js';
 import { QA_CONFIGS } from '../../scripts/utils/frictionless-utils.js';
 
+const ICONS_BASE = '/express/code/icons';
+
 export const ACTION_TYPES = {
   QUICK_ACTION: 'quick-action', // launches SDK inline with the uploaded file
   APP_INSTALL: 'app-install', // navigates to app install URL (same tab)
@@ -55,43 +57,43 @@ export function getVideoActions(strings, videoFile, videoDuration) {
       label: strings.editVideo,
       badge: strings.appOnly,
       type: ACTION_TYPES.APP_INSTALL,
-      icon: 'edit-video',
+      iconPath: `${ICONS_BASE}/edit-video.svg`,
     },
     {
       id: 'convert-to-gif',
       label: strings.convertVideoToGif,
       type: ACTION_TYPES.QUICK_ACTION,
-      icon: 'ax-convert-to-gif-22',
+      iconPath: `${ICONS_BASE}/ax-convert-to-gif-22.svg`,
     },
     {
       id: 'crop-video',
       label: strings.cropVideo,
       type: ACTION_TYPES.QUICK_ACTION,
-      icon: 'ax-crop-image-22', // TODO: replace with crop-video-22 icon when available
+      iconPath: `${ICONS_BASE}/vqa-crop-video.svg`,
     },
     {
       id: 'trim-video',
       label: strings.trimVideo,
       type: ACTION_TYPES.QUICK_ACTION,
-      icon: 'trim-video-22',
+      iconPath: `${ICONS_BASE}/vqa-trim-video.svg`,
     },
     {
       id: 'resize-video',
       label: strings.resizeVideo,
       type: ACTION_TYPES.QUICK_ACTION,
-      icon: 'ax-resize-video-22',
+      iconPath: `${ICONS_BASE}/vqa-resize-video.svg`,
     },
     {
       id: 'convert-to-mp4',
       label: strings.convertVideoToMp4,
       type: ACTION_TYPES.QUICK_ACTION,
-      icon: 'ax-convert-22', // TODO: replace with convert-video-to-mp4-22 icon when available
+      iconPath: `${ICONS_BASE}/convert-to-mp4.svg`,
     },
     {
       id: 'caption-video',
       label: strings.captionVideo,
       type: ACTION_TYPES.QUICK_ACTION,
-      icon: 'ax-caption-video-22',
+      iconPath: `${ICONS_BASE}/ax-caption-video-22.svg`,
     },
   ];
 

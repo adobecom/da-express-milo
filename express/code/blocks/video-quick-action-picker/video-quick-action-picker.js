@@ -17,7 +17,7 @@ function loadStyles() {
   document.head.append(link);
 }
 
-const ICONS_BASE = '/express/code/icons';
+const CLOSE_ICON_PATH = '/express/code/icons/close-white.svg';
 
 function getAppInstallLink() {
   const metadataMap = createMetadataMap();
@@ -94,9 +94,9 @@ function buildActionCard(action) {
   const actionTitle = createTag('div', { class: 'vqap-action-title' });
 
   const iconWrapper = createTag('span', { class: 'vqap-card-icon' });
-  if (action.icon) {
+  if (action.iconPath) {
     const icon = createTag('img', {
-      src: `${ICONS_BASE}/${action.icon}.svg`,
+      src: action.iconPath,
       alt: '',
       'aria-hidden': 'true',
       width: '28',
@@ -149,7 +149,7 @@ export default async function showVideoQuickActionPicker(videoFile, block, sdkHa
     'aria-label': strings.closeDialog,
   });
   const closeIcon = createTag('img', {
-    src: `${ICONS_BASE}/close-white.svg`,
+    src: CLOSE_ICON_PATH,
     alt: '',
     'aria-hidden': 'true',
     width: '18',
