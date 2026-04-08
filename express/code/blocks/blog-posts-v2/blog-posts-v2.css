@@ -484,7 +484,7 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   }
 
   main .blog-posts-v2 {
-    max-width: var(--block-wd-max-width);
+    /* max-width: var(--block-wd-max-width); */
     margin-right: auto;
     margin-left: auto;
   }
