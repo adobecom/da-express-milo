@@ -44,7 +44,6 @@ export async function getLocalizedStrings() {
     captionVideo: await resolveKey('caption-video', 'Caption video'),
     openingPreview: await resolveKey('opening-preview', 'Opening preview'),
     uploadedVideo: await resolveKey('uploaded-video', 'Uploaded video'),
-    previewUnavailable: await resolveKey('preview-unavailable', 'Preview unavailable'),
     startFromYourVideo: await resolveKey('start-from-your-video', 'Start from your video'),
     closeDialog: await resolveKey('close-dialog', 'Close dialog'),
   };
