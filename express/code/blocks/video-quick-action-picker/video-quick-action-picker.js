@@ -42,7 +42,7 @@ function unlockBodyScroll() {
   delete document.body.dataset.vqapScrollY;
 }
 
-function createVideoPreview(file, strings) {
+function createVideoPreview(blobUrl, strings) {
   const previewContainer = createTag('div', { class: 'vqap-preview-container' });
 
   const loading = createTag('div', {
@@ -60,8 +60,7 @@ function createVideoPreview(file, strings) {
     'aria-label': strings.uploadedVideo,
   });
   video.style.display = 'none';
-  const blobUrl = URL.createObjectURL(file);
-  video.setAttribute('src', blobUrl);
+  video.src = blobUrl;
 
   // Resolve duration from the same video element to avoid a separate load
   const durationPromise = new Promise((resolve) => {
@@ -77,13 +76,10 @@ function createVideoPreview(file, strings) {
   video.addEventListener('error', () => {
     loading.remove();
     video.remove();
-    const errorEl = createTag('div', { class: 'vqap-error' });
-    errorEl.textContent = strings.previewUnavailable;
-    previewContainer.append(errorEl);
   }, { once: true });
 
   previewContainer.append(video);
-  return { previewContainer, video, durationPromise };
+  return { previewContainer, durationPromise };
 }
 
 function buildActionCard(action) {
@@ -127,13 +123,13 @@ function buildActionCard(action) {
 /**
  * @param {File} videoFile - the selected video blob
  * @param {HTMLElement} block - the frictionless-quick-action-mobile block
- * @param {Object} sdkHandlers - { startSDKWithUnconvertedFiles }
+ * @param {Object} sdkHandlers - { startSDKWithUnconvertedFiles, blobUrl }
  */
 export default async function showVideoQuickActionPicker(videoFile, block, sdkHandlers) {
   loadStyles();
   await loadPlaceholders();
   const strings = await getLocalizedStrings();
-  const { startSDKWithUnconvertedFiles } = sdkHandlers;
+  const { startSDKWithUnconvertedFiles, blobUrl } = sdkHandlers;
 
   const dialog = createTag('div', {
     class: 'vqap-dialog',
@@ -158,7 +154,7 @@ export default async function showVideoQuickActionPicker(videoFile, block, sdkHa
   });
   closeBtn.append(closeIcon);
 
-  const { previewContainer, video, durationPromise } = createVideoPreview(videoFile, strings);
+  const { previewContainer, durationPromise } = createVideoPreview(blobUrl, strings);
   hero.append(headerBar, previewContainer);
 
   const body = createTag('div', { class: 'vqap-body' });
@@ -171,7 +167,7 @@ export default async function showVideoQuickActionPicker(videoFile, block, sdkHa
   function closeDialog() {
     document.removeEventListener('keydown', handleKeydown);
     unlockBodyScroll();
-    if (video.src) URL.revokeObjectURL(video.src);
+    URL.revokeObjectURL(blobUrl);
     dialog.remove();
   }
 

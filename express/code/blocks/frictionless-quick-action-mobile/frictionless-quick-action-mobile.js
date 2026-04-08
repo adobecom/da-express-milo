@@ -288,11 +288,17 @@ export default async function decorate(block) {
     const file = inputElement.files[0];
     if (shouldShowVideoQuickActionPickerForMobile(quickAction, file)) {
       if (!file) return;
+      const blobUrl = URL.createObjectURL(file);
+      inputElement.value = '';
+      if (!blobUrl.startsWith('blob:')) {
+        URL.revokeObjectURL(blobUrl);
+        showErrorToast(block, await getErrorMsg('file-type-not-supported'));
+        return;
+      }
       const { default: showVideoQuickActionPicker } = await import(
         '../video-quick-action-picker/video-quick-action-picker.js'
       );
-      showVideoQuickActionPicker(file, block, { startSDKWithUnconvertedFiles });
-      inputElement.value = '';
+      showVideoQuickActionPicker(file, block, { startSDKWithUnconvertedFiles, blobUrl });
     } else if (quickAction === 'merge-videos' && inputElement.files.length > 1) {
       startSDKWithUnconvertedFiles(inputElement.files, quickAction, block);
     } else {
