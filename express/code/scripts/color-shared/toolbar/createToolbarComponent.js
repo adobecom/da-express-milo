@@ -15,7 +15,6 @@ function interpolate(tpl, vars) {
 }
 
 const TOOLBAR_DEFAULTS = {
-  shareText: 'Check out this {{type}}: {{name}}\nColors: {{colors}}',
   sharedSuccessfully: 'Shared successfully',
   copiedToClipboard: 'Copied to clipboard',
   downloadStarted: 'Download started',
