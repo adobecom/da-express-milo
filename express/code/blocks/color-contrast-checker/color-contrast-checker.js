@@ -174,7 +174,6 @@ export default async function decorate(block) {
       },
     });
 
-    adoptHeadline(block, layoutInstance);
     await layoutInstance.actionMenuReady;
 
     layoutInstance.actionMenu?.pushState?.(initialPalette.colors);
@@ -202,6 +201,7 @@ export default async function decorate(block) {
       destroy: destroyInstance,
     });
 
+    adoptHeadline(block, layoutInstance);
     block.dataset.shellState = 'ready';
     block.dataset.blockStatus = 'loaded';
     trackColorBlockLoad('color-contrast-checker');

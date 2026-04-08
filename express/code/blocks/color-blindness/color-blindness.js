@@ -95,7 +95,6 @@ export default async function decorate(block) {
       },
     });
 
-    adoptHeadline(block, layoutInstance);
     await layoutInstance.actionMenuReady;
 
     const { sidebar, canvas, topbar } = layoutInstance.slots;
@@ -251,6 +250,7 @@ export default async function decorate(block) {
     };
     document.addEventListener(HISTORY_EVENT, historyHandler);
 
+    adoptHeadline(block, layoutInstance);
     block.classList.add('ax-shell-host');
     block.dataset.blockStatus = 'loaded';
     trackColorBlockLoad('color-blindness');
