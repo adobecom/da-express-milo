@@ -42,7 +42,6 @@
 /* When image is loaded, the 640px marquee wrapper must expand to full width */
 .color-extract-marquee-wrapper:has(.color-extract.has-image) {
   width: 100%;
-  max-width: unset;
 }
 
 /* Section containing the marquee wrapper: position for bg/fade, flex to vertically center content */
@@ -55,7 +54,6 @@
 }
 
 .color-extract {
-  contain: layout style;
   --color-extract-max-width: 1440px;
   --color-extract-gap: 32px;
   --color-extract-radius: 16px;
@@ -89,14 +87,13 @@
   display: flex;
   flex-direction: column;
   gap: 48px;
-  max-width: 100%;
   margin: 0 auto;
   padding: 0 0 72px;
   color: var(--color-extract-text);
 }
 
 .color-extract.has-image .color-extract-inner {
-  max-width: var(--color-extract-max-width);
+  width: min(var(--color-extract-max-width), 100%);
   padding: 66px 24px 72px;
 }
 
@@ -129,14 +126,20 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing {
   pointer-events: none;
 }
 
-.color-extract .color-extract-landing-bg picture,
-.color-extract .color-extract-landing-bg img {
+.color-extract .color-extract-landing-bg picture {
   position: absolute;
   inset: 0;
-  width: 100%;
+  display: block;
+}
+
+.color-extract .color-extract-landing-bg img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: none;
   height: auto;
-  max-width: 1920px;
-  margin: 0 auto;
 }
 
 /*
@@ -165,21 +168,26 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   z-index: 0;
 }
 
-.section > .color-extract-landing-bg picture,
-.section > .color-extract-landing-bg img {
+.section > .color-extract-landing-bg picture {
   position: absolute;
   inset: 0;
-  width: 100%;
+  display: block;
+}
+
+.section > .color-extract-landing-bg img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: none;
   height: auto;
-  max-width: 1920px;
-  margin: 0 auto;
 }
 
 .color-extract .color-extract-landing-content {
   position: relative;
   z-index: 2;
   width: min(1440px, 100%);
-  max-width: 1679px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -389,8 +397,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   flex-direction: column;
   gap: 12px;
   align-items: center;
-  width: 100%;
-  max-width: 343px;
+  width: min(343px, 100%);
 }
 
 .color-extract .color-extract-suggestions-label {
@@ -498,7 +505,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   display: none;
   flex-direction: column;
   gap: 24px;
-  contain: layout style paint;
 }
 
 .color-extract.has-image .color-extract-edit {
@@ -510,7 +516,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 .color-extract.has-image .color-extract-edit-copy {
-  max-width: 720px;
+  width: min(720px, 100%);
   text-align: left;
 }
 
@@ -936,7 +942,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 .color-extract .color-extract-gradient-editor-col .gradient-editor {
   flex: 0 0 auto;
   width: 100%;
-  max-width: 100%;
   height: 80px;
   border-radius: 16px;
   overflow: visible;
@@ -988,7 +993,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
   .color-extract .color-extract-landing-content {
     width: 100%;
-    max-width: 100%;
   }
 
   .color-extract .color-extract-edit-copy h1 {
@@ -1047,6 +1051,11 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 @media (max-width: 599px) {
+  .section:has(.color-extract-marquee-wrapper) {
+    align-items: flex-start;
+    min-height: unset;
+  }
+
   .color-extract .color-extract-landing {
     padding: 32px 16px;
   }
