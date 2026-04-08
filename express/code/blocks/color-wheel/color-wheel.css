@@ -357,11 +357,6 @@ color-wheel-express {
   overflow: hidden;
 }
 
-.color-wheel .color-floating-toolbar-container .ax-swatch-strip,
-.color-wheel .color-floating-toolbar-container .ax-palette-summary sp-action-button {
-  display: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .color-wheel-harmony-carousel-host .simple-carousel-platform {
     scroll-behavior: auto;

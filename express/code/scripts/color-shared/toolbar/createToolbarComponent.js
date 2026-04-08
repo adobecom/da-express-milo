@@ -80,7 +80,7 @@ async function handleOpenInExpress({ id, name, colors }) {
   url.searchParams.set('referrer', 'express-colors');
   url.searchParams.set('entryPoint', 'color-explorer');
   url.searchParams.set('feature-enable', 'colors-product-entry-enabled');
-  url.searchParams.set('category', 'theme');
+  url.searchParams.set('category', 'yourStuff');
 
   window.open(url.toString(), '_blank');
 }
@@ -214,6 +214,7 @@ function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t) {
       size: 'm',
       onClick: onEditClick,
     });
+    editBtn.classList.add('ax-edit-btn');
     attachTooltip(editBtn, t.edit);
     paletteSummary.appendChild(editBtn);
   }

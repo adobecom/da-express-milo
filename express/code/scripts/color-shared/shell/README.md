@@ -98,9 +98,9 @@ createColorToolLayout(container, {
 
   // Toolbar options
   toolbar: {
-    mode: 'sticky-on-scroll',             // 'inline' | 'sticky' | 'sticky-on-scroll'
+    variant: 'sticky-on-scroll',          // 'inline' | 'standalone' | 'sticky' | 'sticky-on-scroll'
+    standaloneAppearance: 'standalone',    // 'standalone' (default) | 'raised' (sticky visuals, no sticky positioning)
     type: 'palette',
-    variant: 'standalone',                // Toolbar presentation variant
   },
 
   // Action menu options (mounted in topbar slot)
