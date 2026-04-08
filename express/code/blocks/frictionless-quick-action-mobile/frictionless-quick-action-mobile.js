@@ -296,7 +296,6 @@ export default async function decorate(block) {
     } else if (quickAction === 'merge-videos' && inputElement.files.length > 1) {
       startSDKWithUnconvertedFiles(inputElement.files, quickAction, block);
     } else {
-      const file = inputElement.files[0];
       startSDKWithUnconvertedFiles([file], quickAction, block);
     }
   };
