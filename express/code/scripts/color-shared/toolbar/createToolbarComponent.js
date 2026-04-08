@@ -388,7 +388,7 @@ export function createToolbar(options) {
 
   const main = createTag('div', { class: 'ax-toolbar-main' });
 
-  const DEFAULT_EDIT_BASE_PATH = '/express/colors/color-wheel';
+  const DEFAULT_EDIT_BASE_PATH = '/create/color-wheel';
 
   const paletteSummary = buildPaletteSummary(
     colors,
