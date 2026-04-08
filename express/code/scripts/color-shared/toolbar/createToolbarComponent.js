@@ -1,5 +1,6 @@
 import { announceToScreenReader } from '../spectrum/index.js';
-import { isMobileViewport, buildPaletteEditUrl } from '../utils/utilities.js';
+import { isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi } from '../utils/utilities.js';
+import { showExpressToast } from '../spectrum/components/express-toast.js';
 import { createIconButton } from '../utils/icons.js';
 import { createEventBus } from '../utils/createEventBus.js';
 import { createTag, getLibs } from '../../utils.js';
@@ -33,27 +34,40 @@ const TOOLBAR_DEFAULTS = {
   paletteName: 'Palette name',
   paletteNamePlaceholder: 'My Color Theme',
   ctaText: 'Create with my color palette',
+  urlCopiedToClipboard: 'URL copied to clipboard',
+  shareFailed: 'Unable to share. Please try again.',
 };
 
 let toolbarInstanceCounter = 0;
 
 /* ── Default Handlers ────────────────────────────────────────── */
 
-async function handleShare({ name, colors, type }, t) {
-  const text = interpolate(t.shareText, { type, name, colors: colors.join(', ') });
+async function handleShare({ name, colors }, t) {
+  const url = new URL(window.location.href);
+  const { setOnUrl } = createColorPaletteParamApi();
+  setOnUrl(url, colors, { name });
+  const shareUrl = url.toString();
+
   try {
-    await navigator.share({ title: name, text });
+    await navigator.share({ title: name, url: shareUrl });
     announceToScreenReader(t.sharedSuccessfully);
-  } catch {
-    try {
-      await navigator.clipboard.writeText(text);
-      announceToScreenReader(t.copiedToClipboard);
-    } catch (err) {
-      window.lana?.log(`Share/clipboard failed: ${err.message}`, {
-        tags: 'color-floating-toolbar,share',
-        severity: 'error',
-      });
-    }
+    showExpressToast({ message: t.sharedSuccessfully, variant: 'positive' });
+    return;
+  } catch (err) {
+    if (err?.name === 'AbortError') return;
+  }
+
+  try {
+    await navigator.clipboard.writeText(shareUrl);
+    announceToScreenReader(t.urlCopiedToClipboard);
+    showExpressToast({ message: t.urlCopiedToClipboard, variant: 'positive' });
+  } catch (err) {
+    window.lana?.log(`Share/clipboard failed: ${err.message}`, {
+      tags: 'color-floating-toolbar,share',
+      severity: 'error',
+    });
+    announceToScreenReader(t.shareFailed);
+    showExpressToast({ message: t.shareFailed, variant: 'negative' });
   }
 }
 
