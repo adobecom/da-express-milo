@@ -401,10 +401,6 @@ color-wheel-express {
 /* Large Tablet */
 
 @media (min-width: 888px) {
-  .color-wheel .ax-shell-slot--topbar {
-    padding-block-end: var(--spacing-100);
-  }
-
   .color-wheel .ax-shell-slot--sidebar {
     padding-block-end: 0;
   }
@@ -558,5 +554,11 @@ color-wheel-express {
 
   .color-wheel .color-floating-toolbar-container .ax-swatch-strip {
     display: flex;
+  }
+}
+
+@media (min-width: 1440px) {
+  .color-wheel .ax-color-tool-layout {
+    box-sizing: content-box;
   }
 }

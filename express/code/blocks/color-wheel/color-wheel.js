@@ -651,7 +651,6 @@ export default async function decorate(block) {
     block.className = 'color-wheel';
     const section = createTag('section');
     block.appendChild(section);
-    if (headline) section.appendChild(headline);
 
     try {
       const [strings, { getResolvedPalette, getResolvedPaletteName }] = await Promise.all([
@@ -753,7 +752,6 @@ export default async function decorate(block) {
         },
       });
 
-      adoptHeadline(section, layoutInstance);
       await layoutInstance.actionMenuReady;
 
       const actionMenuApi = layoutInstance.actionMenu;
@@ -950,6 +948,8 @@ export default async function decorate(block) {
         }
       });
 
+      if (headline) section.appendChild(headline);
+      adoptHeadline(section, layoutInstance);
       block.classList.add('ax-shell-host');
       block.dataset.shellState = 'ready';
       trackColorBlockLoad('color-wheel');
