@@ -13,6 +13,12 @@
   width: 100%;
 }
 
+@media (min-width: 600px) and (max-width: 1199px) {
+  .color-extract-marquee-wrapper {
+    width: min(835px, 100%);
+  }
+}
+
 .color-headline *,
 .color-headline *::before,
 .color-headline *::after {
@@ -37,7 +43,6 @@ body:has(.color-extract.has-image) .color-headline.extract {
 
 .color-headline.extract > div > div {
   width: 100%;
-  max-width: 640px;
 }
 
 .color-headline .express-logo {
@@ -70,6 +75,12 @@ body:has(.color-extract.has-image) .color-headline.extract {
   .color-headline.extract p {
     font-size: 16px;
     line-height: 1.4;
+  }
+}
+
+@media (max-width: 599px) {
+  .color-headline.extract {
+    padding-top: 32px;
   }
 }
 
