@@ -240,7 +240,7 @@ export function createColorInput(config) {
       palette,
       selectedIndex,
       colorMode: 'HEX',
-      showPalette: palette.length > 1 && mobile,
+      showPalette: palette.length > 1,
       mobile,
     }, {
       onColorChange: ({ hex }) => {
@@ -316,9 +316,6 @@ export function createColorInput(config) {
     claimActiveColorInput(controllerRef);
 
     try {
-      await import('../../../../scripts/color-shared/components/color-edit/index.js');
-      if (!isCurrentOpenRequest(requestId)) return;
-
       const colorEdit = createColorEdit();
 
       if (colorEdit.mobile) {
