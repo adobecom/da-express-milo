@@ -150,7 +150,7 @@
 /* Desktop styles */
 @media (min-width: 1280px) {
   .link-blade {
-    padding: var(--spacing-900) var(--spacing-600);
+    padding: var(--spacing-600) var(--spacing-500);
     min-width: 1280px;
   }
 
