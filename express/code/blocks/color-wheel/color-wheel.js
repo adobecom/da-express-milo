@@ -679,7 +679,7 @@ export default async function decorate(block) {
         palette: initialPalette,
         toolbar: {
           variant: 'sticky-on-scroll',
-          showEdit: !isDesktop,
+          showEdit: false,
           showPalette: true,
           showPaletteName: true,
           editPaletteName: true,

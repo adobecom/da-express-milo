@@ -159,7 +159,7 @@ export function createColorInput(config) {
   }
 
   function syncActiveEditorPalette() {
-    if (!activeColorEditAdapter) return;
+    if (!activeColorEditAdapter || syncingFromEditor) return;
 
     const { palette, selectedIndex } = resolveColorEditPalette();
     activeColorEditAdapter.setPalette(palette);
@@ -251,6 +251,12 @@ export function createColorInput(config) {
       onColorChangeEnd: ({ hex }) => {
         syncEditorHexValue(hex);
         runWithEditorSync(() => commitEditorValueIfChanged());
+      },
+      onSwatchSelect: ({ index }) => {
+        const hex = palette[index];
+        if (hex && syncEditorHexValue(hex)) {
+          runWithEditorSync(() => onInput?.({ value: hex }));
+        }
       },
       onClose: () => closeEditor(),
     });

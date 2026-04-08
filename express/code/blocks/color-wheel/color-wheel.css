@@ -363,10 +363,6 @@ color-wheel-express {
   }
 }
 
-.color-wheel .ax-toolbar-standalone .ax-edit-btn {
-  display: none;
-}
-
 @media (max-width: 599px) {
   .color-wheel .ax-toolbar-standalone .ax-palette-name {
       display: flex;
