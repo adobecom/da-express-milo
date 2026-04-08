@@ -470,7 +470,7 @@ function createFloatingToolbarMount(controller, variant) {
         variant: 'sticky-on-scroll',
         standaloneAppearance: 'raised',
         palette,
-        showEdit: false,
+        showEdit: true,
         showPaletteName: true,
         editPaletteName: true,
       });
