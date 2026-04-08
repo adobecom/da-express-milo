@@ -75,13 +75,18 @@ function createPromptLinkElement(promptLink, prompt) {
   return wrapper;
 }
 
-const LOGO = 'adobe-express-logo';
 function injectExpressLogo(block, wrapper) {
   if (block.classList.contains('entitled')) return;
-  if (!['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) return;
-  const logo = getIconElementDeprecated(LOGO, '22px');
-  logo.classList.add('express-logo');
-  wrapper.prepend(logo);
+  const metadataValue = getMetadata('marquee-inject-logo')?.toLowerCase();
+  let logoName = 'adobe-express-logo';
+  let logoClass = 'express-logo';
+  if (metadataValue === 'acrobat-express') {
+    logoName = 'cobrand-lockup-acrobat-express';
+    logoClass = 'acrobat-express-lockup';
+  }
+  const logoElement = getIconElementDeprecated(logoName, '22px');
+  logoElement.classList.add(logoClass);
+  wrapper.prepend(logoElement);
 }
 
 async function setHorizontalMasonry(el) {
