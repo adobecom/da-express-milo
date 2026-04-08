@@ -49,7 +49,7 @@ async function handleShare({ name, colors }, t) {
   const shareUrl = url.toString();
 
   try {
-    await navigator.share({ title: name, text: t.shareText, url: shareUrl });
+    await navigator.share({ title: name, url: shareUrl });
     announceToScreenReader(t.sharedSuccessfully);
     showExpressToast({ message: t.sharedSuccessfully, variant: 'positive' });
     return;
