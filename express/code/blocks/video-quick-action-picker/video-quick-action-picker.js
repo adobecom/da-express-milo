@@ -60,6 +60,7 @@ function createVideoPreview(blobUrl, strings) {
     'aria-label': strings.uploadedVideo,
   });
   video.style.display = 'none';
+  if (typeof blobUrl !== 'string' || !blobUrl.startsWith('blob:')) return { previewContainer, durationPromise: Promise.resolve(0) };
   video.src = blobUrl;
 
   // Resolve duration from the same video element to avoid a separate load
@@ -171,6 +172,9 @@ export default async function showVideoQuickActionPicker(videoFile, block, sdkHa
     dialog.remove();
   }
 
+  function handleKeydown(e) {
+    if (e.key === 'Escape') closeDialog();
+  }
   const videoDuration = await durationPromise;
   const videoActions = getVideoActions(strings, videoFile, videoDuration);
   videoActions.forEach((action) => {
