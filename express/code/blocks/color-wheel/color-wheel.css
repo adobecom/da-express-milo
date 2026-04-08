@@ -401,10 +401,6 @@ color-wheel-express {
 /* Large Tablet */
 
 @media (min-width: 888px) {
-  .color-wheel .ax-shell-slot--topbar {
-    padding-block-end: var(--spacing-100);
-  }
-
   .color-wheel .ax-shell-slot--sidebar {
     padding-block-end: 0;
   }
