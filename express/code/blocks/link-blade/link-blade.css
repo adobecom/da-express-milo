@@ -69,8 +69,15 @@
   position: relative;
 }
 
-.link-blade .link-blade-chevron.hidden {
+.link-blade .link-blade-chevron.hidden,
+.link-blade .link-blade-chevron.force-hidden {
   display: none;
+}
+
+.link-blade .link-blade-links.centered {
+  justify-content: center;
+  flex-wrap: wrap;
+  overflow-x: visible;
 }
 
 .link-blade .link-blade-chevron.left {
