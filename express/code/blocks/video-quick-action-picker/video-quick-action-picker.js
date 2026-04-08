@@ -170,12 +170,12 @@ export default async function showVideoQuickActionPicker(videoFile, block, sdkHa
     const body = createTag('div', { class: 'vqap-body' });
     const contentContainer = createTag('div', { class: 'vqap-content-container' });
 
-    function closeDialog() {
+    const closeDialog = () => {
       document.removeEventListener('keydown', handleKeydown);
       unlockBodyScroll();
       URL.revokeObjectURL(blobUrl);
       dialog.remove();
-    }
+    };
 
     handleKeydown = (e) => {
       if (e.key === 'Escape') {
