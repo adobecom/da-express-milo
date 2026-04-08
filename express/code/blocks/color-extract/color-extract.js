@@ -472,7 +472,7 @@ function createFloatingToolbarMount(controller, variant) {
         palette,
         showEdit: true,
         showPaletteName: true,
-        editPaletteName: true,
+        editPaletteName: false,
       });
 
       controller.subscribe(() => sync());
