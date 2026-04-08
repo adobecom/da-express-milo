@@ -1,0 +1,128 @@
+@import url('/express/code/scripts/color-shared/components/strips/color-strip.css');
+
+.color-blindness .ax-color-tool-layout {
+  --ax-layout-inline-size: auto;
+  --ax-text-content-gap: var(--spacing-100);
+  --ax-padding-sidebar-mobile: 0;
+  --ax-padding-canvas-mobile: 0;
+}
+
+.color-blindness .ax-shell-slot--sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+  overflow: visible;
+}
+
+.color-blindness color-wheel-express,
+.color-blindness color-conflicts {
+  max-width: 100%;
+}
+
+.color-blindness color-wheel-express {
+  width: 90%;
+  max-width: 315px;
+  aspect-ratio: 1 / 1;
+  align-self: center;
+}
+
+.color-blindness .ax-text-content__heading,
+.color-blindness .ax-text-content__paragraph {
+  overflow-wrap: break-word;
+}
+
+.color-blindness .strip-conflict-summary {
+  display: none;
+}
+
+.color-blindness .strip-with-color-blindness--four-rows {
+  flex: 1;
+  min-height: 0;
+}
+
+.color-blindness .strip-variant--four-rows__rail-container color-swatch-rail {
+  height: 100%;
+  min-height: 0;
+}
+
+.color-blindness .strip-cb-mobile-layout {
+  flex: 1;
+}
+
+.color-blindness .ax-shell-slot--canvas {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+
+.color-blindness .cb-strip-wrapper {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.color-blindness .action-menu-controls-only .action-menu-controls {
+  justify-content: flex-end;
+}
+
+.color-blindness .ax-shell-slot--topbar .action-menu-full .action-menu-controls {
+  display: none;
+}
+
+@media (min-width: 888px) {
+  .color-blindness .ax-shell-slot--topbar .action-menu-full .action-menu-controls {
+    display: flex;
+  }
+
+  .color-blindness .ax-shell-slot--canvas > .action-menu-controls-only {
+    display: none;
+  }
+
+  .color-blindness .ax-color-tool-layout {
+    grid-template-rows: auto 1fr auto;
+    --ax-padding-sidebar-desktop: var(--spacing-100) 0 0;
+    --ax-footer-margin-top: 0;
+  }
+
+  .color-blindness .ax-shell-slot--topbar {
+    grid-column: 1 / -1;
+  }
+
+  .color-blindness .ax-shell-slot--sidebar {
+    grid-row: 2 / span 2;
+  }
+
+  .color-blindness .color-explorer-strip-container {
+    flex: 1;
+    min-height: 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .color-blindness {
+    --cb-label-column-width: 100px;
+  }
+
+  .color-blindness .ax-shell-slot--canvas {
+    height: 600px;
+  }
+
+  .color-blindness .ax-color-tool-layout {
+    --ax-layout-column-gap: var(--spacing-400);
+    --ax-layout-row-gap: var(--spacing-300);
+  }
+
+  .color-blindness .ax-shell-slot--topbar {
+    grid-column: var(--ax-main-column-desktop);
+    padding-left: calc(var(--cb-label-column-width) + var(--spacing-50));
+  }
+
+  .color-blindness .ax-shell-slot--sidebar {
+    grid-row: 1 / span 3;
+  }
+
+  .color-blindness .ax-shell-slot--footer {
+    padding-left: calc(var(--cb-label-column-width) + var(--spacing-50));
+  }
+}

@@ -1,0 +1,51 @@
+/*
+ * Shared bottom-sheet / drawer structural foundation.
+ * Imported by modal-styles.css and drawer.css.
+ * All rules use :where() (zero specificity) so consumer rules always win.
+ */
+
+/* ── Body scroll lock ────────────────────────────────────────── */
+
+:where(body.ax-color-modal-open, body.ax-drawer-body-locked) {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+/* ── Curtain (backdrop overlay) ──────────────────────────────── */
+
+:where(.ax-color-modal-curtain, .ax-drawer-curtain) {
+  position: fixed;
+  inset: 0;
+  transition: opacity 200ms ease-in-out;
+}
+
+/* ── Panel (mobile bottom sheet) ─────────────────────────────── */
+
+:where(.ax-color-modal-container, .ax-drawer-panel) {
+  position: fixed;
+  bottom: 0;
+  --drawer-drag-y: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 20px 20px 0 0;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+/* ── Drag handle ─────────────────────────────────────────────── */
+
+:where(.ax-color-modal-handle, .ax-drawer-line) {
+  width: 80px;
+  height: 4px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  margin-inline: auto;
+  flex-shrink: 0;
+}
+
+/* ── Hide handle on tablet+ ──────────────────────────────────── */
+
+@media (min-width: 600px) {
+  :where(.ax-color-modal-handle, .ax-drawer-line) {
+    display: none;
+  }
+}

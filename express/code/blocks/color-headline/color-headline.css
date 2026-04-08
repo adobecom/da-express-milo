@@ -1,0 +1,121 @@
+/* Wrapper injected by color-headline.js when the extract variant is present.
+   Matches the Figma Content-container spec: 640px centered flex column. */
+.color-extract-marquee-wrapper {
+  display: flex;
+  width: min(640px, 100%);
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-500, 32px);
+  margin: 0 auto;
+}
+
+.color-extract-marquee-wrapper > * {
+  width: 100%;
+}
+
+@media (min-width: 600px) and (max-width: 1199px) {
+  .color-extract-marquee-wrapper {
+    width: min(835px, 100%);
+  }
+}
+
+.color-headline *,
+.color-headline *::before,
+.color-headline *::after {
+  box-sizing: border-box;
+}
+
+.color-headline.extract {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 56px 16px 0;
+  /* Sit above the color-extract landing background images */
+  position: relative;
+  z-index: 1;
+  margin-bottom: 0;
+}
+
+body:has(.color-extract.has-image) .color-headline.extract {
+  display: none;
+}
+
+.color-headline.extract > div > div {
+  width: 100%;
+}
+
+.color-headline .express-logo {
+  display: block;
+  width: unset;
+  height: 30px;
+  padding: 0;
+  margin-bottom: 12px;
+  margin-inline: auto;
+}
+
+.color-headline.extract h1 {
+  font-size: 45px;
+  line-height: 1.04;
+  margin: 0 0 16px;
+}
+
+.color-headline.extract p {
+  margin: 0;
+  color: #505050;
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+@media (max-width: 1199px) {
+  .color-headline.extract h1 {
+    font-size: 32px;
+  }
+
+  .color-headline.extract p {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+}
+
+@media (max-width: 599px) {
+  .color-headline.extract {
+    padding-top: 32px;
+  }
+}
+
+.color-headline.tools {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+}
+
+.color-headline.tools .express-logo {
+  display: block;
+  width: unset;
+  height: 29px;
+  padding: 0;
+  margin-inline: 0;
+  margin-bottom: var(--spacing-100);
+}
+
+.color-headline.tools h1,
+.color-headline.tools h2,
+.color-headline.tools h3 {
+  font-family: var(--body-font-family);
+  font-size: var(--ax-heading-xl-size);
+  font-weight: var(--heading-font-weight-extra);
+  line-height: 1.04;
+  color: var(--color-default-font);
+  margin: 0;
+  padding-block-end: var(--spacing-100);
+}
+
+.color-headline.tools p {
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
+  line-height: 1.3;
+  color: var(--color-dark-gray);
+  margin: 0;
+}

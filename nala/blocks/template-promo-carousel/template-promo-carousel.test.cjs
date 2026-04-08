@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { test, expect } from '@playwright/test';
+import { test } from '@playwright/test';
 import { features } from './template-promo-carousel.spec.cjs';
 import TemplatePromoCarousel from './template-promo-carousel.page.cjs';
 

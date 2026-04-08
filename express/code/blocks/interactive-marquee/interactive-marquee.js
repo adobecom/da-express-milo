@@ -87,6 +87,7 @@ function injectExpressLogo(block, wrapper) {
 async function setHorizontalMasonry(el) {
   const link = el.querySelector(':scope .con-button');
   if (!link) {
+    // eslint-disable-next-line no-console
     console.error('Missing Generate Link');
     return;
   }
