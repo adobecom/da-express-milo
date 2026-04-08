@@ -347,7 +347,7 @@ function buildSuggestedImages(row, onSelect) {
       const img = await loadImg();
       if (!img) return;
       try {
-        const maxWidth = 160;
+        const maxWidth = EXTRACT_CANVAS_MAX;
         const ratio = img.naturalHeight / img.naturalWidth || 1;
         const w = Math.min(maxWidth, img.naturalWidth);
         const h = Math.round(w * ratio);
