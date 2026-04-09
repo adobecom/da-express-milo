@@ -361,10 +361,6 @@ async function loadPage() {
   const adobeHomeRedirect = createTag('meta', { name: 'adobe-home-redirect', content: 'on' });
   document.head.append(adobeHomeRedirect);
 
-  const googleLoginRedirect = createTag('meta', { name: 'google-login', content: 'desktop' });
-  document.head.append(googleLoginRedirect);
-  // end TODO remove metadata after we go live
-
   const config = setConfig({ ...CONFIG, miloLibs });
 
   if (getMetadata('template-search-page') === 'Y') {
@@ -416,6 +412,9 @@ async function loadPage() {
   });
 
   await loadArea();
+
+  // Set after loadArea so milo's delayed doesn't pick it up — express-delayed owns google login
+  document.head.append(createTag('meta', { name: 'google-login', content: 'desktop' }));
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));
