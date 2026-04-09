@@ -1,0 +1,1099 @@
+
+/* Express theme fallbacks for floating toolbar (overridden when full theme loads) */
+:where(.color-extract) {
+  --color-white: #ffffff;
+  --color-default-font: #131313;
+  --color-blue-800: #3b63fb;
+  --color-light-gray-2: #f3f3f3;
+  --color-gray-300-variant: #dadada;
+  --color-gray-800-variant: #292929;
+  --Palette-gray-600: #717171;
+  --spacing-80: 6px;
+  --spacing-100: 8px;
+  --spacing-200: 12px;
+  --spacing-300: 16px;
+  --border-width-2: 2px;
+  --body-font-family: 'Adobe Clean', adobe-clean, 'Trebuchet MS', sans-serif;
+  --ax-body-weight: 700;
+  --ax-body-xs-size: 12px;
+  --ax-body-xxs-size: 11px;
+  --ax-toolbar-sticky-z: 40;
+  --gradient-stop-size: 16px;
+  --gradient-stop-border-color: #fff;
+  --gradient-editor-handle-stroke-width: 2px;
+  --Corner-radius-bar: 12px;
+  --Gradient-editor-max-width-l: 668px;
+  --Gradient-editor-max-width-m: 500px;
+  --Gradient-editor-max-width-s: 343px;
+  --Elevation-floating-button: 0 1px 4px rgba(0, 0, 0, 0.16);
+  --Palette-gray-200: #e9e9e9;
+  --Palette-white: #fff;
+  --Spacing-Spacing-50: 2px;
+  --modal-focus-outline-width: 2px;
+  --S2A-Color-border-focus-indicator: #4b75ff;
+}
+
+.color-extract *,
+.color-extract *::before,
+.color-extract *::after {
+  box-sizing: border-box;
+}
+
+/* When image is loaded, the 640px marquee wrapper must expand to full width */
+.color-extract-marquee-wrapper:has(.color-extract.has-image) {
+  width: 100%;
+}
+
+/* Section containing the marquee wrapper: position for bg/fade, flex to vertically center content */
+.section:has(.color-extract-marquee-wrapper) {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 800px;
+}
+
+.color-extract {
+  --color-extract-max-width: 1440px;
+  --color-extract-gap: 32px;
+  --color-extract-radius: 16px;
+  --color-extract-bg: #ffffff;
+  --color-extract-text: #131313;
+  --color-extract-subtle: #505050;
+  --color-extract-border: #292929;
+  --color-extract-accent: #3b63fb;
+  --color-extract-accent-hover: #274dea;
+  --color-extract-accent-soft: rgba(59, 99, 251, 0.08);
+  --color-extract-focus: #4b75ff;
+  --color-extract-disabled-bg: #e9e9e9;
+  --color-extract-disabled-text: #c6c6c6;
+  --color-extract-gray-50: #f8f8f8;
+  --color-extract-gray-100: #f3f3f3;
+  --color-extract-gray-200: #e9e9e9;
+  --color-extract-gray-300: #e1e1e1;
+  --color-extract-gray-350: #d4d4d4;
+  --color-extract-gray-hover: #f5f5f5;
+  --color-extract-success: #0a8a0a;
+  --color-extract-overlay-image:
+    linear-gradient(45deg, #ccc 25%, transparent 25%),
+    linear-gradient(-45deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+}
+
+/* ---- Inner container ---- */
+
+.color-extract .color-extract-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 48px;
+  margin: 0 auto;
+  padding: 0 0 72px;
+  color: var(--color-extract-text);
+}
+
+.color-extract.has-image .color-extract-inner {
+  width: min(var(--color-extract-max-width), 100%);
+  padding: 66px 24px 72px;
+}
+
+/* ---- Landing stage ---- */
+
+.color-extract .color-extract-landing {
+  position: relative;
+  height: auto;
+  width: 100%;
+  overflow: visible;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 66px 24px 40px;
+}
+
+body:has(.color-headline.extract) .color-extract .color-extract-landing {
+  padding-top: 0;
+}
+
+.color-extract.has-image .color-extract-landing {
+  display: none;
+}
+
+/* Background image — when NOT inside marquee wrapper (standalone color-extract) */
+.color-extract .color-extract-landing-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.color-extract .color-extract-landing-bg picture {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.color-extract .color-extract-landing-bg img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: none;
+  height: auto;
+}
+
+/*
+ * CSS fallback: bg still inside .color-extract (JS did not move it to section level).
+ * .color-extract has contain:layout, making it the containing block.
+ * Because .color-extract is a centered 640px element, the math resolves correctly:
+ *   left: 50% of 640px centered = viewport midpoint → translateX(-50vw) = viewport left edge.
+ * Negative top extends the bg above .color-extract to also cover the headline block.
+ */
+body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
+  top: -400px;
+  bottom: 0;
+  left: 50%;
+  right: auto;
+  width: 100vw;
+  height: auto;
+  transform: translateX(-50%);
+}
+
+/* Background image — section level (moved out of marquee wrapper by JS) */
+.section > .color-extract-landing-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.section > .color-extract-landing-bg picture {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.section > .color-extract-landing-bg img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: none;
+  height: auto;
+}
+
+.color-extract .color-extract-landing-content {
+  position: relative;
+  z-index: 2;
+  width: min(1440px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  text-align: center;
+}
+
+.color-extract.is-dragging .color-extract-landing {
+  background: var(--color-extract-gray-50);
+}
+
+.color-extract.is-dragging .color-extract-landing::after {
+  display: none;
+}
+
+/* Fade — when NOT inside marquee wrapper (standalone color-extract) */
+.color-extract .color-extract-landing-fade {
+  position: absolute;
+  width: 100vw;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 0;
+  height: 143px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, var(--color-extract-bg) 80.29%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.color-extract.has-image .color-extract-landing-fade,
+.color-extract.is-loading .color-extract-landing-fade {
+  display: none;
+}
+
+/* Fade — section level (moved out of marquee wrapper by JS) */
+.section > .color-extract-landing-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 143px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0) 0%, #ffffff 80.29%);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Hide section-level bg/fade when image is loaded or overlay is showing */
+.section:has(.color-extract.has-image) > .color-extract-landing-bg,
+.section:has(.color-extract.has-image) > .color-extract-landing-fade,
+.section:has(.color-extract.is-loading) > .color-extract-landing-fade {
+  display: none;
+}
+
+/* ---- Drag overlay (appended to document.body to escape contain:layout) ---- */
+
+.color-extract-drag-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(47px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 50;
+}
+
+.color-extract-drag-overlay.is-dragging {
+  opacity: 1;
+}
+
+.color-extract-drag-icon {
+  width: 65px;
+  height: 65px;
+  color: var(--color-extract-text);
+}
+
+.color-extract-drag-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.color-extract-drag-text {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--color-extract-text);
+}
+
+/* ---- Full-screen loading overlay ---- */
+
+.color-extract-loading-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(47px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 50;
+}
+
+.color-extract-loading-overlay.is-loading {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.color-extract-loading-overlay .color-extract-loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 192px;
+}
+
+.color-extract-loading-overlay .color-extract-loading-label {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 22px;
+  color: #505050;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.color-extract-loading-overlay .color-extract-loading-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 5px;
+  background: #dadada;
+  overflow: hidden;
+}
+
+.color-extract-loading-overlay .color-extract-loading-bar {
+  height: 100%;
+  width: 0;
+  border-radius: 5px;
+  background: #5258e4;
+}
+
+.color-extract-loading-overlay.is-loading .color-extract-loading-bar {
+  animation: color-extract-loading-progress 1s ease-out forwards;
+}
+
+@keyframes color-extract-loading-progress {
+  0% { width: 0; }
+  100% { width: 100%; }
+}
+
+/* ---- Typography ---- */
+
+.color-extract .color-extract-edit-copy h1 {
+  font-size: 45px;
+  line-height: 1.04;
+  margin: 0 0 12px;
+}
+
+.color-extract .color-extract-edit-copy p {
+  margin: 0;
+  color: var(--color-extract-subtle);
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+/* ---- Dropzone (shared component) - block-specific overrides ---- */
+
+.color-extract .image-upload-dropzone-container::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: var(--color-extract-radius);
+  opacity: 0;
+  pointer-events: none;
+  z-index: 0;
+  background-image: var(--color-extract-overlay-image);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  transition: opacity 0.15s ease;
+}
+
+.color-extract .image-upload-dropzone-container:hover::before,
+.color-extract .image-upload-dropzone-container:active:not(.is-disabled)::before,
+.color-extract.is-dragging .image-upload-dropzone-container:not(.is-disabled)::before {
+  opacity: 0.15;
+}
+
+.color-extract.is-dragging .image-upload-dropzone-container:not(.is-disabled) {
+  border-color: var(--color-extract-accent-hover);
+  background: var(--color-extract-bg);
+}
+
+.color-extract.is-dragging .image-upload-dropzone-title {
+  color: var(--color-extract-text);
+}
+
+/* ---- Suggestions ---- */
+
+.color-extract .color-extract-suggestions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  width: min(343px, 100%);
+}
+
+.color-extract .color-extract-suggestions-label {
+  font-weight: 700;
+  font-size: 16px;
+  text-align: center;
+}
+
+.color-extract .color-extract-suggestions-list {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
+
+.color-extract .color-extract-suggestion {
+  border: 1px solid var(--color-extract-gray-300);
+  padding: 0;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--color-extract-bg);
+  width: 80px;
+  height: 80px;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  transition: border-color 0.15s ease, padding 0.1s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.color-extract .color-extract-suggestion:hover {
+  border-color: var(--color-extract-text);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.12);
+}
+
+.color-extract .color-extract-suggestion:active {
+  border-color: var(--color-extract-text);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18);
+}
+
+.color-extract .color-extract-suggestion:focus-visible {
+  outline: none;
+  border-color: var(--color-extract-text);
+  padding: 2px;
+  box-shadow: 0 0 0 2px var(--color-extract-focus);
+}
+
+.color-extract .color-extract-suggestion.is-selected {
+  border-color: var(--color-extract-text);
+  padding: 2px;
+  box-shadow: 0 0 0 2px var(--color-extract-text);
+}
+
+.color-extract .color-extract-suggestion:disabled,
+.color-extract .color-extract-suggestion[aria-disabled='true'] {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.color-extract .color-extract-suggestion-preview {
+  flex: 1;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+  transition: border-radius 0.1s ease;
+}
+
+.color-extract .color-extract-suggestion.is-selected .color-extract-suggestion-preview,
+.color-extract .color-extract-suggestion:focus-visible .color-extract-suggestion-preview {
+  border-radius: 8px;
+}
+
+.color-extract .color-extract-suggestion img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+.color-extract .color-extract-suggestion-bar {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  height: 16px;
+}
+
+.color-extract .color-extract-suggestion-chip {
+  display: block;
+  height: 100%;
+}
+
+.color-extract .color-extract-suggestion-chip.is-1 { background: var(--color-extract-bg); }
+.color-extract .color-extract-suggestion-chip.is-2 { background: var(--color-extract-gray-50); }
+.color-extract .color-extract-suggestion-chip.is-3 { background: var(--color-extract-gray-100); }
+.color-extract .color-extract-suggestion-chip.is-4 { background: var(--color-extract-gray-200); }
+.color-extract .color-extract-suggestion-chip.is-5 { background: var(--color-extract-gray-300); }
+
+/* ---- Edit stage ---- */
+
+.color-extract .color-extract-edit {
+  display: none;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.color-extract.has-image .color-extract-edit {
+  display: flex;
+}
+
+.color-extract.is-loading .color-extract-edit {
+  display: none;
+}
+
+.color-extract.has-image .color-extract-edit-copy {
+  width: min(720px, 100%);
+  text-align: left;
+}
+
+.color-extract.has-image .color-extract-edit-copy h1,
+.color-extract.has-image .color-extract-edit-copy p {
+  text-align: left;
+}
+
+.color-extract .color-extract-edit-stage {
+  position: relative;
+  height: 800px;
+  width: min(1440px, 100%);
+  margin: 0 auto;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--color-extract-bg);
+  display: flex;
+  align-items: stretch;
+  justify-content: flex-end;
+}
+
+.color-extract.has-image .color-extract-edit-stage {
+  height: auto;
+  background: transparent;
+  overflow: visible;
+  display: grid;
+  grid-template-columns: minmax(0, 668fr) minmax(0, 692fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.color-extract .color-extract-edit-left {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+.color-extract .color-extract-edit-bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+
+.color-extract.has-image .color-extract-edit-bg {
+  position: relative;
+  inset: auto;
+  border-radius: 16px;
+  overflow: visible;
+  background: var(--color-extract-gray-100);
+  padding: 16px;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(28px);
+  /* Fixed 634px from Figma spec — image scales to fit, never drives sizing */
+  height: 634px;
+}
+
+.color-extract .color-extract-edit-bg picture,
+.color-extract .color-extract-edit-bg img {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 1920px;
+  height: 800px;
+  object-fit: cover;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.color-extract.has-image .color-extract-edit-bg picture {
+  /* Fill the grey container completely — reset base rule's 1920×800 sizing */
+  position: absolute;
+  inset: 16px;
+  width: auto;
+  height: auto;
+  margin: 0;
+  transform: none;
+  display: block;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.color-extract.has-image .color-extract-edit-bg img {
+  /* Image fits within the fixed container — never drives sizing */
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 8px;
+  object-fit: contain;
+  left: 0;
+  transform: none;
+  position: relative;
+  inset: auto;
+}
+
+/* ---- Swatch rail (adapter wrapper) ---- */
+
+.color-extract .color-extract-swatch-rail {
+  display: block;
+  width: 100%;
+  align-self: stretch;
+  min-height: 0;
+  --figma-strip-radius: 16px;
+  --swatch-rail-gap: 2px;
+}
+
+.color-extract .color-extract-swatch-rail color-swatch-rail {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* ---- Toolbar ---- */
+
+.color-extract .color-extract-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  min-height: 32px;
+  gap: 12px;
+}
+
+.color-extract .color-extract-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 1;
+  min-width: 0;
+}
+
+.color-extract .color-extract-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ---- Mood selector (dropdown) ---- */
+
+.color-extract .color-extract-mood {
+  display: flex;
+  align-items: center;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.color-extract .color-extract-mood-label {
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-extract-subtle);
+  padding-right: 12px;
+  white-space: nowrap;
+  line-height: 18px;
+}
+
+.color-extract .color-extract-mood-dropdown {
+  position: relative;
+  width: 330px;
+}
+
+.color-extract .color-extract-mood-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+  height: 32px;
+  padding: 0 11px 0 12px;
+  background: var(--color-extract-gray-300);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-extract-text);
+  line-height: 18px;
+  transition: background-color 0.15s ease;
+}
+
+.color-extract .color-extract-mood-trigger:hover {
+  background: var(--color-extract-gray-350);
+}
+
+.color-extract .color-extract-mood-trigger:focus-visible {
+  outline: 2px solid var(--color-extract-focus);
+  outline-offset: 1px;
+}
+
+.color-extract .color-extract-mood-trigger-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+.color-extract .color-extract-mood-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  color: var(--color-extract-text);
+  transition: transform 0.15s ease;
+}
+
+.color-extract .color-extract-mood-dropdown.is-open .color-extract-mood-chevron {
+  transform: rotate(180deg);
+}
+
+.color-extract .color-extract-mood-popover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  min-width: 100%;
+  background: var(--color-extract-bg);
+  border-radius: 8px;
+  box-shadow:
+    0 4px 12px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    0 0 2px rgba(0, 0, 0, 0.12);
+  padding: 4px 0;
+  z-index: 30;
+}
+
+.color-extract .color-extract-mood-popover[hidden] {
+  display: none;
+}
+
+.color-extract .color-extract-mood-option {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--color-extract-text);
+  text-align: left;
+  transition: background-color 0.1s ease;
+}
+
+.color-extract .color-extract-mood-option:hover {
+  background: var(--color-extract-gray-hover);
+}
+
+.color-extract .color-extract-mood-option.is-selected {
+  font-weight: 600;
+}
+
+.color-extract .color-extract-mood-option:focus-visible {
+  outline: 2px solid var(--color-extract-focus);
+  outline-offset: -2px;
+}
+
+/* ---- Toolbar divider ---- */
+
+.color-extract .color-extract-toolbar-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--color-extract-gray-300);
+  flex-shrink: 0;
+  align-self: center;
+}
+
+/* ---- Image markers ---- */
+
+.color-extract .color-extract-markers {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.color-extract.has-image .color-extract-markers {
+  /* CSS fallback: match bgWrapper padding. JS refines to exact rendered image area. */
+  inset: 16px;
+}
+
+.color-extract .color-extract-marker {
+  position: absolute;
+  width: 33px;
+  height: 33px;
+  border-radius: 50%;
+  cursor: crosshair;
+  touch-action: none;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  transition: width 0.2s ease, height 0.2s ease;
+  background: var(--marker-color, transparent);
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 17px rgba(0, 0, 0, 0.16);
+  /* Center on percentage point — size-independent, works at every breakpoint */
+  transform: translate(-50%, -50%);
+}
+
+.color-extract .color-extract-marker:hover {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), 0 0 20px rgba(0, 0, 0, 0.22);
+}
+
+.color-extract .color-extract-marker.is-active {
+  width: 56px;
+  height: 56px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
+  z-index: 10;
+}
+
+.color-extract .color-extract-marker:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-extract-focus), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-extract .color-extract-marker-zoom {
+  display: none;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  image-rendering: pixelated;
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+}
+
+.color-extract .color-extract-marker-dot {
+  display: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--marker-color, #000);
+  border: 0.5px solid #fff;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  pointer-events: none;
+  position: relative;
+  z-index: 1;
+}
+
+.color-extract .color-extract-marker.is-active .color-extract-marker-dot {
+  display: block;
+}
+
+/* ---- Magnified state (handle becomes the zoom lens on drag) ---- */
+
+.color-extract .color-extract-marker.is-magnified {
+  width: 80px;
+  height: 80px;
+  background: transparent;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
+  z-index: 20;
+  transition: none;
+}
+
+.color-extract .color-extract-marker.is-magnified .color-extract-marker-zoom {
+  display: block;
+}
+
+.color-extract .color-extract-marker.is-magnified .color-extract-marker-dot {
+  display: block;
+}
+
+/* ---- Mobile color loupe (teardrop above handle on touch) ---- */
+
+.color-extract .color-extract-loupe {
+  position: absolute;
+  pointer-events: none;
+  z-index: 25;
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.12))
+          drop-shadow(0 3px 9px rgba(0, 0, 0, 0.04))
+          drop-shadow(0 6px 17px rgba(0, 0, 0, 0.08));
+}
+
+.color-extract .color-extract-loupe[hidden] {
+  display: none;
+}
+
+.color-extract .color-extract-loupe svg {
+  display: block;
+}
+
+/* ---- Floating toolbar mount ---- */
+
+.color-extract .color-extract-floating-toolbar-mount:empty {
+  display: none;
+}
+
+/* ---- Gradient variant ---- */
+
+.color-extract.gradient.has-image .color-extract-edit-stage--gradient {
+  height: auto;
+  background: transparent;
+  overflow: visible;
+  display: grid;
+  grid-template-columns: minmax(0, 668fr) minmax(0, 692fr);
+  gap: 24px;
+  align-items: stretch;
+}
+
+.color-extract .color-extract-gradient-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  align-self: stretch;
+}
+
+.color-extract .color-extract-swatch-rail--gradient {
+  flex: 1 1 0;
+  min-height: 0;
+}
+
+.color-extract .color-extract-gradient-editor-col {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  min-width: 0;
+  flex: 0 0 auto;
+}
+
+.color-extract .color-extract-gradient-editor-col .gradient-editor {
+  flex: 0 0 auto;
+  width: 100%;
+  height: 80px;
+  border-radius: 16px;
+  overflow: visible;
+}
+
+.color-extract .color-extract-gradient-editor-col .gradient-editor-bar-wrap {
+  height: 80px;
+  position: relative;
+}
+
+.color-extract .color-extract-gradient-editor-col .gradient-editor-bar {
+  border-radius: 16px;
+}
+
+.color-extract .color-extract-gradient-editor-col .gradient-editor-handles {
+  left: 12px;
+  right: 12px;
+}
+
+
+/* ==================== Responsive ==================== */
+
+@media (max-width: 1199px) {
+  .color-extract .color-extract-landing {
+    height: auto;
+    padding: 32px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: visible;
+  }
+
+  body:has(.color-headline.extract) .color-extract .color-extract-landing {
+    min-height: unset;
+  }
+
+  .color-extract .color-extract-landing-bg {
+    display: none;
+  }
+
+  .section > .color-extract-landing-bg,
+  .section > .color-extract-landing-fade {
+    display: none;
+  }
+
+  .color-extract .color-extract-landing-fade {
+    display: none;
+  }
+
+  .color-extract .color-extract-landing-content {
+    width: 100%;
+  }
+
+  .color-extract .color-extract-edit-copy h1 {
+    font-size: 32px;
+  }
+
+  .color-extract .color-extract-edit-copy p {
+    font-size: 16px;
+    line-height: 1.4;
+  }
+
+  .color-extract .image-upload-dropzone-container {
+    height: 200px;
+    justify-content: center;
+  }
+
+  /* Hide "Or drag and drop" title but keep file-type subtitle visible */
+  .color-extract .image-upload-dropzone-text {
+    display: flex;
+  }
+
+  .color-extract .image-upload-dropzone-title {
+    display: none;
+  }
+
+  .color-extract .color-extract-suggestions-label {
+    font-size: 14px;
+    line-height: 20px;
+  }
+
+  .color-extract .color-extract-edit-stage {
+    height: auto;
+  }
+
+  .color-extract.has-image .color-extract-edit-stage {
+    grid-template-columns: 1fr;
+  }
+
+  .color-extract.has-image .color-extract-edit-bg {
+    height: 400px;
+  }
+
+  .color-extract .color-extract-swatch-rail {
+    min-height: 240px;
+  }
+
+  .color-extract .color-extract-toolbar {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .color-extract.gradient.has-image .color-extract-edit-stage--gradient {
+    grid-template-columns: 1fr;
+  }
+
+}
+
+@media (max-width: 599px) {
+  .section:has(.color-extract-marquee-wrapper) {
+    align-items: flex-start;
+    min-height: unset;
+  }
+
+  .color-extract .color-extract-landing {
+    padding: 32px 16px;
+  }
+
+  .color-extract.has-image .color-extract-inner {
+    padding: 32px 16px 56px;
+    gap: 24px;
+  }
+
+  .color-extract .color-extract-marker {
+    width: 26px;
+    height: 26px;
+  }
+
+  .color-extract .color-extract-marker.is-active {
+    width: 42px;
+    height: 42px;
+  }
+
+  .color-extract .color-extract-marker.is-magnified {
+    width: 60px;
+    height: 60px;
+  }
+
+  .color-extract .color-extract-toolbar-divider {
+    display: none;
+  }
+
+}
+
+/* ---- Reduced motion ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  .color-extract .color-extract-marker,
+  .color-extract .color-extract-suggestion,
+  .color-extract .color-action-button,
+  .color-extract .color-extract-mood-trigger,
+  .color-extract .image-upload-dropzone-container {
+    transition: none;
+  }
+}

@@ -1,0 +1,538 @@
+/**
+ * Spectrum Web Components — Centralized Lazy Loader
+ *
+ * Provides per-component-family loading functions so each Color Explorer
+ * page imports only the Spectrum components it needs.
+ *
+ * Every loader is idempotent — calling it more than once is a no-op.
+ *
+ * Usage:
+ *   import { loadPicker } from '../spectrum/load-spectrum.js';
+ *   await loadPicker();
+ *   // sp-picker, sp-menu, sp-menu-item are now registered
+ */
+
+import { installRegistryGuard, waitForComponents } from './registry.js';
+
+// ── paths ────────────────────────────────────────────────────────────
+const DIST = '../../widgets/spectrum/dist';
+
+// ── internal state ───────────────────────────────────────────────────
+// Each entry caches the loading promise so concurrent calls are safe.
+let coreLoadedPromise = null;
+const componentLoaded = {};
+
+// ── persistent error suppression (non-fatal SWC menu.js WeakMap bug) ─
+// These errors fire both at load time and later when menu items are
+// added/removed, so the handler stays installed for the page lifetime.
+let errorHandlerInstalled = false;
+
+function installErrorSuppression() {
+  if (errorHandlerInstalled) return;
+  errorHandlerInstalled = true;
+
+  const original = window.onerror;
+  const seen = new Set();
+
+  window.onerror = function handler(msg, src, line, col, err) {
+    const m = String(msg || '');
+    const s = String(src || '');
+    const st = String(err?.stack || '');
+    const isMenu = s.includes('menu.js')
+      || st.includes('menu.js')
+      || m.includes('onSelectableItemAddedOrUpdated')
+      || st.includes('onSelectableItemAddedOrUpdated');
+    const isUndef = m.includes('Cannot read properties of undefined')
+      || st.includes('Cannot read properties of undefined');
+    const isWeak = m.includes("reading 'set'")
+      || m.includes("reading 'get'")
+      || st.includes("reading 'set'")
+      || st.includes("reading 'get'");
+
+    if (isMenu && isUndef && isWeak) {
+      const key = `${s}:${line}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        console.warn('[Spectrum] Suppressed non-fatal menu.js error:', m);
+      }
+      return true;
+    }
+    return original ? original.call(this, msg, src, line, col, err) : false;
+  };
+
+  // LANA and other trackers may listen via addEventListener('error').
+  // Stop propagation for the known non-fatal Spectrum menu WeakMap issue.
+  window.addEventListener('error', (event) => {
+    const message = String(event?.message || '');
+    const filename = String(event?.filename || '');
+    const stack = String(event?.error?.stack || '');
+    const isMenu = filename.includes('menu.js')
+      || message.includes('menu.js')
+      || stack.includes('menu.js')
+      || message.includes('onSelectableItemAddedOrUpdated')
+      || stack.includes('onSelectableItemAddedOrUpdated');
+    const isUndef = message.includes('Cannot read properties of undefined')
+      || stack.includes('Cannot read properties of undefined');
+    const isWeak = message.includes("reading 'set'")
+      || message.includes("reading 'get'")
+      || stack.includes("reading 'set'")
+      || stack.includes("reading 'get'");
+    if (isMenu && isUndef && isWeak) {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+    }
+  }, true);
+
+  // Some SWC menu.js failures surface as unhandled Promise rejections.
+  // Keep this narrowly scoped so only the known non-fatal menu WeakMap
+  // issue is suppressed.
+  window.addEventListener('unhandledrejection', (event) => {
+    const reason = event?.reason;
+    const text = String(reason?.message || reason || '');
+    const stack = String(reason?.stack || '');
+    const isMenu = stack.includes('menu.js')
+      || text.includes('menu.js')
+      || text.includes('onSelectableItemAddedOrUpdated')
+      || stack.includes('onSelectableItemAddedOrUpdated');
+    const isUndef = text.includes('Cannot read properties of undefined');
+    const isWeak = text.includes("reading 'set'") || text.includes("reading 'get'");
+    if (isMenu && isUndef && isWeak) {
+      event.preventDefault();
+    }
+  });
+}
+
+// ── core dependencies (loaded once) ─────────────────────────────────
+function loadCoreDeps() {
+  if (!coreLoadedPromise) {
+    coreLoadedPromise = (async () => {
+      installErrorSuppression();
+
+      const guard = installRegistryGuard();
+
+      try {
+        const litMod = await import(`${DIST}/lit.js`);
+        window.__SpectrumAdoptStyles = litMod.adoptStyles;
+
+        await import(`${DIST}/base.js`);
+
+        await import(`${DIST}/theme.js`);
+        await new Promise((r) => setTimeout(r, 50));
+
+        await import(`${DIST}/reactive-controllers.js`);
+
+        await import(`${DIST}/shared.js`);
+
+        await import(`${DIST}/icons-ui.js`);
+        await import(`${DIST}/icons-workflow.js`);
+      } finally {
+        guard.restore();
+      }
+    })().catch((error) => {
+      // Allow retries after transient import/registration failures.
+      coreLoadedPromise = null;
+      throw error;
+    });
+  }
+  return coreLoadedPromise;
+}
+
+// ── public loaders ───────────────────────────────────────────────────
+
+/**
+ * Load picker components (sp-picker, sp-menu, sp-menu-item, sp-popover, sp-overlay).
+ */
+export function loadPicker() {
+  if (!componentLoaded.picker) {
+    componentLoaded.picker = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      let importError = null;
+      try {
+        try {
+          await import(`${DIST}/overlay.js`);
+          await import(`${DIST}/popover.js`);
+          await import(`${DIST}/menu.js`);
+          await import(`${DIST}/picker.js`);
+        } catch (error) {
+          importError = error;
+        }
+
+        try {
+          await waitForComponents(['sp-theme', 'sp-picker', 'sp-menu', 'sp-menu-item']);
+        } catch (waitError) {
+          const pickerReady = Boolean(
+            window.customElements.get('sp-picker')
+              && window.customElements.get('sp-menu')
+              && window.customElements.get('sp-menu-item'),
+          );
+
+          if (!pickerReady) {
+            throw importError || waitError;
+          }
+        }
+
+        if (importError) {
+          const pickerReady = Boolean(
+            window.customElements.get('sp-picker')
+              && window.customElements.get('sp-menu')
+              && window.customElements.get('sp-menu-item'),
+          );
+
+          if (!pickerReady) {
+            throw importError;
+          }
+
+          // eslint-disable-next-line no-console
+          console.warn('[Spectrum] loadPicker recovered after non-fatal import error:', importError);
+        }
+      } finally {
+        guard.restore();
+      }
+    })().catch((error) => {
+      // Allow createExpressPicker retry logic to re-attempt a clean load.
+      componentLoaded.picker = null;
+      throw error;
+    });
+  }
+  return componentLoaded.picker;
+}
+
+/**
+ * Load button components (sp-button, sp-action-button, etc.).
+ */
+export function loadButton() {
+  if (!componentLoaded.button) {
+    componentLoaded.button = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/button.js`);
+        await waitForComponents(['sp-theme', 'sp-button']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.button;
+}
+
+/**
+ * Load action button component (sp-action-button).
+ */
+export function loadActionButton() {
+  if (!componentLoaded.actionButton) {
+    componentLoaded.actionButton = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/action-button.js`);
+        await waitForComponents(['sp-theme', 'sp-action-button']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.actionButton;
+}
+
+/**
+ * Load tooltip component (sp-tooltip).
+ * Also loads overlay since tooltips use the overlay system.
+ */
+export function loadTooltip() {
+  if (!componentLoaded.tooltip) {
+    componentLoaded.tooltip = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/overlay.js`);
+        await import(`${DIST}/tooltip.js`);
+        await waitForComponents(['sp-theme', 'sp-tooltip']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.tooltip;
+}
+
+/**
+ * Load dialog components (sp-dialog, sp-dialog-wrapper).
+ * Also loads overlay for backdrop/stacking.
+ */
+export function loadDialog() {
+  if (!componentLoaded.dialog) {
+    componentLoaded.dialog = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/overlay.js`);
+        await import(`${DIST}/button.js`);
+        await import(`${DIST}/dialog.js`);
+        await waitForComponents(['sp-theme', 'sp-dialog']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.dialog;
+}
+
+/**
+ * Load icons for color-swatch-rail (copy, add, delete, lock, accessibility, open-in). Tint and drag use Figma SVGs only — not Spectrum sp-icon-edit.
+ */
+export async function loadIconsRail() {
+  if (componentLoaded.iconsRail) return;
+  await loadCoreDeps();
+  // icons-workflow.js in this repo is the canonical source for rail icons.
+  await import(`${DIST}/icons-workflow.js`);
+  await waitForComponents([
+    'sp-icon-alert',
+    'sp-icon-circle',
+    'sp-icon-copy',
+    'sp-icon-delete',
+    'sp-icon-edit',
+    'sp-icon-filter',
+    'sp-icon-open-in',
+    'sp-icon-switch-vertical',
+    'sp-icon-target',
+  ]);
+  componentLoaded.iconsRail = true;
+}
+
+/**
+ * Load toast component (sp-toast).
+ */
+export function loadToast() {
+  if (!componentLoaded.toast) {
+    componentLoaded.toast = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/button.js`);
+        await import(`${DIST}/toast.js`);
+        await waitForComponents(['sp-theme', 'sp-toast']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.toast;
+}
+
+/**
+ * Load tag components (sp-tag, sp-tags).
+ */
+export function loadTag() {
+  if (!componentLoaded.tag) {
+    componentLoaded.tag = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/tags.js`);
+        await waitForComponents(['sp-theme', 'sp-tag']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.tag;
+}
+
+/**
+ * Load textfield component (sp-textfield).
+ */
+export function loadTextfield() {
+  if (!componentLoaded.textfield) {
+    componentLoaded.textfield = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/textfield.js`);
+        await waitForComponents(['sp-theme', 'sp-textfield']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.textfield;
+}
+
+/**
+ * Load search component (sp-search).
+ * Also loads textfield since sp-search extends sp-textfield.
+ */
+export function loadSearch() {
+  if (!componentLoaded.search) {
+    componentLoaded.search = (async () => {
+      await loadTextfield();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/button.js`);
+        await import(`${DIST}/search.js`);
+        await waitForComponents(['sp-theme', 'sp-search']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.search;
+}
+
+/**
+ * Load swatch components (sp-swatch, sp-swatch-group).
+ */
+export function loadSwatch() {
+  if (!componentLoaded.swatch) {
+    componentLoaded.swatch = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/swatch.js`);
+        await waitForComponents(['sp-theme', 'sp-swatch']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.swatch;
+}
+
+/**
+ * Load color-area component (sp-color-area).
+ */
+export function loadColorArea() {
+  if (!componentLoaded.colorArea) {
+    componentLoaded.colorArea = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/color-area.js`);
+        await waitForComponents(['sp-theme', 'sp-color-area']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.colorArea;
+}
+
+/**
+ * Load color-slider component (sp-color-slider).
+ */
+export function loadColorSlider() {
+  if (!componentLoaded.colorSlider) {
+    componentLoaded.colorSlider = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/color-slider.js`);
+        await waitForComponents(['sp-theme', 'sp-color-slider']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.colorSlider;
+}
+
+/**
+ * Load slider component (sp-slider).
+ */
+export function loadSlider() {
+  if (!componentLoaded.slider) {
+    componentLoaded.slider = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/slider.js`);
+        await waitForComponents(['sp-theme', 'sp-slider']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.slider;
+}
+
+/**
+ * Load standalone menu components (sp-menu, sp-menu-item, sp-menu-divider, sp-menu-group).
+ * Note: Menu is already loaded as part of loadPicker(), but this allows
+ * using menus independently without the picker.
+ */
+export function loadMenu() {
+  if (!componentLoaded.menu) {
+    componentLoaded.menu = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/overlay.js`);
+        await import(`${DIST}/popover.js`);
+        await import(`${DIST}/menu.js`);
+        await waitForComponents(['sp-theme', 'sp-menu', 'sp-menu-item']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.menu;
+}
+
+/**
+ * Load badge component (sp-badge).
+ */
+export function loadBadge() {
+  if (!componentLoaded.badge) {
+    componentLoaded.badge = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/badge.js`);
+        await waitForComponents(['sp-theme', 'sp-badge']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.badge;
+}
+
+/**
+ * Load tray component (sp-tray).
+ * Also loads overlay since tray uses the overlay system.
+ */
+export function loadTray() {
+  if (!componentLoaded.tray) {
+    componentLoaded.tray = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/overlay.js`);
+        await import(`${DIST}/tray.js`);
+        await waitForComponents(['sp-theme', 'sp-tray']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.tray;
+}
+
+/**
+ * Load tabs components (sp-tabs, sp-tab, sp-tab-panel).
+ * Also loads action-button since tabs uses it for overflow navigation.
+ */
+export async function loadTabs() {
+  if (componentLoaded.tabs) return;
+  await loadActionButton();
+
+  const guard = installRegistryGuard();
+  try {
+    await import(`${DIST}/tabs.js`);
+    await waitForComponents(['sp-theme', 'sp-tabs', 'sp-tab', 'sp-tab-panel']);
+    componentLoaded.tabs = true;
+  } finally {
+    guard.restore();
+  }
+}

@@ -165,7 +165,7 @@ function watchFloatingButtonState(block) {
     const observer = new MutationObserver(callback);
     observer.observe($floatingButton, config);
   }
-  const callback = function (mutationsList, observer) {
+  const callback = function handleMutation(mutationsList, observer) {
     for (const mutation of mutationsList) {
       if (mutation.type === 'childList') {
         mutation.addedNodes.forEach((node) => {
