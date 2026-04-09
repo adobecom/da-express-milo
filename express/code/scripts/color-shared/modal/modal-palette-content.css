@@ -236,6 +236,31 @@
   box-sizing: border-box;
 }
 
+.ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] {
+  overflow-y: auto;
+}
+
+.ax-color-modal-content .modal-palette-container--color-rail:has(.modal-color-rail-wrap[data-color-count-range="large"]) {
+  position: relative;
+}
+
+.ax-color-modal-content .modal-palette-container--color-rail:has(.modal-color-rail-wrap[data-color-count-range="large"])::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 48px;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.2s ease-out;
+}
+
+.ax-color-modal-content .modal-palette-container--color-rail.scrolled-to-bottom::after {
+  opacity: 0;
+}
+
 .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap color-swatch-rail {
   border-radius: 8px;
   overflow: hidden;
@@ -744,7 +769,6 @@
   .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] {
     height: 264px;
     min-height: 264px;
-    overflow-y: auto;
   }
 }
 

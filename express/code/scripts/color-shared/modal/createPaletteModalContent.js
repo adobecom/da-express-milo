@@ -372,6 +372,27 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   railSection.appendChild(railWrap);
   root.appendChild(railSection);
 
+  if (colorCountRange === 'large') {
+    const updateFade = () => {
+      const noOverflow = railWrap.scrollHeight <= railWrap.clientHeight;
+      const atBottom = !noOverflow
+        && railWrap.scrollHeight - railWrap.scrollTop - railWrap.clientHeight < 2;
+      railSection.classList.toggle('scrolled-to-bottom', noOverflow || atBottom);
+    };
+    railWrap.addEventListener('scroll', updateFade, { passive: true });
+    (async () => {
+      try {
+        await customElements.whenDefined('color-swatch-rail');
+        const rail = railWrap.querySelector('color-swatch-rail');
+        if (rail?.updateComplete) await rail.updateComplete;
+      } catch { /* noop */ }
+      requestAnimationFrame(() => {
+        updateFade();
+        new ResizeObserver(updateFade).observe(railWrap);
+      });
+    })();
+  }
+
   const { initTabIndexes } = setupSwatchColumnNav(railWrap);
 
   root.appendChild(createPaletteMetaSection(normalizedPalette, options));
