@@ -2,6 +2,7 @@ import { createTag } from '../../utils.js';
 import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createGradientEditor } from '../components/gradients/gradient-editor.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
+
 let gradientsModalContentStylesLoaded = false;
 const CREATOR_PLACEHOLDER_PATH = '/express/code/scripts/color-shared/modal/images/creator-placeholder.png';
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
