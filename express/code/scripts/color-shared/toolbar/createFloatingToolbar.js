@@ -27,6 +27,8 @@ const TOOLBAR_I18N_MAP = {
   paletteName: 'color-toolbar-palette-name',
   paletteNamePlaceholder: 'color-toolbar-palette-placeholder',
   ctaText: 'color-toolbar-cta',
+  urlCopiedToClipboard: 'color-toolbar-url-copied-to-clipboard',
+  shareFailed: 'color-toolbar-share-failed',
 };
 
 const DRAWER_I18N_MAP = {
