@@ -28,14 +28,16 @@ function buildDaaLl(analytics = {}) {
 
 function gradientToBackgroundImage(gradient) {
   if (gradient.gradient && typeof gradient.gradient === 'string') {
-    return gradient.gradient;
+    return gradient.gradient.replace(
+      /linear-gradient\(\s*\d+deg/,
+      'linear-gradient(90deg',
+    );
   }
   if (gradient.colorStops && Array.isArray(gradient.colorStops)) {
     const stops = gradient.colorStops
       .map((stop) => `${stop.color} ${Math.round((stop.position ?? 0) * 100)}%`)
       .join(', ');
-    const angle = gradient.angle ?? 90;
-    return `linear-gradient(${angle}deg, ${stops})`;
+    return `linear-gradient(90deg, ${stops})`;
   }
   return 'linear-gradient(90deg, #ccc, #999)';
 }
