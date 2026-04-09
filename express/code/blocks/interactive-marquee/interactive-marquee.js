@@ -81,12 +81,15 @@ function injectExpressLogo(block, wrapper) {
   if (!['on', 'yes', 'acrobat-express'].includes(metadataValue)) return;
   let logoName = 'adobe-express-logo';
   let logoClass = 'express-logo';
+  let logoAlt = 'Adobe Express logo';
   if (metadataValue === 'acrobat-express') {
     logoName = 'cobrand-lockup-acrobat-express';
     logoClass = 'acrobat-express-lockup';
+    logoAlt = 'Adobe Acrobat X Adobe Express co-brand logo';
   }
   const logoElement = getIconElementDeprecated(logoName, '22px');
   logoElement.classList.add(logoClass);
+  logoElement.alt = logoAlt;
   wrapper.prepend(logoElement);
 }
 
