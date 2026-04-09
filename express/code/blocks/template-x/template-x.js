@@ -111,7 +111,9 @@ async function fetchAndRenderTemplates(props, options = {}) {
  */
 async function fetchAndRenderTemplatesFromTaas(taasQuery, props, options = {}) {
   const { isFirstLoad = false } = options;
-  const res = await fetchResults(taasQuery);
+  const queryParams = new URLSearchParams(taasQuery);
+  if (props?.start) queryParams.set('start', props.start);
+  const res = await fetchResults(queryParams.toString());
 
   if (!res || !res.items || !Array.isArray(res.items)) {
     return { templates: null };
@@ -490,15 +492,9 @@ async function build2by2(parentContainer, block) {
 
 // WIP
 async function decorateNewTemplates(block, props, options = { reDrawMasonry: false }) {
-  let fetchResult;
-  if (props.taasQuery) {
-    const params = new URLSearchParams(props.taasQuery);
-    if (props.start) params.set('start', props.start);
-    fetchResult = await fetchAndRenderTemplatesFromTaas(params.toString(), props);
-  } else {
-    fetchResult = await fetchAndRenderTemplates(props);
-  }
-  const { templates: newTemplates } = fetchResult;
+  const { templates: newTemplates } = props.taasQuery
+    ? await fetchAndRenderTemplatesFromTaas(props.taasQuery, props)
+    : await fetchAndRenderTemplates(props);
   updateImpressionCache({ result_count: props.total });
   const loadMore = block.parentElement.querySelector('.load-more');
 
