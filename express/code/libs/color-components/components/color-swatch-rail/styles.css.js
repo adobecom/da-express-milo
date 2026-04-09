@@ -1141,11 +1141,5 @@ export const style = css`
 
   .swatch-rail[data-orientation="stacked"] .swatch-column--empty {
     flex: 0;
-  }
-
-  @media (max-width: 899px) {
-    .swatch-column--super-light {
-      box-shadow: none;
-    }
-  }
+  }  
 `;
