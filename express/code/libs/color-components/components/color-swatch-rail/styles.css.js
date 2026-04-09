@@ -549,6 +549,7 @@ export const style = css`
     flex: 1 1 0;
     min-width: 0;
     justify-content: flex-start;
+    padding-left: 0;
   }
 
   .swatch-rail[data-orientation="stacked"] .hex-code {
