@@ -336,8 +336,15 @@ export const style = css`
   }
 
   
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column {
+  .swatch-rail[data-orientation="vertical"] .swatch-column {
     border-radius: 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"] .swatch-column:first-child {
+    border-radius: var(--Corner-radius-corner-radius-200) 0 0 var(--Corner-radius-corner-radius-200);
+  }
+  .swatch-rail[data-orientation="vertical"] .swatch-column:last-child {
+    border-radius: 0 var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0;
   }
 
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:first-child {
