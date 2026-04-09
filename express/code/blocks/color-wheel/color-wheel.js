@@ -119,23 +119,21 @@ const HARMONY_ALLOWED_FOR_THREE = new Set([
   'SPLIT_COMPLEMENTARY', 'SHADES',
 ]);
 const HARMONY_CAROUSEL_ACTIVE_CLASS = 'color-wheel-harmony-option--selected';
-const DEFAULT_ACTION_MENU_CONFIG = {
-  id: 'color-wheel-action-menu',
-  activeId: 'palette',
-  navLinks: [
-    { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
-    { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/contrast-checker' },
-    { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/express/colors/color-blindness-simulator' },
-  ],
-  controls: [
-    { id: 'undo', label: 'Undo' },
-    { id: 'redo', label: 'Redo' },
-    { id: 'generate-random', label: 'Generate random' },
-    { id: 'expand', label: 'Maximize' },
-  ],
-};
+const ACTION_MENU_ID = 'color-wheel-action-menu';
+
+function buildDefaultActionMenuConfig(strings) {
+  return {
+    id: ACTION_MENU_ID,
+    activeId: 'palette',
+    navLinks: [
+      { id: 'palette', label: strings.createPalette, href: '/create/color-wheel' },
+      { id: 'contrast', label: strings.contrastChecker, href: '/create/color-contrast-analyzer' },
+      { id: 'color-blindness', label: strings.colorBlindnessSimulator, href: '/create/color-accessibility' },
+    ],
+  };
+}
 const THEME_NAME = 'My Color Theme';
-const HISTORY_EVENT = `${DEFAULT_ACTION_MENU_CONFIG.id}:history-index-changed`;
+const HISTORY_EVENT = `${ACTION_MENU_ID}:history-index-changed`;
 const HISTORY_SKIP_SOURCES = new Set(['active-index', 'metadata', 'base-index']);
 let harmonyCarouselCleanup = null;
 let harmonyStateUnsubscribe = null;
@@ -651,7 +649,6 @@ export default async function decorate(block) {
     block.className = 'color-wheel';
     const section = createTag('section');
     block.appendChild(section);
-    if (headline) section.appendChild(headline);
 
     try {
       const [strings, { getResolvedPalette, getResolvedPaletteName }] = await Promise.all([
@@ -674,24 +671,19 @@ export default async function decorate(block) {
       let activeHarmonyRule = controller.getState().harmonyRule || 'CUSTOM';
 
       const isDesktop = desktopQuery.matches;
+      const defaultActionMenuConfig = buildDefaultActionMenuConfig(strings);
 
       layoutInstance = await createColorToolLayout(section, {
         palette: initialPalette,
         toolbar: {
-          variant: 'standalone',
-          mode: 'sticky-on-scroll',
-          showEdit: !isDesktop,
+          variant: 'sticky-on-scroll',
+          showEdit: false,
           showPalette: true,
           showPaletteName: true,
           editPaletteName: true,
         },
         actionMenu: {
-          ...DEFAULT_ACTION_MENU_CONFIG,
-          navLinks: [
-            { id: 'palette', label: strings.createPalette, href: '/express/colors/color-palette-generator' },
-            { id: 'contrast', label: strings.contrastChecker, href: '/express/colors/contrast-checker' },
-            { id: 'color-blindness', label: strings.colorBlindnessSimulator, href: '/express/colors/color-blindness-simulator' },
-          ],
+          ...defaultActionMenuConfig,
           controls: [
             { id: 'undo', label: strings.undo },
             { id: 'redo', label: strings.redo },
@@ -753,7 +745,6 @@ export default async function decorate(block) {
         },
       });
 
-      adoptHeadline(section, layoutInstance);
       await layoutInstance.actionMenuReady;
 
       const actionMenuApi = layoutInstance.actionMenu;
@@ -851,7 +842,7 @@ export default async function decorate(block) {
         const { createActionMenuComponent } = await import('../../scripts/color-shared/components/createActionMenuComponent.js');
 
         const actionMenu = await createActionMenuComponent({
-          ...DEFAULT_ACTION_MENU_CONFIG,
+          defaultActionMenuConfig,
           type: 'controls-only',
           onGenerateRandom: () => {
             isGeneratingRandom = true;
@@ -950,6 +941,8 @@ export default async function decorate(block) {
         }
       });
 
+      if (headline) section.appendChild(headline);
+      adoptHeadline(section, layoutInstance);
       block.classList.add('ax-shell-host');
       block.dataset.shellState = 'ready';
       trackColorBlockLoad('color-wheel');

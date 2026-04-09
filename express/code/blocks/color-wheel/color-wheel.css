@@ -357,11 +357,6 @@ color-wheel-express {
   overflow: hidden;
 }
 
-.color-wheel .color-floating-toolbar-container .ax-swatch-strip,
-.color-wheel .color-floating-toolbar-container .ax-palette-summary sp-action-button {
-  display: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .color-wheel-harmony-carousel-host .simple-carousel-platform {
     scroll-behavior: auto;
@@ -401,10 +396,6 @@ color-wheel-express {
 /* Large Tablet */
 
 @media (min-width: 888px) {
-  .color-wheel .ax-shell-slot--topbar {
-    padding-block-end: var(--spacing-100);
-  }
-
   .color-wheel .ax-shell-slot--sidebar {
     padding-block-end: 0;
   }
@@ -558,5 +549,11 @@ color-wheel-express {
 
   .color-wheel .color-floating-toolbar-container .ax-swatch-strip {
     display: flex;
+  }
+}
+
+@media (min-width: 1440px) {
+  .color-wheel .ax-color-tool-layout {
+    box-sizing: content-box;
   }
 }

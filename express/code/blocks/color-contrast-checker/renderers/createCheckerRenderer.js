@@ -2,7 +2,7 @@ import { createTag } from '../../../scripts/utils.js';
 import createBaseRenderer from '../../../scripts/color-shared/renderers/createBaseRenderer.js';
 import { announceToScreenReader } from '../../../scripts/color-shared/spectrum/index.js';
 import { ensureHash, isMobileOrTabletViewport, isMobileViewport } from '../../../scripts/color-shared/utils/utilities.js';
-import { generateTints, hexToRgb, rgbToHsv } from '../utils/contrastUtils.js';
+import { generateTints, hexToRgb, rgbToHsv, hsvToRgb, rgbToHex } from '../utils/contrastUtils.js';
 import createSuggestionsTab from './components/createSuggestionsTab.js';
 import createSetRatioTab from './components/createSetRatioTab.js';
 import { createColorInput } from './components/createColorInput.js';
@@ -238,6 +238,9 @@ function createTintSlider(hex, onInput, onCommit, strings, label = '') {
     maxlength: '5',
   });
 
+  const initialHsv = rgbToHsv(...Object.values(hexToRgb(hex)));
+  let baseHue = initialHsv.h;
+  let baseSaturation = initialHsv.s;
   let tints = generateTintScale(hex);
 
   function syncTintValue(index) {
@@ -313,8 +316,14 @@ function createTintSlider(hex, onInput, onCommit, strings, label = '') {
     slider: sliderAdapter.element,
     tintInput,
     refreshTints(newHex) {
-      tints = generateTintScale(newHex);
-      sliderAdapter.setGradient(buildTintGradient(newHex));
+      const { h, s, v } = rgbToHsv(...Object.values(hexToRgb(newHex)));
+      if (v > 0) {
+        baseHue = h;
+        baseSaturation = s;
+      }
+      const baseHex = rgbToHex(...Object.values(hsvToRgb(baseHue, baseSaturation, 1)));
+      tints = generateTintScale(baseHex);
+      sliderAdapter.setGradient(buildTintGradient(baseHex));
     },
     updatePosition(newHex) {
       const idx = findTintIndex(newHex);
