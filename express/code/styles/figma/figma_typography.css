@@ -1,0 +1,684 @@
+:root.figma-system {
+  /* PRIMITIVE TOKENS*/
+  
+
+  /* SEMANTIC TOKENS */
+
+
+  /* Font Families */
+  --figma-font-family-heading: 'Adobe Clean Spectrum VF', 'adobe-clean', 'Adobe Clean', 'Trebuchet MS', sans-serif;
+  --figma-font-family-title: 'Adobe Clean Spectrum VF', 'adobe-clean', 'Adobe Clean', 'Trebuchet MS', sans-serif;
+  --figma-font-family-body: 'Adobe Clean Spectrum VF', 'adobe-clean', 'Adobe Clean', 'Trebuchet MS', sans-serif;
+  --figma-font-family-detail: 'Adobe Clean Spectrum VF', 'adobe-clean', 'Adobe Clean', 'Trebuchet MS', sans-serif;
+  --figma-font-family-label: 'Adobe Clean Spectrum VF', 'adobe-clean', 'Adobe Clean', 'Trebuchet MS', sans-serif;
+  --figma-font-family-logotype: 'Adobe Clean Display', 'adobe-clean', 'Adobe Clean', 'Trebuchet MS', sans-serif;
+
+  /* Font Weights */
+  --figma-font-weight-black: 900;
+  --figma-font-weight-extra-bold: 800;
+  --figma-font-weight-bold: 700;
+  --figma-font-weight-medium: 500;
+  --figma-font-weight-regular: 400;
+
+  /* Typography Colors */
+  --figma-typography-color-heading: #131313;
+  --figma-typography-color-title: #131313;
+  --figma-typography-color-body: #505050;
+  --figma-typography-color-detail: #717171;
+  --figma-typography-color-code: #292929;
+
+
+  /* Heading — font-size (Spectrum token reference in comments) */
+  --figma-heading-4xl-size: 48px;   /* font-size-1150 */
+  --figma-heading-3xl-size: 40px;   /* font-size-1000 */
+  --figma-heading-2xl-size: 32px;   /* font-size-800 */
+  --figma-heading-xl-size: 28px;    /* font-size-700 */
+  --figma-heading-l-size: 24px;     /* font-size-600 */
+  --figma-heading-m-size: 20px;     /* font-size-400 */
+  --figma-heading-s-size: 18px;     /* font-size-300 */
+  --figma-heading-xs-size: 16px;    /* font-size-200 */
+
+  /* Heading — line-height (ratio) */
+  --figma-heading-4xl-lh: 1.02;
+  --figma-heading-3xl-lh: 1.04;
+  --figma-heading-2xl-lh: 1.04;
+  --figma-heading-xl-lh: 1.04;
+  --figma-heading-l-lh: 1.05;
+  --figma-heading-m-lh: 1.06;
+  --figma-heading-s-lh: 1.06;
+  --figma-heading-xs-lh: 1.06;
+
+  /* Title — font-size */
+  --figma-title-2xl-size: 28px;
+  --figma-title-xl-size: 24px;
+  --figma-title-l-size: 22px;
+  --figma-title-m-size: 20px;
+  --figma-title-s-size: 18px;
+  --figma-title-xs-size: 16px;
+  --figma-title-2xs-size: 14px;
+
+  /* Title — line-height (px) */
+  --figma-title-2xl-lh: 32px;
+  --figma-title-xl-lh: 28px;
+  --figma-title-l-lh: 26px;
+  --figma-title-m-lh: 24px;
+  --figma-title-s-lh: 22px;
+  --figma-title-xs-lh: 20px;
+  --figma-title-2xs-lh: 18px;
+
+  /* Body — font-size */
+  --figma-body-2xl-size: 24px;
+  --figma-body-xl-size: 20px;
+  --figma-body-l-size: 18px;
+  --figma-body-m-size: 16px;
+  --figma-body-s-size: 14px;
+  --figma-body-xs-size: 14px;
+  --figma-body-2xs-size: 12px;
+
+  /* Body — line-height (ratio, constant across breakpoints) */
+  --figma-body-lh: 1.3;
+
+  /* Detail — font-size */
+  --figma-detail-l-size: 18px;
+  --figma-detail-m-size: 16px;
+  --figma-detail-s-size: 12px;
+
+  /* Detail — line-height (px) */
+  --figma-detail-l-lh: 22px;
+  --figma-detail-m-lh: 20px;
+  --figma-detail-s-lh: 14px;
+
+  /* Label — font-size */
+  --figma-label-2xl-size: 22px;
+  --figma-label-xl-size: 20px;
+  --figma-label-l-size: 18px;
+  --figma-label-m-size: 16px;
+  --figma-label-s-size: 14px;
+  --figma-label-xs-size: 12px;
+
+  /* Label — line-height (px) */
+  --figma-label-2xl-lh: 26px;
+  --figma-label-xl-lh: 24px;
+  --figma-label-l-lh: 22px;
+  --figma-label-m-lh: 20px;
+  --figma-label-s-lh: 18px;
+  --figma-label-xs-lh: 14px;
+
+  /* Logotype — font-size (no breakpoint changes) */
+  --figma-logotype-2xl-size: 55px;
+  --figma-logotype-xl-size: 44px;
+  --figma-logotype-l-size: 36px;
+  --figma-logotype-m-size: 27px;
+  --figma-logotype-s-size: 22px;
+  --figma-logotype-xs-size: 16px;
+  --figma-logotype-2xs-size: 11px;
+
+  /* Logotype — line-height (ratio, constant) */
+  --figma-logotype-lh: 1.25;
+}
+
+
+@media (min-width: 1200px) {
+  :root {
+    /* Heading — font-size */
+    --figma-heading-4xl-size: 72px;
+    --figma-heading-3xl-size: 52px;
+
+    /* Heading — line-height */
+    --figma-heading-4xl-lh: 1;
+    --figma-heading-3xl-lh: 1.02;
+    --figma-heading-l-lh: 1.04;
+    --figma-heading-m-lh: 1.05;
+
+    /* Title — font-size */
+    --figma-title-2xl-size: 32px;
+    --figma-title-l-size: 24px;
+    --figma-title-m-size: 22px;
+    --figma-title-s-size: 20px;
+    --figma-title-xs-size: 18px;
+    --figma-title-2xs-size: 16px;
+
+    /* Title — line-height */
+    --figma-title-2xl-lh: 36px;
+    --figma-title-l-lh: 28px;
+    --figma-title-m-lh: 26px;
+    --figma-title-s-lh: 24px;
+    --figma-title-xs-lh: 22px;
+    --figma-title-2xs-lh: 20px;
+
+    /* Body — font-size */
+    --figma-body-m-size: 18px;
+    --figma-body-s-size: 16px;
+
+    /* Detail — line-height */
+    --figma-detail-m-lh: 22px;
+    --figma-detail-s-lh: 16px;
+
+    /* Label — font-size */
+    --figma-label-2xl-size: 20px;
+    --figma-label-xl-size: 18px;
+    --figma-label-l-size: 16px;
+    --figma-label-m-size: 14px;
+    --figma-label-s-size: 12px;
+    --figma-label-xs-size: 11px;
+
+    /* Label — line-height */
+    --figma-label-2xl-lh: 24px;
+    --figma-label-xl-lh: 22px;
+    --figma-label-l-lh: 20px;
+    --figma-label-m-lh: 18px;
+    --figma-label-s-lh: 16px;
+  }
+}
+
+
+
+.figma-heading-4xl {
+  font-family: var(--figma-font-family-heading);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-heading-4xl-size);
+  line-height: var(--figma-heading-4xl-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-heading-3xl {
+  font-family: var(--figma-font-family-heading);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-heading-3xl-size);
+  line-height: var(--figma-heading-3xl-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-heading-2xl {
+  font-family: var(--figma-font-family-heading);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-heading-2xl-size);
+  line-height: var(--figma-heading-2xl-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-heading-xl {
+  font-family: var(--figma-font-family-heading);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-heading-xl-size);
+  line-height: var(--figma-heading-xl-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-heading-l {
+  font-family: var(--figma-font-family-heading);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-heading-l-size);
+  line-height: var(--figma-heading-l-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-heading-m {
+  font-family: var(--figma-font-family-heading);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-heading-m-size);
+  line-height: var(--figma-heading-m-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-heading-s {
+  font-family: var(--figma-font-family-heading);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-heading-s-size);
+  line-height: var(--figma-heading-s-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-heading-xs {
+  font-family: var(--figma-font-family-heading);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-heading-xs-size);
+  line-height: var(--figma-heading-xs-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+/* === Titles ==============================================================
+   Family: title | Weight: bold (700) | Line-height: px
+   Sizes 2XL–M use "Title-default" style; S–2XS use "Title-subdued" style.figma-
+   Both resolve to font-weight 700 in CSS.figma-
+   ========================================================================= */
+
+.figma-title-2xl {
+  font-family: var(--figma-font-family-title);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-title-2xl-size);
+  line-height: var(--figma-title-2xl-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-title-xl {
+  font-family: var(--figma-font-family-title);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-title-xl-size);
+  line-height: var(--figma-title-xl-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-title-l {
+  font-family: var(--figma-font-family-title);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-title-l-size);
+  line-height: var(--figma-title-l-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-title-m {
+  font-family: var(--figma-font-family-title);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-title-m-size);
+  line-height: var(--figma-title-m-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-title-s {
+  font-family: var(--figma-font-family-title);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-title-s-size);
+  line-height: var(--figma-title-s-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-title-xs {
+  font-family: var(--figma-font-family-title);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-title-xs-size);
+  line-height: var(--figma-title-xs-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-title-2xs {
+  font-family: var(--figma-font-family-title);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-title-2xs-size);
+  line-height: var(--figma-title-2xs-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+/* ========================================================================= */
+
+.figma-body-2xl {
+  font-family: var(--figma-font-family-body);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-body-2xl-size);
+  line-height: var(--figma-body-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-body-xl {
+  font-family: var(--figma-font-family-body);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-body-xl-size);
+  line-height: var(--figma-body-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-body-l {
+  font-family: var(--figma-font-family-body);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-body-l-size);
+  line-height: var(--figma-body-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-body-m {
+  font-family: var(--figma-font-family-body);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-body-m-size);
+  line-height: var(--figma-body-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-body-s {
+  font-family: var(--figma-font-family-body);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-body-s-size);
+  line-height: var(--figma-body-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-body-xs {
+  font-family: var(--figma-font-family-body);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-body-xs-size);
+  line-height: var(--figma-body-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-body-2xs {
+  font-family: var(--figma-font-family-body);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-body-2xs-size);
+  line-height: var(--figma-body-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+/* === Detail — Regular ====================================================
+   Family: detail | Weight: regular (400) | Line-height: px
+   ========================================================================= */
+
+.figma-detail-l {
+  font-family: var(--figma-font-family-detail);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-detail-l-size);
+  line-height: var(--figma-detail-l-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-detail-m {
+  font-family: var(--figma-font-family-detail);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-detail-m-size);
+  line-height: var(--figma-detail-m-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-detail-s {
+  font-family: var(--figma-font-family-detail);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-detail-s-size);
+  line-height: var(--figma-detail-s-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+/* === Detail — Bold =======================================================
+   Family: detail | Weight: bold (700) | Line-height: px
+   ========================================================================= */
+
+.figma-detail-l-bold {
+  font-family: var(--figma-font-family-detail);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-detail-l-size);
+  line-height: var(--figma-detail-l-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-detail-m-bold {
+  font-family: var(--figma-font-family-detail);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-detail-m-size);
+  line-height: var(--figma-detail-m-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-detail-s-bold {
+  font-family: var(--figma-font-family-detail);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-detail-s-size);
+  line-height: var(--figma-detail-s-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+/* === Label — Regular =====================================================
+   Family: label | Weight: regular (400) | Line-height: px
+   ========================================================================= */
+
+.figma-label-2xl {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-label-2xl-size);
+  line-height: var(--figma-label-2xl-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-xl {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-label-xl-size);
+  line-height: var(--figma-label-xl-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-l {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-label-l-size);
+  line-height: var(--figma-label-l-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-m {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-label-m-size);
+  line-height: var(--figma-label-m-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-s {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-label-s-size);
+  line-height: var(--figma-label-s-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-xs {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-regular);
+  font-size: var(--figma-label-xs-size);
+  line-height: var(--figma-label-xs-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+/* === Label — Medium ======================================================
+   Family: label | Weight: medium (500) | Line-height: px
+   ========================================================================= */
+
+.figma-label-2xl-medium {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-medium);
+  font-size: var(--figma-label-2xl-size);
+  line-height: var(--figma-label-2xl-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-xl-medium {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-medium);
+  font-size: var(--figma-label-xl-size);
+  line-height: var(--figma-label-xl-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-l-medium {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-medium);
+  font-size: var(--figma-label-l-size);
+  line-height: var(--figma-label-l-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-m-medium {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-medium);
+  font-size: var(--figma-label-m-size);
+  line-height: var(--figma-label-m-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-s-medium {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-medium);
+  font-size: var(--figma-label-s-size);
+  line-height: var(--figma-label-s-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-xs-medium {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-medium);
+  font-size: var(--figma-label-xs-size);
+  line-height: var(--figma-label-xs-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+/* === Label — Bold ========================================================
+   Family: label | Weight: bold (700) | Line-height: px
+   ========================================================================= */
+
+.figma-label-2xl-bold {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-label-2xl-size);
+  line-height: var(--figma-label-2xl-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-xl-bold {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-label-xl-size);
+  line-height: var(--figma-label-xl-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-l-bold {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-label-l-size);
+  line-height: var(--figma-label-l-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-m-bold {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-label-m-size);
+  line-height: var(--figma-label-m-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-s-bold {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-label-s-size);
+  line-height: var(--figma-label-s-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-label-xs-bold {
+  font-family: var(--figma-font-family-label);
+  font-weight: var(--figma-font-weight-bold);
+  font-size: var(--figma-label-xs-size);
+  line-height: var(--figma-label-xs-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+/* === Logotype ============================================================
+   Family: logotype (Adobe Clean Display) | Weight: black (900)
+   Line-height: 1.figma-25 ratio | No breakpoint changes
+   ========================================================================= */
+
+.figma-logotype-2xl {
+  font-family: var(--figma-font-family-logotype);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-logotype-2xl-size);
+  line-height: var(--figma-logotype-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-logotype-xl {
+  font-family: var(--figma-font-family-logotype);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-logotype-xl-size);
+  line-height: var(--figma-logotype-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-logotype-l {
+  font-family: var(--figma-font-family-logotype);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-logotype-l-size);
+  line-height: var(--figma-logotype-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-logotype-m {
+  font-family: var(--figma-font-family-logotype);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-logotype-m-size);
+  line-height: var(--figma-logotype-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-logotype-s {
+  font-family: var(--figma-font-family-logotype);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-logotype-s-size);
+  line-height: var(--figma-logotype-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-logotype-xs {
+  font-family: var(--figma-font-family-logotype);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-logotype-xs-size);
+  line-height: var(--figma-logotype-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
+
+.figma-logotype-2xs {
+  font-family: var(--figma-font-family-logotype);
+  font-weight: var(--figma-font-weight-black);
+  font-size: var(--figma-logotype-2xs-size);
+  line-height: var(--figma-logotype-lh);
+  letter-spacing: 0;
+  font-variation-settings: 'wdth' 100;
+}
