@@ -996,8 +996,11 @@ export const style = css`
 
 
   .hex-code {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 18px;
+    letter-spacing: 0;
     color: var(--swatch-text-color);
     text-transform: uppercase;
     text-shadow: var(--swatch-text-shadow);
