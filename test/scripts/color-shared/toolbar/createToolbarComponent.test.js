@@ -343,6 +343,38 @@ describe('createToolbar', () => {
       expect(cb.firstCall.args[0]).to.have.property('palette');
     });
 
+    it('on("download", cb) fires when Download button clicked with gradient type', async () => {
+      const fakeGrad = { addColorStop: sinon.stub() };
+      const fakeCtx = {
+        createLinearGradient: sinon.stub().returns(fakeGrad),
+        fillRect: sinon.stub(),
+        fillStyle: '',
+      };
+      sinon.stub(HTMLCanvasElement.prototype, 'getContext').returns(fakeCtx);
+      sinon.stub(HTMLCanvasElement.prototype, 'toBlob').callsFake((cb) => {
+        cb(new Blob(['img'], { type: 'image/jpeg' }));
+      });
+      sinon.stub(URL, 'createObjectURL').returns('blob:fake');
+      sinon.stub(URL, 'revokeObjectURL');
+      sinon.stub(HTMLAnchorElement.prototype, 'click');
+
+      const toolbar = createToolbar(defaultOptions({
+        type: 'gradient',
+        palette: MOCK_GRADIENT,
+      }));
+      document.body.appendChild(toolbar.element);
+
+      const cb = sinon.stub();
+      toolbar.on('download', cb);
+
+      const downloadBtn = toolbar.element.querySelector('sp-action-button[label="Download this color palette"]');
+      downloadBtn.click();
+      await new Promise((r) => setTimeout(r, 100));
+
+      expect(cb.calledOnce).to.be.true;
+      expect(cb.firstCall.args[0]).to.have.property('palette');
+    });
+
     it('on("save", cb) fires when CC Library button clicked', async () => {
       const mockCtx = createMockGetLibraryContext([], null);
       const toolbar = createToolbar(defaultOptions({ getLibraryContext: mockCtx }));
@@ -461,6 +493,30 @@ describe('createToolbar', () => {
 
       expect(cb.calledOnce).to.be.true;
       expect(cb.firstCall.args[0].name).to.equal('Renamed Palette');
+    });
+  });
+
+  describe('setVariant', () => {
+    it('setVariant("sticky") adds ax-toolbar-sticky class and sets sticky to true', () => {
+      const toolbar = createToolbar(defaultOptions({ variant: 'standalone' }));
+      document.body.appendChild(toolbar.element);
+
+      toolbar.setVariant('sticky');
+
+      const tb = toolbar.element.querySelector('.ax-toolbar');
+      expect(tb.classList.contains('ax-toolbar-sticky')).to.be.true;
+      expect(toolbar.sticky).to.be.true;
+    });
+
+    it('setVariant("standalone") removes ax-toolbar-sticky class and sets sticky to false', () => {
+      const toolbar = createToolbar(defaultOptions({ variant: 'sticky' }));
+      document.body.appendChild(toolbar.element);
+
+      toolbar.setVariant('standalone');
+
+      const tb = toolbar.element.querySelector('.ax-toolbar');
+      expect(tb.classList.contains('ax-toolbar-sticky')).to.be.false;
+      expect(toolbar.sticky).to.be.false;
     });
   });
 

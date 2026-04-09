@@ -54,6 +54,7 @@
 }
 
 .color-extract {
+  --ax-color-tool-presentation-max-width: 1440px;
   --color-extract-max-width: 1440px;
   --color-extract-gap: 32px;
   --color-extract-radius: 16px;
@@ -570,8 +571,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   padding: 16px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(28px);
-  /* Fixed 634px from Figma spec — image scales to fit, never drives sizing */
-  height: 634px;
+  height: 490px;
 }
 
 .color-extract .color-extract-edit-bg picture,
@@ -604,7 +604,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   width: 100%;
   height: 100%;
   display: block;
-  border-radius: 8px;
+  border-radius: 0;
   object-fit: contain;
   left: 0;
   transform: none;
@@ -674,7 +674,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 .color-extract .color-extract-mood-dropdown {
   position: relative;
-  width: 330px;
+  width: fit-content;
+  max-width: 330px;
 }
 
 .color-extract .color-extract-mood-trigger {
@@ -957,8 +958,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 .color-extract .color-extract-gradient-editor-col .gradient-editor-handles {
-  left: 12px;
-  right: 12px;
+  left: 8px;
+  right: 8px;
 }
 
 
@@ -1054,6 +1055,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   .section:has(.color-extract-marquee-wrapper) {
     align-items: flex-start;
     min-height: unset;
+    padding-inline: 16px;
   }
 
   .color-extract .color-extract-landing {
@@ -1082,6 +1084,11 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
   .color-extract .color-extract-toolbar-divider {
     display: none;
+  }
+
+  .color-extract .color-extract-mood-dropdown {
+    width: 100%;
+    max-width: none;
   }
 
 }

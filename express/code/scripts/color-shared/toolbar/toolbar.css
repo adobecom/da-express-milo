@@ -263,6 +263,7 @@
 
   position: fixed;
   inline-size: calc(100% - var(--ax-toolbar-inline-margin) * 2);
+  max-inline-size: var(--ax-toolbar-presentation-max-width);
   inset-block-end: var(--ax-toolbar-floating-bottom-offset);
   inset-inline-start: 0;
   inset-inline-end: 0;
@@ -273,6 +274,15 @@
 
 .ax-toolbar-sticky-wrapper.ax-toolbar-exiting {
   animation: ax-toolbar-slide-out 0.2s ease-in both;
+}
+
+/* Hide toolbar when footer is in view — slides off-screen like floating-cta */
+.color-floating-toolbar-container.ax-toolbar-footer-hidden,
+.ax-toolbar-sticky-wrapper.ax-toolbar-footer-hidden {
+  transform: translateY(110%);
+  pointer-events: none;
+  transition: transform 0.3s ease-in;
+  animation: none;
 }
 
 @keyframes ax-toolbar-slide-in {
