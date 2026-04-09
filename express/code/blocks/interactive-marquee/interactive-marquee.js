@@ -80,16 +80,16 @@ function injectExpressLogo(block, wrapper) {
   const metadataValue = getMetadata('marquee-inject-logo')?.toLowerCase();
   if (!['on', 'yes', 'acrobat-express'].includes(metadataValue)) return;
   let logoName = 'adobe-express-logo';
-  let logoClass = 'express-logo';
+  let logoSize = '22px';
   let logoAlt = 'Adobe Express logo';
+  let logoClass = 'express-logo';
   if (metadataValue === 'acrobat-express') {
     logoName = 'cobrand-lockup-acrobat-express';
-    logoClass = 'acrobat-express-lockup';
+    logoSize = '22px';
     logoAlt = 'Adobe Acrobat X Adobe Express co-brand logo';
+    logoClass = 'acrobat-express-lockup';
   }
-  const logoElement = getIconElementDeprecated(logoName, '22px');
-  logoElement.classList.add(logoClass);
-  logoElement.alt = logoAlt;
+  const logoElement = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
   wrapper.prepend(logoElement);
 }
 
