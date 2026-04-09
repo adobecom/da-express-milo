@@ -994,7 +994,7 @@ export const style = css`
     }
 
     .bottom-info .hex-code {
-      align-self: flex-end;
+      align-self: flex-start;
     }
 
     .bottom-info .bottom-info__actions {
@@ -1052,6 +1052,7 @@ export const style = css`
   }
   .hex-code--static {
     cursor: default;
+    padding-left: 6px;
   }
 
   
