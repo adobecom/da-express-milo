@@ -478,6 +478,7 @@ export const style = css`
   .swatch-rail[data-orientation="horizontal"] .hex-code {
     flex-shrink: 0;
     min-width: 0;
+    width: auto;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -1015,9 +1016,13 @@ export const style = css`
     padding: 7px 12px;
     font: inherit;
     text-align: center;
-    min-width: 75px;
+    width: 90px;
+    flex-shrink: 0;
     height: 32px;
     border-radius: var(--Corner-radius-corner-radius-100);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .swatch-column[data-contrast="dark"] button.hex-code:hover {
     background-color: rgba(255, 255, 255, 0.12);
