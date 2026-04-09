@@ -66,6 +66,9 @@ export function createPaletteVariant(palette, variant, options = {}) {
 
     const visual = createTag('div', { class: 'color-card-visual' });
     visual.appendChild(strip.element);
+    visual.addEventListener('click', () => {
+      emit('palette-click', palette);
+    });
     const paletteEl = visual.querySelector('color-palette');
     if (paletteEl) {
       paletteEl.setAttribute('focusable', 'false');
