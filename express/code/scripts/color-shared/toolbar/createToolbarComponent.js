@@ -1,6 +1,7 @@
 import { announceToScreenReader } from '../spectrum/index.js';
 import { isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi } from '../utils/utilities.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
+import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { createIconButton } from '../utils/icons.js';
 import { createEventBus } from '../utils/createEventBus.js';
 import { createTag, getLibs } from '../../utils.js';
@@ -158,11 +159,11 @@ async function handleSave(
 /* ── Tooltip Helper ──────────────────────────────────────────── */
 
 function attachTooltip(actionBtn, text) {
-  const tooltip = document.createElement('sp-tooltip');
-  tooltip.setAttribute('self-managed', '');
-  tooltip.setAttribute('placement', 'top');
-  tooltip.textContent = text;
-  actionBtn.appendChild(tooltip);
+  createExpressTooltip({
+    targetEl: actionBtn,
+    content: text,
+    placement: 'top',
+  }).catch(() => {});
 }
 
 /* ── DOM Builders ────────────────────────────────────────────── */
