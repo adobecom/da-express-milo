@@ -203,9 +203,6 @@
     max-width: 500px;
     margin: 0;
   }
-  main .interactive-marquee .foreground .acrobat-express-lockup {
-    padding-bottom: 10px;
-  }
 }
 
 @media screen and (max-width: 600px) {
@@ -380,7 +377,14 @@ main .interactive-marquee.horizontal-masonry.tall .media-container p.image-conta
   height: 200px;
 }
 
-
+main .interactive-marquee.horizontal-masonry.wide .media-container p.image-container {
+  position: relative;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  height: 150px;
+  max-width: 400px;
+  flex: unset
+}
 
 main .interactive-marquee.horizontal-masonry .media-container p.image-container img {
   border-radius: 16px;
@@ -507,11 +511,6 @@ main .interactive-marquee.horizontal-masonry.wide .media-container {
 }
 
 main .interactive-marquee.horizontal-masonry.wide .media-container p.image-container {
-  position: relative;
-  margin-bottom: 20px;
-  border-radius: 16px;
-  height: 150px;
-  max-width: 400px;
   flex: 0 0 calc(50% - 10px);
 }
 
@@ -585,7 +584,6 @@ main .interactive-marquee.horizontal-masonry .media-container p.image-container:
     z-index: 8;
   }
 
-
   main .interactive-marquee.horizontal-masonry .media-container p.image-container .external-link-element  .icon{
     display: inline;
     position: relative;
@@ -595,7 +593,6 @@ main .interactive-marquee.horizontal-masonry .media-container p.image-container:
     padding-top: 5px;
 
   }
-
 
   main .interactive-marquee.horizontal-masonry .media-container p.overlay .prompt-title {
     display: block;
@@ -649,10 +646,10 @@ main .interactive-marquee.horizontal-masonry .media-container p.image-container:
   }
 
   main .interactive-marquee.horizontal-masonry .container {
+    width: calc(100% - 20px);
     flex-direction: column-reverse;
-    width: calc(100% - 20px)
   }
-
+  
   main .interactive-marquee.horizontal-masonry .enticement-container {
     margin-top: 40px;
   }
@@ -697,7 +694,7 @@ main .interactive-marquee.interactive-marquee.horizontal-masonry .media-containe
 }
 
 main .interactive-marquee .foreground .text p {
-  font-size: 20x;
+  font-size: 20px;
   margin: 10px 0px;
 }
 
@@ -715,4 +712,10 @@ main .interactive-marquee .foreground .express-logo {
 main .interactive-marquee .foreground .acrobat-express-lockup {
   width: fit-content;
   height: 20px;
+  padding-bottom: 0px;
+}
+@media screen and (max-width: 1200px) {
+  main .interactive-marquee .foreground .acrobat-express-lockup {
+    padding-bottom: 10px;
+  }
 }
