@@ -18,6 +18,7 @@ import {
   preDecorateSections,
   getRedirectUri,
   getIconElementDeprecated,
+  getContentRoot,
 } from './utils.js';
 
 // Add project-wide style path here.
@@ -33,13 +34,6 @@ if (jarvisVisibleMeta && ['mobile', 'desktop', 'on'].includes(jarvisVisibleMeta)
   (jarvisVisibleMeta === 'mobile' && !desktopViewport) || (jarvisVisibleMeta === 'desktop' && desktopViewport))) jarvisImmediatelyVisible = true;
 
 const prodDomains = ['business.adobe.com', 'www.adobe.com', 'color.adobe.com'];
-
-// eslint-disable-next-line import/prefer-default-export
-export function getContentRoot(location) {
-  const { hostname } = location || window.location;
-  if (['--express-color--', 'color.stage.adobe.com', 'color.adobe.com'].some((i) => hostname.includes(i))) return '';
-  return '/express';
-}
 
 // Add any config options.
 const CONFIG = {
