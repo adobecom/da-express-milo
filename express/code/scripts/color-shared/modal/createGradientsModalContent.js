@@ -2,19 +2,9 @@ import { createTag } from '../../utils.js';
 import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createGradientEditor } from '../components/gradients/gradient-editor.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
-import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
-
 let gradientsModalContentStylesLoaded = false;
 const CREATOR_PLACEHOLDER_PATH = '/express/code/scripts/color-shared/modal/images/creator-placeholder.png';
-const DEFAULT_LIKES_COUNT = '1.2K';
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
-
-function normalizeLikesCount(rawValue) {
-  if (rawValue == null) return DEFAULT_LIKES_COUNT;
-  const value = typeof rawValue === 'string' ? rawValue.trim() : rawValue;
-  if (value === '' || value === 0 || value === '0') return DEFAULT_LIKES_COUNT;
-  return String(value);
-}
 
 function normalizeCreatorName(rawValue) {
   if (typeof rawValue === 'string' && rawValue.trim()) return rawValue.trim();
@@ -61,9 +51,6 @@ function createGradientPreviewSection(gradient) {
 }
 
 function createMetadataSection(gradient = {}, options = {}) {
-  const likesCount = normalizeLikesCount(
-    options.likesCount ?? gradient?.likes ?? gradient?.likesCount,
-  );
   const creatorName = normalizeCreatorName(
     options.creatorName ?? gradient?.creator?.name ?? gradient?.creatorName,
   );
@@ -83,42 +70,6 @@ function createMetadataSection(gradient = {}, options = {}) {
   const nameEl = createTag('h2', { class: 'gradients-modal-content__title' });
   nameEl.textContent = gradient?.name || 'Gradient';
   headerRow.appendChild(nameEl);
-
-  const likes = createTag('div', { class: 'gradients-modal-content__likes' });
-  const likeBtn = createTag('button', {
-    type: 'button',
-    class: 'gradients-modal-content__like-btn',
-    'aria-label': 'Add to favorites',
-  });
-  const likeIconTheme = createTag('sp-theme', {
-    system: 'spectrum-two',
-    color: 'light',
-    scale: 'medium',
-  });
-  let liked = options.liked ?? gradient?.liked ?? false;
-  const likeIcon = createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' });
-  likeIconTheme.appendChild(likeIcon);
-  likeBtn.setAttribute('aria-label', liked ? 'Remove from favorites' : 'Add to favorites');
-  likeBtn.classList.toggle('is-liked', liked);
-  likeBtn.appendChild(likeIconTheme);
-  let likeTooltip = null;
-  createExpressTooltip({ targetEl: likeBtn, content: liked ? 'Remove from favorites' : 'Add to favorites', placement: 'bottom' })
-    .then((t) => { likeTooltip = t; })
-    .catch(() => {});
-  likeBtn.addEventListener('click', () => {
-    liked = !liked;
-    likeIconTheme.replaceChildren();
-    const icon = createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' });
-    likeIconTheme.appendChild(icon);
-    likeBtn.setAttribute('aria-label', liked ? 'Remove from favorites' : 'Add to favorites');
-    likeBtn.classList.toggle('is-liked', liked);
-    likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
-  });
-  const likesText = createTag('p', { class: 'gradients-modal-content__likes-count' });
-  likesText.textContent = likesCount;
-  likes.appendChild(likeBtn);
-  likes.appendChild(likesText);
-  headerRow.appendChild(likes);
   section.appendChild(headerRow);
 
   const authorTagsRow = createTag('div', { class: 'gradients-modal-content__author-tags' });

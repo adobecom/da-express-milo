@@ -51,57 +51,6 @@
   transform: translateX(0);
 }
 
-.ax-color-modal-content .gradients-modal-content__likes {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-50);
-}
-
-.ax-color-modal-content .gradients-modal-content__like-btn {
-  width: var(--spacing-500);
-  height: var(--spacing-500);
-  border: none;
-  background: transparent;
-  padding: 3px;
-  cursor: pointer;
-  color: var(--color-gray-800-variant);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--Corner-radius-corner-radius-100);
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.ax-color-modal-content .gradients-modal-content__like-btn.is-liked {
-  color: var(--color-error-red);
-}
-
-.ax-color-modal-content .gradients-modal-content__like-btn:hover {
-  background: var(--color-light-gray);
-  color: var(--color-content-neutral);
-}
-
-.ax-color-modal-content .gradients-modal-content__like-btn.is-liked:hover {
-  color: var(--color-error-red);
-}
-
-.ax-color-modal-content .gradients-modal-content__like-btn:focus-visible {
-  outline: var(--spacing-50) solid var(--color-blue-800);
-  outline-offset: var(--spacing-50);
-  border-radius: var(--Corner-radius-corner-radius-100);
-}
-
-.ax-color-modal-content .gradients-modal-content__like-btn sp-icon-heart {
-  --mod-icon-size: var(--spacing-350);
-}
-
-.ax-color-modal-content .gradients-modal-content__likes-count {
-  margin: 0;
-  font-size: var(--body-font-size-s);
-  color: var(--color-gray-800-variant);
-  font-weight: var(--ax-body-weight-bold);
-}
-
 .ax-color-modal-content .gradients-modal-content__author-tags {
   display: flex;
   flex-direction: column;

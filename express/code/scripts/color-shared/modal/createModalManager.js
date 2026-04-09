@@ -274,14 +274,12 @@ export function createModalManager() {
     } = await import('./createGradientPickerRebuildContent.js');
     await loadGradientPickerRebuildStyles();
 
-    const likesCount = gradient?.likesCount ?? gradient?.likes ?? '1.2K';
     const creatorName = gradient?.creator?.name ?? gradient?.creatorName ?? 'nicolagilroy';
     const creatorImageUrl = gradient?.creator?.imageUrl ?? gradient?.creatorImageUrl;
     open({
       title: (gradient?.name && String(gradient.name)) || 'Gradient',
       showTitle: false,
       content: () => createGradientPickerRebuildContent(gradient || {}, {
-        likesCount,
         creatorName,
         creatorImageUrl,
       }),

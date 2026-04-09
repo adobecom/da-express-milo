@@ -25,15 +25,7 @@ function parseLinearGradient(css) {
 }
 
 const CREATOR_PLACEHOLDER_PATH = 'scripts/color-shared/modal/images/creator-placeholder.png';
-const DEFAULT_LIKES_COUNT = '1.2K';
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
-
-function normalizeLikesCount(rawValue) {
-  if (rawValue == null) return DEFAULT_LIKES_COUNT;
-  const value = typeof rawValue === 'string' ? rawValue.trim() : rawValue;
-  if (value === '' || value === 0 || value === '0') return DEFAULT_LIKES_COUNT;
-  return String(value);
-}
 
 function normalizeCreatorName(rawValue) {
   if (typeof rawValue === 'string' && rawValue.trim()) return rawValue.trim();
@@ -83,9 +75,6 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
     colorStops = [{ color: '#ccc', position: 0 }, { color: '#999', position: 1 }];
   }
   const title = gradient?.name || 'Gradient';
-  const likesCount = normalizeLikesCount(
-    opts.likesCount ?? gradient?.likes ?? gradient?.likesCount,
-  );
   const creatorName = normalizeCreatorName(
     opts.creatorName ?? gradient?.creator?.name ?? gradient?.creatorName,
   );
@@ -123,55 +112,9 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   main.appendChild(containerSection);
 
   const nameTagsSection = createTag('section', { class: 'modal-palette-name-tags' });
-  const nameLikes = createTag('div', { class: 'modal-palette-name-likes' });
   const h1 = createTag('h1', { class: 'modal-palette-name' });
   h1.textContent = title;
-  const likesDiv = createTag('div', { class: 'modal-palette-likes' });
-  const likeBtn = createTag('button', { type: 'button', class: 'like-icon' });
-  const likeTheme = createTag('sp-theme', {
-    system: 'spectrum-two',
-    color: 'light',
-    scale: 'medium',
-  });
-  let liked = opts.liked ?? gradient?.liked ?? false;
-  const updateLikeState = () => {
-    likeTheme.replaceChildren();
-    likeTheme.appendChild(createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', {
-      size: 'm',
-      'aria-hidden': 'true',
-    }));
-    likeBtn.setAttribute('aria-label', liked ? 'Remove from favorites' : 'Add to favorites');
-    likeBtn.classList.toggle('is-liked', liked);
-  };
-  updateLikeState();
-  likeBtn.appendChild(likeTheme);
-  let likeTooltip = null;
-  createExpressTooltip({
-    targetEl: likeBtn,
-    content: liked ? 'Remove from favorites' : 'Add to favorites',
-    placement: 'bottom',
-  }).then((tooltipController) => {
-    likeTooltip = tooltipController;
-  }).catch(() => {});
-  likeBtn.addEventListener('click', () => {
-    const previousLiked = liked;
-    liked = !liked;
-    updateLikeState();
-    likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
-    opts.onLikeToggle?.({ id: gradient?.id, liked: previousLiked })?.catch?.((err) => {
-      window.lana?.log(`[GradientPicker] Like toggle error: ${err?.message}`, {
-        tags: 'color-modal,like',
-        severity: 'warning',
-      });
-    });
-  });
-  const likesCountEl = createTag('p', { class: 'modal-likes-count' });
-  likesCountEl.textContent = likesCount;
-  likesDiv.appendChild(likeBtn);
-  likesDiv.appendChild(likesCountEl);
-  nameLikes.appendChild(h1);
-  nameLikes.appendChild(likesDiv);
-  nameTagsSection.appendChild(nameLikes);
+  nameTagsSection.appendChild(h1);
 
   const thumbTags = createTag('div', { class: 'modal-palette-thumb-tags' });
   const thumbContainer = createTag('div', { class: 'modal-thumbnail-container' });
