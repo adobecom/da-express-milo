@@ -261,6 +261,18 @@ export const style = css`
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column {
     border-radius: 0;
   }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:first-child {
+    border-radius: var(--Corner-radius-corner-radius-200) 0 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:last-child {
+    border-radius: 0 0 var(--Corner-radius-corner-radius-200) 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column.corner-top-right {
+    border-radius: 0 var(--Corner-radius-corner-radius-200) 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column.corner-bottom-left {
+    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200);
+  }
 
   
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--simulated {

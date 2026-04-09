@@ -1215,8 +1215,9 @@ export class ColorSwatchRail extends LitElement {
         const textColor = getContrastTextColor(swatch.hex);
         const shadow = textColor === '#ffffff' ? '0 0 2px rgba(0,0,0,0.5)' : '0 0 2px rgba(255,255,255,0.5)';
         const simulatedSuperLight = isSuperLight(swatch.hex);
+        const simClasses = ['swatch-column', 'swatch-column--simulated', simulatedSuperLight && 'swatch-column--super-light', opts.cornerClass || ''].filter(Boolean).join(' ');
         return html`
-          <div class="swatch-column swatch-column--simulated ${simulatedSuperLight ? 'swatch-column--super-light' : ''}" tabindex="-1" role="group" aria-label="Simulated color"
+          <div class="${simClasses}" tabindex="-1" role="group" aria-label="Simulated color"
             style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: var(--swatch-text-shadow-override, ${shadow}); --swatch-icon-color: ${textColor};"
             data-swatch-index="${index}">
             ${swatch.conflict ? conflictIcon() : ''}
@@ -1445,11 +1446,14 @@ export class ColorSwatchRail extends LitElement {
           ? displaySwatches.slice(start, start + colCount)
           : swatches.slice(start, start + colCount);
         const isSimulatedRow = useCBData && r >= 1;
+        const isLastRow = r === FOUR_ROWS_ROWS - 1;
         rowSwatches.forEach((swatch, c) => {
           const idx = start + c;
-          allItems.push(renderSwatch(swatch, idx, { isSimulatedCell: isSimulatedRow }));
+          let cornerClass = '';
+          if (r === 0 && c === rowSwatches.length - 1) cornerClass = 'corner-top-right';
+          if (isLastRow && c === 0) cornerClass = 'corner-bottom-left';
+          allItems.push(renderSwatch(swatch, idx, { isSimulatedCell: isSimulatedRow, cornerClass }));
         });
-        const isLastRow = r === FOUR_ROWS_ROWS - 1;
         const showEmptySlot = isLastRow && showEmpty && (useCBData ? swatches.length < MAX_SWATCHES_FOUR_ROWS : rowSwatches.length < colCount);
         if (showEmptySlot) {
           allItems.push(html`
