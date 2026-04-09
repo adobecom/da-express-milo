@@ -203,6 +203,9 @@
     max-width: 500px;
     margin: 0;
   }
+  main .interactive-marquee .foreground .acrobat-express-lockup {
+    padding-bottom: 10px;
+  }
 }
 
 @media screen and (max-width: 600px) {
@@ -377,14 +380,7 @@ main .interactive-marquee.horizontal-masonry.tall .media-container p.image-conta
   height: 200px;
 }
 
-main .interactive-marquee.horizontal-masonry.wide .media-container p.image-container {
-  position: relative;
-  margin-bottom: 20px;
-  border-radius: 16px;
-  height: 150px;
-  max-width: 400px;
-  flex: unset
-}
+
 
 main .interactive-marquee.horizontal-masonry .media-container p.image-container img {
   border-radius: 16px;
@@ -511,6 +507,11 @@ main .interactive-marquee.horizontal-masonry.wide .media-container {
 }
 
 main .interactive-marquee.horizontal-masonry.wide .media-container p.image-container {
+  position: relative;
+  margin-bottom: 20px;
+  border-radius: 16px;
+  height: 150px;
+  max-width: 400px;
   flex: 0 0 calc(50% - 10px);
 }
 
@@ -572,14 +573,6 @@ main .interactive-marquee.horizontal-masonry .media-container p.image-container:
     width: 100%;
   }
 
-  main .interactive-marquee.horizontal-masonry .container {
-    flex-direction: column-reverse;
-  }
-
-
-
-
-
   main .interactive-marquee.horizontal-masonry .media-container p.image-container:hover .external-link-element .mobile-prompt-link {
     color: white;
     position: relative;
@@ -617,7 +610,6 @@ main .interactive-marquee.horizontal-masonry .media-container p.image-container:
     border-radius: 20px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
     padding: 15px 20px;
-    left: 0;
     height: fit-content;
     margin: auto;
     color: #333;
@@ -657,6 +649,7 @@ main .interactive-marquee.horizontal-masonry .media-container p.image-container:
   }
 
   main .interactive-marquee.horizontal-masonry .container {
+    flex-direction: column-reverse;
     width: calc(100% - 20px)
   }
 
