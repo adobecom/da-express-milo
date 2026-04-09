@@ -55,7 +55,6 @@ async function createNav(navLinks, activeId, getColors, getName) {
   const nav = createTag('nav', { class: 'action-menu-nav', 'aria-label': 'Color palette tools' });
   const ul = createTag('ul');
   const linkElements = [];
-  let activeIndex = -1;
   const paletteApi = createColorPaletteParamApi();
 
   for (let index = 0; index < list.length; index += 1) {
@@ -63,52 +62,50 @@ async function createNav(navLinks, activeId, getColors, getName) {
     // eslint-disable-next-line no-continue
     if (!isValidActionMenuItem(link, 'href')) continue;
     const isActive = link.id === activeId;
-    if (isActive) activeIndex = linkElements.length;
     const li = createTag('li');
-    const linkEl = createTag('a', {
-      href: link.href,
-      class: `action-menu-link ${link.id}-link color-action-button ${isActive ? 'active' : ''}`,
-    });
-    linkEl.addEventListener('click', (e) => {
-      const colors = typeof getColors === 'function' ? getColors() : null;
-      if (!colors?.length) return;
-      e.preventDefault();
-      try {
-        const url = new URL(linkEl.href, window.location.href);
-        const name = typeof getName === 'function' ? getName() : undefined;
-        paletteApi.setOnUrl(url, colors, { name });
-        window.location.href = url.toString();
-      } catch {
-        window.location.href = linkEl.href;
-      }
-    });
-    const iconSvg = ICON_MAP[link.id];
-    if (iconSvg) linkEl.append(createTag('span', null, iconSvg));
-    let labelEl = null;
     if (isActive) {
-      labelEl = createTag('span', { id: `${link.id}-label`, class: 'active-label' }, link.label);
-      linkEl.setAttribute('aria-labelledby', `${link.id}-label`);
-      linkEl.setAttribute('aria-current', 'page');
+      const span = createTag('span', { class: `action-menu-link ${link.id}-link color-action-button active` });
+      const iconSvg = ICON_MAP[link.id];
+      if (iconSvg) span.append(createTag('span', null, iconSvg));
+      const labelEl = createTag('span', { class: 'active-label' }, link.label);
+      li.append(span, labelEl);
     } else {
+      const linkEl = createTag('a', {
+        href: link.href,
+        class: `action-menu-link ${link.id}-link color-action-button`,
+      });
+      linkEl.addEventListener('click', (e) => {
+        const colors = typeof getColors === 'function' ? getColors() : null;
+        if (!colors?.length) return;
+        e.preventDefault();
+        try {
+          const url = new URL(linkEl.href, window.location.href);
+          const name = typeof getName === 'function' ? getName() : undefined;
+          paletteApi.setOnUrl(url, colors, { name });
+          window.location.href = url.toString();
+        } catch {
+          window.location.href = linkEl.href;
+        }
+      });
+      const iconSvg = ICON_MAP[link.id];
+      if (iconSvg) linkEl.append(createTag('span', null, iconSvg));
       linkEl.setAttribute('aria-label', link.label);
+      li.append(linkEl);
+      linkElements.push(linkEl);
+      await createExpressTooltip({
+        targetEl: linkEl,
+        content: link.label,
+        placement: 'top',
+        disableAria: true,
+      });
     }
-    li.append(linkEl);
-    if (labelEl) li.append(labelEl);
     ul.append(li);
     if (link.id === 'palette') {
-      const dividerEl = createTag('li', { role: 'separator', 'aria-hidden': true, class: 'palette-divider' });
-      ul.append(dividerEl);
+      ul.append(createTag('li', { role: 'separator', 'aria-hidden': true, class: 'palette-divider' }));
     }
-    linkElements.push(linkEl);
-    await createExpressTooltip({
-      targetEl: linkEl,
-      content: link.label,
-      placement: 'top',
-      disableAria: true,
-    });
   }
 
-  attachRovingTabIndex(ul, linkElements, activeIndex >= 0 ? activeIndex : 0);
+  attachRovingTabIndex(ul, linkElements, 0);
   nav.append(ul);
   return nav;
 }

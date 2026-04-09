@@ -180,3 +180,46 @@ describe('color-swatch-rail tint bands', () => {
     });
   });
 });
+
+describe('color-swatch-rail icon order', () => {
+  let rail;
+
+  afterEach(() => {
+    rail?.remove();
+    rail = null;
+  });
+
+  async function renderRail(features, orientation = 'vertical') {
+    rail = document.createElement('color-swatch-rail');
+    rail.swatches = [{ hex: '#FF0000' }, { hex: '#00FF00' }];
+    rail.lockedByIndex = new Set();
+    rail.tintIndex = null;
+    rail.swatchFeatures = features;
+    rail.orientation = orientation;
+    document.body.appendChild(rail);
+    await rail.updateComplete;
+    return rail;
+  }
+
+  it('vertical: lock appears before drag, drag before trash', async () => {
+    await renderRail(['lock', 'drag', 'trash', 'colorPicker']);
+    const topRight = rail.shadowRoot.querySelector('.top-actions--right');
+    const buttons = [...topRight.querySelectorAll('button')];
+    const lockIdx = buttons.findIndex((b) => b.classList.contains('icon-button--lock'));
+    const dragIdx = buttons.findIndex((b) => b.classList.contains('icon-button--drag'));
+    const trashIdx = buttons.findIndex((b) => b.classList.contains('icon-button--trash'));
+    expect(lockIdx).to.be.lessThan(dragIdx);
+    expect(dragIdx).to.be.lessThan(trashIdx);
+  });
+
+  it('stacked: lock appears before trash, trash before drag', async () => {
+    await renderRail(['lock', 'drag', 'trash', 'colorPicker'], 'stacked');
+    const iconsDiv = rail.shadowRoot.querySelector('.stacked-row__icons');
+    const buttons = [...iconsDiv.querySelectorAll('button')];
+    const lockIdx = buttons.findIndex((b) => b.classList.contains('icon-button--lock'));
+    const dragIdx = buttons.findIndex((b) => b.classList.contains('icon-button--drag'));
+    const trashIdx = buttons.findIndex((b) => b.classList.contains('icon-button--trash'));
+    expect(lockIdx).to.be.lessThan(trashIdx);
+    expect(trashIdx).to.be.lessThan(dragIdx);
+  });
+});

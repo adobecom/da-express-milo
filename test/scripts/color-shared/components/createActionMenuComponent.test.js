@@ -69,6 +69,29 @@ describe('createActionMenuComponent', () => {
     expect(document.body.contains(el)).to.be.false;
   });
 
+  it('active nav item renders as a non-interactive span, not a link', async () => {
+    instance = await createActionMenuComponent({
+      type: 'nav-only',
+      activeId: 'palette',
+      navLinks: [
+        { id: 'palette', href: '#palette', label: 'Color Palette' },
+        { id: 'contrast', href: '#contrast', label: 'Contrast' },
+      ],
+    });
+    const activeEl = instance.element.querySelector('.palette-link.active');
+    expect(activeEl).to.exist;
+    expect(activeEl.tagName.toLowerCase()).to.equal('span');
+    expect(activeEl.getAttribute('href')).to.be.null;
+
+    const labelEl = instance.element.querySelector('.active-label');
+    expect(labelEl).to.exist;
+    expect(labelEl.textContent).to.equal('Color Palette');
+
+    const contrastLink = instance.element.querySelector('.contrast-link');
+    expect(contrastLink.tagName.toLowerCase()).to.equal('a');
+    expect(contrastLink.getAttribute('href')).to.equal('#contrast');
+  });
+
   it('action-menu:history-index-changed updates undo/redo aria-disabled', async () => {
     instance = await createActionMenuComponent({
       type: 'controls-only',
