@@ -267,6 +267,67 @@ describe('createToolbar', () => {
       expect(cb.firstCall.args[0]).to.have.property('palette');
     });
 
+    it('share passes a URL with color-palette params to navigator.share', async () => {
+      const shareStub = sinon.stub(navigator, 'share').resolves();
+      const toolbar = createToolbar(defaultOptions());
+      document.body.appendChild(toolbar.element);
+
+      const shareBtn = toolbar.element.querySelector('sp-action-button[label="Share this color palette"]');
+      shareBtn.click();
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(shareStub.calledOnce).to.be.true;
+      const shareArg = shareStub.firstCall.args[0];
+      expect(shareArg).to.have.property('url');
+      expect(shareArg.url).to.include('color-palette=');
+      expect(shareArg).to.have.property('title', MOCK_PALETTE.name);
+    });
+
+    it('share falls back to clipboard when navigator.share is unavailable', async () => {
+      sinon.stub(navigator, 'share').rejects(new TypeError('share not supported'));
+      const clipboardStub = sinon.stub(navigator.clipboard, 'writeText').resolves();
+      const toolbar = createToolbar(defaultOptions());
+      document.body.appendChild(toolbar.element);
+
+      const shareBtn = toolbar.element.querySelector('sp-action-button[label="Share this color palette"]');
+      shareBtn.click();
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(clipboardStub.calledOnce).to.be.true;
+      expect(clipboardStub.firstCall.args[0]).to.include('color-palette=');
+    });
+
+    it('share does nothing when user cancels native share dialog (AbortError)', async () => {
+      const abortErr = new DOMException('Share canceled', 'AbortError');
+      sinon.stub(navigator, 'share').rejects(abortErr);
+      const clipboardStub = sinon.stub(navigator.clipboard, 'writeText').resolves();
+      const toolbar = createToolbar(defaultOptions());
+      document.body.appendChild(toolbar.element);
+
+      const shareBtn = toolbar.element.querySelector('sp-action-button[label="Share this color palette"]');
+      shareBtn.click();
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(clipboardStub.called).to.be.false;
+    });
+
+    it('share logs error when both share and clipboard fail', async () => {
+      sinon.stub(navigator, 'share').rejects(new TypeError('share not supported'));
+      sinon.stub(navigator.clipboard, 'writeText').rejects(new Error('clipboard denied'));
+      const lanaStub = sinon.stub();
+      window.lana = { log: lanaStub };
+      const toolbar = createToolbar(defaultOptions());
+      document.body.appendChild(toolbar.element);
+
+      const shareBtn = toolbar.element.querySelector('sp-action-button[label="Share this color palette"]');
+      shareBtn.click();
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(lanaStub.calledOnce).to.be.true;
+      expect(lanaStub.firstCall.args[0]).to.include('Share/clipboard failed');
+      delete window.lana;
+    });
+
     it('on("download", cb) fires when Download button clicked', async () => {
       const toolbar = createToolbar(defaultOptions());
       document.body.appendChild(toolbar.element);

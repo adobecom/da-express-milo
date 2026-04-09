@@ -110,8 +110,10 @@
   box-shadow: none;
 }
 
-/* Sticky mode overrides */
+/* Sticky mode overrides — toolbar fills the wrapper which owns the width constraints */
 .ax-toolbar.ax-toolbar-sticky {
+  max-inline-size: none;
+  margin-inline: 0;
   border-start-start-radius: var(--Corner-radius-corner-radius-200);
   border-start-end-radius: var(--Corner-radius-corner-radius-200);
   border-end-end-radius: 0;
@@ -223,6 +225,7 @@
   }
 }
 
+
 .ax-palette-name-input {
   font-family: var(--body-font-family);
   font-weight: var(--ax-body-weight);
@@ -257,15 +260,43 @@
   --ax-toolbar-floating-bottom-offset: 0;
   --ax-toolbar-inline-margin: 0;
   --ax-toolbar-presentation-max-width: var(--ax-color-tool-presentation-max-width, 1920px);
-  --ax-toolbar-max-width-desktop: calc(var(--ax-toolbar-presentation-max-width) - var(--ax-toolbar-inline-margin) * 2);
 
   position: fixed;
-  inline-size: min(calc(100% - var(--ax-toolbar-inline-margin) * 2), var(--ax-toolbar-max-width-desktop));
+  inline-size: calc(100% - var(--ax-toolbar-inline-margin) * 2);
   inset-block-end: var(--ax-toolbar-floating-bottom-offset);
   inset-inline-start: 0;
   inset-inline-end: 0;
   margin-inline: auto;
   z-index: var(--ax-toolbar-sticky-z);
+  animation: ax-toolbar-slide-in 0.25s ease-out both;
+}
+
+.ax-toolbar-sticky-wrapper.ax-toolbar-exiting {
+  animation: ax-toolbar-slide-out 0.2s ease-in both;
+}
+
+@keyframes ax-toolbar-slide-in {
+  from { opacity: 0; transform: translateY(30%); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes ax-toolbar-slide-out {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(30%); }
+}
+
+.color-floating-toolbar-container.ax-toolbar-fade-out {
+  opacity: 0;
+  transition: opacity 0.15s ease-out;
+}
+
+.color-floating-toolbar-container.ax-toolbar-fade-in {
+  animation: ax-toolbar-fade-in 0.15s ease-out both;
+}
+
+@keyframes ax-toolbar-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* ── Tablet (600px+) ─────────────────────────────────────────── */
@@ -296,7 +327,6 @@
 
   .ax-toolbar-sticky-wrapper {
     --ax-toolbar-floating-bottom-offset: var(--spacing-300);
-    inline-size: min(calc(100% - var(--ax-toolbar-inline-margin) * 2), var(--ax-toolbar-max-width-desktop));
     inset-block-end: var(--ax-toolbar-floating-bottom-offset);
   }
 

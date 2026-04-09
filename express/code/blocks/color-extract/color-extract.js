@@ -439,27 +439,13 @@ function buildEditStage(copyRow, imageRow) {
 
 function createFloatingToolbarMount(controller, variant) {
   const container = createTag('div', { class: 'color-extract-floating-toolbar-mount' });
-  let tb = null;
+  let toolbarHandle = null;
   let mounted = false;
-  let cssLoaded = false;
-
-  async function loadToolbarCss() {
-    if (cssLoaded) return;
-    cssLoaded = true;
-    try {
-      const { loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`);
-      const codeRoot = getConfig?.()?.codeRoot || '/express/code';
-      await Promise.all([
-        new Promise((resolve) => { loadStyle(`${codeRoot}/scripts/color-shared/color-tokens.css`, resolve); }),
-        new Promise((resolve) => { loadStyle(`${codeRoot}/scripts/color-shared/toolbar/toolbar.css`, resolve); }),
-      ]);
-    } catch { /* best-effort */ }
-  }
 
   function sync() {
-    if (!tb) return;
+    if (!toolbarHandle) return;
     const state = controller.getState();
-    tb.updateSwatches(state.swatches.map((s) => s.hex));
+    toolbarHandle.toolbar?.updateSwatches(state.swatches.map((s) => s.hex));
   }
 
   async function mount() {
@@ -470,9 +456,7 @@ function createFloatingToolbarMount(controller, variant) {
     mounted = true;
 
     try {
-      await loadToolbarCss();
-
-      const mod = await import('../../scripts/color-shared/toolbar/createToolbarComponent.js');
+      const { initFloatingToolbar } = await import('../../scripts/color-shared/toolbar/createFloatingToolbar.js');
       const state = controller.getState();
       const palette = {
         name: state.name || 'Extracted Palette',
@@ -481,16 +465,16 @@ function createFloatingToolbarMount(controller, variant) {
         ...(variant === VARIANTS.GRADIENT ? { angle: 90 } : {}),
       };
 
-      tb = mod.createToolbar({
-        palette,
+      toolbarHandle = await initFloatingToolbar(container, {
         type: variant === VARIANTS.GRADIENT ? 'gradient' : 'palette',
-        variant: 'sticky',
-        showEdit: false,
+        variant: 'sticky-on-scroll',
+        standaloneAppearance: 'raised',
+        palette,
+        showEdit: true,
         showPaletteName: true,
-        editPaletteName: true,
+        editPaletteName: false,
       });
 
-      container.appendChild(tb.element);
       controller.subscribe(() => sync());
     } catch (err) {
       const { default: lana } = await import(`${getLibs()}/utils/lana.js`);

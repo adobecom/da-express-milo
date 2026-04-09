@@ -64,9 +64,9 @@ export default async function decorate(block) {
     };
 
     const navLinks = [
-      { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
-      { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/color-contrast-checker' },
-      { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/express/colors/color-blindness-simulator' },
+      { id: 'palette', label: 'Create palette', href: '/create/color-wheel' },
+      { id: 'contrast', label: 'Contrast Checker', href: '/create/color-contrast-analyzer' },
+      { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/create/color-accessibility' },
     ];
     const controls = [
       { id: 'undo', label: 'Undo' },
@@ -76,8 +76,7 @@ export default async function decorate(block) {
     layoutInstance = await createColorToolLayout(section, {
       palette: initialPalette,
       toolbar: {
-        variant: 'standalone',
-        mode: 'sticky-on-scroll',
+        variant: 'sticky-on-scroll',
         showEdit: false,
         showPaletteName: true,
         editPaletteName: false,
