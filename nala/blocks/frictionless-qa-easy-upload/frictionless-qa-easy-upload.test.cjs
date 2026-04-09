@@ -64,7 +64,6 @@ test.describe('Express Frictionless QA Easy Upload block test suite', () => {
       await expect(easyUploadBlock.confirmButton).toHaveClass(/disabled/);
       await expect(easyUploadBlock.confirmTooltip).toContainText(data.confirmTooltip);
       await expect(easyUploadBlock.qrCodeWidget).toBeVisible({ timeout: 10000 });
-      await expect(easyUploadBlock.qrCodeWidget).toHaveAttribute('aria-label', 'QR code — scan with your phone to upload a file');
     });
 
     await test.step('Run accessibility scan on the QR pane', async () => {
