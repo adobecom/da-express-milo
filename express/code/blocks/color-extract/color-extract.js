@@ -6,6 +6,7 @@ import {
 import parseBlockConfig from './helpers/parseConfig.js';
 import createHistoryManager from './helpers/historyManager.js';
 import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
+import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 
 function injectStylesheet(href) {
   if (document.querySelector(`link[href="${href}"]`)) return;
@@ -360,9 +361,20 @@ function buildSuggestedImages(row, onSelect) {
         const { extractColorsFromImage } = await import('./helpers/extractWorker.js');
         const result = await extractColorsFromImage(imageData, w, h, chips.length);
         applyPaletteToChips(result.colors, chips);
-      } catch {
-        // Fallback to naive sampling if worker fails
+      } catch (err) {
+        window.lana?.log(`Color Extract: extraction failed — ${err?.message}`, { tags: 'color-extract', severity: 'error' });
         applyPaletteToChips(extractPaletteFromImageElement(img, chips.length), chips);
+        if (!extractionErrorShown) {
+          extractionErrorShown = true;
+          const [{ getConfig }, { replaceKey }] = await Promise.all([
+            import(`${getLibs()}/utils/utils.js`),
+            import(`${getLibs()}/features/placeholders.js`),
+          ]);
+          const key = 'color-extract-block-error';
+          const raw = await replaceKey(key, getConfig());
+          const message = (raw && raw !== key.replaceAll('-', ' ')) ? raw : 'Failed to load Color Extract.';
+          showExpressToast({ message, variant: 'negative' });
+        }
       }
     };
     const scheduleHydrate = () => {
@@ -604,6 +616,7 @@ function renderColorVariant(block, rows, config) {
     enableImageUpload: config.enableImageUpload ?? DEFAULTS.ENABLE_IMAGE_UPLOAD,
     enableUrlInput: config.enableUrlInput ?? DEFAULTS.ENABLE_URL_INPUT,
   };
+  let extractionErrorShown = false;
 
   let currentMood = DEFAULTS.MOOD;
   let currentCanvas = null;
@@ -688,7 +701,8 @@ function renderColorVariant(block, rows, config) {
         mood,
         src: currentSrc,
       });
-    } catch {
+    } catch (err) {
+      window.lana?.log(`Color Extract: extraction failed — ${err?.message}`, { tags: 'color-extract', severity: 'error' });
       const fallback = samplePalette(ctx, canvas.width, canvas.height, swatchCount);
       controller.setState({
         swatches: fallback.map((hex) => ({ hex })),
@@ -697,6 +711,17 @@ function renderColorVariant(block, rows, config) {
       if (markers) {
         const pts = fallback.map((_, i) => ({ x: (i + 1) / (fallback.length + 1), y: 0.5 }));
         markers.setPositions(fallback, pts);
+      }
+      if (!extractionErrorShown) {
+        extractionErrorShown = true;
+        const [{ getConfig }, { replaceKey }] = await Promise.all([
+          import(`${getLibs()}/utils/utils.js`),
+          import(`${getLibs()}/features/placeholders.js`),
+        ]);
+        const key = 'color-extract-block-error';
+        const raw = await replaceKey(key, getConfig());
+        const message = (raw && raw !== key.replaceAll('-', ' ')) ? raw : 'Failed to load Color Extract.';
+        showExpressToast({ message, variant: 'negative' });
       }
     }
   }
@@ -1080,7 +1105,8 @@ async function renderGradientVariant(block, rows, config) {
         points: result.points,
         src: currentSrc,
       });
-    } catch {
+    } catch (err) {
+      window.lana?.log(`Color Extract: gradient extraction failed — ${err?.message}`, { tags: 'color-extract', severity: 'error' });
       const fallback = samplePalette(ctx, canvas.width, canvas.height, resolvedConfig.maxColors);
       const colorStops = fallback.map((hex, i) => ({
         color: hex,
@@ -1095,6 +1121,14 @@ async function renderGradientVariant(block, rows, config) {
         const pts = fallback.map((_, i) => ({ x: (i + 1) / (fallback.length + 1), y: 0.5 }));
         markers.setPositions(fallback, pts);
       }
+      const [{ getConfig }, { replaceKey }] = await Promise.all([
+        import(`${getLibs()}/utils/utils.js`),
+        import(`${getLibs()}/features/placeholders.js`),
+      ]);
+      const key = 'color-extract-block-error';
+      const raw = await replaceKey(key, getConfig());
+      const message = (raw && raw !== key.replaceAll('-', ' ')) ? raw : 'Failed to load Color Extract.';
+      showExpressToast({ message, variant: 'negative' });
     }
   }
 
