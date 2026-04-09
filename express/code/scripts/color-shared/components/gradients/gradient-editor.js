@@ -322,16 +322,8 @@ export function createGradientEditor(initialGradient, options = {}) {
       .catch(() => {});
   }
 
-  function showCopiedTooltipFeedback(handle) {
+  function showCopiedTooltipFeedback() {
     showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 2000 });
-    const info = handleTooltipControllers.get(handle);
-    if (!info?.controller) return;
-    info.controller.setContent('Copied to clipboard');
-    if (info.resetTimer) clearTimeout(info.resetTimer);
-    info.resetTimer = setTimeout(() => {
-      info.controller.setContent(info.copyLabel);
-      info.resetTimer = null;
-    }, 1200);
   }
 
   function clearHandleTooltips() {
