@@ -490,7 +490,15 @@ async function build2by2(parentContainer, block) {
 
 // WIP
 async function decorateNewTemplates(block, props, options = { reDrawMasonry: false }) {
-  const { templates: newTemplates } = await fetchAndRenderTemplates(props);
+  let fetchResult;
+  if (props.taasQuery) {
+    const params = new URLSearchParams(props.taasQuery);
+    if (props.start) params.set('start', props.start);
+    fetchResult = await fetchAndRenderTemplatesFromTaas(params.toString(), props);
+  } else {
+    fetchResult = await fetchAndRenderTemplates(props);
+  }
+  const { templates: newTemplates } = fetchResult;
   updateImpressionCache({ result_count: props.total });
   const loadMore = block.parentElement.querySelector('.load-more');
 
