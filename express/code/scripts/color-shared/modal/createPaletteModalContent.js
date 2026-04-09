@@ -388,7 +388,15 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
       } catch { /* noop */ }
       requestAnimationFrame(() => {
         updateFade();
-        new ResizeObserver(updateFade).observe(railWrap);
+        const ro = new ResizeObserver(updateFade);
+        ro.observe(railWrap);
+        new MutationObserver((_, mo) => {
+          if (!document.contains(railSection)) {
+            ro.disconnect();
+            railWrap.removeEventListener('scroll', updateFade);
+            mo.disconnect();
+          }
+        }).observe(document.body, { childList: true, subtree: true });
       });
     })();
   }
