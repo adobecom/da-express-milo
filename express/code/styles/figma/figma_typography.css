@@ -1,4 +1,4 @@
-:root.figma-system {
+.figma-system {
   /* PRIMITIVE TOKENS*/
   
 
@@ -178,8 +178,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-heading-4xl-size);
   line-height: var(--figma-heading-4xl-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-heading-3xl {
@@ -187,8 +185,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-heading-3xl-size);
   line-height: var(--figma-heading-3xl-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-heading-2xl {
@@ -196,8 +192,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-heading-2xl-size);
   line-height: var(--figma-heading-2xl-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-heading-xl {
@@ -205,8 +199,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-heading-xl-size);
   line-height: var(--figma-heading-xl-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-heading-l {
@@ -214,8 +206,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-heading-l-size);
   line-height: var(--figma-heading-l-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-heading-m {
@@ -223,8 +213,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-heading-m-size);
   line-height: var(--figma-heading-m-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-heading-s {
@@ -232,8 +220,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-heading-s-size);
   line-height: var(--figma-heading-s-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-heading-xs {
@@ -241,8 +227,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-heading-xs-size);
   line-height: var(--figma-heading-xs-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 /* === Titles ==============================================================
@@ -256,8 +240,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-title-2xl-size);
   line-height: var(--figma-title-2xl-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-title-xl {
@@ -265,8 +247,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-title-xl-size);
   line-height: var(--figma-title-xl-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-title-l {
@@ -274,8 +254,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-title-l-size);
   line-height: var(--figma-title-l-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-title-m {
@@ -283,8 +261,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-title-m-size);
   line-height: var(--figma-title-m-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-title-s {
@@ -292,8 +268,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-title-s-size);
   line-height: var(--figma-title-s-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-title-xs {
@@ -301,8 +275,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-title-xs-size);
   line-height: var(--figma-title-xs-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-title-2xs {
@@ -310,8 +282,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-title-2xs-size);
   line-height: var(--figma-title-2xs-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 /* ========================================================================= */
@@ -321,8 +291,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-body-2xl-size);
   line-height: var(--figma-body-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-body-xl {
@@ -330,8 +298,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-body-xl-size);
   line-height: var(--figma-body-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-body-l {
@@ -339,8 +305,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-body-l-size);
   line-height: var(--figma-body-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-body-m {
@@ -348,8 +312,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-body-m-size);
   line-height: var(--figma-body-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-body-s {
@@ -357,8 +319,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-body-s-size);
   line-height: var(--figma-body-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-body-xs {
@@ -366,8 +326,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-body-xs-size);
   line-height: var(--figma-body-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-body-2xs {
@@ -375,8 +333,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-body-2xs-size);
   line-height: var(--figma-body-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 /* === Detail — Regular ====================================================
@@ -388,8 +344,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-detail-l-size);
   line-height: var(--figma-detail-l-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-detail-m {
@@ -397,8 +351,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-detail-m-size);
   line-height: var(--figma-detail-m-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-detail-s {
@@ -406,8 +358,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-detail-s-size);
   line-height: var(--figma-detail-s-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 /* === Detail — Bold =======================================================
@@ -419,8 +369,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-detail-l-size);
   line-height: var(--figma-detail-l-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-detail-m-bold {
@@ -428,8 +376,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-detail-m-size);
   line-height: var(--figma-detail-m-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-detail-s-bold {
@@ -437,8 +383,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-detail-s-size);
   line-height: var(--figma-detail-s-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 /* === Label — Regular =====================================================
@@ -450,8 +394,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-label-2xl-size);
   line-height: var(--figma-label-2xl-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-xl {
@@ -459,8 +401,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-label-xl-size);
   line-height: var(--figma-label-xl-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-l {
@@ -468,8 +408,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-label-l-size);
   line-height: var(--figma-label-l-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-m {
@@ -477,8 +415,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-label-m-size);
   line-height: var(--figma-label-m-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-s {
@@ -486,8 +422,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-label-s-size);
   line-height: var(--figma-label-s-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-xs {
@@ -495,8 +429,6 @@
   font-weight: var(--figma-font-weight-regular);
   font-size: var(--figma-label-xs-size);
   line-height: var(--figma-label-xs-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 /* === Label — Medium ======================================================
@@ -508,8 +440,6 @@
   font-weight: var(--figma-font-weight-medium);
   font-size: var(--figma-label-2xl-size);
   line-height: var(--figma-label-2xl-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-xl-medium {
@@ -517,8 +447,6 @@
   font-weight: var(--figma-font-weight-medium);
   font-size: var(--figma-label-xl-size);
   line-height: var(--figma-label-xl-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-l-medium {
@@ -526,8 +454,6 @@
   font-weight: var(--figma-font-weight-medium);
   font-size: var(--figma-label-l-size);
   line-height: var(--figma-label-l-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-m-medium {
@@ -535,8 +461,6 @@
   font-weight: var(--figma-font-weight-medium);
   font-size: var(--figma-label-m-size);
   line-height: var(--figma-label-m-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-s-medium {
@@ -544,8 +468,6 @@
   font-weight: var(--figma-font-weight-medium);
   font-size: var(--figma-label-s-size);
   line-height: var(--figma-label-s-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-xs-medium {
@@ -553,8 +475,6 @@
   font-weight: var(--figma-font-weight-medium);
   font-size: var(--figma-label-xs-size);
   line-height: var(--figma-label-xs-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 /* === Label — Bold ========================================================
@@ -566,8 +486,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-label-2xl-size);
   line-height: var(--figma-label-2xl-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-xl-bold {
@@ -575,8 +493,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-label-xl-size);
   line-height: var(--figma-label-xl-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-l-bold {
@@ -584,8 +500,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-label-l-size);
   line-height: var(--figma-label-l-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-m-bold {
@@ -593,8 +507,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-label-m-size);
   line-height: var(--figma-label-m-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-s-bold {
@@ -602,8 +514,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-label-s-size);
   line-height: var(--figma-label-s-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-label-xs-bold {
@@ -611,8 +521,6 @@
   font-weight: var(--figma-font-weight-bold);
   font-size: var(--figma-label-xs-size);
   line-height: var(--figma-label-xs-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 /* === Logotype ============================================================
@@ -625,8 +533,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-logotype-2xl-size);
   line-height: var(--figma-logotype-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-logotype-xl {
@@ -634,8 +540,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-logotype-xl-size);
   line-height: var(--figma-logotype-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-logotype-l {
@@ -643,8 +547,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-logotype-l-size);
   line-height: var(--figma-logotype-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-logotype-m {
@@ -652,8 +554,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-logotype-m-size);
   line-height: var(--figma-logotype-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-logotype-s {
@@ -661,8 +561,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-logotype-s-size);
   line-height: var(--figma-logotype-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-logotype-xs {
@@ -670,8 +568,6 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-logotype-xs-size);
   line-height: var(--figma-logotype-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
 
 .figma-logotype-2xs {
@@ -679,6 +575,4 @@
   font-weight: var(--figma-font-weight-black);
   font-size: var(--figma-logotype-2xs-size);
   line-height: var(--figma-logotype-lh);
-  letter-spacing: 0;
-  font-variation-settings: 'wdth' 100;
 }
