@@ -65,23 +65,28 @@ async function createNav(navLinks, activeId, getColors, getName) {
     const isActive = link.id === activeId;
     if (isActive) activeIndex = linkElements.length;
     const li = createTag('li');
-    const linkEl = createTag('a', {
-      href: link.href,
-      class: `action-menu-link ${link.id}-link color-action-button ${isActive ? 'active' : ''}`,
-    });
-    linkEl.addEventListener('click', (e) => {
-      const colors = typeof getColors === 'function' ? getColors() : null;
-      if (!colors?.length) return;
-      e.preventDefault();
-      try {
-        const url = new URL(linkEl.href, window.location.href);
-        const name = typeof getName === 'function' ? getName() : undefined;
-        paletteApi.setOnUrl(url, colors, { name });
-        window.location.href = url.toString();
-      } catch {
-        window.location.href = linkEl.href;
-      }
-    });
+    const linkEl = createTag(
+      isActive ? 'span' : 'a',
+      {
+        ...(isActive ? {} : { href: link.href }),
+        class: `action-menu-link ${link.id}-link color-action-button ${isActive ? 'active' : ''}`,
+      },
+    );
+    if (!isActive) {
+      linkEl.addEventListener('click', (e) => {
+        const colors = typeof getColors === 'function' ? getColors() : null;
+        if (!colors?.length) return;
+        e.preventDefault();
+        try {
+          const url = new URL(linkEl.href, window.location.href);
+          const name = typeof getName === 'function' ? getName() : undefined;
+          paletteApi.setOnUrl(url, colors, { name });
+          window.location.href = url.toString();
+        } catch {
+          window.location.href = linkEl.href;
+        }
+      });
+    }
     const iconSvg = ICON_MAP[link.id];
     if (iconSvg) linkEl.append(createTag('span', null, iconSvg));
     let labelEl = null;

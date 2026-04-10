@@ -20,6 +20,7 @@
   gap: var(--spacing-300);
   overflow: visible;
   padding-block-end: var(--spacing-300);
+  isolation: isolate;
 }
 
 .color-wheel .ax-shell-slot--canvas {

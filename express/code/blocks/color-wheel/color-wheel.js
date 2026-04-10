@@ -842,7 +842,7 @@ export default async function decorate(block) {
         const { createActionMenuComponent } = await import('../../scripts/color-shared/components/createActionMenuComponent.js');
 
         const actionMenu = await createActionMenuComponent({
-          defaultActionMenuConfig,
+          ...defaultActionMenuConfig,
           type: 'controls-only',
           onGenerateRandom: () => {
             isGeneratingRandom = true;
