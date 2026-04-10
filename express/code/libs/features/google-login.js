@@ -3,13 +3,13 @@ const GOOGLE_ID = '530526366930-l874a90ipfkn26naa71r010u8epp39jt.apps.googleuser
 const PLACEHOLDER = 'feds-googleLogin';
 const WRAPPER = 'feds-profile';
 
-const onToken = async (getMetadata, data) => {
-  let destination;
+const onToken = async (getMetadata, getConfig, data) => {
   const acceptedTouList = getMetadata('google-login-accepted-tou-list')?.trim();
+  let destination;
   try {
-    destination = new URL(getMetadata('google-login-redirect'))?.href;
+    destination = new URL(getMetadata('google-login-redirect'))?.href || await getConfig()?.googleLoginURLCallback?.()  ;
   } catch {
-    // Do nothing
+    window.lana?.log('[local] error parsing google-login-redirect', getMetadata('google-login-redirect'), { tags: 'google-login', severity: 'error' });
   }
 
   await window.adobeIMS.socialHeadlessSignIn({
@@ -32,12 +32,10 @@ const onToken = async (getMetadata, data) => {
   });
 };
 
-export default async function initGoogleLogin(loadIms, getMetadata, loadScript) {
-  console.log('[local] initGoogleLogin called');
+export default async function initGoogleLogin(loadIms, getMetadata, loadScript, getConfig) {
   try {
     await loadIms();
-  } catch (error) {
-    console.error('[local] error loading IMS', error);
+  } catch {
     return;
   }
   if (window.adobeIMS?.isSignedInUser()) return;
@@ -49,7 +47,7 @@ export default async function initGoogleLogin(loadIms, getMetadata, loadScript) 
 
   window.google?.accounts?.id?.initialize({
     client_id: GOOGLE_ID,
-    callback: (data) => onToken(getMetadata, data),
+    callback: (data) => onToken(getMetadata, getConfig, data),
     prompt_parent_id: PLACEHOLDER,
     cancel_on_tap_outside: false,
     auto_select: getMetadata('google-yolo-zero-tap')?.toLowerCase() === 'on',
