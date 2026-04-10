@@ -272,7 +272,7 @@ export function createColorInput(config) {
 
     requestAnimationFrame(() => {
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
-      colorEdit.show();
+      colorEdit.show?.();
     });
   }
 
@@ -303,7 +303,7 @@ export function createColorInput(config) {
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
       await colorEdit.updateComplete;
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
-      await colorEdit.show();
+      await colorEdit.show?.();
       focusTrap = trapFocus(overlay);
 
       addDismissListener('keydown', (e) => {
