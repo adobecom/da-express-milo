@@ -4,7 +4,6 @@ import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 
-const DEFAULT_LIKES_COUNT = '1.2K';
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
 
 let contentStylesLoaded = false;
@@ -38,9 +37,9 @@ function getPaletteColors(palette = {}) {
 }
 
 function normalizeLikesCount(rawValue) {
-  if (rawValue == null) return DEFAULT_LIKES_COUNT;
+  if (rawValue == null) return '0';
   const value = typeof rawValue === 'string' ? rawValue.trim() : rawValue;
-  if (value === '' || value === 0 || value === '0') return DEFAULT_LIKES_COUNT;
+  if (value === '') return '0';
   return String(value);
 }
 
@@ -232,6 +231,9 @@ function createPaletteMetaSection(palette = {}, options = {}) {
     updateLikeState();
     likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
     options.onLikeToggle?.({ id: palette?.id, liked: previousLiked })?.catch?.((error) => {
+      liked = previousLiked;
+      updateLikeState();
+      likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
       window.lana?.log(`[PaletteModal] Like toggle error: ${error?.message}`, {
         tags: 'color-modal,like',
         severity: 'warning',
