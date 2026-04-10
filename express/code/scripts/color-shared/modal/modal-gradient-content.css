@@ -532,6 +532,10 @@
     justify-content: space-between;
   }
 
+  .ax-color-modal-content .modal-thumbnail-container {
+    order: 1;
+  }
+
   .ax-color-modal-content .modal-palette-container,
   .ax-color-modal-content .modal-palette-name-tags,
   .ax-color-modal-content .modal-palette-toolbar {
