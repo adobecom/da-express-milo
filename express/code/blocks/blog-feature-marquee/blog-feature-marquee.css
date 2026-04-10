@@ -86,7 +86,7 @@ main .section .blog-feature-marquee p {
 .blog-feature-marquee .blog-feature-marquee-subcopy {
   margin: 0;
   color: var(--color-white);
-  font-size: var(--ax-body-m-size);
+  font-size: var(--ax-body-l-size);
   font-weight: var(--ax-body-weight);
   line-height: 1.3;
 }
