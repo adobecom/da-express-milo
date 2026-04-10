@@ -595,9 +595,7 @@ function PaperTypeContent({ onClose }) {
       button.setAttribute('aria-checked', isSelected ? 'true' : 'false');
       button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
       button.addEventListener('click', () => {
-        if (option.value !== selectedOptionValue) {
-          actions.selectOption(attribute.name, option.value);
-        }
+        actions.selectOption(attribute.name, option.value);
       });
 
       const img = document.createElement('img');
