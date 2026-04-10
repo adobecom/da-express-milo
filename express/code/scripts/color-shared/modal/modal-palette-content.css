@@ -251,7 +251,7 @@
   left: 0;
   right: 0;
   height: 48px;
-  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), #fff);
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0), var(--color-white));
   pointer-events: none;
   z-index: 1;
   transition: opacity 0.2s ease-out;
