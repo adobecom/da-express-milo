@@ -82,6 +82,7 @@ describe('createActionMenuComponent', () => {
     expect(activeEl).to.exist;
     expect(activeEl.tagName.toLowerCase()).to.equal('span');
     expect(activeEl.getAttribute('href')).to.be.null;
+    expect(activeEl.getAttribute('aria-current')).to.equal('page');
 
     const labelEl = instance.element.querySelector('.active-label');
     expect(labelEl).to.exist;
