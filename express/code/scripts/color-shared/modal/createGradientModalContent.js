@@ -51,7 +51,7 @@ export async function attachGradientHandleTooltips(container) {
   }
 }
 
-export function createGradientPickerRebuildContent(gradient, opts = {}) {
+export function createGradientModalContent(gradient, opts = {}) {
   const codeRoot = opts.codeRoot || '/express/code';
   let angle = gradient?.angle ?? 90;
   let colorStops = gradient?.colorStops || [];
@@ -176,7 +176,7 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   return main;
 }
 
-let pickerRebuildStylesLoaded = false;
+let gradientModalContentStylesLoaded = false;
 
 /** True if a stylesheet with this filename is already in document (e.g. via @import from block). */
 function isStylesheetInDocument(filename) {
@@ -189,19 +189,19 @@ function isStylesheetInDocument(filename) {
 }
 
 /**
- * Loads modal-picker-rebuild.css and gradient-editor.css via Milo loadStyle. Idempotent.
+ * Loads modal-gradient-content.css and gradient-editor.css via Milo loadStyle. Idempotent.
  * Skips gradient-editor.css if already in document (e.g. block @import).
  */
-export async function loadGradientPickerRebuildStyles() {
-  if (pickerRebuildStylesLoaded) return;
+export async function ensureGradientModalContentStyles() {
+  if (gradientModalContentStylesLoaded) return;
   try {
-    await loadMiloStyle('scripts/color-shared/modal/modal-picker-rebuild.css');
+    await loadMiloStyle('scripts/color-shared/modal/modal-gradient-content.css');
     if (!isStylesheetInDocument('gradient-editor.css')) {
       await loadMiloStyle('scripts/color-shared/components/gradients/gradient-editor.css');
     }
-    pickerRebuildStylesLoaded = true;
-    document.documentElement.dataset.gradientPickerStylesLoaded = 'true';
+    gradientModalContentStylesLoaded = true;
+    document.documentElement.dataset.gradientModalContentStylesLoaded = 'true';
   } catch {
-    pickerRebuildStylesLoaded = true;
+    gradientModalContentStylesLoaded = true;
   }
 }

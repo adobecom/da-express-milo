@@ -5,7 +5,7 @@ import BlockMediator from '../../scripts/block-mediator.min.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
 import { createSwatchesRenderer } from '../../scripts/color-shared/renderers/createSwatchesRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
-import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
+import { createGradientModalContent, ensureGradientModalContentStyles } from '../../scripts/color-shared/modal/createGradientModalContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
@@ -336,12 +336,12 @@ export default async function decorate(block) {
       block.addEventListener('block-unload', cleanupDualMode, { once: true });
 
       const openModalForItem = async (item, fallbackTitle) => {
-        await loadGradientPickerRebuildStyles();
+        await ensureGradientModalContentStyles();
         const content = item || {};
         modalManager.open({
           title: content.name || fallbackTitle,
           showTitle: false,
-          content: () => createGradientPickerRebuildContent(content, {
+          content: () => createGradientModalContent(content, {
             likesCount: content.likes ?? content.likesCount ?? 0,
             liked: content.liked ?? false,
             creatorName: content.creator?.name ?? '',

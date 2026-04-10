@@ -52,7 +52,7 @@ The modal system consists of:
 modal/
 ├── createModalManager.js                 [MANAGER - Orchestrates everything]
 ├── createPaletteModal.js                 [CONTENT - Palette editing]
-├── createGradientPickerRebuildContent.js [CONTENT - Gradient viewing/editing]
+├── createGradientModalContent.js        [CONTENT - Gradient viewing/editing]
 ├── createColorWheelModal.js              [CONTENT - Color wheel (generic)]
 └── MODAL-ARCHITECTURE.md                 [THIS FILE - Documentation]
 ```
@@ -72,7 +72,7 @@ Renderer (e.g., Gradients)
 Create Modal Content
     │
     ├─→ openGradientModal(gradient) on modal manager
-    │   └─→ Loads createGradientPickerRebuildContent (see createModalManager.js)
+    │   └─→ Loads createGradientModalContent (see createModalManager.js)
     │
     ▼
 Open Modal via Manager
@@ -174,7 +174,7 @@ function createStripsRenderer(options) {
 ### **Example 2: Gradient Modal (Gradients Variant)**
 
 ```javascript
-// Gradient modal content is built by createGradientPickerRebuildContent.js
+// Gradient modal content is built by createGradientModalContent.js
 // and opened via the modal manager helper:
 
 import { createModalManager } from '../modal/createModalManager.js';

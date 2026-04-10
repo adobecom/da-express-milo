@@ -269,17 +269,17 @@ export function createModalManager() {
 
   async function openGradientModal(gradient = {}) {
     const {
-      createGradientPickerRebuildContent,
-      loadGradientPickerRebuildStyles,
-    } = await import('./createGradientPickerRebuildContent.js');
-    await loadGradientPickerRebuildStyles();
+      createGradientModalContent,
+      ensureGradientModalContentStyles,
+    } = await import('./createGradientModalContent.js');
+    await ensureGradientModalContentStyles();
 
     const creatorName = gradient?.creator?.name ?? gradient?.creatorName ?? 'nicolagilroy';
     const creatorImageUrl = gradient?.creator?.imageUrl ?? gradient?.creatorImageUrl;
     open({
       title: (gradient?.name && String(gradient.name)) || 'Gradient',
       showTitle: false,
-      content: () => createGradientPickerRebuildContent(gradient || {}, {
+      content: () => createGradientModalContent(gradient || {}, {
         creatorName,
         creatorImageUrl,
       }),
