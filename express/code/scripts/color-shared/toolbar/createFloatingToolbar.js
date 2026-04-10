@@ -63,6 +63,8 @@ const DRAWER_I18N_MAP = {
   yourLibrary: 'color-drawer-your-library',
   tagFieldHelp: 'color-drawer-tag-field-help',
   tagRemoveAriaLabel: 'color-drawer-tag-remove-aria-label',
+  libraryCreatedToast: 'color-drawer-library-created-toast',
+  createLibraryFailedToast: 'color-drawer-create-library-failed-toast',
 };
 
 async function loadI18nStrings() {

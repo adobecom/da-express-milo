@@ -65,6 +65,8 @@ const DRAWER_DEFAULTS = {
   yourLibrary: 'Your Library',
   tagFieldHelp: 'Press return \u21B5 to create tag',
   tagRemoveAriaLabel: 'Remove {{tag}}',
+  libraryCreatedToast: "Library '{{name}}' created",
+  createLibraryFailedToast: 'Something went wrong. Try again.',
 };
 
 const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
@@ -221,12 +223,20 @@ function setupCreateLibraryHandler(
         renderMenuItems();
         closePopover();
         announceToScreenReader(interpolate(t.libraryCreated, { name: newLib.name }));
+        showExpressToast({
+          variant: 'positive',
+          message: interpolate(t.libraryCreatedToast, { name: newLib.name }),
+        });
       } catch (err) {
         window.lana?.log(`Create library failed: ${err.message}`, {
           tags: 'color-floating-toolbar,drawer',
           severity: 'error',
         });
         announceToScreenReader(t.createLibraryFailed);
+        showExpressToast({
+          variant: 'negative',
+          message: t.createLibraryFailedToast,
+        });
       } finally {
         createBtn.disabled = false;
         createBtn.textContent = t.create;
