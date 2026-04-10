@@ -749,21 +749,7 @@ export const style = css`
     top: calc(var(--swatch-column-padding) + 4 * var(--icon-button-size) + 3 * var(--top-actions-gap) + 16px);
   }
 
-  .swatch-rail[data-orientation="stacked"] .swatch-column .add-slot--column-top {
-    top: 0px;
-    bottom: auto;
-    left: 50%;
-    right: auto;
-    transform: translate(-50%, -50%);
-  }
-  .swatch-rail[data-orientation="stacked"] .swatch-column .add-slot--column-bottom {
-    top: auto;
-    bottom: 0px;
-    left: 50%;
-    right: auto;
-    transform: translate(-50%, 50%);
-  }
-  .swatch-column:focus-visible .add-slot--column,
+.swatch-column:focus-visible .add-slot--column,
   .swatch-column:has(.swatch-column-focusable:focus-visible) .add-slot--column {
     opacity: 1;
     pointer-events: auto;

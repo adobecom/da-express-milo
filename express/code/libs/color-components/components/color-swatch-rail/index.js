@@ -1228,9 +1228,7 @@ export class ColorSwatchRail extends LitElement {
       const isBaseReadOnly = f.baseColorReadOnly && index === this.baseColorIndex;
       const showAddLeftHere = !isStacked && canAddGlobal && f.addLeft;
       const showAddRightHere = !isStacked && canAddGlobal && f.addRight;
-      const showAddTopHere = false;
-      const showAddBottomHere = false;
-      
+
       const textColor = getContrastTextColor(swatch.hex);
       const superLight = isSuperLight(swatch.hex);
       const useLightIcons = textColor.toUpperCase() === '#FFFFFF';
@@ -1405,12 +1403,6 @@ export class ColorSwatchRail extends LitElement {
           </div>` : ''}
           ${showAddRightHere ? html`<div class="add-slot add-slot--column add-slot--column-right">
             <button type="button" class="icon-button icon-button--add swatch-column-focusable" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index + 1, 'right')} aria-label="Add color right" title="Add color right">${icon('add')}</button>
-          </div>` : ''}
-          ${showAddTopHere ? html`<div class="add-slot add-slot--column add-slot--column-top">
-            <button type="button" class="icon-button icon-button--add swatch-column-focusable" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index, 'left')} aria-label="Add color above" title="Add color above">${icon('add')}</button>
-          </div>` : ''}
-          ${showAddBottomHere ? html`<div class="add-slot add-slot--column add-slot--column-bottom">
-            <button type="button" class="icon-button icon-button--add swatch-column-focusable" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index + 1, 'right')} aria-label="Add color below" title="Add color below">${icon('add')}</button>
           </div>` : ''}
         </div>
       `;
