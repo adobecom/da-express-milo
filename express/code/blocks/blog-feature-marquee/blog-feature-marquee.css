@@ -69,7 +69,7 @@ main .section .blog-feature-marquee p {
   font-weight: var(--ax-body-weight-bold);
   line-height: 137.5%;
 }
-
+.blog-feature-marquee .blog-feature-marquee-content h1 strong, .blog-feature-marquee .blog-feature-marquee-content h2 strong,
 .blog-feature-marquee .blog-feature-marquee-content h1, .blog-feature-marquee .blog-feature-marquee-content h2 {
   margin: 0;
   color: var(--color-white);
