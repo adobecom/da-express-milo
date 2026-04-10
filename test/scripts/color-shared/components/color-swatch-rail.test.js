@@ -67,7 +67,7 @@ describe('color-swatch-rail tint bands', () => {
     });
   });
 
-  it('does not apply tint band when swatch is locked', () => {
+  it('applies tint band even when swatch is locked', () => {
     const rail = createRail();
     rail.swatches = [{ hex: '#1900AB' }];
     rail.lockedByIndex = new Set([0]);
@@ -81,7 +81,7 @@ describe('color-swatch-rail tint bands', () => {
 
     const selectedBand = rail._buildTintBands('#1900AB')[1];
     rail._handleTintBandSelect(0, selectedBand);
-    expect(setStateCalled).to.equal(false);
+    expect(setStateCalled).to.equal(true);
   });
 
   it('returns null when no tint swatch is currently selected', () => {
