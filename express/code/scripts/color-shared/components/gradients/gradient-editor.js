@@ -62,7 +62,7 @@ function gradientToCSS(data, midpoints = []) {
   const stops = parts.map((p) => `${p.color} ${Math.round(p.pos * 100)}%`).join(', ');
   if (type === 'radial') return `radial-gradient(circle, ${stops})`;
   if (type === 'conic') return `conic-gradient(from ${angle}deg, ${stops})`;
-  return `linear-gradient(${angle}deg, ${stops})`;
+  return `linear-gradient(90deg, ${stops})`;
 }
 
 function sampleColorAtPosition(data, midpoints, p) {
