@@ -78,6 +78,9 @@ main .section .blog-feature-marquee p {
   font-size: var(--heading-font-size-l);
   font-weight: 900;
   line-height: 1.04;
+  word-break: normal;
+  overflow-wrap: break-word;
+  hyphens: none;
 }
 
 .blog-feature-marquee .blog-feature-marquee-subcopy {
