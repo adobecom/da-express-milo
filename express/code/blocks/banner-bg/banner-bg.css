@@ -274,7 +274,7 @@
   }
 
   .banner-bg[class*="-bg"] .background-container {
-    max-width: var(--block-wd-max-width);
+    max-width: unset;
     margin: 0 auto;
   }
 
