@@ -147,7 +147,7 @@
   }
 }
 
-/* Wrapper for gradient strip in modal (MWPW-185800) — from modal-picker-rebuild */
+/* Wrapper for gradient strip in modal (MWPW-185800) — from modal-gradient-content */
 .gradient-strip-tall-wrap,
 .ax-color-modal-gradient-strip-wrap {
   width: 100%;

@@ -587,9 +587,8 @@ export function createGradientsRenderer(options) {
     });
 
     card.addEventListener('click', (e) => {
-      // Card/visual click should not open modal. Only the Open action button does.
       if (e.target.closest('.gradient-strip-action-btn')) return;
-      e.stopPropagation();
+      handleCardActivation(gradient);
     });
   }
 

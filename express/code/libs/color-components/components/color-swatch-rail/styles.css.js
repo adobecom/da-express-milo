@@ -261,6 +261,18 @@ export const style = css`
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column {
     border-radius: 0;
   }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:first-child {
+    border-radius: var(--Corner-radius-corner-radius-200) 0 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:last-child {
+    border-radius: 0 0 var(--Corner-radius-corner-radius-200) 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column.corner-top-right {
+    border-radius: 0 var(--Corner-radius-corner-radius-200) 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column.corner-bottom-left {
+    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200);
+  }
 
   
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--simulated {
@@ -336,8 +348,15 @@ export const style = css`
   }
 
   
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column {
+  .swatch-rail[data-orientation="vertical"] .swatch-column {
     border-radius: 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"] .swatch-column:first-child {
+    border-radius: var(--Corner-radius-corner-radius-200) 0 0 var(--Corner-radius-corner-radius-200);
+  }
+  .swatch-rail[data-orientation="vertical"] .swatch-column:last-child {
+    border-radius: 0 var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0;
   }
 
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:first-child {
@@ -542,6 +561,7 @@ export const style = css`
     flex: 1 1 0;
     min-width: 0;
     justify-content: flex-start;
+    padding-left: 0;
   }
 
   .swatch-rail[data-orientation="stacked"] .hex-code {
@@ -986,7 +1006,7 @@ export const style = css`
     }
 
     .bottom-info .hex-code {
-      align-self: flex-end;
+      align-self: flex-start;
     }
 
     .bottom-info .bottom-info__actions {
@@ -996,8 +1016,11 @@ export const style = css`
 
 
   .hex-code {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 18px;
+    letter-spacing: 0;
     color: var(--swatch-text-color);
     text-transform: uppercase;
     text-shadow: var(--swatch-text-shadow);
@@ -1041,6 +1064,7 @@ export const style = css`
   }
   .hex-code--static {
     cursor: default;
+    padding-left: 6px;
   }
 
   
@@ -1131,11 +1155,5 @@ export const style = css`
 
   .swatch-rail[data-orientation="stacked"] .swatch-column--empty {
     flex: 0;
-  }
-
-  @media (max-width: 899px) {
-    .swatch-column--super-light {
-      box-shadow: none;
-    }
-  }
+  }  
 `;
