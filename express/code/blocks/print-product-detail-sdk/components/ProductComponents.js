@@ -229,7 +229,7 @@ export function ProductImages() {
         carouselCleanupRef.current = null;
       }
     };
-  }, [realviews.map((r) => r.id).join(',')]);
+  }, [realviews.map((r) => `${r.id}:${r.url}`).join(',')]);
 
   // Update selected state when selection changes
   useEffect(() => {
