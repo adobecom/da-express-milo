@@ -4,7 +4,6 @@ import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 
-const CREATOR_PLACEHOLDER_PATH = '/express/code/scripts/color-shared/modal/images/creator-placeholder.png';
 const DEFAULT_LIKES_COUNT = '1.2K';
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
 
@@ -197,7 +196,7 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   const creatorImageUrl = options.creatorImageUrl
     ?? palette?.creator?.imageUrl
     ?? palette?.creatorImageUrl
-    ?? CREATOR_PLACEHOLDER_PATH;
+    ?? null;
   const hasOptionTags = Array.isArray(options.tags) && options.tags.length;
   const hasItemTags = Array.isArray(palette?.tags) && palette.tags.length;
   let tags = ['Color', 'Palette'];
@@ -250,8 +249,14 @@ function createPaletteMetaSection(palette = {}, options = {}) {
 
   const thumbnailContainer = createTag('div', { class: 'modal-thumbnail-container' });
   const thumbnailWrap = createTag('div', { class: 'modal-thumbnail' });
-  const thumbnailImg = createTag('img', { class: 'thumbnail-image', alt: creatorName, src: creatorImageUrl });
-  thumbnailWrap.appendChild(thumbnailImg);
+  if (creatorImageUrl) {
+    const thumbnailImg = createTag('img', { class: 'thumbnail-image', alt: creatorName, src: creatorImageUrl });
+    thumbnailWrap.appendChild(thumbnailImg);
+  } else {
+    const initial = createTag('span', { class: 'thumbnail-initial', 'aria-hidden': 'true' });
+    initial.textContent = creatorName.charAt(0).toUpperCase();
+    thumbnailWrap.appendChild(initial);
+  }
   const creatorNameEl = createTag('p', { class: 'modal-creator-name' });
   creatorNameEl.textContent = creatorName;
   thumbnailContainer.appendChild(thumbnailWrap);
