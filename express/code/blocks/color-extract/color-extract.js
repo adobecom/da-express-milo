@@ -769,6 +769,8 @@ function renderColorVariant(block, rows, config) {
 
   const floatingToolbar = createFloatingToolbarMount(controller, VARIANTS.PALETTE);
 
+  const popstateAc = new AbortController();
+
   function goToLanding() {
     block.classList.remove('has-image', 'is-loading');
     if (markerResizeObserver) markerResizeObserver.disconnect();
@@ -781,6 +783,7 @@ function renderColorVariant(block, rows, config) {
     history.clear();
     currentCanvas = null;
     currentSrc = null;
+    popstateAc.abort();
     block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
       el.classList.remove('is-selected');
       el.setAttribute('aria-pressed', 'false');
@@ -930,7 +933,7 @@ function renderColorVariant(block, rows, config) {
     if (block.classList.contains('has-image') && e.state?.colorExtract !== 'results') {
       goToLanding();
     }
-  });
+  }, { signal: popstateAc.signal });
 }
 
 /* ---------- Gradient edit stage ---------- */
@@ -1187,6 +1190,7 @@ async function renderGradientVariant(block, rows, config) {
   }
 
   const floatingToolbar = createFloatingToolbarMount(swatchController, VARIANTS.GRADIENT);
+  const popstateAc = new AbortController();
 
   function goToLanding() {
     block.classList.remove('has-image', 'is-loading');
@@ -1200,6 +1204,7 @@ async function renderGradientVariant(block, rows, config) {
     history.clear();
     currentCanvas = null;
     currentSrc = null;
+    popstateAc.abort();
     gradientEditor.setGradient(initialGradient);
     block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
       el.classList.remove('is-selected');
@@ -1362,7 +1367,7 @@ async function renderGradientVariant(block, rows, config) {
     if (block.classList.contains('has-image') && e.state?.colorExtract !== 'results') {
       goToLanding();
     }
-  });
+  }, { signal: popstateAc.signal });
 }
 
 export default async function decorate(block) {

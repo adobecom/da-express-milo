@@ -180,6 +180,7 @@ export function createGradientEditor(initialGradient, options = {}) {
   let barEl = null;
   let handlesWrap = null;
   let barRect = null;
+  let cachedStopSize = null;
   const eventListeners = {};
   const midHalf = 5;
   let selectedStopId = null;
@@ -464,8 +465,10 @@ export function createGradientEditor(initialGradient, options = {}) {
 
   function getHandleOverflow() {
     if (!barRect) barRect = barEl.getBoundingClientRect();
-    const stopSize = parseFloat(getComputedStyle(barEl).getPropertyValue('--gradient-stop-size')) || 22;
-    return barRect.width > 0 ? (stopSize / 2) / barRect.width : 0;
+    if (cachedStopSize === null) {
+      cachedStopSize = parseFloat(getComputedStyle(barEl).getPropertyValue('--gradient-stop-size')) || 22;
+    }
+    return barRect.width > 0 ? (cachedStopSize / 2) / barRect.width : 0;
   }
 
   function positionFromEvent(e) {
