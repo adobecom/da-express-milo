@@ -21,7 +21,7 @@ const PROD_CONFIG = {
       baseUrl: 'https://search.adobe.io/api/v2',
       exploreBaseUrl: 'https://themesb3.adobe.io',
       apiKey: 'KulerBackendClientId',
-      middleware: [{ name: 'auth', topics: ['kuler.like.*'] }],
+      middleware: [{ name: 'auth', topics: ['like.*'] }],
       endpoints: {
         search: '/search',
         api: '/api/v2',
