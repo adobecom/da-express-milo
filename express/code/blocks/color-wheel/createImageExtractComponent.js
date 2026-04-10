@@ -177,16 +177,37 @@ export function buildSuggestedImages(row, onSelect, strings = {}) {
     const previewImage = preview.querySelector('img');
     if (previewImage) previewImage.draggable = false;
 
-    const hydratePalette = () => {
+    const hydratePalette = async () => {
+      const imgEl = previewImage?.naturalWidth ? previewImage : null;
+      const loadImg = () => {
+        if (imgEl) return Promise.resolve(imgEl);
+        if (!src) return Promise.resolve(null);
+        return new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = 'anonymous';
+          img.onload = () => resolve(img);
+          img.onerror = () => resolve(null);
+          img.src = src;
+        });
+      };
+      const img = await loadImg();
+      if (!img) return;
       try {
-        if (previewImage?.naturalWidth) {
-          applyPaletteToChips(extractPaletteFromImageElement(previewImage, chips.length), chips);
-          return;
-        }
-      } catch { /* canvas tainted — fall through to crossOrigin load */ }
-      if (!src) return;
-      extractPaletteFromSrc(src, chips.length)
-        .then((colors) => applyPaletteToChips(colors, chips));
+        const ratio = img.naturalHeight / img.naturalWidth || 1;
+        const w = Math.min(EXTRACT_CANVAS_MAX, img.naturalWidth);
+        const h = Math.round(w * ratio);
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const context = canvas.getContext('2d');
+        context.drawImage(img, 0, 0, w, h);
+        const imageData = context.getImageData(0, 0, w, h);
+        const { extractColorsFromImage } = await import('../color-extract/helpers/extractWorker.js');
+        const result = await extractColorsFromImage(imageData, w, h, chips.length);
+        applyPaletteToChips(result.colors, chips);
+      } catch {
+        applyPaletteToChips(extractPaletteFromImageElement(img, chips.length), chips);
+      }
     };
 
     const scheduleHydrate = () => {
@@ -236,15 +257,39 @@ function setBackground(bgWrapper, src) {
 function attachWindowDragHandlers(container, dropzone) {
   const ac = new AbortController();
   const { signal } = ac;
+  let dragCounter = 0;
+  const clearDrag = () => {
+    dragCounter = 0;
+    container.classList.remove('is-dragging');
+  };
   const isInViewport = () => {
     const rect = container.getBoundingClientRect();
     return rect.bottom > 0 && rect.top < window.innerHeight;
   };
-  window.addEventListener('dragenter', (e) => { if (isInViewport() && isFileDrag(e)) { preventDefaults(e); container.classList.add('is-dragging'); } }, { signal });
-  window.addEventListener('dragover', (e) => { if (isInViewport() && isFileDrag(e)) { preventDefaults(e); container.classList.add('is-dragging'); } }, { signal });
-  window.addEventListener('dragleave', (e) => { preventDefaults(e); if (!e.relatedTarget && !document.elementFromPoint(e.clientX, e.clientY)) container.classList.remove('is-dragging'); }, { signal });
-  window.addEventListener('dragend', (e) => { preventDefaults(e); container.classList.remove('is-dragging'); }, { signal });
-  window.addEventListener('drop', (e) => { if (!isInViewport() || !isFileDrag(e)) return; preventDefaults(e); dropzone.handleFile(e.dataTransfer.files[0]); setTimeout(() => container.classList.remove('is-dragging'), 200); }, { signal });
+  window.addEventListener('dragenter', (e) => { if (isInViewport() && isFileDrag(e)) { preventDefaults(e); dragCounter += 1; container.classList.add('is-dragging'); } }, { signal });
+  window.addEventListener('dragover', (e) => { if (isInViewport() && isFileDrag(e)) { preventDefaults(e); } }, { signal });
+  window.addEventListener('dragleave', (e) => { preventDefaults(e); if (isFileDrag(e)) { dragCounter -= 1; if (dragCounter <= 0) clearDrag(); } }, { signal });
+  window.addEventListener('dragend', (e) => { preventDefaults(e); clearDrag(); }, { signal });
+  window.addEventListener('drop', (e) => { if (!isInViewport() || !isFileDrag(e)) { clearDrag(); return; } preventDefaults(e); dropzone.handleFile(e.dataTransfer.files[0]); setTimeout(clearDrag, 200); }, { signal });
+  window.addEventListener('blur', clearDrag, { signal });
+  document.addEventListener('visibilitychange', () => { if (document.hidden) clearDrag(); }, { signal });
+
+  // When dropping directly onto the dropzone element, its own `drop` listener calls
+  // stopPropagation, so the window-level handler never fires — meaning `is-dragging`
+  // is never removed and the wrapped handleFile (is-loading) is skipped.
+  const dropzoneEl = dropzone.container?.querySelector('.image-upload-dropzone');
+  if (dropzoneEl) {
+    dropzoneEl.addEventListener('drop', (e) => {
+      if (isFileDrag(e)) {
+        const file = e.dataTransfer?.files?.[0];
+        if (file?.type?.startsWith('image/')) {
+          container.classList.add('is-loading');
+        }
+      }
+      setTimeout(clearDrag, 200);
+    });
+  }
+
   const detach = () => ac.abort();
   const observer = new MutationObserver(() => { if (!container.isConnected) { detach(); observer.disconnect(); } });
   observer.observe(container.parentElement || document.body, { childList: true });
@@ -322,8 +367,8 @@ export default function createImageExtractComponent(options = {}) {
     const state = controller.getState();
     const currentSwatches = state.swatches || [];
     if (currentSwatches.length >= DEFAULTS.MAX_TOTAL_COLORS) return;
-    const pctX = Math.random();
-    const pctY = Math.random();
+    const pctX = 0.1 + Math.random() * 0.8;
+    const pctY = 0.1 + Math.random() * 0.8;
     const cx = Math.round(pctX * currentCanvas.width);
     const cy = Math.round(pctY * currentCanvas.height);
     const [r, g, b] = currentCanvas.getContext('2d').getImageData(cx, cy, 1, 1).data;
@@ -496,22 +541,6 @@ function createImageExtractDropzone(block, controller, onImageReady, config = {}
     block.classList.add('is-loading');
     origHandleUrl(url);
   };
-
-  // When dropping directly onto the dropzone element, its own `drop` listener calls
-  // stopPropagation, so the window-level handler never fires — meaning `is-dragging`
-  // is never removed and the wrapped handleFile (is-loading) is skipped.
-  const dropzoneEl = dz.container.querySelector('.image-upload-dropzone');
-  if (dropzoneEl) {
-    dropzoneEl.addEventListener('drop', (e) => {
-      if (isFileDrag(e)) {
-        const file = e.dataTransfer?.files?.[0];
-        if (file?.type?.startsWith('image/')) {
-          block.classList.add('is-loading');
-        }
-      }
-      setTimeout(() => block.classList.remove('is-dragging'), 200);
-    });
-  }
 
   return dz;
 }

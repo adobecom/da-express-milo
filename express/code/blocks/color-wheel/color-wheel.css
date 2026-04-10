@@ -153,6 +153,7 @@
   transition: none;
   width: auto;
   height: auto;
+  aspect-ratio: 1 / 1;
 }
 
 .color-wheel .color-extract-suggestion:hover {
@@ -161,10 +162,17 @@
 
 .color-wheel .color-extract-suggestion:active {
   outline: 2px solid var(--Palette-gray-900);
+  border-color: transparent;
 }
 
 .color-wheel .color-extract-suggestion:focus-visible {
   outline: 2px solid var(--Alias-focus-indicator-default);
+  border-color: transparent;
+}
+
+.image-extract .color-extract-suggestion-preview {
+  display: flex;
+  flex-direction: column;
 }
 
 .image-extract .color-extract-suggestion-bar {
