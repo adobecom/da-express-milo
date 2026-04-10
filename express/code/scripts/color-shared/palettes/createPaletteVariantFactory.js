@@ -94,7 +94,7 @@ export function createPaletteVariant(palette, variant, options = {}) {
     editBtn.appendChild(editIcon);
     editBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      emit('palette-click', palette);
+      emit('palette-edit', palette);
     });
     const shareBtn = createTag('button', {
       type: 'button',
