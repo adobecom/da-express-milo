@@ -272,14 +272,7 @@ export function createColorInput(config) {
 
     requestAnimationFrame(() => {
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
-      if (!colorEdit.show) {
-        window.lana?.log(
-          'colorEdit.show is not defined — skipping focus trap',
-          { tags: 'color-contrast-checker,color-input', severity: 'error' },
-        );
-        return;
-      }
-      colorEdit.show();
+      colorEdit.show?.();
     });
   }
 
