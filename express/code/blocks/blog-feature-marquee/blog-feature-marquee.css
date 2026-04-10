@@ -75,7 +75,7 @@ main .section .blog-feature-marquee p {
 .blog-feature-marquee .blog-feature-marquee-content h1, .blog-feature-marquee .blog-feature-marquee-content h2 {
   margin: 0;
   color: var(--color-white);
-  font-size: var(--heading-font-size-l);
+  font-size: var(--heading-font-size-ml);
   font-weight: 900;
   line-height: 1.04;
   word-break: normal;
