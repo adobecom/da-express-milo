@@ -8,6 +8,7 @@ import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 import { createPicker } from '../../../scripts/widgets/picker.js';
 import { trackPrintAddonOptionSelect } from '../../../scripts/instrument.js';
 import { debounce } from '../../../scripts/utils/hofs.js';
+import { sanitizeHtml } from '../utilities/utility-functions.js';
 
 const debouncedTrackOptionSelect = debounce((payload) => {
   trackPrintAddonOptionSelect(payload).catch(() => { });
@@ -767,7 +768,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
           />
           <div
             dangerouslySetInnerHTML=${{
-    __html: selector.preview.descriptionHTML,
+    __html: sanitizeHtml(selector.preview.descriptionHTML),
   }}
           />
         </div>
@@ -793,18 +794,14 @@ function renderAttribute(attribute, onRequestDrawer, key, productType) {
         productType=${productType}
       />`;
     case 'radio':
-      return html`<${DropdownSelector}
+      return html`<${RadioSelector}
         key=${key}
         attribute=${attribute}
-        onRequestDrawer=${onRequestDrawer}
-        productType=${productType}
       />`;
     case 'checkbox':
-      return html`<${DropdownSelector}
+      return html`<${CheckboxSelector}
         key=${key}
         attribute=${attribute}
-        onRequestDrawer=${onRequestDrawer}
-        productType=${productType}
       />`;
     default:
       return null;

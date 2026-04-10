@@ -8,7 +8,7 @@ import {
 } from '../../../scripts/vendors/htm-preact.min.js';
 import { useStore, useDrawer } from './Contexts.js';
 import axAccordionDecorate from '../../ax-accordion/ax-accordion.js';
-import { formatLargeNumberToK } from '../utilities/utility-functions.js';
+import { formatLargeNumberToK, sanitizeHtml } from '../utilities/utility-functions.js';
 import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 
 function mapToAccordionFormat(descriptions) {
@@ -303,6 +303,10 @@ export function CheckoutButton({ templateId }) {
       .then(({ getCountry }) => getCountry())
       .then((country) => {
         if (active) setOutOfRegion(!VALID_COUNTRIES.includes(country));
+      })
+      .catch((err) => {
+        window.lana?.log(`print-product-detail-sdk: country detection failed: ${err.message}`, { tags: 'print-product-detail-sdk', severity: 'warning' });
+        if (active) setOutOfRegion(false);
       });
     return () => { active = false; };
   }, []);
@@ -710,7 +714,7 @@ function PaperTypeContent({ onClose }) {
         ${state?.descriptionComponents?.[1]?.descriptionHTML && html`
           <div
             class="pdpx-drawer-description"
-            dangerouslySetInnerHTML=${{ __html: state.descriptionComponents[1].descriptionHTML }}
+            dangerouslySetInnerHTML=${{ __html: sanitizeHtml(state.descriptionComponents[1].descriptionHTML) }}
           />
         `}
       </div>

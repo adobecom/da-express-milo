@@ -79,6 +79,37 @@ export async function formatPriceZazzle(price, differential = false) {
   return formattedPrice;
 }
 
+const ALLOWED_TAGS = new Set([
+  'p', 'br', 'strong', 'em', 'b', 'i', 'u', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+]);
+
+function cleanNode(node, doc) {
+  const fragment = doc.createDocumentFragment();
+  node.childNodes.forEach((child) => {
+    if (child.nodeType === Node.TEXT_NODE) {
+      fragment.appendChild(doc.createTextNode(child.textContent));
+    } else if (child.nodeType === Node.ELEMENT_NODE) {
+      if (ALLOWED_TAGS.has(child.tagName.toLowerCase())) {
+        const el = doc.createElement(child.tagName.toLowerCase());
+        el.appendChild(cleanNode(child, doc));
+        fragment.appendChild(el);
+      } else {
+        fragment.appendChild(cleanNode(child, doc));
+      }
+    }
+  });
+  return fragment;
+}
+
+export function sanitizeHtml(html) {
+  if (!html) return '';
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const cleaned = cleanNode(doc.body, document);
+  const wrapper = document.createElement('div');
+  wrapper.appendChild(cleaned);
+  return wrapper.innerHTML;
+}
+
 export function formatStringSnakeCase(string) {
   const normalizedString = string.replace(/[^a-zA-Z0-9\s]/g, '_');
   const formattedString = normalizedString.trim().toLowerCase().replace(/ /g, '_');

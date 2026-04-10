@@ -5,6 +5,7 @@ import {
   render,
   useEffect,
   useRef,
+  useState,
   Fragment,
 } from '../../scripts/vendors/htm-preact.min.js';
 import { StoreProvider, useStore, DrawerProvider, useDrawer } from './components/Contexts.js';
@@ -39,6 +40,7 @@ function PDPContent({ templateId }) {
   const { fetchProduct } = actions;
   const containerRef = useRef(null);
   const hasTrackedPageView = useRef(false);
+  const [fetchError, setFetchError] = useState(false);
 
   useSeo(templateId);
 
@@ -46,7 +48,10 @@ function PDPContent({ templateId }) {
     if (!templateId) {
       return;
     }
-    fetchProduct(templateId);
+    fetchProduct(templateId).catch((err) => {
+      window.lana?.log(`print-product-detail-sdk: fetchProduct failed: ${err.message}`, { tags: 'print-product-detail-sdk', severity: 'error' });
+      setFetchError(true);
+    });
   }, [templateId, fetchProduct]);
 
   useEffect(() => {
@@ -85,6 +90,16 @@ function PDPContent({ templateId }) {
     }
     openDrawer({ type: request.type, payload: request.payload });
   };
+
+  if (fetchError) {
+    return html`
+      <div class="pdpx-global-container">
+        <div class="pdpx-error-container">
+          <p>Something went wrong loading this product. Please try refreshing the page.</p>
+        </div>
+      </div>
+    `;
+  }
 
   if (!state) {
     return html`
