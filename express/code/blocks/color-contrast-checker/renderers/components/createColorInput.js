@@ -272,7 +272,14 @@ export function createColorInput(config) {
 
     requestAnimationFrame(() => {
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
-      colorEdit.show?.();
+      if (!colorEdit.show) {
+        window.lana?.log(
+          'colorEdit.show is not defined — skipping focus trap',
+          { tags: 'color-contrast-checker,color-input', severity: 'error' },
+        );
+        return;
+      }
+      colorEdit.show();
     });
   }
 
@@ -303,7 +310,14 @@ export function createColorInput(config) {
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
       await colorEdit.updateComplete;
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
-      await colorEdit.show?.();
+      if (!colorEdit.show) {
+        window.lana?.log(
+          'colorEdit.show is not defined — skipping focus trap',
+          { tags: 'color-contrast-checker,color-input', severity: 'error' },
+        );
+        return;
+      }
+      await colorEdit.show();
       focusTrap = trapFocus(overlay);
 
       addDismissListener('keydown', (e) => {
