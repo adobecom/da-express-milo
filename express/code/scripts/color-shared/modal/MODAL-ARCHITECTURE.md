@@ -50,11 +50,11 @@ The modal system consists of:
 
 ```
 modal/
-├── createModalManager.js        [MANAGER - Orchestrates everything]
-├── createPaletteModal.js        [CONTENT - Palette editing]
-├── createGradientModal.js       [CONTENT - Gradient editing]
-├── createColorWheelModal.js     [CONTENT - Color wheel (generic)]
-└── MODAL-ARCHITECTURE.md        [THIS FILE - Documentation]
+├── createModalManager.js                 [MANAGER - Orchestrates everything]
+├── createPaletteModal.js                 [CONTENT - Palette editing]
+├── createGradientPickerRebuildContent.js [CONTENT - Gradient viewing/editing]
+├── createColorWheelModal.js              [CONTENT - Color wheel (generic)]
+└── MODAL-ARCHITECTURE.md                 [THIS FILE - Documentation]
 ```
 
 ---
@@ -71,8 +71,8 @@ Renderer (e.g., Gradients)
     ▼
 Create Modal Content
     │
-    ├─→ createGradientModal(gradient, options)
-    │   └─→ Returns { element, getGradient, destroy }
+    ├─→ openGradientModal(gradient) on modal manager
+    │   └─→ Loads createGradientPickerRebuildContent (see createModalManager.js)
     │
     ▼
 Open Modal via Manager
@@ -174,45 +174,18 @@ function createStripsRenderer(options) {
 ### **Example 2: Gradient Modal (Gradients Variant)**
 
 ```javascript
-// In renderers/createGradientsRenderer.js
+// Gradient modal content is built by createGradientPickerRebuildContent.js
+// and opened via the modal manager helper:
 
 import { createModalManager } from '../modal/createModalManager.js';
-import { createGradientModal } from '../modal/createGradientModal.js';
 
 function createGradientsRenderer(options) {
   const modalManager = createModalManager();
-  
+
   function handleGradientClick(gradient) {
-    // Create gradient modal content
-    const gradientModal = createGradientModal(gradient, {
-      onColorEdit: (color, stopIndex) => {
-        // Open nested color wheel modal
-        openColorWheelModal(color, (newColor) => {
-          gradientModal.updateColorStop(stopIndex, newColor);
-        });
-      },
-    });
-    
-    // Open modal
-    modalManager.open({
-      type: 'full-screen',
-      title: `Edit ${gradient.name}`,
-      content: gradientModal.element,
-      actions: {
-        cancelLabel: 'Cancel',
-        confirmLabel: 'Save Gradient',
-        onConfirm: () => {
-          const updatedGradient = gradientModal.getGradient();
-          saveGradient(updatedGradient);
-          modalManager.close();
-        },
-      },
-      onClose: () => {
-        gradientModal.destroy();
-      },
-    });
+    modalManager.openGradientModal(gradient);
   }
-  
+
   return { handleGradientClick };
 }
 ```
