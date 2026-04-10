@@ -27,6 +27,16 @@ function defaultOptions(overrides = {}) {
 }
 
 describe('createToolbar', () => {
+  before(() => {
+    if (!('share' in navigator)) {
+      Object.defineProperty(navigator, 'share', {
+        configurable: true,
+        writable: true,
+        value: () => Promise.resolve(),
+      });
+    }
+  });
+
   beforeEach(() => {
     window.isTestEnv = true;
   });
