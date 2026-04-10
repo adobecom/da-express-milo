@@ -749,7 +749,7 @@ export const style = css`
     top: calc(var(--swatch-column-padding) + 4 * var(--icon-button-size) + 3 * var(--top-actions-gap) + 16px);
   }
 
-.swatch-column:focus-visible .add-slot--column,
+  .swatch-column:focus-visible .add-slot--column,
   .swatch-column:has(.swatch-column-focusable:focus-visible) .add-slot--column {
     opacity: 1;
     pointer-events: auto;

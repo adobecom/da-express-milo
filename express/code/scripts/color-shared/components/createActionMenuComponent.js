@@ -64,7 +64,10 @@ async function createNav(navLinks, activeId, getColors, getName) {
     const isActive = link.id === activeId;
     const li = createTag('li');
     if (isActive) {
-      const span = createTag('span', { class: `action-menu-link ${link.id}-link color-action-button active` });
+      const span = createTag('span', {
+        class: `action-menu-link ${link.id}-link color-action-button active`,
+        'aria-current': 'page',
+      });
       const iconSvg = ICON_MAP[link.id];
       if (iconSvg) span.append(createTag('span', null, iconSvg));
       const labelEl = createTag('span', { class: 'active-label' }, link.label);

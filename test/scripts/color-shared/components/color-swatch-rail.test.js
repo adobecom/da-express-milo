@@ -202,24 +202,28 @@ describe('color-swatch-rail icon order', () => {
   }
 
   it('vertical: lock appears before drag, drag before trash', async () => {
-    await renderRail(['lock', 'drag', 'trash', 'colorPicker']);
+    await renderRail(['lock', 'editTint', 'drag', 'trash', 'colorPicker']);
     const topRight = rail.shadowRoot.querySelector('.top-actions--right');
     const buttons = [...topRight.querySelectorAll('button')];
     const lockIdx = buttons.findIndex((b) => b.classList.contains('icon-button--lock'));
+    const tintIdx = buttons.findIndex((b) => b.classList.contains('icon-button--edit-tint'));
     const dragIdx = buttons.findIndex((b) => b.classList.contains('icon-button--drag'));
     const trashIdx = buttons.findIndex((b) => b.classList.contains('icon-button--trash'));
-    expect(lockIdx).to.be.lessThan(dragIdx);
+    expect(lockIdx).to.be.lessThan(tintIdx);
+    expect(tintIdx).to.be.lessThan(dragIdx);
     expect(dragIdx).to.be.lessThan(trashIdx);
   });
 
   it('stacked: lock appears before trash, trash before drag', async () => {
-    await renderRail(['lock', 'drag', 'trash', 'colorPicker'], 'stacked');
+    await renderRail(['lock', 'editTint', 'drag', 'trash', 'colorPicker'], 'stacked');
     const iconsDiv = rail.shadowRoot.querySelector('.stacked-row__icons');
     const buttons = [...iconsDiv.querySelectorAll('button')];
     const lockIdx = buttons.findIndex((b) => b.classList.contains('icon-button--lock'));
+    const tintIdx = buttons.findIndex((b) => b.classList.contains('icon-button--edit-tint'));
     const dragIdx = buttons.findIndex((b) => b.classList.contains('icon-button--drag'));
     const trashIdx = buttons.findIndex((b) => b.classList.contains('icon-button--trash'));
-    expect(lockIdx).to.be.lessThan(trashIdx);
+    expect(lockIdx).to.be.lessThan(tintIdx);
+    expect(tintIdx).to.be.lessThan(trashIdx);
     expect(trashIdx).to.be.lessThan(dragIdx);
   });
 });
