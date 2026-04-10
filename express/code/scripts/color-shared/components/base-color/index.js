@@ -236,16 +236,23 @@ class BaseColor extends LitElement {
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
 
     if (!this._hasOriginal) {
-      this._originalHue = hsb.hue;
-      this._originalSaturation = hsb.saturation;
       this._originalBrightness = hsb.brightness;
+      if (hsb.brightness > 0) {
+        this._originalHue = hsb.hue;
+        this._originalSaturation = hsb.saturation;
+      } else {
+        this._originalHue = this._hue;
+        this._originalSaturation = this._saturation;
+      }
       this._hasOriginal = true;
     }
 
     if (this.color.toUpperCase() === this._hex.toUpperCase()) return;
-    this._hue = hsb.hue;
-    this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
+    if (hsb.brightness > 0) {
+      this._hue = hsb.hue;
+      this._saturation = hsb.saturation;
+    }
     this._colorUpdatedFromPicker = true;
     this._labCache = null;
   }
@@ -436,7 +443,7 @@ class BaseColor extends LitElement {
     if (!area) return;
 
     this._saturation = area.x * 100;
-    this._brightness = area.y * 100;
+    this._brightness = Math.max(1, area.y * 100);
     this._hexError = false;
     this._colorUpdatedFromPicker = true;
     this._labCache = null;

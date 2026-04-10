@@ -104,9 +104,11 @@ class ColorEdit extends LitElement {
     const rgb = hexToRGB(hex);
     if (!rgb) return;
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
-    this._hue = hsb.hue;
-    this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
+    if (hsb.brightness > 0) {
+      this._hue = hsb.hue;
+      this._saturation = hsb.saturation;
+    }
   }
 
   _emitColorChange() {
@@ -455,9 +457,11 @@ class ColorEdit extends LitElement {
       const rgb = hexToRGB(`#${hex}`);
       if (!rgb) return;
       const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
-      this._hue = hsb.hue;
-      this._saturation = hsb.saturation;
       this._brightness = hsb.brightness;
+      if (hsb.brightness > 0) {
+        this._hue = hsb.hue;
+        this._saturation = hsb.saturation;
+      }
       if (this.palette?.length) {
         const newPalette = [...this.palette];
         newPalette[this.selectedIndex] = this._hex;
