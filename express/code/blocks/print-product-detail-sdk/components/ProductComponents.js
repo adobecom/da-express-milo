@@ -764,14 +764,15 @@ export function Drawer() {
     document.addEventListener('keydown', handleKeyDown);
 
     // Move focus into the drawer
-    requestAnimationFrame(() => {
-      if (drawerRef.current) {
-        const firstFocusable = drawerRef.current.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
-        if (firstFocusable) firstFocusable.focus();
-      }
-    });
+    let active = true;
+    setTimeout(() => {
+      if (!active || !drawerRef.current) return;
+      const firstFocusable = drawerRef.current.querySelector('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (firstFocusable) firstFocusable.focus();
+    }, 0);
 
     return () => {
+      active = false;
       document.removeEventListener('keydown', handleKeyDown);
       // Return focus to the triggering element
       if (triggerRef.current?.focus) {

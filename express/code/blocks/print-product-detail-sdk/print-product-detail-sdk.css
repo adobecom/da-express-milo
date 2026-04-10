@@ -575,51 +575,46 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
   border-color: var(--color-black);
   transition: var(--standard-transition-hover-in-border-color);
 }
-@media (hover: none), (pointer: coarse) {
-  .pdpx-mini-pill-image-container::after,
-  .pdpx-mini-pill-image-container::before {
-    display: none !important;
-    content: none;
+@media (hover: hover) {
+  .pdpx-mini-pill-image-container::after {
+    content: attr(aria-label);
+    position: fixed;
+    font-size: var(--ax-body-xs-size);
+    padding: var(--spacing-325) var(--spacing-200);
+    top: var(--tooltip-top);
+    left: var(--tooltip-left);
+    background: var(--color-gray-800);
+    color: var(--color-white);
+    border-radius: 6px;
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--standard-transition-hover-out-opacity);
+    z-index: 200;
   }
-}
-.pdpx-mini-pill-image-container::after {
-  content: attr(aria-label);
-  position: fixed;
-  font-size: var(--ax-body-xs-size);
-  padding: var(--spacing-325) var(--spacing-200);
-  top: var(--tooltip-top);
-  left: var(--tooltip-left);
-  background: var(--color-gray-800);
-  color: var(--color-white);
-  border-radius: 6px;
-  white-space: nowrap;
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: var(--standard-transition-hover-out-opacity);
-  z-index: 200;
-}
-.pdpx-mini-pill-image-container::before {
-  content: '';
-  position: fixed;
-  top: var(--arrow-top);
-  left: var(--arrow-left);
-  bottom: 100%;
-  transform: translate(-50%, -4px) rotate(45deg);
-  width: 8px;
-  height: 8px;
-  background: var(--color-gray-800);
-  pointer-events: none;
-  opacity: 0;
-  visibility: hidden;
-  transition: var(--standard-transition-hover-out-opacity);
-  z-index: 199;
-}
-.pdpx-mini-pill-image-container:hover::after,
-.pdpx-mini-pill-image-container:hover::before {
-  opacity: 1;
-  visibility: visible;
-  transition: var(--standard-transition-hover-in-opacity);
+  .pdpx-mini-pill-image-container::before {
+    content: '';
+    position: fixed;
+    top: var(--arrow-top);
+    left: var(--arrow-left);
+    bottom: 100%;
+    transform: translate(-50%, -4px) rotate(45deg);
+    width: 8px;
+    height: 8px;
+    background: var(--color-gray-800);
+    pointer-events: none;
+    opacity: 0;
+    visibility: hidden;
+    transition: var(--standard-transition-hover-out-opacity);
+    z-index: 199;
+  }
+  .pdpx-mini-pill-image-container:hover::after,
+  .pdpx-mini-pill-image-container:hover::before {
+    opacity: 1;
+    visibility: visible;
+    transition: var(--standard-transition-hover-in-opacity);
+  }
 }
 .pdpx-mini-pill-text-container {
   display: none;
