@@ -766,6 +766,11 @@
     min-height: 248px;
   }
 
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="small"] color-swatch-rail[orientation="stacked"] {
+    flex: 1 1 0;
+    height: 100%;
+  }
+
   .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] {
     height: 264px;
     min-height: 264px;
