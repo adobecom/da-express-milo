@@ -339,6 +339,7 @@ describe('createToolbar', () => {
       delete window.lana;
     });
 
+    // Fix test MWPW-192264
     it.skip('on("download", cb) fires when Download button clicked', async () => {
       const toolbar = createToolbar(defaultOptions());
       document.body.appendChild(toolbar.element);
