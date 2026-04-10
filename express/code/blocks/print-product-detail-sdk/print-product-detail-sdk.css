@@ -119,6 +119,10 @@
 .pdpx-customization-inputs-container {
   padding-bottom: var(--spacing-400);
 }
+.pdpx-customization-inputs-container .picker-container.opened {
+  position: relative;
+  z-index: 19;
+}
 .pdpx-price-info-container {
   display: flex;
   flex-direction: column;
