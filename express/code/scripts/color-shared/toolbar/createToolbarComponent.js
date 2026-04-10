@@ -37,6 +37,7 @@ const TOOLBAR_DEFAULTS = {
   shareText: 'Check out this color palette on Adobe.com',
   urlCopiedToClipboard: 'URL copied to clipboard',
   shareFailed: 'Unable to share. Please try again.',
+  networkError: 'Network request failed. Check your connection or try again.',
 };
 
 let toolbarInstanceCounter = 0;

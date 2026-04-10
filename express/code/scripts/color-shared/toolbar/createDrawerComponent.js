@@ -64,6 +64,7 @@ const DRAWER_DEFAULTS = {
   keywordSuggestions: 'Blue,Green,Bold,Bright,Beige',
   yourLibrary: 'Your Library',
   tagFieldHelp: 'Press return \u21B5 to create tag',
+  tagRemoveAriaLabel: 'Remove {{tag}}',
 };
 
 const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
@@ -603,7 +604,7 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
     t.tags,
     palette?.tags ?? [],
     t.tagsPlaceholder,
-    { helpTextStr: t.tagFieldHelp },
+    { helpTextStr: t.tagFieldHelp, removeLabel: t.tagRemoveAriaLabel },
   );
   const {
     wrapper: tagsWrapper,
@@ -615,7 +616,7 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   const onSuggestionClick = (keyword) => {
     const existing = getTagValues(tagsContainerEl).map((v) => v.toLowerCase());
     if (existing.includes(keyword.toLowerCase())) return;
-    const pill = createTagPill(keyword, { onRemove: syncTagState });
+    const pill = createTagPill(keyword, { removeLabel: t.tagRemoveAriaLabel, onRemove: syncTagState });
     tagsContainerEl.appendChild(pill);
     tagsInputEl.focus();
     syncTagState();
@@ -632,7 +633,7 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   tagsInputEl.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
     e.preventDefault();
-    addTagFromInputHelper(tagsInputEl, tagsContainerEl, { onStateChange: syncTagState });
+    addTagFromInputHelper(tagsInputEl, tagsContainerEl, { onStateChange: syncTagState, removeLabel: t.tagRemoveAriaLabel });
   });
 
   const saveBtnEl = document.createElement('sp-button');

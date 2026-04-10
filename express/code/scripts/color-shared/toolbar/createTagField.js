@@ -19,7 +19,7 @@ export function createTagPill(text, { onRemove, removeLabel } = {}) {
   const closeBtn = createTag('button', {
     type: 'button',
     class: 'ax-tag-pill-close',
-    'aria-label': removeLabel || `Remove ${text}`,
+    'aria-label': removeLabel ? removeLabel.replace('{{tag}}', text) : `Remove ${text}`,
   });
   const closeIcon = createSpectrumIcon('Close');
   closeIcon.setAttribute('aria-hidden', 'true');
