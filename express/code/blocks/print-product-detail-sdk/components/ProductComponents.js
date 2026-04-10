@@ -104,7 +104,7 @@ export function ProductHeader() {
                 <span class="pdpx-ratings-number" id="pdpx-ratings-number" aria-hidden="true">${formattedRating}</span>
               </div>
               <div class="pdpx-ratings-amount-container">
-                <button class="pdpx-ratings-amount" id="pdpx-ratings-amount" type="button" aria-label="${formattedCount} reviews">${formattedCount}</button>
+                <span class="pdpx-ratings-amount" id="pdpx-ratings-amount" aria-label="${formattedCount} reviews">${formattedCount}</span>
               </div>
             </div>
           `}
@@ -561,6 +561,8 @@ function PaperTypeContent({ onClose }) {
   const { state: drawerState } = useDrawer();
   const pillContainerRef = useRef(null);
   const carouselCleanupRef = useRef(null);
+  const actionsRef = useRef(actions);
+  actionsRef.current = actions;
   const attrName = drawerState.payload?.attribute?.name;
   const attribute = (state?.attributes || []).find((a) => a.name === attrName);
   if (!attribute) return null;
@@ -595,7 +597,7 @@ function PaperTypeContent({ onClose }) {
       button.setAttribute('aria-checked', isSelected ? 'true' : 'false');
       button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
       button.addEventListener('click', () => {
-        actions.selectOption(attribute.name, option.value);
+        actionsRef.current.selectOption(attribute.name, option.value);
       });
 
       const img = document.createElement('img');
@@ -801,7 +803,7 @@ export function Drawer() {
         class="pdpx-drawer ${state.open ? '' : 'hidden'}"
         id="pdp-x-drawer"
         role="dialog"
-        aria-modal="${state.open ? 'true' : 'false'}"
+        aria-modal="true"
         aria-label="${drawerLabel}"
       >
         <div class="pdpx-drawer-head">

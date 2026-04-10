@@ -39,7 +39,7 @@
   }
 }
 
-.hidden {
+.print-product-detail-sdk .hidden {
   display: none;
   visibility: hidden;
   position: absolute;
@@ -60,7 +60,7 @@
   -moz-appearance: none;
   appearance: none;
 }
-[data-skeleton='true'] {
+.print-product-detail-sdk [data-skeleton='true'] {
   background: linear-gradient(90deg, #eee 25%, #f5f5f5 37%, #eee 63%);
   background-size: 400% 100%;
   animation: skeleton-shimmer 1.2s ease-in-out infinite;
@@ -874,26 +874,26 @@ main .section .ax-accordion-item-description p {
   background: rgb(0 0 0 / 40%);
 }
 /* SIZE CHART */
-.size-chart-product-name {
+.print-product-detail-sdk .size-chart-product-name {
   font-size: var(--body-font-size-l);
   font-weight: var(--subheading-font-weight);
   color: var(--color-gray-950);
   margin: 0;
   margin-bottom: var(--spacing-100);
 }
-.size-chart-table-container {
+.print-product-detail-sdk .size-chart-table-container {
   border-radius: 16px;
   border: 1px solid var(--color-gray-325);
   padding: var(--spacing-400);
   color: var(--color-gray-900);
   margin-bottom: var(--spacing-400);
 }
-.size-chart-table-section {
+.print-product-detail-sdk .size-chart-table-section {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-100);
 }
-.size-chart-table thead .size-chart-table-header {
+.print-product-detail-sdk .size-chart-table thead .size-chart-table-header {
   font-size: var(--body-font-size-s);
   font-weight: var(--subheading-font-weight);
   color: var(--color-gray-950);
@@ -901,13 +901,13 @@ main .section .ax-accordion-item-description p {
   padding: var(--spacing-100);
   white-space: nowrap;
 }
-.size-chart-table {
+.print-product-detail-sdk .size-chart-table {
   width: 100%;
   border-collapse: separate;
   border-spacing: 0 var(--spacing-100);
   table-layout: fixed;
 }
-.size-chart-table thead th {
+.print-product-detail-sdk .size-chart-table thead th {
   font-size: var(--body-font-size-s);
   font-weight: normal;
   color: var(--color-gray-800);
@@ -915,50 +915,50 @@ main .section .ax-accordion-item-description p {
   padding: var(--spacing-100);
   padding-top: 0px;
 }
-.size-chart-table thead th:nth-child(2),
-.size-chart-table thead th:nth-child(3) {
+.print-product-detail-sdk .size-chart-table thead th:nth-child(2),
+.print-product-detail-sdk .size-chart-table thead th:nth-child(3) {
   padding-left: var(--spacing-400);
   text-align: right;
 }
-.size-chart-table tbody tr {
+.print-product-detail-sdk .size-chart-table tbody tr {
   background: var(--color-white);
 }
-.size-chart-table tbody tr:nth-child(odd) {
+.print-product-detail-sdk .size-chart-table tbody tr:nth-child(odd) {
   background: #ebebeb;
 }
-.size-chart-table tbody tr:nth-child(odd) td:first-child {
+.print-product-detail-sdk .size-chart-table tbody tr:nth-child(odd) td:first-child {
   border-top-left-radius: 8px;
   border-bottom-left-radius: 8px;
 }
-.size-chart-table tbody tr:nth-child(odd) td:last-child {
+.print-product-detail-sdk .size-chart-table tbody tr:nth-child(odd) td:last-child {
   border-top-right-radius: 8px;
   border-bottom-right-radius: 8px;
 }
-.size-chart-table tbody td {
+.print-product-detail-sdk .size-chart-table tbody td {
   font-size: var(--body-font-size-xs);
   color: var(--color-gray-950);
   padding: var(--spacing-100) var(--spacing-200);
   word-break: break-word;
   line-height: 1.3;
 }
-.size-chart-table tbody td:nth-child(2),
-.size-chart-table tbody td:nth-child(3) {
+.print-product-detail-sdk .size-chart-table tbody td:nth-child(2),
+.print-product-detail-sdk .size-chart-table tbody td:nth-child(3) {
   padding-left: var(--spacing-400);
   text-align: right;
 }
-.size-chart-instructions {
+.print-product-detail-sdk .size-chart-instructions {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-300);
   margin-bottom: 80px;
 }
-.size-chart-instruction-section h3 {
+.print-product-detail-sdk .size-chart-instruction-section h3 {
   font-size: var(--body-font-size-m);
   font-weight: var(--subheading-font-weight);
   color: var(--color-gray-950);
   margin: 0 0 var(--spacing-100) 0;
 }
-.size-chart-instructions .size-chart-instruction-text {
+.print-product-detail-sdk .size-chart-instructions .size-chart-instruction-text {
   font-size: var(--body-font-size-s);
   font-style: normal;
   font-weight: var(--ax-body-weight);

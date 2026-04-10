@@ -393,6 +393,7 @@ function buildPillElement(option, isSelected, index, setSize, activeIndex, handl
 function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
   const containerRef = useRef(null);
   const carouselCleanupsRef = useRef([]);
+  const handlersRef = useRef({});
   const { actions } = useStore();
   const { selector, selectedOptionValue, title } = attribute;
   let { helpLink } = attribute;
@@ -422,35 +423,36 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
       label: 'Learn More',
     };
   }
-  const handleOptionClick = (option) => {
-    actions.selectOption(attribute.name, option.value);
-    debouncedTrackOptionSelect({
-      attributeName: attribute.name,
-      actionValue: option.value,
-      productType,
-    });
-  };
-
-  const handleMiniPillKeyDown = (event) => {
-    const { key, currentTarget } = event;
-    if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(key)) {
-      return;
-    }
-    const buttons = Array.from(
-      containerRef.current?.querySelectorAll('.pdpx-mini-pill-image-container') || [],
-    );
-    if (!buttons.length) {
-      return;
-    }
-    const currentIndex = buttons.indexOf(currentTarget);
-    if (currentIndex < 0) {
-      return;
-    }
-    event.preventDefault();
-    const nextIndex = getNextRadioIndex(currentIndex, key, buttons.length - 1);
-    const nextButton = buttons[nextIndex];
-    nextButton?.focus();
-    nextButton?.click();
+  handlersRef.current = {
+    handleOptionClick: (option) => {
+      actions.selectOption(attribute.name, option.value);
+      debouncedTrackOptionSelect({
+        attributeName: attribute.name,
+        actionValue: option.value,
+        productType,
+      });
+    },
+    handleMiniPillKeyDown: (event) => {
+      const { key, currentTarget } = event;
+      if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(key)) {
+        return;
+      }
+      const buttons = Array.from(
+        containerRef.current?.querySelectorAll('.pdpx-mini-pill-image-container') || [],
+      );
+      if (!buttons.length) {
+        return;
+      }
+      const currentIndex = buttons.indexOf(currentTarget);
+      if (currentIndex < 0) {
+        return;
+      }
+      event.preventDefault();
+      const nextIndex = getNextRadioIndex(currentIndex, key, buttons.length - 1);
+      const nextButton = buttons[nextIndex];
+      nextButton?.focus();
+      nextButton?.click();
+    },
   };
 
   const triggerDrawer = () => {
@@ -470,7 +472,10 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
 
     const container = containerRef.current;
     container.innerHTML = '';
-    const handlers = { handleOptionClick, handleMiniPillKeyDown };
+    const handlers = {
+      handleOptionClick: (option) => handlersRef.current.handleOptionClick(option),
+      handleMiniPillKeyDown: (event) => handlersRef.current.handleMiniPillKeyDown(event),
+    };
 
     if (isSegmented) {
       const sectionsWrapper = document.createElement('div');

@@ -15,7 +15,7 @@ import useSeo from './components/useSeo.js';
 
 function LoadingSkeleton() {
   return html`
-    <div class="pdpx-global-container" someProp="someValue" aria-busy="true" aria-label="Loading product information">
+    <div class="pdpx-global-container" aria-busy="true" aria-label="Loading product information">
       <div class="pdpx-product-images-container">
         <div class="pdpx-product-hero-image-container" data-skeleton="true" style="height: 400px;"></div>
       </div>
@@ -96,7 +96,7 @@ function PDPContent({ templateId }) {
   }
 
   return html`
-      <div ref=${containerRef} class="pdpx-global-container" someProp="someValue" data-template-id="${templateId}">
+      <div ref=${containerRef} class="pdpx-global-container" data-template-id="${templateId}">
         <${ProductImages} />
         <div class="pdpx-product-info-wrapper">
           <${ProductHeader} />
