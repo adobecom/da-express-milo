@@ -123,6 +123,15 @@
   position: relative;
   z-index: 19;
 }
+.pdpx-customization-inputs-container .picker-container.opened .picker-options-wrapper::after {
+  content: '';
+  position: absolute;
+  bottom: -16px;
+  left: 0;
+  width: 1px;
+  height: 16px;
+  pointer-events: none;
+}
 .pdpx-price-info-container {
   display: flex;
   flex-direction: column;
@@ -971,6 +980,7 @@ main .section .ax-accordion-item-description p {
   pointer-events: none;
   background: linear-gradient(to top, white 20%, rgba(255, 255, 255, 0) 100%);
 }
+
 
 /*TABLET*/
 @media (min-width: 600px) {
