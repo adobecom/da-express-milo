@@ -180,6 +180,7 @@ export function createGradientEditor(initialGradient, options = {}) {
   let barEl = null;
   let handlesWrap = null;
   let barRect = null;
+  let cachedStopSize = null;
   const eventListeners = {};
   const midHalf = 5;
   let selectedStopId = null;
@@ -454,13 +455,22 @@ export function createGradientEditor(initialGradient, options = {}) {
     updateMockHandlesOrder();
   }
 
+  function getHandleOverflow() {
+    if (!barRect) barRect = barEl.getBoundingClientRect();
+    if (cachedStopSize === null) {
+      cachedStopSize = parseFloat(getComputedStyle(barEl).getPropertyValue('--gradient-stop-size')) || 22;
+    }
+    return barRect.width > 0 ? (cachedStopSize / 2) / barRect.width : 0;
+  }
+
   function positionFromEvent(e) {
     const clientX = e.touches?.[0]?.clientX ?? e.clientX;
     if (!barRect) barRect = barEl.getBoundingClientRect();
     const { width } = barRect;
     if (!width) return 0.5;
     const x = (clientX - barRect.left) / width;
-    return Math.max(0, Math.min(1, x));
+    const overflow = getHandleOverflow();
+    return Math.max(-overflow, Math.min(1 + overflow, x));
   }
 
   function startDragStop(e, stop) {
@@ -479,7 +489,8 @@ export function createGradientEditor(initialGradient, options = {}) {
       ev.preventDefault();
       barRect = barEl.getBoundingClientRect();
       const pos = positionFromEvent(ev);
-      stop.position = Math.max(0, Math.min(1, pos));
+      const overflow = getHandleOverflow();
+      stop.position = Math.max(-overflow, Math.min(1 + overflow, pos));
       data.colorStops.sort((a, b) => a.position - b.position);
       midpoints.length = 0;
       for (let i = 0; i < data.colorStops.length - 1; i += 1) {
