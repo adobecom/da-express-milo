@@ -495,7 +495,6 @@ export class ColorSwatchRail extends LitElement {
   }
 
   _handleTrash(index) {
-    if ((this.lockedByIndex || new Set()).has(index)) return;
     const minSwatches = this._features.minSwatches ?? 0;
     if ((this.swatches?.length ?? 0) <= minSwatches) return;
     const e = new CustomEvent('color-swatch-rail-delete', { bubbles: true, composed: true, detail: { index } });
@@ -508,7 +507,12 @@ export class ColorSwatchRail extends LitElement {
         else if (index < currentTintIndex) nextTintIndex = currentTintIndex - 1;
         else if (index === currentTintIndex) nextTintIndex = Math.min(currentTintIndex, swatches.length - 1);
       }
-      this.controller.setState({ swatches, tintIndex: nextTintIndex });
+      const nextLocked = new Set();
+      for (const i of (this.lockedByIndex || [])) {
+        if (i === index) continue;
+        nextLocked.add(i > index ? i - 1 : i);
+      }
+      this.controller.setState({ swatches, tintIndex: nextTintIndex, lockedByIndex: nextLocked });
       showExpressToast({ message: 'Color removed', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
@@ -654,7 +658,6 @@ export class ColorSwatchRail extends LitElement {
   _handleTintBandSelect(index, band, event) {
     event?.stopPropagation?.();
     if (!band?.hex || !this.controller?.setState) return;
-    if ((this.lockedByIndex || new Set()).has(index)) return;
     const swatches = [...this.swatches];
     if (!swatches[index]) return;
     const nextHex = this._normalizeHex(band.hex);
@@ -681,7 +684,6 @@ export class ColorSwatchRail extends LitElement {
   }
 
   _handleTintSelect(index, anchorEl = null) {
-    if ((this.lockedByIndex || new Set()).has(index)) return;
     const hex = this.swatches[index]?.hex;
     const rect = anchorEl?.getBoundingClientRect?.();
     const anchorRect = rect
@@ -749,7 +751,6 @@ export class ColorSwatchRail extends LitElement {
   }
 
   _onNativePickerChange(index, e) {
-    if ((this.lockedByIndex || new Set()).has(index)) return;
     this._markNativePickerOpen();
     const hex = e.target?.value;
     if (hex && this.controller?.setState) {
@@ -781,7 +782,6 @@ export class ColorSwatchRail extends LitElement {
 
   _handleDragStart(index, e) {
     if (!this._features.drag) return;
-    if ((this.lockedByIndex || new Set()).has(index)) return;
     if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge, .tint-band-btn')) return;
     this._dragFromIndex = index;
     e.dataTransfer.effectAllowed = 'move';
@@ -847,7 +847,6 @@ export class ColorSwatchRail extends LitElement {
     if (!col || col.closest('.swatch-column--empty')) return;
     const idx = col.getAttribute('data-swatch-index');
     if (idx === null || idx === '') return;
-    if ((this.lockedByIndex || new Set()).has(Number(idx))) return;
     if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge, .tint-band-btn')) return;
     e.preventDefault();
     this._touchDragFromIndex = Number(idx);
@@ -1336,7 +1335,7 @@ export class ColorSwatchRail extends LitElement {
         isBase && 'base-color',
         tintMode && 'swatch-column--tint-mode',
         isTintSelected && 'swatch-column--tint-selected',
-        f.drag && !isLocked && 'swatch-column--draggable',
+        f.drag && 'swatch-column--draggable',
         superLight && 'swatch-column--super-light',
         f.rightActionsHoverOnly && 'swatch-column--right-actions-hover-only',
         opts.cornerClass || ''
