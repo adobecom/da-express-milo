@@ -67,6 +67,13 @@ export async function createExpressTooltip(config) {
 
   theme.appendChild(tooltip);
 
+  Object.assign(theme.style, {
+    position: 'absolute',
+    width: '0',
+    height: '0',
+    overflow: 'hidden',
+  });
+
   const ariaLink = disableAria ? null : ariaDescribedBy(targetEl, tooltip);
 
   const controller = new AbortController();
