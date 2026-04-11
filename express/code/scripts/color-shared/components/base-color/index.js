@@ -67,6 +67,7 @@ class BaseColor extends LitElement {
     this._originalHue = 0;
     this._originalSaturation = 0;
     this._originalBrightness = 0;
+    this._pickerInputEnabled = false;
   }
 
   get _rgb() {
@@ -123,7 +124,7 @@ class BaseColor extends LitElement {
     super.connectedCallback();
     loadButton();
     this._menuLoadPromise = loadMenu();
-    loadColorArea();
+    this._colorAreaReady = loadColorArea();
     loadColorSlider();
     loadTextfield();
     this._closeMenuOnOutsideClick = (e) => {
@@ -150,11 +151,29 @@ class BaseColor extends LitElement {
     super.disconnectedCallback();
   }
 
-  updated(changed) {
+  willUpdate(changed) {
     if (changed.has('color') || !this._hasOriginal) {
       this._syncFromColor();
     }
+  }
+
+  updated() {
     this._updateOriginalDots();
+    if (!this._colorAreaInitSynced) {
+      this._colorAreaInitSynced = true;
+      this._syncColorAreaAfterInit();
+    }
+  }
+
+  async _syncColorAreaAfterInit() {
+    await this._colorAreaReady;
+    const area = this.renderRoot.querySelector('sp-color-area');
+    if (!area) return;
+    await area.updateComplete;
+    if (this._pickerInputEnabled) return;
+    area.x = this._saturation / 100;
+    area.y = this._brightness / 100;
+    area.hue = this._hue;
   }
 
   _ensureDotStyles(shadowRoot) {
@@ -235,24 +254,27 @@ class BaseColor extends LitElement {
     if (!rgb) return;
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
 
-    if (!this._hasOriginal) {
-      this._originalBrightness = hsb.brightness;
-      if (hsb.brightness > 0) {
-        this._originalHue = hsb.hue;
-        this._originalSaturation = hsb.saturation;
-      } else {
+    if (this.color.toUpperCase() === this._hex.toUpperCase()) {
+      if (!this._hasOriginal) {
         this._originalHue = this._hue;
         this._originalSaturation = this._saturation;
+        this._originalBrightness = this._brightness;
+        this._hasOriginal = true;
       }
+      return;
+    }
+
+    this._hue = hsb.hue;
+    this._saturation = hsb.saturation;
+    this._brightness = hsb.brightness;
+
+    if (!this._hasOriginal) {
+      this._originalHue = hsb.hue;
+      this._originalSaturation = hsb.saturation;
+      this._originalBrightness = hsb.brightness;
       this._hasOriginal = true;
     }
 
-    if (this.color.toUpperCase() === this._hex.toUpperCase()) return;
-    this._brightness = hsb.brightness;
-    if (hsb.brightness > 0) {
-      this._hue = hsb.hue;
-      this._saturation = hsb.saturation;
-    }
     this._colorUpdatedFromPicker = true;
     this._labCache = null;
   }
@@ -427,6 +449,11 @@ class BaseColor extends LitElement {
 
   _onPointerDown(e) {
     this._lastPointerType = e.pointerType;
+    this._pickerInputEnabled = true;
+  }
+
+  _onPickerKeyDown() {
+    this._pickerInputEnabled = true;
   }
 
   _blurOnTouch(target) {
@@ -439,11 +466,12 @@ class BaseColor extends LitElement {
   // --- Color area (Saturation/Brightness) ---
 
   _onColorAreaInput(e) {
+    if (!this._pickerInputEnabled) return;
     const area = e.target;
     if (!area) return;
 
     this._saturation = area.x * 100;
-    this._brightness = Math.max(1, area.y * 100);
+    this._brightness = area.y * 100;
     this._hexError = false;
     this._colorUpdatedFromPicker = true;
     this._labCache = null;
@@ -459,6 +487,7 @@ class BaseColor extends LitElement {
   // --- Hue slider ---
 
   _onHueInput(e) {
+    if (!this._pickerInputEnabled) return;
     const slider = e.target;
     if (slider.value == null) return;
 
@@ -937,6 +966,7 @@ class BaseColor extends LitElement {
             .y=${this._brightness / 100}
             .hue=${this._hue}
             @pointerdown=${this._onPointerDown}
+            @keydown=${this._onPickerKeyDown}
             @input=${this._onColorAreaInput}
             @change=${this._onColorAreaChange}
           ></sp-color-area>
@@ -945,6 +975,7 @@ class BaseColor extends LitElement {
             gradient="hue"
             color=${currentColor}
             @pointerdown=${this._onPointerDown}
+            @keydown=${this._onPickerKeyDown}
             @input=${this._onHueInput}
             @change=${this._onHueInput}
           ></sp-color-slider>

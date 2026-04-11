@@ -61,7 +61,6 @@ class ColorEdit extends LitElement {
     loadSwatch();
     this._menuLoadPromise = loadMenu();
     loadTextfield();
-    this._syncFromPalette();
     this._closeMenuOnOutsideClick = (e) => {
       if (this._modeMenuOpen && !e.composedPath().includes(this.shadowRoot.querySelector('.ce-mode-wrap'))) {
         this._modeMenuOpen = false;
@@ -92,7 +91,7 @@ class ColorEdit extends LitElement {
     super.disconnectedCallback();
   }
 
-  updated(changed) {
+  willUpdate(changed) {
     if (changed.has('palette') || changed.has('selectedIndex')) {
       this._syncFromPalette();
     }
@@ -104,11 +103,9 @@ class ColorEdit extends LitElement {
     const rgb = hexToRGB(hex);
     if (!rgb) return;
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
+    this._hue = hsb.hue;
+    this._saturation = hsb.saturation;
     this._brightness = hsb.brightness;
-    if (hsb.brightness > 0) {
-      this._hue = hsb.hue;
-      this._saturation = hsb.saturation;
-    }
   }
 
   _emitColorChange() {
@@ -457,11 +454,9 @@ class ColorEdit extends LitElement {
       const rgb = hexToRGB(`#${hex}`);
       if (!rgb) return;
       const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
+      this._hue = hsb.hue;
+      this._saturation = hsb.saturation;
       this._brightness = hsb.brightness;
-      if (hsb.brightness > 0) {
-        this._hue = hsb.hue;
-        this._saturation = hsb.saturation;
-      }
       if (this.palette?.length) {
         const newPalette = [...this.palette];
         newPalette[this.selectedIndex] = this._hex;
