@@ -89,7 +89,7 @@ body:has(.color-extract.has-image) .color-headline.extract {
 
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-200);
+  gap: var(--spacing-100);
 }
 
 .color-headline.tools:not([data-adopted="true"]) {
