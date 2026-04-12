@@ -401,8 +401,13 @@ export default async function decorate(block) {
 
           const urlQuery = new URLSearchParams(window.location.search).get('q');
           if (urlQuery) {
-            allData = await activeDataService.search(urlQuery);
-            isSearchActive = true;
+            const searchResults = await activeDataService.search(urlQuery);
+            if (searchResults.length > 0) {
+              allData = searchResults;
+              isSearchActive = true;
+            } else {
+              allData = await activeDataService.fetchData();
+            }
           } else {
             allData = await activeDataService.fetchData();
           }
@@ -486,9 +491,23 @@ export default async function decorate(block) {
 
           floatingSearchHandler = async (e) => {
             const { query } = e.detail;
-            isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
-            allData = await activeDataService.search(query);
+            if (!query) {
+              isSearchActive = false;
+              allData = await activeDataService.fetchData();
+              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+            } else {
+              const searchResults = await activeDataService.search(query);
+              if (searchResults.length === 0) {
+                isSearchActive = false;
+                allData = await activeDataService.fetchData();
+                document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+              } else {
+                isSearchActive = true;
+                allData = searchResults;
+                document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+              }
+            }
             visibleCount = alignToFullRow(
               Math.min(config.initialLoad, allData.length),
               allData.length,
@@ -496,15 +515,10 @@ export default async function decorate(block) {
             await activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
-            if (query && allData.length === 0) {
-              document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
-            } else {
-              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
-            }
           };
           document.addEventListener('floating-search:submit', floatingSearchHandler);
 
-          if (urlQuery && allData.length === 0) {
+          if (urlQuery && !isSearchActive) {
             document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query: urlQuery }, bubbles: true }));
           } else if (urlQuery) {
             document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
@@ -535,8 +549,13 @@ export default async function decorate(block) {
 
           const urlQuery = new URLSearchParams(window.location.search).get('q');
           if (urlQuery) {
-            allData = await activeDataService.search(urlQuery);
-            isSearchActive = true;
+            const searchResults = await activeDataService.search(urlQuery);
+            if (searchResults.length > 0) {
+              allData = searchResults;
+              isSearchActive = true;
+            } else {
+              allData = await activeDataService.fetchData();
+            }
           } else {
             allData = await activeDataService.fetchData();
           }
@@ -632,9 +651,23 @@ export default async function decorate(block) {
 
           floatingSearchHandler = async (e) => {
             const { query } = e.detail;
-            isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
-            allData = await activeDataService.search(query);
+            if (!query) {
+              isSearchActive = false;
+              allData = await activeDataService.fetchData();
+              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+            } else {
+              const searchResults = await activeDataService.search(query);
+              if (searchResults.length === 0) {
+                isSearchActive = false;
+                allData = await activeDataService.fetchData();
+                document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+              } else {
+                isSearchActive = true;
+                allData = searchResults;
+                document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+              }
+            }
             visibleCount = alignToFullRow(
               Math.min(config.initialLoad, allData.length),
               allData.length,
@@ -642,15 +675,10 @@ export default async function decorate(block) {
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
-            if (query && allData.length === 0) {
-              document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
-            } else {
-              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
-            }
           };
           document.addEventListener('floating-search:submit', floatingSearchHandler);
 
-          if (urlQuery && allData.length === 0) {
+          if (urlQuery && !isSearchActive) {
             document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query: urlQuery }, bubbles: true }));
           } else if (urlQuery) {
             document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
@@ -679,8 +707,13 @@ export default async function decorate(block) {
       let isSearchActive = false;
       let allData;
       if (urlQuery) {
-        allData = await dataService.search(urlQuery);
-        isSearchActive = true;
+        const searchResults = await dataService.search(urlQuery);
+        if (searchResults.length > 0) {
+          allData = searchResults;
+          isSearchActive = true;
+        } else {
+          allData = await dataService.fetchData();
+        }
       } else {
         allData = await dataService.fetchData();
       }
@@ -783,9 +816,23 @@ export default async function decorate(block) {
 
       const floatingHandler = async (e) => {
         const { query } = e.detail;
-        isSearchActive = !!query;
         block.classList.add(CSS_CLASSES.LOADING);
-        allData = await dataService.search(query);
+        if (!query) {
+          isSearchActive = false;
+          allData = await dataService.fetchData();
+          document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+        } else {
+          const searchResults = await dataService.search(query);
+          if (searchResults.length === 0) {
+            isSearchActive = false;
+            allData = await dataService.fetchData();
+            document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+          } else {
+            isSearchActive = true;
+            allData = searchResults;
+            document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+          }
+        }
         visibleCount = alignToFullRow(
           Math.min(config.initialLoad, allData.length),
           allData.length,
@@ -793,15 +840,10 @@ export default async function decorate(block) {
         renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
         block.classList.remove(CSS_CLASSES.LOADING);
-        if (query && allData.length === 0) {
-          document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
-        } else {
-          document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
-        }
       };
       document.addEventListener('floating-search:submit', floatingHandler);
 
-      if (urlQuery && allData.length === 0) {
+      if (urlQuery && !isSearchActive) {
         document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query: urlQuery }, bubbles: true }));
       } else if (urlQuery) {
         document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
