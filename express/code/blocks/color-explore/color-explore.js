@@ -399,7 +399,13 @@ export default async function decorate(block) {
             (filters) => gradientFilterHandler?.(filters),
           );
 
-          allData = await activeDataService.fetchData();
+          const urlQuery = new URLSearchParams(window.location.search).get('q');
+          if (urlQuery) {
+            allData = await activeDataService.search(urlQuery);
+            isSearchActive = true;
+          } else {
+            allData = await activeDataService.fetchData();
+          }
           visibleCount = alignToFullRow(
             Math.min(config.initialLoad, allData.length),
             allData.length,
@@ -498,9 +504,10 @@ export default async function decorate(block) {
           };
           document.addEventListener('floating-search:submit', floatingSearchHandler);
 
-          const urlQuery = new URLSearchParams(window.location.search).get('q');
-          if (urlQuery) {
-            await floatingSearchHandler({ detail: { query: urlQuery } });
+          if (urlQuery && allData.length === 0) {
+            document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query: urlQuery }, bubbles: true }));
+          } else if (urlQuery) {
+            document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
           }
 
           publishInstances();
@@ -526,7 +533,13 @@ export default async function decorate(block) {
             (filters) => stripsFilterHandler?.(filters),
           );
 
-          allData = await activeDataService.fetchData();
+          const urlQuery = new URLSearchParams(window.location.search).get('q');
+          if (urlQuery) {
+            allData = await activeDataService.search(urlQuery);
+            isSearchActive = true;
+          } else {
+            allData = await activeDataService.fetchData();
+          }
           const alignedCount = Math.min(config.initialLoad, allData.length);
           visibleCount = alignToFullRow(alignedCount, allData.length);
 
@@ -637,9 +650,10 @@ export default async function decorate(block) {
           };
           document.addEventListener('floating-search:submit', floatingSearchHandler);
 
-          const urlQuery = new URLSearchParams(window.location.search).get('q');
-          if (urlQuery) {
-            await floatingSearchHandler({ detail: { query: urlQuery } });
+          if (urlQuery && allData.length === 0) {
+            document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query: urlQuery }, bubbles: true }));
+          } else if (urlQuery) {
+            document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
           }
 
           publishInstances();
@@ -661,10 +675,17 @@ export default async function decorate(block) {
       });
 
       (async () => {
-      const allData = await dataService.fetchData();
+      const urlQuery = new URLSearchParams(window.location.search).get('q');
+      let isSearchActive = false;
+      let allData;
+      if (urlQuery) {
+        allData = await dataService.search(urlQuery);
+        isSearchActive = true;
+      } else {
+        allData = await dataService.fetchData();
+      }
       const alignedCount = Math.min(config.initialLoad, allData.length);
       let visibleCount = alignToFullRow(alignedCount, allData.length);
-      let isSearchActive = false;
 
       let renderer;
       if (isSwatchesMode(config)) {
@@ -780,9 +801,10 @@ export default async function decorate(block) {
       };
       document.addEventListener('floating-search:submit', floatingHandler);
 
-      const urlQuery = new URLSearchParams(window.location.search).get('q');
-      if (urlQuery) {
-        await floatingHandler({ detail: { query: urlQuery } });
+      if (urlQuery && allData.length === 0) {
+        document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query: urlQuery }, bubbles: true }));
+      } else if (urlQuery) {
+        document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
       }
 
       block.addEventListener('block-unload', () => {
