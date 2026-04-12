@@ -18,7 +18,7 @@ const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
 const DEFAULTS = {
   variant: VARIANTS.STRIPS,
   initialLoad: 24,
-  loadMoreIncrement: 10,
+  loadMoreIncrement: 12,
   maxItems: 100,
   enableFilters: true,
   enableSearch: true,
