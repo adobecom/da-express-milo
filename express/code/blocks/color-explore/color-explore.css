@@ -23,6 +23,18 @@
   max-width: var(--block-wd-content-max-width);
 }
 
+.color-explore sp-theme {
+  display: block;
+}
+
+.color-explore > .ax-color-loading {
+  width: 100%;
+  max-width: var(--block-wd-content-max-width);
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 0 var(--spacing-300) var(--spacing-600);
+}
+
 .color-explore-container {
   width: 100%;
   max-width: var(--block-wd-content-max-width);

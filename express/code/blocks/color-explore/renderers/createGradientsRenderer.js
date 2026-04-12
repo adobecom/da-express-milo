@@ -4,6 +4,7 @@ import { createGradientStripElements } from '../../../scripts/color-shared/compo
 import { createLoadMoreComponent } from '../../../scripts/color-shared/components/createLoadMoreComponent.js';
 import { loadIconsRail } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createExpressTooltip } from '../../../scripts/color-shared/spectrum/components/express-tooltip.js';
+import { createLoadingScreenComponent } from '../../../scripts/color-shared/components/createLoadingScreenComponent.js';
 
 const PAGINATION = {
   INITIAL_COUNT: 24,
@@ -708,6 +709,13 @@ export function createGradientsRenderer(options) {
     if (isInitialRender) {
       container.addEventListener('color-explore:filter-interaction', onFilterInteraction);
       container.replaceChildren();
+
+      gradientsSection = createTag('section', { class: 'explore-main-section' });
+      const loadingScreen = createLoadingScreenComponent({ variant: 'strips', cardCount: 6 });
+      gradientsSection.appendChild(loadingScreen.element);
+      loadingScreen.show();
+      container.appendChild(gradientsSection);
+
       await loadIconsRail();
 
       const header = createTag('div', { class: 'explore-header' });
@@ -715,9 +723,9 @@ export function createGradientsRenderer(options) {
       const countLabel = formatCount(allGradients.length);
       title.textContent = `${countLabel} color gradients`;
       header.appendChild(title);
-      container.appendChild(header);
+      container.insertBefore(header, gradientsSection);
 
-      gradientsSection = createTag('section', { class: 'explore-main-section' });
+      gradientsSection.replaceChildren();
 
       const columns = getGridColumns();
       const rows = Math.ceil(allGradients.length / columns);

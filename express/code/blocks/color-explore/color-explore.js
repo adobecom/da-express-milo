@@ -9,6 +9,7 @@ import { createGradientModalContent, ensureGradientModalContentStyles } from '..
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { buildPaletteEditUrl } from '../../scripts/color-shared/utils/utilities.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
+import { createLoadingScreenComponent } from '../../scripts/color-shared/components/createLoadingScreenComponent.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 
@@ -213,6 +214,7 @@ async function createBlockFilterControl(container, variant, onFilterChange) {
   }
 
   return {
+    element: filters.element,
     destroy() {
       filters.reset?.();
       filters.element?.remove?.();
@@ -229,7 +231,7 @@ export default async function decorate(block) {
     const config = parseBlockConfig(rows, DEFAULTS);
     if (variantFromClass) config.variant = variantFromClass;
 
-    await loadStripSharedStyles();
+    loadStripSharedStyles();
 
     block.dataset.blockStatus = 'loading';
     block.replaceChildren();
@@ -249,6 +251,23 @@ export default async function decorate(block) {
     const container = document.createElement('div');
     container.className = CSS_CLASSES.CONTAINER;
     themeHost.appendChild(container);
+
+    const isGradients = config.variant === VARIANTS.GRADIENTS;
+    function showLoadingSkeleton() {
+      const header = document.createElement('div');
+      header.className = 'explore-header';
+      const titleEl = document.createElement(isGradients ? 'h2' : 'span');
+      titleEl.className = isGradients ? 'gradients-title' : 'results-count';
+      titleEl.textContent = '\u00a0';
+      header.appendChild(titleEl);
+      const section = document.createElement('section');
+      section.className = 'explore-main-section';
+      const loadingScreen = createLoadingScreenComponent({ variant: 'gradients', cardCount: 6 });
+      section.appendChild(loadingScreen.element);
+      loadingScreen.show();
+      container.replaceChildren(header, section);
+    }
+    showLoadingSkeleton();
 
     if (config.variant === VARIANTS.GRADIENTS || config.variant === VARIANTS.STRIPS) {
       const gradientsDataService = createSharedColorDataService({
@@ -373,12 +392,14 @@ export default async function decorate(block) {
           setModeClasses(VARIANTS.GRADIENTS);
           block.dispatchEvent(new CustomEvent('color-explore:mode-change', { detail: { mode: VARIANTS.GRADIENTS }, bubbles: true }));
 
-          block.classList.add(CSS_CLASSES.LOADING);
-          try {
-            allData = await activeDataService.fetchData();
-          } finally {
-            block.classList.remove(CSS_CLASSES.LOADING);
-          }
+          let gradientFilterHandler = null;
+          filtersControl = await createBlockFilterControl(
+            container,
+            VARIANTS.GRADIENTS,
+            (filters) => gradientFilterHandler?.(filters),
+          );
+
+          allData = await activeDataService.fetchData();
           visibleCount = alignToFullRow(
             Math.min(config.initialLoad, allData.length),
             allData.length,
@@ -411,28 +432,30 @@ export default async function decorate(block) {
 
           await activeRenderer.render();
 
+          const gradientHeader = container.querySelector('.explore-header, .gradients-header');
+          if (gradientHeader && filtersControl?.element) {
+            gradientHeader.querySelectorAll(':scope > .filters-container').forEach((n) => n.remove());
+            gradientHeader.appendChild(filtersControl.element);
+          }
+
           // Explore contract: filters are always rendered for gradients/palettes.
-          filtersControl = await createBlockFilterControl(
-            container,
-            VARIANTS.GRADIENTS,
-            async (filters) => {
-              filterInteractionSuppressUntil = Date.now() + 350;
-              isSearchActive = false;
-              if (filters?.contentType === 'color-palettes') {
-                await mountStripsMode();
-                return;
-              }
-              block.classList.add(CSS_CLASSES.LOADING);
-              allData = await activeDataService.filter(filters);
-              visibleCount = alignToFullRow(
-                Math.min(config.initialLoad, allData.length),
-                allData.length,
-              );
-              await activeRenderer.update(allData.slice(0, visibleCount));
-              updateLoadMoreState();
-              block.classList.remove(CSS_CLASSES.LOADING);
-            },
-          );
+          gradientFilterHandler = async (filters) => {
+            filterInteractionSuppressUntil = Date.now() + 350;
+            isSearchActive = false;
+            if (filters?.contentType === 'color-palettes') {
+              await mountStripsMode();
+              return;
+            }
+            block.classList.add(CSS_CLASSES.LOADING);
+            allData = activeDataService.filter(filters);
+            visibleCount = alignToFullRow(
+              Math.min(config.initialLoad, allData.length),
+              allData.length,
+            );
+            await activeRenderer.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+            block.classList.remove(CSS_CLASSES.LOADING);
+          };
 
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
             const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
@@ -496,12 +519,14 @@ export default async function decorate(block) {
           setModeClasses(VARIANTS.STRIPS);
           block.dispatchEvent(new CustomEvent('color-explore:mode-change', { detail: { mode: VARIANTS.STRIPS }, bubbles: true }));
 
-          block.classList.add(CSS_CLASSES.LOADING);
-          try {
-            allData = await activeDataService.fetchData();
-          } finally {
-            block.classList.remove(CSS_CLASSES.LOADING);
-          }
+          let stripsFilterHandler = null;
+          filtersControl = await createBlockFilterControl(
+            container,
+            VARIANTS.STRIPS,
+            (filters) => stripsFilterHandler?.(filters),
+          );
+
+          allData = await activeDataService.fetchData();
           const alignedCount = Math.min(config.initialLoad, allData.length);
           visibleCount = alignToFullRow(alignedCount, allData.length);
 
@@ -516,27 +541,29 @@ export default async function decorate(block) {
           });
           await activeRenderer.render?.(container);
 
-          filtersControl = await createBlockFilterControl(
-            container,
-            VARIANTS.STRIPS,
-            async (filters) => {
-              filterInteractionSuppressUntil = Date.now() + 350;
-              isSearchActive = false;
-              if (filters?.contentType === 'color-gradients') {
-                await mountGradientsMode();
-                return;
-              }
-              block.classList.add(CSS_CLASSES.LOADING);
-              allData = await activeDataService.filter(filters);
-              visibleCount = alignToFullRow(
-                Math.min(config.initialLoad, allData.length),
-                allData.length,
-              );
-              activeRenderer.update(allData.slice(0, visibleCount));
-              updateLoadMoreState();
-              block.classList.remove(CSS_CLASSES.LOADING);
-            },
-          );
+          const stripsHeader = container.querySelector('.explore-header, .gradients-header');
+          if (stripsHeader && filtersControl?.element) {
+            stripsHeader.querySelectorAll(':scope > .filters-container').forEach((n) => n.remove());
+            stripsHeader.appendChild(filtersControl.element);
+          }
+
+          stripsFilterHandler = async (filters) => {
+            filterInteractionSuppressUntil = Date.now() + 350;
+            isSearchActive = false;
+            if (filters?.contentType === 'color-gradients') {
+              await mountGradientsMode();
+              return;
+            }
+            block.classList.add(CSS_CLASSES.LOADING);
+            allData = activeDataService.filter(filters);
+            visibleCount = alignToFullRow(
+              Math.min(config.initialLoad, allData.length),
+              allData.length,
+            );
+            activeRenderer.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+            block.classList.remove(CSS_CLASSES.LOADING);
+          };
 
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
             const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
@@ -621,11 +648,10 @@ export default async function decorate(block) {
         }
       };
 
-      if (activeMode === VARIANTS.GRADIENTS) {
-        await mountGradientsMode();
-      } else {
-        await mountStripsMode();
-      }
+      const mountFn = activeMode === VARIANTS.GRADIENTS ? mountGradientsMode : mountStripsMode;
+      mountFn().catch((err) => {
+        window.lana?.log(`[ColorExplore] Mount error: ${err?.message}`, { tags: 'color-explore', severity: 'error' });
+      });
     } else {
       const dataService = createSharedColorDataService({
         variant: config.variant,
@@ -634,12 +660,11 @@ export default async function decorate(block) {
         apiEndpoint: config.apiEndpoint,
       });
 
-      block.classList.add(CSS_CLASSES.LOADING);
-      let allData = await dataService.fetchData();
+      (async () => {
+      const allData = await dataService.fetchData();
       const alignedCount = Math.min(config.initialLoad, allData.length);
       let visibleCount = alignToFullRow(alignedCount, allData.length);
       let isSearchActive = false;
-      block.classList.remove(CSS_CLASSES.LOADING);
 
       let renderer;
       if (isSwatchesMode(config)) {
@@ -651,7 +676,7 @@ export default async function decorate(block) {
           config,
         });
       }
-      await renderer.render?.(container);
+      if (renderer.render) renderer.render(container);
       const loadMoreControl = !isSwatchesMode(config)
         ? await createBlockLoadMoreControl(container, async () => {
           const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
@@ -768,9 +793,11 @@ export default async function decorate(block) {
       block.rendererInstance = renderer;
       block.modalManagerInstance = modalManager;
       block.dataServiceInstance = dataService;
+      })().catch((err) => {
+        window.lana?.log(`[ColorExplore] Mount error: ${err?.message}`, { tags: 'color-explore', severity: 'error' });
+      });
     }
 
-    block.dataset.blockStatus = 'loaded';
     trackColorBlockLoad('color-explore');
   } catch (error) {
     window.lana?.log(`[ColorExplore] ❌ Error: ${error}`, { tags: 'color-explore', severity: 'error' });
