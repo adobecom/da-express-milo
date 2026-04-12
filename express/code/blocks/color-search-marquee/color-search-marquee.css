@@ -54,7 +54,6 @@
   max-width: none;
   min-width: 0;
   overflow: hidden;
-  padding-block: 6px;
   margin-block: -6px;
   margin-inline: calc(-1 * var(--spacing-300));
 }
@@ -68,6 +67,7 @@
   -ms-overflow-style: none;
   width: 100%;
   box-sizing: border-box;
+  padding-block: 6px;
 }
 
 .color-search-marquee .tags-container::-webkit-scrollbar {

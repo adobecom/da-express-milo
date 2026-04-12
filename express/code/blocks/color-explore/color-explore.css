@@ -298,6 +298,8 @@
   outline: var(--border-width-2) solid var(--color-blue-800);
   outline-offset: var(--border-width-2);
   border-radius: var(--Corner-radius-corner-radius-100);
+  position: relative;
+  z-index: 2;
 }
 
 .color-explore .filters-desktop .filter-dropdown sp-theme {
@@ -349,6 +351,8 @@
   outline: var(--border-width-2) solid var(--color-blue-800);
   outline-offset: var(--border-width-2);
   border-radius: 8px;
+  position: relative;
+  z-index: 2;
 }
 
 .color-explore .filters-mobile__panel {
