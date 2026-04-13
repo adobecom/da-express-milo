@@ -11,10 +11,6 @@ const ignoreError = () => {};
 const ANALYTICS_TEXT_LIMIT = 20;
 const FILTER_CLICK_SUPPRESS_MS = 250;
 
-function formatCount(n) {
-  return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
-}
-
 function sanitizeAnalyticsText(value) {
   const raw = String(value ?? '')
     .replace(/[^a-zA-Z0-9\s]/g, '')
@@ -388,12 +384,9 @@ export function createStripsRenderer(options) {
     await loadIconsRail();
 
     if (config?.renderGridVariant === 'summary') {
-      const data = getData();
-      const count = Array.isArray(data) ? data.length : 0;
-      const countLabel = formatCount(count);
       const headerEl = createTag('div', { class: 'explore-header' });
       resultsCountEl = createTag('span', { class: 'results-count' });
-      resultsCountEl.textContent = `${countLabel} color palettes`;
+      resultsCountEl.textContent = 'Color palettes';
       headerEl.appendChild(resultsCountEl);
 
       const sectionEl = createTag('section', { class: 'explore-main-section' });
@@ -408,12 +401,9 @@ export function createStripsRenderer(options) {
     const searchUI = createSearchUI();
     gridElement = createPalettesGridDefault();
 
-    const data = getData();
-    const count = Array.isArray(data) ? data.length : 0;
-    const countLabel = formatCount(count);
     const resultsHeader = createTag('div', { class: 'results-header' });
     resultsCountEl = createTag('span', { class: 'results-count' });
-    resultsCountEl.textContent = `${countLabel} color palettes`;
+    resultsCountEl.textContent = 'Color palettes';
     resultsHeader.appendChild(resultsCountEl);
 
     container.append(searchUI, resultsHeader, gridElement);
@@ -444,9 +434,7 @@ export function createStripsRenderer(options) {
     gridNavReinit?.();
 
     if (resultsCountEl) {
-      const count = newData.length;
-      const countLabel = formatCount(count);
-      resultsCountEl.textContent = `${countLabel} color palettes`;
+      resultsCountEl.textContent = 'Color palettes';
     }
     applyCardActionAnalytics(gridElement);
     scheduleGridTooltips(gridElement);

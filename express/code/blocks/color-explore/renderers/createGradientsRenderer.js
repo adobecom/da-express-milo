@@ -18,10 +18,6 @@ function sanitizeAnalyticsText(value, max = 20) {
   return raw.substring(0, max);
 }
 
-function formatCount(n) {
-  return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
-}
-
 export function createGradientsRenderer(options) {
   const { container, data = [], config = {} } = options;
 
@@ -65,7 +61,7 @@ export function createGradientsRenderer(options) {
 
   function getAnalyticsHeaderText() {
     const titleText = container?.querySelector('.gradients-title')?.textContent?.trim();
-    const fallback = `${formatCount(allGradients.length)} color gradients`;
+    const fallback = 'Color gradients';
     return sanitizeAnalyticsText(titleText || fallback);
   }
 
@@ -654,8 +650,7 @@ export function createGradientsRenderer(options) {
   function updateTitle() {
     const title = container?.querySelector('.gradients-title');
     if (title) {
-      const countLabel = formatCount(allGradients.length);
-      title.textContent = `${countLabel} color gradients`;
+      title.textContent = 'Color gradients';
     }
   }
 
@@ -720,8 +715,7 @@ export function createGradientsRenderer(options) {
 
       const header = createTag('div', { class: 'explore-header' });
       const title = createTag('h2', { class: 'gradients-title' });
-      const countLabel = formatCount(allGradients.length);
-      title.textContent = `${countLabel} color gradients`;
+      title.textContent = 'Color gradients';
       header.appendChild(title);
       container.insertBefore(header, gradientsSection);
 
