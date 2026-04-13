@@ -14,6 +14,11 @@ import '../color-channel-slider/index.js';
 
 const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
 
+/** Snap hue slider to original when within this many degrees (wraps at 0/360). */
+const ORIGINAL_COLOR_HUE_SNAP_DEG = 10;
+/** Snap color area to original S/B when both axes are within this many percent points. */
+const ORIGINAL_COLOR_AREA_SNAP_PCT = 4;
+
 class BaseColor extends LitElement {
   static get styles() {
     return [style];
@@ -469,13 +474,32 @@ class BaseColor extends LitElement {
 
   // --- Color area (Saturation/Brightness) ---
 
+  _snapColorAreaToOriginal(area, saturation, brightness) {
+    if (!this._hasOriginal) return { saturation, brightness };
+    const ds = Math.abs(saturation - this._originalSaturation);
+    const db = Math.abs(brightness - this._originalBrightness);
+    if (ds > ORIGINAL_COLOR_AREA_SNAP_PCT || db > ORIGINAL_COLOR_AREA_SNAP_PCT) {
+      return { saturation, brightness };
+    }
+    const s = this._originalSaturation;
+    const b = this._originalBrightness;
+    if (area) {
+      area.x = s / 100;
+      area.y = b / 100;
+    }
+    return { saturation: s, brightness: b };
+  }
+
   _onColorAreaInput(e) {
     if (!this._pickerInputEnabled) return;
     const area = e.target;
     if (!area) return;
 
-    this._saturation = area.x * 100;
-    this._brightness = area.y * 100;
+    const rawS = area.x * 100;
+    const rawB = area.y * 100;
+    const snapped = this._snapColorAreaToOriginal(area, rawS, rawB);
+    this._saturation = snapped.saturation;
+    this._brightness = snapped.brightness;
     this._hexError = false;
     this._colorUpdatedFromPicker = true;
     this._labCache = null;
@@ -499,7 +523,10 @@ class BaseColor extends LitElement {
     if (this._hasOriginal) {
       const diff = Math.abs(hue - this._originalHue);
       const wrappedDiff = Math.min(diff, 360 - diff);
-      if (wrappedDiff <= 5) hue = this._originalHue;
+      if (wrappedDiff <= ORIGINAL_COLOR_HUE_SNAP_DEG) {
+        hue = this._originalHue;
+        slider.value = hue;
+      }
     }
 
     this._hue = hue;
