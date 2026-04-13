@@ -24,8 +24,8 @@ export function decorateAnalyticsAttributes(element, { linkLabel, linkIndex, hea
   );
   const safeHeader = sanitizeAnalyticsText(headerText || '');
   const idx = linkIndex ?? 1;
-  const dataLl = `${safeLabel}-${idx}--${safeHeader}`;
-  element.setAttribute('data-ll', dataLl);
+  const daaLl = `${safeLabel}-${idx}--${safeHeader}`;
+  element.setAttribute('daa-ll', daaLl);
 }
 
 const SWIPE_CLOSE_THRESHOLD_PX = 120;
