@@ -484,7 +484,7 @@ export default async function decorate(block) {
               return;
             }
             block.classList.add(CSS_CLASSES.LOADING);
-            allData = activeDataService.filter(filters);
+            allData = await activeDataService.filter(filters);
             visibleCount = alignToFullRow(
               Math.min(config.initialLoad, allData.length),
               allData.length,
@@ -616,7 +616,7 @@ export default async function decorate(block) {
               return;
             }
             block.classList.add(CSS_CLASSES.LOADING);
-            allData = activeDataService.filter(filters);
+            allData = await activeDataService.filter(filters);
             visibleCount = alignToFullRow(
               Math.min(config.initialLoad, allData.length),
               allData.length,
