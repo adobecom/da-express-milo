@@ -476,6 +476,21 @@ async function buildSearchDropdown(searchBarWrapper) {
   suggestionsTitle.textContent = searchSuggestionsTitle !== 'search suggestions title' ? searchSuggestionsTitle : '';
   suggestionsContainer.append(suggestionsTitle, suggestionsList);
   dropdownContainer.append(trendsContainer, suggestionsContainer);
+
+  const loadFreePlan = () => import('../../scripts/widgets/free-plan.js')
+    .then(({ buildFreePlanWidget }) => buildFreePlanWidget({ typeKey: 'branded', checkmarks: true }))
+    .then((freePlanTags) => {
+      const freePlanContainer = createTag('div', { class: 'free-plans-container' });
+      freePlanContainer.append(freePlanTags);
+      dropdownContainer.append(freePlanContainer);
+    })
+    .catch(() => {});
+  if ('requestIdleCallback' in window) {
+    requestIdleCallback(loadFreePlan);
+  } else {
+    setTimeout(loadFreePlan, 0);
+  }
+
   searchBarWrapper.append(dropdownContainer);
 }
 

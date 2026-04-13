@@ -32,17 +32,13 @@
 }
 
 .template-x-carousel-toolbar .centered-heading {
-  text-align: center;
   margin-bottom: var(--spacing-400);
-
-  color: var(--Alias-content-typography-heading, var(--Alias-content-typography-heading, #131313));
+  color: var(--Alias-content-typography-heading, #131313);
   text-align: center;
-
-  /* Heading (Express)/M */ 
   font-size: var(--Font-size-500, 22px);
   font-style: normal;
   font-weight: 900;
-  line-height: var(--Line-height-500, 26px); /* 118.182% */
+  line-height: var(--Line-height-500, 26px);
   letter-spacing: var(--Letter-spacing, 0);
 }
 
@@ -53,25 +49,17 @@
   flex-direction: column;
   gap: var(--spacing-400);
   margin-bottom: var(--spacing-800);
-
-  
 }
 
 .template-x-carousel-toolbar.search-bar .centered-heading {
   margin-bottom: 0;
   padding-bottom: 0;
-  color: var(--color-gray-950);
-  font-weight: 700;
-  font-size: var(--body-font-size-l);
+  color: var(--Alias-content-typography-heading, #131313);
   text-align: center;
-  color: var(--Alias-content-typography-heading, var(--Alias-content-typography-heading, #131313));
-  text-align: center;
-
-  /* Heading (Express)/M */ 
   font-size: var(--Font-size-500, 22px);
   font-style: normal;
   font-weight: 900;
-  line-height: var(--Line-height-500, 26px); /* 118.182% */
+  line-height: var(--Line-height-500, 26px);
   letter-spacing: var(--Letter-spacing, 0);
 }
 
@@ -228,6 +216,21 @@
 
 .template-x-carousel-toolbar .search-dropdown-container .trends-container .trends-wrapper li a {
   color: var(--color-black);
+}
+
+.template-x-carousel-toolbar .search-dropdown-container .free-plans-container .free-plan-widget {
+  width: 100%;
+  border-radius: 0 0 12px 12px;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin: 0;
+  justify-content: center;
+}
+
+.template-x-carousel-toolbar .search-dropdown-container .free-plans-container .free-plan-widget .plan-widget-tag {
+  font-size: var(--body-font-size-s);
 }
 
 .templates-container.search-bar-gallery .template.gallery--item .still-wrapper .image-wrapper .free-tag {
@@ -654,7 +657,7 @@
   }
 
   /* Controls label: left-pinned beside right-controls on desktop */
-  .template-x-carousel-toolbar p.controls-label {
+  .template-x-carousel-toolbar .toolbar p.controls-label {
     margin: auto;
     width: auto;
     text-align: left;
