@@ -577,7 +577,7 @@ export function createStripContainerRenderer(options) {
   }
 
   function positionPopover(popover, anchorRect, container) {
-    const gap = 8;
+    const gap = 4;
     const popRect = popover.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
 
