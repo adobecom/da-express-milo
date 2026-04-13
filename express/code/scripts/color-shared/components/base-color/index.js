@@ -166,7 +166,11 @@ class BaseColor extends LitElement {
   }
 
   async _syncColorAreaAfterInit() {
-    await this._colorAreaReady;
+    try {
+      await this._colorAreaReady;
+    } catch {
+      return;
+    }
     const area = this.renderRoot.querySelector('sp-color-area');
     if (!area) return;
     await area.updateComplete;
