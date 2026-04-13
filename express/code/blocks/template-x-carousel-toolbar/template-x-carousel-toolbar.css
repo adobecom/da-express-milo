@@ -39,38 +39,173 @@
 .template-x-carousel-toolbar.search-bar {
   padding-bottom: 0;
   max-width: unset;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-rows: auto auto;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-400);
   margin-bottom: var(--spacing-800);
 }
 
 .template-x-carousel-toolbar.search-bar .centered-heading {
-  grid-column: 1 / -1;
-  grid-row: 1;
   margin-bottom: 0;
   padding-bottom: 0;
   color: var(--color-gray-950);
   font-weight: 700;
   font-size: var(--body-font-size-l);
-  text-align: left;
-  width: 150px;
+  text-align: center;
 }
 
+/* search-bar variant: toolbar stacks vertically */
 .template-x-carousel-toolbar.search-bar .toolbar.search-bar {
-  grid-column: 2;
-  grid-row: 1;
-  justify-self: end;
   z-index: 1;
   padding-bottom: 0;
-  gap: 0;
+  gap: var(--toolbar-gap);
+  flex-direction: column;
 }
 
-.template-x-carousel-toolbar.search-bar .templates-container {
-  grid-column: 1 / -1;
-  grid-row: 2;
+/* controls row: label on left, right-controls on right */
+.template-x-carousel-toolbar.search-bar .controls-container {
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+/* right-controls: filter + nav stacked vertically */
+.template-x-carousel-toolbar .right-controls {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--toolbar-gap);
+  width: 100%;
+  justify-content: center;
+}
+
+/* optional label: centered on mobile */
+.template-x-carousel-toolbar .controls-label {
+  margin: auto;
+  width: fit-content;
+  color: var(--Alias-content-typography-heading, #131313);
+  font-size: var(--Font-size-400, 20px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--Line-height-400, 24px);
+  letter-spacing: var(--Letter-spacing, 0);
+}
+
+/* Search bar in toolbar: 100% wide on mobile */
+.template-x-carousel-toolbar .search-bar-wrapper {
+  position: relative;
+  width: 100%;
+  height: max-content;
+}
+
+.template-x-carousel-toolbar .search-bar-wrapper .search-form {
+  margin: 0;
+}
+
+.template-x-carousel-toolbar .search-bar-wrapper .search-bar {
+  box-sizing: border-box;
+  margin: 0;
+  font-family: var(--body-font-family);
+  font-weight: 400;
+  font-size: var(--body-font-size-m);
+  padding: 8px var(--spacing-600);
+  border: var(--color-gray-200) var(--border-width-2) solid;
+  border-radius: 100px;
+  width: 100%;
+  height: 38px;
+}
+
+.template-x-carousel-toolbar .search-bar-wrapper .search-bar:focus-visible,
+.template-x-carousel-toolbar .search-bar-wrapper .search-bar:focus {
+  border: var(--border-width-2) solid var(--color-gray-700);
+  outline: none;
+}
+
+.template-x-carousel-toolbar .search-bar-wrapper .icon.icon-search {
+  position: absolute;
+  z-index: 1;
+  height: 16px;
+  width: 16px;
+  cursor: pointer;
+  top: 50%;
+  transform: translateY(-50%);
+  left: var(--spacing-300);
+}
+
+.template-x-carousel-toolbar .search-bar-wrapper .icon.icon-search-clear {
+  position: absolute;
+  z-index: 1;
+  height: 16px;
+  width: 16px;
+  cursor: pointer;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 40px;
+}
+
+/* Search dropdown */
+.template-x-carousel-toolbar .search-dropdown-container {
+  background: var(--color-white);
+  top: calc(100% + var(--spacing-80));
+  border-radius: 12px;
+  box-shadow: 0 0 20px #00000029;
+  position: absolute;
+  width: 100%;
+  box-sizing: border-box;
+  left: 0;
+  z-index: 12;
+}
+
+.template-x-carousel-toolbar .search-dropdown-container .dropdown-title {
+  margin: 0;
+  font-size: var(--body-font-size-s);
+  color: var(--color-gray-500);
+}
+
+.template-x-carousel-toolbar .search-dropdown-container .trends-container,
+.template-x-carousel-toolbar .search-dropdown-container .suggestions-container {
+  padding: var(--spacing-350) 28px 0;
+  text-align: left;
+}
+
+.template-x-carousel-toolbar .search-dropdown-container .trends-container ul {
+  padding-left: 0;
+  list-style: none;
+  max-height: 216px;
+  overflow: auto;
+}
+
+.template-x-carousel-toolbar .search-dropdown-container .suggestions-container ul {
+  padding-left: 0;
+  list-style: none;
+  max-height: 164px;
+  overflow: auto;
+  margin: 0 0 var(--spacing-300) calc(-1 * var(--spacing-100));
+}
+
+.template-x-carousel-toolbar .search-dropdown-container .trends-container .trends-wrapper li,
+.template-x-carousel-toolbar .search-dropdown-container .suggestions-container li {
+  margin-bottom: var(--spacing-300);
+}
+
+.template-x-carousel-toolbar .search-dropdown-container .suggestions-container li {
+  cursor: pointer;
+  margin: 0 var(--spacing-100) 0 0;
+  padding: var(--spacing-100);
+}
+
+.template-x-carousel-toolbar .search-dropdown-container .suggestions-container li:hover,
+.template-x-carousel-toolbar .search-dropdown-container .suggestions-container li:focus-visible {
+  background: var(--color-gray-200);
+  outline: none;
+  border-radius: 8px;
+}
+
+.template-x-carousel-toolbar .search-dropdown-container .trends-container .trends-wrapper {
+  margin: var(--spacing-300) 0;
+}
+
+.template-x-carousel-toolbar .search-dropdown-container .trends-container .trends-wrapper li a {
+  color: var(--color-black);
 }
 
 .templates-container.search-bar-gallery .template.gallery--item .still-wrapper .image-wrapper .free-tag {
@@ -481,15 +616,33 @@
   .template-x-carousel-toolbar .heading {
     font-size: var(--heading-font-size-s);
   }
-  .template-x-carousel-toolbar.search-bar .centered-heading {
-    width: unset;
-    text-align: center;
-  }
-  .template-x-carousel-toolbar .toolbar {
+
+  .template-x-carousel-toolbar .toolbar:not(.search-bar) {
     padding-top: 0;
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+  }
+
+  /* Search bar: cap width at 480px on desktop */
+  .template-x-carousel-toolbar .search-bar-wrapper {
+    max-width: 480px;
+    margin: auto;
+  }
+
+  /* Controls label: left-pinned beside right-controls on desktop */
+  .template-x-carousel-toolbar p.controls-label {
+    margin: auto;
+    width: auto;
+    flex: 1;
+    font-size: var(--body-font-size-xl);
+  }
+
+  /* Right-controls: right-aligned on desktop */
+  .template-x-carousel-toolbar .right-controls {
+    width: auto;
+    flex-direction: row;
+    justify-content: flex-end;
   }
 }
 

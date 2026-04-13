@@ -3,8 +3,15 @@ import { fetchResults, isValidTemplate } from '../../scripts/template-utils.js';
 import renderTemplate from '../template-x/template-rendering.js';
 import buildGallery from '../../scripts/widgets/gallery/gallery.js';
 
-let createTag; let getConfig;
+let createTag;
+let getConfig;
+let getMetadata;
 let replaceKey;
+let replaceKeyArray;
+let BlockMediator;
+let trackSearch;
+let updateImpressionCache;
+let generateSearchId;
 
 const fromScratchFallbackLink = 'https://adobesparkpost.app.link/c4bWARQhWAb';
 
@@ -195,6 +202,283 @@ const sortConfig = {
   'new-templates': '-createDate',
 };
 
+function handlelize(str) {
+  return str.normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/(\W+|\s+)/g, '-')
+    .replace(/--+/g, '-')
+    .replace(/(^-+|-+$)/g, '')
+    .toLowerCase();
+}
+
+function wordExistsInString(word, inputString) {
+  const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regexPattern = new RegExp(`(?:^|\\s|[.,!?()'"\\-])${escapedWord}(?:$|\\s|[.,!?()'"\\-])`, 'i');
+  return regexPattern.test(inputString);
+}
+
+function cycleThroughSuggestions(el, targetIndex = 0) {
+  const suggestions = el.querySelectorAll('.suggestions-list li');
+  if (targetIndex >= suggestions.length || targetIndex < 0) return;
+  if (suggestions.length > 0) suggestions[targetIndex].focus();
+}
+
+function initSearchFunction(el, searchBarWrapper) {
+  const searchDropdown = searchBarWrapper.querySelector('.search-dropdown-container');
+  const searchForm = searchBarWrapper.querySelector('.search-form');
+  const searchBar = searchBarWrapper.querySelector('input.search-bar');
+  const clearBtn = searchBarWrapper.querySelector('.icon-search-clear');
+  const trendsContainer = searchBarWrapper.querySelector('.trends-container');
+  const suggestionsContainer = searchBarWrapper.querySelector('.suggestions-container');
+  const suggestionsList = searchBarWrapper.querySelector('.suggestions-list');
+
+  clearBtn.style.display = 'none';
+
+  searchBar.addEventListener('click', (e) => {
+    e.stopPropagation();
+    searchBar.scrollIntoView({ behavior: 'smooth' });
+    searchDropdown.classList.remove('hidden');
+  }, { passive: true });
+
+  searchBar.addEventListener('keyup', () => {
+    if (searchBar.value !== '') {
+      clearBtn.style.display = 'inline-block';
+      trendsContainer.classList.add('hidden');
+      suggestionsContainer.classList.remove('hidden');
+    } else {
+      clearBtn.style.display = 'none';
+      trendsContainer.classList.remove('hidden');
+      suggestionsContainer.classList.add('hidden');
+    }
+  }, { passive: true });
+
+  searchBar.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.keyCode === 40) {
+      e.preventDefault();
+      cycleThroughSuggestions(el);
+    }
+  });
+
+  document.addEventListener('click', (e) => {
+    const { target } = e;
+    if (target !== searchBarWrapper && !searchBarWrapper.contains(target)) {
+      searchDropdown.classList.add('hidden');
+    }
+  }, { passive: true });
+
+  const trimInput = (tasks, input) => {
+    let alteredInput = input;
+    tasks[0][1].sort((a, b) => b.length - a.length).forEach((word) => {
+      alteredInput = alteredInput.toLowerCase().replace(word.toLowerCase(), '');
+    });
+    return alteredInput.trim();
+  };
+
+  const findTask = (map) => Object.entries(map).filter((task) => task[1].some((word) => {
+    const searchValue = searchBar.value.toLowerCase();
+    return wordExistsInString(word.toLowerCase(), searchValue);
+  })).sort((a, b) => b[0].length - a[0].length);
+
+  const redirectSearch = async () => {
+    const cfg = getConfig();
+    const { prefix } = cfg.locale;
+    const taskMap = await replaceKey('task-name-mapping', cfg) || {};
+    const taskXMap = await replaceKey('x-task-name-mapping', cfg) || {};
+    const format = getMetadata('placeholder-format');
+
+    const currentTasks = { xCore: '', content: '' };
+    let searchInput = searchBar.value?.toLowerCase() || getMetadata('topics');
+    const tasksFoundInInput = findTask(JSON.parse(taskMap));
+    const tasksXFoundInInput = findTask(JSON.parse(taskXMap));
+
+    if (tasksFoundInInput.length > 0) {
+      searchInput = trimInput(tasksFoundInInput, searchInput);
+      [[currentTasks.xCore]] = tasksFoundInInput;
+    }
+    if (tasksXFoundInInput.length > 0) {
+      searchInput = trimInput(tasksXFoundInInput, searchInput);
+      [[currentTasks.content]] = tasksXFoundInInput;
+    }
+
+    const topicUrl = searchInput ? `/${searchInput}` : '';
+    const taskUrl = `/${handlelize(currentTasks.xCore.toLowerCase())}`;
+    const taskXUrl = `/${handlelize(currentTasks.content.toLowerCase())}`;
+    const targetPath = `${prefix}/express/templates${taskUrl}${topicUrl}`;
+    const targetPathX = `${prefix}/express/templates${taskXUrl}${topicUrl}`;
+    const { default: fetchAllTemplatesMetadata } = await import('../../scripts/utils/all-templates-metadata.js');
+    const allTemplatesMetadata = await fetchAllTemplatesMetadata(getConfig);
+
+    updateImpressionCache({ collection: currentTasks.content || 'all-templates', content_category: 'templates' });
+    trackSearch('search-inspire');
+
+    const searchId = BlockMediator.get('templateSearchSpecs')?.search_id;
+    let targetLocation;
+    if (allTemplatesMetadata.some((e) => e.url === targetPathX) && document.body.dataset.device !== 'mobile') {
+      targetLocation = `${window.location.origin}${targetPathX}?searchId=${searchId || ''}`;
+    } else if (allTemplatesMetadata.some((e) => e.url === targetPath) && document.body.dataset.device !== 'desktop') {
+      targetLocation = `${window.location.origin}${targetPath}?searchId=${searchId || ''}`;
+    } else {
+      const searchUrlTemplate = `/express/templates/search?tasks=${currentTasks.xCore}&tasksx=${currentTasks.content}&phformat=${format}&topics=${searchInput || "''"}&q=${searchBar.value || "''"}&searchId=${searchId || ''}`;
+      targetLocation = `${window.location.origin}${prefix}${searchUrlTemplate}`;
+    }
+    window.location.assign(targetLocation);
+  };
+
+  const onSearchSubmit = async () => {
+    const { sampleRUM } = await import(`${getLibs()}/utils/samplerum.js`);
+    searchBar.disabled = true;
+    sampleRUM('search', { source: el.dataset.blockName, target: searchBar.value }, 1);
+    await redirectSearch();
+  };
+
+  async function handleSubmitInteraction(item, index) {
+    if (item.query !== searchBar.value) {
+      searchBar.value = item.query;
+      searchBar.dispatchEvent(new Event('input'));
+    }
+    updateImpressionCache({
+      status_filter: 'free',
+      type_filter: 'all',
+      collection: 'all-templates',
+      keyword_rank: index + 1,
+      search_keyword: searchBar.value || 'empty search',
+      search_type: 'autocomplete',
+    });
+    await onSearchSubmit();
+  }
+
+  searchForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    updateImpressionCache({
+      status_filter: 'free',
+      type_filter: 'all',
+      collection: 'all-templates',
+      search_keyword: searchBar.value || 'empty search',
+      search_type: 'direct',
+    });
+    await onSearchSubmit();
+  });
+
+  clearBtn.addEventListener('click', () => {
+    searchBar.value = '';
+    suggestionsList.innerHTML = '';
+    trendsContainer.classList.remove('hidden');
+    suggestionsContainer.classList.add('hidden');
+    clearBtn.style.display = 'none';
+  }, { passive: true });
+
+  const suggestionsListUIUpdateCB = (suggestions) => {
+    suggestionsList.innerHTML = '';
+    const searchBarVal = searchBar.value.toLowerCase();
+    if (suggestions && !(suggestions.length <= 1 && suggestions[0]?.query === searchBarVal)) {
+      suggestions.forEach((item, index) => {
+        const li = createTag('li', { tabindex: 0 });
+        const valRegEx = new RegExp(searchBar.value, 'i');
+        li.innerHTML = item.query.replace(valRegEx, `<b>${searchBarVal}</b>`);
+        li.addEventListener('click', async () => { await handleSubmitInteraction(item, index); });
+        li.addEventListener('keydown', async (e) => {
+          if (e.key === 'Enter' || e.keyCode === 13) await handleSubmitInteraction(item, index);
+        });
+        li.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowDown' || e.keyCode === 40) {
+            e.preventDefault();
+            cycleThroughSuggestions(el, index + 1);
+          }
+        });
+        li.addEventListener('keydown', (e) => {
+          if (e.key === 'ArrowUp' || e.keyCode === 38) {
+            e.preventDefault();
+            cycleThroughSuggestions(el, index - 1);
+          }
+        });
+        suggestionsList.append(li);
+      });
+      updateImpressionCache({
+        prefix_query: searchBarVal,
+        suggestion_list_shown: suggestions.map((s) => s.query).join(','),
+      });
+    }
+  };
+
+  import('../../scripts/autocomplete-api-v3.js').then(({ default: useInputAutocomplete }) => {
+    const { inputHandler } = useInputAutocomplete(
+      suggestionsListUIUpdateCB,
+      getConfig,
+      { throttleDelay: 300, debounceDelay: 500, limit: 5 },
+    );
+    searchBar.addEventListener('input', inputHandler);
+  });
+}
+
+async function createSearchBarWrapper() {
+  const searchBarWrapper = createTag('div', { class: 'search-bar-wrapper' });
+  const searchForm = createTag('form', { class: 'search-form' });
+  const cfg = getConfig();
+  const searchBar = createTag('input', {
+    class: 'search-bar',
+    type: 'text',
+    placeholder: await replaceKey('template-search-placeholder', cfg) || 'Search for over 50,000 templates',
+    enterKeyHint: await replaceKey('search', cfg) || 'Search',
+  });
+  searchForm.append(searchBar);
+  const searchIcon = getIconElementDeprecated('search');
+  searchIcon.loading = 'lazy';
+  const searchClearIcon = getIconElementDeprecated('search-clear');
+  searchClearIcon.loading = 'lazy';
+  searchBarWrapper.append(searchIcon, searchClearIcon, searchForm);
+  return searchBarWrapper;
+}
+
+async function buildSearchDropdown(searchBarWrapper) {
+  if (!searchBarWrapper) return;
+  const dropdownContainer = createTag('div', { class: 'search-dropdown-container hidden' });
+  const trendsContainer = createTag('div', { class: 'trends-container' });
+  const suggestionsContainer = createTag('div', { class: 'suggestions-container hidden' });
+  const suggestionsTitle = createTag('p', { class: 'dropdown-title' });
+  const suggestionsList = createTag('ul', { class: 'suggestions-list' });
+
+  const cfg = getConfig();
+  const [trendsTitle, searchTrends, searchSuggestionsTitle] = await replaceKeyArray(
+    ['search-trends-title', 'search-trends', 'search-suggestions-title'],
+    cfg,
+  );
+
+  if (trendsTitle) {
+    const trendsTitleEl = createTag('p', { class: 'dropdown-title' });
+    trendsTitleEl.textContent = trendsTitle;
+    trendsContainer.append(trendsTitleEl);
+  }
+
+  let trends;
+  if (searchTrends && searchTrends !== 'search trends') {
+    try { trends = JSON.parse(searchTrends); } catch { /* no trends */ }
+  }
+
+  if (trends) {
+    const trendsWrapper = createTag('ul', { class: 'trends-wrapper' });
+    const onTrendClick = (key, href) => {
+      updateImpressionCache({ keyword_filter: key, content_category: 'templates' });
+      const searchId = new URLSearchParams(new URL(href).search).get('searchId');
+      trackSearch('search-inspire', searchId);
+    };
+    Object.entries(trends).forEach(([key, value]) => {
+      const trendLinkWrapper = createTag('li');
+      const href = `${value}?searchId=${generateSearchId()}`;
+      const trendLink = createTag('a', { class: 'trend-link', href });
+      trendLink.addEventListener('click', () => onTrendClick(key, trendLink.href));
+      trendLink.textContent = key;
+      trendLinkWrapper.append(trendLink);
+      trendsWrapper.append(trendLinkWrapper);
+    });
+    trendsContainer.append(trendsWrapper);
+  }
+
+  suggestionsTitle.textContent = searchSuggestionsTitle !== 'search suggestions title' ? searchSuggestionsTitle : '';
+  suggestionsContainer.append(suggestionsTitle, suggestionsList);
+  dropdownContainer.append(trendsContainer, suggestionsContainer);
+  searchBarWrapper.append(dropdownContainer);
+}
+
 export async function extractSort(recipe) {
   const recipeParams = new URLSearchParams(recipe);
   const sortKeys = Object.keys(sortConfig);
@@ -218,7 +502,7 @@ export async function extractSort(recipe) {
 }
 
 export default async function init(el) {
-  [{ createTag, getConfig }, { replaceKey }] = await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]);
+  [{ createTag, getConfig, getMetadata }, { replaceKey, replaceKeyArray }] = await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]);
   const [toolbar, recipeRow] = el.children;
   const includesSearchBar = el.classList.contains('search-bar');
 
@@ -237,6 +521,26 @@ export default async function init(el) {
   const recipe = recipeRow.textContent.trim();
   recipeRow.remove();
 
+  // Extract optional 3rd paragraph from authored content for search-bar variant
+  let optionalLabel = null;
+  if (includesSearchBar) {
+    const toolbarInner = toolbar.querySelector(':scope > div');
+    const allParas = toolbarInner ? [...toolbarInner.querySelectorAll(':scope > p')] : [];
+    if (allParas[1]) {
+      [, optionalLabel] = allParas;
+      optionalLabel.classList.add('controls-label');
+      optionalLabel.remove();
+    }
+
+    // Load search-specific dependencies only for this variant
+    const searchDeps = await Promise.all([
+      import('../../scripts/block-mediator.min.js'),
+      import('../../scripts/template-search-api-v3.js'),
+    ]);
+    ({ default: BlockMediator } = searchDeps[0]);
+    ({ trackSearch, updateImpressionCache, generateSearchId } = searchDeps[1]);
+  }
+
   try {
     // TODO: lazy load templates
     const [
@@ -248,22 +552,28 @@ export default async function init(el) {
     ]);
     const { sortOptions, defaultIndex, sortPlaceholderText } = sortSetup;
 
-    let dropdown;
-    if (!includesSearchBar) {
-      dropdown = createDropdown(
-        sortOptions,
-        defaultIndex,
-        updateTemplates,
-        sortPlaceholderText,
-      );
-    }
+    const dropdown = createDropdown(
+      sortOptions, defaultIndex, updateTemplates, sortPlaceholderText,
+    );
 
     const controlsContainer = createTag('div', { class: 'controls-container' });
-    if (!includesSearchBar && sortOptions && dropdown) {
-      controlsContainer.append(dropdown);
+
+    if (includesSearchBar) {
+      // Right-pinned: filter + nav stacked vertically
+      const rightControls = createTag('div', { class: 'right-controls' });
+      rightControls.append(dropdown, galleryControl);
+      if (optionalLabel) controlsContainer.append(optionalLabel);
+      controlsContainer.append(rightControls);
+
+      // Search bar sits above controls row
+      const searchBarWrapper = await createSearchBarWrapper();
+      await buildSearchDropdown(searchBarWrapper);
+      toolbar.append(searchBarWrapper, controlsContainer);
+      initSearchFunction(el, searchBarWrapper);
+    } else {
+      controlsContainer.append(dropdown, galleryControl);
+      toolbar.append(controlsContainer);
     }
-    controlsContainer.append(galleryControl);
-    toolbar.append(controlsContainer);
 
     el.append(templatesContainer);
   } catch (error) {
