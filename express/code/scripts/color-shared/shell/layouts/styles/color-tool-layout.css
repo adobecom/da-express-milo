@@ -44,11 +44,9 @@
   --ax-padding-canvas-desktop: 0;
 
   /* Z-index layers */
-  --ax-z-topbar: 20;
   --ax-z-footer: 10;
 
   /* Sticky positions */
-  --ax-sticky-topbar-top: 0;
   --ax-sticky-footer-bottom: 0;
 
   /* Canvas Styling */
@@ -103,9 +101,6 @@
 .ax-shell-slot--topbar {
   grid-area: var(--ax-area-topbar);
   background-color: var(--ax-bg-topbar);
-  position: sticky;
-  top: var(--ax-sticky-topbar-top);
-  z-index: var(--ax-z-topbar);
 }
 
 .ax-shell-slot--sidebar {
@@ -170,12 +165,6 @@
   .ax-shell-slot {
     order: unset;
     grid-area: auto;
-  }
-
-  .ax-shell-slot--topbar {
-    position: relative;
-    top: unset;
-    z-index: unset;
   }
 
   .ax-shell-slot--sidebar {
