@@ -34,6 +34,16 @@
 .template-x-carousel-toolbar .centered-heading {
   text-align: center;
   margin-bottom: var(--spacing-400);
+
+  color: var(--Alias-content-typography-heading, var(--Alias-content-typography-heading, #131313));
+  text-align: center;
+
+  /* Heading (Express)/M */ 
+  font-size: var(--Font-size-500, 22px);
+  font-style: normal;
+  font-weight: 900;
+  line-height: var(--Line-height-500, 26px); /* 118.182% */
+  letter-spacing: var(--Letter-spacing, 0);
 }
 
 .template-x-carousel-toolbar.search-bar {
@@ -43,6 +53,8 @@
   flex-direction: column;
   gap: var(--spacing-400);
   margin-bottom: var(--spacing-800);
+
+  
 }
 
 .template-x-carousel-toolbar.search-bar .centered-heading {
@@ -52,6 +64,15 @@
   font-weight: 700;
   font-size: var(--body-font-size-l);
   text-align: center;
+  color: var(--Alias-content-typography-heading, var(--Alias-content-typography-heading, #131313));
+  text-align: center;
+
+  /* Heading (Express)/M */ 
+  font-size: var(--Font-size-500, 22px);
+  font-style: normal;
+  font-weight: 900;
+  line-height: var(--Line-height-500, 26px); /* 118.182% */
+  letter-spacing: var(--Letter-spacing, 0);
 }
 
 /* search-bar variant: toolbar stacks vertically */
@@ -79,13 +100,14 @@
 }
 
 /* optional label: centered on mobile */
-.template-x-carousel-toolbar .controls-label {
+.template-x-carousel-toolbar .toolbar p.controls-label {
   margin: auto;
   width: fit-content;
   color: var(--Alias-content-typography-heading, #131313);
   font-size: var(--Font-size-400, 20px);
   font-style: normal;
   font-weight: 700;
+  text-align: center;
   line-height: var(--Line-height-400, 24px);
   letter-spacing: var(--Letter-spacing, 0);
 }
@@ -213,8 +235,9 @@
 }
 
 .template-x-carousel-toolbar .toolbar p {
-  margin: 0;
+  margin: auto;
   line-height: 1.3;
+  text-align: center;
   font-size: var(--body-font-size-m);
 }
 
@@ -634,6 +657,7 @@
   .template-x-carousel-toolbar p.controls-label {
     margin: auto;
     width: auto;
+    text-align: left;
     flex: 1;
     font-size: var(--body-font-size-xl);
   }
