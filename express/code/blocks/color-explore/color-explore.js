@@ -231,8 +231,6 @@ export default async function decorate(block) {
     const config = parseBlockConfig(rows, DEFAULTS);
     if (variantFromClass) config.variant = variantFromClass;
 
-    loadStripSharedStyles();
-
     block.dataset.blockStatus = 'loading';
     block.replaceChildren();
     block.className = CSS_CLASSES.BLOCK;
@@ -262,12 +260,16 @@ export default async function decorate(block) {
       header.appendChild(titleEl);
       const section = document.createElement('section');
       section.className = 'explore-main-section';
-      const loadingScreen = createLoadingScreenComponent({ variant: 'gradients', cardCount: 6 });
+      const loadingScreen = createLoadingScreenComponent({
+        variant: isGradients ? 'gradients' : 'strips',
+        cardCount: 6,
+      });
       section.appendChild(loadingScreen.element);
       loadingScreen.show();
       container.replaceChildren(header, section);
     }
     showLoadingSkeleton();
+    await loadStripSharedStyles();
 
     if (config.variant === VARIANTS.GRADIENTS || config.variant === VARIANTS.STRIPS) {
       const gradientsDataService = createSharedColorDataService({
@@ -569,6 +571,7 @@ export default async function decorate(block) {
               ...config,
               variant: VARIANTS.STRIPS,
               renderGridVariant: 'summary',
+              initialActivationSuppressUntil: filterInteractionSuppressUntil,
             },
           });
           await activeRenderer.render?.(container);
@@ -691,9 +694,14 @@ export default async function decorate(block) {
       };
 
       const mountFn = activeMode === VARIANTS.GRADIENTS ? mountGradientsMode : mountStripsMode;
-      mountFn().catch((err) => {
-        window.lana?.log(`[ColorExplore] Mount error: ${err?.message}`, { tags: 'color-explore', severity: 'error' });
-      });
+      mountFn()
+        .then(() => {
+          block.dataset.blockStatus = 'loaded';
+        })
+        .catch((err) => {
+          window.lana?.log(`[ColorExplore] Mount error: ${err?.message}`, { tags: 'color-explore', severity: 'error' });
+          block.dataset.blockStatus = '';
+        });
     } else {
       const dataService = createSharedColorDataService({
         variant: config.variant,
@@ -857,8 +865,10 @@ export default async function decorate(block) {
       block.rendererInstance = renderer;
       block.modalManagerInstance = modalManager;
       block.dataServiceInstance = dataService;
+      block.dataset.blockStatus = 'loaded';
       })().catch((err) => {
         window.lana?.log(`[ColorExplore] Mount error: ${err?.message}`, { tags: 'color-explore', severity: 'error' });
+        block.dataset.blockStatus = '';
       });
     }
 

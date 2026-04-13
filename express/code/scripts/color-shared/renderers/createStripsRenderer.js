@@ -9,6 +9,7 @@ import { loadIconsRail } from '../spectrum/load-spectrum.js';
 
 const ignoreError = () => {};
 const ANALYTICS_TEXT_LIMIT = 20;
+const FILTER_CLICK_SUPPRESS_MS = 250;
 
 function formatCount(n) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
@@ -185,6 +186,30 @@ export function createStripsRenderer(options) {
   const base = createBaseRenderer(options);
   const { getData, setData, emit, createGrid, config } = base;
 
+  let suppressActivationUntil = Number.isFinite(config?.initialActivationSuppressUntil)
+    ? Number(config.initialActivationSuppressUntil)
+    : 0;
+  let filterInteractionListenerBound = false;
+
+  function isActivationSuppressed() {
+    return Date.now() < suppressActivationUntil;
+  }
+
+  function onFilterInteraction() {
+    suppressActivationUntil = Date.now() + FILTER_CLICK_SUPPRESS_MS;
+  }
+
+  function emitPaletteInteractionGuarded(event, detail) {
+    if (event === 'palette-click' && isActivationSuppressed()) return;
+    emit(event, detail);
+  }
+
+  function bindFilterInteractionSuppressor() {
+    if (!rootContainer || filterInteractionListenerBound) return;
+    rootContainer.addEventListener('color-explore:filter-interaction', onFilterInteraction);
+    filterInteractionListenerBound = true;
+  }
+
   let gridElement = null;
   let searchAdapter = null;
   let resultsCountEl = null;
@@ -265,7 +290,7 @@ export function createStripsRenderer(options) {
     const variant = variantOverride
       || (config?.stripVariant === 'compact' ? PALETTE_VARIANT.COMPACT : PALETTE_VARIANT.SUMMARY);
     const { element } = createPaletteVariant(palette, variant, {
-      emit,
+      emit: emitPaletteInteractionGuarded,
       cardFocusable: config?.cardFocusable !== false,
       registry: {
         pushStrip: (strip) => paletteStrips.push(strip),
@@ -355,6 +380,7 @@ export function createStripsRenderer(options) {
   }
 
   async function render(container) {
+    bindFilterInteractionSuppressor();
     tooltipInitToken += 1;
     clearGridTooltips();
     container.replaceChildren();
@@ -427,6 +453,10 @@ export function createStripsRenderer(options) {
   }
 
   function destroy() {
+    if (rootContainer && filterInteractionListenerBound) {
+      rootContainer.removeEventListener('color-explore:filter-interaction', onFilterInteraction);
+      filterInteractionListenerBound = false;
+    }
     tooltipInitToken += 1;
     clearGridTooltips();
     gridNavDestroy?.();
