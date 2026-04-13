@@ -4,9 +4,6 @@ import { createSwatchRailAdapter, createColorEditAdapter } from '../adapters/lit
 import { getContrastTextColor, isSuperLight } from '../../../libs/color-components/utils/ColorConversions.js';
 import {
   TYPE_ORDER,
-  TYPE_LABELS,
-  DEFECT_DEFINITIONS,
-  DEFECT_TOOLTIP_DEFINITIONS,
   getConflictPairs,
   getConflictingIndices,
   simulateHex,
@@ -105,7 +102,11 @@ function refreshColorBlindnessLabelTooltips(root) {
 }
 
 function createColorBlindnessRowsInMatrix(
-  controller, orientation, containerEl, railWrapEl, cbStrings,
+  controller,
+  orientation,
+  containerEl,
+  railWrapEl,
+  cbStrings,
 ) {
   const cb = resolveCBLabels(cbStrings);
   const unsub = controller?.subscribe?.((state) => {
@@ -220,7 +221,7 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
   };
 }
 
-function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS, cbStrings) {
+function createMobileCBLayout(controller, cbStrings, maxColumns = MAX_CB_COLUMNS) {
   const cb = resolveCBLabels(cbStrings);
   const container = createTag('div', { class: 'strip-cb-mobile-layout' });
 
@@ -302,7 +303,9 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS, cbStrings
           role: 'img',
           'aria-label': `${sim.toUpperCase()} ${cb.labels[type]}`,
         });
-        if (conflicting.has(colorIndex)) simCell.appendChild(createConflictIcon(cb.conflictIconAria));
+        if (conflicting.has(colorIndex)) {
+          simCell.appendChild(createConflictIcon(cb.conflictIconAria));
+        }
         row.appendChild(simCell);
       });
 
@@ -323,7 +326,7 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS, cbStrings
 export function createFourRowsColorBlindnessLayout(adapter, cbStrings) {
   const controller = getAdapterController(adapter);
   // eslint-disable-next-line no-use-before-define
-  const summary = createConflictSummaryBlock(controller, MAX_CB_COLUMNS, cbStrings);
+  const summary = createConflictSummaryBlock(controller, cbStrings);
   const outer = createTag('div', { class: 'strip-with-color-blindness strip-with-color-blindness--four-rows' });
 
   const desktopLayout = createTag('div', { class: 'strip-cb-desktop-layout' });
@@ -337,7 +340,7 @@ export function createFourRowsColorBlindnessLayout(adapter, cbStrings) {
 
   let mobileLayout = null;
   if (controller) {
-    mobileLayout = createMobileCBLayout(controller, MAX_CB_COLUMNS, cbStrings);
+    mobileLayout = createMobileCBLayout(controller, cbStrings);
     outer.appendChild(mobileLayout);
 
     createFourRowsColorBlindnessTitlesOnly(controller, gridContainer, railContainer, cbStrings);
@@ -441,7 +444,7 @@ function createWarningIcon() {
   return el;
 }
 
-function createConflictSummaryBlock(controller, maxColumns = MAX_CB_COLUMNS, cbStrings) {
+function createConflictSummaryBlock(controller, cbStrings, maxColumns = MAX_CB_COLUMNS) {
   const cb = resolveCBLabels(cbStrings);
   const wrap = createTag('div', { class: 'strip-conflict-summary' });
   const label = createTag('span', { class: 'strip-conflict-summary__label' });
@@ -517,10 +520,14 @@ export function createStripWithColorBlindness(adapter, orientation, cbStrings) {
       unsub = u;
     } else {
       unsub = createColorBlindnessRowsInMatrix(
-        controller, orientation, matrixOrRows, railWrap, cbStrings,
+        controller,
+        orientation,
+        matrixOrRows,
+        railWrap,
+        cbStrings,
       );
     }
-    const conflictSummary = createConflictSummaryBlock(controller, MAX_CB_COLUMNS, cbStrings);
+    const conflictSummary = createConflictSummaryBlock(controller, cbStrings);
     conflictSummary.cleanup = conflictSummary.cleanup || (() => {});
     const origDestroy = adapter.destroy;
     adapter.destroy = () => {
