@@ -848,7 +848,7 @@ export class ColorSwatchRail extends LitElement {
     const idx = col.getAttribute('data-swatch-index');
     if (idx === null || idx === '') return;
     if ((this.lockedByIndex || new Set()).has(Number(idx))) return;
-    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge, .tint-band-btn')) return;
+    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge, .tint-band-btn, .hex-code')) return;
     e.preventDefault();
     this._touchDragFromIndex = Number(idx);
     col.classList.add('swatch-column--dragging');
