@@ -1013,16 +1013,14 @@ export const style = css`
   button.hex-code {
     background: none;
     border: none;
-    padding: 7px 12px;
+    padding-block: 7px;
+    padding-inline: 0;
     font: inherit;
     text-align: center;
-    width: 90px;
+    width: 75px;
     flex-shrink: 0;
     height: 32px;
     border-radius: var(--Corner-radius-corner-radius-100);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
   .swatch-column[data-contrast="dark"] button.hex-code:hover {
     background-color: rgba(255, 255, 255, 0.12);
@@ -1045,7 +1043,6 @@ export const style = css`
     outline-offset: 2px;
   }
   .hex-code--editable {
-    padding: 7px 12px;
     cursor: pointer;
   }
   .hex-code--copyable {
