@@ -287,7 +287,7 @@ function attachWindowDragHandlers(container, dropzone) {
         }
       }
       setTimeout(clearDrag, 200);
-    });
+    }, { signal });
   }
 
   const detach = () => ac.abort();
