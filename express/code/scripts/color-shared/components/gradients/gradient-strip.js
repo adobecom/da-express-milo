@@ -1,30 +1,5 @@
 import { createTag } from '../../../utils.js';
-
-const ANALYTICS_TEXT_LIMIT = 20;
-
-function sanitizeAnalyticsText(value) {
-  const raw = String(value ?? '')
-    .replace(/[^a-zA-Z0-9\s]/g, '')
-    .trim()
-    .substring(0, ANALYTICS_TEXT_LIMIT);
-  return raw;
-}
-
-function buildDaaLl(analytics = {}) {
-  if (!analytics || typeof analytics !== 'object') return null;
-
-  if (analytics.daaLl) {
-    return String(analytics.daaLl);
-  }
-
-  if (analytics.linkIndex == null) {
-    return null;
-  }
-
-  const label = sanitizeAnalyticsText(analytics.linkLabel || 'View details');
-  const header = sanitizeAnalyticsText(analytics.headerText || '');
-  return `${label}-${analytics.linkIndex}--${header}`;
-}
+import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
 
 function gradientToBackgroundImage(gradient) {
   if (gradient.gradient && typeof gradient.gradient === 'string') {
@@ -72,10 +47,12 @@ function createGradientStrip(gradient, options = {}) {
     'data-tooltip-content': actionLabel,
     tabindex: '-1',
   });
-  const daaLl = buildDaaLl(analytics);
-  if (daaLl) {
-    actionBtn.setAttribute('daa-ll', daaLl);
-    actionBtn.setAttribute('data-ll', daaLl);
+  if (analytics && typeof analytics === 'object' && analytics.linkIndex != null) {
+    decorateAnalyticsAttributes(actionBtn, {
+      linkLabel: analytics.linkLabel || 'View details',
+      linkIndex: analytics.linkIndex,
+      headerText: analytics.headerText || '',
+    });
   }
 
   const wrapper = createTag('div', { class: 'action-icon-wrapper' });

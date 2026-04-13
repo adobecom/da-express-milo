@@ -3,6 +3,7 @@ import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
+import { decorateAnalyticsAttributes } from '../utils/utilities.js';
 
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
 
@@ -134,6 +135,7 @@ export function createFullPaletteModalContent(palette, options = {}) {
     const copyBtn = createTag('button', { type: 'button', class: 'color-modal-full-palette-btn' });
     copyBtn.textContent = 'Copy';
     copyBtn.setAttribute('aria-label', `Copy ${hex}`);
+    decorateAnalyticsAttributes(copyBtn, { linkLabel: 'Copy color', linkIndex: index + 1, headerText: 'palette detail' });
     copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(hex).then(() => {
         copyBtn.textContent = 'Copied';
@@ -144,6 +146,7 @@ export function createFullPaletteModalContent(palette, options = {}) {
     const editBtn = createTag('button', { type: 'button', class: 'color-modal-full-palette-btn' });
     editBtn.textContent = 'Edit';
     editBtn.setAttribute('aria-label', `Edit color ${hex}`);
+    decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit color', linkIndex: index + 1, headerText: 'palette detail' });
     editBtn.addEventListener('click', () => {
       onEditColor?.(hex, index);
     });
@@ -176,6 +179,7 @@ export function createFullPaletteModalContent(palette, options = {}) {
   const saveSection = createTag('div', { class: 'color-modal-full-palette-save' });
   const saveBtn = createTag('button', { type: 'button', class: 'color-modal-full-palette-save-btn' });
   saveBtn.textContent = 'Save to Adobe Libraries';
+  decorateAnalyticsAttributes(saveBtn, { linkLabel: 'Save to libraries', headerText: 'palette detail' });
   saveBtn.addEventListener('click', () => {
     onSave?.({ name: nameInput.value, colors });
   });
@@ -211,6 +215,7 @@ function createPaletteMetaSection(palette = {}, options = {}) {
 
   const likesWrap = createTag('div', { class: 'modal-palette-likes' });
   const likeBtn = createTag('button', { type: 'button', class: 'like-icon', 'aria-label': 'Add to favorites' });
+  decorateAnalyticsAttributes(likeBtn, { linkLabel: 'Toggle favorite', headerText: 'palette detail' });
   const likeTheme = createTag('sp-theme', { system: 'spectrum-two', color: 'light', scale: 'medium' });
   let liked = options.liked ?? palette?.liked ?? false;
   const updateLikeState = () => {

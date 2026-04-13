@@ -1,4 +1,5 @@
 import { createTag } from '../../../utils.js';
+import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
 
 const SUPPORTED_TYPES = ['image/'];
 const CLS = 'image-upload-dropzone';
@@ -86,6 +87,7 @@ export function createUploadDropzone(options = {}) {
     createTag('span', { class: `${CLS}-title` }, opts.dragDropText),
     createTag('span', { class: `${CLS}-subtitle` }, opts.fileHintText),
   );
+  decorateAnalyticsAttributes(dropzone, { linkLabel: 'Upload image', headerText: 'image upload' });
   dropzone.append(uploadButton, dropzoneText);
 
   const input = createTag('input', { type: 'file', accept: 'image/*' });

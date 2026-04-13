@@ -6,25 +6,12 @@ import {
 import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPaletteVariantFactory.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { loadIconsRail } from '../spectrum/load-spectrum.js';
+import { decorateAnalyticsAttributes } from '../utils/utilities.js';
 
 const ignoreError = () => {};
-const ANALYTICS_TEXT_LIMIT = 20;
 
 function formatCount(n) {
   return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
-}
-
-function sanitizeAnalyticsText(value) {
-  const raw = String(value ?? '')
-    .replace(/[^a-zA-Z0-9\s]/g, '')
-    .trim();
-  return raw.substring(0, ANALYTICS_TEXT_LIMIT);
-}
-
-function createDaaLl(linkLabel, linkIndex, headerText) {
-  const safeLabel = sanitizeAnalyticsText(linkLabel);
-  const safeHeader = sanitizeAnalyticsText(headerText);
-  return `${safeLabel}-${linkIndex}--${safeHeader}`;
 }
 
 function getPaletteGridColumns() {
@@ -300,10 +287,9 @@ export function createStripsRenderer(options) {
   }
 
   function getAnalyticsHeaderText() {
-    const headerText = resultsCountEl?.textContent
+    return resultsCountEl?.textContent
       || rootContainer?.querySelector('.results-count')?.textContent
       || 'Color palettes';
-    return sanitizeAnalyticsText(headerText);
   }
 
   function applyCardActionAnalytics(gridEl) {
@@ -315,9 +301,7 @@ export function createStripsRenderer(options) {
       const linkLabel = button.getAttribute('data-tooltip-content')
         || button.getAttribute('aria-label')
         || 'Open';
-      const daaLl = createDaaLl(linkLabel, index + 1, headerText);
-      button.setAttribute('daa-ll', daaLl);
-      button.setAttribute('data-ll', daaLl);
+      decorateAnalyticsAttributes(button, { linkLabel, linkIndex: index + 1, headerText });
     });
   }
 

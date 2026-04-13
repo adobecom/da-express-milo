@@ -5,6 +5,7 @@ import {
   createKeyboardNavigation,
   attachItemNavigation,
 } from '../../utils/keyboardNavigation.js';
+import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
 import {
   loadSearchBarStyles,
   loadSearchBarSuggestionStyles,
@@ -145,6 +146,7 @@ function createSearchBarWrapper(
     'aria-label': 'Clear search',
   });
   clearBtn.innerHTML = ICONS.clear;
+  decorateAnalyticsAttributes(clearBtn, { linkLabel: 'Clear search', headerText: 'search bar' });
 
   inputWrapper.append(searchIcon, input, clearBtn);
   form.append(inputWrapper);

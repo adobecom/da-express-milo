@@ -1,5 +1,33 @@
 import { createTag } from '../../utils.js';
 
+const ANALYTICS_TEXT_LIMIT = 20;
+
+function sanitizeAnalyticsText(value) {
+  return String(value ?? '').replace(/[^a-zA-Z0-9\s]/g, '').trim()
+    .substring(0, ANALYTICS_TEXT_LIMIT);
+}
+
+/**
+ * Sets `data-ll` on a clickable element so the global click handler in
+ * instrument.js fires `web.webinteraction.linkClicks` via `trackButtonClick`.
+ *
+ * Only `data-ll` is set (not `daa-ll`) to avoid a duplicate event from
+ * Milo's analytics system which independently tracks elements with `daa-ll`.
+ *
+ * @param {Element} element
+ * @param {{ linkLabel?: string, linkIndex?: number, headerText?: string }} opts
+ */
+export function decorateAnalyticsAttributes(element, { linkLabel, linkIndex, headerText } = {}) {
+  if (!element) return;
+  const safeLabel = sanitizeAnalyticsText(
+    linkLabel || element.getAttribute('aria-label') || element.textContent || 'action',
+  );
+  const safeHeader = sanitizeAnalyticsText(headerText || '');
+  const idx = linkIndex ?? 1;
+  const dataLl = `${safeLabel}-${idx}--${safeHeader}`;
+  element.setAttribute('data-ll', dataLl);
+}
+
 const SWIPE_CLOSE_THRESHOLD_PX = 120;
 const SWIPE_MAX_DRAG_PX = 400;
 

@@ -1,5 +1,5 @@
 import { announceToScreenReader } from '../spectrum/index.js';
-import { isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi } from '../utils/utilities.js';
+import { isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi, decorateAnalyticsAttributes } from '../utils/utilities.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { createIconButton } from '../utils/icons.js';
@@ -271,6 +271,7 @@ function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t) {
       onClick: onEditClick,
     });
     editBtn.classList.add('ax-edit-btn');
+    decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit palette', headerText: 'toolbar' });
     attachTooltip(editBtn, t.edit);
     paletteSummary.appendChild(editBtn);
   }
@@ -286,6 +287,7 @@ function buildActionButtons(handlers, t) {
     size: 'm',
     onClick: handlers.onShare,
   });
+  decorateAnalyticsAttributes(shareBtn, { linkLabel: 'Share', linkIndex: 1, headerText: 'toolbar' });
   attachTooltip(shareBtn, t.share);
   actions.appendChild(shareBtn);
 
@@ -295,6 +297,7 @@ function buildActionButtons(handlers, t) {
     size: 'm',
     onClick: handlers.onDownload,
   });
+  decorateAnalyticsAttributes(downloadBtn, { linkLabel: 'Download', linkIndex: 2, headerText: 'toolbar' });
   attachTooltip(downloadBtn, t.download);
   actions.appendChild(downloadBtn);
 
@@ -304,6 +307,7 @@ function buildActionButtons(handlers, t) {
     size: 'm',
     onClick: handlers.onSave,
   });
+  decorateAnalyticsAttributes(ccLibBtn, { linkLabel: 'Save to library', linkIndex: 3, headerText: 'toolbar' });
   attachTooltip(ccLibBtn, t.saveToLibrary);
   actions.appendChild(ccLibBtn);
 
@@ -316,6 +320,7 @@ function buildCTAButton(getCTAText, onClick) {
   ctaBtn.setAttribute('size', 'l');
   ctaBtn.textContent = getCTAText();
   ctaBtn.addEventListener('click', onClick);
+  decorateAnalyticsAttributes(ctaBtn, { linkLabel: 'CTA', headerText: 'toolbar' });
   return ctaBtn;
 }
 

@@ -7,6 +7,7 @@ import parseBlockConfig from './helpers/parseConfig.js';
 import createHistoryManager from './helpers/historyManager.js';
 import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
+import { decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
 
 let extractionErrorShown = false;
 async function showExtractionError() {
@@ -325,13 +326,14 @@ function buildSuggestedImages(row, onSelect) {
 
   const pictures = [...(row?.querySelectorAll('picture') || [])];
   list.replaceChildren();
-  pictures.forEach((picture) => {
+  pictures.forEach((picture, imgIndex) => {
     const button = createTag('button', {
       class: 'color-extract-suggestion',
       type: 'button',
       'aria-label': 'Use this image',
       'aria-pressed': 'false',
     });
+    decorateAnalyticsAttributes(button, { linkLabel: 'Use this image', linkIndex: imgIndex + 1, headerText: 'color extract' });
     const preview = createTag('div', { class: 'color-extract-suggestion-preview' });
     const palette = createTag('div', { class: 'color-extract-suggestion-bar' }, [
       createTag('span', { class: 'color-extract-suggestion-chip is-1' }),

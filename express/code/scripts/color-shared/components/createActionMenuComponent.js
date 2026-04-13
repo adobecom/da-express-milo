@@ -4,7 +4,7 @@ import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createExpressButton, createExpressTooltip } from '../spectrum/index.js';
 import { createActionMenuState } from './createActionMenuState.js';
 import { attachRovingTabIndex } from '../spectrum/utils/a11y.js';
-import { createColorPaletteParamApi } from '../utils/utilities.js';
+import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../utils/utilities.js';
 import {
   COLOR_ICON,
   ACCESSIBILITY_ICON,
@@ -104,6 +104,7 @@ async function createNav(navLinks, activeId, getColors, getName) {
       const dividerEl = createTag('li', { role: 'separator', 'aria-hidden': true, class: 'palette-divider' });
       ul.append(dividerEl);
     }
+    decorateAnalyticsAttributes(linkEl, { linkLabel: link.label, linkIndex: index + 1, headerText: 'action menu' });
     linkElements.push(linkEl);
     await createExpressTooltip({
       targetEl: linkEl,
@@ -141,6 +142,7 @@ async function createHistoryButton(
     if (btn.getAttribute('aria-disabled') === 'true' || btn.disabled) return;
     onClick();
   });
+  decorateAnalyticsAttributes(btn, { linkLabel: control.label, headerText: 'action menu' });
   buttonRefs[control.id] = btn;
   await createExpressTooltip({
     targetEl: btn,
@@ -223,6 +225,7 @@ async function createControls(
             disableAria: true,
           });
         }
+        decorateAnalyticsAttributes(btn, { linkLabel: control.label, headerText: 'action menu' });
         controlContainer.append(btn);
         break;
       }
@@ -238,6 +241,7 @@ async function createControls(
           },
           ICON_MAP[control.id].maximize,
         );
+        decorateAnalyticsAttributes(btn, { linkLabel: control.label, headerText: 'action menu' });
         controlContainer.append(btn);
         btn.addEventListener('click', () => {
           const oldIsPressed = btn.getAttribute('aria-pressed') === 'true';

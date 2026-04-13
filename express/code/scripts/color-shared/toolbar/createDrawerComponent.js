@@ -13,6 +13,7 @@ import {
   unlockBodyScroll,
   saveFocusedElement,
   restoreFocusedElement,
+  decorateAnalyticsAttributes,
   getNextOverlayZIndex,
 } from '../utils/utilities.js';
 import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
@@ -146,6 +147,7 @@ function createLibraryPickerTrigger(selectedName) {
   const triggerChevron = createTag('span', { class: 'ax-lib-picker-trigger-chevron', 'aria-hidden': 'true' });
   triggerChevron.appendChild(createChevronDownIcon());
   trigger.append(triggerLabel, triggerChevron);
+  decorateAnalyticsAttributes(trigger, { linkLabel: 'Library picker', headerText: 'drawer' });
   return { trigger, triggerLabel };
 }
 
@@ -174,6 +176,7 @@ function createLibraryPopover(label, t) {
   createBtn.setAttribute('size', 'm');
   createBtn.classList.add('ax-lib-picker-create-btn');
   createBtn.textContent = t.create;
+  decorateAnalyticsAttributes(createBtn, { linkLabel: 'Create library', headerText: 'drawer' });
 
   const createRow = createTag('div', { class: 'ax-lib-picker-create-row' });
   createRow.append(createInput, createBtn);
@@ -298,11 +301,12 @@ function createLibraryPickerField(
 
   function renderMenuItems() {
     menu.replaceChildren();
-    localLibraries.forEach((lib) => {
+    localLibraries.forEach((lib, libIndex) => {
       const item = document.createElement('sp-menu-item');
       item.setAttribute('value', lib.id);
       if (lib.id === state.currentId) item.setAttribute('selected', '');
       item.textContent = lib.name;
+      decorateAnalyticsAttributes(item, { linkLabel: 'Select library', linkIndex: libIndex + 1, headerText: 'drawer' });
       item.addEventListener('click', (e) => {
         e.stopPropagation();
         selectLibrary(lib, item);
@@ -355,12 +359,13 @@ function createLibraryPickerField(
 function createKeywordSuggestions(keywords, mobile, { onSuggestionClick } = {}) {
   const wrapper = createTag('div', { class: 'ax-drawer-keyword-suggestions' });
   const size = mobile ? 'm' : 's';
-  keywords.forEach((keyword) => {
+  keywords.forEach((keyword, kwIndex) => {
     const btn = document.createElement('sp-button');
     btn.setAttribute('variant', 'primary');
     btn.setAttribute('size', size);
     btn.classList.add('ax-drawer-tag-btn');
     btn.textContent = keyword;
+    decorateAnalyticsAttributes(btn, { linkLabel: keyword, linkIndex: kwIndex + 1, headerText: 'drawer' });
     const icon = createSpectrumIcon('Add');
     icon.setAttribute('slot', 'icon');
     btn.prepend(icon);
@@ -643,9 +648,11 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   if (isSignedIn) {
     saveBtnEl.textContent = t.saveToLibrary;
     saveBtnEl.addEventListener('click', onSave);
+    decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Save to library', headerText: 'drawer' });
   } else {
     saveBtnEl.textContent = t.signInToSave;
     saveBtnEl.addEventListener('click', onSignIn);
+    decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Sign in to save', headerText: 'drawer' });
   }
   content.appendChild(saveBtnEl);
 
