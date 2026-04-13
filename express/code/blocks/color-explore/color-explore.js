@@ -15,6 +15,11 @@ import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
+const THEME_URL_PARAM = 'theme';
+const THEME_URL_QUERY_VALUE = {
+  [VARIANTS.GRADIENTS]: 'color-gradients',
+  [VARIANTS.STRIPS]: 'color-palettes',
+};
 const DEFAULTS = {
   variant: VARIANTS.STRIPS,
   initialLoad: 24,
@@ -83,6 +88,23 @@ function getVariantFromBlock(block) {
   if (block.classList.contains(VARIANT_CLASSES.GRADIENTS)) return VARIANTS.GRADIENTS;
   if (block.classList.contains(VARIANT_CLASSES.PALETTES)) return VARIANTS.STRIPS;
   return null;
+}
+
+function getVariantFromThemeUrlParam() {
+  if (typeof window === 'undefined') return null;
+  const t = new URLSearchParams(window.location.search).get(THEME_URL_PARAM);
+  if (t === THEME_URL_QUERY_VALUE[VARIANTS.GRADIENTS]) return VARIANTS.GRADIENTS;
+  if (t === THEME_URL_QUERY_VALUE[VARIANTS.STRIPS]) return VARIANTS.STRIPS;
+  return null;
+}
+
+function syncColorExploreThemeUrl(variant) {
+  if (typeof window === 'undefined') return;
+  const value = THEME_URL_QUERY_VALUE[variant];
+  if (!value) return;
+  const url = new URL(window.location.href);
+  url.searchParams.set(THEME_URL_PARAM, value);
+  window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
 }
 
 function isSwatchesMode(config) {
@@ -229,7 +251,7 @@ export default async function decorate(block) {
     const variantFromClass = getVariantFromBlock(block);
     const rows = [...block.children];
     const config = parseBlockConfig(rows, DEFAULTS);
-    if (variantFromClass) config.variant = variantFromClass;
+    config.variant = getVariantFromThemeUrlParam() ?? variantFromClass ?? config.variant;
 
     block.dataset.blockStatus = 'loading';
     block.replaceChildren();
@@ -301,6 +323,7 @@ export default async function decorate(block) {
       let filterInteractionSuppressUntil = 0;
       let isSearchActive = false;
       let currentColumnCount = getGridColumnCount();
+      let hasCompletedInitialModeMount = false;
 
       const setModeClasses = (variant) => {
         block.classList.remove(VARIANT_CLASSES.GRADIENTS, VARIANT_CLASSES.PALETTES);
@@ -392,6 +415,7 @@ export default async function decorate(block) {
           activeMode = VARIANTS.GRADIENTS;
           activeDataService = gradientsDataService;
           setModeClasses(VARIANTS.GRADIENTS);
+          if (hasCompletedInitialModeMount) syncColorExploreThemeUrl(VARIANTS.GRADIENTS);
           block.dispatchEvent(new CustomEvent('color-explore:mode-change', { detail: { mode: VARIANTS.GRADIENTS }, bubbles: true }));
 
           let gradientFilterHandler = null;
@@ -526,6 +550,7 @@ export default async function decorate(block) {
             document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
           }
 
+          if (!hasCompletedInitialModeMount) hasCompletedInitialModeMount = true;
           publishInstances();
         } finally {
           isMounting = false;
@@ -540,6 +565,7 @@ export default async function decorate(block) {
           activeMode = VARIANTS.STRIPS;
           activeDataService = palettesDataService;
           setModeClasses(VARIANTS.STRIPS);
+          if (hasCompletedInitialModeMount) syncColorExploreThemeUrl(VARIANTS.STRIPS);
           block.dispatchEvent(new CustomEvent('color-explore:mode-change', { detail: { mode: VARIANTS.STRIPS }, bubbles: true }));
 
           let stripsFilterHandler = null;
@@ -687,6 +713,7 @@ export default async function decorate(block) {
             document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
           }
 
+          if (!hasCompletedInitialModeMount) hasCompletedInitialModeMount = true;
           publishInstances();
         } finally {
           isMounting = false;
