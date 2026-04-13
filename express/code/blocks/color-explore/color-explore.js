@@ -273,7 +273,7 @@ export default async function decorate(block) {
     themeHost.appendChild(container);
 
     const isGradients = config.variant === VARIANTS.GRADIENTS;
-    function showLoadingSkeleton() {
+    const showLoadingSkeleton = () => {
       const header = document.createElement('div');
       header.className = 'explore-header';
       const titleEl = document.createElement(isGradients ? 'h2' : 'span');
@@ -289,7 +289,7 @@ export default async function decorate(block) {
       section.appendChild(loadingScreen.element);
       loadingScreen.show();
       container.replaceChildren(header, section);
-    }
+    };
     showLoadingSkeleton();
     await loadStripSharedStyles();
 
@@ -738,161 +738,161 @@ export default async function decorate(block) {
       });
 
       (async () => {
-      const urlQuery = new URLSearchParams(window.location.search).get('q');
-      let isSearchActive = false;
-      let allData;
-      if (urlQuery) {
-        const searchResults = await dataService.search(urlQuery);
-        if (searchResults.length > 0) {
-          allData = searchResults;
-          isSearchActive = true;
-        } else {
-          allData = await dataService.fetchData();
-        }
-      } else {
-        allData = await dataService.fetchData();
-      }
-      const alignedCount = Math.min(config.initialLoad, allData.length);
-      let visibleCount = alignToFullRow(alignedCount, allData.length);
-
-      let renderer;
-      if (isSwatchesMode(config)) {
-        renderer = createSwatchesRenderer({ container, data: allData, config });
-      } else {
-        renderer = createStripsRenderer({
-          container,
-          data: allData.slice(0, visibleCount),
-          config,
-        });
-      }
-      if (renderer.render) renderer.render(container);
-      const loadMoreControl = !isSwatchesMode(config)
-        ? await createBlockLoadMoreControl(container, async () => {
-          const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
-          if (nextTarget > allData.length) {
-            const moreData = isSearchActive
-              ? await dataService.searchMore()
-              : await dataService.loadMore();
-            allData = mergeLoadMoreData(allData, moreData);
+        const urlQuery = new URLSearchParams(window.location.search).get('q');
+        let isSearchActive = false;
+        let allData;
+        if (urlQuery) {
+          const searchResults = await dataService.search(urlQuery);
+          if (searchResults.length > 0) {
+            allData = searchResults;
+            isSearchActive = true;
+          } else {
+            allData = await dataService.fetchData();
           }
-          visibleCount = alignToFullRow(Math.min(nextTarget, allData.length), allData.length);
-          renderer.update(allData.slice(0, visibleCount));
-          loadMoreControl.update(Math.max(0, allData.length - visibleCount));
-        }, { iconSize: config.loadMoreIconSize || 'xl' })
-        : null;
-      loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
-
-      let elseCurrentColumnCount = getGridColumnCount();
-      const elseResizeObserver = new ResizeObserver(() => {
-        const newCols = getGridColumnCount();
-        if (newCols === elseCurrentColumnCount || isSwatchesMode(config)) return;
-        elseCurrentColumnCount = newCols;
-        const aligned = alignToFullRow(visibleCount, allData.length);
-        if (aligned !== visibleCount) {
-          visibleCount = aligned;
-          renderer.update(allData.slice(0, visibleCount));
-          loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
-        }
-      });
-      elseResizeObserver.observe(container);
-
-      const modalManager = createModalManager();
-
-      renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-        await modalManager.openPaletteSwatchesModal(
-          palette || {},
-          {
-            verticalMaxPerRow: config.swatchVerticalMaxPerRow,
-            onLikeToggle: async ({ id, liked }) => dataService.toggleLike({ id, liked }),
-          },
-        );
-      });
-      renderer.on(EVENTS.PALETTE_EDIT, (palette) => {
-        const colors = palette?.colors || [];
-        const name = palette?.name || '';
-        const editUrl = buildPaletteEditUrl('/create/color-wheel', colors, name);
-        window.location.href = editUrl;
-      });
-      renderer.on(EVENTS.SHARE, async ({ palette }) => {
-        await modalManager.openPaletteSwatchesModal(
-          palette || {},
-          {
-            verticalMaxPerRow: config.swatchVerticalMaxPerRow,
-            onLikeToggle: async ({ id, liked }) => dataService.toggleLike({ id, liked }),
-          },
-        );
-      });
-
-      renderer.on(EVENTS.SEARCH, async ({ query }) => {
-        isSearchActive = !!query;
-        block.classList.add(CSS_CLASSES.LOADING);
-        allData = await dataService.search(query);
-        visibleCount = alignToFullRow(
-          Math.min(config.initialLoad, allData.length),
-          allData.length,
-        );
-        renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
-        loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
-        block.classList.remove(CSS_CLASSES.LOADING);
-      });
-
-      renderer.on(EVENTS.FILTER, async (filters) => {
-        isSearchActive = false;
-        block.classList.add(CSS_CLASSES.LOADING);
-        allData = await dataService.filter(filters);
-        visibleCount = alignToFullRow(
-          Math.min(config.initialLoad, allData.length),
-          allData.length,
-        );
-        renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
-        loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
-        block.classList.remove(CSS_CLASSES.LOADING);
-      });
-
-      const floatingHandler = async (e) => {
-        const { query } = e.detail;
-        block.classList.add(CSS_CLASSES.LOADING);
-        if (!query) {
-          isSearchActive = false;
-          allData = await dataService.fetchData();
-          document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
         } else {
-          const searchResults = await dataService.search(query);
-          if (searchResults.length === 0) {
+          allData = await dataService.fetchData();
+        }
+        const alignedCount = Math.min(config.initialLoad, allData.length);
+        let visibleCount = alignToFullRow(alignedCount, allData.length);
+
+        let renderer;
+        if (isSwatchesMode(config)) {
+          renderer = createSwatchesRenderer({ container, data: allData, config });
+        } else {
+          renderer = createStripsRenderer({
+            container,
+            data: allData.slice(0, visibleCount),
+            config,
+          });
+        }
+        if (renderer.render) renderer.render(container);
+        const loadMoreControl = !isSwatchesMode(config)
+          ? await createBlockLoadMoreControl(container, async () => {
+            const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
+            if (nextTarget > allData.length) {
+              const moreData = isSearchActive
+                ? await dataService.searchMore()
+                : await dataService.loadMore();
+              allData = mergeLoadMoreData(allData, moreData);
+            }
+            visibleCount = alignToFullRow(Math.min(nextTarget, allData.length), allData.length);
+            renderer.update(allData.slice(0, visibleCount));
+            loadMoreControl.update(Math.max(0, allData.length - visibleCount));
+          }, { iconSize: config.loadMoreIconSize || 'xl' })
+          : null;
+        loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+
+        let elseCurrentColumnCount = getGridColumnCount();
+        const elseResizeObserver = new ResizeObserver(() => {
+          const newCols = getGridColumnCount();
+          if (newCols === elseCurrentColumnCount || isSwatchesMode(config)) return;
+          elseCurrentColumnCount = newCols;
+          const aligned = alignToFullRow(visibleCount, allData.length);
+          if (aligned !== visibleCount) {
+            visibleCount = aligned;
+            renderer.update(allData.slice(0, visibleCount));
+            loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+          }
+        });
+        elseResizeObserver.observe(container);
+
+        const modalManager = createModalManager();
+
+        renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
+          await modalManager.openPaletteSwatchesModal(
+            palette || {},
+            {
+              verticalMaxPerRow: config.swatchVerticalMaxPerRow,
+              onLikeToggle: async ({ id, liked }) => dataService.toggleLike({ id, liked }),
+            },
+          );
+        });
+        renderer.on(EVENTS.PALETTE_EDIT, (palette) => {
+          const colors = palette?.colors || [];
+          const name = palette?.name || '';
+          const editUrl = buildPaletteEditUrl('/create/color-wheel', colors, name);
+          window.location.href = editUrl;
+        });
+        renderer.on(EVENTS.SHARE, async ({ palette }) => {
+          await modalManager.openPaletteSwatchesModal(
+            palette || {},
+            {
+              verticalMaxPerRow: config.swatchVerticalMaxPerRow,
+              onLikeToggle: async ({ id, liked }) => dataService.toggleLike({ id, liked }),
+            },
+          );
+        });
+
+        renderer.on(EVENTS.SEARCH, async ({ query }) => {
+          isSearchActive = !!query;
+          block.classList.add(CSS_CLASSES.LOADING);
+          allData = await dataService.search(query);
+          visibleCount = alignToFullRow(
+            Math.min(config.initialLoad, allData.length),
+            allData.length,
+          );
+          renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+          loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+          block.classList.remove(CSS_CLASSES.LOADING);
+        });
+
+        renderer.on(EVENTS.FILTER, async (filters) => {
+          isSearchActive = false;
+          block.classList.add(CSS_CLASSES.LOADING);
+          allData = await dataService.filter(filters);
+          visibleCount = alignToFullRow(
+            Math.min(config.initialLoad, allData.length),
+            allData.length,
+          );
+          renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+          loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+          block.classList.remove(CSS_CLASSES.LOADING);
+        });
+
+        const floatingHandler = async (e) => {
+          const { query } = e.detail;
+          block.classList.add(CSS_CLASSES.LOADING);
+          if (!query) {
             isSearchActive = false;
             allData = await dataService.fetchData();
-            document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
-          } else {
-            isSearchActive = true;
-            allData = searchResults;
             document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+          } else {
+            const searchResults = await dataService.search(query);
+            if (searchResults.length === 0) {
+              isSearchActive = false;
+              allData = await dataService.fetchData();
+              document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+            } else {
+              isSearchActive = true;
+              allData = searchResults;
+              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+            }
           }
+          visibleCount = alignToFullRow(
+            Math.min(config.initialLoad, allData.length),
+            allData.length,
+          );
+          renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+          loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+          block.classList.remove(CSS_CLASSES.LOADING);
+        };
+        document.addEventListener('floating-search:submit', floatingHandler);
+
+        if (urlQuery && !isSearchActive) {
+          document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query: urlQuery }, bubbles: true }));
+        } else if (urlQuery) {
+          document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
         }
-        visibleCount = alignToFullRow(
-          Math.min(config.initialLoad, allData.length),
-          allData.length,
-        );
-        renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
-        loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
-        block.classList.remove(CSS_CLASSES.LOADING);
-      };
-      document.addEventListener('floating-search:submit', floatingHandler);
 
-      if (urlQuery && !isSearchActive) {
-        document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query: urlQuery }, bubbles: true }));
-      } else if (urlQuery) {
-        document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
-      }
+        block.addEventListener('block-unload', () => {
+          elseResizeObserver.disconnect();
+          document.removeEventListener('floating-search:submit', floatingHandler);
+        }, { once: true });
 
-      block.addEventListener('block-unload', () => {
-        elseResizeObserver.disconnect();
-        document.removeEventListener('floating-search:submit', floatingHandler);
-      }, { once: true });
-
-      block.rendererInstance = renderer;
-      block.modalManagerInstance = modalManager;
-      block.dataServiceInstance = dataService;
-      block.dataset.blockStatus = 'loaded';
+        block.rendererInstance = renderer;
+        block.modalManagerInstance = modalManager;
+        block.dataServiceInstance = dataService;
+        block.dataset.blockStatus = 'loaded';
       })().catch((err) => {
         window.lana?.log(`[ColorExplore] Mount error: ${err?.message}`, { tags: 'color-explore', severity: 'error' });
         block.dataset.blockStatus = '';
