@@ -170,8 +170,6 @@ export function setupStickyBounds(block, searchBar) {
   endObserver.observe(endSentinel);
   window.addEventListener('resize', evaluateStickyGate, { passive: true });
 
-  evaluateStickyGate();
-
   return () => {
     endObserver.disconnect();
     window.removeEventListener('resize', evaluateStickyGate);
