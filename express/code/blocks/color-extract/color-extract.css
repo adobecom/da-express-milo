@@ -347,6 +347,10 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 /* ---- Typography ---- */
 
+.color-extract .color-extract-edit-copy .icon.icon-adobe-express-logo {
+  padding: 0;
+}
+
 .color-extract .color-extract-edit-copy h1 {
   font-size: 45px;
   line-height: 1.04;
@@ -1063,7 +1067,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   }
 
   .color-extract.has-image .color-extract-inner {
-    padding: 32px 16px 56px;
+    padding: var(--spacing-500) 0 56px;
     gap: 24px;
   }
 
@@ -1086,9 +1090,27 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
     display: none;
   }
 
+  /* Flatten toolbar-left so mood and actions join the toolbar's flex directly */
+  .color-extract .color-extract-toolbar-left {
+    display: contents;
+  }
+
+  /* Mood: full width, stack label above trigger */
+  .color-extract .color-extract-mood {
+    width: 100%;
+    height: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
   .color-extract .color-extract-mood-dropdown {
     width: 100%;
     max-width: none;
+  }
+
+  .color-extract .color-extract-mood-trigger {
+    width: 100%;
   }
 
 }
