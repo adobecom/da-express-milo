@@ -268,7 +268,13 @@ function attachWindowDragHandlers(container, dropzone) {
   };
   window.addEventListener('dragenter', (e) => { if (isInViewport() && isFileDrag(e)) { preventDefaults(e); dragCounter += 1; container.classList.add('is-dragging'); } }, { signal });
   window.addEventListener('dragover', (e) => { if (isInViewport() && isFileDrag(e)) { preventDefaults(e); } }, { signal });
-  window.addEventListener('dragleave', (e) => { preventDefaults(e); if (isFileDrag(e)) { dragCounter -= 1; if (dragCounter <= 0) clearDrag(); } }, { signal });
+  window.addEventListener('dragleave', (e) => {
+    preventDefaults(e);
+    if (isFileDrag(e)) { 
+      dragCounter = Math.max(0, dragCounter - 1);
+      if (dragCounter === 0) clearDrag();
+    }
+  }, { signal });
   window.addEventListener('dragend', (e) => { preventDefaults(e); clearDrag(); }, { signal });
   window.addEventListener('drop', (e) => { if (!isInViewport() || !isFileDrag(e)) { clearDrag(); return; } preventDefaults(e); dropzone.handleFile(e.dataTransfer.files[0]); setTimeout(clearDrag, 200); }, { signal });
   window.addEventListener('blur', clearDrag, { signal });
