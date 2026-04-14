@@ -326,7 +326,7 @@ function buildSuggestedImages(row, onSelect) {
 
   const pictures = [...(row?.querySelectorAll('picture') || [])];
   list.replaceChildren();
-  pictures.forEach((picture, imgIndex) => {
+  pictures.forEach((picture) => {
     const button = createTag('button', {
       class: 'color-extract-suggestion',
       type: 'button',

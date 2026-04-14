@@ -168,7 +168,6 @@ function setupPaletteGridNav(gridEl) {
 }
 
 export function createStripsRenderer(options) {
-  const { container: rootContainer } = options;
   const base = createBaseRenderer(options);
   const { getData, setData, emit, createGrid, config } = base;
 

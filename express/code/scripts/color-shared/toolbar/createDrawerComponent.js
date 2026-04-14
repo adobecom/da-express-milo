@@ -301,7 +301,7 @@ function createLibraryPickerField(
 
   function renderMenuItems() {
     menu.replaceChildren();
-    localLibraries.forEach((lib, libIndex) => {
+    localLibraries.forEach((lib) => {
       const item = document.createElement('sp-menu-item');
       item.setAttribute('value', lib.id);
       if (lib.id === state.currentId) item.setAttribute('selected', '');
@@ -359,7 +359,7 @@ function createLibraryPickerField(
 function createKeywordSuggestions(keywords, mobile, { onSuggestionClick } = {}) {
   const wrapper = createTag('div', { class: 'ax-drawer-keyword-suggestions' });
   const size = mobile ? 'm' : 's';
-  keywords.forEach((keyword, kwIndex) => {
+  keywords.forEach((keyword) => {
     const btn = document.createElement('sp-button');
     btn.setAttribute('variant', 'primary');
     btn.setAttribute('size', size);

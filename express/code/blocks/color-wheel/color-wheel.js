@@ -230,7 +230,7 @@ async function buildHarmonySelector(controller, strings = {}) {
     carouselHost.replaceChildren();
     harmonyButtons = [];
 
-    rules.forEach(({ value, thumb }, ruleIndex) => {
+    rules.forEach(({ value, thumb }) => {
       const btn = createTag('button', {
         type: 'button',
         role: 'radio',
