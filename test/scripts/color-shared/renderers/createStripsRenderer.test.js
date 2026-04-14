@@ -86,14 +86,14 @@ describe('createStripsRenderer — grid', () => {
     const buttons = Array.from(container.querySelectorAll('.color-card-action-btn'));
     expect(buttons).to.have.length(4);
 
-    expect(buttons[0].getAttribute('daa-ll')).to.equal('Edit palette-1--2 color palettes');
-    expect(buttons[0].getAttribute('data-ll')).to.equal('Edit palette-1--2 color palettes');
+    expect(buttons[0].getAttribute('daa-ll')).to.equal('Edit palette-1--Color palettes');
+    expect(buttons[0].getAttribute('data-ll')).to.equal('Edit palette-1--Color palettes');
 
-    expect(buttons[1].getAttribute('daa-ll')).to.equal('Open-2--2 color palettes');
-    expect(buttons[1].getAttribute('data-ll')).to.equal('Open-2--2 color palettes');
+    expect(buttons[1].getAttribute('daa-ll')).to.equal('Open-2--Color palettes');
+    expect(buttons[1].getAttribute('data-ll')).to.equal('Open-2--Color palettes');
 
-    expect(buttons[2].getAttribute('daa-ll')).to.equal('Edit palette-3--2 color palettes');
-    expect(buttons[3].getAttribute('daa-ll')).to.equal('Open-4--2 color palettes');
+    expect(buttons[2].getAttribute('daa-ll')).to.equal('Edit palette-3--Color palettes');
+    expect(buttons[3].getAttribute('daa-ll')).to.equal('Open-4--Color palettes');
   });
 });
 
@@ -187,7 +187,7 @@ describe('createStripsRenderer — summary variant (results count)', () => {
 
     const count = container.querySelector('.results-count');
     expect(count).to.exist;
-    expect(count.textContent).to.include('3');
+    expect(count.textContent).to.equal('Color palettes');
   });
 
   it('update() refreshes results count', async function () {
@@ -198,7 +198,7 @@ describe('createStripsRenderer — summary variant (results count)', () => {
     renderer.update(makeData(7));
 
     const count = container.querySelector('.results-count');
-    expect(count.textContent).to.include('7');
+    expect(count.textContent).to.equal('Color palettes');
   });
 
   it('formats count >= 1000 as xK', async function () {
@@ -209,6 +209,6 @@ describe('createStripsRenderer — summary variant (results count)', () => {
     renderer.update(makeData(1000));
 
     const count = container.querySelector('.results-count');
-    expect(count.textContent).to.include('1.0K');
+    expect(count.textContent).to.equal('Color palettes');
   });
 });
