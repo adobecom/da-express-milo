@@ -478,6 +478,7 @@ export const style = css`
   .swatch-rail[data-orientation="horizontal"] .hex-code {
     flex-shrink: 0;
     min-width: 0;
+    width: auto;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -1011,10 +1012,12 @@ export const style = css`
   button.hex-code {
     background: none;
     border: none;
-    padding: 7px 12px;
+    padding-block: 7px;
+    padding-inline: 0;
     font: inherit;
     text-align: center;
-    min-width: 75px;
+    width: 75px;
+    flex-shrink: 0;
     height: 32px;
     border-radius: var(--Corner-radius-corner-radius-100);
   }
@@ -1039,7 +1042,6 @@ export const style = css`
     outline-offset: 2px;
   }
   .hex-code--editable {
-    padding: 7px 12px;
     cursor: pointer;
   }
   .hex-code--copyable {

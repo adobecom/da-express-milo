@@ -66,7 +66,6 @@ class ColorEdit extends LitElement {
     loadSwatch();
     this._menuLoadPromise = loadMenu();
     loadTextfield();
-    this._syncFromPalette();
     this._closeMenuOnOutsideClick = (e) => {
       if (this._modeMenuOpen && !e.composedPath().includes(this.shadowRoot.querySelector('.ce-mode-wrap'))) {
         this._modeMenuOpen = false;
@@ -97,7 +96,7 @@ class ColorEdit extends LitElement {
     super.disconnectedCallback();
   }
 
-  updated(changed) {
+  willUpdate(changed) {
     if (changed.has('palette') || changed.has('selectedIndex')) {
       this._syncFromPalette();
     }

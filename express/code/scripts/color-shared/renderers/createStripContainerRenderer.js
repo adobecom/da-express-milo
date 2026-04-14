@@ -560,7 +560,7 @@ export function createStripContainerRenderer(options) {
   const cbStrings = config?.colorBlindnessStrings || null;
   const colorEditStrings = config?.colorEditStrings || null;
   const baseColorStrings = config?.baseColorStrings || null;
-  const { onColorChangeEnd } = options;
+  const { onColorChangeEnd, onEditOpen } = options;
   const mobileQuery = typeof options.mobileBreakpointQuery === 'string'
     ? options.mobileBreakpointQuery
     : MOBILE_BREAKPOINT_QUERY;
@@ -633,6 +633,7 @@ export function createStripContainerRenderer(options) {
     anchorRectFromDetail = null,
   ) {
     closeActiveColorEditor();
+    onEditOpen?.(selectedIndex);
 
     const state = controller?.getState?.() || {};
     const palette = (state.swatches || []).map((swatch) => swatch?.hex).filter(Boolean);

@@ -223,6 +223,7 @@ export default async function decorate(block) {
         baseColorStrings,
       },
       onColorChangeEnd: () => pushCurrentPalette(),
+      onEditOpen: (index) => controller.setActiveSwatchIndex(index),
     });
     stripRenderer.render(stripWrapper);
     syncRailConflicts();

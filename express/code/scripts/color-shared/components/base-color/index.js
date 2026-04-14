@@ -15,6 +15,11 @@ import '../color-channel-slider/index.js';
 
 const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
 
+/** Snap hue slider to original when within this many degrees (wraps at 0/360). */
+const ORIGINAL_COLOR_HUE_SNAP_DEG = 10;
+/** Snap color area to original S/B when both axes are within this many percent points. */
+const ORIGINAL_COLOR_AREA_SNAP_PCT = 4;
+
 class BaseColor extends LitElement {
   static get styles() {
     return [style];
@@ -70,6 +75,7 @@ class BaseColor extends LitElement {
     this._originalHue = 0;
     this._originalSaturation = 0;
     this._originalBrightness = 0;
+    this._pickerInputEnabled = false;
   }
 
   get _rgb() {
@@ -126,7 +132,7 @@ class BaseColor extends LitElement {
     super.connectedCallback();
     loadButton();
     this._menuLoadPromise = loadMenu();
-    loadColorArea();
+    this._colorAreaReady = loadColorArea();
     loadColorSlider();
     loadTextfield();
     this._closeMenuOnOutsideClick = (e) => {
@@ -153,11 +159,33 @@ class BaseColor extends LitElement {
     super.disconnectedCallback();
   }
 
-  updated(changed) {
+  willUpdate(changed) {
     if (changed.has('color') || !this._hasOriginal) {
       this._syncFromColor();
     }
+  }
+
+  updated() {
     this._updateOriginalDots();
+    if (!this._colorAreaInitSynced) {
+      this._colorAreaInitSynced = true;
+      this._syncColorAreaAfterInit();
+    }
+  }
+
+  async _syncColorAreaAfterInit() {
+    try {
+      await this._colorAreaReady;
+    } catch {
+      return;
+    }
+    const area = this.renderRoot.querySelector('sp-color-area');
+    if (!area) return;
+    await area.updateComplete;
+    if (this._pickerInputEnabled) return;
+    area.x = this._saturation / 100;
+    area.y = this._brightness / 100;
+    area.hue = this._hue;
   }
 
   _ensureDotStyles(shadowRoot) {
@@ -238,6 +266,20 @@ class BaseColor extends LitElement {
     if (!rgb) return;
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
 
+    if (this.color.toUpperCase() === this._hex.toUpperCase()) {
+      if (!this._hasOriginal) {
+        this._originalHue = this._hue;
+        this._originalSaturation = this._saturation;
+        this._originalBrightness = this._brightness;
+        this._hasOriginal = true;
+      }
+      return;
+    }
+
+    this._hue = hsb.hue;
+    this._saturation = hsb.saturation;
+    this._brightness = hsb.brightness;
+
     if (!this._hasOriginal) {
       this._originalHue = hsb.hue;
       this._originalSaturation = hsb.saturation;
@@ -245,10 +287,6 @@ class BaseColor extends LitElement {
       this._hasOriginal = true;
     }
 
-    if (this.color.toUpperCase() === this._hex.toUpperCase()) return;
-    this._hue = hsb.hue;
-    this._saturation = hsb.saturation;
-    this._brightness = hsb.brightness;
     this._colorUpdatedFromPicker = true;
     this._labCache = null;
   }
@@ -424,6 +462,11 @@ class BaseColor extends LitElement {
 
   _onPointerDown(e) {
     this._lastPointerType = e.pointerType;
+    this._pickerInputEnabled = true;
+  }
+
+  _onPickerKeyDown() {
+    this._pickerInputEnabled = true;
   }
 
   _blurOnTouch(target) {
@@ -435,12 +478,32 @@ class BaseColor extends LitElement {
 
   // --- Color area (Saturation/Brightness) ---
 
+  _snapColorAreaToOriginal(area, saturation, brightness) {
+    if (!this._hasOriginal) return { saturation, brightness };
+    const ds = Math.abs(saturation - this._originalSaturation);
+    const db = Math.abs(brightness - this._originalBrightness);
+    if (ds > ORIGINAL_COLOR_AREA_SNAP_PCT || db > ORIGINAL_COLOR_AREA_SNAP_PCT) {
+      return { saturation, brightness };
+    }
+    const s = this._originalSaturation;
+    const b = this._originalBrightness;
+    if (area) {
+      area.x = s / 100;
+      area.y = b / 100;
+    }
+    return { saturation: s, brightness: b };
+  }
+
   _onColorAreaInput(e) {
+    if (!this._pickerInputEnabled) return;
     const area = e.target;
     if (!area) return;
 
-    this._saturation = area.x * 100;
-    this._brightness = area.y * 100;
+    const rawS = area.x * 100;
+    const rawB = area.y * 100;
+    const snapped = this._snapColorAreaToOriginal(area, rawS, rawB);
+    this._saturation = snapped.saturation;
+    this._brightness = snapped.brightness;
     this._hexError = false;
     this._colorUpdatedFromPicker = true;
     this._labCache = null;
@@ -456,6 +519,7 @@ class BaseColor extends LitElement {
   // --- Hue slider ---
 
   _onHueInput(e) {
+    if (!this._pickerInputEnabled) return;
     const slider = e.target;
     if (slider.value == null) return;
 
@@ -463,7 +527,10 @@ class BaseColor extends LitElement {
     if (this._hasOriginal) {
       const diff = Math.abs(hue - this._originalHue);
       const wrappedDiff = Math.min(diff, 360 - diff);
-      if (wrappedDiff <= 5) hue = this._originalHue;
+      if (wrappedDiff <= ORIGINAL_COLOR_HUE_SNAP_DEG) {
+        hue = this._originalHue;
+        slider.value = hue;
+      }
     }
 
     this._hue = hue;
@@ -939,6 +1006,7 @@ class BaseColor extends LitElement {
             .y=${this._brightness / 100}
             .hue=${this._hue}
             @pointerdown=${this._onPointerDown}
+            @keydown=${this._onPickerKeyDown}
             @input=${this._onColorAreaInput}
             @change=${this._onColorAreaChange}
           ></sp-color-area>
@@ -947,6 +1015,7 @@ class BaseColor extends LitElement {
             gradient="hue"
             color=${currentColor}
             @pointerdown=${this._onPointerDown}
+            @keydown=${this._onPickerKeyDown}
             @input=${this._onHueInput}
             @change=${this._onHueInput}
           ></sp-color-slider>
