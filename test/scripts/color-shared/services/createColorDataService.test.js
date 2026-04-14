@@ -286,8 +286,7 @@ describe('createColorDataService', () => {
 
     const service = createColorDataService({ variant: 'gradients' });
 
-    const result = await service.toggleLike({ id: 'grad-1', liked: true });
-    expect(result).to.equal(true);
+    await service.toggleLike({ id: 'grad-1', liked: true });
     expect(fakeKuler.updateLike.calledOnce).to.equal(true);
     expect(fakeKuler.updateLike.firstCall.args[0]).to.deep.equal({
       id: 'grad-1',
@@ -302,8 +301,7 @@ describe('createColorDataService', () => {
 
     const service = createColorDataService({ variant: 'gradients' });
 
-    const result = await service.toggleLike({ id: 'grad-1', liked: false });
-    expect(result).to.equal(false);
+    await service.toggleLike({ id: 'grad-1', liked: false });
     expect(fakeKuler.updateLike.calledOnce).to.equal(true);
     expect(fakeKuler.updateLike.firstCall.args[0]).to.deep.equal({
       id: 'grad-1',
@@ -312,12 +310,16 @@ describe('createColorDataService', () => {
     });
   });
 
-  it('toggleLike returns liked state when kuler is unavailable', async () => {
+  it('toggleLike throws when kuler is unavailable', async () => {
     sinon.stub(serviceManager, 'getProvider').resolves(null);
 
     const service = createColorDataService({ variant: 'gradients' });
 
-    const result = await service.toggleLike({ id: 'grad-1', liked: true });
-    expect(result).to.equal(true);
+    try {
+      await service.toggleLike({ id: 'grad-1', liked: true });
+      expect.fail('Expected toggleLike to throw');
+    } catch (err) {
+      expect(err.message).to.equal('Kuler provider unavailable');
+    }
   });
 });

@@ -349,6 +349,24 @@ export async function initFloatingToolbar(container, options = {}) {
     reserveSpace,
   });
 
+  /* Hide toolbar when the page footer scrolls into view (mirrors floating-cta pattern) */
+  let footerIo = null;
+  const footer = document.querySelector('footer');
+  if (footer && typeof IntersectionObserver !== 'undefined') {
+    footerIo = new IntersectionObserver((entries) => {
+      const isVisible = entries[0].isIntersecting || entries[0].intersectionRatio > 0;
+      wrapper.classList.toggle('ax-toolbar-footer-hidden', isVisible);
+      if (isVisible) {
+        wrapper.setAttribute('aria-hidden', 'true');
+        wrapper.setAttribute('inert', '');
+      } else {
+        wrapper.removeAttribute('aria-hidden');
+        wrapper.removeAttribute('inert');
+      }
+    }, { rootMargin: '32px', threshold: 0 });
+    footerIo.observe(footer);
+  }
+
   return {
     toolbar,
     palette: finalPalette,
@@ -358,6 +376,7 @@ export async function initFloatingToolbar(container, options = {}) {
     setVariant,
     destroy() {
       clearStickyBehavior(wrapper, stickyReserveContainer, stickyIo);
+      if (footerIo) footerIo.disconnect();
       toolbar.destroy();
       wrapper.remove();
     },

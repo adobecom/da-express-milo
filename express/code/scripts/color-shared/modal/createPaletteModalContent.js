@@ -4,8 +4,6 @@ import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 
-const CREATOR_PLACEHOLDER_PATH = '/express/code/scripts/color-shared/modal/images/creator-placeholder.png';
-const DEFAULT_LIKES_COUNT = '1.2K';
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
 
 let contentStylesLoaded = false;
@@ -39,9 +37,9 @@ function getPaletteColors(palette = {}) {
 }
 
 function normalizeLikesCount(rawValue) {
-  if (rawValue == null) return DEFAULT_LIKES_COUNT;
+  if (rawValue == null) return '0';
   const value = typeof rawValue === 'string' ? rawValue.trim() : rawValue;
-  if (value === '' || value === 0 || value === '0') return DEFAULT_LIKES_COUNT;
+  if (value === '') return '0';
   return String(value);
 }
 
@@ -197,7 +195,7 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   const creatorImageUrl = options.creatorImageUrl
     ?? palette?.creator?.imageUrl
     ?? palette?.creatorImageUrl
-    ?? CREATOR_PLACEHOLDER_PATH;
+    ?? null;
   const hasOptionTags = Array.isArray(options.tags) && options.tags.length;
   const hasItemTags = Array.isArray(palette?.tags) && palette.tags.length;
   let tags = ['Color', 'Palette'];
@@ -233,6 +231,9 @@ function createPaletteMetaSection(palette = {}, options = {}) {
     updateLikeState();
     likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
     options.onLikeToggle?.({ id: palette?.id, liked: previousLiked })?.catch?.((error) => {
+      liked = previousLiked;
+      updateLikeState();
+      likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
       window.lana?.log(`[PaletteModal] Like toggle error: ${error?.message}`, {
         tags: 'color-modal,like',
         severity: 'warning',
@@ -250,8 +251,14 @@ function createPaletteMetaSection(palette = {}, options = {}) {
 
   const thumbnailContainer = createTag('div', { class: 'modal-thumbnail-container' });
   const thumbnailWrap = createTag('div', { class: 'modal-thumbnail' });
-  const thumbnailImg = createTag('img', { class: 'thumbnail-image', alt: creatorName, src: creatorImageUrl });
-  thumbnailWrap.appendChild(thumbnailImg);
+  if (creatorImageUrl) {
+    const thumbnailImg = createTag('img', { class: 'thumbnail-image', alt: creatorName, src: creatorImageUrl });
+    thumbnailWrap.appendChild(thumbnailImg);
+  } else {
+    const initial = createTag('span', { class: 'thumbnail-initial', 'aria-hidden': 'true' });
+    initial.textContent = creatorName.charAt(0).toUpperCase();
+    thumbnailWrap.appendChild(initial);
+  }
   const creatorNameEl = createTag('p', { class: 'modal-creator-name' });
   creatorNameEl.textContent = creatorName;
   thumbnailContainer.appendChild(thumbnailWrap);
@@ -371,6 +378,35 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   railWrap.appendChild(railAdapter.element);
   railSection.appendChild(railWrap);
   root.appendChild(railSection);
+
+  if (colorCountRange === 'large') {
+    const updateFade = () => {
+      const noOverflow = railWrap.scrollHeight <= railWrap.clientHeight;
+      const atBottom = !noOverflow
+        && railWrap.scrollHeight - railWrap.scrollTop - railWrap.clientHeight < 2;
+      railSection.classList.toggle('scrolled-to-bottom', noOverflow || atBottom);
+    };
+    railWrap.addEventListener('scroll', updateFade, { passive: true });
+    (async () => {
+      try {
+        await customElements.whenDefined('color-swatch-rail');
+        const rail = railWrap.querySelector('color-swatch-rail');
+        if (rail?.updateComplete) await rail.updateComplete;
+      } catch { /* noop */ }
+      requestAnimationFrame(() => {
+        updateFade();
+        const ro = new ResizeObserver(updateFade);
+        ro.observe(railWrap);
+        new MutationObserver((_, mo) => {
+          if (!document.contains(railSection)) {
+            ro.disconnect();
+            railWrap.removeEventListener('scroll', updateFade);
+            mo.disconnect();
+          }
+        }).observe(document.body, { childList: true, subtree: true });
+      });
+    })();
+  }
 
   const { initTabIndexes } = setupSwatchColumnNav(railWrap);
 

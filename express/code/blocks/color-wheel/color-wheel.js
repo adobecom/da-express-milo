@@ -842,7 +842,7 @@ export default async function decorate(block) {
         const { createActionMenuComponent } = await import('../../scripts/color-shared/components/createActionMenuComponent.js');
 
         const actionMenu = await createActionMenuComponent({
-          defaultActionMenuConfig,
+          ...defaultActionMenuConfig,
           type: 'controls-only',
           onGenerateRandom: () => {
             isGeneratingRandom = true;
@@ -864,7 +864,7 @@ export default async function decorate(block) {
       stripRenderer = createStripContainerRenderer({
         container: stripHost,
         data: [swatchRailController],
-        mobileBreakpointQuery: '(max-width: 1199px)',
+        mobileBreakpointQuery: '(max-width: 599px)',
         config: {
           stripContainerOrientations: ['vertical-responsive'],
           swatchFeatures: {

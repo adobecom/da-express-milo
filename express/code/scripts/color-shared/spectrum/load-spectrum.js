@@ -80,6 +80,15 @@ function installErrorSuppression() {
     if (isMenu && isUndef && isWeak) {
       event.preventDefault();
       event.stopImmediatePropagation();
+      return;
+    }
+    // "ResizeObserver loop completed with undelivered notifications" is a
+    // benign browser-generated warning, not a real error. The browser handles
+    // it gracefully; suppress it so it doesn't get logged to LANA.
+    const RESIZE_OBSERVER_MSG = 'ResizeObserver loop completed with undelivered notifications';                                                                                                                                                        
+    if (String(event?.message || '') === RESIZE_OBSERVER_MSG) {                                
+      event.preventDefault();                                                                                                                                                                                                                          
+      event.stopImmediatePropagation();
     }
   }, true);
 

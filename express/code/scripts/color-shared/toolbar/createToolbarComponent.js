@@ -114,6 +114,47 @@ async function handleDownload(palette, t) {
   }
 }
 
+/* Renders gradient to canvas for download. Uses even stop distribution since the
+   toolbar palette only carries a flat colors array — stop positions from the
+   gradient editor are not propagated to the toolbar. */
+async function handleGradientDownload(palette, t) {
+  try {
+    const { name = 'gradient', colors = [], angle = 90 } = palette;
+    const canvas = document.createElement('canvas');
+    canvas.width = 1920;
+    canvas.height = 1080;
+    const ctx = canvas.getContext('2d');
+    const rad = (angle - 90) * (Math.PI / 180);
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const len = Math.hypot(canvas.width, canvas.height) / 2;
+    const grad = ctx.createLinearGradient(
+      cx - Math.cos(rad) * len,
+      cy - Math.sin(rad) * len,
+      cx + Math.cos(rad) * len,
+      cy + Math.sin(rad) * len,
+    );
+    colors.forEach((hex, i) => {
+      grad.addColorStop(colors.length > 1 ? i / (colors.length - 1) : 0.5, hex);
+    });
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const blob = await new Promise((resolve) => { canvas.toBlob(resolve, 'image/jpeg', 0.95); });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name}.jpg`;
+    a.click();
+    URL.revokeObjectURL(url);
+    announceToScreenReader(t.downloadStarted);
+  } catch (err) {
+    window.lana?.log(`Gradient download failed: ${err.message}`, {
+      tags: 'color-floating-toolbar,download',
+      severity: 'error',
+    });
+  }
+}
+
 let activeDrawer = null;
 
 async function handleSave(
@@ -413,6 +454,8 @@ export function createToolbar(options) {
     effectiveShowEdit,
     async () => {
       const currentPalette = getPaletteWithName();
+      emit('edit', { palette: currentPalette });
+      if (window.isTestEnv) return;
       if (editPaletteLink) {
         window.location.href = editPaletteLink;
       } else {
@@ -435,7 +478,11 @@ export function createToolbar(options) {
     },
     onDownload: async () => {
       const currentPalette = getPaletteWithName();
-      await handleDownload(currentPalette, t);
+      if (type === 'gradient') {
+        await handleGradientDownload(currentPalette, t);
+      } else {
+        await handleDownload(currentPalette, t);
+      }
       emit('download', { palette: currentPalette });
     },
     onSave: async () => {

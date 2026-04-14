@@ -66,16 +66,21 @@
 
 .color-explore--strips .palettes-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--spacing-300);
   width: 100%;
   max-width: min(var(--explore-content-width), 100%);
   margin: 0 auto;
 }
 
+.color-explore--strips .palettes-grid > * {
+  min-width: 0;
+}
+
 .color-explore--strips .palettes-grid .color-card {
   --explore-palette-card-height: 88px;
   --explore-palette-strip-height: 56px;
+  --color-palette-min-width: 0;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -628,7 +633,7 @@
   }
 
   .color-explore.color-explore--strips .palettes-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--spacing-300);
   }
 

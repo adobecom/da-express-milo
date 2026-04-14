@@ -20,6 +20,7 @@
   gap: var(--spacing-300);
   overflow: visible;
   padding-block-end: var(--spacing-300);
+  isolation: isolate;
 }
 
 .color-wheel .ax-shell-slot--canvas {
@@ -549,11 +550,5 @@ color-wheel-express {
 
   .color-wheel .color-floating-toolbar-container .ax-swatch-strip {
     display: flex;
-  }
-}
-
-@media (min-width: 1440px) {
-  .color-wheel .ax-color-tool-layout {
-    box-sizing: content-box;
   }
 }

@@ -66,6 +66,9 @@ export function createPaletteVariant(palette, variant, options = {}) {
 
     const visual = createTag('div', { class: 'color-card-visual' });
     visual.appendChild(strip.element);
+    visual.addEventListener('click', () => {
+      emit('palette-click', palette);
+    });
     const paletteEl = visual.querySelector('color-palette');
     if (paletteEl) {
       paletteEl.setAttribute('focusable', 'false');
@@ -91,7 +94,7 @@ export function createPaletteVariant(palette, variant, options = {}) {
     editBtn.appendChild(editIcon);
     editBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      emit('palette-click', palette);
+      emit('palette-edit', palette);
     });
     const shareBtn = createTag('button', {
       type: 'button',

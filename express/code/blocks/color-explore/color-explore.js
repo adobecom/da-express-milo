@@ -5,8 +5,9 @@ import BlockMediator from '../../scripts/block-mediator.min.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
 import { createSwatchesRenderer } from '../../scripts/color-shared/renderers/createSwatchesRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
-import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
+import { createGradientModalContent, ensureGradientModalContentStyles } from '../../scripts/color-shared/modal/createGradientModalContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
+import { buildPaletteEditUrl } from '../../scripts/color-shared/utils/utilities.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
@@ -26,6 +27,7 @@ const DEFAULTS = {
 const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
 const EVENTS = {
   PALETTE_CLICK: 'palette-click',
+  PALETTE_EDIT: 'palette-edit',
   GRADIENT_CLICK: 'gradient-click',
   SHARE: 'share',
   SEARCH: 'search',
@@ -336,12 +338,12 @@ export default async function decorate(block) {
       block.addEventListener('block-unload', cleanupDualMode, { once: true });
 
       const openModalForItem = async (item, fallbackTitle) => {
-        await loadGradientPickerRebuildStyles();
+        await ensureGradientModalContentStyles();
         const content = item || {};
         modalManager.open({
           title: content.name || fallbackTitle,
           showTitle: false,
-          content: () => createGradientPickerRebuildContent(content, {
+          content: () => createGradientModalContent(content, {
             likesCount: content.likes ?? content.likesCount ?? 0,
             liked: content.liked ?? false,
             creatorName: content.creator?.name ?? '',
@@ -559,6 +561,12 @@ export default async function decorate(block) {
               },
             );
           });
+          activeRenderer.on(EVENTS.PALETTE_EDIT, (palette) => {
+            const colors = palette?.colors || [];
+            const name = palette?.name || '';
+            const editUrl = buildPaletteEditUrl('/create/color-wheel', colors, name);
+            window.location.href = editUrl;
+          });
           activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
             await modalManager.openPaletteSwatchesModal(
               palette || {},
@@ -684,6 +692,12 @@ export default async function decorate(block) {
             onLikeToggle: async ({ id, liked }) => dataService.toggleLike({ id, liked }),
           },
         );
+      });
+      renderer.on(EVENTS.PALETTE_EDIT, (palette) => {
+        const colors = palette?.colors || [];
+        const name = palette?.name || '';
+        const editUrl = buildPaletteEditUrl('/create/color-wheel', colors, name);
+        window.location.href = editUrl;
       });
       renderer.on(EVENTS.SHARE, async ({ palette }) => {
         await modalManager.openPaletteSwatchesModal(

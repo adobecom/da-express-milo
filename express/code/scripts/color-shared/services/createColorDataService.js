@@ -287,27 +287,17 @@ export function createColorDataService(config) {
   }
 
   async function toggleLike(item) {
-    try {
-      const kuler = await serviceManager.getProvider('kuler');
-      if (!kuler) {
-        window.lana?.log('[DataService] Kuler provider unavailable for like toggle', {
-          tags: 'color-explore,data-service',
-          severity: 'warning',
-        });
-        return item?.liked ?? false;
-      }
-      await kuler.updateLike({
-        id: item?.id,
-        like: item?.liked ? null : { user: true },
-        source: 'color-explore',
-      });
-      return item?.liked ?? false;
-    } catch (error) {
-      window.lana?.log(`[DataService] Toggle like error: ${error?.message}`, {
-        tags: 'color-explore,data-service',
-        severity: 'warning',
-      });
-      return item?.liked ?? false;
+    const kuler = await serviceManager.getProvider('kuler');
+    if (!kuler) {
+      throw new Error('Kuler provider unavailable');
+    }
+    const result = await kuler.updateLike({
+      id: item?.id,
+      like: item?.liked ? null : { user: true },
+      source: 'color-explore',
+    });
+    if (result === null) {
+      throw new Error('Like toggle failed');
     }
   }
 
