@@ -371,8 +371,8 @@ function createLibraryPickerField(
 function createKeywordSuggestions(keywords, { onSuggestionClick } = {}) {
   const wrapper = createTag('div', { class: 'ax-drawer-keyword-suggestions' });
   keywords.forEach((keyword) => {
-    const btn = createTag('button', { type: 'button', class: 'ax-tag-pill ax-drawer-tag-btn' });
-    const label = createTag('span', { class: 'ax-tag-pill-label' });
+    const btn = createTag('button', { type: 'button', class: 'ax-tag-pill ax-drawer-tag-btn', 'aria-label': `Add ${keyword}` });
+    const label = createTag('span', { class: 'ax-tag-pill-label', 'aria-hidden': 'true' });
     label.textContent = keyword;
     const icon = createSpectrumIcon('Add');
     icon.setAttribute('aria-hidden', 'true');

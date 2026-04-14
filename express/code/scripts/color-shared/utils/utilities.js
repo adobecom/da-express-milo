@@ -141,8 +141,8 @@ export function restoreFocusedElement(el) {
   }
 }
 
-let overlayZCounter = 8;
-const OVERLAY_Z_MAX = 17;
+let overlayZCounter = 89;
+const OVERLAY_Z_MAX = 98;
 
 export function getNextOverlayZIndex() {
   if (overlayZCounter < OVERLAY_Z_MAX) overlayZCounter += 1;
