@@ -125,6 +125,11 @@ function styleButtons(block, variantClass) {
     }
 
     button.className = buttonClasses.join(' ');
+
+    if (!button.getAttribute('aria-label')) {
+      const label = button.title || button.textContent?.trim();
+      if (label) button.setAttribute('aria-label', label);
+    }
   });
 }
 

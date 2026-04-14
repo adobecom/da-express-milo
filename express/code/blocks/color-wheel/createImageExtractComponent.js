@@ -347,7 +347,7 @@ export default function createImageExtractComponent(options = {}) {
     if (oldImg && imgLoadHandler) oldImg.removeEventListener('load', imgLoadHandler);
     if (markers) markers.destroy();
 
-    const createImageMarkers = await import('../color-extract/helpers/imageMarkers.js');
+    const { default: createImageMarkers } = await import('../color-extract/helpers/imageMarkers.js');
     markers = createImageMarkers(bgWrapper, canvas, controller, {
       onMoodOverride,
     });

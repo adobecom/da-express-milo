@@ -159,8 +159,7 @@ export default async function decorate(block) {
         name: initialPalette.name,
       },
       toolbar: {
-        mode: 'sticky-on-scroll',
-        variant: 'standalone',
+        variant: 'sticky-on-scroll',
         showEdit: false,
         showPaletteName: true,
         editPaletteName: false,
@@ -174,7 +173,6 @@ export default async function decorate(block) {
       },
     });
 
-    adoptHeadline(block, layoutInstance);
     await layoutInstance.actionMenuReady;
 
     layoutInstance.actionMenu?.pushState?.(initialPalette.colors);
@@ -202,6 +200,7 @@ export default async function decorate(block) {
       destroy: destroyInstance,
     });
 
+    adoptHeadline(block, layoutInstance);
     block.dataset.shellState = 'ready';
     block.dataset.blockStatus = 'loaded';
     trackColorBlockLoad('color-contrast-checker');

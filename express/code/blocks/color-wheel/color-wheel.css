@@ -20,6 +20,7 @@
   gap: var(--spacing-300);
   overflow: visible;
   padding-block-end: var(--spacing-300);
+  isolation: isolate;
 }
 
 .color-wheel .ax-shell-slot--canvas {
@@ -357,11 +358,6 @@ color-wheel-express {
   overflow: hidden;
 }
 
-.color-wheel .color-floating-toolbar-container .ax-swatch-strip,
-.color-wheel .color-floating-toolbar-container .ax-palette-summary sp-action-button {
-  display: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .color-wheel-harmony-carousel-host .simple-carousel-platform {
     scroll-behavior: auto;
@@ -401,10 +397,6 @@ color-wheel-express {
 /* Large Tablet */
 
 @media (min-width: 888px) {
-  .color-wheel .ax-shell-slot--topbar {
-    padding-block-end: var(--spacing-100);
-  }
-
   .color-wheel .ax-shell-slot--sidebar {
     padding-block-end: 0;
   }

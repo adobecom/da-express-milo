@@ -386,6 +386,13 @@ async function loadPage() {
 
   const config = setConfig({ ...CONFIG, miloLibs });
 
+  // Legacy color.adobe.com deeplink redirect
+  if (/color-theme-\d+\/?$/.test(window.location.pathname)) {
+    const { default: colorThemeRedirect } = await import('./utils/color-theme-redirect.js');
+    const redirected = await colorThemeRedirect(config);
+    if (redirected) return;
+  }
+
   if (getMetadata('template-search-page') === 'Y') {
     const { default: redirect } = await import('./utils/template-redirect.js');
     await redirect();

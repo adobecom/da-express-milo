@@ -42,7 +42,6 @@
 /* When image is loaded, the 640px marquee wrapper must expand to full width */
 .color-extract-marquee-wrapper:has(.color-extract.has-image) {
   width: 100%;
-  max-width: unset;
 }
 
 /* Section containing the marquee wrapper: position for bg/fade, flex to vertically center content */
@@ -55,7 +54,7 @@
 }
 
 .color-extract {
-  contain: layout style;
+  --ax-color-tool-presentation-max-width: 1440px;
   --color-extract-max-width: 1440px;
   --color-extract-gap: 32px;
   --color-extract-radius: 16px;
@@ -89,14 +88,13 @@
   display: flex;
   flex-direction: column;
   gap: 48px;
-  max-width: 100%;
   margin: 0 auto;
   padding: 0 0 72px;
   color: var(--color-extract-text);
 }
 
 .color-extract.has-image .color-extract-inner {
-  max-width: var(--color-extract-max-width);
+  width: min(var(--color-extract-max-width), 100%);
   padding: 66px 24px 72px;
 }
 
@@ -129,14 +127,20 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing {
   pointer-events: none;
 }
 
-.color-extract .color-extract-landing-bg picture,
-.color-extract .color-extract-landing-bg img {
+.color-extract .color-extract-landing-bg picture {
   position: absolute;
   inset: 0;
-  width: 100%;
+  display: block;
+}
+
+.color-extract .color-extract-landing-bg img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: none;
   height: auto;
-  max-width: 1920px;
-  margin: 0 auto;
 }
 
 /*
@@ -165,21 +169,26 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   z-index: 0;
 }
 
-.section > .color-extract-landing-bg picture,
-.section > .color-extract-landing-bg img {
+.section > .color-extract-landing-bg picture {
   position: absolute;
   inset: 0;
-  width: 100%;
+  display: block;
+}
+
+.section > .color-extract-landing-bg img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: none;
   height: auto;
-  max-width: 1920px;
-  margin: 0 auto;
 }
 
 .color-extract .color-extract-landing-content {
   position: relative;
   z-index: 2;
   width: min(1440px, 100%);
-  max-width: 1679px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -338,6 +347,10 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 /* ---- Typography ---- */
 
+.color-extract .color-extract-edit-copy .icon.icon-adobe-express-logo {
+  padding: 0;
+}
+
 .color-extract .color-extract-edit-copy h1 {
   font-size: 45px;
   line-height: 1.04;
@@ -389,8 +402,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   flex-direction: column;
   gap: 12px;
   align-items: center;
-  width: 100%;
-  max-width: 343px;
+  width: min(343px, 100%);
 }
 
 .color-extract .color-extract-suggestions-label {
@@ -498,7 +510,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   display: none;
   flex-direction: column;
   gap: 24px;
-  contain: layout style paint;
 }
 
 .color-extract.has-image .color-extract-edit {
@@ -510,7 +521,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 .color-extract.has-image .color-extract-edit-copy {
-  max-width: 720px;
+  width: min(720px, 100%);
   text-align: left;
 }
 
@@ -564,8 +575,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   padding: 16px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(28px);
-  /* Fixed 634px from Figma spec — image scales to fit, never drives sizing */
-  height: 634px;
+  height: 490px;
 }
 
 .color-extract .color-extract-edit-bg picture,
@@ -598,7 +608,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   width: 100%;
   height: 100%;
   display: block;
-  border-radius: 8px;
+  border-radius: 0;
   object-fit: contain;
   left: 0;
   transform: none;
@@ -668,7 +678,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 .color-extract .color-extract-mood-dropdown {
   position: relative;
-  width: 330px;
+  width: fit-content;
+  max-width: 330px;
 }
 
 .color-extract .color-extract-mood-trigger {
@@ -936,7 +947,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 .color-extract .color-extract-gradient-editor-col .gradient-editor {
   flex: 0 0 auto;
   width: 100%;
-  max-width: 100%;
   height: 80px;
   border-radius: 16px;
   overflow: visible;
@@ -952,8 +962,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 .color-extract .color-extract-gradient-editor-col .gradient-editor-handles {
-  left: 12px;
-  right: 12px;
+  left: 8px;
+  right: 8px;
 }
 
 
@@ -988,7 +998,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
   .color-extract .color-extract-landing-content {
     width: 100%;
-    max-width: 100%;
   }
 
   .color-extract .color-extract-edit-copy h1 {
@@ -1047,12 +1056,18 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 @media (max-width: 599px) {
+  .section:has(.color-extract-marquee-wrapper) {
+    align-items: flex-start;
+    min-height: unset;
+    padding-inline: 16px;
+  }
+
   .color-extract .color-extract-landing {
     padding: 32px 16px;
   }
 
   .color-extract.has-image .color-extract-inner {
-    padding: 32px 16px 56px;
+    padding: var(--spacing-500) 0 56px;
     gap: 24px;
   }
 
@@ -1073,6 +1088,29 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
   .color-extract .color-extract-toolbar-divider {
     display: none;
+  }
+
+  /* Flatten toolbar-left so mood and actions join the toolbar's flex directly */
+  .color-extract .color-extract-toolbar-left {
+    display: contents;
+  }
+
+  /* Mood: full width, stack label above trigger */
+  .color-extract .color-extract-mood {
+    width: 100%;
+    height: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .color-extract .color-extract-mood-dropdown {
+    width: 100%;
+    max-width: none;
+  }
+
+  .color-extract .color-extract-mood-trigger {
+    width: 100%;
   }
 
 }
