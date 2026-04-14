@@ -74,8 +74,6 @@ export function createSwatchesRenderer(options) {
   function positionPopover(popover, anchorRect) {
     const gap = 8;
     const popRect = popover.getBoundingClientRect();
-    const scrollX = window.scrollX || window.pageXOffset || 0;
-    const scrollY = window.scrollY || window.pageYOffset || 0;
 
     let top = anchorRect.bottom + gap;
     if (top + popRect.height > window.innerHeight) {
@@ -86,8 +84,8 @@ export function createSwatchesRenderer(options) {
     let left = anchorRect.left + (anchorRect.width - popRect.width) / 2;
     left = Math.max(gap, Math.min(left, window.innerWidth - popRect.width - gap));
 
-    popover.style.top = `${top + scrollY}px`;
-    popover.style.left = `${left + scrollX}px`;
+    popover.style.top = `${top}px`;
+    popover.style.left = `${left}px`;
   }
 
   function closeActiveColorEditor() {
@@ -98,9 +96,11 @@ export function createSwatchesRenderer(options) {
       mobile,
       outsideHandler,
       escapeHandler,
+      scrollHandler,
     } = activeColorEditor;
     if (outsideHandler) document.removeEventListener('click', outsideHandler, true);
     if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
+    if (scrollHandler) window.removeEventListener('scroll', scrollHandler, true);
     if (mobile) {
       try {
         adapter.hide?.();
@@ -162,7 +162,7 @@ export function createSwatchesRenderer(options) {
     popover.className = 'swatches-color-edit-popover';
     popover.setAttribute('role', 'dialog');
     popover.setAttribute('aria-label', 'Edit color');
-    popover.style.position = 'absolute';
+    popover.style.position = 'fixed';
     popover.style.zIndex = '10002';
     popover.appendChild(editorElement);
     document.body.appendChild(popover);
@@ -181,8 +181,13 @@ export function createSwatchesRenderer(options) {
     const escapeHandler = (evt) => {
       if (evt.key === 'Escape') closeActiveColorEditor();
     };
+    const scrollHandler = () => {
+      closeActiveColorEditor();
+    };
+
     document.addEventListener('click', outsideHandler, true);
     document.addEventListener('keydown', escapeHandler, true);
+    window.addEventListener('scroll', scrollHandler, true);
 
     activeColorEditor = {
       adapter,
@@ -190,6 +195,7 @@ export function createSwatchesRenderer(options) {
       mobile: false,
       outsideHandler,
       escapeHandler,
+      scrollHandler,
     };
   }
 
