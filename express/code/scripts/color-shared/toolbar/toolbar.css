@@ -229,7 +229,7 @@
 
 
 .ax-palette-name-input {
-  font-family: var(--body-font-family);
+  font-family: 'Adobe Clean Spectrum VF', var(--body-font-family);
   font-weight: var(--ax-body-weight);
   font-size: var(--ax-body-xs-size);
   line-height: var(--line-height-100);
