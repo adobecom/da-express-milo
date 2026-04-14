@@ -74,7 +74,6 @@ async function handleShare({ name, colors }, t) {
 }
 
 // const COLOR_PALETTE_TEMPLATE_ID = 'urn:aaid:sc:VA6C2:60d17865-6817-5343-84db-34219e8ec3a4';
-const COLOR_PALETTE_LEARN_PARAM = 'exercise:express/how-to/in-app/how-to-apply-your-color-palette-to-the-template:-1';
 
 async function handleOpenInExpress({ id, name, colors }) {
   const isSignedIn = await triggerSignInFlow();
@@ -91,7 +90,6 @@ async function handleOpenInExpress({ id, name, colors }) {
   const colorPaletteData = { id, colors };
   if (name) colorPaletteData.name = name;
 
-  url.searchParams.set('learn', COLOR_PALETTE_LEARN_PARAM);
   url.searchParams.set('colorPalette', JSON.stringify(colorPaletteData));
   url.searchParams.set('referrer', 'express-colors');
   url.searchParams.set('entryPoint', 'color-explorer');
