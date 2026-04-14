@@ -183,8 +183,6 @@ export default async function decorate(block) {
 
     await layoutInstance.actionMenuReady;
 
-    layoutInstance.actionMenu?.pushState?.(initialPalette.colors);
-
     checkerInstance = await mountContrastChecker(layoutInstance.slots.sidebar, {
       config,
       layout: layoutInstance,
