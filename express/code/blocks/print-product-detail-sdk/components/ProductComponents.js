@@ -597,6 +597,7 @@ function PaperTypeContent({ onClose }) {
       button.setAttribute('data-name', option.value);
       button.setAttribute('data-title', option.title);
       button.setAttribute('aria-label', option.title);
+      button.setAttribute('data-tooltip', option.title);
       button.setAttribute('aria-current', isSelected ? 'true' : 'false');
       button.setAttribute('aria-checked', isSelected ? 'true' : 'false');
       button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');

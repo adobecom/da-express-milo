@@ -577,7 +577,7 @@ main .pdpx-checkout-button-subhead a.pdpx-checkout-button-subhead-link {
 }
 @media (hover: hover) {
   .pdpx-mini-pill-image-container::after {
-    content: attr(aria-label);
+    content: attr(data-tooltip);
     position: fixed;
     font-size: var(--ax-body-xs-size);
     padding: var(--spacing-325) var(--spacing-200);

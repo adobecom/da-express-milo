@@ -356,6 +356,7 @@ function buildPillElement(option, isSelected, index, setSize, activeIndex, handl
   button.setAttribute('aria-posinset', String(index + 1));
   button.setAttribute('aria-setsize', String(setSize));
   button.setAttribute('aria-label', `${option.title}${option.priceDelta ? ` ${option.priceDelta}` : ''}`);
+  button.setAttribute('data-tooltip', option.title);
   button.setAttribute('tabindex', index === activeIndex ? '0' : '-1');
   button.addEventListener('click', () => handleOptionClick(option));
   button.addEventListener('keydown', handleMiniPillKeyDown);
