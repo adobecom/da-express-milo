@@ -1,4 +1,4 @@
-import { createZazzleStore, extractTemplateId } from './utilities/utility-functions.js';
+import { createZazzleStore, extractTemplateId, addPrefetchLinks } from './utilities/utility-functions.js';
 import { getLibs } from '../../scripts/utils.js';
 import {
   html,
@@ -143,16 +143,44 @@ export default async function decorate(block) {
   block.innerHTML = '';
   const mountPoint = document.createElement('div');
   block.append(mountPoint);
-  const store = await createZazzleStore();
-  render(html`<${PDPApp} sdkStore=${store.sdk} templateId=${templateId} />`, mountPoint);
-  const { loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`);
-  const { codeRoot } = getConfig();
-  await Promise.all([
-    new Promise((resolve) => {
-      loadStyle(`${codeRoot}/scripts/widgets/simple-carousel.css`, resolve);
-    }),
-    new Promise((resolve) => {
-      loadStyle(`${codeRoot}/scripts/widgets/picker.css`, resolve);
-    }),
-  ]);
+
+  // Show skeleton immediately as static HTML (no store/Preact needed)
+  mountPoint.innerHTML = `
+    <div class="pdpx-global-container" aria-busy="true" aria-label="Loading product information">
+      <div class="pdpx-product-images-container">
+        <div class="pdpx-product-hero-image-container" data-skeleton="true" style="height: 400px;"></div>
+      </div>
+      <div class="pdpx-product-info-wrapper">
+        <div class="pdpx-product-info-heading-section-container">
+          <h1 class="pdpx-product-title" data-skeleton="true" style="height: 32px; width: 60%;"></h1>
+          <div class="pdpx-price-info-container" data-skeleton="true" style="height: 40px; width: 40%; margin-top: 16px;"></div>
+        </div>
+        <div class="pdpx-product-info-section-container">
+          <div class="pdpx-customization-inputs-container" data-skeleton="true" style="height: 300px; margin-top: 24px;"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Preload SDK module so the browser starts fetching it early
+  const sdkPath = new URL('./sdk/index.min.js', import.meta.url).href;
+  const preloadLink = document.createElement('link');
+  preloadLink.rel = 'modulepreload';
+  preloadLink.href = sdkPath;
+  document.head.appendChild(preloadLink);
+
+  // DNS prefetch + preconnect for Zazzle domains (fire-and-forget)
+  addPrefetchLinks();
+
+  // Load widget CSS in parallel (fire-and-forget, don't block decorate)
+  import(`${getLibs()}/utils/utils.js`).then(({ loadStyle, getConfig }) => {
+    const { codeRoot } = getConfig();
+    loadStyle(`${codeRoot}/scripts/widgets/simple-carousel.css`);
+    loadStyle(`${codeRoot}/scripts/widgets/picker.css`);
+  });
+
+  // Create store and mount Preact app async (skeleton already visible)
+  createZazzleStore().then((store) => {
+    render(html`<${PDPApp} sdkStore=${store.sdk} templateId=${templateId} />`, mountPoint);
+  });
 }

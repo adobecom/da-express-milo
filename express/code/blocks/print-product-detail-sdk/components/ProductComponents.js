@@ -174,6 +174,7 @@ export function ProductImages() {
   const { state, actions } = useStore();
   const containerRef = useRef(null);
   const carouselCleanupRef = useRef(null);
+  const hasPreloadedRef = useRef(false);
 
   if (!state || !state.selectedRealview) {
     return null;
@@ -181,6 +182,17 @@ export function ProductImages() {
 
   const { realviews = [], selectedRealview } = state;
   const heroImageUrl = updateImageUrl(selectedRealview.url, 644);
+
+  // Preload the hero image on first render so the browser starts fetching immediately
+  if (!hasPreloadedRef.current && heroImageUrl) {
+    hasPreloadedRef.current = true;
+    const link = document.createElement('link');
+    link.rel = 'preload';
+    link.as = 'image';
+    link.href = heroImageUrl;
+    link.fetchPriority = 'high';
+    document.head.appendChild(link);
+  }
 
   const handleThumbnailClick = (realview) => {
     actions.selectRealview(realview.id);
