@@ -286,22 +286,15 @@ export function createStripsRenderer(options) {
     return createPalettesGridForVariant(variant);
   }
 
-  function getAnalyticsHeaderText() {
-    return resultsCountEl?.textContent
-      || rootContainer?.querySelector('.results-count')?.textContent
-      || 'Color palettes';
-  }
-
   function applyCardActionAnalytics(gridEl) {
     if (!gridEl) return;
     const buttons = Array.from(gridEl.querySelectorAll('.color-card-action-btn'));
-    const headerText = getAnalyticsHeaderText();
 
-    buttons.forEach((button, index) => {
+    buttons.forEach((button) => {
       const linkLabel = button.getAttribute('data-tooltip-content')
         || button.getAttribute('aria-label')
         || 'Open';
-      decorateAnalyticsAttributes(button, { linkLabel, linkIndex: index + 1, headerText });
+      decorateAnalyticsAttributes(button, { linkLabel });
     });
   }
 

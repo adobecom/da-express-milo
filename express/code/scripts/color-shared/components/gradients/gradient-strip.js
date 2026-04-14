@@ -47,11 +47,9 @@ function createGradientStrip(gradient, options = {}) {
     'data-tooltip-content': actionLabel,
     tabindex: '-1',
   });
-  if (analytics && typeof analytics === 'object' && analytics.linkIndex != null) {
+  if (analytics && typeof analytics === 'object') {
     decorateAnalyticsAttributes(actionBtn, {
       linkLabel: analytics.linkLabel || 'View details',
-      linkIndex: analytics.linkIndex,
-      headerText: analytics.headerText || '',
     });
   }
 
@@ -96,26 +94,7 @@ function createGradientStrip(gradient, options = {}) {
 
 export function createGradientStripElements(gradients, options = {}) {
   if (!Array.isArray(gradients) || gradients.length === 0) return [];
-  const { analytics: baseAnalytics } = options;
-  return gradients.map((g, i) => {
-    const cardOptions = { ...options };
-    if (baseAnalytics && (baseAnalytics.linkIndex != null
-      || baseAnalytics.headerText != null
-      || baseAnalytics.startIndex != null)) {
-      let linkIndex = null;
-      if (baseAnalytics.linkIndex != null) {
-        linkIndex = baseAnalytics.linkIndex;
-      } else if (baseAnalytics.startIndex != null) {
-        linkIndex = baseAnalytics.startIndex + i + 1;
-      }
-      cardOptions.analytics = {
-        ...baseAnalytics,
-        linkIndex,
-        headerText: baseAnalytics.headerText ?? '',
-      };
-    }
-    return createGradientStrip(g, cardOptions);
-  });
+  return gradients.map((g) => createGradientStrip(g, options));
 }
 
 export default createGradientStripElements;

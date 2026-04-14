@@ -146,7 +146,7 @@ function createSearchBarWrapper(
     'aria-label': 'Clear search',
   });
   clearBtn.innerHTML = ICONS.clear;
-  decorateAnalyticsAttributes(clearBtn, { linkLabel: 'Clear search', headerText: 'search bar' });
+  decorateAnalyticsAttributes(clearBtn, { linkLabel: 'Clear search' });
 
   inputWrapper.append(searchIcon, input, clearBtn);
   form.append(inputWrapper);

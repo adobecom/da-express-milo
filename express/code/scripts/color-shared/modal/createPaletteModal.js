@@ -52,7 +52,7 @@ export default function createPaletteModal(palette, options = {}) {
         'aria-label': `Edit color ${color}`,
       });
       editBtn.textContent = 'Edit';
-      decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit color', linkIndex: index + 1, headerText: 'palette modal' });
+      decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit color' });
       editBtn.addEventListener('click', () => {
         onColorEdit?.(color, index);
       });
@@ -63,7 +63,7 @@ export default function createPaletteModal(palette, options = {}) {
         'aria-label': `Copy ${color}`,
       });
       copyBtn.textContent = 'Copy';
-      decorateAnalyticsAttributes(copyBtn, { linkLabel: 'Copy color', linkIndex: index + 1, headerText: 'palette modal' });
+      decorateAnalyticsAttributes(copyBtn, { linkLabel: 'Copy color' });
       copyBtn.addEventListener('click', () => {
         navigator.clipboard.writeText(color);
         copyBtn.textContent = 'Copied!';
@@ -128,7 +128,7 @@ export default function createPaletteModal(palette, options = {}) {
       class: 'save-libraries-btn',
     });
     saveBtn.textContent = 'Save to Adobe Libraries';
-    decorateAnalyticsAttributes(saveBtn, { linkLabel: 'Save to libraries', headerText: 'palette modal' });
+    decorateAnalyticsAttributes(saveBtn, { linkLabel: 'Save to libraries' });
     saveBtn.addEventListener('click', () => {
     });
 

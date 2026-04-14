@@ -271,7 +271,7 @@ function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t) {
       onClick: onEditClick,
     });
     editBtn.classList.add('ax-edit-btn');
-    decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit palette', headerText: 'toolbar' });
+    decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit palette' });
     attachTooltip(editBtn, t.edit);
     paletteSummary.appendChild(editBtn);
   }
@@ -287,7 +287,7 @@ function buildActionButtons(handlers, t) {
     size: 'm',
     onClick: handlers.onShare,
   });
-  decorateAnalyticsAttributes(shareBtn, { linkLabel: 'Share', linkIndex: 1, headerText: 'toolbar' });
+  decorateAnalyticsAttributes(shareBtn, { linkLabel: 'Share' });
   attachTooltip(shareBtn, t.share);
   actions.appendChild(shareBtn);
 
@@ -297,7 +297,7 @@ function buildActionButtons(handlers, t) {
     size: 'm',
     onClick: handlers.onDownload,
   });
-  decorateAnalyticsAttributes(downloadBtn, { linkLabel: 'Download', linkIndex: 2, headerText: 'toolbar' });
+  decorateAnalyticsAttributes(downloadBtn, { linkLabel: 'Download' });
   attachTooltip(downloadBtn, t.download);
   actions.appendChild(downloadBtn);
 
@@ -307,7 +307,7 @@ function buildActionButtons(handlers, t) {
     size: 'm',
     onClick: handlers.onSave,
   });
-  decorateAnalyticsAttributes(ccLibBtn, { linkLabel: 'Save to library', linkIndex: 3, headerText: 'toolbar' });
+  decorateAnalyticsAttributes(ccLibBtn, { linkLabel: 'Save to library' });
   attachTooltip(ccLibBtn, t.saveToLibrary);
   actions.appendChild(ccLibBtn);
 
@@ -320,7 +320,7 @@ function buildCTAButton(getCTAText, onClick) {
   ctaBtn.setAttribute('size', 'l');
   ctaBtn.textContent = getCTAText();
   ctaBtn.addEventListener('click', onClick);
-  decorateAnalyticsAttributes(ctaBtn, { linkLabel: 'CTA', headerText: 'toolbar' });
+  decorateAnalyticsAttributes(ctaBtn, { linkLabel: 'CTA' });
   return ctaBtn;
 }
 

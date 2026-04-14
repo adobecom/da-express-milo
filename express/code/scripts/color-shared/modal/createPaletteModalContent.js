@@ -135,7 +135,7 @@ export function createFullPaletteModalContent(palette, options = {}) {
     const copyBtn = createTag('button', { type: 'button', class: 'color-modal-full-palette-btn' });
     copyBtn.textContent = 'Copy';
     copyBtn.setAttribute('aria-label', `Copy ${hex}`);
-    decorateAnalyticsAttributes(copyBtn, { linkLabel: 'Copy color', linkIndex: index + 1, headerText: 'palette detail' });
+    decorateAnalyticsAttributes(copyBtn, { linkLabel: 'Copy color' });
     copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(hex).then(() => {
         copyBtn.textContent = 'Copied';
@@ -146,7 +146,7 @@ export function createFullPaletteModalContent(palette, options = {}) {
     const editBtn = createTag('button', { type: 'button', class: 'color-modal-full-palette-btn' });
     editBtn.textContent = 'Edit';
     editBtn.setAttribute('aria-label', `Edit color ${hex}`);
-    decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit color', linkIndex: index + 1, headerText: 'palette detail' });
+    decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit color' });
     editBtn.addEventListener('click', () => {
       onEditColor?.(hex, index);
     });
@@ -179,7 +179,7 @@ export function createFullPaletteModalContent(palette, options = {}) {
   const saveSection = createTag('div', { class: 'color-modal-full-palette-save' });
   const saveBtn = createTag('button', { type: 'button', class: 'color-modal-full-palette-save-btn' });
   saveBtn.textContent = 'Save to Adobe Libraries';
-  decorateAnalyticsAttributes(saveBtn, { linkLabel: 'Save to libraries', headerText: 'palette detail' });
+  decorateAnalyticsAttributes(saveBtn, { linkLabel: 'Save to libraries' });
   saveBtn.addEventListener('click', () => {
     onSave?.({ name: nameInput.value, colors });
   });
@@ -215,7 +215,7 @@ function createPaletteMetaSection(palette = {}, options = {}) {
 
   const likesWrap = createTag('div', { class: 'modal-palette-likes' });
   const likeBtn = createTag('button', { type: 'button', class: 'like-icon', 'aria-label': 'Add to favorites' });
-  decorateAnalyticsAttributes(likeBtn, { linkLabel: 'Toggle favorite', headerText: 'palette detail' });
+  decorateAnalyticsAttributes(likeBtn, { linkLabel: 'Toggle favorite' });
   const likeTheme = createTag('sp-theme', { system: 'spectrum-two', color: 'light', scale: 'medium' });
   let liked = options.liked ?? palette?.liked ?? false;
   const updateLikeState = () => {

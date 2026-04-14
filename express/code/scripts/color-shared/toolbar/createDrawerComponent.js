@@ -147,7 +147,7 @@ function createLibraryPickerTrigger(selectedName) {
   const triggerChevron = createTag('span', { class: 'ax-lib-picker-trigger-chevron', 'aria-hidden': 'true' });
   triggerChevron.appendChild(createChevronDownIcon());
   trigger.append(triggerLabel, triggerChevron);
-  decorateAnalyticsAttributes(trigger, { linkLabel: 'Library picker', headerText: 'drawer' });
+  decorateAnalyticsAttributes(trigger, { linkLabel: 'Library picker' });
   return { trigger, triggerLabel };
 }
 
@@ -176,7 +176,7 @@ function createLibraryPopover(label, t) {
   createBtn.setAttribute('size', 'm');
   createBtn.classList.add('ax-lib-picker-create-btn');
   createBtn.textContent = t.create;
-  decorateAnalyticsAttributes(createBtn, { linkLabel: 'Create library', headerText: 'drawer' });
+  decorateAnalyticsAttributes(createBtn, { linkLabel: 'Create library' });
 
   const createRow = createTag('div', { class: 'ax-lib-picker-create-row' });
   createRow.append(createInput, createBtn);
@@ -306,7 +306,7 @@ function createLibraryPickerField(
       item.setAttribute('value', lib.id);
       if (lib.id === state.currentId) item.setAttribute('selected', '');
       item.textContent = lib.name;
-      decorateAnalyticsAttributes(item, { linkLabel: 'Select library', linkIndex: libIndex + 1, headerText: 'drawer' });
+      decorateAnalyticsAttributes(item, { linkLabel: 'Select library' });
       item.addEventListener('click', (e) => {
         e.stopPropagation();
         selectLibrary(lib, item);
@@ -365,7 +365,7 @@ function createKeywordSuggestions(keywords, mobile, { onSuggestionClick } = {}) 
     btn.setAttribute('size', size);
     btn.classList.add('ax-drawer-tag-btn');
     btn.textContent = keyword;
-    decorateAnalyticsAttributes(btn, { linkLabel: keyword, linkIndex: kwIndex + 1, headerText: 'drawer' });
+    decorateAnalyticsAttributes(btn, { linkLabel: keyword });
     const icon = createSpectrumIcon('Add');
     icon.setAttribute('slot', 'icon');
     btn.prepend(icon);
@@ -648,11 +648,11 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   if (isSignedIn) {
     saveBtnEl.textContent = t.saveToLibrary;
     saveBtnEl.addEventListener('click', onSave);
-    decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Save to library', headerText: 'drawer' });
+    decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Save to library' });
   } else {
     saveBtnEl.textContent = t.signInToSave;
     saveBtnEl.addEventListener('click', onSignIn);
-    decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Sign in to save', headerText: 'drawer' });
+    decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Sign in to save' });
   }
   content.appendChild(saveBtnEl);
 

@@ -597,7 +597,7 @@ export function createGradientsRenderer(options) {
     card.setAttribute('role', 'gridcell');
     card.setAttribute('tabindex', '-1');
     card.setAttribute('aria-label', `View ${gradient.name} gradient`);
-    decorateAnalyticsAttributes(card, { linkLabel: 'View gradient', linkIndex: linkIndex ?? 1, headerText: 'color explore' });
+    decorateAnalyticsAttributes(card, { linkLabel: 'View gradient' });
     attachCardListeners(card, gradient);
     return card;
   }

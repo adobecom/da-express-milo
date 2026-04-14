@@ -28,7 +28,7 @@ export function createLoadMoreComponent(options = {}) {
 
   button.appendChild(buttonText);
   button.appendChild(spinner);
-  decorateAnalyticsAttributes(button, { linkLabel: 'Load more', headerText: 'color shared' });
+  decorateAnalyticsAttributes(button, { linkLabel: 'Load more' });
 
   let isLoading = false;
 

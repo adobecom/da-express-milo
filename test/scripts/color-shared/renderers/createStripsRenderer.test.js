@@ -78,7 +78,7 @@ describe('createStripsRenderer — grid', () => {
     expect(container.classList.contains('color-explorer-strips')).to.be.true;
   });
 
-  it('sets daa-ll/data-ll on palette action buttons with sequential indexes', async function () {
+  it('sets daa-ll on palette action buttons', async function () {
     this.timeout(TIMEOUT);
     const { container } = await renderRenderer(makeData(2), { renderGridVariant: 'summary' });
     containers.push(container);
@@ -86,14 +86,10 @@ describe('createStripsRenderer — grid', () => {
     const buttons = Array.from(container.querySelectorAll('.color-card-action-btn'));
     expect(buttons).to.have.length(4);
 
-    expect(buttons[0].getAttribute('daa-ll')).to.equal('Edit palette-1--2 color palettes');
-    expect(buttons[0].getAttribute('data-ll')).to.equal('Edit palette-1--2 color palettes');
-
-    expect(buttons[1].getAttribute('daa-ll')).to.equal('Open-2--2 color palettes');
-    expect(buttons[1].getAttribute('data-ll')).to.equal('Open-2--2 color palettes');
-
-    expect(buttons[2].getAttribute('daa-ll')).to.equal('Edit palette-3--2 color palettes');
-    expect(buttons[3].getAttribute('daa-ll')).to.equal('Open-4--2 color palettes');
+    expect(buttons[0].getAttribute('daa-ll')).to.equal('Edit palette');
+    expect(buttons[1].getAttribute('daa-ll')).to.equal('Open');
+    expect(buttons[2].getAttribute('daa-ll')).to.equal('Edit palette');
+    expect(buttons[3].getAttribute('daa-ll')).to.equal('Open');
   });
 });
 

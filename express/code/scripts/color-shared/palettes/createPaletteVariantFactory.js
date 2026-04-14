@@ -66,8 +66,10 @@ export function createPaletteVariant(palette, variant, options = {}) {
     }
 
     const visual = createTag('div', { class: 'color-card-visual' });
+    visual.setAttribute('role', 'button');
+    visual.setAttribute('tabindex', '0');
     visual.appendChild(strip.element);
-    decorateAnalyticsAttributes(visual, { linkLabel: 'View palette', headerText: 'palette card' });
+    decorateAnalyticsAttributes(visual, { linkLabel: 'View palette' });
     visual.addEventListener('click', () => {
       emit('palette-click', palette);
     });

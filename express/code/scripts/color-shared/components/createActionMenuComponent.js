@@ -104,7 +104,7 @@ async function createNav(navLinks, activeId, getColors, getName) {
       const dividerEl = createTag('li', { role: 'separator', 'aria-hidden': true, class: 'palette-divider' });
       ul.append(dividerEl);
     }
-    decorateAnalyticsAttributes(linkEl, { linkLabel: link.label, linkIndex: index + 1, headerText: 'action menu' });
+    decorateAnalyticsAttributes(linkEl, { linkLabel: link.label });
     linkElements.push(linkEl);
     await createExpressTooltip({
       targetEl: linkEl,
@@ -142,7 +142,7 @@ async function createHistoryButton(
     if (btn.getAttribute('aria-disabled') === 'true' || btn.disabled) return;
     onClick();
   });
-  decorateAnalyticsAttributes(btn, { linkLabel: control.label, headerText: 'action menu' });
+  decorateAnalyticsAttributes(btn, { linkLabel: control.label });
   buttonRefs[control.id] = btn;
   await createExpressTooltip({
     targetEl: btn,
@@ -225,7 +225,7 @@ async function createControls(
             disableAria: true,
           });
         }
-        decorateAnalyticsAttributes(btn, { linkLabel: control.label, headerText: 'action menu' });
+        decorateAnalyticsAttributes(btn, { linkLabel: control.label });
         controlContainer.append(btn);
         break;
       }
@@ -241,7 +241,7 @@ async function createControls(
           },
           ICON_MAP[control.id].maximize,
         );
-        decorateAnalyticsAttributes(btn, { linkLabel: control.label, headerText: 'action menu' });
+        decorateAnalyticsAttributes(btn, { linkLabel: control.label });
         controlContainer.append(btn);
         btn.addEventListener('click', () => {
           const oldIsPressed = btn.getAttribute('aria-pressed') === 'true';

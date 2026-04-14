@@ -333,7 +333,7 @@ function buildSuggestedImages(row, onSelect) {
       'aria-label': 'Use this image',
       'aria-pressed': 'false',
     });
-    decorateAnalyticsAttributes(button, { linkLabel: 'Use this image', linkIndex: imgIndex + 1, headerText: 'color extract' });
+    decorateAnalyticsAttributes(button, { linkLabel: 'Use this image' });
     const preview = createTag('div', { class: 'color-extract-suggestion-preview' });
     const palette = createTag('div', { class: 'color-extract-suggestion-bar' }, [
       createTag('span', { class: 'color-extract-suggestion-chip is-1' }),

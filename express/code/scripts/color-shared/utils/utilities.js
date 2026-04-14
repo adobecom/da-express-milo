@@ -8,24 +8,17 @@ function sanitizeAnalyticsText(value) {
 }
 
 /**
- * Sets `data-ll` on a clickable element so the global click handler in
- * instrument.js fires `web.webinteraction.linkClicks` via `trackButtonClick`.
- *
- * Only `data-ll` is set (not `daa-ll`) to avoid a duplicate event from
- * Milo's analytics system which independently tracks elements with `daa-ll`.
+ * Sets `daa-ll` on a clickable element for Milo analytics tracking.
  *
  * @param {Element} element
- * @param {{ linkLabel?: string, linkIndex?: number, headerText?: string }} opts
+ * @param {{ linkLabel?: string }} opts
  */
-export function decorateAnalyticsAttributes(element, { linkLabel, linkIndex, headerText } = {}) {
+export function decorateAnalyticsAttributes(element, { linkLabel } = {}) {
   if (!element) return;
-  const safeLabel = sanitizeAnalyticsText(
+  const value = sanitizeAnalyticsText(
     linkLabel || element.getAttribute('aria-label') || element.textContent || 'action',
   );
-  const safeHeader = sanitizeAnalyticsText(headerText || '');
-  const idx = linkIndex ?? 1;
-  const daaLl = `${safeLabel}-${idx}--${safeHeader}`;
-  element.setAttribute('daa-ll', daaLl);
+  element.setAttribute('daa-ll', value);
 }
 
 const SWIPE_CLOSE_THRESHOLD_PX = 120;

@@ -142,16 +142,8 @@ export async function createFiltersComponent(options = {}) {
     onFilterChange?.({ ...filterValues });
   }
 
-  function getAnalyticsHeaderText() {
-    return interactionRoot
-      ?.closest('.explore-header, .gradients-header')
-      ?.querySelector('.results-count, .gradients-title, h1, h2, h3')
-      ?.textContent
-      || 'Color explore';
-  }
-
-  function applyAnalyticsAttributes(element, linkLabel, linkIndex) {
-    decorateAnalyticsAttributes(element, { linkLabel, linkIndex, headerText: getAnalyticsHeaderText() });
+  function applyAnalyticsAttributes(element, linkLabel) {
+    decorateAnalyticsAttributes(element, { linkLabel });
   }
 
   function setFilterValue(id, value, shouldEmit = true) {

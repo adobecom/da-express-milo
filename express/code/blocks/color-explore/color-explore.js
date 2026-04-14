@@ -177,7 +177,7 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
       }
       text.textContent = 'Load more';
       button.setAttribute('aria-label', 'Load more items');
-      decorateAnalyticsAttributes(button, { linkLabel: 'Load more', headerText: 'color explore' });
+      decorateAnalyticsAttributes(button, { linkLabel: 'Load more' });
       root.style.display = 'flex';
     },
     destroy() {

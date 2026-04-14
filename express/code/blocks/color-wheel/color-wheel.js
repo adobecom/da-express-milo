@@ -239,7 +239,7 @@ async function buildHarmonySelector(controller, strings = {}) {
         'data-harmony-value': value,
         tabindex: '-1',
       });
-      decorateAnalyticsAttributes(btn, { linkLabel: `${getHarmonyLabel(value)} harmony`, linkIndex: ruleIndex + 1, headerText: 'color wheel' });
+      decorateAnalyticsAttributes(btn, { linkLabel: `${getHarmonyLabel(value)} harmony` });
       const img = createTag('img', {
         src: `${HARMONY_THUMB_BASE}/${thumb}`,
         alt: '',
