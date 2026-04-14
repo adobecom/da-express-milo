@@ -191,7 +191,7 @@ const CONFIG = {
     },
   },
   commerce: {
-    'wcs-api-key': 'AdobeExpressWeb',                                                                                                                                                        
+    'wcs-api-key': 'AdobeExpressWeb',
   },
 };
 
