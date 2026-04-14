@@ -576,24 +576,24 @@ export function createStripContainerRenderer(options) {
     return anchorElement.getBoundingClientRect();
   }
 
-  function positionPopover(popover, anchorRect) {
-    const gap = 8;
+  function positionPopover(popover, anchorRect, container) {
+    const gap = 4;
     const popRect = popover.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
 
-    let top = anchorRect.bottom + gap;
-    if (top + popRect.height > window.innerHeight) {
-      top = anchorRect.top - popRect.height - gap;
+    let viewportTop = anchorRect.bottom + gap;
+    if (viewportTop + popRect.height > window.innerHeight) {
+      viewportTop = anchorRect.top - popRect.height - gap;
     }
-    top = Math.max(gap, top);
 
-    let { left } = anchorRect;
-    if (left + popRect.width > window.innerWidth - gap) {
-      left = anchorRect.right - popRect.width;
+    let viewportLeft = anchorRect.left;
+    if (viewportLeft + popRect.width > window.innerWidth - gap) {
+      viewportLeft = anchorRect.right - popRect.width;
     }
-    left = Math.max(gap, Math.min(left, window.innerWidth - popRect.width - gap));
+    viewportLeft = Math.max(gap, Math.min(viewportLeft, window.innerWidth - popRect.width - gap));
 
-    popover.style.top = `${top}px`;
-    popover.style.left = `${left}px`;
+    popover.style.top = `${viewportTop - containerRect.top + container.scrollTop}px`;
+    popover.style.left = `${viewportLeft - containerRect.left + container.scrollLeft}px`;
   }
 
   function closeActiveColorEditor() {
@@ -605,12 +605,10 @@ export function createStripContainerRenderer(options) {
       resizeObserver,
       outsideHandler,
       escapeHandler,
-      scrollHandler,
       railElement: activeRailElement,
     } = activeColorEditor;
     if (outsideHandler) document.removeEventListener('click', outsideHandler, true);
     if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
-    if (scrollHandler) window.removeEventListener('scroll', scrollHandler, true);
     resizeObserver?.disconnect?.();
     if (mobile) {
       try {
@@ -687,20 +685,25 @@ export function createStripContainerRenderer(options) {
       return;
     }
 
+    const container = railElement.closest('.ax-shell-slot--canvas') || document.body;
+
     const popover = document.createElement('div');
     popover.className = 'swatches-color-edit-popover';
     popover.setAttribute('role', 'dialog');
     popover.setAttribute('aria-label', 'Edit color');
-    popover.style.position = 'fixed';
-    popover.style.zIndex = '10002';
+    popover.style.position = 'absolute';
+    popover.style.top = '0';
+    popover.style.left = '0';
+    popover.style.visibility = 'hidden';
+    popover.style.zIndex = '2';
     popover.appendChild(editorElement);
-    document.body.appendChild(popover);
+    container.appendChild(popover);
     const anchorRect = resolveAnchorRect(anchorElement, anchorRectFromDetail);
     const observer = new ResizeObserver((entries) => {
       const { height } = entries[0].contentRect;
       if (height > 0) {
-        observer.disconnect();
-        positionPopover(popover, anchorRect);
+        positionPopover(popover, anchorRect, container);
+        popover.style.visibility = 'visible';
       }
     });
     observer.observe(popover);
@@ -714,13 +717,9 @@ export function createStripContainerRenderer(options) {
     const escapeHandler = (evt) => {
       if (evt.key === 'Escape') closeActiveColorEditor();
     };
-    const scrollHandler = () => {
-      closeActiveColorEditor();
-    };
 
     document.addEventListener('click', outsideHandler, true);
     document.addEventListener('keydown', escapeHandler, true);
-    window.addEventListener('scroll', scrollHandler, true);
 
     activeColorEditor = {
       adapter,
@@ -729,7 +728,6 @@ export function createStripContainerRenderer(options) {
       resizeObserver: observer,
       outsideHandler,
       escapeHandler,
-      scrollHandler,
       railElement,
     };
 

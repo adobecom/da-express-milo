@@ -114,7 +114,6 @@
   grid-area: var(--ax-area-canvas);
   background-color: var(--ax-bg-canvas);
   padding: var(--ax-padding-canvas-mobile);
-  overflow-y: auto;
   block-size: var(--ax-slot-canvas-block-size);
 }
 
