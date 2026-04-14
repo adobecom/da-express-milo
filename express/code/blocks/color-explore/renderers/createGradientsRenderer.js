@@ -4,19 +4,13 @@ import { createGradientStripElements } from '../../../scripts/color-shared/compo
 import { createLoadMoreComponent } from '../../../scripts/color-shared/components/createLoadMoreComponent.js';
 import { loadIconsRail } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createExpressTooltip } from '../../../scripts/color-shared/spectrum/components/express-tooltip.js';
+import { decorateAnalyticsAttributes } from '../../../scripts/color-shared/utils/utilities.js';
 import { createLoadingScreenComponent } from '../../../scripts/color-shared/components/createLoadingScreenComponent.js';
 
 const PAGINATION = {
   INITIAL_COUNT: 24,
   LOAD_MORE_INCREMENT: 12,
 };
-
-function sanitizeAnalyticsText(value, max = 20) {
-  const raw = String(value ?? '')
-    .replace(/[^a-zA-Z0-9\s]/g, '')
-    .trim();
-  return raw.substring(0, max);
-}
 
 export function createGradientsRenderer(options) {
   const { container, data = [], config = {} } = options;
@@ -62,7 +56,7 @@ export function createGradientsRenderer(options) {
   function getAnalyticsHeaderText() {
     const titleText = container?.querySelector('.gradients-title')?.textContent?.trim();
     const fallback = 'Color gradients';
-    return sanitizeAnalyticsText(titleText || fallback);
+    return titleText || fallback;
   }
 
   function isActivationSuppressed() {
@@ -601,6 +595,7 @@ export function createGradientsRenderer(options) {
     card.setAttribute('role', 'gridcell');
     card.setAttribute('tabindex', '-1');
     card.setAttribute('aria-label', `View ${gradient.name} gradient`);
+    decorateAnalyticsAttributes(card, { linkLabel: 'View gradient' });
     attachCardListeners(card, gradient);
     return card;
   }

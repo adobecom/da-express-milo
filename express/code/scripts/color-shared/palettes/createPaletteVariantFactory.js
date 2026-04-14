@@ -3,6 +3,7 @@ import { createPaletteStrip, PALETTE_STRIP_VARIANTS } from './palettes.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { announceToScreenReader, clearScreenReaderAnnouncement } from '../spectrum/utils/a11y.js';
 import { wrapInTheme } from '../spectrum/utils/theme.js';
+import { decorateAnalyticsAttributes } from '../utils/utilities.js';
 
 export const FIGMA_STRIP_NODES = {
   SIMPLIFIED: '5639-129905',
@@ -65,7 +66,10 @@ export function createPaletteVariant(palette, variant, options = {}) {
     }
 
     const visual = createTag('div', { class: 'color-card-visual' });
+    visual.setAttribute('role', 'button');
+    visual.setAttribute('tabindex', '0');
     visual.appendChild(strip.element);
+    decorateAnalyticsAttributes(visual, { linkLabel: 'View palette' });
     visual.addEventListener('click', () => {
       emit('palette-click', palette);
     });

@@ -1,5 +1,26 @@
 import { createTag } from '../../utils.js';
 
+const ANALYTICS_TEXT_LIMIT = 20;
+
+function sanitizeAnalyticsText(value) {
+  return String(value ?? '').replace(/[^a-zA-Z0-9\s]/g, '').trim()
+    .substring(0, ANALYTICS_TEXT_LIMIT);
+}
+
+/**
+ * Sets `daa-ll` on a clickable element for Milo analytics tracking.
+ *
+ * @param {Element} element
+ * @param {{ linkLabel?: string }} opts
+ */
+export function decorateAnalyticsAttributes(element, { linkLabel } = {}) {
+  if (!element) return;
+  const value = sanitizeAnalyticsText(
+    linkLabel || element.getAttribute('aria-label') || element.textContent || 'action',
+  );
+  element.setAttribute('daa-ll', value);
+}
+
 const SWIPE_CLOSE_THRESHOLD_PX = 120;
 const SWIPE_MAX_DRAG_PX = 400;
 

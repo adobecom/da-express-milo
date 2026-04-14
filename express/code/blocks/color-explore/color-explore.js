@@ -7,7 +7,7 @@ import { createSwatchesRenderer } from '../../scripts/color-shared/renderers/cre
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
 import { createGradientModalContent, ensureGradientModalContentStyles } from '../../scripts/color-shared/modal/createGradientModalContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
-import { buildPaletteEditUrl } from '../../scripts/color-shared/utils/utilities.js';
+import { buildPaletteEditUrl, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
 import { createLoadingScreenComponent } from '../../scripts/color-shared/components/createLoadingScreenComponent.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
@@ -200,6 +200,7 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
       }
       text.textContent = 'Load more';
       button.setAttribute('aria-label', 'Load more items');
+      decorateAnalyticsAttributes(button, { linkLabel: 'Load more' });
       root.style.display = 'flex';
     },
     destroy() {

@@ -9,7 +9,7 @@ import ColorThemeExpressController, { randomHex } from '../../scripts/color-shar
 import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
 import createImageExtractComponent from './createImageExtractComponent.js';
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
-import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
+import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 
 async function loadPlaceholders() {
@@ -239,6 +239,7 @@ async function buildHarmonySelector(controller, strings = {}) {
         'data-harmony-value': value,
         tabindex: '-1',
       });
+      decorateAnalyticsAttributes(btn, { linkLabel: `${getHarmonyLabel(value)} harmony` });
       const img = createTag('img', {
         src: `${HARMONY_THUMB_BASE}/${thumb}`,
         alt: '',
