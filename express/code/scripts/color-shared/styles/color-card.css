@@ -197,6 +197,7 @@
   display: flex;
   align-items: stretch;
   border-radius: var(--Corner-radius-corner-radius-100);
+  cursor: pointer;
 }
 
 .color-explorer-strips .color-card:focus-visible {

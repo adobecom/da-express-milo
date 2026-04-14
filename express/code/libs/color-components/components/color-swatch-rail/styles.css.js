@@ -165,19 +165,19 @@ export const style = css`
     border-radius: var(--swatch-column-last-radius);
   }
 
-  .swatch-column:first-child .tint-band-btn:first-child {
+  [role="row"]:only-child .swatch-column:first-child .tint-band-btn:first-child {
     border-radius: var(--figma-strip-radius) 0 0;
   }
 
-  .swatch-column:first-child .tint-band-btn:last-child {
+  [role="row"]:only-child .swatch-column:first-child .tint-band-btn:last-child {
     border-radius: 0 0 0 var(--figma-strip-radius);
   }
 
-  .swatch-column:last-child .tint-band-btn:first-child {
+  [role="row"]:only-child .swatch-column:last-child .tint-band-btn:first-child {
     border-radius: 0 var(--figma-strip-radius) 0 0;
   }
 
-  .swatch-column:last-child .tint-band-btn:last-child {
+  [role="row"]:only-child .swatch-column:last-child .tint-band-btn:last-child {
     border-radius: 0 0 var(--figma-strip-radius) 0;
   }
 
@@ -261,6 +261,18 @@ export const style = css`
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column {
     border-radius: 0;
   }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:first-child {
+    border-radius: var(--Corner-radius-corner-radius-200) 0 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:last-child {
+    border-radius: 0 0 var(--Corner-radius-corner-radius-200) 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column.corner-top-right {
+    border-radius: 0 var(--Corner-radius-corner-radius-200) 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column.corner-bottom-left {
+    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200);
+  }
 
   
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--simulated {
@@ -336,8 +348,15 @@ export const style = css`
   }
 
   
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column {
+  .swatch-rail[data-orientation="vertical"] .swatch-column {
     border-radius: 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"] .swatch-column:first-child {
+    border-radius: var(--Corner-radius-corner-radius-200) 0 0 var(--Corner-radius-corner-radius-200);
+  }
+  .swatch-rail[data-orientation="vertical"] .swatch-column:last-child {
+    border-radius: 0 var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0;
   }
 
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:first-child {
@@ -354,12 +373,8 @@ export const style = css`
     border-radius: 0 0 0 var(--Corner-radius-corner-radius-200);
   }
 
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:first-child .tint-band-btn:first-child {
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column.corner-top-left .tint-band-btn:first-child {
     border-radius: var(--figma-strip-radius) 0 0;
-  }
-
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:first-child .tint-band-btn:last-child {
-    border-radius: 0;
   }
 
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column.corner-top-right .tint-band-btn:first-child {
@@ -370,11 +385,7 @@ export const style = css`
     border-radius: 0 0 0 var(--figma-strip-radius);
   }
 
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:last-child .tint-band-btn:first-child {
-    border-radius: 0;
-  }
-
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:last-child .tint-band-btn:last-child {
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column.corner-bottom-right .tint-band-btn:last-child {
     border-radius: 0 0 var(--figma-strip-radius) 0;
   }
 
@@ -542,6 +553,7 @@ export const style = css`
     flex: 1 1 0;
     min-width: 0;
     justify-content: flex-start;
+    padding-left: 0;
   }
 
   .swatch-rail[data-orientation="stacked"] .hex-code {
@@ -552,7 +564,6 @@ export const style = css`
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 6px;
     flex-shrink: 0;
   }
 
@@ -624,6 +635,20 @@ export const style = css`
   .swatch-column--right-actions-hover-only:has(.swatch-column-focusable:focus-visible) .top-actions--right {
     opacity: 1;
     pointer-events: auto;
+  }
+
+  /* When locked, always show the container so the lock icon is visible */
+  .swatch-column--right-actions-hover-only.locked .top-actions--right {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Non-lock icons fade in on hover/focus; hidden otherwise */
+  .swatch-column--right-actions-hover-only.locked .top-actions--right > :not(.icon-button--lock) {
+    transition: opacity 0.15s ease;
+  }
+  .swatch-column--right-actions-hover-only.locked:not(:hover):not(:focus-visible):not(:has(.swatch-column-focusable:focus-visible)) .top-actions--right > :not(.icon-button--lock) {
+    opacity: 0;
+    pointer-events: none;
   }
 
 
@@ -743,27 +768,6 @@ export const style = css`
     top: calc(var(--swatch-column-padding) + 4 * var(--icon-button-size) + 3 * var(--top-actions-gap) + 16px);
   }
 
-  .swatch-rail[data-orientation="stacked"] .swatch-column .add-slot--column-top {
-    top: 0px;
-    bottom: auto;
-    left: 50%;
-    right: auto;
-    transform: translate(-50%, -50%);
-  }
-  .swatch-rail[data-orientation="stacked"] .swatch-column .add-slot--column-bottom {
-    top: auto;
-    bottom: 0px;
-    left: 50%;
-    right: auto;
-    transform: translate(-50%, 50%);
-  }
-  /* Top/bottom (stacked) still show on any column hover */
-  .swatch-column:hover .add-slot--column-top,
-  .swatch-column:hover .add-slot--column-bottom {
-    opacity: 1;
-    pointer-events: auto;
-  }
-  .swatch-column:focus-within .add-slot--column,
   .swatch-column:focus-visible .add-slot--column,
   .swatch-column:has(.swatch-column-focusable:focus-visible) .add-slot--column {
     opacity: 1;
@@ -772,7 +776,6 @@ export const style = css`
   .swatch-column--tint-selected .add-slot--column,
   .swatch-column--tint-selected .add-slot--column-left:hover,
   .swatch-column--tint-selected .add-slot--column-right:hover,
-  .swatch-column--tint-selected:focus-within .add-slot--column,
   .swatch-column--tint-selected:focus-visible .add-slot--column,
   .swatch-column--tint-selected:has(.swatch-column-focusable:focus-visible) .add-slot--column {
     opacity: 0;
@@ -787,8 +790,8 @@ export const style = css`
     background: var(--color-white);
     color: var(--color-blue-800);
   }
-  .swatch-column .add-slot--column .icon-button--add:hover {
-    background: var(--color-light-gray);
+  .swatch-column .add-slot--column .icon-button--add.icon-button:hover {
+    background: var(--color-white);
     border-color: var(--color-blue-800);
   }
   .swatch-column .add-slot--column .icon-button--add:active {
@@ -986,7 +989,7 @@ export const style = css`
     }
 
     .bottom-info .hex-code {
-      align-self: flex-end;
+      align-self: flex-start;
     }
 
     .bottom-info .bottom-info__actions {
@@ -996,8 +999,11 @@ export const style = css`
 
 
   .hex-code {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 18px;
+    letter-spacing: 0;
     color: var(--swatch-text-color);
     text-transform: uppercase;
     text-shadow: var(--swatch-text-shadow);
@@ -1041,6 +1047,7 @@ export const style = css`
   }
   .hex-code--static {
     cursor: default;
+    padding-left: 6px;
   }
 
   
@@ -1131,11 +1138,5 @@ export const style = css`
 
   .swatch-rail[data-orientation="stacked"] .swatch-column--empty {
     flex: 0;
-  }
-
-  @media (max-width: 899px) {
-    .swatch-column--super-light {
-      box-shadow: none;
-    }
-  }
+  }  
 `;

@@ -54,6 +54,7 @@
 }
 
 .color-extract {
+  --ax-color-tool-presentation-max-width: 1440px;
   --color-extract-max-width: 1440px;
   --color-extract-gap: 32px;
   --color-extract-radius: 16px;
@@ -346,6 +347,10 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 /* ---- Typography ---- */
 
+.color-extract .color-extract-edit-copy .icon.icon-adobe-express-logo {
+  padding: 0;
+}
+
 .color-extract .color-extract-edit-copy h1 {
   font-size: 45px;
   line-height: 1.04;
@@ -570,8 +575,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   padding: 16px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(28px);
-  /* Fixed 634px from Figma spec — image scales to fit, never drives sizing */
-  height: 634px;
+  height: 490px;
 }
 
 .color-extract .color-extract-edit-bg picture,
@@ -604,7 +608,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   width: 100%;
   height: 100%;
   display: block;
-  border-radius: 8px;
+  border-radius: 0;
   object-fit: contain;
   left: 0;
   transform: none;
@@ -674,7 +678,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 .color-extract .color-extract-mood-dropdown {
   position: relative;
-  width: 330px;
+  width: fit-content;
+  max-width: 330px;
 }
 
 .color-extract .color-extract-mood-trigger {
@@ -957,8 +962,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 .color-extract .color-extract-gradient-editor-col .gradient-editor-handles {
-  left: 12px;
-  right: 12px;
+  left: 8px;
+  right: 8px;
 }
 
 
@@ -1054,6 +1059,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   .section:has(.color-extract-marquee-wrapper) {
     align-items: flex-start;
     min-height: unset;
+    padding-inline: 16px;
   }
 
   .color-extract .color-extract-landing {
@@ -1061,7 +1067,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   }
 
   .color-extract.has-image .color-extract-inner {
-    padding: 32px 16px 56px;
+    padding: var(--spacing-500) 0 56px;
     gap: 24px;
   }
 
@@ -1082,6 +1088,29 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
   .color-extract .color-extract-toolbar-divider {
     display: none;
+  }
+
+  /* Flatten toolbar-left so mood and actions join the toolbar's flex directly */
+  .color-extract .color-extract-toolbar-left {
+    display: contents;
+  }
+
+  /* Mood: full width, stack label above trigger */
+  .color-extract .color-extract-mood {
+    width: 100%;
+    height: auto;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .color-extract .color-extract-mood-dropdown {
+    width: 100%;
+    max-width: none;
+  }
+
+  .color-extract .color-extract-mood-trigger {
+    width: 100%;
   }
 
 }
