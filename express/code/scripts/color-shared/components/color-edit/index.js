@@ -8,6 +8,7 @@ import {
 } from '../../../../libs/color-components/utils/ColorConversions.js';
 import { loadSwatch, loadMenu, loadTextfield } from '../../spectrum/load-spectrum.js';
 import { trapFocus, disableBackgroundScroll, restoreBackgroundScroll } from '../../spectrum/utils/a11y.js';
+import { DEFAULT_PLACEHOLDERS as COLOR_EDIT_DEFAULTS } from '../../i18n/loadColorEditPlaceholders.js';
 import '../base-color/index.js';
 
 const COLOR_MODES = ['HEX', 'RGB'];
@@ -23,6 +24,8 @@ class ColorEdit extends LitElement {
       selectedIndex: { type: Number, attribute: 'selected-index' },
       colorMode: { type: String, attribute: 'color-mode' },
       showPalette: { type: Boolean, attribute: 'show-palette' },
+      strings: { type: Object },
+      baseColorStrings: { type: Object, attribute: false },
       mobile: { type: Boolean, reflect: true },
       open: { type: Boolean, reflect: true },
       _hue: { type: Number, state: true },
@@ -39,6 +42,8 @@ class ColorEdit extends LitElement {
     this.selectedIndex = 0;
     this.colorMode = 'HEX';
     this.showPalette = true;
+    this.strings = COLOR_EDIT_DEFAULTS;
+    this.baseColorStrings = null;
     this.mobile = false;
     this.open = false;
     this._hue = 0;
@@ -312,15 +317,16 @@ class ColorEdit extends LitElement {
   }
 
   _renderHeader() {
+    const s = this.strings;
     return html`
       <div class="ce-header">
-        <span class="ce-title">Edit color</span>
+        <span class="ce-title">${s.title}</span>
         <div class="ce-mode-wrap">
           <button
             type="button"
             class="ce-mode-trigger"
             @click=${this._toggleModeMenu}
-            aria-label="Color mode, ${this.colorMode}"
+            aria-label="${s.modeLabel}, ${this.colorMode}"
             aria-haspopup="listbox"
             aria-expanded=${this._modeMenuOpen}
             aria-controls=${this._modeMenuOpen ? 'ce-mode-menu' : nothing}
@@ -335,7 +341,7 @@ class ColorEdit extends LitElement {
                 role="listbox"
                 selects="single"
                 size="s"
-                label="Color mode"
+                label="${s.modeLabel}"
                 @change=${this._onModeMenuChange}
                 @keydown=${this._onModeMenuKeyDown}
               >
@@ -355,13 +361,14 @@ class ColorEdit extends LitElement {
 
   _renderPaletteSwatches() {
     if (!this.showPalette || !this.palette?.length) return nothing;
+    const s = this.strings;
     return html`
       <div class="ce-palette-section">
-        <span class="ce-palette-label">Palette colors</span>
+        <span class="ce-palette-label">${s.paletteColors}</span>
         <sp-theme system="spectrum-two" color="light" scale="medium">
           <div
             role="listbox"
-            aria-label="Color palette colors"
+            aria-label="${s.paletteColors}"
             @keydown=${this._onSwatchGroupKeyDown}
           >
             <sp-swatch-group
@@ -493,15 +500,16 @@ class ColorEdit extends LitElement {
   }
 
   _renderHexInput() {
+    const s = this.strings;
     return html`
       <div class="ce-hex-section">
-        <span class="ce-hex-label">HEX</span>
+        <span class="ce-hex-label">${s.hexLabel}</span>
         <sp-textfield
           class="ce-hex-field"
           size="m"
           maxlength="7"
           .value=${this._hex}
-          label="Color Hex Value"
+          label="${s.hexFieldLabel}"
           label-visibility="none"
           @input=${this._onHexInput}
           @paste=${this._onHexPaste}
@@ -527,6 +535,7 @@ class ColorEdit extends LitElement {
           color-mode=${this.colorMode}
           .showHeader=${false}
           .showBrightnessControl=${isHexMode}
+          .strings=${this.baseColorStrings || nothing}
           @color-change=${this._onBaseColorChange}
         ></base-color>
         <div class="ce-sr-only" role="status" aria-live="polite" aria-atomic="true">${this._liveRegionText}</div>
@@ -543,7 +552,7 @@ class ColorEdit extends LitElement {
               class="ce-sheet ${this.open ? 'open' : ''}"
               role="dialog"
               aria-modal="true"
-              aria-label="Edit color"
+              aria-label="${this.strings.dialogAria}"
               tabindex="-1"
               @keydown=${this._onSheetKeyDown}
             >

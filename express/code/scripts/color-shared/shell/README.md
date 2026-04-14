@@ -176,9 +176,7 @@ The layout exposes CSS variables for common customizations. Override these on yo
 | `--ax-bg-*` | varies | Background color for each slot |
 | `--ax-padding-*-mobile` | `var(--spacing-m)` | Padding for slots on mobile |
 | `--ax-padding-*-desktop` | varies | Padding for slots on desktop |
-| `--ax-z-topbar` | `20` | Z-index for sticky topbar |
 | `--ax-z-footer` | `10` | Z-index for sticky footer |
-| `--ax-sticky-topbar-top` | `0` | Top position for sticky topbar |
 | `--ax-sticky-footer-bottom` | `0` | Bottom position for sticky footer |
 | `--ax-footer-margin-top` | `var(--spacing-300)` | Top margin for footer slot |
 | `--ax-focus-outline-*` | varies | Focus indicator styling |

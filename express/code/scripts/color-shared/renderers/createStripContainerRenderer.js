@@ -4,15 +4,26 @@ import { createSwatchRailAdapter, createColorEditAdapter } from '../adapters/lit
 import { getContrastTextColor, isSuperLight } from '../../../libs/color-components/utils/ColorConversions.js';
 import {
   TYPE_ORDER,
-  TYPE_LABELS,
-  DEFECT_DEFINITIONS,
-  DEFECT_TOOLTIP_DEFINITIONS,
   getConflictPairs,
   getConflictingIndices,
   simulateHex,
 } from '../services/createColorBlindnessService.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { announceToScreenReader } from '../spectrum/utils/a11y.js';
+import { DEFAULT_SHARED_PLACEHOLDERS as CB_DEFAULTS } from '../i18n/loadColorBlindnessPlaceholders.js';
+
+function resolveCBLabels(cbStrings) {
+  const s = cbStrings || CB_DEFAULTS;
+  return {
+    labels: { deutan: s.typeDeutan, protan: s.typeProtan, tritan: s.typeTritan },
+    defs: { deutan: s.typeDescDeutan, protan: s.typeDescProtan, tritan: s.typeDescTritan },
+    summary: s.summary,
+    statusNone: s.statusNone,
+    statusConflictsFound: s.statusConflictsFound,
+    conflictIconAria: s.conflictIconAria,
+    mobilePaletteHeader: s.mobilePaletteHeader,
+  };
+}
 
 const COLORS_PER_ROW_TWO_ROWS = 5;
 
@@ -49,14 +60,14 @@ function getAdapterController(adapter) {
   return adapter?.controller || adapter?.rail?.controller || null;
 }
 
-function createConflictIcon() {
+function createConflictIcon(ariaLabel = CB_DEFAULTS.conflictIconAria) {
   return createTag(
     'span',
     {
       class: 'strip-color-blindness-swatch__conflict-icon',
       'aria-hidden': 'true',
       role: 'img',
-      'aria-label': 'Conflict',
+      'aria-label': ariaLabel,
     },
     '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 3.1L17.1 16H2.9L10 3.1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path><path d="M10 8.1V11.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><circle cx="10" cy="14.2" r="0.9" fill="currentColor"></circle></svg>',
   );
@@ -90,7 +101,14 @@ function refreshColorBlindnessLabelTooltips(root) {
   ).catch(() => {});
 }
 
-function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, railWrapEl) {
+function createColorBlindnessRowsInMatrix(
+  controller,
+  orientation,
+  containerEl,
+  railWrapEl,
+  cbStrings,
+) {
+  const cb = resolveCBLabels(cbStrings);
   const unsub = controller?.subscribe?.((state) => {
     const allColors = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
     if (!allColors.length) return;
@@ -117,11 +135,11 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
         class: `strip-color-blindness-row__title-cell strip-color-blindness-row--${type} ${pairs.length > 0 ? 'fail' : 'pass'}`,
       });
       const label = createTag('span', { class: 'strip-color-blindness-row__label', tabindex: '0' });
-      label.textContent = TYPE_LABELS[type];
-      label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-      label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      label.textContent = cb.labels[type];
+      label.setAttribute('data-tooltip-content', cb.defs[type]);
+      label.setAttribute('aria-label', `${cb.labels[type]}: ${cb.defs[type]}`);
       label.addEventListener('focus', () => {
-        announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+        announceToScreenReader(`${cb.labels[type]}: ${cb.defs[type]}`);
       });
       titleCell.appendChild(label);
       titleCell.style.gridColumn = '1';
@@ -139,9 +157,9 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
           class: `strip-color-blindness-swatch${conflicting.has(i) ? ' conflict' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
           role: 'img',
-          'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
+          'aria-label': `${sim.toUpperCase()} ${cb.labels[type]}`,
         });
-        if (conflicting.has(i)) swatch.appendChild(createConflictIcon());
+        if (conflicting.has(i)) swatch.appendChild(createConflictIcon(cb.conflictIconAria));
         swatchesWrap.appendChild(swatch);
       });
       containerEl.appendChild(swatchesWrap);
@@ -154,7 +172,8 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
   };
 }
 
-function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWrapEl) {
+function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWrapEl, cbStrings) {
+  const cb = resolveCBLabels(cbStrings);
   containerEl.style.display = 'grid';
   containerEl.style.gridTemplateColumns = '100px 1fr';
   containerEl.style.gridTemplateRows = '1fr 90px 90px 90px';
@@ -174,11 +193,11 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
       class: `strip-four-rows-cb-title strip-four-rows-cb-title--${type}`,
     });
     const label = createTag('span', { class: 'strip-four-rows-cb-title__label', tabindex: '0' });
-    label.textContent = TYPE_LABELS[type];
-    label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-    label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+    label.textContent = cb.labels[type];
+    label.setAttribute('data-tooltip-content', cb.defs[type]);
+    label.setAttribute('aria-label', `${cb.labels[type]}: ${cb.defs[type]}`);
     label.addEventListener('focus', () => {
-      announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      announceToScreenReader(`${cb.labels[type]}: ${cb.defs[type]}`);
     });
     titleCell.style.gridColumn = '1';
     titleCell.style.gridRow = String(gridRow);
@@ -202,24 +221,25 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
   };
 }
 
-function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
+function createMobileCBLayout(controller, cbStrings, maxColumns = MAX_CB_COLUMNS) {
+  const cb = resolveCBLabels(cbStrings);
   const container = createTag('div', { class: 'strip-cb-mobile-layout' });
 
   const header = createTag('div', { class: 'strip-cb-mobile-header' });
   const paletteLabel = createTag('span', {
     class: 'strip-cb-mobile-header__label--palette',
   });
-  paletteLabel.textContent = 'Palette';
+  paletteLabel.textContent = cb.mobilePaletteHeader;
   header.appendChild(paletteLabel);
 
   TYPE_ORDER.forEach((type) => {
     const wrap = createTag('div', { class: 'strip-cb-mobile-header__label-wrap' });
     const label = createTag('span', { class: 'strip-cb-mobile-header__label', tabindex: '0' });
-    label.textContent = TYPE_LABELS[type];
-    label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-    label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+    label.textContent = cb.labels[type];
+    label.setAttribute('data-tooltip-content', cb.defs[type]);
+    label.setAttribute('aria-label', `${cb.labels[type]}: ${cb.defs[type]}`);
     label.addEventListener('focus', () => {
-      announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      announceToScreenReader(`${cb.labels[type]}: ${cb.defs[type]}`);
     });
     wrap.appendChild(label);
     header.appendChild(wrap);
@@ -281,9 +301,11 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
           class: `strip-cb-mobile-row__sim${conflicting.has(colorIndex) ? ' conflict' : ''}${isSuperLight(sim) ? ' super-light' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
           role: 'img',
-          'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
+          'aria-label': `${sim.toUpperCase()} ${cb.labels[type]}`,
         });
-        if (conflicting.has(colorIndex)) simCell.appendChild(createConflictIcon());
+        if (conflicting.has(colorIndex)) {
+          simCell.appendChild(createConflictIcon(cb.conflictIconAria));
+        }
         row.appendChild(simCell);
       });
 
@@ -301,10 +323,10 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
   return container;
 }
 
-export function createFourRowsColorBlindnessLayout(adapter) {
+export function createFourRowsColorBlindnessLayout(adapter, cbStrings) {
   const controller = getAdapterController(adapter);
   // eslint-disable-next-line no-use-before-define
-  const summary = createConflictSummaryBlock(controller);
+  const summary = createConflictSummaryBlock(controller, cbStrings);
   const outer = createTag('div', { class: 'strip-with-color-blindness strip-with-color-blindness--four-rows' });
 
   const desktopLayout = createTag('div', { class: 'strip-cb-desktop-layout' });
@@ -318,10 +340,10 @@ export function createFourRowsColorBlindnessLayout(adapter) {
 
   let mobileLayout = null;
   if (controller) {
-    mobileLayout = createMobileCBLayout(controller);
+    mobileLayout = createMobileCBLayout(controller, cbStrings);
     outer.appendChild(mobileLayout);
 
-    createFourRowsColorBlindnessTitlesOnly(controller, gridContainer, railContainer);
+    createFourRowsColorBlindnessTitlesOnly(controller, gridContainer, railContainer, cbStrings);
     outer.cleanup = () => {
       gridContainer.unsubFourRowsTitles?.();
       mobileLayout.cleanup?.();
@@ -333,7 +355,8 @@ export function createFourRowsColorBlindnessLayout(adapter) {
   return outer;
 }
 
-function createColorBlindnessRows(controller, orientation) {
+function createColorBlindnessRows(controller, orientation, cbStrings) {
+  const cb = resolveCBLabels(cbStrings);
   const isTwoRows = orientation === 'two-rows';
   const wrap = createTag('div', {
     class: `strip-color-blindness-rows${isTwoRows ? ' strip-color-blindness-rows--two-rows' : ''}`,
@@ -352,11 +375,11 @@ function createColorBlindnessRows(controller, orientation) {
       });
       const header = createTag('div', { class: 'strip-color-blindness-row__header' });
       const label = createTag('span', { class: 'strip-color-blindness-row__label', tabindex: '0' });
-      label.textContent = TYPE_LABELS[type];
-      label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-      label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      label.textContent = cb.labels[type];
+      label.setAttribute('data-tooltip-content', cb.defs[type]);
+      label.setAttribute('aria-label', `${cb.labels[type]}: ${cb.defs[type]}`);
       label.addEventListener('focus', () => {
-        announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+        announceToScreenReader(`${cb.labels[type]}: ${cb.defs[type]}`);
       });
       header.appendChild(label);
       const swatchesContainer = createTag('div', { class: 'strip-color-blindness-row__grid' });
@@ -372,9 +395,9 @@ function createColorBlindnessRows(controller, orientation) {
           class: `strip-color-blindness-swatch${conflicting.has(colIndex) ? ' conflict' : ''}${isPlaceholder ? ' strip-color-blindness-swatch--placeholder' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
           role: 'img',
-          'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
+          'aria-label': `${sim.toUpperCase()} ${cb.labels[type]}`,
         });
-        if (conflicting.has(colIndex)) swatch.appendChild(createConflictIcon());
+        if (conflicting.has(colIndex)) swatch.appendChild(createConflictIcon(cb.conflictIconAria));
         swatchesContainer.appendChild(swatch);
       });
       row.appendChild(header);
@@ -421,10 +444,11 @@ function createWarningIcon() {
   return el;
 }
 
-function createConflictSummaryBlock(controller, maxColumns = MAX_CB_COLUMNS) {
+function createConflictSummaryBlock(controller, cbStrings, maxColumns = MAX_CB_COLUMNS) {
+  const cb = resolveCBLabels(cbStrings);
   const wrap = createTag('div', { class: 'strip-conflict-summary' });
   const label = createTag('span', { class: 'strip-conflict-summary__label' });
-  label.textContent = 'Potential color blind conflicts';
+  label.textContent = cb.summary;
   const badge = createTag('span', {
     class: 'strip-conflict-summary__badge',
     role: 'status',
@@ -439,7 +463,7 @@ function createConflictSummaryBlock(controller, maxColumns = MAX_CB_COLUMNS) {
       badge.classList.add('none');
       badge.innerHTML = '';
       badge.appendChild(createCheckmarkIcon());
-      badge.appendChild(document.createTextNode('None'));
+      badge.appendChild(document.createTextNode(cb.statusNone));
       return;
     }
     const { hasAny } = getTotalConflictCount(colors, maxColumns);
@@ -448,13 +472,13 @@ function createConflictSummaryBlock(controller, maxColumns = MAX_CB_COLUMNS) {
       badge.classList.add('has-conflicts');
       badge.innerHTML = '';
       badge.appendChild(createWarningIcon());
-      badge.appendChild(document.createTextNode('Conflicts found'));
+      badge.appendChild(document.createTextNode(cb.statusConflictsFound));
     } else {
       badge.classList.remove('has-conflicts');
       badge.classList.add('none');
       badge.innerHTML = '';
       badge.appendChild(createCheckmarkIcon());
-      badge.appendChild(document.createTextNode('None'));
+      badge.appendChild(document.createTextNode(cb.statusNone));
     }
   }
 
@@ -474,7 +498,7 @@ function createConflictSummaryBlock(controller, maxColumns = MAX_CB_COLUMNS) {
   return wrap;
 }
 
-export function createStripWithColorBlindness(adapter, orientation) {
+export function createStripWithColorBlindness(adapter, orientation, cbStrings) {
   const isTwoRows = orientation === 'two-rows';
   const matrixOrRows = createTag('div', {
     class: `strip-with-color-blindness${isTwoRows ? ' strip-with-color-blindness--two-rows' : ''}`,
@@ -491,13 +515,19 @@ export function createStripWithColorBlindness(adapter, orientation) {
   if (controller) {
     let unsub;
     if (isTwoRows) {
-      const { wrap, unsub: u } = createColorBlindnessRows(controller, orientation);
+      const { wrap, unsub: u } = createColorBlindnessRows(controller, orientation, cbStrings);
       matrixOrRows.appendChild(wrap);
       unsub = u;
     } else {
-      unsub = createColorBlindnessRowsInMatrix(controller, orientation, matrixOrRows, railWrap);
+      unsub = createColorBlindnessRowsInMatrix(
+        controller,
+        orientation,
+        matrixOrRows,
+        railWrap,
+        cbStrings,
+      );
     }
-    const conflictSummary = createConflictSummaryBlock(controller);
+    const conflictSummary = createConflictSummaryBlock(controller, cbStrings);
     conflictSummary.cleanup = conflictSummary.cleanup || (() => {});
     const origDestroy = adapter.destroy;
     adapter.destroy = () => {
@@ -527,6 +557,9 @@ export function createStripContainerRenderer(options) {
     : null;
 
   const colorBlindness = config?.colorBlindness === true;
+  const cbStrings = config?.colorBlindnessStrings || null;
+  const colorEditStrings = config?.colorEditStrings || null;
+  const baseColorStrings = config?.baseColorStrings || null;
   const { onColorChangeEnd, onEditOpen } = options;
   const mobileQuery = typeof options.mobileBreakpointQuery === 'string'
     ? options.mobileBreakpointQuery
@@ -606,13 +639,16 @@ export function createStripContainerRenderer(options) {
     const palette = (state.swatches || []).map((swatch) => swatch?.hex).filter(Boolean);
     const mobile = window.matchMedia?.(mobileQuery)?.matches === true;
 
-    const adapter = createColorEditAdapter({
+    const ceOpts = {
       palette,
       selectedIndex,
       colorMode: 'HEX',
       showPalette: mobile,
       mobile,
-    }, {
+    };
+    if (colorEditStrings) ceOpts.strings = colorEditStrings;
+    if (baseColorStrings) ceOpts.baseColorStrings = baseColorStrings;
+    const adapter = createColorEditAdapter(ceOpts, {
       onColorChange: ({ hex, index }) => {
         if (!hex || !controller?.setState) return;
         const currentState = controller.getState?.() || {};
@@ -747,8 +783,8 @@ export function createStripContainerRenderer(options) {
     let el = adapter.element;
     if (colorBlindness) {
       el = orientation === 'four-rows'
-        ? createFourRowsColorBlindnessLayout(adapter)
-        : createStripWithColorBlindness(adapter, orientation);
+        ? createFourRowsColorBlindnessLayout(adapter, cbStrings)
+        : createStripWithColorBlindness(adapter, orientation, cbStrings);
 
       const controller = getAdapterController(adapter);
       if (controller) {

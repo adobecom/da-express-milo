@@ -565,7 +565,6 @@ export const style = css`
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 6px;
     flex-shrink: 0;
   }
 
