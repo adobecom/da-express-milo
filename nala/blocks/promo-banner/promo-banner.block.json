@@ -1,0 +1,22 @@
+{
+  "block": "promo-banner",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@promo-banner-default",
+      "selector": "div.promo-banner",
+      "path": "/drafts/saravana/font-generator2",
+      "data": {
+        "headingText": "The free font generator online",
+        "buttonText": "Try for free"
+      },
+      "tags": [
+        "@promo-banner",
+        "@default",
+        "@express",
+        "@smoke",
+        "@regression"
+      ]
+    }
+  ]
+}
