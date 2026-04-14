@@ -65,6 +65,9 @@ const DRAWER_DEFAULTS = {
   keywordSuggestions: 'Blue,Green,Bold,Bright,Beige',
   yourLibrary: 'Your Library',
   tagFieldHelp: 'Press return \u21B5 to create tag',
+  tagRemoveAriaLabel: 'Remove {{tag}}',
+  libraryCreatedToast: "Library '{{name}}' created",
+  createLibraryFailedToast: 'Something went wrong. Try again.',
 };
 
 const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
@@ -223,12 +226,20 @@ function setupCreateLibraryHandler(
         renderMenuItems();
         closePopover();
         announceToScreenReader(interpolate(t.libraryCreated, { name: newLib.name }));
+        showExpressToast({
+          variant: 'positive',
+          message: interpolate(t.libraryCreatedToast, { name: newLib.name }),
+        });
       } catch (err) {
         window.lana?.log(`Create library failed: ${err.message}`, {
           tags: 'color-floating-toolbar,drawer',
           severity: 'error',
         });
         announceToScreenReader(t.createLibraryFailed);
+        showExpressToast({
+          variant: 'negative',
+          message: t.createLibraryFailedToast,
+        });
       } finally {
         createBtn.disabled = false;
         createBtn.textContent = t.create;
@@ -608,7 +619,7 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
     t.tags,
     palette?.tags ?? [],
     t.tagsPlaceholder,
-    { helpTextStr: t.tagFieldHelp },
+    { helpTextStr: t.tagFieldHelp, removeLabel: t.tagRemoveAriaLabel },
   );
   const {
     wrapper: tagsWrapper,
@@ -620,7 +631,11 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   const onSuggestionClick = (keyword) => {
     const existing = getTagValues(tagsContainerEl).map((v) => v.toLowerCase());
     if (existing.includes(keyword.toLowerCase())) return;
-    const pill = createTagPill(keyword, { onRemove: syncTagState });
+    const pill = createTagPill(keyword, {
+      removeLabel: t.tagRemoveAriaLabel,
+      onRemove: syncTagState,
+      class: 'ax-drawer-tag-pill',
+    });
     tagsContainerEl.appendChild(pill);
     tagsInputEl.focus();
     syncTagState();
@@ -637,7 +652,11 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   tagsInputEl.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
     e.preventDefault();
-    addTagFromInputHelper(tagsInputEl, tagsContainerEl, { onStateChange: syncTagState });
+    addTagFromInputHelper(tagsInputEl, tagsContainerEl, {
+      onStateChange: syncTagState,
+      removeLabel: t.tagRemoveAriaLabel,
+      class: 'ax-drawer-tag-pill',
+    });
   });
 
   const saveBtnEl = document.createElement('sp-button');

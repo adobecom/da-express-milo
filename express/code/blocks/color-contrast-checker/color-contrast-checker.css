@@ -108,6 +108,9 @@
   --cc-tint-input-height: 24px;
   --cc-tint-input-padding-inline: 9px;
   --cc-tint-input-radius: 7px;
+  --cc-tint-slider-border-color: #0000004f;
+  --cc-tint-slider-thumb-size: 19px;
+  --cc-tint-slider-border-radius: 50px;
 
   /* Topbar */
   --cc-topbar-min-height: 40px;
@@ -560,6 +563,9 @@
 
 .cc-tint-slider-wrapper color-channel-slider {
   inline-size: 100%;
+  border-radius: var(--cc-tint-slider-border-radius);
+  border: 1px solid var(--cc-tint-slider-border-color);
+  --channel-slider-thumb-size: var(--cc-tint-slider-thumb-size);
 }
 
 .cc-tint-value-input {
