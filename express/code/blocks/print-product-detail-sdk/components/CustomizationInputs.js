@@ -352,7 +352,6 @@ function buildPillElement(option, isSelected, index, setSize, activeIndex, handl
   button.setAttribute('role', 'radio');
   button.setAttribute('aria-current', isSelected ? 'true' : 'false');
   button.setAttribute('aria-checked', isSelected ? 'true' : 'false');
-  button.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
   button.setAttribute('aria-posinset', String(index + 1));
   button.setAttribute('aria-setsize', String(setSize));
   button.setAttribute('aria-label', `${option.title}${option.priceDelta ? ` ${option.priceDelta}` : ''}`);
@@ -590,7 +589,6 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
       btn.classList.toggle('selected', isSelected);
       btn.setAttribute('aria-current', isSelected ? 'true' : 'false');
       btn.setAttribute('aria-checked', isSelected ? 'true' : 'false');
-      btn.setAttribute('aria-pressed', isSelected ? 'true' : 'false');
       btn.setAttribute('tabindex', isSelected ? '0' : '-1');
     });
     if (!hasSelected && buttons.length > 0) {
@@ -729,7 +727,6 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
                     aria-label="${option.title}${option.priceDelta ? ` ${option.priceDelta}` : ''}"
                     aria-checked="${isSelected ? 'true' : 'false'}"
                     aria-current="${isSelected ? 'true' : 'false'}"
-                    aria-pressed="${isSelected ? 'true' : 'false'}"
                     aria-posinset="${optionIndex + 1}"
                     aria-setsize="${allOptions.length}"
                     tabindex="${optionIndex === activeIndex ? '0' : '-1'}"
