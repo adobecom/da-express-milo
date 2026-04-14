@@ -1,5 +1,5 @@
 import { announceToScreenReader } from '../spectrum/index.js';
-import { isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi } from '../utils/utilities.js';
+import { isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi, decorateAnalyticsAttributes } from '../utils/utilities.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { createIconButton } from '../utils/icons.js';
@@ -37,6 +37,7 @@ const TOOLBAR_DEFAULTS = {
   shareText: 'Check out this color palette on Adobe.com',
   urlCopiedToClipboard: 'URL copied to clipboard',
   shareFailed: 'Unable to share. Please try again.',
+  networkError: 'Network request failed. Check your connection or try again.',
 };
 
 let toolbarInstanceCounter = 0;
@@ -73,9 +74,13 @@ async function handleShare({ name, colors }, t) {
 }
 
 // const COLOR_PALETTE_TEMPLATE_ID = 'urn:aaid:sc:VA6C2:60d17865-6817-5343-84db-34219e8ec3a4';
-const COLOR_PALETTE_LEARN_PARAM = 'exercise:express/how-to/in-app/how-to-apply-your-color-palette-to-the-template:-1';
 
 async function handleOpenInExpress({ id, name, colors }) {
+  const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
+    '../utils/susiRedirect.js'
+  );
+  setSusiColorRedirect(buildColorSignInRedirectUrl(colors, name));
+
   const isSignedIn = await triggerSignInFlow();
   if (!isSignedIn) return;
 
@@ -90,7 +95,6 @@ async function handleOpenInExpress({ id, name, colors }) {
   const colorPaletteData = { id, colors };
   if (name) colorPaletteData.name = name;
 
-  url.searchParams.set('learn', COLOR_PALETTE_LEARN_PARAM);
   url.searchParams.set('colorPalette', JSON.stringify(colorPaletteData));
   url.searchParams.set('referrer', 'express-colors');
   url.searchParams.set('entryPoint', 'color-explorer');
@@ -108,6 +112,47 @@ async function handleDownload(palette, t) {
     announceToScreenReader(t.downloadStarted);
   } catch (err) {
     window.lana?.log(`Download failed: ${err.message}`, {
+      tags: 'color-floating-toolbar,download',
+      severity: 'error',
+    });
+  }
+}
+
+/* Renders gradient to canvas for download. Uses even stop distribution since the
+   toolbar palette only carries a flat colors array — stop positions from the
+   gradient editor are not propagated to the toolbar. */
+async function handleGradientDownload(palette, t) {
+  try {
+    const { name = 'gradient', colors = [], angle = 90 } = palette;
+    const canvas = document.createElement('canvas');
+    canvas.width = 1920;
+    canvas.height = 1080;
+    const ctx = canvas.getContext('2d');
+    const rad = (angle - 90) * (Math.PI / 180);
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const len = Math.hypot(canvas.width, canvas.height) / 2;
+    const grad = ctx.createLinearGradient(
+      cx - Math.cos(rad) * len,
+      cy - Math.sin(rad) * len,
+      cx + Math.cos(rad) * len,
+      cy + Math.sin(rad) * len,
+    );
+    colors.forEach((hex, i) => {
+      grad.addColorStop(colors.length > 1 ? i / (colors.length - 1) : 0.5, hex);
+    });
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const blob = await new Promise((resolve) => { canvas.toBlob(resolve, 'image/jpeg', 0.95); });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${name}.jpg`;
+    a.click();
+    URL.revokeObjectURL(url);
+    announceToScreenReader(t.downloadStarted);
+  } catch (err) {
+    window.lana?.log(`Gradient download failed: ${err.message}`, {
       tags: 'color-floating-toolbar,download',
       severity: 'error',
     });
@@ -230,6 +275,7 @@ function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t) {
       onClick: onEditClick,
     });
     editBtn.classList.add('ax-edit-btn');
+    decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit palette' });
     attachTooltip(editBtn, t.edit);
     paletteSummary.appendChild(editBtn);
   }
@@ -245,6 +291,7 @@ function buildActionButtons(handlers, t) {
     size: 'm',
     onClick: handlers.onShare,
   });
+  decorateAnalyticsAttributes(shareBtn, { linkLabel: 'Share' });
   attachTooltip(shareBtn, t.share);
   actions.appendChild(shareBtn);
 
@@ -254,6 +301,7 @@ function buildActionButtons(handlers, t) {
     size: 'm',
     onClick: handlers.onDownload,
   });
+  decorateAnalyticsAttributes(downloadBtn, { linkLabel: 'Download' });
   attachTooltip(downloadBtn, t.download);
   actions.appendChild(downloadBtn);
 
@@ -263,6 +311,7 @@ function buildActionButtons(handlers, t) {
     size: 'm',
     onClick: handlers.onSave,
   });
+  decorateAnalyticsAttributes(ccLibBtn, { linkLabel: 'Save to library' });
   attachTooltip(ccLibBtn, t.saveToLibrary);
   actions.appendChild(ccLibBtn);
 
@@ -275,6 +324,7 @@ function buildCTAButton(getCTAText, onClick) {
   ctaBtn.setAttribute('size', 'l');
   ctaBtn.textContent = getCTAText();
   ctaBtn.addEventListener('click', onClick);
+  decorateAnalyticsAttributes(ctaBtn, { linkLabel: 'CTA' });
   return ctaBtn;
 }
 
@@ -413,6 +463,8 @@ export function createToolbar(options) {
     effectiveShowEdit,
     async () => {
       const currentPalette = getPaletteWithName();
+      emit('edit', { palette: currentPalette });
+      if (window.isTestEnv) return;
       if (editPaletteLink) {
         window.location.href = editPaletteLink;
       } else {
@@ -435,7 +487,11 @@ export function createToolbar(options) {
     },
     onDownload: async () => {
       const currentPalette = getPaletteWithName();
-      await handleDownload(currentPalette, t);
+      if (type === 'gradient') {
+        await handleGradientDownload(currentPalette, t);
+      } else {
+        await handleDownload(currentPalette, t);
+      }
       emit('download', { palette: currentPalette });
     },
     onSave: async () => {

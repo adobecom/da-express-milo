@@ -35,6 +35,7 @@ export const style = css`
         inset: 0;
         z-index: 100;
         background: var(--Alias-overlay-curtain);
+        backdrop-filter: blur(10px);
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;

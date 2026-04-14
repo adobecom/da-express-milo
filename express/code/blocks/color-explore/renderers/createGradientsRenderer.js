@@ -4,22 +4,13 @@ import { createGradientStripElements } from '../../../scripts/color-shared/compo
 import { createLoadMoreComponent } from '../../../scripts/color-shared/components/createLoadMoreComponent.js';
 import { loadIconsRail } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createExpressTooltip } from '../../../scripts/color-shared/spectrum/components/express-tooltip.js';
+import { decorateAnalyticsAttributes } from '../../../scripts/color-shared/utils/utilities.js';
+import { createLoadingScreenComponent } from '../../../scripts/color-shared/components/createLoadingScreenComponent.js';
 
 const PAGINATION = {
   INITIAL_COUNT: 24,
   LOAD_MORE_INCREMENT: 12,
 };
-
-function sanitizeAnalyticsText(value, max = 20) {
-  const raw = String(value ?? '')
-    .replace(/[^a-zA-Z0-9\s]/g, '')
-    .trim();
-  return raw.substring(0, max);
-}
-
-function formatCount(n) {
-  return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
-}
 
 export function createGradientsRenderer(options) {
   const { container, data = [], config = {} } = options;
@@ -64,8 +55,8 @@ export function createGradientsRenderer(options) {
 
   function getAnalyticsHeaderText() {
     const titleText = container?.querySelector('.gradients-title')?.textContent?.trim();
-    const fallback = `${formatCount(allGradients.length)} color gradients`;
-    return sanitizeAnalyticsText(titleText || fallback);
+    const fallback = 'Color gradients';
+    return titleText || fallback;
   }
 
   function isActivationSuppressed() {
@@ -587,9 +578,8 @@ export function createGradientsRenderer(options) {
     });
 
     card.addEventListener('click', (e) => {
-      // Card/visual click should not open modal. Only the Open action button does.
       if (e.target.closest('.gradient-strip-action-btn')) return;
-      e.stopPropagation();
+      handleCardActivation(gradient);
     });
   }
 
@@ -605,6 +595,7 @@ export function createGradientsRenderer(options) {
     card.setAttribute('role', 'gridcell');
     card.setAttribute('tabindex', '-1');
     card.setAttribute('aria-label', `View ${gradient.name} gradient`);
+    decorateAnalyticsAttributes(card, { linkLabel: 'View gradient' });
     attachCardListeners(card, gradient);
     return card;
   }
@@ -654,8 +645,7 @@ export function createGradientsRenderer(options) {
   function updateTitle() {
     const title = container?.querySelector('.gradients-title');
     if (title) {
-      const countLabel = formatCount(allGradients.length);
-      title.textContent = `${countLabel} color gradients`;
+      title.textContent = 'Color gradients';
     }
   }
 
@@ -709,16 +699,22 @@ export function createGradientsRenderer(options) {
     if (isInitialRender) {
       container.addEventListener('color-explore:filter-interaction', onFilterInteraction);
       container.replaceChildren();
+
+      gradientsSection = createTag('section', { class: 'explore-main-section' });
+      const loadingScreen = createLoadingScreenComponent({ variant: 'strips', cardCount: 6 });
+      gradientsSection.appendChild(loadingScreen.element);
+      loadingScreen.show();
+      container.appendChild(gradientsSection);
+
       await loadIconsRail();
 
       const header = createTag('div', { class: 'explore-header' });
       const title = createTag('h2', { class: 'gradients-title' });
-      const countLabel = formatCount(allGradients.length);
-      title.textContent = `${countLabel} color gradients`;
+      title.textContent = 'Color gradients';
       header.appendChild(title);
-      container.appendChild(header);
+      container.insertBefore(header, gradientsSection);
 
-      gradientsSection = createTag('section', { class: 'explore-main-section' });
+      gradientsSection.replaceChildren();
 
       const columns = getGridColumns();
       const rows = Math.ceil(allGradients.length / columns);

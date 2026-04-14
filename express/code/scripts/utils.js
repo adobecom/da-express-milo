@@ -896,3 +896,9 @@ export function isEmptyValue(value) {
 export function hasContent(value) {
   return !isEmptyValue(value);
 }
+
+export function getContentRoot(location) {
+  const { hostname } = location || window.location;
+  if (['--express-color--', 'color.stage.adobe.com', 'color.adobe.com'].some((i) => hostname.includes(i))) return '';
+  return '/express';
+}

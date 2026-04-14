@@ -13,6 +13,7 @@ import {
   unlockBodyScroll,
   saveFocusedElement,
   restoreFocusedElement,
+  decorateAnalyticsAttributes,
   getNextOverlayZIndex,
 } from '../utils/utilities.js';
 import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
@@ -64,6 +65,9 @@ const DRAWER_DEFAULTS = {
   keywordSuggestions: 'Blue,Green,Bold,Bright,Beige',
   yourLibrary: 'Your Library',
   tagFieldHelp: 'Press return \u21B5 to create tag',
+  tagRemoveAriaLabel: 'Remove {{tag}}',
+  libraryCreatedToast: "Library '{{name}}' created",
+  createLibraryFailedToast: 'Something went wrong. Try again.',
 };
 
 const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
@@ -146,6 +150,7 @@ function createLibraryPickerTrigger(selectedName) {
   const triggerChevron = createTag('span', { class: 'ax-lib-picker-trigger-chevron', 'aria-hidden': 'true' });
   triggerChevron.appendChild(createChevronDownIcon());
   trigger.append(triggerLabel, triggerChevron);
+  decorateAnalyticsAttributes(trigger, { linkLabel: 'Library picker' });
   return { trigger, triggerLabel };
 }
 
@@ -174,6 +179,7 @@ function createLibraryPopover(label, t) {
   createBtn.setAttribute('size', 'm');
   createBtn.classList.add('ax-lib-picker-create-btn');
   createBtn.textContent = t.create;
+  decorateAnalyticsAttributes(createBtn, { linkLabel: 'Create library' });
 
   const createRow = createTag('div', { class: 'ax-lib-picker-create-row' });
   createRow.append(createInput, createBtn);
@@ -220,12 +226,20 @@ function setupCreateLibraryHandler(
         renderMenuItems();
         closePopover();
         announceToScreenReader(interpolate(t.libraryCreated, { name: newLib.name }));
+        showExpressToast({
+          variant: 'positive',
+          message: interpolate(t.libraryCreatedToast, { name: newLib.name }),
+        });
       } catch (err) {
         window.lana?.log(`Create library failed: ${err.message}`, {
           tags: 'color-floating-toolbar,drawer',
           severity: 'error',
         });
         announceToScreenReader(t.createLibraryFailed);
+        showExpressToast({
+          variant: 'negative',
+          message: t.createLibraryFailedToast,
+        });
       } finally {
         createBtn.disabled = false;
         createBtn.textContent = t.create;
@@ -303,6 +317,7 @@ function createLibraryPickerField(
       item.setAttribute('value', lib.id);
       if (lib.id === state.currentId) item.setAttribute('selected', '');
       item.textContent = lib.name;
+      decorateAnalyticsAttributes(item, { linkLabel: 'Select library' });
       item.addEventListener('click', (e) => {
         e.stopPropagation();
         selectLibrary(lib, item);
@@ -361,6 +376,7 @@ function createKeywordSuggestions(keywords, mobile, { onSuggestionClick } = {}) 
     btn.setAttribute('size', size);
     btn.classList.add('ax-drawer-tag-btn');
     btn.textContent = keyword;
+    decorateAnalyticsAttributes(btn, { linkLabel: keyword });
     const icon = createSpectrumIcon('Add');
     icon.setAttribute('slot', 'icon');
     btn.prepend(icon);
@@ -603,7 +619,7 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
     t.tags,
     palette?.tags ?? [],
     t.tagsPlaceholder,
-    { helpTextStr: t.tagFieldHelp },
+    { helpTextStr: t.tagFieldHelp, removeLabel: t.tagRemoveAriaLabel },
   );
   const {
     wrapper: tagsWrapper,
@@ -615,7 +631,11 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   const onSuggestionClick = (keyword) => {
     const existing = getTagValues(tagsContainerEl).map((v) => v.toLowerCase());
     if (existing.includes(keyword.toLowerCase())) return;
-    const pill = createTagPill(keyword, { onRemove: syncTagState });
+    const pill = createTagPill(keyword, {
+      removeLabel: t.tagRemoveAriaLabel,
+      onRemove: syncTagState,
+      class: 'ax-drawer-tag-pill',
+    });
     tagsContainerEl.appendChild(pill);
     tagsInputEl.focus();
     syncTagState();
@@ -632,7 +652,11 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   tagsInputEl.addEventListener('keydown', (e) => {
     if (e.key !== 'Enter') return;
     e.preventDefault();
-    addTagFromInputHelper(tagsInputEl, tagsContainerEl, { onStateChange: syncTagState });
+    addTagFromInputHelper(tagsInputEl, tagsContainerEl, {
+      onStateChange: syncTagState,
+      removeLabel: t.tagRemoveAriaLabel,
+      class: 'ax-drawer-tag-pill',
+    });
   });
 
   const saveBtnEl = document.createElement('sp-button');
@@ -643,9 +667,11 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   if (isSignedIn) {
     saveBtnEl.textContent = t.saveToLibrary;
     saveBtnEl.addEventListener('click', onSave);
+    decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Save to library' });
   } else {
     saveBtnEl.textContent = t.signInToSave;
     saveBtnEl.addEventListener('click', onSignIn);
+    decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Sign in to save' });
   }
   content.appendChild(saveBtnEl);
 
@@ -856,7 +882,20 @@ export async function createDrawer(options) {
       libraries,
       ccLibraryProvider,
       isSignedIn,
-      { onClose: close, onSave: save, onSignIn: triggerSignInFlow, onLibraryCreated },
+      {
+        onClose: close,
+        onSave: save,
+        onSignIn: async () => {
+          const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
+            '../utils/susiRedirect.js'
+          );
+          const colors = paletteData?.colors || [];
+          const paletteName = paletteData?.name || '';
+          setSusiColorRedirect(buildColorSignInRedirectUrl(colors, paletteName));
+          return triggerSignInFlow();
+        },
+        onLibraryCreated,
+      },
       t,
     );
     curtainEl = dom.curtainEl;

@@ -253,8 +253,7 @@ export function createGradientsRenderer(options) {
 
     const title = document.createElement('h2');
     title.className = 'gradients-title';
-    const totalGradients = normalizeGradients(getData()).length;
-    title.textContent = `${totalGradients} color gradients`;
+    title.textContent = 'Color gradients';
 
     header.appendChild(title);
 

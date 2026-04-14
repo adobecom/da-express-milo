@@ -10,9 +10,15 @@ import {
   labToRGB,
 } from '../../../../libs/color-components/utils/ColorConversions.js';
 import { loadMenu, loadButton, loadColorArea, loadColorSlider, loadTextfield } from '../../spectrum/load-spectrum.js';
+import { DEFAULT_PLACEHOLDERS as BASE_COLOR_DEFAULTS } from '../../i18n/loadBaseColorPlaceholders.js';
 import '../color-channel-slider/index.js';
 
 const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
+
+/** Snap hue slider to original when within this many degrees (wraps at 0/360). */
+const ORIGINAL_COLOR_HUE_SNAP_DEG = 10;
+/** Snap color area to original S/B when both axes are within this many percent points. */
+const ORIGINAL_COLOR_AREA_SNAP_PCT = 4;
 
 class BaseColor extends LitElement {
   static get styles() {
@@ -41,6 +47,7 @@ class BaseColor extends LitElement {
       _brightness: { type: Number, state: true },
       _modeMenuOpen: { type: Boolean, state: true },
       _isLocked: { type: Boolean, state: true, reflect: true, attribute: 'locked' },
+      strings: { type: Object },
       _hexError: { type: Boolean, state: true },
       _liveRegionText: { type: String, state: true },
       _colorUpdatedFromPicker: { type: Boolean, state: true },
@@ -53,6 +60,7 @@ class BaseColor extends LitElement {
     this.colorMode = 'HEX';
     this.showHeader = true;
     this.showBrightnessControl = true;
+    this.strings = BASE_COLOR_DEFAULTS;
     this._hue = 0;
     this._saturation = 100;
     this._brightness = 100;
@@ -67,6 +75,7 @@ class BaseColor extends LitElement {
     this._originalHue = 0;
     this._originalSaturation = 0;
     this._originalBrightness = 0;
+    this._pickerInputEnabled = false;
   }
 
   get _rgb() {
@@ -123,7 +132,7 @@ class BaseColor extends LitElement {
     super.connectedCallback();
     loadButton();
     this._menuLoadPromise = loadMenu();
-    loadColorArea();
+    this._colorAreaReady = loadColorArea();
     loadColorSlider();
     loadTextfield();
     this._closeMenuOnOutsideClick = (e) => {
@@ -150,11 +159,33 @@ class BaseColor extends LitElement {
     super.disconnectedCallback();
   }
 
-  updated(changed) {
+  willUpdate(changed) {
     if (changed.has('color') || !this._hasOriginal) {
       this._syncFromColor();
     }
+  }
+
+  updated() {
     this._updateOriginalDots();
+    if (!this._colorAreaInitSynced) {
+      this._colorAreaInitSynced = true;
+      this._syncColorAreaAfterInit();
+    }
+  }
+
+  async _syncColorAreaAfterInit() {
+    try {
+      await this._colorAreaReady;
+    } catch {
+      return;
+    }
+    const area = this.renderRoot.querySelector('sp-color-area');
+    if (!area) return;
+    await area.updateComplete;
+    if (this._pickerInputEnabled) return;
+    area.x = this._saturation / 100;
+    area.y = this._brightness / 100;
+    area.hue = this._hue;
   }
 
   _ensureDotStyles(shadowRoot) {
@@ -235,6 +266,20 @@ class BaseColor extends LitElement {
     if (!rgb) return;
     const hsb = rgbToHSB(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
 
+    if (this.color.toUpperCase() === this._hex.toUpperCase()) {
+      if (!this._hasOriginal) {
+        this._originalHue = this._hue;
+        this._originalSaturation = this._saturation;
+        this._originalBrightness = this._brightness;
+        this._hasOriginal = true;
+      }
+      return;
+    }
+
+    this._hue = hsb.hue;
+    this._saturation = hsb.saturation;
+    this._brightness = hsb.brightness;
+
     if (!this._hasOriginal) {
       this._originalHue = hsb.hue;
       this._originalSaturation = hsb.saturation;
@@ -242,10 +287,6 @@ class BaseColor extends LitElement {
       this._hasOriginal = true;
     }
 
-    if (this.color.toUpperCase() === this._hex.toUpperCase()) return;
-    this._hue = hsb.hue;
-    this._saturation = hsb.saturation;
-    this._brightness = hsb.brightness;
     this._colorUpdatedFromPicker = true;
     this._labCache = null;
   }
@@ -290,18 +331,19 @@ class BaseColor extends LitElement {
   }
 
   _getColorAnnouncement() {
+    const s = this.strings;
     switch (this.colorMode) {
       case 'RGB': {
         const rgb = this._rgb;
-        return `Red ${Math.round(rgb.red)}, Green ${Math.round(rgb.green)}, Blue ${Math.round(rgb.blue)}`;
+        return `${s.channelRed} ${Math.round(rgb.red)}, ${s.channelGreen} ${Math.round(rgb.green)}, ${s.channelBlue} ${Math.round(rgb.blue)}`;
       }
       case 'HSB': {
         const hsb = this._hsb;
-        return `Hue ${hsb.h} degrees, Saturation ${hsb.s}%, Brightness ${hsb.b}%`;
+        return `${s.channelHue} ${hsb.h} degrees, ${s.channelSaturation} ${hsb.s}%, ${s.channelBrightness} ${hsb.b}%`;
       }
       case 'Lab': {
         const lab = this._lab;
-        return `Lightness ${lab.l}, a ${lab.a}, b ${lab.b}`;
+        return `${s.channelLightness} ${lab.l}, ${s.channelLabA} ${lab.a}, ${s.channelLabB} ${lab.b}`;
       }
       case 'HEX':
       default:
@@ -420,6 +462,11 @@ class BaseColor extends LitElement {
 
   _onPointerDown(e) {
     this._lastPointerType = e.pointerType;
+    this._pickerInputEnabled = true;
+  }
+
+  _onPickerKeyDown() {
+    this._pickerInputEnabled = true;
   }
 
   _blurOnTouch(target) {
@@ -431,12 +478,32 @@ class BaseColor extends LitElement {
 
   // --- Color area (Saturation/Brightness) ---
 
+  _snapColorAreaToOriginal(area, saturation, brightness) {
+    if (!this._hasOriginal) return { saturation, brightness };
+    const ds = Math.abs(saturation - this._originalSaturation);
+    const db = Math.abs(brightness - this._originalBrightness);
+    if (ds > ORIGINAL_COLOR_AREA_SNAP_PCT || db > ORIGINAL_COLOR_AREA_SNAP_PCT) {
+      return { saturation, brightness };
+    }
+    const s = this._originalSaturation;
+    const b = this._originalBrightness;
+    if (area) {
+      area.x = s / 100;
+      area.y = b / 100;
+    }
+    return { saturation: s, brightness: b };
+  }
+
   _onColorAreaInput(e) {
+    if (!this._pickerInputEnabled) return;
     const area = e.target;
     if (!area) return;
 
-    this._saturation = area.x * 100;
-    this._brightness = area.y * 100;
+    const rawS = area.x * 100;
+    const rawB = area.y * 100;
+    const snapped = this._snapColorAreaToOriginal(area, rawS, rawB);
+    this._saturation = snapped.saturation;
+    this._brightness = snapped.brightness;
     this._hexError = false;
     this._colorUpdatedFromPicker = true;
     this._labCache = null;
@@ -452,6 +519,7 @@ class BaseColor extends LitElement {
   // --- Hue slider ---
 
   _onHueInput(e) {
+    if (!this._pickerInputEnabled) return;
     const slider = e.target;
     if (slider.value == null) return;
 
@@ -459,7 +527,10 @@ class BaseColor extends LitElement {
     if (this._hasOriginal) {
       const diff = Math.abs(hue - this._originalHue);
       const wrappedDiff = Math.min(diff, 360 - diff);
-      if (wrappedDiff <= 5) hue = this._originalHue;
+      if (wrappedDiff <= ORIGINAL_COLOR_HUE_SNAP_DEG) {
+        hue = this._originalHue;
+        slider.value = hue;
+      }
     }
 
     this._hue = hue;
@@ -665,16 +736,17 @@ class BaseColor extends LitElement {
   _renderHeader() {
     if (!this.showHeader) return nothing;
 
+    const s = this.strings;
     return html`
       <div class="bc-header">
         <div class="bc-header-row">
-          <span class="bc-title">Primary color</span>
+          <span class="bc-title">${s.title}</span>
           <div class="bc-mode-wrap">
             <button
               type="button"
               class="bc-mode-trigger"
               @click=${this._toggleModeMenu}
-              aria-label="Color mode, ${this.colorMode}"
+              aria-label="${s.modeLabel}, ${this.colorMode}"
               aria-haspopup="listbox"
               aria-expanded=${this._modeMenuOpen}
               aria-controls=${this._modeMenuOpen ? 'bc-mode-menu' : nothing}
@@ -688,7 +760,7 @@ class BaseColor extends LitElement {
                 role="listbox"
                 selects="single"
                 size="s"
-                label="Color mode"
+                label="${s.modeLabel}"
                 @change=${this._onModeMenuChange}
                 @keydown=${this._onModeMenuKeyDown}
               >
@@ -714,14 +786,14 @@ class BaseColor extends LitElement {
                 maxlength="7"
                 .value=${this._colorValue}
                 ?invalid=${this._hexError}
-                label="Base color"
+                label="${s.fieldLabel}"
                 @input=${this._onColorValueInput}
                 @paste=${this._onHexPaste}
                 @change=${this._onHexCommit}
               ></sp-textfield>
               <span
                 class="bc-lock-icon"
-                aria-label="${this._isLocked ? 'Color locked' : 'Color unlocked'}"
+                aria-label="${this._isLocked ? s.lockedAria : s.unlockedAria}"
               >
                 <img
                   src="/express/code/icons/${this._isLocked ? 'S2_Icon_Lock_20_N.svg' : 'S2_Icon_LockOpen_20_N.svg'}"
@@ -731,7 +803,7 @@ class BaseColor extends LitElement {
                 />
               </span>
             </div>
-            ${this._hexError ? html`<span class="bc-hex-error-text">Please enter a valid 6-character HEX code</span>` : nothing}
+            ${this._hexError ? html`<span class="bc-hex-error-text">${s.hexError}</span>` : nothing}
           </div>
         ` : nothing}
       </div>
@@ -741,10 +813,11 @@ class BaseColor extends LitElement {
   _renderBrightnessSlider() {
     if (!this.showBrightnessControl) return nothing;
     const h = this._hue / 360;
-    const s = this._saturation / 100;
-    const gradient = `linear-gradient(to right, ${hsbToHEX(h, s, 0)}, ${hsbToHEX(h, s, 1)})`;
+    const sat = this._saturation / 100;
+    const gradient = `linear-gradient(to right, ${hsbToHEX(h, sat, 0)}, ${hsbToHEX(h, sat, 1)})`;
     const value = Math.round(this._brightness);
-    const label = html`<img src="/express/code/icons/S2_Icon_BrightnessContrast_20_N.svg" alt="Brightness/Contrast" width="20" height="20" />`;
+    const str = this.strings;
+    const label = html`<img src="/express/code/icons/S2_Icon_BrightnessContrast_20_N.svg" alt="${str.brightnessContrast}" width="20" height="20" />`;
 
     return html`
       <div class="bc-channel-row">
@@ -754,8 +827,8 @@ class BaseColor extends LitElement {
             min="0"
             max="100"
             .value=${value}
-            label="Lightness control handle"
-            valuetext=${`Lightness: ${value}%`}
+            label="${str.channelLightness}"
+            valuetext=${`${str.channelLightness}: ${value}%`}
             gradient=${gradient}
             @input=${(e) => this._onHSBChannelSliderInput(e, 'b')}
             @change=${() => this._emitColorChangeEnd()}
@@ -767,7 +840,7 @@ class BaseColor extends LitElement {
           size="s"
           maxlength="3"
           .value=${String(value)}
-          label="Lightness amount value"
+          label="${str.channelLightness}"
           label-visibility="none"
           @keydown=${(e) => this._onChannelKeyDown(e)}
           @input=${(e) => this._onHSBChannelTextInput(e, 'b')}
@@ -781,18 +854,19 @@ class BaseColor extends LitElement {
     if (this.colorMode === 'HEX') return this._renderBrightnessSlider();
 
     if (this.colorMode === 'RGB') {
+      const s = this.strings;
       const rgb = this._rgb;
       const channels = [
-        { key: 'red', label: 'R', ariaLabel: 'Red', value: Math.round(rgb.red), min: 0, max: 255, unit: '', maxlength: 3 },
-        { key: 'green', label: 'G', ariaLabel: 'Green', value: Math.round(rgb.green), min: 0, max: 255, unit: '', maxlength: 3 },
-        { key: 'blue', label: 'B', ariaLabel: 'Blue', value: Math.round(rgb.blue), min: 0, max: 255, unit: '', maxlength: 3 },
+        { key: 'red', label: 'R', ariaLabel: s.channelRed, value: Math.round(rgb.red), min: 0, max: 255, unit: '', maxlength: 3 },
+        { key: 'green', label: 'G', ariaLabel: s.channelGreen, value: Math.round(rgb.green), min: 0, max: 255, unit: '', maxlength: 3 },
+        { key: 'blue', label: 'B', ariaLabel: s.channelBlue, value: Math.round(rgb.blue), min: 0, max: 255, unit: '', maxlength: 3 },
       ];
 
       if (this.showBrightnessControl) {
         channels.push({
           key: 'brightness',
-          label: html`<img src="/express/code/icons/S2_Icon_BrightnessContrast_20_N.svg" alt="Brightness/Contrast" width="20" height="20" />`,
-          ariaLabel: 'Brightness/Contrast',
+          label: html`<img src="/express/code/icons/S2_Icon_BrightnessContrast_20_N.svg" alt="${s.brightnessContrast}" width="20" height="20" />`,
+          ariaLabel: s.brightnessContrast,
           value: Math.round(this._brightness),
           min: 0,
           max: 100,
@@ -811,7 +885,7 @@ class BaseColor extends LitElement {
                 min=${ch.min}
                 max=${ch.max}
                 .value=${ch.value}
-                label=${ch.isIcon ? 'Lightness control handle' : ch.ariaLabel}
+                label=${ch.isIcon ? s.channelLightness : ch.ariaLabel}
                 valuetext=${`${ch.ariaLabel}: ${ch.value}${ch.unit}`}
                 gradient=${this._getChannelGradient(ch.key)}
                 @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelSliderInput(e, 'b') : this._onRGBChannelSliderInput(e, ch.key)}
@@ -824,7 +898,7 @@ class BaseColor extends LitElement {
               size="s"
               maxlength=${ch.maxlength}
               .value=${String(ch.value)}
-              label=${ch.isIcon ? 'Lightness amount value' : ch.ariaLabel}
+              label=${ch.isIcon ? s.channelLightness : ch.ariaLabel}
               label-visibility="none"
               @keydown=${(e) => this._onChannelKeyDown(e)}
               @input=${(e) => ch.key === 'brightness' ? this._onHSBChannelTextInput(e, 'b') : this._onRGBChannelTextInput(e, ch.key)}
@@ -836,10 +910,11 @@ class BaseColor extends LitElement {
     }
 
     if (this.colorMode === 'HSB') {
+      const s = this.strings;
       const channels = [
-        { key: 'h', label: 'H', ariaLabel: 'Hue', value: Math.round(this._hue), min: 0, max: 360, unit: ' degrees', maxlength: 3 },
-        { key: 's', label: 'S', ariaLabel: 'Saturation', value: Math.round(this._saturation), min: 0, max: 100, unit: '%', maxlength: 3 },
-        { key: 'b', label: 'B', ariaLabel: 'Brightness', value: Math.round(this._brightness), min: 0, max: 100, unit: '%', maxlength: 3 },
+        { key: 'h', label: 'H', ariaLabel: s.channelHue, value: Math.round(this._hue), min: 0, max: 360, unit: ' degrees', maxlength: 3 },
+        { key: 's', label: 'S', ariaLabel: s.channelSaturation, value: Math.round(this._saturation), min: 0, max: 100, unit: '%', maxlength: 3 },
+        { key: 'b', label: 'B', ariaLabel: s.channelBrightness, value: Math.round(this._brightness), min: 0, max: 100, unit: '%', maxlength: 3 },
       ];
 
       return html`
@@ -876,11 +951,12 @@ class BaseColor extends LitElement {
     }
 
     if (this.colorMode === 'Lab') {
+      const s = this.strings;
       const lab = this._lab;
       const channels = [
-        { key: 'l', label: 'L', ariaLabel: 'Lightness', value: Math.round(lab.l), min: 0, max: 100, unit: '', maxlength: 3, allowNegative: false },
-        { key: 'a', label: 'a', ariaLabel: 'a (green-red)', value: Math.round(lab.a), min: -128, max: 127, unit: '', maxlength: 4, allowNegative: true },
-        { key: 'b', label: 'b', ariaLabel: 'b (blue-yellow)', value: Math.round(lab.b), min: -128, max: 127, unit: '', maxlength: 4, allowNegative: true },
+        { key: 'l', label: 'L', ariaLabel: s.channelLightness, value: Math.round(lab.l), min: 0, max: 100, unit: '', maxlength: 3, allowNegative: false },
+        { key: 'a', label: 'a', ariaLabel: s.channelLabA, value: Math.round(lab.a), min: -128, max: 127, unit: '', maxlength: 4, allowNegative: true },
+        { key: 'b', label: 'b', ariaLabel: s.channelLabB, value: Math.round(lab.b), min: -128, max: 127, unit: '', maxlength: 4, allowNegative: true },
       ];
 
       return html`
@@ -930,6 +1006,7 @@ class BaseColor extends LitElement {
             .y=${this._brightness / 100}
             .hue=${this._hue}
             @pointerdown=${this._onPointerDown}
+            @keydown=${this._onPickerKeyDown}
             @input=${this._onColorAreaInput}
             @change=${this._onColorAreaChange}
           ></sp-color-area>
@@ -938,6 +1015,7 @@ class BaseColor extends LitElement {
             gradient="hue"
             color=${currentColor}
             @pointerdown=${this._onPointerDown}
+            @keydown=${this._onPickerKeyDown}
             @input=${this._onHueInput}
             @change=${this._onHueInput}
           ></sp-color-slider>

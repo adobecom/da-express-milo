@@ -62,7 +62,7 @@ function gradientToCSS(data, midpoints = []) {
   const stops = parts.map((p) => `${p.color} ${Math.round(p.pos * 100)}%`).join(', ');
   if (type === 'radial') return `radial-gradient(circle, ${stops})`;
   if (type === 'conic') return `conic-gradient(from ${angle}deg, ${stops})`;
-  return `linear-gradient(${angle}deg, ${stops})`;
+  return `linear-gradient(90deg, ${stops})`;
 }
 
 function sampleColorAtPosition(data, midpoints, p) {
@@ -180,6 +180,7 @@ export function createGradientEditor(initialGradient, options = {}) {
   let barEl = null;
   let handlesWrap = null;
   let barRect = null;
+  let cachedStopSize = null;
   const eventListeners = {};
   const midHalf = 5;
   let selectedStopId = null;
@@ -322,16 +323,8 @@ export function createGradientEditor(initialGradient, options = {}) {
       .catch(() => {});
   }
 
-  function showCopiedTooltipFeedback(handle) {
+  function showCopiedTooltipFeedback() {
     showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 2000 });
-    const info = handleTooltipControllers.get(handle);
-    if (!info?.controller) return;
-    info.controller.setContent('Copied to clipboard');
-    if (info.resetTimer) clearTimeout(info.resetTimer);
-    info.resetTimer = setTimeout(() => {
-      info.controller.setContent(info.copyLabel);
-      info.resetTimer = null;
-    }, 1200);
   }
 
   function clearHandleTooltips() {
@@ -462,13 +455,22 @@ export function createGradientEditor(initialGradient, options = {}) {
     updateMockHandlesOrder();
   }
 
+  function getHandleOverflow() {
+    if (!barRect) barRect = barEl.getBoundingClientRect();
+    if (cachedStopSize === null) {
+      cachedStopSize = parseFloat(getComputedStyle(barEl).getPropertyValue('--gradient-stop-size')) || 22;
+    }
+    return barRect.width > 0 ? (cachedStopSize / 2) / barRect.width : 0;
+  }
+
   function positionFromEvent(e) {
     const clientX = e.touches?.[0]?.clientX ?? e.clientX;
     if (!barRect) barRect = barEl.getBoundingClientRect();
     const { width } = barRect;
     if (!width) return 0.5;
     const x = (clientX - barRect.left) / width;
-    return Math.max(0, Math.min(1, x));
+    const overflow = getHandleOverflow();
+    return Math.max(-overflow, Math.min(1 + overflow, x));
   }
 
   function startDragStop(e, stop) {
@@ -487,7 +489,8 @@ export function createGradientEditor(initialGradient, options = {}) {
       ev.preventDefault();
       barRect = barEl.getBoundingClientRect();
       const pos = positionFromEvent(ev);
-      stop.position = Math.max(0, Math.min(1, pos));
+      const overflow = getHandleOverflow();
+      stop.position = Math.max(-overflow, Math.min(1 + overflow, pos));
       data.colorStops.sort((a, b) => a.position - b.position);
       midpoints.length = 0;
       for (let i = 0; i < data.colorStops.length - 1; i += 1) {

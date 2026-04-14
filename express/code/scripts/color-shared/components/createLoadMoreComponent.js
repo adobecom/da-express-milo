@@ -1,4 +1,5 @@
 import { createTag } from '../../../scripts/utils.js';
+import { decorateAnalyticsAttributes } from '../utils/utilities.js';
 
 export function createLoadMoreComponent(options = {}) {
   const {
@@ -27,6 +28,7 @@ export function createLoadMoreComponent(options = {}) {
 
   button.appendChild(buttonText);
   button.appendChild(spinner);
+  decorateAnalyticsAttributes(button, { linkLabel: 'Load more' });
 
   let isLoading = false;
 
