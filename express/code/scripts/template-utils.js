@@ -176,7 +176,7 @@ export function containsVideo(template) {
   return !!template?.pages.some((page) => page?.rendition?.video?.thumbnail?.componentId);
 }
 
-function isValidBehaviors(behaviors) {
+export function isValidBehaviors(behaviors) {
   const collectivelyExhaustiveBehaviors = ['animated', 'video', 'still'];
   return Array.isArray(behaviors)
     && behaviors.some((b) => collectivelyExhaustiveBehaviors.includes(b))
