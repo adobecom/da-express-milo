@@ -159,6 +159,15 @@ export function setupStickyBounds(block, searchBar) {
     setStickyEnabled(!shouldDisableSticky);
   };
 
+  let layoutGateRaf = 0;
+  const scheduleEvaluateStickyGate = () => {
+    if (layoutGateRaf) cancelAnimationFrame(layoutGateRaf);
+    layoutGateRaf = requestAnimationFrame(() => {
+      layoutGateRaf = 0;
+      evaluateStickyGate();
+    });
+  };
+
   const endObserver = new IntersectionObserver(() => {
     evaluateStickyGate();
   }, {
@@ -170,9 +179,12 @@ export function setupStickyBounds(block, searchBar) {
   endObserver.observe(endSentinel);
   window.addEventListener('resize', evaluateStickyGate, { passive: true });
 
-  evaluateStickyGate();
+  const exploreLayoutObserver = new ResizeObserver(scheduleEvaluateStickyGate);
+  exploreLayoutObserver.observe(colorExploreBlock);
 
   return () => {
+    if (layoutGateRaf) cancelAnimationFrame(layoutGateRaf);
+    exploreLayoutObserver.disconnect();
     endObserver.disconnect();
     window.removeEventListener('resize', evaluateStickyGate);
     endSentinel.remove();

@@ -863,7 +863,20 @@ export async function createDrawer(options) {
       libraries,
       ccLibraryProvider,
       isSignedIn,
-      { onClose: close, onSave: save, onSignIn: triggerSignInFlow, onLibraryCreated },
+      {
+        onClose: close,
+        onSave: save,
+        onSignIn: async () => {
+          const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
+            '../utils/susiRedirect.js'
+          );
+          const colors = paletteData?.colors || [];
+          const paletteName = paletteData?.name || '';
+          setSusiColorRedirect(buildColorSignInRedirectUrl(colors, paletteName));
+          return triggerSignInFlow();
+        },
+        onLibraryCreated,
+      },
       t,
     );
     curtainEl = dom.curtainEl;

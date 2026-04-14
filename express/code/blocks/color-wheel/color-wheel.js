@@ -865,7 +865,7 @@ export default async function decorate(block) {
       stripRenderer = createStripContainerRenderer({
         container: stripHost,
         data: [swatchRailController],
-        mobileBreakpointQuery: '(max-width: 1199px)',
+        mobileBreakpointQuery: '(max-width: 599px)',
         config: {
           stripContainerOrientations: ['vertical-responsive'],
           swatchFeatures: {

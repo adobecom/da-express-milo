@@ -76,6 +76,11 @@ async function handleShare({ name, colors }, t) {
 const COLOR_PALETTE_LEARN_PARAM = 'exercise:express/how-to/in-app/how-to-apply-your-color-palette-to-the-template:-1';
 
 async function handleOpenInExpress({ id, name, colors }) {
+  const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
+    '../utils/susiRedirect.js'
+  );
+  setSusiColorRedirect(buildColorSignInRedirectUrl(colors, name));
+
   const isSignedIn = await triggerSignInFlow();
   if (!isSignedIn) return;
 
