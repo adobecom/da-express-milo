@@ -14,22 +14,22 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  delete window.__susiColorRedirect;
+  consumeSusiColorRedirect(); // drain any leftover stored redirect
   sinon.restore();
   document.body.innerHTML = '';
   window.history.replaceState({}, '', savedHref);
 });
 
 describe('setSusiColorRedirect', () => {
-  it('stores the URL on window', () => {
+  it('stores the URL, readable via consumeSusiColorRedirect', () => {
     setSusiColorRedirect('https://example.com/redirect');
-    expect(window.__susiColorRedirect).to.equal('https://example.com/redirect');
+    expect(consumeSusiColorRedirect()).to.equal('https://example.com/redirect');
   });
 
   it('overwrites a previously stored URL', () => {
     setSusiColorRedirect('https://example.com/first');
     setSusiColorRedirect('https://example.com/second');
-    expect(window.__susiColorRedirect).to.equal('https://example.com/second');
+    expect(consumeSusiColorRedirect()).to.equal('https://example.com/second');
   });
 });
 
@@ -40,10 +40,10 @@ describe('consumeSusiColorRedirect', () => {
     expect(result).to.equal('https://example.com/redirect');
   });
 
-  it('deletes the stored URL after consuming', () => {
+  it('clears the stored URL after consuming (second call returns null)', () => {
     setSusiColorRedirect('https://example.com/redirect');
     consumeSusiColorRedirect();
-    expect(window.__susiColorRedirect).to.be.undefined;
+    expect(consumeSusiColorRedirect()).to.be.null;
   });
 
   it('returns null when nothing is stored', () => {
