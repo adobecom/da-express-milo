@@ -182,9 +182,9 @@ main .content-toggle-v2 .carousel-container.circleless-button a.button.carousel-
 
 /* Visibility-based hiding for content toggle sections */
 main .section.content-toggle-hidden {
-  display: none;
+  padding: 0;
 }
 
-main .section.content-toggle-active {
-  display: block;
+main .section.content-toggle-hidden > * {
+  display: none;
 }
