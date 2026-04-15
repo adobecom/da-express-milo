@@ -1,16 +1,66 @@
 import { createTag, getLibs } from '../../scripts/utils.js';
-import { trackColorBlockLoad } from '../../scripts/instrument.js';
-import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
-import { createExpressTabs } from '../../scripts/color-shared/spectrum/components/express-tabs.js';
-import createColorWheelExpressAdapter from '../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js';
-import createBaseColorAdapter from '../../scripts/color-shared/adapters/createBaseColorAdapter.js';
-import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
-import ColorThemeExpressController, { randomHex } from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
-import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
-import createImageExtractComponent from './createImageExtractComponent.js';
-import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
-import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
+import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
+
+// CSS deps previously loaded via @import (serial waterfall). Injecting <link>
+// elements at module evaluation starts downloads in parallel with the heavy JS
+// imports below — no need to await a loadStyle helper first.
+const CSS_DEPS = [
+  '/express/code/scripts/color-shared/components/strips/color-strip.css',
+  '/express/code/scripts/color-shared/components/image-upload/image-upload.css',
+  '/express/code/blocks/color-wheel/image-extract.css',
+];
+CSS_DEPS.forEach((href) => {
+  if (!document.querySelector(`link[href="${href}"]`)) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+});
+
+// Module-level refs populated by loadHeavyModules(). Existing helper functions
+// (buildHarmonySelector, buildTabs, etc.) reference these directly.
+let trackColorBlockLoad;
+let createColorToolLayout;
+let createExpressTabs;
+let createColorWheelExpressAdapter;
+let createBaseColorAdapter;
+let createStripContainerRenderer;
+let ColorThemeExpressController;
+let randomHex;
+let createSimpleCarousel;
+let createImageExtractComponent;
+let createExpressTooltip;
+
+// Fire all heavy imports at module evaluation time so they begin resolving
+// immediately — not deferred until decorate()/init() is called.
+const heavyModulesPromise = Promise.all([
+  import('../../scripts/instrument.js'),
+  import('../../scripts/color-shared/shell/layouts/createColorToolLayout.js'),
+  import('../../scripts/color-shared/spectrum/components/express-tabs.js'),
+  import('../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js'),
+  import('../../scripts/color-shared/adapters/createBaseColorAdapter.js'),
+  import('../../scripts/color-shared/renderers/createStripContainerRenderer.js'),
+  import('../../scripts/color-shared/controllers/ColorThemeExpressController.js'),
+  import('../../scripts/widgets/simple-carousel.js'),
+  import('./createImageExtractComponent.js'),
+  import('../../scripts/color-shared/spectrum/components/express-tooltip.js'),
+]);
+async function loadHeavyModules() {
+  const [a, b, c, d, e, f, g, h, i, j] = await heavyModulesPromise;
+  trackColorBlockLoad = a.trackColorBlockLoad;
+  createColorToolLayout = b.default;
+  createExpressTabs = c.createExpressTabs;
+  createColorWheelExpressAdapter = d.default;
+  createBaseColorAdapter = e.default;
+  createStripContainerRenderer = f.createStripContainerRenderer;
+  ColorThemeExpressController = g.default;
+  randomHex = g.randomHex;
+  createSimpleCarousel = h.default;
+  createImageExtractComponent = i.default;
+  createExpressTooltip = j.createExpressTooltip;
+}
 
 async function loadPlaceholders() {
   const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
@@ -446,19 +496,23 @@ async function buildColorWheelContent(controller, strings) {
 }
 
 async function buildTabs(controller, suggestionsRow, { onSelectionChange, strings = {} } = {}) {
-  const tabsInstance = await createExpressTabs({
-    selected: 'color-wheel',
-    size: 'm',
-    quiet: true,
-    tabs: [
-      { label: strings.tabPrimaryColor || 'Primary color', value: 'primary-color', iconSlotHtml: PRIMARY_COLOR_ICON },
-      { label: strings.tabImage || 'Image', value: 'image', spIcon: 'sp-icon-image' },
-      { label: strings.tabColorWheel || 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
-    ],
-    onSelectionChange,
-  });
+  // Create the tabs shell and the color-wheel panel content in parallel
+  const [tabsInstance, cwContent] = await Promise.all([
+    createExpressTabs({
+      selected: 'color-wheel',
+      size: 'm',
+      quiet: true,
+      tabs: [
+        { label: strings.tabPrimaryColor || 'Primary color', value: 'primary-color', iconSlotHtml: PRIMARY_COLOR_ICON },
+        { label: strings.tabImage || 'Image', value: 'image', spIcon: 'sp-icon-image' },
+        { label: strings.tabColorWheel || 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
+      ],
+      onSelectionChange,
+    }),
+    buildColorWheelContent(controller, strings),
+  ]);
 
-  tabsInstance.addPanel('color-wheel', await buildColorWheelContent(controller, strings));
+  tabsInstance.addPanel('color-wheel', cwContent);
   tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings));
   tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller));
 
@@ -659,6 +713,7 @@ export default async function decorate(block) {
       const [strings, { getResolvedPalette, getResolvedPaletteName }] = await Promise.all([
         loadPlaceholders(),
         Promise.resolve(createColorPaletteParamApi()),
+        loadHeavyModules(),
       ]);
 
       // First load: authored content was preserved during the async wait; clear it now
@@ -758,8 +813,36 @@ export default async function decorate(block) {
         },
       });
 
-      await layoutInstance.actionMenuReady;
+      const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
+      layoutInstance.slots.canvas.appendChild(stripHost);
 
+      let activeTab = 'color-wheel';
+
+      const updateBaseColorBadge = () => {
+        const hide = activeTab !== 'color-wheel' || activeHarmonyRule === 'CUSTOM';
+        const hideLock = activeTab === 'color-wheel' && activeHarmonyRule !== 'CUSTOM';
+        stripHost.querySelectorAll('color-swatch-rail').forEach((rail) => {
+          rail.hideBaseColorBadge = hide;
+          rail.hideLock = hideLock;
+        });
+      };
+
+      // actionMenuReady and buildTabs are independent — resolve in parallel
+      const [, tabs] = await Promise.all([
+        layoutInstance.actionMenuReady,
+        buildTabs(controller, suggestionsRow?.cloneNode(true), {
+          onSelectionChange: ({ selected }) => {
+            activeTab = selected;
+            updateBaseColorBadge();
+            if (selected !== 'color-wheel') {
+              controller.setHarmonyRule('CUSTOM');
+            }
+          },
+          strings,
+        }),
+      ]);
+
+      // Both resolved — wire up action menu history and append tabs
       const actionMenuApi = layoutInstance.actionMenu;
       let restoringFromHistory = false;
       let pushingState = false;
@@ -819,30 +902,6 @@ export default async function decorate(block) {
         clearTimeout(historyDebounceTimer);
       };
 
-      const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
-      layoutInstance.slots.canvas.appendChild(stripHost);
-
-      let activeTab = 'color-wheel';
-
-      const updateBaseColorBadge = () => {
-        const hide = activeTab !== 'color-wheel' || activeHarmonyRule === 'CUSTOM';
-        const hideLock = activeTab === 'color-wheel' && activeHarmonyRule !== 'CUSTOM';
-        stripHost.querySelectorAll('color-swatch-rail').forEach((rail) => {
-          rail.hideBaseColorBadge = hide;
-          rail.hideLock = hideLock;
-        });
-      };
-
-      const tabs = await buildTabs(controller, suggestionsRow?.cloneNode(true), {
-        onSelectionChange: ({ selected }) => {
-          activeTab = selected;
-          updateBaseColorBadge();
-          if (selected !== 'color-wheel') {
-            controller.setHarmonyRule('CUSTOM');
-          }
-        },
-        strings,
-      });
       tabs.setPanelEntryFocus('primary-color', () => {
         primaryColorAdapter?.element?.shadowRoot?.querySelector('.bc-mode-trigger')?.focus();
       });

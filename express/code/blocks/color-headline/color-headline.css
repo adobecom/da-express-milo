@@ -93,7 +93,6 @@ body:has(.color-extract.has-image) .color-headline.extract {
 }
 
 .color-headline.tools:not([data-adopted="true"]) {
-  display: none;
   max-width: var(--block-wd-max-width);
   padding: var(--action-menu-buffer) var(--spacing-300) 0;
   margin-inline: auto;
