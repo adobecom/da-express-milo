@@ -645,17 +645,29 @@ export default async function decorate(block) {
   async function init() {
     // Save before clearing — adoptHeadline uses document.querySelector and would lose it otherwise
     const headline = document.querySelector('.color-headline.tools');
-    cleanup();
-    block.innerHTML = '';
+    // On re-init (breakpoint change), tear down immediately to prevent two layouts running in
+    // parallel. On first load, keep authored content visible during the async stall so the block
+    // doesn't show as a blank white area while placeholders and CSS load.
+    const isReinit = !!layoutInstance;
+    if (isReinit) {
+      cleanup();
+      block.innerHTML = '';
+    }
     block.className = 'color-wheel';
-    const section = createTag('section');
-    block.appendChild(section);
 
     try {
       const [strings, { getResolvedPalette, getResolvedPaletteName }] = await Promise.all([
         loadPlaceholders(),
         Promise.resolve(createColorPaletteParamApi()),
       ]);
+
+      // First load: authored content was preserved during the async wait; clear it now
+      if (!isReinit) {
+        cleanup();
+        block.innerHTML = '';
+      }
+      const section = createTag('section');
+      block.appendChild(section);
       const initialPalette = currentPalette || {
         name: getResolvedPaletteName() || THEME_NAME,
         colors: getResolvedPalette(),
