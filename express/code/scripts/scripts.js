@@ -270,6 +270,31 @@ const eagerLoad = (img) => {
   });
 }());
 
+// Override Typekit font-display:auto → swap to eliminate the ~3s FOIT on LCP text.
+// Milo dynamically injects <link href="https://use.typekit.net/...css"> after setConfig().
+// We watch for that link, fetch the same URL (hits the browser cache immediately), replace
+// font-display in the text, and append a <style> block so our @font-face rules win the cascade.
+(function overrideTypekitFontDisplay() {
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node.nodeType !== 1 || node.tagName !== 'LINK') continue;
+        if (!node.href?.includes('typekit.net')) continue;
+        observer.disconnect();
+        fetch(node.href)
+          .then((res) => res.text())
+          .then((css) => {
+            const style = document.createElement('style');
+            style.textContent = css.replace(/font-display\s*:\s*auto/g, 'font-display:swap');
+            document.head.appendChild(style);
+          })
+          .catch(() => {});
+      }
+    }
+  });
+  observer.observe(document.head, { childList: true });
+}());
+
 function decorateHeroLCP(loadStyle, config, createTag) {
   const template = getMetadata('template');
   const h1 = document.querySelector('main h1');
