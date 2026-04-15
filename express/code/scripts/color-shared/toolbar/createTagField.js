@@ -1,6 +1,8 @@
 import { createSpectrumIcon } from '../utils/icons.js';
 import { createTag } from '../../utils.js';
 
+export const MAX_TAGS = 10;
+
 /* ── Tag text helpers ─────────────────────────────────────────── */
 
 export function normalizeTagText(t) {
@@ -78,7 +80,7 @@ export function addTagFromInput(input, tagsContainer, { onStateChange, removeLab
   if (!text) return;
   const existing = getTagValues(tagsContainer)
     .map((v) => v.toLowerCase());
-  if (existing.includes(text.toLowerCase())) {
+  if (existing.includes(text.toLowerCase()) || existing.length >= MAX_TAGS) {
     input.value = '';
     input.focus();
     return;
@@ -152,6 +154,12 @@ export function createTagField(label, tags, placeholder, {
     requestAnimationFrame(doSync);
   });
   input.addEventListener('input', doSync);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace' && !input.value && tagsContainer.lastElementChild) {
+      tagsContainer.lastElementChild.querySelector('.ax-tag-pill-close')?.click();
+      doSync();
+    }
+  });
 
   wrapper.append(labelEl, field, helpText);
 

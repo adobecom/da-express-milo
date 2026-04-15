@@ -4,6 +4,7 @@ import {
   getTagValues,
   addTagFromInput as addTagFromInputHelper,
   createTagPill,
+  MAX_TAGS,
 } from './createTagField.js';
 import {
   isMobileViewport,
@@ -367,21 +368,19 @@ function createLibraryPickerField(
 
 /* ── Keyword suggestion pills ────────────────────────────────── */
 
-function createKeywordSuggestions(keywords, mobile, { onSuggestionClick } = {}) {
+function createKeywordSuggestions(keywords, { onSuggestionClick } = {}) {
   const wrapper = createTag('div', { class: 'ax-drawer-keyword-suggestions' });
-  const size = mobile ? 'm' : 's';
   keywords.forEach((keyword) => {
-    const btn = document.createElement('sp-button');
-    btn.setAttribute('variant', 'primary');
-    btn.setAttribute('size', size);
-    btn.classList.add('ax-drawer-tag-btn');
-    btn.textContent = keyword;
-    decorateAnalyticsAttributes(btn, { linkLabel: keyword });
+    const btn = createTag('button', { type: 'button', class: 'ax-tag-pill ax-drawer-tag-btn', 'aria-label': `Add ${keyword}` });
+    const label = createTag('span', { class: 'ax-tag-pill-label', 'aria-hidden': 'true' });
+    label.textContent = keyword;
     const icon = createSpectrumIcon('Add');
-    icon.setAttribute('slot', 'icon');
-    btn.prepend(icon);
+    icon.setAttribute('aria-hidden', 'true');
+    icon.classList.add('ax-drawer-tag-btn-icon');
+    btn.append(label, icon);
+    decorateAnalyticsAttributes(btn, { linkLabel: keyword });
     if (onSuggestionClick) {
-      btn.addEventListener('click', () => onSuggestionClick(keyword));
+      btn.addEventListener('click', () => onSuggestionClick(keyword, btn));
     }
     wrapper.appendChild(btn);
   });
@@ -628,22 +627,25 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
     syncState: syncTagState,
   } = tagFieldResult;
 
-  const onSuggestionClick = (keyword) => {
+  const onSuggestionClick = (keyword, btn) => {
     const existing = getTagValues(tagsContainerEl).map((v) => v.toLowerCase());
-    if (existing.includes(keyword.toLowerCase())) return;
+    if (existing.includes(keyword.toLowerCase()) || existing.length >= MAX_TAGS) return;
     const pill = createTagPill(keyword, {
       removeLabel: t.tagRemoveAriaLabel,
-      onRemove: syncTagState,
+      onRemove: () => {
+        btn.hidden = false;
+        syncTagState();
+      },
       class: 'ax-drawer-tag-pill',
     });
     tagsContainerEl.appendChild(pill);
+    btn.hidden = true;
     tagsInputEl.focus();
     syncTagState();
   };
 
   tagsWrapper.appendChild(createKeywordSuggestions(
     t.keywordSuggestions.split(',').map((s) => s.trim()),
-    mobile,
     { onSuggestionClick },
   ));
   formFields.appendChild(tagsWrapper);
