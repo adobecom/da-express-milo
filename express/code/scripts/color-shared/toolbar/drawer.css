@@ -625,7 +625,7 @@
   }
 
   .ax-lib-picker-popover sp-menu {
-    min-block-size: fit-content;
+    min-block-size: calc(4 * var(--ax-drawer-input-height));
   }
 
   .ax-drawer-field-label,
