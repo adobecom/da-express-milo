@@ -480,7 +480,7 @@
   height: 100%;
   background-color: #8F8F8F;
   color: var(--color-white);
-  font-family: 'Adobe Clean Spectrum VF', var(--body-font-family);
+  font-family: var(--body-font-family);
   font-size: 24px;
   font-style: normal;
   font-weight: 700;

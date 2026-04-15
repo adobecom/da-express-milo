@@ -459,10 +459,6 @@ function createFloatingToolbarMount(controller, variant) {
   const container = createTag('div', { class: 'color-extract-floating-toolbar-mount' });
   let toolbarHandle = null;
   let mounted = false;
-  let mqlHandler = null;
-
-  const desktopMql = window.matchMedia('(min-width: 1200px)');
-  const getToolbarVariant = () => (desktopMql.matches ? 'sticky-on-scroll' : 'sticky');
 
   function sync() {
     if (!toolbarHandle) return;
@@ -471,7 +467,6 @@ function createFloatingToolbarMount(controller, variant) {
   }
 
   function destroy() {
-    if (mqlHandler) desktopMql.removeEventListener('change', mqlHandler);
     toolbarHandle?.destroy?.();
     toolbarHandle = null;
     mounted = false;
@@ -496,18 +491,13 @@ function createFloatingToolbarMount(controller, variant) {
 
       toolbarHandle = await initFloatingToolbar(container, {
         type: variant === VARIANTS.GRADIENT ? 'gradient' : 'palette',
-        variant: getToolbarVariant(),
+        variant: 'sticky',
         standaloneAppearance: 'raised',
         palette,
         showEdit: true,
         showPaletteName: true,
         editPaletteName: true,
       });
-
-      mqlHandler = () => {
-        toolbarHandle?.setVariant?.(getToolbarVariant());
-      };
-      desktopMql.addEventListener('change', mqlHandler);
 
       controller.subscribe(() => sync());
     } catch (err) {

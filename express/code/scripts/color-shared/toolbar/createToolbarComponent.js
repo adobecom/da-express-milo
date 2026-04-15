@@ -482,8 +482,9 @@ export function createToolbar(options) {
 
   const { actions, ccLibBtn } = buildActionButtons({
     onShare: async () => {
-      await handleShare({ name: getPaletteWithName().name, colors, type }, t);
-      emit('share', { palette: getPaletteWithName() });
+      const currentPalette = getPaletteWithName();
+      await handleShare({ name: currentPalette.name, colors: currentPalette.colors }, t);
+      emit('share', { palette: currentPalette });
     },
     onDownload: async () => {
       const currentPalette = getPaletteWithName();
