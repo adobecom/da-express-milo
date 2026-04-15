@@ -576,15 +576,29 @@ export function createStripContainerRenderer(options) {
     return anchorElement.getBoundingClientRect();
   }
 
+  function getStickyHeaderBottom() {
+    const selectors = ['header.global-navigation', '.feds-localnav'];
+    return selectors.reduce((max, sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return max;
+      return Math.max(max, el.getBoundingClientRect().bottom);
+    }, 0);
+  }
+
   function positionPopover(popover, anchorRect, container) {
     const gap = 4;
     const popRect = popover.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
 
-    let viewportTop = anchorRect.bottom + gap;
-    if (viewportTop + popRect.height > window.innerHeight) {
-      viewportTop = anchorRect.top - popRect.height - gap;
-    }
+    const belowTop = anchorRect.bottom + gap;
+    const aboveTop = anchorRect.top - popRect.height - gap;
+    const headerBottom = getStickyHeaderBottom();
+
+    const fitsBelow = belowTop + popRect.height <= window.innerHeight;
+    const fitsAbove = aboveTop >= headerBottom;
+
+    let viewportTop = belowTop;
+    if (!fitsBelow && fitsAbove) viewportTop = aboveTop;
 
     let viewportLeft = anchorRect.left;
     if (viewportLeft + popRect.width > window.innerWidth - gap) {
