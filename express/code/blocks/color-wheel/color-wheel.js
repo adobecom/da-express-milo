@@ -541,9 +541,36 @@ function createSwatchRailControllerBridge(controller) {
           ? Math.min(Math.max(0, requestedBase), nextHexes.length - 1)
           : 0;
 
+        const currentHexes = (current.swatches || []).map((s) => (s?.hex || '').toUpperCase());
+        const sameLength = nextHexes.length === currentHexes.length;
+
+        // If only the base color changed, use setSwatchHex so the harmony engine
+        // recalculates the non-base colors via onBaseColorChange().
+        const onlyBaseChanged = sameLength
+          && !Object.prototype.hasOwnProperty.call(next, 'baseColorIndex')
+          && nextHexes[clampedBase] !== currentHexes[clampedBase]
+          && nextHexes.every((hex, i) => i === clampedBase || hex === currentHexes[i]);
+        if (onlyBaseChanged) {
+          if (Object.prototype.hasOwnProperty.call(next, 'tintIndex')) {
+            tintIndex = Number.isInteger(next.tintIndex) ? next.tintIndex : null;
+          }
+          controller.setSwatchHex(clampedBase, nextHexes[clampedBase]);
+          return;
+        }
+
+        // If a non-base color changed and a harmony is active, switch to CUSTOM
+        // because the palette no longer follows the harmony rule.
+        const currentHarmony = current.harmonyRule || 'CUSTOM';
+        let nextHarmonyRule = currentHarmony;
+        if (currentHarmony !== 'CUSTOM') {
+          const nonBaseChanged = nextHexes.some((hex, i) => (
+            i !== clampedBase && hex !== currentHexes[i]));
+          if (nonBaseChanged) nextHarmonyRule = 'CUSTOM';
+        }
+
         controller.replaceSwatchesFromHexes(nextHexes, {
           baseIndex: clampedBase,
-          harmonyRule: current.harmonyRule || 'CUSTOM',
+          harmonyRule: nextHarmonyRule,
         });
 
         if (requestedBase == null) {
