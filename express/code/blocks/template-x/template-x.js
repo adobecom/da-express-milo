@@ -22,7 +22,6 @@ import {
 import { fetchResults, isValidTemplate as isValidTemplateTaas } from '../../scripts/template-utils.js';
 import fetchAllTemplatesMetadata from '../../scripts/utils/all-templates-metadata.js';
 import renderTemplate from './template-rendering.js';
-import { applyTaasToolbarOverrides } from './taas-query-overrides.js';
 import isDarkOverlayReadable from '../../scripts/color-tools.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
 import buildGallery from '../../scripts/widgets/gallery/gallery.js';
@@ -113,7 +112,32 @@ async function fetchAndRenderTemplates(props, options = {}) {
 async function fetchAndRenderTemplatesFromTaas(taasQuery, props, options = {}) {
   const { isFirstLoad = false } = options;
   const queryParams = new URLSearchParams(taasQuery);
-  applyTaasToolbarOverrides(queryParams, props);
+  if (props?.start) queryParams.set('start', props.start);
+
+  // Apply toolbar filter/sort overrides so user selections affect TAAS results
+  if (props?.filters?.premium && props.filters.premium !== 'all') {
+    queryParams.set('license', props.filters.premium.toLowerCase() === 'false' ? 'free' : 'premium');
+  } else if (props?.filters?.premium === 'all') {
+    queryParams.delete('license');
+  }
+  if (props?.filters?.animated && props.filters.animated !== 'all') {
+    queryParams.set('behaviors', props.filters.animated.toLowerCase() === 'false' ? 'still' : 'animated');
+  } else if (props?.filters?.animated === 'all') {
+    queryParams.delete('behaviors');
+  }
+  if (props?.sort) {
+    const sortToOrderBy = {
+      'Most Viewed': '-remixCount',
+      'Rare & Original': 'remixCount',
+      'Newest to Oldest': '-createDate',
+      'Oldest to Newest': 'createDate',
+    };
+    if (sortToOrderBy[props.sort]) {
+      queryParams.set('orderBy', sortToOrderBy[props.sort]);
+    } else {
+      queryParams.delete('orderBy');
+    }
+  }
 
   const res = await fetchResults(queryParams.toString());
 
