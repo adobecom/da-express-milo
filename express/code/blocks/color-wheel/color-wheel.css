@@ -382,6 +382,7 @@ color-wheel-express {
   .color-wheel .ax-toolbar-standalone .ax-palette-name {
       display: flex;
   }
+}
 
 @media (max-width: 600px) {
   .color-wheel .image-upload-dropzone-container {
