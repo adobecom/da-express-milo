@@ -1,3 +1,13 @@
+/* Hide authored <div> children during the loading phase on desktop.
+   The real UI mounts inside a <section>; authored divs are not LCP content
+   (the H1 lives in the separate color-headline block) so hiding them is safe.
+   This prevents the wide-then-narrow visual shift while async init runs. */
+@media (min-width: 1200px) {
+  .color-wheel > div {
+    display: none;
+  }
+}
+
 .color-wheel .ax-color-tool-layout {
   box-sizing: border-box;
   max-width: var(--block-wd-max-width);
