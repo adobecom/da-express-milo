@@ -270,7 +270,12 @@ function appendTemplateId(url, template) {
   if (!urnId) return url;
   const [urlWithoutHash, hash = ''] = url.split('#');
   const [basePath, queryString = ''] = urlWithoutHash.split('?');
-  if (basePath.includes(urnId)) return url;
+  if (basePath.includes(urnId) || queryString.includes(`templateId=${urnId}`)) return url;
+  if (!basePath.includes('/design/template/')) {
+    const separator = queryString ? '&' : '?';
+    const hashSuffix = hash ? `#${hash}` : '';
+    return `${urlWithoutHash}${separator}templateId=${urnId}${hashSuffix}`;
+  }
   const normalizedPath = basePath.endsWith('/') ? basePath : `${basePath}/`;
   const querySuffix = queryString ? `?${queryString}` : '';
   const hashSuffix = hash ? `#${hash}` : '';
