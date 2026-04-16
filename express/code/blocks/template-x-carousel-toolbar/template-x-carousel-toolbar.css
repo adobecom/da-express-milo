@@ -678,7 +678,7 @@
 
 @media (min-width: 1200px) {
   .template-x-carousel-toolbar.search-bar .centered-heading {
-    font-size: var(--body-font-size-xl);
+    font-size: 22px;
   }
 }
 
