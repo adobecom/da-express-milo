@@ -207,6 +207,9 @@ const CONFIG = {
       window.location.reload();
     },
   },
+  commerce: {
+    'wcs-api-key': 'AdobeExpressWeb',
+  },
 };
 
 /*
