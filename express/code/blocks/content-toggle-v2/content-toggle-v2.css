@@ -185,6 +185,8 @@ main .section.content-toggle-hidden {
   padding: 0;
 }
 
+
+main .fragment .section.content-toggle-hidden > *,
 main .section.content-toggle-hidden > * {
   display: none;
 }
