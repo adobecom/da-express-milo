@@ -44,6 +44,10 @@ const heavyModulesPromise1 = Promise.all([
   import('../../scripts/instrument.js'),
   import('../../scripts/color-shared/controllers/ColorThemeExpressController.js'),
   import('../../scripts/widgets/simple-carousel.js'),
+  // load-spectrum.js is statically imported by createColorToolLayout.js (group 2a)
+  // but its module-level loadCoreDeps() call starts Spectrum core downloads much
+  // earlier by also importing it here in group 1 — saving ~0.5-1s on slow 4G.
+  import('../../scripts/color-shared/spectrum/load-spectrum.js'),
 ]);
 // Layout shell + tabs: register the outer Spectrum chrome first
 const heavyModulesPromise2a = Promise.all([
@@ -770,10 +774,15 @@ export default async function decorate(block) {
         loadHeavyModules(),
       ]);
 
-      // First load: authored content was preserved during the async wait; clear it now
+      // First load: remove authored rows except headlineRow — never remove it
+      // from the DOM so the LCP element (heading) stays continuously painted.
+      // Removing it causes the browser to re-track LCP from when it re-appears
+      // (after adoptHeadline), which pushes LCP from ~FCP to ~tool-render time.
       if (!isReinit) {
         cleanup();
-        block.innerHTML = '';
+        [...block.children].forEach((child) => {
+          if (child !== headlineRow) child.remove();
+        });
       }
       const section = createTag('section');
       block.appendChild(section);

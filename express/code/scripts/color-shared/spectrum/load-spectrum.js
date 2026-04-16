@@ -576,3 +576,12 @@ export async function loadTabs() {
     guard.restore();
   }
 }
+
+// Prime Spectrum core downloads immediately when this module evaluates.
+// color-wheel.js imports this file in its earliest heavyModulesPromise group
+// so lit.js, base.js, theme.js, etc. start downloading in parallel with the
+// color-wheel modules — saving ~0.5-1s on slow 4G vs waiting for
+// createColorToolLayout() to be invoked inside init().
+// loadCoreDeps() is idempotent; component loaders that call it later
+// will await the same cached promise.
+loadCoreDeps().catch(() => {});
