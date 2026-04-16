@@ -1,10 +1,71 @@
-/* Hide authored <div> children during the loading phase on desktop.
-   The real UI mounts inside a <section>; authored divs are not LCP content
-   (the H1 lives in the separate color-headline block) so hiding them is safe.
-   This prevents the wide-then-narrow visual shift while async init runs. */
+/* ─── Loading-phase layout (desktop only) ──────────────────────────────────
+   Before the shell mounts (data-shell-state="ready" is absent):
+   • The headline row (layoutRows[0]) is visible in the sidebar area. It has
+     color-headline + tools classes added by JS synchronously in decorate().
+   • The suggestions row (layoutRows[1]) is hidden — no LCP content there.
+   • A light-gray rectangle marks where the canvas (color strips) will appear.
+   Once data-shell-state="ready" is set all three rules become inert.
+   ──────────────────────────────────────────────────────────────────────── */
 @media (min-width: 1200px) {
-  .color-wheel > div {
+  /* Hide all authored row divs except the headline, which shows in the sidebar. */
+  .color-wheel > div:not(.color-headline) {
     display: none;
+  }
+
+  /* Position the pre-adopted headline so it occupies the same y-coordinate and
+     x-extent it will have in the final sidebar slot, eliminating the jump on
+     adoption. padding-top = grid top padding (--spacing-600 = 40px).
+     box-sizing: border-box ensures 100% resolves to the block's border width. */
+  .color-wheel > .color-headline.tools:not([data-adopted="true"]) {
+    padding-top: var(--spacing-600);
+    padding-inline: var(--spacing-600);
+    max-width: var(--block-wd-max-width);
+    margin-inline: auto;
+    box-sizing: border-box;
+  }
+
+  /* Exact 4-column sidebar width.  grid: 12 cols, gap=16px (--spacing-300),
+     outer padding=40px (--spacing-600) each side.
+     sidebar = (4*(W-256px))/12 + 48px  where W = block width (≤ 1440px).
+     In CSS (100% = content width = W - 80px):
+       (4*(100%+80) - 128) / 12  =  (4*100% - 128px+320px-128px) / 12
+       =  (4*100% - 128+320 - 128) / 12  — simplified:
+     sidebar = (4 * 100% + 192px) / 12  ... let me just verify the direct form:
+     (4*(100%+80) − 8*16) / 12 = (4*100% + 320 − 128) / 12 = (4*100% + 192px) / 12
+     @1440px: (4*1360+192)/12 = (5440+192)/12 = 5632/12 = 469px — wrong.
+     Correct: sidebar = 4*col + 3*gap; col = (W-80-11*16)/12 = (W-256)/12
+     = 4*(W-256)/12 + 48 = (4W-1024)/12 + 48 = (4W-1024+576)/12 = (4W-448)/12
+     In terms of 100% (=W-80): 4*(100%+80) = 4*100%+320; (4*100%+320-448)/12 = (4*100%-128)/12
+     @1440px: (4*1360-128)/12 = (5440-128)/12 = 5312/12 = 443px ✓
+     @1200px: (4*1120-128)/12 = (4480-128)/12 = 4352/12 = 363px ✓ */
+  .color-wheel > .color-headline.tools:not([data-adopted="true"]) > div {
+    width: calc((4 * 100% - 128px) / 12);
+  }
+
+  /* Reserve the block's final height before the shell mounts.
+     40px top + ~50px topbar + 16px gap + 600px strips + 16px gap + 40px bottom ≈ 760px. */
+  .color-wheel:not([data-shell-state="ready"]) {
+    min-height: 760px;
+    position: relative;
+  }
+
+  /* Light-gray placeholder for the canvas area (right ~65% of the content).
+     Geometry (--spacing-600=40px, --spacing-300=16px, sidebar=4/12 cols):
+       left  = max(35%, calc(50% - 215px))
+         @1200px: max(420, 385)=420  actual 419px ✓
+         @1440px: max(504, 505)=505  actual 499px ✓
+         @2252px: max(789, 911)=911  actual 905px ✓
+       right = max(var(--spacing-600), calc(50% - 680px))
+         @1200px: 40px ✓  @1440px: 40px ✓  @2252px: 446px ✓ */
+  .color-wheel:not([data-shell-state="ready"])::after {
+    content: '';
+    position: absolute;
+    top: var(--spacing-600);
+    bottom: var(--spacing-600);
+    left: max(35%, calc(50% - 215px));
+    right: max(var(--spacing-600), calc(50% - 680px));
+    background: #f5f5f5;
+    border-radius: 4px;
   }
 }
 

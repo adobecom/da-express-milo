@@ -1,4 +1,4 @@
-import { createTag, getLibs } from '../../scripts/utils.js';
+import { createTag, getIconElementDeprecated, getLibs } from '../../scripts/utils.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
 
@@ -9,6 +9,9 @@ const CSS_DEPS = [
   '/express/code/scripts/color-shared/components/strips/color-strip.css',
   '/express/code/scripts/color-shared/components/image-upload/image-upload.css',
   '/express/code/blocks/color-wheel/image-extract.css',
+  // color-headline.css is not auto-loaded by Milo when there is no separate
+  // color-headline block on the page; load it here so the headline styles apply.
+  '/express/code/blocks/color-headline/color-headline.css',
 ];
 CSS_DEPS.forEach((href) => {
   if (!document.querySelector(`link[href="${href}"]`)) {
@@ -725,8 +728,24 @@ function cleanup() {
 
 export default async function decorate(block) {
   const layoutRows = [...block.children];
-  const suggestionsRow = layoutRows[0] || null;
+  // Row 0: headline (h1 + description), now authored directly inside this block.
+  // Row 1: image suggestions (unchanged).
+  const headlineRow = layoutRows[0] || null;
+  const suggestionsRow = layoutRows[1] || null;
   const desktopQuery = window.matchMedia('(min-width: 1200px)');
+
+  // Give the headline row the same classes the color-headline (tools) block would
+  // have so that color-headline.css and the color-wheel pre-adoption CSS apply.
+  // The Express logo is injected here; adoptHeadline's ensureLogo() skips it later.
+  if (headlineRow) {
+    headlineRow.classList.add('color-headline', 'tools');
+    const heading = headlineRow.querySelector('h1, h2, h3, h4, h5, h6');
+    if (heading && !headlineRow.querySelector('.express-logo')) {
+      const logo = getIconElementDeprecated('adobe-express-logo');
+      logo.classList.add('express-logo');
+      heading.before(logo);
+    }
+  }
 
   // Preserved across breakpoint re-inits so the user's palette survives resize
   let currentPalette = null;

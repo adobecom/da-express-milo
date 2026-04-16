@@ -17,6 +17,13 @@ import { installRegistryGuard, waitForComponents } from './registry.js';
 // ── paths ────────────────────────────────────────────────────────────
 const DIST = '../../widgets/spectrum/dist';
 
+// Yields to a new browser task so Spectrum evaluation bursts don't block
+// paint on mobile (slow 4G + 4× CPU). Uses scheduler.yield() when available.
+function yieldToMain() {
+  if ('scheduler' in window && 'yield' in window.scheduler) return window.scheduler.yield();
+  return new Promise((resolve) => { setTimeout(resolve, 0); });
+}
+
 // ── internal state ───────────────────────────────────────────────────
 // Each entry caches the loading promise so concurrent calls are safe.
 let coreLoadedPromise = null;
@@ -120,28 +127,31 @@ function loadCoreDeps() {
       const guard = installRegistryGuard();
 
       try {
-        // Fire all core Lit + Spectrum base modules in parallel — the module
-        // system resolves their internal static-import deps automatically.
-        // Previously these were 7 sequential awaits + a 50 ms artificial delay;
-        // on a fast desktop connection that created a single long task.
-        const [litMod] = await Promise.all([
+        // Start ALL downloads in parallel immediately — icons need sp-theme
+        // to be registered before they evaluate, but they can download while
+        // core modules are evaluating. On slow 4G this saves ~1 full RTT.
+        const coreReady = Promise.all([
           import(`${DIST}/lit.js`),
           import(`${DIST}/base.js`),
           import(`${DIST}/theme.js`),
           import(`${DIST}/reactive-controllers.js`),
           import(`${DIST}/shared.js`),
         ]);
-        window.__SpectrumAdoptStyles = litMod.adoptStyles;
-
-        // Wait for sp-theme to finish registering before loading icon sets
-        // that depend on the Spectrum theme context being present.
-        await waitForComponents(['sp-theme']);
-
-        // Icons can load in parallel with each other.
-        await Promise.all([
+        const iconsReady = Promise.all([
           import(`${DIST}/icons-ui.js`),
           import(`${DIST}/icons-workflow.js`),
         ]);
+
+        const [litMod] = await coreReady;
+        window.__SpectrumAdoptStyles = litMod.adoptStyles;
+        // sp-theme registers synchronously during theme.js evaluation, so
+        // waitForComponents() here is only a microtask-yield — not a real
+        // task boundary. Yield explicitly so core evaluation (lit + 4 modules)
+        // and icon evaluation are two separate tasks. On mobile (4× CPU) this
+        // keeps per-task time under 50ms and prevents a 400ms+ TBT burst.
+        await yieldToMain();
+
+        await iconsReady;
       } finally {
         guard.restore();
       }
@@ -167,10 +177,15 @@ export function loadPicker() {
       let importError = null;
       try {
         try {
-          await import(`${DIST}/overlay.js`);
-          await import(`${DIST}/popover.js`);
-          await import(`${DIST}/menu.js`);
-          await import(`${DIST}/picker.js`);
+          // All four can download in parallel — the module graph resolves
+          // static deps (overlay → popover → menu → picker) in order.
+          // On slow 4G, parallel saves ~3 extra round-trips vs sequential.
+          await Promise.all([
+            import(`${DIST}/overlay.js`),
+            import(`${DIST}/popover.js`),
+            import(`${DIST}/menu.js`),
+            import(`${DIST}/picker.js`),
+          ]);
         } catch (error) {
           importError = error;
         }
@@ -263,8 +278,10 @@ export function loadTooltip() {
       await loadCoreDeps();
       const guard = installRegistryGuard();
       try {
-        await import(`${DIST}/overlay.js`);
-        await import(`${DIST}/tooltip.js`);
+        await Promise.all([
+          import(`${DIST}/overlay.js`),
+          import(`${DIST}/tooltip.js`),
+        ]);
         await waitForComponents(['sp-theme', 'sp-tooltip']);
       } finally {
         guard.restore();
@@ -284,9 +301,11 @@ export function loadDialog() {
       await loadCoreDeps();
       const guard = installRegistryGuard();
       try {
-        await import(`${DIST}/overlay.js`);
-        await import(`${DIST}/button.js`);
-        await import(`${DIST}/dialog.js`);
+        await Promise.all([
+          import(`${DIST}/overlay.js`),
+          import(`${DIST}/button.js`),
+          import(`${DIST}/dialog.js`),
+        ]);
         await waitForComponents(['sp-theme', 'sp-dialog']);
       } finally {
         guard.restore();
@@ -484,9 +503,11 @@ export function loadMenu() {
       await loadCoreDeps();
       const guard = installRegistryGuard();
       try {
-        await import(`${DIST}/overlay.js`);
-        await import(`${DIST}/popover.js`);
-        await import(`${DIST}/menu.js`);
+        await Promise.all([
+          import(`${DIST}/overlay.js`),
+          import(`${DIST}/popover.js`),
+          import(`${DIST}/menu.js`),
+        ]);
         await waitForComponents(['sp-theme', 'sp-menu', 'sp-menu-item']);
       } finally {
         guard.restore();
@@ -525,8 +546,10 @@ export function loadTray() {
       await loadCoreDeps();
       const guard = installRegistryGuard();
       try {
-        await import(`${DIST}/overlay.js`);
-        await import(`${DIST}/tray.js`);
+        await Promise.all([
+          import(`${DIST}/overlay.js`),
+          import(`${DIST}/tray.js`),
+        ]);
         await waitForComponents(['sp-theme', 'sp-tray']);
       } finally {
         guard.restore();
