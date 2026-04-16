@@ -286,7 +286,6 @@ function preloadLCPImage(img) {
   });
 }());
 
-
 function decorateHeroLCP(loadStyle, config, createTag) {
   const template = getMetadata('template');
   const h1 = document.querySelector('main h1');
