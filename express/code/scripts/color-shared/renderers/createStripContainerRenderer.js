@@ -607,7 +607,10 @@ export function createStripContainerRenderer(options) {
       escapeHandler,
       railElement: activeRailElement,
     } = activeColorEditor;
-    if (outsideHandler) document.removeEventListener('click', outsideHandler, true);
+    if (outsideHandler) {
+      document.removeEventListener('click', outsideHandler, true);
+      document.removeEventListener('touchend', outsideHandler, true);
+    }
     if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
     resizeObserver?.disconnect?.();
     if (mobile) {
@@ -630,7 +633,10 @@ export function createStripContainerRenderer(options) {
     anchorElement,
     anchorRectFromDetail = null,
   ) {
+    const alreadyOpen = activeColorEditor?.railElement === railElement
+      && activeColorEditor?.selectedIndex === selectedIndex;
     closeActiveColorEditor();
+    if (alreadyOpen) return;
     onEditOpen?.(selectedIndex);
 
     const state = controller?.getState?.() || {};
@@ -710,15 +716,18 @@ export function createStripContainerRenderer(options) {
 
     const outsideHandler = (evt) => {
       const path = evt.composedPath?.() || [];
-      if (!path.includes(popover)) {
-        closeActiveColorEditor();
-      }
+      if (path.includes(popover)) return;
+      // Clicks on hex-code/edit-tint elements will call openColorEditorForRail,
+      // which handles the toggle via alreadyOpen. Don't close here.
+      if (path.some((n) => n?.classList?.contains?.('hex-code') || n?.classList?.contains?.('icon-button--edit-tint'))) return;
+      closeActiveColorEditor();
     };
     const escapeHandler = (evt) => {
       if (evt.key === 'Escape') closeActiveColorEditor();
     };
 
     document.addEventListener('click', outsideHandler, true);
+    document.addEventListener('touchend', outsideHandler, true);
     document.addEventListener('keydown', escapeHandler, true);
 
     activeColorEditor = {
@@ -729,6 +738,7 @@ export function createStripContainerRenderer(options) {
       outsideHandler,
       escapeHandler,
       railElement,
+      selectedIndex,
     };
 
     requestAnimationFrame(async () => {

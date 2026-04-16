@@ -120,20 +120,28 @@ function loadCoreDeps() {
       const guard = installRegistryGuard();
 
       try {
-        const litMod = await import(`${DIST}/lit.js`);
+        // Fire all core Lit + Spectrum base modules in parallel — the module
+        // system resolves their internal static-import deps automatically.
+        // Previously these were 7 sequential awaits + a 50 ms artificial delay;
+        // on a fast desktop connection that created a single long task.
+        const [litMod] = await Promise.all([
+          import(`${DIST}/lit.js`),
+          import(`${DIST}/base.js`),
+          import(`${DIST}/theme.js`),
+          import(`${DIST}/reactive-controllers.js`),
+          import(`${DIST}/shared.js`),
+        ]);
         window.__SpectrumAdoptStyles = litMod.adoptStyles;
 
-        await import(`${DIST}/base.js`);
+        // Wait for sp-theme to finish registering before loading icon sets
+        // that depend on the Spectrum theme context being present.
+        await waitForComponents(['sp-theme']);
 
-        await import(`${DIST}/theme.js`);
-        await new Promise((r) => setTimeout(r, 50));
-
-        await import(`${DIST}/reactive-controllers.js`);
-
-        await import(`${DIST}/shared.js`);
-
-        await import(`${DIST}/icons-ui.js`);
-        await import(`${DIST}/icons-workflow.js`);
+        // Icons can load in parallel with each other.
+        await Promise.all([
+          import(`${DIST}/icons-ui.js`),
+          import(`${DIST}/icons-workflow.js`),
+        ]);
       } finally {
         guard.restore();
       }
