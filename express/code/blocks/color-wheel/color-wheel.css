@@ -1,3 +1,19 @@
+/* Express logo sizing — duplicated from color-headline.css to prevent CLS.
+   color-headline.css loads asynchronously (CSS_DEPS) and may not arrive
+   before the section becomes visible on 4G. color-wheel.css is loaded
+   by Milo before decorate() runs, so these rules are active at first paint.
+   Specificity .color-wheel .icon.express-logo (0,3,0) beats Milo's
+   .icon (0,1,0) which would otherwise set small default dimensions. */
+.color-wheel .icon.express-logo {
+  display: block;
+  width: auto;
+  height: 29px;
+  aspect-ratio: 295.73 / 54;
+  padding: 0;
+  margin-inline: 0;
+  margin-bottom: var(--spacing-100);
+}
+
 /* ─── Loading-phase headline (CSS-only, all viewports) ────────────────────
    Before decorate() adds .color-headline.tools, style the authored
    headline row using structural selectors so the H1 paints at the
@@ -45,6 +61,26 @@
    the div:not(.color-headline){display:none} rule below but harmless. */
 .color-wheel > div + div {
   display: none;
+}
+
+/* Mobile/tablet: remove the action-menu-buffer above the headline.
+   With the early-return pattern, decorate() returns before init() runs, so
+   the section becomes visible immediately with just the headline. There is no
+   action-menu bar above the headline at this point — the toolbar renders
+   inside the layout section below. Setting the buffer to 0 keeps the headline
+   flush at the top of the block, which matches its final adopted position
+   (inside the sidebar with zero top offset). This eliminates the 81-97px
+   padding jump that would otherwise cause CLS when the layout mounts. */
+@media (max-width: 1199px) {
+  .color-wheel > .color-headline.tools:not([data-adopted="true"]) {
+    --action-menu-buffer: 0px;
+  }
+
+  /* Reserve block height so content below the block (footer, next section)
+     doesn't jump when the tool UI mounts inside the <section>. */
+  .color-wheel:not([data-shell-state="ready"]) {
+    min-height: 100dvh;
+  }
 }
 
 @media (min-width: 600px) {

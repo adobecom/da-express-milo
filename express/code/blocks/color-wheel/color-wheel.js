@@ -1,6 +1,25 @@
-import { createTag, getIconElementDeprecated, getLibs } from '../../scripts/utils.js';
-import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
-import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
+// Dynamic imports for utils that were previously static. Converting them from
+// static to dynamic removes adoptHeadline.js and utilities.js from the module
+// resolution chain — the browser no longer needs to download/evaluate them before
+// color-wheel.js can evaluate. This lets module-level code (CSS_DEPS, heavy import
+// promises) fire sooner, and decorate() gets called sooner → section visible sooner.
+// utils.js is already cached (statically imported by scripts.js) so it resolves
+// near-instantly; the other two are small but each adds a 4G round-trip when static.
+let createTag;
+let getIconElementDeprecated;
+let getLibs;
+let adoptHeadline;
+let createColorPaletteParamApi;
+let decorateAnalyticsAttributes;
+const utilsReady = import('../../scripts/utils.js').then((m) => {
+  ({ createTag, getIconElementDeprecated, getLibs } = m);
+});
+const adoptHeadlineReady = import('../../scripts/color-shared/utils/adoptHeadline.js').then((m) => {
+  adoptHeadline = m.default;
+});
+const utilitiesReady = import('../../scripts/color-shared/utils/utilities.js').then((m) => {
+  ({ createColorPaletteParamApi, decorateAnalyticsAttributes } = m);
+});
 
 // CSS deps previously loaded via @import (serial waterfall). Injecting <link>
 // elements at module evaluation starts downloads in parallel with the heavy JS
@@ -21,6 +40,29 @@ CSS_DEPS.forEach((href) => {
     document.head.appendChild(link);
   }
 });
+
+// Preconnect to Typekit to speed up font loading on 4G.
+// Saves one DNS+TCP+TLS roundtrip (~200-400ms), reducing the window
+// between text first-paint (fallback font) and font-swap (Typekit),
+// which directly reduces font-swap CLS on the headline.
+if (!document.querySelector('link[rel="preconnect"][href*="typekit"]')) {
+  const pc = document.createElement('link');
+  pc.rel = 'preconnect';
+  pc.href = 'https://use.typekit.net';
+  pc.crossOrigin = '';
+  document.head.appendChild(pc);
+}
+
+// Preload the Express logo SVG so it's ready when decorate() injects it.
+// This fires at module evaluation — before decorate() is called.
+const LOGO_HREF = '/express/code/icons/adobe-express-logo.svg';
+if (!document.querySelector(`link[rel="preload"][href="${LOGO_HREF}"]`)) {
+  const preload = document.createElement('link');
+  preload.rel = 'preload';
+  preload.as = 'image';
+  preload.href = LOGO_HREF;
+  document.head.appendChild(preload);
+}
 
 // Module-level refs populated by loadHeavyModules(). Existing helper functions
 // (buildHarmonySelector, buildTabs, etc.) reference these directly.
@@ -105,6 +147,7 @@ async function loadHeavyModules() {
 }
 
 async function loadPlaceholders() {
+  await utilsReady; // getLibs() needs utils.js resolved
   const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
     import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
@@ -738,15 +781,27 @@ export default async function decorate(block) {
   const suggestionsRow = layoutRows[1] || null;
   const desktopQuery = window.matchMedia('(min-width: 1200px)');
 
-  // Give the headline row the same classes the color-headline (tools) block would
-  // have so that color-headline.css and the color-wheel pre-adoption CSS apply.
-  // The Express logo is injected here; adoptHeadline's ensureLogo() skips it later.
+  // Add .color-headline IMMEDIATELY — this is pure DOM, needs no imports.
+  // On pages where Milo hides sections until :has(.color-headline) matches,
+  // this triggers section visibility the moment decorate() is called.
   if (headlineRow) {
     headlineRow.classList.add('color-headline', 'tools');
+  }
+
+  // Await utils (cached — near-instant) to inject the Express logo.
+  // The logo SVG is already being preloaded from module-level code above.
+  await utilsReady;
+  if (headlineRow) {
     const heading = headlineRow.querySelector('h1, h2, h3, h4, h5, h6');
     if (heading && !headlineRow.querySelector('.express-logo')) {
       const logo = getIconElementDeprecated('adobe-express-logo');
       logo.classList.add('express-logo');
+      // Inline styles guarantee stable dimensions regardless of CSS load
+      // timing on 4G. Beats Milo's .icon selector and any async stylesheet.
+      // Matches color-headline.css: height 29px, aspect-ratio 295.73/54.
+      logo.style.cssText = 'display:block;width:auto;height:29px;aspect-ratio:295.73/54;padding:0;margin-bottom:8px';
+      logo.width = 159;
+      logo.height = 29;
       heading.before(logo);
     }
   }
@@ -770,8 +825,9 @@ export default async function decorate(block) {
     try {
       const [strings, { getResolvedPalette, getResolvedPaletteName }] = await Promise.all([
         loadPlaceholders(),
-        Promise.resolve(createColorPaletteParamApi()),
+        utilitiesReady.then(() => createColorPaletteParamApi()),
         loadHeavyModules(),
+        adoptHeadlineReady,
       ]);
 
       // First load: remove authored rows except headlineRow — never remove it
@@ -1076,8 +1132,14 @@ export default async function decorate(block) {
         }
       });
 
-      if (headline) section.appendChild(headline);
-      adoptHeadline(section, layoutInstance);
+      // Desktop / reinit: move headline into sidebar for 2-column grid.
+      // Mobile first load: leave headline as a direct child of the block
+      // so it stays in exactly the same position — zero CLS. The layout
+      // section renders below it; stacked mobile layout looks identical.
+      if (isDesktop || isReinit) {
+        if (headline) section.appendChild(headline);
+        adoptHeadline(section, layoutInstance);
+      }
       block.classList.add('ax-shell-host');
       block.dataset.shellState = 'ready';
       trackColorBlockLoad('color-wheel');
@@ -1092,7 +1154,12 @@ export default async function decorate(block) {
     }
   }
 
-  await init();
+  // Do NOT await init() — return from decorate() immediately so Milo can
+  // delete data-status on the section and make it visible. The headline
+  // (styled by CSS-only structural selectors in color-wheel.css) paints
+  // at section-visible time. The heavy tool UI mounts in the background.
+  // This follows the marquee pattern: decorate() is fast, async work is deferred.
+  init();
 
   const onBreakpointChange = async () => {
     if (!block.isConnected) {
