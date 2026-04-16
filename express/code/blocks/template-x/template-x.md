@@ -72,14 +72,14 @@ String values `"null"`, `"no"`, `"false"`, `"off"` are treated as falsy/empty.
 | `action` | string | Marketing tracking param appended to CTA URLs |
 | `zazzle url` | string | Base URL for print iframe modal (flyer/t-shirt variants) |
 | `taskid` | string | Task ID passed to Zazzle print iframe |
-| `custom url config` | string | JSON string `{baseUrl, queryParams}` to override CTA href (templateId URN auto-appended) |
+| `custom url config` | string | JSON string `{baseUrl, queryParams}` to override CTA href (template URN is inserted in the URL path) |
 | `initial template view` | string | Starting grid zoom: `sm`, `md`, or `lg` |
 | `print` | string | Enables print variant: `flyer` or `t-shirt` opens an iFrame modal instead of Express |
 | `experiment` | string | CSS class name applied for running A/B experiments |
 
 **Page metadata** (not block props) that also affect behavior:
 - `template-experiment` — fallback experiment name if not set in props
-- `external-template-cta-link-1` — override CTA href on eligible free/static templates (templateId auto-appended)
+- `external-template-cta-link-1` — override CTA href on eligible free/static templates (template URN auto-appended to URL path)
 - `external-template-cta-link-2` — adds a secondary CTA button alongside the primary
 - `short-title` — used in toolbar heading and breadcrumbs
 - `toolbar-heading` — enables the template count heading
@@ -135,9 +135,9 @@ Each card is a `<div>` with two children:
 Instead of an Express editor link, the CTA opens a **Zazzle iFrame modal** using `zazzle url`, `taskid`, `branchUrl`, and document `lang`.
 
 ### Custom / Experimental CTAs
-- If `custom url config` prop is set, the CTA href is built from `baseUrl + queryParams + templateId` (URN extracted from template).
+- If `custom url config` prop is set, the CTA href is built by appending the template URN to `baseUrl` and preserving `queryParams`.
 - If `external-template-cta-link-1` page metadata is set, it overrides the primary CTA for eligible templates (free + non-animated + non-print).
-- `external-template-cta-link-2` adds a `.secondary-template-cta` button. Both experimental CTAs get `?templateId=<urn>` appended automatically.
+- `external-template-cta-link-2` adds a `.secondary-template-cta` button. Both experimental CTAs get `<base>/<urn>` URL construction automatically.
 
 ---
 

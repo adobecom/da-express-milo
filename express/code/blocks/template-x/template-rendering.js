@@ -259,18 +259,6 @@ function extractURNFromTemplate(template) {
   return null;
 }
 
-function constructCustomURL(template, customUrlConfig) {
-  if (!customUrlConfig?.baseUrl) return null;
-
-  const urnId = extractURNFromTemplate(template);
-  if (!urnId) return null;
-
-  const { baseUrl, queryParams } = customUrlConfig;
-  const separator = queryParams ? '&' : '?';
-
-  return `${baseUrl}?${queryParams}${separator}templateId=${urnId}`;
-}
-
 function ensureAbsoluteUrl(url) {
   if (!url) return url;
   if (/^https?:\/\/|^\/\/|^\//.test(url)) return url;
@@ -280,8 +268,25 @@ function ensureAbsoluteUrl(url) {
 function appendTemplateId(url, template) {
   const urnId = extractURNFromTemplate(template);
   if (!urnId) return url;
-  const separator = url.includes('?') ? '&' : '?';
-  return `${url}${separator}templateId=${urnId}`;
+  const [urlWithoutHash, hash = ''] = url.split('#');
+  const [basePath, queryString = ''] = urlWithoutHash.split('?');
+  if (basePath.includes(urnId)) return url;
+  const normalizedPath = basePath.endsWith('/') ? basePath : `${basePath}/`;
+  const querySuffix = queryString ? `?${queryString}` : '';
+  const hashSuffix = hash ? `#${hash}` : '';
+  return `${normalizedPath}${urnId}${querySuffix}${hashSuffix}`;
+}
+
+function constructCustomURL(template, customUrlConfig) {
+  if (!customUrlConfig?.baseUrl) return null;
+
+  const urnId = extractURNFromTemplate(template);
+  if (!urnId) return null;
+
+  const { baseUrl, queryParams } = customUrlConfig;
+  const separator = baseUrl.includes('?') ? '&' : '?';
+  const urlWithQueryParams = queryParams ? `${baseUrl}${separator}${queryParams}` : baseUrl;
+  return appendTemplateId(urlWithQueryParams, template);
 }
 
 function renderCTA(branchUrl, template, customUrlConfig = null) {
@@ -534,7 +539,6 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   cta.setAttribute('aria-label', `${editThisTemplate} ${getTemplateTitle(template)}`);
   ctaLink.append(mediaWrapper);
 
-
   const experimentalCta1Url = getMetadata('external-template-cta-link-1');
   const experimentalCta2Url = getMetadata('external-template-cta-link-2');
   const experimentalCta1Text = getMetadata('external-template-cta-link-text-1');
@@ -579,7 +583,7 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   };
   const shareWrapper = renderShareWrapper(templateInfo);
 
-  if ( (experimentalCta1Url || experimentalCta1Text)) {
+  if ((experimentalCta1Url || experimentalCta1Text)) {
     btnContainer.classList.add('experimental-ctas');
   }
 
