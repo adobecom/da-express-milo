@@ -6,6 +6,64 @@ export function getDefaultEmbed(url) {
   </div>`;
 }
 
+function extractCCVData(html) {
+  const marker = 'window.ccv$serverData = ';
+  const start = html.indexOf(marker);
+  if (start === -1) return null;
+  const jsonStart = html.indexOf('{', start);
+  if (jsonStart === -1) return null;
+  let depth = 0;
+  let i = jsonStart;
+  while (i < html.length) {
+    if (html[i] === '{') depth += 1;
+    else if (html[i] === '}') {
+      depth -= 1;
+      if (depth === 0) break;
+    }
+    i += 1;
+  }
+  try {
+    return JSON.parse(html.slice(jsonStart, i + 1));
+  } catch {
+    return null;
+  }
+}
+
+export async function embedExpressVideo(url) {
+  // Always use express.adobe.com — stageDomainsMap rewrites this to
+  // stage.projectx.corp.adobe.com which shows a legacy Spark error view
+  const prodUrl = new URL(url.href);
+  prodUrl.hostname = 'express.adobe.com';
+
+  try {
+    const resp = await fetch(prodUrl.href);
+    if (resp.ok) {
+      const ccv = extractCCVData(await resp.text());
+      if (ccv?.mp4URL) {
+        const poster = ccv.posterframe ? ` poster="${ccv.posterframe}"` : '';
+        return `<div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;">
+          <video controls playsinline preload="none"${poster}
+            style="border: 0; top: 0; left: 0; width: 100%; height: 100%; position: absolute;"
+            oncontextmenu="return false" controlsList="nodownload">
+            ${ccv.m3u8URL ? `<source src="${ccv.m3u8URL}" type="application/x-mpegURL">` : ''}
+            <source src="${ccv.mp4URL}" type="video/mp4">
+          </video>
+        </div>`;
+      }
+    }
+  } catch {
+    // CORS blocks the fetch on stage — fall through to iframe with prod URL
+  }
+
+  return `<div style="left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;">
+    <iframe src="${prodUrl.href}"
+      style="border: 0; top: 0; left: 0; width: 100%; height: 100%; position: absolute;"
+      scrolling="no" allow="autoplay; encrypted-media; fullscreen"
+      title="Adobe Express video" loading="lazy">
+    </iframe>
+  </div>`;
+}
+
 export function embedInstagram(url) {
   const location = window.location.href;
   const src = `${url.origin}${url.pathname}${url.pathname.charAt(url.pathname.length - 1) === '/' ? '' : '/'}embed/?cr=1&amp;v=13&amp;wp=1316&amp;rd=${location.endsWith('.html') ? location : `${location}.html`}`;
@@ -29,17 +87,25 @@ const EMBEDS_CONFIG = {
     type: '',
     embed: embedInstagram,
   },
+  'express.adobe.com': {
+    type: 'express',
+    embed: embedExpressVideo,
+  },
+  'stage.projectx.corp.adobe.com': {
+    type: 'express',
+    embed: embedExpressVideo,
+  },
 };
 
-function decorateBlockEmbeds(block) {
-  block.querySelectorAll('.embed a:not([href*="youtube.com"], [href*="vimeo.com"], [href*="twitter.com"])').forEach((a) => {
+async function decorateBlockEmbeds(block) {
+  const links = [...block.querySelectorAll('.embed a:not([href*="youtube.com"], [href*="vimeo.com"], [href*="twitter.com"])')];
+  for (const a of links) {
     const url = new URL(a.href.replace(/\/$/, ''));
-
     const config = EMBEDS_CONFIG[url.hostname];
-
     let embedContent;
     if (config) {
-      embedContent = config.embed(url);
+      // eslint-disable-next-line no-await-in-loop
+      embedContent = await config.embed(url);
       if (embedContent instanceof HTMLElement) {
         embedContent = embedContent.outerHTML;
       }
@@ -49,9 +115,9 @@ function decorateBlockEmbeds(block) {
       block.innerHTML = getDefaultEmbed(url);
       block.classList = `block embed embed-${getServer(url)}`;
     }
-  });
+  }
 }
 
-export default function decorate(block) {
-  decorateBlockEmbeds(block);
+export default async function decorate(block) {
+  await decorateBlockEmbeds(block);
 }

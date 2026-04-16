@@ -18,13 +18,25 @@ export async function fetchVideoAnalytics() {
   return window.videoAnalytics;
 }
 
+function isExpressVideoLink(url) {
+  try {
+    const u = new URL(url);
+    return u.hostname === 'express.adobe.com'
+      && u.pathname === '/published'
+      && u.searchParams.get('type') === 'video';
+  } catch {
+    return false;
+  }
+}
+
 export function isVideoLink(url) {
   if (!url) return null;
   return url.includes('youtube.com/watch')
       || url.includes('youtu.be/')
       || url.includes('vimeo')
       || /^https?:[/][/]video[.]tv[.]adobe[.]com/.test(url)
-      || /.*\/media_.*(mp4|webm|m3u8)$/.test(new URL(url).pathname);
+      || /.*\/media_.*(mp4|webm|m3u8)$/.test(new URL(url).pathname)
+      || isExpressVideoLink(url);
 }
 
 async function getVideoAnalytic($video) {
@@ -186,6 +198,16 @@ async function playInlineVideo($element, vidUrls, playerType, title, ts) {
       });
 
       $element.replaceChildren($iframe);
+    } else if (playerType === 'express') {
+      const $iframe = createTag('iframe', {
+        title,
+        src: primaryUrl,
+        frameborder: '0',
+        allow: 'autoplay; encrypted-media; fullscreen',
+        scrolling: 'no',
+      });
+
+      $element.replaceChildren($iframe);
     } else {
       // iframe 3rd party player
       const $iframe = createTag('iframe', {
@@ -280,6 +302,8 @@ export async function displayVideoModal(url, title, push) {
     let ts = 0;
     if (/^https?:[/][/]video[.]tv[.]adobe[.]com/.test(primaryUrl)) {
       vidType = 'adobetv';
+    } else if (isExpressVideoLink(primaryUrl)) {
+      vidType = 'express';
     } else if (primaryUrl.includes('youtu')) {
       vidType = 'youtube';
       const yturl = new URL(primaryUrl);
