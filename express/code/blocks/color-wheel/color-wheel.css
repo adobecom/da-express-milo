@@ -63,19 +63,12 @@
   display: none;
 }
 
-/* Mobile/tablet: remove the action-menu-buffer above the headline.
-   With the early-return pattern, decorate() returns before init() runs, so
-   the section becomes visible immediately with just the headline. There is no
-   action-menu bar above the headline at this point — the toolbar renders
-   inside the layout section below. Setting the buffer to 0 keeps the headline
-   flush at the top of the block, which matches its final adopted position
-   (inside the sidebar with zero top offset). This eliminates the 81-97px
-   padding jump that would otherwise cause CLS when the layout mounts. */
+/* Mobile/tablet: the action-menu-buffer (81px on mobile, 97px on tablet)
+   reserves space above the headline for the topbar that mounts later.
+   When init() completes the topbar fills this gap, then adoption moves
+   the headline into the sidebar (removing the buffer via :not([data-adopted])).
+   The headline stays at the same y-coordinate throughout → zero CLS. */
 @media (max-width: 1199px) {
-  .color-wheel > .color-headline.tools:not([data-adopted="true"]) {
-    --action-menu-buffer: 0px;
-  }
-
   /* Reserve block height so content below the block (footer, next section)
      doesn't jump when the tool UI mounts inside the <section>. */
   .color-wheel:not([data-shell-state="ready"]) {

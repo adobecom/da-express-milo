@@ -1132,14 +1132,8 @@ export default async function decorate(block) {
         }
       });
 
-      // Desktop / reinit: move headline into sidebar for 2-column grid.
-      // Mobile first load: leave headline as a direct child of the block
-      // so it stays in exactly the same position — zero CLS. The layout
-      // section renders below it; stacked mobile layout looks identical.
-      if (isDesktop || isReinit) {
-        if (headline) section.appendChild(headline);
-        adoptHeadline(section, layoutInstance);
-      }
+      if (headline) section.appendChild(headline);
+      adoptHeadline(section, layoutInstance);
       block.classList.add('ax-shell-host');
       block.dataset.shellState = 'ready';
       trackColorBlockLoad('color-wheel');

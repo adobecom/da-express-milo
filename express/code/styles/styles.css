@@ -27,6 +27,16 @@
   src: local('Trebuchet MS'), local('TrebuchetMS'), local('Arial'), local('Helvetica');
 }
 
+@font-face {
+  font-family: 'adobe-clean';
+  font-display: swap;
+  src: local('adobe-clean'), local('AdobeClean');
+  size-adjust: 95%;
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+}
+
 :root {
   --color-white: #fff;
 
