@@ -580,6 +580,12 @@ export function createToolbar(options) {
         nameInput.value = newName;
       }
     },
+    closeDrawer() {
+      if (activeDrawer?.isOpen) {
+        activeDrawer.close();
+        activeDrawer = null;
+      }
+    },
     setVariant(nextVariant = 'standalone') {
       const resolvedVariant = nextVariant === 'sticky' ? 'sticky' : 'standalone';
       if (resolvedVariant === currentVariant) return;
