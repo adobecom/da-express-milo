@@ -1,3 +1,67 @@
+/* ─── Loading-phase headline (CSS-only, all viewports) ────────────────────
+   Before decorate() adds .color-headline.tools, style the authored
+   headline row using structural selectors so the H1 paints at the
+   correct size at FCP — preventing a late LCP re-measurement.
+   Once JS adds .color-headline, :not(.color-headline) becomes inert
+   and color-headline.css takes over seamlessly.
+   On desktop this also overrides the div:not(.color-headline){display:none}
+   rule below, keeping the LCP element (H1) visible during the JS phase.
+   ──────────────────────────────────────────────────────────────────────── */
+
+.color-wheel > div:first-child:not(.color-headline) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  max-width: var(--block-wd-max-width);
+  padding: 81px var(--spacing-300) 0;
+  margin-inline: auto;
+}
+
+.color-wheel > div:first-child:not(.color-headline) h1,
+.color-wheel > div:first-child:not(.color-headline) h2,
+.color-wheel > div:first-child:not(.color-headline) h3 {
+  font-family: var(--body-font-family);
+  font-size: var(--ax-heading-xl-size);
+  font-weight: var(--heading-font-weight-extra);
+  line-height: 1.04;
+  color: var(--color-default-font);
+  margin: 0;
+  padding-block-end: var(--spacing-100);
+}
+
+.color-wheel > div:first-child:not(.color-headline) p {
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
+  line-height: 1.3;
+  color: var(--color-dark-gray);
+  margin: 0;
+}
+
+/* Hide the suggestions row (sample images) on all viewports during loading.
+   These images are never shown directly — JS extracts them to build the UI.
+   Hiding them prevents lazy-loaded sample images from becoming LCP candidates
+   and competing for bandwidth on mobile 4G. On desktop this is redundant with
+   the div:not(.color-headline){display:none} rule below but harmless. */
+.color-wheel > div + div {
+  display: none;
+}
+
+@media (min-width: 600px) {
+  .color-wheel > div:first-child:not(.color-headline) {
+    padding: 97px var(--spacing-500) 0;
+  }
+}
+
+@media (min-width: 1200px) {
+  .color-wheel > div:first-child:not(.color-headline) {
+    padding: var(--spacing-600) var(--spacing-600) 0;
+  }
+  .color-wheel > div:first-child:not(.color-headline) > div {
+    width: calc((4 * 100% - 128px) / 12);
+  }
+}
+
 /* ─── Loading-phase layout (desktop only) ──────────────────────────────────
    Before the shell mounts (data-shell-state="ready" is absent):
    • The headline row (layoutRows[0]) is visible in the sidebar area. It has
