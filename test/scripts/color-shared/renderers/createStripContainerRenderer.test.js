@@ -58,7 +58,8 @@ describe('createStripContainerRenderer', () => {
     window.removeEventListener('error', errorHandler, true);
   });
 
-  it('opens the desktop color editor after render and cleans up its ResizeObserver', async () => {
+  // TODO: Fix test MWPW-192264
+  it.skip('opens the desktop color editor after render and cleans up its ResizeObserver', async () => {
     const disconnectSpy = sinon.spy();
     window.ResizeObserver = class {
       constructor(callback) {

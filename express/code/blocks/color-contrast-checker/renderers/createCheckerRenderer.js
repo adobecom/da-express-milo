@@ -330,6 +330,13 @@ function createTintSlider(hex, onInput, onCommit, strings, label = '') {
       sliderAdapter.setValue(idx);
       syncTintValue(idx);
     },
+    getBaseHueSat() {
+      return { h: baseHue, s: baseSaturation };
+    },
+    setBaseHueSat(h, s) {
+      baseHue = h;
+      baseSaturation = s;
+    },
   };
 }
 
@@ -798,6 +805,12 @@ export function createCheckerRenderer(options) {
     }, swapSvg);
     swapButton.appendChild(iconWrapper);
     swapButton.addEventListener('click', () => {
+      const fgBase = fgSlider?.getBaseHueSat();
+      const bgBase = bgSlider?.getBaseHueSat();
+      if (fgBase && bgBase) {
+        fgSlider.setBaseHueSat(bgBase.h, bgBase.s);
+        bgSlider.setBaseHueSat(fgBase.h, fgBase.s);
+      }
       setColorPair(background, foreground, { historyMode: 'immediate' });
     });
 

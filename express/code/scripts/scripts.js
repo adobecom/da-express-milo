@@ -18,6 +18,7 @@ import {
   preDecorateSections,
   getRedirectUri,
   getIconElementDeprecated,
+  getContentRoot,
 } from './utils.js';
 
 // Add project-wide style path here.
@@ -32,7 +33,7 @@ const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
 if (jarvisVisibleMeta && ['mobile', 'desktop', 'on'].includes(jarvisVisibleMeta) && (
   (jarvisVisibleMeta === 'mobile' && !desktopViewport) || (jarvisVisibleMeta === 'desktop' && desktopViewport))) jarvisImmediatelyVisible = true;
 
-const prodDomains = ['business.adobe.com', 'www.adobe.com'];
+const prodDomains = ['business.adobe.com', 'www.adobe.com', 'color.adobe.com'];
 
 // Add any config options.
 const CONFIG = {
@@ -40,16 +41,32 @@ const CONFIG = {
   stage: { express: 'stage.projectx.corp.adobe.com', commerce: 'commerce-stg.adobe.com' },
   prod: { express: 'express.adobe.com', commerce: 'commerce.adobe.com' },
   codeRoot: '/express/code',
-  contentRoot: '/express',
+  contentRoot: getContentRoot(),
   stageDomainsMap: {
     '--da-express-milo--adobecom.(hlx|aem).(page|live)': {
       'www.adobe.com': 'origin',
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'color.adobe.com': 'color.stage.adobe.com',
     },
     'www.stage.adobe.com': {
       'www.adobe.com': 'origin',
+      'commerce.adobe.com': 'commerce-stg.adobe.com',
+      'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'color.adobe.com': 'color.stage.adobe.com',
+    },
+    '--express-color--adobecom.(hlx|aem).(page|live)': {
+      'color.adobe.com': 'origin',
+      'www.adobe.com': 'www.stage.adobe.com',
+      'commerce.adobe.com': 'commerce-stg.adobe.com',
+      'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'express.adobe.com': 'stage.projectx.corp.adobe.com',
+    },
+    'color.stage.adobe.com': {
+      'color.adobe.com': 'origin',
+      'www.adobe.com': 'www.stage.adobe.com',
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
@@ -368,6 +385,13 @@ async function loadPage() {
   // end TODO remove metadata after we go live
 
   const config = setConfig({ ...CONFIG, miloLibs });
+
+  // Legacy color.adobe.com deeplink redirect
+  if (/color-theme-\d+\/?$/.test(window.location.pathname)) {
+    const { default: colorThemeRedirect } = await import('./utils/color-theme-redirect.js');
+    const redirected = await colorThemeRedirect(config);
+    if (redirected) return;
+  }
 
   if (getMetadata('template-search-page') === 'Y') {
     const { default: redirect } = await import('./utils/template-redirect.js');

@@ -149,10 +149,16 @@ describe('color-blindness block', () => {
 
   describe('decoration without headline sibling', () => {
     let block;
+    const oldBody = document.body.innerHTML;
 
     before(async () => {
+      document.body.innerHTML = await readFile({ path: './mocks/body-no-headline.html' });
       block = document.querySelector('#cb-no-headline');
       await decorate(block);
+    });
+
+    after(() => {
+      document.body.innerHTML = oldBody;
     });
 
     it('sets data-block-status to loaded even without headline', () => {

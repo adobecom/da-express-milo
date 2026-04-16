@@ -197,4 +197,72 @@ describe('initFloatingToolbar', () => {
       expect(io).to.exist;
     });
   });
+
+  describe('footer visibility observer', () => {
+    let OriginalIntersectionObserver;
+    let observers;
+    let footer;
+
+    beforeEach(() => {
+      footer = document.createElement('footer');
+      document.body.appendChild(footer);
+
+      OriginalIntersectionObserver = window.IntersectionObserver;
+      observers = [];
+      window.IntersectionObserver = function MockIO(cb, opts) {
+        const instance = {
+          observe: sinon.stub(),
+          disconnect: sinon.stub(),
+          opts,
+          trigger(entry) { cb([entry]); },
+        };
+        observers.push(instance);
+        return instance;
+      };
+    });
+
+    afterEach(() => {
+      window.IntersectionObserver = OriginalIntersectionObserver;
+    });
+
+    it('creates a footer IntersectionObserver with rootMargin "32px"', async () => {
+      await callInit(container, { palette: MOCK_PALETTE });
+      const footerIo = observers.find((o) => o.opts?.rootMargin === '32px');
+      expect(footerIo).to.exist;
+      expect(footerIo.observe.calledOnce).to.be.true;
+    });
+
+    it('adds aria-hidden and inert and ax-toolbar-footer-hidden when footer enters view', async () => {
+      await callInit(container, { palette: MOCK_PALETTE });
+      const wrapper = container.querySelector('.color-floating-toolbar-container');
+      const footerIo = observers.find((o) => o.opts?.rootMargin === '32px');
+
+      footerIo.trigger({ isIntersecting: true, intersectionRatio: 1 });
+
+      expect(wrapper.classList.contains('ax-toolbar-footer-hidden')).to.be.true;
+      expect(wrapper.getAttribute('aria-hidden')).to.equal('true');
+      expect(wrapper.hasAttribute('inert')).to.be.true;
+    });
+
+    it('removes aria-hidden and inert and ax-toolbar-footer-hidden when footer leaves view', async () => {
+      await callInit(container, { palette: MOCK_PALETTE });
+      const wrapper = container.querySelector('.color-floating-toolbar-container');
+      const footerIo = observers.find((o) => o.opts?.rootMargin === '32px');
+
+      footerIo.trigger({ isIntersecting: true, intersectionRatio: 1 });
+      footerIo.trigger({ isIntersecting: false, intersectionRatio: 0 });
+
+      expect(wrapper.classList.contains('ax-toolbar-footer-hidden')).to.be.false;
+      expect(wrapper.hasAttribute('aria-hidden')).to.be.false;
+      expect(wrapper.hasAttribute('inert')).to.be.false;
+    });
+
+    it('destroy() disconnects the footer observer', async () => {
+      const result = await callInit(container, { palette: MOCK_PALETTE });
+      const footerIo = observers.find((o) => o.opts?.rootMargin === '32px');
+
+      result.destroy();
+      expect(footerIo.disconnect.calledOnce).to.be.true;
+    });
+  });
 });

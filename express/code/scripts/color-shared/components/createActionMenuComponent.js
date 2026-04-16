@@ -4,7 +4,7 @@ import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createExpressButton, createExpressTooltip } from '../spectrum/index.js';
 import { createActionMenuState } from './createActionMenuState.js';
 import { attachRovingTabIndex } from '../spectrum/utils/a11y.js';
-import { createColorPaletteParamApi } from '../utils/utilities.js';
+import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../utils/utilities.js';
 import {
   COLOR_ICON,
   ACCESSIBILITY_ICON,
@@ -65,23 +65,28 @@ async function createNav(navLinks, activeId, getColors, getName) {
     const isActive = link.id === activeId;
     if (isActive) activeIndex = linkElements.length;
     const li = createTag('li');
-    const linkEl = createTag('a', {
-      href: link.href,
-      class: `action-menu-link ${link.id}-link color-action-button ${isActive ? 'active' : ''}`,
-    });
-    linkEl.addEventListener('click', (e) => {
-      const colors = typeof getColors === 'function' ? getColors() : null;
-      if (!colors?.length) return;
-      e.preventDefault();
-      try {
-        const url = new URL(linkEl.href, window.location.href);
-        const name = typeof getName === 'function' ? getName() : undefined;
-        paletteApi.setOnUrl(url, colors, { name });
-        window.location.href = url.toString();
-      } catch {
-        window.location.href = linkEl.href;
-      }
-    });
+    const linkEl = createTag(
+      isActive ? 'span' : 'a',
+      {
+        ...(isActive ? {} : { href: link.href }),
+        class: `action-menu-link ${link.id}-link color-action-button ${isActive ? 'active' : ''}`,
+      },
+    );
+    if (!isActive) {
+      linkEl.addEventListener('click', (e) => {
+        const colors = typeof getColors === 'function' ? getColors() : null;
+        if (!colors?.length) return;
+        e.preventDefault();
+        try {
+          const url = new URL(linkEl.href, window.location.href);
+          const name = typeof getName === 'function' ? getName() : undefined;
+          paletteApi.setOnUrl(url, colors, { name });
+          window.location.href = url.toString();
+        } catch {
+          window.location.href = linkEl.href;
+        }
+      });
+    }
     const iconSvg = ICON_MAP[link.id];
     if (iconSvg) linkEl.append(createTag('span', null, iconSvg));
     let labelEl = null;
@@ -99,6 +104,7 @@ async function createNav(navLinks, activeId, getColors, getName) {
       const dividerEl = createTag('li', { role: 'separator', 'aria-hidden': true, class: 'palette-divider' });
       ul.append(dividerEl);
     }
+    decorateAnalyticsAttributes(linkEl, { linkLabel: link.label });
     linkElements.push(linkEl);
     await createExpressTooltip({
       targetEl: linkEl,
@@ -136,6 +142,7 @@ async function createHistoryButton(
     if (btn.getAttribute('aria-disabled') === 'true' || btn.disabled) return;
     onClick();
   });
+  decorateAnalyticsAttributes(btn, { linkLabel: control.label });
   buttonRefs[control.id] = btn;
   await createExpressTooltip({
     targetEl: btn,
@@ -218,6 +225,7 @@ async function createControls(
             disableAria: true,
           });
         }
+        decorateAnalyticsAttributes(btn, { linkLabel: control.label });
         controlContainer.append(btn);
         break;
       }
@@ -233,6 +241,7 @@ async function createControls(
           },
           ICON_MAP[control.id].maximize,
         );
+        decorateAnalyticsAttributes(btn, { linkLabel: control.label });
         controlContainer.append(btn);
         btn.addEventListener('click', () => {
           const oldIsPressed = btn.getAttribute('aria-pressed') === 'true';

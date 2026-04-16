@@ -27,6 +27,9 @@ const TOOLBAR_I18N_MAP = {
   paletteName: 'color-toolbar-palette-name',
   paletteNamePlaceholder: 'color-toolbar-palette-placeholder',
   ctaText: 'color-toolbar-cta',
+  urlCopiedToClipboard: 'color-toolbar-url-copied-to-clipboard',
+  shareFailed: 'color-toolbar-share-failed',
+  networkError: 'color-toolbar-network-error',
 };
 
 const DRAWER_I18N_MAP = {
@@ -59,6 +62,9 @@ const DRAWER_I18N_MAP = {
   keywordSuggestions: 'color-drawer-keyword-suggestions',
   yourLibrary: 'color-drawer-your-library',
   tagFieldHelp: 'color-drawer-tag-field-help',
+  tagRemoveAriaLabel: 'color-drawer-tag-remove-aria-label',
+  libraryCreatedToast: 'color-drawer-library-created-toast',
+  createLibraryFailedToast: 'color-drawer-create-library-failed-toast',
 };
 
 async function loadI18nStrings() {
@@ -98,7 +104,7 @@ async function ensureServices() {
   await serviceManager.init({ plugins: ['cclibrary'] });
 }
 
-async function getLibraryContext() {
+async function getLibraryContext(networkErrorMsg = NETWORK_ERROR_MESSAGE) {
   try {
     if (!window.adobeIMS?.isSignedInUser()) return { libraries: [], provider: null };
 
@@ -124,7 +130,7 @@ async function getLibraryContext() {
     if (isNetworkError) {
       showExpressToast({
         variant: 'negative',
-        message: NETWORK_ERROR_MESSAGE,
+        message: networkErrorMsg,
       });
     }
     return { libraries: [], provider: null };
@@ -237,7 +243,7 @@ export async function initFloatingToolbar(container, options = {}) {
     showPaletteName,
     editPaletteName,
     editPaletteLink,
-    getLibraryContext,
+    getLibraryContext: () => getLibraryContext(toolbarI18n.networkError),
     i18n: toolbarI18n,
     drawerI18n,
   });
@@ -347,6 +353,24 @@ export async function initFloatingToolbar(container, options = {}) {
     reserveSpace,
   });
 
+  /* Hide toolbar when the page footer scrolls into view (mirrors floating-cta pattern) */
+  let footerIo = null;
+  const footer = document.querySelector('footer');
+  if (footer && typeof IntersectionObserver !== 'undefined') {
+    footerIo = new IntersectionObserver((entries) => {
+      const isVisible = entries[0].isIntersecting || entries[0].intersectionRatio > 0;
+      wrapper.classList.toggle('ax-toolbar-footer-hidden', isVisible);
+      if (isVisible) {
+        wrapper.setAttribute('aria-hidden', 'true');
+        wrapper.setAttribute('inert', '');
+      } else {
+        wrapper.removeAttribute('aria-hidden');
+        wrapper.removeAttribute('inert');
+      }
+    }, { rootMargin: '32px', threshold: 0 });
+    footerIo.observe(footer);
+  }
+
   return {
     toolbar,
     palette: finalPalette,
@@ -356,6 +380,7 @@ export async function initFloatingToolbar(container, options = {}) {
     setVariant,
     destroy() {
       clearStickyBehavior(wrapper, stickyReserveContainer, stickyIo);
+      if (footerIo) footerIo.disconnect();
       toolbar.destroy();
       wrapper.remove();
     },
