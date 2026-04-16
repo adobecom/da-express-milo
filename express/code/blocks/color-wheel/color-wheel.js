@@ -33,31 +33,44 @@ let createSimpleCarousel;
 let createImageExtractComponent;
 let createExpressTooltip;
 
-// Fire all heavy imports at module evaluation time so they begin resolving
-// immediately — not deferred until decorate()/init() is called.
-const heavyModulesPromise = Promise.all([
+// All ten imports start downloading in parallel at module evaluation time.
+// They are split into two groups so loadHeavyModules() can yield between
+// evaluation phases — giving the browser a task boundary to paint LCP
+// content before the heavier Spectrum/Lit web-component burst runs.
+const heavyModulesPromise1 = Promise.all([
   import('../../scripts/instrument.js'),
+  import('../../scripts/color-shared/controllers/ColorThemeExpressController.js'),
+  import('../../scripts/widgets/simple-carousel.js'),
+]);
+const heavyModulesPromise2 = Promise.all([
   import('../../scripts/color-shared/shell/layouts/createColorToolLayout.js'),
   import('../../scripts/color-shared/spectrum/components/express-tabs.js'),
   import('../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js'),
   import('../../scripts/color-shared/adapters/createBaseColorAdapter.js'),
   import('../../scripts/color-shared/renderers/createStripContainerRenderer.js'),
-  import('../../scripts/color-shared/controllers/ColorThemeExpressController.js'),
-  import('../../scripts/widgets/simple-carousel.js'),
   import('./createImageExtractComponent.js'),
   import('../../scripts/color-shared/spectrum/components/express-tooltip.js'),
 ]);
+
 async function loadHeavyModules() {
-  const [a, b, c, d, e, f, g, h, i, j] = await heavyModulesPromise;
+  const [a, g, h] = await heavyModulesPromise1;
   trackColorBlockLoad = a.trackColorBlockLoad;
+  ColorThemeExpressController = g.default;
+  randomHex = g.randomHex;
+  createSimpleCarousel = h.default;
+
+  // Yield to give the browser a chance to paint before the heavier
+  // Spectrum/Lit web-component evaluation burst in group 2.
+  if ('scheduler' in window && 'yield' in window.scheduler) {
+    await window.scheduler.yield();
+  }
+
+  const [b, c, d, e, f, i, j] = await heavyModulesPromise2;
   createColorToolLayout = b.default;
   createExpressTabs = c.createExpressTabs;
   createColorWheelExpressAdapter = d.default;
   createBaseColorAdapter = e.default;
   createStripContainerRenderer = f.createStripContainerRenderer;
-  ColorThemeExpressController = g.default;
-  randomHex = g.randomHex;
-  createSimpleCarousel = h.default;
   createImageExtractComponent = i.default;
   createExpressTooltip = j.createExpressTooltip;
 }

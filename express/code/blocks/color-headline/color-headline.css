@@ -149,7 +149,12 @@ body:has(.color-extract.has-image) .color-headline.extract {
     --action-menu-buffer: var(--spacing-600);
   }
 
+  /* In the adopted (final) layout the headline sits at the top of the sidebar
+     with no top offset. Zero out the buffer for the unadopted phase so the
+     headline starts in approximately the same vertical position it will occupy
+     after adoption — eliminating the 40px upward jump. */
   .color-headline.tools:not([data-adopted="true"]) {
+    --action-menu-buffer: 0px;
     padding-inline: var(--spacing-600);
   }
 
