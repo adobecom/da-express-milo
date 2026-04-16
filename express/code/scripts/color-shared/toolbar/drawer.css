@@ -44,7 +44,6 @@
   --ax-drawer-chevron-size: 16px;
   --ax-drawer-chevron-icon-size: 10px;
   --ax-drawer-chevron-transition: transform 0.15s;
-  --ax-drawer-keyword-icon-size: 10px;
   --ax-drawer-title-min-height: 24px;
   --ax-drawer-save-border-radius: 24px;
   --ax-drawer-popover-z: 10;
@@ -52,12 +51,7 @@
   --ax-drawer-divider-height: 1px;
   --ax-drawer-focus-ring-width: 2px;
   --ax-drawer-focus-ring-offset: 2px;
-  --ax-drawer-tag-btn-gap: var(--spacing-75);
-  --ax-drawer-tag-icon-size: 12px;
   --ax-drawer-tag-icon-size-mobile: 14px;
-  --ax-drawer-tag-min-width-mobile: 27px;
-  --ax-drawer-tag-height-mobile: 32px;
-  --ax-drawer-tag-max-inline-size-mobile: 224px;
   --ax-tag-field-min-height: 56px;
   --ax-tag-field-gap: 6px;
   --ax-tag-pill-max-width: 224px;
@@ -233,6 +227,10 @@
   gap: var(--spacing-100);
 }
 
+.ax-drawer-tag-section .ax-drawer-field-label:first-child {
+  padding-bottom: 0;
+}
+
 /* ── Tag field (bordered container) ─────────────────────────── */
 
 .ax-tag-field {
@@ -295,6 +293,10 @@
   box-sizing: border-box;
 }
 
+.ax-tag-pill[hidden] {
+  display: none;
+}
+
 .ax-tag-pill-label {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -331,24 +333,31 @@
   display: none;
 }
 
-/* ── Tag chip buttons (sp-button.ax-drawer-tag-btn — suggestions) ── */
+/* ── Tag chip buttons (native button.ax-drawer-tag-btn — suggestions) ── */
 
 .ax-drawer-tag-btn {
-  --mod-button-border-radius: 7px;
-  --mod-button-edge-to-text: var(--spacing-100);
-  --mod-button-text-to-icon: var(--ax-drawer-tag-btn-gap);
-  --mod-button-background-color-default: var(--color-light-gray);
-  --mod-button-background-color-hover: var(--color-light-gray-2);
-  --mod-button-background-color-down: var(--color-gray-300-variant);
-  --mod-button-background-color-focus: var(--color-light-gray-2);
-  --mod-button-content-color-default: var(--color-gray-800-variant);
-  --mod-button-content-color-hover: var(--color-gray-800-variant);
-  --mod-button-content-color-down: var(--color-gray-800-variant);
-  --mod-button-content-color-focus: var(--color-gray-800-variant);
-  --mod-icon-size: var(--ax-drawer-tag-icon-size);
-  --mod-icon-color: var(--color-black);
-  flex-direction: row-reverse;
+  border: none;
   cursor: pointer;
+}
+
+.ax-drawer-tag-btn:hover {
+  background: var(--color-light-gray-2);
+}
+
+.ax-drawer-tag-btn:active {
+  background: var(--color-gray-300-variant);
+}
+
+.ax-drawer-tag-btn:focus-visible {
+  outline: var(--ax-drawer-focus-ring-width) solid var(--color-blue-800);
+  outline-offset: var(--ax-drawer-focus-ring-offset);
+}
+
+.ax-drawer-tag-btn-icon {
+  --mod-icon-inline-size: var(--ax-tag-pill-icon-size);
+  --mod-icon-block-size: var(--ax-tag-pill-icon-size);
+  color: var(--color-black);
+  flex-shrink: 0;
 }
 
 /* ── Keyword suggestion pills ────────────────────────────────── */
@@ -358,10 +367,6 @@
   flex-wrap: wrap;
   gap: var(--spacing-100);
   align-items: flex-start;
-}
-
-.ax-drawer-keyword-suggestions .ax-drawer-tag-btn {
-  --mod-icon-size: var(--ax-drawer-keyword-icon-size);
 }
 
 .ax-drawer-field-input::placeholder {
@@ -545,12 +550,9 @@
 
 /* ── Mobile drawer overrides ────────────────────── */
 
-.ax-drawer-mobile .ax-drawer-tag-btn {
-  --ax-drawer-tag-btn-gap: var(--spacing-200);
-  --mod-icon-size: var(--ax-drawer-tag-icon-size-mobile);
-  --mod-button-border-radius: var(--Corner-radius-corner-radius-100);
-  --mod-button-edge-to-text: var(--spacing-200);
-  font-weight: var(--ax-drawer-font-weight-medium);
+.ax-drawer-mobile .ax-drawer-tag-btn-icon {
+  --mod-icon-inline-size: var(--ax-drawer-tag-icon-size-mobile);
+  --mod-icon-block-size: var(--ax-drawer-tag-icon-size-mobile);
 }
 
 .ax-drawer-mobile .ax-lib-picker-create-section {
@@ -600,7 +602,12 @@
     display: flex;
     flex-direction: column;
     gap: var(--spacing-300);
-    padding: 0 !important; 
+    padding: 0 !important;
+  }
+
+  .ax-drawer-panel > sp-theme {
+    overflow: visible;
+    min-block-size: auto;
   }
 
   .ax-drawer-content {
@@ -625,7 +632,7 @@
   }
 
   .ax-lib-picker-popover sp-menu {
-    min-block-size: fit-content;
+    min-block-size: calc(4 * var(--ax-drawer-input-height));
   }
 
   .ax-drawer-field-label,

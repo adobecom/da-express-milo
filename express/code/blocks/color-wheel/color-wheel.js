@@ -9,7 +9,7 @@ import ColorThemeExpressController, { randomHex } from '../../scripts/color-shar
 import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
 import createImageExtractComponent from './createImageExtractComponent.js';
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
-import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
+import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 
 async function loadPlaceholders() {
@@ -239,6 +239,7 @@ async function buildHarmonySelector(controller, strings = {}) {
         'data-harmony-value': value,
         tabindex: '-1',
       });
+      decorateAnalyticsAttributes(btn, { linkLabel: `${getHarmonyLabel(value)} harmony` });
       const img = createTag('img', {
         src: `${HARMONY_THUMB_BASE}/${thumb}`,
         alt: '',
@@ -842,7 +843,7 @@ export default async function decorate(block) {
         const { createActionMenuComponent } = await import('../../scripts/color-shared/components/createActionMenuComponent.js');
 
         const actionMenu = await createActionMenuComponent({
-          defaultActionMenuConfig,
+          ...defaultActionMenuConfig,
           type: 'controls-only',
           onGenerateRandom: () => {
             isGeneratingRandom = true;
@@ -864,7 +865,7 @@ export default async function decorate(block) {
       stripRenderer = createStripContainerRenderer({
         container: stripHost,
         data: [swatchRailController],
-        mobileBreakpointQuery: '(max-width: 1199px)',
+        mobileBreakpointQuery: '(max-width: 599px)',
         config: {
           stripContainerOrientations: ['vertical-responsive'],
           swatchFeatures: {
