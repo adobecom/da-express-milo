@@ -33,24 +33,40 @@ let createSimpleCarousel;
 let createImageExtractComponent;
 let createExpressTooltip;
 
-// All ten imports start downloading in parallel at module evaluation time.
-// They are split into two groups so loadHeavyModules() can yield between
-// evaluation phases — giving the browser a task boundary to paint LCP
-// content before the heavier Spectrum/Lit web-component burst runs.
+// All imports start downloading in parallel at module evaluation time.
+// They are split into four groups so loadHeavyModules() can yield between
+// evaluation phases — spreading the JS evaluation cost across multiple tasks
+// to reduce TBT on throttled-CPU environments (e.g. Lighthouse desktop).
 const heavyModulesPromise1 = Promise.all([
   import('../../scripts/instrument.js'),
   import('../../scripts/color-shared/controllers/ColorThemeExpressController.js'),
   import('../../scripts/widgets/simple-carousel.js'),
 ]);
-const heavyModulesPromise2 = Promise.all([
+// Layout shell + tabs: register the outer Spectrum chrome first
+const heavyModulesPromise2a = Promise.all([
   import('../../scripts/color-shared/shell/layouts/createColorToolLayout.js'),
   import('../../scripts/color-shared/spectrum/components/express-tabs.js'),
+]);
+// Color adapters + strip renderer: the core interaction layer
+const heavyModulesPromise2b = Promise.all([
   import('../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js'),
   import('../../scripts/color-shared/adapters/createBaseColorAdapter.js'),
   import('../../scripts/color-shared/renderers/createStripContainerRenderer.js'),
+]);
+// Image extract + tooltip: used only when switching tabs or on desktop hover
+const heavyModulesPromise2c = Promise.all([
   import('./createImageExtractComponent.js'),
   import('../../scripts/color-shared/spectrum/components/express-tooltip.js'),
 ]);
+
+// Always yields to a new task — uses scheduler.yield() when available,
+// falls back to setTimeout(0) so the boundary is guaranteed in all runtimes.
+function yieldToMain() {
+  if ('scheduler' in window && 'yield' in window.scheduler) {
+    return window.scheduler.yield();
+  }
+  return new Promise((resolve) => { setTimeout(resolve, 0); });
+}
 
 async function loadHeavyModules() {
   const [a, g, h] = await heavyModulesPromise1;
@@ -59,18 +75,24 @@ async function loadHeavyModules() {
   randomHex = g.randomHex;
   createSimpleCarousel = h.default;
 
-  // Yield to give the browser a chance to paint before the heavier
-  // Spectrum/Lit web-component evaluation burst in group 2.
-  if ('scheduler' in window && 'yield' in window.scheduler) {
-    await window.scheduler.yield();
-  }
+  // Yield between each sub-group so Spectrum/Lit web-component evaluation
+  // is spread across separate tasks rather than one 350ms+ burst.
+  await yieldToMain();
 
-  const [b, c, d, e, f, i, j] = await heavyModulesPromise2;
+  const [b, c] = await heavyModulesPromise2a;
   createColorToolLayout = b.default;
   createExpressTabs = c.createExpressTabs;
+
+  await yieldToMain();
+
+  const [d, e, f] = await heavyModulesPromise2b;
   createColorWheelExpressAdapter = d.default;
   createBaseColorAdapter = e.default;
   createStripContainerRenderer = f.createStripContainerRenderer;
+
+  await yieldToMain();
+
+  const [i, j] = await heavyModulesPromise2c;
   createImageExtractComponent = i.default;
   createExpressTooltip = j.createExpressTooltip;
 }
