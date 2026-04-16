@@ -383,11 +383,6 @@ color-wheel-express {
       display: flex;
   }
 
-  .color-wheel .ax-palette-summary {
-    min-width: 200px;
-  }
-}
-
 @media (max-width: 600px) {
   .color-wheel .image-upload-dropzone-container {
     height: 211px;
