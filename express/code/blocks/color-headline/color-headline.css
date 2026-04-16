@@ -149,6 +149,10 @@ body:has(.color-extract.has-image) .color-headline.extract {
     --action-menu-buffer: var(--spacing-600);
   }
 
+  .color-headline.tools:not([data-adopted="true"]) {
+    padding-inline: var(--spacing-600);
+  }
+
   .color-headline.tools:not([data-adopted="true"]) > div {
     width: calc(33.33% - 12px);
   }
