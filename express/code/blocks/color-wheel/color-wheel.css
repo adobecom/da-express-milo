@@ -1,6 +1,12 @@
-@import url('../../scripts/color-shared/components/strips/color-strip.css');
-@import url('../../scripts/color-shared/components/image-upload/image-upload.css');
-@import url('./image-extract.css');
+/* Hide authored <div> children during the loading phase on desktop.
+   The real UI mounts inside a <section>; authored divs are not LCP content
+   (the H1 lives in the separate color-headline block) so hiding them is safe.
+   This prevents the wide-then-narrow visual shift while async init runs. */
+@media (min-width: 1200px) {
+  .color-wheel > div {
+    display: none;
+  }
+}
 
 .color-wheel .ax-color-tool-layout {
   box-sizing: border-box;
@@ -375,6 +381,10 @@ color-wheel-express {
 @media (max-width: 599px) {
   .color-wheel .ax-toolbar-standalone .ax-palette-name {
       display: flex;
+  }
+
+  .color-wheel .ax-palette-summary {
+    min-width: 200px;
   }
 }
 

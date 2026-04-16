@@ -223,38 +223,50 @@ const eagerLoad = (img) => {
   img?.setAttribute('fetchpriority', 'high');
 };
 
+function preloadLCPImage(img) {
+  // Build a preload that mirrors the <picture> responsive sources when available.
+  // currentSrc is empty at module-evaluation time (before layout), so we extract
+  // the best candidate from <source> srcset or fall back to img.src.
+  const picture = img?.closest('picture');
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.fetchPriority = 'high';
+
+  if (picture) {
+    const sources = [...picture.querySelectorAll('source')];
+    if (sources.length) {
+      // Use imagesrcset/imagesizes so the browser picks the right variant
+      link.type = sources[0].type || '';
+      link.imageSrcset = sources[0].srcset || '';
+      if (sources[0].sizes) link.imageSizes = sources[0].sizes;
+      if (sources[0].media) link.media = sources[0].media;
+    } else {
+      link.href = img.src;
+    }
+  } else {
+    link.href = img.src;
+  }
+
+  const key = link.href || link.imageSrcset;
+  if (key && !document.querySelector(`link[rel="preload"][href="${key}"]`)) {
+    document.head.appendChild(link);
+  }
+}
+
 (function decorateLCPImage() {
   const firstSection = document.querySelector('body > main > div:nth-child(1)');
   if (!firstSection) return;
 
-  // Get all images in the first section
   const images = firstSection.querySelectorAll('img');
   if (images.length > 0) {
     images.forEach(eagerLoad);
-
-    // Preload the first image to force early loading
-    const firstImg = images[0];
-    if (firstImg?.currentSrc && !document.querySelector(`link[rel="preload"][href="${firstImg.currentSrc}"]`)) {
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'image';
-      link.href = firstImg.currentSrc;
-      link.fetchPriority = 'high';
-      document.head.appendChild(link);
-    }
+    preloadLCPImage(images[0]);
   } else {
-    // Fallback: if no images in first section, try first image on page
     const lcpImg = document.querySelector('img');
     if (lcpImg) {
       eagerLoad(lcpImg);
-      if (lcpImg.currentSrc && !document.querySelector(`link[rel="preload"][href="${lcpImg.currentSrc}"]`)) {
-        const link = document.createElement('link');
-        link.rel = 'preload';
-        link.as = 'image';
-        link.href = lcpImg.currentSrc;
-        link.fetchPriority = 'high';
-        document.head.appendChild(link);
-      }
+      preloadLCPImage(lcpImg);
     }
   }
 }());
@@ -268,6 +280,35 @@ const eagerLoad = (img) => {
     link.setAttribute('href', path);
     document.head.appendChild(link);
   });
+}());
+
+// Override Typekit font-display:auto → swap to eliminate the ~3s FOIT on LCP text.
+// Milo dynamically injects <link href="https://use.typekit.net/...css"> after setConfig().
+// We watch for that link, fetch the same URL (hits the browser cache immediately), replace
+// font-display in the text, and append a <style> block so our @font-face rules win the cascade.
+(function overrideTypekitFontDisplay() {
+  const observer = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      for (const node of mutation.addedNodes) {
+        if (node.nodeType === 1 && node.tagName === 'LINK') {
+          let typekitUrl;
+          try { typekitUrl = new URL(node.href); } catch { /* invalid href */ }
+          if (typekitUrl?.hostname === 'use.typekit.net') {
+            observer.disconnect();
+            fetch(node.href)
+              .then((res) => res.text())
+              .then((css) => {
+                const style = document.createElement('style');
+                style.textContent = css.replace(/font-display\s*:\s*auto/g, 'font-display:swap');
+                document.head.appendChild(style);
+              })
+              .catch(() => {});
+          }
+        }
+      }
+    }
+  });
+  observer.observe(document.head, { childList: true });
 }());
 
 function decorateHeroLCP(loadStyle, config, createTag) {
