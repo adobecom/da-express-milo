@@ -3,6 +3,7 @@
 import { getLibs } from './utils.js';
 import BlockMediator from './block-mediator.min.js';
 import { memoize } from './utils/hofs.js';
+import { isValidBehaviors } from './template-utils.js';
 
 let getConfig;
 
@@ -348,12 +349,6 @@ async function fetchTemplatesWithToolbar(props) {
   // ultimate fallback in case no fallback locale is authored
   response = await fetchSearchUrl({ ...props, filters: {}, q: '' });
   return { response, fallbackMsg: await getFallbackMsg() };
-}
-
-function isValidBehaviors(behaviors) {
-  const collectivelyExhausiveBehaviors = ['animated', 'video', 'still'];
-  return behaviors.some((b) => collectivelyExhausiveBehaviors.includes(b))
-        && (!behaviors.includes('still') || !(behaviors.includes('video') || behaviors.includes('animated')));
 }
 
 export function isValidTemplate(template) {
