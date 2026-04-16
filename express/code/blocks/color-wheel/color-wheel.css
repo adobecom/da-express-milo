@@ -24,7 +24,7 @@
    rule below, keeping the LCP element (H1) visible during the JS phase.
    ──────────────────────────────────────────────────────────────────────── */
 
-.color-wheel > div:first-child:not(.color-headline) {
+.color-wheel > div:first-child:not(.color-headline):not(.ax-shell-slot) {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-100);
@@ -33,9 +33,9 @@
   margin-inline: auto;
 }
 
-.color-wheel > div:first-child:not(.color-headline) h1,
-.color-wheel > div:first-child:not(.color-headline) h2,
-.color-wheel > div:first-child:not(.color-headline) h3 {
+.color-wheel > div:first-child:not(.color-headline):not(.ax-shell-slot) h1,
+.color-wheel > div:first-child:not(.color-headline):not(.ax-shell-slot) h2,
+.color-wheel > div:first-child:not(.color-headline):not(.ax-shell-slot) h3 {
   font-family: var(--body-font-family);
   font-size: var(--ax-heading-xl-size);
   font-weight: var(--heading-font-weight-extra);
@@ -45,7 +45,7 @@
   padding-block-end: var(--spacing-100);
 }
 
-.color-wheel > div:first-child:not(.color-headline) p {
+.color-wheel > div:first-child:not(.color-headline):not(.ax-shell-slot) p {
   font-family: var(--body-font-family);
   font-size: var(--ax-body-s-size);
   font-weight: var(--ax-body-weight);
@@ -63,12 +63,15 @@
   display: none;
 }
 
-/* Mobile/tablet: the action-menu-buffer (81px on mobile, 97px on tablet)
-   reserves space above the headline for the topbar that mounts later.
-   When init() completes the topbar fills this gap, then adoption moves
-   the headline into the sidebar (removing the buffer via :not([data-adopted])).
-   The headline stays at the same y-coordinate throughout → zero CLS. */
 @media (max-width: 1199px) {
+  /* On mobile first load the topbar is moved out of the layout grid and
+     placed as a direct block child (above the headline) for correct visual
+     ordering without moving the headline. Re-apply the grid's side padding
+     so it aligns with the headline and layout content below. */
+  .color-wheel > .ax-shell-slot--topbar {
+    padding-inline: var(--spacing-300);
+  }
+
   /* Reserve block height so content below the block (footer, next section)
      doesn't jump when the tool UI mounts inside the <section>. */
   .color-wheel:not([data-shell-state="ready"]) {
@@ -76,17 +79,23 @@
   }
 }
 
+@media (min-width: 600px) and (max-width: 1199px) {
+  .color-wheel > .ax-shell-slot--topbar {
+    padding-inline: var(--spacing-500);
+  }
+}
+
 @media (min-width: 600px) {
-  .color-wheel > div:first-child:not(.color-headline) {
+  .color-wheel > div:first-child:not(.color-headline):not(.ax-shell-slot) {
     padding: 97px var(--spacing-500) 0;
   }
 }
 
 @media (min-width: 1200px) {
-  .color-wheel > div:first-child:not(.color-headline) {
+  .color-wheel > div:first-child:not(.color-headline):not(.ax-shell-slot) {
     padding: var(--spacing-600) var(--spacing-600) 0;
   }
-  .color-wheel > div:first-child:not(.color-headline) > div {
+  .color-wheel > div:first-child:not(.color-headline):not(.ax-shell-slot) > div {
     width: calc((4 * 100% - 128px) / 12);
   }
 }

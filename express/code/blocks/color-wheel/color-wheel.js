@@ -1132,8 +1132,24 @@ export default async function decorate(block) {
         }
       });
 
-      if (headline) section.appendChild(headline);
-      adoptHeadline(section, layoutInstance);
+      if (isDesktop || isReinit) {
+        // Desktop: headline must be in the sidebar for the 2-column grid.
+        // Reinit: block was cleared, adopt normally.
+        if (headline) section.appendChild(headline);
+        adoptHeadline(section, layoutInstance);
+      } else {
+        // Mobile first load: move ONLY the topbar above the headline.
+        // The headline stays put — zero CLS from headline adoption.
+        // The topbar (81px) fills the headline's action-menu-buffer (81px).
+        // Then remove the buffer so the headline content stays at the same
+        // y-coordinate: old y = buffer(81px), new y = topbar(81px) + 0 = 81px.
+        // Both operations are synchronous → same paint → no visible shift.
+        const topbar = section.querySelector('.ax-shell-slot--topbar');
+        if (topbar && headline) {
+          block.insertBefore(topbar, headline);
+          headline.style.setProperty('--action-menu-buffer', '0px');
+        }
+      }
       block.classList.add('ax-shell-host');
       block.dataset.shellState = 'ready';
       trackColorBlockLoad('color-wheel');
