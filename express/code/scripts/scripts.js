@@ -290,17 +290,21 @@ function preloadLCPImage(img) {
   const observer = new MutationObserver((mutations) => {
     for (const mutation of mutations) {
       for (const node of mutation.addedNodes) {
-        if (node.nodeType !== 1 || node.tagName !== 'LINK') continue;
-        if (!node.href?.includes('typekit.net')) continue;
-        observer.disconnect();
-        fetch(node.href)
-          .then((res) => res.text())
-          .then((css) => {
-            const style = document.createElement('style');
-            style.textContent = css.replace(/font-display\s*:\s*auto/g, 'font-display:swap');
-            document.head.appendChild(style);
-          })
-          .catch(() => {});
+        if (node.nodeType === 1 && node.tagName === 'LINK') {
+          let typekitUrl;
+          try { typekitUrl = new URL(node.href); } catch { /* invalid href */ }
+          if (typekitUrl?.hostname === 'use.typekit.net') {
+            observer.disconnect();
+            fetch(node.href)
+              .then((res) => res.text())
+              .then((css) => {
+                const style = document.createElement('style');
+                style.textContent = css.replace(/font-display\s*:\s*auto/g, 'font-display:swap');
+                document.head.appendChild(style);
+              })
+              .catch(() => {});
+          }
+        }
       }
     }
   });
