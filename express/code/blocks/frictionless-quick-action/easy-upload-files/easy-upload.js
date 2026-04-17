@@ -25,6 +25,8 @@ let easyUploadInstance = null;
 let easyUploadStylesLoaded = false;
 let tooltipStylesLoaded = false;
 let activeDebugMode = DEBUG_MODES.NONE;
+let storedDropzoneContainer = null;
+let storedQrPane = null;
 const easyUploadPaneContent = {
   hasContent: false,
   primary: {
