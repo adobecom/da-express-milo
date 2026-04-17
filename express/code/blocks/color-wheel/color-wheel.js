@@ -475,7 +475,8 @@ function buildPrimaryColorContent(controller) {
   primaryColorAdapter = null;
 
   const state = controller.getState();
-  const baseColor = swatchHexListFromState(state)[0];
+  const baseColorIndex = state.baseColorIndex ?? 0;
+  const baseColor = state.swatches?.[baseColorIndex]?.hex || '#FF0000';
   const adapter = createBaseColorAdapter(
     baseColor,
     'HEX',
@@ -483,7 +484,6 @@ function buildPrimaryColorContent(controller) {
       onColorChange: (detail) => {
         if (!detail?.hex) return;
         controller.setBaseColor(detail.hex);
-        controller.setSwatchHex(0, detail.hex);
       },
       onColorChangeEnd: () => {
         // eslint-disable-next-line no-underscore-dangle
@@ -493,10 +493,11 @@ function buildPrimaryColorContent(controller) {
         const locked = detail?.locked;
         const current = swatchRailController?.getState?.()?.lockedByIndex || new Set();
         const next = new Set(current);
+        const currentBaseIndex = controller.getState().baseColorIndex ?? 0;
         if (locked) {
-          next.add(0);
+          next.add(currentBaseIndex);
         } else {
-          next.delete(0);
+          next.delete(currentBaseIndex);
         }
         swatchRailController?.setState?.({ lockedByIndex: next });
       },
@@ -1070,11 +1071,12 @@ export default async function decorate(block) {
       paletteUnsubscribe = controller.subscribe((state) => {
         currentPalette = paletteFromThemeState(state);
         layoutInstance?.context?.set('palette', currentPalette);
-        const firstHex = swatchHexListFromState(state)[0];
+        const baseIdx = state.baseColorIndex ?? 0;
+        const baseHex = state.swatches?.[baseIdx]?.hex;
         const currentColor = primaryColorAdapter?.element?.color;
-        if (primaryColorAdapter?.setColor && firstHex
-          && String(currentColor).toUpperCase() !== String(firstHex).toUpperCase()) {
-          primaryColorAdapter.setColor(firstHex);
+        if (primaryColorAdapter?.setColor && baseHex
+          && String(currentColor).toUpperCase() !== String(baseHex).toUpperCase()) {
+          primaryColorAdapter.setColor(baseHex);
         }
       });
 
