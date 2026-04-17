@@ -395,6 +395,7 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
   if (!dropzone || !dropzoneContainer) {
     return;
   }
+  storedDropzoneContainer = dropzoneContainer;
 
   const ctas = dropzone.querySelectorAll('a.button, a.con-button');
   const secondaryCta = ctas[1];
@@ -426,6 +427,7 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
     if (!qrPane.querySelector('.qr-code-dropzone')) {
       qrPane.innerHTML = '';
       const qrDropzone = createTag('div', { class: 'dropzone qr-code-dropzone' });
+      storedQrPane = qrPane;
       const handleBack = () => {
         dropzoneContainer.classList.remove('hidden');
         qrPane.classList.add('hidden');
@@ -604,4 +606,12 @@ export function cleanupEasyUpload() {
     easyUploadInstance.cleanup();
     easyUploadInstance = null;
   }
+  if (storedDropzoneContainer) {
+    storedDropzoneContainer.classList.remove('hidden');
+  }
+  if (storedQrPane) {
+    storedQrPane.classList.add('hidden');
+  }
+  storedDropzoneContainer = null;
+  storedQrPane = null;
 }
