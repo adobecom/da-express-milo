@@ -361,6 +361,7 @@ export async function initFloatingToolbar(container, options = {}) {
       const isVisible = entries[0].isIntersecting || entries[0].intersectionRatio > 0;
       wrapper.classList.toggle('ax-toolbar-footer-hidden', isVisible);
       if (isVisible) {
+        toolbar.closeDrawer?.();
         wrapper.setAttribute('aria-hidden', 'true');
         wrapper.setAttribute('inert', '');
       } else {
