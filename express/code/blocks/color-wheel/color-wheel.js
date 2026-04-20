@@ -614,7 +614,12 @@ function createSwatchRailControllerBridge(controller) {
         } else {
           incoming = [];
         }
+        const prevSize = lockedByIndex.size;
         lockedByIndex = new Set(incoming.filter((index) => Number.isInteger(index) && index >= 0));
+        const lockAdded = lockedByIndex.size > prevSize;
+        if (lockAdded && controller.getState().harmonyRule !== 'CUSTOM') {
+          controller.setHarmonyRule('CUSTOM');
+        }
       }
 
       const current = controller.getState();
@@ -885,10 +890,8 @@ export default async function decorate(block) {
 
       const updateBaseColorBadge = () => {
         const hide = activeTab !== 'color-wheel' || activeHarmonyRule === 'CUSTOM';
-        const hideLock = activeTab === 'color-wheel' && activeHarmonyRule !== 'CUSTOM';
         stripHost.querySelectorAll('color-swatch-rail').forEach((rail) => {
           rail.hideBaseColorBadge = hide;
-          rail.hideLock = hideLock;
         });
       };
 
@@ -1031,8 +1034,12 @@ export default async function decorate(block) {
       const badgeRuleUnsubscribe = controller.subscribe((state) => {
         const rule = state.harmonyRule || 'CUSTOM';
         if (rule !== activeHarmonyRule) {
+          const wasCustom = activeHarmonyRule === 'CUSTOM';
           activeHarmonyRule = rule;
           updateBaseColorBadge();
+          if (wasCustom && rule !== 'CUSTOM') {
+            swatchRailController?.setState?.({ lockedByIndex: new Set() });
+          }
         }
       });
       const prevHistoryCleanup = historyCleanup;
