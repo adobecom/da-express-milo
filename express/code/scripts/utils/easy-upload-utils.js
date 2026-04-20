@@ -1007,11 +1007,9 @@ export class EasyUpload {
       if (disabled) {
         this.confirmButton.classList.add('disabled');
         this.confirmButton.setAttribute('aria-disabled', 'true');
-        this.confirmButton.style.pointerEvents = 'none';
       } else {
         this.confirmButton.classList.remove('disabled');
         this.confirmButton.removeAttribute('aria-disabled');
-        this.confirmButton.style.pointerEvents = 'auto';
       }
     }
   }

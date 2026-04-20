@@ -516,6 +516,10 @@ function bindConfirmButton(qrPane) {
     const handleConfirmClick = async (event) => {
       event.preventDefault();
       event.stopPropagation();
+      if (confirmButton.classList.contains('disabled')) {
+        easyUploadInstance.showConfirmTooltip?.('pending');
+        return;
+      }
       await easyUploadInstance.handleConfirmImport();
     };
     trackListener(confirmButton, 'click', handleConfirmClick);
