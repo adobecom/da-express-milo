@@ -1048,7 +1048,7 @@ export class EasyUpload {
      */
   async setupQRCodeInterface() {
     try {
-      const dropzone = document.querySelector('.dropzone');
+      const dropzone = document.querySelector('.qr-code-container');
       const buttonContainer = dropzone?.querySelector('.button-container');
       await this.initializeQRCode();
       if (buttonContainer) {
