@@ -229,6 +229,13 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
     receiveQuickActionErrors: true,
     callbacks: {
       onIntentChange: () => {
+        if (fromQrCode && easyUploadModulePromise) {
+          easyUploadModulePromise
+            .then(({ notifyEasyUploadSdkInitialization }) => (
+              notifyEasyUploadSdkInitialization?.(block)
+            ))
+            .catch((err) => window.lana?.log(`[FrictionlessQA] Failed to notify Easy Upload SDK init: ${err?.message || err}`, { severity: 'warning' }));
+        }
         quickActionContainer?.remove();
         fadeIn(uploadContainer);
         document.body.classList.add('editor-modal-loaded');
@@ -971,6 +978,10 @@ export default async function decorate(block) {
         if (!isQrPaneVisible) {
           easyUploadModulePromise.then(({ cleanupEasyUpload }) => cleanupEasyUpload?.())
             .catch((err) => window.lana?.log(`[FrictionlessQA] Failed to cleanup Easy Upload: ${err?.message || err}`, { severity: 'warning' }));
+        } else {
+          easyUploadModulePromise
+            .then(({ refreshEasyUploadQrIfConsumed }) => refreshEasyUploadQrIfConsumed?.(block))
+            .catch((err) => window.lana?.log(`[FrictionlessQA] Failed to refresh consumed Easy Upload QR: ${err?.message || err}`, { severity: 'warning' }));
         }
       }
     }

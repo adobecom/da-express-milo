@@ -19,6 +19,7 @@ function trackListener(el, type, fn) {
 
 const EASY_UPLOAD_CSS_PATH = '/blocks/frictionless-quick-action/easy-upload-files/easy-upload.css';
 const TOOLTIP_CSS_PATH = '/scripts/widgets/tooltip.css';
+const EASY_UPLOAD_SDK_INITIALIZED_EVENT = 'easyupload:sdk-initialized';
 const AUTOLOAD_QR_CODE = false;
 const DISABLE_QR_CODE_RENDER = false;
 let easyUploadInstance = null;
@@ -78,6 +79,16 @@ export function isEasyUploadExperimentEnabled(quickAction) {
 
 export function isEasyUploadControlExperimentEnabled(quickAction) {
   return Object.values(EasyUploadControls).includes(quickAction);
+}
+
+export function notifyEasyUploadSdkInitialization(block) {
+  if (!block) {
+    return;
+  }
+
+  window.dispatchEvent(new CustomEvent(EASY_UPLOAD_SDK_INITIALIZED_EVENT, {
+    detail: { block },
+  }));
 }
 
 export function runEasyUploadExperiment(
@@ -383,6 +394,52 @@ function setupEasyUploadFirstPane(block, createTag) {
 
 let deferredInitContext = null;
 
+function bindEasyUploadSdkInitListener(block) {
+  const handleSdkInitialized = (event) => {
+    const eventBlock = event?.detail?.block;
+    if (!easyUploadInstance || (eventBlock && eventBlock !== block)) {
+      return;
+    }
+    easyUploadInstance.markQrCodeConsumed?.();
+    const qrPane = block.querySelector('.qr-code-container.dropzone-container');
+    if (qrPane) {
+      delete qrPane.dataset.qrInitialized;
+    }
+  };
+  trackListener(window, EASY_UPLOAD_SDK_INITIALIZED_EVENT, handleSdkInitialized);
+}
+
+export async function refreshEasyUploadQrIfConsumed(block) {
+  if (!easyUploadInstance || (block && easyUploadInstance.block !== block)) {
+    return false;
+  }
+
+  if (!easyUploadInstance.isQrCodeConsumed?.()) {
+    return false;
+  }
+
+  const activeBlock = block || easyUploadInstance.block;
+  const qrPane = activeBlock?.querySelector('.qr-code-container.dropzone-container');
+  if (!qrPane || qrPane.classList.contains('hidden')) {
+    return false;
+  }
+
+  delete qrPane.dataset.qrInitialized;
+  try {
+    if (easyUploadInstance.resetUploadSession) {
+      await easyUploadInstance.resetUploadSession();
+    }
+    await easyUploadInstance.initializeQRCode?.();
+    easyUploadInstance.updateConfirmButtonState?.(true);
+    easyUploadInstance.startUploadDetectionPolling?.();
+    qrPane.dataset.qrInitialized = 'true';
+    return true;
+  } catch (error) {
+    window.lana?.log(`[EasyUpload-UI] Failed to refresh consumed QR code: ${error?.message || error}`, { severity: 'warning' });
+    return false;
+  }
+}
+
 function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
   if (!easyUploadPaneContent.hasContent) {
     return;
@@ -571,6 +628,7 @@ export async function setupEasyUploadUI({
       initializeUploadService,
       startSDKWithUnconvertedFiles,
     };
+  bindEasyUploadSdkInitListener(block);
   attachSecondaryCtaHandler(block, createTag, showErrorToast);
 
   if (AUTOLOAD_QR_CODE && activeDebugMode === DEBUG_MODES.NONE) {
