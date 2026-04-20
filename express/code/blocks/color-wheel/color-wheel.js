@@ -475,7 +475,8 @@ function buildPrimaryColorContent(controller) {
   primaryColorAdapter = null;
 
   const state = controller.getState();
-  const baseColor = swatchHexListFromState(state)[0];
+  const baseColorIndex = state.baseColorIndex ?? 0;
+  const baseColor = state.swatches?.[baseColorIndex]?.hex || '#FF0000';
   const adapter = createBaseColorAdapter(
     baseColor,
     'HEX',
@@ -483,7 +484,6 @@ function buildPrimaryColorContent(controller) {
       onColorChange: (detail) => {
         if (!detail?.hex) return;
         controller.setBaseColor(detail.hex);
-        controller.setSwatchHex(0, detail.hex);
       },
       onColorChangeEnd: () => {
         // eslint-disable-next-line no-underscore-dangle
@@ -493,10 +493,11 @@ function buildPrimaryColorContent(controller) {
         const locked = detail?.locked;
         const current = swatchRailController?.getState?.()?.lockedByIndex || new Set();
         const next = new Set(current);
+        const currentBaseIndex = controller.getState().baseColorIndex ?? 0;
         if (locked) {
-          next.add(0);
+          next.add(currentBaseIndex);
         } else {
-          next.delete(0);
+          next.delete(currentBaseIndex);
         }
         swatchRailController?.setState?.({ lockedByIndex: next });
       },
@@ -614,7 +615,12 @@ function createSwatchRailControllerBridge(controller) {
         } else {
           incoming = [];
         }
+        const prevSize = lockedByIndex.size;
         lockedByIndex = new Set(incoming.filter((index) => Number.isInteger(index) && index >= 0));
+        const lockAdded = lockedByIndex.size > prevSize;
+        if (lockAdded && controller.getState().harmonyRule !== 'CUSTOM') {
+          controller.setHarmonyRule('CUSTOM');
+        }
       }
 
       const current = controller.getState();
@@ -830,6 +836,7 @@ export default async function decorate(block) {
             // If no HISTORY_EVENT fires (e.g. all colors locked, palette unchanged),
             // reset the flag so it doesn't corrupt the next undo/redo
             queueMicrotask(() => { isGeneratingRandom = false; });
+            primaryColorAdapter?.element?.resetOriginalColor?.();
           },
           transformPalette: makeTransformPalette(
             () => activeHarmonyRule,
@@ -885,10 +892,8 @@ export default async function decorate(block) {
 
       const updateBaseColorBadge = () => {
         const hide = activeTab !== 'color-wheel' || activeHarmonyRule === 'CUSTOM';
-        const hideLock = activeTab === 'color-wheel' && activeHarmonyRule !== 'CUSTOM';
         stripHost.querySelectorAll('color-swatch-rail').forEach((rail) => {
           rail.hideBaseColorBadge = hide;
-          rail.hideLock = hideLock;
         });
       };
 
@@ -984,6 +989,7 @@ export default async function decorate(block) {
           onGenerateRandom: () => {
             isGeneratingRandom = true;
             queueMicrotask(() => { isGeneratingRandom = false; });
+            primaryColorAdapter?.element?.resetOriginalColor?.();
           },
           transformPalette: makeTransformPalette(
             () => activeHarmonyRule,
@@ -1031,8 +1037,12 @@ export default async function decorate(block) {
       const badgeRuleUnsubscribe = controller.subscribe((state) => {
         const rule = state.harmonyRule || 'CUSTOM';
         if (rule !== activeHarmonyRule) {
+          const wasCustom = activeHarmonyRule === 'CUSTOM';
           activeHarmonyRule = rule;
           updateBaseColorBadge();
+          if (wasCustom && rule !== 'CUSTOM') {
+            swatchRailController?.setState?.({ lockedByIndex: new Set() });
+          }
         }
       });
       const prevHistoryCleanup = historyCleanup;
@@ -1070,11 +1080,12 @@ export default async function decorate(block) {
       paletteUnsubscribe = controller.subscribe((state) => {
         currentPalette = paletteFromThemeState(state);
         layoutInstance?.context?.set('palette', currentPalette);
-        const firstHex = swatchHexListFromState(state)[0];
+        const baseIdx = state.baseColorIndex ?? 0;
+        const baseHex = state.swatches?.[baseIdx]?.hex;
         const currentColor = primaryColorAdapter?.element?.color;
-        if (primaryColorAdapter?.setColor && firstHex
-          && String(currentColor).toUpperCase() !== String(firstHex).toUpperCase()) {
-          primaryColorAdapter.setColor(firstHex);
+        if (primaryColorAdapter?.setColor && baseHex
+          && String(currentColor).toUpperCase() !== String(baseHex).toUpperCase()) {
+          primaryColorAdapter.setColor(baseHex);
         }
       });
 
