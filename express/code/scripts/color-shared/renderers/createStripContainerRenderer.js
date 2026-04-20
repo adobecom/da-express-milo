@@ -577,15 +577,29 @@ export function createStripContainerRenderer(options) {
     return anchorElement.getBoundingClientRect();
   }
 
+  function getStickyHeaderBottom() {
+    const selectors = ['header.global-navigation', '.feds-localnav'];
+    return selectors.reduce((max, sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return max;
+      return Math.max(max, el.getBoundingClientRect().bottom);
+    }, 0);
+  }
+
   function positionPopover(popover, anchorRect, container) {
     const gap = 4;
     const popRect = popover.getBoundingClientRect();
     const containerRect = container.getBoundingClientRect();
 
-    let viewportTop = anchorRect.bottom + gap;
-    if (viewportTop + popRect.height > window.innerHeight) {
-      viewportTop = anchorRect.top - popRect.height - gap;
-    }
+    const belowTop = anchorRect.bottom + gap;
+    const aboveTop = anchorRect.top - popRect.height - gap;
+    const headerBottom = getStickyHeaderBottom();
+
+    const fitsBelow = belowTop + popRect.height <= window.innerHeight;
+    const fitsAbove = aboveTop >= headerBottom;
+
+    let viewportTop = belowTop;
+    if (!fitsBelow && fitsAbove) viewportTop = aboveTop;
 
     let viewportLeft = anchorRect.left;
     if (viewportLeft + popRect.width > window.innerWidth - gap) {
@@ -609,7 +623,10 @@ export function createStripContainerRenderer(options) {
       selectedIndex: editedIndex,
     } = activeColorEditor;
     activeColorEditor = null;
-    if (outsideHandler) document.removeEventListener('click', outsideHandler, true);
+    if (outsideHandler) {
+      document.removeEventListener('click', outsideHandler, true);
+      document.removeEventListener('touchend', outsideHandler, true);
+    }
     if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
     resizeObserver?.disconnect?.();
     try {
@@ -638,8 +655,11 @@ export function createStripContainerRenderer(options) {
     anchorElement,
     anchorRectFromDetail = null,
   ) {
+    const alreadyOpen = activeColorEditor?.railElement === railElement
+      && activeColorEditor?.selectedIndex === selectedIndex;
     closeActiveColorEditor();
     isEditorOpening = true;
+    if (alreadyOpen) return;
     onEditOpen?.(selectedIndex);
     isEditorOpening = false;
 
@@ -722,9 +742,11 @@ export function createStripContainerRenderer(options) {
 
     const outsideHandler = (evt) => {
       const path = evt.composedPath?.() || [];
-      if (!path.includes(popover)) {
-        closeActiveColorEditor();
-      }
+      if (path.includes(popover)) return;
+      // Clicks on hex-code/edit-tint elements will call openColorEditorForRail,
+      // which handles the toggle via alreadyOpen. Don't close here.
+      if (path.some((n) => n?.classList?.contains?.('hex-code') || n?.classList?.contains?.('icon-button--edit-tint'))) return;
+      closeActiveColorEditor();
     };
     const escapeHandler = (evt) => {
       if (evt.key === 'Escape') {
@@ -734,6 +756,7 @@ export function createStripContainerRenderer(options) {
     };
 
     document.addEventListener('click', outsideHandler, true);
+    document.addEventListener('touchend', outsideHandler, true);
     document.addEventListener('keydown', escapeHandler, true);
 
     activeColorEditor = {
