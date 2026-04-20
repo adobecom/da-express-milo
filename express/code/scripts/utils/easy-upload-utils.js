@@ -75,6 +75,49 @@ const ACP_STORAGE_CONFIG = {
   POLLING_TIMEOUT_MS: 100000,
 };
 
+function isEasyUploadDebugEnabled() {
+  try {
+    const urlParam = new URLSearchParams(window.location.search).get('easyuploaddebug');
+    const normalizedUrlParam = (urlParam || '').toLowerCase();
+    const urlDebugEnabled = ['1', 'true', 'on', 'yes'].includes(normalizedUrlParam);
+    const localDebugEnabled = window.localStorage?.getItem('easyuploaddebug') === '1';
+    return urlDebugEnabled || localDebugEnabled;
+  } catch (error) {
+    return false;
+  }
+}
+
+function safeSerializeDebugPayload(payload, maxLength = 2000) {
+  try {
+    const serialized = JSON.stringify(payload, (_key, value) => {
+      if (typeof value === 'string' && value.length > 400) {
+        return `${value.slice(0, 400)}... [truncated ${value.length - 400} chars]`;
+      }
+      return value;
+    });
+    if (serialized.length > maxLength) {
+      return `${serialized.slice(0, maxLength)}... [truncated ${serialized.length - maxLength} chars]`;
+    }
+    return serialized;
+  } catch (error) {
+    return String(payload);
+  }
+}
+
+function summarizeServiceObject(data) {
+  if (!data || typeof data !== 'object') {
+    return data;
+  }
+
+  const links = data._links || data.links || {};
+  return {
+    keys: Object.keys(data),
+    linkRels: Object.keys(links),
+    selfHref: links?.self?.href || data?.['repo:path'] || null,
+    version: data?.version || data?.['repo:version'] || null,
+  };
+}
+
 /**
  * Fallback: Create asset using createAssetForUser/createAssetForGuest
  * Replicates the logic of UploadService.createAsset()
@@ -364,6 +407,16 @@ export class EasyUpload {
     window.addEventListener('beforeunload', this.handleBeforeUnload);
   }
 
+  debugLog(message, payload = undefined) {
+    if (!isEasyUploadDebugEnabled()) {
+      return;
+    }
+    const serializedPayload = payload === undefined ? '' : ` payload=${safeSerializeDebugPayload(payload)}`;
+    window.lana?.log(`[EasyUpload][debug] ${message}${serializedPayload}`, {
+      severity: 'info',
+    });
+  }
+
   setConfirmTooltipConfig({ element, messages } = {}) {
     this.confirmTooltipElement = element || null;
     this.confirmTooltipMessages = messages || {};
@@ -441,6 +494,10 @@ export class EasyUpload {
       } else {
         this.asset = await fallbackCreateAsset(this.uploadService, ACP_STORAGE_CONFIG.CONTENT_TYPE);
       }
+      this.debugLog('createAsset response received', {
+        native: hasNativeCreateAsset,
+        asset: summarizeServiceObject(this.asset),
+      });
 
       if (hasNativeInitializeBlockUpload) {
         this.uploadAsset = await this.uploadService.initializeBlockUpload(
@@ -457,6 +514,10 @@ export class EasyUpload {
           ACP_STORAGE_CONFIG.CONTENT_TYPE,
         );
       }
+      this.debugLog('initializeBlockUpload response received', {
+        native: hasNativeInitializeBlockUpload,
+        uploadAsset: summarizeServiceObject(this.uploadAsset),
+      });
 
       return extractLinkHref(this.uploadAsset._links, LINK_REL.BLOCK_TRANSFER);
     } catch (error) {
@@ -491,6 +552,14 @@ export class EasyUpload {
             ? await this.uploadService.getAssetVersion(this.asset)
             : await fallbackGetAssetVersion(this.asset);
           const success = isAssetVersionReady(version);
+          if (success || pollAttempts % 5 === 0) {
+            this.debugLog('version polling check', {
+              native: hasNativeGetAssetVersion,
+              pollAttempts,
+              version,
+              success,
+            });
+          }
 
           if (success) {
             clearInterval(this.pollingInterval);
@@ -518,12 +587,22 @@ export class EasyUpload {
   async finalizeUpload() {
     const hasNativeFinalizeUpload = typeof this.uploadService?.finalizeUpload === 'function';
     if (hasNativeFinalizeUpload) {
-      await this.uploadService.finalizeUpload(this.uploadAsset);
+      const finalizeResult = await this.uploadService.finalizeUpload(this.uploadAsset);
       this.uploadFinalized = true;
+      this.debugLog('finalizeUpload response received', {
+        native: true,
+        uploadFinalized: this.uploadFinalized,
+        finalizeResult: summarizeServiceObject(finalizeResult),
+      });
       return;
     }
     await fallbackFinalizeUpload(this.uploadAsset);
     this.uploadFinalized = true;
+    this.debugLog('fallbackFinalizeUpload completed', {
+      native: false,
+      uploadFinalized: this.uploadFinalized,
+      uploadAsset: summarizeServiceObject(this.uploadAsset),
+    });
   }
 
   /**
@@ -565,6 +644,13 @@ export class EasyUpload {
       const fileName = `upload_${Date.now()}_${generateUUID().substring(0, 8)}`;
 
       const file = new File([blob], fileName, { type: detectedType });
+      this.debugLog('downloadAssetContent blob diagnostics', {
+        native: hasNativeDownloadAssetContent,
+        blobSize: blob.size,
+        blobType: blob.type,
+        detectedType,
+        firstBytesTextSample: typeString,
+      });
 
       return file;
     } catch (error) {
@@ -1089,6 +1175,10 @@ export class EasyUpload {
 
         if (this.uploadFinalized) {
           this.uploadDetected = true;
+          this.debugLog('confirm enabled from polling due to uploadFinalized state', {
+            uploadDetected: this.uploadDetected,
+            uploadFinalized: this.uploadFinalized,
+          });
           this.updateConfirmButtonState(false);
           clearInterval(this.uploadDetectionInterval);
           this.uploadDetectionInterval = null;
@@ -1103,6 +1193,10 @@ export class EasyUpload {
 
         if (this.uploadFinalized && !this.uploadDetected) {
           this.uploadDetected = true;
+          this.debugLog('confirm enabled after finalizeUpload during polling', {
+            uploadDetected: this.uploadDetected,
+            uploadFinalized: this.uploadFinalized,
+          });
 
           this.updateConfirmButtonState(false);
 
