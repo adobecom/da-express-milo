@@ -567,6 +567,7 @@ export function createStripContainerRenderer(options) {
 
   let listElement = null;
   let activeColorEditor = null;
+  let isEditorOpening = false;
   const cleanupHandlers = [];
 
   function resolveAnchorRect(anchorElement, anchorRectFromDetail) {
@@ -615,29 +616,36 @@ export function createStripContainerRenderer(options) {
     const {
       adapter,
       popover,
-      mobile,
       resizeObserver,
       outsideHandler,
       escapeHandler,
       railElement: activeRailElement,
+      selectedIndex: editedIndex,
     } = activeColorEditor;
+    activeColorEditor = null;
     if (outsideHandler) {
       document.removeEventListener('click', outsideHandler, true);
       document.removeEventListener('touchend', outsideHandler, true);
     }
     if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
     resizeObserver?.disconnect?.();
-    if (mobile) {
-      try {
-        adapter.hide?.();
-      } catch (_err) {
-        // no-op
-      }
+    try {
+      adapter.hide?.();
+    } catch (_err) {
+      // no-op
     }
     adapter.destroy?.();
     popover?.remove();
     activeRailElement?.setActiveEditIndex?.(null);
-    activeColorEditor = null;
+    requestAnimationFrame(() => {
+      const column = activeRailElement?.shadowRoot?.querySelector(
+        `.swatch-column[data-swatch-index="${editedIndex}"]`,
+      );
+      if (column) {
+        column.setAttribute('tabindex', '0');
+        column.focus();
+      }
+    });
   }
 
   function openColorEditorForRail(
@@ -650,8 +658,10 @@ export function createStripContainerRenderer(options) {
     const alreadyOpen = activeColorEditor?.railElement === railElement
       && activeColorEditor?.selectedIndex === selectedIndex;
     closeActiveColorEditor();
+    isEditorOpening = true;
     if (alreadyOpen) return;
     onEditOpen?.(selectedIndex);
+    isEditorOpening = false;
 
     const state = controller?.getState?.() || {};
     const palette = (state.swatches || []).map((swatch) => swatch?.hex).filter(Boolean);
@@ -692,7 +702,7 @@ export function createStripContainerRenderer(options) {
     const editorElement = adapter.getElement?.() || adapter.element;
     if (mobile) {
       document.body.appendChild(editorElement);
-      activeColorEditor = { adapter, mobile: true, railElement };
+      activeColorEditor = { adapter, mobile: true, railElement, selectedIndex };
       requestAnimationFrame(async () => {
         try {
           await customElements.whenDefined('color-edit');
@@ -714,7 +724,8 @@ export function createStripContainerRenderer(options) {
     popover.style.position = 'absolute';
     popover.style.top = '0';
     popover.style.left = '0';
-    popover.style.visibility = 'hidden';
+    popover.style.opacity = '0';
+    popover.style.pointerEvents = 'none';
     popover.style.zIndex = '2';
     popover.appendChild(editorElement);
     container.appendChild(popover);
@@ -723,7 +734,8 @@ export function createStripContainerRenderer(options) {
       const { height } = entries[0].contentRect;
       if (height > 0) {
         positionPopover(popover, anchorRect, container);
-        popover.style.visibility = 'visible';
+        popover.style.opacity = '1';
+        popover.style.pointerEvents = '';
       }
     });
     observer.observe(popover);
@@ -737,7 +749,10 @@ export function createStripContainerRenderer(options) {
       closeActiveColorEditor();
     };
     const escapeHandler = (evt) => {
-      if (evt.key === 'Escape') closeActiveColorEditor();
+      if (evt.key === 'Escape') {
+        evt.stopPropagation();
+        closeActiveColorEditor();
+      }
     };
 
     document.addEventListener('click', outsideHandler, true);
@@ -837,7 +852,7 @@ export function createStripContainerRenderer(options) {
   }
 
   function update(newData) {
-    if (!listElement) return;
+    if (!listElement || isEditorOpening) return;
     closeActiveColorEditor();
     cleanupHandlers.splice(0).forEach((fn) => fn());
     listElement.innerHTML = '';
