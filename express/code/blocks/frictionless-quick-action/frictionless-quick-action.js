@@ -963,8 +963,15 @@ export default async function decorate(block) {
       fadeIn(uploadContainer);
       document.body.dataset.suppressfloatingcta = 'false';
       if (easyUploadModulePromise) {
-        easyUploadModulePromise.then(({ cleanupEasyUpload }) => cleanupEasyUpload?.())
-          .catch((err) => window.lana?.log(`[FrictionlessQA] Failed to cleanup Easy Upload: ${err?.message || err}`, { severity: 'warning' }));
+        // When cancel returns to the QR pane, keep Easy Upload listeners alive
+        // so pane-local controls (like the back button) remain functional.
+        const isQrPaneVisible = Boolean(
+          block.querySelector('.qr-code-container.dropzone-container:not(.hidden)'),
+        );
+        if (!isQrPaneVisible) {
+          easyUploadModulePromise.then(({ cleanupEasyUpload }) => cleanupEasyUpload?.())
+            .catch((err) => window.lana?.log(`[FrictionlessQA] Failed to cleanup Easy Upload: ${err?.message || err}`, { severity: 'warning' }));
+        }
       }
     }
   }, { passive: true });
