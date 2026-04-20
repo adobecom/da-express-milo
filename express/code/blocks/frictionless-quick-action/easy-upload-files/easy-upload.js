@@ -489,12 +489,20 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
       }
     }
 
+    if (easyUploadInstance?.isQrCodeConsumed?.()) {
+      delete qrPane.dataset.qrInitialized;
+    }
+
     if (!qrPane.dataset.qrInitialized && easyUploadInstance?.initializeQRCode) {
       try {
         qrPane.dataset.qrInitialized = 'true';
         if (DISABLE_QR_CODE_RENDER) {
           easyUploadInstance.showLoader?.();
           return;
+        }
+
+        if (easyUploadInstance?.isQrCodeConsumed?.() && easyUploadInstance?.resetUploadSession) {
+          await easyUploadInstance.resetUploadSession();
         }
 
         await easyUploadInstance.initializeQRCode();
@@ -520,7 +528,10 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
             e.stopPropagation();
             await easyUploadInstance.handleConfirmImport();
           };
-          trackListener(confirmButton, 'click', handleConfirmClick);
+          if (!confirmButton.dataset.easyUploadConfirmBound) {
+            trackListener(confirmButton, 'click', handleConfirmClick);
+            confirmButton.dataset.easyUploadConfirmBound = 'true';
+          }
 
           easyUploadInstance.startUploadDetectionPolling();
         } else {

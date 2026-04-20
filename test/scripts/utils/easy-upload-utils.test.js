@@ -70,6 +70,31 @@ describe('EasyUpload failure handling', () => {
     expect(startSDKStub.called).to.be.false;
   });
 
+  it('marks the QR code as consumed after confirm import is pressed', async () => {
+    const easyUpload = createInstance();
+    sinon.stub(easyUpload, 'finalizeUpload').resolves();
+    sinon.stub(easyUpload, 'retrieveUploadedFile').resolves(
+      new File(['file-content'], 'upload.png', { type: 'image/png' }),
+    );
+
+    await easyUpload.handleConfirmImport();
+
+    expect(easyUpload.isQrCodeConsumed()).to.be.true;
+    expect(startSDKStub.calledOnce).to.be.true;
+  });
+
+  it('marks the QR code as fresh after regenerating it', async () => {
+    const easyUpload = createInstance();
+    easyUpload.markQrCodeConsumed();
+    sinon.stub(easyUpload, 'generateUploadUrl').resolves('https://example.com/upload');
+    sinon.stub(easyUpload, 'displayQRCode').resolves();
+    sinon.stub(easyUpload, 'scheduleQRRefresh');
+
+    await easyUpload.initializeQRCode();
+
+    expect(easyUpload.isQrCodeConsumed()).to.be.false;
+  });
+
   it('propagates initializeBlockUpload failures during URL generation', async () => {
     const createAssetStub = sinon.stub().resolves({ links: {} });
     const initializeBlockUploadStub = sinon.stub().rejects(new Error('init failed'));
