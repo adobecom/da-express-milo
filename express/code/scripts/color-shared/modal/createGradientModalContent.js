@@ -160,6 +160,7 @@ export function createGradientModalContent(gradient, opts = {}) {
   };
 
   initFloatingToolbar(toolbarMount, {
+    type: 'gradient',
     palette: paletteForToolbar,
     ctaText: 'Create with color palette',
     showPaletteName: false,
