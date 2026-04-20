@@ -28,6 +28,19 @@ import { hsvToAllSpacesDenormalized, valuesToAllSpaces } from '../../../../libs/
 
 const MAX_NUMBER_OF_SWATCHES = 10;
 
+const MIN_SWATCHES_FOR_EACH_HARMONY = {
+    ANALOGOUS: 3,
+    COMPLEMENTARY: 2,
+    TRIAD: 3,
+    SQUARE: 4,
+    MONOCHROMATIC: 2,
+    SPLIT_COMPLEMENTARY: 3,
+    DOUBLE_SPLIT_COMPLEMENTARY: 4,
+    COMPOUND: 4,
+    SHADES: 2,
+    CUSTOM: 2,
+};
+
 const polarPointCanonicalAngle0To360 = function (deg) {
     const a = deg % 360;
 
@@ -1172,7 +1185,7 @@ Rule.COMPLEMENTARY = function () {
     const _super = Rule;
 
     _super.call(this);
-    this._fName = 'COMPLEMENTARY 2';
+    this._fName = 'COMPLEMENTARY';
 
     this.addSchemeToFormulaImpl = function (harmonyFormula) {
         const colorScheme = new ColorScheme().setTo(30.0);
@@ -1185,41 +1198,31 @@ Rule.COMPLEMENTARY = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength) {
         colorScheme.setRegionsToBaseOnly(180.0);
+        this._fRegionLength = regionLength;
 
-        this.addDependentRegions(colorScheme);
+        this.addDependentRegions(colorScheme, regionLength);
     };
 
-    this.addDependentRegions = function (colorScheme) {
-        //                                                                    DA     dR    dH   linkA  theta fromC  linkR  linkH
-        let newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 0.0, 0.1, -0.3, true, 0.0, false, false, false);
-        // Darker shade of base
+    this.addDependentRegions = function (colorScheme, regionLength) {
+        let zeroAngle = 0, complementaryAngle = 180, hueRegions = MIN_SWATCHES_FOR_EACH_HARMONY.COMPLEMENTARY,
+        numOfColors = regionLength,
+        numColorsEachHueSide = Math.ceil(numOfColors / hueRegions),
+        zeroRadius = -parseFloat(1 / (numColorsEachHueSide + 1)), dZeroRadius = zeroRadius,
+        complementaryRadius = 0, dComplementaryRadius = -parseFloat(1 / numColorsEachHueSide),
+        totalRegions = 0;
 
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-        //    Flips to lighter if base is dark
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 0.0, -0.1, 0.3, true, 0.0, false, false, false);
-        // Lighter tint of base
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowScrunch));
-        //    Scrunches if base is light
-        //    (We don't want it to reflect
-        //    Because we already have a -0.3
-        //    Region that it would nearly
-        //    Coincide with.)
+        for (let region = 0; region <= numColorsEachHueSide; region++) {
+            totalRegions = addRegions(colorScheme, complementaryAngle, complementaryRadius, complementaryRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
 
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 180.0, 0.2, -0.3, true, 0.0, false, false, false);
-        // Darkened complement
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-        //    Flips to lighter if base is dark
+            totalRegions = addRegions(colorScheme, zeroAngle, zeroRadius, zeroRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
 
-        new RelativeColorRegion().setColorScheme5(colorScheme, 180.0, 0.0, 0.0, true, 0.0, false, false, false);
-        // Pure complement
-
-        /*
-    newRegion = new RelativeColorRegion().setColorScheme5( colorScheme, 170.0, -0.1,  0.2,  true,   0.0,  false, false, false );// lightened off-complement
-    newRegion.setOnRadiusOverflow( new OverflowResponse( kOverflowNegate ) );
-    newRegion.setOnHeightOverflow( new OverflowResponse( kOverflowNegate ) );
-    */
+            zeroRadius += dZeroRadius;
+            complementaryRadius += dComplementaryRadius;
+        }
         // Record which rule created the scheme. This must be done after all the regions are defined.
         colorScheme.setCreatingRule(this._fName);
     };
@@ -1233,49 +1236,8 @@ Rule.COMPOUND = function () {
     const _super = Rule;
 
     _super.call(this);
-    this._fName = 'COMPOUND1';
+    this._fName = 'COMPOUND';
 
-    this.addDependentRegions = function (colorScheme) {
-        let newRegion;
-
-        //                                                      DA    dR     dH  linkA theta fromC  linkR  linkH
-        // Clockwise hue shift, slightly brighter
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 30.0, 0.1, 0.2, true, 0.0, false, false, false);
-        // Flips to less saturated if base is bright
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
-        // Flips to darker if base is light
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-
-        // Lighter tint of clockwise hue
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 30.0, -0.4, 0.4, true, 0.0, false, false, false);
-        //  Flips to more saturated if base is desaturated
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
-        // Flips to darker if base is light
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-
-        // Off-complement, desaturated
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 165, -0.25, 0.05, true, 0.0, false, false, false);
-        // Flips to more saturated if base is desaturated
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
-
-        // Off-complement, slightly brighter
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 150, 0.1, 0.2, true, 0.0, false, false, false);
-        // Flips to less saturated if base is bright
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
-        // Flips to darker if base is light
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-
-        /*
-    // lighter tint of off-complement
-    newRegion = new RelativeColorRegion().setColorScheme5( colorScheme, 150, -0.4, 0.4, true, 0.0, false, false, false );
-    // flips to more saturated if base is desaturated
-    newRegion.setOnRadiusOverflow( new OverflowResponse( kOverflowNegate ) );
-    // flips to darker if base is light
-    newRegion.setOnHeightOverflow( new OverflowResponse( kOverflowNegate ) );
-    */
-        // Record which rule created the scheme. This must be done after all the regions are defined.
-        colorScheme.setCreatingRule(this._fName);
-    };
     this.addSchemeToFormulaImpl = function (harmonyFormula) {
         const colorScheme = new ColorScheme().setTo(0);
 
@@ -1289,10 +1251,44 @@ Rule.COMPOUND = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
-        colorScheme.setRegionsToBaseOnly(30.0);
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength) {
+        colorScheme.setRegionsToBaseOnly(90.0);
+        this._fRegionLength = regionLength;
 
         this.addDependentRegions(colorScheme);
+    };
+
+    this.addDependentRegions = function (colorScheme) {
+        let zeroAngle = 0, complementaryAngle = 180, firstAngle = -30, secondAngle = -150, hueRegions = MIN_SWATCHES_FOR_EACH_HARMONY.COMPOUND,
+        numOfColors = this._fRegionLength,
+        numColorsEachHueSide = Math.ceil(numOfColors / hueRegions),
+        zeroRadius = -parseFloat(1 / (numColorsEachHueSide + 1)), dZeroRadius = zeroRadius,
+        firstAngleRadius = 0, dfirstAngleRadius = -parseFloat(1 / numColorsEachHueSide),
+        complementaryAngleRadius = 0, dcomplementaryAngleRadius = -parseFloat(1 / numColorsEachHueSide),
+        secondAngleRadius = 0, dsecondAngleRadius = -parseFloat(1 / numColorsEachHueSide);
+
+        let totalRegions = 0;
+
+        for (let region = 0; region <= numColorsEachHueSide; region++) {
+            totalRegions = addRegions(colorScheme, firstAngle, firstAngleRadius, firstAngleRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
+
+            totalRegions = addRegions(colorScheme, secondAngle, secondAngleRadius, secondAngleRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
+
+            totalRegions = addRegions(colorScheme, complementaryAngle, complementaryAngleRadius, complementaryAngleRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
+
+            totalRegions = addRegions(colorScheme, zeroAngle, zeroRadius, zeroRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
+
+            zeroRadius += dZeroRadius;
+            complementaryAngleRadius += dcomplementaryAngleRadius;
+            secondAngleRadius += dsecondAngleRadius;
+            firstAngleRadius += dfirstAngleRadius;
+        }
+        // Record which rule created the scheme. This must be done after all the regions are defined.
+        colorScheme.setCreatingRule(this._fName);
     };
 };
 
@@ -1303,14 +1299,14 @@ Rule.MONOCHROMATIC = function () {
     const _super = Rule;
 
     _super.call(this);
-    this._fName = 'MONOCHROMATIC 2';
+    this._fName = 'MONOCHROMATIC';
 
     this.addSchemeToFormulaImpl = function (harmonyFormula) {
         const colorScheme = new ColorScheme().setTo(0.0);
 
         colorScheme.setBaseColor(new CylindricalColor().setTo(0, 1, 1));
 
-        new RelativeColorRegion().setColorScheme2(colorScheme, 0, 0, 0, false);
+        new RelativeColorRegion().setColorScheme2(colorScheme, 0, 0, 1, false);
 
         this.addDependentRegions(colorScheme);
 
@@ -1318,25 +1314,20 @@ Rule.MONOCHROMATIC = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength) {
         colorScheme.setRegionsToBaseOnly(0.0);
+        this._fRegionLength = regionLength;
 
         this.addDependentRegions(colorScheme);
     };
 
     this.addDependentRegions = function (colorScheme) {
-        let newRegion;
-        //                                                                  DA   dR  dH linkA theta  fromC  linkR  linkH
+        let radius = -(parseFloat(1 / this._fRegionLength)), dR = radius;
 
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 0.0, 0.0, 0.3, true, 0.0, false, true, false);
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowWraparound));
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 0.0, -0.3, 0.1, true, 0.0, false, false, true);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 0.0, -0.3, 0.3, true, 0.0, false, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowWraparound));
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 0.0, 0.0, 0.6, true, 0.0, false, true, false);
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowWraparound));
+        for (let region = 0; region < (this._fRegionLength - 1); region++) {
+            addRegions(colorScheme, 0.0, radius, radius, true, 0.0, false, true, false);
+            radius += dR;
+        }
 
         // Record which rule created the scheme. This must be done after all the regions are defined.
         colorScheme.setCreatingRule(this._fName);
@@ -1357,9 +1348,9 @@ Rule.SHADES = function () {
     this.addSchemeToFormulaImpl = function (harmonyFormula) {
         const colorScheme = new ColorScheme().setTo(0.0);
 
-        colorScheme.setBaseColor(new CylindricalColor().setTo(0, 1, 1));
+        colorScheme.setBaseColor(new CylindricalColor().setTo(0, 0.0, 1));
 
-        new RelativeColorRegion().setColorScheme2(colorScheme, 0, 0, 0, false);
+        new RelativeColorRegion().setColorScheme2(colorScheme, 0, 0, 0.0, false);
 
         this.addDependentRegions(colorScheme);
 
@@ -1369,26 +1360,38 @@ Rule.SHADES = function () {
 
     this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
         colorScheme.setRegionsToBaseOnly(0.0);
+        this._fRegionLength = regionLength;
+        this._showTints = showTints;
 
-        this.addDependentRegions(colorScheme);
+        this.addDependentRegions(colorScheme, showTints);
     };
 
     this.addDependentRegions = function (colorScheme) {
-        let newRegion;
-        //                                                DA   dR  dH linkA theta  fromC  linkR  linkH
+        let numberOfColorsOnEachSide = this._fRegionLength % 2 === 0 ? this._fRegionLength / 2 : (this._fRegionLength - 1) / 2,
+        totalRegions = 0, numOfColors = this._fRegionLength,
+        delta = 0.80 / this._fRegionLength,
+        height = 0.5 + (numberOfColorsOnEachSide - 1) * delta;
 
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 0.0, 0.0, -0.25, true, 0.0, false, true, false);
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowWraparound));
+        if (height > 0.9) {
+            height = 0.9;
+        }
 
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 0.0, 0.0, -0.50, true, 0.0, false, true, false);
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowWraparound));
+        for (let i = 0; i < this._fRegionLength - 1; i++) {
+            let newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 0, 0, height, true, 0.0, false, true, false);
 
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 0.0, 0.0, -0.75, true, 0.0, false, true, false);
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowWraparound));
+            newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowWraparound));
+            newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
 
-        // Added by Ketan to Make 5
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 0.0, 0.0, -0.9, true, 0.0, false, true, false);
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowWraparound));
+            totalRegions++;
+            if (totalRegions === numOfColors - 1) break;
+
+            height -= delta;
+
+            if (height < 0.1 && !this._showTints) {
+                height = 0.1;
+            }
+        }
+
         // Record which rule created the scheme. This must be done after all the regions are defined.
         colorScheme.setCreatingRule(this._fName);
     };
@@ -1403,7 +1406,7 @@ Rule.TRIAD = function () {
     const _super = Rule;
 
     _super.call(this);
-    this._fName = 'TRIAD2';
+    this._fName = 'TRIAD';
 
     this.addSchemeToFormulaImpl = function (harmonyFormula) {
         const colorScheme = new ColorScheme().setTo(120.0);
@@ -1418,36 +1421,36 @@ Rule.TRIAD = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
-        colorScheme.setRegionsToBaseOnly(120.0);
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength) {
+        colorScheme.setRegionsToBaseOnly(0.0);
+        this._fRegionLength = regionLength;
 
         this.addDependentRegions(colorScheme);
     };
 
     this.addDependentRegions = function (colorScheme) {
-        let newRegion;
+        let zeroAngle = 0, positiveTriadAngle = 120, negativeTriadAngle = -120, hueRegions = MIN_SWATCHES_FOR_EACH_HARMONY.TRIAD,
+        numOfColors = this._fRegionLength,
+        numColorsEachHueSide = Math.ceil(numOfColors / hueRegions),
+        zeroRadius = -parseFloat(1 / (numColorsEachHueSide + 1)), dZeroRadius = zeroRadius,
+        positiveTriadRadius = 0, dpositiveTriadRadius = -parseFloat(1 / numColorsEachHueSide),
+        negativeTriadRadius = 0, dnegativeTriadRadius = -parseFloat(1 / numColorsEachHueSide),
+        totalRegions = 0;
 
-        // Darker shade of base
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 0.0, 0.1, -0.3, true, 0.0, false, false, false);
+        for (let region = 0; region <= numColorsEachHueSide; region++) {
+            totalRegions = addRegions(colorScheme, negativeTriadAngle, negativeTriadRadius, negativeTriadRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
 
-        //    Flips to lighter if base is dark
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
+            totalRegions = addRegions(colorScheme, positiveTriadAngle, positiveTriadRadius, positiveTriadRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
 
-        // The positive fork, slightly desaturated
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 120.0, -0.1, 0.0, true, 0.0, false, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
+            totalRegions = addRegions(colorScheme, zeroAngle, zeroRadius, zeroRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
 
-        // The negative fork, darker shade
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, -120.0, 0.1, 0.0, true, 0.0, false, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-
-        // The negative fork, lighter tint
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, -120.0, 0.05, -0.3, true, 0.0, false, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-        // Note: since the thetaCoefficients are defaulted to zero, this is a "locked at 120 degrees" TRIAD2
+            zeroRadius += dZeroRadius;
+            positiveTriadRadius += dpositiveTriadRadius;
+            negativeTriadRadius += dnegativeTriadRadius;
+        }
 
         // Record which rule created the scheme. This must be done after all the regions are defined.
         colorScheme.setCreatingRule(this._fName);
@@ -1473,36 +1476,41 @@ Rule.SQUARE = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength) {
         colorScheme.setRegionsToBaseOnly(90.0);
+        this._fRegionLength = regionLength;
 
         this.addDependentRegions(colorScheme);
     };
 
     this.addDependentRegions = function (colorScheme) {
-        let newRegion;
+        let zeroAngle = 0, rightAngle = 90, complementaryAngle = 180, negativeRightAngle = -90, hueRegions = MIN_SWATCHES_FOR_EACH_HARMONY.SQUARE,
+        numOfColors = this._fRegionLength,
+        numColorsEachHueSide = Math.ceil(numOfColors / hueRegions),
+        zeroRadius = -parseFloat(1 / (numColorsEachHueSide + 1)), dZeroRadius = zeroRadius,
+        rightAngleRadius = 0, drightAngleRadius = -parseFloat(1 / numColorsEachHueSide),
+        complementaryAngleRadius = 0, dcomplementaryAngleRadius = -parseFloat(1 / numColorsEachHueSide),
+        negativeRightAngleRadius = 0, dnegativeRightAngleRadius = -parseFloat(1 / numColorsEachHueSide),
+        totalRegions = 0;
 
-        // Darker shade of base
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 0.0, 0.1, 0.0, true, 0.0, false, false, false);
+        for (let region = 0; region <= numColorsEachHueSide; region++) {
+            totalRegions = addRegions(colorScheme, negativeRightAngle, negativeRightAngleRadius, negativeRightAngleRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
 
-        //    Flips to lighter if base is dark
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
+            totalRegions = addRegions(colorScheme, complementaryAngle, complementaryAngleRadius, complementaryAngleRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
 
-        // The positive fork, slightly desaturated
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 90.0, -0.1, 0.0, true, 0.0, false, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
+            totalRegions = addRegions(colorScheme, rightAngle, rightAngleRadius, rightAngleRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
 
-        // The negative fork, darker shade
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 180.0, 0.1, 0.0, true, 0.0, false, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
+            totalRegions = addRegions(colorScheme, zeroAngle, zeroRadius, zeroRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
 
-        // The negative fork, lighter tint
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, -90.0, 0.05, 0.0, true, 0.0, false, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-        // Note: since the thetaCoefficients are defaulted to zero, this is a "locked at 120 degrees" TRIAD2
+            zeroRadius += dZeroRadius;
+            complementaryAngleRadius += dcomplementaryAngleRadius;
+            negativeRightAngleRadius += dnegativeRightAngleRadius;
+            rightAngleRadius += drightAngleRadius;
+        }
 
         // Record which rule created the scheme. This must be done after all the regions are defined.
         colorScheme.setCreatingRule(this._fName);
@@ -1517,7 +1525,7 @@ Rule.SPLIT_COMPLEMENTARY = function () {
     this._fName = 'SPLIT_COMPLEMENTARY';
 
     this.addSchemeToFormulaImpl = function (harmonyFormula) {
-        const colorScheme = new ColorScheme().setTo(150.0);
+        const colorScheme = new ColorScheme().setTo(0.0);
 
         colorScheme.setBaseColor(new CylindricalColor().setTo(0, 1, 1));
 
@@ -1529,38 +1537,37 @@ Rule.SPLIT_COMPLEMENTARY = function () {
         return colorScheme;
     };
 
-    this.setSchemeToRuleImpl = function (colorScheme, regionLength, showTints) {
+    this.setSchemeToRuleImpl = function (colorScheme, regionLength) {
         colorScheme.setRegionsToBaseOnly(0.0);
+        this._fRegionLength = regionLength;
 
         this.addDependentRegions(colorScheme);
     };
 
     this.addDependentRegions = function (colorScheme) {
-        let newRegion;
+        let zeroAngle = 0, secondAngle = 162, firstAngle = 198, hueRegions = MIN_SWATCHES_FOR_EACH_HARMONY.SPLIT_COMPLEMENTARY,
+        numOfColors = this._fRegionLength,
+        numColorsEachHueSide = Math.ceil(numOfColors / hueRegions),
+        zeroRadius = -parseFloat(1 / (numColorsEachHueSide)), dZeroRadius = zeroRadius,
+        firstAngleRadius = 0, dfirstAngleRadius = -parseFloat(1 / numColorsEachHueSide),
+        secondAngleRadius = 0, dsecondAngleRadius = -parseFloat(1 / numColorsEachHueSide),
+        totalRegions = 0;
 
-        // Darker shade of base                                             DA    dR    dH   linkA theta fromC linkR  linkH
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 150.0, -0.1, 0.3, true, 0.5, true, false, false);
+        for (let region = 0; region <= numColorsEachHueSide; region++) {
+            totalRegions = addRegions(colorScheme, firstAngle, firstAngleRadius, firstAngleRadius, true, 0.0, true, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
 
-        //    Flips to lighter if base is dark
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
+            totalRegions = addRegions(colorScheme, secondAngle, secondAngleRadius, secondAngleRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
 
-        // The positive fork, slightly desaturated
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, 150.0, -0.05, 0, true, 0.5, true, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
+            totalRegions = addRegions(colorScheme, zeroAngle, zeroRadius, zeroRadius, true, 0.0, false, false, false, totalRegions);
+            if (checkIfAllRegionsAreMapped(totalRegions, numOfColors)) break;
 
-        // The negative fork, darker shade
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, -150.0, 0.1, 0.3, true, -0.5, true, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
+            zeroRadius += dZeroRadius;
+            firstAngleRadius += dfirstAngleRadius;
+            secondAngleRadius += dsecondAngleRadius;
+        }
 
-        // The negative fork, lighter tint
-        newRegion = new RelativeColorRegion().setColorScheme5(colorScheme, -150.0, 0.05, 0, true, -0.5, true, false, false);
-        newRegion.setOnRadiusOverflow(new OverflowResponse(kOverflowNegate));
-        newRegion.setOnHeightOverflow(new OverflowResponse(kOverflowNegate));
-        // Note: since the thetaCoefficients are defaulted to zero, this is a "locked at 120 degrees" TRIAD2
-
-        // Record which rule created the scheme. This must be done after all the regions are defined.
         colorScheme.setCreatingRule(this._fName);
     };
 };
@@ -1741,7 +1748,7 @@ function HarmonyAdapter(theme, setSwatch) {
     function _updateBaseColor() {
         if (_rule === null) { return; }
         var baseColor = _colorSet.swatches[_colorSet.baseColorIndex];
-        var baseCylindricalColor = new CylindricalColor(colorwheel.scientificToArtisticSmooth(baseColor.hsv.h), baseColor.hsv.s / 100, baseColor.hsv.v / 100);
+        var baseCylindricalColor = new CylindricalColor(colorwheel.scientificToArtisticSmooth(Math.round(baseColor.hsv.h)), Math.round(baseColor.hsv.s) / 100, Math.round(baseColor.hsv.v) / 100);
         _harmonyController.setBasePoint(baseCylindricalColor);
 
         if (_initFromColors) { _initFromColors = false; _resetFromColors(); }
@@ -1773,7 +1780,7 @@ function HarmonyAdapter(theme, setSwatch) {
         scheme.clearRegionList();
         var baseColor = _colorSet.swatches[_colorSet.baseColorIndex];
 
-        var baseC = new CylindricalColor(colorwheel.scientificToArtisticSmooth(baseColor.hsv.h), baseColor.hsv.s / 100, baseColor.hsv.v / 100);
+        var baseC = new CylindricalColor(colorwheel.scientificToArtisticSmooth(Math.round(baseColor.hsv.h)), Math.round(baseColor.hsv.s) / 100, Math.round(baseColor.hsv.v) / 100);
         var region = new RelativeColorRegion().setColorScheme2(scheme, 0, 0, 0, true);
 
         scheme.setBaseColor(baseC);
