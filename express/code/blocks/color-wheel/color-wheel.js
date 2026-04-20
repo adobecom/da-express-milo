@@ -830,6 +830,7 @@ export default async function decorate(block) {
             // If no HISTORY_EVENT fires (e.g. all colors locked, palette unchanged),
             // reset the flag so it doesn't corrupt the next undo/redo
             queueMicrotask(() => { isGeneratingRandom = false; });
+            primaryColorAdapter?.element?.resetOriginalColor?.();
           },
           transformPalette: makeTransformPalette(
             () => activeHarmonyRule,
@@ -984,6 +985,7 @@ export default async function decorate(block) {
           onGenerateRandom: () => {
             isGeneratingRandom = true;
             queueMicrotask(() => { isGeneratingRandom = false; });
+            primaryColorAdapter?.element?.resetOriginalColor?.();
           },
           transformPalette: makeTransformPalette(
             () => activeHarmonyRule,
