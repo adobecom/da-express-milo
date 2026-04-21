@@ -1,6 +1,12 @@
-@import url('../../scripts/color-shared/components/strips/color-strip.css');
-@import url('../../scripts/color-shared/components/image-upload/image-upload.css');
-@import url('./image-extract.css');
+/* Hide authored <div> children during the loading phase on desktop.
+   The real UI mounts inside a <section>; authored divs are not LCP content
+   (the H1 lives in the separate color-headline block) so hiding them is safe.
+   This prevents the wide-then-narrow visual shift while async init runs. */
+@media (min-width: 1200px) {
+  .color-wheel > div {
+    display: none;
+  }
+}
 
 .color-wheel .ax-color-tool-layout {
   box-sizing: border-box;
@@ -20,6 +26,7 @@
   gap: var(--spacing-300);
   overflow: visible;
   padding-block-end: var(--spacing-300);
+  isolation: isolate;
 }
 
 .color-wheel .ax-shell-slot--canvas {
@@ -152,6 +159,7 @@
   transition: none;
   width: auto;
   height: auto;
+  aspect-ratio: 1 / 1;
 }
 
 .color-wheel .color-extract-suggestion:hover {
@@ -160,10 +168,17 @@
 
 .color-wheel .color-extract-suggestion:active {
   outline: 2px solid var(--Palette-gray-900);
+  border-color: transparent;
 }
 
 .color-wheel .color-extract-suggestion:focus-visible {
   outline: 2px solid var(--Alias-focus-indicator-default);
+  border-color: transparent;
+}
+
+.image-extract .color-extract-suggestion-preview {
+  display: flex;
+  flex-direction: column;
 }
 
 .image-extract .color-extract-suggestion-bar {
@@ -357,11 +372,6 @@ color-wheel-express {
   overflow: hidden;
 }
 
-.color-wheel .color-floating-toolbar-container .ax-swatch-strip,
-.color-wheel .color-floating-toolbar-container .ax-palette-summary sp-action-button {
-  display: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .color-wheel-harmony-carousel-host .simple-carousel-platform {
     scroll-behavior: auto;
@@ -401,10 +411,6 @@ color-wheel-express {
 /* Large Tablet */
 
 @media (min-width: 888px) {
-  .color-wheel .ax-shell-slot--topbar {
-    padding-block-end: var(--spacing-100);
-  }
-
   .color-wheel .ax-shell-slot--sidebar {
     padding-block-end: 0;
   }

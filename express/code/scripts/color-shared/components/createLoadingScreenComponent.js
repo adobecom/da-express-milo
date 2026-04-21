@@ -82,8 +82,8 @@ export function createLoadingScreenComponent(options = {}) {
     element: root,
     setVariant,
     setCardCount,
-    async show() {
-      await loadLoadingScreenStyles();
+    show() {
+      loadLoadingScreenStyles();
       root.dataset.loadingVisible = 'true';
       root.setAttribute('aria-hidden', 'true');
       root.style.display = 'block';

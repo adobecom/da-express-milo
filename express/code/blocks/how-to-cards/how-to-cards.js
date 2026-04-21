@@ -96,6 +96,7 @@ export async function buildGallery(
   if (!root) throw new Error('Invalid Gallery input');
   const control = createControl([...items], container);
   container.classList.add('gallery');
+  container.setAttribute('tabindex', '0');
   [...items].forEach((item) => {
     item.classList.add('gallery--item');
   });

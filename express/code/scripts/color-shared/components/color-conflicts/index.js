@@ -1,6 +1,7 @@
 import { LitElement, html } from '../../../../libs/deps/lit-all.min.js';
 import { style } from './styles.css.js';
 import { loadBadge, loadTooltip } from '../../spectrum/load-spectrum.js';
+import { DEFAULT_SHARED_PLACEHOLDERS as CB_DEFAULTS } from '../../i18n/loadColorBlindnessPlaceholders.js';
 
 const TOOLTIP_CSS_PATH = '/express/code/scripts/color-shared/spectrum/styles/tooltip.css';
 
@@ -15,13 +16,15 @@ class ColorConflicts extends LitElement {
     return {
       conflictsFound: { type: Boolean, attribute: 'conflicts-found' },
       label: { type: String },
+      strings: { type: Object },
     };
   }
 
   constructor() {
     super();
     this.conflictsFound = false;
-    this.label = 'Potential color blind conflicts';
+    this.label = CB_DEFAULTS.summary;
+    this.strings = CB_DEFAULTS;
     this._hasRendered = false;
     this._tooltipOpen = false;
     this._isTouchDevice = false;
@@ -109,23 +112,25 @@ class ColorConflicts extends LitElement {
   }
 
   get _statusText() {
-    return this.conflictsFound ? 'Conflicts found' : 'No conflicts';
+    const s = this.strings;
+    return this.conflictsFound ? s.statusConflictsFound : s.statusNoConflicts;
   }
 
   render() {
-    const tooltipContent = 'The conflicts between colors are shown with a caution symbol.';
+    const s = this.strings;
+    const tooltipContent = s.tooltip;
     const badge = this.conflictsFound
       ? html`
         <sp-badge variant="negative" size="s"
-          aria-label="Color blind conflicts found">
+          aria-label="${s.badgeConflictsAria}">
           <sp-icon-alert-triangle slot="icon"></sp-icon-alert-triangle>
-          Conflicts found
+          ${s.statusConflictsFound}
         </sp-badge>`
       : html`
         <sp-badge variant="positive" size="s"
-          aria-label="No color blind conflicts">
+          aria-label="${s.badgeNoneAria}">
           <sp-icon-checkmark-circle slot="icon"></sp-icon-checkmark-circle>
-          None
+          ${s.statusNone}
         </sp-badge>`;
 
     return html`

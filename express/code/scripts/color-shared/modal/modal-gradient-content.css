@@ -170,7 +170,7 @@
   opacity: 0.8;
 }
 
-.ax-color-modal-content .like-icon:focus {
+.ax-color-modal-content .like-icon:focus-visible {
   outline: 2px solid var(--S2-Buttons-Accent-Color-Default);
   outline-offset: 2px;
   border-radius: 2px;
@@ -530,6 +530,10 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+  }
+
+  .ax-color-modal-content .modal-thumbnail-container {
+    order: 1;
   }
 
   .ax-color-modal-content .modal-palette-container,

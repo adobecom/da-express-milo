@@ -184,6 +184,9 @@ export default async function decorate(block) {
     const header = firstChild.querySelector('h2, h3, h4, h5, h6');
     header.classList.add('center-title');
     headerText = header.textContent.trim();
+    header.setAttribute('aria-label', `${headerText} cards`);
+    const subtitle = firstChild.querySelector('p');
+    if (subtitle) subtitle.classList.add('subtitle');
     block.insertBefore(firstChild, block.firstChild);
   }
 

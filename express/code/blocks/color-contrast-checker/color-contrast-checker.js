@@ -59,15 +59,23 @@ async function mountContrastChecker(slot, { config, layout, initialPalette }) {
 
   renderer.on('contrast-change', (detail) => {
     const currentPalette = context.get('palette');
+    const currentColors = currentPalette?.colors || colors;
     const previousForeground = currentPalette?.selectedForeground ?? foreground;
     const previousBackground = currentPalette?.selectedBackground ?? background;
-    const nextColors = syncPaletteSelections(
-      currentPalette?.colors || colors,
-      previousForeground,
-      previousBackground,
-      detail.foreground,
-      detail.background,
-    );
+
+    const normalize = (h) => (typeof h === 'string' ? h.trim().toUpperCase() : '');
+    const fgInPalette = currentColors.some((c) => normalize(c) === normalize(detail.foreground));
+    const bgInPalette = currentColors.some((c) => normalize(c) === normalize(detail.background));
+
+    const nextColors = (fgInPalette && bgInPalette)
+      ? currentColors
+      : syncPaletteSelections(
+        currentColors,
+        previousForeground,
+        previousBackground,
+        detail.foreground,
+        detail.background,
+      );
 
     context.set('palette', {
       colors: nextColors,
@@ -159,8 +167,7 @@ export default async function decorate(block) {
         name: initialPalette.name,
       },
       toolbar: {
-        mode: 'sticky-on-scroll',
-        variant: 'standalone',
+        variant: 'sticky-on-scroll',
         showEdit: false,
         showPaletteName: true,
         editPaletteName: false,
@@ -174,10 +181,7 @@ export default async function decorate(block) {
       },
     });
 
-    adoptHeadline(block, layoutInstance);
     await layoutInstance.actionMenuReady;
-
-    layoutInstance.actionMenu?.pushState?.(initialPalette.colors);
 
     checkerInstance = await mountContrastChecker(layoutInstance.slots.sidebar, {
       config,
@@ -202,6 +206,7 @@ export default async function decorate(block) {
       destroy: destroyInstance,
     });
 
+    adoptHeadline(block, layoutInstance);
     block.dataset.shellState = 'ready';
     block.dataset.blockStatus = 'loaded';
     trackColorBlockLoad('color-contrast-checker');

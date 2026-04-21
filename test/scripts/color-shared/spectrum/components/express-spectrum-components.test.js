@@ -24,7 +24,7 @@ describe('Express Spectrum component wrappers', () => {
 
     expect(tagElement).to.exist;
     expect(iconSlot).to.exist;
-    expect(iconSlot.classList.contains('test-icon')).to.be.true;
+    expect(iconSlot.querySelector('.test-icon')).to.exist;
     expect(iconSlot).to.not.equal(icon);
   });
 
@@ -72,6 +72,6 @@ describe('Express Spectrum component wrappers', () => {
     expect(actionButton.hasAttribute('quiet')).to.be.true;
     expect(actionButton.getAttribute('label')).to.equal('Swap colors');
     expect(iconSlot).to.exist;
-    expect(iconSlot.classList.contains('test-action-icon')).to.be.true;
+    expect(iconSlot.querySelector('.test-action-icon')).to.exist;
   });
 });

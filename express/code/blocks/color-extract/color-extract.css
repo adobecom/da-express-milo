@@ -42,7 +42,6 @@
 /* When image is loaded, the 640px marquee wrapper must expand to full width */
 .color-extract-marquee-wrapper:has(.color-extract.has-image) {
   width: 100%;
-  max-width: unset;
 }
 
 /* Section containing the marquee wrapper: position for bg/fade, flex to vertically center content */
@@ -50,30 +49,31 @@
   position: relative;
   display: flex;
   justify-content: center;
-  align-items: center;
-  min-height: 800px;
+  align-items: flex-start;
+  min-height: unset;
+  padding-inline: 16px;
 }
 
 .color-extract {
-  contain: layout style;
-  --color-extract-max-width: 1440px;
-  --color-extract-gap: 32px;
-  --color-extract-radius: 16px;
-  --color-extract-bg: #ffffff;
-  --color-extract-text: #131313;
-  --color-extract-subtle: #505050;
-  --color-extract-border: #292929;
+  --ax-color-tool-presentation-max-width: var(--block-wd-max-width);
+  --color-extract-max-width: var(--block-wd-max-width);
+  --color-extract-gap: var(--spacing-500);
+  --color-extract-radius: var(--Radius-corner-radius-200);
+  --color-extract-bg: var(--color-white);
+  --color-extract-text: var(--color-gray-950);
+  --color-extract-subtle: var(--palette-gray-700);
+  --color-extract-border: var(--color-gray-800-variant);
   --color-extract-accent: #3b63fb;
   --color-extract-accent-hover: #274dea;
   --color-extract-accent-soft: rgba(59, 99, 251, 0.08);
-  --color-extract-focus: #4b75ff;
-  --color-extract-disabled-bg: #e9e9e9;
-  --color-extract-disabled-text: #c6c6c6;
-  --color-extract-gray-50: #f8f8f8;
-  --color-extract-gray-100: #f3f3f3;
-  --color-extract-gray-200: #e9e9e9;
-  --color-extract-gray-300: #e1e1e1;
-  --color-extract-gray-350: #d4d4d4;
+  --color-extract-focus: var(--color-focus-ring-strong);
+  --color-extract-disabled-bg: var(--color-light-gray);
+  --color-extract-disabled-text: var(--color-gray-400-variant);
+  --color-extract-gray-50: var(--color-gray-100);
+  --color-extract-gray-100: var(--color-gray-150);
+  --color-extract-gray-200: var(--color-light-gray);
+  --color-extract-gray-300: var(--color-gray-250);
+  --color-extract-gray-350: var(--color-gray-300);
   --color-extract-gray-hover: #f5f5f5;
   --color-extract-success: #0a8a0a;
   --color-extract-overlay-image:
@@ -89,15 +89,15 @@
   display: flex;
   flex-direction: column;
   gap: 48px;
-  max-width: 100%;
   margin: 0 auto;
   padding: 0 0 72px;
   color: var(--color-extract-text);
 }
 
 .color-extract.has-image .color-extract-inner {
-  max-width: var(--color-extract-max-width);
-  padding: 66px 24px 72px;
+  width: min(var(--color-extract-max-width), 100%);
+  padding: var(--spacing-500) 0 56px;
+  gap: 24px;
 }
 
 /* ---- Landing stage ---- */
@@ -108,13 +108,15 @@
   width: 100%;
   overflow: visible;
   display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 66px 24px 40px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 32px 16px;
 }
 
 body:has(.color-headline.extract) .color-extract .color-extract-landing {
   padding-top: 0;
+  min-height: unset;
 }
 
 .color-extract.has-image .color-extract-landing {
@@ -123,20 +125,27 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing {
 
 /* Background image — when NOT inside marquee wrapper (standalone color-extract) */
 .color-extract .color-extract-landing-bg {
+  display: none;
   position: absolute;
   inset: 0;
   overflow: hidden;
   pointer-events: none;
 }
 
-.color-extract .color-extract-landing-bg picture,
-.color-extract .color-extract-landing-bg img {
+.color-extract .color-extract-landing-bg picture {
   position: absolute;
   inset: 0;
-  width: 100%;
+  display: block;
+}
+
+.color-extract .color-extract-landing-bg img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: none;
   height: auto;
-  max-width: 1920px;
-  margin: 0 auto;
 }
 
 /*
@@ -158,6 +167,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 /* Background image — section level (moved out of marquee wrapper by JS) */
 .section > .color-extract-landing-bg {
+  display: none;
   position: absolute;
   inset: 0;
   overflow: hidden;
@@ -165,21 +175,26 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   z-index: 0;
 }
 
-.section > .color-extract-landing-bg picture,
-.section > .color-extract-landing-bg img {
+.section > .color-extract-landing-bg picture {
   position: absolute;
   inset: 0;
-  width: 100%;
+  display: block;
+}
+
+.section > .color-extract-landing-bg img {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: none;
   height: auto;
-  max-width: 1920px;
-  margin: 0 auto;
 }
 
 .color-extract .color-extract-landing-content {
   position: relative;
   z-index: 2;
-  width: min(1440px, 100%);
-  max-width: 1679px;
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -197,6 +212,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 /* Fade — when NOT inside marquee wrapper (standalone color-extract) */
 .color-extract .color-extract-landing-fade {
+  display: none;
   position: absolute;
   width: 100vw;
   left: 50%;
@@ -215,6 +231,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 /* Fade — section level (moved out of marquee wrapper by JS) */
 .section > .color-extract-landing-fade {
+  display: none;
   position: absolute;
   bottom: 0;
   left: 0;
@@ -307,7 +324,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   font-size: 18px;
   font-weight: 400;
   line-height: 22px;
-  color: #505050;
+  color: var(--palette-gray-700);
   text-align: center;
   white-space: nowrap;
 }
@@ -316,7 +333,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   width: 100%;
   height: 10px;
   border-radius: 5px;
-  background: #dadada;
+  background: var(--color-gray-300-variant);
   overflow: hidden;
 }
 
@@ -324,7 +341,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   height: 100%;
   width: 0;
   border-radius: 5px;
-  background: #5258e4;
+  background: var(--color-background-accent-default);
 }
 
 .color-extract-loading-overlay.is-loading .color-extract-loading-bar {
@@ -338,8 +355,12 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 /* ---- Typography ---- */
 
+.color-extract .color-extract-edit-copy .icon.icon-adobe-express-logo {
+  padding: 0;
+}
+
 .color-extract .color-extract-edit-copy h1 {
-  font-size: 45px;
+  font-size: 32px;
   line-height: 1.04;
   margin: 0 0 12px;
 }
@@ -347,11 +368,24 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 .color-extract .color-extract-edit-copy p {
   margin: 0;
   color: var(--color-extract-subtle);
-  font-size: 18px;
-  line-height: 1.3;
+  font-size: 16px;
+  line-height: 1.4;
 }
 
 /* ---- Dropzone (shared component) - block-specific overrides ---- */
+
+.color-extract .image-upload-dropzone-container {
+  height: 200px;
+  justify-content: center;
+}
+
+.color-extract .image-upload-dropzone-text {
+  display: flex;
+}
+
+.color-extract .image-upload-dropzone-title {
+  display: none;
+}
 
 .color-extract .image-upload-dropzone-container::before {
   content: '';
@@ -389,13 +423,13 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   flex-direction: column;
   gap: 12px;
   align-items: center;
-  width: 100%;
-  max-width: 343px;
+  width: min(343px, 100%);
 }
 
 .color-extract .color-extract-suggestions-label {
   font-weight: 700;
-  font-size: 16px;
+  font-size: 14px;
+  line-height: 20px;
   text-align: center;
 }
 
@@ -498,7 +532,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   display: none;
   flex-direction: column;
   gap: 24px;
-  contain: layout style paint;
 }
 
 .color-extract.has-image .color-extract-edit {
@@ -510,7 +543,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 .color-extract.has-image .color-extract-edit-copy {
-  max-width: 720px;
+  width: min(720px, 100%);
   text-align: left;
 }
 
@@ -521,7 +554,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 .color-extract .color-extract-edit-stage {
   position: relative;
-  height: 800px;
+  height: auto;
   width: min(1440px, 100%);
   margin: 0 auto;
   border-radius: 16px;
@@ -537,7 +570,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   background: transparent;
   overflow: visible;
   display: grid;
-  grid-template-columns: minmax(0, 668fr) minmax(0, 692fr);
+  grid-template-columns: 1fr;
   gap: 24px;
   align-items: stretch;
 }
@@ -564,8 +597,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   padding: 16px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(28px);
-  /* Fixed 634px from Figma spec — image scales to fit, never drives sizing */
-  height: 634px;
+  height: 207px;
 }
 
 .color-extract .color-extract-edit-bg picture,
@@ -598,7 +630,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   width: 100%;
   height: 100%;
   display: block;
-  border-radius: 8px;
+  border-radius: 0;
   object-fit: contain;
   left: 0;
   transform: none;
@@ -612,7 +644,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   display: block;
   width: 100%;
   align-self: stretch;
-  min-height: 0;
+  min-height: 240px;
   --figma-strip-radius: 16px;
   --swatch-rail-gap: 2px;
 }
@@ -629,17 +661,14 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   width: 100%;
   min-height: 32px;
-  gap: 12px;
+  gap: 8px;
 }
 
 .color-extract .color-extract-toolbar-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex: 1;
-  min-width: 0;
+  display: contents;
 }
 
 .color-extract .color-extract-toolbar-actions {
@@ -652,9 +681,12 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 .color-extract .color-extract-mood {
   display: flex;
-  align-items: center;
-  height: 32px;
+  flex-direction: column;
+  align-items: flex-start;
+  height: auto;
   flex-shrink: 0;
+  width: 100%;
+  gap: 8px;
 }
 
 .color-extract .color-extract-mood-label {
@@ -668,7 +700,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 .color-extract .color-extract-mood-dropdown {
   position: relative;
-  width: 330px;
+  width: 100%;
+  max-width: none;
 }
 
 .color-extract .color-extract-mood-trigger {
@@ -773,6 +806,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 /* ---- Toolbar divider ---- */
 
 .color-extract .color-extract-toolbar-divider {
+  display: none;
   width: 1px;
   height: 16px;
   background: var(--color-extract-gray-300);
@@ -796,8 +830,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 .color-extract .color-extract-marker {
   position: absolute;
-  width: 33px;
-  height: 33px;
+  width: 26px;
+  height: 26px;
   border-radius: 50%;
   cursor: crosshair;
   touch-action: none;
@@ -818,8 +852,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 .color-extract .color-extract-marker.is-active {
-  width: 56px;
-  height: 56px;
+  width: 42px;
+  height: 42px;
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
   z-index: 10;
 }
@@ -859,8 +893,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 /* ---- Magnified state (handle becomes the zoom lens on drag) ---- */
 
 .color-extract .color-extract-marker.is-magnified {
-  width: 80px;
-  height: 80px;
+  width: 60px;
+  height: 60px;
   background: transparent;
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
   z-index: 20;
@@ -907,7 +941,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   background: transparent;
   overflow: visible;
   display: grid;
-  grid-template-columns: minmax(0, 668fr) minmax(0, 692fr);
+  grid-template-columns: 1fr;
   gap: 24px;
   align-items: stretch;
 }
@@ -936,7 +970,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 .color-extract .color-extract-gradient-editor-col .gradient-editor {
   flex: 0 0 auto;
   width: 100%;
-  max-width: 100%;
   height: 80px;
   border-radius: 16px;
   overflow: visible;
@@ -952,129 +985,155 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 .color-extract .color-extract-gradient-editor-col .gradient-editor-handles {
-  left: 12px;
-  right: 12px;
+  left: 8px;
+  right: 8px;
 }
 
 
 /* ==================== Responsive ==================== */
 
-@media (max-width: 1199px) {
-  .color-extract .color-extract-landing {
-    height: auto;
-    padding: 32px;
-    flex-direction: column;
+@media (min-width: 600px) {
+  .section:has(.color-extract-marquee-wrapper) {
     align-items: center;
-    justify-content: flex-start;
-    overflow: visible;
+    min-height: 800px;
+    padding-inline: 0;
   }
 
-  body:has(.color-headline.extract) .color-extract .color-extract-landing {
-    min-height: unset;
+  .color-extract .color-extract-landing {
+    padding: 32px;
   }
 
+  .color-extract.has-image .color-extract-inner {
+    padding: 66px 24px 72px;
+    gap: 48px;
+  }
+
+  .color-extract.has-image .color-extract-edit-bg {
+    height: 554px;
+  }
+
+  .color-extract .color-extract-toolbar-divider {
+    display: block;
+  }
+
+  /* Flatten toolbar-left: restore flex layout */
+  .color-extract .color-extract-toolbar-left {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Mood: restore inline row layout */
+  .color-extract .color-extract-mood {
+    flex-direction: row;
+    align-items: center;
+    height: 32px;
+    width: auto;
+    gap: 0;
+  }
+
+  .color-extract .color-extract-mood-dropdown {
+    width: fit-content;
+    max-width: 330px;
+  }
+
+  .color-extract .color-extract-marker {
+    width: 33px;
+    height: 33px;
+  }
+
+  .color-extract .color-extract-marker.is-active {
+    width: 56px;
+    height: 56px;
+  }
+
+  .color-extract .color-extract-marker.is-magnified {
+    width: 80px;
+    height: 80px;
+  }
+}
+
+@media (min-width: 1200px) {
   .color-extract .color-extract-landing-bg {
-    display: none;
+    display: block;
   }
 
   .section > .color-extract-landing-bg,
   .section > .color-extract-landing-fade {
-    display: none;
+    display: block;
   }
 
   .color-extract .color-extract-landing-fade {
-    display: none;
+    display: block;
+  }
+
+  .color-extract .color-extract-landing {
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: center;
+    padding: 66px 24px 40px;
   }
 
   .color-extract .color-extract-landing-content {
-    width: 100%;
-    max-width: 100%;
+    width: min(1440px, 100%);
   }
 
   .color-extract .color-extract-edit-copy h1 {
-    font-size: 32px;
+    font-size: 45px;
   }
 
   .color-extract .color-extract-edit-copy p {
-    font-size: 16px;
-    line-height: 1.4;
+    font-size: 18px;
+    line-height: 1.3;
   }
 
   .color-extract .image-upload-dropzone-container {
-    height: 200px;
-    justify-content: center;
+    height: revert;
+    justify-content: revert;
   }
 
-  /* Hide "Or drag and drop" title but keep file-type subtitle visible */
-  .color-extract .image-upload-dropzone-text {
-    display: flex;
-  }
-
+  /* Restore "Or drag and drop" title at desktop */
   .color-extract .image-upload-dropzone-title {
-    display: none;
+    display: revert;
   }
 
   .color-extract .color-extract-suggestions-label {
-    font-size: 14px;
-    line-height: 20px;
+    font-size: 16px;
+    line-height: revert;
   }
 
   .color-extract .color-extract-edit-stage {
-    height: auto;
+    height: 800px;
   }
 
   .color-extract.has-image .color-extract-edit-stage {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 668fr) minmax(0, 692fr);
   }
 
   .color-extract.has-image .color-extract-edit-bg {
-    height: 400px;
+    height: 458px;
   }
 
   .color-extract .color-extract-swatch-rail {
-    min-height: 240px;
+    min-height: 0;
   }
 
   .color-extract .color-extract-toolbar {
-    flex-wrap: wrap;
-    gap: 8px;
+    flex-wrap: nowrap;
+    gap: 12px;
   }
 
   .color-extract.gradient.has-image .color-extract-edit-stage--gradient {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 668fr) minmax(0, 692fr);
   }
-
 }
 
-@media (max-width: 599px) {
-  .color-extract .color-extract-landing {
-    padding: 32px 16px;
+@media (min-width: 1680px) {
+  .color-extract.has-image .color-extract-edit-bg {
+    height: 602px;
   }
-
-  .color-extract.has-image .color-extract-inner {
-    padding: 32px 16px 56px;
-    gap: 24px;
-  }
-
-  .color-extract .color-extract-marker {
-    width: 26px;
-    height: 26px;
-  }
-
-  .color-extract .color-extract-marker.is-active {
-    width: 42px;
-    height: 42px;
-  }
-
-  .color-extract .color-extract-marker.is-magnified {
-    width: 60px;
-    height: 60px;
-  }
-
-  .color-extract .color-extract-toolbar-divider {
-    display: none;
-  }
-
 }
 
 /* ---- Reduced motion ---- */

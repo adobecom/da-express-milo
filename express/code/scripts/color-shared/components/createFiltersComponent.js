@@ -22,13 +22,13 @@ import { createExpressPicker } from '../spectrum/components/express-picker.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { loadIconsRail, loadPicker } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
+import { decorateAnalyticsAttributes } from '../utils/utilities.js';
 
 export const FILTER_IDS = {
   CONTENT_TYPE: 'contentType',
   SORT: 'sort',
   TIME_RANGE: 'timeRange',
 };
-const ANALYTICS_TEXT_LIMIT = 20;
 const PICKER_MIN_WIDTH_FALLBACK_PX = 144;
 const PICKER_MAX_WIDTH_FALLBACK_PX = 180;
 const PICKER_HORIZONTAL_CHROME_PX = 40;
@@ -142,27 +142,8 @@ export async function createFiltersComponent(options = {}) {
     onFilterChange?.({ ...filterValues });
   }
 
-  function sanitizeAnalyticsText(value) {
-    const raw = String(value ?? '')
-      .replace(/[^a-zA-Z0-9\s]/g, '')
-      .trim();
-    return raw.substring(0, ANALYTICS_TEXT_LIMIT);
-  }
-
-  function getAnalyticsHeaderText() {
-    const headerText = interactionRoot
-      ?.closest('.explore-header, .gradients-header')
-      ?.querySelector('.results-count, .gradients-title, h1, h2, h3')
-      ?.textContent
-      || 'Color explore';
-    return sanitizeAnalyticsText(headerText);
-  }
-
-  function applyAnalyticsAttributes(element, linkLabel, linkIndex) {
-    if (!element) return;
-    const daaLl = `${sanitizeAnalyticsText(linkLabel)}-${linkIndex}--${getAnalyticsHeaderText()}`;
-    element.setAttribute('daa-ll', daaLl);
-    element.setAttribute('data-ll', daaLl);
+  function applyAnalyticsAttributes(element, linkLabel) {
+    decorateAnalyticsAttributes(element, { linkLabel });
   }
 
   function setFilterValue(id, value, shouldEmit = true) {

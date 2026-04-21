@@ -5,7 +5,7 @@ import sinon from 'sinon';
 import { setLibs } from '../../../express/code/scripts/utils.js';
 import { serviceManager } from '../../../express/code/libs/services/index.js';
 
-setLibs('/libs');
+setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
 // Suppress benign ResizeObserver loop notifications that the test runner
 // would otherwise report as unhandled errors.
@@ -149,10 +149,16 @@ describe('color-blindness block', () => {
 
   describe('decoration without headline sibling', () => {
     let block;
+    const oldBody = document.body.innerHTML;
 
     before(async () => {
+      document.body.innerHTML = await readFile({ path: './mocks/body-no-headline.html' });
       block = document.querySelector('#cb-no-headline');
       await decorate(block);
+    });
+
+    after(() => {
+      document.body.innerHTML = oldBody;
     });
 
     it('sets data-block-status to loaded even without headline', () => {

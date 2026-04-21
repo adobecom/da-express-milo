@@ -256,6 +256,8 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
     colorMode = 'RGB',
     showPalette = true,
     mobile = false,
+    strings,
+    baseColorStrings,
   } = options;
 
   element.palette = palette.slice(0, 10);
@@ -263,6 +265,8 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
   element.colorMode = colorMode;
   element.showPalette = showPalette;
   element.mobile = mobile;
+  if (strings) element.strings = strings;
+  if (baseColorStrings) element.baseColorStrings = baseColorStrings;
 
   element.addEventListener('color-change', (e) => {
     callbacks.onColorChange?.(e.detail);
@@ -344,11 +348,13 @@ export function createColorConflictsAdapter(options = {}) {
   const element = document.createElement('color-conflicts');
   const {
     conflictsFound = false,
-    label = 'Potential color blind conflicts',
+    label,
+    strings,
   } = options;
 
   element.conflictsFound = conflictsFound;
-  element.label = label;
+  if (strings) element.strings = strings;
+  if (label) element.label = label;
 
   return {
     element,
@@ -371,12 +377,14 @@ export function createBaseColorAdapter(options = {}, callbacks = {}) {
     colorMode = 'HEX',
     showHeader = true,
     showBrightnessControl = true,
+    strings,
   } = options;
 
   element.color = color;
   element.colorMode = colorMode;
   element.showHeader = showHeader;
   element.showBrightnessControl = showBrightnessControl;
+  if (strings) element.strings = strings;
 
   element.addEventListener('color-change', (e) => {
     callbacks.onColorChange?.(e.detail);

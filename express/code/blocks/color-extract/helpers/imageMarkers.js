@@ -198,7 +198,10 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
   function getContainerRect() { return overlay.getBoundingClientRect(); }
 
   function pctToCanvas(pctX, pctY) {
-    return { cx: pctX * canvas.width, cy: pctY * canvas.height };
+    return {
+      cx: clamp(pctX * canvas.width, 0, canvas.width - 1),
+      cy: clamp(pctY * canvas.height, 0, canvas.height - 1),
+    };
   }
 
   /** Center-based positioning via CSS transform — size-independent. */

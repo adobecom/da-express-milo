@@ -18,9 +18,10 @@ export const [setLibs, getLibs] = (() => {
     (prodLibs, location) => {
       libs = (() => {
         const { hostname, search } = location || window.location;
-        if (!['.aem.', '.hlx.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
+        if (!['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
         const branch = new URLSearchParams(search).get('milolibs') || 'main';
         if (branch === 'local') return 'http://localhost:6456/libs';
+        if (branch === 'main' && hostname.includes('.stage.')) return '/libs';
         return branch.includes('--') ? `https://${branch}.aem.live/libs` : `https://${branch}--milo--adobecom.aem.live/libs`;
       })();
       return libs;
@@ -894,4 +895,10 @@ export function isEmptyValue(value) {
  */
 export function hasContent(value) {
   return !isEmptyValue(value);
+}
+
+export function getContentRoot(location) {
+  const { hostname } = location || window.location;
+  if (['--express-color--', 'color.stage.adobe.com', 'color.adobe.com'].some((i) => hostname.includes(i))) return '';
+  return '/express';
 }

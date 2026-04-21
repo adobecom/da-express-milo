@@ -167,6 +167,11 @@ export class ExploreActions extends BaseActionGroup {
       url = `${url}?filter=${filter}&sort=${sort}&time=${time}`;
     }
 
+    const auth = this.plugin.getAuthState();
+    if (auth.isLoggedIn && auth.token) {
+      url = `${url}&metadata=all`;
+    }
+
     url = `${url}&startIndex=${startIndex}&maxNumber=${KULER_DEFAULT_BATCH_SIZE}`;
     return url;
   }

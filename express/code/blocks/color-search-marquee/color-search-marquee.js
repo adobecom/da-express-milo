@@ -135,7 +135,12 @@ export function setupStickyBounds(block, searchBar) {
   endSentinel.dataset.searchBarEndSentinel = 'true';
   endSentinel.setAttribute('aria-hidden', 'true');
   endSentinel.style.cssText = 'display:block;inline-size:1px;block-size:1px;';
-  colorExploreBlock.after(endSentinel);
+  const footer = document.querySelector('footer');
+  if (footer) {
+    footer.before(endSentinel);
+  } else {
+    colorExploreBlock.after(endSentinel);
+  }
 
   let stickyEnabled = true;
 
@@ -159,6 +164,15 @@ export function setupStickyBounds(block, searchBar) {
     setStickyEnabled(!shouldDisableSticky);
   };
 
+  let layoutGateRaf = 0;
+  const scheduleEvaluateStickyGate = () => {
+    if (layoutGateRaf) cancelAnimationFrame(layoutGateRaf);
+    layoutGateRaf = requestAnimationFrame(() => {
+      layoutGateRaf = 0;
+      evaluateStickyGate();
+    });
+  };
+
   const endObserver = new IntersectionObserver(() => {
     evaluateStickyGate();
   }, {
@@ -170,9 +184,12 @@ export function setupStickyBounds(block, searchBar) {
   endObserver.observe(endSentinel);
   window.addEventListener('resize', evaluateStickyGate, { passive: true });
 
-  evaluateStickyGate();
+  const exploreLayoutObserver = new ResizeObserver(scheduleEvaluateStickyGate);
+  exploreLayoutObserver.observe(colorExploreBlock);
 
   return () => {
+    if (layoutGateRaf) cancelAnimationFrame(layoutGateRaf);
+    exploreLayoutObserver.disconnect();
     endObserver.disconnect();
     window.removeEventListener('resize', evaluateStickyGate);
     endSentinel.remove();

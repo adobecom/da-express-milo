@@ -44,11 +44,9 @@
   --ax-padding-canvas-desktop: 0;
 
   /* Z-index layers */
-  --ax-z-topbar: 20;
   --ax-z-footer: 10;
 
   /* Sticky positions */
-  --ax-sticky-topbar-top: 0;
   --ax-sticky-footer-bottom: 0;
 
   /* Canvas Styling */
@@ -95,10 +93,6 @@
   min-inline-size: 0;
 }
 
-.ax-toolbar-floating-host {
-  display: contents;
-}
-
 .ax-color-tool-layout--canvas-footer .ax-shell-slot--topbar,
 .ax-color-tool-layout--canvas-footer .ax-shell-slot--sidebar {
   display: none;
@@ -107,9 +101,6 @@
 .ax-shell-slot--topbar {
   grid-area: var(--ax-area-topbar);
   background-color: var(--ax-bg-topbar);
-  position: sticky;
-  top: var(--ax-sticky-topbar-top);
-  z-index: var(--ax-z-topbar);
 }
 
 .ax-shell-slot--sidebar {
@@ -123,7 +114,6 @@
   grid-area: var(--ax-area-canvas);
   background-color: var(--ax-bg-canvas);
   padding: var(--ax-padding-canvas-mobile);
-  overflow-y: auto;
   block-size: var(--ax-slot-canvas-block-size);
 }
 
@@ -136,26 +126,28 @@
   z-index: auto;
 }
 
-.ax-color-tool-layout[data-layout-variant="default"][data-toolbar-mode="sticky"] .ax-shell-slot--footer {
+.ax-color-tool-layout[data-layout-variant="default"][data-toolbar-variant="sticky"] .ax-shell-slot--footer {
   position: sticky;
   bottom: var(--ax-sticky-footer-bottom);
   z-index: var(--ax-z-footer);
 }
 
-.ax-color-tool-layout[data-toolbar-mode="sticky-on-scroll"] .ax-toolbar-standalone .ax-swatch-strip {
-  display: none;
-}
-
-.ax-color-tool-layout[data-toolbar-mode="sticky-on-scroll"] .ax-toolbar-standalone .ax-palette-name {
-  display: flex;
-}
-
 .ax-color-tool-layout[data-layout-variant="canvas-footer"] .ax-shell-slot--footer,
-.ax-color-tool-layout[data-toolbar-mode="inline"] .ax-shell-slot--footer,
-.ax-color-tool-layout[data-toolbar-mode="sticky-on-scroll"] .ax-shell-slot--footer {
+.ax-color-tool-layout[data-toolbar-variant="inline"] .ax-shell-slot--footer,
+.ax-color-tool-layout[data-toolbar-variant="sticky-on-scroll"] .ax-shell-slot--footer {
   position: relative;
   bottom: unset;
   z-index: auto;
+}
+
+@media (max-width: 1199px) {
+  .ax-color-tool-layout[data-toolbar-variant="sticky-on-scroll"] .ax-toolbar-standalone .ax-swatch-strip {
+    display: none;
+  }
+
+  .ax-color-tool-layout[data-toolbar-variant="sticky-on-scroll"] .ax-toolbar-standalone .ax-palette-name {
+    display: flex;
+  }
 }
 
 .ax-shell-slot:focus-within {
@@ -172,12 +164,6 @@
   .ax-shell-slot {
     order: unset;
     grid-area: auto;
-  }
-
-  .ax-shell-slot--topbar {
-    position: relative;
-    top: unset;
-    z-index: unset;
   }
 
   .ax-shell-slot--sidebar {

@@ -1,16 +1,104 @@
 import { createTag, getLibs } from '../../scripts/utils.js';
-import { trackColorBlockLoad } from '../../scripts/instrument.js';
-import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
-import { createExpressTabs } from '../../scripts/color-shared/spectrum/components/express-tabs.js';
-import createColorWheelExpressAdapter from '../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js';
-import createBaseColorAdapter from '../../scripts/color-shared/adapters/createBaseColorAdapter.js';
-import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
-import ColorThemeExpressController, { randomHex } from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
-import createSimpleCarousel from '../../scripts/widgets/simple-carousel.js';
-import createImageExtractComponent from './createImageExtractComponent.js';
-import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
-import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
+import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
+
+// CSS deps previously loaded via @import (serial waterfall). Injecting <link>
+// elements at module evaluation starts downloads in parallel with the heavy JS
+// imports below — no need to await a loadStyle helper first.
+const CSS_DEPS = [
+  '/express/code/scripts/color-shared/components/strips/color-strip.css',
+  '/express/code/scripts/color-shared/components/image-upload/image-upload.css',
+  '/express/code/blocks/color-wheel/image-extract.css',
+];
+CSS_DEPS.forEach((href) => {
+  if (!document.querySelector(`link[href="${href}"]`)) {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = href;
+    document.head.appendChild(link);
+  }
+});
+
+// Module-level refs populated by loadHeavyModules(). Existing helper functions
+// (buildHarmonySelector, buildTabs, etc.) reference these directly.
+let trackColorBlockLoad;
+let createColorToolLayout;
+let createExpressTabs;
+let createColorWheelExpressAdapter;
+let createBaseColorAdapter;
+let createStripContainerRenderer;
+let ColorThemeExpressController;
+let randomHex;
+let createSimpleCarousel;
+let createImageExtractComponent;
+let createExpressTooltip;
+
+// All imports start downloading in parallel at module evaluation time.
+// They are split into groups so loadHeavyModules() can yield between
+// evaluation phases — spreading the JS evaluation cost across multiple tasks
+// to reduce TBT on throttled-CPU environments (e.g. Lighthouse desktop).
+// NOTE: Per-module yields (one yield per import) was tested and INCREASED
+// TBT from 420ms to 920ms — the scheduling overhead and lost batch-evaluation
+// of shared Spectrum dependencies outweighed the finer granularity.
+const heavyModulesPromise1 = Promise.all([
+  import('../../scripts/instrument.js'),
+  import('../../scripts/color-shared/controllers/ColorThemeExpressController.js'),
+  import('../../scripts/widgets/simple-carousel.js'),
+]);
+// Layout shell + tabs: register the outer Spectrum chrome first
+const heavyModulesPromise2a = Promise.all([
+  import('../../scripts/color-shared/shell/layouts/createColorToolLayout.js'),
+  import('../../scripts/color-shared/spectrum/components/express-tabs.js'),
+]);
+// Color adapters + strip renderer: the core interaction layer
+const heavyModulesPromise2b = Promise.all([
+  import('../../scripts/color-shared/adapters/createColorWheelExpressAdapter.js'),
+  import('../../scripts/color-shared/adapters/createBaseColorAdapter.js'),
+  import('../../scripts/color-shared/renderers/createStripContainerRenderer.js'),
+]);
+// Image extract + tooltip: used only when switching tabs or on desktop hover
+const heavyModulesPromise2c = Promise.all([
+  import('./createImageExtractComponent.js'),
+  import('../../scripts/color-shared/spectrum/components/express-tooltip.js'),
+]);
+
+// Always yields to a new task — uses scheduler.yield() when available,
+// falls back to setTimeout(0) so the boundary is guaranteed in all runtimes.
+function yieldToMain() {
+  if ('scheduler' in window && 'yield' in window.scheduler) {
+    return window.scheduler.yield();
+  }
+  return new Promise((resolve) => { setTimeout(resolve, 0); });
+}
+
+async function loadHeavyModules() {
+  const [a, g, h] = await heavyModulesPromise1;
+  trackColorBlockLoad = a.trackColorBlockLoad;
+  ColorThemeExpressController = g.default;
+  randomHex = g.randomHex;
+  createSimpleCarousel = h.default;
+
+  // Yield between each sub-group so Spectrum/Lit web-component evaluation
+  // is spread across separate tasks rather than one 350ms+ burst.
+  await yieldToMain();
+
+  const [b, c] = await heavyModulesPromise2a;
+  createColorToolLayout = b.default;
+  createExpressTabs = c.createExpressTabs;
+
+  await yieldToMain();
+
+  const [d, e, f] = await heavyModulesPromise2b;
+  createColorWheelExpressAdapter = d.default;
+  createBaseColorAdapter = e.default;
+  createStripContainerRenderer = f.createStripContainerRenderer;
+
+  await yieldToMain();
+
+  const [i, j] = await heavyModulesPromise2c;
+  createImageExtractComponent = i.default;
+  createExpressTooltip = j.createExpressTooltip;
+}
 
 async function loadPlaceholders() {
   const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
@@ -119,23 +207,21 @@ const HARMONY_ALLOWED_FOR_THREE = new Set([
   'SPLIT_COMPLEMENTARY', 'SHADES',
 ]);
 const HARMONY_CAROUSEL_ACTIVE_CLASS = 'color-wheel-harmony-option--selected';
-const DEFAULT_ACTION_MENU_CONFIG = {
-  id: 'color-wheel-action-menu',
-  activeId: 'palette',
-  navLinks: [
-    { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
-    { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/contrast-checker' },
-    { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/express/colors/color-blindness-simulator' },
-  ],
-  controls: [
-    { id: 'undo', label: 'Undo' },
-    { id: 'redo', label: 'Redo' },
-    { id: 'generate-random', label: 'Generate random' },
-    { id: 'expand', label: 'Maximize' },
-  ],
-};
+const ACTION_MENU_ID = 'color-wheel-action-menu';
+
+function buildDefaultActionMenuConfig(strings) {
+  return {
+    id: ACTION_MENU_ID,
+    activeId: 'palette',
+    navLinks: [
+      { id: 'palette', label: strings.createPalette, href: '/create/color-wheel' },
+      { id: 'contrast', label: strings.contrastChecker, href: '/create/color-contrast-analyzer' },
+      { id: 'color-blindness', label: strings.colorBlindnessSimulator, href: '/create/color-accessibility' },
+    ],
+  };
+}
 const THEME_NAME = 'My Color Theme';
-const HISTORY_EVENT = `${DEFAULT_ACTION_MENU_CONFIG.id}:history-index-changed`;
+const HISTORY_EVENT = `${ACTION_MENU_ID}:history-index-changed`;
 const HISTORY_SKIP_SOURCES = new Set(['active-index', 'metadata', 'base-index']);
 let harmonyCarouselCleanup = null;
 let harmonyStateUnsubscribe = null;
@@ -241,6 +327,7 @@ async function buildHarmonySelector(controller, strings = {}) {
         'data-harmony-value': value,
         tabindex: '-1',
       });
+      decorateAnalyticsAttributes(btn, { linkLabel: `${getHarmonyLabel(value)} harmony` });
       const img = createTag('img', {
         src: `${HARMONY_THUMB_BASE}/${thumb}`,
         alt: '',
@@ -388,7 +475,8 @@ function buildPrimaryColorContent(controller) {
   primaryColorAdapter = null;
 
   const state = controller.getState();
-  const baseColor = swatchHexListFromState(state)[0];
+  const baseColorIndex = state.baseColorIndex ?? 0;
+  const baseColor = state.swatches?.[baseColorIndex]?.hex || '#FF0000';
   const adapter = createBaseColorAdapter(
     baseColor,
     'HEX',
@@ -396,7 +484,6 @@ function buildPrimaryColorContent(controller) {
       onColorChange: (detail) => {
         if (!detail?.hex) return;
         controller.setBaseColor(detail.hex);
-        controller.setSwatchHex(0, detail.hex);
       },
       onColorChangeEnd: () => {
         // eslint-disable-next-line no-underscore-dangle
@@ -406,10 +493,11 @@ function buildPrimaryColorContent(controller) {
         const locked = detail?.locked;
         const current = swatchRailController?.getState?.()?.lockedByIndex || new Set();
         const next = new Set(current);
+        const currentBaseIndex = controller.getState().baseColorIndex ?? 0;
         if (locked) {
-          next.add(0);
+          next.add(currentBaseIndex);
         } else {
-          next.delete(0);
+          next.delete(currentBaseIndex);
         }
         swatchRailController?.setState?.({ lockedByIndex: next });
       },
@@ -447,19 +535,23 @@ async function buildColorWheelContent(controller, strings) {
 }
 
 async function buildTabs(controller, suggestionsRow, { onSelectionChange, strings = {} } = {}) {
-  const tabsInstance = await createExpressTabs({
-    selected: 'color-wheel',
-    size: 'm',
-    quiet: true,
-    tabs: [
-      { label: strings.tabPrimaryColor || 'Primary color', value: 'primary-color', iconSlotHtml: PRIMARY_COLOR_ICON },
-      { label: strings.tabImage || 'Image', value: 'image', spIcon: 'sp-icon-image' },
-      { label: strings.tabColorWheel || 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
-    ],
-    onSelectionChange,
-  });
+  // Create the tabs shell and the color-wheel panel content in parallel
+  const [tabsInstance, cwContent] = await Promise.all([
+    createExpressTabs({
+      selected: 'color-wheel',
+      size: 'm',
+      quiet: true,
+      tabs: [
+        { label: strings.tabPrimaryColor || 'Primary color', value: 'primary-color', iconSlotHtml: PRIMARY_COLOR_ICON },
+        { label: strings.tabImage || 'Image', value: 'image', spIcon: 'sp-icon-image' },
+        { label: strings.tabColorWheel || 'Color Wheel', value: 'color-wheel', iconSlotHtml: COLOR_WHEEL_ICON },
+      ],
+      onSelectionChange,
+    }),
+    buildColorWheelContent(controller, strings),
+  ]);
 
-  tabsInstance.addPanel('color-wheel', await buildColorWheelContent(controller, strings));
+  tabsInstance.addPanel('color-wheel', cwContent);
   tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings));
   tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller));
 
@@ -523,7 +615,12 @@ function createSwatchRailControllerBridge(controller) {
         } else {
           incoming = [];
         }
+        const prevSize = lockedByIndex.size;
         lockedByIndex = new Set(incoming.filter((index) => Number.isInteger(index) && index >= 0));
+        const lockAdded = lockedByIndex.size > prevSize;
+        if (lockAdded && controller.getState().harmonyRule !== 'CUSTOM') {
+          controller.setHarmonyRule('CUSTOM');
+        }
       }
 
       const current = controller.getState();
@@ -542,9 +639,36 @@ function createSwatchRailControllerBridge(controller) {
           ? Math.min(Math.max(0, requestedBase), nextHexes.length - 1)
           : 0;
 
+        const currentHexes = (current.swatches || []).map((s) => (s?.hex || '').toUpperCase());
+        const sameLength = nextHexes.length === currentHexes.length;
+
+        // If only the base color changed, use setSwatchHex so the harmony engine
+        // recalculates the non-base colors via onBaseColorChange().
+        const onlyBaseChanged = sameLength
+          && !Object.prototype.hasOwnProperty.call(next, 'baseColorIndex')
+          && nextHexes[clampedBase] !== currentHexes[clampedBase]
+          && nextHexes.every((hex, i) => i === clampedBase || hex === currentHexes[i]);
+        if (onlyBaseChanged) {
+          if (Object.prototype.hasOwnProperty.call(next, 'tintIndex')) {
+            tintIndex = Number.isInteger(next.tintIndex) ? next.tintIndex : null;
+          }
+          controller.setSwatchHex(clampedBase, nextHexes[clampedBase]);
+          return;
+        }
+
+        // If a non-base color changed and a harmony is active, switch to CUSTOM
+        // because the palette no longer follows the harmony rule.
+        const currentHarmony = current.harmonyRule || 'CUSTOM';
+        let nextHarmonyRule = currentHarmony;
+        if (currentHarmony !== 'CUSTOM') {
+          const nonBaseChanged = nextHexes.some((hex, i) => (
+            i !== clampedBase && hex !== currentHexes[i]));
+          if (nonBaseChanged) nextHarmonyRule = 'CUSTOM';
+        }
+
         controller.replaceSwatchesFromHexes(nextHexes, {
           baseIndex: clampedBase,
-          harmonyRule: current.harmonyRule || 'CUSTOM',
+          harmonyRule: nextHarmonyRule,
         });
 
         if (requestedBase == null) {
@@ -646,18 +770,30 @@ export default async function decorate(block) {
   async function init() {
     // Save before clearing — adoptHeadline uses document.querySelector and would lose it otherwise
     const headline = document.querySelector('.color-headline.tools');
-    cleanup();
-    block.innerHTML = '';
+    // On re-init (breakpoint change), tear down immediately to prevent two layouts running in
+    // parallel. On first load, keep authored content visible during the async stall so the block
+    // doesn't show as a blank white area while placeholders and CSS load.
+    const isReinit = !!layoutInstance;
+    if (isReinit) {
+      cleanup();
+      block.innerHTML = '';
+    }
     block.className = 'color-wheel';
-    const section = createTag('section');
-    block.appendChild(section);
-    if (headline) section.appendChild(headline);
 
     try {
       const [strings, { getResolvedPalette, getResolvedPaletteName }] = await Promise.all([
         loadPlaceholders(),
         Promise.resolve(createColorPaletteParamApi()),
+        loadHeavyModules(),
       ]);
+
+      // First load: authored content was preserved during the async wait; clear it now
+      if (!isReinit) {
+        cleanup();
+        block.innerHTML = '';
+      }
+      const section = createTag('section');
+      block.appendChild(section);
       const initialPalette = currentPalette || {
         name: getResolvedPaletteName() || THEME_NAME,
         colors: getResolvedPalette(),
@@ -674,24 +810,19 @@ export default async function decorate(block) {
       let activeHarmonyRule = controller.getState().harmonyRule || 'CUSTOM';
 
       const isDesktop = desktopQuery.matches;
+      const defaultActionMenuConfig = buildDefaultActionMenuConfig(strings);
 
       layoutInstance = await createColorToolLayout(section, {
         palette: initialPalette,
         toolbar: {
-          variant: 'standalone',
-          mode: 'sticky-on-scroll',
-          showEdit: !isDesktop,
+          variant: 'sticky-on-scroll',
+          showEdit: false,
           showPalette: true,
           showPaletteName: true,
           editPaletteName: true,
         },
         actionMenu: {
-          ...DEFAULT_ACTION_MENU_CONFIG,
-          navLinks: [
-            { id: 'palette', label: strings.createPalette, href: '/express/colors/color-palette-generator' },
-            { id: 'contrast', label: strings.contrastChecker, href: '/express/colors/contrast-checker' },
-            { id: 'color-blindness', label: strings.colorBlindnessSimulator, href: '/express/colors/color-blindness-simulator' },
-          ],
+          ...defaultActionMenuConfig,
           controls: [
             { id: 'undo', label: strings.undo },
             { id: 'redo', label: strings.redo },
@@ -705,6 +836,7 @@ export default async function decorate(block) {
             // If no HISTORY_EVENT fires (e.g. all colors locked, palette unchanged),
             // reset the flag so it doesn't corrupt the next undo/redo
             queueMicrotask(() => { isGeneratingRandom = false; });
+            primaryColorAdapter?.element?.resetOriginalColor?.();
           },
           transformPalette: makeTransformPalette(
             () => activeHarmonyRule,
@@ -753,9 +885,34 @@ export default async function decorate(block) {
         },
       });
 
-      adoptHeadline(section, layoutInstance);
-      await layoutInstance.actionMenuReady;
+      const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
+      layoutInstance.slots.canvas.appendChild(stripHost);
 
+      let activeTab = 'color-wheel';
+
+      const updateBaseColorBadge = () => {
+        const hide = activeTab !== 'color-wheel' || activeHarmonyRule === 'CUSTOM';
+        stripHost.querySelectorAll('color-swatch-rail').forEach((rail) => {
+          rail.hideBaseColorBadge = hide;
+        });
+      };
+
+      // actionMenuReady and buildTabs are independent — resolve in parallel
+      const [, tabs] = await Promise.all([
+        layoutInstance.actionMenuReady,
+        buildTabs(controller, suggestionsRow?.cloneNode(true), {
+          onSelectionChange: ({ selected }) => {
+            activeTab = selected;
+            updateBaseColorBadge();
+            if (selected !== 'color-wheel') {
+              controller.setHarmonyRule('CUSTOM');
+            }
+          },
+          strings,
+        }),
+      ]);
+
+      // Both resolved — wire up action menu history and append tabs
       const actionMenuApi = layoutInstance.actionMenu;
       let restoringFromHistory = false;
       let pushingState = false;
@@ -815,30 +972,6 @@ export default async function decorate(block) {
         clearTimeout(historyDebounceTimer);
       };
 
-      const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
-      layoutInstance.slots.canvas.appendChild(stripHost);
-
-      let activeTab = 'color-wheel';
-
-      const updateBaseColorBadge = () => {
-        const hide = activeTab !== 'color-wheel' || activeHarmonyRule === 'CUSTOM';
-        const hideLock = activeTab === 'color-wheel' && activeHarmonyRule !== 'CUSTOM';
-        stripHost.querySelectorAll('color-swatch-rail').forEach((rail) => {
-          rail.hideBaseColorBadge = hide;
-          rail.hideLock = hideLock;
-        });
-      };
-
-      const tabs = await buildTabs(controller, suggestionsRow?.cloneNode(true), {
-        onSelectionChange: ({ selected }) => {
-          activeTab = selected;
-          updateBaseColorBadge();
-          if (selected !== 'color-wheel') {
-            controller.setHarmonyRule('CUSTOM');
-          }
-        },
-        strings,
-      });
       tabs.setPanelEntryFocus('primary-color', () => {
         primaryColorAdapter?.element?.shadowRoot?.querySelector('.bc-mode-trigger')?.focus();
       });
@@ -851,11 +984,12 @@ export default async function decorate(block) {
         const { createActionMenuComponent } = await import('../../scripts/color-shared/components/createActionMenuComponent.js');
 
         const actionMenu = await createActionMenuComponent({
-          ...DEFAULT_ACTION_MENU_CONFIG,
+          ...defaultActionMenuConfig,
           type: 'controls-only',
           onGenerateRandom: () => {
             isGeneratingRandom = true;
             queueMicrotask(() => { isGeneratingRandom = false; });
+            primaryColorAdapter?.element?.resetOriginalColor?.();
           },
           transformPalette: makeTransformPalette(
             () => activeHarmonyRule,
@@ -873,7 +1007,7 @@ export default async function decorate(block) {
       stripRenderer = createStripContainerRenderer({
         container: stripHost,
         data: [swatchRailController],
-        mobileBreakpointQuery: '(max-width: 1199px)',
+        mobileBreakpointQuery: '(max-width: 599px)',
         config: {
           stripContainerOrientations: ['vertical-responsive'],
           swatchFeatures: {
@@ -903,8 +1037,12 @@ export default async function decorate(block) {
       const badgeRuleUnsubscribe = controller.subscribe((state) => {
         const rule = state.harmonyRule || 'CUSTOM';
         if (rule !== activeHarmonyRule) {
+          const wasCustom = activeHarmonyRule === 'CUSTOM';
           activeHarmonyRule = rule;
           updateBaseColorBadge();
+          if (wasCustom && rule !== 'CUSTOM') {
+            swatchRailController?.setState?.({ lockedByIndex: new Set() });
+          }
         }
       });
       const prevHistoryCleanup = historyCleanup;
@@ -942,14 +1080,17 @@ export default async function decorate(block) {
       paletteUnsubscribe = controller.subscribe((state) => {
         currentPalette = paletteFromThemeState(state);
         layoutInstance?.context?.set('palette', currentPalette);
-        const firstHex = swatchHexListFromState(state)[0];
+        const baseIdx = state.baseColorIndex ?? 0;
+        const baseHex = state.swatches?.[baseIdx]?.hex;
         const currentColor = primaryColorAdapter?.element?.color;
-        if (primaryColorAdapter?.setColor && firstHex
-          && String(currentColor).toUpperCase() !== String(firstHex).toUpperCase()) {
-          primaryColorAdapter.setColor(firstHex);
+        if (primaryColorAdapter?.setColor && baseHex
+          && String(currentColor).toUpperCase() !== String(baseHex).toUpperCase()) {
+          primaryColorAdapter.setColor(baseHex);
         }
       });
 
+      if (headline) section.appendChild(headline);
+      adoptHeadline(section, layoutInstance);
       block.classList.add('ax-shell-host');
       block.dataset.shellState = 'ready';
       trackColorBlockLoad('color-wheel');
