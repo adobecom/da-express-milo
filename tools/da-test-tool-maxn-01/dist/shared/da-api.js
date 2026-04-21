@@ -1,36 +1,21 @@
 export const DA_ADMIN = 'https://admin.da.live';
 
-const AEM_ADMIN = 'https://admin.hlx.page';
-const STATUS_BATCH_SIZE = 5;
-const STATUS_BATCH_MS = 500; // 5 req per 500ms = 10 req/sec, within the AEM Admin rate limit
+// aem.live is the public CDN for published AEM Edge Delivery content.
+// HEAD requests require no auth and have a 200 req/sec rate limit.
+// admin.hlx.page was tried first but has CORS restrictions that block browser requests from non-production origins.
+const STATUS_BATCH_SIZE = 20;
+const STATUS_BATCH_MS = 200; // 20 req per 200ms = 100 req/sec, well under the 200 req/sec aem.live limit
 
-function daPathToStatusUrl(daPath) {
-  // /adobecom/da-express-milo/express/foo/bar.html → https://admin.hlx.page/status/adobecom/da-express-milo/main/express/foo/bar
+function daPathToLiveUrl(daPath) {
+  // /adobecom/da-express-milo/express/foo/bar.html → https://main--da-express-milo--adobecom.aem.live/express/foo/bar
   const parts = daPath.split('/').filter(Boolean);
   const [org, repo, ...rest] = parts;
-  const contentPath = rest.join('/').replace(/\.html$/, '');
-  return `${AEM_ADMIN}/status/${org}/${repo}/main/${contentPath}`;
+  const contentPath = `/${rest.join('/').replace(/\.html$/, '')}`;
+  return `https://main--${repo}--${org}.aem.live${contentPath}`;
 }
 
-async function probeAuthMode(url, token) {
-  let resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-  if (resp.ok || resp.status === 404) return 'bearer';
-  if (resp.status === 401) {
-    resp = await fetch(url, { credentials: 'include' });
-    if (resp.ok || resp.status === 404) return 'credentials';
-  }
-  return null;
-}
-
-export async function fetchPublishedPaths(paths, token, onProgress) {
+export async function fetchPublishedPaths(paths, _token, onProgress) {
   if (paths.length === 0) return [];
-
-  const authMode = await probeAuthMode(daPathToStatusUrl(paths[0]), token);
-  if (!authMode) throw new Error('Status unavailable: authentication failed for admin.hlx.page.');
-
-  const fetchOpts = authMode === 'bearer'
-    ? { headers: { Authorization: `Bearer ${token}` } }
-    : { credentials: 'include' };
 
   const published = [];
   for (let i = 0; i < paths.length; i += STATUS_BATCH_SIZE) {
@@ -39,10 +24,8 @@ export async function fetchPublishedPaths(paths, token, onProgress) {
     // eslint-disable-next-line no-await-in-loop
     const results = await Promise.all(batch.map(async (path) => {
       try {
-        const resp = await fetch(daPathToStatusUrl(path), fetchOpts);
-        if (!resp.ok) return null;
-        const data = await resp.json();
-        return data.publishLastModified ? path : null;
+        const resp = await fetch(daPathToLiveUrl(path), { method: 'HEAD' });
+        return resp.ok ? path : null;
       } catch { return null; }
     }));
     for (const p of results) if (p) published.push(p);
