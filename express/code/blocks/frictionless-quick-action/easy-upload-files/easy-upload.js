@@ -648,8 +648,8 @@ function attachSecondaryCtaHandler(block, qrPane, createTag, showErrorToast) {
     return;
   }
 
-  const ctas = dropzone.querySelectorAll('a.button, a.con-button');
-  const secondaryCta = ctas[1];
+  const secondaryButtonContainer = dropzone.querySelector('.easy-upload-cta-row > p.button-container:nth-child(2)');
+  const secondaryCta = secondaryButtonContainer?.querySelector('a.button, a.con-button');
   if (!secondaryCta) {
     return;
   }
@@ -657,6 +657,7 @@ function attachSecondaryCtaHandler(block, qrPane, createTag, showErrorToast) {
   const handleSecondaryCta = async (event) => {
     event.preventDefault();
     event.stopPropagation();
+    event.stopImmediatePropagation();
     navigateToQrPane(block);
     await initializeQrPane(block, qrPane, createTag, showErrorToast);
   };
