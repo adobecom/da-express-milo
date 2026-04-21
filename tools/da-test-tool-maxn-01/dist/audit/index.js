@@ -1,7 +1,7 @@
 /* eslint-disable import/no-unresolved */
 import DA_SDK from 'https://da.live/nx/utils/sdk.js';
 /* eslint-enable import/no-unresolved */
-import { collectDocs, cat, readJson, writeJson } from '../shared/da-api.js';
+import { collectDocs, cat, readJson, writeJson, fetchPublishedPaths } from '../shared/da-api.js';
 
 const SCAN_ROOT = '/adobecom/da-express-milo/express';
 const AUDIT_DATA_PATH = '/adobecom/da-express-milo/drafts/da-test-tool-maxn-01/audit-results.json';
@@ -10,6 +10,7 @@ const GITHUB_MILO_API = 'https://api.github.com/repos/adobecom/milo/contents/lib
 const BATCH_SIZE = 10;
 
 const $scanBtn = document.getElementById('scan-btn');
+const $statusBtn = document.getElementById('status-btn');
 const $lastScanned = document.getElementById('last-scanned');
 const $status = document.getElementById('status');
 const $blockCount = document.getElementById('block-count');
@@ -68,7 +69,7 @@ function repoBlocksFromStored(stored) {
   };
 }
 
-function renderResults(data, repoBlocks) {
+function renderResults(data, repoBlocks, publishedSet) {
   const { express: expressBlocks, milo: miloBlocks } = repoBlocks;
   const allRepoBlocks = new Set([...expressBlocks, ...miloBlocks]);
 
@@ -119,7 +120,9 @@ function renderResults(data, repoBlocks) {
 
     const countSpan = document.createElement('span');
     countSpan.className = 'summary-count';
-    countSpan.textContent = ` — ${paths.length} use${paths.length !== 1 ? 's' : ''}`;
+    const pubCount = publishedSet ? paths.filter((p) => publishedSet.has(p)).length : null;
+    const pubSuffix = pubCount !== null ? ` <span class="published-count">(${pubCount} published)</span>` : '';
+    countSpan.innerHTML = ` — ${paths.length} use${paths.length !== 1 ? 's' : ''}${pubSuffix}`;
     left.appendChild(countSpan);
 
     summary.appendChild(left);
@@ -129,6 +132,13 @@ function renderResults(data, repoBlocks) {
     for (const path of paths) {
       const li = document.createElement('li');
       li.textContent = path;
+      if (publishedSet && publishedSet.has(path)) {
+        const badge = document.createElement('span');
+        badge.className = 'published-badge';
+        badge.title = 'Published';
+        badge.textContent = '●';
+        li.appendChild(badge);
+      }
       ul.appendChild(li);
     }
     details.appendChild(summary);
@@ -196,8 +206,27 @@ async function runScan(token) {
   return data;
 }
 
+// Collect all unique doc paths across all blocks in the data object
+function allDocPaths(data) {
+  const seen = new Set();
+  for (const paths of Object.values(data.blocks)) {
+    for (const p of paths) seen.add(p);
+  }
+  return [...seen];
+}
+
 (async function init() {
   const { token } = await DA_SDK;
+
+  let currentData = null;
+
+  function showResults(data, repoBlocks) {
+    currentData = data;
+    const publishedSet = data.publishedPaths ? new Set(data.publishedPaths) : null;
+    renderResults(data, repoBlocks, publishedSet);
+    $statusBtn.style.display = '';
+    $statusBtn.textContent = data.publishedPaths ? 'Refresh Status' : 'Check Status';
+  }
 
   $status.textContent = 'Loading…';
   const cached = await readJson(AUDIT_DATA_PATH, token);
@@ -205,21 +234,44 @@ async function runScan(token) {
   if (cached) {
     $lastScanned.textContent = `Last scanned: ${new Date(cached.scannedAt).toLocaleString()}`;
     $scanBtn.textContent = 'Rescan';
-    renderResults(cached, repoBlocksFromStored(cached.repoBlocks || {}));
+    showResults(cached, repoBlocksFromStored(cached.repoBlocks || {}));
   }
   $status.textContent = '';
 
   $scanBtn.addEventListener('click', async () => {
     $scanBtn.disabled = true;
+    $statusBtn.style.display = 'none';
     try {
       const data = await runScan(token);
       $lastScanned.textContent = `Last scanned: ${new Date(data.scannedAt).toLocaleString()}`;
       $scanBtn.textContent = 'Rescan';
       $status.textContent = '';
-      renderResults(data, repoBlocksFromStored(data.repoBlocks));
+      showResults(data, repoBlocksFromStored(data.repoBlocks));
     } catch (err) {
       $status.textContent = `Error: ${err.message}`;
     } finally {
+      $scanBtn.disabled = false;
+    }
+  });
+
+  $statusBtn.addEventListener('click', async () => {
+    if (!currentData) return;
+    $statusBtn.disabled = true;
+    $scanBtn.disabled = true;
+    try {
+      const paths = allDocPaths(currentData);
+      const publishedPaths = await fetchPublishedPaths(paths, token, (done, total) => {
+        $status.textContent = `Checking status… ${done} / ${total}`;
+      });
+      currentData = { ...currentData, statusCheckedAt: new Date().toISOString(), publishedPaths };
+      $status.textContent = 'Saving status results…';
+      await writeJson(AUDIT_DATA_PATH, currentData, token);
+      $status.textContent = '';
+      showResults(currentData, repoBlocksFromStored(currentData.repoBlocks || {}));
+    } catch (err) {
+      $status.textContent = `Error: ${err.message}`;
+    } finally {
+      $statusBtn.disabled = false;
       $scanBtn.disabled = false;
     }
   });

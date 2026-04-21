@@ -67,6 +67,8 @@
         list-style: none;
       }
       .block-paths li { padding: 0.12rem 0; color: #555; }
+      .published-badge { color: #2d9e2d; margin-left: 0.4em; font-size: 0.85em; }
+      .published-count { color: #2d9e2d; font-weight: 400; }
     </style>
     <script src="https://da.live/nx/utils/sdk.js" type="module"></script>
     <script src="./index.js" type="module"></script>
@@ -76,6 +78,7 @@
     <h2>Block Index</h2>
     <div class="toolbar">
       <button id="scan-btn">Run Scan</button>
+      <button id="status-btn" style="display:none">Check Status</button>
       <span id="last-scanned" class="meta"></span>
     </div>
     <p id="status"></p>

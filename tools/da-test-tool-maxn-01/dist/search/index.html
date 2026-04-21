@@ -22,6 +22,7 @@
       button { padding: 0.4rem 1rem; cursor: pointer; }
       #status { color: #555; margin-bottom: 0.5rem; min-height: 1.2em; }
       #results li { font-family: monospace; margin: 0.2rem 0; }
+      .published-badge { color: #2d9e2d; margin-left: 0.4em; font-size: 0.85em; }
     </style>
     <script src="https://da.live/nx/utils/sdk.js" type="module"></script>
     <script src="./index.js" type="module"></script>
@@ -35,5 +36,6 @@
     </form>
     <p id="status"></p>
     <ul id="results"></ul>
+    <button id="status-btn" style="display:none">Check Status</button>
   </body>
 </html>

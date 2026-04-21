@@ -1,13 +1,14 @@
 /* eslint-disable import/no-unresolved */
 import DA_SDK from 'https://da.live/nx/utils/sdk.js';
 /* eslint-enable import/no-unresolved */
-import { collectDocs, cat } from '../shared/da-api.js';
+import { collectDocs, cat, fetchPublishedPaths } from '../shared/da-api.js';
 
 const SCAN_ROOT = '/adobecom/da-express-milo/express';
 const BATCH_SIZE = 10;
 
 const $status = document.getElementById('status');
 const $results = document.getElementById('results');
+const $statusBtn = document.getElementById('status-btn');
 const $form = document.getElementById('search-form');
 
 function docContainsBlock(html, blockName) {
@@ -52,6 +53,7 @@ async function scanDocs(paths, blockName, token) {
         if (docContainsBlock(html, blockName)) {
           const li = document.createElement('li');
           li.textContent = path;
+          li.dataset.path = path;
           $results.appendChild(li);
         }
         return 0;
@@ -79,6 +81,8 @@ async function scanDocs(paths, blockName, token) {
     if (!blockName) return;
 
     $form.querySelector('button').disabled = true;
+    $statusBtn.style.display = 'none';
+    $statusBtn.textContent = 'Check Status';
     $results.innerHTML = '';
     $status.textContent = 'Traversing /express directory tree…';
 
@@ -86,9 +90,39 @@ async function scanDocs(paths, blockName, token) {
       const docs = await collectDocs(SCAN_ROOT, token);
       $status.textContent = `Found ${docs.length} documents. Scanning for "${blockName}"…`;
       await scanDocs(docs, blockName, token);
+      if ($results.children.length > 0) $statusBtn.style.display = '';
     } catch (err) {
       $status.textContent = `Error: ${err.message}`;
     } finally {
+      $form.querySelector('button').disabled = false;
+    }
+  });
+
+  $statusBtn.addEventListener('click', async () => {
+    const paths = [...$results.querySelectorAll('li')].map((li) => li.dataset.path);
+    if (paths.length === 0) return;
+    $statusBtn.disabled = true;
+    $form.querySelector('button').disabled = true;
+    try {
+      const publishedPaths = await fetchPublishedPaths(paths, token, (done, total) => {
+        $statusBtn.textContent = `Checking… ${done} / ${total}`;
+      });
+      const publishedSet = new Set(publishedPaths);
+      for (const li of $results.querySelectorAll('li')) {
+        if (publishedSet.has(li.dataset.path) && !li.querySelector('.published-badge')) {
+          const badge = document.createElement('span');
+          badge.className = 'published-badge';
+          badge.title = 'Published';
+          badge.textContent = '●';
+          li.appendChild(badge);
+        }
+      }
+      $statusBtn.textContent = 'Refresh Status';
+    } catch (err) {
+      $status.textContent = `Error: ${err.message}`;
+      $statusBtn.textContent = 'Check Status';
+    } finally {
+      $statusBtn.disabled = false;
       $form.querySelector('button').disabled = false;
     }
   });
