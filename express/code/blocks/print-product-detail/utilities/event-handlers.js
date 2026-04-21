@@ -1,3 +1,5 @@
+/* eslint-disable import/no-cycle */
+import { getLibs } from '../../../scripts/utils.js';
 import fetchAPIData, {
   fetchUIStrings,
 } from '../fetchData/fetchProductDetails.js';
@@ -133,9 +135,8 @@ function createUpdatedSelectedValuesObject(
 }
 
 export default async function updateAllDynamicElements(productId) {
-  const { templateId } = document.querySelector(
-    '.pdpx-global-container',
-  ).dataset;
+  const containerElement = document.querySelector('.pdpx-global-container');
+  const { templateId } = containerElement.dataset;
   const form = document.querySelector('#pdpx-customization-inputs-form');
   const formData = new FormData(form);
   const formDataObject = Object.fromEntries(formData.entries());
@@ -205,4 +206,8 @@ export default async function updateAllDynamicElements(productId) {
     attributes: updatedConfigurationOptions.product.attributes,
     formData: formDataObject,
   });
+  const { decorateDefaultLinkAnalytics } = await import(`${getLibs()}/martech/attributes.js`);
+  const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+  const config = getConfig();
+  decorateDefaultLinkAnalytics(containerElement, config);
 }

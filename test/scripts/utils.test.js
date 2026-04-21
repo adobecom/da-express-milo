@@ -2,7 +2,13 @@ import { expect } from '@esm-bundle/chai';
 import { readFile } from '@web/test-runner-commands';
 import sinon from 'sinon';
 import { mockRes } from '../blocks/test-utilities.js';
-import { setLibs, hideQuickActionsOnDevices, getIconElementDeprecated, convertToInlineSVG, createInjectableLogo } from '../../express/code/scripts/utils.js';
+import {
+  setLibs,
+  hideQuickActionsOnDevices,
+  getIconElementDeprecated,
+  convertToInlineSVG,
+  getContentRoot,
+} from '../../express/code/scripts/utils.js';
 import { transformLinkToAnimation } from '../../express/code/scripts/utils/media.js';
 
 describe('Libs', () => {
@@ -45,6 +51,14 @@ describe('Libs', () => {
     };
     const libs = setLibs('/libs', location);
     expect(libs).to.equal('https://awesome--milo--forkedowner.aem.live/libs');
+  });
+
+  it('Uses stage libs on stage', () => {
+    const location = {
+      hostname: 'www.stage.adobe.com',
+    };
+    const libs = setLibs('/libs', location);
+    expect(libs).to.equal('/libs');
   });
 });
 
@@ -218,8 +232,8 @@ describe('transformLinkToAnimation', () => {
 
     const result = transformLinkToAnimation(invalidLink);
     expect(result).to.be.null;
-    expect(window.lana.log.calledOnce).to.be.true;
-    expect(window.lana.log.firstCall.args[0]).to.equal('Invalid video URL in transformLinkToAnimation:');
+    expect(window.lana?.log.calledOnce).to.be.true;
+    expect(window.lana?.log.firstCall.args[0]).to.equal('Invalid video URL in transformLinkToAnimation:');
 
     // Restore original lana and URL
     window.lana = originalLana;
@@ -245,345 +259,32 @@ describe('transformLinkToAnimation', () => {
 
     const result = transformLinkToAnimation(problematicLink);
     expect(result).to.be.null;
-    expect(window.lana.log.calledOnce).to.be.true;
-    expect(window.lana.log.firstCall.args[0]).to.equal('Error in transformLinkToAnimation:');
+    expect(window.lana?.log.calledOnce).to.be.true;
+    expect(window.lana?.log.firstCall.args[0]).to.equal('Error in transformLinkToAnimation:');
 
     // Restore original lana
     window.lana = originalLana;
   });
 });
 
-describe('createInjectableLogo', () => {
-  let mockGetMetadata;
-  let originalLana;
-
-  beforeEach(() => {
-    // Mock lana for logging
-    originalLana = window.lana;
-    window.lana = {
-      log: sinon.spy(),
-    };
-
-    // Create a mock getMetadata function
-    mockGetMetadata = sinon.stub();
-
-    // Clean up any existing metadata tags
-    document.querySelectorAll('meta[name^="marquee-inject"]').forEach((meta) => meta.remove());
-  });
-
-  afterEach(() => {
-    window.lana = originalLana;
-  });
-
-  describe('validation and metadata checks', () => {
-    it('should return null if getMetadata function is not provided', () => {
-      const block = document.createElement('div');
-      block.className = 'ax-marquee';
-
-      const logo = createInjectableLogo(block, null, {});
-
-      expect(logo).to.be.null;
-      expect(window.lana.log.calledOnce).to.be.true;
-      expect(window.lana.log.firstCall.args[0]).to.equal('createInjectableLogo: getMetadata function is required');
-    });
-
-    it('should return null if metadata does not enable logo injection', () => {
-      const block = document.createElement('div');
-      block.className = 'ax-marquee';
-      mockGetMetadata.returns('off');
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.be.null;
-      expect(mockGetMetadata.calledWith('marquee-inject-logo')).to.be.true;
-    });
-
-    it('should return null for unsupported block types', () => {
-      const block = document.createElement('div');
-      block.className = 'some-other-block';
-      mockGetMetadata.withArgs('marquee-inject-logo').returns('on');
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.be.null;
-    });
-  });
-
-  describe('supported block types', () => {
-    beforeEach(() => {
-      mockGetMetadata.withArgs('marquee-inject-logo').returns('on');
-    });
-
-    it('should inject logo for ax-marquee block', () => {
-      const block = document.createElement('div');
-      block.className = 'ax-marquee';
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-      expect(logo.tagName).to.equal('IMG');
-      expect(logo.classList.contains('express-logo')).to.be.true;
-    });
-
-    it('should inject logo for headline block', () => {
-      const block = document.createElement('div');
-      block.className = 'headline';
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-      expect(logo.classList.contains('express-logo')).to.be.true;
-    });
-
-    it('should inject logo for interactive-marquee block', () => {
-      const block = document.createElement('div');
-      block.className = 'interactive-marquee';
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-      expect(logo.classList.contains('express-logo')).to.be.true;
-    });
-
-    it('should inject logo for fullscreen-marquee block', () => {
-      const block = document.createElement('div');
-      block.className = 'fullscreen-marquee';
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-      expect(logo.classList.contains('express-logo')).to.be.true;
-    });
-
-    it('should inject logo for ax-columns with marquee variant', () => {
-      const block = document.createElement('div');
-      block.className = 'ax-columns marquee';
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-      expect(logo.classList.contains('express-logo')).to.be.true;
-    });
-
-    it('should inject logo for ax-columns with hero variant', () => {
-      const block = document.createElement('div');
-      block.className = 'ax-columns hero';
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-      expect(logo.classList.contains('express-logo')).to.be.true;
-    });
-
-    it('should not inject logo for ax-columns without marquee variant', () => {
-      const block = document.createElement('div');
-      block.className = 'ax-columns';
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.be.null;
-    });
-  });
-
-  describe('custom logo name', () => {
-    beforeEach(() => {
-      mockGetMetadata.withArgs('marquee-inject-logo').returns('on');
-    });
-
-    it('should use custom logo name when provided', () => {
-      const block = document.createElement('div');
-      block.className = 'interactive-marquee';
-
-      const logo = createInjectableLogo(block, 'adobe-express-logo', { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-      expect(logo.src).to.include('adobe-express-logo.svg');
-    });
-
-    it('should use default logo when custom name is not provided', () => {
-      const block = document.createElement('div');
-      block.className = 'ax-marquee';
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-      // Default logo is adobe-express-logo from the LOGO constant
-      expect(logo.src).to.include('adobe-express-logo.svg');
-    });
-  });
-
-  describe('logo size', () => {
-    beforeEach(() => {
-      mockGetMetadata.withArgs('marquee-inject-logo').returns('on');
-    });
-
-    it('should apply custom logo size when provided', () => {
-      const block = document.createElement('div');
-      block.className = 'interactive-marquee';
-
-      const logo = createInjectableLogo(block, 'adobe-express-logo', {
-        getMetadata: mockGetMetadata,
-        logoSize: '22px',
-      });
-
-      expect(logo).to.not.be.null;
-      // Note: getIconElementDeprecated should handle the size parameter
-      expect(logo.tagName).to.equal('IMG');
-    });
-  });
-
-  describe('photo logo injection', () => {
-    beforeEach(() => {
-      mockGetMetadata.withArgs('marquee-inject-photo-logo').returns('on');
-      mockGetMetadata.withArgs('marquee-inject-logo').returns('off');
-    });
-
-    it('should inject photo logo when metadata enables it', () => {
-      const block = document.createElement('div');
-      block.className = 'ax-marquee';
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-      expect(logo.src).to.include('adobe-express-photos-logo.svg');
-      expect(logo.classList.contains('express-logo')).to.be.true;
-    });
-
-    it('should prioritize photo logo over custom logo name', () => {
-      const block = document.createElement('div');
-      block.className = 'ax-marquee';
-
-      const logo = createInjectableLogo(block, 'custom-logo', { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-      expect(logo.src).to.include('adobe-express-photos-logo.svg');
-      expect(logo.src).to.not.include('custom-logo');
-    });
-  });
-
-  describe('dark mode support', () => {
-    let matchMediaStub;
-
-    beforeEach(() => {
-      mockGetMetadata.withArgs('marquee-inject-logo').returns('on');
-    });
-
-    afterEach(() => {
-      if (matchMediaStub) {
-        matchMediaStub.restore();
-        matchMediaStub = null;
-      }
-    });
-
-    it('should use white logo for dark block on desktop', () => {
-      // Mock media query for desktop
-      const mockMediaQuery = {
-        matches: true,
-        addEventListener: sinon.spy(),
-      };
-      matchMediaStub = sinon.stub(window, 'matchMedia');
-      matchMediaStub.withArgs('(min-width: 900px)').returns(mockMediaQuery);
-
-      const block = document.createElement('div');
-      block.className = 'ax-marquee dark';
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-      expect(logo.src).to.include('adobe-express-logo-white.svg');
-    });
-
-    it('should use regular logo for dark block on mobile', () => {
-      // Mock media query for mobile
-      const mockMediaQuery = {
-        matches: false,
-        addEventListener: sinon.spy(),
-      };
-      matchMediaStub = sinon.stub(window, 'matchMedia');
-      matchMediaStub.withArgs('(min-width: 900px)').returns(mockMediaQuery);
-
-      const block = document.createElement('div');
-      block.className = 'ax-marquee dark';
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-      expect(logo.src).to.include('adobe-express-logo.svg');
-      expect(logo.src).to.not.include('white');
-    });
-
-    it('should not use white logo when supportsDarkMode is false', () => {
-      // Mock media query for desktop
-      const mockMediaQuery = {
-        matches: true,
-        addEventListener: sinon.spy(),
-      };
-      matchMediaStub = sinon.stub(window, 'matchMedia');
-      matchMediaStub.withArgs('(min-width: 900px)').returns(mockMediaQuery);
-
-      const block = document.createElement('div');
-      block.className = 'headline dark';
-
-      const logo = createInjectableLogo(block, null, {
-        getMetadata: mockGetMetadata,
-        supportsDarkMode: false,
-      });
-
-      expect(logo).to.not.be.null;
-      expect(logo.src).to.include('adobe-express-logo.svg');
-      expect(logo.src).to.not.include('white');
-    });
-
-    it('should use custom logo with white variant in dark mode', () => {
-      // Mock media query for desktop
-      const mockMediaQuery = {
-        matches: true,
-        addEventListener: sinon.spy(),
-      };
-      matchMediaStub = sinon.stub(window, 'matchMedia');
-      matchMediaStub.withArgs('(min-width: 900px)').returns(mockMediaQuery);
-
-      const block = document.createElement('div');
-      block.className = 'interactive-marquee dark';
-
-      const logo = createInjectableLogo(block, 'adobe-express-logo', {
-        getMetadata: mockGetMetadata,
-      });
-
-      expect(logo).to.not.be.null;
-      expect(logo.src).to.include('adobe-express-logo-white.svg');
-    });
-  });
-
-  describe('metadata variations', () => {
-    it('should accept "yes" as valid value for marquee-inject-logo', () => {
-      const block = document.createElement('div');
-      block.className = 'ax-marquee';
-      mockGetMetadata.withArgs('marquee-inject-logo').returns('yes');
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-    });
-
-    it('should accept "ON" (uppercase) as valid value', () => {
-      const block = document.createElement('div');
-      block.className = 'ax-marquee';
-      mockGetMetadata.withArgs('marquee-inject-logo').returns('ON');
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
-    });
-
-    it('should accept "Yes" (mixed case) as valid value', () => {
-      const block = document.createElement('div');
-      block.className = 'ax-marquee';
-      mockGetMetadata.withArgs('marquee-inject-logo').returns('Yes');
-
-      const logo = createInjectableLogo(block, null, { getMetadata: mockGetMetadata });
-
-      expect(logo).to.not.be.null;
+describe('getContentRoot', () => {
+  const tests = [
+    ['https://main--express-color--adobecom.aem.page/', ''],
+    ['https://main--express-color--adobecom.aem.live/', ''],
+    ['https://color.stage.adobe.com', ''],
+    ['https://color.adobe.com', ''],
+    ['https://main--da-express-milo--adobecom.aem.page/', '/express'],
+    ['https://main--da-express-milo--adobecom.aem.live/', '/express'],
+    ['https://www.stage.adobe.com/', '/express'],
+    ['https://www.adobe.com/', '/express'],
+    ['http://localhost:3000', '/express'],
+  ];
+
+  tests.forEach(([url, expected]) => {
+    it(`Sets content root for ${url}`, () => {
+      const location = new URL(url);
+      const contentRoot = getContentRoot(location);
+      expect(contentRoot).to.equal(expected);
     });
   });
 });

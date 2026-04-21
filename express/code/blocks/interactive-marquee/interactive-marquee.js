@@ -1,4 +1,4 @@
-import { getLibs, getIconElementDeprecated, createInjectableLogo } from '../../scripts/utils.js';
+import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 
 let decorateButtons; let createTag;
 let getMetadata; let getConfig;
@@ -77,13 +77,26 @@ function createPromptLinkElement(promptLink, prompt) {
 
 function injectExpressLogo(block, wrapper) {
   if (block.classList.contains('entitled')) return;
-  const logo = createInjectableLogo(block, 'adobe-express-logo', { getMetadata, logoSize: '22px' });
-  if (logo) wrapper.prepend(logo);
+  const metadataValue = getMetadata('marquee-inject-logo')?.toLowerCase();
+  if (!['on', 'yes', 'acrobat-express'].includes(metadataValue)) return;
+  let logoName = 'adobe-express-logo';
+  let logoSize = '22px';
+  let logoAlt = 'Adobe Express logo';
+  let logoClass = 'express-logo';
+  if (metadataValue === 'acrobat-express') {
+    logoName = 'cobrand-lockup-acrobat-express';
+    logoSize = '22px';
+    logoAlt = 'Adobe Acrobat X Adobe Express co-brand logo';
+    logoClass = 'acrobat-express-lockup';
+  }
+  const logoElement = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
+  wrapper.prepend(logoElement);
 }
 
 async function setHorizontalMasonry(el) {
   const link = el.querySelector(':scope .con-button');
   if (!link) {
+    // eslint-disable-next-line no-console
     console.error('Missing Generate Link');
     return;
   }
@@ -177,7 +190,7 @@ function interactiveInit(el) {
 
 export default async function init(el) {
   if (!el.classList.contains('horizontal-masonry')) {
-    window.lana?.log('Using interactive-marquee on Express requires using the horizontal-masonry class.');
+    window.lana?.log('Using interactive-marquee on Express requires using the horizontal-masonry class.', { tags: 'interactive-marquee', severity: 'error' });
     return;
   }
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`), import(`${getLibs()}/utils/decorate.js`)]).then(([utils, placeholders, decorate]) => {

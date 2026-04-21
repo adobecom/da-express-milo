@@ -70,6 +70,7 @@ async function createTemplatesContainer(recipe, el, includesSearchBar = false) {
   const { control: initialControl } = await buildGallery(
     galleryItems,
     templatesContainer,
+    { intersectionThreshold: 0.9 },
   );
   return {
     templatesContainer,
@@ -80,6 +81,7 @@ async function createTemplatesContainer(recipe, el, includesSearchBar = false) {
       const { control: newControl } = await buildGallery(
         newGalleryItems,
         templatesContainer,
+        { intersectionThreshold: 0.9 },
       );
       const oldControl = el.querySelector('.gallery-control');
       // hack to reduce cls. TODO: implement updateItems() for gallery
@@ -266,8 +268,8 @@ export default async function init(el) {
     toolbar.append(controlsContainer);
 
     el.append(templatesContainer);
-  } catch (err) {
-    window.lana?.log(`Error in template-x-carousel-toolbar: ${err}`);
+  } catch (error) {
+    window.lana?.log(`Error in template-x-carousel-toolbar: ${error?.message || error?.detail || error}`, { tags: 'template-x-carousel-toolbar', severity: 'error' });
     if (getConfig().env.name === 'prod') {
       el.remove();
     } else {

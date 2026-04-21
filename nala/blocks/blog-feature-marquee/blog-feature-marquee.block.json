@@ -1,0 +1,55 @@
+{
+  "block": "blog-feature-marquee",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@blog-feature-marquee-default",
+      "selector": "div.blog-feature-marquee",
+      "path": "/drafts/nala/blocks/blog-feature-marquee/default",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".blog-feature-marquee-headline",
+              "text": "Welcome to the Adobe Express blog."
+            },
+            {
+              "selector": ".blog-feature-marquee-subcopy",
+              "text": "Explore design trends and how-tos, marketing tips, and branding wisdom to make your content stand-out."
+            },
+            {
+              "selector": ".blog-feature-marquee-card .blog-feature-marquee-card-title",
+              "nth": 0,
+              "text": "Where creators find inspiration"
+            }
+          ],
+          "media": [
+            {
+              "selector": ".blog-feature-marquee-card .blog-feature-marquee-featured-badge",
+              "nth": 0
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": ".blog-feature-marquee-card",
+              "nth": 0,
+              "href": "/express/learn/blog/top-creative-influences"
+            },
+            {
+              "type": "link",
+              "selector": ".blog-feature-marquee-view-all-link",
+              "text": "View All",
+              "href": "/express/"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@blog-feature-marquee",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

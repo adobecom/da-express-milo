@@ -7,13 +7,13 @@ const MOBILE_MAX = 600;
 const TABLET_MAX = 900;
 const HERO_IMAGE_WIDTHS = { mobile: 480, tablet: 720, desktop: 960 };
 const PRECONNECT_DATA_ATTRIBUTE = 'blogArticleMarquee';
-const DEFAULT_PRODUCT_ICON_PATH = 'https://main--da-express-milo--adobecom.aem.page/express/learn/blog/assets/media_1f021705c13704e1e3041b414d0aa1ce883e067ec.png';
+const DEFAULT_PRODUCT_ICON_PATH = '/express/code/icons/fallback_author_icon.png';
 const PRODUCT_ICON_SIZE = 48;
 
 const METADATA_KEYS = {
   eyebrow: 'category',
   headline: 'headline',
-  subcopy: 'sub-heading',
+  subcopy: 'subheading',
   title: 'og:title',
   productName: 'author',
   productIcon: 'blog-marquee-icon',
@@ -97,6 +97,7 @@ function addImagePreconnects(imageUrl) {
       });
     }
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Error adding image preconnect:', e);
   }
 }
@@ -111,8 +112,9 @@ function buildOptimizedImageUrl(src, width) {
   try {
     const url = new URL(src, window.location.href);
     const roundedWidth = Math.max(1, Math.round(width));
-    return `${url.pathname}?width=${roundedWidth}&format=webp&optimize=medium`;
+    return `${url.pathname}?width=${roundedWidth}&format=webply&optimize=medium`;
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error('Error building optimized image URL:', e);
     return null;
   }

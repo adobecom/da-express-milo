@@ -28,12 +28,12 @@ const onRedirect = (e) => {
     window.location.assign(e.detail);
   }, 100);
 };
-const onError = (e) => {
-  window.lana?.log('on error:', e);
+const onError = (error) => {
+  window.lana?.log(`on error: ${error?.message || error?.detail || error}`, { tags: 'susi-light', severity: 'error' });
 };
 
-const onAuthFailed = (e) => {
-  window.lana?.log(`on auth failed: ${e.detail}`);
+const onAuthFailed = (error) => {
+  window.lana?.log(`on auth failed: ${error?.message || error?.detail || error}`, { tags: 'susi-light, susi-auth-failed', severity: 'error' });
 };
 // easier to mock in unit test
 export const SUSIUtils = {
@@ -51,8 +51,8 @@ async function getDestURL(url) {
   try {
     const appended = await getTrackingAppendedURL(url);
     destURL = new URL(appended);
-  } catch (err) {
-    window.lana?.log(`invalid redirect uri for susi-light: ${url}`);
+  } catch (error) {
+    window.lana?.log(`invalid redirect uri for susi-light: ${url}: ${error?.message || error?.detail || error}`, { tags: 'susi-light, susi-invalid-redirect-uri', severity: 'error' });
     destURL = new URL('https://new.express.adobe.com');
   }
   if (isStage) {
@@ -148,7 +148,9 @@ function redirectIfLoggedIn(destURL) {
         /* c8 ignore next */
         window.adobeIMS?.isSignedInUser() && goDest();
       })
-      .catch((e) => { window.lana?.log(`Unable to load IMS in susi-light: ${e}`); });
+      .catch((error) => {
+        window.lana?.log(`Unable to load IMS in susi-light: ${error?.message || error?.detail || error}`, { tags: 'susi-light, susi-load-ims-failed', severity: 'error' });
+      });
   }
 }
 
@@ -427,7 +429,18 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
 
 async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const rows = el.querySelectorAll(':scope > div > div');
-  const redirectUrl = rows[0]?.textContent?.trim();
+  const isColor = el.classList.contains('color');
+
+  let redirectUrl;
+  if (isColor) {
+    const { consumeSusiColorRedirect } = await import(
+      '../../scripts/color-shared/utils/susiRedirect.js'
+    );
+    redirectUrl = consumeSusiColorRedirect() || window.location.href;
+  } else {
+    redirectUrl = rows[0]?.textContent?.trim();
+  }
+
   const client_id = rows[1]?.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb');
   const title = rows[2]?.textContent?.trim();
   const popup = el.classList.contains('popup') || false;
@@ -436,7 +449,7 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const params = buildSUSIParams({
     client_id, variant, destURL, locale, title, popup, responseType: 'token',
   });
-  if (!noRedirect) {
+  if (!noRedirect && !isColor) {
     redirectIfLoggedIn(params.destURL);
   }
   await SUSIUtils.loadSUSIScripts();

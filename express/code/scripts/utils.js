@@ -21,6 +21,7 @@ export const [setLibs, getLibs] = (() => {
         if (!['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
         const branch = new URLSearchParams(search).get('milolibs') || 'main';
         if (branch === 'local') return 'http://localhost:6456/libs';
+        if (branch === 'main' && hostname.includes('.stage.')) return '/libs';
         return branch.includes('--') ? `https://${branch}.aem.live/libs` : `https://${branch}--milo--adobecom.aem.live/libs`;
       })();
       return libs;
@@ -124,7 +125,9 @@ function createSVGWrapper(icon, sheetSize, alt, altSrc) {
   svgWrapper.setAttribute('aria-hidden', 'true');
   svgWrapper.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/1999/xlink');
   if (alt) {
-    svgWrapper.appendChild(createTag('title', { innerText: alt }));
+    const titleEl = createTag('title', {});
+    titleEl.textContent = alt;
+    svgWrapper.appendChild(titleEl);
   }
   const u = document.createElementNS('http://www.w3.org/2000/svg', 'use');
   if (altSrc) {
@@ -294,87 +297,6 @@ export async function fixIcons(el = document) {
   });
 }
 
-const LOGO = 'adobe-express-logo';
-const LOGO_WHITE = 'adobe-express-logo-white';
-
-export function createInjectableLogo(
-  block,
-  customLogoName,
-  { getMetadata: getMetadataFn, supportsDarkMode = true, logoSize } = {},
-) {
-  if (!getMetadataFn) {
-    window.lana?.log('createInjectableLogo: getMetadata function is required');
-    return null;
-  }
-
-  const injectRegularLogo = ['on', 'yes'].includes(getMetadataFn('marquee-inject-logo')?.toLowerCase());
-  const injectPhotoLogo = ['on', 'yes'].includes(getMetadataFn('marquee-inject-photo-logo')?.toLowerCase());
-
-  if (!injectRegularLogo && !injectPhotoLogo) return null;
-
-  const specializedMarqueeBlockTypes = [
-    'ax-marquee',
-    'headline',
-    'interactive-marquee',
-    'fullscreen-marquee',
-  ];
-
-  const marqueeBlockTypes = [
-    'ax-columns',
-  ];
-
-  const marqueeVariants = [
-    'marquee',
-    'hero',
-    'fullsize',
-    'hero-animation-overlay',
-  ];
-
-  const blockClasses = Array.from(block.classList);
-
-  const isSpecializedMarqueeBlock = blockClasses.some(
-    (className) => specializedMarqueeBlockTypes.includes(className),
-  );
-
-  const isGenericMarqueeBlock = blockClasses.some(
-    (className) => marqueeBlockTypes.includes(className),
-  ) && blockClasses.some(
-    (className) => marqueeVariants.includes(className),
-  );
-
-  if (!(isSpecializedMarqueeBlock || isGenericMarqueeBlock)) {
-    return null;
-  }
-  let logo;
-  if (injectPhotoLogo) {
-    logo = getIconElementDeprecated('adobe-express-photos-logo', logoSize);
-  } else {
-    const logoName = customLogoName || LOGO;
-    const logoWhiteName = customLogoName ? `${customLogoName}-white` : LOGO_WHITE;
-
-    const isDarkBlock = block.classList.contains('dark');
-    const mediaQuery = window.matchMedia('(min-width: 900px)');
-    const shouldUseDarkLogo = supportsDarkMode && isDarkBlock && mediaQuery.matches;
-
-    logo = getIconElementDeprecated(shouldUseDarkLogo ? logoWhiteName : logoName, logoSize);
-
-    if (supportsDarkMode && isDarkBlock) {
-      mediaQuery.addEventListener('change', (e) => {
-        if (e.matches) {
-          logo.src = logo.src.replace(`${logoName}.svg`, `${logoWhiteName}.svg`);
-          logo.alt = logo.alt.replace(logoName, logoWhiteName);
-        } else {
-          logo.src = logo.src.replace(`${logoWhiteName}.svg`, `${logoName}.svg`);
-          logo.alt = logo.alt.replace(logoWhiteName, logoName);
-        }
-      });
-    }
-  }
-
-  logo.classList.add('express-logo');
-  return logo;
-}
-
 // This was only added for the blocks premigration.
 // For new blocks they should only use the decorateButtons method from milo.
 export async function decorateButtonsDeprecated(el, size) {
@@ -440,8 +362,8 @@ export async function decorateButtonsDeprecated(el, size) {
           }
         }
       }
-    } catch (e) {
-      window.lana?.log(`Ignoring button due to error: ${e}`);
+    } catch (error) {
+      window.lana?.log(`Ignoring button due to error: ${error?.message || error?.detail || error}`, { tags: 'utils', severity: 'error' });
     }
   });
 }
@@ -552,8 +474,8 @@ export function preDecorateSections(area) {
       let linkToTargetURL = null;
       try {
         linkToTargetURL = new URL(linkToTarget);
-      } catch (err) {
-        window.lana?.log(err);
+      } catch (error) {
+        window.lana?.log(`${error?.message || error?.detail || error}`, { tags: 'utils', severity: 'error' });
       }
       const sameUrlCTAs = Array.from(area.querySelectorAll('a:any-link'))
         .filter((a) => {
@@ -567,8 +489,8 @@ export function preDecorateSections(area) {
 
             return (sameText || (samePathname && sameHash))
               && isNotInFloatingCta && notFloatingCtaIgnore;
-          } catch (err) {
-            window.lana?.log(err);
+          } catch (error) {
+            window.lana?.log(`${error?.message || error?.detail || error}`, { tags: 'utils', severity: 'error' });
             return false;
           }
         });
@@ -838,14 +760,16 @@ export async function formatDynamicCartLink(a) {
     const pattern = /.*commerce.*adobe\.com.*/gm;
     if (!pattern.test(a.href)) return a;
     a.style.visibility = 'hidden';
+    /* eslint-disable import/no-cycle */
     const [{ fetchPlanOnePlans, buildUrl }, { getConfig }] = await Promise.all([
       import('./utils/pricing.js'), import(`${getLibs()}/utils/utils.js`),
     ]);
+    /* eslint-enable import/no-cycle */
     const { url, country, language, offerId } = await fetchPlanOnePlans(a.href);
     const newTrialHref = buildUrl(url, country, language, getConfig, offerId);
     a.href = newTrialHref;
   } catch (error) {
-    window.lana.log(`Failed to fetch prices for page plan: ${error}`);
+    window.lana?.log(`Failed to fetch prices for page plan: ${error}`, { tags: 'utils', severity: 'error' });
   }
   a.style.visibility = 'visible';
   return a;
@@ -876,8 +800,8 @@ export function decorateArea(area = document) {
   }());
 
   if (area.querySelectorAll(`${selector} a[href*="adobesparkpost.app.link"], ${selector} a[href*="adobesparkpost-web.app.link"]`).length) {
-    // eslint-disable-next-line import/no-cycle
     // select links again to refresh reference
+    // eslint-disable-next-line import/no-cycle
     import('./branchlinks.js').then((mod) => mod.default(area.querySelectorAll(`${selector} a[href*="adobesparkpost.app.link"], ${selector} a[href*="adobesparkpost-web.app.link"]`)));
   }
 
@@ -913,7 +837,7 @@ export async function convertToInlineSVG(img) {
     const svgElement = svgDoc.querySelector('svg');
 
     if (!svgElement) {
-      window.lana?.log(`No SVG element found in file ${img.src}`);
+      window.lana?.log(`No SVG element found in file ${img.src}`, { tags: 'utils, convertToInlineSVG', severity: 'error' });
       return img;
     }
 
@@ -940,7 +864,7 @@ export async function convertToInlineSVG(img) {
 
     return svgElement;
   } catch (error) {
-    window.lana?.log(`Error converting SVG: ${error}`);
+    window.lana?.log(`Error converting SVG: ${error?.message || error?.detail || error}`, { tags: 'utils, convertToInlineSVG', severity: 'error' });
     return img;
   }
 }
@@ -971,4 +895,10 @@ export function isEmptyValue(value) {
  */
 export function hasContent(value) {
   return !isEmptyValue(value);
+}
+
+export function getContentRoot(location) {
+  const { hostname } = location || window.location;
+  if (['--express-color--', 'color.stage.adobe.com', 'color.adobe.com'].some((i) => hostname.includes(i))) return '';
+  return '/express';
 }

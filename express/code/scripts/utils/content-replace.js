@@ -246,7 +246,7 @@ async function getReplacementsFromSearch() {
 const bladeRegex = /\{\{[a-zA-Z_-]+\}\}/g;
 
 function replaceBladesInStr(str, replacements) {
-  if (!replacements) return str;
+  if (!replacements || str === null) return str;
   return str.replaceAll(bladeRegex, (match) => {
     if (match in replacements) {
       return replacements[match];
@@ -314,8 +314,8 @@ async function autoUpdatePage(main) {
         a.href = getMetadata(url.hash.replace('#', ''));
         url = new URL(a.href);
       }
-    } catch (e) {
-      window.lana?.log(`Error while attempting to replace link ${a.href}: ${e}`);
+    } catch (error) {
+      window.lana?.log(`Error while attempting to replace link ${a.href}: ${error?.message || error?.detail || error}`, { tags: 'utils, content-replace, autoUpdatePage', severity: 'error' });
     }
   });
 }

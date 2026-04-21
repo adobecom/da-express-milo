@@ -24,21 +24,13 @@ export function formatProductDescriptions(attributes, selectedOptions = {}) {
     if (!title || !selectedValue) {
       return;
     }
-    let description = selectedValue.descriptionShort
+    const description = selectedValue.descriptionShort
       || selectedValue.description
       || selectedValue.descriptionBrief
       || selectedValue.title
       || selectedValue.titleLong
       || '';
-    if (description && description.includes('<')) {
-      description = description
-        .replace(/<p>/g, '')
-        .replace(/<\/p>/g, '')
-        .replace(/<ul>/g, '<ul class="pdpx-details-list">')
-        .replace(/<li>/g, '<li class="pdpx-details-list-item">')
-        .replace(/\r\n/g, '')
-        .trim();
-    }
+
     if (title && description) {
       productDescriptions.push({ title, description });
     }
@@ -83,7 +75,7 @@ async function convertAttributeToOptionsObject(productType, attribute) {
       optionsArray[i].gsm = gsm;
     }
     if (productType === 'zazzle_shirt' && attribute.name === 'color') {
-      optionsArray[i].printingProcess = option.properties.tags?.includes('showswhite') ? 'vivid' : 'classic';
+      optionsArray[i].printingProcess = option.name.endsWith('_da') ? 'vivid' : 'classic';
     }
   }
   return optionsArray;

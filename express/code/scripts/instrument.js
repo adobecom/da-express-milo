@@ -1,6 +1,6 @@
 /* global _satellite __satelliteLoadedCallback alloy */
 
-import { getLibs } from './utils.js';
+import { getLibs, getMetadata } from './utils.js';
 import trackBranchParameters from './branchlinks.js';
 
 let loadScript; let getConfig;
@@ -9,15 +9,15 @@ const d = document;
 const loc = window.location;
 const { pathname } = loc;
 let expressLandingPageType;
-// home
-if (
-  pathname === '/express'
+switch (true) {
+  case (
+    pathname === '/express'
     || pathname === '/express/'
-) {
-  expressLandingPageType = 'home';
-  // seo
-} else if (
-  pathname === '/express/create'
+  ):
+    expressLandingPageType = 'home';
+    break;
+  case (
+    pathname === '/express/create'
     || pathname.includes('/create/')
     || pathname === '/express/make'
     || pathname.includes('/make/')
@@ -25,41 +25,44 @@ if (
     || pathname.includes('/feature/')
     || pathname === '/express/discover'
     || pathname.includes('/discover/')
-) {
-  expressLandingPageType = 'seo';
-  // learn
-} else if (
-  pathname === '/express/tools'
+  ):
+    expressLandingPageType = 'seo';
+    break;
+  case (
+    pathname === '/express/tools'
     || pathname.includes('/tools/')
-) {
-  expressLandingPageType = 'quickAction';
-} else if (
-  pathname === '/express/learn'
+  ):
+    expressLandingPageType = 'quickAction';
+    break;
+  case (
+    pathname === '/express/learn'
     || (
       pathname.includes('/learn/')
-        && !pathname.includes('/blog/')
+      && !pathname.includes('/blog/')
     )
-) {
-  expressLandingPageType = 'learn';
-  // blog
-} else if (
-  pathname === '/express/learn/blog'
+  ):
+    expressLandingPageType = 'learn';
+    break;
+  case (
+    pathname === '/express/learn/blog'
     || pathname.includes('/learn/blog/')
-) {
-  expressLandingPageType = 'blog';
-  // pricing
-} else if (
-  pathname.includes('/pricing')
-) {
-  expressLandingPageType = 'pricing';
-  // edu
-} else if (
-  pathname.includes('/education/')
-) {
-  expressLandingPageType = 'edu';
-  // other
-} else {
-  expressLandingPageType = 'other';
+  ):
+    expressLandingPageType = 'blog';
+    break;
+  case pathname.includes('/pricing'):
+    expressLandingPageType = 'pricing';
+    break;
+  case pathname.includes('/education/'):
+    expressLandingPageType = 'edu';
+    break;
+  case (
+    pathname === '/express/templates'
+    || pathname.includes('/templates/')
+  ):
+    expressLandingPageType = 'template';
+    break;
+  default:
+    expressLandingPageType = 'other';
 }
 
 export function getExpressLandingPageType() {
@@ -85,12 +88,17 @@ function set(path, value) {
   return obj;
 }
 
-function setDataAnalyticsAttributesForMartech() {
-  if (!window.alloy_all) window.alloy_all = {};
+function getPageName() {
   const locale = getConfig().locale.prefix;
   const pathSegments = pathname.substr(1).split('/');
   if (locale !== '') pathSegments.shift();
   const pageName = `adobe.com:${pathSegments.join(':')}`;
+  return pageName;
+}
+
+function setDataAnalyticsAttributesForMartech() {
+  if (!window.alloy_all) window.alloy_all = {};
+  const pageName = getPageName();
 
   let category;
   if (pathname.includes('/create/')
@@ -145,9 +153,9 @@ export function sendEventToAnalytics(eventName) {
   safelyFireAnalyticsEvent(fireEvent);
 }
 
-export function sendFrictionlessEventToAdobeAnaltics(block) {
-  const eventName = 'view-quickaction-upload-page';
+export function sendFrictionlessEventToAdobeAnaltics(block, eventName, extraProperties = {}) {
   const fireEvent = () => {
+    const { event: extraEvent = {}, custom: extraCustom = {} } = extraProperties;
     _satellite.track('event', {
       xdm: {},
       data: {
@@ -164,11 +172,13 @@ export function sendFrictionlessEventToAdobeAnaltics(block) {
             event: {
               pagename: eventName,
               url: loc.href,
+              ...extraEvent,
             },
             custom: {
               qa: {
                 group: block.dataset.frictionlessgroup ?? 'unknown',
                 type: block.dataset.frictionlesstype ?? 'unknown',
+                ...extraCustom.qa,
               },
             },
           },
@@ -177,6 +187,189 @@ export function sendFrictionlessEventToAdobeAnaltics(block) {
     });
   };
   safelyFireAnalyticsEvent(fireEvent);
+}
+
+export async function trackViewTemplatePage(
+  pageType,
+  useCase,
+  templateId,
+  templateTask,
+  isPrintPdp = false,
+  printMetadata = {},
+  isMauEligible = true,
+) {
+  const adobeEventName = 'adobe.com:express:view-template-page';
+  const pageName = getPageName();
+  const fireEvent = () => {
+    _satellite.track('event', {
+      xdm: {
+        eventType: 'web.webpagedetails.pageViews',
+        web: {
+          webPageDetails: {
+            name: pageName,
+            URL: window.location.href,
+          },
+        },
+      },
+      data: {
+        _adobe_corpnew: {
+          digitalData: {
+            primaryEvent: {
+              eventInfo: {
+                eventName: adobeEventName,
+              },
+            },
+            page: {
+              pageInfo: {
+                pageName,
+                pageType,
+              },
+              category: {
+                useCase,
+              },
+            },
+            template: {
+              templateInfo: {
+                templateId: templateId || undefined,
+                templateTask: templateTask || undefined,
+              },
+            },
+            pdp: {
+              isPrintPdp: Boolean(isPrintPdp),
+              ...printMetadata,
+            },
+            custom: {
+              event: {
+                is_mau: Boolean(isMauEligible),
+              },
+              link: {
+                pdp_page_flag: pageType === 'pdp',
+              },
+            },
+          },
+        },
+      },
+      documentUnloading: true,
+    });
+  };
+  try {
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (error) {
+    window.lana?.log(`Failed to track PDP pageload using _satellite.track: ${error}`, { tags: `${pageType}-page, analytics`, errorType: 'e', severity: 'warning', sampleRate: '1' });
+  }
+}
+
+function trackTemplatePageLoad() {
+  let useCase = 'unknown';
+  const pathSegments = pathname.split('/').filter(Boolean);
+  const templatesSegmentIndex = pathSegments.indexOf('templates');
+  const useCaseFromPath = templatesSegmentIndex >= 0 ? pathSegments[templatesSegmentIndex + 1] : '';
+  if (useCaseFromPath && useCaseFromPath !== 'search') {
+    useCase = decodeURIComponent(useCaseFromPath);
+  } else {
+    useCase = getMetadata('topics')
+      || getMetadata('q')
+      || getMetadata('short-title')
+      || 'search';
+  }
+  if (expressLandingPageType === 'template') {
+    trackViewTemplatePage('template', useCase, undefined, undefined, false, {}, true);
+  }
+}
+
+function trackColorPageLoad() {
+  try {
+    if (getMetadata('pagetype') !== 'color') return;
+
+    const eventName = 'view-color-page';
+    let refDomain = '';
+    let previousPagename = '';
+    try {
+      const referrerUrl = new URL(document.referrer);
+      refDomain = referrerUrl.hostname;
+      previousPagename = referrerUrl.pathname;
+    } catch { /* no referrer or invalid */ }
+
+    const fireEvent = () => {
+      _satellite.track('event', {
+        xdm: {},
+        data: {
+          eventType: 'web.webinteraction.linkClicks',
+          web: {
+            webInteraction: {
+              name: eventName,
+              linkClicks: { value: 1 },
+              type: 'other',
+            },
+          },
+          _adobe_corpnew: {
+            sdm: {
+              event: {
+                pagename: eventName,
+                url: loc.href,
+              },
+              custom: {
+                aa: {
+                  page_name: getPageName(),
+                  ref_domain: refDomain,
+                  previous_pagename: previousPagename,
+                },
+                link: {
+                  page_url: loc.href,
+                },
+                ui: {
+                  location: pathname,
+                },
+              },
+            },
+          },
+        },
+      });
+    };
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (error) {
+    window.lana?.log(`Failed to track color page load: ${error}`, { tags: 'color, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
+  }
+}
+
+export function trackColorBlockLoad(blockType) {
+  try {
+    const eventName = 'view-color-block';
+    const fireEvent = () => {
+      _satellite.track('event', {
+        xdm: {},
+        data: {
+          eventType: 'web.webinteraction.linkClicks',
+          web: {
+            webInteraction: {
+              name: eventName,
+              linkClicks: { value: 1 },
+              type: 'other',
+            },
+          },
+          _adobe_corpnew: {
+            sdm: {
+              event: {
+                pagename: eventName,
+                url: loc.href,
+              },
+              custom: {
+                ui: {
+                  location: pathname,
+                },
+                block: {
+                  type: blockType,
+                },
+              },
+            },
+          },
+        },
+      });
+    };
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (error) {
+    window.lana?.log(`Failed to track color block load: ${error}`, { tags: 'color, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
+  }
 }
 
 export function textToName(text) {
@@ -375,6 +568,8 @@ export default async function martechLoadedCB() {
   ({ loadScript, getConfig } = await import(`${getLibs()}/utils/utils.js`));
   setDataAnalyticsAttributesForMartech();
   decorateAnalyticsEvents();
+  trackTemplatePageLoad();
+  trackColorPageLoad();
 
   // TODO Start of section to be removed after Jingle finishes adding xlg to old express Repo
   // this piece of code is necessary for the ratings block atm so that the right user
@@ -462,4 +657,57 @@ export default async function martechLoadedCB() {
     }, { once: true });
   }
   // end of section to be removed after Jingle finishes adding xlg to old express Repo
+}
+
+export async function trackPrintAddonInteraction(metadata = {}) {
+  try {
+    const fireEvent = () => {
+      const payload = {
+        xdm: {},
+        data: {
+          eventType: 'web.webinteraction.linkClicks',
+          web: {
+            webInteraction: {
+              name: 'print-addon-interaction',
+              linkClicks: { value: 1 },
+              type: 'other',
+            },
+          },
+          _adobe_corpnew: {
+            sdm: {
+              event: {
+                pagename: 'print-addon-interaction',
+              },
+              custom: {
+                print_addon: {
+                  page_type: 'product-configuration',
+                  action_type: metadata.action_type,
+                  action_name: `product-option-${metadata.action_name}`,
+                  action_value: metadata.action_value,
+                },
+                task: {
+                  name: metadata.productType,
+                },
+              },
+            },
+          },
+        },
+      };
+      if (typeof _satellite !== 'undefined' && _satellite.track) {
+        _satellite.track('event', payload);
+      }
+    };
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (e) {
+    // do not surface errors to page
+  }
+}
+
+export function trackPrintAddonOptionSelect({ attributeName, actionValue, productType }) {
+  return trackPrintAddonInteraction({
+    action_type: 'button',
+    action_name: attributeName,
+    action_value: actionValue,
+    productType,
+  });
 }

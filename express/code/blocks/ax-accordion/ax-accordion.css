@@ -116,14 +116,6 @@
   transition: opacity 300ms ease-out, padding 300ms ease-out;
 }
 
-.ax-accordion-item-description ul,
-.ax-accordion-item-description ol {
-  padding-top: 0;
-  padding-bottom: 0;
-  margin-top: 0;
-  margin-bottom: 0;
-}
-
 .ax-accordion-item-description ul {
   list-style-type: disc;
 }

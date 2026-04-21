@@ -1,6 +1,8 @@
 import { getLibs } from '../../utils.js';
 import { throttle, debounce } from '../../utils/hofs.js';
 
+const INTERSECTION_THRESHOLD = 0.1;
+
 const nextSVGHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
   <g id="Slider Button - Arrow - Right">
     <circle id="Ellipse 24477" cx="16" cy="16" r="16" fill="#FFFFFF"/>
@@ -17,7 +19,7 @@ const prevSVGHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none"
 
 let createTag; let loadStyle;
 
-function createControl(items, container) {
+function createControl(items, container, options = {}) {
   const control = createTag('div', { class: 'gallery-control loading' });
   const prevButton = createTag('button', {
     class: 'prev',
@@ -69,7 +71,7 @@ function createControl(items, container) {
 
   const scrollObserver = new IntersectionObserver((entries) => {
     reactToChange(entries);
-  }, { root: container, threshold: 0.99 });
+  }, { root: container, threshold: options.intersectionThreshold ?? INTERSECTION_THRESHOLD });
 
   items.forEach((item) => scrollObserver.observe(item));
 
@@ -80,9 +82,10 @@ function createControl(items, container) {
 export default async function buildGallery(
   items,
   container = items?.[0]?.parentNode,
+  options = {},
 ) {
   ({ createTag, loadStyle } = await import(`${getLibs()}/utils/utils.js`));
-  const control = createControl([...items], container);
+  const control = createControl([...items], container, options);
   await new Promise((res) => {
     loadStyle('/express/code/scripts/widgets/gallery/gallery.css', res);
   });

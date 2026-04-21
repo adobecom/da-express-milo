@@ -3,6 +3,10 @@
   min-width: 320px;
   box-sizing: border-box;
   text-align: left;
+
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 main .ax-marquee-dynamic-hero p.button-container {
@@ -103,7 +107,7 @@ main .ax-marquee-dynamic-hero p.button-container {
   background-color: var(--color-background-accent-default);
   padding-top: var(--spacing-200);
   padding-bottom: var(--spacing-200);
-  border-radius: var(--body-font-size-xl);
+  border-radius: 24px;
   width: 183px;
   font-size: var(--body-font-size-m);
   font-style: normal;
@@ -114,6 +118,9 @@ main .ax-marquee-dynamic-hero p.button-container {
 .ax-marquee-dynamic-hero [class*="heading"]:first-of-type {
   font-size: var(--heading-font-size-l);
   text-align: left;
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .ax-marquee-dynamic-hero [class*="heading"]:first-of-type + p {

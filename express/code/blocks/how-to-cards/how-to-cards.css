@@ -42,9 +42,7 @@
   margin: 0;
   padding: var(--spacing-100) 0 var(--spacing-500) 0;
   font-size: var(--body-font-size-l);
-
 }
-
 
 .how-to-cards .card {
   flex: 0 0 auto;
@@ -144,6 +142,7 @@
   .how-to-cards.cards-count-6 .cards-container {
     width: 100vw;
   }
+
 }
 
 @media (min-width: 1280px) {
@@ -200,7 +199,7 @@
   }
 }
 
-.gallery {
+.how-to-cards .gallery {
   display: flex;
   flex-wrap: nowrap;
   gap: var(--spacing-300);
@@ -213,22 +212,22 @@
   scroll-padding: 0 var(--spacing-300);
 }
 
-.gallery::-webkit-scrollbar {
+.how-to-cards .gallery::-webkit-scrollbar {
   -webkit-appearance: none;
   width: 0;
   height: 0;
 }
 
-.gallery.center.gallery--all-displayed {
+.how-to-cards .gallery.center.gallery--all-displayed {
   justify-content: center;
 }
 
-.gallery--item {
+.how-to-cards .gallery--item {
   scroll-snap-align: start;
   width: calc(100% - var(--spacing-300));
 }
 
-.gallery-control {
+.how-to-cards .gallery-control {
   padding: var(--spacing-300) var(--spacing-300) 0;
   display: flex;
   justify-content: flex-end;
@@ -236,16 +235,16 @@
   align-items: center;
 }
 
-.gallery-control.hide,
-.gallery-control .hide {
+.how-to-cards .gallery-control.hide,
+.how-to-cards .gallery-control .hide {
   display: none;
 }
 
-.gallery-control.loading {
+.how-to-cards .gallery-control.loading {
   visibility: hidden;
 }
 
-.gallery-control button {
+.how-to-cards .gallery-control button {
   all: unset;
   cursor: pointer;
   width: 2rem;
@@ -258,38 +257,38 @@
   background-color: var(--color-white);
 }
 
-.gallery-control button:focus {
+.how-to-cards .gallery-control button:focus {
   outline: revert;
 }
 
-.gallery-control button:hover:not(:disabled) {
+.how-to-cards .gallery-control button:hover:not(:disabled) {
   background-color: var(--color-gray-300);
 }
 
-.gallery-control button:disabled {
+.how-to-cards .gallery-control button:disabled {
   cursor: auto;
 }
 
-.gallery-control button .chevron-icon {
+.how-to-cards .gallery-control button .chevron-icon {
   width: 1.25rem;
   height: 1.25rem;
   transform-origin: center;
   display: block;
 }
 
-.gallery-control button.prev .chevron-icon {
+.how-to-cards .gallery-control button.prev .chevron-icon {
   transform: rotate(-90deg) translate(0px, -1px);
 }
 
-.gallery-control button.next .chevron-icon {
+.how-to-cards .gallery-control button.next .chevron-icon {
   transform:rotate(90deg) translate(0px, -1px);
 }
 
-.gallery-control button:disabled .chevron-icon {
+.how-to-cards .gallery-control button:disabled .chevron-icon {
   opacity: 0.35;
 }
 
-.gallery-control .status {
+.how-to-cards .gallery-control .status {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -301,14 +300,14 @@
   box-sizing: border-box;
 }
 
-.gallery-control .status .dot {
+.how-to-cards .gallery-control .status .dot {
   border-radius: 50px;
   width: var(--status-dot-size);
   height: var(--status-dot-size);
   background-color: var(--color-gray-600);
 }
 
-.gallery-control .status .dot.curr {
+.how-to-cards .gallery-control .status .dot.curr {
   width: var(--status-curr-width);
   background-color: var(--color-black);
 }

@@ -1,0 +1,712 @@
+@import url("../modal/modal-base.css");
+
+/* ── Curtain (mobile backdrop) ────────────────────────────────── */
+
+.ax-drawer-curtain {
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .ax-drawer-curtain {
+    background-color: var(--Alias-overlay-curtain);
+    backdrop-filter: blur(10px);
+  }
+}
+
+.ax-drawer-curtain.ax-drawer-curtain-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* ── Panel (mobile-first: bottom sheet) ──────────────────────── */
+
+.ax-drawer-panel {
+  /* ── Scoped vars ── */
+  --ax-drawer-max-height: 90dvh;
+  --ax-drawer-shadow: 0 -4px 24px rgba(0, 0, 0, 0.15);
+  --ax-drawer-transition: transform 200ms ease;
+  --ax-drawer-panel-width-tablet: 307px;
+  --ax-drawer-max-height-tablet: 90vh;
+  --ax-drawer-transition-tablet: opacity 150ms ease, box-shadow 150ms ease;
+  --ax-drawer-input-height: 40px;
+  --ax-drawer-input-height-compact: 32px;
+  --ax-drawer-input-padding-inline: 15px;
+  --ax-drawer-input-padding-compact: 12px;
+  --ax-drawer-input-border-radius: 9px;
+  --ax-drawer-input-border-radius-compact: 8px;
+  --ax-drawer-trigger-padding-start: 15px;
+  --ax-drawer-trigger-padding-end: 14px;
+  --ax-drawer-trigger-padding-start-compact: 12px;
+  --ax-drawer-trigger-padding-end-compact: 11px;
+  --ax-drawer-back-icon-size: 20px;
+  --ax-drawer-chevron-size: 16px;
+  --ax-drawer-chevron-icon-size: 10px;
+  --ax-drawer-chevron-transition: transform 0.15s;
+  --ax-drawer-title-min-height: 24px;
+  --ax-drawer-save-border-radius: 24px;
+  --ax-drawer-popover-z: 10;
+  --ax-drawer-popover-max-height: 50vh;
+  --ax-drawer-divider-height: 1px;
+  --ax-drawer-focus-ring-width: 2px;
+  --ax-drawer-focus-ring-offset: 2px;
+  --ax-drawer-tag-icon-size-mobile: 14px;
+  --ax-tag-field-min-height: 56px;
+  --ax-tag-field-gap: 6px;
+  --ax-tag-pill-max-width: 224px;
+  --ax-tag-pill-min-width: 27px;
+  --ax-tag-pill-icon-size: 10px;
+  --ax-drawer-line-height-s: 18px;
+  --ax-drawer-line-height-l: 20px;
+  --ax-drawer-label-padding-block-s: 7px;
+  --ax-drawer-label-padding-block-l: 10px;
+  --ax-drawer-font-weight-medium: 500;
+
+  inset-inline-start: 0;
+  inline-size: 100%;
+  max-block-size: var(--ax-drawer-max-height);
+  background: var(--color-white);
+  padding-block: var(--spacing-100) var(--spacing-300);
+  padding-inline: var(--spacing-300);
+  padding-block-end: calc(var(--spacing-300) + env(safe-area-inset-bottom, 0px));
+  box-shadow: var(--ax-drawer-shadow);
+  transform: translateY(100%);
+  transition: var(--ax-drawer-transition);
+}
+
+.ax-drawer-panel.ax-drawer-open {
+  transform: translateY(var(--drawer-drag-y));
+}
+
+.ax-drawer-panel.ax-drawer-dragging {
+  transition: none;
+}
+
+.ax-drawer-panel > sp-theme {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-block-size: 0;
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+/* ── Drawer line (mobile handle) ─────────────────────────────── */
+
+.ax-drawer-line {
+  background: var(--color-gray-300-variant);
+  margin-block: 0 var(--spacing-200);
+  margin-inline: auto;
+}
+
+/* ── Header ──────────────────────────────────────────────────── */
+
+.ax-drawer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-block-end: var(--spacing-100);
+}
+
+.ax-drawer-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-100);
+  padding-block: var(--spacing-100);
+  padding-inline: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  font-size: var(--ax-body-xs-size);
+  color: var(--color-gray-800-variant);
+}
+
+.ax-drawer-back-icon {
+  inline-size: var(--ax-drawer-back-icon-size);
+  block-size: var(--ax-drawer-back-icon-size);
+  color: currentColor;
+}
+
+/* Figma Title 2XS */
+.ax-drawer-title {
+  font-size: var(--Global-Typography-Size-Title-Title-2XS);
+  font-weight: var(--ax-heading-weight);
+  line-height: var(--Global-Typography-Line-height-Title-Title-2XS);
+  color: var(--color-default-font);
+  min-block-size: var(--ax-drawer-title-min-height);
+  margin: 0;
+}
+
+/* ── Content ─────────────────────────────────────────────────── */
+
+.ax-drawer-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  justify-content: flex-end;
+}
+
+/* ── Form field ──────────────────────────────────────────────── */
+
+.ax-drawer-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ax-drawer-field-label,
+.ax-drawer-picker-label {
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
+  line-height: var(--ax-drawer-line-height-l);
+  color: var(--color-dark-gray);
+  padding-block: var(--ax-drawer-label-padding-block-l);
+  padding-inline: 0;
+  box-sizing: border-box;
+}
+
+.ax-drawer-field-input {
+  inline-size: 100%;
+  block-size: var(--ax-drawer-input-height);
+  padding-block: 0;
+  padding-inline: var(--ax-drawer-input-padding-inline);
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
+  color: var(--color-gray-800-variant);
+  background: var(--color-white);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
+  border-radius: var(--ax-drawer-input-border-radius);
+  box-sizing: border-box;
+}
+
+.ax-drawer-field-input:focus {
+  outline: none;
+  border-color: var(--color-black);
+}
+
+/* ── Picker field ────────────────────────────────────────────── */
+
+.ax-drawer-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.ax-drawer-picker sp-picker {
+  inline-size: 100%;
+  --mod-picker-background-color: var(--color-light-gray);
+  --mod-picker-border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+.ax-drawer-picker-fallback {
+  inline-size: 100%;
+  block-size: var(--ax-drawer-input-height);
+  padding-block: 0;
+  padding-inline: var(--spacing-200);
+  font-size: var(--ax-body-xs-size);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: var(--color-light-gray);
+}
+
+/* ── Form fields group ───────────────────────────────────────── */
+
+.ax-drawer-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+
+/* ── Tags section ────────────────────────────────────────────── */
+
+.ax-drawer-tag-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+
+.ax-drawer-tag-section .ax-drawer-field-label:first-child {
+  padding-bottom: 0;
+}
+
+/* ── Tag field (bordered container) ─────────────────────────── */
+
+.ax-tag-field {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--ax-tag-field-gap);
+  min-block-size: var(--ax-tag-field-min-height);
+  padding: var(--spacing-200);
+  background: var(--color-white);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  box-sizing: border-box;
+  cursor: text;
+}
+
+.ax-tag-field.ax-tag-field-active,
+.ax-tag-field.ax-tag-field-has-tags {
+  border-color: var(--color-gray-950);
+}
+
+.ax-tag-field-tags {
+  display: contents;
+}
+
+.ax-tag-field-input {
+  flex: 1;
+  min-inline-size: 80px;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
+  line-height: var(--ax-drawer-line-height-l);
+  color: var(--color-gray-800-variant);
+  outline: none;
+}
+
+.ax-tag-field-input::placeholder {
+  color: var(--color-gray-800-variant);
+}
+
+/* ── Tag pills (inside field) ──────────────────────────────────── */
+
+.ax-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-200);
+  block-size: var(--spacing-500);
+  padding-inline: var(--spacing-200);
+  background: var(--color-light-gray);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--ax-drawer-font-weight-medium);
+  color: var(--color-gray-800-variant);
+  max-inline-size: var(--ax-tag-pill-max-width);
+  min-inline-size: var(--ax-tag-pill-min-width);
+  box-sizing: border-box;
+}
+
+.ax-tag-pill[hidden] {
+  display: none;
+}
+
+.ax-tag-pill-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-tag-pill-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  color: var(--color-black);
+  flex-shrink: 0;
+  --mod-icon-inline-size: var(--ax-tag-pill-icon-size);
+  --mod-icon-block-size: var(--ax-tag-pill-icon-size);
+}
+
+/* ── Helper text below field ──────────────────────────────────── */
+
+.ax-tag-field-help {
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--ax-body-weight);
+  line-height: var(--ax-drawer-line-height-l);
+  color: var(--color-dark-gray);
+  padding-block: var(--ax-drawer-label-padding-block-s);
+  padding-inline: 0;
+}
+
+.ax-tag-field-help[hidden] {
+  display: none;
+}
+
+/* ── Tag chip buttons (native button.ax-drawer-tag-btn — suggestions) ── */
+
+.ax-drawer-tag-btn {
+  border: none;
+  cursor: pointer;
+}
+
+.ax-drawer-tag-btn:hover {
+  background: var(--color-light-gray-2);
+}
+
+.ax-drawer-tag-btn:active {
+  background: var(--color-gray-300-variant);
+}
+
+.ax-drawer-tag-btn:focus-visible {
+  outline: var(--ax-drawer-focus-ring-width) solid var(--color-blue-800);
+  outline-offset: var(--ax-drawer-focus-ring-offset);
+}
+
+.ax-drawer-tag-btn-icon {
+  --mod-icon-inline-size: var(--ax-tag-pill-icon-size);
+  --mod-icon-block-size: var(--ax-tag-pill-icon-size);
+  color: var(--color-black);
+  flex-shrink: 0;
+}
+
+/* ── Keyword suggestion pills ────────────────────────────────── */
+
+.ax-drawer-keyword-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-100);
+  align-items: flex-start;
+}
+
+.ax-drawer-field-input::placeholder {
+  color: var(--Palette-gray-500);
+}
+
+/* ── Library picker combo (trigger + popover + menu) ─────────── */
+
+.ax-drawer-library-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+.ax-lib-picker-trigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  inline-size: 100%;
+  block-size: var(--ax-drawer-input-height);
+  padding-block: 0;
+  padding-inline: var(--ax-drawer-trigger-padding-start) var(--ax-drawer-trigger-padding-end);
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-s-size);
+  line-height: var(--ax-drawer-line-height-l);
+  color: var(--color-gray-800-variant);
+  background: var(--color-light-gray);
+  border: none;
+  border-radius: var(--ax-drawer-input-border-radius);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.ax-lib-picker-trigger:hover {
+  background: var(--color-light-gray-2);
+}
+
+.ax-lib-picker-trigger:focus-visible {
+  outline: var(--ax-drawer-focus-ring-width) solid var(--color-blue-800);
+  outline-offset: var(--ax-drawer-focus-ring-offset);
+}
+
+.ax-lib-picker-trigger-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  text-align: start;
+}
+
+.ax-lib-picker-trigger-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: var(--ax-drawer-chevron-size);
+  block-size: var(--ax-drawer-chevron-size);
+  flex-shrink: 0;
+  color: var(--color-dark-gray);
+  transition: var(--ax-drawer-chevron-transition);
+}
+
+.ax-lib-picker-trigger-chevron > * {
+  inline-size: var(--ax-drawer-chevron-icon-size);
+  block-size: var(--ax-drawer-chevron-icon-size);
+  color: currentColor;
+}
+
+.ax-lib-picker-trigger[aria-expanded="true"] .ax-lib-picker-trigger-chevron {
+  transform: rotate(180deg);
+}
+
+.ax-lib-picker-popover {
+  display: none;
+  flex-direction: column;
+  position: absolute;
+  inset-block-start: calc(100% + var(--spacing-75));
+  inset-inline-start: 0;
+  inline-size: 100%;
+  background: var(--color-white);
+  border: 1px solid var(--color-light-gray-2);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  box-shadow: var(--Modal-close-shadow-desktop);
+  z-index: var(--ax-drawer-popover-z);
+  box-sizing: border-box;
+  max-block-size: var(--ax-drawer-popover-max-height);
+  overflow: hidden;
+}
+
+.ax-lib-picker-popover.ax-lib-picker-popover-open {
+  display: flex;
+}
+
+.ax-lib-picker-popover sp-menu {
+  border: none;
+  padding-block: var(--spacing-100);
+  padding-inline: 0;
+  flex: 1 1 0;
+  overflow-y: auto;
+  min-block-size: calc(3 * var(--ax-drawer-input-height));
+}
+
+.ax-lib-picker-divider {
+  block-size: var(--ax-drawer-divider-height);
+  background: var(--color-light-gray-2);
+  margin-block: 0;
+  margin-inline: var(--spacing-200);
+}
+
+.ax-lib-picker-create-section {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--spacing-100);
+  padding: var(--spacing-200);
+}
+
+.ax-lib-picker-create-row {
+  display: contents;
+}
+
+.ax-lib-picker-create-label {
+  grid-column: 1 / -1;
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--ax-body-weight);
+  line-height: var(--ax-drawer-line-height-s);
+  color: var(--color-dark-gray);
+}
+
+.ax-lib-picker-create-input {
+  inline-size: 100%;
+  block-size: 32px;
+  padding-block: 0;
+  padding-inline: var(--spacing-200);
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-xs-size);
+  line-height: var(--ax-drawer-line-height-s);
+  color: var(--color-gray-800-variant);
+  border: var(--border-width-2) solid var(--color-gray-300-variant);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: var(--color-white);
+  box-sizing: border-box;
+}
+
+.ax-lib-picker-create-input:focus {
+  outline: none;
+  border-color: var(--color-blue-800);
+}
+
+.ax-lib-picker-create-input::placeholder {
+  color: var(--Palette-gray-500);
+}
+
+/* ── Disabled picker (signed-out state) ──────────────────────── */
+
+.ax-lib-picker-trigger-disabled {
+  background: var(--color-light-gray);
+  color: var(--color-gray-400-variant);
+  cursor: default;
+  pointer-events: none;
+}
+
+.ax-lib-picker-trigger-disabled .ax-lib-picker-trigger-label {
+  color: var(--color-gray-400-variant);
+}
+
+.ax-lib-picker-trigger-disabled:hover {
+  background: var(--color-light-gray);
+}
+
+.ax-drawer-picker-label-disabled {
+  color: var(--color-gray-400-variant);
+}
+
+/* ── Save button ─────────────────────────────────────────────── */
+
+.ax-drawer-save-btn {
+  inline-size: 100%;
+  --mod-button-border-radius: var(--ax-drawer-save-border-radius);
+}
+
+/* ── Mobile drawer overrides ────────────────────── */
+
+.ax-drawer-mobile .ax-drawer-tag-btn-icon {
+  --mod-icon-inline-size: var(--ax-drawer-tag-icon-size-mobile);
+  --mod-icon-block-size: var(--ax-drawer-tag-icon-size-mobile);
+}
+
+.ax-drawer-mobile .ax-lib-picker-create-section {
+  align-items: center;
+}
+
+.ax-drawer-mobile .ax-lib-picker-create-label {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.ax-drawer-mobile .ax-lib-picker-create-input {
+  grid-column: 1 / -1;
+  grid-row: 2;
+}
+
+.ax-drawer-mobile .ax-lib-picker-create-btn {
+  grid-column: 1;
+  grid-row: 3;
+  inline-size: fit-content;
+}
+
+.ax-lib-picker-popover sp-menu-item[selected],
+.ax-lib-picker-popover sp-menu-item[aria-selected="true"] {
+  display: flex;
+}
+
+/* ── Tablet / Desktop (600px+) ───────────────────────────────── */
+
+@media (min-width: 600px) {
+  .ax-drawer-curtain {
+    display: none;
+  }
+
+  .ax-drawer-panel {
+    position: fixed;
+    inset-block-end: auto;
+    inset-inline-start: auto;
+    inline-size: var(--ax-drawer-panel-width-tablet);
+    max-block-size: var(--ax-drawer-max-height-tablet);
+    overflow-y: auto;
+    border-radius: var(--Corner-radius-corner-radius-100);
+    box-shadow: var(--Modal-close-shadow-tablet);
+    transform: none;
+    opacity: 0;
+    transition: var(--ax-drawer-transition-tablet);
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-300);
+    padding: 0 !important;
+  }
+
+  .ax-drawer-panel > sp-theme {
+    overflow: visible;
+    min-block-size: auto;
+  }
+
+  .ax-drawer-content {
+    margin: var(--spacing-300);
+  }
+
+  .ax-drawer-panel.ax-drawer-open {
+    opacity: 1;
+  }
+
+  .ax-drawer-panel.ax-drawer-dropdown-open {
+    box-shadow: var(--Elevation-Tray);
+    overflow: visible;
+  }
+
+  .ax-drawer-panel.ax-drawer-dropdown-open > sp-theme {
+    overflow: visible;
+  }
+
+  .ax-drawer-panel.ax-drawer-dropdown-open .ax-lib-picker-popover {
+    max-height: none;
+  }
+
+  .ax-lib-picker-popover sp-menu {
+    min-block-size: calc(4 * var(--ax-drawer-input-height));
+  }
+
+  .ax-drawer-field-label,
+  .ax-drawer-picker-label {
+    font-size: var(--ax-body-xs-size);
+    line-height: var(--ax-drawer-line-height-s);
+    padding-block: var(--ax-drawer-label-padding-block-s);
+    padding-inline: 0;
+  }
+
+  .ax-drawer-field-input {
+    block-size: var(--ax-drawer-input-height-compact);
+    padding-block: 0;
+    padding-inline: var(--ax-drawer-input-padding-compact);
+    font-size: var(--ax-body-xs-size);
+    border-radius: var(--ax-drawer-input-border-radius-compact);
+  }
+
+  .ax-lib-picker-trigger {
+    block-size: var(--ax-drawer-input-height-compact);
+    padding-block: 0;
+    padding-inline: var(--ax-drawer-trigger-padding-start-compact) var(--ax-drawer-trigger-padding-end-compact);
+    font-size: var(--ax-body-xs-size);
+    border-radius: var(--ax-drawer-input-border-radius-compact);
+  }
+
+  .ax-drawer-picker-fallback {
+    block-size: var(--ax-drawer-input-height-compact);
+  }
+
+  .ax-tag-field-input {
+    font-size: var(--ax-body-xs-size);
+    line-height: var(--ax-drawer-line-height-s);
+  }
+
+  .ax-tag-field-help {
+    font-size: var(--ax-body-xs-size);
+    line-height: var(--ax-drawer-line-height-s);
+  }
+
+  .ax-drawer-save-btn {
+    inline-size: auto;
+    min-inline-size: 108px;
+    align-self: flex-start;
+  }
+
+  @supports (anchor-name: --ax-drawer-anchor) {
+    .ax-drawer-panel {
+      position-anchor: --ax-drawer-anchor;
+      top: auto;
+      right: anchor(right);
+      bottom: anchor(top);
+      left: auto;
+      margin-block-end: var(--spacing-100);
+      position-try-fallbacks: flip-block;
+    }
+  }
+}
+
+@media (max-width: 1200px) {
+  .ax-drawer-panel {
+    box-shadow: var(--Modal-close-shadow-desktop);
+  }
+}
+
+/* ── Reduced motion ──────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-drawer-curtain,
+  .ax-drawer-panel {
+    transition: none;
+  }
+
+  .ax-drawer-panel.ax-drawer-dragging {
+    transition: none;
+  }
+}

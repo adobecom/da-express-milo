@@ -5,6 +5,7 @@ const JPG = 'jpg';
 const JPEG = 'jpeg';
 const PNG = 'png';
 const WEBP = 'webp';
+const HEIC = 'heic';
 
 const VIDEO_FORMATS = [
   'mov',
@@ -83,13 +84,23 @@ const getMergeVideosCfg = () => ({
 
 // Shared QA configurations
 export const QA_CONFIGS = {
-  'convert-to-jpg': { ...getBaseImgCfg(PNG, WEBP) },
-  'convert-to-png': { ...getBaseImgCfg(JPG, JPEG, WEBP) },
+  'convert-to-jpg': {
+    ...getBaseImgCfg(PNG, WEBP, HEIC),
+    input_check: (input) => getBaseImgCfg(PNG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+  },
+  'convert-to-png': {
+    ...getBaseImgCfg(JPG, JPEG, WEBP, HEIC),
+    input_check: (input) => getBaseImgCfg(JPG, JPEG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+  },
   'convert-to-svg': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'crop-image': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'resize-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
   'remove-background': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'generate-qr-code': {
+    ...getBaseImgCfg(JPG, JPEG, PNG),
+    input_check: () => true,
+  },
+  'remove-background-easy-upload-variant': {
     ...getBaseImgCfg(JPG, JPEG, PNG),
     input_check: () => true,
   },
@@ -106,6 +117,16 @@ export const QA_CONFIGS = {
   'caption-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'edit-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
+  'remove-background-fast-track-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'remove-background-fast-track-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'heic-to-jpg': {
+    ...getBaseImgCfg(PNG, WEBP, HEIC),
+    input_check: (input) => getBaseImgCfg(PNG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+  },
+  'heic-to-png': {
+    ...getBaseImgCfg(JPG, JPEG, WEBP, HEIC),
+    input_check: (input) => getBaseImgCfg(JPG, JPEG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+  },
 };
 
 // Experimental variants
@@ -114,6 +135,8 @@ export const EXPERIMENTAL_VARIANTS = [
   'qa-in-product-variant2',
   'qa-nba',
   'qa-in-product-control',
+  'remove-background-fast-track-variant',
+  'remove-background-fast-track-control',
 ];
 
 export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
@@ -121,11 +144,8 @@ export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
   'qa-in-product-variant2': '9DJJ47N3',
   'qa-nba': '9J8K43X2',
   'qa-in-product-control': '91BF4LV6',
-};
-
-export const AUTH_EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
-  'qa-in-product-variant1': 'HQZ6WVXG',
-  'qa-nba': 'HVQ7WR6F',
+  'remove-background-fast-track-variant': '6DWQ762R',
+  'remove-background-fast-track-control': '55KD8FF5',
 };
 
 // Quick actions allowed in frictionless upload feature
@@ -134,6 +154,11 @@ export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   imageEditor: 'edit-image',
   removeBackgroundVariant1: 'qa-in-product-variant1',
   removeBackgroundVariant2: 'qa-in-product-variant2',
+  removeBackgroundFasttrackVariant: 'remove-background-fast-track-variant',
+};
+
+export const AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
+  removeBackground: 'remove-background',
 };
 
 // Route paths map corresponding to the express routes
@@ -396,6 +421,18 @@ export function executeQuickAction(
       exportConfig,
       contConfig,
     ),
+    'heic-to-jpg': () => ccEverywhere.quickAction.convertToJPEG(
+      docConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
+    'heic-to-png': () => ccEverywhere.quickAction.convertToPNG(
+      docConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
   };
 
   const action = quickActionMap[quickActionId];
@@ -480,8 +517,8 @@ export async function loadAndInitializeCCEverywhere(getConfig) {
   if (urlOverride) {
     try {
       if (new URL(urlOverride).host === 'dev.cc-embed.adobe.com') valid = true;
-    } catch (e) {
-      window.lana.log('Invalid SDK URL');
+    } catch (error) {
+      window.lana?.log(`Invalid SDK URL: ${error}`, { tags: 'frictionless-utils', severity: 'error' });
     }
   }
   const CDN_URL = valid
