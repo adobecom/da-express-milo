@@ -1,5 +1,6 @@
 import { getLibs, decorateButtonsDeprecated } from './utils.js';
 import BlockMediator from './block-mediator.min.js';
+import { loadWebApplicationSchema } from './utils/web-app-schema.js';
 
 let createTag; let getMetadata;
 let getConfig; let loadStyle;
@@ -74,6 +75,7 @@ export default async function loadDelayed() {
     addJapaneseSectionHeaderSizing();
     turnContentLinksIntoButtons();
     preloadSUSILight();
+    loadWebApplicationSchema();
     return null;
   } catch (error) {
     window.lana?.log(`Express-Delayed Error: ${error?.message || error?.detail || error}`, { tags: 'express-delayed', severity: 'error' });
