@@ -20,7 +20,11 @@
       .toolbar { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
       .meta { color: #888; font-size: 0.9rem; }
       #status { color: #555; min-height: 1.2em; margin-bottom: 0.5rem; }
-      #results { margin-top: 0.75rem; }
+      #legend { display: flex; gap: 1.25rem; font-size: 0.8rem; margin: 0.4rem 0 0.6rem; }
+      .legend-express { color: #8a6500; }
+      .legend-milo { color: #b03060; }
+      .legend-unknown { color: #999; }
+      #results { margin-top: 0.25rem; }
       details {
         border: 1px solid #e0e0e0;
         border-radius: 8px;
@@ -29,6 +33,10 @@
         background: #fafafa;
       }
       details[open] { background: #fff; }
+      details.repo-express { background: rgba(255, 215, 0, 0.1); border-color: rgba(200, 160, 0, 0.25); }
+      details.repo-express[open] { background: rgba(255, 215, 0, 0.16); }
+      details.repo-milo { background: rgba(255, 130, 160, 0.08); border-color: rgba(200, 80, 120, 0.2); }
+      details.repo-milo[open] { background: rgba(255, 130, 160, 0.14); }
       summary {
         cursor: pointer;
         font-weight: 600;
@@ -38,8 +46,19 @@
         align-items: center;
       }
       summary::-webkit-details-marker { display: none; }
-      summary::after { content: '▸'; color: #aaa; margin-left: 0.5rem; }
+      summary::after { content: '▸'; color: #aaa; margin-left: 0.5rem; flex-shrink: 0; }
       details[open] summary::after { content: '▾'; }
+      .summary-left { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; }
+      .summary-count { font-weight: 400; color: inherit; }
+      .override-badge {
+        font-size: 0.7rem;
+        font-weight: 500;
+        background: rgba(255, 130, 160, 0.25);
+        color: #b03060;
+        padding: 0.1rem 0.4rem;
+        border-radius: 4px;
+        flex-shrink: 0;
+      }
       .block-paths {
         font-family: monospace;
         font-size: 0.82rem;
@@ -48,9 +67,6 @@
         list-style: none;
       }
       .block-paths li { padding: 0.12rem 0; color: #555; }
-      .summary-left { display: inline-flex; align-items: center; gap: 0.5rem; }
-      .repo-badge { font-size: 0.72rem; font-weight: 600; background: #e8f5e9; color: #2e7d32; padding: 0.1rem 0.45rem; border-radius: 4px; }
-      .summary-count { color: #999; font-size: 0.88rem; font-weight: 400; margin-right: 0.25rem; }
     </style>
     <script src="https://da.live/nx/utils/sdk.js" type="module"></script>
     <script src="./index.js" type="module"></script>
@@ -64,6 +80,7 @@
     </div>
     <p id="status"></p>
     <p id="block-count" class="meta"></p>
+    <div id="legend"></div>
     <div id="results"></div>
   </body>
 </html>
