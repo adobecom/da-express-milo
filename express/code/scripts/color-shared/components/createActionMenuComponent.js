@@ -323,7 +323,9 @@ export async function createActionMenuComponent(options = {}) {
     handleGenerateRandomState = state.onGenerateRandom;
     pushStateFn = state.addOnePaletteToHistory;
     getCurrentPaletteFn = state.getCurrentPalette;
-    state.init();
+    if (type !== 'controls-only') {
+      state.init();
+    }
   }
 
   function handleUndo() {
