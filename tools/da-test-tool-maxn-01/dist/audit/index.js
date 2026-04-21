@@ -5,7 +5,19 @@ import { collectDocs, cat, readJson, writeJson } from '../shared/da-api.js';
 
 const SCAN_ROOT = '/adobecom/da-express-milo/express';
 const AUDIT_DATA_PATH = '/adobecom/da-express-milo/drafts/da-test-tool-maxn-01/audit-results.json';
+const GITHUB_BLOCKS_API = 'https://api.github.com/repos/adobecom/da-express-milo/contents/express/code/blocks?ref=stage';
 const BATCH_SIZE = 10;
+
+async function fetchRepoBlocks() {
+  try {
+    const resp = await fetch(GITHUB_BLOCKS_API);
+    if (!resp.ok) return new Set();
+    const items = await resp.json();
+    return new Set(items.filter((i) => i.type === 'dir').map((i) => i.name.toLowerCase()));
+  } catch {
+    return new Set();
+  }
+}
 
 const $scanBtn = document.getElementById('scan-btn');
 const $lastScanned = document.getElementById('last-scanned');
@@ -37,7 +49,7 @@ function extractBlocks(html) {
   return [...blocks];
 }
 
-function renderResults(data) {
+function renderResults(data, repoBlocks) {
   const sorted = Object.entries(data.blocks)
     .sort(([, a], [, b]) => b.length - a.length);
 
@@ -47,7 +59,24 @@ function renderResults(data) {
   for (const [blockName, paths] of sorted) {
     const details = document.createElement('details');
     const summary = document.createElement('summary');
-    summary.textContent = `${blockName} — ${paths.length} use${paths.length !== 1 ? 's' : ''}`;
+
+    const left = document.createElement('span');
+    left.className = 'summary-left';
+    const nameSpan = document.createElement('span');
+    nameSpan.textContent = blockName;
+    left.appendChild(nameSpan);
+    if (repoBlocks.has(blockName)) {
+      const badge = document.createElement('span');
+      badge.className = 'repo-badge';
+      badge.textContent = '✓ in repo';
+      left.appendChild(badge);
+    }
+    const countSpan = document.createElement('span');
+    countSpan.className = 'summary-count';
+    countSpan.textContent = `${paths.length} use${paths.length !== 1 ? 's' : ''}`;
+    summary.appendChild(left);
+    summary.appendChild(countSpan);
+
     const ul = document.createElement('ul');
     ul.className = 'block-paths';
     for (const path of paths) {
@@ -65,6 +94,9 @@ async function runScan(token) {
   $results.innerHTML = '';
   $blockCount.textContent = '';
   $status.textContent = 'Traversing /express directory tree…';
+
+  // Fetch repo block list in parallel with the BFS traversal
+  const repoBlocksPromise = fetchRepoBlocks();
 
   const docs = await collectDocs(SCAN_ROOT, token, (count) => {
     $status.textContent = `Traversing… ${count} documents found`;
@@ -97,10 +129,13 @@ async function runScan(token) {
     $status.textContent = `Scanning… ${scanned} / ${docs.length}${errStr}`;
   }
 
+  const repoBlocks = await repoBlocksPromise;
+
   const data = {
     scannedAt: new Date().toISOString(),
     docCount: docs.length,
     scanErrors: errors,
+    repoBlocks: [...repoBlocks],
     blocks,
   };
 
@@ -119,7 +154,7 @@ async function runScan(token) {
   if (cached) {
     $lastScanned.textContent = `Last scanned: ${new Date(cached.scannedAt).toLocaleString()}`;
     $scanBtn.textContent = 'Rescan';
-    renderResults(cached);
+    renderResults(cached, new Set(cached.repoBlocks || []));
   }
   $status.textContent = '';
 
@@ -130,7 +165,7 @@ async function runScan(token) {
       $lastScanned.textContent = `Last scanned: ${new Date(data.scannedAt).toLocaleString()}`;
       $scanBtn.textContent = 'Rescan';
       $status.textContent = '';
-      renderResults(data);
+      renderResults(data, new Set(data.repoBlocks || []));
     } catch (err) {
       $status.textContent = `Error: ${err.message}`;
     } finally {
