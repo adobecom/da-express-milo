@@ -40,15 +40,16 @@ Response shape (from docs):
 
 **Problem**: CORS errors. The browser blocks the request from `http://localhost:3000` (and possibly from `https://da.live` too — not yet verified from production). The server doesn't return `Access-Control-Allow-Origin` for these origins. Rate limit: 10 req/sec.
 
-### Attempt 2: `aem.live` public CDN HEAD requests
+### Attempt 2: `aem.live` public CDN HEAD requests (current implementation)
 
 ```
 HEAD https://main--da-express-milo--adobecom.aem.live/express/foo/bar
 ```
 
 A 200 response = published; 404 = not published. No auth needed. Rate limit: 200 req/sec.
+Throttled to 10 concurrent / 500ms per batch (~20 req/sec). Custom header `X-DA-Tool: da-test-tool-maxn-01` is sent for log identifiability.
 
-**Status**: Not yet tested — may also have CORS restrictions. The CORS behavior of `aem.live` for cross-origin HEAD requests from a browser is unconfirmed.
+**Status**: Not yet tested in the browser — CORS behavior of `aem.live` for cross-origin HEAD requests from `https://da.live` is unconfirmed. HEAD requests return no body so no analytics JS fires.
 
 ---
 

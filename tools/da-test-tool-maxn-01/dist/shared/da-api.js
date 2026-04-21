@@ -1,10 +1,12 @@
 export const DA_ADMIN = 'https://admin.da.live';
 
 // aem.live is the public CDN for published AEM Edge Delivery content.
-// HEAD requests require no auth and have a 200 req/sec rate limit.
-// admin.hlx.page was tried first but has CORS restrictions that block browser requests from non-production origins.
-const STATUS_BATCH_SIZE = 20;
-const STATUS_BATCH_MS = 200; // 20 req per 200ms = 100 req/sec, well under the 200 req/sec aem.live limit
+// HEAD requests require no auth, return no body (so no analytics JS fires), and have a 200 req/sec limit.
+// No custom headers — any non-standard header triggers a CORS preflight (OPTIONS) that aem.live does not handle,
+// causing the browser to block the request before it reaches the server.
+// Throttled to 10 concurrent / 500ms per batch (~20 req/sec) to be a polite client.
+const STATUS_BATCH_SIZE = 10;
+const STATUS_BATCH_MS = 500; // 10 req per 500ms = 20 req/sec
 
 function daPathToLiveUrl(daPath) {
   // /adobecom/da-express-milo/express/foo/bar.html → https://main--da-express-milo--adobecom.aem.live/express/foo/bar
