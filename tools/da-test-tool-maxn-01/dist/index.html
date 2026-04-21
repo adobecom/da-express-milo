@@ -1,27 +1,20 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>DA Block Auditor</title>
+    <title>DA Tools</title>
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="icon" href="data:,">
     <style>
       body { font-family: sans-serif; margin: 1rem 2rem; }
-      form { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-      input { flex: 1; padding: 0.4rem; font-size: 1rem; }
-      button { padding: 0.4rem 1rem; cursor: pointer; }
-      #status { color: #555; margin-bottom: 0.5rem; min-height: 1.2em; }
-      #results li { font-family: monospace; margin: 0.2rem 0; }
     </style>
-    <script src="https://da.live/nx/utils/sdk.js" type="module"></script>
-    <script src="./index.js" type="module"></script>
   </head>
   <body>
-    <h2>Block Auditor</h2>
-    <form id="search-form">
-      <input id="block-input" type="text" placeholder="Block name (e.g. hero)" required />
-      <button type="submit">Scan</button>
-    </form>
-    <p id="status"></p>
-    <ul id="results"></ul>
+    <h1>DA Tools</h1>
+    <p>Hello world.</p>
+    <ul>
+      <li><a href="./search/">Block Auditor</a></li>
+      <li><a href="./counter/">Document Counter</a></li>
+      <li><a href="./audit/">Block Audit</a></li>
+    </ul>
   </body>
 </html>

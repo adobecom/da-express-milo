@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>DA Document Counter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="icon" href="data:,">
+    <style>
+      body { font-family: sans-serif; margin: 1rem 2rem; }
+      form { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+      input { flex: 1; padding: 0.4rem; font-size: 1rem; font-family: monospace; }
+      button { padding: 0.4rem 1rem; cursor: pointer; }
+      #status { color: #555; margin-bottom: 0.5rem; min-height: 1.2em; }
+      #result { font-size: 2rem; font-weight: bold; }
+    </style>
+    <script src="https://da.live/nx/utils/sdk.js" type="module"></script>
+    <script src="./index.js" type="module"></script>
+  </head>
+  <body>
+    <h2>Document Counter</h2>
+    <form id="count-form">
+      <input id="path-input" type="text" value="/adobecom/da-express-milo/express" required />
+      <button type="submit">Count</button>
+    </form>
+    <p id="status"></p>
+    <p id="result"></p>
+  </body>
+</html>

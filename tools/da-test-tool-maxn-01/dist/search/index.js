@@ -1,54 +1,14 @@
 /* eslint-disable import/no-unresolved */
 import DA_SDK from 'https://da.live/nx/utils/sdk.js';
+/* eslint-enable import/no-unresolved */
+import { collectDocs, cat } from '../shared/da-api.js';
 
-const DA_ADMIN = 'https://admin.da.live';
 const SCAN_ROOT = '/adobecom/da-express-milo/express';
 const BATCH_SIZE = 10;
 
 const $status = document.getElementById('status');
 const $results = document.getElementById('results');
 const $form = document.getElementById('search-form');
-
-// Safety guardrail: this tool is read-only. Throws if any non-GET request is attempted.
-function safeFetch(url, options = {}) {
-  const method = (options.method || 'GET').toUpperCase();
-  if (method !== 'GET') throw new Error(`Write operations are not permitted (attempted ${method} ${url})`);
-  return fetch(url, { ...options, method: 'GET' });
-}
-
-async function ls(path, token) {
-  const resp = await safeFetch(`${DA_ADMIN}/list${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!resp.ok) throw new Error(`ls ${path}: ${resp.status}`);
-  return resp.json();
-}
-
-async function cat(path, token) {
-  const resp = await safeFetch(`${DA_ADMIN}/source${path}`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!resp.ok) throw new Error(`cat ${path}: ${resp.status}`);
-  return resp.text();
-}
-
-// BFS traversal — lists all directories at a given level in parallel
-async function collectDocs(rootDir, token) {
-  const docs = [];
-  let dirs = [rootDir];
-  while (dirs.length) {
-    // eslint-disable-next-line no-await-in-loop
-    const listings = await Promise.all(dirs.map((d) => ls(d, token)));
-    dirs = [];
-    for (const items of listings) {
-      for (const item of items) {
-        if (item.ext === 'html') docs.push(item.path);
-        else if (!item.ext) dirs.push(item.path);
-      }
-    }
-  }
-  return docs;
-}
 
 function docContainsBlock(html, blockName) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
