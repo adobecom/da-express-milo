@@ -211,7 +211,7 @@ const CONFIG = {
     'wcs-api-key': 'AdobeExpressWeb',
   },
 };
-
+console.log('CDN test');
 /*
  * ------------------------------------------------------------
  * Edit below at your own risk
