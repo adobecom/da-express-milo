@@ -4,7 +4,7 @@ import DA_SDK from 'https://da.live/nx/utils/sdk.js';
 import { collectDocs, cat, readJson, writeJson } from '../shared/da-api.js';
 
 const SCAN_ROOT = '/adobecom/da-express-milo/express';
-const AUDIT_DATA_PATH = '/adobecom/da-express-milo/tools/da-test-tool-maxn-01/audit-results.json';
+const AUDIT_DATA_PATH = '/adobecom/da-express-milo/drafts/da-test-tool-maxn-01/audit-results.json';
 const BATCH_SIZE = 10;
 
 const $scanBtn = document.getElementById('scan-btn');
