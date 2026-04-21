@@ -11,12 +11,10 @@ export function injectWebApplicationSchema() {
   const offerPriceCurrency = getMeta('schema-offer-price-currency') || 'USD';
   const offerUrl = getMeta('schema-offer-url');
   const offerAvailability = getMeta('schema-offer-availability');
-  const offerCategory = getMeta('schema-offer-category');
 
   const offer = { '@type': 'Offer', price: offerPrice, priceCurrency: offerPriceCurrency };
   if (offerUrl) offer.url = offerUrl;
   if (offerAvailability) offer.availability = offerAvailability;
-  if (offerCategory) offer.offerCategory = offerCategory;
 
   const schema = {
     '@context': 'https://schema.org',
