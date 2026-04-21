@@ -9,8 +9,15 @@ const $status = document.getElementById('status');
 const $results = document.getElementById('results');
 const $form = document.getElementById('search-form');
 
+// Safety guardrail: this tool is read-only. Throws if any non-GET request is attempted.
+function safeFetch(url, options = {}) {
+  const method = (options.method || 'GET').toUpperCase();
+  if (method !== 'GET') throw new Error(`Write operations are not permitted (attempted ${method} ${url})`);
+  return fetch(url, { ...options, method: 'GET' });
+}
+
 async function ls(path, token) {
-  const resp = await fetch(`${DA_ADMIN}/list${path}`, {
+  const resp = await safeFetch(`${DA_ADMIN}/list${path}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!resp.ok) throw new Error(`ls ${path}: ${resp.status}`);
@@ -18,7 +25,7 @@ async function ls(path, token) {
 }
 
 async function cat(path, token) {
-  const resp = await fetch(`${DA_ADMIN}/source${path}`, {
+  const resp = await safeFetch(`${DA_ADMIN}/source${path}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!resp.ok) throw new Error(`cat ${path}: ${resp.status}`);
@@ -46,6 +53,15 @@ async function collectDocs(rootDir, token) {
 function docContainsBlock(html, blockName) {
   const doc = new DOMParser().parseFromString(html, 'text/html');
   const query = blockName.toLowerCase().trim();
+
+  // DA stores blocks as <div class="block-name [variant...]">
+  // The block name is always the first class token
+  for (const div of doc.querySelectorAll('div[class]')) {
+    const firstClass = div.className.trim().toLowerCase().split(/\s+/)[0];
+    if (firstClass === query) return true;
+  }
+
+  // Fallback: table-based format (older Word/Google Docs-authored content)
   for (const table of doc.querySelectorAll('table')) {
     const firstCell = table.querySelector('tr:first-child th, tr:first-child td');
     if (firstCell) {
@@ -58,17 +74,19 @@ function docContainsBlock(html, blockName) {
       ) return true;
     }
   }
+
   return false;
 }
 
 async function scanDocs(paths, blockName, token) {
   let scanned = 0;
+  let errors = 0;
   $results.innerHTML = '';
 
   for (let i = 0; i < paths.length; i += BATCH_SIZE) {
     const batch = paths.slice(i, i + BATCH_SIZE);
     // eslint-disable-next-line no-await-in-loop
-    await Promise.all(batch.map(async (path) => {
+    const batchErrors = await Promise.all(batch.map(async (path) => {
       try {
         const html = await cat(path, token);
         if (docContainsBlock(html, blockName)) {
@@ -76,14 +94,20 @@ async function scanDocs(paths, blockName, token) {
           li.textContent = path;
           $results.appendChild(li);
         }
-      } catch { /* skip unreadable files */ }
+        return 0;
+      } catch {
+        return 1;
+      }
     }));
+    errors += batchErrors.reduce((sum, e) => sum + e, 0);
     scanned += batch.length;
-    $status.textContent = `Scanning… ${scanned} / ${paths.length}`;
+    const errStr = errors > 0 ? `, ${errors} error${errors !== 1 ? 's' : ''}` : '';
+    $status.textContent = `Scanning… ${scanned} / ${paths.length}${errStr}`;
   }
 
   const count = $results.children.length;
-  $status.textContent = `Done — ${count} document${count !== 1 ? 's' : ''} contain "${blockName}".`;
+  const errSuffix = errors > 0 ? ` (${errors} file${errors !== 1 ? 's' : ''} could not be read)` : '';
+  $status.textContent = `Done — ${count} document${count !== 1 ? 's' : ''} contain "${blockName}"${errSuffix}.`;
 }
 
 (async function init() {
