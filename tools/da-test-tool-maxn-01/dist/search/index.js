@@ -6,8 +6,8 @@ import { collectDocs, cat } from '../shared/da-api.js';
 const SCAN_ROOT = '/adobecom/da-express-milo/express';
 const BATCH_SIZE = 10;
 
-const $status = document.getElementById('search-status');
-const $results = document.getElementById('search-results');
+const $status = document.getElementById('status');
+const $results = document.getElementById('results');
 const $form = document.getElementById('search-form');
 
 function docContainsBlock(html, blockName) {
@@ -70,7 +70,7 @@ async function scanDocs(paths, blockName, token) {
   $status.textContent = `Done — ${count} document${count !== 1 ? 's' : ''} contain "${blockName}"${errSuffix}.`;
 }
 
-async function init() {
+(async function init() {
   const { token } = await DA_SDK;
 
   $form.addEventListener('submit', async (e) => {
@@ -92,13 +92,4 @@ async function init() {
       $form.querySelector('button').disabled = false;
     }
   });
-}
-
-let started = false;
-function activate() {
-  if (started || location.hash !== '#search') return;
-  started = true;
-  init();
-}
-activate();
-window.addEventListener('hashchange', activate);
+}());

@@ -1,7 +1,39 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <script>window.location.replace('../#counter');</script>
+    <title>DA Document Counter</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <link rel="icon" href="data:,">
+    <style>
+      body { font-family: sans-serif; margin: 1rem 2rem; }
+      .back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        color: #888;
+        text-decoration: none;
+        font-size: 0.92rem;
+        margin-bottom: 1.25rem;
+      }
+      .back::before { content: '‹'; font-size: 1.5em; line-height: 1; margin-top: -0.06em; }
+      .back:hover { color: #000; }
+      form { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
+      input { flex: 1; padding: 0.4rem; font-size: 1rem; font-family: monospace; }
+      button { padding: 0.4rem 1rem; cursor: pointer; }
+      #status { color: #555; margin-bottom: 0.5rem; min-height: 1.2em; }
+      #result { font-size: 2rem; font-weight: bold; }
+    </style>
+    <script src="https://da.live/nx/utils/sdk.js" type="module"></script>
+    <script src="./index.js" type="module"></script>
   </head>
+  <body>
+    <a href="../" class="back">All Tools</a>
+    <h2>Document Counter</h2>
+    <form id="count-form">
+      <input id="path-input" type="text" value="/adobecom/da-express-milo/express" required />
+      <button type="submit">Count</button>
+    </form>
+    <p id="status"></p>
+    <p id="result"></p>
+  </body>
 </html>

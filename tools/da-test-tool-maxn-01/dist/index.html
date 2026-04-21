@@ -5,24 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="icon" href="data:,">
     <style>
-      body { font-family: sans-serif; margin: 1rem 2rem; }
-
-      /* Back button */
-      .back {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.25rem;
-        color: #888;
-        text-decoration: none;
-        font-size: 0.92rem;
-        margin-bottom: 1.25rem;
-      }
-      .back::before { content: '‹'; font-size: 1.5em; line-height: 1; margin-top: -0.06em; }
-      .back:hover { color: #000; }
-
-      /* Home view */
-      #view-home { max-width: 480px; }
-      #view-home h1 { margin-bottom: 1.5rem; }
+      body { font-family: sans-serif; margin: 2rem; max-width: 480px; }
+      h1 { margin-bottom: 1.5rem; }
       .card {
         display: flex;
         align-items: center;
@@ -40,135 +24,30 @@
       .card-text strong { display: block; font-size: 1rem; margin-bottom: 0.2rem; }
       .card-text p { margin: 0; color: #666; font-size: 0.85rem; }
       .chevron { font-size: 1.4rem; color: #bbb; flex-shrink: 0; margin-left: 1rem; }
-
-      /* Shared tool styles */
-      form { display: flex; gap: 0.5rem; margin-bottom: 1rem; }
-      input { flex: 1; padding: 0.4rem; font-size: 1rem; }
-      button { padding: 0.4rem 1rem; cursor: pointer; }
-      .status { color: #555; margin-bottom: 0.5rem; min-height: 1.2em; }
-      .meta { color: #888; font-size: 0.9rem; }
-
-      /* Counter */
-      #counter-result { font-size: 2rem; font-weight: bold; }
-      #path-input { font-family: monospace; }
-
-      /* Audit */
-      .toolbar { display: flex; align-items: baseline; gap: 1rem; flex-wrap: wrap; margin-bottom: 0.5rem; }
-      #audit-results { margin-top: 0.75rem; }
-      details {
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        padding: 0.6rem 1rem;
-        margin: 0.4rem 0;
-        background: #fafafa;
-      }
-      details[open] { background: #fff; }
-      summary {
-        cursor: pointer;
-        font-weight: 600;
-        list-style: none;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      summary::-webkit-details-marker { display: none; }
-      summary::after { content: '▸'; color: #aaa; margin-left: 0.5rem; }
-      details[open] summary::after { content: '▾'; }
-      .block-paths {
-        font-family: monospace;
-        font-size: 0.82rem;
-        margin: 0.5rem 0 0.1rem;
-        padding-left: 0.25rem;
-        list-style: none;
-      }
-      .block-paths li { padding: 0.12rem 0; color: #555; }
-
-      /* Search results */
-      #search-results li { font-family: monospace; margin: 0.2rem 0; }
     </style>
-    <script src="https://da.live/nx/utils/sdk.js" type="module"></script>
-    <script src="./search/index.js" type="module"></script>
-    <script src="./counter/index.js" type="module"></script>
-    <script src="./audit/index.js" type="module"></script>
   </head>
   <body>
-
-    <!-- Home -->
-    <section id="view-home">
-      <h1>DA Tools</h1>
-      <a class="card" href="#search">
-        <div class="card-text">
-          <strong>Block Finder</strong>
-          <p>Search for a block name and see every page in the /express tree that uses it.</p>
-        </div>
-        <span class="chevron">›</span>
-      </a>
-      <a class="card" href="#counter">
-        <div class="card-text">
-          <strong>Document Counter</strong>
-          <p>Count how many HTML documents exist under any given directory path.</p>
-        </div>
-        <span class="chevron">›</span>
-      </a>
-      <a class="card" href="#audit">
-        <div class="card-text">
-          <strong>Block Index</strong>
-          <p>Scan the entire /express tree and build a full index of every block in use.</p>
-        </div>
-        <span class="chevron">›</span>
-      </a>
-    </section>
-
-    <!-- Block Finder -->
-    <section id="view-search" hidden>
-      <a href="#" class="back">All Tools</a>
-      <h2>Block Finder</h2>
-      <form id="search-form">
-        <input id="block-input" type="text" placeholder="Block name (e.g. hero)" required />
-        <button type="submit">Scan</button>
-      </form>
-      <p id="search-status" class="status"></p>
-      <ul id="search-results"></ul>
-    </section>
-
-    <!-- Document Counter -->
-    <section id="view-counter" hidden>
-      <a href="#" class="back">All Tools</a>
-      <h2>Document Counter</h2>
-      <form id="count-form">
-        <input id="path-input" type="text" value="/adobecom/da-express-milo/express" required />
-        <button type="submit">Count</button>
-      </form>
-      <p id="counter-status" class="status"></p>
-      <p id="counter-result"></p>
-    </section>
-
-    <!-- Block Index -->
-    <section id="view-audit" hidden>
-      <a href="#" class="back">All Tools</a>
-      <h2>Block Index</h2>
-      <div class="toolbar">
-        <button id="scan-btn">Run Scan</button>
-        <span id="last-scanned" class="meta"></span>
+    <h1>DA Tools</h1>
+    <a class="card" href="./search/">
+      <div class="card-text">
+        <strong>Block Finder</strong>
+        <p>Search for a block name and see every page in the /express tree that uses it.</p>
       </div>
-      <p id="audit-status" class="status"></p>
-      <p id="block-count" class="meta"></p>
-      <div id="audit-results"></div>
-    </section>
-
-    <script type="module">
-      const ROUTES = { '': 'view-home', search: 'view-search', counter: 'view-counter', audit: 'view-audit' };
-      const TITLES = { search: 'DA Block Finder', counter: 'DA Document Counter', audit: 'DA Block Index' };
-
-      function route() {
-        const key = location.hash.slice(1);
-        const id = ROUTES[key] || 'view-home';
-        document.querySelectorAll('[id^="view-"]').forEach((el) => { el.hidden = el.id !== id; });
-        document.title = TITLES[key] || 'DA Tools';
-      }
-
-      route();
-      window.addEventListener('hashchange', route);
-    </script>
+      <span class="chevron">›</span>
+    </a>
+    <a class="card" href="./counter/">
+      <div class="card-text">
+        <strong>Document Counter</strong>
+        <p>Count how many HTML documents exist under any given directory path.</p>
+      </div>
+      <span class="chevron">›</span>
+    </a>
+    <a class="card" href="./audit/">
+      <div class="card-text">
+        <strong>Block Index</strong>
+        <p>Scan the entire /express tree and build a full index of every block in use.</p>
+      </div>
+      <span class="chevron">›</span>
+    </a>
   </body>
 </html>
