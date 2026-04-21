@@ -3,11 +3,11 @@ import DA_SDK from 'https://da.live/nx/utils/sdk.js';
 /* eslint-enable import/no-unresolved */
 import { collectDocs } from '../shared/da-api.js';
 
-const $status = document.getElementById('status');
-const $result = document.getElementById('result');
+const $status = document.getElementById('counter-status');
+const $result = document.getElementById('counter-result');
 const $form = document.getElementById('count-form');
 
-(async function init() {
+async function init() {
   const { token } = await DA_SDK;
 
   $form.addEventListener('submit', async (e) => {
@@ -31,4 +31,13 @@ const $form = document.getElementById('count-form');
       $form.querySelector('button').disabled = false;
     }
   });
-}());
+}
+
+let started = false;
+function activate() {
+  if (started || location.hash !== '#counter') return;
+  started = true;
+  init();
+}
+activate();
+window.addEventListener('hashchange', activate);

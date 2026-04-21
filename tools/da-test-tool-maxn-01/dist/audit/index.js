@@ -9,9 +9,9 @@ const BATCH_SIZE = 10;
 
 const $scanBtn = document.getElementById('scan-btn');
 const $lastScanned = document.getElementById('last-scanned');
-const $status = document.getElementById('status');
+const $status = document.getElementById('audit-status');
 const $blockCount = document.getElementById('block-count');
-const $results = document.getElementById('results');
+const $results = document.getElementById('audit-results');
 
 // Extracts block names from a DA HTML document.
 // Targets direct children of section divs (main > div > div[class]) which is
@@ -110,7 +110,7 @@ async function runScan(token) {
   return data;
 }
 
-(async function init() {
+async function init() {
   const { token } = await DA_SDK;
 
   $status.textContent = 'Loading…';
@@ -137,4 +137,13 @@ async function runScan(token) {
       $scanBtn.disabled = false;
     }
   });
-}());
+}
+
+let started = false;
+function activate() {
+  if (started || location.hash !== '#audit') return;
+  started = true;
+  init();
+}
+activate();
+window.addEventListener('hashchange', activate);
