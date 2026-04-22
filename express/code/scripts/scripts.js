@@ -445,9 +445,10 @@ async function loadPage() {
     import('./instrument.js').then((mod) => { mod.default(); });
   }
 
-  /* region based redirect to homepage */
+  /* region based redirect to CN homepage */
+  const isAdobeOrigin = /^(www\.stage\.|www\.)adobe\.com$/.test(window.location.hostname);
   import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
-    if (country === 'cn') { window.location.href = '/cn'; }
+    if (country === 'cn' && isAdobeOrigin && !window.location.pathname.startsWith('/cn') && !window.isErrorPage) { window.location.href = '/cn'; }
   });
 
   document.head.querySelectorAll('meta').forEach((meta) => {
