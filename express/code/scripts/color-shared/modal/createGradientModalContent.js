@@ -156,10 +156,12 @@ export function createGradientModalContent(gradient, opts = {}) {
   const paletteForToolbar = {
     id: gradient?.id ?? '',
     name: gradient?.name ?? 'Gradient',
+    angle: angle || 90,
     colors: colorStops.map((s) => s.color),
   };
 
   initFloatingToolbar(toolbarMount, {
+    type: 'gradient',
     palette: paletteForToolbar,
     ctaText: 'Create with color palette',
     showPaletteName: false,
