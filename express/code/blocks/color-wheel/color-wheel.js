@@ -815,6 +815,7 @@ export default async function decorate(block) {
       layoutInstance = await createColorToolLayout(section, {
         palette: initialPalette,
         toolbar: {
+          daaLh: 'color-wheel',
           variant: 'sticky-on-scroll',
           showEdit: false,
           showPalette: true,

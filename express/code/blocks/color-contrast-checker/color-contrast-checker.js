@@ -167,6 +167,7 @@ export default async function decorate(block) {
         name: initialPalette.name,
       },
       toolbar: {
+        daaLh: 'color-contrast-checker',
         variant: 'sticky-on-scroll',
         showEdit: false,
         showPaletteName: true,

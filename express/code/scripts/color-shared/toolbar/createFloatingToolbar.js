@@ -220,6 +220,7 @@ export async function initFloatingToolbar(container, options = {}) {
     standaloneAppearance = 'standalone',
     palette: providedPalette = null,
     deps = {},
+    daaLh = null,
   } = options;
 
   // 'raised' gives sticky visuals (band, shadow) without sticky positioning
@@ -232,6 +233,7 @@ export async function initFloatingToolbar(container, options = {}) {
   if (!finalPalette) return null;
 
   const wrapper = createTag('div', { class: 'color-floating-toolbar-container' });
+  if (daaLh) wrapper.setAttribute('daa-lh', daaLh);
   const toolbar = createToolbar({
     palette: finalPalette,
     type,
