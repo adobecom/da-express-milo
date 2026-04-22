@@ -179,7 +179,6 @@ export default async function decorate(block) {
         type: isMobileOrTabletViewport() ? 'nav-only' : 'full',
         activeId: 'contrast',
         getName: () => initialPalette.name,
-        daaLh: 'color-contrast-checker',
       },
     });
 

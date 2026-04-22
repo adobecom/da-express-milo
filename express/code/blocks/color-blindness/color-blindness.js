@@ -239,6 +239,7 @@ export default async function decorate(block) {
       type: 'controls-only',
       controls,
       enableState: false,
+      daaLh: 'color-blindness',
       onUndo: () => fullMenuEl?.querySelector('.undo-btn')?.click(),
       onRedo: () => fullMenuEl?.querySelector('.redo-btn')?.click(),
     });

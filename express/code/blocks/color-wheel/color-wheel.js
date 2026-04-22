@@ -213,6 +213,7 @@ function buildDefaultActionMenuConfig(strings) {
   return {
     id: ACTION_MENU_ID,
     activeId: 'palette',
+    daaLh: 'color-wheel',
     navLinks: [
       { id: 'palette', label: strings.createPalette, href: '/create/color-wheel' },
       { id: 'contrast', label: strings.contrastChecker, href: '/create/color-contrast-analyzer' },
@@ -831,7 +832,6 @@ export default async function decorate(block) {
             { id: 'expand', label: strings.maximize },
           ],
           type: isDesktop ? 'full' : 'nav-only',
-          daaLh: 'color-wheel',
           getName: () => currentPalette?.name || initialPalette.name,
           onGenerateRandom: () => {
             isGeneratingRandom = true;
