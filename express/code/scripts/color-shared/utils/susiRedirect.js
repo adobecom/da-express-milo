@@ -34,7 +34,7 @@ function pageHasBlock(...classNames) {
 export function buildColorSignInRedirectUrl(colors, name) {
   const { setOnUrl } = createColorPaletteParamApi();
 
-  if (pageHasBlock('color-explore', 'color-extract')) {
+  if (pageHasBlock('color-explore')) {
     const prefix = getLocalePrefix();
     const url = new URL(`${prefix}${COLOR_WHEEL_PATH}`, window.location.origin);
     setOnUrl(url, colors, { name });
