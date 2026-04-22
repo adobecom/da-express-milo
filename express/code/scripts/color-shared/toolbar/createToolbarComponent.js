@@ -324,7 +324,7 @@ function buildCTAButton(getCTAText, onClick) {
   ctaBtn.setAttribute('size', 'l');
   ctaBtn.textContent = getCTAText();
   ctaBtn.addEventListener('click', onClick);
-  decorateAnalyticsAttributes(ctaBtn, { linkLabel: 'CTA' });
+  decorateAnalyticsAttributes(ctaBtn, { linkLabel: 'Create-with-palette-CTA' });
   return ctaBtn;
 }
 

@@ -17,6 +17,7 @@ export const WCAG_THRESHOLDS = {
 
 export function createDefaultActionMenuConfig(placeholders = {}) {
   return {
+    daaLh: 'color-contrast-checker',
     navLinks: [
       { id: 'palette', href: '/create/color-wheel', label: placeholders.colorPaletteLabel || 'Color palette' },
       { id: 'contrast', href: '/create/color-contrast-analyzer', label: placeholders.contrastCheckerLabel || 'Contrast checker' },

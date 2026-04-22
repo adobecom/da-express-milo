@@ -86,6 +86,7 @@ export default async function decorate(block) {
     layoutInstance = await createColorToolLayout(section, {
       palette: initialPalette,
       toolbar: {
+        daaLh: 'color-blindness',
         variant: 'sticky-on-scroll',
         showEdit: false,
         showPaletteName: true,
@@ -101,6 +102,7 @@ export default async function decorate(block) {
         activeId: 'color-blindness',
         navLinks,
         controls,
+        daaLh: 'color-blindness',
       },
     });
 
@@ -237,6 +239,7 @@ export default async function decorate(block) {
       type: 'controls-only',
       controls,
       enableState: false,
+      daaLh: 'color-blindness',
       onUndo: () => fullMenuEl?.querySelector('.undo-btn')?.click(),
       onRedo: () => fullMenuEl?.querySelector('.redo-btn')?.click(),
     });
