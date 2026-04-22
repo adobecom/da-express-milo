@@ -97,11 +97,11 @@ export async function collectDocs(rootDir, token, onProgress) {
     for (let i = 0; i < dirs.length; i += LS_CONCURRENCY) {
       const batch = dirs.slice(i, i + LS_CONCURRENCY);
       // eslint-disable-next-line no-await-in-loop
-      const listings = await Promise.all(batch.map((d) => ls(d, token)));
+      const listings = await Promise.all(batch.map((d) => ls(d, token).catch(() => [])));
       for (const items of listings) {
         for (const item of items) {
           if (item.ext === 'html') docs.push(item.path);
-          else if (!item.ext) nextDirs.push(item.path);
+          else if (!item.ext && item.path.split('/').pop() !== 'drafts') nextDirs.push(item.path);
         }
       }
       if (onProgress) onProgress(docs.length);
