@@ -234,6 +234,7 @@ let primaryColorAdapter = null;
 let sidebarNaturalWidth = 0;
 let sidebarTransitionCleanup = null;
 let historyCleanup = null;
+let currentInitToken = 0;
 
 function swatchHexListFromState(state) {
   const swatches = state?.swatches || [];
@@ -780,12 +781,19 @@ export default async function decorate(block) {
     }
     block.className = 'color-wheel';
 
+    // Each init() call claims a token. After every await, bail if a newer call has started.
+    // This prevents a stale concurrent init from appending duplicate tabs/layout to the DOM.
+    currentInitToken += 1;
+    const myToken = currentInitToken;
+
     try {
       const [strings, { getResolvedPalette, getResolvedPaletteName }] = await Promise.all([
         loadPlaceholders(),
         Promise.resolve(createColorPaletteParamApi()),
         loadHeavyModules(),
       ]);
+
+      if (myToken !== currentInitToken) return;
 
       // First load: authored content was preserved during the async wait; clear it now
       if (!isReinit) {
@@ -885,6 +893,8 @@ export default async function decorate(block) {
         },
       });
 
+      if (myToken !== currentInitToken) return;
+
       const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
       layoutInstance.slots.canvas.appendChild(stripHost);
 
@@ -911,6 +921,8 @@ export default async function decorate(block) {
           strings,
         }),
       ]);
+
+      if (myToken !== currentInitToken) return;
 
       // Both resolved — wire up action menu history and append tabs
       const actionMenuApi = layoutInstance.actionMenu;
