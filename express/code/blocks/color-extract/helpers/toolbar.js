@@ -1,6 +1,7 @@
 import { createTag, getLibs } from '../../../scripts/utils.js';
 import { createExpressTooltip } from '../../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { UNDO_ICON, REDO_ICON } from '../../../scripts/color-shared/components/actionMenuIcons.js';
+import { decorateAnalyticsAttributes } from '../../../scripts/color-shared/utils/utilities.js';
 
 /* S2 icons from Figma — Extract-toolbar (node 3582:110610) */
 const ICON_EYEDROPPER = '<svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><mask id="eyedropper-mask" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20"><path d="M18.2705 2.16211C17.709 1.49316 16.9385 1.10449 16.1016 1.06738C15.2002 1.05468 14.2881 1.40234 13.5976 2.09277L12.2988 3.38379C11.3457 2.88281 10.1357 3.03223 9.33495 3.83301L8.95018 4.21778C8.03099 5.13599 7.9807 6.58668 8.77635 7.57728L4.91405 11.4404C3.24803 13.1055 1.78026 14.5732 1.75487 14.5996C0.74999 15.6045 0.74999 17.2402 1.75487 18.2451C2.2578 18.7481 2.91796 18.999 3.57714 18.999C4.2373 18.999 4.89745 18.7481 5.40038 18.2451L12.4206 11.2256C12.8847 11.6072 13.4482 11.8096 14.0176 11.8096C14.664 11.8096 15.3115 11.5635 15.8037 11.0713L16.1885 10.6865C16.9873 9.8877 17.1387 8.68262 16.6416 7.73048L17.8496 6.54298L17.8545 6.5381C19.1435 5.24904 19.3184 3.40821 18.2705 2.16211ZM4.33985 17.1846C3.9209 17.6035 3.23633 17.6055 2.81544 17.1846C2.39552 16.7647 2.39552 16.0801 2.81935 15.6572C2.86818 15.6065 4.32423 14.1514 5.97462 12.501L9.81739 8.65723L11.3428 10.1826L4.33985 17.1846ZM16.7969 5.47461L15.1328 7.10938C14.9902 7.25 14.9092 7.44141 14.9082 7.64161C14.9072 7.84083 14.9863 8.03321 15.1279 8.17481C15.5283 8.5752 15.5283 9.22559 15.1279 9.62598L14.7432 10.0107C14.3428 10.4111 13.6924 10.4111 13.292 10.0107L10.0107 6.7295C9.61036 6.32911 9.61036 5.67872 10.0107 5.27833L10.3955 4.89356C10.5957 4.69336 10.8584 4.59376 11.1211 4.59376C11.3838 4.59376 11.6465 4.69337 11.8467 4.89356C12.1387 5.18653 12.6133 5.18653 12.9053 4.89551L14.6563 3.15528C15.0508 2.75977 15.5449 2.54493 16.0361 2.56641C16.4541 2.58496 16.8291 2.77832 17.1221 3.12696C17.7559 3.88087 17.3975 4.87109 16.7969 5.47461Z" fill="#292929"/><path d="M4.2 6.3C4.2 6.6866 3.8866 7 3.5 7C3.1134 7 2.8 6.6866 2.8 6.3V0.7C2.8 0.313401 3.1134 0 3.5 0C3.8866 0 4.2 0.313401 4.2 0.7V6.3Z" fill="black"/><path d="M0.7 4.2C0.313401 4.2 0 3.8866 0 3.5C0 3.1134 0.313401 2.8 0.7 2.8L6.3 2.8C6.6866 2.8 7 3.1134 7 3.5C7 3.8866 6.6866 4.2 6.3 4.2L0.7 4.2Z" fill="black"/></mask><g mask="url(#eyedropper-mask)"><rect width="20" height="20" fill="#292929"/></g></svg>';
@@ -120,6 +121,8 @@ export default async function createToolbar(options = {}) {
 
   const undoBtn = await createIconButton(UNDO_ICON, 'Undo', options.onUndo);
   const redoBtn = await createIconButton(REDO_ICON, 'Redo', options.onRedo);
+  decorateAnalyticsAttributes(undoBtn, { linkLabel: 'Undo' });
+  decorateAnalyticsAttributes(redoBtn, { linkLabel: 'Redo' });
   undoBtn.setAttribute('aria-disabled', 'true');
   redoBtn.setAttribute('aria-disabled', 'true');
   historyGroup.append(undoBtn, redoBtn);

@@ -831,6 +831,7 @@ export default async function decorate(block) {
             { id: 'expand', label: strings.maximize },
           ],
           type: isDesktop ? 'full' : 'nav-only',
+          daaLh: 'color-wheel',
           getName: () => currentPalette?.name || initialPalette.name,
           onGenerateRandom: () => {
             isGeneratingRandom = true;

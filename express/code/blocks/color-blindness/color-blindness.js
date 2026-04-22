@@ -102,6 +102,7 @@ export default async function decorate(block) {
         activeId: 'color-blindness',
         navLinks,
         controls,
+        daaLh: 'color-blindness',
       },
     });
 
