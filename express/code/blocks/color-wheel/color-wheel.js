@@ -783,7 +783,8 @@ export default async function decorate(block) {
 
     // Each init() call claims a token. After every await, bail if a newer call has started.
     // This prevents a stale concurrent init from appending duplicate tabs/layout to the DOM.
-    const myToken = ++currentInitToken;
+    currentInitToken += 1;
+    const myToken = currentInitToken;
 
     try {
       const [strings, { getResolvedPalette, getResolvedPaletteName }] = await Promise.all([
