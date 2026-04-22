@@ -388,9 +388,10 @@ export class ColorWheelExpress extends ColorWheel {
     this.getCanvasPosition();
     this._dragIndex = index;
 
-    const markerV = this.swatches[index]?.hsv?.v != null
+    const rawV = this.swatches[index]?.hsv?.v != null
       ? Number(this.swatches[index].hsv.v)
       : this.wheelBrightness;
+    const markerV = rawV > 0 ? rawV : this.wheelBrightness;
 
     const moveHandler = (e) => {
       this._dragFixedBrightness = markerV;
@@ -441,10 +442,10 @@ export class ColorWheelExpress extends ColorWheel {
           this.paint();
         }
 
-        if (this.swatches.length > 0 && active?.hsv != null) {
+        if (this.swatches.length > 0 && active?.hsv != null && this._dragIndex < 0) {
           const activeV = Math.round(Number(active.hsv.v) ?? 100);
           const v = Math.min(100, Math.max(0, activeV));
-          if (this.wheelBrightness !== v) {
+          if (v > 0 && this.wheelBrightness !== v) {
             this.wheelBrightness = v;
             this.generateColorWheel();
           }
