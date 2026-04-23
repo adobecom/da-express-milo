@@ -76,7 +76,7 @@ describe('buildColorSignInRedirectUrl', () => {
     expect(param).to.include('FF0000');
   });
 
-  it('uses current page URL when not on color-explore or color-extract', () => {
+  it('uses current page URL when not on color-explore', () => {
     window.history.replaceState({}, '', '/create/color-wheel');
 
     const result = buildColorSignInRedirectUrl(colors, name);
@@ -96,16 +96,16 @@ describe('buildColorSignInRedirectUrl', () => {
     expect(url.pathname).to.equal('/create/color-wheel');
   });
 
-  it('redirects to color-wheel when on color-extract page', () => {
+  it('uses current page URL for color-extract', () => {
     const el = document.createElement('div');
     el.className = 'color-extract';
     document.body.appendChild(el);
 
-    window.history.replaceState({}, '', '/color-extract');
+    window.history.replaceState({}, '', '/create/image');
 
     const result = buildColorSignInRedirectUrl(colors, name);
     const url = new URL(result);
-    expect(url.pathname).to.equal('/create/color-wheel');
+    expect(url.pathname).to.equal('/create/image');
   });
 
   it('preserves locale prefix on color-explore redirect', () => {

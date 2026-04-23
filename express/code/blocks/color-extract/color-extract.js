@@ -7,7 +7,7 @@ import parseBlockConfig from './helpers/parseConfig.js';
 import createHistoryManager from './helpers/historyManager.js';
 import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
-import { decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
+import { decorateAnalyticsAttributes, createColorPaletteParamApi, PARAM_NAME } from '../../scripts/color-shared/utils/utilities.js';
 
 let extractionErrorShown = false;
 async function showExtractionError() {
@@ -811,6 +811,9 @@ function renderColorVariant(block, rows, config) {
     if (oldImg && imgLoadHandler) oldImg.removeEventListener('load', imgLoadHandler);
     if (markers) markers.destroy();
 
+    if (!edit.bgWrapper.isConnected) {
+      edit.leftCol.querySelector('.image-upload-dropzone-container')?.replaceWith(edit.bgWrapper);
+    }
     currentCanvas = drawImageToCanvas(image);
     await setupMarkers(currentCanvas);
 
@@ -936,6 +939,18 @@ function renderColorVariant(block, rows, config) {
 
   if (resolvedConfig.enableImageUpload) {
     attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay);
+  }
+
+  if (new URLSearchParams(window.location.search).has(PARAM_NAME)) {
+    const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
+    const colors = getResolvedPalette();
+    const paletteName = getResolvedPaletteName();
+    controller.setState({ swatches: colors.map((hex) => ({ hex })), baseColorIndex: 0 });
+    if (paletteName) controller.setMetadata({ name: paletteName });
+    edit.bgWrapper.replaceWith(dropzone.container);
+    block.classList.add('has-image');
+    window.history.replaceState({ colorExtract: 'results' }, '');
+    floatingToolbar.mount();
   }
 
   window.addEventListener('popstate', (e) => {
@@ -1235,6 +1250,9 @@ async function renderGradientVariant(block, rows, config) {
     if (oldImg && imgLoadHandler) oldImg.removeEventListener('load', imgLoadHandler);
     if (markers) markers.destroy();
 
+    if (!edit.bgWrapper.isConnected) {
+      edit.leftCol.querySelector('.image-upload-dropzone-container')?.replaceWith(edit.bgWrapper);
+    }
     currentCanvas = drawImageToCanvas(image);
     await setupMarkers(currentCanvas);
     runGradientExtraction(currentCanvas);
@@ -1372,6 +1390,22 @@ async function renderGradientVariant(block, rows, config) {
 
   if (resolvedConfig.enableImageUpload) {
     attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay);
+  }
+
+  if (new URLSearchParams(window.location.search).has(PARAM_NAME)) {
+    const { getResolvedPalette } = createColorPaletteParamApi();
+    const colors = getResolvedPalette();
+    const colorStops = colors.map((color, i) => ({
+      color,
+      position: colors.length <= 1 ? 0.5 : i / (colors.length - 1),
+    }));
+    const gradientData = { type: 'linear', angle: 90, colorStops };
+    gradientEditor.setGradient(gradientData);
+    syncSwatchesFromGradient(gradientData);
+    edit.bgWrapper.replaceWith(dropzone.container);
+    block.classList.add('has-image');
+    window.history.replaceState({ colorExtract: 'results' }, '');
+    floatingToolbar.mount();
   }
 
   window.addEventListener('popstate', (e) => {
