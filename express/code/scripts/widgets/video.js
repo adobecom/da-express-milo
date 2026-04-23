@@ -24,6 +24,7 @@ export function isVideoLink(url) {
       || url.includes('youtu.be/')
       || url.includes('vimeo')
       || /^https?:[/][/]video[.]tv[.]adobe[.]com/.test(url)
+      || /^https?:[/][/]cdn[.]cp[.]adobe[.]io[/]content[/]\d+[/]video[/].+[/]embed(?:[?#].*)?$/.test(url)
       || /.*\/media_.*(mp4|webm|m3u8)$/.test(new URL(url).pathname);
 }
 
