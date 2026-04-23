@@ -76,6 +76,7 @@ class BaseColor extends LitElement {
     this._originalSaturation = 0;
     this._originalBrightness = 0;
     this._pickerInputEnabled = false;
+    this._keyboardActive = false;
   }
 
   get _rgb() {
@@ -463,10 +464,12 @@ class BaseColor extends LitElement {
   _onPointerDown(e) {
     this._lastPointerType = e.pointerType;
     this._pickerInputEnabled = true;
+    this._keyboardActive = false;
   }
 
   _onPickerKeyDown() {
     this._pickerInputEnabled = true;
+    this._keyboardActive = true;
   }
 
   _blurOnTouch(target) {
@@ -479,7 +482,7 @@ class BaseColor extends LitElement {
   // --- Color area (Saturation/Brightness) ---
 
   _snapColorAreaToOriginal(area, saturation, brightness) {
-    if (!this._hasOriginal) return { saturation, brightness };
+    if (!this._hasOriginal || this._keyboardActive) return { saturation, brightness };
     const ds = Math.abs(saturation - this._originalSaturation);
     const db = Math.abs(brightness - this._originalBrightness);
     if (ds > ORIGINAL_COLOR_AREA_SNAP_PCT || db > ORIGINAL_COLOR_AREA_SNAP_PCT) {
@@ -524,7 +527,7 @@ class BaseColor extends LitElement {
     if (slider.value == null) return;
 
     let hue = slider.value;
-    if (this._hasOriginal) {
+    if (this._hasOriginal && !this._keyboardActive) {
       const diff = Math.abs(hue - this._originalHue);
       const wrappedDiff = Math.min(diff, 360 - diff);
       if (wrappedDiff <= ORIGINAL_COLOR_HUE_SNAP_DEG) {

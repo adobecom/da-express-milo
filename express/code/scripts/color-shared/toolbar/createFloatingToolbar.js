@@ -220,6 +220,7 @@ export async function initFloatingToolbar(container, options = {}) {
     standaloneAppearance = 'standalone',
     palette: providedPalette = null,
     deps = {},
+    daaLh = null,
   } = options;
 
   // 'raised' gives sticky visuals (band, shadow) without sticky positioning
@@ -232,6 +233,7 @@ export async function initFloatingToolbar(container, options = {}) {
   if (!finalPalette) return null;
 
   const wrapper = createTag('div', { class: 'color-floating-toolbar-container' });
+  if (daaLh) wrapper.setAttribute('daa-lh', daaLh);
   const toolbar = createToolbar({
     palette: finalPalette,
     type,
@@ -361,6 +363,7 @@ export async function initFloatingToolbar(container, options = {}) {
       const isVisible = entries[0].isIntersecting || entries[0].intersectionRatio > 0;
       wrapper.classList.toggle('ax-toolbar-footer-hidden', isVisible);
       if (isVisible) {
+        toolbar.closeDrawer?.();
         wrapper.setAttribute('aria-hidden', 'true');
         wrapper.setAttribute('inert', '');
       } else {

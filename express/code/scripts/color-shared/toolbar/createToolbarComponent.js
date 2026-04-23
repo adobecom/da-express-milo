@@ -324,7 +324,7 @@ function buildCTAButton(getCTAText, onClick) {
   ctaBtn.setAttribute('size', 'l');
   ctaBtn.textContent = getCTAText();
   ctaBtn.addEventListener('click', onClick);
-  decorateAnalyticsAttributes(ctaBtn, { linkLabel: 'CTA' });
+  decorateAnalyticsAttributes(ctaBtn, { linkLabel: 'Create-with-palette-CTA' });
   return ctaBtn;
 }
 
@@ -578,6 +578,12 @@ export function createToolbar(options) {
       palette.name = newName;
       if (nameInput && nameInput.value !== newName) {
         nameInput.value = newName;
+      }
+    },
+    closeDrawer() {
+      if (activeDrawer?.isOpen) {
+        activeDrawer.close();
+        activeDrawer = null;
       }
     },
     setVariant(nextVariant = 'standalone') {

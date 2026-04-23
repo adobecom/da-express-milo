@@ -135,7 +135,12 @@ export function setupStickyBounds(block, searchBar) {
   endSentinel.dataset.searchBarEndSentinel = 'true';
   endSentinel.setAttribute('aria-hidden', 'true');
   endSentinel.style.cssText = 'display:block;inline-size:1px;block-size:1px;';
-  colorExploreBlock.after(endSentinel);
+  const footer = document.querySelector('footer');
+  if (footer) {
+    footer.before(endSentinel);
+  } else {
+    colorExploreBlock.after(endSentinel);
+  }
 
   let stickyEnabled = true;
 

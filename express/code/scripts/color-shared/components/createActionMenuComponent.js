@@ -301,6 +301,7 @@ export async function createActionMenuComponent(options = {}) {
     transformPalette,
     getName,
     enableState = true,
+    daaLh = null,
   } = options;
 
   if (!TYPES.includes(type)) {
@@ -340,6 +341,7 @@ export async function createActionMenuComponent(options = {}) {
   }
 
   const container = createTag('div', { class: `action-menu-${type}` });
+  if (daaLh) container.setAttribute('daa-lh', daaLh);
   const buttonRefs = {};
   const sections = [];
 

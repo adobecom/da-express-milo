@@ -367,7 +367,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   };
 
   const colorCount = normalizedPalette.colors.length;
-  const root = createTag('main', { class: 'modal-content' });
+  const root = createTag('main', { class: 'modal-content', 'daa-lh': 'color-palette-modal' });
 
   const railSection = createTag('section', {
     class: 'modal-palette-container modal-palette-container--color-rail',

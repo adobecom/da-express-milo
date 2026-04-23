@@ -84,7 +84,7 @@ export function createGradientModalContent(gradient, opts = {}) {
     ?? gradient?.creatorImageUrl ?? defaultCreatorImageUrl;
   const tags = opts.tags || ['Color', 'Gradient'];
 
-  const main = createTag('main', { class: 'modal-content' });
+  const main = createTag('main', { class: 'modal-content', 'daa-lh': 'color-gradient-modal' });
 
   const containerSection = createTag('section', {
     class: 'modal-palette-container',
@@ -156,10 +156,12 @@ export function createGradientModalContent(gradient, opts = {}) {
   const paletteForToolbar = {
     id: gradient?.id ?? '',
     name: gradient?.name ?? 'Gradient',
+    angle: angle || 90,
     colors: colorStops.map((s) => s.color),
   };
 
   initFloatingToolbar(toolbarMount, {
+    type: 'gradient',
     palette: paletteForToolbar,
     ctaText: 'Create with color palette',
     showPaletteName: false,
