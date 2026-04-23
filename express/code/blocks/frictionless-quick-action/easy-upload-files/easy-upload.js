@@ -656,8 +656,6 @@ function attachSecondaryCtaHandler(block, qrPane, createTag, showErrorToast) {
 
   const handleSecondaryCta = async (event) => {
     event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation();
     navigateToQrPane(block);
     await initializeQrPane(block, qrPane, createTag, showErrorToast);
   };
