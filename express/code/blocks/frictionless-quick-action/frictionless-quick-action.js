@@ -877,15 +877,19 @@ export default async function decorate(block) {
   };
   block.append(inputElement);
 
-  dropzoneContainer.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (quickAction === 'generate-qr-code') {
-      document.body.dataset.suppressfloatingcta = 'true';
-      startSDK([''], quickAction, block);
-    } else {
-      inputElement.click();
-    }
-  });
+  // Easy Upload provides its own CTA click handling.
+  // Keep the dropzone container non-clickable there.
+  if (!quickAction.includes('easy-upload')) {
+    dropzoneContainer.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (quickAction === 'generate-qr-code') {
+        document.body.dataset.suppressfloatingcta = 'true';
+        startSDK([''], quickAction, block);
+      } else {
+        inputElement.click();
+      }
+    });
+  }
 
   function preventDefaults(e) {
     e.preventDefault();

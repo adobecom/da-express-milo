@@ -663,6 +663,32 @@ function attachSecondaryCtaHandler(block, qrPane, createTag, showErrorToast) {
   trackListener(secondaryCta, 'click', handleSecondaryCta);
 }
 
+function attachPrimaryCtaHandler(block) {
+  if (!easyUploadPaneContent.hasContent) {
+    return;
+  }
+
+  const dropzone = block.querySelector('.dropzone');
+  if (!dropzone) {
+    return;
+  }
+
+  const primaryButtonContainer = dropzone.querySelector('.easy-upload-cta-row > p.button-container:nth-child(1)');
+  const primaryCta = primaryButtonContainer?.querySelector('a.button, a.con-button');
+  if (!primaryCta) {
+    return;
+  }
+
+  const handlePrimaryCta = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    const inputElement = block.querySelector('input[type="file"]');
+    inputElement?.click();
+  };
+
+  trackListener(primaryCta, 'click', handlePrimaryCta);
+}
+
 export async function refreshEasyUploadQrIfConsumed(block) {
   const activeBlock = block || easyUploadInstance?.block;
   const qrPane = activeBlock ? getQrPane(activeBlock) : null;
@@ -712,6 +738,7 @@ export async function setupEasyUploadUI({
 
   const qrPane = setupQrPane(block, createTag);
   bindEasyUploadSdkInitListener(block, createTag, showErrorToast);
+  attachPrimaryCtaHandler(block);
   attachSecondaryCtaHandler(block, qrPane, createTag, showErrorToast);
 
   if (AUTOLOAD_QR_CODE && activeDebugMode === DEBUG_MODES.NONE) {
