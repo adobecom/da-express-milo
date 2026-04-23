@@ -153,6 +153,7 @@ export function createModalManager() {
       title = 'Modal',
       showTitle = false,
       onClose,
+      initialFocusSelector,
     } = options;
 
     onCloseCallback = onClose;
@@ -201,7 +202,7 @@ export function createModalManager() {
     announceToScreenReader(`${title} modal opened`, 'assertive');
 
     escHandler = handleEscapeClose(overlay, close);
-    focusTrap = trapFocus(overlay);
+    focusTrap = trapFocus(overlay, { getInitialFocus: initialFocusSelector });
 
     /* Force reflow so the browser records translateY(100%) before the open class fires. */
     // eslint-disable-next-line no-unused-expressions
@@ -263,6 +264,7 @@ export function createModalManager() {
       onClose: () => {
         contentView.destroy?.();
       },
+      initialFocusSelector: options.initialFocusSelector,
     });
     contentView.initNav?.();
   }

@@ -738,6 +738,7 @@ export default async function decorate(block) {
                   onLikeToggle: async ({ id, liked }) => (
                     activeDataService.toggleLike({ id, liked })
                   ),
+                  initialFocusSelector: () => null,
                 });
               }
             }
