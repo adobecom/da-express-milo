@@ -212,8 +212,6 @@ const CONFIG = {
   },
 };
 
-console.log('CDN test to main');
-
 /*
  * ------------------------------------------------------------
  * Edit below at your own risk
