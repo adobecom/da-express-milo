@@ -85,7 +85,6 @@ async function loadStripSharedStyles() {
   );
 }
 
-
 function getVariantFromBlock(block) {
   if (block.classList.contains(VARIANT_CLASSES.GRADIENTS)) return VARIANTS.GRADIENTS;
   if (block.classList.contains(VARIANT_CLASSES.PALETTES)) return VARIANTS.STRIPS;
@@ -736,7 +735,9 @@ export default async function decorate(block) {
               if (item) {
                 await modalManager.openPaletteSwatchesModal(item, {
                   verticalMaxPerRow: config.swatchVerticalMaxPerRow,
-                  onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
+                  onLikeToggle: async ({ id, liked }) => (
+                    activeDataService.toggleLike({ id, liked })
+                  ),
                 });
               }
             }
