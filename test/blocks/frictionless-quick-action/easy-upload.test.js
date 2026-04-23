@@ -201,7 +201,10 @@ describe('Easy Upload module', () => {
     expect(qrPaneReady).to.be.true;
 
     notifyEasyUploadSdkInitialization(block);
-    const refreshedByEvent = await waitFor(() => EasyUpload.prototype.initializeQRCode.callCount === 2);
+    const refreshedByEvent = await waitFor(
+      () => EasyUpload.prototype.initializeQRCode.callCount === 2,
+      100,
+    );
 
     expect(markConsumedSpy.called).to.be.true;
     expect(refreshedByEvent).to.be.true;
