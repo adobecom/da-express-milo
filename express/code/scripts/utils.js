@@ -818,8 +818,8 @@ export function decorateArea(area = document) {
   const embeds = area.querySelectorAll(`${selector} > .embed a[href*="instagram.com"]`);
   linksToNotAutoblock.push(...embeds);
 
-  let videoLinksToNotAutoBlock = ['ax-columns', 'ax-marquee', 'hero-animation', 'cta-carousel', 'frictionless-quick-action', 'fullscreen-marquee', 'template-x', 'grid-marquee', 'drawer-cards', 'image-list', 'tutorials', 'quick-action-hub', 'holiday-blade'].map((block) => `${selector} .${block} a[href$=".mp4"]`).join(', ');
-  videoLinksToNotAutoBlock += `,${['tutorials'].map((block) => `${selector} .${block} a[href*="youtube.com"], ${selector} .${block} a[href*="youtu.be"], ${selector} .${block} a[href$=".mp4"], ${selector} .${block} a[href*="vimeo.com"], ${selector} .${block} a[href*="video.tv.adobe.com"]`).join(', ')}`;
+  let videoLinksToNotAutoBlock = ['ax-columns', 'ax-marquee', 'hero-animation', 'cta-carousel', 'frictionless-quick-action', 'fullscreen-marquee', 'template-x', 'grid-marquee', 'drawer-cards', 'image-list', 'tutorials', 'quick-action-hub', 'holiday-blade'].map((block) => `${selector} .${block} a[href$=".mp4"], ${selector} .${block} a[href*="cdn.cp.adobe.io/content/2/video/"]`).join(', ');
+  videoLinksToNotAutoBlock += `,${['tutorials'].map((block) => `${selector} .${block} a[href*="youtube.com"], ${selector} .${block} a[href*="youtu.be"], ${selector} .${block} a[href$=".mp4"], ${selector} .${block} a[href*="vimeo.com"], ${selector} .${block} a[href*="video.tv.adobe.com"], ${selector} .${block} a[href*="cdn.cp.adobe.io/content/2/video/"]`).join(', ')}`;
   linksToNotAutoblock.push(...area.querySelectorAll(videoLinksToNotAutoBlock));
   linksToNotAutoblock.forEach((link) => {
     if (!link.href.includes('#_dnb')) link.href = `${link.href}#_dnb`;
