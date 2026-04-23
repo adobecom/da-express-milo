@@ -27,6 +27,7 @@
     0 1px 4px 0 var(--Alias-drop-shadow-transition-color, rgba(0, 0, 0, 0.04)),
     0 2px 8px 0 var(--Alias-drop-shadow-ambient-color, rgba(0, 0, 0, 0.08));
   transition: background 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
 }
 
 .frictionless-quick-action[data-frictionlesstype$="-easy-upload-variant"] .dropzone-container:hover {
