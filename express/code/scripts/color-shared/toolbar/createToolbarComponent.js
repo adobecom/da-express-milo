@@ -79,7 +79,7 @@ async function handleOpenInExpress({ id, name, colors }) {
   const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
     '../utils/susiRedirect.js'
   );
-  setSusiColorRedirect(buildColorSignInRedirectUrl(colors, name));
+  setSusiColorRedirect(buildColorSignInRedirectUrl(colors, name, id));
 
   const isSignedIn = await triggerSignInFlow();
   if (!isSignedIn) return;
