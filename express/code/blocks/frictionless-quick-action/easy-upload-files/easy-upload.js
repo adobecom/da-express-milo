@@ -692,7 +692,14 @@ function attachPrimaryCtaHandler(block) {
 export async function refreshEasyUploadQrIfConsumed(block) {
   const activeBlock = block || easyUploadInstance?.block;
   const qrPane = activeBlock ? getQrPane(activeBlock) : null;
-  if (!easyUploadInstance || !activeBlock || !qrPane || qrPane.classList.contains('hidden')) {
+  if (
+    !easyUploadInstance
+    || !sharedCreateTag
+    || !sharedShowErrorToast
+    || !activeBlock
+    || !qrPane
+    || qrPane.classList.contains('hidden')
+  ) {
     return false;
   }
   if (!easyUploadInstance.isQrCodeConsumed?.()) {
