@@ -553,7 +553,15 @@ export default async function decorate(block) {
             document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
           }
 
+          const isInitialGradientMount = !hasCompletedInitialModeMount;
           if (!hasCompletedInitialModeMount) hasCompletedInitialModeMount = true;
+          if (isInitialGradientMount) {
+            const url = new URL(window.location.href);
+            if (url.searchParams.has(ITEM_ID_URL_PARAM)) {
+              url.searchParams.delete(ITEM_ID_URL_PARAM);
+              window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+            }
+          }
           publishInstances();
         } finally {
           isMounting = false;
