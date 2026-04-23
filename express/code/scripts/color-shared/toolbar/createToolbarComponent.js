@@ -9,7 +9,6 @@ import { loadButton, loadActionButton, loadTooltip } from '../spectrum/load-spec
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
-import { triggerSignInFlow } from '../../../libs/services/middlewares/auth.middleware.js';
 
 function interpolate(tpl, vars) {
   return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{{${k}}}`, v), tpl);
@@ -76,14 +75,6 @@ async function handleShare({ name, colors }, t) {
 // const COLOR_PALETTE_TEMPLATE_ID = 'urn:aaid:sc:VA6C2:60d17865-6817-5343-84db-34219e8ec3a4';
 
 async function handleOpenInExpress({ id, name, colors }) {
-  const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
-    '../utils/susiRedirect.js'
-  );
-  setSusiColorRedirect(buildColorSignInRedirectUrl(colors, name, id));
-
-  const isSignedIn = await triggerSignInFlow();
-  if (!isSignedIn) return;
-
   const { getTrackingAppendedURL } = await import('../../branchlinks.js');
 
   const baseUrl = 'https://273916.prenv.projectx.corp.adobe.com/new';
