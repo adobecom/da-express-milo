@@ -136,8 +136,12 @@ export function setupStickyBounds(block, searchBar) {
   endSentinel.setAttribute('aria-hidden', 'true');
   endSentinel.style.cssText = 'display:block;inline-size:1px;block-size:1px;';
   const footer = document.querySelector('footer');
-  if (footer) {
-    footer.before(endSentinel);
+  const bannerBg = document.querySelector('.banner-bg');
+  const bannerBeforeFooter = bannerBg
+    && (!footer || document.querySelectorAll('.banner-bg, footer')[0] === bannerBg);
+  const sentinelTarget = bannerBeforeFooter ? bannerBg : footer;
+  if (sentinelTarget) {
+    sentinelTarget.before(endSentinel);
   } else {
     colorExploreBlock.after(endSentinel);
   }
