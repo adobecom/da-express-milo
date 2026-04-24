@@ -16,6 +16,7 @@ import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
 const THEME_URL_PARAM = 'theme';
+const ITEM_ID_URL_PARAM = 'id';
 const THEME_URL_QUERY_VALUE = {
   [VARIANTS.GRADIENTS]: 'color-gradients',
   [VARIANTS.STRIPS]: 'color-palettes',
@@ -551,7 +552,15 @@ export default async function decorate(block) {
             document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
           }
 
+          const isInitialGradientMount = !hasCompletedInitialModeMount;
           if (!hasCompletedInitialModeMount) hasCompletedInitialModeMount = true;
+          if (isInitialGradientMount) {
+            const url = new URL(window.location.href);
+            if (url.searchParams.has(ITEM_ID_URL_PARAM)) {
+              url.searchParams.delete(ITEM_ID_URL_PARAM);
+              window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+            }
+          }
           publishInstances();
         } finally {
           isMounting = false;
@@ -714,7 +723,26 @@ export default async function decorate(block) {
             document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
           }
 
+          const isInitialStripsMount = !hasCompletedInitialModeMount;
           if (!hasCompletedInitialModeMount) hasCompletedInitialModeMount = true;
+          if (isInitialStripsMount) {
+            const itemId = new URLSearchParams(window.location.search).get(ITEM_ID_URL_PARAM);
+            if (itemId) {
+              const url = new URL(window.location.href);
+              url.searchParams.delete(ITEM_ID_URL_PARAM);
+              window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+              const item = await activeDataService.getTheme(itemId);
+              if (item) {
+                await modalManager.openPaletteSwatchesModal(item, {
+                  verticalMaxPerRow: config.swatchVerticalMaxPerRow,
+                  onLikeToggle: async ({ id, liked }) => (
+                    activeDataService.toggleLike({ id, liked })
+                  ),
+                  initialFocusSelector: () => null,
+                });
+              }
+            }
+          }
           publishInstances();
         } finally {
           isMounting = false;
