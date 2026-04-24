@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1"/>
     <link rel="icon" href="data:,">
     <style>
+      :root {
+      --express-result-border-color: rgba(191, 146, 13, 0.25);
+      --milo-result-border-color: rgba(191, 56, 175, 0.2);
+      }
       body { font-family: sans-serif; margin: 1rem 2rem; }
       .back {
         display: inline-flex;
@@ -77,8 +81,8 @@
         will-change: transform;
       }
       #results details[open] { background: #fff; }
-      #results details.repo-express { background: rgba(254, 195, 17, 0.1); border-color: rgba(191, 146, 13, 0.25); }
-      #results details.repo-milo { background: rgba(254, 75, 233, 0.08); border-color: rgba(191, 56, 175, 0.2); }
+      #results details.repo-express { background: rgba(254, 195, 17, 0.1); border-color: var(--express-result-border-color); }
+      #results details.repo-milo { background: rgba(254, 75, 233, 0.08); border-color: var(--milo-result-border-color) }
       #results summary {
         cursor: pointer;
         font-weight: 600;
@@ -88,6 +92,12 @@
         align-items: center;
         margin: -0.6rem -1rem;
         padding: 0.6rem 1rem;
+      }
+      #results details.repo-express[open] summary {
+        border-bottom: 1px solid var(--express-result-border-color)
+      }
+      #results details.repo-milo[open] summary {
+        border-bottom: 1px solid var(--milo-result-border-color)
       }
       #results summary::-webkit-details-marker { display: none; }
       #results summary::after { content: '▸'; color: #aaa; margin-left: 0.5rem; flex-shrink: 0; }
@@ -110,8 +120,11 @@
         padding-left: 0.25rem;
         list-style: none;
       }
-      .block-paths li { padding: 0.12rem 0; color: #555; }
-      .published-badge { color: #2d9e2d; margin-left: 0.4em; font-size: 0.85em; }
+      .block-paths li { display: flex; align-items: center; padding: 12px 0; color: #555; border-bottom: 1px solid var(--express-result-border-color); }
+      
+      .block-paths li:last-child { border-bottom: none; }
+      .published-badge { color: #2d9e2d; margin-left: 1rem; }
+      .published-badge:hover { color: #1a7a1a; }
       .published-count { color: #2d9e2d; font-weight: 400; }
     </style>
     <script src="https://da.live/nx/utils/sdk.js" type="module"></script>
