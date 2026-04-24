@@ -100,6 +100,9 @@ function mergeAllParts(dirParts) {
 }
 
 function sortEntries(entries, expressBlocks, miloBlocks) {
+  if ($sortSelect.value === 'alpha') {
+    return entries.sort(([nameA], [nameB]) => nameA.localeCompare(nameB));
+  }
   if ($sortSelect.value === 'repo') {
     const rank = (name) => {
       if (expressBlocks.has(name)) return 0;
@@ -150,6 +153,7 @@ function applyFlipAnimation(container, renderFn) {
 
 const COPY_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
 const CHECK_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+const BOOK_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
 
 function daEditUrl(path) {
   return `https://da.live/edit#${path.replace(/\.html$/, '')}`;
@@ -161,7 +165,25 @@ function publishedUrl(path) {
   return `https://www.adobe.com${withoutExt}`;
 }
 
-function renderResults(data, repoBlocks, publishedSet) {
+async function fetchKitchenSinkBlocks(token) {
+  const toSet = (items) => new Set(
+    items.filter((i) => i.ext === 'html').map((i) => i.path.split('/').pop().replace(/\.html$/, '')),
+  );
+  const [expressList, miloList] = await Promise.all([
+    ls('/adobecom/da-express-milo/docs/library/kitchen-sink', token).catch(() => []),
+    ls('/adobecom/milo/docs/library/kitchen-sink', token).catch(() => []),
+  ]);
+  return { express: toSet(expressList), milo: toSet(miloList) };
+}
+
+function kitchenSinkUrl(blockName, repoType) {
+  const base = repoType === 'milo'
+    ? 'https://main--milo--adobecom.aem.live'
+    : 'https://main--da-express-milo--adobecom.aem.live';
+  return `${base}/docs/library/kitchen-sink/${blockName}`;
+}
+
+function renderResults(data, repoBlocks, publishedSet, kitchenSinkBlocks) {
   const { express: expressBlocks, milo: miloBlocks } = repoBlocks;
   const allRepoBlocks = new Set([...expressBlocks, ...miloBlocks]);
 
@@ -224,6 +246,24 @@ function renderResults(data, repoBlocks, publishedSet) {
       return a.localeCompare(b);
     });
 
+    // eslint-disable-next-line no-nested-ternary
+    const repoType = expressBlocks.has(blockName) ? 'express' : miloBlocks.has(blockName) ? 'milo' : null;
+    if (repoType) {
+      const ksSet = repoType === 'express' ? kitchenSinkBlocks?.express : kitchenSinkBlocks?.milo;
+      const hasKS = ksSet?.has(blockName) ?? false;
+      const ksEl = document.createElement(hasKS ? 'a' : 'span');
+      ksEl.className = hasKS ? 'ks-btn' : 'ks-btn disabled';
+      ksEl.innerHTML = BOOK_ICON;
+      ksEl.title = hasKS ? 'View kitchen-sink docs' : 'No kitchen-sink page';
+      if (hasKS) {
+        ksEl.href = kitchenSinkUrl(blockName, repoType);
+        ksEl.target = '_blank';
+        ksEl.rel = 'noopener noreferrer';
+        ksEl.addEventListener('click', (e) => e.stopPropagation());
+      }
+      summary.appendChild(ksEl);
+    }
+
     const copyBtn = document.createElement('button');
     copyBtn.type = 'button';
     copyBtn.className = 'copy-btn';
@@ -276,6 +316,7 @@ function renderResults(data, repoBlocks, publishedSet) {
   let dirs = [];
   const dirParts = {};
   let repoBlocks = { express: new Set(), milo: new Set() };
+  let kitchenSinkBlocks = null;
   let isBusy = false;
   let lastRenderData = null;
   let lastPublishedSet = null;
@@ -338,7 +379,7 @@ function renderResults(data, repoBlocks, publishedSet) {
     }
     lastRenderData = merged;
     lastPublishedSet = merged.publishedPaths ? new Set(merged.publishedPaths) : null;
-    renderResults(merged, repoBlocks, lastPublishedSet);
+    renderResults(merged, repoBlocks, lastPublishedSet, kitchenSinkBlocks);
     $statusBtn.style.display = '';
     $statusBtn.textContent = merged.publishedPaths?.length ? 'Refresh Status' : 'Check Status';
   }
@@ -440,10 +481,12 @@ function renderResults(data, repoBlocks, publishedSet) {
 
   setStatus('Loading…');
 
-  const [rootItems, rb] = await Promise.all([
+  const [rootItems, rb, ksb] = await Promise.all([
     ls(SCAN_ROOT, token).catch(() => []),
     fetchRepoBlocks(),
+    fetchKitchenSinkBlocks(token),
   ]);
+  kitchenSinkBlocks = ksb;
 
   // Fall back to stored repo blocks if GitHub fetch returned nothing
   repoBlocks = (rb.express.size > 0 || rb.milo.size > 0) ? rb : (() => {
@@ -494,7 +537,9 @@ function renderResults(data, repoBlocks, publishedSet) {
 
   $sortSelect.addEventListener('change', () => {
     if (!lastRenderData) return;
-    applyFlipAnimation($results, () => renderResults(lastRenderData, repoBlocks, lastPublishedSet));
+    applyFlipAnimation($results, () => {
+      renderResults(lastRenderData, repoBlocks, lastPublishedSet, kitchenSinkBlocks);
+    });
   });
 
   $statusBtn.addEventListener('click', async () => {

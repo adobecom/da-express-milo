@@ -104,6 +104,9 @@
       .summary-left { flex: 1; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; }
       .copy-btn { background: none; border: none; padding: 0; cursor: pointer; color: #bbb; display: flex; align-items: center; flex-shrink: 0; line-height: 0; }
       .copy-btn:hover { color: #555; }
+      .ks-btn { display: flex; align-items: center; flex-shrink: 0; line-height: 0; color: #bbb; text-decoration: none; }
+      .ks-btn:not(.disabled):hover { color: #555; }
+      .ks-btn.disabled { color: #e0e0e0; cursor: default; }
       .summary-count { font-weight: 400; color: inherit; }
       .override-badge {
         font-size: 0.7rem;
@@ -151,6 +154,7 @@
       <select id="sort-select">
         <option value="usage">By Usage</option>
         <option value="repo">By Repo</option>
+        <option value="alpha">Alphabetical</option>
       </select>
     </div>
     <div id="results"></div>
