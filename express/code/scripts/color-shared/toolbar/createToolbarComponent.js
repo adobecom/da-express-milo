@@ -89,7 +89,7 @@ async function handleOpenInExpress({ id, name, colors }) {
   url.searchParams.set('colorPalette', JSON.stringify(colorPaletteData));
   url.searchParams.set('referrer', 'express-colors');
   url.searchParams.set('entryPoint', 'color-explorer');
-  url.searchParams.set('feature-enable', 'colors-product-entry-enabled');
+  url.searchParams.set('feature-enable', 'colors-product-entry');
   url.searchParams.set('category', 'yourStuff');
 
   window.open(url.toString(), '_blank');
