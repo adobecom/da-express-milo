@@ -1,0 +1,224 @@
+All 238 localised keys currently in the Express placeholder sheet
+Source: https://main--da-express-milo--adobecom.aem.live/express/placeholders.json
+===================================================================
+
+Key                                        | Value
+-------------------------------------------|--------------------------------------------------------------
+edit this template                         | Edit this template
+view all                                   | View all
+subscription                               | Subscription
+load more articles                         | Load more articles
+express                                    | Home
+creative-cloud-express                     | Adobe Express logo
+cc-express-logo                            | Adobe Express logo
+rush                                       | Adobe Premiere Rush logo
+psx                                        | Adobe Photoshop Express logo
+ps-express                                 | Adobe Photoshop Express logo
+facebook                                   | Facebook logo
+youtube                                    | YouTube logo
+instagram                                  | Instagram logo
+tiktok                                     | Tiktok logo
+snapchat                                   | Snapchat logo
+pinterest                                  | Pinterest logo
+twitter                                    | Twitter logo
+linkedin                                   | LinkedIn logo
+sparkpage                                  | Spark page
+sparkvideo                                 | Spark video
+adobe-stock                                | Adobe Stock
+adobefonts                                 | Adobe Fonts
+premium                                    | Premium
+pricingpremium                             | Premium pricing
+pricingfree                                | Free pricing
+users                                      | Users
+library                                    | Library
+libraries                                  | Libraries
+templates                                  | Templates
+premium-templates                          | Premium templates
+brand                                      | Brand
+brandswitch                                | Switch brand
+brand-libraries                            | Brand libraries
+incredibly-easy                            | Incredibly easy
+magicwand                                  | Magic wand
+blank                                      | Blank
+stickers                                   | Stickers
+elements                                   | Elements
+text                                       | Text
+image                                      | Image
+photos                                     | Photos
+photoeffects                               | Photo effects
+animation                                  | Animation
+resize                                     | Resize
+trim-video                                 | Trim video
+resize-video                               | Resize video
+crop-video                                 | Crop video
+mergevideo                                 | Merge video
+reversevideo                               | Reverse video
+changespeed                                | Change speed
+muteaudio                                  | Mute audio
+play                                       | Play
+convert                                    | Convert
+remove-watermark                           | Remove watermark
+remove-background                          | Remove background
+premium-remove-background                  | Premium remove background
+up-download                                | Download
+upload                                     | Upload
+download                                   | Download
+cloud-storage                              | Cloud storage
+privacy                                    | Privacy
+certified                                  | Certified
+chevron                                    | Chevron
+globe                                      | Globe
+check                                      | Check
+desktop-round                              | Desktop
+mobile-round                               | v
+webmobile                                  | Web and mobile
+cursor-browser                             | Cursor browser
+see-more                                   | See more
+see-less                                   | See less
+one-star-rating                            | Disappointing
+one-star-rating-text                       | We're sorry to hear that. What went wrong?
+one-star-rating-input                      | Your feedback (Required)
+two-star-rating                            | Insufficient
+two-star-rating-text                       | We value your feedback. How can we improve?
+two-star-rating-input                      | Your feedback (Required)
+three-star-rating                          | Sufficient
+three-star-rating-text                     | Sufficient is good, but what would make it great?
+three-star-rating-input                    | Your feedback (Required)
+four-star-rating                           | Helpful
+four-star-rating-text                      | Was there more we could do to be better?
+four-star-rating-input                     | Your feedback (Optional)
+five-star-rating                           | Amazing
+five-star-rating-text                      | That's great. Could you tell us what you loved?
+five-star-rating-input                     | Your feedback (Optional)
+rating-submit                              | Submit rating
+rating-submission-title                    | Thank you for your feedback. 👍
+rating-submission-text                     | We're always improving our tools to work better for you.
+rating-default-title                       | Rate our Quick Action
+rating-action-not-used                     | You need to use the Quick Action before you can rate it.
+rating-already-submitted-title             | This Quick Action is rated
+rating-already-submitted-text              | You have already submitted your rating for this action. Thank you for your feedback!
+rating-votes                               | Votes
+subscribe-cta                              | Get notified
+free-plan-features-1                       | Free to use
+free-plan-check-1                          | Free to use
+free-plan-check-2                          | No credit card required
+entitled-plan-tag                          | Your membership includes access to all premium features, templates, and assets
+load-more                                  | Load more
+tag-copied                                 | Copied to clipboard
+apple-store-rating-score                   | 4.8
+apple-store-rating-count                   | 345.6K
+google-store-rating-score                  | 4.6
+google-store-rating-count                  | 574K
+app-store-ratings                          | 4.8, 345.6K ratings; 4.6, 574k ratings; https://adobesparkpost.app.link/GJrBPFUWBBb
+app-store-blade-follow-block               | link-list-container
+app-store-highlight-follow-block           | columns-fullsize-center-container
+free-in-app                                | Free in app
+api-powered-grid-heading                   | Templates
+choose-your-path-cc                        | See what you can do with Creative Cloud
+choose-your-path-express                   | Make a new project with Adobe Express
+learn-more                                 | Learn more
+template-search-heading-singular           | {{quantity}} {{type}} template.
+template-search-heading-plural             | {{quantity}} {{type}} templates.
+template-placeholder                       | {{quantity}} {{type}} templates
+template-search-placeholder                | Search across hundreds of thousands of templates.
+filter                                     | Filter
+sort                                       | Sort
+jump-to-category                           | Jump to Category
+apply-filters                              | Apply Filters
+free                                       | Free
+static                                     | Static
+animated                                   | Animated
+versus-shorthand                           | vs
+search-from-scratch                        | Create {{template-type}} from scratch in the app.
+suggestions                                | Suggestions
+show-less                                  | Show less
+show-more                                  | Show more
+search                                     | Search
+edit-this-template                         | Edit this template
+open-to-see-animation                      | Open template to see animation
+all                                        | All
+start-from-scratch                         | Start from scratch
+sign-in                                    | Sign in
+relevant-rows-view-all                     | View all in app
+relevant-rows-view-all-link                | https://www.adobe.com/express
+relevant-rows-templates-limit              | 10
+bundle-plan-description                    | When you choose to bundle Adobe Express Premium with {{ App Name }}.
+breadcrumbs-create                         | Create
+breadcrumbs-feature                        | Feature
+breadcrumbs-business                       | For business
+breadcrumbs-discover                       | Discover
+search-suggestions-title                   | Suggestions
+search-trends-title                        | Trending Searches
+templates-fallback-with-tasks              | Sorry we couldn't find any results for what you searched for, try some of these popular {{tasks}} templates instead.
+templates-fallback-without-tasks           | Explore 150,000+ free templates to make your own.
+play-animation                             | play animation
+pause-animation                            | pause animation
+generate                                   | Generate
+gen-ai-input-placeholder                   | Try describing things, environments, people, moods. (English only)
+gen-ai-link-template                       | https://new.express.adobe.com/new?category=media&prompt={{prompt-text}}&action=text+to+image&width=1080&height=1080
+cancel                                     | Cancel
+pep-header                                 | Taking you to Adobe Express
+pep-cancel                                 | Cancel to stay on the page
+change-region                              | Choose your region
+change-region-description                  | Selecting a region changes the language and/or content on Adobe.com
+page-did-not-exist                         | This page did not exist for your locale.
+buy-now                                    | Buy Now
+start-30-day-free-trial                    | Start 30-day free trial
+view-all-features                          | View all features
+per-year                                   | per year.
+per-month-per-seat                         | per person monthly.
+per-month                                  | per month.
+per-year-per-seat                          | per person annually.
+vat-include-text                           | VAT included.
+vat-exclude-text                           | VAT excluded.
+monthly                                    | Monthly
+annually                                   | Annual, prepaid
+subscription-type                          | Subscription type:
+annual-billed-monthly                      | Annual, billed monthly
+file-type-not-supported                    | File type not supported.
+file-size-not-supported                    | File size not supported.
+describe-image-mobile                      | Describe your image...
+describe-image-desktop                     | Describe the image you want to create...
+use-this-prompt                            | Use this prompt
+prompt-title                               | Prompt used
+simplified-per-year                        | /year
+simplified-per-month                       | /mo
+simplified-per-year-teams                  | /seat per year
+simplified-per-month-teams                 | /mo
+view-more                                  | View more
+view-less                                  | View less
+share                                      | share
+app-store-ratings-play-store               | Get it on Google Play
+app-store-ratings-apple-store              | Download on the app store
+app-store-stars                            | Stars
+aria-label-pricing-icon-cross              | no
+aria-label-pricing-icon-check              | yes
+popular                                    | Popular
+new-templates                              | New templates
+download-to-phone                          | Download to Phone
+edit-in-adobe-express-for-free             | Edit in Adobe Express for free
+learn-more-about-cancellation              | Learn More About Our Cancellation Policy
+simplified-per-month-teams-2               | /per person monthly.
+simplified-per-month-2                     | /month.
+per-month-per-seat-2                       | /per person monthly.
+per-month-2                                | /per month.
+change-language                            | Change your language
+search-language                            | Search language
+uploading-media                            | is uploading your media...
+upload-media-error                         | Upload failed. Please try again.
+
+
+Keys needed by video-quick-action-picker — MISSING from sheet (need to be added)
+=================================================================================
+
+Key                        | Suggested English value
+---------------------------|-----------------------------
+edit-video                 | Edit video
+ios-app-only               | iOS App only
+convert-video-to-gif       | Convert video to GIF
+convert-video-to-mp4       | Convert video to MP4
+caption-video              | Caption video
+opening-preview            | Opening preview
+uploaded-video             | Uploaded video
+start-from-your-video      | Start from your video
+close-dialog               | Close dialog

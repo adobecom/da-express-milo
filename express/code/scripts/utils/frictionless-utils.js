@@ -95,6 +95,7 @@ export const QA_CONFIGS = {
   'convert-to-svg': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'crop-image': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'resize-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
+  'compress-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
   'remove-background': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'generate-qr-code': {
     ...getBaseImgCfg(JPG, JPEG, PNG),
@@ -362,6 +363,12 @@ export function executeQuickAction(
       contConfig,
     ),
     'resize-image': () => ccEverywhere.quickAction.resizeImage(
+      docConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
+    'compress-image': () => ccEverywhere.quickAction.compressImage(
       docConfig,
       appConfig,
       exportConfig,
