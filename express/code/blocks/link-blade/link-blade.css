@@ -157,8 +157,8 @@
 /* Desktop styles */
 @media (min-width: 1200px) {
   .link-blade {
-    padding: var(--spacing-600) var(--spacing-500);
-    min-width: 1280px;
+    padding: var(--spacing-800) var(--spacing-500);
+    min-width: 1200px;
   }
 
   .link-blade .link-blade-header {
