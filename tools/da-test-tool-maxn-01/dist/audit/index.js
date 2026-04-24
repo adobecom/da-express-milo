@@ -148,6 +148,9 @@ function applyFlipAnimation(container, renderFn) {
   });
 }
 
+const COPY_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
+const CHECK_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
 function daEditUrl(path) {
   return `https://da.live/edit#${path.replace(/\.html$/, '')}`;
 }
@@ -220,6 +223,26 @@ function renderResults(data, repoBlocks, publishedSet) {
       if (ap !== bp) return ap - bp;
       return a.localeCompare(b);
     });
+
+    const copyBtn = document.createElement('button');
+    copyBtn.type = 'button';
+    copyBtn.className = 'copy-btn';
+    copyBtn.title = 'Copy all paths';
+    copyBtn.innerHTML = COPY_ICON;
+    copyBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const text = sortedPaths.map((p) => (publishedSet?.has(p) ? publishedUrl(p) : daEditUrl(p))).join('\n');
+      navigator.clipboard.writeText(text).then(() => {
+        copyBtn.innerHTML = CHECK_ICON;
+        copyBtn.style.color = '#2d9e2d';
+        setTimeout(() => {
+          copyBtn.innerHTML = COPY_ICON;
+          copyBtn.style.color = '';
+        }, 1500);
+      });
+    });
+    summary.appendChild(copyBtn);
+
     for (const path of sortedPaths) {
       const li = document.createElement('li');
       const pathLink = document.createElement('a');

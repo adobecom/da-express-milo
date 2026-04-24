@@ -88,8 +88,8 @@
         font-weight: 600;
         list-style: none;
         display: flex;
-        justify-content: space-between;
         align-items: center;
+        gap: 0.5rem;
         padding: 0.6rem 1rem;
       }
       #results details.repo-express[open] summary {
@@ -99,9 +99,11 @@
         border-bottom: 1px solid var(--milo-result-border-color)
       }
       #results summary::-webkit-details-marker { display: none; }
-      #results summary::after { content: '▸'; color: #aaa; margin-left: 0.5rem; flex-shrink: 0; }
+      #results summary::after { content: '▸'; color: #aaa; flex-shrink: 0; }
       #results details[open] summary::after { content: '▾'; }
-      .summary-left { display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; }
+      .summary-left { flex: 1; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 600; }
+      .copy-btn { background: none; border: none; padding: 0; cursor: pointer; color: #bbb; display: flex; align-items: center; flex-shrink: 0; line-height: 0; }
+      .copy-btn:hover { color: #555; }
       .summary-count { font-weight: 400; color: inherit; }
       .override-badge {
         font-size: 0.7rem;
