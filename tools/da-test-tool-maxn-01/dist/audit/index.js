@@ -148,6 +148,10 @@ function applyFlipAnimation(container, renderFn) {
   });
 }
 
+function daEditUrl(path) {
+  return `https://da.live/edit#${path.replace(/\.html$/, '')}`;
+}
+
 function publishedUrl(path) {
   const withoutPrefix = path.replace('/adobecom/da-express-milo', '');
   const withoutExt = withoutPrefix.replace(/\.html$/, '');
@@ -218,7 +222,13 @@ function renderResults(data, repoBlocks, publishedSet) {
     });
     for (const path of sortedPaths) {
       const li = document.createElement('li');
-      li.textContent = path;
+      const pathLink = document.createElement('a');
+      pathLink.className = 'path-link';
+      pathLink.href = daEditUrl(path);
+      pathLink.target = '_blank';
+      pathLink.rel = 'noopener noreferrer';
+      pathLink.textContent = path;
+      li.appendChild(pathLink);
       if (publishedSet && publishedSet.has(path)) {
         const badge = document.createElement('a');
         badge.className = 'published-badge';
