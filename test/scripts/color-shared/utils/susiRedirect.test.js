@@ -84,7 +84,7 @@ describe('buildColorSignInRedirectUrl', () => {
     expect(url.pathname).to.equal('/create/color-wheel');
   });
 
-  it('redirects to color-wheel when on color-explore page', () => {
+  it('returns current URL when on color-explore page', () => {
     const el = document.createElement('div');
     el.className = 'color-explore';
     document.body.appendChild(el);
@@ -93,7 +93,7 @@ describe('buildColorSignInRedirectUrl', () => {
 
     const result = buildColorSignInRedirectUrl(colors, name);
     const url = new URL(result);
-    expect(url.pathname).to.equal('/create/color-wheel');
+    expect(url.pathname).to.equal('/color-explore');
   });
 
   it('uses current page URL for color-extract', () => {
@@ -108,7 +108,7 @@ describe('buildColorSignInRedirectUrl', () => {
     expect(url.pathname).to.equal('/create/image');
   });
 
-  it('preserves locale prefix on color-explore redirect', () => {
+  it('preserves locale prefix when returning current URL on color-explore page', () => {
     const el = document.createElement('div');
     el.className = 'color-explore';
     document.body.appendChild(el);
@@ -117,7 +117,7 @@ describe('buildColorSignInRedirectUrl', () => {
 
     const result = buildColorSignInRedirectUrl(colors, name);
     const url = new URL(result);
-    expect(url.pathname).to.equal('/cn/create/color-wheel');
+    expect(url.pathname).to.equal('/cn/color-explore');
   });
 
   it('no locale prefix for default (English) locale on color-explore redirect', () => {
