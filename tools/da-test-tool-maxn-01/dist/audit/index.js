@@ -19,6 +19,7 @@ const $legend = document.getElementById('legend');
 const $results = document.getElementById('results');
 const $dirDetails = document.getElementById('dir-details');
 const $dirList = document.getElementById('dir-list');
+const $sortSelect = document.getElementById('sort-select');
 
 async function fetchGitHubDirNames(url) {
   try {
@@ -98,6 +99,55 @@ function mergeAllParts(dirParts) {
   };
 }
 
+function sortEntries(entries, expressBlocks, miloBlocks) {
+  if ($sortSelect.value === 'repo') {
+    const rank = (name) => {
+      if (expressBlocks.has(name)) return 0;
+      if (miloBlocks.has(name)) return 1;
+      return 2;
+    };
+    return entries.sort(([nameA, a], [nameB, b]) => {
+      const dr = rank(nameA) - rank(nameB);
+      if (dr !== 0) return dr;
+      if (b.length !== a.length) return b.length - a.length;
+      return nameA.localeCompare(nameB);
+    });
+  }
+  return entries.sort(([nameA, a], [nameB, b]) => {
+    if (b.length !== a.length) return b.length - a.length;
+    return nameA.localeCompare(nameB);
+  });
+}
+
+function applyFlipAnimation(container, renderFn) {
+  const items = [...container.children];
+  const oldTops = new Map(items.map((el) => [el.dataset.blockName, el.getBoundingClientRect().top]));
+
+  renderFn();
+
+  const newItems = [...container.children];
+  for (const el of newItems) {
+    const oldTop = oldTops.get(el.dataset.blockName);
+    if (oldTop === undefined) continue;
+    const dy = oldTop - el.getBoundingClientRect().top;
+    if (dy === 0) continue;
+    el.style.transition = 'none';
+    el.style.transform = `translateY(${dy}px)`;
+  }
+
+  requestAnimationFrame(() => {
+    for (const el of newItems) {
+      el.style.transition = 'transform 0.35s ease';
+      el.style.transform = '';
+    }
+    setTimeout(() => {
+      for (const el of newItems) {
+        el.style.transition = '';
+      }
+    }, 400);
+  });
+}
+
 function renderResults(data, repoBlocks, publishedSet) {
   const { express: expressBlocks, milo: miloBlocks } = repoBlocks;
   const allRepoBlocks = new Set([...expressBlocks, ...miloBlocks]);
@@ -107,10 +157,7 @@ function renderResults(data, repoBlocks, publishedSet) {
     if (!allBlocks[name]) allBlocks[name] = [];
   }
 
-  const sorted = Object.entries(allBlocks).sort(([nameA, a], [nameB, b]) => {
-    if (b.length !== a.length) return b.length - a.length;
-    return nameA.localeCompare(nameB);
-  });
+  const sorted = sortEntries(Object.entries(allBlocks), expressBlocks, miloBlocks);
 
   $blockCount.textContent = `${sorted.length} unique block${sorted.length !== 1 ? 's' : ''} across ${data.docCount.toLocaleString()} documents`;
 
@@ -127,6 +174,7 @@ function renderResults(data, repoBlocks, publishedSet) {
     const inMilo = miloBlocks.has(blockName);
 
     const details = document.createElement('details');
+    details.dataset.blockName = blockName;
     if (inExpress) details.className = 'repo-express';
     else if (inMilo) details.className = 'repo-milo';
 
@@ -181,6 +229,8 @@ function renderResults(data, repoBlocks, publishedSet) {
   const dirParts = {};
   let repoBlocks = { express: new Set(), milo: new Set() };
   let isBusy = false;
+  let lastRenderData = null;
+  let lastPublishedSet = null;
 
   function setStatus(text) { $status.textContent = text; }
 
@@ -234,10 +284,13 @@ function renderResults(data, repoBlocks, publishedSet) {
       $legend.innerHTML = '';
       $results.innerHTML = '';
       $statusBtn.style.display = 'none';
+      lastRenderData = null;
+      lastPublishedSet = null;
       return;
     }
-    const publishedSet = merged.publishedPaths ? new Set(merged.publishedPaths) : null;
-    renderResults(merged, repoBlocks, publishedSet);
+    lastRenderData = merged;
+    lastPublishedSet = merged.publishedPaths ? new Set(merged.publishedPaths) : null;
+    renderResults(merged, repoBlocks, lastPublishedSet);
     $statusBtn.style.display = '';
     $statusBtn.textContent = merged.publishedPaths?.length ? 'Refresh Status' : 'Check Status';
   }
@@ -390,6 +443,11 @@ function renderResults(data, repoBlocks, publishedSet) {
   renderMergedResults();
 
   $scanAllBtn.addEventListener('click', scanAllDirs);
+
+  $sortSelect.addEventListener('change', () => {
+    if (!lastRenderData) return;
+    applyFlipAnimation($results, () => renderResults(lastRenderData, repoBlocks, lastPublishedSet));
+  });
 
   $statusBtn.addEventListener('click', async () => {
     if (isBusy) return;

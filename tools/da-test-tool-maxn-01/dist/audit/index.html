@@ -58,11 +58,13 @@
       .dir-btn { padding: 0.15rem 0.5rem; font-size: 0.78rem; cursor: pointer; }
 
       /* Block index legend */
-      #legend { display: flex; gap: 2rem; margin: 0.4rem 0 0.6rem; }
+      #legend-row { display: flex; justify-content: space-between; align-items: center; margin: 0.4rem 0 0.6rem; }
+      #legend { display: flex; gap: 2rem; }
       .legend-express-square { font-size: 2rem; line-height: 0; }
       .legend-express { display: flex; align-items: center; color: #fec311; }
       .legend-milo { display: flex; align-items: center; color: #fe4be9; }
       .legend-unknown { display: flex; align-items: center; color: #999; }
+      #sort-select { font-size: 0.85rem; padding: 0.2rem 0.4rem; border: 1px solid #ddd; border-radius: 4px; background: #fff; color: #555; cursor: pointer; }
 
       /* Block accordions */
       #results { margin-top: 0.25rem; }
@@ -72,6 +74,7 @@
         padding: 0.6rem 1rem;
         margin: 0.4rem 0;
         background: #fafafa;
+        will-change: transform;
       }
       #results details[open] { background: #fff; }
       #results details.repo-express { background: rgba(254, 195, 17, 0.1); border-color: rgba(191, 146, 13, 0.25); }
@@ -125,7 +128,13 @@
       <div id="dir-list"></div>
     </details>
     <p id="block-count" class="meta"></p>
-    <div id="legend"></div>
+    <div id="legend-row">
+      <div id="legend"></div>
+      <select id="sort-select">
+        <option value="usage">By Usage</option>
+        <option value="repo">By Repo</option>
+      </select>
+    </div>
     <div id="results"></div>
   </body>
 </html>
