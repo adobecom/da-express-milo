@@ -49,3 +49,62 @@ export function buildPath(relativePath: string): string {
   const p = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
   return `/${ORG}/${REPO}${p}`;
 }
+
+// Convert any DA-related URL to an admin source path (/org/repo/path)
+export function urlToSourcePath(url: string): string {
+  // DA edit URL: https://da.live/#/adobecom/da-express-milo/...
+  if (url.includes('da.live/#/')) {
+    return url.substring(url.indexOf('da.live/#/') + 'da.live/#'.length);
+  }
+  // Raw source path already
+  if (url.startsWith('/')) return url;
+  // AEM page/preview URL: https://main--repo--org.aem.page/path
+  try {
+    const u = new URL(url);
+    const sub = u.hostname.split('.')[0];
+    const parts = sub.split('--');
+    const org = parts[parts.length - 1];
+    const repo = parts[parts.length - 2];
+    return `/${org}/${repo}${u.pathname}`;
+  } catch {
+    return url;
+  }
+}
+
+export function extractPlaceholders(html: string): string[] {
+  const matches = [...html.matchAll(/\{\{([^}]+)\}\}/g)];
+  return [...new Set(matches.map((m) => m[1]))];
+}
+
+export interface TemplateValidation {
+  status: 'ready' | 'warning' | 'invalid';
+  placeholders: string[];
+  issues: string[];
+}
+
+export function validateTemplate(html: string): TemplateValidation {
+  const issues: string[] = [];
+  const placeholders = extractPlaceholders(html);
+
+  if (!/<main[\s>]/i.test(html)) {
+    issues.push('Missing <main> element — template may not be a valid DA document');
+  }
+  if (!/<meta\s/i.test(html)) {
+    issues.push('No <meta> tags found — SEO metadata may not populate correctly');
+  }
+  if (placeholders.length === 0) {
+    issues.push('No {{placeholder}} tokens found — verify the template has substitution markers');
+  }
+  const hasHero =
+    /class="hero"/i.test(html) ||
+    /<th[^>]*>\s*hero\s*<\/th>/i.test(html) ||
+    /<td[^>]*>\s*hero\s*<\/td>/i.test(html);
+  if (!hasHero) {
+    issues.push('No hero block detected — verify the template includes expected PDP structure');
+  }
+
+  const isInvalid = issues.some((i) => i.includes('Missing <main>'));
+  const status = isInvalid ? 'invalid' : issues.length > 0 ? 'warning' : 'ready';
+
+  return { status, issues, placeholders };
+}
