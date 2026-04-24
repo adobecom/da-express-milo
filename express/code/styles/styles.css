@@ -136,7 +136,7 @@
   /* 20px */
 
   --heading-font-size-ml : 2rem;
- /* 32px */
+  /* 32px */
  
   --block-sm-max-width: 375px;
   --block-md-max-width: 830px;
@@ -483,16 +483,16 @@ main {
 }
 
 main .section:not([data-padding='none']):not(.xxxl-spacing-static,
-  .xxl-spacing-static,
-  .xl-spacing-static,
-  .xxxl-spacing,
-  .xxl-spacing,
-  .xl-spacing,
-  .l-spacing,
-  .m-spacing,
-  .s-spacing,
-  .xs-spacing,
-  .xxs-spacing)>.content:first-child {
+.xxl-spacing-static,
+.xl-spacing-static,
+.xxxl-spacing,
+.xxl-spacing,
+.xl-spacing,
+.l-spacing,
+.m-spacing,
+.s-spacing,
+.xs-spacing,
+.xxs-spacing)>.content:first-child {
   padding-top: 60px;
 }
 
@@ -1143,16 +1143,16 @@ main .section p {
 }
 
 main .section:not(.xxxl-spacing-static,
-  .xxl-spacing-static,
-  .xl-spacing-static,
-  .xxxl-spacing,
-  .xxl-spacing,
-  .xl-spacing,
-  .l-spacing,
-  .m-spacing,
-  .s-spacing,
-  .xs-spacing,
-  .xxs-spacing):last-of-type>.content:not(:has(+ .template-list-wrapper)) {
+.xxl-spacing-static,
+.xl-spacing-static,
+.xxxl-spacing,
+.xxl-spacing,
+.xl-spacing,
+.l-spacing,
+.m-spacing,
+.s-spacing,
+.xs-spacing,
+.xxs-spacing):last-of-type>.content:not(:has(+ .template-list-wrapper)) {
   padding-bottom: var(--spacing-600);
 }
 
@@ -1459,6 +1459,7 @@ main .section.long-form .content h2 {
 
 main .section.long-form.long-form-blog .content h2 {
   font-size: var(--Global-Typography-Size-Headings-Heading-XL);
+  font-weight: var(--heading-font-weight-extra);
   line-height: 104%;
 }
 
