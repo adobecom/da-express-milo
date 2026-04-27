@@ -301,9 +301,10 @@ export default async function decorate(block) {
 
   document.addEventListener('color-explore:empty-result', (e) => {
     const { query } = e.detail;
+    const { heading, description } = emptyResult;
     block.classList.add('empty-result');
-    emptyResult.heading.textContent = interpolate(strings.noResultsHeading, { query, type: 'color palettes' });
-    emptyResult.description.textContent = interpolate(strings.noResultsDesc, { query });
+    heading.textContent = interpolate(strings.noResultsHeading, { query, type: 'color palettes' });
+    description.textContent = interpolate(strings.noResultsDesc, { query });
   });
 
   document.addEventListener('color-explore:results-found', () => {
@@ -328,9 +329,10 @@ export default async function decorate(block) {
     ...searchBar,
     deepLinkManager,
     showEmptyResult({ searchTerm, type = 'color palettes' }) {
+      const { heading, description } = emptyResult;
       block.classList.add('empty-result');
-      emptyResult.heading.textContent = interpolate(strings.noResultsHeading, { query: searchTerm, type });
-      emptyResult.description.textContent = interpolate(strings.noResultsDesc, { query: searchTerm });
+      heading.textContent = interpolate(strings.noResultsHeading, { query: searchTerm, type });
+      description.textContent = interpolate(strings.noResultsDesc, { query: searchTerm });
     },
     clearEmptyResult() {
       block.classList.remove('empty-result');

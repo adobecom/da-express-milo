@@ -14,7 +14,9 @@ const PAGINATION = {
 };
 
 export function createGradientsRenderer(options) {
-  const { container, data = [], config = {}, placeholders = createColorExplorePlaceholders() } = options;
+  const {
+    container, data = [], config = {}, placeholders = createColorExplorePlaceholders(),
+  } = options;
 
   const base = createBaseRenderer(options);
   const { emit, setData } = base;
@@ -375,7 +377,11 @@ export function createGradientsRenderer(options) {
         const gradientIndex = allGradients.findIndex((g) => g.id === gradientId);
         const rowIndex = Math.floor(gradientIndex / numCols) + 1;
         const colIndex = (gradientIndex % numCols) + 1;
-        announceToScreenReader(interpolate(placeholders.a11yNavigatedTo, { name: gradient.name, row: rowIndex, col: colIndex }), 1000);
+        const navMsg = interpolate(
+          placeholders.a11yNavigatedTo,
+          { name: gradient.name, row: rowIndex, col: colIndex },
+        );
+        announceToScreenReader(navMsg, 1000);
       }
     }
   }
@@ -559,8 +565,12 @@ export function createGradientsRenderer(options) {
           const rowIndex = Math.floor(gradientIndex / columns) + 1;
           const colIndex = (gradientIndex % columns) + 1;
           const announcement = previousIndex === -1
-            ? interpolate(placeholders.a11yEnteredGrid, { name: g.name, row: rowIndex, col: colIndex, total: allGradients.length })
-            : interpolate(placeholders.a11yCardPosition, { name: g.name, row: rowIndex, col: colIndex });
+            ? interpolate(placeholders.a11yEnteredGrid, {
+              name: g.name, row: rowIndex, col: colIndex, total: allGradients.length,
+            })
+            : interpolate(placeholders.a11yCardPosition, {
+              name: g.name, row: rowIndex, col: colIndex,
+            });
           announceToScreenReader(announcement, previousIndex === -1 ? 3000 : 1000);
         }
       }
@@ -655,7 +665,9 @@ export function createGradientsRenderer(options) {
     const totalCount = allGradients.length;
     const remaining = totalCount - displayedCount;
     liveRegion.textContent = remaining > 0
-      ? interpolate(placeholders.gridShowingPartial, { displayed: displayedCount, total: totalCount, remaining })
+      ? interpolate(placeholders.gridShowingPartial, {
+        displayed: displayedCount, total: totalCount, remaining,
+      })
       : interpolate(placeholders.gridShowingAll, { total: totalCount });
   }
 

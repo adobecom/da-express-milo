@@ -38,7 +38,10 @@ function normalizeCreatorName(rawValue) {
  * Attach Spectrum tooltips (Figma M, bottom) to each gradient handle in container.
  * Replaces native title; sp-tooltip matches Figma 9530-159590. Export for modal and demo.
  */
-export async function attachGradientHandleTooltips(container, strings = createColorModalPlaceholders()) {
+export async function attachGradientHandleTooltips(
+  container,
+  strings = createColorModalPlaceholders(),
+) {
   const handles = container.querySelectorAll('.gradient-editor-handle[data-color]');
   if (!handles.length) return;
   for (const handle of handles) {
