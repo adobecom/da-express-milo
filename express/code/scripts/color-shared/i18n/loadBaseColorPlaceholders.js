@@ -1,4 +1,4 @@
-import { loadPlaceholders } from './utils.js';
+import loadPlaceholders from './utils.js';
 
 export const DEFAULT_PLACEHOLDERS = Object.freeze({
   title: 'Base color',

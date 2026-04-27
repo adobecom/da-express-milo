@@ -4,7 +4,7 @@ function isResolvedPlaceholder(value, key) {
   return value && value !== key.replaceAll('-', ' ');
 }
 
-export async function loadPlaceholders(keyMap, createFn) {
+export default async function loadPlaceholders(keyMap, createFn) {
   try {
     const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
       import(`${getLibs()}/utils/utils.js`),
