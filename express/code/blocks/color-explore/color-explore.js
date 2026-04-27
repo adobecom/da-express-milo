@@ -257,7 +257,7 @@ export default async function decorate(block) {
     config.variant = getVariantFromThemeUrlParam() ?? variantFromClass ?? config.variant;
 
     block.dataset.blockStatus = 'loading';
-    const placeholders = await loadColorExplorePlaceholders();
+    const placeholdersPromise = loadColorExplorePlaceholders();
     block.replaceChildren();
     block.className = CSS_CLASSES.BLOCK;
     const variantClass = config.variant === VARIANTS.GRADIENTS
@@ -295,7 +295,7 @@ export default async function decorate(block) {
       container.replaceChildren(header, section);
     };
     showLoadingSkeleton();
-    await loadStripSharedStyles();
+    const [placeholders] = await Promise.all([placeholdersPromise, loadStripSharedStyles()]);
 
     if (config.variant === VARIANTS.GRADIENTS || config.variant === VARIANTS.STRIPS) {
       const gradientsDataService = createSharedColorDataService({
