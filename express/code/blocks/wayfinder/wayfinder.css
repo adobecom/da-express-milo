@@ -7,8 +7,8 @@ body main .section:has(.wayfinder) {
     border: 2px solid var(--color-black);
     border-radius: 20px;
     padding: var(--spacing-300) 0 var(--spacing-300) 0;
-    margin-left: var( --spacing-350);
-    margin-right: var( --spacing-350);
+    margin-left: var(--spacing-350);
+    margin-right: var(--spacing-350);
     margin-top: 60px;
     text-align: center;
     max-width: 1328px;
@@ -40,25 +40,18 @@ main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, 
     border: 2px solid var(--color-info-accent);
 }
 
-.wayfinder.light a {
-    color: var(--color-black);
+.wayfinder a, .wayfinder.light a, .wayfinder.dark a, .wayfinder.gradient a {
+    color: inherit;
     text-decoration: underline;
 }
 
-.wayfinder.dark a {
-    color: var(--color-white);
-    text-decoration: underline;
-}
+
 
 .wayfinder.gradient {
     color: var(--color-black);
     border: 2px solid var(--color-white);
 }
 
-.wayfinder.gradient a {
-    color: var(--color-black);
-    text-decoration: underline;
-}
 
 .wayfinder .cta-row .button {
     height: fit-content;
@@ -139,7 +132,6 @@ main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, 
         flex-direction: column;
         justify-content: center;
         align-items: center;
-        margin: 30px 2p0px 2p0px auto; /* what is this? */
         padding: 10px;
     }
 
@@ -150,7 +142,7 @@ main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, 
 
     .wayfinder .text-row div {
       display: flex;
-        gap: var(--spacing-80);
+        gap: var(--spacing-100);
     }
 
     .wayfinder .cta-row {
