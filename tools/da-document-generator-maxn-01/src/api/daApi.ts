@@ -38,7 +38,8 @@ export async function postDoc(dest: string, html: string): Promise<PostDocRespon
 export async function cat(filePath: string): Promise<string> {
   const t = getToken();
   if (!t) throw new Error('DA token not set; set VITE_DA_TOKEN or run from DA.live');
-  const resp = await fetch(`${DA_API}/source${filePath}`, {
+  const path = filePath.endsWith('.html') ? filePath : `${filePath}.html`;
+  const resp = await fetch(`${DA_API}/source${path}`, {
     headers: { Authorization: `Bearer ${t}` },
   });
   if (!resp.ok) throw new Error(`${resp.status}: ${await resp.text()}`);
@@ -52,9 +53,12 @@ export function buildPath(relativePath: string): string {
 
 // Convert any DA-related URL to an admin source path (/org/repo/path)
 export function urlToSourcePath(url: string): string {
-  // DA edit URL: https://da.live/#/adobecom/da-express-milo/...
-  if (url.includes('da.live/#/')) {
-    return url.substring(url.indexOf('da.live/#/') + 'da.live/#'.length);
+  // DA edit URLs (both formats):
+  //   https://da.live/edit#/adobecom/da-express-milo/...
+  //   https://da.live/#/adobecom/da-express-milo/...
+  if (url.includes('da.live')) {
+    const hashIdx = url.indexOf('#/');
+    if (hashIdx !== -1) return url.substring(hashIdx + 1);
   }
   // Raw source path already
   if (url.startsWith('/')) return url;

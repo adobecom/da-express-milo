@@ -63,7 +63,7 @@ export default function TemplateConfirm({ state, onChange }: Props) {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
-          placeholder="https://da.live/#/adobecom/da-express-milo/drafts/…"
+          placeholder="https://da.live/edit#/adobecom/da-express-milo/drafts/…"
           className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
         />
         <button
@@ -83,7 +83,7 @@ export default function TemplateConfirm({ state, onChange }: Props) {
               {STATUS_LABEL[state.status]}
             </span>
             {state.sourcePath && (
-              <code className="text-xs text-gray-500 truncate max-w-full">{state.sourcePath}</code>
+              <code className="text-xs text-gray-500 break-all">{state.sourcePath}</code>
             )}
           </div>
 
@@ -117,9 +117,13 @@ export default function TemplateConfirm({ state, onChange }: Props) {
         </div>
       )}
 
-      <p className="text-xs text-gray-400">
-        Paste a DA edit URL, AEM page URL, or raw source path
-      </p>
+      <div className="text-xs text-gray-400 flex flex-col gap-0.5">
+        <p>Accepted formats:</p>
+        <code className="bg-gray-100 px-1 rounded">https://da.live/edit#/org/repo/path</code>
+        <code className="bg-gray-100 px-1 rounded">https://da.live/#/org/repo/path</code>
+        <code className="bg-gray-100 px-1 rounded">/org/repo/path</code>
+        <code className="bg-gray-100 px-1 rounded">https://main--repo--org.aem.page/path</code>
+      </div>
     </div>
   );
 }
