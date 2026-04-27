@@ -1,4 +1,4 @@
-import { getLibs } from '../../utils.js';
+import { loadPlaceholders } from './utils.js';
 
 export const DEFAULT_PLACEHOLDERS = Object.freeze({
   ariaLabel: 'Gradient editor',
@@ -34,34 +34,10 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   stopPosition: 'gradient-editor-stop-position',
 });
 
-function isResolvedPlaceholder(value, key) {
-  return value && value !== key.replaceAll('-', ' ');
-}
-
 export function createGradientEditorPlaceholders(overrides = {}) {
   return { ...DEFAULT_PLACEHOLDERS, ...overrides };
 }
 
-export default async function loadGradientEditorPlaceholders() {
-  try {
-    const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
-      import(`${getLibs()}/utils/utils.js`),
-      import(`${getLibs()}/features/placeholders.js`),
-    ]);
-
-    const keys = Object.values(PLACEHOLDER_KEY_MAP);
-    const values = await replaceKeyArray(keys, getConfig());
-    const overrides = {};
-
-    Object.entries(PLACEHOLDER_KEY_MAP).forEach(([prop, key], index) => {
-      const value = values[index];
-      if (isResolvedPlaceholder(value, key)) {
-        overrides[prop] = value;
-      }
-    });
-
-    return createGradientEditorPlaceholders(overrides);
-  } catch {
-    return createGradientEditorPlaceholders();
-  }
+export default function loadGradientEditorPlaceholders() {
+  return loadPlaceholders(PLACEHOLDER_KEY_MAP, createGradientEditorPlaceholders);
 }

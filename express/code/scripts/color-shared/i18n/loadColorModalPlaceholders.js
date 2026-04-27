@@ -1,4 +1,4 @@
-import { getLibs } from '../../utils.js';
+import { loadPlaceholders } from './utils.js';
 
 export const DEFAULT_PLACEHOLDERS = Object.freeze({
   closeAria: 'Close modal',
@@ -28,34 +28,10 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   gradientPreviewAria: 'color-modal-gradient-preview-aria',
 });
 
-function isResolvedPlaceholder(value, key) {
-  return value && value !== key.replaceAll('-', ' ');
-}
-
 export function createColorModalPlaceholders(overrides = {}) {
   return { ...DEFAULT_PLACEHOLDERS, ...overrides };
 }
 
-export default async function loadColorModalPlaceholders() {
-  try {
-    const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
-      import(`${getLibs()}/utils/utils.js`),
-      import(`${getLibs()}/features/placeholders.js`),
-    ]);
-
-    const keys = Object.values(PLACEHOLDER_KEY_MAP);
-    const values = await replaceKeyArray(keys, getConfig());
-    const overrides = {};
-
-    Object.entries(PLACEHOLDER_KEY_MAP).forEach(([prop, key], index) => {
-      const value = values[index];
-      if (isResolvedPlaceholder(value, key)) {
-        overrides[prop] = value;
-      }
-    });
-
-    return createColorModalPlaceholders(overrides);
-  } catch {
-    return createColorModalPlaceholders();
-  }
+export default function loadColorModalPlaceholders() {
+  return loadPlaceholders(PLACEHOLDER_KEY_MAP, createColorModalPlaceholders);
 }

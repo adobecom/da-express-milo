@@ -1,4 +1,4 @@
-import { getLibs } from '../../utils.js';
+import { loadPlaceholders } from './utils.js';
 
 export const DEFAULT_PLACEHOLDERS = Object.freeze({
   loadMore: 'Load more',
@@ -44,34 +44,10 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   a11yCardPosition: 'color-explore-a11y-card-position',
 });
 
-function isResolvedPlaceholder(value, key) {
-  return value && value !== key.replaceAll('-', ' ');
-}
-
 export function createColorExplorePlaceholders(overrides = {}) {
   return { ...DEFAULT_PLACEHOLDERS, ...overrides };
 }
 
-export default async function loadColorExplorePlaceholders() {
-  try {
-    const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
-      import(`${getLibs()}/utils/utils.js`),
-      import(`${getLibs()}/features/placeholders.js`),
-    ]);
-
-    const keys = Object.values(PLACEHOLDER_KEY_MAP);
-    const values = await replaceKeyArray(keys, getConfig());
-    const overrides = {};
-
-    Object.entries(PLACEHOLDER_KEY_MAP).forEach(([prop, key], index) => {
-      const value = values[index];
-      if (isResolvedPlaceholder(value, key)) {
-        overrides[prop] = value;
-      }
-    });
-
-    return createColorExplorePlaceholders(overrides);
-  } catch {
-    return createColorExplorePlaceholders();
-  }
+export default function loadColorExplorePlaceholders() {
+  return loadPlaceholders(PLACEHOLDER_KEY_MAP, createColorExplorePlaceholders);
 }
