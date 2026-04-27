@@ -68,6 +68,14 @@ describe('template-utils', () => {
       expect(filters.includes('topics==class')).to.be.true;
       expect(filters.includes('language==en-US')).to.be.true;
     });
+    it('handles locales as filter', () => {
+      const { url } = recipe2ApiQuery('topics=class&locales=en or fr&collection=default');
+      const params = new URL(url).searchParams;
+      const filters = params.getAll('filters');
+      expect(filters.includes('topics==class')).to.be.true;
+      expect(filters.includes('applicableRegions==ZZ,FR')).to.be.true;
+      expect(params.get('locales')).to.not.exist;
+    });
     it('handles topics top-level AND', () => {
       // filters=language==en-US
       const { url } = recipe2ApiQuery('topics=birthday AND music,geometric,gourmet,cactus_journal,60 AND sprinkles,fun,cakestand,paint paper,abstract AND dance,organic,cursive,succulent,photo memories,zig zag&limit=10&collection=default');

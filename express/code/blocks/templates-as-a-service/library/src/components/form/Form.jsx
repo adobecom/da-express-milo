@@ -114,6 +114,14 @@ export default function Form() {
       />
 
       <TextField
+        label="Locales:"
+        name="locales"
+        value={formData.locales}
+        onChange={createFieldChangeHandler('locales')}
+        info="Template-x style locale list. Example: en or fr or de."
+      />
+
+      <TextField
         label="Tasks:"
         name="tasks"
         value={formData.tasks}

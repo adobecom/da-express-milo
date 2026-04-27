@@ -44,6 +44,19 @@ function handleFilters(params) {
     params.append('filters', `language==${params.get('language')}`);
     params.delete('language');
   }
+  if (params.get('locales')) {
+    const applicableRegions = params
+      .get('locales')
+      .split(/\s+or\s+|,/i)
+      .map((locale) => locale.trim())
+      .filter(Boolean)
+      .map((locale) => (locale.toLowerCase() === 'en' ? 'ZZ' : locale.toUpperCase()))
+      .join(',');
+    if (applicableRegions) {
+      params.append('filters', `applicableRegions==${applicableRegions}`);
+    }
+    params.delete('locales');
+  }
 }
 
 function handleHeaders(params) {
