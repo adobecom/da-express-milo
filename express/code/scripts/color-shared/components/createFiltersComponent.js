@@ -22,7 +22,8 @@ import { createExpressPicker } from '../spectrum/components/express-picker.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { loadIconsRail, loadPicker } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
-import { decorateAnalyticsAttributes } from '../utils/utilities.js';
+import { decorateAnalyticsAttributes, interpolate } from '../utils/utilities.js';
+import { createColorFiltersPlaceholders } from '../i18n/loadColorFiltersPlaceholders.js';
 
 export const FILTER_IDS = {
   CONTENT_TYPE: 'contentType',
@@ -46,6 +47,7 @@ export async function createFiltersComponent(options = {}) {
     filters = [],
     onFilterChange,
     variant = 'strips',
+    strings = createColorFiltersPlaceholders(),
   } = options;
 
   const filterValues = {};
@@ -100,39 +102,39 @@ export async function createFiltersComponent(options = {}) {
     const defaultContentType = isGradients ? 'color-gradients' : 'color-palettes';
     const contentTypeOptions = isGradients
       ? [
-        { label: 'Color gradients', value: 'color-gradients' },
-        { label: 'Color palettes', value: 'color-palettes' },
+        { label: strings.contentGradients, value: 'color-gradients' },
+        { label: strings.contentPalettes, value: 'color-palettes' },
       ]
       : [
-        { label: 'Color palettes', value: 'color-palettes' },
-        { label: 'Color gradients', value: 'color-gradients' },
+        { label: strings.contentPalettes, value: 'color-palettes' },
+        { label: strings.contentGradients, value: 'color-gradients' },
       ];
     return [
       {
         id: FILTER_IDS.CONTENT_TYPE,
-        label: isGradients ? 'Color gradients' : 'Color palettes',
+        label: isGradients ? strings.contentGradients : strings.contentPalettes,
         defaultValue: defaultContentType,
         options: contentTypeOptions,
       },
       {
         id: FILTER_IDS.SORT,
-        label: 'Most popular',
+        label: strings.sortPopular,
         defaultValue: 'most-popular',
         options: [
-          { label: 'Most popular', value: 'most-popular' },
-          { label: 'All', value: 'all' },
-          { label: 'Most used', value: 'most-used' },
-          { label: 'Random', value: 'random' },
+          { label: strings.sortPopular, value: 'most-popular' },
+          { label: strings.sortAll, value: 'all' },
+          { label: strings.sortMostUsed, value: 'most-used' },
+          { label: strings.sortRandom, value: 'random' },
         ],
       },
       {
         id: FILTER_IDS.TIME_RANGE,
-        label: 'All time',
+        label: strings.timeLabelAllTime,
         defaultValue: 'all-time',
         options: [
-          { label: 'All time', value: 'all-time' },
-          { label: 'This month', value: 'this-month' },
-          { label: 'This week', value: 'this-week' },
+          { label: strings.timeLabelAllTime, value: 'all-time' },
+          { label: strings.timeMonth, value: 'this-month' },
+          { label: strings.timeWeek, value: 'this-week' },
         ],
       },
     ];
@@ -266,7 +268,7 @@ export async function createFiltersComponent(options = {}) {
 
     const select = createTag('select', {
       class: 'filter-picker-fallback',
-      'aria-label': `Filter by ${filter?.label || filterId || 'value'}`,
+      'aria-label': interpolate(strings.filterByItem, { label: filter?.label || filterId || 'value' }),
     });
 
     optionsList.forEach((option) => {
@@ -372,7 +374,7 @@ export async function createFiltersComponent(options = {}) {
 
   function createApplyButton() {
     const applyBtn = createTag('button', { type: 'button', class: 'filters-mobile__apply' });
-    applyBtn.textContent = 'Apply';
+    applyBtn.textContent = strings.applyLabel;
     return applyBtn;
   }
 
@@ -559,13 +561,13 @@ export async function createFiltersComponent(options = {}) {
   const sortFilter = findFilter(FILTER_IDS.SORT, filtersToUse);
   const timeFilter = findFilter(FILTER_IDS.TIME_RANGE, filtersToUse);
 
-  const sortButton = createMobileIconButton('filters-mobile__btn--sort', 'sp-icon-switch-vertical', 'Sort');
-  const filterButton = createMobileIconButton('filters-mobile__btn--filter', 'sp-icon-filter', 'Filter');
+  const sortButton = createMobileIconButton('filters-mobile__btn--sort', 'sp-icon-switch-vertical', strings.sortLabel);
+  const filterButton = createMobileIconButton('filters-mobile__btn--filter', 'sp-icon-filter', strings.filterLabel);
 
   const attachMobileTooltips = async () => {
     const targets = [
-      { el: filterButton, content: 'Filter' },
-      { el: sortButton, content: 'Sort' },
+      { el: filterButton, content: strings.filterLabel },
+      { el: sortButton, content: strings.sortLabel },
     ];
     await Promise.all(targets.map(async ({ el, content }) => {
       try {
@@ -611,7 +613,7 @@ export async function createFiltersComponent(options = {}) {
 
   sortPanel.append(
     createPanelHandle(),
-    createPanelTitle('Sort by'),
+    createPanelTitle(strings.sortBy),
     sortMenuController.element,
     createTag('div', { class: 'filters-mobile__divider', 'aria-hidden': 'true' }),
     timeMenuController.element,
@@ -620,7 +622,7 @@ export async function createFiltersComponent(options = {}) {
 
   filterPanel.append(
     createPanelHandle(),
-    createPanelTitle('Filter by'),
+    createPanelTitle(strings.filterBy),
     contentTypeMenuController.element,
     filterApplyButton,
   );
@@ -803,10 +805,10 @@ export async function createFiltersComponent(options = {}) {
     mobileTooltipControllers.splice(0).forEach((controller) => controller?.destroy?.());
   });
 
-  applyAnalyticsAttributes(filterButton, 'Filter', 1);
-  applyAnalyticsAttributes(sortButton, 'Sort', 2);
-  applyAnalyticsAttributes(sortApplyButton, 'Apply', 3);
-  applyAnalyticsAttributes(filterApplyButton, 'Apply', 4);
+  applyAnalyticsAttributes(filterButton, strings.filterLabel, 1);
+  applyAnalyticsAttributes(sortButton, strings.sortLabel, 2);
+  applyAnalyticsAttributes(sortApplyButton, strings.applyLabel, 3);
+  applyAnalyticsAttributes(filterApplyButton, strings.applyLabel, 4);
 
   mobileThemeWrapper.append(mobileCurtain, mobileContainer);
   container.append(desktopContainer, mobileThemeWrapper);

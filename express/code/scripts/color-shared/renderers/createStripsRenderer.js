@@ -7,6 +7,7 @@ import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPalette
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { loadIconsRail } from '../spectrum/load-spectrum.js';
 import { decorateAnalyticsAttributes } from '../utils/utilities.js';
+import { createColorFiltersPlaceholders } from '../i18n/loadColorFiltersPlaceholders.js';
 
 const ignoreError = () => {};
 const FILTER_CLICK_SUPPRESS_MS = 250;
@@ -165,7 +166,7 @@ function setupPaletteGridNav(gridEl) {
 }
 
 export function createStripsRenderer(options) {
-  const { container: rootContainer } = options;
+  const { container: rootContainer, strings = createColorFiltersPlaceholders() } = options;
   const base = createBaseRenderer(options);
   const { getData, setData, emit, createGrid, config } = base;
 
@@ -258,6 +259,7 @@ export function createStripsRenderer(options) {
 
   function createSearchUI() {
     searchAdapter = createSearchAdapter({
+      placeholder: strings.searchPlaceholderShort,
       onSearch: (query) => {
         emit('search', { query });
       },
