@@ -868,11 +868,12 @@ export default async function decorate(block) {
 
     document.body.dataset.suppressfloatingcta = 'true';
 
+    const action = EASY_UPLOAD_LEGACY_MAP[quickAction] || quickAction;
     if (quickAction === 'merge-videos' && files.length > 1) {
-      startSDKWithUnconvertedFiles(files, quickAction, block);
+      startSDKWithUnconvertedFiles(files, action, block);
     } else {
       const [file] = files;
-      startSDKWithUnconvertedFiles([file], quickAction, block);
+      startSDKWithUnconvertedFiles([file], action, block);
     }
   };
   block.append(inputElement);
