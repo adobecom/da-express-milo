@@ -859,7 +859,7 @@ export default async function decorate(block) {
     accept: QA_CONFIGS[quickAction].accept,
     ...(quickAction === 'merge-videos' && { multiple: true }),
   });
-  inputElement.onchange = () => {
+  inputElement.onchange = async () => {
     const { files } = inputElement;
     if (!files?.length) {
       document.body.dataset.suppressfloatingcta = 'false';
@@ -867,6 +867,15 @@ export default async function decorate(block) {
     }
 
     document.body.dataset.suppressfloatingcta = 'true';
+
+    if (quickAction.includes('easy-upload')) {
+      const { isEasyUploadExperimentEnabled } = await loadEasyUploadModule();
+      if (isEasyUploadExperimentEnabled(quickAction)) {
+        const [file] = files;
+        performUploadAction([file], block, quickAction);
+        return;
+      }
+    }
 
     if (quickAction === 'merge-videos' && files.length > 1) {
       startSDKWithUnconvertedFiles(files, quickAction, block);
