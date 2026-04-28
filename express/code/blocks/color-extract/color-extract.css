@@ -961,11 +961,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   align-self: stretch;
 }
 
-.color-extract .color-extract-swatch-rail--gradient {
-  flex: 1 1 0;
-  min-height: 0;
-}
-
 .color-extract .color-extract-gradient-editor-col {
   display: flex;
   flex-direction: column;
@@ -1069,6 +1064,11 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
   .color-extract .color-extract-landing-bg {
     display: block;
+  }
+
+  .color-extract .color-extract-swatch-rail--gradient {
+    flex: 1 1 0;
+    min-height: 0;
   }
 
   .section > .color-extract-landing-bg,
