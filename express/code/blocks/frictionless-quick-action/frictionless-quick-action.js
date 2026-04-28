@@ -728,7 +728,12 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCod
   // here update the variant to the url variant if it exists
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
-  const variant = urlVariant || quickAction;
+  let variant = urlVariant || quickAction;
+
+  // edit-image easy-upload variants follow the same redirect flow as regular edit-image
+  if (variant === 'edit-image-easy-upload-variant' || variant === 'edit-image-easy-upload-control') {
+    variant = FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor;
+  }
 
   const frictionlessAllowedQuickActions = Object.values(FRICTIONLESS_UPLOAD_QUICK_ACTIONS);
   if (frictionlessAllowedQuickActions.includes(variant)
