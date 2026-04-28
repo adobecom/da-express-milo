@@ -926,12 +926,11 @@ export default async function decorate(block) {
 
     document.body.dataset.suppressfloatingcta = 'true';
 
-    const action = EASY_UPLOAD_LEGACY_MAP[quickAction] || quickAction;
     if (quickAction === 'merge-videos' && files.length > 1) {
-      startSDKWithUnconvertedFiles(files, action, block);
+      startSDKWithUnconvertedFiles(files, quickAction, block);
     } else {
       await Promise.all(
-        [...files].map((file) => startSDKWithUnconvertedFiles([file], action, block)),
+        [...files].map((file) => startSDKWithUnconvertedFiles([file], quickAction, block)),
       );
     }
   }, false);
