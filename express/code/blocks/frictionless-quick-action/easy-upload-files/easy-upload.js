@@ -125,6 +125,10 @@ export function runEasyUploadExperiment(
       exportConfig.pop();
       ccEverywhere.quickAction.convertToSVG(docConfig, appConfig, exportConfig, contConfig);
       break;
+    case EasyUploadVariants.editImageEasyUploadVariant:
+    case EasyUploadControls.editImageEasyUploadControl:
+      ccEverywhere.quickAction.editImage(docConfig, appConfig, exportConfig, contConfig);
+      break;
     default:
       break;
   }
