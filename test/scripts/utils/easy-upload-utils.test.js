@@ -95,6 +95,27 @@ describe('EasyUpload failure handling', () => {
     expect(easyUpload.isQrCodeConsumed()).to.be.false;
   });
 
+  it('resetUploadSession clears polling intervals and resets upload state', async () => {
+    const easyUpload = createInstance();
+    easyUpload.qrRefreshInterval = setTimeout(() => {}, 10000);
+    easyUpload.pollingInterval = setInterval(() => {}, 10000);
+    easyUpload.uploadFinalized = true;
+    easyUpload.uploadDetected = true;
+    const versionReject = sinon.stub();
+    easyUpload.versionReadyPromise = { reject: versionReject };
+    sinon.stub(easyUpload, 'stopUploadDetectionPolling');
+    sinon.stub(easyUpload, 'cleanupAcpStorage').resolves();
+
+    await easyUpload.resetUploadSession();
+
+    expect(easyUpload.qrRefreshInterval).to.be.null;
+    expect(easyUpload.pollingInterval).to.be.null;
+    expect(easyUpload.uploadFinalized).to.be.false;
+    expect(easyUpload.uploadDetected).to.be.false;
+    expect(versionReject.calledOnce).to.be.true;
+    expect(easyUpload.versionReadyPromise).to.be.null;
+  });
+
   it('propagates initializeBlockUpload failures during URL generation', async () => {
     const createAssetStub = sinon.stub().resolves({ links: {} });
     const initializeBlockUploadStub = sinon.stub().rejects(new Error('init failed'));

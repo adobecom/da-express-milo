@@ -1,5 +1,5 @@
 import { EasyUploadControls, EasyUploadVariants, EasyUploadVariantsPromoidMap } from '../../../scripts/utils/easy-upload-utils.js';
-import { getIconElementDeprecated } from '../../../scripts/utils.js';
+import { getIconElementDeprecated, getLibs } from '../../../scripts/utils.js';
 import { adjustElementPosition } from '../../../scripts/widgets/tooltip.js';
 import {
   DEBUG_MODES,
@@ -29,6 +29,7 @@ let activeDebugMode = DEBUG_MODES.NONE;
 let deferredInitContext = null;
 let sharedCreateTag = null;
 let sharedShowErrorToast = null;
+let sharedReplaceKey = null;
 const easyUploadPaneContent = {
   hasContent: false,
   primary: {
@@ -420,6 +421,30 @@ function navigateAwayFromQrPane(block) {
   dropzoneContainer.classList.remove('hidden');
 }
 
+async function resolveQrInitFailedMessage(fallbackMessage) {
+  const getConfig = deferredInitContext?.getConfig;
+  if (!getConfig) {
+    return fallbackMessage;
+  }
+
+  try {
+    if (!sharedReplaceKey) {
+      ({ replaceKey: sharedReplaceKey } = await import(`${getLibs()}/features/placeholders.js`));
+    }
+    const translated = await sharedReplaceKey('qr-init-failed', getConfig());
+    if (!translated || translated === 'qr-init-failed') {
+      return fallbackMessage;
+    }
+    return translated;
+  } catch (error) {
+    window.lana?.log(
+      `[EasyUpload-UI] Failed to resolve qr-init-failed placeholder: ${error?.message || error}`,
+      { severity: 'warning' },
+    );
+    return fallbackMessage;
+  }
+}
+
 async function ensureEasyUploadInstance(block, createTag, showErrorToast) {
   if (easyUploadInstance) {
     return true;
@@ -452,7 +477,8 @@ async function ensureEasyUploadInstance(block, createTag, showErrorToast) {
       `[EasyUpload-UI] Deferred initialization failed: ${error?.message || error}`,
       { severity: 'error' },
     );
-    showErrorToast?.(block, 'Failed to initialize QR code upload.');
+    const errorMessage = await resolveQrInitFailedMessage('Failed to initialize QR code upload.');
+    showErrorToast?.(block, errorMessage);
     return false;
   }
 }
@@ -579,7 +605,8 @@ async function initializeQrPane(block, qrPane, createTag, showErrorToast, option
       `[EasyUpload-UI] initializeQRCode failed: ${error?.name} ${error?.message}`,
       { severity: 'error' },
     );
-    showErrorToast?.(block, 'Failed to load QR code.');
+    const errorMessage = await resolveQrInitFailedMessage('Failed to load QR code.');
+    showErrorToast?.(block, errorMessage);
     return false;
   }
 }
@@ -760,6 +787,7 @@ export function cleanupEasyUpload() {
   deferredInitContext = null;
   sharedCreateTag = null;
   sharedShowErrorToast = null;
+  sharedReplaceKey = null;
   if (easyUploadInstance) {
     easyUploadInstance.cleanup();
     easyUploadInstance = null;
