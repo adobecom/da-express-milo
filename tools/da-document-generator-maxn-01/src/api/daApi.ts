@@ -53,15 +53,23 @@ export function buildPath(relativePath: string): string {
 
 // Convert any DA-related URL to an admin source path (/org/repo/path)
 export function urlToSourcePath(url: string): string {
-  // DA edit URLs (both formats):
-  //   https://da.live/edit#/adobecom/da-express-milo/...
-  //   https://da.live/#/adobecom/da-express-milo/...
   if (url.includes('da.live')) {
-    const hashIdx = url.indexOf('#/');
-    if (hashIdx !== -1) return url.substring(hashIdx + 1);
+    try {
+      const u = new URL(url);
+      if (u.hash.length > 1) {
+        const fragment = u.hash.slice(1);
+        return fragment.startsWith('/') ? fragment : `/${fragment}`;
+      }
+    } catch { /* fall through */ }
+    const hashIdx = url.indexOf('#');
+    if (hashIdx !== -1) {
+      const fragment = url.substring(hashIdx + 1);
+      return fragment.startsWith('/') ? fragment : `/${fragment}`;
+    }
   }
-  // Raw source path already
   if (url.startsWith('/')) return url;
+  // Relative path without scheme: org/repo/path
+  if (!url.includes('://')) return `/${url}`;
   // AEM page/preview URL: https://main--repo--org.aem.page/path
   try {
     const u = new URL(url);

@@ -118,11 +118,10 @@ export default function TemplateConfirm({ state, onChange }: Props) {
       )}
 
       <div className="text-xs text-gray-400 flex flex-col gap-0.5">
-        <p>Accepted formats:</p>
-        <code className="bg-gray-100 px-1 rounded">https://da.live/edit#/org/repo/path</code>
-        <code className="bg-gray-100 px-1 rounded">https://da.live/#/org/repo/path</code>
-        <code className="bg-gray-100 px-1 rounded">/org/repo/path</code>
-        <code className="bg-gray-100 px-1 rounded">https://main--repo--org.aem.page/path</code>
+        <p>Paste a DA edit URL or a source path, e.g.:</p>
+        <code className="bg-gray-100 px-1 rounded">https://da.live/edit#/adobecom/da-express-milo/drafts/…</code>
+        <code className="bg-gray-100 px-1 rounded">/adobecom/da-express-milo/drafts/…</code>
+        <code className="bg-gray-100 px-1 rounded">adobecom/da-express-milo/drafts/…</code>
       </div>
     </div>
   );
