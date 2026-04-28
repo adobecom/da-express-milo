@@ -543,6 +543,59 @@ describe('createToolbar', () => {
     });
   });
 
+  describe('handleOpenInExpress URL selection', () => {
+    let openStub;
+
+    beforeEach(() => {
+      openStub = sinon.stub(window, 'open');
+    });
+
+    afterEach(() => {
+      window.history.pushState({}, '', '/');
+    });
+
+    async function clickCTA() {
+      const toolbar = createToolbar(defaultOptions({ onCTA: undefined }));
+      document.body.appendChild(toolbar.element);
+      toolbar.element.querySelector('sp-button[variant="accent"]').click();
+      await new Promise((r) => setTimeout(r, 100));
+      return openStub.firstCall.args[0];
+    }
+
+    it('opens with noopener noreferrer', async () => {
+      await clickCTA();
+      expect(openStub.firstCall.args[1]).to.equal('_blank');
+      expect(openStub.firstCall.args[2]).to.equal('noopener noreferrer');
+    });
+
+    it('uses the branch link URL by default', async () => {
+      const url = await clickCTA();
+      expect(url).to.include('adobesparkpost.app.link/color-palette');
+    });
+
+    it('uses stage URL when hzenv=stage', async () => {
+      window.history.pushState({}, '', '?hzenv=stage');
+      const url = await clickCTA();
+      expect(url).to.include('stage.projectx.corp.adobe.com');
+    });
+
+    it('uses custom URL when hzenv=stage&base=<url>', async () => {
+      window.history.pushState({}, '', '?hzenv=stage&base=https%3A%2F%2Fcustom.example.com%2Fnew');
+      const url = await clickCTA();
+      expect(url).to.include('custom.example.com');
+    });
+
+    it('appends color palette params to the URL', async () => {
+      const urlStr = await clickCTA();
+      const url = new URL(urlStr);
+      expect(url.searchParams.get('referrer')).to.equal('express-colors');
+      expect(url.searchParams.get('entryPoint')).to.equal('color-explorer');
+      expect(url.searchParams.get('feature-enable')).to.equal('colors-product-entry');
+      expect(url.searchParams.get('category')).to.equal('yourStuff');
+      expect(url.searchParams.has('colorPalette')).to.be.true;
+    });
+  });
+
   describe('responsive CTA text', () => {
     it('CTA text updates based on isMobileViewport() when matchMedia fires', () => {
       const origMatchMedia = window.matchMedia;
@@ -553,8 +606,8 @@ describe('createToolbar', () => {
           return {
             get matches() { return mobileMatches; },
             media: query,
-            addEventListener(evt, cb) { changeListeners.push(cb); },
-            removeEventListener(evt, cb) { changeListeners = changeListeners.filter((l) => l !== cb); },
+            addEventListener(_evt, cb) { changeListeners.push(cb); },
+            removeEventListener(_evt, cb) { changeListeners = changeListeners.filter((l) => l !== cb); },
             addListener() {},
             removeListener() {},
           };

@@ -77,7 +77,10 @@ async function handleShare({ name, colors }, t) {
 async function handleOpenInExpress({ id, name, colors }) {
   const { getTrackingAppendedURL } = await import('../../branchlinks.js');
 
-  const baseUrl = 'https://273916.prenv.projectx.corp.adobe.com/new';
+  const params = new URLSearchParams(window.location.search);
+  const baseUrl = params.get('hzenv') === 'stage'
+    ? (params.get('base') || 'https://stage.projectx.corp.adobe.com/new')
+    : 'https://adobesparkpost.app.link/color-palette';
   const url = new URL(await getTrackingAppendedURL(baseUrl, {
     placement: 'color-explorer',
     isSearchOverride: true,
@@ -92,7 +95,7 @@ async function handleOpenInExpress({ id, name, colors }) {
   url.searchParams.set('feature-enable', 'colors-product-entry');
   url.searchParams.set('category', 'yourStuff');
 
-  window.open(url.toString(), '_blank');
+  window.open(url.toString(), '_blank', 'noopener noreferrer');
 }
 
 async function handleDownload(palette, t) {
