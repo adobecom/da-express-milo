@@ -3,6 +3,8 @@ import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createGradientEditor } from '../components/gradients/gradient-editor.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
+import { createColorModalPlaceholders } from '../i18n/loadColorModalPlaceholders.js';
+import { interpolate } from '../utils/utilities.js';
 
 function parseLinearGradient(css) {
   const linear = /linear-gradient\s*\(\s*(\d+)deg\s*,\s*([^)]+)\s*\)/i.exec(css);
@@ -36,12 +38,15 @@ function normalizeCreatorName(rawValue) {
  * Attach Spectrum tooltips (Figma M, bottom) to each gradient handle in container.
  * Replaces native title; sp-tooltip matches Figma 9530-159590. Export for modal and demo.
  */
-export async function attachGradientHandleTooltips(container) {
+export async function attachGradientHandleTooltips(
+  container,
+  strings = createColorModalPlaceholders(),
+) {
   const handles = container.querySelectorAll('.gradient-editor-handle[data-color]');
   if (!handles.length) return;
   for (const handle of handles) {
     const hex = handle.getAttribute('data-color') || '';
-    const copyLabel = `Copy #${hex.replace(/^#/, '').toUpperCase()}`;
+    const copyLabel = interpolate(strings.gradientCopyHex, { hex: hex.replace(/^#/, '').toUpperCase() });
     handle.removeAttribute('title');
     await createExpressTooltip({
       targetEl: handle,
@@ -52,6 +57,7 @@ export async function attachGradientHandleTooltips(container) {
 }
 
 export function createGradientModalContent(gradient, opts = {}) {
+  const strings = opts.strings ?? createColorModalPlaceholders();
   const codeRoot = opts.codeRoot || '/express/code';
   let angle = gradient?.angle ?? 90;
   let colorStops = gradient?.colorStops || [];
@@ -92,7 +98,7 @@ export function createGradientModalContent(gradient, opts = {}) {
   const previewWrap = createTag('div', {
     class: 'modal-palette-colors modal-gradient-preview',
     role: 'region',
-    'aria-label': `Selected color palette, ${colorStops.length} colors`,
+    'aria-label': interpolate(strings.gradientPaletteAria, { count: colorStops.length }),
     tabindex: '-1',
   });
   const gradientData = {
@@ -105,7 +111,7 @@ export function createGradientModalContent(gradient, opts = {}) {
     size: 'strip-responsive',
     draggable: false,
     copyable: true,
-    ariaLabel: `Gradient preview, ${colorStops.length} colors`,
+    ariaLabel: interpolate(strings.gradientPreviewAria, { count: colorStops.length }),
   });
   previewWrap.appendChild(gradientEditor.element);
   containerSection.appendChild(previewWrap);
@@ -138,7 +144,7 @@ export function createGradientModalContent(gradient, opts = {}) {
 
   const tagsContainer = createTag('div', {
     class: 'modal-tags-container',
-    'aria-label': 'Palette tags',
+    'aria-label': strings.gradientTagsAria,
     role: 'list',
   });
   tags.forEach((tag) => {
@@ -150,7 +156,7 @@ export function createGradientModalContent(gradient, opts = {}) {
   nameTagsSection.appendChild(thumbTags);
   main.appendChild(nameTagsSection);
 
-  const toolbarMount = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': 'Palette actions' });
+  const toolbarMount = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': strings.gradientActionsAria });
   main.appendChild(toolbarMount);
 
   const paletteForToolbar = {
@@ -163,7 +169,7 @@ export function createGradientModalContent(gradient, opts = {}) {
   initFloatingToolbar(toolbarMount, {
     type: 'gradient',
     palette: paletteForToolbar,
-    ctaText: 'Create with color palette',
+    ctaText: strings.gradientCta,
     showPaletteName: false,
   }).catch((err) => {
     window.lana?.log(`Floating toolbar init failed: ${err.message}`, {

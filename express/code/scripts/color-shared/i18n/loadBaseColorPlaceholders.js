@@ -1,4 +1,4 @@
-import { getLibs } from '../../utils.js';
+import loadPlaceholders from './utils.js';
 
 export const DEFAULT_PLACEHOLDERS = Object.freeze({
   title: 'Base color',
@@ -38,34 +38,10 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   channelLabB: 'base-color-channel-lab-b',
 });
 
-function isResolvedPlaceholder(value, key) {
-  return value && value !== key.replaceAll('-', ' ');
-}
-
 export function createBaseColorPlaceholders(overrides = {}) {
   return { ...DEFAULT_PLACEHOLDERS, ...overrides };
 }
 
-export default async function loadBaseColorPlaceholders() {
-  try {
-    const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
-      import(`${getLibs()}/utils/utils.js`),
-      import(`${getLibs()}/features/placeholders.js`),
-    ]);
-
-    const keys = Object.values(PLACEHOLDER_KEY_MAP);
-    const values = await replaceKeyArray(keys, getConfig());
-    const overrides = {};
-
-    Object.entries(PLACEHOLDER_KEY_MAP).forEach(([prop, key], index) => {
-      const value = values[index];
-      if (isResolvedPlaceholder(value, key)) {
-        overrides[prop] = value;
-      }
-    });
-
-    return createBaseColorPlaceholders(overrides);
-  } catch {
-    return createBaseColorPlaceholders();
-  }
+export default function loadBaseColorPlaceholders() {
+  return loadPlaceholders(PLACEHOLDER_KEY_MAP, createBaseColorPlaceholders);
 }

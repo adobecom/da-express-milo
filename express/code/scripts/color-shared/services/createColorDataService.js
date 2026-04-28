@@ -1,6 +1,10 @@
 /* eslint-disable import/prefer-default-export, no-underscore-dangle */
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
-import { gradientApiResponsesToGradients, themesToGradients } from '../../../libs/services/providers/transforms.js';
+import {
+  gradientApiResponsesToGradients,
+  themeToGradient,
+  themesToGradients,
+} from '../../../libs/services/providers/transforms.js';
 
 export const PALETTE_10_COLORS_MODAL = {
   id: 'palette-1',
@@ -322,6 +326,15 @@ export function createColorDataService(config) {
     return results;
   }
 
+  async function getTheme(id) {
+    const kuler = await serviceManager.getProvider('kuler');
+    if (!kuler) return null;
+    const raw = await kuler.getTheme(id);
+    if (!raw) return null;
+    const item = themeToGradient(raw);
+    return withDerivedMeta([ensurePaletteColors([item])[0]])[0] ?? null;
+  }
+
   function clearCache() {
     cache = null;
   }
@@ -336,6 +349,7 @@ export function createColorDataService(config) {
     search,
     searchMore,
     filter,
+    getTheme,
     clearCache,
     loadMore,
     toggleLike,

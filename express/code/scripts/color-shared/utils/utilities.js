@@ -1,5 +1,9 @@
 import { createTag } from '../../utils.js';
 
+export function interpolate(template, vars) {
+  return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), template);
+}
+
 const ANALYTICS_TEXT_LIMIT = 20;
 
 function sanitizeAnalyticsText(value) {
