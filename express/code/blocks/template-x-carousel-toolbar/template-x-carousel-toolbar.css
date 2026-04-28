@@ -120,7 +120,7 @@
   font-family: var(--body-font-family);
   font-weight: 400;
   font-size: var(--body-font-size-m);
-  padding: var(--spacing-100) var(--spacing-600);
+  padding: 11px var(--spacing-600);
   border: var(--color-gray-200) var(--border-width-2) solid;
   border-radius: 100px;
   width: 100%;
