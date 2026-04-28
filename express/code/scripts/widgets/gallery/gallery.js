@@ -46,9 +46,8 @@ function createControl(items, container) {
   const updateDOM = debounce((first, last) => {
     prevButton.disabled = first === 0;
     nextButton.disabled = last === items.length - 1;
-    const isNavigationDisabled = prevButton.disabled && nextButton.disabled;
     const hasHorizontalOverflow = container.scrollWidth - container.clientWidth > 1;
-    if ((items.length === last - first + 1 && !hasHorizontalOverflow) || isNavigationDisabled) {
+    if (items.length === last - first + 1 && !hasHorizontalOverflow) {
       control.classList.add('hide');
       container.classList.add('gallery--all-displayed');
     } else {
