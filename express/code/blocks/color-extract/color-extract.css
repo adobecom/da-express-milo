@@ -995,7 +995,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 /* ==================== Responsive ==================== */
 
 @media (min-width: 600px) {
-  
   .color-extract {
     --color-extract-edit-bg-height: 554px;
   }
