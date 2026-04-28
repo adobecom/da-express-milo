@@ -394,7 +394,7 @@ async function loadPage() {
   const footer = createTag('meta', { name: 'footer', content: 'global-footer' });
   document.head.append(footer);
 
-  if (!getMetadata('footer-source') && CONFIG.contentRoot) {
+  if (!getMetadata('footer-source')) {
     document.head.append(createTag('meta', { name: 'footer-source', content: `${window.location.origin}/federal/footer/footer` }));
   }
 
