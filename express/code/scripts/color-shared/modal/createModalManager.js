@@ -2,7 +2,8 @@ import { createTag } from '../../utils.js';
 import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
 import { createSpectrumIcon } from '../utils/icons.js';
-import { addSwipeToClose, saveFocusedElement, restoreFocusedElement, getNextOverlayZIndex } from '../utils/utilities.js';
+import { addSwipeToClose, saveFocusedElement, restoreFocusedElement, getNextOverlayZIndex, interpolate } from '../utils/utilities.js';
+import { createColorModalPlaceholders } from '../i18n/loadColorModalPlaceholders.js';
 
 const MODAL_STYLES_LOADED = 'colorSharedModalStylesLoaded';
 
@@ -19,7 +20,7 @@ function ensureModalStyles() {
 }
 
 // eslint-disable-next-line import/prefer-default-export -- named export for createModalManager
-export function createModalManager() {
+export function createModalManager(strings = createColorModalPlaceholders()) {
   // Persistent shell — created once, never removed until destroy().
   let overlay = null;
   let container = null;
@@ -38,8 +39,8 @@ export function createModalManager() {
     if (!isOpen) return;
     isOpen = false;
 
-    const closingTitle = overlay.getAttribute('aria-label') || openOptions?.title || 'Modal';
-    announceToScreenReader(`${closingTitle} modal closed`);
+    const closingTitle = overlay.getAttribute('aria-label') || openOptions?.title || strings.defaultTitle;
+    announceToScreenReader(interpolate(strings.announceClosed, { title: closingTitle }));
 
     clearTimeout(closeTimeoutId);
     container.classList.remove('ax-color-modal-open');
@@ -72,7 +73,7 @@ export function createModalManager() {
     const closeBtn = createTag('button', {
       type: 'button',
       class: 'ax-color-modal-close',
-      'aria-label': 'Close modal',
+      'aria-label': strings.closeAria,
     });
     const icon = createSpectrumIcon('Close');
     icon.setAttribute('aria-hidden', 'true');
@@ -150,7 +151,7 @@ export function createModalManager() {
 
     const {
       content,
-      title = 'Modal',
+      title = strings.defaultTitle,
       showTitle = false,
       onClose,
       initialFocusSelector,
@@ -191,7 +192,7 @@ export function createModalManager() {
     if (bodyEl.children.length === 0) {
       const fallback = document.createElement('div');
       fallback.className = 'ax-color-modal-content-fallback';
-      fallback.textContent = 'No content provided';
+      fallback.textContent = strings.noContent;
       fallback.setAttribute('role', 'status');
       bodyEl.appendChild(fallback);
     }
@@ -199,7 +200,7 @@ export function createModalManager() {
     previousActiveElement = saveFocusedElement();
     document.body.classList.add('ax-color-modal-open');
     isOpen = true;
-    announceToScreenReader(`${title} modal opened`, 'assertive');
+    announceToScreenReader(interpolate(strings.announceOpened, { title }), 'assertive');
 
     escHandler = handleEscapeClose(overlay, close);
     focusTrap = trapFocus(overlay, { getInitialFocus: initialFocusSelector });
