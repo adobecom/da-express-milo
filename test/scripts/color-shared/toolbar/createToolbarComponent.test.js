@@ -579,10 +579,17 @@ describe('createToolbar', () => {
       expect(url).to.include('stage.projectx.corp.adobe.com');
     });
 
-    it('uses custom URL when hzenv=stage&base=<url>', async () => {
-      window.history.pushState({}, '', '?hzenv=stage&base=https%3A%2F%2Fcustom.example.com%2Fnew');
+    it('uses prenv base URL when hostname matches *.prenv.projectx.corp.adobe.com', async () => {
+      window.history.pushState({}, '', '?hzenv=stage&base=https%3A%2F%2F273916.prenv.projectx.corp.adobe.com%2Fnew');
       const url = await clickCTA();
-      expect(url).to.include('custom.example.com');
+      expect(url).to.include('273916.prenv.projectx.corp.adobe.com');
+    });
+
+    it('falls back to stage URL when base hostname is not in the allowlist', async () => {
+      window.history.pushState({}, '', '?hzenv=stage&base=https%3A%2F%2Fattacker.com%2F');
+      const url = await clickCTA();
+      expect(url).to.include('stage.projectx.corp.adobe.com');
+      expect(url).not.to.include('attacker.com');
     });
 
     it('appends color palette params to the URL', async () => {

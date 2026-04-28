@@ -74,12 +74,24 @@ async function handleShare({ name, colors }, t) {
 
 // const COLOR_PALETTE_TEMPLATE_ID = 'urn:aaid:sc:VA6C2:60d17865-6817-5343-84db-34219e8ec3a4';
 
+function getStageBaseUrl(base) {
+  if (!base) return 'https://stage.projectx.corp.adobe.com/new';
+  try {
+    const { hostname } = new URL(base);
+    const isAllowed = hostname === 'stage.projectx.corp.adobe.com'
+      || hostname.endsWith('.prenv.projectx.corp.adobe.com');
+    return isAllowed ? base : 'https://stage.projectx.corp.adobe.com/new';
+  } catch {
+    return 'https://stage.projectx.corp.adobe.com/new';
+  }
+}
+
 async function handleOpenInExpress({ id, name, colors }) {
   const { getTrackingAppendedURL } = await import('../../branchlinks.js');
 
   const params = new URLSearchParams(window.location.search);
   const baseUrl = params.get('hzenv') === 'stage'
-    ? (params.get('base') || 'https://stage.projectx.corp.adobe.com/new')
+    ? getStageBaseUrl(params.get('base'))
     : 'https://adobesparkpost.app.link/color-palette';
   const url = new URL(await getTrackingAppendedURL(baseUrl, {
     placement: 'color-explorer',
