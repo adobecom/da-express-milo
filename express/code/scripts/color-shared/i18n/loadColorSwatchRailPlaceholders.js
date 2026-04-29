@@ -29,7 +29,7 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   simulatedColor: 'Simulated color',
   conflictDetected: 'Conflict detected',
   colorPaletteAria: 'Color palette',
-  // Templates use {{token}} placeholders; translators must keep tokens intact
+  // Templates use {token} placeholders; translators must keep tokens intact
   colorStripAria: '{hex} color strip',
   colorPositionAria: 'Color {index}, {hex}',
   tintAndShadeAria: 'Tint and shade options for color {index}',
