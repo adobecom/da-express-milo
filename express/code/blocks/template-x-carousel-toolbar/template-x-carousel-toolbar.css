@@ -674,6 +674,10 @@
     flex-direction: row;
     justify-content: flex-end;
   }
+
+  .template-x-carousel-toolbar .right-controls .gallery-control {
+    margin: auto;
+  }
 }
 
 @media (min-width: 1200px) {
