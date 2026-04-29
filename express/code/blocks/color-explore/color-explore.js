@@ -14,6 +14,7 @@ import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import loadColorExplorePlaceholders from '../../scripts/color-shared/i18n/loadColorExplorePlaceholders.js';
 import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
+import loadColorFiltersPlaceholders from '../../scripts/color-shared/i18n/loadColorFiltersPlaceholders.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
@@ -217,13 +218,14 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
   };
 }
 
-async function createBlockFilterControl(container, variant, onFilterChange) {
+async function createBlockFilterControl(container, variant, onFilterChange, strings) {
   const header = container.querySelector('.explore-header, .gradients-header');
   if (!header) return null;
 
   const filters = await createFiltersComponent({
     variant,
     onFilterChange,
+    ...(strings ? { strings } : {}),
   });
 
   if (!(filters?.element instanceof Node)) return null;
@@ -260,6 +262,7 @@ export default async function decorate(block) {
     block.dataset.blockStatus = 'loading';
     const placeholdersPromise = loadColorExplorePlaceholders();
     const colorSwatchRailStringsPromise = loadColorSwatchRailPlaceholders();
+    const colorFiltersStringsPromise = loadColorFiltersPlaceholders();
     block.replaceChildren();
     block.className = CSS_CLASSES.BLOCK;
     const variantClass = config.variant === VARIANTS.GRADIENTS
@@ -429,6 +432,7 @@ export default async function decorate(block) {
             container,
             VARIANTS.GRADIENTS,
             (filters) => gradientFilterHandler?.(filters),
+            await colorFiltersStringsPromise,
           );
 
           const urlQuery = new URLSearchParams(window.location.search).get('q');
@@ -588,6 +592,7 @@ export default async function decorate(block) {
             container,
             VARIANTS.STRIPS,
             (filters) => stripsFilterHandler?.(filters),
+            await colorFiltersStringsPromise,
           );
 
           const urlQuery = new URLSearchParams(window.location.search).get('q');
@@ -608,6 +613,7 @@ export default async function decorate(block) {
           activeRenderer = createStripsRenderer({
             container,
             data: allData.slice(0, visibleCount),
+            strings: await colorFiltersStringsPromise,
             config: {
               ...config,
               variant: VARIANTS.STRIPS,
@@ -801,6 +807,7 @@ export default async function decorate(block) {
           renderer = createStripsRenderer({
             container,
             data: allData.slice(0, visibleCount),
+            strings: await colorFiltersStringsPromise,
             config,
           });
         }
