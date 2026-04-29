@@ -125,6 +125,18 @@ export function runEasyUploadExperiment(
       exportConfig.pop();
       ccEverywhere.quickAction.convertToSVG(docConfig, appConfig, exportConfig, contConfig);
       break;
+    case EasyUploadVariants.editImageEasyUploadVariant:
+    case EasyUploadControls.editImageEasyUploadControl:
+      // Edit Image is on the `module` namespace (not `quickAction`).
+      // Using the SDK keeps IMS auth state aligned with the SEO page,
+      // avoiding the cross-origin handoff that breaks the redirect flow.
+      ccEverywhere.module.editImage(
+        { asset: docConfig.asset, intent: 'no-intent' },
+        { ...appConfig, appVersion: '2' },
+        exportConfig,
+        contConfig,
+      );
+      break;
     default:
       break;
   }

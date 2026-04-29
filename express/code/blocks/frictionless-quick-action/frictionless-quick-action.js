@@ -712,34 +712,22 @@ async function performUploadAction(files, block, quickAction) {
 }
 
 async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCode = false) {
-  const isEditImageEasyUpload = quickAction === 'edit-image-easy-upload-variant'
-    || quickAction === 'edit-image-easy-upload-control';
-  const normalizedQuickAction = isEditImageEasyUpload
-    ? FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor
-    : quickAction;
-
-  let data = await processFilesForQuickAction(files, normalizedQuickAction);
+  let data = await processFilesForQuickAction(files, quickAction);
   if (!data[0]) {
-    const msg = await getErrorMsg(files, normalizedQuickAction, replaceKey, getConfig);
+    const msg = await getErrorMsg(files, quickAction, replaceKey, getConfig);
     showErrorToast(block, msg);
     return;
   }
 
   if (data.some((item) => !item)) {
-    const msg = await getErrorMsg(files, normalizedQuickAction, replaceKey, getConfig);
+    const msg = await getErrorMsg(files, quickAction, replaceKey, getConfig);
     showErrorToast(block, msg);
     data = data.filter((item) => item);
   }
 
-  // here update the variant to the url variant if it exists
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
-  let variant = urlVariant || normalizedQuickAction;
-
-  // edit-image easy-upload variants follow the same redirect flow as regular edit-image
-  if (variant === 'edit-image-easy-upload-variant' || variant === 'edit-image-easy-upload-control') {
-    variant = FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor;
-  }
+  const variant = urlVariant || quickAction;
 
   const frictionlessAllowedQuickActions = Object.values(FRICTIONLESS_UPLOAD_QUICK_ACTIONS);
   if (frictionlessAllowedQuickActions.includes(variant)
@@ -748,7 +736,7 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCod
     return;
   }
 
-  startSDK(data, normalizedQuickAction, block, fromQrCode);
+  startSDK(data, quickAction, block, fromQrCode);
 }
 
 function setupFrictionlessTargetBaseUrl(quickAction) {
