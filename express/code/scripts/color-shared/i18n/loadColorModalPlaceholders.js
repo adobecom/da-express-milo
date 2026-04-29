@@ -12,6 +12,9 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   gradientCopyHex: 'Copy #{hex}',
   gradientPaletteAria: 'Selected color palette, {count} colors',
   gradientPreviewAria: 'Gradient preview, {count} colors',
+  paletteCta: 'Create with color palette',
+  addFavorite: 'Add to favorites',
+  removeFavorite: 'Remove from favorites',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -26,6 +29,9 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   gradientCopyHex: 'color-modal-gradient-copy-hex',
   gradientPaletteAria: 'color-modal-gradient-palette-aria',
   gradientPreviewAria: 'color-modal-gradient-preview-aria',
+  paletteCta: 'color-modal-palette-cta',
+  addFavorite: 'color-modal-add-favorite',
+  removeFavorite: 'color-modal-remove-favorite',
 });
 
 export function createColorModalPlaceholders(overrides = {}) {

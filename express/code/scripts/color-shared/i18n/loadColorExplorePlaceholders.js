@@ -23,6 +23,10 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   gradientStripDefaultName: 'Gradient',
   gradientStripVisualAria: '{name} gradient visual',
   gradientStripActionAria: 'Open',
+  paletteCardEditTooltip: 'Edit palette',
+  paletteCardOpenTooltip: 'Open',
+  paletteCardEditAria: 'Edit {name}',
+  paletteCardAriaLabel: 'Palette: {name}',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -48,6 +52,10 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   gradientStripDefaultName: 'gradient-strip-default-name',
   gradientStripVisualAria: 'gradient-strip-visual-aria',
   gradientStripActionAria: 'gradient-strip-action-aria',
+  paletteCardEditTooltip: 'color-explore-palette-card-edit-tooltip',
+  paletteCardOpenTooltip: 'color-explore-palette-card-open-tooltip',
+  paletteCardEditAria: 'color-explore-palette-card-edit-aria',
+  paletteCardAriaLabel: 'color-explore-palette-card-aria-label',
 });
 
 export function createColorExplorePlaceholders(overrides = {}) {

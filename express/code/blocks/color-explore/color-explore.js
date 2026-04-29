@@ -15,6 +15,7 @@ import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum
 import loadColorExplorePlaceholders from '../../scripts/color-shared/i18n/loadColorExplorePlaceholders.js';
 import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
 import loadColorFiltersPlaceholders from '../../scripts/color-shared/i18n/loadColorFiltersPlaceholders.js';
+import loadColorModalPlaceholders from '../../scripts/color-shared/i18n/loadColorModalPlaceholders.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
@@ -263,6 +264,7 @@ export default async function decorate(block) {
     const placeholdersPromise = loadColorExplorePlaceholders();
     const colorSwatchRailStringsPromise = loadColorSwatchRailPlaceholders();
     const colorFiltersStringsPromise = loadColorFiltersPlaceholders();
+    const colorModalStringsPromise = loadColorModalPlaceholders();
     block.replaceChildren();
     block.className = CSS_CLASSES.BLOCK;
     const variantClass = config.variant === VARIANTS.GRADIENTS
@@ -396,14 +398,18 @@ export default async function decorate(block) {
         modalManager.open({
           title: content.name || fallbackTitle,
           showTitle: false,
-          content: () => createGradientModalContent(content, {
-            likesCount: content.likes ?? content.likesCount ?? 0,
-            liked: content.liked ?? false,
-            creatorName: content.creator?.name ?? '',
-            creatorImageUrl: content.creator?.imageUrl ?? content.creatorImageUrl,
-            tags: item.tags ?? [],
-            onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
-          }),
+          content: async () => {
+            const modalStrings = await colorModalStringsPromise;
+            return createGradientModalContent(content, {
+              likesCount: content.likes ?? content.likesCount ?? 0,
+              liked: content.liked ?? false,
+              creatorName: content.creator?.name ?? '',
+              creatorImageUrl: content.creator?.imageUrl ?? content.creatorImageUrl,
+              tags: item.tags ?? [],
+              onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
+              strings: modalStrings,
+            });
+          },
         });
       };
 
@@ -614,6 +620,7 @@ export default async function decorate(block) {
             container,
             data: allData.slice(0, visibleCount),
             strings: await colorFiltersStringsPromise,
+            paletteCardStrings: await placeholdersPromise,
             config: {
               ...config,
               variant: VARIANTS.STRIPS,
@@ -808,6 +815,7 @@ export default async function decorate(block) {
             container,
             data: allData.slice(0, visibleCount),
             strings: await colorFiltersStringsPromise,
+            paletteCardStrings: await placeholdersPromise,
             config,
           });
         }
@@ -850,6 +858,8 @@ export default async function decorate(block) {
             {
               verticalMaxPerRow: config.swatchVerticalMaxPerRow,
               onLikeToggle: async ({ id, liked }) => dataService.toggleLike({ id, liked }),
+              modalStrings: await colorModalStringsPromise,
+              colorSwatchRailStrings: await colorSwatchRailStringsPromise,
             },
           );
         });
@@ -865,6 +875,8 @@ export default async function decorate(block) {
             {
               verticalMaxPerRow: config.swatchVerticalMaxPerRow,
               onLikeToggle: async ({ id, liked }) => dataService.toggleLike({ id, liked }),
+              modalStrings: await colorModalStringsPromise,
+              colorSwatchRailStrings: await colorSwatchRailStringsPromise,
             },
           );
         });
