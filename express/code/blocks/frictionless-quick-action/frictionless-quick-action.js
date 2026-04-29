@@ -712,22 +712,30 @@ async function performUploadAction(files, block, quickAction) {
 }
 
 async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCode = false) {
-  let data = await processFilesForQuickAction(files, quickAction);
+  // edit-image easy-upload variants share the vanilla edit-image redirect journey
+  // (upload to ACP, hand off to the main editor on express.adobe.com).
+  const isEditImageEasyUpload = quickAction === 'edit-image-easy-upload-variant'
+    || quickAction === 'edit-image-easy-upload-control';
+  const normalizedQuickAction = isEditImageEasyUpload
+    ? FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor
+    : quickAction;
+
+  let data = await processFilesForQuickAction(files, normalizedQuickAction);
   if (!data[0]) {
-    const msg = await getErrorMsg(files, quickAction, replaceKey, getConfig);
+    const msg = await getErrorMsg(files, normalizedQuickAction, replaceKey, getConfig);
     showErrorToast(block, msg);
     return;
   }
 
   if (data.some((item) => !item)) {
-    const msg = await getErrorMsg(files, quickAction, replaceKey, getConfig);
+    const msg = await getErrorMsg(files, normalizedQuickAction, replaceKey, getConfig);
     showErrorToast(block, msg);
     data = data.filter((item) => item);
   }
 
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
-  const variant = urlVariant || quickAction;
+  const variant = urlVariant || normalizedQuickAction;
 
   const frictionlessAllowedQuickActions = Object.values(FRICTIONLESS_UPLOAD_QUICK_ACTIONS);
   if (frictionlessAllowedQuickActions.includes(variant)
@@ -736,7 +744,7 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCod
     return;
   }
 
-  startSDK(data, quickAction, block, fromQrCode);
+  startSDK(data, normalizedQuickAction, block, fromQrCode);
 }
 
 function setupFrictionlessTargetBaseUrl(quickAction) {
