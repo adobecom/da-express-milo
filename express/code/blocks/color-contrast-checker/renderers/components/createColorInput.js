@@ -47,6 +47,7 @@ export function createColorInput(config) {
     onChange,
     onColorChangeEnd,
     getColorEditPalette,
+    colorEditStrings,
   } = config;
   const commitCallback = onColorChangeEnd || onChange;
 
@@ -242,6 +243,7 @@ export function createColorInput(config) {
       colorMode: 'HEX',
       showPalette: palette.length > 1,
       mobile,
+      ...(colorEditStrings ? { strings: colorEditStrings } : {}),
     }, {
       onColorChange: ({ hex }) => {
         if (syncEditorHexValue(hex)) {

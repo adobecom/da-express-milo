@@ -587,6 +587,7 @@ export function createCheckerRenderer(options) {
       label,
       ariaLabel: strings.colorValueAriaLabel,
       value: initialValue,
+      colorEditStrings: config.colorEditStrings,
       getColorEditPalette: ({ value }) => getColorEditPalette(type, value),
       onInput: ({ value: v }) => {
         const hex = ensureHash(v.trim());

@@ -3,6 +3,7 @@ import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createContrastRenderer } from './factory/createContrastRenderer.js';
 import loadContrastCheckerPlaceholders from './utils/placeholders.js';
+import loadColorEditPlaceholders from '../../scripts/color-shared/i18n/loadColorEditPlaceholders.js';
 import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
 import { createDefaultActionMenuConfig } from './utils/contrastConstants.js';
@@ -138,7 +139,10 @@ export default async function decorate(block) {
   block.dataset.blockStatus = 'loading';
 
   const { preview } = parseContent(block);
-  const strings = await loadContrastCheckerPlaceholders();
+  const [strings, colorEditStrings] = await Promise.all([
+    loadContrastCheckerPlaceholders(),
+    loadColorEditPlaceholders(),
+  ]);
 
   const destroyInstance = () => {
     checkerInstance?.destroy();
@@ -153,6 +157,7 @@ export default async function decorate(block) {
     const config = {
       ...getDefaultConfig(),
       strings,
+      colorEditStrings,
     };
     block.replaceChildren();
 
