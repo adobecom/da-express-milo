@@ -8,7 +8,7 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   hexLabel: 'HEX',
   hexFieldLabel: 'HEX color value',
   editColorAria: 'Edit color',
-  editColorWithHexAria: 'Edit color {{hex}}',
+  editColorWithHexAria: 'Edit color {hex}',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({

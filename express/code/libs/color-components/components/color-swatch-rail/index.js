@@ -622,10 +622,10 @@ export class ColorSwatchRail extends LitElement {
     }
     const template = s.tintBandAria || SWATCH_RAIL_DEFAULTS.tintBandAria;
     return template
-      .replace('{{tone}}', toneLabel)
-      .replace('{{index}}', String(bandIndex + 1))
-      .replace('{{total}}', String(totalBands))
-      .replace('{{hex}}', hex);
+      .replace('{tone}', toneLabel)
+      .replace('{index}', String(bandIndex + 1))
+      .replace('{total}', String(totalBands))
+      .replace('{hex}', hex);
   }
 
   _getTintBandButtons(scope) {
@@ -1383,11 +1383,11 @@ export class ColorSwatchRail extends LitElement {
       ].filter(Boolean).join(' ');
 
       const stripAriaLabel = orientation === 'vertical'
-        ? colorStripTemplate.replace('{{hex}}', swatch.hex)
+        ? colorStripTemplate.replace('{hex}', swatch.hex)
         : colorPositionTemplate
-            .replace('{{index}}', String(index + 1))
-            .replace('{{hex}}', swatch.hex);
-      const tintAndShadeAriaLabel = tintAndShadeTemplate.replace('{{index}}', String(index + 1));
+            .replace('{index}', String(index + 1))
+            .replace('{hex}', swatch.hex);
+      const tintAndShadeAriaLabel = tintAndShadeTemplate.replace('{index}', String(index + 1));
       return html`
         <div class="${swatchClasses}"
           data-contrast="${useLightIcons ? 'dark' : 'light'}"

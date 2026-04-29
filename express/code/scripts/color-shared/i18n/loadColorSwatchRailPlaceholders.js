@@ -30,14 +30,14 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   conflictDetected: 'Conflict detected',
   colorPaletteAria: 'Color palette',
   // Templates use {{token}} placeholders; translators must keep tokens intact
-  colorStripAria: '{{hex}} color strip',
-  colorPositionAria: 'Color {{index}}, {{hex}}',
-  tintAndShadeAria: 'Tint and shade options for color {{index}}',
+  colorStripAria: '{hex} color strip',
+  colorPositionAria: 'Color {index}, {hex}',
+  tintAndShadeAria: 'Tint and shade options for color {index}',
   // Tone names + tint-band tooltip template
   toneBase: 'Base color',
   toneTint: 'Tint',
   toneShade: 'Shade',
-  tintBandAria: '{{tone}}, {{index}} of {{total}}, {{hex}}',
+  tintBandAria: '{tone}, {index} of {total}, {hex}',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({

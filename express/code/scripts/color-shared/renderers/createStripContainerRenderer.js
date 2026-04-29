@@ -274,7 +274,7 @@ function createMobileCBLayout(
         style: `background-color: ${hex};`,
         role: 'button',
         tabindex: '0',
-        'aria-label': (colorEditStrings?.editColorWithHexAria || 'Edit color {{hex}}').replace('{{hex}}', hex.toUpperCase()),
+        'aria-label': (colorEditStrings?.editColorWithHexAria || 'Edit color {hex}').replace('{hex}', hex.toUpperCase()),
       });
       const hexLabel = createTag('span', {
         class: 'strip-cb-mobile-row__hex',

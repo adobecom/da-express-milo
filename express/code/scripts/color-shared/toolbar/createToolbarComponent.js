@@ -11,7 +11,7 @@ import { paletteToThemeData } from '../../../libs/services/providers/transforms.
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
 
 function interpolate(tpl, vars) {
-  return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{{${k}}}`, v), tpl);
+  return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), tpl);
 }
 
 const TOOLBAR_DEFAULTS = {
@@ -22,7 +22,7 @@ const TOOLBAR_DEFAULTS = {
   share: 'Share',
   download: 'Download',
   saveToLibrary: 'Save to library',
-  swatchLabel: 'Color {{index}}: {{hex}}',
+  swatchLabel: 'Color {index}: {hex}',
   swatchStripLabel: '{{count}} colors in {{type}}',
   gradientLabel: 'Gradient: {{stops}}',
   editPalette: 'Edit this color palette',
