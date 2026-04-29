@@ -80,6 +80,7 @@ const CONFIG = {
   imsClientId: 'AdobeExpressWeb',
   prodDomains,
   geoRouting: 'on',
+  lingoProjectSuccessLogging: 'on',
   fallbackRouting: 'on',
   decorateArea,
   faasCloseModalAfterSubmit: 'on',
