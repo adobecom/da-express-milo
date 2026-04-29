@@ -9,6 +9,8 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   hexFieldLabel: 'HEX color value',
   editColorAria: 'Edit color',
   editColorWithHexAria: 'Edit color {hex}',
+  liveAnnouncementHex: 'Color updated to {hex}',
+  liveAnnouncementRgb: 'Color updated to Red {red}, Green {green}, Blue {blue}',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -20,6 +22,8 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   hexFieldLabel: 'color-edit-hex-field-label',
   editColorAria: 'color-edit-dialog-aria',
   editColorWithHexAria: 'color-strip-mobile-edit-color-aria',
+  liveAnnouncementHex: 'color-edit-live-announcement-hex',
+  liveAnnouncementRgb: 'color-edit-live-announcement-rgb',
 });
 
 export function createColorEditPlaceholders(overrides = {}) {

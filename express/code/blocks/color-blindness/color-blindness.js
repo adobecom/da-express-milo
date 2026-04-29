@@ -159,6 +159,9 @@ export default async function decorate(block) {
       announceToScreenReader(blockStrings.wheelFocusAnnouncement);
     });
     wheelEl.showLines = true;
+    if (blockStrings.markerAriaTemplate) {
+      wheelEl.markerAriaTemplate = blockStrings.markerAriaTemplate;
+    }
 
     const computeAndSetConflictPairs = (colors) => {
       const allPairs = [];

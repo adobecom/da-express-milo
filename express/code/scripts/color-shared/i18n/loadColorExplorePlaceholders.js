@@ -20,6 +20,9 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   a11yPressEscape: 'Press Escape to return to grid navigation.',
   a11yEnteredGrid: 'Entered gradient grid. {name}, row {row}, column {col} of {total}. Use arrow keys to navigate, Enter to access button, Tab to exit.',
   a11yCardPosition: '{name}, row {row}, column {col}',
+  gradientStripDefaultName: 'Gradient',
+  gradientStripVisualAria: '{name} gradient visual',
+  gradientStripActionAria: 'Open',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -42,6 +45,9 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   a11yPressEscape: 'color-explore-a11y-press-escape',
   a11yEnteredGrid: 'color-explore-a11y-entered-grid',
   a11yCardPosition: 'color-explore-a11y-card-position',
+  gradientStripDefaultName: 'gradient-strip-default-name',
+  gradientStripVisualAria: 'gradient-strip-visual-aria',
+  gradientStripActionAria: 'gradient-strip-action-aria',
 });
 
 export function createColorExplorePlaceholders(overrides = {}) {
