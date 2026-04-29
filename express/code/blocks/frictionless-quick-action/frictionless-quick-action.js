@@ -712,15 +712,21 @@ async function performUploadAction(files, block, quickAction) {
 }
 
 async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCode = false) {
-  let data = await processFilesForQuickAction(files, quickAction);
+  const isEditImageEasyUpload = quickAction === 'edit-image-easy-upload-variant'
+    || quickAction === 'edit-image-easy-upload-control';
+  const normalizedQuickAction = isEditImageEasyUpload
+    ? FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor
+    : quickAction;
+
+  let data = await processFilesForQuickAction(files, normalizedQuickAction);
   if (!data[0]) {
-    const msg = await getErrorMsg(files, quickAction, replaceKey, getConfig);
+    const msg = await getErrorMsg(files, normalizedQuickAction, replaceKey, getConfig);
     showErrorToast(block, msg);
     return;
   }
 
   if (data.some((item) => !item)) {
-    const msg = await getErrorMsg(files, quickAction, replaceKey, getConfig);
+    const msg = await getErrorMsg(files, normalizedQuickAction, replaceKey, getConfig);
     showErrorToast(block, msg);
     data = data.filter((item) => item);
   }
@@ -728,7 +734,7 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCod
   // here update the variant to the url variant if it exists
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
-  let variant = urlVariant || quickAction;
+  let variant = urlVariant || normalizedQuickAction;
 
   // edit-image easy-upload variants follow the same redirect flow as regular edit-image
   if (variant === 'edit-image-easy-upload-variant' || variant === 'edit-image-easy-upload-control') {
@@ -742,7 +748,7 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCod
     return;
   }
 
-  startSDK(data, quickAction, block, fromQrCode);
+  startSDK(data, normalizedQuickAction, block, fromQrCode);
 }
 
 function setupFrictionlessTargetBaseUrl(quickAction) {
