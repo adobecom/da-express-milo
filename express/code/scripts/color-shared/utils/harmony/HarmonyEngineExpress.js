@@ -1748,7 +1748,7 @@ function HarmonyAdapter(theme, setSwatch) {
     function _updateBaseColor() {
         if (_rule === null) { return; }
         var baseColor = _colorSet.swatches[_colorSet.baseColorIndex];
-        var baseCylindricalColor = new CylindricalColor(colorwheel.scientificToArtisticSmooth(Math.round(baseColor.hsv.h)), Math.round(baseColor.hsv.s) / 100, Math.round(baseColor.hsv.v) / 100);
+        var baseCylindricalColor = new CylindricalColor(colorwheel.scientificToArtisticSmooth(baseColor.hsv.h), baseColor.hsv.s / 100, baseColor.hsv.v / 100);
         _harmonyController.setBasePoint(baseCylindricalColor);
 
         if (_initFromColors) { _initFromColors = false; _resetFromColors(); }
@@ -1780,7 +1780,7 @@ function HarmonyAdapter(theme, setSwatch) {
         scheme.clearRegionList();
         var baseColor = _colorSet.swatches[_colorSet.baseColorIndex];
 
-        var baseC = new CylindricalColor(colorwheel.scientificToArtisticSmooth(Math.round(baseColor.hsv.h)), Math.round(baseColor.hsv.s) / 100, Math.round(baseColor.hsv.v) / 100);
+        var baseC = new CylindricalColor(colorwheel.scientificToArtisticSmooth(baseColor.hsv.h), baseColor.hsv.s / 100, baseColor.hsv.v / 100);
         var region = new RelativeColorRegion().setColorScheme2(scheme, 0, 0, 0, true);
 
         scheme.setBaseColor(baseC);
