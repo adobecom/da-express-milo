@@ -221,7 +221,12 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
   };
 }
 
-function createMobileCBLayout(controller, cbStrings, maxColumns = MAX_CB_COLUMNS) {
+function createMobileCBLayout(
+  controller,
+  cbStrings,
+  maxColumns = MAX_CB_COLUMNS,
+  colorEditStrings = null,
+) {
   const cb = resolveCBLabels(cbStrings);
   const container = createTag('div', { class: 'strip-cb-mobile-layout' });
 
@@ -269,7 +274,7 @@ function createMobileCBLayout(controller, cbStrings, maxColumns = MAX_CB_COLUMNS
         style: `background-color: ${hex};`,
         role: 'button',
         tabindex: '0',
-        'aria-label': `Edit color ${hex.toUpperCase()}`,
+        'aria-label': (colorEditStrings?.editColorWithHexAria || 'Edit color {{hex}}').replace('{{hex}}', hex.toUpperCase()),
       });
       const hexLabel = createTag('span', {
         class: 'strip-cb-mobile-row__hex',
@@ -323,7 +328,7 @@ function createMobileCBLayout(controller, cbStrings, maxColumns = MAX_CB_COLUMNS
   return container;
 }
 
-export function createFourRowsColorBlindnessLayout(adapter, cbStrings) {
+export function createFourRowsColorBlindnessLayout(adapter, cbStrings, colorEditStrings = null) {
   const controller = getAdapterController(adapter);
   // eslint-disable-next-line no-use-before-define
   const summary = createConflictSummaryBlock(controller, cbStrings);
@@ -340,7 +345,7 @@ export function createFourRowsColorBlindnessLayout(adapter, cbStrings) {
 
   let mobileLayout = null;
   if (controller) {
-    mobileLayout = createMobileCBLayout(controller, cbStrings);
+    mobileLayout = createMobileCBLayout(controller, cbStrings, MAX_CB_COLUMNS, colorEditStrings);
     outer.appendChild(mobileLayout);
 
     createFourRowsColorBlindnessTitlesOnly(controller, gridContainer, railContainer, cbStrings);
@@ -560,6 +565,7 @@ export function createStripContainerRenderer(options) {
   const cbStrings = config?.colorBlindnessStrings || null;
   const colorEditStrings = config?.colorEditStrings || null;
   const baseColorStrings = config?.baseColorStrings || null;
+  const colorSwatchRailStrings = config?.colorSwatchRailStrings || null;
   const { onColorChangeEnd, onEditOpen } = options;
   const mobileQuery = typeof options.mobileBreakpointQuery === 'string'
     ? options.mobileBreakpointQuery
@@ -720,7 +726,7 @@ export function createStripContainerRenderer(options) {
     const popover = document.createElement('div');
     popover.className = 'swatches-color-edit-popover';
     popover.setAttribute('role', 'dialog');
-    popover.setAttribute('aria-label', 'Edit color');
+    popover.setAttribute('aria-label', colorEditStrings?.editColorAria || 'Edit color');
     popover.style.position = 'absolute';
     popover.style.top = '0';
     popover.style.left = '0';
@@ -812,6 +818,7 @@ export function createStripContainerRenderer(options) {
     } else if (swatchFeatures != null) {
       opts.swatchFeatures = swatchFeatures;
     }
+    if (colorSwatchRailStrings) opts.strings = colorSwatchRailStrings;
     return opts;
   }
 
@@ -820,7 +827,7 @@ export function createStripContainerRenderer(options) {
     let el = adapter.element;
     if (colorBlindness) {
       el = orientation === 'four-rows'
-        ? createFourRowsColorBlindnessLayout(adapter, cbStrings)
+        ? createFourRowsColorBlindnessLayout(adapter, cbStrings, colorEditStrings)
         : createStripWithColorBlindness(adapter, orientation, cbStrings);
 
       const controller = getAdapterController(adapter);

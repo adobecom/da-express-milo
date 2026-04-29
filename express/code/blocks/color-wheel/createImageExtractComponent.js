@@ -445,6 +445,7 @@ export default function createImageExtractComponent(options = {}) {
     enableUrlInput: true,
     maxColors,
     loadingText: options.strings?.extractingColors,
+    imageUploadStrings: options.strings?.imageUploadStrings,
   });
 
   const topBar = createTag('div', { class: 'color-extract-top-bar' });
@@ -476,10 +477,11 @@ export default function createImageExtractComponent(options = {}) {
         currentMood = mood;
         controller.setMetadata({ mood });
         if (currentCanvas) runExtraction(currentCanvas, mood);
-      });
+      }, { strings: options.strings?.colorExtractStrings });
       moodRow.append(moodSelectorRef.element);
 
       createToolbar({
+        strings: options.strings?.colorExtractStrings,
         moodElement: null,
         onAddColor: addColorToImage,
         onReset: () => {
@@ -520,12 +522,16 @@ export default function createImageExtractComponent(options = {}) {
 }
 
 function createImageExtractDropzone(block, controller, onImageReady, config = {}) {
-  const { enableImageUpload = true, enableUrlInput = true, loadingText = 'Extracting colors...' } = config;
+  const {
+    enableImageUpload = true, enableUrlInput = true, loadingText = 'Extracting colors...',
+    imageUploadStrings, ariaLabel,
+  } = config;
 
   const dz = createUploadDropzone({
     enabled: enableImageUpload,
+    strings: imageUploadStrings,
     loadingText,
-    ariaLabel: 'Upload an image to extract colors',
+    ariaLabel: ariaLabel || 'Upload an image to extract colors',
     onImageReady: (image, src) => {
       block.classList.remove('is-loading');
       block.classList.add('has-image');

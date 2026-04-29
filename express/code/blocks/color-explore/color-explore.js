@@ -13,6 +13,7 @@ import { createLoadingScreenComponent } from '../../scripts/color-shared/compone
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import loadColorExplorePlaceholders from '../../scripts/color-shared/i18n/loadColorExplorePlaceholders.js';
+import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
@@ -258,6 +259,7 @@ export default async function decorate(block) {
 
     block.dataset.blockStatus = 'loading';
     const placeholdersPromise = loadColorExplorePlaceholders();
+    const colorSwatchRailStringsPromise = loadColorSwatchRailPlaceholders();
     block.replaceChildren();
     block.className = CSS_CLASSES.BLOCK;
     const variantClass = config.variant === VARIANTS.GRADIENTS
@@ -789,7 +791,12 @@ export default async function decorate(block) {
 
         let renderer;
         if (isSwatchesMode(config)) {
-          renderer = createSwatchesRenderer({ container, data: allData, config });
+          const colorSwatchRailStrings = await colorSwatchRailStringsPromise;
+          renderer = createSwatchesRenderer({
+            container,
+            data: allData,
+            config: { ...config, colorSwatchRailStrings },
+          });
         } else {
           renderer = createStripsRenderer({
             container,

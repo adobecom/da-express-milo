@@ -1,6 +1,11 @@
 import { createTag, getLibs } from '../../scripts/utils.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
+import loadBaseColorPlaceholders from '../../scripts/color-shared/i18n/loadBaseColorPlaceholders.js';
+import loadColorEditPlaceholders from '../../scripts/color-shared/i18n/loadColorEditPlaceholders.js';
+import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
+import loadImageUploadPlaceholders from '../../scripts/color-shared/i18n/loadImageUploadPlaceholders.js';
+import loadColorExtractPlaceholders from '../../scripts/color-shared/i18n/loadColorExtractPlaceholders.js';
 
 // CSS deps previously loaded via @import (serial waterfall). Injecting <link>
 // elements at module evaluation starts downloads in parallel with the heavy JS
@@ -101,9 +106,22 @@ async function loadHeavyModules() {
 }
 
 async function loadPlaceholders() {
-  const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
+  const [
+    { getConfig },
+    { replaceKeyArray },
+    baseColorStrings,
+    colorEditStrings,
+    imageUploadStrings,
+    colorExtractStrings,
+    colorSwatchRailStrings,
+  ] = await Promise.all([
     import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
+    loadBaseColorPlaceholders(),
+    loadColorEditPlaceholders(),
+    loadImageUploadPlaceholders(),
+    loadColorExtractPlaceholders(),
+    loadColorSwatchRailPlaceholders(),
   ]);
   const values = await replaceKeyArray([
     'primary-color',
@@ -156,6 +174,11 @@ async function loadPlaceholders() {
     noImageTryOurs: values[20] || 'Don\u2019t have an image? Try one of ours:',
     useThisImage: values[21] || 'Use this image',
     extractingColors: values[22] || 'Extracting colors...',
+    baseColorStrings,
+    colorEditStrings,
+    imageUploadStrings,
+    colorExtractStrings,
+    colorSwatchRailStrings,
   };
 }
 
@@ -472,7 +495,7 @@ function paletteFromThemeState(state) {
   };
 }
 
-function buildPrimaryColorContent(controller) {
+function buildPrimaryColorContent(controller, strings = {}) {
   primaryColorAdapter?.destroy?.();
   primaryColorAdapter = null;
 
@@ -483,6 +506,7 @@ function buildPrimaryColorContent(controller) {
     baseColor,
     'HEX',
     {
+      strings: strings.baseColorStrings,
       onColorChange: (detail) => {
         if (!detail?.hex) return;
         controller.setBaseColor(detail.hex);
@@ -555,7 +579,7 @@ async function buildTabs(controller, suggestionsRow, { onSelectionChange, string
 
   tabsInstance.addPanel('color-wheel', cwContent);
   tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings));
-  tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller));
+  tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller, strings));
 
   return tabsInstance;
 }
@@ -1040,6 +1064,8 @@ export default async function decorate(block) {
             minSwatches: 2,
           },
           swatchVerticalMaxPerRow: 6,
+          colorEditStrings: strings.colorEditStrings,
+          colorSwatchRailStrings: strings.colorSwatchRailStrings,
         },
       });
       await stripRenderer.render(stripHost);
