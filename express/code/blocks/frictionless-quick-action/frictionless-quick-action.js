@@ -391,52 +391,76 @@ async function setupUploadUI(block) {
 }
 
 /* c8 ignore next 13 */
-async function uploadAssetToStorage(file, quickAction, uploadStartTime) {
+async function uploadAssetToStorage(file, quickAction, uploadStartTime, options = {}) {
+  const { forceGuestUpload = false } = options;
   const service = await initializeUploadService();
+  const originalAuthConfig = service.getConfig?.().authConfig
+    ? { ...service.getConfig().authConfig }
+    : null;
+  const shouldForceGuestUpload = forceGuestUpload
+    && originalAuthConfig
+    && originalAuthConfig.tokenType !== 'guest'
+    && typeof service.updateConfig === 'function';
+
+  if (shouldForceGuestUpload) {
+    service.updateConfig({
+      authConfig: {
+        ...originalAuthConfig,
+        tokenType: 'guest',
+        token: '',
+      },
+    });
+  }
   createUploadStatusListener(uploadEvents.UPLOAD_STATUS);
 
-  const { asset } = await service.uploadAsset({
-    file,
-    fileName: file.name,
-    contentType: file.type,
-  });
+  try {
+    const { asset } = await service.uploadAsset({
+      file,
+      fileName: file.name,
+      contentType: file.type,
+    });
 
-  progressBar.setProgress(100);
+    progressBar.setProgress(100);
 
-  // Clear upload state on success
-  uploadInProgress = null;
+    // Clear upload state on success
+    uploadInProgress = null;
 
-  // Log video upload success for analytics
-  if (file.type.startsWith('video/')) {
-    const uploadDuration = Date.now() - uploadStartTime;
-    window.lana?.log(
-      'Video upload successful '
+    // Log video upload success for analytics
+    if (file.type.startsWith('video/')) {
+      const uploadDuration = Date.now() - uploadStartTime;
+      window.lana?.log(
+        'Video upload successful '
         + `id:${asset.assetId} `
         + `size:${file.size} `
         + `type:${file.type} `
         + `quickAction:${quickAction} `
         + `uploadDuration:${uploadDuration}`,
-      {
-        clientId: 'express',
-        tags: 'frictionless-quick-action, frictionless-video-upload-success',
-        errorType: 'i',
-        severity: 'info',
+        {
+          clientId: 'express',
+          tags: 'frictionless-quick-action, frictionless-video-upload-success',
+          errorType: 'i',
+          severity: 'info',
 
-      },
-    );
+        },
+      );
+    }
+
+    return asset.assetId;
+  } finally {
+    if (shouldForceGuestUpload && originalAuthConfig) {
+      service.updateConfig({ authConfig: originalAuthConfig });
+    }
   }
-
-  return asset.assetId;
 }
 
 /* c8 ignore next 14 */
-async function performStorageUpload(files, block, quickAction) {
+async function performStorageUpload(files, block, quickAction, options = {}) {
   const file = files[0];
   const uploadStartTime = Date.now();
   uploadInProgress = { file, startTime: uploadStartTime, quickAction };
   try {
     progressBar = await setupUploadUI(block);
-    return await uploadAssetToStorage(file, quickAction, uploadStartTime);
+    return await uploadAssetToStorage(file, quickAction, uploadStartTime, options);
   } catch (error) {
     if (error.code === 'UPLOAD_FAILED') {
       const message = await replaceKey('upload-media-error', getConfig());
@@ -643,11 +667,11 @@ async function buildEditorUrl(quickAction, assetId, dimensions) {
 }
 
 /* c8 ignore next 38 */
-async function performUploadAction(files, block, quickAction) {
+async function performUploadAction(files, block, quickAction, options = {}) {
   const initialDecodeController = new AbortController();
 
   const initialDecodePromise = startAssetDecoding(files[0], initialDecodeController);
-  const uploadPromise = performStorageUpload(files, block, quickAction);
+  const uploadPromise = performStorageUpload(files, block, quickAction, options);
 
   const firstToComplete = await raceUploadAndDecode(uploadPromise, initialDecodePromise);
 
@@ -738,7 +762,8 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCod
   const frictionlessAllowedQuickActions = Object.values(FRICTIONLESS_UPLOAD_QUICK_ACTIONS);
   if (frictionlessAllowedQuickActions.includes(variant)
     || isAuthFrictionlessUploadQuickAction(variant)) {
-    await performUploadAction(files, block, variant);
+    const shouldForceGuestUpload = variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor;
+    await performUploadAction(files, block, variant, { forceGuestUpload: shouldForceGuestUpload });
     return;
   }
 
