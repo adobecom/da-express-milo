@@ -13,6 +13,7 @@ export default function createBaseColorAdapter(
   if (options.controller && typeof options.controller.subscribe === 'function') {
     element.controller = options.controller;
   }
+  if (options.strings) element.strings = options.strings;
 
   element.addEventListener('color-change', (e) => {
     callbacks.onColorChange?.(e.detail);

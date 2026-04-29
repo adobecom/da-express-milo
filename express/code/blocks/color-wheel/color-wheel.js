@@ -101,35 +101,46 @@ async function loadHeavyModules() {
 }
 
 async function loadPlaceholders() {
-  const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
+  const [
+    { getConfig },
+    { replaceKeyArray },
+    { default: loadColorEditPlaceholders },
+    { default: loadBaseColorPlaceholders },
+  ] = await Promise.all([
     import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
+    import('../../scripts/color-shared/i18n/loadColorEditPlaceholders.js'),
+    import('../../scripts/color-shared/i18n/loadBaseColorPlaceholders.js'),
   ]);
-  const values = await replaceKeyArray([
-    'primary-color',
-    'image',
-    'color-wheel',
-    'custom',
-    'analogous',
-    'complementary',
-    'split-complementary',
-    'triad',
-    'square',
-    'compound',
-    'shades',
-    'monochromatic',
-    'color-harmonies',
-    'undo',
-    'redo',
-    'generate-random',
-    'maximize',
-    'create-palette',
-    'contrast-checker',
-    'color-blindness-simulator',
-    'no-image-try-ours',
-    'use-this-image',
-    'extracting-colors',
-  ], getConfig());
+  const [values, colorEditStrings, baseColorStrings] = await Promise.all([
+    replaceKeyArray([
+      'primary-color',
+      'image',
+      'color-wheel',
+      'custom',
+      'analogous',
+      'complementary',
+      'split-complementary',
+      'triad',
+      'square',
+      'compound',
+      'shades',
+      'monochromatic',
+      'color-harmonies',
+      'undo',
+      'redo',
+      'generate-random',
+      'maximize',
+      'create-palette',
+      'contrast-checker',
+      'color-blindness-simulator',
+      'no-image-try-ours',
+      'use-this-image',
+      'extracting-colors',
+    ], getConfig()),
+    loadColorEditPlaceholders(),
+    loadBaseColorPlaceholders(),
+  ]);
   return {
     tabPrimaryColor: values[0] || 'Primary color',
     tabImage: values[1] || 'Image',
@@ -156,6 +167,8 @@ async function loadPlaceholders() {
     noImageTryOurs: values[20] || 'Don\u2019t have an image? Try one of ours:',
     useThisImage: values[21] || 'Use this image',
     extractingColors: values[22] || 'Extracting colors...',
+    colorEditStrings,
+    baseColorStrings,
   };
 }
 
@@ -472,7 +485,7 @@ function paletteFromThemeState(state) {
   };
 }
 
-function buildPrimaryColorContent(controller) {
+function buildPrimaryColorContent(controller, strings) {
   primaryColorAdapter?.destroy?.();
   primaryColorAdapter = null;
 
@@ -504,6 +517,7 @@ function buildPrimaryColorContent(controller) {
         swatchRailController?.setState?.({ lockedByIndex: next });
       },
     },
+    { strings: strings?.baseColorStrings },
   );
   primaryColorAdapter = adapter;
 
@@ -555,7 +569,7 @@ async function buildTabs(controller, suggestionsRow, { onSelectionChange, string
 
   tabsInstance.addPanel('color-wheel', cwContent);
   tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings));
-  tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller));
+  tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller, strings));
 
   return tabsInstance;
 }
@@ -1040,6 +1054,8 @@ export default async function decorate(block) {
             minSwatches: 2,
           },
           swatchVerticalMaxPerRow: 6,
+          colorEditStrings: strings.colorEditStrings,
+          baseColorStrings: strings.baseColorStrings,
         },
       });
       await stripRenderer.render(stripHost);
