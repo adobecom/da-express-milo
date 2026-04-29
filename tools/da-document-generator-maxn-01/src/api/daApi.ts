@@ -1,6 +1,24 @@
 const DA_API = 'https://admin.da.live';
 const ORG = 'adobecom';
 const REPO = 'da-express-milo';
+const HLX_ADMIN = 'https://admin.hlx.page';
+const BRANCH = 'main';
+
+function parseDAPath(daPath: string): { org: string; repo: string; contentPath: string } {
+  const parts = daPath.replace(/\.html$/, '').split('/').filter(Boolean);
+  const [org, repo, ...rest] = parts;
+  return { org, repo, contentPath: `/${rest.join('/')}` };
+}
+
+export function daPathToPreviewUrl(daPath: string): string {
+  const { org, repo, contentPath } = parseDAPath(daPath);
+  return `https://${BRANCH}--${repo}--${org}.aem.page${contentPath}`;
+}
+
+export function daPathToLiveUrl(daPath: string): string {
+  const { org, repo, contentPath } = parseDAPath(daPath);
+  return `https://${BRANCH}--${repo}--${org}.aem.live${contentPath}`;
+}
 
 let token: string | null = null;
 
@@ -119,4 +137,38 @@ export function validateTemplate(html: string): TemplateValidation {
   const status = isInvalid ? 'invalid' : issues.length > 0 ? 'warning' : 'ready';
 
   return { status, issues, placeholders };
+}
+
+export async function triggerPreview(daPath: string, token: string): Promise<void> {
+  const { org, repo, contentPath } = parseDAPath(daPath);
+  const resp = await fetch(`${HLX_ADMIN}/preview/${org}/${repo}/${BRANCH}${contentPath}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!resp.ok) throw new Error(`preview ${daPath}: ${resp.status}`);
+}
+
+export async function triggerPublish(daPath: string, token: string): Promise<void> {
+  const { org, repo, contentPath } = parseDAPath(daPath);
+  const resp = await fetch(`${HLX_ADMIN}/live/${org}/${repo}/${BRANCH}${contentPath}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!resp.ok) throw new Error(`publish ${daPath}: ${resp.status}`);
+}
+
+export interface HlxPageStatus {
+  preview: { status: number; url: string; lastModified?: string } | null;
+  live: { status: number; url: string } | null;
+}
+
+export async function getPageStatus(daPath: string, token: string): Promise<HlxPageStatus> {
+  const { org, repo, contentPath } = parseDAPath(daPath);
+  const resp = await fetch(
+    `${HLX_ADMIN}/status/${org}/${repo}/${BRANCH}${contentPath}`,
+    { headers: { Authorization: `Bearer ${token}` } },
+  );
+  if (!resp.ok) throw new Error(`status ${daPath}: ${resp.status}`);
+  const data = await resp.json();
+  return { preview: data.preview ?? null, live: data.live ?? null };
 }

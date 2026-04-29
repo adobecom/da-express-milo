@@ -1,15 +1,14 @@
 import { useState } from 'react';
-import { postDoc } from '../api/daApi';
-import { applyTemplate, rowToOutputPath } from '../lib/generate';
-import type { CsvRow, TemplateState } from '../types';
-
-interface RowResult {
-  id: string;
-  path: string;
-  status: 'pending' | 'generating' | 'done' | 'error';
-  editUrl?: string;
-  error?: string;
-}
+import {
+  postDoc,
+  triggerPreview,
+  triggerPublish,
+  getToken,
+  daPathToPreviewUrl,
+  daPathToLiveUrl,
+} from '../api/daApi';
+import { applyTemplate, rowToOutputPath, runQa } from '../lib/generate';
+import type { CsvRow, TemplateState, RowResult, QaResult } from '../types';
 
 interface Props {
   rows: CsvRow[];
@@ -19,28 +18,47 @@ interface Props {
 const DEFAULT_OUTPUT_DIR = '/adobecom/da-express-milo/drafts/maxn/document-generator';
 const CONCURRENCY = 3;
 
+type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing';
+
 export default function GeneratePanel({ rows, template }: Props) {
   const [outputDir, setOutputDir] = useState(DEFAULT_OUTPUT_DIR);
   const [results, setResults] = useState<RowResult[]>([]);
-  const [running, setRunning] = useState(false);
+  const [bulkOp, setBulkOp] = useState<BulkOp>('idle');
 
-  const doneCount = results.filter((r) => r.status === 'done').length;
-  const errorCount = results.filter((r) => r.status === 'error').length;
-  const inProgress = results.filter((r) => r.status === 'generating').length;
+  const running = bulkOp !== 'idle';
 
-  function initResults(): RowResult[] {
-    return rows.map((row) => ({
-      id: row['_id'],
-      path: rowToOutputPath(row, outputDir),
-      status: 'pending',
-    }));
+  const counts = {
+    generated: results.filter((r) =>
+      ['generated', 'qa-fail', 'previewing', 'previewed', 'publishing', 'published'].includes(r.stage),
+    ).length,
+    previewed: results.filter((r) =>
+      ['previewed', 'publishing', 'published'].includes(r.stage),
+    ).length,
+    publishable: results.filter((r) => r.stage === 'previewed' && r.qa?.pass).length,
+    done: results.filter((r) => r.stage === 'generated').length,
+    qaFail: results.filter((r) => r.stage === 'qa-fail').length,
+    error: results.filter((r) => r.stage === 'error').length,
+    published: results.filter((r) => r.stage === 'published').length,
+  };
+
+  async function runBatch(items: RowResult[], fn: (r: RowResult) => Promise<void>) {
+    const queue = [...items];
+    let idx = 0;
+    async function worker() {
+      while (idx < queue.length) {
+        // eslint-disable-next-line no-await-in-loop
+        await fn(queue[idx++]);
+      }
+    }
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, queue.length) }, worker));
   }
 
   async function handleGenerate() {
     if (!template.html) return;
-    const initial = initResults();
-    setResults(initial);
-    setRunning(true);
+    setResults(
+      rows.map((row) => ({ id: row['_id'], path: rowToOutputPath(row, outputDir), stage: 'pending' })),
+    );
+    setBulkOp('generating');
 
     const queue = [...rows];
     let idx = 0;
@@ -48,37 +66,92 @@ export default function GeneratePanel({ rows, template }: Props) {
     async function processRow(row: CsvRow) {
       const path = rowToOutputPath(row, outputDir);
       setResults((prev) =>
-        prev.map((r) => (r.id === row['_id'] ? { ...r, status: 'generating' } : r))
+        prev.map((r) => (r.id === row['_id'] ? { ...r, stage: 'generating' } : r)),
       );
       try {
         const html = applyTemplate(template.html!, row);
+        const qa = runQa(html, row);
         const res = await postDoc(path, html);
         setResults((prev) =>
           prev.map((r) =>
             r.id === row['_id']
-              ? { ...r, status: 'done', editUrl: res.source?.editUrl }
-              : r
-          )
+              ? { ...r, stage: qa.pass ? 'generated' : 'qa-fail', qa, editUrl: res.source?.editUrl }
+              : r,
+          ),
         );
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         setResults((prev) =>
-          prev.map((r) => (r.id === row['_id'] ? { ...r, status: 'error', error: msg } : r))
+          prev.map((r) => (r.id === row['_id'] ? { ...r, stage: 'error', error: msg } : r)),
         );
       }
     }
 
     async function worker() {
       while (idx < queue.length) {
-        const row = queue[idx++];
-        await processRow(row);
+        // eslint-disable-next-line no-await-in-loop
+        await processRow(queue[idx++]);
       }
     }
 
-    const workers = Array.from({ length: Math.min(CONCURRENCY, queue.length) }, () => worker());
-    await Promise.all(workers);
-    setRunning(false);
+    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, queue.length) }, worker));
+    setBulkOp('idle');
   }
+
+  async function handlePreview() {
+    const token = getToken();
+    if (!token) return;
+    const targets = results.filter((r) => r.stage === 'generated' || r.stage === 'qa-fail');
+    setBulkOp('previewing');
+    await runBatch(targets, async (r) => {
+      setResults((prev) => prev.map((x) => (x.id === r.id ? { ...x, stage: 'previewing' } : x)));
+      try {
+        await triggerPreview(r.path, token);
+        setResults((prev) =>
+          prev.map((x) =>
+            x.id === r.id
+              ? { ...x, stage: 'previewed', previewUrl: daPathToPreviewUrl(r.path) }
+              : x,
+          ),
+        );
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setResults((prev) =>
+          prev.map((x) => (x.id === r.id ? { ...x, stage: 'error', error: msg } : x)),
+        );
+      }
+    });
+    setBulkOp('idle');
+  }
+
+  async function handlePublish() {
+    const token = getToken();
+    if (!token) return;
+    const targets = results.filter((r) => r.stage === 'previewed' && r.qa?.pass);
+    setBulkOp('publishing');
+    await runBatch(targets, async (r) => {
+      setResults((prev) => prev.map((x) => (x.id === r.id ? { ...x, stage: 'publishing' } : x)));
+      try {
+        await triggerPublish(r.path, token);
+        setResults((prev) =>
+          prev.map((x) =>
+            x.id === r.id
+              ? { ...x, stage: 'published', liveUrl: daPathToLiveUrl(r.path) }
+              : x,
+          ),
+        );
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setResults((prev) =>
+          prev.map((x) => (x.id === r.id ? { ...x, stage: 'error', error: msg } : x)),
+        );
+      }
+    });
+    setBulkOp('idle');
+  }
+
+  const showPreviewBtn = !running && counts.generated > 0 && counts.previewed === 0;
+  const showPublishBtn = !running && counts.previewed > 0;
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4">
@@ -104,54 +177,98 @@ export default function GeneratePanel({ rows, template }: Props) {
         </p>
       </div>
 
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <button
           type="button"
           onClick={handleGenerate}
           disabled={running || !template.html}
           className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          {running ? `Generating… ${doneCount + errorCount} / ${rows.length}` : `Generate ${rows.length} document${rows.length !== 1 ? 's' : ''}`}
+          {bulkOp === 'generating'
+            ? `Generating… ${counts.done + counts.qaFail + counts.error} / ${rows.length}`
+            : `Generate ${rows.length} document${rows.length !== 1 ? 's' : ''}`}
         </button>
 
+        {showPreviewBtn && (
+          <button
+            type="button"
+            onClick={handlePreview}
+            className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+          >
+            Preview {counts.generated + counts.qaFail} document{counts.generated + counts.qaFail !== 1 ? 's' : ''}
+          </button>
+        )}
+
+        {bulkOp === 'previewing' && (
+          <span className="text-sm text-indigo-600 font-medium">
+            Previewing… {counts.previewed} / {counts.generated + counts.qaFail}
+          </span>
+        )}
+
+        {showPublishBtn && (
+          <button
+            type="button"
+            onClick={handlePublish}
+            disabled={counts.publishable === 0}
+            className="px-5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Publish {counts.publishable} passing document{counts.publishable !== 1 ? 's' : ''}
+          </button>
+        )}
+
+        {bulkOp === 'publishing' && (
+          <span className="text-sm text-green-600 font-medium">
+            Publishing… {counts.published} / {counts.publishable}
+          </span>
+        )}
+
         {results.length > 0 && !running && (
-          <p className="text-sm text-gray-600">
-            <span className="text-green-600 font-medium">{doneCount} succeeded</span>
-            {errorCount > 0 && (
-              <span className="text-red-600 font-medium">, {errorCount} failed</span>
-            )}
+          <p className="text-sm text-gray-500 ml-auto">
+            {counts.done > 0 && <span className="text-green-600 font-medium">{counts.done} generated </span>}
+            {counts.qaFail > 0 && <span className="text-yellow-600 font-medium">{counts.qaFail} QA fail </span>}
+            {counts.error > 0 && <span className="text-red-600 font-medium">{counts.error} error</span>}
           </p>
         )}
       </div>
 
       {results.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 max-h-80 overflow-y-auto">
+        <div className="overflow-x-auto rounded-xl border border-gray-200 max-h-96 overflow-y-auto">
           <table className="text-xs w-full">
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
               <tr>
                 <th className="px-3 py-2 text-left font-medium text-gray-600">Path</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600 w-24">Status</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600 w-28">QA</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600 w-20">Preview</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600 w-28">Status</th>
               </tr>
             </thead>
             <tbody>
               {results.map((r) => (
                 <tr key={r.id} className="border-b border-gray-100 last:border-0">
-                  <td className="px-3 py-2 font-mono text-gray-600 truncate max-w-[320px]">
-                    {r.status === 'done' && r.editUrl ? (
-                      <a
-                        href={r.editUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline"
-                      >
+                  <td className="px-3 py-2 font-mono text-gray-600 truncate max-w-[260px]">
+                    {r.editUrl ? (
+                      <a href={r.editUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                         {r.path}
                       </a>
-                    ) : (
-                      r.path
+                    ) : r.path}
+                  </td>
+                  <td className="px-3 py-2">
+                    <QaPill qa={r.qa} />
+                  </td>
+                  <td className="px-3 py-2">
+                    {r.previewUrl && (
+                      <a href={r.previewUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
+                        aem.page ↗
+                      </a>
+                    )}
+                    {r.liveUrl && (
+                      <a href={r.liveUrl} target="_blank" rel="noopener noreferrer" className="text-green-700 hover:underline ml-1">
+                        aem.live ↗
+                      </a>
                     )}
                   </td>
                   <td className="px-3 py-2">
-                    <StatusPill result={r} inProgress={inProgress} />
+                    <StagePill result={r} />
                   </td>
                 </tr>
               ))}
@@ -163,19 +280,50 @@ export default function GeneratePanel({ rows, template }: Props) {
   );
 }
 
-function StatusPill({ result }: { result: RowResult; inProgress: number }) {
-  if (result.status === 'pending') {
-    return <span className="text-gray-400">Pending</span>;
-  }
-  if (result.status === 'generating') {
-    return <span className="text-blue-600 font-medium">Generating…</span>;
-  }
-  if (result.status === 'done') {
-    return <span className="text-green-600 font-medium">Done</span>;
+function QaPill({ qa }: { qa?: QaResult }) {
+  if (!qa) return <span className="text-gray-300">—</span>;
+  if (qa.pass) {
+    return <span className="text-green-600 font-medium">Pass {qa.score}</span>;
   }
   return (
-    <span className="text-red-600 font-medium" title={result.error}>
-      Error
+    <span
+      className="text-yellow-700 font-medium cursor-help"
+      title={qa.issues.join('\n')}
+    >
+      Fail {qa.score}
+    </span>
+  );
+}
+
+function StagePill({ result }: { result: RowResult }) {
+  const map: Record<string, string> = {
+    pending: 'text-gray-400',
+    generating: 'text-blue-600',
+    generated: 'text-green-600',
+    'qa-fail': 'text-yellow-700',
+    previewing: 'text-indigo-500',
+    previewed: 'text-indigo-700',
+    publishing: 'text-green-500',
+    published: 'text-green-700',
+    error: 'text-red-600',
+  };
+  const label: Record<string, string> = {
+    pending: 'Pending',
+    generating: 'Generating…',
+    generated: 'Generated',
+    'qa-fail': 'QA Fail',
+    previewing: 'Previewing…',
+    previewed: 'Previewed',
+    publishing: 'Publishing…',
+    published: 'Published',
+    error: 'Error',
+  };
+  return (
+    <span
+      className={`font-medium ${map[result.stage]}`}
+      title={result.stage === 'error' ? result.error : undefined}
+    >
+      {label[result.stage]}
     </span>
   );
 }

@@ -17,3 +17,31 @@ export interface TemplateState {
   placeholders: string[];
   issues: string[];
 }
+
+export type RowStage =
+  | 'pending'
+  | 'generating'
+  | 'generated'
+  | 'qa-fail'
+  | 'previewing'
+  | 'previewed'
+  | 'publishing'
+  | 'published'
+  | 'error';
+
+export interface QaResult {
+  pass: boolean;
+  score: number;
+  issues: string[];
+}
+
+export interface RowResult {
+  id: string;
+  path: string;
+  stage: RowStage;
+  error?: string;
+  editUrl?: string;
+  previewUrl?: string;
+  liveUrl?: string;
+  qa?: QaResult;
+}
