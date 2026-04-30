@@ -2,4 +2,4 @@
 . "$(dirname -- "$0")/_/husky.sh"
 
 # Run CSS variable linting
-# npm run lint:css-vars 
+npm run lint:css-vars 
