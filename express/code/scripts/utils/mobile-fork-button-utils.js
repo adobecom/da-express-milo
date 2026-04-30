@@ -68,6 +68,7 @@ export function androidCheck(getMetadata, getMobileOperatingSystem) {
  * @param {Object} metadataMap - Map of metadata
  * @param {number} index - CTA index (1 or 2)
  * @param {boolean} useFrictionless - Whether to use frictionless metadata with fallback
+ * @param {string} metadataPrefix - Optional metadata prefix for platform-specific fields
  * @returns {Object} Tool data with icon, iconText, and anchor
  */
 export function createToolData(
@@ -76,8 +77,9 @@ export function createToolData(
   metadataMap,
   index,
   useFrictionless = false,
+  metadataPrefix = '',
 ) {
-  const prefix = `fork-cta-${index}`;
+  const prefix = `${metadataPrefix}fork-cta-${index}`;
 
   // Metadata lookup with optional frictionless fallback
   const iconMetadata = (useFrictionless && metadataMap[`${prefix}-icon-frictionless`])
@@ -156,6 +158,64 @@ export function collectFloatingButtonData(
       metadataMap,
       i,
       useFrictionless,
+    );
+    if (toolData) {
+      data.tools.push(toolData);
+      if (getTextWidth(toolData.anchor.textContent, 16) > LONG_TEXT_CUTOFF) {
+        data.longText = true;
+      }
+    }
+  }
+
+  return data;
+}
+
+/**
+ * Collects floating button data from platform-prefixed fork metadata.
+ * @param {Function} createTag - Function to create DOM elements
+ * @param {Function} getIconElementDeprecated - Function to get icon elements
+ * @param {string} platform - Platform metadata prefix ('android' or 'ios')
+ * @param {Object} extraMainCtaProps - Extra properties to add to mainCta (optional)
+ * @returns {Object} Floating button data
+ */
+export function collectOsSplitFloatingButtonData(
+  createTag,
+  getIconElementDeprecated,
+  platform,
+  extraMainCtaProps = {},
+) {
+  const metadataMap = createMetadataMap();
+  const getMetadataLocal = (key) => metadataMap[key];
+  const metadataPrefix = `${platform}-`;
+
+  const data = {
+    scrollState: 'withLottie',
+    showAppStoreBadge: ['on'].includes(getMetadataLocal('show-floating-cta-app-store-badge')?.toLowerCase()),
+    toolsToStash: getMetadataLocal('ctas-above-divider'),
+    delay: getMetadataLocal('floating-cta-drawer-delay') || 0,
+    tools: [],
+    mainCta: {
+      desktopHref: getMetadataLocal('desktop-floating-cta-link'),
+      desktopText: getMetadataLocal('desktop-floating-cta-text'),
+      mobileHref: getMetadataLocal('mobile-floating-cta-link'),
+      mobileText: getMetadataLocal('mobile-floating-cta-text'),
+      href: getMetadataLocal('main-cta-link'),
+      text: getMetadataLocal('main-cta-text'),
+      ...extraMainCtaProps,
+    },
+    bubbleSheet: getMetadataLocal('floating-cta-bubble-sheet'),
+    live: getMetadataLocal('floating-cta-live'),
+    forkButtonHeader: getMetadataLocal(`${metadataPrefix}fork-button-header`),
+  };
+
+  for (let i = 1; i < 3; i += 1) {
+    const toolData = createToolData(
+      createTag,
+      getIconElementDeprecated,
+      metadataMap,
+      i,
+      false,
+      metadataPrefix,
     );
     if (toolData) {
       data.tools.push(toolData);
