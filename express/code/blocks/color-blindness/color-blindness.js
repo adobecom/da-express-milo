@@ -1,4 +1,4 @@
-import { createTag } from '../../scripts/utils.js';
+import { createTag, getLibs } from '../../scripts/utils.js';
 import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
@@ -80,10 +80,12 @@ export default async function decorate(block) {
       ...(hasValidBaseColor && { baseColorIndex }),
     };
 
+    const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+    const { locale } = getConfig();
     const navLinks = [
-      { id: 'palette', label: blockStrings.navCreatePalette, href: '/create/color-wheel' },
-      { id: 'contrast', label: blockStrings.navContrastChecker, href: '/create/color-contrast-analyzer' },
-      { id: 'color-blindness', label: blockStrings.navColorBlindness, href: '/create/color-accessibility' },
+      { id: 'palette', label: blockStrings.navCreatePalette, href: `${locale.contentRoot}/create/color-wheel` },
+      { id: 'contrast', label: blockStrings.navContrastChecker, href: `${locale.contentRoot}/create/color-contrast-analyzer` },
+      { id: 'color-blindness', label: blockStrings.navColorBlindness, href: `${locale.contentRoot}/create/color-accessibility` },
     ];
     const controls = [
       { id: 'undo', label: blockStrings.controlUndo },

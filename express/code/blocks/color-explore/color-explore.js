@@ -1,3 +1,4 @@
+import { getLibs } from '../../scripts/utils.js';
 import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import { parseBlockConfig } from './helpers/parseConfig.js';
 import { createColorRenderer } from './factory/createColorRenderer.js';
@@ -261,6 +262,9 @@ export default async function decorate(block) {
     config.variant = getVariantFromThemeUrlParam() ?? variantFromClass ?? config.variant;
 
     block.dataset.blockStatus = 'loading';
+    const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+    const { locale } = getConfig();
+    const colorWheelPath = `${locale.contentRoot}/create/color-wheel`;
     const placeholdersPromise = loadColorExplorePlaceholders();
     const colorSwatchRailStringsPromise = loadColorSwatchRailPlaceholders();
     const colorFiltersStringsPromise = loadColorFiltersPlaceholders();
@@ -680,7 +684,7 @@ export default async function decorate(block) {
           activeRenderer.on(EVENTS.PALETTE_EDIT, (palette) => {
             const colors = palette?.colors || [];
             const name = palette?.name || '';
-            const editUrl = buildPaletteEditUrl('/create/color-wheel', colors, name);
+            const editUrl = buildPaletteEditUrl(colorWheelPath, colors, name);
             window.location.href = editUrl;
           });
           activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
@@ -866,7 +870,7 @@ export default async function decorate(block) {
         renderer.on(EVENTS.PALETTE_EDIT, (palette) => {
           const colors = palette?.colors || [];
           const name = palette?.name || '';
-          const editUrl = buildPaletteEditUrl('/create/color-wheel', colors, name);
+          const editUrl = buildPaletteEditUrl(colorWheelPath, colors, name);
           window.location.href = editUrl;
         });
         renderer.on(EVENTS.SHARE, async ({ palette }) => {

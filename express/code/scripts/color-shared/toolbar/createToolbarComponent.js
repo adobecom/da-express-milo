@@ -480,8 +480,6 @@ export function createToolbar(options) {
 
   const main = createTag('div', { class: 'ax-toolbar-main' });
 
-  const DEFAULT_EDIT_BASE_PATH = '/create/color-wheel';
-
   const paletteSummary = buildPaletteSummary(
     colors,
     type,
@@ -494,7 +492,9 @@ export function createToolbar(options) {
       if (editPaletteLink) {
         window.location.href = editPaletteLink;
       } else {
-        const processedLink = await applyLinkParamOverride(DEFAULT_EDIT_BASE_PATH);
+        const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+        const { locale } = getConfig();
+        const processedLink = await applyLinkParamOverride(`${locale.contentRoot}/create/color-wheel`);
         const editUrl = buildPaletteEditUrl(
           processedLink,
           currentPalette.colors,
