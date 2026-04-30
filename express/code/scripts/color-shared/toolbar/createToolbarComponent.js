@@ -9,6 +9,7 @@ import { loadButton, loadActionButton, loadTooltip } from '../spectrum/load-spec
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
+import { triggerSignInFlow, ensureIms } from '../../../libs/services/middlewares/auth.middleware.js';
 
 function interpolate(tpl, vars) {
   return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{{${k}}}`, v), tpl);
@@ -86,7 +87,26 @@ function getStageBaseUrl(base) {
   }
 }
 
+async function checkIsSignedIn() {
+  try {
+    const ims = await ensureIms();
+    return ims.isSignedInUser();
+  } catch {
+    return false;
+  }
+}
+
 async function handleOpenInExpress({ id, name, colors }) {
+  const isSignedIn = await checkIsSignedIn();
+  if (!isSignedIn) {
+    const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
+      '../utils/susiRedirect.js'
+    );
+    setSusiColorRedirect(buildColorSignInRedirectUrl(colors, name, id));
+    await triggerSignInFlow();
+    return;
+  }
+
   const { getTrackingAppendedURL } = await import('../../branchlinks.js');
 
   const params = new URLSearchParams(window.location.search);

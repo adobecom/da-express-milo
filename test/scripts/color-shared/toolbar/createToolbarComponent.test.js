@@ -3,6 +3,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
 import { createToolbar } from '../../../../express/code/scripts/color-shared/toolbar/createToolbarComponent.js';
+import { consumeSusiColorRedirect } from '../../../../express/code/scripts/color-shared/utils/susiRedirect.js';
 import { MOCK_PALETTE, MOCK_GRADIENT } from './mocks/palette.js';
 import { createMockGetLibraryContext } from './mocks/stubs.js';
 
@@ -548,10 +549,14 @@ describe('createToolbar', () => {
 
     beforeEach(() => {
       openStub = sinon.stub(window, 'open');
+      window.adobeIMS = {
+        isSignedInUser: sinon.stub().returns(true),
+      };
     });
 
     afterEach(() => {
       window.history.pushState({}, '', '/');
+      delete window.adobeIMS;
     });
 
     async function clickCTA() {
@@ -600,6 +605,60 @@ describe('createToolbar', () => {
       expect(url.searchParams.get('feature-enable')).to.equal('colors-product-entry');
       expect(url.searchParams.get('category')).to.equal('yourStuff');
       expect(url.searchParams.has('colorPalette')).to.be.true;
+    });
+  });
+
+  describe('handleOpenInExpress sign-in enforcement', () => {
+    let openStub;
+
+    beforeEach(() => {
+      openStub = sinon.stub(window, 'open');
+    });
+
+    afterEach(() => {
+      delete window.adobeIMS;
+      consumeSusiColorRedirect();
+    });
+
+    async function clickCTA() {
+      const toolbar = createToolbar(defaultOptions({ onCTA: undefined }));
+      document.body.appendChild(toolbar.element);
+      toolbar.element.querySelector('sp-button[variant="accent"]').click();
+      await new Promise((r) => setTimeout(r, 100));
+    }
+
+    it('does not open Express when user is not signed in', async () => {
+      window.adobeIMS = {
+        isSignedInUser: sinon.stub().returns(false),
+      };
+
+      await clickCTA();
+
+      expect(openStub.called).to.be.false;
+    });
+
+    it('stores a SUSI redirect URL containing the color palette when not signed in', async () => {
+      window.adobeIMS = {
+        isSignedInUser: sinon.stub().returns(false),
+      };
+
+      await clickCTA();
+
+      const stored = consumeSusiColorRedirect();
+      expect(stored).to.be.a('string');
+      expect(stored).to.include('color-palette=');
+    });
+
+    it('opens Express in a new tab when user is signed in', async () => {
+      window.adobeIMS = {
+        isSignedInUser: sinon.stub().returns(true),
+      };
+
+      await clickCTA();
+
+      expect(openStub.calledOnce).to.be.true;
+      expect(openStub.firstCall.args[1]).to.equal('_blank');
+      expect(consumeSusiColorRedirect()).to.be.null;
     });
   });
 
