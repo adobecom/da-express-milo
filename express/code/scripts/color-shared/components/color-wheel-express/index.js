@@ -35,6 +35,7 @@ export class ColorWheelExpress extends ColorWheel {
       showLines: { type: Boolean },
       conflictPairs: { type: Array },
       isMarkerUp: { type: Boolean },
+      markerAriaTemplate: { attribute: false },
     };
   }
 
@@ -47,6 +48,7 @@ export class ColorWheelExpress extends ColorWheel {
     this.isMarkerUp = true;
     this._dragIndex = -1;
     this._kbFocusIndex = -1;
+    this.markerAriaTemplate = '{hex}, use arrow keys to move';
   }
 
   firstUpdated() {
@@ -170,7 +172,7 @@ export class ColorWheelExpress extends ColorWheel {
         marker.style.left = `calc(50% + ${x}px)`;
         marker.style.top = `calc(50% + ${y}px)`;
         marker.style.setProperty('--wheel-marker-color', swatch.hex);
-        marker.setAttribute('aria-label', `${swatch.hex}, use arrow keys to move`);
+        marker.setAttribute('aria-label', (this.markerAriaTemplate || '{hex}, use arrow keys to move').replace('{hex}', swatch.hex));
       }
 
       this.drawLines();
@@ -207,7 +209,7 @@ export class ColorWheelExpress extends ColorWheel {
       marker.dataset.index = index;
       marker.setAttribute('role', 'button');
       marker.setAttribute('tabindex', '-1');
-      marker.setAttribute('aria-label', `${swatch.hex}, use arrow keys to move`);
+      marker.setAttribute('aria-label', (this.markerAriaTemplate || '{hex}, use arrow keys to move').replace('{hex}', swatch.hex));
       if (index === this.baseColorIndex && this.harmonyRule !== 'CUSTOM') {
         marker.classList.add('wheel-marker-overlay--base');
       }

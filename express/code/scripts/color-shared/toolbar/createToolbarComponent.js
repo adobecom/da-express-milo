@@ -9,9 +9,10 @@ import { loadButton, loadActionButton, loadTooltip } from '../spectrum/load-spec
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
+import { triggerSignInFlow, ensureIms } from '../../../libs/services/middlewares/auth.middleware.js';
 
 function interpolate(tpl, vars) {
-  return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{{${k}}}`, v), tpl);
+  return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), tpl);
 }
 
 const TOOLBAR_DEFAULTS = {
@@ -22,14 +23,14 @@ const TOOLBAR_DEFAULTS = {
   share: 'Share',
   download: 'Download',
   saveToLibrary: 'Save to library',
-  swatchLabel: 'Color {{index}}: {{hex}}',
-  swatchStripLabel: '{{count}} colors in {{type}}',
-  gradientLabel: 'Gradient: {{stops}}',
+  swatchLabel: 'Color {index}: {hex}',
+  swatchStripLabel: '{count} colors in {type}',
+  gradientLabel: 'Gradient: {stops}',
   editPalette: 'Edit this color palette',
   sharePalette: 'Share this color palette',
   downloadPalette: 'Download this color palette',
   savePalette: 'Save this palette to your Library',
-  toolbarLabel: '{{type}} toolbar',
+  toolbarLabel: '{type} toolbar',
   paletteName: 'Palette name',
   paletteNamePlaceholder: 'My Color Theme',
   ctaText: 'Create with my color palette',
@@ -86,7 +87,26 @@ function getStageBaseUrl(base) {
   }
 }
 
+async function checkIsSignedIn() {
+  try {
+    const ims = await ensureIms();
+    return ims.isSignedInUser();
+  } catch {
+    return false;
+  }
+}
+
 async function handleOpenInExpress({ id, name, colors }) {
+  const isSignedIn = await checkIsSignedIn();
+  if (!isSignedIn) {
+    const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
+      '../utils/susiRedirect.js'
+    );
+    setSusiColorRedirect(buildColorSignInRedirectUrl(colors, name, id));
+    await triggerSignInFlow();
+    return;
+  }
+
   const { getTrackingAppendedURL } = await import('../../branchlinks.js');
 
   const params = new URLSearchParams(window.location.search);

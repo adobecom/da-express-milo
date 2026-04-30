@@ -1,6 +1,11 @@
 import { createTag, getLibs } from '../../scripts/utils.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
+import loadBaseColorPlaceholders from '../../scripts/color-shared/i18n/loadBaseColorPlaceholders.js';
+import loadColorEditPlaceholders from '../../scripts/color-shared/i18n/loadColorEditPlaceholders.js';
+import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
+import loadImageUploadPlaceholders from '../../scripts/color-shared/i18n/loadImageUploadPlaceholders.js';
+import loadColorExtractPlaceholders from '../../scripts/color-shared/i18n/loadColorExtractPlaceholders.js';
 
 // CSS deps previously loaded via @import (serial waterfall). Injecting <link>
 // elements at module evaluation starts downloads in parallel with the heavy JS
@@ -101,61 +106,72 @@ async function loadHeavyModules() {
 }
 
 async function loadPlaceholders() {
-  const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
+  const [
+    { getConfig },
+    { replaceKeyArray },
+    baseColorStrings,
+    colorEditStrings,
+    imageUploadStrings,
+    colorExtractStrings,
+    colorSwatchRailStrings,
+  ] = await Promise.all([
     import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
+    loadBaseColorPlaceholders(),
+    loadColorEditPlaceholders(),
+    loadImageUploadPlaceholders(),
+    loadColorExtractPlaceholders(),
+    loadColorSwatchRailPlaceholders(),
   ]);
-  const values = await replaceKeyArray([
-    'primary-color',
-    'image',
-    'color-wheel',
-    'custom',
-    'analogous',
-    'complementary',
-    'split-complementary',
-    'triad',
-    'square',
-    'compound',
-    'shades',
-    'monochromatic',
-    'color-harmonies',
-    'undo',
-    'redo',
-    'generate-random',
-    'maximize',
-    'create-palette',
-    'contrast-checker',
-    'color-blindness-simulator',
-    'no-image-try-ours',
-    'use-this-image',
-    'extracting-colors',
-  ], getConfig());
+  const KEYS = [
+    'primary-color', 'image', 'color-wheel', 'custom', 'analogous', 'complementary',
+    'split-complementary', 'triad', 'square', 'compound', 'shades', 'monochromatic',
+    'color-harmonies', 'undo', 'redo', 'generate-random', 'maximize', 'create-palette',
+    'contrast-checker', 'color-blindness-simulator', 'no-image-try-ours', 'use-this-image',
+    'extracting-colors', 'color-wheel-keyboard-hint', 'color-wheel-harmony-aria',
+    'color-wheel-aria-with-hint', 'color-wheel-marker-aria',
+  ];
+  const values = await replaceKeyArray(KEYS, getConfig());
+  const v = (i, fallback) => {
+    const value = values[i];
+    if (value && value !== KEYS[i].replaceAll('-', ' ')) return value;
+    return fallback;
+  };
   return {
-    tabPrimaryColor: values[0] || 'Primary color',
-    tabImage: values[1] || 'Image',
-    tabColorWheel: values[2] || 'Color Wheel',
+    tabPrimaryColor: v(0, 'Primary color'),
+    tabImage: v(1, 'Image'),
+    tabColorWheel: v(2, 'Color Wheel'),
     harmonyLabels: {
-      CUSTOM: values[3] || 'Custom',
-      ANALOGOUS: values[4] || 'Analogous',
-      COMPLEMENTARY: values[5] || 'Complementary',
-      SPLIT_COMPLEMENTARY: values[6] || 'Split complementary',
-      TRIAD: values[7] || 'Triad',
-      SQUARE: values[8] || 'Square',
-      COMPOUND: values[9] || 'Compound',
-      SHADES: values[10] || 'Shades',
-      MONOCHROMATIC: values[11] || 'Monochromatic',
+      CUSTOM: v(3, 'Custom'),
+      ANALOGOUS: v(4, 'Analogous'),
+      COMPLEMENTARY: v(5, 'Complementary'),
+      SPLIT_COMPLEMENTARY: v(6, 'Split complementary'),
+      TRIAD: v(7, 'Triad'),
+      SQUARE: v(8, 'Square'),
+      COMPOUND: v(9, 'Compound'),
+      SHADES: v(10, 'Shades'),
+      MONOCHROMATIC: v(11, 'Monochromatic'),
     },
-    colorHarmonies: values[12] || 'Color harmonies:',
-    undo: values[13] || 'Undo',
-    redo: values[14] || 'Redo',
-    generateRandom: values[15] || 'Generate random',
-    maximize: values[16] || 'Maximize',
-    createPalette: values[17] || 'Create palette',
-    contrastChecker: values[18] || 'Contrast Checker',
-    colorBlindnessSimulator: values[19] || 'Color Blindness Simulator',
-    noImageTryOurs: values[20] || 'Don\u2019t have an image? Try one of ours:',
-    useThisImage: values[21] || 'Use this image',
-    extractingColors: values[22] || 'Extracting colors...',
+    colorHarmonies: v(12, 'Color harmonies:'),
+    undo: v(13, 'Undo'),
+    redo: v(14, 'Redo'),
+    generateRandom: v(15, 'Generate random'),
+    maximize: v(16, 'Maximize'),
+    createPalette: v(17, 'Create palette'),
+    contrastChecker: v(18, 'Contrast Checker'),
+    colorBlindnessSimulator: v(19, 'Color Blindness Simulator'),
+    noImageTryOurs: v(20, 'Don\u2019t have an image? Try one of ours:'),
+    useThisImage: v(21, 'Use this image'),
+    extractingColors: v(22, 'Extracting colors...'),
+    keyboardHint: v(23, 'Use Left and Right arrow keys to choose a color harmony. Home and End jump to the first or last option.'),
+    harmonyAriaTemplate: v(24, '{harmony} color harmony'),
+    wheelAriaWithHint: v(25, 'Color Wheel - Press Enter to access color handles'),
+    markerAriaTemplate: v(26, '{hex}, use arrow keys to move'),
+    baseColorStrings,
+    colorEditStrings,
+    imageUploadStrings,
+    colorExtractStrings,
+    colorSwatchRailStrings,
   };
 }
 
@@ -280,7 +296,7 @@ async function buildHarmonySelector(controller, strings = {}) {
     id: `${uid}-kbd-hint`,
     class: 'color-wheel-sr-only',
   });
-  kbdHint.textContent = 'Use Left and Right arrow keys to choose a color harmony. Home and End jump to the first or last option.';
+  kbdHint.textContent = strings.keyboardHint;
   titleRow.append(titleStatic, currentName);
   section.appendChild(titleRow);
 
@@ -325,7 +341,7 @@ async function buildHarmonySelector(controller, strings = {}) {
         type: 'button',
         role: 'radio',
         class: 'color-wheel-harmony-option',
-        'aria-label': `${getHarmonyLabel(value)} color harmony`,
+        'aria-label': strings.harmonyAriaTemplate.replace('{harmony}', getHarmonyLabel(value)),
         'data-harmony-value': value,
         tabindex: '-1',
       });
@@ -396,7 +412,7 @@ async function buildHarmonySelector(controller, strings = {}) {
 
     harmonyButtons.forEach((btn) => {
       btn.setAttribute('role', 'radio');
-      btn.setAttribute('aria-label', `${getHarmonyLabel(btn.dataset.harmonyValue)} color harmony`);
+      btn.setAttribute('aria-label', strings.harmonyAriaTemplate.replace('{harmony}', getHarmonyLabel(btn.dataset.harmonyValue)));
     });
 
     updateRovingTabindex(controller.getState().harmonyRule || 'CUSTOM');
@@ -472,7 +488,7 @@ function paletteFromThemeState(state) {
   };
 }
 
-function buildPrimaryColorContent(controller) {
+function buildPrimaryColorContent(controller, strings = {}) {
   primaryColorAdapter?.destroy?.();
   primaryColorAdapter = null;
 
@@ -483,6 +499,7 @@ function buildPrimaryColorContent(controller) {
     baseColor,
     'HEX',
     {
+      strings: strings.baseColorStrings,
       onColorChange: (detail) => {
         if (!detail?.hex) return;
         controller.setBaseColor(detail.hex);
@@ -528,7 +545,11 @@ function buildImageContent(controller, suggestionsRow, strings) {
 async function buildColorWheelContent(controller, strings) {
   const colorWheel = createTag('div', { class: 'color-wheel-content' });
   const baseHex = controller.getState().swatches?.[controller.getState().baseColorIndex]?.hex || '#FF0000';
-  const adapter = createColorWheelExpressAdapter(baseHex, {}, { controller });
+  const adapter = createColorWheelExpressAdapter(baseHex, {}, {
+    controller,
+    ariaLabel: strings.wheelAriaWithHint,
+    markerAriaTemplate: strings.markerAriaTemplate,
+  });
   const harmonySelector = await buildHarmonySelector(controller, strings);
 
   colorWheel.append(adapter.element, harmonySelector);
@@ -555,7 +576,7 @@ async function buildTabs(controller, suggestionsRow, { onSelectionChange, string
 
   tabsInstance.addPanel('color-wheel', cwContent);
   tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings));
-  tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller));
+  tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller, strings));
 
   return tabsInstance;
 }
@@ -1040,6 +1061,8 @@ export default async function decorate(block) {
             minSwatches: 2,
           },
           swatchVerticalMaxPerRow: 6,
+          colorEditStrings: strings.colorEditStrings,
+          colorSwatchRailStrings: strings.colorSwatchRailStrings,
         },
       });
       await stripRenderer.render(stripHost);

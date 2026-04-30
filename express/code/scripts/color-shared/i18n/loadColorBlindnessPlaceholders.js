@@ -29,6 +29,7 @@ export const DEFAULT_BLOCK_PLACEHOLDERS = Object.freeze({
   wheelFocusAnnouncement: 'Color wheel',
   conflictsFocusAnnouncement: 'The conflicts between colors are shown with a caution symbol.',
   blockError: 'Failed to load Color Blindness.',
+  markerAriaTemplate: '{hex}, use arrow keys to move',
 });
 
 const SHARED_KEY_MAP = Object.freeze({
@@ -60,6 +61,7 @@ const BLOCK_KEY_MAP = Object.freeze({
   wheelFocusAnnouncement: 'color-blindness-wheel-focus-announcement',
   conflictsFocusAnnouncement: 'color-blindness-conflicts-focus-announcement',
   blockError: 'color-blindness-block-error',
+  markerAriaTemplate: 'color-wheel-marker-aria',
 });
 
 function isResolvedPlaceholder(value, key) {

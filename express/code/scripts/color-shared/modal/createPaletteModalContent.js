@@ -213,32 +213,35 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   nameEl.textContent = palette?.name || 'Palette';
   nameLikesRow.appendChild(nameEl);
 
+  const modalStrings = options.modalStrings || {};
+  const addFavorite = modalStrings.addFavorite || 'Add to favorites';
+  const removeFavorite = modalStrings.removeFavorite || 'Remove from favorites';
   const likesWrap = createTag('div', { class: 'modal-palette-likes' });
-  const likeBtn = createTag('button', { type: 'button', class: 'like-icon', 'aria-label': 'Add to favorites' });
+  const likeBtn = createTag('button', { type: 'button', class: 'like-icon', 'aria-label': addFavorite });
   decorateAnalyticsAttributes(likeBtn, { linkLabel: 'Toggle favorite' });
   const likeTheme = createTag('sp-theme', { system: 'spectrum-two', color: 'light', scale: 'medium' });
   let liked = options.liked ?? palette?.liked ?? false;
   const updateLikeState = () => {
     likeTheme.replaceChildren();
     likeTheme.appendChild(createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' }));
-    likeBtn.setAttribute('aria-label', liked ? 'Remove from favorites' : 'Add to favorites');
+    likeBtn.setAttribute('aria-label', liked ? removeFavorite : addFavorite);
     likeBtn.classList.toggle('is-liked', liked);
   };
   updateLikeState();
   likeBtn.appendChild(likeTheme);
   let likeTooltip = null;
-  createExpressTooltip({ targetEl: likeBtn, content: liked ? 'Remove from favorites' : 'Add to favorites', placement: 'bottom' })
+  createExpressTooltip({ targetEl: likeBtn, content: liked ? removeFavorite : addFavorite, placement: 'bottom' })
     .then((t) => { likeTooltip = t; })
     .catch(() => {});
   likeBtn.addEventListener('click', () => {
     const previousLiked = liked;
     liked = !liked;
     updateLikeState();
-    likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
+    likeTooltip?.setContent(liked ? removeFavorite : addFavorite);
     options.onLikeToggle?.({ id: palette?.id, liked: previousLiked })?.catch?.((error) => {
       liked = previousLiked;
       updateLikeState();
-      likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
+      likeTooltip?.setContent(liked ? removeFavorite : addFavorite);
       window.lana?.log(`[PaletteModal] Like toggle error: ${error?.message}`, {
         tags: 'color-modal,like',
         severity: 'warning',
@@ -344,8 +347,10 @@ function setupSwatchColumnNav(container) {
 }
 
 export function createPaletteSwatchesModalContent(palette, options = {}) {
+  const modalStrings = options.modalStrings || {};
   const {
-    ctaText = 'Create with color palette',
+    colorSwatchRailStrings,
+    ctaText = modalStrings.paletteCta || 'Create with color palette',
     swatchFeatures: inputSwatchFeatures = {},
     verticalMaxPerRow,
   } = options;
@@ -379,6 +384,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
     orientation: 'vertical-responsive',
     swatchFeatures,
     ...(Number.isFinite(verticalMaxPerRow) ? { verticalMaxPerRow } : {}),
+    ...(colorSwatchRailStrings ? { strings: colorSwatchRailStrings } : {}),
   });
   railWrap.appendChild(railAdapter.element);
   railSection.appendChild(railWrap);
