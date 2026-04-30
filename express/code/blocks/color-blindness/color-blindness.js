@@ -11,6 +11,7 @@ import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 import loadColorBlindnessPlaceholders from '../../scripts/color-shared/i18n/loadColorBlindnessPlaceholders.js';
 import loadBaseColorPlaceholders from '../../scripts/color-shared/i18n/loadBaseColorPlaceholders.js';
 import loadColorEditPlaceholders from '../../scripts/color-shared/i18n/loadColorEditPlaceholders.js';
+import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
 import '../../scripts/color-shared/components/color-wheel-express/index.js';
 
 const ACTION_MENU_ID = 'action-menu-color-blindness';
@@ -48,10 +49,16 @@ export default async function decorate(block) {
 
     block.innerHTML = '';
 
-    const [cbStrings, baseColorStrings, colorEditStrings] = await Promise.all([
+    const [
+      cbStrings,
+      baseColorStrings,
+      colorEditStrings,
+      colorSwatchRailStrings,
+    ] = await Promise.all([
       loadColorBlindnessPlaceholders(),
       loadBaseColorPlaceholders(),
       loadColorEditPlaceholders(),
+      loadColorSwatchRailPlaceholders(),
     ]);
     const { shared, block: blockStrings } = cbStrings;
 
@@ -152,6 +159,9 @@ export default async function decorate(block) {
       announceToScreenReader(blockStrings.wheelFocusAnnouncement);
     });
     wheelEl.showLines = true;
+    if (blockStrings.markerAriaTemplate) {
+      wheelEl.markerAriaTemplate = blockStrings.markerAriaTemplate;
+    }
 
     const computeAndSetConflictPairs = (colors) => {
       const allPairs = [];
@@ -223,6 +233,7 @@ export default async function decorate(block) {
         colorBlindnessStrings: shared,
         colorEditStrings,
         baseColorStrings,
+        colorSwatchRailStrings,
       },
       onColorChangeEnd: () => pushCurrentPalette(),
       onEditOpen: (index) => controller.setActiveSwatchIndex(index),

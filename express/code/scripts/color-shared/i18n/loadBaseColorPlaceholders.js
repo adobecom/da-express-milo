@@ -17,6 +17,8 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   channelLightness: 'Lightness',
   channelLabA: 'a (green-red)',
   channelLabB: 'b (blue-yellow)',
+  colorHandleAria: 'Color handle',
+  hueHandleAria: 'Hue control handle',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -36,6 +38,8 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   channelLightness: 'base-color-channel-lightness',
   channelLabA: 'base-color-channel-lab-a',
   channelLabB: 'base-color-channel-lab-b',
+  colorHandleAria: 'base-color-color-handle-aria',
+  hueHandleAria: 'base-color-hue-handle-aria',
 });
 
 export function createBaseColorPlaceholders(overrides = {}) {

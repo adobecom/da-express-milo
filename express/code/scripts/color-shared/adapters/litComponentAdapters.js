@@ -83,6 +83,9 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   if (options.swatchFeatures != null && !byOrientation) {
     element.swatchFeatures = options.swatchFeatures;
   }
+  if (options.strings) {
+    element.strings = options.strings;
+  }
   element.controller = controller;
   loadIconsRail()
     .then(() => {

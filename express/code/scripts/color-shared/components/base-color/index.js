@@ -1004,7 +1004,7 @@ class BaseColor extends LitElement {
       <div class="bc-color-control">
         <div class="bc-color-area-wrapper ${this.colorMode !== 'HEX' || this.showBrightnessControl ? 'has-sliders' : ''}">
           <sp-color-area
-            aria-label="Color handle"
+            aria-label="${this.strings?.colorHandleAria || BASE_COLOR_DEFAULTS.colorHandleAria}"
             .x=${this._saturation / 100}
             .y=${this._brightness / 100}
             .hue=${this._hue}
@@ -1014,7 +1014,7 @@ class BaseColor extends LitElement {
             @change=${this._onColorAreaChange}
           ></sp-color-area>
           <sp-color-slider
-            label="Hue control handle"
+            label="${this.strings?.hueHandleAria || BASE_COLOR_DEFAULTS.hueHandleAria}"
             gradient="hue"
             color=${currentColor}
             @pointerdown=${this._onPointerDown}
