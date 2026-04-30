@@ -22,6 +22,10 @@ function handleCollections(params) {
 }
 
 function handleFilters(params) {
+  if (params.get('locales')) {
+    params.append('filters', `applicableRegions==${params.get('locales')}`);
+    params.delete('locales');
+  }
   if (params.get('license')) {
     params.append('filters', `licensingCategory==${params.get('license')}`);
     params.delete('license');
