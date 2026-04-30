@@ -783,6 +783,9 @@ function cleanup() {
 }
 
 export default async function decorate(block) {
+  if (block.dataset.blockStatus === 'loaded' || block.dataset.blockStatus === 'loading') return;
+  block.dataset.blockStatus = 'loading';
+
   const layoutRows = [...block.children];
   const suggestionsRow = layoutRows[0] || null;
   const desktopQuery = window.matchMedia('(min-width: 1200px)');
@@ -1130,6 +1133,7 @@ export default async function decorate(block) {
       adoptHeadline(section, layoutInstance);
       block.classList.add('ax-shell-host');
       block.dataset.shellState = 'ready';
+      block.dataset.blockStatus = 'loaded';
       trackColorBlockLoad('color-wheel');
     } catch (error) {
       window.lana?.log(`Color Wheel init error: ${error.message}`, {
