@@ -87,7 +87,6 @@ describe('Express Spectrum component wrappers', () => {
     });
 
     document.body.appendChild(picker.element);
-    await picker.waitForReady();
 
     const pickerElement = picker.element.querySelector('sp-picker');
     pickerElement.open = true;
