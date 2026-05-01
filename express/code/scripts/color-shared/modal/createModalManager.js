@@ -182,7 +182,10 @@ export function createModalManager(strings = createColorModalPlaceholders()) {
     overlay.removeAttribute('aria-hidden');
 
     if (content !== undefined && content !== null) {
-      const node = typeof content === 'function' ? content() : content;
+      const nodeOrPromise = typeof content === 'function' ? content() : content;
+      const node = (nodeOrPromise && typeof nodeOrPromise.then === 'function')
+        ? await nodeOrPromise
+        : nodeOrPromise;
       if (typeof node === 'string') {
         bodyEl.textContent = node;
       } else if (node && typeof node.nodeType === 'number') {
