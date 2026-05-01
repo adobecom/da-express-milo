@@ -189,9 +189,10 @@ export function createUploadDropzone(options = {}) {
   ['dragenter', 'dragover'].forEach((n) => {
     dropzone.addEventListener(n, () => container.classList.add('highlight'));
   });
-  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((n) => {
-    dropzone.addEventListener(n, preventDefaults);
+  ['dragenter', 'dragover', 'dragleave'].forEach((n) => {
+    dropzone.addEventListener(n, (e) => e.preventDefault());
   });
+  dropzone.addEventListener('drop', preventDefaults);
   ['dragleave', 'drop'].forEach((n) => {
     dropzone.addEventListener(n, () => container.classList.remove('highlight'));
   });
