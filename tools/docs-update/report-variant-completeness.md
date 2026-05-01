@@ -40,12 +40,10 @@ These variants exist in the block's CSS or JS but are absent from the kitchen si
 | `ax-table-of-contents` | `horizontal` | Variant exists in JS, not shown in KS |
 | `banner` | `compact`, `multi-button` | Both are CSS-defined; `light` in KS but not in CSS — may be milo-inherited |
 | `cards` | `featured`, `large` | Two significant display variants missing entirely from KS |
-| `collapsible-rows` | `expandable` | Only functional variant not documented |
 | `embed` | `embed-instagram`, `embed-twitter` | Platform-specific class names added by JS; should be noted in authoring instructions |
 | `faqv2` | `bold`, `small`, `no-background` | Multiple CSS variants missing; only `expandable` and `longform` shown |
 | `interactive-marquee` | `dark`, `horizontal-masonry`, `no-search`, `quad`, `tall`, `wide` | All 6 variants missing from KS (see note below) |
 | `quotes` | `carousel` | Distinct layout variant not shown |
-| `ribbon-banner` | `text-light`, `light` | Both CSS variants absent from KS |
 | `template-x` | `apipowered`, `horizontal`, `large`, `mini` | KS shows default only; 4 documented variants in CSS/JS |
 
 ### Medium Priority
