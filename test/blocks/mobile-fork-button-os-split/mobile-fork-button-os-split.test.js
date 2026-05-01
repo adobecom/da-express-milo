@@ -12,7 +12,7 @@ const { default: decorate } = await import('../../../express/code/blocks/mobile-
 const ANDROID_USER_AGENT = 'Mozilla/5.0 (Linux; Android 8.0.0; SM-G955U Build/R16NW) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Mobile Safari/537.36';
 const IOS_USER_AGENT = 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1';
 
-function setDocumentMetadata() {
+function setDocumentMetadata(overrides = {}) {
   const metadata = {
     'floating-cta-live': 'Y',
     'show-floating-cta': 'yes',
@@ -40,6 +40,7 @@ function setDocumentMetadata() {
     'ios-fork-cta-2-link': 'https://www.google.com?os=ios-web',
     'ios-fork-cta-2-text': 'iOS Web',
     'ios-fork-cta-2-icon-text': 'iOS Browser',
+    ...overrides,
   };
 
   Object.entries(metadata).forEach(([name, content]) => {
@@ -50,12 +51,12 @@ function setDocumentMetadata() {
   });
 }
 
-async function render(userAgent) {
+async function render(userAgent, metadataOverrides = {}) {
   Object.defineProperty(navigator, 'userAgent', {
     value: userAgent,
     configurable: true,
   });
-  setDocumentMetadata();
+  setDocumentMetadata(metadataOverrides);
   const block = document.createElement('div');
   block.className = 'floating-button meta-powered';
   block.innerHTML = '<div>mobile</div>';
@@ -142,5 +143,33 @@ describe('Mobile Fork Button OS Split', () => {
     expect(links.length).to.equal(2);
     expect(links[0].textContent).to.equal('Get Android App');
     expect(links[1].textContent).to.equal('Android Web');
+  });
+
+  it('opens the mobile FQA upload target from Android CTA 2 metadata', async () => {
+    let uploadClicks = 0;
+    const uploadButton = document.createElement('button');
+    uploadButton.id = 'mobile-fqa-upload';
+    uploadButton.addEventListener('click', () => { uploadClicks += 1; });
+    document.body.append(uploadButton);
+
+    await render(ANDROID_USER_AGENT, { 'android-fork-cta-2-link': '#mobile-fqa-upload' });
+
+    document.querySelectorAll('.mobile-gating-row')[1].querySelector('a').click();
+
+    expect(uploadClicks).to.equal(1);
+  });
+
+  it('opens the mobile FQA upload target from iOS CTA 2 metadata', async () => {
+    let uploadClicks = 0;
+    const uploadButton = document.createElement('button');
+    uploadButton.id = 'mobile-fqa-upload';
+    uploadButton.addEventListener('click', () => { uploadClicks += 1; });
+    document.body.append(uploadButton);
+
+    await render(IOS_USER_AGENT, { 'ios-fork-cta-2-link': '#mobile-fqa-upload' });
+
+    document.querySelectorAll('.mobile-gating-row')[1].querySelector('a').click();
+
+    expect(uploadClicks).to.equal(1);
   });
 });

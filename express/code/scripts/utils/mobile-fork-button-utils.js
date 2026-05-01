@@ -69,6 +69,7 @@ export function androidCheck(getMetadata, getMobileOperatingSystem) {
  * @param {number} index - CTA index (1 or 2)
  * @param {boolean} useFrictionless - Whether to use frictionless metadata with fallback
  * @param {string} metadataPrefix - Optional metadata prefix for platform-specific fields
+ * @param {boolean} enableMobileFqaUpload - Whether the upload hash should click the upload button
  * @returns {Object} Tool data with icon, iconText, and anchor
  */
 export function createToolData(
@@ -78,6 +79,7 @@ export function createToolData(
   index,
   useFrictionless = false,
   metadataPrefix = '',
+  enableMobileFqaUpload = useFrictionless,
 ) {
   const prefix = `${metadataPrefix}fork-cta-${index}`;
 
@@ -98,7 +100,7 @@ export function createToolData(
   const aTag = createTag('a', { title: textMetadata, href: hrefMetadata });
 
   // Special handler for frictionless upload
-  if (useFrictionless && hrefMetadata.toLowerCase().trim() === '#mobile-fqa-upload') {
+  if (enableMobileFqaUpload && hrefMetadata.toLowerCase().trim() === '#mobile-fqa-upload') {
     aTag.addEventListener('click', (e) => {
       e.preventDefault();
       document.getElementById('mobile-fqa-upload').click();
@@ -216,6 +218,7 @@ export function collectOsSplitFloatingButtonData(
       i,
       false,
       metadataPrefix,
+      true,
     );
     if (toolData) {
       data.tools.push(toolData);
