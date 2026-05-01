@@ -808,6 +808,7 @@ function renderColorVariant(block, rows, config, strings = {}) {
 
   function goToLanding() {
     block.classList.remove('has-image', 'is-loading');
+    dropzone.container.classList.remove('has-image');
     if (markerResizeObserver) markerResizeObserver.disconnect();
     if (resizeHandler) window.removeEventListener('resize', resizeHandler);
     if (markers) {
@@ -1259,6 +1260,7 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
 
   function goToLanding() {
     block.classList.remove('has-image', 'is-loading');
+    dropzone.container.classList.remove('has-image');
     if (markerResizeObserver) markerResizeObserver.disconnect();
     if (resizeHandler) window.removeEventListener('resize', resizeHandler);
     if (markers) {
