@@ -266,6 +266,12 @@ function applyPaletteToChips(colors, chips) {
   colors.forEach((hex, i) => { if (chips[i]) chips[i].style.background = hex; });
 }
 
+function applyGradientToBar(colors, bar) {
+  if (!colors?.length || !bar) return;
+  const stops = colors.map((hex, i) => `${hex} ${Math.round((i / (colors.length - 1)) * 100)}%`).join(', ');
+  bar.style.backgroundImage = `linear-gradient(90deg, ${stops})`;
+}
+
 function getPictureSource(picture) {
   const img = picture?.querySelector('img');
   const source = picture?.querySelector('source');
@@ -335,7 +341,7 @@ function createColorExtractDropzone(block, config, onImageReady, strings = {}) {
 
 /* ---------- Suggested images ---------- */
 
-function buildSuggestedImages(row, onSelect, strings = COLOR_EXTRACT_DEFAULTS) {
+function buildSuggestedImages(row, onSelect, strings = COLOR_EXTRACT_DEFAULTS, variant = 'palette') {
   const wrapper = createTag('div', { class: 'color-extract-suggestions' });
   const label = row?.children?.[0] || createTag('div', {}, strings.noImageTryOurs);
   label.classList.add('color-extract-suggestions-label');
@@ -355,17 +361,24 @@ function buildSuggestedImages(row, onSelect, strings = COLOR_EXTRACT_DEFAULTS) {
     });
     decorateAnalyticsAttributes(button, { linkLabel: 'Use this image' });
     const preview = createTag('div', { class: 'color-extract-suggestion-preview' });
-    const palette = createTag('div', { class: 'color-extract-suggestion-bar' }, [
-      createTag('span', { class: 'color-extract-suggestion-chip is-1' }),
-      createTag('span', { class: 'color-extract-suggestion-chip is-2' }),
-      createTag('span', { class: 'color-extract-suggestion-chip is-3' }),
-      createTag('span', { class: 'color-extract-suggestion-chip is-4' }),
-      createTag('span', { class: 'color-extract-suggestion-chip is-5' }),
-    ]);
+    const isGradient = variant === 'gradient';
+    let palette;
+    let chips = [];
+    if (isGradient) {
+      palette = createTag('div', { class: 'color-extract-suggestion-bar is-gradient' });
+    } else {
+      palette = createTag('div', { class: 'color-extract-suggestion-bar' }, [
+        createTag('span', { class: 'color-extract-suggestion-chip is-1' }),
+        createTag('span', { class: 'color-extract-suggestion-chip is-2' }),
+        createTag('span', { class: 'color-extract-suggestion-chip is-3' }),
+        createTag('span', { class: 'color-extract-suggestion-chip is-4' }),
+        createTag('span', { class: 'color-extract-suggestion-chip is-5' }),
+      ]);
+      chips = [...palette.querySelectorAll('.color-extract-suggestion-chip')];
+    }
     const src = getPictureSource(picture);
     preview.append(picture.cloneNode(true), palette);
     button.append(preview);
-    const chips = [...palette.querySelectorAll('.color-extract-suggestion-chip')];
     const previewImage = preview.querySelector('img');
     if (previewImage) previewImage.draggable = false;
     const hydratePalette = async () => {
@@ -395,11 +408,19 @@ function buildSuggestedImages(row, onSelect, strings = COLOR_EXTRACT_DEFAULTS) {
         context.drawImage(img, 0, 0, w, h);
         const imageData = context.getImageData(0, 0, w, h);
         const { extractColorsFromImage } = await import('./helpers/extractWorker.js');
-        const result = await extractColorsFromImage(imageData, w, h, chips.length);
-        applyPaletteToChips(result.colors, chips);
+        const result = await extractColorsFromImage(imageData, w, h, isGradient ? 5 : chips.length);
+        if (isGradient) {
+          applyGradientToBar(result.colors, palette);
+        } else {
+          applyPaletteToChips(result.colors, chips);
+        }
       } catch (err) {
         window.lana?.log(`Color Extract: extraction failed — ${err?.message}`, { tags: 'color-extract', severity: 'error' });
-        applyPaletteToChips(extractPaletteFromImageElement(img, chips.length), chips);
+        if (isGradient) {
+          applyGradientToBar(extractPaletteFromImageElement(img, 5), palette);
+        } else {
+          applyPaletteToChips(extractPaletteFromImageElement(img, chips.length), chips);
+        }
         await showExtractionError();
       }
     };
@@ -1346,7 +1367,7 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
   }
 
   const suggestions = resolvedConfig.enableUrlInput
-    ? buildSuggestedImages(rows[0], handleSuggestionClick, colorExtractStrings)
+    ? buildSuggestedImages(rows[0], handleSuggestionClick, colorExtractStrings, 'gradient')
     : null;
   const landing = buildLandingStage(rows[2], colorExtractStrings);
   const dragOverlay = buildDragOverlay(colorExtractStrings);
