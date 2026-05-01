@@ -450,7 +450,9 @@ async function loadPage() {
   /* region based redirect to CN homepage */
   const isAdobeOrigin = /^(www|color)\.(stage\.)?adobe\.com$/.test(window.location.hostname);
   import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
-    if (country === 'cn' && isAdobeOrigin && !window.location.pathname.startsWith('/cn') && !window.isErrorPage) { window.location.href = '/cn'; }
+    if (country === 'cn' && isAdobeOrigin && !window.location.pathname.startsWith('/cn') && !window.isErrorPage) {
+      window.location.href = window.location.hostname.includes('stage') ? 'https://www.stage.adobe.com/cn' : 'https://www.adobe.com/cn';
+    }
   });
 
   document.head.querySelectorAll('meta').forEach((meta) => {
