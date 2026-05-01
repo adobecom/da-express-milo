@@ -9,6 +9,7 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import { createGradientModalContent, ensureGradientModalContentStyles } from '../../scripts/color-shared/modal/createGradientModalContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
 import { buildPaletteEditUrl, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
+import { getLibs } from '../../scripts/utils.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
 import { createLoadingScreenComponent } from '../../scripts/color-shared/components/createLoadingScreenComponent.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
@@ -703,7 +704,7 @@ export default async function decorate(block) {
               },
             );
           });
-          activeRenderer.on(EVENTS.PALETTE_EDIT, (palette) => {
+          activeRenderer.on(EVENTS.PALETTE_EDIT, async (palette) => {
             const colors = palette?.colors || [];
             const name = palette?.name || '';
             const editUrl = buildPaletteEditUrl(colorWheelPath, colors, name);
@@ -889,7 +890,7 @@ export default async function decorate(block) {
             },
           );
         });
-        renderer.on(EVENTS.PALETTE_EDIT, (palette) => {
+        renderer.on(EVENTS.PALETTE_EDIT, async (palette) => {
           const colors = palette?.colors || [];
           const name = palette?.name || '';
           const editUrl = buildPaletteEditUrl(colorWheelPath, colors, name);
