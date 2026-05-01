@@ -118,7 +118,7 @@ export default function Form() {
         name="locales"
         value={formData.locales}
         onChange={createFieldChangeHandler('locales')}
-        info="Template-x style locale list. Example: en or fr or de."
+        info="Region filter values, for example IN. These are sent as applicableRegions filters."
       />
 
       <TextField

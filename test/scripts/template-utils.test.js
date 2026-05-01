@@ -58,10 +58,11 @@ describe('template-utils', () => {
     });
     it('handles filters', () => {
       // filters=language==en-US
-      const { url } = recipe2ApiQuery('topics=class&tasks=flyer&language=en-US&license=free&behaviors=still&collection=default');
+      const { url } = recipe2ApiQuery('topics=class&tasks=flyer&language=en-US&locales=IN&license=free&behaviors=still&collection=default');
       const params = new URL(url).searchParams;
       const filters = params.getAll('filters');
-      expect(filters.length).to.equal(5);
+      expect(filters.length).to.equal(6);
+      expect(filters.includes('applicableRegions==IN')).to.be.true;
       expect(filters.includes('licensingCategory==free')).to.be.true;
       expect(filters.includes('behaviors==still')).to.be.true;
       expect(filters.includes('pages.task.name==flyer')).to.be.true;

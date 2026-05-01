@@ -69,6 +69,12 @@ function diffForms(form1, form2) {
 export function recipe2Form(recipe) {
   const params = new URLSearchParams(recipe);
   const formData = structuredClone(initialFormData);
+  params.getAll('filters').forEach((filter) => {
+    const [, key, value] = /^([^=]+)==(.+)$/.exec(filter) || [];
+    if (key === 'applicableRegions') {
+      formData.locales = value;
+    }
+  });
   if (params.has('collectionId')) {
     if (params.get('collectionId') === defaultCollectionId) {
       formData.collection = 'default';
