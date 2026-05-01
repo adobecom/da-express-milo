@@ -93,7 +93,7 @@
   --ax-palette-name-padding-block: 3px;
   --ax-palette-name-width-desktop: 224px;
   --ax-toolbar-divider-width: 0.5px;
-  --ax-toolbar-focus-ring-width: 2px;
+  --ax-toolbar-focus-ring-width: var(--spacing-50);
   --ax-toolbar-focus-ring-offset: 2px;
   --ax-toolbar-summary-gap-desktop: 10px;
   --ax-toolbar-input-height: var(--spacing-600);
@@ -216,7 +216,7 @@
   font-family: var(--body-font-family);
   font-weight: var(--ax-body-weight);
   font-size: var(--ax-body-xxs-size);
-  line-height: 16px;
+  line-height: var(--spacing-300);
   color: var(--Palette-gray-600);
   min-height: 0;
 }
@@ -281,7 +281,7 @@
 /* Hide toolbar when footer is in view — slides off-screen like floating-cta */
 .color-floating-toolbar-container.ax-toolbar-footer-hidden,
 .ax-toolbar-sticky-wrapper.ax-toolbar-footer-hidden {
-  transform: translateY(110%);
+  transform: translateY(130%);
   pointer-events: none;
   transition: transform 0.3s ease-in;
   animation: none;
