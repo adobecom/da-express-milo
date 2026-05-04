@@ -153,42 +153,62 @@ export class ColorWheelExpress extends ColorWheel {
     markerLayer.appendChild(marker);
   }
 
+  _createMarker(index) {
+    const marker = document.createElement('div');
+    marker.className = 'wheel-marker-overlay';
+    marker.style.position = 'absolute';
+    marker.style.transform = 'translate(-50%, -50%)';
+    marker.dataset.index = index;
+    marker.setAttribute('role', 'button');
+    marker.setAttribute('tabindex', '-1');
+    // Listeners are bound once at creation; index is read live from dataset
+    // to avoid stale closures if a marker's slot index ever shifts.
+    marker.addEventListener('pointerdown', (e) => {
+      this.handleMarkerDown(e, Number(marker.dataset.index));
+    });
+    marker.addEventListener('keydown', (e) => {
+      this._handleMarkerKeydown(e, Number(marker.dataset.index));
+    });
+    marker.addEventListener('focus', () => {
+      this._kbFocusIndex = Number(marker.dataset.index);
+      marker.classList.add('wheel-marker-overlay--kb-focused');
+    });
+    marker.addEventListener('blur', (e) => {
+      marker.classList.remove('wheel-marker-overlay--kb-focused');
+      if (!e.relatedTarget || !this.shadowRoot.contains(e.relatedTarget)) {
+        this._kbFocusIndex = -1;
+      }
+    });
+    return marker;
+  }
+
   updateMarkers() {
     const markerLayer = this.shadowRoot.querySelector('.marker-layer');
     if (!markerLayer || !this.swatches.length) return;
 
-    if (this.harmonyRule === 'CUSTOM' && this._dragIndex >= 0) {
-      const swatch = this.swatches[this._dragIndex];
-      if (!swatch?.hsv) return;
+    // Patch existing markers/spokes in place. Wiping markerLayer.innerHTML on
+    // every drag tick destroys the marker the user is currently pressing,
+    // which on iOS Safari corrupts the active gesture (handle drift, in some
+    // cases triggering a navigation/refresh) and leaks DOM/listeners until
+    // the tab OOMs. Only create/remove DOM when the swatch count changes.
+    const showSpokes = this.harmonyRule !== 'CUSTOM';
+    const desiredCount = this.swatches.length;
 
-      const { h, s } = swatch.hsv;
-      const smoothH = scientificToArtisticSmooth(h);
-      const radius = (this.wheelRadius * s) / 100;
-      const phi = degToRad(180 - smoothH);
-      const [x, y] = polarToXy(radius, phi);
-
-      const marker = markerLayer.querySelector(`[data-index="${this._dragIndex}"]`);
-      if (marker) {
-        marker.style.left = `calc(50% + ${x}px)`;
-        marker.style.top = `calc(50% + ${y}px)`;
-        marker.style.setProperty('--wheel-marker-color', swatch.hex);
-        marker.setAttribute('aria-label', (this.markerAriaTemplate || '{hex}, use arrow keys to move').replace('{hex}', swatch.hex));
-      }
-
-      this.drawLines();
-      return;
+    const existingMarkers = markerLayer.querySelectorAll('.wheel-marker-overlay');
+    for (let i = existingMarkers.length - 1; i >= desiredCount; i -= 1) {
+      existingMarkers[i].remove();
     }
-
-    markerLayer.innerHTML = '';
+    const existingSpokes = markerLayer.querySelectorAll('.wheel-spoke');
+    existingSpokes.forEach((spoke) => spoke.remove());
 
     this.swatches.forEach((swatch, index) => {
+      if (!swatch?.hsv) return;
       const { h, s } = swatch.hsv;
       const smoothH = scientificToArtisticSmooth(h);
       const radius = (this.wheelRadius * s) / 100;
       const phi = degToRad(180 - smoothH);
       const [x, y] = polarToXy(radius, phi);
 
-      const showSpokes = this.harmonyRule !== 'CUSTOM';
       if (radius > 0 && showSpokes) {
         const spoke = document.createElement('div');
         spoke.className = 'wheel-spoke';
@@ -198,43 +218,28 @@ export class ColorWheelExpress extends ColorWheel {
         markerLayer.appendChild(spoke);
       }
 
-      const marker = document.createElement('div');
-      marker.className = 'wheel-marker-overlay';
-      marker.style.position = 'absolute';
+      let marker = markerLayer.querySelector(`.wheel-marker-overlay[data-index="${index}"]`);
+      if (!marker) {
+        marker = this._createMarker(index);
+        markerLayer.appendChild(marker);
+      } else if (Number(marker.dataset.index) !== index) {
+        marker.dataset.index = index;
+      }
       marker.style.left = `calc(50% + ${x}px)`;
       marker.style.top = `calc(50% + ${y}px)`;
-      marker.style.transform = 'translate(-50%, -50%)';
       marker.style.setProperty('--wheel-marker-color', swatch.hex);
       marker.style.zIndex = index === this.baseColorIndex ? 10 : 5;
-      marker.dataset.index = index;
-      marker.setAttribute('role', 'button');
-      marker.setAttribute('tabindex', '-1');
       marker.setAttribute('aria-label', (this.markerAriaTemplate || '{hex}, use arrow keys to move').replace('{hex}', swatch.hex));
-      if (index === this.baseColorIndex && this.harmonyRule !== 'CUSTOM') {
-        marker.classList.add('wheel-marker-overlay--base');
-      }
-      marker.addEventListener('pointerdown', (e) => this.handleMarkerDown(e, index));
-      marker.addEventListener('keydown', (e) => this._handleMarkerKeydown(e, index));
-      marker.addEventListener('focus', () => {
-        this._kbFocusIndex = index;
-        marker.classList.add('wheel-marker-overlay--kb-focused');
-      });
-      marker.addEventListener('blur', (e) => {
-        marker.classList.remove('wheel-marker-overlay--kb-focused');
-        if (!e.relatedTarget || !this.shadowRoot.contains(e.relatedTarget)) {
-          this._kbFocusIndex = -1;
-        }
-      });
-
-      markerLayer.appendChild(marker);
+      const isBase = index === this.baseColorIndex && this.harmonyRule !== 'CUSTOM';
+      marker.classList.toggle('wheel-marker-overlay--base', isBase);
     });
 
     if (this._kbFocusIndex >= 0 && this._kbFocusIndex < this.swatches.length) {
       const kbIdx = this._kbFocusIndex;
-      requestAnimationFrame(() => {
-        const m = markerLayer.querySelector(`[data-index="${kbIdx}"]`);
-        if (m) m.focus({ preventScroll: true });
-      });
+      const m = markerLayer.querySelector(`[data-index="${kbIdx}"]`);
+      if (m && this.shadowRoot.activeElement !== m) {
+        requestAnimationFrame(() => m.focus({ preventScroll: true }));
+      }
     }
 
     this.drawLines();
