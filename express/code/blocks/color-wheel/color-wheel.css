@@ -493,6 +493,8 @@ color-wheel-express {
     flex: 1 1 0;
     min-height: 0;
     width: 100%;
+    display: block;
+
   }
 
   .color-wheel-content {
