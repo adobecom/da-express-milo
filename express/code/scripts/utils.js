@@ -487,9 +487,10 @@ export function preDecorateSections(area) {
             const sameHash = currURL.hash === linkToTargetURL?.hash;
             const isNotInFloatingCta = !a.closest('.block')?.classList.contains('floating-button');
             const notFloatingCtaIgnore = !a.classList.contains('floating-cta-ignore');
+            const isNotInCtaCarousel = !a.closest('.cta-carousel');
 
             return (sameText || (samePathname && sameHash))
-              && isNotInFloatingCta && notFloatingCtaIgnore;
+              && isNotInFloatingCta && notFloatingCtaIgnore && isNotInCtaCarousel;
           } catch (error) {
             window.lana?.log(`${error?.message || error?.detail || error}`, { tags: 'utils', severity: 'error' });
             return false;

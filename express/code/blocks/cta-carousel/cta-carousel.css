@@ -51,6 +51,7 @@
 .cta-carousel .card {
     margin: 0 8px;
     position: relative;
+    cursor: pointer;
 }
 
 .cta-carousel .card:focus-within {
