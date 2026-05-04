@@ -499,6 +499,7 @@ color-wheel-express {
 
   .color-wheel-content {
     gap: var(--spacing-100);
+    max-width: 370px;
   }
 
   .color-wheel .action-menu-controls-only {
@@ -568,3 +569,5 @@ color-wheel-express {
     display: flex;
   }
 }
+
+
