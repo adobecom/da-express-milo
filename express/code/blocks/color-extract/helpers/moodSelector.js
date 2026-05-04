@@ -137,22 +137,22 @@ export default function createMoodSelector(initialMood, onChange, options = {}) 
   });
 
   popover.addEventListener('keydown', (e) => {
-    const options = getOptions();
+    const pOptions = getOptions();
     const focused = document.activeElement;
-    const index = options.indexOf(focused);
+    const index = pOptions.indexOf(focused);
 
     if (e.key === 'ArrowDown') {
       e.preventDefault();
-      focusOption(options[(index + 1) % options.length]);
+      focusOption(pOptions[(index + 1) % pOptions.length]);
     } else if (e.key === 'ArrowUp') {
       e.preventDefault();
-      focusOption(options[(index - 1 + options.length) % options.length]);
+      focusOption(pOptions[(index - 1 + pOptions.length) % pOptions.length]);
     } else if (e.key === 'Home') {
       e.preventDefault();
-      focusOption(options[0]);
+      focusOption(pOptions[0]);
     } else if (e.key === 'End') {
       e.preventDefault();
-      focusOption(options[options.length - 1]);
+      focusOption(pOptions[pOptions.length - 1]);
     } else if (e.key === 'Escape') {
       e.preventDefault();
       closePopover();
