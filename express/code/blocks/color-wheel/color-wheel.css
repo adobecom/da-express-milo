@@ -571,16 +571,3 @@ color-wheel-express {
 }
 
 
-.color-wheel sp-tab-panel[selected] {
-  display: block;
-  min-width: 0;
-}
-.color-wheel sp-tab-panel[selected] .color-wheel-content {
-  width: 100%;
-  max-width: 370px;
-  min-width: 0;
-}
-.color-wheel-harmony-carousel-host {
-  width: 100%;
-  min-width: 0;
-}
