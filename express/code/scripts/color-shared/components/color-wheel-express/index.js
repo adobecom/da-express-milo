@@ -84,6 +84,17 @@ export class ColorWheelExpress extends ColorWheel {
       cancelAnimationFrame(this._dragRaf);
       this._dragRaf = 0;
     }
+    if (this._dragWriteTimer) {
+      clearTimeout(this._dragWriteTimer);
+      this._dragWriteTimer = null;
+    }
+    // If the component is torn down mid-drag (e.g. breakpoint re-init), the
+    // window-level pointer listeners would otherwise leak forever, holding
+    // closures over the dead element and re-firing on every subsequent drag.
+    if (this._activeDragCleanup) {
+      try { this._activeDragCleanup(); } catch (_) { /* noop */ }
+      this._activeDragCleanup = null;
+    }
     super.disconnectedCallback();
   }
 
@@ -344,16 +355,60 @@ export class ColorWheelExpress extends ColorWheel {
     return hex;
   }
 
-  // Each pointermove triggers setSwatchHex, which fans out to every controller
-  // subscriber (color-wheel-express itself, the swatch-rail bridge → strip
-  // re-render, primary-color adapter, palette context, etc.) and a deep-clone
-  // of state per notification. iOS Safari dispatches coalesced pointer events
-  // at up to 120 Hz; without throttling the main thread can't keep up,
-  // tripping the unresponsive-page watchdog (which reloads the page) and
-  // bloating memory until the tab is OOM-killed.
-  // Coalescing to one update per animation frame collapses N events to 1
-  // controller write per frame — the user-visible drag is still smooth
-  // because the screen only paints once per frame anyway.
+  // Decouple visual feedback from controller writes during drag.
+  //
+  // The dominant cost of a drag tick is NOT the rAF rate — it is the
+  // setSwatchHex fan-out: 2 deep-clone _notify calls × ~6 controller
+  // subscribers, including the swatch-rail bridge that re-emits to a Lit
+  // re-render of the entire strip (Spectrum components, hex labels, lock /
+  // trash buttons, etc.) plus the context provider's listeners and document
+  // event bus dispatch. On iOS Safari the resulting per-second allocation
+  // and shadow-DOM churn causes the WebContent process to be killed by
+  // jetsam (page-refresh symptom) and eventually shows
+  // "a problem repeatedly occurred".
+  //
+  // Strategy:
+  //   • Visual update (marker DOM position + colour) at every rAF tick —
+  //     cheap, keeps the marker locked to the finger.
+  //   • controller.setSwatchHex throttled to ~12 Hz (every ~80 ms). The
+  //     strip and harmony recompute breathe between writes.
+  //   • A trailing setTimeout flush guarantees the user's final cursor
+  //     position is committed even if it arrives inside a throttle gap.
+  //
+  // Compute marker position via the same HSB→wheel-coords pipeline that
+  // updateMarkers() uses, so the local position matches the eventual
+  // controller-driven re-render and there is no snap when it commits.
+  _updateMarkerDomLocally(index, hex) {
+    const layer = this.shadowRoot?.querySelector('.marker-layer');
+    if (!layer) return;
+    const marker = layer.querySelector(`.wheel-marker-overlay[data-index="${index}"]`);
+    if (!marker) return;
+
+    const { red, green, blue } = hexToRGB(hex);
+    const { hue, saturation } = rgbToHSB(red, green, blue);
+    const smoothH = scientificToArtisticSmooth(hue);
+    const radius = (this.wheelRadius * saturation) / 100;
+    const phi = degToRad(180 - smoothH);
+    const [x, y] = polarToXy(radius, phi);
+
+    marker.style.left = `calc(50% + ${x}px)`;
+    marker.style.top = `calc(50% + ${y}px)`;
+    marker.style.setProperty('--wheel-marker-color', hex);
+  }
+
+  _flushPendingDragWrite() {
+    if (this._dragWriteTimer) {
+      clearTimeout(this._dragWriteTimer);
+      this._dragWriteTimer = null;
+    }
+    if (this._pendingDragWrite && this.controller) {
+      const { index, hex } = this._pendingDragWrite;
+      this._pendingDragWrite = null;
+      this._lastDragWriteAt = performance.now();
+      this.controller.setSwatchHex(index, hex);
+    }
+  }
+
   _scheduleDragUpdate(index, event) {
     this._pendingDragEvent = event;
     this._pendingDragIndex = index;
@@ -364,8 +419,36 @@ export class ColorWheelExpress extends ColorWheel {
       const i = this._pendingDragIndex;
       this._pendingDragEvent = null;
       if (!e || !this.controller) return;
+
+      // Compute the hex for this position; it's needed either now (if we
+      // commit immediately) or for the trailing flush.
       const hex = this.updateMarkerPosition(e);
-      this.controller.setSwatchHex(i, hex);
+
+      // Cheap visual update — marker tracks the finger every frame, using
+      // the same HSB→position pipeline updateMarkers() will use later.
+      this._updateMarkerDomLocally(i, hex);
+
+      const now = performance.now();
+      const elapsed = now - (this._lastDragWriteAt || 0);
+      const MIN_WRITE_INTERVAL_MS = 80;
+
+      if (elapsed >= MIN_WRITE_INTERVAL_MS) {
+        this._lastDragWriteAt = now;
+        this._pendingDragWrite = null;
+        if (this._dragWriteTimer) {
+          clearTimeout(this._dragWriteTimer);
+          this._dragWriteTimer = null;
+        }
+        this.controller.setSwatchHex(i, hex);
+      } else {
+        this._pendingDragWrite = { index: i, hex };
+        if (!this._dragWriteTimer) {
+          this._dragWriteTimer = setTimeout(() => {
+            this._dragWriteTimer = null;
+            this._flushPendingDragWrite();
+          }, MIN_WRITE_INTERVAL_MS - elapsed);
+        }
+      }
     });
   }
 
@@ -383,8 +466,14 @@ export class ColorWheelExpress extends ColorWheel {
       }
       const hex = this.updateMarkerPosition(event);
       if (this.controller) {
+        this._lastDragWriteAt = performance.now();
         this.controller.setSwatchHex(this.activeSwatchIndex, hex);
       }
+    }
+
+    if (this._activeDragCleanup) {
+      try { this._activeDragCleanup(); } catch (_) { /* noop */ }
+      this._activeDragCleanup = null;
     }
 
     const target = event.target;
@@ -395,13 +484,15 @@ export class ColorWheelExpress extends ColorWheel {
       if (e.pointerId !== pointerId) return;
       this._scheduleDragUpdate(this.activeSwatchIndex, e);
     };
-    const upHandler = (e) => {
-      if (e.pointerId !== pointerId) return;
+    const endDrag = () => {
       if (this._dragRaf) {
         cancelAnimationFrame(this._dragRaf);
         this._dragRaf = 0;
         this._pendingDragEvent = null;
       }
+      // Commit the user's final cursor position, even if a throttle gap
+      // would have otherwise dropped it.
+      this._flushPendingDragWrite();
       try { target?.releasePointerCapture?.(pointerId); } catch (_) { /* noop */ }
       const { red, green, blue } = hexToRGB(this.color);
       this.dispatchEvent(new CustomEvent('change-end', {
@@ -410,11 +501,24 @@ export class ColorWheelExpress extends ColorWheel {
       window.removeEventListener('pointermove', moveHandler);
       window.removeEventListener('pointerup', upHandler);
       window.removeEventListener('pointercancel', upHandler);
+      target?.removeEventListener?.('lostpointercapture', lostHandler);
+      this._activeDragCleanup = null;
     };
+    const upHandler = (e) => {
+      if (e.pointerId !== pointerId) return;
+      endDrag();
+    };
+    // iOS Safari can lose pointer capture mid-drag (multi-touch interruption,
+    // backgrounding) without firing pointerup OR pointercancel. Without this
+    // fallback the window listeners would leak.
+    const lostHandler = () => endDrag();
+
+    this._activeDragCleanup = endDrag;
 
     window.addEventListener('pointermove', moveHandler);
     window.addEventListener('pointerup', upHandler);
     window.addEventListener('pointercancel', upHandler);
+    target?.addEventListener?.('lostpointercapture', lostHandler);
   }
 
   handleMarkerDown(event, index) {
@@ -441,24 +545,34 @@ export class ColorWheelExpress extends ColorWheel {
     const markerV = rawV > 0 ? rawV : this.wheelBrightness;
     this._dragFixedBrightness = markerV;
 
+    if (this._activeDragCleanup) {
+      try { this._activeDragCleanup(); } catch (_) { /* noop */ }
+      this._activeDragCleanup = null;
+    }
+
     const target = event.currentTarget || event.target;
     const pointerId = event.pointerId;
     // Capture the pointer to the marker so the gesture survives any DOM
     // movement and the browser stops considering native pan/refresh gestures.
     try { target?.setPointerCapture?.(pointerId); } catch (_) { /* noop */ }
 
+    // Reset the throttle clock so the first move during a fresh drag commits
+    // immediately rather than waiting for the trailing flush.
+    this._lastDragWriteAt = 0;
+
     const moveHandler = (e) => {
       if (e.pointerId !== pointerId) return;
       this._scheduleDragUpdate(index, e);
     };
-
-    const upHandler = (e) => {
-      if (e.pointerId !== pointerId) return;
+    const endDrag = () => {
       if (this._dragRaf) {
         cancelAnimationFrame(this._dragRaf);
         this._dragRaf = 0;
         this._pendingDragEvent = null;
       }
+      // Commit the user's final cursor position, even if a throttle gap
+      // would have otherwise dropped it.
+      this._flushPendingDragWrite();
       this._dragIndex = -1;
       this._dragFixedBrightness = null;
       if (this.showLines && !this.isMarkerUp) {
@@ -473,11 +587,24 @@ export class ColorWheelExpress extends ColorWheel {
       window.removeEventListener('pointermove', moveHandler);
       window.removeEventListener('pointerup', upHandler);
       window.removeEventListener('pointercancel', upHandler);
+      target?.removeEventListener?.('lostpointercapture', lostHandler);
+      this._activeDragCleanup = null;
     };
+    const upHandler = (e) => {
+      if (e.pointerId !== pointerId) return;
+      endDrag();
+    };
+    // iOS Safari can lose pointer capture mid-drag (multi-touch interruption,
+    // backgrounding) without firing pointerup OR pointercancel. Without this
+    // fallback the window listeners would leak.
+    const lostHandler = () => endDrag();
+
+    this._activeDragCleanup = endDrag;
 
     window.addEventListener('pointermove', moveHandler);
     window.addEventListener('pointerup', upHandler);
     window.addEventListener('pointercancel', upHandler);
+    target?.addEventListener?.('lostpointercapture', lostHandler);
   }
 
   attachController() {
