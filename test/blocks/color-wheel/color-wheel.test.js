@@ -118,9 +118,9 @@ describe('color-wheel utilities', () => {
       expect(paletteFromThemeState({ swatches: [] }).colors).to.deep.equal(['#FF0000']);
     });
 
-    it('falls back to default name when name is absent', () => {
+    it('falls back to empty string when name is absent', () => {
       const palette = paletteFromThemeState({ swatches: [{ hex: '#FF0000' }] });
-      expect(palette.name).to.be.a('string').and.have.length.above(0);
+      expect(palette.name).to.equal('');
     });
   });
 
