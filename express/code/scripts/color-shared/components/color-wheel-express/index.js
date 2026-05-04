@@ -137,6 +137,7 @@ export class ColorWheelExpress extends ColorWheel {
       try { this._activeDragCleanup(); } catch (_) { /* noop */ }
       this._activeDragCleanup = null;
     }
+    this._dragMarkerRef = null;
     super.disconnectedCallback();
   }
 
@@ -267,12 +268,27 @@ export class ColorWheelExpress extends ColorWheel {
     const showSpokes = this.harmonyRule !== 'CUSTOM';
     const desiredCount = this.swatches.length;
 
-    const existingMarkers = markerLayer.querySelectorAll('.wheel-marker-overlay');
-    for (let i = existingMarkers.length - 1; i >= desiredCount; i -= 1) {
-      existingMarkers[i].remove();
+    // Build a single index map from one querySelectorAll instead of five
+    // separate querySelector calls per swatch. updateMarkers fires per
+    // controller notify (~12 Hz mid-drag); cutting redundant DOM lookups
+    // matters for iOS allocation pressure.
+    const existingMarkerNodes = markerLayer.querySelectorAll('.wheel-marker-overlay');
+    const markerByIndex = new Map();
+    existingMarkerNodes.forEach((m) => {
+      markerByIndex.set(Number(m.dataset.index), m);
+    });
+    for (let i = existingMarkerNodes.length - 1; i >= desiredCount; i -= 1) {
+      existingMarkerNodes[i].remove();
+      markerByIndex.delete(Number(existingMarkerNodes[i].dataset.index));
     }
-    const existingSpokes = markerLayer.querySelectorAll('.wheel-spoke');
-    existingSpokes.forEach((spoke) => spoke.remove());
+    // Patch spokes in place. Previously we removed all spokes and recreated
+    // them on every notify — at ~12 Hz × 5 spokes that's 60 DOM allocations
+    // per second of pure churn while dragging the base marker, and on iOS
+    // Safari that contributes to the WebContent jetsam during sustained
+    // drags. Now we reuse the existing spoke nodes and only remove the tail
+    // when the visible spoke count actually shrinks.
+    const existingSpokes = Array.from(markerLayer.querySelectorAll('.wheel-spoke'));
+    let spokeCursor = 0;
 
     this.swatches.forEach((swatch, index) => {
       if (!swatch?.hsv) return;
@@ -283,20 +299,24 @@ export class ColorWheelExpress extends ColorWheel {
       const [x, y] = polarToXy(radius, phi);
 
       if (radius > 0 && showSpokes) {
-        const spoke = document.createElement('div');
-        spoke.className = 'wheel-spoke';
+        let spoke = existingSpokes[spokeCursor];
+        if (!spoke) {
+          spoke = document.createElement('div');
+          spoke.className = 'wheel-spoke';
+          markerLayer.appendChild(spoke);
+          existingSpokes.push(spoke);
+        }
         spoke.dataset.spoke = index;
         spoke.style.width = `${radius}px`;
         spoke.style.transform = `rotate(${-smoothH}deg)`;
-        markerLayer.appendChild(spoke);
+        spokeCursor += 1;
       }
 
-      let marker = markerLayer.querySelector(`.wheel-marker-overlay[data-index="${index}"]`);
+      let marker = markerByIndex.get(index);
       if (!marker) {
         marker = this._createMarker(index);
         markerLayer.appendChild(marker);
-      } else if (Number(marker.dataset.index) !== index) {
-        marker.dataset.index = index;
+        markerByIndex.set(index, marker);
       }
       marker.style.left = `calc(50% + ${x}px)`;
       marker.style.top = `calc(50% + ${y}px)`;
@@ -308,9 +328,13 @@ export class ColorWheelExpress extends ColorWheel {
       marker.classList.toggle('wheel-marker-overlay--active', index === this.activeSwatchIndex);
     });
 
+    for (let i = existingSpokes.length - 1; i >= spokeCursor; i -= 1) {
+      existingSpokes[i].remove();
+    }
+
     if (this._kbFocusIndex >= 0 && this._kbFocusIndex < this.swatches.length) {
       const kbIdx = this._kbFocusIndex;
-      const m = markerLayer.querySelector(`[data-index="${kbIdx}"]`);
+      const m = markerByIndex.get(kbIdx);
       if (m && this.shadowRoot.activeElement !== m) {
         requestAnimationFrame(() => m.focus({ preventScroll: true }));
       }
@@ -366,6 +390,14 @@ export class ColorWheelExpress extends ColorWheel {
     });
   }
 
+  // Returns the hex of the position under the pointer. No event dispatch:
+  // we previously fired a 'change' CustomEvent (with HSL detail) on every
+  // rAF tick (60 Hz), but the only listener — createColorWheelExpressAdapter —
+  // invoked an empty callback, and color-blindness only listens for
+  // change-end. The CustomEvent + HSL allocations and DOM tree walk per
+  // frame contributed to the iOS Safari WebContent jetsam during sustained
+  // drag. Committed state still flows through controller.setSwatchHex on
+  // the throttled write path.
   updateMarkerPosition(event) {
     const dx = event.clientX - this.canvasPosition.x - this.wheelRadius;
     const dy = event.clientY - this.canvasPosition.y - this.wheelRadius;
@@ -384,11 +416,7 @@ export class ColorWheelExpress extends ColorWheel {
       ? Math.min(100, Math.max(0, this._dragFixedBrightness)) / 100
       : Math.min(100, Math.max(0, this.wheelBrightness)) / 100;
     const rgb = hsbToRGB(hue / 360, saturation, brightnessToUse);
-    const hex = rgbToHex(rgb);
-    const hsl = rgbToHSL(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
-
-    this.dispatchEvent(new CustomEvent('change', { detail: hsl }));
-    return hex;
+    return rgbToHex(rgb);
   }
 
   // Decouple visual feedback from controller writes during drag.
@@ -415,10 +443,20 @@ export class ColorWheelExpress extends ColorWheel {
   // updateMarkers() uses, so the local position matches the eventual
   // controller-driven re-render and there is no snap when it commits.
   _updateMarkerDomLocally(index, hex) {
-    const layer = this.shadowRoot?.querySelector('.marker-layer');
-    if (!layer) return;
-    const marker = layer.querySelector(`.wheel-marker-overlay[data-index="${index}"]`);
-    if (!marker) return;
+    // Cache the marker reference for the duration of the drag — at 60 Hz the
+    // two querySelectors (.marker-layer + the data-index lookup) per rAF tick
+    // are pure allocation churn. handleMarkerDown / handlePointerDown set
+    // _dragMarkerRef when the gesture starts; endDrag clears it. If the
+    // cached node is detached (e.g. updateMarkers ran an excess-removal pass
+    // mid-drag), fall back to the lookup once.
+    let marker = this._dragMarkerRef;
+    if (!marker || !marker.isConnected || Number(marker.dataset.index) !== index) {
+      const layer = this.shadowRoot?.querySelector('.marker-layer');
+      if (!layer) return;
+      marker = layer.querySelector(`.wheel-marker-overlay[data-index="${index}"]`);
+      if (!marker) return;
+      this._dragMarkerRef = marker;
+    }
 
     const { red, green, blue } = hexToRGB(hex);
     const { hue, saturation } = rgbToHSB(red, green, blue);
@@ -518,6 +556,13 @@ export class ColorWheelExpress extends ColorWheel {
     const pointerId = event.pointerId;
     try { target?.setPointerCapture?.(pointerId); } catch (_) { /* noop */ }
 
+    // Canvas drag tracks the active marker — let _updateMarkerDomLocally
+    // skip its 60 Hz querySelectors by caching the active marker now.
+    const layer = this.shadowRoot?.querySelector('.marker-layer');
+    this._dragMarkerRef = layer?.querySelector(
+      `.wheel-marker-overlay[data-index="${this.activeSwatchIndex}"]`,
+    ) || null;
+
     const moveHandler = (e) => {
       if (e.pointerId !== pointerId) return;
       this._scheduleDragUpdate(this.activeSwatchIndex, e);
@@ -531,6 +576,7 @@ export class ColorWheelExpress extends ColorWheel {
       // Commit the user's final cursor position, even if a throttle gap
       // would have otherwise dropped it.
       this._flushPendingDragWrite();
+      this._dragMarkerRef = null;
       try { target?.releasePointerCapture?.(pointerId); } catch (_) { /* noop */ }
       const { red, green, blue } = hexToRGB(this.color);
       this.dispatchEvent(new CustomEvent('change-end', {
@@ -611,6 +657,15 @@ export class ColorWheelExpress extends ColorWheel {
     // movement and the browser stops considering native pan/refresh gestures.
     try { target?.setPointerCapture?.(pointerId); } catch (_) { /* noop */ }
 
+    // Cache the marker DOM node so _updateMarkerDomLocally can skip the
+    // querySelectors at 60 Hz. event.currentTarget IS the marker; if the
+    // gesture started on the inner hitbox we walk up to find the overlay.
+    let markerNode = target;
+    while (markerNode && !markerNode.classList?.contains('wheel-marker-overlay')) {
+      markerNode = markerNode.parentElement;
+    }
+    this._dragMarkerRef = markerNode || null;
+
     // Reset the throttle clock so the first move during a fresh drag commits
     // immediately rather than waiting for the trailing flush.
     this._lastDragWriteAt = 0;
@@ -630,6 +685,7 @@ export class ColorWheelExpress extends ColorWheel {
       this._flushPendingDragWrite();
       this._dragIndex = -1;
       this._dragFixedBrightness = null;
+      this._dragMarkerRef = null;
       if (this.showLines && !this.isMarkerUp) {
         this.isMarkerUp = true;
         this.dispatchEvent(new CustomEvent('marker-deselect'));
