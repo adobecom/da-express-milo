@@ -23,6 +23,7 @@ import {
   drawConfusionLinesCurve,
   drawConflictLinesOnCanvas,
 } from '../../utils/confusionLineUtils.js';
+import * as cwdiag from './cwdiag.js';
 
 export class ColorWheelExpress extends ColorWheel {
   static get styles() {
@@ -75,6 +76,7 @@ export class ColorWheelExpress extends ColorWheel {
   }
 
   disconnectedCallback() {
+    cwdiag.event('disconnectedCallback');
     this._resizeObserver?.disconnect();
     if (this._controllerUnsubscribe) {
       this._controllerUnsubscribe();
@@ -420,35 +422,22 @@ export class ColorWheelExpress extends ColorWheel {
       this._pendingDragEvent = null;
       if (!e || !this.controller) return;
 
-      // Compute the hex for this position; it's needed either now (if we
-      // commit immediately) or for the trailing flush.
+      // Diagnostic test: every frame writes to localStorage so we can see
+      // post-mortem when the iOS reload happened relative to the last tick.
+      cwdiag.tick();
+
+      // Hex of the dragged position.
       const hex = this.updateMarkerPosition(e);
 
-      // Cheap visual update — marker tracks the finger every frame, using
-      // the same HSB→position pipeline updateMarkers() will use later.
+      // Cheap visual update — marker tracks the finger every frame.
       this._updateMarkerDomLocally(i, hex);
 
-      const now = performance.now();
-      const elapsed = now - (this._lastDragWriteAt || 0);
-      const MIN_WRITE_INTERVAL_MS = 80;
-
-      if (elapsed >= MIN_WRITE_INTERVAL_MS) {
-        this._lastDragWriteAt = now;
-        this._pendingDragWrite = null;
-        if (this._dragWriteTimer) {
-          clearTimeout(this._dragWriteTimer);
-          this._dragWriteTimer = null;
-        }
-        this.controller.setSwatchHex(i, hex);
-      } else {
-        this._pendingDragWrite = { index: i, hex };
-        if (!this._dragWriteTimer) {
-          this._dragWriteTimer = setTimeout(() => {
-            this._dragWriteTimer = null;
-            this._flushPendingDragWrite();
-          }, MIN_WRITE_INTERVAL_MS - elapsed);
-        }
-      }
+      // BRUTE-FORCE TEST: never call controller.setSwatchHex during a drag.
+      // The latest position is buffered; _flushPendingDragWrite() commits it
+      // on pointerup. If the iOS Safari refresh stops with this in place,
+      // controller fan-out (deep-clone + Lit re-render across ~6 subscribers)
+      // is the cause. If it still happens, the cause is elsewhere.
+      this._pendingDragWrite = { index: i, hex };
     });
   }
 
@@ -500,24 +489,33 @@ export class ColorWheelExpress extends ColorWheel {
       }));
       window.removeEventListener('pointermove', moveHandler);
       window.removeEventListener('pointerup', upHandler);
-      window.removeEventListener('pointercancel', upHandler);
+      window.removeEventListener('pointercancel', cancelHandler);
       target?.removeEventListener?.('lostpointercapture', lostHandler);
       this._activeDragCleanup = null;
     };
     const upHandler = (e) => {
       if (e.pointerId !== pointerId) return;
+      cwdiag.event('canvas pointerup');
+      endDrag();
+    };
+    const cancelHandler = (e) => {
+      if (e.pointerId !== pointerId) return;
+      cwdiag.event('canvas pointercancel');
       endDrag();
     };
     // iOS Safari can lose pointer capture mid-drag (multi-touch interruption,
     // backgrounding) without firing pointerup OR pointercancel. Without this
     // fallback the window listeners would leak.
-    const lostHandler = () => endDrag();
+    const lostHandler = () => {
+      cwdiag.event('canvas lostpointercapture');
+      endDrag();
+    };
 
     this._activeDragCleanup = endDrag;
 
     window.addEventListener('pointermove', moveHandler);
     window.addEventListener('pointerup', upHandler);
-    window.addEventListener('pointercancel', upHandler);
+    window.addEventListener('pointercancel', cancelHandler);
     target?.addEventListener?.('lostpointercapture', lostHandler);
   }
 
@@ -526,6 +524,8 @@ export class ColorWheelExpress extends ColorWheel {
     event.stopPropagation();
 
     if (isRightMouseButtonClicked(event)) return;
+
+    cwdiag.event(`markerDown #${index} pid=${event.pointerId} type=${event.pointerType}`);
 
     if (this.controller && index !== this.activeSwatchIndex) {
       this.controller.setActiveSwatchIndex(index);
@@ -586,24 +586,33 @@ export class ColorWheelExpress extends ColorWheel {
       }));
       window.removeEventListener('pointermove', moveHandler);
       window.removeEventListener('pointerup', upHandler);
-      window.removeEventListener('pointercancel', upHandler);
+      window.removeEventListener('pointercancel', cancelHandler);
       target?.removeEventListener?.('lostpointercapture', lostHandler);
       this._activeDragCleanup = null;
     };
     const upHandler = (e) => {
       if (e.pointerId !== pointerId) return;
+      cwdiag.event(`pointerup #${index}`);
+      endDrag();
+    };
+    const cancelHandler = (e) => {
+      if (e.pointerId !== pointerId) return;
+      cwdiag.event(`pointercancel #${index}`);
       endDrag();
     };
     // iOS Safari can lose pointer capture mid-drag (multi-touch interruption,
     // backgrounding) without firing pointerup OR pointercancel. Without this
     // fallback the window listeners would leak.
-    const lostHandler = () => endDrag();
+    const lostHandler = () => {
+      cwdiag.event(`lostpointercapture #${index}`);
+      endDrag();
+    };
 
     this._activeDragCleanup = endDrag;
 
     window.addEventListener('pointermove', moveHandler);
     window.addEventListener('pointerup', upHandler);
-    window.addEventListener('pointercancel', upHandler);
+    window.addEventListener('pointercancel', cancelHandler);
     target?.addEventListener?.('lostpointercapture', lostHandler);
   }
 
