@@ -70,6 +70,14 @@ export default function createMoodSelector(initialMood, onChange, options = {}) 
     });
   }
 
+  function getOptions() {
+    return [...popover.querySelectorAll('.color-extract-mood-option')];
+  }
+
+  function focusOption(option) {
+    if (option) option.focus();
+  }
+
   MOOD_LIST.forEach((mood) => {
     const option = createTag('button', {
       class: `color-extract-mood-option ${mood === currentMood ? 'is-selected' : ''}`,
@@ -83,11 +91,13 @@ export default function createMoodSelector(initialMood, onChange, options = {}) 
       e.stopPropagation();
       if (mood === currentMood) {
         closePopover();
+        trigger.focus();
         return;
       }
       setMood(mood);
       onChange(mood);
       closePopover();
+      trigger.focus();
     });
 
     popover.append(option);
@@ -99,6 +109,9 @@ export default function createMoodSelector(initialMood, onChange, options = {}) 
     popover.hidden = false;
     trigger.setAttribute('aria-expanded', 'true');
     dropdown.classList.add('is-open');
+    const selected = popover.querySelector('.color-extract-mood-option.is-selected')
+      || getOptions()[0];
+    focusOption(selected);
   }
 
   trigger.addEventListener('click', (e) => {
@@ -110,7 +123,43 @@ export default function createMoodSelector(initialMood, onChange, options = {}) 
   document.addEventListener('click', () => closePopover());
 
   trigger.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') closePopover();
+    if (e.key === 'Escape') {
+      closePopover();
+    } else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (popover.hidden) openPopover();
+    } else if (e.key === 'Enter' || e.key === ' ') {
+      if (popover.hidden) {
+        e.preventDefault();
+        openPopover();
+      }
+    }
+  });
+
+  popover.addEventListener('keydown', (e) => {
+    const options = getOptions();
+    const focused = document.activeElement;
+    const index = options.indexOf(focused);
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusOption(options[(index + 1) % options.length]);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusOption(options[(index - 1 + options.length) % options.length]);
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      focusOption(options[0]);
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      focusOption(options[options.length - 1]);
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      closePopover();
+      trigger.focus();
+    } else if (e.key === 'Tab') {
+      closePopover();
+    }
   });
 
   wrapper.append(label, dropdown);
