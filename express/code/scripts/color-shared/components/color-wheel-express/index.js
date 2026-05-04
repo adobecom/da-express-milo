@@ -76,6 +76,14 @@ export class ColorWheelExpress extends ColorWheel {
 
   disconnectedCallback() {
     this._resizeObserver?.disconnect();
+    if (this._controllerUnsubscribe) {
+      this._controllerUnsubscribe();
+      this._controllerUnsubscribe = null;
+    }
+    if (this._dragRaf) {
+      cancelAnimationFrame(this._dragRaf);
+      this._dragRaf = 0;
+    }
     super.disconnectedCallback();
   }
 
@@ -336,45 +344,77 @@ export class ColorWheelExpress extends ColorWheel {
     return hex;
   }
 
+  // Each pointermove triggers setSwatchHex, which fans out to every controller
+  // subscriber (color-wheel-express itself, the swatch-rail bridge → strip
+  // re-render, primary-color adapter, palette context, etc.) and a deep-clone
+  // of state per notification. iOS Safari dispatches coalesced pointer events
+  // at up to 120 Hz; without throttling the main thread can't keep up,
+  // tripping the unresponsive-page watchdog (which reloads the page) and
+  // bloating memory until the tab is OOM-killed.
+  // Coalescing to one update per animation frame collapses N events to 1
+  // controller write per frame — the user-visible drag is still smooth
+  // because the screen only paints once per frame anyway.
+  _scheduleDragUpdate(index, event) {
+    this._pendingDragEvent = event;
+    this._pendingDragIndex = index;
+    if (this._dragRaf) return;
+    this._dragRaf = requestAnimationFrame(() => {
+      this._dragRaf = 0;
+      const e = this._pendingDragEvent;
+      const i = this._pendingDragIndex;
+      this._pendingDragEvent = null;
+      if (!e || !this.controller) return;
+      const hex = this.updateMarkerPosition(e);
+      this.controller.setSwatchHex(i, hex);
+    });
+  }
+
   handlePointerDown(event) {
     preventDefault(event);
     event.stopPropagation();
 
-    if (!isRightMouseButtonClicked(event)) {
-      this.getCanvasPosition();
+    if (isRightMouseButtonClicked(event)) return;
+    this.getCanvasPosition();
 
-      if (event.target === this.canvas) {
-        if (this.showLines && !this.isMarkerUp) {
-          this.isMarkerUp = true;
-          this.dispatchEvent(new CustomEvent('marker-deselect'));
-        }
-        const hex = this.updateMarkerPosition(event);
-        if (this.controller) {
-          this.controller.setSwatchHex(this.activeSwatchIndex, hex);
-        }
+    if (event.target === this.canvas) {
+      if (this.showLines && !this.isMarkerUp) {
+        this.isMarkerUp = true;
+        this.dispatchEvent(new CustomEvent('marker-deselect'));
       }
-
-      const moveHandler = (e) => {
-        const hex = this.updateMarkerPosition(e);
-        if (this.controller) {
-          this.controller.setSwatchHex(this.activeSwatchIndex, hex);
-        }
-      };
-      const upHandler = () => {
-        const { red, green, blue } = hexToRGB(this.color);
-        this.dispatchEvent(new CustomEvent('change-end', {
-          detail: rgbToHSL(red / 255, green / 255, blue / 255),
-        }));
-
-        window.removeEventListener('pointermove', moveHandler);
-        window.removeEventListener('pointerup', upHandler);
-        window.removeEventListener('pointercancel', upHandler);
-      };
-
-      window.addEventListener('pointermove', moveHandler);
-      window.addEventListener('pointerup', upHandler);
-      window.addEventListener('pointercancel', upHandler);
+      const hex = this.updateMarkerPosition(event);
+      if (this.controller) {
+        this.controller.setSwatchHex(this.activeSwatchIndex, hex);
+      }
     }
+
+    const target = event.target;
+    const pointerId = event.pointerId;
+    try { target?.setPointerCapture?.(pointerId); } catch (_) { /* noop */ }
+
+    const moveHandler = (e) => {
+      if (e.pointerId !== pointerId) return;
+      this._scheduleDragUpdate(this.activeSwatchIndex, e);
+    };
+    const upHandler = (e) => {
+      if (e.pointerId !== pointerId) return;
+      if (this._dragRaf) {
+        cancelAnimationFrame(this._dragRaf);
+        this._dragRaf = 0;
+        this._pendingDragEvent = null;
+      }
+      try { target?.releasePointerCapture?.(pointerId); } catch (_) { /* noop */ }
+      const { red, green, blue } = hexToRGB(this.color);
+      this.dispatchEvent(new CustomEvent('change-end', {
+        detail: rgbToHSL(red / 255, green / 255, blue / 255),
+      }));
+      window.removeEventListener('pointermove', moveHandler);
+      window.removeEventListener('pointerup', upHandler);
+      window.removeEventListener('pointercancel', upHandler);
+    };
+
+    window.addEventListener('pointermove', moveHandler);
+    window.addEventListener('pointerup', upHandler);
+    window.addEventListener('pointercancel', upHandler);
   }
 
   handleMarkerDown(event, index) {
@@ -399,22 +439,33 @@ export class ColorWheelExpress extends ColorWheel {
       ? Number(this.swatches[index].hsv.v)
       : this.wheelBrightness;
     const markerV = rawV > 0 ? rawV : this.wheelBrightness;
+    this._dragFixedBrightness = markerV;
+
+    const target = event.currentTarget || event.target;
+    const pointerId = event.pointerId;
+    // Capture the pointer to the marker so the gesture survives any DOM
+    // movement and the browser stops considering native pan/refresh gestures.
+    try { target?.setPointerCapture?.(pointerId); } catch (_) { /* noop */ }
 
     const moveHandler = (e) => {
-      this._dragFixedBrightness = markerV;
-      const hex = this.updateMarkerPosition(e);
-      if (this.controller) {
-        this.controller.setSwatchHex(index, hex);
-      }
+      if (e.pointerId !== pointerId) return;
+      this._scheduleDragUpdate(index, e);
     };
 
-    const upHandler = () => {
+    const upHandler = (e) => {
+      if (e.pointerId !== pointerId) return;
+      if (this._dragRaf) {
+        cancelAnimationFrame(this._dragRaf);
+        this._dragRaf = 0;
+        this._pendingDragEvent = null;
+      }
       this._dragIndex = -1;
       this._dragFixedBrightness = null;
       if (this.showLines && !this.isMarkerUp) {
         this.isMarkerUp = true;
         this.dispatchEvent(new CustomEvent('marker-deselect'));
       }
+      try { target?.releasePointerCapture?.(pointerId); } catch (_) { /* noop */ }
       const { red, green, blue } = hexToRGB(this.color);
       this.dispatchEvent(new CustomEvent('change-end', {
         detail: rgbToHSL(red / 255, green / 255, blue / 255),
