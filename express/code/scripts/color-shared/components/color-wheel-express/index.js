@@ -16,13 +16,47 @@ import {
   isRightMouseButtonClicked,
   preventDefault,
 } from '../../../../libs/color-components/utils/util.js';
-import { drawColorwheel, scientificToArtisticSmooth } from '../../../../libs/color-components/components/color-wheel/ColorWheelUtils.js';
+import { drawColorwheel, scientificToArtisticSmooth, rgbHueOf } from '../../../../libs/color-components/components/color-wheel/ColorWheelUtils.js';
 import {
   hsvToWheelXY,
   computeConfusionLinePoints,
   drawConfusionLinesCurve,
   drawConflictLinesOnCanvas,
 } from '../../utils/confusionLineUtils.js';
+
+// Same artistic-angle → RGB-hue lookup that drawColorwheel uses internally to
+// paint each wedge. We mirror it here so updateMarkerPosition can derive hue
+// from angle directly without ever calling getImageData on the canvas. iOS
+// Safari's WebContent process was being killed under the per-rAF GPU→CPU
+// readback that getImageData forces; computing the value from xy avoids
+// that path entirely.
+const WHEEL_LOOKUP = [
+  0, 0,
+  15, 8,
+  30, 17,
+  45, 26,
+  60, 34,
+  75, 41,
+  90, 48,
+  105, 54,
+  120, 60,
+  135, 81,
+  150, 103,
+  165, 123,
+  180, 138,
+  195, 155,
+  210, 171,
+  225, 187,
+  240, 204,
+  255, 219,
+  270, 234,
+  285, 251,
+  300, 267,
+  315, 282,
+  330, 298,
+  345, 329,
+  360, 360,
+];
 
 export class ColorWheelExpress extends ColorWheel {
   static get styles() {
@@ -57,12 +91,12 @@ export class ColorWheelExpress extends ColorWheel {
     this.conflictCanvas = this.shadowRoot.querySelector('.conflict-lines-canvas');
     this.confusionCanvas = this.shadowRoot.querySelector('.confusion-lines-canvas');
 
-    // Drag reads pixels via getImageData on every rAF tick. Without this
-    // flag the canvas is GPU-backed and each read forces a sync GPU→CPU
-    // readback (allocating staging buffers each call). iOS Safari's
-    // WebContent process gets killed under that pressure. Setting the
-    // flag once here is sticky — the parent class's bare getContext('2d')
-    // calls return this same context, so reads stay cheap.
+    // Defensive: drag now derives hue/saturation from xy directly via
+    // updateMarkerPosition, so the per-rAF getImageData hot path is gone.
+    // Keeping the willReadFrequently hint guards against regressions if
+    // future code reintroduces canvas reads — the contextAttributes are
+    // sticky from the first getContext call, so once set here, any later
+    // bare getContext('2d') returns the same CPU-friendly context.
     this.canvas?.getContext('2d', { willReadFrequently: true });
 
     this._resizeObserver = new ResizeObserver(() => this.updateRadius());
@@ -333,42 +367,23 @@ export class ColorWheelExpress extends ColorWheel {
   }
 
   updateMarkerPosition(event) {
-    const position = {
-      x: event.clientX - this.canvasPosition.x,
-      y: event.clientY - this.canvasPosition.y,
-    };
+    const dx = event.clientX - this.canvasPosition.x - this.wheelRadius;
+    const dy = event.clientY - this.canvasPosition.y - this.wheelRadius;
 
-    position.x = Math.round(position.x);
-    position.y = Math.round(position.y);
+    const [rawR, phi] = xyToPolar(dx, dy);
+    const r = Math.min(rawR, this.wheelRadius);
+    const saturation = this.wheelRadius > 0 ? r / this.wheelRadius : 0;
 
-    position.x = Math.min(this.canvas.width - 1, Math.max(0, position.x));
-    position.y = Math.min(this.canvas.height - 1, Math.max(0, position.y));
+    // Forward draw uses phi = degToRad(180 - smoothH); inverting gives
+    // smoothH = -phi * 180/π. Normalize to [0, 360) so rgbHueOf finds a
+    // segment.
+    const smoothH = ((-phi * 180) / Math.PI % 360 + 360) % 360;
+    const hue = rgbHueOf(smoothH, WHEEL_LOOKUP) ?? 0;
 
-    let [r, angle] = xyToPolar(
-      position.x - this.wheelRadius,
-      position.y - this.wheelRadius,
-    );
-
-    let red; let green; let blue;
-
-    if (r < this.wheelRadius) {
-      [red, green, blue] = this.getColor(position);
-    } else {
-      r = this.wheelRadius;
-      const [x, y] = polarToXy(r, angle);
-
-      const edgePos = {
-        x: x + this.wheelRadius,
-        y: y + this.wheelRadius,
-      };
-      [red, green, blue] = this.getColor(edgePos);
-    }
-
-    const hsb = rgbToHSB(red / 255, green / 255, blue / 255);
     const brightnessToUse = this._dragFixedBrightness != null
       ? Math.min(100, Math.max(0, this._dragFixedBrightness)) / 100
       : Math.min(100, Math.max(0, this.wheelBrightness)) / 100;
-    const rgb = hsbToRGB(hsb.hue / 360, hsb.saturation / 100, brightnessToUse);
+    const rgb = hsbToRGB(hue / 360, saturation, brightnessToUse);
     const hex = rgbToHex(rgb);
     const hsl = rgbToHSL(rgb.red / 255, rgb.green / 255, rgb.blue / 255);
 

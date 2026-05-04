@@ -33,6 +33,12 @@ export const style = css`
         left: 0;
         border-radius: 50%;
         display: block;
+        /* Same reason as the marker-overlay rule below: touch-action is
+           read from the element the touch starts on, so the parent
+           .canvas-container declaration does not cover canvas drags.
+           Without this, iOS Safari can claim the gesture for pull-to-
+           refresh and reload the page mid-drag. */
+        touch-action: none;
     }
 
     /* Legacy single marker - deprecated but kept for fallback */
@@ -124,12 +130,16 @@ export const style = css`
 
     /* Transparent tap-target expander. Lives outside the visible marker
        circle (inset: -8px) so iOS finger taps don't miss. Pointer events
-       bubble up to the parent marker where the listener is bound. */
+       bubble up to the parent marker where the listener is bound.
+       touch-action is NOT inherited — without it here, a finger landing
+       on the hitbox extension would trigger iOS pull-to-refresh (the
+       parent's touch-action: none doesn't cover it). */
     .wheel-marker-hitbox {
         position: absolute;
         inset: -8px;
         border-radius: 50%;
         pointer-events: auto;
+        touch-action: none;
     }
 
     /* Conflict / confusion line overlay canvases */
