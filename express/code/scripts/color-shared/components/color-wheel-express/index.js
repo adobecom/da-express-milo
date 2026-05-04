@@ -23,7 +23,6 @@ import {
   drawConfusionLinesCurve,
   drawConflictLinesOnCanvas,
 } from '../../utils/confusionLineUtils.js';
-import * as cwdiag from './cwdiag.js';
 
 export class ColorWheelExpress extends ColorWheel {
   static get styles() {
@@ -58,6 +57,14 @@ export class ColorWheelExpress extends ColorWheel {
     this.conflictCanvas = this.shadowRoot.querySelector('.conflict-lines-canvas');
     this.confusionCanvas = this.shadowRoot.querySelector('.confusion-lines-canvas');
 
+    // Drag reads pixels via getImageData on every rAF tick. Without this
+    // flag the canvas is GPU-backed and each read forces a sync GPU→CPU
+    // readback (allocating staging buffers each call). iOS Safari's
+    // WebContent process gets killed under that pressure. Setting the
+    // flag once here is sticky — the parent class's bare getContext('2d')
+    // calls return this same context, so reads stay cheap.
+    this.canvas?.getContext('2d', { willReadFrequently: true });
+
     this._resizeObserver = new ResizeObserver(() => this.updateRadius());
     this._resizeObserver.observe(this.container);
 
@@ -76,7 +83,6 @@ export class ColorWheelExpress extends ColorWheel {
   }
 
   disconnectedCallback() {
-    cwdiag.event('disconnectedCallback');
     this._resizeObserver?.disconnect();
     if (this._controllerUnsubscribe) {
       this._controllerUnsubscribe();
@@ -253,6 +259,7 @@ export class ColorWheelExpress extends ColorWheel {
       marker.setAttribute('aria-label', (this.markerAriaTemplate || '{hex}, use arrow keys to move').replace('{hex}', swatch.hex));
       const isBase = index === this.baseColorIndex && this.harmonyRule !== 'CUSTOM';
       marker.classList.toggle('wheel-marker-overlay--base', isBase);
+      marker.classList.toggle('wheel-marker-overlay--active', index === this.activeSwatchIndex);
     });
 
     if (this._kbFocusIndex >= 0 && this._kbFocusIndex < this.swatches.length) {
@@ -422,22 +429,37 @@ export class ColorWheelExpress extends ColorWheel {
       this._pendingDragEvent = null;
       if (!e || !this.controller) return;
 
-      // Diagnostic test: every frame writes to localStorage so we can see
-      // post-mortem when the iOS reload happened relative to the last tick.
-      cwdiag.tick();
-
       // Hex of the dragged position.
       const hex = this.updateMarkerPosition(e);
 
       // Cheap visual update — marker tracks the finger every frame.
       this._updateMarkerDomLocally(i, hex);
 
-      // BRUTE-FORCE TEST: never call controller.setSwatchHex during a drag.
-      // The latest position is buffered; _flushPendingDragWrite() commits it
-      // on pointerup. If the iOS Safari refresh stops with this in place,
-      // controller fan-out (deep-clone + Lit re-render across ~6 subscribers)
-      // is the cause. If it still happens, the cause is elsewhere.
-      this._pendingDragWrite = { index: i, hex };
+      // Throttle controller writes to ~12Hz so the strip updates during the
+      // drag without forcing a deep-clone + multi-subscriber Lit re-render
+      // on every frame. The trailing setTimeout guarantees the final
+      // position commits even if the gap was inside the throttle window.
+      const now = performance.now();
+      const elapsed = now - (this._lastDragWriteAt || 0);
+      const MIN_WRITE_INTERVAL_MS = 80;
+
+      if (elapsed >= MIN_WRITE_INTERVAL_MS) {
+        this._lastDragWriteAt = now;
+        this._pendingDragWrite = null;
+        if (this._dragWriteTimer) {
+          clearTimeout(this._dragWriteTimer);
+          this._dragWriteTimer = null;
+        }
+        this.controller.setSwatchHex(i, hex);
+      } else {
+        this._pendingDragWrite = { index: i, hex };
+        if (!this._dragWriteTimer) {
+          this._dragWriteTimer = setTimeout(() => {
+            this._dragWriteTimer = null;
+            this._flushPendingDragWrite();
+          }, MIN_WRITE_INTERVAL_MS - elapsed);
+        }
+      }
     });
   }
 
@@ -495,21 +517,16 @@ export class ColorWheelExpress extends ColorWheel {
     };
     const upHandler = (e) => {
       if (e.pointerId !== pointerId) return;
-      cwdiag.event('canvas pointerup');
       endDrag();
     };
     const cancelHandler = (e) => {
       if (e.pointerId !== pointerId) return;
-      cwdiag.event('canvas pointercancel');
       endDrag();
     };
     // iOS Safari can lose pointer capture mid-drag (multi-touch interruption,
     // backgrounding) without firing pointerup OR pointercancel. Without this
     // fallback the window listeners would leak.
-    const lostHandler = () => {
-      cwdiag.event('canvas lostpointercapture');
-      endDrag();
-    };
+    const lostHandler = () => endDrag();
 
     this._activeDragCleanup = endDrag;
 
@@ -525,7 +542,18 @@ export class ColorWheelExpress extends ColorWheel {
 
     if (isRightMouseButtonClicked(event)) return;
 
-    cwdiag.event(`markerDown #${index} pid=${event.pointerId} type=${event.pointerType}`);
+    // Paint the active ring optimistically — the controller fan-out (deep
+    // clone state + Lit re-render across ~6 subscribers) can take many ms
+    // on iOS and the user otherwise sees no feedback during that window.
+    if (index !== this.activeSwatchIndex) {
+      const layer = this.shadowRoot?.querySelector('.marker-layer');
+      if (layer) {
+        layer.querySelectorAll('.wheel-marker-overlay--active')
+          .forEach((m) => m.classList.remove('wheel-marker-overlay--active'));
+        const next = layer.querySelector(`.wheel-marker-overlay[data-index="${index}"]`);
+        next?.classList.add('wheel-marker-overlay--active');
+      }
+    }
 
     if (this.controller && index !== this.activeSwatchIndex) {
       this.controller.setActiveSwatchIndex(index);
@@ -592,21 +620,16 @@ export class ColorWheelExpress extends ColorWheel {
     };
     const upHandler = (e) => {
       if (e.pointerId !== pointerId) return;
-      cwdiag.event(`pointerup #${index}`);
       endDrag();
     };
     const cancelHandler = (e) => {
       if (e.pointerId !== pointerId) return;
-      cwdiag.event(`pointercancel #${index}`);
       endDrag();
     };
     // iOS Safari can lose pointer capture mid-drag (multi-touch interruption,
     // backgrounding) without firing pointerup OR pointercancel. Without this
     // fallback the window listeners would leak.
-    const lostHandler = () => {
-      cwdiag.event(`lostpointercapture #${index}`);
-      endDrag();
-    };
+    const lostHandler = () => endDrag();
 
     this._activeDragCleanup = endDrag;
 
