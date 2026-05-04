@@ -122,6 +122,16 @@ export const style = css`
         z-index: 20;
     }
 
+    /* Transparent tap-target expander. Lives outside the visible marker
+       circle (inset: -8px) so iOS finger taps don't miss. Pointer events
+       bubble up to the parent marker where the listener is bound. */
+    .wheel-marker-hitbox {
+        position: absolute;
+        inset: -8px;
+        border-radius: 50%;
+        pointer-events: auto;
+    }
+
     /* Conflict / confusion line overlay canvases */
     .conflict-lines-canvas,
     .confusion-lines-canvas {

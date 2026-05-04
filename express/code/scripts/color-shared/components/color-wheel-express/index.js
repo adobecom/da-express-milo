@@ -188,6 +188,18 @@ export class ColorWheelExpress extends ColorWheel {
     marker.dataset.index = index;
     marker.setAttribute('role', 'button');
     marker.setAttribute('tabindex', '-1');
+
+    // Visible marker is 33px; below Apple HIG's 44px minimum tap target.
+    // Users on iOS overshoot the dot and land on the canvas instead, which
+    // moves the active marker's hex but doesn't change which marker is
+    // active — symptom: "I tap another color, no blue line; ring stays on
+    // the previously selected color." The transparent hitbox extends the
+    // effective tap area by 8px on all sides (~49px) without changing the
+    // visual size. Pointer events bubble to the marker's existing listener.
+    const hitbox = document.createElement('div');
+    hitbox.className = 'wheel-marker-hitbox';
+    marker.appendChild(hitbox);
+
     // Listeners are bound once at creation; index is read live from dataset
     // to avoid stale closures if a marker's slot index ever shifts.
     marker.addEventListener('pointerdown', (e) => {
