@@ -74,6 +74,10 @@ export const style = css`
         box-sizing: border-box;
         cursor: grab;
         pointer-events: auto;
+        /* Prevent iOS Safari pull-to-refresh / scroll when dragging a handle.
+           touch-action is read from the element the touch starts on, so the
+           parent .canvas-container rule does not cover marker drags. */
+        touch-action: none;
         transition: transform 0.05s linear;
     }
 
