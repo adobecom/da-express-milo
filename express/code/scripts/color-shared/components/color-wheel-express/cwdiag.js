@@ -7,13 +7,20 @@
 // refresh we're trying to diagnose. localStorage is the only persistence
 // available; an on-screen panel reflects it for the human.
 
+// Unconditional load marker — lets us confirm "did the new bundle ship to
+// the device?" by remote-attaching Safari Inspector once. If this line
+// doesn't fire, you're running a stale cache and need a hard reload.
+try { console.warn('[cwdiag] module loaded — append ?cwdiag=1 to URL to enable panel'); } catch (_) {}
+
 const PARAM = 'cwdiag';
 const STORAGE_KEY = 'cwdiag.state.v1';
+const ACTIVE_KEY = 'cwdiag.active.v1';
 
 let active = false;
 let initialized = false;
 let panel = null;
 let _lastRenderAt = 0;
+let _bodyWatcher = null;
 
 let state = {
   loadAt: 0,
@@ -56,29 +63,35 @@ function pushEvent(name) {
 }
 
 function buildPanel() {
-  if (panel || !document.body) return;
+  if (panel) return;
   panel = document.createElement('div');
   panel.id = 'cwdiag-panel';
-  panel.style.cssText = [
-    'position:fixed',
-    'bottom:8px',
-    'left:8px',
-    'z-index:2147483647',
-    'width:240px',
-    'max-height:50vh',
-    'overflow:auto',
-    'padding:6px 8px',
-    'background:rgba(20,20,20,0.92)',
-    'color:#fff',
-    'font:10px/1.3 -apple-system,monospace',
-    'border-radius:6px',
-    'box-shadow:0 4px 14px rgba(0,0,0,0.45)',
-    'pointer-events:auto',
-    'user-select:text',
-    '-webkit-user-select:text',
-    'transition:transform 0.15s ease',
-  ].join(';');
-  document.body.appendChild(panel);
+  // Use !important on every property so site CSS (or Milo's body
+  // visibility flip) can't hide the panel.
+  const props = [
+    ['position', 'fixed'],
+    ['bottom', '8px'],
+    ['left', '8px'],
+    ['z-index', '2147483647'],
+    ['width', '240px'],
+    ['max-height', '50vh'],
+    ['overflow', 'auto'],
+    ['padding', '6px 8px'],
+    ['background', 'rgba(20,20,20,0.92)'],
+    ['color', '#fff'],
+    ['font', '10px/1.3 -apple-system,monospace'],
+    ['border-radius', '6px'],
+    ['box-shadow', '0 4px 14px rgba(0,0,0,0.45)'],
+    ['pointer-events', 'auto'],
+    ['user-select', 'text'],
+    ['-webkit-user-select', 'text'],
+    ['display', 'block'],
+    ['visibility', 'visible'],
+    ['opacity', '1'],
+  ];
+  props.forEach(([k, v]) => panel.style.setProperty(k, v, 'important'));
+  const host = document.body || document.documentElement;
+  host.appendChild(panel);
   panel.addEventListener('click', (e) => {
     const action = e.target?.dataset?.cwdiagAction;
     if (action === 'clear') {
@@ -152,12 +165,37 @@ function init() {
   if (initialized) return;
   initialized = true;
 
+  let urlVal = null;
   try {
     const params = new URLSearchParams(window.location.search);
-    if (params.get(PARAM) !== '1') return;
-  } catch (_) { return; }
+    urlVal = params.get(PARAM);
+  } catch (_) { /* noop */ }
+  // Also accept the param in the hash fragment (e.g. #cwdiag=1) — useful
+  // when redirects strip the query string.
+  if (urlVal == null) {
+    try {
+      const hash = window.location.hash || '';
+      const m = hash.match(/cwdiag=([01])/);
+      if (m) urlVal = m[1];
+    } catch (_) { /* noop */ }
+  }
+
+  // Sticky activation: ?cwdiag=1 turns it on for this origin (survives
+  // redirects that strip the query string), ?cwdiag=0 turns it off.
+  if (urlVal === '1') {
+    try { localStorage.setItem(ACTIVE_KEY, '1'); } catch (_) {}
+  } else if (urlVal === '0') {
+    try { localStorage.removeItem(ACTIVE_KEY); } catch (_) {}
+    return;
+  }
+
+  let stored = null;
+  try { stored = localStorage.getItem(ACTIVE_KEY); } catch (_) {}
+  if (urlVal !== '1' && stored !== '1') return;
 
   active = true;
+  try { console.warn('[cwdiag] active'); } catch (_) {}
+  try { window.cwdiag = { state: () => state, clear: () => { try { localStorage.removeItem(STORAGE_KEY); } catch (_) {} } }; } catch (_) {}
 
   const persisted = readPersisted() || {};
   const now = Date.now();
@@ -183,12 +221,45 @@ function init() {
   }
   persist();
 
-  const mount = () => { buildPanel(); render(); };
+  const mount = () => {
+    buildPanel();
+    render();
+    // Re-attach if something later wipes the panel from the DOM (block
+    // re-init clears innerHTML on certain breakpoint changes).
+    if (panel && !panel.isConnected) {
+      panel = null;
+      buildPanel();
+      render();
+    }
+  };
+  const tryMount = () => {
+    if (document.body || document.documentElement) {
+      mount();
+    } else {
+      _bodyWatcher = new MutationObserver(() => {
+        if (document.body) {
+          _bodyWatcher.disconnect();
+          _bodyWatcher = null;
+          mount();
+        }
+      });
+      _bodyWatcher.observe(document.documentElement, { childList: true });
+    }
+  };
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', mount, { once: true });
+    document.addEventListener('DOMContentLoaded', tryMount, { once: true });
   } else {
-    mount();
+    tryMount();
   }
+  // Also re-attach periodically in case the panel gets removed by block
+  // re-decoration. Cheap, fires only when active.
+  setInterval(() => {
+    if (panel && !panel.isConnected) {
+      panel = null;
+      buildPanel();
+      render();
+    }
+  }, 1000);
 
   window.addEventListener('error', (e) => {
     state.lastError = `${e.message || 'error'} @ ${e.filename || '?'}:${e.lineno || '?'}`;
