@@ -16,16 +16,16 @@ function pageHasBlock(...classNames) {
   return classNames.some((cls) => document.querySelector(`.${cls}`));
 }
 
-export function buildColorSignInRedirectUrl(colors, name, id = null) {
+export function buildColorSignInRedirectUrl(colors, name, id = null, openInExpress = false) {
   const { setOnUrl } = createColorPaletteParamApi();
+  const url = new URL(window.location.href);
 
   if (pageHasBlock('color-explore')) {
-    const url = new URL(window.location.href);
     if (id) url.searchParams.set('id', id);
-    return url.toString();
+  } else {
+    setOnUrl(url, colors, { name });
   }
 
-  const url = new URL(window.location.href);
-  setOnUrl(url, colors, { name });
+  if (openInExpress) url.searchParams.set('openInExpress', 'true');
   return url.toString();
 }
