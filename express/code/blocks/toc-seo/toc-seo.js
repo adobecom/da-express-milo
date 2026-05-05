@@ -361,11 +361,9 @@ function setupActiveLinks(content) {
   function update() {
     const currentPairs = getPairs();
     if (!currentPairs.length) return;
-
-    const offset = isDesktop() ? CONFIG.scrollOffset.desktop : CONFIG.scrollOffset.mobile;
     let activeLink = null;
     for (const { header, link } of currentPairs) {
-      if (header.getBoundingClientRect().top <= offset + 10) {
+      if (header.getBoundingClientRect().top <= window.innerHeight * 0.3) {
         activeLink = link;
       }
     }
