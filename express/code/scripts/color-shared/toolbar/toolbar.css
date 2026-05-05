@@ -248,6 +248,16 @@
   min-height: 0;
 }
 
+.ax-palette-name-input::placeholder {
+  color: var(--Alias-content-neutral-default);
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-xs-size);
+  font-style: normal;
+  font-weight: var(--ax-body-weight);
+  line-height: var(--ax-body-xxs-lh);
+  letter-spacing: 0;
+}
+
 /* ── CTA button (mobile: full-width wrap) ────────────────────── */
 
 .ax-toolbar-main > sp-button {
