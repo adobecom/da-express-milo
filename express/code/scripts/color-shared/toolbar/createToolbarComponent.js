@@ -592,7 +592,12 @@ export function createToolbar(options) {
       '',
       `${window.location.pathname}${cleanSearch ? `?${cleanSearch}` : ''}${window.location.hash}`,
     );
-    openInExpress(getPaletteWithName()).catch(() => {});
+    openInExpress(getPaletteWithName()).catch((err) => {
+      window.lana?.log(`openInExpress post-sign-in failed: ${err.message}`, {
+        tags: 'color-floating-toolbar,open-in-express',
+        severity: 'error',
+      });
+    });
   }
 
   const api = {
