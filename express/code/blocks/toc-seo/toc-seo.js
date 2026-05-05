@@ -335,74 +335,45 @@ function setupFloatingButton(floatingButton, tocContainer) {
 }
 
 /**
- * Matches each TOC link to its corresponding header element at init time,
- * adding data-toc-id to both for a stable association. Text-matching runs
- * once here rather than on every click.
+ * Tracks the active TOC link based on scroll position. The last header whose
+ * top edge is at or above the scroll offset threshold is the active section.
+ * Header matching is deferred to first scroll so Milo's section decoration
+ * (which adds the `.content` and `long-form` classes) has completed.
  * @param {HTMLElement} content - TOC content element containing links
- * @returns {{ linkToHeader: Map, headerToLink: Map }}
+ * @returns {{ onScroll: Function }} Handler for the consolidated scroll listener
  */
-function buildHeaderMap(content) {
-  const allHeaders = document.querySelectorAll(CONFIG.selectors.headers);
-  const links = content.querySelectorAll('.toc-link');
-  const linkToHeader = new Map();
-  const headerToLink = new Map();
+function setupActiveLinks(content) {
+  let pairs = null;
 
-  links.forEach((link, index) => {
-    const searchText = link.dataset.fullText.replace('...', '').trim();
-    const matched = Array.from(allHeaders).find((h) => h.textContent.trim().includes(searchText));
-    if (matched) {
-      const tocId = `toc-section-${index + 1}`;
-      matched.dataset.tocId = tocId;
-      link.dataset.tocId = tocId;
-      linkToHeader.set(link, matched);
-      headerToLink.set(matched, link);
+  function getPairs() {
+    if (!pairs) {
+      const allHeaders = Array.from(document.querySelectorAll(CONFIG.selectors.headers));
+      pairs = Array.from(content.querySelectorAll('.toc-link')).reduce((acc, link) => {
+        const searchText = link.dataset.fullText.replace('...', '').trim();
+        const header = allHeaders.find((h) => h.textContent.trim().includes(searchText));
+        if (header) acc.push({ header, link });
+        return acc;
+      }, []);
     }
-  });
-
-  return { linkToHeader, headerToLink };
-}
-
-/**
- * Tracks which section is active using IntersectionObserver. Highlights the
- * topmost visible TOC-mapped header's link, updating as the user scrolls.
- * @param {HTMLElement} content - TOC content element
- * @param {Map} headerToLink - Map from header element to link element
- * @returns {IntersectionObserver|null}
- */
-function setupActiveLinks(content, headerToLink) {
-  if (!headerToLink.size) return null;
-
-  const tocLinks = content.querySelectorAll('.toc-link');
-  const visibleHeaders = new Set();
-
-  function updateActive() {
-    // eslint-disable-next-line no-bitwise
-    const topmost = Array.from(visibleHeaders).sort((a, b) => (
-      a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
-    ))[0];
-
-    if (topmost) {
-      const link = headerToLink.get(topmost);
-      if (link) {
-        tocLinks.forEach((l) => l.classList.remove('active'));
-        link.classList.add('active');
-      }
-    }
+    return pairs;
   }
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        visibleHeaders.add(entry.target);
-      } else {
-        visibleHeaders.delete(entry.target);
-      }
-    });
-    updateActive();
-  }, { rootMargin: '-80px 0px -50% 0px' });
+  function update() {
+    const currentPairs = getPairs();
+    if (!currentPairs.length) return;
 
-  headerToLink.forEach((_link, header) => observer.observe(header));
-  return observer;
+    const offset = isDesktop() ? CONFIG.scrollOffset.desktop : CONFIG.scrollOffset.mobile;
+    let activeLink = null;
+    for (const { header, link } of currentPairs) {
+      if (header.getBoundingClientRect().top <= offset + 10) {
+        activeLink = link;
+      }
+    }
+
+    content.querySelectorAll('.toc-link').forEach((l) => l.classList.toggle('active', l === activeLink));
+  }
+
+  return { onScroll: update };
 }
 
 /**
@@ -431,11 +402,14 @@ function setupToggle(container, titleBar, content) {
 }
 
 /**
- * Sets up navigation behavior for links
+ * Sets up navigation behavior for links. Header matching is deferred to click
+ * time (and cached per link) so Milo's section decoration — which adds the
+ * `.content` and `long-form` classes — has completed before we query the DOM.
  * @param {HTMLElement} content - Content element with links
- * @param {Map} linkToHeader - Map from link element to its matched header element
  */
-function setupNavigation(content, linkToHeader) {
+function setupNavigation(content) {
+  const cache = new Map();
+
   content.querySelectorAll('.toc-link').forEach((link) => {
     link.addEventListener('mousedown', (e) => {
       e.preventDefault();
@@ -443,8 +417,20 @@ function setupNavigation(content, linkToHeader) {
 
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      const header = linkToHeader.get(link);
-      if (header) header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      if (!cache.has(link)) {
+        const searchText = link.dataset.fullText.replace('...', '').trim();
+        const allHeaders = document.querySelectorAll(CONFIG.selectors.headers);
+        const matched = Array.from(allHeaders).find(
+          (h) => h.textContent.trim().includes(searchText),
+        ) || null;
+        cache.set(link, matched);
+      }
+      const header = cache.get(link);
+      if (header) {
+        header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        content.querySelectorAll('.toc-link').forEach((l) => l.classList.remove('active'));
+        link.classList.add('active');
+      }
       link.blur();
     });
   });
@@ -753,11 +739,9 @@ export default async function decorate(block) {
     container.appendChild(socialIcons);
 
     // Phase 5: Setup behaviors
-    // Build header map once at init (text-matching runs here, not on every click)
-    const { linkToHeader, headerToLink } = buildHeaderMap(content);
-    setupNavigation(content, linkToHeader);
+    setupNavigation(content);
     setupSocialSharing(socialIcons);
-    setupActiveLinks(content, headerToLink);
+    const activeLinksHandlers = setupActiveLinks(content);
 
     // Phase 6: Insert TOC after start element
     const startElement = document.querySelector(CONFIG.selectors.startElement);
@@ -791,12 +775,10 @@ export default async function decorate(block) {
 
     // Phase 9: Setup consolidated, optimized event handlers
     const updateFunctions = [
-      // Floating button update (has onScroll and onResize)
       { onScroll: floatingButtonUpdate, onResize: floatingButtonUpdate },
-      // Desktop handlers (has onScroll and onResize)
       desktopHandlers,
-      // Responsive handlers for mobile default state
       responsiveHandlers,
+      activeLinksHandlers,
     ];
 
     setupConsolidatedHandlers(updateFunctions);
