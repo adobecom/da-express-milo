@@ -1,5 +1,6 @@
 import { createTag } from '../../../utils.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
+import { DEFAULT_PLACEHOLDERS as IMAGE_UPLOAD_DEFAULTS } from '../../i18n/loadImageUploadPlaceholders.js';
 
 const SUPPORTED_TYPES = ['image/'];
 const CLS = 'image-upload-dropzone';
@@ -18,10 +19,10 @@ function isImageFile(file) {
   return file && SUPPORTED_TYPES.some((t) => file.type?.startsWith(t));
 }
 
-async function showLoadError() {
+async function showLoadError(message) {
   const { showExpressToast } = await import('../../spectrum/components/express-toast.js');
   showExpressToast({
-    message: 'Unable to load image. Please try again.',
+    message: message || IMAGE_UPLOAD_DEFAULTS.loadError,
     variant: 'negative',
     timeout: 3000,
   });
@@ -31,23 +32,28 @@ async function showLoadError() {
  * Create a reusable upload dropzone (dashed-border box with upload button, drag text, file hint).
  *
  * @param {object} options
- * @param {string} [options.uploadButtonText='Upload your image'] - Authorable button label
- * @param {string} [options.dragDropText='Or drag and drop here'] - Drag hint text
+ * @param {object} [options.strings] - Localized strings (image-upload placeholder bundle).
+ *   When provided, supplies defaults for uploadButtonText/dragDropText/fileHintText/loadingText/ariaLabel/loadError.
+ *   Per-key options on `options` still override `strings`.
+ * @param {string} [options.uploadButtonText] - Authorable button label
+ * @param {string} [options.dragDropText] - Drag hint text
  * @param {string} [options.fileHintText] - File type/size hint
- * @param {string} [options.loadingText='Uploading your image...'] - Loading overlay text
- * @param {string} [options.ariaLabel='Upload an image'] - Accessible name for the dropzone
+ * @param {string} [options.loadingText] - Loading overlay text
+ * @param {string} [options.ariaLabel] - Accessible name for the dropzone
  * @param {boolean} [options.enabled=true] - Whether the dropzone is interactive
  * @param {function(HTMLImageElement, string): void} [options.onImageReady] - Image ready callback
  * @returns {{container: HTMLElement, handleUrl: function, handleFile: function,
  *   input: HTMLInputElement, setLoading: function}}
  */
 export function createUploadDropzone(options = {}) {
+  const strings = { ...IMAGE_UPLOAD_DEFAULTS, ...(options.strings || {}) };
   const opts = {
-    uploadButtonText: 'Upload your image',
-    dragDropText: 'Or drag and drop here',
-    fileHintText: 'File must be JPEG, JPG, PNG or WebP and up to 40MB',
-    loadingText: 'Uploading your image...',
-    ariaLabel: 'Upload an image',
+    uploadButtonText: strings.uploadButtonText,
+    dragDropText: strings.dragDropText,
+    fileHintText: strings.fileHintText,
+    loadingText: strings.loadingText,
+    ariaLabel: strings.ariaLabel,
+    loadError: strings.loadError,
     enabled: true,
     ...options,
   };
@@ -144,13 +150,13 @@ export function createUploadDropzone(options = {}) {
       image.onload = () => processImage(image, image.src);
       image.onerror = () => {
         setLoading(false);
-        showLoadError();
+        showLoadError(opts.loadError);
       };
       image.src = reader.result;
     };
     reader.onerror = () => {
       setLoading(false);
-      showLoadError();
+      showLoadError(opts.loadError);
     };
     reader.readAsDataURL(file);
   };
@@ -163,7 +169,7 @@ export function createUploadDropzone(options = {}) {
     image.onload = () => processImage(image, url);
     image.onerror = () => {
       setLoading(false);
-      showLoadError();
+      showLoadError(opts.loadError);
     };
     image.src = url;
   };

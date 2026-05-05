@@ -85,7 +85,7 @@ function collectTabbable(root) {
  * @param {HTMLElement} root — container that should trap focus
  * @returns {{ release: () => void }} — call release() to remove the trap
  */
-export function trapFocus(root) {
+export function trapFocus(root, options = {}) {
   const controller = new AbortController();
 
   function handler(e) {
@@ -116,8 +116,13 @@ export function trapFocus(root) {
   requestAnimationFrame(() => {
     const active = getDeepActiveElement();
     if (!isWithin(active, root)) {
-      const focusable = collectTabbable(root);
-      if (focusable[0]) focusable[0].focus();
+      const { getInitialFocus } = options;
+      if (getInitialFocus) {
+        getInitialFocus(root)?.focus();
+      } else {
+        const focusable = collectTabbable(root);
+        if (focusable[0]) focusable[0].focus();
+      }
     }
   });
 

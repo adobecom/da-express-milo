@@ -394,7 +394,9 @@ async function loadPage() {
   const footer = createTag('meta', { name: 'footer', content: 'global-footer' });
   document.head.append(footer);
 
-  getMetadata('footer-source') || document.head.append(createTag('meta', { name: 'footer-source', content: '/federal/footer/footer' }));
+  if (!getMetadata('footer-source')) {
+    document.head.append(createTag('meta', { name: 'footer-source', content: `${window.location.origin}/federal/footer/footer` }));
+  }
 
   const adobeHomeRedirect = createTag('meta', { name: 'adobe-home-redirect', content: 'on' });
   document.head.append(adobeHomeRedirect);
@@ -445,9 +447,12 @@ async function loadPage() {
     import('./instrument.js').then((mod) => { mod.default(); });
   }
 
-  /* region based redirect to homepage */
+  /* region based redirect to CN homepage */
+  const isAdobeOrigin = /^(www|color)\.(stage\.)?adobe\.com$/.test(window.location.hostname);
   import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
-    if (country === 'cn') { window.location.href = '/cn'; }
+    if (country === 'cn' && isAdobeOrigin && !window.location.pathname.startsWith('/cn') && !window.isErrorPage) {
+      window.location.href = window.location.hostname.includes('stage') ? 'https://www.stage.adobe.com/cn' : 'https://www.adobe.com/cn';
+    }
   });
 
   document.head.querySelectorAll('meta').forEach((meta) => {

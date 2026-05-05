@@ -10,6 +10,10 @@ export default function createBaseColorAdapter(
   element.color = initialColor;
   element.setAttribute('color-mode', colorMode);
 
+  if (callbacks.strings) {
+    element.strings = callbacks.strings;
+  }
+
   if (options.controller && typeof options.controller.subscribe === 'function') {
     element.controller = options.controller;
   }

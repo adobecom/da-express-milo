@@ -2,6 +2,7 @@
 import { createTag } from '../../scripts/utils.js';
 import { DEFAULTS, MOODS } from '../color-extract/helpers/constants.js';
 import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
+import { DEFAULT_PLACEHOLDERS as COLOR_EXTRACT_DEFAULTS } from '../../scripts/color-shared/i18n/loadColorExtractPlaceholders.js';
 
 const EXTRACT_CANVAS_MAX = 320;
 
@@ -445,6 +446,7 @@ export default function createImageExtractComponent(options = {}) {
     enableUrlInput: true,
     maxColors,
     loadingText: options.strings?.extractingColors,
+    imageUploadStrings: options.strings?.imageUploadStrings,
   });
 
   const topBar = createTag('div', { class: 'color-extract-top-bar' });
@@ -476,10 +478,11 @@ export default function createImageExtractComponent(options = {}) {
         currentMood = mood;
         controller.setMetadata({ mood });
         if (currentCanvas) runExtraction(currentCanvas, mood);
-      });
+      }, { strings: options.strings?.colorExtractStrings });
       moodRow.append(moodSelectorRef.element);
 
       createToolbar({
+        strings: options.strings?.colorExtractStrings,
         moodElement: null,
         onAddColor: addColorToImage,
         onReset: () => {
@@ -520,12 +523,17 @@ export default function createImageExtractComponent(options = {}) {
 }
 
 function createImageExtractDropzone(block, controller, onImageReady, config = {}) {
-  const { enableImageUpload = true, enableUrlInput = true, loadingText = 'Extracting colors...' } = config;
+  const {
+    enableImageUpload = true, enableUrlInput = true,
+    loadingText = COLOR_EXTRACT_DEFAULTS.extractingColors,
+    imageUploadStrings, ariaLabel,
+  } = config;
 
   const dz = createUploadDropzone({
     enabled: enableImageUpload,
+    strings: imageUploadStrings,
     loadingText,
-    ariaLabel: 'Upload an image to extract colors',
+    ariaLabel: ariaLabel || COLOR_EXTRACT_DEFAULTS.dropzoneAria,
     onImageReady: (image, src) => {
       block.classList.remove('is-loading');
       block.classList.add('has-image');

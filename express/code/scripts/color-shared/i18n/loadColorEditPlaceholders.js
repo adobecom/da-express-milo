@@ -1,4 +1,4 @@
-import { getLibs } from '../../utils.js';
+import loadPlaceholders from './utils.js';
 
 export const DEFAULT_PLACEHOLDERS = Object.freeze({
   title: 'Edit color',
@@ -7,6 +7,10 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   paletteColors: 'Palette colors',
   hexLabel: 'HEX',
   hexFieldLabel: 'HEX color value',
+  editColorAria: 'Edit color',
+  editColorWithHexAria: 'Edit color {hex}',
+  liveAnnouncementHex: 'Color updated to {hex}',
+  liveAnnouncementRgb: 'Color updated to Red {red}, Green {green}, Blue {blue}',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -16,36 +20,16 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   paletteColors: 'color-edit-palette-colors',
   hexLabel: 'color-edit-hex-label',
   hexFieldLabel: 'color-edit-hex-field-label',
+  editColorAria: 'color-edit-dialog-aria',
+  editColorWithHexAria: 'color-strip-mobile-edit-color-aria',
+  liveAnnouncementHex: 'color-edit-live-announcement-hex',
+  liveAnnouncementRgb: 'color-edit-live-announcement-rgb',
 });
-
-function isResolvedPlaceholder(value, key) {
-  return value && value !== key.replaceAll('-', ' ');
-}
 
 export function createColorEditPlaceholders(overrides = {}) {
   return { ...DEFAULT_PLACEHOLDERS, ...overrides };
 }
 
-export default async function loadColorEditPlaceholders() {
-  try {
-    const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
-      import(`${getLibs()}/utils/utils.js`),
-      import(`${getLibs()}/features/placeholders.js`),
-    ]);
-
-    const keys = Object.values(PLACEHOLDER_KEY_MAP);
-    const values = await replaceKeyArray(keys, getConfig());
-    const overrides = {};
-
-    Object.entries(PLACEHOLDER_KEY_MAP).forEach(([prop, key], index) => {
-      const value = values[index];
-      if (isResolvedPlaceholder(value, key)) {
-        overrides[prop] = value;
-      }
-    });
-
-    return createColorEditPlaceholders(overrides);
-  } catch {
-    return createColorEditPlaceholders();
-  }
+export default function loadColorEditPlaceholders() {
+  return loadPlaceholders(PLACEHOLDER_KEY_MAP, createColorEditPlaceholders);
 }

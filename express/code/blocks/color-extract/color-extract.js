@@ -7,7 +7,24 @@ import parseBlockConfig from './helpers/parseConfig.js';
 import createHistoryManager from './helpers/historyManager.js';
 import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
-import { decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
+import { decorateAnalyticsAttributes, createColorPaletteParamApi, PARAM_NAME } from '../../scripts/color-shared/utils/utilities.js';
+import loadColorExtractPlaceholders, { DEFAULT_PLACEHOLDERS as COLOR_EXTRACT_DEFAULTS } from '../../scripts/color-shared/i18n/loadColorExtractPlaceholders.js';
+import loadImageUploadPlaceholders, { DEFAULT_PLACEHOLDERS as IMAGE_UPLOAD_DEFAULTS } from '../../scripts/color-shared/i18n/loadImageUploadPlaceholders.js';
+import loadColorSwatchRailPlaceholders, { DEFAULT_PLACEHOLDERS as COLOR_SWATCH_RAIL_DEFAULTS } from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
+
+const placeholdersPromise = Promise.all([
+  loadColorExtractPlaceholders(),
+  loadImageUploadPlaceholders(),
+  loadColorSwatchRailPlaceholders(),
+]).then(([colorExtractStrings, imageUploadStrings, colorSwatchRailStrings]) => ({
+  colorExtractStrings,
+  imageUploadStrings,
+  colorSwatchRailStrings,
+})).catch(() => ({
+  colorExtractStrings: COLOR_EXTRACT_DEFAULTS,
+  imageUploadStrings: IMAGE_UPLOAD_DEFAULTS,
+  colorSwatchRailStrings: COLOR_SWATCH_RAIL_DEFAULTS,
+}));
 
 let extractionErrorShown = false;
 async function showExtractionError() {
@@ -261,11 +278,14 @@ function getPictureSource(picture) {
 
 /* ---------- Dropzone (uses shared createUploadDropzone) ---------- */
 
-function createColorExtractDropzone(block, config, onImageReady) {
+function createColorExtractDropzone(block, config, onImageReady, strings = {}) {
+  const colorExtractStrings = { ...COLOR_EXTRACT_DEFAULTS, ...(strings.colorExtractStrings || {}) };
+  const imageUploadStrings = { ...IMAGE_UPLOAD_DEFAULTS, ...(strings.imageUploadStrings || {}) };
   const dz = createUploadDropzone({
     enabled: config.enableImageUpload,
-    loadingText: 'Extracting colors...',
-    ariaLabel: 'Upload an image to extract colors',
+    strings: imageUploadStrings,
+    loadingText: colorExtractStrings.extractingColors,
+    ariaLabel: colorExtractStrings.dropzoneAria,
     onImageReady: (image, src) => {
       block.classList.remove('is-loading');
       block.classList.add('has-image');
@@ -315,9 +335,9 @@ function createColorExtractDropzone(block, config, onImageReady) {
 
 /* ---------- Suggested images ---------- */
 
-function buildSuggestedImages(row, onSelect) {
+function buildSuggestedImages(row, onSelect, strings = COLOR_EXTRACT_DEFAULTS) {
   const wrapper = createTag('div', { class: 'color-extract-suggestions' });
-  const label = row?.children?.[0] || createTag('div', {}, '\u2019t have an image? Try one of ours:');
+  const label = row?.children?.[0] || createTag('div', {}, strings.noImageTryOurs);
   label.classList.add('color-extract-suggestions-label');
   wrapper.append(label);
 
@@ -330,7 +350,7 @@ function buildSuggestedImages(row, onSelect) {
     const button = createTag('button', {
       class: 'color-extract-suggestion',
       type: 'button',
-      'aria-label': 'Use this image',
+      'aria-label': strings.useThisImage,
       'aria-pressed': 'false',
     });
     decorateAnalyticsAttributes(button, { linkLabel: 'Use this image' });
@@ -511,8 +531,8 @@ function createFloatingToolbarMount(controller, variant) {
 
 /* ---------- Landing ---------- */
 
-function buildLandingStage(imageRow) {
-  const stage = createTag('div', { class: 'color-extract-landing', role: 'region', 'aria-label': 'Upload an image for color extraction' });
+function buildLandingStage(imageRow, strings = COLOR_EXTRACT_DEFAULTS) {
+  const stage = createTag('div', { class: 'color-extract-landing', role: 'region', 'aria-label': strings.landingAria });
   const bgWrapper = createTag('div', { class: 'color-extract-landing-bg' });
   const picture = imageRow?.querySelector('picture') || imageRow?.querySelector('img');
   if (picture) {
@@ -530,18 +550,18 @@ function buildLandingStage(imageRow) {
   return { stage, content };
 }
 
-function buildDragOverlay() {
+function buildDragOverlay(strings = COLOR_EXTRACT_DEFAULTS) {
   const overlay = createTag('div', { class: 'color-extract-drag-overlay', 'aria-hidden': 'true' });
   const icon = createTag('div', { class: 'color-extract-drag-icon' }, ICON_HAND);
   overlay.append(icon);
-  overlay.append(createTag('p', { class: 'color-extract-drag-text' }, 'Drop your image anywhere'));
+  overlay.append(createTag('p', { class: 'color-extract-drag-text' }, strings.dropOverlayText));
   return overlay;
 }
 
-function buildLoadingOverlay() {
+function buildLoadingOverlay(strings = COLOR_EXTRACT_DEFAULTS) {
   const overlay = createTag('div', { class: 'color-extract-loading-overlay', 'aria-live': 'polite' });
   const content = createTag('div', { class: 'color-extract-loading-content' });
-  const label = createTag('p', { class: 'color-extract-loading-label' }, 'Uploading your image...');
+  const label = createTag('p', { class: 'color-extract-loading-label' }, strings.uploadingImage);
   const track = createTag('div', { class: 'color-extract-loading-track' });
   const bar = createTag('div', { class: 'color-extract-loading-bar' });
   track.append(bar);
@@ -635,7 +655,13 @@ function hoistLandingDecorations(block, landing) {
   if (landingFade) marqueeWrapper.after(landingFade);
 }
 
-function renderColorVariant(block, rows, config) {
+function renderColorVariant(block, rows, config, strings = {}) {
+  const colorExtractStrings = { ...COLOR_EXTRACT_DEFAULTS, ...(strings.colorExtractStrings || {}) };
+  const colorSwatchRailStrings = {
+    ...COLOR_SWATCH_RAIL_DEFAULTS,
+    ...(strings.colorSwatchRailStrings || {}),
+  };
+  const imageUploadStrings = { ...IMAGE_UPLOAD_DEFAULTS, ...(strings.imageUploadStrings || {}) };
   const maxColors = Math.max(1, Math.min(10, Number(config.maxColors) || DEFAULTS.MAX_COLORS));
   const resolvedConfig = {
     ...config,
@@ -811,6 +837,9 @@ function renderColorVariant(block, rows, config) {
     if (oldImg && imgLoadHandler) oldImg.removeEventListener('load', imgLoadHandler);
     if (markers) markers.destroy();
 
+    if (!edit.bgWrapper.isConnected) {
+      edit.leftCol.querySelector('.image-upload-dropzone-container')?.replaceWith(edit.bgWrapper);
+    }
     currentCanvas = drawImageToCanvas(image);
     await setupMarkers(currentCanvas);
 
@@ -818,7 +847,12 @@ function renderColorVariant(block, rows, config) {
     floatingToolbar.mount();
   }
 
-  const dropzone = createColorExtractDropzone(block, resolvedConfig, onImageReady);
+  const dropzone = createColorExtractDropzone(
+    block,
+    resolvedConfig,
+    onImageReady,
+    { colorExtractStrings, imageUploadStrings },
+  );
 
   async function addColorToImage() {
     if (!currentCanvas || !markers) return;
@@ -848,11 +882,11 @@ function renderColorVariant(block, rows, config) {
   }
 
   const suggestions = resolvedConfig.enableUrlInput
-    ? buildSuggestedImages(rows[0], handleSuggestionClick)
+    ? buildSuggestedImages(rows[0], handleSuggestionClick, colorExtractStrings)
     : null;
-  const landing = buildLandingStage(rows[2]);
-  const dragOverlay = buildDragOverlay();
-  const loadingOverlay = buildLoadingOverlay();
+  const landing = buildLandingStage(rows[2], colorExtractStrings);
+  const dragOverlay = buildDragOverlay(colorExtractStrings);
+  const loadingOverlay = buildLoadingOverlay(colorExtractStrings);
 
   const innerContainer = createTag('div', { class: 'color-extract-inner' });
   landing.content.append(dropzone.container);
@@ -879,6 +913,7 @@ function renderColorVariant(block, rows, config) {
         swatchFeatures: {
           copy: true, hexCode: true, trash: true, minSwatches: 2, editColorDisabled: true,
         },
+        strings: colorSwatchRailStrings,
       });
       railAdapter.element.classList.add('color-extract-swatch-rail');
       edit.railSlot.replaceWith(railAdapter.element);
@@ -902,9 +937,10 @@ function renderColorVariant(block, rows, config) {
         controller.setMetadata({ mood });
         emitBlockEvent(block, EVENTS.MOOD_CHANGE, { mood });
         if (currentCanvas) runExtraction(currentCanvas, mood);
-      });
+      }, { strings: colorExtractStrings });
 
       createToolbar({
+        strings: colorExtractStrings,
         moodElement: moodSelectorRef.element,
         onAddColor: addColorToImage,
         onReset: () => {
@@ -936,6 +972,18 @@ function renderColorVariant(block, rows, config) {
 
   if (resolvedConfig.enableImageUpload) {
     attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay);
+  }
+
+  if (new URLSearchParams(window.location.search).has(PARAM_NAME)) {
+    const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
+    const colors = getResolvedPalette();
+    const paletteName = getResolvedPaletteName();
+    controller.setState({ swatches: colors.map((hex) => ({ hex })), baseColorIndex: 0 });
+    if (paletteName) controller.setMetadata({ name: paletteName });
+    edit.bgWrapper.replaceWith(dropzone.container);
+    block.classList.add('has-image');
+    window.history.replaceState({ colorExtract: 'results' }, '');
+    floatingToolbar.mount();
   }
 
   window.addEventListener('popstate', (e) => {
@@ -1006,7 +1054,13 @@ function createGradientControllerProxy(editor) {
 
 /* ---------- Gradient variant renderer ---------- */
 
-async function renderGradientVariant(block, rows, config) {
+async function renderGradientVariant(block, rows, config, strings = {}) {
+  const colorExtractStrings = { ...COLOR_EXTRACT_DEFAULTS, ...(strings.colorExtractStrings || {}) };
+  const colorSwatchRailStrings = {
+    ...COLOR_SWATCH_RAIL_DEFAULTS,
+    ...(strings.colorSwatchRailStrings || {}),
+  };
+  const imageUploadStrings = { ...IMAGE_UPLOAD_DEFAULTS, ...(strings.imageUploadStrings || {}) };
   injectStylesheet(new URL('../../scripts/color-shared/components/gradients/gradient-editor.css', import.meta.url).href);
   const { createGradientEditor } = await import('../../scripts/color-shared/components/gradients/gradient-editor.js');
   const maxColors = Math.max(2, Math.min(10, Number(config.maxColors) || DEFAULTS.MAX_COLORS));
@@ -1235,13 +1289,21 @@ async function renderGradientVariant(block, rows, config) {
     if (oldImg && imgLoadHandler) oldImg.removeEventListener('load', imgLoadHandler);
     if (markers) markers.destroy();
 
+    if (!edit.bgWrapper.isConnected) {
+      edit.leftCol.querySelector('.image-upload-dropzone-container')?.replaceWith(edit.bgWrapper);
+    }
     currentCanvas = drawImageToCanvas(image);
     await setupMarkers(currentCanvas);
     runGradientExtraction(currentCanvas);
     floatingToolbar.mount();
   }
 
-  const dropzone = createColorExtractDropzone(block, resolvedConfig, onImageReady);
+  const dropzone = createColorExtractDropzone(
+    block,
+    resolvedConfig,
+    onImageReady,
+    { colorExtractStrings, imageUploadStrings },
+  );
 
   async function addColorToImage() {
     if (!currentCanvas || !markers || !gradientEditor) return;
@@ -1284,11 +1346,11 @@ async function renderGradientVariant(block, rows, config) {
   }
 
   const suggestions = resolvedConfig.enableUrlInput
-    ? buildSuggestedImages(rows[0], handleSuggestionClick)
+    ? buildSuggestedImages(rows[0], handleSuggestionClick, colorExtractStrings)
     : null;
-  const landing = buildLandingStage(rows[2]);
-  const dragOverlay = buildDragOverlay();
-  const loadingOverlay = buildLoadingOverlay();
+  const landing = buildLandingStage(rows[2], colorExtractStrings);
+  const dragOverlay = buildDragOverlay(colorExtractStrings);
+  const loadingOverlay = buildLoadingOverlay(colorExtractStrings);
 
   const innerContainer = createTag('div', { class: 'color-extract-inner' });
   landing.content.append(dropzone.container);
@@ -1313,6 +1375,7 @@ async function renderGradientVariant(block, rows, config) {
         swatchFeatures: {
           copy: true, hexCode: true, trash: true, minSwatches: 2, editColorDisabled: true,
         },
+        strings: colorSwatchRailStrings,
       });
       railAdapter.element.classList.add('color-extract-swatch-rail', 'color-extract-swatch-rail--gradient');
       edit.railSlot.replaceWith(railAdapter.element);
@@ -1341,6 +1404,7 @@ async function renderGradientVariant(block, rows, config) {
       });
 
       createToolbar({
+        strings: colorExtractStrings,
         moodElement: null,
         onAddColor: addColorToImage,
         onReset: () => {
@@ -1374,6 +1438,22 @@ async function renderGradientVariant(block, rows, config) {
     attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay);
   }
 
+  if (new URLSearchParams(window.location.search).has(PARAM_NAME)) {
+    const { getResolvedPalette } = createColorPaletteParamApi();
+    const colors = getResolvedPalette();
+    const colorStops = colors.map((color, i) => ({
+      color,
+      position: colors.length <= 1 ? 0.5 : i / (colors.length - 1),
+    }));
+    const gradientData = { type: 'linear', angle: 90, colorStops };
+    gradientEditor.setGradient(gradientData);
+    syncSwatchesFromGradient(gradientData);
+    edit.bgWrapper.replaceWith(dropzone.container);
+    block.classList.add('has-image');
+    window.history.replaceState({ colorExtract: 'results' }, '');
+    floatingToolbar.mount();
+  }
+
   window.addEventListener('popstate', (e) => {
     if (block.classList.contains('has-image') && e.state?.colorExtract !== 'results') {
       goToLanding();
@@ -1397,10 +1477,12 @@ export default async function decorate(block) {
   block.classList.remove(VARIANTS.GRADIENT, VARIANTS.PALETTE);
   block.classList.add(variant);
 
+  const strings = await placeholdersPromise;
+
   if (variant === VARIANTS.PALETTE) {
-    renderColorVariant(block, contentRows, config);
+    renderColorVariant(block, contentRows, config, strings);
   } else {
-    await renderGradientVariant(block, contentRows, config);
+    await renderGradientVariant(block, contentRows, config, strings);
   }
   trackColorBlockLoad('color-extract');
 }

@@ -12,10 +12,15 @@ import { createFiltersComponent } from '../../scripts/color-shared/components/cr
 import { createLoadingScreenComponent } from '../../scripts/color-shared/components/createLoadingScreenComponent.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
+import loadColorExplorePlaceholders from '../../scripts/color-shared/i18n/loadColorExplorePlaceholders.js';
+import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
+import loadColorFiltersPlaceholders from '../../scripts/color-shared/i18n/loadColorFiltersPlaceholders.js';
+import loadColorModalPlaceholders from '../../scripts/color-shared/i18n/loadColorModalPlaceholders.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
 const THEME_URL_PARAM = 'theme';
+const ITEM_ID_URL_PARAM = 'id';
 const THEME_URL_QUERY_VALUE = {
   [VARIANTS.GRADIENTS]: 'color-gradients',
   [VARIANTS.STRIPS]: 'color-palettes',
@@ -140,7 +145,7 @@ function mergeLoadMoreData(currentData, moreData) {
 }
 
 async function createBlockLoadMoreControl(container, onClick, options = {}) {
-  const { iconSize = 'xl' } = options;
+  const { iconSize = 'xl', strings } = options;
   await loadIconsRail();
 
   let root = container.querySelector(':scope > .load-more-container[data-owner="color-explore"]');
@@ -198,9 +203,9 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
         root.style.display = 'none';
         return;
       }
-      text.textContent = 'Load more';
-      button.setAttribute('aria-label', 'Load more items');
-      decorateAnalyticsAttributes(button, { linkLabel: 'Load more' });
+      text.textContent = strings?.loadMore ?? 'Load more';
+      button.setAttribute('aria-label', strings?.loadMoreAria ?? 'Load more gradients');
+      decorateAnalyticsAttributes(button, { linkLabel: strings?.loadMore ?? 'Load more' });
       root.style.display = 'flex';
     },
     destroy() {
@@ -214,13 +219,14 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
   };
 }
 
-async function createBlockFilterControl(container, variant, onFilterChange) {
+async function createBlockFilterControl(container, variant, onFilterChange, strings) {
   const header = container.querySelector('.explore-header, .gradients-header');
   if (!header) return null;
 
   const filters = await createFiltersComponent({
     variant,
     onFilterChange,
+    ...(strings ? { strings } : {}),
   });
 
   if (!(filters?.element instanceof Node)) return null;
@@ -255,6 +261,10 @@ export default async function decorate(block) {
     config.variant = getVariantFromThemeUrlParam() ?? variantFromClass ?? config.variant;
 
     block.dataset.blockStatus = 'loading';
+    const placeholdersPromise = loadColorExplorePlaceholders();
+    const colorSwatchRailStringsPromise = loadColorSwatchRailPlaceholders();
+    const colorFiltersStringsPromise = loadColorFiltersPlaceholders();
+    const colorModalStringsPromise = loadColorModalPlaceholders();
     block.replaceChildren();
     block.className = CSS_CLASSES.BLOCK;
     const variantClass = config.variant === VARIANTS.GRADIENTS
@@ -292,7 +302,7 @@ export default async function decorate(block) {
       container.replaceChildren(header, section);
     };
     showLoadingSkeleton();
-    await loadStripSharedStyles();
+    const [placeholders] = await Promise.all([placeholdersPromise, loadStripSharedStyles()]);
 
     if (config.variant === VARIANTS.GRADIENTS || config.variant === VARIANTS.STRIPS) {
       const gradientsDataService = createSharedColorDataService({
@@ -388,14 +398,18 @@ export default async function decorate(block) {
         modalManager.open({
           title: content.name || fallbackTitle,
           showTitle: false,
-          content: () => createGradientModalContent(content, {
-            likesCount: content.likes ?? content.likesCount ?? 0,
-            liked: content.liked ?? false,
-            creatorName: content.creator?.name ?? '',
-            creatorImageUrl: content.creator?.imageUrl ?? content.creatorImageUrl,
-            tags: item.tags ?? [],
-            onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
-          }),
+          content: async () => {
+            const modalStrings = await colorModalStringsPromise;
+            return createGradientModalContent(content, {
+              likesCount: content.likes ?? content.likesCount ?? 0,
+              liked: content.liked ?? false,
+              creatorName: content.creator?.name ?? '',
+              creatorImageUrl: content.creator?.imageUrl ?? content.creatorImageUrl,
+              tags: item.tags ?? [],
+              onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
+              strings: modalStrings,
+            });
+          },
         });
       };
 
@@ -424,6 +438,7 @@ export default async function decorate(block) {
             container,
             VARIANTS.GRADIENTS,
             (filters) => gradientFilterHandler?.(filters),
+            await colorFiltersStringsPromise,
           );
 
           const urlQuery = new URLSearchParams(window.location.search).get('q');
@@ -466,6 +481,7 @@ export default async function decorate(block) {
             dataService: activeDataService,
             modalManager,
             stateKey,
+            placeholders,
           });
 
           await activeRenderer.render();
@@ -506,14 +522,14 @@ export default async function decorate(block) {
             visibleCount = alignToFullRow(Math.min(nextTarget, allData.length), allData.length);
             await activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
-          }, { iconSize: config.loadMoreIconSize || 'xl' });
+          }, { iconSize: config.loadMoreIconSize || 'xl', strings: placeholders });
           updateLoadMoreState();
 
           activeRenderer.on(EVENTS.GRADIENT_CLICK, async ({ gradient }) => {
             const item = gradient || {};
             const currentState = BlockMediator.get(stateKey);
             BlockMediator.set(stateKey, { ...currentState, selectedItem: item });
-            await openModalForItem(item, 'Gradient');
+            await openModalForItem(item, placeholders.modalDefaultGradientTitle);
           });
 
           floatingSearchHandler = async (e) => {
@@ -551,7 +567,15 @@ export default async function decorate(block) {
             document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
           }
 
+          const isInitialGradientMount = !hasCompletedInitialModeMount;
           if (!hasCompletedInitialModeMount) hasCompletedInitialModeMount = true;
+          if (isInitialGradientMount) {
+            const url = new URL(window.location.href);
+            if (url.searchParams.has(ITEM_ID_URL_PARAM)) {
+              url.searchParams.delete(ITEM_ID_URL_PARAM);
+              window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+            }
+          }
           publishInstances();
         } finally {
           isMounting = false;
@@ -574,6 +598,7 @@ export default async function decorate(block) {
             container,
             VARIANTS.STRIPS,
             (filters) => stripsFilterHandler?.(filters),
+            await colorFiltersStringsPromise,
           );
 
           const urlQuery = new URLSearchParams(window.location.search).get('q');
@@ -594,6 +619,8 @@ export default async function decorate(block) {
           activeRenderer = createStripsRenderer({
             container,
             data: allData.slice(0, visibleCount),
+            strings: await colorFiltersStringsPromise,
+            paletteCardStrings: await placeholdersPromise,
             config: {
               ...config,
               variant: VARIANTS.STRIPS,
@@ -638,7 +665,7 @@ export default async function decorate(block) {
             visibleCount = alignToFullRow(Math.min(nextTarget, allData.length), allData.length);
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
-          }, { iconSize: config.loadMoreIconSize || 'xl' });
+          }, { iconSize: config.loadMoreIconSize || 'xl', strings: placeholders });
           updateLoadMoreState();
 
           activeRenderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
@@ -714,7 +741,26 @@ export default async function decorate(block) {
             document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
           }
 
+          const isInitialStripsMount = !hasCompletedInitialModeMount;
           if (!hasCompletedInitialModeMount) hasCompletedInitialModeMount = true;
+          if (isInitialStripsMount) {
+            const itemId = new URLSearchParams(window.location.search).get(ITEM_ID_URL_PARAM);
+            if (itemId) {
+              const url = new URL(window.location.href);
+              url.searchParams.delete(ITEM_ID_URL_PARAM);
+              window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+              const item = await activeDataService.getTheme(itemId);
+              if (item) {
+                await modalManager.openPaletteSwatchesModal(item, {
+                  verticalMaxPerRow: config.swatchVerticalMaxPerRow,
+                  onLikeToggle: async ({ id, liked }) => (
+                    activeDataService.toggleLike({ id, liked })
+                  ),
+                  initialFocusSelector: () => null,
+                });
+              }
+            }
+          }
           publishInstances();
         } finally {
           isMounting = false;
@@ -758,11 +804,18 @@ export default async function decorate(block) {
 
         let renderer;
         if (isSwatchesMode(config)) {
-          renderer = createSwatchesRenderer({ container, data: allData, config });
+          const colorSwatchRailStrings = await colorSwatchRailStringsPromise;
+          renderer = createSwatchesRenderer({
+            container,
+            data: allData,
+            config: { ...config, colorSwatchRailStrings },
+          });
         } else {
           renderer = createStripsRenderer({
             container,
             data: allData.slice(0, visibleCount),
+            strings: await colorFiltersStringsPromise,
+            paletteCardStrings: await placeholdersPromise,
             config,
           });
         }
@@ -779,7 +832,7 @@ export default async function decorate(block) {
             visibleCount = alignToFullRow(Math.min(nextTarget, allData.length), allData.length);
             renderer.update(allData.slice(0, visibleCount));
             loadMoreControl.update(Math.max(0, allData.length - visibleCount));
-          }, { iconSize: config.loadMoreIconSize || 'xl' })
+          }, { iconSize: config.loadMoreIconSize || 'xl', strings: placeholders })
           : null;
         loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
 
@@ -805,6 +858,8 @@ export default async function decorate(block) {
             {
               verticalMaxPerRow: config.swatchVerticalMaxPerRow,
               onLikeToggle: async ({ id, liked }) => dataService.toggleLike({ id, liked }),
+              modalStrings: await colorModalStringsPromise,
+              colorSwatchRailStrings: await colorSwatchRailStringsPromise,
             },
           );
         });
@@ -820,6 +875,8 @@ export default async function decorate(block) {
             {
               verticalMaxPerRow: config.swatchVerticalMaxPerRow,
               onLikeToggle: async ({ id, liked }) => dataService.toggleLike({ id, liked }),
+              modalStrings: await colorModalStringsPromise,
+              colorSwatchRailStrings: await colorSwatchRailStringsPromise,
             },
           );
         });
@@ -906,7 +963,7 @@ export default async function decorate(block) {
     block.classList.add(CSS_CLASSES.ERROR);
     block.dataset.blockStatus = '';
     const errMsg = document.createElement('p');
-    errMsg.textContent = `Failed to load Color Explore: ${error.message}`;
+    errMsg.textContent = 'Failed to load Color Explore';
     block.appendChild(errMsg);
     block.setAttribute('data-failed', 'true');
   }
