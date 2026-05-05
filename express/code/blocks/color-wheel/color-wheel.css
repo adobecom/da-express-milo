@@ -252,7 +252,7 @@ color-wheel-express {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 2px;
+  gap: var(--spacing-50);
   margin-bottom: 0.75rem;
 }
 
@@ -297,27 +297,27 @@ color-wheel-express {
 .color-wheel-harmony-carousel-host .simple-carousel-fader-right {
   display: flex;
   width: 88px;
-  height: 48px;
+  height: var(--spacing-700);
   align-items: center;
   gap: 10px;
 }
 
 .color-wheel-harmony-carousel-host .simple-carousel-fader-left {
-  background: linear-gradient(90deg, #FFFFFF 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
+  background: linear-gradient(90deg, var(--color-white) 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
   padding-inline-start: var(--spacing-100);
   justify-content: flex-start;
 }
 
 .color-wheel-harmony-carousel-host .simple-carousel-fader-right {
-  background: linear-gradient(270deg, #FFFFFF 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
+  background: linear-gradient(270deg, var(--color-white) 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
   padding-inline-end: var(--spacing-100);
   justify-content: flex-end;
 }
 
 .color-wheel-harmony-option {
   box-sizing: border-box;
-  width: 48px;
-  height: 48px;
+  width: var(--spacing-700);
+  height: var(--spacing-700);
   padding: 0;
   margin: 0;
   border-radius: var(--Radius-corner-radius-75);
@@ -345,8 +345,8 @@ color-wheel-express {
 }
 
 .color-wheel .icon.simple-carousel-arrow-icon {
-  height: 18px;
-  width: 18px;
+  height: var(--spacing-325);
+  width: var(--spacing-325);
 }
 
 .mobile-container {
@@ -570,3 +570,22 @@ color-wheel-express {
 }
 
 
+@media (min-width: 1200px) {
+  .color-wheel .ax-color-tool-layout {
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    align-items: stretch;
+  }
+  .color-wheel .ax-shell-slot--sidebar {
+    grid-row: 1 / span 3;
+  }
+  .color-wheel .ax-shell-slot--topbar {
+    grid-row: 1;
+  }
+  .color-wheel .ax-shell-slot--canvas {
+    grid-row: 2;
+    min-height: 0;
+  }
+  .color-wheel .ax-shell-slot--footer {
+    grid-row: 3;
+  }
+}
