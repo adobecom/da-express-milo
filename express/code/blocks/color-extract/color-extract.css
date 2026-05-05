@@ -1,38 +1,3 @@
-
-/* Express theme fallbacks for floating toolbar (overridden when full theme loads) */
-:where(.color-extract) {
-  --color-white: #ffffff;
-  --color-default-font: #131313;
-  --color-blue-800: #3b63fb;
-  --color-light-gray-2: #f3f3f3;
-  --color-gray-300-variant: #dadada;
-  --color-gray-800-variant: #292929;
-  --Palette-gray-600: #717171;
-  --spacing-80: 6px;
-  --spacing-100: 8px;
-  --spacing-200: 12px;
-  --spacing-300: 16px;
-  --border-width-2: 2px;
-  --body-font-family: 'Adobe Clean', adobe-clean, 'Trebuchet MS', sans-serif;
-  --ax-body-weight: 700;
-  --ax-body-xs-size: 12px;
-  --ax-body-xxs-size: 11px;
-  --ax-toolbar-sticky-z: 40;
-  --gradient-stop-size: 16px;
-  --gradient-stop-border-color: #fff;
-  --gradient-editor-handle-stroke-width: 2px;
-  --Corner-radius-bar: 12px;
-  --Gradient-editor-max-width-l: 668px;
-  --Gradient-editor-max-width-m: 500px;
-  --Gradient-editor-max-width-s: 343px;
-  --Elevation-floating-button: 0 1px 4px rgba(0, 0, 0, 0.16);
-  --Palette-gray-200: #e9e9e9;
-  --Palette-white: #fff;
-  --Spacing-Spacing-50: 2px;
-  --modal-focus-outline-width: 2px;
-  --S2A-Color-border-focus-indicator: #4b75ff;
-}
-
 .color-extract *,
 .color-extract *::before,
 .color-extract *::after {

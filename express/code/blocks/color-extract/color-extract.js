@@ -58,7 +58,7 @@ function createExtractController(maxColors = 5, callbacks = {}) {
   let state = {
     swatches: Array.from({ length: maxColors }, () => ({ hex: '#808080' })),
     baseColorIndex: 0,
-    name: 'Extracted Palette',
+    name: '',
     mood: 'colorful',
   };
   const listeners = new Set();
@@ -503,7 +503,7 @@ function createFloatingToolbarMount(controller, variant) {
       const { initFloatingToolbar } = await import('../../scripts/color-shared/toolbar/createFloatingToolbar.js');
       const state = controller.getState();
       const palette = {
-        name: state.name || 'Extracted Palette',
+        name: state.name || '',
         colors: state.swatches.map((s) => s.hex),
         tags: [],
         ...(variant === VARIANTS.GRADIENT ? { angle: 90 } : {}),

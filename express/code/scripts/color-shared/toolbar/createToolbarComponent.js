@@ -465,7 +465,10 @@ export function createToolbar(options) {
 
   const { on, emit } = createEventBus(toolbar, 'color-floating-toolbar');
 
-  const getPaletteWithName = () => ({ ...palette, name: nameInput?.value ?? name });
+  const getPaletteWithName = () => ({
+    ...palette,
+    name: nameInput?.value || t.paletteNamePlaceholder,
+  });
 
   const getCTAText = () => (isMobileViewport()
     ? (mobileCTAText || t.ctaText)

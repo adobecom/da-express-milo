@@ -1,7 +1,6 @@
 import { getLibs } from '../../../scripts/utils.js';
 
 export const DEFAULT_PLACEHOLDERS = Object.freeze({
-  randomPresetName: 'Random Preset',
   customPaletteName: 'Custom Palette',
   errorMessage: 'Failed to load Contrast Checker.',
   summaryTabLabel: 'Summary',
@@ -52,7 +51,6 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
-  randomPresetName: 'color-contrast-checker-random-preset-name',
   customPaletteName: 'color-contrast-checker-custom-palette-name',
   errorMessage: 'color-contrast-checker-error-message',
   summaryTabLabel: 'color-contrast-checker-summary-tab-label',
