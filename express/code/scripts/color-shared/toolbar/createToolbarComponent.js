@@ -96,17 +96,7 @@ async function checkIsSignedIn() {
   }
 }
 
-async function handleOpenInExpress({ id, name, colors }) {
-  const isSignedIn = await checkIsSignedIn();
-  if (!isSignedIn) {
-    const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
-      '../utils/susiRedirect.js'
-    );
-    setSusiColorRedirect(buildColorSignInRedirectUrl(colors, name, id));
-    await triggerSignInFlow();
-    return;
-  }
-
+async function openInExpress({ id, name, colors }) {
   const { getTrackingAppendedURL } = await import('../../branchlinks.js');
 
   const params = new URLSearchParams(window.location.search);
@@ -128,6 +118,20 @@ async function handleOpenInExpress({ id, name, colors }) {
   url.searchParams.set('category', 'yourStuff');
 
   window.open(url.toString(), '_blank', 'noopener noreferrer');
+}
+
+async function handleOpenInExpress({ id, name, colors }) {
+  const isSignedIn = await checkIsSignedIn();
+  if (!isSignedIn) {
+    const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
+      '../utils/susiRedirect.js'
+    );
+    setSusiColorRedirect(buildColorSignInRedirectUrl(colors, name, id, true));
+    await triggerSignInFlow();
+    return;
+  }
+
+  await openInExpress({ id, name, colors });
 }
 
 async function handleDownload(palette, t) {
@@ -578,6 +582,18 @@ export function createToolbar(options) {
   const mql = window.matchMedia('(max-width: 599px)');
   const mqlHandler = () => { ctaBtn.textContent = getCTAText(); };
   mql.addEventListener('change', mqlHandler);
+
+  const postSignInParams = new URLSearchParams(window.location.search);
+  if (postSignInParams.has('openInExpress')) {
+    postSignInParams.delete('openInExpress');
+    const cleanSearch = postSignInParams.toString();
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${cleanSearch ? `?${cleanSearch}` : ''}${window.location.hash}`,
+    );
+    openInExpress(getPaletteWithName()).catch(() => {});
+  }
 
   const api = {
     element: theme,
