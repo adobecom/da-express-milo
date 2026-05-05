@@ -649,18 +649,6 @@ describe('createToolbar', () => {
       expect(stored).to.include('color-palette=');
     });
 
-    it('stores a SUSI redirect URL with openInExpress=true when not signed in', async () => {
-      window.adobeIMS = {
-        isSignedInUser: sinon.stub().returns(false),
-      };
-
-      await clickCTA();
-
-      const stored = consumeSusiColorRedirect();
-      const url = new URL(stored);
-      expect(url.searchParams.get('openInExpress')).to.equal('true');
-    });
-
     it('opens Express in a new tab when user is signed in', async () => {
       window.adobeIMS = {
         isSignedInUser: sinon.stub().returns(true),
@@ -671,54 +659,6 @@ describe('createToolbar', () => {
       expect(openStub.calledOnce).to.be.true;
       expect(openStub.firstCall.args[1]).to.equal('_blank');
       expect(consumeSusiColorRedirect()).to.be.null;
-    });
-  });
-
-  describe('openInExpress post-sign-in redirect', () => {
-    let openStub;
-    let savedHref;
-
-    beforeEach(() => {
-      savedHref = window.location.href;
-      openStub = sinon.stub(window, 'open');
-    });
-
-    afterEach(() => {
-      delete window.adobeIMS;
-      window.history.replaceState({}, '', savedHref);
-    });
-
-    it('automatically opens Express when openInExpress=true is in the URL and user is signed in', async () => {
-      window.adobeIMS = { isSignedInUser: sinon.stub().returns(true) };
-      window.history.replaceState({}, '', '?openInExpress=true');
-
-      const toolbar = createToolbar(defaultOptions({ onCTA: undefined }));
-      document.body.appendChild(toolbar.element);
-      await new Promise((r) => setTimeout(r, 100));
-
-      expect(openStub.calledOnce).to.be.true;
-      expect(openStub.firstCall.args[1]).to.equal('_blank');
-    });
-
-    it('removes openInExpress from the URL after auto-triggering', async () => {
-      window.adobeIMS = { isSignedInUser: sinon.stub().returns(true) };
-      window.history.replaceState({}, '', '?openInExpress=true');
-
-      const toolbar = createToolbar(defaultOptions({ onCTA: undefined }));
-      document.body.appendChild(toolbar.element);
-      await new Promise((r) => setTimeout(r, 100));
-
-      expect(new URLSearchParams(window.location.search).has('openInExpress')).to.be.false;
-    });
-
-    it('does not open Express automatically when openInExpress is not in the URL', async () => {
-      window.adobeIMS = { isSignedInUser: sinon.stub().returns(true) };
-
-      const toolbar = createToolbar(defaultOptions({ onCTA: undefined }));
-      document.body.appendChild(toolbar.element);
-      await new Promise((r) => setTimeout(r, 100));
-
-      expect(openStub.called).to.be.false;
     });
   });
 
