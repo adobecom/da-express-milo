@@ -43,28 +43,6 @@ describe('createColorBlindnessService', () => {
   });
 
   describe('simulate', () => {
-    it('deutan averages R and G, keeps B unchanged', () => {
-      const [r2, g2, b2] = simulate(200, 100, 50, 'deutan');
-      const expectedRG = ((200 / 255 + 100 / 255) / 2) * 255;
-      expect(r2).to.be.closeTo(expectedRG, 0.01);
-      expect(g2).to.be.closeTo(expectedRG, 0.01);
-      expect(b2).to.be.closeTo(50, 0.01);
-    });
-
-    it('protan averages R and G identically to deutan', () => {
-      const deutan = simulate(200, 100, 50, 'deutan');
-      const protan = simulate(200, 100, 50, 'protan');
-      expect(protan).to.deep.equal(deutan);
-    });
-
-    it('tritan keeps R and G, averages G and B', () => {
-      const [r2, g2, b2] = simulate(200, 100, 50, 'tritan');
-      const expectedGB = ((100 / 255 + 50 / 255) / 2) * 255;
-      expect(r2).to.be.closeTo(200, 0.01);
-      expect(g2).to.be.closeTo(100, 0.01);
-      expect(b2).to.be.closeTo(expectedGB, 0.01);
-    });
-
     it('clamps output to 0-255 range', () => {
       const [r2, g2, b2] = simulate(0, 0, 0, 'deutan');
       expect(r2).to.be.at.least(0);
@@ -95,10 +73,34 @@ describe('createColorBlindnessService', () => {
       });
     });
 
-    it('unknown type falls through to tritan logic', () => {
-      const tritan = simulate(200, 100, 50, 'tritan');
-      const unknown = simulate(200, 100, 50, 'unknown');
-      expect(unknown).to.deep.equal(tritan);
+    it('defaults to intensity 10', () => {
+      TYPE_ORDER.forEach((type) => {
+        expect(simulate(200, 100, 50, type)).to.deep.equal(simulate(200, 100, 50, type, 10));
+      });
+    });
+
+    it('different intensities produce different results for non-neutral colors', () => {
+      TYPE_ORDER.forEach((type) => {
+        expect(simulate(200, 100, 50, type, 1)).to.not.deep.equal(simulate(200, 100, 50, type, 10));
+      });
+    });
+
+    it('lower intensity deviates less from the original color', () => {
+      const [r, g, b] = [200, 100, 50];
+      TYPE_ORDER.forEach((type) => {
+        const [r1, g1, b1] = simulate(r, g, b, type, 1);
+        const [r10, g10, b10] = simulate(r, g, b, type, 10);
+        const dist1 = Math.hypot(r1 - r, g1 - g, b1 - b);
+        const dist10 = Math.hypot(r10 - r, g10 - g, b10 - b);
+        expect(dist1).to.be.lessThan(dist10);
+      });
+    });
+
+    it('each type produces distinct output for a non-neutral color', () => {
+      const results = TYPE_ORDER.map((type) => simulate(200, 100, 50, type));
+      expect(results[0]).to.not.deep.equal(results[1]);
+      expect(results[0]).to.not.deep.equal(results[2]);
+      expect(results[1]).to.not.deep.equal(results[2]);
     });
   });
 
@@ -106,13 +108,6 @@ describe('createColorBlindnessService', () => {
     it('returns a valid 7-char hex string', () => {
       const result = simulateHex('#FF0000', 'deutan');
       expect(result).to.match(/^#[0-9a-f]{6}$/);
-    });
-
-    it('deutan simulation of pure red produces equal R and G', () => {
-      const result = simulateHex('#FF0000', 'deutan');
-      const rHex = result.slice(1, 3);
-      const gHex = result.slice(3, 5);
-      expect(rHex).to.equal(gHex);
     });
 
     it('black stays black', () => {
@@ -127,9 +122,21 @@ describe('createColorBlindnessService', () => {
       });
     });
 
-    it('tritan simulation keeps R unchanged', () => {
+    it('tritan simulation keeps R unchanged for pure red', () => {
       const result = simulateHex('#FF0000', 'tritan');
       expect(result.slice(1, 3)).to.equal('ff');
+    });
+
+    it('defaults to intensity 10', () => {
+      TYPE_ORDER.forEach((type) => {
+        expect(simulateHex('#FF8000', type)).to.equal(simulateHex('#FF8000', type, 10));
+      });
+    });
+
+    it('intensity parameter affects the simulated output', () => {
+      TYPE_ORDER.forEach((type) => {
+        expect(simulateHex('#FF8000', type, 1)).to.not.equal(simulateHex('#FF8000', type, 10));
+      });
     });
   });
 
@@ -146,12 +153,6 @@ describe('createColorBlindnessService', () => {
       const colors = ['#FF0000', '#FF0000'];
       const pairs = getConflictPairs(colors, 'deutan');
       expect(pairs).to.deep.include([0, 1]);
-    });
-
-    it('detects red-green conflicts under deutan simulation', () => {
-      const colors = ['#FF0000', '#00FF00'];
-      const pairs = getConflictPairs(colors, 'deutan');
-      expect(pairs.length).to.be.greaterThan(0);
     });
 
     it('returns empty for a single-color array', () => {

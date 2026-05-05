@@ -36,7 +36,7 @@ describe('ThemeActions', () => {
 
   describe('buildThemeUrl', () => {
     it('should build URL from configured endpoints', () => {
-      expect(actions.buildThemeUrl('abc')).to.equal('https://themes.test.io/api/v2/themes/abc');
+      expect(actions.buildThemeUrl('abc')).to.equal('https://themes.test.io/api/v2/themes/abc?metadata=all');
     });
 
     it('should throw ConfigError when serviceConfig is empty', async () => {
@@ -342,7 +342,7 @@ describe('ThemeActions', () => {
     it('should call correct theme URL with GET', async () => {
       await actions.fetchTheme('t-123');
       const [url, opts] = fetchStub.firstCall.args;
-      expect(url).to.equal('https://themes.test.io/api/v2/themes/t-123');
+      expect(url).to.equal('https://themes.test.io/api/v2/themes/t-123?metadata=all');
       expect(opts.method).to.equal('GET');
     });
 
@@ -477,7 +477,7 @@ describe('ThemeActions', () => {
     it('should DELETE to correct URL', async () => {
       await actions.deleteTheme({ id: 'del-1', name: 'Old' });
       const [url, opts] = fetchStub.firstCall.args;
-      expect(url).to.equal('https://themes.test.io/api/v2/themes/del-1');
+      expect(url).to.equal('https://themes.test.io/api/v2/themes/del-1?metadata=all');
       expect(opts.method).to.equal('DELETE');
     });
 

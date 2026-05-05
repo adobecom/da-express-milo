@@ -13,6 +13,8 @@ function createTestPlugin(overrides = {}) {
       likeBaseUrl: 'https://asset.test.io',
       apiKey: 'test-key',
       endpoints: {
+        themeBaseUrl: 'https://themes.test.io',
+        gradientBaseUrl: 'https://gradient.test.io',
         search: '/search',
         api: '/api/v2',
         themePath: '/themes',

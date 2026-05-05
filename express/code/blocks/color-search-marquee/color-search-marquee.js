@@ -3,6 +3,8 @@ import {
   createDeepLinkManager,
 } from '../../scripts/color-shared/components/search-bar/index.js';
 import { getIconElementDeprecated, addTempWrapperDeprecated, getMetadata } from '../../scripts/utils.js';
+import loadColorSearchMarqueePlaceholders from '../../scripts/color-shared/i18n/loadColorSearchMarqueePlaceholders.js';
+import { interpolate } from '../../scripts/color-shared/utils/utilities.js';
 
 const CHEVRON_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 22 22" fill="none">
   <path d="M8.5 4.5L15 11L8.5 17.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -25,7 +27,7 @@ function updateScrollFades(container, fadeRight, fadeLeft) {
   container.classList.toggle('tags-centered', !isOverflowing);
 }
 
-function renderTagPills(block, tags, searchBar, deepLinkManager) {
+function renderTagPills(block, tags, searchBar, deepLinkManager, strings) {
   if (!tags.length) return;
 
   const wrapper = document.createElement('div');
@@ -57,7 +59,7 @@ function renderTagPills(block, tags, searchBar, deepLinkManager) {
   const scrollBtnRight = document.createElement('button');
   scrollBtnRight.className = 'tags-scroll-btn';
   scrollBtnRight.innerHTML = CHEVRON_SVG;
-  scrollBtnRight.setAttribute('aria-label', 'Scroll tags right');
+  scrollBtnRight.setAttribute('aria-label', strings?.scrollRight ?? 'Scroll tags right');
   scrollBtnRight.addEventListener('click', () => {
     container.scrollBy({ left: container.clientWidth * 0.75, behavior: 'smooth' });
   });
@@ -70,7 +72,7 @@ function renderTagPills(block, tags, searchBar, deepLinkManager) {
   const scrollBtnLeft = document.createElement('button');
   scrollBtnLeft.className = 'tags-scroll-btn';
   scrollBtnLeft.innerHTML = CHEVRON_SVG;
-  scrollBtnLeft.setAttribute('aria-label', 'Scroll tags left');
+  scrollBtnLeft.setAttribute('aria-label', strings?.scrollLeft ?? 'Scroll tags left');
   scrollBtnLeft.addEventListener('click', () => {
     container.scrollBy({ left: -container.clientWidth * 0.75, behavior: 'smooth' });
   });
@@ -135,9 +137,9 @@ export function setupStickyBounds(block, searchBar) {
   endSentinel.dataset.searchBarEndSentinel = 'true';
   endSentinel.setAttribute('aria-hidden', 'true');
   endSentinel.style.cssText = 'display:block;inline-size:1px;block-size:1px;';
-  const footer = document.querySelector('footer');
-  if (footer) {
-    footer.before(endSentinel);
+  const sentinelTarget = document.querySelector('.banner-bg, footer');
+  if (sentinelTarget) {
+    sentinelTarget.before(endSentinel);
   } else {
     colorExploreBlock.after(endSentinel);
   }
@@ -223,6 +225,8 @@ export default async function decorate(block) {
     }
   }
 
+  const strings = await loadColorSearchMarqueePlaceholders();
+
   const deepLinkManager = createDeepLinkManager({
     enabled: true,
     queryParam: 'q',
@@ -230,7 +234,7 @@ export default async function decorate(block) {
 
   const searchBar = await createExploreSearchBar(
     {
-      placeholder: 'Search for colors, moods, themes, etc.',
+      placeholder: strings.searchPlaceholder,
       enableSuggestions: true,
       enableStickyBehavior: true,
       enableAutocomplete: true,
@@ -284,7 +288,7 @@ export default async function decorate(block) {
 
   const emptyResult = createEmptyResultElements(block, searchBar.element);
 
-  renderTagPills(block, tags, searchBar, deepLinkManager);
+  renderTagPills(block, tags, searchBar, deepLinkManager, strings);
 
   const urlQuery = deepLinkManager.getQueryFromUrl();
   if (urlQuery) {
@@ -297,9 +301,10 @@ export default async function decorate(block) {
 
   document.addEventListener('color-explore:empty-result', (e) => {
     const { query } = e.detail;
+    const { heading, description } = emptyResult;
     block.classList.add('empty-result');
-    emptyResult.heading.textContent = `'${query}' color palettes`;
-    emptyResult.description.textContent = `Sorry, no color gradients found for "${query}." See other gradients you might like...`;
+    heading.textContent = interpolate(strings.noResultsHeading, { query, type: 'color palettes' });
+    description.textContent = interpolate(strings.noResultsDesc, { query });
   });
 
   document.addEventListener('color-explore:results-found', () => {
@@ -324,9 +329,10 @@ export default async function decorate(block) {
     ...searchBar,
     deepLinkManager,
     showEmptyResult({ searchTerm, type = 'color palettes' }) {
+      const { heading, description } = emptyResult;
       block.classList.add('empty-result');
-      emptyResult.heading.textContent = `'${searchTerm}' ${type}`;
-      emptyResult.description.textContent = `Sorry, no color gradients found for "${searchTerm}." See other gradients you might like...`;
+      heading.textContent = interpolate(strings.noResultsHeading, { query: searchTerm, type });
+      description.textContent = interpolate(strings.noResultsDesc, { query: searchTerm });
     },
     clearEmptyResult() {
       block.classList.remove('empty-result');

@@ -160,6 +160,7 @@ async function mountActionMenu(topbarSlot, actionMenuConfig, modulePromise) {
     transformPalette: actionMenuConfig.transformPalette,
     getName: actionMenuConfig.getName,
     enableState: actionMenuConfig.enableState !== false,
+    daaLh: actionMenuConfig.daaLh,
   });
 
   if (actionMenu?.element) {

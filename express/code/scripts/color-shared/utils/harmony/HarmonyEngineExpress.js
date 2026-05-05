@@ -1837,6 +1837,7 @@ function HarmonyAdapter(theme, setSwatch) {
             color = _colorSet.swatches[i];
             if (!region || !color) { continue; }
             if (i == _changedColorIndex) { continue; }
+            if (i === _colorSet.baseColorIndex) { continue; }
             derivedColor = region.derivedColor();
 
             const colorToAllSpaces = hsvToAllSpacesDenormalized([colorwheel.artisticToScientificSmooth(derivedColor.angle()), derivedColor.radius() * 100, derivedColor.height() * 100]);
