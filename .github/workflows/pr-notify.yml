@@ -50,11 +50,15 @@ jobs:
             
             // Notify Slack
             if (process.env.SLACK_WEBHOOK) {
-              await fetch(process.env.SLACK_WEBHOOK, {
+              const res = await fetch(process.env.SLACK_WEBHOOK, {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   text: `🔔 <${pr.html_url}|${pr.title}> by ${pr.user.login}`
                 })
               });
+              if (!res.ok) {
+                core.warning(`Slack notification failed: ${res.status} ${await res.text()}`);
+              }
             }
 
