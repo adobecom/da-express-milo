@@ -237,7 +237,7 @@ function buildDefaultActionMenuConfig(strings) {
     ],
   };
 }
-const THEME_NAME = 'My Color Theme';
+const THEME_NAME = '';
 const HISTORY_EVENT = `${ACTION_MENU_ID}:history-index-changed`;
 const HISTORY_SKIP_SOURCES = new Set(['active-index', 'metadata', 'base-index']);
 let harmonyCarouselCleanup = null;
@@ -831,6 +831,7 @@ export default async function decorate(block) {
 
       const controller = new ColorThemeExpressController({
         swatches: initialPalette.colors,
+        name: initialPalette.name,
         harmonyRule: 'CUSTOM',
         baseColorIndex: 0,
       });

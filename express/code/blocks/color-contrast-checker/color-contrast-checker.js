@@ -22,10 +22,10 @@ function getDefaultConfig() {
   };
 }
 
-function getPalette(strings) {
+function getPalette() {
   const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
   const colors = getResolvedPalette();
-  const name = getResolvedPaletteName() || strings.randomPresetName;
+  const name = getResolvedPaletteName() || '';
 
   const dataService = createContrastDataService();
   const { brightest, darkest } = dataService.findBrightestAndDarkest(colors);
@@ -164,7 +164,7 @@ export default async function decorate(block) {
     };
     block.replaceChildren();
 
-    const initialPalette = getPalette(strings);
+    const initialPalette = getPalette();
     layoutInstance = await createColorToolLayout(block, {
       layoutSpans: {
         tablet: { sidebar: 6, canvas: 6 },
