@@ -12,11 +12,6 @@ const CONFIG = {
     navigation: '.global-navigation, header',
     stopElement: '.faqv2, .ax-link-list-v2-container, .ax-blog-posts-container, .banner-bg, footer',
   },
-  scrollOffset: {
-    mobile: 75,
-    tablet: 75,
-    desktop: 120,
-  },
   aria: {
     navigation: 'Table of Contents',
   },
