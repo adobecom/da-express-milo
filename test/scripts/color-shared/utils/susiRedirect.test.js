@@ -133,25 +133,4 @@ describe('buildColorSignInRedirectUrl', () => {
     expect(url.pathname).to.not.match(/^\/[a-z]{2,3}\//);
   });
 
-  it('does not include openInExpress param by default', () => {
-    const result = buildColorSignInRedirectUrl(colors, name);
-    const url = new URL(result);
-    expect(url.searchParams.has('openInExpress')).to.be.false;
-  });
-
-  it('includes openInExpress=true when openInExpress arg is true', () => {
-    const result = buildColorSignInRedirectUrl(colors, name, null, true);
-    const url = new URL(result);
-    expect(url.searchParams.get('openInExpress')).to.equal('true');
-  });
-
-  it('includes openInExpress=true on color-explore page when openInExpress arg is true', () => {
-    const el = document.createElement('div');
-    el.className = 'color-explore';
-    document.body.appendChild(el);
-
-    const result = buildColorSignInRedirectUrl(colors, name, null, true);
-    const url = new URL(result);
-    expect(url.searchParams.get('openInExpress')).to.equal('true');
-  });
 });

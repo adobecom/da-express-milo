@@ -16,7 +16,7 @@ function pageHasBlock(...classNames) {
   return classNames.some((cls) => document.querySelector(`.${cls}`));
 }
 
-export function buildColorSignInRedirectUrl(colors, name, id = null, openInExpress = false) {
+export function buildColorSignInRedirectUrl(colors, name, id = null) {
   const { setOnUrl } = createColorPaletteParamApi();
   const url = new URL(window.location.href);
 
@@ -26,6 +26,5 @@ export function buildColorSignInRedirectUrl(colors, name, id = null, openInExpre
     setOnUrl(url, colors, { name });
   }
 
-  if (openInExpress) url.searchParams.set('openInExpress', 'true');
   return url.toString();
 }
