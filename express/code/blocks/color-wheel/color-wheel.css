@@ -40,7 +40,19 @@
 }
 
 .color-wheel sp-tabs {
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-300);
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.color-wheel sp-tab-panel {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .color-wheel-content {
@@ -237,6 +249,8 @@
 /* Color wheel panel */
 
 color-wheel-express {
+  box-sizing: border-box;
+  width: 100%;
   max-width: 400px;
   padding: var(--spacing-300);
 }
@@ -505,8 +519,6 @@ color-wheel-express {
   .color-wheel sp-tabs {
     flex: 1 1 0;
     min-height: 0;
-    width: 100%;
-    display: block;
   }
 
   .color-wheel-content {
