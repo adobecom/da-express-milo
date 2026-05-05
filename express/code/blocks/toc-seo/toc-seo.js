@@ -8,7 +8,7 @@ const CONFIG = {
   selectors: {
     startElement: '.section div.highlight, .blog-article-marquee',
     section: 'main .section',
-    headers: ['main .section.long-form .content h2', 'main .section.long-form .content h3', 'main .section.long-form .content h4'],
+    headers: 'main .section.long-form .content h2, main .section.long-form .content h3, main .section.long-form .content h4',
     navigation: '.global-navigation, header',
     stopElement: '.faqv2, .ax-link-list-v2-container, .ax-blog-posts-container, .banner-bg, footer',
   },
@@ -24,10 +24,6 @@ const CONFIG = {
 
 let createTag;
 let getMetadata;
-let hasPrimedFirstTocClick = false;
-let pendingTocTarget = null;
-let pendingScrollTimeout = null;
-let scrollEndListenerInitialized = false;
 
 /**
  * Checks if current viewport is desktop
@@ -339,45 +335,74 @@ function setupFloatingButton(floatingButton, tocContainer) {
 }
 
 /**
- * Scrolls to target header with proper offset for mobile/tablet
- * @param {string} fullText - Full text content of target header
+ * Matches each TOC link to its corresponding header element at init time,
+ * adding data-toc-id to both for a stable association. Text-matching runs
+ * once here rather than on every click.
+ * @param {HTMLElement} content - TOC content element containing links
+ * @returns {{ linkToHeader: Map, headerToLink: Map }}
  */
-function scrollToHeader(fullText) {
-  const headers = document.querySelectorAll(CONFIG.selectors.headers);
-  const targetHeader = Array.from(headers).find((h) => {
-    const headerContent = h.textContent.trim();
-    const searchText = fullText.replace('...', '').trim();
-    return headerContent.includes(searchText);
+function buildHeaderMap(content) {
+  const allHeaders = document.querySelectorAll(CONFIG.selectors.headers);
+  const links = content.querySelectorAll('.toc-link');
+  const linkToHeader = new Map();
+  const headerToLink = new Map();
+
+  links.forEach((link, index) => {
+    const searchText = link.dataset.fullText.replace('...', '').trim();
+    const matched = Array.from(allHeaders).find((h) => h.textContent.trim().includes(searchText));
+    if (matched) {
+      const tocId = `toc-section-${index + 1}`;
+      matched.dataset.tocId = tocId;
+      link.dataset.tocId = tocId;
+      linkToHeader.set(link, matched);
+      headerToLink.set(matched, link);
+    }
   });
 
-  if (targetHeader) {
-    const headerRect = targetHeader.getBoundingClientRect();
-    // Use desktop offset on desktop, mobile/tablet offset otherwise
-    const offset = isDesktop() ? CONFIG.scrollOffset.desktop : CONFIG.scrollOffset.mobile;
-    const scrollDistance = headerRect.top + window.pageYOffset - offset;
-
-    window.scrollTo({
-      top: Math.max(0, scrollDistance),
-      behavior: 'smooth',
-    });
-  }
+  return { linkToHeader, headerToLink };
 }
 
-function ensureScrollEndListener() {
-  if (scrollEndListenerInitialized) return;
-  scrollEndListenerInitialized = true;
+/**
+ * Tracks which section is active using IntersectionObserver. Highlights the
+ * topmost visible TOC-mapped header's link, updating as the user scrolls.
+ * @param {HTMLElement} content - TOC content element
+ * @param {Map} headerToLink - Map from header element to link element
+ * @returns {IntersectionObserver|null}
+ */
+function setupActiveLinks(content, headerToLink) {
+  if (!headerToLink.size) return null;
 
-  const handleScrollEnd = () => {
-    if (!pendingTocTarget) return;
-    if (pendingScrollTimeout) window.clearTimeout(pendingScrollTimeout);
-    pendingScrollTimeout = window.setTimeout(() => {
-      scrollToHeader(pendingTocTarget);
-      pendingTocTarget = null;
-      pendingScrollTimeout = null;
-    }, 140);
-  };
+  const tocLinks = content.querySelectorAll('.toc-link');
+  const visibleHeaders = new Set();
 
-  window.addEventListener('scroll', handleScrollEnd, { passive: true });
+  function updateActive() {
+    // eslint-disable-next-line no-bitwise
+    const topmost = Array.from(visibleHeaders).sort((a, b) => (
+      a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
+    ))[0];
+
+    if (topmost) {
+      const link = headerToLink.get(topmost);
+      if (link) {
+        tocLinks.forEach((l) => l.classList.remove('active'));
+        link.classList.add('active');
+      }
+    }
+  }
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        visibleHeaders.add(entry.target);
+      } else {
+        visibleHeaders.delete(entry.target);
+      }
+    });
+    updateActive();
+  }, { rootMargin: '-80px 0px -50% 0px' });
+
+  headerToLink.forEach((_link, header) => observer.observe(header));
+  return observer;
 }
 
 /**
@@ -408,33 +433,18 @@ function setupToggle(container, titleBar, content) {
 /**
  * Sets up navigation behavior for links
  * @param {HTMLElement} content - Content element with links
+ * @param {Map} linkToHeader - Map from link element to its matched header element
  */
-function setupNavigation(content) {
-  const links = content.querySelectorAll('.toc-link');
-  const firstLink = links[0];
-
-  links.forEach((link) => {
-    // Prevent focus outline on mouse click
+function setupNavigation(content, linkToHeader) {
+  content.querySelectorAll('.toc-link').forEach((link) => {
     link.addEventListener('mousedown', (e) => {
       e.preventDefault();
     });
 
-    // Handle click
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      if (!hasPrimedFirstTocClick && firstLink) {
-        hasPrimedFirstTocClick = true;
-        ensureScrollEndListener();
-        pendingTocTarget = link.dataset.fullText;
-        const { fullText: firstText } = firstLink.dataset;
-        scrollToHeader(firstText);
-        link.blur();
-        return;
-      }
-
-      const { fullText } = link.dataset;
-      scrollToHeader(fullText);
-      // Remove focus after navigation
+      const header = linkToHeader.get(link);
+      if (header) header.scrollIntoView({ behavior: 'smooth', block: 'start' });
       link.blur();
     });
   });
@@ -599,84 +609,26 @@ function updateDesktopPosition(tocContainer) {
 }
 
 /**
- * Updates active link based on current scroll position
- * @param {HTMLElement} tocContainer - TOC container element
- */
-let sectionNodeList;
-function updateActiveLink(tocContainer) {
-  if (!isDesktop()) return;
-  if (!updateActiveLink.headers) {
-    sectionNodeList = document.querySelectorAll(CONFIG.selectors.section);
-    updateActiveLink.tocLinks = tocContainer.querySelectorAll('.toc-link');
-    updateActiveLink.tocTitle = tocContainer.querySelector('.toc-title');
-  }
-
-  const { tocLinks, tocTitle } = updateActiveLink;
-  if (!sectionNodeList.length || !tocLinks.length) return;
-
-  // Get TOC title position for offset
-  const tocTitleRect = tocTitle ? tocTitle.getBoundingClientRect() : { top: 200 };
-  const offset = tocTitleRect.top + 20;
-
-  let activeHeader = null;
-  let minDistance = Infinity;
-
-  // Find the header closest to the offset position
-  sectionNodeList.forEach((sectionNode) => {
-    const rect = sectionNode.getBoundingClientRect();
-    const distance = Math.abs(rect.top - offset);
-
-    if (rect.top <= offset && distance < minDistance) {
-      minDistance = distance;
-      activeHeader = sectionNode;
-    }
-  });
-
-  // Add active class to matching link
-  if (activeHeader) {
-    const headerText = activeHeader.textContent.trim();
-    const activeLink = Array.from(tocLinks).find((link) => {
-      const fullText = link.dataset.fullText || link.textContent.trim();
-      return fullText.includes(headerText) || headerText.includes(fullText.replace('...', '').trim());
-    });
-
-    if (activeLink) {
-      // Remove active class from all links
-      tocLinks.forEach((link) => link.classList.remove('active'));
-      activeLink.classList.add('active');
-    }
-  }
-}
-
-/**
- * Sets up desktop positioning and active link tracking
+ * Sets up desktop positioning
  * @param {HTMLElement} tocContainer - TOC container element
  * @returns {Object} Update functions for consolidated handlers
  */
 function setupDesktop(tocContainer) {
-  // Initial position (only if already on desktop)
   if (isDesktop()) {
     tocContainer.style.visibility = 'hidden';
     updateDesktopPosition(tocContainer);
     tocContainer.style.visibility = 'visible';
-    updateActiveLink(tocContainer);
   }
 
-  // Always return handlers, they check viewport internally
   return {
     onScroll: () => {
-      if (isDesktop()) {
-        updateDesktopPosition(tocContainer);
-        updateActiveLink(tocContainer);
-      }
+      if (isDesktop()) updateDesktopPosition(tocContainer);
     },
     onResize: () => {
-      // Always reset cached position on resize to ensure correct positioning
       delete tocContainer.dataset.initialTop;
 
       if (isDesktop()) {
         updateDesktopPosition(tocContainer);
-        updateActiveLink(tocContainer);
       } else {
         tocContainer.classList.remove('toc-desktop');
         tocContainer.classList.remove('toc-desktop-fixed');
@@ -801,9 +753,11 @@ export default async function decorate(block) {
     container.appendChild(socialIcons);
 
     // Phase 5: Setup behaviors
-    // Navigation and Social: All viewports
-    setupNavigation(content);
+    // Build header map once at init (text-matching runs here, not on every click)
+    const { linkToHeader, headerToLink } = buildHeaderMap(content);
+    setupNavigation(content, linkToHeader);
     setupSocialSharing(socialIcons);
+    setupActiveLinks(content, headerToLink);
 
     // Phase 6: Insert TOC after start element
     const startElement = document.querySelector(CONFIG.selectors.startElement);
@@ -817,7 +771,7 @@ export default async function decorate(block) {
     document.body.appendChild(floatingButton);
     const floatingButtonUpdate = setupFloatingButton(floatingButton, container);
 
-    // Phase 8: Setup desktop positioning and active link tracking
+    // Phase 8: Setup desktop positioning
     const desktopHandlers = setupDesktop(container);
 
     // Phase 8b: Handle desktop → mobile/tablet transitions so TOC defaults open

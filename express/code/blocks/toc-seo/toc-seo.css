@@ -303,6 +303,21 @@
     }
   }
   
+  /* Scroll offset for TOC navigation — keeps headers below the sticky nav */
+  main .section.long-form .content h2,
+  main .section.long-form .content h3,
+  main .section.long-form .content h4 {
+    scroll-margin-top: 75px;
+  }
+
+  @media (min-width: 1024px) {
+    main .section.long-form .content h2,
+    main .section.long-form .content h3,
+    main .section.long-form .content h4 {
+      scroll-margin-top: 120px;
+    }
+  }
+
   @media print {
     .toc-container {
       border: 1px solid #ccc;
