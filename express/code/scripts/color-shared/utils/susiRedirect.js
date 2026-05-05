@@ -18,13 +18,14 @@ function pageHasBlock(...classNames) {
 
 export function buildColorSignInRedirectUrl(colors, name, id = null) {
   const { setOnUrl } = createColorPaletteParamApi();
-  const url = new URL(window.location.href);
 
   if (pageHasBlock('color-explore')) {
+    const url = new URL(window.location.href);
     if (id) url.searchParams.set('id', id);
-  } else {
-    setOnUrl(url, colors, { name });
+    return url.toString();
   }
 
+  const url = new URL(window.location.href);
+  setOnUrl(url, colors, { name });
   return url.toString();
 }

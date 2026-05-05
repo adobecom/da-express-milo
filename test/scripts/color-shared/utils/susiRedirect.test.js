@@ -132,5 +132,4 @@ describe('buildColorSignInRedirectUrl', () => {
     expect(url.pathname).to.equal('/create/color-wheel');
     expect(url.pathname).to.not.match(/^\/[a-z]{2,3}\//);
   });
-
 });
