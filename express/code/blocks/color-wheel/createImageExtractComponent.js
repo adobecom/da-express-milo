@@ -511,6 +511,13 @@ export default function createImageExtractComponent(options = {}) {
 
   const detachWindowDrag = attachWindowDragHandlers(container, dropzone);
 
+  if (options.initialSrc) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => onImageReady(img, options.initialSrc);
+    img.src = options.initialSrc;
+  }
+
   function destroy() {
     detachWindowDrag?.();
     markerResizeObserver?.disconnect();
@@ -519,7 +526,7 @@ export default function createImageExtractComponent(options = {}) {
     markers = null;
   }
 
-  return { element: container, destroy };
+  return { element: container, destroy, getCurrentSrc: () => currentSrc };
 }
 
 function createImageExtractDropzone(block, controller, onImageReady, config = {}) {
