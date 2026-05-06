@@ -189,6 +189,9 @@ export function collectOsSplitFloatingButtonData(
   const metadataMap = createMetadataMap();
   const getMetadataLocal = (key) => metadataMap[key];
   const metadataPrefix = `${platform}-`;
+  const getOsOrDefaultForkMetadata = (osKey, defaultKey) => (
+    getMetadataLocal(osKey) ?? getMetadataLocal(defaultKey)
+  );
 
   const data = {
     scrollState: 'withLottie',
@@ -207,14 +210,25 @@ export function collectOsSplitFloatingButtonData(
     },
     bubbleSheet: getMetadataLocal('floating-cta-bubble-sheet'),
     live: getMetadataLocal('floating-cta-live'),
-    forkButtonHeader: getMetadataLocal(`${metadataPrefix}fork-button-header`),
+    forkButtonHeader: getOsOrDefaultForkMetadata(
+      `${metadataPrefix}fork-button-header`,
+      'fork-button-header',
+    ),
   };
 
   for (let i = 1; i < 3; i += 1) {
+    const metadataWithForkFallback = { ...metadataMap };
+    ['icon', 'icon-text', 'link', 'text'].forEach((field) => {
+      const osKey = `${metadataPrefix}fork-cta-${i}-${field}`;
+      const defaultKey = `fork-cta-${i}-${field}`;
+      if (metadataWithForkFallback[osKey] === undefined && metadataWithForkFallback[defaultKey] !== undefined) {
+        metadataWithForkFallback[osKey] = metadataWithForkFallback[defaultKey];
+      }
+    });
     const toolData = createToolData(
       createTag,
       getIconElementDeprecated,
-      metadataMap,
+      metadataWithForkFallback,
       i,
       false,
       metadataPrefix,

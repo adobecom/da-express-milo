@@ -172,4 +172,43 @@ describe('Mobile Fork Button OS Split', () => {
 
     expect(uploadClicks).to.equal(1);
   });
+
+  it('falls back to default fork metadata when Android metadata is missing', async () => {
+    Object.defineProperty(navigator, 'userAgent', {
+      value: ANDROID_USER_AGENT,
+      configurable: true,
+    });
+    setDocumentMetadata({
+      'fork-button-header': 'Default header',
+      'fork-cta-1-text': 'Default CTA 1 Text',
+      'fork-cta-1-link': 'https://www.google.com?os=default-app',
+      'fork-cta-1-icon-text': 'Default CTA 1 Label',
+      'fork-cta-2-text': 'Default CTA 2 Text',
+      'fork-cta-2-link': 'https://www.google.com?os=default-web',
+      'fork-cta-2-icon-text': 'Default CTA 2 Label',
+    });
+    document.head.querySelector('meta[name="android-fork-button-header"]')?.remove();
+    document.head.querySelector('meta[name="android-fork-cta-1-text"]')?.remove();
+    document.head.querySelector('meta[name="android-fork-cta-1-link"]')?.remove();
+    document.head.querySelector('meta[name="android-fork-cta-1-icon-text"]')?.remove();
+    document.head.querySelector('meta[name="android-fork-cta-2-text"]')?.remove();
+    document.head.querySelector('meta[name="android-fork-cta-2-link"]')?.remove();
+    document.head.querySelector('meta[name="android-fork-cta-2-icon-text"]')?.remove();
+    const block = document.createElement('div');
+    block.className = 'floating-button meta-powered';
+    block.innerHTML = '<div>mobile</div>';
+    document.querySelector('main .section').append(block);
+
+    await decorate(block);
+
+    const blockWrapper = document.querySelector('.floating-button.block');
+    const rows = blockWrapper.querySelectorAll('.mobile-gating-row');
+    expect(blockWrapper.querySelector('.mobile-gating-header').textContent).to.equal('Default header');
+    expect(rows[0].querySelector('a').textContent).to.equal('Default CTA 1 Text');
+    expect(rows[0].querySelector('a').href).to.equal('https://www.google.com/?os=default-app');
+    expect(rows[0].querySelector('.mobile-gating-text').textContent).to.equal('Default CTA 1 Label');
+    expect(rows[1].querySelector('a').textContent).to.equal('Default CTA 2 Text');
+    expect(rows[1].querySelector('a').href).to.equal('https://www.google.com/?os=default-web');
+    expect(rows[1].querySelector('.mobile-gating-text').textContent).to.equal('Default CTA 2 Label');
+  });
 });
