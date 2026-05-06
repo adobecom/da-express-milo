@@ -265,6 +265,19 @@ function ensureAbsoluteUrl(url) {
   return `https://${url}`;
 }
 
+function normalizeEncodedAmpersands(value) {
+  if (!value || typeof value !== 'string') return value;
+  return value
+    .replace(/%26amp%3B/gi, '&')
+    .replace(/%26amp;/gi, '&')
+    .replace(/&amp%3B/gi, '&')
+    .replace(/&amp;/gi, '&');
+}
+
+function sanitizeExternalCtaUrl(url) {
+  return ensureAbsoluteUrl(normalizeEncodedAmpersands(url));
+}
+
 function appendTemplateId(url, template) {
   const urnId = extractURNFromTemplate(template);
   if (!urnId) return url;
@@ -289,8 +302,12 @@ function constructCustomURL(template, customUrlConfig) {
   if (!urnId) return null;
 
   const { baseUrl, queryParams } = customUrlConfig;
-  const separator = baseUrl.includes('?') ? '&' : '?';
-  const urlWithQueryParams = queryParams ? `${baseUrl}${separator}${queryParams}` : baseUrl;
+  const normalizedBaseUrl = sanitizeExternalCtaUrl(baseUrl);
+  const normalizedQueryParams = normalizeEncodedAmpersands(queryParams);
+  const separator = normalizedBaseUrl.includes('?') ? '&' : '?';
+  const urlWithQueryParams = normalizedQueryParams
+    ? `${normalizedBaseUrl}${separator}${normalizedQueryParams}`
+    : normalizedBaseUrl;
   return appendTemplateId(urlWithQueryParams, template);
 }
 
@@ -556,7 +573,7 @@ function renderHoverWrapper(template, customUrlConfig = null) {
     && !containsVideo(template.pages);
 
   if (experimentalCta1Url) {
-    cta.href = appendTemplateId(ensureAbsoluteUrl(experimentalCta1Url), template);
+    cta.href = appendTemplateId(sanitizeExternalCtaUrl(experimentalCta1Url), template);
   }
 
   if (experimentalCta1Text) {
@@ -569,7 +586,7 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   if (isFreeStatic && experimentalCta2Url) {
     const btnTitle = experimentalCta2Text || (editThisTemplate === 'edit this template' ? 'Edit this template' : editThisTemplate);
     secondaryCta = createTag('a', {
-      href: appendTemplateId(ensureAbsoluteUrl(experimentalCta2Url), template),
+      href: appendTemplateId(sanitizeExternalCtaUrl(experimentalCta2Url), template),
       title: btnTitle,
       class: 'button gray small secondary-template-cta',
       'aria-label': `${btnTitle} ${getTemplateTitle(template)}`,
