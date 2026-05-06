@@ -266,7 +266,7 @@ color-wheel-express {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: var(--spacing-50);
+  gap: 2px;
   margin-bottom: 0.75rem;
 }
 
@@ -311,7 +311,7 @@ color-wheel-express {
 .color-wheel-harmony-carousel-host .simple-carousel-fader-right {
   display: flex;
   width: 88px;
-  height: var(--spacing-700);
+  height: 48px;
   align-items: center;
   gap: 10px;
 }
@@ -330,8 +330,8 @@ color-wheel-express {
 
 .color-wheel-harmony-option {
   box-sizing: border-box;
-  width: var(--spacing-700);
-  height: var(--spacing-700);
+  width: 48px;
+  height: 48px;
   padding: 0;
   margin: 0;
   border-radius: var(--Radius-corner-radius-75);
@@ -359,8 +359,8 @@ color-wheel-express {
 }
 
 .color-wheel .icon.simple-carousel-arrow-icon {
-  height: var(--spacing-325);
-  width: var(--spacing-325);
+  height: 18px;
+  width: 18px;
 }
 
 .mobile-container {
@@ -523,7 +523,6 @@ color-wheel-express {
 
   .color-wheel-content {
     gap: var(--spacing-100);
-    max-width: 370px;
   }
 
   .color-wheel .action-menu-controls-only {
