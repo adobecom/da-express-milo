@@ -57,7 +57,7 @@ function buildBlockConfig(block) {
   });
 
   // Validate and set defaults
-  const title = config['toc-title'] || 'Table of Contents';
+  const title = (config['toc-title'] || 'Table of Contents').replace(/:$/, '');
   const ariaLabel = config['toc-aria-label'] || 'Table of Contents Navigation';
   const rawStopElement = config.stopElement || config['stop-element'] || config['toc-stop-element'];
   const stopElement = rawStopElement && !rawStopElement.startsWith('.')
