@@ -82,7 +82,6 @@ export function createToolData(
   enableMobileFqaUpload = useFrictionless,
 ) {
   const prefix = `${metadataPrefix}fork-cta-${index}`;
-
   // Metadata lookup with optional frictionless fallback
   const iconMetadata = (useFrictionless && metadataMap[`${prefix}-icon-frictionless`])
     || metadataMap[`${prefix}-icon`];
@@ -221,7 +220,8 @@ export function collectOsSplitFloatingButtonData(
     ['icon', 'icon-text', 'link', 'text'].forEach((field) => {
       const osKey = `${metadataPrefix}fork-cta-${i}-${field}`;
       const defaultKey = `fork-cta-${i}-${field}`;
-      if (metadataWithForkFallback[osKey] === undefined && metadataWithForkFallback[defaultKey] !== undefined) {
+      if (metadataWithForkFallback[osKey] === undefined
+        && metadataWithForkFallback[defaultKey] !== undefined) {
         metadataWithForkFallback[osKey] = metadataWithForkFallback[defaultKey];
       }
     });
