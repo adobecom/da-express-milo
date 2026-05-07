@@ -34,6 +34,7 @@ const TOOLBAR_DEFAULTS = {
   paletteName: 'Palette name',
   paletteNamePlaceholder: 'My Color Theme',
   ctaText: 'Create with my color palette',
+  ctaBaseUrl: 'https://adobesparkpost.app.link/color-palette',
   shareText: 'Check out this color palette on Adobe.com',
   urlCopiedToClipboard: 'URL copied to clipboard',
   shareFailed: 'Unable to share. Please try again.',
@@ -96,13 +97,13 @@ async function checkIsSignedIn() {
   }
 }
 
-async function buildExpressUrl({ id, name, colors }) {
+async function buildExpressUrl({ id, name, colors }, prodBaseUrl) {
   const { getTrackingAppendedURL } = await import('../../branchlinks.js');
 
   const params = new URLSearchParams(window.location.search);
   const baseUrl = params.get('hzenv') === 'stage'
     ? getStageBaseUrl(params.get('base'))
-    : 'https://adobesparkpost.app.link/color-palette';
+    : prodBaseUrl;
   const url = new URL(await getTrackingAppendedURL(baseUrl, {
     placement: 'color-explorer',
     isSearchOverride: true,
@@ -120,20 +121,20 @@ async function buildExpressUrl({ id, name, colors }) {
   return url.toString();
 }
 
-async function openInExpress(palette) {
-  window.open(await buildExpressUrl(palette), '_blank', 'noopener noreferrer');
+async function openInExpress(palette, prodBaseUrl) {
+  window.open(await buildExpressUrl(palette, prodBaseUrl), '_blank', 'noopener noreferrer');
 }
 
-async function handleOpenInExpress({ id, name, colors }) {
+async function handleOpenInExpress({ id, name, colors }, prodBaseUrl) {
   const isSignedIn = await checkIsSignedIn();
   if (!isSignedIn) {
     const { setSusiColorRedirect } = await import('../utils/susiRedirect.js');
-    setSusiColorRedirect(await buildExpressUrl({ id, name, colors }));
+    setSusiColorRedirect(await buildExpressUrl({ id, name, colors }, prodBaseUrl));
     await triggerSignInFlow();
     return;
   }
 
-  await openInExpress({ id, name, colors });
+  await openInExpress({ id, name, colors }, prodBaseUrl);
 }
 
 async function handleDownload(palette, t) {
@@ -552,7 +553,7 @@ export function createToolbar(options) {
   main.appendChild(actionContainer);
 
   const ctaBtn = buildCTAButton(getCTAText, () => {
-    (onCTA ?? handleOpenInExpress)(getPaletteWithName());
+    (onCTA ?? ((p) => handleOpenInExpress(p, t.ctaBaseUrl)))(getPaletteWithName());
     emit('cta', { palette: getPaletteWithName() });
   });
   main.appendChild(ctaBtn);
