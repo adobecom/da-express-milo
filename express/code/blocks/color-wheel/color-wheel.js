@@ -225,15 +225,18 @@ const HARMONY_ALLOWED_FOR_THREE = new Set([
 const HARMONY_CAROUSEL_ACTIVE_CLASS = 'color-wheel-harmony-option--selected';
 const ACTION_MENU_ID = 'color-wheel-action-menu';
 
-function buildDefaultActionMenuConfig(strings) {
+async function buildDefaultActionMenuConfig(strings) {
+  const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+  const { locale } = getConfig();
+
   return {
     id: ACTION_MENU_ID,
     activeId: 'palette',
     daaLh: 'color-wheel',
     navLinks: [
-      { id: 'palette', label: strings.createPalette, href: '/create/color-wheel' },
-      { id: 'contrast', label: strings.contrastChecker, href: '/create/color-contrast-analyzer' },
-      { id: 'color-blindness', label: strings.colorBlindnessSimulator, href: '/create/color-accessibility' },
+      { id: 'palette', label: strings.createPalette, href: `${locale.contentRoot}/create/color-wheel` },
+      { id: 'contrast', label: strings.contrastChecker, href: `${locale.contentRoot}/create/color-contrast-analyzer` },
+      { id: 'color-blindness', label: strings.colorBlindnessSimulator, href: `${locale.contentRoot}/create/color-accessibility` },
     ],
   };
 }
@@ -841,7 +844,7 @@ export default async function decorate(block) {
       let activeHarmonyRule = controller.getState().harmonyRule || 'CUSTOM';
 
       const isDesktop = desktopQuery.matches;
-      const defaultActionMenuConfig = buildDefaultActionMenuConfig(strings);
+      const defaultActionMenuConfig = await buildDefaultActionMenuConfig(strings);
 
       layoutInstance = await createColorToolLayout(section, {
         palette: initialPalette,

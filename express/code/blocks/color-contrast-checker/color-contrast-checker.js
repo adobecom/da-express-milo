@@ -1,4 +1,4 @@
-import { createTag } from '../../scripts/utils.js';
+import { createTag, getLibs } from '../../scripts/utils.js';
 import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createContrastRenderer } from './factory/createContrastRenderer.js';
@@ -140,11 +140,13 @@ export default async function decorate(block) {
   block.dataset.blockStatus = 'loading';
 
   const { preview } = parseContent(block);
-  const [strings, colorEditStrings, baseColorStrings] = await Promise.all([
+  const [{ getConfig }, strings, colorEditStrings, baseColorStrings] = await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
     loadContrastCheckerPlaceholders(),
     loadColorEditPlaceholders(),
     loadBaseColorPlaceholders(),
   ]);
+  const { locale } = getConfig();
 
   const destroyInstance = () => {
     checkerInstance?.destroy();
@@ -182,7 +184,7 @@ export default async function decorate(block) {
         editPaletteName: false,
       },
       actionMenu: {
-        ...createDefaultActionMenuConfig(strings),
+        ...createDefaultActionMenuConfig(strings, locale.contentRoot),
         id: 'color-contrast-checker-menu',
         type: isMobileOrTabletViewport() ? 'nav-only' : 'full',
         activeId: 'contrast',
