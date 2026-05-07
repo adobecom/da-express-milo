@@ -39,7 +39,7 @@ function getPaletteColors(palette = {}) {
 
 function normalizeLikesCount(rawValue) {
   if (rawValue == null) return '0';
-  const value = typeof rawValue === 'string' ? Math.abs(rawValue.trim()) : rawValue;
+  const value = typeof rawValue === 'string' ? rawValue.trim() : rawValue;
   if (value === '') return '0';
   return String(Math.abs(value));
 }
