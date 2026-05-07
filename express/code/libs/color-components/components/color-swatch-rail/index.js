@@ -907,11 +907,12 @@ export class ColorSwatchRail extends LitElement {
 
   _handleTouchDragStart(e) {
     if (!this._features.drag) return;
-    const col = e.target.closest('.swatch-column--draggable');
+    const dragHandle = e.target.closest('.icon-button--drag');
+    if (!dragHandle) return;
+    const col = dragHandle.closest('.swatch-column--draggable');
     if (!col || col.closest('.swatch-column--empty')) return;
     const idx = col.getAttribute('data-swatch-index');
     if (idx === null || idx === '') return;
-    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge, .tint-band-btn, .hex-code')) return;
     e.preventDefault();
     this._touchDragFromIndex = Number(idx);
     col.classList.add('swatch-column--dragging');
@@ -1442,8 +1443,6 @@ export class ColorSwatchRail extends LitElement {
           aria-label="${stripAriaLabel}"
           @keydown=${(ev) => this._handleColumnKeydown(ev, index)}
           @focusout=${(ev) => this._handleColumnFocusout(ev)}
-          ?draggable=${f.drag}
-          @dragstart=${(ev) => f.drag && this._handleDragStart(index, ev)}
           @dragend=${this._handleDragEnd}
           @dragenter=${this._handleDragEnter}
           @dragover=${this._handleDragOver}
