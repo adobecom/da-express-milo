@@ -505,7 +505,6 @@ function buildPrimaryColorContent(controller, strings = {}) {
     pendingBaseColorHex = null;
   };
 
-  // Coalesce drag updates to one per frame to keep Safari responsive.
   const queueBaseColorUpdate = (hex) => {
     if (!hex) return;
     pendingBaseColorHex = hex;
