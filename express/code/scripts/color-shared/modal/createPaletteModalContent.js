@@ -248,7 +248,6 @@ function createPaletteMetaSection(palette = {}, options = {}) {
       });
     });
   });
-  
   const likesText = createTag('p', { class: 'modal-likes-count' });
   likesText.textContent = String(likesCount);
   likesWrap.appendChild(likeBtn);
