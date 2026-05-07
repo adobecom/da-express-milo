@@ -41,7 +41,7 @@ function normalizeLikesCount(rawValue) {
   if (rawValue == null) return '0';
   const value = typeof rawValue === 'string' ? rawValue.trim() : rawValue;
   if (value === '') return '0';
-  return String(value);
+  return String(Math.abs(value));
 }
 
 function normalizeCreatorName(rawValue) {

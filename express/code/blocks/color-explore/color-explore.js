@@ -1,3 +1,4 @@
+import { getLibs } from '../../scripts/utils.js';
 import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import { parseBlockConfig } from './helpers/parseConfig.js';
 import { createColorRenderer } from './factory/createColorRenderer.js';
@@ -21,6 +22,7 @@ const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
 const THEME_URL_PARAM = 'theme';
 const ITEM_ID_URL_PARAM = 'id';
+const PENDING_GRADIENT_SESSION_KEY = 'color-explore-pending-gradient-id';
 const THEME_URL_QUERY_VALUE = {
   [VARIANTS.GRADIENTS]: 'color-gradients',
   [VARIANTS.STRIPS]: 'color-palettes',
@@ -261,6 +263,9 @@ export default async function decorate(block) {
     config.variant = getVariantFromThemeUrlParam() ?? variantFromClass ?? config.variant;
 
     block.dataset.blockStatus = 'loading';
+    const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+    const { locale } = getConfig();
+    const colorWheelPath = `${locale.contentRoot}/create/color-wheel`;
     const placeholdersPromise = loadColorExplorePlaceholders();
     const colorSwatchRailStringsPromise = loadColorSwatchRailPlaceholders();
     const colorFiltersStringsPromise = loadColorFiltersPlaceholders();
@@ -529,6 +534,11 @@ export default async function decorate(block) {
             const item = gradient || {};
             const currentState = BlockMediator.get(stateKey);
             BlockMediator.set(stateKey, { ...currentState, selectedItem: item });
+            if (item.id) {
+              try {
+                sessionStorage.setItem(PENDING_GRADIENT_SESSION_KEY, String(item.id));
+              } catch { /* sessionStorage unavailable */ }
+            }
             await openModalForItem(item, placeholders.modalDefaultGradientTitle);
           });
 
@@ -570,10 +580,26 @@ export default async function decorate(block) {
           const isInitialGradientMount = !hasCompletedInitialModeMount;
           if (!hasCompletedInitialModeMount) hasCompletedInitialModeMount = true;
           if (isInitialGradientMount) {
-            const url = new URL(window.location.href);
-            if (url.searchParams.has(ITEM_ID_URL_PARAM)) {
+            const searchParams = new URLSearchParams(window.location.search);
+            let itemId = searchParams.get(ITEM_ID_URL_PARAM);
+            if (!itemId && searchParams.has('url')) {
+              // susi-light appends a `url` tracking param on sign-in redirect;
+              // use it as a signal that we're returning from sign-in and should
+              // restore the gradient the user was trying to save.
+              itemId = sessionStorage.getItem(PENDING_GRADIENT_SESSION_KEY) || null;
+            }
+            try {
+              sessionStorage.removeItem(PENDING_GRADIENT_SESSION_KEY);
+            } catch { /* sessionStorage unavailable */ }
+            if (itemId) {
+              const url = new URL(window.location.href);
               url.searchParams.delete(ITEM_ID_URL_PARAM);
               window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+              const item = allData.find((g) => String(g.id) === String(itemId))
+                ?? await activeDataService.getTheme(itemId);
+              if (item) {
+                await openModalForItem(item, placeholders.modalDefaultGradientTitle);
+              }
             }
           }
           publishInstances();
@@ -680,7 +706,7 @@ export default async function decorate(block) {
           activeRenderer.on(EVENTS.PALETTE_EDIT, (palette) => {
             const colors = palette?.colors || [];
             const name = palette?.name || '';
-            const editUrl = buildPaletteEditUrl('/create/color-wheel', colors, name);
+            const editUrl = buildPaletteEditUrl(colorWheelPath, colors, name);
             window.location.href = editUrl;
           });
           activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
@@ -866,7 +892,7 @@ export default async function decorate(block) {
         renderer.on(EVENTS.PALETTE_EDIT, (palette) => {
           const colors = palette?.colors || [];
           const name = palette?.name || '';
-          const editUrl = buildPaletteEditUrl('/create/color-wheel', colors, name);
+          const editUrl = buildPaletteEditUrl(colorWheelPath, colors, name);
           window.location.href = editUrl;
         });
         renderer.on(EVENTS.SHARE, async ({ palette }) => {
