@@ -96,17 +96,7 @@ async function checkIsSignedIn() {
   }
 }
 
-async function handleOpenInExpress({ id, name, colors }) {
-  const isSignedIn = await checkIsSignedIn();
-  if (!isSignedIn) {
-    const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
-      '../utils/susiRedirect.js'
-    );
-    setSusiColorRedirect(buildColorSignInRedirectUrl(colors, name, id));
-    await triggerSignInFlow();
-    return;
-  }
-
+async function buildExpressUrl({ id, name, colors }) {
   const { getTrackingAppendedURL } = await import('../../branchlinks.js');
 
   const params = new URLSearchParams(window.location.search);
@@ -127,7 +117,23 @@ async function handleOpenInExpress({ id, name, colors }) {
   url.searchParams.set('feature-enable', 'colors-product-entry');
   url.searchParams.set('category', 'yourStuff');
 
-  window.open(url.toString(), '_blank', 'noopener noreferrer');
+  return url.toString();
+}
+
+async function openInExpress(palette) {
+  window.open(await buildExpressUrl(palette), '_blank', 'noopener noreferrer');
+}
+
+async function handleOpenInExpress({ id, name, colors }) {
+  const isSignedIn = await checkIsSignedIn();
+  if (!isSignedIn) {
+    const { setSusiColorRedirect } = await import('../utils/susiRedirect.js');
+    setSusiColorRedirect(await buildExpressUrl({ id, name, colors }));
+    await triggerSignInFlow();
+    return;
+  }
+
+  await openInExpress({ id, name, colors });
 }
 
 async function handleDownload(palette, t) {

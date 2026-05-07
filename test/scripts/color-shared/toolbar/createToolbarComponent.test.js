@@ -637,7 +637,7 @@ describe('createToolbar', () => {
       expect(openStub.called).to.be.false;
     });
 
-    it('stores a SUSI redirect URL containing the color palette when not signed in', async () => {
+    it('stores the Express URL as the SUSI redirect when not signed in', async () => {
       window.adobeIMS = {
         isSignedInUser: sinon.stub().returns(false),
       };
@@ -646,7 +646,7 @@ describe('createToolbar', () => {
 
       const stored = consumeSusiColorRedirect();
       expect(stored).to.be.a('string');
-      expect(stored).to.include('color-palette=');
+      expect(stored).to.include('colorPalette=');
     });
 
     it('opens Express in a new tab when user is signed in', async () => {
