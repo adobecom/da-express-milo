@@ -590,9 +590,7 @@ function buildLoadingOverlay(strings = COLOR_EXTRACT_DEFAULTS) {
 function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) {
   const ac = new AbortController();
   const { signal } = ac;
-  let dragCounter = 0;
   const clearDrag = () => {
-    dragCounter = 0;
     block.classList.remove('is-dragging');
   };
   const isBlockInViewport = () => {
@@ -602,7 +600,6 @@ function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) 
   window.addEventListener('dragenter', (e) => {
     if (isBlockInViewport() && isFileDrag(e)) {
       preventDefaults(e);
-      dragCounter += 1;
       block.classList.add('is-dragging');
     }
   }, { signal });
@@ -613,10 +610,7 @@ function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) 
   }, { signal });
   window.addEventListener('dragleave', (e) => {
     preventDefaults(e);
-    if (isFileDrag(e)) {
-      dragCounter -= 1;
-      if (dragCounter <= 0) clearDrag();
-    }
+    if (isFileDrag(e) && !e.relatedTarget) clearDrag();
   }, { signal });
   window.addEventListener('dragend', (e) => {
     preventDefaults(e);
