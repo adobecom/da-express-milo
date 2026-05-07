@@ -820,6 +820,7 @@ export class ColorSwatchRail extends LitElement {
   _handleDragStart(index, e) {
     if (!this._features.drag) return;
     if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge, .tint-band-btn')) return;
+    this._clearDragVisualState();
     this._dragFromIndex = index;
     e.dataTransfer.effectAllowed = 'move';
     e.dataTransfer.setData('text/plain', String(index));
@@ -830,19 +831,41 @@ export class ColorSwatchRail extends LitElement {
   _handleDragEnd(e) {
     this._dragFromIndex = -1;
     e.target.closest('.swatch-column')?.classList.remove('swatch-column--dragging');
+    this._clearDragVisualState();
+  }
+
+  _clearDragVisualState() {
     this.shadowRoot?.querySelectorAll('.swatch-column--drag-over').forEach((el) => el.classList.remove('swatch-column--drag-over'));
+    this.shadowRoot?.querySelectorAll('.swatch-column--dragging').forEach((el) => el.classList.remove('swatch-column--dragging'));
+  }
+
+  _setDragOverTarget(target) {
+    if (!target || target.classList.contains('swatch-column--empty')) return;
+    this.shadowRoot?.querySelectorAll('.swatch-column--drag-over').forEach((el) => {
+      if (el !== target) el.classList.remove('swatch-column--drag-over');
+    });
+    target.classList.add('swatch-column--drag-over');
+  }
+
+  _handleDragEnter(e) {
+    if (!this._features.drag) return;
+    this._setDragOverTarget(e.currentTarget);
   }
 
   _handleDragOver(e) {
     if (!this._features.drag) return;
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    e.currentTarget?.classList.add('swatch-column--drag-over');
+    this._setDragOverTarget(e.currentTarget);
   }
 
   _handleDragLeave(e) {
     const col = e.currentTarget;
-    if (!col?.contains(e.relatedTarget)) {
+    const related = e.relatedTarget;
+    // During HTML5 drag transitions, some browsers emit dragleave with a null
+    // relatedTarget while still inside the same column; avoid clearing hover.
+    if (!related) return;
+    if (!col?.contains(related)) {
       col.classList.remove('swatch-column--drag-over');
     }
   }
@@ -850,14 +873,17 @@ export class ColorSwatchRail extends LitElement {
   _handleDrop(e) {
     e.preventDefault();
     e.stopPropagation();
-    const dropTarget = e.target.closest('.swatch-column[data-swatch-index]');
+    const dropTarget = e.currentTarget?.matches?.('.swatch-column[data-swatch-index]')
+      ? e.currentTarget
+      : e.target.closest('.swatch-column[data-swatch-index]');
     if (!dropTarget) return;
-    dropTarget.classList.remove('swatch-column--drag-over');
+    this._clearDragVisualState();
     const f = this._features;
     if (!f.drag || !this.controller?.setState) return;
     const fromData = e.dataTransfer?.getData('application/x-color-swatch-index') ?? e.dataTransfer?.getData('text/plain') ?? '';
     const fromIndex = fromData !== '' && Number(fromData) >= 0 ? Number(fromData) : this._dragFromIndex;
     const toIndex = Number(dropTarget.dataset?.swatchIndex ?? -1);
+    this._dragFromIndex = -1;
     if (fromIndex < 0 || toIndex < 0 || fromIndex === toIndex) return;
     const swatches = [...this.swatches];
     const [removed] = swatches.splice(fromIndex, 1);
@@ -1419,6 +1445,7 @@ export class ColorSwatchRail extends LitElement {
           ?draggable=${f.drag}
           @dragstart=${(ev) => f.drag && this._handleDragStart(index, ev)}
           @dragend=${this._handleDragEnd}
+          @dragenter=${this._handleDragEnter}
           @dragover=${this._handleDragOver}
           @dragleave=${this._handleDragLeave}
           @drop=${this._handleDrop}>

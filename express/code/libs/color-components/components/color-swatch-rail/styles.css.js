@@ -958,8 +958,17 @@ export const style = css`
   }
 
   .swatch-column--drag-over {
-    outline: 2px dashed var(--color-blue-800);
-    outline-offset: 2px;
+    outline: none;
+  }
+
+  .swatch-column--drag-over::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    border: 2px dashed var(--color-blue-800);
+    border-radius: inherit;
+    pointer-events: none;
+    z-index: 6;
   }
 
   
