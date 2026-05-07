@@ -644,6 +644,29 @@ function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) 
 
 /* ---------- Palette variant ---------- */
 
+function createGoToLanding(block, getDropzone, s, floatingToolbar, history, popstateAc, onReset) {
+  return function goToLanding() {
+    block.classList.remove('has-image', 'is-loading');
+    getDropzone().container.classList.remove('has-image');
+    if (s.markerResizeObserver) s.markerResizeObserver.disconnect();
+    if (s.resizeHandler) window.removeEventListener('resize', s.resizeHandler);
+    if (s.markers) {
+      s.markers.destroy();
+      s.markers = null;
+    }
+    floatingToolbar.destroy();
+    history.clear();
+    s.currentCanvas = null;
+    s.currentSrc = null;
+    popstateAc.abort();
+    onReset?.();
+    block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
+      el.classList.remove('is-selected');
+      el.setAttribute('aria-pressed', 'false');
+    });
+  };
+}
+
 function hoistLandingDecorations(block, landing) {
   const marqueeWrapper = block.closest('.color-extract-marquee-wrapper');
   if (!marqueeWrapper) return;
@@ -835,25 +858,16 @@ function renderColorVariant(block, rows, config, strings = {}) {
     { colorExtractStrings, imageUploadStrings },
   );
 
-  function goToLanding() {
-    block.classList.remove('has-image', 'is-loading');
-    dropzone.container.classList.remove('has-image');
-    if (markerResizeObserver) markerResizeObserver.disconnect();
-    if (resizeHandler) window.removeEventListener('resize', resizeHandler);
-    if (markers) {
-      markers.destroy();
-      markers = null;
-    }
-    floatingToolbar.destroy();
-    history.clear();
-    currentCanvas = null;
-    currentSrc = null;
-    popstateAc.abort();
-    block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
-      el.classList.remove('is-selected');
-      el.setAttribute('aria-pressed', 'false');
-    });
-  }
+  const goToLanding = createGoToLanding(block, () => dropzone, {
+    get markers() { return markers; },
+    set markers(v) { markers = v; },
+    get markerResizeObserver() { return markerResizeObserver; },
+    get resizeHandler() { return resizeHandler; },
+    get currentCanvas() { return currentCanvas; },
+    set currentCanvas(v) { currentCanvas = v; },
+    get currentSrc() { return currentSrc; },
+    set currentSrc(v) { currentSrc = v; },
+  }, floatingToolbar, history, popstateAc);
 
   async function addColorToImage() {
     if (!currentCanvas || !markers) return;
@@ -1286,26 +1300,16 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
     { colorExtractStrings, imageUploadStrings },
   );
 
-  function goToLanding() {
-    block.classList.remove('has-image', 'is-loading');
-    dropzone.container.classList.remove('has-image');
-    if (markerResizeObserver) markerResizeObserver.disconnect();
-    if (resizeHandler) window.removeEventListener('resize', resizeHandler);
-    if (markers) {
-      markers.destroy();
-      markers = null;
-    }
-    floatingToolbar.destroy();
-    history.clear();
-    currentCanvas = null;
-    currentSrc = null;
-    popstateAc.abort();
-    gradientEditor.setGradient(initialGradient);
-    block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
-      el.classList.remove('is-selected');
-      el.setAttribute('aria-pressed', 'false');
-    });
-  }
+  const goToLanding = createGoToLanding(block, () => dropzone, {
+    get markers() { return markers; },
+    set markers(v) { markers = v; },
+    get markerResizeObserver() { return markerResizeObserver; },
+    get resizeHandler() { return resizeHandler; },
+    get currentCanvas() { return currentCanvas; },
+    set currentCanvas(v) { currentCanvas = v; },
+    get currentSrc() { return currentSrc; },
+    set currentSrc(v) { currentSrc = v; },
+  }, floatingToolbar, history, popstateAc, () => gradientEditor.setGradient(initialGradient));
 
   async function addColorToImage() {
     if (!currentCanvas || !markers || !gradientEditor) return;
