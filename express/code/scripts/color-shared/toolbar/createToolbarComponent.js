@@ -97,17 +97,7 @@ async function checkIsSignedIn() {
   }
 }
 
-async function handleOpenInExpress({ id, name, colors }, prodBaseUrl) {
-  const isSignedIn = await checkIsSignedIn();
-  if (!isSignedIn) {
-    const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
-      '../utils/susiRedirect.js'
-    );
-    setSusiColorRedirect(buildColorSignInRedirectUrl(colors, name, id));
-    await triggerSignInFlow();
-    return;
-  }
-
+async function buildExpressUrl({ id, name, colors }, prodBaseUrl) {
   const { getTrackingAppendedURL } = await import('../../branchlinks.js');
 
   const params = new URLSearchParams(window.location.search);
@@ -128,7 +118,23 @@ async function handleOpenInExpress({ id, name, colors }, prodBaseUrl) {
   url.searchParams.set('feature-enable', 'colors-product-entry');
   url.searchParams.set('category', 'yourStuff');
 
-  window.open(url.toString(), '_blank', 'noopener noreferrer');
+  return url.toString();
+}
+
+async function openInExpress(palette, prodBaseUrl) {
+  window.open(await buildExpressUrl(palette, prodBaseUrl), '_blank', 'noopener noreferrer');
+}
+
+async function handleOpenInExpress({ id, name, colors }, prodBaseUrl) {
+  const isSignedIn = await checkIsSignedIn();
+  if (!isSignedIn) {
+    const { setSusiColorRedirect } = await import('../utils/susiRedirect.js');
+    setSusiColorRedirect(await buildExpressUrl({ id, name, colors }, prodBaseUrl));
+    await triggerSignInFlow();
+    return;
+  }
+
+  await openInExpress({ id, name, colors }, prodBaseUrl);
 }
 
 async function handleDownload(palette, t) {
@@ -466,7 +472,10 @@ export function createToolbar(options) {
 
   const { on, emit } = createEventBus(toolbar, 'color-floating-toolbar');
 
-  const getPaletteWithName = () => ({ ...palette, name: nameInput?.value ?? name });
+  const getPaletteWithName = () => ({
+    ...palette,
+    name: nameInput?.value || t.paletteNamePlaceholder,
+  });
 
   const getCTAText = () => (isMobileViewport()
     ? (mobileCTAText || t.ctaText)

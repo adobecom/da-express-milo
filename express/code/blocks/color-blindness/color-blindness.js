@@ -75,7 +75,7 @@ export default async function decorate(block) {
       : -1;
     const hasValidBaseColor = baseColorIndex >= 0;
     const initialPalette = {
-      name: getResolvedPaletteName() || 'My Color Theme',
+      name: getResolvedPaletteName() || '',
       colors: paletteColors,
       ...(hasValidBaseColor && { baseColorIndex }),
     };

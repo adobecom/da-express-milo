@@ -26,8 +26,6 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   toolbarReplaceImage: 'Replace image',
   toolbarUndo: 'Undo',
   toolbarRedo: 'Redo',
-  // Default palette name (used by floating toolbar fallback)
-  defaultPaletteName: 'Extracted Palette',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -53,7 +51,6 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   toolbarReplaceImage: 'color-extract-toolbar-replace-image',
   toolbarUndo: 'color-extract-toolbar-undo',
   toolbarRedo: 'color-extract-toolbar-redo',
-  defaultPaletteName: 'color-extract-default-palette-name',
 });
 
 export function createColorExtractPlaceholders(overrides = {}) {

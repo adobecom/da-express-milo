@@ -7,7 +7,7 @@ import parseBlockConfig from './helpers/parseConfig.js';
 import createHistoryManager from './helpers/historyManager.js';
 import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
-import { decorateAnalyticsAttributes, createColorPaletteParamApi, PARAM_NAME } from '../../scripts/color-shared/utils/utilities.js';
+import { decorateAnalyticsAttributes, createColorPaletteParamApi, PARAM_NAME, isMobileOrTabletViewport } from '../../scripts/color-shared/utils/utilities.js';
 import loadColorExtractPlaceholders, { DEFAULT_PLACEHOLDERS as COLOR_EXTRACT_DEFAULTS } from '../../scripts/color-shared/i18n/loadColorExtractPlaceholders.js';
 import loadImageUploadPlaceholders, { DEFAULT_PLACEHOLDERS as IMAGE_UPLOAD_DEFAULTS } from '../../scripts/color-shared/i18n/loadImageUploadPlaceholders.js';
 import loadColorSwatchRailPlaceholders, { DEFAULT_PLACEHOLDERS as COLOR_SWATCH_RAIL_DEFAULTS } from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
@@ -58,7 +58,7 @@ function createExtractController(maxColors = 5, callbacks = {}) {
   let state = {
     swatches: Array.from({ length: maxColors }, () => ({ hex: '#808080' })),
     baseColorIndex: 0,
-    name: 'Extracted Palette',
+    name: '',
     mood: 'colorful',
   };
   const listeners = new Set();
@@ -478,6 +478,7 @@ function buildEditStage(copyRow, imageRow) {
 function createFloatingToolbarMount(controller, variant) {
   const container = createTag('div', { class: 'color-extract-floating-toolbar-mount' });
   let toolbarHandle = null;
+  let mqCleanup = null;
   let mounted = false;
 
   function sync() {
@@ -487,6 +488,8 @@ function createFloatingToolbarMount(controller, variant) {
   }
 
   function destroy() {
+    mqCleanup?.();
+    mqCleanup = null;
     toolbarHandle?.destroy?.();
     toolbarHandle = null;
     mounted = false;
@@ -503,21 +506,33 @@ function createFloatingToolbarMount(controller, variant) {
       const { initFloatingToolbar } = await import('../../scripts/color-shared/toolbar/createFloatingToolbar.js');
       const state = controller.getState();
       const palette = {
-        name: state.name || 'Extracted Palette',
+        name: state.name || '',
         colors: state.swatches.map((s) => s.hex),
         tags: [],
         ...(variant === VARIANTS.GRADIENT ? { angle: 90 } : {}),
       };
 
+      const initialVariant = isMobileOrTabletViewport() ? 'sticky' : 'sticky-on-scroll';
+
       toolbarHandle = await initFloatingToolbar(container, {
         type: variant === VARIANTS.GRADIENT ? 'gradient' : 'palette',
-        variant: 'sticky',
+        variant: initialVariant,
         standaloneAppearance: 'raised',
         palette,
         showEdit: true,
         showPaletteName: true,
         editPaletteName: true,
       });
+
+      const mq = window.matchMedia('(max-width: 1199px)');
+      const onBreakpointChange = (e) => {
+        toolbarHandle?.setVariant(e.matches ? 'sticky' : 'sticky-on-scroll', {
+          reserveContainer: container,
+          reserveSpace: false,
+        });
+      };
+      mq.addEventListener('change', onBreakpointChange);
+      mqCleanup = () => mq.removeEventListener('change', onBreakpointChange);
 
       controller.subscribe(() => sync());
     } catch (err) {
@@ -1485,4 +1500,17 @@ export default async function decorate(block) {
     await renderGradientVariant(block, contentRows, config, strings);
   }
   trackColorBlockLoad('color-extract');
+
+  const syncFloatingCta = () => {
+    const inResults = block.classList.contains('has-image');
+    document.querySelectorAll('.floating-button-wrapper').forEach((el) => {
+      el.classList.toggle('floating-button--hidden', inResults);
+      el.toggleAttribute('aria-hidden', inResults);
+      el.toggleAttribute('inert', inResults);
+    });
+  };
+
+  const ctaObserver = new MutationObserver(syncFloatingCta);
+  ctaObserver.observe(block, { attributeFilter: ['class'] });
+  syncFloatingCta();
 }
