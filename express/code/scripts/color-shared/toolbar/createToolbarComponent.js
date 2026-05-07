@@ -201,6 +201,7 @@ async function handleSave(
   ccLibraryProvider,
   libCtxCache,
   drawerI18n,
+  { autoSave = false } = {},
 ) {
   try {
     if (activeDrawer?.isOpen) {
@@ -220,6 +221,7 @@ async function handleSave(
       onLibraryCreated: (newLib) => {
         if (libCtxCache) libCtxCache.libraries.push(newLib);
       },
+      autoSave,
       i18n: drawerI18n,
     };
     if (libraries?.length) drawerOpts.libraries = libraries;
@@ -446,7 +448,11 @@ export function createToolbar(options) {
 
   let libCtxCache = null;
   async function fetchLibCtxOnce() {
-    if (!libCtxCache && getLibraryContext) libCtxCache = await getLibraryContext();
+    if (!libCtxCache && getLibraryContext) {
+      const ctx = await getLibraryContext();
+      if (ctx?.provider) libCtxCache = ctx;
+      return ctx ?? { libraries: [], provider: null };
+    }
     return libCtxCache ?? { libraries: [], provider: null };
   }
 
@@ -587,6 +593,37 @@ export function createToolbar(options) {
   const mql = window.matchMedia('(max-width: 599px)');
   const mqlHandler = () => { ctaBtn.textContent = getCTAText(); };
   mql.addEventListener('change', mqlHandler);
+
+  if (new URLSearchParams(window.location.search).get('pendingSave') === '1') {
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete('pendingSave');
+    window.history.replaceState({}, '', cleanUrl.toString());
+
+    (async () => {
+      try {
+        await ensureIms();
+        if (!getLibraryContext) return;
+        const ctx = await getLibraryContext();
+        if (!ctx?.provider) return;
+        libCtxCache = ctx;
+        await handleSave(
+          getPaletteWithName(),
+          type,
+          ccLibBtn,
+          ctx.libraries,
+          ctx.provider,
+          libCtxCache,
+          drawerI18n,
+          { autoSave: true },
+        );
+      } catch (err) {
+        window.lana?.log(`Auto-save after sign-in failed: ${err.message}`, {
+          tags: 'color-floating-toolbar,auto-save',
+          severity: 'error',
+        });
+      }
+    })();
+  }
 
   const api = {
     element: theme,
