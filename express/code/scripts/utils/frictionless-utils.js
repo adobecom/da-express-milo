@@ -368,6 +368,11 @@ export function executeQuickAction(
       exportConfig,
       contConfig,
     ),
+    // TODO(cross-repo): ccEverywhere.quickAction.compressImage is not yet exposed
+    // by the CCEverywhere SDK. See .claude/handoffs/image-compressor/cceverywhere.md
+    // for the integration contract. Until the SDK ships, this dispatch throws at
+    // call time and is caught upstream by the frictionless-quick-action block's
+    // error handler — the panel does not mount.
     'compress-image': () => ccEverywhere.quickAction.compressImage(
       docConfig,
       appConfig,

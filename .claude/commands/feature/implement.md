@@ -88,7 +88,10 @@ Do not proceed until the user types `proceed`.
 
 ## Step 0b — Figma Sufficiency Check
 
-Runs only if the charter's frontmatter `figma:` is set. Skip entirely if `figma: n/a`.
+**Skip conditions** (any one of these is sufficient to skip):
+- Charter frontmatter says `figma: n/a`
+- Charter's `## Open Items` / `## Explicitly Out of Scope` / `## Decisions Made During Clarification` sections already reconcile the missing Figma states (e.g. "inherit error/loading states from existing block", "mobile not designed → inherit from shared dispatch"). If the charter addresses a known Figma gap with an explicit decision, don't re-ask.
+- The feature is a pure reuse of an existing page pattern and the block-reuse analysis (Step 2a) will return `reuse-as-is`/`reuse-extend` for all items — you can't know this yet at Step 0b, but if the charter signals it ("mirror X-image pattern end-to-end", "hero swap only, body unchanged"), a lighter pass suffices: verify the buildable frames exist, skip the full sufficiency matrix.
 
 The Discovery Agent's Figma Reader sub-agent writes a summary to `.claude/figma-summaries/<feature-slug>.md`. Before the analysis sub-agents read it, you must verify it has enough detail for implementation. A gap caught now is cheaper than a gap caught mid-code-scope.
 
@@ -138,22 +141,24 @@ If any gap was resolved inline or via targeted re-fetch, state the resolution in
 
 ---
 
-## Step 1 — Load Implementation Context
+## Step 1 — Load Implementation Context (lazy — on demand only)
 
-Load these four `.cursor/rules/` eagerly before spawning any sub-agent. Together they define the authoring-to-code contract and the phase constraints that Phase-B decisions depend on.
+Do NOT eagerly load cursor rules at the start. Prior runs have shown that eager-loading Phase-A rules contributes zero decisions for features that are mostly reuse — the rules then become context-window ceremony.
 
-### Phase-A rules (eager load, always)
+Instead: as each file in `code-scope.md` is about to be edited (Step 4), load only the Phase-A or Phase-B rules that apply to THAT file's area of change. Cite each rule the moment you consult it so the user can audit.
 
-| File | What to extract |
+### Phase-A reference table (load only when their area of change is touched)
+
+| File | When to load |
 |---|---|
-| `.cursor/rules/express-milo-block-patterns.mdc` | Block export pattern (`export default async function init(el)`), divide→probe→decorate→preserve, express-milo utilities, authoring conventions |
-| `.cursor/rules/aem-markup-sections-blocks.mdc` | Block name = folder = CSS class = filename. Section Metadata is content-layer. Auto-blocking. Default content vs blocks |
-| `.cursor/rules/aem-eds-transformation-patterns.mdc` | Raw → Decorated → Loaded transformation rules. Identical final DOM across phases. Dev-mode `?martech=off&milolibs=local` |
-| `.cursor/rules/aem-franklin-loading-phases.mdc` | Phase E (first section, LCP, 100KB, single origin), Phase L (below fold), Phase D (third-party, 3s+ after LCP). Use to assign every new file or import to a phase |
+| `.cursor/rules/express-milo-block-patterns.mdc` | Editing a `/express/code/blocks/<name>/<name>.js` file's `decorate()` / `init()` logic |
+| `.cursor/rules/aem-markup-sections-blocks.mdc` | Creating a new block folder, or deciding content-layer vs code-layer for a requirement |
+| `.cursor/rules/aem-eds-transformation-patterns.mdc` | Writing CSS that must target the final decorated DOM (not raw) |
+| `.cursor/rules/aem-franklin-loading-phases.mdc` | Adding a new file/import that moves work between Phase E/L/D, or when code-scope entries disagree on phase assignment |
 
-Do NOT load `.cursor/rules/aem-three-phase-performance.mdc` — it duplicates the loading-phases rule. Pick one reference, not both.
+Do NOT load `.cursor/rules/aem-three-phase-performance.mdc` — it duplicates the loading-phases rule.
 
-### Phase-B rules (load on demand only, cite when used)
+### Phase-B rules (load on demand, cite when used)
 
 Only load when the code change specifically touches that area. State in your output *which* rule you consulted and *which* specific guidance you applied — so the user can audit.
 
@@ -177,9 +182,11 @@ Only load when the code change specifically touches that area. State in your out
 
 ---
 
-## Step 2 — Pre-implementation Analysis (three parallel sub-agents)
+## Step 2 — Pre-implementation Analysis
 
-**Hard rule:** you MUST spawn these three as sub-agents (single Agent tool invocation with all three in parallel). Do NOT do their work in your own context. Each produces a separate artifact file under `.claude/analysis/<feature-slug>/`. The user reviews these artifacts in Step 3.
+**Hard rule:** spawn the Block-Reuse sub-agent (2a) first and wait for its result. Its decisions shape the scope of 2b and 2c — running them in parallel led to 2b producing plans that contradicted 2a (observed failure mode: milo-doc sub-agent produced a "net-new block" plan while block-reuse returned "reuse-as-is" for the same requirement). Spawn 2b and (conditionally) 2c after 2a returns.
+
+Artifact files are written under `.claude/analysis/<feature-slug>/`. The user reviews at the Step 3 gate.
 
 Create the directory first: `.claude/analysis/<feature-slug>/` where `<feature-slug>` is derived from the charter filename (strip extension, strip date).
 
@@ -234,12 +241,29 @@ Return a short summary object to the orchestrator:
 **Input:** charter + block-reuse decisions (starts after 2a completes)
 **Tools:** Grep, Glob, Read, Write, Bash
 **Output files:**
-- `.claude/analysis/<feature-slug>/milo-doc-plan.md` — rationale doc for the human (always written)
-- `.claude/authoring/<feature-slug>/page.md` — the page content as markdown for review (always written)
-- `.claude/authoring/<feature-slug>/build.py` — a self-contained Python driver that, when executed, writes `page.docx` (always written)
-- `.claude/authoring/<feature-slug>/page.docx` — the final Milo docx (written **only if python-docx is available** — see Step M1)
+- `.claude/authoring/<feature-slug>/build.py` — self-contained Python driver that, when executed, writes `page.docx` (always written). Must be content-only (schema helper calls), with a module docstring that captures the rationale inline (page metadata keys chosen + why, block-reuse notes, content-author placeholders). The docstring replaces the separate rationale doc.
+- `.claude/authoring/<feature-slug>/page.docx` — final Milo docx (written **only if python-docx is available** — see Step M1)
 
-> **Canonical Milo-doc conventions live in `.claude/tools/build_milo_doc.py`.** That file exports the helpers (`add_block`, `add_section_break`, `add_runs`, constants) that encode table structure, block-name-as-gray-header-row, merged cells, section breaks, hyperlink colour, and column-width conventions. Do NOT duplicate those conventions elsewhere — import and reuse them.
+`page.md` and `milo-doc-plan.md` are no longer emitted. Prior runs showed both were redundant — `build.py` is self-readable with the schema helpers, and the rationale belongs in its module docstring where it stays next to the code. If a PM needs a non-technical view, `page.docx` in Word is the review surface.
+
+> **Canonical Milo-doc conventions live in `.claude/tools/build_milo_doc.py`.** That module exports **schema-driven helpers** — one per Milo block type — that encode table structure, merged cells, column widths, block-name-as-gray-header-row, native `w:sectPr` section breaks, hyperlink colour, and **real Word `Heading N` paragraph styles** (so DA ingest emits `<h1>`/`<h2>`/`<h3>`, not `<p><strong>`). The feature `build.py` should call these helpers with **content only** — never rebuild table shapes, column widths, or run formatting by hand.
+>
+> Preferred helpers (import from `build_milo_doc`):
+> - `add_frictionless_quick_action` — desktop FQA hero (3-row pattern)
+> - `add_frictionless_quick_action_mobile` — mobile FQA hero (5-row pattern)
+> - `add_columns_fullsize_hero` — non-qualified fallback hero
+> - `add_how_to_steps` — 3-step how-to strip (emits section heading automatically)
+> - `add_content_column` — alternating image/text columns block
+> - `add_banner` — promo banner (default variant = indigo `#5c5ce0` solid band)
+> - `add_link_list` — "Discover even more" style pill rail
+> - `add_faq` — FAQ accordion (emits section heading automatically)
+> - `add_breadcrumbs` — breadcrumb trail
+> - `add_metadata` — page metadata block (accepts a dict)
+> - `add_showwith` / `add_section_metadata` — section-metadata gating
+> - `add_h2` — standalone Heading-2 paragraph between blocks
+> - `add_section_break` — native Word continuous section break (`w:type="continuous"`)
+>
+> Fall back to the low-level `add_block` + `add_runs` only when a block type has no dedicated helper. If you find yourself writing `add_block(doc, 'frictionless-quick-action', [...])` with hand-crafted rows, stop — use `add_frictionless_quick_action` instead.
 
 **Step M1 — python-docx check + mode selection**
 
@@ -259,74 +283,79 @@ python3 -c "import docx, requests" 2>&1 && echo "PRESENT" || echo "MISSING"
 >
 > Options:
 >   a) Install now: `pip install python-docx requests` — then reply `installed` and I'll produce the full package (markdown + build.py + docx).
->   b) Reply `skip docx` — I'll still produce `page.md` and `build.py`. The author (or a future run) can execute `build.py` once dependencies are installed.
+>   b) Reply `skip docx` — I'll still produce `build.py`. The author (or a future run) can execute it once dependencies are installed.
 >
 > Which do you want?"
 
 Branch on the reply:
 - `installed` → re-run the import check; if still missing, surface the exact error and ask again. Once confirmed, set `docx_mode = "full"` and continue.
-- `skip docx` → set `docx_mode = "md-only"`. Still produce `page.md` and `build.py` (they don't need the dependency to be generated — only to be executed). Skip Step M4. Flag in the rationale doc that the author must run `build.py` manually after `pip install python-docx requests`.
+- `skip docx` → set `docx_mode = "py-only"`. Still produce `build.py` (it doesn't need the dependency to be generated — only to be executed). Skip Step M4. Flag in `build.py`'s module docstring that the author must run `pip install python-docx requests && python3 build.py` before uploading.
 
 Record the chosen mode in the return object.
 
-**Step M2 — Produce the page markdown (human review)**
+**Step M2 — Reference page-metadata conventions while drafting build.py**
 
-Generate `.claude/authoring/<feature-slug>/page.md`. This markdown is for the human reviewer at the Step 3 gate — not for docx conversion. It mirrors, row-for-row, the block structure `build.py` will emit.
+There is no separate `page.md` file — skip straight to Step M3. But while you're about to author the `add_metadata(...)` call in `build.py`, consult this key reference so the metadata block is complete. Common keys and their read points:
 
-The markdown must contain:
+- `Title`, `Description`, `Short Title`, `Theme`, `Page Name` — Milo-level SEO/theme fields
+- `template` — [scripts.js:293](express/code/scripts/scripts.js). Only emit if `template === 'blog'` matters; feature pages usually omit it and rely on `metadata.xlsx` inheritance.
+- `Frictionless-safari` (capital F) — [utils.js:428](express/code/scripts/utils.js) (required if feature is a quick action on iOS Safari)
+- `show-floating-cta` — [utils.js:469](express/code/scripts/utils.js)
+- `desktop-floating-cta` / `mobile-floating-cta` — picks the floating CTA variant
+- `fork-cta-1-*` / `fork-cta-2-*` — mobile fork-button copy
+- `main-cta-link` — primary CTA deep-link URL
+- `hero-inject-logo`, `marquee-inject-logo` — logo injection toggles
+- `sheet-powered` — [scripts.js:423](express/code/scripts/scripts.js)
+- `branch-*` keys — Branch SDK deep-linking (only if the charter calls them out for this feature)
+- `breadcrumbs` — set to `n/a` if a breadcrumbs block handles rendering explicitly
 
-1. **`metadata` block** (last block in a Milo doc by convention, but reviewed first). Include every key the page needs. Common keys and their read points:
-   - `Title`, `Description`, `Short Title`, `Theme`, `Page Name` — Milo-level SEO/theme fields
-   - `template` — [scripts.js:293](express/code/scripts/scripts.js)
-   - `Frictionless-safari` (capital F) — [utils.js:428](express/code/scripts/utils.js) (required if feature is a quick action on iOS Safari)
-   - `show-floating-cta` — [utils.js:469](express/code/scripts/utils.js)
-   - `hero-inject-logo` — [scripts.js:319](express/code/scripts/scripts.js)
-   - `sheet-powered` — [scripts.js:423](express/code/scripts/scripts.js)
-   - `branch-*` keys (`branch-category`, `branch-canvas-width`, `branch-canvas-height`, `branch-is-video-maker`, etc.) for Branch deep-linking on video/image features
-   - `breadcrumbs` — set to `n/a` if the breadcrumbs block handles it, otherwise the value used at read
-   - Any feature-flag metadata the charter calls out
-
-2. **`section-metadata` blocks** for each section that needs conditional rendering or styling:
-   - `showwith` — conditional section (e.g. `fqa-non-qualified`, `fqa-qualified-mobile`, `fqa-qualified-desktop` — these are the flags set at [utils.js:410-434](express/code/scripts/utils.js))
-   - `audience` — `mobile` | `desktop`
-   - `anchor` — section id
-   - `style` — variant class (e.g. `long-form` for SEO copy sections)
-
-3. **Block tables** — one per block the charter uses. Block-name variants go in parens: `columns (fullsize)`. For `frictionless-quick-action`:
-   ```
-   | frictionless-quick-action |           |
-   | <content row — merged>    |           |
-   | <animation or image>      | <upload + ToS>  |
-   | Quick-Action              | <type>    |
-   ```
-   The `Quick-Action | <type>` row is parsed at [frictionless-quick-action.js:776-786](express/code/blocks/frictionless-quick-action/frictionless-quick-action.js). `<type>` must be a key in `QA_CONFIGS`.
-
-4. **`breadcrumbs` block** (if the page wants breadcrumbs rendered).
-
-Each block in the markdown is preceded by a heading `## Block: <name>` so a reviewer can jump between them.
+`section-metadata` gates (authored as `add_showwith(doc, ...)` or `add_section_metadata(doc, {...})`):
+- `showwith` — conditional section (e.g. `fqa-non-qualified`, `fqa-qualified-mobile`, `fqa-qualified-desktop` — flags set at [utils.js:410-434](express/code/scripts/utils.js))
+- `audience` — `mobile` | `desktop`
+- `anchor` — section id
+- `style` — variant class (e.g. `long-form` for SEO copy sections)
 
 **Step M3 — Generate the build.py driver**
 
-Generate `.claude/authoring/<feature-slug>/build.py` — a self-contained Python script that produces `page.docx` when executed. Template:
+Generate `.claude/authoring/<feature-slug>/build.py` — a self-contained, **content-only** Python script that produces `page.docx` when executed. The script should read like a content brief, not like docx plumbing. Template:
 
 ```python
-#!/usr/bin/env python3
-"""Build .claude/authoring/<feature-slug>/page.docx for <feature>."""
-import sys
-from pathlib import Path
+"""Build .claude/authoring/<feature-slug>/page.docx for <feature>.
 
-# Import canonical Milo conventions
-ROOT = Path(__file__).resolve().parents[3]   # repo root
-sys.path.insert(0, str(ROOT / ".claude" / "tools"))
+Content-only build: every structural decision (row shape, column widths,
+merged cells, section breaks, heading styles, hyperlink colour) lives in
+`.claude/tools/build_milo_doc.py`. This script only declares WHAT the
+page says, not HOW each block is shaped.
+"""
+import os, sys
+REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+sys.path.insert(0, os.path.join(REPO_ROOT, ".claude", "tools"))
+
 from build_milo_doc import (
-    Document, Cm, Pt,
-    add_block, add_section_break, add_runs,
+    Document, Cm,
+    add_section_break,
+    add_showwith,
+    add_columns_fullsize_hero,
+    add_frictionless_quick_action,
+    add_frictionless_quick_action_mobile,
+    add_how_to_steps,
+    add_content_column,
+    add_banner,
+    add_link_list,
+    add_faq,
+    add_breadcrumbs,
+    add_metadata,
 )
 
-OUT = Path(__file__).parent / "page.docx"
+OUT_PATH = os.path.join(os.path.dirname(__file__), "page.docx")
 
-# ---- Content (one constant per reusable chunk) ----
-# <feature-specific chunks — hero text, upload CTA, images, etc.>
+# ---- Assets (URLs) and copy (strings) -----------------------------------
+# Keep each concern in one place so content-ops can eyeball a diff.
+H1 = "<headline>"
+SUBHEAD = "<subhead paragraph>"
+UPLOAD_ANIMATION_URL = "<https://main--da-express-milo--adobecom.aem.live/media_....mp4>"
+# ... more asset URLs and copy constants ...
+
 
 def build():
     doc = Document()
@@ -334,29 +363,63 @@ def build():
         s.left_margin = s.right_margin = Cm(1.5)
         s.top_margin = s.bottom_margin = Cm(1.5)
 
-    # ---- Block 1: <name> ----
-    add_block(doc, '<block-name>', [
-        # rows...
-    ], col_widths=[3.3, 3.3])
-
+    # --- Hero (triplet if frictionless: fallback → desktop → mobile) ----
+    add_columns_fullsize_hero(doc, headline=H1, subhead=SUBHEAD, ...)
+    add_showwith(doc, "fqa-non-qualified")
     add_section_break(doc)
 
-    # ---- Block 2, 3, ... ----
-    # ...
+    add_frictionless_quick_action(doc, headline=H1, subhead=SUBHEAD,
+                                  quick_action_id="<qa-id>", ...)
+    add_showwith(doc, "fqa-qualified-desktop")
+    add_section_break(doc)
 
-    doc.save(OUT)
-    print(f"Wrote {OUT}")
+    add_frictionless_quick_action_mobile(doc, headline=H1, subhead=SUBHEAD,
+                                         quick_action_id="<qa-id>", ...)
+    add_showwith(doc, "fqa-qualified-mobile")
+    add_section_break(doc)
+
+    # --- Body: how-to, content columns, link-list, banner, FAQ ----------
+    add_how_to_steps(doc, heading="<H2>", steps=[...])
+    add_section_break(doc)
+
+    add_content_column(doc, image_side='left', image_url=..., heading=..., body=...)
+    # ... more content_column calls ...
+    add_section_break(doc)
+
+    add_link_list(doc, heading="Discover even more.", links=[("Label", "url"), ...])
+    add_section_break(doc)
+
+    add_banner(doc, heading="<promo heading>")
+    add_section_break(doc)
+
+    add_faq(doc, heading="Frequently asked questions.", qa_pairs=[(q, a), ...])
+    add_section_break(doc)
+
+    add_breadcrumbs(doc, crumbs=[("Home", url), ("Feature", url), ("<leaf>", None)])
+    add_section_break(doc)
+
+    add_metadata(doc, {
+        "Title": "...",
+        "Description": "...",
+        # ... keys per charter ...
+    })
+
+    doc.save(OUT_PATH)
+    print(f"Wrote {OUT_PATH} ({os.path.getsize(OUT_PATH)} bytes)")
+
 
 if __name__ == "__main__":
     build()
 ```
 
 Hard rules for generating `build.py`:
-- It MUST import helpers from `.claude/tools/build_milo_doc.py` — never redefine them.
+- Use the **schema helpers** listed in the canonical-helpers callout above. Do NOT hand-craft rows via `add_block(doc, 'frictionless-quick-action', [...])` — call `add_frictionless_quick_action(...)` instead. The helper knows the row shape.
+- Do NOT set font sizes, bold, or line-height on runs. Heading semantics come from the helper applying `Heading N` paragraph styles; display styling comes from the live page's CSS at render time. Manual font formatting in the docx will mislead reviewers and is ignored by DA ingest anyway.
 - It MUST be idempotent — same inputs produce the same output every time.
-- Images must be referenced by their full `https://main--da-express-milo--adobecom.aem.live/media_...png` URL (the helper fetches them at run time).
-- Hyperlink text and URLs are passed as `('link', text, url)` tuples to `add_runs` — do NOT attempt to encode them inline in strings.
-- Every `frictionless-quick-action` block ends with a `Quick-Action | <type>` row where `<type>` is a confirmed key in [QA_CONFIGS](express/code/scripts/utils/frictionless-utils.js).
+- Images must be referenced by their full `https://main--da-express-milo--adobecom.aem.live/media_...<ext>` URL (the helper fetches them at run time).
+- Hyperlink text and URLs are passed as `('link', text, url)` tuples inside `('p', [...])` paragraph parts — never inline in strings.
+- For a frictionless feature the `quick_action_id` passed to the helper must be a confirmed key in [QA_CONFIGS](express/code/scripts/utils/frictionless-utils.js).
+- **Asset URLs must come from the Figma or a real DA-hosted file** — never silently fall back to a sibling feature's asset (e.g. reusing the resize MP4 for a compress page hero) without a charter amendment recording the swap. If the Figma doesn't surface the asset URL, spawn a targeted figma-reader re-fetch on the hero node; if still not resolvable, emit a clearly-labeled placeholder + flag it as an `unresolved_placeholder` to the orchestrator for user sign-off at the Step 3 gate.
 
 The `build.py` is a first-class deliverable: it's committed to the repo alongside the charter, diff-reviewed, and re-runnable any time the page needs to be regenerated.
 
@@ -370,65 +433,61 @@ python3 ".claude/authoring/<feature-slug>/build.py"
 
 Verify the output: `page.docx` exists and is non-zero. If the script raised an exception, capture the traceback into `milo-doc-plan.md` under `## build.py runtime errors`, and halt this sub-agent — do not silently emit a broken docx.
 
-**Step M5 — Write the rationale doc**
+**Step M5 — Fold the rationale into `build.py`'s module docstring (not a separate file)**
 
-`.claude/analysis/<feature-slug>/milo-doc-plan.md` — human-readable companion for author and PM review. Structure:
+No separate `milo-doc-plan.md`. The rationale lives in `build.py` alongside the code that implements it, so the two can never drift. Include a top-of-file docstring covering:
 
-```markdown
-# Milo Doc Plan — <feature>
+- **What this doc produces** — target page path, three-line scope summary
+- **Reference pattern** — which existing Milo page this mirrors (the live page URL)
+- **Unresolved placeholders** — any asset URLs or metadata values the content author must review (flagged loudly with `TODO` or `PLACEHOLDER`)
+- **Deltas from charter** — if the block-reuse analysis superseded any charter prescription (e.g. "charter said new banner block; reuse-as-is via default variant"), note the override here
 
-## How this doc was produced
-- Canonical helpers : `.claude/tools/build_milo_doc.py`
-- Driver           : `.claude/authoring/<feature-slug>/build.py`
-- Markdown review  : `.claude/authoring/<feature-slug>/page.md`
-- Docx output      : `.claude/authoring/<feature-slug>/page.docx` (run `build.py` to regenerate)
+Example shape:
 
-## Page metadata keys
-| Key | Value | Why (code reference) |
-|---|---|---|
-| <key> | <value> | <one line + file:line where this key is read> |
+```python
+"""Build page.docx for <feature>.
 
-## Section metadata
-### Section: <name>
-| Key | Value | Why |
-|---|---|---|
+Target page : /express/feature/image/compress/jpg
+Reference   : /express/feature/image/resize (mirrors its 3-variant hero pattern)
+Deltas from charter:
+  - Purple promo band: charter said 'new block'; block-reuse found 'banner'
+    default variant renders the Figma spec exactly → reuse-as-is
+  - FAQ Q2 dropped (HARMAN add-on account question no longer applicable)
 
-## Blocks used
-### <block-name>
-- Reuse decision: <from 2a>
-- Variant: <e.g. "(fullsize)" or "default">
-- Table structure: (see page.md)
-- Metadata rows: <e.g. "Quick-Action | edit-video">
-- Required assets: <image URLs, video URLs, icon names, exact copy strings>
-
-## build.py runtime errors
-<from Step M4 — empty if docx built cleanly>
-
-## Locales / variants
-<if multi-page: list each page's path and what differs>
-
-## Notes for the content author
-- To regenerate the docx: `python3 .claude/authoring/<feature-slug>/build.py`
-- Dependencies: `pip install python-docx requests`
-- Conventions (gray block-header, merged cells, section-metadata pattern) come from `.claude/tools/build_milo_doc.py` — if DA rejects the docx, the fix goes into that file, not into `build.py`.
+Run: python3 .claude/authoring/<feature-slug>/build.py
+Deps: pip install python-docx requests
+Conventions live in .claude/tools/build_milo_doc.py — if DA rejects the
+docx, the fix goes into that file, not into this build.py.
+"""
 ```
+
+If `build.py` raised on execution, capture the traceback inline with a `# BUILD_ERROR` comment at the line that failed, not in a separate rationale file.
 
 **Return to orchestrator:**
 
 ```
 {
-  docx_mode: "full" | "md-only",
-  plan_file: ".claude/analysis/<feature-slug>/milo-doc-plan.md",
-  page_markdown: ".claude/authoring/<feature-slug>/page.md",
+  docx_mode: "full" | "py-only",
   build_script: ".claude/authoring/<feature-slug>/build.py",
-  page_docx: ".claude/authoring/<feature-slug>/page.docx" | null,   // null if docx_mode = "md-only"
-  build_errors: "<traceback or empty>"
+  page_docx: ".claude/authoring/<feature-slug>/page.docx" | null,   // null if docx_mode = "py-only"
+  build_errors: "<traceback or empty>",
+  unresolved_placeholders: [ "<asset URL, metadata value, etc>" ],
+  content_questions: [ "<copy decisions the user should weigh in on>" ]
 }
 ```
 
-The orchestrator surfaces `docx_mode` in the Step 3 gate summary so the user sees at a glance whether the docx is part of this run's deliverable or if the author has to regenerate it locally.
+The orchestrator surfaces `docx_mode`, `unresolved_placeholders`, and `content_questions` at the Step 3 gate so the user sees at a glance whether the docx is ready as-is or needs decisions.
 
-### 2c. Code-Change Scope Sub-Agent
+### 2c. Code-Change Scope Sub-Agent (conditional)
+
+**Skip this sub-agent when** the block-reuse decisions from 2a are trivial — specifically:
+- Zero `build-new` and zero `fork-new-variant` decisions, AND
+- ≤ 3 `reuse-extend` decisions (typically just config/map additions), AND
+- Zero `reuse-modify` decisions (no block JS/CSS edits)
+
+In that case the orchestrator writes `code-scope.md` inline from the block-reuse output — roughly 20–40 lines, one file-entry per changed file with a pseudo-diff. No sub-agent spawn needed.
+
+Spawn the sub-agent only when the change set is non-trivial (new blocks, JS edits, multiple files).
 
 **Input:** charter + block-reuse decisions
 **Tools:** Grep, Glob, Read
@@ -457,7 +516,7 @@ Produce a concrete file-by-file change list before any code is written. Grounded
 
 **Must-include entries for same-tab redirect features:**
 - Block that constructs the URL (follow susi-light or cta-carousel pattern)
-- Any new metadata key read (add to `milo-doc-plan.md` cross-reference)
+- Any new metadata key read (add to `build.py` docstring cross-reference)
 
 **Return to orchestrator:**
 
@@ -482,12 +541,15 @@ Analysis complete.
 Block reuse decisions    : as-is=N, extend=N, modify=N, fork=N, new=N
   Highest risk          : <from 2a summary>
 
-Milo doc package           (docx_mode: full | md-only)
-  Rationale              : .claude/analysis/<feature-slug>/milo-doc-plan.md
-  Markdown review        : .claude/authoring/<feature-slug>/page.md
-  Build driver           : .claude/authoring/<feature-slug>/build.py
+Milo doc package           (docx_mode: full | py-only)
+  Build driver           : .claude/authoring/<feature-slug>/build.py   (content-only, self-readable)
   Docx (if full mode)    : .claude/authoring/<feature-slug>/page.docx
   build.py errors        : <none | traceback excerpt>
+  Unresolved placeholders: <list or "none">
+  Content questions      : <list or "none">
+
+Cross-repo handoff docs    (one per charter handoff section)
+  .claude/handoffs/<feature-slug>/<team>.md
 
 Code change scope
   Files to create       : N
@@ -536,15 +598,9 @@ If during implementation you discover the scope is wrong (missing file, incorrec
 
 ## Step 5 — Milo-Doc Authoring Package
 
-Already produced in Step 2b. Verify the files are present and non-empty (set is conditional on `docx_mode`):
-
-Always:
-- `.claude/authoring/<feature-slug>/page.md`
-- `.claude/authoring/<feature-slug>/build.py`
-- `.claude/analysis/<feature-slug>/milo-doc-plan.md`
-
-Only if `docx_mode = "full"`:
-- `.claude/authoring/<feature-slug>/page.docx`
+Already produced in Step 2b. Verify:
+- `.claude/authoring/<feature-slug>/build.py` exists and is non-empty (always)
+- `.claude/authoring/<feature-slug>/page.docx` exists and is non-empty (only if `docx_mode = "full"`)
 
 If any required file is missing or empty, abort and say so clearly — do not fabricate artifacts.
 
@@ -552,22 +608,55 @@ Hand off instructions to the user:
 
 ```
 Milo doc package ready for content author:
-  - page.docx       → upload to DA, place at the page path agreed in the charter
-                      (if docx_mode was md-only, run build.py to generate it first)
-  - build.py        → re-runnable driver; regenerates page.docx from the same source
-  - page.md         → human review / diff tool (mirrors page.docx structure)
-  - milo-doc-plan.md → rationale for PM / author review
+  - page.docx       → upload to DA at the page path agreed in the charter
+                      (if docx_mode was py-only, run build.py first)
+  - build.py        → re-runnable driver + rationale (module docstring);
+                      regenerates page.docx from the same source
 ```
 
-If `docx_mode = "md-only"`, prepend this line to the handoff:
-
-> "To produce the `.docx`: `pip install python-docx requests && python3 .claude/authoring/<feature-slug>/build.py`"
+If `docx_mode = "py-only"`, prepend: *"To produce the `.docx`: `pip install python-docx requests && python3 .claude/authoring/<feature-slug>/build.py`"*
 
 ---
 
-## Step 6 — Test Plan (markdown only)
+## Step 5b — Cross-Repo Handoff Docs
 
-Write `.claude/analysis/<feature-slug>/test-plan.md`. This agent does **not** write `.cjs` Nala files or unit test files — a later agent does. Produce only a tabular test plan.
+For every charter section titled `## <Team> Requirements (handoff)` (typical examples: `CCEverywhere Requirements (handoff)`, `Horizon Requirements (handoff)`, `<Other-Team> Requirements (handoff)`), write a standalone handoff doc. These are the artifacts this repo sends to the other repo/team so they can start parallel work without having to read the full charter.
+
+Output path: `.claude/handoffs/<feature-slug>/<team-slug>.md` (team-slug in lowercase, no spaces — e.g. `cceverywhere`, `horizon`).
+
+Each handoff doc must contain:
+
+1. **TL;DR** — one paragraph. Who the handoff is to, what they need to deliver, and by when (if the charter specifies a gating timeline or co-launch constraint).
+2. **Integration contract** — the exact shape da-express-milo expects from the other side. For SDK teams: method signature, argument types, return shape, error events. For UI teams (like Horizon): rendered component spec with Figma node IDs, frame IDs, and exact CSS variables / tokens.
+3. **Where our code calls theirs** — `file:line` pointer to the call site in da-express-milo so the other team knows what will break if the contract changes.
+4. **Acceptance criteria** — ordered list of what's required for da-express-milo to successfully integrate. Mirror the charter's `- [ ]` checkboxes for that section.
+5. **References** — Figma URLs (copied from charter frontmatter), related PRs, Slack threads, tracking tickets if known. Links only — don't re-paste Figma copy that lives in the figma-summary files.
+6. **Contact** — what to do if the other team needs to clarify the contract (defer to the user for routing if unknown).
+
+A handoff doc is **a shippable artifact** — content authors / SDK engineers / cross-repo PMs should be able to read it standalone. Do NOT reference `.claude/charters/...` paths inside it; quote or extract what's needed instead, because the other team likely doesn't have this repo checked out.
+
+At the orchestrator level, a TODO comment MUST also be added in the da-express-milo code at the call site that depends on the other repo's handoff:
+
+```js
+// TODO(cross-repo): <method> not yet exposed by <team>. See
+// .claude/handoffs/<feature-slug>/<team>.md for the integration contract.
+// Dispatch silently no-ops via the `if (action)` guard until it ships.
+```
+
+Place this as a single-line comment immediately above the line that calls into the other repo's surface. The "why" is non-obvious (a reader seeing `ccEverywhere.quickAction.compressImage(...)` wouldn't know the method doesn't exist yet), so this is one of the few cases where a comment is warranted per the repo's comment-minimalism rules.
+
+---
+
+## Step 6 — Test Plan (conditional, markdown only)
+
+**Skip conditions:**
+- Charter's `## Out of Scope` / `## Explicitly Out of Scope` section says tests are deferred, OR
+- User explicitly drops Nala/E2E during the Step 3 gate or mid-implementation, OR
+- Entire code diff is ≤ 10 lines of config/data (no logic change) — smoke via manual checklist in the Step 7 handoff is enough
+
+When skipping: add a one-line note to the Step 7 handoff output ("Test plan: deferred per <reason>") and skip this step entirely. Do not emit an empty or placeholder test-plan.md.
+
+Otherwise write `.claude/analysis/<feature-slug>/test-plan.md`. This agent does **not** write `.cjs` Nala files or unit test files — a later agent does. Produce only a tabular test plan.
 
 ```markdown
 # Test Plan — <feature>
@@ -606,19 +695,21 @@ Print:
 ```
 Implementation complete.
 
-Code changes         : <N files touched>
-Milo doc package     : .claude/authoring/<feature-slug>/
-Analysis trail       : .claude/analysis/<feature-slug>/
-Test plan            : .claude/analysis/<feature-slug>/test-plan.md
+Code changes          : <N files touched>
+Milo doc package      : .claude/authoring/<feature-slug>/
+Cross-repo handoffs   : .claude/handoffs/<feature-slug>/<team>.md   (one per handoff section)
+Analysis trail        : .claude/analysis/<feature-slug>/block-reuse.md (+ code-scope.md if spawned)
+Test plan             : .claude/analysis/<feature-slug>/test-plan.md  OR  deferred per <reason>
 
 Charter Tier-2 items remaining : <list from charter — did not block ship but must resolve>
 
 Next steps (out of scope for this agent):
   - Content author uploads page.docx to DA
-  - Nala / unit test agent consumes test-plan.md
+  - Hand each .claude/handoffs/<feature-slug>/*.md to the corresponding team/repo
+  - (If not deferred) Nala / unit test agent consumes test-plan.md
   - PR agent opens the PR
 ```
 
 Do not open a PR. Do not run tests. Your job ends here.
 
-Any downstream agent reads the artifacts in `.claude/analysis/<feature-slug>/` and `.claude/authoring/<feature-slug>/` directly — they are the handoff contract.
+Any downstream agent or cross-repo team reads the artifacts in `.claude/handoffs/<feature-slug>/`, `.claude/analysis/<feature-slug>/`, and `.claude/authoring/<feature-slug>/` directly — they are the handoff contract.

@@ -59,6 +59,39 @@ Some behaviour is injected by code at runtime based on metadata it reads. For ex
 2. Check the path-level `metadata.xlsx`
 3. Check `buildAutoBlocks()` and `scripts.js` for programmatic overrides
 
+### Draft-path exception (testing gotcha)
+
+`metadata.xlsx` inheritance applies by **path prefix**. Pages outside the `/express/...` hierarchy do NOT inherit it:
+
+```
+/express/feature/image/compress/jpg          → inherits /express/feature/metadata.xlsx ✓
+/drafts/nala/test-gen/.../fqa-image-compress → inherits nothing ✗
+/drafts/<anything>                           → inherits nothing ✗
+```
+
+**Consequence for testing:** when an author copies a feature page to `/drafts/...` for Nala test runs, branch previews, or staging, every xlsx-inherited key becomes missing. This typically silently breaks:
+
+- **Page chrome** — `gnav-source` / `footer-source` missing → no global nav, no footer, or wrong ones
+- **Template-level behavior** — `template`, `theme` fallbacks missing → page renders against EDS defaults
+- **Floating CTA defaults** — per-path fallbacks for `show-floating-cta`, `desktop-floating-cta`, etc. missing
+- **Locale / GeoRouting** — `georouting` missing → users may not be redirected to the correct locale page
+
+**How to compensate when authoring a draft-path page:**
+1. Audit the live parent-path page (e.g. fetch HTML of the closest production sibling) and enumerate every `<meta name="…">` tag it exposes.
+2. Add the inherited-but-critical keys directly into the draft page's `metadata` block. The emitted `page.docx` from the Implementation Agent's `build.py` should include the full set for a feature page — not just the charter-specified keys — to keep drafts test-able standalone.
+3. Alternatively, upload the authored docx directly to the production path (overwriting the live page) — inheritance then applies. Only viable when the feature is actually ready to ship.
+
+**Symptom → likely cause mapping:**
+| Symptom on a draft page | Most likely missing keys (usually inherited) |
+|---|---|
+| No global nav / footer | `gnav-source`, `footer-source` |
+| Fallback hero showing on a frictionless page instead of the upload block | Page is not inheriting but also missing `fqa-qualified-*` meta injection because `frictionless-safari` isn't being read — verify that key is present on the draft |
+| CTA redirects to Express app instead of opening a file picker | `main-cta-text` / `main-cta-link` / fork-cta copy keys missing, OR section-metadata `showwith` gating failed and the `columns (fullsize)` fallback hero is visible |
+| Floating CTA doesn't appear | `show-floating-cta`, `desktop-floating-cta`, `mobile-floating-cta`, and their `-text`/`-link` companions all need to be authored on the draft |
+| Wrong locale behavior | `georouting` missing |
+
+Always note which path the test was run against when reporting failures — draft-path symptoms can look identical to genuine bugs.
+
 ---
 
 ## Express-Specific Block Patterns

@@ -36,12 +36,17 @@ import requests
 from docx import Document
 from docx.shared import Pt, Cm, RGBColor, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.section import WD_SECTION
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
 HEADER_FILL = "EFEFEF"
 BORDER_COLOR = "D0D0D0"
 LINK_COLOR = "1473E6"
+
+# Common Adobe/Milo URLs — re-exported so feature build.py scripts don't redefine them.
+TERMS_URL = "https://www.adobe.com/legal/terms.html"
+PRIVACY_URL = "https://www.adobe.com/privacy/policy.html"
 
 # ----- low-level helpers ---------------------------------------------------
 
@@ -137,10 +142,30 @@ def add_runs(paragraph, parts):
             paragraph.add_run().add_break()
 
 
+def _apply_heading_style(paragraph, level):
+    """Apply Word's built-in `Heading N` paragraph style so DA/EDS converts the
+    paragraph to a real <hN> element on ingest.
+
+    A bold run at a custom font size is NOT sufficient — DA only emits <h1>/<h2>/<h3>
+    when the paragraph has `<w:pStyle w:val="HeadingN"/>` in its properties. Every
+    Document Word opens has Heading 1–9 as built-in styles by default.
+    """
+    try:
+        paragraph.style = paragraph.part.document.styles[f'Heading {level}']
+    except KeyError:
+        # Style not registered on this document — fall back to bold at approximate size.
+        run = paragraph.runs[-1] if paragraph.runs else paragraph.add_run()
+        run.bold = True
+        run.font.size = Pt({1: 20, 2: 16, 3: 13}.get(level, 13))
+
+
 def write_cell(cell, content_blocks, bold_all=False):
     """content_blocks: list of blocks. Each block is one of:
         ('p', parts)            — paragraph (parts passed to add_runs)
-        ('h', level, text)      — heading (level 1/2/3 → size 20/16/13pt, bold)
+        ('h', level, text)      — heading. Applies Word's `Heading N` paragraph style
+                                  so DA/EDS ingest converts it to a real <hN>. Runs
+                                  inherit font size/weight from the style — do NOT
+                                  also set bold or font size manually.
         ('ul', [items])         — bulleted list (each item is a parts list)
         ('img', url, alt)       — image fetched from url; falls back to [image: alt] on error
     """
@@ -161,14 +186,8 @@ def write_cell(cell, content_blocks, bold_all=False):
                     run.bold = True
         elif kind == 'h':
             level, text = block[1], block[2]
-            run = p.add_run(text)
-            run.bold = True
-            if level == 1:
-                run.font.size = Pt(20)
-            elif level == 2:
-                run.font.size = Pt(16)
-            elif level == 3:
-                run.font.size = Pt(13)
+            p.add_run(text)
+            _apply_heading_style(p, level)
         elif kind == 'ul':
             items = block[1]
             for i, item_parts in enumerate(items):
@@ -237,26 +256,311 @@ def add_block(doc, name, rows, col_widths=None):
 
 
 def add_section_break(doc):
-    """Visual marker between Milo sections. Renders as centered gray text."""
-    p = doc.add_paragraph()
+    """Insert a Milo/DA-compatible section break between blocks.
+
+    Emits TWO signals so the converter picks up on whichever it supports:
+      1. A paragraph containing `---` — matches Milo's canonical markdown
+         section-boundary convention. DA's docx-to-markdown importer
+         translates this to a section break reliably.
+      2. A native Word continuous section break (`<w:sectPr type="continuous">`)
+         via `doc.add_section()` — Word renders the thin-line "SECTION BREAK"
+         indicator natively, and some importers recognize this as the semantic
+         boundary too.
+
+    Using just (2) alone broke section detection on DA in practice (all blocks
+    merged into one section → fallback hero rendered alongside qualified
+    sections, and its plain-link CTA produced a redirect on click). The `---`
+    paragraph is the load-bearing signal; the native break is belt-and-braces.
+    """
+    p = doc.add_paragraph("---")
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    run = p.add_run("— SECTION BREAK —")
-    run.font.size = Pt(8)
-    run.font.color.rgb = RGBColor(0xA0, 0xA0, 0xA0)
-    run.bold = True
+    doc.add_section(WD_SECTION.CONTINUOUS)
+
+
+# ----- high-level block helpers (schema-driven, content-only API) -----------
+# Each of these encapsulates a Milo authoring pattern so feature build.py
+# scripts only pass content — never row shape, column widths, or merged cells.
+
+
+def add_h2(doc, text):
+    """Standalone Heading 2 paragraph between blocks.
+
+    Applies Word's built-in `Heading 2` style so DA ingest emits a real <h2>.
+    Use this for section headings that sit OUTSIDE a block's table (e.g. the
+    "How to compress a JPEG." heading above the how-to steps block).
+    """
+    p = doc.add_paragraph(text, style='Heading 2')
+    return p
+
+
+def add_showwith(doc, value, col_widths=(3.3, 3.3)):
+    """section-metadata block with a single `showwith = value` row."""
+    return add_block(
+        doc, "section-metadata",
+        [[[('p', [('text', 'showwith')])], [('p', [('text', value)])]]],
+        col_widths=list(col_widths),
+    )
+
+
+def add_section_metadata(doc, pairs, col_widths=(3.3, 3.3)):
+    """Generic section-metadata block. pairs = dict of key → value strings."""
+    rows = [
+        [[('p', [('text', k)])], [('p', [('text', v)])]]
+        for k, v in pairs.items()
+    ]
+    return add_block(doc, "section-metadata", rows, col_widths=list(col_widths))
+
+
+def add_columns_fullsize_hero(
+    doc, *, headline, subhead, cta_text, cta_url,
+    upload_animation_url, col_widths=(3.3, 3.3),
+):
+    """Fallback hero for non-qualified browsers (columns fullsize variant)."""
+    return add_block(
+        doc, "columns (fullsize)",
+        [[
+            [
+                ('h', 1, headline),
+                ('p', [('text', subhead)]),
+                ('p', [('link', cta_text, cta_url)]),
+            ],
+            [
+                ('p', [('link', "Upload animation (MP4)", upload_animation_url)]),
+            ],
+        ]],
+        col_widths=list(col_widths),
+    )
+
+
+def add_frictionless_quick_action(
+    doc, *, headline, subhead, upload_animation_url,
+    upload_heading_text, upload_heading_em,
+    upload_cta_text, upload_cta_url,
+    file_restrictions_text, quick_action_id,
+    terms_url=TERMS_URL, privacy_url=PRIVACY_URL,
+    col_widths=(3.3, 3.3),
+):
+    """Desktop frictionless-quick-action hero block.
+
+    Three-row pattern:
+      (headline + subhead, empty)
+      (video link, upload card with heading + CTA + restrictions + ToS)
+      (Quick-Action, <id>)
+
+    The upload heading renders as "<upload_heading_text>\\nor <upload_heading_em>"
+    with the em part italicised.
+    """
+    return add_block(
+        doc, "frictionless-quick-action",
+        [
+            [
+                [('h', 1, headline), ('p', [('text', subhead)])],
+                [('p', [('text', '')])],
+            ],
+            [
+                [('p', [('link', "Alternate video source (MP4)", upload_animation_url)])],
+                [
+                    ('p', [
+                        ('text', upload_heading_text),
+                        ('br',),
+                        ('text', 'or '),
+                        ('em', upload_heading_em),
+                    ]),
+                    ('p', [('link', upload_cta_text, upload_cta_url)]),
+                    ('p', [('text', file_restrictions_text)]),
+                    ('p', [
+                        ('text', 'By uploading your image or video, you agree to the Adobe '),
+                        ('link', 'Terms of Use', terms_url),
+                        ('text', ' and '),
+                        ('link', 'Privacy Policy', privacy_url),
+                    ]),
+                ],
+            ],
+            [
+                [('p', [('text', 'Quick-Action')])],
+                [('p', [('text', quick_action_id)])],
+            ],
+        ],
+        col_widths=list(col_widths),
+    )
+
+
+def add_frictionless_quick_action_mobile(
+    doc, *, headline, subhead, tagline, upload_animation_url,
+    tap_prefix_text, tap_em_text,
+    file_restrictions_text, fallback_fragment_url, quick_action_id,
+    terms_url=TERMS_URL, privacy_url=PRIVACY_URL,
+    col_widths=(3.3, 3.3),
+):
+    """Mobile frictionless-quick-action-mobile hero block (5-row pattern)."""
+    return add_block(
+        doc, "frictionless-quick-action-mobile",
+        [
+            [
+                [
+                    ('h', 1, headline),
+                    ('p', [('text', subhead)]),
+                    ('p', [('text', tagline)]),
+                ],
+                [('p', [('text', '')])],
+            ],
+            [
+                [('p', [('link', "Alternate video source (MP4)", upload_animation_url)])],
+                [('p', [('text', tap_prefix_text), ('em', tap_em_text)])],
+            ],
+            [
+                [('p', [('text', '')])],
+                [
+                    ('p', [('text', file_restrictions_text)]),
+                    ('p', [
+                        ('text', 'By uploading your image or video, you agree to the Adobe '),
+                        ('link', 'Terms of Use', terms_url),
+                        ('text', ' and '),
+                        ('link', 'Privacy Policy', privacy_url),
+                    ]),
+                ],
+            ],
+            [
+                [('p', [('text', 'fallback')])],
+                [('p', [('link', fallback_fragment_url, fallback_fragment_url)])],
+            ],
+            [
+                [('p', [('text', 'Quick-Action')])],
+                [('p', [('text', quick_action_id)])],
+            ],
+        ],
+        col_widths=list(col_widths),
+    )
+
+
+def add_how_to_steps(
+    doc, *, heading, steps, variant="highlight, image, schema",
+    col_widths=(2.0, 4.6),
+):
+    """How-to-steps block. `steps` is a list of dicts:
+        { 'icon_url': ..., 'icon_alt': ..., 'title': ..., 'body': ... }
+    Renders an h2 heading paragraph above the block automatically.
+    """
+    add_h2(doc, heading)
+    rows = [
+        [
+            [('img', s['icon_url'], s['icon_alt'])],
+            [('h', 3, s['title']), ('p', [('text', s['body'])])],
+        ]
+        for s in steps
+    ]
+    return add_block(doc, f"steps ({variant})", rows, col_widths=list(col_widths))
+
+
+def add_content_column(
+    doc, *, image_url, image_alt, heading, body,
+    image_side='left', col_widths=(3.3, 3.3),
+):
+    """Single `columns` block with image + heading + body. `image_side` picks the half."""
+    image_cell = [('img', image_url, image_alt)]
+    text_cell = [('h', 2, heading), ('p', [('text', body)])]
+    cells = [image_cell, text_cell] if image_side == 'left' else [text_cell, image_cell]
+    return add_block(doc, "columns", [cells], col_widths=list(col_widths))
+
+
+def add_banner(doc, *, heading, variant=None, cta=None, col_widths=(6.6,)):
+    """Purple/indigo promo band. Default variant = solid `--color-info-accent` bg.
+
+    `variant` examples: None (default), 'compact', 'standout', 'narrow', 'cool', 'light'.
+    `cta` = optional (text, url) tuple rendered as a pill button below the heading.
+    """
+    block_name = "banner" if not variant else f"banner ({variant})"
+    content = [('h', 2, heading)]
+    if cta:
+        content.append(('p', [('link', cta[0], cta[1])]))
+    return add_block(doc, block_name, [[content]], col_widths=list(col_widths))
+
+
+def add_link_list(doc, *, heading, links, col_widths=(6.6,)):
+    """`link-list` block with an h3 heading and a list of (text, url) links."""
+    content = [('h', 3, heading)]
+    content.extend([('p', [('link', t, u)]) for t, u in links])
+    return add_block(doc, "link-list", [[content]], col_widths=list(col_widths))
+
+
+def add_faq(doc, *, heading, qa_pairs, col_widths=(3.3, 3.3)):
+    """FAQ block. `qa_pairs` is a list of (question, answer) tuples where answer
+    is either a plain string or a list of `add_runs` parts (for mixed content).
+    Renders an h2 heading above the block automatically.
+    """
+    add_h2(doc, heading)
+    rows = []
+    for q, a in qa_pairs:
+        if isinstance(a, str):
+            a_parts = [('text', a)]
+        else:
+            a_parts = a
+        rows.append([
+            [('p', [('text', q)])],
+            [('p', a_parts)],
+        ])
+    return add_block(doc, "faq", rows, col_widths=list(col_widths))
+
+
+def add_breadcrumbs(doc, *, crumbs, col_widths=(6.6,)):
+    """`breadcrumbs` block. `crumbs` = list of (text, url_or_None) tuples.
+    Last crumb (current page) typically has url=None → rendered as plain text.
+    """
+    content = []
+    for text, url in crumbs:
+        if url:
+            content.append(('p', [('link', text, url)]))
+        else:
+            content.append(('p', [('text', text)]))
+    return add_block(doc, "breadcrumbs", [[content]], col_widths=list(col_widths))
+
+
+def add_metadata(doc, pairs, col_widths=(3.3, 3.3)):
+    """Page-level `metadata` block. `pairs` = dict (ordered in Python 3.7+)
+    or list of (key, value) tuples. A value that is a URL string starting with
+    http(s) is rendered as a self-referential hyperlink.
+    """
+    items = pairs.items() if isinstance(pairs, dict) else pairs
+    rows = []
+    for k, v in items:
+        if isinstance(v, str) and (v.startswith('http://') or v.startswith('https://')):
+            val_parts = [('link', v, v)]
+        else:
+            val_parts = [('text', str(v))]
+        rows.append([
+            [('p', [('text', k)])],
+            [('p', val_parts)],
+        ])
+    return add_block(doc, "metadata", rows, col_widths=list(col_widths))
 
 
 # ----- re-exports ----------------------------------------------------------
-# Consumers typically only need Document + add_block + add_section_break +
-# add_runs. Everything else is exposed for advanced use.
+# Feature build.py scripts typically need: Document + add_section_break +
+# the high-level block helpers. Low-level add_block/add_runs/write_cell are
+# exposed for non-standard blocks the helpers don't cover.
 
 __all__ = [
+    # Core types
     'Document',
     'Pt', 'Cm', 'Inches', 'RGBColor',
-    'HEADER_FILL', 'BORDER_COLOR', 'LINK_COLOR',
+    # Constants
+    'HEADER_FILL', 'BORDER_COLOR', 'LINK_COLOR', 'TERMS_URL', 'PRIVACY_URL',
+    # Low-level helpers (advanced use)
     'set_cell_shading', 'set_cell_borders', 'set_table_borders',
     'merge_row_cells',
-    'add_hyperlink', 'add_runs',
-    'write_cell',
+    'add_hyperlink', 'add_runs', 'write_cell',
     'add_block', 'add_section_break',
+    # High-level schema helpers (preferred)
+    'add_h2',
+    'add_showwith', 'add_section_metadata',
+    'add_columns_fullsize_hero',
+    'add_frictionless_quick_action',
+    'add_frictionless_quick_action_mobile',
+    'add_how_to_steps',
+    'add_content_column',
+    'add_banner',
+    'add_link_list',
+    'add_faq',
+    'add_breadcrumbs',
+    'add_metadata',
 ]
