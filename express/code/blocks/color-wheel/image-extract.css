@@ -498,6 +498,7 @@
   color: var(--color-extract-text);
   text-align: left;
   transition: background-color 0.1s ease;
+  min-width:177px;
 }
 
 .image-extract .color-extract-mood-option:hover {

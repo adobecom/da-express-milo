@@ -215,6 +215,11 @@ body {
   max-width: 200px;
 }
 
+.color-wheel .color-extract-mood-dropdown {
+  min-width: 200px;
+  box-sizing: content-box;
+}
+
 .color-wheel .color-extract-mood {
   flex-direction: column;
   height: auto;
@@ -241,7 +246,13 @@ body {
   padding-block: var(--spacing-300) var(--spacing-100);
 }
 
+.color-wheel .image-extract .color-extract-mood-dropdown {
+  min-width: 200px;
+}
+
 .color-wheel .image-extract .color-extract-mood-option {
+  min-width: 200px;
+  box-sizing: border-box;
   justify-content: flex-start;
   gap: var(--spacing-100);
 }
