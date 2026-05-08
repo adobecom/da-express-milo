@@ -253,6 +253,57 @@ body {
   padding-block: var(--spacing-300) var(--spacing-100);
 }
 
+.color-wheel .image-extract .color-extract-mood-option {
+  justify-content: flex-start;
+  gap: var(--spacing-100);
+}
+
+.color-wheel .image-extract .color-extract-mood-option-check {
+  width: var(--spacing-125);
+  height: var(--spacing-125);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-blue-800);
+  opacity: 0;
+}
+
+.color-wheel .image-extract .color-extract-mood-option-check svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.color-wheel .image-extract .color-extract-mood-option.is-selected {
+  font-weight: 400;
+}
+
+.color-wheel .image-extract .color-extract-mood-option.is-selected .color-extract-mood-option-check {
+  opacity: 1;
+}
+
+.color-wheel .image-extract .color-extract-marker {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker:hover {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 20px rgba(0, 0, 0, 0.22);
+}
+
+.color-wheel .image-extract .color-extract-marker.is-active {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-extract-focus), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker.is-magnified {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+
 .color-wheel .color-extract-drag-overlay {
   position: fixed;
 }
@@ -277,7 +328,7 @@ color-wheel-express {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 2px;
+  gap: var(--spacing-50);
   margin-bottom: 0.75rem;
 }
 
@@ -322,7 +373,7 @@ color-wheel-express {
 .color-wheel-harmony-carousel-host .simple-carousel-fader-right {
   display: flex;
   width: 88px;
-  height: 48px;
+  height: var(--spacing-700);
   align-items: center;
   gap: 10px;
 }
@@ -341,8 +392,8 @@ color-wheel-express {
 
 .color-wheel-harmony-option {
   box-sizing: border-box;
-  width: 48px;
-  height: 48px;
+  width: var(--spacing-700);
+  height: var(--spacing-700);
   padding: 0;
   margin: 0;
   border-radius: var(--Radius-corner-radius-75);
@@ -370,8 +421,8 @@ color-wheel-express {
 }
 
 .color-wheel .icon.simple-carousel-arrow-icon {
-  height: 18px;
-  width: 18px;
+  height: var(--spacing-325);
+  width: var(--spacing-325);
 }
 
 .mobile-container {
