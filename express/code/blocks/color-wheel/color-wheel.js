@@ -248,6 +248,8 @@ let harmonyStateUnsubscribe = null;
 let layoutInstance = null;
 let stripRenderer = null;
 let paletteUnsubscribe = null;
+let setColorRafId = null;
+let pendingSetColorHex = null;
 let swatchRailController = null;
 let imagePanelDestroy = null;
 let primaryColorAdapter = null;
@@ -768,6 +770,11 @@ function cleanup() {
   harmonyCarouselCleanup = null;
   paletteUnsubscribe?.();
   paletteUnsubscribe = null;
+  if (setColorRafId !== null) {
+    cancelAnimationFrame(setColorRafId);
+    setColorRafId = null;
+  }
+  pendingSetColorHex = null;
   swatchRailController?.destroy?.();
   swatchRailController = null;
   imagePanelDestroy?.();
@@ -1126,7 +1133,16 @@ export default async function decorate(block) {
         const currentColor = primaryColorAdapter?.element?.color;
         if (primaryColorAdapter?.setColor && baseHex
           && String(currentColor).toUpperCase() !== String(baseHex).toUpperCase()) {
-          primaryColorAdapter.setColor(baseHex);
+          pendingSetColorHex = baseHex;
+          if (setColorRafId === null) {
+            setColorRafId = requestAnimationFrame(() => {
+              setColorRafId = null;
+              if (primaryColorAdapter?.setColor && pendingSetColorHex) {
+                primaryColorAdapter.setColor(pendingSetColorHex);
+              }
+              pendingSetColorHex = null;
+            });
+          }
         }
       });
 
