@@ -30,7 +30,7 @@ function artHue(swatch) {
 
 // Signed angular difference in artistic hue space, range -180..180
 function artOffset(swatchA, swatchB) {
-  let d = ((artHue(swatchA) - artHue(swatchB)) % 360 + 360) % 360;
+  let d = (((artHue(swatchA) - artHue(swatchB)) % 360) + 360) % 360;
   if (d > 180) d -= 360;
   return d;
 }
