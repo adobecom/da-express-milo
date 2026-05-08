@@ -1127,10 +1127,6 @@
   background: var(--cc-preview-browser-bar-bg);
   display: none;
   align-items: center;
-  border-inline: 1px solid var(--cc-border-preview);
-  border-block-start: 1px solid var(--cc-border-preview);
-  border-top-right-radius: inherit;
-  border-top-left-radius: inherit;
 }
 
 .cc-browser-dots {
