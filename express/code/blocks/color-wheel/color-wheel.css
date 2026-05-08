@@ -164,7 +164,6 @@ body {
 }
 
 .color-wheel .color-extract-suggestion {
-  border-radius: var(--corner-radius-80);
   border: 2px solid transparent;
   box-shadow: none;
   transition: none;
