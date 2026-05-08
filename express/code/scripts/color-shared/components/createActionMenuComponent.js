@@ -231,6 +231,8 @@ async function createControls(
       }
       case 'expand':
         if (typeof onExpand !== 'function') break;
+        {
+          const expandedLabel = control.expandedLabel || control.label;
         btn = createTag(
           'button',
           {
@@ -246,20 +248,24 @@ async function createControls(
         btn.addEventListener('click', () => {
           const oldIsPressed = btn.getAttribute('aria-pressed') === 'true';
           const isPressed = !oldIsPressed;
+          const nextLabel = isPressed ? expandedLabel : control.label;
           onExpand(isPressed);
           btn.setAttribute('aria-pressed', isPressed);
+          btn.setAttribute('aria-label', nextLabel);
           if (type === 'full') {
             const containerEl = btn.closest('.action-menu-full');
             containerEl?.classList.toggle('expanded', isPressed);
           }
           btn.innerHTML = ICON_MAP[control.id][isPressed ? 'minimize' : 'maximize'];
+          expandTooltip?.setContent(nextLabel);
         });
-        await createExpressTooltip({
+        const expandTooltip = await createExpressTooltip({
           targetEl: btn,
           content: control.label,
           placement: 'top',
           disableAria: true,
         });
+        }
         break;
       default:
         break;

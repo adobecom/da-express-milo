@@ -129,7 +129,7 @@ async function loadPlaceholders() {
     'color-harmonies', 'undo', 'redo', 'generate-random', 'maximize', 'create-palette',
     'contrast-checker', 'color-blindness-simulator', 'no-image-try-ours', 'use-this-image',
     'extracting-colors', 'color-wheel-keyboard-hint', 'color-wheel-harmony-aria',
-    'color-wheel-aria-with-hint', 'color-wheel-marker-aria',
+    'color-wheel-aria-with-hint', 'color-wheel-marker-aria', 'minimize',
   ];
   const values = await replaceKeyArray(KEYS, getConfig());
   const v = (i, fallback) => {
@@ -157,6 +157,7 @@ async function loadPlaceholders() {
     redo: v(14, 'Redo'),
     generateRandom: v(15, 'Generate random'),
     maximize: v(16, 'Maximize'),
+    minimize: v(27, 'Minimize'),
     createPalette: v(17, 'Create palette'),
     contrastChecker: v(18, 'Contrast Checker'),
     colorBlindnessSimulator: v(19, 'Color Blindness Simulator'),
@@ -862,7 +863,7 @@ export default async function decorate(block) {
             { id: 'undo', label: strings.undo },
             { id: 'redo', label: strings.redo },
             { id: 'generate-random', label: strings.generateRandom },
-            { id: 'expand', label: strings.maximize },
+            { id: 'expand', label: strings.maximize, expandedLabel: strings.minimize },
           ],
           type: isDesktop ? 'full' : 'nav-only',
           getName: () => currentPalette?.name || initialPalette.name,
