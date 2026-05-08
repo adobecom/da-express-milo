@@ -472,12 +472,7 @@ export class ColorWheelExpress extends ColorWheel {
     marker.style.setProperty('--wheel-marker-color', hex);
 
     if (this.harmonyRule !== 'CUSTOM') {
-      if (!this._dragSpokeRef || !this._dragSpokeRef.isConnected
-        || Number(this._dragSpokeRef.dataset.spoke) !== index) {
-        this._dragSpokeRef = marker.parentElement
-          ?.querySelector(`.wheel-spoke[data-spoke="${index}"]`) ?? null;
-      }
-      if (this._dragSpokeRef) {
+      if (this._dragSpokeRef?.isConnected) {
         this._dragSpokeRef.style.width = `${radius}px`;
         this._dragSpokeRef.style.transform = `rotate(${-smoothH}deg)`;
       }
@@ -609,6 +604,9 @@ export class ColorWheelExpress extends ColorWheel {
     this._dragMarkerRef = layer?.querySelector(
       `.wheel-marker-overlay[data-index="${this.activeSwatchIndex}"]`,
     ) || null;
+    this._dragSpokeRef = (this.harmonyRule !== 'CUSTOM' && layer)
+      ? layer.querySelector(`.wheel-spoke[data-spoke="${this.activeSwatchIndex}"]`) ?? null
+      : null;
 
     const moveHandler = (e) => {
       if (e.pointerId !== pointerId) return;
@@ -624,6 +622,7 @@ export class ColorWheelExpress extends ColorWheel {
       // would have otherwise dropped it.
       this._flushPendingDragWrite();
       this._dragMarkerRef = null;
+      this._dragSpokeRef = null;
       try { target?.releasePointerCapture?.(pointerId); } catch (_) { /* noop */ }
       const { red, green, blue } = hexToRGB(this.color);
       this.dispatchEvent(new CustomEvent('change-end', {
@@ -717,19 +716,23 @@ export class ColorWheelExpress extends ColorWheel {
     // markers together (the whole harmony shifts). Cache sibling marker/spoke
     // refs now so _updateMarkerDomLocally can update them at 60 Hz without a
     // querySelector per frame.
+    this._dragSpokeRef = null;
     this._dragHarmonyRefs = null;
-    if (this.harmonyRule !== 'CUSTOM' && this.swatches?.length > 1) {
+    if (this.harmonyRule !== 'CUSTOM') {
       const layer = this.shadowRoot?.querySelector('.marker-layer');
       if (layer) {
-        const refs = new Map();
-        this.swatches.forEach((_, i) => {
-          if (i === index) return;
-          refs.set(i, {
-            marker: layer.querySelector(`.wheel-marker-overlay[data-index="${i}"]`),
-            spoke: layer.querySelector(`.wheel-spoke[data-spoke="${i}"]`),
+        this._dragSpokeRef = layer.querySelector(`.wheel-spoke[data-spoke="${index}"]`) ?? null;
+        if (this.swatches?.length > 1) {
+          const refs = new Map();
+          this.swatches.forEach((_, i) => {
+            if (i === index) return;
+            refs.set(i, {
+              marker: layer.querySelector(`.wheel-marker-overlay[data-index="${i}"]`),
+              spoke: layer.querySelector(`.wheel-spoke[data-spoke="${i}"]`),
+            });
           });
-        });
-        this._dragHarmonyRefs = refs;
+          this._dragHarmonyRefs = refs;
+        }
       }
     }
 
