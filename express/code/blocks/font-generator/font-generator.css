@@ -1,0 +1,313 @@
+/* ── Layout ──────────────────────────────────────────────────────────────── */
+.font-generator {
+  container-type: inline-size;
+}
+
+.fg-layout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+  padding: var(--spacing-400) var(--spacing-350);
+  max-width: 1600px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1024px) {
+  .fg-layout {
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--spacing-600);
+    padding: var(--spacing-600);
+  }
+}
+
+/* ── Side panel ──────────────────────────────────────────────────────────── */
+.fg-side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  flex: 0 0 auto;
+}
+
+@media (min-width: 1024px) {
+  .fg-side-panel {
+    width: 380px;
+    position: sticky;
+    top: var(--spacing-400);
+  }
+}
+
+/* Spectrum textfield — grow to fill panel width */
+.fg-side-panel sp-textfield,
+.fg-side-panel .ax-spectrum-textfield {
+  width: 100%;
+}
+
+/* ── Char counter ────────────────────────────────────────────────────────── */
+.fg-char-counter {
+  margin: 0;
+  font-size: var(--body-font-size-xs);
+  color: var(--color-gray-600);
+  text-align: right;
+}
+
+.fg-char-counter--near-limit {
+  color: var(--color-red-700, #d31510);
+}
+
+/* ── Suggestion pills ────────────────────────────────────────────────────── */
+.fg-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.fg-suggestions-label {
+  font-size: var(--body-font-size-s);
+  color: var(--color-gray-600);
+  margin-right: var(--spacing-100);
+  white-space: nowrap;
+}
+
+.fg-suggestion-pill {
+  background: none;
+  border: 1px solid var(--color-gray-300, #dadada);
+  border-radius: 16px;
+  padding: 4px var(--spacing-200);
+  font-size: var(--body-font-size-s);
+  cursor: pointer;
+  color: var(--color-text-primary, #2c2c2c);
+  transition: background-color 0.15s ease;
+}
+
+.fg-suggestion-pill:hover {
+  background-color: var(--color-gray-100, #f5f5f5);
+}
+
+/* ── Font size slider ────────────────────────────────────────────────────── */
+.fg-slider-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+
+.fg-slider-label {
+  font-size: var(--body-font-size-s);
+  color: var(--color-gray-700, #464646);
+  font-weight: var(--subheading-font-weight);
+}
+
+/* Spectrum slider track + handle color overrides per Figma spec */
+.fg-slider-section sp-slider {
+  --spectrum-slider-track-color: #dadada;
+  --spectrum-slider-handle-background-color: #292929;
+  --spectrum-slider-handle-border-color: #292929;
+  width: 100%;
+}
+
+/* ── Category accordion ──────────────────────────────────────────────────── */
+.fg-accordion {
+  border: 1px solid var(--color-gray-200, #ebebeb);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.fg-accordion-summary {
+  padding: var(--spacing-200) var(--spacing-300);
+  font-size: var(--body-font-size-s);
+  font-weight: var(--subheading-font-weight);
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: var(--color-gray-50, #f8f8f8);
+}
+
+.fg-accordion-summary::after {
+  content: '▾';
+  font-size: 12px;
+  transition: transform 0.15s ease;
+}
+
+.fg-accordion[open] .fg-accordion-summary::after {
+  transform: rotate(180deg);
+}
+
+.fg-accordion-summary::-webkit-details-marker {
+  display: none;
+}
+
+.fg-accordion-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-100);
+  padding: var(--spacing-200) var(--spacing-300) var(--spacing-300);
+}
+
+.fg-category-pill {
+  background: none;
+  border: 1px solid var(--color-gray-300, #dadada);
+  border-radius: 16px;
+  padding: 4px var(--spacing-200);
+  font-size: var(--body-font-size-s);
+  cursor: pointer;
+  color: var(--color-text-primary, #2c2c2c);
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.fg-category-pill:hover {
+  background-color: var(--color-gray-100, #f5f5f5);
+}
+
+.fg-category-pill.is-selected {
+  background-color: #292929;
+  border-color: #292929;
+  color: #ffffff;
+}
+
+/* ── Right panel ─────────────────────────────────────────────────────────── */
+.fg-right-panel {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  min-width: 0;
+}
+
+/* ── Global controls (view + color toggles) ──────────────────────────────── */
+.fg-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-300);
+  justify-content: flex-end;
+}
+
+.fg-view-toggle,
+.fg-color-toggle {
+  display: flex;
+  border: 1px solid var(--color-gray-300, #dadada);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.fg-view-btn,
+.fg-color-btn {
+  background: none;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: var(--body-font-size-s);
+  color: var(--color-gray-600);
+  transition: background-color 0.15s ease;
+}
+
+.fg-view-btn:hover,
+.fg-color-btn:hover {
+  background-color: var(--color-gray-100, #f5f5f5);
+}
+
+.fg-view-btn.is-active,
+.fg-color-btn.is-active {
+  background-color: #292929;
+  color: #ffffff;
+}
+
+/* ── Card container ──────────────────────────────────────────────────────── */
+.fg-card-container {
+  --fg-preview-font-size: 24px;
+  --fg-card-bg: #ffffff;
+  --fg-card-text: #2c2c2c;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: var(--spacing-300);
+}
+
+/* Dark mode toggle */
+.fg-card-container--dark {
+  --fg-card-bg: #1e1e1e;
+  --fg-card-text: #ffffff;
+}
+
+/* List view toggle */
+.fg-card-container--list {
+  grid-template-columns: 1fr;
+}
+
+.fg-card-container--list .fg-card {
+  flex-direction: row;
+  align-items: center;
+}
+
+.fg-card-container--list .fg-card-preview {
+  flex: 1;
+  min-height: unset;
+  padding: var(--spacing-300);
+  font-size: var(--fg-preview-font-size);
+}
+
+/* ── Font card ───────────────────────────────────────────────────────────── */
+.fg-card {
+  background-color: var(--fg-card-bg);
+  border: 1px solid var(--color-gray-200, #ebebeb);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.15s ease;
+}
+
+.fg-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.fg-card[hidden] {
+  display: none;
+}
+
+.fg-card-preview {
+  flex: 1;
+  min-height: 100px;
+  padding: var(--spacing-300);
+  font-size: var(--fg-preview-font-size);
+  color: var(--fg-card-text);
+  word-break: break-all;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+.fg-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-200) var(--spacing-300);
+  border-top: 1px solid var(--color-gray-100, #f5f5f5);
+  background-color: var(--fg-card-bg);
+}
+
+.fg-card-name {
+  font-size: var(--body-font-size-xs);
+  color: var(--color-gray-600);
+  font-weight: var(--subheading-font-weight);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fg-card-copy {
+  flex-shrink: 0;
+  font-size: var(--body-font-size-xs);
+  padding: 4px 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  background-color: var(--color-background-accent-default, #292929);
+  color: #ffffff;
+  border: none;
+  transition: opacity 0.15s ease;
+}
+
+.fg-card-copy:hover {
+  opacity: 0.85;
+}

@@ -1,0 +1,141 @@
+/* ── Block wrapper ───────────────────────────────────────────────────────── */
+.font-bento {
+  padding: var(--spacing-600) var(--spacing-350);
+  max-width: 1600px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+@media (min-width: 1024px) {
+  .font-bento {
+    padding: var(--spacing-900) var(--spacing-600);
+  }
+}
+
+/* ── Header area ─────────────────────────────────────────────────────────── */
+.fb-header {
+  margin-bottom: var(--spacing-500);
+}
+
+.fb-header h2 {
+  font-size: var(--heading-font-size-l);
+  margin-bottom: var(--spacing-200);
+}
+
+.fb-header p {
+  font-size: var(--body-font-size-m);
+  color: var(--color-gray-700, #464646);
+  margin-bottom: var(--spacing-400);
+}
+
+.fb-header .button-container a.button.accent {
+  background-color: #3b63fb;
+  color: #ffffff;
+  border-radius: 24px;
+  padding: var(--spacing-200) var(--spacing-400);
+  font-size: var(--body-font-size-m);
+  font-weight: var(--subheading-font-weight);
+  text-decoration: none;
+  display: inline-block;
+  transition: opacity 0.15s ease;
+}
+
+.fb-header .button-container a.button.accent:hover {
+  opacity: 0.88;
+}
+
+/* ── Bento grid ──────────────────────────────────────────────────────────── */
+.fb-grid {
+  display: grid;
+  gap: var(--spacing-300);
+  grid-template-columns: 1fr;
+  grid-template-areas:
+    "card-1"
+    "card-2"
+    "card-3"
+    "card-4"
+    "card-5"
+    "card-6";
+}
+
+@media (min-width: 768px) {
+  .fb-grid {
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto auto;
+    grid-template-areas:
+      "card-1 card-1 card-2"
+      "card-3 card-4 card-5"
+      "card-6 card-6 .";
+  }
+}
+
+@media (min-width: 1024px) {
+  .fb-grid {
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: 1fr 1fr;
+    grid-template-areas:
+      "card-1 card-1 card-2 card-3"
+      "card-4 card-5 card-6 card-6";
+  }
+}
+
+/* ── Bento card ──────────────────────────────────────────────────────────── */
+.fb-card {
+  position: relative;
+  border-radius: 16px;
+  overflow: hidden;
+  min-height: 200px;
+  background-color: var(--color-gray-100, #f5f5f5);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: flex-end;
+}
+
+@media (min-width: 1024px) {
+  .fb-card {
+    min-height: 260px;
+  }
+}
+
+/* Gradient scrim for text legibility */
+.fb-card--has-bg::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, rgba(0, 0, 0, 0) 60%);
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* ── Card overlay text ───────────────────────────────────────────────────── */
+.fb-card-overlay {
+  position: relative;
+  z-index: 1;
+  padding: var(--spacing-300) var(--spacing-400);
+  color: #ffffff;
+  width: 100%;
+}
+
+.fb-card-overlay p,
+.fb-card-overlay h2,
+.fb-card-overlay h3 {
+  color: #ffffff;
+  margin: 0;
+}
+
+.fb-card-overlay p {
+  font-size: var(--body-font-size-l);
+  font-weight: var(--subheading-font-weight);
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+/* Grid area assignments */
+[data-area="card-1"] { grid-area: card-1; }
+[data-area="card-2"] { grid-area: card-2; }
+[data-area="card-3"] { grid-area: card-3; }
+[data-area="card-4"] { grid-area: card-4; }
+[data-area="card-5"] { grid-area: card-5; }
+[data-area="card-6"] { grid-area: card-6; }
