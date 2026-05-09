@@ -1,4 +1,4 @@
-import { createTag } from '../../scripts/utils.js';
+import { createTag, getLibs } from '../../scripts/utils.js';
 import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
@@ -11,6 +11,7 @@ import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 import loadColorBlindnessPlaceholders from '../../scripts/color-shared/i18n/loadColorBlindnessPlaceholders.js';
 import loadBaseColorPlaceholders from '../../scripts/color-shared/i18n/loadBaseColorPlaceholders.js';
 import loadColorEditPlaceholders from '../../scripts/color-shared/i18n/loadColorEditPlaceholders.js';
+import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
 import '../../scripts/color-shared/components/color-wheel-express/index.js';
 
 const ACTION_MENU_ID = 'action-menu-color-blindness';
@@ -48,10 +49,16 @@ export default async function decorate(block) {
 
     block.innerHTML = '';
 
-    const [cbStrings, baseColorStrings, colorEditStrings] = await Promise.all([
+    const [
+      cbStrings,
+      baseColorStrings,
+      colorEditStrings,
+      colorSwatchRailStrings,
+    ] = await Promise.all([
       loadColorBlindnessPlaceholders(),
       loadBaseColorPlaceholders(),
       loadColorEditPlaceholders(),
+      loadColorSwatchRailPlaceholders(),
     ]);
     const { shared, block: blockStrings } = cbStrings;
 
@@ -68,15 +75,17 @@ export default async function decorate(block) {
       : -1;
     const hasValidBaseColor = baseColorIndex >= 0;
     const initialPalette = {
-      name: getResolvedPaletteName() || 'My Color Theme',
+      name: getResolvedPaletteName() || '',
       colors: paletteColors,
       ...(hasValidBaseColor && { baseColorIndex }),
     };
 
+    const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+    const { locale } = getConfig();
     const navLinks = [
-      { id: 'palette', label: blockStrings.navCreatePalette, href: '/create/color-wheel' },
-      { id: 'contrast', label: blockStrings.navContrastChecker, href: '/create/color-contrast-analyzer' },
-      { id: 'color-blindness', label: blockStrings.navColorBlindness, href: '/create/color-accessibility' },
+      { id: 'palette', label: blockStrings.navCreatePalette, href: `${locale.contentRoot}/create/color-wheel` },
+      { id: 'contrast', label: blockStrings.navContrastChecker, href: `${locale.contentRoot}/create/color-contrast-analyzer` },
+      { id: 'color-blindness', label: blockStrings.navColorBlindness, href: `${locale.contentRoot}/create/color-accessibility` },
     ];
     const controls = [
       { id: 'undo', label: blockStrings.controlUndo },
@@ -86,6 +95,7 @@ export default async function decorate(block) {
     layoutInstance = await createColorToolLayout(section, {
       palette: initialPalette,
       toolbar: {
+        daaLh: 'color-blindness',
         variant: 'sticky-on-scroll',
         showEdit: false,
         showPaletteName: true,
@@ -101,6 +111,7 @@ export default async function decorate(block) {
         activeId: 'color-blindness',
         navLinks,
         controls,
+        daaLh: 'color-blindness',
       },
     });
 
@@ -150,6 +161,9 @@ export default async function decorate(block) {
       announceToScreenReader(blockStrings.wheelFocusAnnouncement);
     });
     wheelEl.showLines = true;
+    if (blockStrings.markerAriaTemplate) {
+      wheelEl.markerAriaTemplate = blockStrings.markerAriaTemplate;
+    }
 
     const computeAndSetConflictPairs = (colors) => {
       const allPairs = [];
@@ -221,6 +235,7 @@ export default async function decorate(block) {
         colorBlindnessStrings: shared,
         colorEditStrings,
         baseColorStrings,
+        colorSwatchRailStrings,
       },
       onColorChangeEnd: () => pushCurrentPalette(),
       onEditOpen: (index) => controller.setActiveSwatchIndex(index),
@@ -237,6 +252,7 @@ export default async function decorate(block) {
       type: 'controls-only',
       controls,
       enableState: false,
+      daaLh: 'color-blindness',
       onUndo: () => fullMenuEl?.querySelector('.undo-btn')?.click(),
       onRedo: () => fullMenuEl?.querySelector('.redo-btn')?.click(),
     });

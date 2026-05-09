@@ -8,6 +8,17 @@
   }
 }
 
+/* iOS Safari pull-to-refresh defence. Even with touch-action: none on the
+   wheel-marker-overlay, drag gestures that originate near the top of the
+   visible viewport can still commit to the native refresh gesture before
+   the JS handler runs. overscroll-behavior on the document scroller is the
+   documented way to disable it. This stylesheet is only loaded on color-wheel
+   pages, so the global body/html selector is scoped by load context. */
+html,
+body {
+  overscroll-behavior-y: contain;
+}
+
 .color-wheel .ax-color-tool-layout {
   box-sizing: border-box;
   max-width: var(--block-wd-max-width);

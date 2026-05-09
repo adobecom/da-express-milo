@@ -27,6 +27,7 @@ const TOOLBAR_I18N_MAP = {
   paletteName: 'color-toolbar-palette-name',
   paletteNamePlaceholder: 'color-toolbar-palette-placeholder',
   ctaText: 'color-toolbar-cta',
+  ctaBaseUrl: 'color-toolbar-cta-base-url',
   urlCopiedToClipboard: 'color-toolbar-url-copied-to-clipboard',
   shareFailed: 'color-toolbar-share-failed',
   networkError: 'color-toolbar-network-error',
@@ -220,6 +221,7 @@ export async function initFloatingToolbar(container, options = {}) {
     standaloneAppearance = 'standalone',
     palette: providedPalette = null,
     deps = {},
+    daaLh = null,
   } = options;
 
   // 'raised' gives sticky visuals (band, shadow) without sticky positioning
@@ -232,6 +234,7 @@ export async function initFloatingToolbar(container, options = {}) {
   if (!finalPalette) return null;
 
   const wrapper = createTag('div', { class: 'color-floating-toolbar-container' });
+  if (daaLh) wrapper.setAttribute('daa-lh', daaLh);
   const toolbar = createToolbar({
     palette: finalPalette,
     type,
@@ -353,23 +356,46 @@ export async function initFloatingToolbar(container, options = {}) {
     reserveSpace,
   });
 
-  /* Hide toolbar when the page footer scrolls into view (mirrors floating-cta pattern) */
+  /* Hide toolbar when the page footer or .banner-bg scrolls into view */
   let footerIo = null;
-  const footer = document.querySelector('footer');
-  if (footer && typeof IntersectionObserver !== 'undefined') {
-    footerIo = new IntersectionObserver((entries) => {
-      const isVisible = entries[0].isIntersecting || entries[0].intersectionRatio > 0;
-      wrapper.classList.toggle('ax-toolbar-footer-hidden', isVisible);
-      if (isVisible) {
-        toolbar.closeDrawer?.();
-        wrapper.setAttribute('aria-hidden', 'true');
-        wrapper.setAttribute('inert', '');
-      } else {
-        wrapper.removeAttribute('aria-hidden');
-        wrapper.removeAttribute('inert');
-      }
-    }, { rootMargin: '32px', threshold: 0 });
-    footerIo.observe(footer);
+  let bannerBgIo = null;
+  const hiddenBy = new Set();
+
+  const updateHiddenState = () => {
+    const shouldHide = hiddenBy.size > 0;
+    wrapper.classList.toggle('ax-toolbar-footer-hidden', shouldHide);
+    if (shouldHide) {
+      toolbar.closeDrawer?.();
+      wrapper.setAttribute('aria-hidden', 'true');
+      wrapper.setAttribute('inert', '');
+    } else {
+      wrapper.removeAttribute('aria-hidden');
+      wrapper.removeAttribute('inert');
+    }
+  };
+
+  if (typeof IntersectionObserver !== 'undefined') {
+    const footer = document.querySelector('footer');
+    if (footer) {
+      footerIo = new IntersectionObserver((entries) => {
+        const isVisible = entries[0].isIntersecting || entries[0].intersectionRatio > 0;
+        if (isVisible) hiddenBy.add('footer');
+        else hiddenBy.delete('footer');
+        updateHiddenState();
+      }, { rootMargin: '32px', threshold: 0 });
+      footerIo.observe(footer);
+    }
+
+    const bannerBg = document.querySelector('.banner-bg');
+    if (bannerBg) {
+      bannerBgIo = new IntersectionObserver((entries) => {
+        const isVisible = entries[0].isIntersecting || entries[0].intersectionRatio > 0;
+        if (isVisible) hiddenBy.add('banner-bg');
+        else hiddenBy.delete('banner-bg');
+        updateHiddenState();
+      }, { threshold: 0 });
+      bannerBgIo.observe(bannerBg);
+    }
   }
 
   return {
@@ -382,6 +408,7 @@ export async function initFloatingToolbar(container, options = {}) {
     destroy() {
       clearStickyBehavior(wrapper, stickyReserveContainer, stickyIo);
       if (footerIo) footerIo.disconnect();
+      if (bannerBgIo) bannerBgIo.disconnect();
       toolbar.destroy();
       wrapper.remove();
     },

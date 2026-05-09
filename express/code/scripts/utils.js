@@ -20,6 +20,7 @@ export const [setLibs, getLibs] = (() => {
         const { hostname, search } = location || window.location;
         if (!['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
         const branch = new URLSearchParams(search).get('milolibs') || 'main';
+        if (!/^[a-zA-Z0-9_-]+$/.test(branch)) throw new Error('Invalid branch name.');
         if (branch === 'local') return 'http://localhost:6456/libs';
         if (branch === 'main' && hostname.includes('.stage.')) return '/libs';
         return branch.includes('--') ? `https://${branch}.aem.live/libs` : `https://${branch}--milo--adobecom.aem.live/libs`;
@@ -64,6 +65,11 @@ export function getMobileOperatingSystem() {
   }
 
   return 'unknown';
+}
+
+export function isWindows(userAgent) {
+  const ua = userAgent ?? window.navigator?.userAgent ?? '';
+  return /\bwindows nt\b/i.test(ua);
 }
 
 export async function getRedirectUri() {
@@ -486,9 +492,10 @@ export function preDecorateSections(area) {
             const sameHash = currURL.hash === linkToTargetURL?.hash;
             const isNotInFloatingCta = !a.closest('.block')?.classList.contains('floating-button');
             const notFloatingCtaIgnore = !a.classList.contains('floating-cta-ignore');
+            const isNotInCtaCarousel = !a.closest('.cta-carousel');
 
             return (sameText || (samePathname && sameHash))
-              && isNotInFloatingCta && notFloatingCtaIgnore;
+              && isNotInFloatingCta && notFloatingCtaIgnore && isNotInCtaCarousel;
           } catch (error) {
             window.lana?.log(`${error?.message || error?.detail || error}`, { tags: 'utils', severity: 'error' });
             return false;

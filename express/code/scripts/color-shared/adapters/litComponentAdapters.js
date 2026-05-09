@@ -83,6 +83,9 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   if (options.swatchFeatures != null && !byOrientation) {
     element.swatchFeatures = options.swatchFeatures;
   }
+  if (options.strings) {
+    element.strings = options.strings;
+  }
   element.controller = controller;
   loadIconsRail()
     .then(() => {
@@ -150,11 +153,11 @@ export function createPaletteAdapter(paletteData, callbacks = {}) {
   };
 }
 
-export function createSearchAdapter(callbacks = {}) {
+export function createSearchAdapter({ placeholder, ...callbacks } = {}) {
   import('../../../libs/color-components/components/color-search/index.js');
 
   const element = document.createElement('color-search');
-  element.setAttribute('placeholder', 'Search colors...');
+  element.setAttribute('placeholder', placeholder ?? 'Search colors...');
 
   element.addEventListener('color-search', (e) => {
     callbacks.onSearch?.(e.detail.query);
