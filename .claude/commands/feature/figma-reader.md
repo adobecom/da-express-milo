@@ -3,7 +3,8 @@
 You are a focused Figma reader. Your only job is to fetch everything from a Figma file, curate it, and write a structured summary file. You do not make implementation decisions — you extract and organise.
 
 **Input:** A Figma file URL and a feature slug (e.g. `image-compressor`)
-**Tools:** `mcp__figma__get_metadata`, `mcp__figma__get_screenshot`, `mcp__figma__get_design_context`
+**Tools:** `mcp__figma__get_metadata`, `mcp__figma__get_design_context`
+*(No screenshots are taken or stored — see F3. `mcp__figma__get_screenshot` is never called.)*
 
 ---
 
@@ -30,17 +31,13 @@ From the returned XML, identify every **direct child** of the `<canvas>` element
 
 ---
 
-## Step F3 — Screenshot all top-level nodes in parallel
+## Step F3 — Classify each top-level node from metadata alone
 
-Call `get_screenshot` for **every** top-level node ID from F2, all in a single parallel batch. Do not wait — fire them all at once.
+Using only the data already collected in F2 (id, name, element type, dimensions), classify every node before fetching design context. No screenshot calls are needed for classification.
 
-This gives you a visual of everything on the page before you decide what needs deep inspection.
+**No screenshots are taken or stored.** The Milo-Doc Reviewer works entirely from HTML+CSS snapshots generated in F5b — plain text files the reviewer can read directly and compare against `build.py`. Screenshots would be binary blobs that require visual interpretation; HTML+CSS gives exact copy strings, heading levels, and color hex values instead.
 
----
-
-## Step F4 — Classify each node
-
-After all screenshots return, classify each node:
+Classification rules:
 
 | Role | Description | Next action |
 |---|---|---|
@@ -63,9 +60,11 @@ Classification heuristics:
 
 ---
 
-## Step F5 — Deep fetch design frames and component library in parallel
+## Step F4 — Deep fetch design frames and component library in parallel
 
 Call `get_design_context` for every node classified as `design_frame`, `platform_variant`, or `component_library`. Run all calls in a single parallel batch — do not wait for one before starting others.
+
+**Failure handling:** if a `get_design_context` call fails or returns empty, do not abort. Record the node ID and error in a `## Fetch failures` section of the summary file. Continue fetching the remaining nodes — the reviewer can flag missing snapshots as "unverifiable" rather than failing the whole run.
 
 From each `design_frame` / `platform_variant` result, extract:
 - All visible **text content** (headings, labels, button copy, placeholder text, body copy)
@@ -86,6 +85,243 @@ From each `component_library` result, extract for every component variant found:
 
 ---
 
+## Step F5 — Synthesise block-structured HTML+CSS snapshots
+
+This is the primary artifact the Milo-Doc Reviewer reads. For **each `design_frame` and `platform_variant`**, generate one HTML file that maps the Figma content into Milo's block model — exact copy, correct heading levels, CSS custom properties for every color and font value. Plain text, no binary. The reviewer compares this against `build.py` to find missing blocks, copy mismatches, wrong heading levels, and wrong block variants.
+
+```bash
+mkdir -p ".claude/figma-summaries/<feature-slug>/blocks"
+```
+
+**What to generate per frame:**
+
+Create `.claude/figma-summaries/<feature-slug>/blocks/<frame-slug>.html` where `frame-slug` is the node name lowercased with spaces replaced by `-` (e.g. "Image compressor desktop" → `image-compressor-desktop.html`).
+
+The file structure:
+
+```html
+<!-- Figma node <nodeId> — "<Node Name>" -->
+<!-- Platform: desktop | mobile | all -->
+
+<style>
+  /* Design tokens extracted from this frame */
+  :root {
+    /* Typography — use exact px values from Figma */
+    --h1-size: 48px;  --h1-weight: 700;
+    --h2-size: 32px;  --h2-weight: 700;
+    --h3-size: 20px;  --h3-weight: 600;
+    --body-size: 16px; --body-weight: 400;
+
+    /* Colors — use exact hex from Figma */
+    --cta-primary-bg: #1473E6;
+    --cta-primary-text: #FFFFFF;
+    --link-color: #1473E6;
+    --text-primary: #2C2C2C;
+    --banner-bg: #5C5CE0;
+    /* Add any other colors seen in the frame */
+  }
+
+  /*
+   * Banner color → Milo block variant reference:
+   * #5C5CE0 / indigo  → banner (default)
+   * #0070F2 / blue    → banner (cool)
+   * #F5F5F5 / white   → banner (light)
+   * #272727 / dark    → banner (standout)
+   * compact/narrow = layout variants, not color — check frame width
+   */
+</style>
+
+<!-- ═══ Section 1 ═══════════════════════════════════════════════════ -->
+<section
+  data-block="columns (fullsize)"
+  data-showwith="fqa-non-qualified"
+  data-milo-helper="add_columns_fullsize_hero">
+
+  <h1 style="font-size:var(--h1-size);font-weight:var(--h1-weight)">
+    Compress your image online for free
+  </h1>
+  <p>Reduce the file size of your JPEGs, PNGs, and SVGs without sacrificing quality.</p>
+  <a style="background:var(--cta-primary-bg);color:var(--cta-primary-text)">
+    Get started for free
+  </a>
+  <!-- right column: upload animation video -->
+</section>
+
+<!-- ═══ Section 2 ═══════════════════════════════════════════════════ -->
+<section
+  data-block="frictionless-quick-action"
+  data-showwith="fqa-qualified-desktop"
+  data-milo-helper="add_frictionless_quick_action">
+
+  <h1 style="font-size:var(--h1-size);font-weight:var(--h1-weight)">
+    Compress your image online for free
+  </h1>
+  <p>Reduce the file size without sacrificing quality.</p>
+
+  <div data-component="upload-card">
+    <p>Upload your photo<br>or <em>drag and drop</em></p>
+    <a style="background:var(--cta-primary-bg);color:var(--cta-primary-text)">
+      Get started for free
+    </a>
+    <p>Supports: JPEG, PNG, SVG (max 40 MB)</p>
+    <p>By uploading your image or video, you agree to the Adobe
+      <a style="color:var(--link-color)">Terms of Use</a> and
+      <a style="color:var(--link-color)">Privacy Policy</a>.
+    </p>
+  </div>
+  <div data-component="qa-config">
+    <span>Quick-Action</span>: <span>compress-image</span>
+  </div>
+</section>
+
+<!-- ═══ Section N — How-to steps ════════════════════════════════════ -->
+<section
+  data-block="steps (highlight, image, schema)"
+  data-milo-helper="add_how_to_steps">
+
+  <h2 style="font-size:var(--h2-size);font-weight:var(--h2-weight)">
+    How to compress a JPEG.
+  </h2><!-- heading above block, emitted by add_h2() -->
+
+  <div data-component="step">
+    <!-- icon: [icon url or name from Figma] -->
+    <h3 style="font-size:var(--h3-size)">Upload your image.</h3>
+    <p>Click the button above or drag your JPEG into the editor.</p>
+  </div>
+  <div data-component="step">
+    <h3>Adjust quality settings.</h3>
+    <p>Use the slider to balance file size and visual quality.</p>
+  </div>
+  <div data-component="step">
+    <h3>Download your result.</h3>
+    <p>Save the compressed file to your device.</p>
+  </div>
+</section>
+
+<!-- ═══ Section N — Banner ══════════════════════════════════════════ -->
+<section
+  data-block="banner"
+  data-banner-variant="default"
+  data-milo-helper="add_banner">
+  <!-- Banner background color: var(--banner-bg) = #5C5CE0 → default variant -->
+  <h2>Do more with Adobe Express.</h2>
+  <!-- optional CTA: <a>Try for free</a> -->
+</section>
+
+<!-- ═══ Section N — FAQ ══════════════════════════════════════════════ -->
+<section
+  data-block="faq"
+  data-milo-helper="add_faq">
+
+  <h2>Frequently asked questions.</h2><!-- heading above block -->
+
+  <div data-component="qa-pair">
+    <p data-role="question">What is image compression?</p>
+    <p data-role="answer">Image compression reduces file size by removing redundant data...</p>
+  </div>
+  <!-- one div per Q&A pair -->
+</section>
+
+<!-- ═══ Section N — Breadcrumbs ══════════════════════════════════════ -->
+<section
+  data-block="breadcrumbs"
+  data-milo-helper="add_breadcrumbs">
+  <a href="/">Home</a> /
+  <a href="/express/feature/image/">Image tools</a> /
+  <span>Image Compressor</span><!-- last crumb = plain text, no link -->
+</section>
+
+<!-- ═══ Section N — Metadata ════════════════════════════════════════ -->
+<section
+  data-block="metadata"
+  data-milo-helper="add_metadata">
+  <!-- page-level metadata keys seen in Figma annotations or implied by the design -->
+  <dl>
+    <dt>Title</dt>       <dd>Compress images online for free | Adobe Express</dd>
+    <dt>Description</dt> <dd>Reduce file size without sacrificing quality...</dd>
+    <dt>Short Title</dt> <dd>Image Compressor</dd>
+    <dt>frictionless-safari</dt> <dd>on</dd>
+    <dt>show-floating-cta</dt>   <dd>on</dd>
+    <!-- add every key the Figma annotations or design implies -->
+  </dl>
+</section>
+```
+
+**Authoring rules for the HTML snapshot:**
+
+1. **One `<section>` per Milo section** (separated by `---` in the docx). Assign `data-block` to the exact Milo block name that should appear in the docx header row. Assign `data-milo-helper` to the Python helper that produces it.
+
+2. **Infer `data-block` from the Figma pattern** using this mapping — pick the first match:
+
+   | Figma pattern | `data-block` | `data-milo-helper` |
+   |---|---|---|
+   | Large h1 + upload drop zone + file-type list + ToS copy, desktop width | `frictionless-quick-action` | `add_frictionless_quick_action` |
+   | Large h1 + upload drop zone + file-type list + ToS copy, mobile/narrow | `frictionless-quick-action-mobile` | `add_frictionless_quick_action_mobile` |
+   | Large h1 + CTA button + animation area, no upload zone | `columns (fullsize)` | `add_columns_fullsize_hero` |
+   | Numbered/icon + title + body rows | `steps (highlight, image, schema)` | `add_how_to_steps` |
+   | Image + heading + paragraph (one pair) | `columns` | `add_content_column` |
+   | Full-width coloured band with heading | `banner` | `add_banner` |
+   | Horizontal list of text links/pills | `link-list` | `add_link_list` |
+   | Accordion of Q&A pairs | `faq` | `add_faq` |
+   | Breadcrumb trail | `breadcrumbs` | `add_breadcrumbs` |
+   | Key–value pairs at page bottom | `metadata` | `add_metadata` |
+   | *(none of the above patterns match)* | `unknown` | *(none)* |
+
+   When a section gets `data-block="unknown"`, also add an HTML comment immediately inside it: `<!-- UNRECOGNIZED: describe what you see (e.g. "animated carousel with 4 cards") -->`. Add the node to an `unrecognized_blocks` array in `manifest.json` so the reviewer and implementation agent are alerted.
+
+3. **Heading levels must match visual hierarchy** — this is the most critical mapping:
+   - The single most prominent text on the page → `<h1>`
+   - Section-level labels that sit *above* a block (e.g. "How to compress a JPEG.") → `<h2>`
+   - Sub-items *inside* a block (step titles, column headings, link-list heading) → `<h3>`
+   - Body copy → `<p>` — never accidentally promote body text to a heading
+
+4. **Every visible text string must be in the HTML verbatim** — do not paraphrase. If the Figma design context returned the copy, copy it exactly.
+
+5. **CSS custom properties** — for every color and font value in the design context, add a `--` variable in the `<style>` block. Then reference it inline on the element. This makes it trivial for the reviewer to spot a wrong block variant: if `--banner-bg: #0070F2` (blue) but `build.py` uses `add_banner(doc, heading=..., variant=None)` (default = indigo), that's a WRONG-VARIANT finding.
+
+6. **`data-showwith`** — if the frame is a frictionless hero variant, set the correct value (`fqa-non-qualified`, `fqa-qualified-desktop`, `fqa-qualified-mobile`). If it's a regular section, omit the attribute.
+
+7. **Do not emit CSS layout, margins, paddings, or pixel positions** — those are page CSS concerns, not docx concerns. Only include typography and color values that map to block variant choices or heading level decisions.
+
+8. **`data-banner-variant`** — when a `banner` section is found, set this to the matching Milo variant name based on the background color. Leave it as `"default"` if the color is indigo/purple.
+
+9. **Metadata section** — populate from designer annotations, `metadata.xlsx` signals visible in the frame, or properties implied by the design (e.g. an upload tool → `frictionless-safari: on`). Include every key you can infer; the reviewer will verify against `build.py`'s `add_metadata(...)` call.
+
+**After writing the HTML file**, also write a companion `tokens.css` file per feature (one file total, not one per frame) at `.claude/figma-summaries/<feature-slug>/tokens.css`:
+
+```css
+/* Design tokens — <feature-slug>
+   Extracted from Figma. Use these for block-variant decisions.
+   Source nodes: <comma-separated node names>
+*/
+:root {
+  /* Typography */
+  --h1-size: 48px; --h1-weight: 700; --h1-font: "Adobe Clean", sans-serif;
+  --h2-size: 32px; --h2-weight: 700;
+  --h3-size: 20px; --h3-weight: 600;
+  --body-size: 16px; --body-weight: 400;
+  --label-size: 14px;
+
+  /* Colors */
+  --cta-primary-bg: #1473E6;
+  --cta-primary-text: #FFFFFF;
+  --link-color: #1473E6;
+  --text-primary: #2C2C2C;
+  --banner-bg: #5C5CE0;
+  /* ... all other colors from the Figma frames ... */
+}
+
+/*
+ * Color → Milo block variant:
+ * #5C5CE0 → banner (default)   [indigo/purple]
+ * #0070F2 → banner (cool)      [blue]
+ * #F5F5F5 → banner (light)     [near-white]
+ * #272727 → banner (standout)  [near-black]
+ */
+```
+
+---
+
 ## Step F6 — Capture reference frame context
 
 For every `reference_screenshot` node, note:
@@ -95,16 +331,52 @@ For every `reference_screenshot` node, note:
 
 ---
 
-## Step F7 — Write the summary file
+## Step F7 — Write the summary file and artifact manifest
 
 **Save to:** `.claude/figma-summaries/<feature-slug>.md`
 
 This file is the lasting record. Future sessions and the Implementation Agent read it directly — they must never need to re-fetch Figma. Write it completely.
 
+**Also write a manifest** to `.claude/figma-summaries/<feature-slug>/manifest.json` so the Milo-Doc Reviewer can discover what is stored without scanning directories:
+
+```json
+{
+  "feature_slug": "<feature-slug>",
+  "figma_url": "<original figma url>",
+  "fetched": "<YYYY-MM-DD>",
+  "blocks": [
+    {
+      "node_id": "0:466",
+      "name": "Image compressor desktop",
+      "role": "design_frame",
+      "platform": "desktop",
+      "html_file": "blocks/image-compressor-desktop.html"
+    },
+    {
+      "node_id": "0:651",
+      "name": "Image compressor mobile",
+      "role": "platform_variant",
+      "platform": "mobile",
+      "html_file": "blocks/image-compressor-mobile.html"
+    }
+  ],
+  "tokens_css": "tokens.css"
+}
+```
+
+Only list nodes where the HTML file was actually written. Omit `cover`, `flow_annotation`, and `reference_screenshot` nodes.
+
+Write the complete summary file using this template (the `Stored artifacts:` block goes immediately after the `Fetched:` line — do not omit it):
+
 ```markdown
 # Figma Summary — <feature name>
 Source: <figma url>
 Fetched: <YYYY-MM-DD>
+
+Stored artifacts: .claude/figma-summaries/<feature-slug>/
+  blocks/       — HTML+CSS snapshot per design frame (plain text, Read-tool readable)
+  tokens.css    — design tokens (colors, typography) extracted from all frames
+  manifest.json — index of stored files
 
 ## Page Overview
 | Node ID | Name | Role | Description |
@@ -190,7 +462,14 @@ Fetched: <YYYY-MM-DD>
 
 ## Return to Discovery Agent
 
-Return this structured object only — do not return raw Figma data, code output, or XML:
+Return this structured object only — do not return raw Figma data, code output, or XML.
+
+**Page `type` classification:**
+- `current_state` — shows an existing live page or flow (reference only, do not rebuild)
+- `new_state` — shows the target design to build (what the feature should look like after launch)
+- `flow_diff` — shows a before/after comparison of a change
+- `platform_variant` — a mobile/iOS/Android-specific version of a `new_state` frame
+- `unknown` — cannot determine from available metadata
 
 ```
 {

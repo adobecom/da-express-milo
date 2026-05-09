@@ -95,7 +95,7 @@ Do not proceed until the user types `proceed`.
 
 The Discovery Agent's Figma Reader sub-agent writes a summary to `.claude/figma-summaries/<feature-slug>.md`. Before the analysis sub-agents read it, you must verify it has enough detail for implementation. A gap caught now is cheaper than a gap caught mid-code-scope.
 
-> **Known constraint of the current figma-reader output:** it is a text summary only — it does not persist screenshots or image assets to disk. If the summary's text descriptions are adequate, proceed; if you need pixel-level reference, spawn a targeted figma-reader re-fetch with specific node IDs (see "Handling gaps" below). Do not assume image files exist on disk.
+> **Figma artifacts on disk:** The Figma Reader now synthesises block-structured HTML+CSS snapshots (`blocks/<frame-slug>.html`) and a design token file (`tokens.css`) alongside the text summary, indexed by `manifest.json`. These are plain text files — the Milo-Doc Reviewer reads them directly and does exact string comparison against `build.py` (copy, heading levels, block names, color→variant mapping). No screenshots, no binary files. Check whether `.claude/figma-summaries/<feature-slug>/manifest.json` exists. If it does, the reviewer can run. If it is missing (old run or aborted fetch), the reviewer will be SKIPPED — note this at the Step 3 gate.
 
 ### What to check for
 
@@ -121,7 +121,7 @@ Read `.claude/figma-summaries/<feature-slug>.md`. Confirm every item:
 
 All gaps resolve through the **Gap Resolution Protocol**. For Figma gaps specifically, two handling patterns fit naturally inside the protocol's "ask the user" flow:
 
-- **Frame exists in Figma, but the summary missed detail** — in your question to the user, offer: "I can spawn a targeted Figma re-fetch on node IDs `[X, Y, Z]` to pull the missing detail, or you can describe it directly — which do you prefer?" If they choose re-fetch, spawn a figma-reader sub-agent with prompt: *"Re-fetch these nodes for <specific missing detail>: [node IDs]. Append results to `.claude/figma-summaries/<feature-slug>.md` under a `## Targeted re-fetch — <YYYY-MM-DD>` section. Do not re-read the whole file."*
+- **Frame exists in Figma, but the summary missed detail** — in your question to the user, offer: "I can spawn a targeted Figma re-fetch on node IDs `[X, Y, Z]` to pull the missing detail, or you can describe it directly — which do you prefer?" If they choose re-fetch, spawn a figma-reader sub-agent with prompt: *"Re-fetch these nodes for <specific missing detail>: [node IDs]. Append results to `.claude/figma-summaries/<feature-slug>.md` under a `## Targeted re-fetch — <YYYY-MM-DD>` section. Also generate updated HTML+CSS snapshots for the re-fetched nodes in `.claude/figma-summaries/<feature-slug>/blocks/`, update `tokens.css` if new color values were found, and add the new entries to `manifest.json`. Do not re-read the whole file."*
 
 - **Frame does not exist in Figma at all** — this is a designer gap (e.g. charter says "mobile variant" but Figma only shows desktop). Ask the user directly whether this is out of scope, deferred, or the designer owes a frame. Record their answer as a charter amendment. Do NOT build code for a frame that does not exist in Figma.
 
@@ -246,9 +246,11 @@ Return a short summary object to the orchestrator:
 
 `page.md` and `milo-doc-plan.md` are no longer emitted. Prior runs showed both were redundant — `build.py` is self-readable with the schema helpers, and the rationale belongs in its module docstring where it stays next to the code. If a PM needs a non-technical view, `page.docx` in Word is the review surface.
 
-> **Canonical Milo-doc conventions live in `.claude/tools/build_milo_doc.py`.** That module exports **schema-driven helpers** — one per Milo block type — that encode table structure, merged cells, column widths, block-name-as-gray-header-row, native `w:sectPr` section breaks, hyperlink colour, and **real Word `Heading N` paragraph styles** (so DA ingest emits `<h1>`/`<h2>`/`<h3>`, not `<p><strong>`). The feature `build.py` should call these helpers with **content only** — never rebuild table shapes, column widths, or run formatting by hand.
+> **Canonical Milo-doc conventions live in `.claude/tools/build_milo_doc.md`.** That file contains the complete Python source for every helper as a fenced reference block — one helper per Milo block type — encoding table structure, merged cells, column widths, block-name-as-gray-header-row, native `w:sectPr` section breaks, hyperlink colour, and **real Word `Heading N` paragraph styles** (so DA ingest emits `<h1>`/`<h2>`/`<h3>`, not `<p><strong>`).
 >
-> Preferred helpers (import from `build_milo_doc`):
+> **Do NOT import from a shared `.py` module.** Each feature `build.py` must be self-contained. When generating `build.py`, read `build_milo_doc.md`, then inline the low-level core helpers plus only the high-level helpers the page actually uses into a `# ---- Milo helpers (inlined) ----` section. See the "Self-contained `build.py` template" section in `build_milo_doc.md` for the exact skeleton.
+>
+> Available helpers (inline from `build_milo_doc.md`):
 > - `add_frictionless_quick_action` — desktop FQA hero (3-row pattern)
 > - `add_frictionless_quick_action_mobile` — mobile FQA hero (5-row pattern)
 > - `add_columns_fullsize_hero` — non-qualified fallback hero
@@ -263,11 +265,11 @@ Return a short summary object to the orchestrator:
 > - `add_h2` — standalone Heading-2 paragraph between blocks
 > - `add_section_break` — native Word continuous section break (`w:type="continuous"`)
 >
-> Fall back to the low-level `add_block` + `add_runs` only when a block type has no dedicated helper. If you find yourself writing `add_block(doc, 'frictionless-quick-action', [...])` with hand-crafted rows, stop — use `add_frictionless_quick_action` instead.
+> Fall back to the low-level `add_block` + `add_runs` (also in `build_milo_doc.md`) only when a block type has no dedicated helper. If you find yourself writing `add_block(doc, 'frictionless-quick-action', [...])` with hand-crafted rows, stop — use `add_frictionless_quick_action` instead.
 
 **Step M1 — python-docx check + mode selection**
 
-The Milo doc is produced programmatically via the `python-docx` library. No sample-learning step is needed — the conventions are already encoded in `.claude/tools/build_milo_doc.py`.
+The Milo doc is produced programmatically via the `python-docx` library. No sample-learning step is needed — the conventions are documented in `.claude/tools/build_milo_doc.md` and will be inlined directly into `build.py`.
 
 Check at runtime:
 
@@ -295,25 +297,16 @@ Record the chosen mode in the return object.
 
 **Step M2 — Reference page-metadata conventions while drafting build.py**
 
-There is no separate `page.md` file — skip straight to Step M3. But while you're about to author the `add_metadata(...)` call in `build.py`, consult this key reference so the metadata block is complete. Common keys and their read points:
+There is no separate `page.md` file — skip straight to Step M3. But while you're about to author the `add_metadata(...)` call in `build.py`, consult the full metadata catalog in `.claude/tools/build_milo_doc.md` (Part 3 — Page metadata key catalog). It lists every key by category with source file:line and accepted values.
 
-- `Title`, `Description`, `Short Title`, `Theme`, `Page Name` — Milo-level SEO/theme fields
-- `template` — [scripts.js:293](express/code/scripts/scripts.js). Only emit if `template === 'blog'` matters; feature pages usually omit it and rely on `metadata.xlsx` inheritance.
-- `Frictionless-safari` (capital F) — [utils.js:428](express/code/scripts/utils.js) (required if feature is a quick action on iOS Safari)
-- `show-floating-cta` — [utils.js:469](express/code/scripts/utils.js)
-- `desktop-floating-cta` / `mobile-floating-cta` — picks the floating CTA variant
-- `fork-cta-1-*` / `fork-cta-2-*` — mobile fork-button copy
-- `main-cta-link` — primary CTA deep-link URL
-- `hero-inject-logo`, `marquee-inject-logo` — logo injection toggles
-- `sheet-powered` — [scripts.js:423](express/code/scripts/scripts.js)
-- `branch-*` keys — Branch SDK deep-linking (only if the charter calls them out for this feature)
-- `breadcrumbs` — set to `n/a` if a breadcrumbs block handles rendering explicitly
+Key decision rules:
+- **Always include** Category A (SEO) keys: `Title`, `Description`, `Short Title`.
+- **Include Category B** (`frictionless-safari`) on every frictionless quick-action page. Set to `on` unless the charter explicitly excludes iOS Safari.
+- **Include all of Category C as a unit** if the floating CTA is required. Never author just `show-floating-cta` without also setting `desktop-floating-cta`, `mobile-floating-cta`, and the corresponding link/text keys — a partial set produces a broken button.
+- **Include `breadcrumbs: n/a`** when using the `add_breadcrumbs(...)` block to prevent auto-injection.
+- **Do not author** `fqa-off` / `fqa-on` — they are injected at runtime by `hideQuickActionsOnDevices()`.
 
-`section-metadata` gates (authored as `add_showwith(doc, ...)` or `add_section_metadata(doc, {...})`):
-- `showwith` — conditional section (e.g. `fqa-non-qualified`, `fqa-qualified-mobile`, `fqa-qualified-desktop` — flags set at [utils.js:410-434](express/code/scripts/utils.js))
-- `audience` — `mobile` | `desktop`
-- `anchor` — section id
-- `style` — variant class (e.g. `long-form` for SEO copy sections)
+For any metadata key not listed in `build_milo_doc.md`, follow the Runtime Discovery Guide (Part 4) to look it up in the source before asking the user.
 
 **Step M3 — Generate the build.py driver**
 
@@ -322,32 +315,41 @@ Generate `.claude/authoring/<feature-slug>/build.py` — a self-contained, **con
 ```python
 """Build .claude/authoring/<feature-slug>/page.docx for <feature>.
 
-Content-only build: every structural decision (row shape, column widths,
-merged cells, section breaks, heading styles, hyperlink colour) lives in
-`.claude/tools/build_milo_doc.py`. This script only declares WHAT the
-page says, not HOW each block is shaped.
-"""
-import os, sys
-REPO_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
-sys.path.insert(0, os.path.join(REPO_ROOT, ".claude", "tools"))
+Target page : /express/feature/...
+Reference   : /express/feature/image/resize  (or whichever page this mirrors)
+Deltas from charter:
+  - <note any block-reuse overrides here>
 
-from build_milo_doc import (
-    Document, Cm,
-    add_section_break,
-    add_showwith,
-    add_columns_fullsize_hero,
-    add_frictionless_quick_action,
-    add_frictionless_quick_action_mobile,
-    add_how_to_steps,
-    add_content_column,
-    add_banner,
-    add_link_list,
-    add_faq,
-    add_breadcrumbs,
-    add_metadata,
-)
+Self-contained: all Milo helper functions are inlined below — no repo-internal
+imports required. Structural conventions live in the helpers; this script only
+declares WHAT the page says, not HOW each block is shaped.
+
+Run : python3 .claude/authoring/<feature-slug>/build.py
+Deps: pip install python-docx requests
+"""
+import io, os
+import requests
+from docx import Document
+from docx.shared import Pt, Cm, Inches
+from docx.enum.text import WD_ALIGN_PARAGRAPH
+from docx.enum.section import WD_SECTION
+from docx.oxml.ns import qn
+from docx.oxml import OxmlElement
 
 OUT_PATH = os.path.join(os.path.dirname(__file__), "page.docx")
+
+# ---- Milo helpers (inlined from .claude/tools/build_milo_doc.md) --------
+# Low-level core (always include):
+#   set_cell_shading, set_cell_borders, set_table_borders, merge_row_cells,
+#   add_hyperlink, add_runs, _apply_heading_style, write_cell,
+#   add_block, add_section_break
+# High-level (include only what this page uses — paste from build_milo_doc.md):
+#   add_h2, add_showwith, add_section_metadata,
+#   add_columns_fullsize_hero, add_frictionless_quick_action,
+#   add_frictionless_quick_action_mobile, add_how_to_steps,
+#   add_content_column, add_banner, add_link_list,
+#   add_faq, add_breadcrumbs, add_metadata
+# [paste selected helpers here]
 
 # ---- Assets (URLs) and copy (strings) -----------------------------------
 # Keep each concern in one place so content-ops can eyeball a diff.
@@ -363,7 +365,12 @@ def build():
         s.left_margin = s.right_margin = Cm(1.5)
         s.top_margin = s.bottom_margin = Cm(1.5)
 
-    # --- Hero (triplet if frictionless: fallback → desktop → mobile) ----
+    # --- Hero ---------------------------------------------------------------
+    # FQA features (entry-point = quick-action-iframe): use the full triplet below.
+    # Non-FQA features: replace the triplet with the appropriate single hero block
+    # (e.g. a plain `columns (fullsize)`) and omit the frictionless showwith gates.
+    #
+    # FQA triplet (fallback → desktop → mobile):
     add_columns_fullsize_hero(doc, headline=H1, subhead=SUBHEAD, ...)
     add_showwith(doc, "fqa-non-qualified")
     add_section_break(doc)
@@ -425,7 +432,7 @@ The `build.py` is a first-class deliverable: it's committed to the repo alongsid
 
 **Step M4 — Execute build.py to produce page.docx** *(only runs if `docx_mode = "full"`)*
 
-Skip if `docx_mode = "md-only"`.
+Skip if `docx_mode = "py-only"`.
 
 ```bash
 python3 ".claude/authoring/<feature-slug>/build.py"
@@ -454,14 +461,131 @@ Deltas from charter:
     default variant renders the Figma spec exactly → reuse-as-is
   - FAQ Q2 dropped (HARMAN add-on account question no longer applicable)
 
-Run: python3 .claude/authoring/<feature-slug>/build.py
+Run : python3 .claude/authoring/<feature-slug>/build.py
 Deps: pip install python-docx requests
-Conventions live in .claude/tools/build_milo_doc.py — if DA rejects the
-docx, the fix goes into that file, not into this build.py.
+Helper conventions live in .claude/tools/build_milo_doc.md — if DA rejects
+the docx, the fix goes into the inlined helpers in this build.py (and into
+build_milo_doc.md so future features inherit the fix).
 """
 ```
 
 If `build.py` raised on execution, capture the traceback inline with a `# BUILD_ERROR` comment at the line that failed, not in a separate rationale file.
+
+**Step M6 — Milo-Doc Figma Reviewer Sub-Agent (fresh context, always runs)**
+
+Spawn this as a **separate sub-agent with no prior conversation context**. It acts as a fresh pair of eyes: it knows nothing about what the Milo-Doc Mapper decided — it only reads the Figma and the produced `build.py` and tells you what doesn't match.
+
+**Skip conditions** (skip the sub-agent, record reason in return object):
+- Charter frontmatter says `figma: n/a`
+- `build.py` raised an exception (nothing to review)
+- `.claude/figma-summaries/<feature-slug>/manifest.json` does not exist (Figma artifacts were never stored — cannot review without re-fetching, which this agent does not do)
+
+**Input to the sub-agent (pass all of these explicitly in the prompt — it has no other context):**
+- Path to the Figma summary: `.claude/figma-summaries/<feature-slug>.md`
+- Path to the manifest: `.claude/figma-summaries/<feature-slug>/manifest.json`
+- Path to build.py: `.claude/authoring/<feature-slug>/build.py`
+- Feature slug and target page path (from charter)
+
+**Tools the sub-agent may use:** Read, Bash only. **No Figma MCP calls** — the reviewer never re-fetches from Figma.
+
+**What the sub-agent does:**
+
+1. **Load stored Figma artifacts** — do not call any Figma tool.
+   - Read `.claude/figma-summaries/<feature-slug>/manifest.json` to get the list of stored HTML snapshots.
+   - **Path resolution:** all `html_file` values in `manifest.blocks` are relative to `.claude/figma-summaries/<feature-slug>/`. Prepend that base path before reading — e.g. `"html_file": "blocks/foo.html"` → read `.claude/figma-summaries/<feature-slug>/blocks/foo.html`.
+   - For every entry in `manifest.blocks` where `role` is `design_frame` or `platform_variant`: read the HTML file at the resolved path. These are plain-text block-structured HTML+CSS snapshots that the Figma Reader generated in Step F5b. Each `<section data-block="...">` represents one Milo section with exact copy, heading levels, CSS color values, and data attributes encoding the block name and showwith gate.
+   - Read `.claude/figma-summaries/<feature-slug>/tokens.css` for the full color and typography token set.
+   - Read `.claude/figma-summaries/<feature-slug>.md` for the text summary (component states, typography notes, designer annotations).
+   - If a node listed in `manifest.blocks` has a missing HTML file on disk, note it as "unverifiable — HTML snapshot missing" in the review report. Do not treat a missing file as a FAIL on its own.
+
+2. **Read `build.py` in full** — map every helper call to the section it produces. Build an internal checklist: section order, block names, heading levels, copy strings, quick-action IDs, metadata keys.
+
+3. **Run the five-dimension comparison — HTML snapshot vs `build.py`:**
+
+   The HTML snapshots use `data-block`, `data-milo-helper`, `data-showwith`, and `data-component` attributes that map directly to `build.py` helper calls. This is a structural text comparison, not a visual one.
+
+   **Dimension 1 — Section completeness**
+   For every `<section data-block="...">` in every HTML snapshot: is there a corresponding helper call in `build.py`?
+   - Count `<section>` elements in HTML → count helper calls in `build.py` → should match.
+   - Check order: sections in HTML should appear in the same order as helper calls in `build.py`.
+   - Flag any section present in HTML but absent from `build.py` as **MISSING**.
+   - Flag any helper call in `build.py` with no corresponding HTML section as **EXTRA** (may be intentional — note it, don't auto-fail).
+
+   **Dimension 2 — Block and variant correctness**
+   For each `<section>` in the HTML, compare `data-block` value against the first argument of the corresponding helper call in `build.py`:
+   - HTML `data-block="frictionless-quick-action"` → `build.py` must call `add_frictionless_quick_action(...)`. Flag mismatch as **WRONG-BLOCK**.
+   - HTML `data-block="banner"` with `data-banner-variant="cool"` → `build.py` must call `add_banner(doc, ..., variant='cool')`. Flag wrong or missing variant as **WRONG-VARIANT**.
+   - For banner specifically: compare `--banner-bg` hex in `tokens.css` against the variant in `build.py` using the color→variant table in `tokens.css` comments.
+
+   **Dimension 3 — Copy accuracy**
+   For each section, compare every text node in the HTML against the corresponding argument in `build.py`:
+   - `<h1>` text → `headline=` arg in the FQA helper
+   - `<p>` under `<h1>` → `subhead=` arg
+   - CTA `<a>` text → `upload_cta_text=` or `cta_text=`
+   - Upload card `<p>` text (including line-break pattern and `<em>`) → `upload_heading_text=` + `upload_heading_em=`
+   - File restrictions `<p>` → `file_restrictions_text=`
+   - `<h2>` above how-to strip → `heading=` in `add_how_to_steps`
+   - Step `<h3>` + `<p>` → each dict in `steps=[...]`
+   - FAQ `<p data-role="question">` / `<p data-role="answer">` → `qa_pairs=` list
+   - Breadcrumb `<a>` texts and `<span>` (last crumb) → `crumbs=` list
+   - Metadata `<dt>`/`<dd>` pairs → `add_metadata({...})` dict
+
+   Flag exact-string mismatches as **COPY-MISMATCH**. Flag an authored placeholder (e.g. `"<headline>"`) against a real HTML string as **PLACEHOLDER-NEEDS-FILL**.
+
+   **Dimension 4 — Heading hierarchy**
+   For each heading element in the HTML snapshot, find its counterpart in `build.py` and verify the level matches:
+   - HTML `<h1>` → `build.py` must use `('h', 1, ...)` — flag as **WRONG-HEADING-LEVEL** if it uses `('h', 2, ...)` or `('p', [...])`
+   - HTML `<h2>` above a block (emitted by `add_h2()`) → `build.py` must call `add_h2(doc, ...)` or pass the heading to a helper that calls `add_h2` internally
+   - HTML `<h3>` inside a block (step title, column heading) → `build.py` must use `('h', 3, ...)`
+   - HTML `<p>` (body copy) → `build.py` must use `('p', [...])` — flag if accidentally promoted to a heading level
+
+   **Dimension 5 — Color → block variant**
+   Read `tokens.css`. For each color custom property, apply the variant mapping table documented in the file's comments:
+   - `--banner-bg` value → look up the Milo variant → verify `add_banner(doc, ..., variant=<expected>)` matches
+   - `--cta-primary-bg` → should match `LINK_COLOR` constant (`1473E6`); if different, flag as **INFO** (CSS handles link colour on the live page, but the docx uses the constant — no docx fix needed, just document)
+   - Do NOT flag font-size or font-weight values — those come from CSS on the live page, not from the docx. Only heading *level* mismatches (Dimension 4) and block *variant* mismatches (this dimension) are actionable.
+
+4. **Write the report** to `.claude/analysis/<feature-slug>/doc-review.md`:
+
+```markdown
+# Milo Doc Review — <feature>
+Figma source  : <file key / node IDs reviewed>
+Reviewed file : .claude/authoring/<feature-slug>/build.py
+Verdict       : PASS | WARN | FAIL
+
+## Summary
+| Dimension | Status | Issues found |
+|---|---|---|
+| Section completeness | ✅ / ⚠️ / ❌ | N |
+| Block & variant | ✅ / ⚠️ / ❌ | N |
+| Copy accuracy | ✅ / ⚠️ / ❌ | N |
+| Heading hierarchy | ✅ / ⚠️ / ❌ | N |
+| Visual treatment | ✅ / ⚠️ / ❌ | N |
+
+## Findings
+
+### FAIL — must fix before upload
+| # | Type | Location in build.py | Figma value | Authored value | Fix |
+|---|---|---|---|---|---|
+| 1 | MISSING | (absent) | Mobile hero section | (not authored) | Add add_frictionless_quick_action_mobile(...) |
+
+### WARN — review recommended
+| # | Type | Location in build.py | Figma value | Authored value | Notes |
+|---|---|---|---|---|---|
+
+### PASS — verified correct
+- Section order: fallback → desktop → mobile → body ✅
+- quick_action_id: "remove-background" matches QA_CONFIGS ✅
+- ...
+
+## Skipped checks
+- <anything that could not be verified and why>
+```
+
+Verdict rules:
+- **FAIL** — any MISSING, WRONG-BLOCK, COPY-MISMATCH (on non-placeholder text), or WRONG-HEADING-LEVEL for h1.
+- **WARN** — PLACEHOLDER-NEEDS-FILL, WRONG-VARIANT, WRONG-HEADING-LEVEL for h2/h3, INFO items.
+- **PASS** — no FAIL or WARN items found.
 
 **Return to orchestrator:**
 
@@ -469,14 +593,22 @@ If `build.py` raised on execution, capture the traceback inline with a `# BUILD_
 {
   docx_mode: "full" | "py-only",
   build_script: ".claude/authoring/<feature-slug>/build.py",
-  page_docx: ".claude/authoring/<feature-slug>/page.docx" | null,   // null if docx_mode = "py-only"
+  page_docx: ".claude/authoring/<feature-slug>/page.docx" | null,
   build_errors: "<traceback or empty>",
   unresolved_placeholders: [ "<asset URL, metadata value, etc>" ],
-  content_questions: [ "<copy decisions the user should weigh in on>" ]
+  content_questions: [ "<copy decisions the user should weigh in on>" ],
+  doc_review: {
+    verdict: "PASS" | "WARN" | "FAIL" | "SKIPPED",
+    skip_reason: "<if SKIPPED>",
+    report_file: ".claude/analysis/<feature-slug>/doc-review.md",
+    fail_count: N,
+    warn_count: N,
+    fail_items: [ "<one-line summary per FAIL item>" ]
+  }
 }
 ```
 
-The orchestrator surfaces `docx_mode`, `unresolved_placeholders`, and `content_questions` at the Step 3 gate so the user sees at a glance whether the docx is ready as-is or needs decisions.
+The orchestrator surfaces the review verdict and all FAIL items at the Step 3 gate so the user sees them before approving. A FAIL verdict does not automatically block the gate — the user decides — but all FAIL items must be listed explicitly so the user can make an informed choice.
 
 ### 2c. Code-Change Scope Sub-Agent (conditional)
 
@@ -485,7 +617,7 @@ The orchestrator surfaces `docx_mode`, `unresolved_placeholders`, and `content_q
 - ≤ 3 `reuse-extend` decisions (typically just config/map additions), AND
 - Zero `reuse-modify` decisions (no block JS/CSS edits)
 
-In that case the orchestrator writes `code-scope.md` inline from the block-reuse output — roughly 20–40 lines, one file-entry per changed file with a pseudo-diff. No sub-agent spawn needed.
+In that case the orchestrator writes `code-scope.md` inline from the block-reuse output — roughly 20–40 lines, one file-entry per changed file with a pseudo-diff. No sub-agent spawn needed. Use the same per-file format as the 2c template below (one `## relative/path/to/file` section per file, with Action / Reason / Change surface / Loading phase / Risk fields). For content-only changes the entry is two lines: `**Action:** modify` and `**Change surface:** content authoring only — no code change`.
 
 Spawn the sub-agent only when the change set is non-trivial (new blocks, JS edits, multiple files).
 
@@ -533,7 +665,7 @@ Produce a concrete file-by-file change list before any code is written. Grounded
 
 ## Step 3 — Analysis Gate (Hard Stop)
 
-After all three sub-agents return, print this compact summary to the user and **wait for explicit approval**:
+After all sub-agents return, print this compact summary to the user and **wait for explicit approval**:
 
 ```
 Analysis complete.
@@ -542,11 +674,18 @@ Block reuse decisions    : as-is=N, extend=N, modify=N, fork=N, new=N
   Highest risk          : <from 2a summary>
 
 Milo doc package           (docx_mode: full | py-only)
-  Build driver           : .claude/authoring/<feature-slug>/build.py   (content-only, self-readable)
+  Build driver           : .claude/authoring/<feature-slug>/build.py
   Docx (if full mode)    : .claude/authoring/<feature-slug>/page.docx
   build.py errors        : <none | traceback excerpt>
   Unresolved placeholders: <list or "none">
   Content questions      : <list or "none">
+
+Figma ↔ Doc review        (verdict: PASS | WARN | FAIL | SKIPPED)
+  Report                 : .claude/analysis/<feature-slug>/doc-review.md
+  FAILs (must fix)       : N
+    - <one-line per FAIL item, or "none">
+  WARNs (review)         : N
+    - <one-line per WARN item, or "none">
 
 Cross-repo handoff docs    (one per charter handoff section)
   .claude/handoffs/<feature-slug>/<team>.md
@@ -559,14 +698,31 @@ Code change scope
 Full scope             : .claude/analysis/<feature-slug>/code-scope.md
 
 Reply:
-  'approve'                  → proceed to implementation
+  'approve'                  → proceed to implementation (FAILs not auto-blocking — your call)
+  'fix-doc'                  → I will fix the FAIL/WARN items in build.py and re-run the reviewer
   'revise: <short ask>'      → I will re-run the relevant sub-agent
   'stop'                     → halt, no code changes
 ```
 
+**Hard rule:** if `doc_review.verdict = "FAIL"`, surface all FAIL items verbatim and explicitly note them as user decision points — never silently proceed past a FAIL.
+
 **Hard rule:** write zero code until the user replies `approve`.
 
 If the user replies `revise:`, re-run only the relevant sub-agent with the revision as additional input, regenerate the artifact, and return to this gate. Do not skip back to Step 4 without explicit approval.
+
+If the user replies `fix-doc`:
+1. Read the FAIL and WARN items from `.claude/analysis/<feature-slug>/doc-review.md`.
+2. Edit `build.py` directly — fix each item (correct heading level, fix copy string, add missing block call, fix block variant name, etc.).
+3. If `docx_mode = "full"`, re-run `python3 .claude/authoring/<feature-slug>/build.py` to regenerate the docx.
+4. Re-spawn the Milo-Doc Figma Reviewer Sub-Agent (Step M6) directly from the orchestrator — it does not need to go through 2b again. Use this prompt template:
+
+   > "Re-review `build.py` after doc fixes. Tools: Read, Bash only — no Figma MCP calls.
+   > Figma summary: `.claude/figma-summaries/<feature-slug>.md`
+   > Manifest: `.claude/figma-summaries/<feature-slug>/manifest.json`
+   > Build script: `.claude/authoring/<feature-slug>/build.py`
+   > Feature: `<feature-slug>` — `<target-page-path>`
+   > This is a re-review. Focus on the FAIL items from the previous run at `.claude/analysis/<feature-slug>/doc-review.md`. Verify each was fixed. Check all five dimensions for any regressions introduced by the edits. Overwrite the report file with the updated findings."
+5. Return to this gate with the updated summary. Do not proceed to Step 4 until the user replies `approve`.
 
 ---
 
