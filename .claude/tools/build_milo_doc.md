@@ -417,7 +417,7 @@ These three always appear together in the order below. Each is gated by a `secti
 
 | Helper | What it emits | When to use |
 |---|---|---|
-| `add_section_break(doc)` | `---` paragraph + native `w:sectPr continuous` | Between every section. Every section boundary needs one. |
+| `add_section_break(doc)` | centered `---` paragraph (DA section separator only — no Word section break) | Between every section. Every section boundary needs one. |
 | `add_h2(doc, text)` | Standalone `Heading 2` paragraph | Between blocks where a heading sits outside a table (e.g. above `how-to-steps`, above `faq`). Do not put these inside block tables. |
 | `add_showwith(doc, value)` | `section-metadata` with a single `showwith` row | Immediately after a hero block to gate its visibility. |
 | `add_section_metadata(doc, pairs)` | `section-metadata` with multiple key–value rows | When a section needs more than just `showwith` (e.g. `showwith` + `anchor`). |
@@ -457,7 +457,6 @@ import io
 import requests
 from docx.shared import Pt, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.section import WD_SECTION
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
@@ -639,10 +638,9 @@ def add_block(doc, name, rows, col_widths=None):
 
 
 def add_section_break(doc):
-    """Insert `---` paragraph + native Word continuous section break."""
+    """Insert a centered `---` paragraph (DA section separator). No Word section break — that caused double-separator rendering bugs."""
     p = doc.add_paragraph("---")
     p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    doc.add_section(WD_SECTION.CONTINUOUS)
 
 
 # ----- high-level block helpers --------------------------------------------
@@ -900,7 +898,6 @@ import requests
 from docx import Document
 from docx.shared import Pt, Cm, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.section import WD_SECTION
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 

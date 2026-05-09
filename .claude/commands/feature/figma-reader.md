@@ -241,8 +241,6 @@ The file structure:
     <dt>Title</dt>       <dd>Compress images online for free | Adobe Express</dd>
     <dt>Description</dt> <dd>Reduce file size without sacrificing quality...</dd>
     <dt>Short Title</dt> <dd>Image Compressor</dd>
-    <dt>frictionless-safari</dt> <dd>on</dd>
-    <dt>show-floating-cta</dt>   <dd>on</dd>
     <!-- add every key the Figma annotations or design implies -->
   </dl>
 </section>
@@ -268,7 +266,64 @@ The file structure:
    | Key–value pairs at page bottom | `metadata` | `add_metadata` |
    | *(none of the above patterns match)* | `unknown` | *(none)* |
 
-   When a section gets `data-block="unknown"`, also add an HTML comment immediately inside it: `<!-- UNRECOGNIZED: describe what you see (e.g. "animated carousel with 4 cards") -->`. Add the node to an `unrecognized_blocks` array in `manifest.json` so the reviewer and implementation agent are alerted.
+   When a section gets `data-block="unknown"`, follow the **Spectrum component spec-capture rule** below before continuing — then also add an HTML comment immediately inside it: `<!-- UNRECOGNIZED: describe what you see (e.g. "animated carousel with 4 cards") -->`. Add the node to an `unrecognized_blocks` array in `manifest.json` so the reviewer and implementation agent are alerted.
+
+   **Spectrum component spec-capture rule (applies to every `data-block="unknown"` section)**
+
+   When no Milo block pattern matches a Figma section, the engineer will likely need to build a custom Spectrum component from scratch. All layout/spacing rules are suspended for this section — capture EVERYTHING from the Figma design context:
+
+   - **Dimensions:** exact width, height, min-height, max-width of the component and each sub-element (in px, as returned by Figma)
+   - **Spacing:** padding (top/right/bottom/left), gap between children, margin (if any), border-radius
+   - **Colors:** background, border, text, icon fill — hex values for every distinct element state (default, hover, active, disabled, error, selected)
+   - **Typography:** font family, size (px), weight, line-height, letter-spacing, text-align — per text element
+   - **Layout mode:** flex row / flex column / grid — note direction, alignment (justify-content, align-items), wrap behavior
+   - **Border:** width, style, color per side
+   - **Shadow:** box-shadow values (x, y, blur, spread, color)
+   - **Icons:** exact Spectrum icon name if identifiable (e.g. `sp-icon-chevron`), or describe shape; export as PNG per Step F5b rules
+   - **States:** for every interactive state visible in the component library — list exact visual differences (color delta, border change, opacity, transform)
+   - **Content/copy:** every visible text string verbatim, including placeholder text and aria-labels if annotated
+   - **Interaction notes:** any designer annotations about click, hover, focus, keyboard behavior
+
+   Write this into the `<section>` as a structured comment block:
+
+   ```html
+   <section data-block="unknown" data-spectrum-build="true">
+     <!-- UNRECOGNIZED: font picker dropdown — needs custom Spectrum component -->
+     <!--
+     SPECTRUM SPEC:
+     Component: <name from Figma layer>
+     Dimensions: width=320px height=48px border-radius=4px
+     Layout: flex row; justify-content=space-between; align-items=center; padding=12px 16px
+     Background: default=#FFFFFF  hover=#F5F5F5  active=#E8E8E8  disabled=#FAFAFA
+     Border: 1px solid #D0D0D0  focus=2px solid #1473E6
+     Typography: font="Adobe Clean" size=16px weight=400 color=#2C2C2C  placeholder=#767676
+     Icon: sp-icon-chevron-down; 16x16px; color=#464646
+     States:
+       - default: border=#D0D0D0 bg=#FFFFFF
+       - hover:   border=#ABABAB bg=#F5F5F5
+       - focus:   border=2px #1473E6 (ring, not replace)
+       - selected: border=#1473E6 label=selected-font-name
+       - disabled: opacity=0.4 cursor=not-allowed
+     Content: placeholder text "Choose a font"
+     Interaction: click opens dropdown overlay; keyboard: arrow keys to navigate, Enter to select, Escape to close
+     -->
+     <p>Choose a font</p>
+     <span data-role="icon">chevron-down</span>
+   </section>
+   ```
+
+   Also write the Spectrum spec into `manifest.json` under `"spectrum_components"` (array, one entry per unknown section):
+   ```json
+   {
+     "node_id": "<id>",
+     "name": "<Figma layer name>",
+     "description": "<one-line description>",
+     "html_file": "blocks/<frame-slug>.html",
+     "dimensions": { "width": 320, "height": 48 },
+     "has_states": true,
+     "state_count": 5
+   }
+   ```
 
 3. **Heading levels must match visual hierarchy** — this is the most critical mapping:
    - The single most prominent text on the page → `<h1>`
@@ -282,7 +337,7 @@ The file structure:
 
 6. **`data-showwith`** — if the frame is a frictionless hero variant, set the correct value (`fqa-non-qualified`, `fqa-qualified-desktop`, `fqa-qualified-mobile`). If it's a regular section, omit the attribute.
 
-7. **Do not emit CSS layout, margins, paddings, or pixel positions** — those are page CSS concerns, not docx concerns. Only include typography and color values that map to block variant choices or heading level decisions.
+7. **Do not emit CSS layout, margins, paddings, or pixel positions** for sections with a recognized `data-block` — those are page CSS concerns, not docx concerns. Only include typography and color values that map to block variant choices or heading level decisions. **Exception: `data-block="unknown"` (Spectrum component) sections** — capture ALL layout, spacing, dimensions, and states per the Spectrum spec-capture rule above.
 
 8. **`data-banner-variant`** — when a `banner` section is found, set this to the matching Milo variant name based on the background color. Leave it as `"default"` if the color is indigo/purple.
 
@@ -415,11 +470,22 @@ This file is the lasting record. Future sessions and the Implementation Agent re
       "local_path": null,
       "aem_url": "https://main--da-express-milo--adobecom.aem.live/media_16e016e....png"
     }
+  ],
+  "spectrum_components": [
+    {
+      "node_id": "<id>",
+      "name": "<Figma layer name>",
+      "description": "<one-line: what this component does>",
+      "html_file": "blocks/<frame-slug>.html",
+      "dimensions": { "width": 320, "height": 48 },
+      "has_states": true,
+      "state_count": 5
+    }
   ]
 }
 ```
 
-Only list nodes where the HTML file was actually written in `blocks`. Omit `cover`, `flow_annotation`, and `reference_screenshot` nodes from `blocks`. All exported and AEM-derived image assets go into `assets` (both sources).
+Only list nodes where the HTML file was actually written in `blocks`. Omit `cover`, `flow_annotation`, and `reference_screenshot` nodes from `blocks`. All exported and AEM-derived image assets go into `assets` (both sources). Omit `spectrum_components` entirely if no `data-block="unknown"` sections were found.
 
 Write the complete summary file using this template (the `Stored artifacts:` block goes immediately after the `Fetched:` line — do not omit it):
 

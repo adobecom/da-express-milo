@@ -300,7 +300,7 @@ Record the chosen mode in the return object.
 
 **Step M2 — Reference page-metadata conventions while drafting build.py**
 
-There is no separate `page.md` file — skip straight to Step M3. But while you're about to author the `add_metadata(...)` call in `build.py`, consult the full metadata catalog in `.claude/tools/build_milo_doc.md` (Part 3 — Page metadata key catalog). It lists every key by category with source file:line and accepted values.
+There is no separate `page.md` file — skip straight to Step M3. But while you're about to author the `add_metadata(...)` call in `build.py`, consult `.claude/docs/metadata-reference.md` — the authoritative catalog of every metadata key, organized by category with accepted values, dependency chains, and silent-failure warnings. Do NOT guess key names or values; look them up there first.
 
 Key decision rules:
 - **Always include** Category A (SEO) keys: `Title`, `Description`, `Short Title`.
@@ -309,7 +309,7 @@ Key decision rules:
 
   **Before adding `show-floating-cta`, investigate:**
   1. **Is there evidence?** Check charter, Figma annotations, and wiki for an explicit floating CTA requirement. If none is found, omit Category C entirely and note the omission.
-  2. **Which block variant?** Determine `desktop-floating-cta` and `mobile-floating-cta` values from the charter or Figma. Valid block names: `floating-button`, `multifunction-button`, `mobile-fork-button`, `mobile-fork-button-frictionless`, `mobile-fork-button-dismissable`. Grep `express/code/scripts/utils.js` line ~613 for the full accepted list.
+  2. **Which block variant?** Determine `desktop-floating-cta` and `mobile-floating-cta` values from the charter or Figma — these keys select the block variant and are required alongside `show-floating-cta`. Valid values: `floating-button`, `multifunction-button`, `mobile-fork-button`, `mobile-fork-button-frictionless`, `mobile-fork-button-dismissable` (`utils.js:618`).
   3. **What is the CTA destination?** `main-cta-link` + `main-cta-text` are the fallback for both devices. If desktop and mobile should route to different URLs, also set `desktop-floating-cta-link` + `desktop-floating-cta-text` and `mobile-floating-cta-link` + `mobile-floating-cta-text`.
 
   **If the block variant is `multifunction-button`, `mobile-fork-button`, or `mobile-fork-button-frictionless`:**
@@ -321,7 +321,7 @@ Key decision rules:
 - **Include `breadcrumbs: n/a`** when using the `add_breadcrumbs(...)` block to prevent auto-injection.
 - **Do not author** `fqa-off` / `fqa-on` — they are injected at runtime by `hideQuickActionsOnDevices()`.
 
-For any metadata key not listed in `build_milo_doc.md`, follow the Runtime Discovery Guide (Part 4) to look it up in the source before asking the user.
+For any metadata key not listed in `metadata-reference.md`, grep `getMetadata` across `express/code/` to find it in the source before asking the user.
 
 **Step M3 — Generate the build.py driver**
 
@@ -399,9 +399,12 @@ def build():
     add_showwith(doc, "fqa-qualified-mobile")
     add_section_break(doc)
 
-    # --- Body: link-list, how-to, content columns, banner, FAQ ----------
-    # Section order follows Figma layout: "Discover even more" pill rail immediately
-    # after the hero triplet, then how-to strip, then alternating content columns.
+    # --- Body blocks ----------------------------------------------------------
+    # DERIVE ORDER FROM FIGMA: read the <section> elements in
+    # .claude/figma-summaries/<feature-slug>/blocks/<frame>.html top-to-bottom.
+    # Generate helper calls in THAT order. Do NOT reorder to match this template.
+    # The sequence below (link-list → how-to → columns → banner → faq) is a common
+    # pattern — it is NOT a mandate. If Figma differs, Figma wins.
     add_link_list(doc, heading="Discover even more.", links=[("Label", "url"), ...])
     add_section_break(doc)
 
@@ -497,6 +500,137 @@ The Figma Reader sub-agent (Step F5b) has already exported all raster assets to 
    ```
 
 6. **Document in `build.py`'s module docstring** which assets are local exports (draft-only, must be swapped for AEM URLs before production DA upload) and which already use live AEM URLs.
+
+**Step M3.6 — Handle Spectrum component sections** *(runs when `manifest.json` has a `spectrum_components` array)*
+
+If `manifest.json` contains a non-empty `"spectrum_components"` array, the Figma Reader found sections that do not map to any existing Milo block. The Implementation Agent must:
+
+1. **Read each entry's HTML file** (from `html_file` in the `spectrum_components` array). The HTML will contain a `SPECTRUM SPEC:` comment block with dimensions, spacing, colors, states, typography, and interaction notes.
+
+2. **Route to the correct agent:**
+   - If the charter's da-express-milo requirements include a `build-new` decision for this section (from `block-reuse.md`): implement the Spectrum component as a new block in `express/code/blocks/<block-name>/`. The full spec in the HTML comment is the design source of truth — use it directly instead of re-fetching Figma.
+   - If this section is NOT yet in the charter requirements: flag it as a gap via the **Gap Resolution Protocol** — ask the user whether to build it or defer it.
+
+3. **Never author Spectrum components into the docx via `add_block`.** A Spectrum component is not a content-layer Milo block — it is a code-layer block that the engineer builds. The docx only needs to represent sections that DA can author. If this section has no docx representation (it's pure JS/CSS), omit it from `build.py` and note the omission in the module docstring.
+
+4. **Pass the full spec to the code-scope sub-agent (Step 3c).** When generating the `code-scope.md` file for this block, quote the `SPECTRUM SPEC:` comment from the HTML verbatim as the "Design source" so the engineer has everything in one place without reading Figma.
+
+### Spectrum vs vanilla JS — ask before committing (hard gate)
+
+Before writing any Spectrum code for a new component, ask the user:
+
+> "This component (`<component name>`) needs to be built from scratch. Should I use **Spectrum Web Components** or **vanilla JS**?
+>
+> - **Spectrum** — design consistency with Adobe's system; lazy-loaded but adds ~N KB bundle overhead per component family on first use. Good choice when the component has complex interactive states, accessibility requirements, or needs to match Spectrum visual tokens exactly.
+> - **Vanilla JS** — zero extra download; you write the DOM, styles, and event handling yourself. Good choice for simpler components where bundle latency matters (e.g. a fast-loading landing page) or where Spectrum doesn't have the right component.
+>
+> Which do you prefer?"
+
+Record the answer. If **vanilla JS** is chosen, skip Steps S1–S7 below entirely and go straight to the **New block code quality rules** section. If **Spectrum** is chosen, work through S1–S7.
+
+---
+
+### Spectrum integration pattern (required reading before writing any Spectrum code)
+
+This repo has an existing Spectrum wrapper system scoped to color pages. Before writing any Spectrum code, work through this decision tree:
+
+**Step S1 — Read the internal docs first.**
+- `express/code/scripts/color-shared/spectrum/docs/USAGE.md` — architecture, loading model, theming
+- `express/code/scripts/color-shared/spectrum/docs/COMPONENT_API.md` — API for every existing Express wrapper
+- These docs are authoritative for this repo. Do not guess patterns from memory.
+
+**Step S2 — Check if an Express wrapper already exists.**
+Look in `express/code/scripts/color-shared/spectrum/components/`. Existing wrappers:
+
+| File | SWC tag(s) it wraps | Import via |
+|------|--------------------|----|
+| `express-picker.js` | `sp-picker`, `sp-menu`, `sp-menu-item` | `spectrum/index.js` |
+| `express-button.js` | `sp-button` | `spectrum/index.js` |
+| `express-tooltip.js` | `sp-tooltip` | `spectrum/index.js` |
+| `express-dialog.js` | `sp-dialog` | `spectrum/index.js` |
+| `express-toast.js` | `sp-toast` | `spectrum/index.js` |
+| `express-tag.js` | `sp-tag` | `spectrum/index.js` |
+| `express-textfield.js` | `sp-textfield` | `spectrum/index.js` |
+| `express-search.js` | `sp-search` | `spectrum/index.js` |
+| `express-menu.js` | `sp-menu` standalone | `spectrum/index.js` |
+
+If the component you need already has a wrapper → **import from `spectrum/index.js`**. Do NOT bypass the wrapper and use the SWC tag directly in markup — the wrapper handles loading, theming, and Express overrides.
+
+**Step S3 — If no wrapper exists, check whether the bundle is available.**
+Open `express/code/scripts/color-shared/spectrum/load-spectrum.js`. Scan the `DIST` import list. If a `load<ComponentName>()` function exists → the bundle is already compiled. Create a new Express wrapper in `spectrum/components/express-<name>.js` following the pattern of an existing wrapper (e.g. `express-button.js`). Also add the loader call to `spectrum/index.js`.
+
+**Step S4 — If the bundle does NOT exist in `DIST`, consult the SWC docs.**
+Before building or adding any new bundle, check what the component supports:
+`https://opensource.adobe.com/spectrum-web-components/components/<component-name>/`
+(e.g. for sidenav: `https://opensource.adobe.com/spectrum-web-components/components/sidenav/`)
+
+From the docs page, extract:
+- What attributes/properties the component accepts
+- What events it fires (`change`, `click`, `sp-closed`, etc.)
+- What slots it uses (default slot, named slots)
+- What CSS custom properties it exposes for theming
+- Any known accessibility behaviour (keyboard, ARIA roles)
+
+Use this to determine whether SWC already supports the component. If it does, add the bundle to `DIST` per `express/code/scripts/color-shared/spectrum/docs/BUNDLER.md`, then create a wrapper per Step S3.
+
+**Step S5 — Always wrap in `<sp-theme system="spectrum-two" color="light" scale="medium">`.**
+Every Spectrum component must be inside an `sp-theme`. Use `createThemeWrapper()` from `spectrum/utils/theme.js` — do NOT create a raw `<sp-theme>` element inline.
+
+**Step S6 — Loading is always lazy, never global.**
+Follow `load-spectrum.js` exactly — call `loadCoreDeps()` first, then the component-specific bundle, then `waitForComponents([...])`. The component loader must be idempotent (use the `componentLoaded` cache pattern already in `load-spectrum.js`). Do NOT add a `<script>` tag for a Spectrum bundle in the block's HTML or JS entry point.
+
+**Step S7 — Add Express override CSS.**
+Every wrapper gets a matching CSS file in `spectrum/styles/<name>.css` for Express design token overrides (color, spacing, border-radius corrections). Load it via `style-loader.js` inside the wrapper, not in the block's main CSS file.
+
+---
+
+### New block code quality rules (applies to ALL new blocks — Spectrum and vanilla JS)
+
+These rules apply whenever `block-reuse.md` returns `build-new` or `fork-new-variant` for any requirement. No exceptions.
+
+**Component decomposition — break it up:**
+- The block entry file (`<block-name>.js`) should contain only the `init()` or `default` export that wires sections together. It must not contain rendering logic inline.
+- Extract each distinct UI concern into its own factory file under a subfolder:
+  ```
+  express/code/blocks/<block-name>/
+    <block-name>.js          ← entry: reads DOM, calls factories, assembles sections
+    <block-name>.css         ← block-level layout and non-Spectrum styles only
+    components/
+      create<ComponentA>.js  ← one factory per logical UI piece
+      create<ComponentB>.js
+    helpers/
+      <utility>.js           ← pure functions shared across the block
+  ```
+  Look at `express/code/blocks/color-explore/` and `express/code/blocks/color-extract/` as the reference file structure.
+
+**DRY — no copy-paste:**
+- If the same DOM shape, event pattern, or config object appears in two places → extract it into a helper.
+- If two factory functions share setup logic → lift the shared code into `helpers/`.
+- If a helper would be useful across blocks → put it in `express/code/scripts/color-shared/` (but only if it is genuinely reusable, not just coincidentally similar).
+
+**Function size and single responsibility:**
+- Every function must do exactly one thing. If you need an "and" to describe what it does → split it.
+- Target: ≤ 30 lines per function. Functions that exceed this are almost always doing two jobs.
+- Name functions with a verb + noun pattern that makes the one job obvious: `createFontPreview`, `loadFontData`, `handlePickerChange`, `renderLoadingState`.
+
+**CSS bifurcation:**
+| What | Where |
+|---|---|
+| Block layout (grid, flex, max-width, section spacing) | `<block-name>.css` |
+| Component visual styles (colors, borders, typography per element) | `components/create<X>.css` or inline in the factory via `loadStyle` |
+| Spectrum token overrides | `spectrum/styles/<name>.css` (loaded by the wrapper) |
+| Shared design tokens | `express/code/scripts/color-shared/spectrum/styles/` |
+- Never put Spectrum overrides in the block's main CSS file — they will break when the wrapper is reused on other pages.
+- Never put layout rules inside a component factory's CSS — layout is the block's concern, not the component's.
+
+**Event handling:**
+- Attach event listeners inside the factory that creates the element, not in the block entry.
+- Remove listeners in the factory's `destroy()` method (use `AbortController` where feasible).
+- Do NOT attach global `document` or `window` listeners for component-local events.
+
+**State management:**
+- Keep state local to the factory. Return a minimal control API (`{ getValue, setValue, destroy }`) — do not expose internal DOM refs.
+- Use a single source of truth per piece of state. If two components need the same value, pass it as a parameter — do not read from the DOM.
 
 **Step M4 — Execute build.py to produce page.docx** *(only runs if `docx_mode = "full"`)*
 
