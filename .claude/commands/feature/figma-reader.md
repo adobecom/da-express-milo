@@ -3,8 +3,9 @@
 You are a focused Figma reader. Your only job is to fetch everything from a Figma file, curate it, and write a structured summary file. You do not make implementation decisions — you extract and organise.
 
 **Input:** A Figma file URL and a feature slug (e.g. `image-compressor`)
-**Tools:** `mcp__figma__get_metadata`, `mcp__figma__get_design_context`
-*(No screenshots are taken or stored — see F3. `mcp__figma__get_screenshot` is never called.)*
+**Tools:** `mcp__figma__get_metadata`, `mcp__figma__get_design_context`, `mcp__figma__get_screenshot`
+
+`get_screenshot` is used only in Step F5b (asset export) to produce raster PNG exports of icon and illustration nodes. It is not used for full design frames — those are captured as HTML+CSS snapshots in Step F5. See Step F3 for the no-screenshot rule that applies to design frame classification.
 
 ---
 
@@ -35,7 +36,7 @@ From the returned XML, identify every **direct child** of the `<canvas>` element
 
 Using only the data already collected in F2 (id, name, element type, dimensions), classify every node before fetching design context. No screenshot calls are needed for classification.
 
-**No screenshots are taken or stored.** The Milo-Doc Reviewer works entirely from HTML+CSS snapshots generated in F5b — plain text files the reviewer can read directly and compare against `build.py`. Screenshots would be binary blobs that require visual interpretation; HTML+CSS gives exact copy strings, heading levels, and color hex values instead.
+**No screenshots of full design frames are taken.** The Milo-Doc Reviewer works entirely from HTML+CSS snapshots generated in Step F5 — plain text files the reviewer can read directly and compare against `build.py`. Screenshots of full frames would be binary blobs requiring visual interpretation; HTML+CSS gives exact copy strings, heading levels, and color hex values instead. `get_screenshot` is used only in Step F5b for individual asset nodes (icons, illustrations) that need to be embedded as raster images in the docx.
 
 Classification rules:
 
@@ -322,6 +323,42 @@ The file structure:
 
 ---
 
+## Step F5b — Export image and icon assets
+
+The Milo-Doc Mapper needs raster copies of every visual asset (hero illustration, step icons, content column images) to embed in the docx without re-fetching Figma. Export them here, alongside the HTML snapshots, so the Implementation Agent only needs to read files — no Figma tool calls at implementation time.
+
+```bash
+mkdir -p ".claude/figma-summaries/<feature-slug>/assets"
+```
+
+**AEM-hosted nodes (node name starts with `media_`):**
+Do NOT call `get_screenshot` — these are already hosted on AEM. Derive the URL directly:
+`https://main--da-express-milo--adobecom.aem.live/<node-name>.<ext>`
+Record in the manifest with `"source": "aem"` and `"aem_url": "<derived url>"`. No local file needed.
+
+**Non-AEM nodes (icons, illustrations, synthetic design elements):**
+For each visual asset node found during F4 that is NOT a `media_*` node, call:
+```
+mcp__figma__get_screenshot(fileKey="<key>", nodeId="<id>")
+```
+Download the returned PNG to `.claude/figma-summaries/<feature-slug>/assets/<slug>.png` where `slug` is the node name lowercased with spaces/slashes replaced by `-`.
+
+**Critical: SVG files cannot be embedded in docx** — python-docx's `add_picture` only accepts raster formats. Always export as PNG, never SVG, even if the Figma node contains an SVG icon. The `get_screenshot` tool returns a PNG render regardless of the original vector format.
+
+**What nodes to export:**
+- The hero animation / upload illustration node
+- Step icon nodes (one per how-to step)
+- Content column image nodes (one per column)
+- Any other visual node referenced in the HTML snapshots with a placeholder comment
+
+**What NOT to export:**
+- `cover`, `flow_annotation`, `reference_screenshot` nodes (not used in docx)
+- Full-page design frames — these are captured as HTML+CSS in F5, not as images
+
+Add all assets (both exported and AEM-derived) to `manifest.json` under an `"assets"` array (see Step F7).
+
+---
+
 ## Step F6 — Capture reference frame context
 
 For every `reference_screenshot` node, note:
@@ -360,11 +397,29 @@ This file is the lasting record. Future sessions and the Implementation Agent re
       "html_file": "blocks/image-compressor-mobile.html"
     }
   ],
-  "tokens_css": "tokens.css"
+  "tokens_css": "tokens.css",
+  "assets": [
+    {
+      "node_id": "0:13",
+      "name": "upload44",
+      "role": "step_icon",
+      "source": "figma_export",
+      "local_path": "assets/upload44.png",
+      "aem_url": null
+    },
+    {
+      "node_id": "0:1014",
+      "name": "media_16e016e...",
+      "role": "content_column_image",
+      "source": "aem",
+      "local_path": null,
+      "aem_url": "https://main--da-express-milo--adobecom.aem.live/media_16e016e....png"
+    }
+  ]
 }
 ```
 
-Only list nodes where the HTML file was actually written. Omit `cover`, `flow_annotation`, and `reference_screenshot` nodes.
+Only list nodes where the HTML file was actually written in `blocks`. Omit `cover`, `flow_annotation`, and `reference_screenshot` nodes from `blocks`. All exported and AEM-derived image assets go into `assets` (both sources).
 
 Write the complete summary file using this template (the `Stored artifacts:` block goes immediately after the `Fetched:` line — do not omit it):
 
@@ -375,8 +430,9 @@ Fetched: <YYYY-MM-DD>
 
 Stored artifacts: .claude/figma-summaries/<feature-slug>/
   blocks/       — HTML+CSS snapshot per design frame (plain text, Read-tool readable)
+  assets/       — exported PNG assets (icons, illustrations; media_* nodes listed by AEM URL only)
   tokens.css    — design tokens (colors, typography) extracted from all frames
-  manifest.json — index of stored files
+  manifest.json — index of stored files (blocks + assets)
 
 ## Page Overview
 | Node ID | Name | Role | Description |

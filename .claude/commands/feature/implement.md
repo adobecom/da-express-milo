@@ -263,7 +263,10 @@ Return a short summary object to the orchestrator:
 > - `add_metadata` — page metadata block (accepts a dict)
 > - `add_showwith` / `add_section_metadata` — section-metadata gating
 > - `add_h2` — standalone Heading-2 paragraph between blocks
-> - `add_section_break` — native Word continuous section break (`w:type="continuous"`)
+> - `add_section_break` — visual section separator (emits a centered `---` paragraph; does NOT insert a Word continuous-section break)
+> - `_animation_cell(url, alt)` — **not a top-level helper; inline this locally in `build.py`.** Returns the correct cell-content tuple depending on file type: raster files (`.png`, `.jpg`, `.webp`) → `[('img', url, alt)]` (embedded picture); video files (`.mp4`, `.mov`, `.webm`) → `[('p', [('link', alt, url)])]` (link for block JS to transform into a `<video>` at runtime). Pass the result directly as the animation cell argument in the FQA helpers.
+>
+> **Image tuple width override:** the `('img', url, alt)` tuple accepts an optional 4th element for explicit width in inches: `('img', url, alt, 0.6)`. Use this for small icons (step icons, inline decorative icons) where the default 2.0" width would stretch them. Normal content images should use the default.
 >
 > Fall back to the low-level `add_block` + `add_runs` (also in `build_milo_doc.md`) only when a block type has no dedicated helper. If you find yourself writing `add_block(doc, 'frictionless-quick-action', [...])` with hand-crafted rows, stop — use `add_frictionless_quick_action` instead.
 
@@ -302,7 +305,19 @@ There is no separate `page.md` file — skip straight to Step M3. But while you'
 Key decision rules:
 - **Always include** Category A (SEO) keys: `Title`, `Description`, `Short Title`.
 - **Include Category B** (`frictionless-safari`) on every frictionless quick-action page. Set to `on` unless the charter explicitly excludes iOS Safari.
-- **Include all of Category C as a unit** if the floating CTA is required. Never author just `show-floating-cta` without also setting `desktop-floating-cta`, `mobile-floating-cta`, and the corresponding link/text keys — a partial set produces a broken button.
+- **Include Category C (floating CTA) only when explicitly called for by the charter or Figma.** Do NOT add `show-floating-cta` speculatively — this key injects a floating button on every device and requires a full set of companion keys. Adding the gate key alone without its companions produces a broken, invisible, or misrouted button.
+
+  **Before adding `show-floating-cta`, investigate:**
+  1. **Is there evidence?** Check charter, Figma annotations, and wiki for an explicit floating CTA requirement. If none is found, omit Category C entirely and note the omission.
+  2. **Which block variant?** Determine `desktop-floating-cta` and `mobile-floating-cta` values from the charter or Figma. Valid block names: `floating-button`, `multifunction-button`, `mobile-fork-button`, `mobile-fork-button-frictionless`, `mobile-fork-button-dismissable`. Grep `express/code/scripts/utils.js` line ~613 for the full accepted list.
+  3. **What is the CTA destination?** `main-cta-link` + `main-cta-text` are the fallback for both devices. If desktop and mobile should route to different URLs, also set `desktop-floating-cta-link` + `desktop-floating-cta-text` and `mobile-floating-cta-link` + `mobile-floating-cta-text`.
+
+  **If the block variant is `multifunction-button`, `mobile-fork-button`, or `mobile-fork-button-frictionless`:**
+  - Each CTA slot (1..N) requires ALL THREE of `cta-N-icon`, `cta-N-link`, and `cta-N-text`. A partial slot (icon without link, or link without icon) fails silently — the slot loop breaks on the first missing icon, so all subsequent slots are skipped too.
+  - For frictionless variants, use `fork-cta-N-*` key naming (checked first) or `fork-cta-N-*-frictionless` for the frictionless path (see `mobile-fork-button-utils.js`).
+  - Optionally include `fork-button-header` (drawer label) and `fork-eligibility-check: on` (restrict to Android only).
+
+  **If any of these dependencies are unknown**, emit them as unresolved placeholders in `build.py`'s module docstring — do NOT author placeholder URLs or empty strings in the metadata block. An empty `main-cta-link` is worse than omitting the floating CTA entirely.
 - **Include `breadcrumbs: n/a`** when using the `add_breadcrumbs(...)` block to prevent auto-injection.
 - **Do not author** `fqa-off` / `fqa-on` — they are injected at runtime by `hideQuickActionsOnDevices()`.
 
@@ -332,7 +347,6 @@ import requests
 from docx import Document
 from docx.shared import Pt, Cm, Inches
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.section import WD_SECTION
 from docx.oxml.ns import qn
 from docx.oxml import OxmlElement
 
@@ -385,15 +399,17 @@ def build():
     add_showwith(doc, "fqa-qualified-mobile")
     add_section_break(doc)
 
-    # --- Body: how-to, content columns, link-list, banner, FAQ ----------
+    # --- Body: link-list, how-to, content columns, banner, FAQ ----------
+    # Section order follows Figma layout: "Discover even more" pill rail immediately
+    # after the hero triplet, then how-to strip, then alternating content columns.
+    add_link_list(doc, heading="Discover even more.", links=[("Label", "url"), ...])
+    add_section_break(doc)
+
     add_how_to_steps(doc, heading="<H2>", steps=[...])
     add_section_break(doc)
 
     add_content_column(doc, image_side='left', image_url=..., heading=..., body=...)
     # ... more content_column calls ...
-    add_section_break(doc)
-
-    add_link_list(doc, heading="Discover even more.", links=[("Label", "url"), ...])
     add_section_break(doc)
 
     add_banner(doc, heading="<promo heading>")
@@ -429,6 +445,58 @@ Hard rules for generating `build.py`:
 - **Asset URLs must come from the Figma or a real DA-hosted file** — never silently fall back to a sibling feature's asset (e.g. reusing the resize MP4 for a compress page hero) without a charter amendment recording the swap. If the Figma doesn't surface the asset URL, spawn a targeted figma-reader re-fetch on the hero node; if still not resolvable, emit a clearly-labeled placeholder + flag it as an `unresolved_placeholder` to the orchestrator for user sign-off at the Step 3 gate.
 
 The `build.py` is a first-class deliverable: it's committed to the repo alongside the charter, diff-reviewed, and re-runnable any time the page needs to be regenerated.
+
+**Step M3.5 — Wire Figma assets into build.py** *(runs when `manifest.json` exists)*
+
+The Figma Reader sub-agent (Step F5b) has already exported all raster assets to `.claude/figma-summaries/<feature-slug>/assets/` and recorded AEM URLs for `media_*` nodes. This step reads that manifest and wires the assets into `build.py` — no Figma MCP calls are made here.
+
+**Hard rule: never call `mcp__figma__*` tools in this step.** All Figma interaction is the Figma Reader's responsibility. If an asset is missing from the manifest, surface it as an unresolved placeholder — do not spawn a Figma call inline.
+
+**What to do:**
+
+1. **Read `manifest.json`.** Parse the `"assets"` array. For each entry, note: `node_id`, `role`, `source` (`"figma_export"` or `"aem"`), `local_path` (relative to `.claude/figma-summaries/<feature-slug>/`), and `aem_url`.
+
+2. **Copy `figma_export` assets to the authoring directory.** For assets with `"source": "figma_export"`, copy from `.claude/figma-summaries/<feature-slug>/<local_path>` to `.claude/authoring/<feature-slug>/assets/<filename>`. Create the `assets/` directory if it does not exist. This keeps authoring artifacts self-contained alongside `build.py`.
+
+3. **Update `build.py` constants.** Set each image variable to the appropriate path/URL and annotate with source provenance:
+
+   For `figma_export` assets:
+   ```python
+   ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
+   STEP_ICON_1 = os.path.join(ASSETS_DIR, "<node-name>.png")  # Figma node <id>
+   # Production: replace with AEM URL once asset is published to DA
+   ```
+
+   For `aem` assets — use the AEM URL directly (fetched at docx build time by `requests`):
+   ```python
+   COL1_IMAGE_URL = "https://main--da-express-milo--adobecom.aem.live/media_<hash>.<ext>"  # Figma node <id>
+   ```
+
+4. **Update `write_cell` to support local paths.** The core helper must detect local paths and read from disk instead of fetching via `requests`:
+   ```python
+   elif kind == 'img':
+       url, alt = block[1], block[2]
+       width_in = block[3] if len(block) > 3 else 2.0
+       try:
+           if not url.startswith('http') and os.path.exists(url):
+               with open(url, 'rb') as f:
+                   data = f.read()
+           else:
+               data = requests.get(url, timeout=20).content
+           run = p.add_run()
+           run.add_picture(io.BytesIO(data), width=Inches(width_in))
+       except Exception:
+           r = p.add_run(f"[image: {alt}]")
+           r.italic = True
+   ```
+   **Note: SVG files cannot be embedded in docx** — python-docx only accepts raster formats (PNG, JPG). The Figma Reader always exports PNG so this should not arise, but guard against it by checking the extension before calling `add_picture`.
+
+5. **If an asset is missing from the manifest** (the Figma Reader didn't export it — e.g. aborted early), emit a clearly-labeled placeholder constant and flag it as an `unresolved_placeholder` in the return object:
+   ```python
+   STEP_ICON_2 = "PLACEHOLDER_figma_node_<id>"  # TODO: export from Figma and replace
+   ```
+
+6. **Document in `build.py`'s module docstring** which assets are local exports (draft-only, must be swapped for AEM URLs before production DA upload) and which already use live AEM URLs.
 
 **Step M4 — Execute build.py to produce page.docx** *(only runs if `docx_mode = "full"`)*
 
@@ -532,6 +600,8 @@ Spawn this as a **separate sub-agent with no prior conversation context**. It ac
 
    Flag exact-string mismatches as **COPY-MISMATCH**. Flag an authored placeholder (e.g. `"<headline>"`) against a real HTML string as **PLACEHOLDER-NEEDS-FILL**.
 
+   **Sibling-feature copy bleed — flag as WARN.** If a string in `build.py` matches verbatim copy from a known sibling feature (e.g. the heading reads "How to compress a JPEG" on a video-compressor page, or "How to resize an image" on a compress page), flag it as **SIBLING-COPY-BLEED** with severity WARN. This is distinct from COPY-MISMATCH (which is about Figma vs build.py) — this check is about whether the authored copy makes semantic sense for the target feature. Signal to detect this: look for the feature type token in headings and copy strings — if the token names a different media type or action than the target feature slug, it is bleed. For example, a `build.py` for `compress-video` that contains any of the strings `"JPEG"`, `"resize"`, `"remove background"`, `"change background"`, `"convert to"` in headings or step titles is likely carrying sibling copy.
+
    **Dimension 4 — Heading hierarchy**
    For each heading element in the HTML snapshot, find its counterpart in `build.py` and verify the level matches:
    - HTML `<h1>` → `build.py` must use `('h', 1, ...)` — flag as **WRONG-HEADING-LEVEL** if it uses `('h', 2, ...)` or `('p', [...])`
@@ -584,7 +654,7 @@ Verdict       : PASS | WARN | FAIL
 
 Verdict rules:
 - **FAIL** — any MISSING, WRONG-BLOCK, COPY-MISMATCH (on non-placeholder text), or WRONG-HEADING-LEVEL for h1.
-- **WARN** — PLACEHOLDER-NEEDS-FILL, WRONG-VARIANT, WRONG-HEADING-LEVEL for h2/h3, INFO items.
+- **WARN** — PLACEHOLDER-NEEDS-FILL, WRONG-VARIANT, WRONG-HEADING-LEVEL for h2/h3, SIBLING-COPY-BLEED, INFO items.
 - **PASS** — no FAIL or WARN items found.
 
 **Return to orchestrator:**
