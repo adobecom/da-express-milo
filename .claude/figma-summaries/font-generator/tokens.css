@@ -1,0 +1,72 @@
+/* Design tokens — font-generator
+   Extracted from Figma.
+   Source nodes: Unicode generator - W (1:20857), Font-generator (1:20906),
+   transparent-img-marquee (1:20905), Columns-Variables (1:20907),
+   how-to-v2 (1:20958), Font-bento (1:21094), Banner-cool-variables (1:21701)
+*/
+:root {
+  /* Typography */
+  --h1-size: 45px;   --h1-weight: 900;  --h1-font: "Adobe Clean Spectrum VF", sans-serif; --h1-line-height: 1.04;
+  --h2-size: 36px;   --h2-weight: 900;
+  --h3-size: 22px;   --h3-weight: 700;  /* Title/M */
+  --body-l-size: 20px; --body-l-weight: 400; --body-l-line-height: 1.3;
+  --body-m-size: 18px; --body-m-weight: 400; --body-m-line-height: 1.3;
+  --body-s-size: 16px; --body-s-weight: 400;
+  --label-2xl-size: 17.71px;
+  --label-size: 14px;
+
+  /* Heading 2XL (banner) */
+  --banner-h-size: 45px; --banner-h-weight: 900;
+
+  /* Colors */
+  --cta-primary-bg: #292929;    /* black/neutral button */
+  --cta-accent-bg: #3b63fb;     /* blue accent button (Palette/blue/900) */
+  --cta-primary-text: #FFFFFF;
+  --link-color: #3b63fb;
+  --text-primary: #131313;
+  --text-heading: #131313;
+  --text-body: #505050;
+  --text-code: #292929;
+  --text-neutral: #222222;      /* section headings */
+
+  /* Backgrounds */
+  --bg-page: #FFFFFF;
+  --bg-generator: #f3f3f3;      /* Font-generator section */
+  --bg-bento: #f8f8f8;          /* Font-bento section (Palette/gray/50) */
+  --bg-card: #FFFFFF;           /* bento card bg */
+  --bg-category-pill: #e9e9e9;  /* tag pill bg (gray/100) */
+
+  /* Palette: Celery (font name display on dark bg) */
+  --celery-1100: #2c5c09;       /* dark green bg */
+  --celery-200: #c5ff9c;        /* light green text */
+
+  /* Palette: Seafoam (font name display on dark bg, bento cards bg) */
+  --seafoam-1100: #035c50;      /* dark teal bg */
+  --seafoam-300: #a9edd8;       /* light teal text */
+
+  /* Banner */
+  --banner-bg: #000000;          /* black → standout variant */
+  --banner-border: #079355;      /* green border (Palette/green/800) */
+
+  /* Borders / Separators */
+  --border-color: #e9e9e9;       /* Palette/gray/100 */
+  --border-muted: #dadada;       /* Palette/gray/300 */
+  --border-selected: #3b63fb;    /* Font-category-selector selected state */
+
+  /* Shadows */
+  --shadow-card: 0px 4px 12px 0px rgba(0,0,0,0.08);
+  --shadow-text-field: 0px 0px 2px 0px rgba(0,0,0,0.12), 0px 2px 6px 0px rgba(0,0,0,0.04), 0px 4px 12px 0px rgba(0,0,0,0.08);
+
+  /* Border radius */
+  --radius-card: 16px;
+  --radius-pill: 24px;
+  --radius-selector: 6px;        /* Font-category-selector pill */
+}
+
+/*
+ * Color → Milo block variant:
+ * #000000 → banner (standout) [black bg]
+ * #5C5CE0 → banner (default)  [indigo/purple bg]
+ * #0070F2 → banner (cool)     [blue bg]
+ * #F5F5F5 → banner (light)    [near-white bg]
+ */

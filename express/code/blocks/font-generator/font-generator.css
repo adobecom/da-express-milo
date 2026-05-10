@@ -1,0 +1,275 @@
+/* font-generator — Pattern B Spectrum block */
+
+/* ── Block shell ─────────────────────────────────────────────────────────── */
+
+.font-generator {
+  background: #f3f3f3;
+  padding: 48px 40px;
+}
+
+.font-generator-container {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+.font-generator sp-theme {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+/* ── Left: sticky side panel ─────────────────────────────────────────────── */
+
+.font-generator-panel {
+  width: 477px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* White card containing textarea + controls */
+.font-panel-card {
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ── Textarea ────────────────────────────────────────────────────────────── */
+
+.font-panel-textarea-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.font-panel-textarea-wrap sp-textfield {
+  width: 100%;
+  --spectrum-textfield-min-height: 120px;
+}
+
+.font-panel-counter {
+  font-size: 12px;
+  color: #6e6e6e;
+  text-align: right;
+  margin: 0;
+}
+
+/* ── Labels ──────────────────────────────────────────────────────────────── */
+
+.font-panel-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2c2c2c;
+  margin: 0 0 8px;
+}
+
+/* ── Suggestion tags ─────────────────────────────────────────────────────── */
+
+.font-panel-suggestions {
+  display: flex;
+  flex-direction: column;
+}
+
+.font-panel-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* ── Category pills ──────────────────────────────────────────────────────── */
+
+.font-panel-categories {
+  display: flex;
+  flex-direction: column;
+}
+
+.font-panel-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Override Spectrum action-button selected state to border-only blue */
+.font-panel-pill-row sp-action-button[selected] {
+  --spectrum-actionbutton-background-color-selected: #fff;
+  --spectrum-actionbutton-border-color-selected: #3b63fb;
+  --spectrum-actionbutton-content-color-selected: #3b63fb;
+  border: 1px solid #3b63fb;
+  color: #3b63fb;
+  background: #fff;
+}
+
+/* ── Font count ──────────────────────────────────────────────────────────── */
+
+.font-panel-count-label {
+  font-size: 13px;
+  color: #6e6e6e;
+  margin: 0;
+}
+
+/* ── Slider ──────────────────────────────────────────────────────────────── */
+
+.font-panel-slider-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.font-panel-slider-wrap sp-slider {
+  width: 100%;
+  --spectrum-slider-track-color: #d0d0d0;
+}
+
+/* ── Promo strip ─────────────────────────────────────────────────────────── */
+
+.font-panel-promo {
+  background: #fff;
+  border-radius: 16px;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.font-panel-promo p {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #2c2c2c;
+}
+
+.font-panel-promo-cta {
+  background: #000;
+  color: #fff;
+  border-radius: 24px;
+  padding: 10px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.font-panel-promo-cta:hover {
+  background: #2c2c2c;
+}
+
+/* ── Right: preview card grid ────────────────────────────────────────────── */
+
+.font-generator-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  align-content: start;
+}
+
+/* ── Font preview cards ──────────────────────────────────────────────────── */
+
+.font-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 304px;
+}
+
+.font-card--hidden {
+  display: none;
+}
+
+/* Preview area (top 240px) */
+.font-card-preview {
+  flex: 1;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  overflow: hidden;
+}
+
+.font-card-text {
+  font-size: 32px;
+  line-height: 1.2;
+  text-align: center;
+  word-break: break-word;
+  margin: 0;
+  color: #2c2c2c;
+}
+
+/* Copy icon — top-right of preview area */
+.font-card-copy {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  color: #6e6e6e;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.font-card-copy:hover {
+  background: #f3f3f3;
+  color: #2c2c2c;
+}
+
+/* Footer (64px) */
+.font-card-footer {
+  height: 64px;
+  border-top: 1px solid #f0f0f0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.font-card-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2c2c2c;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+}
+
+.font-card-cta {
+  background: #000;
+  color: #fff;
+  border-radius: 24px;
+  padding: 8px 14px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Override main a:any-link color which has higher base specificity */
+main .font-generator .font-card-cta,
+main .font-generator .font-panel-promo-cta {
+  color: #fff;
+  text-decoration: none;
+}
+
+.font-card-cta:hover {
+  background: #2c2c2c;
+}
