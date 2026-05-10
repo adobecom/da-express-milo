@@ -184,16 +184,23 @@ Only load when the code change specifically touches that area. State in your out
 
 ## Step 2 — Pre-implementation Analysis
 
-**Hard rule:** spawn the Block-Reuse sub-agent (2a) first and wait for its result. Its decisions shape the scope of 2b and 2c — running them in parallel led to 2b producing plans that contradicted 2a (observed failure mode: milo-doc sub-agent produced a "net-new block" plan while block-reuse returned "reuse-as-is" for the same requirement). Spawn 2b and (conditionally) 2c after 2a returns.
+**Hard rule:** all Block-Reuse sub-agents (2a) must complete — and Step 2a.5 deep-extraction must complete — before spawning 2b or 2c. Their combined output is what 2b uses to decide block names and row schemas. Running 2b in parallel with 2a led to the Milo-Doc Mapper generating rows for a block that 2a later rejected (observed failure mode).
 
 Artifact files are written under `.claude/analysis/<feature-slug>/`. The user reviews at the Step 3 gate.
 
 Create the directory first: `.claude/analysis/<feature-slug>/` where `<feature-slug>` is derived from the charter filename (strip extension, strip date).
 
-### 2a. Block-Reuse Analyzer Sub-Agent
+### 2a. Block-Reuse Analyzer Sub-Agents (parallel — one per requirement)
 
-**Input:** charter's "da-express-milo Requirements" section + entry-point pattern
+**Input:** one da-express-milo requirement from the charter + the entry-point pattern + the output of `ls express/code/blocks/` (orchestrator runs this once and passes the result to every sub-agent)
 **Tools:** Grep, Glob, Read
+
+**Orchestration:** parse the charter's "da-express-milo Requirements" section into N individual requirements. Spawn N sub-agents **in parallel**, each handling exactly one requirement. Pass each sub-agent:
+1. The single requirement text it is investigating
+2. The full block list from `ls express/code/blocks/` (run once, share the output)
+3. The entry-point pattern from the charter
+
+Wait for **all N sub-agents** to return before proceeding to Step 2a.5. Then merge all N decision objects into `.claude/analysis/<feature-slug>/block-reuse.md` in the same order the requirements appear in the charter.
 **Output file:** `.claude/analysis/<feature-slug>/block-reuse.md`
 
 For each da-express-milo requirement, decide exactly one of:
@@ -203,7 +210,58 @@ For each da-express-milo requirement, decide exactly one of:
 - `fork-new-variant` — clone an existing block into a new folder with a new name
 - `build-new` — genuinely new block, no existing pattern covers it
 
-**Decision guide (based on current codebase):**
+**Step 1 — Discover all available blocks:**
+Run `ls express/code/blocks/` to get the complete current list of block folder names. This is the ground truth — do not rely on a static list in this document, which will always lag behind the codebase.
+
+**Step 2 — Generate candidates for each requirement:**
+For each requirement, produce a shortlist of 3–4 candidate block names using two signals in order:
+
+1. **Figma component name** — Read the HTML snapshots in `.claude/figma-summaries/<feature-slug>/blocks/`. If a `<section>` has a `data-block` from the Figma layer name (exact or semantic match, not visual fallback), that block goes to the top of the candidate list. If a `data-variant-hint` is present, note it.
+
+2. **Semantic name match** — From the full block list (Step 1), identify blocks whose folder name is semantically related to the requirement description or Figma component name. Consider word stems, synonyms, and compound words (e.g. requirement "step-by-step guide" → candidates: `how-to-v2`, `how-to-cards`, `how-to-steps`, `steps`). Pick the 3–4 closest by name alone. If the Figma name already gave a strong anchor, still list 2–3 alternatives so the investigation can confirm or reject it.
+
+Do not pre-filter by assumption. If the name sounds plausible, include it as a candidate.
+
+**Step 3 — Investigate all candidates:**
+For every block in the candidate shortlist, read both source files before making any decision. Extract **two things in one pass** — authoring schema and contextual gates:
+
+1. Read `express/code/blocks/<block>/<block>.js` — trace `decorate()` or `init()` top-to-bottom. While reading, note:
+
+   **Authoring schema** (determines if this block fits the requirement):
+   - How many columns per row, which rows are positionally consumed (`rows.shift()`), what merged rows exist
+   - What variants are gated by `classList.contains()` — these are the valid authored variants
+   - What interactive behaviour the block produces
+
+   **Contextual styling gates** (determines what the reviewer must not flag as bugs):
+   While reading the same file, look for code that changes visual appearance based on the *surrounding page* rather than the block's own authored content. Flag every instance:
+
+   | JS pattern | What it signals |
+   |---|---|
+   | `block.closest('.section:has(.other-block)')` | Appearance changes when a sibling block is present |
+   | `getMetadata('some-key')` inside visual logic | A page metadata value controls styling |
+   | `document.querySelector('main .block-name') === block` | First-instance-on-page gating |
+   | `document.body.dataset.device` | Device-type gating that changes DOM structure |
+   | `window.matchMedia(...)` inside style logic | Viewport-based style switches |
+
+   Record each gate as: `<file:line> → <condition> → <visual effect>` — this becomes the **Contextual styling notes** field in the output.
+
+2. Read `express/code/blocks/<block>/<block>.css` — list every variant class (`.block-name.variant`). If a `data-variant-hint` exists, verify it appears as a CSS class.
+
+3. Score each candidate against the requirement: does the row structure, interactive behaviour, and available variants match what the Figma design and charter describe?
+
+Pick the highest-scoring candidate. If two candidates are close, state both in `block-reuse.md` and explain the deciding factor.
+
+**Step 4 — Finalise decision:**
+Assign one of: `reuse-as-is` / `reuse-extend` / `reuse-modify` / `fork-new-variant` / `build-new`.
+
+Only reach `build-new` if all investigated candidates fail on structure or behaviour. A `build-new` decision must name every candidate investigated and explain specifically why each was rejected.
+
+**Hard rules:**
+- Never finalise without reading `.js` + `.css` for every candidate. A block that looks right by name may have the wrong row structure.
+- Never skip the candidate list because "it seems obvious." The obvious choice has been wrong before.
+- The static decision guide below covers only frictionless/SDK-specific requirements that require grep checks beyond a block name lookup. For all other requirements, Steps 1–4 above replace it.
+
+**Frictionless/SDK decision guide** *(apply only when the requirement involves file upload, quick actions, or Express SDK dispatch):*
 
 | Requirement signal | Check here first | Decision trigger |
 |---|---|---|
@@ -214,6 +272,8 @@ For each da-express-milo requirement, decide exactly one of:
 | CTA that redirects to `express.adobe.com` | Patterns in [susi-light.js:49-67,138-142](express/code/blocks/susi-light/susi-light.js) + [cta-carousel.js:53-69](express/code/blocks/cta-carousel/cta-carousel.js) | If URL-param construction with tokens → follow `susi-light` pattern. If simple navigation → follow `cta-carousel` |
 | Authored deep link (content-driven URL) | [template-promo.js:43-48](express/code/blocks/template-promo/template-promo.js) | `reuse-as-is` or `fork-new-variant` — author supplies the URL via the block table |
 
+---
+
 **Output format — one entry per charter requirement:**
 
 ```markdown
@@ -221,24 +281,107 @@ For each da-express-milo requirement, decide exactly one of:
 
 **Decision:** reuse-as-is | reuse-extend | reuse-modify | fork-new-variant | build-new
 **Anchor block:** `express/code/blocks/<block>/` (if reuse) or `n/a` (if build-new)
-**Why:** <one-paragraph reasoning, citing file:line from the decision guide above>
+**Candidates investigated:** `block-a` (rejected — reason), `block-b` (rejected — reason), `block-c` (chosen)
+**Why:** <one-paragraph reasoning citing specific JS line or CSS class that confirmed or rejected each candidate>
 **Change surface:** <one-paragraph — what exactly changes; for `reuse-as-is` write "no code change; content authoring only">
 **Loading phase:** E | L | D (per aem-franklin-loading-phases.mdc)
+**Contextual styling notes:** <list of contextual gates found in JS — or "none" if the block has no contextual visual gating>
 ```
 
-Return a short summary object to the orchestrator:
+Return a summary object to the orchestrator (one object per sub-agent, one requirement per object):
 
 ```
 {
-  output_file: ".claude/analysis/<feature-slug>/block-reuse.md",
-  decisions_count: { as_is: N, extend: N, modify: N, fork: N, new: N },
-  highest_risk: "<one sentence naming the riskiest decision and why>"
+  requirement: "<requirement label from charter>",
+  decision: "reuse-as-is | reuse-extend | reuse-modify | fork-new-variant | build-new",
+  anchor_block: "express/code/blocks/<block>/ | n/a",
+  candidates_investigated: ["block-a (rejected — reason)", "block-b (chosen)"],
+  contextual_styling_notes: ["<condition at file:line> → <visual effect>"],
+  highest_risk: "<one sentence if this requirement is the riskiest — else omit>"
 }
 ```
 
+The orchestrator merges all N objects into `.claude/analysis/<feature-slug>/block-reuse.md` in charter order, then proceeds to Step 2a.5.
+
+---
+
+### 2a.5. Build-New Figma Deep-Extraction Sub-Agent *(runs after all 2a agents return)*
+
+**Trigger:** any requirement returned `build-new` or `fork-new-variant` from Step 2a.
+
+**Why this step exists:** For blocks that will be built from scratch, the figma-reader summary collected during discovery is often too shallow — it captures the top-level frame but misses component hierarchy, exact spacing, all interactive states, and token mappings. A code reviewer comparing the built block against Figma needs all of that detail. This step fetches it once, before implementation begins, so engineers don't have to re-open Figma mid-build.
+
+**Orchestration:** Spawn **one sub-agent per `build-new` / `fork-new-variant` requirement**, all in parallel. Each sub-agent receives:
+1. The requirement label and its Figma node ID (from `.claude/figma-summaries/<feature-slug>/manifest.json` — use the `design_frame` node ID for the matching section)
+2. The feature slug
+3. A target output path: `.claude/figma-summaries/<feature-slug>/deep/<section-slug>.md`
+
+**Each sub-agent's job — extract the following from the Figma node:**
+
+1. **Component hierarchy** — the full layer tree for the section frame. For each named layer, record: layer name, Figma component name (if it is a component instance), parent-child relationships.
+
+2. **Colors** — every fill and stroke color in the frame, as hex values. If a Spectrum token name is visible in the Figma layer (e.g. `--spectrum-blue-900`), record the mapping: `hex → token name`.
+
+3. **Spacing and layout** — padding, gap, margin, border-radius for every distinct region. Record in pixels. Note which values align to a Spectrum spacing token (e.g. 8px = `--spectrum-spacing-100`).
+
+4. **Typography** — font family, size, weight, line-height, color for every distinct text style in the frame. If it maps to a Spectrum type token, record the mapping.
+
+5. **Interactive states** — for every interactive element (button, input, picker, checkbox, radio, toggle): document default, hover, focus, active, disabled, and error states. Include color changes per state. If the Figma file has a component variants panel for this element, fetch all variant properties.
+
+6. **Content copy** — every visible text string, verbatim, with its role (heading level, label, placeholder, helper text, error message, button label).
+
+7. **Inter-component positioning** — for compound components (e.g. label + input + helper text stacked, or icon + button side-by-side): describe the spatial relationship and alignment (top-aligned, centered, gap size).
+
+8. **Asset names** — every icon, illustration, or image in the frame: layer name, file format hint if discernible, dimensions.
+
+**Output file format:** `.claude/figma-summaries/<feature-slug>/deep/<section-slug>.md`
+
+```markdown
+# Deep Figma Spec — <requirement label>
+Node ID: <node-id>
+Fetched: <YYYY-MM-DD>
+
+## Component Hierarchy
+<layer tree — indented list>
+
+## Colors
+| Hex | Token (if mapped) | Used on |
+|---|---|---|
+
+## Spacing & Layout
+<paddings, gaps, border-radii per region>
+
+## Typography
+| Element | Font | Size | Weight | Line-height | Token |
+|---|---|---|---|---|---|
+
+## Interactive States
+### <Component name>
+| State | Background | Border | Text color | Icon color |
+|---|---|---|---|---|
+
+## Content Copy
+| Role | Text |
+|---|---|
+
+## Inter-component Positioning
+<describe compound arrangements>
+
+## Assets
+| Layer name | Dimensions | Format hint |
+|---|---|---|
+```
+
+**Hard rules:**
+- Do not re-fetch what the main figma-summary already captured clearly. Focus on depth (states, tokens, hierarchy) not repetition of top-level copy already in the summary.
+- If a node ID is missing from `manifest.json` for a `build-new` section, ask the user for the Figma URL of that specific frame before proceeding — do not skip the extraction.
+- The output file is the design source of truth for Step M3.6 and the code-scope sub-agent. Quote it verbatim rather than re-reading Figma during implementation.
+
+---
+
 ### 2b. Milo-Doc Mapper Sub-Agent
 
-**Input:** charter + block-reuse decisions (starts after 2a completes)
+**Input:** charter + block-reuse decisions + deep Figma specs (from `.claude/figma-summaries/<feature-slug>/deep/`) (starts after 2a and 2a.5 complete)
 **Tools:** Grep, Glob, Read, Write, Bash
 **Output files:**
 - `.claude/authoring/<feature-slug>/build.py` — self-contained Python driver that, when executed, writes `page.docx` (always written). Must be content-only (schema helper calls), with a module docstring that captures the rationale inline (page metadata keys chosen + why, block-reuse notes, content-author placeholders). The docstring replaces the separate rationale doc.
@@ -269,6 +412,19 @@ Return a short summary object to the orchestrator:
 > **Image tuple width override:** the `('img', url, alt)` tuple accepts an optional 4th element for explicit width in inches: `('img', url, alt, 0.6)`. Use this for small icons (step icons, inline decorative icons) where the default 2.0" width would stretch them. Normal content images should use the default.
 >
 > Fall back to the low-level `add_block` + `add_runs` (also in `build_milo_doc.md`) only when a block type has no dedicated helper. If you find yourself writing `add_block(doc, 'frictionless-quick-action', [...])` with hand-crafted rows, stop — use `add_frictionless_quick_action` instead.
+>
+> **When using `add_block` for a block with no helper — derive the row format from the source before writing a single row:**
+>
+> 1. Read `express/code/blocks/<block>/<block>.js`. Trace `decorate()` top-to-bottom: note every `block.children[N]`, `rows.shift()`, `row.children`, and `querySelectorAll` call — each one maps to a specific row or cell position in the authored table.
+> 2. Read `express/code/blocks/<block>/<block>.css`. List every variant class (`.block-name.variant`) — these are the only valid modifiers to pass in the block header cell.
+> 3. From the JS trace, build the exact row schema:
+>    - How many columns does the block expect per row?
+>    - Which rows are single-cell (merged across all columns, e.g. a background image row or a heading row)?
+>    - What is the order of special rows at the top (optional background, media, config) vs content rows?
+>    - Does the block use `rows.shift()` — meaning some rows are consumed positionally, not by content?
+> 4. Write the `add_block(...)` rows to exactly match that schema. Annotate each row with a comment quoting the JS line that reads it (e.g. `# mediaData = rows.shift() — how-to-v2.js:100`).
+>
+> **Never hand-craft rows by guessing from the visual design.** The JS is the only authoritative authoring spec. A block that looks like two columns may consume its first row as a single merged cell for a background image — the only way to know is to read the code.
 
 **Step M1 — python-docx check + mode selection**
 
@@ -449,71 +605,114 @@ Hard rules for generating `build.py`:
 
 The `build.py` is a first-class deliverable: it's committed to the repo alongside the charter, diff-reviewed, and re-runnable any time the page needs to be regenerated.
 
-**Step M3.5 — Wire Figma assets into build.py** *(runs when `manifest.json` exists)*
+**Step M3.5 — Derive required assets from block decisions, then fetch and wire**
 
-The Figma Reader sub-agent (Step F5b) has already exported all raster assets to `.claude/figma-summaries/<feature-slug>/assets/` and recorded AEM URLs for `media_*` nodes. This step reads that manifest and wires the assets into `build.py` — no Figma MCP calls are made here.
+This step runs after `block-reuse.md` is finalised. It knows exactly which blocks are being authored, so it reads each block's JS at runtime to determine what image cells need to be populated — no hardcoded mapping table. It then checks the manifest for each required asset and fetches directly from Figma anything that is missing.
 
-**Hard rule: never call `mcp__figma__*` tools in this step.** All Figma interaction is the Figma Reader's responsibility. If an asset is missing from the manifest, surface it as an unresolved placeholder — do not spawn a Figma call inline.
+**Sub-step A — Derive asset requirements by reading each block's JS at runtime**
 
-**What to do:**
+Do not use a hardcoded block → asset table — it goes stale as new blocks are added. Instead, for each block in `block-reuse.md` that will appear in `build.py`, read `express/code/blocks/<block>/<block>.js` and trace `decorate()` or `init()` to determine which authored cells are expected to contain images.
 
-1. **Read `manifest.json`.** Parse the `"assets"` array. For each entry, note: `node_id`, `role`, `source` (`"figma_export"` or `"aem"`), `local_path` (relative to `.claude/figma-summaries/<feature-slug>/`), and `aem_url`.
+For each block, look for these patterns in the JS:
+- `querySelector('picture')`, `querySelector('img')`, `querySelector('picture, img')` — the cell at this row/col position must be authored with an image.
+- `rows.shift()` whose returned element is then checked for `img` or `picture` — a positional image row consumed before normal card/step rows.
+- `block.style.setProperty('--background-image', ...)` — the image in this row becomes a CSS background rather than an inline `<img>`.
+- Any `src` or URL read from an authored cell and stored in a `data-*` attribute or variable.
 
-2. **Copy `figma_export` assets to the authoring directory.** For assets with `"source": "figma_export"`, copy from `.claude/figma-summaries/<feature-slug>/<local_path>` to `.claude/authoring/<feature-slug>/assets/<filename>`. Create the `assets/` directory if it does not exist. This keeps authoring artifacts self-contained alongside `build.py`.
+For each image cell found, record:
+```
+{ block, row: <index or "positional">, col: <index or "merged">, role: "<brief description>", figma_node_hint: "<node id from figma summary if available>" }
+```
 
-3. **Update `build.py` constants.** Set each image variable to the appropriate path/URL and annotate with source provenance:
+`figma_node_hint` — scan `.claude/figma-summaries/<feature-slug>.md` for the section describing this block and note the node ID. If the summary names per-card child nodes (e.g. individual card components), record those.
 
-   For `figma_export` assets:
+Build the full **required asset list** from this trace. Only then move to Sub-step B.
+
+**Sub-step B — Check the manifest**
+
+Read `.claude/figma-summaries/<feature-slug>/manifest.json`. For each required asset, check if a matching entry exists in `"assets"` by role or node ID.
+
+- **Found in manifest** → proceed to Sub-step C (copy and wire).
+- **Not in manifest** → go to Sub-step D (fetch from Figma).
+
+**Sub-step C — Copy manifest assets and wire into build.py**
+
+For assets found in the manifest:
+
+1. Copy `figma_export` assets from `.claude/figma-summaries/<feature-slug>/<local_path>` to `.claude/authoring/<feature-slug>/assets/<filename>`.
+2. Wire into `build.py` constants with provenance annotation:
+
    ```python
    ASSETS_DIR = os.path.join(os.path.dirname(__file__), "assets")
-   STEP_ICON_1 = os.path.join(ASSETS_DIR, "<node-name>.png")  # Figma node <id>
-   # Production: replace with AEM URL once asset is published to DA
+   HERO_IMAGE = os.path.join(ASSETS_DIR, "<filename>.png")  # Figma node <id>
+   # Production: replace with AEM URL once published to DA
    ```
 
-   For `aem` assets — use the AEM URL directly (fetched at docx build time by `requests`):
+   For `aem` source assets — use the AEM URL directly:
    ```python
-   COL1_IMAGE_URL = "https://main--da-express-milo--adobecom.aem.live/media_<hash>.<ext>"  # Figma node <id>
+   COL_IMAGE_URL = "https://main--da-express-milo--adobecom.aem.live/media_<hash>.<ext>"
    ```
 
-4. **Update `write_cell` to support local paths.** The core helper must detect local paths and read from disk instead of fetching via `requests`:
-   ```python
-   elif kind == 'img':
-       url, alt = block[1], block[2]
-       width_in = block[3] if len(block) > 3 else 2.0
-       try:
-           if not url.startswith('http') and os.path.exists(url):
-               with open(url, 'rb') as f:
-                   data = f.read()
-           else:
-               data = requests.get(url, timeout=20).content
-           run = p.add_run()
-           run.add_picture(io.BytesIO(data), width=Inches(width_in))
-       except Exception:
-           r = p.add_run(f"[image: {alt}]")
-           r.italic = True
-   ```
-   **Note: SVG files cannot be embedded in docx** — python-docx only accepts raster formats (PNG, JPG). The Figma Reader always exports PNG so this should not arise, but guard against it by checking the extension before calling `add_picture`.
+**Sub-step D — Fetch missing assets from Figma**
 
-5. **If an asset is missing from the manifest** (the Figma Reader didn't export it — e.g. aborted early), emit a clearly-labeled placeholder constant and flag it as an `unresolved_placeholder` in the return object:
-   ```python
-   STEP_ICON_2 = "PLACEHOLDER_figma_node_<id>"  # TODO: export from Figma and replace
-   ```
+For each required asset NOT found in the manifest:
 
-6. **Document in `build.py`'s module docstring** which assets are local exports (draft-only, must be swapped for AEM URLs before production DA upload) and which already use live AEM URLs.
+1. Find the corresponding Figma node ID from the figma summary (`.claude/figma-summaries/<feature-slug>.md`) — look for the section that contains the block, and use the `node_id` recorded there. If the summary does not name a node ID for this asset, use the parent frame's node ID.
 
-**Step M3.6 — Handle Spectrum component sections** *(runs when `manifest.json` has a `spectrum_components` array)*
+2. Call `mcp__figma__get_design_context` on that node to get asset URLs. Parse the response for image asset URLs (look for `img*` keys in the assets object).
 
-If `manifest.json` contains a non-empty `"spectrum_components"` array, the Figma Reader found sections that do not map to any existing Milo block. The Implementation Agent must:
+3. Download the asset to `.claude/authoring/<feature-slug>/assets/<role>.png` using `curl` or `requests`.
 
-1. **Read each entry's HTML file** (from `html_file` in the `spectrum_components` array). The HTML will contain a `SPECTRUM SPEC:` comment block with dimensions, spacing, colors, states, typography, and interaction notes.
+4. Add the asset to `manifest.json` under `"assets"` with `"source": "figma_fetch_inline"` so future runs know it was fetched here.
+
+5. Wire into `build.py` as a local path constant (same as Sub-step C).
+
+If no Figma node ID can be found for a required asset after checking the summary, emit a clearly-labeled placeholder and flag as `unresolved_placeholder` — do not guess or reuse another feature's asset.
+
+**Sub-step E — Update `write_cell` to support local paths**
+
+The core `write_cell` helper must handle local file paths in addition to HTTP URLs:
+
+```python
+elif kind == 'img':
+    url, alt = block[1], block[2]
+    width_in = block[3] if len(block) > 3 else 2.0
+    try:
+        if not url.startswith('http') and os.path.exists(url):
+            with open(url, 'rb') as f:
+                data = f.read()
+        else:
+            data = requests.get(url, timeout=20).content
+        run = p.add_run()
+        run.add_picture(io.BytesIO(data), width=Inches(width_in))
+    except Exception:
+        r = p.add_run(f"[image: {alt}]")
+        r.italic = True
+```
+
+**Note: SVG files cannot be embedded in docx** — python-docx only accepts raster formats. Always download as PNG. If Figma returns an SVG URL, call `get_screenshot` instead to get a raster export.
+
+**Sub-step F — Document in build.py module docstring**
+
+Record which assets are local exports (draft-only, must be swapped for AEM URLs before production DA upload) and which are already live AEM URLs.
+
+**Step M3.6 — Handle Spectrum component sections** *(runs when `manifest.json` has a `spectrum_components` array OR when `block-reuse.md` contains any `build-new` decision)*
+
+The primary design source for every `build-new` section is the deep Figma spec produced by Step 2a.5 at `.claude/figma-summaries/<feature-slug>/deep/<section-slug>.md`. Read it first. If it is absent (Step 2a.5 was skipped or failed), fall back to the HTML file from `manifest.json`.
+
+The Implementation Agent must:
+
+1. **Read the deep Figma spec** at `.claude/figma-summaries/<feature-slug>/deep/<section-slug>.md`. This file contains the full component hierarchy, all colors (with Spectrum token mappings), spacing, typography, interactive states (default/hover/focus/active/disabled/error), content copy, inter-component positioning, and asset names. Use this as the design source of truth — do NOT re-fetch Figma.
+
+   If the deep spec is missing for a section that `block-reuse.md` listed as `build-new`: stop, ask the user to trigger a targeted re-fetch (Step 2a.5) for the missing node before continuing.
 
 2. **Route to the correct agent:**
-   - If the charter's da-express-milo requirements include a `build-new` decision for this section (from `block-reuse.md`): implement the Spectrum component as a new block in `express/code/blocks/<block-name>/`. The full spec in the HTML comment is the design source of truth — use it directly instead of re-fetching Figma.
-   - If this section is NOT yet in the charter requirements: flag it as a gap via the **Gap Resolution Protocol** — ask the user whether to build it or defer it.
+   - `build-new` decision in `block-reuse.md` for this section → implement the block in `express/code/blocks/<block-name>/` using the deep spec as the authoritative design source.
+   - Section appears in `manifest.json spectrum_components` but is NOT in the charter requirements → flag via the **Gap Resolution Protocol** — ask the user whether to build it or defer it.
 
 3. **Never author Spectrum components into the docx via `add_block`.** A Spectrum component is not a content-layer Milo block — it is a code-layer block that the engineer builds. The docx only needs to represent sections that DA can author. If this section has no docx representation (it's pure JS/CSS), omit it from `build.py` and note the omission in the module docstring.
 
-4. **Pass the full spec to the code-scope sub-agent (Step 3c).** When generating the `code-scope.md` file for this block, quote the `SPECTRUM SPEC:` comment from the HTML verbatim as the "Design source" so the engineer has everything in one place without reading Figma.
+4. **Pass the full deep spec to the code-scope sub-agent (Step 3c).** When generating `code-scope.md` for this block, quote the deep spec file path and include the states table and token mappings verbatim — so the engineer has everything in one place without opening Figma.
 
 ### Spectrum vs vanilla JS — ask before committing (hard gate)
 
@@ -533,6 +732,17 @@ Record the answer. If **vanilla JS** is chosen, skip Steps S1–S7 below entirel
 ### Spectrum integration pattern (required reading before writing any Spectrum code)
 
 This repo has an existing Spectrum wrapper system scoped to color pages. Before writing any Spectrum code, work through this decision tree:
+
+**Step S0 — Build a catalog of all available SWC components (runs once per Spectrum feature, before any component decisions).**
+
+Fetch the SWC component index to get the complete list of what Spectrum Web Components ships:
+`https://opensource.adobe.com/spectrum-web-components/components/`
+
+From the index, extract every component name and its SWC tag (e.g. `button → sp-button`, `picker → sp-picker`, `sidenav → sp-sidenav`). Record this as a lookup table in your working context.
+
+**Why this matters:** Figma designs frequently use component names from the Spectrum design system vocabulary — `Picker`, `Tag`, `Search`, `Sidenav`, `Tray`. Without the full catalog, you cannot map a Figma component name to its `sp-*` tag. You would either guess wrong or build a custom component when a standard one exists. The catalog scan takes one request and eliminates this entire class of error for the rest of the feature build.
+
+After building the catalog, cross-reference it against the Figma design section names from the deep spec (Step 2a.5). For each Figma component name, identify whether it maps to an SWC component in the catalog. Record the mapping: `Figma name → sp-tag → wrapper exists? (yes/no)`. This mapping drives Steps S2–S4.
 
 **Step S1 — Read the internal docs first.**
 - `express/code/scripts/color-shared/spectrum/docs/USAGE.md` — architecture, loading model, theming
@@ -556,22 +766,39 @@ Look in `express/code/scripts/color-shared/spectrum/components/`. Existing wrapp
 
 If the component you need already has a wrapper → **import from `spectrum/index.js`**. Do NOT bypass the wrapper and use the SWC tag directly in markup — the wrapper handles loading, theming, and Express overrides.
 
+**Step S2b — Read the SWC docs for every component you will use (wrapper or not). This step is mandatory, not optional.**
+
+Fetch the docs page at runtime:
+`https://opensource.adobe.com/spectrum-web-components/components/<component-name>/`
+
+(e.g. `https://opensource.adobe.com/spectrum-web-components/components/picker/` for sp-picker,
+`https://opensource.adobe.com/spectrum-web-components/components/button/` for sp-button)
+
+Extract and record the full API surface before writing a single line of component code:
+
+| API surface | What to extract | Why it matters |
+|---|---|---|
+| **Attributes / properties** | Every attribute the element accepts (e.g. `size`, `quiet`, `emphasized`, `pending`, `disabled`) | Without this list you will hardcode the wrong attribute name or miss a variant that eliminates custom CSS |
+| **Variants** | Every named visual variant and how to activate it (attribute value vs boolean vs slot) | Figma designs often match a specific variant — if you don't know the variant exists you will recreate it in CSS instead |
+| **Slots** | Default slot, named slots, and what each accepts | Determines how you structure the inner HTML — getting slots wrong produces invisible or misplaced content |
+| **Events** | Event names, what triggers them, what `event.detail` contains | Needed for wiring state changes and analytics |
+| **CSS custom properties** | Token names the component exposes for override (e.g. `--spectrum-button-background-color`) | Use these in `spectrum/styles/<name>.css` — never override internal classes directly |
+| **Keyboard / ARIA** | Keyboard navigation model, implicit ARIA roles | Required for accessibility compliance |
+
+Store the extracted table in a `## Spectrum API — <component-name>` section of the deep Figma spec file (`.claude/figma-summaries/<feature-slug>/deep/<section-slug>.md`) so it travels with the design spec and the reviewer can compare built behaviour against documented behaviour in one place.
+
+**If the SWC docs page returns 404 or is missing for the component**, it means SWC does not have this component. Stop and inform the user — do not build a custom SWC-style component from scratch, as it will not load through the existing bundle system.
+
 **Step S3 — If no wrapper exists, check whether the bundle is available.**
 Open `express/code/scripts/color-shared/spectrum/load-spectrum.js`. Scan the `DIST` import list. If a `load<ComponentName>()` function exists → the bundle is already compiled. Create a new Express wrapper in `spectrum/components/express-<name>.js` following the pattern of an existing wrapper (e.g. `express-button.js`). Also add the loader call to `spectrum/index.js`.
 
-**Step S4 — If the bundle does NOT exist in `DIST`, consult the SWC docs.**
-Before building or adding any new bundle, check what the component supports:
-`https://opensource.adobe.com/spectrum-web-components/components/<component-name>/`
-(e.g. for sidenav: `https://opensource.adobe.com/spectrum-web-components/components/sidenav/`)
+**Step S4 — If the bundle does NOT exist in `DIST`, add it before wrapping.**
+You already read the SWC docs in Step S2b. Now use that API surface to:
+1. Confirm SWC ships the component (404 check done in S2b)
+2. Add the bundle to `DIST` per `express/code/scripts/color-shared/spectrum/docs/BUNDLER.md`
+3. Create a wrapper per Step S3
 
-From the docs page, extract:
-- What attributes/properties the component accepts
-- What events it fires (`change`, `click`, `sp-closed`, etc.)
-- What slots it uses (default slot, named slots)
-- What CSS custom properties it exposes for theming
-- Any known accessibility behaviour (keyboard, ARIA roles)
-
-Use this to determine whether SWC already supports the component. If it does, add the bundle to `DIST` per `express/code/scripts/color-shared/spectrum/docs/BUNDLER.md`, then create a wrapper per Step S3.
+Do NOT re-read the docs here — the API table from S2b is already in the deep spec file.
 
 **Step S5 — Always wrap in `<sp-theme system="spectrum-two" color="light" scale="medium">`.**
 Every Spectrum component must be inside an `sp-theme`. Use `createThemeWrapper()` from `spectrum/utils/theme.js` — do NOT create a raw `<sp-theme>` element inline.
@@ -748,6 +975,15 @@ Spawn this as a **separate sub-agent with no prior conversation context**. It ac
    - `--banner-bg` value → look up the Milo variant → verify `add_banner(doc, ..., variant=<expected>)` matches
    - `--cta-primary-bg` → should match `LINK_COLOR` constant (`1473E6`); if different, flag as **INFO** (CSS handles link colour on the live page, but the docx uses the constant — no docx fix needed, just document)
    - Do NOT flag font-size or font-weight values — those come from CSS on the live page, not from the docx. Only heading *level* mismatches (Dimension 4) and block *variant* mismatches (this dimension) are actionable.
+
+   **Contextual styling exemption — check before flagging any color or style mismatch.**
+   Before raising any color, button style, or visual treatment discrepancy as a finding, cross-reference `block-reuse.md` for the section being reviewed. If the `**Contextual styling notes:**` field for that section is non-empty, evaluate whether the Figma color/style matches a contextual gate that would NOT be active on the target page:
+
+   - If the Figma captures a state that requires a sibling block (e.g. `.ax-columns.highlight` in the same section) and the target page does not have that sibling → the visual difference is **expected**. Record it as `CONTEXT-EXEMPT` (severity INFO) with the explanation from the note. Do NOT raise as WRONG-VARIANT or COPY-MISMATCH.
+   - If a Figma color matches a `getMetadata(...)` variant that is not set in the target page's metadata → same: `CONTEXT-EXEMPT` (INFO).
+   - If no contextual note exists for the section and the color/style differs from Figma → raise normally as WRONG-VARIANT or INFO.
+
+   The rule: **never propose a CSS or code change to make the page match a Figma color that was produced by a contextual condition absent from the target page.** The Figma is showing you a different page's rendering, not the target page's intended state.
 
 4. **Write the report** to `.claude/analysis/<feature-slug>/doc-review.md`:
 

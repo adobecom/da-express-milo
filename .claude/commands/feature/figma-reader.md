@@ -73,7 +73,13 @@ From each `design_frame` / `platform_variant` result, extract:
 - **Color values** (`#hex`)
 - **Typography** (font family, size, weight per element type)
 - **Layout** (two-column? stacked? max-width? centering?)
-- **Component names** from the layer tree (these may map directly to block names in code)
+- **Component names and frame names** from the layer tree — record the exact Figma name verbatim, then resolve it to a block + variant using this three-pass lookup:
+
+  **Pass 1 — exact match:** Check whether the Figma name exactly matches a folder under `express/code/blocks/`. If it does, record `data-block="<name>"` and stop. Do NOT override with visual pattern-matching.
+
+  **Pass 2 — semantic/substring match:** If no exact match, check whether the Figma name *contains* a known block folder name as a substring (case-insensitive, treat hyphens/underscores/spaces as equivalent). If a block folder name is found as a substring, extract it as the block and treat the remaining text as a variant/descriptor hint. Record `data-block="<block>"` and `data-variant-hint="<remaining text>"` separately so the block-reuse analyzer can verify the variant against the block's actual CSS. Do NOT override with visual pattern-matching.
+
+  **Pass 3 — visual fallback:** Only if both passes produce no match, infer from the visual pattern table in Step F5.
 - Any **designer annotations** — text nodes outside the main frame boundary, sticky notes, comment labels
 
 From each `component_library` result, extract for every component variant found:
@@ -250,14 +256,19 @@ The file structure:
 
 1. **One `<section>` per Milo section** (separated by `---` in the docx). Assign `data-block` to the exact Milo block name that should appear in the docx header row. Assign `data-milo-helper` to the Python helper that produces it.
 
-2. **Infer `data-block` from the Figma pattern** using this mapping — pick the first match:
+2. **Assign `data-block`** — always check the Figma layer/component name FIRST before visual pattern-matching:
+
+   **Rule 1 (hard, takes priority):** If the Figma frame or component name matches a folder under `express/code/blocks/` — assign that name as `data-block` directly. Do not override it with a visual pattern match. Examples: a frame named `how-to-v2` → `data-block="how-to-v2"`, a frame named `ax-columns` → `data-block="ax-columns"`, a frame named `icon-carousel` → `data-block="icon-carousel"`. This rule fires whenever the name is unambiguous.
+
+   **Rule 2 (fallback):** If the Figma name does NOT directly match a block folder, infer `data-block` from the visual pattern using this mapping — pick the first match:
 
    | Figma pattern | `data-block` | `data-milo-helper` |
    |---|---|---|
    | Large h1 + upload drop zone + file-type list + ToS copy, desktop width | `frictionless-quick-action` | `add_frictionless_quick_action` |
    | Large h1 + upload drop zone + file-type list + ToS copy, mobile/narrow | `frictionless-quick-action-mobile` | `add_frictionless_quick_action_mobile` |
    | Large h1 + CTA button + animation area, no upload zone | `columns (fullsize)` | `add_columns_fullsize_hero` |
-   | Numbered/icon + title + body rows | `steps (highlight, image, schema)` | `add_how_to_steps` |
+   | Background img + media img + numbered accordion steps (how-to-v2 pattern) | `how-to-v2` | `add_block("how-to-v2", ...)` |
+   | Per-step icons + title + body rows, all steps visible simultaneously | `steps (highlight, image, schema)` | `add_how_to_steps` |
    | Image + heading + paragraph (one pair) | `columns` | `add_content_column` |
    | Full-width coloured band with heading | `banner` | `add_banner` |
    | Horizontal list of text links/pills | `link-list` | `add_link_list` |

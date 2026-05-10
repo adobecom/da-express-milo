@@ -401,6 +401,7 @@ These three always appear together in the order below. Each is gated by a `secti
 | Helper | Docx header | Live output | Notes |
 |---|---|---|---|
 | `add_how_to_steps(...)` | `steps (highlight, image, schema)` | Icon-left, title+body-right rows. Auto-emits an h2 paragraph above the block. Schema variant injects HowTo JSON-LD unless suppressed by `show-howto-schema: no`. | `steps` param overrides variant string |
+| `add_how_to_cards(...)` | `how-to-cards` or `how-to-cards (summary)` | Numbered card carousel. Optional header row (H2 + body). Card rows are single-column (h3 + p). JS auto-adds step numbers — do NOT author them. `summary` variant replaces numbers with per-card icons (picture as first child). `schema` modifier injects HowTo JSON-LD. **Use this block for any "icon + title + body" horizontal card pattern** — the `summary` variant covers it without a new block. | Derived from [how-to-cards.js:168–221](express/code/blocks/how-to-cards/how-to-cards.js) |
 | `add_content_column(...)` | `columns` | Single row with image on one side, h2 + body text on the other. `image_side` param swaps order. | Use alternating left/right across sequential calls |
 | `add_link_list(...)` | `link-list` | h3 heading + one paragraph per link. Renders as a horizontal pill-link rail on the live page. | Typically used for "Discover even more" cross-links |
 | `add_banner(...)` | `banner` or `banner (variant)` | Full-width promotional band. Pass `variant=None` (Python `None`, **not** the string `"default"`) for the default indigo band — header row reads `banner` with no parentheses. Optional `cta` tuple renders a pill button. | **Color → variant:** `#5C5CE0` indigo = `None` (default); `#0070F2` blue = `'cool'`; `#F5F5F5` near-white = `'light'`; `#272727` near-black = `'standout'`. Layout-only (no bg change): `'compact'`, `'narrow'`. |
@@ -794,6 +795,59 @@ def add_how_to_steps(
         for s in steps
     ]
     return add_block(doc, f"steps ({variant})", rows, col_widths=list(col_widths))
+
+
+def add_how_to_cards(
+    doc, *, cards, heading=None, body=None,
+    variant=None, schema=False,
+    col_widths=(6.6,),
+):
+    """Numbered how-to card carousel. Derived from how-to-cards.js:168-221.
+
+    Row schema (from JS init()):
+      Row 0 (optional): single-column — H2 + body paragraph.
+                        JS line 177: steps[0].querySelector('h2') → .text class.
+                        Omit entirely if no heading is needed.
+      Rows 1-N:         single-column — h3 title + p body per card.
+                        JS line 182: each remaining div becomes a card <li>.
+                        JS auto-adds step number circle — do NOT author numbers in h3.
+
+    variant: None (default numbered) or 'summary' (icons instead of numbers).
+    schema:  True adds 'schema' modifier → HowTo JSON-LD injected at runtime.
+
+    For 'summary' variant, each card dict may include 'icon_url' and 'icon_alt'.
+    The icon picture must be the FIRST child of the card cell (JS line 156-163:
+    firstElement is PICTURE → promoted to step-icon). Pass icon_width=0.6 for 40px icons.
+
+    cards: list of dicts with keys: title (str), body (str),
+           and optionally icon_url + icon_alt (summary variant only).
+    """
+    modifiers = []
+    if variant:
+        modifiers.append(variant)
+    if schema:
+        modifiers.append('schema')
+    block_name = "how-to-cards" if not modifiers else f"how-to-cards ({', '.join(modifiers)})"
+
+    rows = []
+    # Row 0 — optional header text section (JS line 177-181)
+    if heading:
+        header_content = [('h', 2, heading)]
+        if body:
+            header_content.append(('p', [('text', body)]))
+        rows.append([header_content])
+
+    # Card rows — JS line 182: content = div.querySelector('div')
+    for card in cards:
+        cell = []
+        # summary variant: icon picture MUST be first child (JS line 156-163)
+        if variant == 'summary' and card.get('icon_url'):
+            cell.append(('img', card['icon_url'], card.get('icon_alt', ''), 0.6))
+        cell.append(('h', 3, card['title']))     # JS line 115: step.querySelector('h3')
+        cell.append(('p', [('text', card['body'])]))  # JS line 116: step.querySelector('p')
+        rows.append([cell])
+
+    return add_block(doc, block_name, rows, col_widths=list(col_widths))
 
 
 def add_content_column(
