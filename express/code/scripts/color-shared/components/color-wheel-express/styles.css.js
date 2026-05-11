@@ -121,8 +121,7 @@ export const style = css`
     }
 
     .wheel-marker-overlay:focus,
-    .wheel-marker-overlay--kb-focused,
-    .wheel-marker-overlay--active {
+    .wheel-marker-overlay--kb-focused {
         outline: 2px solid var(--Alias-content-semantic-accent-key-focus);
         outline-offset: 2px;
         z-index: 20;

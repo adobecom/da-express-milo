@@ -103,6 +103,15 @@ export class ColorWheelExpress extends ColorWheel {
     this._resizeObserver.observe(this.container);
 
     this.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab' && !e.shiftKey && !this.shadowRoot?.activeElement) {
+        const firstMarker = this.shadowRoot?.querySelector('.wheel-marker-overlay[data-index="0"]');
+        if (firstMarker) {
+          e.preventDefault();
+          this._kbFocusIndex = 0;
+          firstMarker.focus({ preventScroll: true });
+        }
+        return;
+      }
       if (e.key === 'Enter' && this._kbFocusIndex < 0) {
         e.preventDefault();
         const firstMarker = this.shadowRoot?.querySelector('.wheel-marker-overlay[data-index="0"]');
@@ -222,7 +231,7 @@ export class ColorWheelExpress extends ColorWheel {
     marker.style.transform = 'translate(-50%, -50%)';
     marker.dataset.index = index;
     marker.setAttribute('role', 'button');
-    marker.setAttribute('tabindex', '-1');
+    marker.setAttribute('tabindex', '0');
 
     // Visible marker is 33px; below Apple HIG's 44px minimum tap target.
     // Users on iOS overshoot the dot and land on the canvas instead, which
@@ -350,17 +359,6 @@ export class ColorWheelExpress extends ColorWheel {
       case 'ArrowLeft': e.preventDefault(); this._moveMarkerByKey(index, -step, 0); break;
       case 'ArrowUp': e.preventDefault(); this._moveMarkerByKey(index, 0, step); break;
       case 'ArrowDown': e.preventDefault(); this._moveMarkerByKey(index, 0, -step); break;
-      case 'Tab': {
-        e.preventDefault();
-        const count = this.swatches.length;
-        const next = e.shiftKey ? (index - 1 + count) % count : (index + 1) % count;
-        const nextMarker = this.shadowRoot?.querySelector(`.wheel-marker-overlay[data-index="${next}"]`);
-        if (nextMarker) {
-          this._kbFocusIndex = next;
-          nextMarker.focus({ preventScroll: true });
-        }
-        break;
-      }
       case 'Escape':
         e.preventDefault();
         this._kbFocusIndex = -1;
@@ -614,6 +612,7 @@ export class ColorWheelExpress extends ColorWheel {
     event.stopPropagation();
 
     if (isRightMouseButtonClicked(event)) return;
+    event.currentTarget?.focus?.({ preventScroll: true });
 
     // Paint the active ring optimistically — the controller fan-out (deep
     // clone state + Lit re-render across ~6 subscribers) can take many ms
