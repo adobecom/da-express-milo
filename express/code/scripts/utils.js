@@ -422,12 +422,24 @@ export function hideQuickActionsOnDevices(userAgent) {
   }
   // latest setup that supports safari frictionless, enabled by metadata
   // fqa-non-qualified: always removed. (before: safari)
-  // fqa-qualified-mobile: mobile only. (before: non-safari mobile)
+  // fqa-qualified-ios: iOS mobile only.
+  // fqa-qualified-android: Android mobile only.
+  // fqa-qualified-mobile: mobile only. (before: non-safari mobile) — kept for backwards compat
   // fqa-qualified-desktop: desktop only. (before: non-safari desktop)
   const audienceFqaMeta = document.createElement('meta');
   audienceFqaMeta.setAttribute('content', 'on');
   if (getMetadata('frictionless-safari')?.toLowerCase() === 'on' || isQualifiedBrowser) {
-    audienceFqaMeta.setAttribute('name', `fqa-qualified-${isMobile ? 'mobile' : 'desktop'}`);
+    if (isMobile) {
+      const os = getMobileOperatingSystem();
+      audienceFqaMeta.setAttribute('name', os === 'Android' ? 'fqa-qualified-android' : 'fqa-qualified-ios');
+      // also inject fqa-qualified-mobile so sections targeting both iOS + Android still show
+      const mobileFqaMeta = document.createElement('meta');
+      mobileFqaMeta.setAttribute('name', 'fqa-qualified-mobile');
+      mobileFqaMeta.setAttribute('content', 'on');
+      document.head.append(mobileFqaMeta);
+    } else {
+      audienceFqaMeta.setAttribute('name', 'fqa-qualified-desktop');
+    }
   } else {
     audienceFqaMeta.setAttribute('name', 'fqa-non-qualified');
   }
@@ -455,7 +467,7 @@ export function preDecorateSections(area) {
             || urlParams.get(`${sectionMeta.showwith}`);
         }
         const showwith = sectionMeta.showwith.toLowerCase();
-        if (['fqa-off', 'fqa-on', 'fqa-non-qualified', 'fqa-qualified-mobile', 'fqa-qualified-desktop'].includes(showwith)) hideQuickActionsOnDevices(navigator.userAgent);
+        if (['fqa-off', 'fqa-on', 'fqa-non-qualified', 'fqa-qualified-mobile', 'fqa-qualified-desktop', 'fqa-qualified-ios', 'fqa-qualified-android'].includes(showwith)) hideQuickActionsOnDevices(navigator.userAgent);
         sectionRemove = showWithSearchParam !== null ? showWithSearchParam !== 'on' : getMetadata(showwith) !== 'on';
       }
       if (sectionRemove) section.remove();

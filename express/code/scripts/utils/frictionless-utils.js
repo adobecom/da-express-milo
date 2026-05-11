@@ -1,4 +1,4 @@
-import { getLibs } from '../utils.js';
+import { getLibs, getMobileOperatingSystem } from '../utils.js';
 
 // Shared constants and configurations for frictionless quick actions
 const JPG = 'jpg';
@@ -160,6 +160,12 @@ export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
 export const AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   removeBackground: 'remove-background',
 };
+
+export function shouldShowVideoQuickActionPickerForMobile(quickAction, file) {
+  return quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.videoEditor
+    && getMobileOperatingSystem() === 'iOS'
+    && file?.type?.startsWith('video/');
+}
 
 // Route paths map corresponding to the express routes
 export const EXPRESS_ROUTE_PATHS = {
