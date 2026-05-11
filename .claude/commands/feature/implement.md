@@ -232,6 +232,12 @@ For every block in the candidate shortlist, read both source files before making
    - What variants are gated by `classList.contains()` — these are the valid authored variants
    - What interactive behaviour the block produces
 
+   **Heading-inside-block rule:**
+   Before assuming a block's section heading belongs as a standalone `<h2>` before the block, check whether the JS reads its heading from `rows.shift()` (or an equivalent positional row consume). If it does, the heading is the **first row of the block table itself** — not an external paragraph. Record it in the authoring schema as a positional row: `"Row 0: heading row (single-cell, merged — consumed by rows.shift() as section title)"`. Do not use a standalone heading helper before such a block.
+
+   **Block-not-matching rule:**
+   When investigating a candidate block, if reading its JS and CSS reveals that no available variant fully satisfies the visual requirement (e.g. background treatment, border style, or layout differs from the design), do not finalise on that block — flag it as **insufficient** and extend the candidate list. A block whose name partially matches is not necessarily the right block; other blocks in the same family may have the correct variant. Exhaust all semantically related candidates before settling on one or escalating to `build-new`.
+
    **Contextual styling gates** (determines what the reviewer must not flag as bugs):
    While reading the same file, look for code that changes visual appearance based on the *surrounding page* rather than the block's own authored content. Flag every instance:
 
@@ -256,6 +262,12 @@ Assign one of: `reuse-as-is` / `reuse-extend` / `reuse-modify` / `fork-new-varia
 
 Only reach `build-new` if all investigated candidates fail on structure or behaviour. A `build-new` decision must name every candidate investigated and explain specifically why each was rejected.
 
+When you assign `build-new`, also assign a sub-type — this drives whether the component is built in the current session or deferred to a dedicated fresh session:
+
+- **`build-new:heavy`** — a component containing multiple interactive sub-components, complex state machines, or custom Spectrum builds. It has a self-contained DOM hierarchy (sticky panels, picker grids, multi-component layouts) that does NOT follow the standard `decorate(block)` authored-table pattern. **This component is SKIPPED in the current session.** A handoff digest is written at `.claude/handoffs/<feature-slug>/<component-slug>-handoff.md` and a new session is dispatched at Step 7. Signals: Figma frame has 5+ distinct named sub-components; `data-block="unknown"` Spectrum spec entries exist; the block manages its own internal state; it is scoped to one specific page or tool.
+
+- **`build-new:light`** — a reusable block that follows the standard `decorate(block)` pattern: its structure comes from authored AEM table rows, it is content-configurable, it can be dropped on any page. Figma governs visual treatment and variant states, but `express-milo-block-patterns.mdc` governs structure. **This component is built in the current session.** Signals: the block will live under `express/code/blocks/<name>/` and be usable anywhere; its content is authored by content editors, not hardcoded; static or minimal interactivity.
+
 **Hard rules:**
 - Never finalise without reading `.js` + `.css` for every candidate. A block that looks right by name may have the wrong row structure.
 - Never skip the candidate list because "it seems obvious." The obvious choice has been wrong before.
@@ -279,11 +291,11 @@ Only reach `build-new` if all investigated candidates fail on structure or behav
 ```markdown
 ## <requirement label from charter>
 
-**Decision:** reuse-as-is | reuse-extend | reuse-modify | fork-new-variant | build-new
+**Decision:** reuse-as-is | reuse-extend | reuse-modify | fork-new-variant | build-new:heavy | build-new:light
 **Anchor block:** `express/code/blocks/<block>/` (if reuse) or `n/a` (if build-new)
 **Candidates investigated:** `block-a` (rejected — reason), `block-b` (rejected — reason), `block-c` (chosen)
 **Why:** <one-paragraph reasoning citing specific JS line or CSS class that confirmed or rejected each candidate>
-**Change surface:** <one-paragraph — what exactly changes; for `reuse-as-is` write "no code change; content authoring only">
+**Change surface:** <one-paragraph — what exactly changes; for `reuse-as-is` write "no code change; content authoring only"; for `build-new:heavy` write "deferred — new session dispatch at Step 7">
 **Loading phase:** E | L | D (per aem-franklin-loading-phases.mdc)
 **Contextual styling notes:** <list of contextual gates found in JS — or "none" if the block has no contextual visual gating>
 ```
@@ -293,8 +305,9 @@ Return a summary object to the orchestrator (one object per sub-agent, one requi
 ```
 {
   requirement: "<requirement label from charter>",
-  decision: "reuse-as-is | reuse-extend | reuse-modify | fork-new-variant | build-new",
+  decision: "reuse-as-is | reuse-extend | reuse-modify | fork-new-variant | build-new:heavy | build-new:light",
   anchor_block: "express/code/blocks/<block>/ | n/a",
+  build_new_subtype: "heavy | light | null",
   candidates_investigated: ["block-a (rejected — reason)", "block-b (chosen)"],
   contextual_styling_notes: ["<condition at file:line> → <visual effect>"],
   highest_risk: "<one sentence if this requirement is the riskiest — else omit>"
@@ -307,75 +320,41 @@ The orchestrator merges all N objects into `.claude/analysis/<feature-slug>/bloc
 
 ### 2a.5. Build-New Figma Deep-Extraction Sub-Agent *(runs after all 2a agents return)*
 
-**Trigger:** any requirement returned `build-new` or `fork-new-variant` from Step 2a.
+**Trigger:** any requirement returned `build-new:light` or `fork-new-variant` from Step 2a.
 
-**Why this step exists:** For blocks that will be built from scratch, the figma-reader summary collected during discovery is often too shallow — it captures the top-level frame but misses component hierarchy, exact spacing, all interactive states, and token mappings. A code reviewer comparing the built block against Figma needs all of that detail. This step fetches it once, before implementation begins, so engineers don't have to re-open Figma mid-build.
+**`build-new:heavy` items are NOT processed here.** For each heavy item, write a handoff digest to `.claude/handoffs/<feature-slug>/<component-slug>-handoff.md` (see Step 7) and skip deep extraction entirely. Heavy components are dispatched to a fresh session at the end of the current run — their deep extraction happens there with a clean context window.
 
-**Orchestration:** Spawn **one sub-agent per `build-new` / `fork-new-variant` requirement**, all in parallel. Each sub-agent receives:
-1. The requirement label and its Figma node ID (from `.claude/figma-summaries/<feature-slug>/manifest.json` — use the `design_frame` node ID for the matching section)
-2. The feature slug
-3. A target output path: `.claude/figma-summaries/<feature-slug>/deep/<section-slug>.md`
+**Why this step exists:** The figma-reader summary from discovery captures the top-level frame but misses component hierarchy, exact spacing, all interactive states, and token mappings. This step fetches that depth once, before implementation begins, so engineers do not have to re-open Figma mid-build.
 
-**Each sub-agent's job — extract the following from the Figma node:**
+**Orchestration:** Spawn **one sub-agent per `build-new:light` / `fork-new-variant` requirement**, all in parallel. Prompt each sub-agent:
 
-1. **Component hierarchy** — the full layer tree for the section frame. For each named layer, record: layer name, Figma component name (if it is a component instance), parent-child relationships.
+> "You are the Figma Reader Sub-Agent. Read the **Deep Extraction Mode** section of `.claude/commands/feature/figma-reader.md` and execute it with:
+> - File key: `<file-key>` Node ID: `<node-id>` (from `manifest.json` — use `design_frame` for this section)
+> - Sub-type: `build-new:light` (determined by the block-reuse decision in Step 2a)
+> - Output path: `.claude/figma-summaries/<feature-slug>/deep/<section-slug>.md`"
 
-2. **Colors** — every fill and stroke color in the frame, as hex values. If a Spectrum token name is visible in the Figma layer (e.g. `--spectrum-blue-900`), record the mapping: `hex → token name`.
+The full extraction instructions — what to call, what to extract, how deep to go per sub-type, and the output format — live in figma-reader.md. Do not inline them here.
 
-3. **Spacing and layout** — padding, gap, margin, border-radius for every distinct region. Record in pixels. Note which values align to a Spectrum spacing token (e.g. 8px = `--spectrum-spacing-100`).
+**Hard rules (orchestrator level):**
+- If a node ID is missing from `manifest.json` for a `build-new:light` section, ask the user for the Figma URL of that specific frame before spawning — do not skip the extraction.
+- Never spawn a deep extraction sub-agent for a `build-new:heavy` item — their extraction runs in the fresh session, not here.
+- The deep spec is a **design reference**, not an implementation blueprint. It captures what the designer intended visually. The implementation must follow repo rules and guidelines — not replicate Figma constructs verbatim. See the translation rule below.
 
-4. **Typography** — font family, size, weight, line-height, color for every distinct text style in the frame. If it maps to a Spectrum type token, record the mapping.
+**Figma → Code translation rule (applies to every `build-new` implementation that uses a deep spec):**
 
-5. **Interactive states** — for every interactive element (button, input, picker, checkbox, radio, toggle): document default, hover, focus, active, disabled, and error states. Include color changes per state. If the Figma file has a component variants panel for this element, fetch all variant properties.
+Figma files are design tools, not code specs. They frequently contain constructs that look right in a static canvas but are wrong or harmful in production HTML/CSS. When you read the deep spec and build the component, apply these translations:
 
-6. **Content copy** — every visible text string, verbatim, with its role (heading level, label, placeholder, helper text, error message, button label).
-
-7. **Inter-component positioning** — for compound components (e.g. label + input + helper text stacked, or icon + button side-by-side): describe the spatial relationship and alignment (top-aligned, centered, gap size).
-
-8. **Asset names** — every icon, illustration, or image in the frame: layer name, file format hint if discernible, dimensions.
-
-**Output file format:** `.claude/figma-summaries/<feature-slug>/deep/<section-slug>.md`
-
-```markdown
-# Deep Figma Spec — <requirement label>
-Node ID: <node-id>
-Fetched: <YYYY-MM-DD>
-
-## Component Hierarchy
-<layer tree — indented list>
-
-## Colors
-| Hex | Token (if mapped) | Used on |
+| Figma pattern | Do NOT replicate | Build instead |
 |---|---|---|
+| Text inside an image / text baked into artwork | Do not extract as an `<img>` with the text invisible to screen readers | Implement as real HTML text styled with CSS to match the visual intent |
+| Absolute pixel positions (`x: 120, y: 48`) | Do not use `position: absolute` with hardcoded offsets | Use flex / grid layout; translate pixel gaps to `--spectrum-spacing-*` tokens or CSS custom properties |
+| Fixed pixel sizes for spacing (`padding: 32px`) | Do not hardcode — spacing will break at different screen sizes | Map to the nearest Spectrum spacing token or `var(--spacing-*)` from the repo token system |
+| Flat decorative layers (gradient overlays, shadow shapes drawn as rectangles) | Do not add extra DOM nodes to replicate Figma's layer structure | Use CSS `background`, `box-shadow`, `::before`/`::after` pseudo-elements |
+| Components rendered as a flat group (designer flattened for simplicity) | Do not build a single monolithic `<div>` with inline styles | Decompose into the correct semantic HTML hierarchy per repo component decomposition rules |
+| Figma auto-layout with fixed column widths | Treat column counts and rough proportions as the intent | Use CSS Grid with `fr` units, not `width: 248px` |
+| Colors as raw hex values | Do not hardcode hex in CSS | Map to the nearest Spectrum token or repo CSS custom property; only use raw hex if no token maps within reasonable tolerance |
 
-## Spacing & Layout
-<paddings, gaps, border-radii per region>
-
-## Typography
-| Element | Font | Size | Weight | Line-height | Token |
-|---|---|---|---|---|---|
-
-## Interactive States
-### <Component name>
-| State | Background | Border | Text color | Icon color |
-|---|---|---|---|---|
-
-## Content Copy
-| Role | Text |
-|---|---|
-
-## Inter-component Positioning
-<describe compound arrangements>
-
-## Assets
-| Layer name | Dimensions | Format hint |
-|---|---|---|
-```
-
-**Hard rules:**
-- Do not re-fetch what the main figma-summary already captured clearly. Focus on depth (states, tokens, hierarchy) not repetition of top-level copy already in the summary.
-- If a node ID is missing from `manifest.json` for a `build-new` section, ask the user for the Figma URL of that specific frame before proceeding — do not skip the extraction.
-- The output file is the design source of truth for Step M3.6 and the code-scope sub-agent. Quote it verbatim rather than re-reading Figma during implementation.
+**The guiding principle:** Figma shows you *what* the designer wants to achieve. The repo rules tell you *how* to achieve it in code. Use the deep spec to understand the visual goal — spacing rhythm, hierarchy, states, copy — then build it the way the codebase expects, not the way Figma drew it.
 
 ---
 
@@ -401,7 +380,7 @@ Fetched: <YYYY-MM-DD>
 > - `add_content_column` — alternating image/text columns block
 > - `add_banner` — promo banner (default variant = indigo `#5c5ce0` solid band)
 > - `add_link_list` — "Discover even more" style pill rail
-> - `add_faq` — FAQ accordion (emits section heading automatically)
+> - `add_faq` — FAQ accordion. **WARNING — do NOT use for `faqv2 (expandable)`**: `add_faq` emits the heading as a standalone H2 OUTSIDE the block table, but `faqv2.js` reads its section title from `rows.shift()` (the first row of the block table). Using `add_faq` causes the first Q&A pair to be consumed as the accordion title and one FAQ item is silently lost. Use `add_block(doc, 'faqv2 (expandable)', [[heading_row], [q|a], ...])` directly instead, with the heading as a single-cell first row.
 > - `add_breadcrumbs` — breadcrumb trail
 > - `add_metadata` — page metadata block (accepts a dict)
 > - `add_showwith` / `add_section_metadata` — section-metadata gating
@@ -702,7 +681,7 @@ The primary design source for every `build-new` section is the deep Figma spec p
 
 The Implementation Agent must:
 
-1. **Read the deep Figma spec** at `.claude/figma-summaries/<feature-slug>/deep/<section-slug>.md`. This file contains the full component hierarchy, all colors (with Spectrum token mappings), spacing, typography, interactive states (default/hover/focus/active/disabled/error), content copy, inter-component positioning, and asset names. Use this as the design source of truth — do NOT re-fetch Figma.
+1. **Read the deep Figma spec** at `.claude/figma-summaries/<feature-slug>/deep/<section-slug>.md`. This file contains the full component hierarchy, all colors (with Spectrum token mappings), spacing, typography, interactive states (default/hover/focus/active/disabled/error), content copy, inter-component positioning, and asset names. Use it as a **design reference** — it tells you what the designer intended visually. Do NOT re-fetch Figma. Do NOT replicate Figma constructs verbatim: the implementation must follow repo rules and the Figma → Code translation rule in Step 2a.5. Figma shows the *what*; the codebase tells you the *how*.
 
    If the deep spec is missing for a section that `block-reuse.md` listed as `build-new`: stop, ask the user to trigger a targeted re-fetch (Step 2a.5) for the missing node before continuing.
 
@@ -944,7 +923,7 @@ Spawn this as a **separate sub-agent with no prior conversation context**. It ac
    For each `<section>` in the HTML, compare `data-block` value against the first argument of the corresponding helper call in `build.py`:
    - HTML `data-block="frictionless-quick-action"` → `build.py` must call `add_frictionless_quick_action(...)`. Flag mismatch as **WRONG-BLOCK**.
    - HTML `data-block="banner"` with `data-banner-variant="cool"` → `build.py` must call `add_banner(doc, ..., variant='cool')`. Flag wrong or missing variant as **WRONG-VARIANT**.
-   - For banner specifically: compare `--banner-bg` hex in `tokens.css` against the variant in `build.py` using the color→variant table in `tokens.css` comments.
+   - When the HTML snapshot's `data-block` value does not match the block name in `build.py`, verify whether the two are the same block (variant mismatch → **WRONG-VARIANT**) or different blocks in the same family (e.g. `banner` vs a sibling block with a different name → **WRONG-BLOCK**). Use `ls express/code/blocks/` to check if a same-family block exists before flagging.
 
    **Dimension 3 — Copy accuracy**
    For each section, compare every text node in the HTML against the corresponding argument in `build.py`:
@@ -1172,7 +1151,9 @@ Work through `code-scope.md` in this fixed order:
 1. **Content-layer-only changes first** — these are just new AEM pages / metadata flips, no code
 2. **`reuse-extend` changes** — adding config entries (`QA_CONFIGS`, `quickActionMap` branches)
 3. **`reuse-modify` changes** — editing existing block JS/CSS
-4. **`fork-new-variant` and `build-new`** — scaffolding new block folders last, since they carry the most risk
+4. **`fork-new-variant` and `build-new:light`** — scaffolding new block folders last, since they carry the most risk
+
+**`build-new:heavy` items do not appear in this order.** They were skipped at Step 2a.5 and will be dispatched to a new session at Step 7 — do not implement them here.
 
 For every file edit, before writing:
 1. Load the Phase-B rule(s) listed in the file's `code-scope.md` entry.
@@ -1180,10 +1161,36 @@ For every file edit, before writing:
 3. Apply the rule. Edit the file.
 4. If a change would exceed the file's declared loading-phase budget (Phase E 100KB), stop — flag back to the user; do not silently spill into a different phase.
 
+**When to call `mcp__figma__get_design_context` during implementation:**
+The Step 2a.5 hard rule (call `get_design_context` for every build-new section) applies there because you're building from scratch. The same need arises mid-implementation whenever you are constructing new DOM structure from a Figma spec — even inside a `reuse-modify` or `reuse-extend` block:
+- Adding a new variant or visual state that has a corresponding Figma frame → call `get_design_context` on that frame before building it
+- Adding a new sub-component (new card type, new panel section, new overlay) → call `get_design_context` on its node
+- Changing only CSS values, config entries, or copy (no new DOM) → text summary and existing code are sufficient; no `get_design_context` needed
+
+Rule of thumb: if you are writing `document.createElement` calls that didn't exist in the block before, you need `get_design_context` for the Figma frame those elements come from.
+
 If during implementation you discover the scope is wrong (missing file, incorrect phase assignment, a block-reuse decision that no longer holds):
 - Do NOT improvise. Stop.
 - Tell the user: "Scope drift detected: <specific>. Should I re-run the Code-Change Scope sub-agent, or adjust inline?"
 - Wait for direction.
+
+**Content fidelity rule:**
+All text visible in the Figma design — labels, button copy, placeholder strings, category names, suggestion phrases, card titles — is a product requirement. Copy it verbatim into code constants. Do not substitute, paraphrase, or invent placeholder text. A text mismatch is a product bug, not a polish item.
+
+Before copying any text string from Figma, check the charter's "Decisions Made During Clarification" table for a `Source: wiki override` entry covering that element. If one exists, use the wiki string — Figma was captured before the copy was finalised and is stale for that element. Do not re-open the question or silently revert to Figma.
+
+**Precedence: charter override → wiki explicit copy → Figma verbatim.**
+
+The charter is the single source of truth for resolved conflicts. If a string feels wrong but has no charter override, flag it to the user rather than substituting your own text.
+
+**Icon fidelity rule:**
+Before referencing any icon by file path, run `ls express/code/icons/` to confirm the file exists. Do not assume a file is present because the Figma layer names it — the icon folder contains Express-specific and brand SVGs, not the full Spectrum S2 icon set. Use this decision tree:
+
+1. **Figma names a Spectrum 2 icon** (`S2_Icon_*`): use an `sp-icon-<kebab-name>` custom element (e.g. `S2_Icon_Copy_20_N` → `sp-icon-copy`). Create with `document.createElement('sp-icon-<name>')`. These elements register via `icons-workflow.js`, which loads transitively through `loadCoreDeps()` — called by every `load-spectrum.js` loader. Size with CSS `width`/`height`; tint with CSS `color` (the SVG uses `currentColor`). Elements created before the bundle loads upgrade progressively — this is safe.
+
+2. **Simple geometric icon with no Spectrum equivalent**: build inline SVG via `document.createElementNS` with `fill="currentColor"`, so CSS `color` controls appearance with no external dependency.
+
+3. **Express-specific file confirmed present via `ls`**: use `<img src="/express/code/icons/filename.svg">` with explicit `width`, `height`, and `aria-hidden="true"`.
 
 **Do not:**
 - Add features, refactor adjacent code, or introduce abstractions beyond the scope.
@@ -1305,6 +1312,149 @@ Next steps (out of scope for this agent):
   - (If not deferred) Nala / unit test agent consumes test-plan.md
   - PR agent opens the PR
 ```
+
+---
+
+### Step 7b — Heavy-Build Dispatch *(runs only if any `build-new:heavy` items were deferred)*
+
+**Skip entirely if no `build-new:heavy` decisions exist in `block-reuse.md`.**
+
+**Step 1 — Write handoff digest for each heavy item**
+
+For each `build-new:heavy` requirement, write `.claude/handoffs/<feature-slug>/<component-slug>-handoff.md`:
+
+```markdown
+---
+type: build-new-heavy-handoff
+feature: <feature name>
+charter: .claude/charters/<key>.md
+component: <component name>
+figma_file_key: <file key from charter frontmatter>
+figma_node_id: <node ID from manifest.json design_frame for this section>
+date: <YYYY-MM-DD>
+---
+
+## What to build
+<verbatim charter requirement for this component only>
+
+## Why this was deferred
+build-new:heavy — <reason from block-reuse decision: e.g. "5 distinct sub-components (font picker, preview panel,
+category rail, suggestion grid, thumbnail carousel); 3 Spectrum custom builds; self-contained state machine">
+
+## Block-reuse decision
+<paste the full block-reuse.md entry for this requirement>
+
+## Decisions from Discovery — read the charter
+
+Read `.claude/charters/<key>.md` — specifically the `## Decisions Made During Clarification` table.
+Every row in that table is a hard constraint resolved during the discovery clarification round.
+Do NOT re-ask them. Do NOT re-derive them from Figma or the codebase.
+These override anything you observe in Figma or infer from code.
+
+## Step 1 — Figma deep extraction (FIRST ACTION — do this before reading requirements or writing any code)
+
+**Hard gate:** do not plan, do not scaffold, do not write a single line of code until the deep spec
+file exists at `.claude/figma-summaries/<feature-slug>/deep/<component-slug>.md`.
+
+**Hard rule:** spawn the Figma Reader Sub-Agent — do NOT call any Figma MCP tool directly in your own
+context. Raw Figma output (XML, React/Tailwind code, design context) is large and pollutes the session
+context. All of it stays inside the sub-agent's isolated context. You receive only the structured deep
+spec file it writes to disk.
+
+Spawn the sub-agent with this prompt:
+
+> "You are the Figma Reader Sub-Agent. Read the **Deep Extraction Mode** section of
+> `.claude/commands/feature/figma-reader.md` and execute it with:
+> - File key : `<figma_file_key>`
+> - Node ID  : `<figma_node_id>`
+> - Sub-type : `build-new:heavy` (full recursive extraction — call get_design_context on the top frame
+>   AND every distinct named sub-component node; decompose every interactive sub-piece)
+> - Output   : `.claude/figma-summaries/<feature-slug>/deep/<component-slug>.md`"
+
+After the sub-agent returns: confirm the output file exists and is non-empty. If it is missing or empty,
+stop and report — do not proceed to Step 2.
+
+**Precedence when conflicts arise:** charter `## Decisions Made During Clarification` → wiki/requirements → Figma.
+Charter decisions were resolved after Figma was captured — they win over anything Figma shows.
+
+## Command to start fresh session
+/feature build-new .claude/handoffs/<feature-slug>/<component-slug>-handoff.md
+```
+
+**Step 2 — Detect environment and dispatch**
+
+```bash
+# Ensure tmux is available (install if missing)
+if ! command -v tmux &>/dev/null; then
+  if command -v brew &>/dev/null; then
+    brew install tmux
+  elif command -v apt-get &>/dev/null; then
+    sudo apt-get install -y tmux
+  elif command -v yum &>/dev/null; then
+    sudo yum install -y tmux
+  fi
+fi
+
+# Environment detection
+if [ -n "$TMUX_PANE" ] && command -v tmux &>/dev/null; then ENV="tmux"
+elif [ "$TERM_PROGRAM" = "vscode" ] || [ -n "$VSCODE_CWD" ] || [ -n "$VSCODE_PID" ]; then ENV="vscode"
+else ENV="terminal"
+fi
+```
+
+**If `ENV = tmux`:**
+
+Spawn one new TMUX window per heavy item. The parent window stays open and can monitor the child window.
+
+```bash
+tmux new-window -n "build-<component-slug>" \
+  "cd $(pwd) && claude '/feature build-new .claude/handoffs/<feature-slug>/<component-slug>-handoff.md'"
+```
+
+Print to the current session:
+
+```
+Heavy-build dispatch — TMUX
+
+Spawned <N> new window(s):
+  Window "build-<component-slug>" → /feature build-new .claude/handoffs/<feature-slug>/<component-slug>-handoff.md
+
+The new session starts with a clean context window and runs deep Figma extraction
+before building the component. You can monitor it in the TMUX window list (prefix + w).
+```
+
+**If `ENV = vscode` or `ENV = terminal`:**
+
+Do not auto-spawn. Print a rich formatted prompt the user can copy-paste or click into a new Claude Code session:
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  HEAVY COMPONENT — OPEN IN NEW SESSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The following component(s) were identified as build-new:heavy and were
+skipped in this session to preserve context quality:
+
+  Component  : <component name>
+  Why heavy  : <one-line reason from block-reuse decision>
+  Figma node : <node ID>
+  Digest     : .claude/handoffs/<feature-slug>/<component-slug>-handoff.md
+
+To build it — open a new Claude Code session and run:
+
+  /feature build-new .claude/handoffs/<feature-slug>/<component-slug>-handoff.md
+
+The fresh session will:
+  1. Run deep Figma extraction (clean context — no prior session weight)
+  2. Break the component into sub-pieces matching Figma hierarchy
+  3. Build and wire all interactive sub-components
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+Repeat the block once per heavy item if there are multiple.
+
+---
 
 Do not open a PR. Do not run tests. Your job ends here.
 

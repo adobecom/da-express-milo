@@ -105,7 +105,6 @@ export const QA_CONFIGS = {
   'convert-to-svg': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'crop-image': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'resize-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
-  'compress-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
   'remove-background': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'generate-qr-code': {
     ...getBaseImgCfg(JPG, JPEG, PNG),
@@ -373,17 +372,6 @@ export function executeQuickAction(
       contConfig,
     ),
     'resize-image': () => ccEverywhere.quickAction.resizeImage(
-      docConfig,
-      appConfig,
-      exportConfig,
-      contConfig,
-    ),
-    // TODO(cross-repo): ccEverywhere.quickAction.compressImage is not yet exposed
-    // by the CCEverywhere SDK. See .claude/handoffs/image-compressor/cceverywhere.md
-    // for the integration contract. Until the SDK ships, this dispatch throws at
-    // call time and is caught upstream by the frictionless-quick-action block's
-    // error handler — the panel does not mount.
-    'compress-image': () => ccEverywhere.quickAction.compressImage(
       docConfig,
       appConfig,
       exportConfig,

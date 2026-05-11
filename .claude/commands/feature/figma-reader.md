@@ -407,7 +407,17 @@ For each visual asset node found during F4 that is NOT a `media_*` node, call:
 ```
 mcp__figma__get_screenshot(fileKey="<key>", nodeId="<id>")
 ```
-Download the returned PNG to `.claude/figma-summaries/<feature-slug>/assets/<slug>.png` where `slug` is the node name lowercased with spaces/slashes replaced by `-`.
+The tool returns a short-lived `image_url`. **You MUST download this URL immediately using `curl` and save the PNG to disk.** Do NOT record the Figma MCP URL in `manifest.json` as the asset value — those URLs require MCP session auth and fail when `build.py` runs later outside the MCP context.
+
+```bash
+curl -s -o ".claude/figma-summaries/<feature-slug>/assets/<slug>.png" "<image_url>"
+```
+
+Record `"local_path": "assets/<slug>.png"` in the manifest. The `local_path` field must always be populated for non-AEM assets — `null` is a failure. If the curl download fails, note the failure in the manifest under `"download_error"` and flag it as an unresolved placeholder.
+
+**Rule: never write a Figma MCP URL into build.py constants or manifest.json asset URLs.** These URLs are session-scoped and will silently fail when `build.py` is run locally, producing `[image: ...]` fallback text in the docx instead of real images. Always download to local disk in this step.
+
+Download the PNG to `.claude/figma-summaries/<feature-slug>/assets/<slug>.png` where `slug` is the node name lowercased with spaces/slashes replaced by `-`.
 
 **Critical: SVG files cannot be embedded in docx** — python-docx's `add_picture` only accepts raster formats. Always export as PNG, never SVG, even if the Figma node contains an SVG icon. The `get_screenshot` tool returns a PNG render regardless of the original vector format.
 
@@ -480,6 +490,7 @@ This file is the lasting record. Future sessions and the Implementation Agent re
       "source": "aem",
       "local_path": null,
       "aem_url": "https://main--da-express-milo--adobecom.aem.live/media_16e016e....png"
+      // local_path is null only for AEM-source assets — that is correct and expected.
     }
   ],
   "spectrum_components": [
@@ -590,6 +601,83 @@ Stored artifacts: .claude/figma-summaries/<feature-slug>/
 - [ ] Empty / initial state
 <!-- check off only phases that have at least one design_frame covering them -->
 ```
+
+---
+
+## Deep Extraction Mode *(triggered by Implementation Agent Step 2a.5 for `build-new:light` items, and by a fresh session for `build-new:heavy` items)*
+
+When spawned with a specific node ID and a target depth (`heavy` or `light`), skip Steps F1–F7 and run this mode instead. The goal is a deep spec file that the Implementation Agent can use as the authoritative design source without re-opening Figma.
+
+**Input you will receive:**
+- Figma file key + node ID of the specific section frame
+- Block sub-type: `build-new:heavy` or `build-new:light`
+- Target output path: `.claude/figma-summaries/<feature-slug>/deep/<section-slug>.md`
+
+**Step D1 — Call `get_design_context`:**
+Call `mcp__figma__get_design_context` with the node ID and file key. This is mandatory — the figma-reader text summary from discovery is supplementary only. It is a lossy description that loses parent–child relationships and exact panel assignments. The `get_design_context` response contains authoritative React/Tailwind code with exact class names, spacing values, and nesting hierarchy.
+
+**Step D2 — Depth by sub-type:**
+
+- **`build-new:heavy`** — Call `get_design_context` on the top frame AND recursively on each distinct named sub-component node (panels, cards, toolbars, grids — anything that is a Figma component instance, not just a group). The Figma component nesting IS the DOM nesting for this type; do not stop at the top-level frame response. This is the full recursive extraction — decompose every interactive sub-piece before returning.
+
+- **`build-new:light`** — Call `get_design_context` once on the top frame. The block's DOM structure follows `express-milo-block-patterns.mdc`; the Figma response informs visual treatment only. Recurse into sub-component nodes only if a specific interactive state (hover, selected, error) is absent from the top-frame response.
+
+**Step D3 — Extract and record:**
+
+1. **Component hierarchy** — full layer tree for the frame. For each named layer: layer name, Figma component name (if a component instance), parent-child relationships.
+2. **Colors** — every fill and stroke as hex. If a Spectrum token name is visible in the layer (`--spectrum-blue-900`), record the mapping: `hex → token name`.
+3. **Spacing and layout** — padding, gap, margin, border-radius per distinct region, in pixels. Note Spectrum spacing token matches (e.g. 8px = `--spectrum-spacing-100`).
+4. **Typography** — font family, size, weight, line-height, color per distinct text style. Note Spectrum type token if mapped.
+5. **Interactive states** — for every interactive element (button, input, picker, toggle): default, hover, focus, active, disabled, error states with color changes. If a component variants panel exists, fetch all variant properties.
+6. **Content copy** — every visible text string verbatim, with its role (heading level, label, placeholder, helper text, error message, button label).
+7. **Inter-component positioning** — for compound components: spatial relationship and alignment (top-aligned, centered, gap size).
+8. **Assets** — every icon, illustration, or image: layer name, dimensions, format hint.
+
+**Step D4 — Write output:**
+
+Output path: `.claude/figma-summaries/<feature-slug>/deep/<section-slug>.md`
+
+```markdown
+# Deep Figma Spec — <requirement label>
+Node ID: <node-id>
+Sub-type: build-new:immersive | build-new:standard
+Fetched: <YYYY-MM-DD>
+
+## Component Hierarchy
+<layer tree — indented list>
+
+## Colors
+| Hex | Token (if mapped) | Used on |
+|---|---|---|
+
+## Spacing & Layout
+<paddings, gaps, border-radii per region>
+
+## Typography
+| Element | Font | Size | Weight | Line-height | Token |
+|---|---|---|---|---|---|
+
+## Interactive States
+### <Component name>
+| State | Background | Border | Text color | Icon color |
+|---|---|---|---|---|
+
+## Content Copy
+| Role | Text |
+|---|---|
+
+## Inter-component Positioning
+<describe compound arrangements>
+
+## Assets
+| Layer name | Dimensions | Format hint |
+|---|---|---|
+```
+
+**Hard rules:**
+- Do not re-fetch what the discovery summary already captured clearly. Focus on depth (states, tokens, hierarchy), not repetition of top-level copy already in the summary.
+- If a node ID is missing or returns an error, report it back to the Implementation Agent — do not skip or fabricate.
+- This output file is the design source of truth for implementation. Do not summarise or paraphrase — quote `get_design_context` values exactly.
 
 ---
 
