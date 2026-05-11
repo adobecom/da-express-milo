@@ -110,18 +110,18 @@ const ICON_MAP = {
   copy: () => (hasIcon('sp-icon-copy')
     ? html`<sp-icon-copy size="m" aria-hidden="true"></sp-icon-copy>`
     : iconFallback('m11.75,18h-7.5c-1.24023,0-2.25-1.00977-2.25-2.25v-7.5c0-1.24023,1.00977-2.25,2.25-2.25.41406,0,.75.33594.75.75s-.33594.75-.75.75c-.41309,0-.75.33691-.75.75v7.5c0,.41309.33691.75.75.75h7.5c.41309,0,.75-.33691.75-.75,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,1.24023-1.00977,2.25-2.25,2.25Zm-5-13c-.41406,0-.75-.33594-.75-.75,0-1.24023,1.00977-2.25,2.25-2.25.41406,0,.75.33594.75.75s-.33594.75-.75.75c-.41309,0-.75.33691-.75.75,0,.41406-.33594.75-.75.75Zm6.25-1.5h-2c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h2c.41406,0,.75.33594.75.75s-.33594.75-.75.75Zm0,10.5h-2c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h2c.41406,0,.75.33594.75.75s-.33594.75-.75.75Zm2.75,0c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75c.41309,0,.75-.33691.75-.75,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,1.24023-1.00977,2.25-2.25,2.25Zm1.5-9c-.41406,0-.75-.33594-.75-.75,0-.41309-.33691-.75-.75-.75-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75c1.24023,0,2.25,1.00977,2.25,2.25,0,.41406-.33594.75-.75.75Zm0,4.75c-.41406,0-.75-.33594-.75-.75v-2c0-.41406.33594-.75.75-.75s.75.33594.75.75v2c0,.41406-.33594.75-.75.75Zm-10.5,0c-.41406,0-.75-.33594-.75-.75v-2c0-.41406.33594-.75.75-.75s.75.33594.75.75v2c0,.41406-.33594.75-.75.75Zm1.5,4.25c-1.24023,0-2.25-1.00977-2.25-2.25,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,.41309.33691.75.75.75.41406,0,.75.33594.75.75s-.33594.75-.75.75Z')),
-  editTint: () => html`<img class="icon-tint" src="/express/code/icons/S2_Icon_Tint_20_N.svg" alt="" width="32" height="32" aria-hidden="true">`,
+  editTint: () => html`<img class="icon-tint" src="/express/code/icons/S2_Icon_Tint_20_N.svg" alt="" width="32" height="32" aria-hidden="true" draggable="false">`,
   trash: () => (hasIcon('sp-icon-delete')
     ? html`<sp-icon-delete size="m" aria-hidden="true"></sp-icon-delete>`
     : iconFallback('M7 3h6l1 2h3v2H3V5h3l1-2zm-1 6h2v7H6V9zm6 0h2v7h-2V9zM9 9h2v7H9V9z')),
-  drag: () => html`<img class="icon-drag" src="/express/code/icons/drag.svg" alt="" width="32" height="32" aria-hidden="true">`,
+  drag: () => html`<img class="icon-drag" src="/express/code/icons/drag.svg" alt="" width="32" height="32" aria-hidden="true" draggable="false">`,
   add: () => (hasIcon('sp-icon-add')
     ? html`<sp-icon-add size="m" aria-hidden="true"></sp-icon-add>`
     : iconFallback('M9 3h2v6h6v2h-6v6H9v-6H3V9h6V3z')),
 
   colorBlindness: () => html`<span class="color-blindness-placeholder" aria-hidden="true">A11y</span>`,
-  lockOpen: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_LockOpen_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
-  lockClosed: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_Lock_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
+  lockOpen: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_LockOpen_20_N.svg" alt="" width="20" height="20" aria-hidden="true" draggable="false">`,
+  lockClosed: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_Lock_20_N.svg" alt="" width="20" height="20" aria-hidden="true" draggable="false">`,
   baseColorCircle: () => (hasIcon('sp-icon-circle')
     ? html`<sp-icon-circle size="m" aria-hidden="true"></sp-icon-circle>`
     : html`<svg class="icon-fallback" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="6.25" fill="none" stroke="currentColor" stroke-width="1.8"></circle></svg>`),
