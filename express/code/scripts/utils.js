@@ -9,6 +9,8 @@
  * OF ANY KIND, either express or implied. See the License for the specific language
  * governing permissions and limitations under the License.
  */
+import isVideoLink from './utils/video-links.js';
+
 /**
  * The decision engine for where to get Milo's libs from.
  */
@@ -39,51 +41,84 @@ export const [setLibs, getLibs] = (() => {
  */
 const cachedMetadata = [];
 
-function isFacebookVideoUrl(url) {
+function getVideoEmbedType(url) {
   try {
-    const { hostname, pathname, searchParams } = new URL(url);
-    return /(^|\.)facebook[.]com$/.test(hostname) && (
-      (pathname === '/plugins/video.php' && searchParams.has('href'))
-      || pathname.includes('/videos/')
-    );
+    const { hostname, pathname } = new URL(url);
+    if (hostname.includes('youtu')) return 'youtube';
+    if (hostname.includes('vimeo')) return 'vimeo';
+    if (/(^|\.)facebook[.]com$/.test(hostname)) return 'facebook';
+    if (hostname === 'video.tv.adobe.com') return 'adobetv';
+    if (/\/media_.*(mp4|webm|m3u8)$/.test(pathname)) return 'video';
   } catch {
-    return false;
+    // fall through
   }
+  return 'video';
 }
 
-function getFacebookVideoEmbedUrl(url) {
+function getVideoEmbedUrl(url) {
   const parsedUrl = new URL(url);
-  if (parsedUrl.pathname === '/plugins/video.php') return url;
-  const embedUrl = new URL('https://www.facebook.com/plugins/video.php');
-  embedUrl.searchParams.set('href', url);
-  embedUrl.searchParams.set('show_text', '0');
-  embedUrl.searchParams.set('width', '560');
-  return embedUrl.href;
+  if (parsedUrl.hostname.includes('youtu')) {
+    const vid = parsedUrl.searchParams.get('v') || parsedUrl.pathname.substr(1);
+    return `https://www.youtube.com/embed/${vid}?feature=oembed`;
+  }
+  if (parsedUrl.hostname.includes('vimeo')) {
+    const vid = parsedUrl.pathname.split('/')[1];
+    return `https://player.vimeo.com/video/${vid}?app_id=122963`;
+  }
+  if (/(^|\.)facebook[.]com$/.test(parsedUrl.hostname)) {
+    if (parsedUrl.pathname === '/plugins/video.php') return url;
+    const embedUrl = new URL('https://www.facebook.com/plugins/video.php');
+    embedUrl.searchParams.set('href', url);
+    embedUrl.searchParams.set('show_text', '0');
+    embedUrl.searchParams.set('width', '560');
+    return embedUrl.href;
+  }
+  return url;
 }
 
-function createFacebookVideoEmbed(url) {
+function createHtml5VideoEmbed(url) {
+  const video = document.createElement('video');
+  const source = document.createElement('source');
+  const path = new URL(url).pathname;
+  const extension = path.split('.').pop();
+
+  video.setAttribute('controls', '');
+  video.setAttribute('playsinline', '');
+  source.setAttribute('src', url);
+  source.setAttribute('type', extension === 'm3u8' ? 'application/x-mpegURL' : `video/${extension}`);
+  video.append(source);
+  return video;
+}
+
+function createVideoEmbed(url) {
   const embed = document.createElement('div');
   const wrapper = document.createElement('div');
-  const iframe = document.createElement('iframe');
+  const type = getVideoEmbedType(url);
 
-  embed.className = 'embed embed-facebook';
+  embed.className = `embed embed-${type}`;
   wrapper.setAttribute('style', 'left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;');
-  iframe.setAttribute('src', getFacebookVideoEmbedUrl(url));
-  iframe.setAttribute('style', 'border: 0; top: 0; left: 0; width: 100%; height: 100%; position: absolute;');
-  iframe.setAttribute('allowfullscreen', '');
-  iframe.setAttribute('scrolling', 'no');
-  iframe.setAttribute('allow', 'encrypted-media');
-  iframe.setAttribute('title', 'Facebook video');
-  iframe.setAttribute('loading', 'lazy');
-
-  wrapper.append(iframe);
+  if (type === 'video') {
+    const video = createHtml5VideoEmbed(url);
+    video.setAttribute('style', 'top: 0; left: 0; width: 100%; height: 100%; position: absolute;');
+    wrapper.append(video);
+  } else {
+    const iframe = document.createElement('iframe');
+    iframe.setAttribute('src', getVideoEmbedUrl(url));
+    iframe.setAttribute('style', 'border: 0; top: 0; left: 0; width: 100%; height: 100%; position: absolute;');
+    iframe.setAttribute('allowfullscreen', '');
+    iframe.setAttribute('scrolling', 'no');
+    iframe.setAttribute('allow', 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture');
+    iframe.setAttribute('title', 'Video');
+    iframe.setAttribute('loading', 'lazy');
+    wrapper.append(iframe);
+  }
   embed.append(wrapper);
   return embed;
 }
 
-function decorateFacebookVideoParagraphs(area, selector) {
-  const links = [...area.querySelectorAll(`${selector} p > a[href*="facebook.com"]`)]
-    .filter((link) => isFacebookVideoUrl(link.href));
+function decorateVideoParagraphs(area, selector) {
+  const links = [...area.querySelectorAll(`${selector} p > a[href]`)]
+    .filter((link) => isVideoLink(link.href));
 
   links.forEach((link) => {
     const paragraph = link.parentElement;
@@ -91,7 +126,7 @@ function decorateFacebookVideoParagraphs(area, selector) {
     if (paragraph.textContent.trim() !== link.textContent.trim()) return;
     if (paragraph.closest('.embed')) return;
 
-    paragraph.replaceWith(createFacebookVideoEmbed(link.href));
+    paragraph.replaceWith(createVideoEmbed(link.href));
   });
 }
 
@@ -877,7 +912,7 @@ export function decorateArea(area = document) {
   renameConflictingBlocks(area, selector);
   addPromotion(area);
   decorateLegalCopy(area);
-  decorateFacebookVideoParagraphs(area, selector);
+  decorateVideoParagraphs(area, selector);
 
   const linksToNotAutoblock = [];
   const embeds = area.querySelectorAll(`${selector} > .embed a[href*="instagram.com"]`);

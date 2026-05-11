@@ -1,5 +1,6 @@
 import { expect } from '@esm-bundle/chai';
 import { setLibs } from '../../../express/code/scripts/utils.js';
+import { isVideoLink as isActualVideoLink } from '../../../express/code/scripts/widgets/video.js';
 
 setLibs('/libs');
 
@@ -199,6 +200,14 @@ describe('Scripts Widgets Utility Functions', () => {
 
     it('should handle URLs with fragments', () => {
       expect(isVideoLink('https://example.com/video.mp4#t=30')).to.be.true;
+    });
+  });
+
+  describe('isVideoLink actual video helper', () => {
+    it('recognizes Facebook plugin video URLs', () => {
+      const url = 'https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2FCappuccinoBrown%2Fvideos%2F640794130052798%2F&show_text=0&width=267';
+
+      expect(isActualVideoLink(url)).to.be.true;
     });
   });
 

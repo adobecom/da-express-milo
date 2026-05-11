@@ -148,7 +148,7 @@ describe('SVG Inline Conversion', () => {
   });
 });
 
-describe('decorateArea Facebook video links', () => {
+describe('decorateArea video links', () => {
   it('converts standalone Facebook video paragraphs to embeds', () => {
     document.body.innerHTML = `
       <main>
@@ -166,7 +166,24 @@ describe('decorateArea Facebook video links', () => {
     expect(document.querySelector('main p')).to.not.exist;
   });
 
-  it('does not convert inline Facebook video links', () => {
+  it('converts standalone video paragraphs using isVideoLink', () => {
+    document.body.innerHTML = `
+      <main>
+        <div>
+          <p><a href="https://www.youtube.com/watch?v=abc123">https://www.youtube.com/watch?v=abc123</a></p>
+        </div>
+      </main>
+    `;
+
+    decorateArea();
+
+    const embed = document.querySelector('.embed.embed-youtube');
+    expect(embed).to.exist;
+    expect(embed.querySelector('iframe').src).to.contain('youtube.com/embed/abc123');
+    expect(document.querySelector('main p')).to.not.exist;
+  });
+
+  it('does not convert inline video links', () => {
     document.body.innerHTML = `
       <main>
         <div>
