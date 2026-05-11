@@ -637,10 +637,3 @@ color-wheel-express {
     display: flex;
   }
 }
-
-/* Ticket MWPW-192508: preserve palette right padding in this desktop band */
-@media (min-width: 1440px) and (max-width: 1553px) {
-  .color-wheel .ax-shell-slot--sidebar {
-    padding-inline-end: var(--spacing-300);
-  }
-}
