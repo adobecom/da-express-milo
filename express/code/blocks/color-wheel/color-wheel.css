@@ -524,6 +524,10 @@ color-wheel-express {
 /* Desktop */
 
 @media (min-width: 1200px) {
+  .color-wheel .ax-toolbar {
+    --ax-palette-name-width-desktop: 11.5rem;
+  }
+
   .color-wheel .ax-color-tool-layout {
     padding: var(--spacing-600);
     grid-template-rows: auto;
