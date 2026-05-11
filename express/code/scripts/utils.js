@@ -38,6 +38,63 @@ export const [setLibs, getLibs] = (() => {
  * ------------------------------------------------------------
  */
 const cachedMetadata = [];
+
+function isFacebookVideoUrl(url) {
+  try {
+    const { hostname, pathname, searchParams } = new URL(url);
+    return /(^|\.)facebook[.]com$/.test(hostname) && (
+      (pathname === '/plugins/video.php' && searchParams.has('href'))
+      || pathname.includes('/videos/')
+    );
+  } catch {
+    return false;
+  }
+}
+
+function getFacebookVideoEmbedUrl(url) {
+  const parsedUrl = new URL(url);
+  if (parsedUrl.pathname === '/plugins/video.php') return url;
+  const embedUrl = new URL('https://www.facebook.com/plugins/video.php');
+  embedUrl.searchParams.set('href', url);
+  embedUrl.searchParams.set('show_text', '0');
+  embedUrl.searchParams.set('width', '560');
+  return embedUrl.href;
+}
+
+function createFacebookVideoEmbed(url) {
+  const embed = document.createElement('div');
+  const wrapper = document.createElement('div');
+  const iframe = document.createElement('iframe');
+
+  embed.className = 'embed embed-facebook';
+  wrapper.setAttribute('style', 'left: 0; width: 100%; height: 0; position: relative; padding-bottom: 56.25%;');
+  iframe.setAttribute('src', getFacebookVideoEmbedUrl(url));
+  iframe.setAttribute('style', 'border: 0; top: 0; left: 0; width: 100%; height: 100%; position: absolute;');
+  iframe.setAttribute('allowfullscreen', '');
+  iframe.setAttribute('scrolling', 'no');
+  iframe.setAttribute('allow', 'encrypted-media');
+  iframe.setAttribute('title', 'Facebook video');
+  iframe.setAttribute('loading', 'lazy');
+
+  wrapper.append(iframe);
+  embed.append(wrapper);
+  return embed;
+}
+
+function decorateFacebookVideoParagraphs(area, selector) {
+  const links = [...area.querySelectorAll(`${selector} p > a[href*="facebook.com"]`)]
+    .filter((link) => isFacebookVideoUrl(link.href));
+
+  links.forEach((link) => {
+    const paragraph = link.parentElement;
+    if (!paragraph || paragraph.tagName !== 'P' || paragraph.children.length !== 1) return;
+    if (paragraph.textContent.trim() !== link.textContent.trim()) return;
+    if (paragraph.closest('.embed')) return;
+
+    paragraph.replaceWith(createFacebookVideoEmbed(link.href));
+  });
+}
+
 export const getMetadata = (name, doc = document) => {
   const attr = name && name.includes(':') ? 'property' : 'name';
   const meta = doc.head.querySelector(`meta[${attr}="${name}"]`);
@@ -820,6 +877,7 @@ export function decorateArea(area = document) {
   renameConflictingBlocks(area, selector);
   addPromotion(area);
   decorateLegalCopy(area);
+  decorateFacebookVideoParagraphs(area, selector);
 
   const linksToNotAutoblock = [];
   const embeds = area.querySelectorAll(`${selector} > .embed a[href*="instagram.com"]`);

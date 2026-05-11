@@ -8,6 +8,7 @@ import {
   getIconElementDeprecated,
   convertToInlineSVG,
   getContentRoot,
+  decorateArea,
 } from '../../express/code/scripts/utils.js';
 import { transformLinkToAnimation } from '../../express/code/scripts/utils/media.js';
 
@@ -144,6 +145,40 @@ describe('SVG Inline Conversion', () => {
     expect(svg.getAttribute('width')).to.equal('18');
     expect(svg.getAttribute('height')).to.equal('18');
     expect(svg.getAttribute('data-test')).equal('ha');
+  });
+});
+
+describe('decorateArea Facebook video links', () => {
+  it('converts standalone Facebook video paragraphs to embeds', () => {
+    document.body.innerHTML = `
+      <main>
+        <div>
+          <p><a href="https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2FCappuccinoBrown%2Fvideos%2F640794130052798%2F&show_text=0&width=267">https://www.facebook.com/plugins/video.php?href=https%3A%2F%2Fwww.facebook.com%2FCappuccinoBrown%2Fvideos%2F640794130052798%2F&show_text=0&width=267</a></p>
+        </div>
+      </main>
+    `;
+
+    decorateArea();
+
+    const embed = document.querySelector('.embed.embed-facebook');
+    expect(embed).to.exist;
+    expect(embed.querySelector('iframe').src).to.contain('facebook.com/plugins/video.php');
+    expect(document.querySelector('main p')).to.not.exist;
+  });
+
+  it('does not convert inline Facebook video links', () => {
+    document.body.innerHTML = `
+      <main>
+        <div>
+          <p>Watch this <a href="https://www.facebook.com/CappuccinoBrown/videos/640794130052798/">Facebook video</a> later.</p>
+        </div>
+      </main>
+    `;
+
+    decorateArea();
+
+    expect(document.querySelector('.embed.embed-facebook')).to.not.exist;
+    expect(document.querySelector('main p a')).to.exist;
   });
 });
 
