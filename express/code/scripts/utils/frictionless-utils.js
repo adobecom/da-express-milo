@@ -129,6 +129,7 @@ export const QA_CONFIGS = {
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
   'remove-background-fast-track-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'remove-background-fast-track-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'remove-background-focused': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'heic-to-jpg': {
     ...getBaseImgCfg(PNG, WEBP, HEIC),
     input_check: getHeicInputCheck(PNG, WEBP, HEIC),
@@ -169,6 +170,7 @@ export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
 
 export const AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   removeBackground: 'remove-background',
+  removeBackgroundFocused: 'remove-background-focused',
 };
 
 // Route paths map corresponding to the express routes

@@ -543,6 +543,9 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
       routeSpecificParams = {
         locale: ietf,
         skipUploadStep: true,
+        ...(quickAction === AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused && {
+          'edit-action': 'remove-bg',
+        }),
       };
       break;
     }
@@ -700,7 +703,11 @@ async function performUploadAction(files, block, quickAction) {
 
   // temporary solution: allows analytics to go thru. should move to a promise
   setTimeout(() => {
-    window.location.href = url.toString();
+    if (quickAction === AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused) {
+      window.open(url.toString(), '_blank');
+    } else {
+      window.location.href = url.toString();
+    }
   }, 300);
 }
 
@@ -737,9 +744,18 @@ function setupFrictionlessTargetBaseUrl(quickAction) {
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
   const variant = urlVariant || quickAction;
+  if (variant === AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused) {
+    const isStage = urlParams.get('hzenv') === 'stage';
+    const stageFocusedUrl = urlParams.get('base') ? urlParams.get('base') : `https://stage.projectx.corp.adobe.com${EXPRESS_ROUTE_PATHS.focusedEditor}`;
+    frictionlessTargetBaseUrl = isStage
+      ? stageFocusedUrl
+      : `https://express.adobe.com${EXPRESS_ROUTE_PATHS.focusedEditor}`;
+    return;
+  }
+
   if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
     || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2
-    || (isAuthFrictionlessUploadQuickAction(variant))) {
+    || isAuthFrictionlessUploadQuickAction(variant)) {
     const isStage = urlParams.get('hzenv') === 'stage';
     const stageURL = urlParams.get('base') ? urlParams.get('base') : 'https://stage.projectx.corp.adobe.com/new';
     frictionlessTargetBaseUrl = isStage
