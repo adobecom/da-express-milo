@@ -696,6 +696,8 @@ export default async function decorate(block) {
               {
                 verticalMaxPerRow: config.swatchVerticalMaxPerRow,
                 onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
+                modalStrings: await colorModalStringsPromise,
+                colorSwatchRailStrings: await colorSwatchRailStringsPromise,
               },
             );
           });
@@ -711,6 +713,8 @@ export default async function decorate(block) {
               {
                 verticalMaxPerRow: config.swatchVerticalMaxPerRow,
                 onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
+                modalStrings: await colorModalStringsPromise,
+                colorSwatchRailStrings: await colorSwatchRailStringsPromise,
               },
             );
           });
@@ -778,6 +782,8 @@ export default async function decorate(block) {
                   onLikeToggle: async ({ id, liked }) => (
                     activeDataService.toggleLike({ id, liked })
                   ),
+                  modalStrings: await colorModalStringsPromise,
+                  colorSwatchRailStrings: await colorSwatchRailStringsPromise,
                   initialFocusSelector: () => null,
                 });
               }
