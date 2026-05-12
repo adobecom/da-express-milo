@@ -315,6 +315,11 @@ export class ColorSwatchRail extends LitElement {
   }
 
   _scheduleTooltipsRefresh() {
+    // Touch-only devices (iPhone, iPad without mouse) have no hover capability,
+    // so Spectrum tooltip nodes serve no purpose. Skipping their creation and
+    // destruction eliminates the single biggest source of iOS WebContent jetsam
+    // (per the comment in attachController above).
+    if (window.matchMedia('(hover: none)').matches) return;
     if (this._nativePickerOpen) {
       this._tooltipRefreshQueued = true;
       return;

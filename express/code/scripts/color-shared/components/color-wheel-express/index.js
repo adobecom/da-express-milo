@@ -138,6 +138,8 @@ export class ColorWheelExpress extends ColorWheel {
       this._activeDragCleanup = null;
     }
     this._dragMarkerRef = null;
+    this._dragSpokeRef = null;
+    this._dragHarmonyRefs = null;
     super.disconnectedCallback();
   }
 
@@ -468,6 +470,46 @@ export class ColorWheelExpress extends ColorWheel {
     marker.style.left = `calc(50% + ${x}px)`;
     marker.style.top = `calc(50% + ${y}px)`;
     marker.style.setProperty('--wheel-marker-color', hex);
+
+    if (this.harmonyRule !== 'CUSTOM') {
+      if (this._dragSpokeRef?.isConnected) {
+        this._dragSpokeRef.style.width = `${radius}px`;
+        this._dragSpokeRef.style.transform = `rotate(${-smoothH}deg)`;
+      }
+
+      // Shift all sibling markers and spokes by the same angular delta so the
+      // whole harmony rotates as a group (works for both base and non-base drags).
+      //
+      // Delta must be computed in ARTISTIC hue space — harmony rules express
+      // angular offsets on the artistic wheel, which is non-linear relative to
+      // scientific hue. A scientific-space delta applied to non-linear regions
+      // (e.g. yellow/orange) produces per-swatch overshoot that causes siblings
+      // to visually shudder as each 12 Hz commit snaps them back.
+      if (this._dragHarmonyRefs) {
+        const committedSmH = scientificToArtisticSmooth(
+          this.swatches?.[index]?.hsv?.h ?? 0,
+        );
+        let deltaA = smoothH - committedSmH;
+        if (deltaA > 180) deltaA -= 360;
+        if (deltaA < -180) deltaA += 360;
+        if (Math.abs(deltaA) > 0.001) {
+          this._dragHarmonyRefs.forEach(({ marker: m, spoke: sp }, i) => {
+            const swatch = this.swatches[i];
+            if (!swatch?.hsv || !m?.isConnected) return;
+            const siblingSmH = scientificToArtisticSmooth(swatch.hsv.h);
+            const newSmH = ((siblingSmH + deltaA) % 360 + 360) % 360;
+            const r = (this.wheelRadius * swatch.hsv.s) / 100;
+            const p = degToRad(180 - newSmH);
+            const [sx, sy] = polarToXy(r, p);
+            m.style.left = `calc(50% + ${sx}px)`;
+            m.style.top = `calc(50% + ${sy}px)`;
+            if (sp?.isConnected) {
+              sp.style.transform = `rotate(${-newSmH}deg)`;
+            }
+          });
+        }
+      }
+    }
   }
 
   _flushPendingDragWrite() {
@@ -562,6 +604,9 @@ export class ColorWheelExpress extends ColorWheel {
     this._dragMarkerRef = layer?.querySelector(
       `.wheel-marker-overlay[data-index="${this.activeSwatchIndex}"]`,
     ) || null;
+    this._dragSpokeRef = (this.harmonyRule !== 'CUSTOM' && layer)
+      ? layer.querySelector(`.wheel-spoke[data-spoke="${this.activeSwatchIndex}"]`) ?? null
+      : null;
 
     const moveHandler = (e) => {
       if (e.pointerId !== pointerId) return;
@@ -577,6 +622,7 @@ export class ColorWheelExpress extends ColorWheel {
       // would have otherwise dropped it.
       this._flushPendingDragWrite();
       this._dragMarkerRef = null;
+      this._dragSpokeRef = null;
       try { target?.releasePointerCapture?.(pointerId); } catch (_) { /* noop */ }
       const { red, green, blue } = hexToRGB(this.color);
       this.dispatchEvent(new CustomEvent('change-end', {
@@ -666,6 +712,30 @@ export class ColorWheelExpress extends ColorWheel {
     }
     this._dragMarkerRef = markerNode || null;
 
+    // In non-CUSTOM harmony, dragging a non-base marker should rotate all
+    // markers together (the whole harmony shifts). Cache sibling marker/spoke
+    // refs now so _updateMarkerDomLocally can update them at 60 Hz without a
+    // querySelector per frame.
+    this._dragSpokeRef = null;
+    this._dragHarmonyRefs = null;
+    if (this.harmonyRule !== 'CUSTOM') {
+      const layer = this.shadowRoot?.querySelector('.marker-layer');
+      if (layer) {
+        this._dragSpokeRef = layer.querySelector(`.wheel-spoke[data-spoke="${index}"]`) ?? null;
+        if (this.swatches?.length > 1) {
+          const refs = new Map();
+          this.swatches.forEach((_, i) => {
+            if (i === index) return;
+            refs.set(i, {
+              marker: layer.querySelector(`.wheel-marker-overlay[data-index="${i}"]`),
+              spoke: layer.querySelector(`.wheel-spoke[data-spoke="${i}"]`),
+            });
+          });
+          this._dragHarmonyRefs = refs;
+        }
+      }
+    }
+
     // Reset the throttle clock so the first move during a fresh drag commits
     // immediately rather than waiting for the trailing flush.
     this._lastDragWriteAt = 0;
@@ -686,6 +756,8 @@ export class ColorWheelExpress extends ColorWheel {
       this._dragIndex = -1;
       this._dragFixedBrightness = null;
       this._dragMarkerRef = null;
+      this._dragSpokeRef = null;
+      this._dragHarmonyRefs = null;
       if (this.showLines && !this.isMarkerUp) {
         this.isMarkerUp = true;
         this.dispatchEvent(new CustomEvent('marker-deselect'));

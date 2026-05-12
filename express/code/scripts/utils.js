@@ -615,7 +615,7 @@ export function buildAutoBlocks() {
     const lastDiv = document.querySelector('main > div:last-of-type');
     const newDiv = document.createElement('div');
     lastDiv.insertAdjacentElement('afterend', newDiv);
-    const validButtonVersion = ['floating-button', 'multifunction-button', 'mobile-fork-button', 'mobile-fork-button-frictionless', 'mobile-fork-button-dismissable'];
+    const validButtonVersion = ['floating-button', 'multifunction-button', 'mobile-fork-button', 'mobile-fork-button-frictionless', 'mobile-fork-button-dismissable', 'mobile-fork-button-os-split'];
     const device = document.body.dataset?.device;
     const blockName = getMetadata(`${device}-floating-cta`);
 

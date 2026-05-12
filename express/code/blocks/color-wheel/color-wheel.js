@@ -248,8 +248,11 @@ let harmonyStateUnsubscribe = null;
 let layoutInstance = null;
 let stripRenderer = null;
 let paletteUnsubscribe = null;
+let setColorRafId = null;
+let pendingSetColorHex = null;
 let swatchRailController = null;
 let imagePanelDestroy = null;
+let imagePanelGetSrc = null;
 let primaryColorAdapter = null;
 let sidebarNaturalWidth = 0;
 let sidebarTransitionCleanup = null;
@@ -498,6 +501,23 @@ function buildPrimaryColorContent(controller, strings = {}) {
   const state = controller.getState();
   const baseColorIndex = state.baseColorIndex ?? 0;
   const baseColor = state.swatches?.[baseColorIndex]?.hex || '#FF0000';
+  let pendingBaseColorHex = null;
+  let pendingBaseColorRaf = null;
+
+  const flushPendingBaseColor = () => {
+    pendingBaseColorRaf = null;
+    if (!pendingBaseColorHex) return;
+    controller.setBaseColor(pendingBaseColorHex);
+    pendingBaseColorHex = null;
+  };
+
+  const queueBaseColorUpdate = (hex) => {
+    if (!hex) return;
+    pendingBaseColorHex = hex;
+    if (pendingBaseColorRaf != null) return;
+    pendingBaseColorRaf = requestAnimationFrame(flushPendingBaseColor);
+  };
+
   const adapter = createBaseColorAdapter(
     baseColor,
     'HEX',
@@ -505,9 +525,13 @@ function buildPrimaryColorContent(controller, strings = {}) {
       strings: strings.baseColorStrings,
       onColorChange: (detail) => {
         if (!detail?.hex) return;
-        controller.setBaseColor(detail.hex);
+        queueBaseColorUpdate(detail.hex);
       },
       onColorChangeEnd: () => {
+        if (pendingBaseColorRaf != null) {
+          cancelAnimationFrame(pendingBaseColorRaf);
+          flushPendingBaseColor();
+        }
         // eslint-disable-next-line no-underscore-dangle
         adapter.element._setLocked?.(true);
       },
@@ -532,15 +556,17 @@ function buildPrimaryColorContent(controller, strings = {}) {
   return wrapper;
 }
 
-function buildImageContent(controller, suggestionsRow, strings) {
+function buildImageContent(controller, suggestionsRow, strings, initialSrc = null) {
   const image = createTag('div', { class: 'image-content' });
   const panel = createImageExtractComponent({
     controller,
     maxColors: 5,
     suggestionsRowEl: suggestionsRow,
     strings,
+    initialSrc,
   });
   imagePanelDestroy = panel.destroy;
+  imagePanelGetSrc = panel.getCurrentSrc;
   image.appendChild(panel.element);
   return image;
 }
@@ -560,7 +586,9 @@ async function buildColorWheelContent(controller, strings) {
   return colorWheel;
 }
 
-async function buildTabs(controller, suggestionsRow, { onSelectionChange, strings = {} } = {}) {
+async function buildTabs(controller, suggestionsRow, {
+  onSelectionChange, strings = {}, initialImageSrc = null,
+} = {}) {
   // Create the tabs shell and the color-wheel panel content in parallel
   const [tabsInstance, cwContent] = await Promise.all([
     createExpressTabs({
@@ -578,7 +606,7 @@ async function buildTabs(controller, suggestionsRow, { onSelectionChange, string
   ]);
 
   tabsInstance.addPanel('color-wheel', cwContent);
-  tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings));
+  tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings, initialImageSrc));
   tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller, strings));
 
   return tabsInstance;
@@ -768,10 +796,16 @@ function cleanup() {
   harmonyCarouselCleanup = null;
   paletteUnsubscribe?.();
   paletteUnsubscribe = null;
+  if (setColorRafId !== null) {
+    cancelAnimationFrame(setColorRafId);
+    setColorRafId = null;
+  }
+  pendingSetColorHex = null;
   swatchRailController?.destroy?.();
   swatchRailController = null;
   imagePanelDestroy?.();
   imagePanelDestroy = null;
+  imagePanelGetSrc = null;
   primaryColorAdapter?.destroy?.();
   primaryColorAdapter = null;
   stripRenderer?.destroy?.();
@@ -792,6 +826,8 @@ export default async function decorate(block) {
 
   // Preserved across breakpoint re-inits so the user's palette survives resize
   let currentPalette = null;
+  let savedActiveTab = 'color-wheel';
+  let savedImageSrc = null;
 
   async function init() {
     // Save before clearing — adoptHeadline uses document.querySelector and would lose it otherwise
@@ -801,6 +837,7 @@ export default async function decorate(block) {
     // doesn't show as a blank white area while placeholders and CSS load.
     const isReinit = !!layoutInstance;
     if (isReinit) {
+      savedImageSrc = imagePanelGetSrc?.() ?? savedImageSrc;
       cleanup();
       block.innerHTML = '';
     }
@@ -940,16 +977,24 @@ export default async function decorate(block) {
         buildTabs(controller, suggestionsRow?.cloneNode(true), {
           onSelectionChange: ({ selected }) => {
             activeTab = selected;
+            savedActiveTab = selected;
             updateBaseColorBadge();
             if (selected !== 'color-wheel') {
               controller.setHarmonyRule('CUSTOM');
             }
           },
           strings,
+          initialImageSrc: savedImageSrc,
         }),
       ]);
 
       if (myToken !== currentInitToken) return;
+
+      if (savedActiveTab !== 'color-wheel') {
+        tabs.setSelected(savedActiveTab);
+        activeTab = savedActiveTab;
+        updateBaseColorBadge();
+      }
 
       // Both resolved — wire up action menu history and append tabs
       const actionMenuApi = layoutInstance.actionMenu;
@@ -1126,7 +1171,16 @@ export default async function decorate(block) {
         const currentColor = primaryColorAdapter?.element?.color;
         if (primaryColorAdapter?.setColor && baseHex
           && String(currentColor).toUpperCase() !== String(baseHex).toUpperCase()) {
-          primaryColorAdapter.setColor(baseHex);
+          pendingSetColorHex = baseHex;
+          if (setColorRafId === null) {
+            setColorRafId = requestAnimationFrame(() => {
+              setColorRafId = null;
+              if (primaryColorAdapter?.setColor && pendingSetColorHex) {
+                primaryColorAdapter.setColor(pendingSetColorHex);
+              }
+              pendingSetColorHex = null;
+            });
+          }
         }
       });
 

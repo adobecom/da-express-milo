@@ -2,6 +2,7 @@ import { expect } from '@esm-bundle/chai';
 import createExpressActionButton from '../../../../../express/code/scripts/color-shared/spectrum/components/express-action-button.js';
 import { createExpressTag } from '../../../../../express/code/scripts/color-shared/spectrum/components/express-tag.js';
 import { createExpressTextfield } from '../../../../../express/code/scripts/color-shared/spectrum/components/express-textfield.js';
+import { createExpressPicker } from '../../../../../express/code/scripts/color-shared/spectrum/components/express-picker.js';
 
 describe('Express Spectrum component wrappers', () => {
   afterEach(() => {
@@ -73,5 +74,28 @@ describe('Express Spectrum component wrappers', () => {
     expect(actionButton.getAttribute('label')).to.equal('Swap colors');
     expect(iconSlot).to.exist;
     expect(iconSlot.querySelector('.test-action-icon')).to.exist;
+  });
+
+  it('closes picker overlays before removing the picker wrapper', async () => {
+    const picker = await createExpressPicker({
+      label: 'Sort',
+      value: 'popular',
+      options: [
+        { label: 'Popular', value: 'popular' },
+        { label: 'All', value: 'all' },
+      ],
+    });
+
+    document.body.appendChild(picker.element);
+
+    const pickerElement = picker.element.querySelector('sp-picker');
+    pickerElement.open = true;
+    pickerElement.setAttribute('open', '');
+
+    picker.destroy();
+
+    expect(pickerElement.open).to.equal(false);
+    expect(pickerElement.hasAttribute('open')).to.equal(false);
+    expect(picker.element.isConnected).to.equal(false);
   });
 });
