@@ -69,7 +69,6 @@ const DRAWER_DEFAULTS = {
   tagRemoveAriaLabel: 'Remove {{tag}}',
   libraryCreatedToast: "Library '{{name}}' created",
   createLibraryFailedToast: 'Something went wrong. Try again.',
-  viewInLibrary: 'View in Library',
 };
 
 const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
@@ -764,7 +763,6 @@ export async function createDrawer(options) {
     libraries: userLibraries,
     ccLibraryProvider,
     onLibraryCreated,
-    autoSave = false,
     i18n = {},
     deps = {},
   } = options;
@@ -849,11 +847,6 @@ export async function createDrawer(options) {
           label,
           libraryName: formData.library?.name ?? t.yourLibrary,
         }),
-        timeout: 6000,
-        action: {
-          label: t.viewInLibrary,
-          href: 'https://new.express.adobe.com/libraries',
-        },
       });
       await onSave?.(formData);
     } catch (err) {
@@ -935,10 +928,6 @@ export async function createDrawer(options) {
     isOpen = true;
 
     announceToScreenReader(t.title);
-
-    if (autoSave && isSignedIn) {
-      await save();
-    }
   }
 
   function destroy() {
