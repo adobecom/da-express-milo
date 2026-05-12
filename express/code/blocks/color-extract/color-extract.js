@@ -330,6 +330,21 @@ function createColorExtractDropzone(block, config, onImageReady, strings = {}) {
     });
   }
 
+  // The file input's change event calls the internal handleFile directly (bypassing the
+  // wrapped dz.handleFile), so block.is-loading is never set via that path. This covers
+  // both "Upload your image" click and the toolbar's "Replace image" button, both of
+  // which trigger the OS file picker via dz.input.click().
+  // Capture phase on the container fires before the input's own listener, which does
+  // input.value = '' — clearing input.files before any later same-element handlers see it.
+  dz.container.addEventListener('change', (e) => {
+    if (e.target !== dz.input) return;
+    const file = e.target.files?.[0];
+    if (file?.type?.startsWith('image/')) {
+      block.classList.add('is-loading');
+      emitBlockEvent(block, EVENTS.IMAGE_UPLOAD, { file });
+    }
+  }, { capture: true });
+
   return dz;
 }
 
@@ -886,8 +901,7 @@ function renderColorVariant(block, rows, config, strings = {}) {
   }
 
   function handleSuggestionClick(imgEl, src) {
-    block.classList.add('has-image');
-    onImageReady(imgEl, src);
+    dropzone.handleUrl(src);
   }
 
   const suggestions = resolvedConfig.enableUrlInput
@@ -1350,8 +1364,7 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
   }
 
   function handleSuggestionClick(imgEl, src) {
-    block.classList.add('has-image');
-    onImageReady(imgEl, src);
+    dropzone.handleUrl(src);
   }
 
   const suggestions = resolvedConfig.enableUrlInput
