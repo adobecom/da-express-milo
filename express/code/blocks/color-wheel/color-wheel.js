@@ -250,6 +250,7 @@ let stripRenderer = null;
 let paletteUnsubscribe = null;
 let swatchRailController = null;
 let imagePanelDestroy = null;
+let imagePanelGetSrc = null;
 let primaryColorAdapter = null;
 let sidebarNaturalWidth = 0;
 let sidebarTransitionCleanup = null;
@@ -532,15 +533,17 @@ function buildPrimaryColorContent(controller, strings = {}) {
   return wrapper;
 }
 
-function buildImageContent(controller, suggestionsRow, strings) {
+function buildImageContent(controller, suggestionsRow, strings, initialSrc = null) {
   const image = createTag('div', { class: 'image-content' });
   const panel = createImageExtractComponent({
     controller,
     maxColors: 5,
     suggestionsRowEl: suggestionsRow,
     strings,
+    initialSrc,
   });
   imagePanelDestroy = panel.destroy;
+  imagePanelGetSrc = panel.getCurrentSrc;
   image.appendChild(panel.element);
   return image;
 }
@@ -560,7 +563,9 @@ async function buildColorWheelContent(controller, strings) {
   return colorWheel;
 }
 
-async function buildTabs(controller, suggestionsRow, { onSelectionChange, strings = {} } = {}) {
+async function buildTabs(controller, suggestionsRow, {
+  onSelectionChange, strings = {}, initialImageSrc = null,
+} = {}) {
   // Create the tabs shell and the color-wheel panel content in parallel
   const [tabsInstance, cwContent] = await Promise.all([
     createExpressTabs({
@@ -578,7 +583,7 @@ async function buildTabs(controller, suggestionsRow, { onSelectionChange, string
   ]);
 
   tabsInstance.addPanel('color-wheel', cwContent);
-  tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings));
+  tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings, initialImageSrc));
   tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller, strings));
 
   return tabsInstance;
@@ -772,6 +777,7 @@ function cleanup() {
   swatchRailController = null;
   imagePanelDestroy?.();
   imagePanelDestroy = null;
+  imagePanelGetSrc = null;
   primaryColorAdapter?.destroy?.();
   primaryColorAdapter = null;
   stripRenderer?.destroy?.();
@@ -792,6 +798,8 @@ export default async function decorate(block) {
 
   // Preserved across breakpoint re-inits so the user's palette survives resize
   let currentPalette = null;
+  let savedActiveTab = 'color-wheel';
+  let savedImageSrc = null;
 
   async function init() {
     // Save before clearing — adoptHeadline uses document.querySelector and would lose it otherwise
@@ -801,6 +809,7 @@ export default async function decorate(block) {
     // doesn't show as a blank white area while placeholders and CSS load.
     const isReinit = !!layoutInstance;
     if (isReinit) {
+      savedImageSrc = imagePanelGetSrc?.() ?? savedImageSrc;
       cleanup();
       block.innerHTML = '';
     }
@@ -940,16 +949,24 @@ export default async function decorate(block) {
         buildTabs(controller, suggestionsRow?.cloneNode(true), {
           onSelectionChange: ({ selected }) => {
             activeTab = selected;
+            savedActiveTab = selected;
             updateBaseColorBadge();
             if (selected !== 'color-wheel') {
               controller.setHarmonyRule('CUSTOM');
             }
           },
           strings,
+          initialImageSrc: savedImageSrc,
         }),
       ]);
 
       if (myToken !== currentInitToken) return;
+
+      if (savedActiveTab !== 'color-wheel') {
+        tabs.setSelected(savedActiveTab);
+        activeTab = savedActiveTab;
+        updateBaseColorBadge();
+      }
 
       // Both resolved — wire up action menu history and append tabs
       const actionMenuApi = layoutInstance.actionMenu;
