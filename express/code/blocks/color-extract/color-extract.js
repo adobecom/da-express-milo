@@ -644,7 +644,7 @@ function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) 
 
 /* ---------- Palette variant ---------- */
 
-function createGoToLanding(block, getDropzone, s, floatingToolbar, history, popstateAc, onReset) {
+function createGoToLanding(block, getDropzone, s, floatingToolbar, history, onReset) {
   return function goToLanding() {
     block.classList.remove('has-image', 'is-loading');
     getDropzone().container.classList.remove('has-image');
@@ -658,7 +658,6 @@ function createGoToLanding(block, getDropzone, s, floatingToolbar, history, pops
     history.clear();
     s.currentCanvas = null;
     s.currentSrc = null;
-    popstateAc.abort();
     onReset?.();
     block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
       el.classList.remove('is-selected');
@@ -827,10 +826,12 @@ function renderColorVariant(block, rows, config, strings = {}) {
 
   const floatingToolbar = createFloatingToolbarMount(controller, VARIANTS.PALETTE);
 
-  const popstateAc = new AbortController();
-
   async function onImageReady(image, src) {
-    window.history.pushState({ colorExtract: 'results' }, '');
+    if (window.history.state?.colorExtract === 'results') {
+      window.history.replaceState({ colorExtract: 'results' }, '');
+    } else {
+      window.history.pushState({ colorExtract: 'results' }, '');
+    }
     currentSrc = src;
     edit.setBackground(src);
     history.clear();
@@ -867,7 +868,7 @@ function renderColorVariant(block, rows, config, strings = {}) {
     set currentCanvas(v) { currentCanvas = v; },
     get currentSrc() { return currentSrc; },
     set currentSrc(v) { currentSrc = v; },
-  }, floatingToolbar, history, popstateAc);
+  }, floatingToolbar, history);
 
   async function addColorToImage() {
     if (!currentCanvas || !markers) return;
@@ -1005,7 +1006,7 @@ function renderColorVariant(block, rows, config, strings = {}) {
     if (block.classList.contains('has-image') && e.state?.colorExtract !== 'results') {
       goToLanding();
     }
-  }, { signal: popstateAc.signal });
+  });
 }
 
 /* ---------- Gradient edit stage ---------- */
@@ -1270,10 +1271,13 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
   }
 
   const floatingToolbar = createFloatingToolbarMount(swatchController, VARIANTS.GRADIENT);
-  const popstateAc = new AbortController();
 
   async function onImageReady(image, src) {
-    window.history.pushState({ colorExtract: 'results' }, '');
+    if (window.history.state?.colorExtract === 'results') {
+      window.history.replaceState({ colorExtract: 'results' }, '');
+    } else {
+      window.history.pushState({ colorExtract: 'results' }, '');
+    }
     currentSrc = src;
     edit.setBackground(src);
     history.clear();
@@ -1309,7 +1313,7 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
     set currentCanvas(v) { currentCanvas = v; },
     get currentSrc() { return currentSrc; },
     set currentSrc(v) { currentSrc = v; },
-  }, floatingToolbar, history, popstateAc, () => gradientEditor.setGradient(initialGradient));
+  }, floatingToolbar, history, () => gradientEditor.setGradient(initialGradient));
 
   async function addColorToImage() {
     if (!currentCanvas || !markers || !gradientEditor) return;
@@ -1464,7 +1468,7 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
     if (block.classList.contains('has-image') && e.state?.colorExtract !== 'results') {
       goToLanding();
     }
-  }, { signal: popstateAc.signal });
+  });
 }
 
 export default async function decorate(block) {
