@@ -8,6 +8,7 @@ const CONFIG = {
   selectors: {
     startElement: '.section div.highlight, .blog-article-marquee',
     section: 'main .section',
+    longFormSection: 'main .section.long-form',
     headers: 'main .section.long-form .content h2, main .section.long-form .content h3, main .section.long-form .content h4',
     navigation: '.global-navigation, header',
     stopElement: '.faqv2, .ax-link-list-v2-container, .ax-blog-posts-container, .banner-bg, footer',
@@ -555,51 +556,19 @@ function getTopBarClearance() {
 function updateDesktopPosition(tocContainer) {
   if (!isDesktop()) return;
 
-  const startElement = document.querySelector(CONFIG.selectors.startElement);
-  if (!startElement) return;
+  const longFormEl = document.querySelector(CONFIG.selectors.longFormSection);
+  if (!longFormEl) return;
 
-  // Calculate and cache the initial absolute position if not already stored
-  if (!tocContainer.dataset.initialTop) {
-    const startRect = startElement.getBoundingClientRect();
-    const startBottom = window.pageYOffset + startRect.bottom;
-    tocContainer.dataset.initialTop = startBottom + 34;
-  }
+  const minTopPosition = getTopBarClearance();
+  let topPosition = Math.max(longFormEl.getBoundingClientRect().top, minTopPosition);
 
-  const initialTop = parseFloat(tocContainer.dataset.initialTop);
-  const scrollY = window.pageYOffset;
-
-  const fixedTopPosition = getTopBarClearance();
-  const minTopPosition = fixedTopPosition;
-
-  // Calculate the current top position:
-  // Before scrolling past the initial position, TOC should appear to stay with content
-  // After scrolling past, it should stick to the viewport
-  let topPosition;
-  if (scrollY >= initialTop - fixedTopPosition) {
-    // Scrolled past: stick to viewport
-    topPosition = fixedTopPosition;
-  } else {
-    // Not scrolled past yet: calculate position relative to viewport
-    topPosition = initialTop - scrollY;
-  }
-
-  // Ensure we never position higher than the minimum
-  topPosition = Math.max(topPosition, minTopPosition);
-
-  // Check if there's a stop element we shouldn't scroll past
   const stopSelector = tocContainer.dataset.stopSelector || CONFIG.selectors.stopElement;
   const stopElement = stopSelector
     ? Array.from(document.querySelectorAll(stopSelector)).find((el) => el.offsetHeight > 0)
     : null;
-  if (stopElement && scrollY > 0) {
+  if (stopElement && window.pageYOffset > 0) {
     const stopRect = stopElement.getBoundingClientRect();
-    const stopTop = stopRect.top; // Position relative to viewport
-    const tocHeight = tocContainer.offsetHeight;
-    // If the TOC would overlap with the stop element, limit its position
-    // We want: topPosition + tocHeight <= stopTop
-    // So: topPosition <= stopTop - tocHeight
-    const maxTopPosition = stopTop - tocHeight - 20; // 20px buffer
-
+    const maxTopPosition = stopRect.top - tocContainer.offsetHeight - 20;
     if (topPosition > maxTopPosition && stopRect.height > 0) {
       topPosition = maxTopPosition;
     }
@@ -626,8 +595,6 @@ function setupDesktop(tocContainer) {
       if (isDesktop()) updateDesktopPosition(tocContainer);
     },
     onResize: () => {
-      delete tocContainer.dataset.initialTop;
-
       if (isDesktop()) {
         updateDesktopPosition(tocContainer);
       } else {
