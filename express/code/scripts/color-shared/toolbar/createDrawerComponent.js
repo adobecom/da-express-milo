@@ -69,7 +69,6 @@ const DRAWER_DEFAULTS = {
   tagRemoveAriaLabel: 'Remove {{tag}}',
   libraryCreatedToast: "Library '{{name}}' created",
   createLibraryFailedToast: 'Something went wrong. Try again.',
-  viewInLibrary: 'View in Library',
 };
 
 const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
@@ -849,11 +848,6 @@ export async function createDrawer(options) {
           label,
           libraryName: formData.library?.name ?? t.yourLibrary,
         }),
-        timeout: 6000,
-        action: {
-          label: t.viewInLibrary,
-          href: 'https://new.express.adobe.com/libraries',
-        },
       });
       await onSave?.(formData);
     } catch (err) {
