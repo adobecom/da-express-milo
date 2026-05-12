@@ -421,8 +421,6 @@ function setupNavigation(content) {
       const header = cache.get(link);
       if (header) {
         header.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        content.querySelectorAll('.toc-link').forEach((l) => l.classList.remove('active'));
-        link.classList.add('active');
       }
       link.blur();
     });
@@ -526,6 +524,31 @@ function setupSocialSharing(socialContainer) {
 // ============================================================================
 
 /**
+ * Returns the clearance needed below fixed/sticky elements pinned at the top of the viewport.
+ * Only elements that are currently stuck at the top (rect.top ≤ 1) are counted.
+ * @returns {number} Pixels from viewport top the TOC should clear
+ */
+function getTopBarClearance() {
+  const candidates = [
+    CONFIG.selectors.navigation,
+    '.ribbon-banner',
+    '.feds-promo-wrapper',
+  ];
+  let maxBottom = 0;
+  candidates.forEach((sel) => {
+    document.querySelectorAll(sel).forEach((el) => {
+      const pos = getComputedStyle(el).position;
+      if (pos !== 'fixed' && pos !== 'sticky') return;
+      const rect = el.getBoundingClientRect();
+      if (rect.top <= 1 && rect.height > 0) {
+        maxBottom = Math.max(maxBottom, rect.bottom);
+      }
+    });
+  });
+  return (maxBottom || 100) + 15;
+}
+
+/**
  * Calculates and sets the desktop TOC position based on start element and scroll
  * @param {HTMLElement} tocContainer - TOC container element
  */
@@ -545,9 +568,8 @@ function updateDesktopPosition(tocContainer) {
   const initialTop = parseFloat(tocContainer.dataset.initialTop);
   const scrollY = window.pageYOffset;
 
-  // Calculate desired top position (115px from viewport top when fixed)
-  const fixedTopPosition = 115;
-  const minTopPosition = 115; // Never position higher than this
+  const fixedTopPosition = getTopBarClearance();
+  const minTopPosition = fixedTopPosition;
 
   // Calculate the current top position:
   // Before scrolling past the initial position, TOC should appear to stay with content
