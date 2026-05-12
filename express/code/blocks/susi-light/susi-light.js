@@ -432,11 +432,14 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const isColor = el.classList.contains('color');
 
   let redirectUrl;
+  let consumeSusiColorRedirect;
   if (isColor) {
-    const { consumeSusiColorRedirect } = await import(
+    ({ consumeSusiColorRedirect } = await import(
       '../../scripts/color-shared/utils/susiRedirect.js'
-    );
-    redirectUrl = consumeSusiColorRedirect() || window.location.href;
+    ));
+    // Use the current page URL as redirect_uri so IMS always gets a valid whitelisted URI.
+    // The actual Express destination is read lazily at sign-in success time.
+    redirectUrl = window.location.href;
   } else {
     redirectUrl = rows[0]?.textContent?.trim();
   }
@@ -456,7 +459,10 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const titleDiv = createTag('div', { class: 'title' }, title);
   const susiWrapper = createTag('div', { class: 'susi-wrapper' }, createSUSIComponent({
     ...params,
-    onSuccessfulToken: () => window.location.assign(destURL.toString()),
+    onSuccessfulToken: () => {
+      const target = (isColor && consumeSusiColorRedirect?.()) || destURL.toString();
+      window.location.assign(target);
+    },
   }));
   const layout = createTag('div', { class: 'susi-layout' }, [createLogo(), titleDiv, susiWrapper]);
   return layout;
