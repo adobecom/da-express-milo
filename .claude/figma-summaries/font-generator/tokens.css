@@ -1,0 +1,86 @@
+/* Design tokens — font-generator
+   Extracted from Figma file 6vX2FEPZ2ahzNnPUDExQjo
+   Source nodes: Unicode generator - W (1:20857), transparent-img-marquee (1:20905),
+                 Font-generator (1:20906), Columns-Variables (1:20907), how-to-v2 (1:20958),
+                 icon-carousel (1:21093), Font-bento (1:21094), Testimonials Block (1:21699),
+                 FAQ-accordian (1:21700), Banner-cool-variables (1:21701)
+   Fetched: 2026-05-12
+*/
+:root {
+  /* Typography */
+  --h1-size: 45px;    --h1-weight: 900;    --h1-line-height: 1.04;
+  --h2-size: 36px;    --h2-weight: 900;    --h2-line-height: 1.04;
+  --h2-faq-size: 36px; /* FAQ heading uses 36px Black */
+  --h2-banner-size: 45px; /* Banner heading uses heading-2xl */
+  --h3-size: 22px;    --h3-weight: 700;    --h3-line-height: 1.28;
+  --title-m-size: 22px;  --title-m-weight: 700;
+  --title-2xs-size: 16px; --title-2xs-weight: 700;
+  --body-xl-size: 20px;  --body-xl-weight: 400;
+  --body-l-size: 18px;   --body-l-weight: 400;
+  --body-m-size: 18px;   --body-m-weight: 400; /* typography/body/m */
+  --body-s-size: 16px;   --body-s-weight: 400;
+  --label-s-size: 12px;  --label-s-weight: 400;
+  --label-l-size: 16px;  --label-l-weight: 700;
+  --font-family-heading: "Adobe Clean Spectrum VF", "Adobe Clean", sans-serif;
+  --font-family-body: "Adobe Clean Spectrum VF", "Adobe Clean", sans-serif;
+  --font-family-title: "Adobe Clean Spectrum VF", "Adobe Clean", sans-serif;
+
+  /* Colors */
+  --cta-accent-bg: #3B63FB;          /* Button (Accent) — used in Font-bento, Banner */
+  --cta-primary-dark-bg: #292929;    /* Button (Primary dark) — Columns section */
+  --cta-transparent-black-bg: rgba(0,0,0,0.84); /* Button (Primary Static black) — tool cards */
+  --cta-text-white: #FFFFFF;
+
+  --text-heading: #131313;
+  --text-title: #131313;
+  --text-body: #505050;
+  --text-neutral: #222222;
+  --text-dark: #2C2C2C;              /* FAQ headings */
+  --text-code: #292929;
+
+  --bg-hero: #000000;                /* transparent-img-marquee */
+  --bg-tool: #F3F3F3;                /* Font-generator tool section (--gray/75) */
+  --bg-bento: #F8F8F8;               /* Font-bento (--gray/50) */
+  --bg-testimonials: #FFFFFF;
+  --bg-faq: #FFFFFF;
+  --bg-faq-open: #FAFAFA;
+  --bg-card: #FFFFFF;
+  --bg-card-light: #F8F8F8;          /* icon-carousel cards, testimonial cards */
+  --bg-columns: #FFFFFF;             /* Columns-Variables section */
+  --bg-banner: #000000;              /* Banner-cool-variables */
+  --banner-inner-border: #079355;    /* Green border on banner inner card */
+
+  --seafoam-1100: #035C50;           /* Bento card image backgrounds */
+  --celery-1100: #2C5C09;            /* Bento messaging card bg */
+  --celery-200: #C5FF9C;             /* Font text on celery bg */
+  --seafoam-300: #A9EDD8;            /* Font text on seafoam bg */
+  --blue-900: #3B63FB;               /* Selected category border / CTA */
+  --accent-default: #5C5CE0;         /* Selection box strokes in Design bento card */
+  --magenta-800: #F02D6E;            /* Design bento multi-user avatar bg */
+  --red-1200: #811B0E;               /* Design bento template heading color */
+  --gray-1000: #000000;              /* Banner bg */
+  --gray-50: #F8F8F8;
+  --gray-100: #E9E9E9;
+  --gray-300: #DADADA;
+  --gray-400: #C6C6C6;
+  --white: #FFFFFF;
+
+  /* Spacing */
+  --section-padding-xl: 80px;        /* Vertical section padding */
+  --container-padding-side: 40px;    /* Horizontal container padding */
+  --max-content-width: 1600px;
+  --card-padding: 24px;              /* Bento card padding */
+  --card-radius: 16px;               /* Bento card border-radius */
+  --card-gap: 24px;                  /* Grid gap in bento */
+}
+
+/*
+ * Color → Milo block variant:
+ * #000000 (black) → banner (standout)
+ * #5C5CE0 (indigo/purple) → banner (default)
+ * #0070F2 (blue) → banner (cool)
+ * #F5F5F5 (white/light) → banner (light)
+ *
+ * NOTE: The banner in this design uses black (#000000) with a green border (#079355).
+ * This is the "standout" (dark) variant.
+ */
