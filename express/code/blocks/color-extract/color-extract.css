@@ -620,6 +620,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   min-height: 240px;
   --figma-strip-radius: 16px;
   --swatch-rail-gap: 2px;
+  --hex-code-static-padding-left: 16px;
 }
 
 .color-extract .color-extract-swatch-rail color-swatch-rail {

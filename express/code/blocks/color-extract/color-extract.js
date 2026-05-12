@@ -934,7 +934,12 @@ function renderColorVariant(block, rows, config, strings = {}) {
       const railAdapter = createSwatchRailAdapter(controller, {
         orientation: 'stacked',
         swatchFeatures: {
-          copy: true, hexCode: true, trash: true, minSwatches: 2, editColorDisabled: true,
+          copy: true,
+          hexCode: true,
+          trash: true,
+          minSwatches: 2,
+          editColorDisabled: true,
+          copyFromHex: false,
         },
         strings: colorSwatchRailStrings,
       });
@@ -1395,7 +1400,12 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
       const railAdapter = createSwatchRailAdapter(swatchController, {
         orientation: 'stacked',
         swatchFeatures: {
-          copy: true, hexCode: true, trash: true, minSwatches: 2, editColorDisabled: true,
+          copy: true,
+          hexCode: true,
+          trash: true,
+          minSwatches: 2,
+          editColorDisabled: true,
+          copyFromHex: false,
         },
         strings: colorSwatchRailStrings,
       });
