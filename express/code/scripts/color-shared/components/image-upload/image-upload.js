@@ -80,7 +80,7 @@ export function createUploadDropzone(options = {}) {
     role: 'button',
     tabindex: opts.enabled ? '0' : '-1',
     'aria-label': opts.ariaLabel,
-    'aria-disabled': opts.enabled ? undefined : 'true',
+    ...(!opts.enabled && { 'aria-disabled': 'true' }),
   });
 
   const uploadIcon = createTag('span', { class: `${CLS}-upload-icon`, 'aria-hidden': 'true' }, UPLOAD_SVG);
@@ -189,9 +189,10 @@ export function createUploadDropzone(options = {}) {
   ['dragenter', 'dragover'].forEach((n) => {
     dropzone.addEventListener(n, () => container.classList.add('highlight'));
   });
-  ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((n) => {
-    dropzone.addEventListener(n, preventDefaults);
+  ['dragenter', 'dragover', 'dragleave'].forEach((n) => {
+    dropzone.addEventListener(n, (e) => e.preventDefault());
   });
+  dropzone.addEventListener('drop', preventDefaults);
   ['dragleave', 'drop'].forEach((n) => {
     dropzone.addEventListener(n, () => container.classList.remove('highlight'));
   });

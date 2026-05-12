@@ -123,8 +123,9 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   if (!isController) {
     result.controller = controller;
     result.update = (newData) => {
-      const next = createSwatchRailController(newData);
-      controller.setState(next.getState());
+      const colors = newData?.colors || [];
+      const swatches = colors.map((c) => ({ hex: c.startsWith('#') ? c : `#${c}` }));
+      controller.setState({ swatches, baseColorIndex: newData?.baseColorIndex ?? 0 });
     };
   }
   return result;

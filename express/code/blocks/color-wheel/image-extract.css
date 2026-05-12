@@ -100,6 +100,7 @@
   flex-direction: column;
   gap: 16px;
   align-items: center;
+  margin: auto;
 }
 
 .image-extract .color-extract-suggestions-label {

@@ -273,6 +273,10 @@ export class ColorSwatchRail extends LitElement {
       cancelAnimationFrame(this._tooltipRefreshRafId);
       this._tooltipRefreshRafId = null;
     }
+    if (this._subscribeTooltipDebounceId != null) {
+      clearTimeout(this._subscribeTooltipDebounceId);
+      this._subscribeTooltipDebounceId = null;
+    }
     if (this._nativePickerCloseTimer != null) {
       clearTimeout(this._nativePickerCloseTimer);
       this._nativePickerCloseTimer = null;
@@ -311,6 +315,11 @@ export class ColorSwatchRail extends LitElement {
   }
 
   _scheduleTooltipsRefresh() {
+    // Touch-only devices (iPhone, iPad without mouse) have no hover capability,
+    // so Spectrum tooltip nodes serve no purpose. Skipping their creation and
+    // destruction eliminates the single biggest source of iOS WebContent jetsam
+    // (per the comment in attachController above).
+    if (window.matchMedia('(hover: none)').matches) return;
     if (this._nativePickerOpen) {
       this._tooltipRefreshQueued = true;
       return;
@@ -433,7 +442,21 @@ export class ColorSwatchRail extends LitElement {
         this.lockedByIndex = state.lockedByIndex ?? new Set();
         this.requestUpdate();
         if (this._tooltipsInitialized) {
-          this.updateComplete.then(() => this._scheduleTooltipsRefresh()).catch(() => {});
+          // Debounce tooltip refreshes during sustained controller activity.
+          // Each _refreshTooltips tears down and rebuilds Spectrum tooltips
+          // on every visible button (sp-tooltip in shadow DOM, listeners,
+          // observers, ...). At ~12 Hz (color-wheel drag throttle rate) that
+          // allocation churn was a major contributor to the iOS Safari
+          // WebContent jetsam during long drags. The aria-labels on the
+          // buttons are updated immediately by the Lit render above; only
+          // the floating Spectrum tooltip nodes are stale until quiescence.
+          if (this._subscribeTooltipDebounceId != null) {
+            clearTimeout(this._subscribeTooltipDebounceId);
+          }
+          this._subscribeTooltipDebounceId = setTimeout(() => {
+            this._subscribeTooltipDebounceId = null;
+            this.updateComplete.then(() => this._scheduleTooltipsRefresh()).catch(() => {});
+          }, 150);
         }
       });
     }

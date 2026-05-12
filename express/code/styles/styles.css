@@ -1156,8 +1156,8 @@ main .section:not(.xxxl-spacing-static,
   padding-bottom: var(--spacing-600);
 }
 
-div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .ribbon-banner, .content, .banner, .text, .hover-cards, .cta-cards, .simplified-pricing-cards-v2) a.button.same-fcta,
-div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .ribbon-banner, .content, .banner, .text, .hover-cards, .cta-cards, .simplified-pricing-cards-v2) a.con-button.same-fcta,
+div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .ribbon-banner, .content, .banner, .text, .hover-cards, .cta-cards, .simplified-pricing-cards-v2, .cta-carousel) a.button.same-fcta,
+div[data-block-status]:not(.pricing-cards-wrapper, .pricing-table-wrapper, .split-action-wrapper, .link-list-wrapper, .wayfinder, .ratings, .ribbon-banner, .content, .banner, .text, .hover-cards, .cta-cards, .simplified-pricing-cards-v2, .cta-carousel) a.con-button.same-fcta,
 #hero a.same-fcta {
   display: none;
 }

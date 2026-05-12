@@ -67,6 +67,11 @@ export function getMobileOperatingSystem() {
   return 'unknown';
 }
 
+export function isWindows(userAgent) {
+  const ua = userAgent ?? window.navigator?.userAgent ?? '';
+  return /\bwindows nt\b/i.test(ua);
+}
+
 export async function getRedirectUri() {
   const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
   if (getMetadata('adobe-home-redirect') === 'on') {
@@ -487,9 +492,10 @@ export function preDecorateSections(area) {
             const sameHash = currURL.hash === linkToTargetURL?.hash;
             const isNotInFloatingCta = !a.closest('.block')?.classList.contains('floating-button');
             const notFloatingCtaIgnore = !a.classList.contains('floating-cta-ignore');
+            const isNotInCtaCarousel = !a.closest('.cta-carousel');
 
             return (sameText || (samePathname && sameHash))
-              && isNotInFloatingCta && notFloatingCtaIgnore;
+              && isNotInFloatingCta && notFloatingCtaIgnore && isNotInCtaCarousel;
           } catch (error) {
             window.lana?.log(`${error?.message || error?.detail || error}`, { tags: 'utils', severity: 'error' });
             return false;

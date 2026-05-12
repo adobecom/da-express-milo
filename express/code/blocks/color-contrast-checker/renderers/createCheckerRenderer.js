@@ -659,7 +659,7 @@ export function createCheckerRenderer(options) {
       const modal = createModalManager();
       modal.openContrastCheckerModal(
         { colors, name: paletteData?.name },
-        { dataService },
+        { dataService, strings },
       );
     });
 
