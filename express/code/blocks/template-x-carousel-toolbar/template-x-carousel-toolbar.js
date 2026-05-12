@@ -547,12 +547,21 @@ export default async function init(el) {
     }
 
     // Load search-specific dependencies only for this variant
-    const searchDeps = await Promise.all([
+    const [
+      { default: importedBlockMediator },
+      {
+        trackSearch: importedTrackSearch,
+        updateImpressionCache: importedUpdateImpressionCache,
+        generateSearchId: importedGenerateSearchId,
+      },
+    ] = await Promise.all([
       import('../../scripts/block-mediator.min.js'),
       import('../../scripts/template-search-api-v3.js'),
     ]);
-    ({ default: BlockMediator } = searchDeps[0]);
-    ({ trackSearch, updateImpressionCache, generateSearchId } = searchDeps[1]);
+    BlockMediator = importedBlockMediator;
+    trackSearch = importedTrackSearch;
+    updateImpressionCache = importedUpdateImpressionCache;
+    generateSearchId = importedGenerateSearchId;
   }
 
   try {
@@ -567,7 +576,10 @@ export default async function init(el) {
     const { sortOptions, defaultIndex, sortPlaceholderText } = sortSetup;
 
     const dropdown = createDropdown(
-      sortOptions, defaultIndex, updateTemplates, sortPlaceholderText,
+      sortOptions,
+      defaultIndex,
+      updateTemplates,
+      sortPlaceholderText,
     );
 
     const controlsContainer = createTag('div', { class: 'controls-container' });
