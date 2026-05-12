@@ -72,7 +72,7 @@ main .mobile-fork-button-os-split .floating-button a.button:any-link {
 }
 
 main .mobile-fork-button-os-split .floating-button a.button:any-link.accent {
-  color: var(--color-var(--color-white));
+  color: var(--color-white);
   background-color: var(--color-info-accent);
   border-color: var(--color-info-accent);
 }
