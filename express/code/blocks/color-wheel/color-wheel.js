@@ -501,6 +501,23 @@ function buildPrimaryColorContent(controller, strings = {}) {
   const state = controller.getState();
   const baseColorIndex = state.baseColorIndex ?? 0;
   const baseColor = state.swatches?.[baseColorIndex]?.hex || '#FF0000';
+  let pendingBaseColorHex = null;
+  let pendingBaseColorRaf = null;
+
+  const flushPendingBaseColor = () => {
+    pendingBaseColorRaf = null;
+    if (!pendingBaseColorHex) return;
+    controller.setBaseColor(pendingBaseColorHex);
+    pendingBaseColorHex = null;
+  };
+
+  const queueBaseColorUpdate = (hex) => {
+    if (!hex) return;
+    pendingBaseColorHex = hex;
+    if (pendingBaseColorRaf != null) return;
+    pendingBaseColorRaf = requestAnimationFrame(flushPendingBaseColor);
+  };
+
   const adapter = createBaseColorAdapter(
     baseColor,
     'HEX',
@@ -508,9 +525,13 @@ function buildPrimaryColorContent(controller, strings = {}) {
       strings: strings.baseColorStrings,
       onColorChange: (detail) => {
         if (!detail?.hex) return;
-        controller.setBaseColor(detail.hex);
+        queueBaseColorUpdate(detail.hex);
       },
       onColorChangeEnd: () => {
+        if (pendingBaseColorRaf != null) {
+          cancelAnimationFrame(pendingBaseColorRaf);
+          flushPendingBaseColor();
+        }
         // eslint-disable-next-line no-underscore-dangle
         adapter.element._setLocked?.(true);
       },
