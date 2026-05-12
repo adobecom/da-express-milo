@@ -491,6 +491,11 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 .color-extract .color-extract-suggestion-chip.is-4 { background: var(--color-extract-gray-200); }
 .color-extract .color-extract-suggestion-chip.is-5 { background: var(--color-extract-gray-300); }
 
+.color-extract .color-extract-suggestion-bar.is-gradient {
+  display: block;
+  background: var(--color-extract-gray-100);
+}
+
 /* ---- Edit stage ---- */
 
 .color-extract .color-extract-edit {

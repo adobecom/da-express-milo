@@ -127,4 +127,25 @@ describe('Color Extract — gradient variant', () => {
     // gradient mock HTML has 2 suggestion images
     expect(suggestions.length).to.equal(2);
   });
+
+  it('suggestion bars use gradient style, not palette chips', async () => {
+    const block = document.querySelector('.color-extract');
+    await decorate(block);
+    const bars = block.querySelectorAll('.color-extract-suggestion-bar');
+    bars.forEach((bar) => {
+      expect(bar.classList.contains('is-gradient')).to.be.true;
+      expect(bar.querySelector('.color-extract-suggestion-chip')).to.not.exist;
+    });
+  });
+
+  it('palette variant suggestion bars use chips, not gradient style', async () => {
+    document.body.innerHTML = basic;
+    const block = document.querySelector('.color-extract');
+    await decorate(block);
+    const bars = block.querySelectorAll('.color-extract-suggestion-bar');
+    bars.forEach((bar) => {
+      expect(bar.classList.contains('is-gradient')).to.be.false;
+      expect(bar.querySelectorAll('.color-extract-suggestion-chip').length).to.be.greaterThan(0);
+    });
+  });
 });
