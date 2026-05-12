@@ -120,6 +120,7 @@ export const style = css`
         cursor: not-allowed;
     }
 
+    :host(:not(.wheel-marker-focus-entered)) .wheel-marker-overlay--active,
     .wheel-marker-overlay:focus,
     .wheel-marker-overlay--kb-focused {
         outline: 2px solid var(--Alias-content-semantic-accent-key-focus);

@@ -253,6 +253,7 @@ export class ColorWheelExpress extends ColorWheel {
       this._handleMarkerKeydown(e, Number(marker.dataset.index));
     });
     marker.addEventListener('focus', () => {
+      this.classList.add('wheel-marker-focus-entered');
       this._kbFocusIndex = Number(marker.dataset.index);
       marker.classList.add('wheel-marker-overlay--kb-focused');
     });
