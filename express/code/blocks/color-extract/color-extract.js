@@ -863,6 +863,7 @@ function renderColorVariant(block, rows, config, strings = {}) {
     history.clear();
     currentCanvas = null;
     currentSrc = null;
+    sessionStorage.removeItem('color-extract-image-src');
     popstateAc.abort();
     block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
       el.classList.remove('is-selected');
@@ -873,6 +874,7 @@ function renderColorVariant(block, rows, config, strings = {}) {
   async function onImageReady(image, src) {
     window.history.pushState({ colorExtract: 'results' }, '');
     currentSrc = src;
+    try { sessionStorage.setItem('color-extract-image-src', src); } catch { /* quota exceeded — image won't be restored after sign-in */ }
     edit.setBackground(src);
     history.clear();
 
@@ -1029,7 +1031,21 @@ function renderColorVariant(block, rows, config, strings = {}) {
     const paletteName = getResolvedPaletteName();
     controller.setState({ swatches: colors.map((hex) => ({ hex })), baseColorIndex: 0 });
     if (paletteName) controller.setMetadata({ name: paletteName });
-    edit.bgWrapper.replaceWith(dropzone.container);
+
+    const storedSrc = sessionStorage.getItem('color-extract-image-src');
+    sessionStorage.removeItem('color-extract-image-src');
+    if (storedSrc) {
+      const img = new Image();
+      img.onload = async () => {
+        currentSrc = storedSrc;
+        edit.setBackground(storedSrc);
+        currentCanvas = drawImageToCanvas(img);
+        await setupMarkers(currentCanvas);
+      };
+      img.src = storedSrc;
+    } else {
+      edit.bgWrapper.replaceWith(dropzone.container);
+    }
     block.classList.add('has-image');
     window.history.replaceState({ colorExtract: 'results' }, '');
     floatingToolbar.mount();
@@ -1318,6 +1334,7 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
     history.clear();
     currentCanvas = null;
     currentSrc = null;
+    sessionStorage.removeItem('color-extract-image-src');
     popstateAc.abort();
     gradientEditor.setGradient(initialGradient);
     block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
@@ -1329,6 +1346,7 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
   async function onImageReady(image, src) {
     window.history.pushState({ colorExtract: 'results' }, '');
     currentSrc = src;
+    try { sessionStorage.setItem('color-extract-image-src', src); } catch { /* quota exceeded — image won't be restored after sign-in */ }
     edit.setBackground(src);
     history.clear();
 
@@ -1501,7 +1519,21 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
     const gradientData = { type: 'linear', angle: 90, colorStops };
     gradientEditor.setGradient(gradientData);
     syncSwatchesFromGradient(gradientData);
-    edit.bgWrapper.replaceWith(dropzone.container);
+
+    const storedSrc = sessionStorage.getItem('color-extract-image-src');
+    sessionStorage.removeItem('color-extract-image-src');
+    if (storedSrc) {
+      const img = new Image();
+      img.onload = async () => {
+        currentSrc = storedSrc;
+        edit.setBackground(storedSrc);
+        currentCanvas = drawImageToCanvas(img);
+        await setupMarkers(currentCanvas);
+      };
+      img.src = storedSrc;
+    } else {
+      edit.bgWrapper.replaceWith(dropzone.container);
+    }
     block.classList.add('has-image');
     window.history.replaceState({ colorExtract: 'results' }, '');
     floatingToolbar.mount();
