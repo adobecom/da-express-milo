@@ -689,6 +689,28 @@ function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) 
 
 /* ---------- Palette variant ---------- */
 
+function createGoToLanding(block, getDropzone, s, floatingToolbar, history, onReset) {
+  return function goToLanding() {
+    block.classList.remove('has-image', 'is-loading');
+    getDropzone().container.classList.remove('has-image');
+    if (s.markerResizeObserver) s.markerResizeObserver.disconnect();
+    if (s.resizeHandler) window.removeEventListener('resize', s.resizeHandler);
+    if (s.markers) {
+      s.markers.destroy();
+      s.markers = null;
+    }
+    floatingToolbar.destroy();
+    history.clear();
+    s.currentCanvas = null;
+    s.currentSrc = null;
+    onReset?.();
+    block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
+      el.classList.remove('is-selected');
+      el.setAttribute('aria-pressed', 'false');
+    });
+  };
+}
+
 function hoistLandingDecorations(block, landing) {
   const marqueeWrapper = block.closest('.color-extract-marquee-wrapper');
   if (!marqueeWrapper) return;
@@ -849,30 +871,12 @@ function renderColorVariant(block, rows, config, strings = {}) {
 
   const floatingToolbar = createFloatingToolbarMount(controller, VARIANTS.PALETTE);
 
-  const popstateAc = new AbortController();
-
-  function goToLanding() {
-    block.classList.remove('has-image', 'is-loading');
-    if (markerResizeObserver) markerResizeObserver.disconnect();
-    if (resizeHandler) window.removeEventListener('resize', resizeHandler);
-    if (markers) {
-      markers.destroy();
-      markers = null;
-    }
-    floatingToolbar.destroy();
-    history.clear();
-    currentCanvas = null;
-    currentSrc = null;
-    sessionStorage.removeItem('color-extract-image-src');
-    popstateAc.abort();
-    block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
-      el.classList.remove('is-selected');
-      el.setAttribute('aria-pressed', 'false');
-    });
-  }
-
   async function onImageReady(image, src) {
-    window.history.pushState({ colorExtract: 'results' }, '');
+    if (window.history.state?.colorExtract === 'results') {
+      window.history.replaceState({ colorExtract: 'results' }, '');
+    } else {
+      window.history.pushState({ colorExtract: 'results' }, '');
+    }
     currentSrc = src;
     try { sessionStorage.setItem('color-extract-image-src', src); } catch { /* quota exceeded — image won't be restored after sign-in */ }
     edit.setBackground(src);
@@ -900,6 +904,17 @@ function renderColorVariant(block, rows, config, strings = {}) {
     onImageReady,
     { colorExtractStrings, imageUploadStrings },
   );
+
+  const goToLanding = createGoToLanding(block, () => dropzone, {
+    get markers() { return markers; },
+    set markers(v) { markers = v; },
+    get markerResizeObserver() { return markerResizeObserver; },
+    get resizeHandler() { return resizeHandler; },
+    get currentCanvas() { return currentCanvas; },
+    set currentCanvas(v) { currentCanvas = v; },
+    get currentSrc() { return currentSrc; },
+    set currentSrc(v) { currentSrc = v; },
+  }, floatingToolbar, history);
 
   async function addColorToImage() {
     if (!currentCanvas || !markers) return;
@@ -1055,7 +1070,7 @@ function renderColorVariant(block, rows, config, strings = {}) {
     if (block.classList.contains('has-image') && e.state?.colorExtract !== 'results') {
       goToLanding();
     }
-  }, { signal: popstateAc.signal });
+  });
 }
 
 /* ---------- Gradient edit stage ---------- */
@@ -1320,31 +1335,12 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
   }
 
   const floatingToolbar = createFloatingToolbarMount(swatchController, VARIANTS.GRADIENT);
-  const popstateAc = new AbortController();
-
-  function goToLanding() {
-    block.classList.remove('has-image', 'is-loading');
-    if (markerResizeObserver) markerResizeObserver.disconnect();
-    if (resizeHandler) window.removeEventListener('resize', resizeHandler);
-    if (markers) {
-      markers.destroy();
-      markers = null;
-    }
-    floatingToolbar.destroy();
-    history.clear();
-    currentCanvas = null;
-    currentSrc = null;
-    sessionStorage.removeItem('color-extract-image-src');
-    popstateAc.abort();
-    gradientEditor.setGradient(initialGradient);
-    block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
-      el.classList.remove('is-selected');
-      el.setAttribute('aria-pressed', 'false');
-    });
-  }
-
   async function onImageReady(image, src) {
-    window.history.pushState({ colorExtract: 'results' }, '');
+    if (window.history.state?.colorExtract === 'results') {
+      window.history.replaceState({ colorExtract: 'results' }, '');
+    } else {
+      window.history.pushState({ colorExtract: 'results' }, '');
+    }
     currentSrc = src;
     try { sessionStorage.setItem('color-extract-image-src', src); } catch { /* quota exceeded — image won't be restored after sign-in */ }
     edit.setBackground(src);
@@ -1371,6 +1367,17 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
     onImageReady,
     { colorExtractStrings, imageUploadStrings },
   );
+
+  const goToLanding = createGoToLanding(block, () => dropzone, {
+    get markers() { return markers; },
+    set markers(v) { markers = v; },
+    get markerResizeObserver() { return markerResizeObserver; },
+    get resizeHandler() { return resizeHandler; },
+    get currentCanvas() { return currentCanvas; },
+    set currentCanvas(v) { currentCanvas = v; },
+    get currentSrc() { return currentSrc; },
+    set currentSrc(v) { currentSrc = v; },
+  }, floatingToolbar, history, () => gradientEditor.setGradient(initialGradient));
 
   async function addColorToImage() {
     if (!currentCanvas || !markers || !gradientEditor) return;
@@ -1543,7 +1550,7 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
     if (block.classList.contains('has-image') && e.state?.colorExtract !== 'results') {
       goToLanding();
     }
-  }, { signal: popstateAc.signal });
+  });
 }
 
 export default async function decorate(block) {
