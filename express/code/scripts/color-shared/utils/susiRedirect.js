@@ -3,22 +3,12 @@ import { createColorPaletteParamApi } from './utilities.js';
 const KEY = '__susiColorRedirect';
 
 export function setSusiColorRedirect(url) {
-  try {
-    sessionStorage.setItem(KEY, url);
-  } catch {
-    window[KEY] = url;
-  }
+  window[KEY] = url;
 }
 
 export function consumeSusiColorRedirect() {
-  let url;
-  try {
-    url = sessionStorage.getItem(KEY);
-    if (url) sessionStorage.removeItem(KEY);
-  } catch {
-    url = window[KEY];
-    delete window[KEY];
-  }
+  const url = window[KEY];
+  delete window[KEY];
   return url || null;
 }
 
