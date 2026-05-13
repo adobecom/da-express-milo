@@ -360,7 +360,7 @@ function preloadLCPImage(img) {
 
 (function loadStyles() {
   const paths = [`${miloLibs}/styles/styles.css`];
-  if (getMetadata('theme') !== 'doodlebug') {
+  if (getMetadata('doodlebug-test') !== 'true') {
     paths.push('/express/code/styles/styles.css');
   }
   if (STYLES) { paths.push(STYLES); }
@@ -549,6 +549,22 @@ async function loadPage() {
   });
 
   await loadArea();
+
+  if (getMetadata('doodlebug-test') === 'true') {
+    const { getConfig } = await import(`${miloLibs}/utils/utils.js`);
+    const miloConfig = getConfig();
+    const experiments = miloConfig.mep?.experiments ?? [];
+    const hasMyManifest = experiments.some(
+      ({ experiment }) => experiment?.manifestPath?.includes('opt40927-poc.json'),
+    );
+    if (!hasMyManifest) {
+      const path = '/express/code/styles/styles.css';
+      const link = document.createElement('link');
+      link.setAttribute('rel', 'stylesheet');
+      link.setAttribute('href', path);
+      document.head.appendChild(link);
+    }
+  }
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));
