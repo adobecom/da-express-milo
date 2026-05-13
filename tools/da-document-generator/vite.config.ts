@@ -3,7 +3,7 @@ import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig(({ command }) => {
-  const base = command === 'serve' ? '/' : '/tools/da-document-generator-maxn-01/dist/'
+  const base = command === 'serve' ? '/' : '/tools/da-document-generator/dist/'
 
   return {
     plugins: [react(), tailwindcss()],
