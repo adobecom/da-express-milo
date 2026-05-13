@@ -746,7 +746,17 @@ function setupFrictionlessTargetBaseUrl(quickAction) {
   const variant = urlVariant || quickAction;
   if (variant === AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused) {
     const isStage = urlParams.get('hzenv') === 'stage';
-    const stageFocusedUrl = urlParams.get('base') ? urlParams.get('base') : `https://stage.projectx.corp.adobe.com${EXPRESS_ROUTE_PATHS.focusedEditor}`;
+    let stageFocusedUrl = `https://stage.projectx.corp.adobe.com${EXPRESS_ROUTE_PATHS.focusedEditor}`;
+    const base = urlParams.get('base');
+    if (base) {
+      try {
+        const normalizedBase = base.startsWith('http') ? base : `https://${base}`;
+        const { hostname, origin } = new URL(normalizedBase);
+        if (hostname.endsWith('adobe.com')) {
+          stageFocusedUrl = `${origin}${EXPRESS_ROUTE_PATHS.focusedEditor}`;
+        }
+      } catch { /* keep default stage URL */ }
+    }
     frictionlessTargetBaseUrl = isStage
       ? stageFocusedUrl
       : `https://express.adobe.com${EXPRESS_ROUTE_PATHS.focusedEditor}`;
