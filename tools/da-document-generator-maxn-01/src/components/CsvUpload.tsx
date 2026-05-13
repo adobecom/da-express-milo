@@ -9,7 +9,7 @@ interface Props {
 
 function computeSummary(rows: CsvRow[]): InputSummary {
   const total = rows.length;
-  const withId = rows.filter((r) => r['template_id']?.trim());
+  const withId = rows.filter((r) => r['template_id']?.trim() && r['url_slug']?.trim());
   const valid = withId.length;
   const missing = total - valid;
 
@@ -36,6 +36,7 @@ export default function CsvUpload({ rows, onChange }: Props) {
     Papa.parse<Record<string, string>>(file, {
       header: true,
       skipEmptyLines: true,
+      transformHeader: (h) => h.trim(),
       complete: (result) => {
         const parsed = result.data.map((row, i) => ({ ...row, _id: String(i) })) as CsvRow[];
         onChange(parsed);
@@ -97,8 +98,9 @@ export default function CsvUpload({ rows, onChange }: Props) {
               : 'Drop a CSV file here or click to upload'}
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            Requires a{' '}
-            <code className="bg-gray-100 px-1 rounded">template_id</code> column
+            Requires{' '}
+            <code className="bg-gray-100 px-1 rounded">template_id</code> and{' '}
+            <code className="bg-gray-100 px-1 rounded">url_slug</code> columns
           </p>
         </div>
       )}

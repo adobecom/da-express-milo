@@ -31,12 +31,12 @@ export default function GeneratePanel({ rows, template }: Props) {
     generated: results.filter((r) =>
       ['generated', 'qa-fail', 'previewing', 'previewed', 'publishing', 'published'].includes(r.stage),
     ).length,
+    previewable: results.filter((r) => r.stage === 'generated' || r.stage === 'qa-fail').length,
     previewed: results.filter((r) =>
       ['previewed', 'publishing', 'published'].includes(r.stage),
     ).length,
     publishable: results.filter((r) => r.stage === 'previewed' && r.qa?.pass).length,
     done: results.filter((r) => r.stage === 'generated').length,
-    qaFail: results.filter((r) => r.stage === 'qa-fail').length,
     error: results.filter((r) => r.stage === 'error').length,
     published: results.filter((r) => r.stage === 'published').length,
   };
@@ -150,7 +150,7 @@ export default function GeneratePanel({ rows, template }: Props) {
     setBulkOp('idle');
   }
 
-  const showPreviewBtn = !running && counts.generated > 0 && counts.previewed === 0;
+  const showPreviewBtn = !running && results.some((r) => r.stage === 'generated' || r.stage === 'qa-fail');
   const showPublishBtn = !running && counts.previewed > 0;
 
   return (
@@ -185,7 +185,7 @@ export default function GeneratePanel({ rows, template }: Props) {
           className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {bulkOp === 'generating'
-            ? `Generating… ${counts.done + counts.qaFail + counts.error} / ${rows.length}`
+            ? `Generating… ${counts.generated + counts.error} / ${rows.length}`
             : `Generate ${rows.length} document${rows.length !== 1 ? 's' : ''}`}
         </button>
 
@@ -195,13 +195,13 @@ export default function GeneratePanel({ rows, template }: Props) {
             onClick={handlePreview}
             className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors"
           >
-            Preview {counts.generated + counts.qaFail} document{counts.generated + counts.qaFail !== 1 ? 's' : ''}
+            Preview {counts.previewable} document{counts.previewable !== 1 ? 's' : ''}
           </button>
         )}
 
         {bulkOp === 'previewing' && (
           <span className="text-sm text-indigo-600 font-medium">
-            Previewing… {counts.previewed} / {counts.generated + counts.qaFail}
+            Previewing… {counts.previewed} / {counts.previewable}
           </span>
         )}
 
@@ -224,8 +224,9 @@ export default function GeneratePanel({ rows, template }: Props) {
 
         {results.length > 0 && !running && (
           <p className="text-sm text-gray-500 ml-auto">
-            {counts.done > 0 && <span className="text-green-600 font-medium">{counts.done} generated </span>}
-            {counts.qaFail > 0 && <span className="text-yellow-600 font-medium">{counts.qaFail} QA fail </span>}
+            {counts.generated > 0 && <span className="text-green-600 font-medium">{counts.generated} generated </span>}
+            {counts.previewed > 0 && <span className="text-indigo-600 font-medium">{counts.previewed} previewed </span>}
+            {counts.published > 0 && <span className="text-green-700 font-medium">{counts.published} published </span>}
             {counts.error > 0 && <span className="text-red-600 font-medium">{counts.error} error</span>}
           </p>
         )}
@@ -237,15 +238,16 @@ export default function GeneratePanel({ rows, template }: Props) {
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
               <tr>
                 <th className="px-3 py-2 text-left font-medium text-gray-600">Path</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600 w-28">QA</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600 w-20">Preview</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600 w-28">Status</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600 w-24">QA</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600 w-28">Generate</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600 w-32">Preview</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600 w-32">Publish</th>
               </tr>
             </thead>
             <tbody>
               {results.map((r) => (
                 <tr key={r.id} className="border-b border-gray-100 last:border-0">
-                  <td className="px-3 py-2 font-mono text-gray-600 truncate max-w-[260px]">
+                  <td className="px-3 py-2 font-mono text-gray-600 truncate max-w-[240px]">
                     {r.editUrl ? (
                       <a href={r.editUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                         {r.path}
@@ -256,19 +258,13 @@ export default function GeneratePanel({ rows, template }: Props) {
                     <QaPill qa={r.qa} />
                   </td>
                   <td className="px-3 py-2">
-                    {r.previewUrl && (
-                      <a href={r.previewUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 hover:underline">
-                        aem.page ↗
-                      </a>
-                    )}
-                    {r.liveUrl && (
-                      <a href={r.liveUrl} target="_blank" rel="noopener noreferrer" className="text-green-700 hover:underline ml-1">
-                        aem.live ↗
-                      </a>
-                    )}
+                    <GeneratePill result={r} />
                   </td>
                   <td className="px-3 py-2">
-                    <StagePill result={r} />
+                    <PreviewPill result={r} />
+                  </td>
+                  <td className="px-3 py-2">
+                    <PublishPill result={r} />
                   </td>
                 </tr>
               ))}
@@ -295,35 +291,38 @@ function QaPill({ qa }: { qa?: QaResult }) {
   );
 }
 
-function StagePill({ result }: { result: RowResult }) {
-  const map: Record<string, string> = {
-    pending: 'text-gray-400',
-    generating: 'text-blue-600',
-    generated: 'text-green-600',
-    'qa-fail': 'text-yellow-700',
-    previewing: 'text-indigo-500',
-    previewed: 'text-indigo-700',
-    publishing: 'text-green-500',
-    published: 'text-green-700',
-    error: 'text-red-600',
-  };
-  const label: Record<string, string> = {
-    pending: 'Pending',
-    generating: 'Generating…',
-    generated: 'Generated',
-    'qa-fail': 'QA Fail',
-    previewing: 'Previewing…',
-    previewed: 'Previewed',
-    publishing: 'Publishing…',
-    published: 'Published',
-    error: 'Error',
-  };
-  return (
-    <span
-      className={`font-medium ${map[result.stage]}`}
-      title={result.stage === 'error' ? result.error : undefined}
-    >
-      {label[result.stage]}
-    </span>
-  );
+function GeneratePill({ result }: { result: RowResult }) {
+  const { stage, error } = result;
+  if (stage === 'pending') return <span className="text-gray-300">—</span>;
+  if (stage === 'generating') return <span className="text-blue-600 font-medium">Generating…</span>;
+  if (stage === 'error') return <span className="text-red-600 font-medium cursor-help" title={error}>Error</span>;
+  if (['generated', 'qa-fail', 'previewing', 'previewed', 'publishing', 'published'].includes(stage))
+    return <span className="text-green-600 font-medium">Generated</span>;
+  return <span className="text-gray-300">—</span>;
+}
+
+function PreviewPill({ result }: { result: RowResult }) {
+  const { stage, previewUrl } = result;
+  if (stage === 'previewing') return <span className="text-indigo-500 font-medium">Previewing…</span>;
+  if (previewUrl) {
+    return (
+      <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 font-medium hover:underline">
+        ✓ aem.page ↗
+      </a>
+    );
+  }
+  return <span className="text-gray-300">—</span>;
+}
+
+function PublishPill({ result }: { result: RowResult }) {
+  const { stage, liveUrl } = result;
+  if (stage === 'publishing') return <span className="text-green-500 font-medium">Publishing…</span>;
+  if (liveUrl) {
+    return (
+      <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="text-green-700 font-medium hover:underline">
+        ✓ aem.live ↗
+      </a>
+    );
+  }
+  return <span className="text-gray-300">—</span>;
 }

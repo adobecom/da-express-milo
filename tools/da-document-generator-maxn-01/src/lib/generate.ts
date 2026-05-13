@@ -18,13 +18,17 @@ export function toSlug(value: string): string {
 }
 
 export function rowToOutputPath(row: CsvRow, outputDir: string): string {
-  const slug = row['template_id'] ? toSlug(row['template_id']) : `doc-${row['_id']}`;
-  const dir = outputDir.replace(/\/$/, '');
-  return `${dir}/${slug}`;
+  const slug = row['url_slug']?.trim() || `doc-${row['_id']}`;
+  return `${outputDir.replace(/\/$/, '')}/${slug}`;
 }
 
 export function runQa(html: string, row: CsvRow): QaResult {
   const issues: string[] = [];
+
+  if (!row['url_slug']?.trim()) issues.push('Missing url_slug (required for page path)');
+  if (!row['title']?.trim()) issues.push('Missing title');
+  if (!row['short_title']?.trim()) issues.push('Missing short_title');
+
   const doc = new DOMParser().parseFromString(html, 'text/html');
 
   if (!doc.querySelector('title')?.textContent?.trim())
@@ -46,9 +50,6 @@ export function runQa(html: string, row: CsvRow): QaResult {
     (img) => img.getAttribute('src')?.trim(),
   );
   if (!hasImage) issues.push('No images with src found');
-
-  // Suppress unused-variable warning — row reserved for future data-completeness checks
-  void row;
 
   const score = Math.max(0, 100 - issues.length * 20);
   return { pass: issues.length === 0, score, issues };
