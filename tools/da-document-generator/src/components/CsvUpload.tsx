@@ -1,5 +1,6 @@
 import { useRef, useState } from 'react';
 import Papa from 'papaparse';
+import * as XLSX from 'xlsx';
 import type { CsvRow, InputSummary } from '../types';
 
 interface Props {
@@ -24,8 +25,6 @@ function computeSummary(rows: CsvRow[]): InputSummary {
 }
 
 export default function CsvUpload({ rows, onChange }: Props) {
-  const [mode, setMode] = useState<'csv' | 'paste'>('csv');
-  const [pasteText, setPasteText] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -44,86 +43,67 @@ export default function CsvUpload({ rows, onChange }: Props) {
     });
   }
 
-  function handlePaste() {
-    const ids = pasteText.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
-    onChange(ids.map((id, i) => ({ _id: String(i), template_id: id })));
-    setPasteText('');
+  function parseXlsx(file: File) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const data = new Uint8Array(e.target!.result as ArrayBuffer);
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      const raw = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { defval: '', raw: false });
+      const parsed = raw.map((row, i) => ({
+        ...Object.fromEntries(Object.entries(row).map(([k, v]) => [k.trim(), String(v)])),
+        _id: String(i),
+      })) as CsvRow[];
+      onChange(parsed);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+
+  function handleFile(file: File) {
+    if (file.name.endsWith('.xlsx')) {
+      parseXlsx(file);
+    } else {
+      parseCsv(file);
+    }
   }
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-2">
-        {(['csv', 'paste'] as const).map((m) => (
-          <button
-            key={m}
-            type="button"
-            onClick={() => setMode(m)}
-            className={`px-3 py-1.5 text-sm rounded-lg font-medium transition-colors ${
-              mode === m ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            {m === 'csv' ? 'CSV Upload' : 'Paste IDs'}
-          </button>
-        ))}
-      </div>
-
-      {mode === 'csv' && (
-        <div
-          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={(e) => {
-            e.preventDefault();
-            setIsDragging(false);
-            const file = e.dataTransfer.files[0];
-            if (file) parseCsv(file);
+      <div
+        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+        onDragLeave={() => setIsDragging(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setIsDragging(false);
+          const file = e.dataTransfer.files[0];
+          if (file) handleFile(file);
+        }}
+        onClick={() => fileRef.current?.click()}
+        className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
+          isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+        }`}
+      >
+        <input
+          ref={fileRef}
+          type="file"
+          accept=".csv,.xlsx"
+          className="hidden"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (file) handleFile(file);
           }}
-          onClick={() => fileRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
-            isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-          }`}
-        >
-          <input
-            ref={fileRef}
-            type="file"
-            accept=".csv"
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) parseCsv(file);
-            }}
-          />
-          <p className="text-sm text-gray-500">
-            {rows.length > 0
-              ? `${rows.length} rows loaded — click to replace`
-              : 'Drop a CSV file here or click to upload'}
-          </p>
-          <p className="text-xs text-gray-400 mt-1">
-            Requires{' '}
-            <code className="bg-gray-100 px-1 rounded">template_id</code> and{' '}
-            <code className="bg-gray-100 px-1 rounded">url_slug</code> columns
-          </p>
-        </div>
-      )}
-
-      {mode === 'paste' && (
-        <div className="flex flex-col gap-2">
-          <textarea
-            value={pasteText}
-            onChange={(e) => setPasteText(e.target.value)}
-            placeholder="Paste template IDs, one per line or comma-separated"
-            rows={6}
-            className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-mono resize-y focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-          <button
-            type="button"
-            onClick={handlePaste}
-            disabled={!pasteText.trim()}
-            className="self-end px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            Load IDs
-          </button>
-        </div>
-      )}
+        />
+        <p className="text-sm text-gray-500">
+          {rows.length > 0
+            ? `${rows.length} rows loaded — click to replace`
+            : 'Drop a .csv or .xlsx file here, or click to browse'}
+        </p>
+        <p className="text-xs text-gray-400 mt-1">
+          Requires{' '}
+          <code className="bg-gray-100 px-1 rounded">template_id</code> and{' '}
+          <code className="bg-gray-100 px-1 rounded">url_slug</code> columns
+        </p>
+      </div>
 
       {rows.length > 0 && (
         <>
