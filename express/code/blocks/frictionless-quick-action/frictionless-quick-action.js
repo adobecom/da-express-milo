@@ -545,6 +545,8 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
         skipUploadStep: true,
         ...(quickAction === AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused && {
           'edit-action': 'remove-bg',
+          'l2-panel': 'backgrounds',
+          'open-download': true,
         }),
       };
       break;
