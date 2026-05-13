@@ -10,13 +10,6 @@ export function applyTemplate(templateHtml: string, row: CsvRow): string {
   return html;
 }
 
-export function toSlug(value: string): string {
-  return value
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '');
-}
-
 export function rowToOutputPath(row: CsvRow, outputDir: string): string {
   const slug = row['url_slug']?.trim() || `doc-${row['_id']}`;
   return `${outputDir.replace(/\/$/, '')}/${slug}`;

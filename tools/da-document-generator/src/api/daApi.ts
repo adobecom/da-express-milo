@@ -1,6 +1,4 @@
 const DA_API = 'https://admin.da.live';
-const ORG = 'adobecom';
-const REPO = 'da-express-milo';
 const HLX_ADMIN = 'https://admin.hlx.page';
 const BRANCH = 'main';
 
@@ -62,11 +60,6 @@ export async function cat(filePath: string): Promise<string> {
   });
   if (!resp.ok) throw new Error(`${resp.status}: ${await resp.text()}`);
   return resp.text();
-}
-
-export function buildPath(relativePath: string): string {
-  const p = relativePath.startsWith('/') ? relativePath : `/${relativePath}`;
-  return `/${ORG}/${REPO}${p}`;
 }
 
 // Convert any DA-related URL to an admin source path (/org/repo/path)
@@ -157,18 +150,3 @@ export async function triggerPublish(daPath: string, token: string): Promise<voi
   if (!resp.ok) throw new Error(`publish ${daPath}: ${resp.status}`);
 }
 
-export interface HlxPageStatus {
-  preview: { status: number; url: string; lastModified?: string } | null;
-  live: { status: number; url: string } | null;
-}
-
-export async function getPageStatus(daPath: string, token: string): Promise<HlxPageStatus> {
-  const { org, repo, contentPath } = parseDAPath(daPath);
-  const resp = await fetch(
-    `${HLX_ADMIN}/status/${org}/${repo}/${BRANCH}${contentPath}`,
-    { headers: { Authorization: `Bearer ${token}` } },
-  );
-  if (!resp.ok) throw new Error(`status ${daPath}: ${resp.status}`);
-  const data = await resp.json();
-  return { preview: data.preview ?? null, live: data.live ?? null };
-}
