@@ -112,9 +112,6 @@ export function validateTemplate(html: string): TemplateValidation {
   if (!/<main[\s>]/i.test(html)) {
     issues.push('Missing <main> element — template may not be a valid DA document');
   }
-  if (!/<meta\s/i.test(html)) {
-    issues.push('No <meta> tags found — SEO metadata may not populate correctly');
-  }
   if (placeholders.length === 0) {
     issues.push('No {{placeholder}} tokens found — verify the template has substitution markers');
   }

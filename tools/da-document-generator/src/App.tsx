@@ -37,12 +37,12 @@ export default function App() {
         </div>
 
         <div className="grid grid-cols-1 gap-4">
-          <Panel step={1} title="Product Data" complete={inputsReady}>
-            <CsvUpload rows={rows} onChange={setRows} />
+          <Panel step={1} title="Template" complete={templateReady}>
+            <TemplateConfirm state={template} onChange={setTemplate} />
           </Panel>
 
-          <Panel step={2} title="Template" complete={templateReady}>
-            <TemplateConfirm state={template} onChange={setTemplate} />
+          <Panel step={2} title="Product Data" complete={inputsReady}>
+            <CsvUpload rows={rows} onChange={setRows} />
           </Panel>
         </div>
 

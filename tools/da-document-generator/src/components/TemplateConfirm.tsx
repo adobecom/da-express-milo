@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { cat, urlToSourcePath, validateTemplate } from '../api/daApi';
 import type { TemplateState } from '../types';
 
@@ -53,6 +53,12 @@ export default function TemplateConfirm({ state, onChange }: Props) {
     }
   }
 
+  useEffect(() => {
+    if (!url.trim()) return;
+    const timer = setTimeout(() => { handleConfirm(); }, 600);
+    return () => clearTimeout(timer);
+  }, [url]);
+
   const showResult = state.status !== 'idle' && state.status !== 'loading';
 
   return (
@@ -63,7 +69,7 @@ export default function TemplateConfirm({ state, onChange }: Props) {
           value={url}
           onChange={(e) => setUrl(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
-          placeholder="https://da.live/edit#/adobecom/da-express-milo/drafts/…"
+          placeholder="https://da.live/app/adobecom/da-express-milo/tools/da-document-generator-maxn-01/dist/index?ref=da-document-generator-maxn-01"
           className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
         />
         <button
