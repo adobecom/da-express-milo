@@ -8,6 +8,9 @@ interface Props {
   onChange: (rows: CsvRow[]) => void;
 }
 
+const PLACEHOLDER_COLUMNS = ['template_id', 'url_slug', 'title'];
+const PLACEHOLDER_ROW: CsvRow = { _id: 'placeholder', template_id: '-', url_slug: '-', title: '-' };
+
 function computeSummary(rows: CsvRow[]): InputSummary {
   const total = rows.length;
   const withId = rows.filter((r) => r['template_id']?.trim() && r['url_slug']?.trim());
@@ -29,7 +32,9 @@ export default function CsvUpload({ rows, onChange }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const summary = computeSummary(rows);
-  const columns = rows.length > 0 ? Object.keys(rows[0]).filter((k) => k !== '_id') : [];
+  const hasData = rows.length > 0;
+  const tableColumns = hasData ? Object.keys(rows[0]).filter((k) => k !== '_id') : PLACEHOLDER_COLUMNS;
+  const tableRows = hasData ? rows : [PLACEHOLDER_ROW];
 
   function parseCsv(file: File) {
     Papa.parse<Record<string, string>>(file, {
@@ -94,71 +99,71 @@ export default function CsvUpload({ rows, onChange }: Props) {
           }}
         />
         <p className="text-sm text-gray-500">
-          {rows.length > 0
+          {hasData
             ? `${rows.length} rows loaded — click to replace`
             : 'Drop a .csv or .xlsx file here, or click to browse'}
         </p>
         <p className="text-xs text-gray-400 mt-1">
           Requires{' '}
-          <code className="bg-gray-100 px-1 rounded">template_id</code> and{' '}
-          <code className="bg-gray-100 px-1 rounded">url_slug</code> columns
+          <code className="bg-gray-100 px-1 rounded">template_id</code> column
         </p>
       </div>
 
-      {rows.length > 0 && (
-        <>
-          <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-            <Stat label="Total" value={summary.total} />
-            <Stat
-              label="Valid"
-              value={summary.valid}
-              color={summary.valid === summary.total ? 'green' : 'yellow'}
-            />
-            {summary.duplicates > 0 && (
-              <Stat label="Duplicates" value={summary.duplicates} color="yellow" />
-            )}
-            {summary.missing > 0 && (
-              <Stat label="Missing ID" value={summary.missing} color="red" />
-            )}
-          </div>
-
-          {columns.length > 0 && (
-            <div className="overflow-x-auto rounded-xl border border-gray-200">
-              <table className="text-xs w-full">
-                <thead className="bg-gray-50 border-b border-gray-200">
-                  <tr>
-                    {columns.slice(0, 5).map((col) => (
-                      <th key={col} className="px-3 py-2 text-left font-medium text-gray-600 whitespace-nowrap">
-                        {col}
-                      </th>
-                    ))}
-                    {columns.length > 5 && (
-                      <th className="px-3 py-2 text-left text-gray-400">+{columns.length - 5} more</th>
-                    )}
-                  </tr>
-                </thead>
-                <tbody>
-                  {rows.slice(0, 5).map((row) => (
-                    <tr key={row._id} className="border-b border-gray-100 last:border-0">
-                      {columns.slice(0, 5).map((col) => (
-                        <td key={col} className="px-3 py-2 text-gray-700 whitespace-nowrap max-w-[160px] truncate">
-                          {row[col] ?? ''}
-                        </td>
-                      ))}
-                      {columns.length > 5 && <td className="px-3 py-2 text-gray-300">…</td>}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-              {rows.length > 5 && (
-                <p className="text-xs text-gray-400 text-center py-2">
-                  Showing 5 of {rows.length} rows
-                </p>
-              )}
-            </div>
+      {hasData && (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          <Stat label="Total" value={summary.total} />
+          <Stat
+            label="Valid"
+            value={summary.valid}
+            color={summary.valid === summary.total ? 'green' : 'yellow'}
+          />
+          {summary.duplicates > 0 && (
+            <Stat label="Duplicates" value={summary.duplicates} color="yellow" />
           )}
-        </>
+          {summary.missing > 0 && (
+            <Stat label="Missing ID" value={summary.missing} color="red" />
+          )}
+        </div>
       )}
+
+      <DataTable columns={tableColumns} rows={tableRows} placeholder={!hasData} />
+    </div>
+  );
+}
+
+function DataTable({
+  columns,
+  rows,
+  placeholder,
+}: {
+  columns: string[];
+  rows: CsvRow[];
+  placeholder: boolean;
+}) {
+  return (
+    <div className={`overflow-auto rounded-xl border border-gray-200 max-h-[420px] ${placeholder ? 'opacity-40' : ''}`}>
+      <table className="text-xs w-full">
+        <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
+          <tr>
+            {columns.map((col) => (
+              <th key={col} className="px-3 py-2 text-left font-medium text-gray-600 whitespace-nowrap">
+                {col}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr key={row._id} className="border-b border-gray-100 last:border-0">
+              {columns.map((col) => (
+                <td key={col} className="px-3 py-2 text-gray-700 whitespace-nowrap max-w-[200px] truncate">
+                  {row[col] ?? ''}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
