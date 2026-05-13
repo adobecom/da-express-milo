@@ -28,8 +28,11 @@ const STATUS_LABEL: Record<string, string> = {
   error: 'Error',
 };
 
+const DEFAULT_TEMPLATE = '/adobecom/da-express-milo/drafts/maxn/document-generator-template';
+
 export default function TemplateConfirm({ state, onChange }: Props) {
-  const [url, setUrl] = useState('');
+  const [url, setUrl] = useState(DEFAULT_TEMPLATE);
+  const [showFormats, setShowFormats] = useState(false);
 
   async function handleConfirm() {
     if (!url.trim()) return;
@@ -63,24 +66,12 @@ export default function TemplateConfirm({ state, onChange }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={url}
-          onChange={(e) => setUrl(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleConfirm()}
-          placeholder="https://da.live/app/adobecom/da-express-milo/tools/da-document-generator-maxn-01/dist/index?ref=da-document-generator-maxn-01"
-          className="flex-1 rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-0"
-        />
-        <button
-          type="button"
-          onClick={handleConfirm}
-          disabled={!url.trim() || state.status === 'loading'}
-          className="px-4 py-2 text-sm font-medium bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
-        >
-          {state.status === 'loading' ? 'Loading…' : 'Confirm'}
-        </button>
-      </div>
+      <input
+        type="text"
+        value={url}
+        onChange={(e) => setUrl(e.target.value)}
+        className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
 
       {showResult && (
         <div className={`rounded-xl p-4 border flex flex-col gap-3 ${STATUS_CARD[state.status]}`}>
@@ -89,7 +80,18 @@ export default function TemplateConfirm({ state, onChange }: Props) {
               {STATUS_LABEL[state.status]}
             </span>
             {state.sourcePath && (
-              <code className="text-xs text-gray-500 break-all">{state.sourcePath}</code>
+              <a
+                href={`https://da.live/edit#${state.sourcePath}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-500 break-all hover:text-blue-600 font-mono inline-flex items-center gap-1"
+              >
+                {state.sourcePath}
+                <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 shrink-0">
+                  <path d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"/>
+                  <path d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z"/>
+                </svg>
+              </a>
             )}
           </div>
 
@@ -123,11 +125,24 @@ export default function TemplateConfirm({ state, onChange }: Props) {
         </div>
       )}
 
-      <div className="text-xs text-gray-400 flex flex-col gap-0.5">
-        <p>Paste a DA edit URL or a source path, e.g.:</p>
-        <code className="bg-gray-100 px-1 rounded">https://da.live/edit#/adobecom/da-express-milo/drafts/…</code>
-        <code className="bg-gray-100 px-1 rounded">/adobecom/da-express-milo/drafts/…</code>
-        <code className="bg-gray-100 px-1 rounded">adobecom/da-express-milo/drafts/…</code>
+      <div className="text-xs text-gray-400">
+        <button
+          type="button"
+          onClick={() => setShowFormats((v) => !v)}
+          className="flex items-center gap-1 hover:text-gray-600 transition-colors cursor-pointer"
+        >
+          <span>Accepted Formats</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0">
+            <path d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+          </svg>
+        </button>
+        {showFormats && (
+          <div className="flex flex-col gap-0.5 mt-1">
+            <code className="bg-gray-100 px-1 rounded">https://da.live/edit#/adobecom/da-express-milo/drafts/maxn/document-generator-template</code>
+            <code className="bg-gray-100 px-1 rounded">/adobecom/da-express-milo/drafts/maxn/document-generator-template</code>
+            <code className="bg-gray-100 px-1 rounded">da-express-milo/drafts/maxn/document-generator-template</code>
+          </div>
+        )}
       </div>
     </div>
   );

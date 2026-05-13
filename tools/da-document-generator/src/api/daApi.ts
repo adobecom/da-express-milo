@@ -115,13 +115,6 @@ export function validateTemplate(html: string): TemplateValidation {
   if (placeholders.length === 0) {
     issues.push('No {{placeholder}} tokens found — verify the template has substitution markers');
   }
-  const hasHero =
-    /class="hero"/i.test(html) ||
-    /<th[^>]*>\s*hero\s*<\/th>/i.test(html) ||
-    /<td[^>]*>\s*hero\s*<\/td>/i.test(html);
-  if (!hasHero) {
-    issues.push('No hero block detected — verify the template includes expected PDP structure');
-  }
 
   const isInvalid = issues.some((i) => i.includes('Missing <main>'));
   const status = isInvalid ? 'invalid' : issues.length > 0 ? 'warning' : 'ready';
