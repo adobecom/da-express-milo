@@ -9,7 +9,7 @@ import { loadButton, loadActionButton, loadTooltip } from '../spectrum/load-spec
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
-import { triggerSignInFlow, ensureIms } from '../../../libs/services/middlewares/auth.middleware.js';
+import { triggerSignInFlow, ensureIms, waitForSignedInUser } from '../../../libs/services/middlewares/auth.middleware.js';
 
 function interpolate(tpl, vars) {
   return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), tpl);
@@ -602,7 +602,7 @@ export function createToolbar(options) {
 
     (async () => {
       try {
-        await ensureIms();
+        await waitForSignedInUser();
         if (!getLibraryContext) return;
         const ctx = await getLibraryContext();
         if (!ctx?.provider) return;

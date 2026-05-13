@@ -893,7 +893,7 @@ export async function createDrawer(options) {
             '../utils/susiRedirect.js'
           );
           const colors = paletteData?.colors || [];
-          const paletteName = paletteData?.name || '';
+          const paletteName = nameInput?.value?.trim() || paletteData?.name || '';
           setSusiColorRedirect(buildColorSignInRedirectUrl(colors, paletteName, paletteData?.id));
           return triggerSignInFlow();
         },
