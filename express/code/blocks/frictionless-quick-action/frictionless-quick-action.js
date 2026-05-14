@@ -529,7 +529,7 @@ async function handleDecodeFirst(dimensions, uploadPromise, initialDecodeControl
  * @returns {Object} Search parameters object
  */
 /* c8 ignore next */
-function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimensions) {
+export function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimensions) {
   const baseSearchParams = {
     frictionlessUploadAssetId: assetId,
   };
@@ -705,15 +705,15 @@ async function performUploadAction(files, block, quickAction) {
 
   // temporary solution: allows analytics to go thru. should move to a promise
   setTimeout(() => {
-    if (quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused) {
-      window.open(url.toString(), '_blank');
-    } else {
-      window.location.href = url.toString();
-    }
+    window.location.href = url.toString();
   }, 300);
 }
 
 async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCode = false) {
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlVariant = urlParams.get('variant');
+  const variant = urlVariant || quickAction;
+
   let data = await processFilesForQuickAction(files, quickAction);
   if (!data[0]) {
     const msg = await getErrorMsg(files, quickAction, replaceKey, getConfig);
@@ -727,11 +727,6 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCod
     data = data.filter((item) => item);
   }
 
-  // here update the variant to the url variant if it exists
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlVariant = urlParams.get('variant');
-  const variant = urlVariant || quickAction;
-
   const frictionlessAllowedQuickActions = Object.values(FRICTIONLESS_UPLOAD_QUICK_ACTIONS);
   if (frictionlessAllowedQuickActions.includes(variant)
     || isAuthFrictionlessUploadQuickAction(variant)) {
@@ -742,7 +737,9 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCod
   startSDK(data, quickAction, block, fromQrCode);
 }
 
-function setupFrictionlessTargetBaseUrl(quickAction) {
+export function getFrictionlessTargetBaseUrl() { return frictionlessTargetBaseUrl; }
+
+export function setupFrictionlessTargetBaseUrl(quickAction) {
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
   const variant = urlVariant || quickAction;
@@ -757,7 +754,9 @@ function setupFrictionlessTargetBaseUrl(quickAction) {
         if (hostname === 'adobe.com' || hostname.endsWith('.adobe.com')) {
           stageFocusedUrl = `${origin}${EXPRESS_ROUTE_PATHS.focusedEditor}`;
         }
-      } catch { /* keep default stage URL */ }
+      } catch (e) {
+        window.lana?.log(`[frictionless] invalid base URL param: ${e.message}`, { tags: 'frictionless,url' });
+      }
     }
     frictionlessTargetBaseUrl = isStage
       ? stageFocusedUrl
