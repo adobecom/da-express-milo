@@ -2,6 +2,7 @@ import { useRef, useState } from 'react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import type { CsvRow, InputSummary } from '../types';
+import { fetchProductFromTemplate } from '../api/zazzleApi';
 
 interface Props {
   rows: CsvRow[];
@@ -27,14 +28,63 @@ function computeSummary(rows: CsvRow[]): InputSummary {
   return { total, valid, duplicates, missing };
 }
 
+function toSnake(s: string) {
+  return s.replace(/([A-Z])/g, '_$1').toLowerCase();
+}
+
+function buildZazzleMap(): Record<string, string> {
+  const keys: string[] = [
+    'id', 'rootRawTitle', 'description', 'initialPrettyPreferredViewUrl',
+    'departmentName', 'productType', 'quantities', 'pluralUnitLabel', 'singularUnitLabel',
+  ];
+  const map: Record<string, string> = {};
+  for (const k of keys) map[toSnake(k)] = k;
+  return map;
+}
+
+const MAX_VISIBLE_ROWS = 200;
+
 export default function CsvUpload({ rows, onChange }: Props) {
   const [isDragging, setIsDragging] = useState(false);
+  const [hydrating, setHydrating] = useState(false);
+  const [hydrateMsg, setHydrateMsg] = useState<string | null>(null);
+  const [columns, setColumns] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const summary = computeSummary(rows);
   const hasData = rows.length > 0;
-  const tableColumns = hasData ? Object.keys(rows[0]).filter((k) => k !== '_id') : PLACEHOLDER_COLUMNS;
-  const tableRows = hasData ? rows : [PLACEHOLDER_ROW];
+  const tableColumns = hasData
+    ? (columns.length > 0 ? columns : Object.keys(rows[0]).filter((k) => k !== '_id'))
+    : PLACEHOLDER_COLUMNS;
+  const visibleRows = hasData ? rows.slice(0, MAX_VISIBLE_ROWS) : [PLACEHOLDER_ROW];
+
+  async function handleHydrate() {
+    setHydrating(true);
+    setHydrateMsg(null);
+    const zazzleMap = buildZazzleMap();
+    const updated = await Promise.all(
+      rows.map(async (row) => {
+        const hasMissing = tableColumns.some((col) => !row[col]?.trim());
+        if (!hasMissing || !row.template_id?.trim()) return row;
+        const product = await fetchProductFromTemplate(row.template_id);
+        if (!product) return row;
+        const filled = { ...row };
+        for (const col of tableColumns) {
+          if (!filled[col]?.trim()) {
+            const zKey = zazzleMap[col];
+            if (zKey) filled[col] = String((product as unknown as Record<string, unknown>)[zKey] ?? '');
+          }
+        }
+        return filled;
+      }),
+    );
+    const changedCount = updated.filter((row, i) => row !== rows[i]).length;
+    setHydrateMsg(changedCount > 0
+      ? `Updated ${changedCount} row${changedCount === 1 ? '' : 's'} from Zazzle`
+      : 'No matching Zazzle data found for missing fields');
+    onChange(updated);
+    setHydrating(false);
+  }
 
   function parseCsv(file: File) {
     Papa.parse<Record<string, string>>(file, {
@@ -42,6 +92,8 @@ export default function CsvUpload({ rows, onChange }: Props) {
       skipEmptyLines: true,
       transformHeader: (h) => h.trim(),
       complete: (result) => {
+        const fields = (result.meta.fields ?? []).filter((f) => f !== '_id');
+        setColumns(fields);
         const parsed = result.data.map((row, i) => ({ ...row, _id: String(i) })) as CsvRow[];
         onChange(parsed);
       },
@@ -59,6 +111,8 @@ export default function CsvUpload({ rows, onChange }: Props) {
         ...Object.fromEntries(Object.entries(row).map(([k, v]) => [k.trim(), String(v)])),
         _id: String(i),
       })) as CsvRow[];
+      const fields = Object.keys(parsed[0] ?? {}).filter((k) => k !== '_id');
+      setColumns(fields);
       onChange(parsed);
     };
     reader.readAsArrayBuffer(file);
@@ -121,12 +175,32 @@ export default function CsvUpload({ rows, onChange }: Props) {
             <Stat label="Duplicates" value={summary.duplicates} color="yellow" />
           )}
           {summary.missing > 0 && (
-            <Stat label="Missing ID" value={summary.missing} color="red" />
+            <Stat label="Rows Missing Values" value={summary.missing} color="red" />
           )}
         </div>
       )}
 
-      <DataTable columns={tableColumns} rows={tableRows} placeholder={!hasData} />
+      {hasData && summary.missing > 0 && (
+        <div className="flex items-center gap-3">
+          <button
+            onClick={handleHydrate}
+            disabled={hydrating}
+            className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            {hydrating ? 'Hydrating…' : 'Hydrate from Zazzle'}
+          </button>
+          {hydrateMsg && (
+            <span className="text-xs text-gray-500">{hydrateMsg}</span>
+          )}
+        </div>
+      )}
+
+      <DataTable columns={tableColumns} rows={visibleRows} placeholder={!hasData} />
+      {hasData && rows.length > MAX_VISIBLE_ROWS && (
+        <p className="text-xs text-gray-400 text-center">
+          Showing {MAX_VISIBLE_ROWS} of {rows.length} rows
+        </p>
+      )}
     </div>
   );
 }
@@ -142,9 +216,10 @@ function DataTable({
 }) {
   return (
     <div className={`overflow-auto rounded-xl border border-gray-200 max-h-[420px] ${placeholder ? 'opacity-40' : ''}`}>
-      <table className="text-xs w-full">
+      <table className="text-xs w-full min-w-max">
         <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
           <tr>
+            <th className="px-3 py-2 text-left font-medium text-gray-400 whitespace-nowrap w-[40px]">#</th>
             {columns.map((col) => (
               <th key={col} className="px-3 py-2 text-left font-medium text-gray-600 whitespace-nowrap">
                 {col}
@@ -155,11 +230,20 @@ function DataTable({
         <tbody>
           {rows.map((row) => (
             <tr key={row._id} className="border-b border-gray-100 last:border-0">
-              {columns.map((col) => (
-                <td key={col} className="px-3 py-2 text-gray-700 whitespace-nowrap max-w-[200px] truncate">
-                  {row[col] ?? ''}
-                </td>
-              ))}
+              <td className="px-3 py-2 text-gray-400 whitespace-nowrap w-[40px]">
+                {placeholder ? '—' : parseInt(row._id) + 1}
+              </td>
+              {columns.map((col) => {
+                const isEmpty = !placeholder && !row[col]?.trim();
+                return (
+                  <td
+                    key={col}
+                    className={`px-3 py-2 whitespace-nowrap max-w-[200px] truncate ${isEmpty ? 'bg-red-50 text-red-400 italic' : 'text-gray-700'}`}
+                  >
+                    {isEmpty ? '—' : (row[col] ?? '')}
+                  </td>
+                );
+              })}
             </tr>
           ))}
         </tbody>
