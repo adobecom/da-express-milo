@@ -586,8 +586,15 @@ function updateDesktopPosition(tocContainer) {
 function setupDesktop(tocContainer) {
   if (isDesktop()) {
     tocContainer.style.visibility = 'hidden';
-    updateDesktopPosition(tocContainer);
-    tocContainer.style.visibility = 'visible';
+    const initPosition = () => {
+      updateDesktopPosition(tocContainer);
+      tocContainer.style.visibility = 'visible';
+    };
+    if (document.readyState === 'complete') {
+      requestAnimationFrame(initPosition);
+    } else {
+      window.addEventListener('load', initPosition, { once: true });
+    }
   }
 
   return {
