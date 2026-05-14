@@ -763,6 +763,7 @@ export async function createDrawer(options) {
     libraries: userLibraries,
     ccLibraryProvider,
     onLibraryCreated,
+    autoSave = false,
     i18n = {},
     deps = {},
   } = options;
@@ -892,7 +893,7 @@ export async function createDrawer(options) {
             '../utils/susiRedirect.js'
           );
           const colors = paletteData?.colors || [];
-          const paletteName = paletteData?.name || '';
+          const paletteName = nameInput?.value?.trim() || paletteData?.name || '';
           setSusiColorRedirect(buildColorSignInRedirectUrl(colors, paletteName, paletteData?.id));
           return triggerSignInFlow();
         },
@@ -928,6 +929,10 @@ export async function createDrawer(options) {
     isOpen = true;
 
     announceToScreenReader(t.title);
+
+    if (autoSave && isSignedIn) {
+      await save();
+    }
   }
 
   function destroy() {
