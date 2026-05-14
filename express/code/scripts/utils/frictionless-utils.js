@@ -129,6 +129,7 @@ export const QA_CONFIGS = {
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
   'remove-background-fast-track-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'remove-background-fast-track-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'remove-background-focused': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'heic-to-jpg': {
     ...getBaseImgCfg(PNG, WEBP, HEIC),
     input_check: getHeicInputCheck(PNG, WEBP, HEIC),
@@ -165,6 +166,7 @@ export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   removeBackgroundVariant1: 'qa-in-product-variant1',
   removeBackgroundVariant2: 'qa-in-product-variant2',
   removeBackgroundFasttrackVariant: 'remove-background-fast-track-variant',
+  removeBackgroundFocused: 'remove-background-focused',
 };
 
 export const AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {

@@ -189,30 +189,10 @@ export function createFullPaletteModalContent(palette, options = {}) {
   return container;
 }
 
-function createPaletteMetaSection(palette = {}, options = {}) {
+function createPaletteLikeWidget(palette = {}, options = {}) {
   const likesCount = normalizeLikesCount(
     options.likesCount ?? palette?.likes ?? palette?.likesCount,
   );
-  const creatorName = normalizeCreatorName(
-    options.creatorName ?? palette?.creator?.name ?? palette?.creatorName,
-  );
-  const creatorImageUrl = options.creatorImageUrl
-    ?? palette?.creator?.imageUrl
-    ?? palette?.creatorImageUrl
-    ?? null;
-  const hasOptionTags = Array.isArray(options.tags) && options.tags.length;
-  const hasItemTags = Array.isArray(palette?.tags) && palette.tags.length;
-  let tags = ['Color', 'Palette'];
-  if (hasOptionTags) tags = options.tags;
-  else if (hasItemTags) tags = palette.tags;
-
-  const section = createTag('section', { class: 'modal-palette-name-tags' });
-
-  const nameLikesRow = createTag('div', { class: 'modal-palette-name-likes' });
-  const nameEl = createTag('h1', { class: 'modal-palette-name' });
-  nameEl.textContent = palette?.name || 'Palette';
-  nameLikesRow.appendChild(nameEl);
-
   const modalStrings = options.modalStrings || {};
   const addFavorite = modalStrings.addFavorite || 'Add to favorites';
   const removeFavorite = modalStrings.removeFavorite || 'Remove from favorites';
@@ -252,7 +232,33 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   likesText.textContent = String(likesCount);
   likesWrap.appendChild(likeBtn);
   likesWrap.appendChild(likesText);
-  nameLikesRow.appendChild(likesWrap);
+  return likesWrap;
+}
+
+function createPaletteMetaSection(palette = {}, options = {}) {
+  const creatorName = normalizeCreatorName(
+    options.creatorName ?? palette?.creator?.name ?? palette?.creatorName,
+  );
+  const creatorImageUrl = options.creatorImageUrl
+    ?? palette?.creator?.imageUrl
+    ?? palette?.creatorImageUrl
+    ?? null;
+  const hasOptionTags = Array.isArray(options.tags) && options.tags.length;
+  const hasItemTags = Array.isArray(palette?.tags) && palette.tags.length;
+  let tags = ['Color', 'Palette'];
+  if (hasOptionTags) tags = options.tags;
+  else if (hasItemTags) tags = palette.tags;
+
+  const section = createTag('section', { class: 'modal-palette-name-tags' });
+
+  const nameLikesRow = createTag('div', { class: 'modal-palette-name-likes' });
+  const nameEl = createTag('h1', { class: 'modal-palette-name' });
+  nameEl.textContent = palette?.name || 'Palette';
+  nameLikesRow.appendChild(nameEl);
+  // This widget has been disabled for the time being until the like backend is fixed
+  if (options.enableLikeWidget === true) {
+    nameLikesRow.appendChild(createPaletteLikeWidget(palette, options));
+  }
   section.appendChild(nameLikesRow);
 
   const thumbTagsRow = createTag('div', { class: 'modal-palette-thumb-tags' });
