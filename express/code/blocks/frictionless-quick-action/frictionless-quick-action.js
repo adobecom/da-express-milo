@@ -543,7 +543,7 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
       routeSpecificParams = {
         locale: ietf,
         skipUploadStep: true,
-        ...(quickAction === AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused && {
+        ...(quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused && {
           'edit-action': 'remove-bg',
           'l2-panel': 'backgrounds',
           'open-download': true,
@@ -705,7 +705,7 @@ async function performUploadAction(files, block, quickAction) {
 
   // temporary solution: allows analytics to go thru. should move to a promise
   setTimeout(() => {
-    if (quickAction === AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused) {
+    if (quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused) {
       window.open(url.toString(), '_blank');
     } else {
       window.location.href = url.toString();
@@ -746,7 +746,7 @@ function setupFrictionlessTargetBaseUrl(quickAction) {
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
   const variant = urlVariant || quickAction;
-  if (variant === AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused) {
+  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused) {
     const isStage = urlParams.get('hzenv') === 'stage';
     let stageFocusedUrl = `https://stage.projectx.corp.adobe.com${EXPRESS_ROUTE_PATHS.focusedEditor}`;
     const base = urlParams.get('base');
@@ -754,7 +754,7 @@ function setupFrictionlessTargetBaseUrl(quickAction) {
       try {
         const normalizedBase = base.startsWith('http') ? base : `https://${base}`;
         const { hostname, origin } = new URL(normalizedBase);
-        if (hostname.endsWith('adobe.com')) {
+        if (hostname === 'adobe.com' || hostname.endsWith('.adobe.com')) {
           stageFocusedUrl = `${origin}${EXPRESS_ROUTE_PATHS.focusedEditor}`;
         }
       } catch { /* keep default stage URL */ }

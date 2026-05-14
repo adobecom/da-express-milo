@@ -166,11 +166,11 @@ export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   removeBackgroundVariant1: 'qa-in-product-variant1',
   removeBackgroundVariant2: 'qa-in-product-variant2',
   removeBackgroundFasttrackVariant: 'remove-background-fast-track-variant',
+  removeBackgroundFocused: 'remove-background-focused',
 };
 
 export const AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   removeBackground: 'remove-background',
-  removeBackgroundFocused: 'remove-background-focused',
 };
 
 // Route paths map corresponding to the express routes
