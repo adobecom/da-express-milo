@@ -1029,6 +1029,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
   .color-extract .color-extract-mood-dropdown {
     width: fit-content;
+    min-width: 64px;
     max-width: 330px;
   }
 
