@@ -1064,6 +1064,14 @@ export default async function decorate(block) {
       });
       layoutInstance.slots.sidebar.appendChild(tabs.element);
 
+      const wheelEl = tabs.getPanel('color-wheel')?.querySelector('color-wheel-express');
+      if (wheelEl) {
+        wheelEl.lockedByIndex = swatchRailController.getState().lockedByIndex;
+        swatchRailController.subscribe((state) => {
+          wheelEl.lockedByIndex = state.lockedByIndex;
+        });
+      }
+
       if (!isDesktop) {
         const { createActionMenuComponent } = await import('../../scripts/color-shared/components/createActionMenuComponent.js');
 

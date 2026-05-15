@@ -258,6 +258,28 @@ export class ColorWheelExpress extends ColorWheel {
     return marker;
   }
 
+  set lockedByIndex(val) {
+    this._lockedByIndex = val instanceof Set ? val : new Set();
+    this.updateMarkers();
+  }
+
+  _showLockedTip(index) {
+    const layer = this.shadowRoot?.querySelector('.marker-layer');
+    const marker = layer?.querySelector(`.wheel-marker-overlay[data-index="${index}"]`);
+    if (!marker || !layer) return;
+
+    layer.querySelector(`.wheel-locked-tip[data-tip-index="${index}"]`)?.remove();
+
+    const tip = document.createElement('div');
+    tip.className = 'wheel-locked-tip';
+    tip.dataset.tipIndex = index;
+    tip.textContent = this.lockedTipText || 'Unlock to change value';
+    tip.style.left = marker.style.left;
+    tip.style.top = marker.style.top;
+    layer.appendChild(tip);
+    tip.addEventListener('animationend', () => tip.remove());
+  }
+
   updateMarkers() {
     const markerLayer = this.shadowRoot.querySelector('.marker-layer');
     if (!markerLayer || !this.swatches.length) return;
@@ -328,6 +350,7 @@ export class ColorWheelExpress extends ColorWheel {
       const isBase = index === this.baseColorIndex && this.harmonyRule !== 'CUSTOM';
       marker.classList.toggle('wheel-marker-overlay--base', isBase);
       marker.classList.toggle('wheel-marker-overlay--active', index === this.activeSwatchIndex);
+      marker.classList.toggle('wheel-marker-overlay--locked', this._lockedByIndex?.has(index) ?? false);
     });
 
     for (let i = existingSpokes.length - 1; i >= spokeCursor; i -= 1) {
@@ -346,6 +369,13 @@ export class ColorWheelExpress extends ColorWheel {
   }
 
   _handleMarkerKeydown(e, index) {
+    if (this._lockedByIndex?.has(index)) {
+      if (['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+        e.preventDefault();
+        this._showLockedTip(index);
+      }
+      return;
+    }
     const step = 3;
     switch (e.key) {
       case 'ArrowRight': e.preventDefault(); this._moveMarkerByKey(index, step, 0); break;
@@ -575,6 +605,12 @@ export class ColorWheelExpress extends ColorWheel {
     event.stopPropagation();
 
     if (isRightMouseButtonClicked(event)) return;
+
+    if (event.target === this.canvas && this._lockedByIndex?.has(this.activeSwatchIndex)) {
+      this._showLockedTip(this.activeSwatchIndex);
+      return;
+    }
+
     this.getCanvasPosition();
 
     if (event.target === this.canvas) {
@@ -684,6 +720,12 @@ export class ColorWheelExpress extends ColorWheel {
     }
 
     this.getCanvasPosition();
+
+    if (this._lockedByIndex?.has(index)) {
+      this._showLockedTip(index);
+      return;
+    }
+
     this._dragIndex = index;
 
     const rawV = this.swatches[index]?.hsv?.v != null
