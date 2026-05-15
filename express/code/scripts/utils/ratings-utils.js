@@ -108,8 +108,34 @@ const waitForIms = (timeout = 1000) => new Promise((resolve) => {
   setTimeout(() => resolve(!!window.adobeIMS), timeout);
 });
 
+// Force Milo's loadIms() to run with guest-token mode enabled, so anonymous
+// visitors on any host (incl. *.aem.live / *.aem.page) get an OAuth token
+// the RNR API will accept. Without this, getAccessToken() returns null on
+// preview hosts and aggregate-rating reads 401.
+let ensureImsPromise;
+const ensureImsBootstrapped = async () => {
+  if (ensureImsPromise) return ensureImsPromise;
+  ensureImsPromise = (async () => {
+    if (!document.querySelector('meta[name="ims-guest-token"]')) {
+      const meta = document.createElement('meta');
+      meta.setAttribute('name', 'ims-guest-token');
+      meta.setAttribute('content', 'on');
+      document.head.appendChild(meta);
+    }
+    try {
+      const { loadIms } = await import(`${getLibs()}/utils/utils.js`);
+      await loadIms();
+    } catch (e) {
+      // loadIms can reject (timeout, missing config); fall through to
+      // existing waitForIms / refresh-token retry path.
+    }
+  })();
+  return ensureImsPromise;
+};
+
 export const getAndValidateImsToken = async (operation) => {
   if (isNalaTestRatings()) return 'nala-test-token';
+  await ensureImsBootstrapped();
   await waitForIms();
   const token = await getImsToken(operation);
   return token;
