@@ -54,6 +54,8 @@ export function createSwatchesRenderer(options) {
   const verticalMaxPerRow = Number.isFinite(config?.swatchVerticalMaxPerRow)
     ? Math.max(1, Math.min(10, Math.floor(config.swatchVerticalMaxPerRow)))
     : null;
+  const colorEditStrings = config?.colorEditStrings || null;
+  const colorSwatchRailStrings = config?.colorSwatchRailStrings || null;
 
   function getAnchorFromEvent(event, railElement) {
     const path = event.composedPath?.() || [];
@@ -126,13 +128,15 @@ export function createSwatchesRenderer(options) {
     const palette = (state.swatches || []).map((swatch) => swatch?.hex).filter(Boolean);
     const mobile = window.matchMedia?.(MOBILE_BREAKPOINT_QUERY)?.matches === true;
 
-    const adapter = createColorEditAdapter({
+    const ceOpts = {
       palette,
       selectedIndex,
       colorMode: 'HEX',
       showPalette: true,
       mobile,
-    }, {
+    };
+    if (colorEditStrings) ceOpts.strings = colorEditStrings;
+    const adapter = createColorEditAdapter(ceOpts, {
       onColorChange: ({ hex, index }) => {
         if (!hex || !controller?.setState) return;
         const currentState = controller.getState?.() || {};
@@ -161,7 +165,7 @@ export function createSwatchesRenderer(options) {
     const popover = document.createElement('div');
     popover.className = 'swatches-color-edit-popover';
     popover.setAttribute('role', 'dialog');
-    popover.setAttribute('aria-label', 'Edit color');
+    popover.setAttribute('aria-label', colorEditStrings?.editColorAria || 'Edit color');
     popover.style.position = 'fixed';
     popover.style.zIndex = '10002';
     popover.appendChild(editorElement);
@@ -220,6 +224,7 @@ export function createSwatchesRenderer(options) {
       if (swatchFeatures != null) opts.swatchFeatures = swatchFeatures;
       if (hexCopyFirstRowOnly) opts.hexCopyFirstRowOnly = true;
       if (verticalMaxPerRow != null) opts.verticalMaxPerRow = verticalMaxPerRow;
+      if (colorSwatchRailStrings) opts.strings = colorSwatchRailStrings;
       const adapter = createSwatchRailAdapter(palette, opts);
       const onEdit = (event) => {
         event.preventDefault();

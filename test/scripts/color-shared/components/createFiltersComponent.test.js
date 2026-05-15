@@ -57,4 +57,22 @@ describe('createFiltersComponent', () => {
 
     component.reset();
   });
+
+  it('does not duplicate desktop pickers when readiness is awaited more than once', async () => {
+    const component = await createFiltersComponent({
+      variant: 'strips',
+    });
+
+    document.body.appendChild(component.element);
+    await Promise.all([
+      component.waitForReady(),
+      component.waitForReady(),
+    ]);
+
+    const desktopPickers = component.element.querySelectorAll('.filters-desktop sp-picker');
+    expect(desktopPickers.length).to.equal(3);
+
+    component.reset();
+    expect(component.element.querySelectorAll('sp-picker').length).to.equal(0);
+  });
 });

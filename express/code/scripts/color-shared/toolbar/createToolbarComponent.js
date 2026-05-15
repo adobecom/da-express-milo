@@ -9,10 +9,10 @@ import { loadButton, loadActionButton, loadTooltip } from '../spectrum/load-spec
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
-import { triggerSignInFlow } from '../../../libs/services/middlewares/auth.middleware.js';
+import { triggerSignInFlow, ensureIms, waitForSignedInUser } from '../../../libs/services/middlewares/auth.middleware.js';
 
 function interpolate(tpl, vars) {
-  return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{{${k}}}`, v), tpl);
+  return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), tpl);
 }
 
 const TOOLBAR_DEFAULTS = {
@@ -23,17 +23,18 @@ const TOOLBAR_DEFAULTS = {
   share: 'Share',
   download: 'Download',
   saveToLibrary: 'Save to library',
-  swatchLabel: 'Color {{index}}: {{hex}}',
-  swatchStripLabel: '{{count}} colors in {{type}}',
-  gradientLabel: 'Gradient: {{stops}}',
+  swatchLabel: 'Color {index}: {hex}',
+  swatchStripLabel: '{count} colors in {type}',
+  gradientLabel: 'Gradient: {stops}',
   editPalette: 'Edit this color palette',
   sharePalette: 'Share this color palette',
   downloadPalette: 'Download this color palette',
   savePalette: 'Save this palette to your Library',
-  toolbarLabel: '{{type}} toolbar',
+  toolbarLabel: '{type} toolbar',
   paletteName: 'Palette name',
   paletteNamePlaceholder: 'My Color Theme',
   ctaText: 'Create with my color palette',
+  ctaBaseUrl: 'https://adobesparkpost.app.link/color-palette',
   shareText: 'Check out this color palette on Adobe.com',
   urlCopiedToClipboard: 'URL copied to clipboard',
   shareFailed: 'Unable to share. Please try again.',
@@ -75,18 +76,34 @@ async function handleShare({ name, colors }, t) {
 
 // const COLOR_PALETTE_TEMPLATE_ID = 'urn:aaid:sc:VA6C2:60d17865-6817-5343-84db-34219e8ec3a4';
 
-async function handleOpenInExpress({ id, name, colors }) {
-  const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
-    '../utils/susiRedirect.js'
-  );
-  setSusiColorRedirect(buildColorSignInRedirectUrl(colors, name));
+function getStageBaseUrl(base) {
+  if (!base) return 'https://stage.projectx.corp.adobe.com/new';
+  try {
+    const { hostname } = new URL(base);
+    const isAllowed = hostname === 'stage.projectx.corp.adobe.com'
+      || hostname.endsWith('.prenv.projectx.corp.adobe.com');
+    return isAllowed ? base : 'https://stage.projectx.corp.adobe.com/new';
+  } catch {
+    return 'https://stage.projectx.corp.adobe.com/new';
+  }
+}
 
-  const isSignedIn = await triggerSignInFlow();
-  if (!isSignedIn) return;
+async function checkIsSignedIn() {
+  try {
+    const ims = await ensureIms();
+    return ims.isSignedInUser();
+  } catch {
+    return false;
+  }
+}
 
+async function buildExpressUrl({ id, name, colors }, prodBaseUrl) {
   const { getTrackingAppendedURL } = await import('../../branchlinks.js');
 
-  const baseUrl = 'https://273916.prenv.projectx.corp.adobe.com/new';
+  const params = new URLSearchParams(window.location.search);
+  const baseUrl = params.get('hzenv') === 'stage'
+    ? getStageBaseUrl(params.get('base'))
+    : prodBaseUrl;
   const url = new URL(await getTrackingAppendedURL(baseUrl, {
     placement: 'color-explorer',
     isSearchOverride: true,
@@ -98,10 +115,26 @@ async function handleOpenInExpress({ id, name, colors }) {
   url.searchParams.set('colorPalette', JSON.stringify(colorPaletteData));
   url.searchParams.set('referrer', 'express-colors');
   url.searchParams.set('entryPoint', 'color-explorer');
-  url.searchParams.set('feature-enable', 'colors-product-entry-enabled');
+  url.searchParams.set('feature-enable', 'colors-product-entry');
   url.searchParams.set('category', 'yourStuff');
 
-  window.open(url.toString(), '_blank');
+  return url.toString();
+}
+
+async function openInExpress(palette, prodBaseUrl) {
+  window.open(await buildExpressUrl(palette, prodBaseUrl), '_blank', 'noopener noreferrer');
+}
+
+async function handleOpenInExpress({ id, name, colors }, prodBaseUrl) {
+  const isSignedIn = await checkIsSignedIn();
+  if (!isSignedIn) {
+    const { setSusiColorRedirect } = await import('../utils/susiRedirect.js');
+    setSusiColorRedirect(await buildExpressUrl({ id, name, colors }, prodBaseUrl));
+    await triggerSignInFlow();
+    return;
+  }
+
+  await openInExpress({ id, name, colors }, prodBaseUrl);
 }
 
 async function handleDownload(palette, t) {
@@ -169,6 +202,7 @@ async function handleSave(
   ccLibraryProvider,
   libCtxCache,
   drawerI18n,
+  { autoSave = false } = {},
 ) {
   try {
     if (activeDrawer?.isOpen) {
@@ -188,6 +222,7 @@ async function handleSave(
       onLibraryCreated: (newLib) => {
         if (libCtxCache) libCtxCache.libraries.push(newLib);
       },
+      autoSave,
       i18n: drawerI18n,
     };
     if (libraries?.length) drawerOpts.libraries = libraries;
@@ -324,7 +359,7 @@ function buildCTAButton(getCTAText, onClick) {
   ctaBtn.setAttribute('size', 'l');
   ctaBtn.textContent = getCTAText();
   ctaBtn.addEventListener('click', onClick);
-  decorateAnalyticsAttributes(ctaBtn, { linkLabel: 'CTA' });
+  decorateAnalyticsAttributes(ctaBtn, { linkLabel: 'Create-with-palette-CTA' });
   return ctaBtn;
 }
 
@@ -414,7 +449,11 @@ export function createToolbar(options) {
 
   let libCtxCache = null;
   async function fetchLibCtxOnce() {
-    if (!libCtxCache && getLibraryContext) libCtxCache = await getLibraryContext();
+    if (!libCtxCache && getLibraryContext) {
+      const ctx = await getLibraryContext();
+      if (ctx?.provider) libCtxCache = ctx;
+      return ctx ?? { libraries: [], provider: null };
+    }
     return libCtxCache ?? { libraries: [], provider: null };
   }
 
@@ -439,7 +478,10 @@ export function createToolbar(options) {
 
   const { on, emit } = createEventBus(toolbar, 'color-floating-toolbar');
 
-  const getPaletteWithName = () => ({ ...palette, name: nameInput?.value ?? name });
+  const getPaletteWithName = () => ({
+    ...palette,
+    name: nameInput?.value || t.paletteNamePlaceholder,
+  });
 
   const getCTAText = () => (isMobileViewport()
     ? (mobileCTAText || t.ctaText)
@@ -454,8 +496,6 @@ export function createToolbar(options) {
 
   const main = createTag('div', { class: 'ax-toolbar-main' });
 
-  const DEFAULT_EDIT_BASE_PATH = '/create/color-wheel';
-
   const paletteSummary = buildPaletteSummary(
     colors,
     type,
@@ -468,7 +508,9 @@ export function createToolbar(options) {
       if (editPaletteLink) {
         window.location.href = editPaletteLink;
       } else {
-        const processedLink = await applyLinkParamOverride(DEFAULT_EDIT_BASE_PATH);
+        const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+        const { locale } = getConfig();
+        const processedLink = await applyLinkParamOverride(`${locale.contentRoot}/create/color-wheel`);
         const editUrl = buildPaletteEditUrl(
           processedLink,
           currentPalette.colors,
@@ -517,7 +559,7 @@ export function createToolbar(options) {
   main.appendChild(actionContainer);
 
   const ctaBtn = buildCTAButton(getCTAText, () => {
-    (onCTA ?? handleOpenInExpress)(getPaletteWithName());
+    (onCTA ?? ((p) => handleOpenInExpress(p, t.ctaBaseUrl)))(getPaletteWithName());
     emit('cta', { palette: getPaletteWithName() });
   });
   main.appendChild(ctaBtn);
@@ -553,6 +595,37 @@ export function createToolbar(options) {
   const mqlHandler = () => { ctaBtn.textContent = getCTAText(); };
   mql.addEventListener('change', mqlHandler);
 
+  if (new URLSearchParams(window.location.search).get('pendingSave') === '1') {
+    const cleanUrl = new URL(window.location.href);
+    cleanUrl.searchParams.delete('pendingSave');
+    window.history.replaceState({}, '', cleanUrl.toString());
+
+    (async () => {
+      try {
+        await waitForSignedInUser();
+        if (!getLibraryContext) return;
+        const ctx = await getLibraryContext();
+        if (!ctx?.provider) return;
+        libCtxCache = ctx;
+        await handleSave(
+          getPaletteWithName(),
+          type,
+          ccLibBtn,
+          ctx.libraries,
+          ctx.provider,
+          libCtxCache,
+          drawerI18n,
+          { autoSave: true },
+        );
+      } catch (err) {
+        window.lana?.log(`Auto-save after sign-in failed: ${err.message}`, {
+          tags: 'color-floating-toolbar,auto-save',
+          severity: 'error',
+        });
+      }
+    })();
+  }
+
   const api = {
     element: theme,
     paletteSlot,
@@ -578,6 +651,12 @@ export function createToolbar(options) {
       palette.name = newName;
       if (nameInput && nameInput.value !== newName) {
         nameInput.value = newName;
+      }
+    },
+    closeDrawer() {
+      if (activeDrawer?.isOpen) {
+        activeDrawer.close();
+        activeDrawer = null;
       }
     },
     setVariant(nextVariant = 'standalone') {

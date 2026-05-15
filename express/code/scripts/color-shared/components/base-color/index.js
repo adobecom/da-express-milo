@@ -76,6 +76,7 @@ class BaseColor extends LitElement {
     this._originalSaturation = 0;
     this._originalBrightness = 0;
     this._pickerInputEnabled = false;
+    this._keyboardActive = false;
   }
 
   get _rgb() {
@@ -463,10 +464,12 @@ class BaseColor extends LitElement {
   _onPointerDown(e) {
     this._lastPointerType = e.pointerType;
     this._pickerInputEnabled = true;
+    this._keyboardActive = false;
   }
 
   _onPickerKeyDown() {
     this._pickerInputEnabled = true;
+    this._keyboardActive = true;
   }
 
   _blurOnTouch(target) {
@@ -479,7 +482,7 @@ class BaseColor extends LitElement {
   // --- Color area (Saturation/Brightness) ---
 
   _snapColorAreaToOriginal(area, saturation, brightness) {
-    if (!this._hasOriginal) return { saturation, brightness };
+    if (!this._hasOriginal || this._keyboardActive) return { saturation, brightness };
     const ds = Math.abs(saturation - this._originalSaturation);
     const db = Math.abs(brightness - this._originalBrightness);
     if (ds > ORIGINAL_COLOR_AREA_SNAP_PCT || db > ORIGINAL_COLOR_AREA_SNAP_PCT) {
@@ -524,7 +527,7 @@ class BaseColor extends LitElement {
     if (slider.value == null) return;
 
     let hue = slider.value;
-    if (this._hasOriginal) {
+    if (this._hasOriginal && !this._keyboardActive) {
       const diff = Math.abs(hue - this._originalHue);
       const wrappedDiff = Math.min(diff, 360 - diff);
       if (wrappedDiff <= ORIGINAL_COLOR_HUE_SNAP_DEG) {
@@ -1001,7 +1004,7 @@ class BaseColor extends LitElement {
       <div class="bc-color-control">
         <div class="bc-color-area-wrapper ${this.colorMode !== 'HEX' || this.showBrightnessControl ? 'has-sliders' : ''}">
           <sp-color-area
-            aria-label="Color handle"
+            aria-label="${this.strings?.colorHandleAria || BASE_COLOR_DEFAULTS.colorHandleAria}"
             .x=${this._saturation / 100}
             .y=${this._brightness / 100}
             .hue=${this._hue}
@@ -1011,7 +1014,7 @@ class BaseColor extends LitElement {
             @change=${this._onColorAreaChange}
           ></sp-color-area>
           <sp-color-slider
-            label="Hue control handle"
+            label="${this.strings?.hueHandleAria || BASE_COLOR_DEFAULTS.hueHandleAria}"
             gradient="hue"
             color=${currentColor}
             @pointerdown=${this._onPointerDown}

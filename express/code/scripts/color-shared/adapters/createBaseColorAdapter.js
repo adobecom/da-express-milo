@@ -10,12 +10,25 @@ export default function createBaseColorAdapter(
   element.color = initialColor;
   element.setAttribute('color-mode', colorMode);
 
+  if (callbacks.strings) {
+    element.strings = callbacks.strings;
+  }
+
   if (options.controller && typeof options.controller.subscribe === 'function') {
     element.controller = options.controller;
   }
 
+  let rafId = null;
+  let pendingDetail = null;
   element.addEventListener('color-change', (e) => {
-    callbacks.onColorChange?.(e.detail);
+    if (!callbacks.onColorChange) return;
+    pendingDetail = e.detail;
+    if (rafId !== null) return;
+    rafId = requestAnimationFrame(() => {
+      rafId = null;
+      callbacks.onColorChange(pendingDetail);
+      pendingDetail = null;
+    });
   });
 
   element.addEventListener('mode-change', (e) => {
@@ -40,6 +53,7 @@ export default function createBaseColorAdapter(
     },
     getController: () => options.controller,
     destroy: () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
       element.remove();
     },
   };

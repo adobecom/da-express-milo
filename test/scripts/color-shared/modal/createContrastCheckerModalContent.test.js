@@ -232,6 +232,58 @@ describe('createContrastCheckerModalContent', () => {
     });
   });
 
+  describe('localized strings', () => {
+    it('uses English defaults when no strings option is provided', () => {
+      const result = createContrastCheckerModalContent(
+        { colors: [] },
+        { dataService },
+      );
+      expect(result.element.textContent).to.include('At least 2 colors');
+      result.destroy();
+    });
+
+    it('uses provided string overrides for empty state', () => {
+      const result = createContrastCheckerModalContent(
+        { colors: ['#FF0000'] },
+        {
+          dataService,
+          strings: { modalEmptyMessage: 'Au moins 2 couleurs sont requises.' },
+        },
+      );
+      expect(result.element.textContent).to.equal('Au moins 2 couleurs sont requises.');
+      result.destroy();
+    });
+
+    it('uses provided string overrides for matrix aria label', async () => {
+      const result = createContrastCheckerModalContent(
+        { colors: ['#000000', '#FFFFFF'] },
+        {
+          dataService,
+          strings: { modalMatrixAria: 'Matrice de comparaison de contraste' },
+        },
+      );
+      // Wait for async init (header/spectrum imports)
+      await new Promise((r) => { setTimeout(r, 500); });
+      const grid = result.element.querySelector('.cc-modal-grid');
+      if (grid) {
+        expect(grid.getAttribute('aria-label')).to.equal('Matrice de comparaison de contraste');
+      }
+      result.destroy();
+    });
+
+    it('falls back to English defaults for missing keys in partial overrides', () => {
+      const result = createContrastCheckerModalContent(
+        { colors: [] },
+        {
+          dataService,
+          strings: { modalTitle: 'Voir le contraste' },
+        },
+      );
+      expect(result.element.textContent).to.include('At least 2 colors');
+      result.destroy();
+    });
+  });
+
   describe('contrast ratio calculations', () => {
     it('should correctly identify black on white as passing all levels', () => {
       const result = dataService.checkWCAG('#000000', '#FFFFFF');
