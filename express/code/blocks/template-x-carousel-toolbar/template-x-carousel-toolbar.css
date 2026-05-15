@@ -9,6 +9,8 @@
   --template-purple: #5258e4;
   --white-background: var(--color-gray-250);
   --toolbar-gap: var(--spacing-350);
+  --gallery-inline-offset: 0px;
+  --gallery-item-gap: 22px;
 
   padding-bottom: var(--template-expand-bot-len);
   max-width: var(--ax-grid-10-col-width);
@@ -340,17 +342,30 @@
 
 /* gallery styles */
 .template-x-carousel-toolbar .gallery {
-  /* cancel the padding */
-  margin: calc(-1 * var(--template-expand-top-len)) 0 calc(-1 * var(--template-expand-bot-len));
-  /* avoid capping from .button-container */
-  padding: var(--template-expand-top-len) 0 var(--template-expand-bot-len);
+  /* cancel vertical padding; bleed into parent's inline padding + first-item gap on left */
+  margin: calc(-1 * var(--template-expand-top-len))
+          calc(-1 * var(--gallery-inline-offset))
+          calc(-1 * var(--template-expand-bot-len))
+          calc(-1 * (var(--gallery-inline-offset) + var(--gallery-item-gap)));
+  /* restore vertical space; left padding gives first item its leading gap */
+  padding: var(--template-expand-top-len)
+           var(--gallery-inline-offset)
+           var(--template-expand-bot-len)
+           calc(var(--gallery-inline-offset) + var(--gallery-item-gap));
+  scroll-padding-left: calc(var(--gallery-inline-offset) + var(--gallery-item-gap));
   align-items: flex-start;
-  gap: 22px;
+  gap: var(--gallery-item-gap);
 }
+
+
 
 /* individual templates styles */
 .template-x-carousel-toolbar .template p {
   margin: 0;
+}
+
+.template-x-carousel-toolbar .template:first-child {
+  margin-left: 20px;
 }
 
 .template-x-carousel-toolbar .template {
@@ -434,10 +449,18 @@
   pointer-events: none;
 }
 
+.template-x-carousel-toolbar .template:hover {
+  z-index: 1;
+}
+
 .template-x-carousel-toolbar .template:hover .button-container {
   z-index: 1;
   opacity: 1;
   pointer-events: initial;
+}
+
+.template-x-carousel-toolbar .template:has(.shared-tooltip.display-tooltip) {
+  z-index: 2;
 }
 
 .template-x-carousel-toolbar .template .icon-share-arrow {

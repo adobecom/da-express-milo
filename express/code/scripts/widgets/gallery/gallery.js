@@ -33,7 +33,7 @@ function createControl(items, container) {
   const intersecting = Array.from(items).fill(false);
 
   const len = items.length;
-  const atStart = () => container.scrollLeft <= 1;
+  const atStart = () => container.scrollLeft <= parseFloat(getComputedStyle(container).paddingLeft) + 1;
   const atEnd = () => container.scrollLeft + container.clientWidth >= container.scrollWidth - 1;
   const updateButtons = () => {
     prevButton.disabled = atStart();
