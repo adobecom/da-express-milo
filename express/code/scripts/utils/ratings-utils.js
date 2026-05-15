@@ -108,28 +108,42 @@ const waitForIms = (timeout = 1000) => new Promise((resolve) => {
   setTimeout(() => resolve(!!window.adobeIMS), timeout);
 });
 
-// Force Milo's loadIms() to run with guest-token mode enabled, so anonymous
-// visitors on any host (incl. *.aem.live / *.aem.page) get an OAuth token
-// the RNR API will accept. Without this, getAccessToken() returns null on
-// preview hosts and aggregate-rating reads 401.
+// Bootstrap an anonymous guest IMS token so RNR aggregate-rating reads
+// succeed on non-prod hosts (*.aem.live, *.aem.page, localhost). Milo's
+// own loadIms() picks stage IMS for those hosts, and stage IMS doesn't
+// CORS-allowlist them - so we force prod IMS + guest mode directly.
+// On www.adobe.com, Milo already has window.adobeIMS by this point and
+// we skip the bootstrap.
 let ensureImsPromise;
 const ensureImsBootstrapped = async () => {
   if (ensureImsPromise) return ensureImsPromise;
-  ensureImsPromise = (async () => {
-    if (!document.querySelector('meta[name="ims-guest-token"]')) {
-      const meta = document.createElement('meta');
-      meta.setAttribute('name', 'ims-guest-token');
-      meta.setAttribute('content', 'on');
-      document.head.appendChild(meta);
+  if (isProd && window.adobeIMS) {
+    ensureImsPromise = Promise.resolve();
+    return ensureImsPromise;
+  }
+  ensureImsPromise = new Promise((resolve) => {
+    if (window.adobeIMS && window.adobeIMS.getAccessToken?.()?.token) {
+      resolve();
+      return;
     }
-    try {
-      const { loadIms } = await import(`${getLibs()}/utils/utils.js`);
-      await loadIms();
-    } catch (e) {
-      // loadIms can reject (timeout, missing config); fall through to
-      // existing waitForIms / refresh-token retry path.
-    }
-  })();
+    const timeout = setTimeout(resolve, 8000);
+    window.adobeid = {
+      client_id: RNR_API_KEY,
+      scope: 'AdobeID,openid,gnav',
+      environment: 'prod',
+      useLocalStorage: false,
+      autoValidateToken: true,
+      api_parameters: { check_token: { guest_allowed: true } },
+      enableGuestAccounts: true,
+      enableGuestTokenForceRefresh: true,
+      onReady: () => { clearTimeout(timeout); resolve(); },
+      onError: () => { clearTimeout(timeout); resolve(); },
+    };
+    const script = document.createElement('script');
+    script.src = 'https://auth.services.adobe.com/imslib/imslib.min.js';
+    script.onerror = () => { clearTimeout(timeout); resolve(); };
+    document.head.appendChild(script);
+  });
   return ensureImsPromise;
 };
 
