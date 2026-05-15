@@ -590,6 +590,12 @@ def write_cell(cell, content_blocks, bold_all=False):
                 lp.style = cell.part.document.styles['List Bullet']
                 add_runs(lp, item_parts)
         elif kind == 'img':
+            # Image blob is fetched at build time and embedded directly in the docx.
+            # When the author pastes the docx into DA, DA uploads the embedded blob
+            # to AEM and generates the media_* URL automatically — nothing to replace.
+            # Therefore: url must be reachable NOW (Figma MCP asset, local file path,
+            # or picsum seed). Never use an AEM media_* path — it does not exist yet
+            # and requests.get() will 404, silently falling back to [image: alt].
             url, alt = block[1], block[2]
             try:
                 data = requests.get(url, timeout=20).content

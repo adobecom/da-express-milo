@@ -124,15 +124,12 @@ No user prompt needed for this decision — make the call based on the SWC catal
 
 **Figma → code translation — apply every time you read the deep spec:**
 
-| Figma pattern | Do NOT replicate | Build instead |
-|---|---|---|
-| Absolute pixel positions (`x: 120, y: 48`) | `position: absolute` with hardcoded offsets | Flex / grid; pixel gaps → Spectrum spacing tokens |
-| Fixed pixel spacing (`padding: 32px`) | Hardcoded values | Nearest Spectrum spacing token or `var(--spacing-*)` |
-| Flat decorative layers (gradient overlays, shadow rectangles) | Extra DOM nodes | CSS `background`, `box-shadow`, `::before`/`::after` |
-| Auto-layout with fixed column widths | `width: 248px` | CSS Grid with `fr` units |
-| Colors as raw hex | Hardcoded hex in CSS | Nearest Spectrum token or repo CSS custom property |
-| Text baked into a flattened image raster | Image with invisible text | Real HTML text styled to match; image as background/decorative only |
-| Component rendered as a flat group | Monolithic `<div>` with inline styles | Correct semantic HTML hierarchy, decomposed per the factory structure above |
+| Figma pattern | Build instead |
+|---|---|
+| Absolute/fixed positions, padding, or auto-layout fixed column widths | Flex/grid with `fr` units; pixel gaps/padding → nearest Spectrum spacing token or `var(--spacing-*)` |
+| Flat decorative layers (gradients, shadow rectangles) or flattened component groups | CSS `background`/`box-shadow`/`::before`/`::after` for decoration; decompose groups into semantic HTML |
+| Text baked into a flattened image raster | Real HTML text styled with CSS; image as background/decorative only |
+| Colors as raw hex | Nearest Spectrum token or repo CSS custom property |
 
 **Figma cannot show:** scroll vs fixed, hover/focus/active states (read `## Component States` in the
 figma summary), animations (check wiki/requirements), or click target sizes (WCAG 44×44px minimum).
