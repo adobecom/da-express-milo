@@ -11,6 +11,7 @@
   --toolbar-gap: var(--spacing-350);
   --gallery-inline-offset: 0px;
   --gallery-item-gap: 22px;
+  --gallery-offset: 12px;
 
   padding-bottom: var(--template-expand-bot-len);
   max-width: var(--ax-grid-10-col-width);
@@ -342,17 +343,17 @@
 
 /* gallery styles */
 .template-x-carousel-toolbar .gallery {
-  /* cancel vertical padding; bleed into parent's inline padding + first-item gap on left */
+  /* cancel vertical padding; bleed into parent's inline padding + first-item offset on left */
   margin: calc(-1 * var(--template-expand-top-len))
           calc(-1 * var(--gallery-inline-offset))
           calc(-1 * var(--template-expand-bot-len))
-          calc(-1 * (var(--gallery-inline-offset) + var(--gallery-item-gap)));
-  /* restore vertical space; left padding gives first item its leading gap */
+          calc(-1 * (var(--gallery-inline-offset) + var(--gallery-offset)));
+  /* restore vertical space; left padding gives first item its leading offset */
   padding: var(--template-expand-top-len)
            var(--gallery-inline-offset)
            var(--template-expand-bot-len)
-           calc(var(--gallery-inline-offset) + var(--gallery-item-gap));
-  scroll-padding-left: calc(var(--gallery-inline-offset) + var(--gallery-item-gap));
+           calc(var(--gallery-inline-offset) + var(--gallery-offset));
+  scroll-padding-left: calc(var(--gallery-inline-offset) + var(--gallery-offset));
   align-items: flex-start;
   gap: var(--gallery-item-gap);
 }
@@ -454,8 +455,9 @@
 }
 
 .template-x-carousel-toolbar .template:hover .button-container {
-  z-index: 1;
+  z-index: 20;
   opacity: 1;
+  position: absolute;
   pointer-events: initial;
 }
 
@@ -660,6 +662,10 @@
 }
 
 @media (min-width: 600px) {
+  .template-x-carousel-toolbar {
+    --gallery-offset: 22px;
+  }
+
   .template-x-carousel-toolbar .heading {
     font-size: var(--heading-font-size-s);
   }

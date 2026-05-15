@@ -466,6 +466,7 @@ function renderMediaWrapper(template) {
       renderedMedia = await renderRotatingMedias(mediaWrapper, template.pages, templateInfo);
     }
     renderedMedia.hover();
+    currentHoveredElement?.closest('.button-container')?.querySelector('.shared-tooltip')?.classList.remove('display-tooltip');
     currentHoveredElement?.classList.remove('singleton-hover');
     currentHoveredElement = e.target;
     currentHoveredElement?.classList.add('singleton-hover');
@@ -483,6 +484,7 @@ function renderMediaWrapper(template) {
       renderedMedia = await renderRotatingMedias(mediaWrapper, template.pages, templateInfo);
       renderedMedia.hover();
     }
+    currentHoveredElement?.closest('.button-container')?.querySelector('.shared-tooltip')?.classList.remove('display-tooltip');
     currentHoveredElement?.classList.remove('singleton-hover');
     currentHoveredElement = e.target;
     currentHoveredElement?.classList.add('singleton-hover');
