@@ -74,8 +74,7 @@ export default function createMoodSelector(initialMood, onChange, options = {}) 
   }
 
   MOOD_LIST.forEach((mood) => {
-    const checkIcon = createTag('span', { class: 'color-extract-mood-option-check', 'aria-hidden': 'true' });
-    checkIcon.innerHTML = CHECK_SVG;
+    const checkIcon = createTag('span', { class: 'color-extract-mood-option-check', 'aria-hidden': 'true' }, CHECK_SVG);
     const optionText = createTag('span', { class: 'color-extract-mood-option-text' }, MOOD_LABELS[mood]);
     const option = createTag('button', {
       class: `color-extract-mood-option ${mood === currentMood ? 'is-selected' : ''}`,

@@ -87,6 +87,7 @@ body {
 
 .color-wheel .image-extract {
   --color-extract-max-width: 100%;
+  --color-wheel-mood-width: 200px;
 }
 
 .color-wheel .color-extract-landing {
@@ -211,11 +212,11 @@ body {
 
 .color-wheel .color-extract-mood-row {
   flex: 1;
-  max-width: 200px;
+  max-width: var(--color-wheel-mood-width);
 }
 
 .color-wheel .color-extract-mood-dropdown {
-  min-width: 200px;
+  min-width: var(--color-wheel-mood-width);
   box-sizing: content-box;
 }
 
@@ -245,40 +246,8 @@ body {
   padding-block: var(--spacing-300) var(--spacing-100);
 }
 
-.color-wheel .image-extract .color-extract-mood-dropdown {
-  min-width: 200px;
-}
-
 .color-wheel .image-extract .color-extract-mood-option {
-  min-width: 200px;
-  box-sizing: border-box;
-  justify-content: flex-start;
-  gap: var(--spacing-100);
-}
-
-.color-wheel .image-extract .color-extract-mood-option-check {
-  width: var(--spacing-125);
-  height: var(--spacing-125);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--color-blue-800);
-  opacity: 0;
-}
-
-.color-wheel .image-extract .color-extract-mood-option-check svg {
-  width: 100%;
-  height: 100%;
-  display: block;
-}
-
-.color-wheel .image-extract .color-extract-mood-option.is-selected {
-  font-weight: 400;
-}
-
-.color-wheel .image-extract .color-extract-mood-option.is-selected .color-extract-mood-option-check {
-  opacity: 1;
+  min-width: var(--color-wheel-mood-width);
 }
 
 .color-wheel .image-extract .color-extract-marker {
@@ -368,7 +337,7 @@ color-wheel-express {
 .color-wheel-harmony-carousel-host .simple-carousel-fader-right {
   display: flex;
   width: 88px;
-  height: var(--spacing-700);
+  height: 48px;
   align-items: center;
   gap: 10px;
 }
@@ -387,8 +356,8 @@ color-wheel-express {
 
 .color-wheel-harmony-option {
   box-sizing: border-box;
-  width: var(--spacing-700);
-  height: var(--spacing-700);
+  width: 48px;
+  height: 48px;
   padding: 0;
   margin: 0;
   border-radius: var(--Radius-corner-radius-75);
@@ -416,8 +385,8 @@ color-wheel-express {
 }
 
 .color-wheel .icon.simple-carousel-arrow-icon {
-  height: var(--spacing-325);
-  width: var(--spacing-325);
+  height: 18px;
+  width: 18px;
 }
 
 .mobile-container {
@@ -525,7 +494,7 @@ color-wheel-express {
 
 @media (min-width: 1200px) {
   .color-wheel .ax-toolbar {
-    --ax-palette-name-width-desktop: 11.5rem;
+    --ax-palette-name-width-desktop: 184px;
   }
 
   .color-wheel .ax-color-tool-layout {
@@ -618,7 +587,7 @@ color-wheel-express {
   }
 
   .color-wheel .color-extract-mood {
-    width: 200px;
+    width: var(--color-wheel-mood-width);
   }
 
   .color-wheel .color-extract-mood-dropdown {

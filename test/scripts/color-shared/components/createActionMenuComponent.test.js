@@ -69,17 +69,17 @@ describe('createActionMenuComponent', () => {
     const expandBtn = instance.element.querySelector('.expand-btn');
     expect(expandBtn).to.exist;
     expect(expandBtn.getAttribute('aria-label')).to.equal('Maximize');
-    expect(expandBtn.getAttribute('aria-pressed')).to.equal('false');
+    expect(expandBtn.hasAttribute('aria-pressed')).to.be.false;
 
     expandBtn.click();
     expect(expandedValue).to.equal(true);
     expect(expandBtn.getAttribute('aria-label')).to.equal('Minimize');
-    expect(expandBtn.getAttribute('aria-pressed')).to.equal('true');
+    expect(expandBtn.hasAttribute('aria-pressed')).to.be.false;
 
     expandBtn.click();
     expect(expandedValue).to.equal(false);
     expect(expandBtn.getAttribute('aria-label')).to.equal('Maximize');
-    expect(expandBtn.getAttribute('aria-pressed')).to.equal('false');
+    expect(expandBtn.hasAttribute('aria-pressed')).to.be.false;
   });
 
   it('destroy() removes element from DOM', async () => {
