@@ -18,6 +18,7 @@ const isProd = [
 ].includes(window.location.hostname);
 
 const RNR_API_URL = isProd ? 'https://rnr.adobe.io/v1' : 'https://rnr-stage.adobe.io/v1';
+const RNR_API_READ_URL = 'https://rnr.adobe.io/v1';
 
 /**
  * True when Nala E2E tests request the ratings block to be visible without IMS (CI/CD).
@@ -146,7 +147,7 @@ export async function fetchRatingsData(sheet) {
     };
 
     const response = await fetch(
-      `${RNR_API_URL}/ratings?assetType=${ASSET_TYPE}&assetId=${sheet}`,
+      `${RNR_API_READ_URL}/ratings?assetType=${ASSET_TYPE}&assetId=${sheet}`,
       { headers },
     );
 
