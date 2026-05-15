@@ -139,13 +139,10 @@ export async function fetchRatingsData(sheet) {
     if (isNalaTestRatings()) {
       return { average: '5.00', total: 0, segments: null };
     }
-    const token = await getAndValidateImsToken('load review data');
-    if (!token) return null;
 
     const headers = {
       Accept: 'application/vnd.adobe-review.review-overall-rating-v1+json',
       'x-api-key': RNR_API_KEY,
-      Authorization: token,
     };
 
     const response = await fetch(
