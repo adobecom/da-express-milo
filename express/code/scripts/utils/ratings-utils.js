@@ -147,8 +147,28 @@ const ensureImsBootstrapped = async () => {
   return ensureImsPromise;
 };
 
+// Manual token override: ?ratings-token=<jwt> lets you paste an IMS guest
+// token directly into the URL when IMS won't bootstrap (CORS blocked on
+// preview hosts). Get one with:
+//   curl -s -X POST "https://adobeid-na1.services.adobe.com/ims/check/v6/token?jslVersion=v2-v0.55.0" \
+//     -H "Content-Type: application/x-www-form-urlencoded;charset=UTF-8" \
+//     -H "Origin: https://www.adobe.com" -H "Referer: https://www.adobe.com/" \
+//     --data-urlencode "client_id=AdobeExpressWeb" \
+//     --data-urlencode "scope=AdobeID,openid,gnav" \
+//     --data-urlencode "guest_allowed=true" --data-urlencode "guest_user=true"
+// Token is valid for 1 hour.
+function getOverrideToken() {
+  try {
+    return new URL(window.location.href).searchParams.get('ratings-token') || null;
+  } catch (e) {
+    return null;
+  }
+}
+
 export const getAndValidateImsToken = async (operation) => {
   if (isNalaTestRatings()) return 'nala-test-token';
+  const overrideToken = getOverrideToken();
+  if (overrideToken) return overrideToken;
   await ensureImsBootstrapped();
   await waitForIms();
   const token = await getImsToken(operation);
