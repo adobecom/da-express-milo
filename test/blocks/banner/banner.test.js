@@ -92,6 +92,16 @@ describe('Banner', () => {
     expect(button.classList.contains('dark', 'accent')).to.be.true;
   });
 
+  it('adds aria-labels to banner buttons', async () => {
+    document.body.innerHTML = multiButton;
+    const banner = document.querySelector('.banner');
+    await decorate(banner);
+
+    const buttons = [...banner.querySelectorAll('a.button')];
+    expect(buttons[0].getAttribute('aria-label')).to.equal('Start for free');
+    expect(buttons[1].getAttribute('aria-label')).to.equal('Second button');
+  });
+
   it('Banner multi-button has correct elements', async () => {
     document.body.innerHTML = multiButton;
     const banner = document.querySelector('.banner');

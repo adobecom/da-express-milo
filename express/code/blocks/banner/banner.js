@@ -55,6 +55,11 @@ export default async function decorate(block) {
         button.classList.add('reverse');
       }
     }
+
+    if (!button.getAttribute('aria-label')) {
+      const label = button.textContent?.trim() || button.title;
+      if (label) button.setAttribute('aria-label', label);
+    }
   });
 
   const phoneNumberTags = block.querySelectorAll('a[title="{{business-sales-numbers}}"]');
