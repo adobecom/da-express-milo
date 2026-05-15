@@ -1,5 +1,6 @@
 import { createTag } from '../../scripts/utils.js';
 import { createMetadataMap } from '../../scripts/utils/mobile-fork-button-utils.js';
+import { sendFrictionlessEventToAdobeAnaltics } from '../../scripts/instrument.js';
 import {
   ACTION_TYPES,
   loadPlaceholders,
@@ -175,6 +176,10 @@ export default async function showVideoQuickActionPicker(videoFile, block, sdkHa
       unlockBodyScroll();
       URL.revokeObjectURL(blobUrl);
       dialog.remove();
+      sendFrictionlessEventToAdobeAnaltics(block, 'exit-guided-workflow-panel', {
+        content: { category: 'videos' },
+        custom: { ui: { location: 'seo' } },
+      });
     };
 
     handleKeydown = (e) => {
@@ -190,12 +195,22 @@ export default async function showVideoQuickActionPicker(videoFile, block, sdkHa
     document.body.append(dialog);
     lockBodyScroll();
     closeBtn.focus();
+    sendFrictionlessEventToAdobeAnaltics(block, 'view-guided-workflow-panel', {
+      content: { category: 'videos' },
+      custom: { ui: { location: 'seo' } },
+    });
 
     const videoDuration = await durationPromise;
     const videoActions = getVideoActions(strings, videoFile, videoDuration);
     videoActions.forEach((action) => {
       const card = buildActionCard(action);
       card.addEventListener('click', () => {
+        sendFrictionlessEventToAdobeAnaltics(block, 'select-guided-workflow-option', {
+          custom: {
+            ui: { location: 'seo' },
+            task: { create_selection: action.id },
+          },
+        });
         closeDialog();
         if (action.type === ACTION_TYPES.APP_INSTALL) {
           const appLink = getAppInstallLink();

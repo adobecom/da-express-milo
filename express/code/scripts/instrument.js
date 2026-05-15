@@ -155,7 +155,7 @@ export function sendEventToAnalytics(eventName) {
 
 export function sendFrictionlessEventToAdobeAnaltics(block, eventName, extraProperties = {}) {
   const fireEvent = () => {
-    const { event: extraEvent = {}, custom: extraCustom = {} } = extraProperties;
+    const { event: extraEvent = {}, custom: extraCustom = {}, content: extraContent } = extraProperties;
     _satellite.track('event', {
       xdm: {},
       data: {
@@ -174,7 +174,9 @@ export function sendFrictionlessEventToAdobeAnaltics(block, eventName, extraProp
               url: loc.href,
               ...extraEvent,
             },
+            ...(extraContent && { content: extraContent }),
             custom: {
+              ...extraCustom,
               qa: {
                 group: block.dataset.frictionlessgroup ?? 'unknown',
                 type: block.dataset.frictionlesstype ?? 'unknown',
