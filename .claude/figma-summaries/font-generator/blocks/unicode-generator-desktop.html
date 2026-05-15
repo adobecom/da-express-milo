@@ -1,0 +1,347 @@
+<!-- Figma node 1:20857 — "Unicode generator - W" -->
+<!-- Platform: desktop -->
+
+<style>
+  /* Design tokens extracted from this frame */
+  :root {
+    /* Typography */
+    --h1-size: 45px;  --h1-weight: 900;  --h1-font: "Adobe Clean Spectrum VF", sans-serif; --h1-line-height: 1.04;
+    --h2-size: 36px;  --h2-weight: 900;
+    --h3-size: 22px;  --h3-weight: 700;
+    --body-l-size: 20px; --body-l-weight: 400; --body-l-line-height: 1.3;
+    --body-m-size: 18px; --body-m-weight: 400; --body-m-line-height: 1.3;
+    --body-s-size: 16px; --body-s-weight: 400;
+    --label-size: 14px; --label-weight: 400;
+
+    /* Colors */
+    --cta-primary-bg: #292929;       /* black button */
+    --cta-accent-bg: #3b63fb;        /* blue accent button */
+    --cta-primary-text: #FFFFFF;
+    --link-color: #3b63fb;
+    --text-primary: #131313;
+    --text-body: #505050;
+    --text-code: #292929;
+    --bg-page: #f8f8f8;              /* light gray page bg */
+    --bg-white: #FFFFFF;
+    --bg-generator: #f3f3f3;         /* Font-generator section bg */
+    --bg-bento: #f8f8f8;             /* Font-bento section bg */
+    --bg-banner: #000000;            /* Banner background: black */
+    --border-color: #e9e9e9;
+    --border-muted: #dadada;
+    --selected-border: #3b63fb;      /* selected Font-category-selector */
+    --palette-celery-1100: #2c5c09;  /* dark green - card/image bg */
+    --palette-seafoam-1100: #035c50; /* dark teal - card/image bg */
+    --palette-celery-200: #c5ff9c;   /* light green text on dark bg */
+    --palette-seafoam-300: #a9edd8;  /* light teal text on dark bg */
+    --banner-border: #079355;        /* green border on black banner */
+  }
+
+  /*
+   * Banner color → Milo block variant reference:
+   * #000000 / black  → banner (standout)
+   * #5C5CE0 / indigo → banner (default)
+   * #0070F2 / blue   → banner (cool)
+   * #F5F5F5 / white  → banner (light)
+   */
+</style>
+
+<!-- ═══ Section 1 — Hero / transparent-img-marquee ════════════════════ -->
+<section
+  data-block="transparent-img-marquee"
+  data-milo-helper="add_block('transparent-img-marquee', ...)">
+  <!-- Background: black (#000000) -->
+  <!-- Two-column: left = text + logo, right = image (600x400 photo with font overlays) -->
+
+  <!-- Left column -->
+  <div data-component="nav-logo">
+    <!-- Adobe Express white outline logo (30x30px) + "Adobe Express" wordmark (124x18px) -->
+  </div>
+  <h1 style="font-size:var(--h1-size);font-weight:var(--h1-weight);color:white;line-height:var(--h1-line-height)">
+    Free unicode font generator.
+  </h1>
+  <p style="font-size:var(--body-s-size);color:white;line-height:1.3">
+    Create eye-catching text styles you can copy and paste anywhere. Then bring your style into Adobe Express to design social posts, emails, and handles effortlessly.
+  </p>
+
+  <!-- Right column -->
+  <div data-component="hero-image">
+    <!-- Image: woman smiling, with "NEW POST" unicode font overlays in various styles -->
+    <!-- asset: https://www.figma.com/api/mcp/asset/b95b7c12-13ec-4021-b196-3fd7b938bf8c -->
+  </div>
+</section>
+
+<!-- ═══ Section 2 — Font Generator Tool ══════════════════════════════ -->
+<section
+  data-block="font-generator"
+  data-milo-helper="add_block('font-generator', ...)">
+  <!-- Background: #f3f3f3 light gray -->
+  <!-- Two-column sticky layout: left = side panel (477px wide sticky), right = preview cards -->
+
+  <!-- Left panel: font-generator-side-panel -->
+  <div data-component="font-generator-side-panel">
+    <!-- Text input field (card, white bg, rounded-16px, shadow) -->
+    <div data-component="text-field">
+      <!-- Textarea: placeholder "Type the preview text you want to get started..." -->
+      <!-- Character counter: "40/200" -->
+      <!-- Resize handle icon (bottom-right) -->
+      <!-- Suggestions bar (shown below field): -->
+      <!--   Label "Try these:" + scrollable tag pills: -->
+      <!--     "The quick brown fox jumps over the lazy dog" -->
+      <!--     "ABCDEFGHIJKLMNOPQRSTUVWXYZ" -->
+      <!--     "Realigned equestrian fez bewilders picky monarch" -->
+      <!--     "Roger, hungry: ate 236 peaches & cantaloupes in 1904!" -->
+      <!--     "Voix ambiguë d'un cœur qui au zéphyr préfère les jattes de kiwi" -->
+      <!--     "Victor jagt zwölf Boxkämpfer quer über den großen Sylter Deich" -->
+      <!--     "Quiere la boca exhausta vid, kiwi, piña y fugaz jamón" -->
+    </div>
+
+    <!-- Categories accordion -->
+    <div data-component="categories-accordion">
+      <p>Categories</p>
+      <!-- Accordion items (collapsed by default): -->
+      <!-- Each item is an accordion row with a chevron -->
+    </div>
+
+    <!-- Font category selector pills (filter panel) -->
+    <div data-component="filter-panel-atoms">
+      <!-- 56 unicode fonts label -->
+      <p>56 unicode fonts</p>
+      <!-- Category buttons (pill/card style, 45px height, rounded-6px) -->
+      <!-- Selected state: border=#3b63fb (blue), bg=white -->
+      <!-- Default state: no border, bg=white -->
+      <div data-component="Font-category-selector" data-state="selected">𝓐𝓵𝓵</div>
+      <div data-component="Font-category-selector" data-state="default">🅟🅞🅟🅤🅛🅐🅡</div>
+      <div data-component="Font-category-selector" data-state="default">ⓒⓞⓞⓛ</div>
+      <div data-component="Font-category-selector" data-state="default">ƒαɳ૮ყ</div>
+      <div data-component="Font-category-selector" data-state="default">̶G̶̶l̶̶i̶̶t̶̶c̶̶h̶</div>
+      <div data-component="Font-category-selector" data-state="default">❚█══Symbol══█❚</div>
+    </div>
+
+    <!-- "Looking for more fonts?" upsell card -->
+    <div data-component="upsell-card">
+      <p>Looking for more fonts?</p>
+      <a style="background:var(--cta-primary-bg);color:var(--cta-primary-text)">Get Adobe Express Free</a>
+    </div>
+
+    <!-- Preview font size label -->
+    <p>Preview font size</p>
+    <!-- Size slider / number input -->
+  </div>
+
+  <!-- Right panel: font preview cards grid -->
+  <div data-component="font-preview-cards">
+    <!-- Each card shows the typed text rendered in a different unicode font style -->
+    <!-- Card examples (rendered text names from Figma): -->
+    <!-- "Light text bubble" / "Ⓣⓨⓟⓔ ⓨⓞⓤⓡ ⓣⓔⓧⓣ ⓗⓔⓡⓔ ⓣⓞ ⓖⓔⓣ ⓢⓣⓐⓡⓣⓔⓓ..." -->
+    <!-- "Dark text bubble" / "🅣🅨🅟🅔 🅢🅞🅜🅔🅣🅗🅘🅝🅖 🅣🅞 🅖🅔🅣 🅢🅣🅐🅡🅣🅔🅓" -->
+    <!-- "Full width" / "Ｔｙｐｅ ｓｏｍｅｔｈｉｎｇ ｔｏ ｇｅｔ ｓｔａｒｔｅｄ" -->
+    <!-- "Inverted" / "⊥ʎdǝ ʎonɹ ʇǝxʇ ɥǝɹǝ ʇo ƃǝʇ sʇɐɹʇǝp..." -->
+    <!-- "Diagonal strikes" / "̷T̷̷y̷̷p̷̷e̷..." -->
+    <!-- "Acute accents" / "Tӳṕé ӳőúŕ téxt héŕé tő ǵét śtáŕtéd..." -->
+    <!-- "Underline with dashes" / "̠T̠̠y̠̠p̠̠e̠..." -->
+    <!-- "Metal umlauts" / "Ṫÿṗë ÿöüṛ ẗëẍẗ ḧëṛë ẗö ġëẗ ṡẗäṛẗëḋ..." -->
+    <!-- "Bandaid" / "͓̽T͓͓̽̽y͓͓̽̽p͓͓̽̽e͓̽..." -->
+    <!-- Each card has a copy icon (S2_Icon_Copy_20_N) + "Design with style" CTA button -->
+    <!-- "Design with style" button = small black pill (rgba(0,0,0,0.84)) with open-in icon (S2_Icon_OpenIn_20_N) -->
+  </div>
+</section>
+
+<!-- ═══ Section 3 — Columns / River Flow ("Looking for more fonts?") ══ -->
+<section
+  data-block="columns"
+  data-milo-helper="add_content_column">
+  <!-- Background: white -->
+  <!-- Two-column: left = text + CTA, right = animated font image (dark green bg) -->
+
+  <h2 style="font-size:var(--h2-size);font-weight:var(--h2-weight);color:var(--text-primary)">
+    Looking for more fonts?
+  </h2>
+  <p style="font-size:var(--body-m-size);color:var(--text-body)">
+    Browse the complete Adobe Fonts collection with over 30,000+ fonts in Adobe Express. Then start with a template to design anything.
+  </p>
+  <a style="background:var(--cta-primary-bg);color:var(--cta-primary-text);border-radius:24px;padding:10px 20px">
+    Get Adobe Express Free
+  </a>
+
+  <!-- Right column: animated cycling image showing various font names -->
+  <!-- Dark green bg (#2c5c09 celery/1100), scrolling font names in celery/200 (#c5ff9c) -->
+  <!-- Font names shown: Bacalar, Bogart, RINGOLD, Gardez, Swear Display, P22 Civilite, Aboreto -->
+  <!-- Second animation layer: seafoam/1100 (#035c50) bg, same font names in seafoam/300 (#a9edd8) -->
+  <!-- Rounded corners: 16px -->
+</section>
+
+<!-- ═══ Section 4 — How-to-v2 ═══════════════════════════════════════ -->
+<section
+  data-block="how-to-v2"
+  data-milo-helper="add_block('how-to-v2', ...)">
+  <!-- Background: white -->
+  <!-- Heading centered above content -->
+
+  <h2 style="font-size:var(--h2-size);font-weight:var(--h2-weight);text-align:center;color:#222">
+    How the unicode font generator works.
+  </h2>
+
+  <!-- Two-column layout: left = visual/media, right = step accordion -->
+
+  <!-- Left column: visual demo (dark green/teal bg, rounded-16px) -->
+  <!-- Shows: font category selector pills (floating card) + iPhone mockup with "NEW POST" styled text -->
+  <!-- Category pills: 𝓐𝓵𝓵 (All), 🅟🅞🅟🅤🅛🅐🅡, ⓒⓞⓞⓛ, ƒαɳ૮ყ, ̶G̶̶l̶̶i̶̶t̶̶c̶̶h̶, ❚█══Symbol══█❚ -->
+  <!-- Text-field card overlaid on visual, shows "🅝🅔🅦 🅟🅞🅢🅣" with "Design with style" button -->
+
+  <!-- Right column: step accordion (how-to-v2 Right Content Wrap) -->
+  <!-- Step 1 active (gradient left indicator: pink→orange) -->
+  <div data-component="step-content" data-state="active">
+    <h3 style="font-size:var(--h3-size);font-weight:var(--h3-weight);color:#222">
+      1. Find your unicode font.
+    </h3>
+    <p style="font-size:var(--body-s-size);color:var(--text-body)">
+      Lorem ipsum dolor sit amet consectetur. Diam tortor magna lectus leo maecenas consectetur potenti pretium amet. Semper in blandit ultrices at etiam in facilisis.
+    </p>
+    <!-- Left indicator: gradient linear -17deg, pink #FF4885 → orange #FC7D00 -->
+  </div>
+
+  <!-- Steps 2-4 collapsed (gray indicator) -->
+  <div data-component="step-content" data-state="collapsed">
+    <h3 style="font-size:var(--h3-size);font-weight:var(--h3-weight);color:#222">
+      2. Edit and copy text.
+    </h3>
+  </div>
+  <div data-component="step-content" data-state="collapsed">
+    <h3 style="font-size:var(--h3-size);font-weight:var(--h3-weight);color:#222">
+      3. Paste anywhere online.
+    </h3>
+  </div>
+  <div data-component="step-content" data-state="collapsed">
+    <h3 style="font-size:var(--h3-size);font-weight:var(--h3-weight);color:#222">
+      4. Take your unicode font further in Adobe Express.
+    </h3>
+  </div>
+</section>
+
+<!-- ═══ Section 5 — Icon Carousel ═══════════════════════════════════ -->
+<section
+  data-block="icon-carousel"
+  data-milo-helper="add_block('icon-carousel', ...)">
+  <!-- Instance name: "icon-carousel" — matches block folder name exactly (Pass 1) -->
+  <!-- Width: 1920px, height: 540px -->
+  <!-- Content not fully visible in metadata; implementation agent should check icon-carousel block -->
+</section>
+
+<!-- ═══ Section 6 — Font-bento ("See your unicode font in action.") ══ -->
+<section
+  data-block="font-bento"
+  data-milo-helper="add_block('font-bento', ...)">
+  <!-- Background: #f8f8f8 -->
+  <!-- New block: "font-bento" — no existing match in blocks folder -->
+
+  <!-- Header row: heading left + "Create now" button right -->
+  <h2 style="font-size:var(--h2-size);font-weight:var(--h2-weight);color:var(--text-primary)">
+    See your unicode font in action.
+  </h2>
+  <p style="font-size:var(--body-m-size);color:var(--text-body)">
+    Felis interdum neque enim pretium hendrerit metus ornare vel malesuada. Cras mi dolor aenean risus. Sagittis vel at ipsum non elementum sit eget semper.
+  </p>
+  <a style="background:var(--cta-accent-bg);color:var(--cta-primary-text);border-radius:24px;padding:10px 20px">
+    Create now
+  </a>
+
+  <!-- Bento grid: 4 columns × 2 rows -->
+  <!-- Row 1: bento-card-1 (span 2 cols) + bento-card-2 (1 col) + bento-card-3 (1 col) -->
+  <!-- Row 2: bento-card-4 (1 col) + bento-card-5 (1 col) + bento-card-6 (span 2 cols) -->
+
+  <!-- bento-card-1: Social media -->
+  <div data-component="bento-card" data-label="Social media" data-cols="2">
+    <!-- Dark teal bg (#035c50), phone mockup showing: "Lunch time is my ɦαρρყ ρℓα૮ε 🥗🍴" -->
+    <!-- Card image: 620×290px ratio -->
+  </div>
+
+  <!-- bento-card-2: Games -->
+  <div data-component="bento-card" data-label="Games" data-cols="1">
+    <!-- Dark teal bg, game chat UI: "Game Chat / Player 01: ggs ⓛⓞⓦ ⓓⓘⓕⓕ / Player 02: what a clutch play!" -->
+    <!-- Card image: 274×290px ratio -->
+  </div>
+
+  <!-- bento-card-3: Design -->
+  <div data-component="bento-card" data-label="Design" data-cols="1">
+    <!-- Dark teal bg, template editor showing "ØŘĐ€Ř" in red (#811b0e) on golden bg -->
+    <!-- Card image: 274×290px ratio -->
+  </div>
+
+  <!-- bento-card-4: Messaging -->
+  <div data-component="bento-card" data-label="Messaging" data-cols="1">
+    <!-- Dark green bg (#2c5c09 celery), messages showing: "🅢🅔🅔 🅨🅞🅤 🅣🅗🅔🅡🅔" + "͓̽c͓̽a͓͓̽̽n͓̽'͓̽t͓̽ ͓̽w͓̽a͓͓̽̽i͓͓̽̽t͓̽ 😊" -->
+    <!-- Card image: 274×290px ratio -->
+  </div>
+
+  <!-- bento-card-5: Ads -->
+  <div data-component="bento-card" data-label="Ads" data-cols="1">
+    <!-- Dark teal bg, ad poster: "Franky's FUDGES / 🅞🅝 🅢🅐🅛🅔" -->
+    <!-- Card image: 274×290px ratio -->
+  </div>
+
+  <!-- bento-card-6: Documents -->
+  <div data-component="bento-card" data-label="Documents" data-cols="2">
+    <!-- Dark teal bg, document/book cover: "Ⓣⓗⓔ Ⓞⓧⓕⓞⓡⓓ Ⓒⓞⓜⓜⓐ / A Matter of Life, Death, and Grammar / by Ruby Chilvers" -->
+    <!-- Card image: 620×290px ratio -->
+  </div>
+</section>
+
+<!-- ═══ Section 7 — Testimonials Block ══════════════════════════════ -->
+<section
+  data-block="Testimonials Block"
+  data-milo-helper="add_block('Testimonials Block', ...)">
+  <!-- Instance name: "Testimonials Block" -->
+  <!-- Width: 1920px, height: 589px -->
+  <!-- Content not fetched; standard testimonials block pattern -->
+</section>
+
+<!-- ═══ Section 8 — FAQ Accordion ═══════════════════════════════════ -->
+<section
+  data-block="faq"
+  data-milo-helper="add_faq">
+  <!-- Instance name: "FAQ-accordian" matches faq block pattern -->
+  <!-- Width: 1920px, height: 978px -->
+  <!-- Q&A pair accordion structure; exact copy not visible — needs further fetch -->
+  <h2>Frequently asked questions.</h2>
+  <!-- Accordion Q&A pairs go here -->
+</section>
+
+<!-- ═══ Section 9 — Banner ═══════════════════════════════════════════ -->
+<section
+  data-block="banner"
+  data-banner-variant="standout"
+  data-milo-helper="add_banner">
+  <!-- Background: #000000 (black) → banner (standout) variant -->
+  <!-- Green border: #079355 (2px solid) around inner content area -->
+  <!-- Adobe Express logo + wordmark centered above headline -->
+
+  <h2 style="font-size:45px;font-weight:900;color:white;text-align:center">
+    Looking for more fonts?
+  </h2>
+  <p style="font-size:var(--body-l-size);color:white;text-align:center;max-width:715px">
+    Browse the complete Adobe Fonts collection with over 30,000+ fonts in Adobe Express.
+  </p>
+  <a style="background:var(--cta-accent-bg);color:var(--cta-primary-text);border-radius:24px;padding:13px 24px">
+    Get Adobe Express Free
+  </a>
+</section>
+
+<!-- ═══ Section 10 — Global Footer ══════════════════════════════════ -->
+<section
+  data-block="Global footer"
+  data-milo-helper="add_footer">
+  <!-- Instance name: "Global footer" — standard footer block -->
+  <!-- Width: 1920px, height: 533px -->
+</section>
+
+<!-- ═══ Section 11 — Metadata ════════════════════════════════════════ -->
+<section
+  data-block="metadata"
+  data-milo-helper="add_metadata">
+  <dl>
+    <dt>Title</dt>       <dd>Free Unicode Font Generator | Adobe Express</dd>
+    <dt>Description</dt> <dd>Create eye-catching unicode text styles you can copy and paste anywhere. Use Adobe Express to design social posts, emails, and more.</dd>
+    <dt>Short Title</dt> <dd>Unicode Font Generator</dd>
+    <!-- Additional metadata keys may be specified by the designer -->
+  </dl>
+</section>

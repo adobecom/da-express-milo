@@ -1,0 +1,83 @@
+/* transparent-img-marquee — Phase E black-background two-column hero */
+
+.transparent-img-marquee {
+  background-color: #000;
+  color: #fff;
+  padding: 0 40px;
+  box-sizing: border-box;
+}
+
+/* Outer row: full-width flex container */
+.transparent-img-marquee > div {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 80px;
+  max-width: 1600px;
+  margin: 0 auto;
+  min-height: 525px;
+}
+
+/* ── Left column: text content ───────────────────────────────────────────── */
+
+.transparent-img-marquee .marquee-left {
+  width: 438px;
+  flex-shrink: 0;
+  padding: 80px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.transparent-img-marquee .express-logo-link {
+  display: inline-block;
+  margin-bottom: 32px;
+  line-height: 0;
+}
+
+.transparent-img-marquee .express-logo {
+  display: block;
+  height: 30px;
+  width: auto;
+}
+
+.transparent-img-marquee h1 {
+  color: #fff;
+  font-size: clamp(32px, 3.5vw, 52px);
+  line-height: 1.1;
+  margin: 0 0 20px;
+}
+
+.transparent-img-marquee p {
+  color: #fff;
+  font-size: 16px;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.transparent-img-marquee a:not(.express-logo-link) {
+  color: #fff;
+}
+
+/* ── Right column: image ─────────────────────────────────────────────────── */
+
+.transparent-img-marquee .marquee-right {
+  width: 788px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.transparent-img-marquee .marquee-right picture {
+  display: block;
+  max-width: 600px;
+  width: 100%;
+}
+
+.transparent-img-marquee .marquee-right picture img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
