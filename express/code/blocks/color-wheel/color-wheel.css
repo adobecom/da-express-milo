@@ -246,10 +246,6 @@ body {
   padding-block: var(--spacing-300) var(--spacing-100);
 }
 
-.color-wheel .image-extract .color-extract-mood-option {
-  min-width: var(--color-wheel-mood-width);
-}
-
 .color-wheel .image-extract .color-extract-marker {
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
 }
