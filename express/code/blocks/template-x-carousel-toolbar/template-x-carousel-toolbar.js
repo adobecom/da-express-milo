@@ -317,7 +317,7 @@ function initSearchFunction(el, searchBarWrapper) {
     } else if (allTemplatesMetadata.some((e) => e.url === targetPath) && document.body.dataset.device !== 'desktop') {
       targetLocation = `${window.location.origin}${targetPath}?searchId=${searchId || ''}`;
     } else {
-      const searchUrlTemplate = `/express/templates/search?tasks=${currentTasks.xCore}&tasksx=${currentTasks.content}&phformat=${format}&topics=${searchInput || "''"}&q=${searchBar.value || "''"}&searchId=${searchId || ''}`;
+      const searchUrlTemplate = `/express/templates/search?tasks=${encodeURIComponent(currentTasks.xCore)}&tasksx=${encodeURIComponent(currentTasks.content)}&phformat=${encodeURIComponent(format)}&topics=${encodeURIComponent(searchInput || '')}&q=${encodeURIComponent(searchBar.value || '')}&searchId=${encodeURIComponent(searchId || '')}`;
       targetLocation = `${window.location.origin}${prefix}${searchUrlTemplate}`;
     }
     window.location.assign(targetLocation);
@@ -372,8 +372,16 @@ function initSearchFunction(el, searchBarWrapper) {
     if (suggestions && !(suggestions.length <= 1 && suggestions[0]?.query === searchBarVal)) {
       suggestions.forEach((item, index) => {
         const li = createTag('li', { tabindex: 0 });
-        const valRegEx = new RegExp(searchBar.value, 'i');
-        li.innerHTML = item.query.replace(valRegEx, `<b>${searchBarVal}</b>`);
+        const matchStart = item.query.toLowerCase().indexOf(searchBarVal);
+        if (matchStart !== -1) {
+          li.append(
+            document.createTextNode(item.query.slice(0, matchStart)),
+            Object.assign(createTag('b'), { textContent: item.query.slice(matchStart, matchStart + searchBarVal.length) }),
+            document.createTextNode(item.query.slice(matchStart + searchBarVal.length)),
+          );
+        } else {
+          li.textContent = item.query;
+        }
         li.addEventListener('click', async () => { await handleSubmitInteraction(item, index); });
         li.addEventListener('keydown', async (e) => {
           if (e.key === 'Enter' || e.keyCode === 13) await handleSubmitInteraction(item, index);
@@ -413,10 +421,12 @@ async function createSearchBarWrapper() {
   const searchBarWrapper = createTag('div', { class: 'search-bar-wrapper' });
   const searchForm = createTag('form', { class: 'search-form' });
   const cfg = getConfig();
+  const searchPlaceholder = await replaceKey('template-search-placeholder', cfg) || 'Search for over 50,000 templates';
   const searchBar = createTag('input', {
     class: 'search-bar',
     type: 'text',
-    placeholder: await replaceKey('template-search-placeholder', cfg) || 'Search for over 50,000 templates',
+    placeholder: searchPlaceholder,
+    'aria-label': searchPlaceholder,
     enterKeyHint: await replaceKey('search', cfg) || 'Search',
   });
   searchForm.append(searchBar);

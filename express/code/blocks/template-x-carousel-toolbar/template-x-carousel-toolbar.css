@@ -33,13 +33,11 @@
 
 .template-x-carousel-toolbar .centered-heading {
   margin-bottom: var(--spacing-400);
-  color: var(--Alias-content-typography-heading, #131313);
+  color: #131313;
   text-align: center;
-  font-size: var(--Font-size-500, 22px);
-  font-style: normal;
+  font-size: 22px;
   font-weight: 900;
-  line-height: var(--Line-height-500, 26px);
-  letter-spacing: var(--Letter-spacing, 0);
+  line-height: 26px;
 }
 
 .template-x-carousel-toolbar.search-bar {
@@ -54,14 +52,11 @@
 .template-x-carousel-toolbar.search-bar .centered-heading {
   margin-bottom: 0;
   padding-bottom: 0;
-  color: var(--Alias-content-typography-heading, #131313);
+  color: #131313;
   text-align: center;
-  font-size: var(--Font-size-500, 22px);
-  font-style: normal;
+  font-size: 22px;
   font-weight: 900;
-  line-height: var(--Line-height-500, 26px);
-  letter-spacing: var(--Letter-spacing, 0);
-
+  line-height: 26px;
 }
 
 /* search-bar variant: toolbar stacks vertically */
@@ -136,8 +131,8 @@
 .template-x-carousel-toolbar .search-bar-wrapper .icon.icon-search {
   position: absolute;
   z-index: 1;
-  height: var(--spacing-300);
-  width: var(--spacing-300);
+  height: 16px;
+  width: 16px;
   cursor: pointer;
   top: 50%;
   transform: translateY(-50%);
@@ -147,8 +142,8 @@
 .template-x-carousel-toolbar .search-bar-wrapper .icon.icon-search-clear {
   position: absolute;
   z-index: 1;
-  height: var(--spacing-300);
-  width: var(--spacing-300);
+  height: 16px;
+  width: 16px;
   cursor: pointer;
   top: 50%;
   transform: translateY(-50%);
@@ -576,7 +571,7 @@
   font-weight: 500;
   font-size: var(--body-font-size-xs);
   line-height:var(--body-font-size-m);
-  background: var(--color-black)B3;
+  background: rgba(0, 0, 0, 0.7);
   color: var(--color-white);
 }
 
