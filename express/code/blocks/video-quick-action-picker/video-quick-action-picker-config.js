@@ -33,19 +33,47 @@ async function resolveKey(key, fallback) {
 }
 
 export async function getLocalizedStrings() {
+  const keys = [
+    ['edit-video', 'Edit video'],
+    ['ios-app-only', 'iOS App only'],
+    ['convert-video-to-gif', 'Convert video to GIF'],
+    ['crop-video', 'Crop video'],
+    ['trim-video', 'Trim video'],
+    ['resize-video', 'Resize video'],
+    ['convert-video-to-mp4', 'Convert video to MP4'],
+    ['caption-video', 'Caption video'],
+    ['opening-preview', 'Opening preview'],
+    ['uploaded-video', 'Uploaded video'],
+    ['start-from-your-video', 'Start from your video'],
+    ['close-dialog', 'Close dialog'],
+  ];
+  const [
+    editVideo,
+    appOnly,
+    convertVideoToGif,
+    cropVideo,
+    trimVideo,
+    resizeVideo,
+    convertVideoToMp4,
+    captionVideo,
+    openingPreview,
+    uploadedVideo,
+    startFromYourVideo,
+    closeDialog,
+  ] = await Promise.all(keys.map(([key, fb]) => resolveKey(key, fb)));
   return {
-    editVideo: await resolveKey('edit-video', 'Edit video'),
-    appOnly: await resolveKey('ios-app-only', 'iOS App only'),
-    convertVideoToGif: await resolveKey('convert-video-to-gif', 'Convert video to GIF'),
-    cropVideo: await resolveKey('crop-video', 'Crop video'),
-    trimVideo: await resolveKey('trim-video', 'Trim video'),
-    resizeVideo: await resolveKey('resize-video', 'Resize video'),
-    convertVideoToMp4: await resolveKey('convert-video-to-mp4', 'Convert video to MP4'),
-    captionVideo: await resolveKey('caption-video', 'Caption video'),
-    openingPreview: await resolveKey('opening-preview', 'Opening preview'),
-    uploadedVideo: await resolveKey('uploaded-video', 'Uploaded video'),
-    startFromYourVideo: await resolveKey('start-from-your-video', 'Start from your video'),
-    closeDialog: await resolveKey('close-dialog', 'Close dialog'),
+    editVideo,
+    appOnly,
+    convertVideoToGif,
+    cropVideo,
+    trimVideo,
+    resizeVideo,
+    convertVideoToMp4,
+    captionVideo,
+    openingPreview,
+    uploadedVideo,
+    startFromYourVideo,
+    closeDialog,
   };
 }
 
