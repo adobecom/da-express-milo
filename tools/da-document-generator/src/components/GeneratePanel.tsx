@@ -7,7 +7,7 @@ import {
   daPathToPreviewUrl,
   daPathToLiveUrl,
 } from '../api/daApi';
-import { applyTemplate, rowToOutputPath, runQa } from '../lib/generate';
+import { applyTemplate, rowToOutputPath, runGenerationQa, runPreviewQa } from '../lib/generate';
 import type { CsvRow, TemplateState, RowResult, QaResult } from '../types';
 
 interface Props {
@@ -34,13 +34,13 @@ export default function GeneratePanel({ rows, template }: Props) {
 
   const counts = {
     generated: results.filter((r) =>
-      ['generated', 'qa-fail', 'previewing', 'previewed', 'publishing', 'published'].includes(r.stage),
+      ['generated', 'previewing', 'previewed', 'qa-fail', 'publishing', 'published'].includes(r.stage),
     ).length,
-    previewable: results.filter((r) => r.stage === 'generated' || r.stage === 'qa-fail').length,
+    previewable: results.filter((r) => r.stage === 'generated').length,
     previewed: results.filter((r) =>
-      ['previewed', 'publishing', 'published'].includes(r.stage),
+      ['previewed', 'qa-fail', 'publishing', 'published'].includes(r.stage),
     ).length,
-    publishable: results.filter((r) => r.stage === 'previewed' && r.qa?.pass).length,
+    publishable: results.filter((r) => r.stage === 'previewed').length,
     done: results.filter((r) => r.stage === 'generated').length,
     error: results.filter((r) => r.stage === 'error').length,
     published: results.filter((r) => r.stage === 'published').length,
@@ -75,12 +75,12 @@ export default function GeneratePanel({ rows, template }: Props) {
       );
       try {
         const html = applyTemplate(template.html!, row);
-        const qa = runQa(html, row);
+        const qa = runGenerationQa(html);
         const res = await postDoc(path, html);
         setResults((prev) =>
           prev.map((r) =>
             r.id === row['_id']
-              ? { ...r, stage: qa.pass ? 'generated' : 'qa-fail', qa, editUrl: res.source?.editUrl }
+              ? { ...r, stage: 'generated', qa, editUrl: res.source?.editUrl }
               : r,
           ),
         );
@@ -106,16 +106,34 @@ export default function GeneratePanel({ rows, template }: Props) {
   async function handlePreview() {
     const token = getToken();
     if (!token) return;
-    const targets = results.filter((r) => r.stage === 'generated' || r.stage === 'qa-fail');
+    const targets = results.filter((r) => r.stage === 'generated');
     setBulkOp('previewing');
     await runBatch(targets, async (r) => {
       setResults((prev) => prev.map((x) => (x.id === r.id ? { ...x, stage: 'previewing' } : x)));
       try {
         await triggerPreview(r.path, token);
+        const previewUrl = daPathToPreviewUrl(r.path);
+        let qa: QaResult;
+        try {
+          const resp = await fetch(previewUrl);
+          const html = await resp.text();
+          qa = runPreviewQa(html);
+        } catch {
+          qa = {
+            pass: false,
+            score: 0,
+            issues: [{
+              id: 'page-fetch-failed',
+              label: 'Page not accessible',
+              description: `Could not fetch ${previewUrl} for QA.`,
+              suggestion: 'Check that the preview completed successfully and the page is publicly accessible.',
+            }],
+          };
+        }
         setResults((prev) =>
           prev.map((x) =>
             x.id === r.id
-              ? { ...x, stage: 'previewed', previewUrl: daPathToPreviewUrl(r.path) }
+              ? { ...x, stage: qa.pass ? 'previewed' : 'qa-fail', previewUrl, qa }
               : x,
           ),
         );
@@ -155,8 +173,8 @@ export default function GeneratePanel({ rows, template }: Props) {
     setBulkOp('idle');
   }
 
-  const showPreviewBtn = !running && results.some((r) => r.stage === 'generated' || r.stage === 'qa-fail');
-  const showPublishBtn = !running && counts.previewed > 0;
+  const showPreviewBtn = !running && counts.previewable > 0;
+  const showPublishBtn = !running && counts.publishable > 0;
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4">
@@ -214,10 +232,9 @@ export default function GeneratePanel({ rows, template }: Props) {
           <button
             type="button"
             onClick={handlePublish}
-            disabled={counts.publishable === 0}
-            className="px-5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="px-5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 transition-colors"
           >
-            Publish {counts.publishable} passing document{counts.publishable !== 1 ? 's' : ''}
+            Publish {counts.publishable} document{counts.publishable !== 1 ? 's' : ''}
           </button>
         )}
 
