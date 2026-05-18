@@ -103,15 +103,6 @@ export class ColorWheelExpress extends ColorWheel {
     this._resizeObserver.observe(this.container);
 
     this.addEventListener('keydown', (e) => {
-      if (e.key === 'Tab' && !e.shiftKey && !this.shadowRoot?.activeElement) {
-        const firstMarker = this.shadowRoot?.querySelector('.wheel-marker-overlay[data-index="0"]');
-        if (firstMarker) {
-          e.preventDefault();
-          this._kbFocusIndex = 0;
-          firstMarker.focus({ preventScroll: true });
-        }
-        return;
-      }
       if (e.key === 'Enter' && this._kbFocusIndex < 0) {
         e.preventDefault();
         const firstMarker = this.shadowRoot?.querySelector('.wheel-marker-overlay[data-index="0"]');
@@ -253,7 +244,6 @@ export class ColorWheelExpress extends ColorWheel {
       this._handleMarkerKeydown(e, Number(marker.dataset.index));
     });
     marker.addEventListener('focus', () => {
-      this.classList.add('wheel-marker-focus-entered');
       this._kbFocusIndex = Number(marker.dataset.index);
       marker.classList.add('wheel-marker-overlay--kb-focused');
     });
