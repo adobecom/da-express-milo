@@ -32,12 +32,10 @@ export interface QaIssue {
   id: string;
   label: string;
   description: string;
-  suggestion: string;
 }
 
 export interface QaResult {
   pass: boolean;
-  score: number;
   issues: QaIssue[];
 }
 

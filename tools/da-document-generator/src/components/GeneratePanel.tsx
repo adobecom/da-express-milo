@@ -293,7 +293,6 @@ export default function GeneratePanel({ rows, template }: Props) {
                             <div key={issue.id} className="flex flex-col gap-0.5">
                               <span className="font-semibold text-amber-900">{issue.label}</span>
                               <span className="text-gray-600">{issue.description}</span>
-                              <span className="text-gray-400 italic">Fix: {issue.suggestion}</span>
                             </div>
                           ))}
                         </div>
