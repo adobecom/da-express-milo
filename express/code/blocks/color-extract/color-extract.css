@@ -966,28 +966,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
 /* ==================== Responsive ==================== */
 
-@media (max-width: 599px) {
-  .color-extract .color-extract-inner {
-    padding-bottom: 32px;
-  }
-
-  .color-extract .image-upload-dropzone-container {
-    height: auto;
-  }
-
-  .color-extract .image-upload-dropzone {
-    flex-direction: row;
-    justify-content: flex-start;
-    padding: 12px 16px;
-    gap: 8px;
-  }
-
-  .color-extract .image-upload-dropzone-text {
-    display: flex;
-    text-align: left;
-  }
-}
-
 @media (min-width: 600px) {
   .section:has(.color-extract-marquee-wrapper) {
     align-items: center;
