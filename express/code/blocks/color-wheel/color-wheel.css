@@ -411,11 +411,20 @@ color-wheel-express {
 
 @media (max-width: 600px) {
   .color-wheel .image-upload-dropzone-container {
-    height: 211px;
+    height: auto;
+    aspect-ratio: unset;
+    padding: var(--spacing-300) var(--spacing-300);
+  }
+
+  .color-wheel .image-upload-dropzone {
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: var(--spacing-200);
   }
 
   .color-wheel .image-upload-dropzone-text {
     display: unset;
+    text-align: left;
   }
 }
 
