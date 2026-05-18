@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+/* eslint-disable no-console */
 
 import fs from 'fs';
 import path from 'path';
@@ -205,8 +206,7 @@ function checkFile(filePath, colorVars, spacingVars) {
     const matchIndex = match.index;
 
     // Extract spacing values (numbers with units)
-    const spacingMatches = fullValue.match(/-?\d+px|-?\d+rem|-?\d+em|-?\d+%|-?\d+vw|-?\d+vh/g)
-      ?.filter((v) => parseFloat(v) !== 0);
+    const spacingMatches = fullValue.match(/\d+px|\d+rem|\d+em|\d+%|\d+vw|\d+vh/g);
 
     if (spacingMatches) {
       const replacements = [];
@@ -269,11 +269,9 @@ function applyFixes(filePath, issues) {
 
       issue.replacements.forEach((replacement) => {
         console.log(`  Looking for "${replacement.from}" -> "${replacement.to}"`);
-        const safeFrom = replacement.from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        const exactMatch = new RegExp(`(?<![\\d-])${safeFrom}(?!\\w)`, 'g');
-        if (exactMatch.test(newLine)) {
+        if (newLine.includes(replacement.from)) {
           console.log('    Found! Replacing...');
-          newLine = newLine.replace(exactMatch, replacement.to);
+          newLine = newLine.replace(replacement.from, replacement.to);
           lineModified = true;
         } else {
           console.log('    Not found in line');
