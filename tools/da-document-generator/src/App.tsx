@@ -42,7 +42,7 @@ export default function App() {
           </Panel>
 
           <Panel step={2} title="Product Data" complete={inputsReady}>
-            <CsvUpload rows={rows} onChange={setRows} />
+            <CsvUpload rows={rows} onChange={setRows} placeholders={template.placeholders} />
           </Panel>
         </div>
 

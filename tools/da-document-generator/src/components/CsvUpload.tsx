@@ -7,6 +7,7 @@ import { fetchProductFromTemplate } from '../api/zazzleApi';
 interface Props {
   rows: CsvRow[];
   onChange: (rows: CsvRow[]) => void;
+  placeholders?: string[];
 }
 
 const PLACEHOLDER_COLUMNS = ['template_id', 'url_slug', 'title'];
@@ -15,8 +16,7 @@ const PLACEHOLDER_ROW: CsvRow = { _id: 'placeholder', template_id: '-', url_slug
 function computeSummary(rows: CsvRow[]): InputSummary {
   const total = rows.length;
   const withId = rows.filter((r) => r['template_id']?.trim() && r['url_slug']?.trim());
-  const valid = withId.length;
-  const missing = total - valid;
+  const missing = total - withId.length;
 
   const counts: Record<string, number> = {};
   for (const r of withId) {
@@ -25,7 +25,23 @@ function computeSummary(rows: CsvRow[]): InputSummary {
   }
   const duplicates = withId.filter((r) => counts[r['template_id'].trim()] > 1).length;
 
-  return { total, valid, duplicates, missing };
+  return { total, duplicates, missing };
+}
+
+interface SchemaMatch {
+  missingFromCsv: string[];
+  extraInCsv: string[];
+  matchedCount: number;
+}
+
+function computeSchemaMatch(csvColumns: string[], templatePlaceholders: string[]): SchemaMatch {
+  const csvSet = new Set(csvColumns.filter((c) => c !== '_id'));
+  const placeholderSet = new Set(templatePlaceholders);
+  return {
+    missingFromCsv: templatePlaceholders.filter((p) => !csvSet.has(p)),
+    extraInCsv: csvColumns.filter((c) => c !== '_id' && !placeholderSet.has(c)),
+    matchedCount: templatePlaceholders.filter((p) => csvSet.has(p)).length,
+  };
 }
 
 function toSnake(s: string) {
@@ -44,7 +60,7 @@ function buildZazzleMap(): Record<string, string> {
 
 const MAX_VISIBLE_ROWS = 200;
 
-export default function CsvUpload({ rows, onChange }: Props) {
+export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) {
   const [isDragging, setIsDragging] = useState(false);
   const [hydrating, setHydrating] = useState(false);
   const [hydrateMsg, setHydrateMsg] = useState<string | null>(null);
@@ -194,11 +210,6 @@ export default function CsvUpload({ rows, onChange }: Props) {
       {hasData && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <Stat label="Total" value={summary.total} />
-          <Stat
-            label="Valid"
-            value={summary.valid}
-            color={summary.valid === summary.total ? 'green' : 'yellow'}
-          />
           {summary.duplicates > 0 && (
             <Stat label="Duplicates" value={summary.duplicates} color="yellow" />
           )}
@@ -207,6 +218,49 @@ export default function CsvUpload({ rows, onChange }: Props) {
           )}
         </div>
       )}
+
+      {hasData && placeholders.length > 0 && (() => {
+        const schemaMatch = computeSchemaMatch(tableColumns, placeholders);
+        const hasMismatch = schemaMatch.missingFromCsv.length > 0 || schemaMatch.extraInCsv.length > 0;
+        if (!hasMismatch) {
+          return (
+            <p className="text-xs font-medium text-green-600">
+              ✓ All {placeholders.length} template placeholder{placeholders.length !== 1 ? 's' : ''} matched
+            </p>
+          );
+        }
+        return (
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex flex-col gap-2.5">
+            <p className="text-xs font-semibold text-amber-800">Column / template mismatch</p>
+            {schemaMatch.missingFromCsv.length > 0 && (
+              <div className="flex flex-col gap-1">
+                <p className="text-xs text-amber-700">
+                  Missing from CSV — template expects {schemaMatch.missingFromCsv.length} more:
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {schemaMatch.missingFromCsv.map((p) => (
+                    <code key={p} className="text-xs bg-amber-100 border border-amber-300 text-amber-900 px-1.5 py-0.5 rounded">
+                      {p}
+                    </code>
+                  ))}
+                </div>
+              </div>
+            )}
+            {schemaMatch.extraInCsv.length > 0 && (
+              <div className="flex flex-col gap-1">
+                <p className="text-xs text-amber-700">Extra in CSV — not used by template:</p>
+                <div className="flex flex-wrap gap-1">
+                  {schemaMatch.extraInCsv.map((c) => (
+                    <code key={c} className="text-xs bg-amber-100 border border-amber-300 text-amber-900 px-1.5 py-0.5 rounded">
+                      {c}
+                    </code>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {hasData && (
         <div className="flex items-center gap-3 flex-wrap">

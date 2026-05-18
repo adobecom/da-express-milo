@@ -3,7 +3,6 @@ export type CsvRow = Record<string, string>;
 
 export interface InputSummary {
   total: number;
-  valid: number;
   duplicates: number;
   missing: number;
 }
