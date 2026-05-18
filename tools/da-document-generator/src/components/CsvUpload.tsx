@@ -48,6 +48,9 @@ export default function CsvUpload({ rows, onChange }: Props) {
   const [isDragging, setIsDragging] = useState(false);
   const [hydrating, setHydrating] = useState(false);
   const [hydrateMsg, setHydrateMsg] = useState<string | null>(null);
+  const [validating, setValidating] = useState(false);
+  const [validateMsg, setValidateMsg] = useState<string | null>(null);
+  const [validationStatus, setValidationStatus] = useState<Record<string, 'valid' | 'invalid'>>({});
   const [columns, setColumns] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -86,6 +89,27 @@ export default function CsvUpload({ rows, onChange }: Props) {
     setHydrating(false);
   }
 
+  async function handleValidate() {
+    setValidating(true);
+    setValidateMsg(null);
+    const results: Record<string, 'valid' | 'invalid'> = {};
+
+    await Promise.all(
+      rows.map(async (row) => {
+        const id = row.template_id?.trim();
+        if (!id) { results[row._id] = 'invalid'; return; }
+        const product = await fetchProductFromTemplate(id);
+        results[row._id] = product ? 'valid' : 'invalid';
+      }),
+    );
+
+    setValidationStatus(results);
+    const validCount = Object.values(results).filter((v) => v === 'valid').length;
+    const invalidCount = Object.values(results).filter((v) => v === 'invalid').length;
+    setValidateMsg(`${validCount} valid, ${invalidCount} invalid`);
+    setValidating(false);
+  }
+
   function parseCsv(file: File) {
     Papa.parse<Record<string, string>>(file, {
       header: true,
@@ -119,6 +143,9 @@ export default function CsvUpload({ rows, onChange }: Props) {
   }
 
   function handleFile(file: File) {
+    setValidationStatus({});
+    setValidateMsg(null);
+    setHydrateMsg(null);
     if (file.name.endsWith('.xlsx')) {
       parseXlsx(file);
     } else {
@@ -150,6 +177,7 @@ export default function CsvUpload({ rows, onChange }: Props) {
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (file) handleFile(file);
+            e.target.value = '';
           }}
         />
         <p className="text-sm text-gray-500">
@@ -180,22 +208,30 @@ export default function CsvUpload({ rows, onChange }: Props) {
         </div>
       )}
 
-      {hasData && summary.missing > 0 && (
-        <div className="flex items-center gap-3">
+      {hasData && (
+        <div className="flex items-center gap-3 flex-wrap">
           <button
-            onClick={handleHydrate}
-            disabled={hydrating}
-            className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            onClick={handleValidate}
+            disabled={validating || hydrating}
+            className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {hydrating ? 'Hydrating…' : 'Hydrate from Zazzle'}
+            {validating ? 'Validating…' : 'Validate Template IDs'}
           </button>
-          {hydrateMsg && (
-            <span className="text-xs text-gray-500">{hydrateMsg}</span>
+          {summary.missing > 0 && (
+            <button
+              onClick={handleHydrate}
+              disabled={hydrating || validating}
+              className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {hydrating ? 'Hydrating…' : 'Hydrate from Zazzle'}
+            </button>
           )}
+          {validateMsg && <span className="text-xs text-gray-500">{validateMsg}</span>}
+          {hydrateMsg && <span className="text-xs text-gray-500">{hydrateMsg}</span>}
         </div>
       )}
 
-      <DataTable columns={tableColumns} rows={visibleRows} placeholder={!hasData} />
+      <DataTable columns={tableColumns} rows={visibleRows} placeholder={!hasData} validationStatus={validationStatus} />
       {hasData && rows.length > MAX_VISIBLE_ROWS && (
         <p className="text-xs text-gray-400 text-center">
           Showing {MAX_VISIBLE_ROWS} of {rows.length} rows
@@ -209,10 +245,12 @@ function DataTable({
   columns,
   rows,
   placeholder,
+  validationStatus = {},
 }: {
   columns: string[];
   rows: CsvRow[];
   placeholder: boolean;
+  validationStatus?: Record<string, 'valid' | 'invalid'>;
 }) {
   return (
     <div className={`overflow-auto rounded-xl border border-gray-200 max-h-[420px] ${placeholder ? 'opacity-40' : ''}`}>
@@ -228,24 +266,39 @@ function DataTable({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => (
-            <tr key={row._id} className="border-b border-gray-100 last:border-0">
-              <td className="px-3 py-2 text-gray-400 whitespace-nowrap w-[40px]">
-                {placeholder ? '—' : parseInt(row._id) + 1}
-              </td>
-              {columns.map((col) => {
-                const isEmpty = !placeholder && !row[col]?.trim();
-                return (
-                  <td
-                    key={col}
-                    className={`px-3 py-2 whitespace-nowrap max-w-[200px] truncate ${isEmpty ? 'bg-red-50 text-red-400 italic' : 'text-gray-700'}`}
-                  >
-                    {isEmpty ? '—' : (row[col] ?? '')}
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
+          {rows.map((row) => {
+            const status = validationStatus[row._id];
+            return (
+              <tr
+                key={row._id}
+                className={`border-b border-gray-100 last:border-0 border-l-2 ${
+                  status === 'valid' ? 'border-l-green-400' :
+                  status === 'invalid' ? 'border-l-red-400' :
+                  'border-l-transparent'
+                }`}
+              >
+                <td className="px-3 py-2 text-gray-400 whitespace-nowrap w-[40px]">
+                  {placeholder ? '—' : parseInt(row._id) + 1}
+                </td>
+                {columns.map((col) => {
+                  const isEmpty = !placeholder && !row[col]?.trim();
+                  return (
+                    <td
+                      key={col}
+                      className={`px-3 py-2 whitespace-nowrap max-w-[200px] truncate ${isEmpty ? 'bg-red-50 text-red-400 italic' : 'text-gray-700'}`}
+                    >
+                      {col === 'template_id' && status && (
+                        <span className={`mr-1 font-bold ${status === 'valid' ? 'text-green-500' : 'text-red-500'}`}>
+                          {status === 'valid' ? '✓' : '✗'}
+                        </span>
+                      )}
+                      {isEmpty ? '—' : (row[col] ?? '')}
+                    </td>
+                  );
+                })}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>

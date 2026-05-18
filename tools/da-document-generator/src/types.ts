@@ -29,10 +29,17 @@ export type RowStage =
   | 'published'
   | 'error';
 
+export interface QaIssue {
+  id: string;
+  label: string;
+  description: string;
+  suggestion: string;
+}
+
 export interface QaResult {
   pass: boolean;
   score: number;
-  issues: string[];
+  issues: QaIssue[];
 }
 
 export interface RowResult {

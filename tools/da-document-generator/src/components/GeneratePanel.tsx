@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, Fragment } from 'react';
 import {
   postDoc,
   triggerPreview,
@@ -24,6 +24,11 @@ export default function GeneratePanel({ rows, template }: Props) {
   const [outputDir, setOutputDir] = useState(DEFAULT_OUTPUT_DIR);
   const [results, setResults] = useState<RowResult[]>([]);
   const [bulkOp, setBulkOp] = useState<BulkOp>('idle');
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+
+  function toggleRowDetail(id: string) {
+    setExpandedRowId((prev) => (prev === id ? null : id));
+  }
 
   const running = bulkOp !== 'idle';
 
@@ -238,7 +243,7 @@ export default function GeneratePanel({ rows, template }: Props) {
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
               <tr>
                 <th className="px-3 py-2 text-left font-medium text-gray-600">Path</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600 w-24">QA</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600 w-28">Issues</th>
                 <th className="px-3 py-2 text-left font-medium text-gray-600 w-28">Generate</th>
                 <th className="px-3 py-2 text-left font-medium text-gray-600 w-32">Preview</th>
                 <th className="px-3 py-2 text-left font-medium text-gray-600 w-32">Publish</th>
@@ -246,27 +251,48 @@ export default function GeneratePanel({ rows, template }: Props) {
             </thead>
             <tbody>
               {results.map((r) => (
-                <tr key={r.id} className="border-b border-gray-100 last:border-0">
-                  <td className="px-3 py-2 font-mono text-gray-600 truncate max-w-[240px]">
-                    {r.editUrl ? (
-                      <a href={r.editUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                        {r.path}
-                      </a>
-                    ) : r.path}
-                  </td>
-                  <td className="px-3 py-2">
-                    <QaPill qa={r.qa} />
-                  </td>
-                  <td className="px-3 py-2">
-                    <GeneratePill result={r} />
-                  </td>
-                  <td className="px-3 py-2">
-                    <PreviewPill result={r} />
-                  </td>
-                  <td className="px-3 py-2">
-                    <PublishPill result={r} />
-                  </td>
-                </tr>
+                <Fragment key={r.id}>
+                  <tr className="border-b border-gray-100">
+                    <td className="px-3 py-2 font-mono text-gray-600 truncate max-w-[240px]">
+                      {r.editUrl ? (
+                        <a href={r.editUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                          {r.path}
+                        </a>
+                      ) : r.path}
+                    </td>
+                    <td className="px-3 py-2">
+                      <QaIssueBadge
+                        qa={r.qa}
+                        expanded={expandedRowId === r.id}
+                        onToggle={() => toggleRowDetail(r.id)}
+                      />
+                    </td>
+                    <td className="px-3 py-2">
+                      <GeneratePill result={r} />
+                    </td>
+                    <td className="px-3 py-2">
+                      <PreviewPill result={r} />
+                    </td>
+                    <td className="px-3 py-2">
+                      <PublishPill result={r} />
+                    </td>
+                  </tr>
+                  {expandedRowId === r.id && r.qa && r.qa.issues.length > 0 && (
+                    <tr className="border-b border-gray-100 bg-amber-50">
+                      <td colSpan={5} className="px-4 py-3">
+                        <div className="flex flex-col gap-3">
+                          {r.qa.issues.map((issue) => (
+                            <div key={issue.id} className="flex flex-col gap-0.5">
+                              <span className="font-semibold text-amber-900">{issue.label}</span>
+                              <span className="text-gray-600">{issue.description}</span>
+                              <span className="text-gray-400 italic">Fix: {issue.suggestion}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
               ))}
             </tbody>
           </table>
@@ -276,18 +302,26 @@ export default function GeneratePanel({ rows, template }: Props) {
   );
 }
 
-function QaPill({ qa }: { qa?: QaResult }) {
+function QaIssueBadge({
+  qa,
+  expanded,
+  onToggle,
+}: {
+  qa?: QaResult;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
   if (!qa) return <span className="text-gray-300">—</span>;
-  if (qa.pass) {
-    return <span className="text-green-600 font-medium">Pass {qa.score}</span>;
-  }
+  if (qa.pass) return <span className="text-green-600 font-medium">✓ Pass</span>;
   return (
-    <span
-      className="text-yellow-700 font-medium cursor-help"
-      title={qa.issues.join('\n')}
+    <button
+      type="button"
+      onClick={onToggle}
+      className="text-amber-700 font-medium hover:text-amber-900 flex items-center gap-1"
     >
-      Fail {qa.score}
-    </span>
+      {qa.issues.length} issue{qa.issues.length !== 1 ? 's' : ''}
+      <span className="text-xs leading-none">{expanded ? '▲' : '▼'}</span>
+    </button>
   );
 }
 
