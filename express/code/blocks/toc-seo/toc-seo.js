@@ -562,13 +562,26 @@ function updateDesktopPosition(tocContainer) {
  */
 function setupDesktop(tocContainer) {
   if (isDesktop()) {
-    const show = () => {
-      updateDesktopPosition(tocContainer);
+    const tryShow = () => {
+      if (document.querySelector(CONFIG.selectors.longFormSection)) {
+        requestAnimationFrame(() => updateDesktopPosition(tocContainer));
+        return;
+      }
+      // section-metadata may not have decorated yet — watch for the long-form class
+      const root = document.querySelector('main') || document.body;
+      const observer = new MutationObserver(() => {
+        if (document.querySelector(CONFIG.selectors.longFormSection)) {
+          observer.disconnect();
+          requestAnimationFrame(() => updateDesktopPosition(tocContainer));
+        }
+      });
+      observer.observe(root, { subtree: true, attributeFilter: ['class'] });
     };
+
     if (document.readyState === 'complete') {
-      requestAnimationFrame(show);
+      tryShow();
     } else {
-      window.addEventListener('load', () => requestAnimationFrame(show), { once: true });
+      window.addEventListener('load', tryShow, { once: true });
     }
   }
 
