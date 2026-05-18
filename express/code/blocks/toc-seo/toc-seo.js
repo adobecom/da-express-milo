@@ -548,6 +548,11 @@ function updateDesktopPosition(tocContainer) {
 
   tocContainer.style.setProperty('--toc-top-position', `${topPosition}px`);
   tocContainer.classList.add('toc-desktop');
+
+  const contentEl = tocContainer.querySelector('.toc-content');
+  if (contentEl) {
+    tocContainer.classList.toggle('toc-scrollable', contentEl.scrollHeight > contentEl.clientHeight);
+  }
 }
 
 /**

@@ -292,12 +292,11 @@ main .toc-content .toc-link:focus:not(:focus-visible) {
   
   .toc-title {
     position: relative;
-    padding: var(--spacing-300) var(--spacing-300) var(--spacing-200) var(--spacing-300);
+    padding: var(--spacing-300) var(--spacing-300) 0 var(--spacing-300);
     cursor: default;
   }
 
   .toc-title::after {
-    content: '';
     position: absolute;
     bottom: -40px;
     left: 0;
@@ -306,6 +305,10 @@ main .toc-content .toc-link:focus:not(:focus-visible) {
     background: linear-gradient(to bottom, var(--color-gray-100), transparent);
     pointer-events: none;
     z-index: 1;
+  }
+
+  .toc-scrollable .toc-title::after {
+    content: '';
   }
 
   main .toc-content .toc-link {
@@ -320,7 +323,6 @@ main .toc-content .toc-link:focus:not(:focus-visible) {
   }
 
   .toc-social-icons::before {
-    content: '';
     position: absolute;
     top: -40px;
     left: 0;
@@ -329,6 +331,10 @@ main .toc-content .toc-link:focus:not(:focus-visible) {
     background: linear-gradient(to top, var(--color-gray-100), transparent);
     pointer-events: none;
     z-index: 1;
+  }
+
+  .toc-scrollable .toc-social-icons::before {
+    content: '';
   }
 }
 
