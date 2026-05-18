@@ -110,22 +110,23 @@ export default function createImageExtractComponent(options = {}) {
   stage.append(leftCol);
   edit.append(stage);
 
-  async function runExtraction(canvas, mood) {
+  async function runExtraction(canvas, mood, count) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const swatchCount = count || controller.getState().swatches?.length || maxColors;
     try {
       const { extractColorsFromImage } = await import('../color-extract/helpers/extractWorker.js');
       const result = await extractColorsFromImage(
         imageData,
         canvas.width,
         canvas.height,
-        maxColors,
+        swatchCount,
         mood,
       );
       controller.replaceSwatchesFromHexes(result.colors, { baseIndex: 0, harmonyRule: 'CUSTOM' });
       if (markers) markers.setPositions(result.colors, result.points);
     } catch {
-      const fallback = samplePalette(ctx, canvas.width, canvas.height, maxColors);
+      const fallback = samplePalette(ctx, canvas.width, canvas.height, swatchCount);
       controller.replaceSwatchesFromHexes(fallback, { baseIndex: 0, harmonyRule: 'CUSTOM' });
       if (markers) {
         const pts = fallback.map((_, i) => ({ x: (i + 1) / (fallback.length + 1), y: 0.5 }));
@@ -251,7 +252,7 @@ export default function createImageExtractComponent(options = {}) {
         moodElement: null,
         onAddColor: addColorToImage,
         onReset: () => {
-          if (currentCanvas) runExtraction(currentCanvas, currentMood);
+          if (currentCanvas) runExtraction(currentCanvas, currentMood, maxColors);
         },
         onReplace: () => {
           dropzone.input.value = '';
