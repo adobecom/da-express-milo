@@ -36,6 +36,41 @@ function attachTooltip(actionBtn, text, placement = 'top') {
     placement,
   }, text);
   actionBtn.appendChild(tooltip);
+
+  // iOS Safari: sp-tooltip[self-managed] relies on focus/blur which iOS
+  // clears immediately after a tap on non-input elements, causing the
+  // tooltip to flash and vanish. Use touchstart to manually control
+  // open state and keep it visible until the user taps elsewhere.
+  if ('ontouchstart' in window) {
+    let outsideCloseHandler = null;
+
+    const removeOutsideHandler = () => {
+      if (outsideCloseHandler) {
+        document.removeEventListener('touchstart', outsideCloseHandler, true);
+        outsideCloseHandler = null;
+      }
+    };
+
+    actionBtn.addEventListener('touchstart', () => {
+      if (tooltip.hasAttribute('open')) {
+        tooltip.removeAttribute('open');
+        removeOutsideHandler();
+      } else {
+        tooltip.setAttribute('open', '');
+        // Delay registering the outside-close listener so it doesn't
+        // react to the same touchstart that just opened the tooltip.
+        setTimeout(() => {
+          outsideCloseHandler = (ev) => {
+            if (!actionBtn.contains(ev.target)) {
+              tooltip.removeAttribute('open');
+              removeOutsideHandler();
+            }
+          };
+          document.addEventListener('touchstart', outsideCloseHandler, { capture: true });
+        }, 0);
+      }
+    }, { passive: true });
+  }
 }
 
 function createTooltipLabelButton(label, tooltip, className = 'cc-summary-label') {
