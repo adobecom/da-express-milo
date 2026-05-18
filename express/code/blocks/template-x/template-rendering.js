@@ -272,8 +272,7 @@ function normalizeEncodedAmpersands(value) {
   } catch (e) {
     // Keep original value when URI decoding fails.
   }
-  return normalized.replace(/&amp(?:%3B|;)/gi, '&');
-    .replace(/&amp;/gi, '&');
+  return normalized.replace(/&amp(?:%3B|;)/gi, '&').replace(/&amp;/gi, '&');
 }
 
 function sanitizeExternalCtaUrl(url) {
