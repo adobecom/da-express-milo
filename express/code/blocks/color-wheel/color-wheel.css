@@ -253,10 +253,6 @@ body {
   padding-block: var(--spacing-300) var(--spacing-100);
 }
 
-.color-wheel .color-extract-drag-overlay {
-  position: fixed;
-}
-
 /* Color wheel panel */
 
 color-wheel-express {

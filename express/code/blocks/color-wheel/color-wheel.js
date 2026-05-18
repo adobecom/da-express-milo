@@ -13,6 +13,7 @@ import loadColorExtractPlaceholders from '../../scripts/color-shared/i18n/loadCo
 const CSS_DEPS = [
   '/express/code/scripts/color-shared/components/strips/color-strip.css',
   '/express/code/scripts/color-shared/components/image-upload/image-upload.css',
+  '/express/code/scripts/color-shared/components/image-extract/buildExtractOverlays.css',
   '/express/code/blocks/color-wheel/image-extract.css',
 ];
 CSS_DEPS.forEach((href) => {
@@ -253,6 +254,7 @@ let pendingSetColorHex = null;
 let swatchRailController = null;
 let imagePanelDestroy = null;
 let imagePanelGetSrc = null;
+let imagePanelHandleFile = null;
 let primaryColorAdapter = null;
 let sidebarNaturalWidth = 0;
 let sidebarTransitionCleanup = null;
@@ -556,7 +558,14 @@ function buildPrimaryColorContent(controller, strings = {}) {
   return wrapper;
 }
 
-function buildImageContent(controller, suggestionsRow, strings, initialSrc = null) {
+function buildImageContent(
+  controller,
+  suggestionsRow,
+  strings,
+  initialSrc = null,
+  onImageProcessed = null,
+  viewportEl = null,
+) {
   const image = createTag('div', { class: 'image-content' });
   const panel = createImageExtractComponent({
     controller,
@@ -564,9 +573,12 @@ function buildImageContent(controller, suggestionsRow, strings, initialSrc = nul
     suggestionsRowEl: suggestionsRow,
     strings,
     initialSrc,
+    onImageProcessed,
+    viewportEl,
   });
   imagePanelDestroy = panel.destroy;
   imagePanelGetSrc = panel.getCurrentSrc;
+  imagePanelHandleFile = panel.handleFile;
   image.appendChild(panel.element);
   return image;
 }
@@ -587,7 +599,7 @@ async function buildColorWheelContent(controller, strings) {
 }
 
 async function buildTabs(controller, suggestionsRow, {
-  onSelectionChange, strings = {}, initialImageSrc = null,
+  onSelectionChange, strings = {}, initialImageSrc = null, viewportEl = null,
 } = {}) {
   // Create the tabs shell and the color-wheel panel content in parallel
   const [tabsInstance, cwContent] = await Promise.all([
@@ -606,7 +618,8 @@ async function buildTabs(controller, suggestionsRow, {
   ]);
 
   tabsInstance.addPanel('color-wheel', cwContent);
-  tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings, initialImageSrc));
+  const switchToImageTab = () => tabsInstance.setSelected('image');
+  tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings, initialImageSrc, switchToImageTab, viewportEl));
   tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller, strings));
 
   return tabsInstance;
@@ -806,6 +819,7 @@ function cleanup() {
   imagePanelDestroy?.();
   imagePanelDestroy = null;
   imagePanelGetSrc = null;
+  imagePanelHandleFile = null;
   primaryColorAdapter?.destroy?.();
   primaryColorAdapter = null;
   stripRenderer?.destroy?.();
@@ -847,6 +861,19 @@ export default async function decorate(block) {
     // This prevents a stale concurrent init from appending duplicate tabs/layout to the DOM.
     currentInitToken += 1;
     const myToken = currentInitToken;
+
+    // Capture any file dropped before createImageExtractComponent's window handlers are ready,
+    // so we can replay it once buildTabs resolves.
+    // NOTE: site-wide — any file drop during init is captured; finally block removes these.
+    let pendingDropFile = null;
+    const earlyPreventFileDrop = (e) => {
+      e.preventDefault();
+      if (e.type === 'drop' && e.dataTransfer?.files?.[0]) {
+        [pendingDropFile] = e.dataTransfer.files;
+      }
+    };
+    window.addEventListener('dragover', earlyPreventFileDrop);
+    window.addEventListener('drop', earlyPreventFileDrop);
 
     try {
       const [strings, { getResolvedPalette, getResolvedPaletteName }] = await Promise.all([
@@ -985,8 +1012,16 @@ export default async function decorate(block) {
           },
           strings,
           initialImageSrc: savedImageSrc,
+          viewportEl: block,
         }),
       ]);
+
+      if (pendingDropFile) {
+        const file = pendingDropFile;
+        pendingDropFile = null;
+        tabs.setSelected('image');
+        imagePanelHandleFile?.(file);
+      }
 
       if (myToken !== currentInitToken) return;
 
@@ -1197,6 +1232,9 @@ export default async function decorate(block) {
       cleanup();
       block.replaceChildren();
       block.append(createTag('p', { class: 'color-wheel-error' }, 'Failed to load Color Wheel.'));
+    } finally {
+      window.removeEventListener('dragover', earlyPreventFileDrop);
+      window.removeEventListener('drop', earlyPreventFileDrop);
     }
   }
 
