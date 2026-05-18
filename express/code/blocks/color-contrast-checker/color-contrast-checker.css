@@ -1237,6 +1237,21 @@
 }
 
 
+@media (max-width: 599px) {
+  /* Safari iOS: tight line-height can clip FatFrank ascenders/descenders.
+     Raise to 1 so the line box fully contains the glyph on iOS. */
+  .cc-preview-heading {
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Prevent iOS viewport text-size adjustment from rescaling preview text. */
+  .cc-preview-frame {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
 @media (min-width: 600px) {
   .cc-color-column {
     flex: 1;
