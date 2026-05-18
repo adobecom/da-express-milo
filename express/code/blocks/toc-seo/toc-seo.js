@@ -557,20 +557,13 @@ function updateDesktopPosition(tocContainer) {
  */
 function setupDesktop(tocContainer) {
   if (isDesktop()) {
-    tocContainer.style.visibility = 'hidden';
     const show = () => {
       updateDesktopPosition(tocContainer);
-      tocContainer.style.visibility = 'visible';
     };
-    const startEl = document.querySelector(CONFIG.selectors.startElement);
-    const img = startEl?.querySelector('img');
-    if (img && !img.complete) {
-      img.addEventListener('load', () => requestAnimationFrame(show), { once: true });
-      img.addEventListener('error', () => requestAnimationFrame(show), { once: true });
-    } else if (document.readyState === 'complete') {
+    if (document.readyState === 'complete') {
       requestAnimationFrame(show);
     } else {
-      window.addEventListener('load', show, { once: true });
+      window.addEventListener('load', () => requestAnimationFrame(show), { once: true });
     }
   }
 

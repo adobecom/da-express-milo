@@ -255,8 +255,6 @@ main .toc-content .toc-link:focus:not(:focus-visible) {
   
 @media (min-width: 1024px) {
   .toc-container {
-    position: fixed;
-    top: var(--toc-top-position, 115px);
     left: var(--spacing-600);
     width: var(--ax-grid-3-col-width);
     margin: 0;
@@ -265,6 +263,17 @@ main .toc-content .toc-link:focus:not(:focus-visible) {
     border-radius: 8px;
     overflow: visible;
     z-index: 1;
+  }
+
+  /* Hide until JS has computed a reliable position */
+  .toc-container:not(.toc-desktop) {
+    display: none;
+  }
+
+  /* Applied by updateDesktopPosition() only after a reliable top value is set */
+  .toc-container.toc-desktop {
+    position: fixed;
+    top: var(--toc-top-position);
   }
   
   /* Always show content on desktop - no toggle */
