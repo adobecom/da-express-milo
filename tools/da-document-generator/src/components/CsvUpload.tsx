@@ -39,23 +39,26 @@ function computeSchemaMatch(csvColumns: string[], templatePlaceholders: string[]
   const placeholderSet = new Set(templatePlaceholders);
   return {
     missingFromCsv: templatePlaceholders.filter((p) => !csvSet.has(p)),
-    extraInCsv: csvColumns.filter((c) => c !== '_id' && !placeholderSet.has(c)),
+    extraInCsv: csvColumns.filter((c) => c !== '_id' && c !== 'url_slug' && !placeholderSet.has(c)),
     matchedCount: templatePlaceholders.filter((p) => csvSet.has(p)).length,
   };
 }
 
-function toSnake(s: string) {
-  return s.replace(/([A-Z])/g, '_$1').toLowerCase();
+function buildZazzleMap(): Record<string, string> {
+  return {
+    title: 'rootRawTitle',
+    short_title: 'rootRawTitle',
+    description: 'description',
+    initial_pretty_preferred_view_url: 'initialPrettyPreferredViewUrl',
+    department_name: 'departmentName',
+    product_type: 'productType',
+    plural_unit_label: 'pluralUnitLabel',
+    singular_unit_label: 'singularUnitLabel',
+  };
 }
 
-function buildZazzleMap(): Record<string, string> {
-  const keys: string[] = [
-    'id', 'rootRawTitle', 'description', 'initialPrettyPreferredViewUrl',
-    'departmentName', 'productType', 'quantities', 'pluralUnitLabel', 'singularUnitLabel',
-  ];
-  const map: Record<string, string> = {};
-  for (const k of keys) map[toSnake(k)] = k;
-  return map;
+function slugify(s: string): string {
+  return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
 const MAX_VISIBLE_ROWS = 200;
@@ -72,8 +75,11 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
 
   const summary = computeSummary(rows);
   const hasData = rows.length > 0;
+  const baseCols = columns.length > 0
+    ? columns
+    : Object.keys(rows[0] ?? {}).filter((k) => k !== '_id');
   const tableColumns = hasData
-    ? (columns.length > 0 ? columns : Object.keys(rows[0]).filter((k) => k !== '_id'))
+    ? (baseCols.includes('url_slug') ? baseCols : [...baseCols, 'url_slug'])
     : PLACEHOLDER_COLUMNS;
   const visibleRows = hasData ? rows.slice(0, MAX_VISIBLE_ROWS) : [PLACEHOLDER_ROW];
 
@@ -93,6 +99,9 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
             const zKey = zazzleMap[col];
             if (zKey) filled[col] = String((product as unknown as Record<string, unknown>)[zKey] ?? '');
           }
+        }
+        if (!filled['url_slug']?.trim() && filled['short_title']?.trim()) {
+          filled['url_slug'] = slugify(filled['short_title']);
         }
         return filled;
       }),
