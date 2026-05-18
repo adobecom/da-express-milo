@@ -567,6 +567,7 @@ async function buildTabs(controller, suggestionsRow, { onSelectionChange, string
       selected: 'color-wheel',
       size: 'm',
       quiet: true,
+      enterPanelOnTab: ['color-wheel'],
       tabs: [
         { label: strings.tabPrimaryColor || 'Primary color', value: 'primary-color', iconSlotHtml: PRIMARY_COLOR_ICON },
         { label: strings.tabImage || 'Image', value: 'image', spIcon: 'sp-icon-image' },
