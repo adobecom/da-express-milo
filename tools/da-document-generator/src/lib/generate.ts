@@ -26,7 +26,7 @@ export function runGenerationQa(html: string): QaResult {
   return { pass: issues.length === 0, score: issues.length === 0 ? 100 : 0, issues };
 }
 
-export function runPreviewQa(pageHtml: string): QaResult {
+export function runPageQa(pageHtml: string): QaResult {
   const issues: QaIssue[] = [];
   const doc = new DOMParser().parseFromString(pageHtml, 'text/html');
 

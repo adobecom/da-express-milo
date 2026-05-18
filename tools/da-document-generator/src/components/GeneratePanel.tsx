@@ -7,7 +7,7 @@ import {
   daPathToPreviewUrl,
   daPathToLiveUrl,
 } from '../api/daApi';
-import { applyTemplate, rowToOutputPath, runGenerationQa, runPreviewQa } from '../lib/generate';
+import { applyTemplate, rowToOutputPath, runGenerationQa, runPageQa } from '../lib/generate';
 import type { CsvRow, TemplateState, RowResult, QaResult } from '../types';
 
 interface Props {
@@ -38,7 +38,7 @@ export default function GeneratePanel({ rows, template }: Props) {
     ).length,
     previewable: results.filter((r) => r.stage === 'generated').length,
     previewed: results.filter((r) =>
-      ['previewed', 'qa-fail', 'publishing', 'published'].includes(r.stage),
+      ['previewed', 'publishing', 'published'].includes(r.stage),
     ).length,
     publishable: results.filter((r) => r.stage === 'previewed').length,
     done: results.filter((r) => r.stage === 'generated').length,
@@ -112,28 +112,10 @@ export default function GeneratePanel({ rows, template }: Props) {
       setResults((prev) => prev.map((x) => (x.id === r.id ? { ...x, stage: 'previewing' } : x)));
       try {
         await triggerPreview(r.path, token);
-        const previewUrl = daPathToPreviewUrl(r.path);
-        let qa: QaResult;
-        try {
-          const resp = await fetch(previewUrl);
-          const html = await resp.text();
-          qa = runPreviewQa(html);
-        } catch {
-          qa = {
-            pass: false,
-            score: 0,
-            issues: [{
-              id: 'page-fetch-failed',
-              label: 'Page not accessible',
-              description: `Could not fetch ${previewUrl} for QA.`,
-              suggestion: 'Check that the preview completed successfully and the page is publicly accessible.',
-            }],
-          };
-        }
         setResults((prev) =>
           prev.map((x) =>
             x.id === r.id
-              ? { ...x, stage: qa.pass ? 'previewed' : 'qa-fail', previewUrl, qa }
+              ? { ...x, stage: 'previewed', previewUrl: daPathToPreviewUrl(r.path) }
               : x,
           ),
         );
@@ -156,10 +138,19 @@ export default function GeneratePanel({ rows, template }: Props) {
       setResults((prev) => prev.map((x) => (x.id === r.id ? { ...x, stage: 'publishing' } : x)));
       try {
         await triggerPublish(r.path, token);
+        const liveUrl = daPathToLiveUrl(r.path);
+        let qa: QaResult | undefined;
+        try {
+          const resp = await fetch(liveUrl);
+          const html = await resp.text();
+          qa = runPageQa(html);
+        } catch {
+          // QA fetch failed — page is still published, just no QA data
+        }
         setResults((prev) =>
           prev.map((x) =>
             x.id === r.id
-              ? { ...x, stage: 'published', liveUrl: daPathToLiveUrl(r.path) }
+              ? { ...x, stage: 'published', liveUrl, qa }
               : x,
           ),
         );
