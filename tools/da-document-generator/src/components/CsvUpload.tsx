@@ -175,11 +175,11 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
       .map((s) => s.trim())
       .filter(Boolean);
     if (!ids.length) return;
-    setColumns(['template_id']);
+    setColumns(['template_id', 'title', 'short_title', 'url_slug']);
     setValidationStatus({});
     setValidateMsg(null);
     setHydrateMsg(null);
-    onChange(ids.map((id, i) => ({ _id: String(i), template_id: id })));
+    onChange(ids.map((id, i) => ({ _id: String(i), template_id: id, title: '', short_title: '', url_slug: '' })));
   }
 
   function handleFile(file: File) {
