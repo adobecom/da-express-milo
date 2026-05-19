@@ -3398,7 +3398,7 @@ main .template-x.tworow .template-2x2-col .template .still-wrapper img:not(.icon
 
 .template-x .experimental-ctas.button-container .secondary-template-cta {
   border-radius: 16px;
-  background: var(--Palette-transparent-black-100, rgba(0, 0, 0, 0.09));
+  background:rgba(0, 0, 0, 0.09);
   color: var(--color-black);
   border: none;
 }
