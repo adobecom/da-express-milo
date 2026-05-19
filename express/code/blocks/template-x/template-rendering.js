@@ -266,11 +266,7 @@ function ensureAbsoluteUrl(url) {
 
 function normalizeEncodedAmpersands(value) {
   if (!value || typeof value !== 'string') return value ?? '';
-  return value
-    .replace(/%26amp%3B/gi, '&')
-    .replace(/%26amp;/gi, '&')
-    .replace(/&amp%3B/gi, '&')
-    .replace(/&amp;/gi, '&');
+  return value.replace(/(?:%26|&)amp(?:%3B|;)/gi, '&');
 }
 
 function sanitizeExternalCtaUrl(url) {
