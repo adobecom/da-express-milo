@@ -1,16 +1,12 @@
 .ax-color-tool-layout {
   /* Layout configuration */
   --ax-layout-gap: var(--spacing-300);
-  --ax-layout-row-gap: var(--ax-layout-gap);
+  --ax-layout-row-gap: 0;
   --ax-layout-column-gap: var(--ax-layout-gap);
   --ax-color-tool-presentation-max-width: var(--block-wd-max-width);
-  --ax-layout-outer-margin-inline: var(--spacing-300);
-  --ax-layout-outer-margin-block: var(--spacing-300);
   --ax-layout-presentation-max-width: var(--ax-color-tool-presentation-max-width);
   --ax-layout-max-inline-size: var(--ax-layout-presentation-max-width);
   --ax-layout-grid-gutter: var(--ax-grid-gutter, var(--spacing-300));
-  --ax-layout-padding-inline: 0;
-  --ax-layout-padding-block: 0;
   --ax-layout-inline-size: 100%;
 
   /* Grid configuration (desktop) */
@@ -72,8 +68,9 @@
   --ax-text-body-gap: var(--spacing-100);
   --ax-logo-gap: var(--spacing-100);
 
-  padding: var(--ax-layout-padding-block) var(--ax-layout-padding-inline);
-  margin: var(--ax-layout-outer-margin-block) var(--ax-layout-outer-margin-inline);
+  box-sizing: border-box;
+  padding: 0 var(--spacing-300) var(--spacing-300);
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   row-gap: var(--ax-layout-row-gap);
@@ -155,12 +152,13 @@
   outline-offset: var(--ax-focus-outline-offset);
 }
 
-@media (min-width: 888px) {
+@media (min-width: 600px) {
   .ax-color-tool-layout {
-    --ax-layout-outer-margin-inline: var(--spacing-500);
-    --ax-layout-outer-margin-block: var(--spacing-500);
+    padding: var(--spacing-400) var(--spacing-500);
   }
+}
 
+@media (min-width: 888px) {
   .ax-shell-slot {
     order: unset;
     grid-area: auto;
@@ -228,10 +226,7 @@
 
 @media (min-width: 1200px) {
   .ax-color-tool-layout {
-    --ax-layout-outer-margin-inline: var(--spacing-600);
-    --ax-layout-outer-margin-block: var(--spacing-600);
-    padding-inline: var(--spacing-600);
-    margin-inline: auto;
+    padding: var(--spacing-600);
   }
 
   .ax-shell-slot--topbar {

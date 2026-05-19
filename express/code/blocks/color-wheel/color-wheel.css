@@ -19,14 +19,6 @@ body {
   overscroll-behavior-y: contain;
 }
 
-.color-wheel .ax-color-tool-layout {
-  box-sizing: border-box;
-  max-width: var(--block-wd-max-width);
-  margin: 0 auto;
-  padding: 0 var(--spacing-300) var(--spacing-300);
-  row-gap: 0;
-}
-
 .color-wheel .ax-shell-slot--topbar {
   padding-block-end: var(--spacing-400);
 }
@@ -422,11 +414,6 @@ color-wheel-express {
 /* Small Tablet */
 
 @media (min-width: 600px) {
-  .color-wheel .ax-color-tool-layout {
-    padding: var(--spacing-400) var(--spacing-500);
-    row-gap: 0;
-  }
-
   .color-wheel .ax-shell-slot--topbar,
   .color-wheel .ax-shell-slot--sidebar {
     padding-block-end: var(--spacing-400);
@@ -479,7 +466,6 @@ color-wheel-express {
 
 @media (min-width: 1200px) {
   .color-wheel .ax-color-tool-layout {
-    padding: var(--spacing-600);
     grid-template-rows: auto minmax(0, 1fr) auto;
     grid-template-columns: minmax(0, var(--cw-sidebar-fr, 4fr)) minmax(0, 8fr);
     align-items: stretch;
