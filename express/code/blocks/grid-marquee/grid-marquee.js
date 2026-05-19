@@ -210,9 +210,16 @@ async function makeRating(
   await trackBranchParameters([storeLink]);
 
   const star = getIconElementDeprecated('star');
-  star.setAttribute('role', 'img');
-  star.setAttribute('aria-label', starsPlaceholder);
-  return createTag('div', { class: 'ratings-container' }, [score, star, cnt, storeLink]);
+  const ratingsLabel = `${score} ${starsPlaceholder}, ${cnt}`;
+  return createTag('div', {
+    class: 'ratings-container',
+    role: 'group',
+    'aria-label': ratingsLabel,
+  }, [
+    createTag('span', { 'aria-hidden': 'true' }, [score, star]),
+    createTag('span', { 'aria-hidden': 'true' }, cnt),
+    storeLink,
+  ]);
 }
 
 async function makeRatings(
