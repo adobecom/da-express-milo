@@ -3,6 +3,7 @@ import {
   postDoc,
   triggerPreview,
   triggerPublish,
+  triggerUnpublish,
   getToken,
   daPathToPreviewUrl,
   daPathToLiveUrl,
@@ -18,7 +19,7 @@ interface Props {
 const DEFAULT_OUTPUT_DIR = '/adobecom/da-express-milo/drafts/maxn/document-generator';
 const CONCURRENCY = 3;
 
-type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing';
+type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing' | 'unpublishing';
 
 export default function GeneratePanel({ rows, template }: Props) {
   const [outputDir, setOutputDir] = useState(DEFAULT_OUTPUT_DIR);
@@ -44,6 +45,7 @@ export default function GeneratePanel({ rows, template }: Props) {
     done: results.filter((r) => r.stage === 'generated').length,
     error: results.filter((r) => r.stage === 'error').length,
     published: results.filter((r) => r.stage === 'published').length,
+    unpublished: results.filter((r) => r.stage === 'unpublished').length,
   };
 
   async function runBatch(items: RowResult[], fn: (r: RowResult) => Promise<void>) {
@@ -164,8 +166,48 @@ export default function GeneratePanel({ rows, template }: Props) {
     setBulkOp('idle');
   }
 
+  async function handleUnpublishRow(rowId: string, path: string) {
+    const token = getToken();
+    if (!token) return;
+    setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'unpublishing' } : r));
+    try {
+      await triggerUnpublish(path, token);
+      setResults((prev) => prev.map((r) =>
+        r.id === rowId ? { ...r, stage: 'unpublished', liveUrl: undefined } : r,
+      ));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'error', error: msg } : r));
+    }
+  }
+
+  async function handleUnpublish() {
+    const token = getToken();
+    if (!token) return;
+    const targets = results.filter((r) => r.stage === 'published');
+    setBulkOp('unpublishing');
+    await runBatch(targets, async (r) => {
+      setResults((prev) => prev.map((x) => x.id === r.id ? { ...x, stage: 'unpublishing' } : x));
+      try {
+        await triggerUnpublish(r.path, token);
+        setResults((prev) => prev.map((x) =>
+          x.id === r.id ? { ...x, stage: 'unpublished', liveUrl: undefined } : x,
+        ));
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setResults((prev) => prev.map((x) => x.id === r.id ? { ...x, stage: 'error', error: msg } : x));
+      }
+    });
+    setBulkOp('idle');
+  }
+
   const showPreviewBtn = !running && counts.previewable > 0;
   const showPublishBtn = !running && counts.publishable > 0;
+  const showUnpublishBtn = !running
+    && results.some((r) => r.stage === 'published')
+    && !results.some((r) =>
+      ['pending', 'generating', 'generated', 'previewing', 'previewed', 'publishing'].includes(r.stage),
+    );
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4">
@@ -235,6 +277,22 @@ export default function GeneratePanel({ rows, template }: Props) {
           </span>
         )}
 
+        {showUnpublishBtn && (
+          <button
+            type="button"
+            onClick={handleUnpublish}
+            className="px-5 py-2.5 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors"
+          >
+            Unpublish all ({counts.published})
+          </button>
+        )}
+
+        {bulkOp === 'unpublishing' && (
+          <span className="text-sm text-red-600 font-medium">
+            Unpublishing… {counts.unpublished} / {results.filter((r) => r.stage === 'unpublishing' || r.stage === 'unpublished').length}
+          </span>
+        )}
+
         {results.length > 0 && !running && (
           <p className="text-sm text-gray-500 ml-auto">
             {counts.generated > 0 && <span className="text-green-600 font-medium">{counts.generated} generated </span>}
@@ -282,7 +340,7 @@ export default function GeneratePanel({ rows, template }: Props) {
                       <PreviewPill result={r} />
                     </td>
                     <td className="px-3 py-2">
-                      <PublishPill result={r} />
+                      <PublishPill result={r} onUnpublish={() => handleUnpublishRow(r.id, r.path)} />
                     </td>
                   </tr>
                   {expandedRowId === r.id && r.qa && r.qa.issues.length > 0 && (
@@ -355,14 +413,25 @@ function PreviewPill({ result }: { result: RowResult }) {
   return <span className="text-gray-300">—</span>;
 }
 
-function PublishPill({ result }: { result: RowResult }) {
+function PublishPill({ result, onUnpublish }: { result: RowResult; onUnpublish: () => void }) {
   const { stage, liveUrl } = result;
   if (stage === 'publishing') return <span className="text-green-500 font-medium">Publishing…</span>;
+  if (stage === 'unpublishing') return <span className="text-orange-500 font-medium">Unpublishing…</span>;
+  if (stage === 'unpublished') return <span className="text-gray-400 font-medium">Unpublished</span>;
   if (liveUrl) {
     return (
-      <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="text-green-700 font-medium hover:underline">
-        ✓ aem.live ↗
-      </a>
+      <div className="flex items-center gap-2">
+        <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="text-green-700 font-medium hover:underline">
+          ✓ aem.live ↗
+        </a>
+        <button
+          type="button"
+          onClick={onUnpublish}
+          className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
+        >
+          Unpublish
+        </button>
+      </div>
     );
   }
   return <span className="text-gray-300">—</span>;

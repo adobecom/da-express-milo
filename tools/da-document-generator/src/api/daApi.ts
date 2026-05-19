@@ -140,3 +140,12 @@ export async function triggerPublish(daPath: string, token: string): Promise<voi
   if (!resp.ok) throw new Error(`publish ${daPath}: ${resp.status}`);
 }
 
+export async function triggerUnpublish(daPath: string, token: string): Promise<void> {
+  const { org, repo, contentPath } = parseDAPath(daPath);
+  const resp = await fetch(`${HLX_ADMIN}/live/${org}/${repo}/${BRANCH}${contentPath}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!resp.ok) throw new Error(`unpublish ${daPath}: ${resp.status}`);
+}
+
