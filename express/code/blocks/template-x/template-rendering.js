@@ -556,7 +556,7 @@ function applyExperimentalCtas(template, cta, btnContainer) {
 
   let secondaryCta = null;
   if (isFreeStatic && cta2Url) {
-    const btnTitle = cta2Text || '';
+    const btnTitle = cta2Text;
     secondaryCta = createTag('a', {
       href: appendTemplateId(sanitizeExternalCtaUrl(cta2Url), template),
       title: btnTitle,
