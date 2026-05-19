@@ -532,6 +532,47 @@ function renderMediaWrapper(template) {
   return { mediaWrapper, enterHandler, leaveHandler, focusHandler };
 }
 
+function applyExperimentalCtas(template, cta, btnContainer) {
+  const cta1Url = getMetadata('external-template-cta-link-1');
+  const cta2Url = getMetadata('external-template-cta-link-2');
+  const cta1Text = getMetadata('external-template-cta-link-text-1');
+  const cta2Text = getMetadata('external-template-cta-link-text-2');
+
+  if (!cta1Url && !cta2Url && !cta1Text && !cta2Text) return null;
+
+  if (cta1Url) {
+    cta.href = appendTemplateId(sanitizeExternalCtaUrl(cta1Url), template);
+  }
+  if (cta1Text) {
+    cta.textContent = cta1Text;
+    cta.title = cta1Text;
+    cta.setAttribute('aria-label', `${cta1Text} ${getTemplateTitle(template)}`);
+  }
+
+  const isFreeStatic = !variants?.includes('flyer')
+    && !variants?.includes('t-shirt')
+    && !variants?.includes('print')
+    && template.licensingCategory === 'free'
+    && !containsVideo(template.pages);
+
+  let secondaryCta = null;
+  if (isFreeStatic && cta2Url) {
+    const btnTitle = cta2Text;
+    secondaryCta = createTag('a', {
+      href: appendTemplateId(sanitizeExternalCtaUrl(cta2Url), template),
+      title: btnTitle,
+      class: 'button gray small secondary-template-cta',
+      'aria-label': `${btnTitle} ${getTemplateTitle(template)}`,
+    });
+    secondaryCta.textContent = btnTitle;
+  }
+
+  if (cta1Url || cta1Text) btnContainer.classList.add('experimental-ctas');
+  if (secondaryCta) btnContainer.append(secondaryCta);
+
+  return secondaryCta;
+}
+
 function renderHoverWrapper(template, customUrlConfig = null) {
   let cta;
   let ctaLink;
@@ -562,38 +603,7 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   cta.setAttribute('aria-label', `${editThisTemplate} ${getTemplateTitle(template)}`);
   ctaLink.append(mediaWrapper);
 
-  const experimentalCta1Url = getMetadata('external-template-cta-link-1');
-  const experimentalCta2Url = getMetadata('external-template-cta-link-2');
-  const experimentalCta1Text = getMetadata('external-template-cta-link-text-1');
-  const experimentalCta2Text = getMetadata('external-template-cta-link-text-2');
-
-  const isFreeStatic = !variants?.includes('flyer')
-    && !variants?.includes('t-shirt')
-    && !variants?.includes('print')
-    && template.licensingCategory === 'free'
-    && !containsVideo(template.pages);
-
-  if (experimentalCta1Url) {
-    cta.href = appendTemplateId(sanitizeExternalCtaUrl(experimentalCta1Url), template);
-  }
-
-  if (experimentalCta1Text) {
-    cta.textContent = experimentalCta1Text;
-    cta.title = experimentalCta1Text;
-    cta.setAttribute('aria-label', `${experimentalCta1Text} ${getTemplateTitle(template)}`);
-  }
-
-  let secondaryCta = null;
-  if (isFreeStatic && experimentalCta2Url) {
-    const btnTitle = experimentalCta2Text;
-    secondaryCta = createTag('a', {
-      href: appendTemplateId(sanitizeExternalCtaUrl(experimentalCta2Url), template),
-      title: btnTitle,
-      class: 'button gray small secondary-template-cta',
-      'aria-label': `${btnTitle} ${getTemplateTitle(template)}`,
-    });
-    secondaryCta.textContent = btnTitle;
-  }
+  const secondaryCta = applyExperimentalCtas(template, cta, btnContainer);
 
   // Create shareWrapper separately
   const templateTitle = getTemplateTitle(template);
@@ -606,11 +616,6 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   };
   const shareWrapper = renderShareWrapper(templateInfo);
 
-  if ((experimentalCta1Url || experimentalCta1Text)) {
-    btnContainer.classList.add('experimental-ctas');
-  }
-
-  if (secondaryCta) btnContainer.append(secondaryCta);
   btnContainer.append(cta);
   btnContainer.append(ctaLink);
   btnContainer.append(shareWrapper);
