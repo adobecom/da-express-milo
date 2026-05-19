@@ -26,12 +26,12 @@
 }
 
 .section.ax-blog-posts-container:not([data-padding='none']):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static,
-  .xxxl-spacing, .xxl-spacing, .xl-spacing, .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.content:first-child {
+.xxxl-spacing, .xxl-spacing, .xl-spacing, .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.content:first-child {
   padding: 0;
 }
 
 .blog main .section:has(.blog-posts-wrapper):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>div:first-child {
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>div:first-child {
   padding: 0;
   margin-top: var(--spacing-800);
 }
@@ -52,6 +52,7 @@ main .section:has(.blog-posts-wrapper) .blog-posts-header .header {
   margin-top: 0;
   text-align: left;
   width: 66%;
+  font-weight: var(--heading-font-weight-extra)
 }
 
 .blog main .section:has(.blog-posts-wrapper)>div>h2,
