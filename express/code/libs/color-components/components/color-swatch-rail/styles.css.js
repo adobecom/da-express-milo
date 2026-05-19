@@ -1047,10 +1047,8 @@ export const style = css`
   }
   .hex-code--static {
     cursor: default;
-    padding-left: 6px;
+    padding-left: var(--hex-code-static-padding-left);
   }
-
-  
   .icon-button {
     background: none;
     border: none;

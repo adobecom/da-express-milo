@@ -302,7 +302,7 @@ export function createModalManager(strings = createColorModalPlaceholders()) {
 
     const contentView = createContrastCheckerModalContent(palette, options);
     open({
-      title: 'See contrast for your full palette',
+      title: options.strings?.modalTitle || 'See contrast for your full palette',
       showTitle: false,
       content: contentView.element,
       initialFocusSelector: (body) => body.querySelector('.cc-modal-tab-bar [role="tab"]'),

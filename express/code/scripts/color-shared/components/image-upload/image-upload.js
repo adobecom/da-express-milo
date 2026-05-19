@@ -80,7 +80,7 @@ export function createUploadDropzone(options = {}) {
     role: 'button',
     tabindex: opts.enabled ? '0' : '-1',
     'aria-label': opts.ariaLabel,
-    'aria-disabled': opts.enabled ? undefined : 'true',
+    ...(!opts.enabled && { 'aria-disabled': 'true' }),
   });
 
   const uploadIcon = createTag('span', { class: `${CLS}-upload-icon`, 'aria-hidden': 'true' }, UPLOAD_SVG);

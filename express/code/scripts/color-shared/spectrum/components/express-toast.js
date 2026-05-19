@@ -14,7 +14,7 @@
  *   });
  */
 
-import { loadToast } from '../load-spectrum.js';
+import { loadToast, loadButton } from '../load-spectrum.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { announceToScreenReader } from '../utils/a11y.js';
 import { loadOverrideStyles } from './style-loader.js';
@@ -53,6 +53,8 @@ function updateStack() {
  * @param {'positive'|'negative'|'info'|'neutral'} [config.variant='info']
  * @param {number} [config.timeout=4000] — auto-dismiss in ms (0 = manual close)
  * @param {Function} [config.onClose]    — called when the toast is dismissed
+ * @param {{label: string, href?: string, onClick?: Function}} [config.action]
+ *        — optional inline action button
  * @returns {Promise<{close: ()=>void}>}
  */
 export async function showExpressToast(config) {
@@ -61,11 +63,17 @@ export async function showExpressToast(config) {
     variant = 'info',
     timeout = 4000,
     onClose,
+    action,
   } = config;
 
   await loadToast();
   await loadOverrideStyles('toast', STYLES_PATH);
   await customElements.whenDefined('sp-toast');
+
+  if (action?.label && (action.href || action.onClick)) {
+    await loadButton();
+    await customElements.whenDefined('sp-button');
+  }
 
   const container = ensureContainer();
   const theme = createThemeWrapper();
@@ -82,6 +90,25 @@ export async function showExpressToast(config) {
   if (spVariant) toast.setAttribute('variant', spVariant);
   toast.setAttribute('open', '');
   toast.textContent = message;
+
+  if (action?.label && (action.href || action.onClick)) {
+    const button = document.createElement('sp-button');
+    button.slot = 'action';
+    button.setAttribute('variant', 'secondary');
+    button.setAttribute('treatment', 'outline');
+    button.setAttribute('static-color', 'white');
+    button.setAttribute('size', 's');
+    button.textContent = action.label;
+    if (action.href) {
+      button.setAttribute('href', action.href);
+      button.setAttribute('target', '_blank');
+      button.setAttribute('rel', 'noopener noreferrer');
+    }
+    if (action.onClick) {
+      button.addEventListener('click', action.onClick);
+    }
+    toast.appendChild(button);
+  }
 
   theme.appendChild(toast);
   container.appendChild(theme);

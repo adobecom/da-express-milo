@@ -21,6 +21,7 @@ let layoutInstance = null;
 let controlsMenu = null;
 let stripRenderer = null;
 let railUnsub = null;
+let cachedRailController = null;
 let controllerUnsubscribe = null;
 let historyHandler = null;
 
@@ -33,6 +34,7 @@ function cleanup() {
   controllerUnsubscribe = null;
   railUnsub?.();
   railUnsub = null;
+  cachedRailController = null;
   stripRenderer?.destroy();
   stripRenderer = null;
   controlsMenu?.destroy();
@@ -140,6 +142,7 @@ export default async function decorate(block) {
     });
 
     let syncingFromRail = false;
+    let syncingFromController = false;
     let restoringFromHistory = false;
     let pushingState = false;
 
@@ -182,10 +185,22 @@ export default async function decorate(block) {
     };
 
     const syncRailConflicts = () => {
-      railUnsub?.();
       const rail = canvas.querySelector('color-swatch-rail');
-      if (!rail?.controller?.subscribe) return;
-      railUnsub = rail.controller.subscribe((state) => {
+      const railController = rail?.controller;
+      if (!railController?.subscribe) {
+        railUnsub?.();
+        railUnsub = null;
+        cachedRailController = null;
+        return;
+      }
+      // Controller hasn't changed — already subscribed, nothing to do.
+      if (railController === cachedRailController) return;
+      railUnsub?.();
+      cachedRailController = railController;
+      railUnsub = railController.subscribe((state) => {
+        // Skip when this fired because we pushed an update from the main controller.
+        // computeAndSetConflictPairs was already called before stripRenderer.update().
+        if (syncingFromController) return;
         const colors = (state.swatches || []).map((s) => s.hex);
         computeAndSetConflictPairs(colors);
 
@@ -212,7 +227,9 @@ export default async function decorate(block) {
 
       computeAndSetConflictPairs(colors);
 
+      syncingFromController = true;
       stripRenderer?.update([{ ...initialPalette, colors }]);
+      syncingFromController = false;
       syncRailConflicts();
     });
 

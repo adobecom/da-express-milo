@@ -1,4 +1,4 @@
-import { getLibs, isWindows } from '../utils.js';
+import { getLibs, isWindows, getMobileOperatingSystem } from '../utils.js';
 
 // Shared constants and configurations for frictionless quick actions
 const JPG = 'jpg';
@@ -129,6 +129,7 @@ export const QA_CONFIGS = {
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
   'remove-background-fast-track-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'remove-background-fast-track-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'remove-background-focused': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'heic-to-jpg': {
     ...getBaseImgCfg(PNG, WEBP, HEIC),
     input_check: getHeicInputCheck(PNG, WEBP, HEIC),
@@ -165,11 +166,18 @@ export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   removeBackgroundVariant1: 'qa-in-product-variant1',
   removeBackgroundVariant2: 'qa-in-product-variant2',
   removeBackgroundFasttrackVariant: 'remove-background-fast-track-variant',
+  removeBackgroundFocused: 'remove-background-focused',
 };
 
 export const AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   removeBackground: 'remove-background',
 };
+
+export function shouldShowVideoQuickActionPickerForMobile(quickAction, file) {
+  return quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.videoEditor
+    && getMobileOperatingSystem() === 'iOS'
+    && file?.type?.startsWith('video/');
+}
 
 // Route paths map corresponding to the express routes
 export const EXPRESS_ROUTE_PATHS = {
