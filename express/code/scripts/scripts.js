@@ -444,26 +444,6 @@ function decorateHeroLCP(loadStyle, config, createTag) {
   }
 }
 
-const listenAlloy = () => {
-  let resolver;
-  let loaded;
-  window.alloyLoader = new Promise((r) => {
-    resolver = r;
-  });
-  window.addEventListener('alloy_sendEvent', (e) => {
-    if (e.detail.type === 'pageView') {
-      // eslint-disable-next-line no-console
-      loaded = true;
-      resolver(e.detail.result);
-    }
-  }, { once: true });
-  setTimeout(() => {
-    if (!loaded) {
-      resolver();
-    }
-  }, 3000);
-};
-
 async function loadPage() {
   if (window.isTestEnv) return;
   const {
@@ -514,9 +494,6 @@ async function loadPage() {
 
   loadLana({ clientId: 'express' });
 
-  // TODO this method should be removed about two weeks after going live
-  listenAlloy();
-
   // prevent milo gnav from loading
   const headerMeta = createTag('meta', { name: 'custom-header', content: 'on' });
   document.head.append(headerMeta);
@@ -525,10 +502,6 @@ async function loadPage() {
 
   buildAutoBlocks();
   decorateHeroLCP(loadStyle, config, createTag, getMetadata);
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('martech') !== 'off' && getMetadata('martech') !== 'off') {
-    import('./instrument.js').then((mod) => { mod.default(); });
-  }
 
   /* region based redirect to CN homepage */
   const isAdobeOrigin = /^(www|color)\.(stage\.)?adobe\.com$/.test(window.location.hostname);
@@ -552,6 +525,11 @@ async function loadPage() {
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));
+
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('martech') !== 'off' && getMetadata('martech') !== 'off') {
+    import('./instrument.js').then((mod) => { mod.default(); });
+  }
 
   import('./express-delayed.js').then((mod) => {
     mod.default();
