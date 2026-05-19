@@ -211,15 +211,15 @@ async function makeRating(
 
   const star = getIconElementDeprecated('star');
   const ratingsLabel = `${score} ${starsPlaceholder}, ${cnt}`;
-  return createTag('div', {
-    class: 'ratings-container',
+  const ratingsText = createTag('span', {
+    class: 'ratings-metric',
     role: 'group',
     'aria-label': ratingsLabel,
   }, [
     createTag('span', { class: 'rating-visual', 'aria-hidden': 'true' }, [score, star]),
     createTag('span', { class: 'rating-visual', 'aria-hidden': 'true' }, cnt),
-    storeLink,
   ]);
+  return createTag('div', { class: 'ratings-container' }, [ratingsText, storeLink]);
 }
 
 async function makeRatings(
