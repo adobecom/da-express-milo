@@ -181,6 +181,30 @@ export default function GeneratePanel({ rows, template }: Props) {
     }
   }
 
+  async function handlePublishRow(rowId: string, path: string) {
+    const token = getToken();
+    if (!token) return;
+    setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'publishing' } : r));
+    try {
+      await triggerPublish(path, token);
+      const liveUrl = daPathToLiveUrl(path);
+      let qa: QaResult | undefined;
+      try {
+        const resp = await fetch(liveUrl);
+        const html = await resp.text();
+        qa = runPageQa(html);
+      } catch {
+        // QA fetch failed — page is still published
+      }
+      setResults((prev) => prev.map((r) =>
+        r.id === rowId ? { ...r, stage: 'published', liveUrl, qa } : r,
+      ));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'error', error: msg } : r));
+    }
+  }
+
   async function handleUnpublishRow(rowId: string, path: string) {
     const token = getToken();
     if (!token) return;
@@ -355,7 +379,7 @@ export default function GeneratePanel({ rows, template }: Props) {
                       <PreviewPill result={r} onPreview={() => handlePreviewRow(r.id, r.path)} />
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">
-                      <PublishPill result={r} onUnpublish={() => handleUnpublishRow(r.id, r.path)} />
+                      <PublishPill result={r} onPublish={() => handlePublishRow(r.id, r.path)} onUnpublish={() => handleUnpublishRow(r.id, r.path)} />
                     </td>
                   </tr>
                   {expandedRowId === r.id && r.qa && r.qa.issues.length > 0 && (
@@ -436,7 +460,15 @@ function PreviewPill({ result, onPreview }: { result: RowResult; onPreview: () =
   return <span className="text-gray-300">—</span>;
 }
 
-function PublishPill({ result, onUnpublish }: { result: RowResult; onUnpublish: () => void }) {
+function PublishPill({
+  result,
+  onPublish,
+  onUnpublish,
+}: {
+  result: RowResult;
+  onPublish: () => void;
+  onUnpublish: () => void;
+}) {
   const { stage, liveUrl } = result;
   if (stage === 'publishing') return <span className="text-green-500 font-medium">Publishing…</span>;
   if (stage === 'unpublishing') return <span className="text-orange-500 font-medium">Unpublishing…</span>;
@@ -447,14 +479,19 @@ function PublishPill({ result, onUnpublish }: { result: RowResult; onUnpublish: 
         <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="text-green-700 font-medium hover:underline">
           ✓ aem.live ↗
         </a>
-        <button
-          type="button"
-          onClick={onUnpublish}
-          className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors"
-        >
+        <button type="button" onClick={onUnpublish}
+          className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors">
           Unpublish
         </button>
       </div>
+    );
+  }
+  if (stage === 'previewed') {
+    return (
+      <button type="button" onClick={onPublish}
+        className="text-xs text-green-600 hover:text-green-800 font-medium transition-colors">
+        Publish
+      </button>
     );
   }
   return <span className="text-gray-300">—</span>;
