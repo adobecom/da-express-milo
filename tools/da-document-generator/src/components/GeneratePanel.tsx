@@ -166,6 +166,21 @@ export default function GeneratePanel({ rows, template }: Props) {
     setBulkOp('idle');
   }
 
+  async function handlePreviewRow(rowId: string, path: string) {
+    const token = getToken();
+    if (!token) return;
+    setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'previewing' } : r));
+    try {
+      await triggerPreview(path, token);
+      setResults((prev) => prev.map((r) =>
+        r.id === rowId ? { ...r, stage: 'previewed', previewUrl: daPathToPreviewUrl(path) } : r,
+      ));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'error', error: msg } : r));
+    }
+  }
+
   async function handleUnpublishRow(rowId: string, path: string) {
     const token = getToken();
     if (!token) return;
@@ -305,41 +320,41 @@ export default function GeneratePanel({ rows, template }: Props) {
 
       {results.length > 0 && (
         <div className="overflow-x-auto rounded-xl border border-gray-200 max-h-96 overflow-y-auto">
-          <table className="text-xs w-full">
+          <table className="text-xs min-w-max">
             <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
               <tr>
-                <th className="px-3 py-2 text-left font-medium text-gray-600">Path</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600 min-w-[280px]">Path</th>
                 <th className="px-3 py-2 text-left font-medium text-gray-600 w-28">Issues</th>
                 <th className="px-3 py-2 text-left font-medium text-gray-600 w-28">Generate</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600 w-32">Preview</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600 w-32">Publish</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600 w-44">Preview</th>
+                <th className="px-3 py-2 text-left font-medium text-gray-600 w-52">Publish</th>
               </tr>
             </thead>
             <tbody>
               {results.map((r) => (
                 <Fragment key={r.id}>
                   <tr className="border-b border-gray-100">
-                    <td className="px-3 py-2 font-mono text-gray-600 truncate max-w-[240px]">
+                    <td className="px-3 py-2 font-mono text-gray-600 whitespace-nowrap min-w-[280px]">
                       {r.editUrl ? (
                         <a href={r.editUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                           {r.path}
                         </a>
                       ) : r.path}
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 whitespace-nowrap">
                       <QaIssueBadge
                         qa={r.qa}
                         expanded={expandedRowId === r.id}
                         onToggle={() => toggleRowDetail(r.id)}
                       />
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 whitespace-nowrap">
                       <GeneratePill result={r} />
                     </td>
-                    <td className="px-3 py-2">
-                      <PreviewPill result={r} />
+                    <td className="px-3 py-2 whitespace-nowrap">
+                      <PreviewPill result={r} onPreview={() => handlePreviewRow(r.id, r.path)} />
                     </td>
-                    <td className="px-3 py-2">
+                    <td className="px-3 py-2 whitespace-nowrap">
                       <PublishPill result={r} onUnpublish={() => handleUnpublishRow(r.id, r.path)} />
                     </td>
                   </tr>
@@ -400,7 +415,7 @@ function GeneratePill({ result }: { result: RowResult }) {
   return <span className="text-gray-300">—</span>;
 }
 
-function PreviewPill({ result }: { result: RowResult }) {
+function PreviewPill({ result, onPreview }: { result: RowResult; onPreview: () => void }) {
   const { stage, previewUrl } = result;
   if (stage === 'previewing') return <span className="text-indigo-500 font-medium">Previewing…</span>;
   if (previewUrl) {
@@ -408,6 +423,14 @@ function PreviewPill({ result }: { result: RowResult }) {
       <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 font-medium hover:underline">
         ✓ aem.page ↗
       </a>
+    );
+  }
+  if (stage === 'generated') {
+    return (
+      <button type="button" onClick={onPreview}
+        className="text-xs text-indigo-500 hover:text-indigo-700 font-medium transition-colors">
+        Preview
+      </button>
     );
   }
   return <span className="text-gray-300">—</span>;
@@ -420,7 +443,7 @@ function PublishPill({ result, onUnpublish }: { result: RowResult; onUnpublish: 
   if (stage === 'unpublished') return <span className="text-gray-400 font-medium">Unpublished</span>;
   if (liveUrl) {
     return (
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 whitespace-nowrap">
         <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="text-green-700 font-medium hover:underline">
           ✓ aem.live ↗
         </a>
