@@ -1,0 +1,9 @@
+<!-- Drag to reorder. Source: https://www.figma.com/design/mcJuQTxJdWsL0dMmqaecpn/Final-Color-Expansion-CCEX-221263?node-id=6082-526823 Replace with export: FIGMA_ACCESS_TOKEN=xxx node dev/figma-export-drag-icon.js -->
+<svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="6" cy="6" r="1.5" fill="currentColor"/>
+  <circle cx="6" cy="10" r="1.5" fill="currentColor"/>
+  <circle cx="6" cy="14" r="1.5" fill="currentColor"/>
+  <circle cx="14" cy="6" r="1.5" fill="currentColor"/>
+  <circle cx="14" cy="10" r="1.5" fill="currentColor"/>
+  <circle cx="14" cy="14" r="1.5" fill="currentColor"/>
+</svg>

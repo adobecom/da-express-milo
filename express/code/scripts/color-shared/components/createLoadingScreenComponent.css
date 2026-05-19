@@ -1,0 +1,84 @@
+.ax-color-loading {
+  width: 100%;
+  --ax-color-loading-gray-100: var(--Palette-gray-100);
+  --ax-color-loading-gray-200: var(--Palette-gray-200);
+}
+
+.ax-color-loading__grid {
+  display: grid;
+  width: 100%;
+}
+
+.ax-color-loading-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+.ax-color-loading-card__visual {
+  width: 100%;
+  height: 56px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  border: 0.5px solid var(--Palette-gray-100);
+  background-color: var(--ax-color-loading-gray-200);
+}
+
+.ax-color-loading-card__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  min-height: var(--spacing-500);
+}
+
+.ax-color-loading-card__text {
+  width: min(300px, calc(100% - 34px));
+  height: 18px;
+  border-radius: 100px;
+  background-color: var(--ax-color-loading-gray-200);
+}
+
+.ax-color-loading-card__icon {
+  width: var(--spacing-400);
+  height: var(--spacing-400);
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: var(--ax-color-loading-gray-200);
+}
+
+@property --ax-shimmer-pos {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+.ax-color-loading-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--ax-color-loading-gray-100) 0%,
+    var(--ax-color-loading-gray-200) var(--ax-shimmer-pos),
+    var(--ax-color-loading-gray-100) 100%
+  );
+  animation: ax-color-loading-shimmer-slide 1000ms ease-out 1ms infinite;
+}
+
+@keyframes ax-color-loading-shimmer-slide {
+  0% {
+    --ax-shimmer-pos: 0%;
+  }
+
+  50% {
+    --ax-shimmer-pos: 50%;
+  }
+
+  100% {
+    --ax-shimmer-pos: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-color-loading-shimmer {
+    animation: none;
+  }
+}

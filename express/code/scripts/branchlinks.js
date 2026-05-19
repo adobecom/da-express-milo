@@ -1,3 +1,4 @@
+// eslint-disable-next-line import/no-cycle
 import { getCachedMetadata, getLibs, toClassName } from './utils.js';
 
 function toCamelCase(name) {

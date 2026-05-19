@@ -6,7 +6,13 @@ import { mockRes } from '../test-utilities.js';
 
 const imports = await Promise.all([import('../../../express/code/scripts/utils.js'), import('../../../express/code/scripts/scripts.js'), import('../../../express/code/blocks/frictionless-quick-action/frictionless-quick-action.js')]);
 const { getLibs, createTag } = imports[0];
-const { default: init, runQuickAction } = imports[2];
+const {
+  default: init,
+  runQuickAction,
+  setupFrictionlessTargetBaseUrl,
+  getFrictionlessTargetBaseUrl,
+  buildSearchParamsForEditorUrl,
+} = imports[2];
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   mod.setConfig({ locales: { '': { ietf: 'en-US', tk: 'jdq5hay.css' } } });
 });
@@ -55,7 +61,7 @@ describe('Frictionless Quick Action Block', () => {
     document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
     const block = document.body.querySelector('.frictionless-quick-action');
 
-    runQuickAction('convert-to-jpg', 'data:image/png;base64,', block);
+    await runQuickAction('convert-to-jpg', ['data:image/png;base64,'], block);
     const qac = block.querySelector('.quick-action-container');
     expect(qac).to.not.be.null;
   });
@@ -249,5 +255,63 @@ describe('Frictionless Quick Action - Utility Functions', () => {
     expect(url.searchParams.get('param4')).to.be.null;
     expect(url.searchParams.get('param5')).to.be.null;
     expect(url.searchParams.get('param6')).to.equal('0'); // 0 is valid
+  });
+});
+
+describe('remove-background-focused — URL setup and editor params', () => {
+  let originalSearch;
+
+  before(() => {
+    originalSearch = window.location.search;
+  });
+
+  afterEach(() => {
+    window.history.pushState({}, '', originalSearch);
+    sinon.restore();
+  });
+
+  it('sets the prod editor URL when not in stage', () => {
+    window.history.pushState({}, '', '?');
+    setupFrictionlessTargetBaseUrl('remove-background-focused');
+    expect(getFrictionlessTargetBaseUrl()).to.equal('https://express.adobe.com/photo-editor/focused');
+  });
+
+  it('falls back to default stage URL when hzenv=stage but no base param', () => {
+    window.history.pushState({}, '', '?hzenv=stage');
+    setupFrictionlessTargetBaseUrl('remove-background-focused');
+    expect(getFrictionlessTargetBaseUrl()).to.equal('https://stage.projectx.corp.adobe.com/photo-editor/focused');
+  });
+
+  it('accepts a valid adobe.com base URL override', () => {
+    window.history.pushState({}, '', '?hzenv=stage&base=https://custom.adobe.com/');
+    setupFrictionlessTargetBaseUrl('remove-background-focused');
+    expect(getFrictionlessTargetBaseUrl()).to.equal('https://custom.adobe.com/photo-editor/focused');
+  });
+
+  it('rejects a non-adobe base URL and falls back to the default stage URL', () => {
+    window.history.pushState({}, '', '?hzenv=stage&base=https://evil.notadobe.com/');
+    setupFrictionlessTargetBaseUrl('remove-background-focused');
+    expect(getFrictionlessTargetBaseUrl()).to.equal('https://stage.projectx.corp.adobe.com/photo-editor/focused');
+  });
+
+  it('rejects a URL that ends with adobe.com but is not a subdomain (e.g. eviladobe.com)', () => {
+    window.history.pushState({}, '', '?hzenv=stage&base=https://eviladobe.com/');
+    setupFrictionlessTargetBaseUrl('remove-background-focused');
+    expect(getFrictionlessTargetBaseUrl()).to.equal('https://stage.projectx.corp.adobe.com/photo-editor/focused');
+  });
+
+  it('appends the three focused-editor params in buildSearchParamsForEditorUrl', () => {
+    const params = buildSearchParamsForEditorUrl('/photo-editor/focused', 'asset-123', 'remove-background-focused', null);
+    expect(params['edit-action']).to.equal('remove-bg');
+    expect(params['l2-panel']).to.equal('backgrounds');
+    expect(params['open-download']).to.equal(true);
+    expect(params.frictionlessUploadAssetId).to.equal('asset-123');
+  });
+
+  it('does not append focused-editor params for other quick actions on the focused route', () => {
+    const params = buildSearchParamsForEditorUrl('/photo-editor/focused', 'asset-123', 'crop-image', null);
+    expect(params['edit-action']).to.be.undefined;
+    expect(params['l2-panel']).to.be.undefined;
+    expect(params['open-download']).to.be.undefined;
   });
 });

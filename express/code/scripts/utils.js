@@ -18,9 +18,11 @@ export const [setLibs, getLibs] = (() => {
     (prodLibs, location) => {
       libs = (() => {
         const { hostname, search } = location || window.location;
-        if (!['.aem.', '.hlx.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
+        if (!['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
         const branch = new URLSearchParams(search).get('milolibs') || 'main';
+        if (!/^[a-zA-Z0-9_-]+$/.test(branch)) throw new Error('Invalid branch name.');
         if (branch === 'local') return 'http://localhost:6456/libs';
+        if (branch === 'main' && hostname.includes('.stage.')) return '/libs';
         return branch.includes('--') ? `https://${branch}.aem.live/libs` : `https://${branch}--milo--adobecom.aem.live/libs`;
       })();
       return libs;
@@ -63,6 +65,11 @@ export function getMobileOperatingSystem() {
   }
 
   return 'unknown';
+}
+
+export function isWindows(userAgent) {
+  const ua = userAgent ?? window.navigator?.userAgent ?? '';
+  return /\bwindows nt\b/i.test(ua);
 }
 
 export async function getRedirectUri() {
@@ -124,7 +131,9 @@ function createSVGWrapper(icon, sheetSize, alt, altSrc) {
   svgWrapper.setAttribute('aria-hidden', 'true');
   svgWrapper.setAttributeNS('http://www.w3.org/2000/xmlns/', 'xmlns', 'http://www.w3.org/1999/xlink');
   if (alt) {
-    svgWrapper.appendChild(createTag('title', { innerText: alt }));
+    const titleEl = createTag('title', {});
+    titleEl.textContent = alt;
+    svgWrapper.appendChild(titleEl);
   }
   const u = document.createElementNS('http://www.w3.org/2000/svg', 'use');
   if (altSrc) {
@@ -418,12 +427,24 @@ export function hideQuickActionsOnDevices(userAgent) {
   }
   // latest setup that supports safari frictionless, enabled by metadata
   // fqa-non-qualified: always removed. (before: safari)
-  // fqa-qualified-mobile: mobile only. (before: non-safari mobile)
+  // fqa-qualified-ios: iOS mobile only.
+  // fqa-qualified-android: Android mobile only.
+  // fqa-qualified-mobile: mobile only. (before: non-safari mobile) — kept for backwards compat
   // fqa-qualified-desktop: desktop only. (before: non-safari desktop)
   const audienceFqaMeta = document.createElement('meta');
   audienceFqaMeta.setAttribute('content', 'on');
   if (getMetadata('frictionless-safari')?.toLowerCase() === 'on' || isQualifiedBrowser) {
-    audienceFqaMeta.setAttribute('name', `fqa-qualified-${isMobile ? 'mobile' : 'desktop'}`);
+    if (isMobile) {
+      const os = getMobileOperatingSystem();
+      audienceFqaMeta.setAttribute('name', os === 'Android' ? 'fqa-qualified-android' : 'fqa-qualified-ios');
+      // also inject fqa-qualified-mobile so sections targeting both iOS + Android still show
+      const mobileFqaMeta = document.createElement('meta');
+      mobileFqaMeta.setAttribute('name', 'fqa-qualified-mobile');
+      mobileFqaMeta.setAttribute('content', 'on');
+      document.head.append(mobileFqaMeta);
+    } else {
+      audienceFqaMeta.setAttribute('name', 'fqa-qualified-desktop');
+    }
   } else {
     audienceFqaMeta.setAttribute('name', 'fqa-non-qualified');
   }
@@ -451,7 +472,7 @@ export function preDecorateSections(area) {
             || urlParams.get(`${sectionMeta.showwith}`);
         }
         const showwith = sectionMeta.showwith.toLowerCase();
-        if (['fqa-off', 'fqa-on', 'fqa-non-qualified', 'fqa-qualified-mobile', 'fqa-qualified-desktop'].includes(showwith)) hideQuickActionsOnDevices(navigator.userAgent);
+        if (['fqa-off', 'fqa-on', 'fqa-non-qualified', 'fqa-qualified-mobile', 'fqa-qualified-desktop', 'fqa-qualified-ios', 'fqa-qualified-android'].includes(showwith)) hideQuickActionsOnDevices(navigator.userAgent);
         sectionRemove = showWithSearchParam !== null ? showWithSearchParam !== 'on' : getMetadata(showwith) !== 'on';
       }
       if (sectionRemove) section.remove();
@@ -483,9 +504,10 @@ export function preDecorateSections(area) {
             const sameHash = currURL.hash === linkToTargetURL?.hash;
             const isNotInFloatingCta = !a.closest('.block')?.classList.contains('floating-button');
             const notFloatingCtaIgnore = !a.classList.contains('floating-cta-ignore');
+            const isNotInCtaCarousel = !a.closest('.cta-carousel');
 
             return (sameText || (samePathname && sameHash))
-              && isNotInFloatingCta && notFloatingCtaIgnore;
+              && isNotInFloatingCta && notFloatingCtaIgnore && isNotInCtaCarousel;
           } catch (error) {
             window.lana?.log(`${error?.message || error?.detail || error}`, { tags: 'utils', severity: 'error' });
             return false;
@@ -605,7 +627,7 @@ export function buildAutoBlocks() {
     const lastDiv = document.querySelector('main > div:last-of-type');
     const newDiv = document.createElement('div');
     lastDiv.insertAdjacentElement('afterend', newDiv);
-    const validButtonVersion = ['floating-button', 'multifunction-button', 'mobile-fork-button', 'mobile-fork-button-frictionless', 'mobile-fork-button-dismissable'];
+    const validButtonVersion = ['floating-button', 'multifunction-button', 'mobile-fork-button', 'mobile-fork-button-frictionless', 'mobile-fork-button-dismissable', 'mobile-fork-button-os-split'];
     const device = document.body.dataset?.device;
     const blockName = getMetadata(`${device}-floating-cta`);
 
@@ -757,9 +779,11 @@ export async function formatDynamicCartLink(a) {
     const pattern = /.*commerce.*adobe\.com.*/gm;
     if (!pattern.test(a.href)) return a;
     a.style.visibility = 'hidden';
+    /* eslint-disable import/no-cycle */
     const [{ fetchPlanOnePlans, buildUrl }, { getConfig }] = await Promise.all([
       import('./utils/pricing.js'), import(`${getLibs()}/utils/utils.js`),
     ]);
+    /* eslint-enable import/no-cycle */
     const { url, country, language, offerId } = await fetchPlanOnePlans(a.href);
     const newTrialHref = buildUrl(url, country, language, getConfig, offerId);
     a.href = newTrialHref;
@@ -795,8 +819,8 @@ export function decorateArea(area = document) {
   }());
 
   if (area.querySelectorAll(`${selector} a[href*="adobesparkpost.app.link"], ${selector} a[href*="adobesparkpost-web.app.link"]`).length) {
-    // eslint-disable-next-line import/no-cycle
     // select links again to refresh reference
+    // eslint-disable-next-line import/no-cycle
     import('./branchlinks.js').then((mod) => mod.default(area.querySelectorAll(`${selector} a[href*="adobesparkpost.app.link"], ${selector} a[href*="adobesparkpost-web.app.link"]`)));
   }
 
@@ -890,4 +914,10 @@ export function isEmptyValue(value) {
  */
 export function hasContent(value) {
   return !isEmptyValue(value);
+}
+
+export function getContentRoot(location) {
+  const { hostname } = location || window.location;
+  if (['--express-color--', 'color.stage.adobe.com', 'color.adobe.com'].some((i) => hostname.includes(i))) return '';
+  return '/express';
 }

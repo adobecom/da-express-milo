@@ -75,18 +75,28 @@ function createPromptLinkElement(promptLink, prompt) {
   return wrapper;
 }
 
-const LOGO = 'adobe-express-logo';
 function injectExpressLogo(block, wrapper) {
   if (block.classList.contains('entitled')) return;
-  if (!['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) return;
-  const logo = getIconElementDeprecated(LOGO, '22px');
-  logo.classList.add('express-logo');
-  wrapper.prepend(logo);
+  const metadataValue = getMetadata('marquee-inject-logo')?.toLowerCase();
+  if (!['on', 'yes', 'acrobat-express'].includes(metadataValue)) return;
+  let logoName = 'adobe-express-logo';
+  let logoSize = '22px';
+  let logoAlt = 'Adobe Express logo';
+  let logoClass = 'express-logo';
+  if (metadataValue === 'acrobat-express') {
+    logoName = 'cobrand-lockup-acrobat-express';
+    logoSize = '22px';
+    logoAlt = 'Adobe Acrobat X Adobe Express co-brand logo';
+    logoClass = 'acrobat-express-lockup';
+  }
+  const logoElement = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
+  wrapper.prepend(logoElement);
 }
 
 async function setHorizontalMasonry(el) {
   const link = el.querySelector(':scope .con-button');
   if (!link) {
+    // eslint-disable-next-line no-console
     console.error('Missing Generate Link');
     return;
   }

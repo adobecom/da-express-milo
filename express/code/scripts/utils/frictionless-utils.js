@@ -1,4 +1,4 @@
-import { getLibs } from '../utils.js';
+import { getLibs, isWindows, getMobileOperatingSystem } from '../utils.js';
 
 // Shared constants and configurations for frictionless quick actions
 const JPG = 'jpg';
@@ -82,6 +82,16 @@ const getMergeVideosCfg = () => ({
   },
 });
 
+const getHeicInputCheck = (...types) => (input, fileName) => {
+  const baseCheck = getBaseImgCfg(...types).input_check(input);
+  if (baseCheck || input === `image/${HEIC}`) return true;
+  if (!input && fileName && isWindows()) {
+    const ext = fileName.split('.').pop()?.toLowerCase();
+    return types.includes(ext);
+  }
+  return false;
+};
+
 // Shared QA configurations
 export const QA_CONFIGS = {
   'convert-to-jpg': {
@@ -100,6 +110,10 @@ export const QA_CONFIGS = {
     ...getBaseImgCfg(JPG, JPEG, PNG),
     input_check: () => true,
   },
+  'remove-background-easy-upload-variant': {
+    ...getBaseImgCfg(JPG, JPEG, PNG),
+    input_check: () => true,
+  },
   'qa-in-product-variant1': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'qa-in-product-variant2': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'qa-in-product-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
@@ -115,13 +129,14 @@ export const QA_CONFIGS = {
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
   'remove-background-fast-track-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'remove-background-fast-track-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'remove-background-focused': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'heic-to-jpg': {
     ...getBaseImgCfg(PNG, WEBP, HEIC),
-    input_check: (input) => getBaseImgCfg(PNG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+    input_check: getHeicInputCheck(PNG, WEBP, HEIC),
   },
   'heic-to-png': {
     ...getBaseImgCfg(JPG, JPEG, WEBP, HEIC),
-    input_check: (input) => getBaseImgCfg(JPG, JPEG, WEBP, HEIC).input_check(input) || input === `image/${HEIC}`,
+    input_check: getHeicInputCheck(JPG, JPEG, WEBP, HEIC),
   },
 };
 
@@ -151,11 +166,18 @@ export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   removeBackgroundVariant1: 'qa-in-product-variant1',
   removeBackgroundVariant2: 'qa-in-product-variant2',
   removeBackgroundFasttrackVariant: 'remove-background-fast-track-variant',
+  removeBackgroundFocused: 'remove-background-focused',
 };
 
 export const AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   removeBackground: 'remove-background',
 };
+
+export function shouldShowVideoQuickActionPickerForMobile(quickAction, file) {
+  return quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.videoEditor
+    && getMobileOperatingSystem() === 'iOS'
+    && file?.type?.startsWith('video/');
+}
 
 // Route paths map corresponding to the express routes
 export const EXPRESS_ROUTE_PATHS = {
@@ -440,7 +462,7 @@ export function executeQuickAction(
 export async function getErrorMsg(files, quickAction, replaceKey, getConfig) {
   let msg;
   const isNotValid = Array.from(files).some(
-    (file) => !QA_CONFIGS[quickAction].input_check(file.type),
+    (file) => !QA_CONFIGS[quickAction].input_check(file.type, file.name),
   );
   if (isNotValid) {
     msg = await replaceKey('file-type-not-supported', getConfig());
@@ -456,7 +478,7 @@ export async function processFileForQuickAction(
 ) {
   const maxSize = QA_CONFIGS[quickAction].max_size ?? 40 * 1024 * 1024;
 
-  if (QA_CONFIGS[quickAction].input_check(file.type) && file.size <= maxSize) {
+  if (QA_CONFIGS[quickAction].input_check(file.type, file.name) && file.size <= maxSize) {
     const isVideo = QA_CONFIGS[quickAction].group === 'video';
     if (isVideo) {
       window.history.pushState({ hideFrictionlessQa: true }, '', '');
