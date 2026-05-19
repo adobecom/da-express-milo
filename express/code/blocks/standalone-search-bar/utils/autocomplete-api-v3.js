@@ -3,7 +3,7 @@ import { memoize, throttle, debounce } from '../../../scripts/utils/hofs.js';
 const url = 'https://adobesearch-atc.adobe.io/uss/v3/autocomplete';
 const experienceId = 'default-templates-autocomplete-v1';
 const scopeEntities = ['HzTemplate'];
-const wlLocales = ['en-US', 'fr-FR', 'de-DE', 'ja-JP', 'en-IN'];
+const wlLocales = ['en-US', 'fr-FR', 'de-DE', 'ja-JP'];
 const emptyRes = { queryResults: [{ items: [] }] };
 
 export async function fetchAPI({ limit = 5, textQuery, locale = 'en-US' }) {

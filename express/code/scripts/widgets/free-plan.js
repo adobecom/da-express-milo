@@ -50,17 +50,21 @@ export async function addFreePlanWidget(elem) {
   const { getMetadata } = await import(`${getLibs()}/utils/utils.js`);
   const freePlanMeta = getMetadata('show-free-plan')?.toLowerCase();
 
-  const WIDGET_TYPES = {
-    branded: ['yes', 'true', 'y', 'on', 'branded'],
-    features: ['features'],
-    entitled: ['entitled'],
-  };
+  if (!freePlanMeta || ['no', 'false', 'n', 'off'].includes(freePlanMeta)) return;
+  let widget;
 
-  if (!freePlanMeta) return;
-  const typeKey = Object.keys(WIDGET_TYPES).find((k) => WIDGET_TYPES[k].includes(freePlanMeta));
-  if (!typeKey || !elem) return;
+  if (elem && ['yes', 'true', 'y', 'on', 'branded'].includes(freePlanMeta)) {
+    widget = await buildFreePlanWidget({ typeKey: 'branded' });
+  }
 
-  const widget = await buildFreePlanWidget({ typeKey });
+  if (elem && ['features'].includes(freePlanMeta)) {
+    widget = await buildFreePlanWidget({ typeKey: 'features' });
+  }
+
+  if (elem && ['entitled'].includes(freePlanMeta)) {
+    widget = await buildFreePlanWidget({ typeKey: 'entitled' });
+  }
+
   elem.append(widget);
   elem.classList.add('free-plan-container');
 }

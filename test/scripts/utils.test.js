@@ -2,13 +2,7 @@ import { expect } from '@esm-bundle/chai';
 import { readFile } from '@web/test-runner-commands';
 import sinon from 'sinon';
 import { mockRes } from '../blocks/test-utilities.js';
-import {
-  setLibs,
-  hideQuickActionsOnDevices,
-  getIconElementDeprecated,
-  convertToInlineSVG,
-  getContentRoot,
-} from '../../express/code/scripts/utils.js';
+import { setLibs, hideQuickActionsOnDevices, getIconElementDeprecated, convertToInlineSVG } from '../../express/code/scripts/utils.js';
 import { transformLinkToAnimation } from '../../express/code/scripts/utils/media.js';
 
 describe('Libs', () => {
@@ -264,27 +258,5 @@ describe('transformLinkToAnimation', () => {
 
     // Restore original lana
     window.lana = originalLana;
-  });
-});
-
-describe('getContentRoot', () => {
-  const tests = [
-    ['https://main--express-color--adobecom.aem.page/', ''],
-    ['https://main--express-color--adobecom.aem.live/', ''],
-    ['https://color.stage.adobe.com', ''],
-    ['https://color.adobe.com', ''],
-    ['https://main--da-express-milo--adobecom.aem.page/', '/express'],
-    ['https://main--da-express-milo--adobecom.aem.live/', '/express'],
-    ['https://www.stage.adobe.com/', '/express'],
-    ['https://www.adobe.com/', '/express'],
-    ['http://localhost:3000', '/express'],
-  ];
-
-  tests.forEach(([url, expected]) => {
-    it(`Sets content root for ${url}`, () => {
-      const location = new URL(url);
-      const contentRoot = getContentRoot(location);
-      expect(contentRoot).to.equal(expected);
-    });
   });
 });

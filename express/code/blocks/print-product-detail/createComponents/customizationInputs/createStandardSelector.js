@@ -1,4 +1,3 @@
-/* eslint-disable import/no-cycle */
 import { getLibs } from '../../../../scripts/utils.js';
 import { createPicker } from '../../../../scripts/widgets/picker.js';
 import updateAllDynamicElements from '../../utilities/event-handlers.js';

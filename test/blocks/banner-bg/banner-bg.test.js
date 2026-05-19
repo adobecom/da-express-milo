@@ -11,7 +11,6 @@ const basic = await readFile({ path: './mocks/basic.html' });
 const lightBg = await readFile({ path: './mocks/light-bg.html' });
 const multiButton = await readFile({ path: './mocks/multi-button.html' });
 const withLogo = await readFile({ path: './mocks/with-logo.html' });
-const coolDarkBg = await readFile({ path: './mocks/cool-dark-bg.html' });
 
 describe('Banner Background', () => {
   before(() => {
@@ -136,15 +135,6 @@ describe('Banner Background', () => {
     expect(button.classList.contains('accent')).to.be.true;
     expect(button.classList.contains('dark')).to.be.true;
     expect(button.classList.contains('bg-banner-button')).to.be.false;
-  });
-
-  it('cool-dark-bg CTA button has aria-label', async () => {
-    document.body.innerHTML = coolDarkBg;
-    const banner = document.querySelector('.banner-bg');
-    await decorate(banner);
-
-    const button = banner.querySelector('a.button');
-    expect(button.getAttribute('aria-label')).to.equal('Get Started for Free');
   });
 
   it('Multi-button styling includes reverse class', async () => {

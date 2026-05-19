@@ -9,6 +9,7 @@ let getMetadata; let replaceKeyArray;
 let tagCopied; let editThisTemplate;
 let free;
 let variants;
+let props;
 let sharePlaceholder;
 let mv;
 let sdid;
@@ -175,10 +176,10 @@ function renderShareWrapper(templateInfo) {
   return wrapper;
 }
 
-export const buildiFrameContent = (template, properties = {}) => {
+export const buildiFrameContent = (template) => {
   const { branchUrl } = template.customLinks;
-  const taskID = properties?.taskid;
-  const zazzleUrl = properties?.zazzleurl;
+  const taskID = props?.taskid;
+  const zazzleUrl = props?.zazzleurl;
   const { lang } = document.documentElement;
   const iFrame = createTag('iframe', {
     src: `${zazzleUrl}?TD=${template.id}&taskID=${taskID}&shortcode=${branchUrl.split('/').pop()}&lang=${lang}`,
@@ -190,10 +191,10 @@ export const buildiFrameContent = (template, properties = {}) => {
   return iFrame;
 };
 /* c8 ignore next */
-const showModaliFrame = async (template, properties) => {
+const showModaliFrame = async (template) => {
   const { getModal } = await import(`${getLibs()}/blocks/modal/modal.js`);
 
-  const iFrameContent = buildiFrameContent(template, properties);
+  const iFrameContent = buildiFrameContent(template);
   const modal = await getModal(null, {
     id: template.id.replace(/:/g, '-'),
     class: 'print-iframe',
@@ -205,7 +206,7 @@ const showModaliFrame = async (template, properties) => {
 };
 
 /* c8 ignore next */
-function renderPrintCTA(template, properties) {
+function renderPrintCTA(template) {
   const btnTitle = 'Customize design';
   const btnEl = createTag('a', {
     href: '#modal',
@@ -216,14 +217,14 @@ function renderPrintCTA(template, properties) {
 
   btnEl.addEventListener('click', async (e) => {
     e.preventDefault();
-    await showModaliFrame(template, properties);
+    await showModaliFrame(template);
   });
 
   btnEl.textContent = btnTitle;
   return btnEl;
 }
 
-function renderPrintCTALink(template, properties) {
+function renderPrintCTALink(template) {
   const link = createTag('a', {
     href: '#modal',
     title: 'Customize design',
@@ -232,7 +233,7 @@ function renderPrintCTALink(template, properties) {
 
   link.addEventListener('click', async (e) => {
     e.preventDefault();
-    await showModaliFrame(template, properties);
+    await showModaliFrame(template);
   });
 
   return link;
@@ -547,13 +548,13 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   if (variants?.includes('flyer')
   || variants?.includes('t-shirt')
   || variants?.includes('print')) {
-    cta = renderPrintCTA(template, properties);
-    ctaLink = renderPrintCTALink(template, properties);
+    cta = renderPrintCTA(template);
+    ctaLink = renderPrintCTALink(template);
   } else {
-    mv = properties?.mv ? `?mv=${properties.mv}` : '';
-    sdid = properties?.sdid ? `&sdid=${properties.sdid}` : '';
-    source = properties?.source ? `&source=${properties.source}` : '';
-    action = properties?.action ? `&action=${properties.action}` : '';
+    mv = props?.mv ? `?mv=${props.mv}` : '';
+    sdid = props?.sdid ? `&sdid=${props.sdid}` : '';
+    source = props?.source ? `&source=${props.source}` : '';
+    action = props?.action ? `&action=${props.action}` : '';
     cta = renderCTA(template.customLinks.branchUrl, template, customUrlConfig);
     ctaLink = renderCTALink(template.customLinks.branchUrl, template, customUrlConfig);
   }
@@ -712,6 +713,7 @@ function renderStillWrapper(template, renderOptions = {}) {
 
 export default async function renderTemplate(template, variant, properties, renderOptions = {}) {
   variants = variant;
+  props = properties;
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]).then(([utils, placeholders]) => {
     ({ createTag, getConfig, getMetadata } = utils);
     ({ replaceKeyArray } = placeholders);
@@ -726,6 +728,6 @@ export default async function renderTemplate(template, variant, properties, rend
   const customUrlConfig = properties?.customUrlConfig || null;
 
   tmpltEl.append(renderStillWrapper(template, renderOptions));
-  tmpltEl.append(renderHoverWrapper(template, customUrlConfig, properties));
+  tmpltEl.append(renderHoverWrapper(template, customUrlConfig));
   return tmpltEl;
 }

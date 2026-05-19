@@ -474,14 +474,6 @@ function createAriaLiveRegion(comparisonBlock) {
   return ariaLiveRegion;
 }
 
-function applyTabAnchorToButtons(comparisonBlock) {
-  const closestTab = comparisonBlock.closest('[role="tabpanel"]');
-  if (!closestTab) return;
-  const tabId = parseInt(closestTab.id.split('-').pop(), 10);
-  if (Number.isNaN(tabId)) return;
-  comparisonBlock.setAttribute('id', `pricing-table-${tabId}`);
-}
-
 /**
  * Process button styling for fill buttons
  * @param {Array} contentSections - The content sections array
@@ -774,7 +766,6 @@ export default async function decorate(comparisonBlock) {
     const ariaLiveRegion = createAriaLiveRegion(comparisonBlock);
 
     processButtonStyling(contentSections);
-    applyTabAnchorToButtons(comparisonBlock);
 
     const { stickyHeaderEl, colTitles } = createStickyHeader(contentSections[0], comparisonBlock);
     comparisonBlock.appendChild(stickyHeaderEl);

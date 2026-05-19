@@ -1,6 +1,4 @@
-// eslint-disable-next-line import/no-cycle
 import { getCountry } from './location-utils.js';
-// eslint-disable-next-line import/no-cycle
 import { getLibs } from '../utils.js';
 
 const currencies = {

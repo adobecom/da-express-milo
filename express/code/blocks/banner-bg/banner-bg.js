@@ -9,7 +9,6 @@ const CONFIG = {
       'blue-green-pink-bg': '/express/code/blocks/banner-bg/img/blue-green-pink-bg.jpg',
       'blue-bg': '/express/code/blocks/banner-bg/img/blue-bg.jpg',
       'blue-pink-orange-bg': '/express/code/blocks/banner-bg/img/blue-pink-orange-bg.jpg',
-      'cool-dark-bg': 'cool-dark-bg',
       'green-blue-red-bg': '/express/code/blocks/banner-bg/img/green-blue-red-bg.jpg',
       'blue-purple-gray-bg': '/express/code/blocks/banner-bg/img/blue-purple-gray-bg.jpg',
       'yellow-pink-blue-bg': '/express/code/blocks/banner-bg/img/yellow-pink-blue-bg.jpg',
@@ -29,7 +28,6 @@ const CONFIG = {
   headings: ['h2', 'h3', 'h4'],
   logo: {
     icon: 'adobe-express-logo',
-    iconDark: 'adobe-express-logo-white',
     class: 'express-logo',
     target: 'H2',
   },
@@ -47,8 +45,7 @@ function detectBackgroundVariant(block) {
 }
 
 function preloadBackgroundImage(imagePath) {
-  // if imagePath is not a valid URL, return
-  if (!imagePath || !imagePath.startsWith('/') || document.querySelector(`link[href="${imagePath}"]`)) {
+  if (!imagePath || document.querySelector(`link[href="${imagePath}"]`)) {
     return;
   }
 
@@ -71,17 +68,7 @@ function createBackgroundContainer(block) {
   normalizeHeadings(block, CONFIG.headings);
 }
 
-// ============================================================================
-// CONTENT ENHANCEMENT
-// ============================================================================
-
-/**
- * Injects Adobe Express logo if configured
- * @param {HTMLElement} block - The banner block element
- * @param {HTMLElement} section - The parent section element
- * @param {'light'|'dark'} theme - Logo theme variant
- */
-function injectLogo(block, section, theme = 'light') {
+function injectLogo(block, section) {
   const metadata = section?.querySelector('.section-metadata');
   if (!metadata) return;
 
@@ -89,8 +76,7 @@ function injectLogo(block, section, theme = 'light') {
   const shouldInject = ['on', 'yes'].includes(config['inject-logo']?.toLowerCase());
 
   if (shouldInject) {
-    const iconName = theme === 'dark' ? CONFIG.logo.iconDark : CONFIG.logo.icon;
-    const logo = getIconElementDeprecated(iconName);
+    const logo = getIconElementDeprecated(CONFIG.logo.icon);
     logo.classList.add(CONFIG.logo.class);
     block.querySelector(CONFIG.logo.target)?.parentElement?.prepend(logo);
   }
@@ -125,11 +111,6 @@ function styleButtons(block, variantClass) {
     }
 
     button.className = buttonClasses.join(' ');
-
-    if (!button.getAttribute('aria-label')) {
-      const label = button.title || button.textContent?.trim();
-      if (label) button.setAttribute('aria-label', label);
-    }
   });
 }
 
@@ -207,8 +188,7 @@ function handleSectionInheritance(block) {
 }
 
 async function enhanceContent(block, section, variantClass) {
-  const logoTheme = variantClass === 'cool-dark-bg' ? 'dark' : 'light';
-  injectLogo(block, section, logoTheme);
+  injectLogo(block, section);
   styleButtons(block, variantClass);
   await formatPhoneNumbers(block);
   fixIcons(block);

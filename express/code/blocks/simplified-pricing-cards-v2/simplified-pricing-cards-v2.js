@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { getLibs, addTempWrapperDeprecated, decorateButtonsDeprecated, getIconElementDeprecated } from '../../scripts/utils.js';
 import {
   fetchPlanOnePlans,

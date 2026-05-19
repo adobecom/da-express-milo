@@ -4,11 +4,11 @@ body main .section:has(.wayfinder) {
 
 
 .wayfinder {
-    border: 2px solid var(--color-black);
+    border: 2px solid black;
     border-radius: 20px;
-    padding: var(--spacing-300) 0 var(--spacing-300) 0;
-    margin-left: var(--spacing-350);
-    margin-right: var(--spacing-350);
+    padding: 16px 0 16px 0;
+    margin-left: 20px;
+    margin-right: 20px;
     margin-top: 60px;
     text-align: center;
     max-width: 1328px;
@@ -20,7 +20,7 @@ main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, 
   font-style: normal;
   font-weight: 700;
   line-height: 130%; /* 20.8px */
-  margin: var(--spacing-300) 0 var(--spacing-50) 0;
+  margin: 16px 0 2px 0;
 }
 
 .wayfinder.narrow {
@@ -32,37 +32,29 @@ main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, 
 }
 
 .wayfinder.dark {
-    background-color: var(--color-black);
-    color: var(--color-white);
+    background-color: black;
+    color: white;
 }
 
 .wayfinder.light {
     border: 2px solid var(--color-info-accent);
 }
 
-.wayfinder a, .wayfinder.light a, .wayfinder.dark a, .wayfinder.gradient a {
-    color: inherit;
-    text-decoration: underline;
-}
-
-
-
 .wayfinder.gradient {
-    color: var(--color-black);
-    border: 2px solid var(--color-white);
+    color: black;
+    border: 2px solid white;
 }
-
 
 .wayfinder .cta-row .button {
     height: fit-content;
-    margin: var(--spacing-100);
-    background-color: var(--color-black);
-    border-color: var(--color-black);
+    margin: 8px;
+    background-color: black;
+    border-color: black;
 }
 
 .wayfinder.dark .cta-row .button {
-    color: var(--color-white);
-    border-color: var(--color-white);
+    color: white;
+    border-color: white;
 }
 .wayfinder .text-row > div {
   padding: var(--spacing-200);
@@ -75,15 +67,15 @@ main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, 
 
 .wayfinder .cta-row strong .button {
     background-color: var(--color-info-accent);
-    color: var(--color-white);
+    color: white;
     border: none;
-    padding-bottom: var(--spacing-100);
-    padding-top: var(--spacing-100);
+    padding-bottom: 8px;
+    padding-top: 8px;
 }
 
 .wayfinder .cta-row em .button {
     background-color: transparent;
-    color: var(--color-black);
+    color: black;
 }
 .wayfinder .cta-row em .button:hover {
   color: var(--color-white);
@@ -93,11 +85,11 @@ main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, 
     background-color: none;
     border: none;
     text-underline-offset: 5px;
-    margin-left: var(--spacing-0);
-    margin-right: var(--spacing-0);
+    margin-left: 0px;
+    margin-right: 0px;
     text-decoration: underline;
-    padding-left: var(--spacing-100);
-    padding-right: var(--spacing-100);
+    padding-left: 8px;
+    padding-right: 8px;
     margin-top: 11px;
 }
 
@@ -124,7 +116,7 @@ main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, 
     font-style: normal;
     font-weight: 700;
     line-height: 130%; /* 20.8px */
-    margin: var(--spacing-300) 0;
+    margin: 16px 0;
   }
 
     .wayfinder {
@@ -132,6 +124,7 @@ main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, 
         flex-direction: column;
         justify-content: center;
         align-items: center;
+        margin: 30px 2p0px 2p0px auto;
         padding: 10px;
     }
 
@@ -142,13 +135,13 @@ main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, 
 
     .wayfinder .text-row div {
       display: flex;
-        gap: var(--spacing-100);
+        gap: 8px;
     }
 
     .wayfinder .cta-row {
         display: flex;
         position: relative;
-        top: var(--spacing-50);
+        top: 2px;
         margin-left: 10px;
         overflow-x: scroll;
     }

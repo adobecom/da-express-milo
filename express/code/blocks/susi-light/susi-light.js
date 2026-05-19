@@ -429,18 +429,7 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
 
 async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const rows = el.querySelectorAll(':scope > div > div');
-  const isColor = el.classList.contains('color');
-
-  let redirectUrl;
-  if (isColor) {
-    const { consumeSusiColorRedirect } = await import(
-      '../../scripts/color-shared/utils/susiRedirect.js'
-    );
-    redirectUrl = consumeSusiColorRedirect() || window.location.href;
-  } else {
-    redirectUrl = rows[0]?.textContent?.trim();
-  }
-
+  const redirectUrl = rows[0]?.textContent?.trim();
   const client_id = rows[1]?.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb');
   const title = rows[2]?.textContent?.trim();
   const popup = el.classList.contains('popup') || false;
@@ -449,7 +438,7 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const params = buildSUSIParams({
     client_id, variant, destURL, locale, title, popup, responseType: 'token',
   });
-  if (!noRedirect && !isColor) {
+  if (!noRedirect) {
     redirectIfLoggedIn(params.destURL);
   }
   await SUSIUtils.loadSUSIScripts();

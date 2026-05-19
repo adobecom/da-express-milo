@@ -457,12 +457,6 @@ export default async function decorate(block) {
         } else if (aTag.classList.contains('light')) {
           aTag.classList.replace('accent', 'primary');
         }
-        if (!aTag.getAttribute('aria-label')) {
-          const header = cell.querySelector('h1, h2, h3, h4, h5, h6');
-          if (header) {
-            aTag.setAttribute('aria-label', `${aTag.textContent.trim()} ${header.textContent.trim()}`);
-          }
-        }
       }
 
       // handle history events

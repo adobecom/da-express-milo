@@ -205,7 +205,6 @@ async function getReplacementsFromSearch() {
     phformat,
     topics,
     q,
-    ckgid,
   } = params;
   if (!tasks && !phformat) {
     return null;
@@ -223,7 +222,6 @@ async function getReplacementsFromSearch() {
   const sanitizedTasksx = tasksx?.match(exp) ? '' : tasksx;
   const sanitizedTopics = topics?.match(exp) ? '' : topics;
   const sanitizedQuery = q?.match(exp) ? '' : q;
-  const sanitizedCkgId = ckgid?.match(exp) ? '' : ckgid;
 
   const tasksPair = Object.entries(categories).find((cat) => cat[1] === sanitizedTasks);
   const xTasksPair = Object.entries(xCategories).find((cat) => cat[1] === sanitizedTasksx);
@@ -231,11 +229,6 @@ async function getReplacementsFromSearch() {
   let translatedTasks = xTasksPair?.[1] ? xTasksPair[0].toLowerCase() : sanitizedTasksx;
   if (!translatedTasks) {
     translatedTasks = tasksPair?.[1] ? tasksPair[0].toLowerCase() : sanitizedTasks;
-  }
-  // CKG searches already include a fully qualified query phrase in `topics`/`q`.
-  // Appending translated tasks duplicates terms in page title, marquee heading, and breadcrumbs.
-  if (sanitizedCkgId) {
-    translatedTasks = '';
   }
   return {
     '{{queryTasks}}': sanitizedTasks || '',

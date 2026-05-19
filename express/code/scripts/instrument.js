@@ -155,11 +155,7 @@ export function sendEventToAnalytics(eventName) {
 
 export function sendFrictionlessEventToAdobeAnaltics(block, eventName, extraProperties = {}) {
   const fireEvent = () => {
-    const {
-      event: extraEvent = {},
-      custom: extraCustom = {},
-      content: extraContent,
-    } = extraProperties;
+    const { event: extraEvent = {}, custom: extraCustom = {} } = extraProperties;
     _satellite.track('event', {
       xdm: {},
       data: {
@@ -178,9 +174,7 @@ export function sendFrictionlessEventToAdobeAnaltics(block, eventName, extraProp
               url: loc.href,
               ...extraEvent,
             },
-            ...(extraContent && { content: extraContent }),
             custom: {
-              ...extraCustom,
               qa: {
                 group: block.dataset.frictionlessgroup ?? 'unknown',
                 type: block.dataset.frictionlesstype ?? 'unknown',
@@ -280,101 +274,6 @@ function trackTemplatePageLoad() {
   }
   if (expressLandingPageType === 'template') {
     trackViewTemplatePage('template', useCase, undefined, undefined, false, {}, true);
-  }
-}
-
-function trackColorPageLoad() {
-  try {
-    if (getMetadata('pagetype') !== 'color') return;
-
-    const eventName = 'view-color-page';
-    let refDomain = '';
-    let previousPagename = '';
-    try {
-      const referrerUrl = new URL(document.referrer);
-      refDomain = referrerUrl.hostname;
-      previousPagename = referrerUrl.pathname;
-    } catch { /* no referrer or invalid */ }
-
-    const fireEvent = () => {
-      _satellite.track('event', {
-        xdm: {},
-        data: {
-          eventType: 'web.webinteraction.linkClicks',
-          web: {
-            webInteraction: {
-              name: eventName,
-              linkClicks: { value: 1 },
-              type: 'other',
-            },
-          },
-          _adobe_corpnew: {
-            sdm: {
-              event: {
-                pagename: eventName,
-                url: loc.href,
-              },
-              custom: {
-                aa: {
-                  page_name: getPageName(),
-                  ref_domain: refDomain,
-                  previous_pagename: previousPagename,
-                },
-                link: {
-                  page_url: loc.href,
-                },
-                ui: {
-                  location: pathname,
-                },
-              },
-            },
-          },
-        },
-      });
-    };
-    safelyFireAnalyticsEvent(fireEvent);
-  } catch (error) {
-    window.lana?.log(`Failed to track color page load: ${error}`, { tags: 'color, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
-  }
-}
-
-export function trackColorBlockLoad(blockType) {
-  try {
-    const eventName = 'view-color-block';
-    const fireEvent = () => {
-      _satellite.track('event', {
-        xdm: {},
-        data: {
-          eventType: 'web.webinteraction.linkClicks',
-          web: {
-            webInteraction: {
-              name: eventName,
-              linkClicks: { value: 1 },
-              type: 'other',
-            },
-          },
-          _adobe_corpnew: {
-            sdm: {
-              event: {
-                pagename: eventName,
-                url: loc.href,
-              },
-              custom: {
-                ui: {
-                  location: pathname,
-                },
-                block: {
-                  type: blockType,
-                },
-              },
-            },
-          },
-        },
-      });
-    };
-    safelyFireAnalyticsEvent(fireEvent);
-  } catch (error) {
-    window.lana?.log(`Failed to track color block load: ${error}`, { tags: 'color, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
   }
 }
 
@@ -575,7 +474,6 @@ export default async function martechLoadedCB() {
   setDataAnalyticsAttributesForMartech();
   decorateAnalyticsEvents();
   trackTemplatePageLoad();
-  trackColorPageLoad();
 
   // TODO Start of section to be removed after Jingle finishes adding xlg to old express Repo
   // this piece of code is necessary for the ratings block atm so that the right user

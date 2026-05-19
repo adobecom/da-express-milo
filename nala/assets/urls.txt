@@ -42,8 +42,6 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/collapsibl
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/collapsible-rows/collapsible-rows
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color-wheel
-
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/content-toggle/content-toggle
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/content-toggle-v2/content-toggle-v2

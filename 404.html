@@ -105,6 +105,7 @@
           ['dk', '/'],
           ['it', '/'],
           ['br', '/'],
+          ['cn', '/'],
           ['de', '/'],
           ['es', '/'],
           ['fi', '/'],
@@ -118,6 +119,7 @@
           ['vn_en', '/'],
           ['vn_vi', '/'],
           ['za', '/'],
+          ['zh-Hans-CN', '/cn/' ],
           ['zh-Hant-TW', '/tw/'],
         ]
       );
@@ -136,16 +138,15 @@
 
         let userLocale, redirectURL, redirectMapping, valueInMap;
         const noop = ()=>{};
-        const isColor = /color(\.(stage))?\.adobe\.com|--express-color--adobecom\.aem\.(page|live)/.test(hostname);
 
-        if (pathname.includes(eduWithExpressPrefix) && search && !isColor) {
+        if (pathname.includes(eduWithExpressPrefix) && search) {
           [_, userLocale] =   search.split('=');
           valueInMap = redirectMap.get(userLocale);
           redirectMapping =  valueInMap ? `${valueInMap}${eduRedirectPath}` : `/${eduRedirectPath}`;
           redirectURL = `${protocol}${adobeDomain}${redirectMapping}`;
           win.location.replace(redirectURL);
         }
-        else if (pathname.includes(eduWithoutPrefix) && search && !isColor) {
+        else if (pathname.includes(eduWithoutPrefix) && search ) {
 
           [_, userLocale] =   search.split('=');
           valueInMap = redirectMap.get(userLocale);
@@ -161,11 +162,7 @@
         else {
           [_, userLocale] = pathname.split('/');
           valueInMap = redirectMap.get(userLocale);
-          if (isColor) {
-            valueInMap ? win.location.replace( href.replace(`/${userLocale}`, valueInMap)) : noop;
-          } else {
-            valueInMap ? win.location.replace( href.replace(`/${userLocale}/`, valueInMap)) : noop;
-          }
+          valueInMap ? win.location.replace( href.replace(`/${userLocale}/`, valueInMap)) : noop;
         }
       }(window));
 

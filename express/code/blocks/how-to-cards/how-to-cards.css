@@ -199,7 +199,7 @@
   }
 }
 
-.how-to-cards .gallery {
+.gallery {
   display: flex;
   flex-wrap: nowrap;
   gap: var(--spacing-300);
@@ -212,22 +212,22 @@
   scroll-padding: 0 var(--spacing-300);
 }
 
-.how-to-cards .gallery::-webkit-scrollbar {
+.gallery::-webkit-scrollbar {
   -webkit-appearance: none;
   width: 0;
   height: 0;
 }
 
-.how-to-cards .gallery.center.gallery--all-displayed {
+.gallery.center.gallery--all-displayed {
   justify-content: center;
 }
 
-.how-to-cards .gallery--item {
+.gallery--item {
   scroll-snap-align: start;
   width: calc(100% - var(--spacing-300));
 }
 
-.how-to-cards .gallery-control {
+.gallery-control {
   padding: var(--spacing-300) var(--spacing-300) 0;
   display: flex;
   justify-content: flex-end;
@@ -235,16 +235,16 @@
   align-items: center;
 }
 
-.how-to-cards .gallery-control.hide,
-.how-to-cards .gallery-control .hide {
+.gallery-control.hide,
+.gallery-control .hide {
   display: none;
 }
 
-.how-to-cards .gallery-control.loading {
+.gallery-control.loading {
   visibility: hidden;
 }
 
-.how-to-cards .gallery-control button {
+.gallery-control button {
   all: unset;
   cursor: pointer;
   width: 2rem;
@@ -257,38 +257,38 @@
   background-color: var(--color-white);
 }
 
-.how-to-cards .gallery-control button:focus {
+.gallery-control button:focus {
   outline: revert;
 }
 
-.how-to-cards .gallery-control button:hover:not(:disabled) {
+.gallery-control button:hover:not(:disabled) {
   background-color: var(--color-gray-300);
 }
 
-.how-to-cards .gallery-control button:disabled {
+.gallery-control button:disabled {
   cursor: auto;
 }
 
-.how-to-cards .gallery-control button .chevron-icon {
+.gallery-control button .chevron-icon {
   width: 1.25rem;
   height: 1.25rem;
   transform-origin: center;
   display: block;
 }
 
-.how-to-cards .gallery-control button.prev .chevron-icon {
+.gallery-control button.prev .chevron-icon {
   transform: rotate(-90deg) translate(0px, -1px);
 }
 
-.how-to-cards .gallery-control button.next .chevron-icon {
+.gallery-control button.next .chevron-icon {
   transform:rotate(90deg) translate(0px, -1px);
 }
 
-.how-to-cards .gallery-control button:disabled .chevron-icon {
+.gallery-control button:disabled .chevron-icon {
   opacity: 0.35;
 }
 
-.how-to-cards .gallery-control .status {
+.gallery-control .status {
   display: flex;
   align-items: center;
   gap: 6px;
@@ -300,14 +300,14 @@
   box-sizing: border-box;
 }
 
-.how-to-cards .gallery-control .status .dot {
+.gallery-control .status .dot {
   border-radius: 50px;
   width: var(--status-dot-size);
   height: var(--status-dot-size);
   background-color: var(--color-gray-600);
 }
 
-.how-to-cards .gallery-control .status .dot.curr {
+.gallery-control .status .dot.curr {
   width: var(--status-curr-width);
   background-color: var(--color-black);
 }

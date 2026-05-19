@@ -14,11 +14,6 @@ main .section .discover-cards {
     background-repeat: no-repeat;
 }
 
-.discover-cards .subtitle {
-    padding-bottom: var(--spacing-500);
-    margin: 0;
-}
-
 .discover-cards .sub-header {
     font-weight: 400;
     font-size: var(--ax-body-s-size);
@@ -62,12 +57,6 @@ main .section .discover-cards {
 .discover-cards.flip .cards-container .card {
   background: unset;
   border: none;
-  background-color: transparent;
-  min-width: initial;
-  width: 250px;
-  max-width: initial;
-  height: 100%;
-  cursor: pointer;
 }
 
 .discover-cards.flip .flip-card-front p,
@@ -81,7 +70,6 @@ main .section .discover-cards {
   font-weight: 700;
   line-height: 130%;
   margin-top: var(--spacing-350);
-  overflow-wrap: break-word;
 }
 .discover-cards.xl-heading h1,
 .discover-cards.xl-heading h2 {
@@ -128,7 +116,7 @@ main .section .discover-cards {
 }
 .discover-cards .center-title {
     text-align: center;
-    font-size: var(--heading-font-size-m);
+    font-size: var(--heading-font-size-s);
     padding: 0 var(--spacing-300) var(--spacing-300);
 }
 .discover-cards .gallery-control {
@@ -150,14 +138,14 @@ main .section .discover-cards {
 }
 .discover-cards .cards-container .card .text-content .header {
     text-align: left;
-    font-size: var(--ax-heading-l-size);
+    font-size: var(--ax-heading-m-size);
     margin-top: 17px;
 }
 .discover-cards .cards-container .card .text-content .body {
     font-size: var(--ax-body-s-size);
     width: 262px;
-    margin-top: var(--spacing-100);
-    margin-bottom: var(--spacing-50);
+    margin-top: 8px;
+    margin-bottom: 2px;
 }
 .discover-cards .cards-container .card picture img.short {
     height: 147px;
@@ -183,8 +171,7 @@ main .section .discover-cards {
 
 @media (min-width: 600px) {
   .discover-cards .center-title {
-        padding-bottom: var(--spacing-100);
-        font-size: var(--heading-font-size-l);
+        font-size: var(--heading-font-size-m);
     }
 
     .discover-cards.v2 .center-title {
@@ -193,10 +180,11 @@ main .section .discover-cards {
     .discover-cards .cards-container .card {
         min-width: 399px;
         max-width: 399px;
-        margin: var(--spacing-0) -5px 10px auto;
+        margin: 9px -5px 10px auto;
     }
 
     .discover-cards .cards-container .card .text-content .header {
+        font-size: var(--ax-heading-xl-size);
         margin-top: 10px;
     }
     .discover-cards.v2 .cards-container .card .text-content .header  {
@@ -244,7 +232,7 @@ main .section .discover-cards {
     }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 900px) { 
   .discover-cards.flip .center-title {
     font-size: var(--heading-font-size-l);
   }
@@ -341,6 +329,15 @@ main .section .discover-cards {
     stroke: var(--color-gray-300);
 }
 
+.discover-cards.flip .card {
+  background-color: transparent;
+  min-width: initial;
+  width: 250px;
+  max-width: initial;
+  height: 100%;
+  cursor: pointer;
+}
+
 .discover-cards.flip .flip-card-inner {
   position: relative;
   width: 100%;
@@ -349,14 +346,13 @@ main .section .discover-cards {
   transition: transform 350ms ease-out;
   transform-style: preserve-3d;
   display: grid;
-  min-width: 0;
 }
 
 .discover-cards.flip .card.is-flipped .flip-card-inner {
   transform: rotateY(180deg);
 }
 
-.discover-cards.flip .flip-card-front,
+.discover-cards.flip .flip-card-front, 
 .discover-cards.flip .flip-card-back {
   font-size: var(--heading-font-size-s);
   text-align: left;
@@ -369,24 +365,20 @@ main .section .discover-cards {
   padding: var(--spacing-500) var(--spacing-400);
   box-sizing: border-box;
   grid-area: 1 / 1;
-  min-width: 0;
-  overflow: hidden;
 }
 .discover-cards.flip .flip-card-back {
   width: 100%;
   height: 100%;
   padding: 0;
   transform: rotateY(180deg);
-  position: relative;
-  overflow: visible;
 }
 
 .discover-cards.flip .flip-card-back .scrollable-content {
   position: absolute;
-  top: var(--spacing-400);
-  left: var(--spacing-300);
-  right: var(--spacing-300);
-  bottom: var(--spacing-400);
+  top: 24px;
+  left: 16px;
+  right: 16px;
+  bottom: 24px;
   overflow-y: auto;
   padding: 0;
   line-height: 1.3;
@@ -405,10 +397,10 @@ main .section .discover-cards {
 .discover-cards.flip .plus-icon-wrapper,
 .discover-cards.flip .minus-icon-wrapper {
   position: absolute;
-  bottom: var(--spacing-300);
-  right: var(--spacing-300);
-  width: var(--spacing-400);
-  height: var(--spacing-400);
+  bottom: 16px;
+  right: 16px;
+  width: 24px;
+  height: 24px;
   background-color: var(--color-black);
   border-radius: 50%;
   display: flex;
@@ -418,16 +410,16 @@ main .section .discover-cards {
 
 .discover-cards.flip .plus-icon-wrapper img,
 .discover-cards.flip .minus-icon-wrapper img {
-  width: var(--spacing-200);
-  height: var(--spacing-200);
+  width: 12px;
+  height: 12px;
 }
 
 .discover-cards.flip .minus-icon-wrapper {
   position: absolute;
-  bottom: var(--spacing-300);
-  right: var(--spacing-300);
-  width: var(--spacing-400);
-  height: var(--spacing-400);
+  bottom: 16px;
+  right: 16px;
+  width: 24px;
+  height: 24px;
   background-color: var(--color-black);
   border-radius: 50%;
   display: flex;

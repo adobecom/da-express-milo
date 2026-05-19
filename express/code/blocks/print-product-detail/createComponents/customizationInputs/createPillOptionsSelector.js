@@ -1,4 +1,3 @@
-/* eslint-disable import/no-cycle */
 import { getLibs } from '../../../../scripts/utils.js';
 import updateAllDynamicElements from '../../utilities/event-handlers.js';
 import { trackPrintAddonOptionSelect } from '../../../../scripts/instrument.js';

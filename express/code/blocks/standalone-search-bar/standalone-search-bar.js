@@ -269,7 +269,6 @@ function initSearchFunction(block, searchBarWrapper) {
       searchBar.addEventListener('input', inputHandler);
     })
     .catch((error) => {
-      // eslint-disable-next-line no-console
       console.error('Failed to load autocomplete functionality:', error);
     });
 }
@@ -407,7 +406,6 @@ async function buildSearchDropdown(searchBarWrapper) {
         dropdownContainer.append(freePlanContainer);
       })
       .catch((error) => {
-        // eslint-disable-next-line no-console
         console.error('Failed to load free plan widget:', error);
       });
   }

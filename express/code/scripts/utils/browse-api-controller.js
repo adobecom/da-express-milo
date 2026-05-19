@@ -19,10 +19,10 @@ const mFetch = memoize(
 );
 
 export default async function getData() {
-  const { getConfig, getMetadata } = await import(`${getLibs()}/utils/utils.js`);
+  const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
   const { locale } = getConfig();
 
-  let textQuery = window.location.pathname
+  const textQuery = window.location.pathname
     .split('/')
     .filter(Boolean)
     .map((s) => s.trim())
@@ -38,9 +38,7 @@ export default async function getData() {
   }
 
   if (!textQuery || textQuery.trim() === '') {
-    // Fall back to page metadata when URL doesn't provide enough context (e.g. TAAS query pages)
-    textQuery = getMetadata('tasks-x') || getMetadata('tasks') || '';
-    if (!textQuery) return null;
+    return null;
   }
 
   const data = {

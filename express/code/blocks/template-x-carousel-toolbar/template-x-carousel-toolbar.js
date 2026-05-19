@@ -70,7 +70,6 @@ async function createTemplatesContainer(recipe, el, includesSearchBar = false) {
   const { control: initialControl } = await buildGallery(
     galleryItems,
     templatesContainer,
-    { intersectionThreshold: 0.9 },
   );
   return {
     templatesContainer,
@@ -81,7 +80,6 @@ async function createTemplatesContainer(recipe, el, includesSearchBar = false) {
       const { control: newControl } = await buildGallery(
         newGalleryItems,
         templatesContainer,
-        { intersectionThreshold: 0.9 },
       );
       const oldControl = el.querySelector('.gallery-control');
       // hack to reduce cls. TODO: implement updateItems() for gallery
