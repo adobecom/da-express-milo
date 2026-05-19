@@ -19,6 +19,10 @@ body {
   overscroll-behavior-y: contain;
 }
 
+.color-wheel .ax-color-tool-layout {
+  row-gap: 0;
+}
+
 .color-wheel .ax-shell-slot--topbar {
   padding-block-end: var(--spacing-400);
 }
