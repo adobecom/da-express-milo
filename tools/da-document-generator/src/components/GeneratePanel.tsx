@@ -242,11 +242,7 @@ export default function GeneratePanel({ rows, template }: Props) {
 
   const showPreviewBtn = !running && counts.previewable > 0;
   const showPublishBtn = !running && counts.publishable > 0;
-  const showUnpublishBtn = !running
-    && results.some((r) => r.stage === 'published')
-    && !results.some((r) =>
-      ['pending', 'generating', 'generated', 'previewing', 'previewed', 'publishing'].includes(r.stage),
-    );
+  const showUnpublishBtn = !running && counts.published >= 2;
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4">
@@ -322,7 +318,7 @@ export default function GeneratePanel({ rows, template }: Props) {
             onClick={handleUnpublish}
             className="px-5 py-2.5 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors"
           >
-            Unpublish all ({counts.published})
+            Unpublish {counts.published} documents
           </button>
         )}
 
@@ -483,7 +479,14 @@ function PublishPill({
   const { stage, liveUrl } = result;
   if (stage === 'publishing') return <span className="text-green-500 font-medium">Publishing…</span>;
   if (stage === 'unpublishing') return <span className="text-orange-500 font-medium">Unpublishing…</span>;
-  if (stage === 'unpublished') return <span className="text-gray-400 font-medium">Unpublished</span>;
+  if (stage === 'unpublished') {
+    return (
+      <button type="button" onClick={onPublish}
+        className="text-xs text-green-600 hover:text-green-800 font-medium transition-colors cursor-pointer">
+        Publish
+      </button>
+    );
+  }
   if (liveUrl) {
     return (
       <div className="flex items-center gap-2 whitespace-nowrap">
