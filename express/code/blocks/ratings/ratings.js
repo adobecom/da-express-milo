@@ -94,11 +94,10 @@ export default async function decorate(block) {
     const commentBox = block.querySelector('.slider-comment');
     const timerAnimation = createTag('div', { class: 'timer' });
     const syncSubmitDisabledState = () => {
-      if (textarea.hasAttribute('required') && textarea.value.trim() === '') {
-        submit.setAttribute('aria-disabled', 'true');
-      } else {
-        submit.removeAttribute('aria-disabled');
-      }
+      const shouldDisable = textarea.hasAttribute('required') && textarea.value.trim() === '';
+      if (shouldDisable === (submit.getAttribute('aria-disabled') === 'true')) return;
+      if (shouldDisable) submit.setAttribute('aria-disabled', 'true');
+      else submit.removeAttribute('aria-disabled');
     };
     // Countdown timer to auto-submit
     const countdown = (bool) => {
@@ -141,7 +140,6 @@ export default async function decorate(block) {
         countdown(true);
       }
       commentBox.classList.add('comment--appear');
-      syncSubmitDisabledState();
     };
     // Updates the value of the slider and tooltip.
     const updateSliderValue = (snap = true) => {
