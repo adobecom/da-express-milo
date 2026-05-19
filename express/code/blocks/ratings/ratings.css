@@ -361,7 +361,11 @@
   border-color: var(--color-gray-400);
 }
 
-.ratings form [type='submit'][aria-disabled='true'] {
+.ratings form [type='submit'][aria-disabled='true'],
+.ratings form [type='submit'][aria-disabled='true']:hover,
+.ratings form [type='submit'][aria-disabled='true']:focus,
+.ratings form [type='submit'][aria-disabled='true']:focus:hover,
+.ratings form [type='submit'][aria-disabled='true']:active {
   background-color: #f0f0f0;
   border-color: #f0f0f0;
   color: #b9b9b9;
