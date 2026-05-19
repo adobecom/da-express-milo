@@ -571,8 +571,7 @@ function applyExperimentalCtas(template, cta, btnContainer) {
 
   return secondaryCta;
 }
-
-function renderHoverWrapper(template, customUrlConfig = null) {
+function renderHoverWrapper(template, customUrlConfig = null, properties = {}) {
   let cta;
   let ctaLink;
 
