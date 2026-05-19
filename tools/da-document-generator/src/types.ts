@@ -28,6 +28,7 @@ export type RowStage =
   | 'published'
   | 'unpublishing'
   | 'unpublished'
+  | 'deleting'
   | 'error';
 
 export interface QaIssue {

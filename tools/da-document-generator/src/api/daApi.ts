@@ -149,3 +149,12 @@ export async function triggerUnpublish(daPath: string, token: string): Promise<v
   if (!resp.ok) throw new Error(`unpublish ${daPath}: ${resp.status}`);
 }
 
+export async function deleteDocument(daPath: string, token: string): Promise<void> {
+  const fullpath = `${DA_API}/source${daPath}${daPath.endsWith('.html') ? '' : '.html'}`;
+  const resp = await fetch(fullpath, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  if (!resp.ok) throw new Error(`delete ${daPath}: ${resp.status}`);
+}
+

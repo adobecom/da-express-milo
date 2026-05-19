@@ -4,6 +4,7 @@ import {
   triggerPreview,
   triggerPublish,
   triggerUnpublish,
+  deleteDocument,
   getToken,
   daPathToPreviewUrl,
   daPathToLiveUrl,
@@ -19,13 +20,14 @@ interface Props {
 const DEFAULT_OUTPUT_DIR = '/adobecom/da-express-milo/drafts/maxn/document-generator';
 const CONCURRENCY = 3;
 
-type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing' | 'unpublishing';
+type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing' | 'unpublishing' | 'deleting';
 
 export default function GeneratePanel({ rows, template }: Props) {
   const [outputDir, setOutputDir] = useState(DEFAULT_OUTPUT_DIR);
   const [results, setResults] = useState<RowResult[]>([]);
   const [bulkOp, setBulkOp] = useState<BulkOp>('idle');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
 
   function toggleRowDetail(id: string) {
     setExpandedRowId((prev) => (prev === id ? null : id));
@@ -46,6 +48,10 @@ export default function GeneratePanel({ rows, template }: Props) {
     error: results.filter((r) => r.stage === 'error').length,
     published: results.filter((r) => r.stage === 'published').length,
     unpublished: results.filter((r) => r.stage === 'unpublished').length,
+    deletable: results.filter((r) =>
+      ['generated', 'qa-fail', 'previewing', 'previewed', 'publishing',
+        'published', 'unpublishing', 'unpublished'].includes(r.stage),
+    ).length,
   };
 
   async function runBatch(items: RowResult[], fn: (r: RowResult) => Promise<void>) {
@@ -102,6 +108,64 @@ export default function GeneratePanel({ rows, template }: Props) {
     }
 
     await Promise.all(Array.from({ length: Math.min(CONCURRENCY, queue.length) }, worker));
+    setBulkOp('idle');
+  }
+
+  async function handleGenerateRow(rowId: string) {
+    if (!template.html) return;
+    const row = rows.find((r) => r['_id'] === rowId);
+    if (!row) return;
+    const path = rowToOutputPath(row, outputDir);
+    setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'generating' } : r));
+    try {
+      const html = applyTemplate(template.html!, row);
+      const qa = runGenerationQa(html);
+      const res = await postDoc(path, html);
+      setResults((prev) => prev.map((r) =>
+        r.id === rowId ? { ...r, stage: 'generated', qa, editUrl: res.source?.editUrl } : r,
+      ));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'error', error: msg } : r));
+    }
+  }
+
+  async function handleDeleteRow(rowId: string, path: string) {
+    const token = getToken();
+    if (!token) return;
+    setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'deleting' } : r));
+    try {
+      await deleteDocument(path, token);
+      setResults((prev) => prev.map((r) =>
+        r.id === rowId ? { id: r.id, path: r.path, stage: 'pending' } : r,
+      ));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'error', error: msg } : r));
+    }
+  }
+
+  async function handleBulkDelete() {
+    const token = getToken();
+    if (!token) return;
+    setDeleteModalOpen(false);
+    const targets = results.filter((r) =>
+      ['generated', 'qa-fail', 'previewing', 'previewed', 'publishing',
+        'published', 'unpublishing', 'unpublished'].includes(r.stage),
+    );
+    setBulkOp('deleting');
+    await runBatch(targets, async (r) => {
+      setResults((prev) => prev.map((x) => x.id === r.id ? { ...x, stage: 'deleting' } : x));
+      try {
+        await deleteDocument(r.path, token);
+        setResults((prev) => prev.map((x) =>
+          x.id === r.id ? { id: x.id, path: x.path, stage: 'pending' } : x,
+        ));
+      } catch (err) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setResults((prev) => prev.map((x) => x.id === r.id ? { ...x, stage: 'error', error: msg } : x));
+      }
+    });
     setBulkOp('idle');
   }
 
@@ -243,6 +307,7 @@ export default function GeneratePanel({ rows, template }: Props) {
   const showPreviewBtn = !running && counts.previewable > 0;
   const showPublishBtn = !running && counts.publishable > 0;
   const showUnpublishBtn = !running && counts.published >= 2;
+  const showDeleteBtn = !running && counts.deletable >= 2;
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4">
@@ -328,6 +393,22 @@ export default function GeneratePanel({ rows, template }: Props) {
           </span>
         )}
 
+        {showDeleteBtn && (
+          <button
+            type="button"
+            onClick={() => setDeleteModalOpen(true)}
+            className="px-5 py-2.5 bg-red-700 text-white text-sm font-medium rounded-xl hover:bg-red-800 transition-colors"
+          >
+            Delete {counts.deletable} documents
+          </button>
+        )}
+
+        {bulkOp === 'deleting' && (
+          <span className="text-sm text-red-700 font-medium">
+            Deleting…
+          </span>
+        )}
+
         {results.length > 0 && !running && (
           <p className="text-sm text-gray-500 ml-auto">
             {counts.generated > 0 && <span className="text-green-600 font-medium">{counts.generated} generated </span>}
@@ -370,7 +451,11 @@ export default function GeneratePanel({ rows, template }: Props) {
                       />
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">
-                      <GeneratePill result={r} />
+                      <GeneratePill
+                        result={r}
+                        onGenerate={() => handleGenerateRow(r.id)}
+                        onDelete={() => handleDeleteRow(r.id, r.path)}
+                      />
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">
                       <PreviewPill result={r} onPreview={() => handlePreviewRow(r.id, r.path)} />
@@ -397,6 +482,43 @@ export default function GeneratePanel({ rows, template }: Props) {
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {deleteModalOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-full max-w-md flex flex-col gap-4 shadow-xl">
+            <h3 className="font-semibold text-gray-900 text-base">
+              Delete {counts.deletable} document{counts.deletable !== 1 ? 's' : ''}?
+            </h3>
+            <p className="text-sm text-gray-500">
+              This will permanently delete the following documents from DA:
+            </p>
+            <ul className="text-xs font-mono text-gray-700 max-h-64 overflow-y-auto border border-gray-100 rounded-lg p-3 flex flex-col gap-1">
+              {results
+                .filter((r) =>
+                  ['generated', 'qa-fail', 'previewing', 'previewed', 'publishing',
+                    'published', 'unpublishing', 'unpublished'].includes(r.stage),
+                )
+                .map((r) => <li key={r.id}>{r.path}</li>)}
+            </ul>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setDeleteModalOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleBulkDelete}
+                className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
@@ -435,14 +557,34 @@ function QaIssueBadge({
   );
 }
 
-function GeneratePill({ result }: { result: RowResult }) {
+function GeneratePill({
+  result,
+  onGenerate,
+  onDelete,
+}: {
+  result: RowResult;
+  onGenerate: () => void;
+  onDelete: () => void;
+}) {
   const { stage, error } = result;
-  if (stage === 'pending') return <span className="text-gray-300">—</span>;
   if (stage === 'generating') return <span className="text-blue-600 font-medium">Generating…</span>;
+  if (stage === 'deleting') return <span className="text-red-500 font-medium">Deleting…</span>;
   if (stage === 'error') return <span className="text-red-600 font-medium cursor-help" title={error}>Error</span>;
-  if (['generated', 'qa-fail', 'previewing', 'previewed', 'publishing', 'published'].includes(stage))
-    return <span className="text-green-600 font-medium">Generated</span>;
-  return <span className="text-gray-300">—</span>;
+  if (['generated', 'qa-fail', 'previewing', 'previewed', 'publishing',
+    'published', 'unpublishing', 'unpublished'].includes(stage)) {
+    return (
+      <button type="button" onClick={onDelete}
+        className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors cursor-pointer">
+        Delete
+      </button>
+    );
+  }
+  return (
+    <button type="button" onClick={onGenerate}
+      className="text-xs text-blue-500 hover:text-blue-700 font-medium transition-colors cursor-pointer">
+      Generate
+    </button>
+  );
 }
 
 function PreviewPill({ result, onPreview }: { result: RowResult; onPreview: () => void }) {
