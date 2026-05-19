@@ -1,0 +1,151 @@
+.font-bento {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 40px;
+  padding: 80px 40px;
+  background: #f8f8f8;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Text header row */
+
+.font-bento-text {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 1600px;
+  width: 100%;
+}
+
+.font-bento-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.font-bento-text h2,
+.font-bento-text h3 {
+  margin: 0;
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1.04;
+  color: #131313;
+  max-width: 700px;
+}
+
+.font-bento-text p:not(.button-container) {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: #505050;
+  max-width: 700px;
+}
+
+.font-bento-text .button-container {
+  margin: 0;
+}
+
+.font-bento-text a.button.accent {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #3b63fb;
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  padding: 10px 20px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 22px;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.font-bento-text a.button.accent:hover {
+  background: #2d53e0;
+}
+
+/* Bento grid */
+
+.font-bento-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 1600px;
+  width: 100%;
+}
+
+/* Cards */
+
+.font-bento-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: #fff;
+  border-radius: 16px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.font-bento-card-title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 22px;
+  color: #131313;
+}
+
+.font-bento-card-image {
+  overflow: hidden;
+  border-radius: 16px;
+  background: #f8f8f8;
+  flex-shrink: 0;
+  width: 100%;
+  aspect-ratio: 274 / 290;
+}
+
+.font-bento-card.wide .font-bento-card-image {
+  aspect-ratio: 620 / 290;
+}
+
+.font-bento-card-image picture,
+.font-bento-card-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (min-width: 900px) {
+  .font-bento-text {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+
+  .font-bento-text-group {
+    flex: 1 0 0;
+    min-width: 0;
+  }
+
+  .font-bento-text h2,
+  .font-bento-text h3 {
+    font-size: 36px;
+  }
+
+  .font-bento-text .button-container {
+    flex-shrink: 0;
+  }
+
+  .font-bento-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-rows: repeat(2, auto);
+    column-gap: 24px;
+    row-gap: 24px;
+  }
+}
