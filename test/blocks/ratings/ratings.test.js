@@ -4,7 +4,7 @@ import sinon from 'sinon';
 
 // Set ?nala=ratings so isNalaTestRatings() returns true in ratings-utils.js.
 // This bypasses IMS token validation and returns mock ratings data.
-history.replaceState({}, '', '?nala=ratings');
+window.history.replaceState({}, '', '?nala=ratings');
 window.isTestEnv = true;
 window.lana = { log: () => {} };
 
@@ -26,7 +26,7 @@ async function waitForSlider(block, timeout = 8000) {
   const start = Date.now();
   while (!block.querySelector('input[type=submit]')) {
     if (Date.now() - start > timeout) return false;
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise((r) => { setTimeout(r, 100); });
   }
   return true;
 }
@@ -36,7 +36,7 @@ async function waitForNoSlider(block, timeout = 8000) {
   const start = Date.now();
   while (!block.querySelector('.no-slider')) {
     if (Date.now() - start > timeout) return false;
-    await new Promise((r) => setTimeout(r, 100));
+    await new Promise((r) => { setTimeout(r, 100); });
   }
   return true;
 }
@@ -169,7 +169,7 @@ describe('Ratings Block - syncSubmitDisabledState (WCAG 2.4.7)', () => {
 
     const snapshotHTML = block.innerHTML;
     form.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-    await new Promise((r) => setTimeout(r, 200));
+    await new Promise((r) => { setTimeout(r, 200); });
 
     // Block content should be unchanged — submit was blocked
     expect(block.innerHTML).to.equal(snapshotHTML);
