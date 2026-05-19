@@ -265,6 +265,7 @@ function ensureAbsoluteUrl(url) {
 }
 
 function normalizeEncodedAmpersands(value) {
+  if (!value || typeof value !== 'string') return value ?? '';
   let normalized = value;
   try {
     normalized = decodeURIComponent(normalized);
