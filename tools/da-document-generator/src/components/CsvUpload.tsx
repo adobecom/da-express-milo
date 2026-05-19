@@ -272,7 +272,6 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
           </button>
         </div>
       )}
-
       {hasData && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <Stat label="Total" value={summary.total} />
@@ -405,14 +404,16 @@ function DataTable({
                   return (
                     <td
                       key={col}
-                      className={`px-3 py-2 whitespace-nowrap max-w-[200px] truncate ${isEmpty ? 'bg-red-50 text-red-400 italic' : 'text-gray-700'}`}
+                      className={`px-3 py-2 ${isEmpty ? 'bg-red-50 text-red-400 italic' : 'text-gray-700'}`}
                     >
-                      {col === 'template_id' && status && (
-                        <span className={`mr-1 font-bold ${status === 'valid' ? 'text-green-500' : 'text-red-500'}`}>
-                          {status === 'valid' ? '✓' : '✗'}
-                        </span>
-                      )}
-                      {isEmpty ? '—' : (row[col] ?? '')}
+                      <div className="max-w-[200px] overflow-x-auto whitespace-nowrap">
+                        {col === 'template_id' && status && (
+                          <span className={`mr-1 font-bold ${status === 'valid' ? 'text-green-500' : 'text-red-500'}`}>
+                            {status === 'valid' ? '✓' : '✗'}
+                          </span>
+                        )}
+                        {isEmpty ? '—' : (row[col] ?? '')}
+                      </div>
                     </td>
                   );
                 })}

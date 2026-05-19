@@ -53,7 +53,7 @@ export default function GeneratePanel({ rows, template }: Props) {
     let idx = 0;
     async function worker() {
       while (idx < queue.length) {
-        // eslint-disable-next-line no-await-in-loop
+         
         await fn(queue[idx++]);
       }
     }
@@ -96,7 +96,7 @@ export default function GeneratePanel({ rows, template }: Props) {
 
     async function worker() {
       while (idx < queue.length) {
-        // eslint-disable-next-line no-await-in-loop
+         
         await processRow(queue[idx++]);
       }
     }
@@ -268,7 +268,7 @@ export default function GeneratePanel({ rows, template }: Props) {
         />
         <p className="text-xs text-gray-400">
           Documents will be written to{' '}
-          <code className="bg-gray-100 px-1 rounded">{outputDir}/{'{{slug}}'}</code>
+          <code className="bg-gray-100 px-1 rounded">{outputDir}/{'{{url_slug}}'}</code>
         </p>
       </div>
 
@@ -360,8 +360,9 @@ export default function GeneratePanel({ rows, template }: Props) {
                   <tr className="border-b border-gray-100">
                     <td className="px-3 py-2 font-mono text-gray-600 whitespace-nowrap min-w-[280px]">
                       {r.editUrl ? (
-                        <a href={r.editUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
+                        <a href={r.editUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center gap-1">
                           {r.path}
+                          <ExternalLinkIcon />
                         </a>
                       ) : r.path}
                     </td>
@@ -406,6 +407,15 @@ export default function GeneratePanel({ rows, template }: Props) {
   );
 }
 
+function ExternalLinkIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 shrink-0">
+      <path d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z" />
+      <path d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z" />
+    </svg>
+  );
+}
+
 function QaIssueBadge({
   qa,
   expanded,
@@ -421,7 +431,7 @@ function QaIssueBadge({
     <button
       type="button"
       onClick={onToggle}
-      className="text-amber-700 font-medium hover:text-amber-900 flex items-center gap-1"
+      className="text-amber-700 font-medium hover:text-amber-900 flex items-center gap-1 cursor-pointer"
     >
       {qa.issues.length} issue{qa.issues.length !== 1 ? 's' : ''}
       <span className="text-xs leading-none">{expanded ? '▲' : '▼'}</span>
@@ -444,15 +454,16 @@ function PreviewPill({ result, onPreview }: { result: RowResult; onPreview: () =
   if (stage === 'previewing') return <span className="text-indigo-500 font-medium">Previewing…</span>;
   if (previewUrl) {
     return (
-      <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 font-medium hover:underline">
-        ✓ aem.page ↗
+      <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 font-medium hover:underline inline-flex items-center gap-1">
+        ✓ aem.page
+        <ExternalLinkIcon />
       </a>
     );
   }
   if (stage === 'generated') {
     return (
       <button type="button" onClick={onPreview}
-        className="text-xs text-indigo-500 hover:text-indigo-700 font-medium transition-colors">
+        className="text-xs text-indigo-500 hover:text-indigo-700 font-medium transition-colors cursor-pointer">
         Preview
       </button>
     );
@@ -476,11 +487,12 @@ function PublishPill({
   if (liveUrl) {
     return (
       <div className="flex items-center gap-2 whitespace-nowrap">
-        <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="text-green-700 font-medium hover:underline">
-          ✓ aem.live ↗
+        <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="text-green-700 font-medium hover:underline inline-flex items-center gap-1">
+          ✓ aem.live
+          <ExternalLinkIcon />
         </a>
         <button type="button" onClick={onUnpublish}
-          className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors">
+          className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors cursor-pointer">
           Unpublish
         </button>
       </div>
@@ -489,7 +501,7 @@ function PublishPill({
   if (stage === 'previewed') {
     return (
       <button type="button" onClick={onPublish}
-        className="text-xs text-green-600 hover:text-green-800 font-medium transition-colors">
+        className="text-xs text-green-600 hover:text-green-800 font-medium transition-colors cursor-pointer">
         Publish
       </button>
     );

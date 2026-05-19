@@ -66,12 +66,35 @@ export default function TemplateConfirm({ state, onChange }: Props) {
 
   return (
     <div className="flex flex-col gap-4">
+      <div>
       <input
         type="text"
         value={url}
         onChange={(e) => setUrl(e.target.value)}
         className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
+      
+
+      <div className="text-xs text-gray-400 pt-1 pl-3">
+        <button
+          type="button"
+          onClick={() => setShowFormats((v) => !v)}
+          className="flex items-center gap-1 hover:text-gray-600 transition-colors cursor-pointer"
+        >
+          <span>Accepted Formats</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0">
+            <path d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
+          </svg>
+        </button>
+        {showFormats && (
+          <div className="flex flex-col gap-0.5 mt-1">
+            <code className="bg-gray-100 px-1 rounded">https://da.live/edit#/adobecom/da-express-milo/drafts/maxn/document-generator-template</code>
+            <code className="bg-gray-100 px-1 rounded">/adobecom/da-express-milo/drafts/maxn/document-generator-template</code>
+            <code className="bg-gray-100 px-1 rounded">da-express-milo/drafts/maxn/document-generator-template</code>
+          </div>
+        )}
+      </div>
+      </div>
 
       {showResult && (
         <div className={`rounded-xl p-4 border flex flex-col gap-3 ${STATUS_CARD[state.status]}`}>
@@ -124,26 +147,6 @@ export default function TemplateConfirm({ state, onChange }: Props) {
           )}
         </div>
       )}
-
-      <div className="text-xs text-gray-400">
-        <button
-          type="button"
-          onClick={() => setShowFormats((v) => !v)}
-          className="flex items-center gap-1 hover:text-gray-600 transition-colors cursor-pointer"
-        >
-          <span>Accepted Formats</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="w-3.5 h-3.5 shrink-0">
-            <path d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z" />
-          </svg>
-        </button>
-        {showFormats && (
-          <div className="flex flex-col gap-0.5 mt-1">
-            <code className="bg-gray-100 px-1 rounded">https://da.live/edit#/adobecom/da-express-milo/drafts/maxn/document-generator-template</code>
-            <code className="bg-gray-100 px-1 rounded">/adobecom/da-express-milo/drafts/maxn/document-generator-template</code>
-            <code className="bg-gray-100 px-1 rounded">da-express-milo/drafts/maxn/document-generator-template</code>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
