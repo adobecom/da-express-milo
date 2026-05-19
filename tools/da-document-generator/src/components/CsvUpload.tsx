@@ -64,6 +64,8 @@ function slugify(s: string): string {
 const MAX_VISIBLE_ROWS = 200;
 
 export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) {
+  const [inputMode, setInputMode] = useState<'upload' | 'manual'>('upload');
+  const [manualInput, setManualInput] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [hydrating, setHydrating] = useState(false);
   const [hydrateMsg, setHydrateMsg] = useState<string | null>(null);
@@ -167,6 +169,19 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
     reader.readAsArrayBuffer(file);
   }
 
+  function handleManualSubmit() {
+    const ids = manualInput
+      .split(/[\n,]+/)
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (!ids.length) return;
+    setColumns(['template_id']);
+    setValidationStatus({});
+    setValidateMsg(null);
+    setHydrateMsg(null);
+    onChange(ids.map((id, i) => ({ _id: String(i), template_id: id })));
+  }
+
   function handleFile(file: File) {
     setValidationStatus({});
     setValidateMsg(null);
@@ -180,41 +195,83 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
 
   return (
     <div className="flex flex-col gap-4">
-      <div
-        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-        onDragLeave={() => setIsDragging(false)}
-        onDrop={(e) => {
-          e.preventDefault();
-          setIsDragging(false);
-          const file = e.dataTransfer.files[0];
-          if (file) handleFile(file);
-        }}
-        onClick={() => fileRef.current?.click()}
-        className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
-          isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
-        }`}
-      >
-        <input
-          ref={fileRef}
-          type="file"
-          accept=".csv,.xlsx"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) handleFile(file);
-            e.target.value = '';
-          }}
-        />
-        <p className="text-sm text-gray-500">
-          {hasData
-            ? `${rows.length} rows loaded — click to replace`
-            : 'Drop a .csv or .xlsx file here, or click to browse'}
-        </p>
-        <p className="text-xs text-gray-400 mt-1">
-          Requires{' '}
-          <code className="bg-gray-100 px-1 rounded">template_id</code> column
-        </p>
+      <div className="flex gap-2">
+        <button
+          onClick={() => setInputMode('upload')}
+          className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
+            inputMode === 'upload'
+              ? 'bg-gray-900 text-white border-gray-900'
+              : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+          }`}
+        >
+          Upload File
+        </button>
+        <button
+          onClick={() => setInputMode('manual')}
+          className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
+            inputMode === 'manual'
+              ? 'bg-gray-900 text-white border-gray-900'
+              : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+          }`}
+        >
+          Enter IDs
+        </button>
       </div>
+
+      {inputMode === 'upload' ? (
+        <div
+          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={(e) => {
+            e.preventDefault();
+            setIsDragging(false);
+            const file = e.dataTransfer.files[0];
+            if (file) handleFile(file);
+          }}
+          onClick={() => fileRef.current?.click()}
+          className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
+            isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+          }`}
+        >
+          <input
+            ref={fileRef}
+            type="file"
+            accept=".csv,.xlsx"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleFile(file);
+              e.target.value = '';
+            }}
+          />
+          <p className="text-sm text-gray-500">
+            {hasData
+              ? `${rows.length} rows loaded — click to replace`
+              : 'Drop a .csv or .xlsx file here, or click to browse'}
+          </p>
+          <p className="text-xs text-gray-400 mt-1">
+            Requires{' '}
+            <code className="bg-gray-100 px-1 rounded">template_id</code> column
+          </p>
+        </div>
+      ) : (
+        <div className="flex flex-col gap-2">
+          <textarea
+            value={manualInput}
+            onChange={(e) => setManualInput(e.target.value)}
+            placeholder={'Paste template IDs, one per line or comma-separated\ne.g.\n150004762482726999\n150004762482726998'}
+            rows={6}
+            className="w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-700 font-mono resize-y focus:outline-none focus:ring-2 focus:ring-indigo-300"
+          />
+          <button
+            onClick={handleManualSubmit}
+            disabled={!manualInput.trim()}
+            className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          >
+            Load IDs
+          </button>
+        </div>
+      )}
 
       {hasData && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
