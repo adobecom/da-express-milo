@@ -272,7 +272,7 @@ function normalizeEncodedAmpersands(value) {
   } catch (e) {
     // Keep original value when URI decoding fails.
   }
-  return normalized.replace(/&amp(?:%3B|;)/gi, '&').replace(/&amp;/gi, '&');
+  return normalized.replace(/&amp(?:%3B|;)/gi, '&');
 }
 
 function sanitizeExternalCtaUrl(url) {
@@ -585,7 +585,7 @@ function renderHoverWrapper(template, customUrlConfig = null) {
 
   let secondaryCta = null;
   if (isFreeStatic && experimentalCta2Url) {
-    const btnTitle = experimentalCta2Text || (editThisTemplate === 'edit this template' ? 'Edit this template' : editThisTemplate);
+    const btnTitle = experimentalCta2Text;
     secondaryCta = createTag('a', {
       href: appendTemplateId(sanitizeExternalCtaUrl(experimentalCta2Url), template),
       title: btnTitle,
