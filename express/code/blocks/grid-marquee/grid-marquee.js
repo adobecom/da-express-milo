@@ -217,7 +217,7 @@ async function makeRating(
     'aria-label': ratingsLabel,
   }, [
     createTag('span', { class: 'rating-visual', 'aria-hidden': 'true' }, [score, star]),
-    createTag('span', { class: 'rating-visual', 'aria-hidden': 'true' }, cnt),
+    createTag('span', { 'aria-hidden': 'true' }, cnt),
   ]);
   return createTag('div', { class: 'ratings-container' }, [ratingsText, storeLink]);
 }
