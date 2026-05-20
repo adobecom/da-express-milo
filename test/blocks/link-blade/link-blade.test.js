@@ -1,7 +1,13 @@
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
 
-const [, { default: decorate, isCarouselNeeded, buildCarousel, toggleChevronVisibility }] = await Promise.all([
+/* eslint-disable import/no-unresolved */
+const [, {
+  default: decorate,
+  isCarouselNeeded,
+  buildCarousel,
+  toggleChevronVisibility,
+}] = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
   import('../../../express/code/blocks/link-blade/link-blade.js'),
 ]);
