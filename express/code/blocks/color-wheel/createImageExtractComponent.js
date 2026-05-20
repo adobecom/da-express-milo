@@ -260,7 +260,7 @@ export default function createImageExtractComponent(options = {}) {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const swatchCount = count || controller.getState().swatches?.length || maxColors;
     try {
-      const { extractColorsFromImage } = await import('../color-extract/helpers/extractWorker.js');
+      const { extractColorsFromImage } = await import('../../scripts/color-shared/utils/extractWorker.js');
       const result = await extractColorsFromImage(
         imageData,
         canvas.width,

@@ -82,7 +82,7 @@ export default function buildSuggestedImages(row, onSelect, options = {}) {
         const context = canvas.getContext('2d');
         context.drawImage(img, 0, 0, w, h);
         const imageData = context.getImageData(0, 0, w, h);
-        const { extractColorsFromImage } = await import('../../../../blocks/color-extract/helpers/extractWorker.js');
+        const { extractColorsFromImage } = await import('../../utils/extractWorker.js');
         const result = await extractColorsFromImage(imageData, w, h, isGradient ? 5 : chips.length);
         if (isGradient) {
           applyGradientToBar(result.colors, colorBar);

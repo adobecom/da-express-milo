@@ -578,7 +578,7 @@ function renderColorVariant(block, rows, config, strings = {}) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     try {
-      const { extractColorsFromImage } = await import('./helpers/extractWorker.js');
+      const { extractColorsFromImage } = await import('../../scripts/color-shared/utils/extractWorker.js');
       const result = await extractColorsFromImage(
         imageData,
         canvas.width,
@@ -1042,7 +1042,7 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     try {
-      const { extractColorsFromImage } = await import('./helpers/extractWorker.js');
+      const { extractColorsFromImage } = await import('../../scripts/color-shared/utils/extractWorker.js');
       const result = await extractColorsFromImage(
         imageData,
         canvas.width,

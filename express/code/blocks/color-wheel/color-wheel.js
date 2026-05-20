@@ -862,11 +862,15 @@ export default async function decorate(block) {
     currentInitToken += 1;
     const myToken = currentInitToken;
 
-    // Capture any file dropped before createImageExtractComponent's window handlers are ready,
-    // so we can replay it once buildTabs resolves.
-    // NOTE: site-wide — any file drop during init is captured; finally block removes these.
+    // Capture any file dropped while createImageExtractComponent's window handlers are not yet
+    // ready, so it can be replayed once buildTabs resolves. Only active when block is in viewport.
     let pendingDropFile = null;
+    const isBlockInViewport = () => {
+      const rect = block.getBoundingClientRect();
+      return rect.bottom > 0 && rect.top < window.innerHeight;
+    };
     const earlyPreventFileDrop = (e) => {
+      if (!isBlockInViewport()) return;
       e.preventDefault();
       if (e.type === 'drop' && e.dataTransfer?.files?.[0]) {
         [pendingDropFile] = e.dataTransfer.files;
