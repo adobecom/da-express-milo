@@ -296,12 +296,7 @@ main .section .grid-marquee h1 {
   gap: var(--spacing-75);
 }
 
-.grid-marquee .ratings-metric {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-75);
-}
-
+.grid-marquee .ratings-metric,
 .grid-marquee .rating-visual {
   display: inline-flex;
   align-items: center;
