@@ -5,6 +5,7 @@ import type { TemplateState } from '../types';
 interface Props {
   state: TemplateState;
   onChange: (state: TemplateState) => void;
+  onAuthError?: () => void;
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -30,7 +31,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 const DEFAULT_TEMPLATE = '/adobecom/da-express-milo/drafts/maxn/document-generator-template';
 
-export default function TemplateConfirm({ state, onChange }: Props) {
+export default function TemplateConfirm({ state, onChange, onAuthError }: Props) {
   const [url, setUrl] = useState(DEFAULT_TEMPLATE);
   const [showFormats, setShowFormats] = useState(false);
 
@@ -45,13 +46,19 @@ export default function TemplateConfirm({ state, onChange }: Props) {
       onChange({ status: validation.status, html, sourcePath, placeholders: validation.placeholders, issues: validation.issues });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
+      const is403 = msg.startsWith('403');
       const is404 = msg.startsWith('404');
+      if (is403) onAuthError?.();
       onChange({
-        status: is404 ? 'invalid' : 'error',
+        status: is403 || is404 ? 'invalid' : 'error',
         html: null,
         sourcePath,
         placeholders: [],
-        issues: [is404 ? 'Template not found — check the URL and confirm you have access' : `Fetch error: ${msg}`],
+        issues: [
+          is403 ? 'Access denied — confirm you are in the correct DA organization'
+                : is404 ? 'Template not found — check the URL and confirm you have access'
+                : `Fetch error: ${msg}`,
+        ],
       });
     }
   }

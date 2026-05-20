@@ -5,6 +5,20 @@ import TemplateConfirm from './components/TemplateConfirm';
 import GeneratePanel from './components/GeneratePanel';
 import type { CsvRow, TemplateState } from './types';
 
+type TokenStatus = 'ready' | 'unauthorized' | 'no-token';
+
+const PILL_STYLES: Record<TokenStatus, string> = {
+  ready: 'bg-green-100 text-green-700',
+  unauthorized: 'bg-red-100 text-red-700',
+  'no-token': 'bg-yellow-100 text-yellow-700',
+};
+
+const PILL_LABELS: Record<TokenStatus, string> = {
+  ready: 'Token ready',
+  unauthorized: 'Unauthorized',
+  'no-token': 'No token',
+};
+
 const INITIAL_TEMPLATE: TemplateState = {
   status: 'idle',
   html: null,
@@ -16,11 +30,13 @@ const INITIAL_TEMPLATE: TemplateState = {
 export default function App() {
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [template, setTemplate] = useState<TemplateState>(INITIAL_TEMPLATE);
-  const hasToken = !!getToken();
+  const [tokenStatus, setTokenStatus] = useState<TokenStatus>(
+    getToken() ? 'ready' : 'no-token'
+  );
 
   const inputsReady = rows.length > 0;
   const templateReady = template.status === 'ready' || template.status === 'warning';
-  const canGenerate = inputsReady && templateReady && hasToken;
+  const canGenerate = inputsReady && templateReady && tokenStatus !== 'no-token';
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -28,17 +44,25 @@ export default function App() {
         <div className="flex items-center justify-between">
           <h1 className="text-2xl font-semibold text-gray-900">DA Document Generator</h1>
           <span
-            className={`text-xs font-medium px-2.5 py-1 rounded-full ${
-              hasToken ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
-            }`}
+            className={`text-xs font-medium px-2.5 py-1 rounded-full ${PILL_STYLES[tokenStatus]}`}
           >
-            {hasToken ? 'Token ready' : 'No token'}
+            {PILL_LABELS[tokenStatus]}
           </span>
         </div>
 
+        {tokenStatus === 'unauthorized' && (
+          <p className="text-xs text-red-500 text-center">
+            Token may be scoped to a different DA organization.
+          </p>
+        )}
+
         <div className="grid grid-cols-1 gap-4">
           <Panel step={1} title="Template" complete={templateReady}>
-            <TemplateConfirm state={template} onChange={setTemplate} />
+            <TemplateConfirm
+              state={template}
+              onChange={setTemplate}
+              onAuthError={() => setTokenStatus('unauthorized')}
+            />
           </Panel>
 
           <Panel step={2} title="Product Data" complete={inputsReady}>
@@ -48,7 +72,7 @@ export default function App() {
 
         {canGenerate && <GeneratePanel rows={rows} template={template} />}
 
-        {!hasToken && (
+        {tokenStatus === 'no-token' && (
           <p className="text-xs text-gray-400 text-center">
             Set{' '}
             <code className="bg-gray-100 px-1 rounded">VITE_DA_TOKEN</code> in{' '}
