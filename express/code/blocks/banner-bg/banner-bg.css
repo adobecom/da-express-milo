@@ -2,7 +2,7 @@
 
 /* Base styles for all background variants - using higher specificity */
 .banner-bg[class*="-bg"] {
-  padding: var(--spacing-600) var(--spacing-350);
+  padding: var(--spacing-600) var(--spacing-300);
   text-align: center;
   margin: 0 auto;
   background-size: cover;
@@ -53,8 +53,8 @@
   border-radius: var(--spacing-300);
   border: var(--border-width-2) solid var(--color-white);
   background: linear-gradient(95deg, rgba(255, 255, 255, 0.80) 18%, rgba(255, 255, 255, 0.40) 93%);
-  padding: var(--spacing-800) var(--spacing-500);
-  width: calc(100vw - var(--spacing-600));
+  padding: var(--spacing-600) var(--spacing-500);
+  width: calc(100vw - var(--spacing-500));
   box-sizing: border-box;
   max-width: none;
 }
@@ -64,8 +64,8 @@
   border: var(--border-width-2) solid transparent;
   background: linear-gradient(var(--color-black), var(--color-black)) padding-box,
     linear-gradient(90deg, var(--color-green-800), var(--color-blue-800), var(--color-purple-1000), var(--color-orange-700)) border-box;
-  padding: var(--spacing-800) var(--spacing-500);
-  width: calc(100vw - var(--spacing-600));
+  padding: var(--spacing-600) var(--spacing-500);
+  width: calc(100vw - var(--spacing-500));
   box-sizing: border-box;
   max-width: none;
 }
@@ -249,7 +249,8 @@
   }
 
   .banner-bg[class*="-bg"] .background-container {
-    width: calc(100vw - var(--spacing-900));
+    padding: var(--spacing-700) var(--spacing-500);
+    width: calc(100vw - var(--spacing-800));
   }
 
   /* Paragraph styling for background variants */
@@ -274,6 +275,7 @@
   }
 
   .banner-bg[class*="-bg"] .background-container {
+    padding: var(--spacing-800) var(--spacing-500);
     max-width: var(--block-wd-max-width);
     margin: 0 auto;
   }

@@ -100,6 +100,7 @@
   flex-direction: column;
   gap: 16px;
   align-items: center;
+  margin: auto;
 }
 
 .image-extract .color-extract-suggestions-label {
@@ -294,9 +295,11 @@
 .image-extract.has-image .color-extract-edit-bg img {
   width: 100%;
   height: 100%;
+  display: block;
   left: 0;
   transform: none;
-  border-radius: 8px;
+  border-radius: 0;
+  object-fit: contain;
   position: relative;
   inset: auto;
 }
@@ -535,6 +538,8 @@
   transition: width 0.2s ease, height 0.2s ease;
   background: var(--marker-color, transparent);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 17px rgba(0, 0, 0, 0.16);
+  /* Center on percentage point — size-independent, works at every breakpoint */
+  transform: translate(-50%, -50%);
 }
 
 .image-extract .color-extract-marker:hover {

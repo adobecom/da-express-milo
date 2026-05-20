@@ -1,25 +1,29 @@
 import { createTag } from '../../../scripts/utils.js';
+import { decorateAnalyticsAttributes, interpolate } from '../utils/utilities.js';
+import { createColorLoadMorePlaceholders } from '../i18n/loadColorLoadMorePlaceholders.js';
 
 export function createLoadMoreComponent(options = {}) {
   const {
     onLoadMore,
     remaining = 0,
-    label = 'Load more',
+    label,
+    strings = createColorLoadMorePlaceholders(),
   } = options;
 
+  const resolvedLabel = label ?? strings.label;
 
   const container = createTag('div', { class: 'load-more-container' });
 
   const button = createTag('button', {
     class: 'load-more-button',
     type: 'button',
-    'aria-label': `Load ${remaining} more items`,
+    'aria-label': interpolate(strings.ariaLabel, { remaining }),
   });
 
   const buttonText = createTag('span', { class: 'button-text' });
-  buttonText.textContent = remaining > 0 
-    ? `${label} (${remaining})` 
-    : label;
+  buttonText.textContent = remaining > 0
+    ? `${resolvedLabel} (${remaining})`
+    : resolvedLabel;
 
   const spinner = createTag('span', { class: 'button-spinner' });
   spinner.style.display = 'none';
@@ -27,6 +31,7 @@ export function createLoadMoreComponent(options = {}) {
 
   button.appendChild(buttonText);
   button.appendChild(spinner);
+  decorateAnalyticsAttributes(button, { linkLabel: resolvedLabel });
 
   let isLoading = false;
 
@@ -61,10 +66,10 @@ export function createLoadMoreComponent(options = {}) {
     element: container,
     
     updateRemaining: (count) => {
-      buttonText.textContent = count > 0 
-        ? `${label} (${count})` 
-        : label;
-      button.setAttribute('aria-label', `Load ${count} more items`);
+      buttonText.textContent = count > 0
+        ? `${resolvedLabel} (${count})`
+        : resolvedLabel;
+      button.setAttribute('aria-label', interpolate(strings.ariaLabel, { remaining: count }));
       
       if (count === 0) {
         container.style.display = 'none';

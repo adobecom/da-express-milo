@@ -3,6 +3,8 @@ import { createTag } from '../../../utils.js';
 import loadMiloStyle from '../../utils/loadMiloStyle.js';
 import { announceToScreenReader } from '../../spectrum/utils/a11y.js';
 import { showExpressToast } from '../../spectrum/components/express-toast.js';
+import { createGradientEditorPlaceholders } from '../../i18n/loadGradientEditorPlaceholders.js';
+import { interpolate } from '../../utils/utilities.js';
 
 const DEFAULT_HEX = '#808080';
 const DEFAULT_STOPS = [
@@ -62,7 +64,7 @@ function gradientToCSS(data, midpoints = []) {
   const stops = parts.map((p) => `${p.color} ${Math.round(p.pos * 100)}%`).join(', ');
   if (type === 'radial') return `radial-gradient(circle, ${stops})`;
   if (type === 'conic') return `conic-gradient(from ${angle}deg, ${stops})`;
-  return `linear-gradient(${angle}deg, ${stops})`;
+  return `linear-gradient(90deg, ${stops})`;
 }
 
 function sampleColorAtPosition(data, midpoints, p) {
@@ -143,7 +145,8 @@ export function createGradientEditor(initialGradient, options = {}) {
     showHandles: optShowHandles,
     showMidpoints: optShowMidpoints,
     showBarTrack: optShowBarTrack,
-    ariaLabel = 'Gradient editor',
+    ariaLabel,
+    strings = createGradientEditorPlaceholders(),
     showMockDebug = false,
     showMockHandlesOrder = false,
     onChange,
@@ -180,6 +183,7 @@ export function createGradientEditor(initialGradient, options = {}) {
   let barEl = null;
   let handlesWrap = null;
   let barRect = null;
+  let cachedStopSize = null;
   const eventListeners = {};
   const midHalf = 5;
   let selectedStopId = null;
@@ -192,7 +196,7 @@ export function createGradientEditor(initialGradient, options = {}) {
     'data-size': resolvedSize,
     'data-show-bar-track': String(showBarTrack),
     role: 'group',
-    'aria-label': ariaLabel,
+    'aria-label': ariaLabel ?? strings.ariaLabel,
     tabIndex: 0,
     'data-gradient-focus': 'outside',
   });
@@ -296,7 +300,7 @@ export function createGradientEditor(initialGradient, options = {}) {
 
   function attachSpectrumCopyTooltip(handle, hex) {
     if (!copyable || !handle || !hex) return;
-    const copyLabel = `Copy #${String(hex).replace(/^#/, '').toUpperCase()}`;
+    const copyLabel = interpolate(strings.copyLabel, { hex: String(hex).replace(/^#/, '').toUpperCase() });
     handle.removeAttribute('title');
     ensureExpressTooltipFactory()
       .then((createExpressTooltip) => {
@@ -322,16 +326,8 @@ export function createGradientEditor(initialGradient, options = {}) {
       .catch(() => {});
   }
 
-  function showCopiedTooltipFeedback(handle) {
-    showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 2000 });
-    const info = handleTooltipControllers.get(handle);
-    if (!info?.controller) return;
-    info.controller.setContent('Copied to clipboard');
-    if (info.resetTimer) clearTimeout(info.resetTimer);
-    info.resetTimer = setTimeout(() => {
-      info.controller.setContent(info.copyLabel);
-      info.resetTimer = null;
-    }, 1200);
+  function showCopiedTooltipFeedback() {
+    showExpressToast({ message: strings.copySuccessToast, variant: 'positive', timeout: 2000 });
   }
 
   function clearHandleTooltips() {
@@ -355,7 +351,7 @@ export function createGradientEditor(initialGradient, options = {}) {
         handle.setAttribute('data-color', displayHex);
         handle.setAttribute('data-position', String(positionPct));
         handle.style.setProperty('--handle-color', displayHex);
-        const label = copyable ? `Copy ${hexForA11y(displayHex)}` : `Color handle for ${hexForA11y(displayHex)}`;
+        const label = copyable ? interpolate(strings.copyHandleAria, { hex: hexForA11y(displayHex) }) : interpolate(strings.handleAria, { hex: hexForA11y(displayHex) });
         handle.setAttribute('aria-label', label);
         wrapper.setAttribute('data-selected-stop-id', String(stop.id));
         wrapper.setAttribute('data-selected-hex', displayHex);
@@ -431,7 +427,7 @@ export function createGradientEditor(initialGradient, options = {}) {
         const colorAtPosition = sampleColorAtPosition(data, midpoints, pos);
         handle.style.setProperty('--handle-position-pct', String(positionPct));
         handle.style.setProperty('--handle-color', colorAtPosition);
-        const label = copyable ? `Copy ${hexForA11y(colorAtPosition)}` : `Color handle for ${hexForA11y(colorAtPosition)}`;
+        const label = copyable ? interpolate(strings.copyHandleAria, { hex: hexForA11y(colorAtPosition) }) : interpolate(strings.handleAria, { hex: hexForA11y(colorAtPosition) });
         handle.setAttribute('aria-label', label);
         handle.setAttribute('data-color', colorAtPosition);
         handle.setAttribute('data-position', String(positionPctRounded));
@@ -444,7 +440,7 @@ export function createGradientEditor(initialGradient, options = {}) {
         el.style.left = `calc(${midpoints[i] * 100}% - ${midHalf}px)`;
         const leftHex = sortedStops[i] && typeof sortedStops[i].color === 'string' ? sortedStops[i].color : DEFAULT_HEX;
         const rightHex = sortedStops[i + 1] && typeof sortedStops[i + 1].color === 'string' ? sortedStops[i + 1].color : DEFAULT_HEX;
-        const label = `Gradient stop between ${hexForA11y(leftHex)} and ${hexForA11y(rightHex)}`;
+        const label = interpolate(strings.stopBetweenAria, { leftHex: hexForA11y(leftHex), rightHex: hexForA11y(rightHex) });
         el.setAttribute('aria-label', label);
       }
     });
@@ -462,13 +458,22 @@ export function createGradientEditor(initialGradient, options = {}) {
     updateMockHandlesOrder();
   }
 
+  function getHandleOverflow() {
+    if (!barRect) barRect = barEl.getBoundingClientRect();
+    if (cachedStopSize === null) {
+      cachedStopSize = parseFloat(getComputedStyle(barEl).getPropertyValue('--gradient-stop-size')) || 22;
+    }
+    return barRect.width > 0 ? (cachedStopSize / 2) / barRect.width : 0;
+  }
+
   function positionFromEvent(e) {
     const clientX = e.touches?.[0]?.clientX ?? e.clientX;
     if (!barRect) barRect = barEl.getBoundingClientRect();
     const { width } = barRect;
     if (!width) return 0.5;
     const x = (clientX - barRect.left) / width;
-    return Math.max(0, Math.min(1, x));
+    const overflow = getHandleOverflow();
+    return Math.max(-overflow, Math.min(1 + overflow, x));
   }
 
   function startDragStop(e, stop) {
@@ -487,7 +492,8 @@ export function createGradientEditor(initialGradient, options = {}) {
       ev.preventDefault();
       barRect = barEl.getBoundingClientRect();
       const pos = positionFromEvent(ev);
-      stop.position = Math.max(0, Math.min(1, pos));
+      const overflow = getHandleOverflow();
+      stop.position = Math.max(-overflow, Math.min(1 + overflow, pos));
       data.colorStops.sort((a, b) => a.position - b.position);
       midpoints.length = 0;
       for (let i = 0; i < data.colorStops.length - 1; i += 1) {
@@ -506,7 +512,7 @@ export function createGradientEditor(initialGradient, options = {}) {
       document.removeEventListener('touchend', end);
       reorderHandlesByPosition();
       const pct = Math.round((stop.position ?? 0) * 100);
-      announceToScreenReader(`Color handle at ${pct}%`, 'polite');
+      announceToScreenReader(interpolate(strings.handlePosition, { pct }), 'polite');
     };
     document.addEventListener('mousemove', move);
     document.addEventListener('mouseup', end);
@@ -544,7 +550,7 @@ export function createGradientEditor(initialGradient, options = {}) {
       reorderHandlesByPosition();
       if (midpoints[midIndex] != null) {
         const pct = Math.round(midpoints[midIndex] * 100);
-        announceToScreenReader(`Gradient stop at ${pct}%`, 'polite');
+        announceToScreenReader(interpolate(strings.stopPosition, { pct }), 'polite');
       }
     };
     document.addEventListener('mousemove', move);
@@ -568,7 +574,7 @@ export function createGradientEditor(initialGradient, options = {}) {
     const displayHex = typeof stop.color === 'string' ? stop.color : DEFAULT_HEX;
     const pct = Math.round((stop.position ?? 0) * 100);
     setMockDebug(displayHex, `${EVENT_PREFIX}change`, pct);
-    announceToScreenReader(`Color handle at ${pct}%`, 'polite');
+    announceToScreenReader(interpolate(strings.handlePosition, { pct }), 'polite');
   }
 
   function handleKeydownStop(e, stop) {
@@ -590,7 +596,7 @@ export function createGradientEditor(initialGradient, options = {}) {
     updateBarAndHandles();
     setMockDebug('(midpoint)', `${EVENT_PREFIX}change`);
     const pct = Math.round(midpoints[midIndex] * 100);
-    announceToScreenReader(`Gradient stop at ${pct}%`, 'polite');
+    announceToScreenReader(interpolate(strings.stopPosition, { pct }), 'polite');
   }
 
   function handleKeydownMidpoint(e, midIndex) {
@@ -611,7 +617,7 @@ export function createGradientEditor(initialGradient, options = {}) {
       if (list.length) {
         list[0].focus();
         setHandlesTabIndex(0);
-        announceToScreenReader('Gradient editor. Use arrow keys to move stops. Press Escape to exit.', 'polite');
+        announceToScreenReader(strings.announceEnter, 'polite');
       }
       return;
     }
@@ -621,7 +627,7 @@ export function createGradientEditor(initialGradient, options = {}) {
       e.stopPropagation();
       wrapper.focus();
       setHandlesTabIndex(-1);
-      announceToScreenReader('Left gradient editor.', 'polite');
+      announceToScreenReader(strings.announceLeft, 'polite');
       return;
     }
 
@@ -674,7 +680,7 @@ export function createGradientEditor(initialGradient, options = {}) {
 
   wrapper.addEventListener('focus', (e) => {
     if (e.target === wrapper) {
-      announceToScreenReader('Gradient editor. Press Enter to adjust color stops.', 'polite');
+      announceToScreenReader(strings.announceAdjust, 'polite');
     }
   });
 
@@ -696,7 +702,7 @@ export function createGradientEditor(initialGradient, options = {}) {
     if (showColorHandles) {
       const positionPct = Math.round((stop.position ?? 0) * 100);
       const hex = typeof stop.color === 'string' ? stop.color : DEFAULT_HEX;
-      const handleLabel = copyable ? `Copy ${hexForA11y(hex)}` : `Color handle for ${hexForA11y(hex)}`;
+      const handleLabel = copyable ? interpolate(strings.copyHandleAria, { hex: hexForA11y(hex) }) : interpolate(strings.handleAria, { hex: hexForA11y(hex) });
       const handle = createTag('button', {
         type: 'button',
         class: 'gradient-editor-handle',
@@ -726,10 +732,10 @@ export function createGradientEditor(initialGradient, options = {}) {
           const copyHex = typeof stop.color === 'string' ? stop.color : sampledHex;
           copyTextToClipboard(copyHex).then((ok) => {
             if (ok) {
-              announceToScreenReader('Color copied', 'polite');
+              announceToScreenReader(strings.copySuccessSr, 'polite');
               showCopiedTooltipFeedback(handle);
             } else {
-              announceToScreenReader('Copy failed', 'polite');
+              announceToScreenReader(strings.copyFailedSr, 'polite');
             }
           });
         }
@@ -748,7 +754,7 @@ export function createGradientEditor(initialGradient, options = {}) {
       const stopColorHex = typeof stop.color === 'string'
         ? stop.color
         : sampleColorAtPosition(data, midpoints, stop.position ?? 0);
-      const focusLabel = `Color handle for ${hexForA11y(stopColorHex)}`;
+      const focusLabel = interpolate(strings.handleAria, { hex: hexForA11y(stopColorHex) });
       handle.addEventListener('focus', () => announceToScreenReader(focusLabel, 'polite'));
       handlesWrap.appendChild(handle);
     }
@@ -764,7 +770,7 @@ export function createGradientEditor(initialGradient, options = {}) {
       const rightHex = sortedStops[i + 1] && typeof sortedStops[i + 1].color === 'string'
         ? sortedStops[i + 1].color
         : DEFAULT_HEX;
-      const midLabel = `Gradient stop between ${hexForA11y(leftHex)} and ${hexForA11y(rightHex)}`;
+      const midLabel = interpolate(strings.stopBetweenAria, { leftHex: hexForA11y(leftHex), rightHex: hexForA11y(rightHex) });
       const midEl = createTag('div', {
         class: 'gradient-editor-midpoint',
         'data-midpoint-index': String(i),
@@ -780,7 +786,7 @@ export function createGradientEditor(initialGradient, options = {}) {
         midEl.addEventListener('touchstart', (e) => startDragMidpoint(e, i), { passive: false });
       }
       midEl.addEventListener('keydown', (e) => handleKeydownMidpoint(e, i));
-      midEl.addEventListener('focus', () => announceToScreenReader(`Gradient stop between ${hexForA11y(leftHex)} and ${hexForA11y(rightHex)}`, 'polite'));
+      midEl.addEventListener('focus', () => announceToScreenReader(interpolate(strings.stopBetweenAria, { leftHex: hexForA11y(leftHex), rightHex: hexForA11y(rightHex) }), 'polite'));
       handlesWrap.appendChild(midEl);
     }
   }
@@ -818,7 +824,7 @@ export function createGradientEditor(initialGradient, options = {}) {
         if (showColorHandles) {
           const positionPct = Math.round((stop.position ?? 0) * 100);
           const hex = typeof stop.color === 'string' ? stop.color : DEFAULT_HEX;
-          const handleLabel = `Color handle for ${hexForA11y(hex)}`;
+          const handleLabel = interpolate(strings.handleAria, { hex: hexForA11y(hex) });
           const handle = createTag('button', {
             type: 'button',
             class: 'gradient-editor-handle',
@@ -870,7 +876,7 @@ export function createGradientEditor(initialGradient, options = {}) {
           const stopColorHexSet = typeof stop.color === 'string'
             ? stop.color
             : sampleColorAtPosition(data, midpoints, stop.position ?? 0);
-          const focusLabelSet = `Color handle for ${hexForA11y(stopColorHexSet)}`;
+          const focusLabelSet = interpolate(strings.handleAria, { hex: hexForA11y(stopColorHexSet) });
           handle.addEventListener('focus', () => announceToScreenReader(focusLabelSet, 'polite'));
           handlesWrap.appendChild(handle);
         }
@@ -886,7 +892,7 @@ export function createGradientEditor(initialGradient, options = {}) {
           const rightHex = sortedStops[i + 1] && typeof sortedStops[i + 1].color === 'string'
             ? sortedStops[i + 1].color
             : DEFAULT_HEX;
-          const midLabel = `Gradient stop between ${hexForA11y(leftHex)} and ${hexForA11y(rightHex)}`;
+          const midLabel = interpolate(strings.stopBetweenAria, { leftHex: hexForA11y(leftHex), rightHex: hexForA11y(rightHex) });
           const midEl = createTag('div', {
             class: 'gradient-editor-midpoint',
             'data-midpoint-index': String(i),
@@ -902,7 +908,7 @@ export function createGradientEditor(initialGradient, options = {}) {
             midEl.addEventListener('touchstart', (e) => startDragMidpoint(e, i), { passive: false });
           }
           midEl.addEventListener('keydown', (e) => handleKeydownMidpoint(e, i));
-          midEl.addEventListener('focus', () => announceToScreenReader(`Gradient stop between ${hexForA11y(leftHex)} and ${hexForA11y(rightHex)}`, 'polite'));
+          midEl.addEventListener('focus', () => announceToScreenReader(interpolate(strings.stopBetweenAria, { leftHex: hexForA11y(leftHex), rightHex: hexForA11y(rightHex) }), 'polite'));
           handlesWrap.appendChild(midEl);
         }
       }

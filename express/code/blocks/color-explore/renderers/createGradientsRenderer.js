@@ -4,25 +4,19 @@ import { createGradientStripElements } from '../../../scripts/color-shared/compo
 import { createLoadMoreComponent } from '../../../scripts/color-shared/components/createLoadMoreComponent.js';
 import { loadIconsRail } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createExpressTooltip } from '../../../scripts/color-shared/spectrum/components/express-tooltip.js';
+import { decorateAnalyticsAttributes, interpolate } from '../../../scripts/color-shared/utils/utilities.js';
+import { createLoadingScreenComponent } from '../../../scripts/color-shared/components/createLoadingScreenComponent.js';
+import { createColorExplorePlaceholders } from '../../../scripts/color-shared/i18n/loadColorExplorePlaceholders.js';
 
 const PAGINATION = {
   INITIAL_COUNT: 24,
   LOAD_MORE_INCREMENT: 12,
 };
 
-function sanitizeAnalyticsText(value, max = 20) {
-  const raw = String(value ?? '')
-    .replace(/[^a-zA-Z0-9\s]/g, '')
-    .trim();
-  return raw.substring(0, max);
-}
-
-function formatCount(n) {
-  return n >= 1000 ? `${(n / 1000).toFixed(1)}K` : String(n);
-}
-
 export function createGradientsRenderer(options) {
-  const { container, data = [], config = {} } = options;
+  const {
+    container, data = [], config = {}, placeholders = createColorExplorePlaceholders(),
+  } = options;
 
   const base = createBaseRenderer(options);
   const { emit, setData } = base;
@@ -64,8 +58,7 @@ export function createGradientsRenderer(options) {
 
   function getAnalyticsHeaderText() {
     const titleText = container?.querySelector('.gradients-title')?.textContent?.trim();
-    const fallback = `${formatCount(allGradients.length)} color gradients`;
-    return sanitizeAnalyticsText(titleText || fallback);
+    return titleText || placeholders.gridTitle;
   }
 
   function isActivationSuppressed() {
@@ -233,7 +226,7 @@ export function createGradientsRenderer(options) {
       const gradient = allGradients.find((g) => g.id === gradientId);
       if (gradient) {
         announceToScreenReader(
-          `Returned to grid navigation. ${gradient.name}. Use arrow keys to navigate.`,
+          interpolate(placeholders.a11yReturnedToGrid, { name: gradient.name }),
           2000,
         );
       }
@@ -384,7 +377,11 @@ export function createGradientsRenderer(options) {
         const gradientIndex = allGradients.findIndex((g) => g.id === gradientId);
         const rowIndex = Math.floor(gradientIndex / numCols) + 1;
         const colIndex = (gradientIndex % numCols) + 1;
-        announceToScreenReader(`Navigated to ${gradient.name}, row ${rowIndex}, column ${colIndex}`, 1000);
+        const navMsg = interpolate(
+          placeholders.a11yNavigatedTo,
+          { name: gradient.name, row: rowIndex, col: colIndex },
+        );
+        announceToScreenReader(navMsg, 1000);
       }
     }
   }
@@ -420,7 +417,7 @@ export function createGradientsRenderer(options) {
           if (!gridNavigationEnabled) {
             e.preventDefault();
             e.stopPropagation();
-            announceToScreenReader('Press Escape to return to grid navigation.', 1200);
+            announceToScreenReader(placeholders.a11yPressEscape, 1200);
           }
           return;
         }
@@ -514,7 +511,7 @@ export function createGradientsRenderer(options) {
         if (firstWidget) {
           try {
             firstWidget.focus();
-            announceToScreenReader('Button focused. Press Escape to return to grid navigation, or Tab to exit grid.', 2000);
+            announceToScreenReader(placeholders.a11yButtonFocused, 2000);
           } catch (err) {
             if (window.lana) {
               window.lana.log(`Focus failed on Enter: ${err.message}`, {
@@ -532,7 +529,7 @@ export function createGradientsRenderer(options) {
         if (firstWidget) {
           try {
             firstWidget.focus();
-            announceToScreenReader('Button focused. Press Escape to return to grid navigation, or Tab to exit grid.', 2000);
+            announceToScreenReader(placeholders.a11yButtonFocused, 2000);
           } catch (err) {
             if (window.lana) {
               window.lana.log(`Focus failed on Space: ${err.message}`, {
@@ -568,8 +565,12 @@ export function createGradientsRenderer(options) {
           const rowIndex = Math.floor(gradientIndex / columns) + 1;
           const colIndex = (gradientIndex % columns) + 1;
           const announcement = previousIndex === -1
-            ? `Entered gradient grid. ${g.name}, row ${rowIndex}, column ${colIndex} of ${allGradients.length}. Use arrow keys to navigate, Enter to access button, Tab to exit.`
-            : `${g.name}, row ${rowIndex}, column ${colIndex}`;
+            ? interpolate(placeholders.a11yEnteredGrid, {
+              name: g.name, row: rowIndex, col: colIndex, total: allGradients.length,
+            })
+            : interpolate(placeholders.a11yCardPosition, {
+              name: g.name, row: rowIndex, col: colIndex,
+            });
           announceToScreenReader(announcement, previousIndex === -1 ? 3000 : 1000);
         }
       }
@@ -587,16 +588,15 @@ export function createGradientsRenderer(options) {
     });
 
     card.addEventListener('click', (e) => {
-      // Card/visual click should not open modal. Only the Open action button does.
       if (e.target.closest('.gradient-strip-action-btn')) return;
-      e.stopPropagation();
+      handleCardActivation(gradient);
     });
   }
 
   function createGradientCard(gradient, linkIndex) {
     if (!gradient || !gradient.id || !gradient.name) {
       const errorCard = createTag('div', { class: 'gradient-strip-error' });
-      errorCard.textContent = 'Invalid gradient data';
+      errorCard.textContent = placeholders.gridInvalidData;
       return errorCard;
     }
     const cards = createGradientStripElements([gradient], getCardOptions(linkIndex));
@@ -604,7 +604,8 @@ export function createGradientsRenderer(options) {
     if (!card) return createTag('div', { class: 'gradient-strip-error' });
     card.setAttribute('role', 'gridcell');
     card.setAttribute('tabindex', '-1');
-    card.setAttribute('aria-label', `View ${gradient.name} gradient`);
+    card.setAttribute('aria-label', interpolate(placeholders.gridCardAria, { name: gradient.name }));
+    decorateAnalyticsAttributes(card, { linkLabel: 'View gradient' });
     attachCardListeners(card, gradient);
     return card;
   }
@@ -654,8 +655,7 @@ export function createGradientsRenderer(options) {
   function updateTitle() {
     const title = container?.querySelector('.gradients-title');
     if (title) {
-      const countLabel = formatCount(allGradients.length);
-      title.textContent = `${countLabel} color gradients`;
+      title.textContent = placeholders.gridTitle;
     }
   }
 
@@ -665,8 +665,10 @@ export function createGradientsRenderer(options) {
     const totalCount = allGradients.length;
     const remaining = totalCount - displayedCount;
     liveRegion.textContent = remaining > 0
-      ? `Showing ${displayedCount} of ${totalCount} gradients. ${remaining} more available.`
-      : `Showing all ${totalCount} gradients`;
+      ? interpolate(placeholders.gridShowingPartial, {
+        displayed: displayedCount, total: totalCount, remaining,
+      })
+      : interpolate(placeholders.gridShowingAll, { total: totalCount });
   }
 
   function updateLoadMoreButton() {
@@ -680,7 +682,7 @@ export function createGradientsRenderer(options) {
   function createLoadMoreButton() {
     loadMoreComponent = createLoadMoreComponent({
       remaining: Math.max(0, allGradients.length - displayedCount),
-      label: 'Load more',
+      label: placeholders.loadMore,
       buttonClass: 'gradient-load-more-btn',
       onLoadMore: async () => {
         const remaining = allGradients.length - displayedCount;
@@ -709,24 +711,30 @@ export function createGradientsRenderer(options) {
     if (isInitialRender) {
       container.addEventListener('color-explore:filter-interaction', onFilterInteraction);
       container.replaceChildren();
+
+      gradientsSection = createTag('section', { class: 'explore-main-section' });
+      const loadingScreen = createLoadingScreenComponent({ variant: 'strips', cardCount: 6 });
+      gradientsSection.appendChild(loadingScreen.element);
+      loadingScreen.show();
+      container.appendChild(gradientsSection);
+
       await loadIconsRail();
 
       const header = createTag('div', { class: 'explore-header' });
       const title = createTag('h2', { class: 'gradients-title' });
-      const countLabel = formatCount(allGradients.length);
-      title.textContent = `${countLabel} color gradients`;
+      title.textContent = placeholders.gridTitle;
       header.appendChild(title);
-      container.appendChild(header);
+      container.insertBefore(header, gradientsSection);
 
-      gradientsSection = createTag('section', { class: 'explore-main-section' });
+      gradientsSection.replaceChildren();
 
       const columns = getGridColumns();
       const rows = Math.ceil(allGradients.length / columns);
       gridElement = createTag('div', {
         class: 'gradients-grid',
         role: 'grid',
-        'aria-label': `Color gradients, ${allGradients.length} gradients available`,
-        'aria-roledescription': 'gradient grid',
+        'aria-label': interpolate(placeholders.gridAria, { count: allGradients.length }),
+        'aria-roledescription': placeholders.gridRoleDesc,
         'aria-colcount': columns.toString(),
         'aria-rowcount': rows.toString(),
       });
@@ -736,7 +744,7 @@ export function createGradientsRenderer(options) {
         class: 'visually-hidden',
         'aria-live': 'polite',
         'aria-atomic': 'true',
-        'aria-label': 'Gradient updates',
+        'aria-label': placeholders.gridLiveRegion,
       });
       gradientsSection.appendChild(liveRegion);
 

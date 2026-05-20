@@ -46,3 +46,7 @@ export function createTag(tag, attributes = {}, html = '') {
   }
   return el;
 }
+
+export function decorateLinks() {
+  // no-op in tests
+}

@@ -189,8 +189,6 @@
 .gradient-editor-handles {
   position: absolute;
   inset: 0;
-  left: var(--border-width-2);
-  right: var(--border-width-2);
   pointer-events: none;
 }
 

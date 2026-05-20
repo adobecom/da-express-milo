@@ -83,6 +83,9 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   if (options.swatchFeatures != null && !byOrientation) {
     element.swatchFeatures = options.swatchFeatures;
   }
+  if (options.strings) {
+    element.strings = options.strings;
+  }
   element.controller = controller;
   loadIconsRail()
     .then(() => {
@@ -120,8 +123,9 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   if (!isController) {
     result.controller = controller;
     result.update = (newData) => {
-      const next = createSwatchRailController(newData);
-      controller.setState(next.getState());
+      const colors = newData?.colors || [];
+      const swatches = colors.map((c) => ({ hex: c.startsWith('#') ? c : `#${c}` }));
+      controller.setState({ swatches, baseColorIndex: newData?.baseColorIndex ?? 0 });
     };
   }
   return result;
@@ -150,11 +154,11 @@ export function createPaletteAdapter(paletteData, callbacks = {}) {
   };
 }
 
-export function createSearchAdapter(callbacks = {}) {
+export function createSearchAdapter({ placeholder, ...callbacks } = {}) {
   import('../../../libs/color-components/components/color-search/index.js');
 
   const element = document.createElement('color-search');
-  element.setAttribute('placeholder', 'Search colors...');
+  element.setAttribute('placeholder', placeholder ?? 'Search colors...');
 
   element.addEventListener('color-search', (e) => {
     callbacks.onSearch?.(e.detail.query);
@@ -256,6 +260,8 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
     colorMode = 'RGB',
     showPalette = true,
     mobile = false,
+    strings,
+    baseColorStrings,
   } = options;
 
   element.palette = palette.slice(0, 10);
@@ -263,6 +269,8 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
   element.colorMode = colorMode;
   element.showPalette = showPalette;
   element.mobile = mobile;
+  if (strings) element.strings = strings;
+  if (baseColorStrings) element.baseColorStrings = baseColorStrings;
 
   element.addEventListener('color-change', (e) => {
     callbacks.onColorChange?.(e.detail);
@@ -344,11 +352,13 @@ export function createColorConflictsAdapter(options = {}) {
   const element = document.createElement('color-conflicts');
   const {
     conflictsFound = false,
-    label = 'Potential color blind conflicts',
+    label,
+    strings,
   } = options;
 
   element.conflictsFound = conflictsFound;
-  element.label = label;
+  if (strings) element.strings = strings;
+  if (label) element.label = label;
 
   return {
     element,
@@ -371,12 +381,14 @@ export function createBaseColorAdapter(options = {}, callbacks = {}) {
     colorMode = 'HEX',
     showHeader = true,
     showBrightnessControl = true,
+    strings,
   } = options;
 
   element.color = color;
   element.colorMode = colorMode;
   element.showHeader = showHeader;
   element.showBrightnessControl = showBrightnessControl;
+  if (strings) element.strings = strings;
 
   element.addEventListener('color-change', (e) => {
     callbacks.onColorChange?.(e.detail);

@@ -47,6 +47,8 @@ export function createColorInput(config) {
     onChange,
     onColorChangeEnd,
     getColorEditPalette,
+    colorEditStrings,
+    baseColorStrings,
   } = config;
   const commitCallback = onColorChangeEnd || onChange;
 
@@ -159,7 +161,7 @@ export function createColorInput(config) {
   }
 
   function syncActiveEditorPalette() {
-    if (!activeColorEditAdapter) return;
+    if (!activeColorEditAdapter || syncingFromEditor) return;
 
     const { palette, selectedIndex } = resolveColorEditPalette();
     activeColorEditAdapter.setPalette(palette);
@@ -242,6 +244,8 @@ export function createColorInput(config) {
       colorMode: 'HEX',
       showPalette: palette.length > 1,
       mobile,
+      ...(colorEditStrings ? { strings: colorEditStrings } : {}),
+      ...(baseColorStrings ? { baseColorStrings } : {}),
     }, {
       onColorChange: ({ hex }) => {
         if (syncEditorHexValue(hex)) {
@@ -251,6 +255,12 @@ export function createColorInput(config) {
       onColorChangeEnd: ({ hex }) => {
         syncEditorHexValue(hex);
         runWithEditorSync(() => commitEditorValueIfChanged());
+      },
+      onSwatchSelect: ({ index }) => {
+        const hex = palette[index];
+        if (hex && syncEditorHexValue(hex)) {
+          runWithEditorSync(() => onInput?.({ value: hex }));
+        }
       },
       onClose: () => closeEditor(),
     });
@@ -266,7 +276,7 @@ export function createColorInput(config) {
 
     requestAnimationFrame(() => {
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
-      colorEdit.show();
+      colorEdit.show?.();
     });
   }
 
@@ -297,6 +307,13 @@ export function createColorInput(config) {
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
       await colorEdit.updateComplete;
       if (!isActiveEditorRequest(requestId, colorEdit)) return;
+      if (!colorEdit.show) {
+        window.lana?.log(
+          'colorEdit.show is not defined — skipping focus trap',
+          { tags: 'color-contrast-checker,color-input', severity: 'error' },
+        );
+        return;
+      }
       await colorEdit.show();
       focusTrap = trapFocus(overlay);
 
@@ -316,9 +333,6 @@ export function createColorInput(config) {
     claimActiveColorInput(controllerRef);
 
     try {
-      await import('../../../../scripts/color-shared/components/color-edit/index.js');
-      if (!isCurrentOpenRequest(requestId)) return;
-
       const colorEdit = createColorEdit();
 
       if (colorEdit.mobile) {

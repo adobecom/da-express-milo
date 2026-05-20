@@ -3,9 +3,8 @@ import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
+import { decorateAnalyticsAttributes } from '../utils/utilities.js';
 
-const CREATOR_PLACEHOLDER_PATH = '/express/code/scripts/color-shared/modal/images/creator-placeholder.png';
-const DEFAULT_LIKES_COUNT = '1.2K';
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
 
 let contentStylesLoaded = false;
@@ -39,10 +38,10 @@ function getPaletteColors(palette = {}) {
 }
 
 function normalizeLikesCount(rawValue) {
-  if (rawValue == null) return DEFAULT_LIKES_COUNT;
+  if (rawValue == null) return '0';
   const value = typeof rawValue === 'string' ? rawValue.trim() : rawValue;
-  if (value === '' || value === 0 || value === '0') return DEFAULT_LIKES_COUNT;
-  return String(value);
+  if (value === '') return '0';
+  return String(Math.abs(value));
 }
 
 function normalizeCreatorName(rawValue) {
@@ -136,6 +135,7 @@ export function createFullPaletteModalContent(palette, options = {}) {
     const copyBtn = createTag('button', { type: 'button', class: 'color-modal-full-palette-btn' });
     copyBtn.textContent = 'Copy';
     copyBtn.setAttribute('aria-label', `Copy ${hex}`);
+    decorateAnalyticsAttributes(copyBtn, { linkLabel: 'Copy color' });
     copyBtn.addEventListener('click', () => {
       navigator.clipboard.writeText(hex).then(() => {
         copyBtn.textContent = 'Copied';
@@ -146,6 +146,7 @@ export function createFullPaletteModalContent(palette, options = {}) {
     const editBtn = createTag('button', { type: 'button', class: 'color-modal-full-palette-btn' });
     editBtn.textContent = 'Edit';
     editBtn.setAttribute('aria-label', `Edit color ${hex}`);
+    decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit color' });
     editBtn.addEventListener('click', () => {
       onEditColor?.(hex, index);
     });
@@ -178,6 +179,7 @@ export function createFullPaletteModalContent(palette, options = {}) {
   const saveSection = createTag('div', { class: 'color-modal-full-palette-save' });
   const saveBtn = createTag('button', { type: 'button', class: 'color-modal-full-palette-save-btn' });
   saveBtn.textContent = 'Save to Adobe Libraries';
+  decorateAnalyticsAttributes(saveBtn, { linkLabel: 'Save to libraries' });
   saveBtn.addEventListener('click', () => {
     onSave?.({ name: nameInput.value, colors });
   });
@@ -187,17 +189,60 @@ export function createFullPaletteModalContent(palette, options = {}) {
   return container;
 }
 
-function createPaletteMetaSection(palette = {}, options = {}) {
+function createPaletteLikeWidget(palette = {}, options = {}) {
   const likesCount = normalizeLikesCount(
     options.likesCount ?? palette?.likes ?? palette?.likesCount,
   );
+  const modalStrings = options.modalStrings || {};
+  const addFavorite = modalStrings.addFavorite || 'Add to favorites';
+  const removeFavorite = modalStrings.removeFavorite || 'Remove from favorites';
+  const likesWrap = createTag('div', { class: 'modal-palette-likes' });
+  const likeBtn = createTag('button', { type: 'button', class: 'like-icon', 'aria-label': addFavorite });
+  decorateAnalyticsAttributes(likeBtn, { linkLabel: 'Toggle favorite' });
+  const likeTheme = createTag('sp-theme', { system: 'spectrum-two', color: 'light', scale: 'medium' });
+  let liked = options.liked ?? palette?.liked ?? false;
+  const updateLikeState = () => {
+    likeTheme.replaceChildren();
+    likeTheme.appendChild(createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' }));
+    likeBtn.setAttribute('aria-label', liked ? removeFavorite : addFavorite);
+    likeBtn.classList.toggle('is-liked', liked);
+  };
+  updateLikeState();
+  likeBtn.appendChild(likeTheme);
+  let likeTooltip = null;
+  createExpressTooltip({ targetEl: likeBtn, content: liked ? removeFavorite : addFavorite, placement: 'bottom' })
+    .then((t) => { likeTooltip = t; })
+    .catch(() => {});
+  likeBtn.addEventListener('click', () => {
+    const previousLiked = liked;
+    liked = !liked;
+    updateLikeState();
+    likeTooltip?.setContent(liked ? removeFavorite : addFavorite);
+    options.onLikeToggle?.({ id: palette?.id, liked: previousLiked })?.catch?.((error) => {
+      liked = previousLiked;
+      updateLikeState();
+      likeTooltip?.setContent(liked ? removeFavorite : addFavorite);
+      window.lana?.log(`[PaletteModal] Like toggle error: ${error?.message}`, {
+        tags: 'color-modal,like',
+        severity: 'warning',
+      });
+    });
+  });
+  const likesText = createTag('p', { class: 'modal-likes-count' });
+  likesText.textContent = String(likesCount);
+  likesWrap.appendChild(likeBtn);
+  likesWrap.appendChild(likesText);
+  return likesWrap;
+}
+
+function createPaletteMetaSection(palette = {}, options = {}) {
   const creatorName = normalizeCreatorName(
     options.creatorName ?? palette?.creator?.name ?? palette?.creatorName,
   );
   const creatorImageUrl = options.creatorImageUrl
     ?? palette?.creator?.imageUrl
     ?? palette?.creatorImageUrl
-    ?? CREATOR_PLACEHOLDER_PATH;
+    ?? null;
   const hasOptionTags = Array.isArray(options.tags) && options.tags.length;
   const hasItemTags = Array.isArray(palette?.tags) && palette.tags.length;
   let tags = ['Color', 'Palette'];
@@ -210,48 +255,24 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   const nameEl = createTag('h1', { class: 'modal-palette-name' });
   nameEl.textContent = palette?.name || 'Palette';
   nameLikesRow.appendChild(nameEl);
-
-  const likesWrap = createTag('div', { class: 'modal-palette-likes' });
-  const likeBtn = createTag('button', { type: 'button', class: 'like-icon', 'aria-label': 'Add to favorites' });
-  const likeTheme = createTag('sp-theme', { system: 'spectrum-two', color: 'light', scale: 'medium' });
-  let liked = options.liked ?? palette?.liked ?? false;
-  const updateLikeState = () => {
-    likeTheme.replaceChildren();
-    likeTheme.appendChild(createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', { size: 'm', 'aria-hidden': 'true' }));
-    likeBtn.setAttribute('aria-label', liked ? 'Remove from favorites' : 'Add to favorites');
-    likeBtn.classList.toggle('is-liked', liked);
-  };
-  updateLikeState();
-  likeBtn.appendChild(likeTheme);
-  let likeTooltip = null;
-  createExpressTooltip({ targetEl: likeBtn, content: liked ? 'Remove from favorites' : 'Add to favorites', placement: 'bottom' })
-    .then((t) => { likeTooltip = t; })
-    .catch(() => {});
-  likeBtn.addEventListener('click', () => {
-    const previousLiked = liked;
-    liked = !liked;
-    updateLikeState();
-    likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
-    options.onLikeToggle?.({ id: palette?.id, liked: previousLiked })?.catch?.((error) => {
-      window.lana?.log(`[PaletteModal] Like toggle error: ${error?.message}`, {
-        tags: 'color-modal,like',
-        severity: 'warning',
-      });
-    });
-  });
-  const likesText = createTag('p', { class: 'modal-likes-count' });
-  likesText.textContent = String(likesCount);
-  likesWrap.appendChild(likeBtn);
-  likesWrap.appendChild(likesText);
-  nameLikesRow.appendChild(likesWrap);
+  // This widget has been disabled for the time being until the like backend is fixed
+  if (options.enableLikeWidget === true) {
+    nameLikesRow.appendChild(createPaletteLikeWidget(palette, options));
+  }
   section.appendChild(nameLikesRow);
 
   const thumbTagsRow = createTag('div', { class: 'modal-palette-thumb-tags' });
 
   const thumbnailContainer = createTag('div', { class: 'modal-thumbnail-container' });
   const thumbnailWrap = createTag('div', { class: 'modal-thumbnail' });
-  const thumbnailImg = createTag('img', { class: 'thumbnail-image', alt: creatorName, src: creatorImageUrl });
-  thumbnailWrap.appendChild(thumbnailImg);
+  if (creatorImageUrl) {
+    const thumbnailImg = createTag('img', { class: 'thumbnail-image', alt: creatorName, src: creatorImageUrl });
+    thumbnailWrap.appendChild(thumbnailImg);
+  } else {
+    const initial = createTag('span', { class: 'thumbnail-initial', 'aria-hidden': 'true' });
+    initial.textContent = creatorName.charAt(0).toUpperCase();
+    thumbnailWrap.appendChild(initial);
+  }
   const creatorNameEl = createTag('p', { class: 'modal-creator-name' });
   creatorNameEl.textContent = creatorName;
   thumbnailContainer.appendChild(thumbnailWrap);
@@ -332,8 +353,10 @@ function setupSwatchColumnNav(container) {
 }
 
 export function createPaletteSwatchesModalContent(palette, options = {}) {
+  const modalStrings = options.modalStrings || {};
   const {
-    ctaText = 'Create with color palette',
+    colorSwatchRailStrings,
+    ctaText = modalStrings.paletteCta || 'Create with color palette',
     swatchFeatures: inputSwatchFeatures = {},
     verticalMaxPerRow,
   } = options;
@@ -355,7 +378,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   };
 
   const colorCount = normalizedPalette.colors.length;
-  const root = createTag('main', { class: 'modal-content' });
+  const root = createTag('main', { class: 'modal-content', 'daa-lh': 'color-palette-modal' });
 
   const railSection = createTag('section', {
     class: 'modal-palette-container modal-palette-container--color-rail',
@@ -367,10 +390,40 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
     orientation: 'vertical-responsive',
     swatchFeatures,
     ...(Number.isFinite(verticalMaxPerRow) ? { verticalMaxPerRow } : {}),
+    ...(colorSwatchRailStrings ? { strings: colorSwatchRailStrings } : {}),
   });
   railWrap.appendChild(railAdapter.element);
   railSection.appendChild(railWrap);
   root.appendChild(railSection);
+
+  if (colorCountRange === 'large') {
+    const updateFade = () => {
+      const noOverflow = railWrap.scrollHeight <= railWrap.clientHeight;
+      const atBottom = !noOverflow
+        && railWrap.scrollHeight - railWrap.scrollTop - railWrap.clientHeight < 2;
+      railSection.classList.toggle('scrolled-to-bottom', noOverflow || atBottom);
+    };
+    railWrap.addEventListener('scroll', updateFade, { passive: true });
+    (async () => {
+      try {
+        await customElements.whenDefined('color-swatch-rail');
+        const rail = railWrap.querySelector('color-swatch-rail');
+        if (rail?.updateComplete) await rail.updateComplete;
+      } catch { /* noop */ }
+      requestAnimationFrame(() => {
+        updateFade();
+        const ro = new ResizeObserver(updateFade);
+        ro.observe(railWrap);
+        new MutationObserver((_, mo) => {
+          if (!document.contains(railSection)) {
+            ro.disconnect();
+            railWrap.removeEventListener('scroll', updateFade);
+            mo.disconnect();
+          }
+        }).observe(document.body, { childList: true, subtree: true });
+      });
+    })();
+  }
 
   const { initTabIndexes } = setupSwatchColumnNav(railWrap);
 

@@ -3,6 +3,8 @@ import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createGradientEditor } from '../components/gradients/gradient-editor.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
+import { createColorModalPlaceholders } from '../i18n/loadColorModalPlaceholders.js';
+import { interpolate } from '../utils/utilities.js';
 
 function parseLinearGradient(css) {
   const linear = /linear-gradient\s*\(\s*(\d+)deg\s*,\s*([^)]+)\s*\)/i.exec(css);
@@ -25,15 +27,7 @@ function parseLinearGradient(css) {
 }
 
 const CREATOR_PLACEHOLDER_PATH = 'scripts/color-shared/modal/images/creator-placeholder.png';
-const DEFAULT_LIKES_COUNT = '1.2K';
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
-
-function normalizeLikesCount(rawValue) {
-  if (rawValue == null) return DEFAULT_LIKES_COUNT;
-  const value = typeof rawValue === 'string' ? rawValue.trim() : rawValue;
-  if (value === '' || value === 0 || value === '0') return DEFAULT_LIKES_COUNT;
-  return String(value);
-}
 
 function normalizeCreatorName(rawValue) {
   if (typeof rawValue === 'string' && rawValue.trim()) return rawValue.trim();
@@ -44,12 +38,15 @@ function normalizeCreatorName(rawValue) {
  * Attach Spectrum tooltips (Figma M, bottom) to each gradient handle in container.
  * Replaces native title; sp-tooltip matches Figma 9530-159590. Export for modal and demo.
  */
-export async function attachGradientHandleTooltips(container) {
+export async function attachGradientHandleTooltips(
+  container,
+  strings = createColorModalPlaceholders(),
+) {
   const handles = container.querySelectorAll('.gradient-editor-handle[data-color]');
   if (!handles.length) return;
   for (const handle of handles) {
     const hex = handle.getAttribute('data-color') || '';
-    const copyLabel = `Copy #${hex.replace(/^#/, '').toUpperCase()}`;
+    const copyLabel = interpolate(strings.gradientCopyHex, { hex: hex.replace(/^#/, '').toUpperCase() });
     handle.removeAttribute('title');
     await createExpressTooltip({
       targetEl: handle,
@@ -59,7 +56,8 @@ export async function attachGradientHandleTooltips(container) {
   }
 }
 
-export function createGradientPickerRebuildContent(gradient, opts = {}) {
+export function createGradientModalContent(gradient, opts = {}) {
+  const strings = opts.strings ?? createColorModalPlaceholders();
   const codeRoot = opts.codeRoot || '/express/code';
   let angle = gradient?.angle ?? 90;
   let colorStops = gradient?.colorStops || [];
@@ -83,9 +81,6 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
     colorStops = [{ color: '#ccc', position: 0 }, { color: '#999', position: 1 }];
   }
   const title = gradient?.name || 'Gradient';
-  const likesCount = normalizeLikesCount(
-    opts.likesCount ?? gradient?.likes ?? gradient?.likesCount,
-  );
   const creatorName = normalizeCreatorName(
     opts.creatorName ?? gradient?.creator?.name ?? gradient?.creatorName,
   );
@@ -95,7 +90,7 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
     ?? gradient?.creatorImageUrl ?? defaultCreatorImageUrl;
   const tags = opts.tags || ['Color', 'Gradient'];
 
-  const main = createTag('main', { class: 'modal-content' });
+  const main = createTag('main', { class: 'modal-content', 'daa-lh': 'color-gradient-modal' });
 
   const containerSection = createTag('section', {
     class: 'modal-palette-container',
@@ -103,7 +98,7 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   const previewWrap = createTag('div', {
     class: 'modal-palette-colors modal-gradient-preview',
     role: 'region',
-    'aria-label': `Selected color palette, ${colorStops.length} colors`,
+    'aria-label': interpolate(strings.gradientPaletteAria, { count: colorStops.length }),
     tabindex: '-1',
   });
   const gradientData = {
@@ -116,62 +111,16 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
     size: 'strip-responsive',
     draggable: false,
     copyable: true,
-    ariaLabel: `Gradient preview, ${colorStops.length} colors`,
+    ariaLabel: interpolate(strings.gradientPreviewAria, { count: colorStops.length }),
   });
   previewWrap.appendChild(gradientEditor.element);
   containerSection.appendChild(previewWrap);
   main.appendChild(containerSection);
 
   const nameTagsSection = createTag('section', { class: 'modal-palette-name-tags' });
-  const nameLikes = createTag('div', { class: 'modal-palette-name-likes' });
   const h1 = createTag('h1', { class: 'modal-palette-name' });
   h1.textContent = title;
-  const likesDiv = createTag('div', { class: 'modal-palette-likes' });
-  const likeBtn = createTag('button', { type: 'button', class: 'like-icon' });
-  const likeTheme = createTag('sp-theme', {
-    system: 'spectrum-two',
-    color: 'light',
-    scale: 'medium',
-  });
-  let liked = opts.liked ?? gradient?.liked ?? false;
-  const updateLikeState = () => {
-    likeTheme.replaceChildren();
-    likeTheme.appendChild(createTag(liked ? 'sp-icon-heart-filled' : 'sp-icon-heart', {
-      size: 'm',
-      'aria-hidden': 'true',
-    }));
-    likeBtn.setAttribute('aria-label', liked ? 'Remove from favorites' : 'Add to favorites');
-    likeBtn.classList.toggle('is-liked', liked);
-  };
-  updateLikeState();
-  likeBtn.appendChild(likeTheme);
-  let likeTooltip = null;
-  createExpressTooltip({
-    targetEl: likeBtn,
-    content: liked ? 'Remove from favorites' : 'Add to favorites',
-    placement: 'bottom',
-  }).then((tooltipController) => {
-    likeTooltip = tooltipController;
-  }).catch(() => {});
-  likeBtn.addEventListener('click', () => {
-    const previousLiked = liked;
-    liked = !liked;
-    updateLikeState();
-    likeTooltip?.setContent(liked ? 'Remove from favorites' : 'Add to favorites');
-    opts.onLikeToggle?.({ id: gradient?.id, liked: previousLiked })?.catch?.((err) => {
-      window.lana?.log(`[GradientPicker] Like toggle error: ${err?.message}`, {
-        tags: 'color-modal,like',
-        severity: 'warning',
-      });
-    });
-  });
-  const likesCountEl = createTag('p', { class: 'modal-likes-count' });
-  likesCountEl.textContent = likesCount;
-  likesDiv.appendChild(likeBtn);
-  likesDiv.appendChild(likesCountEl);
-  nameLikes.appendChild(h1);
-  nameLikes.appendChild(likesDiv);
-  nameTagsSection.appendChild(nameLikes);
+  nameTagsSection.appendChild(h1);
 
   const thumbTags = createTag('div', { class: 'modal-palette-thumb-tags' });
   const thumbContainer = createTag('div', { class: 'modal-thumbnail-container' });
@@ -195,7 +144,7 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
 
   const tagsContainer = createTag('div', {
     class: 'modal-tags-container',
-    'aria-label': 'Palette tags',
+    'aria-label': strings.gradientTagsAria,
     role: 'list',
   });
   tags.forEach((tag) => {
@@ -207,18 +156,20 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   nameTagsSection.appendChild(thumbTags);
   main.appendChild(nameTagsSection);
 
-  const toolbarMount = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': 'Palette actions' });
+  const toolbarMount = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': strings.gradientActionsAria });
   main.appendChild(toolbarMount);
 
   const paletteForToolbar = {
     id: gradient?.id ?? '',
     name: gradient?.name ?? 'Gradient',
+    angle: angle || 90,
     colors: colorStops.map((s) => s.color),
   };
 
   initFloatingToolbar(toolbarMount, {
+    type: 'gradient',
     palette: paletteForToolbar,
-    ctaText: 'Create with color palette',
+    ctaText: strings.gradientCta,
     showPaletteName: false,
   }).catch((err) => {
     window.lana?.log(`Floating toolbar init failed: ${err.message}`, {
@@ -233,7 +184,7 @@ export function createGradientPickerRebuildContent(gradient, opts = {}) {
   return main;
 }
 
-let pickerRebuildStylesLoaded = false;
+let gradientModalContentStylesLoaded = false;
 
 /** True if a stylesheet with this filename is already in document (e.g. via @import from block). */
 function isStylesheetInDocument(filename) {
@@ -246,19 +197,19 @@ function isStylesheetInDocument(filename) {
 }
 
 /**
- * Loads modal-picker-rebuild.css and gradient-editor.css via Milo loadStyle. Idempotent.
+ * Loads modal-gradient-content.css and gradient-editor.css via Milo loadStyle. Idempotent.
  * Skips gradient-editor.css if already in document (e.g. block @import).
  */
-export async function loadGradientPickerRebuildStyles() {
-  if (pickerRebuildStylesLoaded) return;
+export async function ensureGradientModalContentStyles() {
+  if (gradientModalContentStylesLoaded) return;
   try {
-    await loadMiloStyle('scripts/color-shared/modal/modal-picker-rebuild.css');
+    await loadMiloStyle('scripts/color-shared/modal/modal-gradient-content.css');
     if (!isStylesheetInDocument('gradient-editor.css')) {
       await loadMiloStyle('scripts/color-shared/components/gradients/gradient-editor.css');
     }
-    pickerRebuildStylesLoaded = true;
-    document.documentElement.dataset.gradientPickerStylesLoaded = 'true';
+    gradientModalContentStylesLoaded = true;
+    document.documentElement.dataset.gradientModalContentStylesLoaded = 'true';
   } catch {
-    pickerRebuildStylesLoaded = true;
+    gradientModalContentStylesLoaded = true;
   }
 }

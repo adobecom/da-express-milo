@@ -108,6 +108,9 @@
   --cc-tint-input-height: 24px;
   --cc-tint-input-padding-inline: 9px;
   --cc-tint-input-radius: 7px;
+  --cc-tint-slider-border-color: #0000004f;
+  --cc-tint-slider-thumb-size: 19px;
+  --cc-tint-slider-border-radius: 50px;
 
   /* Topbar */
   --cc-topbar-min-height: 40px;
@@ -560,6 +563,9 @@
 
 .cc-tint-slider-wrapper color-channel-slider {
   inline-size: 100%;
+  border-radius: var(--cc-tint-slider-border-radius);
+  border: 1px solid var(--cc-tint-slider-border-color);
+  --channel-slider-thumb-size: var(--cc-tint-slider-thumb-size);
 }
 
 .cc-tint-value-input {
@@ -1121,10 +1127,6 @@
   background: var(--cc-preview-browser-bar-bg);
   display: none;
   align-items: center;
-  border-inline: 1px solid var(--cc-border-preview);
-  border-block-start: 1px solid var(--cc-border-preview);
-  border-top-right-radius: inherit;
-  border-top-left-radius: inherit;
 }
 
 .cc-browser-dots {
@@ -1219,7 +1221,7 @@
 .cc-preview-image picture,
 .cc-preview-image img {
   width: 100%;
-  height: 100%;
+  height: 101%;
   object-fit: cover;
 }
 

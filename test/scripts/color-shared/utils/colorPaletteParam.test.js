@@ -221,7 +221,7 @@ describe('createColorPaletteParamApi', () => {
 
 describe('PALETTE_PRESETS defaults', () => {
   it('contains the expected number of preset palettes', () => {
-    expect(PALETTE_PRESETS).to.be.an('array').with.lengthOf(11);
+    expect(PALETTE_PRESETS).to.be.an('array').with.lengthOf(10);
   });
 
   it('each preset has a colors array with valid hex values', () => {
@@ -235,17 +235,16 @@ describe('PALETTE_PRESETS defaults', () => {
 
   it('contains the specific Design-provided palettes', () => {
     const allColors = PALETTE_PRESETS.map((p) => p.colors);
-    expect(allColors).to.deep.include(['#811B0E', '#D29500', '#FFEBE8', '#D7F7E1', '#1D3ECF']);
-    expect(allColors).to.deep.include(['#D73220', '#F4DACB', '#1286CD', '#68150A', '#1F0062']);
-    expect(allColors).to.deep.include(['#AF7400', '#FFF197', '#FF9D91', '#0E1843', '#120B00']);
-    expect(allColors).to.deep.include(['#FF4885', '#CBE2FE', '#EDC4AC', '#10288C', '#4B0090']);
+    expect(allColors).to.deep.include(['#D73220', '#F9ECE5', '#68150A', '#0B78B3', '#1F0062']);
+    expect(allColors).to.deep.include(['#B72818', '#FFEBE8', '#E6AF00', '#D7F7E1', '#1D3ECF']);
+    expect(allColors).to.deep.include(['#10288C', '#EAF6AD', '#6338EE', '#B6DB00', '#274DEA']);
+    expect(allColors).to.deep.include(['#FF4885', '#CBE2FE', '#10288C', '#FFE8F0', '#4B0090']);
     expect(allColors).to.deep.include(['#2A0081', '#B7E7FC', '#FFD3F0', '#F5C700', '#BA1650']);
-    expect(allColors).to.deep.include(['#ADEEC5', '#B72818', '#E86A00', '#3B63FB', '#480058']);
-    expect(allColors).to.deep.include(['#1C3A16', '#04953D', '#482E0A', '#D0F1B7', '#FCFAFA', '#607F5D', '#1C221B']);
-    expect(allColors).to.deep.include(['#911400', '#F7E7CB', '#3B0014', '#9AB6FF', '#00291B', '#F2B9A9']);
-    expect(allColors).to.deep.include(['#2086F9', '#00428D', '#F1EDE5', '#FEFFB2', '#F04517', '#181B1E']);
-    expect(allColors).to.deep.include(['#2B2D42', '#9DD8FF', '#B20D30', '#999CC0', '#FFB997', '#1D7874']);
-    expect(allColors).to.deep.include(['#F1EEE1', '#1A1717', '#627E2E', '#D2AF9A', '#602222', '#B6DAF0']);
+    expect(allColors).to.deep.include(['#ADEEC5', '#B72818', '#FFA213', '#4B75FF', '#480058']);
+    expect(allColors).to.deep.include(['#9C2113', '#F9ECE5', '#014B43', '#FFD6D1', '#099078']);
+    expect(allColors).to.deep.include(['#8EB9FC', '#274DEA', '#EBFFDC', '#FFF197', '#FF513D']);
+    expect(allColors).to.deep.include(['#424242', '#FF98BB', '#BA1650', '#CCCCCC', '#056C5C']);
+    expect(allColors).to.deep.include(['#566700', '#FF94DB', '#B6DB00', '#E5F0FE', '#4B75FF']);
   });
 
   it('pickRandomPalette returns one of the presets', () => {

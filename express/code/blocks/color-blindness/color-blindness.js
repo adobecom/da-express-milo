@@ -1,4 +1,4 @@
-import { createTag } from '../../scripts/utils.js';
+import { createTag, getLibs } from '../../scripts/utils.js';
 import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
@@ -8,6 +8,10 @@ import { getConflictPairs, TYPE_ORDER } from '../../scripts/color-shared/service
 import { announceToScreenReader } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
+import loadColorBlindnessPlaceholders from '../../scripts/color-shared/i18n/loadColorBlindnessPlaceholders.js';
+import loadBaseColorPlaceholders from '../../scripts/color-shared/i18n/loadBaseColorPlaceholders.js';
+import loadColorEditPlaceholders from '../../scripts/color-shared/i18n/loadColorEditPlaceholders.js';
+import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
 import '../../scripts/color-shared/components/color-wheel-express/index.js';
 
 const ACTION_MENU_ID = 'action-menu-color-blindness';
@@ -17,6 +21,7 @@ let layoutInstance = null;
 let controlsMenu = null;
 let stripRenderer = null;
 let railUnsub = null;
+let cachedRailController = null;
 let controllerUnsubscribe = null;
 let historyHandler = null;
 
@@ -29,6 +34,7 @@ function cleanup() {
   controllerUnsubscribe = null;
   railUnsub?.();
   railUnsub = null;
+  cachedRailController = null;
   stripRenderer?.destroy();
   stripRenderer = null;
   controlsMenu?.destroy();
@@ -45,7 +51,20 @@ export default async function decorate(block) {
 
     block.innerHTML = '';
 
-    const section = createTag('section', { 'aria-label': 'Color blindness simulator' });
+    const [
+      cbStrings,
+      baseColorStrings,
+      colorEditStrings,
+      colorSwatchRailStrings,
+    ] = await Promise.all([
+      loadColorBlindnessPlaceholders(),
+      loadBaseColorPlaceholders(),
+      loadColorEditPlaceholders(),
+      loadColorSwatchRailPlaceholders(),
+    ]);
+    const { shared, block: blockStrings } = cbStrings;
+
+    const section = createTag('section', { 'aria-label': blockStrings.sectionAria });
     block.appendChild(section);
 
     const {
@@ -58,26 +77,28 @@ export default async function decorate(block) {
       : -1;
     const hasValidBaseColor = baseColorIndex >= 0;
     const initialPalette = {
-      name: getResolvedPaletteName() || 'My Color Theme',
+      name: getResolvedPaletteName() || '',
       colors: paletteColors,
       ...(hasValidBaseColor && { baseColorIndex }),
     };
 
+    const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+    const { locale } = getConfig();
     const navLinks = [
-      { id: 'palette', label: 'Create palette', href: '/express/colors/color-palette-generator' },
-      { id: 'contrast', label: 'Contrast Checker', href: '/express/colors/color-contrast-checker' },
-      { id: 'color-blindness', label: 'Color Blindness Simulator', href: '/express/colors/color-blindness-simulator' },
+      { id: 'palette', label: blockStrings.navCreatePalette, href: `${locale.contentRoot}/create/color-wheel` },
+      { id: 'contrast', label: blockStrings.navContrastChecker, href: `${locale.contentRoot}/create/color-contrast-analyzer` },
+      { id: 'color-blindness', label: blockStrings.navColorBlindness, href: `${locale.contentRoot}/create/color-accessibility` },
     ];
     const controls = [
-      { id: 'undo', label: 'Undo' },
-      { id: 'redo', label: 'Redo' },
+      { id: 'undo', label: blockStrings.controlUndo },
+      { id: 'redo', label: blockStrings.controlRedo },
     ];
 
     layoutInstance = await createColorToolLayout(section, {
       palette: initialPalette,
       toolbar: {
-        variant: 'standalone',
-        mode: 'sticky-on-scroll',
+        daaLh: 'color-blindness',
+        variant: 'sticky-on-scroll',
         showEdit: false,
         showPaletteName: true,
         editPaletteName: false,
@@ -92,10 +113,10 @@ export default async function decorate(block) {
         activeId: 'color-blindness',
         navLinks,
         controls,
+        daaLh: 'color-blindness',
       },
     });
 
-    adoptHeadline(block, layoutInstance);
     await layoutInstance.actionMenuReady;
 
     const { sidebar, canvas, topbar } = layoutInstance.slots;
@@ -106,11 +127,12 @@ export default async function decorate(block) {
     const actionMenuApi = layoutInstance.actionMenu;
     const conflicts = createColorConflictsAdapter({
       conflictsFound: true,
-      label: 'Potential color blind conflicts',
+      label: shared.summary,
+      strings: shared,
     });
     conflicts.element.setAttribute('tabindex', '0');
     conflicts.element.addEventListener('focus', () => {
-      announceToScreenReader('The conflicts between colors are shown with a caution symbol.');
+      announceToScreenReader(blockStrings.conflictsFocusAnnouncement);
     });
     sidebar.appendChild(conflicts.element);
 
@@ -120,6 +142,7 @@ export default async function decorate(block) {
     });
 
     let syncingFromRail = false;
+    let syncingFromController = false;
     let restoringFromHistory = false;
     let pushingState = false;
 
@@ -133,14 +156,17 @@ export default async function decorate(block) {
     };
 
     const wheelEl = createTag('color-wheel-express', {
-      'aria-label': 'Color wheel',
+      'aria-label': blockStrings.wheelAria,
       color: initialPalette.colors[0],
       tabindex: '0',
     });
     wheelEl.addEventListener('focus', () => {
-      announceToScreenReader('Color wheel');
+      announceToScreenReader(blockStrings.wheelFocusAnnouncement);
     });
     wheelEl.showLines = true;
+    if (blockStrings.markerAriaTemplate) {
+      wheelEl.markerAriaTemplate = blockStrings.markerAriaTemplate;
+    }
 
     const computeAndSetConflictPairs = (colors) => {
       const allPairs = [];
@@ -159,10 +185,22 @@ export default async function decorate(block) {
     };
 
     const syncRailConflicts = () => {
-      railUnsub?.();
       const rail = canvas.querySelector('color-swatch-rail');
-      if (!rail?.controller?.subscribe) return;
-      railUnsub = rail.controller.subscribe((state) => {
+      const railController = rail?.controller;
+      if (!railController?.subscribe) {
+        railUnsub?.();
+        railUnsub = null;
+        cachedRailController = null;
+        return;
+      }
+      // Controller hasn't changed — already subscribed, nothing to do.
+      if (railController === cachedRailController) return;
+      railUnsub?.();
+      cachedRailController = railController;
+      railUnsub = railController.subscribe((state) => {
+        // Skip when this fired because we pushed an update from the main controller.
+        // computeAndSetConflictPairs was already called before stripRenderer.update().
+        if (syncingFromController) return;
         const colors = (state.swatches || []).map((s) => s.hex);
         computeAndSetConflictPairs(colors);
 
@@ -189,7 +227,9 @@ export default async function decorate(block) {
 
       computeAndSetConflictPairs(colors);
 
+      syncingFromController = true;
       stripRenderer?.update([{ ...initialPalette, colors }]);
+      syncingFromController = false;
       syncRailConflicts();
     });
 
@@ -209,8 +249,13 @@ export default async function decorate(block) {
         swatchFeatures: hasValidBaseColor
           ? { baseColor: false, baseColorReadOnly: true }
           : { baseColor: false },
+        colorBlindnessStrings: shared,
+        colorEditStrings,
+        baseColorStrings,
+        colorSwatchRailStrings,
       },
       onColorChangeEnd: () => pushCurrentPalette(),
+      onEditOpen: (index) => controller.setActiveSwatchIndex(index),
     });
     stripRenderer.render(stripWrapper);
     syncRailConflicts();
@@ -224,6 +269,7 @@ export default async function decorate(block) {
       type: 'controls-only',
       controls,
       enableState: false,
+      daaLh: 'color-blindness',
       onUndo: () => fullMenuEl?.querySelector('.undo-btn')?.click(),
       onRedo: () => fullMenuEl?.querySelector('.redo-btn')?.click(),
     });
@@ -251,6 +297,7 @@ export default async function decorate(block) {
     };
     document.addEventListener(HISTORY_EVENT, historyHandler);
 
+    adoptHeadline(block, layoutInstance);
     block.classList.add('ax-shell-host');
     block.dataset.blockStatus = 'loaded';
     trackColorBlockLoad('color-blindness');

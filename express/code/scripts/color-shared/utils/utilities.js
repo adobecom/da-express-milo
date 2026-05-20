@@ -1,5 +1,30 @@
 import { createTag } from '../../utils.js';
 
+export function interpolate(template, vars) {
+  return Object.entries(vars).reduce((s, [k, v]) => s.replaceAll(`{${k}}`, v), template);
+}
+
+const ANALYTICS_TEXT_LIMIT = 20;
+
+function sanitizeAnalyticsText(value) {
+  return String(value ?? '').replace(/[^a-zA-Z0-9\s]/g, '').trim()
+    .substring(0, ANALYTICS_TEXT_LIMIT);
+}
+
+/**
+ * Sets `daa-ll` on a clickable element for Milo analytics tracking.
+ *
+ * @param {Element} element
+ * @param {{ linkLabel?: string }} opts
+ */
+export function decorateAnalyticsAttributes(element, { linkLabel } = {}) {
+  if (!element) return;
+  const value = sanitizeAnalyticsText(
+    linkLabel || element.getAttribute('aria-label') || element.textContent || 'action',
+  );
+  element.setAttribute('daa-ll', value);
+}
+
 const SWIPE_CLOSE_THRESHOLD_PX = 120;
 const SWIPE_MAX_DRAG_PX = 400;
 
@@ -133,17 +158,16 @@ export function ensureHash(hex) {
 }
 
 export const PALETTE_PRESETS = [
-  { colors: ['#811B0E', '#D29500', '#FFEBE8', '#D7F7E1', '#1D3ECF'] },
-  { colors: ['#D73220', '#F4DACB', '#1286CD', '#68150A', '#1F0062'] },
-  { colors: ['#AF7400', '#FFF197', '#FF9D91', '#0E1843', '#120B00'] },
-  { colors: ['#FF4885', '#CBE2FE', '#EDC4AC', '#10288C', '#4B0090'] },
+  { colors: ['#D73220', '#F9ECE5', '#68150A', '#0B78B3', '#1F0062'] },
+  { colors: ['#B72818', '#FFEBE8', '#E6AF00', '#D7F7E1', '#1D3ECF'] },
+  { colors: ['#10288C', '#EAF6AD', '#6338EE', '#B6DB00', '#274DEA'] },
+  { colors: ['#FF4885', '#CBE2FE', '#10288C', '#FFE8F0', '#4B0090'] },
   { colors: ['#2A0081', '#B7E7FC', '#FFD3F0', '#F5C700', '#BA1650'] },
-  { colors: ['#ADEEC5', '#B72818', '#E86A00', '#3B63FB', '#480058'] },
-  { colors: ['#1C3A16', '#04953D', '#482E0A', '#D0F1B7', '#FCFAFA', '#607F5D', '#1C221B'] },
-  { colors: ['#911400', '#F7E7CB', '#3B0014', '#9AB6FF', '#00291B', '#F2B9A9'] },
-  { colors: ['#2086F9', '#00428D', '#F1EDE5', '#FEFFB2', '#F04517', '#181B1E'] },
-  { colors: ['#2B2D42', '#9DD8FF', '#B20D30', '#999CC0', '#FFB997', '#1D7874'] },
-  { colors: ['#F1EEE1', '#1A1717', '#627E2E', '#D2AF9A', '#602222', '#B6DAF0'] },
+  { colors: ['#ADEEC5', '#B72818', '#FFA213', '#4B75FF', '#480058'] },
+  { colors: ['#9C2113', '#F9ECE5', '#014B43', '#FFD6D1', '#099078'] },
+  { colors: ['#8EB9FC', '#274DEA', '#EBFFDC', '#FFF197', '#FF513D'] },
+  { colors: ['#424242', '#FF98BB', '#BA1650', '#CCCCCC', '#056C5C'] },
+  { colors: ['#566700', '#FF94DB', '#B6DB00', '#E5F0FE', '#4B75FF'] },
 ];
 
 export function pickRandomPalette() {

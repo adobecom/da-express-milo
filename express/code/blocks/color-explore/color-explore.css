@@ -23,6 +23,18 @@
   max-width: var(--block-wd-content-max-width);
 }
 
+.color-explore sp-theme {
+  display: block;
+}
+
+.color-explore > .ax-color-loading {
+  width: 100%;
+  max-width: var(--block-wd-content-max-width);
+  margin: 0 auto;
+  box-sizing: border-box;
+  padding: 0 var(--spacing-300) var(--spacing-600);
+}
+
 .color-explore-container {
   width: 100%;
   max-width: var(--block-wd-content-max-width);
@@ -66,16 +78,21 @@
 
 .color-explore--strips .palettes-grid {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: minmax(0, 1fr);
   gap: var(--spacing-300);
   width: 100%;
   max-width: min(var(--explore-content-width), 100%);
   margin: 0 auto;
 }
 
+.color-explore--strips .palettes-grid > * {
+  min-width: 0;
+}
+
 .color-explore--strips .palettes-grid .color-card {
   --explore-palette-card-height: 88px;
   --explore-palette-strip-height: 56px;
+  --color-palette-min-width: 0;
   width: 100%;
   max-width: 100%;
   min-width: 0;
@@ -281,6 +298,8 @@
   outline: var(--border-width-2) solid var(--color-blue-800);
   outline-offset: var(--border-width-2);
   border-radius: var(--Corner-radius-corner-radius-100);
+  position: relative;
+  z-index: 2;
 }
 
 .color-explore .filters-desktop .filter-dropdown sp-theme {
@@ -332,6 +351,8 @@
   outline: var(--border-width-2) solid var(--color-blue-800);
   outline-offset: var(--border-width-2);
   border-radius: 8px;
+  position: relative;
+  z-index: 2;
 }
 
 .color-explore .filters-mobile__panel {
@@ -628,7 +649,7 @@
   }
 
   .color-explore.color-explore--strips .palettes-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--spacing-300);
   }
 
