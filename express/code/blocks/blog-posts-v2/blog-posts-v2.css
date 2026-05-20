@@ -484,8 +484,13 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   }
 
   main .blog-posts-v2 {
+    max-width: var(--block-wd-max-width);
     margin-right: auto;
     margin-left: auto;
+  }
+
+  main .blog-posts-v2.wide {
+    max-width: unset;
   }
 
   main .blog-posts-v2 .blog-hero-card .blog-card-image {
