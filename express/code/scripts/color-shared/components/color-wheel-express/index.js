@@ -222,7 +222,7 @@ export class ColorWheelExpress extends ColorWheel {
     marker.style.transform = 'translate(-50%, -50%)';
     marker.dataset.index = index;
     marker.setAttribute('role', 'button');
-    marker.setAttribute('tabindex', '0');
+    marker.setAttribute('tabindex', '-1');
 
     // Visible marker is 33px; below Apple HIG's 44px minimum tap target.
     // Users on iOS overshoot the dot and land on the canvas instead, which
@@ -355,6 +355,19 @@ export class ColorWheelExpress extends ColorWheel {
         this._kbFocusIndex = -1;
         this.focus({ preventScroll: true });
         break;
+      case 'Tab': {
+        e.preventDefault();
+        const allMarkers = Array.from(
+          this.shadowRoot.querySelectorAll('.wheel-marker-overlay[data-index]'),
+        );
+        if (!allMarkers.length) break;
+        const cur = allMarkers.findIndex((m) => Number(m.dataset.index) === index);
+        const next = e.shiftKey
+          ? (cur - 1 + allMarkers.length) % allMarkers.length
+          : (cur + 1) % allMarkers.length;
+        allMarkers[next].focus({ preventScroll: true });
+        break;
+      }
       default: break;
     }
   }
