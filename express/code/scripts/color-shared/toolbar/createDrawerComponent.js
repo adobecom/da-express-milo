@@ -646,7 +646,7 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   };
 
   tagsWrapper.appendChild(createKeywordSuggestions(
-    t.keywordSuggestions.split(',').map((s) => s.trim()),
+    t.keywordSuggestions.split(',').map((s) => { const w = s.trim(); return w ? w[0].toUpperCase() + w.slice(1) : w; }),
     { onSuggestionClick },
   ));
   formFields.appendChild(tagsWrapper);
