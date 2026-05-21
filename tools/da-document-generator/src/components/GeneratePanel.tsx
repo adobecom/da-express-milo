@@ -15,6 +15,7 @@ import type { CsvRow, TemplateState, RowResult, QaResult } from '../types';
 interface Props {
   rows: CsvRow[];
   template: TemplateState;
+  generateBlockReason?: string;
 }
 
 const DEFAULT_OUTPUT_DIR = '/adobecom/da-express-milo/drafts/maxn/document-generator';
@@ -22,7 +23,7 @@ const CONCURRENCY = 3;
 
 type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing' | 'unpublishing' | 'deleting';
 
-export default function GeneratePanel({ rows, template }: Props) {
+export default function GeneratePanel({ rows, template, generateBlockReason }: Props) {
   const [outputDir, setOutputDir] = useState(DEFAULT_OUTPUT_DIR);
   const [results, setResults] = useState<RowResult[]>([]);
   const [bulkOp, setBulkOp] = useState<BulkOp>('idle');
@@ -334,22 +335,29 @@ export default function GeneratePanel({ rows, template }: Props) {
       </div>
 
       <div className="flex items-center gap-3 flex-wrap">
-        <button
-          type="button"
-          onClick={handleGenerate}
-          disabled={running || !template.html}
-          className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-        >
-          {bulkOp === 'generating'
-            ? `Generating… ${counts.generated + counts.error} / ${rows.length}`
-            : `Generate ${rows.length} document${rows.length !== 1 ? 's' : ''}`}
-        </button>
+        <div className="relative group inline-block">
+          <button
+            type="button"
+            onClick={handleGenerate}
+            disabled={running || !template.html || !!generateBlockReason}
+            className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+          >
+            {bulkOp === 'generating'
+              ? `Generating… ${counts.generated + counts.error} / ${rows.length}`
+              : `Generate ${rows.length} document${rows.length !== 1 ? 's' : ''}`}
+          </button>
+          {generateBlockReason && (
+            <div className="absolute bottom-full left-0 mb-1.5 px-2.5 py-1.5 bg-gray-800 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity duration-150">
+              {generateBlockReason}
+            </div>
+          )}
+        </div>
 
         {showPreviewBtn && (
           <button
             type="button"
             onClick={handlePreview}
-            className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+            className="px-5 py-2.5 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 cursor-pointer transition-colors"
           >
             Preview {counts.previewable} document{counts.previewable !== 1 ? 's' : ''}
           </button>
@@ -365,7 +373,7 @@ export default function GeneratePanel({ rows, template }: Props) {
           <button
             type="button"
             onClick={handlePublish}
-            className="px-5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 transition-colors"
+            className="px-5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-xl hover:bg-green-700 cursor-pointer transition-colors"
           >
             Publish {counts.publishable} document{counts.publishable !== 1 ? 's' : ''}
           </button>
@@ -381,7 +389,7 @@ export default function GeneratePanel({ rows, template }: Props) {
           <button
             type="button"
             onClick={handleUnpublish}
-            className="px-5 py-2.5 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors"
+            className="px-5 py-2.5 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 cursor-pointer transition-colors"
           >
             Unpublish {counts.published} documents
           </button>
@@ -397,7 +405,7 @@ export default function GeneratePanel({ rows, template }: Props) {
           <button
             type="button"
             onClick={() => setDeleteModalOpen(true)}
-            className="px-5 py-2.5 bg-red-700 text-white text-sm font-medium rounded-xl hover:bg-red-800 transition-colors"
+            className="px-5 py-2.5 bg-red-700 text-white text-sm font-medium rounded-xl hover:bg-red-800 cursor-pointer transition-colors"
           >
             Delete {counts.deletable} documents
           </button>
@@ -494,7 +502,7 @@ export default function GeneratePanel({ rows, template }: Props) {
 
       {deleteModalOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-full max-w-md flex flex-col gap-4 shadow-xl">
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-max max-w-[90vw] flex flex-col gap-4 shadow-xl">
             <h3 className="font-semibold text-gray-900 text-base">
               Delete {counts.deletable} document{counts.deletable !== 1 ? 's' : ''}?
             </h3>
@@ -507,20 +515,20 @@ export default function GeneratePanel({ rows, template }: Props) {
                   ['generated', 'qa-fail', 'previewing', 'previewed', 'publishing',
                     'published', 'unpublishing', 'unpublished'].includes(r.stage),
                 )
-                .map((r) => <li key={r.id}>{r.path}</li>)}
+                .map((r) => <li key={r.id} className="whitespace-nowrap">{r.path}</li>)}
             </ul>
             <div className="flex gap-3 justify-end">
               <button
                 type="button"
                 onClick={() => setDeleteModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 cursor-pointer transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleBulkDelete}
-                className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 transition-colors"
+                className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 cursor-pointer transition-colors"
               >
                 Delete
               </button>

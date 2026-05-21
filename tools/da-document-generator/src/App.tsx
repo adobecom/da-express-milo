@@ -15,10 +15,20 @@ const INITIAL_TEMPLATE: TemplateState = {
 export default function App() {
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [template, setTemplate] = useState<TemplateState>(INITIAL_TEMPLATE);
+  const [csvReadiness, setCsvReadiness] = useState({ dataComplete: false, idsValid: false });
 
   const inputsReady = rows.length > 0;
   const templateReady = template.status === 'ready' || template.status === 'warning';
   const canGenerate = inputsReady && templateReady;
+
+  const generateBlockReason: string | undefined =
+    !csvReadiness.dataComplete && !csvReadiness.idsValid
+      ? 'Fill in missing data and validate all template IDs before generating'
+      : !csvReadiness.dataComplete
+      ? 'Fill in all missing data before generating'
+      : !csvReadiness.idsValid
+      ? 'Validate all template IDs before generating'
+      : undefined;
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -31,11 +41,11 @@ export default function App() {
           </Panel>
 
           <Panel step={2} title="Product Data" complete={inputsReady}>
-            <CsvUpload rows={rows} onChange={setRows} placeholders={template.placeholders} />
+            <CsvUpload rows={rows} onChange={setRows} placeholders={template.placeholders} onReadinessChange={setCsvReadiness} />
           </Panel>
         </div>
 
-        {canGenerate && <GeneratePanel rows={rows} template={template} />}
+        {canGenerate && <GeneratePanel rows={rows} template={template} generateBlockReason={generateBlockReason} />}
       </div>
     </div>
   );

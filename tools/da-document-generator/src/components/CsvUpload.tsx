@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import type { CsvRow, InputSummary } from '../types';
@@ -8,6 +8,7 @@ interface Props {
   rows: CsvRow[];
   onChange: (rows: CsvRow[]) => void;
   placeholders?: string[];
+  onReadinessChange?: (state: { dataComplete: boolean; idsValid: boolean }) => void;
 }
 
 const PLACEHOLDER_COLUMNS = ['template_id', 'url_slug', 'title', 'description'];
@@ -63,7 +64,7 @@ function slugify(s: string): string {
 
 const MAX_VISIBLE_ROWS = 200;
 
-export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) {
+export default function CsvUpload({ rows, onChange, placeholders = [], onReadinessChange }: Props) {
   const [inputMode, setInputMode] = useState<'upload' | 'manual'>('upload');
   const [manualInput, setManualInput] = useState('');
   const [isDragging, setIsDragging] = useState(false);
@@ -84,6 +85,18 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
     ? [...baseCols, ...['url_slug', 'description'].filter((c) => !baseCols.includes(c))]
     : PLACEHOLDER_COLUMNS;
   const visibleRows = hasData ? rows.slice(0, MAX_VISIBLE_ROWS) : [PLACEHOLDER_ROW];
+
+  const allDataComplete = hasData && rows.every(
+    (row) => tableColumns.every((col) => !!row[col]?.trim()),
+  );
+  const allIdsValid =
+    hasData &&
+    Object.keys(validationStatus).length === rows.length &&
+    Object.values(validationStatus).every((v) => v === 'valid');
+
+  useEffect(() => {
+    onReadinessChange?.({ dataComplete: allDataComplete, idsValid: allIdsValid });
+  }, [allDataComplete, allIdsValid]);
 
   async function handleHydrate() {
     setHydrating(true);
@@ -198,7 +211,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
       <div className="flex gap-2">
         <button
           onClick={() => setInputMode('upload')}
-          className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
+          className={`text-xs px-3 py-1 rounded-full border font-medium cursor-pointer transition-colors ${
             inputMode === 'upload'
               ? 'bg-gray-900 text-white border-gray-900'
               : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
@@ -208,7 +221,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
         </button>
         <button
           onClick={() => setInputMode('manual')}
-          className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
+          className={`text-xs px-3 py-1 rounded-full border font-medium cursor-pointer transition-colors ${
             inputMode === 'manual'
               ? 'bg-gray-900 text-white border-gray-900'
               : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
@@ -266,7 +279,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
           <button
             onClick={handleManualSubmit}
             disabled={!manualInput.trim()}
-            className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
             Load IDs
           </button>
@@ -332,7 +345,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
           <button
             onClick={handleValidate}
             disabled={validating || hydrating}
-            className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
             {validating ? 'Validating…' : 'Validate Template IDs'}
           </button>
@@ -340,7 +353,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
             <button
               onClick={handleHydrate}
               disabled={hydrating || validating}
-              className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
             >
               {hydrating ? 'Hydrating…' : 'Hydrate from Zazzle'}
             </button>
@@ -390,7 +403,7 @@ function DataTable({
             return (
               <tr
                 key={row._id}
-                className={`border-b border-gray-100 last:border-0 border-l-2 ${
+                className={`border-b border-gray-100 last:border-b-0 border-l-2 ${
                   status === 'valid' ? 'border-l-green-400' :
                   status === 'invalid' ? 'border-l-red-400' :
                   'border-l-transparent'
