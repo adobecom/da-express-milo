@@ -13,6 +13,10 @@ let trackSearch;
 let updateImpressionCache;
 let generateSearchId;
 
+// Authored per-block overrides; populated during init() if the author provides them.
+let authoredLoggedOutUrl = null;
+let authoredLoggedInUrl = null;
+
 const fromScratchFallbackLink = 'https://adobesparkpost.app.link/c4bWARQhWAb';
 
 async function createTemplates(recipe, customProperties = null) {
@@ -205,11 +209,22 @@ const sortConfig = {
 // Redirects to the Express editor with `searchTerm` pre-filled.
 // Logged-out  \u2192 full editor: blank canvas (1080\u00d71080 px square) with the term in the left-nav search
 // Logged-in   \u2192 explore-templates page with the term pre-populated
+// If the block author provided custom URLs (authoredLoggedOutUrl / authoredLoggedInUrl),
+// those are used instead; the literal `<category>` token is replaced with the search term.
 function redirectToEditor(searchTerm) {
   const isLoggedIn = window.adobeIMS?.isSignedInUser();
   const term = searchTerm?.trim() || '';
-  let url;
+  const navigate = window.t_locationAssign ?? ((u) => window.location.assign(u));
 
+  // Use authored URL if provided, substituting <category> with the search term.
+  const authoredTemplate = isLoggedIn ? authoredLoggedInUrl : authoredLoggedOutUrl;
+  if (authoredTemplate) {
+    navigate(authoredTemplate.replace('<category>', encodeURIComponent(term)));
+    return;
+  }
+
+  // Default URLs
+  let url;
   if (isLoggedIn) {
     url = new URL('https://new.express.adobe.com/explore/templates');
   } else {
@@ -221,9 +236,8 @@ function redirectToEditor(searchTerm) {
     url.searchParams.set('category', 'templates');
     url.searchParams.set('taskID', 'standard-size-square');
   }
-
   if (term) url.searchParams.set('q', term);
-  (window.t_locationAssign ?? ((u) => window.location.assign(u)))(url.toString());
+  navigate(url.toString());
 }
 
 function cycleThroughSuggestions(el, targetIndex = 0) {
@@ -484,6 +498,8 @@ export async function extractSort(recipe) {
 
 export default async function init(el) {
   [{ createTag, getConfig, getMetadata }, { replaceKey, replaceKeyArray }] = await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]);
+  authoredLoggedOutUrl = null;
+  authoredLoggedInUrl = null;
   const [toolbar, recipeRow] = el.children;
   const includesSearchBar = el.classList.contains('search-bar');
 
@@ -501,6 +517,19 @@ export default async function init(el) {
   }
   const recipe = recipeRow.textContent.trim();
   recipeRow.remove();
+
+  // Parse and remove any authored redirect-URL rows (logged-out / logged-in).
+  // Rows after the first two follow the pattern: key cell | URL cell.
+  [...el.children].forEach((row) => {
+    const cells = [...row.children];
+    if (cells.length < 2) return;
+    const key = cells[0].textContent.trim().toLowerCase();
+    const url = cells[1].textContent.trim();
+    if (key === 'logged-out') authoredLoggedOutUrl = url;
+    else if (key === 'logged-in') authoredLoggedInUrl = url;
+    else return;
+    row.remove();
+  });
 
   // Extract optional 3rd paragraph from authored content for search-bar variant
   let optionalLabel = null;
