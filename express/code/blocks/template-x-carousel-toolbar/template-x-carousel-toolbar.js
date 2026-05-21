@@ -5,8 +5,10 @@ import buildGallery from '../../scripts/widgets/gallery/gallery.js';
 
 let createTag;
 let getConfig;
+let getMetadata;
 let replaceKey;
 let replaceKeyArray;
+let BlockMediator;
 let trackSearch;
 let updateImpressionCache;
 let generateSearchId;
