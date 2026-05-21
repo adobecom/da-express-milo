@@ -106,10 +106,12 @@ describe('template-x-carousel-toolbar', () => {
     beforeEach(async () => {
       document.body.innerHTML = searchBarBody;
       block = document.querySelector('.template-x-carousel-toolbar');
+      window.t_locationAssign = sinon.stub();
       await decorate(block);
     });
 
     afterEach(() => {
+      delete window.t_locationAssign;
       document.body.innerHTML = defaultBody;
     });
 
@@ -179,6 +181,153 @@ describe('template-x-carousel-toolbar', () => {
 
       document.body.click();
       expect(searchDropdown.classList.contains('hidden')).to.be.true;
+    });
+
+    describe('editor redirect', () => {
+      const EXPLORE_URL = 'https://new.express.adobe.com/explore/templates';
+      const EDITOR_URL = 'https://new.express.adobe.com/new';
+
+      afterEach(() => {
+        delete window.adobeIMS;
+      });
+
+      it('redirects logged-out users to the full editor with search term and blank canvas params', async () => {
+        window.adobeIMS = { isSignedInUser: () => false };
+        const searchBarWrapper = block.querySelector('.search-bar-wrapper');
+        const searchInput = searchBarWrapper.querySelector('input.search-bar');
+        const searchForm = searchBarWrapper.querySelector('.search-form');
+
+        searchInput.value = 'birthday card';
+        searchForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+        // Wait for sampleRUM async import
+        await new Promise((r) => { setTimeout(r, 50); });
+
+        expect(window.t_locationAssign.calledOnce).to.be.true;
+        const redirectedUrl = new URL(window.t_locationAssign.firstCall.args[0]);
+        expect(redirectedUrl.origin + redirectedUrl.pathname).to.equal(EDITOR_URL);
+        expect(redirectedUrl.searchParams.get('q')).to.equal('birthday card');
+        expect(redirectedUrl.searchParams.get('category')).to.equal('templates');
+        expect(redirectedUrl.searchParams.get('taskID')).to.equal('standard-size-square');
+        expect(redirectedUrl.searchParams.get('width')).to.equal('1080');
+        expect(redirectedUrl.searchParams.get('height')).to.equal('1080');
+      });
+
+      it('redirects logged-in users to the explore templates page with search term', async () => {
+        window.adobeIMS = { isSignedInUser: () => true };
+        const searchBarWrapper = block.querySelector('.search-bar-wrapper');
+        const searchInput = searchBarWrapper.querySelector('input.search-bar');
+        const searchForm = searchBarWrapper.querySelector('.search-form');
+
+        searchInput.value = 'flyer';
+        searchForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+
+        await new Promise((r) => { setTimeout(r, 50); });
+
+        expect(window.t_locationAssign.calledOnce).to.be.true;
+        const redirectedUrl = new URL(window.t_locationAssign.firstCall.args[0]);
+        expect(redirectedUrl.origin + redirectedUrl.pathname).to.equal(EXPLORE_URL);
+        expect(redirectedUrl.searchParams.get('q')).to.equal('flyer');
+        expect(redirectedUrl.searchParams.has('taskID')).to.be.false;
+      });
+    });
+
+    describe('authored redirect URLs', () => {
+      const CUSTOM_OUT_URL = 'https://example.com/out?q=<category>';
+      const CUSTOM_IN_URL = 'https://example.com/in?q=<category>';
+
+      beforeEach(async () => {
+        const authoredBody = `
+<main>
+  <div class="section" data-status="decorated" data-idx="2">
+    <div class="template-x-carousel-toolbar search-bar">
+      <div>
+        <div>
+          <h2>Start with a template.</h2>
+          <p>Search templates.</p>
+          <p>Browse by category</p>
+        </div>
+      </div>
+      <div><div>tasks=invoice&amp;orderBy=-createDate&amp;limit=10&amp;collection=default</div></div>
+      <div><div>logged-out</div><div>${CUSTOM_OUT_URL.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div></div>
+      <div><div>logged-in</div><div>${CUSTOM_IN_URL.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div></div>
+    </div>
+  </div>
+</main>`;
+        document.body.innerHTML = authoredBody;
+        block = document.querySelector('.template-x-carousel-toolbar');
+        window.t_locationAssign = sinon.stub();
+        await decorate(block);
+      });
+
+      afterEach(() => {
+        delete window.t_locationAssign;
+        delete window.adobeIMS;
+        document.body.innerHTML = defaultBody;
+      });
+
+      it('removes authored redirect rows from the DOM', () => {
+        const rows = [...block.querySelectorAll(':scope > div')];
+        const hasLoggedOutRow = rows.some((r) => r.textContent.toLowerCase().includes('logged-out'));
+        const hasLoggedInRow = rows.some((r) => r.textContent.toLowerCase().includes('logged-in'));
+        expect(hasLoggedOutRow).to.be.false;
+        expect(hasLoggedInRow).to.be.false;
+      });
+
+      it('uses the authored logged-out URL for unauthenticated users', async () => {
+        window.adobeIMS = { isSignedInUser: () => false };
+        const searchForm = block.querySelector('.search-form');
+        block.querySelector('input.search-bar').value = 'poster';
+        searchForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        await new Promise((r) => { setTimeout(r, 50); });
+        expect(window.t_locationAssign.calledOnce).to.be.true;
+        expect(window.t_locationAssign.firstCall.args[0]).to.equal(
+          CUSTOM_OUT_URL.replace('<category>', encodeURIComponent('poster')),
+        );
+      });
+
+      it('uses the authored logged-in URL for authenticated users', async () => {
+        window.adobeIMS = { isSignedInUser: () => true };
+        const searchForm = block.querySelector('.search-form');
+        block.querySelector('input.search-bar').value = 'poster';
+        searchForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
+        await new Promise((r) => { setTimeout(r, 50); });
+        expect(window.t_locationAssign.calledOnce).to.be.true;
+        expect(window.t_locationAssign.firstCall.args[0]).to.equal(
+          CUSTOM_IN_URL.replace('<category>', encodeURIComponent('poster')),
+        );
+      });
+    });
+  });
+
+  describe('search-bar variant – trend cap', () => {
+    let trendBlock;
+
+    before(async () => {
+      window.placeholders = {
+        'search-trends': JSON.stringify({
+          'Term 1': '/express/templates/t1',
+          'Term 2': '/express/templates/t2',
+          'Term 3': '/express/templates/t3',
+          'Term 4': '/express/templates/t4',
+          'Term 5': '/express/templates/t5',
+          'Term 6': '/express/templates/t6',
+          'Term 7': '/express/templates/t7',
+        }),
+      };
+      document.body.innerHTML = searchBarBody;
+      trendBlock = document.querySelector('.template-x-carousel-toolbar');
+      await decorate(trendBlock);
+    });
+
+    after(() => {
+      delete window.placeholders;
+      document.body.innerHTML = defaultBody;
+    });
+
+    it('shows at most 5 trend links when source has more than 5 entries', () => {
+      const trendLinks = trendBlock.querySelectorAll('.trends-wrapper .trend-link');
+      expect(trendLinks.length).to.equal(5);
     });
   });
 });
