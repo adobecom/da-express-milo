@@ -15,14 +15,16 @@ const INITIAL_TEMPLATE: TemplateState = {
 export default function App() {
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [template, setTemplate] = useState<TemplateState>(INITIAL_TEMPLATE);
-  const [csvReadiness, setCsvReadiness] = useState({ dataComplete: false, idsValid: false });
+  const [csvReadiness, setCsvReadiness] = useState({ dataComplete: false, idsValid: false, noDuplicates: true });
 
   const inputsReady = rows.length > 0;
   const templateReady = template.status === 'ready' || template.status === 'warning';
   const canGenerate = inputsReady && templateReady;
 
   const generateBlockReason: string | undefined =
-    !csvReadiness.dataComplete && !csvReadiness.idsValid
+    !csvReadiness.noDuplicates
+      ? 'Fix duplicate template IDs or URL slugs before generating'
+      : !csvReadiness.dataComplete && !csvReadiness.idsValid
       ? 'Fill in missing data and validate all template IDs before generating'
       : !csvReadiness.dataComplete
       ? 'Fill in all missing data before generating'

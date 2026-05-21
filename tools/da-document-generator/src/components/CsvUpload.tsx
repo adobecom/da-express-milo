@@ -8,7 +8,7 @@ interface Props {
   rows: CsvRow[];
   onChange: (rows: CsvRow[]) => void;
   placeholders?: string[];
-  onReadinessChange?: (state: { dataComplete: boolean; idsValid: boolean }) => void;
+  onReadinessChange?: (state: { dataComplete: boolean; idsValid: boolean; noDuplicates: boolean }) => void;
 }
 
 const PLACEHOLDER_COLUMNS = ['template_id', 'url_slug', 'title', 'description'];
@@ -16,17 +16,30 @@ const PLACEHOLDER_ROW: CsvRow = { _id: 'placeholder', template_id: '-', url_slug
 
 function computeSummary(rows: CsvRow[]): InputSummary {
   const total = rows.length;
+
+  const templateIdMap: Record<string, string[]> = {};
+  for (const r of rows) {
+    const id = r['template_id']?.trim();
+    if (id) (templateIdMap[id] ??= []).push(r._id);
+  }
+  const duplicateTemplateIdRowIds = new Set(
+    Object.values(templateIdMap).filter((ids) => ids.length > 1).flat(),
+  );
+
+  const slugMap: Record<string, string[]> = {};
+  for (const r of rows) {
+    const slug = r['url_slug']?.trim();
+    if (slug) (slugMap[slug] ??= []).push(r._id);
+  }
+  const duplicateSlugRowIds = new Set(
+    Object.values(slugMap).filter((ids) => ids.length > 1).flat(),
+  );
+
   const withId = rows.filter((r) => r['template_id']?.trim() && r['url_slug']?.trim());
   const missing = total - withId.length;
+  const duplicates = duplicateTemplateIdRowIds.size;
 
-  const counts: Record<string, number> = {};
-  for (const r of withId) {
-    const id = r['template_id'].trim();
-    counts[id] = (counts[id] ?? 0) + 1;
-  }
-  const duplicates = withId.filter((r) => counts[r['template_id'].trim()] > 1).length;
-
-  return { total, duplicates, missing };
+  return { total, duplicates, missing, duplicateTemplateIdRowIds, duplicateSlugRowIds };
 }
 
 interface SchemaMatch {
@@ -94,9 +107,12 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
     Object.keys(validationStatus).length === rows.length &&
     Object.values(validationStatus).every((v) => v === 'valid');
 
+  const hasDuplicates =
+    summary.duplicateTemplateIdRowIds.size > 0 || summary.duplicateSlugRowIds.size > 0;
+
   useEffect(() => {
-    onReadinessChange?.({ dataComplete: allDataComplete, idsValid: allIdsValid });
-  }, [allDataComplete, allIdsValid]);
+    onReadinessChange?.({ dataComplete: allDataComplete, idsValid: allIdsValid, noDuplicates: !hasDuplicates });
+  }, [allDataComplete, allIdsValid, hasDuplicates]);
 
   async function handleHydrate() {
     setHydrating(true);
@@ -289,7 +305,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <Stat label="Total" value={summary.total} />
           {summary.duplicates > 0 && (
-            <Stat label="Duplicates" value={summary.duplicates} color="yellow" />
+            <Stat label="Duplicates" value={summary.duplicates} color="orange" />
           )}
           {summary.missing > 0 && (
             <Stat label="Rows Missing Values" value={summary.missing} color="red" />
@@ -363,7 +379,14 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
         </div>
       )}
 
-      <DataTable columns={tableColumns} rows={visibleRows} placeholder={!hasData} validationStatus={validationStatus} />
+      <DataTable
+        columns={tableColumns}
+        rows={visibleRows}
+        placeholder={!hasData}
+        validationStatus={validationStatus}
+        duplicateTemplateIdRowIds={summary.duplicateTemplateIdRowIds}
+        duplicateSlugRowIds={summary.duplicateSlugRowIds}
+      />
       {hasData && rows.length > MAX_VISIBLE_ROWS && (
         <p className="text-xs text-gray-400 text-center">
           Showing {MAX_VISIBLE_ROWS} of {rows.length} rows
@@ -378,11 +401,15 @@ function DataTable({
   rows,
   placeholder,
   validationStatus = {},
+  duplicateTemplateIdRowIds = new Set(),
+  duplicateSlugRowIds = new Set(),
 }: {
   columns: string[];
   rows: CsvRow[];
   placeholder: boolean;
   validationStatus?: Record<string, 'valid' | 'invalid'>;
+  duplicateTemplateIdRowIds?: Set<string>;
+  duplicateSlugRowIds?: Set<string>;
 }) {
   return (
     <div className={`overflow-auto rounded-xl border border-gray-200 max-h-[420px] ${placeholder ? 'opacity-40' : ''}`}>
@@ -400,14 +427,17 @@ function DataTable({
         <tbody>
           {rows.map((row) => {
             const status = validationStatus[row._id];
+            const isTemplateDup = duplicateTemplateIdRowIds.has(row._id);
+            const isSlugDup = duplicateSlugRowIds.has(row._id);
+            const isDup = isTemplateDup || isSlugDup;
+            const borderClass = isDup ? 'border-l-orange-400' :
+              status === 'valid' ? 'border-l-green-400' :
+              status === 'invalid' ? 'border-l-red-400' :
+              'border-l-transparent';
             return (
               <tr
                 key={row._id}
-                className={`border-b border-gray-100 last:border-b-0 border-l-2 ${
-                  status === 'valid' ? 'border-l-green-400' :
-                  status === 'invalid' ? 'border-l-red-400' :
-                  'border-l-transparent'
-                }`}
+                className={`border-b border-gray-100 last:border-b-0 border-l-2 ${borderClass}`}
               >
                 <td className="px-3 py-2 text-gray-400 whitespace-nowrap w-[40px]">
                   {placeholder ? '—' : parseInt(row._id) + 1}
@@ -419,13 +449,21 @@ function DataTable({
                       key={col}
                       className={`px-3 py-2 ${isEmpty ? 'bg-red-50 text-red-400 italic' : 'text-gray-700'}`}
                     >
-                      <div className="max-w-[200px] overflow-x-auto whitespace-nowrap">
+                      <div className="flex items-center gap-1">
+                        {col === 'template_id' && isTemplateDup && (
+                          <span className="shrink-0 font-bold text-orange-500" title="Duplicate template ID">⚠</span>
+                        )}
                         {col === 'template_id' && status && (
-                          <span className={`mr-1 font-bold ${status === 'valid' ? 'text-green-500' : 'text-red-500'}`}>
+                          <span className={`shrink-0 font-bold ${status === 'valid' ? 'text-green-500' : 'text-red-500'}`}>
                             {status === 'valid' ? '✓' : '✗'}
                           </span>
                         )}
-                        {isEmpty ? '—' : (row[col] ?? '')}
+                        {col === 'url_slug' && isSlugDup && (
+                          <span className="shrink-0 font-bold text-orange-500" title="Duplicate URL slug">⚠</span>
+                        )}
+                        <div className="overflow-x-auto whitespace-nowrap min-w-0 flex-1">
+                          {isEmpty ? '—' : (row[col] ?? '')}
+                        </div>
                       </div>
                     </td>
                   );
@@ -446,11 +484,11 @@ function Stat({
 }: {
   label: string;
   value: number;
-  color?: 'gray' | 'green' | 'yellow' | 'red';
+  color?: 'gray' | 'green' | 'yellow' | 'red' | 'orange';
 }) {
-  const bg = { gray: 'bg-gray-50', green: 'bg-green-50', yellow: 'bg-yellow-50', red: 'bg-red-50' }[color];
-  const text = { gray: 'text-gray-900', green: 'text-gray-900', yellow: 'text-yellow-700', red: 'text-red-700' }[color];
-  const sub = { gray: 'text-gray-500', green: 'text-gray-500', yellow: 'text-yellow-600', red: 'text-red-600' }[color];
+  const bg = { gray: 'bg-gray-50', green: 'bg-green-50', yellow: 'bg-yellow-50', red: 'bg-red-50', orange: 'bg-orange-50' }[color];
+  const text = { gray: 'text-gray-900', green: 'text-gray-900', yellow: 'text-yellow-700', red: 'text-red-700', orange: 'text-orange-700' }[color];
+  const sub = { gray: 'text-gray-500', green: 'text-gray-500', yellow: 'text-yellow-600', red: 'text-red-600', orange: 'text-orange-600' }[color];
   return (
     <div className={`${bg} rounded-lg p-3 text-center`}>
       <p className={`text-xl font-semibold ${text}`}>{value}</p>

@@ -5,6 +5,8 @@ export interface InputSummary {
   total: number;
   duplicates: number;
   missing: number;
+  duplicateTemplateIdRowIds: Set<string>;
+  duplicateSlugRowIds: Set<string>;
 }
 
 export type TemplateStatus = 'idle' | 'loading' | 'ready' | 'warning' | 'invalid' | 'error';
