@@ -263,21 +263,56 @@ export class ColorWheelExpress extends ColorWheel {
     this.updateMarkers();
   }
 
-  _showLockedTip(index) {
+  async _ensureLockedTooltip() {
+    if (this._lockedTooltipEl) return this._lockedTooltipEl;
+    const [{ loadTooltip }, { createThemeWrapper }, { loadOverrideStyles }] = await Promise.all([
+      import('../../spectrum/load-spectrum.js'),
+      import('../../spectrum/utils/theme.js'),
+      import('../../spectrum/components/style-loader.js'),
+    ]);
+    await loadTooltip();
+    await loadOverrideStyles('tooltip', '/express/code/scripts/color-shared/spectrum/styles/tooltip.css');
+    await customElements.whenDefined('sp-tooltip');
+
+    const theme = createThemeWrapper();
+    const tooltip = document.createElement('sp-tooltip');
+    tooltip.setAttribute('placement', 'top');
+    tooltip.setAttribute('self-managed', '');
+    tooltip.textContent = this.lockedTipText || 'Unlock to change value';
+    theme.appendChild(tooltip);
+    Object.assign(theme.style, { position: 'absolute', width: '0', height: '0', overflow: 'hidden' });
+    document.body.appendChild(theme);
+    await (tooltip.updateComplete ?? Promise.resolve());
+
+    this._lockedTooltipEl = { tooltip, theme };
+    return this._lockedTooltipEl;
+  }
+
+  async _showLockedTip(index) {
     const layer = this.shadowRoot?.querySelector('.marker-layer');
     const marker = layer?.querySelector(`.wheel-marker-overlay[data-index="${index}"]`);
-    if (!marker || !layer) return;
+    if (!marker) return;
 
-    layer.querySelector(`.wheel-locked-tip[data-tip-index="${index}"]`)?.remove();
+    const { tooltip } = await this._ensureLockedTooltip();
 
-    const tip = document.createElement('div');
-    tip.className = 'wheel-locked-tip';
-    tip.dataset.tipIndex = index;
-    tip.textContent = this.lockedTipText || 'Unlock to change value';
-    tip.style.left = marker.style.left;
-    tip.style.top = marker.style.top;
-    layer.appendChild(tip);
-    tip.addEventListener('animationend', () => tip.remove());
+    const overlay = tooltip.shadowRoot?.querySelector?.('sp-overlay');
+    if (overlay && typeof overlay.triggerElement !== 'undefined') {
+      overlay.triggerElement = marker;
+    }
+
+    if (this._lockedTipTimer) clearTimeout(this._lockedTipTimer);
+    tooltip.setAttribute('open', '');
+    this._lockedTipTimer = setTimeout(() => {
+      tooltip.removeAttribute('open');
+      this._lockedTipTimer = null;
+    }, 2000);
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback?.();
+    if (this._lockedTipTimer) clearTimeout(this._lockedTipTimer);
+    this._lockedTooltipEl?.theme?.remove();
+    this._lockedTooltipEl = null;
   }
 
   updateMarkers() {

@@ -118,7 +118,6 @@ export const style = css`
     .wheel-marker-overlay--locked,
     .wheel-marker-overlay--locked:active {
         cursor: not-allowed;
-        opacity: 0.65;
     }
 
     .wheel-marker-overlay:focus,
@@ -152,26 +151,6 @@ export const style = css`
         border-radius: 50%;
         pointer-events: none;
         z-index: 3;
-    }
-
-    /* Transient tooltip shown when a user attempts to move a locked handle */
-    .wheel-locked-tip {
-        position: absolute;
-        background: var(--spectrum-global-color-gray-800, #2c2c2c);
-        color: #fff;
-        font-size: 11px;
-        line-height: 1.4;
-        border-radius: 4px;
-        padding: 4px 8px;
-        pointer-events: none;
-        white-space: nowrap;
-        z-index: 200;
-        transform: translate(-50%, calc(-100% - 10px));
-        animation: wheel-tip-fade 2s forwards;
-    }
-    @keyframes wheel-tip-fade {
-        0%, 70% { opacity: 1; }
-        100% { opacity: 0; }
     }
 
     /* Spoke lines */
