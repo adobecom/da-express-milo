@@ -696,6 +696,7 @@ function createSwatchRailControllerBridge(controller) {
         }
         const prevSize = lockedByIndex.size;
         lockedByIndex = new Set(incoming.filter((index) => Number.isInteger(index) && index >= 0));
+        controller.setLockedByIndex?.(lockedByIndex);
         const lockAdded = lockedByIndex.size > prevSize;
         if (lockAdded && !skipAutoCustom && controller.getState().harmonyRule !== 'CUSTOM') {
           controller.setHarmonyRule('CUSTOM');

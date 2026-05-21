@@ -225,9 +225,18 @@ export default class ColorThemeExpressController {
     return incoming.map((color) => createSwatch(color.hex || color));
   }
 
+  setLockedByIndex(set) {
+    this._lockedByIndex = set instanceof Set ? set : new Set();
+  }
+
   _handleHarmonyUpdates(swatchList = []) {
     swatchList.forEach(({ i, swatch }) => {
       if (typeof i !== 'number' || !swatch) {
+        return;
+      }
+      // Preserve colors for locked swatches — the harmony engine must not
+      // overwrite them even when recalculating from a moved non-locked handle.
+      if (this._lockedByIndex?.has(i)) {
         return;
       }
       this.theme.swatches[i] = createSwatch(swatch.hex || this.theme.swatches[i].hex, swatch);
