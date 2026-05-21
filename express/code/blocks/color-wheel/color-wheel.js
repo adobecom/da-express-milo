@@ -329,8 +329,25 @@ async function buildHarmonySelector(controller, strings = {}) {
       const { lockedByIndex } = swatchRailController?.getState?.() ?? {};
       if (lockedByIndex?.size === 1) {
         const lockedIndex = [...lockedByIndex][0];
-        const lockedHex = controller.getState().swatches[lockedIndex]?.hex;
-        if (lockedHex) controller.setBaseColor(lockedHex);
+        if (Number.isInteger(lockedIndex)) {
+          // Move the base to the locked swatch's position so the harmony is
+          // computed from that color. The locked swatch stays at its index.
+          controller.setBaseColorIndex(lockedIndex);
+          controller.setHarmonyRule(value);
+          // The badge subscriber clears locks when leaving CUSTOM; restore
+          // the lock without triggering the auto-CUSTOM guard.
+          swatchRailController?.setState?.(
+            { lockedByIndex: new Set([lockedIndex]) },
+            { skipAutoCustom: true },
+          );
+          setCurrentNameLabel(value);
+          updateRovingTabindex(value);
+          if (focusButton) {
+            const btn = harmonyButtons.find((b) => b.dataset.harmonyValue === value);
+            btn?.focus();
+          }
+          return;
+        }
       }
     }
     controller.setHarmonyRule(value);
@@ -665,7 +682,7 @@ function createSwatchRailControllerBridge(controller) {
         tintIndex,
       };
     },
-    setState(next = {}) {
+    setState(next = {}, { skipAutoCustom = false } = {}) {
       if (!next || typeof next !== 'object') return;
 
       if (Object.prototype.hasOwnProperty.call(next, 'lockedByIndex')) {
@@ -680,7 +697,7 @@ function createSwatchRailControllerBridge(controller) {
         const prevSize = lockedByIndex.size;
         lockedByIndex = new Set(incoming.filter((index) => Number.isInteger(index) && index >= 0));
         const lockAdded = lockedByIndex.size > prevSize;
-        if (lockAdded && controller.getState().harmonyRule !== 'CUSTOM') {
+        if (lockAdded && !skipAutoCustom && controller.getState().harmonyRule !== 'CUSTOM') {
           controller.setHarmonyRule('CUSTOM');
         }
       }
