@@ -258,6 +258,38 @@ function extractURNFromTemplate(template) {
   return null;
 }
 
+function ensureAbsoluteUrl(url) {
+  if (!url) return url;
+  if (/^https?:\/\/|^\/\/|^\//.test(url)) return url;
+  return `https://${url}`;
+}
+
+function normalizeEncodedAmpersands(value) {
+  if (!value || typeof value !== 'string') return value ?? '';
+  return value.replace(/(?:%26|&)amp(?:%3B|;)/gi, '&');
+}
+
+function sanitizeExternalCtaUrl(url) {
+  return ensureAbsoluteUrl(normalizeEncodedAmpersands(url));
+}
+
+function appendTemplateId(url, template) {
+  const urnId = extractURNFromTemplate(template);
+  if (!urnId) return url;
+  const [urlWithoutHash, hash = ''] = url.split('#');
+  const [basePath, queryString = ''] = urlWithoutHash.split('?');
+  if (basePath.includes(urnId) || queryString.includes(`templateId=${urnId}`)) return url;
+  if (!basePath.includes('/design/template/')) {
+    const separator = queryString ? '&' : '?';
+    const hashSuffix = hash ? `#${hash}` : '';
+    return `${urlWithoutHash}${separator}templateId=${urnId}${hashSuffix}`;
+  }
+  const normalizedPath = basePath.endsWith('/') ? basePath : `${basePath}/`;
+  const querySuffix = queryString ? `?${queryString}` : '';
+  const hashSuffix = hash ? `#${hash}` : '';
+  return `${normalizedPath}${urnId}${querySuffix}${hashSuffix}`;
+}
+
 function constructCustomURL(template, customUrlConfig) {
   if (!customUrlConfig?.baseUrl) return null;
 
@@ -265,9 +297,13 @@ function constructCustomURL(template, customUrlConfig) {
   if (!urnId) return null;
 
   const { baseUrl, queryParams } = customUrlConfig;
-  const separator = queryParams ? '&' : '?';
-
-  return `${baseUrl}?${queryParams}${separator}templateId=${urnId}`;
+  const normalizedBaseUrl = sanitizeExternalCtaUrl(baseUrl);
+  const normalizedQueryParams = normalizeEncodedAmpersands(queryParams);
+  const separator = normalizedBaseUrl.includes('?') ? '&' : '?';
+  const urlWithQueryParams = normalizedQueryParams
+    ? `${normalizedBaseUrl}${separator}${normalizedQueryParams}`
+    : normalizedBaseUrl;
+  return appendTemplateId(urlWithQueryParams, template);
 }
 
 function renderCTA(branchUrl, template, customUrlConfig = null) {
@@ -490,6 +526,46 @@ function renderMediaWrapper(template) {
   return { mediaWrapper, enterHandler, leaveHandler, focusHandler };
 }
 
+function applyExperimentalCtas(template, cta, btnContainer) {
+  const cta1Url = getMetadata('external-template-cta-link-1');
+  const cta2Url = getMetadata('external-template-cta-link-2');
+  const cta1Text = getMetadata('external-template-cta-link-text-1');
+  const cta2Text = getMetadata('external-template-cta-link-text-2');
+
+  if (!cta1Url && !cta2Url && !cta1Text && !cta2Text) return null;
+
+  if (cta1Url) {
+    cta.href = appendTemplateId(sanitizeExternalCtaUrl(cta1Url), template);
+  }
+  if (cta1Text) {
+    cta.textContent = cta1Text;
+    cta.title = cta1Text;
+    cta.setAttribute('aria-label', `${cta1Text} ${getTemplateTitle(template)}`);
+  }
+
+  const isFreeStatic = !variants?.includes('flyer')
+    && !variants?.includes('t-shirt')
+    && !variants?.includes('print')
+    && template.licensingCategory === 'free'
+    && !containsVideo(template.pages);
+
+  let secondaryCta = null;
+  if (isFreeStatic && cta2Url) {
+    const btnTitle = cta2Text || '';
+    secondaryCta = createTag('a', {
+      href: appendTemplateId(sanitizeExternalCtaUrl(cta2Url), template),
+      title: btnTitle,
+      class: 'button gray small secondary-template-cta',
+      'aria-label': `${btnTitle} ${getTemplateTitle(template)}`,
+    });
+    secondaryCta.textContent = btnTitle;
+  }
+
+  if (cta1Url || cta1Text) btnContainer.classList.add('experimental-ctas');
+  if (secondaryCta) btnContainer.append(secondaryCta);
+
+  return secondaryCta;
+}
 function renderHoverWrapper(template, customUrlConfig = null, properties = {}) {
   let cta;
   let ctaLink;
@@ -519,6 +595,8 @@ function renderHoverWrapper(template, customUrlConfig = null, properties = {}) {
 
   cta.setAttribute('aria-label', `${editThisTemplate} ${getTemplateTitle(template)}`);
   ctaLink.append(mediaWrapper);
+
+  const secondaryCta = applyExperimentalCtas(template, cta, btnContainer);
 
   // Create shareWrapper separately
   const templateTitle = getTemplateTitle(template);
@@ -560,6 +638,7 @@ function renderHoverWrapper(template, customUrlConfig = null, properties = {}) {
   };
 
   cta.addEventListener('click', ctaClickHandler, { passive: true });
+  if (secondaryCta) secondaryCta.addEventListener('click', ctaClickHandler, { passive: true });
   ctaLink.addEventListener('click', ctaClickHandler, { passive: true });
   ctaLink.addEventListener('click', ctaClickHandlerTouchDevice);
   return btnContainer;
