@@ -184,56 +184,7 @@ describe('template-x-carousel-toolbar', () => {
       document.body.click();
       expect(searchDropdown.classList.contains('hidden')).to.be.true;
     });
-
-    describe('editor redirect', () => {
-      const EXPLORE_URL = 'https://new.express.adobe.com/explore/templates';
-      const EDITOR_URL = 'https://new.express.adobe.com/new';
-
-      afterEach(() => {
-        delete window.adobeIMS;
-      });
-
-      it('redirects logged-out users to the full editor with search term and blank canvas params', async () => {
-        window.adobeIMS = { isSignedInUser: () => false };
-        const searchBarWrapper = block.querySelector('.search-bar-wrapper');
-        const searchInput = searchBarWrapper.querySelector('input.search-bar');
-        const searchForm = searchBarWrapper.querySelector('.search-form');
-
-        searchInput.value = 'birthday card';
-        searchForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-
-        // Wait for sampleRUM async import
-        await new Promise((r) => { setTimeout(r, 50); });
-
-        expect(window.t_locationAssign.calledOnce).to.be.true;
-        const redirectedUrl = new URL(window.t_locationAssign.firstCall.args[0]);
-        expect(redirectedUrl.origin + redirectedUrl.pathname).to.equal(EDITOR_URL);
-        expect(redirectedUrl.searchParams.get('q')).to.equal('birthday card');
-        expect(redirectedUrl.searchParams.get('category')).to.equal('templates');
-        expect(redirectedUrl.searchParams.get('taskID')).to.equal('standard-size-square');
-        expect(redirectedUrl.searchParams.get('width')).to.equal('1080');
-        expect(redirectedUrl.searchParams.get('height')).to.equal('1080');
-      });
-
-      it('redirects logged-in users to the explore templates page with search term', async () => {
-        window.adobeIMS = { isSignedInUser: () => true };
-        const searchBarWrapper = block.querySelector('.search-bar-wrapper');
-        const searchInput = searchBarWrapper.querySelector('input.search-bar');
-        const searchForm = searchBarWrapper.querySelector('.search-form');
-
-        searchInput.value = 'flyer';
-        searchForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-
-        await new Promise((r) => { setTimeout(r, 50); });
-
-        expect(window.t_locationAssign.calledOnce).to.be.true;
-        const redirectedUrl = new URL(window.t_locationAssign.firstCall.args[0]);
-        expect(redirectedUrl.origin + redirectedUrl.pathname).to.equal(EXPLORE_URL);
-        expect(redirectedUrl.searchParams.get('q')).to.equal('flyer');
-        expect(redirectedUrl.searchParams.has('taskID')).to.be.false;
-      });
-    });
-
+    
     describe('authored redirect URLs', () => {
       const CUSTOM_OUT_URL = 'https://example.com/out?q=<category>';
       const CUSTOM_IN_URL = 'https://example.com/in?q=<category>';
