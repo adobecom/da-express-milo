@@ -1,4 +1,4 @@
-import type { CsvRow, QaIssue, QaResult } from '../types';
+import type { CsvRow, QaCheck, QaResult } from '../types';
 
 export function applyTemplate(templateHtml: string, row: CsvRow): string {
   let html = templateHtml;
@@ -17,46 +17,52 @@ export function rowToOutputPath(row: CsvRow, outputDir: string): string {
 
 export function runGenerationQa(html: string): QaResult {
   const unsubstituted = [...new Set([...html.matchAll(/\{\{([^}]+)\}\}/g)].map((m) => m[1]))];
-  const issues: QaIssue[] = unsubstituted.length > 0 ? [{
+  const pass = unsubstituted.length === 0;
+  const checks: QaCheck[] = [{
     id: 'unsubstituted-placeholders',
-    label: 'Unsubstituted placeholders',
-    description: `These template placeholders were not replaced: ${unsubstituted.join(', ')}.`,
-  }] : [];
-  return { pass: issues.length === 0, issues };
+    label: 'Placeholder substitution',
+    description: pass
+      ? 'All template placeholders were successfully replaced.'
+      : `These placeholders were not replaced: ${unsubstituted.join(', ')}.`,
+    pass,
+  }];
+  return { pass, checks };
 }
 
 export function runPageQa(pageHtml: string): QaResult {
-  const issues: QaIssue[] = [];
   const doc = new DOMParser().parseFromString(pageHtml, 'text/html');
-
-  if (!doc.querySelector('title')?.textContent?.trim())
-    issues.push({
-      id: 'missing-page-title',
-      label: 'Missing page title',
-      description: 'The page has no <title> element or it is empty.',
-    });
-
-  if (!doc.querySelector('meta[name="description"]')?.getAttribute('content'))
-    issues.push({
-      id: 'missing-meta-description',
-      label: 'Missing meta description',
-      description: 'The page has no <meta name="description"> with content.',
-    });
-
-  if (!doc.querySelector('meta[property="og:image"]')?.getAttribute('content'))
-    issues.push({
-      id: 'missing-og-image',
-      label: 'Missing og:image',
-      description: 'The page has no <meta property="og:image"> with content.',
-    });
-
+  const hasTitle = !!doc.querySelector('title')?.textContent?.trim();
+  const hasDesc = !!doc.querySelector('meta[name="description"]')?.getAttribute('content');
+  const hasOgImage = !!doc.querySelector('meta[property="og:image"]')?.getAttribute('content');
   const unsubstituted = [...new Set([...pageHtml.matchAll(/\{\{([^}]+)\}\}/g)].map((m) => m[1]))];
-  if (unsubstituted.length > 0)
-    issues.push({
-      id: 'unsubstituted-placeholders',
-      label: 'Unsubstituted placeholders',
-      description: `These template placeholders were not replaced: ${unsubstituted.join(', ')}.`,
-    });
 
-  return { pass: issues.length === 0, issues };
+  const checks: QaCheck[] = [
+    {
+      id: 'missing-page-title',
+      label: 'Page title',
+      description: hasTitle ? 'The page has a <title> element.' : 'The page has no <title> element or it is empty.',
+      pass: hasTitle,
+    },
+    {
+      id: 'missing-meta-description',
+      label: 'Meta description',
+      description: hasDesc ? 'The page has a <meta name="description"> with content.' : 'The page has no <meta name="description"> with content.',
+      pass: hasDesc,
+    },
+    {
+      id: 'missing-og-image',
+      label: 'OG image',
+      description: hasOgImage ? 'The page has a <meta property="og:image"> with content.' : 'The page has no <meta property="og:image"> with content.',
+      pass: hasOgImage,
+    },
+    {
+      id: 'unsubstituted-placeholders',
+      label: 'Placeholder substitution',
+      description: unsubstituted.length === 0
+        ? 'All template placeholders were successfully replaced.'
+        : `These placeholders were not replaced: ${unsubstituted.join(', ')}.`,
+      pass: unsubstituted.length === 0,
+    },
+  ];
+  return { pass: checks.every((c) => c.pass), checks };
 }

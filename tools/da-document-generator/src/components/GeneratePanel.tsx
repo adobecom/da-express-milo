@@ -464,14 +464,21 @@ export default function GeneratePanel({ rows, template }: Props) {
                       <PublishPill result={r} onPublish={() => handlePublishRow(r.id, r.path)} onUnpublish={() => handleUnpublishRow(r.id, r.path)} />
                     </td>
                   </tr>
-                  {expandedRowId === r.id && r.qa && r.qa.issues.length > 0 && (
-                    <tr className="border-b border-gray-100 bg-amber-50">
+                  {expandedRowId === r.id && r.qa && (
+                    <tr className="border-b border-gray-100 bg-gray-50">
                       <td colSpan={5} className="px-4 py-3">
-                        <div className="flex flex-col gap-3">
-                          {r.qa.issues.map((issue) => (
-                            <div key={issue.id} className="flex flex-col gap-0.5">
-                              <span className="font-semibold text-amber-900">{issue.label}</span>
-                              <span className="text-gray-600">{issue.description}</span>
+                        <div className="flex flex-col gap-2">
+                          {r.qa.checks.map((check) => (
+                            <div key={check.id} className="flex gap-2 items-start">
+                              <span className={`shrink-0 font-semibold ${check.pass ? 'text-green-600' : 'text-amber-700'}`}>
+                                {check.pass ? '✓' : '✗'}
+                              </span>
+                              <div className="flex flex-col gap-0.5">
+                                <span className={`font-semibold ${check.pass ? 'text-gray-700' : 'text-amber-900'}`}>
+                                  {check.label}
+                                </span>
+                                <span className="text-gray-500">{check.description}</span>
+                              </div>
                             </div>
                           ))}
                         </div>
@@ -544,14 +551,16 @@ function QaIssueBadge({
   onToggle: () => void;
 }) {
   if (!qa) return <span className="text-gray-300">—</span>;
-  if (qa.pass) return <span className="text-green-600 font-medium">✓ Pass</span>;
+  const failCount = qa.checks.filter((c) => !c.pass).length;
   return (
     <button
       type="button"
       onClick={onToggle}
-      className="text-amber-700 font-medium hover:text-amber-900 flex items-center gap-1 cursor-pointer"
+      className={`font-medium flex items-center gap-1 cursor-pointer ${
+        qa.pass ? 'text-green-600 hover:text-green-800' : 'text-amber-700 hover:text-amber-900'
+      }`}
     >
-      {qa.issues.length} issue{qa.issues.length !== 1 ? 's' : ''}
+      {qa.pass ? '✓ Pass' : `Issues (${failCount})`}
       <span className="text-xs leading-none">{expanded ? '▲' : '▼'}</span>
     </button>
   );

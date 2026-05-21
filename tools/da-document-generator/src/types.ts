@@ -31,15 +31,16 @@ export type RowStage =
   | 'deleting'
   | 'error';
 
-export interface QaIssue {
+export interface QaCheck {
   id: string;
   label: string;
   description: string;
+  pass: boolean;
 }
 
 export interface QaResult {
   pass: boolean;
-  issues: QaIssue[];
+  checks: QaCheck[];
 }
 
 export interface RowResult {
