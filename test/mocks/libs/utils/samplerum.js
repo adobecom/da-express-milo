@@ -1,2 +1,2 @@
-// es-lint-disable-next-line prefer-default-export
+// eslint-disable-next-line import/prefer-default-export
 export function sampleRUM() {}
