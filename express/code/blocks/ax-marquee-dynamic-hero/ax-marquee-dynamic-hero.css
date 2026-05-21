@@ -131,11 +131,8 @@ main .ax-marquee-dynamic-hero p.button-container {
 }
 
 @media (min-width: 900px) {
-  .ax-marquee-dynamic-hero .button-container.free-plan-container a.button.same-fcta,
-  .ax-marquee-dynamic-hero .button-container.free-plan-container a.con-button.same-fcta {
+  .ax-marquee-dynamic-hero .button-container.free-plan-container a.button.same-fcta {
     display: flex;
-    align-items: center;
-    justify-content: center;
   }
 }
 
