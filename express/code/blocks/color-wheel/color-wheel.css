@@ -20,11 +20,16 @@ body {
 }
 
 .color-wheel .ax-color-tool-layout {
+  --ax-padding-topbar-desktop: 0 0 var(--spacing-400);
+  --ax-padding-topbar-mobile: 0 0 var(--spacing-400);
+  --ax-padding-sidebar-mobile: 0 0 var(--spacing-400);
+  --ax-padding-canvas-mobile: 0 0 var(--spacing-300);
+
   row-gap: 0;
 }
 
 .color-wheel .ax-shell-slot--topbar {
-  padding-block-end: var(--spacing-400);
+  /* padding-block-end: var(--spacing-400); */
 }
 
 .color-wheel .ax-shell-slot--sidebar {
@@ -32,12 +37,12 @@ body {
   flex-direction: column;
   gap: var(--spacing-300);
   overflow: visible;
-  padding-block-end: var(--spacing-300);
+  /* padding-block-end: var(--spacing-300); */
   isolation: isolate;
 }
 
 .color-wheel .ax-shell-slot--canvas {
-  padding-block-end: var(--spacing-300);
+  /* padding-block-end: var(--spacing-300); */
   box-sizing: border-box;
   overflow-y: visible;
 }
@@ -420,7 +425,7 @@ color-wheel-express {
 @media (min-width: 600px) {
   .color-wheel .ax-shell-slot--topbar,
   .color-wheel .ax-shell-slot--sidebar {
-    padding-block-end: var(--spacing-400);
+    /* padding-block-end: var(--spacing-400); */
   }
 }
 
@@ -428,7 +433,7 @@ color-wheel-express {
 
 @media (min-width: 888px) {
   .color-wheel .ax-shell-slot--sidebar {
-    padding-block-end: 0;
+    /* padding-block-end: 0; */
   }
 
   .color-wheel .ax-shell-slot--canvas {

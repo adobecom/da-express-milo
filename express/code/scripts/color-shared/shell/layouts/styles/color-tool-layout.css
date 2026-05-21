@@ -32,10 +32,12 @@
   --ax-bg-footer: var(--color-white);
 
   /* Slot padding (mobile) */
+  --ax-padding-topbar-mobile: 0;
   --ax-padding-sidebar-mobile: 0;
   --ax-padding-canvas-mobile: 0;
 
   /* Slot padding (desktop) */
+  --ax-padding-topbar-desktop: 0;
   --ax-padding-sidebar-desktop: 0;
   --ax-padding-canvas-desktop: 0;
 
@@ -88,6 +90,7 @@
   position: relative;
   order: var(--mobile-order);
   min-inline-size: 0;
+  box-sizing: border-box;
 }
 
 .ax-color-tool-layout--canvas-footer .ax-shell-slot--topbar,
@@ -98,6 +101,7 @@
 .ax-shell-slot--topbar {
   grid-area: var(--ax-area-topbar);
   background-color: var(--ax-bg-topbar);
+  padding: var(--ax-padding-topbar-mobile);
 }
 
 .ax-shell-slot--sidebar {
@@ -162,6 +166,10 @@
   .ax-shell-slot {
     order: unset;
     grid-area: auto;
+  }
+
+  .ax-shell-slot--topbar {
+    padding: var(--ax-padding-topbar-desktop);
   }
 
   .ax-shell-slot--sidebar {
