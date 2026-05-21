@@ -5,10 +5,8 @@ import buildGallery from '../../scripts/widgets/gallery/gallery.js';
 
 let createTag;
 let getConfig;
-let getMetadata;
 let replaceKey;
 let replaceKeyArray;
-let BlockMediator;
 let trackSearch;
 let updateImpressionCache;
 let generateSearchId;
@@ -207,38 +205,24 @@ const sortConfig = {
 };
 
 // Redirects to the Express editor with `searchTerm` pre-filled.
-// Logged-out  \u2192 full editor: blank canvas (1080\u00d71080 px square) with the term in the left-nav search
-// Logged-in   \u2192 explore-templates page with the term pre-populated
-// If the block author provided custom URLs (authoredLoggedOutUrl / authoredLoggedInUrl),
-// those are used instead; the literal `<category>` token is replaced with the search term.
+// Authored URLs (authoredLoggedOutUrl / authoredLoggedInUrl) take precedence;
+// the literal `<category>` token is replaced with the encoded search term.
 function redirectToEditor(searchTerm) {
   const isLoggedIn = window.adobeIMS?.isSignedInUser();
   const term = searchTerm?.trim() || '';
   const navigate = window.t_locationAssign ?? ((u) => window.location.assign(u));
 
-  // Use authored URL if provided, substituting <category> with the search term.
   const authoredTemplate = isLoggedIn ? authoredLoggedInUrl : authoredLoggedOutUrl;
-  let url;
- 
   if (authoredTemplate) {
-    url = new URL(authoredTemplate);
+    const url = new URL(authoredTemplate);
     url.searchParams.set('q', term);
     navigate(url.toString());
     return;
   }
 
-  // Default URLs
-  if (isLoggedIn) {
-    url = new URL('https://new.express.adobe.com/explore/templates');
-  } else {
-    url = new URL('https://new.express.adobe.com/new');
-    url.searchParams.set('width', '1080');
-    url.searchParams.set('height', '1080');
-    url.searchParams.set('unit', 'px');
-    url.searchParams.set('aspectRatioLock', 'true');
-    url.searchParams.set('category', 'templates');
-    url.searchParams.set('taskID', 'standard-size-square');
-  }
+  const url = isLoggedIn
+    ? new URL('https://new.express.adobe.com/explore/templates')
+    : new URL('https://new.express.adobe.com/new?width=1080&height=1080&unit=px&aspectRatioLock=true&category=templates&taskID=standard-size-square');
   if (term) url.searchParams.set('q', term);
   navigate(url.toString());
 }
@@ -500,7 +484,7 @@ export async function extractSort(recipe) {
 }
 
 export default async function init(el) {
-  [{ createTag, getConfig, getMetadata }, { replaceKey, replaceKeyArray }] = await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]);
+  [{ createTag, getConfig }, { replaceKey, replaceKeyArray }] = await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]);
   authoredLoggedOutUrl = null;
   authoredLoggedInUrl = null;
   const [toolbar, recipeRow] = el.children;
@@ -547,7 +531,7 @@ export default async function init(el) {
 
     // Load search-specific dependencies only for this variant
     const [
-      { default: importedBlockMediator },
+      ,
       {
         trackSearch: importedTrackSearch,
         updateImpressionCache: importedUpdateImpressionCache,
@@ -557,7 +541,6 @@ export default async function init(el) {
       import('../../scripts/block-mediator.min.js'),
       import('../../scripts/template-search-api-v3.js'),
     ]);
-    BlockMediator = importedBlockMediator;
     trackSearch = importedTrackSearch;
     updateImpressionCache = importedUpdateImpressionCache;
     generateSearchId = importedGenerateSearchId;
