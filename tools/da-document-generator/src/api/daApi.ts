@@ -56,6 +56,7 @@ export async function cat(filePath: string): Promise<string> {
   if (!t) throw new Error('DA token not set; set VITE_DA_TOKEN or run from DA.live');
   const path = filePath.endsWith('.html') ? filePath : `${filePath}.html`;
   const resp = await fetch(`${DA_API}/source${path}`, {
+    cache: 'no-store',
     headers: { Authorization: `Bearer ${t}` },
   });
   if (!resp.ok) throw new Error(`${resp.status}: ${await resp.text()}`);

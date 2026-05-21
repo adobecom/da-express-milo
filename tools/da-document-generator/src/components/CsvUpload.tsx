@@ -10,8 +10,8 @@ interface Props {
   placeholders?: string[];
 }
 
-const PLACEHOLDER_COLUMNS = ['template_id', 'url_slug', 'title'];
-const PLACEHOLDER_ROW: CsvRow = { _id: 'placeholder', template_id: '-', url_slug: '-', title: '-' };
+const PLACEHOLDER_COLUMNS = ['template_id', 'url_slug', 'title', 'description'];
+const PLACEHOLDER_ROW: CsvRow = { _id: 'placeholder', template_id: '-', url_slug: '-', title: '-', description: '-' };
 
 function computeSummary(rows: CsvRow[]): InputSummary {
   const total = rows.length;
@@ -81,7 +81,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
     ? columns
     : Object.keys(rows[0] ?? {}).filter((k) => k !== '_id');
   const tableColumns = hasData
-    ? (baseCols.includes('url_slug') ? baseCols : [...baseCols, 'url_slug'])
+    ? [...baseCols, ...['url_slug', 'description'].filter((c) => !baseCols.includes(c))]
     : PLACEHOLDER_COLUMNS;
   const visibleRows = hasData ? rows.slice(0, MAX_VISIBLE_ROWS) : [PLACEHOLDER_ROW];
 
@@ -175,11 +175,11 @@ export default function CsvUpload({ rows, onChange, placeholders = [] }: Props) 
       .map((s) => s.trim())
       .filter(Boolean);
     if (!ids.length) return;
-    setColumns(['template_id', 'title', 'short_title', 'url_slug']);
+    setColumns(['template_id', 'title', 'short_title', 'description', 'url_slug']);
     setValidationStatus({});
     setValidateMsg(null);
     setHydrateMsg(null);
-    onChange(ids.map((id, i) => ({ _id: String(i), template_id: id, title: '', short_title: '', url_slug: '' })));
+    onChange(ids.map((id, i) => ({ _id: String(i), template_id: id, title: '', short_title: '', description: '', url_slug: '' })));
   }
 
   function handleFile(file: File) {
