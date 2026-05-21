@@ -5,7 +5,6 @@ import type { TemplateState } from '../types';
 interface Props {
   state: TemplateState;
   onChange: (state: TemplateState) => void;
-  onAuthError?: () => void;
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -31,7 +30,7 @@ const STATUS_LABEL: Record<string, string> = {
 
 const DEFAULT_TEMPLATE = '/adobecom/da-express-milo/drafts/maxn/document-generator-template';
 
-export default function TemplateConfirm({ state, onChange, onAuthError }: Props) {
+export default function TemplateConfirm({ state, onChange }: Props) {
   const [url, setUrl] = useState(DEFAULT_TEMPLATE);
   const [showFormats, setShowFormats] = useState(false);
 
@@ -48,7 +47,6 @@ export default function TemplateConfirm({ state, onChange, onAuthError }: Props)
       const msg = err instanceof Error ? err.message : String(err);
       const is403 = msg.startsWith('403');
       const is404 = msg.startsWith('404');
-      if (is403) onAuthError?.();
       onChange({
         status: is403 || is404 ? 'invalid' : 'error',
         html: null,
@@ -80,7 +78,7 @@ export default function TemplateConfirm({ state, onChange, onAuthError }: Props)
         onChange={(e) => setUrl(e.target.value)}
         className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
       />
-      
+
 
       <div className="text-xs text-gray-400 pt-1 pl-3">
         <button
