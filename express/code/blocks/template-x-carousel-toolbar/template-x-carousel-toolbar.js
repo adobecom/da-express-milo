@@ -202,19 +202,28 @@ const sortConfig = {
   'new-templates': '-createDate',
 };
 
-function handlelize(str) {
-  return str.normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/(\W+|\s+)/g, '-')
-    .replace(/--+/g, '-')
-    .replace(/(^-+|-+$)/g, '')
-    .toLowerCase();
-}
+// Redirects to the Express editor with `searchTerm` pre-filled.
+// Logged-out  \u2192 full editor: blank canvas (1080\u00d71080 px square) with the term in the left-nav search
+// Logged-in   \u2192 explore-templates page with the term pre-populated
+function redirectToEditor(searchTerm) {
+  const isLoggedIn = window.adobeIMS?.isSignedInUser();
+  const term = searchTerm?.trim() || '';
+  let url;
 
-function wordExistsInString(word, inputString) {
-  const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regexPattern = new RegExp(`(?:^|\\s|[.,!?()'"\\-])${escapedWord}(?:$|\\s|[.,!?()'"\\-])`, 'i');
-  return regexPattern.test(inputString);
+  if (isLoggedIn) {
+    url = new URL('https://new.express.adobe.com/explore/templates');
+  } else {
+    url = new URL('https://new.express.adobe.com/new');
+    url.searchParams.set('width', '1080');
+    url.searchParams.set('height', '1080');
+    url.searchParams.set('unit', 'px');
+    url.searchParams.set('aspectRatioLock', 'true');
+    url.searchParams.set('category', 'templates');
+    url.searchParams.set('taskID', 'standard-size-square');
+  }
+
+  if (term) url.searchParams.set('q', term);
+  (window.t_locationAssign ?? ((u) => window.location.assign(u)))(url.toString());
 }
 
 function cycleThroughSuggestions(el, targetIndex = 0) {
@@ -265,69 +274,17 @@ function initSearchFunction(el, searchBarWrapper) {
     }
   }, { passive: true });
 
-  const trimInput = (tasks, input) => {
-    let alteredInput = input;
-    tasks[0][1].sort((a, b) => b.length - a.length).forEach((word) => {
-      alteredInput = alteredInput.toLowerCase().replace(word.toLowerCase(), '');
-    });
-    return alteredInput.trim();
-  };
-
-  const findTask = (map) => Object.entries(map).filter((task) => task[1].some((word) => {
-    const searchValue = searchBar.value.toLowerCase();
-    return wordExistsInString(word.toLowerCase(), searchValue);
-  })).sort((a, b) => b[0].length - a[0].length);
-
-  const redirectSearch = async () => {
-    const cfg = getConfig();
-    const { prefix } = cfg.locale;
-    const taskMap = await replaceKey('task-name-mapping', cfg) || {};
-    const taskXMap = await replaceKey('x-task-name-mapping', cfg) || {};
-    const format = getMetadata('placeholder-format');
-
-    const currentTasks = { xCore: '', content: '' };
-    let searchInput = searchBar.value?.toLowerCase() || getMetadata('topics');
-    const tasksFoundInInput = findTask(JSON.parse(taskMap));
-    const tasksXFoundInInput = findTask(JSON.parse(taskXMap));
-
-    if (tasksFoundInInput.length > 0) {
-      searchInput = trimInput(tasksFoundInInput, searchInput);
-      [[currentTasks.xCore]] = tasksFoundInInput;
-    }
-    if (tasksXFoundInInput.length > 0) {
-      searchInput = trimInput(tasksXFoundInInput, searchInput);
-      [[currentTasks.content]] = tasksXFoundInInput;
-    }
-
-    const topicUrl = searchInput ? `/${searchInput}` : '';
-    const taskUrl = `/${handlelize(currentTasks.xCore.toLowerCase())}`;
-    const taskXUrl = `/${handlelize(currentTasks.content.toLowerCase())}`;
-    const targetPath = `${prefix}/express/templates${taskUrl}${topicUrl}`;
-    const targetPathX = `${prefix}/express/templates${taskXUrl}${topicUrl}`;
-    const { default: fetchAllTemplatesMetadata } = await import('../../scripts/utils/all-templates-metadata.js');
-    const allTemplatesMetadata = await fetchAllTemplatesMetadata(getConfig);
-
-    updateImpressionCache({ collection: currentTasks.content || 'all-templates', content_category: 'templates' });
+  const redirectSearch = () => {
+    updateImpressionCache({ collection: 'all-templates', content_category: 'templates' });
     trackSearch('search-inspire');
-
-    const searchId = BlockMediator.get('templateSearchSpecs')?.search_id;
-    let targetLocation;
-    if (allTemplatesMetadata.some((e) => e.url === targetPathX) && document.body.dataset.device !== 'mobile') {
-      targetLocation = `${window.location.origin}${targetPathX}?searchId=${searchId || ''}`;
-    } else if (allTemplatesMetadata.some((e) => e.url === targetPath) && document.body.dataset.device !== 'desktop') {
-      targetLocation = `${window.location.origin}${targetPath}?searchId=${searchId || ''}`;
-    } else {
-      const searchUrlTemplate = `/express/templates/search?tasks=${encodeURIComponent(currentTasks.xCore)}&tasksx=${encodeURIComponent(currentTasks.content)}&phformat=${encodeURIComponent(format)}&topics=${encodeURIComponent(searchInput || '')}&q=${encodeURIComponent(searchBar.value || '')}&searchId=${encodeURIComponent(searchId || '')}`;
-      targetLocation = `${window.location.origin}${prefix}${searchUrlTemplate}`;
-    }
-    window.location.assign(targetLocation);
+    redirectToEditor(searchBar.value);
   };
 
   const onSearchSubmit = async () => {
     const { sampleRUM } = await import(`${getLibs()}/utils/samplerum.js`);
     searchBar.disabled = true;
     sampleRUM('search', { source: el.dataset.blockName, target: searchBar.value }, 1);
-    await redirectSearch();
+    redirectSearch();
   };
 
   async function handleSubmitInteraction(item, index) {
@@ -465,17 +422,17 @@ async function buildSearchDropdown(searchBarWrapper) {
 
   if (trends) {
     const trendsWrapper = createTag('ul', { class: 'trends-wrapper' });
-    const onTrendClick = (key, href) => {
-      updateImpressionCache({ keyword_filter: key, content_category: 'templates' });
-      const searchId = new URLSearchParams(new URL(href).search).get('searchId');
-      trackSearch('search-inspire', searchId);
-    };
-    Object.entries(trends).forEach(([key, value]) => {
+    Object.entries(trends).slice(0, 5).forEach(([key, value]) => {
       const trendLinkWrapper = createTag('li');
-      const href = `${value}?searchId=${generateSearchId()}`;
-      const trendLink = createTag('a', { class: 'trend-link', href });
-      trendLink.addEventListener('click', () => onTrendClick(key, trendLink.href));
+      // Keep the original templates-page href as a no-JS fallback.
+      const trendLink = createTag('a', { class: 'trend-link', href: `${value}?searchId=${generateSearchId()}` });
       trendLink.textContent = key;
+      trendLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        updateImpressionCache({ keyword_filter: key, content_category: 'templates' });
+        trackSearch('search-inspire', generateSearchId());
+        redirectToEditor(key);
+      });
       trendLinkWrapper.append(trendLink);
       trendsWrapper.append(trendLinkWrapper);
     });
