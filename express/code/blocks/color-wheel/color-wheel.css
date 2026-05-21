@@ -99,6 +99,7 @@ body {
 
 .color-wheel .image-extract {
   --color-extract-max-width: 100%;
+  --color-wheel-mood-width: 200px;
 }
 
 .color-wheel .color-extract-landing {
@@ -176,7 +177,6 @@ body {
 }
 
 .color-wheel .color-extract-suggestion {
-  border-radius: var(--corner-radius-80);
   border: 2px solid transparent;
   box-shadow: none;
   transition: none;
@@ -224,7 +224,12 @@ body {
 
 .color-wheel .color-extract-mood-row {
   flex: 1;
-  max-width: 200px;
+  max-width: var(--color-wheel-mood-width);
+}
+
+.color-wheel .color-extract-mood-dropdown {
+  min-width: var(--color-wheel-mood-width);
+  box-sizing: content-box;
 }
 
 .color-wheel .color-extract-mood {
@@ -253,6 +258,26 @@ body {
   padding-block: var(--spacing-300) var(--spacing-100);
 }
 
+.color-wheel .image-extract .color-extract-marker {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker:hover {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 20px rgba(0, 0, 0, 0.22);
+}
+
+.color-wheel .image-extract .color-extract-marker.is-active {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-extract-focus), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker.is-magnified {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
 .color-wheel .color-extract-drag-overlay {
   position: fixed;
 }
@@ -277,7 +302,7 @@ color-wheel-express {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 2px;
+  gap: var(--spacing-50);
   margin-bottom: 0.75rem;
 }
 
@@ -478,6 +503,10 @@ color-wheel-express {
 /* Desktop */
 
 @media (min-width: 1200px) {
+  .color-wheel .ax-toolbar {
+    --ax-palette-name-width-desktop: 184px;
+  }
+
   .color-wheel .ax-color-tool-layout {
     padding: var(--spacing-600);
     grid-template-rows: auto minmax(0, 1fr) auto;
@@ -580,7 +609,7 @@ color-wheel-express {
   }
 
   .color-wheel .color-extract-mood {
-    width: 200px;
+    width: var(--color-wheel-mood-width);
   }
 
   .color-wheel .color-extract-mood-dropdown {
