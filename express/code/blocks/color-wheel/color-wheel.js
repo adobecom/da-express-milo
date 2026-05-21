@@ -325,6 +325,14 @@ async function buildHarmonySelector(controller, strings = {}) {
   }
 
   function selectHarmony(value, { focusButton } = {}) {
+    if (value !== 'CUSTOM') {
+      const { lockedByIndex } = swatchRailController?.getState?.() ?? {};
+      if (lockedByIndex?.size === 1) {
+        const lockedIndex = [...lockedByIndex][0];
+        const lockedHex = controller.getState().swatches[lockedIndex]?.hex;
+        if (lockedHex) controller.setBaseColor(lockedHex);
+      }
+    }
     controller.setHarmonyRule(value);
     setCurrentNameLabel(value);
     updateRovingTabindex(value);
