@@ -184,7 +184,7 @@ describe('template-x-carousel-toolbar', () => {
       document.body.click();
       expect(searchDropdown.classList.contains('hidden')).to.be.true;
     });
-    
+
     describe('authored redirect URLs', () => {
       const CUSTOM_OUT_URL = 'https://example.com/out?q=<category>';
       const CUSTOM_IN_URL = 'https://example.com/in?q=<category>';
