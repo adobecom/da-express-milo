@@ -1337,7 +1337,7 @@ export class ColorSwatchRail extends LitElement {
       const topRightIcons = html`
         <div class="top-actions top-actions--right">
           ${f.lock && !this.hideLock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${isLocked ? labelUnlockColor : labelLockColor} title=${isLocked ? labelUnlockColor : labelLockColor}>${icon(isLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
-          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="${labelEditTint}" title=${swatch.hex.toUpperCase()}>${icon('editTint')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" ?disabled=${isLocked} aria-disabled="${isLocked}" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="${labelEditTint}" title=${swatch.hex.toUpperCase()}>${icon('editTint')}</button>` : ''}
           ${f.drag ? html`
             <button
               type="button"
@@ -1345,15 +1345,17 @@ export class ColorSwatchRail extends LitElement {
               tabindex="-1"
               aria-label="${labelDragToReorder}"
               title="${labelDragToReorder}"
-              draggable="true"
+              ?disabled=${isLocked}
+              aria-disabled="${isLocked}"
+              ?draggable=${!isLocked}
               @dragstart=${(ev) => this._handleDragStart(index, ev)}
               @dragend=${this._handleDragEnd}
             >${icon('drag')}</button>
           ` : ''}
-          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="${labelDeleteColor}" title="${labelDeleteColor}" ?disabled=${trashDisabled} aria-disabled="${trashDisabled}">${icon('trash')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="${labelDeleteColor}" title="${labelDeleteColor}" ?disabled=${trashDisabled || isLocked} aria-disabled="${trashDisabled || isLocked}">${icon('trash')}</button>` : ''}
         </div>
       `;
-      
+
       const stackedIcons = html`
         <div class="stacked-row__icons">
           ${showBaseColorBadge ? html`
@@ -1369,8 +1371,8 @@ export class ColorSwatchRail extends LitElement {
           ${isBaseReadOnly ? html`<span class="base-color-badge base-color-badge--active base-color-badge--readonly" aria-label="${labelBaseColor}">${icon('baseColorTarget')}</span>` : ''}
           ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="${labelCopyHex}" title="${labelCopyHex}">${icon('copy')}</button>` : ''}
           ${f.lock && !this.hideLock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${isLocked ? labelUnlockColor : labelLockColor} title=${isLocked ? labelUnlockColor : labelLockColor}>${icon(isLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
-          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="${labelEditTint}" title=${swatch.hex.toUpperCase()}>${icon('editTint')}</button>` : ''}
-          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="${labelDeleteColor}" title="${labelDeleteColor}" ?disabled=${trashDisabled} aria-disabled="${trashDisabled}">${icon('trash')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" ?disabled=${isLocked} aria-disabled="${isLocked}" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="${labelEditTint}" title=${swatch.hex.toUpperCase()}>${icon('editTint')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="${labelDeleteColor}" title="${labelDeleteColor}" ?disabled=${trashDisabled || isLocked} aria-disabled="${trashDisabled || isLocked}">${icon('trash')}</button>` : ''}
           ${f.drag ? html`
             <button
               type="button"
@@ -1378,7 +1380,9 @@ export class ColorSwatchRail extends LitElement {
               tabindex="-1"
               aria-label="${labelDragToReorder}"
               title="${labelDragToReorder}"
-              draggable="true"
+              ?disabled=${isLocked}
+              aria-disabled="${isLocked}"
+              ?draggable=${!isLocked}
               @dragstart=${(ev) => this._handleDragStart(index, ev)}
               @dragend=${this._handleDragEnd}
             >${icon('drag')}</button>
