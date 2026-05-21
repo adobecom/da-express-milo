@@ -41,8 +41,16 @@ export function createTag(tag, attributes = {}, html = '') {
     });
   }
   if (html) {
-    if (html instanceof HTMLElement) el.append(html);
-    else el.insertAdjacentHTML('beforeend', html);
+    if (Array.isArray(html)) {
+      html.forEach((item) => {
+        if (item instanceof Node) el.append(item);
+        else if (item != null) el.append(document.createTextNode(String(item)));
+      });
+    } else if (html instanceof Node) {
+      el.append(html);
+    } else {
+      el.insertAdjacentHTML('beforeend', html);
+    }
   }
   return el;
 }

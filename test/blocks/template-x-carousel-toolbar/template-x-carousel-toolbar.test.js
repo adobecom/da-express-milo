@@ -4,10 +4,12 @@ import sinon from 'sinon';
 import { mockRes } from '../test-utilities.js';
 
 const imports = await Promise.all([import('../../../express/code/scripts/utils.js'), import('../../../express/code/scripts/scripts.js')]);
-const { getLibs } = imports[0];
+const { setLibs, getLibs } = imports[0];
+// Point getLibs() at the local mocks so dynamic imports inside the block
+// (placeholders, samplerum, etc.) resolve to stubs instead of the CDN.
+setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
-  const conf = {};
-  mod.setConfig(conf);
+  mod.setConfig({});
 });
 const [{ default: decorate }] = await Promise.all([import('../../../express/code/blocks/template-x-carousel-toolbar/template-x-carousel-toolbar.js')]);
 document.body.innerHTML = await readFile({ path: './mocks/body.html' });
