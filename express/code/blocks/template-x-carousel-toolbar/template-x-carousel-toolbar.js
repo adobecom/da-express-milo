@@ -218,13 +218,16 @@ function redirectToEditor(searchTerm) {
 
   // Use authored URL if provided, substituting <category> with the search term.
   const authoredTemplate = isLoggedIn ? authoredLoggedInUrl : authoredLoggedOutUrl;
+  let url;
+ 
   if (authoredTemplate) {
-    navigate(authoredTemplate.replace('<category>', encodeURIComponent(term)));
+    url = new URL(authoredTemplate);
+    url.searchParams.set('q', term);
+    navigate(url.toString());
     return;
   }
 
   // Default URLs
-  let url;
   if (isLoggedIn) {
     url = new URL('https://new.express.adobe.com/explore/templates');
   } else {
