@@ -288,12 +288,13 @@ export class ColorWheelExpress extends ColorWheel {
     return this._lockedTooltipEl;
   }
 
-  async _showLockedTip(index) {
+  async _showLockedTip(index, message) {
     const layer = this.shadowRoot?.querySelector('.marker-layer');
     const marker = layer?.querySelector(`.wheel-marker-overlay[data-index="${index}"]`);
     if (!marker) return;
 
     const { tooltip } = await this._ensureLockedTooltip();
+    tooltip.textContent = message || this.lockedTipText || 'Unlock to change value';
 
     const overlay = tooltip.shadowRoot?.querySelector?.('sp-overlay');
     if (overlay && typeof overlay.triggerElement !== 'undefined') {
@@ -404,11 +405,18 @@ export class ColorWheelExpress extends ColorWheel {
   }
 
   _handleMarkerKeydown(e, index) {
+    const arrowKeys = ['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'];
     if (this._lockedByIndex?.has(index)) {
-      if (['ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown'].includes(e.key)) {
+      if (arrowKeys.includes(e.key)) {
         e.preventDefault();
         this._showLockedTip(index);
       }
+      return;
+    }
+    if (this._lockedByIndex?.size > 0 && this.harmonyRule !== 'CUSTOM' && arrowKeys.includes(e.key)) {
+      e.preventDefault();
+      const lockedIndex = [...this._lockedByIndex][0];
+      this._showLockedTip(lockedIndex, 'Unlock base color to change value');
       return;
     }
     const step = 3;
@@ -641,9 +649,16 @@ export class ColorWheelExpress extends ColorWheel {
 
     if (isRightMouseButtonClicked(event)) return;
 
-    if (event.target === this.canvas && this._lockedByIndex?.has(this.activeSwatchIndex)) {
-      this._showLockedTip(this.activeSwatchIndex);
-      return;
+    if (event.target === this.canvas) {
+      if (this._lockedByIndex?.has(this.activeSwatchIndex)) {
+        this._showLockedTip(this.activeSwatchIndex);
+        return;
+      }
+      if (this._lockedByIndex?.size > 0 && this.harmonyRule !== 'CUSTOM') {
+        const lockedIndex = [...this._lockedByIndex][0];
+        this._showLockedTip(lockedIndex, 'Unlock base color to change value');
+        return;
+      }
     }
 
     this.getCanvasPosition();
@@ -758,6 +773,15 @@ export class ColorWheelExpress extends ColorWheel {
 
     if (this._lockedByIndex?.has(index)) {
       this._showLockedTip(index);
+      return;
+    }
+
+    // In a non-custom harmony with a locked base, dragging any other handle
+    // would indirectly change the locked swatch through harmony recalculation.
+    // Block it and explain what needs to happen.
+    if (this._lockedByIndex?.size > 0 && this.harmonyRule !== 'CUSTOM') {
+      const lockedIndex = [...this._lockedByIndex][0];
+      this._showLockedTip(lockedIndex, 'Unlock base color to change value');
       return;
     }
 
