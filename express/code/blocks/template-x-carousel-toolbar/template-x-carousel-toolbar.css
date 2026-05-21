@@ -320,7 +320,7 @@
 }
 
 .template-x-carousel-toolbar .sizing-proxy {
-  /* icon spacing */
+  /* icon spacing  */
   padding-right: var(--spacing-300);
   position: relative;
   height: 0;
@@ -436,6 +436,7 @@
   transform: translate(-50%, calc(-50% + 22px));
   padding: var(--spacing-100);
   border-radius: 20px;
+  box-sizing: border-box;
   width: 100%;
   max-width: 90vw;
   min-height: 100%;
@@ -503,8 +504,7 @@
   border-radius: 6px;
   padding: var(--spacing-80);
   width: 130px;
-  visibility: hidden;
-  display: flex;
+  display: none;
   align-items: center;
   gap: var(--spacing-75);
   text-align: center;
@@ -528,7 +528,7 @@
 }
 
 .template-x-carousel-toolbar .template .shared-tooltip.display-tooltip {
-  visibility: visible;
+  display: flex;
 }
 
 .template-x-carousel-toolbar .template .shared-tooltip.flipped {

@@ -9,6 +9,7 @@ export const style = css`
         display: flex;
         align-items: center;
         width: 100%;
+        --channel-slider-thumb-size: ${THUMB_SIZE}px;
         --channel-slider-handle-border-color: var(--color-white);
         --channel-slider-handle-inner-border-width: 1px;
         --channel-slider-handle-inner-border-color: #1F1F1F4D;
@@ -43,14 +44,14 @@ export const style = css`
     input[type="range"]::-webkit-slider-thumb {
         -webkit-appearance: none;
         appearance: none;
-        width: ${THUMB_SIZE}px;
-        height: ${THUMB_SIZE}px;
+        width: var(--channel-slider-thumb-size);
+        height: var(--channel-slider-thumb-size);
         border-radius: 50%;
         background: transparent;
         border: var(--spacing-50) solid var(--channel-slider-handle-border-color);
         box-shadow: inset 0 0 0 var(--channel-slider-handle-inner-border-width, 1px)
             var(--channel-slider-handle-inner-border-color);
-        margin-top: ${(TRACK_HEIGHT - THUMB_SIZE) / 2}px;
+        margin-top: calc((${TRACK_HEIGHT}px - var(--channel-slider-thumb-size)) / 2);
         cursor: pointer;
     }
 
@@ -64,8 +65,8 @@ export const style = css`
     }
 
     input[type="range"]::-moz-range-thumb {
-        width: ${THUMB_SIZE}px;
-        height: ${THUMB_SIZE}px;
+        width: var(--channel-slider-thumb-size);
+        height: var(--channel-slider-thumb-size);
         border-radius: 50%;
         background: transparent;
         border: var(--spacing-50) solid var(--channel-slider-handle-border-color);

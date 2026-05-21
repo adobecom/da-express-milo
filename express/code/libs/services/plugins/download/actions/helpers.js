@@ -423,9 +423,15 @@ export function getLinearGradientColorStops(stops) {
   const colorStops = [];
   let prevStop = {};
 
+  const safeOffset = (val, index) => {
+    const n = Number(val);
+    if (Number.isFinite(n)) return n;
+    return stops.length > 1 ? index / (stops.length - 1) : 0;
+  };
+
   stops.forEach((currentStop, index) => {
     const stop = {
-      offset: currentStop.offset,
+      offset: safeOffset(currentStop.offset, index),
       R: Number.parseInt(currentStop.rgb.r * 255, 10),
       G: Number.parseInt(currentStop.rgb.g * 255, 10),
       B: Number.parseInt(currentStop.rgb.b * 255, 10),
@@ -435,10 +441,12 @@ export function getLinearGradientColorStops(stops) {
       prevStop = stop;
     } else {
       if (currentStop.midpoint !== DEFAULT_GRADIENT_MIDPOINT) {
+        const midOffset = prevStop.offset
+          + (stop.offset - prevStop.offset) * currentStop.midpoint;
         colorStops.push({
-          offset: String(
-            prevStop.offset + (currentStop.offset - prevStop.offset) * currentStop.midpoint,
-          ),
+          offset: Number.isFinite(midOffset)
+            ? midOffset
+            : (prevStop.offset + stop.offset) / 2,
           R: Math.round((prevStop.R + stop.R) / 2),
           G: Math.round((prevStop.G + stop.G) / 2),
           B: Math.round((prevStop.B + stop.B) / 2),

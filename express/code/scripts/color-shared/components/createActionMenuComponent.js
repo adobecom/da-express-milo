@@ -4,7 +4,7 @@ import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createExpressButton, createExpressTooltip } from '../spectrum/index.js';
 import { createActionMenuState } from './createActionMenuState.js';
 import { attachRovingTabIndex } from '../spectrum/utils/a11y.js';
-import { createColorPaletteParamApi } from '../utils/utilities.js';
+import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../utils/utilities.js';
 import {
   COLOR_ICON,
   ACCESSIBILITY_ICON,
@@ -104,6 +104,7 @@ async function createNav(navLinks, activeId, getColors, getName) {
       const dividerEl = createTag('li', { role: 'separator', 'aria-hidden': true, class: 'palette-divider' });
       ul.append(dividerEl);
     }
+    decorateAnalyticsAttributes(linkEl, { linkLabel: link.label });
     linkElements.push(linkEl);
     await createExpressTooltip({
       targetEl: linkEl,
@@ -141,6 +142,7 @@ async function createHistoryButton(
     if (btn.getAttribute('aria-disabled') === 'true' || btn.disabled) return;
     onClick();
   });
+  decorateAnalyticsAttributes(btn, { linkLabel: control.label });
   buttonRefs[control.id] = btn;
   await createExpressTooltip({
     targetEl: btn,
@@ -223,40 +225,46 @@ async function createControls(
             disableAria: true,
           });
         }
+        decorateAnalyticsAttributes(btn, { linkLabel: control.label });
         controlContainer.append(btn);
         break;
       }
-      case 'expand':
+      case 'expand': {
         if (typeof onExpand !== 'function') break;
+        const expandedLabel = control.expandedLabel || control.label;
+        let isExpanded = false;
         btn = createTag(
           'button',
           {
             class: `${control.id}-btn color-action-button`,
             'aria-label': control.label,
-            'aria-pressed': false,
             tabindex: '0',
           },
           ICON_MAP[control.id].maximize,
         );
+        decorateAnalyticsAttributes(btn, { linkLabel: control.label });
         controlContainer.append(btn);
+        let expandTooltip = null;
         btn.addEventListener('click', () => {
-          const oldIsPressed = btn.getAttribute('aria-pressed') === 'true';
-          const isPressed = !oldIsPressed;
-          onExpand(isPressed);
-          btn.setAttribute('aria-pressed', isPressed);
+          isExpanded = !isExpanded;
+          const nextLabel = isExpanded ? expandedLabel : control.label;
+          onExpand(isExpanded);
+          btn.setAttribute('aria-label', nextLabel);
           if (type === 'full') {
             const containerEl = btn.closest('.action-menu-full');
-            containerEl?.classList.toggle('expanded', isPressed);
+            containerEl?.classList.toggle('expanded', isExpanded);
           }
-          btn.innerHTML = ICON_MAP[control.id][isPressed ? 'minimize' : 'maximize'];
+          btn.innerHTML = ICON_MAP[control.id][isExpanded ? 'minimize' : 'maximize'];
+          expandTooltip?.setContent(nextLabel);
         });
-        await createExpressTooltip({
+        expandTooltip = await createExpressTooltip({
           targetEl: btn,
           content: control.label,
           placement: 'top',
           disableAria: true,
         });
         break;
+      }
       default:
         break;
     }
@@ -297,6 +305,7 @@ export async function createActionMenuComponent(options = {}) {
     transformPalette,
     getName,
     enableState = true,
+    daaLh = null,
   } = options;
 
   if (!TYPES.includes(type)) {
@@ -319,7 +328,9 @@ export async function createActionMenuComponent(options = {}) {
     handleGenerateRandomState = state.onGenerateRandom;
     pushStateFn = state.addOnePaletteToHistory;
     getCurrentPaletteFn = state.getCurrentPalette;
-    state.init();
+    if (type !== 'controls-only') {
+      state.init();
+    }
   }
 
   function handleUndo() {
@@ -336,6 +347,7 @@ export async function createActionMenuComponent(options = {}) {
   }
 
   const container = createTag('div', { class: `action-menu-${type}` });
+  if (daaLh) container.setAttribute('daa-lh', daaLh);
   const buttonRefs = {};
   const sections = [];
 

@@ -127,4 +127,90 @@ describe('Color Extract — gradient variant', () => {
     // gradient mock HTML has 2 suggestion images
     expect(suggestions.length).to.equal(2);
   });
+
+  it('suggestion bars use gradient style, not palette chips', async () => {
+    const block = document.querySelector('.color-extract');
+    await decorate(block);
+    const bars = block.querySelectorAll('.color-extract-suggestion-bar');
+    bars.forEach((bar) => {
+      expect(bar.classList.contains('is-gradient')).to.be.true;
+      expect(bar.querySelector('.color-extract-suggestion-chip')).to.not.exist;
+    });
+  });
+
+  it('palette variant suggestion bars use chips, not gradient style', async () => {
+    document.body.innerHTML = basic;
+    const block = document.querySelector('.color-extract');
+    await decorate(block);
+    const bars = block.querySelectorAll('.color-extract-suggestion-bar');
+    bars.forEach((bar) => {
+      expect(bar.classList.contains('is-gradient')).to.be.false;
+      expect(bar.querySelectorAll('.color-extract-suggestion-chip').length).to.be.greaterThan(0);
+    });
+  });
+});
+
+describe('Color Extract — sign-in image restoration', () => {
+  const IMAGE_SRC_KEY = 'color-extract-image-src';
+  // Use a URL that triggers onerror (not onload) so the async setupMarkers
+  // dynamic import is never reached in the test environment.
+  const FAKE_SRC = './nonexistent-test-image.png';
+  const PARAM_NAME = 'color-palette';
+
+  before(() => {
+    window.isTestEnv = true;
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem(IMAGE_SRC_KEY);
+    window.history.replaceState({}, '', window.location.pathname);
+  });
+
+  it('palette: keeps bgWrapper in DOM when image src is stored and color-palette param present', async () => {
+    sessionStorage.setItem(IMAGE_SRC_KEY, FAKE_SRC);
+    window.history.replaceState({}, '', `${window.location.pathname}?${PARAM_NAME}=FF0000,00FF00`);
+    document.body.innerHTML = basic;
+    const block = document.querySelector('.color-extract');
+    await decorate(block);
+
+    expect(sessionStorage.getItem(IMAGE_SRC_KEY)).to.be.null;
+    expect(block.classList.contains('has-image')).to.be.true;
+    // bgWrapper should remain in the DOM (not replaced by the dropzone)
+    expect(block.querySelector('.color-extract-edit-bg')).to.exist;
+  });
+
+  it('palette: replaces bgWrapper with dropzone when no image stored and color-palette param present', async () => {
+    sessionStorage.removeItem(IMAGE_SRC_KEY);
+    window.history.replaceState({}, '', `${window.location.pathname}?${PARAM_NAME}=FF0000,00FF00`);
+    document.body.innerHTML = basic;
+    const block = document.querySelector('.color-extract');
+    await decorate(block);
+
+    expect(block.classList.contains('has-image')).to.be.true;
+    // bgWrapper replaced by dropzone — edit-bg should be gone
+    expect(block.querySelector('.color-extract-edit-bg')).to.not.exist;
+  });
+
+  it('gradient: keeps bgWrapper in DOM when image src is stored and color-palette param present', async () => {
+    sessionStorage.setItem(IMAGE_SRC_KEY, FAKE_SRC);
+    window.history.replaceState({}, '', `${window.location.pathname}?${PARAM_NAME}=FF0000,00FF00`);
+    document.body.innerHTML = gradient;
+    const block = document.querySelector('.color-extract');
+    await decorate(block);
+
+    expect(sessionStorage.getItem(IMAGE_SRC_KEY)).to.be.null;
+    expect(block.classList.contains('has-image')).to.be.true;
+    expect(block.querySelector('.color-extract-edit-bg')).to.exist;
+  });
+
+  it('gradient: replaces bgWrapper with dropzone when no image stored and color-palette param present', async () => {
+    sessionStorage.removeItem(IMAGE_SRC_KEY);
+    window.history.replaceState({}, '', `${window.location.pathname}?${PARAM_NAME}=FF0000,00FF00`);
+    document.body.innerHTML = gradient;
+    const block = document.querySelector('.color-extract');
+    await decorate(block);
+
+    expect(block.classList.contains('has-image')).to.be.true;
+    expect(block.querySelector('.color-extract-edit-bg')).to.not.exist;
+  });
 });

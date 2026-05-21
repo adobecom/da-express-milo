@@ -4,15 +4,26 @@ import { createSwatchRailAdapter, createColorEditAdapter } from '../adapters/lit
 import { getContrastTextColor, isSuperLight } from '../../../libs/color-components/utils/ColorConversions.js';
 import {
   TYPE_ORDER,
-  TYPE_LABELS,
-  DEFECT_DEFINITIONS,
-  DEFECT_TOOLTIP_DEFINITIONS,
   getConflictPairs,
   getConflictingIndices,
   simulateHex,
 } from '../services/createColorBlindnessService.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { announceToScreenReader } from '../spectrum/utils/a11y.js';
+import { DEFAULT_SHARED_PLACEHOLDERS as CB_DEFAULTS } from '../i18n/loadColorBlindnessPlaceholders.js';
+
+function resolveCBLabels(cbStrings) {
+  const s = cbStrings || CB_DEFAULTS;
+  return {
+    labels: { deutan: s.typeDeutan, protan: s.typeProtan, tritan: s.typeTritan },
+    defs: { deutan: s.typeDescDeutan, protan: s.typeDescProtan, tritan: s.typeDescTritan },
+    summary: s.summary,
+    statusNone: s.statusNone,
+    statusConflictsFound: s.statusConflictsFound,
+    conflictIconAria: s.conflictIconAria,
+    mobilePaletteHeader: s.mobilePaletteHeader,
+  };
+}
 
 const COLORS_PER_ROW_TWO_ROWS = 5;
 
@@ -49,14 +60,14 @@ function getAdapterController(adapter) {
   return adapter?.controller || adapter?.rail?.controller || null;
 }
 
-function createConflictIcon() {
+function createConflictIcon(ariaLabel = CB_DEFAULTS.conflictIconAria) {
   return createTag(
     'span',
     {
       class: 'strip-color-blindness-swatch__conflict-icon',
       'aria-hidden': 'true',
       role: 'img',
-      'aria-label': 'Conflict',
+      'aria-label': ariaLabel,
     },
     '<svg width="16" height="16" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 3.1L17.1 16H2.9L10 3.1Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"></path><path d="M10 8.1V11.8" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"></path><circle cx="10" cy="14.2" r="0.9" fill="currentColor"></circle></svg>',
   );
@@ -90,7 +101,14 @@ function refreshColorBlindnessLabelTooltips(root) {
   ).catch(() => {});
 }
 
-function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, railWrapEl) {
+function createColorBlindnessRowsInMatrix(
+  controller,
+  orientation,
+  containerEl,
+  railWrapEl,
+  cbStrings,
+) {
+  const cb = resolveCBLabels(cbStrings);
   const unsub = controller?.subscribe?.((state) => {
     const allColors = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
     if (!allColors.length) return;
@@ -117,11 +135,11 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
         class: `strip-color-blindness-row__title-cell strip-color-blindness-row--${type} ${pairs.length > 0 ? 'fail' : 'pass'}`,
       });
       const label = createTag('span', { class: 'strip-color-blindness-row__label', tabindex: '0' });
-      label.textContent = TYPE_LABELS[type];
-      label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-      label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      label.textContent = cb.labels[type];
+      label.setAttribute('data-tooltip-content', cb.defs[type]);
+      label.setAttribute('aria-label', `${cb.labels[type]}: ${cb.defs[type]}`);
       label.addEventListener('focus', () => {
-        announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+        announceToScreenReader(`${cb.labels[type]}: ${cb.defs[type]}`);
       });
       titleCell.appendChild(label);
       titleCell.style.gridColumn = '1';
@@ -139,9 +157,9 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
           class: `strip-color-blindness-swatch${conflicting.has(i) ? ' conflict' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
           role: 'img',
-          'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
+          'aria-label': `${sim.toUpperCase()} ${cb.labels[type]}`,
         });
-        if (conflicting.has(i)) swatch.appendChild(createConflictIcon());
+        if (conflicting.has(i)) swatch.appendChild(createConflictIcon(cb.conflictIconAria));
         swatchesWrap.appendChild(swatch);
       });
       containerEl.appendChild(swatchesWrap);
@@ -154,7 +172,8 @@ function createColorBlindnessRowsInMatrix(controller, orientation, containerEl, 
   };
 }
 
-function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWrapEl) {
+function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWrapEl, cbStrings) {
+  const cb = resolveCBLabels(cbStrings);
   containerEl.style.display = 'grid';
   containerEl.style.gridTemplateColumns = '100px 1fr';
   containerEl.style.gridTemplateRows = '1fr 90px 90px 90px';
@@ -162,64 +181,69 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
   railWrapEl.style.gridColumn = '2';
   railWrapEl.style.gridRow = '1 / -1';
 
-  const titleUnsubs = [];
-  const getCurrentHexes = () => {
-    const state = controller?.getState?.();
-    return (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
-  };
-
+  const titleCells = [];
   TYPE_ORDER.forEach((type, rowIndex) => {
     const gridRow = rowIndex + 2;
     const titleCell = createTag('div', {
       class: `strip-four-rows-cb-title strip-four-rows-cb-title--${type}`,
     });
     const label = createTag('span', { class: 'strip-four-rows-cb-title__label', tabindex: '0' });
-    label.textContent = TYPE_LABELS[type];
-    label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-    label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+    label.textContent = cb.labels[type];
+    label.setAttribute('data-tooltip-content', cb.defs[type]);
+    label.setAttribute('aria-label', `${cb.labels[type]}: ${cb.defs[type]}`);
     label.addEventListener('focus', () => {
-      announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      announceToScreenReader(`${cb.labels[type]}: ${cb.defs[type]}`);
     });
     titleCell.style.gridColumn = '1';
     titleCell.style.gridRow = String(gridRow);
     titleCell.appendChild(label);
     containerEl.appendChild(titleCell);
+    titleCells.push({ titleCell, type });
+  });
+  refreshColorBlindnessLabelTooltips(containerEl);
 
-    const updatePassFail = () => {
-      const hexes = getCurrentHexes();
+  // Single subscription updates all title cells — avoids 3 independent getConflictPairs
+  // calls per frame (was one subscription per type, each calling getConflictPairs separately).
+  const updateAllTitles = (state) => {
+    const hexes = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
+    titleCells.forEach(({ titleCell, type }) => {
       const pairs = hexes.length ? getConflictPairs(hexes, type) : [];
       titleCell.classList.toggle('pass', pairs.length === 0);
       titleCell.classList.toggle('fail', pairs.length > 0);
-    };
-    updatePassFail();
-    const unsub = controller?.subscribe?.(updatePassFail);
-    if (unsub) titleUnsubs.push(unsub);
-  });
-  refreshColorBlindnessLabelTooltips(containerEl);
+    });
+  };
+  const titleUnsub = controller?.subscribe?.(updateAllTitles);
+
   containerEl.unsubFourRowsTitles = () => {
-    titleUnsubs.forEach((fn) => fn?.());
+    titleUnsub?.();
     clearTooltipDestroys(containerEl);
   };
 }
 
-function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
+function createMobileCBLayout(
+  controller,
+  cbStrings,
+  maxColumns = MAX_CB_COLUMNS,
+  colorEditStrings = null,
+) {
+  const cb = resolveCBLabels(cbStrings);
   const container = createTag('div', { class: 'strip-cb-mobile-layout' });
 
   const header = createTag('div', { class: 'strip-cb-mobile-header' });
   const paletteLabel = createTag('span', {
     class: 'strip-cb-mobile-header__label--palette',
   });
-  paletteLabel.textContent = 'Palette';
+  paletteLabel.textContent = cb.mobilePaletteHeader;
   header.appendChild(paletteLabel);
 
   TYPE_ORDER.forEach((type) => {
     const wrap = createTag('div', { class: 'strip-cb-mobile-header__label-wrap' });
     const label = createTag('span', { class: 'strip-cb-mobile-header__label', tabindex: '0' });
-    label.textContent = TYPE_LABELS[type];
-    label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-    label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+    label.textContent = cb.labels[type];
+    label.setAttribute('data-tooltip-content', cb.defs[type]);
+    label.setAttribute('aria-label', `${cb.labels[type]}: ${cb.defs[type]}`);
     label.addEventListener('focus', () => {
-      announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      announceToScreenReader(`${cb.labels[type]}: ${cb.defs[type]}`);
     });
     wrap.appendChild(label);
     header.appendChild(wrap);
@@ -233,12 +257,50 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
     const allColors = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
     if (!allColors.length) return;
     const colors = allColors.slice(0, maxColumns);
-    rowsWrap.innerHTML = '';
 
     const conflictsByType = {};
     TYPE_ORDER.forEach((type) => {
       conflictsByType[type] = getConflictingIndices(getConflictPairs(colors, type));
     });
+
+    // In-place update when row count matches — avoids DOM teardown at 12 Hz
+    if (rowsWrap.children.length === colors.length) {
+      colors.forEach((hex, colorIndex) => {
+        const row = rowsWrap.children[colorIndex];
+        const paletteCell = row.querySelector('.strip-cb-mobile-row__palette');
+        if (paletteCell) {
+          paletteCell.style.backgroundColor = hex;
+          paletteCell.classList.toggle('super-light', isSuperLight(hex));
+          paletteCell.setAttribute('aria-label', (colorEditStrings?.editColorWithHexAria || 'Edit color {hex}').replace('{hex}', hex.toUpperCase()));
+          const hexLabel = paletteCell.querySelector('.strip-cb-mobile-row__hex');
+          if (hexLabel) {
+            hexLabel.style.color = getContrastTextColor(hex);
+            hexLabel.textContent = hex.toUpperCase();
+          }
+        }
+        const simCells = row.querySelectorAll('.strip-cb-mobile-row__sim');
+        TYPE_ORDER.forEach((type, typeIndex) => {
+          const sim = simulateHex(hex, type);
+          const simCell = simCells[typeIndex];
+          if (!simCell) return;
+          simCell.style.backgroundColor = sim;
+          simCell.style.setProperty('--cb-conflict-icon-color', getContrastTextColor(sim));
+          simCell.classList.toggle('super-light', isSuperLight(sim));
+          simCell.setAttribute('aria-label', `${sim.toUpperCase()} ${cb.labels[type]}`);
+          const isConflicting = conflictsByType[type].has(colorIndex);
+          const wasConflicting = simCell.classList.contains('conflict');
+          if (isConflicting !== wasConflicting) {
+            simCell.classList.toggle('conflict', isConflicting);
+            simCell.querySelector('.strip-color-blindness-swatch__conflict-icon')?.remove();
+            if (isConflicting) simCell.appendChild(createConflictIcon(cb.conflictIconAria));
+          }
+        });
+      });
+      return;
+    }
+
+    // Full rebuild on count change
+    rowsWrap.innerHTML = '';
 
     colors.forEach((hex, colorIndex) => {
       const row = createTag('div', { class: 'strip-cb-mobile-row' });
@@ -249,7 +311,7 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
         style: `background-color: ${hex};`,
         role: 'button',
         tabindex: '0',
-        'aria-label': `Edit color ${hex.toUpperCase()}`,
+        'aria-label': (colorEditStrings?.editColorWithHexAria || 'Edit color {hex}').replace('{hex}', hex.toUpperCase()),
       });
       const hexLabel = createTag('span', {
         class: 'strip-cb-mobile-row__hex',
@@ -281,9 +343,11 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
           class: `strip-cb-mobile-row__sim${conflicting.has(colorIndex) ? ' conflict' : ''}${isSuperLight(sim) ? ' super-light' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
           role: 'img',
-          'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
+          'aria-label': `${sim.toUpperCase()} ${cb.labels[type]}`,
         });
-        if (conflicting.has(colorIndex)) simCell.appendChild(createConflictIcon());
+        if (conflicting.has(colorIndex)) {
+          simCell.appendChild(createConflictIcon(cb.conflictIconAria));
+        }
         row.appendChild(simCell);
       });
 
@@ -301,10 +365,10 @@ function createMobileCBLayout(controller, maxColumns = MAX_CB_COLUMNS) {
   return container;
 }
 
-export function createFourRowsColorBlindnessLayout(adapter) {
+export function createFourRowsColorBlindnessLayout(adapter, cbStrings, colorEditStrings = null) {
   const controller = getAdapterController(adapter);
   // eslint-disable-next-line no-use-before-define
-  const summary = createConflictSummaryBlock(controller);
+  const summary = createConflictSummaryBlock(controller, cbStrings);
   const outer = createTag('div', { class: 'strip-with-color-blindness strip-with-color-blindness--four-rows' });
 
   const desktopLayout = createTag('div', { class: 'strip-cb-desktop-layout' });
@@ -318,10 +382,10 @@ export function createFourRowsColorBlindnessLayout(adapter) {
 
   let mobileLayout = null;
   if (controller) {
-    mobileLayout = createMobileCBLayout(controller);
+    mobileLayout = createMobileCBLayout(controller, cbStrings, MAX_CB_COLUMNS, colorEditStrings);
     outer.appendChild(mobileLayout);
 
-    createFourRowsColorBlindnessTitlesOnly(controller, gridContainer, railContainer);
+    createFourRowsColorBlindnessTitlesOnly(controller, gridContainer, railContainer, cbStrings);
     outer.cleanup = () => {
       gridContainer.unsubFourRowsTitles?.();
       mobileLayout.cleanup?.();
@@ -333,7 +397,8 @@ export function createFourRowsColorBlindnessLayout(adapter) {
   return outer;
 }
 
-function createColorBlindnessRows(controller, orientation) {
+function createColorBlindnessRows(controller, orientation, cbStrings) {
+  const cb = resolveCBLabels(cbStrings);
   const isTwoRows = orientation === 'two-rows';
   const wrap = createTag('div', {
     class: `strip-color-blindness-rows${isTwoRows ? ' strip-color-blindness-rows--two-rows' : ''}`,
@@ -352,11 +417,11 @@ function createColorBlindnessRows(controller, orientation) {
       });
       const header = createTag('div', { class: 'strip-color-blindness-row__header' });
       const label = createTag('span', { class: 'strip-color-blindness-row__label', tabindex: '0' });
-      label.textContent = TYPE_LABELS[type];
-      label.setAttribute('data-tooltip-content', DEFECT_TOOLTIP_DEFINITIONS[type]);
-      label.setAttribute('aria-label', `${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+      label.textContent = cb.labels[type];
+      label.setAttribute('data-tooltip-content', cb.defs[type]);
+      label.setAttribute('aria-label', `${cb.labels[type]}: ${cb.defs[type]}`);
       label.addEventListener('focus', () => {
-        announceToScreenReader(`${TYPE_LABELS[type]}: ${DEFECT_DEFINITIONS[type]}`);
+        announceToScreenReader(`${cb.labels[type]}: ${cb.defs[type]}`);
       });
       header.appendChild(label);
       const swatchesContainer = createTag('div', { class: 'strip-color-blindness-row__grid' });
@@ -372,9 +437,9 @@ function createColorBlindnessRows(controller, orientation) {
           class: `strip-color-blindness-swatch${conflicting.has(colIndex) ? ' conflict' : ''}${isPlaceholder ? ' strip-color-blindness-swatch--placeholder' : ''}`,
           style: `background-color: ${sim}; --cb-conflict-icon-color: ${getContrastTextColor(sim)};`,
           role: 'img',
-          'aria-label': `${sim.toUpperCase()} ${TYPE_LABELS[type]} simulation`,
+          'aria-label': `${sim.toUpperCase()} ${cb.labels[type]}`,
         });
-        if (conflicting.has(colIndex)) swatch.appendChild(createConflictIcon());
+        if (conflicting.has(colIndex)) swatch.appendChild(createConflictIcon(cb.conflictIconAria));
         swatchesContainer.appendChild(swatch);
       });
       row.appendChild(header);
@@ -421,10 +486,11 @@ function createWarningIcon() {
   return el;
 }
 
-function createConflictSummaryBlock(controller, maxColumns = MAX_CB_COLUMNS) {
+function createConflictSummaryBlock(controller, cbStrings, maxColumns = MAX_CB_COLUMNS) {
+  const cb = resolveCBLabels(cbStrings);
   const wrap = createTag('div', { class: 'strip-conflict-summary' });
   const label = createTag('span', { class: 'strip-conflict-summary__label' });
-  label.textContent = 'Potential color blind conflicts';
+  label.textContent = cb.summary;
   const badge = createTag('span', {
     class: 'strip-conflict-summary__badge',
     role: 'status',
@@ -439,7 +505,7 @@ function createConflictSummaryBlock(controller, maxColumns = MAX_CB_COLUMNS) {
       badge.classList.add('none');
       badge.innerHTML = '';
       badge.appendChild(createCheckmarkIcon());
-      badge.appendChild(document.createTextNode('None'));
+      badge.appendChild(document.createTextNode(cb.statusNone));
       return;
     }
     const { hasAny } = getTotalConflictCount(colors, maxColumns);
@@ -448,13 +514,13 @@ function createConflictSummaryBlock(controller, maxColumns = MAX_CB_COLUMNS) {
       badge.classList.add('has-conflicts');
       badge.innerHTML = '';
       badge.appendChild(createWarningIcon());
-      badge.appendChild(document.createTextNode('Conflicts found'));
+      badge.appendChild(document.createTextNode(cb.statusConflictsFound));
     } else {
       badge.classList.remove('has-conflicts');
       badge.classList.add('none');
       badge.innerHTML = '';
       badge.appendChild(createCheckmarkIcon());
-      badge.appendChild(document.createTextNode('None'));
+      badge.appendChild(document.createTextNode(cb.statusNone));
     }
   }
 
@@ -474,7 +540,7 @@ function createConflictSummaryBlock(controller, maxColumns = MAX_CB_COLUMNS) {
   return wrap;
 }
 
-export function createStripWithColorBlindness(adapter, orientation) {
+export function createStripWithColorBlindness(adapter, orientation, cbStrings) {
   const isTwoRows = orientation === 'two-rows';
   const matrixOrRows = createTag('div', {
     class: `strip-with-color-blindness${isTwoRows ? ' strip-with-color-blindness--two-rows' : ''}`,
@@ -491,13 +557,19 @@ export function createStripWithColorBlindness(adapter, orientation) {
   if (controller) {
     let unsub;
     if (isTwoRows) {
-      const { wrap, unsub: u } = createColorBlindnessRows(controller, orientation);
+      const { wrap, unsub: u } = createColorBlindnessRows(controller, orientation, cbStrings);
       matrixOrRows.appendChild(wrap);
       unsub = u;
     } else {
-      unsub = createColorBlindnessRowsInMatrix(controller, orientation, matrixOrRows, railWrap);
+      unsub = createColorBlindnessRowsInMatrix(
+        controller,
+        orientation,
+        matrixOrRows,
+        railWrap,
+        cbStrings,
+      );
     }
-    const conflictSummary = createConflictSummaryBlock(controller);
+    const conflictSummary = createConflictSummaryBlock(controller, cbStrings);
     conflictSummary.cleanup = conflictSummary.cleanup || (() => {});
     const origDestroy = adapter.destroy;
     adapter.destroy = () => {
@@ -527,14 +599,20 @@ export function createStripContainerRenderer(options) {
     : null;
 
   const colorBlindness = config?.colorBlindness === true;
-  const { onColorChangeEnd } = options;
+  const cbStrings = config?.colorBlindnessStrings || null;
+  const colorEditStrings = config?.colorEditStrings || null;
+  const baseColorStrings = config?.baseColorStrings || null;
+  const colorSwatchRailStrings = config?.colorSwatchRailStrings || null;
+  const { onColorChangeEnd, onEditOpen } = options;
   const mobileQuery = typeof options.mobileBreakpointQuery === 'string'
     ? options.mobileBreakpointQuery
     : MOBILE_BREAKPOINT_QUERY;
 
   let listElement = null;
   let activeColorEditor = null;
+  let isEditorOpening = false;
   const cleanupHandlers = [];
+  let liveAdapters = [];
 
   function resolveAnchorRect(anchorElement, anchorRectFromDetail) {
     if (anchorRectFromDetail && Number.isFinite(anchorRectFromDetail.left)) {
@@ -543,24 +621,38 @@ export function createStripContainerRenderer(options) {
     return anchorElement.getBoundingClientRect();
   }
 
-  function positionPopover(popover, anchorRect) {
-    const gap = 8;
+  function getStickyHeaderBottom() {
+    const selectors = ['header.global-navigation', '.feds-localnav'];
+    return selectors.reduce((max, sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return max;
+      return Math.max(max, el.getBoundingClientRect().bottom);
+    }, 0);
+  }
+
+  function positionPopover(popover, anchorRect, container) {
+    const gap = 4;
     const popRect = popover.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
 
-    let top = anchorRect.bottom + gap;
-    if (top + popRect.height > window.innerHeight) {
-      top = anchorRect.top - popRect.height - gap;
+    const belowTop = anchorRect.bottom + gap;
+    const aboveTop = anchorRect.top - popRect.height - gap;
+    const headerBottom = getStickyHeaderBottom();
+
+    const fitsBelow = belowTop + popRect.height <= window.innerHeight;
+    const fitsAbove = aboveTop >= headerBottom;
+
+    let viewportTop = belowTop;
+    if (!fitsBelow && fitsAbove) viewportTop = aboveTop;
+
+    let viewportLeft = anchorRect.left;
+    if (viewportLeft + popRect.width > window.innerWidth - gap) {
+      viewportLeft = anchorRect.right - popRect.width;
     }
-    top = Math.max(gap, top);
+    viewportLeft = Math.max(gap, Math.min(viewportLeft, window.innerWidth - popRect.width - gap));
 
-    let { left } = anchorRect;
-    if (left + popRect.width > window.innerWidth - gap) {
-      left = anchorRect.right - popRect.width;
-    }
-    left = Math.max(gap, Math.min(left, window.innerWidth - popRect.width - gap));
-
-    popover.style.top = `${top}px`;
-    popover.style.left = `${left}px`;
+    popover.style.top = `${viewportTop - containerRect.top + container.scrollTop}px`;
+    popover.style.left = `${viewportLeft - containerRect.left + container.scrollLeft}px`;
   }
 
   function closeActiveColorEditor() {
@@ -568,28 +660,36 @@ export function createStripContainerRenderer(options) {
     const {
       adapter,
       popover,
-      mobile,
       resizeObserver,
       outsideHandler,
       escapeHandler,
-      scrollHandler,
       railElement: activeRailElement,
+      selectedIndex: editedIndex,
     } = activeColorEditor;
-    if (outsideHandler) document.removeEventListener('click', outsideHandler, true);
+    activeColorEditor = null;
+    if (outsideHandler) {
+      document.removeEventListener('click', outsideHandler, true);
+      document.removeEventListener('touchend', outsideHandler, true);
+    }
     if (escapeHandler) document.removeEventListener('keydown', escapeHandler, true);
-    if (scrollHandler) window.removeEventListener('scroll', scrollHandler, true);
     resizeObserver?.disconnect?.();
-    if (mobile) {
-      try {
-        adapter.hide?.();
-      } catch (_err) {
-        // no-op
-      }
+    try {
+      adapter.hide?.();
+    } catch (_err) {
+      // no-op
     }
     adapter.destroy?.();
     popover?.remove();
     activeRailElement?.setActiveEditIndex?.(null);
-    activeColorEditor = null;
+    requestAnimationFrame(() => {
+      const column = activeRailElement?.shadowRoot?.querySelector(
+        `.swatch-column[data-swatch-index="${editedIndex}"]`,
+      );
+      if (column) {
+        column.setAttribute('tabindex', '0');
+        column.focus();
+      }
+    });
   }
 
   function openColorEditorForRail(
@@ -599,19 +699,28 @@ export function createStripContainerRenderer(options) {
     anchorElement,
     anchorRectFromDetail = null,
   ) {
+    const alreadyOpen = activeColorEditor?.railElement === railElement
+      && activeColorEditor?.selectedIndex === selectedIndex;
     closeActiveColorEditor();
+    isEditorOpening = true;
+    if (alreadyOpen) return;
+    onEditOpen?.(selectedIndex);
+    isEditorOpening = false;
 
     const state = controller?.getState?.() || {};
     const palette = (state.swatches || []).map((swatch) => swatch?.hex).filter(Boolean);
     const mobile = window.matchMedia?.(mobileQuery)?.matches === true;
 
-    const adapter = createColorEditAdapter({
+    const ceOpts = {
       palette,
       selectedIndex,
       colorMode: 'HEX',
       showPalette: mobile,
       mobile,
-    }, {
+    };
+    if (colorEditStrings) ceOpts.strings = colorEditStrings;
+    if (baseColorStrings) ceOpts.baseColorStrings = baseColorStrings;
+    const adapter = createColorEditAdapter(ceOpts, {
       onColorChange: ({ hex, index }) => {
         if (!hex || !controller?.setState) return;
         const currentState = controller.getState?.() || {};
@@ -637,7 +746,7 @@ export function createStripContainerRenderer(options) {
     const editorElement = adapter.getElement?.() || adapter.element;
     if (mobile) {
       document.body.appendChild(editorElement);
-      activeColorEditor = { adapter, mobile: true, railElement };
+      activeColorEditor = { adapter, mobile: true, railElement, selectedIndex };
       requestAnimationFrame(async () => {
         try {
           await customElements.whenDefined('color-edit');
@@ -650,40 +759,49 @@ export function createStripContainerRenderer(options) {
       return;
     }
 
+    const container = railElement.closest('.ax-shell-slot--canvas') || document.body;
+
     const popover = document.createElement('div');
     popover.className = 'swatches-color-edit-popover';
     popover.setAttribute('role', 'dialog');
-    popover.setAttribute('aria-label', 'Edit color');
-    popover.style.position = 'fixed';
-    popover.style.zIndex = '10002';
+    popover.setAttribute('aria-label', colorEditStrings?.editColorAria || 'Edit color');
+    popover.style.position = 'absolute';
+    popover.style.top = '0';
+    popover.style.left = '0';
+    popover.style.opacity = '0';
+    popover.style.pointerEvents = 'none';
+    popover.style.zIndex = '2';
     popover.appendChild(editorElement);
-    document.body.appendChild(popover);
+    container.appendChild(popover);
     const anchorRect = resolveAnchorRect(anchorElement, anchorRectFromDetail);
     const observer = new ResizeObserver((entries) => {
       const { height } = entries[0].contentRect;
       if (height > 0) {
-        observer.disconnect();
-        positionPopover(popover, anchorRect);
+        positionPopover(popover, anchorRect, container);
+        popover.style.opacity = '1';
+        popover.style.pointerEvents = '';
       }
     });
     observer.observe(popover);
 
     const outsideHandler = (evt) => {
       const path = evt.composedPath?.() || [];
-      if (!path.includes(popover)) {
+      if (path.includes(popover)) return;
+      // Clicks on hex-code/edit-tint elements will call openColorEditorForRail,
+      // which handles the toggle via alreadyOpen. Don't close here.
+      if (path.some((n) => n?.classList?.contains?.('hex-code') || n?.classList?.contains?.('icon-button--edit-tint'))) return;
+      closeActiveColorEditor();
+    };
+    const escapeHandler = (evt) => {
+      if (evt.key === 'Escape') {
+        evt.stopPropagation();
         closeActiveColorEditor();
       }
     };
-    const escapeHandler = (evt) => {
-      if (evt.key === 'Escape') closeActiveColorEditor();
-    };
-    const scrollHandler = () => {
-      closeActiveColorEditor();
-    };
 
     document.addEventListener('click', outsideHandler, true);
+    document.addEventListener('touchend', outsideHandler, true);
     document.addEventListener('keydown', escapeHandler, true);
-    window.addEventListener('scroll', scrollHandler, true);
 
     activeColorEditor = {
       adapter,
@@ -692,8 +810,8 @@ export function createStripContainerRenderer(options) {
       resizeObserver: observer,
       outsideHandler,
       escapeHandler,
-      scrollHandler,
       railElement,
+      selectedIndex,
     };
 
     requestAnimationFrame(async () => {
@@ -738,6 +856,7 @@ export function createStripContainerRenderer(options) {
     } else if (swatchFeatures != null) {
       opts.swatchFeatures = swatchFeatures;
     }
+    if (colorSwatchRailStrings) opts.strings = colorSwatchRailStrings;
     return opts;
   }
 
@@ -746,8 +865,8 @@ export function createStripContainerRenderer(options) {
     let el = adapter.element;
     if (colorBlindness) {
       el = orientation === 'four-rows'
-        ? createFourRowsColorBlindnessLayout(adapter)
-        : createStripWithColorBlindness(adapter, orientation);
+        ? createFourRowsColorBlindnessLayout(adapter, cbStrings, colorEditStrings)
+        : createStripWithColorBlindness(adapter, orientation, cbStrings);
 
       const controller = getAdapterController(adapter);
       if (controller) {
@@ -769,22 +888,38 @@ export function createStripContainerRenderer(options) {
     container.classList.add('color-explorer-strip-container', 'strip-container');
     if (colorBlindness) container.classList.add('color-explorer-strip-container--color-blindness');
     listElement = container;
+    liveAdapters = [];
 
     const data = getData().slice(0, orientations.length);
     data.forEach((palette, index) => {
       const adapter = createSwatchRailAdapter(palette, railOptions(orientations[index]));
+      liveAdapters.push(adapter);
       appendStrip(adapter, orientations[index]);
     });
   }
 
   function update(newData) {
-    if (!listElement) return;
+    if (!listElement || isEditorOpening) return;
+    const data = (Array.isArray(newData) ? newData : getData()).slice(0, orientations.length);
+
+    // When adapter count matches, push new colors through each adapter's controller
+    // instead of tearing down and rebuilding the DOM. At 12 Hz during drag this
+    // avoids destroying/recreating Lit elements, swatch-rail subscriptions, and
+    // color-blindness layout DOM on every frame.
+    if (liveAdapters.length === data.length
+      && liveAdapters.every((a) => typeof a.update === 'function')) {
+      data.forEach((palette, i) => liveAdapters[i].update(palette));
+      return;
+    }
+
+    // Full rebuild: swatch count changed or adapters were destroyed.
     closeActiveColorEditor();
     cleanupHandlers.splice(0).forEach((fn) => fn());
     listElement.innerHTML = '';
-    const data = (Array.isArray(newData) ? newData : getData()).slice(0, orientations.length);
+    liveAdapters = [];
     data.forEach((palette, index) => {
       const adapter = createSwatchRailAdapter(palette, railOptions(orientations[index]));
+      liveAdapters.push(adapter);
       appendStrip(adapter, orientations[index]);
     });
   }
@@ -792,6 +927,7 @@ export function createStripContainerRenderer(options) {
   function destroy() {
     closeActiveColorEditor();
     cleanupHandlers.splice(0).forEach((fn) => fn());
+    liveAdapters = [];
     listElement = null;
   }
 

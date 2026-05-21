@@ -100,6 +100,7 @@
   flex-direction: column;
   gap: 16px;
   align-items: center;
+  margin: auto;
 }
 
 .image-extract .color-extract-suggestions-label {
@@ -294,9 +295,11 @@
 .image-extract.has-image .color-extract-edit-bg img {
   width: 100%;
   height: 100%;
+  display: block;
   left: 0;
   transform: none;
-  border-radius: 8px;
+  border-radius: 0;
+  object-fit: contain;
   position: relative;
   inset: auto;
 }
@@ -485,6 +488,8 @@
 .image-extract .color-extract-mood-option {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
   width: 100%;
   padding: 8px 16px;
   background: none;
@@ -496,14 +501,37 @@
   color: var(--color-extract-text);
   text-align: left;
   transition: background-color 0.1s ease;
+  min-width: 177px;
+  box-sizing: border-box;
 }
 
 .image-extract .color-extract-mood-option:hover {
   background: #f5f5f5;
 }
 
+.image-extract .color-extract-mood-option-check {
+  width: 10px;
+  height: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-extract-accent);
+  opacity: 0;
+}
+
+.image-extract .color-extract-mood-option-check svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .image-extract .color-extract-mood-option.is-selected {
-  font-weight: 600;
+  font-weight: 400;
+}
+
+.image-extract .color-extract-mood-option.is-selected .color-extract-mood-option-check {
+  opacity: 1;
 }
 
 .image-extract .color-extract-mood-option:focus-visible {
@@ -535,6 +563,8 @@
   transition: width 0.2s ease, height 0.2s ease;
   background: var(--marker-color, transparent);
   box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), 0 0 17px rgba(0, 0, 0, 0.16);
+  /* Center on percentage point — size-independent, works at every breakpoint */
+  transform: translate(-50%, -50%);
 }
 
 .image-extract .color-extract-marker:hover {

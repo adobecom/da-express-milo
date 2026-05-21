@@ -22,6 +22,19 @@ function handleCollections(params) {
 }
 
 function handleFilters(params) {
+  if (params.get('locales')) {
+    const applicableRegions = params
+      .get('locales')
+      .split(/\s+or\s+|,/i)
+      .map((locale) => locale.trim())
+      .filter(Boolean)
+      .map((locale) => (locale.toLowerCase() === 'en' ? 'ZZ' : locale.toUpperCase()))
+      .join(',');
+    if (applicableRegions) {
+      params.append('filters', `applicableRegions==${applicableRegions}`);
+    }
+    params.delete('locales');
+  }
   if (params.get('license')) {
     params.append('filters', `licensingCategory==${params.get('license')}`);
     params.delete('license');
@@ -176,12 +189,20 @@ export function containsVideo(template) {
   return !!template?.pages.some((page) => page?.rendition?.video?.thumbnail?.componentId);
 }
 
+export function isValidBehaviors(behaviors) {
+  const collectivelyExhaustiveBehaviors = ['animated', 'video', 'still'];
+  return Array.isArray(behaviors)
+    && behaviors.some((b) => collectivelyExhaustiveBehaviors.includes(b))
+    && (!behaviors.includes('still') || !(behaviors.includes('video') || behaviors.includes('animated')));
+}
+
 export function isValidTemplate(template) {
   return !!(template.status === 'approved'
       && template.customLinks?.branchUrl
       && (template.assetType === 'Webpage_Template' || template.pages?.[0]?.rendition?.image?.thumbnail?.componentId)
       && template._links?.['http://ns.adobe.com/adobecloud/rel/rendition']?.href?.replace
       && template._links?.['http://ns.adobe.com/adobecloud/rel/component']?.href?.replace
+      && isValidBehaviors(template.behaviors)
   );
 }
 

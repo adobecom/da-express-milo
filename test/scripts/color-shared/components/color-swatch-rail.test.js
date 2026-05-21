@@ -67,7 +67,7 @@ describe('color-swatch-rail tint bands', () => {
     });
   });
 
-  it('does not apply tint band when swatch is locked', () => {
+  it('applies tint band even when swatch is locked', () => {
     const rail = createRail();
     rail.swatches = [{ hex: '#1900AB' }];
     rail.lockedByIndex = new Set([0]);
@@ -81,7 +81,7 @@ describe('color-swatch-rail tint bands', () => {
 
     const selectedBand = rail._buildTintBands('#1900AB')[1];
     rail._handleTintBandSelect(0, selectedBand);
-    expect(setStateCalled).to.equal(false);
+    expect(setStateCalled).to.equal(true);
   });
 
   it('returns null when no tint swatch is currently selected', () => {
@@ -178,6 +178,22 @@ describe('color-swatch-rail tint bands', () => {
     buttons.forEach((btn) => {
       expect(btn.getAttribute('tabindex')).to.equal('0');
     });
+  });
+});
+
+describe('color-swatch-rail _scheduleTooltipsRefresh', () => {
+  it('skips RAF scheduling on touch-only (hover: none) devices', () => {
+    const rail = createRail();
+    rail._tooltipRefreshRafId = null;
+
+    const origMatchMedia = window.matchMedia;
+    window.matchMedia = (query) => ({ matches: query === '(hover: none)' });
+
+    rail._scheduleTooltipsRefresh();
+
+    window.matchMedia = origMatchMedia;
+
+    expect(rail._tooltipRefreshRafId).to.equal(null);
   });
 });
 

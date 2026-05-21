@@ -1,30 +1,5 @@
 import { createTag } from '../../../utils.js';
-
-const ANALYTICS_TEXT_LIMIT = 20;
-
-function sanitizeAnalyticsText(value) {
-  const raw = String(value ?? '')
-    .replace(/[^a-zA-Z0-9\s]/g, '')
-    .trim()
-    .substring(0, ANALYTICS_TEXT_LIMIT);
-  return raw;
-}
-
-function buildDaaLl(analytics = {}) {
-  if (!analytics || typeof analytics !== 'object') return null;
-
-  if (analytics.daaLl) {
-    return String(analytics.daaLl);
-  }
-
-  if (analytics.linkIndex == null) {
-    return null;
-  }
-
-  const label = sanitizeAnalyticsText(analytics.linkLabel || 'View details');
-  const header = sanitizeAnalyticsText(analytics.headerText || '');
-  return `${label}-${analytics.linkIndex}--${header}`;
-}
+import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
 
 function gradientToBackgroundImage(gradient) {
   if (gradient.gradient && typeof gradient.gradient === 'string') {
@@ -49,19 +24,22 @@ function createGradientStrip(gradient, options = {}) {
     iconSrc,
     analytics,
     actionLabel = 'Open',
+    strings = {},
   } = options;
+  const defaultName = strings.defaultName || 'Gradient';
+  const visualAriaTpl = strings.visualAria || '{name} gradient visual';
   const strip = createTag('article', {
     class: 'gradient-strip',
     'data-gradient-id': gradient.id,
   });
 
   const visual = createTag('div', { class: 'gradient-strip-visual' });
-  visual.setAttribute('aria-label', `${gradient.name ?? 'Gradient'} gradient visual`);
+  visual.setAttribute('aria-label', visualAriaTpl.replace('{name}', gradient.name ?? defaultName));
   visual.style.backgroundImage = gradientToBackgroundImage(gradient);
 
   const info = createTag('div', { class: 'gradient-strip-info' });
   const nameEl = createTag('p', { class: 'gradient-strip-name' });
-  nameEl.textContent = gradient.name ?? 'Gradient';
+  nameEl.textContent = gradient.name ?? defaultName;
   info.appendChild(nameEl);
 
   const actions = createTag('div', { class: 'gradient-strip-actions' });
@@ -72,10 +50,10 @@ function createGradientStrip(gradient, options = {}) {
     'data-tooltip-content': actionLabel,
     tabindex: '-1',
   });
-  const daaLl = buildDaaLl(analytics);
-  if (daaLl) {
-    actionBtn.setAttribute('daa-ll', daaLl);
-    actionBtn.setAttribute('data-ll', daaLl);
+  if (analytics && typeof analytics === 'object') {
+    decorateAnalyticsAttributes(actionBtn, {
+      linkLabel: analytics.linkLabel || 'View details',
+    });
   }
 
   const wrapper = createTag('div', { class: 'action-icon-wrapper' });
@@ -119,26 +97,7 @@ function createGradientStrip(gradient, options = {}) {
 
 export function createGradientStripElements(gradients, options = {}) {
   if (!Array.isArray(gradients) || gradients.length === 0) return [];
-  const { analytics: baseAnalytics } = options;
-  return gradients.map((g, i) => {
-    const cardOptions = { ...options };
-    if (baseAnalytics && (baseAnalytics.linkIndex != null
-      || baseAnalytics.headerText != null
-      || baseAnalytics.startIndex != null)) {
-      let linkIndex = null;
-      if (baseAnalytics.linkIndex != null) {
-        linkIndex = baseAnalytics.linkIndex;
-      } else if (baseAnalytics.startIndex != null) {
-        linkIndex = baseAnalytics.startIndex + i + 1;
-      }
-      cardOptions.analytics = {
-        ...baseAnalytics,
-        linkIndex,
-        headerText: baseAnalytics.headerText ?? '',
-      };
-    }
-    return createGradientStrip(g, cardOptions);
-  });
+  return gradients.map((g) => createGradientStrip(g, options));
 }
 
 export default createGradientStripElements;

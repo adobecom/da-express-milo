@@ -1,6 +1,8 @@
 import { createSpectrumIcon } from '../utils/icons.js';
 import { createTag } from '../../utils.js';
 
+export const MAX_TAGS = 10;
+
 /* ── Tag text helpers ─────────────────────────────────────────── */
 
 export function normalizeTagText(t) {
@@ -10,8 +12,16 @@ export function normalizeTagText(t) {
 
 /* ── Tag pill (selected tag inside field) ─────────────────────── */
 
-export function createTagPill(text, { onRemove, removeLabel } = {}) {
-  const pill = createTag('div', { class: 'ax-tag-pill', 'data-tag-value': text });
+const buildRemoveLabel = (template, text) => {
+  const fallback = `Remove ${text}`;
+  if (!template) return fallback;
+  const result = template.replace('{{tag}}', text);
+  return result !== template ? result : fallback;
+};
+
+export function createTagPill(text, { onRemove, removeLabel, class: extraClass } = {}) {
+  const classes = ['ax-tag-pill', extraClass].filter(Boolean).join(' ');
+  const pill = createTag('div', { class: classes, 'data-tag-value': text });
 
   const label = createTag('span', { class: 'ax-tag-pill-label' });
   label.textContent = text;
@@ -19,7 +29,7 @@ export function createTagPill(text, { onRemove, removeLabel } = {}) {
   const closeBtn = createTag('button', {
     type: 'button',
     class: 'ax-tag-pill-close',
-    'aria-label': removeLabel || `Remove ${text}`,
+    'aria-label': buildRemoveLabel(removeLabel, text),
   });
   const closeIcon = createSpectrumIcon('Close');
   closeIcon.setAttribute('aria-hidden', 'true');
@@ -70,7 +80,7 @@ export function addTagFromInput(input, tagsContainer, { onStateChange, removeLab
   if (!text) return;
   const existing = getTagValues(tagsContainer)
     .map((v) => v.toLowerCase());
-  if (existing.includes(text.toLowerCase())) {
+  if (existing.includes(text.toLowerCase()) || existing.length >= MAX_TAGS) {
     input.value = '';
     input.focus();
     return;
@@ -144,6 +154,12 @@ export function createTagField(label, tags, placeholder, {
     requestAnimationFrame(doSync);
   });
   input.addEventListener('input', doSync);
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace' && !input.value && tagsContainer.lastElementChild) {
+      tagsContainer.lastElementChild.querySelector('.ax-tag-pill-close')?.click();
+      doSync();
+    }
+  });
 
   wrapper.append(labelEl, field, helpText);
 

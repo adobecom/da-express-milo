@@ -3388,3 +3388,17 @@ main .template-x.tworow .template-2x2-col .template .still-wrapper img:not(.icon
     margin: auto;
   }
  }
+
+.template-x .experimental-ctas.button-container a.button { 
+    width: 100%;
+    margin: 10px 0 0; 
+    border: none;
+    padding: 7px 16px;
+ }
+
+.template-x .experimental-ctas.button-container .secondary-template-cta {
+  border-radius: 16px;
+  background:rgba(0, 0, 0, 0.09);
+  color: var(--color-black);
+  border: none;
+}

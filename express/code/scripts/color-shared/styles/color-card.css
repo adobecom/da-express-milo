@@ -31,9 +31,9 @@
   width: 100%;
   border-radius: var(--Corner-radius-corner-radius-100);
   --color-palette-margin-bottom: 0;
-  --color-palette-border-width: 0.5px;
-  --color-palette-border-color: var(--color-gray-100);
-  --color-palette-active-border-color: var(--color-gray-100);
+  --color-palette-border-width: 1px;
+  --color-palette-border-color: #1f1f1f33;
+  --color-palette-active-border-color: #1f1f1f33;
   --color-palette-min-height: var(--color-card-palette-min-height);
 }
 

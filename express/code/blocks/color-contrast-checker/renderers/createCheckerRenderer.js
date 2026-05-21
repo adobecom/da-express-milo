@@ -330,6 +330,13 @@ function createTintSlider(hex, onInput, onCommit, strings, label = '') {
       sliderAdapter.setValue(idx);
       syncTintValue(idx);
     },
+    getBaseHueSat() {
+      return { h: baseHue, s: baseSaturation };
+    },
+    setBaseHueSat(h, s) {
+      baseHue = h;
+      baseSaturation = s;
+    },
   };
 }
 
@@ -580,6 +587,8 @@ export function createCheckerRenderer(options) {
       label,
       ariaLabel: strings.colorValueAriaLabel,
       value: initialValue,
+      colorEditStrings: config.colorEditStrings,
+      baseColorStrings: config.baseColorStrings,
       getColorEditPalette: ({ value }) => getColorEditPalette(type, value),
       onInput: ({ value: v }) => {
         const hex = ensureHash(v.trim());
@@ -650,7 +659,7 @@ export function createCheckerRenderer(options) {
       const modal = createModalManager();
       modal.openContrastCheckerModal(
         { colors, name: paletteData?.name },
-        { dataService },
+        { dataService, strings },
       );
     });
 
@@ -798,6 +807,12 @@ export function createCheckerRenderer(options) {
     }, swapSvg);
     swapButton.appendChild(iconWrapper);
     swapButton.addEventListener('click', () => {
+      const fgBase = fgSlider?.getBaseHueSat();
+      const bgBase = bgSlider?.getBaseHueSat();
+      if (fgBase && bgBase) {
+        fgSlider.setBaseHueSat(bgBase.h, bgBase.s);
+        bgSlider.setBaseHueSat(fgBase.h, fgBase.s);
+      }
       setColorPair(background, foreground, { historyMode: 'immediate' });
     });
 

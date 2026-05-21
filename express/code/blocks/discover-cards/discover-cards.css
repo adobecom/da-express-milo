@@ -62,6 +62,12 @@ main .section .discover-cards {
 .discover-cards.flip .cards-container .card {
   background: unset;
   border: none;
+  background-color: transparent;
+  min-width: initial;
+  width: 250px;
+  max-width: initial;
+  height: 100%;
+  cursor: pointer;
 }
 
 .discover-cards.flip .flip-card-front p,
@@ -75,6 +81,7 @@ main .section .discover-cards {
   font-weight: 700;
   line-height: 130%;
   margin-top: var(--spacing-350);
+  overflow-wrap: break-word;
 }
 .discover-cards.xl-heading h1,
 .discover-cards.xl-heading h2 {
@@ -334,15 +341,6 @@ main .section .discover-cards {
     stroke: var(--color-gray-300);
 }
 
-.discover-cards.flip .card {
-  background-color: transparent;
-  min-width: initial;
-  width: 250px;
-  max-width: initial;
-  height: 100%;
-  cursor: pointer;
-}
-
 .discover-cards.flip .flip-card-inner {
   position: relative;
   width: 100%;
@@ -351,13 +349,14 @@ main .section .discover-cards {
   transition: transform 350ms ease-out;
   transform-style: preserve-3d;
   display: grid;
+  min-width: 0;
 }
 
 .discover-cards.flip .card.is-flipped .flip-card-inner {
   transform: rotateY(180deg);
 }
 
-.discover-cards.flip .flip-card-front, 
+.discover-cards.flip .flip-card-front,
 .discover-cards.flip .flip-card-back {
   font-size: var(--heading-font-size-s);
   text-align: left;
@@ -370,12 +369,16 @@ main .section .discover-cards {
   padding: var(--spacing-500) var(--spacing-400);
   box-sizing: border-box;
   grid-area: 1 / 1;
+  min-width: 0;
+  overflow: hidden;
 }
 .discover-cards.flip .flip-card-back {
   width: 100%;
   height: 100%;
   padding: 0;
   transform: rotateY(180deg);
+  position: relative;
+  overflow: visible;
 }
 
 .discover-cards.flip .flip-card-back .scrollable-content {

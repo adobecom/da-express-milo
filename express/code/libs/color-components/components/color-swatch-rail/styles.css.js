@@ -478,6 +478,7 @@ export const style = css`
   .swatch-rail[data-orientation="horizontal"] .hex-code {
     flex-shrink: 0;
     min-width: 0;
+    width: auto;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -564,7 +565,6 @@ export const style = css`
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 6px;
     flex-shrink: 0;
   }
 
@@ -1012,35 +1012,34 @@ export const style = css`
   button.hex-code {
     background: none;
     border: none;
-    padding: 7px 12px;
+    padding-block: 7px;
+    padding-inline: 0;
     font: inherit;
     text-align: center;
-    min-width: 75px;
+    width: 75px;
+    flex-shrink: 0;
     height: 32px;
     border-radius: var(--Corner-radius-corner-radius-100);
   }
-  .swatch-column[data-contrast="dark"] button.hex-code:hover {
-    background-color: rgba(255, 255, 255, 0.12);
-  }
-  .swatch-column[data-contrast="light"] button.hex-code:hover {
-    background-color: rgba(0, 0, 0, 0.12);
-  }
-  .swatch-column[data-contrast="light"] button.hex-code.hex-code--editor-open {
-    border-radius: 5px;
-    border: 1px solid var(--color-gray-950);
-    background: transparent;
+  @media (hover: hover) {
+    .swatch-column[data-contrast="dark"] button.hex-code:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+    .swatch-column[data-contrast="light"] button.hex-code:hover {
+      background-color: rgba(0, 0, 0, 0.12);
+    }
   }
   .swatch-column[data-contrast="dark"] button.hex-code.hex-code--editor-open {
-    border-radius: 5px;
-    border: 1px solid var(--color-gray-400-variant);
-    background: transparent;
+    background-color: rgba(255, 255, 255, 0.12);
+  }
+  .swatch-column[data-contrast="light"] button.hex-code.hex-code--editor-open {
+    background-color: rgba(0, 0, 0, 0.12);
   }
   button.hex-code:focus-visible {
     outline: 2px solid var(--color-blue-800);
     outline-offset: 2px;
   }
   .hex-code--editable {
-    padding: 7px 12px;
     cursor: pointer;
   }
   .hex-code--copyable {
@@ -1048,10 +1047,8 @@ export const style = css`
   }
   .hex-code--static {
     cursor: default;
-    padding-left: 6px;
+    padding-left: var(--hex-code-static-padding-left);
   }
-
-  
   .icon-button {
     background: none;
     border: none;
@@ -1065,16 +1062,20 @@ export const style = css`
     justify-content: center;
     color: var(--swatch-text-color);
     transition: background-color 0.15s ease, color 0.15s ease;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
 
   
 
   
-  .swatch-column[data-contrast="dark"] .icon-button:hover {
-    background-color: rgba(255, 255, 255, 0.12);
-  }
-  .swatch-column[data-contrast="light"] .icon-button:hover {
-    background-color: rgba(0, 0, 0, 0.12);
+  @media (hover: hover) {
+    .swatch-column[data-contrast="dark"] .icon-button:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+    .swatch-column[data-contrast="light"] .icon-button:hover {
+      background-color: rgba(0, 0, 0, 0.12);
+    }
   }
 
   
@@ -1112,6 +1113,8 @@ export const style = css`
   .icon-button .icon-tint {
     display: inline-block;
     filter: var(--swatch-icon-filter);
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   
@@ -1121,6 +1124,8 @@ export const style = css`
     width: 20px;
     height: 20px;
     filter: var(--swatch-icon-filter);
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   .edit-input-native {

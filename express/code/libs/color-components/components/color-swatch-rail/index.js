@@ -13,6 +13,7 @@ import {
   getConflictingIndices,
   simulateHex as simulateHexService,
 } from '../../../../scripts/color-shared/services/createColorBlindnessService.js';
+import { DEFAULT_PLACEHOLDERS as SWATCH_RAIL_DEFAULTS } from '../../../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
 
 
 const MAX_SWATCHES = 10;
@@ -109,18 +110,18 @@ const ICON_MAP = {
   copy: () => (hasIcon('sp-icon-copy')
     ? html`<sp-icon-copy size="m" aria-hidden="true"></sp-icon-copy>`
     : iconFallback('m11.75,18h-7.5c-1.24023,0-2.25-1.00977-2.25-2.25v-7.5c0-1.24023,1.00977-2.25,2.25-2.25.41406,0,.75.33594.75.75s-.33594.75-.75.75c-.41309,0-.75.33691-.75.75v7.5c0,.41309.33691.75.75.75h7.5c.41309,0,.75-.33691.75-.75,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,1.24023-1.00977,2.25-2.25,2.25Zm-5-13c-.41406,0-.75-.33594-.75-.75,0-1.24023,1.00977-2.25,2.25-2.25.41406,0,.75.33594.75.75s-.33594.75-.75.75c-.41309,0-.75.33691-.75.75,0,.41406-.33594.75-.75.75Zm6.25-1.5h-2c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h2c.41406,0,.75.33594.75.75s-.33594.75-.75.75Zm0,10.5h-2c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h2c.41406,0,.75.33594.75.75s-.33594.75-.75.75Zm2.75,0c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75c.41309,0,.75-.33691.75-.75,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,1.24023-1.00977,2.25-2.25,2.25Zm1.5-9c-.41406,0-.75-.33594-.75-.75,0-.41309-.33691-.75-.75-.75-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75c1.24023,0,2.25,1.00977,2.25,2.25,0,.41406-.33594.75-.75.75Zm0,4.75c-.41406,0-.75-.33594-.75-.75v-2c0-.41406.33594-.75.75-.75s.75.33594.75.75v2c0,.41406-.33594.75-.75.75Zm-10.5,0c-.41406,0-.75-.33594-.75-.75v-2c0-.41406.33594-.75.75-.75s.75.33594.75.75v2c0,.41406-.33594.75-.75.75Zm1.5,4.25c-1.24023,0-2.25-1.00977-2.25-2.25,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,.41309.33691.75.75.75.41406,0,.75.33594.75.75s-.33594.75-.75.75Z')),
-  editTint: () => html`<img class="icon-tint" src="/express/code/icons/S2_Icon_Tint_20_N.svg" alt="" width="32" height="32" aria-hidden="true">`,
+  editTint: () => html`<svg class="icon-tint" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M9.99999 12.7764C12.4228 12.7764 14.25 11.0645 14.25 8.79493C14.25 7.09473 12.8633 5.27149 11.6401 3.66407C11.2656 3.17188 10.9092 2.70411 10.624 2.27637C10.3457 1.8584 9.65429 1.8584 9.37597 2.27637C9.09081 2.7041 8.73437 3.17188 8.35986 3.66407C7.13672 5.27149 5.75 7.09473 5.75 8.79493C5.75 11.0645 7.57714 12.7764 9.99999 12.7764ZM9.5537 4.57228C9.70653 4.37111 9.85643 4.17384 9.99999 3.98146C10.1435 4.17384 10.2934 4.37111 10.4463 4.57228C11.4727 5.92091 12.75 7.59962 12.75 8.79494C12.75 10.2324 11.5933 11.2764 9.99999 11.2764C8.40673 11.2764 7.24999 10.2324 7.24999 8.79494C7.24999 7.59963 8.52733 5.92092 9.5537 4.57228Z" fill="currentColor"/><path d="M18.25 5.80176C17.8359 5.80176 17.5 6.1377 17.5 6.55176V8.48731H16.2827C15.8686 8.48731 15.5327 8.82325 15.5327 9.23731C15.5327 9.65137 15.8686 9.98731 16.2827 9.98731H17.5V15.8018C17.5 16.2148 17.1636 16.5518 16.75 16.5518H3.25C2.83643 16.5518 2.5 16.2148 2.5 15.8018V9.98731H3.71729C4.13135 9.98731 4.46729 9.65137 4.46729 9.23731C4.46729 8.82325 4.13135 8.48731 3.71729 8.48731H2.5V6.55176C2.5 6.1377 2.16406 5.80176 1.75 5.80176C1.33594 5.80176 1 6.1377 1 6.55176V15.8018C1 17.042 2.00928 18.0518 3.25 18.0518H16.75C17.9907 18.0518 19 17.042 19 15.8018V6.55176C19 6.1377 18.6641 5.80176 18.25 5.80176Z" fill="currentColor"/></svg>`,
   trash: () => (hasIcon('sp-icon-delete')
     ? html`<sp-icon-delete size="m" aria-hidden="true"></sp-icon-delete>`
     : iconFallback('M7 3h6l1 2h3v2H3V5h3l1-2zm-1 6h2v7H6V9zm6 0h2v7h-2V9zM9 9h2v7H9V9z')),
-  drag: () => html`<img class="icon-drag" src="/express/code/icons/drag.svg" alt="" width="32" height="32" aria-hidden="true">`,
+  drag: () => html`<img class="icon-drag" src="/express/code/icons/drag.svg" alt="" width="32" height="32" aria-hidden="true" draggable="false">`,
   add: () => (hasIcon('sp-icon-add')
     ? html`<sp-icon-add size="m" aria-hidden="true"></sp-icon-add>`
     : iconFallback('M9 3h2v6h6v2h-6v6H9v-6H3V9h6V3z')),
 
   colorBlindness: () => html`<span class="color-blindness-placeholder" aria-hidden="true">A11y</span>`,
-  lockOpen: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_LockOpen_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
-  lockClosed: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_Lock_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
+  lockOpen: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_LockOpen_20_N.svg" alt="" width="20" height="20" aria-hidden="true" draggable="false">`,
+  lockClosed: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_Lock_20_N.svg" alt="" width="20" height="20" aria-hidden="true" draggable="false">`,
   baseColorCircle: () => (hasIcon('sp-icon-circle')
     ? html`<sp-icon-circle size="m" aria-hidden="true"></sp-icon-circle>`
     : html`<svg class="icon-fallback" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="6.25" fill="none" stroke="currentColor" stroke-width="1.8"></circle></svg>`),
@@ -132,19 +133,22 @@ const ICON_MAP = {
 const icon = (name) => (ICON_MAP[name] ? ICON_MAP[name]() : html``);
 
 
-const conflictIcon = () => html`
+const conflictIcon = (strings = SWATCH_RAIL_DEFAULTS) => {
+  const label = strings?.conflictDetected || SWATCH_RAIL_DEFAULTS.conflictDetected;
+  return html`
   <button
     type="button"
     class="strip-color-blindness-swatch__conflict-icon"
     tabindex="-1"
-    aria-label="Conflict detected"
-    title="Conflict detected"
+    aria-label="${label}"
+    title="${label}"
   >
     ${hasIcon('sp-icon-alert')
     ? html`<sp-icon-alert size="m" aria-hidden="true"></sp-icon-alert>`
     : iconFallback('M10 2 19 18H1L10 2zm-1 5h2v6H9V7zm0 8h2v2H9v-2z')}
   </button>
 `;
+};
 
 
 function buildDisplaySwatchesForFourRowsCB(swatches) {
@@ -178,6 +182,7 @@ export class ColorSwatchRail extends LitElement {
       hexCopyFirstRowOnly: { type: Boolean, reflect: true, attribute: 'hex-copy-first-row-only' },
       hideBaseColorBadge: { type: Boolean, attribute: 'hide-base-color-badge' },
       hideLock: { type: Boolean, attribute: 'hide-lock' },
+      strings: { attribute: false },
     };
   }
 
@@ -195,6 +200,7 @@ export class ColorSwatchRail extends LitElement {
     this.hexCopyFirstRowOnly = false;
     this.hideBaseColorBadge = false;
     this.hideLock = false;
+    this.strings = SWATCH_RAIL_DEFAULTS;
     this._controllerUnsubscribe = null;
     this.swatches = [];
     this.baseColorIndex = 0;
@@ -267,6 +273,10 @@ export class ColorSwatchRail extends LitElement {
       cancelAnimationFrame(this._tooltipRefreshRafId);
       this._tooltipRefreshRafId = null;
     }
+    if (this._subscribeTooltipDebounceId != null) {
+      clearTimeout(this._subscribeTooltipDebounceId);
+      this._subscribeTooltipDebounceId = null;
+    }
     if (this._nativePickerCloseTimer != null) {
       clearTimeout(this._nativePickerCloseTimer);
       this._nativePickerCloseTimer = null;
@@ -305,6 +315,11 @@ export class ColorSwatchRail extends LitElement {
   }
 
   _scheduleTooltipsRefresh() {
+    // Touch-only devices (iPhone, iPad without mouse) have no hover capability,
+    // so Spectrum tooltip nodes serve no purpose. Skipping their creation and
+    // destruction eliminates the single biggest source of iOS WebContent jetsam
+    // (per the comment in attachController above).
+    if (window.matchMedia('(hover: none)').matches) return;
     if (this._nativePickerOpen) {
       this._tooltipRefreshQueued = true;
       return;
@@ -427,7 +442,21 @@ export class ColorSwatchRail extends LitElement {
         this.lockedByIndex = state.lockedByIndex ?? new Set();
         this.requestUpdate();
         if (this._tooltipsInitialized) {
-          this.updateComplete.then(() => this._scheduleTooltipsRefresh()).catch(() => {});
+          // Debounce tooltip refreshes during sustained controller activity.
+          // Each _refreshTooltips tears down and rebuilds Spectrum tooltips
+          // on every visible button (sp-tooltip in shadow DOM, listeners,
+          // observers, ...). At ~12 Hz (color-wheel drag throttle rate) that
+          // allocation churn was a major contributor to the iOS Safari
+          // WebContent jetsam during long drags. The aria-labels on the
+          // buttons are updated immediately by the Lit render above; only
+          // the floating Spectrum tooltip nodes are stale until quiescence.
+          if (this._subscribeTooltipDebounceId != null) {
+            clearTimeout(this._subscribeTooltipDebounceId);
+          }
+          this._subscribeTooltipDebounceId = setTimeout(() => {
+            this._subscribeTooltipDebounceId = null;
+            this.updateComplete.then(() => this._scheduleTooltipsRefresh()).catch(() => {});
+          }, 150);
         }
       });
     }
@@ -465,13 +494,14 @@ export class ColorSwatchRail extends LitElement {
 
   async _handleCopy(hex) {
     if (!hex) return;
+    const s = this.strings || SWATCH_RAIL_DEFAULTS;
     try {
       const copied = await this._copyText(hex);
       if (!copied) throw new Error('clipboard_copy_failed');
-      showExpressToast({ message: 'Copied to clipboard', variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
-      announceToScreenReader('Copied to clipboard');
+      showExpressToast({ message: s.copiedToast || SWATCH_RAIL_DEFAULTS.copiedToast, variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+      announceToScreenReader(s.copiedToast || SWATCH_RAIL_DEFAULTS.copiedToast);
     } catch (error) {
-      showExpressToast({ message: 'Failed to copy', variant: 'negative', timeout: 2000 });
+      showExpressToast({ message: s.copyFailedToast || SWATCH_RAIL_DEFAULTS.copyFailedToast, variant: 'negative', timeout: 2000 });
     }
   }
 
@@ -482,7 +512,8 @@ export class ColorSwatchRail extends LitElement {
     else next.add(index);
     if (this.controller?.setState) {
       this.controller.setState({ lockedByIndex: next });
-      showExpressToast({ message: wasLocked ? 'Color unlocked' : 'Color locked', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+      const s = this.strings || SWATCH_RAIL_DEFAULTS;
+      showExpressToast({ message: wasLocked ? (s.colorUnlockedToast || SWATCH_RAIL_DEFAULTS.colorUnlockedToast) : (s.colorLockedToast || SWATCH_RAIL_DEFAULTS.colorLockedToast), variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
 
@@ -490,12 +521,12 @@ export class ColorSwatchRail extends LitElement {
     const next = this.baseColorIndex === index ? null : index;
     if (this.controller?.setState) {
       this.controller.setState({ baseColorIndex: next });
-      showExpressToast({ message: next != null ? 'Base color set' : 'Base color cleared', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+      const s = this.strings || SWATCH_RAIL_DEFAULTS;
+      showExpressToast({ message: next != null ? (s.baseColorSetToast || SWATCH_RAIL_DEFAULTS.baseColorSetToast) : (s.baseColorClearedToast || SWATCH_RAIL_DEFAULTS.baseColorClearedToast), variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
 
   _handleTrash(index) {
-    if ((this.lockedByIndex || new Set()).has(index)) return;
     const minSwatches = this._features.minSwatches ?? 0;
     if ((this.swatches?.length ?? 0) <= minSwatches) return;
     const e = new CustomEvent('color-swatch-rail-delete', { bubbles: true, composed: true, detail: { index } });
@@ -508,8 +539,14 @@ export class ColorSwatchRail extends LitElement {
         else if (index < currentTintIndex) nextTintIndex = currentTintIndex - 1;
         else if (index === currentTintIndex) nextTintIndex = Math.min(currentTintIndex, swatches.length - 1);
       }
-      this.controller.setState({ swatches, tintIndex: nextTintIndex });
-      showExpressToast({ message: 'Color removed', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+      const nextLocked = new Set();
+      for (const i of (this.lockedByIndex || [])) {
+        if (i === index) continue;
+        nextLocked.add(i > index ? i - 1 : i);
+      }
+      this.controller.setState({ swatches, tintIndex: nextTintIndex, lockedByIndex: nextLocked });
+      const s = this.strings || SWATCH_RAIL_DEFAULTS;
+      showExpressToast({ message: s.colorRemovedToast || SWATCH_RAIL_DEFAULTS.colorRemovedToast, variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
 
@@ -525,7 +562,8 @@ export class ColorSwatchRail extends LitElement {
         ? currentTintIndex + 1
         : currentTintIndex;
       this.controller.setState({ swatches, tintIndex: nextTintIndex });
-      showExpressToast({ message: 'Color added', variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+      const s = this.strings || SWATCH_RAIL_DEFAULTS;
+      showExpressToast({ message: s.colorAddedToast || SWATCH_RAIL_DEFAULTS.colorAddedToast, variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
 
@@ -594,15 +632,23 @@ export class ColorSwatchRail extends LitElement {
   _getTintBandA11yLabel(band, bandIndex, totalBands) {
     const hex = this._normalizeHex(band?.hex) || '#808080';
     const id = String(band?.id || '');
-    let toneLabel = 'Tone';
+    const s = this.strings || SWATCH_RAIL_DEFAULTS;
+    let toneLabel = s.toneBase || SWATCH_RAIL_DEFAULTS.toneBase;
     if (id === 'base') {
-      toneLabel = 'Base color';
+      toneLabel = s.toneBase || SWATCH_RAIL_DEFAULTS.toneBase;
     } else if (id.startsWith('tint-')) {
-      toneLabel = `Tint ${id.split('-')[1] || ''}`.trim();
+      const suffix = id.split('-')[1] || '';
+      toneLabel = `${s.toneTint || SWATCH_RAIL_DEFAULTS.toneTint} ${suffix}`.trim();
     } else if (id.startsWith('shade-')) {
-      toneLabel = `Shade ${id.split('-')[1] || ''}`.trim();
+      const suffix = id.split('-')[1] || '';
+      toneLabel = `${s.toneShade || SWATCH_RAIL_DEFAULTS.toneShade} ${suffix}`.trim();
     }
-    return `${toneLabel}, ${bandIndex + 1} of ${totalBands}, ${hex}`;
+    const template = s.tintBandAria || SWATCH_RAIL_DEFAULTS.tintBandAria;
+    return template
+      .replace('{tone}', toneLabel)
+      .replace('{index}', String(bandIndex + 1))
+      .replace('{total}', String(totalBands))
+      .replace('{hex}', hex);
   }
 
   _getTintBandButtons(scope) {
@@ -654,7 +700,6 @@ export class ColorSwatchRail extends LitElement {
   _handleTintBandSelect(index, band, event) {
     event?.stopPropagation?.();
     if (!band?.hex || !this.controller?.setState) return;
-    if ((this.lockedByIndex || new Set()).has(index)) return;
     const swatches = [...this.swatches];
     if (!swatches[index]) return;
     const nextHex = this._normalizeHex(band.hex);
@@ -681,7 +726,6 @@ export class ColorSwatchRail extends LitElement {
   }
 
   _handleTintSelect(index, anchorEl = null) {
-    if ((this.lockedByIndex || new Set()).has(index)) return;
     const hex = this.swatches[index]?.hex;
     const rect = anchorEl?.getBoundingClientRect?.();
     const anchorRect = rect
@@ -749,7 +793,6 @@ export class ColorSwatchRail extends LitElement {
   }
 
   _onNativePickerChange(index, e) {
-    if ((this.lockedByIndex || new Set()).has(index)) return;
     this._markNativePickerOpen();
     const hex = e.target?.value;
     if (hex && this.controller?.setState) {
@@ -781,7 +824,6 @@ export class ColorSwatchRail extends LitElement {
 
   _handleDragStart(index, e) {
     if (!this._features.drag) return;
-    if ((this.lockedByIndex || new Set()).has(index)) return;
     if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge, .tint-band-btn')) return;
     this._dragFromIndex = index;
     e.dataTransfer.effectAllowed = 'move';
@@ -836,19 +878,19 @@ export class ColorSwatchRail extends LitElement {
     const e2 = new CustomEvent('color-swatch-rail-reorder', { bubbles: true, composed: true, detail: { fromIndex, toIndex, swatches } });
     if (this.dispatchEvent(e2) && !e2.defaultPrevented) {
       this.controller.setState(stateUpdate);
-      showExpressToast({ message: 'Reordered', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+      const s = this.strings || SWATCH_RAIL_DEFAULTS;
+      showExpressToast({ message: s.reorderedToast || SWATCH_RAIL_DEFAULTS.reorderedToast, variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
 
-  
+
   _handleTouchDragStart(e) {
     if (!this._features.drag) return;
     const col = e.target.closest('.swatch-column--draggable');
     if (!col || col.closest('.swatch-column--empty')) return;
     const idx = col.getAttribute('data-swatch-index');
     if (idx === null || idx === '') return;
-    if ((this.lockedByIndex || new Set()).has(Number(idx))) return;
-    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge, .tint-band-btn')) return;
+    if (e.target.closest('.icon-button--copy, .icon-button--edit-tint, .icon-button--trash, .icon-button--add, .icon-button--lock, .base-color-badge, .color-blindness-badge, .tint-band-btn, .hex-code')) return;
     e.preventDefault();
     this._touchDragFromIndex = Number(idx);
     col.classList.add('swatch-column--dragging');
@@ -900,7 +942,8 @@ export class ColorSwatchRail extends LitElement {
     const ev = new CustomEvent('color-swatch-rail-reorder', { bubbles: true, composed: true, detail: { fromIndex, toIndex, swatches } });
     if (this.dispatchEvent(ev) && !ev.defaultPrevented) {
       this.controller.setState(stateUpdate);
-      showExpressToast({ message: 'Reordered', variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+      const s = this.strings || SWATCH_RAIL_DEFAULTS;
+      showExpressToast({ message: s.reorderedToast || SWATCH_RAIL_DEFAULTS.reorderedToast, variant: 'neutral', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
     }
   }
 
@@ -1198,11 +1241,31 @@ export class ColorSwatchRail extends LitElement {
     const f = this._features;
     const swatches = this.swatches || [];
     const editDisabled = f.editColorDisabled;
+    const s = this.strings || SWATCH_RAIL_DEFAULTS;
+    const sFallback = SWATCH_RAIL_DEFAULTS;
+    const labelAddColor = s.addColor || sFallback.addColor;
+    const labelAddColorLeft = s.addColorLeft || sFallback.addColorLeft;
+    const labelAddColorRight = s.addColorRight || sFallback.addColorRight;
+    const labelLockColor = s.lockColor || sFallback.lockColor;
+    const labelUnlockColor = s.unlockColor || sFallback.unlockColor;
+    const labelEditTint = s.editTint || sFallback.editTint;
+    const labelEditColor = s.editColor || sFallback.editColor;
+    const labelCopyHex = s.copyHex || sFallback.copyHex;
+    const labelDeleteColor = s.deleteColor || sFallback.deleteColor;
+    const labelDragToReorder = s.dragToReorder || sFallback.dragToReorder;
+    const labelBaseColor = s.baseColor || sFallback.baseColor;
+    const labelBaseColorActiveAria = s.baseColorActiveAria || sFallback.baseColorActiveAria;
+    const labelSetAsBaseColor = s.setAsBaseColor || sFallback.setAsBaseColor;
+    const labelSimulatedColor = s.simulatedColor || sFallback.simulatedColor;
+    const labelColorPaletteAria = s.colorPaletteAria || sFallback.colorPaletteAria;
+    const colorStripTemplate = s.colorStripAria || sFallback.colorStripAria;
+    const colorPositionTemplate = s.colorPositionAria || sFallback.colorPositionAria;
+    const tintAndShadeTemplate = s.tintAndShadeAria || sFallback.tintAndShadeAria;
 
     const renderAddButton = (side, insertIndex) => {
       if (side === 'left' && !f.addLeft) return '';
       if (side === 'right' && !f.addRight) return '';
-      const label = side === 'left' ? 'Add color left' : 'Add color right';
+      const label = side === 'left' ? labelAddColorLeft : labelAddColorRight;
       const btn = html`<button type="button" class="icon-button icon-button--add" part="add-button" @click=${() => this._handleAddAt(insertIndex, side)} aria-label="${label}" title="${label}">${icon('add')}</button>`;
       return html`<div class="add-slot add-slot--${side}">${btn}</div>`;
     };
@@ -1217,10 +1280,10 @@ export class ColorSwatchRail extends LitElement {
         const simulatedSuperLight = isSuperLight(swatch.hex);
         const simClasses = ['swatch-column', 'swatch-column--simulated', simulatedSuperLight && 'swatch-column--super-light', opts.cornerClass || ''].filter(Boolean).join(' ');
         return html`
-          <div class="${simClasses}" tabindex="-1" role="group" aria-label="Simulated color"
+          <div class="${simClasses}" tabindex="-1" role="group" aria-label="${labelSimulatedColor}"
             style="background-color: ${swatch.hex}; --swatch-text-color: ${textColor}; --swatch-text-shadow: var(--swatch-text-shadow-override, ${shadow}); --swatch-icon-color: ${textColor};"
             data-swatch-index="${index}">
-            ${swatch.conflict ? conflictIcon() : ''}
+            ${swatch.conflict ? conflictIcon(s) : ''}
           </div>
         `;
       }
@@ -1262,32 +1325,32 @@ export class ColorSwatchRail extends LitElement {
               type="button"
               class="${baseColorBadgeClass} swatch-column-focusable"
               tabindex="-1"
-              aria-label=${isBase ? 'Base color is the basis for color harmony rules' : 'Set as base color'}
-              title=${isBase ? 'Base color is the basis for color harmony rules' : 'Set as base color'}
+              aria-label=${isBase ? labelBaseColorActiveAria : labelSetAsBaseColor}
+              title=${isBase ? labelBaseColorActiveAria : labelSetAsBaseColor}
               @click=${(e) => { e.stopPropagation(); if (!isBase) this._handleBaseColorToggle(index); }}
             >${baseColorIcon}</button>
           `: ''}
           ${isBaseReadOnly ? html`
-            <span class="base-color-badge base-color-badge--active base-color-badge--readonly" aria-label="Base color">${icon('baseColorTarget')}</span>` : ''}
+            <span class="base-color-badge base-color-badge--active base-color-badge--readonly" aria-label="${labelBaseColor}">${icon('baseColorTarget')}</span>` : ''}
         </div>
       `;
       const topRightIcons = html`
         <div class="top-actions top-actions--right">
-          ${f.lock && !this.hideLock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${isLocked ? 'Unlock color' : 'Lock color'} title=${isLocked ? 'Unlock color' : 'Lock color'}>${icon(isLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
-          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
+          ${f.lock && !this.hideLock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${isLocked ? labelUnlockColor : labelLockColor} title=${isLocked ? labelUnlockColor : labelLockColor}>${icon(isLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="${labelEditTint}" title=${swatch.hex.toUpperCase()}>${icon('editTint')}</button>` : ''}
           ${f.drag ? html`
             <button
               type="button"
               class="icon-button icon-button--drag swatch-column-focusable"
               tabindex="-1"
-              aria-label="Drag to reorder"
-              title="Drag to reorder"
+              aria-label="${labelDragToReorder}"
+              title="${labelDragToReorder}"
               draggable="true"
               @dragstart=${(ev) => this._handleDragStart(index, ev)}
               @dragend=${this._handleDragEnd}
             >${icon('drag')}</button>
           ` : ''}
-          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${trashDisabled} aria-disabled="${trashDisabled}">${icon('trash')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="${labelDeleteColor}" title="${labelDeleteColor}" ?disabled=${trashDisabled} aria-disabled="${trashDisabled}">${icon('trash')}</button>` : ''}
         </div>
       `;
       
@@ -1298,23 +1361,23 @@ export class ColorSwatchRail extends LitElement {
               type="button"
               class="${baseColorBadgeClass} swatch-column-focusable"
               tabindex="-1"
-              aria-label=${isBase ? 'Base color is the basis for color harmony rules' : 'Set as base color'}
-              title=${isBase ? 'Base color is the basis for color harmony rules' : 'Set as base color'}
+              aria-label=${isBase ? labelBaseColorActiveAria : labelSetAsBaseColor}
+              title=${isBase ? labelBaseColorActiveAria : labelSetAsBaseColor}
               @click=${(e) => { e.stopPropagation(); if (!isBase) this._handleBaseColorToggle(index); }}
             >${baseColorIcon}</button>
           ` : ''}
-          ${isBaseReadOnly ? html`<span class="base-color-badge base-color-badge--active base-color-badge--readonly" aria-label="Base color">${icon('baseColorTarget')}</span>` : ''}
-          ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="Copy hex" title="Copy hex">${icon('copy')}</button>` : ''}
-          ${f.lock && !this.hideLock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${isLocked ? 'Unlock color' : 'Lock color'} title=${isLocked ? 'Unlock color' : 'Lock color'}>${icon(isLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
-          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="Edit tint" title="Edit tint">${icon('editTint')}</button>` : ''}
-          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="Delete color" title="Delete color" ?disabled=${trashDisabled} aria-disabled="${trashDisabled}">${icon('trash')}</button>` : ''}
+          ${isBaseReadOnly ? html`<span class="base-color-badge base-color-badge--active base-color-badge--readonly" aria-label="${labelBaseColor}">${icon('baseColorTarget')}</span>` : ''}
+          ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="${labelCopyHex}" title="${labelCopyHex}">${icon('copy')}</button>` : ''}
+          ${f.lock && !this.hideLock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${isLocked ? labelUnlockColor : labelLockColor} title=${isLocked ? labelUnlockColor : labelLockColor}>${icon(isLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
+          ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="${labelEditTint}" title=${swatch.hex.toUpperCase()}>${icon('editTint')}</button>` : ''}
+          ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="${labelDeleteColor}" title="${labelDeleteColor}" ?disabled=${trashDisabled} aria-disabled="${trashDisabled}">${icon('trash')}</button>` : ''}
           ${f.drag ? html`
             <button
               type="button"
               class="icon-button icon-button--drag swatch-column-focusable"
               tabindex="-1"
-              aria-label="Drag to reorder"
-              title="Drag to reorder"
+              aria-label="${labelDragToReorder}"
+              title="${labelDragToReorder}"
               draggable="true"
               @dragstart=${(ev) => this._handleDragStart(index, ev)}
               @dragend=${this._handleDragEnd}
@@ -1325,7 +1388,7 @@ export class ColorSwatchRail extends LitElement {
       const stackedContent = html`
         <div class="bottom-info bottom-info--stacked" part="bottom-info">
           ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-          ${f.hexCode ? ((showEdit || f.copyFromHex) ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`) : ''}
+          ${f.hexCode ? ((showEdit || f.copyFromHex) ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`) : ''}
         </div>
         ${stackedIcons}
       `;
@@ -1336,12 +1399,18 @@ export class ColorSwatchRail extends LitElement {
         isBase && 'base-color',
         tintMode && 'swatch-column--tint-mode',
         isTintSelected && 'swatch-column--tint-selected',
-        f.drag && !isLocked && 'swatch-column--draggable',
+        f.drag && 'swatch-column--draggable',
         superLight && 'swatch-column--super-light',
         f.rightActionsHoverOnly && 'swatch-column--right-actions-hover-only',
         opts.cornerClass || ''
       ].filter(Boolean).join(' ');
 
+      const stripAriaLabel = orientation === 'vertical'
+        ? colorStripTemplate.replace('{hex}', swatch.hex)
+        : colorPositionTemplate
+            .replace('{index}', String(index + 1))
+            .replace('{hex}', swatch.hex);
+      const tintAndShadeAriaLabel = tintAndShadeTemplate.replace('{index}', String(index + 1));
       return html`
         <div class="${swatchClasses}"
           data-contrast="${useLightIcons ? 'dark' : 'light'}"
@@ -1349,7 +1418,7 @@ export class ColorSwatchRail extends LitElement {
           data-swatch-index="${index}"
           tabindex="${orientation === 'vertical' ? '-1' : '0'}"
           role="${orientation === 'vertical' ? 'gridcell' : 'group'}"
-          aria-label="${orientation === 'vertical' ? `${swatch.hex} color strip` : `Color ${index + 1}, ${swatch.hex}`}"
+          aria-label="${stripAriaLabel}"
           @keydown=${(ev) => this._handleColumnKeydown(ev, index)}
           @focusout=${(ev) => this._handleColumnFocusout(ev)}
           ?draggable=${f.drag}
@@ -1362,7 +1431,7 @@ export class ColorSwatchRail extends LitElement {
             <div
               class="tint-bands"
               role="radiogroup"
-              aria-label="Tint and shade options for color ${index + 1}"
+              aria-label="${tintAndShadeAriaLabel}"
               aria-orientation=${isStacked ? 'horizontal' : 'vertical'}>
               ${tintBands.map((band, bandIndex) => {
                 const isActiveTone = this._normalizeHex(band.hex) === this._normalizeHex(swatch.hex);
@@ -1392,18 +1461,18 @@ export class ColorSwatchRail extends LitElement {
             ${showEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
             ${f.hexCode && showHexCopyForThisSwatch ? (
               showEdit || f.copyFromHex
-                ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? 'Edit color' : 'Copy hex'} title=${showEdit ? 'Edit color' : 'Copy hex'}>${swatch.hex}</button>`
+                ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>`
                 : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`
             ) : ''}
             <div class="bottom-info__actions">
-              ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="Copy hex" title="Copy hex">${icon('copy')}</button>` : ''}
+              ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="${labelCopyHex}" title="${labelCopyHex}">${icon('copy')}</button>` : ''}
             </div>
           </div>` : ''}
           ${showAddLeftHere ? html`<div class="add-slot add-slot--column add-slot--column-left">
-            <button type="button" class="icon-button icon-button--add swatch-column-focusable" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index, 'left')} aria-label="Add color left" title="Add color left">${icon('add')}</button>
+            <button type="button" class="icon-button icon-button--add swatch-column-focusable" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index, 'left')} aria-label="${labelAddColorLeft}" title="${labelAddColorLeft}">${icon('add')}</button>
           </div>` : ''}
           ${showAddRightHere ? html`<div class="add-slot add-slot--column add-slot--column-right">
-            <button type="button" class="icon-button icon-button--add swatch-column-focusable" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index + 1, 'right')} aria-label="Add color right" title="Add color right">${icon('add')}</button>
+            <button type="button" class="icon-button icon-button--add swatch-column-focusable" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index + 1, 'right')} aria-label="${labelAddColorRight}" title="${labelAddColorRight}">${icon('add')}</button>
           </div>` : ''}
         </div>
       `;
@@ -1412,7 +1481,7 @@ export class ColorSwatchRail extends LitElement {
     const renderEmptyStrip = () => {
       const max = orientation === 'two-rows' ? MAX_SWATCHES_TWO_ROWS : MAX_SWATCHES;
       if (!f.emptyStrip || (swatches?.length ?? 0) >= max) return '';
-      const label = 'Add color';
+      const label = labelAddColor;
       return html`
         <div class="swatch-column swatch-column--empty" tabindex="${orientation === 'vertical' ? '-1' : '0'}" role="${orientation === 'vertical' ? 'gridcell' : 'group'}" aria-label="${label}"
           @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
@@ -1448,10 +1517,10 @@ export class ColorSwatchRail extends LitElement {
         const showEmptySlot = isLastRow && showEmpty && (useCBData ? swatches.length < MAX_SWATCHES_FOUR_ROWS : rowSwatches.length < colCount);
         if (showEmptySlot) {
           allItems.push(html`
-            <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
+            <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="${labelAddColor}"
               @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
               @focusout=${(ev) => this._handleColumnFocusout(ev)}>
-              <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="Add color" title="Add color">${icon('add')}</button>
+              <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="${labelAddColor}" title="${labelAddColor}">${icon('add')}</button>
             </div>
           `);
         }
@@ -1473,10 +1542,10 @@ export class ColorSwatchRail extends LitElement {
         const items = rowSwatches.map((swatch, colIndex) => renderSwatch(swatch, rowIndex * TWO_ROWS_COLORS_PER_ROW + colIndex));
         if (rowIndex === 1 && showEmpty && rowSwatches.length < TWO_ROWS_COLORS_PER_ROW) {
           items.push(html`
-            <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="Add color"
+            <div class="swatch-column swatch-column--empty" tabindex="0" role="group" aria-label="${labelAddColor}"
               @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
               @focusout=${(ev) => this._handleColumnFocusout(ev)}>
-              <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="Add color" title="Add color">${icon('add')}</button>
+              <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="${labelAddColor}" title="${labelAddColor}">${icon('add')}</button>
             </div>
           `);
         }
@@ -1503,10 +1572,10 @@ export class ColorSwatchRail extends LitElement {
       const isColorWheelVerticalLayout = verticalMaxPerRow === 6;
 
       const emptyGridCell = html`
-        <div class="swatch-column swatch-column--empty" tabindex="-1" role="gridcell" aria-label="Add color"
+        <div class="swatch-column swatch-column--empty" tabindex="-1" role="gridcell" aria-label="${labelAddColor}"
           @keydown=${(ev) => this._handleColumnKeydown(ev, swatches.length)}
           @focusout=${(ev) => this._handleColumnFocusout(ev)}>
-          <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="Add color" title="Add color">${icon('add')}</button>
+          <button type="button" class="icon-button icon-button--add swatch-column-focusable" tabindex="-1" part="add-button" @click=${() => this._handleAddAt(swatches.length, 'end')} aria-label="${labelAddColor}" title="${labelAddColor}">${icon('add')}</button>
         </div>
       `;
 
@@ -1522,7 +1591,7 @@ export class ColorSwatchRail extends LitElement {
           if (showEmpty && (totalSwatches % 2 === 1)) row2Items.push(emptyGridCell);
 
           return html`
-            <div class="swatch-rail vertical--two-rows" data-orientation="vertical" style="--vertical-max-per-row: ${rowSize}" role="grid" aria-label="Color palette">
+            <div class="swatch-rail vertical--two-rows" data-orientation="vertical" style="--vertical-max-per-row: ${rowSize}" role="grid" aria-label="${labelColorPaletteAria}">
               <div role="row" style="display:contents">${row1Items}</div>
               <div role="row" style="display:contents">${row2Items}</div>
             </div>
@@ -1534,7 +1603,7 @@ export class ColorSwatchRail extends LitElement {
         const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
 
         return html`
-          <div class="swatch-rail" data-orientation="vertical" style="--rail-columns: ${railColumns}" role="grid" aria-label="Color palette">
+          <div class="swatch-rail" data-orientation="vertical" style="--rail-columns: ${railColumns}" role="grid" aria-label="${labelColorPaletteAria}">
             <div role="row" style="display:contents">
               ${railItems}
               ${showSingleRowEmpty ? renderEmptyStrip() : ''}
@@ -1552,7 +1621,7 @@ export class ColorSwatchRail extends LitElement {
         const row2Items = row2Swatches.map((swatch, i) => renderSwatch(swatch, verticalMaxPerRow + i, { cornerClass: i === 0 ? 'corner-bottom-left' : i === row2Swatches.length - 1 ? 'corner-bottom-right' : '' }));
         if (showEmpty) row2Items.push(emptyGridCell);
         return html`
-          <div class="swatch-rail vertical--two-rows" data-orientation="vertical" style="--vertical-max-per-row: ${verticalMaxPerRow}" role="grid" aria-label="Color palette">
+          <div class="swatch-rail vertical--two-rows" data-orientation="vertical" style="--vertical-max-per-row: ${verticalMaxPerRow}" role="grid" aria-label="${labelColorPaletteAria}">
             <div role="row" style="display:contents">${row1Items}</div>
             <div role="row" style="display:contents">${row2Items}</div>
           </div>
@@ -1561,7 +1630,7 @@ export class ColorSwatchRail extends LitElement {
 
       const railItems = swatches.map((swatch, index) => renderSwatch(swatch, index));
       return html`
-        <div class="swatch-rail" data-orientation="vertical" style="--rail-columns: ${totalSlots}" role="grid" aria-label="Color palette">
+        <div class="swatch-rail" data-orientation="vertical" style="--rail-columns: ${totalSlots}" role="grid" aria-label="${labelColorPaletteAria}">
           <div role="row" style="display:contents">
             ${railItems}
             ${renderEmptyStrip()}
