@@ -1,6 +1,7 @@
 import { getLibs } from '../../scripts/utils.js';
+
 let loadLink;
-let loadScript
+let loadScript;
 
 function getUnityLibs(prodLibs = '/unitylibs') {
   const { hostname } = window.location;
