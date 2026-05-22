@@ -1,3 +1,27 @@
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/express/code/fonts/Poppins-Regular.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/express/code/fonts/Poppins-Medium.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Poppins';
+  font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: url('/express/code/fonts/Poppins-Black.ttf') format('truetype');
+}
+
 .color-contrast-checker {
   --cc-swatch-size: 40px;
   --cc-swatch-wrapper-padding: var(--spacing-50);
@@ -1151,9 +1175,9 @@
 }
 
 .cc-preview-heading {
-  font-family: 'FatFrank', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: var(--cc-preview-heading-mobile);
-  font-weight: var(--ax-body-weight);
+  font-weight: 900;
   line-height: 0.95;
   margin: var(--spacing-0);
   order: 1;
