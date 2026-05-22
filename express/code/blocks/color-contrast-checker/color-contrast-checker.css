@@ -1317,7 +1317,6 @@
 
   .cc-preview-body-text {
     font-size: var(--cc-preview-body-size-tablet);
-    margin: var(--spacing-400) 0 !important;
   }
 
   .cc-preview-cta {
