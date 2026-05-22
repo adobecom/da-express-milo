@@ -1076,10 +1076,10 @@ export default async function decorate(block) {
         if (e.key === ' ') {
           e.preventDefault();
           actionMenuApi?.generateRandom?.();
-        } else if (e.metaKey && !e.shiftKey && e.key === 'z') {
+        } else if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === 'z') {
           e.preventDefault();
           actionMenuApi?.undo?.();
-        } else if (e.metaKey && e.shiftKey && e.key === 'z') {
+        } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'z') {
           e.preventDefault();
           actionMenuApi?.redo?.();
         }
