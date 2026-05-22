@@ -348,7 +348,7 @@
   background-color: var(--color-gray-300);
   border-color: var(--color-gray-300);
   outline: none;
-  box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-info-accent);
+  box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-gray-400);
 }
 
 .ratings form [type='submit']:focus:hover {
@@ -371,6 +371,11 @@
   color: #b9b9b9;
   cursor: default;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.ratings form [type='submit']:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-info-accent);
 }
 
 /* Custom styling for the native range input, with cross-browser compatibility */
