@@ -1076,13 +1076,8 @@ export default async function decorate(block) {
         if (e.key === ' ') {
           e.preventDefault();
           actionMenuApi?.generateRandom?.();
-        } else if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key === 'z') {
-          e.preventDefault();
-          actionMenuApi?.undo?.();
-        } else if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key === 'z') {
-          e.preventDefault();
-          actionMenuApi?.redo?.();
         }
+        // Cmd/Ctrl+Z undo/redo handled by createColorToolLayout
       };
       document.addEventListener('keydown', onKeyDown);
       keyboardCleanup = () => document.removeEventListener('keydown', onKeyDown);
