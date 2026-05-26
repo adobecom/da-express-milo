@@ -438,6 +438,21 @@
         padding: 14px 16px;
       }
 
+      /* Shadow overlay on the right edge of the sticky label column.
+         ::after is absolutely positioned relative to the sticky cell,
+         so it travels with the column as the user scrolls horizontally. */
+      .dt-table .dt-label-col::after {
+        content: '';
+        position: absolute;
+        left: 100%;
+        top: 0;
+        width: 16px;
+        height: 100%;
+        background: linear-gradient(270deg, rgba(0, 0, 0, 0.00) 45.63%, rgba(0, 0, 0, 0.04) 100%);
+        pointer-events: none;
+        z-index: 1;
+      }
+
       /* Scale down the section header */
       .dt-header-text h2 {
         font-size: 21px;
