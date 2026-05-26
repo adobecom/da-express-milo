@@ -1,6 +1,5 @@
 const TRAILING = 16;
 const MOBILE_BREAKPOINT = 768;
-const LABEL_COL_RATIO = 0.44;
 const SCROLL_PADDING_OFFSET = 6;
 
 // ── DOM builders ─────────────────────────────────────────────────────────────
@@ -206,17 +205,13 @@ function initCarousel(block) {
       return;
     }
     const cw = container.clientWidth;
-    const labelW = Math.round(cw * LABEL_COL_RATIO);
-    const rawDataColW = cw - labelW - TRAILING;
 
-    // Apply computed widths as a starting point.
-    labelTh.style.width = `${labelW}px`;
-    dataColThs.forEach((th) => { th.style.width = `${rawDataColW}px`; });
-
-    // Read back actual rendered widths — CSS max-width may have capped them.
-    // offsetWidth forces a synchronous layout reflow so values are up to date.
+    // CSS owns the label column width per breakpoint; read it back via offsetWidth.
     const actualLabelW = labelTh.offsetWidth;
-    dataColW = dataColThs[0]?.offsetWidth ?? rawDataColW;
+    dataColThs.forEach((th) => { th.style.width = `${cw - actualLabelW - TRAILING}px`; });
+
+    // Read back actual rendered width — CSS max-width may have capped it.
+    dataColW = dataColThs[0]?.offsetWidth ?? (cw - actualLabelW - TRAILING);
 
     table.style.width = `${actualLabelW + totalCols * dataColW}px`;
     container.style.scrollPaddingLeft = `${actualLabelW + SCROLL_PADDING_OFFSET}px`;
