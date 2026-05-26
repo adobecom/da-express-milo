@@ -143,13 +143,13 @@
        Table container
     ══════════════════════════════════════ */
     .dt-table-container {
-      /* border-radius: var(--border-radius-table);
-      border: 1px solid var(--color-gray-325);
-      background: var(--color-white); */
-      /* clip rather than hidden: clips overflow to border-radius but does NOT
-         establish a scroll container, so position:sticky on thead th still
-         looks up to the page scroll ancestor instead of stopping here. */
+      /* overflow:clip clips paint to the rounded rectangle without creating a
+         scroll container, so position:sticky on thead th / .dt-label-col still
+         propagates to the page scroll ancestor. Adding border-radius here makes
+         that clip region rounded, preventing scrolled content from bleeding
+         through the arc at the table corners. */
       overflow: clip;
+      border-radius: var(--border-radius-table);
     }
 
     /* ══════════════════════════════════════
@@ -160,7 +160,7 @@
       border-collapse: separate;
       border-spacing: 0;
       border-radius: var(--border-radius-table);
-      border: 1px solid var(--color-gray-300);
+      /* border: 1px solid var(--color-gray-300); */
       border-left: none;
       background: var(--color-white);
     }
@@ -188,6 +188,7 @@
 
     /* "Feature" label in top-left cell */
     .dt-table thead th.dt-label-col {
+      border-top: 1px solid var(--color-gray-300);
       text-align: left;
       font-size: 11px;
       font-weight: 600;
@@ -195,8 +196,8 @@
       text-transform: uppercase;
       letter-spacing: 0.6px;
       border-bottom: 1px solid var(--color-gray-300);
-      border-bottom: 1px solid var(--color-gray-300);
       border-left: 1px solid var(--color-gray-300);
+      border-top-left-radius: var(--border-radius-table);
       /* Highest z-index: sticky in both axes on mobile, or just top on desktop */
       z-index: 3;
     }
@@ -316,6 +317,10 @@
       display: inline-block;
       vertical-align: middle;
       flex-shrink: 0;
+    }
+
+    .dt-table thead tr:first-of-type th{
+      border-top: 1px solid var(--color-gray-300);
     }
 
     .dt-icon-check {
