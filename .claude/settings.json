@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "hooks": {
+    "PreToolUse": [],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path'); [ -n \"$CLAUDE_PROJECT_DIR\" ] && case \"$f\" in \"$CLAUDE_PROJECT_DIR\"/*) ;; *) exit 0 ;; esac; case \"$f\" in *.js|*.mjs|*.jsx|*.ts|*.tsx) if ls .eslintrc* eslint.config.* 2>/dev/null | grep -q .; then npx --no-install eslint --fix \"$f\" 2>/dev/null; else npx --no-install prettier --write \"$f\" 2>/dev/null; fi ;; *.css|*.scss) ls .stylelintrc* 2>/dev/null | grep -q . && npx --no-install stylelint --fix \"$f\" 2>/dev/null ;; *.json|*.md|*.yml|*.yaml) npx --no-install prettier --write \"$f\" 2>/dev/null ;; esac; exit 0"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [],
+    "Stop": [],
+    "Notification": []
+  }
+}

@@ -146,6 +146,7 @@
   --ax-padding-sidebar-desktop: var(--spacing-100) 0 0;
   --ax-padding-topbar-mobile: 0 0 var(--spacing-400);
   --ax-padding-sidebar-mobile: 0 0 var(--spacing-300);
+  background: rgba(0, 0, 0, .7);
 }
 
 
@@ -154,8 +155,8 @@
   flex-direction: column;
   gap: var(--spacing-300);
   margin-block-start: var(--spacing-300);
+  background: url("../assets/patterns/pattern-1.png") repeat;
 }
-
 
 .cc-color-inputs-wrapper {
   --cc-inputs-wrapper-gap: var(--spacing-75);
