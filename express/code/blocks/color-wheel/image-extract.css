@@ -621,6 +621,10 @@
   transition: none;
 }
 
+.image-extract:has(.color-extract-marker.is-magnified) {
+  cursor: none;
+}
+
 .image-extract .color-extract-marker.is-magnified .color-extract-marker-zoom {
   display: block;
 }

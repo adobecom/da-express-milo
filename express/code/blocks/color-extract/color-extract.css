@@ -903,6 +903,10 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   transition: none;
 }
 
+.color-extract:has(.color-extract-marker.is-magnified) {
+  cursor: none;
+}
+
 .color-extract .color-extract-marker.is-magnified .color-extract-marker-zoom {
   display: block;
 }
