@@ -265,7 +265,15 @@
     .dt-table td.dt-data-col:not(.dt-last-col),
     .dt-table thead th.dt-data-col:not(.dt-last-col) {
       border-right: 1px solid var(--color-gray-200);
+    
     }
+
+    .dt-table td.dt-data-col[data-col="0"],
+    .dt-table thead th.dt-data-col[data-col="0"] {
+      border-left: 1px solid var(--color-gray-200);
+    
+    }
+
 
     /* ══════════════════════════════════════
        Row header cell  (left / first column)
@@ -277,7 +285,8 @@
       background: var(--color-white);
       padding: 18px 24px;
       vertical-align: middle;
-      border-right: 1px solid var(--color-gray-200);
+    
+      /* border-right: 1px solid var(--color-gray-200); */
     }
 
     /* Keep alternating shade on the pinned column */
