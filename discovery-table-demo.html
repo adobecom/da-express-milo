@@ -31,6 +31,7 @@
       --color-gray-700: #4a4a4a;
       --color-gray-500: #6d6d6d;
       --color-gray-325: #d0d0d0;
+      --color-gray-300: #DADADA;
       --color-gray-200: #ebebeb;
       --color-gray-100: #f9f9f9;
       --color-white: #ffffff;
@@ -91,7 +92,7 @@
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      border: 1.5px solid var(--color-gray-325);
+      border: 1px solid var(--color-gray-300);
       background: var(--color-white);
       cursor: pointer;
       display: flex;
@@ -156,19 +157,17 @@
     ══════════════════════════════════════ */
     .dt-table {
       width: 100%;
-     
+      border-collapse: separate;
+      border-spacing: 0;
       border-radius: var(--border-radius-table);
-      border: 1px solid var(--color-gray-325);
+      border: 1px solid var(--color-gray-300);
+      border-left: none;
       background: var(--color-white);
     }
 
     /* ══════════════════════════════════════
        Column header row
     ══════════════════════════════════════ */
-    .dt-table thead tr {
-      border-bottom: 1.5px solid var(--color-gray-325);
-    }
-
     .dt-table thead th {
       padding: 20px 24px;
       font-family: inherit;
@@ -178,7 +177,10 @@
       text-align: center;
       vertical-align: bottom;
       background: var(--color-white);
-      /* Stick to viewport top so rows scroll under the header */
+      /* Border on the cell, not the tr — tr borders are ignored in
+         border-collapse:separate mode. Placing it here means it travels
+         with the sticky header and is never hidden by scrolling. */
+      border-bottom: 1px solid var(--color-gray-300);
       position: sticky;
       top: 0;
       z-index: 2;
@@ -192,8 +194,17 @@
       color: #999;
       text-transform: uppercase;
       letter-spacing: 0.6px;
+      border-bottom: 1px solid var(--color-gray-300);
+      border-bottom: 1px solid var(--color-gray-300);
+      border-left: 1px solid var(--color-gray-300);
       /* Highest z-index: sticky in both axes on mobile, or just top on desktop */
       z-index: 3;
+    }
+
+    /* First cell of each body row: left border only, no bottom divider */
+    .dt-table tbody th.dt-label-col {
+      border-bottom: none;
+      border-left: 1px solid var(--color-gray-300);
     }
 
     /* Plan name + price inside each column header */
@@ -216,11 +227,13 @@
     /* ══════════════════════════════════════
        Body rows
     ══════════════════════════════════════ */
-    .dt-table tbody tr {
+    .dt-table tbody td,
+    .dt-table tbody th {
       border-bottom: 1px solid var(--color-gray-200);
     }
 
-    .dt-table tbody tr:last-child {
+    .dt-table tbody tr:last-child td,
+    .dt-table tbody tr:last-child th {
       border-bottom: none;
     }
 
@@ -851,8 +864,9 @@
         dataColThs.forEach(function (th) { th.style.width = dataColW + 'px'; });
         table.style.width = (labelW + totalCols * dataColW) + 'px';
 
-        // Shift snap targets right past the sticky label column
-        container.style.scrollPaddingLeft = labelW + 'px';
+        // +4 accounts for the effective left offset introduced by the border
+        // shuffling (table carries the border instead of the container).
+        container.style.scrollPaddingLeft = (labelW + 6) + 'px';
       }
 
       // ── Carousel scroll ──────────────────────────────────────────
