@@ -160,8 +160,6 @@
       border-collapse: separate;
       border-spacing: 0;
       border-radius: var(--border-radius-table);
-      /* border: 1px solid var(--color-gray-300); */
-      border-left: none;
       background: var(--color-white);
     }
 
@@ -188,7 +186,6 @@
 
     /* "Feature" label in top-left cell */
     .dt-table thead th.dt-label-col {
-      border-top: 1px solid var(--color-gray-300);
       text-align: left;
       font-size: 11px;
       font-weight: 600;
@@ -197,7 +194,6 @@
       letter-spacing: 0.6px;
       border-bottom: 1px solid var(--color-gray-300);
       border-left: 1px solid var(--color-gray-300);
-      border-top-left-radius: var(--border-radius-table);
       /* Highest z-index: sticky in both axes on mobile, or just top on desktop */
       z-index: 3;
     }
@@ -233,13 +229,42 @@
       border-bottom: 1px solid var(--color-gray-200);
     }
 
-    .dt-table tbody tr:last-child td,
-    .dt-table tbody tr:last-child th {
-      border-bottom: none;
-    }
-
     .dt-table tbody tr:nth-child(even) {
       background: var(--color-gray-100);
+    }
+
+    /* ══════════════════════════════════════
+       Position-based borders & corners
+       Classes (dt-first-row, dt-last-row, dt-first-col, dt-last-col)
+       are stamped by JS on init so CSS can use simple selectors.
+    ══════════════════════════════════════ */
+
+    /* Outer top edge */
+    .dt-table .dt-first-row th,
+    .dt-table .dt-first-row td {
+      border-top: 1px solid var(--color-gray-300);
+    }
+
+    /* Outer right edge */
+    .dt-table .dt-last-col {
+      border-right: 1px solid var(--color-gray-300);
+    }
+
+    /* Outer bottom edge — .dt-last-row.dt-first-col beats the
+       border-bottom:none on tbody th.dt-label-col (higher specificity) */
+    .dt-table .dt-last-row td { border-bottom: 1px solid var(--color-gray-300); }
+    .dt-table .dt-last-row.dt-first-col { border-bottom: 1px solid var(--color-gray-300); }
+
+    /* Corner radii */
+    .dt-table .dt-first-row.dt-first-col { border-top-left-radius: var(--border-radius-table); }
+    .dt-table .dt-first-row.dt-last-col  { border-top-right-radius: var(--border-radius-table); }
+    .dt-table .dt-last-row.dt-first-col  { border-bottom-left-radius: var(--border-radius-table); }
+    .dt-table .dt-last-row.dt-last-col   { border-bottom-right-radius: var(--border-radius-table); }
+
+    /* Interior column dividers between data columns */
+    .dt-table td.dt-data-col:not(.dt-last-col),
+    .dt-table thead th.dt-data-col:not(.dt-last-col) {
+      border-right: 1px solid var(--color-gray-200);
     }
 
     /* ══════════════════════════════════════
@@ -252,6 +277,7 @@
       background: var(--color-white);
       padding: 18px 24px;
       vertical-align: middle;
+      border-right: 1px solid var(--color-gray-200);
     }
 
     /* Keep alternating shade on the pinned column */
@@ -841,6 +867,27 @@
       // The CSS padding-right provides the matching trailing space for the last column.
       var TRAILING = 16;
 
+      // ── Cell position labelling ──────────────────────────────────
+      // Stamps dt-first-row / dt-last-row / dt-first-col / dt-last-col
+      // onto every cell so CSS can use simple class selectors for outer
+      // borders, corner radii, and column dividers.
+      function labelCells() {
+        var allRows = [table.querySelector('thead tr')].concat(
+          Array.from(table.querySelectorAll('tbody tr'))
+        );
+        var lastRowIdx = allRows.length - 1;
+        allRows.forEach(function (tr, rowIdx) {
+          var cells = Array.from(tr.querySelectorAll('th, td'));
+          var lastColIdx = cells.length - 1;
+          cells.forEach(function (cell, colIdx) {
+            cell.classList.toggle('dt-first-row', rowIdx === 0);
+            cell.classList.toggle('dt-last-row',  rowIdx === lastRowIdx);
+            cell.classList.toggle('dt-first-col', colIdx === 0);
+            cell.classList.toggle('dt-last-col',  colIdx === lastColIdx);
+          });
+        });
+      }
+
       // ── Layout setup ─────────────────────────────────────────────
       // Sizes the table so exactly one data column fills the viewport
       // beside the sticky label column, then sets scroll-padding-left
@@ -924,6 +971,7 @@
       });
 
       // ── Init ─────────────────────────────────────────────────────
+      labelCells();
       setup();
       updateNav();
     }());
