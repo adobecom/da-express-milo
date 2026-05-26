@@ -187,8 +187,11 @@
 /* ── Position-based borders & corners ───────────────────────────────────── */
 /* dt-first-row / dt-last-row / dt-first-col / dt-last-col are stamped by JS */
 
-.dt-table .dt-first-row th,
-.dt-table .dt-first-row td {
+/* dt-first-row / dt-last-row are stamped on the cell itself, so the selector
+   must be th.dt-first-row — not .dt-first-row th (which would look for a th
+   nested inside a dt-first-row ancestor, which never exists). */
+.dt-table th.dt-first-row,
+.dt-table td.dt-first-row {
   border-top: 1px solid var(--color-gray-300);
 }
 
@@ -204,10 +207,10 @@
   border-right: 1px solid var(--color-gray-300);
 }
 
-.dt-table .dt-last-row td { border-bottom: 1px solid var(--color-gray-300); }
+.dt-table td.dt-last-row { border-bottom: none;}
 
 /* Specificity beats border-bottom:none on tbody th.dt-label-col */
-.dt-table .dt-last-row.dt-first-col { border-bottom: 1px solid var(--color-gray-300); }
+.dt-table .dt-last-row.dt-first-col { border-bottom: none;}
 
 .dt-table .dt-first-row.dt-first-col { border-top-left-radius: var(--border-radius-table); }
 .dt-table .dt-first-row.dt-last-col  { border-top-right-radius: var(--border-radius-table); }
@@ -236,8 +239,8 @@
 }
 
 .dt-table tbody th.dt-label-col {
-  border-bottom: none;
   border-left: 1px solid var(--color-gray-300);
+  border-bottom: 1px solid var(--color-gray-200);
 }
 
 .dt-table tbody tr:nth-child(even) th.dt-label-col {
@@ -287,6 +290,7 @@
     -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     padding-right: 16px;
+    border-bottom: 1px solid var(--color-gray-200);
   }
 
   .dt-table-container::-webkit-scrollbar {
@@ -323,7 +327,7 @@
   }
 
   /* Shadow at the right edge of the sticky label column */
-  .dt-table .dt-label-col::after {
+  /* .dt-table .dt-label-col::after {
     content: '';
     position: absolute;
     left: 100%;
@@ -333,7 +337,7 @@
     background: linear-gradient(270deg, rgb(0 0 0 / 0%) 45.63%, rgb(0 0 0 / 4%) 100%);
     pointer-events: none;
     z-index: 1;
-  }
+  } */
 
   .dt-header-text h2,
   .dt-header-text h3 {

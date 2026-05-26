@@ -207,12 +207,19 @@ function initCarousel(block) {
     }
     const cw = container.clientWidth;
     const labelW = Math.round(cw * LABEL_COL_RATIO);
-    dataColW = cw - labelW - TRAILING;
+    const rawDataColW = cw - labelW - TRAILING;
 
+    // Apply computed widths as a starting point.
     labelTh.style.width = `${labelW}px`;
-    dataColThs.forEach((th) => { th.style.width = `${dataColW}px`; });
-    table.style.width = `${labelW + totalCols * dataColW}px`;
-    container.style.scrollPaddingLeft = `${labelW + SCROLL_PADDING_OFFSET}px`;
+    dataColThs.forEach((th) => { th.style.width = `${rawDataColW}px`; });
+
+    // Read back actual rendered widths — CSS max-width may have capped them.
+    // offsetWidth forces a synchronous layout reflow so values are up to date.
+    const actualLabelW = labelTh.offsetWidth;
+    dataColW = dataColThs[0]?.offsetWidth ?? rawDataColW;
+
+    table.style.width = `${actualLabelW + totalCols * dataColW}px`;
+    container.style.scrollPaddingLeft = `${actualLabelW + SCROLL_PADDING_OFFSET}px`;
   }
 
   function updateNav() {
