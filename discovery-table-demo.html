@@ -327,17 +327,18 @@
          beside the sticky label column, with a trailing 16 px peek gap. */
       .dt-table-container {
         overflow-x: auto;
-        overflow-y: clip;             /* keep corners clipped without trapping sticky */
+        /* overflow-y: auto makes this the vertical scroll root so:
+           - thead th sticky top anchors to the container, not the page
+           - rows scroll inside the container first
+           - browser scroll-chaining moves the page only after the table
+             has reached its bottom limit (default browser behaviour) */
+        overflow-y: auto;
+        max-height: 60vh;             /* bounded height triggers vertical scroll */
         scroll-snap-type: x mandatory;
         -webkit-overflow-scrolling: touch;
         scrollbar-width: none;        /* Firefox */
-        /* Bleed to the right device edge — negates the body's 16 px right padding */
-        margin-right: -16px;
-        border-right: none;
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-        /* Right padding = trailing gap: visible after the last column snaps into
-           view, AND provides the extra scrollable room the last snap point needs */
+        /* Trailing gap: visible after the last column snaps into view and
+           provides the extra scrollable room the last snap point needs */
         padding-right: 16px;
       }
       .dt-table-container::-webkit-scrollbar {
