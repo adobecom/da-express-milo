@@ -17,7 +17,9 @@
       background: #f0f2f5;
       color: #1a1a1a;
       min-height: 100vh;
+    
       padding: 40px 16px 80px;
+      padding-right: 0;
       -webkit-text-size-adjust: 100%;
     }
 
@@ -140,9 +142,9 @@
        Table container
     ══════════════════════════════════════ */
     .dt-table-container {
-      border-radius: var(--border-radius-table);
+      /* border-radius: var(--border-radius-table);
       border: 1px solid var(--color-gray-325);
-      background: var(--color-white);
+      background: var(--color-white); */
       /* clip rather than hidden: clips overflow to border-radius but does NOT
          establish a scroll container, so position:sticky on thead th still
          looks up to the page scroll ancestor instead of stopping here. */
@@ -154,7 +156,10 @@
     ══════════════════════════════════════ */
     .dt-table {
       width: 100%;
-      border-collapse: collapse;
+     
+      border-radius: var(--border-radius-table);
+      border: 1px solid var(--color-gray-325);
+      background: var(--color-white);
     }
 
     /* ══════════════════════════════════════
@@ -339,7 +344,8 @@
         scrollbar-width: none;        /* Firefox */
         /* Trailing gap: visible after the last column snaps into view and
            provides the extra scrollable room the last snap point needs */
-        padding-right: 16px;
+           padding-right: 16px;
+       
       }
       .dt-table-container::-webkit-scrollbar {
         display: none;                /* Chrome / Safari */
