@@ -1,4 +1,3 @@
-const TRAILING = 16;
 const MOBILE_BREAKPOINT = 768;
 const SCROLL_PADDING_OFFSET = 6;
 
@@ -14,20 +13,14 @@ function buildCarouselNav(totalCols) {
   prevBtn.className = 'dt-nav-btn dt-prev';
   prevBtn.setAttribute('aria-label', 'Previous');
   prevBtn.disabled = true;
-  prevBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg>';
-
-  const indicator = document.createElement('span');
-  indicator.className = 'dt-nav-indicator';
-  indicator.setAttribute('aria-live', 'polite');
-  indicator.setAttribute('aria-atomic', 'true');
-  indicator.textContent = `1 / ${totalCols}`;
+  prevBtn.innerHTML = '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#FFFFFF"/><path d="M17.3984 21.1996L12.5984 16.3996L17.3984 11.5996" stroke="#292929" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   const nextBtn = document.createElement('button');
   nextBtn.className = 'dt-nav-btn dt-next';
   nextBtn.setAttribute('aria-label', 'Next');
-  nextBtn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="9 18 15 12 9 6"></polyline></svg>';
+  nextBtn.innerHTML = '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#FFFFFF"/><path d="M14.6016 21.1996L19.4016 16.3996L14.6016 11.5996" stroke="#292929" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-  nav.append(prevBtn, indicator, nextBtn);
+  nav.append(prevBtn, nextBtn);
   return nav;
 }
 
@@ -187,7 +180,6 @@ function initCarousel(block) {
   const table = block.querySelector('.dt-table');
   const prevBtn = block.querySelector('.dt-prev');
   const nextBtn = block.querySelector('.dt-next');
-  const indicator = block.querySelector('.dt-nav-indicator');
   const labelTh = table.querySelector('thead .dt-label-col');
   const dataColThs = Array.from(table.querySelectorAll('thead .dt-data-col'));
   const totalCols = dataColThs.length;
@@ -204,34 +196,33 @@ function initCarousel(block) {
       dataColW = 0;
       return;
     }
-    const cw = container.clientWidth;
-
     // CSS owns the label column width per breakpoint; read it back via offsetWidth.
     const actualLabelW = labelTh.offsetWidth;
-    dataColThs.forEach((th) => { th.style.width = `${cw - actualLabelW - TRAILING}px`; });
+    // Use window.innerWidth directly — container.clientWidth can be 0 on first paint.
+    // 32px = block left padding (16px) + container right padding (16px).
+    dataColThs.forEach((th) => { th.style.width = `${window.innerWidth - 32 - actualLabelW}px`; });
 
     // Read back actual rendered width — CSS max-width may have capped it.
-    dataColW = dataColThs[0]?.offsetWidth ?? (cw - actualLabelW - TRAILING);
+    dataColW = dataColThs[0]?.offsetWidth ?? (window.innerWidth - 32 - actualLabelW);
 
     table.style.width = `${actualLabelW + totalCols * dataColW}px`;
     container.style.scrollPaddingLeft = `${actualLabelW + SCROLL_PADDING_OFFSET}px`;
   }
 
   function updateNav() {
-    indicator.textContent = `${current + 1} / ${totalCols}`;
     prevBtn.disabled = current === 0;
     nextBtn.disabled = current === totalCols - 1;
   }
 
   function scrollToCol(index) {
     current = Math.max(0, Math.min(totalCols - 1, index));
-    container.scrollTo({ left: current * dataColW, behavior: 'smooth' });
+    container.scrollTo({ left: Math.max(0, current * dataColW - SCROLL_PADDING_OFFSET), behavior: 'smooth' });
     updateNav();
   }
 
   function syncFromScroll() {
     if (dataColW === 0) return;
-    const snapped = Math.max(0, Math.min(totalCols - 1, Math.round(container.scrollLeft / dataColW)));
+    const snapped = Math.max(0, Math.min(totalCols - 1, Math.round((container.scrollLeft + SCROLL_PADDING_OFFSET) / dataColW)));
     if (snapped !== current) { current = snapped; updateNav(); }
   }
 

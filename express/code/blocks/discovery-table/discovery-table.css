@@ -55,56 +55,30 @@
 }
 
 .dt-nav-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  border: 1px solid var(--color-gray-300);
-  background: var(--color-white);
+  all: unset;
   cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--color-gray-900);
-  padding: 0;
-  transition:
-    background var(--transition-standard),
-    border-color var(--transition-standard);
+  height: 2rem;
+  box-shadow: 0 2px 8px 0 #00000029;
+  border-radius: 50px;
   -webkit-tap-highlight-color: transparent;
 }
 
-.dt-nav-btn svg {
-  width: 18px;
-  height: 18px;
-  stroke: currentcolor;
-  stroke-width: 2.2;
-  fill: none;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  display: block;
+.dt-nav-btn:focus {
+  outline: revert;
 }
 
-.dt-nav-btn:hover:not(:disabled) {
-  background: var(--color-gray-100);
-  border-color: #888;
-}
-
-.dt-nav-btn:active:not(:disabled) {
-  background: var(--color-gray-200);
+.dt-nav-btn:hover:not(:disabled) circle {
+  fill: var(--color-gray-300);
 }
 
 .dt-nav-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
+  cursor: auto;
 }
 
-.dt-nav-indicator {
-  font-size: 12px;
-  color: var(--color-gray-500);
-  min-width: 34px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  user-select: none;
+.dt-nav-btn:disabled path {
+  stroke: var(--color-gray-300);
 }
+
 
 /* ── Table container ─────────────────────────────────────────────────────── */
 
@@ -134,7 +108,7 @@
   font-size: 14px;
   font-weight: 700;
   color: var(--color-gray-900);
-  text-align: center;
+  text-align: left;
   vertical-align: middle;
   background: var(--color-white);
   border-bottom: 1px solid var(--color-gray-300);
@@ -256,7 +230,7 @@
 
 .dt-table td.dt-data-col {
   padding: 18px 24px;
-  text-align: center;
+  text-align: left;
   vertical-align: middle;
   font-size: 14px;
   color: var(--color-gray-700);
