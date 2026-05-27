@@ -16,7 +16,7 @@ main .logo-row .block-layout {
     font-family: Arial, sans-serif;
 }
 
-main .logo-row .text-column :where(h1, h2, h3, h4, h5, h6, p) {
+main .logo-row .text-column :where(h1, h2, h3, h4, h5, h6) {
     font-size: var(--heading-font-size-s);
     font-style: normal;
 }
