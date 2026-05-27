@@ -892,6 +892,10 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   display: block;
 }
 
+.color-extract .color-extract-marker.is-active .color-extract-marker-zoom {
+  display: block;
+}
+
 /* ---- Magnified state (handle becomes the zoom lens on drag) ---- */
 
 .color-extract .color-extract-marker.is-magnified {

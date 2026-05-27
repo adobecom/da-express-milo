@@ -610,6 +610,10 @@
   display: block;
 }
 
+.image-extract .color-extract-marker.is-active .color-extract-marker-zoom {
+  display: block;
+}
+
 /* ---- Magnified state (handle becomes zoom lens on drag) ---- */
 
 .image-extract .color-extract-marker.is-magnified {
