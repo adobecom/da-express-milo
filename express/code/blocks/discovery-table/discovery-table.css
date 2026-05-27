@@ -170,10 +170,10 @@
   border-right: 1px solid var(--color-gray-300);
 }
 
-.dt-table td.dt-last-row { border-bottom: none;}
-
-/* Specificity beats border-bottom:none on tbody th.dt-label-col */
-.dt-table .dt-last-row.dt-first-col { border-bottom: none;}
+.dt-table th.dt-last-row,
+.dt-table td.dt-last-row {
+  border-bottom: 1px solid var(--color-gray-300);
+}
 
 .dt-table .dt-first-row.dt-first-col { border-top-left-radius: var(--border-radius-table); }
 .dt-table .dt-first-row.dt-last-col  { border-top-right-radius: var(--border-radius-table); }
@@ -293,6 +293,11 @@
     box-sizing: border-box;
   }
 
+  .dt-table th.dt-last-row,
+  .dt-table td.dt-last-row {
+    border-bottom: none;
+  }
+
 
 
   /* Shadow at the right edge of the sticky label column */
@@ -356,7 +361,7 @@
 
   .dt-header-text h2,
   .dt-header-text h3 {
-    font-size: 34px;
+    font-size: 22px;
     letter-spacing: -0.4px;
   }
 
