@@ -312,6 +312,18 @@ function attachWindowDragHandlers(container, dropzone) {
  * @param {HTMLElement | null} [options.suggestionsRowEl]
  * @returns {{ element: HTMLElement, destroy: Function }}
  */
+const IMAGE_SRC_KEY = 'color-wheel-image-src';
+
+export function saveImageSrc(src) {
+  try {
+    sessionStorage.setItem(IMAGE_SRC_KEY, src);
+  } catch {
+    // Quota exceeded (typically a large data: URL from a file upload).
+    // Clear any stale entry so it isn't mistakenly restored on the next sign-in redirect.
+    try { sessionStorage.removeItem(IMAGE_SRC_KEY); } catch { /* ignore */ }
+  }
+}
+
 export default function createImageExtractComponent(options = {}) {
   const controller = options.controller;
   if (!controller) {
@@ -425,6 +437,7 @@ export default function createImageExtractComponent(options = {}) {
 
   function onImageReady(image, src) {
     currentSrc = src;
+    saveImageSrc(src);
     setBackground(bgWrapper, src);
 
     currentCanvas = drawImageToCanvas(image);
