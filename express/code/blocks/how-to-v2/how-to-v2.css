@@ -5,10 +5,6 @@
   max-width: unset;
 }
 
-.how-to-v2 ol.setps {
-  padding-inline-start: 0px;
-}
-
 .how-to-v2 h2 {
   font-size: var(--heading-font-size-s);
   text-align: center;
@@ -25,6 +21,7 @@ main .section > .content:has( + .how-to-v2) h2 {
 .how-to-v2 ol {
   list-style-type: none;
   font-size: 21px;
+  padding-inline-start: 0px;
   font-weight: 900;
 }
 
