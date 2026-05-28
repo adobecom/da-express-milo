@@ -5,6 +5,10 @@
   max-width: unset;
 }
 
+.how-to-v2 ol.setps {
+  padding-inline-start: 0px;
+}
+
 .how-to-v2 h2 {
   font-size: var(--heading-font-size-s);
   text-align: center;
