@@ -26,7 +26,25 @@ const STYLES = [];
 
 // Use 'https://milo.adobe.com/libs' if you cannot map '/libs' to milo's origin.
 const LIBS = '/libs';
+const UNITY_LIBS = '/unitylibs';
 const miloLibs = setLibs(LIBS);
+
+// Setup Unity libs
+  const { hostname, search } = window.location;
+  const unityBranch = new URLSearchParams(search).get('unitylibs') || 'main';
+  const unityEnv = hostname.includes('.hlx.') ? 'hlx' : 'aem';
+  const unityLibs = !['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))
+    ? UNITY_LIBS
+    : `https://${unityBranch}${unityBranch.includes('--') ? '' : '--unity--adobecom'}.${unityEnv}.live/unitylibs`;
+  let unityBlocks = [];
+  try {
+    const { setUnityLibs, UNITY_BLOCKS } = await import(`${unityLibs}/scripts/utils.js`);
+    setUnityLibs(unityLibs, 'da-express-milo');
+    unityBlocks = UNITY_BLOCKS;
+  } catch (e) {
+    window.lana?.log(`Failed to load Unity libs: ${e.message}`, { tags: 'Express_Milo', severity: 'warn' });
+  }
+
 let jarvisImmediatelyVisible = false;
 const jarvisVisibleMeta = getMetadata('jarvis-immediately-visible')?.toLowerCase();
 const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
@@ -488,7 +506,11 @@ async function loadPage() {
   document.head.append(googleLoginRedirect);
   // end TODO remove metadata after we go live
 
-  const config = setConfig({ ...CONFIG, miloLibs });
+  const config = setConfig({
+    ...CONFIG,
+    miloLibs,
+    externalLibs: [{ blocks: unityBlocks, base: unityLibs }],
+  });
 
   // Legacy color.adobe.com deeplink redirect
   if (/color-theme-\d+\/?$/.test(window.location.pathname)) {
