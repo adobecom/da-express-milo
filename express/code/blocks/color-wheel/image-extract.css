@@ -270,7 +270,7 @@
   position: relative;
   inset: auto;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
   min-height: 360px;
   height: 490px;
   background: #f3f3f3;
