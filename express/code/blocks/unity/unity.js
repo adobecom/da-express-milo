@@ -1,3 +1,5 @@
+import { getLibs } from '../../scripts/utils.js';
+
 const LIMITS = {};
 
 export const localeMap = {
@@ -109,6 +111,10 @@ export default async function init(el) {
   if ((/iPad|iPhone|iPod/.test(window.browser?.ua) && !window.MSStream)
     || /android/i.test(window.browser?.ua)) {
     mobileApp = true;
+  }
+
+  if (!window.adobeIMS) {
+    import(`${getLibs()}/utils/utils.js`).then(({ loadIms }) => loadIms()).catch(() => {});
   }
 
   const element = el.querySelector('span');
