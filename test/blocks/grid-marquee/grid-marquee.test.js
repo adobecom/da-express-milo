@@ -20,7 +20,10 @@ describe('Grid Marquee - Legacy vs New Authoring', () => {
   before(() => {
     window.isTestEnv = true;
     originalRAF = window.requestAnimationFrame;
-    window.requestAnimationFrame = (cb) => { cb(performance.now()); return 0; };
+    window.requestAnimationFrame = (cb) => {
+      cb(performance.now());
+      return 0;
+    };
   });
 
   after(() => {
