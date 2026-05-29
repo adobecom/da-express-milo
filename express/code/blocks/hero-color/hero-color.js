@@ -116,11 +116,6 @@ function decorateCTA(block) {
 
   primaryCta.classList.add('primaryCta');
   BlockMediator.set('primaryCtaUrl', primaryCta.href);
-
-  if (!primaryCta.getAttribute('aria-label')) {
-    const label = primaryCta.textContent?.trim() || primaryCta.title;
-    if (label) primaryCta.setAttribute('aria-label', label);
-  }
 }
 
 export default async function decorate(block) {
