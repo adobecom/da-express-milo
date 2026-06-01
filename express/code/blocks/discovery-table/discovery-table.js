@@ -167,13 +167,13 @@ function labelCells(table) {
 }
 
 // ── Carousel ─────────────────────────────────────────────────────────────────
-// On mobile the table container keeps overflow:clip (same as desktop) so
-// position:sticky on thead propagates to the page viewport naturally.
-// Horizontal column navigation is driven by transform:translateX on the table.
-// All .dt-label-col cells get a counter-transform so they stay pinned at the
-// left edge while the data columns slide.
+// On mobile the container uses overflow:visible + clip-path so position:sticky
+// on thead propagates to the page viewport and transform:translateX can reveal
+// off-screen columns (clip-path clips post-transform, overflow:clip does not).
+// All .dt-label-col cells get a counter-transform to stay pinned at the left.
 
 function initCarousel(block) {
+  const container = block.querySelector('.dt-table-container');
   const table = block.querySelector('.dt-table');
   const sectionHeader = block.querySelector('.dt-section-header');
   const prevBtn = block.querySelector('.dt-prev');
@@ -213,9 +213,13 @@ function initCarousel(block) {
     }
     // CSS owns the label column width per breakpoint; read it back via offsetWidth.
     const actualLabelW = labelTh.offsetWidth;
-    // 32px = block left padding (16px) + right visual margin (16px).
-    dataColThs.forEach((th) => { th.style.width = `${window.innerWidth - 32 - actualLabelW}px`; });
-    dataColW = dataColThs[0]?.offsetWidth ?? (window.innerWidth - 32 - actualLabelW);
+    // 32px = 16px block left padding + 16px right gap. Sizing each data column
+    // 32px narrower than the viewport leaves the label col + one data col on
+    // screen, and a 16px gap between the last col and the device's right edge
+    // when fully scrolled (mirroring the left padding).
+    const dataColTarget = window.innerWidth - 32 - actualLabelW;
+    dataColThs.forEach((th) => { th.style.width = `${dataColTarget}px`; });
+    dataColW = dataColThs[0]?.offsetWidth ?? dataColTarget;
     table.style.width = `${actualLabelW + totalCols * dataColW}px`;
     applyTransform(current);
   }
@@ -233,6 +237,51 @@ function initCarousel(block) {
 
   prevBtn.addEventListener('click', () => goToCol(current - 1));
   nextBtn.addEventListener('click', () => goToCol(current + 1));
+
+  const SWIPE_THRESHOLD = 40;
+
+  // Pointer drag — covers both mouse drag and touch swipe in one path.
+  // (Native swipe is gone since there's no scroll container.) We only act on
+  // pointerup so we never preventDefault during the gesture, leaving vertical
+  // page scroll and link taps untouched.
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let dragging = false;
+  container.addEventListener('pointerdown', (e) => {
+    if (dataColW === 0) return; // desktop — carousel inactive
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    dragging = true;
+    // Capture so pointerup fires here even if the pointer leaves the container.
+    try { container.setPointerCapture(e.pointerId); } catch { /* ignore */ }
+  });
+  container.addEventListener('pointerup', (e) => {
+    if (!dragging) return;
+    dragging = false;
+    const dx = dragStartX - e.clientX;
+    const dy = dragStartY - e.clientY;
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > SWIPE_THRESHOLD) {
+      goToCol(current + (dx > 0 ? 1 : -1));
+    }
+  });
+  container.addEventListener('pointercancel', () => { dragging = false; });
+
+  // Wheel / trackpad — map horizontal intent (deltaX, or shift+deltaY) to a
+  // single column step, throttled so one gesture moves one column. Vertical
+  // scroll falls through to the page (no preventDefault).
+  let wheelLock = false;
+  container.addEventListener('wheel', (e) => {
+    if (dataColW === 0) return; // desktop — carousel inactive
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY)
+      ? e.deltaX
+      : (e.shiftKey ? e.deltaY : 0);
+    if (Math.abs(delta) < 10) return; // vertical scroll → let the page handle it
+    e.preventDefault();
+    if (wheelLock) return;
+    wheelLock = true;
+    goToCol(current + (delta > 0 ? 1 : -1));
+    setTimeout(() => { wheelLock = false; }, 400);
+  }, { passive: false });
 
   window.addEventListener('resize', () => {
     // Disable transition during resize snap to avoid visual jank.

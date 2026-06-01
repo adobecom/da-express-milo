@@ -265,6 +265,18 @@
     top: calc(var(--gnav-offset-height) + var(--dt-section-header-h, 0px));
   }
 
+  /* overflow:clip clips based on layout position (pre-transform), so transforms
+     can't reveal off-screen columns. overflow:visible + clip-path clips based on
+     the visual (post-transform) position, which is what we need here.
+     clip-path does not create a scroll container, so position:sticky propagates.
+     The 16px right inset clips off the next column that would otherwise peek
+     into the gap, giving a clean 16px gap (and a card symmetric with the 16px
+     block left padding) that aligns with the section header's right edge. */
+  .dt-table-container {
+    overflow: visible;
+    clip-path: inset(0 16px 0 0 round var(--border-radius-table));
+  }
+
   .dt-table {
     table-layout: fixed;
     transition: transform 0.3s ease;
