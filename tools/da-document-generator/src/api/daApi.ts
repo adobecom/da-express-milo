@@ -78,12 +78,27 @@ export async function listDirectory(dirPath: string): Promise<DaListItem[]> {
   return resp.json() as Promise<DaListItem[]>;
 }
 
-export async function checkDirectoryExists(dirPath: string): Promise<boolean> {
+export interface DirectoryCheckResult {
+  valid: boolean;
+  error?: string;
+}
+
+export async function checkDirectoryExists(dirPath: string): Promise<DirectoryCheckResult> {
   try {
     await listDirectory(dirPath);
-    return true;
-  } catch {
-    return false;
+    return { valid: true };
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const is403 = msg.startsWith('403');
+    const is404 = msg.startsWith('404');
+    return {
+      valid: false,
+      error: is403
+        ? "Access denied — you don't have permission to write to this directory"
+        : is404
+        ? 'Directory not found — confirm the path exists in DA before generating'
+        : `Could not verify directory (${msg})`,
+    };
   }
 }
 

@@ -17,6 +17,7 @@ export interface TemplateState {
   sourcePath: string | null;
   outputDir: string | null;
   outputDirValid: boolean | null;
+  outputDirError: string | null;
   placeholders: string[];
   issues: string[];
 }

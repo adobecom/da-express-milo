@@ -577,7 +577,16 @@ function GeneratePill({
   const { stage, error } = result;
   if (stage === 'generating') return <span className="text-blue-600 font-medium">Generating…</span>;
   if (stage === 'deleting') return <span className="text-red-500 font-medium">Deleting…</span>;
-  if (stage === 'error') return <span className="text-red-600 font-medium cursor-help" title={error}>Error</span>;
+  if (stage === 'error') {
+    const codeMatch = error?.match(/^(\d{3})[:\s]/);
+    const code = codeMatch?.[1];
+    const label = code === '403' ? 'Access Denied'
+                : code === '404' ? 'Not Found'
+                : code === '500' ? 'Server Error'
+                : 'Error';
+    const display = code ? `${label} (${code})` : 'Error';
+    return <span className="text-red-600 font-medium cursor-help" title={error}>{display}</span>;
+  }
   if (['generated', 'qa-fail', 'previewing', 'previewed', 'publishing',
     'published', 'unpublishing', 'unpublished'].includes(stage)) {
     return (

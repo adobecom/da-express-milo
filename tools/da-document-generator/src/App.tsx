@@ -10,6 +10,7 @@ const INITIAL_TEMPLATE: TemplateState = {
   sourcePath: null,
   outputDir: null,
   outputDirValid: null,
+  outputDirError: null,
   placeholders: [],
   issues: [],
 };

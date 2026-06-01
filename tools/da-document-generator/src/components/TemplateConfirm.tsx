@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { cat, checkDirectoryExists, fetchSheet, validateTemplate } from '../api/daApi';
+import type { DirectoryCheckResult } from '../api/daApi';
 import type { TemplateState } from '../types';
 
 interface Props {
@@ -20,7 +21,7 @@ const STATUS_CARD: Record<string, string> = {
   error: 'bg-red-50 border-red-200',
 };
 
-const CONFIG_SHEET = '/adobecom/da-express-milo/drafts/maxn/document-generator/test-sheet';
+const CONFIG_SHEET = '/adobecom/da-express-milo/doc-generator-presets';
 
 function ExternalLinkIcon() {
   return (
@@ -53,7 +54,16 @@ export default function TemplateConfirm({ state, onChange }: Props) {
         setOptions(parsed);
         if (parsed.length > 0) setSelected(parsed[0]);
       } catch (err) {
-        setListError(err instanceof Error ? err.message : String(err));
+        const msg = err instanceof Error ? err.message : String(err);
+        const is403 = msg.startsWith('403');
+        const is404 = msg.startsWith('404');
+        setListError(
+          is403
+            ? '403 — Access Denied: You do not have access to the template config sheet. You may be signed in to the wrong Organization, check your active Organization in DA and try reloading.'
+            : is404
+            ? '404 — Not Found: The template config sheet could not be found. Confirm the sheet path is correct.'
+            : `Error loading template config: ${msg}`,
+        );
       } finally {
         setListLoading(false);
       }
@@ -74,14 +84,16 @@ export default function TemplateConfirm({ state, onChange }: Props) {
   async function handleConfirm() {
     if (!selected) return;
     const { templatePath, outputDir } = selected;
-    onChange({ status: 'loading', html: null, sourcePath: templatePath, outputDir, outputDirValid: null, placeholders: [], issues: [] });
+    onChange({ status: 'loading', html: null, sourcePath: templatePath, outputDir, outputDirValid: null, outputDirError: null, placeholders: [], issues: [] });
 
-    const [htmlResult, dirResult] = await Promise.allSettled([
+    const [htmlResult, dirCheck] = await Promise.allSettled([
       cat(templatePath),
       checkDirectoryExists(outputDir),
     ]);
 
-    const dirExists = dirResult.status === 'fulfilled' ? dirResult.value : false;
+    const dirResult: DirectoryCheckResult = dirCheck.status === 'fulfilled'
+      ? dirCheck.value
+      : { valid: false, error: 'Could not reach DA to verify directory' };
 
     if (htmlResult.status === 'rejected') {
       const msg = htmlResult.reason instanceof Error ? htmlResult.reason.message : String(htmlResult.reason);
@@ -92,7 +104,8 @@ export default function TemplateConfirm({ state, onChange }: Props) {
         html: null,
         sourcePath: templatePath,
         outputDir,
-        outputDirValid: dirExists,
+        outputDirValid: dirResult.valid,
+        outputDirError: dirResult.error ?? null,
         placeholders: [],
         issues: [
           is403 ? 'Access denied — confirm you are in the correct DA organization'
@@ -110,7 +123,8 @@ export default function TemplateConfirm({ state, onChange }: Props) {
       html,
       sourcePath: templatePath,
       outputDir,
-      outputDirValid: dirExists,
+      outputDirValid: dirResult.valid,
+      outputDirError: dirResult.error ?? null,
       placeholders: validation.placeholders,
       issues: validation.issues,
     });
@@ -132,7 +146,7 @@ export default function TemplateConfirm({ state, onChange }: Props) {
           <p className="text-xs text-gray-400">Loading templates…</p>
         )}
         {listError && (
-          <p className="text-xs text-red-500">Could not load config: {listError}</p>
+          <p className="text-xs text-red-500 pl-1">{listError}</p>
         )}
 
         {!listLoading && options.length > 0 && (
@@ -260,10 +274,8 @@ export default function TemplateConfirm({ state, onChange }: Props) {
             <ExternalLinkIcon />
           </a>
 
-          {!state.outputDirValid && (
-            <p className="text-xs text-red-600">
-              Directory not found — confirm the path exists in DA before generating
-            </p>
+          {!state.outputDirValid && state.outputDirError && (
+            <p className="text-xs text-red-600">{state.outputDirError}</p>
           )}
         </div>
       )}

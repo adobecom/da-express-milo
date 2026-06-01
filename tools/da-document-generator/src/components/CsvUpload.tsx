@@ -144,14 +144,15 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
     const referenceValues: Record<string, { title?: string; description?: string }> = {};
     const updated = await Promise.all(
       rows.map(async (row) => {
-        const hasMissing = tableColumns.some((col) => !row[col]?.trim());
-        if (!hasMissing || !row.template_id?.trim()) return row;
+        if (!row.template_id?.trim()) return row;
         const product = await fetchProductFromTemplate(row.template_id);
         if (!product) return row;
         referenceValues[row._id] = {
           title: product.rootRawTitle,
           description: product.description,
         };
+        const hasMissing = tableColumns.some((col) => !row[col]?.trim());
+        if (!hasMissing) return row;
         const filled = { ...row };
         const newlyHydrated: string[] = [];
         for (const col of tableColumns) {
@@ -172,9 +173,14 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
       }),
     );
     const changedCount = updated.filter((row, i) => row !== rows[i]).length;
-    setHydrateMsg(changedCount > 0
-      ? `Updated ${changedCount} row${changedCount === 1 ? '' : 's'} from Zazzle`
-      : 'No matching Zazzle data found for missing fields');
+    const refCount = Object.keys(referenceValues).length;
+    setHydrateMsg(
+      changedCount > 0
+        ? `Updated ${changedCount} row${changedCount === 1 ? '' : 's'} from Zazzle`
+        : refCount > 0
+        ? 'All fields already complete — Zazzle data loaded for comparison'
+        : 'No matching Zazzle data found',
+    );
     setZazzleHydratedFields(hydratedFields);
     setZazzleReferenceValues(referenceValues);
     setExpandedDiffCells({});
@@ -410,7 +416,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
           >
             {validating ? 'Validating…' : 'Validate Template IDs'}
           </button>
-          {summary.missing > 0 && (
+          {hasData && (
             <button
               onClick={handleHydrate}
               disabled={hydrating || validating}
