@@ -8,11 +8,13 @@
   --color-gray-300: #dadada;
   --color-gray-200: #ebebeb;
   --color-gray-100: #f9f9f9;
+  --color-gray-50: #F8F8F8;
   --color-white: #fff;
   --color-green-900: #05834e;
   --color-neutral: #aaa;
   --border-radius-table: 8px;
   --transition-standard: 0.15s ease-out;
+  --gnav-offset-height: var(--spacing-800, 64px);
 
   padding: 40px 0px 40px 16px;
 }
@@ -111,18 +113,18 @@
   color: var(--color-gray-900);
   text-align: left;
   vertical-align: middle;
-  background: var(--color-white);
+  background: var(--color-gray-50);
   border-bottom: 1px solid var(--color-gray-300);
   /* Borders on cells (not tr) so they travel with the sticky header row. */
   position: sticky;
-  top: 0;
+  top: var(--gnav-offset-height);
   z-index: 2;
-  background-color: #F8F8F8;
 }
 
-.dt-table thead th.dt-label-col {  
+.dt-table thead th.dt-label-col {
   border-bottom: 1px solid var(--color-gray-300);
   border-left: 1px solid var(--color-gray-300);
+  background: var(--color-gray-50);
   z-index: 3;
 }
 
@@ -203,10 +205,6 @@
   vertical-align: middle;
 }
 
-.dt-label-col.dt-first-row.dt-first-col {
-  background-color: #F8F8F8;
-}
-
 .dt-table tbody th.dt-label-col {
   border-left: 1px solid var(--color-gray-300);
   border-bottom: 1px solid var(--color-gray-200);
@@ -244,52 +242,53 @@
 }
 
 /* ── Mobile (< 768px) ────────────────────────────────────────────────────── */
+/* The table container keeps overflow:clip (same as desktop) so
+   position:sticky on thead th propagates to the page viewport naturally.
+   Horizontal column navigation uses transform:translateX on the table;
+   .dt-label-col cells get a counter-transform to stay pinned at the left. */
 
 @media (max-width: 767px) {
   .dt-carousel-nav {
-    display: flex; 
+    display: flex;
   }
 
-  .dt-table-container {
-    overflow-x: auto;
-    overflow-y: auto;
-    max-height: 60vh;
-    scroll-snap-type: x mandatory;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-right: 16px;
-    border-bottom: 1px solid var(--color-gray-200);
+  /* Section header sticks at the nav offset; thead sticks just below it.
+     --dt-section-header-h is measured and set by JS. */
+  .dt-section-header {
+    position: sticky;
+    top: var(--gnav-offset-height);
+    z-index: 10;
+    background: white;
   }
 
-  .dt-table-container::-webkit-scrollbar {
-    display: none;
+  .dt-table thead th {
+    top: calc(var(--gnav-offset-height) + var(--dt-section-header-h, 0px));
   }
 
   .dt-table {
     table-layout: fixed;
+    transition: transform 0.3s ease;
   }
 
+  /* Label column stays visually pinned via JS counter-transform.
+     position:relative is only on tbody cells (needed for ::after shadow);
+     the thead label cell inherits position:sticky from the global thead th rule
+     so it sticks with the rest of the header row. */
   .dt-table .dt-label-col {
-    position: sticky;
-    left: 0;
-    z-index: 2;
     background: var(--color-white);
+    transition: transform 0.3s ease;
+  }
+
+  .dt-table tbody .dt-label-col {
+    position: relative;
   }
 
   .dt-table tbody tr:nth-child(even) .dt-label-col {
     background: var(--color-gray-100);
   }
 
-  .dt-table thead th.dt-label-col {
-    z-index: 3;
-  }
-
   .dt-table th.dt-label-col {
     width: 110px;
-  }
-
-  .dt-table thead .dt-data-col {
-    scroll-snap-align: start;
   }
 
   .dt-table thead th,
@@ -299,14 +298,7 @@
     box-sizing: border-box;
   }
 
-  .dt-table th.dt-last-row,
-  .dt-table td.dt-last-row {
-    border-bottom: none;
-  }
-
-
-
-  /* Shadow at the right edge of the sticky label column */
+  /* Shadow at the right edge of the label column */
   .dt-table .dt-label-col::after {
     content: '';
     position: absolute;
@@ -320,7 +312,7 @@
   }
 
   .dt-header-text h2,
-  .dt-header-text h3 {  
+  .dt-header-text h3 {
     color: var(--Alias-content-typography-Title, #131313);
     font-size: 22px;
     font-weight: 700;

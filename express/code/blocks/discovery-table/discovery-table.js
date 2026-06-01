@@ -1,5 +1,4 @@
 const MOBILE_BREAKPOINT = 768;
-const SCROLL_PADDING_OFFSET = 6;
 
 // ── DOM builders ─────────────────────────────────────────────────────────────
 
@@ -31,7 +30,6 @@ function buildSectionHeader(titleDiv, totalCols) {
   const headerText = document.createElement('div');
   headerText.className = 'dt-header-text';
 
-  // Preserve an existing heading; otherwise wrap in h2
   const existingHeading = titleDiv.querySelector('h1,h2,h3,h4,h5,h6');
   if (existingHeading) {
     headerText.appendChild(existingHeading);
@@ -41,7 +39,6 @@ function buildSectionHeader(titleDiv, totalCols) {
     headerText.appendChild(h2);
   }
 
-  // Carry over any sub-paragraph (optional subtitle below the heading)
   const subtitleP = titleDiv.querySelector('p');
   if (subtitleP) headerText.appendChild(subtitleP);
 
@@ -90,7 +87,7 @@ function buildLabelTh(cellDiv, isHeader = false) {
   th.className = 'dt-label-col';
   th.setAttribute('scope', isHeader ? 'col' : 'row');
 
-  if (isHeader) return th; // empty top-left cell
+  if (isHeader) return th;
 
   const paras = Array.from(cellDiv.querySelectorAll('p'));
   const primaryText = paras[0]?.textContent ?? cellDiv.textContent;
@@ -125,9 +122,6 @@ function buildTable(colHeaderDivs, dataRowDivs) {
   const table = document.createElement('table');
   table.className = 'dt-table';
 
-  // thead — first div in the header row is the label-column header (e.g. "Feature"),
-  // the rest are the data-column headers. This matches the data rows where the first
-  // child is also the label cell, keeping column counts in sync.
   const [labelHeaderDiv, ...dataHeaderDivs] = colHeaderDivs;
   const thead = document.createElement('thead');
   const headerTr = document.createElement('tr');
@@ -140,7 +134,6 @@ function buildTable(colHeaderDivs, dataRowDivs) {
   thead.appendChild(headerTr);
   table.appendChild(thead);
 
-  // tbody
   const tbody = document.createElement('tbody');
   dataRowDivs.forEach((rowDiv) => {
     const tr = document.createElement('tr');
@@ -174,39 +167,57 @@ function labelCells(table) {
 }
 
 // ── Carousel ─────────────────────────────────────────────────────────────────
+// On mobile the table container keeps overflow:clip (same as desktop) so
+// position:sticky on thead propagates to the page viewport naturally.
+// Horizontal column navigation is driven by transform:translateX on the table.
+// All .dt-label-col cells get a counter-transform so they stay pinned at the
+// left edge while the data columns slide.
 
 function initCarousel(block) {
-  const container = block.querySelector('.dt-table-container');
   const table = block.querySelector('.dt-table');
+  const sectionHeader = block.querySelector('.dt-section-header');
   const prevBtn = block.querySelector('.dt-prev');
   const nextBtn = block.querySelector('.dt-next');
   const labelTh = table.querySelector('thead .dt-label-col');
   const dataColThs = Array.from(table.querySelectorAll('thead .dt-data-col'));
+  const labelColCells = Array.from(table.querySelectorAll('.dt-label-col'));
   const totalCols = dataColThs.length;
   let current = 0;
   let dataColW = 0;
+
+  function updateStickyOffsets() {
+    if (window.innerWidth >= MOBILE_BREAKPOINT) {
+      block.style.removeProperty('--dt-section-header-h');
+      return;
+    }
+    block.style.setProperty('--dt-section-header-h', `${sectionHeader.offsetHeight}px`);
+  }
+
+  function applyTransform(index) {
+    if (dataColW === 0) return;
+    const offset = index * dataColW;
+    table.style.transform = `translateX(-${offset}px)`;
+    labelColCells.forEach((cell) => { cell.style.transform = `translateX(${offset}px)`; });
+  }
 
   function setup() {
     const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
     if (!isMobile) {
       table.style.width = '';
+      table.style.transform = '';
       labelTh.style.width = '';
       dataColThs.forEach((th) => { th.style.width = ''; });
-      container.style.scrollPaddingLeft = '';
+      labelColCells.forEach((cell) => { cell.style.transform = ''; });
       dataColW = 0;
       return;
     }
     // CSS owns the label column width per breakpoint; read it back via offsetWidth.
     const actualLabelW = labelTh.offsetWidth;
-    // Use window.innerWidth directly — container.clientWidth can be 0 on first paint.
-    // 32px = block left padding (16px) + container right padding (16px).
+    // 32px = block left padding (16px) + right visual margin (16px).
     dataColThs.forEach((th) => { th.style.width = `${window.innerWidth - 32 - actualLabelW}px`; });
-
-    // Read back actual rendered width — CSS max-width may have capped it.
     dataColW = dataColThs[0]?.offsetWidth ?? (window.innerWidth - 32 - actualLabelW);
-
     table.style.width = `${actualLabelW + totalCols * dataColW}px`;
-    container.style.scrollPaddingLeft = `${actualLabelW + SCROLL_PADDING_OFFSET}px`;
+    applyTransform(current);
   }
 
   function updateNav() {
@@ -214,40 +225,33 @@ function initCarousel(block) {
     nextBtn.disabled = current === totalCols - 1;
   }
 
-  function scrollToCol(index) {
+  function goToCol(index) {
     current = Math.max(0, Math.min(totalCols - 1, index));
-    container.scrollTo({ left: Math.max(0, current * dataColW - SCROLL_PADDING_OFFSET), behavior: 'smooth' });
+    applyTransform(current);
     updateNav();
   }
 
-  function syncFromScroll() {
-    if (dataColW === 0) return;
-    const snapped = Math.max(0, Math.min(totalCols - 1, Math.round((container.scrollLeft + SCROLL_PADDING_OFFSET) / dataColW)));
-    if (snapped !== current) { current = snapped; updateNav(); }
-  }
-
-  if ('onscrollend' in window) {
-    container.addEventListener('scrollend', syncFromScroll);
-  } else {
-    let t;
-    container.addEventListener('scroll', () => { clearTimeout(t); t = setTimeout(syncFromScroll, 120); });
-  }
-
-  prevBtn.addEventListener('click', () => scrollToCol(current - 1));
-  nextBtn.addEventListener('click', () => scrollToCol(current + 1));
+  prevBtn.addEventListener('click', () => goToCol(current - 1));
+  nextBtn.addEventListener('click', () => goToCol(current + 1));
 
   window.addEventListener('resize', () => {
+    // Disable transition during resize snap to avoid visual jank.
+    table.style.transition = 'none';
+    labelColCells.forEach((cell) => { cell.style.transition = 'none'; });
     current = 0;
-    container.scrollLeft = 0;
     setup();
     updateNav();
+    updateStickyOffsets();
+    requestAnimationFrame(() => {
+      table.style.transition = '';
+      labelColCells.forEach((cell) => { cell.style.transition = ''; });
+    });
   });
 
-  // Defer initial setup by one rAF so the browser has finished layout and
-  // container.clientWidth reflects the real rendered width, not 0.
   requestAnimationFrame(() => {
     setup();
     updateNav();
+    updateStickyOffsets();
   });
 }
 
@@ -255,13 +259,12 @@ function initCarousel(block) {
 
 export default function decorate(block) {
   const rows = Array.from(block.children);
-  if (rows.length < 3) return; // title + col headers + at least 1 data row
+  if (rows.length < 3) return;
 
   const [titleRow, colHeaderRow, ...dataRows] = rows;
 
   const titleDiv = titleRow.querySelector('div') ?? titleRow;
   const colHeaderDivs = Array.from(colHeaderRow.children);
-  // First child is the label-column header; the rest are data column headers.
   const totalDataCols = colHeaderDivs.length - 1;
 
   const sectionHeader = buildSectionHeader(titleDiv, totalDataCols);
