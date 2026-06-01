@@ -8,7 +8,6 @@ import {
   getToken,
   daPathToPreviewUrl,
   daPathToLiveUrl,
-  templateToOutputDir,
 } from '../api/daApi';
 import { applyTemplate, rowToOutputPath, runGenerationQa, runPageQa } from '../lib/generate';
 import type { CsvRow, TemplateState, RowResult, QaResult } from '../types';
@@ -24,7 +23,7 @@ const CONCURRENCY = 3;
 type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing' | 'unpublishing' | 'deleting';
 
 export default function GeneratePanel({ rows, template, generateBlockReason }: Props) {
-  const outputDir = template.sourcePath ? templateToOutputDir(template.sourcePath) : '';
+  const outputDir = template.outputDir ?? '';
   const [results, setResults] = useState<RowResult[]>([]);
   const [bulkOp, setBulkOp] = useState<BulkOp>('idle');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
@@ -323,7 +322,6 @@ export default function GeneratePanel({ rows, template, generateBlockReason }: P
         <p className="text-xs text-gray-400">
           Documents will be written to{' '}
           <code className="bg-gray-100 px-1 rounded font-mono">{outputDir}/{'{{url_slug}}'}</code>
-          {' '}— same folder as the template.
         </p>
       )}
 

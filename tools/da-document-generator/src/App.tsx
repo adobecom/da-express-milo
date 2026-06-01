@@ -8,6 +8,7 @@ const INITIAL_TEMPLATE: TemplateState = {
   status: 'idle',
   html: null,
   sourcePath: null,
+  outputDir: null,
   placeholders: [],
   issues: [],
 };

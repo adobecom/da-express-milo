@@ -1,10 +1,16 @@
-import { useEffect, useState } from 'react';
-import { cat, listDirectory, validateTemplate } from '../api/daApi';
+import { useEffect, useRef, useState } from 'react';
+import { cat, fetchSheet, validateTemplate } from '../api/daApi';
 import type { TemplateState } from '../types';
 
 interface Props {
   state: TemplateState;
   onChange: (state: TemplateState) => void;
+}
+
+interface TemplateOption {
+  productName: string;
+  templatePath: string;
+  outputDir: string;
 }
 
 const STATUS_BADGE: Record<string, string> = {
@@ -28,40 +34,57 @@ const STATUS_LABEL: Record<string, string> = {
   error: 'Error',
 };
 
-const TEMPLATES_DIR = '/adobecom/da-express-milo/express/print/document-generator';
+const CONFIG_SHEET = '/adobecom/da-express-milo/drafts/maxn/document-generator/test-sheet';
 
 export default function TemplateConfirm({ state, onChange }: Props) {
-  const [templatePaths, setTemplatePaths] = useState<string[]>([]);
+  const [options, setOptions] = useState<TemplateOption[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
-  const [selectedPath, setSelectedPath] = useState('');
+  const [selected, setSelected] = useState<TemplateOption | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    async function fetchTemplates() {
+    async function load() {
       try {
-        const items = await listDirectory(TEMPLATES_DIR);
-        const paths = items
-          .filter((item) => item.ext)
-          .map((item) => item.path.replace(/\.html$/, ''));
-        setTemplatePaths(paths);
-        if (paths.length > 0) setSelectedPath(paths[0]);
+        const rows = await fetchSheet(CONFIG_SHEET);
+        const parsed: TemplateOption[] = rows
+          .filter((r) => r['Template Path'])
+          .map((r) => ({
+            productName: r['Product Name'] ?? '',
+            templatePath: r['Template Path'],
+            outputDir: r['Output Directory'] ?? '',
+          }));
+        setOptions(parsed);
+        if (parsed.length > 0) setSelected(parsed[0]);
       } catch (err) {
         setListError(err instanceof Error ? err.message : String(err));
       } finally {
         setListLoading(false);
       }
     }
-    fetchTemplates();
+    load();
+  }, []);
+
+  useEffect(() => {
+    function handler(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   async function handleConfirm() {
-    if (!selectedPath.trim()) return;
-    onChange({ status: 'loading', html: null, sourcePath: selectedPath, placeholders: [], issues: [] });
+    if (!selected) return;
+    const { templatePath, outputDir } = selected;
+    onChange({ status: 'loading', html: null, sourcePath: templatePath, outputDir, placeholders: [], issues: [] });
 
     try {
-      const html = await cat(selectedPath);
+      const html = await cat(templatePath);
       const validation = validateTemplate(html);
-      onChange({ status: validation.status, html, sourcePath: selectedPath, placeholders: validation.placeholders, issues: validation.issues });
+      onChange({ status: validation.status, html, sourcePath: templatePath, outputDir, placeholders: validation.placeholders, issues: validation.issues });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       const is403 = msg.startsWith('403');
@@ -69,11 +92,12 @@ export default function TemplateConfirm({ state, onChange }: Props) {
       onChange({
         status: is403 || is404 ? 'invalid' : 'error',
         html: null,
-        sourcePath: selectedPath,
+        sourcePath: templatePath,
+        outputDir,
         placeholders: [],
         issues: [
           is403 ? 'Access denied — confirm you are in the correct DA organization'
-                : is404 ? 'Template not found — check the URL and confirm you have access'
+                : is404 ? 'Template not found — check the path and confirm you have access'
                 : `Fetch error: ${msg}`,
         ],
       });
@@ -81,36 +105,61 @@ export default function TemplateConfirm({ state, onChange }: Props) {
   }
 
   useEffect(() => {
-    if (!selectedPath.trim()) return;
+    if (!selected?.templatePath) return;
     const timer = setTimeout(() => { handleConfirm(); }, 600);
     return () => clearTimeout(timer);
-  }, [selectedPath]);
+  }, [selected]);
 
   const showResult = state.status !== 'idle' && state.status !== 'loading';
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
+      <div className="flex flex-col gap-1" ref={dropdownRef}>
         {listLoading && (
           <p className="text-xs text-gray-400">Loading templates…</p>
         )}
         {listError && (
-          <p className="text-xs text-red-500">Could not load templates: {listError}</p>
+          <p className="text-xs text-red-500">Could not load config: {listError}</p>
         )}
-        {!listLoading && templatePaths.length > 0 && (
-          <select
-            value={selectedPath}
-            onChange={(e) => setSelectedPath(e.target.value)}
-            className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-          >
-            {templatePaths.map((t) => (
-              <option key={t} value={t}>{t.split('/').pop()}</option>
-            ))}
-          </select>
+
+        {!listLoading && options.length > 0 && (
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setIsOpen((o) => !o)}
+              className="w-full flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-left cursor-pointer"
+            >
+              <span className="font-medium text-gray-800">
+                {selected?.productName ?? 'Select a template'}
+              </span>
+              <svg className="w-4 h-4 text-gray-400 shrink-0 ml-2" viewBox="0 0 16 16" fill="none">
+                <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+
+            {isOpen && (
+              <ul className="absolute z-10 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg max-h-64 overflow-y-auto">
+                {options.map((opt) => (
+                  <li
+                    key={opt.templatePath}
+                    onClick={() => { setSelected(opt); setIsOpen(false); }}
+                    className={`px-3 py-2.5 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
+                      selected?.templatePath === opt.templatePath ? 'bg-blue-50' : ''
+                    }`}
+                  >
+                    <p className="text-sm font-medium text-gray-800">{opt.productName}</p>
+                    <p className="text-xs text-gray-400 truncate mt-0.5">{opt.templatePath}</p>
+                    <p className="text-xs text-gray-400 truncate">{opt.outputDir}</p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
         )}
+
         <p className="text-xs text-gray-400 pl-1">
-          Templates sourced from{' '}
-          <code className="bg-gray-100 px-1 rounded font-mono">{TEMPLATES_DIR}</code>
+          Template config from{' '}
+          <code className="bg-gray-100 px-1 rounded font-mono">{CONFIG_SHEET}</code>
         </p>
       </div>
 
