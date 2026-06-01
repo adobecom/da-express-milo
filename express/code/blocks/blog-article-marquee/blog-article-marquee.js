@@ -21,7 +21,7 @@ function getDateFormatter(language) {
 }
 
 function formatPublicationDate(dateStr, formatter) {
-  if (!dateStr || !formatter) return dateStr;
+  if (!dateStr || !formatter) return '';
   const trimmed = dateStr.trim();
   const isTimestamp = /^\d+$/.test(trimmed);
   let publicationDate;
