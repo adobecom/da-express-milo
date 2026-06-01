@@ -289,7 +289,7 @@
   .dt-table thead th,
   .dt-table th.dt-label-col,
   .dt-table td.dt-data-col {
-    padding: 14px 16px;
+    padding: 16px 12px;
     box-sizing: border-box;
   }
 
@@ -339,7 +339,7 @@
 
 .dt-table td.dt-data-col,
   .dt-table th.dt-label-col {
-    padding: var(--spacing-300, 16px);
+    padding: var(--spacing-200);
   }
 
   
