@@ -186,10 +186,6 @@ function initCarousel(block) {
   let dataColW = 0;
 
   function updateStickyOffsets() {
-    if (window.innerWidth >= MOBILE_BREAKPOINT) {
-      block.style.removeProperty('--dt-section-header-h');
-      return;
-    }
     block.style.setProperty('--dt-section-header-h', `${sectionHeader.offsetHeight}px`);
   }
 

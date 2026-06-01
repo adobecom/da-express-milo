@@ -14,7 +14,7 @@
   --color-neutral: #aaa;
   --border-radius-table: 8px;
   --transition-standard: 0.15s ease-out;
-  --gnav-offset-height: var(--spacing-800, 64px);
+  --gnav-offset-height: 40px;
 
   padding: 40px 0px 40px 16px;
 }
@@ -28,6 +28,12 @@
   justify-content: space-between;
   gap: 16px;
   padding: 8px 16px 8px 0;
+  position: sticky;
+  top: var(--gnav-offset-height);
+  z-index: 5;
+  background: white;
+
+  border-left: 1px solid white
 }
 
 .dt-header-text h2,
@@ -117,7 +123,7 @@
   border-bottom: 1px solid var(--color-gray-300);
   /* Borders on cells (not tr) so they travel with the sticky header row. */
   position: sticky;
-  top: var(--gnav-offset-height);
+  top: calc(var(--gnav-offset-height) + var(--dt-section-header-h, 0px));
   z-index: 2;
 }
 
@@ -250,19 +256,6 @@
 @media (max-width: 767px) {
   .dt-carousel-nav {
     display: flex;
-  }
-
-  /* Section header sticks at the nav offset; thead sticks just below it.
-     --dt-section-header-h is measured and set by JS. */
-  .dt-section-header {
-    position: sticky;
-    top: var(--gnav-offset-height);
-    z-index: 10;
-    background: white;
-  }
-
-  .dt-table thead th {
-    top: calc(var(--gnav-offset-height) + var(--dt-section-header-h, 0px));
   }
 
   /* overflow:clip clips based on layout position (pre-transform), so transforms
