@@ -78,6 +78,15 @@ export async function listDirectory(dirPath: string): Promise<DaListItem[]> {
   return resp.json() as Promise<DaListItem[]>;
 }
 
+export async function checkDirectoryExists(dirPath: string): Promise<boolean> {
+  try {
+    await listDirectory(dirPath);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export async function fetchSheet(daPath: string): Promise<Record<string, string>[]> {
   const t = getToken();
   if (!t) throw new Error('DA token not set; set VITE_DA_TOKEN or run from DA.live');

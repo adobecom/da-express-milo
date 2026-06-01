@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { cat, fetchSheet, validateTemplate } from '../api/daApi';
+import { cat, checkDirectoryExists, fetchSheet, validateTemplate } from '../api/daApi';
 import type { TemplateState } from '../types';
 
 interface Props {
@@ -13,13 +13,6 @@ interface TemplateOption {
   outputDir: string;
 }
 
-const STATUS_BADGE: Record<string, string> = {
-  ready: 'bg-green-100 text-green-700',
-  warning: 'bg-yellow-100 text-yellow-700',
-  invalid: 'bg-red-100 text-red-700',
-  error: 'bg-red-100 text-red-700',
-};
-
 const STATUS_CARD: Record<string, string> = {
   ready: 'bg-green-50 border-green-200',
   warning: 'bg-yellow-50 border-yellow-200',
@@ -27,14 +20,16 @@ const STATUS_CARD: Record<string, string> = {
   error: 'bg-red-50 border-red-200',
 };
 
-const STATUS_LABEL: Record<string, string> = {
-  ready: 'Ready',
-  warning: 'Warning',
-  invalid: 'Invalid',
-  error: 'Error',
-};
-
 const CONFIG_SHEET = '/adobecom/da-express-milo/drafts/maxn/document-generator/test-sheet';
+
+function ExternalLinkIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 shrink-0">
+      <path d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"/>
+      <path d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z"/>
+    </svg>
+  );
+}
 
 export default function TemplateConfirm({ state, onChange }: Props) {
   const [options, setOptions] = useState<TemplateOption[]>([]);
@@ -79,14 +74,17 @@ export default function TemplateConfirm({ state, onChange }: Props) {
   async function handleConfirm() {
     if (!selected) return;
     const { templatePath, outputDir } = selected;
-    onChange({ status: 'loading', html: null, sourcePath: templatePath, outputDir, placeholders: [], issues: [] });
+    onChange({ status: 'loading', html: null, sourcePath: templatePath, outputDir, outputDirValid: null, placeholders: [], issues: [] });
 
-    try {
-      const html = await cat(templatePath);
-      const validation = validateTemplate(html);
-      onChange({ status: validation.status, html, sourcePath: templatePath, outputDir, placeholders: validation.placeholders, issues: validation.issues });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
+    const [htmlResult, dirResult] = await Promise.allSettled([
+      cat(templatePath),
+      checkDirectoryExists(outputDir),
+    ]);
+
+    const dirExists = dirResult.status === 'fulfilled' ? dirResult.value : false;
+
+    if (htmlResult.status === 'rejected') {
+      const msg = htmlResult.reason instanceof Error ? htmlResult.reason.message : String(htmlResult.reason);
       const is403 = msg.startsWith('403');
       const is404 = msg.startsWith('404');
       onChange({
@@ -94,6 +92,7 @@ export default function TemplateConfirm({ state, onChange }: Props) {
         html: null,
         sourcePath: templatePath,
         outputDir,
+        outputDirValid: dirExists,
         placeholders: [],
         issues: [
           is403 ? 'Access denied — confirm you are in the correct DA organization'
@@ -101,7 +100,20 @@ export default function TemplateConfirm({ state, onChange }: Props) {
                 : `Fetch error: ${msg}`,
         ],
       });
+      return;
     }
+
+    const html = htmlResult.value;
+    const validation = validateTemplate(html);
+    onChange({
+      status: validation.status,
+      html,
+      sourcePath: templatePath,
+      outputDir,
+      outputDirValid: dirExists,
+      placeholders: validation.placeholders,
+      issues: validation.issues,
+    });
   }
 
   useEffect(() => {
@@ -111,6 +123,7 @@ export default function TemplateConfirm({ state, onChange }: Props) {
   }, [selected]);
 
   const showResult = state.status !== 'idle' && state.status !== 'loading';
+  const templateValid = state.status === 'ready' || state.status === 'warning';
 
   return (
     <div className="flex flex-col gap-4">
@@ -148,8 +161,8 @@ export default function TemplateConfirm({ state, onChange }: Props) {
                     }`}
                   >
                     <p className="text-sm font-medium text-gray-800">{opt.productName}</p>
-                    <p className="text-xs text-gray-400 truncate mt-0.5">{opt.templatePath}</p>
-                    <p className="text-xs text-gray-400 truncate">{opt.outputDir}</p>
+                    <p className="text-xs text-gray-400 truncate mt-0.5"><span className="font-medium">Template Path:</span> {opt.templatePath}</p>
+                    <p className="text-xs text-gray-400 truncate"><span className="font-medium">Output Directory:</span> {opt.outputDir}</p>
                   </li>
                 ))}
               </ul>
@@ -159,31 +172,40 @@ export default function TemplateConfirm({ state, onChange }: Props) {
 
         <p className="text-xs text-gray-400 pl-1">
           Template config from{' '}
-          <code className="bg-gray-100 px-1 rounded font-mono">{CONFIG_SHEET}</code>
+          <a
+            href={`https://da.live/sheet#${CONFIG_SHEET}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-mono text-gray-500 hover:text-blue-600 inline-flex items-center gap-0.5"
+          >
+            <code className="bg-gray-100 px-1 rounded">{CONFIG_SHEET}</code>
+            <ExternalLinkIcon />
+          </a>
         </p>
       </div>
 
       {showResult && (
         <div className={`rounded-xl p-4 border flex flex-col gap-3 ${STATUS_CARD[state.status]}`}>
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${STATUS_BADGE[state.status]}`}>
-              {STATUS_LABEL[state.status]}
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-gray-600">Template Path</span>
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              templateValid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+            }`}>
+              {templateValid ? 'Valid' : 'Invalid'}
             </span>
-            {state.sourcePath && (
-              <a
-                href={`https://da.live/edit#${state.sourcePath}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-xs text-gray-500 break-all hover:text-blue-600 font-mono inline-flex items-center gap-1"
-              >
-                {state.sourcePath}
-                <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 shrink-0">
-                  <path d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"/>
-                  <path d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z"/>
-                </svg>
-              </a>
-            )}
           </div>
+
+          {state.sourcePath && (
+            <a
+              href={`https://da.live/edit#${state.sourcePath}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-gray-500 break-all hover:text-blue-600 font-mono inline-flex items-center gap-1"
+            >
+              {state.sourcePath}
+              <ExternalLinkIcon />
+            </a>
+          )}
 
           {state.placeholders.length > 0 && (
             <div>
@@ -211,6 +233,37 @@ export default function TemplateConfirm({ state, onChange }: Props) {
                 ))}
               </ul>
             </div>
+          )}
+        </div>
+      )}
+
+      {state.outputDir && state.outputDirValid !== null && (
+        <div className={`rounded-xl p-4 border flex flex-col gap-3 ${
+          state.outputDirValid ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-gray-600">Output Directory</span>
+            <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
+              state.outputDirValid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+            }`}>
+              {state.outputDirValid ? 'Valid' : 'Invalid'}
+            </span>
+          </div>
+
+          <a
+            href={`https://da.live/#${state.outputDir}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-xs text-gray-500 break-all hover:text-blue-600 font-mono inline-flex items-center gap-1"
+          >
+            {state.outputDir}
+            <ExternalLinkIcon />
+          </a>
+
+          {!state.outputDirValid && (
+            <p className="text-xs text-red-600">
+              Directory not found — confirm the path exists in DA before generating
+            </p>
           )}
         </div>
       )}

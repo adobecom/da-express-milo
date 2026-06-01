@@ -9,6 +9,7 @@ const INITIAL_TEMPLATE: TemplateState = {
   html: null,
   sourcePath: null,
   outputDir: null,
+  outputDirValid: null,
   placeholders: [],
   issues: [],
 };
@@ -19,7 +20,9 @@ export default function App() {
   const [csvReadiness, setCsvReadiness] = useState({ dataComplete: false, idsValid: false, noDuplicates: true });
 
   const inputsReady = rows.length > 0;
-  const templateReady = template.status === 'ready' || template.status === 'warning';
+  const templateReady =
+    (template.status === 'ready' || template.status === 'warning') &&
+    template.outputDirValid === true;
   const canGenerate = inputsReady && templateReady;
 
   const generateBlockReason: string | undefined =
