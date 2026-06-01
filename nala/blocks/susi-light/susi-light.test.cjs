@@ -127,5 +127,19 @@ test.describe('SusiLightBlock Test Suite', () => {
     await test.step('step-4: SEO validation', async () => {
       await runSeoChecks({ page, feature: features[1], skipSeoTest: false });
     });
+
+    await test.step('step-5: Tab switch preserves layout height (CLS)', async () => {
+      const heightTolerancePx = 8;
+      await block.waitForSusiReady();
+      const susiCount = await block.susiComponent.count();
+      if (susiCount < 2) {
+        test.skip(true, 'SUSI CDN unavailable — expected susi-sentry-light in both tab panels');
+      }
+      const heightTab0 = await block.getLayoutHeight();
+      expect(heightTab0).toBeGreaterThan(0);
+      await block.clickTab(1);
+      const heightTab1 = await block.getLayoutHeight();
+      expect(Math.abs(heightTab0 - heightTab1)).toBeLessThanOrEqual(heightTolerancePx);
+    });
   });
 });

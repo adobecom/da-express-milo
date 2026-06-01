@@ -1,7 +1,18 @@
+/*
+ * CLS height tokens (max prod Elm + draft/stage, +8px buffer).
+ * Re-measure on: adobe.com/express/login, prod modals, drafts/sircar/login,
+ * drafts/sircar/susi-light-copy when SUSI wrapper or authoring changes.
+ */
 :root {
   --susi-modal-width: 370px;
   --susi-tabs-width: 400px;
-  --susi-min-height: 462px;
+  --susi-min-height: 580px;
+  --susi-tabs-panel-height: 528px;
+  --susi-wrapper-standard: 458px;
+  --susi-wrapper-edu-express: 400px;
+  --susi-wrapper-student: 422px;
+  --susi-wrapper-b2b-email-only: 380px;
+  --susi-wrapper-simplified: 400px;
   --susi-standard-padding: 24px;
 }
 
@@ -116,25 +127,44 @@
 .susi-light.tabs [role='tabpanel'] {
   width: var(--susi-tabs-width);
   max-width: 95vw;
+  min-height: var(--susi-tabs-panel-height);
 }
 
 .susi-light.tabs [role='tabpanel'].hide {
   display: none;
 }
 
-/* CLS optiimzations */
-/* TODO: makes this dynamic based on # of social logins */
-.susi-light.tabs [role='tabpanel'].standard .susi-wrapper {
-  min-height: 457.5px;
-}
-
-.susi-light.tabs [role='tabpanel'].edu-express .susi-wrapper {
-  min-height: 366.5px;
+/* CLS: unified tab panel height (widget + footer); avoids tab-switch jump */
+.susi-light.tabs [role='tabpanel'] .susi-wrapper {
+  min-height: 0;
 }
 
 .susi-light.student .susi-wrapper {
-  min-height: 421.5px;
+  min-height: var(--susi-wrapper-student);
   width: var(--susi-modal-width);
+}
+
+.susi-light.edu .susi-wrapper {
+  min-height: var(--susi-wrapper-edu-express);
+}
+
+.susi-light.b2b .susi-wrapper {
+  min-height: var(--susi-wrapper-standard);
+}
+
+.susi-light.b2b.email-only .susi-wrapper {
+  min-height: var(--susi-wrapper-b2b-email-only);
+}
+
+.susi-light.simplified .susi-wrapper {
+  min-height: var(--susi-wrapper-simplified);
+}
+
+/* legacy buildEdu: susi-sentry-light without .susi-layout / .susi-wrapper */
+.susi-light:not(:has(.susi-layout)) > susi-sentry-light {
+  display: block;
+  width: 100%;
+  min-height: var(--susi-wrapper-edu-express);
 }
 
 /* student styles */
