@@ -350,16 +350,33 @@ async function buildStudent(el, locale, imsClientId, noRedirect) {
 // each tab wraps susi component with custom logo + footer
 let tabsId = 0;
 
-/** Tab panel min-heights (widget + footer); sync with :root tokens in susi-light.css */
+function readTokenPx(root, prop, fallback) {
+  const n = parseFloat(root.getPropertyValue(prop));
+  return Number.isFinite(n) ? n : fallback;
+}
+
+/** Tab panel slot = max(measured panel per variant) + buffer; sync tokens in susi-light.css */
 export function resolveTabsPanelMinHeight(variants) {
   const root = getComputedStyle(document.documentElement);
-  const parsePx = (prop, fallback) => {
-    const n = parseFloat(root.getPropertyValue(prop));
-    return Number.isFinite(n) ? n : fallback;
+  const panelByVariant = {
+    standard: readTokenPx(root, '--susi-tabs-panel-standard', 508),
+    'edu-express': readTokenPx(root, '--susi-tabs-panel-edu-express', 513),
   };
+  const buffer = readTokenPx(root, '--susi-tabs-panel-buffer', 8);
+  const fallback = readTokenPx(root, '--susi-tabs-panel-height', 521);
+  const heights = variants
+    .filter(Boolean)
+    .map((v) => panelByVariant[v] ?? panelByVariant.standard);
+  if (!heights.length) return fallback;
+  return Math.ceil(Math.max(...heights) + buffer);
+}
+
+/** Tallest widget min-height across authored variants (for tests / tooling) */
+export function resolveTabsWrapperMinHeight(variants) {
+  const root = getComputedStyle(document.documentElement);
   const byVariant = {
-    standard: parsePx('--susi-tabs-panel-height', 528),
-    'edu-express': parsePx('--susi-tabs-panel-height-edu-express', 480),
+    standard: readTokenPx(root, '--susi-tabs-wrapper-standard', 458),
+    'edu-express': readTokenPx(root, '--susi-tabs-wrapper-edu-express', 367),
   };
   const fallback = byVariant.standard;
   const heights = variants
@@ -367,6 +384,11 @@ export function resolveTabsPanelMinHeight(variants) {
     .map((v) => byVariant[v] ?? fallback);
   if (!heights.length) return fallback;
   return Math.max(...heights);
+}
+
+/** Reserve tallest tab panel slot from authoring row 2 variants (CLS). */
+export function applyTabsReserveFromAuthoring(el, variants) {
+  el.style.setProperty('--susi-tabs-panel-height', `${resolveTabsPanelMinHeight(variants)}px`);
 }
 
 function setTabPanelActive(panel, isActive) {
@@ -384,7 +406,7 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
   const title = rows[0].textContent?.trim();
   const tabNames = [...rows[1].querySelectorAll('div')].map((div) => div.textContent);
   const variants = [...rows[2].querySelectorAll('div')].map((div) => div.textContent?.trim().toLowerCase());
-  el.style.setProperty('--susi-tabs-panel-height', `${resolveTabsPanelMinHeight(variants)}px`);
+  applyTabsReserveFromAuthoring(el, variants);
   const redirectUrls = [...rows[3].querySelectorAll('div')].map((div) => div.textContent?.trim());
   const client_ids = [...rows[4].querySelectorAll('div')].map((div) => div.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb'));
   const footers = rows[5] ? [...rows[5].querySelectorAll('div')] : [];
@@ -452,7 +474,9 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
     return panel;
   });
   const titleDiv = createTag('div', { class: 'title' }, title);
-  layout.append(createLogo(), titleDiv, tabList, ...panels);
+  const tabPanelsSlot = createTag('div', { class: 'susi-tab-panels' });
+  panels.forEach((panel) => tabPanelsSlot.append(panel));
+  layout.append(createLogo(), titleDiv, tabList, tabPanelsSlot);
   return layout;
 }
 

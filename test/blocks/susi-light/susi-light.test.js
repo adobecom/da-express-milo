@@ -17,7 +17,7 @@ const imports = await Promise.all([
 const [{
   getLibs,
 }, _, {
-  default: decorate, SUSIUtils, DCTX_ID_MAP, resolveTabsPanelMinHeight,
+  default: decorate, SUSIUtils, DCTX_ID_MAP, resolveTabsPanelMinHeight, resolveTabsWrapperMinHeight,
 }] = imports;
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   const conf = { locales };
@@ -80,17 +80,22 @@ describe('Susi-light', async () => {
   describe('susi-light tabs variant', () => {
     const block = document.querySelector('.susi-light.tabs');
 
-    it('sets tab panel min-height from tallest authored variant', () => {
-      expect(block.style.getPropertyValue('--susi-tabs-panel-height').trim()).to.equal('528px');
-      expect(resolveTabsPanelMinHeight(['standard', 'edu-express'])).to.equal(528);
-      expect(resolveTabsPanelMinHeight(['edu-express', 'edu-express'])).to.equal(480);
-      expect(resolveTabsPanelMinHeight([])).to.equal(528);
-      expect(resolveTabsPanelMinHeight(['', ''])).to.equal(528);
+    it('sets tab panel height from tallest measured panel token + buffer', () => {
+      expect(block.style.getPropertyValue('--susi-tabs-panel-height').trim()).to.equal('521px');
+      expect(resolveTabsPanelMinHeight(['standard', 'edu-express'])).to.equal(521);
+      expect(resolveTabsPanelMinHeight(['standard', 'standard'])).to.equal(516);
+      expect(resolveTabsWrapperMinHeight(['standard', 'edu-express'])).to.equal(458);
+      expect(resolveTabsPanelMinHeight(['edu-express', 'edu-express'])).to.equal(521);
+      expect(resolveTabsWrapperMinHeight(['edu-express', 'edu-express'])).to.equal(367);
+      expect(resolveTabsPanelMinHeight([])).to.equal(521);
+      expect(resolveTabsWrapperMinHeight([])).to.equal(458);
     });
 
     it('allocates content into tabs', () => {
       expect(block.querySelector('.express-logo')).to.exist;
       expect(block.querySelector('.title')).to.exist;
+      expect(block.querySelector('.susi-tab-panels')).to.exist;
+      expect(block.querySelectorAll('.susi-tab-panels [role=tabpanel]').length).to.equal(2);
       expect(block.querySelectorAll('[role=tablist] > [role=tab]').length).to.equal(2);
       expect(block.querySelectorAll('[role=tabpanel]').length).to.equal(2);
       expect(block.querySelectorAll('[role=tabpanel].standard')).to.exist;

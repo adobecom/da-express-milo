@@ -1,16 +1,18 @@
 /*
- * CLS height tokens: max(prod Elm, draft/stage) full panel + 8px buffer.
- * PR sign-off: measure adobe.com/express/login + draft login + modals before
- * changing values. Tab panels: --susi-tabs-panel-height (standard/tall tab),
- * --susi-tabs-panel-height-edu-express (short tab / edu-only fixtures).
+ * CLS height tokens: measure adobe.com/express/login tab panels + modals before changing.
+ * Tab slot: --susi-tabs-panel-height (block override via JS from --susi-tabs-panel-*).
+ * Modal widget: --susi-wrapper-standard (484px), email-only 380px.
  */
 :root {
   --susi-modal-width: 370px;
   --susi-tabs-width: 400px;
-  --susi-min-height: 580px;
-  --susi-tabs-panel-height: 528px;
-  --susi-tabs-panel-height-edu-express: 480px;
-  --susi-wrapper-standard: 458px;
+  --susi-tabs-panel-height: 521px;
+  --susi-tabs-panel-standard: 508px;
+  --susi-tabs-panel-edu-express: 513px;
+  --susi-tabs-wrapper-standard: 458px;
+  --susi-tabs-wrapper-edu-express: 367px;
+  --susi-tabs-panel-buffer: 8px;
+  --susi-wrapper-standard: 484px;
   --susi-wrapper-edu-express: 400px;
   --susi-wrapper-student: 422px;
   --susi-wrapper-b2b-email-only: 380px;
@@ -126,19 +128,56 @@
   background-color: var(--color-white);
 }
 
-.susi-light.tabs [role='tabpanel'] {
+.susi-light.tabs .susi-tab-panels {
+  position: relative;
   width: var(--susi-tabs-width);
   max-width: 95vw;
+  height: var(--susi-tabs-panel-height);
   min-height: var(--susi-tabs-panel-height);
+  max-height: var(--susi-tabs-panel-height);
+  flex-shrink: 0;
+  box-sizing: border-box;
+}
+
+.susi-light.tabs [role='tabpanel'] {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  min-height: var(--susi-tabs-panel-height);
+  box-sizing: border-box;
 }
 
 .susi-light.tabs [role='tabpanel'].hide {
   display: none;
 }
 
-/* CLS: unified tab panel height (widget + footer); avoids tab-switch jump */
-.susi-light.tabs [role='tabpanel'] .susi-wrapper {
-  min-height: 0;
+.susi-light.tabs [role='tabpanel'].standard .susi-wrapper {
+  flex: 0 0 auto;
+  min-height: var(--susi-tabs-wrapper-standard);
+}
+
+.susi-light.tabs [role='tabpanel'].edu-express .susi-wrapper {
+  flex: 0 0 auto;
+  min-height: var(--susi-tabs-wrapper-edu-express);
+}
+
+.susi-light.tabs [role='tabpanel'] .footer {
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.dialog-modal .susi-light.tabs .susi-tab-panels {
+  height: var(--susi-tabs-panel-height);
+  min-height: var(--susi-tabs-panel-height);
+  max-height: var(--susi-tabs-panel-height);
+}
+
+.dialog-modal .susi-light.tabs [role='tabpanel'] {
+  flex: 0 0 auto;
+  height: var(--susi-tabs-panel-height);
+  min-height: var(--susi-tabs-panel-height);
+  max-height: var(--susi-tabs-panel-height);
 }
 
 .susi-light.student .susi-wrapper {
@@ -162,7 +201,6 @@
   min-height: var(--susi-wrapper-simplified);
 }
 
-/* legacy buildEdu: susi-sentry-light without .susi-layout / .susi-wrapper */
 .susi-light:not(:has(.susi-layout)) > susi-sentry-light {
   display: block;
   width: 100%;
@@ -202,12 +240,37 @@
 /* modal styles */
 .dialog-modal:has(.susi-light) {
   width: var(--susi-modal-width);
-  min-height: var(--susi-min-height);
 }
 
 .dialog-modal:has(.susi-light.tabs) {
   width: var(--susi-tabs-width);
-  min-height: var(--susi-min-height);
+}
+
+.dialog-modal:has(.susi-light.tabs) .susi-layout {
+  align-items: stretch;
+}
+
+.dialog-modal:has(.susi-light.edu .susi-layout) .susi-wrapper,
+.dialog-modal:has(.susi-light.b2b:not(.email-only) .susi-layout) .susi-wrapper,
+.dialog-modal:has(.susi-light.student .susi-layout) .susi-wrapper {
+  flex: 0 0 var(--susi-wrapper-standard);
+  height: var(--susi-wrapper-standard);
+  min-height: 0;
+  max-height: var(--susi-wrapper-standard);
+  overflow: auto;
+}
+
+.dialog-modal:has(.susi-light.b2b.email-only) .susi-wrapper {
+  flex: 0 0 var(--susi-wrapper-b2b-email-only);
+  height: var(--susi-wrapper-b2b-email-only);
+  min-height: 0;
+  max-height: var(--susi-wrapper-b2b-email-only);
+  overflow: auto;
+}
+
+.dialog-modal .susi-light {
+  align-items: stretch;
+  justify-content: flex-start;
 }
 
 .dialog-modal .susi-light .express-logo {

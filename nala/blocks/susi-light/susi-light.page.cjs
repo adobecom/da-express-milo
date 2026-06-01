@@ -18,7 +18,7 @@ class SusiLightBlock {
 
   async clickTab(index) {
     await this.tabs.nth(index).click();
-    await this.susiComponent.nth(index).waitFor({ state: 'visible', timeout: 30000 });
+    await this.susiComponent.nth(index).waitFor({ state: 'attached', timeout: 30000 });
   }
 }
 
