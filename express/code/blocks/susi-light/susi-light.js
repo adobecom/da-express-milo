@@ -349,11 +349,42 @@ async function buildStudent(el, locale, imsClientId, noRedirect) {
 
 // each tab wraps susi component with custom logo + footer
 let tabsId = 0;
+
+/** Tab panel min-heights (widget + footer); sync with :root tokens in susi-light.css */
+export function resolveTabsPanelMinHeight(variants) {
+  const root = getComputedStyle(document.documentElement);
+  const parsePx = (prop, fallback) => {
+    const n = parseFloat(root.getPropertyValue(prop));
+    return Number.isFinite(n) ? n : fallback;
+  };
+  const byVariant = {
+    standard: parsePx('--susi-tabs-panel-height', 528),
+    'edu-express': parsePx('--susi-tabs-panel-height-edu-express', 480),
+  };
+  const fallback = byVariant.standard;
+  const heights = variants
+    .filter(Boolean)
+    .map((v) => byVariant[v] ?? fallback);
+  if (!heights.length) return fallback;
+  return Math.max(...heights);
+}
+
+function setTabPanelActive(panel, isActive) {
+  panel.classList.toggle('hide', !isActive);
+  panel.setAttribute('aria-hidden', String(!isActive));
+  if (isActive) {
+    panel.removeAttribute('inert');
+  } else {
+    panel.setAttribute('inert', '');
+  }
+}
+
 async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
   const rows = [...el.children];
   const title = rows[0].textContent?.trim();
   const tabNames = [...rows[1].querySelectorAll('div')].map((div) => div.textContent);
   const variants = [...rows[2].querySelectorAll('div')].map((div) => div.textContent?.trim().toLowerCase());
+  el.style.setProperty('--susi-tabs-panel-height', `${resolveTabsPanelMinHeight(variants)}px`);
   const redirectUrls = [...rows[3].querySelectorAll('div')].map((div) => div.textContent?.trim());
   const client_ids = [...rows[4].querySelectorAll('div')].map((div) => div.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb'));
   const footers = rows[5] ? [...rows[5].querySelectorAll('div')] : [];
@@ -405,7 +436,7 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
     const id = sanitizeId(`${tabName}-${tabsId}`);
     panel.setAttribute('aria-labelledby', `tab-${id}`);
     panel.id = `panel-${id}`;
-    i > 0 && panel.classList.add('hide');
+    setTabPanelActive(panel, i === 0);
     const tab = createTag('button', {
       role: 'tab',
       'aria-selected': i === 0,
@@ -415,9 +446,7 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
     tab.addEventListener('click', () => {
       tabList.querySelector('[aria-selected=true]')?.setAttribute('aria-selected', false);
       tab.setAttribute('aria-selected', true);
-      panels.forEach((p) => {
-        p !== panel ? p.classList.add('hide') : p.classList.remove('hide');
-      });
+      panels.forEach((p) => setTabPanelActive(p, p === panel));
     });
     tabList.append(tab);
     return panel;

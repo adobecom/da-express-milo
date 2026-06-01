@@ -1,13 +1,15 @@
 /*
- * CLS height tokens (max prod Elm + draft/stage, +8px buffer).
- * Re-measure on: adobe.com/express/login, prod modals, drafts/sircar/login,
- * drafts/sircar/susi-light-copy when SUSI wrapper or authoring changes.
+ * CLS height tokens: max(prod Elm, draft/stage) full panel + 8px buffer.
+ * PR sign-off: measure adobe.com/express/login + draft login + modals before
+ * changing values. Tab panels: --susi-tabs-panel-height (standard/tall tab),
+ * --susi-tabs-panel-height-edu-express (short tab / edu-only fixtures).
  */
 :root {
   --susi-modal-width: 370px;
   --susi-tabs-width: 400px;
   --susi-min-height: 580px;
   --susi-tabs-panel-height: 528px;
+  --susi-tabs-panel-height-edu-express: 480px;
   --susi-wrapper-standard: 458px;
   --susi-wrapper-edu-express: 400px;
   --susi-wrapper-student: 422px;

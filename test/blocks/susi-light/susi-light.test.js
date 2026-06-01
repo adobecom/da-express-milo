@@ -14,7 +14,11 @@ const imports = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
   import('../../../express/code/blocks/susi-light/susi-light.js'),
 ]);
-const [{ getLibs }, _, { default: decorate, SUSIUtils, DCTX_ID_MAP }] = imports;
+const [{
+  getLibs,
+}, _, {
+  default: decorate, SUSIUtils, DCTX_ID_MAP, resolveTabsPanelMinHeight,
+}] = imports;
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
   const conf = { locales };
   mod.setConfig(conf);
@@ -76,6 +80,14 @@ describe('Susi-light', async () => {
   describe('susi-light tabs variant', () => {
     const block = document.querySelector('.susi-light.tabs');
 
+    it('sets tab panel min-height from tallest authored variant', () => {
+      expect(block.style.getPropertyValue('--susi-tabs-panel-height').trim()).to.equal('528px');
+      expect(resolveTabsPanelMinHeight(['standard', 'edu-express'])).to.equal(528);
+      expect(resolveTabsPanelMinHeight(['edu-express', 'edu-express'])).to.equal(480);
+      expect(resolveTabsPanelMinHeight([])).to.equal(528);
+      expect(resolveTabsPanelMinHeight(['', ''])).to.equal(528);
+    });
+
     it('allocates content into tabs', () => {
       expect(block.querySelector('.express-logo')).to.exist;
       expect(block.querySelector('.title')).to.exist;
@@ -102,6 +114,10 @@ describe('Susi-light', async () => {
         expect(tab2.getAttribute('aria-selected')).to.equal('false');
         expect(panel1.classList.contains('hide')).to.be.false;
         expect(panel2.classList.contains('hide')).to.be.true;
+        expect(panel1.getAttribute('aria-hidden')).to.equal('false');
+        expect(panel2.getAttribute('aria-hidden')).to.equal('true');
+        expect(panel1.hasAttribute('inert')).to.be.false;
+        expect(panel2.hasAttribute('inert')).to.be.true;
       },
       () => {
         const [tab1, tab2] = [...block.querySelectorAll('[role=tab]')];
@@ -110,6 +126,10 @@ describe('Susi-light', async () => {
         expect(tab2.getAttribute('aria-selected')).to.equal('true');
         expect(panel1.classList.contains('hide')).to.be.true;
         expect(panel2.classList.contains('hide')).to.be.false;
+        expect(panel1.getAttribute('aria-hidden')).to.equal('true');
+        expect(panel2.getAttribute('aria-hidden')).to.equal('false');
+        expect(panel1.hasAttribute('inert')).to.be.true;
+        expect(panel2.hasAttribute('inert')).to.be.false;
       },
     ];
     it('displays first tab by default', () => {
