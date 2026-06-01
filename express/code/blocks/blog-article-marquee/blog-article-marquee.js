@@ -34,7 +34,7 @@ function formatPublicationDate(dateStr, formatter) {
       publicationDate = new Date(Date.UTC(y, m - 1, d));
     }
   }
-  if (!publicationDate || Number.isNaN(publicationDate.getTime())) return dateStr;
+  if (!publicationDate || Number.isNaN(publicationDate.getTime())) return '';
   return formatter.format(publicationDate);
 }
 
