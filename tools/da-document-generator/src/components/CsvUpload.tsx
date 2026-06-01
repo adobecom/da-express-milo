@@ -87,6 +87,9 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
   const [validateMsg, setValidateMsg] = useState<string | null>(null);
   const [validationStatus, setValidationStatus] = useState<Record<string, 'valid' | 'invalid'>>({});
   const [columns, setColumns] = useState<string[]>([]);
+  const [zazzleHydratedFields, setZazzleHydratedFields] = useState<Record<string, string[]>>({});
+  const [zazzleReferenceValues, setZazzleReferenceValues] = useState<Record<string, { title?: string; description?: string }>>({});
+  const [expandedDiffCells, setExpandedDiffCells] = useState<Record<string, boolean>>({});
   const fileRef = useRef<HTMLInputElement>(null);
 
   const summary = computeSummary(rows);
@@ -118,22 +121,34 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
     setHydrating(true);
     setHydrateMsg(null);
     const zazzleMap = buildZazzleMap();
+    const hydratedFields: Record<string, string[]> = {};
+    const referenceValues: Record<string, { title?: string; description?: string }> = {};
     const updated = await Promise.all(
       rows.map(async (row) => {
         const hasMissing = tableColumns.some((col) => !row[col]?.trim());
         if (!hasMissing || !row.template_id?.trim()) return row;
         const product = await fetchProductFromTemplate(row.template_id);
         if (!product) return row;
+        referenceValues[row._id] = {
+          title: product.rootRawTitle,
+          description: product.description,
+        };
         const filled = { ...row };
+        const newlyHydrated: string[] = [];
         for (const col of tableColumns) {
           if (!filled[col]?.trim()) {
             const zKey = zazzleMap[col];
-            if (zKey) filled[col] = String((product as unknown as Record<string, unknown>)[zKey] ?? '');
+            if (zKey) {
+              filled[col] = String((product as unknown as Record<string, unknown>)[zKey] ?? '');
+              newlyHydrated.push(col);
+            }
           }
         }
         if (!filled['url_slug']?.trim() && filled['short_title']?.trim()) {
           filled['url_slug'] = slugify(filled['short_title']);
+          if (!newlyHydrated.includes('url_slug')) newlyHydrated.push('url_slug');
         }
+        hydratedFields[row._id] = newlyHydrated;
         return filled;
       }),
     );
@@ -141,6 +156,9 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
     setHydrateMsg(changedCount > 0
       ? `Updated ${changedCount} row${changedCount === 1 ? '' : 's'} from Zazzle`
       : 'No matching Zazzle data found for missing fields');
+    setZazzleHydratedFields(hydratedFields);
+    setZazzleReferenceValues(referenceValues);
+    setExpandedDiffCells({});
     onChange(updated);
     setHydrating(false);
   }
@@ -208,6 +226,9 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
     setValidationStatus({});
     setValidateMsg(null);
     setHydrateMsg(null);
+    setZazzleHydratedFields({});
+    setZazzleReferenceValues({});
+    setExpandedDiffCells({});
     onChange(ids.map((id, i) => ({ _id: String(i), template_id: id, title: '', short_title: '', description: '', url_slug: '' })));
   }
 
@@ -215,6 +236,9 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
     setValidationStatus({});
     setValidateMsg(null);
     setHydrateMsg(null);
+    setZazzleHydratedFields({});
+    setZazzleReferenceValues({});
+    setExpandedDiffCells({});
     if (file.name.endsWith('.xlsx')) {
       parseXlsx(file);
     } else {
@@ -379,6 +403,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
         </div>
       )}
 
+      {hasData && Object.keys(zazzleHydratedFields).length > 0 && <ZazzleLegend />}
       <DataTable
         columns={tableColumns}
         rows={visibleRows}
@@ -386,6 +411,10 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
         validationStatus={validationStatus}
         duplicateTemplateIdRowIds={summary.duplicateTemplateIdRowIds}
         duplicateSlugRowIds={summary.duplicateSlugRowIds}
+        zazzleHydratedFields={zazzleHydratedFields}
+        zazzleReferenceValues={zazzleReferenceValues}
+        expandedDiffCells={expandedDiffCells}
+        onToggleDiffCell={(key) => setExpandedDiffCells((prev) => ({ ...prev, [key]: !prev[key] }))}
       />
       {hasData && rows.length > MAX_VISIBLE_ROWS && (
         <p className="text-xs text-gray-400 text-center">
@@ -403,6 +432,10 @@ function DataTable({
   validationStatus = {},
   duplicateTemplateIdRowIds = new Set(),
   duplicateSlugRowIds = new Set(),
+  zazzleHydratedFields = {},
+  zazzleReferenceValues = {},
+  expandedDiffCells = {},
+  onToggleDiffCell,
 }: {
   columns: string[];
   rows: CsvRow[];
@@ -410,6 +443,10 @@ function DataTable({
   validationStatus?: Record<string, 'valid' | 'invalid'>;
   duplicateTemplateIdRowIds?: Set<string>;
   duplicateSlugRowIds?: Set<string>;
+  zazzleHydratedFields?: Record<string, string[]>;
+  zazzleReferenceValues?: Record<string, { title?: string; description?: string }>;
+  expandedDiffCells?: Record<string, boolean>;
+  onToggleDiffCell?: (key: string) => void;
 }) {
   return (
     <div className={`overflow-auto rounded-xl border border-gray-200 max-h-[420px] ${placeholder ? 'opacity-40' : ''}`}>
@@ -447,26 +484,59 @@ function DataTable({
                 </td>
                 {columns.map((col) => {
                   const isEmpty = !placeholder && !row[col]?.trim();
+                  const isHydrated = !placeholder && (zazzleHydratedFields[row._id]?.includes(col) ?? false);
+                  const isTitleCol = col === 'title' || col === 'short_title';
+                  const isDescCol = col === 'description';
+                  const zazzleRef = (isTitleCol || isDescCol)
+                    ? (isTitleCol ? zazzleReferenceValues[row._id]?.title : zazzleReferenceValues[row._id]?.description)
+                    : undefined;
+                  const hasComparison = !isHydrated && !!zazzleRef && !!row[col]?.trim();
+                  const valuesMatch = hasComparison && row[col]?.trim() === zazzleRef?.trim();
+                  const diffKey = `${row._id}-${col}`;
+                  const isDiffExpanded = expandedDiffCells[diffKey] ?? false;
+                  const cellClass = isHydrated
+                    ? 'bg-purple-50 text-purple-700'
+                    : isEmpty
+                      ? 'bg-red-50 text-red-400 italic'
+                      : 'text-gray-700';
                   return (
-                    <td
-                      key={col}
-                      className={`px-3 py-2 ${isEmpty ? 'bg-red-50 text-red-400 italic' : 'text-gray-700'}`}
-                    >
-                      <div className="flex items-center gap-1">
-                        {col === 'template_id' && isTemplateDup && (
-                          <span className="shrink-0 font-bold text-orange-500" title="Duplicate template ID">⚠</span>
-                        )}
-                        {col === 'template_id' && status && (
-                          <span className={`shrink-0 font-bold ${status === 'valid' ? 'text-green-500' : 'text-red-500'}`}>
-                            {status === 'valid' ? '✓' : '✗'}
-                          </span>
-                        )}
-                        {col === 'url_slug' && isSlugDup && (
-                          <span className="shrink-0 font-bold text-orange-500" title="Duplicate URL slug">⚠</span>
-                        )}
-                        <div className="overflow-x-auto whitespace-nowrap min-w-0 flex-1">
-                          {isEmpty ? '—' : (row[col] ?? '')}
+                    <td key={col} className={`px-3 py-2 ${cellClass}`}>
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-1">
+                          {col === 'template_id' && isTemplateDup && (
+                            <span className="shrink-0 font-bold text-orange-500" title="Duplicate template ID">⚠</span>
+                          )}
+                          {col === 'template_id' && status && (
+                            <span className={`shrink-0 font-bold ${status === 'valid' ? 'text-green-500' : 'text-red-500'}`}>
+                              {status === 'valid' ? '✓' : '✗'}
+                            </span>
+                          )}
+                          {col === 'url_slug' && isSlugDup && (
+                            <span className="shrink-0 font-bold text-orange-500" title="Duplicate URL slug">⚠</span>
+                          )}
+                          {hasComparison && valuesMatch && (
+                            <span className="shrink-0 text-green-500 font-bold" title="Matches Zazzle data">✓</span>
+                          )}
+                          {hasComparison && !valuesMatch && (
+                            <button
+                              type="button"
+                              onClick={() => onToggleDiffCell?.(diffKey)}
+                              className="shrink-0 flex items-center gap-0.5 font-medium text-amber-600 hover:text-amber-800 cursor-pointer"
+                              title="Differs from Zazzle — click to see Zazzle's value"
+                            >
+                              <span>⚠</span>
+                              <span className="text-xs leading-none">{isDiffExpanded ? '▲' : '▼'}</span>
+                            </button>
+                          )}
+                          <div className="overflow-x-auto whitespace-nowrap min-w-0 flex-1">
+                            {isEmpty ? '—' : (row[col] ?? '')}
+                          </div>
                         </div>
+                        {hasComparison && !valuesMatch && isDiffExpanded && (
+                          <div className="mt-1 text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded px-2 py-1 whitespace-normal">
+                            <span className="font-medium">Zazzle: </span>{zazzleRef}
+                          </div>
+                        )}
                       </div>
                     </td>
                   );
@@ -491,6 +561,26 @@ function DataTable({
           })}
         </tbody>
       </table>
+    </div>
+  );
+}
+
+function ZazzleLegend() {
+  return (
+    <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
+      <span className="font-medium text-gray-600">Legend:</span>
+      <span className="flex items-center gap-1">
+        <span className="inline-block w-3 h-3 rounded-sm bg-purple-100 border border-purple-300" />
+        Populated from Zazzle
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="text-green-500 font-bold">✓</span>
+        Matches Zazzle
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="text-amber-600 font-bold">⚠</span>
+        Differs from Zazzle
+      </span>
     </div>
   );
 }
