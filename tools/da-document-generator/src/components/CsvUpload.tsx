@@ -75,6 +75,27 @@ function slugify(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
 }
 
+function ensureShortTitle(fields: string[], rows: CsvRow[]): { fields: string[]; rows: CsvRow[] } {
+  const hasTitle = fields.includes('title');
+  const hasShortTitle = fields.includes('short_title');
+  if (hasShortTitle) return { fields, rows };
+
+  const normalizedFields = [...fields];
+  let normalizedRows = rows;
+
+  if (!hasTitle) {
+    const tidx = normalizedFields.indexOf('template_id');
+    normalizedFields.splice(tidx >= 0 ? tidx + 1 : normalizedFields.length, 0, 'title');
+    normalizedRows = normalizedRows.map((row) => ({ ...row, title: '' }));
+  }
+
+  const titleIdx = normalizedFields.indexOf('title');
+  normalizedFields.splice(titleIdx + 1, 0, 'short_title');
+  normalizedRows = normalizedRows.map((row) => ({ ...row, short_title: row.title ?? '' }));
+
+  return { fields: normalizedFields, rows: normalizedRows };
+}
+
 const MAX_VISIBLE_ROWS = 200;
 
 export default function CsvUpload({ rows, onChange, placeholders = [], onReadinessChange }: Props) {
@@ -190,10 +211,11 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
       skipEmptyLines: true,
       transformHeader: (h) => h.trim(),
       complete: (result) => {
-        const fields = (result.meta.fields ?? []).filter((f) => f !== '_id');
+        const rawFields = (result.meta.fields ?? []).filter((f) => f !== '_id');
+        const rawParsed = result.data.map((row, i) => ({ ...row, _id: String(i) })) as CsvRow[];
+        const { fields, rows } = ensureShortTitle(rawFields, rawParsed);
         setColumns(fields);
-        const parsed = result.data.map((row, i) => ({ ...row, _id: String(i) })) as CsvRow[];
-        onChange(parsed);
+        onChange(rows);
       },
     });
   }
@@ -205,13 +227,14 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
       const workbook = XLSX.read(data, { type: 'array' });
       const sheet = workbook.Sheets[workbook.SheetNames[0]];
       const raw = XLSX.utils.sheet_to_json<Record<string, string>>(sheet, { defval: '', raw: false });
-      const parsed = raw.map((row, i) => ({
+      const rawParsed = raw.map((row, i) => ({
         ...Object.fromEntries(Object.entries(row).map(([k, v]) => [k.trim(), String(v)])),
         _id: String(i),
       })) as CsvRow[];
-      const fields = Object.keys(parsed[0] ?? {}).filter((k) => k !== '_id');
+      const rawFields = Object.keys(rawParsed[0] ?? {}).filter((k) => k !== '_id');
+      const { fields, rows } = ensureShortTitle(rawFields, rawParsed);
       setColumns(fields);
-      onChange(parsed);
+      onChange(rows);
     };
     reader.readAsArrayBuffer(file);
   }
