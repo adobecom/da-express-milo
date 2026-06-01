@@ -339,7 +339,7 @@
 
 .dt-table td.dt-data-col,
   .dt-table th.dt-label-col {
-    padding: var(--spacing-200);
+    padding: var(--spacing-300) var(--spacing-200);
   }
 
   
