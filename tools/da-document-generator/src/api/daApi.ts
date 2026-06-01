@@ -63,6 +63,33 @@ export async function cat(filePath: string): Promise<string> {
   return resp.text();
 }
 
+export interface DaListItem {
+  path: string;
+  ext?: string;
+}
+
+export async function listDirectory(dirPath: string): Promise<DaListItem[]> {
+  const t = getToken();
+  if (!t) throw new Error('DA token not set; set VITE_DA_TOKEN or run from DA.live');
+  const resp = await fetch(`${DA_API}/list${dirPath}`, {
+    headers: { Authorization: `Bearer ${t}` },
+  });
+  if (!resp.ok) throw new Error(`${resp.status}: ${await resp.text()}`);
+  return resp.json() as Promise<DaListItem[]>;
+}
+
+const TEMPLATE_NAME_PREFIX = 'default-print-pdp-';
+const OUTPUT_BASE = '/adobecom/da-express-milo/express/print';
+
+export function templateToOutputDir(sourcePath: string): string {
+  const fileName = sourcePath.replace(/\.html$/, '').split('/').pop() ?? '';
+  if (fileName.startsWith(TEMPLATE_NAME_PREFIX)) {
+    return `${OUTPUT_BASE}/${fileName.slice(TEMPLATE_NAME_PREFIX.length)}`;
+  }
+  const lastSlash = sourcePath.lastIndexOf('/');
+  return lastSlash > 0 ? sourcePath.slice(0, lastSlash) : sourcePath;
+}
+
 // Convert any DA-related URL to an admin source path (/org/repo/path)
 export function urlToSourcePath(url: string): string {
   if (url.includes('da.live')) {

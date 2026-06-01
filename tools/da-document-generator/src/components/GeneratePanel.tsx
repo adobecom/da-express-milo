@@ -8,6 +8,7 @@ import {
   getToken,
   daPathToPreviewUrl,
   daPathToLiveUrl,
+  templateToOutputDir,
 } from '../api/daApi';
 import { applyTemplate, rowToOutputPath, runGenerationQa, runPageQa } from '../lib/generate';
 import type { CsvRow, TemplateState, RowResult, QaResult } from '../types';
@@ -18,13 +19,12 @@ interface Props {
   generateBlockReason?: string;
 }
 
-const DEFAULT_OUTPUT_DIR = '/adobecom/da-express-milo/drafts/maxn/document-generator';
 const CONCURRENCY = 3;
 
 type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing' | 'unpublishing' | 'deleting';
 
 export default function GeneratePanel({ rows, template, generateBlockReason }: Props) {
-  const [outputDir, setOutputDir] = useState(DEFAULT_OUTPUT_DIR);
+  const outputDir = template.sourcePath ? templateToOutputDir(template.sourcePath) : '';
   const [results, setResults] = useState<RowResult[]>([]);
   const [bulkOp, setBulkOp] = useState<BulkOp>('idle');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
@@ -319,20 +319,13 @@ export default function GeneratePanel({ rows, template, generateBlockReason }: P
         <h2 className="font-medium text-gray-900">Generate</h2>
       </div>
 
-      <div className="flex flex-col gap-1">
-        <label className="text-xs font-medium text-gray-600">Output directory</label>
-        <input
-          type="text"
-          value={outputDir}
-          onChange={(e) => setOutputDir(e.target.value)}
-          disabled={running}
-          className="rounded-xl border border-gray-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-60"
-        />
+      {outputDir && (
         <p className="text-xs text-gray-400">
           Documents will be written to{' '}
-          <code className="bg-gray-100 px-1 rounded">{outputDir}/{'{{url_slug}}'}</code>
+          <code className="bg-gray-100 px-1 rounded font-mono">{outputDir}/{'{{url_slug}}'}</code>
+          {' '}— same folder as the template.
         </p>
-      </div>
+      )}
 
       <div className="flex items-center gap-3 flex-wrap">
         <div className="relative group inline-block">
