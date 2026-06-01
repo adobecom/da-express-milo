@@ -527,7 +527,7 @@ function DataTable({
                       <div className="flex flex-col">
                         <div className="flex items-center gap-1">
                           {col === 'template_id' && isTemplateDup && (
-                            <span className="shrink-0 font-bold text-orange-500" title="Duplicate template ID">⚠</span>
+                            <span className="shrink-0 text-orange-500" title="Duplicate template ID"><DuplicateIcon /></span>
                           )}
                           {col === 'template_id' && status && (
                             <span className={`shrink-0 font-bold ${status === 'valid' ? 'text-green-500' : 'text-red-500'}`}>
@@ -535,7 +535,7 @@ function DataTable({
                             </span>
                           )}
                           {col === 'url_slug' && isSlugDup && (
-                            <span className="shrink-0 font-bold text-orange-500" title="Duplicate URL slug">⚠</span>
+                            <span className="shrink-0 text-orange-500" title="Duplicate URL slug"><DuplicateIcon /></span>
                           )}
                           {hasComparison && valuesMatch && (
                             <span className="shrink-0 text-green-500 font-bold" title="Matches Zazzle data">✓</span>
@@ -604,6 +604,10 @@ function ZazzleLegend() {
         <span className="text-amber-600 font-bold">⚠</span>
         Differs from Zazzle
       </span>
+      <span className="flex items-center gap-1">
+        <span className="text-orange-500"><DuplicateIcon /></span>
+        Duplicate value
+      </span>
     </div>
   );
 }
@@ -613,6 +617,15 @@ function ExternalLinkIcon() {
     <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 shrink-0">
       <path d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z" />
       <path d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z" />
+    </svg>
+  );
+}
+
+function DuplicateIcon() {
+  return (
+    <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 shrink-0">
+      <path d="M5 2a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v7a1 1 0 0 1-1 1h-1V5a2 2 0 0 0-2-2H5V2Z"/>
+      <path d="M2 5a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5Z"/>
     </svg>
   );
 }
