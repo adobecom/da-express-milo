@@ -96,8 +96,6 @@ function ensureShortTitle(fields: string[], rows: CsvRow[]): { fields: string[];
   return { fields: normalizedFields, rows: normalizedRows };
 }
 
-const MAX_VISIBLE_ROWS = 200;
-
 export default function CsvUpload({ rows, onChange, placeholders = [], onReadinessChange }: Props) {
   const [inputMode, setInputMode] = useState<'upload' | 'manual'>('upload');
   const [manualInput, setManualInput] = useState('');
@@ -121,7 +119,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
   const tableColumns = hasData
     ? [...baseCols, ...['url_slug', 'description'].filter((c) => !baseCols.includes(c))]
     : PLACEHOLDER_COLUMNS;
-  const visibleRows = hasData ? rows.slice(0, MAX_VISIBLE_ROWS) : [PLACEHOLDER_ROW];
+  const visibleRows = hasData ? rows : [PLACEHOLDER_ROW];
 
   const allDataComplete = hasData && rows.every(
     (row) => tableColumns.every((col) => !!row[col]?.trim()),
@@ -439,11 +437,6 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
         expandedDiffCells={expandedDiffCells}
         onToggleDiffCell={(key) => setExpandedDiffCells((prev) => ({ ...prev, [key]: !prev[key] }))}
       />
-      {hasData && rows.length > MAX_VISIBLE_ROWS && (
-        <p className="text-xs text-gray-400 text-center">
-          Showing {MAX_VISIBLE_ROWS} of {rows.length} rows
-        </p>
-      )}
     </div>
   );
 }
