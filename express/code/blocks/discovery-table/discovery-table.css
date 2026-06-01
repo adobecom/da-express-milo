@@ -117,6 +117,7 @@
   position: sticky;
   top: 0;
   z-index: 2;
+  background-color: #F8F8F8;
 }
 
 .dt-table thead th.dt-label-col {  
@@ -195,10 +196,15 @@
 
 .dt-table th.dt-label-col {
   text-align: left;
+  
   font-weight: normal;
   background: var(--color-white);
   padding: 18px 24px;
   vertical-align: middle;
+}
+
+.dt-label-col.dt-first-row.dt-first-col {
+  background-color: #F8F8F8;
 }
 
 .dt-table tbody th.dt-label-col {
