@@ -94,12 +94,9 @@ function frictionlessQAExperiment(
   appConfig.metaData.entryPoint = 'seo-quickaction-image-upload';
   switch (variant) {
     case 'qa-nba':
-      ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
-      break;
     case 'qa-in-product-control':
-      ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
-      break;
     case 'remove-background-fast-track-control':
+    case 'remove-background-focused-control':
       ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
       break;
     default:
@@ -543,7 +540,7 @@ export function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, di
       routeSpecificParams = {
         locale: ietf,
         skipUploadStep: true,
-        ...(quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused && {
+        ...(quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocusedChallenger && {
           'edit-action': 'remove-bg',
           'l2-panel': 'backgrounds',
           'open-download': true,
@@ -743,7 +740,7 @@ export function setupFrictionlessTargetBaseUrl(quickAction) {
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
   const variant = urlVariant || quickAction;
-  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused) {
+  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocusedChallenger) {
     const isStage = urlParams.get('hzenv') === 'stage';
     let stageFocusedUrl = `https://stage.projectx.corp.adobe.com${EXPRESS_ROUTE_PATHS.focusedEditor}`;
     const base = urlParams.get('base');
