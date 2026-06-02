@@ -18,10 +18,10 @@ const { default: decorate } = await import('../../../express/code/blocks/ax-colu
 // eslint-disable-next-line max-len
 const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList, notHighlight, numbered30, offer, offerIcon, picture, video, marquee, fullsizeTwoButtons, injectLogo] = await Promise.all(
   [readFile({ path: './mocks/button-light.html' }), readFile({ path: './mocks/color.html' }), readFile({ path: './mocks/fullsize.html' }), readFile({ path: './mocks/highlight.html' }),
-    readFile({ path: './mocks/icon.html' }), readFile({ path: './mocks/icon-with-sibling.html' }), readFile({ path: './mocks/icon-list.html' }), readFile({ path: './mocks/not-highlight.html' }), readFile({ path: './mocks/numbered-30.html' }),
-    readFile({ path: './mocks/offer.html' }), readFile({ path: './mocks/offer-icon.html' }), readFile({ path: './mocks/picture.html' }), readFile({ path: './mocks/video.html' }),
-    readFile({ path: './mocks/marquee.html' }), readFile({ path: './mocks/fullsize-two-buttons.html' }),
-    readFile({ path: './mocks/inject-logo.html' })],
+  readFile({ path: './mocks/icon.html' }), readFile({ path: './mocks/icon-with-sibling.html' }), readFile({ path: './mocks/icon-list.html' }), readFile({ path: './mocks/not-highlight.html' }), readFile({ path: './mocks/numbered-30.html' }),
+  readFile({ path: './mocks/offer.html' }), readFile({ path: './mocks/offer-icon.html' }), readFile({ path: './mocks/picture.html' }), readFile({ path: './mocks/video.html' }),
+  readFile({ path: './mocks/marquee.html' }), readFile({ path: './mocks/fullsize-two-buttons.html' }),
+  readFile({ path: './mocks/inject-logo.html' })],
 );
 
 describe('Columns', () => {
@@ -226,7 +226,7 @@ describe('Logo injection', () => {
     await decorate(block);
     const logo = block.querySelector('.express-logo');
     expect(logo).to.exist;
-    expect(logo.classList.contains('acrobat-express-lockup')).to.be.true;
+    expect(logo.classList.contains('marquee-eyebrow-logo-wide')).to.be.true;
     expect(logo.alt).to.equal('Adobe Acrobat X Adobe Express co-brand logo');
   });
 });

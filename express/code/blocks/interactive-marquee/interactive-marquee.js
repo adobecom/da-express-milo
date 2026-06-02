@@ -87,7 +87,13 @@ function injectExpressLogo(block, wrapper) {
     logoName = 'cobrand-lockup-acrobat-express';
     logoSize = '22px';
     logoAlt = 'Adobe Acrobat X Adobe Express co-brand logo';
-    logoClass = 'acrobat-express-lockup';
+    logoClass = 'marquee-eyebrow-logo-wide';
+  }
+  if (metadataValue === 'real-madrid') {
+    logoName = 'cobrand-lockup-real-madrid-logo';
+    logoSize = '22px';
+    logoAlt = 'Adobe X Real Madrid logo';
+    logoClass = 'marquee-eyebrow-logo-wide';
   }
   const logoElement = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
   wrapper.prepend(logoElement);
