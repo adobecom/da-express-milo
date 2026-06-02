@@ -426,8 +426,6 @@
 }
 
 body {
-  -webkit-text-size-adjust: 100%;
-  text-size-adjust: 100%;
   background-color: var(--body-background-color);
 }
 
