@@ -98,7 +98,6 @@ export const localeMap = {
 function getUnityLibs(prodLibs = '/unitylibs') {
   const { hostname, search } = window.location;
   if (!['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
-  // eslint-disable-next-line compat/compat
   const branch = new URLSearchParams(search).get('unitylibs') || 'main';
   if (!/^[a-zA-Z0-9_-]+$/.test(branch)) throw new Error('Invalid branch name.');
   if (branch === 'main' && hostname === 'www.stage.adobe.com') return prodLibs;
