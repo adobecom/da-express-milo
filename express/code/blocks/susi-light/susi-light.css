@@ -1,7 +1,4 @@
-/*
- * CLS height tokens: re-measure on /drafts/sircar/susi-light-copy (node scripts/measure-susi-modals.mjs).
- * Tabs: --susi-tabs-panel-* ; layout/legacy: --susi-modal-wrapper-height on block (modal + in-page).
- */
+/* CLS height tokens — re-measure: /drafts/sircar/susi-light-copy */
 :root {
   --susi-modal-width: 370px;
   --susi-tabs-width: 400px;
@@ -192,7 +189,7 @@
   max-height: var(--susi-tabs-panel-height);
 }
 
-/* CLS: profile height from applyModalWrapperReserve (modal + in-page) */
+/* CLS: height set by applyModalWrapperReserve */
 .susi-light:not(.tabs):has(.susi-layout) .susi-wrapper {
   min-height: var(--susi-modal-wrapper-height, var(--susi-wrapper-standard));
 }

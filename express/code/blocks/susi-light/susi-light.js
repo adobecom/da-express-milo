@@ -350,7 +350,6 @@ async function buildStudent(el, locale, imsClientId, noRedirect) {
 // each tab wraps susi component with custom logo + footer
 let tabsId = 0;
 
-/** Sync with :root --susi-tabs-panel-* in susi-light.css */
 const TABS_PANEL_HEIGHTS = {
   standard: 508,
   'edu-express': 513,
@@ -358,13 +357,11 @@ const TABS_PANEL_HEIGHTS = {
 const TABS_PANEL_BUFFER = 8;
 const TABS_PANEL_FALLBACK = 521;
 
-/** Sync with :root --susi-tabs-wrapper-* in susi-light.css */
 const TABS_WRAPPER_HEIGHTS = {
   standard: 458,
   'edu-express': 367,
 };
 
-/** Tab panel slot = max(measured panel per variant) + buffer; sync tokens in susi-light.css */
 export function resolveTabsPanelMinHeight(variants) {
   const heights = variants
     .filter(Boolean)
@@ -373,7 +370,6 @@ export function resolveTabsPanelMinHeight(variants) {
   return Math.ceil(Math.max(...heights) + TABS_PANEL_BUFFER);
 }
 
-/** Tallest widget min-height across authored variants (for tests / tooling) */
 export function resolveTabsWrapperMinHeight(variants) {
   const fallback = TABS_WRAPPER_HEIGHTS.standard;
   const heights = variants
@@ -383,7 +379,7 @@ export function resolveTabsWrapperMinHeight(variants) {
   return Math.max(...heights);
 }
 
-/** Reserve tallest tab panel slot from authoring row 2 variants (CLS). */
+/** CLS: reserve tab panel slot from authoring row 2 variants. */
 export function applyTabsReserveFromAuthoring(el, variants) {
   el.style.setProperty('--susi-tabs-panel-height', `${resolveTabsPanelMinHeight(variants)}px`);
 }
@@ -405,7 +401,7 @@ function resolveFlavorModalWrapperProfile(el, flavor, clientId) {
   return `${flavor}-default`;
 }
 
-/** Legacy buildEdu blocks (no b2b/edu/student class) — bare susi-sentry-light. */
+/** Legacy: no flavor class, bare susi-sentry-light. */
 function resolveLegacyModalWrapperProfile(clientId) {
   if (clientId === 'AdobeExpressWeb_HED' || clientId?.endsWith('_HED')) return 'legacy-edu-hed';
   if (clientId === 'AdobeExpressWeb_Business' || clientId?.endsWith('_Business')) {
@@ -414,7 +410,7 @@ function resolveLegacyModalWrapperProfile(clientId) {
   return 'legacy-edu-express';
 }
 
-/** Debug-friendly profile id matching fragment names, e.g. b2b-hed, edu-business. */
+/** Profile id matches fragment names, e.g. b2b-hed, edu-business. */
 export function resolveModalWrapperProfile(el, clientId) {
   if (el.classList.contains('tabs') || el.classList.contains('simplified')) return null;
   const flavor = MODAL_FLAVORS.find((c) => el.classList.contains(c));
@@ -422,7 +418,7 @@ export function resolveModalWrapperProfile(el, clientId) {
   return resolveLegacyModalWrapperProfile(clientId);
 }
 
-/** Sync with :root --susi-wrapper-* in susi-light.css (before block CSS loads). */
+/** Measured px per profile — mirrors :root --susi-wrapper-* tokens. */
 const MODAL_WRAPPER_FALLBACK_PX = {
   'b2b-default': 484,
   'b2b-hed': 267,
@@ -440,14 +436,13 @@ const MODAL_WRAPPER_FALLBACK_PX = {
   'legacy-edu-hed': 478,
 };
 
-/** Modal wrapper height from MODAL_WRAPPER_FALLBACK_PX; sync tokens in susi-light.css */
 export function resolveModalWrapperHeight(el, clientId) {
   const profile = resolveModalWrapperProfile(el, clientId);
   if (!profile) return null;
   return MODAL_WRAPPER_FALLBACK_PX[profile] ?? 484;
 }
 
-/** Set --susi-modal-wrapper-height before SUSI hydrate (modal + in-page CLS). */
+/** CLS: set --susi-modal-wrapper-height before SUSI hydrates. */
 export function applyModalWrapperReserve(el, clientId) {
   const profile = resolveModalWrapperProfile(el, clientId);
   if (!profile) return;
