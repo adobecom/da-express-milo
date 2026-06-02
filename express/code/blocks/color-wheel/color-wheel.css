@@ -20,15 +20,12 @@ body {
 }
 
 .color-wheel .ax-color-tool-layout {
-  box-sizing: border-box;
-  max-width: var(--block-wd-max-width);
-  margin: 0 auto;
-  padding: 0 var(--spacing-300) var(--spacing-300);
-  row-gap: 0;
-}
+  --ax-padding-topbar-desktop: 0 0 var(--spacing-400);
+  --ax-padding-topbar-mobile: 0 0 var(--spacing-400);
+  --ax-padding-sidebar-mobile: 0 0 var(--spacing-300);
+  --ax-padding-canvas-mobile: 0 0 var(--spacing-300);
 
-.color-wheel .ax-shell-slot--topbar {
-  padding-block-end: var(--spacing-400);
+  row-gap: 0;
 }
 
 .color-wheel .ax-shell-slot--sidebar {
@@ -36,12 +33,10 @@ body {
   flex-direction: column;
   gap: var(--spacing-300);
   overflow: visible;
-  padding-block-end: var(--spacing-300);
   isolation: isolate;
 }
 
 .color-wheel .ax-shell-slot--canvas {
-  padding-block-end: var(--spacing-300);
   box-sizing: border-box;
   overflow-y: visible;
 }
@@ -99,6 +94,7 @@ body {
 
 .color-wheel .image-extract {
   --color-extract-max-width: 100%;
+  --color-wheel-mood-width: 200px;
 }
 
 .color-wheel .color-extract-landing {
@@ -176,7 +172,6 @@ body {
 }
 
 .color-wheel .color-extract-suggestion {
-  border-radius: var(--corner-radius-80);
   border: 2px solid transparent;
   box-shadow: none;
   transition: none;
@@ -224,7 +219,12 @@ body {
 
 .color-wheel .color-extract-mood-row {
   flex: 1;
-  max-width: 200px;
+  max-width: var(--color-wheel-mood-width);
+}
+
+.color-wheel .color-extract-mood-dropdown {
+  min-width: var(--color-wheel-mood-width);
+  box-sizing: content-box;
 }
 
 .color-wheel .color-extract-mood {
@@ -253,6 +253,30 @@ body {
   padding-block: var(--spacing-300) var(--spacing-100);
 }
 
+.color-wheel .image-extract .color-extract-marker {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker:hover {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 20px rgba(0, 0, 0, 0.22);
+}
+
+.color-wheel .image-extract .color-extract-marker.is-active {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-extract-focus), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker.is-magnified {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .color-extract-drag-overlay {
+  position: fixed;
+}
+
 /* Color wheel panel */
 
 color-wheel-express {
@@ -273,7 +297,7 @@ color-wheel-express {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 2px;
+  gap: var(--spacing-50);
   margin-bottom: 0.75rem;
 }
 
@@ -419,23 +443,13 @@ color-wheel-express {
 
 @media (min-width: 600px) {
   .color-wheel .ax-color-tool-layout {
-    padding: var(--spacing-400) var(--spacing-500);
-    row-gap: 0;
-  }
-
-  .color-wheel .ax-shell-slot--topbar,
-  .color-wheel .ax-shell-slot--sidebar {
-    padding-block-end: var(--spacing-400);
+    --ax-padding-sidebar-mobile: 0 0 var(--spacing-400);
   }
 }
 
 /* Large Tablet */
 
 @media (min-width: 888px) {
-  .color-wheel .ax-shell-slot--sidebar {
-    padding-block-end: 0;
-  }
-
   .color-wheel .ax-shell-slot--canvas {
     padding-block-end: var(--spacing-200);
   }
@@ -474,8 +488,11 @@ color-wheel-express {
 /* Desktop */
 
 @media (min-width: 1200px) {
+  .color-wheel .ax-toolbar {
+    --ax-palette-name-width-desktop: 184px;
+  }
+
   .color-wheel .ax-color-tool-layout {
-    padding: var(--spacing-600);
     grid-template-rows: auto minmax(0, 1fr) auto;
     grid-template-columns: minmax(0, var(--cw-sidebar-fr, 4fr)) minmax(0, 8fr);
     align-items: stretch;
@@ -576,7 +593,7 @@ color-wheel-express {
   }
 
   .color-wheel .color-extract-mood {
-    width: 200px;
+    width: var(--color-wheel-mood-width);
   }
 
   .color-wheel .color-extract-mood-dropdown {

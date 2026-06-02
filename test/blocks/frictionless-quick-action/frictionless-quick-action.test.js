@@ -258,7 +258,7 @@ describe('Frictionless Quick Action - Utility Functions', () => {
   });
 });
 
-describe('remove-background-focused — URL setup and editor params', () => {
+describe('remove-background-focused-challenger — URL setup and editor params', () => {
   let originalSearch;
 
   before(() => {
@@ -272,36 +272,36 @@ describe('remove-background-focused — URL setup and editor params', () => {
 
   it('sets the prod editor URL when not in stage', () => {
     window.history.pushState({}, '', '?');
-    setupFrictionlessTargetBaseUrl('remove-background-focused');
+    setupFrictionlessTargetBaseUrl('remove-background-focused-challenger');
     expect(getFrictionlessTargetBaseUrl()).to.equal('https://express.adobe.com/photo-editor/focused');
   });
 
   it('falls back to default stage URL when hzenv=stage but no base param', () => {
     window.history.pushState({}, '', '?hzenv=stage');
-    setupFrictionlessTargetBaseUrl('remove-background-focused');
+    setupFrictionlessTargetBaseUrl('remove-background-focused-challenger');
     expect(getFrictionlessTargetBaseUrl()).to.equal('https://stage.projectx.corp.adobe.com/photo-editor/focused');
   });
 
   it('accepts a valid adobe.com base URL override', () => {
     window.history.pushState({}, '', '?hzenv=stage&base=https://custom.adobe.com/');
-    setupFrictionlessTargetBaseUrl('remove-background-focused');
+    setupFrictionlessTargetBaseUrl('remove-background-focused-challenger');
     expect(getFrictionlessTargetBaseUrl()).to.equal('https://custom.adobe.com/photo-editor/focused');
   });
 
   it('rejects a non-adobe base URL and falls back to the default stage URL', () => {
     window.history.pushState({}, '', '?hzenv=stage&base=https://evil.notadobe.com/');
-    setupFrictionlessTargetBaseUrl('remove-background-focused');
+    setupFrictionlessTargetBaseUrl('remove-background-focused-challenger');
     expect(getFrictionlessTargetBaseUrl()).to.equal('https://stage.projectx.corp.adobe.com/photo-editor/focused');
   });
 
   it('rejects a URL that ends with adobe.com but is not a subdomain (e.g. eviladobe.com)', () => {
     window.history.pushState({}, '', '?hzenv=stage&base=https://eviladobe.com/');
-    setupFrictionlessTargetBaseUrl('remove-background-focused');
+    setupFrictionlessTargetBaseUrl('remove-background-focused-challenger');
     expect(getFrictionlessTargetBaseUrl()).to.equal('https://stage.projectx.corp.adobe.com/photo-editor/focused');
   });
 
   it('appends the three focused-editor params in buildSearchParamsForEditorUrl', () => {
-    const params = buildSearchParamsForEditorUrl('/photo-editor/focused', 'asset-123', 'remove-background-focused', null);
+    const params = buildSearchParamsForEditorUrl('/photo-editor/focused', 'asset-123', 'remove-background-focused-challenger', null);
     expect(params['edit-action']).to.equal('remove-bg');
     expect(params['l2-panel']).to.equal('backgrounds');
     expect(params['open-download']).to.equal(true);

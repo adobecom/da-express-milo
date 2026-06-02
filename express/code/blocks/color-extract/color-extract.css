@@ -76,7 +76,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 32px 16px;
 }
 
 body:has(.color-headline.extract) .color-extract .color-extract-landing {
@@ -652,6 +651,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 .color-extract .color-extract-mood-option {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
   width: 100%;
   padding: 8px 16px;
   background: none;
@@ -663,14 +664,36 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   color: var(--color-extract-text);
   text-align: left;
   transition: background-color 0.1s ease;
+  box-sizing: border-box;
 }
 
 .color-extract .color-extract-mood-option:hover {
   background: var(--color-extract-gray-hover);
 }
 
+.color-extract .color-extract-mood-option-check {
+  width: 10px;
+  height: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-extract-accent);
+  opacity: 0;
+}
+
+.color-extract .color-extract-mood-option-check svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .color-extract .color-extract-mood-option.is-selected {
-  font-weight: 600;
+  font-weight: 400;
+}
+
+.color-extract .color-extract-mood-option.is-selected .color-extract-mood-option-check {
+  opacity: 1;
 }
 
 .color-extract .color-extract-mood-option:focus-visible {
@@ -727,8 +750,9 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 .color-extract .color-extract-marker.is-active {
-  width: 42px;
-  height: 42px;
+  width: 60px;
+  height: 60px;
+  background: transparent;
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
   z-index: 10;
 }
@@ -765,6 +789,10 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   display: block;
 }
 
+.color-extract .color-extract-marker.is-active .color-extract-marker-zoom {
+  display: block;
+}
+
 /* ---- Magnified state (handle becomes the zoom lens on drag) ---- */
 
 .color-extract .color-extract-marker.is-magnified {
@@ -774,6 +802,10 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
   z-index: 20;
   transition: none;
+}
+
+.color-extract:has(.color-extract-marker.is-magnified) {
+  cursor: none;
 }
 
 .color-extract .color-extract-marker.is-magnified .color-extract-marker-zoom {
@@ -911,8 +943,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   }
 
   .color-extract .color-extract-marker.is-active {
-    width: 56px;
-    height: 56px;
+    width: 80px;
+    height: 80px;
   }
 
   .color-extract .color-extract-marker.is-magnified {

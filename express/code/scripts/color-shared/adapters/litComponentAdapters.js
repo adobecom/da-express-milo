@@ -1,6 +1,11 @@
 import { createGradientEditor } from '../components/gradients/gradient-editor.js';
 import { wrapInTheme } from '../spectrum/utils/theme.js';
 import { loadIconsRail } from '../spectrum/load-spectrum.js';
+import {
+  getPreferredColorMode,
+  setPreferredColorMode,
+  subscribeColorMode,
+} from '../utils/colorModePreference.js';
 
 const VERTICAL_STACKED_BREAKPOINT_PX = 1200;
 
@@ -266,7 +271,7 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
 
   element.palette = palette.slice(0, 10);
   element.selectedIndex = selectedIndex;
-  element.colorMode = colorMode;
+  element.colorMode = getPreferredColorMode(colorMode);
   element.showPalette = showPalette;
   element.mobile = mobile;
   if (strings) element.strings = strings;
@@ -282,10 +287,15 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
     callbacks.onSwatchSelect?.(e.detail);
   });
   element.addEventListener('mode-change', (e) => {
+    setPreferredColorMode(e.detail?.mode);
     callbacks.onModeChange?.(e.detail);
   });
   element.addEventListener('panel-close', () => {
     callbacks.onClose?.();
+  });
+
+  const unsubscribe = subscribeColorMode((mode) => {
+    if (element.colorMode !== mode) element.colorMode = mode;
   });
 
   return {
@@ -302,7 +312,10 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
       element.colorMode = mode;
     },
     getElement: () => element,
-    destroy: () => element.remove(),
+    destroy: () => {
+      unsubscribe();
+      element.remove();
+    },
   };
 }
 
@@ -385,7 +398,7 @@ export function createBaseColorAdapter(options = {}, callbacks = {}) {
   } = options;
 
   element.color = color;
-  element.colorMode = colorMode;
+  element.colorMode = getPreferredColorMode(colorMode);
   element.showHeader = showHeader;
   element.showBrightnessControl = showBrightnessControl;
   if (strings) element.strings = strings;
@@ -394,10 +407,15 @@ export function createBaseColorAdapter(options = {}, callbacks = {}) {
     callbacks.onColorChange?.(e.detail);
   });
   element.addEventListener('mode-change', (e) => {
+    setPreferredColorMode(e.detail?.mode);
     callbacks.onModeChange?.(e.detail);
   });
   element.addEventListener('lock-change', (e) => {
     callbacks.onLockChange?.(e.detail);
+  });
+
+  const unsubscribe = subscribeColorMode((mode) => {
+    if (element.colorMode !== mode) element.colorMode = mode;
   });
 
   return {
@@ -409,6 +427,9 @@ export function createBaseColorAdapter(options = {}, callbacks = {}) {
       element.colorMode = mode;
     },
     getElement: () => element,
-    destroy: () => element.remove(),
+    destroy: () => {
+      unsubscribe();
+      element.remove();
+    },
   };
 }

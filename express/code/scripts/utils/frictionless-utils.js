@@ -129,7 +129,6 @@ export const QA_CONFIGS = {
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
   'remove-background-fast-track-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'remove-background-fast-track-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
-  'remove-background-focused': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'heic-to-jpg': {
     ...getBaseImgCfg(PNG, WEBP, HEIC),
     input_check: getHeicInputCheck(PNG, WEBP, HEIC),
@@ -148,6 +147,8 @@ export const EXPERIMENTAL_VARIANTS = [
   'qa-in-product-control',
   'remove-background-fast-track-variant',
   'remove-background-fast-track-control',
+  'remove-background-focused-control',
+  'remove-background-focused-challenger',
 ];
 
 export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
@@ -157,6 +158,8 @@ export const EXPERIMENTAL_VARIANTS_PROMOID_MAP = {
   'qa-in-product-control': '91BF4LV6',
   'remove-background-fast-track-variant': '6DWQ762R',
   'remove-background-fast-track-control': '55KD8FF5',
+  'remove-background-focused-control': 'FZPQYL16',
+  'remove-background-focused-challenger': 'G4FRYG95',
 };
 
 // Quick actions allowed in frictionless upload feature
@@ -166,7 +169,7 @@ export const FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {
   removeBackgroundVariant1: 'qa-in-product-variant1',
   removeBackgroundVariant2: 'qa-in-product-variant2',
   removeBackgroundFasttrackVariant: 'remove-background-fast-track-variant',
-  removeBackgroundFocused: 'remove-background-focused',
+  removeBackgroundFocusedChallenger: 'remove-background-focused-challenger',
 };
 
 export const AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS = {

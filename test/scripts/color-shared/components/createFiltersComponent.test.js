@@ -10,9 +10,17 @@ describe('createFiltersComponent', () => {
   beforeEach(() => {
     originalLana = window.lana;
     window.lana = { log: sinon.spy() };
+    // requestAnimationFrame is throttled to ~1fps in background browser tabs
+    // (concurrent WTR sessions). Use queueMicrotask so rAF-based retry loops
+    // in waitUntilConnected / express-picker resolve immediately under load.
+    sinon.stub(window, 'requestAnimationFrame').callsFake((cb) => {
+      queueMicrotask(() => cb(0));
+      return 0;
+    });
   });
 
   afterEach(() => {
+    sinon.restore();
     document.body.innerHTML = '';
     if (originalLana === undefined) delete window.lana;
     else window.lana = originalLana;

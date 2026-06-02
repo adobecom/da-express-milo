@@ -114,14 +114,14 @@ const ICON_MAP = {
   trash: () => (hasIcon('sp-icon-delete')
     ? html`<sp-icon-delete size="m" aria-hidden="true"></sp-icon-delete>`
     : iconFallback('M7 3h6l1 2h3v2H3V5h3l1-2zm-1 6h2v7H6V9zm6 0h2v7h-2V9zM9 9h2v7H9V9z')),
-  drag: () => html`<img class="icon-drag" src="/express/code/icons/drag.svg" alt="" width="32" height="32" aria-hidden="true">`,
+  drag: () => html`<img class="icon-drag" src="/express/code/icons/drag.svg" alt="" width="32" height="32" aria-hidden="true" draggable="false">`,
   add: () => (hasIcon('sp-icon-add')
     ? html`<sp-icon-add size="m" aria-hidden="true"></sp-icon-add>`
     : iconFallback('M9 3h2v6h6v2h-6v6H9v-6H3V9h6V3z')),
 
   colorBlindness: () => html`<span class="color-blindness-placeholder" aria-hidden="true">A11y</span>`,
-  lockOpen: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_LockOpen_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
-  lockClosed: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_Lock_20_N.svg" alt="" width="20" height="20" aria-hidden="true">`,
+  lockOpen: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_LockOpen_20_N.svg" alt="" width="20" height="20" aria-hidden="true" draggable="false">`,
+  lockClosed: () => html`<img class="icon-asset icon-lock" src="/express/code/icons/S2_Icon_Lock_20_N.svg" alt="" width="20" height="20" aria-hidden="true" draggable="false">`,
   baseColorCircle: () => (hasIcon('sp-icon-circle')
     ? html`<sp-icon-circle size="m" aria-hidden="true"></sp-icon-circle>`
     : html`<svg class="icon-fallback" viewBox="0 0 20 20" aria-hidden="true" focusable="false"><circle cx="10" cy="10" r="6.25" fill="none" stroke="currentColor" stroke-width="1.8"></circle></svg>`),

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { recipe2ApiQuery } from '../../../../../../scripts/template-utils.js';
 import { form2Recipe } from '../../utils/recipe-form-utils';
 import {
   useFormData,
@@ -10,10 +11,12 @@ export default function Recipe() {
   const [showCopied, setShowCopied] = useState(false);
   const formData = useFormData();
   const recipe = form2Recipe(formData);
+  const { url } = recipe2ApiQuery(recipe);
+  const query = new URL(url).search.slice(1);
   const formDispatch = useFormDispatch();
 
   const copyRecipe = () => {
-    navigator.clipboard.writeText(recipe);
+    navigator.clipboard.writeText(query);
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 2000);
   };
@@ -25,7 +28,7 @@ export default function Recipe() {
         autoCorrect="off"
         autoCapitalize="off"
         spellCheck="false"
-        value={recipe}
+        value={query}
         onChange={(e) =>
           formDispatch({
             type: ACTION_TYPES.UPDATE_RECIPE,
