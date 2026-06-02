@@ -1137,9 +1137,13 @@ main .section>.content {
   max-width: 375px;
 }
 
-main .section :not('.unity-verb-marquee') .content p,
-main .section :not('.unity-verb-marquee') p {
+main .section .content p,
+main .section p {
   margin: var(--spacing-500) 0;
+}
+
+main .section .unity-verb-marquee p {
+  margin: 0;
 }
 
 main .section:not(.xxxl-spacing-static,
@@ -1366,8 +1370,12 @@ main .section.blog-content>.content>p {
     hyphens: unset;
   }
 
-  main .section :not('.unity-verb-marquee') h1 {
+  main .section h1 {
     font-size: var(--heading-font-size-l);
+  }
+
+  main .section .unity-verb-marquee h1 {
+    font-size: var(--heading-font-size-xxl);
   }
 
   main #hero h1 {
