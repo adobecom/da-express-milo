@@ -181,13 +181,20 @@ const LOGO_WHITE = 'adobe-express-logo-white';
 function injectLogo(block) {
   const injectRegularLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase());
   const injectPhotoLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-photo-logo')?.toLowerCase());
+  const injectAcrobatLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase());
 
-  if (!injectRegularLogo && !injectPhotoLogo) return null;
+  if (!injectRegularLogo && !injectPhotoLogo && !injectAcrobatLogo) return null;
 
   let logo;
 
   if (injectPhotoLogo) {
     logo = getIconElementDeprecated('adobe-express-photos-logo');
+  } else if (injectAcrobatLogo) {
+    const logoName = 'cobrand-lockup-acrobat-express';
+    const logoSize = '22px';
+    const logoAlt = 'Adobe Acrobat X Adobe Express co-brand logo';
+    const logoClass = 'acrobat-express-lockup';
+    logo = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
   } else {
     const mediaQuery = window.matchMedia('(min-width: 900px)');
     logo = getIconElementDeprecated(block.classList.contains('dark') && mediaQuery.matches ? LOGO_WHITE : LOGO);
@@ -456,6 +463,12 @@ export default async function decorate(block) {
           aTag.classList.add('primaryCTA');
         } else if (aTag.classList.contains('light')) {
           aTag.classList.replace('accent', 'primary');
+        }
+        if (!aTag.getAttribute('aria-label')) {
+          const header = cell.querySelector('h1, h2, h3, h4, h5, h6');
+          if (header) {
+            aTag.setAttribute('aria-label', `${aTag.textContent.trim()} ${header.textContent.trim()}`);
+          }
         }
       }
 

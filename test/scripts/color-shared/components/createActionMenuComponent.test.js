@@ -56,6 +56,32 @@ describe('createActionMenuComponent', () => {
     expect(instance.element.querySelector('.redo-btn')).to.exist;
   });
 
+  it('expand control updates aria-label when toggled', async () => {
+    let expandedValue = null;
+    instance = await createActionMenuComponent({
+      type: 'controls-only',
+      controls: [{ id: 'expand', label: 'Maximize', expandedLabel: 'Minimize' }],
+      onExpand: (isExpanded) => {
+        expandedValue = isExpanded;
+      },
+    });
+
+    const expandBtn = instance.element.querySelector('.expand-btn');
+    expect(expandBtn).to.exist;
+    expect(expandBtn.getAttribute('aria-label')).to.equal('Maximize');
+    expect(expandBtn.hasAttribute('aria-pressed')).to.be.false;
+
+    expandBtn.click();
+    expect(expandedValue).to.equal(true);
+    expect(expandBtn.getAttribute('aria-label')).to.equal('Minimize');
+    expect(expandBtn.hasAttribute('aria-pressed')).to.be.false;
+
+    expandBtn.click();
+    expect(expandedValue).to.equal(false);
+    expect(expandBtn.getAttribute('aria-label')).to.equal('Maximize');
+    expect(expandBtn.hasAttribute('aria-pressed')).to.be.false;
+  });
+
   it('destroy() removes element from DOM', async () => {
     instance = await createActionMenuComponent({
       type: 'nav-only',
