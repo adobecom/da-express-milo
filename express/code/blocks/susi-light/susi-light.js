@@ -350,38 +350,35 @@ async function buildStudent(el, locale, imsClientId, noRedirect) {
 // each tab wraps susi component with custom logo + footer
 let tabsId = 0;
 
-function readTokenPx(root, prop, fallback) {
-  const n = parseFloat(root.getPropertyValue(prop));
-  return Number.isFinite(n) ? n : fallback;
-}
+/** Sync with :root --susi-tabs-panel-* in susi-light.css */
+const TABS_PANEL_HEIGHTS = {
+  standard: 508,
+  'edu-express': 513,
+};
+const TABS_PANEL_BUFFER = 8;
+const TABS_PANEL_FALLBACK = 521;
+
+/** Sync with :root --susi-tabs-wrapper-* in susi-light.css */
+const TABS_WRAPPER_HEIGHTS = {
+  standard: 458,
+  'edu-express': 367,
+};
 
 /** Tab panel slot = max(measured panel per variant) + buffer; sync tokens in susi-light.css */
 export function resolveTabsPanelMinHeight(variants) {
-  const root = getComputedStyle(document.documentElement);
-  const panelByVariant = {
-    standard: readTokenPx(root, '--susi-tabs-panel-standard', 508),
-    'edu-express': readTokenPx(root, '--susi-tabs-panel-edu-express', 513),
-  };
-  const buffer = readTokenPx(root, '--susi-tabs-panel-buffer', 8);
-  const fallback = readTokenPx(root, '--susi-tabs-panel-height', 521);
   const heights = variants
     .filter(Boolean)
-    .map((v) => panelByVariant[v] ?? panelByVariant.standard);
-  if (!heights.length) return fallback;
-  return Math.ceil(Math.max(...heights) + buffer);
+    .map((v) => TABS_PANEL_HEIGHTS[v] ?? TABS_PANEL_HEIGHTS.standard);
+  if (!heights.length) return TABS_PANEL_FALLBACK;
+  return Math.ceil(Math.max(...heights) + TABS_PANEL_BUFFER);
 }
 
 /** Tallest widget min-height across authored variants (for tests / tooling) */
 export function resolveTabsWrapperMinHeight(variants) {
-  const root = getComputedStyle(document.documentElement);
-  const byVariant = {
-    standard: readTokenPx(root, '--susi-tabs-wrapper-standard', 458),
-    'edu-express': readTokenPx(root, '--susi-tabs-wrapper-edu-express', 367),
-  };
-  const fallback = byVariant.standard;
+  const fallback = TABS_WRAPPER_HEIGHTS.standard;
   const heights = variants
     .filter(Boolean)
-    .map((v) => byVariant[v] ?? fallback);
+    .map((v) => TABS_WRAPPER_HEIGHTS[v] ?? fallback);
   if (!heights.length) return fallback;
   return Math.max(...heights);
 }
@@ -443,15 +440,11 @@ const MODAL_WRAPPER_FALLBACK_PX = {
   'legacy-edu-hed': 478,
 };
 
-/** Modal wrapper height from --susi-wrapper-{profile}; sync tokens in susi-light.css */
+/** Modal wrapper height from MODAL_WRAPPER_FALLBACK_PX; sync tokens in susi-light.css */
 export function resolveModalWrapperHeight(el, clientId) {
   const profile = resolveModalWrapperProfile(el, clientId);
   if (!profile) return null;
-  const root = getComputedStyle(document.documentElement);
-  const token = `--susi-wrapper-${profile}`;
-  const fallback = MODAL_WRAPPER_FALLBACK_PX[profile]
-    ?? readTokenPx(root, '--susi-wrapper-standard', 484);
-  return readTokenPx(root, token, fallback);
+  return MODAL_WRAPPER_FALLBACK_PX[profile] ?? 484;
 }
 
 /** Set --susi-modal-wrapper-height before SUSI hydrate (modal + in-page CLS). */
