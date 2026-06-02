@@ -27,6 +27,8 @@
   --susi-wrapper-student-email-only: 230px;
   --susi-wrapper-student: 422px;
   --susi-wrapper-simplified: 400px;
+  --susi-wrapper-legacy-edu-express: 545px;
+  --susi-wrapper-legacy-edu-hed: 478px;
   --susi-standard-padding: 24px;
 }
 
@@ -214,7 +216,7 @@
 .susi-light:not(:has(.susi-layout)) > susi-sentry-light {
   display: block;
   width: 100%;
-  min-height: var(--susi-wrapper-edu-express);
+  min-height: var(--susi-modal-wrapper-height, var(--susi-wrapper-edu-express));
 }
 
 /* student styles */

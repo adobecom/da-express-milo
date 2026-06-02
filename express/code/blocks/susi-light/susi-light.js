@@ -398,11 +398,7 @@ function readClientIdFromAuthoring(el, imsClientId) {
   return cells[1]?.textContent?.trim() || imsClientId || 'AdobeExpressWeb';
 }
 
-/** Debug-friendly profile id matching fragment names, e.g. b2b-hed, edu-business. */
-export function resolveModalWrapperProfile(el, clientId) {
-  if (el.classList.contains('tabs') || el.classList.contains('simplified')) return null;
-  const flavor = MODAL_FLAVORS.find((c) => el.classList.contains(c));
-  if (!flavor) return null;
+function resolveFlavorModalWrapperProfile(el, flavor, clientId) {
   if (el.classList.contains('email-only')) return `${flavor}-email-only`;
   if (flavor === 'b2b' && el.classList.contains('email-first')) return 'b2b-email-first';
   if (clientId === 'AdobeExpressWeb_HED' || clientId?.endsWith('_HED')) return `${flavor}-hed`;
@@ -412,7 +408,24 @@ export function resolveModalWrapperProfile(el, clientId) {
   return `${flavor}-default`;
 }
 
-/** Sync with :root --susi-wrapper-{profile} in susi-light.css (used before block CSS is available). */
+/** Legacy buildEdu blocks (no b2b/edu/student class) — bare susi-sentry-light. */
+function resolveLegacyModalWrapperProfile(clientId) {
+  if (clientId === 'AdobeExpressWeb_HED' || clientId?.endsWith('_HED')) return 'legacy-edu-hed';
+  if (clientId === 'AdobeExpressWeb_Business' || clientId?.endsWith('_Business')) {
+    return 'edu-business';
+  }
+  return 'legacy-edu-express';
+}
+
+/** Debug-friendly profile id matching fragment names, e.g. b2b-hed, edu-business. */
+export function resolveModalWrapperProfile(el, clientId) {
+  if (el.classList.contains('tabs') || el.classList.contains('simplified')) return null;
+  const flavor = MODAL_FLAVORS.find((c) => el.classList.contains(c));
+  if (flavor) return resolveFlavorModalWrapperProfile(el, flavor, clientId);
+  return resolveLegacyModalWrapperProfile(clientId);
+}
+
+/** Sync with :root --susi-wrapper-* in susi-light.css (before block CSS loads). */
 const MODAL_WRAPPER_FALLBACK_PX = {
   'b2b-default': 484,
   'b2b-hed': 267,
@@ -426,6 +439,8 @@ const MODAL_WRAPPER_FALLBACK_PX = {
   'student-hed': 422,
   'student-business': 422,
   'student-email-only': 230,
+  'legacy-edu-express': 545,
+  'legacy-edu-hed': 478,
 };
 
 /** Modal wrapper height from --susi-wrapper-{profile}; sync tokens in susi-light.css */
