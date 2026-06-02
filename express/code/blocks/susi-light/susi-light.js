@@ -391,6 +391,64 @@ export function applyTabsReserveFromAuthoring(el, variants) {
   el.style.setProperty('--susi-tabs-panel-height', `${resolveTabsPanelMinHeight(variants)}px`);
 }
 
+const MODAL_FLAVORS = ['b2b', 'edu', 'student'];
+
+function readClientIdFromAuthoring(el, imsClientId) {
+  const cells = el.querySelectorAll(':scope > div > div');
+  return cells[1]?.textContent?.trim() || imsClientId || 'AdobeExpressWeb';
+}
+
+/** Debug-friendly profile id matching fragment names, e.g. b2b-hed, edu-business. */
+export function resolveModalWrapperProfile(el, clientId) {
+  if (el.classList.contains('tabs') || el.classList.contains('simplified')) return null;
+  const flavor = MODAL_FLAVORS.find((c) => el.classList.contains(c));
+  if (!flavor) return null;
+  if (el.classList.contains('email-only')) return `${flavor}-email-only`;
+  if (flavor === 'b2b' && el.classList.contains('email-first')) return 'b2b-email-first';
+  if (clientId === 'AdobeExpressWeb_HED' || clientId?.endsWith('_HED')) return `${flavor}-hed`;
+  if (clientId === 'AdobeExpressWeb_Business' || clientId?.endsWith('_Business')) {
+    return `${flavor}-business`;
+  }
+  return `${flavor}-default`;
+}
+
+/** Sync with :root --susi-wrapper-{profile} in susi-light.css (used before block CSS is available). */
+const MODAL_WRAPPER_FALLBACK_PX = {
+  'b2b-default': 484,
+  'b2b-hed': 267,
+  'b2b-business': 393,
+  'b2b-email-first': 409,
+  'b2b-email-only': 230,
+  'edu-default': 484,
+  'edu-hed': 267,
+  'edu-business': 393,
+  'student-default': 462,
+  'student-hed': 422,
+  'student-business': 422,
+  'student-email-only': 230,
+};
+
+/** Modal wrapper height from --susi-wrapper-{profile}; sync tokens in susi-light.css */
+export function resolveModalWrapperHeight(el, clientId) {
+  const profile = resolveModalWrapperProfile(el, clientId);
+  if (!profile) return null;
+  const root = getComputedStyle(document.documentElement);
+  const token = `--susi-wrapper-${profile}`;
+  const fallback = MODAL_WRAPPER_FALLBACK_PX[profile]
+    ?? readTokenPx(root, '--susi-wrapper-standard', 484);
+  return readTokenPx(root, token, fallback);
+}
+
+/** Set --susi-modal-wrapper-height before SUSI hydrate (modal CLS). */
+export function applyModalWrapperReserve(el, clientId) {
+  const profile = resolveModalWrapperProfile(el, clientId);
+  if (!profile) return;
+  const height = resolveModalWrapperHeight(el, clientId);
+  if (!height) return;
+  el.dataset.susiWrapperProfile = profile;
+  el.style.setProperty('--susi-modal-wrapper-height', `${height}px`);
+}
+
 function setTabPanelActive(panel, isActive) {
   panel.classList.toggle('hide', !isActive);
   panel.setAttribute('aria-hidden', String(!isActive));
@@ -549,6 +607,8 @@ export default async function init(el) {
   const locale = getConfig().locale.ietf.toLowerCase();
   const { imsClientId } = getConfig();
   const noRedirect = el.classList.contains('no-redirect');
+  const clientId = readClientIdFromAuthoring(el, imsClientId);
+  applyModalWrapperReserve(el, clientId);
 
   /**
    * customize can be used to add custom logic to the susi-light component

@@ -1,7 +1,6 @@
 /*
- * CLS height tokens: measure adobe.com/express/login tab panels + modals before changing.
- * Tab slot: --susi-tabs-panel-height (block override via JS from --susi-tabs-panel-*).
- * Modal widget: --susi-wrapper-standard (484px), email-only 380px.
+ * CLS height tokens: re-measure on /drafts/sircar/susi-light-copy (node scripts/measure-susi-modals.mjs).
+ * Tabs: --susi-tabs-panel-* ; modals: --susi-wrapper-{flavor}-{profile} via --susi-modal-wrapper-height on block.
  */
 :root {
   --susi-modal-width: 370px;
@@ -13,9 +12,20 @@
   --susi-tabs-wrapper-edu-express: 367px;
   --susi-tabs-panel-buffer: 8px;
   --susi-wrapper-standard: 484px;
+  --susi-wrapper-b2b-default: 484px;
+  --susi-wrapper-b2b-hed: 267px;
+  --susi-wrapper-b2b-business: 393px;
+  --susi-wrapper-b2b-email-first: 409px;
+  --susi-wrapper-b2b-email-only: 230px;
+  --susi-wrapper-edu-default: 484px;
+  --susi-wrapper-edu-hed: 267px;
+  --susi-wrapper-edu-business: 393px;
   --susi-wrapper-edu-express: 400px;
+  --susi-wrapper-student-default: 462px;
+  --susi-wrapper-student-hed: 422px;
+  --susi-wrapper-student-business: 422px;
+  --susi-wrapper-student-email-only: 230px;
   --susi-wrapper-student: 422px;
-  --susi-wrapper-b2b-email-only: 380px;
   --susi-wrapper-simplified: 400px;
   --susi-standard-padding: 24px;
 }
@@ -250,21 +260,11 @@
   align-items: stretch;
 }
 
-.dialog-modal:has(.susi-light.edu .susi-layout) .susi-wrapper,
-.dialog-modal:has(.susi-light.b2b:not(.email-only) .susi-layout) .susi-wrapper,
-.dialog-modal:has(.susi-light.student .susi-layout) .susi-wrapper {
-  flex: 0 0 var(--susi-wrapper-standard);
-  height: var(--susi-wrapper-standard);
+.dialog-modal:has(.susi-light:not(.tabs) .susi-layout) .susi-wrapper {
+  flex: 0 0 var(--susi-modal-wrapper-height, var(--susi-wrapper-standard));
+  height: var(--susi-modal-wrapper-height, var(--susi-wrapper-standard));
   min-height: 0;
-  max-height: var(--susi-wrapper-standard);
-  overflow: auto;
-}
-
-.dialog-modal:has(.susi-light.b2b.email-only) .susi-wrapper {
-  flex: 0 0 var(--susi-wrapper-b2b-email-only);
-  height: var(--susi-wrapper-b2b-email-only);
-  min-height: 0;
-  max-height: var(--susi-wrapper-b2b-email-only);
+  max-height: var(--susi-modal-wrapper-height, var(--susi-wrapper-standard));
   overflow: auto;
 }
 
