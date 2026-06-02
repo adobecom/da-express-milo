@@ -6,6 +6,7 @@ import type { TemplateState } from '../types';
 interface Props {
   state: TemplateState;
   onChange: (state: TemplateState) => void;
+  disabled?: boolean;
 }
 
 interface TemplateOption {
@@ -32,7 +33,7 @@ function ExternalLinkIcon() {
   );
 }
 
-export default function TemplateConfirm({ state, onChange }: Props) {
+export default function TemplateConfirm({ state, onChange, disabled = false }: Props) {
   const [options, setOptions] = useState<TemplateOption[]>([]);
   const [listLoading, setListLoading] = useState(true);
   const [listError, setListError] = useState<string | null>(null);
@@ -131,10 +132,10 @@ export default function TemplateConfirm({ state, onChange }: Props) {
   }
 
   useEffect(() => {
-    if (!selected?.templatePath) return;
+    if (disabled || !selected?.templatePath) return;
     const timer = setTimeout(() => { handleConfirm(); }, 600);
     return () => clearTimeout(timer);
-  }, [selected]);
+  }, [selected, disabled]);
 
   const showResult = state.status !== 'idle' && state.status !== 'loading';
   const templateValid = state.status === 'ready' || state.status === 'warning';
@@ -150,11 +151,14 @@ export default function TemplateConfirm({ state, onChange }: Props) {
         )}
 
         {!listLoading && options.length > 0 && (
-          <div className="relative">
+          <div className="relative group">
             <button
               type="button"
-              onClick={() => setIsOpen((o) => !o)}
-              className="w-full flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 text-left cursor-pointer"
+              onClick={() => { if (!disabled) setIsOpen((o) => !o); }}
+              disabled={disabled}
+              className={`w-full flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-sm bg-white focus:outline-none text-left transition-colors ${
+                disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer focus:ring-2 focus:ring-blue-500'
+              }`}
             >
               <span className="font-medium text-gray-800">
                 {selected?.productName ?? 'Select a template'}
@@ -163,6 +167,11 @@ export default function TemplateConfirm({ state, onChange }: Props) {
                 <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
             </button>
+            {disabled && (
+              <div className="absolute bottom-full left-0 mb-1.5 px-2.5 py-1.5 bg-gray-800 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity duration-150">
+                Reset results in Step 3 to change the template
+              </div>
+            )}
 
             {isOpen && (
               <ul className="absolute z-10 mt-1 w-full rounded-xl border border-gray-200 bg-white shadow-lg max-h-64 overflow-y-auto">

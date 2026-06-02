@@ -9,6 +9,7 @@ interface Props {
   onChange: (rows: CsvRow[]) => void;
   placeholders?: string[];
   onReadinessChange?: (state: { dataComplete: boolean; idsValid: boolean; noDuplicates: boolean }) => void;
+  disabled?: boolean;
 }
 
 const PLACEHOLDER_COLUMNS = ['template_id', 'url_slug', 'title', 'description'];
@@ -97,7 +98,7 @@ function ensureShortTitle(fields: string[], rows: CsvRow[]): { fields: string[];
   return { fields: normalizedFields, rows: normalizedRows };
 }
 
-export default function CsvUpload({ rows, onChange, placeholders = [], onReadinessChange }: Props) {
+export default function CsvUpload({ rows, onChange, placeholders = [], onReadinessChange, disabled = false }: Props) {
   const [inputMode, setInputMode] = useState<'upload' | 'manual'>('upload');
   const [manualInput, setManualInput] = useState('');
   const [isDragging, setIsDragging] = useState(false);
@@ -278,21 +279,23 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
         <button
-          onClick={() => setInputMode('upload')}
-          className={`text-xs px-3 py-1 rounded-full border font-medium cursor-pointer transition-colors ${
-            inputMode === 'upload'
-              ? 'bg-gray-900 text-white border-gray-900'
-              : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+          onClick={() => { if (!disabled) setInputMode('upload'); }}
+          disabled={disabled}
+          className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
+            disabled
+              ? `opacity-40 cursor-not-allowed ${inputMode === 'upload' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-200'}`
+              : `cursor-pointer ${inputMode === 'upload' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'}`
           }`}
         >
           Upload File
         </button>
         <button
-          onClick={() => setInputMode('manual')}
-          className={`text-xs px-3 py-1 rounded-full border font-medium cursor-pointer transition-colors ${
-            inputMode === 'manual'
-              ? 'bg-gray-900 text-white border-gray-900'
-              : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'
+          onClick={() => { if (!disabled) setInputMode('manual'); }}
+          disabled={disabled}
+          className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
+            disabled
+              ? `opacity-40 cursor-not-allowed ${inputMode === 'manual' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-200'}`
+              : `cursor-pointer ${inputMode === 'manual' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'}`
           }`}
         >
           Enter IDs
@@ -301,17 +304,21 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
 
       {inputMode === 'upload' ? (
         <div
-          onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-          onDragLeave={() => setIsDragging(false)}
-          onDrop={(e) => {
+          onDragOver={disabled ? undefined : (e) => { e.preventDefault(); setIsDragging(true); }}
+          onDragLeave={disabled ? undefined : () => setIsDragging(false)}
+          onDrop={disabled ? undefined : (e) => {
             e.preventDefault();
             setIsDragging(false);
             const file = e.dataTransfer.files[0];
             if (file) handleFile(file);
           }}
-          onClick={() => fileRef.current?.click()}
-          className={`border-2 border-dashed rounded-xl p-8 text-center cursor-pointer transition-colors ${
-            isDragging ? 'border-blue-400 bg-blue-50' : 'border-gray-200 hover:border-gray-300'
+          onClick={disabled ? undefined : () => fileRef.current?.click()}
+          className={`border-2 border-dashed rounded-xl p-8 text-center transition-colors ${
+            disabled
+              ? 'border-gray-200 opacity-40 cursor-not-allowed'
+              : isDragging
+                ? 'border-blue-400 bg-blue-50 cursor-pointer'
+                : 'border-gray-200 hover:border-gray-300 cursor-pointer'
           }`}
         >
           <input
@@ -339,14 +346,15 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
         <div className="flex flex-col gap-2">
           <textarea
             value={manualInput}
-            onChange={(e) => setManualInput(e.target.value)}
+            onChange={(e) => { if (!disabled) setManualInput(e.target.value); }}
+            disabled={disabled}
             placeholder={'Paste template IDs, one per line or comma-separated\ne.g.\n150004762482726999\n150004762482726998'}
             rows={6}
-            className="w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-700 font-mono resize-y focus:outline-none focus:ring-2 focus:ring-indigo-300"
+            className="w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-700 font-mono resize-y focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:opacity-40 disabled:cursor-not-allowed"
           />
           <button
             onClick={handleManualSubmit}
-            disabled={!manualInput.trim()}
+            disabled={!manualInput.trim() || disabled}
             className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
             Load IDs
@@ -412,7 +420,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
         <div className="flex items-center gap-3 flex-wrap">
           <button
             onClick={handleValidate}
-            disabled={validating || hydrating}
+            disabled={validating || hydrating || disabled}
             className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
             {validating ? 'Validating…' : 'Validate Template IDs'}
@@ -420,7 +428,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
           {hasData && (
             <button
               onClick={handleHydrate}
-              disabled={hydrating || validating}
+              disabled={hydrating || validating || disabled}
               className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
             >
               {hydrating ? 'Hydrating…' : 'Hydrate from Zazzle'}
@@ -432,6 +440,11 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
       )}
 
       {hasData && Object.keys(zazzleHydratedFields).length > 0 && <ZazzleLegend />}
+      {disabled && hasData && (
+        <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+          Data inputs are locked while results exist. Reset results in Step 3 to make changes.
+        </p>
+      )}
       <DataTable
         columns={tableColumns}
         rows={visibleRows}

@@ -1,4 +1,4 @@
-import { useState, Fragment } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import {
   postDoc,
   triggerPreview,
@@ -16,18 +16,24 @@ interface Props {
   rows: CsvRow[];
   template: TemplateState;
   generateBlockReason?: string;
+  onResultsChange?: (hasResults: boolean) => void;
 }
 
 const CONCURRENCY = 3;
 
 type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing' | 'unpublishing' | 'deleting';
 
-export default function GeneratePanel({ rows, template, generateBlockReason }: Props) {
+export default function GeneratePanel({ rows, template, generateBlockReason, onResultsChange }: Props) {
   const outputDir = template.outputDir ?? '';
   const [results, setResults] = useState<RowResult[]>([]);
   const [bulkOp, setBulkOp] = useState<BulkOp>('idle');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [resetModalOpen, setResetModalOpen] = useState(false);
+
+  useEffect(() => {
+    onResultsChange?.(results.some((r) => r.stage !== 'pending'));
+  }, [results]);
 
   function toggleRowDetail(id: string) {
     setExpandedRowId((prev) => (prev === id ? null : id));
@@ -326,6 +332,16 @@ export default function GeneratePanel({ rows, template, generateBlockReason }: P
       )}
 
       <div className="flex items-center gap-3 flex-wrap">
+        {results.length > 0 && !running && (
+          <button
+            type="button"
+            onClick={() => setResetModalOpen(true)}
+            className="px-5 py-2.5 bg-gray-100 text-gray-700 text-sm font-medium rounded-xl hover:bg-gray-200 cursor-pointer transition-colors border border-gray-200"
+          >
+            Reset Results
+          </button>
+        )}
+
         <div className="relative group inline-block">
           <button
             type="button"
@@ -488,6 +504,35 @@ export default function GeneratePanel({ rows, template, generateBlockReason }: P
               ))}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {resetModalOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-max max-w-[90vw] flex flex-col gap-4 shadow-xl">
+            <h3 className="font-semibold text-gray-900 text-base">Reset results?</h3>
+            <p className="text-sm text-gray-500">
+              This will clear all {results.length} result{results.length !== 1 ? 's' : ''} from this
+              view and unlock the template and data inputs. Documents already written to DA are not
+              deleted — use the Delete button to remove them first.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setResetModalOpen(false)}
+                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 cursor-pointer transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => { setResults([]); setResetModalOpen(false); }}
+                className="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-xl hover:bg-gray-900 cursor-pointer transition-colors"
+              >
+                Reset
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
