@@ -689,7 +689,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   justify-content: space-between;
   gap: 6px;
   width: 100%;
-  min-width: 244px;
+  min-width: 200px;
   height: 32px;
   padding: 0 11px 0 12px;
   background: var(--color-extract-gray-300);
