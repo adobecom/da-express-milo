@@ -5,8 +5,10 @@
   --susi-standard-padding: 24px;
 }
 
+
 .susi-light {
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
   line-height: initial;
@@ -15,6 +17,7 @@
 
 .susi-layout {
   display: flex;
+  width: 100%;
   flex-direction: column;
   align-items: center;
   text-align: center;
@@ -135,6 +138,10 @@
 .susi-light.student .susi-wrapper {
   min-height: 421.5px;
   width: var(--susi-modal-width);
+}
+
+.susi-light.color .susi-wrapper {
+  width: 100%;
 }
 
 /* student styles */
