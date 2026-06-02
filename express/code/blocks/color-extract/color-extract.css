@@ -777,8 +777,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 .color-extract .color-extract-mood-option-check {
-  width: var(--spacing-125);
-  height: var(--spacing-125);
+  width: 10px;
+  height: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;

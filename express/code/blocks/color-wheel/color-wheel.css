@@ -258,8 +258,8 @@ body {
 }
 
 .color-wheel .image-extract .color-extract-mood-option-check {
-  width: var(--spacing-125);
-  height: var(--spacing-125);
+  width: 10px;
+  height: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -372,7 +372,7 @@ color-wheel-express {
 .color-wheel-harmony-carousel-host .simple-carousel-fader-right {
   display: flex;
   width: 88px;
-  height: var(--spacing-700);
+  height: 48px;
   align-items: center;
   gap: 10px;
 }
@@ -391,8 +391,8 @@ color-wheel-express {
 
 .color-wheel-harmony-option {
   box-sizing: border-box;
-  width: var(--spacing-700);
-  height: var(--spacing-700);
+  width: 48px;
+  height: 48px;
   padding: 0;
   margin: 0;
   border-radius: var(--Radius-corner-radius-75);
@@ -420,8 +420,8 @@ color-wheel-express {
 }
 
 .color-wheel .icon.simple-carousel-arrow-icon {
-  height: var(--spacing-325);
-  width: var(--spacing-325);
+  height: 18px;
+  width: 18px;
 }
 
 .mobile-container {
