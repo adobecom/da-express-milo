@@ -366,10 +366,10 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <Stat label="Total" value={summary.total} />
           {summary.duplicates > 0 && (
-            <Stat label="Duplicate IDs" value={summary.duplicates} color="orange" />
+            <Stat label="Duplicate template_id values" value={summary.duplicates} color="orange" />
           )}
           {summary.duplicateSlugs > 0 && (
-            <Stat label="Duplicate Slugs" value={summary.duplicateSlugs} color="orange" />
+            <Stat label="Duplicate url_slug values" value={summary.duplicateSlugs} color="orange" />
           )}
           {summary.missing > 0 && (
             <Stat label="Rows Missing Values" value={summary.missing} color="red" />
@@ -499,7 +499,7 @@ function DataTable({
                 {col}
               </th>
             ))}
-            {Object.keys(validationStatus).length > 0 && (
+            {(Object.keys(validationStatus).length > 0 || Object.keys(zazzleReferenceValues).length > 0) && (
               <th className="px-3 py-2 text-left font-medium text-gray-600 whitespace-nowrap w-[40px]">API</th>
             )}
           </tr>
@@ -581,7 +581,7 @@ function DataTable({
                     </td>
                   );
                 })}
-                {Object.keys(validationStatus).length > 0 && (
+                {(Object.keys(validationStatus).length > 0 || Object.keys(zazzleReferenceValues).length > 0) && (
                   <td className="px-3 py-2 text-center">
                     {row.template_id?.trim() && (
                       <a
