@@ -15,6 +15,7 @@ const PLACEHOLDER_COLUMNS = ['template_id', 'url_slug', 'title', 'description'];
 const PLACEHOLDER_ROW: CsvRow = { _id: 'placeholder', template_id: '-', url_slug: '-', title: '-', description: '-' };
 
 function computeSummary(rows: CsvRow[]): InputSummary {
+  
   const total = rows.length;
 
   const templateIdMap: Record<string, string[]> = {};
