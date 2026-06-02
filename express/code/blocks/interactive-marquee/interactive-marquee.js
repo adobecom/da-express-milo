@@ -78,7 +78,7 @@ function createPromptLinkElement(promptLink, prompt) {
 function injectExpressLogo(block, wrapper) {
   if (block.classList.contains('entitled')) return;
   const metadataValue = getMetadata('marquee-inject-logo')?.toLowerCase();
-  if (!['on', 'yes', 'acrobat-express'].includes(metadataValue)) return;
+  if (!['on', 'yes', 'acrobat-express', 'real-madrid'].includes(metadataValue)) return;
   let logoName = 'adobe-express-logo';
   let logoSize = '22px';
   let logoAlt = 'Adobe Express logo';
