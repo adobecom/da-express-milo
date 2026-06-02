@@ -13,6 +13,7 @@ import loadColorExtractPlaceholders from '../../scripts/color-shared/i18n/loadCo
 const CSS_DEPS = [
   '/express/code/scripts/color-shared/components/strips/color-strip.css',
   '/express/code/scripts/color-shared/components/image-upload/image-upload.css',
+  '/express/code/scripts/color-shared/components/image-extract/buildExtractOverlays.css',
   '/express/code/blocks/color-wheel/image-extract.css',
 ];
 CSS_DEPS.forEach((href) => {
@@ -129,7 +130,7 @@ async function loadPlaceholders() {
     'color-harmonies', 'undo', 'redo', 'generate-random', 'maximize', 'create-palette',
     'contrast-checker', 'color-blindness-simulator', 'no-image-try-ours', 'use-this-image',
     'extracting-colors', 'color-wheel-keyboard-hint', 'color-wheel-harmony-aria',
-    'color-wheel-aria-with-hint', 'color-wheel-marker-aria',
+    'color-wheel-aria-with-hint', 'color-wheel-marker-aria', 'minimize',
   ];
   const values = await replaceKeyArray(KEYS, getConfig());
   const v = (i, fallback) => {
@@ -157,6 +158,7 @@ async function loadPlaceholders() {
     redo: v(14, 'Redo'),
     generateRandom: v(15, 'Generate random'),
     maximize: v(16, 'Maximize'),
+    minimize: v(27, 'Minimize'),
     createPalette: v(17, 'Create palette'),
     contrastChecker: v(18, 'Contrast Checker'),
     colorBlindnessSimulator: v(19, 'Color Blindness Simulator'),
@@ -253,6 +255,7 @@ let pendingSetColorHex = null;
 let swatchRailController = null;
 let imagePanelDestroy = null;
 let imagePanelGetSrc = null;
+let imagePanelHandleFile = null;
 let primaryColorAdapter = null;
 let sidebarNaturalWidth = 0;
 let sidebarTransitionCleanup = null;
@@ -556,7 +559,14 @@ function buildPrimaryColorContent(controller, strings = {}) {
   return wrapper;
 }
 
-function buildImageContent(controller, suggestionsRow, strings, initialSrc = null) {
+function buildImageContent(
+  controller,
+  suggestionsRow,
+  strings,
+  initialSrc = null,
+  onImageProcessed = null,
+  viewportEl = null,
+) {
   const image = createTag('div', { class: 'image-content' });
   const panel = createImageExtractComponent({
     controller,
@@ -564,9 +574,12 @@ function buildImageContent(controller, suggestionsRow, strings, initialSrc = nul
     suggestionsRowEl: suggestionsRow,
     strings,
     initialSrc,
+    onImageProcessed,
+    viewportEl,
   });
   imagePanelDestroy = panel.destroy;
   imagePanelGetSrc = panel.getCurrentSrc;
+  imagePanelHandleFile = panel.handleFile;
   image.appendChild(panel.element);
   return image;
 }
@@ -587,7 +600,7 @@ async function buildColorWheelContent(controller, strings) {
 }
 
 async function buildTabs(controller, suggestionsRow, {
-  onSelectionChange, strings = {}, initialImageSrc = null,
+  onSelectionChange, strings = {}, initialImageSrc = null, viewportEl = null,
 } = {}) {
   // Create the tabs shell and the color-wheel panel content in parallel
   const [tabsInstance, cwContent] = await Promise.all([
@@ -606,7 +619,8 @@ async function buildTabs(controller, suggestionsRow, {
   ]);
 
   tabsInstance.addPanel('color-wheel', cwContent);
-  tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings, initialImageSrc));
+  const switchToImageTab = () => tabsInstance.setSelected('image');
+  tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings, initialImageSrc, switchToImageTab, viewportEl));
   tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller, strings));
 
   return tabsInstance;
@@ -806,6 +820,7 @@ function cleanup() {
   imagePanelDestroy?.();
   imagePanelDestroy = null;
   imagePanelGetSrc = null;
+  imagePanelHandleFile = null;
   primaryColorAdapter?.destroy?.();
   primaryColorAdapter = null;
   stripRenderer?.destroy?.();
@@ -847,6 +862,23 @@ export default async function decorate(block) {
     // This prevents a stale concurrent init from appending duplicate tabs/layout to the DOM.
     currentInitToken += 1;
     const myToken = currentInitToken;
+
+    // Capture any file dropped while createImageExtractComponent's window handlers are not yet
+    // ready, so it can be replayed once buildTabs resolves. Only active when block is in viewport.
+    let pendingDropFile = null;
+    const isBlockInViewport = () => {
+      const rect = block.getBoundingClientRect();
+      return rect.bottom > 0 && rect.top < window.innerHeight;
+    };
+    const earlyPreventFileDrop = (e) => {
+      if (!isBlockInViewport()) return;
+      e.preventDefault();
+      if (e.type === 'drop' && e.dataTransfer?.files?.[0]) {
+        [pendingDropFile] = e.dataTransfer.files;
+      }
+    };
+    window.addEventListener('dragover', earlyPreventFileDrop);
+    window.addEventListener('drop', earlyPreventFileDrop);
 
     try {
       const [strings, { getResolvedPalette, getResolvedPaletteName }] = await Promise.all([
@@ -899,7 +931,7 @@ export default async function decorate(block) {
             { id: 'undo', label: strings.undo },
             { id: 'redo', label: strings.redo },
             { id: 'generate-random', label: strings.generateRandom },
-            { id: 'expand', label: strings.maximize },
+            { id: 'expand', label: strings.maximize, expandedLabel: strings.minimize },
           ],
           type: isDesktop ? 'full' : 'nav-only',
           getName: () => currentPalette?.name || initialPalette.name,
@@ -985,8 +1017,16 @@ export default async function decorate(block) {
           },
           strings,
           initialImageSrc: savedImageSrc,
+          viewportEl: block,
         }),
       ]);
+
+      if (pendingDropFile) {
+        const file = pendingDropFile;
+        pendingDropFile = null;
+        tabs.setSelected('image');
+        imagePanelHandleFile?.(file);
+      }
 
       if (myToken !== currentInitToken) return;
 
@@ -1197,6 +1237,9 @@ export default async function decorate(block) {
       cleanup();
       block.replaceChildren();
       block.append(createTag('p', { class: 'color-wheel-error' }, 'Failed to load Color Wheel.'));
+    } finally {
+      window.removeEventListener('dragover', earlyPreventFileDrop);
+      window.removeEventListener('drop', earlyPreventFileDrop);
     }
   }
 

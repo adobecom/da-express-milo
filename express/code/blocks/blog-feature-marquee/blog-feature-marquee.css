@@ -485,9 +485,7 @@ main .section .blog-feature-marquee p {
   }
 }
 
-/* ── Responsive: Tablet M (800px+) ────────────────────────────────────────── */
-
-@media (min-width: 800px) {
+@media (min-width: 600px) {
 
   .blog-feature-marquee .carousel-control-bar {
     display: flex;

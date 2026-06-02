@@ -1474,6 +1474,7 @@ main .section.long-form .content h6 {
 main .section.long-form.long-form-blog .content :is(h3, h4, h5, h6) {
   font-size: var(--Global-Typography-Size-Headings-Heading-L);
   line-height: 104%;
+  font-weight: var(--heading-font-weight-extra);
 }
 
 main .section.long-form .content,

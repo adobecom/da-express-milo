@@ -936,7 +936,7 @@ export const style = css`
   }
 
   
-  .swatch-column.base-color {
+  .swatch-column.base-color:not(.swatch-column--drag-over) {
     outline: none;
   }
 
@@ -1062,6 +1062,8 @@ export const style = css`
     justify-content: center;
     color: var(--swatch-text-color);
     transition: background-color 0.15s ease, color 0.15s ease;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
 
   
@@ -1111,6 +1113,8 @@ export const style = css`
   .icon-button .icon-tint {
     display: inline-block;
     filter: var(--swatch-icon-filter);
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   
@@ -1120,6 +1124,8 @@ export const style = css`
     width: 20px;
     height: 20px;
     filter: var(--swatch-icon-filter);
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   .edit-input-native {
