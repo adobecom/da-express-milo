@@ -4,6 +4,7 @@ export type CsvRow = Record<string, string>;
 export interface InputSummary {
   total: number;
   duplicates: number;
+  duplicateSlugs: number;
   missing: number;
   duplicateTemplateIdRowIds: Set<string>;
   duplicateSlugRowIds: Set<string>;

@@ -40,8 +40,9 @@ function computeSummary(rows: CsvRow[]): InputSummary {
   const withId = rows.filter((r) => r['template_id']?.trim() && r['url_slug']?.trim());
   const missing = total - withId.length;
   const duplicates = duplicateTemplateIdRowIds.size;
+  const duplicateSlugs = duplicateSlugRowIds.size;
 
-  return { total, duplicates, missing, duplicateTemplateIdRowIds, duplicateSlugRowIds };
+  return { total, duplicates, duplicateSlugs, missing, duplicateTemplateIdRowIds, duplicateSlugRowIds };
 }
 
 interface SchemaMatch {
@@ -365,7 +366,10 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <Stat label="Total" value={summary.total} />
           {summary.duplicates > 0 && (
-            <Stat label="Duplicates" value={summary.duplicates} color="orange" />
+            <Stat label="Duplicate IDs" value={summary.duplicates} color="orange" />
+          )}
+          {summary.duplicateSlugs > 0 && (
+            <Stat label="Duplicate Slugs" value={summary.duplicateSlugs} color="orange" />
           )}
           {summary.missing > 0 && (
             <Stat label="Rows Missing Values" value={summary.missing} color="red" />

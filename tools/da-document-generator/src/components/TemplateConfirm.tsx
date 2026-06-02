@@ -194,7 +194,7 @@ export default function TemplateConfirm({ state, onChange, disabled = false }: P
         )}
 
         <p className="text-xs text-gray-400 pl-1">
-          Template config from{' '}
+          Template options are loaded from{' '}
           <a
             href={`https://da.live/sheet#${CONFIG_SHEET}`}
             target="_blank"
@@ -204,6 +204,7 @@ export default function TemplateConfirm({ state, onChange, disabled = false }: P
             <code className="bg-gray-100 px-1 rounded">{CONFIG_SHEET}</code>
             <ExternalLinkIcon />
           </a>
+          {' '}— add new template document / output directory options directly in that sheet.
         </p>
       </div>
 
