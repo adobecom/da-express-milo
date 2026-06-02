@@ -189,19 +189,6 @@
 .dt-table .dt-last-row.dt-first-col  { border-bottom-left-radius: var(--border-radius-table); }
 .dt-table .dt-last-row.dt-last-col   { border-bottom-right-radius: var(--border-radius-table); }
 
-/* Fill the transparent corner gap of the sticky top-left cell so scrolling
-   tbody content doesn't bleed through the border-radius cutout.
-   ::before at z-index:-1 sits within the sticky cell's stacking context
-   (above body rows) but behind the cell's own background, making it visible
-   only through the transparent corner gap. */
-.dt-table thead th.dt-label-col.dt-first-row.dt-first-col::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: var(--color-gray-50);
-  z-index: -1;
-}
-
 /* Interior column dividers */
 .dt-table td.dt-data-col:not(.dt-last-col),
 .dt-table thead th.dt-data-col:not(.dt-last-col) {
