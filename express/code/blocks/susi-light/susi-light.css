@@ -1,6 +1,6 @@
 /*
  * CLS height tokens: re-measure on /drafts/sircar/susi-light-copy (node scripts/measure-susi-modals.mjs).
- * Tabs: --susi-tabs-panel-* ; modals: --susi-wrapper-{flavor}-{profile} via --susi-modal-wrapper-height on block.
+ * Tabs: --susi-tabs-panel-* ; layout/legacy: --susi-modal-wrapper-height on block (modal + in-page).
  */
 :root {
   --susi-modal-width: 370px;
@@ -192,21 +192,13 @@
   max-height: var(--susi-tabs-panel-height);
 }
 
+/* CLS: profile height from applyModalWrapperReserve (modal + in-page) */
+.susi-light:not(.tabs):has(.susi-layout) .susi-wrapper {
+  min-height: var(--susi-modal-wrapper-height, var(--susi-wrapper-standard));
+}
+
 .susi-light.student .susi-wrapper {
-  min-height: var(--susi-wrapper-student);
   width: var(--susi-modal-width);
-}
-
-.susi-light.edu .susi-wrapper {
-  min-height: var(--susi-wrapper-edu-express);
-}
-
-.susi-light.b2b .susi-wrapper {
-  min-height: var(--susi-wrapper-standard);
-}
-
-.susi-light.b2b.email-only .susi-wrapper {
-  min-height: var(--susi-wrapper-b2b-email-only);
 }
 
 .susi-light.simplified .susi-wrapper {

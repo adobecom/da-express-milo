@@ -454,7 +454,7 @@ export function resolveModalWrapperHeight(el, clientId) {
   return readTokenPx(root, token, fallback);
 }
 
-/** Set --susi-modal-wrapper-height before SUSI hydrate (modal CLS). */
+/** Set --susi-modal-wrapper-height before SUSI hydrate (modal + in-page CLS). */
 export function applyModalWrapperReserve(el, clientId) {
   const profile = resolveModalWrapperProfile(el, clientId);
   if (!profile) return;

@@ -81,6 +81,13 @@ describe('Susi-light', async () => {
       expect(block.dataset.susiWrapperProfile).to.equal('b2b-email-first');
       expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('409px');
     });
+
+    it('sets wrapper reserve on in-page b2b block after decorate', () => {
+      const wrapper = block.querySelector('.susi-wrapper');
+      expect(wrapper).to.exist;
+      expect(block.dataset.susiWrapperProfile).to.equal('b2b-email-first');
+      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('409px');
+    });
   });
 
   describe('modal wrapper profile resolver', () => {
