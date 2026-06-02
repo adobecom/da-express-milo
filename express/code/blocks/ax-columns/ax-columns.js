@@ -198,9 +198,9 @@ function injectLogo(block) {
     logo = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
   } else if (injectRealMadridLogo) {
     const logoName = 'cobrand-lockup-real-madrid-logo';
-    const logoSize = '22px';
+    const logoSize = '40px';
     const logoAlt = 'Adobe X Real Madrid logo';
-    const logoClass = 'marquee-eyebrow-logo-wide';
+    const logoClass = 'marquee-eyebrow-logo-large';
     logo = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
   } else {
     const mediaQuery = window.matchMedia('(min-width: 900px)');
