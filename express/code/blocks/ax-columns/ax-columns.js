@@ -183,8 +183,8 @@ function injectLogo(block) {
   const injectPhotoLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-photo-logo')?.toLowerCase());
   const injectAcrobatLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase());
   const injectRealMadridLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-real-madrid-logo')?.toLowerCase());
-  // eslint-disable-next-line
-  if (!injectRegularLogo && !injectPhotoLogo && !injectAcrobatLogo && !injectRealMadridLogo) return null;
+  if (!injectRegularLogo
+    && !injectPhotoLogo && !injectAcrobatLogo && !injectRealMadridLogo) return null;
 
   let logo;
 
@@ -615,10 +615,10 @@ export default async function decorate(block) {
   if (document.querySelector('main .ax-columns.marquee') === block && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
     addFreePlanWidget(
       block.querySelector('.button-container')
-      || block.querySelector('.con-button')?.parentElement
-      || block.querySelector(
-        ':scope .column:not(.hero-animation-overlay,.columns-picture)',
-      ),
+        || block.querySelector('.con-button')?.parentElement
+        || block.querySelector(
+          ':scope .column:not(.hero-animation-overlay,.columns-picture)',
+        ),
     );
   }
 
