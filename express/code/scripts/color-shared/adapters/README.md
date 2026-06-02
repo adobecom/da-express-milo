@@ -14,7 +14,7 @@ Adapter for `<color-edit>`. Use from strips, color wheel, contrast checker, or m
 |------|------|---------|-------------|
 | `palette` | `string[]` | `[]` | Hex color array (up to 10 per Figma). |
 | `selectedIndex` | `number` | `0` | Selected palette index. |
-| `colorMode` | `string` | `'RGB'` | `'RGB'` \| `'HEX'`. |
+| `colorMode` | `string` | `'RGB'` | `'RGB'` \| `'HEX'`. Used as the fallback only — the adapter initializes from the persisted user preference (`express-color-mode` in localStorage) when one exists, and writes back to it on every mode change so other live pickers stay in sync. |
 | `showPalette` | `boolean` | `true` | Whether to show the palette row. |
 | `mobile` | `boolean` | `false` | When true, renders as bottom sheet. |
 
@@ -78,7 +78,7 @@ Adapter for `<base-color>`. Use when only the color picker (no palette) is neede
 | Name | Type | Default | Description |
 |------|------|---------|-------------|
 | `color` | `string` | `'#FF0000'` | Initial hex color. |
-| `colorMode` | `string` | `'HEX'` | `'HEX'` \| `'RGB'` \| `'HSB'` \| `'Lab'`. |
+| `colorMode` | `string` | `'HEX'` | `'HEX'` \| `'RGB'` \| `'HSB'` \| `'Lab'`. Used as the fallback only — the adapter initializes from the persisted user preference (`express-color-mode` in localStorage) when one exists, and writes back to it on every mode change so other live pickers stay in sync. |
 | `showHeader` | `boolean` | `true` | Show header row. |
 | `showBrightnessControl` | `boolean` | `true` | Show brightness slider. |
 

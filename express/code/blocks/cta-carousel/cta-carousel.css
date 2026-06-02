@@ -193,6 +193,10 @@
     margin-left: auto;
 }
 
+.cta-carousel.center-content .carousel-container .carousel-platform {
+    margin-inline: auto;
+}
+
 .cta-carousel.quick-action .card.gen-ai-action .card-sleeve .gen-ai-input-form .gen-ai-submit {
     left: 56px;
     bottom: 24px;
