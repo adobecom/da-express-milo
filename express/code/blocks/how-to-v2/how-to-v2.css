@@ -16,6 +16,8 @@ main .section > .content:has( + .how-to-v2) h2 {
   font-size: var(--heading-font-size-m);
   margin-top: -12px;
   padding-bottom: var(--spacing-200);
+  padding-left: 16px;
+  padding-right: 16px;
 }
 
 .how-to-v2 ol {
