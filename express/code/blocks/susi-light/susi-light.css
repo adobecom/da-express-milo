@@ -89,7 +89,7 @@
 .susi-light.tabs [role='tablist'] {
   margin-top: var(--spacing-300);
   border-radius: 8px;
-  padding: var(--spacing-75);
+  padding: 4px;
   display: flex;
   gap: var(--spacing-75);
   background-color: var(--susi-grey);
@@ -202,9 +202,11 @@
 .section.ax-login-page .susi-light {
   padding-bottom: var(--spacing-700);
 }
+
 .section.ax-login-page .susi-light.b2b {
   width: var(--susi-modal-width);
 }
+
 .section.ax-login-page .susi-layout .footer {
   border-radius: 8px;
 }
@@ -219,6 +221,7 @@
     position: absolute;
     padding-top: 30px;
   }
+
   .section.ax-login-page .susi-layout .footer {
     border-radius: 0 0 16px 16px;
   }
