@@ -12,11 +12,11 @@
   --susi-wrapper-b2b-default: 484px;
   --susi-wrapper-b2b-hed: 267px;
   --susi-wrapper-b2b-business: 393px;
-  --susi-wrapper-b2b-email-first: 409px;
+  --susi-wrapper-b2b-email-first: 527px;
   --susi-wrapper-b2b-email-only: 230px;
-  --susi-wrapper-edu-default: 484px;
-  --susi-wrapper-edu-hed: 267px;
-  --susi-wrapper-edu-business: 393px;
+  --susi-wrapper-edu-default: 536px;
+  --susi-wrapper-edu-hed: 447px;
+  --susi-wrapper-edu-business: 511px;
   --susi-wrapper-edu-express: 400px;
   --susi-wrapper-student-default: 462px;
   --susi-wrapper-student-hed: 422px;
@@ -25,7 +25,7 @@
   --susi-wrapper-student: 422px;
   --susi-wrapper-simplified: 400px;
   --susi-wrapper-legacy-edu-express: 545px;
-  --susi-wrapper-legacy-edu-hed: 478px;
+  --susi-wrapper-legacy-edu-hed: 597px;
   --susi-standard-padding: 24px;
 }
 

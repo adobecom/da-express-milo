@@ -79,14 +79,14 @@ describe('Susi-light', async () => {
 
     it('reserves modal wrapper height from email-first profile', () => {
       expect(block.dataset.susiWrapperProfile).to.equal('b2b-email-first');
-      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('409px');
+      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('527px');
     });
 
     it('sets wrapper reserve on in-page b2b block after decorate', () => {
       const wrapper = block.querySelector('.susi-wrapper');
       expect(wrapper).to.exist;
       expect(block.dataset.susiWrapperProfile).to.equal('b2b-email-first');
-      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('409px');
+      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('527px');
     });
   });
 
@@ -117,7 +117,7 @@ describe('Susi-light', async () => {
     it('returns heights from named css tokens', () => {
       expect(resolveModalWrapperHeight(el('susi-light b2b'), 'AdobeExpressWeb_HED')).to.equal(267);
       expect(resolveModalWrapperHeight(el('susi-light b2b email-only'), 'AdobeExpressWeb_Business')).to.equal(230);
-      expect(resolveModalWrapperHeight(el('susi-light edu'), 'AdobeExpressWeb_Business')).to.equal(393);
+      expect(resolveModalWrapperHeight(el('susi-light edu'), 'AdobeExpressWeb_Business')).to.equal(511);
       expect(resolveModalWrapperHeight(el('susi-light student'), 'AdobeExpressWeb')).to.equal(462);
       expect(resolveModalWrapperHeight(el('susi-light student'), 'AdobeExpressWeb_HED')).to.equal(422);
     });
@@ -127,7 +127,7 @@ describe('Susi-light', async () => {
       expect(resolveModalWrapperProfile(el('susi-light'), 'AdobeExpressWeb_HED')).to.equal('legacy-edu-hed');
       expect(resolveModalWrapperProfile(el('susi-light'), 'AdobeExpressWeb_Business')).to.equal('edu-business');
       expect(resolveModalWrapperHeight(el('susi-light'), 'AdobeExpressWeb')).to.equal(545);
-      expect(resolveModalWrapperHeight(el('susi-light'), 'AdobeExpressWeb_HED')).to.equal(478);
+      expect(resolveModalWrapperHeight(el('susi-light'), 'AdobeExpressWeb_HED')).to.equal(597);
     });
 
     it('applyModalWrapperReserve sets legacy bare block height', () => {
@@ -141,7 +141,7 @@ describe('Susi-light', async () => {
       const block = el('susi-light');
       applyModalWrapperReserve(block, 'AdobeExpressWeb_HED');
       expect(block.dataset.susiWrapperProfile).to.equal('legacy-edu-hed');
-      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('478px');
+      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('597px');
     });
 
     it('skips tabs blocks only', () => {
@@ -162,14 +162,14 @@ describe('Susi-light', async () => {
       const block = el('susi-light edu no-redirect');
       applyModalWrapperReserve(block, 'AdobeExpressWeb_HED');
       expect(block.dataset.susiWrapperProfile).to.equal('edu-hed');
-      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('267px');
+      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('447px');
     });
 
     it('applyModalWrapperReserve sets edu-business height', () => {
       const block = el('susi-light edu no-redirect');
       applyModalWrapperReserve(block, 'AdobeExpressWeb_Business');
       expect(block.dataset.susiWrapperProfile).to.equal('edu-business');
-      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('393px');
+      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('511px');
     });
   });
 
