@@ -252,11 +252,8 @@
 }
 
 .dialog-modal:has(.susi-light:not(.tabs) .susi-layout) .susi-wrapper {
-  flex: 0 0 var(--susi-modal-wrapper-height, var(--susi-wrapper-standard));
-  height: var(--susi-modal-wrapper-height, var(--susi-wrapper-standard));
-  min-height: 0;
-  max-height: var(--susi-modal-wrapper-height, var(--susi-wrapper-standard));
-  overflow: auto;
+  flex: 0 0 auto;
+  min-height: var(--susi-modal-wrapper-height, var(--susi-wrapper-standard));
 }
 
 .dialog-modal .susi-light {
