@@ -146,6 +146,8 @@
   max-height: var(--susi-tabs-panel-height);
   flex-shrink: 0;
   box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .susi-light.tabs [role='tabpanel'] {
@@ -180,6 +182,8 @@
   height: var(--susi-tabs-panel-height);
   min-height: var(--susi-tabs-panel-height);
   max-height: var(--susi-tabs-panel-height);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .dialog-modal .susi-light.tabs [role='tabpanel'] {
@@ -187,6 +191,8 @@
   height: var(--susi-tabs-panel-height);
   min-height: var(--susi-tabs-panel-height);
   max-height: var(--susi-tabs-panel-height);
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 /* CLS: height set by applyModalWrapperReserve */
