@@ -1,4 +1,4 @@
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs, getUnityLibs } from '../../scripts/utils.js';
 
 const LIMITS = {};
 
@@ -95,21 +95,9 @@ export const localeMap = {
   vn_vi: 'en-us',
 };
 
-function getUnityLibs(prodLibs = '/unitylibs') {
-  const { hostname, search } = window.location;
-  if (!['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
-  const branch = new URLSearchParams(search).get('unitylibs') || 'main';
-  if (!/^[a-zA-Z0-9_-]+$/.test(branch)) throw new Error('Invalid branch name.');
-  if (branch === 'main' && hostname === 'www.stage.adobe.com') return prodLibs;
-  return `https://${branch}${branch.includes('--') ? '' : '--unity--adobecom'}.aem.live/unitylibs`;
-}
-
 export default async function init(el) {
-  let mobileApp;
-  if ((/iPad|iPhone|iPod/.test(window.browser?.ua) && !window.MSStream)
-    || /android/i.test(window.browser?.ua)) {
-    mobileApp = true;
-  }
+  const { userAgent } = navigator;
+  const mobileApp = /iPad|iPhone|iPod|android/i.test(userAgent);
 
   if (!window.adobeIMS) {
     import(`${getLibs()}/utils/utils.js`).then(({ loadIms }) => loadIms()).catch(() => {});
@@ -117,16 +105,14 @@ export default async function init(el) {
 
   const element = el.querySelector('span');
   const unityVerbMarquee = el.closest('.section')?.querySelector('.unity-verb-marquee');
+  if (!element && !unityVerbMarquee) return;
+  const unitylibs = getUnityLibs();
   if (unityVerbMarquee) {
-    const unitylibs = getUnityLibs();
     const { LIMITS: UNITY_VERB_MARQUEE_LIMITS } = await import(`${unitylibs}/blocks/unity-verb-marquee/unity-verb-marquee.js`);
     Object.assign(LIMITS, UNITY_VERB_MARQUEE_LIMITS);
   }
-  const widgetBlock = unityVerbMarquee;
-  const verb = (widgetBlock && [...widgetBlock.classList].find((cn) => LIMITS[cn])) || element.classList[1].replace('icon-', '');
+  const verb = (unityVerbMarquee && [...unityVerbMarquee.classList].find((cn) => LIMITS[cn])) || element.classList[1].replace('icon-', '');
   if (mobileApp && LIMITS[verb]?.mobileApp) return;
-
-  const unitylibs = getUnityLibs();
   const langFromPath = window.location.pathname.split('/')[1];
   const languageCode = localeMap[langFromPath] ? localeMap[langFromPath].split('-')[0] : 'en';
   const languageRegion = localeMap[langFromPath] ? localeMap[langFromPath].split('-')[1] : 'us';
