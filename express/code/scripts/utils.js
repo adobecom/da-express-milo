@@ -921,3 +921,13 @@ export function getContentRoot(location) {
   if (['--express-color--', 'color.stage.adobe.com', 'color.adobe.com'].some((i) => hostname.includes(i))) return '';
   return '/express';
 }
+
+export function getUnityLibs(prodLibs = '/unitylibs', location) {
+  const { hostname, search } = location || window.location;
+  if (!['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
+  const branch = new URLSearchParams(search).get('unitylibs') || 'main';
+  if (!/^[a-zA-Z0-9_-]+$/.test(branch)) throw new Error('Invalid branch name.');
+  if (branch === 'main' && hostname.includes('.stage.')) return prodLibs;
+  const env = hostname.includes('.hlx.') ? 'hlx' : 'aem';
+  return `https://${branch}${branch.includes('--') ? '' : '--unity--adobecom'}.${env}.live/unitylibs`;
+}
