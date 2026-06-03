@@ -1,6 +1,6 @@
 # build-block-from-figma
 
-Builds a new C2 block component from Figma designs. Reads Figma frames, generates block JS and CSS under `libs/c2/blocks/`, then runs a visual comparison loop (Playwright), an axe-core accessibility audit (WCAG 2.2 AA), and a Lighthouse performance audit. Supports localhost dev servers and DA-published (`.aem.live`) pages via a remote feature branch.
+Builds a new block component from Figma designs. Reads Figma frames, generates block JS and CSS under `libs/blocks/`, then runs a visual comparison loop (Playwright), an axe-core accessibility audit (WCAG 2.2 AA), and a Lighthouse performance audit. Supports localhost dev servers and DA-published (`.aem.live`) pages via a remote feature branch.
 
 ---
 
@@ -71,12 +71,12 @@ The skill will prompt for:
 
 | Input | Required | Example |
 |-------|----------|---------|
-| Preview URL | Yes | `http://localhost:6456/path` or `https://main--repo--org.aem.live/path` |
-| Figma URL — Mobile (≤767 px) | At least one | Figma frame link |
-| Figma URL — Tablet (768–1279 px) | No | Figma frame link |
-| Figma URL — Desktop (≥1280 px) | No | Figma frame link |
+| Preview URL | Yes | `http://localhost:3000/path` or `https://main--repo--org.aem.live/path` |
+| Figma URL — Mobile (< 600px) | At least one | Figma frame link |
+| Figma URL — Tablet (600–1199px) | No | Figma frame link |
+| Figma URL — Desktop (≥ 1200px) | No | Figma frame link |
 | Base branch | No (default: `stage`) | `feature/my-branch` |
 
 ## Output
 
-New files at `libs/c2/blocks/<name>/<name>.js` and `.css`, the block name registered in `C2_BLOCKS` in `utils.js`, a feature branch (remote mode), and a final summary with accessibility and performance results.
+New files at `libs/blocks/<name>/<name>.js` and `.css`, a feature branch (remote mode), and a final summary with accessibility and performance results.
