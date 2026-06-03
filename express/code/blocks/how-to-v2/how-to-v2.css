@@ -20,6 +20,14 @@ main .section > .content:has( + .how-to-v2) h2 {
   padding-right: 16px;
 }
 
+@supports (-webkit-touch-callout: none) {
+  main .section > .content:has( + .how-to-v2) h2 {
+    hyphens: none;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+}
+
 .how-to-v2 ol {
   list-style-type: none;
   font-size: 21px;
