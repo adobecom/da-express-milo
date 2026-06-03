@@ -322,7 +322,7 @@ describe('getUnityLibs', () => {
   it('returns hlx live URL for .hlx. hostname', () => {
     const location = new URL('https://main--da-express-milo--adobecom.hlx.live/');
     expect(getUnityLibs(location, '/unitylibs'))
-      .to.equal('https://main--unity--adobecom.hlx.live/unitylibs');
+      .to.equal('https://main--unity--adobecom.aem.live/unitylibs');
   });
 
   it('returns aem live URL for localhost', () => {

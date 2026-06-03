@@ -928,6 +928,5 @@ export function getUnityLibs(location, prodLibs = '/unitylibs') {
   const branch = new URLSearchParams(search).get('unitylibs') || 'main';
   if (!/^[a-zA-Z0-9_-]+$/.test(branch)) throw new Error('Invalid branch name.');
   if (branch === 'main' && hostname.includes('.stage.')) return prodLibs;
-  const tld = hostname.includes('.hlx.') ? 'hlx' : 'aem';
-  return `https://${branch}${branch.includes('--') ? '' : '--unity--adobecom'}.${tld}.live/unitylibs`;
+  return `https://${branch}${branch.includes('--') ? '' : '--unity--adobecom'}.aem.live/unitylibs`;
 }
