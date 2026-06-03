@@ -1,4 +1,4 @@
-/* CLS height tokens — re-measure: /drafts/sircar/susi-light-copy */
+/* CLS min-height floors (not exact heights) — re-measure: /drafts/sircar/susi-light-copy */
 :root {
   --susi-modal-width: 370px;
   --susi-tabs-width: 400px;
@@ -199,7 +199,7 @@
 }
 
 .susi-light.simplified .susi-wrapper {
-  min-height: var(--susi-wrapper-simplified);
+  min-height: var(--susi-modal-wrapper-height, var(--susi-wrapper-simplified));
 }
 
 .susi-light:not(:has(.susi-layout)) > susi-sentry-light {

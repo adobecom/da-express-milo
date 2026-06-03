@@ -144,9 +144,18 @@ describe('Susi-light', async () => {
       expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('478px');
     });
 
-    it('skips tabs and simplified blocks', () => {
+    it('skips tabs blocks only', () => {
       expect(resolveModalWrapperProfile(el('susi-light tabs'), 'AdobeExpressWeb')).to.equal(null);
       expect(resolveModalWrapperHeight(el('susi-light tabs'), 'AdobeExpressWeb')).to.equal(null);
+    });
+
+    it('maps simplified to simplified profile and reserve height', () => {
+      expect(resolveModalWrapperProfile(el('susi-light simplified'), 'AdobeExpressWeb')).to.equal('simplified');
+      expect(resolveModalWrapperHeight(el('susi-light simplified'), 'AdobeExpressWeb')).to.equal(400);
+      const block = el('susi-light simplified');
+      applyModalWrapperReserve(block, 'AdobeExpressWeb');
+      expect(block.dataset.susiWrapperProfile).to.equal('simplified');
+      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('400px');
     });
 
     it('applyModalWrapperReserve sets block custom property', () => {

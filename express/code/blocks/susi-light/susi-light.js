@@ -412,7 +412,8 @@ function resolveLegacyModalWrapperProfile(clientId) {
 
 /** Profile id matches fragment names, e.g. b2b-hed, edu-business. */
 export function resolveModalWrapperProfile(el, clientId) {
-  if (el.classList.contains('tabs') || el.classList.contains('simplified')) return null;
+  if (el.classList.contains('tabs')) return null;
+  if (el.classList.contains('simplified')) return 'simplified';
   const flavor = MODAL_FLAVORS.find((c) => el.classList.contains(c));
   if (flavor) return resolveFlavorModalWrapperProfile(el, flavor, clientId);
   return resolveLegacyModalWrapperProfile(clientId);
@@ -434,6 +435,7 @@ const MODAL_WRAPPER_FALLBACK_PX = {
   'student-email-only': 230,
   'legacy-edu-express': 545,
   'legacy-edu-hed': 478,
+  simplified: 400,
 };
 
 export function resolveModalWrapperHeight(el, clientId) {
