@@ -8,6 +8,7 @@ import {
   getIconElementDeprecated,
   convertToInlineSVG,
   getContentRoot,
+  getUnityLibs,
 } from '../../express/code/scripts/utils.js';
 import { transformLinkToAnimation } from '../../express/code/scripts/utils/media.js';
 
@@ -286,5 +287,57 @@ describe('getContentRoot', () => {
       const contentRoot = getContentRoot(location);
       expect(contentRoot).to.equal(expected);
     });
+  });
+});
+
+describe('getUnityLibs', () => {
+  it('returns prodLibs for production hostname', () => {
+    const location = new URL('https://www.adobe.com/');
+    expect(getUnityLibs('/unitylibs', location)).to.equal('/unitylibs');
+  });
+
+  it('returns prodLibs on stage with main branch', () => {
+    const location = new URL('https://www.stage.adobe.com/');
+    expect(getUnityLibs('/unitylibs', location)).to.equal('/unitylibs');
+  });
+
+  it('returns aem live URL for .aem. hostname', () => {
+    const location = new URL('https://main--da-express-milo--adobecom.aem.live/');
+    expect(getUnityLibs('/unitylibs', location))
+      .to.equal('https://main--unity--adobecom.aem.live/unitylibs');
+  });
+
+  it('uses custom branch from query param on .aem. hostname', () => {
+    const location = new URL('https://main--da-express-milo--adobecom.aem.live/?unitylibs=mybranch');
+    expect(getUnityLibs('/unitylibs', location))
+      .to.equal('https://mybranch--unity--adobecom.aem.live/unitylibs');
+  });
+
+  it('uses forked branch (contains --) without appending --unity--adobecom', () => {
+    const location = new URL('https://main--da-express-milo--adobecom.aem.live/?unitylibs=mybranch--unity--myfork');
+    expect(getUnityLibs('/unitylibs', location))
+      .to.equal('https://mybranch--unity--myfork.aem.live/unitylibs');
+  });
+
+  it('returns hlx live URL for .hlx. hostname', () => {
+    const location = new URL('https://main--da-express-milo--adobecom.hlx.live/');
+    expect(getUnityLibs('/unitylibs', location))
+      .to.equal('https://main--unity--adobecom.hlx.live/unitylibs');
+  });
+
+  it('returns aem live URL for localhost', () => {
+    const location = new URL('http://localhost:3000/');
+    expect(getUnityLibs('/unitylibs', location))
+      .to.equal('https://main--unity--adobecom.aem.live/unitylibs');
+  });
+
+  it('throws for invalid branch name', () => {
+    const location = new URL('https://main--da-express-milo--adobecom.aem.live/?unitylibs=bad/branch');
+    expect(() => getUnityLibs('/unitylibs', location)).to.throw('Invalid branch name.');
+  });
+
+  it('uses custom prodLibs default', () => {
+    const location = new URL('https://www.adobe.com/');
+    expect(getUnityLibs('/custom/path', location)).to.equal('/custom/path');
   });
 });
