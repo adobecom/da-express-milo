@@ -922,7 +922,7 @@ export function getContentRoot(location) {
   return '/express';
 }
 
-export function getUnityLibs(prodLibs = '/unitylibs', location) {
+export function getUnityLibs(location, prodLibs = '/unitylibs') {
   const { hostname, search } = location || window.location;
   if (!['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
   const branch = new URLSearchParams(search).get('unitylibs') || 'main';

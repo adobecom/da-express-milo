@@ -31,7 +31,7 @@ const UNITY_LIBS = '/unitylibs';
 const miloLibs = setLibs(LIBS);
 
 async function setupUnityLibs() {
-  const libs = getUnityLibs(UNITY_LIBS);
+  const libs = getUnityLibs(undefined, UNITY_LIBS);
   try {
     const { setUnityLibs, UNITY_BLOCKS } = await import(`${libs}/scripts/utils.js`);
     setUnityLibs(libs, 'da-express-milo');
