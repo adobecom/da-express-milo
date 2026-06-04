@@ -39,7 +39,11 @@ export function createRailControllerFromPalette(palette) {
 }
 
 export function createPaletteVariant(palette, variant, options = {}) {
-  const { emit = () => {}, registry = {}, swatchFeatures } = options;
+  const { emit = () => {}, registry = {}, swatchFeatures, strings = {} } = options;
+  const editTooltip = strings.paletteCardEditTooltip || 'Edit palette';
+  const openTooltip = strings.paletteCardOpenTooltip || 'Open';
+  const editAriaTpl = strings.paletteCardEditAria || 'Edit {name}';
+  const cardAriaTpl = strings.paletteCardAriaLabel || 'Palette: {name}';
   const pushStrip = registry.pushStrip || (() => {});
   const pushController = registry.pushController || (() => {});
   const pushAdapter = registry.pushAdapter || (() => {});
@@ -62,7 +66,7 @@ export function createPaletteVariant(palette, variant, options = {}) {
     const name = palette.name || `Palette ${palette.id}`;
     if (cardFocusable) {
       card.setAttribute('role', 'group');
-      card.setAttribute('aria-label', `Palette: ${name}`);
+      card.setAttribute('aria-label', cardAriaTpl.replace('{name}', name));
     }
 
     const visual = createTag('div', { class: 'color-card-visual' });
@@ -87,8 +91,8 @@ export function createPaletteVariant(palette, variant, options = {}) {
     const editBtn = createTag('button', {
       type: 'button',
       class: 'color-card-action-btn',
-      'aria-label': `Edit ${name}`,
-      'data-tooltip-content': 'Edit palette',
+      'aria-label': editAriaTpl.replace('{name}', name),
+      'data-tooltip-content': editTooltip,
     });
     const editIcon = createTag('span', { class: 'action-icon' });
     const editIconEl = document.createElement('sp-icon-edit');
@@ -103,8 +107,8 @@ export function createPaletteVariant(palette, variant, options = {}) {
     const shareBtn = createTag('button', {
       type: 'button',
       class: 'color-card-action-btn',
-      'aria-label': 'Open',
-      'data-tooltip-content': 'Open',
+      'aria-label': openTooltip,
+      'data-tooltip-content': openTooltip,
     });
     const shareIcon = createTag('span', { class: 'action-icon' });
     const viewIconEl = document.createElement('sp-icon-open-in');

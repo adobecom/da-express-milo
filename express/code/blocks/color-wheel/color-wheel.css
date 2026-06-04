@@ -8,16 +8,24 @@
   }
 }
 
-.color-wheel .ax-color-tool-layout {
-  box-sizing: border-box;
-  max-width: var(--block-wd-max-width);
-  margin: 0 auto;
-  padding: 0 var(--spacing-300) var(--spacing-300);
-  row-gap: 0;
+/* iOS Safari pull-to-refresh defence. Even with touch-action: none on the
+   wheel-marker-overlay, drag gestures that originate near the top of the
+   visible viewport can still commit to the native refresh gesture before
+   the JS handler runs. overscroll-behavior on the document scroller is the
+   documented way to disable it. This stylesheet is only loaded on color-wheel
+   pages, so the global body/html selector is scoped by load context. */
+html,
+body {
+  overscroll-behavior-y: contain;
 }
 
-.color-wheel .ax-shell-slot--topbar {
-  padding-block-end: var(--spacing-400);
+.color-wheel .ax-color-tool-layout {
+  --ax-padding-topbar-desktop: 0 0 var(--spacing-400);
+  --ax-padding-topbar-mobile: 0 0 var(--spacing-400);
+  --ax-padding-sidebar-mobile: 0 0 var(--spacing-300);
+  --ax-padding-canvas-mobile: 0 0 var(--spacing-300);
+
+  row-gap: 0;
 }
 
 .color-wheel .ax-shell-slot--sidebar {
@@ -25,12 +33,10 @@
   flex-direction: column;
   gap: var(--spacing-300);
   overflow: visible;
-  padding-block-end: var(--spacing-300);
   isolation: isolate;
 }
 
 .color-wheel .ax-shell-slot--canvas {
-  padding-block-end: var(--spacing-300);
   box-sizing: border-box;
   overflow-y: visible;
 }
@@ -40,7 +46,19 @@
 }
 
 .color-wheel sp-tabs {
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-300);
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.color-wheel sp-tab-panel {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .color-wheel-content {
@@ -76,6 +94,7 @@
 
 .color-wheel .image-extract {
   --color-extract-max-width: 100%;
+  --color-wheel-mood-width: 200px;
 }
 
 .color-wheel .color-extract-landing {
@@ -153,7 +172,6 @@
 }
 
 .color-wheel .color-extract-suggestion {
-  border-radius: var(--corner-radius-80);
   border: 2px solid transparent;
   box-shadow: none;
   transition: none;
@@ -201,7 +219,12 @@
 
 .color-wheel .color-extract-mood-row {
   flex: 1;
-  max-width: 200px;
+  max-width: var(--color-wheel-mood-width);
+}
+
+.color-wheel .color-extract-mood-dropdown {
+  min-width: var(--color-wheel-mood-width);
+  box-sizing: content-box;
 }
 
 .color-wheel .color-extract-mood {
@@ -230,6 +253,26 @@
   padding-block: var(--spacing-300) var(--spacing-100);
 }
 
+.color-wheel .image-extract .color-extract-marker {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker:hover {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 20px rgba(0, 0, 0, 0.22);
+}
+
+.color-wheel .image-extract .color-extract-marker.is-active {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-extract-focus), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker.is-magnified {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
 .color-wheel .color-extract-drag-overlay {
   position: fixed;
 }
@@ -237,6 +280,8 @@
 /* Color wheel panel */
 
 color-wheel-express {
+  box-sizing: border-box;
+  width: 100%;
   max-width: 400px;
   padding: var(--spacing-300);
 }
@@ -252,7 +297,7 @@ color-wheel-express {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 2px;
+  gap: var(--spacing-50);
   margin-bottom: 0.75rem;
 }
 
@@ -303,13 +348,13 @@ color-wheel-express {
 }
 
 .color-wheel-harmony-carousel-host .simple-carousel-fader-left {
-  background: linear-gradient(90deg, #FFFFFF 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
+  background: linear-gradient(90deg, var(--color-white) 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
   padding-inline-start: var(--spacing-100);
   justify-content: flex-start;
 }
 
 .color-wheel-harmony-carousel-host .simple-carousel-fader-right {
-  background: linear-gradient(270deg, #FFFFFF 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
+  background: linear-gradient(270deg, var(--color-white) 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
   padding-inline-end: var(--spacing-100);
   justify-content: flex-end;
 }
@@ -398,23 +443,13 @@ color-wheel-express {
 
 @media (min-width: 600px) {
   .color-wheel .ax-color-tool-layout {
-    padding: var(--spacing-400) var(--spacing-500);
-    row-gap: 0;
-  }
-
-  .color-wheel .ax-shell-slot--topbar,
-  .color-wheel .ax-shell-slot--sidebar {
-    padding-block-end: var(--spacing-400);
+    --ax-padding-sidebar-mobile: 0 0 var(--spacing-400);
   }
 }
 
 /* Large Tablet */
 
 @media (min-width: 888px) {
-  .color-wheel .ax-shell-slot--sidebar {
-    padding-block-end: 0;
-  }
-
   .color-wheel .ax-shell-slot--canvas {
     padding-block-end: var(--spacing-200);
   }
@@ -453,10 +488,14 @@ color-wheel-express {
 /* Desktop */
 
 @media (min-width: 1200px) {
+  .color-wheel .ax-toolbar {
+    --ax-palette-name-width-desktop: 184px;
+  }
+
   .color-wheel .ax-color-tool-layout {
-    padding: var(--spacing-600);
-    grid-template-rows: auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
     grid-template-columns: minmax(0, var(--cw-sidebar-fr, 4fr)) minmax(0, 8fr);
+    align-items: stretch;
     transition: grid-template-columns 0.35s ease, column-gap 0.35s ease;
   }
 
@@ -469,6 +508,7 @@ color-wheel-express {
     align-self: stretch;
     min-height: 0;
     grid-column: 1;
+    grid-row: 1 / span 3;
   }
 
   .color-wheel .ax-shell-slot--topbar,
@@ -477,22 +517,32 @@ color-wheel-express {
     grid-column: 2;
   }
 
+  .color-wheel .ax-shell-slot--topbar {
+    grid-row: 1;
+  }
+
+  .color-wheel .ax-shell-slot--canvas {
+    grid-row: 2;
+    min-height: 0;
+  }
+
+  .color-wheel .ax-shell-slot--footer {
+    grid-row: 3;
+  }
+
   .color-wheel .ax-shell-slot--topbar,
   .color-wheel .ax-shell-slot--canvas {
     padding-block-end: var(--spacing-300);
   }
 
   .color-wheel .ax-shell-slot--sidebar > sp-theme {
-    flex: 1 1 0;
     min-height: 0;
-    display: flex;
-    flex-direction: column;
+    display: block;
   }
 
   .color-wheel sp-tabs {
     flex: 1 1 0;
     min-height: 0;
-    width: 100%;
   }
 
   .color-wheel-content {
@@ -543,7 +593,7 @@ color-wheel-express {
   }
 
   .color-wheel .color-extract-mood {
-    width: 200px;
+    width: var(--color-wheel-mood-width);
   }
 
   .color-wheel .color-extract-mood-dropdown {

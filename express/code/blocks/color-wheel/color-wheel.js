@@ -1,6 +1,11 @@
 import { createTag, getLibs } from '../../scripts/utils.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
+import loadBaseColorPlaceholders from '../../scripts/color-shared/i18n/loadBaseColorPlaceholders.js';
+import loadColorEditPlaceholders from '../../scripts/color-shared/i18n/loadColorEditPlaceholders.js';
+import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
+import loadImageUploadPlaceholders from '../../scripts/color-shared/i18n/loadImageUploadPlaceholders.js';
+import loadColorExtractPlaceholders from '../../scripts/color-shared/i18n/loadColorExtractPlaceholders.js';
 
 // CSS deps previously loaded via @import (serial waterfall). Injecting <link>
 // elements at module evaluation starts downloads in parallel with the heavy JS
@@ -8,6 +13,7 @@ import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../../s
 const CSS_DEPS = [
   '/express/code/scripts/color-shared/components/strips/color-strip.css',
   '/express/code/scripts/color-shared/components/image-upload/image-upload.css',
+  '/express/code/scripts/color-shared/components/image-extract/buildExtractOverlays.css',
   '/express/code/blocks/color-wheel/image-extract.css',
 ];
 CSS_DEPS.forEach((href) => {
@@ -101,61 +107,73 @@ async function loadHeavyModules() {
 }
 
 async function loadPlaceholders() {
-  const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
+  const [
+    { getConfig },
+    { replaceKeyArray },
+    baseColorStrings,
+    colorEditStrings,
+    imageUploadStrings,
+    colorExtractStrings,
+    colorSwatchRailStrings,
+  ] = await Promise.all([
     import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
+    loadBaseColorPlaceholders(),
+    loadColorEditPlaceholders(),
+    loadImageUploadPlaceholders(),
+    loadColorExtractPlaceholders(),
+    loadColorSwatchRailPlaceholders(),
   ]);
-  const values = await replaceKeyArray([
-    'primary-color',
-    'image',
-    'color-wheel',
-    'custom',
-    'analogous',
-    'complementary',
-    'split-complementary',
-    'triad',
-    'square',
-    'compound',
-    'shades',
-    'monochromatic',
-    'color-harmonies',
-    'undo',
-    'redo',
-    'generate-random',
-    'maximize',
-    'create-palette',
-    'contrast-checker',
-    'color-blindness-simulator',
-    'no-image-try-ours',
-    'use-this-image',
-    'extracting-colors',
-  ], getConfig());
+  const KEYS = [
+    'primary-color', 'image', 'color-wheel', 'custom', 'analogous', 'complementary',
+    'split-complementary', 'triad', 'square', 'compound', 'shades', 'monochromatic',
+    'color-harmonies', 'undo', 'redo', 'generate-random', 'maximize', 'create-palette',
+    'contrast-checker', 'color-blindness-simulator', 'no-image-try-ours', 'use-this-image',
+    'extracting-colors', 'color-wheel-keyboard-hint', 'color-wheel-harmony-aria',
+    'color-wheel-aria-with-hint', 'color-wheel-marker-aria', 'minimize',
+  ];
+  const values = await replaceKeyArray(KEYS, getConfig());
+  const v = (i, fallback) => {
+    const value = values[i];
+    if (value && value !== KEYS[i].replaceAll('-', ' ')) return value;
+    return fallback;
+  };
   return {
-    tabPrimaryColor: values[0] || 'Primary color',
-    tabImage: values[1] || 'Image',
-    tabColorWheel: values[2] || 'Color Wheel',
+    tabPrimaryColor: v(0, 'Primary color'),
+    tabImage: v(1, 'Image'),
+    tabColorWheel: v(2, 'Color Wheel'),
     harmonyLabels: {
-      CUSTOM: values[3] || 'Custom',
-      ANALOGOUS: values[4] || 'Analogous',
-      COMPLEMENTARY: values[5] || 'Complementary',
-      SPLIT_COMPLEMENTARY: values[6] || 'Split complementary',
-      TRIAD: values[7] || 'Triad',
-      SQUARE: values[8] || 'Square',
-      COMPOUND: values[9] || 'Compound',
-      SHADES: values[10] || 'Shades',
-      MONOCHROMATIC: values[11] || 'Monochromatic',
+      CUSTOM: v(3, 'Custom'),
+      ANALOGOUS: v(4, 'Analogous'),
+      COMPLEMENTARY: v(5, 'Complementary'),
+      SPLIT_COMPLEMENTARY: v(6, 'Split complementary'),
+      TRIAD: v(7, 'Triad'),
+      SQUARE: v(8, 'Square'),
+      COMPOUND: v(9, 'Compound'),
+      SHADES: v(10, 'Shades'),
+      MONOCHROMATIC: v(11, 'Monochromatic'),
     },
-    colorHarmonies: values[12] || 'Color harmonies:',
-    undo: values[13] || 'Undo',
-    redo: values[14] || 'Redo',
-    generateRandom: values[15] || 'Generate random',
-    maximize: values[16] || 'Maximize',
-    createPalette: values[17] || 'Create palette',
-    contrastChecker: values[18] || 'Contrast Checker',
-    colorBlindnessSimulator: values[19] || 'Color Blindness Simulator',
-    noImageTryOurs: values[20] || 'Don\u2019t have an image? Try one of ours:',
-    useThisImage: values[21] || 'Use this image',
-    extractingColors: values[22] || 'Extracting colors...',
+    colorHarmonies: v(12, 'Color harmonies:'),
+    undo: v(13, 'Undo'),
+    redo: v(14, 'Redo'),
+    generateRandom: v(15, 'Generate random'),
+    maximize: v(16, 'Maximize'),
+    minimize: v(27, 'Minimize'),
+    createPalette: v(17, 'Create palette'),
+    contrastChecker: v(18, 'Contrast Checker'),
+    colorBlindnessSimulator: v(19, 'Color Blindness Simulator'),
+    noImageTryOurs: v(20, 'Don\u2019t have an image? Try one of ours:'),
+    useThisImage: v(21, 'Use this image'),
+    extractingColors: v(22, 'Extracting colors...'),
+    keyboardHint: v(23, 'Use Left and Right arrow keys to choose a color harmony. Home and End jump to the first or last option.'),
+    harmonyAriaTemplate: v(24, '{harmony} color harmony'),
+    wheelAriaWithHint: v(25, 'Color Wheel - Press Enter to access color handles'),
+    markerAriaTemplate: v(26, '{hex}, use arrow keys to move'),
+    baseColorStrings,
+    colorEditStrings,
+    imageUploadStrings,
+    colorExtractStrings,
+    colorSwatchRailStrings,
   };
 }
 
@@ -209,18 +227,22 @@ const HARMONY_ALLOWED_FOR_THREE = new Set([
 const HARMONY_CAROUSEL_ACTIVE_CLASS = 'color-wheel-harmony-option--selected';
 const ACTION_MENU_ID = 'color-wheel-action-menu';
 
-function buildDefaultActionMenuConfig(strings) {
+async function buildDefaultActionMenuConfig(strings) {
+  const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+  const { locale } = getConfig();
+
   return {
     id: ACTION_MENU_ID,
     activeId: 'palette',
+    daaLh: 'color-wheel',
     navLinks: [
-      { id: 'palette', label: strings.createPalette, href: '/create/color-wheel' },
-      { id: 'contrast', label: strings.contrastChecker, href: '/create/color-contrast-analyzer' },
-      { id: 'color-blindness', label: strings.colorBlindnessSimulator, href: '/create/color-accessibility' },
+      { id: 'palette', label: strings.createPalette, href: `${locale.contentRoot}/create/color-wheel` },
+      { id: 'contrast', label: strings.contrastChecker, href: `${locale.contentRoot}/create/color-contrast-analyzer` },
+      { id: 'color-blindness', label: strings.colorBlindnessSimulator, href: `${locale.contentRoot}/create/color-accessibility` },
     ],
   };
 }
-const THEME_NAME = 'My Color Theme';
+const THEME_NAME = '';
 const HISTORY_EVENT = `${ACTION_MENU_ID}:history-index-changed`;
 const HISTORY_SKIP_SOURCES = new Set(['active-index', 'metadata', 'base-index']);
 let harmonyCarouselCleanup = null;
@@ -228,12 +250,17 @@ let harmonyStateUnsubscribe = null;
 let layoutInstance = null;
 let stripRenderer = null;
 let paletteUnsubscribe = null;
+let setColorRafId = null;
+let pendingSetColorHex = null;
 let swatchRailController = null;
 let imagePanelDestroy = null;
+let imagePanelGetSrc = null;
+let imagePanelHandleFile = null;
 let primaryColorAdapter = null;
 let sidebarNaturalWidth = 0;
 let sidebarTransitionCleanup = null;
 let historyCleanup = null;
+let currentInitToken = 0;
 
 function swatchHexListFromState(state) {
   const swatches = state?.swatches || [];
@@ -278,7 +305,7 @@ async function buildHarmonySelector(controller, strings = {}) {
     id: `${uid}-kbd-hint`,
     class: 'color-wheel-sr-only',
   });
-  kbdHint.textContent = 'Use Left and Right arrow keys to choose a color harmony. Home and End jump to the first or last option.';
+  kbdHint.textContent = strings.keyboardHint;
   titleRow.append(titleStatic, currentName);
   section.appendChild(titleRow);
 
@@ -323,7 +350,7 @@ async function buildHarmonySelector(controller, strings = {}) {
         type: 'button',
         role: 'radio',
         class: 'color-wheel-harmony-option',
-        'aria-label': `${getHarmonyLabel(value)} color harmony`,
+        'aria-label': strings.harmonyAriaTemplate.replace('{harmony}', getHarmonyLabel(value)),
         'data-harmony-value': value,
         tabindex: '-1',
       });
@@ -394,7 +421,7 @@ async function buildHarmonySelector(controller, strings = {}) {
 
     harmonyButtons.forEach((btn) => {
       btn.setAttribute('role', 'radio');
-      btn.setAttribute('aria-label', `${getHarmonyLabel(btn.dataset.harmonyValue)} color harmony`);
+      btn.setAttribute('aria-label', strings.harmonyAriaTemplate.replace('{harmony}', getHarmonyLabel(btn.dataset.harmonyValue)));
     });
 
     updateRovingTabindex(controller.getState().harmonyRule || 'CUSTOM');
@@ -470,22 +497,44 @@ function paletteFromThemeState(state) {
   };
 }
 
-function buildPrimaryColorContent(controller) {
+function buildPrimaryColorContent(controller, strings = {}) {
   primaryColorAdapter?.destroy?.();
   primaryColorAdapter = null;
 
   const state = controller.getState();
-  const baseColor = swatchHexListFromState(state)[0];
+  const baseColorIndex = state.baseColorIndex ?? 0;
+  const baseColor = state.swatches?.[baseColorIndex]?.hex || '#FF0000';
+  let pendingBaseColorHex = null;
+  let pendingBaseColorRaf = null;
+
+  const flushPendingBaseColor = () => {
+    pendingBaseColorRaf = null;
+    if (!pendingBaseColorHex) return;
+    controller.setBaseColor(pendingBaseColorHex);
+    pendingBaseColorHex = null;
+  };
+
+  const queueBaseColorUpdate = (hex) => {
+    if (!hex) return;
+    pendingBaseColorHex = hex;
+    if (pendingBaseColorRaf != null) return;
+    pendingBaseColorRaf = requestAnimationFrame(flushPendingBaseColor);
+  };
+
   const adapter = createBaseColorAdapter(
     baseColor,
     'HEX',
     {
+      strings: strings.baseColorStrings,
       onColorChange: (detail) => {
         if (!detail?.hex) return;
-        controller.setBaseColor(detail.hex);
-        controller.setSwatchHex(0, detail.hex);
+        queueBaseColorUpdate(detail.hex);
       },
       onColorChangeEnd: () => {
+        if (pendingBaseColorRaf != null) {
+          cancelAnimationFrame(pendingBaseColorRaf);
+          flushPendingBaseColor();
+        }
         // eslint-disable-next-line no-underscore-dangle
         adapter.element._setLocked?.(true);
       },
@@ -493,10 +542,11 @@ function buildPrimaryColorContent(controller) {
         const locked = detail?.locked;
         const current = swatchRailController?.getState?.()?.lockedByIndex || new Set();
         const next = new Set(current);
+        const currentBaseIndex = controller.getState().baseColorIndex ?? 0;
         if (locked) {
-          next.add(0);
+          next.add(currentBaseIndex);
         } else {
-          next.delete(0);
+          next.delete(currentBaseIndex);
         }
         swatchRailController?.setState?.({ lockedByIndex: next });
       },
@@ -509,15 +559,27 @@ function buildPrimaryColorContent(controller) {
   return wrapper;
 }
 
-function buildImageContent(controller, suggestionsRow, strings) {
+function buildImageContent(
+  controller,
+  suggestionsRow,
+  strings,
+  initialSrc = null,
+  onImageProcessed = null,
+  viewportEl = null,
+) {
   const image = createTag('div', { class: 'image-content' });
   const panel = createImageExtractComponent({
     controller,
     maxColors: 5,
     suggestionsRowEl: suggestionsRow,
     strings,
+    initialSrc,
+    onImageProcessed,
+    viewportEl,
   });
   imagePanelDestroy = panel.destroy;
+  imagePanelGetSrc = panel.getCurrentSrc;
+  imagePanelHandleFile = panel.handleFile;
   image.appendChild(panel.element);
   return image;
 }
@@ -525,7 +587,11 @@ function buildImageContent(controller, suggestionsRow, strings) {
 async function buildColorWheelContent(controller, strings) {
   const colorWheel = createTag('div', { class: 'color-wheel-content' });
   const baseHex = controller.getState().swatches?.[controller.getState().baseColorIndex]?.hex || '#FF0000';
-  const adapter = createColorWheelExpressAdapter(baseHex, {}, { controller });
+  const adapter = createColorWheelExpressAdapter(baseHex, {}, {
+    controller,
+    ariaLabel: strings.wheelAriaWithHint,
+    markerAriaTemplate: strings.markerAriaTemplate,
+  });
   const harmonySelector = await buildHarmonySelector(controller, strings);
 
   colorWheel.append(adapter.element, harmonySelector);
@@ -533,7 +599,9 @@ async function buildColorWheelContent(controller, strings) {
   return colorWheel;
 }
 
-async function buildTabs(controller, suggestionsRow, { onSelectionChange, strings = {} } = {}) {
+async function buildTabs(controller, suggestionsRow, {
+  onSelectionChange, strings = {}, initialImageSrc = null, viewportEl = null,
+} = {}) {
   // Create the tabs shell and the color-wheel panel content in parallel
   const [tabsInstance, cwContent] = await Promise.all([
     createExpressTabs({
@@ -551,8 +619,9 @@ async function buildTabs(controller, suggestionsRow, { onSelectionChange, string
   ]);
 
   tabsInstance.addPanel('color-wheel', cwContent);
-  tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings));
-  tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller));
+  const switchToImageTab = () => tabsInstance.setSelected('image');
+  tabsInstance.addPanel('image', buildImageContent(controller, suggestionsRow, strings, initialImageSrc, switchToImageTab, viewportEl));
+  tabsInstance.addPanel('primary-color', buildPrimaryColorContent(controller, strings));
 
   return tabsInstance;
 }
@@ -614,7 +683,12 @@ function createSwatchRailControllerBridge(controller) {
         } else {
           incoming = [];
         }
+        const prevSize = lockedByIndex.size;
         lockedByIndex = new Set(incoming.filter((index) => Number.isInteger(index) && index >= 0));
+        const lockAdded = lockedByIndex.size > prevSize;
+        if (lockAdded && controller.getState().harmonyRule !== 'CUSTOM') {
+          controller.setHarmonyRule('CUSTOM');
+        }
       }
 
       const current = controller.getState();
@@ -736,10 +810,17 @@ function cleanup() {
   harmonyCarouselCleanup = null;
   paletteUnsubscribe?.();
   paletteUnsubscribe = null;
+  if (setColorRafId !== null) {
+    cancelAnimationFrame(setColorRafId);
+    setColorRafId = null;
+  }
+  pendingSetColorHex = null;
   swatchRailController?.destroy?.();
   swatchRailController = null;
   imagePanelDestroy?.();
   imagePanelDestroy = null;
+  imagePanelGetSrc = null;
+  imagePanelHandleFile = null;
   primaryColorAdapter?.destroy?.();
   primaryColorAdapter = null;
   stripRenderer?.destroy?.();
@@ -760,6 +841,8 @@ export default async function decorate(block) {
 
   // Preserved across breakpoint re-inits so the user's palette survives resize
   let currentPalette = null;
+  let savedActiveTab = 'color-wheel';
+  let savedImageSrc = null;
 
   async function init() {
     // Save before clearing — adoptHeadline uses document.querySelector and would lose it otherwise
@@ -769,10 +852,33 @@ export default async function decorate(block) {
     // doesn't show as a blank white area while placeholders and CSS load.
     const isReinit = !!layoutInstance;
     if (isReinit) {
+      savedImageSrc = imagePanelGetSrc?.() ?? savedImageSrc;
       cleanup();
       block.innerHTML = '';
     }
     block.className = 'color-wheel';
+
+    // Each init() call claims a token. After every await, bail if a newer call has started.
+    // This prevents a stale concurrent init from appending duplicate tabs/layout to the DOM.
+    currentInitToken += 1;
+    const myToken = currentInitToken;
+
+    // Capture any file dropped while createImageExtractComponent's window handlers are not yet
+    // ready, so it can be replayed once buildTabs resolves. Only active when block is in viewport.
+    let pendingDropFile = null;
+    const isBlockInViewport = () => {
+      const rect = block.getBoundingClientRect();
+      return rect.bottom > 0 && rect.top < window.innerHeight;
+    };
+    const earlyPreventFileDrop = (e) => {
+      if (!isBlockInViewport()) return;
+      e.preventDefault();
+      if (e.type === 'drop' && e.dataTransfer?.files?.[0]) {
+        [pendingDropFile] = e.dataTransfer.files;
+      }
+    };
+    window.addEventListener('dragover', earlyPreventFileDrop);
+    window.addEventListener('drop', earlyPreventFileDrop);
 
     try {
       const [strings, { getResolvedPalette, getResolvedPaletteName }] = await Promise.all([
@@ -780,6 +886,8 @@ export default async function decorate(block) {
         Promise.resolve(createColorPaletteParamApi()),
         loadHeavyModules(),
       ]);
+
+      if (myToken !== currentInitToken) return;
 
       // First load: authored content was preserved during the async wait; clear it now
       if (!isReinit) {
@@ -795,6 +903,7 @@ export default async function decorate(block) {
 
       const controller = new ColorThemeExpressController({
         swatches: initialPalette.colors,
+        name: initialPalette.name,
         harmonyRule: 'CUSTOM',
         baseColorIndex: 0,
       });
@@ -804,11 +913,12 @@ export default async function decorate(block) {
       let activeHarmonyRule = controller.getState().harmonyRule || 'CUSTOM';
 
       const isDesktop = desktopQuery.matches;
-      const defaultActionMenuConfig = buildDefaultActionMenuConfig(strings);
+      const defaultActionMenuConfig = await buildDefaultActionMenuConfig(strings);
 
       layoutInstance = await createColorToolLayout(section, {
         palette: initialPalette,
         toolbar: {
+          daaLh: 'color-wheel',
           variant: 'sticky-on-scroll',
           showEdit: false,
           showPalette: true,
@@ -821,7 +931,7 @@ export default async function decorate(block) {
             { id: 'undo', label: strings.undo },
             { id: 'redo', label: strings.redo },
             { id: 'generate-random', label: strings.generateRandom },
-            { id: 'expand', label: strings.maximize },
+            { id: 'expand', label: strings.maximize, expandedLabel: strings.minimize },
           ],
           type: isDesktop ? 'full' : 'nav-only',
           getName: () => currentPalette?.name || initialPalette.name,
@@ -830,6 +940,7 @@ export default async function decorate(block) {
             // If no HISTORY_EVENT fires (e.g. all colors locked, palette unchanged),
             // reset the flag so it doesn't corrupt the next undo/redo
             queueMicrotask(() => { isGeneratingRandom = false; });
+            primaryColorAdapter?.element?.resetOriginalColor?.();
           },
           transformPalette: makeTransformPalette(
             () => activeHarmonyRule,
@@ -878,6 +989,8 @@ export default async function decorate(block) {
         },
       });
 
+      if (myToken !== currentInitToken) return;
+
       const stripHost = createTag('div', { class: 'color-wheel-strip-host' });
       layoutInstance.slots.canvas.appendChild(stripHost);
 
@@ -885,10 +998,8 @@ export default async function decorate(block) {
 
       const updateBaseColorBadge = () => {
         const hide = activeTab !== 'color-wheel' || activeHarmonyRule === 'CUSTOM';
-        const hideLock = activeTab === 'color-wheel' && activeHarmonyRule !== 'CUSTOM';
         stripHost.querySelectorAll('color-swatch-rail').forEach((rail) => {
           rail.hideBaseColorBadge = hide;
-          rail.hideLock = hideLock;
         });
       };
 
@@ -898,14 +1009,32 @@ export default async function decorate(block) {
         buildTabs(controller, suggestionsRow?.cloneNode(true), {
           onSelectionChange: ({ selected }) => {
             activeTab = selected;
+            savedActiveTab = selected;
             updateBaseColorBadge();
             if (selected !== 'color-wheel') {
               controller.setHarmonyRule('CUSTOM');
             }
           },
           strings,
+          initialImageSrc: savedImageSrc,
+          viewportEl: block,
         }),
       ]);
+
+      if (pendingDropFile) {
+        const file = pendingDropFile;
+        pendingDropFile = null;
+        tabs.setSelected('image');
+        imagePanelHandleFile?.(file);
+      }
+
+      if (myToken !== currentInitToken) return;
+
+      if (savedActiveTab !== 'color-wheel') {
+        tabs.setSelected(savedActiveTab);
+        activeTab = savedActiveTab;
+        updateBaseColorBadge();
+      }
 
       // Both resolved — wire up action menu history and append tabs
       const actionMenuApi = layoutInstance.actionMenu;
@@ -984,6 +1113,7 @@ export default async function decorate(block) {
           onGenerateRandom: () => {
             isGeneratingRandom = true;
             queueMicrotask(() => { isGeneratingRandom = false; });
+            primaryColorAdapter?.element?.resetOriginalColor?.();
           },
           transformPalette: makeTransformPalette(
             () => activeHarmonyRule,
@@ -1020,6 +1150,8 @@ export default async function decorate(block) {
             minSwatches: 2,
           },
           swatchVerticalMaxPerRow: 6,
+          colorEditStrings: strings.colorEditStrings,
+          colorSwatchRailStrings: strings.colorSwatchRailStrings,
         },
       });
       await stripRenderer.render(stripHost);
@@ -1031,8 +1163,12 @@ export default async function decorate(block) {
       const badgeRuleUnsubscribe = controller.subscribe((state) => {
         const rule = state.harmonyRule || 'CUSTOM';
         if (rule !== activeHarmonyRule) {
+          const wasCustom = activeHarmonyRule === 'CUSTOM';
           activeHarmonyRule = rule;
           updateBaseColorBadge();
+          if (wasCustom && rule !== 'CUSTOM') {
+            swatchRailController?.setState?.({ lockedByIndex: new Set() });
+          }
         }
       });
       const prevHistoryCleanup = historyCleanup;
@@ -1070,11 +1206,21 @@ export default async function decorate(block) {
       paletteUnsubscribe = controller.subscribe((state) => {
         currentPalette = paletteFromThemeState(state);
         layoutInstance?.context?.set('palette', currentPalette);
-        const firstHex = swatchHexListFromState(state)[0];
+        const baseIdx = state.baseColorIndex ?? 0;
+        const baseHex = state.swatches?.[baseIdx]?.hex;
         const currentColor = primaryColorAdapter?.element?.color;
-        if (primaryColorAdapter?.setColor && firstHex
-          && String(currentColor).toUpperCase() !== String(firstHex).toUpperCase()) {
-          primaryColorAdapter.setColor(firstHex);
+        if (primaryColorAdapter?.setColor && baseHex
+          && String(currentColor).toUpperCase() !== String(baseHex).toUpperCase()) {
+          pendingSetColorHex = baseHex;
+          if (setColorRafId === null) {
+            setColorRafId = requestAnimationFrame(() => {
+              setColorRafId = null;
+              if (primaryColorAdapter?.setColor && pendingSetColorHex) {
+                primaryColorAdapter.setColor(pendingSetColorHex);
+              }
+              pendingSetColorHex = null;
+            });
+          }
         }
       });
 
@@ -1091,6 +1237,9 @@ export default async function decorate(block) {
       cleanup();
       block.replaceChildren();
       block.append(createTag('p', { class: 'color-wheel-error' }, 'Failed to load Color Wheel.'));
+    } finally {
+      window.removeEventListener('dragover', earlyPreventFileDrop);
+      window.removeEventListener('drop', earlyPreventFileDrop);
     }
   }
 

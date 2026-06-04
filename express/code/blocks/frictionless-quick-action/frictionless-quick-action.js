@@ -94,12 +94,9 @@ function frictionlessQAExperiment(
   appConfig.metaData.entryPoint = 'seo-quickaction-image-upload';
   switch (variant) {
     case 'qa-nba':
-      ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
-      break;
     case 'qa-in-product-control':
-      ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
-      break;
     case 'remove-background-fast-track-control':
+    case 'remove-background-focused-control':
       ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
       break;
     default:
@@ -536,7 +533,7 @@ async function handleDecodeFirst(dimensions, uploadPromise, initialDecodeControl
  * @returns {Object} Search parameters object
  */
 /* c8 ignore next */
-function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimensions) {
+export function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimensions) {
   const baseSearchParams = {
     frictionlessUploadAssetId: assetId,
   };
@@ -550,6 +547,11 @@ function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, dimension
       routeSpecificParams = {
         locale: ietf,
         skipUploadStep: true,
+        ...(quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocusedChallenger && {
+          'edit-action': 'remove-bg',
+          'l2-panel': 'backgrounds',
+          'open-download': true,
+        }),
       };
       break;
     }
@@ -747,13 +749,36 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCod
   startSDK(data, normalizedQuickAction, block, fromQrCode);
 }
 
-function setupFrictionlessTargetBaseUrl(quickAction) {
+export function getFrictionlessTargetBaseUrl() { return frictionlessTargetBaseUrl; }
+
+export function setupFrictionlessTargetBaseUrl(quickAction) {
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
   const variant = urlVariant || quickAction;
+  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocusedChallenger) {
+    const isStage = urlParams.get('hzenv') === 'stage';
+    let stageFocusedUrl = `https://stage.projectx.corp.adobe.com${EXPRESS_ROUTE_PATHS.focusedEditor}`;
+    const base = urlParams.get('base');
+    if (base) {
+      try {
+        const normalizedBase = base.startsWith('http') ? base : `https://${base}`;
+        const { hostname, origin } = new URL(normalizedBase);
+        if (hostname === 'adobe.com' || hostname.endsWith('.adobe.com')) {
+          stageFocusedUrl = `${origin}${EXPRESS_ROUTE_PATHS.focusedEditor}`;
+        }
+      } catch (e) {
+        window.lana?.log(`[frictionless] invalid base URL param: ${e.message}`, { tags: 'frictionless,url' });
+      }
+    }
+    frictionlessTargetBaseUrl = isStage
+      ? stageFocusedUrl
+      : `https://express.adobe.com${EXPRESS_ROUTE_PATHS.focusedEditor}`;
+    return;
+  }
+
   if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant1
     || variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundVariant2
-    || (isAuthFrictionlessUploadQuickAction(variant))) {
+    || isAuthFrictionlessUploadQuickAction(variant)) {
     const isStage = urlParams.get('hzenv') === 'stage';
     const stageURL = urlParams.get('base') ? urlParams.get('base') : 'https://stage.projectx.corp.adobe.com/new';
     frictionlessTargetBaseUrl = isStage

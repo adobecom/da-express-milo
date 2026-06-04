@@ -936,7 +936,7 @@ export const style = css`
   }
 
   
-  .swatch-column.base-color {
+  .swatch-column.base-color:not(.swatch-column--drag-over) {
     outline: none;
   }
 
@@ -1021,11 +1021,17 @@ export const style = css`
     height: 32px;
     border-radius: var(--Corner-radius-corner-radius-100);
   }
-  .swatch-column[data-contrast="dark"] button.hex-code:hover,
+  @media (hover: hover) {
+    .swatch-column[data-contrast="dark"] button.hex-code:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+    .swatch-column[data-contrast="light"] button.hex-code:hover {
+      background-color: rgba(0, 0, 0, 0.12);
+    }
+  }
   .swatch-column[data-contrast="dark"] button.hex-code.hex-code--editor-open {
     background-color: rgba(255, 255, 255, 0.12);
   }
-  .swatch-column[data-contrast="light"] button.hex-code:hover,
   .swatch-column[data-contrast="light"] button.hex-code.hex-code--editor-open {
     background-color: rgba(0, 0, 0, 0.12);
   }
@@ -1041,10 +1047,8 @@ export const style = css`
   }
   .hex-code--static {
     cursor: default;
-    padding-left: 6px;
+    padding-left: var(--hex-code-static-padding-left);
   }
-
-  
   .icon-button {
     background: none;
     border: none;
@@ -1058,16 +1062,20 @@ export const style = css`
     justify-content: center;
     color: var(--swatch-text-color);
     transition: background-color 0.15s ease, color 0.15s ease;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
 
   
 
   
-  .swatch-column[data-contrast="dark"] .icon-button:hover {
-    background-color: rgba(255, 255, 255, 0.12);
-  }
-  .swatch-column[data-contrast="light"] .icon-button:hover {
-    background-color: rgba(0, 0, 0, 0.12);
+  @media (hover: hover) {
+    .swatch-column[data-contrast="dark"] .icon-button:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+    .swatch-column[data-contrast="light"] .icon-button:hover {
+      background-color: rgba(0, 0, 0, 0.12);
+    }
   }
 
   
@@ -1105,6 +1113,8 @@ export const style = css`
   .icon-button .icon-tint {
     display: inline-block;
     filter: var(--swatch-icon-filter);
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   
@@ -1114,6 +1124,8 @@ export const style = css`
     width: 20px;
     height: 20px;
     filter: var(--swatch-icon-filter);
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   .edit-input-native {

@@ -76,7 +76,7 @@ describe('buildColorSignInRedirectUrl', () => {
     expect(param).to.include('FF0000');
   });
 
-  it('uses current page URL when not on color-explore or color-extract', () => {
+  it('uses current page URL when not on color-explore', () => {
     window.history.replaceState({}, '', '/create/color-wheel');
 
     const result = buildColorSignInRedirectUrl(colors, name);
@@ -84,7 +84,7 @@ describe('buildColorSignInRedirectUrl', () => {
     expect(url.pathname).to.equal('/create/color-wheel');
   });
 
-  it('redirects to color-wheel when on color-explore page', () => {
+  it('returns current URL when on color-explore page', () => {
     const el = document.createElement('div');
     el.className = 'color-explore';
     document.body.appendChild(el);
@@ -93,22 +93,58 @@ describe('buildColorSignInRedirectUrl', () => {
 
     const result = buildColorSignInRedirectUrl(colors, name);
     const url = new URL(result);
-    expect(url.pathname).to.equal('/create/color-wheel');
+    expect(url.pathname).to.equal('/color-explore');
   });
 
-  it('redirects to color-wheel when on color-extract page', () => {
+  it('includes gradient id param when on color-explore page and id is provided', () => {
+    const el = document.createElement('div');
+    el.className = 'color-explore';
+    document.body.appendChild(el);
+
+    window.history.replaceState({}, '', '/color-explore');
+
+    const result = buildColorSignInRedirectUrl(colors, name, 'gradient-abc-123');
+    const url = new URL(result);
+    expect(url.searchParams.get('id')).to.equal('gradient-abc-123');
+  });
+
+  it('omits id param when on color-explore page but no id is provided', () => {
+    const el = document.createElement('div');
+    el.className = 'color-explore';
+    document.body.appendChild(el);
+
+    window.history.replaceState({}, '', '/color-explore');
+
+    const result = buildColorSignInRedirectUrl(colors, name);
+    const url = new URL(result);
+    expect(url.searchParams.has('id')).to.be.false;
+  });
+
+  it('omits id param when id is an empty string', () => {
+    const el = document.createElement('div');
+    el.className = 'color-explore';
+    document.body.appendChild(el);
+
+    window.history.replaceState({}, '', '/color-explore');
+
+    const result = buildColorSignInRedirectUrl(colors, name, '');
+    const url = new URL(result);
+    expect(url.searchParams.has('id')).to.be.false;
+  });
+
+  it('uses current page URL for color-extract', () => {
     const el = document.createElement('div');
     el.className = 'color-extract';
     document.body.appendChild(el);
 
-    window.history.replaceState({}, '', '/color-extract');
+    window.history.replaceState({}, '', '/create/image');
 
     const result = buildColorSignInRedirectUrl(colors, name);
     const url = new URL(result);
-    expect(url.pathname).to.equal('/create/color-wheel');
+    expect(url.pathname).to.equal('/create/image');
   });
 
-  it('preserves locale prefix on color-explore redirect', () => {
+  it('preserves locale prefix when returning current URL on color-explore page', () => {
     const el = document.createElement('div');
     el.className = 'color-explore';
     document.body.appendChild(el);
@@ -117,7 +153,7 @@ describe('buildColorSignInRedirectUrl', () => {
 
     const result = buildColorSignInRedirectUrl(colors, name);
     const url = new URL(result);
-    expect(url.pathname).to.equal('/cn/create/color-wheel');
+    expect(url.pathname).to.equal('/cn/color-explore');
   });
 
   it('no locale prefix for default (English) locale on color-explore redirect', () => {

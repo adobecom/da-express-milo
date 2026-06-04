@@ -1,6 +1,11 @@
 import { createGradientEditor } from '../components/gradients/gradient-editor.js';
 import { wrapInTheme } from '../spectrum/utils/theme.js';
 import { loadIconsRail } from '../spectrum/load-spectrum.js';
+import {
+  getPreferredColorMode,
+  setPreferredColorMode,
+  subscribeColorMode,
+} from '../utils/colorModePreference.js';
 
 const VERTICAL_STACKED_BREAKPOINT_PX = 1200;
 
@@ -83,6 +88,9 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   if (options.swatchFeatures != null && !byOrientation) {
     element.swatchFeatures = options.swatchFeatures;
   }
+  if (options.strings) {
+    element.strings = options.strings;
+  }
   element.controller = controller;
   loadIconsRail()
     .then(() => {
@@ -120,8 +128,9 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   if (!isController) {
     result.controller = controller;
     result.update = (newData) => {
-      const next = createSwatchRailController(newData);
-      controller.setState(next.getState());
+      const colors = newData?.colors || [];
+      const swatches = colors.map((c) => ({ hex: c.startsWith('#') ? c : `#${c}` }));
+      controller.setState({ swatches, baseColorIndex: newData?.baseColorIndex ?? 0 });
     };
   }
   return result;
@@ -150,11 +159,11 @@ export function createPaletteAdapter(paletteData, callbacks = {}) {
   };
 }
 
-export function createSearchAdapter(callbacks = {}) {
+export function createSearchAdapter({ placeholder, ...callbacks } = {}) {
   import('../../../libs/color-components/components/color-search/index.js');
 
   const element = document.createElement('color-search');
-  element.setAttribute('placeholder', 'Search colors...');
+  element.setAttribute('placeholder', placeholder ?? 'Search colors...');
 
   element.addEventListener('color-search', (e) => {
     callbacks.onSearch?.(e.detail.query);
@@ -262,7 +271,7 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
 
   element.palette = palette.slice(0, 10);
   element.selectedIndex = selectedIndex;
-  element.colorMode = colorMode;
+  element.colorMode = getPreferredColorMode(colorMode);
   element.showPalette = showPalette;
   element.mobile = mobile;
   if (strings) element.strings = strings;
@@ -278,10 +287,15 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
     callbacks.onSwatchSelect?.(e.detail);
   });
   element.addEventListener('mode-change', (e) => {
+    setPreferredColorMode(e.detail?.mode);
     callbacks.onModeChange?.(e.detail);
   });
   element.addEventListener('panel-close', () => {
     callbacks.onClose?.();
+  });
+
+  const unsubscribe = subscribeColorMode((mode) => {
+    if (element.colorMode !== mode) element.colorMode = mode;
   });
 
   return {
@@ -298,7 +312,10 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
       element.colorMode = mode;
     },
     getElement: () => element,
-    destroy: () => element.remove(),
+    destroy: () => {
+      unsubscribe();
+      element.remove();
+    },
   };
 }
 
@@ -381,7 +398,7 @@ export function createBaseColorAdapter(options = {}, callbacks = {}) {
   } = options;
 
   element.color = color;
-  element.colorMode = colorMode;
+  element.colorMode = getPreferredColorMode(colorMode);
   element.showHeader = showHeader;
   element.showBrightnessControl = showBrightnessControl;
   if (strings) element.strings = strings;
@@ -390,10 +407,15 @@ export function createBaseColorAdapter(options = {}, callbacks = {}) {
     callbacks.onColorChange?.(e.detail);
   });
   element.addEventListener('mode-change', (e) => {
+    setPreferredColorMode(e.detail?.mode);
     callbacks.onModeChange?.(e.detail);
   });
   element.addEventListener('lock-change', (e) => {
     callbacks.onLockChange?.(e.detail);
+  });
+
+  const unsubscribe = subscribeColorMode((mode) => {
+    if (element.colorMode !== mode) element.colorMode = mode;
   });
 
   return {
@@ -405,6 +427,9 @@ export function createBaseColorAdapter(options = {}, callbacks = {}) {
       element.colorMode = mode;
     },
     getElement: () => element,
-    destroy: () => element.remove(),
+    destroy: () => {
+      unsubscribe();
+      element.remove();
+    },
   };
 }

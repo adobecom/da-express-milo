@@ -587,6 +587,8 @@ export function createCheckerRenderer(options) {
       label,
       ariaLabel: strings.colorValueAriaLabel,
       value: initialValue,
+      colorEditStrings: config.colorEditStrings,
+      baseColorStrings: config.baseColorStrings,
       getColorEditPalette: ({ value }) => getColorEditPalette(type, value),
       onInput: ({ value: v }) => {
         const hex = ensureHash(v.trim());
@@ -657,7 +659,7 @@ export function createCheckerRenderer(options) {
       const modal = createModalManager();
       modal.openContrastCheckerModal(
         { colors, name: paletteData?.name },
-        { dataService },
+        { dataService, strings },
       );
     });
 

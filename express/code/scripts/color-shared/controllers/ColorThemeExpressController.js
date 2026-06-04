@@ -42,7 +42,7 @@ export default class ColorThemeExpressController {
     harmonyRule = 'ANALOGOUS',
     baseColorIndex = 0,
     activeSwatchIndex,
-    name = 'My Color Theme',
+    name = '',
     config = {},
   } = {}) {
     this.subscribers = new Set();
@@ -127,12 +127,24 @@ export default class ColorThemeExpressController {
       return;
     }
     this.theme.swatches[index] = createSwatch(hex);
+    // When a harmony rule is active, the harmony adapter recomputes derived
+    // swatches and calls _handleHarmonyUpdates, which itself calls _notify.
+    // The follow-on _notify({ source: 'swatch' }) below would be a redundant
+    // second fan-out with identical state — every subscriber (strip Lit
+    // re-render, harmony toolbar, palette context, history bridge, ...) would
+    // run twice per write. During sustained drag at 12 Hz that doubled
+    // allocations + Spectrum re-renders measurably contributed to the iOS
+    // Safari WebContent jetsam. _harmonyDidNotify lets us skip the duplicate.
+    this._harmonyDidNotify = false;
     if (index === this.theme.baseColorIndex) {
       this.harmonyAdapter.onBaseColorChange();
     } else if (typeof this.harmonyAdapter.onColorChange === 'function') {
       this.harmonyAdapter.onColorChange(index);
     }
-    this._notify({ source: 'swatch' });
+    if (!this._harmonyDidNotify) {
+      this._notify({ source: 'swatch' });
+    }
+    this._harmonyDidNotify = false;
   }
 
   /**
@@ -220,6 +232,7 @@ export default class ColorThemeExpressController {
       }
       this.theme.swatches[i] = createSwatch(swatch.hex || this.theme.swatches[i].hex, swatch);
     });
+    this._harmonyDidNotify = true;
     this._notify({ source: 'harmony' });
   }
 

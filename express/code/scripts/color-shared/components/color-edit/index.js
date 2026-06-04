@@ -11,7 +11,7 @@ import { trapFocus, disableBackgroundScroll, restoreBackgroundScroll } from '../
 import { DEFAULT_PLACEHOLDERS as COLOR_EDIT_DEFAULTS } from '../../i18n/loadColorEditPlaceholders.js';
 import '../base-color/index.js';
 
-const COLOR_MODES = ['HEX', 'RGB'];
+const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
 
 class ColorEdit extends LitElement {
   static get styles() {
@@ -147,9 +147,15 @@ class ColorEdit extends LitElement {
     clearTimeout(this._announceTimer);
     this._announceTimer = setTimeout(() => {
       const rgb = this._rgb;
+      const s = this.strings || COLOR_EDIT_DEFAULTS;
+      const hexTpl = s.liveAnnouncementHex || COLOR_EDIT_DEFAULTS.liveAnnouncementHex;
+      const rgbTpl = s.liveAnnouncementRgb || COLOR_EDIT_DEFAULTS.liveAnnouncementRgb;
       this._liveRegionText = this.colorMode === 'HEX'
-        ? `Color updated to ${this._hex}`
-        : `Color updated to Red ${Math.round(rgb.red)}, Green ${Math.round(rgb.green)}, Blue ${Math.round(rgb.blue)}`;
+        ? hexTpl.replace('{hex}', this._hex)
+        : rgbTpl
+            .replace('{red}', String(Math.round(rgb.red)))
+            .replace('{green}', String(Math.round(rgb.green)))
+            .replace('{blue}', String(Math.round(rgb.blue)));
     }, 500);
   }
 

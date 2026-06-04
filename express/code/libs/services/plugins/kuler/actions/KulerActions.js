@@ -219,19 +219,19 @@ export class ThemeActions extends BaseActionGroup {
    * @returns {string}
    */
   buildThemeUrl(themeId) {
-    const { serviceConfig, endpoints } = this.plugin;
-    const { themeBaseUrl } = serviceConfig;
+    const { endpoints } = this.plugin;
+    const { themeBaseUrl } = endpoints;
     const { api, themePath } = endpoints;
     BaseActionGroup.requireConfig({ themeBaseUrl, api, themePath }, 'Kuler');
-    return `${themeBaseUrl}${api}${themePath}/${themeId}`;
+    return `${themeBaseUrl}${api}${themePath}/${themeId}?metadata=all`;
   }
 
   /**
    * @returns {string}
    */
   buildThemeSaveUrl() {
-    const { serviceConfig, endpoints } = this.plugin;
-    const { themeBaseUrl } = serviceConfig;
+    const { endpoints } = this.plugin;
+    const { themeBaseUrl } = endpoints;
     const { api, themePath } = endpoints;
     BaseActionGroup.requireConfig({ themeBaseUrl, api, themePath }, 'Kuler');
     return `${themeBaseUrl}${api}${themePath}`;
@@ -346,7 +346,7 @@ export class ThemeActions extends BaseActionGroup {
       });
     }
     const url = this.buildThemeUrl(themeId);
-    return this.plugin.fetchWithFullUrl(url, 'GET');
+    return this.plugin.fetchWithFullUrl(url, 'GET', null, { skipAuth: true });
   }
 
   /**
@@ -431,8 +431,8 @@ export class GradientActions extends BaseActionGroup {
    * @returns {string}
    */
   buildGradientSaveUrl() {
-    const { serviceConfig, endpoints } = this.plugin;
-    const { gradientBaseUrl } = serviceConfig;
+    const { endpoints } = this.plugin;
+    const { gradientBaseUrl } = endpoints;
     const { api, gradientPath } = endpoints;
     BaseActionGroup.requireConfig({ gradientBaseUrl, api, gradientPath }, 'Kuler');
     return `${gradientBaseUrl}${api}${gradientPath}`;
@@ -443,8 +443,8 @@ export class GradientActions extends BaseActionGroup {
    * @returns {string}
    */
   buildGradientDeleteUrl(gradientId) {
-    const { serviceConfig, endpoints } = this.plugin;
-    const { gradientBaseUrl } = serviceConfig;
+    const { endpoints } = this.plugin;
+    const { gradientBaseUrl } = endpoints;
     const { api, gradientPath } = endpoints;
     BaseActionGroup.requireConfig({ gradientBaseUrl, api, gradientPath }, 'Kuler');
     return `${gradientBaseUrl}${api}${gradientPath}/${gradientId}`;

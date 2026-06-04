@@ -24,19 +24,22 @@ function createGradientStrip(gradient, options = {}) {
     iconSrc,
     analytics,
     actionLabel = 'Open',
+    strings = {},
   } = options;
+  const defaultName = strings.defaultName || 'Gradient';
+  const visualAriaTpl = strings.visualAria || '{name} gradient visual';
   const strip = createTag('article', {
     class: 'gradient-strip',
     'data-gradient-id': gradient.id,
   });
 
   const visual = createTag('div', { class: 'gradient-strip-visual' });
-  visual.setAttribute('aria-label', `${gradient.name ?? 'Gradient'} gradient visual`);
+  visual.setAttribute('aria-label', visualAriaTpl.replace('{name}', gradient.name ?? defaultName));
   visual.style.backgroundImage = gradientToBackgroundImage(gradient);
 
   const info = createTag('div', { class: 'gradient-strip-info' });
   const nameEl = createTag('p', { class: 'gradient-strip-name' });
-  nameEl.textContent = gradient.name ?? 'Gradient';
+  nameEl.textContent = gradient.name ?? defaultName;
   info.appendChild(nameEl);
 
   const actions = createTag('div', { class: 'gradient-strip-actions' });
