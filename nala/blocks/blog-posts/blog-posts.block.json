@@ -13,21 +13,21 @@
               "selector": "h3.blog-card-title",
               "nth": 0,
               "tag": "h3",
-              "text": "What is a meme – and how do I use them?",
+              "text": "Memes Explained: Meaning, Formats & Trends in 2026 | Adobe",
               "markup": null
             },
             {
               "selector": "p.blog-card-teaser",
               "nth": 0,
               "tag": "p",
-              "text": "Find out what a meme is and the different meme formats you can use. Learn how to make a meme for your social media channels with Adobe Express.",
+              "text": "Learn what a meme is, explore popular meme formats, discover their history, and see how brands use memes to increase engagement and reach",
               "markup": null
             },
             {
               "selector": "p.blog-card-date",
               "nth": 0,
               "tag": "p",
-              "text": "07/21/2023",
+              "text": "05/29/2026",
               "markup": null
             },
             {
@@ -73,7 +73,7 @@
               "type": "link",
               "selector": "a.blog-card",
               "nth": 0,
-              "text": "What is a meme – and how do I use them?\n        Find out what a meme is and the different meme formats you can use. Learn how to make a meme for your social media channels with Adobe Express.\n        07/21/2023",
+              "text": "Memes Explained: Meaning, Formats & Trends in 2026 | Adobe\n        Learn what a meme is, explore popular meme formats, discover their history, and see how brands use memes to increase engagement and reach\n        05/29/2026",
               "href": "/express/learn/blog/what-is-a-meme",
               "ariaLabel": null,
               "rel": null,
