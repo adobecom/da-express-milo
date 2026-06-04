@@ -113,7 +113,19 @@ function getLiteralPatternMetadata(style, entries, options = {}) {
   };
 }
 
-function createLiteralCharacterMap(style, entries, endBoundary = style.length) {
+function createLiteralCharacterMap(
+  style,
+  entries,
+  endBoundary = style.length,
+  patternMetadata = null,
+) {
+  if (patternMetadata?.hasRepeatingMiddlePattern) {
+    return entries.reduce((map, entry) => {
+      map[entry.character] = entry.character;
+      return map;
+    }, {});
+  }
+
   return entries.reduce((map, entry, index) => {
     const next = entries[index + 1];
     const end = next?.position ?? endBoundary;
@@ -218,8 +230,18 @@ export function detectStyle(row) {
       },
     },
     characters: {
-      letters: createLiteralCharacterMap(style, lettersEntries, lettersEndBoundary),
-      numbers: createLiteralCharacterMap(style, numbersEntries, alphanumericEndBoundary),
+      letters: createLiteralCharacterMap(
+        style,
+        lettersEntries,
+        lettersEndBoundary,
+        wholePattern,
+      ),
+      numbers: createLiteralCharacterMap(
+        style,
+        numbersEntries,
+        alphanumericEndBoundary,
+        wholePattern,
+      ),
       specialCharacters: createCharacterMap(SPECIAL_CHARACTERS, specialCharacters),
     },
     missingCharacters: {

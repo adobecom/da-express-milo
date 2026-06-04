@@ -23,35 +23,18 @@ function transformWithCharacterMaps(font, value) {
 }
 
 function transformWithEnvelopePattern(font, value) {
-  return `${font.pattern.startPattern}${transformWithCharacterMaps(font, value)}${font.pattern.endPattern}`;
+  const mappedCharacters = [...value].map((character) => getMappedCharacter(font, character));
+  const mappedValue = font.pattern.hasRepeatingMiddlePattern
+    ? mappedCharacters.join(font.pattern.repeatingMiddlePattern)
+    : mappedCharacters.join('');
+  return `${font.pattern.startPattern}${mappedValue}${font.pattern.endPattern}`;
 }
 
-function getInspectionSummary(styleNames) {
-  return styleNames.map((styleName) => {
-    const font = fontByName[styleName];
-    return {
-      styleName,
-      type: font.type,
-      placement: font.pattern.placement,
-      byCategory: {
-        letters: font.pattern.byCategory?.letters?.placement,
-        numbers: font.pattern.byCategory?.numbers?.placement,
-        specialCharacters: font.pattern.byCategory?.specialCharacters?.placement,
-      },
-      samples: {
-        A: font.characters.letters.A,
-        a: font.characters.letters.a,
-        0: font.characters.numbers['0'],
-        9: font.characters.numbers['9'],
-        '!': font.characters.specialCharacters['!'],
-      },
-      pattern: {
-        start: font.pattern.startPattern,
-        repeatingMiddle: font.pattern.repeatingMiddlePattern,
-        end: font.pattern.endPattern,
-      },
-      missingCharacters: font.missingCharacters,
-    };
+function streamTransformOutputs(cases) {
+  cases.forEach(({ actual, expected }) => {
+    // Intentional inspection output for reviewing generated transforms in the browser console.
+    // eslint-disable-next-line no-console
+    console.log('[font-sheet-transform]', JSON.stringify({ actual, expected }));
   });
 }
 
@@ -62,15 +45,6 @@ describe('font sheet transform', () => {
       return acc;
     }, {});
 
-    // Intentional inspection output for reviewing generated mappings in the browser console.
-    // eslint-disable-next-line no-console
-    console.log('[font-sheet-transform] summary', JSON.stringify({
-      rows: rows.length,
-      fonts: output.fonts.length,
-      counts,
-      sourceCharacters: output.sourceCharacters,
-    }, null, 2));
-
     expect(rows.length).to.equal(33);
     expect(output.fonts.length).to.equal(33);
     expect(counts['direct-map']).to.equal(6);
@@ -80,13 +54,6 @@ describe('font sheet transform', () => {
   it('maps direct one-to-one unicode styles by category', () => {
     const lightTextBubble = fontByName['Light text bubble'];
     const fullWidth = fontByName['Full width'];
-
-    // eslint-disable-next-line no-console
-    console.log('[font-sheet-transform] direct-map samples', JSON.stringify(
-      getInspectionSummary(['Light text bubble', 'Full width']),
-      null,
-      2,
-    ));
 
     expect(lightTextBubble.type).to.equal('direct-map');
     expect(lightTextBubble.characters.letters.A).to.equal('Ⓐ');
@@ -103,13 +70,6 @@ describe('font sheet transform', () => {
   it('extracts combining-mark pattern styles without losing base characters', () => {
     const diagonalStrikes = fontByName['Diagonal strikes'];
     const weirdText = fontByName['Weird text'];
-
-    // eslint-disable-next-line no-console
-    console.log('[font-sheet-transform] combining-pattern samples', JSON.stringify(
-      getInspectionSummary(['Diagonal strikes', 'Weird text']),
-      null,
-      2,
-    ));
 
     expect(diagonalStrikes.type).to.equal('pattern-map');
     expect(diagonalStrikes.pattern.hasStartPattern).to.be.true;
@@ -128,13 +88,6 @@ describe('font sheet transform', () => {
     const arrows = fontByName.Arrows;
     const cupido = fontByName.Cupido;
 
-    // eslint-disable-next-line no-console
-    console.log('[font-sheet-transform] symbol-pattern samples', JSON.stringify(
-      getInspectionSummary(['Sparkles', 'Arrows', 'Cupido']),
-      null,
-      2,
-    ));
-
     expect(sparkles.pattern.placement).to.equal('start+end');
     expect(sparkles.pattern.startPattern).to.equal('(¯`·._.··¸.-~*´¨¯¨`*·~-.');
     expect(sparkles.pattern.endPattern).to.equal('.-~*´¨¯¨`*·~-.¸··._.·´¯)');
@@ -144,8 +97,9 @@ describe('font sheet transform', () => {
     expect(arrows.pattern.startPattern).to.equal('»»»»');
     expect(arrows.pattern.repeatingMiddlePattern).to.equal('»»');
     expect(arrows.pattern.endPattern).to.equal('»»»');
-    expect(arrows.characters.letters.A).to.equal('A»»');
-    expect(arrows.characters.numbers['9']).to.equal('9»»');
+    expect(arrows.characters.letters.A).to.equal('A');
+    expect(arrows.characters.numbers['9']).to.equal('9');
+    expect(arrows.characters.specialCharacters['!']).to.equal('!');
 
     expect(cupido.pattern.placement).to.equal('start+repeating-middle+end');
     expect(cupido.pattern.startPattern).to.equal('»»ᅳ');
@@ -161,13 +115,6 @@ describe('font sheet transform', () => {
       Style: `${output.sourceCharacters.letters.all}012345678${output.sourceCharacters.specialCharacters}`,
       'Font Supported': 'Noto Sans',
     }]).fonts;
-
-    // eslint-disable-next-line no-console
-    console.log('[font-sheet-transform] missing-character sample', JSON.stringify({
-      styleName: fadingEffect.styleName,
-      missingCharacters: fadingEffect.missingCharacters,
-      syntheticMissingNumber: syntheticMissingNumberFont.missingCharacters,
-    }, null, 2));
 
     expect(fadingEffect.missingCharacters.letters).to.deep.equal([]);
     expect(fadingEffect.missingCharacters.numbers).to.deep.equal([]);
@@ -193,11 +140,7 @@ describe('font sheet transform', () => {
       },
     ];
 
-    // eslint-disable-next-line no-console
-    console.log('[font-sheet-transform] direct string transforms', JSON.stringify({
-      source,
-      cases,
-    }, null, 2));
+    streamTransformOutputs(cases);
 
     cases.forEach(({ actual, expected }) => {
       expect(actual).to.equal(expected);
@@ -221,11 +164,7 @@ describe('font sheet transform', () => {
       },
     ];
 
-    // eslint-disable-next-line no-console
-    console.log('[font-sheet-transform] combining string transforms', JSON.stringify({
-      source,
-      cases,
-    }, null, 2));
+    streamTransformOutputs(cases);
 
     cases.forEach(({ actual, expected }) => {
       expect(actual).to.equal(expected);
@@ -252,18 +191,27 @@ describe('font sheet transform', () => {
       {
         styleName: cupido.styleName,
         actual: transformWithEnvelopePattern(cupido, source),
-        expected: '»»ᅳAᅳᅳzᅳᅳ0ᅳᅳ9ᅳ!►',
+        expected: '»»ᅳAᅳᅳzᅳᅳ0ᅳᅳ9ᅳᅳ!►',
       },
     ];
 
-    // eslint-disable-next-line no-console
-    console.log('[font-sheet-transform] envelope string transforms', JSON.stringify({
-      source,
-      cases,
-    }, null, 2));
+    streamTransformOutputs(cases);
 
     cases.forEach(({ actual, expected }) => {
       expect(actual).to.equal(expected);
     });
+  });
+
+  it('applies repeating middle patterns through consecutive special characters', () => {
+    const arrows = fontByName.Arrows;
+    const source = 'ABC!!';
+    const actual = transformWithEnvelopePattern(arrows, source);
+    const expected = '»»»»A»»B»»C»»!»»!»»»';
+
+    streamTransformOutputs([{ actual, expected }]);
+
+    expect(arrows.characters.letters.A).to.equal('A');
+    expect(arrows.characters.specialCharacters['!']).to.equal('!');
+    expect(actual).to.equal(expected);
   });
 });
