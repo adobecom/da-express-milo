@@ -2,6 +2,7 @@ import { getLibs } from '../../scripts/utils.js';
 
 let createTag;
 let getMetadata;
+let getConfig;
 
 const MOBILE_MAX = 600;
 const TABLET_MAX = 900;
@@ -9,6 +10,33 @@ const HERO_IMAGE_WIDTHS = { mobile: 480, tablet: 720, desktop: 960 };
 const PRECONNECT_DATA_ATTRIBUTE = 'blogArticleMarquee';
 const DEFAULT_PRODUCT_ICON_PATH = '/express/code/icons/fallback_author_icon.png';
 const PRODUCT_ICON_SIZE = 48;
+
+function getDateFormatter(language) {
+  return Intl.DateTimeFormat(language, {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+}
+
+function formatPublicationDate(dateStr, formatter) {
+  if (!dateStr || !formatter) return '';
+  const trimmed = dateStr.trim();
+  const isTimestamp = /^\d+$/.test(trimmed);
+  let publicationDate;
+  if (isTimestamp) {
+    publicationDate = new Date(Number(trimmed) * 1000);
+  } else {
+    const parts = trimmed.split('/');
+    if (parts.length === 3) {
+      const [m, d, y] = parts.map(Number);
+      publicationDate = new Date(Date.UTC(y, m - 1, d));
+    }
+  }
+  if (!publicationDate || Number.isNaN(publicationDate.getTime())) return '';
+  return formatter.format(publicationDate);
+}
 
 const METADATA_KEYS = {
   eyebrow: 'category',
@@ -463,11 +491,15 @@ function prepareStructure(block) {
 }
 
 export default async function decorate(block) {
-  ({ createTag, getMetadata } = await import(`${getLibs()}/utils/utils.js`));
+  ({ createTag, getMetadata, getConfig } = await import(`${getLibs()}/utils/utils.js`));
   const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
   block.classList.add('blog-article-marquee');
 
   const metadata = getBlogArticleMarqueeMetadata();
+  if (metadata.date) {
+    const formatter = getDateFormatter(getConfig().locale.ietf);
+    metadata.date = formatPublicationDate(metadata.date, formatter);
+  }
 
   const {
     wrapper,

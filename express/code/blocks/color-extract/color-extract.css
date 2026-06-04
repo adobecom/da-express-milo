@@ -584,6 +584,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   justify-content: space-between;
   gap: 6px;
   width: 100%;
+  min-width: 200px;
   height: 32px;
   padding: 0 11px 0 12px;
   background: var(--color-extract-gray-300);
@@ -652,7 +653,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px;
+  gap: var(--spacing-100);
   width: 100%;
   padding: 8px 16px;
   background: none;
@@ -934,6 +935,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
   .color-extract .color-extract-mood-dropdown {
     width: fit-content;
+    min-width: 64px;
     max-width: 330px;
   }
 
