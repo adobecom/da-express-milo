@@ -134,6 +134,18 @@ function createLiteralCharacterMap(
   }, {});
 }
 
+function createNoPatternMetadata() {
+  return {
+    placement: 'none',
+    hasStartPattern: false,
+    hasRepeatingMiddlePattern: false,
+    hasEndPattern: false,
+    startPattern: '',
+    repeatingMiddlePattern: '',
+    endPattern: '',
+  };
+}
+
 function splitDirectMappings(style, specialStart) {
   const mappedBody = specialStart >= 0 ? style.slice(0, specialStart) : style;
   const mappedCharacters = [...mappedBody];
@@ -159,13 +171,7 @@ export function detectStyle(row) {
     return {
       type: 'direct-map',
       pattern: {
-        placement: 'none',
-        hasStartPattern: false,
-        hasRepeatingMiddlePattern: false,
-        hasEndPattern: false,
-        startPattern: '',
-        repeatingMiddlePattern: '',
-        endPattern: '',
+        ...createNoPatternMetadata(),
         byCategory: {},
       },
       characters: {
@@ -210,24 +216,31 @@ export function detectStyle(row) {
     startBoundary: numbersStartBoundary,
     endBoundary: alphanumericEndBoundary,
   });
+  const specialCharactersPattern = trailingPattern
+    ? {
+      ...createNoPatternMetadata(),
+      placement: 'end',
+      hasEndPattern: true,
+      endPattern: trailingPattern,
+    }
+    : createNoPatternMetadata();
+  const patternByCategory = wholePattern.hasRepeatingMiddlePattern
+    ? {
+      letters: wholePattern,
+      numbers: wholePattern,
+      specialCharacters: wholePattern,
+    }
+    : {
+      letters: lettersPattern,
+      numbers: numbersPattern,
+      specialCharacters: specialCharactersPattern,
+    };
 
   return {
     type: wholePattern?.placement === 'none' ? 'literal-map' : 'pattern-map',
     pattern: {
       ...wholePattern,
-      byCategory: {
-        letters: lettersPattern,
-        numbers: numbersPattern,
-        specialCharacters: {
-          placement: trailingPattern ? 'end' : 'none',
-          hasStartPattern: false,
-          hasRepeatingMiddlePattern: false,
-          hasEndPattern: Boolean(trailingPattern),
-          startPattern: '',
-          repeatingMiddlePattern: '',
-          endPattern: trailingPattern,
-        },
-      },
+      byCategory: patternByCategory,
     },
     characters: {
       letters: createLiteralCharacterMap(

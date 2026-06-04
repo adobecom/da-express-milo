@@ -1093,25 +1093,25 @@
             "hasEndPattern": true,
             "startPattern": "̶",
             "repeatingMiddlePattern": "̶̶",
-            "endPattern": "̶̶"
+            "endPattern": "̶"
           },
           "numbers": {
             "placement": "start+repeating-middle+end",
             "hasStartPattern": true,
             "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "̶̶",
+            "startPattern": "̶",
             "repeatingMiddlePattern": "̶̶",
             "endPattern": "̶"
           },
           "specialCharacters": {
-            "placement": "none",
-            "hasStartPattern": false,
-            "hasRepeatingMiddlePattern": false,
-            "hasEndPattern": false,
-            "startPattern": "",
-            "repeatingMiddlePattern": "",
-            "endPattern": ""
+            "placement": "start+repeating-middle+end",
+            "hasStartPattern": true,
+            "hasRepeatingMiddlePattern": true,
+            "hasEndPattern": true,
+            "startPattern": "̶",
+            "repeatingMiddlePattern": "̶̶",
+            "endPattern": "̶"
           }
         }
       },
@@ -1243,25 +1243,25 @@
             "hasEndPattern": true,
             "startPattern": "ͯ",
             "repeatingMiddlePattern": "ͯͯ",
-            "endPattern": "ͯͯ"
+            "endPattern": "ͯ"
           },
           "numbers": {
             "placement": "start+repeating-middle+end",
             "hasStartPattern": true,
             "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "ͯͯ",
+            "startPattern": "ͯ",
             "repeatingMiddlePattern": "ͯͯ",
             "endPattern": "ͯ"
           },
           "specialCharacters": {
-            "placement": "none",
-            "hasStartPattern": false,
-            "hasRepeatingMiddlePattern": false,
-            "hasEndPattern": false,
-            "startPattern": "",
-            "repeatingMiddlePattern": "",
-            "endPattern": ""
+            "placement": "start+repeating-middle+end",
+            "hasStartPattern": true,
+            "hasRepeatingMiddlePattern": true,
+            "hasEndPattern": true,
+            "startPattern": "ͯ",
+            "repeatingMiddlePattern": "ͯͯ",
+            "endPattern": "ͯ"
           }
         }
       },
@@ -1518,22 +1518,22 @@
             "endPattern": "̳̿͟͞"
           },
           "numbers": {
-            "placement": "start+repeating-middle+end",
-            "hasStartPattern": true,
+            "placement": "repeating-middle+end",
+            "hasStartPattern": false,
             "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "̳̿͟͞",
+            "startPattern": "",
             "repeatingMiddlePattern": "̳̿͟͞",
             "endPattern": "̳̿͟͞"
           },
           "specialCharacters": {
-            "placement": "none",
+            "placement": "repeating-middle+end",
             "hasStartPattern": false,
-            "hasRepeatingMiddlePattern": false,
-            "hasEndPattern": false,
+            "hasRepeatingMiddlePattern": true,
+            "hasEndPattern": true,
             "startPattern": "",
-            "repeatingMiddlePattern": "",
-            "endPattern": ""
+            "repeatingMiddlePattern": "̳̿͟͞",
+            "endPattern": "̳̿͟͞"
           }
         }
       },
@@ -1665,25 +1665,25 @@
             "hasEndPattern": true,
             "startPattern": "̷",
             "repeatingMiddlePattern": "̷̷",
-            "endPattern": "̷̷"
+            "endPattern": "̷"
           },
           "numbers": {
             "placement": "start+repeating-middle+end",
             "hasStartPattern": true,
             "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "̷̷",
+            "startPattern": "̷",
             "repeatingMiddlePattern": "̷̷",
             "endPattern": "̷"
           },
           "specialCharacters": {
-            "placement": "none",
-            "hasStartPattern": false,
-            "hasRepeatingMiddlePattern": false,
-            "hasEndPattern": false,
-            "startPattern": "",
-            "repeatingMiddlePattern": "",
-            "endPattern": ""
+            "placement": "start+repeating-middle+end",
+            "hasStartPattern": true,
+            "hasRepeatingMiddlePattern": true,
+            "hasEndPattern": true,
+            "startPattern": "̷",
+            "repeatingMiddlePattern": "̷̷",
+            "endPattern": "̷"
           }
         }
       },
@@ -2115,25 +2115,25 @@
             "hasEndPattern": true,
             "startPattern": "̳",
             "repeatingMiddlePattern": "̳̳",
-            "endPattern": "̳̳"
+            "endPattern": "̳"
           },
           "numbers": {
             "placement": "start+repeating-middle+end",
             "hasStartPattern": true,
             "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "̳̳",
+            "startPattern": "̳",
             "repeatingMiddlePattern": "̳̳",
             "endPattern": "̳"
           },
           "specialCharacters": {
-            "placement": "none",
-            "hasStartPattern": false,
-            "hasRepeatingMiddlePattern": false,
-            "hasEndPattern": false,
-            "startPattern": "",
-            "repeatingMiddlePattern": "",
-            "endPattern": ""
+            "placement": "start+repeating-middle+end",
+            "hasStartPattern": true,
+            "hasRepeatingMiddlePattern": true,
+            "hasEndPattern": true,
+            "startPattern": "̳",
+            "repeatingMiddlePattern": "̳̳",
+            "endPattern": "̳"
           }
         }
       },
@@ -2865,25 +2865,25 @@
             "hasEndPattern": true,
             "startPattern": "͐",
             "repeatingMiddlePattern": "͐͐",
-            "endPattern": "͐͐"
+            "endPattern": "͐"
           },
           "numbers": {
             "placement": "start+repeating-middle+end",
             "hasStartPattern": true,
             "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "͐͐",
+            "startPattern": "͐",
             "repeatingMiddlePattern": "͐͐",
             "endPattern": "͐"
           },
           "specialCharacters": {
-            "placement": "none",
-            "hasStartPattern": false,
-            "hasRepeatingMiddlePattern": false,
-            "hasEndPattern": false,
-            "startPattern": "",
-            "repeatingMiddlePattern": "",
-            "endPattern": ""
+            "placement": "start+repeating-middle+end",
+            "hasStartPattern": true,
+            "hasRepeatingMiddlePattern": true,
+            "hasEndPattern": true,
+            "startPattern": "͐",
+            "repeatingMiddlePattern": "͐͐",
+            "endPattern": "͐"
           }
         }
       },
@@ -3015,25 +3015,25 @@
             "hasEndPattern": true,
             "startPattern": "͕",
             "repeatingMiddlePattern": "͕͕",
-            "endPattern": "͕͕"
+            "endPattern": "͕"
           },
           "numbers": {
             "placement": "start+repeating-middle+end",
             "hasStartPattern": true,
             "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "͕͕",
+            "startPattern": "͕",
             "repeatingMiddlePattern": "͕͕",
             "endPattern": "͕"
           },
           "specialCharacters": {
-            "placement": "none",
-            "hasStartPattern": false,
-            "hasRepeatingMiddlePattern": false,
-            "hasEndPattern": false,
-            "startPattern": "",
-            "repeatingMiddlePattern": "",
-            "endPattern": ""
+            "placement": "start+repeating-middle+end",
+            "hasStartPattern": true,
+            "hasRepeatingMiddlePattern": true,
+            "hasEndPattern": true,
+            "startPattern": "͕",
+            "repeatingMiddlePattern": "͕͕",
+            "endPattern": "͕"
           }
         }
       },
@@ -3165,25 +3165,25 @@
             "hasEndPattern": true,
             "startPattern": "̅",
             "repeatingMiddlePattern": "̅̅",
-            "endPattern": "̅̅"
+            "endPattern": "̅"
           },
           "numbers": {
             "placement": "start+repeating-middle+end",
             "hasStartPattern": true,
             "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "̅̅",
+            "startPattern": "̅",
             "repeatingMiddlePattern": "̅̅",
             "endPattern": "̅"
           },
           "specialCharacters": {
-            "placement": "none",
-            "hasStartPattern": false,
-            "hasRepeatingMiddlePattern": false,
-            "hasEndPattern": false,
-            "startPattern": "",
-            "repeatingMiddlePattern": "",
-            "endPattern": ""
+            "placement": "start+repeating-middle+end",
+            "hasStartPattern": true,
+            "hasRepeatingMiddlePattern": true,
+            "hasEndPattern": true,
+            "startPattern": "̅",
+            "repeatingMiddlePattern": "̅̅",
+            "endPattern": "̅"
           }
         }
       },
@@ -3315,25 +3315,25 @@
             "hasEndPattern": true,
             "startPattern": "͓",
             "repeatingMiddlePattern": "͓͓",
-            "endPattern": "͓͓"
+            "endPattern": "͓"
           },
           "numbers": {
             "placement": "start+repeating-middle+end",
             "hasStartPattern": true,
             "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "͓͓",
+            "startPattern": "͓",
             "repeatingMiddlePattern": "͓͓",
             "endPattern": "͓"
           },
           "specialCharacters": {
-            "placement": "none",
-            "hasStartPattern": false,
-            "hasRepeatingMiddlePattern": false,
-            "hasEndPattern": false,
-            "startPattern": "",
-            "repeatingMiddlePattern": "",
-            "endPattern": ""
+            "placement": "start+repeating-middle+end",
+            "hasStartPattern": true,
+            "hasRepeatingMiddlePattern": true,
+            "hasEndPattern": true,
+            "startPattern": "͓",
+            "repeatingMiddlePattern": "͓͓",
+            "endPattern": "͓"
           }
         }
       },
@@ -3465,25 +3465,25 @@
             "hasEndPattern": true,
             "startPattern": "̋",
             "repeatingMiddlePattern": "̋̋",
-            "endPattern": "̋̋"
+            "endPattern": "̋"
           },
           "numbers": {
             "placement": "start+repeating-middle+end",
             "hasStartPattern": true,
             "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "̋̋",
+            "startPattern": "̋",
             "repeatingMiddlePattern": "̋̋",
             "endPattern": "̋"
           },
           "specialCharacters": {
-            "placement": "none",
-            "hasStartPattern": false,
-            "hasRepeatingMiddlePattern": false,
-            "hasEndPattern": false,
-            "startPattern": "",
-            "repeatingMiddlePattern": "",
-            "endPattern": ""
+            "placement": "start+repeating-middle+end",
+            "hasStartPattern": true,
+            "hasRepeatingMiddlePattern": true,
+            "hasEndPattern": true,
+            "startPattern": "̋",
+            "repeatingMiddlePattern": "̋̋",
+            "endPattern": "̋"
           }
         }
       },
@@ -3615,25 +3615,25 @@
             "hasEndPattern": true,
             "startPattern": "̊",
             "repeatingMiddlePattern": "̊̊",
-            "endPattern": "̊̊"
+            "endPattern": "̊"
           },
           "numbers": {
             "placement": "start+repeating-middle+end",
             "hasStartPattern": true,
             "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "̊̊",
+            "startPattern": "̊",
             "repeatingMiddlePattern": "̊̊",
             "endPattern": "̊"
           },
           "specialCharacters": {
-            "placement": "none",
-            "hasStartPattern": false,
-            "hasRepeatingMiddlePattern": false,
-            "hasEndPattern": false,
-            "startPattern": "",
-            "repeatingMiddlePattern": "",
-            "endPattern": ""
+            "placement": "start+repeating-middle+end",
+            "hasStartPattern": true,
+            "hasRepeatingMiddlePattern": true,
+            "hasEndPattern": true,
+            "startPattern": "̊",
+            "repeatingMiddlePattern": "̊̊",
+            "endPattern": "̊"
           }
         }
       },
@@ -3915,24 +3915,24 @@
             "hasEndPattern": true,
             "startPattern": "»»»»",
             "repeatingMiddlePattern": "»»",
-            "endPattern": "»»"
+            "endPattern": "»»»"
           },
           "numbers": {
             "placement": "start+repeating-middle+end",
             "hasStartPattern": true,
             "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "»»",
+            "startPattern": "»»»»",
             "repeatingMiddlePattern": "»»",
-            "endPattern": "»»"
+            "endPattern": "»»»"
           },
           "specialCharacters": {
-            "placement": "end",
-            "hasStartPattern": false,
-            "hasRepeatingMiddlePattern": false,
+            "placement": "start+repeating-middle+end",
+            "hasStartPattern": true,
+            "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "",
-            "repeatingMiddlePattern": "",
+            "startPattern": "»»»»",
+            "repeatingMiddlePattern": "»»",
             "endPattern": "»»»"
           }
         }
@@ -4065,24 +4065,24 @@
             "hasEndPattern": true,
             "startPattern": "»»ᅳ",
             "repeatingMiddlePattern": "ᅳᅳ",
-            "endPattern": "ᅳᅳ"
+            "endPattern": "►"
           },
           "numbers": {
             "placement": "start+repeating-middle+end",
             "hasStartPattern": true,
             "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "ᅳᅳ",
+            "startPattern": "»»ᅳ",
             "repeatingMiddlePattern": "ᅳᅳ",
-            "endPattern": "ᅳ"
+            "endPattern": "►"
           },
           "specialCharacters": {
-            "placement": "end",
-            "hasStartPattern": false,
-            "hasRepeatingMiddlePattern": false,
+            "placement": "start+repeating-middle+end",
+            "hasStartPattern": true,
+            "hasRepeatingMiddlePattern": true,
             "hasEndPattern": true,
-            "startPattern": "",
-            "repeatingMiddlePattern": "",
+            "startPattern": "»»ᅳ",
+            "repeatingMiddlePattern": "ᅳᅳ",
             "endPattern": "►"
           }
         }
