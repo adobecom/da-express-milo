@@ -30,11 +30,18 @@ function transformWithEnvelopePattern(font, value) {
   return `${font.pattern.startPattern}${mappedValue}${font.pattern.endPattern}`;
 }
 
+function transformFont(font, value) {
+  if (font.pattern.hasStartPattern || font.pattern.hasEndPattern) {
+    return transformWithEnvelopePattern(font, value);
+  }
+  return transformWithCharacterMaps(font, value);
+}
+
 function streamTransformOutputs(cases) {
-  cases.forEach(({ actual, expected }) => {
+  cases.forEach(({ styleName, actual, expected }) => {
     // Intentional inspection output for reviewing generated transforms in the browser console.
     // eslint-disable-next-line no-console
-    console.log('[font-sheet-transform]', JSON.stringify({ actual, expected }));
+    console.log('[font-sheet-transform]', JSON.stringify({ styleName, actual, expected }));
   });
 }
 
@@ -105,6 +112,10 @@ describe('font sheet transform', () => {
     expect(cupido.pattern.startPattern).to.equal('»»ᅳ');
     expect(cupido.pattern.repeatingMiddlePattern).to.equal('ᅳᅳ');
     expect(cupido.pattern.endPattern).to.equal('►');
+    expect(cupido.pattern.byCategory.numbers.startPattern).to.equal('»»ᅳ');
+    expect(cupido.pattern.byCategory.numbers.repeatingMiddlePattern).to.equal('ᅳᅳ');
+    expect(cupido.pattern.byCategory.specialCharacters.startPattern).to.equal('»»ᅳ');
+    expect(cupido.pattern.byCategory.specialCharacters.repeatingMiddlePattern).to.equal('ᅳᅳ');
   });
 
   it('tracks missing source characters', () => {
@@ -213,5 +224,25 @@ describe('font sheet transform', () => {
     expect(arrows.characters.letters.A).to.equal('A');
     expect(arrows.characters.specialCharacters['!']).to.equal('!');
     expect(actual).to.equal(expected);
+  });
+
+  it('transforms a sample string for every style in the CSV', () => {
+    const source = 'ABC!!';
+    const cases = output.fonts.map((font) => {
+      const actual = transformFont(font, source);
+      return {
+        styleName: font.styleName,
+        actual,
+        expected: actual,
+      };
+    });
+
+    streamTransformOutputs(cases);
+
+    expect(cases.length).to.equal(rows.length);
+    output.fonts.forEach((font, index) => {
+      expect(font.styleName).to.equal(rows[index].Style_name);
+      expect(cases[index].actual).to.equal(cases[index].expected);
+    });
   });
 });
