@@ -37,6 +37,7 @@ Container (block entry point, owns state)
 | Toolbar | `toolbar.js` | Writes `layout`, `fontSize`. Reads `activeFonts.length` for count label. Owns panel open/close toggle. |
 | FontCard | `fontCard.js` | Presentational. Receives `previewText`, `fontSize`, `fontDef` as arguments. |
 | FontCardGrid | `fontCardGrid.js` | Reads `activeFonts`, `visibleCount`, `layout`. Owns Load More button, writes `visibleCount`. |
+| Skeleton loader | `font-generator.css` + markup | Pulsing placeholders over text input, toolbar, and cards. Shown before fonts load; hidden once ready. |
 
 ---
 
@@ -44,37 +45,18 @@ Container (block entry point, owns state)
 
 All shared state lives in `state.js`. Components never share state with each other directly — they only read from and write to the store.
 
-```js
-// state.js
-let state = {
-  previewText: 'Hello',       // string   — synced to URL
-  activeFilters: [],          // string[] — synced to URL. empty = show all categories
-  layout: 'grid',             // 'grid' | 'list' — synced to URL
-  fontSize: 16,               // number   — synced to URL
-  activeFonts: [...allFonts], // derived  — NOT synced to URL, never set directly by components
-  visibleCount: 12,           // number   — NOT synced to URL, resets on filter change
-};
-```
+| Key | Type | URL-synced | Notes |
+|---|---|---|---|
+| `previewText` | string | yes | |
+| `activeFilters` | string[] | yes | empty = show all |
+| `layout` | `'grid'`\|`'list'` | yes | |
+| `fontSize` | number | yes | |
+| `activeFonts` | FontDef[] | no | derived — never set directly |
+| `visibleCount` | number | no | resets to 12 on filter change |
 
 ### Derived state
 
-`activeFonts` is computed inside `setState` whenever `activeFilters` changes. No component sets it directly.
-
-```js
-export function setState(patch) {
-  state = { ...state, ...patch };
-
-  if (patch.activeFilters !== undefined) {
-    state.activeFonts = allFonts.filter(f =>
-      state.activeFilters.length === 0 || state.activeFilters.includes(f.id)
-    );
-    state.visibleCount = 12; // reset pagination when filters change
-  }
-
-  syncToUrl(state);
-  listeners.forEach(fn => fn(state));
-}
-```
+`activeFonts` is computed inside `setState` whenever `activeFilters` changes. No component sets it directly. `visibleCount` also resets to 12 at that point.
 
 ### Who reads and writes what
 
@@ -91,107 +73,34 @@ export function setState(patch) {
 
 ## The store
 
-Follow the same pub/sub pattern used in `ColorThemeExpressController.js`. `subscribe` returns an unsubscribe function. Subscribers receive the full state snapshot.
-
-```js
-// state.js
-import { allFonts } from './unicodeEngine.js';
-
-const listeners = new Set();
-
-let state = {
-  previewText: 'Hello',
-  activeFilters: [],
-  layout: 'grid',
-  fontSize: 16,
-  activeFonts: [...allFonts],
-  visibleCount: 12,
-};
-
-export function getState() {
-  return { ...state };
-}
-
-export function setState(patch) {
-  state = { ...state, ...patch };
-
-  if (patch.activeFilters !== undefined) {
-    state.activeFonts = allFonts.filter(f =>
-      state.activeFilters.length === 0 || state.activeFilters.includes(f.id)
-    );
-    state.visibleCount = 12;
-  }
-
-  syncToUrl(state);
-  listeners.forEach(fn => fn(state));
-}
-
-export function subscribe(fn) {
-  listeners.add(fn);
-  return () => listeners.delete(fn);
-}
-
-export function initFromUrl() {
-  const params = new URLSearchParams(location.search);
-  const patch = {};
-  if (params.get('text')) patch.previewText = params.get('text');
-  if (params.get('filters')) patch.activeFilters = params.get('filters').split(',');
-  if (params.get('layout')) patch.layout = params.get('layout');
-  if (params.get('size')) patch.fontSize = Number(params.get('size'));
-  if (Object.keys(patch).length) setState(patch);
-}
-
-function syncToUrl(s) {
-  const params = new URLSearchParams();
-  if (s.previewText) params.set('text', s.previewText);
-  if (s.activeFilters.length) params.set('filters', s.activeFilters.join(','));
-  if (s.layout !== 'grid') params.set('layout', s.layout);
-  if (s.fontSize !== 16) params.set('size', s.fontSize);
-  const query = params.toString();
-  history.replaceState(null, '', query ? `?${query}` : location.pathname);
-}
-```
+Follow the same pub/sub pattern used in `ColorThemeExpressController.js`. `subscribe` returns an unsubscribe function. Subscribers receive the full state snapshot. `state.js` exports: `getState`, `setState`, `subscribe`, `initFromUrl`.
 
 ---
 
 ## Component pattern
 
-Each component exports an `init(el)` function. It sets up event listeners and subscribes to state. `main.js` (the block's `decorate` function) is the only place that calls `init` and knows about the full tree.
+Each component exports an `init(el)` function. It sets up event listeners and subscribes to state. `font-generator.js` (the block's `decorate` function) is the only place that calls `init` and knows about the full tree.
 
 ```js
-// textInput.js
-import { setState, subscribe } from './state.js';
-
-export function init(el) {
-  const input = el.querySelector('input');
-
-  // Write to store on user input (debounced — see below)
-  input.addEventListener('input', debounce(e => {
-    setState({ previewText: e.target.value });
-  }, 150));
-
-  // Sync UI from store (handles URL load on page init)
-  subscribe(({ previewText }) => {
-    if (input.value !== previewText) input.value = previewText;
-  });
+// font-generator.js
+export default function decorate(block) {
+  initFromUrl(); // must run before any component init
+  initTextInput(block.querySelector('.text-input'));
+  initFilters(block.querySelectorAll('.filters')); // two instances: desktop + panel
+  initToolbar(block.querySelector('.toolbar'));
+  initFontCardGrid(block.querySelector('.font-card-grid'));
 }
 ```
 
+Each component follows the same shape: listen → `setState`, subscribe → update DOM.
+
 ```js
-// font-generator.js (block entry point)
-import { initFromUrl } from './state.js';
-import { init as initTextInput } from './textInput.js';
-import { init as initFilters } from './filters.js';
-import { init as initToolbar } from './toolbar.js';
-import { init as initFontCardGrid } from './fontCardGrid.js';
-
-export default function decorate(block) {
-  initFromUrl(); // must run before any component init
-
-  initTextInput(block.querySelector('.text-input'));
-  initFilters(block.querySelectorAll('.filters')); // two instances: desktop + panel (if panel exists)
-  initToolbar(block.querySelector('.toolbar'));
-  initFontCardGrid(block.querySelector('.font-card-grid'));
+// example: textInput.js
+export function init(el) {
+  const input = el.querySelector('input');
+  // We'll need to test the debounce out to find a balance between code performance and visual crispness
+  input.addEventListener('input', debounce(e => setState({ previewText: e.target.value }), 150));
+  subscribe(({ previewText }) => { if (input.value !== previewText) input.value = previewText; });
 }
 ```
 
@@ -206,13 +115,13 @@ User types → TextInput calls setState({ previewText }) →
 store notifies subscribers → FontCardGrid re-renders cards with new text
 ```
 
-Debounce text input at 150ms to avoid re-rendering on every keypress during fast typing. The debounce lives in `textInput.js` — it's a detail of how input is reported to the store, not something the store or grid should know about.
+Start by debouncing text input at 150ms to avoid re-rendering on every keypress during fast typing. Tune this to optimize UX. The debounce lives in `textInput.js` — it's a detail of how input is reported to the store, not something the store or grid should know about.
 
 ---
 
 ## Panel open/close (mobile/tablet)
 
-> **Note:** A dedicated panel component is TBD. The pattern below applies if one is added.
+> **Note:** A dedicated panel component is up to the discretion of the developer. The pattern below applies if one is added.
 
 `panelOpen` is not stored in the state store. It's transient UI state that no other component needs. The Toolbar toggles a CSS class on the container; the panel responds via CSS.
 
@@ -241,42 +150,52 @@ On desktop, Filters renders inline alongside the CTA Banner. On mobile/tablet, i
 
 ## Load more / pagination
 
-`visibleCount` starts at 12 and increases by 12 each time Load More is clicked. It resets to 12 automatically when filters change (handled in `setState`). FontCardGrid owns the Load More button.
+`visibleCount` starts at 12 and increases by 12 each time Load More is clicked. It resets to 12 automatically when filters change (handled in `setState`). FontCardGrid owns the Load More button and slices `activeFonts` to `visibleCount` on each render.
 
-```js
-// fontCardGrid.js
-import { getState, setState, subscribe } from './state.js';
+---
 
-export function init(el) {
-  const grid = el.querySelector('.cards');
-  const loadMoreBtn = el.querySelector('.load-more');
+## Spectrum components
 
-  loadMoreBtn.addEventListener('click', () => {
-    setState({ visibleCount: getState().visibleCount + 12 });
-  });
+### Font size slider
 
-  subscribe(state => {
-    const visible = state.activeFonts.slice(0, state.visibleCount);
-    const hasMore = state.visibleCount < state.activeFonts.length;
+`createExpressSlider` already exists in `scripts/color-shared/spectrum/components/express-slider.js` and is exported from the barrel (`spectrum/index.js`). Font generator is its first consumer. Wire it in `toolbar.js`:
 
-    grid.className = `cards cards--${state.layout}`;
-    grid.innerHTML = visible.map(f => `
-      <div class="font-card" style="font-size: ${state.fontSize}px">
-        <p class="font-card-preview">${transformText(state.previewText, f)}</p>
-        <span class="font-card-label">${f.label}</span>
-      </div>
-    `).join('');
+- `onInput` → `setState({ fontSize: value })` for live card updates
+- Subscribe to store → `slider.setValue()` to sync on URL init
 
-    loadMoreBtn.hidden = !hasMore;
-  });
-}
-```
+### Categories accordion
+
+`sp-accordion` is not yet in the dist bundle and has no Express wrapper. Three steps to add it:
+
+**1. Add to the dist bundle**
+
+Add `@spectrum-web-components/accordion` to the Spectrum build config and run the bundle script to generate `accordion.js` in `scripts/widgets/spectrum/dist/`. Check how other components are added in that build config — follow the same pattern.
+
+**2. Add `loadAccordion()` to `load-spectrum.js`**
+
+Follow the same shape as `loadSlider()` or `loadButton()` — call `loadCoreDeps()`, wrap the import in `installRegistryGuard`, import `accordion.js` from `DIST`, and `waitForComponents(['sp-theme', 'sp-accordion', 'sp-accordion-item'])`.
+
+**3. Create `express-accordion.js`**
+
+Add `scripts/color-shared/spectrum/components/express-accordion.js` and export it from `spectrum/index.js`. Model it on `express-slider.js`: call `loadAccordion()` and `loadOverrideStyles`, create the `sp-accordion` / `sp-accordion-item` elements inside a theme wrapper, wire the `toggle` event, and return `{ element, destroy }`.
+
+The accordion's open/closed state stays out of the store — it's transient UI, same as `panelOpen`.
+
+---
+
+## Skeleton loader
+
+Pulsing gray placeholders are shown over the text input, toolbar items, and font cards before content is ready. The skeleton is CSS-only — a `loading` class on the container block activates the pulse animation, and `font-generator.js` removes it once fonts are initialized.
+
+Skeleton elements are inert markup siblings of the real components, hidden by default and revealed only while `loading` is present. No JS is needed inside individual components to manage skeleton state.
 
 ---
 
 ## Unicode transformation engine
 
 A pure utility module. No state, no DOM. Takes a string and a font definition and returns the transformed unicode string. All components that need to display transformed text import from here directly.
+
+Also pay attention to the fonts that have prefixes/suffixes rather than a 1:1 relationship.
 
 ```js
 // unicodeEngine.js
