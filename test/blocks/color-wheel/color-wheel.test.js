@@ -10,6 +10,7 @@ const {
   makeTransformPalette,
   paletteFromThemeState,
   swatchHexListFromState,
+  resolveInitialTabAndSrc,
 } = await import('../../../express/code/blocks/color-wheel/color-wheel.js');
 
 describe('color-wheel utilities', () => {
@@ -142,5 +143,82 @@ describe('color-wheel utilities', () => {
       const state = { swatches: Array.from({ length: 15 }, (_, i) => ({ hex: `#${String(i).padStart(6, '0')}` })) };
       expect(swatchHexListFromState(state)).to.have.length(10);
     });
+  });
+});
+
+describe('resolveInitialTabAndSrc', () => {
+  const STORAGE_KEY = 'color-wheel-image-src';
+  const PARAM_NAME = 'color-palette';
+  let savedHref;
+
+  beforeEach(() => {
+    savedHref = window.location.href;
+    sessionStorage.removeItem(STORAGE_KEY);
+  });
+
+  afterEach(() => {
+    sessionStorage.removeItem(STORAGE_KEY);
+    window.history.replaceState({}, '', savedHref);
+  });
+
+  it('defaults to color-wheel tab with no imageSrc when URL has no relevant params', () => {
+    const { activeTab, imageSrc } = resolveInitialTabAndSrc();
+    expect(activeTab).to.equal('color-wheel');
+    expect(imageSrc).to.be.null;
+  });
+
+  it('reads image tab from ?tab=image', () => {
+    window.history.replaceState({}, '', `${window.location.pathname}?tab=image`);
+    expect(resolveInitialTabAndSrc().activeTab).to.equal('image');
+  });
+
+  it('reads primary-color tab from ?tab=primary-color', () => {
+    window.history.replaceState({}, '', `${window.location.pathname}?tab=primary-color`);
+    expect(resolveInitialTabAndSrc().activeTab).to.equal('primary-color');
+  });
+
+  it('reads color-wheel tab from ?tab=color-wheel', () => {
+    window.history.replaceState({}, '', `${window.location.pathname}?tab=color-wheel`);
+    expect(resolveInitialTabAndSrc().activeTab).to.equal('color-wheel');
+  });
+
+  it('ignores an unknown tab value and keeps the default', () => {
+    window.history.replaceState({}, '', `${window.location.pathname}?tab=nonexistent`);
+    expect(resolveInitialTabAndSrc().activeTab).to.equal('color-wheel');
+  });
+
+  it('restores imageSrc from sessionStorage when color-palette param is present', () => {
+    const fakeSrc = 'data:image/png;base64,fakedata==';
+    sessionStorage.setItem(STORAGE_KEY, fakeSrc);
+    window.history.replaceState({}, '', `${window.location.pathname}?${PARAM_NAME}=FF0000`);
+    const { activeTab, imageSrc } = resolveInitialTabAndSrc();
+    expect(imageSrc).to.equal(fakeSrc);
+    expect(activeTab).to.equal('image');
+  });
+
+  it('clears sessionStorage after reading the stored src', () => {
+    sessionStorage.setItem(STORAGE_KEY, 'data:image/png;base64,fakedata==');
+    window.history.replaceState({}, '', `${window.location.pathname}?${PARAM_NAME}=FF0000`);
+    resolveInitialTabAndSrc();
+    expect(sessionStorage.getItem(STORAGE_KEY)).to.be.null;
+  });
+
+  it('returns null imageSrc when color-palette param is present but no src is stored', () => {
+    window.history.replaceState({}, '', `${window.location.pathname}?${PARAM_NAME}=FF0000`);
+    const { activeTab, imageSrc } = resolveInitialTabAndSrc();
+    expect(imageSrc).to.be.null;
+    expect(activeTab).to.equal('color-wheel');
+  });
+
+  it('does not consume sessionStorage when color-palette param is absent', () => {
+    sessionStorage.setItem(STORAGE_KEY, 'data:image/png;base64,fakedata==');
+    resolveInitialTabAndSrc();
+    expect(sessionStorage.getItem(STORAGE_KEY)).to.equal('data:image/png;base64,fakedata==');
+  });
+
+  it('SUSI restore overrides the tab URL param — image tab wins when src is stored', () => {
+    sessionStorage.setItem(STORAGE_KEY, 'data:image/png;base64,fakedata==');
+    window.history.replaceState({}, '', `${window.location.pathname}?tab=primary-color&${PARAM_NAME}=FF0000`);
+    expect(resolveInitialTabAndSrc().activeTab).to.equal('image');
   });
 });
