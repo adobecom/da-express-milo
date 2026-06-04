@@ -72,6 +72,17 @@ function loadEasyUploadModule() {
   return easyUploadModulePromise;
 }
 
+function isEasyUploadVariantQuickAction(quickAction) {
+  return typeof quickAction === 'string' && quickAction.endsWith('-easy-upload-variant');
+}
+
+function getVanillaQuickActionForEasyUploadControl(quickAction) {
+  if (typeof quickAction !== 'string' || !quickAction.endsWith('-easy-upload-control')) {
+    return quickAction;
+  }
+  return EASY_UPLOAD_LEGACY_MAP[quickAction] || quickAction;
+}
+
 function isAuthFrictionlessUploadQuickAction(quickAction) {
   const isAuth = window.adobeIMS?.isSignedInUser();
   return isAuth && Object.values(AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS).includes(quickAction);
@@ -720,7 +731,7 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCod
     || quickAction === 'edit-image-easy-upload-control';
   const normalizedQuickAction = isEditImageEasyUpload
     ? FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor
-    : quickAction;
+    : getVanillaQuickActionForEasyUploadControl(quickAction);
 
   let data = await processFilesForQuickAction(files, normalizedQuickAction);
   if (!data[0]) {
@@ -909,9 +920,9 @@ export default async function decorate(block) {
   };
   block.append(inputElement);
 
-  // Easy Upload provides its own CTA click handling.
-  // Keep the dropzone container non-clickable there.
-  if (!quickAction.includes('easy-upload')) {
+  // Easy Upload variants provide their own CTA click handling.
+  // Controls should continue to behave like vanilla quick-action pages.
+  if (!isEasyUploadVariantQuickAction(quickAction)) {
     dropzoneContainer.addEventListener('click', (e) => {
       e.preventDefault();
       if (quickAction === 'generate-qr-code') {
