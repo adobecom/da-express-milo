@@ -233,6 +233,12 @@ There are two separate test boundaries:
 
 Both suites intentionally log structured transform records with `styleName`, `source`, `actual`, and `expected` so each style can be inspected in test output.
 
+### Development Visualizer
+
+Use the `font-generator-visualizer` block for manual inspection while building the feature. It renders a table of generated `v1.json` font rows and includes a preview text input that updates the runtime `unicodeEngine` output for every style.
+
+The visualizer reads only the generated public JSON. It does not fetch the private CSV source.
+
 ---
 
 ## Reference patterns in this codebase
