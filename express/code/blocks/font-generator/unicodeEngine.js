@@ -129,12 +129,65 @@ function applyFallbackDecoration(char, fontDef) {
   return `${decoration.prefix}${char}${decoration.suffix}`;
 }
 
+/**
+ * Whole-string pattern fonts keep character maps as identity values and store
+ * their decoration in `fontDef.pattern`. Combining-mark fonts keep decoration
+ * baked into each mapped character and should not receive this envelope.
+ *
+ * @param {FontDef} fontDef
+ * @returns {boolean}
+ */
+function usesWholeTextPattern(fontDef) {
+  if (fontDef.type !== 'pattern-map' || !isPlainObject(fontDef.pattern)) return false;
+  const {
+    hasStartPattern,
+    hasRepeatingMiddlePattern,
+    hasEndPattern,
+  } = /** @type {Record<string, unknown>} */ (fontDef.pattern);
+  const hasPattern = Boolean(
+    hasStartPattern
+      || hasRepeatingMiddlePattern
+      || hasEndPattern,
+  );
+  if (!hasPattern) return false;
+
+  return Object.values(fontDef.characters).every((categoryMap) => (
+    Object.entries(categoryMap).every(([sourceChar, mappedValue]) => mappedValue === sourceChar)
+  ));
+}
+
+/**
+ * @param {string[]} mappedCharacters
+ * @param {FontDef} fontDef
+ * @returns {string}
+ */
+function applyWholeTextPattern(mappedCharacters, fontDef) {
+  if (mappedCharacters.length === 0) return '';
+  const {
+    hasRepeatingMiddlePattern,
+    startPattern: maybeStartPattern,
+    repeatingMiddlePattern: maybeMiddlePattern,
+    endPattern: maybeEndPattern,
+  } = /** @type {Record<string, unknown>} */ (fontDef.pattern);
+  const startPattern = typeof maybeStartPattern === 'string' ? maybeStartPattern : '';
+  const middlePattern = typeof maybeMiddlePattern === 'string'
+    ? maybeMiddlePattern
+    : '';
+  const endPattern = typeof maybeEndPattern === 'string' ? maybeEndPattern : '';
+  const mappedValue = hasRepeatingMiddlePattern
+    ? mappedCharacters.join(middlePattern)
+    : mappedCharacters.join('');
+  return `${startPattern}${mappedValue}${endPattern}`;
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
  * Transforms a string using the given font definition.
  *
  * - Characters present in the font's map are substituted directly.
+ * - Whole-string patterns apply start/end wrappers and repeating separators
+ *   from the generated font metadata.
  * - For pattern-map fonts, unmapped characters receive the same combining
  *   decoration as their category peers (e.g. an accented letter gets the
  *   same strike-through as plain ASCII letters).
@@ -153,10 +206,16 @@ export function transformText(text, fontDef) {
   const safeText = text.length > MAX_INPUT_LENGTH ? text.slice(0, MAX_INPUT_LENGTH) : text;
   const map = buildLookupMap(fontDef);
 
-  return [...safeText].map((char) => {
+  const mappedCharacters = [...safeText].map((char) => {
     if (Object.prototype.hasOwnProperty.call(map, char)) return map[char];
     return applyFallbackDecoration(char, fontDef);
-  }).join('');
+  });
+
+  if (usesWholeTextPattern(fontDef)) {
+    return applyWholeTextPattern(mappedCharacters, fontDef);
+  }
+
+  return mappedCharacters.join('');
 }
 
 /**
