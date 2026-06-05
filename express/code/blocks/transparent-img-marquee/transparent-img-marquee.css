@@ -72,7 +72,7 @@
   width: 100%;
 }
 
-@media (min-width: 600px) {
+@media (min-width: 900px) {
   .transparent-img-marquee {
     align-items: flex-end;
     flex-direction: row;
@@ -81,7 +81,6 @@
     padding-inline: var(--spacing-500);
   }
 
-  /* Text column: flex-1 with internal padding; image sits flush to block edges */
   .transparent-img-marquee .foreground {
     flex: 1;
     padding-block: var(--spacing-600);
