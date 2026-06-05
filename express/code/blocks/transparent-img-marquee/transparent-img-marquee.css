@@ -1,0 +1,88 @@
+.transparent-img-marquee {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+  opacity: 0;
+  overflow: hidden;
+  padding-block: var(--spacing-600);
+  padding-inline: var(--spacing-300);
+  width: 100%;
+}
+
+.transparent-img-marquee.appear { opacity: 1; }
+
+.transparent-img-marquee .express-logo { height: 30px; width: auto; }
+
+.transparent-img-marquee .foreground {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+
+.transparent-img-marquee .foreground h2 {
+  font-size: var(--heading-font-size-ml);
+  font-weight: var(--heading-font-weight-extra);
+  line-height: 1.04;
+  margin: 0;
+}
+
+.transparent-img-marquee .foreground > p {
+  font-size: var(--body-font-size-s);
+  margin: 0;
+}
+
+.transparent-img-marquee .button-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-200);
+  margin-block-start: var(--spacing-400);
+}
+
+.transparent-img-marquee .button-container a.button {
+  margin: 0;
+  width: 100%;
+}
+
+.transparent-img-marquee .image-container {
+  align-items: flex-end;
+  display: flex;
+  justify-content: center;
+}
+
+.transparent-img-marquee .image-container img {
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .transparent-img-marquee {
+    align-items: center;
+    flex-direction: row;
+    padding-inline: var(--spacing-500);
+  }
+
+  .transparent-img-marquee .foreground,
+  .transparent-img-marquee .image-container { flex: 1; }
+
+  .transparent-img-marquee .button-container a.button { width: auto; }
+}
+
+@media (min-width: 1200px) {
+  .transparent-img-marquee {
+    padding-block: var(--spacing-900);
+    padding-inline: var(--spacing-600);
+  }
+
+  .transparent-img-marquee .foreground h2 { font-size: var(--heading-font-size-xl); }
+
+  .transparent-img-marquee .foreground > p:not(.disclaimer) { font-size: var(--body-font-size-m); }
+}
+
+@media (min-width: 1680px) {
+  .transparent-img-marquee {
+    margin-inline: auto;
+    max-width: 1680px;
+  }
+}
