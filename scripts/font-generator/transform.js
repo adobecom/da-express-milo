@@ -295,7 +295,6 @@ export function transformRows(rows) {
         pattern: detected.pattern,
         characters: detected.characters,
         missingCharacters: detected.missingCharacters,
-        rawStyle: row.Style,
       };
     }),
   };
