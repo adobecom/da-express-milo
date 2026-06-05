@@ -95,7 +95,6 @@ export const FONT_SIZE_MAX = 48;
  *     numbers: string[];
  *     specialCharacters: string[];
  *   };
- *   rawStyle: string;
  * }} FontDef
  */
 
