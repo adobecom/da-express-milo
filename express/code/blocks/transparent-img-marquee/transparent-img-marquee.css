@@ -13,7 +13,7 @@
 
 .transparent-img-marquee.appear { opacity: 1; }
 
-/* Override global .icon.icon-adobe-express-logo padding that would push the logo off-start */
+/* Override global .icon.icon-adobe-express-logo padding */
 .transparent-img-marquee .express-logo {
   align-self: flex-start;
   height: 30px;
@@ -21,29 +21,43 @@
   width: auto;
 }
 
+/* Main-container equivalent: text column */
 .transparent-img-marquee .foreground {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+}
+
+/* Text-content equivalent: logo + heading + body */
+.transparent-img-marquee .text-content {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-100);
 }
 
-.transparent-img-marquee .foreground h2 {
+.transparent-img-marquee .text-content h2 {
   font-size: var(--heading-font-size-ml);
   font-weight: var(--heading-font-weight-extra);
   line-height: 1.04;
   margin: 0;
 }
 
-.transparent-img-marquee .foreground > p {
+.transparent-img-marquee .text-content > p {
   font-size: var(--body-font-size-s);
   margin: 0;
+}
+
+/* CTA-container equivalent: buttons + disclaimer */
+.transparent-img-marquee .cta-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
 }
 
 .transparent-img-marquee .button-container {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-200);
-  margin-block-start: var(--spacing-400);
 }
 
 .transparent-img-marquee .button-container a.button { margin: 0; }
@@ -65,12 +79,13 @@
     padding-inline: var(--spacing-500);
   }
 
-  /* Text column: internal padding provides vertical spacing; image sits flush to block edges */
+  /* Text column: flex-1 with internal padding; image sits flush to block edges */
   .transparent-img-marquee .foreground {
     flex: 1;
-    max-width: 338px;
     padding-block: var(--spacing-600);
   }
+
+  .transparent-img-marquee .text-content { max-width: 338px; }
 
   .transparent-img-marquee .image-container { flex: 1; }
 
@@ -85,14 +100,13 @@
 
   /* At desktop the image column is naturally taller (3:2 ratio at ~50% viewport)
      than the text column, so the image is full-bleed top and bottom */
-  .transparent-img-marquee .foreground {
-    max-width: 438px;
-    padding-block: var(--spacing-900);
-  }
+  .transparent-img-marquee .foreground { padding-block: var(--spacing-900); }
 
-  .transparent-img-marquee .foreground h2 { font-size: var(--heading-font-size-xl); }
+  .transparent-img-marquee .text-content { max-width: 438px; }
 
-  .transparent-img-marquee .foreground > p:not(.disclaimer) { font-size: var(--body-font-size-m); }
+  .transparent-img-marquee .text-content h2 { font-size: var(--heading-font-size-xl); }
+
+  .transparent-img-marquee .text-content > p:not(.disclaimer) { font-size: var(--body-font-size-m); }
 }
 
 @media (min-width: 1680px) {

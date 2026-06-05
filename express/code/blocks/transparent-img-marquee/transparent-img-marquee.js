@@ -18,6 +18,23 @@ function buildStructure(block) {
   return foreground;
 }
 
+// Mirror Figma's Text-content / CTA-container split inside the foreground.
+// Must run after decorateButtonsDeprecated and injectLogo so class names are stable.
+function splitForeground(foreground) {
+  const textContent = document.createElement('div');
+  textContent.className = 'text-content';
+  const ctaContainer = document.createElement('div');
+  ctaContainer.className = 'cta-container';
+  [...foreground.children].forEach((child) => {
+    if (child.classList.contains('button-container') || child.classList.contains('disclaimer')) {
+      ctaContainer.append(child);
+    } else {
+      textContent.append(child);
+    }
+  });
+  foreground.append(textContent, ctaContainer);
+}
+
 function injectLogo(foreground) {
   if (!['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) return;
   const logo = getIconElementDeprecated('adobe-express-logo');
@@ -33,6 +50,7 @@ export default async function decorate(block) {
   injectLogo(foreground);
   const lastP = [...foreground.querySelectorAll('p:not(.button-container)')].at(-1);
   if (lastP) lastP.classList.add('disclaimer');
+  splitForeground(foreground);
   const ctaLinks = [...block.querySelectorAll('a.button')];
   if (ctaLinks.length) {
     const { default: trackBranchParameters } = await import('../../scripts/branchlinks.js');
