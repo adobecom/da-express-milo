@@ -2,17 +2,24 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-400);
+  gap: var(--spacing-500);
   opacity: 0;
   overflow: hidden;
-  padding-block: var(--spacing-600);
+  padding-block-end: 0;
+  padding-block-start: var(--spacing-600);
   padding-inline: var(--spacing-300);
   width: 100%;
 }
 
 .transparent-img-marquee.appear { opacity: 1; }
 
-.transparent-img-marquee .express-logo { height: 30px; width: auto; }
+/* Override global .icon.icon-adobe-express-logo padding that would push the logo off-start */
+.transparent-img-marquee .express-logo {
+  align-self: flex-start;
+  height: 30px;
+  padding: 0;
+  width: auto;
+}
 
 .transparent-img-marquee .foreground {
   display: flex;
@@ -39,31 +46,32 @@
   margin-block-start: var(--spacing-400);
 }
 
-.transparent-img-marquee .button-container a.button {
-  margin: 0;
-  width: 100%;
-}
-
-.transparent-img-marquee .image-container {
-  align-items: flex-end;
-  display: flex;
-  justify-content: center;
-}
+.transparent-img-marquee .button-container a.button { margin: 0; }
 
 .transparent-img-marquee .image-container img {
+  aspect-ratio: 600 / 400;
+  border-radius: 0;
   display: block;
-  height: auto;
+  object-fit: cover;
   width: 100%;
 }
 
 @media (min-width: 600px) {
   .transparent-img-marquee {
-    align-items: center;
+    align-items: flex-end;
     flex-direction: row;
+    gap: var(--spacing-300);
+    padding-block: 0;
     padding-inline: var(--spacing-500);
   }
 
-  .transparent-img-marquee .foreground,
+  /* Text column: internal padding provides vertical spacing; image sits flush to block edges */
+  .transparent-img-marquee .foreground {
+    flex: 1;
+    max-width: 338px;
+    padding-block: var(--spacing-600);
+  }
+
   .transparent-img-marquee .image-container { flex: 1; }
 
   .transparent-img-marquee .button-container a.button { width: auto; }
@@ -71,8 +79,15 @@
 
 @media (min-width: 1200px) {
   .transparent-img-marquee {
-    padding-block: var(--spacing-900);
+    gap: 0;
     padding-inline: var(--spacing-600);
+  }
+
+  /* At desktop the image column is naturally taller (3:2 ratio at ~50% viewport)
+     than the text column, so the image is full-bleed top and bottom */
+  .transparent-img-marquee .foreground {
+    max-width: 438px;
+    padding-block: var(--spacing-900);
   }
 
   .transparent-img-marquee .foreground h2 { font-size: var(--heading-font-size-xl); }
