@@ -3,9 +3,9 @@ import { expect } from '@esm-bundle/chai';
 import {
   splitTabSeparatedRows,
   transformRows,
-} from '../../../../express/code/blocks/font-generator/font-sheets/transform.js';
+} from '../../../../scripts/font-generator/transform.js';
 
-const csvResponse = await fetch('/express/code/blocks/font-generator/font-sheets/v1/v1.csv');
+const csvResponse = await fetch('/scripts/font-generator/v1/v1.csv');
 const csv = await csvResponse.text();
 const rows = splitTabSeparatedRows(csv);
 const output = transformRows(rows);

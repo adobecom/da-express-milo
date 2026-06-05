@@ -304,7 +304,10 @@ export function transformRows(rows) {
 export async function writeV1Json() {
   const { readFileSync, writeFileSync } = await import('node:fs');
   const csvUrl = new URL('./v1/v1.csv', import.meta.url);
-  const jsonUrl = new URL('./v1/v1.json', import.meta.url);
+  const jsonUrl = new URL(
+    '../../express/code/blocks/font-generator/font-sheets/v1/v1.json',
+    import.meta.url,
+  );
   const csv = readFileSync(csvUrl, 'utf8');
   const rows = splitTabSeparatedRows(csv);
   const output = transformRows(rows);
