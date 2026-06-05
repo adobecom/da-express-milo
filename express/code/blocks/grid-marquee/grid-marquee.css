@@ -12,6 +12,7 @@
   width: initial;
   height: 30px;
   padding: 1rem 0 1rem;
+  max-width: 340px;
 }
 
 main .section .grid-marquee h1 {
@@ -325,7 +326,7 @@ main .section .grid-marquee.pricing-page h1 {
   line-height: 130%;
   text-align: center;
   padding-bottom: var(--padding-bottom);
- 
+
 }
 .grid-marquee.pricing-page .express-logo {
   padding: 0px 0px var(--spacing-300) 0px
@@ -506,7 +507,7 @@ main .section .grid-marquee.pricing-page h1 {
   .grid-marquee.pricing-page .headline {
     max-width: var(--ax-grid-6-col-width);
   }
-  
+
 }
 
 

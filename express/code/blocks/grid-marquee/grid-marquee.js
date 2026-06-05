@@ -1,5 +1,6 @@
 import { getLibs, yieldToMain, getMobileOperatingSystem, getIconElementDeprecated, createTag, formatDynamicCartLink } from '../../scripts/utils.js';
 
+let getMetadata;
 let currDrawer = null;
 const largeMQ = window.matchMedia('(min-width: 1280px)');
 const mediumMQ = window.matchMedia('(min-width: 768px)');
@@ -254,6 +255,9 @@ async function makeRatings(
 }
 
 export default async function init(el) {
+  await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
+    ({ getMetadata } = utils);
+  });
   const rows = [...el.querySelectorAll(':scope > div')];
   const hasLegacyHeadline = !!rows[0]?.querySelector('h1');
   const foreground = createTag('div', { class: 'foreground' });
@@ -305,7 +309,19 @@ export default async function init(el) {
   // Legacy mode: headline + background + items inside this block
   if (hasLegacyHeadline) {
     const [headline, background, ...items] = rows;
-    const logo = getIconElementDeprecated('adobe-express-logo');
+    const injectAcrobatLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase());
+    let logo;
+
+    if (injectAcrobatLogo) {
+      const logoName = 'cobrand-lockup-acrobat-express';
+      const logoSize = '22px';
+      const logoAlt = 'Adobe Acrobat X Adobe Express co-brand logo';
+      const logoClass = 'marquee-eyebrow-logo-wide';
+      logo = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
+    } else {
+      logo = getIconElementDeprecated('adobe-express-logo');
+    }
+
     logo.classList.add('express-logo');
 
     background.classList.add('background');
