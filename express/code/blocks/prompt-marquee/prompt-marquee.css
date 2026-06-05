@@ -138,3 +138,54 @@ main .prompt-marquee  .column .cta-with-input  .con-button {
   position: relative;
   flex-grow: 1;
 }
+
+/* Font Generator POC */
+.font-gen-poc {
+  max-width: 638px;
+  margin: 32px auto 0;
+  padding: 24px;
+  border-radius: 16px;
+  background: var(--color-gray-100, #f5f5f5);
+  text-align: left;
+}
+
+.font-gen-poc h3 {
+  font-size: var(--heading-font-size-s, 20px);
+  margin: 0 0 16px;
+}
+
+.font-gen-label {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-gray-600, #6e6e6e);
+}
+
+.font-gen-preview-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.font-gen-preview {
+  flex: 1;
+  min-height: 48px;
+  padding: 12px 16px;
+  font-size: 22px;
+  background: #fff;
+  border-radius: 8px;
+  word-break: break-word;
+  line-height: 1.6;
+}
+
+.font-gen-copy {
+  padding: 10px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid var(--color-info-accent, #1473e6);
+  border-radius: 8px;
+  background: var(--color-info-accent, #1473e6);
+  color: #fff;
+  white-space: nowrap;
+}

@@ -1,4 +1,5 @@
 import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { appendFontGeneratorPOC } from './font-generator-poc.js';
 
 let getMetadata;
 let loadStyle;
@@ -308,5 +309,9 @@ export default async function decorate(block) {
     };
 
     cta.addEventListener('click', onCtaClick, { capture: true });
+
+    if (window.location.pathname.includes('qr-code-generator')) {
+      appendFontGeneratorPOC(block, input);
+    }
   }
 }
