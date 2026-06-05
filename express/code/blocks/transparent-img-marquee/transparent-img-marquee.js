@@ -26,7 +26,7 @@ function splitForeground(foreground) {
   const ctaContainer = document.createElement('div');
   ctaContainer.className = 'cta-container';
   [...foreground.children].forEach((child) => {
-    if (child.classList.contains('button-container') || child.classList.contains('disclaimer')) {
+    if (child.classList.contains('action-area') || child.classList.contains('button-container') || child.classList.contains('disclaimer')) {
       ctaContainer.append(child);
     } else {
       textContent.append(child);
@@ -48,7 +48,7 @@ export default async function decorate(block) {
   await decorateButtonsDeprecated(block);
   ({ getMetadata } = await import(`${getLibs()}/utils/utils.js`));
   injectLogo(foreground);
-  const lastP = [...foreground.querySelectorAll('p:not(.button-container)')].at(-1);
+  const lastP = [...foreground.querySelectorAll('p:not(.action-area):not(.button-container)')].at(-1);
   if (lastP) lastP.classList.add('disclaimer');
   splitForeground(foreground);
   const ctaLinks = [...block.querySelectorAll('a.button')];
