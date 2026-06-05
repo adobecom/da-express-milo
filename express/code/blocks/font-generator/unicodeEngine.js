@@ -1,6 +1,6 @@
 // @import { FontDef, FontType } from './types.js'
 
-const MAX_INPUT_LENGTH = 500;
+const MAX_INPUT_LENGTH = 200;
 
 const VALID_FONT_TYPES = /** @type {Set<FontType>} */ (
   new Set(['direct-map', 'pattern-map', 'literal-map'])
@@ -194,7 +194,7 @@ function applyWholeTextPattern(mappedCharacters, fontDef) {
  * - For direct-map and literal-map fonts, unmapped characters pass through.
  * - Returns the original text on invalid input rather than throwing.
  *
- * Input is capped at MAX_INPUT_LENGTH (500 chars) before processing.
+ * Input is capped at MAX_INPUT_LENGTH (200 chars) before processing.
  * User input is never used as a regex pattern.
  *
  * @type {import('./types.js').TransformText}
