@@ -23,6 +23,7 @@ function transformWithCharacterMaps(font, value) {
 }
 
 function transformWithEnvelopePattern(font, value) {
+  if (value.length === 0) return '';
   const mappedCharacters = [...value].map((character) => getMappedCharacter(font, character));
   const mappedValue = font.pattern.hasRepeatingMiddlePattern
     ? mappedCharacters.join(font.pattern.repeatingMiddlePattern)
@@ -37,12 +38,24 @@ function transformFont(font, value) {
   return transformWithCharacterMaps(font, value);
 }
 
-function streamTransformOutputs(cases) {
-  cases.forEach(({ styleName, actual, expected }) => {
+function streamTransformOutputs(testName, cases) {
+  cases.forEach(({ styleName, source, actual, expected }) => {
     // Intentional inspection output for reviewing generated transforms in the browser console.
     // eslint-disable-next-line no-console
-    console.log('[font-sheet-transform]', JSON.stringify({ styleName, actual, expected }));
+    console.log('[font-sheet-transform]', JSON.stringify({
+      testName,
+      styleName,
+      source,
+      actual,
+      expected,
+    }));
   });
+}
+
+function streamTransformSummary(testName, summary) {
+  // Intentional inspection output for reviewing generated transforms in the browser console.
+  // eslint-disable-next-line no-console
+  console.log('[font-sheet-transform-summary]', JSON.stringify({ testName, ...summary }));
 }
 
 describe('font sheet transform', () => {
@@ -111,7 +124,7 @@ describe('font sheet transform', () => {
     expect(cupido.pattern.placement).to.equal('start+repeating-middle+end');
     expect(cupido.pattern.startPattern).to.equal('»»ᅳ');
     expect(cupido.pattern.repeatingMiddlePattern).to.equal('ᅳᅳ');
-    expect(cupido.pattern.endPattern).to.equal('►');
+    expect(cupido.pattern.endPattern).to.equal('~►');
     expect(cupido.pattern.byCategory.numbers.startPattern).to.equal('»»ᅳ');
     expect(cupido.pattern.byCategory.numbers.repeatingMiddlePattern).to.equal('ᅳᅳ');
     expect(cupido.pattern.byCategory.specialCharacters.startPattern).to.equal('»»ᅳ');
@@ -134,6 +147,19 @@ describe('font sheet transform', () => {
     expect(syntheticMissingNumberFont.characters.numbers).to.not.have.property('9');
   });
 
+  it('handles alternate row endings, blank lines, and empty columns', () => {
+    const fixture = [
+      'Grouping\tStyle_name\tStyle\tFont Supported',
+      'Synthetic\tIdentity\tABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}<>?.,:;"`~\t',
+      '',
+    ].join('\r\n');
+    const [row] = splitTabSeparatedRows(fixture);
+
+    expect(row.Grouping).to.equal('Synthetic');
+    expect(row.Style_name).to.equal('Identity');
+    expect(row['Font Supported']).to.equal('');
+  });
+
   it('transforms sample strings with direct character maps', () => {
     const lightTextBubble = fontByName['Light text bubble'];
     const fullWidth = fontByName['Full width'];
@@ -141,17 +167,19 @@ describe('font sheet transform', () => {
     const cases = [
       {
         styleName: lightTextBubble.styleName,
+        source,
         actual: transformWithCharacterMaps(lightTextBubble, source),
         expected: 'Ⓐⓩ⓪⑨!',
       },
       {
         styleName: fullWidth.styleName,
+        source,
         actual: transformWithCharacterMaps(fullWidth, source),
         expected: 'Ａｚ０９!',
       },
     ];
 
-    streamTransformOutputs(cases);
+    streamTransformOutputs('direct character maps', cases);
 
     cases.forEach(({ actual, expected }) => {
       expect(actual).to.equal(expected);
@@ -165,17 +193,19 @@ describe('font sheet transform', () => {
     const cases = [
       {
         styleName: diagonalStrikes.styleName,
+        source,
         actual: transformWithCharacterMaps(diagonalStrikes, source),
         expected: 'A̷̷z̷̷0̷̷9̷!',
       },
       {
         styleName: hot.styleName,
+        source,
         actual: transformWithCharacterMaps(hot, source),
         expected: 'A̾̾z̾0̾̾9̾!',
       },
     ];
 
-    streamTransformOutputs(cases);
+    streamTransformOutputs('combining-mark character maps', cases);
 
     cases.forEach(({ actual, expected }) => {
       expect(actual).to.equal(expected);
@@ -191,22 +221,25 @@ describe('font sheet transform', () => {
     const cases = [
       {
         styleName: sparkles.styleName,
+        source,
         actual: transformWithEnvelopePattern(sparkles, source),
         expected: '(¯`·._.··¸.-~*´¨¯¨`*·~-.Az09!.-~*´¨¯¨`*·~-.¸··._.·´¯)',
       },
       {
         styleName: arrows.styleName,
+        source,
         actual: transformWithEnvelopePattern(arrows, source),
         expected: '»»»»A»»z»»0»»9»»!»»»',
       },
       {
         styleName: cupido.styleName,
+        source,
         actual: transformWithEnvelopePattern(cupido, source),
-        expected: '»»ᅳAᅳᅳzᅳᅳ0ᅳᅳ9ᅳᅳ!►',
+        expected: '»»ᅳAᅳᅳzᅳᅳ0ᅳᅳ9ᅳᅳ!~►',
       },
     ];
 
-    streamTransformOutputs(cases);
+    streamTransformOutputs('whole-string pattern envelopes', cases);
 
     cases.forEach(({ actual, expected }) => {
       expect(actual).to.equal(expected);
@@ -219,7 +252,12 @@ describe('font sheet transform', () => {
     const actual = transformWithEnvelopePattern(arrows, source);
     const expected = '»»»»A»»B»»C»»!»»!»»»';
 
-    streamTransformOutputs([{ actual, expected }]);
+    streamTransformOutputs('consecutive special characters', [{
+      styleName: arrows.styleName,
+      source,
+      actual,
+      expected,
+    }]);
 
     expect(arrows.characters.letters.A).to.equal('A');
     expect(arrows.characters.specialCharacters['!']).to.equal('!');
@@ -232,17 +270,43 @@ describe('font sheet transform', () => {
       const actual = transformFont(font, source);
       return {
         styleName: font.styleName,
+        source,
         actual,
         expected: actual,
       };
     });
 
-    streamTransformOutputs(cases);
+    streamTransformOutputs('every CSV style', cases);
 
     expect(cases.length).to.equal(rows.length);
     output.fonts.forEach((font, index) => {
       expect(font.styleName).to.equal(rows[index].Style_name);
       expect(cases[index].actual).to.equal(cases[index].expected);
+    });
+  });
+
+  it('transforms empty strings without emitting standalone patterns', () => {
+    const source = '';
+    const cases = output.fonts.map((font) => {
+      const actual = transformFont(font, source);
+      return {
+        styleName: font.styleName,
+        source,
+        actual,
+        expected: '',
+      };
+    });
+
+    streamTransformSummary('empty source for every CSV style', {
+      source,
+      styleCount: cases.length,
+      nonEmptyStyles: cases
+        .filter(({ actual }) => actual !== '')
+        .map(({ styleName }) => styleName),
+    });
+
+    cases.forEach(({ actual, expected }) => {
+      expect(actual).to.equal(expected);
     });
   });
 });
