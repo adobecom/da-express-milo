@@ -4056,7 +4056,7 @@
         "hasEndPattern": true,
         "startPattern": "»»ᅳ",
         "repeatingMiddlePattern": "ᅳᅳ",
-        "endPattern": "►",
+        "endPattern": "~►",
         "byCategory": {
           "letters": {
             "placement": "start+repeating-middle+end",
@@ -4065,7 +4065,7 @@
             "hasEndPattern": true,
             "startPattern": "»»ᅳ",
             "repeatingMiddlePattern": "ᅳᅳ",
-            "endPattern": "►"
+            "endPattern": "~►"
           },
           "numbers": {
             "placement": "start+repeating-middle+end",
@@ -4074,7 +4074,7 @@
             "hasEndPattern": true,
             "startPattern": "»»ᅳ",
             "repeatingMiddlePattern": "ᅳᅳ",
-            "endPattern": "►"
+            "endPattern": "~►"
           },
           "specialCharacters": {
             "placement": "start+repeating-middle+end",
@@ -4083,7 +4083,7 @@
             "hasEndPattern": true,
             "startPattern": "»»ᅳ",
             "repeatingMiddlePattern": "ᅳᅳ",
-            "endPattern": "►"
+            "endPattern": "~►"
           }
         }
       },
@@ -4191,7 +4191,7 @@
         "numbers": [],
         "specialCharacters": []
       },
-      "rawStyle": "»»ᅳAᅳᅳBᅳᅳCᅳᅳDᅳᅳEᅳᅳFᅳᅳGᅳᅳHᅳᅳIᅳᅳJᅳᅳKᅳᅳLᅳᅳMᅳᅳNᅳᅳOᅳᅳPᅳᅳQᅳᅳRᅳᅳSᅳᅳTᅳᅳUᅳᅳVᅳᅳWᅳᅳXᅳᅳYᅳᅳZᅳᅳaᅳᅳbᅳᅳcᅳᅳdᅳᅳeᅳᅳfᅳᅳgᅳᅳhᅳᅳiᅳᅳjᅳᅳkᅳᅳlᅳᅳmᅳᅳnᅳᅳoᅳᅳpᅳᅳqᅳᅳrᅳᅳsᅳᅳtᅳᅳuᅳᅳvᅳᅳwᅳᅳxᅳᅳyᅳᅳzᅳᅳ0ᅳᅳ1ᅳᅳ2ᅳᅳ3ᅳᅳ4ᅳᅳ5ᅳᅳ6ᅳᅳ7ᅳᅳ8ᅳᅳ9ᅳ!@#$%^&*()-_=+[]{}<>?.,:;'\"`~►"
+      "rawStyle": "»»ᅳAᅳᅳBᅳᅳCᅳᅳDᅳᅳEᅳᅳFᅳᅳGᅳᅳHᅳᅳIᅳᅳJᅳᅳKᅳᅳLᅳᅳMᅳᅳNᅳᅳOᅳᅳPᅳᅳQᅳᅳRᅳᅳSᅳᅳTᅳᅳUᅳᅳVᅳᅳWᅳᅳXᅳᅳYᅳᅳZᅳᅳaᅳᅳbᅳᅳcᅳᅳdᅳᅳeᅳᅳfᅳᅳgᅳᅳhᅳᅳiᅳᅳjᅳᅳkᅳᅳlᅳᅳmᅳᅳnᅳᅳoᅳᅳpᅳᅳqᅳᅳrᅳᅳsᅳᅳtᅳᅳuᅳᅳvᅳᅳwᅳᅳxᅳᅳyᅳᅳzᅳᅳ0ᅳᅳ1ᅳᅳ2ᅳᅳ3ᅳᅳ4ᅳᅳ5ᅳᅳ6ᅳᅳ7ᅳᅳ8ᅳᅳ9ᅳ!@#$%^&*()-_=+[]{}<>?.,:;'\"`~~►"
     },
     {
       "id": "sparkles",
