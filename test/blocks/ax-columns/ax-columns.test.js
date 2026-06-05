@@ -226,7 +226,7 @@ describe('Logo injection', () => {
     await decorate(block);
     const logo = block.querySelector('.express-logo');
     expect(logo).to.exist;
-    expect(logo.classList.contains('marquee-eyebrow-logo-wide')).to.be.true;
+    expect(logo.classList.contains('acrobat-express-lockup')).to.be.true;
     expect(logo.alt).to.equal('Adobe Acrobat X Adobe Express co-brand logo');
   });
 });

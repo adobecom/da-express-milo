@@ -16,18 +16,8 @@ const oldAuthoring = await readFile({ path: './mocks/old-authoring.html' });
 const newAuthoring = await readFile({ path: './mocks/new-authoring.html' });
 
 describe('Grid Marquee - Legacy vs New Authoring', () => {
-  let originalRAF;
   before(() => {
     window.isTestEnv = true;
-    originalRAF = window.requestAnimationFrame;
-    window.requestAnimationFrame = (cb) => {
-      cb(performance.now());
-      return 0;
-    };
-  });
-
-  after(() => {
-    window.requestAnimationFrame = originalRAF;
   });
 
   it('Legacy mode (h1 inside grid-marquee) decorates headline and CTAs', async () => {
@@ -69,16 +59,26 @@ describe('Grid Marquee - Legacy vs New Authoring', () => {
     await decorateHero(hero);
     await decorateGrid(gm);
 
-    const waitForCards = (root) => {
-      const el = root.querySelector('.cards-container');
-      if (!el) throw new Error('.cards-container not found after decorateGrid');
-      return el;
+    // Wait for async RAF-driven rendering of cards in new mode
+    // Poll briefly until cards container appears
+    const waitForCards = async (root, timeoutMs = 4000) => {
+      const start = performance.now();
+      return new Promise((resolve, reject) => {
+        const check = () => {
+          const el = root.querySelector('.cards-container');
+          if (el) return resolve(el);
+          if (performance.now() - start > timeoutMs) return reject(new Error('Timeout waiting for .cards-container'));
+          requestAnimationFrame(check);
+          return undefined;
+        };
+        check();
+      });
     };
 
     const headlineInGM = gm.querySelector('.headline');
     const h1InGM = gm.querySelector('h1');
     const heroH1 = hero.querySelector('h1');
-    const cards = waitForCards(gm);
+    const cards = await waitForCards(gm);
 
     expect(heroH1).to.exist;
     expect(headlineInGM).to.not.exist;

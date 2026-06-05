@@ -415,8 +415,7 @@
 
 .image-extract .color-extract-mood-dropdown {
   position: relative;
-  min-width: 200px;
-
+  min-width: 64px;
 }
 
 .image-extract .color-extract-mood-trigger {
@@ -812,15 +811,6 @@
 
   .image-extract .color-extract-gradient-editor-col .gradient-editor-bar-wrap {
     min-height: 200px;
-  }
-
-  .image-extract .color-extract-top-bar {
-     display: block
-  }
-
-  .image-extract .color-extract-mood-dropdown {
-    width: 100%
-  
   }
 }
 

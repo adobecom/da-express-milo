@@ -78,7 +78,7 @@ function createPromptLinkElement(promptLink, prompt) {
 function injectExpressLogo(block, wrapper) {
   if (block.classList.contains('entitled')) return;
   const metadataValue = getMetadata('marquee-inject-logo')?.toLowerCase();
-  if (!['on', 'yes', 'acrobat-express', 'real-madrid'].includes(metadataValue)) return;
+  if (!['on', 'yes', 'acrobat-express'].includes(metadataValue)) return;
   let logoName = 'adobe-express-logo';
   let logoSize = '22px';
   let logoAlt = 'Adobe Express logo';
@@ -87,13 +87,7 @@ function injectExpressLogo(block, wrapper) {
     logoName = 'cobrand-lockup-acrobat-express';
     logoSize = '22px';
     logoAlt = 'Adobe Acrobat X Adobe Express co-brand logo';
-    logoClass = 'marquee-eyebrow-logo-wide';
-  }
-  if (metadataValue === 'real-madrid') {
-    logoName = 'cobrand-lockup-real-madrid-logo';
-    logoSize = '22px';
-    logoAlt = 'Adobe X Real Madrid logo';
-    logoClass = 'marquee-eyebrow-logo-wide';
+    logoClass = 'acrobat-express-lockup';
   }
   const logoElement = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
   wrapper.prepend(logoElement);

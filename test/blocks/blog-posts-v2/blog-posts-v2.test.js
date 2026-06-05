@@ -319,58 +319,6 @@ describe('Blog Posts V2 Block', () => {
     }
   });
 
-  it('should not render a date when post date is invalid', async () => {
-    const invalidDatePost = {
-      path: '/blog/invalid-date-post.html',
-      title: 'Invalid Date Post',
-      teaser: 'Post teaser with invalid date',
-      image: 'test_image1.jpg',
-      date: '',
-      tags: '["design"]',
-      category: 'Design',
-    };
-    const validDatePost = {
-      path: '/blog/valid-date-post.html',
-      title: 'Valid Date Post',
-      teaser: 'Post teaser with valid date',
-      image: 'test_image2.jpg',
-      date: 1641081600,
-      tags: '["design"]',
-      category: 'Design',
-    };
-    const mockBlogData = {
-      data: [invalidDatePost, validDatePost],
-      byPath: {
-        '/blog/invalid-date-post': invalidDatePost,
-        '/blog/valid-date-post': validDatePost,
-      },
-    };
-
-    fetchStub.resolves({
-      ok: true,
-      json: () => Promise.resolve(mockBlogData),
-    });
-
-    document.body.innerHTML = `
-      <div class="blog-posts-v2">
-        <div>
-          <div>
-            <a href="/blog/invalid-date-post.html">Invalid Date Post</a>
-            <a href="/blog/valid-date-post.html">Valid Date Post</a>
-          </div>
-        </div>
-      </div>
-    `;
-    const invalidDateBlock = document.querySelector('.blog-posts-v2');
-    await decorate(invalidDateBlock);
-
-    const invalidCard = [...invalidDateBlock.querySelectorAll('.blog-card')].find(
-      (card) => card.href.includes('/blog/invalid-date-post'),
-    );
-    expect(invalidCard).to.exist;
-    expect(invalidCard.querySelector('.blog-card-date')).to.not.exist;
-  });
-
   it('should handle view all link localization', async () => {
     // Mock blog index data
     const mockBlogData = {

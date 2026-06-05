@@ -7,7 +7,7 @@
 }
 
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):first-child .ax-columns:first-child {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):first-child .ax-columns:first-child {
   padding-top: 0;
 }
 
@@ -16,7 +16,7 @@
 }
 
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing).long-form .ax-columns:last-child {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing).long-form .ax-columns:last-child {
   padding-bottom: var(--spacing-600);
 }
 
@@ -117,18 +117,18 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child {
   padding-top: 60px;
 }
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.has-ribbon-banner:first-child {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.has-ribbon-banner:first-child {
   padding-top: 0;
 }
 
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:empty:first-child {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:empty:first-child {
   padding-top: 0;
 }
 
@@ -142,9 +142,9 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.ax-columns:last-child,
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.ax-columns:last-child,
 .section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.content:last-child {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.content:last-child {
   padding-bottom: var(--spacing-600);
 }
 
@@ -163,13 +163,13 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:last-child,
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:last-child,
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.dark:last-child,
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.dark:last-child,
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:nth-last-child(2):has(+ .section-metadata),
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:nth-last-child(2):has(+ .section-metadata),
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.dark:nth-last-child(2):has(+ .section-metadata) {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.dark:nth-last-child(2):has(+ .section-metadata) {
   padding-bottom: 40px;
 }
 
@@ -582,7 +582,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 .section:first-child:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child>div.columns-video {
+  .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child>div.columns-video {
   padding: var(--spacing-600) 0;
 }
 
@@ -1613,7 +1613,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   }
 
   .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.extra-wide:first-child:not(:empty) {
+    .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.extra-wide:first-child:not(:empty) {
     padding-top: 0;
   }
 
@@ -1811,11 +1811,11 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   margin-top: var(--spacing-500);
 }
 
-.section:not(:first-child).ax-max-entitled:has(.ax-columns) .ax-columns p {
-  font-size: var(--body-font-size-m);
-  font-weight: var(--body-font-weight);
-  line-height: var(--heading-line-height);
-}
+  .section:not(:first-child).ax-max-entitled:has(.ax-columns) .ax-columns p {
+    font-size: var(--body-font-size-m);
+    font-weight: var(--body-font-weight);
+    line-height: var(--heading-line-height);
+  }
 
 @media (min-width: 600px) {
   .section.ax-max-entitled:has(.ax-columns)>.ax-columns p.button-container {
@@ -1888,15 +1888,5 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .section.ax-max-entitled:has(.ax-columns) .ax-columns:not(.fullsize):not(.marquee) .column:not(.column-picture):not(.hero-animation-overlay):not(.text) {
     padding: 0px;
-  }
-}
-
-main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
-  height: 40px;
-  padding-bottom: 0;
-}
-@media screen and (max-width: 1200px) {
-  main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
-    padding-top: 10px;
   }
 }
