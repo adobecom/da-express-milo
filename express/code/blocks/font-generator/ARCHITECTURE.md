@@ -197,6 +197,11 @@ A pure utility module. No state, no DOM. Takes a string and a font definition an
 
 Also pay attention to the fonts that have prefixes/suffixes or repeating separators rather than a 1:1 relationship. The runtime engine must consume the generated `pattern` metadata, not just the character maps.
 
+Runtime constraints:
+
+- Input is capped at 200 characters before transformation.
+- Transforming a 200-character input across every v1 style should stay under 50ms.
+
 ```js
 // unicodeEngine.js
 export function transformText(text, fontDef) {

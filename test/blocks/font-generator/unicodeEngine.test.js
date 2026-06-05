@@ -6,6 +6,8 @@ const fontSheetResponse = await fetch('/express/code/blocks/font-generator/font-
 const fontSheet = await fontSheetResponse.json();
 const fontByName = Object.fromEntries(fontSheet.fonts.map((font) => [font.styleName, font]));
 const INSPECTION_SOURCE = 'ABC!!é🚀 09';
+const MAX_INPUT_LENGTH = 200;
+const PERFORMANCE_BUDGET_MS = 50;
 
 function getFont(styleName) {
   const font = fontByName[styleName];
@@ -226,14 +228,14 @@ describe('unicode engine', () => {
   });
 
   it('caps very long input before applying runtime patterns', () => {
-    const source = 'A'.repeat(501);
-    const expectedBody = 'A'.repeat(500);
+    const source = 'A'.repeat(MAX_INPUT_LENGTH + 1);
+    const expectedBody = 'A'.repeat(MAX_INPUT_LENGTH);
     const cases = [
       {
         styleName: 'Light text bubble',
         source: `${source.length} characters`,
         actual: transformText(source, getFont('Light text bubble')).length,
-        expected: 500,
+        expected: MAX_INPUT_LENGTH,
       },
       {
         styleName: 'Sparkles',
@@ -248,5 +250,26 @@ describe('unicode engine', () => {
     cases.forEach(({ actual, expected }) => {
       expect(actual).to.equal(expected);
     });
+  });
+
+  it('transforms 200-character input across every style within the performance budget', () => {
+    const source = 'ABCxyz123!'.repeat(20);
+    const start = performance.now();
+    const outputs = fontSheet.fonts.map((font) => transformText(source, font));
+    const elapsedMs = performance.now() - start;
+
+    streamRuntimeSummary('performance budget for every runtime style', {
+      source: `${source.length} characters`,
+      styleCount: fontSheet.fonts.length,
+      elapsedMs,
+      budgetMs: PERFORMANCE_BUDGET_MS,
+    });
+
+    expect(source.length).to.equal(MAX_INPUT_LENGTH);
+    expect(outputs.length).to.equal(fontSheet.fonts.length);
+    outputs.forEach((output) => {
+      expect(output).to.be.a('string');
+    });
+    expect(elapsedMs).to.be.below(PERFORMANCE_BUDGET_MS);
   });
 });
