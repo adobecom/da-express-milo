@@ -12,14 +12,10 @@
 
 import {
   setLibs,
-  buildAutoBlocks,
-  decorateArea,
   getMetadata,
   preDecorateSections,
-  getRedirectUri,
-  getIconElementDeprecated,
   getContentRoot,
-} from './utils.js';
+} from './utils-eager.js';
 
 // Add project-wide style path here.
 const STYLES = [];
@@ -82,7 +78,6 @@ const CONFIG = {
   geoRouting: 'on',
   lingoProjectSuccessLogging: 'on',
   fallbackRouting: 'on',
-  decorateArea,
   faasCloseModalAfterSubmit: 'on',
   locales: {
     '': { ietf: 'en-US', tk: 'jdq5hay.css' },
@@ -194,7 +189,6 @@ const CONFIG = {
     'eb0dcb78-3e56-4b10-89f9-51831f2cc37f': 'express-pep',
   },
   links: 'on',
-  googleLoginURLCallback: getRedirectUri,
   autoBlocks: [
     { axfaas: '/tools/axfaas' },
   ],
@@ -372,7 +366,7 @@ function preloadLCPImage(img) {
   });
 }());
 
-function decorateHeroLCP(loadStyle, config, createTag) {
+function decorateHeroLCP(loadStyle, config, createTag, getIconElementDeprecated) {
   const template = getMetadata('template');
   const h1 = document.querySelector('main h1');
   if (template !== 'blog') {
@@ -467,6 +461,12 @@ const listenAlloy = () => {
 async function loadPage() {
   if (window.isTestEnv) return;
   const {
+    decorateArea,
+    buildAutoBlocks,
+    getRedirectUri,
+    getIconElementDeprecated,
+  } = await import('./utils.js');
+  const {
     loadArea,
     loadStyle,
     setConfig,
@@ -488,7 +488,12 @@ async function loadPage() {
   document.head.append(googleLoginRedirect);
   // end TODO remove metadata after we go live
 
-  const config = setConfig({ ...CONFIG, miloLibs });
+  const config = setConfig({
+    ...CONFIG,
+    miloLibs,
+    decorateArea,
+    googleLoginURLCallback: getRedirectUri,
+  });
 
   // Legacy color.adobe.com deeplink redirect
   if (/color-theme-\d+\/?$/.test(window.location.pathname)) {
@@ -524,7 +529,7 @@ async function loadPage() {
   document.head.append(footerMeta);
 
   buildAutoBlocks();
-  decorateHeroLCP(loadStyle, config, createTag, getMetadata);
+  decorateHeroLCP(loadStyle, config, createTag, getIconElementDeprecated);
   const urlParams = new URLSearchParams(window.location.search);
   if (urlParams.get('martech') !== 'off' && getMetadata('martech') !== 'off') {
     import('./instrument.js').then((mod) => { mod.default(); });
