@@ -11,6 +11,16 @@ const rows = splitTabSeparatedRows(csv);
 const output = transformRows(rows);
 const fontByName = Object.fromEntries(output.fonts.map((font) => [font.styleName, font]));
 
+// Sample inputs are drawn from the canonical source sets the transform exports,
+// so the tests reference common characters rather than scattered literals.
+const { uppercase, lowercase } = output.sourceCharacters.letters;
+const sourceNumbers = output.sourceCharacters.numbers;
+const sourceSpecials = output.sourceCharacters.specialCharacters;
+// One representative character per category, e.g. 'Az09!'.
+const SAMPLE = `${uppercase[0]}${lowercase.at(-1)}${sourceNumbers[0]}${sourceNumbers.at(-1)}${sourceSpecials[0]}`;
+// Three letters plus a doubled special, e.g. 'ABC!!', to exercise consecutive specials.
+const SAMPLE_CONSECUTIVE = `${uppercase.slice(0, 3)}${sourceSpecials[0].repeat(2)}`;
+
 function getMappedCharacter(font, character) {
   return font.characters.letters[character]
     ?? font.characters.numbers[character]
@@ -65,10 +75,13 @@ describe('font sheet transform', () => {
       return acc;
     }, {});
 
-    expect(rows.length).to.equal(33);
-    expect(output.fonts.length).to.equal(33);
-    expect(counts['direct-map']).to.equal(6);
-    expect(counts['pattern-map']).to.equal(27);
+    // Derive from the parsed data rather than hard-coded totals, so adding or
+    // removing CSV styles doesn't require updating magic numbers here.
+    expect(output.fonts.length).to.equal(rows.length);
+    expect(output.fonts.map((font) => font.styleName))
+      .to.deep.equal(rows.map((row) => row.Style_name));
+    expect(counts['direct-map']).to.be.greaterThan(0);
+    expect(counts['pattern-map']).to.be.greaterThan(0);
   });
 
   it('maps direct one-to-one unicode styles by category', () => {
@@ -163,7 +176,7 @@ describe('font sheet transform', () => {
   it('transforms sample strings with direct character maps', () => {
     const lightTextBubble = fontByName['Light text bubble'];
     const fullWidth = fontByName['Full width'];
-    const source = 'Az09!';
+    const source = SAMPLE;
     const cases = [
       {
         styleName: lightTextBubble.styleName,
@@ -189,7 +202,7 @@ describe('font sheet transform', () => {
   it('transforms sample strings with combining-mark character maps', () => {
     const diagonalStrikes = fontByName['Diagonal strikes'];
     const hot = fontByName.Hot;
-    const source = 'Az09!';
+    const source = SAMPLE;
     const cases = [
       {
         styleName: diagonalStrikes.styleName,
@@ -217,7 +230,7 @@ describe('font sheet transform', () => {
     const sparkles = fontByName.Sparkles;
     const arrows = fontByName.Arrows;
     const cupido = fontByName.Cupido;
-    const source = 'Az09!';
+    const source = SAMPLE;
     const cases = [
       {
         styleName: sparkles.styleName,
@@ -248,7 +261,7 @@ describe('font sheet transform', () => {
 
   it('applies repeating middle patterns through consecutive special characters', () => {
     const arrows = fontByName.Arrows;
-    const source = 'ABC!!';
+    const source = SAMPLE_CONSECUTIVE;
     const actual = transformWithEnvelopePattern(arrows, source);
     const expected = '»»»»A»»»B»»»C»»»!»»»!»»»»';
 
@@ -265,7 +278,7 @@ describe('font sheet transform', () => {
   });
 
   it('transforms a sample string for every style in the CSV', () => {
-    const source = 'ABC!!';
+    const source = SAMPLE_CONSECUTIVE;
     const cases = output.fonts.map((font) => {
       const actual = transformFont(font, source);
       return {

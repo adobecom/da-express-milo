@@ -180,6 +180,31 @@ function applyWholeTextPattern(mappedCharacters, fontDef) {
   return `${startPattern}${mappedValue}${endPattern}`;
 }
 
+// ─── Per-font memoization ───────────────────────────────────────────────────
+
+/**
+ * Per-font derived data, keyed by the font object itself. transformText runs on
+ * nearly every keystroke across many cards, so the lookup map and the
+ * whole-text-pattern decision are computed once per font and reused instead of
+ * rebuilt each call. A WeakMap keeps this transparent to callers (no enriched
+ * font shape to thread through) and lets entries be collected with their font.
+ *
+ * @param {FontDef} fontDef
+ * @returns {{ lookupMap: Record<string, string>, usesWholeText: boolean }}
+ */
+const derivedByFont = new WeakMap();
+
+function getDerived(fontDef) {
+  const cached = derivedByFont.get(fontDef);
+  if (cached) return cached;
+  const derived = {
+    lookupMap: buildLookupMap(fontDef),
+    usesWholeText: usesWholeTextPattern(fontDef),
+  };
+  derivedByFont.set(fontDef, derived);
+  return derived;
+}
+
 // ─── Public API ───────────────────────────────────────────────────────────────
 
 /**
@@ -201,17 +226,18 @@ function applyWholeTextPattern(mappedCharacters, fontDef) {
  */
 export function transformText(text, fontDef) {
   if (typeof text !== 'string') return '';
-  if (!isValidFontDef(fontDef)) return typeof text === 'string' ? text : '';
+  // text is guaranteed a string past the guard above.
+  if (!isValidFontDef(fontDef)) return text;
 
   const safeText = text.length > MAX_INPUT_LENGTH ? text.slice(0, MAX_INPUT_LENGTH) : text;
-  const map = buildLookupMap(fontDef);
+  const { lookupMap, usesWholeText } = getDerived(fontDef);
 
   const mappedCharacters = [...safeText].map((char) => {
-    if (Object.prototype.hasOwnProperty.call(map, char)) return map[char];
+    if (Object.prototype.hasOwnProperty.call(lookupMap, char)) return lookupMap[char];
     return applyFallbackDecoration(char, fontDef);
   });
 
-  if (usesWholeTextPattern(fontDef)) {
+  if (usesWholeText) {
     return applyWholeTextPattern(mappedCharacters, fontDef);
   }
 
