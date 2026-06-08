@@ -1,7 +1,8 @@
 <!-- Modifying this file will impact your performance -->
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="head-loaded" content="false"/>
-<script>
+<script src="/express/code/scripts/fallback.js" nomodule></script>
+<script type="module">
   const userAgentMeta = document.querySelector('meta[name="hreflinksuseragents"]');
   const allowedAgents = userAgentMeta && userAgentMeta.content.split(',');
   const userAgentString = window.navigator.userAgent;
@@ -100,8 +101,9 @@
   })();
 
   flagMeta.content = 'true';
+
+  import { scriptInit } from '/express/code/scripts/utils-eager.js';
+  scriptInit();
 </script>
-<script src="/express/code/scripts/fallback.js" nomodule></script>
-<script src="/express/code/scripts/scripts.js" type="module"></script>
 <style>body { display: none; }</style>
 <link rel="icon" href="data:,">
