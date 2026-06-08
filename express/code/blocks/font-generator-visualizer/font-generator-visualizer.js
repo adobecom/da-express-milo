@@ -77,7 +77,7 @@ function createFontRow(font, previewText) {
   const row = document.createElement('tr');
   const outputCell = createCell(transformText(previewText, font), 'font-generator-visualizer-output');
   row.dataset.fontId = font.id;
-  outputCell.style.fontFamily = `"${font.fontSupported}", var(--body-font-family), sans-serif`;
+  outputCell.style.fontFamily = `"${font.fontSupported}"` //, var(--body-font-family), sans-serif`;
 
   row.append(
     createCell(font.grouping),
