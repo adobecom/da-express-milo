@@ -195,54 +195,18 @@ Skeleton elements are inert markup siblings of the real components, hidden by de
 
 A pure utility module. No state, no DOM. Takes a string and a font definition and returns the transformed unicode string. All components that need to display transformed text import from here directly.
 
-Also pay attention to the fonts that have prefixes/suffixes or repeating separators rather than a 1:1 relationship. The runtime engine must consume the generated `pattern` metadata, not just the character maps.
-
-Runtime constraints:
-
-- Input is capped at 200 characters before transformation.
-- Transforming a 200-character input across every v1 style should stay under 50ms.
+Also pay attention to the fonts that have prefixes/suffixes rather than a 1:1 relationship.
 
 ```js
 // unicodeEngine.js
+export const allFonts = [ /* font definitions */ ];
+
 export function transformText(text, fontDef) {
-  // Maps characters and applies any start/end/repeating-middle pattern metadata.
+  return [...text].map(char => fontDef.map[char] ?? char).join('');
 }
 ```
 
 Build and test this module first. Every other ticket depends on it.
-
-### Font Sheet Generation
-
-Font sheet source files are not served publicly. The source/output flow is:
-
-```
-scripts/font-generator/v1/v1.csv
-  -> scripts/font-generator/transform.js
-  -> express/code/blocks/font-generator/font-sheets/v1/v1.json
-```
-
-Regenerate the public JSON after editing the CSV:
-
-```sh
-npm run build:font-sheets
-```
-
-Only the generated `v1.json` is a runtime asset. Do not include source-only fields like the raw CSV style string in that JSON.
-
-### Test Coverage
-
-There are two separate test boundaries:
-
-- `test/blocks/font-generator/font-sheets/transform.test.js` verifies CSV parsing, pattern detection, generated character maps, and generated metadata.
-- `test/blocks/font-generator/unicodeEngine.test.js` verifies runtime behavior against generated `v1.json`, including direct maps, combining-mark maps, start/end patterns, repeating-middle patterns, empty input, invalid input, and length limits.
-
-Both suites intentionally log structured transform records with `styleName`, `source`, `actual`, and `expected` so each style can be inspected in test output.
-
-### Development Visualizer
-
-Use the `font-generator-visualizer` block for manual inspection while building the feature. It renders a table of generated `v1.json` font rows and includes a preview text input that updates the runtime `unicodeEngine` output for every style.
-
-The visualizer reads only the generated public JSON. It does not fetch the private CSV source.
 
 ---
 
