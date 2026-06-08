@@ -3289,9 +3289,9 @@
         "hasStartPattern": true,
         "hasRepeatingMiddlePattern": true,
         "hasEndPattern": true,
-        "startPattern": "»»»»",
-        "repeatingMiddlePattern": "»»»",
-        "endPattern": "»»»»",
+        "startPattern": "»»»",
+        "repeatingMiddlePattern": "»»",
+        "endPattern": "»»»",
         "byCategory": {}
       },
       "characters": {
