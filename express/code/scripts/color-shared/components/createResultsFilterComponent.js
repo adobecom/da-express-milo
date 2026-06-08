@@ -1,13 +1,18 @@
 import { createTag } from '../../../scripts/utils.js';
 import { createSearchAdapter } from '../adapters/litComponentAdapters.js';
+import { createColorFiltersPlaceholders } from '../i18n/loadColorFiltersPlaceholders.js';
 
 export function createResultsFilterComponent(options = {}) {
   const {
     onSearch,
-    placeholder = 'Search colors and palettes...',
+    placeholder,
+    strings = createColorFiltersPlaceholders(),
   } = options;
 
+  const resolvedPlaceholder = placeholder ?? strings.searchPlaceholder;
+
   const adapter = createSearchAdapter({
+    placeholder: resolvedPlaceholder,
     onSearch: (query) => {
       onSearch?.(query);
     },
@@ -19,7 +24,7 @@ export function createResultsFilterComponent(options = {}) {
     class: 'search-label',
     for: 'color-search-input',
   });
-  label.textContent = 'Search';
+  label.textContent = strings.searchLabel;
   label.style.display = 'none';
 
   container.appendChild(label);

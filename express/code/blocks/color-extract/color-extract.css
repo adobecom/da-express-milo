@@ -1,38 +1,3 @@
-
-/* Express theme fallbacks for floating toolbar (overridden when full theme loads) */
-:where(.color-extract) {
-  --color-white: #ffffff;
-  --color-default-font: #131313;
-  --color-blue-800: #3b63fb;
-  --color-light-gray-2: #f3f3f3;
-  --color-gray-300-variant: #dadada;
-  --color-gray-800-variant: #292929;
-  --Palette-gray-600: #717171;
-  --spacing-80: 6px;
-  --spacing-100: 8px;
-  --spacing-200: 12px;
-  --spacing-300: 16px;
-  --border-width-2: 2px;
-  --body-font-family: 'Adobe Clean', adobe-clean, 'Trebuchet MS', sans-serif;
-  --ax-body-weight: 700;
-  --ax-body-xs-size: 12px;
-  --ax-body-xxs-size: 11px;
-  --ax-toolbar-sticky-z: 40;
-  --gradient-stop-size: 16px;
-  --gradient-stop-border-color: #fff;
-  --gradient-editor-handle-stroke-width: 2px;
-  --Corner-radius-bar: 12px;
-  --Gradient-editor-max-width-l: 668px;
-  --Gradient-editor-max-width-m: 500px;
-  --Gradient-editor-max-width-s: 343px;
-  --Elevation-floating-button: 0 1px 4px rgba(0, 0, 0, 0.16);
-  --Palette-gray-200: #e9e9e9;
-  --Palette-white: #fff;
-  --Spacing-Spacing-50: 2px;
-  --modal-focus-outline-width: 2px;
-  --S2A-Color-border-focus-indicator: #4b75ff;
-}
-
 .color-extract *,
 .color-extract *::before,
 .color-extract *::after {
@@ -111,7 +76,6 @@
   flex-direction: column;
   align-items: center;
   justify-content: flex-start;
-  padding: 32px 16px;
 }
 
 body:has(.color-headline.extract) .color-extract .color-extract-landing {
@@ -247,110 +211,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 .section:has(.color-extract.has-image) > .color-extract-landing-fade,
 .section:has(.color-extract.is-loading) > .color-extract-landing-fade {
   display: none;
-}
-
-/* ---- Drag overlay (appended to document.body to escape contain:layout) ---- */
-
-.color-extract-drag-overlay {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(47px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-  z-index: 50;
-}
-
-.color-extract-drag-overlay.is-dragging {
-  opacity: 1;
-}
-
-.color-extract-drag-icon {
-  width: 65px;
-  height: 65px;
-  color: var(--color-extract-text);
-}
-
-.color-extract-drag-icon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.color-extract-drag-text {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 400;
-  color: var(--color-extract-text);
-}
-
-/* ---- Full-screen loading overlay ---- */
-
-.color-extract-loading-overlay {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(47px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-  z-index: 50;
-}
-
-.color-extract-loading-overlay.is-loading {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.color-extract-loading-overlay .color-extract-loading-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  width: 192px;
-}
-
-.color-extract-loading-overlay .color-extract-loading-label {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 400;
-  line-height: 22px;
-  color: var(--palette-gray-700);
-  text-align: center;
-  white-space: nowrap;
-}
-
-.color-extract-loading-overlay .color-extract-loading-track {
-  width: 100%;
-  height: 10px;
-  border-radius: 5px;
-  background: var(--color-gray-300-variant);
-  overflow: hidden;
-}
-
-.color-extract-loading-overlay .color-extract-loading-bar {
-  height: 100%;
-  width: 0;
-  border-radius: 5px;
-  background: var(--color-background-accent-default);
-}
-
-.color-extract-loading-overlay.is-loading .color-extract-loading-bar {
-  animation: color-extract-loading-progress 1s ease-out forwards;
-}
-
-@keyframes color-extract-loading-progress {
-  0% { width: 0; }
-  100% { width: 100%; }
 }
 
 /* ---- Typography ---- */
@@ -526,6 +386,11 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 .color-extract .color-extract-suggestion-chip.is-4 { background: var(--color-extract-gray-200); }
 .color-extract .color-extract-suggestion-chip.is-5 { background: var(--color-extract-gray-300); }
 
+.color-extract .color-extract-suggestion-bar.is-gradient {
+  display: block;
+  background: var(--color-extract-gray-100);
+}
+
 /* ---- Edit stage ---- */
 
 .color-extract .color-extract-edit {
@@ -597,7 +462,15 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   padding: 16px;
   border: 1px solid rgba(0, 0, 0, 0.08);
   backdrop-filter: blur(28px);
-  height: 207px;
+  aspect-ratio: 835 / 586;
+  height: auto;
+}
+
+.color-extract.has-image .color-extract-edit-left .image-upload-dropzone-container {
+  aspect-ratio: 835 / 586;
+  height: auto;
+  width: 100%;
+  justify-content: center;
 }
 
 .color-extract .color-extract-edit-bg picture,
@@ -647,6 +520,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   min-height: 240px;
   --figma-strip-radius: 16px;
   --swatch-rail-gap: 2px;
+  --hex-code-static-padding-left: 16px;
 }
 
 .color-extract .color-extract-swatch-rail color-swatch-rail {
@@ -710,6 +584,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   justify-content: space-between;
   gap: 6px;
   width: 100%;
+  min-width: 200px;
   height: 32px;
   padding: 0 11px 0 12px;
   background: var(--color-extract-gray-300);
@@ -777,6 +652,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 .color-extract .color-extract-mood-option {
   display: flex;
   align-items: center;
+  justify-content: flex-start;
+  gap: var(--spacing-100);
   width: 100%;
   padding: 8px 16px;
   background: none;
@@ -788,14 +665,36 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   color: var(--color-extract-text);
   text-align: left;
   transition: background-color 0.1s ease;
+  box-sizing: border-box;
 }
 
 .color-extract .color-extract-mood-option:hover {
   background: var(--color-extract-gray-hover);
 }
 
+.color-extract .color-extract-mood-option-check {
+  width: 10px;
+  height: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-extract-accent);
+  opacity: 0;
+}
+
+.color-extract .color-extract-mood-option-check svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
 .color-extract .color-extract-mood-option.is-selected {
-  font-weight: 600;
+  font-weight: 400;
+}
+
+.color-extract .color-extract-mood-option.is-selected .color-extract-mood-option-check {
+  opacity: 1;
 }
 
 .color-extract .color-extract-mood-option:focus-visible {
@@ -852,8 +751,9 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 .color-extract .color-extract-marker.is-active {
-  width: 42px;
-  height: 42px;
+  width: 60px;
+  height: 60px;
+  background: transparent;
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
   z-index: 10;
 }
@@ -890,6 +790,10 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   display: block;
 }
 
+.color-extract .color-extract-marker.is-active .color-extract-marker-zoom {
+  display: block;
+}
+
 /* ---- Magnified state (handle becomes the zoom lens on drag) ---- */
 
 .color-extract .color-extract-marker.is-magnified {
@@ -899,6 +803,10 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
   z-index: 20;
   transition: none;
+}
+
+.color-extract:has(.color-extract-marker.is-magnified) {
+  cursor: none;
 }
 
 .color-extract .color-extract-marker.is-magnified .color-extract-marker-zoom {
@@ -954,11 +862,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   align-self: stretch;
 }
 
-.color-extract .color-extract-swatch-rail--gradient {
-  flex: 1 1 0;
-  min-height: 0;
-}
-
 .color-extract .color-extract-gradient-editor-col {
   display: flex;
   flex-direction: column;
@@ -1008,10 +911,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
     gap: 48px;
   }
 
-  .color-extract.has-image .color-extract-edit-bg {
-    height: 554px;
-  }
-
   .color-extract .color-extract-toolbar-divider {
     display: block;
   }
@@ -1036,6 +935,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
   .color-extract .color-extract-mood-dropdown {
     width: fit-content;
+    min-width: 64px;
     max-width: 330px;
   }
 
@@ -1045,8 +945,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   }
 
   .color-extract .color-extract-marker.is-active {
-    width: 56px;
-    height: 56px;
+    width: 80px;
+    height: 80px;
   }
 
   .color-extract .color-extract-marker.is-magnified {
@@ -1056,8 +956,27 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 @media (min-width: 1200px) {
+  .color-extract {
+    --color-extract-edit-bg-height: 490px;
+  }
+
+  .color-extract.has-image .color-extract-edit-bg {
+    aspect-ratio: unset;
+    height: var(--color-extract-edit-bg-height);
+  }
+
+  .color-extract.has-image .color-extract-edit-left .image-upload-dropzone-container {
+    aspect-ratio: unset;
+    height: var(--color-extract-edit-bg-height);
+  }
+
   .color-extract .color-extract-landing-bg {
     display: block;
+  }
+
+  .color-extract .color-extract-swatch-rail--gradient {
+    flex: 1 1 0;
+    min-height: 0;
   }
 
   .section > .color-extract-landing-bg,
@@ -1112,10 +1031,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
     grid-template-columns: minmax(0, 668fr) minmax(0, 692fr);
   }
 
-  .color-extract.has-image .color-extract-edit-bg {
-    height: 458px;
-  }
-
   .color-extract .color-extract-swatch-rail {
     min-height: 0;
   }
@@ -1131,8 +1046,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 @media (min-width: 1680px) {
-  .color-extract.has-image .color-extract-edit-bg {
-    height: 602px;
+  .color-extract {
+    --color-extract-edit-bg-height: 602px;
   }
 }
 

@@ -52,7 +52,7 @@
   --ax-drawer-focus-ring-width: 2px;
   --ax-drawer-focus-ring-offset: 2px;
   --ax-drawer-tag-icon-size-mobile: 14px;
-  --ax-tag-field-min-height: 56px;
+  --ax-tag-field-min-height: 80px;
   --ax-tag-field-gap: 6px;
   --ax-tag-pill-max-width: 224px;
   --ax-tag-pill-min-width: 27px;
@@ -236,7 +236,7 @@
 .ax-tag-field {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--ax-tag-field-gap);
   min-block-size: var(--ax-tag-field-min-height);
   padding: var(--spacing-200);

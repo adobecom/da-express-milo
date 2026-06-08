@@ -1327,10 +1327,15 @@ function toggleMasonryView(block, props, button, toggleButtons) {
 }
 
 const views = ['sm', 'md', 'lg'];
+const MOBILE_TEMPLATE_VIEW_BREAKPOINT = 901;
 function getInitialViewIndex(props) {
-  const authoredViewIndex = views.findIndex(
-    (size) => props.initialTemplateView?.toLowerCase().trim() === size,
-  );
+  const isMobileViewport = window.innerWidth < MOBILE_TEMPLATE_VIEW_BREAKPOINT;
+  const authoredMobileView = props.initialTemplateViewMobile?.toLowerCase().trim();
+  const authoredDefaultView = props.initialTemplateView?.toLowerCase().trim();
+  const selectedView = isMobileViewport && authoredMobileView
+    ? authoredMobileView
+    : authoredDefaultView;
+  const authoredViewIndex = views.findIndex((size) => selectedView === size);
   return authoredViewIndex === -1 ? 0 : authoredViewIndex;
 }
 

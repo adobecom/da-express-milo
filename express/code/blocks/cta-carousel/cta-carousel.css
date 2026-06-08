@@ -51,6 +51,7 @@
 .cta-carousel .card {
     margin: 0 8px;
     position: relative;
+    cursor: pointer;
 }
 
 .cta-carousel .card:focus-within {
@@ -190,6 +191,10 @@
 .cta-carousel.center-heading .cta-carousel-heading-section .cta-carousel-link {
     align-self: flex-end;
     margin-left: auto;
+}
+
+.cta-carousel.center-content .carousel-container .carousel-platform {
+    margin-inline: auto;
 }
 
 .cta-carousel.quick-action .card.gen-ai-action .card-sleeve .gen-ai-input-form .gen-ai-submit {

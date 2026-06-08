@@ -22,7 +22,7 @@ import {
 } from './utils.js';
 
 // Add project-wide style path here.
-const STYLES = ['/express/code/styles/styles.css'];
+const STYLES = [];
 
 // Use 'https://milo.adobe.com/libs' if you cannot map '/libs' to milo's origin.
 const LIBS = '/libs';
@@ -80,6 +80,7 @@ const CONFIG = {
   imsClientId: 'AdobeExpressWeb',
   prodDomains,
   geoRouting: 'on',
+  lingoProjectSuccessLogging: 'on',
   fallbackRouting: 'on',
   decorateArea,
   faasCloseModalAfterSubmit: 'on',
@@ -108,6 +109,85 @@ const CONFIG = {
     // TODO check that this ietf is ok to use everywhere. It's different in the old project zh-Hant-TW
     tw: { ietf: 'zh-TW', tk: 'jay0ecd' },
     uk: { ietf: 'en-GB', tk: 'pps7abe.css' },
+    // Sub-locales declared in languageMap above must also be registered here
+    // so Milo's locale resolver recognizes their URL prefixes (AEEE-34989).
+    // Values match da-cc's canonical locales config.
+    ae_ar: { ietf: 'ar', tk: 'nwq1mna.css', dir: 'rtl' },
+    ae_en: { ietf: 'en', tk: 'pps7abe.css' },
+    africa: { ietf: 'en', tk: 'pps7abe.css' },
+    ar: { ietf: 'es-AR', tk: 'oln4yqj.css' },
+    at: { ietf: 'de-AT', tk: 'vin7zsi.css' },
+    au: { ietf: 'en-AU', tk: 'pps7abe.css' },
+    be_en: { ietf: 'en-BE', tk: 'pps7abe.css' },
+    be_fr: { ietf: 'fr-BE', tk: 'vrk5vyv.css', base: 'fr' },
+    be_nl: { ietf: 'nl-BE', tk: 'cya6bri.css' },
+    bg: { ietf: 'bg-BG', tk: 'aaz7dvd.css' },
+    ca: { ietf: 'en-CA', tk: 'pps7abe.css' },
+    ca_fr: { ietf: 'fr-CA', tk: 'vrk5vyv.css', base: 'fr' },
+    ch_de: { ietf: 'de-CH', tk: 'vin7zsi.css' },
+    ch_fr: { ietf: 'fr-CH', tk: 'vrk5vyv.css', base: 'fr' },
+    ch_it: { ietf: 'it-CH', tk: 'bbf5pok.css' },
+    cis_en: { ietf: 'en', tk: 'pps7abe.css' },
+    cis_ru: { ietf: 'ru', tk: 'qxw8hzm.css' },
+    cl: { ietf: 'es-CL', tk: 'oln4yqj.css' },
+    co: { ietf: 'es-CO', tk: 'oln4yqj.css' },
+    cr: { ietf: 'es-419', tk: 'oln4yqj.css' },
+    cy_en: { ietf: 'en-CY', tk: 'pps7abe.css' },
+    cz: { ietf: 'cs-CZ', tk: 'aaz7dvd.css' },
+    ec: { ietf: 'es-419', tk: 'oln4yqj.css' },
+    ee: { ietf: 'et-EE', tk: 'aaz7dvd.css' },
+    eg_ar: { ietf: 'ar', tk: 'nwq1mna.css', dir: 'rtl' },
+    eg_en: { ietf: 'en-GB', tk: 'pps7abe.css' },
+    gr_el: { ietf: 'el', tk: 'fnx0rsr.css' },
+    gr_en: { ietf: 'en-GR', tk: 'pps7abe.css' },
+    gt: { ietf: 'es-419', tk: 'oln4yqj.css' },
+    hk_en: { ietf: 'en-HK', tk: 'pps7abe.css' },
+    hk_zh: { ietf: 'zh-HK', tk: 'jay0ecd' },
+    hu: { ietf: 'hu-HU', tk: 'aaz7dvd.css' },
+    id_en: { ietf: 'en', tk: 'pps7abe.css' },
+    ie: { ietf: 'en-GB', tk: 'pps7abe.css' },
+    il_en: { ietf: 'en-IL', tk: 'pps7abe.css' },
+    il_he: { ietf: 'he', tk: 'nwq1mna.css', dir: 'rtl' },
+    in_hi: { ietf: 'hi', tk: 'aaa8deh.css' },
+    kw_ar: { ietf: 'ar', tk: 'nwq1mna.css', dir: 'rtl' },
+    kw_en: { ietf: 'en-GB', tk: 'pps7abe.css' },
+    la: { ietf: 'es-LA', tk: 'oln4yqj.css' },
+    lt: { ietf: 'lt-LT', tk: 'aaz7dvd.css' },
+    lu_de: { ietf: 'de-LU', tk: 'vin7zsi.css' },
+    lu_en: { ietf: 'en-LU', tk: 'pps7abe.css' },
+    lu_fr: { ietf: 'fr-LU', tk: 'vrk5vyv.css', base: 'fr' },
+    lv: { ietf: 'lv-LV', tk: 'aaz7dvd.css' },
+    mena_ar: { ietf: 'ar', tk: 'dis2dpj.css', dir: 'rtl' },
+    mena_en: { ietf: 'en', tk: 'pps7abe.css' },
+    mt: { ietf: 'en-MT', tk: 'pps7abe.css' },
+    mx: { ietf: 'es-MX', tk: 'oln4yqj.css' },
+    my_en: { ietf: 'en-GB', tk: 'pps7abe.css' },
+    my_ms: { ietf: 'ms', tk: 'sxj4tvo.css' },
+    nz: { ietf: 'en-GB', tk: 'pps7abe.css' },
+    pe: { ietf: 'es-PE', tk: 'oln4yqj.css' },
+    ph_en: { ietf: 'en', tk: 'pps7abe.css' },
+    ph_fil: { ietf: 'fil-PH', tk: 'ict8rmp.css' },
+    pl: { ietf: 'pl-PL', tk: 'aaz7dvd.css' },
+    pr: { ietf: 'es-419', tk: 'oln4yqj.css' },
+    pt: { ietf: 'pt-PT', tk: 'inq1xob.css' },
+    qa_ar: { ietf: 'ar', tk: 'nwq1mna.css', dir: 'rtl' },
+    qa_en: { ietf: 'en-GB', tk: 'pps7abe.css' },
+    ro: { ietf: 'ro-RO', tk: 'aaz7dvd.css' },
+    ru: { ietf: 'ru-RU', tk: 'aaz7dvd.css' },
+    sa_ar: { ietf: 'ar', tk: 'nwq1mna.css', dir: 'rtl' },
+    sa_en: { ietf: 'en', tk: 'pps7abe.css' },
+    // sea has no da-cc precedent; defaulting to umbrella English.
+    sea: { ietf: 'en', tk: 'pps7abe.css' },
+    sg: { ietf: 'en-SG', tk: 'pps7abe.css' },
+    si: { ietf: 'sl-SI', tk: 'aaz7dvd.css' },
+    sk: { ietf: 'sk-SK', tk: 'aaz7dvd.css' },
+    th_en: { ietf: 'en', tk: 'pps7abe.css' },
+    th_th: { ietf: 'th', tk: 'lqo2bst.css' },
+    tr: { ietf: 'tr-TR', tk: 'aaz7dvd.css' },
+    ua: { ietf: 'uk-UA', tk: 'aaz7dvd.css' },
+    vn_en: { ietf: 'en-GB', tk: 'hah7vzn.css' },
+    vn_vi: { ietf: 'vi', tk: 'qxw8hzm.css' },
+    za: { ietf: 'en-GB', tk: 'pps7abe.css' },
   },
   entitlements: {
     '2a537e84-b35f-4158-8935-170c22b8ae87': 'express-entitled',
@@ -211,7 +291,7 @@ const CONFIG = {
     'wcs-api-key': 'AdobeExpressWeb',
   },
 };
-console.log('CDN test');
+
 /*
  * ------------------------------------------------------------
  * Edit below at your own risk
@@ -280,6 +360,9 @@ function preloadLCPImage(img) {
 
 (function loadStyles() {
   const paths = [`${miloLibs}/styles/styles.css`];
+  if (getMetadata('theme') !== 'doodlebug') {
+    paths.push('/express/code/styles/styles.css');
+  }
   if (STYLES) { paths.push(STYLES); }
   paths.forEach((path) => {
     const link = document.createElement('link');
@@ -394,7 +477,9 @@ async function loadPage() {
   const footer = createTag('meta', { name: 'footer', content: 'global-footer' });
   document.head.append(footer);
 
-  getMetadata('footer-source') || document.head.append(createTag('meta', { name: 'footer-source', content: '/federal/footer/footer' }));
+  if (!getMetadata('footer-source')) {
+    document.head.append(createTag('meta', { name: 'footer-source', content: `${window.location.origin}/federal/footer/footer` }));
+  }
 
   const adobeHomeRedirect = createTag('meta', { name: 'adobe-home-redirect', content: 'on' });
   document.head.append(adobeHomeRedirect);
@@ -446,9 +531,11 @@ async function loadPage() {
   }
 
   /* region based redirect to CN homepage */
-  const isAdobeOrigin = /^(www\.stage\.|www\.)adobe\.com$/.test(window.location.hostname);
+  const isAdobeOrigin = /^(www|color)\.(stage\.)?adobe\.com$/.test(window.location.hostname);
   import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
-    if (country === 'cn' && isAdobeOrigin && !window.location.pathname.startsWith('/cn') && !window.isErrorPage) { window.location.href = '/cn'; }
+    if (country === 'cn' && isAdobeOrigin && !window.location.pathname.startsWith('/cn') && !window.isErrorPage) {
+      window.location.href = window.location.hostname.includes('stage') ? 'https://www.stage.adobe.com/cn' : 'https://www.adobe.com/cn';
+    }
   });
 
   document.head.querySelectorAll('meta').forEach((meta) => {
