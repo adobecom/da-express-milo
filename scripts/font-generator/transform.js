@@ -15,6 +15,14 @@ function slugify(value) {
     .replace(/^-|-$/g, '');
 }
 
+// Authors write human-readable names ("Gothic A1") but the Adobe Fonts kit
+// exposes families as lowercase-hyphenated slugs ("gothic-a1"). Normalize so the
+// generated font-family value matches what the kit registers. Idempotent for
+// values already in slug form.
+function toFontFamily(value) {
+  return value.trim().toLowerCase().replace(/\s+/g, '-');
+}
+
 function createCharacterMap(source, mappedCharacters) {
   return [...source].reduce((map, sourceCharacter, index) => {
     if (mappedCharacters[index] !== undefined) {
@@ -62,20 +70,6 @@ function getDefinedPositionEntries(source, positions) {
     .filter(({ position }) => position !== null);
 }
 
-function allSeparatorsMatch(style, entries) {
-  if (entries.length < 2) return null;
-
-  const separators = [];
-  for (let index = 0; index < entries.length - 1; index += 1) {
-    const current = entries[index];
-    const next = entries[index + 1];
-    separators.push(style.slice(current.position + current.character.length, next.position));
-  }
-
-  const [first] = separators;
-  return separators.every((separator) => separator === first) ? first : null;
-}
-
 function extractSpecialCharacters(style, specialStart) {
   if (specialStart < 0) return [];
   return [...SPECIAL_CHARACTERS].map((character, index) => (
@@ -83,32 +77,29 @@ function extractSpecialCharacters(style, specialStart) {
   ));
 }
 
-function getLiteralPatternMetadata(style, entries, options = {}) {
-  if (!entries.length) return null;
-
-  const {
-    startBoundary = 0,
-    endBoundary = style.length,
-    endPatternOverride = null,
-  } = options;
-  const first = entries[0];
-  const last = entries[entries.length - 1];
-  const repeatingMiddlePattern = allSeparatorsMatch(style, entries);
-  const endPattern = endPatternOverride
-    ?? style.slice(last.position + last.character.length, endBoundary);
-  const startPattern = style.slice(startBoundary, first.position);
+// v2 takes the whole-text wrapper straight from the Start/Middle/End columns
+// rather than inferring it from the Style cell. Inference is what let a leading
+// decoration character in Style masquerade as a start pattern; reading explicit
+// columns removes that class of bug entirely.
+function buildPatternFromColumns(row) {
+  const startPattern = row.Start ?? '';
+  const repeatingMiddlePattern = row.Middle ?? '';
+  const endPattern = row.End ?? '';
+  const hasStartPattern = startPattern !== '';
+  const hasRepeatingMiddlePattern = repeatingMiddlePattern !== '';
+  const hasEndPattern = endPattern !== '';
 
   return {
     placement: [
-      startPattern ? 'start' : null,
-      repeatingMiddlePattern !== null && repeatingMiddlePattern !== '' ? 'repeating-middle' : null,
-      endPattern ? 'end' : null,
+      hasStartPattern ? 'start' : null,
+      hasRepeatingMiddlePattern ? 'repeating-middle' : null,
+      hasEndPattern ? 'end' : null,
     ].filter(Boolean).join('+') || 'none',
-    hasStartPattern: Boolean(startPattern),
-    hasRepeatingMiddlePattern: repeatingMiddlePattern !== null && repeatingMiddlePattern !== '',
-    hasEndPattern: Boolean(endPattern),
+    hasStartPattern,
+    hasRepeatingMiddlePattern,
+    hasEndPattern,
     startPattern,
-    repeatingMiddlePattern: repeatingMiddlePattern ?? '',
+    repeatingMiddlePattern,
     endPattern,
   };
 }
@@ -192,69 +183,37 @@ export function detectStyle(row) {
   const lettersEntries = literalEntries.filter(({ index }) => index < LETTERS.length);
   const numbersEntries = literalEntries.filter(({ index }) => index >= LETTERS.length);
   const specialCharacters = extractSpecialCharacters(style, specialStart);
-  const specialEnd = specialStart >= 0 ? specialStart + SPECIAL_CHARACTERS.length : -1;
-  const trailingPattern = specialEnd >= 0 ? style.slice(specialEnd) : '';
-  const lastLiteralEntry = literalEntries[literalEntries.length - 1];
   const alphanumericEndBoundary = specialStart >= 0 ? specialStart : style.length;
-  const alphanumericEndPattern = style.slice(
-    lastLiteralEntry.position + lastLiteralEntry.character.length,
-    alphanumericEndBoundary,
-  );
-  const wholePattern = getLiteralPatternMetadata(style, literalEntries, {
-    endBoundary: alphanumericEndBoundary,
-    endPatternOverride: trailingPattern || alphanumericEndPattern,
-  });
   const lettersEndBoundary = numbersEntries[0]?.position ?? alphanumericEndBoundary;
-  const numbersStartBoundary = lettersEntries.length
-    ? lettersEntries[lettersEntries.length - 1].position
-      + lettersEntries[lettersEntries.length - 1].character.length
-    : 0;
-  const lettersPattern = getLiteralPatternMetadata(style, lettersEntries, {
-    endBoundary: lettersEndBoundary,
-  });
-  const numbersPattern = getLiteralPatternMetadata(style, numbersEntries, {
-    startBoundary: numbersStartBoundary,
-    endBoundary: alphanumericEndBoundary,
-  });
-  const specialCharactersPattern = trailingPattern
-    ? {
-      ...createNoPatternMetadata(),
-      placement: 'end',
-      hasEndPattern: true,
-      endPattern: trailingPattern,
-    }
-    : createNoPatternMetadata();
-  const patternByCategory = wholePattern.hasRepeatingMiddlePattern
-    ? {
-      letters: wholePattern,
-      numbers: wholePattern,
-      specialCharacters: wholePattern,
-    }
-    : {
-      letters: lettersPattern,
-      numbers: numbersPattern,
-      specialCharacters: specialCharactersPattern,
-    };
+
+  // Whole-text wrapper from the explicit columns; the Style cell only feeds the
+  // per-character maps below. Block styles wrap an identity alphabet, while
+  // combining/zalgo styles bake their decoration into each character's map and
+  // carry no wrapper (placement: 'none').
+  const pattern = buildPatternFromColumns(row);
+  const letters = createLiteralCharacterMap(style, lettersEntries, lettersEndBoundary, pattern);
+  const numbers = createLiteralCharacterMap(
+    style,
+    numbersEntries,
+    alphanumericEndBoundary,
+    pattern,
+  );
+
+  // A style is a pattern-map (vs a plain literal substitution) when it wraps
+  // text or bakes decoration into its character map; that flag drives the
+  // engine's wrapper application and per-character fallback decoration.
+  const mapAddsDecoration = Object.entries(letters).some(([source, mapped]) => mapped !== source)
+    || Object.entries(numbers).some(([source, mapped]) => mapped !== source);
 
   return {
-    type: wholePattern?.placement === 'none' ? 'literal-map' : 'pattern-map',
+    type: pattern.placement !== 'none' || mapAddsDecoration ? 'pattern-map' : 'literal-map',
     pattern: {
-      ...wholePattern,
-      byCategory: patternByCategory,
+      ...pattern,
+      byCategory: {},
     },
     characters: {
-      letters: createLiteralCharacterMap(
-        style,
-        lettersEntries,
-        lettersEndBoundary,
-        wholePattern,
-      ),
-      numbers: createLiteralCharacterMap(
-        style,
-        numbersEntries,
-        alphanumericEndBoundary,
-        wholePattern,
-      ),
+      letters,
+      numbers,
       specialCharacters: createCharacterMap(SPECIAL_CHARACTERS, specialCharacters),
     },
     missingCharacters: {
@@ -273,7 +232,7 @@ export function detectStyle(row) {
 
 export function transformRows(rows) {
   return {
-    version: 'v1',
+    version: 'v2',
     sourceCharacters: {
       letters: {
         uppercase: UPPERCASE,
@@ -290,7 +249,7 @@ export function transformRows(rows) {
         id: slugify(row.Style_name),
         grouping: row.Grouping,
         styleName: row.Style_name,
-        fontSupported: row['Font Supported'],
+        fontSupported: toFontFamily(row['Font Supported']),
         type: detected.type,
         pattern: detected.pattern,
         characters: detected.characters,
@@ -300,17 +259,18 @@ export function transformRows(rows) {
   };
 }
 
-export async function writeV1Json() {
-  const { readFileSync, writeFileSync } = await import('node:fs');
-  const csvUrl = new URL('./v1/v1.csv', import.meta.url);
+export async function writeFontSheet() {
+  const { readFileSync, writeFileSync, mkdirSync } = await import('node:fs');
+  const csvUrl = new URL('./v2/v2.csv', import.meta.url);
   const jsonUrl = new URL(
-    '../../express/code/blocks/font-generator/font-sheets/v1/v1.json',
+    '../../express/code/blocks/font-generator/font-sheets/v2/v2.json',
     import.meta.url,
   );
   const csv = readFileSync(csvUrl, 'utf8');
   const rows = splitTabSeparatedRows(csv);
   const output = transformRows(rows);
 
+  mkdirSync(new URL('.', jsonUrl), { recursive: true });
   writeFileSync(jsonUrl, `${JSON.stringify(output, null, 2)}\n`);
   return output;
 }
@@ -320,5 +280,5 @@ if (
   && process.argv?.[1]
   && import.meta.url === (await import('node:url')).pathToFileURL(process.argv[1]).href
 ) {
-  await writeV1Json();
+  await writeFontSheet();
 }

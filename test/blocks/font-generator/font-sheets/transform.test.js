@@ -5,7 +5,7 @@ import {
   transformRows,
 } from '../../../../scripts/font-generator/transform.js';
 
-const csvResponse = await fetch('/scripts/font-generator/v1/v1.csv');
+const csvResponse = await fetch('/scripts/font-generator/v2/v2.csv');
 const csv = await csvResponse.text();
 const rows = splitTabSeparatedRows(csv);
 const output = transformRows(rows);
@@ -92,8 +92,11 @@ describe('font sheet transform', () => {
     const weirdText = fontByName['Weird text'];
 
     expect(diagonalStrikes.type).to.equal('pattern-map');
-    expect(diagonalStrikes.pattern.hasStartPattern).to.be.true;
-    expect(diagonalStrikes.pattern.hasEndPattern).to.be.true;
+    // v2: combining styles carry no whole-text wrapper — decoration lives in the
+    // per-character map, so the base character survives a mark-stripping pass.
+    expect(diagonalStrikes.pattern.hasStartPattern).to.be.false;
+    expect(diagonalStrikes.pattern.hasEndPattern).to.be.false;
+    expect(diagonalStrikes.characters.letters.A).to.not.equal('A');
     expect(diagonalStrikes.characters.letters.A.normalize('NFD').replace(/\p{M}/gu, '')).to.equal('A');
     expect(diagonalStrikes.characters.numbers['0'].normalize('NFD').replace(/\p{M}/gu, '')).to.equal('0');
 
@@ -108,27 +111,24 @@ describe('font sheet transform', () => {
     const arrows = fontByName.Arrows;
     const cupido = fontByName.Cupido;
 
+    // v2: pattern metadata comes from the explicit Start/Middle/End columns, and
+    // per-category inference (byCategory) is no longer computed.
     expect(sparkles.pattern.placement).to.equal('start+end');
     expect(sparkles.pattern.startPattern).to.equal('(¯`·._.··¸.-~*´¨¯¨`*·~-.');
     expect(sparkles.pattern.endPattern).to.equal('.-~*´¨¯¨`*·~-.¸··._.·´¯)');
-    expect(sparkles.pattern.byCategory.specialCharacters.placement).to.equal('end');
 
     expect(arrows.pattern.placement).to.equal('start+repeating-middle+end');
     expect(arrows.pattern.startPattern).to.equal('»»»»');
-    expect(arrows.pattern.repeatingMiddlePattern).to.equal('»»');
-    expect(arrows.pattern.endPattern).to.equal('»»»');
+    expect(arrows.pattern.repeatingMiddlePattern).to.equal('»»»');
+    expect(arrows.pattern.endPattern).to.equal('»»»»');
     expect(arrows.characters.letters.A).to.equal('A');
-    expect(arrows.characters.numbers['9']).to.equal('9');
+    expect(arrows.characters.numbers['8']).to.equal('8');
     expect(arrows.characters.specialCharacters['!']).to.equal('!');
 
     expect(cupido.pattern.placement).to.equal('start+repeating-middle+end');
     expect(cupido.pattern.startPattern).to.equal('»»ᅳ');
     expect(cupido.pattern.repeatingMiddlePattern).to.equal('ᅳᅳ');
     expect(cupido.pattern.endPattern).to.equal('~►');
-    expect(cupido.pattern.byCategory.numbers.startPattern).to.equal('»»ᅳ');
-    expect(cupido.pattern.byCategory.numbers.repeatingMiddlePattern).to.equal('ᅳᅳ');
-    expect(cupido.pattern.byCategory.specialCharacters.startPattern).to.equal('»»ᅳ');
-    expect(cupido.pattern.byCategory.specialCharacters.repeatingMiddlePattern).to.equal('ᅳᅳ');
   });
 
   it('tracks missing source characters', () => {
@@ -229,7 +229,7 @@ describe('font sheet transform', () => {
         styleName: arrows.styleName,
         source,
         actual: transformWithEnvelopePattern(arrows, source),
-        expected: '»»»»A»»z»»0»»9»»!»»»',
+        expected: '»»»»A»»»z»»»0»»»9»»»!»»»»',
       },
       {
         styleName: cupido.styleName,
@@ -250,7 +250,7 @@ describe('font sheet transform', () => {
     const arrows = fontByName.Arrows;
     const source = 'ABC!!';
     const actual = transformWithEnvelopePattern(arrows, source);
-    const expected = '»»»»A»»B»»C»»!»»!»»»';
+    const expected = '»»»»A»»»B»»»C»»»!»»»!»»»»';
 
     streamTransformOutputs('consecutive special characters', [{
       styleName: arrows.styleName,

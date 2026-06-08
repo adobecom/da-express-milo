@@ -1,7 +1,7 @@
 import { transformText } from '../font-generator/unicodeEngine.js';
 
 const DEFAULT_PREVIEW_TEXT = 'ABC!!é🚀 09';
-const FONT_SHEET_URL = new URL('../font-generator/font-sheets/v1/v1.json', import.meta.url);
+const FONT_SHEET_URL = new URL('../font-generator/font-sheets/v2/v2.json', import.meta.url);
 const PREVIEW_CHARACTERS = ['A', 'a', '0', '!'];
 
 // Adobe Fonts (Typekit) kit holding the supported families (Gothic A1, Noto
