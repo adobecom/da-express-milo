@@ -1,0 +1,55 @@
+.font-generator {
+  padding: var(--spacing-600) var(--spacing-300);
+}
+
+.font-generator .fg-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+  max-width: var(--block-wd-grid-max-width);
+  margin-inline: auto;
+}
+
+/* start placeholders — remove when sidebar and main are implemented */
+.font-generator .fg-sidebar p {
+  min-height: 200px;
+  border: 2px dashed var(--color-blue-600);
+  margin: 0;
+}
+
+.font-generator .fg-main p {
+  min-height: 1400px;
+  border: 2px dashed var(--color-purple-1000);
+  margin: 0;
+}
+/* end placeholders */
+
+/* Tablet */
+@media (min-width: 600px) {
+  .font-generator {
+    padding: var(--spacing-600) var(--spacing-500) var(--spacing-300) var(--spacing-500);
+  }
+}
+
+/* Desktop */
+@media (min-width: 1200px) {
+  .font-generator {
+    padding: var(--spacing-600);
+  }
+
+  .font-generator .fg-container {
+    flex-direction: row;
+    flex-wrap: nowrap;
+  }
+
+  .font-generator .fg-sidebar {
+    width: 477px;
+    position: sticky;
+    top: calc(var(--global-height-nav) + var(--spacing-600));
+    align-self: flex-start;
+  }
+
+  .font-generator .fg-main {
+    flex: 1;
+  }
+}
