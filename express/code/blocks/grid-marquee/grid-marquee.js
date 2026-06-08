@@ -1,6 +1,13 @@
-import { getLibs, yieldToMain, getMobileOperatingSystem, getIconElementDeprecated, createTag, formatDynamicCartLink } from '../../scripts/utils.js';
+import {
+  getLibs,
+  yieldToMain,
+  getMobileOperatingSystem,
+  getIconElementDeprecated,
+  createTag,
+  formatDynamicCartLink,
+  getMetadata,
+} from '../../scripts/utils.js';
 
-let getMetadata;
 let currDrawer = null;
 const largeMQ = window.matchMedia('(min-width: 1280px)');
 const mediumMQ = window.matchMedia('(min-width: 768px)');
@@ -255,9 +262,6 @@ async function makeRatings(
 }
 
 export default async function init(el) {
-  await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
-    ({ getMetadata } = utils);
-  });
   const rows = [...el.querySelectorAll(':scope > div')];
   const hasLegacyHeadline = !!rows[0]?.querySelector('h1');
   const foreground = createTag('div', { class: 'foreground' });
