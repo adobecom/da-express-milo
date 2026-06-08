@@ -15,7 +15,7 @@
       "id": "light-text-bubble",
       "grouping": "Cool",
       "styleName": "Light text bubble",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "direct-map",
       "pattern": {
         "placement": "none",
@@ -136,7 +136,7 @@
       "id": "dark-text-bubble",
       "grouping": "Cool",
       "styleName": "Dark text bubble",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "direct-map",
       "pattern": {
         "placement": "none",
@@ -257,7 +257,7 @@
       "id": "full-width",
       "grouping": "Cool",
       "styleName": "Full width",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "direct-map",
       "pattern": {
         "placement": "none",
@@ -378,7 +378,7 @@
       "id": "diagonal-strikes",
       "grouping": "Glitch",
       "styleName": "Diagonal strikes",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+end",
@@ -527,7 +527,7 @@
       "id": "acute-accents",
       "grouping": "Glitch",
       "styleName": "Acute Accents",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "direct-map",
       "pattern": {
         "placement": "none",
@@ -648,7 +648,7 @@
       "id": "underline-with-dashes",
       "grouping": "Glitch",
       "styleName": "Underline with dashes",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "end",
@@ -797,7 +797,7 @@
       "id": "metal-umalauts",
       "grouping": "Glitch",
       "styleName": "Metal Umalauts",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "direct-map",
       "pattern": {
         "placement": "none",
@@ -918,7 +918,7 @@
       "id": "bandaid",
       "grouping": "Glitch",
       "styleName": "Bandaid",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+end",
@@ -1067,7 +1067,7 @@
       "id": "strikethrough",
       "grouping": "Glitch",
       "styleName": "Strikethrough",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+repeating-middle+end",
@@ -1216,7 +1216,7 @@
       "id": "x-cross",
       "grouping": "Glitch",
       "styleName": "X cross",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+repeating-middle+end",
@@ -1365,7 +1365,7 @@
       "id": "stroked",
       "grouping": "Glitch",
       "styleName": "Stroked",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "direct-map",
       "pattern": {
         "placement": "none",
@@ -1486,7 +1486,7 @@
       "id": "lines-lines-lines",
       "grouping": "Glitch",
       "styleName": "Lines lines lines",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "repeating-middle+end",
@@ -1635,7 +1635,7 @@
       "id": "shadow",
       "grouping": "Glitch",
       "styleName": "Shadow",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+repeating-middle+end",
@@ -1784,7 +1784,7 @@
       "id": "wavy",
       "grouping": "Glitch",
       "styleName": "Wavy",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+end",
@@ -1933,7 +1933,7 @@
       "id": "double-underline",
       "grouping": "Glitch",
       "styleName": "Double underline",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+end",
@@ -2082,7 +2082,7 @@
       "id": "music-bars",
       "grouping": "Glitch",
       "styleName": "Music bars",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+repeating-middle+end",
@@ -2231,7 +2231,7 @@
       "id": "all-the-way-up",
       "grouping": "Glitch",
       "styleName": "All the way up",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+end",
@@ -2380,7 +2380,7 @@
       "id": "comet-tail",
       "grouping": "Glitch",
       "styleName": "Comet tail",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "end",
@@ -2529,7 +2529,7 @@
       "id": "hot",
       "grouping": "Glitch",
       "styleName": "Hot",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "end",
@@ -2678,7 +2678,7 @@
       "id": "weird-text",
       "grouping": "Glitch",
       "styleName": "Weird text",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "end",
@@ -2827,7 +2827,7 @@
       "id": "right-direction-above",
       "grouping": "Glitch",
       "styleName": "Right direction above",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+repeating-middle+end",
@@ -2976,7 +2976,7 @@
       "id": "right-direction-under",
       "grouping": "Glitch",
       "styleName": "Right direction under",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+repeating-middle+end",
@@ -3125,7 +3125,7 @@
       "id": "stacked-above",
       "grouping": "Glitch",
       "styleName": "Stacked above",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+repeating-middle+end",
@@ -3274,7 +3274,7 @@
       "id": "cross-it-under",
       "grouping": "Glitch",
       "styleName": "Cross it under",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+repeating-middle+end",
@@ -3423,7 +3423,7 @@
       "id": "rain-on-top",
       "grouping": "Glitch",
       "styleName": "Rain on top",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+repeating-middle+end",
@@ -3572,7 +3572,7 @@
       "id": "bubbles-on-top",
       "grouping": "Glitch",
       "styleName": "Bubbles on top",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+repeating-middle+end",
@@ -3721,7 +3721,7 @@
       "id": "fading-effect",
       "grouping": "Symbol text",
       "styleName": "Fading effect",
-      "fontSupported": "Gothic A1",
+      "fontSupported": "gothic-a1",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+end",
@@ -3870,7 +3870,7 @@
       "id": "arrows",
       "grouping": "Symbol text",
       "styleName": "Arrows",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+repeating-middle+end",
@@ -4019,7 +4019,7 @@
       "id": "cupido",
       "grouping": "Symbol text",
       "styleName": "Cupido",
-      "fontSupported": "Gothic A1",
+      "fontSupported": "gothic-a1",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+repeating-middle+end",
@@ -4168,7 +4168,7 @@
       "id": "sparkles",
       "grouping": "Symbol text",
       "styleName": "Sparkles",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+end",
@@ -4317,7 +4317,7 @@
       "id": "finish",
       "grouping": "Symbol text",
       "styleName": "Finish",
-      "fontSupported": "Gothic A1",
+      "fontSupported": "gothic-a1",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+end",
@@ -4466,7 +4466,7 @@
       "id": "barcode",
       "grouping": "Symbol text",
       "styleName": "Barcode",
-      "fontSupported": "Gothic A1",
+      "fontSupported": "gothic-a1",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+end",
@@ -4615,7 +4615,7 @@
       "id": "weights",
       "grouping": "Symbol text",
       "styleName": "Weights",
-      "fontSupported": "Noto Sans",
+      "fontSupported": "noto-sans",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+end",
