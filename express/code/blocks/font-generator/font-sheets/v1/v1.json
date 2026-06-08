@@ -1223,9 +1223,9 @@
         "hasStartPattern": true,
         "hasRepeatingMiddlePattern": true,
         "hasEndPattern": true,
-        "startPattern": "ͯ",
+        "startPattern": "",
         "repeatingMiddlePattern": "ͯͯ",
-        "endPattern": "ͯ",
+        "endPattern": "",
         "byCategory": {
           "letters": {
             "placement": "start+repeating-middle+end",
@@ -1642,9 +1642,9 @@
         "hasStartPattern": true,
         "hasRepeatingMiddlePattern": true,
         "hasEndPattern": true,
-        "startPattern": "̷",
+        "startPattern": "",
         "repeatingMiddlePattern": "̷̷",
-        "endPattern": "̷",
+        "endPattern": "",
         "byCategory": {
           "letters": {
             "placement": "start+repeating-middle+end",
