@@ -1,10 +1,8 @@
-// @import { FontDef, FontType } from './types.js'
+// @import { FontDef } from './types.js'
 
 const MAX_INPUT_LENGTH = 200;
 
-const VALID_FONT_TYPES = /** @type {Set<FontType>} */ (
-  new Set(['direct-map', 'pattern-map', 'literal-map'])
-);
+const VALID_FONT_TYPES = new Set(['direct-map', 'pattern-map', 'literal-map']);
 
 // ─── Validation ───────────────────────────────────────────────────────────────
 
@@ -23,14 +21,13 @@ function isPlainObject(value) {
  */
 export function isValidFontDef(fontDef) {
   if (!isPlainObject(fontDef)) return false;
-  const f = /** @type {Record<string, unknown>} */ (fontDef);
-  if (typeof f.id !== 'string' || f.id.length === 0) return false;
-  if (!VALID_FONT_TYPES.has(/** @type {FontType} */ (f.type))) return false;
-  if (!isPlainObject(f.characters)) return false;
-  const c = /** @type {Record<string, unknown>} */ (f.characters);
-  return isPlainObject(c.letters)
-    && isPlainObject(c.numbers)
-    && isPlainObject(c.specialCharacters);
+  if (typeof fontDef.id !== 'string' || fontDef.id.length === 0) return false;
+  if (!VALID_FONT_TYPES.has(fontDef.type)) return false;
+  if (!isPlainObject(fontDef.characters)) return false;
+  const { letters, numbers, specialCharacters } = fontDef.characters;
+  return isPlainObject(letters)
+    && isPlainObject(numbers)
+    && isPlainObject(specialCharacters);
 }
 
 // ─── Lookup map ───────────────────────────────────────────────────────────────
@@ -43,7 +40,7 @@ export function isValidFontDef(fontDef) {
  * @returns {Record<string, string>}
  */
 function buildLookupMap(fontDef) {
-  const map = /** @type {Record<string, string>} */ (Object.create(null));
+  const map = Object.create(null);
   const { letters, numbers, specialCharacters } = fontDef.characters;
   const sources = [letters, numbers, specialCharacters];
   for (const source of sources) {
@@ -143,7 +140,7 @@ function usesWholeTextPattern(fontDef) {
     hasStartPattern,
     hasRepeatingMiddlePattern,
     hasEndPattern,
-  } = /** @type {Record<string, unknown>} */ (fontDef.pattern);
+  } = fontDef.pattern;
   const hasPattern = Boolean(
     hasStartPattern
       || hasRepeatingMiddlePattern
@@ -168,7 +165,7 @@ function applyWholeTextPattern(mappedCharacters, fontDef) {
     startPattern: maybeStartPattern,
     repeatingMiddlePattern: maybeMiddlePattern,
     endPattern: maybeEndPattern,
-  } = /** @type {Record<string, unknown>} */ (fontDef.pattern);
+  } = fontDef.pattern;
   const startPattern = typeof maybeStartPattern === 'string' ? maybeStartPattern : '';
   const middlePattern = typeof maybeMiddlePattern === 'string'
     ? maybeMiddlePattern
@@ -222,7 +219,9 @@ function getDerived(fontDef) {
  * Input is capped at MAX_INPUT_LENGTH (200 chars) before processing.
  * User input is never used as a regex pattern.
  *
- * @type {import('./types.js').TransformText}
+ * @param {string} text
+ * @param {FontDef} fontDef
+ * @returns {string}
  */
 export function transformText(text, fontDef) {
   if (typeof text !== 'string') return '';
