@@ -65,7 +65,7 @@ function mWebCloseEvents() {
 }
 
 function mWebVariant() {
-  if (getMobileOperatingSystem() !== 'Android') return;
+  if (!['Android', 'iOS'].includes(getMobileOperatingSystem())) return;
   mWebBuildElements();
   mWebCloseEvents();
   mWebOverlayScroll();

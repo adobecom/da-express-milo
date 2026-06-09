@@ -96,8 +96,12 @@ describe('Mobile Fork Button', () => {
 
   it('renders button with both fork-cta-1 and fork-cta-2 metadata and fork-cta-3 metadata', async () => {
     setDocumentMetadata(true, true);
-    await buildAutoBlocks();
-    const b = document.querySelector('.floating-button');
+    document.body.dataset.device = 'mobile';
+    // Mirror the authored DOM: the fork block lives inside a section.
+    document.body.innerHTML = '<main><div class="section">'
+      + '<div class="mobile-fork-button-dismissable meta-powered"><div>mobile</div></div>'
+      + '</div></main>';
+    const b = document.querySelector('.mobile-fork-button-dismissable');
 
     await decorate(b);
 
@@ -114,6 +118,31 @@ describe('Mobile Fork Button', () => {
     expect(secondRow.querySelector('a').textContent).to.equal('Free Version');
     expect(secondRow.querySelector('.mobile-gating-text').textContent).to.equal('Test');
 
+    const closeButton = blockWrapper.querySelector('.mweb-close');
+    expect(closeButton).to.exist;
+    expect(document.body.style.overflow).to.equal('hidden');
+    closeButton.click();
+    expect(document.body.style.overflow).to.equal('');
+    const newWrapper = document.querySelector('.floating-button.meta-powered');
+    expect(newWrapper).to.exist;
+  });
+
+  it('builds the dismissible close button and overlay on iOS', async () => {
+    Object.defineProperty(navigator, 'userAgent', {
+      value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+      configurable: true,
+    });
+    document.body.dataset.device = 'mobile';
+    setDocumentMetadata(true);
+    // Mirror the authored DOM: the fork block lives inside a section.
+    document.body.innerHTML = '<main><div class="section">'
+      + '<div class="mobile-fork-button-dismissable meta-powered"><div>mobile</div></div>'
+      + '</div></main>';
+    const b = document.querySelector('.mobile-fork-button-dismissable');
+
+    await decorate(b);
+
+    const blockWrapper = document.querySelector('.floating-button.block');
     const closeButton = blockWrapper.querySelector('.mweb-close');
     expect(closeButton).to.exist;
     expect(document.body.style.overflow).to.equal('hidden');
