@@ -352,10 +352,10 @@ let tabsId = 0;
 
 const TABS_PANEL_HEIGHTS = {
   standard: 508,
-  'edu-express': 513,
+  'edu-express': 521,
 };
 const TABS_PANEL_BUFFER = 0;
-const TABS_PANEL_FALLBACK = 513;
+const TABS_PANEL_FALLBACK = 521;
 
 const TABS_WRAPPER_HEIGHTS = {
   standard: 458,

@@ -182,13 +182,13 @@ describe('Susi-light', async () => {
     });
 
     it('sets tab panel height from tallest measured panel token', () => {
-      expect(block.style.getPropertyValue('--susi-tabs-panel-height').trim()).to.equal('513px');
-      expect(resolveTabsPanelMinHeight(['standard', 'edu-express'])).to.equal(513);
+      expect(block.style.getPropertyValue('--susi-tabs-panel-height').trim()).to.equal('521px');
+      expect(resolveTabsPanelMinHeight(['standard', 'edu-express'])).to.equal(521);
       expect(resolveTabsPanelMinHeight(['standard', 'standard'])).to.equal(508);
       expect(resolveTabsWrapperMinHeight(['standard', 'edu-express'])).to.equal(458);
-      expect(resolveTabsPanelMinHeight(['edu-express', 'edu-express'])).to.equal(513);
+      expect(resolveTabsPanelMinHeight(['edu-express', 'edu-express'])).to.equal(521);
       expect(resolveTabsWrapperMinHeight(['edu-express', 'edu-express'])).to.equal(367);
-      expect(resolveTabsPanelMinHeight([])).to.equal(513);
+      expect(resolveTabsPanelMinHeight([])).to.equal(521);
       expect(resolveTabsWrapperMinHeight([])).to.equal(458);
     });
 
