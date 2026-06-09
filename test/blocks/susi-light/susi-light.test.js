@@ -79,14 +79,14 @@ describe('Susi-light', async () => {
 
     it('reserves modal wrapper height from email-first profile', () => {
       expect(block.dataset.susiWrapperProfile).to.equal('b2b-email-first');
-      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('527px');
+      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('409px');
     });
 
     it('sets wrapper reserve on in-page b2b block after decorate', () => {
       const wrapper = block.querySelector('.susi-wrapper');
       expect(wrapper).to.exist;
       expect(block.dataset.susiWrapperProfile).to.equal('b2b-email-first');
-      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('527px');
+      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('409px');
     });
   });
 
@@ -115,9 +115,9 @@ describe('Susi-light', async () => {
     });
 
     it('returns heights from named css tokens', () => {
-      expect(resolveModalWrapperHeight(el('susi-light b2b'), 'AdobeExpressWeb_HED')).to.equal(267);
-      expect(resolveModalWrapperHeight(el('susi-light b2b email-only'), 'AdobeExpressWeb_Business')).to.equal(230);
-      expect(resolveModalWrapperHeight(el('susi-light edu'), 'AdobeExpressWeb_Business')).to.equal(511);
+      expect(resolveModalWrapperHeight(el('susi-light b2b'), 'AdobeExpressWeb_HED')).to.equal(291);
+      expect(resolveModalWrapperHeight(el('susi-light b2b email-only'), 'AdobeExpressWeb_Business')).to.equal(294);
+      expect(resolveModalWrapperHeight(el('susi-light edu'), 'AdobeExpressWeb_Business')).to.equal(393);
       expect(resolveModalWrapperHeight(el('susi-light student'), 'AdobeExpressWeb')).to.equal(462);
       expect(resolveModalWrapperHeight(el('susi-light student'), 'AdobeExpressWeb_HED')).to.equal(422);
     });
@@ -127,7 +127,7 @@ describe('Susi-light', async () => {
       expect(resolveModalWrapperProfile(el('susi-light'), 'AdobeExpressWeb_HED')).to.equal('legacy-edu-hed');
       expect(resolveModalWrapperProfile(el('susi-light'), 'AdobeExpressWeb_Business')).to.equal('edu-business');
       expect(resolveModalWrapperHeight(el('susi-light'), 'AdobeExpressWeb')).to.equal(545);
-      expect(resolveModalWrapperHeight(el('susi-light'), 'AdobeExpressWeb_HED')).to.equal(597);
+      expect(resolveModalWrapperHeight(el('susi-light'), 'AdobeExpressWeb_HED')).to.equal(477);
     });
 
     it('applyModalWrapperReserve sets legacy bare block height', () => {
@@ -141,7 +141,7 @@ describe('Susi-light', async () => {
       const block = el('susi-light');
       applyModalWrapperReserve(block, 'AdobeExpressWeb_HED');
       expect(block.dataset.susiWrapperProfile).to.equal('legacy-edu-hed');
-      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('597px');
+      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('477px');
     });
 
     it('skips tabs blocks only', () => {
@@ -162,14 +162,14 @@ describe('Susi-light', async () => {
       const block = el('susi-light edu no-redirect');
       applyModalWrapperReserve(block, 'AdobeExpressWeb_HED');
       expect(block.dataset.susiWrapperProfile).to.equal('edu-hed');
-      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('447px');
+      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('333px');
     });
 
     it('applyModalWrapperReserve sets edu-business height', () => {
       const block = el('susi-light edu no-redirect');
       applyModalWrapperReserve(block, 'AdobeExpressWeb_Business');
       expect(block.dataset.susiWrapperProfile).to.equal('edu-business');
-      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('511px');
+      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('393px');
     });
   });
 
@@ -181,14 +181,14 @@ describe('Susi-light', async () => {
       expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('');
     });
 
-    it('sets tab panel height from tallest measured panel token + buffer', () => {
-      expect(block.style.getPropertyValue('--susi-tabs-panel-height').trim()).to.equal('521px');
-      expect(resolveTabsPanelMinHeight(['standard', 'edu-express'])).to.equal(521);
-      expect(resolveTabsPanelMinHeight(['standard', 'standard'])).to.equal(516);
+    it('sets tab panel height from tallest measured panel token', () => {
+      expect(block.style.getPropertyValue('--susi-tabs-panel-height').trim()).to.equal('513px');
+      expect(resolveTabsPanelMinHeight(['standard', 'edu-express'])).to.equal(513);
+      expect(resolveTabsPanelMinHeight(['standard', 'standard'])).to.equal(508);
       expect(resolveTabsWrapperMinHeight(['standard', 'edu-express'])).to.equal(458);
-      expect(resolveTabsPanelMinHeight(['edu-express', 'edu-express'])).to.equal(521);
+      expect(resolveTabsPanelMinHeight(['edu-express', 'edu-express'])).to.equal(513);
       expect(resolveTabsWrapperMinHeight(['edu-express', 'edu-express'])).to.equal(367);
-      expect(resolveTabsPanelMinHeight([])).to.equal(521);
+      expect(resolveTabsPanelMinHeight([])).to.equal(513);
       expect(resolveTabsWrapperMinHeight([])).to.equal(458);
     });
 

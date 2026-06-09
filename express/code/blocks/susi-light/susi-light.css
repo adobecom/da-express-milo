@@ -2,30 +2,30 @@
 :root {
   --susi-modal-width: 370px;
   --susi-tabs-width: 400px;
-  --susi-tabs-panel-height: 521px;
+  --susi-tabs-panel-height: 513px;
   --susi-tabs-panel-standard: 508px;
   --susi-tabs-panel-edu-express: 513px;
   --susi-tabs-wrapper-standard: 458px;
   --susi-tabs-wrapper-edu-express: 367px;
-  --susi-tabs-panel-buffer: 8px;
+  --susi-tabs-panel-buffer: 0px;
   --susi-wrapper-standard: 484px;
   --susi-wrapper-b2b-default: 484px;
-  --susi-wrapper-b2b-hed: 267px;
+  --susi-wrapper-b2b-hed: 291px;
   --susi-wrapper-b2b-business: 393px;
-  --susi-wrapper-b2b-email-first: 527px;
-  --susi-wrapper-b2b-email-only: 230px;
-  --susi-wrapper-edu-default: 536px;
-  --susi-wrapper-edu-hed: 447px;
-  --susi-wrapper-edu-business: 511px;
+  --susi-wrapper-b2b-email-first: 409px;
+  --susi-wrapper-b2b-email-only: 294px;
+  --susi-wrapper-edu-default: 484px;
+  --susi-wrapper-edu-hed: 333px;
+  --susi-wrapper-edu-business: 393px;
   --susi-wrapper-edu-express: 400px;
   --susi-wrapper-student-default: 462px;
   --susi-wrapper-student-hed: 422px;
   --susi-wrapper-student-business: 422px;
-  --susi-wrapper-student-email-only: 230px;
+  --susi-wrapper-student-email-only: 294px;
   --susi-wrapper-student: 422px;
   --susi-wrapper-simplified: 400px;
   --susi-wrapper-legacy-edu-express: 545px;
-  --susi-wrapper-legacy-edu-hed: 597px;
+  --susi-wrapper-legacy-edu-hed: 477px;
   --susi-standard-padding: 24px;
 }
 
@@ -253,18 +253,9 @@
   width: var(--susi-tabs-width);
 }
 
-.dialog-modal:has(.susi-light.tabs) .susi-layout {
-  align-items: stretch;
-}
-
 .dialog-modal:has(.susi-light:not(.tabs) .susi-layout) .susi-wrapper {
   flex: 0 0 auto;
   min-height: var(--susi-modal-wrapper-height, var(--susi-wrapper-standard));
-}
-
-.dialog-modal .susi-light {
-  align-items: stretch;
-  justify-content: flex-start;
 }
 
 .dialog-modal .susi-light .express-logo {

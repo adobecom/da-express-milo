@@ -354,8 +354,8 @@ const TABS_PANEL_HEIGHTS = {
   standard: 508,
   'edu-express': 513,
 };
-const TABS_PANEL_BUFFER = 8;
-const TABS_PANEL_FALLBACK = 521;
+const TABS_PANEL_BUFFER = 0;
+const TABS_PANEL_FALLBACK = 513;
 
 const TABS_WRAPPER_HEIGHTS = {
   standard: 458,
@@ -422,19 +422,19 @@ export function resolveModalWrapperProfile(el, clientId) {
 /** Measured px per profile — mirrors :root --susi-wrapper-* tokens. */
 const MODAL_WRAPPER_FALLBACK_PX = {
   'b2b-default': 484,
-  'b2b-hed': 267,
+  'b2b-hed': 291,
   'b2b-business': 393,
-  'b2b-email-first': 527,
-  'b2b-email-only': 230,
-  'edu-default': 536,
-  'edu-hed': 447,
-  'edu-business': 511,
+  'b2b-email-first': 409,
+  'b2b-email-only': 294,
+  'edu-default': 484,
+  'edu-hed': 333,
+  'edu-business': 393,
   'student-default': 462,
   'student-hed': 422,
   'student-business': 422,
-  'student-email-only': 230,
+  'student-email-only': 294,
   'legacy-edu-express': 545,
-  'legacy-edu-hed': 597,
+  'legacy-edu-hed': 477,
   simplified: 400,
 };
 
