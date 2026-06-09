@@ -1,4 +1,6 @@
 .font-generator {
+  --fg-sidebar-width: 477px;
+
   padding: var(--spacing-600) var(--spacing-300);
 }
 
@@ -43,7 +45,7 @@
   }
 
   .font-generator .fg-sidebar {
-    width: 477px;
+    width: var(--fg-sidebar-width);
     position: sticky;
     top: calc(var(--global-height-nav) + var(--spacing-600));
     align-self: flex-start;

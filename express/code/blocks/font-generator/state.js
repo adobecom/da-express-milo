@@ -46,8 +46,17 @@ function syncToUrl() {
     url.searchParams.delete(URL_PARAMS.activeFilters);
   }
 
-  url.searchParams.set(URL_PARAMS.layout, state.layout);
-  url.searchParams.set(URL_PARAMS.fontSize, state.fontSize);
+  if (state.layout !== DEFAULTS.layout) {
+    url.searchParams.set(URL_PARAMS.layout, state.layout);
+  } else {
+    url.searchParams.delete(URL_PARAMS.layout);
+  }
+
+  if (state.fontSize !== DEFAULTS.fontSize) {
+    url.searchParams.set(URL_PARAMS.fontSize, state.fontSize);
+  } else {
+    url.searchParams.delete(URL_PARAMS.fontSize);
+  }
 
   window.history.replaceState(null, '', url);
 }
