@@ -15,12 +15,13 @@ export const WCAG_THRESHOLDS = {
   UI_AA: 3,
 };
 
-export function createDefaultActionMenuConfig(placeholders = {}) {
+export function createDefaultActionMenuConfig(placeholders = {}, contentRoot = '') {
   return {
+    daaLh: 'color-contrast-checker',
     navLinks: [
-      { id: 'palette', href: '#palette', label: placeholders.colorPaletteLabel || 'Color palette' },
-      { id: 'contrast', href: '#contrast', label: placeholders.contrastCheckerLabel || 'Contrast checker' },
-      { id: 'color-blindness', href: '#color-blindness', label: placeholders.colorBlindnessLabel || 'Color blindness' },
+      { id: 'palette', href: `${contentRoot}/create/color-wheel`, label: placeholders.colorPaletteLabel || 'Color palette' },
+      { id: 'contrast', href: `${contentRoot}/create/color-contrast-analyzer`, label: placeholders.contrastCheckerLabel || 'Contrast checker' },
+      { id: 'color-blindness', href: `${contentRoot}/create/color-accessibility`, label: placeholders.colorBlindnessLabel || 'Color blindness' },
     ],
     controls: [
       { id: 'undo', label: placeholders.undoLabel || 'Undo' },

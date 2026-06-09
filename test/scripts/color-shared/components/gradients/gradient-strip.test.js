@@ -62,7 +62,7 @@ describe('createGradientStripElements', () => {
       const elements = createGradientStripElements(SAMPLE_GRADIENTS);
       const btn = elements[0].querySelector('.gradient-strip-action-btn');
       expect(btn.getAttribute('aria-label')).to.include('Open');
-      expect(btn.getAttribute('data-tooltip-content')).to.equal('Open in modal');
+      expect(btn.getAttribute('data-tooltip-content')).to.equal('Open');
       expect(btn.getAttribute('title')).to.be.null;
       expect(btn.getAttribute('tabindex')).to.equal('-1');
     });
@@ -89,37 +89,34 @@ describe('createGradientStripElements', () => {
     });
   });
 
-  describe('analytics (daa-ll / data-ll)', () => {
-    it('does not set daa-ll or data-ll when analytics is not passed', () => {
+  describe('analytics (daa-ll)', () => {
+    it('does not set daa-ll when analytics is not passed', () => {
       const elements = createGradientStripElements(SAMPLE_GRADIENTS);
       const btn = elements[0].querySelector('.gradient-strip-action-btn');
       expect(btn.getAttribute('daa-ll')).to.be.null;
-      expect(btn.getAttribute('data-ll')).to.be.null;
     });
 
-    it('sets daa-ll and data-ll when analytics.linkIndex and analytics.headerText are provided', () => {
+    it('sets daa-ll when analytics with linkLabel is provided', () => {
       const elements = createGradientStripElements(SAMPLE_GRADIENTS, {
-        analytics: { linkIndex: 1, headerText: '35 color gradients', linkLabel: 'View details' },
+        analytics: { linkLabel: 'View details' },
       });
       const btn = elements[0].querySelector('.gradient-strip-action-btn');
-      const expected = 'View details-1--35 color gradients';
-      expect(btn.getAttribute('daa-ll')).to.equal(expected);
-      expect(btn.getAttribute('data-ll')).to.equal(expected);
+      expect(btn.getAttribute('daa-ll')).to.equal('View details');
     });
 
-    it('uses startIndex to assign link index per card when creating multiple', () => {
+    it('sets daa-ll on all cards when analytics is provided', () => {
       const elements = createGradientStripElements(SAMPLE_GRADIENTS, {
-        analytics: { headerText: '35 color gradients', startIndex: 0 },
+        analytics: { linkLabel: 'View details' },
       });
-      expect(elements[0].querySelector('.gradient-strip-action-btn').getAttribute('daa-ll')).to.equal('View details-1--35 color gradients');
-      expect(elements[1].querySelector('.gradient-strip-action-btn').getAttribute('daa-ll')).to.equal('View details-2--35 color gradients');
+      expect(elements[0].querySelector('.gradient-strip-action-btn').getAttribute('daa-ll')).to.equal('View details');
+      expect(elements[1].querySelector('.gradient-strip-action-btn').getAttribute('daa-ll')).to.equal('View details');
     });
 
     it('uses custom linkLabel when provided', () => {
       const elements = createGradientStripElements([SAMPLE_GRADIENTS[0]], {
-        analytics: { linkIndex: 5, headerText: 'Gradient editor', linkLabel: 'Open in modal' },
+        analytics: { linkLabel: 'Open in modal' },
       });
-      expect(elements[0].querySelector('.gradient-strip-action-btn').getAttribute('daa-ll')).to.equal('Open in modal-5--Gradient editor');
+      expect(elements[0].querySelector('.gradient-strip-action-btn').getAttribute('daa-ll')).to.equal('Open in modal');
     });
   });
 });

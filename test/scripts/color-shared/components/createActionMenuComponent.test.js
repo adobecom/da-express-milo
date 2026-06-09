@@ -1,6 +1,9 @@
 /* eslint-env mocha */
 import { expect } from '@esm-bundle/chai';
+import { setLibs } from '../../../../express/code/scripts/utils.js';
 import { createActionMenuComponent } from '../../../../express/code/scripts/color-shared/components/createActionMenuComponent.js';
+
+setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
 const VALID_NAV_LINKS = [
   { id: 'palette', href: '#palette', label: 'Palette', active: true },
@@ -53,6 +56,32 @@ describe('createActionMenuComponent', () => {
     expect(instance.element.querySelector('.redo-btn')).to.exist;
   });
 
+  it('expand control updates aria-label when toggled', async () => {
+    let expandedValue = null;
+    instance = await createActionMenuComponent({
+      type: 'controls-only',
+      controls: [{ id: 'expand', label: 'Maximize', expandedLabel: 'Minimize' }],
+      onExpand: (isExpanded) => {
+        expandedValue = isExpanded;
+      },
+    });
+
+    const expandBtn = instance.element.querySelector('.expand-btn');
+    expect(expandBtn).to.exist;
+    expect(expandBtn.getAttribute('aria-label')).to.equal('Maximize');
+    expect(expandBtn.hasAttribute('aria-pressed')).to.be.false;
+
+    expandBtn.click();
+    expect(expandedValue).to.equal(true);
+    expect(expandBtn.getAttribute('aria-label')).to.equal('Minimize');
+    expect(expandBtn.hasAttribute('aria-pressed')).to.be.false;
+
+    expandBtn.click();
+    expect(expandedValue).to.equal(false);
+    expect(expandBtn.getAttribute('aria-label')).to.equal('Maximize');
+    expect(expandBtn.hasAttribute('aria-pressed')).to.be.false;
+  });
+
   it('destroy() removes element from DOM', async () => {
     instance = await createActionMenuComponent({
       type: 'nav-only',
@@ -64,6 +93,30 @@ describe('createActionMenuComponent', () => {
 
     instance.destroy();
     expect(document.body.contains(el)).to.be.false;
+  });
+
+  it('active nav item renders as a non-interactive span, not a link', async () => {
+    instance = await createActionMenuComponent({
+      type: 'nav-only',
+      activeId: 'palette',
+      navLinks: [
+        { id: 'palette', href: '#palette', label: 'Color Palette' },
+        { id: 'contrast', href: '#contrast', label: 'Contrast' },
+      ],
+    });
+    const activeEl = instance.element.querySelector('.palette-link.active');
+    expect(activeEl).to.exist;
+    expect(activeEl.tagName.toLowerCase()).to.equal('span');
+    expect(activeEl.getAttribute('href')).to.be.null;
+    expect(activeEl.getAttribute('aria-current')).to.equal('page');
+
+    const labelEl = instance.element.querySelector('.active-label');
+    expect(labelEl).to.exist;
+    expect(labelEl.textContent).to.equal('Color Palette');
+
+    const contrastLink = instance.element.querySelector('.contrast-link');
+    expect(contrastLink.tagName.toLowerCase()).to.equal('a');
+    expect(contrastLink.getAttribute('href')).to.equal('#contrast');
   });
 
   it('action-menu:history-index-changed updates undo/redo aria-disabled', async () => {

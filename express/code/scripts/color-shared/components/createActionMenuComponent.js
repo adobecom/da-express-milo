@@ -1,9 +1,10 @@
 /* eslint-disable import/prefer-default-export */
-import { createTag } from '../../utils.js';
+import { createTag, getLibs } from '../../utils.js';
 import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createExpressButton, createExpressTooltip } from '../spectrum/index.js';
 import { createActionMenuState } from './createActionMenuState.js';
 import { attachRovingTabIndex } from '../spectrum/utils/a11y.js';
+import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../utils/utilities.js';
 import {
   COLOR_ICON,
   ACCESSIBILITY_ICON,
@@ -49,12 +50,13 @@ export async function loadStyles() {
   }
 }
 
-async function createNav(navLinks, activeId) {
+async function createNav(navLinks, activeId, getColors, getName) {
   const list = Array.isArray(navLinks) ? navLinks : [];
   const nav = createTag('nav', { class: 'action-menu-nav', 'aria-label': 'Color palette tools' });
   const ul = createTag('ul');
   const linkElements = [];
   let activeIndex = -1;
+  const paletteApi = createColorPaletteParamApi();
 
   for (let index = 0; index < list.length; index += 1) {
     const link = list[index];
@@ -63,10 +65,28 @@ async function createNav(navLinks, activeId) {
     const isActive = link.id === activeId;
     if (isActive) activeIndex = linkElements.length;
     const li = createTag('li');
-    const linkEl = createTag('a', {
-      href: link.href,
-      class: `action-menu-link ${link.id}-link color-action-button ${isActive ? 'active' : ''}`,
-    });
+    const linkEl = createTag(
+      isActive ? 'span' : 'a',
+      {
+        ...(isActive ? {} : { href: link.href }),
+        class: `action-menu-link ${link.id}-link color-action-button ${isActive ? 'active' : ''}`,
+      },
+    );
+    if (!isActive) {
+      linkEl.addEventListener('click', (e) => {
+        const colors = typeof getColors === 'function' ? getColors() : null;
+        if (!colors?.length) return;
+        e.preventDefault();
+        try {
+          const url = new URL(linkEl.href, window.location.href);
+          const name = typeof getName === 'function' ? getName() : undefined;
+          paletteApi.setOnUrl(url, colors, { name });
+          window.location.href = url.toString();
+        } catch {
+          window.location.href = linkEl.href;
+        }
+      });
+    }
     const iconSvg = ICON_MAP[link.id];
     if (iconSvg) linkEl.append(createTag('span', null, iconSvg));
     let labelEl = null;
@@ -81,9 +101,10 @@ async function createNav(navLinks, activeId) {
     if (labelEl) li.append(labelEl);
     ul.append(li);
     if (link.id === 'palette') {
-      const dividerEl = createTag('span', { class: 'palette-divider' });
+      const dividerEl = createTag('li', { role: 'separator', 'aria-hidden': true, class: 'palette-divider' });
       ul.append(dividerEl);
     }
+    decorateAnalyticsAttributes(linkEl, { linkLabel: link.label });
     linkElements.push(linkEl);
     await createExpressTooltip({
       targetEl: linkEl,
@@ -111,7 +132,6 @@ async function createHistoryButton(
       class: `${control.id}-btn color-action-button`,
       'aria-label': control.label,
       'aria-disabled': 'true',
-      disabled: true,
       tabindex: '0',
     },
     ICON_MAP[control.id],
@@ -122,6 +142,7 @@ async function createHistoryButton(
     if (btn.getAttribute('aria-disabled') === 'true' || btn.disabled) return;
     onClick();
   });
+  decorateAnalyticsAttributes(btn, { linkLabel: control.label });
   buttonRefs[control.id] = btn;
   await createExpressTooltip({
     targetEl: btn,
@@ -204,40 +225,46 @@ async function createControls(
             disableAria: true,
           });
         }
+        decorateAnalyticsAttributes(btn, { linkLabel: control.label });
         controlContainer.append(btn);
         break;
       }
-      case 'expand':
+      case 'expand': {
         if (typeof onExpand !== 'function') break;
+        const expandedLabel = control.expandedLabel || control.label;
+        let isExpanded = false;
         btn = createTag(
           'button',
           {
             class: `${control.id}-btn color-action-button`,
             'aria-label': control.label,
-            'aria-pressed': false,
             tabindex: '0',
           },
           ICON_MAP[control.id].maximize,
         );
+        decorateAnalyticsAttributes(btn, { linkLabel: control.label });
         controlContainer.append(btn);
+        let expandTooltip = null;
         btn.addEventListener('click', () => {
-          const oldIsPressed = btn.getAttribute('aria-pressed') === 'true';
-          const isPressed = !oldIsPressed;
-          onExpand(isPressed);
-          btn.setAttribute('aria-pressed', isPressed);
+          isExpanded = !isExpanded;
+          const nextLabel = isExpanded ? expandedLabel : control.label;
+          onExpand(isExpanded);
+          btn.setAttribute('aria-label', nextLabel);
           if (type === 'full') {
             const containerEl = btn.closest('.action-menu-full');
-            containerEl?.classList.toggle('expanded', isPressed);
+            containerEl?.classList.toggle('expanded', isExpanded);
           }
-          btn.innerHTML = ICON_MAP[control.id][isPressed ? 'minimize' : 'maximize'];
+          btn.innerHTML = ICON_MAP[control.id][isExpanded ? 'minimize' : 'maximize'];
+          expandTooltip?.setContent(nextLabel);
         });
-        await createExpressTooltip({
+        expandTooltip = await createExpressTooltip({
           targetEl: btn,
           content: control.label,
           placement: 'top',
           disableAria: true,
         });
         break;
+      }
       default:
         break;
     }
@@ -253,6 +280,17 @@ async function createControls(
   return controlContainer;
 }
 
+async function applyNavLinkParamOverrides(navLinks) {
+  const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+  const { env } = getConfig();
+  if (env.name === 'prod') return navLinks;
+  const params = new URLSearchParams(window.location.search);
+  return navLinks.map((link) => {
+    const override = params.get(`${link.id}-link`);
+    return override ? { ...link, href: override } : link;
+  });
+}
+
 export async function createActionMenuComponent(options = {}) {
   const {
     id = 'action-menu',
@@ -264,7 +302,10 @@ export async function createActionMenuComponent(options = {}) {
     onUndo,
     onRedo,
     onGenerateRandom,
+    transformPalette,
+    getName,
     enableState = true,
+    daaLh = null,
   } = options;
 
   if (!TYPES.includes(type)) {
@@ -281,13 +322,15 @@ export async function createActionMenuComponent(options = {}) {
   let pushStateFn = null;
   let getCurrentPaletteFn = null;
   if (enableState) {
-    const state = createActionMenuState(stateKey, onUndo, onRedo, onGenerateRandom);
+    const state = createActionMenuState(stateKey, { transformPalette });
     handleUndoState = state.onUndo;
     handleRedoState = state.onRedo;
     handleGenerateRandomState = state.onGenerateRandom;
     pushStateFn = state.addOnePaletteToHistory;
     getCurrentPaletteFn = state.getCurrentPalette;
-    state.init();
+    if (type !== 'controls-only') {
+      state.init();
+    }
   }
 
   function handleUndo() {
@@ -304,10 +347,14 @@ export async function createActionMenuComponent(options = {}) {
   }
 
   const container = createTag('div', { class: `action-menu-${type}` });
+  if (daaLh) container.setAttribute('daa-lh', daaLh);
   const buttonRefs = {};
   const sections = [];
 
-  if (type !== 'controls-only') sections.push(await createNav(navLinks, activeId));
+  if (type !== 'controls-only') {
+    const processedLinks = await applyNavLinkParamOverrides(navLinks);
+    sections.push(await createNav(processedLinks, activeId, getCurrentPaletteFn, getName));
+  }
   if (type !== 'nav-only') {
     sections.push(await createControls(
       controls,
@@ -325,12 +372,10 @@ export async function createActionMenuComponent(options = {}) {
     const { historyIndex, historyLength } = event.detail;
     if (buttonRefs.undo) {
       const isDisabled = historyIndex === 0;
-      buttonRefs.undo.disabled = isDisabled;
       buttonRefs.undo.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
     }
     if (buttonRefs.redo) {
       const isDisabled = historyIndex === historyLength - 1;
-      buttonRefs.redo.disabled = isDisabled;
       buttonRefs.redo.setAttribute('aria-disabled', isDisabled ? 'true' : 'false');
     }
   }

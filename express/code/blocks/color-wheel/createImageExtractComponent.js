@@ -1,174 +1,12 @@
-/* eslint-disable */
 import { createTag } from '../../scripts/utils.js';
-import { rgbToHex } from '../../libs/color-components/utils/ColorConversions.js';
-import { DEFAULTS, MOODS } from '../color-extract/helpers/constants.js';
-import { extractColorsFromImage } from '../color-extract/helpers/extractWorker.js';
-import createImageMarkers from '../color-extract/helpers/imageMarkers.js';
-import createZoomLens from '../color-extract/helpers/zoomLens.js';
-import createMoodSelector from '../color-extract/helpers/moodSelector.js';
-import createToolbar from '../color-extract/helpers/toolbar.js';
-import createHistoryManager from '../color-extract/helpers/historyManager.js';
+import { DEFAULTS, MOODS } from '../../scripts/color-shared/utils/constants.js';
 import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
-
-const EXTRACT_CANVAS_MAX = 320;
-
-const DEFAULT_SUGGESTIONS_EMPTY_HINT =
-  'No sample images yet. Add sample <picture> elements where your page or block defines suggestions (see your authoring documentation).';
-
-function preventDefaults(event) {
-  event.preventDefault();
-  event.stopPropagation();
-}
-
-function drawImageToCanvas(image) {
-  const ratio = image.naturalHeight / image.naturalWidth || 1;
-  const width = Math.min(EXTRACT_CANVAS_MAX, image.naturalWidth);
-  const height = Math.round(width * ratio);
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-  return canvas;
-}
-
-function samplePalette(context, width, height, count) {
-  const imageData = context.getImageData(0, 0, width, height).data;
-  const pixels = imageData.length / 4;
-  const step = Math.max(1, Math.floor(pixels / count));
-  const colors = [];
-  for (let i = 0; i < count; i += 1) {
-    const offset = Math.min(i * step * 4, imageData.length - 4);
-    colors.push(rgbToHex({
-      red: imageData[offset],
-      green: imageData[offset + 1],
-      blue: imageData[offset + 2],
-    }));
-  }
-  return colors;
-}
-
-function extractPaletteFromImageElement(image, swatchCount) {
-  if (!image?.naturalWidth || !image?.naturalHeight) return null;
-  try {
-    const maxWidth = 160;
-    const ratio = image.naturalHeight / image.naturalWidth || 1;
-    const width = Math.min(maxWidth, image.naturalWidth);
-    const height = Math.round(width * ratio);
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-    return samplePalette(canvas.getContext('2d'), width, height, swatchCount);
-  } catch {
-    return null;
-  }
-}
-
-function extractPaletteFromSrc(src, swatchCount) {
-  return new Promise((resolve) => {
-    if (!src) {
-      resolve(null);
-      return;
-    }
-    const image = new Image();
-    image.onload = () => resolve(extractPaletteFromImageElement(image, swatchCount));
-    image.onerror = () => resolve(null);
-    image.src = src;
-  });
-}
-
-function applyPaletteToChips(colors, chips) {
-  if (!colors || !chips?.length) return;
-  colors.forEach((hex, i) => {
-    if (chips[i]) chips[i].style.background = hex;
-  });
-}
-
-function getPictureSource(picture) {
-  const img = picture?.querySelector('img');
-  const source = picture?.querySelector('source');
-  const directSrc = img?.currentSrc || img?.getAttribute('src') || img?.dataset?.src || img?.dataset?.lazySrc;
-  if (directSrc) return directSrc;
-  const srcset = source?.getAttribute('srcset') || img?.getAttribute('srcset') || img?.dataset?.srcset;
-  if (!srcset) return '';
-  return srcset.split(',')[0].trim().split(' ')[0];
-}
-
-/**
- * Suggested images strip (same structure as color-extract block suggestions row).
- * @param {HTMLElement | null} row - Row with label cell + list cell with <picture> nodes, or null
- * @param {(url: string) => void} onSelect
- * @param {{ showEmptyHint?: boolean, emptyHintText?: string }} [options] - If showEmptyHint, append authoring hint when there are no pictures
- */
-export function buildSuggestedImages(row, onSelect, options = {}) {
-  const { showEmptyHint = false, emptyHintText } = options;
-  const wrapper = createTag('div', { class: 'color-extract-suggestions' });
-  const label = row?.children?.[0]
-    || createTag('div', {}, 'Don\u2019t have an image? Try one of ours:');
-  label.classList.add('color-extract-suggestions-label');
-  wrapper.append(label);
-
-  const list = row?.children?.[1] || createTag('div');
-  list.classList.add('color-extract-suggestions-list');
-
-  const pictures = [...(row?.querySelectorAll('picture') || [])];
-  list.innerHTML = '';
-  pictures.forEach((picture) => {
-    const button = createTag('button', {
-      class: 'color-extract-suggestion',
-      type: 'button',
-      'aria-label': 'Use this image',
-      'aria-pressed': 'false',
-    });
-    const preview = createTag('div', { class: 'color-extract-suggestion-preview' });
-    const palette = createTag('div', { class: 'color-extract-suggestion-bar' }, [
-      createTag('span', { class: 'color-extract-suggestion-chip is-1' }),
-      createTag('span', { class: 'color-extract-suggestion-chip is-2' }),
-      createTag('span', { class: 'color-extract-suggestion-chip is-3' }),
-      createTag('span', { class: 'color-extract-suggestion-chip is-4' }),
-      createTag('span', { class: 'color-extract-suggestion-chip is-5' }),
-    ]);
-    const src = getPictureSource(picture);
-    preview.append(picture.cloneNode(true));
-    button.append(preview, palette);
-    const chips = [...palette.querySelectorAll('.color-extract-suggestion-chip')];
-    const previewImage = preview.querySelector('img');
-    const hydratePalette = () => {
-      const colors = extractPaletteFromImageElement(previewImage, chips.length);
-      if (colors) {
-        applyPaletteToChips(colors, chips);
-        return;
-      }
-      extractPaletteFromSrc(src, chips.length).then((c) => applyPaletteToChips(c, chips));
-    };
-    if (previewImage?.complete && previewImage.naturalWidth) hydratePalette();
-    else if (previewImage) previewImage.addEventListener('load', hydratePalette, { once: true });
-    else extractPaletteFromSrc(src, chips.length).then((c) => applyPaletteToChips(c, chips));
-
-    button.addEventListener('click', () => {
-      list.querySelectorAll('.color-extract-suggestion.is-selected').forEach((item) => {
-        item.classList.remove('is-selected');
-        item.setAttribute('aria-pressed', 'false');
-      });
-      button.classList.add('is-selected');
-      button.setAttribute('aria-pressed', 'true');
-      onSelect(src);
-    });
-    list.append(button);
-  });
-
-  wrapper.append(list);
-
-  if (!pictures.length && showEmptyHint) {
-    const hint = createTag('p', {
-      class: 'color-extract-suggestions-hint',
-    }, emptyHintText || DEFAULT_SUGGESTIONS_EMPTY_HINT);
-    hint.setAttribute('role', 'note');
-    wrapper.append(hint);
-  }
-
-  return wrapper;
-}
+import { DEFAULT_PLACEHOLDERS as COLOR_EXTRACT_DEFAULTS } from '../../scripts/color-shared/i18n/loadColorExtractPlaceholders.js';
+import {
+  isFileDrag, preventDefaults, drawImageToCanvas, toHex, samplePalette, syncMarkersToImage,
+} from '../../scripts/color-shared/utils/imageExtractUtils.js';
+import buildSuggestedImages from '../../scripts/color-shared/components/image-extract/buildSuggestedImages.js';
+import { buildDragOverlay, buildLoadingOverlay } from '../../scripts/color-shared/components/image-extract/buildExtractOverlays.js';
 
 function setBackground(bgWrapper, src) {
   const pic = bgWrapper.querySelector('picture');
@@ -181,27 +19,231 @@ function setBackground(bgWrapper, src) {
   }
 }
 
+function attachWindowDragHandlers(container, dropzone, dragOverlay, loadingOverlay, viewportEl) {
+  const ac = new AbortController();
+  const { signal } = ac;
+  const clearDrag = () => {
+    container.classList.remove('is-dragging');
+  };
+  const anchorEl = viewportEl || container;
+  const isInViewport = () => {
+    const rect = anchorEl.getBoundingClientRect();
+    return rect.bottom > 0 && rect.top < window.innerHeight;
+  };
+  // On macOS Chrome, dataTransfer.types is empty during dragleave for cross-monitor
+  // external file drags, so isFileDrag() returns false and the overlay gets stuck.
+  // Debounce clearDrag on null-relatedTarget dragleave: cancel if dragover fires within
+  // 200ms (drag still in browser); otherwise clear. Spectrum shadow DOM crossings also
+  // fire dragleave with null relatedTarget — the follow-up dragover cancels those.
+  let clearDragTimer = null;
+  const cancelClear = () => {
+    if (clearDragTimer !== null) {
+      clearTimeout(clearDragTimer);
+      clearDragTimer = null;
+    }
+  };
+  const scheduleClear = () => {
+    cancelClear();
+    clearDragTimer = setTimeout(() => {
+      clearDragTimer = null;
+      clearDrag();
+    }, 200);
+  };
+
+  // Hoist before event listeners so the capture drop handler can reference it
+  const dropzoneEl = dropzone.container?.querySelector('.image-upload-dropzone');
+
+  // Suppress drag-and-drop while the OS file picker is open. input.click() triggers
+  // a click event on the input; window.focus fires when the picker is dismissed.
+  let isPickerOpen = false;
+  dropzone.input?.addEventListener('click', () => { isPickerOpen = true; }, { signal });
+  dropzone.input?.addEventListener('change', () => { isPickerOpen = false; }, { signal });
+  window.addEventListener('focus', () => { isPickerOpen = false; }, { signal });
+
+  window.addEventListener('dragenter', (e) => {
+    if (isPickerOpen) return;
+    cancelClear();
+    if (isInViewport() && isFileDrag(e)) {
+      preventDefaults(e);
+      container.classList.add('is-dragging');
+    }
+  }, { signal });
+  window.addEventListener('dragover', (e) => {
+    cancelClear();
+    if (isInViewport() && isFileDrag(e)) preventDefaults(e);
+  }, { signal });
+  window.addEventListener('dragleave', (e) => {
+    preventDefaults(e);
+    if (!e.relatedTarget) scheduleClear();
+  }, { signal });
+  window.addEventListener('dragend', (e) => {
+    preventDefaults(e);
+    cancelClear();
+    clearDrag();
+  }, { signal });
+  // Use capture phase so Spectrum web components calling stopPropagation on 'drop'
+  // (COLOR-SWATCH-RAIL, color-tool-layout, etc.) cannot block this handler. Capture fires
+  // top-down before any element's bubble handler. Consequently we must NOT call
+  // stopPropagation here — the event must continue down to the dropzone element so its
+  // own handler (createUploadDropzone) can process the file and manage its loading state.
+  // When the drop landed on the dropzone itself we skip handleFile to avoid double-processing.
+  window.addEventListener('drop', (e) => {
+    cancelClear();
+    if (isPickerOpen || !isInViewport() || !isFileDrag(e)) {
+      clearDrag();
+      return;
+    }
+    e.preventDefault(); // allow drop — no stopPropagation, event must reach the target
+    const onDropzone = !!dropzoneEl && (e.target === dropzoneEl || dropzoneEl.contains(e.target));
+    if (!onDropzone) dropzone.handleFile(e.dataTransfer.files[0]);
+    setTimeout(clearDrag, 200);
+  }, { capture: true, signal });
+  window.addEventListener('blur', () => {
+    cancelClear();
+    clearDrag();
+  }, { signal });
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      cancelClear();
+      clearDrag();
+    }
+  }, { signal });
+
+  // Fires when the drop lands directly on the dropzone element. createUploadDropzone's
+  // own handler (which processes the file) calls stopPropagation, so only this element-level
+  // listener and the capture window handler above see the event.
+  if (dropzoneEl) {
+    dropzoneEl.addEventListener('drop', (e) => {
+      if (isFileDrag(e)) {
+        const file = e.dataTransfer?.files?.[0];
+        if (file?.type?.startsWith('image/')) container.classList.add('is-loading');
+      }
+      // Delay so the loading overlay (0.2s fade-in) is opaque before the drag overlay fades out
+      setTimeout(clearDrag, 200);
+    }, { signal });
+  }
+
+  // Sync is-dragging / is-loading from container to body-level overlays
+  const syncObserver = new MutationObserver(() => {
+    if (dragOverlay) dragOverlay.classList.toggle('is-dragging', container.classList.contains('is-dragging'));
+    if (loadingOverlay) loadingOverlay.classList.toggle('is-loading', container.classList.contains('is-loading'));
+  });
+  syncObserver.observe(container, { attributes: true, attributeFilter: ['class'] });
+
+  const detach = () => {
+    ac.abort();
+    cancelClear();
+    syncObserver.disconnect();
+    dragOverlay?.remove();
+    loadingOverlay?.remove();
+  };
+  // Use viewportEl (the block, always in the DOM) as the anchor for the disconnect observer.
+  // `container` (image-extract div) lives inside an inactive tab panel and is not connected to
+  // the document until the Image tab is selected — observing document.body instead caused
+  // Spectrum overlay mutations to trigger detach() prematurely, removing all drag handlers.
+  const observerAnchor = viewportEl || container;
+  const observer = new MutationObserver(() => {
+    if (!observerAnchor.isConnected) {
+      detach();
+      observer.disconnect();
+    }
+  });
+  observer.observe(observerAnchor.parentElement || document.body, { childList: true });
+  return detach;
+}
+
+function createImageExtractDropzone(block, controller, onImageReady, config = {}) {
+  const {
+    enableImageUpload = true, enableUrlInput = true,
+    imageUploadStrings, ariaLabel,
+  } = config;
+
+  const dz = createUploadDropzone({
+    enabled: enableImageUpload,
+    strings: imageUploadStrings,
+    ariaLabel: ariaLabel || COLOR_EXTRACT_DEFAULTS.dropzoneAria,
+    onImageReady: (image, src) => {
+      block.classList.remove('is-loading');
+      block.classList.add('has-image');
+      onImageReady(image, src);
+    },
+  });
+
+  // The body-level overlay handles loading UX; the dropzone's built-in indicator is redundant
+  dz.container.querySelector('.image-upload-dropzone-loading')?.remove();
+
+  const origHandleFile = dz.handleFile;
+  const origHandleUrl = dz.handleUrl;
+
+  dz.handleFile = (file) => {
+    if (!file?.type?.startsWith('image/')) return;
+    block.classList.add('is-loading');
+    origHandleFile(file);
+  };
+
+  dz.handleUrl = (url) => {
+    if (!url || !enableUrlInput) return;
+    block.classList.add('is-loading');
+    origHandleUrl(url);
+  };
+
+  // The file picker's input.change calls the internal handleFile closure directly, bypassing
+  // the wrapped dz.handleFile above. Listening on dz.container (a parent) with capture phase
+  // fires before the event reaches the input target — before the internal handler runs and
+  // before its input.value = '' clears input.files. Same-element capture listeners fire in
+  // registration order (not before bubble ones), so the input itself cannot be used.
+  const onInputChange = (e) => {
+    if (e.target !== dz.input) return;
+    if (e.target.files?.[0]?.type?.startsWith('image/')) block.classList.add('is-loading');
+  };
+  dz.container.addEventListener('change', onInputChange, { capture: true });
+
+  // Mirror is-loading removal from the dropzone container to the IMAGE-EXTRACT block so that
+  // error paths (image.onerror, reader.onerror) in createUploadDropzone — which only call
+  // setLoading(false) on the dropzone container — also clear the block's is-loading class.
+  const dzContainer = dz.container;
+  const loadingObserver = new MutationObserver(() => {
+    if (!dzContainer.classList.contains('is-loading')) block.classList.remove('is-loading');
+  });
+  loadingObserver.observe(dzContainer, { attributes: true, attributeFilter: ['class'] });
+  dz.destroy = () => {
+    loadingObserver.disconnect();
+    dz.container.removeEventListener('change', onInputChange, { capture: true });
+  };
+
+  return dz;
+}
+
 /**
- * Image extraction UI (dropzone, optional suggestions, edit stage + markers). Mount inside any container.
+ * Image extraction UI (dropzone, optional suggestions, edit stage + markers).
+ * Mount inside any container.
  *
  * @param {object} options
  * @param {object} options.controller - ColorThemeExpressController instance
  * @param {number} [options.maxColors]
  * @param {HTMLElement | null} [options.suggestionsRowEl]
- * @param {boolean} [options.suggestionsShowEmptyHint] - When true and there are no pictures, show an authoring hint
- * @param {string} [options.suggestionsEmptyHintText] - Overrides default empty-suggestions copy
  * @returns {{ element: HTMLElement, destroy: Function }}
  */
-export function createImageExtractComponent(options = {}) {
-  const controller = options.controller;
+const IMAGE_SRC_KEY = 'color-wheel-image-src';
+
+export function saveImageSrc(src) {
+  try {
+    sessionStorage.setItem(IMAGE_SRC_KEY, src);
+  } catch {
+    // Quota exceeded (typically a large data: URL from a file upload).
+    // Clear any stale entry so it isn't mistakenly restored on the next sign-in redirect.
+    try { sessionStorage.removeItem(IMAGE_SRC_KEY); } catch { /* ignore */ }
+  }
+}
+
+export default function createImageExtractComponent(options = {}) {
+  const { controller } = options;
   if (!controller) {
     throw new Error('createImageExtractComponent: controller is required');
   }
 
-  const maxColors = Math.max(
-    1,
-    Math.min(10, Number(options.maxColors) || controller.getState().swatches?.length || DEFAULTS.MAX_COLORS),
-  );
+  const reqColors = Number(options.maxColors) || controller.getState().swatches?.length;
+  const maxColors = Math.max(1, Math.min(10, reqColors || DEFAULTS.MAX_COLORS));
 
   const container = createTag('div', { class: 'image-extract' });
 
@@ -209,66 +251,39 @@ export function createImageExtractComponent(options = {}) {
   let currentCanvas = null;
   let currentSrc = null;
   let markers = null;
-  let zoomLens = null;
+  let markerResizeObserver = null;
+  let resizeHandler = null;
+  let imgLoadHandler = null;
+  let moodSelectorRef = null;
+  let isInitialLoad = !!options.initialSrc;
 
   const landing = createTag('div', { class: 'color-extract-landing' });
   const landingContent = createTag('div', { class: 'color-extract-landing-content' });
 
   const edit = createTag('div', { class: 'color-extract-edit' });
-  const stage = createTag('div', {
-    class: 'color-extract-edit-stage',
-  });
+  const stage = createTag('div', { class: 'color-extract-edit-stage' });
   const leftCol = createTag('div', { class: 'color-extract-edit-left' });
   const bgWrapper = createTag('div', { class: 'color-extract-edit-bg' });
   stage.append(leftCol);
   edit.append(stage);
 
-  function getHistoryState() {
-    const state = controller.getState();
-    return {
-      swatches: state.swatches.map((s) => s.hex),
-      mood: currentMood,
-    };
-  }
-
-  function restoreFromHistory(snapshot) {
-    if (snapshot.swatches?.length) {
-      controller.replaceSwatchesFromHexes(snapshot.swatches, { baseIndex: 0, harmonyRule: 'CUSTOM' });
-    }
-    if (snapshot.mood) {
-      currentMood = snapshot.mood;
-      moodSelector.setMood(snapshot.mood);
-      controller.setMetadata({ mood: snapshot.mood });
-    }
-  }
-
-  const history = createHistoryManager(
-    restoreFromHistory,
-    (canUndo, canRedo) => {
-      toolbar.setUndoEnabled(canUndo);
-      toolbar.setRedoEnabled(canRedo);
-    },
-  );
-
-  function historySnapshot() {
-    history.push(getHistoryState());
-  }
-
-  async function runExtraction(canvas, mood) {
+  async function runExtraction(canvas, mood, count) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const swatchCount = count || controller.getState().swatches?.length || maxColors;
     try {
+      const { extractColorsFromImage } = await import('../../scripts/color-shared/utils/extractWorker.js');
       const result = await extractColorsFromImage(
         imageData,
         canvas.width,
         canvas.height,
-        maxColors,
+        swatchCount,
         mood,
       );
       controller.replaceSwatchesFromHexes(result.colors, { baseIndex: 0, harmonyRule: 'CUSTOM' });
       if (markers) markers.setPositions(result.colors, result.points);
     } catch {
-      const fallback = samplePalette(ctx, canvas.width, canvas.height, maxColors);
+      const fallback = samplePalette(ctx, canvas.width, canvas.height, swatchCount);
       controller.replaceSwatchesFromHexes(fallback, { baseIndex: 0, harmonyRule: 'CUSTOM' });
       if (markers) {
         const pts = fallback.map((_, i) => ({ x: (i + 1) / (fallback.length + 1), y: 0.5 }));
@@ -277,176 +292,178 @@ export function createImageExtractComponent(options = {}) {
     }
   }
 
-  const moodSelector = createMoodSelector(currentMood, (mood) => {
-    historySnapshot();
-    currentMood = mood;
-    controller.setMetadata({ mood });
-    if (currentCanvas) runExtraction(currentCanvas, mood);
-  });
-
   function onMoodOverride(mood) {
     currentMood = mood;
-    moodSelector.setMood(mood);
+    moodSelectorRef?.setMood(mood);
     controller.setMetadata({ mood });
   }
 
-  function setupMarkers(canvas) {
-    if (zoomLens?.element) zoomLens.element.remove();
-    if (markers?.container) markers.destroy();
+  function addColorToImage() {
+    if (!currentCanvas || !markers) return;
+    const state = controller.getState();
+    const currentSwatches = state.swatches || [];
+    if (currentSwatches.length >= DEFAULTS.MAX_TOTAL_COLORS) return;
+    const pctX = 0.1 + Math.random() * 0.8;
+    const pctY = 0.1 + Math.random() * 0.8;
+    const cx = Math.round(pctX * currentCanvas.width);
+    const cy = Math.round(pctY * currentCanvas.height);
+    const [r, g, b] = currentCanvas.getContext('2d').getImageData(cx, cy, 1, 1).data;
+    const hex = toHex(r, g, b);
+    const newHexes = [...currentSwatches.map((s) => s.hex), hex];
+    controller.replaceSwatchesFromHexes(newHexes, { baseIndex: 0, harmonyRule: 'CUSTOM' });
+    markers.addMarker(hex, pctX, pctY);
+    onMoodOverride(MOODS.CUSTOM);
+  }
 
-    zoomLens = createZoomLens(canvas);
-    zoomLens.element.hidden = true;
+  async function setupMarkers(canvas) {
+    if (markerResizeObserver) markerResizeObserver.disconnect();
+    if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+    const oldImg = bgWrapper.querySelector('img');
+    if (oldImg && imgLoadHandler) oldImg.removeEventListener('load', imgLoadHandler);
+    if (markers) markers.destroy();
 
+    const { default: createImageMarkers } = await import('../color-extract/helpers/imageMarkers.js');
     markers = createImageMarkers(bgWrapper, canvas, controller, {
       onMoodOverride,
-      onZoomStart: (el, cx, cy) => zoomLens.show(el, cx, cy),
-      onZoomMove: (el, cx, cy) => zoomLens.move(el, cx, cy),
-      onZoomEnd: () => zoomLens.hide(),
     });
 
     bgWrapper.style.position = 'relative';
-    bgWrapper.append(markers.container, zoomLens.element);
-  }
+    bgWrapper.append(markers.container);
 
-  function showHasImageState() {
-    container.classList.remove('is-loading');
-    container.classList.add('has-image');
+    const doSync = () => syncMarkersToImage(markers.container, bgWrapper);
+
+    const bgImg = bgWrapper.querySelector('img');
+    if (bgImg) {
+      imgLoadHandler = doSync;
+      bgImg.addEventListener('load', doSync);
+      if (bgImg.complete && bgImg.naturalWidth) doSync();
+    }
+
+    requestAnimationFrame(() => requestAnimationFrame(doSync));
+    markerResizeObserver = new ResizeObserver(doSync);
+    markerResizeObserver.observe(bgWrapper);
+    resizeHandler = doSync;
+    window.addEventListener('resize', resizeHandler);
   }
 
   function onImageReady(image, src) {
+    const wasInitial = isInitialLoad;
+    isInitialLoad = false;
     currentSrc = src;
+    saveImageSrc(src);
     setBackground(bgWrapper, src);
-    history.clear();
 
     currentCanvas = drawImageToCanvas(image);
-    setupMarkers(currentCanvas);
-
-    runExtraction(currentCanvas, currentMood)
-      .then(() => {
-        showHasImageState();
-      })
-      .catch(() => {
-        container.classList.remove('is-loading');
-        window.lana?.log('Color wheel image extraction failed', { tags: 'color-wheel,extract' });
-      });
+    setupMarkers(currentCanvas).then(() => {
+      runExtraction(currentCanvas, currentMood)
+        .then(() => {
+          container.classList.remove('is-loading');
+          container.classList.add('has-image');
+          if (!wasInitial) options.onImageProcessed?.();
+        })
+        .catch(() => {
+          container.classList.remove('is-loading');
+          window.lana?.log('Color wheel image extraction failed', { tags: 'color-wheel,extract' });
+          if (!wasInitial) options.onImageProcessed?.();
+        });
+    });
   }
 
-  const dropzone = createUploadDropzone({
-    enabled: true,
-    loadingText: 'Extracting colors...',
-    ariaLabel: 'Upload an image to extract colors for your theme',
-    onImageReady: (image, src) => {
-      onImageReady(image, src);
-    },
+  const dropzone = createImageExtractDropzone(container, controller, onImageReady, {
+    enableImageUpload: true,
+    enableUrlInput: true,
+    maxColors,
+    imageUploadStrings: options.strings?.imageUploadStrings,
   });
 
-  const origHandleFile = dropzone.handleFile.bind(dropzone);
-  const origHandleUrl = dropzone.handleUrl.bind(dropzone);
-
-  dropzone.handleFile = (file) => {
-    container.classList.add('is-loading');
-    origHandleFile(file);
-  };
-
-  dropzone.handleUrl = (url) => {
-    if (!url) return;
-    container.classList.add('is-loading');
-    origHandleUrl(url);
-  };
-
+  const topBar = createTag('div', { class: 'color-extract-top-bar' });
   const moodRow = createTag('div', { class: 'color-extract-mood-row' });
-  moodRow.append(moodSelector.element);
-
-  const toolbar = createToolbar({
-    moodElement: null,
-    onAddColor: () => {},
-    onReset: () => {
-      if (currentCanvas) {
-        historySnapshot();
-        runExtraction(currentCanvas, currentMood);
-      }
-    },
-    onReplace: () => {
-      dropzone.input.value = '';
-      dropzone.input.click();
-    },
-    onUndo: () => history.undo(getHistoryState()),
-    onRedo: () => history.redo(getHistoryState()),
-  });
-
-  leftCol.append(moodRow, bgWrapper, toolbar.element);
+  const toolbarPlaceholder = createTag('div', { class: 'color-extract-toolbar-slot' });
+  topBar.append(moodRow, toolbarPlaceholder);
+  leftCol.append(topBar, bgWrapper);
 
   const suggestions = buildSuggestedImages(
     options.suggestionsRowEl || null,
-    (url) => {
-      dropzone.handleUrl(url);
-    },
-    {
-      showEmptyHint: options.suggestionsShowEmptyHint === true,
-      emptyHintText: options.suggestionsEmptyHintText,
-    },
+    (img, src) => { dropzone.handleUrl(src); },
+    { strings: options.strings },
   );
 
   landingContent.append(dropzone.container, suggestions);
   landing.append(landingContent);
-
   container.append(landing, edit);
 
-  const ac = new AbortController();
-  const { signal } = ac;
+  // Defer UI component imports until after LCP paint settles
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    Promise.all([
+      import('../color-extract/helpers/moodSelector.js'),
+      import('../color-extract/helpers/toolbar.js'),
+    ]).then(([{ default: createMoodSelector }, { default: createToolbar }]) => {
+      moodSelectorRef = createMoodSelector(currentMood, (mood) => {
+        currentMood = mood;
+        controller.setMetadata({ mood });
+        if (currentCanvas) runExtraction(currentCanvas, mood);
+      }, { strings: options.strings?.colorExtractStrings });
+      moodRow.append(moodSelectorRef.element);
 
-  const isContainerInViewport = () => {
-    const rect = container.getBoundingClientRect();
-    return rect.bottom > 0 && rect.top < window.innerHeight;
-  };
+      createToolbar({
+        strings: options.strings?.colorExtractStrings,
+        moodElement: null,
+        onAddColor: addColorToImage,
+        onReset: () => {
+          if (currentCanvas) runExtraction(currentCanvas, currentMood, maxColors);
+        },
+        onReplace: () => {
+          dropzone.input.value = '';
+          dropzone.input.click();
+        },
+      }).then((toolbar) => {
+        // Undo/redo is handled by the action menu — remove the toolbar's history buttons
+        toolbar.element.querySelector('.action-menu-history')?.remove();
+        toolbar.element.querySelectorAll('svg [id]').forEach((node) => {
+          const oldId = node.id;
+          const newId = `${oldId}-extract`;
+          node.id = newId;
+          toolbar.element.querySelectorAll(`[mask="url(#${oldId})"]`).forEach((ref) => {
+            ref.setAttribute('mask', `url(#${newId})`);
+          });
+        });
+        toolbarPlaceholder.replaceWith(toolbar.element);
+      });
+    });
+  }));
 
-  window.addEventListener(
-    'dragenter',
-    (e) => {
-      if (isContainerInViewport()) {
-        preventDefaults(e);
-        container.classList.add('is-dragging');
-      }
-    },
-    { signal },
-  );
-  window.addEventListener(
-    'dragover',
-    (e) => {
-      if (isContainerInViewport()) {
-        preventDefaults(e);
-        container.classList.add('is-dragging');
-      }
-    },
-    { signal },
-  );
-  window.addEventListener('dragleave', (e) => {
-    preventDefaults(e);
-    container.classList.remove('is-dragging');
-  }, { signal });
-  window.addEventListener('dragend', (e) => {
-    preventDefaults(e);
-    container.classList.remove('is-dragging');
-  }, { signal });
-  window.addEventListener(
-    'drop',
-    (e) => {
-      if (!isContainerInViewport()) return;
-      preventDefaults(e);
-      container.classList.remove('is-dragging');
-      dropzone.handleFile(e.dataTransfer?.files?.[0]);
-    },
-    { signal },
+  const extractStrings = options.strings?.colorExtractStrings
+    || options.strings
+    || COLOR_EXTRACT_DEFAULTS;
+  const dragOverlay = buildDragOverlay(extractStrings);
+  const loadingOverlay = buildLoadingOverlay(extractStrings);
+  document.body.append(dragOverlay, loadingOverlay);
+
+  const detachWindowDrag = attachWindowDragHandlers(
+    container,
+    dropzone,
+    dragOverlay,
+    loadingOverlay,
+    options.viewportEl || null,
   );
 
-  function destroy() {
-    ac.abort();
-    markers?.destroy?.();
-    markers = null;
-    zoomLens = null;
+  if (options.initialSrc) {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => onImageReady(img, options.initialSrc);
+    img.src = options.initialSrc;
   }
 
-  return { element: container, destroy };
-}
+  function destroy() {
+    detachWindowDrag?.();
+    markerResizeObserver?.disconnect();
+    if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+    markers?.destroy?.();
+    markers = null;
+    dropzone.destroy?.();
+  }
 
-export default createImageExtractComponent;
+  return {
+    element: container, destroy, getCurrentSrc: () => currentSrc, handleFile: dropzone.handleFile,
+  };
+}

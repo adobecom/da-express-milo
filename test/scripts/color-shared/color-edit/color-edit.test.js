@@ -33,7 +33,7 @@ describe('ColorEdit component', () => {
       await createElement();
       expect(el.palette).to.deep.equal([]);
       expect(el.selectedIndex).to.equal(0);
-      expect(el.colorMode).to.equal('RGB');
+      expect(el.colorMode).to.equal('HEX');
       expect(el.showPalette).to.be.true;
       expect(el.mobile).to.be.false;
       expect(el.open).to.be.false;
@@ -309,7 +309,7 @@ describe('ColorEdit component', () => {
       el._onModeMenuChange({ target: { value: 'INVALID' } });
 
       expect(spy.called).to.be.false;
-      expect(el.colorMode).to.equal('RGB');
+      expect(el.colorMode).to.equal('HEX');
     });
   });
 
@@ -365,7 +365,10 @@ describe('ColorEdit component', () => {
       const spy = sinon.spy();
       el.addEventListener('color-change', spy);
 
-      el._onBaseColorChange({ detail: { hue: 180, saturation: 50, brightness: 75 } });
+      el._onBaseColorChange({
+        stopPropagation: sinon.spy(),
+        detail: { hue: 180, saturation: 50, brightness: 75 },
+      });
 
       expect(el._hue).to.equal(180);
       expect(el._saturation).to.equal(50);

@@ -14,6 +14,9 @@ export const style = css`
 
   
   .swatch-rail {
+    --icon-button-size: 32px;
+    --top-actions-gap: 6px;
+
     position: relative;
     display: flex;
     flex-direction: row;
@@ -25,23 +28,36 @@ export const style = css`
   }
   
   .swatch-rail:has(.add-slot--column-left),
-  .swatch-rail:has(.add-slot--column-right) {
+  .swatch-rail:has(.add-slot--column-right),
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows:has(.add-slot--column-left),
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows:has(.add-slot--column-right) {
     overflow: visible;
   }
 
   .swatch-column {
+    --swatch-column-padding: var(--spacing-200);
+
     flex: var(--swatch-column-flex);
     width: var(--swatch-column-width);
     min-width: var(--swatch-column-min-width);
     align-self: stretch;
     display: flex;
     flex-direction: column;
-    padding: var(--spacing-200);
+    padding: var(--swatch-column-padding);
     position: relative;
     isolation: isolate;
     transition: flex-grow 0.2s ease;
     box-sizing: border-box;
     container-type: inline-size;
+  }
+
+  .swatch-column:hover,
+  .swatch-column:focus-within {
+    z-index: 1;
+  }
+
+  .swatch-column--super-light {
+    box-shadow: inset 0 0 0 1px var(--color-gray-300-variant);
   }
 
   .swatch-column--tint-mode {
@@ -111,19 +127,12 @@ export const style = css`
     pointer-events: auto;
   }
 
-  .tint-band-btn.is-active {
-    box-shadow: inset 0 0 0 999px rgba(255, 255, 255, 0.14);
-  }
-
-  .swatch-column[data-contrast="dark"] .tint-band-btn.is-active {
-    box-shadow: inset 0 0 0 999px rgba(0, 0, 0, 0.2);
-  }
-
-  .tint-band-btn:focus-visible {
-    outline: 2px solid var(--color-blue-800);
+  .tint-band-btn:focus {
+    outline: 2px solid var(--Palette-gray-1000);
     outline-offset: -2px;
     position: relative;
     z-index: 1;
+    box-shadow: inset 0 0 0 4px rgba(255, 255, 255);
   }
 
   .swatch-rail[data-orientation="stacked"] .tint-bands {
@@ -136,6 +145,14 @@ export const style = css`
     height: 100%;
   }
 
+  .swatch-rail[data-orientation="stacked"] .swatch-column:first-child .tint-band-btn:first-child {
+    border-radius: var(--figma-strip-radius) 0 0;
+  }
+
+  .swatch-rail[data-orientation="stacked"] .swatch-column:first-child .tint-band-btn:last-child {
+    border-radius: 0 var(--figma-strip-radius) 0 0;
+  }
+
   .swatch-column:first-child {
     border-radius: var(--swatch-column-first-radius);
   }
@@ -146,6 +163,22 @@ export const style = css`
 
   .swatch-column:last-child {
     border-radius: var(--swatch-column-last-radius);
+  }
+
+  [role="row"]:only-child .swatch-column:first-child .tint-band-btn:first-child {
+    border-radius: var(--figma-strip-radius) 0 0;
+  }
+
+  [role="row"]:only-child .swatch-column:first-child .tint-band-btn:last-child {
+    border-radius: 0 0 0 var(--figma-strip-radius);
+  }
+
+  [role="row"]:only-child .swatch-column:last-child .tint-band-btn:first-child {
+    border-radius: 0 var(--figma-strip-radius) 0 0;
+  }
+
+  [role="row"]:only-child .swatch-column:last-child .tint-band-btn:last-child {
+    border-radius: 0 0 var(--figma-strip-radius) 0;
   }
 
   
@@ -228,6 +261,18 @@ export const style = css`
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column {
     border-radius: 0;
   }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:first-child {
+    border-radius: var(--Corner-radius-corner-radius-200) 0 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column:last-child {
+    border-radius: 0 0 var(--Corner-radius-corner-radius-200) 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column.corner-top-right {
+    border-radius: 0 var(--Corner-radius-corner-radius-200) 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column.corner-bottom-left {
+    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200);
+  }
 
   
   .swatch-rail[data-orientation="vertical"].vertical--four-rows .swatch-column--simulated {
@@ -299,16 +344,58 @@ export const style = css`
   .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column--empty {
     justify-content: center;
     align-items: center;
+    border: 1px solid var(--color-gray-250);
   }
 
   
-  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column {
+  .swatch-rail[data-orientation="vertical"] .swatch-column {
     border-radius: 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"] .swatch-column:first-child {
+    border-radius: var(--Corner-radius-corner-radius-200) 0 0 var(--Corner-radius-corner-radius-200);
+  }
+  .swatch-rail[data-orientation="vertical"] .swatch-column:last-child {
+    border-radius: 0 var(--Corner-radius-corner-radius-200) var(--Corner-radius-corner-radius-200) 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:first-child {
+    border-radius: var(--Corner-radius-corner-radius-200) 0 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:last-child {
+    border-radius: 0 0 var(--Corner-radius-corner-radius-200) 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column.corner-top-right {
+    border-radius: 0 var(--Corner-radius-corner-radius-200) 0 0;
+  }
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column.corner-bottom-left {
+    border-radius: 0 0 0 var(--Corner-radius-corner-radius-200);
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column.corner-top-left .tint-band-btn:first-child {
+    border-radius: var(--figma-strip-radius) 0 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column.corner-top-right .tint-band-btn:first-child {
+    border-radius: 0 var(--figma-strip-radius) 0 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column.corner-bottom-left .tint-band-btn:last-child {
+    border-radius: 0 0 0 var(--figma-strip-radius);
+  }
+
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column.corner-bottom-right .tint-band-btn:last-child {
+    border-radius: 0 0 var(--figma-strip-radius) 0;
   }
 
   .swatch-rail[data-orientation="vertical"] .bottom-info {
     gap: 0;
     padding: 0;
+  }
+
+  .swatch-rail[data-orientation="vertical"] .swatch-column--draggable {
+    cursor: auto;
   }
 
   
@@ -391,6 +478,7 @@ export const style = css`
   .swatch-rail[data-orientation="horizontal"] .hex-code {
     flex-shrink: 0;
     min-width: 0;
+    width: auto;
     overflow: hidden;
     text-overflow: ellipsis;
   }
@@ -434,11 +522,8 @@ export const style = css`
     border-radius: 0 0 var(--figma-strip-radius) var(--figma-strip-radius);
   }
   
-  .swatch-rail[data-orientation="stacked"]:has(.swatch-column--empty:last-child) .swatch-column:nth-last-child(2) {
-    border-radius: 0 0 var(--figma-strip-radius) var(--figma-strip-radius);
-  }
   .swatch-rail[data-orientation="stacked"] .swatch-column:last-child.swatch-column--empty {
-    border-radius: 0;
+    border: 1px solid var(--color-gray-250);
   }
   
   .swatch-rail[data-orientation="stacked"] .swatch-column:not(:first-child):not(:last-child) {
@@ -469,6 +554,7 @@ export const style = css`
     flex: 1 1 0;
     min-width: 0;
     justify-content: flex-start;
+    padding-left: 0;
   }
 
   .swatch-rail[data-orientation="stacked"] .hex-code {
@@ -479,7 +565,6 @@ export const style = css`
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 6px;
     flex-shrink: 0;
   }
 
@@ -509,20 +594,20 @@ export const style = css`
   
   .top-actions-row {
     position: absolute;
-    top: 8px;
-    left: 8px;
-    right: 8px;
+    top: 12px;
+    left: 12px;
+    right: 12px;
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     pointer-events: none;
-    z-index: 2;
+    z-index: 3;
   }
 
   .top-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: var(--top-actions-gap);
     position: static;
     pointer-events: auto;
   }
@@ -540,7 +625,34 @@ export const style = css`
     position: static;
   }
 
-  
+  .swatch-column--right-actions-hover-only .top-actions--right {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+  }
+
+  .swatch-column--right-actions-hover-only:hover .top-actions--right,
+  .swatch-column--right-actions-hover-only:focus-visible .top-actions--right,
+  .swatch-column--right-actions-hover-only:has(.swatch-column-focusable:focus-visible) .top-actions--right {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  /* When locked, always show the container so the lock icon is visible */
+  .swatch-column--right-actions-hover-only.locked .top-actions--right {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* Non-lock icons fade in on hover/focus; hidden otherwise */
+  .swatch-column--right-actions-hover-only.locked .top-actions--right > :not(.icon-button--lock) {
+    transition: opacity 0.15s ease;
+  }
+  .swatch-column--right-actions-hover-only.locked:not(:hover):not(:focus-visible):not(:has(.swatch-column-focusable:focus-visible)) .top-actions--right > :not(.icon-button--lock) {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+
   .add-slots-overlay {
     position: absolute;
     inset: 0;
@@ -626,37 +738,49 @@ export const style = css`
   
   .swatch-column .add-slot--column-left,
   .swatch-column .add-slot--column-right {
-    top: 50%;
-    transform: translateY(-50%);
+    top: 0;
+    height: 100%;
+    width: 24px;
+    pointer-events: auto;
   }
   .swatch-column .add-slot--column-left {
-    left: -18px;
+    left: 0;
   }
   .swatch-column .add-slot--column-right {
-    right: -18px;
+    right: 0;
   }
-  
-  .swatch-rail[data-orientation="stacked"] .swatch-column .add-slot--column-top {
-    top: 0px;
-    bottom: auto;
-    left: 50%;
-    right: auto;
-    transform: translate(-50%, -50%);
+  .swatch-column .add-slot--column-left:hover,
+  .swatch-column .add-slot--column-right:hover {
+    opacity: 1;
   }
-  .swatch-rail[data-orientation="stacked"] .swatch-column .add-slot--column-bottom {
-    top: auto;
-    bottom: 0px;
-    left: 50%;
-    right: auto;
-    transform: translate(-50%, 50%);
+  .swatch-column .add-slot--column-left .icon-button {
+    position: absolute;
+    left: -17px;
   }
-  .swatch-column:hover .add-slot--column {
+  .swatch-column .add-slot--column-right .icon-button {
+    position: absolute;
+    right: -17px;
+  }
+
+  /* With 4+ top-right action icons stacking vertically, push both add buttons down
+     so there is 16px of space below the last action icon. */
+  .swatch-rail[data-orientation="vertical"].vertical--two-rows .swatch-column:has(.top-actions--right > :nth-child(4))
+    .add-slot--column .icon-button {
+    top: calc(var(--swatch-column-padding) + 4 * var(--icon-button-size) + 3 * var(--top-actions-gap) + 16px);
+  }
+
+  .swatch-column:focus-visible .add-slot--column,
+  .swatch-column:has(.swatch-column-focusable:focus-visible) .add-slot--column {
     opacity: 1;
     pointer-events: auto;
   }
-  .swatch-column:focus-within .add-slot--column {
-    opacity: 1;
-    pointer-events: auto;
+  .swatch-column--tint-selected .add-slot--column,
+  .swatch-column--tint-selected .add-slot--column-left:hover,
+  .swatch-column--tint-selected .add-slot--column-right:hover,
+  .swatch-column--tint-selected:focus-visible .add-slot--column,
+  .swatch-column--tint-selected:has(.swatch-column-focusable:focus-visible) .add-slot--column {
+    opacity: 0;
+    pointer-events: none;
   }
   .swatch-column .add-slot--column .icon-button--add {
     width: 32px;
@@ -667,8 +791,8 @@ export const style = css`
     background: var(--color-white);
     color: var(--color-blue-800);
   }
-  .swatch-column .add-slot--column .icon-button--add:hover {
-    background: var(--color-light-gray);
+  .swatch-column .add-slot--column .icon-button--add.icon-button:hover {
+    background: var(--color-white);
     border-color: var(--color-blue-800);
   }
   .swatch-column .add-slot--column .icon-button--add:active {
@@ -748,6 +872,7 @@ export const style = css`
     transition: opacity 0.15s ease;
   }
 
+  .swatch-rail[data-orientation="stacked"] .base-color-badge--hover-only,
   .swatch-column:hover .base-color-badge--hover-only,
   .base-color-badge--hover-only:focus-visible {
     opacity: 1;
@@ -757,10 +882,10 @@ export const style = css`
     width: 20px;
     height: 20px;
   }
-  .base-color-icon--circle {
-    display: none;
+  .base-color-icon--target {
+    display: inline-flex;
   }
-  .swatch-column.base-color:hover .base-color-badge--active .base-color-icon--target {
+  .base-color-icon--circle {
     display: none;
   }
   .swatch-column.base-color:hover .base-color-badge--active .base-color-icon--circle {
@@ -811,7 +936,7 @@ export const style = css`
   }
 
   
-  .swatch-column.base-color {
+  .swatch-column.base-color:not(.swatch-column--drag-over) {
     outline: none;
   }
 
@@ -865,7 +990,7 @@ export const style = css`
     }
 
     .bottom-info .hex-code {
-      align-self: flex-end;
+      align-self: flex-start;
     }
 
     .bottom-info .bottom-info__actions {
@@ -875,8 +1000,11 @@ export const style = css`
 
 
   .hex-code {
-    font-size: 16px;
-    font-weight: 700;
+    font-size: 14px;
+    font-style: normal;
+    font-weight: 500;
+    line-height: 18px;
+    letter-spacing: 0;
     color: var(--swatch-text-color);
     text-transform: uppercase;
     text-shadow: var(--swatch-text-shadow);
@@ -884,17 +1012,27 @@ export const style = css`
   button.hex-code {
     background: none;
     border: none;
-    padding: 0;
+    padding-block: 7px;
+    padding-inline: 0;
     font: inherit;
     text-align: center;
     width: 75px;
+    flex-shrink: 0;
     height: 32px;
     border-radius: var(--Corner-radius-corner-radius-100);
   }
-  .swatch-column[data-contrast="dark"] button.hex-code:hover {
+  @media (hover: hover) {
+    .swatch-column[data-contrast="dark"] button.hex-code:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+    .swatch-column[data-contrast="light"] button.hex-code:hover {
+      background-color: rgba(0, 0, 0, 0.12);
+    }
+  }
+  .swatch-column[data-contrast="dark"] button.hex-code.hex-code--editor-open {
     background-color: rgba(255, 255, 255, 0.12);
   }
-  .swatch-column[data-contrast="light"] button.hex-code:hover {
+  .swatch-column[data-contrast="light"] button.hex-code.hex-code--editor-open {
     background-color: rgba(0, 0, 0, 0.12);
   }
   button.hex-code:focus-visible {
@@ -902,7 +1040,6 @@ export const style = css`
     outline-offset: 2px;
   }
   .hex-code--editable {
-    padding: 7px 12px;
     cursor: pointer;
   }
   .hex-code--copyable {
@@ -910,32 +1047,35 @@ export const style = css`
   }
   .hex-code--static {
     cursor: default;
+    padding-left: var(--hex-code-static-padding-left);
   }
-
-  
   .icon-button {
     background: none;
     border: none;
     cursor: pointer;
     padding: 6px;
-    width: 32px;
-    height: 32px;
+    width: var(--icon-button-size);
+    height: var(--icon-button-size);
     border-radius: var(--Corner-radius-corner-radius-100);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--swatch-text-color);
     transition: background-color 0.15s ease, color 0.15s ease;
+    -webkit-touch-callout: none;
+    user-select: none;
   }
 
   
 
   
-  .swatch-column[data-contrast="dark"] .icon-button:hover {
-    background-color: rgba(255, 255, 255, 0.12);
-  }
-  .swatch-column[data-contrast="light"] .icon-button:hover {
-    background-color: rgba(0, 0, 0, 0.12);
+  @media (hover: hover) {
+    .swatch-column[data-contrast="dark"] .icon-button:hover {
+      background-color: rgba(255, 255, 255, 0.12);
+    }
+    .swatch-column[data-contrast="light"] .icon-button:hover {
+      background-color: rgba(0, 0, 0, 0.12);
+    }
   }
 
   
@@ -972,9 +1112,9 @@ export const style = css`
   .icon-button .icon-asset,
   .icon-button .icon-tint {
     display: inline-block;
-    width: 20px;
-    height: 20px;
     filter: var(--swatch-icon-filter);
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   
@@ -984,6 +1124,8 @@ export const style = css`
     width: 20px;
     height: 20px;
     filter: var(--swatch-icon-filter);
+    -webkit-user-drag: none;
+    user-select: none;
   }
 
   .edit-input-native {
@@ -999,4 +1141,8 @@ export const style = css`
   sp-tooltip * {
     text-transform: none !important;
   }
+
+  .swatch-rail[data-orientation="stacked"] .swatch-column--empty {
+    flex: 0;
+  }  
 `;

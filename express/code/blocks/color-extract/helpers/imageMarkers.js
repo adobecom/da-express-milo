@@ -190,7 +190,6 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
   const connectorSvg = options.showConnectors ? createConnectorSVG() : null;
   const loupe = createMobileLoupe();
   let connectorOrder = null;
-  let activeIndex = 0;
   let isDragging = false;
   let keyboardSnapshotPending = true;
 
@@ -199,7 +198,10 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
   function getContainerRect() { return overlay.getBoundingClientRect(); }
 
   function pctToCanvas(pctX, pctY) {
-    return { cx: pctX * canvas.width, cy: pctY * canvas.height };
+    return {
+      cx: clamp(pctX * canvas.width, 0, canvas.width - 1),
+      cy: clamp(pctY * canvas.height, 0, canvas.height - 1),
+    };
   }
 
   /** Center-based positioning via CSS transform — size-independent. */
@@ -209,7 +211,6 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
   }
 
   function setActiveMarker(index) {
-    activeIndex = index;
     markers.forEach((m, i) => {
       const active = i === index;
       m.el.classList.toggle('is-active', active);
@@ -330,6 +331,8 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
     marker.el.setAttribute('aria-valuetext', hex);
     controller.setSwatchHex(index, hex);
     updateConnectors();
+    const zc = marker.el.querySelector('.color-extract-marker-zoom');
+    if (zc) renderMagnification(zc, canvas, cx, cy);
     if (options.onMoodOverride) options.onMoodOverride(MOODS.CUSTOM);
   }
 
@@ -357,6 +360,12 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
     el.addEventListener('focus', () => {
       keyboardSnapshotPending = true;
       setActiveMarker(index);
+      const { cx, cy } = pctToCanvas(marker.pctX, marker.pctY);
+      const zc = marker.el.querySelector('.color-extract-marker-zoom');
+      if (zc) renderMagnification(zc, canvas, cx, cy);
+    });
+    el.addEventListener('blur', () => {
+      marker.el.classList.remove('is-active');
     });
 
     markers.push(marker);

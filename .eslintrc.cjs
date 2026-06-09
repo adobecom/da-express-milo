@@ -43,6 +43,9 @@ module.exports = {
       },
     },
   ],
+  settings: {
+    'import/ignore': ['color-components', 'sinon', 'axios'],
+  },
   plugins: [
     'chai-friendly',
   ],

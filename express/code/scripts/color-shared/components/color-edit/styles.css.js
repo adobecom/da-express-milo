@@ -35,6 +35,7 @@ export const style = css`
         inset: 0;
         z-index: 100;
         background: var(--Alias-overlay-curtain);
+        backdrop-filter: blur(10px);
         opacity: 0;
         pointer-events: none;
         transition: opacity 0.2s ease;
@@ -164,6 +165,12 @@ export const style = css`
         object-fit: contain;
     }
 
+    .ce-mode-trigger:focus-visible {
+        outline: var(--border-width-2) solid var(--color-blue-800);
+        outline-offset: var(--border-width-2);
+        border-radius: 4px;
+    }
+
     .ce-mode-wrap sp-menu {
         position: absolute;
         top: calc(100% - var(--spacing-50));
@@ -226,6 +233,7 @@ export const style = css`
         --mod-textfield-border-color: var(--color-gray-300-variant);
         --mod-textfield-background-color: var(--color-white);
         --mod-textfield-border-color-hover: var(--color-gray-400-variant);
+        --mod-textfield-placeholder-font-size: var(--body-font-size-m);
     }
 
     .ce-sr-only {

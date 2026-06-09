@@ -26,6 +26,33 @@ import { createTag } from '../../../utils.js';
 
 const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/tabs.css';
 
+const TABBABLE_SELECTOR = [
+  'a[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+function getFirstTabbable(root) {
+  return root.querySelector?.(TABBABLE_SELECTOR) || null;
+}
+
+function getTabbableAdjacentTo(el, reverse = false) {
+  const all = [...document.querySelectorAll(TABBABLE_SELECTOR)].filter(
+    (node) => !el.contains(node) && node.offsetParent !== null,
+  );
+  if (reverse) {
+    return [...all].reverse().find(
+      (node) => el.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_PRECEDING,
+    );
+  }
+  return all.find(
+    (node) => el.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING,
+  );
+}
+
 /**
  * Create an Express tabs component.
  *
@@ -36,6 +63,8 @@ const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/tabs.css
  * @param {'auto'|'compact'} [config.direction='auto']
  * @param {Array<{label: string, value: string, disabled?: boolean, spIcon?: string, iconSlotHtml?: string}>} [config.tabs=[]]
  * @param {Function} [config.onSelectionChange] — ({ selected }) when tab changes
+ * @param {boolean|string[]} [config.enterPanelOnTab=false] — move forward Tab from
+ * selected tabs into the panel
  * @returns {Promise<{
  *   element: HTMLElement,
  *   tabsEl: HTMLElement,
@@ -55,6 +84,7 @@ export async function createExpressTabs(config = {}) {
     direction = 'auto',
     tabs: tabConfigs = [],
     onSelectionChange,
+    enterPanelOnTab = false,
   } = config;
 
   await loadTabs();
@@ -88,14 +118,55 @@ export async function createExpressTabs(config = {}) {
 
   theme.appendChild(tabsEl);
 
+  const panelEntryFocusMap = new Map();
+
+  function shouldEnterPanelOnTab(selectedValue) {
+    if (enterPanelOnTab === true) return true;
+    return Array.isArray(enterPanelOnTab) && enterPanelOnTab.includes(selectedValue);
+  }
+
+  function focusSelectedPanelEntry() {
+    const { selected: selectedValue } = tabsEl;
+    const customFn = panelEntryFocusMap.get(selectedValue);
+    if (customFn) {
+      customFn();
+      return;
+    }
+    const panel = tabsEl.querySelector(`sp-tab-panel[value="${selectedValue}"]`);
+    getFirstTabbable(panel)?.focus();
+  }
+
   const controller = new AbortController();
   const { signal } = controller;
 
   if (onSelectionChange) {
-    tabsEl.addEventListener('change', (e) => {
-      onSelectionChange({ selected: e.target.selected });
+    let lastSelected = selected ?? null;
+    tabsEl.addEventListener('change', () => {
+      const current = tabsEl.selected;
+      if (!current || current === lastSelected) return;
+      lastSelected = current;
+      onSelectionChange({ selected: current });
     }, { signal });
   }
+
+  // Tab skips the panel by default; selected tabs can opt into panel entry.
+  theme.addEventListener('keydown', (e) => {
+    const path = e.composedPath();
+    const isOnTab = path.some((node) => node.tagName === 'SP-TAB');
+    const isInPanel = path.some((node) => node.tagName === 'SP-TAB-PANEL');
+    if (!isOnTab || isInPanel) return;
+
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      if (!e.shiftKey && shouldEnterPanelOnTab(tabsEl.selected)) {
+        requestAnimationFrame(focusSelectedPanelEntry);
+        return;
+      }
+      getTabbableAdjacentTo(theme, e.shiftKey)?.focus();
+    } else if (e.key === 'Enter') {
+      requestAnimationFrame(focusSelectedPanelEntry);
+    }
+  }, { capture: true, signal });
 
   return {
     element: theme,
@@ -129,6 +200,16 @@ export async function createExpressTabs(config = {}) {
      */
     getPanel(value) {
       return tabsEl.querySelector(`sp-tab-panel[value="${value}"]`);
+    },
+
+    /**
+     * Register a custom focus function for a tab panel.
+     * Called instead of the default first-tabbable search when Enter is pressed on that tab.
+     * @param {string} value — the tab's value
+     * @param {Function} fn — called with no arguments to move focus into the panel
+     */
+    setPanelEntryFocus(value, fn) {
+      panelEntryFocusMap.set(value, fn);
     },
 
     destroy() {

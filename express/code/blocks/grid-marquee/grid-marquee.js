@@ -1,4 +1,12 @@
-import { getLibs, yieldToMain, getMobileOperatingSystem, getIconElementDeprecated, createTag, formatDynamicCartLink } from '../../scripts/utils.js';
+import {
+  getLibs,
+  yieldToMain,
+  getMobileOperatingSystem,
+  getIconElementDeprecated,
+  createTag,
+  formatDynamicCartLink,
+  getMetadata,
+} from '../../scripts/utils.js';
 
 let currDrawer = null;
 const largeMQ = window.matchMedia('(min-width: 1280px)');
@@ -210,9 +218,16 @@ async function makeRating(
   await trackBranchParameters([storeLink]);
 
   const star = getIconElementDeprecated('star');
-  star.setAttribute('role', 'img');
-  star.setAttribute('aria-label', starsPlaceholder);
-  return createTag('div', { class: 'ratings-container' }, [score, star, cnt, storeLink]);
+  const ratingsLabel = `${score} ${starsPlaceholder}, ${cnt}`;
+  const ratingsText = createTag('span', {
+    class: 'ratings-metric',
+    role: 'group',
+    'aria-label': ratingsLabel,
+  }, [
+    createTag('span', { class: 'rating-visual', 'aria-hidden': 'true' }, [score, star]),
+    createTag('span', { 'aria-hidden': 'true' }, cnt),
+  ]);
+  return createTag('div', { class: 'ratings-container' }, [ratingsText, storeLink]);
 }
 
 async function makeRatings(
@@ -298,7 +313,19 @@ export default async function init(el) {
   // Legacy mode: headline + background + items inside this block
   if (hasLegacyHeadline) {
     const [headline, background, ...items] = rows;
-    const logo = getIconElementDeprecated('adobe-express-logo');
+    const injectAcrobatLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase());
+    let logo;
+
+    if (injectAcrobatLogo) {
+      const logoName = 'cobrand-lockup-acrobat-express';
+      const logoSize = '22px';
+      const logoAlt = 'Adobe Acrobat X Adobe Express co-brand logo';
+      const logoClass = 'marquee-eyebrow-logo-wide';
+      logo = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
+    } else {
+      logo = getIconElementDeprecated('adobe-express-logo');
+    }
+
     logo.classList.add('express-logo');
 
     background.classList.add('background');

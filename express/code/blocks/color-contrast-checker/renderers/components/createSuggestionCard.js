@@ -13,19 +13,21 @@ export default function createSuggestionCard({
 
   const previewBar = createTag('div', { class: 'cc-suggestion-preview-bar' });
 
-  const fgHalf = createTag('div', {
-    class: 'cc-suggestion-preview-fg',
-    style: `background: ${suggestion.fg}`,
-  });
-  fgHalf.appendChild(createTag('span', { class: 'cc-suggestion-preview-fg-letter' }, 'T'));
-
   const bgHalf = createTag('div', {
     class: 'cc-suggestion-preview-bg',
     style: `background: ${suggestion.bg}`,
   });
+  const letter = createTag('span', { class: 'cc-suggestion-preview-fg-letter' }, 'T');
+  letter.style.color = suggestion.fg;
+  bgHalf.appendChild(letter);
 
-  previewBar.appendChild(fgHalf);
+  const fgHalf = createTag('div', {
+    class: 'cc-suggestion-preview-fg',
+    style: `background: ${suggestion.fg}`,
+  });
+
   previewBar.appendChild(bgHalf);
+  previewBar.appendChild(fgHalf);
 
   const footer = createTag('div', { class: 'cc-suggestion-footer' });
 

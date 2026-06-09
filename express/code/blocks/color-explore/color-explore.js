@@ -1,21 +1,36 @@
+import { getLibs } from '../../scripts/utils.js';
+import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import { parseBlockConfig } from './helpers/parseConfig.js';
 import { createColorRenderer } from './factory/createColorRenderer.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
 import { createStripsRenderer } from '../../scripts/color-shared/renderers/createStripsRenderer.js';
 import { createSwatchesRenderer } from '../../scripts/color-shared/renderers/createSwatchesRenderer.js';
 import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
-import { createGradientPickerRebuildContent, loadGradientPickerRebuildStyles } from '../../scripts/color-shared/modal/createGradientPickerRebuildContent.js';
+import { createGradientModalContent, ensureGradientModalContentStyles } from '../../scripts/color-shared/modal/createGradientModalContent.js';
 import { createColorDataService as createSharedColorDataService } from '../../scripts/color-shared/services/createColorDataService.js';
+import { buildPaletteEditUrl, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
+import { createLoadingScreenComponent } from '../../scripts/color-shared/components/createLoadingScreenComponent.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
+import loadColorExplorePlaceholders from '../../scripts/color-shared/i18n/loadColorExplorePlaceholders.js';
+import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
+import loadColorFiltersPlaceholders from '../../scripts/color-shared/i18n/loadColorFiltersPlaceholders.js';
+import loadColorModalPlaceholders from '../../scripts/color-shared/i18n/loadColorModalPlaceholders.js';
 
 const VARIANTS = { STRIPS: 'strips', GRADIENTS: 'gradients' };
 const VARIANT_CLASSES = { GRADIENTS: 'gradients', PALETTES: 'palettes' };
+const THEME_URL_PARAM = 'theme';
+const ITEM_ID_URL_PARAM = 'id';
+const PENDING_GRADIENT_SESSION_KEY = 'color-explore-pending-gradient-id';
+const THEME_URL_QUERY_VALUE = {
+  [VARIANTS.GRADIENTS]: 'color-gradients',
+  [VARIANTS.STRIPS]: 'color-palettes',
+};
 const DEFAULTS = {
   variant: VARIANTS.STRIPS,
   initialLoad: 24,
-  loadMoreIncrement: 10,
+  loadMoreIncrement: 12,
   maxItems: 100,
   enableFilters: true,
   enableSearch: true,
@@ -25,6 +40,7 @@ const DEFAULTS = {
 const CSS_CLASSES = { BLOCK: 'color-explore', CONTAINER: 'color-explore-container', LOADING: 'is-loading', ERROR: 'has-error' };
 const EVENTS = {
   PALETTE_CLICK: 'palette-click',
+  PALETTE_EDIT: 'palette-edit',
   GRADIENT_CLICK: 'gradient-click',
   SHARE: 'share',
   SEARCH: 'search',
@@ -81,6 +97,23 @@ function getVariantFromBlock(block) {
   return null;
 }
 
+function getVariantFromThemeUrlParam() {
+  if (typeof window === 'undefined') return null;
+  const t = new URLSearchParams(window.location.search).get(THEME_URL_PARAM);
+  if (t === THEME_URL_QUERY_VALUE[VARIANTS.GRADIENTS]) return VARIANTS.GRADIENTS;
+  if (t === THEME_URL_QUERY_VALUE[VARIANTS.STRIPS]) return VARIANTS.STRIPS;
+  return null;
+}
+
+function syncColorExploreThemeUrl(variant) {
+  if (typeof window === 'undefined') return;
+  const value = THEME_URL_QUERY_VALUE[variant];
+  if (!value) return;
+  const url = new URL(window.location.href);
+  url.searchParams.set(THEME_URL_PARAM, value);
+  window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+}
+
 function isSwatchesMode(config) {
   return config?.swatchesOnly === true
     || config?.contentMode === 'swatches'
@@ -114,7 +147,7 @@ function mergeLoadMoreData(currentData, moreData) {
 }
 
 async function createBlockLoadMoreControl(container, onClick, options = {}) {
-  const { iconSize = 'xl' } = options;
+  const { iconSize = 'xl', strings } = options;
   await loadIconsRail();
 
   let root = container.querySelector(':scope > .load-more-container[data-owner="color-explore"]');
@@ -172,8 +205,9 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
         root.style.display = 'none';
         return;
       }
-      text.textContent = 'Load more';
-      button.setAttribute('aria-label', 'Load more items');
+      text.textContent = strings?.loadMore ?? 'Load more';
+      button.setAttribute('aria-label', strings?.loadMoreAria ?? 'Load more gradients');
+      decorateAnalyticsAttributes(button, { linkLabel: strings?.loadMore ?? 'Load more' });
       root.style.display = 'flex';
     },
     destroy() {
@@ -187,29 +221,35 @@ async function createBlockLoadMoreControl(container, onClick, options = {}) {
   };
 }
 
-async function createBlockFilterControl(container, variant, onFilterChange) {
-  const header = container.querySelector('.explore-header, .gradients-header');
-  if (!header) return null;
-
+async function createBlockFilterControl(container, variant, onFilterChange, strings) {
   const filters = await createFiltersComponent({
     variant,
     onFilterChange,
+    ...(strings ? { strings } : {}),
   });
 
   if (!(filters?.element instanceof Node)) return null;
   filters.element.setAttribute('data-owner', 'color-explore-filters');
-  header.querySelectorAll(':scope > .filters-container').forEach((node) => node.remove());
-  header.appendChild(filters.element);
-  try {
-    await filters.waitForReady?.();
-  } catch (error) {
-    window.lana?.log(`[ColorExplore] Filters waitForReady failed: ${error?.message}`, {
-      tags: 'color-explore,filters',
-      severity: 'warning',
-    });
-  }
 
   return {
+    element: filters.element,
+    async attachToHeader() {
+      const header = container.querySelector('.explore-header, .gradients-header');
+      if (!header) return false;
+      header.querySelectorAll(':scope > .filters-container').forEach((node) => {
+        if (node !== filters.element) node.remove();
+      });
+      if (filters.element.parentElement !== header) header.appendChild(filters.element);
+      try {
+        await filters.waitForReady?.();
+      } catch (error) {
+        window.lana?.log(`[ColorExplore] Filters waitForReady failed: ${error?.message}`, {
+          tags: 'color-explore,filters',
+          severity: 'warning',
+        });
+      }
+      return true;
+    },
     destroy() {
       filters.reset?.();
       filters.element?.remove?.();
@@ -224,11 +264,16 @@ export default async function decorate(block) {
     const variantFromClass = getVariantFromBlock(block);
     const rows = [...block.children];
     const config = parseBlockConfig(rows, DEFAULTS);
-    if (variantFromClass) config.variant = variantFromClass;
-
-    await loadStripSharedStyles();
+    config.variant = getVariantFromThemeUrlParam() ?? variantFromClass ?? config.variant;
 
     block.dataset.blockStatus = 'loading';
+    const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+    const { locale } = getConfig();
+    const colorWheelPath = `${locale.contentRoot}/create/color-wheel`;
+    const placeholdersPromise = loadColorExplorePlaceholders();
+    const colorSwatchRailStringsPromise = loadColorSwatchRailPlaceholders();
+    const colorFiltersStringsPromise = loadColorFiltersPlaceholders();
+    const colorModalStringsPromise = loadColorModalPlaceholders();
     block.replaceChildren();
     block.className = CSS_CLASSES.BLOCK;
     const variantClass = config.variant === VARIANTS.GRADIENTS
@@ -246,6 +291,27 @@ export default async function decorate(block) {
     const container = document.createElement('div');
     container.className = CSS_CLASSES.CONTAINER;
     themeHost.appendChild(container);
+
+    const isGradients = config.variant === VARIANTS.GRADIENTS;
+    const showLoadingSkeleton = () => {
+      const header = document.createElement('div');
+      header.className = 'explore-header';
+      const titleEl = document.createElement(isGradients ? 'h2' : 'span');
+      titleEl.className = isGradients ? 'gradients-title' : 'results-count';
+      titleEl.textContent = '\u00a0';
+      header.appendChild(titleEl);
+      const section = document.createElement('section');
+      section.className = 'explore-main-section';
+      const loadingScreen = createLoadingScreenComponent({
+        variant: isGradients ? 'gradients' : 'strips',
+        cardCount: 6,
+      });
+      section.appendChild(loadingScreen.element);
+      loadingScreen.show();
+      container.replaceChildren(header, section);
+    };
+    showLoadingSkeleton();
+    const [placeholders] = await Promise.all([placeholdersPromise, loadStripSharedStyles()]);
 
     if (config.variant === VARIANTS.GRADIENTS || config.variant === VARIANTS.STRIPS) {
       const gradientsDataService = createSharedColorDataService({
@@ -277,6 +343,7 @@ export default async function decorate(block) {
       let filterInteractionSuppressUntil = 0;
       let isSearchActive = false;
       let currentColumnCount = getGridColumnCount();
+      let hasCompletedInitialModeMount = false;
 
       const setModeClasses = (variant) => {
         block.classList.remove(VARIANT_CLASSES.GRADIENTS, VARIANT_CLASSES.PALETTES);
@@ -335,19 +402,23 @@ export default async function decorate(block) {
       block.addEventListener('block-unload', cleanupDualMode, { once: true });
 
       const openModalForItem = async (item, fallbackTitle) => {
-        await loadGradientPickerRebuildStyles();
+        await ensureGradientModalContentStyles();
         const content = item || {};
         modalManager.open({
           title: content.name || fallbackTitle,
           showTitle: false,
-          content: () => createGradientPickerRebuildContent(content, {
-            likesCount: content.likes ?? content.likesCount ?? 0,
-            liked: content.liked ?? false,
-            creatorName: content.creator?.name ?? 'nicolagilroy',
-            creatorImageUrl: content.creator?.imageUrl ?? content.creatorImageUrl,
-            tags: ['Orange', 'Cinematic', 'Summer', 'Water'],
-            onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
-          }),
+          content: async () => {
+            const modalStrings = await colorModalStringsPromise;
+            return createGradientModalContent(content, {
+              likesCount: content.likes ?? content.likesCount ?? 0,
+              liked: content.liked ?? false,
+              creatorName: content.creator?.name ?? '',
+              creatorImageUrl: content.creator?.imageUrl ?? content.creatorImageUrl,
+              tags: item.tags ?? [],
+              onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
+              strings: modalStrings,
+            });
+          },
         });
       };
 
@@ -368,13 +439,28 @@ export default async function decorate(block) {
           activeMode = VARIANTS.GRADIENTS;
           activeDataService = gradientsDataService;
           setModeClasses(VARIANTS.GRADIENTS);
+          if (hasCompletedInitialModeMount) syncColorExploreThemeUrl(VARIANTS.GRADIENTS);
           block.dispatchEvent(new CustomEvent('color-explore:mode-change', { detail: { mode: VARIANTS.GRADIENTS }, bubbles: true }));
 
-          block.classList.add(CSS_CLASSES.LOADING);
-          try {
+          let gradientFilterHandler = null;
+          filtersControl = await createBlockFilterControl(
+            container,
+            VARIANTS.GRADIENTS,
+            (filters) => gradientFilterHandler?.(filters),
+            await colorFiltersStringsPromise,
+          );
+
+          const urlQuery = new URLSearchParams(window.location.search).get('q');
+          if (urlQuery) {
+            const searchResults = await activeDataService.search(urlQuery);
+            if (searchResults.length > 0) {
+              allData = searchResults;
+              isSearchActive = true;
+            } else {
+              allData = await activeDataService.fetchData();
+            }
+          } else {
             allData = await activeDataService.fetchData();
-          } finally {
-            block.classList.remove(CSS_CLASSES.LOADING);
           }
           visibleCount = alignToFullRow(
             Math.min(config.initialLoad, allData.length),
@@ -404,32 +490,31 @@ export default async function decorate(block) {
             dataService: activeDataService,
             modalManager,
             stateKey,
+            placeholders,
           });
 
           await activeRenderer.render();
 
+          await filtersControl?.attachToHeader?.();
+
           // Explore contract: filters are always rendered for gradients/palettes.
-          filtersControl = await createBlockFilterControl(
-            container,
-            VARIANTS.GRADIENTS,
-            async (filters) => {
-              filterInteractionSuppressUntil = Date.now() + 350;
-              isSearchActive = false;
-              if (filters?.contentType === 'color-palettes') {
-                await mountStripsMode();
-                return;
-              }
-              block.classList.add(CSS_CLASSES.LOADING);
-              allData = await activeDataService.filter(filters);
-              visibleCount = alignToFullRow(
-                Math.min(config.initialLoad, allData.length),
-                allData.length,
-              );
-              await activeRenderer.update(allData.slice(0, visibleCount));
-              updateLoadMoreState();
-              block.classList.remove(CSS_CLASSES.LOADING);
-            },
-          );
+          gradientFilterHandler = async (filters) => {
+            filterInteractionSuppressUntil = Date.now() + 350;
+            isSearchActive = false;
+            if (filters?.contentType === 'color-palettes') {
+              await mountStripsMode();
+              return;
+            }
+            block.classList.add(CSS_CLASSES.LOADING);
+            allData = await activeDataService.filter(filters);
+            visibleCount = alignToFullRow(
+              Math.min(config.initialLoad, allData.length),
+              allData.length,
+            );
+            await activeRenderer.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+            block.classList.remove(CSS_CLASSES.LOADING);
+          };
 
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
             const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
@@ -442,21 +527,40 @@ export default async function decorate(block) {
             visibleCount = alignToFullRow(Math.min(nextTarget, allData.length), allData.length);
             await activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
-          }, { iconSize: config.loadMoreIconSize || 'xl' });
+          }, { iconSize: config.loadMoreIconSize || 'xl', strings: placeholders });
           updateLoadMoreState();
 
           activeRenderer.on(EVENTS.GRADIENT_CLICK, async ({ gradient }) => {
             const item = gradient || {};
             const currentState = BlockMediator.get(stateKey);
             BlockMediator.set(stateKey, { ...currentState, selectedItem: item });
-            await openModalForItem(item, 'Gradient');
+            if (item.id) {
+              try {
+                sessionStorage.setItem(PENDING_GRADIENT_SESSION_KEY, String(item.id));
+              } catch { /* sessionStorage unavailable */ }
+            }
+            await openModalForItem(item, placeholders.modalDefaultGradientTitle);
           });
 
           floatingSearchHandler = async (e) => {
             const { query } = e.detail;
-            isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
-            allData = await activeDataService.search(query);
+            if (!query) {
+              isSearchActive = false;
+              allData = await activeDataService.fetchData();
+              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+            } else {
+              const searchResults = await activeDataService.search(query);
+              if (searchResults.length === 0) {
+                isSearchActive = false;
+                allData = await activeDataService.fetchData();
+                document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+              } else {
+                isSearchActive = true;
+                allData = searchResults;
+                document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+              }
+            }
             visibleCount = alignToFullRow(
               Math.min(config.initialLoad, allData.length),
               allData.length,
@@ -464,19 +568,40 @@ export default async function decorate(block) {
             await activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
-            if (query && allData.length === 0) {
-              document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
-            } else {
-              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
-            }
           };
           document.addEventListener('floating-search:submit', floatingSearchHandler);
 
-          const urlQuery = new URLSearchParams(window.location.search).get('q');
-          if (urlQuery) {
-            await floatingSearchHandler({ detail: { query: urlQuery } });
+          if (urlQuery && !isSearchActive) {
+            document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query: urlQuery }, bubbles: true }));
+          } else if (urlQuery) {
+            document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
           }
 
+          const isInitialGradientMount = !hasCompletedInitialModeMount;
+          if (!hasCompletedInitialModeMount) hasCompletedInitialModeMount = true;
+          if (isInitialGradientMount) {
+            const searchParams = new URLSearchParams(window.location.search);
+            let itemId = searchParams.get(ITEM_ID_URL_PARAM);
+            if (!itemId && searchParams.has('url')) {
+              // susi-light appends a `url` tracking param on sign-in redirect;
+              // use it as a signal that we're returning from sign-in and should
+              // restore the gradient the user was trying to save.
+              itemId = sessionStorage.getItem(PENDING_GRADIENT_SESSION_KEY) || null;
+            }
+            try {
+              sessionStorage.removeItem(PENDING_GRADIENT_SESSION_KEY);
+            } catch { /* sessionStorage unavailable */ }
+            if (itemId) {
+              const url = new URL(window.location.href);
+              url.searchParams.delete(ITEM_ID_URL_PARAM);
+              window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+              const item = allData.find((g) => String(g.id) === String(itemId))
+                ?? await activeDataService.getTheme(itemId);
+              if (item) {
+                await openModalForItem(item, placeholders.modalDefaultGradientTitle);
+              }
+            }
+          }
           publishInstances();
         } finally {
           isMounting = false;
@@ -491,13 +616,28 @@ export default async function decorate(block) {
           activeMode = VARIANTS.STRIPS;
           activeDataService = palettesDataService;
           setModeClasses(VARIANTS.STRIPS);
+          if (hasCompletedInitialModeMount) syncColorExploreThemeUrl(VARIANTS.STRIPS);
           block.dispatchEvent(new CustomEvent('color-explore:mode-change', { detail: { mode: VARIANTS.STRIPS }, bubbles: true }));
 
-          block.classList.add(CSS_CLASSES.LOADING);
-          try {
+          let stripsFilterHandler = null;
+          filtersControl = await createBlockFilterControl(
+            container,
+            VARIANTS.STRIPS,
+            (filters) => stripsFilterHandler?.(filters),
+            await colorFiltersStringsPromise,
+          );
+
+          const urlQuery = new URLSearchParams(window.location.search).get('q');
+          if (urlQuery) {
+            const searchResults = await activeDataService.search(urlQuery);
+            if (searchResults.length > 0) {
+              allData = searchResults;
+              isSearchActive = true;
+            } else {
+              allData = await activeDataService.fetchData();
+            }
+          } else {
             allData = await activeDataService.fetchData();
-          } finally {
-            block.classList.remove(CSS_CLASSES.LOADING);
           }
           const alignedCount = Math.min(config.initialLoad, allData.length);
           visibleCount = alignToFullRow(alignedCount, allData.length);
@@ -505,35 +645,36 @@ export default async function decorate(block) {
           activeRenderer = createStripsRenderer({
             container,
             data: allData.slice(0, visibleCount),
+            strings: await colorFiltersStringsPromise,
+            paletteCardStrings: await placeholdersPromise,
             config: {
               ...config,
               variant: VARIANTS.STRIPS,
               renderGridVariant: 'summary',
+              initialActivationSuppressUntil: filterInteractionSuppressUntil,
             },
           });
           await activeRenderer.render?.(container);
 
-          filtersControl = await createBlockFilterControl(
-            container,
-            VARIANTS.STRIPS,
-            async (filters) => {
-              filterInteractionSuppressUntil = Date.now() + 350;
-              isSearchActive = false;
-              if (filters?.contentType === 'color-gradients') {
-                await mountGradientsMode();
-                return;
-              }
-              block.classList.add(CSS_CLASSES.LOADING);
-              allData = await activeDataService.filter(filters);
-              visibleCount = alignToFullRow(
-                Math.min(config.initialLoad, allData.length),
-                allData.length,
-              );
-              activeRenderer.update(allData.slice(0, visibleCount));
-              updateLoadMoreState();
-              block.classList.remove(CSS_CLASSES.LOADING);
-            },
-          );
+          await filtersControl?.attachToHeader?.();
+
+          stripsFilterHandler = async (filters) => {
+            filterInteractionSuppressUntil = Date.now() + 350;
+            isSearchActive = false;
+            if (filters?.contentType === 'color-gradients') {
+              await mountGradientsMode();
+              return;
+            }
+            block.classList.add(CSS_CLASSES.LOADING);
+            allData = await activeDataService.filter(filters);
+            visibleCount = alignToFullRow(
+              Math.min(config.initialLoad, allData.length),
+              allData.length,
+            );
+            activeRenderer.update(allData.slice(0, visibleCount));
+            updateLoadMoreState();
+            block.classList.remove(CSS_CLASSES.LOADING);
+          };
 
           loadMoreControl = await createBlockLoadMoreControl(container, async () => {
             const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
@@ -546,19 +687,35 @@ export default async function decorate(block) {
             visibleCount = alignToFullRow(Math.min(nextTarget, allData.length), allData.length);
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
-          }, { iconSize: config.loadMoreIconSize || 'xl' });
+          }, { iconSize: config.loadMoreIconSize || 'xl', strings: placeholders });
           updateLoadMoreState();
 
           activeRenderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
             await modalManager.openPaletteSwatchesModal(
               palette || {},
-              { verticalMaxPerRow: config.swatchVerticalMaxPerRow },
+              {
+                verticalMaxPerRow: config.swatchVerticalMaxPerRow,
+                onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
+                modalStrings: await colorModalStringsPromise,
+                colorSwatchRailStrings: await colorSwatchRailStringsPromise,
+              },
             );
+          });
+          activeRenderer.on(EVENTS.PALETTE_EDIT, (palette) => {
+            const colors = palette?.colors || [];
+            const name = palette?.name || '';
+            const editUrl = buildPaletteEditUrl(colorWheelPath, colors, name);
+            window.location.href = editUrl;
           });
           activeRenderer.on(EVENTS.SHARE, async ({ palette }) => {
             await modalManager.openPaletteSwatchesModal(
               palette || {},
-              { verticalMaxPerRow: config.swatchVerticalMaxPerRow },
+              {
+                verticalMaxPerRow: config.swatchVerticalMaxPerRow,
+                onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
+                modalStrings: await colorModalStringsPromise,
+                colorSwatchRailStrings: await colorSwatchRailStringsPromise,
+              },
             );
           });
 
@@ -577,9 +734,23 @@ export default async function decorate(block) {
 
           floatingSearchHandler = async (e) => {
             const { query } = e.detail;
-            isSearchActive = !!query;
             block.classList.add(CSS_CLASSES.LOADING);
-            allData = await activeDataService.search(query);
+            if (!query) {
+              isSearchActive = false;
+              allData = await activeDataService.fetchData();
+              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+            } else {
+              const searchResults = await activeDataService.search(query);
+              if (searchResults.length === 0) {
+                isSearchActive = false;
+                allData = await activeDataService.fetchData();
+                document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+              } else {
+                isSearchActive = true;
+                allData = searchResults;
+                document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+              }
+            }
             visibleCount = alignToFullRow(
               Math.min(config.initialLoad, allData.length),
               allData.length,
@@ -587,30 +758,52 @@ export default async function decorate(block) {
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
-            if (query && allData.length === 0) {
-              document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
-            } else {
-              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
-            }
           };
           document.addEventListener('floating-search:submit', floatingSearchHandler);
 
-          const urlQuery = new URLSearchParams(window.location.search).get('q');
-          if (urlQuery) {
-            await floatingSearchHandler({ detail: { query: urlQuery } });
+          if (urlQuery && !isSearchActive) {
+            document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query: urlQuery }, bubbles: true }));
+          } else if (urlQuery) {
+            document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
           }
 
+          const isInitialStripsMount = !hasCompletedInitialModeMount;
+          if (!hasCompletedInitialModeMount) hasCompletedInitialModeMount = true;
+          if (isInitialStripsMount) {
+            const itemId = new URLSearchParams(window.location.search).get(ITEM_ID_URL_PARAM);
+            if (itemId) {
+              const url = new URL(window.location.href);
+              url.searchParams.delete(ITEM_ID_URL_PARAM);
+              window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+              const item = await activeDataService.getTheme(itemId);
+              if (item) {
+                await modalManager.openPaletteSwatchesModal(item, {
+                  verticalMaxPerRow: config.swatchVerticalMaxPerRow,
+                  onLikeToggle: async ({ id, liked }) => (
+                    activeDataService.toggleLike({ id, liked })
+                  ),
+                  modalStrings: await colorModalStringsPromise,
+                  colorSwatchRailStrings: await colorSwatchRailStringsPromise,
+                  initialFocusSelector: () => null,
+                });
+              }
+            }
+          }
           publishInstances();
         } finally {
           isMounting = false;
         }
       };
 
-      if (activeMode === VARIANTS.GRADIENTS) {
-        await mountGradientsMode();
-      } else {
-        await mountStripsMode();
-      }
+      const mountFn = activeMode === VARIANTS.GRADIENTS ? mountGradientsMode : mountStripsMode;
+      mountFn()
+        .then(() => {
+          block.dataset.blockStatus = 'loaded';
+        })
+        .catch((err) => {
+          window.lana?.log(`[ColorExplore] Mount error: ${err?.message}`, { tags: 'color-explore', severity: 'error' });
+          block.dataset.blockStatus = '';
+        });
     } else {
       const dataService = createSharedColorDataService({
         variant: config.variant,
@@ -619,137 +812,186 @@ export default async function decorate(block) {
         apiEndpoint: config.apiEndpoint,
       });
 
-      block.classList.add(CSS_CLASSES.LOADING);
-      let allData = await dataService.fetchData();
-      const alignedCount = Math.min(config.initialLoad, allData.length);
-      let visibleCount = alignToFullRow(alignedCount, allData.length);
-      let isSearchActive = false;
-      block.classList.remove(CSS_CLASSES.LOADING);
-
-      let renderer;
-      if (isSwatchesMode(config)) {
-        renderer = createSwatchesRenderer({ container, data: allData, config });
-      } else {
-        renderer = createStripsRenderer({
-          container,
-          data: allData.slice(0, visibleCount),
-          config,
-        });
-      }
-      await renderer.render?.(container);
-      const loadMoreControl = !isSwatchesMode(config)
-        ? await createBlockLoadMoreControl(container, async () => {
-          const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
-          if (nextTarget > allData.length) {
-            const moreData = isSearchActive
-              ? await dataService.searchMore()
-              : await dataService.loadMore();
-            allData = mergeLoadMoreData(allData, moreData);
+      (async () => {
+        const urlQuery = new URLSearchParams(window.location.search).get('q');
+        let isSearchActive = false;
+        let allData;
+        if (urlQuery) {
+          const searchResults = await dataService.search(urlQuery);
+          if (searchResults.length > 0) {
+            allData = searchResults;
+            isSearchActive = true;
+          } else {
+            allData = await dataService.fetchData();
           }
-          visibleCount = alignToFullRow(Math.min(nextTarget, allData.length), allData.length);
-          renderer.update(allData.slice(0, visibleCount));
-          loadMoreControl.update(Math.max(0, allData.length - visibleCount));
-        }, { iconSize: config.loadMoreIconSize || 'xl' })
-        : null;
-      loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
-
-      let elseCurrentColumnCount = getGridColumnCount();
-      const elseResizeObserver = new ResizeObserver(() => {
-        const newCols = getGridColumnCount();
-        if (newCols === elseCurrentColumnCount || isSwatchesMode(config)) return;
-        elseCurrentColumnCount = newCols;
-        const aligned = alignToFullRow(visibleCount, allData.length);
-        if (aligned !== visibleCount) {
-          visibleCount = aligned;
-          renderer.update(allData.slice(0, visibleCount));
-          loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
-        }
-      });
-      elseResizeObserver.observe(container);
-
-      const modalManager = createModalManager();
-
-      renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
-        await modalManager.openPaletteSwatchesModal(
-          palette || {},
-          { verticalMaxPerRow: config.swatchVerticalMaxPerRow },
-        );
-      });
-      renderer.on(EVENTS.SHARE, async ({ palette }) => {
-        await modalManager.openPaletteSwatchesModal(
-          palette || {},
-          { verticalMaxPerRow: config.swatchVerticalMaxPerRow },
-        );
-      });
-
-      renderer.on(EVENTS.SEARCH, async ({ query }) => {
-        isSearchActive = !!query;
-        block.classList.add(CSS_CLASSES.LOADING);
-        allData = await dataService.search(query);
-        visibleCount = alignToFullRow(
-          Math.min(config.initialLoad, allData.length),
-          allData.length,
-        );
-        renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
-        loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
-        block.classList.remove(CSS_CLASSES.LOADING);
-      });
-
-      renderer.on(EVENTS.FILTER, async (filters) => {
-        isSearchActive = false;
-        block.classList.add(CSS_CLASSES.LOADING);
-        allData = await dataService.filter(filters);
-        visibleCount = alignToFullRow(
-          Math.min(config.initialLoad, allData.length),
-          allData.length,
-        );
-        renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
-        loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
-        block.classList.remove(CSS_CLASSES.LOADING);
-      });
-
-      const floatingHandler = async (e) => {
-        const { query } = e.detail;
-        isSearchActive = !!query;
-        block.classList.add(CSS_CLASSES.LOADING);
-        allData = await dataService.search(query);
-        visibleCount = alignToFullRow(
-          Math.min(config.initialLoad, allData.length),
-          allData.length,
-        );
-        renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
-        loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
-        block.classList.remove(CSS_CLASSES.LOADING);
-        if (query && allData.length === 0) {
-          document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
         } else {
+          allData = await dataService.fetchData();
+        }
+        const alignedCount = Math.min(config.initialLoad, allData.length);
+        let visibleCount = alignToFullRow(alignedCount, allData.length);
+
+        let renderer;
+        if (isSwatchesMode(config)) {
+          const colorSwatchRailStrings = await colorSwatchRailStringsPromise;
+          renderer = createSwatchesRenderer({
+            container,
+            data: allData,
+            config: { ...config, colorSwatchRailStrings },
+          });
+        } else {
+          renderer = createStripsRenderer({
+            container,
+            data: allData.slice(0, visibleCount),
+            strings: await colorFiltersStringsPromise,
+            paletteCardStrings: await placeholdersPromise,
+            config,
+          });
+        }
+        if (renderer.render) renderer.render(container);
+        const loadMoreControl = !isSwatchesMode(config)
+          ? await createBlockLoadMoreControl(container, async () => {
+            const nextTarget = visibleCount + Math.max(1, Number(config.loadMoreIncrement) || 10);
+            if (nextTarget > allData.length) {
+              const moreData = isSearchActive
+                ? await dataService.searchMore()
+                : await dataService.loadMore();
+              allData = mergeLoadMoreData(allData, moreData);
+            }
+            visibleCount = alignToFullRow(Math.min(nextTarget, allData.length), allData.length);
+            renderer.update(allData.slice(0, visibleCount));
+            loadMoreControl.update(Math.max(0, allData.length - visibleCount));
+          }, { iconSize: config.loadMoreIconSize || 'xl', strings: placeholders })
+          : null;
+        loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+
+        let elseCurrentColumnCount = getGridColumnCount();
+        const elseResizeObserver = new ResizeObserver(() => {
+          const newCols = getGridColumnCount();
+          if (newCols === elseCurrentColumnCount || isSwatchesMode(config)) return;
+          elseCurrentColumnCount = newCols;
+          const aligned = alignToFullRow(visibleCount, allData.length);
+          if (aligned !== visibleCount) {
+            visibleCount = aligned;
+            renderer.update(allData.slice(0, visibleCount));
+            loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+          }
+        });
+        elseResizeObserver.observe(container);
+
+        const modalManager = createModalManager();
+
+        renderer.on(EVENTS.PALETTE_CLICK, async (palette) => {
+          await modalManager.openPaletteSwatchesModal(
+            palette || {},
+            {
+              verticalMaxPerRow: config.swatchVerticalMaxPerRow,
+              onLikeToggle: async ({ id, liked }) => dataService.toggleLike({ id, liked }),
+              modalStrings: await colorModalStringsPromise,
+              colorSwatchRailStrings: await colorSwatchRailStringsPromise,
+            },
+          );
+        });
+        renderer.on(EVENTS.PALETTE_EDIT, (palette) => {
+          const colors = palette?.colors || [];
+          const name = palette?.name || '';
+          const editUrl = buildPaletteEditUrl(colorWheelPath, colors, name);
+          window.location.href = editUrl;
+        });
+        renderer.on(EVENTS.SHARE, async ({ palette }) => {
+          await modalManager.openPaletteSwatchesModal(
+            palette || {},
+            {
+              verticalMaxPerRow: config.swatchVerticalMaxPerRow,
+              onLikeToggle: async ({ id, liked }) => dataService.toggleLike({ id, liked }),
+              modalStrings: await colorModalStringsPromise,
+              colorSwatchRailStrings: await colorSwatchRailStringsPromise,
+            },
+          );
+        });
+
+        renderer.on(EVENTS.SEARCH, async ({ query }) => {
+          isSearchActive = !!query;
+          block.classList.add(CSS_CLASSES.LOADING);
+          allData = await dataService.search(query);
+          visibleCount = alignToFullRow(
+            Math.min(config.initialLoad, allData.length),
+            allData.length,
+          );
+          renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+          loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+          block.classList.remove(CSS_CLASSES.LOADING);
+        });
+
+        renderer.on(EVENTS.FILTER, async (filters) => {
+          isSearchActive = false;
+          block.classList.add(CSS_CLASSES.LOADING);
+          allData = await dataService.filter(filters);
+          visibleCount = alignToFullRow(
+            Math.min(config.initialLoad, allData.length),
+            allData.length,
+          );
+          renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+          loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+          block.classList.remove(CSS_CLASSES.LOADING);
+        });
+
+        const floatingHandler = async (e) => {
+          const { query } = e.detail;
+          block.classList.add(CSS_CLASSES.LOADING);
+          if (!query) {
+            isSearchActive = false;
+            allData = await dataService.fetchData();
+            document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+          } else {
+            const searchResults = await dataService.search(query);
+            if (searchResults.length === 0) {
+              isSearchActive = false;
+              allData = await dataService.fetchData();
+              document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query }, bubbles: true }));
+            } else {
+              isSearchActive = true;
+              allData = searchResults;
+              document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
+            }
+          }
+          visibleCount = alignToFullRow(
+            Math.min(config.initialLoad, allData.length),
+            allData.length,
+          );
+          renderer.update(isSwatchesMode(config) ? allData : allData.slice(0, visibleCount));
+          loadMoreControl?.update(Math.max(0, allData.length - visibleCount));
+          block.classList.remove(CSS_CLASSES.LOADING);
+        };
+        document.addEventListener('floating-search:submit', floatingHandler);
+
+        if (urlQuery && !isSearchActive) {
+          document.dispatchEvent(new CustomEvent('color-explore:empty-result', { detail: { query: urlQuery }, bubbles: true }));
+        } else if (urlQuery) {
           document.dispatchEvent(new CustomEvent('color-explore:results-found', { bubbles: true }));
         }
-      };
-      document.addEventListener('floating-search:submit', floatingHandler);
 
-      const urlQuery = new URLSearchParams(window.location.search).get('q');
-      if (urlQuery) {
-        await floatingHandler({ detail: { query: urlQuery } });
-      }
+        block.addEventListener('block-unload', () => {
+          elseResizeObserver.disconnect();
+          document.removeEventListener('floating-search:submit', floatingHandler);
+        }, { once: true });
 
-      block.addEventListener('block-unload', () => {
-        elseResizeObserver.disconnect();
-        document.removeEventListener('floating-search:submit', floatingHandler);
-      }, { once: true });
-
-      block.rendererInstance = renderer;
-      block.modalManagerInstance = modalManager;
-      block.dataServiceInstance = dataService;
+        block.rendererInstance = renderer;
+        block.modalManagerInstance = modalManager;
+        block.dataServiceInstance = dataService;
+        block.dataset.blockStatus = 'loaded';
+      })().catch((err) => {
+        window.lana?.log(`[ColorExplore] Mount error: ${err?.message}`, { tags: 'color-explore', severity: 'error' });
+        block.dataset.blockStatus = '';
+      });
     }
 
-    block.dataset.blockStatus = 'loaded';
+    trackColorBlockLoad('color-explore');
   } catch (error) {
     window.lana?.log(`[ColorExplore] ❌ Error: ${error}`, { tags: 'color-explore', severity: 'error' });
     block.classList.add(CSS_CLASSES.ERROR);
     block.dataset.blockStatus = '';
     const errMsg = document.createElement('p');
-    errMsg.textContent = `Failed to load Color Explore: ${error.message}`;
+    errMsg.textContent = 'Failed to load Color Explore';
     block.appendChild(errMsg);
     block.setAttribute('data-failed', 'true');
   }

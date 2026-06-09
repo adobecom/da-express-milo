@@ -5,21 +5,22 @@ import {
   createKeyboardNavigation,
   attachItemNavigation,
 } from '../../utils/keyboardNavigation.js';
+import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
 import {
   loadSearchBarStyles,
   loadSearchBarSuggestionStyles,
 } from './styles/index.js';
 
 export const CSS_CLASSES = {
-  OUTER_WRAPPER: 'search-bar-outer',
-  SENTINEL: 'search-bar-sentinel',
-  CONTAINER: 'search-bar-container',
-  WRAPPER: 'search-bar-wrapper',
-  FORM: 'search-bar-form',
-  INPUT_WRAPPER: 'search-input-wrapper',
-  INPUT: 'search-bar-input',
-  SEARCH_ICON: 'search-icon',
-  CLEAR_BTN: 'search-clear-btn',
+  OUTER_WRAPPER: 'ax-color-search-bar-outer',
+  SENTINEL: 'ax-color-search-bar-sentinel',
+  CONTAINER: 'ax-color-search-bar-container',
+  WRAPPER: 'ax-color-search-bar-wrapper',
+  FORM: 'ax-color-search-bar-form',
+  INPUT_WRAPPER: 'ax-color-search-input-wrapper',
+  INPUT: 'ax-color-search-bar-input',
+  SEARCH_ICON: 'ax-color-search-icon',
+  CLEAR_BTN: 'ax-color-search-clear-btn',
   SUGGESTIONS_VISIBLE: 'suggestions-visible',
   IS_FETCHING: 'is-fetching',
   HIDDEN: 'hidden',
@@ -111,7 +112,7 @@ function getNestedValue(obj, path) {
 }
 
 function createStickyWrapper() {
-  return createTag('div', { class: 'search-bar-sticky-wrapper' });
+  return createTag('div', { class: 'ax-color-search-bar-sticky-wrapper' });
 }
 
 function createSearchBarWrapper(
@@ -145,6 +146,7 @@ function createSearchBarWrapper(
     'aria-label': 'Clear search',
   });
   clearBtn.innerHTML = ICONS.clear;
+  decorateAnalyticsAttributes(clearBtn, { linkLabel: 'Clear search' });
 
   inputWrapper.append(searchIcon, input, clearBtn);
   form.append(inputWrapper);

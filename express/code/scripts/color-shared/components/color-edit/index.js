@@ -8,9 +8,10 @@ import {
 } from '../../../../libs/color-components/utils/ColorConversions.js';
 import { loadSwatch, loadMenu, loadTextfield } from '../../spectrum/load-spectrum.js';
 import { trapFocus, disableBackgroundScroll, restoreBackgroundScroll } from '../../spectrum/utils/a11y.js';
+import { DEFAULT_PLACEHOLDERS as COLOR_EDIT_DEFAULTS } from '../../i18n/loadColorEditPlaceholders.js';
 import '../base-color/index.js';
 
-const COLOR_MODES = ['HEX', 'RGB'];
+const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
 
 class ColorEdit extends LitElement {
   static get styles() {
@@ -23,6 +24,8 @@ class ColorEdit extends LitElement {
       selectedIndex: { type: Number, attribute: 'selected-index' },
       colorMode: { type: String, attribute: 'color-mode' },
       showPalette: { type: Boolean, attribute: 'show-palette' },
+      strings: { type: Object },
+      baseColorStrings: { type: Object, attribute: false },
       mobile: { type: Boolean, reflect: true },
       open: { type: Boolean, reflect: true },
       _hue: { type: Number, state: true },
@@ -39,6 +42,8 @@ class ColorEdit extends LitElement {
     this.selectedIndex = 0;
     this.colorMode = 'HEX';
     this.showPalette = true;
+    this.strings = COLOR_EDIT_DEFAULTS;
+    this.baseColorStrings = null;
     this.mobile = false;
     this.open = false;
     this._hue = 0;
@@ -61,7 +66,6 @@ class ColorEdit extends LitElement {
     loadSwatch();
     this._menuLoadPromise = loadMenu();
     loadTextfield();
-    this._syncFromPalette();
     this._closeMenuOnOutsideClick = (e) => {
       if (this._modeMenuOpen && !e.composedPath().includes(this.shadowRoot.querySelector('.ce-mode-wrap'))) {
         this._modeMenuOpen = false;
@@ -92,7 +96,7 @@ class ColorEdit extends LitElement {
     super.disconnectedCallback();
   }
 
-  updated(changed) {
+  willUpdate(changed) {
     if (changed.has('palette') || changed.has('selectedIndex')) {
       this._syncFromPalette();
     }
@@ -143,9 +147,15 @@ class ColorEdit extends LitElement {
     clearTimeout(this._announceTimer);
     this._announceTimer = setTimeout(() => {
       const rgb = this._rgb;
+      const s = this.strings || COLOR_EDIT_DEFAULTS;
+      const hexTpl = s.liveAnnouncementHex || COLOR_EDIT_DEFAULTS.liveAnnouncementHex;
+      const rgbTpl = s.liveAnnouncementRgb || COLOR_EDIT_DEFAULTS.liveAnnouncementRgb;
       this._liveRegionText = this.colorMode === 'HEX'
-        ? `Color updated to ${this._hex}`
-        : `Color updated to Red ${Math.round(rgb.red)}, Green ${Math.round(rgb.green)}, Blue ${Math.round(rgb.blue)}`;
+        ? hexTpl.replace('{hex}', this._hex)
+        : rgbTpl
+            .replace('{red}', String(Math.round(rgb.red)))
+            .replace('{green}', String(Math.round(rgb.green)))
+            .replace('{blue}', String(Math.round(rgb.blue)));
     }, 500);
   }
 
@@ -204,11 +214,11 @@ class ColorEdit extends LitElement {
     this._previouslyFocused = document.activeElement;
     this.open = true;
     if (this.mobile) disableBackgroundScroll();
-    this.updateComplete.then(() => {
-      const sheet = this.shadowRoot.querySelector('.ce-sheet');
-      const focusable = sheet?.querySelector('input, button, [tabindex]:not([tabindex="-1"]), sp-button');
-      if (focusable) focusable.focus();
-      if (sheet) this._focusTrap = trapFocus(sheet);
+    return this.updateComplete.then(() => {
+      const container = this.shadowRoot.querySelector('.ce-sheet') || this.shadowRoot.querySelector('.color-edit-panel');
+      if (!container) return;
+      this._focusTrap = trapFocus(container);
+      container.focus();
     });
   }
 
@@ -313,15 +323,16 @@ class ColorEdit extends LitElement {
   }
 
   _renderHeader() {
+    const s = this.strings;
     return html`
       <div class="ce-header">
-        <span class="ce-title">Edit color</span>
+        <span class="ce-title">${s.title}</span>
         <div class="ce-mode-wrap">
           <button
             type="button"
             class="ce-mode-trigger"
             @click=${this._toggleModeMenu}
-            aria-label="Color mode, ${this.colorMode}"
+            aria-label="${s.modeLabel}, ${this.colorMode}"
             aria-haspopup="listbox"
             aria-expanded=${this._modeMenuOpen}
             aria-controls=${this._modeMenuOpen ? 'ce-mode-menu' : nothing}
@@ -336,7 +347,7 @@ class ColorEdit extends LitElement {
                 role="listbox"
                 selects="single"
                 size="s"
-                label="Color mode"
+                label="${s.modeLabel}"
                 @change=${this._onModeMenuChange}
                 @keydown=${this._onModeMenuKeyDown}
               >
@@ -356,32 +367,76 @@ class ColorEdit extends LitElement {
 
   _renderPaletteSwatches() {
     if (!this.showPalette || !this.palette?.length) return nothing;
+    const s = this.strings;
     return html`
       <div class="ce-palette-section">
-        <span class="ce-palette-label">Palette colors</span>
+        <span class="ce-palette-label">${s.paletteColors}</span>
         <sp-theme system="spectrum-two" color="light" scale="medium">
-          <sp-swatch-group
-            size="s"
-            cornerRadius="partial"
+          <div
+            role="listbox"
+            aria-label="${s.paletteColors}"
+            @keydown=${this._onSwatchGroupKeyDown}
           >
-            ${this.palette.map((hex, i) => {
-              const validHex = hex.startsWith('#') ? hex : `#${hex}`;
-              return html`
-                <sp-swatch
-                  border="light"
-                  cornerRounding="partial"
-                  color=${validHex}
-                  value=${String(i)}
-                  ?selected=${i === this.selectedIndex}
-                  @click=${() => this._onSwatchClick(i)}
-                  aria-label="Color ${validHex}"
-                ></sp-swatch>
-              `;
-            })}
-          </sp-swatch-group>
+            <sp-swatch-group
+              size="s"
+              cornerRadius="partial"
+            >
+              ${this.palette.map((hex, i) => {
+                const validHex = hex.startsWith('#') ? hex : `#${hex}`;
+                return html`
+                  <sp-swatch
+                    role="option"
+                    border="light"
+                    cornerRounding="partial"
+                    color=${validHex}
+                    value=${String(i)}
+                    ?selected=${i === this.selectedIndex}
+                    aria-selected=${i === this.selectedIndex ? 'true' : 'false'}
+                    tabindex=${i === this.selectedIndex ? '0' : '-1'}
+                    @click=${() => this._onSwatchClick(i)}
+                    aria-label=${validHex}
+                  ></sp-swatch>
+                `;
+              })}
+            </sp-swatch-group>
+          </div>
         </sp-theme>
       </div>
     `;
+  }
+
+  _onSwatchGroupKeyDown(e) {
+    const swatches = [...this.shadowRoot.querySelectorAll('sp-swatch')];
+    if (!swatches.length) return;
+    const idx = swatches.indexOf(e.target);
+    if (idx === -1) return;
+
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      this._onSwatchClick(idx);
+      return;
+    }
+
+    let next = -1;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      next = (idx + 1) % swatches.length;
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      next = (idx - 1 + swatches.length) % swatches.length;
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      next = 0;
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      next = swatches.length - 1;
+    }
+
+    if (next !== -1) {
+      swatches[idx].setAttribute('tabindex', '-1');
+      swatches[next].setAttribute('tabindex', '0');
+      swatches[next].focus();
+    }
   }
 
   _onBaseColorChange(e) {
@@ -451,15 +506,16 @@ class ColorEdit extends LitElement {
   }
 
   _renderHexInput() {
+    const s = this.strings;
     return html`
       <div class="ce-hex-section">
-        <span class="ce-hex-label">HEX</span>
+        <span class="ce-hex-label">${s.hexLabel}</span>
         <sp-textfield
           class="ce-hex-field"
           size="m"
           maxlength="7"
           .value=${this._hex}
-          label="HEX color value"
+          label="${s.hexFieldLabel}"
           label-visibility="none"
           @input=${this._onHexInput}
           @paste=${this._onHexPaste}
@@ -474,7 +530,7 @@ class ColorEdit extends LitElement {
 
     return html`
       ${this._renderDragHandle()}
-      <div class="color-edit-panel">
+      <div class="color-edit-panel" tabindex="-1">
         <div class="ce-title-dropdown-colors">
           ${this._renderHeader()}
           ${this._renderPaletteSwatches()}
@@ -485,6 +541,7 @@ class ColorEdit extends LitElement {
           color-mode=${this.colorMode}
           .showHeader=${false}
           .showBrightnessControl=${isHexMode}
+          .strings=${this.baseColorStrings || nothing}
           @color-change=${this._onBaseColorChange}
         ></base-color>
         <div class="ce-sr-only" role="status" aria-live="polite" aria-atomic="true">${this._liveRegionText}</div>
@@ -501,7 +558,8 @@ class ColorEdit extends LitElement {
               class="ce-sheet ${this.open ? 'open' : ''}"
               role="dialog"
               aria-modal="true"
-              aria-label="Edit color"
+              aria-label="${this.strings.dialogAria}"
+              tabindex="-1"
               @keydown=${this._onSheetKeyDown}
             >
               ${this._renderPanel()}

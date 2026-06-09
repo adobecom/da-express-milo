@@ -1,7 +1,10 @@
-import { createTag } from '../../scripts/utils.js';
+import { createTag, getLibs } from '../../scripts/utils.js';
+import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createContrastRenderer } from './factory/createContrastRenderer.js';
 import loadContrastCheckerPlaceholders from './utils/placeholders.js';
+import loadColorEditPlaceholders from '../../scripts/color-shared/i18n/loadColorEditPlaceholders.js';
+import loadBaseColorPlaceholders from '../../scripts/color-shared/i18n/loadBaseColorPlaceholders.js';
 import { createPreviewRenderer } from './renderers/createPreviewRenderer.js';
 import createContrastDataService from './services/createContrastDataService.js';
 import { createDefaultActionMenuConfig } from './utils/contrastConstants.js';
@@ -19,10 +22,10 @@ function getDefaultConfig() {
   };
 }
 
-function getPalette(strings) {
+function getPalette() {
   const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
   const colors = getResolvedPalette();
-  const name = getResolvedPaletteName() || strings.randomPresetName;
+  const name = getResolvedPaletteName() || '';
 
   const dataService = createContrastDataService();
   const { brightest, darkest } = dataService.findBrightestAndDarkest(colors);
@@ -58,15 +61,23 @@ async function mountContrastChecker(slot, { config, layout, initialPalette }) {
 
   renderer.on('contrast-change', (detail) => {
     const currentPalette = context.get('palette');
+    const currentColors = currentPalette?.colors || colors;
     const previousForeground = currentPalette?.selectedForeground ?? foreground;
     const previousBackground = currentPalette?.selectedBackground ?? background;
-    const nextColors = syncPaletteSelections(
-      currentPalette?.colors || colors,
-      previousForeground,
-      previousBackground,
-      detail.foreground,
-      detail.background,
-    );
+
+    const normalize = (h) => (typeof h === 'string' ? h.trim().toUpperCase() : '');
+    const fgInPalette = currentColors.some((c) => normalize(c) === normalize(detail.foreground));
+    const bgInPalette = currentColors.some((c) => normalize(c) === normalize(detail.background));
+
+    const nextColors = (fgInPalette && bgInPalette)
+      ? currentColors
+      : syncPaletteSelections(
+        currentColors,
+        previousForeground,
+        previousBackground,
+        detail.foreground,
+        detail.background,
+      );
 
     context.set('palette', {
       colors: nextColors,
@@ -129,7 +140,13 @@ export default async function decorate(block) {
   block.dataset.blockStatus = 'loading';
 
   const { preview } = parseContent(block);
-  const strings = await loadContrastCheckerPlaceholders();
+  const [{ getConfig }, strings, colorEditStrings, baseColorStrings] = await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
+    loadContrastCheckerPlaceholders(),
+    loadColorEditPlaceholders(),
+    loadBaseColorPlaceholders(),
+  ]);
+  const { locale } = getConfig();
 
   const destroyInstance = () => {
     checkerInstance?.destroy();
@@ -144,10 +161,12 @@ export default async function decorate(block) {
     const config = {
       ...getDefaultConfig(),
       strings,
+      colorEditStrings,
+      baseColorStrings,
     };
     block.replaceChildren();
 
-    const initialPalette = getPalette(strings);
+    const initialPalette = getPalette();
     layoutInstance = await createColorToolLayout(block, {
       layoutSpans: {
         tablet: { sidebar: 6, canvas: 6 },
@@ -158,22 +177,21 @@ export default async function decorate(block) {
         name: initialPalette.name,
       },
       toolbar: {
-        mode: 'inline',
-        variant: 'standalone',
+        daaLh: 'color-contrast-checker',
+        variant: 'sticky-on-scroll',
         showEdit: false,
-        showPalette: !isMobileOrTabletViewport(),
         showPaletteName: true,
         editPaletteName: false,
       },
       actionMenu: {
-        ...createDefaultActionMenuConfig(strings),
+        ...createDefaultActionMenuConfig(strings, locale.contentRoot),
         id: 'color-contrast-checker-menu',
         type: isMobileOrTabletViewport() ? 'nav-only' : 'full',
         activeId: 'contrast',
+        getName: () => initialPalette.name,
       },
     });
 
-    adoptHeadline(block, layoutInstance);
     await layoutInstance.actionMenuReady;
 
     checkerInstance = await mountContrastChecker(layoutInstance.slots.sidebar, {
@@ -199,9 +217,10 @@ export default async function decorate(block) {
       destroy: destroyInstance,
     });
 
-    block.classList.add('ax-shell-host', `color-contrast-checker-${config.variant}`);
+    adoptHeadline(block, layoutInstance);
     block.dataset.shellState = 'ready';
     block.dataset.blockStatus = 'loaded';
+    trackColorBlockLoad('color-contrast-checker');
   } catch (error) {
     window.lana?.log(`Contrast Checker init error: ${error.message}`, {
       tags: 'color-contrast-checker,init',

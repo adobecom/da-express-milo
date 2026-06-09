@@ -1,6 +1,11 @@
 import { createGradientEditor } from '../components/gradients/gradient-editor.js';
 import { wrapInTheme } from '../spectrum/utils/theme.js';
 import { loadIconsRail } from '../spectrum/load-spectrum.js';
+import {
+  getPreferredColorMode,
+  setPreferredColorMode,
+  subscribeColorMode,
+} from '../utils/colorModePreference.js';
 
 const VERTICAL_STACKED_BREAKPOINT_PX = 1200;
 
@@ -26,48 +31,6 @@ function createSwatchRailController(paletteData) {
 function resolveVerticalResponsive() {
   if (typeof window === 'undefined') return 'stacked';
   return window.matchMedia(`(min-width: ${VERTICAL_STACKED_BREAKPOINT_PX}px)`).matches ? 'vertical' : 'stacked';
-}
-
-function normalizePaletteColors(paletteData) {
-  return (paletteData?.colors || []).map((color) => (
-    String(color).startsWith('#') ? String(color) : `#${String(color)}`
-  ));
-}
-
-function renderPaletteFallback(
-  hostElement,
-  paletteData,
-  { paletteAriaLabel = 'Palette {hex}, color {index}' } = {},
-) {
-  const colors = normalizePaletteColors(paletteData);
-  hostElement.innerHTML = '';
-
-  const palette = document.createElement('div');
-  palette.className = 'color-palette custom-outline';
-  palette.tabIndex = 0;
-
-  colors.forEach((hex, index) => {
-    const swatch = document.createElement('div');
-    swatch.className = 'palette';
-    swatch.dataset.testid = 'palette-color-pill';
-    swatch.style.backgroundColor = hex;
-    swatch.setAttribute('role', 'button');
-    swatch.setAttribute(
-      'aria-label',
-      paletteAriaLabel
-        .replace('{hex}', hex)
-        .replace('{index}', String(index + 1)),
-    );
-    palette.appendChild(swatch);
-  });
-
-  hostElement.appendChild(palette);
-
-  if (paletteData?.name) {
-    hostElement.setAttribute('title', paletteData.name);
-  } else {
-    hostElement.removeAttribute('title');
-  }
 }
 
 export function createSwatchRailAdapter(paletteOrController, options = {}) {
@@ -125,6 +88,9 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   if (options.swatchFeatures != null && !byOrientation) {
     element.swatchFeatures = options.swatchFeatures;
   }
+  if (options.strings) {
+    element.strings = options.strings;
+  }
   element.controller = controller;
   loadIconsRail()
     .then(() => {
@@ -162,77 +128,42 @@ export function createSwatchRailAdapter(paletteOrController, options = {}) {
   if (!isController) {
     result.controller = controller;
     result.update = (newData) => {
-      const next = createSwatchRailController(newData);
-      controller.setState(next.getState());
+      const colors = newData?.colors || [];
+      const swatches = colors.map((c) => ({ hex: c.startsWith('#') ? c : `#${c}` }));
+      controller.setState({ swatches, baseColorIndex: newData?.baseColorIndex ?? 0 });
     };
   }
   return result;
 }
 
 export function createPaletteAdapter(paletteData, callbacks = {}) {
-  let currentPalette = paletteData;
-  let fallbackMode = false;
+  import('../../../libs/color-components/components/color-palette/index.js');
 
   const element = document.createElement('color-palette');
-  element.palette = currentPalette;
+  element.palette = paletteData;
   element.setAttribute('show-name-tooltip', 'true');
   element.setAttribute('palette-aria-label', 'Palette {hex}, color {index}');
-
-  const renderFallback = () => {
-    fallbackMode = true;
-    renderPaletteFallback(element, currentPalette, {
-      paletteAriaLabel: 'Palette {hex}, color {index}',
-    });
-  };
-
-  import('../../../libs/color-components/components/color-palette/index.js')
-    .catch((error) => {
-      window.lana?.log(`[ColorExplore] Failed loading color-palette component: ${error?.message || error}`, {
-        tags: 'color-explore,color-palette',
-        severity: 'warn',
-      });
-      if (!window.customElements?.get('color-palette')) {
-        renderFallback();
-      }
-    });
 
   element.addEventListener('ac-palette-select', (e) => {
     callbacks.onSelect?.(e.detail.palette);
   });
 
-  const onFallbackSelect = (event) => {
-    if (!fallbackMode) return;
-    if (event.type === 'keydown' && event.key !== 'Enter' && event.key !== ' ') return;
-    event.preventDefault();
-    callbacks.onSelect?.(currentPalette);
-  };
-
-  element.addEventListener('click', onFallbackSelect);
-  element.addEventListener('keydown', onFallbackSelect);
-
   return {
     element,
     update: (newData) => {
-      currentPalette = newData;
-      if (fallbackMode) {
-        renderFallback();
-      } else {
-        element.palette = newData;
-      }
+      element.palette = newData;
     },
     destroy: () => {
-      element.removeEventListener('click', onFallbackSelect);
-      element.removeEventListener('keydown', onFallbackSelect);
       element.remove();
     },
   };
 }
 
-export function createSearchAdapter(callbacks = {}) {
+export function createSearchAdapter({ placeholder, ...callbacks } = {}) {
   import('../../../libs/color-components/components/color-search/index.js');
 
   const element = document.createElement('color-search');
-  element.setAttribute('placeholder', 'Search colors...');
+  element.setAttribute('placeholder', placeholder ?? 'Search colors...');
 
   element.addEventListener('color-search', (e) => {
     callbacks.onSearch?.(e.detail.query);
@@ -334,13 +265,17 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
     colorMode = 'RGB',
     showPalette = true,
     mobile = false,
+    strings,
+    baseColorStrings,
   } = options;
 
   element.palette = palette.slice(0, 10);
   element.selectedIndex = selectedIndex;
-  element.colorMode = colorMode;
+  element.colorMode = getPreferredColorMode(colorMode);
   element.showPalette = showPalette;
   element.mobile = mobile;
+  if (strings) element.strings = strings;
+  if (baseColorStrings) element.baseColorStrings = baseColorStrings;
 
   element.addEventListener('color-change', (e) => {
     callbacks.onColorChange?.(e.detail);
@@ -352,10 +287,15 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
     callbacks.onSwatchSelect?.(e.detail);
   });
   element.addEventListener('mode-change', (e) => {
+    setPreferredColorMode(e.detail?.mode);
     callbacks.onModeChange?.(e.detail);
   });
   element.addEventListener('panel-close', () => {
     callbacks.onClose?.();
+  });
+
+  const unsubscribe = subscribeColorMode((mode) => {
+    if (element.colorMode !== mode) element.colorMode = mode;
   });
 
   return {
@@ -372,6 +312,49 @@ export function createColorEditAdapter(options = {}, callbacks = {}) {
       element.colorMode = mode;
     },
     getElement: () => element,
+    destroy: () => {
+      unsubscribe();
+      element.remove();
+    },
+  };
+}
+
+export function createColorChannelSliderAdapter(options = {}, callbacks = {}) {
+  import('../components/color-channel-slider/index.js');
+
+  const element = document.createElement('color-channel-slider');
+  const {
+    value = 0,
+    min = 0,
+    max = 100,
+    label = '',
+    valuetext = '',
+    gradient = '',
+    disabled = false,
+  } = options;
+
+  element.value = value;
+  element.min = min;
+  element.max = max;
+  element.label = label;
+  element.valuetext = valuetext;
+  element.gradient = gradient;
+  element.disabled = disabled;
+
+  element.addEventListener('input', (e) => {
+    callbacks.onInput?.(e.detail);
+  });
+  element.addEventListener('change', (e) => {
+    callbacks.onChange?.(e.detail);
+  });
+
+  return {
+    element,
+    setValue: (v) => { element.value = v; },
+    setGradient: (g) => { element.gradient = g; },
+    setValuetext: (v) => { element.valuetext = v; },
+    setDisabled: (d) => { element.disabled = d; },
+    getElement: () => element,
     destroy: () => element.remove(),
   };
 }
@@ -382,11 +365,13 @@ export function createColorConflictsAdapter(options = {}) {
   const element = document.createElement('color-conflicts');
   const {
     conflictsFound = false,
-    label = 'Potential color blind conflicts',
+    label,
+    strings,
   } = options;
 
   element.conflictsFound = conflictsFound;
-  element.label = label;
+  if (strings) element.strings = strings;
+  if (label) element.label = label;
 
   return {
     element,
@@ -409,21 +394,28 @@ export function createBaseColorAdapter(options = {}, callbacks = {}) {
     colorMode = 'HEX',
     showHeader = true,
     showBrightnessControl = true,
+    strings,
   } = options;
 
   element.color = color;
-  element.colorMode = colorMode;
+  element.colorMode = getPreferredColorMode(colorMode);
   element.showHeader = showHeader;
   element.showBrightnessControl = showBrightnessControl;
+  if (strings) element.strings = strings;
 
   element.addEventListener('color-change', (e) => {
     callbacks.onColorChange?.(e.detail);
   });
   element.addEventListener('mode-change', (e) => {
+    setPreferredColorMode(e.detail?.mode);
     callbacks.onModeChange?.(e.detail);
   });
   element.addEventListener('lock-change', (e) => {
     callbacks.onLockChange?.(e.detail);
+  });
+
+  const unsubscribe = subscribeColorMode((mode) => {
+    if (element.colorMode !== mode) element.colorMode = mode;
   });
 
   return {
@@ -435,6 +427,9 @@ export function createBaseColorAdapter(options = {}, callbacks = {}) {
       element.colorMode = mode;
     },
     getElement: () => element,
-    destroy: () => element.remove(),
+    destroy: () => {
+      unsubscribe();
+      element.remove();
+    },
   };
 }

@@ -1,6 +1,10 @@
 /* eslint-disable import/prefer-default-export, no-underscore-dangle */
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
-import { gradientApiResponsesToGradients, themesToGradients } from '../../../libs/services/providers/transforms.js';
+import {
+  gradientApiResponsesToGradients,
+  themeToGradient,
+  themesToGradients,
+} from '../../../libs/services/providers/transforms.js';
 
 export const PALETTE_10_COLORS_MODAL = {
   id: 'palette-1',
@@ -287,27 +291,17 @@ export function createColorDataService(config) {
   }
 
   async function toggleLike(item) {
-    try {
-      const kuler = await serviceManager.getProvider('kuler');
-      if (!kuler) {
-        window.lana?.log('[DataService] Kuler provider unavailable for like toggle', {
-          tags: 'color-explore,data-service',
-          severity: 'warning',
-        });
-        return item?.liked ?? false;
-      }
-      await kuler.updateLike({
-        id: item?.id,
-        like: item?.liked ? null : { user: true },
-        source: 'color-explore',
-      });
-      return item?.liked ?? false;
-    } catch (error) {
-      window.lana?.log(`[DataService] Toggle like error: ${error?.message}`, {
-        tags: 'color-explore,data-service',
-        severity: 'warning',
-      });
-      return item?.liked ?? false;
+    const kuler = await serviceManager.getProvider('kuler');
+    if (!kuler) {
+      throw new Error('Kuler provider unavailable');
+    }
+    const result = await kuler.updateLike({
+      id: item?.id,
+      like: item?.liked ? null : { user: true },
+      source: 'color-explore',
+    });
+    if (result === null) {
+      throw new Error('Like toggle failed');
     }
   }
 
@@ -332,6 +326,15 @@ export function createColorDataService(config) {
     return results;
   }
 
+  async function getTheme(id) {
+    const kuler = await serviceManager.getProvider('kuler');
+    if (!kuler) return null;
+    const raw = await kuler.getTheme(id);
+    if (!raw) return null;
+    const item = themeToGradient(raw);
+    return withDerivedMeta([ensurePaletteColors([item])[0]])[0] ?? null;
+  }
+
   function clearCache() {
     cache = null;
   }
@@ -346,6 +349,7 @@ export function createColorDataService(config) {
     search,
     searchMore,
     filter,
+    getTheme,
     clearCache,
     loadMore,
     toggleLike,

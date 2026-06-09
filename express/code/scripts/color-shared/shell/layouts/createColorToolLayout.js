@@ -6,13 +6,13 @@ const LAYOUT_TYPE = 'color-tool';
 const DEFAULT_SLOT_RENDER_ORDER = ['topbar', 'sidebar', 'canvas', 'footer'];
 const DESKTOP_SLOT_RENDER_ORDER = ['sidebar', 'topbar', 'canvas', 'footer'];
 const DEFAULT_LAYOUT_VARIANT = 'default';
-const DEFAULT_TOOLBAR_MODE = 'sticky';
+const DEFAULT_TOOLBAR_VARIANT = 'sticky';
 const DEFAULT_LAYOUT_SPANS = {
   tablet: { sidebar: 6, canvas: 6 },
   desktop: { sidebar: 4, canvas: 8 },
 };
 
-const TOOLBAR_MODES = new Set(['inline', 'sticky', 'sticky-on-scroll']);
+const TOOLBAR_VARIANTS = new Set(['inline', 'standalone', 'sticky', 'sticky-on-scroll']);
 
 const LAYOUT_DEPS = {
   critical: ['scripts/color-shared/shell/layouts/styles/color-tool-layout.css'],
@@ -45,8 +45,8 @@ function normalizeLayoutSpans(layoutSpans = {}) {
   };
 }
 
-function normalizeToolbarMode(toolbarMode, fallback = DEFAULT_TOOLBAR_MODE) {
-  return TOOLBAR_MODES.has(toolbarMode) ? toolbarMode : fallback;
+function normalizeToolbarVariant(toolbarVariant, fallback = DEFAULT_TOOLBAR_VARIANT) {
+  return TOOLBAR_VARIANTS.has(toolbarVariant) ? toolbarVariant : fallback;
 }
 
 function getSlotRenderOrder() {
@@ -92,14 +92,14 @@ function initializeShell(config, host) {
 function buildSlotElements(
   mobileOrder,
   layoutVariant,
-  toolbarMode,
+  toolbarVariant,
   layoutSpans,
 ) {
   const root = createTag('div', {
     class: `ax-color-tool-layout${layoutVariant === 'canvas-footer' ? ' ax-color-tool-layout--canvas-footer' : ''}`,
     'data-layout': LAYOUT_TYPE,
     'data-layout-variant': layoutVariant,
-    'data-toolbar-mode': toolbarMode,
+    'data-toolbar-variant': toolbarVariant,
   });
 
   root.style.setProperty('--ax-sidebar-span-tablet', layoutSpans.tablet.sidebar.toString());
@@ -157,7 +157,10 @@ async function mountActionMenu(topbarSlot, actionMenuConfig, modulePromise) {
     onUndo: actionMenuConfig.onUndo,
     onRedo: actionMenuConfig.onRedo,
     onGenerateRandom: actionMenuConfig.onGenerateRandom,
+    transformPalette: actionMenuConfig.transformPalette,
+    getName: actionMenuConfig.getName,
     enableState: actionMenuConfig.enableState !== false,
+    daaLh: actionMenuConfig.daaLh,
   });
 
   if (actionMenu?.element) {
@@ -167,97 +170,26 @@ async function mountActionMenu(topbarSlot, actionMenuConfig, modulePromise) {
   return actionMenu;
 }
 
-function createStickyVisibilityObserver(target, onVisibilityChange) {
-  if (!target || typeof onVisibilityChange !== 'function' || typeof IntersectionObserver === 'undefined') {
-    return null;
-  }
-
-  onVisibilityChange(false);
-
-  const observer = new IntersectionObserver((entries) => {
-    const entry = entries[0];
-    const shouldShow = Boolean(entry) && !entry.isIntersecting && entry.boundingClientRect.top < 0;
-    onVisibilityChange(shouldShow);
-  }, { threshold: 0 });
-
-  observer.observe(target);
-  return observer;
-}
-
 async function mountToolbarCore(shell, root, footerSlot, toolbarConfig, modulePromise) {
   let toolbarHandle = null;
-  let stickyToolbarHandle = null;
-  let stickyObserver = null;
-  let cleanupToolbarMount = () => {};
 
   const palette = shell.context.get('palette');
   if (palette) {
     const mod = modulePromise || import('../../toolbar/createFloatingToolbar.js');
     const { initFloatingToolbar } = await mod;
     const {
-      mode = DEFAULT_TOOLBAR_MODE,
-      variant = 'standalone',
+      variant = DEFAULT_TOOLBAR_VARIANT,
       reserveSpace,
       ...toolbarOptions
     } = toolbarConfig;
-    const shouldFloatOnScroll = mode === 'sticky-on-scroll';
 
     toolbarHandle = await initFloatingToolbar(footerSlot, {
       type: 'palette',
-      variant: shouldFloatOnScroll ? 'standalone' : variant,
+      variant,
       palette,
       reserveSpace,
       ...toolbarOptions,
     });
-
-    if (shouldFloatOnScroll && toolbarHandle) {
-      const stickyContainer = createTag('div', { class: 'ax-toolbar-floating-host' });
-      stickyContainer.hidden = true;
-      stickyContainer.setAttribute('aria-hidden', 'true');
-      root.appendChild(stickyContainer);
-
-      stickyToolbarHandle = toolbarHandle;
-
-      const syncPaletteName = ({ palette: nextPalette }) => {
-        shell.context.set('palette', nextPalette);
-      };
-
-      let isStickyActive = false;
-      const setStickyState = (nextSticky) => {
-        if (nextSticky === isStickyActive) return;
-
-        isStickyActive = nextSticky;
-
-        if (nextSticky) {
-          stickyContainer.hidden = false;
-          stickyContainer.setAttribute('aria-hidden', 'false');
-          toolbarHandle.mount(stickyContainer);
-          toolbarHandle.setVariant('sticky', {
-            reserveContainer: stickyContainer,
-            reserveSpace: false,
-          });
-          return;
-        }
-
-        toolbarHandle.mount(footerSlot);
-        toolbarHandle.setVariant('standalone', {
-          reserveContainer: footerSlot,
-          reserveSpace,
-        });
-        stickyContainer.hidden = true;
-        stickyContainer.setAttribute('aria-hidden', 'true');
-      };
-
-      toolbarHandle.toolbar?.on('namechange', syncPaletteName);
-      cleanupToolbarMount = () => {
-        toolbarHandle.toolbar?.off?.('namechange', syncPaletteName);
-        stickyContainer.hidden = true;
-        stickyContainer.setAttribute('aria-hidden', 'true');
-        stickyContainer.remove();
-      };
-
-      stickyObserver = createStickyVisibilityObserver(footerSlot, setStickyState);
-    }
   }
 
   const onPaletteChange = (newPalette) => {
@@ -268,9 +200,6 @@ async function mountToolbarCore(shell, root, footerSlot, toolbarConfig, modulePr
 
   return {
     toolbarHandle,
-    stickyToolbarHandle,
-    stickyObserver,
-    cleanupToolbarMount,
     onPaletteChange,
   };
 }
@@ -315,9 +244,6 @@ function createLayoutAPI(slots, shell, root) {
     destroyed: false,
     actionMenu: null,
     toolbar: null,
-    stickyToolbar: null,
-    stickyObserver: null,
-    cleanupToolbarMount: () => {},
     onPaletteChange: () => {},
   };
 
@@ -330,9 +256,6 @@ function createLayoutAPI(slots, shell, root) {
 
     get toolbar() { return state.toolbar; },
     set toolbar(v) { state.toolbar = v; },
-
-    get stickyToolbar() { return state.stickyToolbar; },
-    set stickyToolbar(v) { state.stickyToolbar = v; },
 
     get destroyed() { return state.destroyed; },
 
@@ -356,12 +279,7 @@ function createLayoutAPI(slots, shell, root) {
     destroy() {
       state.destroyed = true;
       if (state.onPaletteChange) shell.context.off('palette', state.onPaletteChange);
-      state.stickyObserver?.disconnect();
-      state.cleanupToolbarMount?.();
       state.actionMenu?.destroy();
-      if (state.stickyToolbar && state.stickyToolbar !== state.toolbar) {
-        state.stickyToolbar.destroy();
-      }
       state.toolbar?.destroy();
       root.remove();
       shell.destroy();
@@ -386,17 +304,17 @@ export default async function createColorToolLayout(container, config = {}) {
   const toolbarModulePromise = config.palette
     ? import('../../toolbar/createFloatingToolbar.js') : null;
 
-  const resolvedToolbarMode = normalizeToolbarMode(toolbarConfig.mode);
+  const resolvedToolbarVariant = normalizeToolbarVariant(toolbarConfig.variant);
   const resolvedLayoutSpans = normalizeLayoutSpans(layoutSpans);
   const resolvedToolbarConfig = {
     ...toolbarConfig,
-    mode: resolvedToolbarMode,
+    variant: resolvedToolbarVariant,
   };
 
   const { root, slots } = buildSlotElements(
     mobileOrder,
     layoutVariant,
-    resolvedToolbarMode,
+    resolvedToolbarVariant,
     resolvedLayoutSpans,
   );
 
@@ -428,13 +346,10 @@ export default async function createColorToolLayout(container, config = {}) {
     toolbarModulePromise,
   );
   const toolbarReady = toolbarMountPromise.then(({
-    toolbarHandle, stickyToolbarHandle, stickyObserver, cleanupToolbarMount, onPaletteChange,
+    toolbarHandle, onPaletteChange,
   }) => {
     if (state.destroyed) return;
     state.toolbar = toolbarHandle;
-    state.stickyToolbar = stickyToolbarHandle;
-    state.stickyObserver = stickyObserver;
-    state.cleanupToolbarMount = cleanupToolbarMount;
     state.onPaletteChange = onPaletteChange;
   }).catch(() => {});
 

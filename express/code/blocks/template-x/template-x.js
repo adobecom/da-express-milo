@@ -111,7 +111,35 @@ async function fetchAndRenderTemplates(props, options = {}) {
  */
 async function fetchAndRenderTemplatesFromTaas(taasQuery, props, options = {}) {
   const { isFirstLoad = false } = options;
-  const res = await fetchResults(taasQuery);
+  const queryParams = new URLSearchParams(taasQuery);
+  if (props?.start) queryParams.set('start', props.start);
+
+  // Apply toolbar filter/sort overrides so user selections affect TAAS results
+  if (props?.filters?.premium && props.filters.premium !== 'all') {
+    queryParams.set('license', props.filters.premium.toLowerCase() === 'false' ? 'free' : 'premium');
+  } else if (props?.filters?.premium === 'all') {
+    queryParams.delete('license');
+  }
+  if (props?.filters?.animated && props.filters.animated !== 'all') {
+    queryParams.set('behaviors', props.filters.animated.toLowerCase() === 'false' ? 'still' : 'animated');
+  } else if (props?.filters?.animated === 'all') {
+    queryParams.delete('behaviors');
+  }
+  if (props?.sort) {
+    const sortToOrderBy = {
+      'Most Viewed': '-remixCount',
+      'Rare & Original': 'remixCount',
+      'Newest to Oldest': '-createDate',
+      'Oldest to Newest': 'createDate',
+    };
+    if (sortToOrderBy[props.sort]) {
+      queryParams.set('orderBy', sortToOrderBy[props.sort]);
+    } else {
+      queryParams.delete('orderBy');
+    }
+  }
+
+  const res = await fetchResults(queryParams.toString());
 
   if (!res || !res.items || !Array.isArray(res.items)) {
     return { templates: null };
@@ -139,7 +167,7 @@ async function fetchAndRenderTemplatesFromTaas(taasQuery, props, options = {}) {
       const renderOptions = {
         eager: isFirstLoad && index < EAGER_LOAD_COUNT,
       };
-      return renderTemplate(item, variant, {}, renderOptions);
+      return renderTemplate(item, variant, props, renderOptions);
     }),
   );
   templates.forEach((tplt) => tplt.classList.add('template'));
@@ -490,7 +518,9 @@ async function build2by2(parentContainer, block) {
 
 // WIP
 async function decorateNewTemplates(block, props, options = { reDrawMasonry: false }) {
-  const { templates: newTemplates } = await fetchAndRenderTemplates(props);
+  const { templates: newTemplates } = props.taasQuery
+    ? await fetchAndRenderTemplatesFromTaas(props.taasQuery, props)
+    : await fetchAndRenderTemplates(props);
   updateImpressionCache({ result_count: props.total });
   const loadMore = block.parentElement.querySelector('.load-more');
 
@@ -1297,10 +1327,15 @@ function toggleMasonryView(block, props, button, toggleButtons) {
 }
 
 const views = ['sm', 'md', 'lg'];
+const MOBILE_TEMPLATE_VIEW_BREAKPOINT = 901;
 function getInitialViewIndex(props) {
-  const authoredViewIndex = views.findIndex(
-    (size) => props.initialTemplateView?.toLowerCase().trim() === size,
-  );
+  const isMobileViewport = window.innerWidth < MOBILE_TEMPLATE_VIEW_BREAKPOINT;
+  const authoredMobileView = props.initialTemplateViewMobile?.toLowerCase().trim();
+  const authoredDefaultView = props.initialTemplateView?.toLowerCase().trim();
+  const selectedView = isMobileViewport && authoredMobileView
+    ? authoredMobileView
+    : authoredDefaultView;
+  const authoredViewIndex = views.findIndex((size) => selectedView === size);
   return authoredViewIndex === -1 ? 0 : authoredViewIndex;
 }
 

@@ -9,7 +9,6 @@ let getMetadata; let replaceKeyArray;
 let tagCopied; let editThisTemplate;
 let free;
 let variants;
-let props;
 let sharePlaceholder;
 let mv;
 let sdid;
@@ -176,10 +175,10 @@ function renderShareWrapper(templateInfo) {
   return wrapper;
 }
 
-export const buildiFrameContent = (template) => {
+export const buildiFrameContent = (template, properties = {}) => {
   const { branchUrl } = template.customLinks;
-  const taskID = props?.taskid;
-  const zazzleUrl = props?.zazzleurl;
+  const taskID = properties?.taskid;
+  const zazzleUrl = properties?.zazzleurl;
   const { lang } = document.documentElement;
   const iFrame = createTag('iframe', {
     src: `${zazzleUrl}?TD=${template.id}&taskID=${taskID}&shortcode=${branchUrl.split('/').pop()}&lang=${lang}`,
@@ -191,10 +190,10 @@ export const buildiFrameContent = (template) => {
   return iFrame;
 };
 /* c8 ignore next */
-const showModaliFrame = async (template) => {
+const showModaliFrame = async (template, properties) => {
   const { getModal } = await import(`${getLibs()}/blocks/modal/modal.js`);
 
-  const iFrameContent = buildiFrameContent(template);
+  const iFrameContent = buildiFrameContent(template, properties);
   const modal = await getModal(null, {
     id: template.id.replace(/:/g, '-'),
     class: 'print-iframe',
@@ -206,7 +205,7 @@ const showModaliFrame = async (template) => {
 };
 
 /* c8 ignore next */
-function renderPrintCTA(template) {
+function renderPrintCTA(template, properties) {
   const btnTitle = 'Customize design';
   const btnEl = createTag('a', {
     href: '#modal',
@@ -217,14 +216,14 @@ function renderPrintCTA(template) {
 
   btnEl.addEventListener('click', async (e) => {
     e.preventDefault();
-    await showModaliFrame(template);
+    await showModaliFrame(template, properties);
   });
 
   btnEl.textContent = btnTitle;
   return btnEl;
 }
 
-function renderPrintCTALink(template) {
+function renderPrintCTALink(template, properties) {
   const link = createTag('a', {
     href: '#modal',
     title: 'Customize design',
@@ -233,7 +232,7 @@ function renderPrintCTALink(template) {
 
   link.addEventListener('click', async (e) => {
     e.preventDefault();
-    await showModaliFrame(template);
+    await showModaliFrame(template, properties);
   });
 
   return link;
@@ -259,6 +258,38 @@ function extractURNFromTemplate(template) {
   return null;
 }
 
+function ensureAbsoluteUrl(url) {
+  if (!url) return url;
+  if (/^https?:\/\/|^\/\/|^\//.test(url)) return url;
+  return `https://${url}`;
+}
+
+function normalizeEncodedAmpersands(value) {
+  if (!value || typeof value !== 'string') return value ?? '';
+  return value.replace(/(?:%26|&)amp(?:%3B|;)/gi, '&');
+}
+
+function sanitizeExternalCtaUrl(url) {
+  return ensureAbsoluteUrl(normalizeEncodedAmpersands(url));
+}
+
+function appendTemplateId(url, template) {
+  const urnId = extractURNFromTemplate(template);
+  if (!urnId) return url;
+  const [urlWithoutHash, hash = ''] = url.split('#');
+  const [basePath, queryString = ''] = urlWithoutHash.split('?');
+  if (basePath.includes(urnId) || queryString.includes(`templateId=${urnId}`)) return url;
+  if (!basePath.includes('/design/template/')) {
+    const separator = queryString ? '&' : '?';
+    const hashSuffix = hash ? `#${hash}` : '';
+    return `${urlWithoutHash}${separator}templateId=${urnId}${hashSuffix}`;
+  }
+  const normalizedPath = basePath.endsWith('/') ? basePath : `${basePath}/`;
+  const querySuffix = queryString ? `?${queryString}` : '';
+  const hashSuffix = hash ? `#${hash}` : '';
+  return `${normalizedPath}${urnId}${querySuffix}${hashSuffix}`;
+}
+
 function constructCustomURL(template, customUrlConfig) {
   if (!customUrlConfig?.baseUrl) return null;
 
@@ -266,9 +297,13 @@ function constructCustomURL(template, customUrlConfig) {
   if (!urnId) return null;
 
   const { baseUrl, queryParams } = customUrlConfig;
-  const separator = queryParams ? '&' : '?';
-
-  return `${baseUrl}?${queryParams}${separator}templateId=${urnId}`;
+  const normalizedBaseUrl = sanitizeExternalCtaUrl(baseUrl);
+  const normalizedQueryParams = normalizeEncodedAmpersands(queryParams);
+  const separator = normalizedBaseUrl.includes('?') ? '&' : '?';
+  const urlWithQueryParams = normalizedQueryParams
+    ? `${normalizedBaseUrl}${separator}${normalizedQueryParams}`
+    : normalizedBaseUrl;
+  return appendTemplateId(urlWithQueryParams, template);
 }
 
 function renderCTA(branchUrl, template, customUrlConfig = null) {
@@ -466,6 +501,7 @@ function renderMediaWrapper(template) {
       renderedMedia = await renderRotatingMedias(mediaWrapper, template.pages, templateInfo);
     }
     renderedMedia.hover();
+    currentHoveredElement?.closest('.button-container')?.querySelector('.shared-tooltip')?.classList.remove('display-tooltip');
     currentHoveredElement?.classList.remove('singleton-hover');
     currentHoveredElement = e.target;
     currentHoveredElement?.classList.add('singleton-hover');
@@ -483,6 +519,7 @@ function renderMediaWrapper(template) {
       renderedMedia = await renderRotatingMedias(mediaWrapper, template.pages, templateInfo);
       renderedMedia.hover();
     }
+    currentHoveredElement?.closest('.button-container')?.querySelector('.shared-tooltip')?.classList.remove('display-tooltip');
     currentHoveredElement?.classList.remove('singleton-hover');
     currentHoveredElement = e.target;
     currentHoveredElement?.classList.add('singleton-hover');
@@ -491,7 +528,47 @@ function renderMediaWrapper(template) {
   return { mediaWrapper, enterHandler, leaveHandler, focusHandler };
 }
 
-function renderHoverWrapper(template, customUrlConfig = null) {
+function applyExperimentalCtas(template, cta, btnContainer) {
+  const cta1Url = getMetadata('external-template-cta-link-1');
+  const cta2Url = getMetadata('external-template-cta-link-2');
+  const cta1Text = getMetadata('external-template-cta-link-text-1');
+  const cta2Text = getMetadata('external-template-cta-link-text-2');
+
+  if (!cta1Url && !cta2Url && !cta1Text && !cta2Text) return null;
+
+  if (cta1Url) {
+    cta.href = appendTemplateId(sanitizeExternalCtaUrl(cta1Url), template);
+  }
+  if (cta1Text) {
+    cta.textContent = cta1Text;
+    cta.title = cta1Text;
+    cta.setAttribute('aria-label', `${cta1Text} ${getTemplateTitle(template)}`);
+  }
+
+  const isFreeStatic = !variants?.includes('flyer')
+    && !variants?.includes('t-shirt')
+    && !variants?.includes('print')
+    && template.licensingCategory === 'free'
+    && !containsVideo(template.pages);
+
+  let secondaryCta = null;
+  if (isFreeStatic && cta2Url) {
+    const btnTitle = cta2Text || '';
+    secondaryCta = createTag('a', {
+      href: appendTemplateId(sanitizeExternalCtaUrl(cta2Url), template),
+      title: btnTitle,
+      class: 'button gray small secondary-template-cta',
+      'aria-label': `${btnTitle} ${getTemplateTitle(template)}`,
+    });
+    secondaryCta.textContent = btnTitle;
+  }
+
+  if (cta1Url || cta1Text) btnContainer.classList.add('experimental-ctas');
+  if (secondaryCta) btnContainer.append(secondaryCta);
+
+  return secondaryCta;
+}
+function renderHoverWrapper(template, customUrlConfig = null, properties = {}) {
   let cta;
   let ctaLink;
 
@@ -507,19 +584,21 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   if (variants?.includes('flyer')
   || variants?.includes('t-shirt')
   || variants?.includes('print')) {
-    cta = renderPrintCTA(template);
-    ctaLink = renderPrintCTALink(template);
+    cta = renderPrintCTA(template, properties);
+    ctaLink = renderPrintCTALink(template, properties);
   } else {
-    mv = props?.mv ? `?mv=${props.mv}` : '';
-    sdid = props?.sdid ? `&sdid=${props.sdid}` : '';
-    source = props?.source ? `&source=${props.source}` : '';
-    action = props?.action ? `&action=${props.action}` : '';
+    mv = properties?.mv ? `?mv=${properties.mv}` : '';
+    sdid = properties?.sdid ? `&sdid=${properties.sdid}` : '';
+    source = properties?.source ? `&source=${properties.source}` : '';
+    action = properties?.action ? `&action=${properties.action}` : '';
     cta = renderCTA(template.customLinks.branchUrl, template, customUrlConfig);
     ctaLink = renderCTALink(template.customLinks.branchUrl, template, customUrlConfig);
   }
 
   cta.setAttribute('aria-label', `${editThisTemplate} ${getTemplateTitle(template)}`);
   ctaLink.append(mediaWrapper);
+
+  const secondaryCta = applyExperimentalCtas(template, cta, btnContainer);
 
   // Create shareWrapper separately
   const templateTitle = getTemplateTitle(template);
@@ -561,6 +640,7 @@ function renderHoverWrapper(template, customUrlConfig = null) {
   };
 
   cta.addEventListener('click', ctaClickHandler, { passive: true });
+  if (secondaryCta) secondaryCta.addEventListener('click', ctaClickHandler, { passive: true });
   ctaLink.addEventListener('click', ctaClickHandler, { passive: true });
   ctaLink.addEventListener('click', ctaClickHandlerTouchDevice);
   return btnContainer;
@@ -633,7 +713,6 @@ function renderStillWrapper(template, renderOptions = {}) {
 
 export default async function renderTemplate(template, variant, properties, renderOptions = {}) {
   variants = variant;
-  props = properties;
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]).then(([utils, placeholders]) => {
     ({ createTag, getConfig, getMetadata } = utils);
     ({ replaceKeyArray } = placeholders);
@@ -648,6 +727,6 @@ export default async function renderTemplate(template, variant, properties, rend
   const customUrlConfig = properties?.customUrlConfig || null;
 
   tmpltEl.append(renderStillWrapper(template, renderOptions));
-  tmpltEl.append(renderHoverWrapper(template, customUrlConfig));
+  tmpltEl.append(renderHoverWrapper(template, customUrlConfig, properties));
   return tmpltEl;
 }

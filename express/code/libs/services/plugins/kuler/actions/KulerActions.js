@@ -167,6 +167,11 @@ export class ExploreActions extends BaseActionGroup {
       url = `${url}?filter=${filter}&sort=${sort}&time=${time}`;
     }
 
+    const auth = this.plugin.getAuthState();
+    if (auth.isLoggedIn && auth.token) {
+      url = `${url}&metadata=all`;
+    }
+
     url = `${url}&startIndex=${startIndex}&maxNumber=${KULER_DEFAULT_BATCH_SIZE}`;
     return url;
   }
@@ -214,19 +219,19 @@ export class ThemeActions extends BaseActionGroup {
    * @returns {string}
    */
   buildThemeUrl(themeId) {
-    const { serviceConfig, endpoints } = this.plugin;
-    const { themeBaseUrl } = serviceConfig;
+    const { endpoints } = this.plugin;
+    const { themeBaseUrl } = endpoints;
     const { api, themePath } = endpoints;
     BaseActionGroup.requireConfig({ themeBaseUrl, api, themePath }, 'Kuler');
-    return `${themeBaseUrl}${api}${themePath}/${themeId}`;
+    return `${themeBaseUrl}${api}${themePath}/${themeId}?metadata=all`;
   }
 
   /**
    * @returns {string}
    */
   buildThemeSaveUrl() {
-    const { serviceConfig, endpoints } = this.plugin;
-    const { themeBaseUrl } = serviceConfig;
+    const { endpoints } = this.plugin;
+    const { themeBaseUrl } = endpoints;
     const { api, themePath } = endpoints;
     BaseActionGroup.requireConfig({ themeBaseUrl, api, themePath }, 'Kuler');
     return `${themeBaseUrl}${api}${themePath}`;
@@ -341,7 +346,7 @@ export class ThemeActions extends BaseActionGroup {
       });
     }
     const url = this.buildThemeUrl(themeId);
-    return this.plugin.fetchWithFullUrl(url, 'GET');
+    return this.plugin.fetchWithFullUrl(url, 'GET', null, { skipAuth: true });
   }
 
   /**
@@ -426,8 +431,8 @@ export class GradientActions extends BaseActionGroup {
    * @returns {string}
    */
   buildGradientSaveUrl() {
-    const { serviceConfig, endpoints } = this.plugin;
-    const { gradientBaseUrl } = serviceConfig;
+    const { endpoints } = this.plugin;
+    const { gradientBaseUrl } = endpoints;
     const { api, gradientPath } = endpoints;
     BaseActionGroup.requireConfig({ gradientBaseUrl, api, gradientPath }, 'Kuler');
     return `${gradientBaseUrl}${api}${gradientPath}`;
@@ -438,8 +443,8 @@ export class GradientActions extends BaseActionGroup {
    * @returns {string}
    */
   buildGradientDeleteUrl(gradientId) {
-    const { serviceConfig, endpoints } = this.plugin;
-    const { gradientBaseUrl } = serviceConfig;
+    const { endpoints } = this.plugin;
+    const { gradientBaseUrl } = endpoints;
     const { api, gradientPath } = endpoints;
     BaseActionGroup.requireConfig({ gradientBaseUrl, api, gradientPath }, 'Kuler');
     return `${gradientBaseUrl}${api}${gradientPath}/${gradientId}`;
@@ -500,9 +505,8 @@ export class LikeActions extends BaseActionGroup {
    * @returns {string}
    */
   buildThemeLikeUrl(themeId) {
-    const { serviceConfig, endpoints } = this.plugin;
-    const { likeBaseUrl } = serviceConfig;
-    const { themePath } = endpoints;
+    const { endpoints } = this.plugin;
+    const { themePath, likeBaseUrl } = endpoints;
     BaseActionGroup.requireConfig({ likeBaseUrl, themePath }, 'Kuler');
     return `${likeBaseUrl}${themePath}/${themeId}/likeDuplicate`;
   }
@@ -512,9 +516,8 @@ export class LikeActions extends BaseActionGroup {
    * @returns {string}
    */
   buildThemeUnlikeUrl(themeId) {
-    const { serviceConfig, endpoints } = this.plugin;
-    const { likeBaseUrl } = serviceConfig;
-    const { themePath } = endpoints;
+    const { endpoints } = this.plugin;
+    const { themePath, likeBaseUrl } = endpoints;
     BaseActionGroup.requireConfig({ likeBaseUrl, themePath }, 'Kuler');
     return `${likeBaseUrl}${themePath}/${themeId}/like`;
   }

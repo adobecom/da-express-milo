@@ -20,13 +20,14 @@ const PROD_CONFIG = {
     kuler: {
       baseUrl: 'https://search.adobe.io/api/v2',
       exploreBaseUrl: 'https://themesb3.adobe.io',
-      apiKey: 'AdobeExpressWeb',
+      apiKey: 'KulerBackendClientId',
+      middleware: ['error', 'logging', { name: 'auth', topics: ['like.*'] }],
       endpoints: {
         search: '/search',
         api: '/api/v2',
         themePath: '/themes',
         gradientPath: '/gradient',
-        themeBaseUrl: 'https://themes.adobe.io',
+        themeBaseUrl: 'https://themesb3.adobe.io',
         likeBaseUrl: 'https://asset.adobe.io',
         gradientBaseUrl: 'https://gradient.adobe.io',
       },
@@ -97,12 +98,14 @@ const STAGE_CONFIG = {
     kuler: {
       ...PROD_CONFIG.services.kuler,
       baseUrl: 'https://search-stage.adobe.io/api/v2',
-      exploreBaseUrl: 'https://themesb3-stage.adobe.io',
+      // exploreBaseUrl: 'https://themesb3-stage.adobe.io', /** Due to issues we are seeing with stage url not loading, we have removed this for now. */
       endpoints: {
         ...PROD_CONFIG.services.kuler.endpoints,
-        themeBaseUrl: 'https://themes-stage.adobe.io',
+        // themeBaseUrl: 'https://themes-stage.adobe.io',
+        /** Due to issues we are seeing with stage url not loading, we have removed this for now. */
         likeBaseUrl: 'https://asset-stage.adobe.io',
-        gradientBaseUrl: 'https://gradient-stage.adobe.io',
+        // gradientBaseUrl: 'https://gradient-stage.adobe.io',
+        /** Due to issues we are seeing with stage url not loading, we have removed this for now. */
       },
     },
     behance: {

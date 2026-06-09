@@ -1,6 +1,8 @@
 import { expect } from '@esm-bundle/chai';
 import { readFile } from '@web/test-runner-commands';
 
+window.isTestEnv = true;
+
 const imports = await Promise.all([
   import('../../express/code/scripts/utils.js'),
   import('../../express/code/scripts/scripts.js'),
@@ -58,15 +60,24 @@ describe('template-utils', () => {
     });
     it('handles filters', () => {
       // filters=language==en-US
-      const { url } = recipe2ApiQuery('topics=class&tasks=flyer&language=en-US&license=free&behaviors=still&collection=default');
+      const { url } = recipe2ApiQuery('topics=class&tasks=flyer&language=en-US&locales=IN&license=free&behaviors=still&collection=default');
       const params = new URL(url).searchParams;
       const filters = params.getAll('filters');
-      expect(filters.length).to.equal(5);
+      expect(filters.length).to.equal(6);
+      expect(filters.includes('applicableRegions==IN')).to.be.true;
       expect(filters.includes('licensingCategory==free')).to.be.true;
       expect(filters.includes('behaviors==still')).to.be.true;
       expect(filters.includes('pages.task.name==flyer')).to.be.true;
       expect(filters.includes('topics==class')).to.be.true;
       expect(filters.includes('language==en-US')).to.be.true;
+    });
+    it('handles locales as filter', () => {
+      const { url } = recipe2ApiQuery('topics=class&locales=en or fr&collection=default');
+      const params = new URL(url).searchParams;
+      const filters = params.getAll('filters');
+      expect(filters.includes('topics==class')).to.be.true;
+      expect(filters.includes('applicableRegions==ZZ,FR')).to.be.true;
+      expect(params.get('locales')).to.not.exist;
     });
     it('handles topics top-level AND', () => {
       // filters=language==en-US

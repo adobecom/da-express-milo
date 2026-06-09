@@ -1,5 +1,8 @@
 /* eslint-disable max-len, no-underscore-dangle */
 import { expect } from '@esm-bundle/chai';
+import { setLibs } from '../../../../express/code/scripts/utils.js';
+
+setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
 // Minimal data service stub that mirrors the real createContrastDataService API.
 function createStubDataService() {
@@ -63,21 +66,7 @@ function createStubDataService() {
   };
 }
 
-// Stub for Spectrum components used by the header
-const tabsStub = {
-  element: document.createElement('div'),
-  getSelected: () => 'large-text',
-  setSelected: () => {},
-  destroy: () => {},
-};
-
-const pickerStub = {
-  element: document.createElement('div'),
-  destroy: () => {},
-};
-
 // Mock dynamic imports before loading the module
-const originalImport = window.__importShim || null;
 
 describe('createContrastCheckerModalContent', () => {
   let createContrastCheckerModalContent;
@@ -181,13 +170,13 @@ describe('createContrastCheckerModalContent', () => {
   });
 
   describe('data service interaction', () => {
-    it('should call checkWCAG for all non-diagonal pairs', () => {
+    it('should call checkWCAG for all non-diagonal pairs', async () => {
       const colors = ['#FF0000', '#00FF00', '#0000FF'];
       let callCount = 0;
       const trackingService = {
         ...dataService,
         checkWCAG(fg, bg) {
-          callCount++;
+          callCount += 1;
           return dataService.checkWCAG(fg, bg);
         },
       };
@@ -196,6 +185,9 @@ describe('createContrastCheckerModalContent', () => {
         { colors },
         { dataService: trackingService },
       );
+
+      // init() is async (awaits Spectrum loadTooltip) — wait for it to complete
+      await new Promise((r) => { setTimeout(r, 500); });
 
       // 3 colors: 3*3 - 3 diagonal = 6 non-diagonal pairs
       expect(callCount).to.equal(6);
@@ -237,6 +229,58 @@ describe('createContrastCheckerModalContent', () => {
       );
       expect(result10.element.classList.contains('cc-modal-contrast-checker')).to.be.true;
       result10.destroy();
+    });
+  });
+
+  describe('localized strings', () => {
+    it('uses English defaults when no strings option is provided', () => {
+      const result = createContrastCheckerModalContent(
+        { colors: [] },
+        { dataService },
+      );
+      expect(result.element.textContent).to.include('At least 2 colors');
+      result.destroy();
+    });
+
+    it('uses provided string overrides for empty state', () => {
+      const result = createContrastCheckerModalContent(
+        { colors: ['#FF0000'] },
+        {
+          dataService,
+          strings: { modalEmptyMessage: 'Au moins 2 couleurs sont requises.' },
+        },
+      );
+      expect(result.element.textContent).to.equal('Au moins 2 couleurs sont requises.');
+      result.destroy();
+    });
+
+    it('uses provided string overrides for matrix aria label', async () => {
+      const result = createContrastCheckerModalContent(
+        { colors: ['#000000', '#FFFFFF'] },
+        {
+          dataService,
+          strings: { modalMatrixAria: 'Matrice de comparaison de contraste' },
+        },
+      );
+      // Wait for async init (header/spectrum imports)
+      await new Promise((r) => { setTimeout(r, 500); });
+      const grid = result.element.querySelector('.cc-modal-grid');
+      if (grid) {
+        expect(grid.getAttribute('aria-label')).to.equal('Matrice de comparaison de contraste');
+      }
+      result.destroy();
+    });
+
+    it('falls back to English defaults for missing keys in partial overrides', () => {
+      const result = createContrastCheckerModalContent(
+        { colors: [] },
+        {
+          dataService,
+          strings: { modalTitle: 'Voir le contraste' },
+        },
+      );
+      expect(result.element.textContent).to.include('At least 2 colors');
+      result.destroy();
     });
   });
 

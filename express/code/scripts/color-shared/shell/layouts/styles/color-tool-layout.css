@@ -1,16 +1,12 @@
 .ax-color-tool-layout {
   /* Layout configuration */
   --ax-layout-gap: var(--spacing-300);
-  --ax-layout-row-gap: var(--ax-layout-gap);
+  --ax-layout-row-gap: 0;
   --ax-layout-column-gap: var(--ax-layout-gap);
   --ax-color-tool-presentation-max-width: var(--block-wd-max-width);
-  --ax-layout-outer-margin-inline: var(--spacing-300);
-  --ax-layout-outer-margin-block: var(--spacing-300);
   --ax-layout-presentation-max-width: var(--ax-color-tool-presentation-max-width);
   --ax-layout-max-inline-size: var(--ax-layout-presentation-max-width);
   --ax-layout-grid-gutter: var(--ax-grid-gutter, var(--spacing-300));
-  --ax-layout-padding-inline: 0;
-  --ax-layout-padding-block: 0;
   --ax-layout-inline-size: 100%;
 
   /* Grid configuration (desktop) */
@@ -36,19 +32,19 @@
   --ax-bg-footer: var(--color-white);
 
   /* Slot padding (mobile) */
+  --ax-padding-topbar-mobile: 0;
   --ax-padding-sidebar-mobile: 0;
   --ax-padding-canvas-mobile: 0;
 
   /* Slot padding (desktop) */
+  --ax-padding-topbar-desktop: 0;
   --ax-padding-sidebar-desktop: 0;
   --ax-padding-canvas-desktop: 0;
 
   /* Z-index layers */
-  --ax-z-topbar: 20;
   --ax-z-footer: 10;
 
   /* Sticky positions */
-  --ax-sticky-topbar-top: 0;
   --ax-sticky-footer-bottom: 0;
 
   /* Canvas Styling */
@@ -74,15 +70,15 @@
   --ax-text-body-gap: var(--spacing-100);
   --ax-logo-gap: var(--spacing-100);
 
-  padding: var(--ax-layout-padding-block) var(--ax-layout-padding-inline);
-  margin: var(--ax-layout-outer-margin-block) var(--ax-layout-outer-margin-inline);
+  box-sizing: border-box;
+  padding: 0 var(--spacing-300) var(--spacing-300);
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   row-gap: var(--ax-layout-row-gap);
   column-gap: var(--ax-layout-column-gap);
   inline-size: var(--ax-layout-inline-size);
   max-inline-size: var(--ax-color-tool-presentation-max-width);
-  contain: layout style;
 }
 
 .ax-color-tool-layout--canvas-footer {
@@ -91,14 +87,10 @@
 }
 
 .ax-shell-slot {
-  contain: layout style;
   position: relative;
   order: var(--mobile-order);
   min-inline-size: 0;
-}
-
-.ax-toolbar-floating-host {
-  display: contents;
+  box-sizing: border-box;
 }
 
 .ax-color-tool-layout--canvas-footer .ax-shell-slot--topbar,
@@ -109,9 +101,7 @@
 .ax-shell-slot--topbar {
   grid-area: var(--ax-area-topbar);
   background-color: var(--ax-bg-topbar);
-  position: sticky;
-  top: var(--ax-sticky-topbar-top);
-  z-index: var(--ax-z-topbar);
+  padding: var(--ax-padding-topbar-mobile);
 }
 
 .ax-shell-slot--sidebar {
@@ -125,7 +115,6 @@
   grid-area: var(--ax-area-canvas);
   background-color: var(--ax-bg-canvas);
   padding: var(--ax-padding-canvas-mobile);
-  overflow-y: auto;
   block-size: var(--ax-slot-canvas-block-size);
 }
 
@@ -138,18 +127,28 @@
   z-index: auto;
 }
 
-.ax-color-tool-layout[data-layout-variant="default"][data-toolbar-mode="sticky"] .ax-shell-slot--footer {
+.ax-color-tool-layout[data-layout-variant="default"][data-toolbar-variant="sticky"] .ax-shell-slot--footer {
   position: sticky;
   bottom: var(--ax-sticky-footer-bottom);
   z-index: var(--ax-z-footer);
 }
 
 .ax-color-tool-layout[data-layout-variant="canvas-footer"] .ax-shell-slot--footer,
-.ax-color-tool-layout[data-toolbar-mode="inline"] .ax-shell-slot--footer,
-.ax-color-tool-layout[data-toolbar-mode="sticky-on-scroll"] .ax-shell-slot--footer {
+.ax-color-tool-layout[data-toolbar-variant="inline"] .ax-shell-slot--footer,
+.ax-color-tool-layout[data-toolbar-variant="sticky-on-scroll"] .ax-shell-slot--footer {
   position: relative;
   bottom: unset;
   z-index: auto;
+}
+
+@media (max-width: 1199px) {
+  .ax-color-tool-layout[data-toolbar-variant="sticky-on-scroll"] .ax-toolbar-standalone .ax-swatch-strip {
+    display: none;
+  }
+
+  .ax-color-tool-layout[data-toolbar-variant="sticky-on-scroll"] .ax-toolbar-standalone .ax-palette-name {
+    display: flex;
+  }
 }
 
 .ax-shell-slot:focus-within {
@@ -157,21 +156,20 @@
   outline-offset: var(--ax-focus-outline-offset);
 }
 
-@media (min-width: 888px) {
+@media (min-width: 600px) {
   .ax-color-tool-layout {
-    --ax-layout-outer-margin-inline: var(--spacing-500);
-    --ax-layout-outer-margin-block: var(--spacing-500);
+    padding: var(--spacing-400) var(--spacing-500);
   }
+}
 
+@media (min-width: 888px) {
   .ax-shell-slot {
     order: unset;
     grid-area: auto;
   }
 
   .ax-shell-slot--topbar {
-    position: relative;
-    top: unset;
-    z-index: unset;
+    padding: var(--ax-padding-topbar-desktop);
   }
 
   .ax-shell-slot--sidebar {
@@ -236,10 +234,7 @@
 
 @media (min-width: 1200px) {
   .ax-color-tool-layout {
-    --ax-layout-outer-margin-inline: var(--spacing-600);
-    --ax-layout-outer-margin-block: var(--spacing-600);
-    padding-inline: var(--spacing-600);
-    margin-inline: auto;
+    padding: var(--spacing-600);
   }
 
   .ax-shell-slot--topbar {

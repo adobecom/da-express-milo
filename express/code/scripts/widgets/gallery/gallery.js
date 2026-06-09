@@ -19,7 +19,7 @@ const prevSVGHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none"
 
 let createTag; let loadStyle;
 
-function createControl(items, container) {
+function createControl(items, container, options = {}) {
   const control = createTag('div', { class: 'gallery-control loading' });
   const prevButton = createTag('button', {
     class: 'prev',
@@ -33,20 +33,28 @@ function createControl(items, container) {
   const intersecting = Array.from(items).fill(false);
 
   const len = items.length;
+  const atStart = () => container.scrollLeft <= parseFloat(getComputedStyle(container).paddingLeft) + 1;
+  const atEnd = () => container.scrollLeft + container.clientWidth >= container.scrollWidth - 1;
+  const updateButtons = () => {
+    prevButton.disabled = atStart();
+    nextButton.disabled = atEnd();
+  };
   const pageInc = throttle((inc) => {
+    if (inc < 0 && atStart()) return;
+    if (inc > 0 && atEnd()) return;
     const first = intersecting.indexOf(true);
     if (first === -1) return; // middle of swapping only page
-    if (first + inc < 0 || first + inc >= len) return; // no looping
-    const target = items[(first + inc + len) % len];
-    target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    const targetIndex = Math.max(0, Math.min(len - 1, first + inc));
+    items[targetIndex].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
   }, 30);
   prevButton.addEventListener('click', () => pageInc(-1));
   nextButton.addEventListener('click', () => pageInc(1));
+  container.addEventListener('scroll', updateButtons, { passive: true });
 
   const updateDOM = debounce((first, last) => {
-    prevButton.disabled = first === 0;
-    nextButton.disabled = last === items.length - 1;
-    if (items.length === last - first + 1) {
+    updateButtons();
+    const hasHorizontalOverflow = container.scrollWidth - container.clientWidth > 1;
+    if (items.length === last - first + 1 && !hasHorizontalOverflow) {
       control.classList.add('hide');
       container.classList.add('gallery--all-displayed');
     } else {
@@ -71,7 +79,7 @@ function createControl(items, container) {
 
   const scrollObserver = new IntersectionObserver((entries) => {
     reactToChange(entries);
-  }, { root: container, threshold: INTERSECTION_THRESHOLD });
+  }, { root: container, threshold: options.intersectionThreshold ?? INTERSECTION_THRESHOLD });
 
   items.forEach((item) => scrollObserver.observe(item));
 
@@ -82,9 +90,10 @@ function createControl(items, container) {
 export default async function buildGallery(
   items,
   container = items?.[0]?.parentNode,
+  options = {},
 ) {
   ({ createTag, loadStyle } = await import(`${getLibs()}/utils/utils.js`));
-  const control = createControl([...items], container);
+  const control = createControl([...items], container, options);
   await new Promise((res) => {
     loadStyle('/express/code/scripts/widgets/gallery/gallery.css', res);
   });

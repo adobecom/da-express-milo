@@ -1,12 +1,31 @@
-@import url('../../scripts/color-shared/components/strips/color-strip.css');
-@import url('../../scripts/color-shared/components/image-upload/image-upload.css');
-@import url('./image-extract.css');
+/* Hide authored <div> children during the loading phase on desktop.
+   The real UI mounts inside a <section>; authored divs are not LCP content
+   (the H1 lives in the separate color-headline block) so hiding them is safe.
+   This prevents the wide-then-narrow visual shift while async init runs. */
+@media (min-width: 1200px) {
+  .color-wheel > div {
+    display: none;
+  }
+}
+
+/* iOS Safari pull-to-refresh defence. Even with touch-action: none on the
+   wheel-marker-overlay, drag gestures that originate near the top of the
+   visible viewport can still commit to the native refresh gesture before
+   the JS handler runs. overscroll-behavior on the document scroller is the
+   documented way to disable it. This stylesheet is only loaded on color-wheel
+   pages, so the global body/html selector is scoped by load context. */
+html,
+body {
+  overscroll-behavior-y: contain;
+}
 
 .color-wheel .ax-color-tool-layout {
-  box-sizing: border-box;
-  max-width: var(--block-wd-max-width);
-  margin: 0 auto;
-  padding: 0 var(--spacing-300) var(--spacing-300);
+  --ax-padding-topbar-desktop: 0 0 var(--spacing-400);
+  --ax-padding-topbar-mobile: 0 0 var(--spacing-400);
+  --ax-padding-sidebar-mobile: 0 0 var(--spacing-300);
+  --ax-padding-canvas-mobile: 0 0 var(--spacing-300);
+
+  row-gap: 0;
 }
 
 .color-wheel .ax-shell-slot--sidebar {
@@ -14,18 +33,53 @@
   flex-direction: column;
   gap: var(--spacing-300);
   overflow: visible;
+  isolation: isolate;
+}
+
+.color-wheel .ax-shell-slot--canvas {
+  box-sizing: border-box;
+  overflow-y: visible;
+}
+
+.color-wheel .color-headline .express-logo {
+  margin-inline: 0;
 }
 
 .color-wheel sp-tabs {
+  display: flex;
+  flex-direction: column;
   gap: var(--spacing-300);
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.color-wheel sp-tab-panel {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .color-wheel-content {
+  width: 100%;
   max-width: 100%;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-100);
+  gap: var(--spacing-400);
   align-items: center;
+}
+
+.color-wheel .action-menu-controls-only {
+  padding-block-end: var(--spacing-100);
+}
+
+/* Primary color panel */
+
+.color-wheel .primary-color-content {
+  width: 100%;
+  min-width: 0;
+  align-self: stretch;
 }
 
 /* Image panel */
@@ -40,6 +94,7 @@
 
 .color-wheel .image-extract {
   --color-extract-max-width: 100%;
+  --color-wheel-mood-width: 200px;
 }
 
 .color-wheel .color-extract-landing {
@@ -70,6 +125,7 @@
   margin-inline: 0;
   padding: var(--spacing-700) var(--spacing-400);
   box-sizing: border-box;
+  aspect-ratio: 153/94;
 }
 
 .color-wheel .image-upload-dropzone {
@@ -116,12 +172,12 @@
 }
 
 .color-wheel .color-extract-suggestion {
-  border-radius: var(--corner-radius-80);
   border: 2px solid transparent;
   box-shadow: none;
   transition: none;
   width: auto;
   height: auto;
+  aspect-ratio: 1 / 1;
 }
 
 .color-wheel .color-extract-suggestion:hover {
@@ -130,14 +186,21 @@
 
 .color-wheel .color-extract-suggestion:active {
   outline: 2px solid var(--Palette-gray-900);
+  border-color: transparent;
 }
 
 .color-wheel .color-extract-suggestion:focus-visible {
   outline: 2px solid var(--Alias-focus-indicator-default);
+  border-color: transparent;
 }
 
-.color-wheel .color-extract-suggestion-bar {
-  display: none;
+.image-extract .color-extract-suggestion-preview {
+  display: flex;
+  flex-direction: column;
+}
+
+.image-extract .color-extract-suggestion-bar {
+  height: 20%;
 }
 
 .color-wheel .image-extract.has-image .color-extract-edit-stage,
@@ -151,7 +214,17 @@
 }
 
 .color-wheel .color-extract-edit-left {
-  gap: 0;
+  gap: var(--spacing-300);
+}
+
+.color-wheel .color-extract-mood-row {
+  flex: 1;
+  max-width: var(--color-wheel-mood-width);
+}
+
+.color-wheel .color-extract-mood-dropdown {
+  min-width: var(--color-wheel-mood-width);
+  box-sizing: content-box;
 }
 
 .color-wheel .color-extract-mood {
@@ -180,31 +253,72 @@
   padding-block: var(--spacing-300) var(--spacing-100);
 }
 
+.color-wheel .image-extract .color-extract-mood-option {
+  justify-content: flex-start;
+  gap: var(--spacing-100);
+}
+
+.color-wheel .image-extract .color-extract-mood-option-check {
+  width: 10px;
+  height: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--color-blue-800);
+  opacity: 0;
+}
+
+.color-wheel .image-extract .color-extract-mood-option-check svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.color-wheel .image-extract .color-extract-mood-option.is-selected {
+  font-weight: 400;
+}
+
+.color-wheel .image-extract .color-extract-mood-option.is-selected .color-extract-mood-option-check {
+  opacity: 1;
+}
+
+.color-wheel .image-extract .color-extract-marker {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.9), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker:hover {
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 20px rgba(0, 0, 0, 0.22);
+}
+
+.color-wheel .image-extract .color-extract-marker.is-active {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker:focus-visible {
+  box-shadow: 0 0 0 3px var(--color-extract-focus), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
+.color-wheel .image-extract .color-extract-marker.is-magnified {
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), inset 0 0 0 1px rgba(31, 31, 31, 0.4), 0 0 17px rgba(0, 0, 0, 0.16);
+}
+
 .color-wheel .color-extract-drag-overlay {
   position: fixed;
-}
-
-/* Base color tab (color-edit embedded layout) */
-
-.color-wheel .base-color-content {
-  width: 100%;
-  min-width: 0;
-  align-self: stretch;
-}
-
-.color-wheel .base-color-content color-edit {
-  display: block;
-  width: 100%;
 }
 
 /* Color wheel panel */
 
 color-wheel-express {
-  max-width: 350px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 400px;
+  padding: var(--spacing-300);
 }
 
 .color-wheel-harmony-section {
   padding-right: var(--spacing-300);
+  width: 100%;
   max-width: 100%;
   box-sizing: border-box;
 }
@@ -213,7 +327,7 @@ color-wheel-express {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
-  gap: 2px;
+  gap: var(--spacing-50);
   margin-bottom: 0.75rem;
 }
 
@@ -264,13 +378,13 @@ color-wheel-express {
 }
 
 .color-wheel-harmony-carousel-host .simple-carousel-fader-left {
-  background: linear-gradient(90deg, #FFFFFF 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
+  background: linear-gradient(90deg, var(--color-white) 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
   padding-inline-start: var(--spacing-100);
   justify-content: flex-start;
 }
 
 .color-wheel-harmony-carousel-host .simple-carousel-fader-right {
-  background: linear-gradient(270deg, #FFFFFF 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
+  background: linear-gradient(270deg, var(--color-white) 14.5%, rgba(255, 255, 255, 0.38) 84%, rgba(255, 255, 255, 0.00) 100%);
   padding-inline-end: var(--spacing-100);
   justify-content: flex-end;
 }
@@ -314,30 +428,34 @@ color-wheel-express {
   max-width: 343px;
 }
 
-/* Temporary styles for sidebar handoff */
-.text-content-placeholder {
-  height: 180px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-gray-200);
+.color-wheel .action-menu-controls-only .expand-btn {
+  display: none;
 }
 
-.topbar-placeholder,
-.footer-placeholder {
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--color-gray-200);
+.color-wheel[data-sidebar-collapsed] {
+  --cw-sidebar-fr: 0fr;
 }
-.color-floating-toolbar-container {
-  display: none;
+
+.color-wheel[data-sidebar-collapsed] .ax-color-tool-layout {
+  column-gap: 0;
+}
+
+.color-wheel[data-sidebar-collapsed] .ax-shell-slot--sidebar {
+  pointer-events: none;
+  align-self: start;
+  height: 0;
+  overflow: hidden;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .color-wheel-harmony-carousel-host .simple-carousel-platform {
     scroll-behavior: auto;
+  }
+}
+
+@media (max-width: 599px) {
+  .color-wheel .ax-toolbar-standalone .ax-palette-name {
+      display: flex;
   }
 }
 
@@ -351,15 +469,19 @@ color-wheel-express {
   }
 }
 
+/* Small Tablet */
+
 @media (min-width: 600px) {
   .color-wheel .ax-color-tool-layout {
-    padding: var(--spacing-400) var(--spacing-500);
+    --ax-padding-sidebar-mobile: 0 0 var(--spacing-400);
   }
 }
 
+/* Large Tablet */
+
 @media (min-width: 888px) {
-  .color-wheel .ax-color-tool-layout {
-    grid-template-rows: auto auto 1fr;
+  .color-wheel .ax-shell-slot--canvas {
+    padding-block-end: var(--spacing-200);
   }
 
   .color-wheel .color-extract-suggestions {
@@ -367,34 +489,102 @@ color-wheel-express {
   }
 }
 
+/* Large Tablet */
+
+@media (min-width: 888px) and (max-width: 1199px) {
+  .color-wheel .ax-shell-slot--topbar {
+    grid-column: 1 / span 6;
+  }
+
+  .color-wheel .ax-shell-slot--sidebar {
+    grid-row: 2 / span 2;
+  }
+
+  .color-wheel .ax-shell-slot--canvas {
+    grid-row: 1 / span 2;
+  }
+
+  .color-wheel .ax-shell-slot--canvas,
+  .color-wheel-strip-host,
+  .color-wheel-strip-host sp-theme,
+  .color-wheel-strip-host color-swatch-rail[orientation="stacked"] {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Desktop */
+
 @media (min-width: 1200px) {
+  .color-wheel .ax-toolbar {
+    --ax-palette-name-width-desktop: 184px;
+  }
+
   .color-wheel .ax-color-tool-layout {
-    padding: var(--spacing-600);
-    grid-template-rows: auto;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    grid-template-columns: minmax(0, var(--cw-sidebar-fr, 4fr)) minmax(0, 8fr);
+    align-items: stretch;
+    transition: grid-template-columns 0.35s ease, column-gap 0.35s ease;
   }
 
   .color-wheel .color-wheel-strip-host.color-explorer-strip-container {
     height: 600px;
     min-height: 600px;
-    overflow: auto;
   }
 
   .color-wheel .ax-shell-slot--sidebar {
     align-self: stretch;
     min-height: 0;
+    grid-column: 1;
+    grid-row: 1 / span 3;
+  }
+
+  .color-wheel .ax-shell-slot--topbar,
+  .color-wheel .ax-shell-slot--canvas,
+  .color-wheel .ax-shell-slot--footer {
+    grid-column: 2;
+  }
+
+  .color-wheel .ax-shell-slot--topbar {
+    grid-row: 1;
+  }
+
+  .color-wheel .ax-shell-slot--canvas {
+    grid-row: 2;
+    min-height: 0;
+  }
+
+  .color-wheel .ax-shell-slot--footer {
+    grid-row: 3;
+  }
+
+  .color-wheel .ax-shell-slot--topbar,
+  .color-wheel .ax-shell-slot--canvas {
+    padding-block-end: var(--spacing-300);
   }
 
   .color-wheel .ax-shell-slot--sidebar > sp-theme {
-    flex: 1 1 0;
     min-height: 0;
-    display: flex;
-    flex-direction: column;
+    display: block;
   }
 
   .color-wheel sp-tabs {
     flex: 1 1 0;
     min-height: 0;
-    width: 100%;
+  }
+
+  .color-wheel-content {
+    gap: var(--spacing-100);
+  }
+
+  .color-wheel .action-menu-controls-only {
+    padding-block-end: 0;
+  }
+
+  .color-wheel color-wheel-express {
+    max-width: 350px;
   }
 
   .color-wheel sp-tab-panel[selected] .image-extract,
@@ -420,6 +610,10 @@ color-wheel-express {
     display: none;
   }
 
+  .color-wheel .image-upload-dropzone-title {
+    display: block;
+  }
+
   .color-wheel .color-extract-landing-content {
     gap: var(--spacing-400);
   }
@@ -428,13 +622,8 @@ color-wheel-express {
     max-width: none;
   }
 
-  .color-wheel .color-extract-edit-left {
-    gap: 16px;
-  }
-
   .color-wheel .color-extract-mood {
-    flex-direction: row;
-    width: 250px;
+    width: var(--color-wheel-mood-width);
   }
 
   .color-wheel .color-extract-mood-dropdown {
@@ -451,5 +640,9 @@ color-wheel-express {
 
   .color-wheel .color-explorer-strip-container color-swatch-rail[orientation="vertical"] {
     height: 600px;
+  }
+
+  .color-wheel .color-floating-toolbar-container .ax-swatch-strip {
+    display: flex;
   }
 }

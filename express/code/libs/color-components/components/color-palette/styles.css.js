@@ -55,7 +55,7 @@ export const style = css`
         content: '';
         position: absolute;
         inset: 0;
-        border: var(--color-palette-border-width, 2px) solid var(--color-palette-border-color, #0000001A);
+        border: var(--color-palette-border-width) solid var(--color-palette-border-color);
         border-radius: var(--color-palette-border-radius, 8px);
     }
 

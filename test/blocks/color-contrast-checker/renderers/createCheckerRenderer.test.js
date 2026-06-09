@@ -45,7 +45,7 @@ describe('createCheckerRenderer', () => {
     document.body.innerHTML = '';
   });
 
-  it('renders the contrast ratio badge with the WCAG tooltip copy', async () => {
+  it('renders the WCAG tooltip on the ratio label text', async () => {
     const container = document.createElement('div');
     document.body.appendChild(container);
 
@@ -63,11 +63,11 @@ describe('createCheckerRenderer', () => {
 
     await renderer.render();
 
-    const tooltipTrigger = container.querySelector('.cc-contrast-ratio-badge-trigger');
-    const tooltip = tooltipTrigger?.querySelector('sp-tooltip');
+    const ratioLabel = container.querySelector('.cc-ratio-label-text');
+    const tooltip = ratioLabel?.querySelector('sp-tooltip');
 
-    expect(tooltipTrigger).to.exist;
-    expect(tooltipTrigger?.tagName).to.equal('SP-ACTION-BUTTON');
+    expect(ratioLabel).to.exist;
+    expect(ratioLabel?.tagName).to.equal('SP-ACTION-BUTTON');
     expect(tooltip?.textContent.trim()).to.equal('Ensure your color choices meet WCAG compliance');
   });
 
