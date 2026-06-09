@@ -9,7 +9,7 @@ import {
   Fragment,
 } from '../../scripts/vendors/htm-preact.min.js';
 import { StoreProvider, useStore, DrawerProvider, useDrawer } from './components/Contexts.js';
-import { ProductImages, ProductDetails, ProductHeader, CheckoutButton, Drawer } from './components/ProductComponents.js';
+import { ProductImages, ProductDetails, ProductHeader, CheckoutButton, Drawer, AssuranceLockup } from './components/ProductComponents.js';
 import { CustomizationInputs } from './components/CustomizationInputs.js';
 import { trackViewTemplatePage } from '../../scripts/instrument.js';
 import useSeo from './components/useSeo.js';
@@ -119,6 +119,7 @@ function PDPContent({ templateId }) {
             <div class="pdpx-product-info-section" id="pdpx-product-info-section">
               <${CustomizationInputs} onRequestDrawer=${handleDrawerRequest} productType=${state.productType} />
               <${ProductDetails} />
+              <${AssuranceLockup} />
               <${Drawer} />
             </div>
             <${CheckoutButton} templateId=${templateId} />

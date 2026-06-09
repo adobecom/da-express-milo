@@ -698,11 +698,11 @@ function PaperTypeContent({ onClose }) {
         ${preview?.descriptionHTML && html`
           <div class="pdpx-drawer-pills-container">
             ${preview.descriptionHTML
-        .split(/<br\s*\/?>/i)[0]
-        .replace(/[<>]/g, '')
-        .split('/')
-        .filter(Boolean)
-        .map((spec) => html`
+    .split(/<br\s*\/?>/i)[0]
+    .replace(/<[^>]*>/g, '')
+    .split('/')
+    .filter(Boolean)
+    .map((spec) => html` 
               <div class="pdpx-drawer-pill">
                 <img class="icon icon-circle-check-mark" src="/express/code/icons/circle-check-mark.svg" alt="" aria-hidden="true" />
                 <span class="pdpx-drawer-pill-text">${spec.trim()}</span>
@@ -742,6 +742,24 @@ function PaperTypeContent({ onClose }) {
         <button class="pdpx-drawer-foot-select-button" type="button" onClick=${onClose}>Select</button>
       </div>
     </${Fragment}>
+  `;
+}
+
+export function AssuranceLockup() {
+  const isEnUs = document.documentElement.lang?.toLowerCase() === 'en-us';
+  return html`
+    <div class="pdpx-assurance-lockup-container">
+      <div class="pdpx-assurance-lockup-item">
+        <img class="icon icon-shield_check_icon" src="/express/code/icons/shield_check_icon.svg" alt="" aria-hidden="true" />
+        <span class="pdpx-assurance-lockup-item-text">100% satisfaction guarantee</span>
+      </div>
+      ${isEnUs && html`
+        <div class="pdpx-assurance-lockup-item">
+          <img class="icon icon-print_icon" src="/express/code/icons/print_icon.svg" alt="" aria-hidden="true" />
+          <span class="pdpx-assurance-lockup-item-text">Made and printed in the USA</span>
+        </div>
+      `}
+    </div>
   `;
 }
 

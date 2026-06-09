@@ -306,8 +306,8 @@ export function RadioSelector({ attribute }) {
               />
               <span
                 >${option.title}${option.priceDelta
-        ? ` ${option.priceDelta}`
-        : ''}</span
+  ? ` ${option.priceDelta}`
+  : ''}</span
               >
             </label>
           `,
@@ -712,10 +712,10 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
               ${group.title
       && html`<div class="pdpx-option-group-title">${group.title}</div>`} 
               ${(group.options || []).map((option) => {
-        const thumbnailUrl = updateImageUrl(option.imageUrl);
-        const isSelected = option.value === selectedOptionValue;
-        const optionIndex = allOptions.findIndex((candidate) => candidate.value === option.value);
-        return html`
+    const thumbnailUrl = updateImageUrl(option.imageUrl);
+    const isSelected = option.value === selectedOptionValue;
+    const optionIndex = allOptions.findIndex((candidate) => candidate.value === option.value);
+    return html`
                   <button
                     key="${option.value}"
                     class="pdpx-pill-container ${isSelected ? 'selected' : ''}"
@@ -752,7 +752,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
                     </div>
                   </button>
                 `;
-      })}
+  })}
             </div>
           `,
   )}
@@ -766,8 +766,8 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
           />
           <div
             dangerouslySetInnerHTML=${{
-        __html: sanitizeHtml(selector.preview.descriptionHTML),
-      }}
+    __html: sanitizeHtml(selector.preview.descriptionHTML),
+  }}
           />
         </div>
       `}
