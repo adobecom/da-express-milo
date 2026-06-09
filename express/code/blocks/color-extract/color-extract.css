@@ -899,7 +899,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   .section:has(.color-extract-marquee-wrapper) {
     align-items: center;
     min-height: 800px;
-    padding-inline: 0;
   }
 
   .color-extract .color-extract-landing {
