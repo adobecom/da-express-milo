@@ -1,4 +1,12 @@
-import { getLibs, yieldToMain, getMobileOperatingSystem, getIconElementDeprecated, createTag, formatDynamicCartLink } from '../../scripts/utils.js';
+import {
+  getLibs,
+  yieldToMain,
+  getMobileOperatingSystem,
+  getIconElementDeprecated,
+  createTag,
+  formatDynamicCartLink,
+  getMetadata,
+} from '../../scripts/utils.js';
 
 let currDrawer = null;
 const largeMQ = window.matchMedia('(min-width: 1280px)');
@@ -305,7 +313,19 @@ export default async function init(el) {
   // Legacy mode: headline + background + items inside this block
   if (hasLegacyHeadline) {
     const [headline, background, ...items] = rows;
-    const logo = getIconElementDeprecated('adobe-express-logo');
+    const injectAcrobatLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase());
+    let logo;
+
+    if (injectAcrobatLogo) {
+      const logoName = 'cobrand-lockup-acrobat-express';
+      const logoSize = '22px';
+      const logoAlt = 'Adobe Acrobat X Adobe Express co-brand logo';
+      const logoClass = 'marquee-eyebrow-logo-wide';
+      logo = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
+    } else {
+      logo = getIconElementDeprecated('adobe-express-logo');
+    }
+
     logo.classList.add('express-logo');
 
     background.classList.add('background');
