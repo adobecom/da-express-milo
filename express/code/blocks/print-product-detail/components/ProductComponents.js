@@ -827,13 +827,13 @@ export function Drawer() {
   return html`
     <${Fragment}>
       <div
-        class="pdpx-curtain ${state.open ? '' : 'hidden'}"
+        class="pdpx-curtain ${state.open ? 'open' : ''}"
         onClick=${closeDrawer}
         role="presentation"
       ></div>
       <aside
         ref=${drawerRef}
-        class="pdpx-drawer ${state.open ? '' : 'hidden'}"
+        class="pdpx-drawer ${state.open ? 'open' : ''}"
         id="pdp-x-drawer"
         role="dialog"
         aria-modal="true"
