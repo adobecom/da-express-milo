@@ -337,6 +337,17 @@ function flattenOptionGroups(selector) {
   })));
 }
 
+function countOptions(attribute) {
+  const { selector } = attribute;
+  if (selector.type === 'thumbnails') {
+    return flattenOptionGroups(selector).length;
+  }
+  if (selector.type === 'dropdown' || selector.type === 'radio') {
+    return (selector.options || []).length;
+  }
+  return 2; // checkbox: binary toggle, always show
+}
+
 function buildPillElement(option, isSelected, index, setSize, activeIndex, handlers) {
   const { handleOptionClick, handleMiniPillKeyDown } = handlers;
   const thumbnailUrl = updateImageUrl(option.imageUrl, 48);
@@ -831,7 +842,9 @@ export function CustomizationInputs({ onRequestDrawer, productType }) {
     return null;
   }
   const productAttributes = sortAttributes(
-    (state.attributes || []).filter((attribute) => attribute.name !== 'quantity'),
+    (state.attributes || [])
+      .filter((attribute) => attribute.name !== 'quantity')
+      .filter((attribute) => countOptions(attribute) > 1),
     productType,
   );
   return html`
