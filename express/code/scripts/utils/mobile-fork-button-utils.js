@@ -4,6 +4,7 @@
  */
 
 export const LONG_TEXT_CUTOFF = 70;
+export const SUPPORTED_MWEB_OS = ['Android', 'iOS'];
 
 /**
  * Calculates the pixel width of text for a given font
@@ -50,7 +51,7 @@ export function buildAction(createTag, entry, buttonType) {
 }
 
 /**
- * Checks if the device is an Android, enables the mobile gating if it is.
+ * Checks if the device OS is eligible for the mobile fork button.
  * If there is no metadata check enabled, still enable the gating block in case authors want it.
  * @param {Function} getMetadata - Function to get metadata
  * @param {Function} getMobileOperatingSystem - Function to get mobile OS
@@ -58,7 +59,7 @@ export function buildAction(createTag, entry, buttonType) {
  */
 export function androidCheck(getMetadata, getMobileOperatingSystem) {
   if (getMetadata('fork-eligibility-check')?.toLowerCase()?.trim() !== 'on') return true;
-  return getMobileOperatingSystem() === 'Android';
+  return SUPPORTED_MWEB_OS.includes(getMobileOperatingSystem());
 }
 
 /**
