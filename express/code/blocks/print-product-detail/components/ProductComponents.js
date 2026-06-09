@@ -308,6 +308,7 @@ export function CheckoutButton({ templateId }) {
   const { state } = useStore();
   const [outOfRegion, setOutOfRegion] = useState(null);
   const promoBarRef = useRef(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     let active = true;
@@ -322,6 +323,25 @@ export function CheckoutButton({ templateId }) {
       });
     return () => { active = false; };
   }, []);
+
+  useEffect(() => {
+    if (!state || !containerRef.current) return undefined;
+    const wrapper = document.querySelector('.pdpx-product-info-wrapper');
+    const sentinel = document.getElementById('pdpx-checkout-button-sentinel-div');
+    if (!wrapper || !sentinel) return undefined;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          containerRef.current?.classList.add('hide-gradient');
+        } else {
+          containerRef.current?.classList.remove('hide-gradient');
+        }
+      },
+      { root: wrapper, threshold: 1.0, rootMargin: '0px 0px -48px 0px' },
+    );
+    io.observe(sentinel);
+    return () => io.disconnect();
+  }, [state, outOfRegion]);
 
   useEffect(() => {
     if (!outOfRegion || !promoBarRef.current) return;
@@ -366,7 +386,7 @@ export function CheckoutButton({ templateId }) {
   }
 
   return html`
-    <div class="pdpx-checkout-button-container">
+    <div class="pdpx-checkout-button-container" ref=${containerRef}>
       <a
         class="pdpx-checkout-button"
         id="pdpx-checkout-button"
@@ -759,6 +779,7 @@ export function AssuranceLockup() {
           <span class="pdpx-assurance-lockup-item-text">Made and printed in the USA</span>
         </div>
       `}
+      <div id="pdpx-checkout-button-sentinel-div"></div>
     </div>
   `;
 }
