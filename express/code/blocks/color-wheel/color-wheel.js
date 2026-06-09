@@ -1,6 +1,6 @@
 import { createTag, getLibs } from '../../scripts/utils.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
-import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
+import { createColorPaletteParamApi, decorateAnalyticsAttributes, PARAM_NAME } from '../../scripts/color-shared/utils/utilities.js';
 import loadBaseColorPlaceholders from '../../scripts/color-shared/i18n/loadBaseColorPlaceholders.js';
 import loadColorEditPlaceholders from '../../scripts/color-shared/i18n/loadColorEditPlaceholders.js';
 import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
@@ -834,6 +834,27 @@ function cleanup() {
   historyCleanup = null;
 }
 
+const VALID_TABS = ['primary-color', 'image', 'color-wheel'];
+
+function resolveInitialTabAndSrc() {
+  const urlParams = new URLSearchParams(window.location.search);
+  let activeTab = 'color-wheel';
+  let imageSrc = null;
+  const tabParam = urlParams.get('tab');
+  if (tabParam && VALID_TABS.includes(tabParam)) {
+    activeTab = tabParam;
+  }
+  if (urlParams.has(PARAM_NAME)) {
+    const storedSrc = sessionStorage.getItem('color-wheel-image-src');
+    if (storedSrc) {
+      sessionStorage.removeItem('color-wheel-image-src');
+      imageSrc = storedSrc;
+      activeTab = 'image';
+    }
+  }
+  return { activeTab, imageSrc };
+}
+
 export default async function decorate(block) {
   const layoutRows = [...block.children];
   const suggestionsRow = layoutRows[0] || null;
@@ -843,6 +864,10 @@ export default async function decorate(block) {
   let currentPalette = null;
   let savedActiveTab = 'color-wheel';
   let savedImageSrc = null;
+
+  // Activate the tab stored in the URL (e.g. ?tab=image) and restore an image
+  // uploaded before a SUSI sign-in redirect (parallel to color-extract's flow).
+  ({ activeTab: savedActiveTab, imageSrc: savedImageSrc } = resolveInitialTabAndSrc());
 
   async function init() {
     // Save before clearing — adoptHeadline uses document.querySelector and would lose it otherwise
@@ -1014,6 +1039,13 @@ export default async function decorate(block) {
             if (selected !== 'color-wheel') {
               controller.setHarmonyRule('CUSTOM');
             }
+            const url = new URL(window.location.href);
+            if (selected === 'color-wheel') {
+              url.searchParams.delete('tab');
+            } else {
+              url.searchParams.set('tab', selected);
+            }
+            window.history.replaceState(null, '', url.toString());
           },
           strings,
           initialImageSrc: savedImageSrc,
@@ -1261,4 +1293,5 @@ export {
   makeTransformPalette,
   paletteFromThemeState,
   swatchHexListFromState,
+  resolveInitialTabAndSrc,
 };

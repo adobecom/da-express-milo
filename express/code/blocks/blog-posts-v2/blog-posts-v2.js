@@ -337,8 +337,17 @@ async function getReadMoreString() {
 function getCardParameters(post, dateFormatter) {
   const path = post.path.split('.')[0];
   const { title, teaser, image } = post;
-  const publicationDate = new Date(post.date * 1000);
-  const dateString = dateFormatter.format(publicationDate);
+  const normalizedDate = typeof post.date === 'string' ? post.date.trim() : post.date;
+  const hasTimestamp = (typeof normalizedDate === 'number' && Number.isFinite(normalizedDate))
+    || (typeof normalizedDate === 'string' && /^\d+$/.test(normalizedDate));
+  const timestamp = hasTimestamp ? Number(normalizedDate) : NaN;
+  let dateString = '';
+  if (Number.isFinite(timestamp) && timestamp > 0) {
+    const publicationDate = new Date(timestamp * 1000);
+    if (!Number.isNaN(publicationDate.getTime())) {
+      dateString = dateFormatter.format(publicationDate);
+    }
+  }
   const filteredTitle = title.replace(/(\s?)(｜|\|)(\s?Adobe\sExpress\s?)$/g, '');
   const imagePath = image.split('?')[0].split('_')[1];
   return {
@@ -362,6 +371,7 @@ async function getHeroCard(post, dateFormatter, blogTag) {
   imageWrapper.appendChild(heroPicture);
 
   const pictureTag = imageWrapper.outerHTML;
+  const dateMarkup = dateString ? `<p class="blog-card-date">${dateString}</p>` : '';
   card.innerHTML = `<div class="blog-card-image">
     ${pictureTag}
     <span class="blog-tag">${blogTag}</span>
@@ -369,7 +379,7 @@ async function getHeroCard(post, dateFormatter, blogTag) {
     <div class="blog-hero-card-body">
       <h3 class="blog-card-title">${filteredTitle}</h3>
       <p class="blog-card-teaser">${teaser}</p>
-      <p class="blog-card-date">${dateString}</p>
+      ${dateMarkup}
       <p class="blog-card-cta button-container">
         <a href="${path}" title="${readMoreString}" class="button accent">${readMoreString}</a></p>
     </div>`;
@@ -389,6 +399,7 @@ function getCard(post, dateFormatter, blogTag) {
   imageWrapper.appendChild(cardPicture);
 
   const pictureTag = imageWrapper.outerHTML;
+  const dateMarkup = dateString ? `<p class="blog-card-date">${dateString}</p>` : '';
   card.innerHTML = `<div class="blog-card-image">
         ${pictureTag}
         <span class="blog-tag">${blogTag}</span>
@@ -396,7 +407,7 @@ function getCard(post, dateFormatter, blogTag) {
         <section class="blog-card-body">
         <h3 class="blog-card-title">${filteredTitle}</h3>
         <p class="blog-card-teaser">${teaser}</p>
-        <p class="blog-card-date">${dateString}</p>
+        ${dateMarkup}
         </section>`;
   return card;
 }
