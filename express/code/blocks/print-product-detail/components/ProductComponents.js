@@ -317,7 +317,7 @@ export function CheckoutButton({ templateId }) {
         if (active) setOutOfRegion(!VALID_COUNTRIES.includes(country));
       })
       .catch((err) => {
-        window.lana?.log(`print-product-detail-sdk: country detection failed: ${err.message}`, { tags: 'print-product-detail-sdk', severity: 'warning' });
+        window.lana?.log(`print-product-detail: country detection failed: ${err.message}`, { tags: 'print-product-detail', severity: 'warning' });
         if (active) setOutOfRegion(false);
       });
     return () => { active = false; };
@@ -347,7 +347,7 @@ export function CheckoutButton({ templateId }) {
         });
       });
     }).catch((error) => {
-      window.lana?.log(`Failed to load sticky-promo-bar: ${error}`, { tags: 'print-product-detail-sdk', severity: 'warning' });
+      window.lana?.log(`Failed to load sticky-promo-bar: ${error}`, { tags: 'print-product-detail', severity: 'warning' });
     });
   }, [outOfRegion]);
 
@@ -698,11 +698,11 @@ function PaperTypeContent({ onClose }) {
         ${preview?.descriptionHTML && html`
           <div class="pdpx-drawer-pills-container">
             ${preview.descriptionHTML
-    .split(/<br\s*\/?>/i)[0]
-    .replace(/[<>]/g, '')
-    .split('/')
-    .filter(Boolean)
-    .map((spec) => html`
+        .split(/<br\s*\/?>/i)[0]
+        .replace(/[<>]/g, '')
+        .split('/')
+        .filter(Boolean)
+        .map((spec) => html`
               <div class="pdpx-drawer-pill">
                 <img class="icon icon-circle-check-mark" src="/express/code/icons/circle-check-mark.svg" alt="" aria-hidden="true" />
                 <span class="pdpx-drawer-pill-text">${spec.trim()}</span>

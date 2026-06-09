@@ -1,50 +1,4 @@
-import { createTag } from '../../../scripts/utils.js';
-
-export function convertImageSize(imageURL, newSize) {
-  if (!imageURL) return imageURL;
-  try {
-    const lastUnderscoreIndex = imageURL.lastIndexOf('_');
-    const afterUnderscore = imageURL.substring(lastUnderscoreIndex + 1);
-    const extensionIndex = afterUnderscore.indexOf('.');
-    const fileExtension = extensionIndex !== -1 ? afterUnderscore.substring(extensionIndex) : '';
-    const newImageURL = imageURL.substring(0, lastUnderscoreIndex + 1) + newSize + fileExtension;
-    const dotIndex = newImageURL.lastIndexOf('.');
-    const newImageURLFinal = `${newImageURL.substring(0, dotIndex + 1)}webp?max_dim=${newSize}`;
-    return newImageURLFinal;
-  } catch (error) {
-    return imageURL;
-  }
-}
-
-export function createHeroImageSrcset(imageURL) {
-  const sizes = [200, 400, 600, 800, 1000];
-  return sizes.map((size) => `${convertImageSize(imageURL, size)} ${size}w`).join(', ');
-}
-
-export function isMobileDevice() {
-  const userAgent = navigator.userAgent || navigator.vendor || window.opera;
-  return /android|iphone|ipad|ipod|blackberry|iemobile|webos|opera mini/i.test(
-    userAgent.toLowerCase(),
-  );
-}
-
-export function detectMobileWithUAData() {
-  const userAgent = navigator.userAgentData;
-  if (!userAgent) return false;
-  return (
-    userAgent.mobile
-    || userAgent.platform === 'Android'
-    || userAgent.platform === 'iOS'
-  );
-}
-
-export function detectMobileWithBrowserWidth() {
-  return window.innerWidth <= 500;
-}
-
-export function detectMobile() {
-  return isMobileDevice() || detectMobileWithUAData() || detectMobileWithBrowserWidth();
-}
+import { getLibs, createTag } from '../../../scripts/utils.js';
 
 export function formatPaperThickness(thickness) {
   const thicknessFormatted = `${thickness.replace('_', '.')}pt thickness`;
@@ -81,7 +35,7 @@ export function formatLargeNumberToK(totalReviews) {
     }
     return `${Math.round(totalReviews / 1000)}.${Math.round((totalReviews % 1000) / 100)}k`;
   }
-  return totalReviews;
+  return String(totalReviews);
 }
 
 export function exchangeRegionForTopLevelDomain(region) {
@@ -95,21 +49,14 @@ export function exchangeRegionForTopLevelDomain(region) {
     'en-AU': 'au',
     'en-NZ': 'nz',
   };
-  let topLevelDomain = regionToTopLevelDomainMap[regionFinal];
-  if (regionFinal !== 'en-US' && regionFinal !== 'en-GB') {
-    topLevelDomain = 'com';
-  }
+  const topLevelDomain = regionToTopLevelDomainMap[regionFinal] || 'com';
   return topLevelDomain;
 }
 
 export async function formatPriceZazzle(price, differential = false) {
-  const { getCountry } = await import(
-    '../../../scripts/utils/location-utils.js'
-  );
+  const { getCountry } = await import('../../../scripts/utils/location-utils.js');
   const country = await getCountry();
-  const { getCurrency, formatPrice } = await import(
-    '../../../scripts/utils/pricing.js'
-  );
+  const { getCurrency, formatPrice } = await import('../../../scripts/utils/pricing.js');
   const currency = await getCurrency(country);
   const urlParams = new URLSearchParams(window.location.search);
   const region = urlParams.get('region');
@@ -132,16 +79,46 @@ export async function formatPriceZazzle(price, differential = false) {
   return formattedPrice;
 }
 
+const ALLOWED_TAGS = new Set([
+  'p', 'br', 'strong', 'em', 'b', 'i', 'u', 'ul', 'ol', 'li', 'span', 'div', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+]);
+
+function cleanNode(node, doc) {
+  const fragment = doc.createDocumentFragment();
+  node.childNodes.forEach((child) => {
+    if (child.nodeType === Node.TEXT_NODE) {
+      fragment.appendChild(doc.createTextNode(child.textContent));
+    } else if (child.nodeType === Node.ELEMENT_NODE) {
+      if (ALLOWED_TAGS.has(child.tagName.toLowerCase())) {
+        const el = doc.createElement(child.tagName.toLowerCase());
+        el.appendChild(cleanNode(child, doc));
+        fragment.appendChild(el);
+      } else {
+        fragment.appendChild(cleanNode(child, doc));
+      }
+    }
+  });
+  return fragment;
+}
+
+export function sanitizeHtml(html) {
+  if (!html) return '';
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const cleaned = cleanNode(doc.body, document);
+  const wrapper = document.createElement('div');
+  wrapper.appendChild(cleaned);
+  return wrapper.innerHTML;
+}
+
 export function formatStringSnakeCase(string) {
   const normalizedString = string.replace(/[^a-zA-Z0-9\s]/g, '_');
-  const formattedString = normalizedString
-    .trim()
-    .toLowerCase()
-    .replace(/ /g, '_');
+  const formattedString = normalizedString.trim().toLowerCase().replace(/ /g, '_');
   return formattedString;
 }
 
-export async function addPrefetchLinks(ietf) {
+export async function addPrefetchLinks() {
+  const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+  const { ietf } = getConfig().locale;
   const topLevelDomain = exchangeRegionForTopLevelDomain(ietf);
   const prefetchLink1 = createTag('link', {
     rel: 'dns-prefetch',
@@ -151,6 +128,7 @@ export async function addPrefetchLinks(ietf) {
     rel: 'dns-prefetch',
     href: `https://rlv.zcache.${topLevelDomain}`,
   });
+
   const preconnectLink1 = createTag('link', {
     rel: 'preconnect',
     href: `https://www.zazzle.${topLevelDomain}`,
@@ -159,5 +137,47 @@ export async function addPrefetchLinks(ietf) {
     rel: 'preconnect',
     href: `https://rlv.zcache.${topLevelDomain}`,
   });
-  document.head.append(prefetchLink1, prefetchLink2, preconnectLink1, preconnectLink2);
+  document.head.appendChild(prefetchLink1);
+  document.head.appendChild(prefetchLink2);
+  document.head.appendChild(preconnectLink1);
+  document.head.appendChild(preconnectLink2);
+}
+
+function normalizeLocale(ietf) {
+  const SUPPORTED_REGIONS = new Set(['at', 'br', 'us', 'au', 'ca', 'gb', 'nz', 'de', 'ch', 'es', 'fr', 'be', 'jp', 'kr', 'nl', 'pt', 'se']);
+  const SUPPORTED_LANGUAGES = new Set(['en', 'de', 'es', 'fr', 'ja', 'ko', 'nl', 'pt', 'sv']);
+  if (!ietf) {
+    return { language: 'en', region: 'us' };
+  }
+
+  const [languageRaw = 'en', regionRaw = 'us'] = ietf.split('-');
+  const language = languageRaw.toLowerCase();
+  const region = regionRaw.toLowerCase();
+
+  return {
+    language: SUPPORTED_LANGUAGES.has(language) ? language : 'en',
+    region: SUPPORTED_REGIONS.has(region) ? region : 'us',
+  };
+}
+
+let storePromise = null;
+export async function createZazzleStore() {
+  if (storePromise) return storePromise;
+  storePromise = (async () => {
+    const [{ createZazzlePDPStore }, { getConfig }] = await Promise.all([
+      import('../sdk/index.min.js'),
+      import(`${getLibs()}/utils/utils.js`),
+    ]);
+
+    const { locale } = getConfig();
+    const { language, region } = normalizeLocale(locale?.ietf);
+
+    const store = createZazzlePDPStore({ language, region });
+
+    return {
+      env: store.env,
+      sdk: store,
+    };
+  })();
+  return storePromise;
 }
