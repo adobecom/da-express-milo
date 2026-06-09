@@ -483,7 +483,7 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
           easyUploadPaneContent.secondary.qrErrorText,
         );
       } catch (error) {
-        window.lana?.log(`[EasyUpload-UI] Deferred initialization failed: ${error?.message || error}`, { severity: 'error' });
+        window.lana?.log(`[EasyUpload-UI] Deferred initialization failed: ${error?.message || error}`, { tags: 'easy-upload', severity: 'error' });
         showErrorToast?.(block, 'Failed to initialize QR code upload.');
         return;
       }
@@ -524,10 +524,10 @@ function attachSecondaryCtaHandler(block, createTag, showErrorToast) {
 
           easyUploadInstance.startUploadDetectionPolling();
         } else {
-          window.lana?.log('[EasyUpload-UI] Could not find confirm button or EasyUpload instance', { severity: 'warning' });
+          window.lana?.log('[EasyUpload-UI] Could not find confirm button or EasyUpload instance', { tags: 'easy-upload', severity: 'warning' });
         }
       } catch (error) {
-        window.lana?.log(`[EasyUpload-UI] initializeQRCode failed: ${error?.name} ${error?.message} code=${error?.code} status=${error?.statusCode}`, { severity: 'error' });
+        window.lana?.log(`[EasyUpload-UI] initializeQRCode failed: ${error?.name} ${error?.message} code=${error?.code} status=${error?.statusCode}`, { tags: 'easy-upload', severity: 'error' });
         showErrorToast?.(block, 'Failed to load QR code.');
       }
     }
@@ -586,7 +586,7 @@ export async function setupEasyUploadUI({
 
         await easyUploadInstance.setupQRCodeInterface();
       } catch (error) {
-        window.lana?.log(`[EasyUpload-UI] Autoload initialization failed: ${error?.message || error}`, { severity: 'error' });
+        window.lana?.log(`[EasyUpload-UI] Autoload initialization failed: ${error?.message || error}`, { tags: 'easy-upload', severity: 'error' });
         easyUploadInstance?.showFailedQR();
       }
     }, 100);

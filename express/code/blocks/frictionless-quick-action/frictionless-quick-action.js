@@ -185,7 +185,7 @@ async function maybeHandleEasyUploadQuickAction(
       return true;
     }
   } catch (error) {
-    window.lana?.log(`[FrictionlessQA] Failed to route Easy Upload quick action: ${error?.message || error}`, { severity: 'error' });
+    window.lana?.log(`[FrictionlessQA] Failed to route Easy Upload quick action: ${error?.message || error}`, { tags: 'frictionless-quick-action', severity: 'error' });
     const fallbackHandled = runLegacyEasyUploadFallback(
       quickActionId,
       docConfig,
@@ -988,7 +988,7 @@ export default async function decorate(block) {
       document.body.dataset.suppressfloatingcta = 'false';
       if (easyUploadModulePromise) {
         easyUploadModulePromise.then(({ cleanupEasyUpload }) => cleanupEasyUpload?.())
-          .catch((err) => window.lana?.log(`[FrictionlessQA] Failed to cleanup Easy Upload: ${err?.message || err}`, { severity: 'warning' }));
+          .catch((err) => window.lana?.log(`[FrictionlessQA] Failed to cleanup Easy Upload: ${err?.message || err}`, { tags: 'frictionless-quick-action', severity: 'warning' }));
       }
     }
   }, { passive: true });
@@ -1016,7 +1016,7 @@ export default async function decorate(block) {
       });
     }
   } catch (e) {
-    window.lana?.log(`Easy upload module failed to load in frictionless-quick-action: ${e?.message}`);
+    window.lana?.log(`Easy upload module failed to load in frictionless-quick-action: ${e?.message}`, { tags: 'frictionless-quick-action', severity: 'error' });
   }
 
   if (
