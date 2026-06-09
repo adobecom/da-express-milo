@@ -353,7 +353,7 @@
   width: 100%;
   margin-top: var(--spacing-200);
   order: 4;
-  z-index: 18;
+  z-index: 9;
   a.pdpx-checkout-button {
     width: calc(100% - (var(--global-container-margin) * 2));
     margin-left: auto;
