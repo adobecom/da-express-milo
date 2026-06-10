@@ -287,6 +287,16 @@ export default async function init(el) {
     ctas[0].parentElement.classList.add('ctas');
     ctas.forEach((cta) => {
       cta.classList.add('button');
+      const icon = cta.parentElement?.querySelector('.icon');
+      const match = icon && iconRegex.exec(icon.className);
+      if (match?.[1]) {
+        const hasExistingGraphic = icon.querySelector('svg, img');
+        if (!hasExistingGraphic) icon.append(getIconElementDeprecated(match[1]));
+        const ctaText = cta.textContent.trim();
+        cta.textContent = '';
+        cta.title = cta.title || ctaText;
+        cta.append(createTag('div', { class: 'text-group' }, [icon, ctaText]));
+      }
     });
     ctas[0].classList.add('primaryCTA');
     // Defer pricing formatting to idle time

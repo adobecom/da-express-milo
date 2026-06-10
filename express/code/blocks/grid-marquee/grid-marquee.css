@@ -40,6 +40,18 @@ main .section .grid-marquee h1 {
   display: none;
 }
 
+.grid-marquee .headline a.button .text-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.grid-marquee .headline a.button .icon {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
 .grid-marquee .headline a:not(.primaryCTA) {
   background-color: var(--color-black);
   border-color: var(--color-black);
