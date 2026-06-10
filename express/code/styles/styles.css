@@ -1008,10 +1008,18 @@ main .section.max-width-900 {
 }
 
 @media (min-width: 1800px) {
+
+
   main .section.panel {
     margin: 0 auto var(--spacing-900) auto;
     max-width: 1679px;
   }
+
+  main .section.max-width-900 {
+    max-width: 900px;
+    margin-inline: auto;
+  }
+  
 }
 
 /* Align link-list with template container when in modular-search */
