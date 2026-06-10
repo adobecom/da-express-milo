@@ -11,6 +11,40 @@ import axAccordionDecorate from '../../ax-accordion/ax-accordion.js';
 import { formatLargeNumberToK, sanitizeHtml } from '../utilities/utility-functions.js';
 import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 
+function renderStars(rating) {
+  const TOTAL = 5;
+  const floor = Math.floor(rating);
+  const decimal = rating - floor;
+  const fullCount = decimal >= 0.75 ? floor + 1 : floor;
+  const hasHalf = decimal >= 0.25 && decimal < 0.75;
+  const emptyCount = TOTAL - fullCount - (hasHalf ? 1 : 0);
+
+  const stars = [];
+  for (let i = 0; i < fullCount; i += 1) {
+    stars.push(html`
+      <div key="full-${i}" class="pdpx-star-icon-wrapper">
+        <img class="pdpx-star-icon" src="/express/code/icons/s2-star-filled.svg" alt="" aria-hidden="true" />
+      </div>
+    `);
+  }
+  if (hasHalf) {
+    stars.push(html`
+      <div key="half" class="pdpx-star-icon-wrapper pdpx-star-icon-half-wrapper">
+        <img class="pdpx-star-icon pdpx-star-icon-half-filled" src="/express/code/icons/s2-star-filled.svg" alt="" aria-hidden="true" />
+        <img class="pdpx-star-icon pdpx-star-icon-half-empty" src="/express/code/icons/s2-star-empty.svg" alt="" aria-hidden="true" />
+      </div>
+    `);
+  }
+  for (let i = 0; i < emptyCount; i += 1) {
+    stars.push(html`
+      <div key="empty-${i}" class="pdpx-star-icon-wrapper">
+        <img class="pdpx-star-icon" src="/express/code/icons/s2-star-empty.svg" alt="" aria-hidden="true" />
+      </div>
+    `);
+  }
+  return stars;
+}
+
 function mapToAccordionFormat(descriptions) {
   if (!descriptions || !Array.isArray(descriptions)) {
     return [];
@@ -95,10 +129,11 @@ export function ProductHeader() {
           </div>
           ${reviewsRating > 0 && html`
             <div class="pdpx-product-ratings-lockup-container">
+              ${/* Star ratings are currently not returned by the SDK for print products,
+                   so this block does not render in practice. The implementation below is
+                   ready: re-enable by ensuring the SDK populates reviewsStats. */ ''}
               <div class="pdpx-star-ratings" role="img" aria-label="${formattedRating} out of 5 stars">
-                ${Array.from({ length: 5 }).map(() => html`
-                  <img class="pdpx-product-info-header-ratings-star" src="/express/code/icons/star-sharp.svg" alt="" aria-hidden="true" />
-                `)}
+                ${renderStars(reviewsRating)}
               </div>
               <div class="pdpx-ratings-number-container">
                 <span class="pdpx-ratings-number" id="pdpx-ratings-number" aria-hidden="true">${formattedRating}</span>
