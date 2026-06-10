@@ -36,7 +36,7 @@ export function ProductDetails() {
     const accordionData = mapToAccordionFormat(descriptions);
     if (!accordionRef.current.accordionData) {
       accordionRef.current.accordionData = accordionData;
-      axAccordionDecorate(accordionRef.current);
+      axAccordionDecorate(accordionRef.current, { disableScrollAfterExpand: true });
     } else {
       const previousDescriptions = previousDescriptionsRef.current;
       if (previousDescriptions !== descriptions && accordionRef.current.updateAccordion) {
