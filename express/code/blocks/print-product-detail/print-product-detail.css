@@ -1194,7 +1194,17 @@ main .section .ax-accordion-item-description p {
 }
 
 .print-product-detail a.pdpx-checkout-button:focus-visible {
-  outline: 3px solid var(--color-white);
+  outline: 3px solid var(--color-background-accent-default);
+  outline-offset: 2px;
+}
+
+.print-product-detail .ax-accordion-item-title-container:focus-visible {
+  outline: 3px solid var(--color-background-accent-default);
+  outline-offset: -3px;
+}
+
+.print-product-detail .pdpx-image-thumbnail-carousel-item:focus-visible {
+  outline: 3px solid var(--color-background-accent-default);
   outline-offset: -3px;
 }
 
