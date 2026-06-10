@@ -698,3 +698,9 @@ nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:not(:last-chil
 }
 
 
+
+.template-x-carousel.centered-toolbar .toolbar {
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0;
+}
