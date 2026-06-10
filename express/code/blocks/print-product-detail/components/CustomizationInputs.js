@@ -367,7 +367,7 @@ function buildPillElement(option, isSelected, index, setSize, activeIndex, handl
   button.setAttribute('aria-setsize', String(setSize));
   button.setAttribute('aria-label', `${option.title}${option.priceDelta ? ` ${option.priceDelta}` : ''}`);
   button.setAttribute('data-tooltip', option.title);
-  button.setAttribute('tabindex', index === activeIndex ? '0' : '-1');
+  button.setAttribute('tabindex', '0');
   button.addEventListener('click', () => handleOptionClick(option));
   button.addEventListener('keydown', handleMiniPillKeyDown);
 
@@ -446,6 +446,11 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
     },
     handleMiniPillKeyDown: (event) => {
       const { key, currentTarget } = event;
+      if (key === 'Enter' || key === ' ') {
+        event.preventDefault();
+        currentTarget.click();
+        return;
+      }
       if (!['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(key)) {
         return;
       }
@@ -545,6 +550,9 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
         )),
       ).then((carousels) => {
         carouselCleanupsRef.current = carousels.filter(Boolean).map((c) => c.cleanup);
+        container.querySelectorAll('.pdpx-mini-pill-container').forEach((el) => {
+          el.removeAttribute('tabindex');
+        });
       });
     } else {
       const selectedIndex = allOptions.findIndex(
@@ -573,6 +581,9 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
         if (carousel) {
           carouselCleanupsRef.current = [carousel.cleanup];
         }
+        container.querySelectorAll('.pdpx-mini-pill-container').forEach((el) => {
+          el.removeAttribute('tabindex');
+        });
       });
     }
 
@@ -600,7 +611,7 @@ function MiniPillCarousel({ attribute, onRequestDrawer, productType }) {
       btn.classList.toggle('selected', isSelected);
       btn.setAttribute('aria-current', isSelected ? 'true' : 'false');
       btn.setAttribute('aria-checked', isSelected ? 'true' : 'false');
-      btn.setAttribute('tabindex', isSelected ? '0' : '-1');
+      btn.setAttribute('tabindex', '0');
     });
     if (!hasSelected && buttons.length > 0) {
       buttons[0].setAttribute('tabindex', '0');

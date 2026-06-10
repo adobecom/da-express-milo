@@ -480,7 +480,7 @@ function SizeChartContent() {
 
   return html`
     <div class="pdpx-drawer-body pdpx-size-chart-container drawer-body--size-chart">
-      <h2 class="size-chart-product-name">${chart.title || 'Size Chart'}</h2>
+      <h2 class="size-chart-product-name">${chart.title || 'Size chart'}</h2>
       <div class="size-chart-table-container">
         <div class="size-chart-tables">
           ${bodyTypes.length > 0 && html`
