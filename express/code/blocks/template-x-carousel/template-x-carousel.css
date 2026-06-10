@@ -704,3 +704,8 @@ nav:has(+ .template-x-carousel.bc.v2) ol.templates-breadcrumbs li:not(:last-chil
   margin-right: auto;
   padding: 0;
 }
+
+.template-x-carousel.full-bleed .templates-container {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}

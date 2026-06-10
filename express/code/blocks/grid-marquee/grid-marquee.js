@@ -323,18 +323,12 @@ export default async function init(el) {
   // Legacy mode: headline + background + items inside this block
   if (hasLegacyHeadline) {
     const [headline, background, ...items] = rows;
-    const injectAcrobatLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase());
-    let logo;
-
-    if (injectAcrobatLogo) {
-      const logoName = 'cobrand-lockup-acrobat-express';
-      const logoSize = '22px';
-      const logoAlt = 'Adobe Acrobat X Adobe Express co-brand logo';
-      const logoClass = 'marquee-eyebrow-logo-wide';
-      logo = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
-    } else {
-      logo = getIconElementDeprecated('adobe-express-logo');
-    }
+    const brandingLogoName = getMetadata('inject-branding-logo')?.trim()
+      || (['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase()) && 'cobrand-lockup-acrobat-express')
+      || null;
+    const logo = brandingLogoName
+      ? getIconElementDeprecated(brandingLogoName)
+      : getIconElementDeprecated('adobe-express-logo');
 
     logo.classList.add('express-logo');
 
