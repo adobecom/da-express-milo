@@ -49,6 +49,7 @@ const CONFIG = {
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
       'color.adobe.com': 'color.stage.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     'www.stage.adobe.com': {
       'www.adobe.com': 'origin',
@@ -56,6 +57,7 @@ const CONFIG = {
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
       'color.adobe.com': 'color.stage.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     '--express-color--adobecom.(hlx|aem).(page|live)': {
       'color.adobe.com': 'origin',
@@ -63,6 +65,7 @@ const CONFIG = {
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     'color.stage.adobe.com': {
       'color.adobe.com': 'origin',
@@ -70,6 +73,7 @@ const CONFIG = {
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
   },
   jarvis: {
