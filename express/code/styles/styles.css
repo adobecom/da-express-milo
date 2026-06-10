@@ -991,7 +991,6 @@ main .section.panel {
 main .section.max-width-900 {
   max-width: 900px;
   margin-inline: auto;
-  margin: auto;
 }
 
 @media (max-width: 899px) {

@@ -287,7 +287,8 @@ export default async function init(el) {
     ctas[0].parentElement.classList.add('ctas');
     ctas.forEach((cta) => {
       cta.classList.add('button');
-      const icon = cta.parentElement?.querySelector('.icon');
+      if (cta.querySelector('.icon')) return;
+      const icon = cta.parentElement?.querySelector(':scope > .icon');
       const match = icon && iconRegex.exec(icon.className);
       if (match?.[1]) {
         const hasExistingGraphic = icon.querySelector('svg, img');
