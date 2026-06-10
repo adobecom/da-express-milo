@@ -145,23 +145,7 @@ export default async function decorate(block) {
   const mountPoint = document.createElement('div');
   block.append(mountPoint);
 
-  // Show skeleton immediately as static HTML (no store/Preact needed)
-  mountPoint.innerHTML = `
-    <div class="pdpx-global-container" aria-busy="true" aria-label="Loading product information">
-      <div class="pdpx-product-images-container">
-        <div class="pdpx-product-hero-image-container" data-skeleton="true" style="height: 400px;"></div>
-      </div>
-      <div class="pdpx-product-info-wrapper">
-        <div class="pdpx-product-info-heading-section-container">
-          <h1 class="pdpx-product-title" data-skeleton="true" style="height: 32px; width: 60%;"></h1>
-          <div class="pdpx-price-info-container" data-skeleton="true" style="height: 40px; width: 40%; margin-top: 16px;"></div>
-        </div>
-        <div class="pdpx-product-info-section-container">
-          <div class="pdpx-customization-inputs-container" data-skeleton="true" style="height: 300px; margin-top: 24px;"></div>
-        </div>
-      </div>
-    </div>
-  `;
+  render(html`<${LoadingSkeleton} />`, mountPoint);
 
   // Preload SDK module so the browser starts fetching it early
   const sdkPath = new URL('./sdk/index.min.js', import.meta.url).href;
