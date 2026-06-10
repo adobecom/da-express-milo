@@ -21,9 +21,10 @@ export function extractTemplateId(block) {
 }
 
 export function formatDeliveryEstimateDateRange(minDate, maxDate) {
+  const locale = document.documentElement.lang || 'en-US';
   const options = { month: 'short', day: 'numeric' };
-  const minFormatted = new Date(minDate).toLocaleDateString('en-US', options);
-  const maxFormatted = new Date(maxDate).toLocaleDateString('en-US', options);
+  const minFormatted = new Date(minDate).toLocaleDateString(locale, options);
+  const maxFormatted = new Date(maxDate).toLocaleDateString(locale, options);
   return `${minFormatted} - ${maxFormatted}`;
 }
 
@@ -38,10 +39,12 @@ export function formatLargeNumberToK(totalReviews) {
   return String(totalReviews);
 }
 
-export function exchangeRegionForTopLevelDomain(region) {
+function getEffectiveRegion(ietf) {
   const urlParams = new URLSearchParams(window.location.search);
-  const regionURL = urlParams.get('region');
-  const regionFinal = regionURL || region;
+  return urlParams.get('region') || ietf;
+}
+
+export function exchangeRegionForTopLevelDomain(region) {
   const regionToTopLevelDomainMap = {
     'en-GB': 'co.uk',
     'en-US': 'com',
@@ -49,17 +52,18 @@ export function exchangeRegionForTopLevelDomain(region) {
     'en-AU': 'au',
     'en-NZ': 'nz',
   };
-  const topLevelDomain = regionToTopLevelDomainMap[regionFinal] || 'com';
-  return topLevelDomain;
+  return regionToTopLevelDomainMap[getEffectiveRegion(region)] || 'com';
 }
 
 export async function formatPriceZazzle(price, differential = false) {
   const { getCountry } = await import('../../../scripts/utils/location-utils.js');
   const country = await getCountry();
-  const { getCurrency, formatPrice } = await import('../../../scripts/utils/pricing.js');
+  const [{ getCurrency, formatPrice }, { getConfig }] = await Promise.all([
+    import('../../../scripts/utils/pricing.js'),
+    import(`${getLibs()}/utils/utils.js`),
+  ]);
   const currency = await getCurrency(country);
-  const urlParams = new URLSearchParams(window.location.search);
-  const region = urlParams.get('region');
+  const { ietf } = getConfig().locale;
   const currencyMap = {
     'en-GB': 'GBP',
     'en-US': 'USD',
@@ -67,7 +71,7 @@ export async function formatPriceZazzle(price, differential = false) {
     'en-AU': 'AUD',
     'en-NZ': 'NZD',
   };
-  const currencyFinal = currencyMap[region] || currency;
+  const currencyFinal = currencyMap[getEffectiveRegion(ietf)] || currency;
   let priceDifferentialOperator;
   const localizedPrice = await formatPrice(price, currencyFinal);
   if (differential) {
