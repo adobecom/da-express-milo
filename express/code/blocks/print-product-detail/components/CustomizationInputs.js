@@ -191,16 +191,15 @@ export function QuantitySelector() {
   const pickerRef = useRef(null);
   const pickerIdRef = useRef('pdpx-picker-qty');
 
-  if (!state) {
-    return null;
-  }
-
-  const { quantity, quantityOptions, productType } = state;
+  const quantityOptions = state?.quantityOptions ?? [];
+  const quantity = state?.quantity;
+  const productType = state?.productType;
   const optionsSignature = quantityOptions
     .map((option) => `${option.quantity}:${option.label}:${option.discount || ''}`)
     .join('|');
 
   useEffect(() => {
+    if (!state) return undefined;
     let cancelled = false;
 
     async function mountPicker() {
@@ -263,13 +262,17 @@ export function QuantitySelector() {
   }, [optionsSignature]);
 
   useEffect(() => {
-    if (!pickerRef.current?.getPicker || !pickerRef.current?.setPicker) {
+    if (quantity === undefined || !pickerRef.current?.getPicker || !pickerRef.current?.setPicker) {
       return;
     }
     if (String(pickerRef.current.getPicker()) !== String(quantity)) {
       pickerRef.current.setPicker(String(quantity));
     }
   }, [quantity]);
+
+  if (!state) {
+    return null;
+  }
 
   return html`
     <div class="pdpx-standard-selector-container">
