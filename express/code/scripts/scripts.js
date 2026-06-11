@@ -19,6 +19,7 @@ import {
   getRedirectUri,
   getIconElementDeprecated,
   getContentRoot,
+  getUnityLibs,
 } from './utils.js';
 
 // Add project-wide style path here.
@@ -26,7 +27,26 @@ const STYLES = [];
 
 // Use 'https://milo.adobe.com/libs' if you cannot map '/libs' to milo's origin.
 const LIBS = '/libs';
+const UNITY_LIBS = '/unitylibs';
 const miloLibs = setLibs(LIBS);
+
+async function setupUnityLibs() {
+  const libs = getUnityLibs(undefined, UNITY_LIBS);
+  try {
+    const { setUnityLibs, UNITY_BLOCKS } = await import(`${libs}/scripts/utils.js`);
+    setUnityLibs(libs, 'da-express-milo');
+    return { unityLibs: libs, unityBlocks: UNITY_BLOCKS };
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.warn(`Failed to load Unity libs: ${e.message}`);
+    return { unityLibs: UNITY_LIBS, unityBlocks: [] };
+  }
+}
+
+const { unityLibs, unityBlocks } = getMetadata('unity') === 'on'
+  ? await setupUnityLibs()
+  : { unityLibs: UNITY_LIBS, unityBlocks: [] };
+
 let jarvisImmediatelyVisible = false;
 const jarvisVisibleMeta = getMetadata('jarvis-immediately-visible')?.toLowerCase();
 const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
@@ -492,7 +512,11 @@ async function loadPage() {
   document.head.append(googleLoginRedirect);
   // end TODO remove metadata after we go live
 
-  const config = setConfig({ ...CONFIG, miloLibs });
+  const config = setConfig({
+    ...CONFIG,
+    miloLibs,
+    externalLibs: [{ blocks: unityBlocks, base: unityLibs }],
+  });
 
   // Legacy color.adobe.com deeplink redirect
   if (/color-theme-\d+\/?$/.test(window.location.pathname)) {

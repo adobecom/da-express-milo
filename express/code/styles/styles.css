@@ -1142,6 +1142,10 @@ main .section p {
   margin: var(--spacing-500) 0;
 }
 
+main .section .unity-verb-marquee p {
+  margin: 0;
+}
+
 main .section:not(.xxxl-spacing-static,
 .xxl-spacing-static,
 .xl-spacing-static,
@@ -1368,6 +1372,10 @@ main .section.blog-content>.content>p {
 
   main .section h1 {
     font-size: var(--heading-font-size-l);
+  }
+
+  main .section .unity-verb-marquee h1 {
+    font-size: var(--heading-font-size-xxl);
   }
 
   main #hero h1 {
