@@ -1,4 +1,4 @@
-import { getLibs, getMobileOperatingSystem } from '../../scripts/utils.js';
+import { getLibs, getMobileOperatingSystem, getIconElementDeprecated } from '../../scripts/utils.js';
 import { fetchResults, isValidTemplate } from '../../scripts/template-utils.js';
 import renderTemplate from '../template-x/template-rendering.js';
 import buildLoopGallery from '../../scripts/widgets/gallery/gallery-loop.js';
@@ -31,6 +31,14 @@ async function createTemplatesContainer(recipe, queryParams = '') {
   };
 
   const templates = await createTemplates(recipe, customProperties);
+
+  // Append the arrow icon to each CTA before the gallery clones the items,
+  // so clones carry it too (matches template-x-carousel v2).
+  templates.forEach((tplt) => {
+    tplt.querySelectorAll('.button-container > a.button').forEach((cta) => {
+      cta.append(getIconElementDeprecated('arrow-up-right'));
+    });
+  });
 
   const [prev, next] = await Promise.all([
     replaceKey('previous', getConfig()),

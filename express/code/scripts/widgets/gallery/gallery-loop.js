@@ -97,8 +97,11 @@ export default async function buildLoopGallery(items, container, options = {}) {
       const leadClone = realItems[(n - 1 - (j % n) + n) % n].cloneNode(true);
       [tailClone, leadClone].forEach((clone) => {
         clone.classList.add('gallery-loop-clone');
-        clone.setAttribute('inert', ''); // keep clones out of tab order + AT
+        // Keep clones out of the tab order + AT, but still hoverable/clickable
+        // (inert would disable :hover, so pull focusables out individually instead).
         clone.setAttribute('aria-hidden', 'true');
+        clone.querySelectorAll('a[href], button, input, select, textarea, [tabindex]')
+          .forEach((node) => node.setAttribute('tabindex', '-1'));
       });
       tail.push(tailClone);
       lead.unshift(leadClone);
@@ -154,25 +157,47 @@ export default async function buildLoopGallery(items, container, options = {}) {
     if (e.key === 'ArrowRight') { e.preventDefault(); step1(1); }
   });
 
-  // Pointer drag / swipe — one step per gesture.
+  // Pointer drag / swipe — one step per gesture. We only capture the pointer
+  // once real movement is detected; otherwise a click/tap is left alone so it
+  // reaches the CTA link inside the card (capturing on pointerdown would steal
+  // the click and the links would never navigate).
+  const DRAG_START_PX = 6;
+  let pointerActive = false;
   let dragging = false;
+  let captured = false;
+  let pointerId = null;
   let startX = 0;
   let baseOffset = 0;
   viewport.addEventListener('pointerdown', (e) => {
-    dragging = true;
+    pointerActive = true;
+    dragging = false;
+    captured = false;
+    pointerId = e.pointerId;
     startX = e.clientX;
     baseOffset = centerOffset(vpos);
-    track.style.transition = 'none';
-    viewport.setPointerCapture(e.pointerId);
   });
   viewport.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
-    track.style.transform = `translate3d(${baseOffset + (e.clientX - startX)}px, 0, 0)`;
+    if (!pointerActive) return;
+    const dx = e.clientX - startX;
+    if (!dragging) {
+      if (Math.abs(dx) < DRAG_START_PX) return;
+      dragging = true;
+      track.style.transition = 'none';
+      try {
+        viewport.setPointerCapture(pointerId);
+        captured = true;
+      } catch (err) {
+        // pointer may already be gone; dragging still works without capture
+      }
+    }
+    track.style.transform = `translate3d(${baseOffset + dx}px, 0, 0)`;
   });
   const endDrag = (e) => {
-    if (!dragging) return;
+    if (!pointerActive) return;
+    pointerActive = false;
+    if (captured) viewport.releasePointerCapture?.(pointerId);
+    if (!dragging) return; // a tap/click — let it through to the CTA link
     dragging = false;
-    viewport.releasePointerCapture?.(e.pointerId);
     track.style.transition = '';
     const delta = e.clientX - startX;
     if (Math.abs(delta) > step * DRAG_THRESHOLD) step1(delta < 0 ? 1 : -1);

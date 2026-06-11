@@ -8,6 +8,12 @@ that reveals its hover CTA. Navigation loops endlessly via prev/next buttons, ke
 arrows, or pointer drag/swipe (one step per gesture). Items must be uniform width — the
 block CSS enforces this with `--loop-card-width`.
 
+The styling that `template-x-carousel` exposes behind its `centered-toolbar`, `full-bleed`,
+and `v2` variant classes is the **default** here — no variant class needed: the toolbar is
+centered, the carousel is full-bleed (`100vw`), and cards use the v2 look (persistent bottom
+label bar, hover-darken overlay). Snap-specific bits (e.g. first-child left margins) are
+intentionally omitted since centering handles edge spacing.
+
 ## Authoring
 
 | Row | Content |

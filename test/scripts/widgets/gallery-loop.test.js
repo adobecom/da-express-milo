@@ -17,6 +17,9 @@ function makeContainer(count) {
     item.style.width = '100px';
     item.style.height = '100px';
     item.dataset.i = String(i);
+    const link = document.createElement('a');
+    link.href = '#';
+    item.append(link);
     items.push(item);
   }
   document.body.append(container);
@@ -36,14 +39,17 @@ describe('gallery-loop engine', () => {
     expect(active[0].dataset.i).to.equal('0');
   });
 
-  it('clones a buffer on each end, kept out of the a11y tree', async () => {
+  it('clones a buffer on each end, hoverable but out of the a11y/tab tree', async () => {
     const { container, items } = makeContainer(5);
     await buildLoopGallery(items, container, {});
     const clones = container.querySelectorAll('.gallery-loop-clone');
     expect(clones.length).to.be.greaterThan(0);
     clones.forEach((clone) => {
-      expect(clone.hasAttribute('inert')).to.be.true;
+      // inert would block :hover, so it must NOT be set
+      expect(clone.hasAttribute('inert')).to.be.false;
       expect(clone.getAttribute('aria-hidden')).to.equal('true');
+      // focusable descendants pulled out of the tab order
+      expect(clone.querySelector('a').getAttribute('tabindex')).to.equal('-1');
     });
   });
 
@@ -69,6 +75,22 @@ describe('gallery-loop engine', () => {
     // backing real item is index 4 after the seam normalizes.
     const active = container.querySelector('.gallery-loop-track .active');
     expect(active).to.exist;
+  });
+
+  it('lets a tap (no drag) pass through without moving or capturing the pointer', async () => {
+    const { container, items } = makeContainer(5);
+    await buildLoopGallery(items, container, {});
+    const viewport = container.querySelector('.gallery-loop-viewport');
+    const before = container.querySelector('.gallery-loop-track .active').dataset.i;
+
+    let captured = false;
+    viewport.setPointerCapture = () => { captured = true; };
+    viewport.dispatchEvent(new PointerEvent('pointerdown', { clientX: 50, pointerId: 1, bubbles: true }));
+    viewport.dispatchEvent(new PointerEvent('pointerup', { clientX: 50, pointerId: 1, bubbles: true }));
+
+    expect(captured).to.be.false;
+    const after = container.querySelector('.gallery-loop-track .active').dataset.i;
+    expect(after).to.equal(before);
   });
 
   it('handles a single item without controls', async () => {

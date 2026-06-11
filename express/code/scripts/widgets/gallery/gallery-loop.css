@@ -30,16 +30,10 @@
   width: 100%;
 }
 
+/* Structural only — the consuming block owns the spotlight scale/opacity
+   aesthetic (via .gallery-loop-item / .active), keyed to --loop-active-scale. */
 .gallery-loop-item {
   flex: 0 0 auto;
-  transform: scale(.86);
-  opacity: .55;
-  transition: transform .35s ease, opacity .35s ease;
-}
-
-.gallery-loop-item.active {
-  transform: scale(var(--loop-active-scale));
-  opacity: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
