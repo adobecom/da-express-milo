@@ -2,7 +2,7 @@
   --template-height: 250px;
   --loop-card-width: 193px;
   --loop-gap: 16px;
-  --loop-edge-fade: 64px;
+  --loop-edge-fade: 0; /* no edge fade on mobile; enabled from tablet up */
   --template-purple: var(--color-background-accent-default);
 
   margin: auto;
@@ -13,7 +13,7 @@
 
 /* Section padding (ported from template-x-carousel .v2 default) */
 .section:has(.template-x-carousel-loop) {
-  padding-top: var(--spacing-600);
+  padding-top: 0;
   padding-bottom: var(--spacing-600);
 }
 
@@ -244,6 +244,10 @@
 }
 
 @media (min-width: 600px) {
+  .template-x-carousel-loop {
+    --loop-edge-fade: 64px; /* enable edge fade on tablet+ */
+  }
+
   .section:has(.template-x-carousel-loop) {
     padding-top: var(--spacing-300);
     padding-bottom: var(--spacing-300);
@@ -273,7 +277,7 @@
   }
 
   .section:has(.template-x-carousel-loop) {
-    padding-top: var(--spacing-600);
+    padding-top:0;
     padding-bottom: var(--spacing-600);
   }
 }

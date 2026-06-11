@@ -990,7 +990,7 @@ main .section.panel {
 
 main .section.max-width-900 {
   max-width: 900px;
-  box-sizing: border-box;
+  box-sizing: border-box;n
   margin-inline: auto;
 }
 

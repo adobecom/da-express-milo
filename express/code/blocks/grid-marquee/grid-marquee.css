@@ -529,6 +529,13 @@ main .section .grid-marquee.pricing-page h1 {
   }
 }
 
+/* narrow variant — centered headline + content, capped at 666px */
+.grid-marquee.narrow .headline {
+  max-width: 666px;
+  margin-inline: auto;
+  text-align: center;
+}
+
 
 
 
