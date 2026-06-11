@@ -309,6 +309,7 @@ export async function loadIconsRail() {
     'sp-icon-circle',
     'sp-icon-copy',
     'sp-icon-delete',
+    'sp-icon-download',
     'sp-icon-edit',
     'sp-icon-filter',
     'sp-icon-open-in',
