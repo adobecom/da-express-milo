@@ -139,6 +139,8 @@ export const QA_CONFIGS = {
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
   'remove-background-fast-track-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'remove-background-fast-track-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'remove-background-focused-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
+  'remove-background-focused-challenger': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'heic-to-jpg': {
     ...getBaseImgCfg(PNG, WEBP, HEIC),
     input_check: getHeicInputCheck(PNG, WEBP, HEIC),
