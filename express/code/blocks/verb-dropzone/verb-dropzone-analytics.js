@@ -47,7 +47,7 @@ function eventData(metaData, { appReferrer: referrer, trackingId: tracking }) {
 
   return {
     event: {
-      pagename: `acrobat:verb-${verb}:${eventName}${errorInfo ? ` ${errorInfo}` : ''}`,
+      pagename: `acrobat-express:verb-${verb}:${eventName}${errorInfo ? ` ${errorInfo}` : ''}`,
       ...(noOfFiles ? { no_of_files: noOfFiles } : {}),
       ...(uploadTime ? { uploadTime } : {}),
     },
@@ -138,13 +138,13 @@ export function sendAnalyticsToSplunk(
   } catch (error) {
     window.lana?.log(
       `An error occurred while sending ${eventName} to splunk, verb: ${verb}, metadata: ${metaData}, error: ${error}`,
-      { sampleRate: 1, tags: 'DC_Milo,Project Unity (DC)', severity: 'error' },
+      { sampleRate: 1, tags: 'express,Project Unity (Express)', severity: 'error' },
     );
   }
 }
 
 export function createEventObject(eventName, verb, metaData, trackingParams, documentUnloading) {
-  const verbEvent = `acrobat:verb-${verb}:${eventName}`;
+  const verbEvent = `acrobat-express:verb-${verb}:${eventName}`;
   const eventDataPayload = eventData({ ...metaData, eventName, verb }, trackingParams);
   const redirectReady = new CustomEvent('DCUnity:RedirectReady');
 
@@ -160,7 +160,7 @@ export function createEventObject(eventName, verb, metaData, trackingParams, doc
         if (error) {
           window.lana?.log(
             `Error Code: ${error}, Status: 'Unknown', Message: An error occurred while sending ${verbEvent}, Account Type: ${accountType}`,
-            { sampleRate: 1, tags: 'DC_Milo,Project Unity (DC)', severity: 'error' },
+            { sampleRate: 1, tags: 'express,Project Unity (Express)', severity: 'error' },
           );
         }
       }
@@ -184,10 +184,6 @@ export function createEventObject(eventName, verb, metaData, trackingParams, doc
           },
           dcweb: eventDataPayload,
           dcweb2: eventDataPayload,
-        },
-        app: {
-          appName: 'ACROBAT_WEB_FRICTIONLESS',
-          appVersion: '1.0',
         },
       },
     },

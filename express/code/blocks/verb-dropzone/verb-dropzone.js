@@ -70,7 +70,7 @@ const EOLBrowserPage = 'https://acrobat.adobe.com/home/index-browser-eol.html';
 
 const lanaOptions = {
   sampleRate: 1,
-  tags: 'Express_Milo,Project Unity (Express)',
+  tags: 'express,Project Unity (Express), verb-dropzone',
   severity: 'error',
 };
 
@@ -334,39 +334,7 @@ export default async function init(element) {
       callback();
     }
   }
-  const initializePingService = async () => {
-    try {
-      const { PingService, USER_TYPE } = await import('../../scripts/ping.js');
-      const isSignedIn = window.adobeIMS?.isSignedInUser() || false;
-      const userType = isSignedIn ? USER_TYPE.SIGNEDIN : USER_TYPE.ANON;
-      const userId = isSignedIn ? ((await window.adobeIMS?.getProfile())?.userId || '') : '';
-      const pingService = new PingService({
-        locale: getLocale(),
-        config: {
-          serverEnv: getEnv(),
-          appName: 'adobe_com',
-          appVersion: '1.0',
-          appReferrer: '',
-        },
-        userId,
-        isSignedIn,
-        userType,
-        subscriptionType: 'unspecified',
-      });
-      const pingConfig = {
-        appPath: 'unity-dc-frictionless',
-        schema: {},
-      };
-      await pingService.sendPingEvent(pingConfig);
-    } catch (error) {
-      window.lana?.log(
-        `Error Code: Unknown, Status: 'Unknown', Message: Failed to send ping: ${error.message}`,
-        lanaOptions,
-      );
-    }
-  };
   runWhenDocumentIsReady(() => {
-    initializePingService();
     window.dispatchEvent(new CustomEvent('analyticsLoad', { detail: { verb: VERB, userAttempts } }));
   });
   const children = element.querySelectorAll(':scope > div');
@@ -561,7 +529,7 @@ export default async function init(element) {
       window.dispatchEvent(redirectReady);
       window.lana?.log(
         'Adobe Analytics done callback failed to trigger, 3 second timeout dispatched event.',
-        { sampleRate: 1, tags: 'DC_Milo,Project Unity (DC)', severity: 'warning' },
+        { ...lanaOptions, severity: 'warning' },
       );
     }, 3000);
     setCookie('UTS_Uploaded', Date.now(), cookieExp);
