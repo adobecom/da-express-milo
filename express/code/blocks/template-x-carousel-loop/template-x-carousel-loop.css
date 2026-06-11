@@ -263,7 +263,10 @@
   }
 
   .template-x-carousel-loop .toolbar {
-    padding-right: var(--spacing-500);
+    padding-right:0;
+    margin-left: auto;
+    margin-right: 0;
+
   }
 
   .section:has(.template-x-carousel-loop) {
