@@ -393,7 +393,7 @@ export function CheckoutButton({ templateId }) {
     Promise.all([
       import(`${getLibs()}/utils/utils.js`),
       import('../../sticky-promo-bar/sticky-promo-bar.js'),
-    ]).then(([{ loadStyle, getConfig }, { default: stickyPromoBar }]) => {
+    ]).then(([{ loadStyle }, { default: stickyPromoBar }]) => {
       const { codeRoot } = getConfig();
       loadStyle(`${codeRoot}/blocks/sticky-promo-bar/sticky-promo-bar.css`, () => {
         stickyPromoBar(promoBar);
