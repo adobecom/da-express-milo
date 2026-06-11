@@ -1,0 +1,140 @@
+.template-x-carousel-loop {
+  --template-height: 300px;
+  --loop-card-width: 220px;
+  --loop-gap: 22px;
+  --template-purple: var(--color-background-accent-default);
+
+  margin: auto;
+  max-width: unset;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.template-x-carousel-loop .headers-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-100);
+  padding: var(--spacing-200) var(--spacing-300);
+}
+
+.template-x-carousel-loop .heading {
+  font-size: var(--heading-font-size-m);
+  font-weight: var(--heading-font-weight-extra);
+  text-align: center;
+  margin: 0;
+}
+
+.template-x-carousel-loop .description {
+  font-size: var(--body-font-size-m);
+  text-align: center;
+  margin: 0;
+}
+
+.template-x-carousel-loop .toolbar {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-400);
+  order: 3;
+}
+
+.template-x-carousel-loop .controls-container {
+  display: flex;
+  align-items: center;
+}
+
+.template-x-carousel-loop .templates-container {
+  order: 2;
+  margin-top: var(--spacing-400);
+}
+
+/* The loop engine needs uniform-width items to compute offsets. */
+.template-x-carousel-loop .gallery-loop-track {
+  column-gap: var(--loop-gap);
+}
+
+.template-x-carousel-loop .template {
+  position: relative;
+  width: var(--loop-card-width);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  text-decoration: unset;
+}
+
+.template-x-carousel-loop .template .image-wrapper,
+.template-x-carousel-loop .template .media-wrapper {
+  position: relative;
+  height: var(--template-height);
+  width: 100%;
+}
+
+.template-x-carousel-loop .template img:not(.icon),
+.template-x-carousel-loop .template video {
+  display: block;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.template-x-carousel-loop .template:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-2) var(--color-white), 0 0 0 4px var(--color-info-accent);
+}
+
+/* Only the spotlit (active) card reveals its hover CTA. */
+.template-x-carousel-loop .template .button-container {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column-reverse;
+  padding: var(--spacing-100);
+  border-radius: 14px;
+  background-color: var(--color-white);
+  box-shadow: 0 0 6px #00000029;
+  opacity: 0;
+  text-align: center;
+  transition: opacity .3s ease-in-out;
+  pointer-events: none;
+}
+
+.template-x-carousel-loop .gallery-loop-item.active:hover .button-container,
+.template-x-carousel-loop .gallery-loop-item.active .button-container:focus-within {
+  z-index: 1;
+  opacity: 1;
+  pointer-events: initial;
+}
+
+.template-x-carousel-loop .view-all {
+  display: block;
+  order: 4;
+  margin-top: var(--spacing-300);
+  font-size: var(--body-font-size-m);
+  text-align: center;
+  color: var(--template-purple);
+}
+
+.template-x-carousel-loop .view-all .icon-s2-chevron-right {
+  width: var(--spacing-400);
+  height: var(--spacing-400);
+  vertical-align: middle;
+  margin-left: var(--spacing-75);
+}
+
+.template-x-carousel-loop .template p {
+  margin: 0;
+}
+
+@media (min-width: 900px) {
+  .template-x-carousel-loop {
+    --loop-card-width: 260px;
+  }
+
+  .template-x-carousel-loop .heading {
+    font-size: var(--heading-font-size-l);
+  }
+}

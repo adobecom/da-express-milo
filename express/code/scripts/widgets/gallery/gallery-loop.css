@@ -1,0 +1,78 @@
+.gallery-loop {
+  --loop-active-scale: 1.08;
+
+  position: relative;
+}
+
+.gallery-loop-viewport {
+  overflow: hidden;
+  /* room for the centered item to scale up without clipping */
+  padding-block: calc((var(--loop-active-scale) - 1) * var(--template-height, 300px) / 2);
+  /* allow vertical page scroll while we capture horizontal drags */
+  touch-action: pan-y;
+  outline: none;
+}
+
+.gallery-loop-viewport:focus-visible {
+  outline: revert;
+}
+
+.gallery-loop-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  will-change: transform;
+  transition: transform .35s ease;
+}
+
+.gallery-loop-track--static {
+  justify-content: center;
+  width: 100%;
+}
+
+.gallery-loop-item {
+  flex: 0 0 auto;
+  transform: scale(.86);
+  opacity: .55;
+  transition: transform .35s ease, opacity .35s ease;
+}
+
+.gallery-loop-item.active {
+  transform: scale(var(--loop-active-scale));
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-loop-track,
+  .gallery-loop-item {
+    transition: none;
+  }
+}
+
+/* Prev/Next control — self-contained so the engine needs no extra stylesheet. */
+.gallery-control {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-100);
+  align-items: center;
+}
+
+.gallery-control.hide {
+  display: none;
+}
+
+.gallery-control button {
+  all: unset;
+  cursor: pointer;
+  height: 2rem;
+  box-shadow: 0 2px 8px 0 #00000029;
+  border-radius: 50px;
+}
+
+.gallery-control button:focus-visible {
+  outline: revert;
+}
+
+.gallery-control button:hover circle {
+  fill: var(--color-gray-300);
+}
