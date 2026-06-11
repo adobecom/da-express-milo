@@ -323,10 +323,6 @@ export default async function init(element) {
   function mergeData(eventData = {}) {
     return { ...eventData, noOfFiles };
   }
-  function getLocale() {
-    const currLocale = getConfig().locale?.prefix.replace('/', '');
-    return currLocale || 'en-us';
-  }
   function runWhenDocumentIsReady(callback) {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', callback);
