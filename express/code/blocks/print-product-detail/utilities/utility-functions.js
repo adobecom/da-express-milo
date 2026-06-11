@@ -121,6 +121,7 @@ export function formatStringSnakeCase(string) {
 }
 
 export async function addPrefetchLinks() {
+  if (document.querySelector('link[href*="zazzle."]')) return;
   const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
   const { ietf } = getConfig().locale;
   const topLevelDomain = exchangeRegionForTopLevelDomain(ietf);

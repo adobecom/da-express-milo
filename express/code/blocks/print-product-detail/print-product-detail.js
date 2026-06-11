@@ -77,10 +77,11 @@ function PDPContent({ templateId }) {
 
   useEffect(() => {
     if (!containerRef.current || !state) return;
-    import(`${getLibs()}/martech/attributes.js`).then(({ decorateDefaultLinkAnalytics }) => {
-      import(`${getLibs()}/utils/utils.js`).then(({ getConfig }) => {
-        decorateDefaultLinkAnalytics(containerRef.current, getConfig());
-      });
+    Promise.all([
+      import(`${getLibs()}/martech/attributes.js`),
+      import(`${getLibs()}/utils/utils.js`),
+    ]).then(([{ decorateDefaultLinkAnalytics }, { getConfig }]) => {
+      decorateDefaultLinkAnalytics(containerRef.current, getConfig());
     });
   }, [state]);
 

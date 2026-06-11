@@ -10,6 +10,7 @@ import { useStore, useDrawer } from './Contexts.js';
 import axAccordionDecorate from '../../ax-accordion/ax-accordion.js';
 import { formatLargeNumberToK, sanitizeHtml } from '../utilities/utility-functions.js';
 import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
+import { getLibs } from '../../../scripts/utils.js';
 
 function renderStars(rating) {
   const TOTAL = 5;
@@ -394,12 +395,13 @@ export function CheckoutButton({ templateId }) {
 
     container.appendChild(promoBar);
 
-    import('../../../scripts/utils.js').then(({ getLibs }) => import(`${getLibs()}/utils/utils.js`)).then(({ loadStyle, getConfig }) => {
+    Promise.all([
+      import(`${getLibs()}/utils/utils.js`),
+      import('../../sticky-promo-bar/sticky-promo-bar.js'),
+    ]).then(([{ loadStyle, getConfig }, { default: stickyPromoBar }]) => {
       const { codeRoot } = getConfig();
       loadStyle(`${codeRoot}/blocks/sticky-promo-bar/sticky-promo-bar.css`, () => {
-        import('../../sticky-promo-bar/sticky-promo-bar.js').then(({ default: stickyPromoBar }) => {
-          stickyPromoBar(promoBar);
-        });
+        stickyPromoBar(promoBar);
       });
     }).catch((error) => {
       window.lana?.log(`Failed to load sticky-promo-bar: ${error}`, { tags: 'print-product-detail', severity: 'warning' });
