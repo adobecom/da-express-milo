@@ -1,5 +1,24 @@
 import { getLibs, createTag } from '../../../scripts/utils.js';
 
+export function updateImageUrl(url, maxDim) {
+  try {
+    const urlObj = new URL(url);
+    urlObj.searchParams.set('max_dim', String(maxDim));
+    return urlObj.toString();
+  } catch {
+    return url;
+  }
+}
+
+export function flattenOptionGroups(selector) {
+  if (!selector?.optionGroups || !Array.isArray(selector.optionGroups)) {
+    return [];
+  }
+  return selector.optionGroups.flatMap(
+    (group) => (group.options || []).map((option) => ({ ...option, groupTitle: group.title })),
+  );
+}
+
 export function formatPaperThickness(thickness) {
   const thicknessFormatted = `${thickness.replace('_', '.')}pt thickness`;
   return thicknessFormatted;

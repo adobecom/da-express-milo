@@ -8,7 +8,7 @@ import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 import { createPicker } from '../../../scripts/widgets/picker.js';
 import { trackPrintAddonOptionSelect } from '../../../scripts/instrument.js';
 import { debounce } from '../../../scripts/utils/hofs.js';
-import { sanitizeHtml } from '../utilities/utility-functions.js';
+import { sanitizeHtml, updateImageUrl, flattenOptionGroups } from '../utilities/utility-functions.js';
 
 const debouncedTrackOptionSelect = debounce((payload) => {
   trackPrintAddonOptionSelect(payload).catch(() => { });
@@ -318,26 +318,6 @@ export function RadioSelector({ attribute }) {
       </div>
     </div>
   `;
-}
-
-function updateImageUrl(url, maxDim = 54) {
-  try {
-    const urlObj = new URL(url);
-    urlObj.searchParams.set('max_dim', String(maxDim));
-    return urlObj.toString();
-  } catch {
-    return url;
-  }
-}
-
-function flattenOptionGroups(selector) {
-  if (!selector.optionGroups || !Array.isArray(selector.optionGroups)) {
-    return [];
-  }
-  return selector.optionGroups.flatMap((group) => (group.options || []).map((option) => ({
-    ...option,
-    groupTitle: group.title,
-  })));
 }
 
 function countOptions(attribute) {
@@ -737,7 +717,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
               ${group.title
       && html`<div class="pdpx-option-group-title">${group.title}</div>`} 
               ${(group.options || []).map((option) => {
-    const thumbnailUrl = updateImageUrl(option.imageUrl);
+    const thumbnailUrl = updateImageUrl(option.imageUrl, 54);
     const isSelected = option.value === selectedOptionValue;
     const optionIndex = allOptions.findIndex((candidate) => candidate.value === option.value);
     return html`

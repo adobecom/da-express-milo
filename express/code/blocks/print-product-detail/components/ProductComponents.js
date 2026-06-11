@@ -8,7 +8,7 @@ import {
 } from '../../../scripts/vendors/htm-preact.min.js';
 import { useStore, useDrawer } from './Contexts.js';
 import axAccordionDecorate from '../../ax-accordion/ax-accordion.js';
-import { formatLargeNumberToK, sanitizeHtml } from '../utilities/utility-functions.js';
+import { formatLargeNumberToK, sanitizeHtml, updateImageUrl, flattenOptionGroups } from '../utilities/utility-functions.js';
 import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 import { getLibs } from '../../../scripts/utils.js';
 
@@ -194,16 +194,6 @@ export function ProductHeader() {
       `}
     </div>
   `;
-}
-
-function updateImageUrl(url, maxDim = 644) {
-  try {
-    const urlObj = new URL(url);
-    urlObj.searchParams.set('max_dim', String(maxDim));
-    return urlObj.toString();
-  } catch {
-    return url;
-  }
 }
 
 export function ProductImages() {
@@ -618,15 +608,6 @@ function PrintingProcessContent() {
       </div>
     </div>
   `;
-}
-
-function flattenOptionGroups(selector) {
-  if (!selector?.optionGroups || !Array.isArray(selector.optionGroups)) {
-    return [];
-  }
-  return selector.optionGroups.flatMap(
-    (group) => (group.options || []).map((option) => ({ ...option, groupTitle: group.title })),
-  );
 }
 
 function PaperTypeContent({ onClose }) {
