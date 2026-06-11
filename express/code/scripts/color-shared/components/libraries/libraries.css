@@ -1,0 +1,721 @@
+/* Libraries accordion shell — item cards reuse color-explore strips (color-palette, gradient visual) */
+
+.ax-libraries {
+  --ax-lib-bg: var(--Palette-white);
+  --ax-lib-border: var(--Palette-gray-75);
+  --ax-lib-heading-color: var(--Alias-content-typography-heading);
+  --ax-lib-detail-color: var(--Alias-content-typography-detail);
+  --ax-lib-accent: var(--S2-Buttons-Accent-Color-Default);
+  --ax-lib-header-height: 76px;
+  --ax-lib-strip-height: 80px;
+  --ax-lib-skeleton-base: var(--Palette-gray-75);
+  --ax-lib-skeleton-shade: var(--Palette-gray-100);
+  --ax-lib-sort-bg: var(--Palette-gray-100);
+
+  background: var(--ax-lib-bg);
+  width: 100%;
+  padding: 0 0 var(--spacing-700);
+  box-sizing: border-box;
+}
+
+/* ── Library search header (count + search + sort) ──────────────
+   Mobile-first: base styles target S; min-width queries layer on M and L. */
+.ax-lib-header {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  width: 100%;
+  background: var(--ax-lib-bg);
+  border-bottom: 1px solid var(--border-subdued);
+  padding-block: var(--spacing-300);
+  box-sizing: border-box;
+}
+
+.ax-lib-header__content {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-100);
+}
+
+.ax-lib-header__title-search {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  min-width: 0;
+}
+
+.ax-lib-header__count {
+  margin: 0;
+  padding-left: var(--spacing-50);
+  font-size: var(--body-font-size-s);
+  font-weight: 700;
+  line-height: 20px;
+  color: var(--ax-lib-heading-color);
+  white-space: nowrap;
+}
+
+.ax-lib-header__count:empty {
+  display: none;
+}
+
+.ax-lib-header__search {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Reuse the shared search-bar component, but un-center it to fill the slot */
+.ax-lib-header__search .ax-color-search-bar-outer {
+  inline-size: 100%;
+  max-inline-size: none;
+  padding-inline: 0;
+  align-items: stretch;
+}
+
+.ax-lib-header__search .ax-color-search-bar-input {
+  block-size: 40px;
+}
+
+/* ── Sort control ───────────────────────────────────────────── */
+.ax-lib-header__sort {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.ax-lib-header__sort-label {
+  display: none;
+  font-size: var(--body-font-size-s);
+  line-height: 18px;
+  color: var(--ax-lib-detail-color);
+  white-space: nowrap;
+}
+
+.ax-lib-header__sort-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-80);
+  height: var(--spacing-500);
+  padding: 0 11px 0 10px;
+  border: none;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: var(--ax-lib-sort-bg);
+  color: var(--ax-lib-heading-color);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  line-height: 18px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ax-lib-header__sort-trigger:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+}
+
+.ax-lib-header__sort-icon {
+  display: inline-flex;
+}
+
+.ax-lib-header__sort-icon img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.ax-lib-header__sort-text {
+  font-weight: var(--font-weight-medium);
+}
+
+.ax-lib-header__sort-value {
+  display: none;
+}
+
+.ax-lib-header__sort-chevron {
+  display: none;
+}
+
+.ax-lib-header__sort-chevron img {
+  display: block;
+  width: 10px;
+  height: auto;
+}
+
+.ax-lib-header__sort-popover {
+  position: absolute;
+  top: calc(100% + var(--spacing-100));
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  padding: var(--spacing-100);
+  background: var(--ax-lib-bg);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-elevated-key);
+}
+
+.ax-lib-header__sort-popover[hidden] {
+  display: none;
+}
+
+.ax-lib-header__sort-heading {
+  margin: 0 0 var(--spacing-80);
+  padding: var(--spacing-80) var(--spacing-100) 0;
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ax-lib-detail-color);
+}
+
+.ax-lib-header__sort-option {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+  width: 100%;
+  padding: var(--spacing-100);
+  border: none;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: transparent;
+  color: var(--ax-lib-heading-color);
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-s);
+  line-height: 18px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ax-lib-header__sort-option:hover {
+  background: var(--ax-lib-border);
+}
+
+.ax-lib-header__sort-option:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: -2px;
+}
+
+.ax-lib-header__sort-check {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  background-color: var(--ax-lib-accent);
+  -webkit-mask-image: url('/express/code/icons/checkmark.svg');
+  mask-image: url('/express/code/icons/checkmark.svg');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  visibility: hidden;
+}
+
+.ax-lib-header__sort-option[aria-selected='true'] .ax-lib-header__sort-check {
+  visibility: visible;
+}
+
+/* Count hides only on mobile once the sticky header is scrolled */
+@media (max-width: 679px) {
+  .ax-lib-header.is-scrolled .ax-lib-header__count {
+    display: none;
+  }
+}
+
+/* ── M (tablet) and up ──────────────────────────────────────── */
+@media (min-width: 680px) {
+  .ax-lib-header {
+    position: static;
+  }
+
+  .ax-lib-header__content {
+    align-items: center;
+    gap: var(--spacing-300);
+  }
+
+  .ax-lib-header__title-search {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-300);
+  }
+
+  .ax-lib-header__count {
+    flex-shrink: 0;
+    padding-left: 0;
+  }
+
+  .ax-lib-header__search {
+    flex: 1 1 auto;
+    max-width: 460px;
+  }
+
+  .ax-lib-header__sort-label {
+    display: inline-flex;
+  }
+
+  .ax-lib-header__sort-trigger {
+    min-width: 144px;
+    justify-content: space-between;
+    padding: 0 11px 0 12px;
+  }
+
+  .ax-lib-header__sort-icon,
+  .ax-lib-header__sort-text {
+    display: none;
+  }
+
+  .ax-lib-header__sort-value {
+    display: inline-block;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .ax-lib-header__sort-chevron {
+    display: inline-flex;
+  }
+
+  .ax-lib-header__sort-heading {
+    display: none;
+  }
+}
+
+/* ── L (desktop) ────────────────────────────────────────────── */
+@media (min-width: 1200px) {
+  .ax-lib-header__count {
+    font-size: var(--body-font-size-m);
+    line-height: 22px;
+  }
+
+  .ax-lib-header__search {
+    flex: 0 0 408px;
+    max-width: 408px;
+  }
+}
+
+/* ── Expand / collapse all (text links + divider) ───────────── */
+.ax-lib-expand-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: var(--spacing-200);
+}
+
+.ax-lib-expand-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-200);
+}
+
+.ax-lib-expand-btn {
+  background: none;
+  border: none;
+  color: var(--ax-lib-accent);
+  cursor: pointer;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+  padding: var(--spacing-75) 0;
+}
+
+.ax-lib-expand-btn:hover {
+  text-decoration: underline;
+}
+
+.ax-lib-expand-btn:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+.ax-lib-expand-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border-subdued);
+}
+
+/* ── Accordion ──────────────────────────────────────────────── */
+.ax-libraries-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.ax-lib-accordion {
+  width: 100%;
+  border-top: 1px solid var(--ax-lib-border);
+}
+
+.ax-lib-accordion-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--ax-lib-header-height);
+  padding: var(--spacing-400) var(--spacing-100);
+  background: var(--ax-lib-bg);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--body-font-family);
+  box-sizing: border-box;
+}
+
+.ax-lib-accordion-header:hover {
+  background: var(--ax-lib-border);
+}
+
+.ax-lib-accordion-header:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: -2px;
+}
+
+.ax-lib-accordion-header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ax-lib-accordion-copy-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-300);
+}
+
+.ax-lib-accordion-heading-row {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-300);
+  min-width: 0;
+}
+
+.ax-lib-accordion-name {
+  font-size: var(--Global-Typography-Size-Label-Label-L);
+  line-height: 1.3;
+  color: var(--ax-lib-heading-color);
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-lib-accordion-count {
+  font-size: var(--Global-Typography-Size-Body-Body-S);
+  line-height: 1.3;
+  color: var(--ax-lib-detail-color);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ax-lib-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-100);
+  color: var(--ax-lib-heading-color);
+  flex-shrink: 0;
+}
+
+.ax-lib-accordion-panel {
+  padding-bottom: var(--spacing-600);
+}
+
+/* ── Item card (reuses existing color/gradient strip visual) ── */
+.ax-lib-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.ax-lib-card__visual {
+  position: relative;
+  width: 100%;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: stretch;
+}
+
+.ax-lib-card__visual:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+}
+
+.ax-lib-card__visual .color-shared-palette-strip {
+  width: 100%;
+}
+
+.ax-lib-card__visual color-palette {
+  display: block;
+  width: 100%;
+  --color-palette-margin-bottom: 0;
+  --color-palette-border-radius: var(--Corner-radius-corner-radius-100);
+  --color-palette-border-width: 0.5px;
+  --color-palette-border-color: var(--Palette-gray-100);
+  --color-palette-active-border-color: var(--Palette-gray-100);
+  --color-palette-min-height: var(--ax-lib-strip-height);
+}
+
+.ax-lib-card__gradient {
+  width: 100%;
+  height: var(--ax-lib-strip-height);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  outline: 1px solid rgba(31, 31, 31, 0.2);
+  outline-offset: -1px;
+}
+
+.ax-lib-card__badge {
+  position: absolute;
+  top: var(--spacing-100);
+  right: var(--spacing-100);
+  padding: var(--spacing-75) var(--spacing-200);
+  background: var(--Palette-white);
+  color: var(--ax-lib-heading-color);
+  font-size: var(--body-font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+  border-radius: var(--Corner-radius-corner-radius-500);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.ax-lib-card__info {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-200);
+  width: 100%;
+  min-width: 0;
+}
+
+.ax-lib-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-50);
+  flex: 1;
+  min-width: 0;
+}
+
+.ax-lib-card__name {
+  margin: 0;
+  font-size: var(--Global-Typography-Size-Body-Body-S);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+  color: var(--ax-lib-heading-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-lib-card__subtitle {
+  margin: 0;
+  font-size: var(--body-font-size-xs);
+  line-height: 1.3;
+  color: var(--ax-lib-detail-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-lib-card__actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-80);
+  flex-shrink: 0;
+}
+
+.ax-lib-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-500);
+  height: var(--spacing-500);
+  padding: var(--spacing-80);
+  border: none;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: transparent;
+  color: var(--Alias-content-neutral-default);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ax-lib-card__action:hover {
+  background: var(--ax-lib-border);
+}
+
+.ax-lib-card__action:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+}
+
+.ax-lib-card__action .action-icon,
+.ax-lib-card__action .action-icon svg,
+.ax-lib-card__action sp-icon-download,
+.ax-lib-card__action sp-icon-delete,
+.ax-lib-card__action sp-icon-edit,
+.ax-lib-card__action sp-icon-open-in {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+/* ── Empty search state ─────────────────────────────────────── */
+.ax-lib-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-100);
+  padding: var(--spacing-800) var(--spacing-400);
+}
+
+.ax-lib-empty-icon {
+  display: inline-flex;
+  color: var(--ax-lib-heading-color);
+  margin-bottom: var(--spacing-200);
+}
+
+.ax-lib-empty__heading {
+  margin: 0;
+  font-size: var(--body-font-size-xl);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ax-lib-heading-color);
+}
+
+.ax-lib-empty__description {
+  margin: 0;
+  font-size: var(--Global-Typography-Size-Body-Body-S);
+  line-height: 1.3;
+  color: var(--ax-lib-detail-color);
+}
+
+.ax-lib-empty__cta {
+  margin-top: var(--spacing-200);
+  padding: 10px 20px;
+  border: none;
+  border-radius: var(--Corner-radius-corner-radius-500);
+  background: var(--ax-lib-accent);
+  color: var(--color-white);
+  font-family: var(--body-font-family);
+  font-size: var(--Global-Typography-Size-Body-Body-S);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.25;
+  cursor: pointer;
+}
+
+.ax-lib-empty__cta:hover {
+  background: var(--S2-Buttons-Accent-Color-Hover);
+}
+
+.ax-lib-empty__cta:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+}
+
+/* ── Loading skeleton (header + card grid) ──────────────────── */
+.ax-lib-loading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+  width: 100%;
+}
+
+.ax-lib-loading-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-300);
+  min-height: var(--ax-lib-header-height);
+  padding: var(--spacing-400) var(--spacing-100);
+  border-top: 1px solid var(--ax-lib-border);
+}
+
+.ax-lib-loading-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+
+.ax-lib-loading-card__visual {
+  width: 100%;
+  height: var(--ax-lib-strip-height);
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+.ax-lib-loading-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-200);
+}
+
+.ax-lib-loading-card__dots {
+  display: flex;
+  gap: var(--spacing-80);
+  flex-shrink: 0;
+}
+
+.ax-lib-loading-bar,
+.ax-lib-loading-card__visual,
+.ax-lib-loading-dot {
+  background: linear-gradient(
+    90deg,
+    var(--ax-lib-skeleton-base) 25%,
+    var(--ax-lib-skeleton-shade) 50%,
+    var(--ax-lib-skeleton-base) 75%
+  );
+  background-size: 200% 100%;
+  animation: ax-lib-shimmer 1.5s infinite;
+}
+
+.ax-lib-loading-bar {
+  height: 16px;
+  border-radius: 4px;
+}
+
+.ax-lib-loading-bar--title {
+  width: 120px;
+}
+
+.ax-lib-loading-bar--count {
+  width: 180px;
+}
+
+.ax-lib-loading-bar--name {
+  width: 120px;
+}
+
+.ax-lib-loading-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+}
+
+@keyframes ax-lib-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Responsive strip height + header ───────────────────────── */
+@media (max-width: 1199px) {
+  .ax-libraries {
+    --ax-lib-strip-height: 56px;
+  }
+}
+
+@media (max-width: 679px) {
+  .ax-lib-accordion-count {
+    display: none;
+  }
+}
