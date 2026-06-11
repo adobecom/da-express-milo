@@ -217,19 +217,3 @@ export default function init(eventName, verb, metaData, documentUnloading = true
     ensureSatelliteReady(trackEvent);
   }
 }
-
-// Note: Commenting out for now because of the long chain of imports. Do we need this?
-// export function reviewAnalytics(verb) {
-//   // eslint-disable-next-line no-underscore-dangle
-//   if (window._satellite?.track instanceof Function) {
-//     import('../frictionless.js').then((mod) => {
-//       mod.default(verb);
-//     });
-//   } else {
-//     ensureSatelliteReady(() => {
-//       import('../frictionless.js').then((mod) => {
-//         mod.default(verb);
-//       });
-//     });
-//   }
-// }
