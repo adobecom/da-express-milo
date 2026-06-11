@@ -40,12 +40,20 @@ async function createTemplatesContainer(recipe, queryParams = '') {
     });
   });
 
-  const [prev, next] = await Promise.all([
-    replaceKey('previous', getConfig()),
-    replaceKey('next', getConfig()),
+  const [prev, next, group, position] = await Promise.all([
+    replaceKey('previous-template', getConfig()),
+    replaceKey('next-template', getConfig()),
+    replaceKey('template-carousel-label', getConfig()),
+    replaceKey('template-carousel-position', getConfig()),
   ]);
   const { control } = await buildLoopGallery(templates, templatesContainer, {
-    labels: { prev, next },
+    labels: {
+      prev: prev || 'Previous template',
+      next: next || 'Next template',
+      group: group || 'Template carousel',
+      // Localizable "X of N" — placeholder authors interpolate {{current}}/{{total}}.
+      position: position?.includes('{{current}}') ? position : '{{current}} of {{total}}',
+    },
   });
   return { templatesContainer, control };
 }
@@ -63,7 +71,9 @@ async function renderTemplates(el, recipe, toolbar, queryParams = '') {
     const controlsContainer = createTag('div', { class: 'controls-container' });
     controlsContainer.append(control);
     toolbar.append(controlsContainer);
-    el.append(templatesContainer);
+    // Place the carousel before the toolbar in the DOM so tab order matches the
+    // visual order (cards first, then the nav buttons that sit below them).
+    el.insertBefore(templatesContainer, toolbar);
   } catch (error) {
     window.lana?.log(`Error in template-x-carousel-loop: ${error?.message || error?.detail || error}`, { tags: 'template-x-carousel-loop', severity: 'error' });
     if (getConfig().env.name === 'prod') {

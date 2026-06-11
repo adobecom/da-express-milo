@@ -47,6 +47,14 @@ describe('template-x-carousel-loop', () => {
     expect(track.querySelectorAll('.gallery-loop-item').length).to.be.greaterThan(0);
   });
 
+  it('places the carousel before the nav toolbar in the DOM (focus order)', () => {
+    const tc = block.querySelector('.templates-container');
+    const toolbar = block.querySelector('.toolbar');
+    // carousel should come before the toolbar, so Tab reaches the cards first.
+    const children = [...block.children];
+    expect(children.indexOf(tc)).to.be.lessThan(children.indexOf(toolbar));
+  });
+
   it('renders localized prev/next controls', () => {
     const control = block.querySelector('.gallery-control');
     expect(control).to.exist;

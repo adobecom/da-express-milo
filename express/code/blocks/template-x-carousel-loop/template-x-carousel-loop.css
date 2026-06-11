@@ -117,7 +117,10 @@
   border-radius: 12px;
 }
 
-.template-x-carousel-loop .template:focus-visible {
+/* The roving focus target is the card's CTA anchor, so ring the whole card
+   when that anchor is keyboard-focused (and if the card itself is focused). */
+.template-x-carousel-loop .template:focus-visible,
+.template-x-carousel-loop .template:has(a:focus-visible) {
   outline: none;
   box-shadow: 0 0 0 var(--border-width-2) var(--color-white), 0 0 0 4px var(--color-info-accent);
 }

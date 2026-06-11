@@ -1,4 +1,5 @@
 import { expect } from '@esm-bundle/chai';
+import { delay } from '../../helpers/waitfor.js';
 
 const imports = await Promise.all([
   import('../../../express/code/scripts/utils.js'),
@@ -62,6 +63,7 @@ describe('gallery-loop engine', () => {
     let active = container.querySelector('.gallery-loop-track .active');
     expect(active.dataset.i).to.equal('1');
 
+    await delay(420); // wait out the one-step-per-gesture lock
     next.click();
     active = container.querySelector('.gallery-loop-track .active');
     expect(active.dataset.i).to.equal('2');
@@ -91,6 +93,51 @@ describe('gallery-loop engine', () => {
     expect(captured).to.be.false;
     const after = container.querySelector('.gallery-loop-track .active').dataset.i;
     expect(after).to.equal(before);
+  });
+
+  it('exposes a polite "X of N" live region wired to the nav buttons', async () => {
+    const { container, items } = makeContainer(5);
+    const { control } = await buildLoopGallery(items, container, {});
+    const live = container.querySelector('.gallery-loop-status');
+    expect(live).to.exist;
+    expect(live.getAttribute('aria-live')).to.equal('polite');
+    expect(live.textContent).to.equal('1 of 5');
+    expect(control.querySelector('button.prev').getAttribute('aria-describedby')).to.equal(live.id);
+    expect(control.querySelector('button.next').getAttribute('aria-describedby')).to.equal(live.id);
+  });
+
+  it('exposes the carousel as a focusable, named group (first focus level)', async () => {
+    const { container, items } = makeContainer(5);
+    await buildLoopGallery(items, container, { labels: { group: 'Template carousel' } });
+    const vp = container.querySelector('.gallery-loop-viewport');
+    expect(vp.getAttribute('role')).to.equal('group');
+    expect(vp.getAttribute('tabindex')).to.equal('0');
+    expect(vp.getAttribute('aria-label')).to.equal('Template carousel');
+    // cards live inside the group, so the group is tabbed before them
+    expect(vp.contains(items[0])).to.be.true;
+  });
+
+  it('keeps a single tab stop on the centre card and roves with arrow keys', async () => {
+    const { container, items } = makeContainer(5);
+    await buildLoopGallery(items, container, {});
+    const links = items.map((it) => it.querySelector('a'));
+
+    const tabbable = links.filter((l) => l.getAttribute('tabindex') === '0');
+    expect(tabbable.length).to.equal(1);
+    expect(links[0].getAttribute('tabindex')).to.equal('0');
+
+    const viewport = container.querySelector('.gallery-loop-viewport');
+    viewport.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+
+    expect(links[1].getAttribute('tabindex')).to.equal('0');
+    expect(links[0].getAttribute('tabindex')).to.equal('-1');
+    expect(container.querySelector('.gallery-loop-status').textContent).to.equal('2 of 5');
+  });
+
+  it('uses the localized position template', async () => {
+    const { container, items } = makeContainer(3);
+    await buildLoopGallery(items, container, { labels: { position: 'Plantilla {{current}} de {{total}}' } });
+    expect(container.querySelector('.gallery-loop-status').textContent).to.equal('Plantilla 1 de 3');
   });
 
   it('handles a single item without controls', async () => {

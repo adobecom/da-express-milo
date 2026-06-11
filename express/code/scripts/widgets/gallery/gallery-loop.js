@@ -37,14 +37,30 @@ export default async function buildLoopGallery(items, container, options = {}) {
     loadStyle('/express/code/scripts/widgets/gallery/gallery-loop.css', res);
   });
 
-  const labels = { prev: 'Previous', next: 'Next', ...options.labels };
+  const labels = {
+    prev: 'Previous template',
+    next: 'Next template',
+    // Accessible name for the carousel group (first focus level).
+    group: 'Template carousel',
+    // {{current}}/{{total}} are interpolated per navigation for the live region.
+    position: '{{current}} of {{total}}',
+    ...options.labels,
+  };
   const realItems = [...items];
   const n = realItems.length;
 
+  // The card's CTA anchor is the roving focus target (second focus level).
+  const cardLink = (card) => card.querySelector('.button-container a.button')
+    || card.querySelector('a[href]');
+
+  // The carousel itself is a focusable, named group — the first focus level.
+  // Tabbing into it announces the group name; Tab again enters the cards.
   const viewport = createTag('div', {
     class: 'gallery-loop-viewport',
     role: 'group',
     'aria-roledescription': 'carousel',
+    'aria-label': labels.group,
+    tabindex: '0',
   });
   const track = createTag('div', { class: 'gallery-loop-track' });
   realItems.forEach((item) => item.classList.add('gallery-loop-item'));
@@ -53,15 +69,43 @@ export default async function buildLoopGallery(items, container, options = {}) {
   container.classList.add('gallery-loop');
   container.append(viewport);
 
+  // Polite live region: announces "X of N" so screen-reader users navigating an
+  // endless loop always know where they are and how many items there are.
+  const statusId = `gallery-loop-status-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const status = createTag('div', {
+    id: statusId,
+    class: 'gallery-loop-status',
+    'aria-live': 'polite',
+    'aria-atomic': 'true',
+  });
+  container.append(status);
+
   const { control, prevButton, nextButton } = createControl(labels);
+  prevButton.setAttribute('aria-describedby', statusId);
+  nextButton.setAttribute('aria-describedby', statusId);
 
   // n <= 1: nothing to loop. Center the single item, no controls.
   if (n <= 1) {
     track.classList.add('gallery-loop-track--static');
     control.classList.add('hide');
-    if (n === 1) realItems[0].classList.add('active');
+    if (n === 1) {
+      realItems[0].classList.add('active');
+      cardLink(realItems[0])?.setAttribute('tabindex', '0');
+    }
     return { control, destroy: () => {} };
   }
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ANIM_MS = reduceMotion ? 0 : 380;
+  let locked = false;
+
+  // Baseline roving tabindex: only the first (initial centre) card is tabbable;
+  // every other card's focusables are pulled out of the tab order.
+  realItems.forEach((card, i) => {
+    card.querySelectorAll('a[href], button, input, select, textarea')
+      .forEach((node) => node.setAttribute('tabindex', '-1'));
+    if (i === 0) cardLink(card)?.setAttribute('tabindex', '0');
+  });
 
   // Measured layout state, refreshed on resize.
   let step = 0; // item width + gap
@@ -73,9 +117,18 @@ export default async function buildLoopGallery(items, container, options = {}) {
   const realIndex = () => ((vpos - bufferCount) % n + n) % n;
   const centerOffset = (childIndex) => viewportWidth / 2 - (childIndex * step + itemWidth / 2);
 
-  function setActive() {
+  function update() {
+    // Visual spotlight follows the centred child (may be a clone mid-transition).
     [...track.children].forEach((child) => child.classList.remove('active'));
     track.children[vpos]?.classList.add('active');
+    // Roving tabindex + live region track the logical (real) index.
+    const ri = realIndex();
+    realItems.forEach((card, i) => {
+      cardLink(card)?.setAttribute('tabindex', i === ri ? '0' : '-1');
+    });
+    status.textContent = labels.position
+      .replace('{{current}}', String(ri + 1))
+      .replace('{{total}}', String(n));
   }
 
   function position(animate) {
@@ -85,7 +138,7 @@ export default async function buildLoopGallery(items, container, options = {}) {
       track.getBoundingClientRect(); // force reflow so the next transition starts clean
       track.style.transition = '';
     }
-    setActive();
+    update();
   }
 
   function buildClones() {
@@ -99,6 +152,7 @@ export default async function buildLoopGallery(items, container, options = {}) {
         clone.classList.add('gallery-loop-clone');
         // Keep clones out of the tab order + AT, but still hoverable/clickable
         // (inert would disable :hover, so pull focusables out individually instead).
+        // cloneNode copies the active card's tabindex="0", so force them all to -1.
         clone.setAttribute('aria-hidden', 'true');
         clone.querySelectorAll('a[href], button, input, select, textarea, [tabindex]')
           .forEach((node) => node.setAttribute('tabindex', '-1'));
@@ -132,29 +186,35 @@ export default async function buildLoopGallery(items, container, options = {}) {
   }
 
   function normalizeSeam() {
-    if (vpos < bufferCount) vpos += n;
-    else if (vpos > bufferCount + n - 1) vpos -= n;
-    else return;
-    position(false);
+    const before = vpos;
+    while (vpos < bufferCount) vpos += n;
+    while (vpos > bufferCount + n - 1) vpos -= n;
+    if (vpos !== before) position(false); // invisible jump back into the real range
   }
 
-  function step1(dir) {
+  // One step per gesture. We lock during the transition, then snap the seam and
+  // unlock (a timeout rather than transitionend so it also fires under
+  // prefers-reduced-motion, where there is no transition).
+  function step1(dir, focusCard = false) {
+    if (locked) return;
+    locked = true;
     vpos += dir;
     position(true);
+    if (focusCard) cardLink(realItems[realIndex()])?.focus({ preventScroll: true });
+    window.setTimeout(() => {
+      normalizeSeam();
+      locked = false;
+    }, ANIM_MS);
   }
-
-  track.addEventListener('transitionend', (e) => {
-    if (e.propertyName === 'transform') normalizeSeam();
-  });
 
   prevButton.addEventListener('click', () => step1(-1));
   nextButton.addEventListener('click', () => step1(1));
 
-  // Keyboard support on the carousel region.
-  viewport.setAttribute('tabindex', '0');
+  // Arrow keys move the spotlight between cards (focus follows). Enter/Space is
+  // left to the natively-focused CTA anchor.
   viewport.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowLeft') { e.preventDefault(); step1(-1); }
-    if (e.key === 'ArrowRight') { e.preventDefault(); step1(1); }
+    if (e.key === 'ArrowLeft') { e.preventDefault(); step1(-1, true); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); step1(1, true); }
   });
 
   // Pointer drag / swipe — one step per gesture. We only capture the pointer

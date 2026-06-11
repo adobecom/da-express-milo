@@ -44,6 +44,28 @@ the block in prod, shows an error message otherwise).
 Block entry point. Parses the authored rows (toolbar/heading/description, recipe, view-all,
 query params) and renders the loop carousel.
 
+## Accessibility
+
+- **Two focus levels.** Tab first lands on the whole carousel — a focusable
+  `role="group"` with an accessible name (`aria-roledescription="carousel"`). Tab
+  again enters the cards.
+- **Roving tabindex on cards.** Only the spotlit (centre) card's CTA is in the
+  tab order; the rest are `tabindex="-1"`.
+- **Arrow keys** (←/→) move the spotlight between cards, looping endlessly, with
+  focus following the centred card. Enter activates the natively-focused CTA.
+- **Live region.** A polite `aria-live` region announces position as "X of N" on
+  every move, so screen-reader users in the infinite loop always know where they
+  are and how many items exist (they won't perceive an endless list).
+- Clones are `aria-hidden` with their focusables removed from the tab order.
+
+### Placeholders (localizable)
+
+- `previous-template` → prev button label (fallback "Previous template")
+- `next-template` → next button label (fallback "Next template")
+- `template-carousel-label` → carousel group accessible name (fallback "Template carousel")
+- `template-carousel-position` → position template containing `{{current}}` and
+  `{{total}}` tokens (fallback "{{current}} of {{total}}")
+
 ## Engine: `buildLoopGallery(items, container, options)`
 Generic, block-agnostic JS-transform carousel.
 - `options.labels` — `{ prev, next }` aria-labels for the controls.

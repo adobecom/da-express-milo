@@ -43,6 +43,20 @@
   }
 }
 
+/* Visually-hidden live region for the "X of N" position announcement. */
+.gallery-loop-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
 /* Prev/Next control — self-contained so the engine needs no extra stylesheet. */
 .gallery-control {
   display: flex;
