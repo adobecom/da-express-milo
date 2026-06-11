@@ -12,6 +12,9 @@ import { formatLargeNumberToK, sanitizeHtml, updateImageUrl, flattenOptionGroups
 import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 import { getLibs } from '../../../scripts/utils.js';
 
+let getConfig = null;
+import(`${getLibs()}/utils/utils.js`).then((m) => { getConfig = m.getConfig; });
+
 function renderStars(rating) {
   const TOTAL = 5;
   const floor = Math.floor(rating);
@@ -162,6 +165,8 @@ export function ProductHeader() {
                   aria-describedby="${tooltipVisible ? 'pdpx-info-tooltip-content' : undefined}"
                   onMouseEnter=${showTooltip}
                   onMouseLeave=${hideTooltip}
+                  onFocus=${showTooltip}
+                  onBlur=${hideTooltip}
                   onClick=${showTooltip}
                 >
                   <img class="pdpx-compare-price-info-icon" src="/express/code/icons/info.svg" alt="" aria-hidden="true" />
@@ -783,7 +788,8 @@ function PaperTypeContent({ onClose }) {
 }
 
 export function AssuranceLockup() {
-  const isEnUs = document.documentElement.lang?.toLowerCase() === 'en-us';
+  const ietf = getConfig?.().locale?.ietf ?? document.documentElement.lang;
+  const isEnUs = ietf?.toLowerCase() === 'en-us';
   return html`
     <div class="pdpx-assurance-lockup-container">
       <div class="pdpx-assurance-lockup-item">
