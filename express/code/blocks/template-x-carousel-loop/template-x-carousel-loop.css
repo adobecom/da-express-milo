@@ -1,7 +1,8 @@
 .template-x-carousel-loop {
-  --template-height: 300px;
-  --loop-card-width: 220px;
-  --loop-gap: 22px;
+  --template-height: 250px;
+  --loop-card-width: 193px;
+  --loop-gap: 16px;
+  --loop-edge-fade: 64px;
   --template-purple: var(--color-background-accent-default);
 
   margin: auto;
@@ -54,10 +55,33 @@
 
 /* templates-container — full-bleed default */
 .template-x-carousel-loop .templates-container {
+  position: relative;
   order: 2;
   width: 100vw;
   margin-left: calc(50% - 50vw);
   margin-top: 22px;
+}
+
+/* Fade the carousel into the page at the left/right viewport edges. */
+.template-x-carousel-loop .templates-container::before,
+.template-x-carousel-loop .templates-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--loop-edge-fade);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.template-x-carousel-loop .templates-container::before {
+  left: 0;
+  background: linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 82.69%);
+}
+
+.template-x-carousel-loop .templates-container::after {
+  right: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.00) 0%, #FFF 82.69%);
 }
 
 /* The loop engine needs uniform-width items to compute offsets. */
@@ -188,12 +212,12 @@
 
 /* Spotlight: centered item scaled up, neighbors slightly smaller (no dimming). */
 .template-x-carousel-loop .gallery-loop-item {
-  transform: scale(.86);
+  /* transform: scale(.86); */
   transition: transform .35s ease;
 }
 
 .template-x-carousel-loop .gallery-loop-item.active {
-  transform: scale(1.08);
+  transform: scale(1); /* centered card at its true 193×250 */
 }
 
 .template-x-carousel-loop .view-all {
@@ -221,15 +245,25 @@
     padding-top: var(--spacing-300);
     padding-bottom: var(--spacing-300);
   }
+
+  /* Anchor the nav buttons to the right of the section on tablet+. */
+  .template-x-carousel-loop .toolbar {
+    justify-content: flex-end;
+    padding-right: var(--spacing-400);
+  }
 }
 
 @media (min-width: 900px) {
   .template-x-carousel-loop {
-    --loop-card-width: 260px;
+    --loop-edge-fade: 160px;
   }
 
   .template-x-carousel-loop .heading {
     font-size: var(--heading-font-size-l);
+  }
+
+  .template-x-carousel-loop .toolbar {
+    padding-right: var(--spacing-500);
   }
 
   .section:has(.template-x-carousel-loop) {
