@@ -1,32 +1,10 @@
+import { useEffect } from '../../../scripts/vendors/htm-preact.min.js';
+import { useStore } from './Contexts.js';
+
 export function getCanonicalUrl() {
   const existing = document.querySelector('link[rel="canonical"]');
   const href = existing?.getAttribute('href');
   return href && href.trim() ? href : window.location.href;
-}
-
-export function getProductCategory(productType) {
-  const productCategoryMap = {
-    zazzle_shirt: 'T-shirt',
-    zazzle_businesscard: 'Business card',
-    mojo_throwpillow: 'Pillow',
-    zazzle_mug: 'Mug',
-    zazzle_bag: 'Bag',
-    zazzle_flyer: 'Flyer',
-    zazzle_print: 'Print',
-    zazzle_sticker: 'Sticker',
-    zazzle_invitation3: 'Invitation',
-    zazzle_foldedthankyoucard: 'Thank you card',
-    zazzle_poster: 'Poster',
-    zazzle_card: 'Card',
-    zazzle_banner: 'Banner',
-    zazzle_sign: 'Sign',
-    zazzle_label: 'Label',
-    zazzle_envelope: 'Envelope',
-    zazzle_envelopeset: 'Envelope set',
-    zazzle_booklet: 'Booklet',
-    default: 'Printed product',
-  };
-  return productCategoryMap[productType] || productCategoryMap.default;
 }
 
 export function getAuthoredOverrides(doc = document) {
@@ -59,10 +37,8 @@ export function upsertLdJson(id, data) {
 
 function stripHtml(input) {
   if (!input) return '';
-  const div = document.createElement('div');
-  div.innerHTML = input;
-  const text = div.textContent || div.innerText || '';
-  return text.replace(/\s+/g, ' ').trim();
+  const doc = new DOMParser().parseFromString(input, 'text/html');
+  return (doc.body.textContent || '').replace(/\s+/g, ' ').trim();
 }
 
 async function getCurrencyCode() {
@@ -79,29 +55,18 @@ export async function buildProductJsonLd(apiData, overrides, canonicalUrl) {
     || (Array.isArray(apiData.productDescriptions) && apiData.productDescriptions[0]?.description)
     || '';
   const description = stripHtml(descriptionSource);
-  const category = getProductCategory(apiData.productType);
-  // if image is default, use the hero image
-  const imageURL = overrides?.image === 'https://www.adobe.com/default-meta-image.png?width=1200&format=pjpg&optimize=medium' ? apiData.heroImage : overrides?.image;
+  const image = overrides?.image || apiData.heroImage || '';
   const sku = apiData.id || apiData.templateId || '';
-  const url = canonicalUrl;
+
   const json = {
     '@context': 'https://schema.org/',
     '@type': 'Product',
     name,
     description,
-    category,
-    image: {
-      '@type': 'ImageObject',
-      url: imageURL,
-      height: '644',
-      width: '644',
-      caption: name,
-    },
-    url,
+    image,
     brand: {
       '@type': 'Brand',
       name: 'Adobe Express',
-      logo: 'https://www.adobe.com/content/dam/cc/icons/AdobeExpressAppIcon.svg',
     },
   };
 
@@ -116,27 +81,9 @@ export async function buildProductJsonLd(apiData, overrides, canonicalUrl) {
       priceCurrency,
       availability: 'https://schema.org/InStock',
       url: canonicalUrl,
-      seller: {
-        '@type': 'Organization',
-        name: 'Adobe Express',
-        url: 'https://www.adobe.com/express/',
-      },
-      itemCondition: 'https://schema.org/NewCondition',
     };
   }
 
-  // Aggregate rating (if reviews available)
-  const ratingValue = Number(apiData.averageRating);
-  const reviewCount = Number(apiData.totalReviews);
-  if (!Number.isNaN(ratingValue) && !Number.isNaN(reviewCount) && reviewCount > 0) {
-    json.aggregateRating = {
-      '@type': 'AggregateRating',
-      ratingValue: ratingValue.toFixed(1),
-      reviewCount,
-      bestRating: 5,
-      worstRating: 1,
-    };
-  }
   return json;
 }
 
@@ -192,4 +139,60 @@ export function buildBreadcrumbsJsonLdFromDom() {
     '@type': 'BreadcrumbList',
     itemListElement: items,
   };
+}
+
+function mapStateToSeoPayload(state, templateId) {
+  const descriptionComponents = Array.isArray(state.descriptionComponents)
+    ? state.descriptionComponents.map((item) => ({ description: item.descriptionHTML }))
+    : [];
+
+  const numericPrice = (() => {
+    const priceString = state.pricing?.unitPrice || state.pricing?.totalPrice || '';
+    const normalized = priceString.replace(/[^0-9.,]/g, '').replace(',', '.');
+    const parsed = Number.parseFloat(normalized);
+    return Number.isFinite(parsed) ? parsed : undefined;
+  })();
+
+  return {
+    productTitle: state.title,
+    productDescriptions: descriptionComponents,
+    heroImage: state.selectedRealview?.url,
+    productPrice: numericPrice,
+    id: templateId,
+    templateId,
+  };
+}
+
+export default function useSeo(templateId) {
+  const { state } = useStore();
+
+  useEffect(() => {
+    if (!state) {
+      return undefined;
+    }
+
+    let active = true;
+    const payload = mapStateToSeoPayload(state, templateId);
+    upsertTitleAndDescriptionRespectingAuthored(payload);
+
+    const canonicalUrl = getCanonicalUrl();
+    const overrides = getAuthoredOverrides(document);
+
+    buildProductJsonLd(payload, overrides, canonicalUrl)
+      .then((json) => {
+        if (active && json) {
+          upsertLdJson('pdp-product-jsonld', json);
+        }
+      })
+      .catch((error) => {
+        window.reportError?.(error);
+      });
+
+    const breadcrumbs = buildBreadcrumbsJsonLdFromDom();
+    if (breadcrumbs) {
+      upsertLdJson('pdp-breadcrumbs-jsonld', breadcrumbs);
+    }
+
+    return () => { active = false; };
+  }, [state, templateId]);
 }

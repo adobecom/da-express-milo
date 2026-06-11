@@ -4,6 +4,7 @@
  */
 
 export const LONG_TEXT_CUTOFF = 70;
+export const SUPPORTED_MWEB_OS = ['Android', 'iOS'];
 
 /**
  * Calculates the pixel width of text for a given font
@@ -50,7 +51,7 @@ export function buildAction(createTag, entry, buttonType) {
 }
 
 /**
- * Checks if the device is an Android, enables the mobile gating if it is.
+ * Checks if the device is Android, enables the mobile gating if it is.
  * If there is no metadata check enabled, still enable the gating block in case authors want it.
  * @param {Function} getMetadata - Function to get metadata
  * @param {Function} getMobileOperatingSystem - Function to get mobile OS
