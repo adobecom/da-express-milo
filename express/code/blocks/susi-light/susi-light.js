@@ -349,11 +349,127 @@ async function buildStudent(el, locale, imsClientId, noRedirect) {
 
 // each tab wraps susi component with custom logo + footer
 let tabsId = 0;
+
+const TABS_PANEL_HEIGHTS = {
+  standard: 508,
+  'edu-express': 521,
+};
+const TABS_PANEL_BUFFER = 0;
+const TABS_PANEL_FALLBACK = 521;
+
+const TABS_WRAPPER_HEIGHTS = {
+  standard: 458,
+  'edu-express': 367,
+};
+
+export function resolveTabsPanelMinHeight(variants) {
+  const heights = variants
+    .filter(Boolean)
+    .map((v) => TABS_PANEL_HEIGHTS[v] ?? TABS_PANEL_HEIGHTS.standard);
+  if (!heights.length) return TABS_PANEL_FALLBACK;
+  return Math.ceil(Math.max(...heights) + TABS_PANEL_BUFFER);
+}
+
+export function resolveTabsWrapperMinHeight(variants) {
+  const fallback = TABS_WRAPPER_HEIGHTS.standard;
+  const heights = variants
+    .filter(Boolean)
+    .map((v) => TABS_WRAPPER_HEIGHTS[v] ?? fallback);
+  if (!heights.length) return fallback;
+  return Math.max(...heights);
+}
+
+/** CLS: reserve tab panel slot from authoring row 2 variants. */
+export function applyTabsReserveFromAuthoring(el, variants) {
+  el.style.setProperty('--susi-tabs-panel-height', `${resolveTabsPanelMinHeight(variants)}px`);
+}
+
+const MODAL_FLAVORS = ['b2b', 'edu', 'student'];
+
+function readClientIdFromAuthoring(el, imsClientId) {
+  const cells = el.querySelectorAll(':scope > div > div');
+  return cells[1]?.textContent?.trim() || imsClientId || 'AdobeExpressWeb';
+}
+
+function resolveFlavorModalWrapperProfile(el, flavor, clientId) {
+  if (el.classList.contains('email-only')) return `${flavor}-email-only`;
+  if (flavor === 'b2b' && el.classList.contains('email-first')) return 'b2b-email-first';
+  if (clientId === 'AdobeExpressWeb_HED' || clientId?.endsWith('_HED')) return `${flavor}-hed`;
+  if (clientId === 'AdobeExpressWeb_Business' || clientId?.endsWith('_Business')) {
+    return `${flavor}-business`;
+  }
+  return `${flavor}-default`;
+}
+
+/** Legacy: no flavor class, bare susi-sentry-light. */
+function resolveLegacyModalWrapperProfile(clientId) {
+  if (clientId === 'AdobeExpressWeb_HED' || clientId?.endsWith('_HED')) return 'legacy-edu-hed';
+  if (clientId === 'AdobeExpressWeb_Business' || clientId?.endsWith('_Business')) {
+    return 'edu-business';
+  }
+  return 'legacy-edu-express';
+}
+
+/** Profile id matches fragment names, e.g. b2b-hed, edu-business. */
+export function resolveModalWrapperProfile(el, clientId) {
+  if (el.classList.contains('tabs')) return null;
+  if (el.classList.contains('simplified')) return 'simplified';
+  const flavor = MODAL_FLAVORS.find((c) => el.classList.contains(c));
+  if (flavor) return resolveFlavorModalWrapperProfile(el, flavor, clientId);
+  return resolveLegacyModalWrapperProfile(clientId);
+}
+
+/** Measured px per profile — mirrors :root --susi-wrapper-* tokens. */
+const MODAL_WRAPPER_FALLBACK_PX = {
+  'b2b-default': 484,
+  'b2b-hed': 291,
+  'b2b-business': 393,
+  'b2b-email-first': 409,
+  'b2b-email-only': 294,
+  'edu-default': 484,
+  'edu-hed': 333,
+  'edu-business': 393,
+  'student-default': 462,
+  'student-hed': 422,
+  'student-business': 422,
+  'student-email-only': 294,
+  'legacy-edu-express': 545,
+  'legacy-edu-hed': 477,
+  simplified: 400,
+};
+
+export function resolveModalWrapperHeight(el, clientId) {
+  const profile = resolveModalWrapperProfile(el, clientId);
+  if (!profile) return null;
+  return MODAL_WRAPPER_FALLBACK_PX[profile] ?? 484;
+}
+
+/** CLS: set --susi-modal-wrapper-height before SUSI hydrates. */
+export function applyModalWrapperReserve(el, clientId) {
+  const profile = resolveModalWrapperProfile(el, clientId);
+  if (!profile) return;
+  const height = resolveModalWrapperHeight(el, clientId);
+  if (!height) return;
+  el.dataset.susiWrapperProfile = profile;
+  el.style.setProperty('--susi-modal-wrapper-height', `${height}px`);
+}
+
+function setTabPanelActive(panel, isActive) {
+  panel.classList.toggle('hide', !isActive);
+  panel.setAttribute('aria-hidden', String(!isActive));
+  if (isActive) {
+    panel.removeAttribute('inert');
+  } else {
+    panel.setAttribute('inert', '');
+  }
+}
+
 async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
   const rows = [...el.children];
   const title = rows[0].textContent?.trim();
   const tabNames = [...rows[1].querySelectorAll('div')].map((div) => div.textContent);
   const variants = [...rows[2].querySelectorAll('div')].map((div) => div.textContent?.trim().toLowerCase());
+  applyTabsReserveFromAuthoring(el, variants);
   const redirectUrls = [...rows[3].querySelectorAll('div')].map((div) => div.textContent?.trim());
   const client_ids = [...rows[4].querySelectorAll('div')].map((div) => div.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb'));
   const footers = rows[5] ? [...rows[5].querySelectorAll('div')] : [];
@@ -405,7 +521,7 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
     const id = sanitizeId(`${tabName}-${tabsId}`);
     panel.setAttribute('aria-labelledby', `tab-${id}`);
     panel.id = `panel-${id}`;
-    i > 0 && panel.classList.add('hide');
+    setTabPanelActive(panel, i === 0);
     const tab = createTag('button', {
       role: 'tab',
       'aria-selected': i === 0,
@@ -415,15 +531,15 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
     tab.addEventListener('click', () => {
       tabList.querySelector('[aria-selected=true]')?.setAttribute('aria-selected', false);
       tab.setAttribute('aria-selected', true);
-      panels.forEach((p) => {
-        p !== panel ? p.classList.add('hide') : p.classList.remove('hide');
-      });
+      panels.forEach((p) => setTabPanelActive(p, p === panel));
     });
     tabList.append(tab);
     return panel;
   });
   const titleDiv = createTag('div', { class: 'title' }, title);
-  layout.append(createLogo(), titleDiv, tabList, ...panels);
+  const tabPanelsSlot = createTag('div', { class: 'susi-tab-panels' });
+  panels.forEach((panel) => tabPanelsSlot.append(panel));
+  layout.append(createLogo(), titleDiv, tabList, tabPanelsSlot);
   return layout;
 }
 
@@ -496,6 +612,8 @@ export default async function init(el) {
   const locale = getConfig().locale.ietf.toLowerCase();
   const { imsClientId } = getConfig();
   const noRedirect = el.classList.contains('no-redirect');
+  const clientId = readClientIdFromAuthoring(el, imsClientId);
+  applyModalWrapperReserve(el, clientId);
 
   /**
    * customize can be used to add custom logic to the susi-light component
