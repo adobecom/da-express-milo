@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@app-ratings-default",
       "selector": "div.app-ratings",
-      "path": "/drafts/nala/test-gen/app-ratings/app-ratings",
+      "path": "/drafts/nala/blocks/app-ratings/app-ratings",
       "data": {
         "semantic": {
           "texts": [],

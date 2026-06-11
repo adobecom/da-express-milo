@@ -1,14 +1,17 @@
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/app-ratings/app-ratings
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ai-credits-cards/pricing-cards-credits
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/app-ratings/app-ratings
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-columns/ax-columns-fullsize
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-columns/ax-columns-fullsize-two-ctas
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-columns/ax-columns-numbered
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-columns/ax-columns-highlight
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-columns/ax-columns-fullsize
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-columns/ax-columns-fullsize-two-ctas
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-columns/ax-columns-numbered
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-default
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-dark
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-short
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-narrow
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-default
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-dark
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-short
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-narrow
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-animation
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-panels/ax-panels
 
@@ -141,7 +144,7 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/pricing-ta
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/pricing-table/pricing-table-2-col
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/pricing-table/pricing-table-3-col
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ai-credits-cards/pricing-cards-credits
+// https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ai-credits-cards/pricing-cards-credits
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/quick-action-hub/quick-action-hub
 
