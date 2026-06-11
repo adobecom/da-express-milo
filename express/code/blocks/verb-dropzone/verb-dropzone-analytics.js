@@ -79,7 +79,7 @@ function createPayloadForSplunk(metaData) {
   return {
     event: {
       name: eventName,
-      category: 'acrobat',
+      category: 'acrobat-express',
       subcategory: verb,
       ...(uploadTime && { uploadTime }),
       ...(uploadType && { uploadType }),
