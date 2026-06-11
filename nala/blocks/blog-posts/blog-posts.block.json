@@ -34,7 +34,7 @@
               "selector": "h3.blog-card-title",
               "nth": 1,
               "tag": "h3",
-              "text": "International Dog Day Social posts and memes",
+              "text": "International Dog Day social posts and memes",
               "markup": null
             },
             {
@@ -84,7 +84,7 @@
               "type": "link",
               "selector": "a.blog-card",
               "nth": 1,
-              "text": "International Dog Day Social Posts and Memes\n        Celebrate International Dog Day with our dog-friendly tips for the perfect post. Make your own post on Instagram, TikTok and more with Adobe Express.\n        06/15/2023",
+              "text": "International Dog Day social posts and memes\n        Celebrate International Dog Day with our dog-friendly tips for the perfect post. Make your own post on Instagram, TikTok and more with Adobe Express.\n        06/15/2023",
               "href": "/express/learn/blog/international-dog-day",
               "ariaLabel": null,
               "rel": null,
