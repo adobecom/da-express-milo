@@ -319,7 +319,16 @@ export async function createPicker({
       updateFocusedOption();
     } else if (e.key === 'Tab') {
       if (isOpen) {
-        closeDropdown();
+        const atBoundary = !e.shiftKey
+          ? focusedOptionIndex >= opts.length - 1
+          : focusedOptionIndex <= 0;
+        if (atBoundary) {
+          closeDropdown();
+        } else {
+          e.preventDefault();
+          focusedOptionIndex += e.shiftKey ? -1 : 1;
+          updateFocusedOption();
+        }
       }
     }
   });
