@@ -44,8 +44,13 @@ main .mobile-fork-button-unity .floating-button a.button:any-link {
 
 main .mobile-fork-button-unity .floating-button a.button:any-link.accent {
   color: var(--color-white);
-  background-color: var(--S2-Buttons-Accent-Color-Default);
-  border-color: var(--S2-Buttons-Accent-Color-Default);
+  background-color: var(--Buttons-default);
+  border-color: var(--Buttons-default);
+}
+
+main .mobile-fork-button-unity .floating-button a.button:any-link.accent:hover {
+  background-color: var(--Buttons-hover);
+  border-color: var(--Buttons-hover);
 }
 
 main .mobile-fork-button-unity .floating-button a.button:any-link.outline {

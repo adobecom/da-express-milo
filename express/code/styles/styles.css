@@ -343,6 +343,7 @@
   --Palette-gray-400: #C6C6C6;
   --Palette-gray-600: #717171;
   --Palette-gray-700: #505050;
+  --Palette-gray-800: #292929;
   --Palette-gray-900: #131313;
   --Palette-gray-1000: #000000;
 
@@ -364,6 +365,7 @@
 
   /* Background/button semantic tokens */
   --Background-accent-default: var(--color-background-accent-default);
+  --Background-secondary-default: var(--Palette-gray-100);
   --Buttons-default: var(--S2-Buttons-Accent-Color-Default);
   --Buttons-hover: var(--S2-Buttons-Accent-Color-Hover);
 }
