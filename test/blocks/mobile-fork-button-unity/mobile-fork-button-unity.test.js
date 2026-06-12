@@ -201,4 +201,30 @@ describe('Mobile Fork Button Unity', () => {
 
     expect(document.querySelector('.multifunction')).to.not.exist;
   });
+
+  it('renders empty header when fork-button-header metadata is absent', async () => {
+    Object.defineProperty(navigator, 'userAgent', { value: ANDROID_USER_AGENT, configurable: true });
+    [
+      ['android-fork-cta-1-link', 'https://play.google.com/store/apps/unity'],
+      ['android-fork-cta-1-text', 'Get Android App'],
+      ['android-fork-cta-2-link', 'https://unity.com/web'],
+      ['android-fork-cta-2-text', 'Continue on web'],
+      ['floating-cta-device-and-ram-check', 'no'],
+      ['fallback-text', '((mobile-gating-fallback-text))'],
+    ].forEach(([name, content]) => {
+      const meta = document.createElement('meta');
+      meta.name = name;
+      meta.content = content;
+      document.head.appendChild(meta);
+    });
+    const block = document.createElement('div');
+    block.className = 'floating-button meta-powered';
+    block.innerHTML = '<div>mobile</div>';
+    document.querySelector('main .section').append(block);
+    await decorate(block);
+
+    const header = document.querySelector('.mobile-gating-header');
+    expect(header).to.exist;
+    expect(header.textContent).to.equal('');
+  });
 });

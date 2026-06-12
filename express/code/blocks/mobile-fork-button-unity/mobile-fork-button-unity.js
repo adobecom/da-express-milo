@@ -22,7 +22,7 @@ async function createUnityMultiFunctionButton(block, data, audience) {
   const floatingButton = buttonWrapper.querySelector('.floating-button');
   floatingButton.firstElementChild?.remove();
   const header = createTag('div', { class: 'mobile-gating-header' });
-  header.textContent = data.forkButtonHeader;
+  header.textContent = data.forkButtonHeader ?? '';
   floatingButton.append(
     header,
     buildUnityAction(data.tools[0], 'accent'),

@@ -6,6 +6,11 @@ main .mobile-fork-button-unity {
   padding: 0;
 }
 
+main .floating-button-wrapper.mobile-fork-button-unity.floating-button--hidden {
+  bottom: -300px;
+}
+
+
 main .mobile-fork-button-unity .floating-button.block {
   background-color: var(--color-white);
   border-radius: var(--Radius-corner-radius-200);
