@@ -101,9 +101,7 @@ async function buildExpressUrl({ id, name, colors }, prodBaseUrl) {
   const { getTrackingAppendedURL } = await import('../../branchlinks.js');
 
   const params = new URLSearchParams(window.location.search);
-  const baseUrl = params.get('hzenv') === 'stage'
-    ? getStageBaseUrl(params.get('base'))
-    : prodBaseUrl;
+  const baseUrl = 'https://localhost.adobe.com:8080/design/template/urn:aaid:sc:VA6C2:7ff9b4ad-cef1-4079-96a1-7de2f4d1f40b';
   const url = new URL(await getTrackingAppendedURL(baseUrl, {
     placement: 'color-explorer',
     isSearchOverride: true,
