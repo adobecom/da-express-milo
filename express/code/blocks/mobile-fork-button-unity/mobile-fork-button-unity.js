@@ -20,7 +20,7 @@ async function createUnityMultiFunctionButton(block, data, audience) {
   buttonWrapper.classList.add('multifunction', 'mobile-fork-button-unity');
 
   const floatingButton = buttonWrapper.querySelector('.floating-button');
-  floatingButton.children[0].remove();
+  floatingButton.firstElementChild?.remove();
   const header = createTag('div', { class: 'mobile-gating-header' });
   header.textContent = data.forkButtonHeader;
   floatingButton.append(
