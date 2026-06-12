@@ -185,10 +185,15 @@ export default async function buildLoopGallery(items, container, options = {}) {
     position(false);
   }
 
-  function normalizeSeam() {
-    const before = vpos;
+  // Clamp vpos back into the real-item window [bufferCount, bufferCount + n - 1].
+  function clampVpos() {
     while (vpos < bufferCount) vpos += n;
     while (vpos > bufferCount + n - 1) vpos -= n;
+  }
+
+  function normalizeSeam() {
+    const before = vpos;
+    clampVpos();
     if (vpos !== before) position(false); // invisible jump back into the real range
   }
 
@@ -304,9 +309,9 @@ export default async function buildLoopGallery(items, container, options = {}) {
       wheelSteps = 0;
 
       vpos = wheelVposStart + stepsToMove;
-      // Inline seam normalisation — avoids position()'s side-effects before we're ready.
-      while (vpos < bufferCount) vpos += n;
-      while (vpos > bufferCount + n - 1) vpos -= n;
+      // clampVpos() only — not normalizeSeam() — because we need to set the
+      // animation start transform ourselves before calling position(true).
+      clampVpos();
 
       track.style.transition = 'none';
       track.style.transform = `translate3d(${centerOffset(vpos) + fractional * step}px, 0, 0)`;

@@ -141,9 +141,6 @@
   opacity: 1;
 }
 
-
-
-
 /* v2 button-container — persistent bottom label bar */
 .template-x-carousel-loop .template .button-container {
   position: absolute;
@@ -213,16 +210,6 @@
   flex-shrink: 0;
 }
 
-/* Spotlight: centered item scaled up, neighbors slightly smaller (no dimming). */
-.template-x-carousel-loop .gallery-loop-item {
-  /* transform: scale(.86); */
-  transition: transform .35s ease;
-}
-
-.template-x-carousel-loop .gallery-loop-item.active {
-  transform: scale(1); /* centered card at its true 193×250 */
-}
-
 .template-x-carousel-loop .view-all {
   display: block;
   order: 4;
@@ -262,13 +249,13 @@
   }
 
   .template-x-carousel-loop .toolbar {
-    padding-right:0;
+    padding-right: 0;
     margin-left: auto;
     margin-right: 0;
   }
 
   .section:has(.template-x-carousel-loop) {
-    padding-top:0;
+    padding-top: 0;
     padding-bottom: var(--spacing-600);
   }
 }
@@ -281,8 +268,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .template-x-carousel-loop .template::before,
-  .template-x-carousel-loop .template .button-container,
-  .template-x-carousel-loop .gallery-loop-item {
+  .template-x-carousel-loop .template .button-container {
     transition: none;
   }
 }
