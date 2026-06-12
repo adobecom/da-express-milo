@@ -640,8 +640,9 @@ export default async function init(el) {
     if (isFullBleed) {
       templatesContainer.querySelectorAll('.template').forEach((tplt) => {
         const id = tplt.dataset.templateId;
+        const separator = fullBleedCtaHref.includes('?') ? '&' : '?';
         const href = fullBleedCtaHref
-          ? `${fullBleedCtaHref}${id ? `?templateId=${encodeURIComponent(id)}` : ''}`
+          ? `${fullBleedCtaHref}${id ? `${separator}templateId=${encodeURIComponent(id)}` : ''}`
           : '';
         const btn = tplt.querySelector('.button-container a.button');
         if (btn && href) {
