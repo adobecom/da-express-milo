@@ -14,8 +14,9 @@ body main .section:has(.wayfinder) {
     max-width: 1328px;
 }
 
-.wayfinder.no-margin-top {
+.wayfinder.template-page {
   margin-top: 0;
+  padding-bottom: var(--spacing-300);
 }
 
 main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, main .wayfinder h5, main .wayfinder h6 {
