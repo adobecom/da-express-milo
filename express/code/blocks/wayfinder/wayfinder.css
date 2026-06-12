@@ -16,7 +16,7 @@ body main .section:has(.wayfinder) {
 
 .wayfinder.template-page {
   margin-top: 0;
-  padding-bottom: var(--spacing-300);
+  margin-bottom: var(--spacing-300);
 }
 
 main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, main .wayfinder h5, main .wayfinder h6 {
