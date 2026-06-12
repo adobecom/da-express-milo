@@ -644,7 +644,10 @@ export default async function init(el) {
           ? `${fullBleedCtaHref}${id ? `?templateId=${encodeURIComponent(id)}` : ''}`
           : '';
         const btn = tplt.querySelector('.button-container a.button');
-        if (btn && href) { btn.href = href; btn.textContent = fullBleedCtaText; }
+        if (btn && href) {
+          btn.href = href;
+          btn.textContent = fullBleedCtaText;
+        }
         const ctaLink = tplt.querySelector('.cta-link');
         if (ctaLink && href) ctaLink.href = href;
         tplt.querySelector('.share-icon-wrapper')?.remove();
