@@ -47,9 +47,7 @@ main .section .grid-marquee h1 {
 }
 
 .grid-marquee .headline a.button .icon {
-  width: 26px;
-  height: 26px;
-  flex-shrink: 0;
+  display: none;
 }
 
 .grid-marquee .headline a:not(.primaryCTA) {

@@ -17,7 +17,9 @@ async function createTemplates(recipe, customProperties = null) {
   return templates;
 }
 
-async function createTemplatesContainer(recipe, queryParams = '') {
+const DEFAULT_TEMPLATE_DEST = 'https://adobesparkpost.app.link/8JaoEy0DrSb';
+
+async function createTemplatesContainer(recipe, queryParams = '', destinationUrl = '') {
   const templatesContainer = createTag('div', { class: 'templates-container' });
 
   const isIOS = getMobileOperatingSystem() === 'iOS';
@@ -25,7 +27,7 @@ async function createTemplatesContainer(recipe, queryParams = '') {
   const localeParams = `locale=${ietf}&contentRegion=${region === 'uk' ? 'gb' : region}`;
   const customProperties = isIOS ? null : {
     customUrlConfig: {
-      baseUrl: 'https://adobesparkpost.app.link/8JaoEy0DrSb',
+      baseUrl: destinationUrl || DEFAULT_TEMPLATE_DEST,
       queryParams: ['source=seo-template', queryParams, localeParams].filter(Boolean).join('&'),
     },
   };
@@ -58,16 +60,16 @@ async function createTemplatesContainer(recipe, queryParams = '') {
   return { templatesContainer, control };
 }
 
-const extractQueryParams = (row) => {
+const extractRow = (row) => {
   if (!row) return '';
   const value = row.textContent.trim();
   row.remove();
   return value;
 };
 
-async function renderTemplates(el, recipe, toolbar, queryParams = '') {
+async function renderTemplates(el, recipe, toolbar, queryParams = '', destinationUrl = '') {
   try {
-    const { templatesContainer, control } = await createTemplatesContainer(recipe, queryParams);
+    const { templatesContainer, control } = await createTemplatesContainer(recipe, queryParams, destinationUrl);
     const controlsContainer = createTag('div', { class: 'controls-container' });
     controlsContainer.append(control);
     toolbar.append(controlsContainer);
@@ -95,6 +97,7 @@ export default async function init(el) {
   const recipeRow = rows[1];
   const viewAllRow = rows[2];
   const queryParamsRow = rows[3];
+  const destinationUrlRow = rows[4];
 
   const heading = toolbar.querySelector('h1,h2,h3');
   const description = toolbar.querySelector('p');
@@ -131,7 +134,8 @@ export default async function init(el) {
     viewAllRow.remove();
   }
 
-  const queryParams = extractQueryParams(queryParamsRow);
+  const queryParams = extractRow(queryParamsRow);
+  const destinationUrl = extractRow(destinationUrlRow);
 
-  await renderTemplates(el, recipe, toolbar, queryParams);
+  await renderTemplates(el, recipe, toolbar, queryParams, destinationUrl);
 }

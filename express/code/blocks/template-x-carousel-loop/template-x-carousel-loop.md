@@ -22,6 +22,7 @@ intentionally omitted since centering handles edge spacing.
 | 2 | Recipe string, e.g. `tasks=card&orderBy=-remixCount&limit=10&collection=default` |
 | 3 | (optional) "View all" link |
 | 4 | (optional) Extra query params appended to template CTA links |
+| 5 | (optional) Custom destination URL for template CTAs. Overrides the default Branch link. Ignored on iOS (which always uses the default Branch link for app-store routing). |
 
 ## Functions
 

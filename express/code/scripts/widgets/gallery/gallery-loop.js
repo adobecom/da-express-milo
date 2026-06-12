@@ -266,6 +266,56 @@ export default async function buildLoopGallery(items, container, options = {}) {
   viewport.addEventListener('pointerup', endDrag);
   viewport.addEventListener('pointercancel', endDrag);
 
+  // Wheel / trackpad: track follows the gesture in real time, then snaps to
+  // the nearest card once scrolling goes idle.
+  // Uses deltaX when the horizontal axis dominates (trackpad swipe), deltaY
+  // otherwise (mouse wheel). The snap animates from wherever the finger stopped
+  // rather than jumping to center, so it feels like native scroll-snap.
+  const WHEEL_IDLE_MS = 150;
+  let wheelSteps = 0;     // fractional cards scrolled since gesture start
+  let wheelVposStart = 0; // vpos when the current gesture began
+  let isWheeling = false;
+  let wheelTimer = null;
+  viewport.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY;
+    if (delta === 0) return;
+
+    if (!isWheeling) {
+      isWheeling = true;
+      locked = true;
+      wheelVposStart = vpos;
+      track.style.transition = 'none';
+      track.getBoundingClientRect();
+    }
+
+    wheelSteps += delta / step;
+    track.style.transform = `translate3d(${centerOffset(wheelVposStart + wheelSteps)}px, 0, 0)`;
+
+    clearTimeout(wheelTimer);
+    wheelTimer = window.setTimeout(() => {
+      isWheeling = false;
+      const stepsToMove = Math.round(wheelSteps);
+      // fractional: sub-card offset between where the finger stopped and the snap target.
+      // Setting the transform to (centerOffset(vpos) + fractional * step) before
+      // re-enabling the transition means the browser animates from the finger's last
+      // position rather than from the snap target — no jump.
+      const fractional = stepsToMove - wheelSteps;
+      wheelSteps = 0;
+
+      vpos = wheelVposStart + stepsToMove;
+      // Inline seam normalisation — avoids position()'s side-effects before we're ready.
+      while (vpos < bufferCount) vpos += n;
+      while (vpos > bufferCount + n - 1) vpos -= n;
+
+      track.style.transition = 'none';
+      track.style.transform = `translate3d(${centerOffset(vpos) + fractional * step}px, 0, 0)`;
+      track.getBoundingClientRect(); // commit start position to rendering pipeline
+      position(true); // re-enables transition, animates to centerOffset(vpos)
+      window.setTimeout(() => { locked = false; }, ANIM_MS);
+    }, WHEEL_IDLE_MS);
+  }, { passive: false });
+
   const onResize = debounce(layout, 100);
   const resizeObserver = new ResizeObserver(onResize);
   resizeObserver.observe(viewport);
@@ -273,6 +323,9 @@ export default async function buildLoopGallery(items, container, options = {}) {
 
   return {
     control,
-    destroy: () => resizeObserver.disconnect(),
+    destroy: () => {
+      resizeObserver.disconnect();
+      clearTimeout(wheelTimer);
+    },
   };
 }
