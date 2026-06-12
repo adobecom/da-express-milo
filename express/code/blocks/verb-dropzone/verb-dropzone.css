@@ -109,7 +109,7 @@ main .section .verb-dropzone p {
   min-width: 0;
 }
 
-.verb-dropzone .acrobat-icon {
+.verb-dropzone .widget-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -118,7 +118,7 @@ main .section .verb-dropzone p {
   height: 49px;
 }
 
-.verb-dropzone .acrobat-icon svg {
+.verb-dropzone .widget-icon svg {
   width: 49px;
   height: 49px;
 }
@@ -517,7 +517,7 @@ main .section .verb-dropzone p {
 
 .verb-dropzone-errorIcon::after {
   content: '';
-  background-image: url('/acrobat/img/icons/ui/alert.svg');
+  background-image: url('/express/code/icons/alert.svg');
   background-repeat: no-repeat;
   display: flex;
   align-items: center;
