@@ -169,8 +169,12 @@ export default async function buildLoopGallery(items, container, options = {}) {
     step = itemWidth + gap;
     viewportWidth = viewport.offsetWidth;
     if (!step || !viewportWidth) return false;
-    const need = Math.ceil(viewportWidth / 2 / step) + 2;
-    return Math.min(need, n);
+    // visibleNeeded: enough clones to cover the viewport edges (no visible seam at rest).
+    // We also floor at n so fast wheel scrolling never outruns the clone buffer —
+    // with n clones per side you must scroll through the whole carousel before the
+    // seam could become visible.
+    const visibleNeeded = Math.ceil(viewportWidth / 2 / step) + 2;
+    return Math.max(visibleNeeded, n);
   }
 
   function layout() {
@@ -295,6 +299,9 @@ export default async function buildLoopGallery(items, container, options = {}) {
     }
 
     wheelSteps += delta / step;
+    // Clamp to the available clone buffer so the transform never points past
+    // the last child and shows blank space.
+    wheelSteps = Math.max(-(bufferCount - 1), Math.min(bufferCount - 1, wheelSteps));
     track.style.transform = `translate3d(${centerOffset(wheelVposStart + wheelSteps)}px, 0, 0)`;
 
     clearTimeout(wheelTimer);
