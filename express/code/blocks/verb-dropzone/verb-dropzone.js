@@ -34,7 +34,7 @@ async function loadPlaceholders(prefix) {
         const placeholderData = await response.json();
         placeholderData.data.forEach(({ key, value }) => {
           if (prefixes.length && !keyMatches(key)) return;
-          window.mph[key] = value.replace(/ /g, ' ');
+          window.mph[key] = value.replace(/\u00A0/g, ' ');
         });
       }
     } catch (error) {
