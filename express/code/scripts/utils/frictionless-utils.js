@@ -406,7 +406,7 @@ export function executeQuickAction(
       exportConfig,
       contConfig,
     ),
-    'crop-video': () => ccEverywhere.quickAction.cropVideo(
+    'crop-video': () => ccEverywhere.quickAction.videoEncode(
       videoDocConfig,
       appConfig,
       exportConfig,
@@ -534,14 +534,7 @@ export function createSDKConfig(getConfig, urlParams) {
 export async function loadAndInitializeCCEverywhere(getConfig) {
   const urlParams = new URLSearchParams(window.location.search);
   const urlOverride = urlParams.get('sdk-override');
-  let valid = false;
-  if (urlOverride) {
-    try {
-      if (new URL(urlOverride).host === 'dev.cc-embed.adobe.com') valid = true;
-    } catch (error) {
-      window.lana?.log(`Invalid SDK URL: ${error}`, { tags: 'frictionless-utils', severity: 'error' });
-    }
-  }
+  let valid = true;
   const CDN_URL = valid
     ? urlOverride
     : 'https://cc-embed.adobe.com/sdk/1p/v4/CCEverywhere.js';
