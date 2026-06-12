@@ -1,0 +1,631 @@
+/* ============================================================
+   BASE — light is the default
+   ============================================================ */
+
+.verb-dropzone {
+  --verb-dropzone-max-width: 900px;
+  --verb-dropzone-height: 120px;
+  --verb-dropzone-top-spacing: 32px;
+
+  position: relative;
+  padding: var(--verb-dropzone-top-spacing) var(--spacing-300) 24px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.verb-dropzone .foreground {
+  width: 100%;
+  max-width: var(--verb-dropzone-max-width);
+  margin-inline: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+main .section .verb-dropzone p {
+  margin: 0;
+}
+
+/* ============================================================
+   DROPZONE AREA
+   ============================================================ */
+
+.verb-dropzone-area {
+  border: 1.043px dashed var(--Palette-gray-500);
+  border-radius: 24px;
+  padding: var(--spacing-500) var(--spacing-400);
+  background: var(--color-gray-100);
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: var(--verb-dropzone-height);
+  color: var(--c1-text-text);
+  font-family: var(--body-font-family);
+}
+
+.verb-dropzone-area:hover,
+.verb-dropzone-area.dragging,
+.verb-dropzone.dragging-block .verb-dropzone-area {
+  background-color: var(--color-gray-150);
+}
+
+.verb-dropzone-area:focus-visible {
+  background-color: var(--color-gray-150);
+  outline: 2px solid var(--Alias-content-semantic-accent-key-focus);
+  outline-offset: 2px;
+}
+
+/* dark overrides */
+.verb-dropzone.dark .verb-dropzone-area,
+.verb-dropzone.mobile-dark .verb-dropzone-area,
+.verb-dropzone.tablet-dark .verb-dropzone-area,
+.verb-dropzone.desktop-dark .verb-dropzone-area {
+  background: #393939;
+  border-color: #8F8F8F;
+  color: var(--color-white);
+}
+
+.verb-dropzone.dark .verb-dropzone-area:hover,
+.verb-dropzone.mobile-dark .verb-dropzone-area:hover,
+.verb-dropzone.tablet-dark .verb-dropzone-area:hover,
+.verb-dropzone.desktop-dark .verb-dropzone-area:hover,
+.verb-dropzone.dark.dragging-block .verb-dropzone-area,
+.verb-dropzone.mobile-dark.dragging-block .verb-dropzone-area,
+.verb-dropzone.tablet-dark.dragging-block .verb-dropzone-area,
+.verb-dropzone.desktop-dark.dragging-block .verb-dropzone-area,
+.verb-dropzone.dark .verb-dropzone-area.dragging,
+.verb-dropzone.mobile-dark .verb-dropzone-area.dragging,
+.verb-dropzone.tablet-dark .verb-dropzone-area.dragging,
+.verb-dropzone.desktop-dark .verb-dropzone-area.dragging {
+  border-color: #B8B8B8;
+  background: #4D4D4D;
+}
+
+.verb-dropzone.dragging-block {
+  outline: none;
+}
+
+.verb-dropzone.dragging-block::before {
+  display: none;
+}
+
+/* ============================================================
+   INNER LAYOUT (icon + content)
+   ============================================================ */
+
+.verb-dropzone-inner {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 16px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.verb-dropzone .widget-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 49px;
+  height: 49px;
+}
+
+.verb-dropzone .widget-icon svg {
+  width: 49px;
+  height: 49px;
+}
+
+.verb-dropzone-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  text-align: left;
+}
+
+/* ============================================================
+   HEADING
+   ============================================================ */
+
+.verb-dropzone-heading {
+  font-family: var(--body-font-family);
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 24px;
+  color: inherit;
+  margin: 0;
+  word-break: break-word;
+}
+
+/* ============================================================
+   SUB LINE — drag text + file limit inline
+   ============================================================ */
+
+.verb-dropzone-sub {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 140%;
+  color: inherit;
+  margin: 0;
+  opacity: 0.85;
+}
+
+/* Mobile drag text: shown below 1200px */
+.verb-dropzone-subcopy-desktop {
+  display: none;
+}
+
+.verb-dropzone-subcopy-mobile {
+  display: block;
+}
+
+.verb-dropzone.dark .verb-dropzone-sub,
+.verb-dropzone.mobile-dark .verb-dropzone-sub,
+.verb-dropzone.tablet-dark .verb-dropzone-sub,
+.verb-dropzone.desktop-dark .verb-dropzone-sub {
+  opacity: 1;
+}
+
+/* ============================================================
+   CTA BUTTON — hidden on mobile, gray on desktop
+   ============================================================ */
+
+.verb-dropzone-cta {
+  display: none;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding: 11px 24px 11px 21px;
+  background-color: var(--Background-secondary-default);
+  color: var(--Palette-gray-800);
+  border: none;
+  border-radius: 24px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 22px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.verb-dropzone-cta .upload-icon {
+  width: 26px;
+  height: 26px;
+  flex-shrink: 0;
+}
+
+.verb-dropzone-cta-label {
+  white-space: nowrap;
+}
+
+/* solo CTA (external link replaced by upload label) */
+.verb-dropzone-cta-solo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px 10px;
+  background-color: #1473E6;
+  color: var(--color-white);
+  border-radius: 100px;
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.verb-dropzone-cta-solo:hover {
+  background-color: #0D66D0;
+  color: var(--color-white);
+  text-decoration: none;
+}
+
+/* ============================================================
+   FOOTER — legal + info icon
+   ============================================================ */
+
+.verb-dropzone-footer {
+  width: 100%;
+}
+
+.verb-dropzone-legal p {
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--Palette-gray-700);
+  flex: 1;
+}
+
+.verb-dropzone-legal a,
+.verb-dropzone-legal .verb-dropzone-legal-url {
+  color: var(--link-color);
+  text-decoration: underline;
+  font-weight: 400;
+}
+
+.verb-dropzone-legal a:hover,
+.verb-dropzone-legal .verb-dropzone-legal-url:hover {
+  color: var(--link-hover-color);
+}
+
+/* dark overrides */
+.verb-dropzone.dark .verb-dropzone-legal,
+.verb-dropzone.mobile-dark .verb-dropzone-legal,
+.verb-dropzone.tablet-dark .verb-dropzone-legal,
+.verb-dropzone.desktop-dark .verb-dropzone-legal {
+  color: var(--color-white);
+}
+
+.verb-dropzone.dark .verb-dropzone-legal a,
+.verb-dropzone.mobile-dark .verb-dropzone-legal a,
+.verb-dropzone.tablet-dark .verb-dropzone-legal a,
+.verb-dropzone.desktop-dark .verb-dropzone-legal a,
+.verb-dropzone.dark .verb-dropzone-legal .verb-dropzone-legal-url,
+.verb-dropzone.mobile-dark .verb-dropzone-legal .verb-dropzone-legal-url,
+.verb-dropzone.tablet-dark .verb-dropzone-legal .verb-dropzone-legal-url,
+.verb-dropzone.desktop-dark .verb-dropzone-legal .verb-dropzone-legal-url {
+  color: var(--consonant-link-color, #2C9AF5);
+}
+
+.verb-dropzone.dark .verb-dropzone-legal a:hover,
+.verb-dropzone.mobile-dark .verb-dropzone-legal a:hover,
+.verb-dropzone.tablet-dark .verb-dropzone-legal a:hover,
+.verb-dropzone.desktop-dark .verb-dropzone-legal a:hover,
+.verb-dropzone.dark .verb-dropzone-legal .verb-dropzone-legal-url:hover,
+.verb-dropzone.mobile-dark .verb-dropzone-legal .verb-dropzone-legal-url:hover,
+.verb-dropzone.tablet-dark .verb-dropzone-legal .verb-dropzone-legal-url:hover,
+.verb-dropzone.desktop-dark .verb-dropzone-legal .verb-dropzone-legal-url:hover {
+  color: var(--consonant-link-color-hover, #84CAFF);
+}
+
+/* ============================================================
+   INFO ICON + TOOLTIP
+   light default: no filter; dark: inverted
+   ============================================================ */
+
+.verb-dropzone .info-icon {
+  --tooltip-background-color: var(--color-content-neutral);
+  --tooltip-text-color: var(--color-white);
+
+  display: inline-flex;
+  vertical-align: middle;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  margin-left: 4px;
+}
+
+.verb-dropzone.dark .info-icon,
+.verb-dropzone.mobile-dark .info-icon,
+.verb-dropzone.tablet-dark .info-icon,
+.verb-dropzone.desktop-dark .info-icon {
+  --tooltip-background-color: var(--color-white);
+  --tooltip-text-color: var(--c1-text-text);
+}
+
+.verb-dropzone .info-icon svg {
+  width: 10px;
+  height: 10px;
+  filter: none;
+  color: var(--tooltip-background-color);
+}
+
+.verb-dropzone.dark .info-icon svg,
+.verb-dropzone.mobile-dark .info-icon svg,
+.verb-dropzone.tablet-dark .info-icon svg,
+.verb-dropzone.desktop-dark .info-icon svg {
+  filter: brightness(0) invert(1);
+}
+
+.verb-dropzone .milo-tooltip {
+  position: relative;
+  text-decoration: none;
+  border-bottom: none;
+}
+
+.verb-dropzone .milo-tooltip::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  left: 100%;
+  margin-left: 7px;
+  max-width: 160px;
+  padding: 3px 8px 5px 8px;
+  border-radius: 5px;
+  background: var(--tooltip-background-color);
+  color: var(--tooltip-text-color);
+  text-align: center;
+  display: none;
+  z-index: 8;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 130%;
+  width: max-content;
+  font-family: var(--body-font-family);
+  box-sizing: border-box;
+}
+
+.verb-dropzone .milo-tooltip::after {
+  content: "";
+  position: absolute;
+  left: 100%;
+  margin-left: -8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 8px solid transparent;
+  border-right-color: var(--tooltip-background-color);
+  display: none;
+  z-index: 8;
+}
+
+.verb-dropzone .milo-tooltip.top::before {
+  left: 50%;
+  top: -13px;
+  transform: translateX(-50%) translateY(-100%);
+  margin-left: 0;
+  margin-bottom: 15px;
+}
+
+.verb-dropzone .milo-tooltip.top::after {
+  left: 50%;
+  top: -6px;
+  transform: translateX(-50%) translateY(-50%);
+  border-color: var(--tooltip-background-color) transparent transparent;
+  border-right-color: transparent;
+  margin-left: 0;
+}
+
+.verb-dropzone .milo-tooltip:hover::before,
+.verb-dropzone .milo-tooltip:focus::before,
+.verb-dropzone .milo-tooltip:hover::after,
+.verb-dropzone .milo-tooltip:focus::after {
+  display: block;
+}
+
+/* ============================================================
+   UTILITY
+   ============================================================ */
+
+.verb-dropzone .hide {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ============================================================
+   DRAG OVERLAY — full-viewport, shown when files dragged over page
+   ============================================================ */
+
+.verb-dropzone-drag-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  align-items: center;
+  justify-content: center;
+  background: rgb(255 255 255 / 70%);
+  backdrop-filter: blur(47px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  z-index: 50;
+}
+
+.verb-dropzone-drag-overlay.is-dragging {
+  opacity: 1;
+}
+
+.verb-dropzone-drag-icon {
+  width: 65px;
+  height: 65px;
+  color: #131313;
+}
+
+.verb-dropzone-drag-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.verb-dropzone-drag-text {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+  color: #131313;
+}
+
+/* ============================================================
+   ERROR STATE
+   ============================================================ */
+
+.verb-dropzone .error.hide {
+  display: none;
+  position: absolute;
+  clip: unset;
+}
+
+.verb-dropzone-error {
+  cursor: default;
+  background: #D31510;
+  max-width: calc(100% - 32px);
+  color: var(--color-white);
+  position: absolute;
+  top: calc(var(--verb-dropzone-top-spacing) + 4px);
+  left: 50%;
+  transform: translate(-50%, 0);
+  font-size: 14px;
+  font-weight: 400;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 6px;
+  z-index: 5;
+}
+
+.verb-dropzone-error-text {
+  border-right: 1px solid rgb(255 255 255 / 20%);
+  font-size: 12px;
+  padding: 0 12px 0 0;
+  margin: 0 6px 0 6px;
+  max-width: none;
+  min-width: auto;
+}
+
+.verb-dropzone-errorBtn {
+  align-self: flex-start;
+  width: 28px;
+  height: 28px;
+  cursor: pointer;
+  display: block;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+.verb-dropzone-errorIcon {
+  align-self: flex-start;
+  width: 16px;
+  height: 16px;
+  margin: 5px 2px 0 6px;
+  flex-shrink: 0;
+}
+
+.verb-dropzone-errorIcon::after {
+  content: '';
+  background-image: url('/express/code/icons/alert.svg');
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================================
+   TABLET + DESKTOP — ≥ 600px
+   Show gray CTA button on tablet and desktop
+   ============================================================ */
+
+@media screen and (min-width: 600px) {
+  .verb-dropzone-area {
+    gap: 16px;
+  }
+
+  .verb-dropzone-cta {
+    display: inline-flex;
+    pointer-events: auto;
+  }
+
+  /* In dark mode, keep button readable */
+  .verb-dropzone.dark .verb-dropzone-cta,
+  .verb-dropzone.mobile-dark .verb-dropzone-cta,
+  .verb-dropzone.tablet-dark .verb-dropzone-cta,
+  .verb-dropzone.desktop-dark .verb-dropzone-cta {
+    background-color: rgb(255 255 255 / 15%);
+    color: var(--color-white);
+  }
+
+  .verb-dropzone.dark .verb-dropzone-area:hover .verb-dropzone-cta,
+  .verb-dropzone.mobile-dark .verb-dropzone-area:hover .verb-dropzone-cta,
+  .verb-dropzone.tablet-dark .verb-dropzone-area:hover .verb-dropzone-cta,
+  .verb-dropzone.desktop-dark .verb-dropzone-area:hover .verb-dropzone-cta {
+    background-color: rgb(255 255 255 / 25%);
+  }
+
+  .verb-dropzone-error {
+    max-width: 435px;
+    padding: 8px;
+  }
+
+  .verb-dropzone-error-text {
+    font-size: 14px;
+    padding-right: 16px;
+    margin-right: 8px;
+    margin-left: 8px;
+    max-width: 324px;
+    min-width: 100px;
+  }
+
+  .verb-dropzone-errorIcon {
+    width: 18px;
+    height: 18px;
+    margin: 7px 4px 0 8px;
+  }
+
+  .verb-dropzone-errorIcon::after {
+    width: 18px;
+    height: 18px;
+  }
+
+  .verb-dropzone-errorBtn {
+    width: 32px;
+    height: 32px;
+  }
+}
+
+/* ============================================================
+   TABLET — 600px–1199px
+   ============================================================ */
+
+@media screen and (min-width: 600px) and (max-width: 1199px) {
+  .verb-dropzone {
+    --verb-dropzone-top-spacing: 40px;
+
+    padding: var(--verb-dropzone-top-spacing) var(--spacing-500) 32px;
+  }
+
+  .verb-dropzone.tablet-dark {
+    color: var(--color-white);
+  }
+}
+
+/* ============================================================
+   DESKTOP — ≥ 1200px
+   Show desktop drag text and gray CTA button
+   ============================================================ */
+
+@media screen and (min-width: 1200px) {
+  .verb-dropzone {
+    --verb-dropzone-top-spacing: 48px;
+
+    padding: var(--verb-dropzone-top-spacing) var(--spacing-600) 40px;
+  }
+
+  /* Show desktop drag text, hide mobile drag text */
+  .verb-dropzone-subcopy-desktop {
+    display: block;
+  }
+
+  .verb-dropzone-subcopy-mobile {
+    display: none;
+  }
+
+  .verb-dropzone.desktop-dark {
+    color: var(--color-white);
+  }
+}
