@@ -66,7 +66,7 @@ describe('verb-dropzone – DOM structure', () => {
   });
 
   it('renders a dropzone button with the correct id', () => {
-    const dz = block.querySelector('#drop-zone');
+    const dz = block.querySelector('#unity-upload');
     expect(dz).to.exist;
     expect(dz.tagName).to.equal('BUTTON');
     expect(dz.classList.contains('verb-dropzone-area')).to.be.true;
