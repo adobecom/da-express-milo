@@ -478,6 +478,7 @@ export function preDecorateSections(area) {
       if (sectionRemove) section.remove();
       else if (sectionMeta.anchor) section.id = sectionMeta.anchor;
       else if (sectionMeta.padding) section.setAttribute('data-padding', 'none');
+      if (sectionMeta['max-width'] === '900') section.classList.add('max-width-900');
     }
   });
 

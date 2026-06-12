@@ -40,6 +40,16 @@ main .section .grid-marquee h1 {
   display: none;
 }
 
+.grid-marquee .headline a.button .text-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.grid-marquee .headline a.button .icon {
+  display: none;
+}
+
 .grid-marquee .headline a:not(.primaryCTA) {
   background-color: var(--color-black);
   border-color: var(--color-black);
@@ -515,6 +525,13 @@ main .section .grid-marquee.pricing-page h1 {
   .grid-marquee.pricing-page {
     --heading-size: 45px;
   }
+}
+
+/* narrow variant — centered headline + content, capped at 666px */
+.grid-marquee.narrow .headline {
+  max-width: 666px;
+  margin-inline: auto;
+  text-align: center;
 }
 
 

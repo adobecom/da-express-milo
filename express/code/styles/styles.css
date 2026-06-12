@@ -977,6 +977,7 @@ main .section.secondary {
   background-color: var(--color-gray-100);
 }
 
+
 main .section.panel {
   margin: 0 var(--spacing-600) var(--spacing-900) var(--spacing-600); 
   padding: var(--spacing-600) var(--spacing-500);
@@ -984,6 +985,13 @@ main .section.panel {
   border: 2px solid var(--color-white);
   background: var(--color-gray-100);
   box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.08), 0 1px 4px 0 rgba(0, 0, 0, 0.04), 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+}
+
+
+main .section.max-width-900 {
+  max-width: 900px;
+  box-sizing: border-box;
+  margin-inline: auto;
 }
 
 @media (max-width: 899px) {
@@ -1001,10 +1009,18 @@ main .section.panel {
 }
 
 @media (min-width: 1800px) {
+
+
   main .section.panel {
     margin: 0 auto var(--spacing-900) auto;
     max-width: 1679px;
   }
+
+  main .section.max-width-900 {
+    max-width: 900px;
+    margin-inline: auto;
+  }
+  
 }
 
 /* Align link-list with template container when in modular-search */
