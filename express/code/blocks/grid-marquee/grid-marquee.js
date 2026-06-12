@@ -285,6 +285,7 @@ export default async function init(el) {
       return headline;
     }
     ctas[0].parentElement.classList.add('ctas');
+    const heading = headline.querySelector('h1, h2, h3, h4, h5, h6');
     ctas.forEach((cta) => {
       cta.classList.add('button');
       if (cta.querySelector('.icon')) return;
@@ -297,6 +298,9 @@ export default async function init(el) {
         cta.textContent = '';
         cta.title = cta.title || ctaText;
         cta.append(createTag('div', { class: 'text-group' }, [icon, ctaText]));
+      }
+      if (!cta.getAttribute('aria-label') && heading) {
+        cta.setAttribute('aria-label', `${cta.textContent.trim()} ${heading.textContent.trim()}`);
       }
     });
     ctas[0].classList.add('primaryCTA');
