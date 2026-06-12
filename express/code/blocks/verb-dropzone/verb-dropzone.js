@@ -342,7 +342,7 @@ export default async function init(element) {
   const dropzone = createTag('button', {
     class: 'verb-dropzone-area',
     type: 'button',
-    id: 'drop-zone',
+    id: 'unity-upload',
     'aria-labelledby': 'verb-dropzone-heading',
     'aria-describedby': 'file-upload-description',
   });
