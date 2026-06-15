@@ -328,6 +328,13 @@ const newComponents = [
       "export * from '@spectrum-web-components/badge';",
     ].join('\n'),
   },
+  {
+    name: 'field-label',
+    entry: [
+      "import '@spectrum-web-components/field-label/sp-field-label.js';",
+      "export * from '@spectrum-web-components/field-label';",
+    ].join('\n'),
+  },
 ];
 
 if (ICONS_CATALOG) {
