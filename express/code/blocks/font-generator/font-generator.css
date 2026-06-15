@@ -1,0 +1,22 @@
+.font-generator.loading > div {
+  display: none;
+}
+
+.font-generator-grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: var(--spacing-300, 16px);
+  background: var(--gray-75, #F3F3F3);
+}
+
+.font-generator-col--side {
+  grid-column: span 4;
+}
+
+.font-generator-col--main {
+  grid-column: span 4;
+}
+
+.font-generator-col--aux {
+  grid-column: span 4;
+}
