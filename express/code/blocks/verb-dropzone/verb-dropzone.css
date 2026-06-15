@@ -594,7 +594,7 @@ main .section .verb-dropzone p {
 
 @media screen and (min-width: 600px) and (max-width: 1199px) {
   .verb-dropzone {
-    --verb-dropzone-top-spacing: 40px;
+    --verb-dropzone-top-spacing: 0px;
 
     padding: var(--verb-dropzone-top-spacing) var(--spacing-500) 32px;
   }

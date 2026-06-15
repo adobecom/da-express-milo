@@ -5,10 +5,7 @@
 }
 
 .gallery-loop-viewport {
-  overflow: hidden;
-  /* room for the centered item to scale up without clipping */
-  padding-block: calc((var(--loop-active-scale) - 1) * var(--template-height, 300px) / 2);
-  /* allow vertical page scroll while we capture horizontal drags */
+  overflow: hidden;  
   touch-action: pan-y;
   outline: none;
 }

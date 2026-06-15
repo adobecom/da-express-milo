@@ -14,7 +14,7 @@
 /* Section padding (ported from template-x-carousel .v2 default) */
 .section:has(.template-x-carousel-loop) {
   padding-top: 0;
-  padding-bottom: var(--spacing-600);
+  padding-bottom: 24px;
 }
 
 /* headers — v2: no padding */
@@ -44,7 +44,7 @@
   order: 3;
   display: flex;
   justify-content: center;
-  margin: var(--spacing-400) auto 0;
+  margin: 16px auto 0;
   padding: 0;
 }
 
@@ -59,7 +59,6 @@
   order: 2;
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  margin-top: 22px;
 }
 
 /* Fade the carousel into the page at the left/right viewport edges. */
@@ -256,7 +255,7 @@
 
   .section:has(.template-x-carousel-loop) {
     padding-top: 0;
-    padding-bottom: var(--spacing-600);
+    padding-bottom: var(--spacing-400);
   }
 }
 
