@@ -5,10 +5,9 @@
 .verb-dropzone {
   --verb-dropzone-max-width: 900px;
   --verb-dropzone-height: 120px;
-  --verb-dropzone-top-spacing: 32px;
 
   position: relative;
-  padding: var(--verb-dropzone-top-spacing) var(--spacing-300) 24px;
+  padding: 0 var(--spacing-300) 24px;
   overflow: hidden;
   box-sizing: border-box;
 }
@@ -475,7 +474,7 @@ main .section .verb-dropzone p {
   max-width: calc(100% - 32px);
   color: var(--color-white);
   position: absolute;
-  top: calc(var(--verb-dropzone-top-spacing) + 4px);
+  top: 4px;
   left: 50%;
   transform: translate(-50%, 0);
   font-size: 14px;
@@ -594,9 +593,7 @@ main .section .verb-dropzone p {
 
 @media screen and (min-width: 600px) and (max-width: 1199px) {
   .verb-dropzone {
-    --verb-dropzone-top-spacing: 40px;
-
-    padding: var(--verb-dropzone-top-spacing) var(--spacing-500) 32px;
+    padding: 0 var(--spacing-500) 32px;
   }
 
   .verb-dropzone.tablet-dark {
@@ -611,9 +608,7 @@ main .section .verb-dropzone p {
 
 @media screen and (min-width: 1200px) {
   .verb-dropzone {
-    --verb-dropzone-top-spacing: 48px;
-
-    padding: var(--verb-dropzone-top-spacing) var(--spacing-600) 40px;
+    padding: 0 var(--spacing-600) 40px;
   }
 
   /* Show desktop drag text, hide mobile drag text */
