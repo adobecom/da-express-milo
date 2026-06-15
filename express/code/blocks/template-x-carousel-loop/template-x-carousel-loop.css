@@ -9,12 +9,7 @@
   max-width: unset;
   display: flex;
   flex-direction: column;
-}
-
-/* Section padding (ported from template-x-carousel .v2 default) */
-.section:has(.template-x-carousel-loop) {
-  padding-top: 0;
-  padding-bottom: var(--spacing-600);
+  padding-block-end: var(--spacing-400);
 }
 
 /* headers — v2: no padding */
@@ -44,7 +39,7 @@
   order: 3;
   display: flex;
   justify-content: center;
-  margin: var(--spacing-400) auto 0;
+  margin: 0 auto;
   padding: 0;
 }
 
@@ -59,7 +54,6 @@
   order: 2;
   width: 100vw;
   margin-left: calc(50% - 50vw);
-  margin-top: 22px;
 }
 
 /* Fade the carousel into the page at the left/right viewport edges. */
@@ -84,6 +78,13 @@
   background: linear-gradient(90deg, rgba(255, 255, 255, 0.00) 0%, #FFF 82.69%);
 }
 
+/* Absorb the toolbar's top margin into the viewport's bottom padding so the
+   box-shadow on .template (needs ~20px clearance) is not clipped by
+   overflow:hidden, while keeping the same total gap to the toolbar. */
+.template-x-carousel-loop .gallery-loop-viewport {
+  padding-block-end: calc((var(--loop-active-scale) - 1) * var(--template-height) / 2 + var(--spacing-200));
+}
+
 /* The loop engine needs uniform-width items to compute offsets. */
 .template-x-carousel-loop .gallery-loop-track {
   column-gap: var(--loop-gap);
@@ -98,6 +99,7 @@
   flex-direction: column;
   justify-content: flex-end;
   text-decoration: unset;
+  box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.16);
 }
 
 .template-x-carousel-loop .template .image-wrapper,
@@ -231,11 +233,6 @@
 }
 
 @media (min-width: 600px) {
-  .section:has(.template-x-carousel-loop) {
-    padding-top: var(--spacing-300);
-    padding-bottom: var(--spacing-300);
-  }
-
   /* Anchor the nav buttons to the right of the section on tablet+. */
   .template-x-carousel-loop .toolbar {
     justify-content: flex-end;
@@ -252,11 +249,6 @@
     padding-right: 0;
     margin-left: auto;
     margin-right: 0;
-  }
-
-  .section:has(.template-x-carousel-loop) {
-    padding-top: 0;
-    padding-bottom: var(--spacing-600);
   }
 }
 

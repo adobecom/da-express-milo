@@ -334,6 +334,8 @@
   --typography-label-l: 16px;
   --typography-title-xs: 16px;
   --typography-title-2xs: 14px;
+  --typography-headings-xl: 28px;
+  --typography-body-s: 14px;
   --typography-line-height-Title-xs: 22px;
   --typography-line-height-Title-2xs: 20px;
 
@@ -407,6 +409,8 @@
     --Global-Typography-Size-Body-Body-M: 18px;
     --typography-title-2xs: 16px;
     --typography-line-height-Title-2xs: 22px;
+    --typography-headings-xl: 36px;
+    --typography-body-s: 16px;
   }
 }
 

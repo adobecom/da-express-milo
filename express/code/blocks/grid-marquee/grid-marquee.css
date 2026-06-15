@@ -528,13 +528,52 @@ main .section .grid-marquee.pricing-page h1 {
 }
 
 /* narrow variant — centered headline + content, capped at 666px */
-.grid-marquee.narrow .headline {
+.grid-marquee.narrow .foreground {
+  --top-padding: var(--spacing-300);
+  --bottom-padding: var(--spacing-400);
+
   max-width: 666px;
   margin-inline: auto;
   text-align: center;
+  padding: var(--top-padding) var(--spacing-300) var(--bottom-padding);
+  box-sizing: content-box;
 }
 
+.grid-marquee.narrow .icon-adobe-brand-logo {
+  height: 20px;
+  padding-block-start: 0;
+  padding-block-end: var(--spacing-300);
+}
 
+.grid-marquee.narrow .headline {
+  padding: 0;
+}
 
+main .section .grid-marquee.narrow h1 {
+  font-size: var(--typography-headings-xl);
+  line-height: 104%;
+  font-weight: 900;
+  color: var(--color-content-neutral);
+}
 
+.grid-marquee.narrow .headline p {
+  font-size: var(--typography-body-s);
+  line-height: 130%;
+  color: var(--Alias-content-typography-Body);
+}
 
+.grid-marquee.narrow .headline .ctas {
+  margin-top: 0;
+}
+
+@media screen and (min-width: 600px) {
+  .grid-marquee.narrow .foreground {
+    --bottom-padding: var(--spacing-500);
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .grid-marquee.narrow .foreground {
+    --top-padding: var(--spacing-600);
+  }
+}
