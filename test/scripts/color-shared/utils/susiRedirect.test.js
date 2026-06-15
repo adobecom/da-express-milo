@@ -96,6 +96,42 @@ describe('buildColorSignInRedirectUrl', () => {
     expect(url.pathname).to.equal('/color-explore');
   });
 
+  it('includes gradient id param when on color-explore page and id is provided', () => {
+    const el = document.createElement('div');
+    el.className = 'color-explore';
+    document.body.appendChild(el);
+
+    window.history.replaceState({}, '', '/color-explore');
+
+    const result = buildColorSignInRedirectUrl(colors, name, 'gradient-abc-123');
+    const url = new URL(result);
+    expect(url.searchParams.get('id')).to.equal('gradient-abc-123');
+  });
+
+  it('omits id param when on color-explore page but no id is provided', () => {
+    const el = document.createElement('div');
+    el.className = 'color-explore';
+    document.body.appendChild(el);
+
+    window.history.replaceState({}, '', '/color-explore');
+
+    const result = buildColorSignInRedirectUrl(colors, name);
+    const url = new URL(result);
+    expect(url.searchParams.has('id')).to.be.false;
+  });
+
+  it('omits id param when id is an empty string', () => {
+    const el = document.createElement('div');
+    el.className = 'color-explore';
+    document.body.appendChild(el);
+
+    window.history.replaceState({}, '', '/color-explore');
+
+    const result = buildColorSignInRedirectUrl(colors, name, '');
+    const url = new URL(result);
+    expect(url.searchParams.has('id')).to.be.false;
+  });
+
   it('uses current page URL for color-extract', () => {
     const el = document.createElement('div');
     el.className = 'color-extract';

@@ -220,6 +220,13 @@ export async function createExpressPicker(config) {
 
     /** Clean up listeners (call when removing from DOM). */
     destroy() {
+      try {
+        picker.open = false;
+        picker.removeAttribute('open');
+        picker.blur?.();
+      } catch (error) {
+        // Non-fatal: teardown should still remove the wrapper.
+      }
       picker.removeEventListener('change', onPickerChange);
       theme.remove();
     },

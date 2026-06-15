@@ -4,6 +4,7 @@
  */
 
 export const LONG_TEXT_CUTOFF = 70;
+export const SUPPORTED_MWEB_OS = ['Android', 'iOS'];
 
 /**
  * Calculates the pixel width of text for a given font
@@ -50,7 +51,7 @@ export function buildAction(createTag, entry, buttonType) {
 }
 
 /**
- * Checks if the device is an Android, enables the mobile gating if it is.
+ * Checks if the device is Android, enables the mobile gating if it is.
  * If there is no metadata check enabled, still enable the gating block in case authors want it.
  * @param {Function} getMetadata - Function to get metadata
  * @param {Function} getMobileOperatingSystem - Function to get mobile OS
@@ -68,6 +69,8 @@ export function androidCheck(getMetadata, getMobileOperatingSystem) {
  * @param {Object} metadataMap - Map of metadata
  * @param {number} index - CTA index (1 or 2)
  * @param {boolean} useFrictionless - Whether to use frictionless metadata with fallback
+ * @param {string} metadataPrefix - Optional metadata prefix for platform-specific fields
+ * @param {boolean} enableMobileFqaUpload - Whether the upload hash should click the upload button
  * @returns {Object} Tool data with icon, iconText, and anchor
  */
 export function createToolData(
@@ -76,9 +79,10 @@ export function createToolData(
   metadataMap,
   index,
   useFrictionless = false,
+  metadataPrefix = '',
+  enableMobileFqaUpload = useFrictionless,
 ) {
-  const prefix = `fork-cta-${index}`;
-
+  const prefix = `${metadataPrefix}fork-cta-${index}`;
   // Metadata lookup with optional frictionless fallback
   const iconMetadata = (useFrictionless && metadataMap[`${prefix}-icon-frictionless`])
     || metadataMap[`${prefix}-icon`];
@@ -96,7 +100,7 @@ export function createToolData(
   const aTag = createTag('a', { title: textMetadata, href: hrefMetadata });
 
   // Special handler for frictionless upload
-  if (useFrictionless && hrefMetadata.toLowerCase().trim() === '#mobile-fqa-upload') {
+  if (enableMobileFqaUpload && hrefMetadata.toLowerCase().trim() === '#mobile-fqa-upload') {
     aTag.addEventListener('click', (e) => {
       e.preventDefault();
       document.getElementById('mobile-fqa-upload').click();
@@ -156,6 +160,80 @@ export function collectFloatingButtonData(
       metadataMap,
       i,
       useFrictionless,
+    );
+    if (toolData) {
+      data.tools.push(toolData);
+      if (getTextWidth(toolData.anchor.textContent, 16) > LONG_TEXT_CUTOFF) {
+        data.longText = true;
+      }
+    }
+  }
+
+  return data;
+}
+
+/**
+ * Collects floating button data from platform-prefixed fork metadata.
+ * @param {Function} createTag - Function to create DOM elements
+ * @param {Function} getIconElementDeprecated - Function to get icon elements
+ * @param {string} platform - Platform metadata prefix ('android' or 'ios')
+ * @param {Object} extraMainCtaProps - Extra properties to add to mainCta (optional)
+ * @returns {Object} Floating button data
+ */
+export function collectOsSplitFloatingButtonData(
+  createTag,
+  getIconElementDeprecated,
+  platform,
+  extraMainCtaProps = {},
+) {
+  const metadataMap = createMetadataMap();
+  const getMetadataLocal = (key) => metadataMap[key];
+  const metadataPrefix = `${platform}-`;
+  const getOsOrDefaultForkMetadata = (osKey, defaultKey) => (
+    getMetadataLocal(osKey) ?? getMetadataLocal(defaultKey)
+  );
+
+  const data = {
+    scrollState: 'withLottie',
+    showAppStoreBadge: ['on'].includes(getMetadataLocal('show-floating-cta-app-store-badge')?.toLowerCase()),
+    toolsToStash: getMetadataLocal('ctas-above-divider'),
+    delay: getMetadataLocal('floating-cta-drawer-delay') || 0,
+    tools: [],
+    mainCta: {
+      desktopHref: getMetadataLocal('desktop-floating-cta-link'),
+      desktopText: getMetadataLocal('desktop-floating-cta-text'),
+      mobileHref: getMetadataLocal('mobile-floating-cta-link'),
+      mobileText: getMetadataLocal('mobile-floating-cta-text'),
+      href: getMetadataLocal('main-cta-link'),
+      text: getMetadataLocal('main-cta-text'),
+      ...extraMainCtaProps,
+    },
+    bubbleSheet: getMetadataLocal('floating-cta-bubble-sheet'),
+    live: getMetadataLocal('floating-cta-live'),
+    forkButtonHeader: getOsOrDefaultForkMetadata(
+      `${metadataPrefix}fork-button-header`,
+      'fork-button-header',
+    ),
+  };
+
+  for (let i = 1; i < 3; i += 1) {
+    const metadataWithForkFallback = { ...metadataMap };
+    ['icon', 'icon-text', 'link', 'text'].forEach((field) => {
+      const osKey = `${metadataPrefix}fork-cta-${i}-${field}`;
+      const defaultKey = `fork-cta-${i}-${field}`;
+      if (metadataWithForkFallback[osKey] === undefined
+        && metadataWithForkFallback[defaultKey] !== undefined) {
+        metadataWithForkFallback[osKey] = metadataWithForkFallback[defaultKey];
+      }
+    });
+    const toolData = createToolData(
+      createTag,
+      getIconElementDeprecated,
+      metadataWithForkFallback,
+      i,
+      false,
+      metadataPrefix,
+      true,
     );
     if (toolData) {
       data.tools.push(toolData);

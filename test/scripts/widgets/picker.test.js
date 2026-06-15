@@ -519,10 +519,10 @@ describe('Picker Widget', () => {
       expect(picker.getPicker()).to.equal('2');
     });
 
-    it('should close dropdown on Tab key', async () => {
+    it('should focus first option on Tab when dropdown is open and no option is focused', async () => {
       const picker = await createPicker({
         id: 'test-picker',
-        options: [{ value: '1', text: 'Option 1' }],
+        options: [{ value: '1', text: 'Option 1' }, { value: '2', text: 'Option 2' }],
       });
 
       container.appendChild(picker);
@@ -531,6 +531,25 @@ describe('Picker Widget', () => {
 
       const event = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true });
       button.dispatchEvent(event);
+
+      expect(picker.classList.contains('opened')).to.be.true;
+      const options = picker.querySelectorAll('.picker-option-button');
+      expect(options[0].classList.contains('focused')).to.be.true;
+    });
+
+    it('should close dropdown on Tab when at last option', async () => {
+      const picker = await createPicker({
+        id: 'test-picker',
+        options: [{ value: '1', text: 'Option 1' }, { value: '2', text: 'Option 2' }],
+      });
+
+      container.appendChild(picker);
+      const button = picker.querySelector('.picker-button-wrapper');
+      button.click();
+
+      button.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      button.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      button.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true }));
 
       expect(picker.classList.contains('opened')).to.be.false;
     });
