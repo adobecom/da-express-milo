@@ -583,6 +583,7 @@ export default async function init(element) {
       dragLeaveTimer = setTimeout(hideDragOverlay, 200);
     });
     document.addEventListener('dragend', hideDragOverlay);
+    document.addEventListener('drop', () => setTimeout(hideDragOverlay, 200), true);
     window.addEventListener('blur', hideDragOverlay);
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState === 'hidden') hideDragOverlay();
