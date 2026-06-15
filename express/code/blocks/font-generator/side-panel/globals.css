@@ -1,0 +1,42 @@
+@import url("https://cdnjs.cloudflare.com/ajax/libs/meyer-reset/2.0/reset.min.css");
+* {
+  -webkit-font-smoothing: antialiased;
+  box-sizing: border-box;
+}
+html,
+body {
+  margin: 0px;
+  min-height: 100%;
+}
+/* a blue color as a generic focus style */
+button:focus-visible {
+  outline: 2px solid #4a90e2 !important;
+  outline: -webkit-focus-ring-color auto 5px !important;
+}
+a {
+  text-decoration: none;
+}
+/* @FONTWARNING[{"type": "restricted", "family": "Adobe Clean Spectrum VF", "weight": "var(--component-l-regular-font-weight)", "style": "normal", "allowsCrossOrigin": false}] */
+
+@font-face {
+  font-family: "Adobe Clean Spectrum VF";
+  src: local("Adobe Clean Spectrum VF");
+}
+/* @FONTWARNING[{"type": "restricted", "family": "Adobe Clean Spectrum VF-Regular", "weight": "400", "style": "normal", "allowsCrossOrigin": false}] */
+
+@font-face {
+  font-family: "Adobe Clean Spectrum VF-Regular";
+  src: local("Adobe Clean Spectrum VF-Regular");
+}
+/* @FONTWARNING[{"type": "restricted", "family": "Adobe Clean", "weight": "var(--desktop-title-s-font-weight)", "style": "normal", "allowsCrossOrigin": false}] */
+
+@font-face {
+  font-family: "Adobe Clean";
+  src: local("Adobe Clean");
+}
+/* @FONTWARNING[{"type": "restricted", "family": "Adobe Clean Spectrum VF-Bold", "weight": "700", "style": "normal", "allowsCrossOrigin": false}] */
+
+@font-face {
+  font-family: "Adobe Clean Spectrum VF-Bold";
+  src: local("Adobe Clean Spectrum VF-Bold");
+}

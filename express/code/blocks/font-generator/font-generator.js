@@ -1,16 +1,22 @@
-import { createTag } from '../../scripts/utils.js';
-import { initFromUrl } from './state.js';
+import { createSidePanel } from './side-panel/output/side-panel.js';
 
 export default function decorate(block) {
-  // ToDo: Extract authored content from DOM
+  block.classList.add('loading');
 
-  initFromUrl();
+  const grid = document.createElement('div');
+  grid.className = 'font-generator-grid';
 
-  block.innerHTML = '';
-  const container = createTag('section', { class: 'fg-container' });
-  // ToDo: Remove placeholder content
-  const sidebar = createTag('div', { class: 'fg-sidebar' }, '<p>Sidebar: Lorem ipsum</p>');
-  const main = createTag('div', { class: 'fg-main' }, '<p>Main: Lorem ipsum</p>');
-  container.append(sidebar, main);
-  block.appendChild(container);
+  const sideCol = document.createElement('div');
+  sideCol.className = 'font-generator-col font-generator-col--side';
+  sideCol.append(createSidePanel());
+
+  const mainCol = document.createElement('div');
+  mainCol.className = 'font-generator-col font-generator-col--main';
+
+  const auxCol = document.createElement('div');
+  auxCol.className = 'font-generator-col font-generator-col--aux';
+
+  grid.append(sideCol, mainCol, auxCol);
+  block.append(grid);
+  block.classList.remove('loading');
 }
