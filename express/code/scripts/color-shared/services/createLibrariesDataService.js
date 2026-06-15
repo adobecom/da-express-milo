@@ -2,16 +2,63 @@ import { serviceManager } from '../../../libs/services/index.js';
 import {
   GRADIENT_ELEMENT_TYPE,
   THEME_ELEMENT_TYPE,
+  THEME_REPRESENTATION_TYPE,
 } from '../../../libs/services/plugins/cclibrary/constants.js';
 
+function channelToHex(value) {
+  const int = Math.min(255, Math.max(0, Math.round(Number(value))));
+  return Number.isNaN(int) ? '00' : int.toString(16).padStart(2, '0');
+}
+
+function rgbObjectToHex(rgb) {
+  if (!rgb || rgb.r == null || rgb.g == null || rgb.b == null) return null;
+  return `#${channelToHex(rgb.r)}${channelToHex(rgb.g)}${channelToHex(rgb.b)}`;
+}
+
+function withHash(hex) {
+  if (typeof hex !== 'string' || !hex) return null;
+  return hex.startsWith('#') ? hex : `#${hex}`;
+}
+
+/**
+ * Resolve a single CC Libraries swatch to a hex string.
+ * Themes saved via the drawer store each swatch as an array of color-mode
+ * entries, e.g. `[{ mode: 'RGB', value: { r, g, b }, profileName }]` (0-255).
+ * Also tolerates plain hex strings, `{ hex }`, and Kuler-style `{ values: [r,g,b] }` (0-1).
+ */
+function swatchToHex(swatch) {
+  if (!swatch) return null;
+  if (typeof swatch === 'string') return withHash(swatch);
+
+  if (Array.isArray(swatch)) {
+    const rgbEntry = swatch.find((entry) => String(entry?.mode).toUpperCase() === 'RGB')
+      ?? swatch[0];
+    return rgbObjectToHex(rgbEntry?.value);
+  }
+
+  if (typeof swatch.hex === 'string') return withHash(swatch.hex);
+  if (typeof swatch.color === 'string') return withHash(swatch.color);
+  if (swatch.value && typeof swatch.value === 'object') return rgbObjectToHex(swatch.value);
+  if (typeof swatch.value === 'string') return withHash(swatch.value);
+
+  if (Array.isArray(swatch.values) && swatch.values.length >= 3) {
+    const [r, g, b] = swatch.values;
+    return rgbObjectToHex({ r: Number(r) * 255, g: Number(g) * 255, b: Number(b) * 255 });
+  }
+
+  return null;
+}
+
 function parseThemeElement(element) {
-  const rep = element.representations?.[0];
+  const reps = element.representations ?? [];
+  const rep = reps.find((r) => r?.['colortheme#data'])
+    ?? reps.find((r) => r?.type === THEME_REPRESENTATION_TYPE)
+    ?? reps[0];
   const themeData = rep?.['colortheme#data'];
   const swatches = themeData?.swatches ?? rep?.['color:#rgb'] ?? [];
-  const colors = swatches.map((swatch) => {
-    if (typeof swatch === 'string') return swatch;
-    return swatch?.value ?? swatch?.color ?? swatch?.hex;
-  }).filter(Boolean);
+  const colors = (Array.isArray(swatches) ? swatches : [])
+    .map(swatchToHex)
+    .filter(Boolean);
 
   return {
     id: element.id,
