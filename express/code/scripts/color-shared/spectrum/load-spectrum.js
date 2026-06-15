@@ -216,6 +216,26 @@ export function loadPicker() {
 }
 
 /**
+ * Load field-label component (sp-field-label) — a visible, focus-forwarding
+ * label that associates with a field (e.g. sp-picker) via its `for` attribute.
+ */
+export function loadFieldLabel() {
+  if (!componentLoaded.fieldLabel) {
+    componentLoaded.fieldLabel = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/field-label.js`);
+        await waitForComponents(['sp-theme', 'sp-field-label']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.fieldLabel;
+}
+
+/**
  * Load button components (sp-button, sp-action-button, etc.).
  */
 export function loadButton() {
