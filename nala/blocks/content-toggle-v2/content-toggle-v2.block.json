@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@content-toggle-v2-padding-20",
       "selector": "div.content-toggle-v2.padding-20",
-      "path": "/drafts/nala/test-gen/content-toggle-v2/content-toggle-v2",
+      "path": "/drafts/nala/blocks/content-toggle-v2/content-toggle-v2",
       "data": {
         "semantic": {
           "texts": [],

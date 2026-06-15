@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@blog-posts-v2-default",
       "selector": "div.blog-posts-v2",
-      "path": "/drafts/nala/test-gen/blog-posts-v2/blog-post-v2",
+      "path": "/drafts/nala/blocks/blog-posts-v2/blog-post-v2",
       "data": {
         "semantic": {
           "texts": [
@@ -25,21 +25,21 @@
               "selector": "picture",
               "nth": 0,
               "tag": "picture",
-              "src": "/drafts/nala/test-gen/blog-posts-v2/media_19fc0ddc0686eb7c3859403046e6ac81a28964849.png?width=750&format=png&optimize=medium",
+              "src": "/drafts/nala/blocks/blog-posts-v2/media_19fc0ddc0686eb7c3859403046e6ac81a28964849.png?width=750&format=png&optimize=medium",
               "alt": "50 quotes about what family means to us"
             },
             {
               "selector": "picture",
               "nth": 1,
               "tag": "picture",
-              "src": "/drafts/nala/test-gen/blog-posts-v2/media_1dc430443bdb6c294afdb93e154f48c4d5c0d566b.png?width=750&format=png&optimize=medium",
+              "src": "/drafts/nala/blocks/blog-posts-v2/media_1dc430443bdb6c294afdb93e154f48c4d5c0d566b.png?width=750&format=png&optimize=medium",
               "alt": "90 Thank You Card Ideas for Every Occasion"
             },
             {
               "selector": "picture",
               "nth": 2,
               "tag": "picture",
-              "src": "/drafts/nala/test-gen/blog-posts-v2/media_195bd091332641fd99467432e5a1e653108078dd9.png?width=750&format=png&optimize=medium",
+              "src": "/drafts/nala/blocks/blog-posts-v2/media_195bd091332641fd99467432e5a1e653108078dd9.png?width=750&format=png&optimize=medium",
               "alt": "60+ quotes that will give you hope"
             }
           ],

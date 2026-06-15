@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@playlist-default",
       "selector": "div.playlist",
-      "path": "/drafts/nala/test-gen/playlist/playlist",
+      "path": "/drafts/nala/blocks/playlist/playlist",
       "data": {
         "semantic": {
           "texts": [

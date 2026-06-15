@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@holiday-blade-default",
       "selector": "div.holiday-blade",
-      "path": "/drafts/nala/test-gen/holiday-blade/holiday-blade",
+      "path": "/drafts/nala/blocks/holiday-blade/holiday-blade",
       "data": {
         "semantic": {
           "texts": [
@@ -72,7 +72,7 @@
       "tcid": "1",
       "name": "@holiday-blade-still-only",
       "selector": "div.holiday-blade.still-only",
-      "path": "/drafts/nala/test-gen/holiday-blade/holiday-blade-still",
+      "path": "/drafts/nala/blocks/holiday-blade/holiday-blade-still",
       "data": {
         "semantic": {
           "texts": [
@@ -139,7 +139,7 @@
       "tcid": "2",
       "name": "@holiday-blade-premium-only",
       "selector": "div.holiday-blade.premium-only",
-      "path": "/drafts/nala/test-gen/holiday-blade/holiday-blade-premium",
+      "path": "/drafts/nala/blocks/holiday-blade/holiday-blade-premium",
       "data": {
         "semantic": {
           "texts": [
@@ -206,7 +206,7 @@
       "tcid": "3",
       "name": "@holiday-blade-light",
       "selector": "div.holiday-blade.light",
-      "path": "/drafts/nala/test-gen/holiday-blade/holiday-blade-light",
+      "path": "/drafts/nala/blocks/holiday-blade/holiday-blade-light",
       "data": {
         "semantic": {
           "texts": [
@@ -273,7 +273,7 @@
       "tcid": "4",
       "name": "@holiday-blade-free-only",
       "selector": "div.holiday-blade.free-only",
-      "path": "/drafts/nala/test-gen/holiday-blade/holiday-blade-free",
+      "path": "/drafts/nala/blocks/holiday-blade/holiday-blade-free",
       "data": {
         "semantic": {
           "texts": [
@@ -340,7 +340,7 @@
       "tcid": "5",
       "name": "@holiday-blade-animated-only",
       "selector": "div.holiday-blade.animated-only",
-      "path": "/drafts/nala/test-gen/holiday-blade/holiday-blade-animated",
+      "path": "/drafts/nala/blocks/holiday-blade/holiday-blade-animated",
       "data": {
         "semantic": {
           "texts": [
