@@ -34,7 +34,7 @@
 .ax-lib-header__content {
   display: flex;
   align-items: flex-end;
-  gap: var(--spacing-100);
+  gap: var(--spacing-200) var(--spacing-100);
 }
 
 .ax-lib-header__title-search {
@@ -45,7 +45,9 @@
   min-width: 0;
 }
 
-.ax-lib-header__count {
+/* `.ax-lib-header` prefix raises specificity above Milo's global
+   `main .section p` margin so these header paragraphs stay flush. */
+.ax-lib-header .ax-lib-header__count {
   margin: 0;
   padding-left: var(--spacing-50);
   font-size: var(--body-font-size-s);
@@ -82,65 +84,92 @@
   display: flex;
   flex-shrink: 0;
   align-items: center;
-  gap: var(--spacing-100);
+  min-height: var(--spacing-600);
 }
 
-.ax-lib-header__sort-label {
+/* L/M: spectrum-two sp-picker (filter picker) — hidden on S. This slot is a plain
+   element and is itself the flex row (label | picker), so the layout never relies
+   on flex crossing sp-theme's shadow <slot>. align-items stays inert until it
+   becomes inline-flex at M+; label↔picker spacing comes from the label's
+   padding-inline-end (below), not a flex gap. */
+.ax-lib-header__sort-picker {
   display: none;
+  align-items: center;
+  min-width: 200px;
+}
+
+/* sp-theme is the flex item that grows to fill the slot beside the label; the
+   picker inside it is width:100% (picker.css), so it fills the wrapper. */
+.ax-lib-header__sort-picker > sp-theme {
+  flex-grow: 1;
+  min-width: 0;
+}
+
+/* Figma 2211-239031 side label: neutral #505050, Regular 14px / 18px, flush.
+   12px (--spacing-200) of inline-end padding sets the gap to the picker now that
+   the slot no longer uses a flex gap. Outer-context host styles win over the
+   component's :host padding-inline for normal declarations, so padding-inline-end
+   applies (right side only; start stays 0). The --mod-fieldlabel-* custom props
+   pierce sp-field-label's shadow boundary. min-height:0 collapses the host
+   (default ~24px) to the text line so the slot's align-items:center centers the
+   label against the 32px picker, not its own box. */
+.ax-lib-header__sort-picker sp-field-label {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding-inline-end: var(--spacing-200);
+  --mod-fieldlabel-font-size: var(--body-font-size-s);
+  --mod-fieldlabel-font-weight: 400;
+  --mod-fieldlabel-line-height: 18px;
+  --mod-fieldlabel-color: var(--Palette-gray-700);
+  --mod-fieldlabel-padding-block: 0;
+  --mod-fieldlabel-min-height: 0;
+}
+
+/* Figma 2211-239031 "Picker (M)": Regular 14px / 18px text in a 32px-tall field.
+   The picker is inside sp-theme (not a direct flex item), so it fills via
+   width:100% from picker.css. Shared picker.css renders 16 / 20 at ~40px for
+   color-explore, so scope the Figma typography to this slot only. */
+.ax-lib-header__sort-picker sp-picker.filter-picker {
+  min-width: 0;
+  --mod-picker-font-size: var(--body-font-size-s);
+  --mod-picker-line-height: 18px;
+}
+
+.ax-lib-header__sort-picker sp-picker.filter-picker::part(button) {
+  min-height: var(--spacing-500);
+  padding-block: 7px;
   font-size: var(--body-font-size-s);
   line-height: 18px;
-  color: var(--ax-lib-detail-color);
-  white-space: nowrap;
 }
 
-.ax-lib-header__sort-trigger {
+.ax-lib-header__sort-picker sp-picker.filter-picker::part(label) {
+  font-size: var(--body-font-size-s);
+  line-height: 18px;
+}
+
+/* S: spectrum-two sp-action-button — hidden on L/M */
+.ax-lib-header__sort-action {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-80);
-  height: var(--spacing-500);
-  padding: 0 11px 0 10px;
-  border: none;
-  border-radius: var(--Corner-radius-corner-radius-100);
-  background: var(--ax-lib-sort-bg);
-  color: var(--ax-lib-heading-color);
-  font-family: var(--body-font-family);
-  font-size: var(--body-font-size-s);
-  line-height: 18px;
-  text-align: left;
-  cursor: pointer;
 }
 
-.ax-lib-header__sort-trigger:focus-visible {
-  outline: 2px solid var(--color-blue-800);
-  outline-offset: 2px;
+.ax-lib-header__sort-action sp-action-button {
+  --mod-button-background-color-default: var(--ax-lib-sort-bg);
+  --mod-button-background-color-hover: var(--Palette-gray-200);
+  --mod-button-border-color-default: transparent;
+  --mod-button-border-color-hover: transparent;
+  --mod-button-content-color-default: var(--Alias-content-neutral-default);
+  --mod-button-content-color-hover: var(--Alias-content-neutral-default);
 }
 
-.ax-lib-header__sort-icon {
+.ax-lib-header__sort-action [slot='icon'] {
   display: inline-flex;
 }
 
-.ax-lib-header__sort-icon img {
+.ax-lib-header__sort-action [slot='icon'] img {
   display: block;
   width: 20px;
   height: 20px;
-}
-
-.ax-lib-header__sort-text {
-  font-weight: var(--font-weight-medium);
-}
-
-.ax-lib-header__sort-value {
-  display: none;
-}
-
-.ax-lib-header__sort-chevron {
-  display: none;
-}
-
-.ax-lib-header__sort-chevron img {
-  display: block;
-  width: 10px;
-  height: auto;
 }
 
 .ax-lib-header__sort-popover {
@@ -161,7 +190,7 @@
   display: none;
 }
 
-.ax-lib-header__sort-heading {
+.ax-lib-header .ax-lib-header__sort-heading {
   margin: 0 0 var(--spacing-80);
   padding: var(--spacing-80) var(--spacing-100) 0;
   font-size: var(--body-font-size-xs);
@@ -170,51 +199,19 @@
   color: var(--ax-lib-detail-color);
 }
 
-.ax-lib-header__sort-option {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-100);
-  width: 100%;
-  padding: var(--spacing-100);
+/* spectrum-two single-select menu inside the popover card */
+.ax-lib-header__sort-menu {
+  --mod-menu-item-label-inline-edge-to-content: var(--spacing-200);
+  --mod-menu-item-selectable-edge-to-text-not-selected: var(--spacing-200);
+  --mod-menu-item-checkmark-width: 10px;
+  --mod-menu-item-text-to-control: 10px;
+  --mod-menu-item-corner-radius: var(--Corner-radius-corner-radius-100);
+  --mod-menu-item-focus-indicator-border-radius: var(--Corner-radius-corner-radius-100);
+
+  display: block;
+  inline-size: 100%;
   border: none;
-  border-radius: var(--Corner-radius-corner-radius-100);
   background: transparent;
-  color: var(--ax-lib-heading-color);
-  font-family: var(--body-font-family);
-  font-size: var(--body-font-size-s);
-  line-height: 18px;
-  text-align: left;
-  cursor: pointer;
-}
-
-.ax-lib-header__sort-option:hover {
-  background: var(--ax-lib-border);
-}
-
-.ax-lib-header__sort-option:focus-visible {
-  outline: 2px solid var(--color-blue-800);
-  outline-offset: -2px;
-}
-
-.ax-lib-header__sort-check {
-  display: inline-block;
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-  background-color: var(--ax-lib-accent);
-  -webkit-mask-image: url('/express/code/icons/checkmark.svg');
-  mask-image: url('/express/code/icons/checkmark.svg');
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-position: center;
-  mask-position: center;
-  -webkit-mask-size: contain;
-  mask-size: contain;
-  visibility: hidden;
-}
-
-.ax-lib-header__sort-option[aria-selected='true'] .ax-lib-header__sort-check {
-  visibility: visible;
 }
 
 /* Count hides only on mobile once the sticky header is scrolled */
@@ -241,7 +238,7 @@
     gap: var(--spacing-300);
   }
 
-  .ax-lib-header__count {
+  .ax-lib-header .ax-lib-header__count {
     flex-shrink: 0;
     padding-left: 0;
   }
@@ -251,41 +248,19 @@
     max-width: 460px;
   }
 
-  .ax-lib-header__sort-label {
+  .ax-lib-header__sort-picker {
     display: inline-flex;
   }
 
-  .ax-lib-header__sort-trigger {
-    min-width: 144px;
-    justify-content: space-between;
-    padding: 0 11px 0 12px;
-  }
-
-  .ax-lib-header__sort-icon,
-  .ax-lib-header__sort-text {
-    display: none;
-  }
-
-  .ax-lib-header__sort-value {
-    display: inline-block;
-    max-width: 120px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .ax-lib-header__sort-chevron {
-    display: inline-flex;
-  }
-
-  .ax-lib-header__sort-heading {
+  .ax-lib-header__sort-action,
+  .ax-lib-header__sort-popover {
     display: none;
   }
 }
 
 /* ── L (desktop) ────────────────────────────────────────────── */
 @media (min-width: 1200px) {
-  .ax-lib-header__count {
+  .ax-lib-header .ax-lib-header__count {
     font-size: var(--body-font-size-m);
     line-height: 22px;
   }

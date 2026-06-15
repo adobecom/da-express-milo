@@ -1,5 +1,8 @@
 import { createTag, getIconElementDeprecated } from '../../../utils.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
+import { loadFieldLabel, loadMenu } from '../../spectrum/load-spectrum.js';
+import { createExpressPicker } from '../../spectrum/components/express-picker.js';
+import createExpressActionButton from '../../spectrum/components/express-action-button.js';
 import { formatSavedCount } from './libraryUtils.js';
 
 export const LIBRARY_SORT = {
@@ -9,10 +12,20 @@ export const LIBRARY_SORT = {
 
 const SCROLL_THRESHOLD = 8;
 
+function logSpectrumFailure(message, error) {
+  window.lana?.log(`${message}: ${error?.message}`, {
+    tags: 'color-libraries,sort',
+    severity: 'warning',
+  });
+}
+
 /**
  * Builds the persistent library search header: saved-count, the reused search
- * bar, and the sort control (Picker on L/M, icon button on S). Breakpoint-specific
- * content is toggled in CSS, so no resize JS is needed here.
+ * bar, and the sort control. The sort control mirrors the Figma per breakpoint:
+ *   - L/M: spectrum-two <sp-picker> ("filter picker")
+ *   - S:   spectrum-two <sp-action-button> that opens a single-select <sp-menu>
+ * Both controls share one selection state and emit `sort-change`. Which control
+ * is visible is toggled in CSS, so no resize JS is needed here.
  *
  * @param {Object} [options]
  * @param {Object} [options.strings] - resolved placeholders
@@ -38,6 +51,9 @@ export function createLibrariesHeader(options = {}) {
   let popoverOpen = false;
   let detachDocumentHandlers = null;
   let scrollFrame = 0;
+  let desktopPicker = null;
+  let mobileButton = null;
+  let mobileTriggerEl = null;
 
   // ── DOM ─────────────────────────────────────────────────────
   const header = createTag('div', { class: 'ax-lib-header' });
@@ -50,94 +66,79 @@ export function createLibrariesHeader(options = {}) {
   titleSearch.append(count, search);
 
   const sort = createTag('div', { class: 'ax-lib-header__sort' });
-  const sortLabel = createTag('span', { class: 'ax-lib-header__sort-label' }, strings.librariesSortBy);
 
-  const trigger = createTag('button', {
-    type: 'button',
-    class: 'ax-lib-header__sort-trigger',
-    'aria-haspopup': 'listbox',
-    'aria-expanded': 'false',
-    'aria-label': strings.librariesSortAria,
-  });
-  const triggerIcon = createTag('span', { class: 'ax-lib-header__sort-icon', 'aria-hidden': 'true' });
-  triggerIcon.appendChild(getIconElementDeprecated('sort'));
-  const triggerValue = createTag('span', { class: 'ax-lib-header__sort-value' });
-  const triggerText = createTag('span', { class: 'ax-lib-header__sort-text' }, strings.librariesSortLabel);
-  const triggerChevron = createTag('span', { class: 'ax-lib-header__sort-chevron', 'aria-hidden': 'true' });
-  triggerChevron.appendChild(getIconElementDeprecated('drop-down-arrow'));
-  trigger.append(triggerIcon, triggerValue, triggerText, triggerChevron);
-  decorateAnalyticsAttributes(trigger, { linkLabel: strings.librariesSortAria });
+  // L/M: sp-picker (filled async). S: sp-action-button (filled async).
+  const pickerSlot = createTag('div', { class: 'ax-lib-header__sort-picker' });
+  const actionSlot = createTag('div', { class: 'ax-lib-header__sort-action' });
 
-  const popover = createTag('div', {
-    class: 'ax-lib-header__sort-popover',
-    role: 'listbox',
-    hidden: '',
-  });
+  // S dropdown: spectrum-two single-select sp-menu inside a positioned card.
+  const popover = createTag('div', { class: 'ax-lib-header__sort-popover', hidden: '' });
   popover.appendChild(createTag('p', { class: 'ax-lib-header__sort-heading' }, strings.librariesSortHeading));
-
-  const optionEls = new Map();
-  sortOptions.forEach((option) => {
-    const optionEl = createTag('button', {
-      type: 'button',
-      class: 'ax-lib-header__sort-option',
-      role: 'option',
-      'data-sort': option.key,
-      'aria-selected': String(option.key === currentSort),
-    });
-    const check = createTag('span', { class: 'ax-lib-header__sort-check', 'aria-hidden': 'true' });
-    optionEl.append(check, createTag('span', { class: 'ax-lib-header__sort-option-label' }, option.label));
-    optionEls.set(option.key, optionEl);
-    popover.appendChild(optionEl);
+  const menu = createTag('sp-menu', {
+    class: 'ax-lib-header__sort-menu',
+    selects: 'single',
+    size: 'm',
+    role: 'listbox',
   });
+  const optionItems = new Map();
+  sortOptions.forEach((option) => {
+    const item = createTag('sp-menu-item', { value: option.key });
+    item.textContent = option.label;
+    if (option.key === currentSort) {
+      item.setAttribute('selected', '');
+      item.setAttribute('aria-selected', 'true');
+    }
+    optionItems.set(option.key, item);
+    menu.appendChild(item);
+  });
+  popover.appendChild(menu);
 
-  sort.append(sortLabel, trigger, popover);
+  sort.append(pickerSlot, actionSlot, popover);
   content.append(titleSearch, sort);
   header.appendChild(content);
 
-  // ── Behavior (defined before being wired up below) ──────────
-  function syncTriggerValue() {
-    const selected = sortOptions.find((option) => option.key === currentSort);
-    triggerValue.textContent = selected ? selected.label : '';
+  loadMenu().catch((error) => logSpectrumFailure('Failed loading libraries sort menu', error));
+
+  // ── Behavior ────────────────────────────────────────────────
+  function syncMenuSelection() {
+    optionItems.forEach((item, key) => {
+      if (key === currentSort) {
+        item.setAttribute('selected', '');
+        item.setAttribute('aria-selected', 'true');
+      } else {
+        item.removeAttribute('selected');
+        item.setAttribute('aria-selected', 'false');
+      }
+    });
   }
 
-  function focusOption(index) {
-    const clamped = Math.max(0, Math.min(index, optionKeys.length - 1));
-    optionEls.get(optionKeys[clamped])?.focus();
+  function setMobileExpanded(expanded) {
+    mobileTriggerEl?.setAttribute('aria-expanded', String(expanded));
   }
 
   function closePopover({ focusTrigger = false } = {}) {
     if (!popoverOpen) return;
     popoverOpen = false;
     popover.setAttribute('hidden', '');
-    trigger.setAttribute('aria-expanded', 'false');
+    setMobileExpanded(false);
     if (detachDocumentHandlers) {
       detachDocumentHandlers();
       detachDocumentHandlers = null;
     }
-    if (focusTrigger) trigger.focus();
+    if (focusTrigger) mobileTriggerEl?.focus?.();
   }
 
   function openPopover() {
     if (popoverOpen) return;
     popoverOpen = true;
     popover.removeAttribute('hidden');
-    trigger.setAttribute('aria-expanded', 'true');
+    setMobileExpanded(true);
 
     const onDocumentClick = (event) => {
       if (!sort.contains(event.target)) closePopover();
     };
     const onDocumentKeydown = (event) => {
-      if (event.key === 'Escape') {
-        closePopover({ focusTrigger: true });
-        return;
-      }
-      if (event.key !== 'ArrowDown' && event.key !== 'ArrowUp') return;
-      event.preventDefault();
-      const activeIndex = optionKeys.findIndex(
-        (key) => optionEls.get(key) === document.activeElement,
-      );
-      if (activeIndex === -1) focusOption(0);
-      else focusOption(event.key === 'ArrowDown' ? activeIndex + 1 : activeIndex - 1);
+      if (event.key === 'Escape') closePopover({ focusTrigger: true });
     };
 
     document.addEventListener('click', onDocumentClick);
@@ -147,18 +148,33 @@ export function createLibrariesHeader(options = {}) {
       document.removeEventListener('keydown', onDocumentKeydown);
     };
 
-    optionEls.get(currentSort)?.focus();
+    // Move focus into the menu once visible. sp-menu handles arrow-key nav.
+    window.requestAnimationFrame(() => {
+      const target = menu.querySelector('sp-menu-item[selected]')
+        || menu.querySelector('sp-menu-item');
+      (target || menu)?.focus?.();
+    });
   }
 
-  function selectSort(key, { silent = false } = {}) {
+  function applySort(key, { silent = false, fromPicker = false } = {}) {
+    if (!optionItems.has(key)) return;
     const changed = key !== currentSort;
     currentSort = key;
-    optionEls.forEach((el, optionKey) => {
-      el.setAttribute('aria-selected', String(optionKey === key));
-    });
-    syncTriggerValue();
-    closePopover({ focusTrigger: !silent });
+    syncMenuSelection();
+    if (!fromPicker && desktopPicker?.setValue) {
+      try {
+        desktopPicker.setValue(key);
+      } catch (error) {
+        // Picker may still be settling; value is re-applied on waitForReady.
+      }
+    }
+    if (!silent) closePopover({ focusTrigger: !fromPicker });
     if (changed && !silent) emit('sort-change', { key });
+  }
+
+  function toggleMobilePopover() {
+    if (popoverOpen) closePopover({ focusTrigger: true });
+    else openPopover();
   }
 
   function onScroll() {
@@ -169,18 +185,81 @@ export function createLibrariesHeader(options = {}) {
     });
   }
 
-  // ── Wire up ─────────────────────────────────────────────────
-  syncTriggerValue();
+  // ── Wire up sp-menu (S dropdown) ────────────────────────────
+  const onMenuClick = (event) => {
+    const item = event.target?.closest?.('sp-menu-item');
+    if (item) applySort(item.getAttribute('value'));
+  };
+  const onMenuChange = () => {
+    const value = menu.value
+      || menu.querySelector('sp-menu-item[selected]')?.getAttribute('value');
+    if (value) applySort(value);
+  };
+  menu.addEventListener('click', onMenuClick);
+  menu.addEventListener('change', onMenuChange);
 
-  optionEls.forEach((optionEl, key) => {
-    optionEl.addEventListener('click', () => selectSort(key));
-  });
+  // ── L/M sp-picker (async) ───────────────────────────────────
+  (async () => {
+    try {
+      desktopPicker = await createExpressPicker({
+        label: strings.librariesSortBy,
+        value: currentSort,
+        options: sortOptions.map((option) => ({ value: option.key, label: option.label })),
+        forcePopover: true,
+        id: 'libraries-sort',
+        onChange: ({ value }) => applySort(value, { fromPicker: true }),
+      });
+      pickerSlot.appendChild(desktopPicker.element);
+      const pickerEl = desktopPicker.element.querySelector('sp-picker');
+      if (pickerEl) {
+        // The sp-field-label[for] below supplies the picker's accessible name,
+        // so drop the factory's generic aria-label to avoid a competing label.
+        pickerEl.removeAttribute('aria-label');
+        decorateAnalyticsAttributes(pickerEl, { linkLabel: strings.librariesSortAria });
+      }
+      await desktopPicker.waitForReady?.();
+      desktopPicker.setValue(currentSort);
+      // Persistent visible label via Spectrum's sp-field-label[for] pattern. The
+      // label sits in the sort-picker slot as a flex sibling of the picker's
+      // sp-theme — the row layout lives on that plain element so it doesn't depend
+      // on flex crossing sp-theme's shadow <slot>. It still resolves the picker by
+      // id via the shared document root, and the picker keeps its own theme.
+      if (pickerEl && !pickerSlot.querySelector('sp-field-label')) {
+        await loadFieldLabel();
+        pickerSlot.insertBefore(
+          createTag('sp-field-label', { for: pickerEl.id, size: 'm' }, strings.librariesSortBy),
+          desktopPicker.element,
+        );
+      }
+    } catch (error) {
+      logSpectrumFailure('Failed creating libraries sort picker', error);
+    }
+  })();
 
-  trigger.addEventListener('click', () => {
-    if (popoverOpen) closePopover({ focusTrigger: true });
-    else openPopover();
-  });
+  // ── S sp-action-button (async) ──────────────────────────────
+  (async () => {
+    try {
+      const icon = getIconElementDeprecated('S2_Icon_Sort_20_N');
+      mobileButton = await createExpressActionButton({
+        label: strings.librariesSortLabel,
+        size: 'm',
+        icon,
+        onClick: toggleMobilePopover,
+      });
+      actionSlot.appendChild(mobileButton.element);
+      mobileTriggerEl = mobileButton.element.querySelector('sp-action-button');
+      if (mobileTriggerEl) {
+        mobileTriggerEl.setAttribute('aria-haspopup', 'listbox');
+        mobileTriggerEl.setAttribute('aria-expanded', 'false');
+        mobileTriggerEl.setAttribute('aria-label', strings.librariesSortAria);
+        decorateAnalyticsAttributes(mobileTriggerEl, { linkLabel: strings.librariesSortAria });
+      }
+    } catch (error) {
+      logSpectrumFailure('Failed creating libraries sort action button', error);
+    }
+  })();
 
+  // ── Scroll (sticky compact on S) ────────────────────────────
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
@@ -190,8 +269,8 @@ export function createLibrariesHeader(options = {}) {
       count.textContent = formatSavedCount(total, strings);
     },
     setSort(key) {
-      if (key && key !== currentSort && optionEls.has(key)) {
-        selectSort(key, { silent: true });
+      if (key && key !== currentSort && optionItems.has(key)) {
+        applySort(key, { silent: true });
       }
     },
     getSort() {
@@ -199,8 +278,12 @@ export function createLibrariesHeader(options = {}) {
     },
     destroy() {
       closePopover();
+      menu.removeEventListener('click', onMenuClick);
+      menu.removeEventListener('change', onMenuChange);
       window.removeEventListener('scroll', onScroll);
       if (scrollFrame) window.cancelAnimationFrame(scrollFrame);
+      desktopPicker?.destroy?.();
+      mobileButton?.destroy?.();
       header.remove();
     },
   };
