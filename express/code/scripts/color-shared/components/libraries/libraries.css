@@ -480,7 +480,7 @@
   min-width: 0;
 }
 
-.ax-lib-card__name {
+.ax-lib-card__text .ax-lib-card__name {
   margin: 0;
   font-size: var(--Global-Typography-Size-Body-Body-S);
   font-weight: var(--font-weight-medium);
@@ -491,7 +491,7 @@
   white-space: nowrap;
 }
 
-.ax-lib-card__subtitle {
+.ax-lib-card__text .ax-lib-card__subtitle {
   margin: 0;
   font-size: var(--body-font-size-xs);
   line-height: 1.3;
