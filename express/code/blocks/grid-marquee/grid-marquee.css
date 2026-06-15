@@ -355,7 +355,6 @@ main .section .grid-marquee.pricing-page h1 {
   }
   .grid-marquee .headline .ctas {
     display: flex;
-    margin-top: 16px;
     padding-top: 16px;
     justify-content: center;
     gap: 8px;

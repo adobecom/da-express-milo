@@ -9,7 +9,12 @@
   max-width: unset;
   display: flex;
   flex-direction: column;
-  padding-block-end: var(--spacing-400);
+}
+
+/* Section padding (ported from template-x-carousel .v2 default) */
+.section:has(.template-x-carousel-loop) {
+  padding-top: 0;
+  padding-bottom: 24px;
 }
 
 /* headers — v2: no padding */
@@ -39,7 +44,7 @@
   order: 3;
   display: flex;
   justify-content: center;
-  margin: 0 auto;
+  margin: 16px auto 0;
   padding: 0;
 }
 
@@ -249,6 +254,11 @@
     padding-right: 0;
     margin-left: auto;
     margin-right: 0;
+  }
+
+  .section:has(.template-x-carousel-loop) {
+    padding-top: 0;
+    padding-bottom: var(--spacing-400);
   }
 }
 
