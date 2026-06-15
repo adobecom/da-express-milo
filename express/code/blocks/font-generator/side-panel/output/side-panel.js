@@ -1,3 +1,7 @@
+import { transformText, getFontById, getCategories } from '../../unicodeEngine.js';
+import { setState } from '../../state.js';
+
+const FONT_SHEET_PATH = '/express/code/blocks/font-generator/font-sheets/v2/v2.json';
 const BASE_PATH = '/express/code/blocks/font-generator/side-panel';
 
 const CSS_DEPS = [
@@ -21,17 +25,11 @@ template.innerHTML = `<div class="font-generator-side">
   <div class="text-field">
     <div class="text-area-l-in-line">
       <div class="field">
-        <div class="div-wrapper">
-          <div class="div-wrapper">
-            <p class="label">Type the preview text you want to get started...</p>
-          </div>
+        <textarea class="label" placeholder="Type the preview text you want to get started..." maxlength="200"></textarea>
+        <div class="counter-expander">
+          <div class="character-count">0/200</div>
         </div>
-      </div>
-      <div class="counter-expander">
-        <div class="character-count">40/200</div>
-        <div class="resize-handle">
-          <img class="vector" src="${BASE_PATH}/img/vector.svg" alt="" aria-hidden="true" />
-        </div>
+        <div class="resize-handle" aria-hidden="true"></div>
       </div>
       <div class="suggestions-bar">
         <div class="text-wrapper">Try these:</div>
@@ -54,16 +52,19 @@ template.innerHTML = `<div class="font-generator-side">
       <div class="div-2">
         <div class="content-stack">
           <div class="spacing"></div>
-          <div class="chevron"><img class="s-chevron" src="/express/code/icons/chevron.svg" alt="" aria-hidden="true" /></div>
+          <div class="chevron"><svg class="s-chevron" aria-hidden="true" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M2.46967 9.53033C2.17678 9.23744 2.17678 8.76256 2.46967 8.46967L6.96967 3.96967C7.26256 3.67678 7.73744 3.67678 8.03033 3.96967L12.5303 8.46967C12.8232 8.76256 12.8232 9.23744 12.5303 9.53033C12.2374 9.82322 11.7626 9.82322 11.4697 9.53033L7.5 5.56066L3.53033 9.53033C3.23744 9.82322 2.76256 9.82322 2.46967 9.53033Z" fill="#292929" stroke="#292929" stroke-width="1" stroke-linejoin="round"/></svg></div>
           <div class="text-stack"><div class="title">Categories</div></div>
           <div class="spacing"></div>
         </div>
         <div class="asset-container">
           <div class="descoped-categories">
-            <div class="font-category"><div class="container"><div class="label-wrapper"><div class="label-2" data-theme-mode="light">&#119840;&#119845;&#119845;</div></div></div></div>
-            <div class="container-wrapper"><div class="text-container-wrapper"><div class="text-container-2"><div class="label-3">&#9400;&#9416;&#9416;&#9421;</div></div></div></div>
-            <div class="font-category-2"><div class="text-container-wrapper"><div class="text-container-2"><div class="label-3">&#820;G&#820;&#820;l&#820;&#820;i&#820;&#820;t&#820;&#820;c&#820;&#820;h&#820;</div></div></div></div>
-            <div class="font-category-3"><div class="text-container-wrapper"><div class="text-container-2"><div class="label-4">&#10074;&#9608;&#9552;&#9552;Symbol&#9552;&#9552;&#9608;&#10074;</div></div></div></div>
+            <div class="font-category">
+              <div class="container">
+                <div class="label-wrapper">
+                  <div class="label-2">All</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -80,7 +81,145 @@ template.innerHTML = `<div class="font-generator-side">
   </div>
 </div>`;
 
+async function fetchFontSheet() {
+  const res = await fetch(FONT_SHEET_PATH);
+  if (!res.ok) return null;
+  return res.json();
+}
+
+function buildCategoryCell(stylizedText) {
+  const cell = document.createElement('div');
+  cell.className = 'font-category-cell';
+  const inner = document.createElement('div');
+  inner.className = 'text-container-2';
+  const label = document.createElement('div');
+  label.className = 'label-3';
+  label.textContent = stylizedText;
+  inner.append(label);
+  cell.append(inner);
+  return cell;
+}
+
+function fitLabelToCell(cell) {
+  const label = cell.querySelector('.label-3');
+  if (!label) return;
+
+  const available = label.clientWidth;
+  if (available === 0) return;
+
+  label.style.whiteSpace = 'nowrap';
+  const natural = label.scrollWidth;
+  label.style.whiteSpace = '';
+
+  if (natural <= available) return;
+
+  const currentSize = parseFloat(getComputedStyle(label).fontSize);
+  const scaled = Math.floor(currentSize * (available / natural));
+  label.style.fontSize = `${Math.max(scaled, 8)}px`;
+}
+
+function initResizeHandle(panel) {
+  const textarea = panel.querySelector('textarea.label');
+  const handle = panel.querySelector('.resize-handle');
+  if (!textarea || !handle) return;
+
+  handle.addEventListener('mousedown', (e) => {
+    const startY = e.clientY;
+    const startHeight = textarea.offsetHeight;
+
+    const onMove = (moveEvent) => {
+      const newHeight = Math.max(104, startHeight + (moveEvent.clientY - startY));
+      textarea.style.height = `${newHeight}px`;
+    };
+
+    const onUp = () => {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onUp);
+    };
+
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    e.preventDefault();
+  });
+}
+
+function initTextAreaCounter(panel) {
+  const textarea = panel.querySelector('textarea.label');
+  const counter = panel.querySelector('.character-count');
+  if (!textarea || !counter) return;
+  const max = textarea.maxLength;
+  textarea.addEventListener('input', () => {
+    counter.textContent = `${textarea.value.length}/${max}`;
+  });
+}
+
+function selectCategory(panel, activeCell, category) {
+  panel.querySelectorAll('.font-category, .font-category-cell').forEach((cell) => {
+    cell.classList.remove('is-selected');
+  });
+  activeCell.classList.add('is-selected');
+  setState({ activeFilters: category === 'all' ? [] : [category] });
+}
+
+function initCategorySelection(panel) {
+  const allCell = panel.querySelector('.font-category');
+  if (allCell) {
+    allCell.classList.add('is-selected');
+    allCell.addEventListener('click', () => selectCategory(panel, allCell, 'all'));
+  }
+}
+
+function initSuggestionPills(panel) {
+  const textarea = panel.querySelector('textarea.label');
+  const counter = panel.querySelector('.character-count');
+  if (!textarea) return;
+
+  panel.querySelector('.tags-wrap')?.addEventListener('click', (e) => {
+    const pill = e.target.closest('.tag-pills');
+    if (!pill) return;
+    const text = pill.querySelector('.div')?.textContent ?? '';
+    textarea.value = text;
+    if (counter) counter.textContent = `${text.length}/${textarea.maxLength}`;
+    textarea.dispatchEvent(new Event('input'));
+  });
+}
+
+function initAccordion(panel) {
+  const header = panel.querySelector('.content-stack');
+  const accordion = panel.querySelector('.categories-accordian');
+  if (!header || !accordion) return;
+  header.addEventListener('click', () => accordion.classList.toggle('is-collapsed'));
+}
+
+async function populateCategories(panel) {
+  const sheet = await fetchFontSheet();
+  if (!sheet?.fonts) return;
+
+  const categories = getCategories(sheet.fonts);
+  const grid = panel.querySelector('.descoped-categories');
+  if (!grid) return;
+
+  const cells = [];
+  for (const { category, fontId } of categories) {
+    const fontDef = getFontById(sheet.fonts, fontId);
+    const stylizedText = fontDef ? transformText(category, fontDef) : category;
+    const cell = buildCategoryCell(stylizedText);
+    cell.addEventListener('click', () => selectCategory(panel, cell, category));
+    grid.append(cell);
+    cells.push(cell);
+  }
+
+  requestAnimationFrame(() => cells.forEach(fitLabelToCell));
+}
+
 export function createSidePanel() {
   injectStyles();
-  return template.content.firstElementChild.cloneNode(true);
+  const panel = template.content.firstElementChild.cloneNode(true);
+  initResizeHandle(panel);
+  initTextAreaCounter(panel);
+  initCategorySelection(panel);
+  initSuggestionPills(panel);
+  initAccordion(panel);
+  populateCategories(panel);
+  return panel;
 }

@@ -255,3 +255,20 @@ export function getFontById(fonts, id) {
   if (!Array.isArray(fonts) || typeof id !== 'string' || id.length === 0) return undefined;
   return fonts.find((f) => isValidFontDef(f) && f.id === id);
 }
+
+/**
+ * Returns distinct font groupings in order of first appearance,
+ * each paired with the id of the first font in that grouping.
+ *
+ * @param {FontDef[]} fonts
+ * @returns {{ category: string; fontId: string }[]}
+ */
+export function getCategories(fonts) {
+  if (!Array.isArray(fonts)) return [];
+  const seen = new Map();
+  for (const font of fonts) {
+    if (!isValidFontDef(font) || typeof font.grouping !== 'string' || font.grouping.length === 0) continue;
+    if (!seen.has(font.grouping)) seen.set(font.grouping, font.id);
+  }
+  return [...seen.entries()].map(([category, fontId]) => ({ category, fontId }));
+}
