@@ -1,0 +1,274 @@
+.template-x-carousel-loop {
+  --template-height: 250px;
+  --loop-card-width: 193px;
+  --loop-gap: 16px;
+  --loop-edge-fade: 0; /* no edge fade on mobile; enabled from tablet up */
+  --template-purple: var(--color-background-accent-default);
+
+  margin: auto;
+  max-width: unset;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Section padding (ported from template-x-carousel .v2 default) */
+.section:has(.template-x-carousel-loop) {
+  padding-top: 0;
+  padding-bottom: var(--spacing-600);
+}
+
+/* headers — v2: no padding */
+.template-x-carousel-loop .headers-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-100);
+  padding: 0;
+}
+
+.template-x-carousel-loop .heading {
+  font-size: var(--heading-font-size-m);
+  font-weight: var(--heading-font-weight-extra);
+  text-align: center;
+  margin: 0;
+}
+
+.template-x-carousel-loop .description {
+  font-size: var(--body-font-size-m);
+  text-align: center;
+  margin: 0;
+}
+
+/* toolbar — centered-toolbar default */
+.template-x-carousel-loop .toolbar {
+  order: 3;
+  display: flex;
+  justify-content: center;
+  margin: var(--spacing-400) auto 0;
+  padding: 0;
+}
+
+.template-x-carousel-loop .controls-container {
+  display: flex;
+  align-items: center;
+}
+
+/* templates-container — full-bleed default */
+.template-x-carousel-loop .templates-container {
+  position: relative;
+  order: 2;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-top: 22px;
+}
+
+/* Fade the carousel into the page at the left/right viewport edges. */
+.template-x-carousel-loop .templates-container::before,
+.template-x-carousel-loop .templates-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: var(--loop-edge-fade);
+  z-index: 3;
+  pointer-events: none;
+}
+
+.template-x-carousel-loop .templates-container::before {
+  left: 0;
+  background: linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 82.69%);
+}
+
+.template-x-carousel-loop .templates-container::after {
+  right: 0;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.00) 0%, #FFF 82.69%);
+}
+
+/* The loop engine needs uniform-width items to compute offsets. */
+.template-x-carousel-loop .gallery-loop-track {
+  column-gap: var(--loop-gap);
+}
+
+.template-x-carousel-loop .template {
+  position: relative;
+  width: var(--loop-card-width);
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  text-decoration: unset;
+}
+
+.template-x-carousel-loop .template .image-wrapper,
+.template-x-carousel-loop .template .media-wrapper {
+  position: relative;
+  height: var(--template-height);
+  width: 100%;
+}
+
+.template-x-carousel-loop .template img:not(.icon),
+.template-x-carousel-loop .template video {
+  display: block;
+  height: 100%;
+  width: 100%;
+  pointer-events: none;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+/* The roving focus target is the card's CTA anchor, so ring the whole card
+   when that anchor is keyboard-focused (and if the card itself is focused). */
+.template-x-carousel-loop .template:focus-visible,
+.template-x-carousel-loop .template:has(a:focus-visible) {
+  outline: none;
+  box-shadow: 0 0 0 var(--border-width-2) var(--color-white), 0 0 0 4px var(--color-info-accent);
+}
+
+/* v2 hover interaction — darken overlay */
+.template-x-carousel-loop .template::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.20);
+  opacity: 0;
+  transition: opacity .3s ease-in-out;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.template-x-carousel-loop .template:hover::before {
+  opacity: 1;
+}
+
+/* v2 button-container — persistent bottom label bar */
+.template-x-carousel-loop .template .button-container {
+  position: absolute;
+  top: auto;
+  bottom: 4px;
+  left: 4px;
+  right: 4px;
+  width: auto;
+  max-width: none;
+  min-height: auto;
+  transform: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  z-index: 2;
+  border-radius: 8px;
+  padding: 16px;
+  background: rgba(255, 255, 255, 0.90);
+  backdrop-filter: blur(6px);
+  box-shadow: none;
+  color: var(--Alias-content-typography-Title, #131313);
+  text-align: center;
+  font-size: var(--typography-title-2xs, 16px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--typography-line-height-Title-2xs, 22px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s ease-in-out;
+}
+
+/* Reveal the button + backdrop only while hovering (or keyboard-focusing) a card. */
+.template-x-carousel-loop .template:hover .button-container,
+.template-x-carousel-loop .template .button-container:focus-within {
+  opacity: 1;
+  pointer-events: initial;
+}
+
+.template-x-carousel-loop .template .cta-link,
+.template-x-carousel-loop .template .share-icon-wrapper {
+  display: none;
+}
+
+/* :any-link keeps specificity above Milo's global accent-button styles
+   (main a.button.accent:any-link[:hover]) so the CTA stays a flat label. */
+.template-x-carousel-loop .template .button-container > a.button:any-link,
+.template-x-carousel-loop .template .button-container > a.button:any-link:hover,
+.template-x-carousel-loop .template .button-container > a.button:any-link:focus {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  background: none;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  color: var(--color-gray-800);
+  padding: 0;
+  margin: 0;
+  font-size: var(--body-font-size-s);
+  font-weight: 600;
+}
+
+.template-x-carousel-loop .template .button-container .icon-arrow-up-right {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.template-x-carousel-loop .view-all {
+  display: block;
+  order: 4;
+  margin-top: var(--spacing-300);
+  font-size: var(--body-font-size-m);
+  text-align: center;
+  color: var(--template-purple);
+}
+
+.template-x-carousel-loop .view-all .icon-s2-chevron-right {
+  width: var(--spacing-400);
+  height: var(--spacing-400);
+  vertical-align: middle;
+  margin-left: var(--spacing-75);
+}
+
+.template-x-carousel-loop .template p {
+  margin: 0;
+}
+
+@media (min-width: 600px) {
+  .section:has(.template-x-carousel-loop) {
+    padding-top: var(--spacing-300);
+    padding-bottom: var(--spacing-300);
+  }
+
+  /* Anchor the nav buttons to the right of the section on tablet+. */
+  .template-x-carousel-loop .toolbar {
+    justify-content: flex-end;
+    padding-right: var(--spacing-400);
+  }
+}
+
+@media (min-width: 900px) {
+  .template-x-carousel-loop .heading {
+    font-size: var(--heading-font-size-l);
+  }
+
+  .template-x-carousel-loop .toolbar {
+    padding-right: 0;
+    margin-left: auto;
+    margin-right: 0;
+  }
+
+  .section:has(.template-x-carousel-loop) {
+    padding-top: 0;
+    padding-bottom: var(--spacing-600);
+  }
+}
+
+@media (min-width: 1200px) {
+  .template-x-carousel-loop {
+    --loop-edge-fade: 160px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .template-x-carousel-loop .template::before,
+  .template-x-carousel-loop .template .button-container {
+    transition: none;
+  }
+}

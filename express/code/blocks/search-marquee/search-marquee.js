@@ -610,7 +610,10 @@ export default async function decorate(block) {
   ({ prefix } = getConfig().locale);
   decorateBackground(block);
   if (shouldInjectLogo(block)) {
-    const logo = getIconElementDeprecated('adobe-express-logo');
+    const brandingLogoName = getMetadata('inject-branding-logo')?.trim()
+      || (LOGO_META_VALUES.includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase()) && 'cobrand-lockup-acrobat-express')
+      || null;
+    const logo = getIconElementDeprecated(brandingLogoName || 'adobe-express-logo');
     logo.classList.add('express-logo');
     block.prepend(logo);
   }
