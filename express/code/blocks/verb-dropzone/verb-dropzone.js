@@ -124,19 +124,6 @@ function getEnv() {
   return 'prod';
 }
 
-function redDirLink(verb) {
-  const hostname = window?.location?.hostname;
-  const env = getEnv();
-  const verbSlug = verb.split('-').join('');
-  return hostname !== 'www.adobe.com'
-    ? `https://www.adobe.com/go/acrobat-${verbSlug}-${env}`
-    : `https://www.adobe.com/go/acrobat-${verbSlug}`;
-}
-
-function redDir(verb) {
-  window.location.href = redDirLink(verb);
-}
-
 function getSplunkEndpoint() {
   return (getEnv() === 'prod') ? 'https://unity.adobe.io/api/v1/log' : 'https://unity-stage.adobe.io/api/v1/log';
 }
@@ -795,18 +782,6 @@ export default async function init(element) {
     }
   });
 
-  async function checkSignedInUser() {
-    if (!window.adobeIMS?.isSignedInUser?.()) return;
-    let accountType;
-    try {
-      accountType = window.adobeIMS.getAccountType();
-    } catch {
-      accountType = (await window.adobeIMS.getProfile()).account_type;
-    }
-    if (accountType) redDir(VERB);
-  }
-  await checkSignedInUser();
-  window.addEventListener('IMS:Ready', checkSignedInUser);
   window.prefetchTargetUrl = null;
   element.parentNode.style.display = 'block';
   window.addEventListener('pageshow', (event) => {
