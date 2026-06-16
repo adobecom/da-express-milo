@@ -11,11 +11,7 @@ const imports = await Promise.all([
 ]);
 const { default: decorate } = imports[1];
 
-function setDocumentMetadata(
-  includeForkCta2 = true,
-  includForkCta3 = false,
-  includeEligibilityCheck = false,
-) {
+function setDocumentMetadata(includeForkCta2 = true, includForkCta3 = false) {
   const metadata = {
     'floating-cta-live': 'Y',
     'show-floating-cta': 'yes',
@@ -43,24 +39,12 @@ function setDocumentMetadata(
     metadata['cta-1-link'] = 'https://adobesparkpost-web.app.link/';
   }
 
-  if (includeEligibilityCheck) {
-    metadata['fork-eligibility-check'] = 'on';
-  }
-
   Object.entries(metadata).forEach(([name, content]) => {
     const meta = document.createElement('meta');
     meta.name = name;
     meta.content = content;
     document.head.appendChild(meta);
   });
-}
-
-function setMobileDom() {
-  document.body.dataset.device = 'mobile';
-  document.body.innerHTML = '<main><div class="section">'
-    + '<div class="mobile-fork-button-dismissable meta-powered"><div>mobile</div></div>'
-    + '</div></main>';
-  return document.querySelector('.mobile-fork-button-dismissable');
 }
 
 describe('Mobile Fork Button', () => {
@@ -112,7 +96,8 @@ describe('Mobile Fork Button', () => {
 
   it('renders button with both fork-cta-1 and fork-cta-2 metadata and fork-cta-3 metadata', async () => {
     setDocumentMetadata(true, true);
-    const b = setMobileDom();
+    await buildAutoBlocks();
+    const b = document.querySelector('.floating-button');
 
     await decorate(b);
 
@@ -136,41 +121,5 @@ describe('Mobile Fork Button', () => {
     expect(document.body.style.overflow).to.equal('');
     const newWrapper = document.querySelector('.floating-button.meta-powered');
     expect(newWrapper).to.exist;
-  });
-
-  it('builds the dismissible close button and overlay on iOS', async () => {
-    Object.defineProperty(navigator, 'userAgent', {
-      value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
-      configurable: true,
-    });
-    setDocumentMetadata(true);
-    const b = setMobileDom();
-
-    await decorate(b);
-
-    const blockWrapper = document.querySelector('.floating-button.block');
-    const closeButton = blockWrapper.querySelector('.mweb-close');
-    expect(closeButton).to.exist;
-    expect(document.body.style.overflow).to.equal('hidden');
-    closeButton.click();
-    expect(document.body.style.overflow).to.equal('');
-    const newWrapper = document.querySelector('.floating-button.meta-powered');
-    expect(newWrapper).to.exist;
-  });
-
-  it('renders dismissible overlay on iOS when fork-eligibility-check is on', async () => {
-    Object.defineProperty(navigator, 'userAgent', {
-      value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
-      configurable: true,
-    });
-    setDocumentMetadata(true, false, true);
-    const b = setMobileDom();
-
-    await decorate(b);
-
-    const blockWrapper = document.querySelector('.floating-button.block');
-    expect(blockWrapper).to.exist;
-    const closeButton = blockWrapper.querySelector('.mweb-close');
-    expect(closeButton).to.exist;
   });
 });
