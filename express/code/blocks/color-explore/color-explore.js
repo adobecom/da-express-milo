@@ -462,6 +462,9 @@ export default async function decorate(block) {
           } else {
             allData = await activeDataService.fetchData();
           }
+          if (!isSearchActive) {
+            allData = activeDataService.filter({ sort: 'most-popular' });
+          }
           visibleCount = alignToFullRow(
             Math.min(config.initialLoad, allData.length),
             allData.length,
@@ -511,6 +514,8 @@ export default async function decorate(block) {
               Math.min(config.initialLoad, allData.length),
               allData.length,
             );
+            // eslint-disable-next-line no-console
+            console.log('[ColorExplore] Visible gradients after filter:', allData.slice(0, visibleCount));
             await activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
@@ -639,6 +644,9 @@ export default async function decorate(block) {
           } else {
             allData = await activeDataService.fetchData();
           }
+          if (!isSearchActive) {
+            allData = activeDataService.filter({ sort: 'most-popular' });
+          }
           const alignedCount = Math.min(config.initialLoad, allData.length);
           visibleCount = alignToFullRow(alignedCount, allData.length);
 
@@ -671,6 +679,8 @@ export default async function decorate(block) {
               Math.min(config.initialLoad, allData.length),
               allData.length,
             );
+            // eslint-disable-next-line no-console
+            console.log('[ColorExplore] Visible palettes after filter:', allData.slice(0, visibleCount));
             activeRenderer.update(allData.slice(0, visibleCount));
             updateLoadMoreState();
             block.classList.remove(CSS_CLASSES.LOADING);
