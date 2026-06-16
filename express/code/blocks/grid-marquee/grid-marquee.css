@@ -40,16 +40,6 @@ main .section .grid-marquee h1 {
   display: none;
 }
 
-.grid-marquee .headline a.button .text-group {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-100);
-}
-
-.grid-marquee .headline a.button .icon {
-  display: none;
-}
-
 .grid-marquee .headline a:not(.primaryCTA) {
   background-color: var(--color-black);
   border-color: var(--color-black);
@@ -528,7 +518,7 @@ main .section .grid-marquee.pricing-page h1 {
 }
 
 /* narrow variant — centered headline + content, capped at 666px */
-.grid-marquee.narrow .foreground {
+.grid-marquee.resume-builder .foreground {
   --top-padding: var(--spacing-300);
   --bottom-padding: var(--spacing-400);
 
@@ -539,41 +529,57 @@ main .section .grid-marquee.pricing-page h1 {
   box-sizing: content-box;
 }
 
-.grid-marquee.narrow .icon-adobe-brand-logo {
+.grid-marquee.resume-builder .icon-adobe-brand-logo {
   height: 20px;
   padding-block-start: 0;
   padding-block-end: var(--spacing-300);
 }
 
-.grid-marquee.narrow .headline {
+.grid-marquee.resume-builder .headline {
   padding: 0;
 }
 
-main .section .grid-marquee.narrow h1 {
+main .section .grid-marquee.resume-builder h1 {
   font-size: var(--typography-headings-xl);
   line-height: 104%;
   font-weight: 900;
   color: var(--color-content-neutral);
 }
 
-.grid-marquee.narrow .headline p {
+.grid-marquee.resume-builder .headline p {
   font-size: var(--typography-body-s);
   line-height: 130%;
   color: var(--Alias-content-typography-Body);
 }
 
-.grid-marquee.narrow .headline .ctas {
+.grid-marquee.resume-builder .headline .ctas {
   margin-top: 0;
 }
 
 @media screen and (min-width: 600px) {
-  .grid-marquee.narrow .foreground {
+  .grid-marquee.resume-builder .foreground {
     --bottom-padding: var(--spacing-500);
   }
 }
 
 @media screen and (min-width: 1200px) {
-  .grid-marquee.narrow .foreground {
+  .grid-marquee.resume-builder .foreground {
     --top-padding: var(--spacing-600);
+  }
+}
+
+.grid-marquee.resume-builder .headline a.button .text-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.grid-marquee.resume-builder .headline a.button .icon {
+  display: none;
+}
+
+@media screen and (min-width: 768px) {
+  .grid-marquee.resume-builder .headline .ctas {
+    margin-top: 0;
   }
 }
