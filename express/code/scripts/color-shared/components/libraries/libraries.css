@@ -442,6 +442,9 @@
 
 .ax-lib-card__visual .color-shared-palette-strip {
   width: 100%;
+  /* palettes.css hardcodes 80px; track the responsive strip height so the
+     wrapper matches the swatch rail (avoids a gap below swatches on mobile). */
+  height: var(--ax-lib-strip-height);
 }
 
 .ax-lib-card__visual color-palette {
