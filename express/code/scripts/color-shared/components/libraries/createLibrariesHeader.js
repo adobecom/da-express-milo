@@ -209,8 +209,12 @@ export function createLibrariesHeader(options = {}) {
         id: 'libraries-sort',
         onChange: ({ value }) => applySort(value, { fromPicker: true }),
       });
-      pickerSlot.appendChild(desktopPicker.element);
+      // The block is already inside one <sp-theme>, so unwrap the factory's
+      // per-component <sp-theme> and mount the bare <sp-picker> directly — it
+      // inherits theme context from the block-level ancestor. Falls back to the
+      // wrapped element if the inner picker can't be found.
       const pickerEl = desktopPicker.element.querySelector('sp-picker');
+      pickerSlot.appendChild(pickerEl || desktopPicker.element);
       if (pickerEl) {
         // The sp-field-label[for] below supplies the picker's accessible name,
         // so drop the factory's generic aria-label to avoid a competing label.
@@ -220,15 +224,13 @@ export function createLibrariesHeader(options = {}) {
       await desktopPicker.waitForReady?.();
       desktopPicker.setValue(currentSort);
       // Persistent visible label via Spectrum's sp-field-label[for] pattern. The
-      // label sits in the sort-picker slot as a flex sibling of the picker's
-      // sp-theme — the row layout lives on that plain element so it doesn't depend
-      // on flex crossing sp-theme's shadow <slot>. It still resolves the picker by
-      // id via the shared document root, and the picker keeps its own theme.
+      // label sits in the sort-picker slot as a flex sibling of the picker and
+      // resolves it by id via the shared document root.
       if (pickerEl && !pickerSlot.querySelector('sp-field-label')) {
         await loadFieldLabel();
         pickerSlot.insertBefore(
           createTag('sp-field-label', { for: pickerEl.id, size: 'm' }, strings.librariesSortBy),
-          desktopPicker.element,
+          pickerEl,
         );
       }
     } catch (error) {
@@ -246,8 +248,10 @@ export function createLibrariesHeader(options = {}) {
         icon,
         onClick: toggleMobilePopover,
       });
-      actionSlot.appendChild(mobileButton.element);
+      // Unwrap the factory's per-component <sp-theme> (the block already provides
+      // one) and mount the bare <sp-action-button> directly.
       mobileTriggerEl = mobileButton.element.querySelector('sp-action-button');
+      actionSlot.appendChild(mobileTriggerEl || mobileButton.element);
       if (mobileTriggerEl) {
         mobileTriggerEl.setAttribute('aria-haspopup', 'listbox');
         mobileTriggerEl.setAttribute('aria-expanded', 'false');
