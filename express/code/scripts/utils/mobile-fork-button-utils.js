@@ -51,7 +51,7 @@ export function buildAction(createTag, entry, buttonType) {
 }
 
 /**
- * Checks if the device OS is eligible for the mobile fork button.
+ * Checks if the device is Android, enables the mobile gating if it is.
  * If there is no metadata check enabled, still enable the gating block in case authors want it.
  * @param {Function} getMetadata - Function to get metadata
  * @param {Function} getMobileOperatingSystem - Function to get mobile OS
@@ -59,7 +59,7 @@ export function buildAction(createTag, entry, buttonType) {
  */
 export function androidCheck(getMetadata, getMobileOperatingSystem) {
   if (getMetadata('fork-eligibility-check')?.toLowerCase()?.trim() !== 'on') return true;
-  return SUPPORTED_MWEB_OS.includes(getMobileOperatingSystem());
+  return getMobileOperatingSystem() === 'Android';
 }
 
 /**

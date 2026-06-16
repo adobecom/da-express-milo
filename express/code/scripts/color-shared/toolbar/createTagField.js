@@ -10,6 +10,13 @@ export function normalizeTagText(t) {
   return t?.tag ?? t?.name ?? '';
 }
 
+export function capitalizeTagLabel(text) {
+  const value = String(text || '').trim();
+  if (!value) return '';
+  const chars = Array.from(value);
+  return `${chars[0].toLocaleUpperCase()}${chars.slice(1).join('')}`;
+}
+
 /* ── Tag pill (selected tag inside field) ─────────────────────── */
 
 const buildRemoveLabel = (template, text) => {
@@ -22,14 +29,15 @@ const buildRemoveLabel = (template, text) => {
 export function createTagPill(text, { onRemove, removeLabel, class: extraClass } = {}) {
   const classes = ['ax-tag-pill', extraClass].filter(Boolean).join(' ');
   const pill = createTag('div', { class: classes, 'data-tag-value': text });
+  const labelText = capitalizeTagLabel(text);
 
   const label = createTag('span', { class: 'ax-tag-pill-label' });
-  label.textContent = text;
+  label.textContent = labelText;
 
   const closeBtn = createTag('button', {
     type: 'button',
     class: 'ax-tag-pill-close',
-    'aria-label': buildRemoveLabel(removeLabel, text),
+    'aria-label': buildRemoveLabel(removeLabel, labelText),
   });
   const closeIcon = createSpectrumIcon('Close');
   closeIcon.setAttribute('aria-hidden', 'true');
