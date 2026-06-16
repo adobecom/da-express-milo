@@ -85,7 +85,9 @@ function mWebVariant() {
 export default async function decorate(block) {
   ({ createTag, getMetadata } = await import(`${getLibs()}/utils/utils.js`));
   const eligibilityOn = getMetadata('fork-eligibility-check')?.toLowerCase()?.trim() === 'on';
-  if (eligibilityOn && !SUPPORTED_MWEB_OS.includes(getMobileOperatingSystem())) {
+  const os = getMobileOperatingSystem();
+  const shouldShowDismissable = eligibilityOn ? os === 'Android' : SUPPORTED_MWEB_OS.includes(os);
+  if (!shouldShowDismissable) {
     const { default: decorateNormal } = await import('../floating-button/floating-button.js');
     decorateNormal(block);
     return;
