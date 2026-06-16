@@ -69,7 +69,10 @@ const extractRow = (row) => {
 
 async function renderTemplates(el, recipe, toolbar, queryParams = '', destinationUrl = '') {
   try {
-    const { templatesContainer, control } = await createTemplatesContainer(recipe, queryParams, destinationUrl);
+    const {
+      templatesContainer,
+      control,
+    } = await createTemplatesContainer(recipe, queryParams, destinationUrl);
     const controlsContainer = createTag('div', { class: 'controls-container' });
     controlsContainer.append(control);
     toolbar.append(controlsContainer);
