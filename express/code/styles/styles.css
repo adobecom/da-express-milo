@@ -1003,6 +1003,26 @@ main .section.max-width-900 {
   margin-inline: auto;
 }
 
+main .section.no-margin {
+  margin: 0;
+}
+
+main .section.no-margin-top {
+  margin-top: 0;
+}
+
+main .section.no-margin-bottom {
+  margin-bottom: 0;
+}
+
+main .section.no-margin-left {
+  margin-left: 0;
+}
+
+main .section.no-margin-right {
+  margin-right: 0;
+}
+
 @media (max-width: 899px) {
   main .section.panel {
     margin: 0 var(--spacing-500) var(--spacing-600) var(--spacing-500);
