@@ -815,8 +815,9 @@ export function decorateArea(area = document) {
   // LCP image decoration
   (function decorateLCPImage() {
     const lcpImg = area.querySelector('img');
-    lcpImg?.removeAttribute('loading');
+   // lcpImg?.removeAttribute('loading');
   }());
+
 
   if (area.querySelectorAll(`${selector} a[href*="adobesparkpost.app.link"], ${selector} a[href*="adobesparkpost-web.app.link"]`).length) {
     // select links again to refresh reference
