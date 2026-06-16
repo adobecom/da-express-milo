@@ -87,22 +87,15 @@
   min-height: var(--spacing-600);
 }
 
-/* L/M: spectrum-two sp-picker (filter picker) — hidden on S. This slot is a plain
-   element and is itself the flex row (label | picker), so the layout never relies
-   on flex crossing sp-theme's shadow <slot>. align-items stays inert until it
-   becomes inline-flex at M+; label↔picker spacing comes from the label's
-   padding-inline-end (below), not a flex gap. */
+/* L/M: spectrum-two sp-picker (filter picker) — hidden on S. This slot is the
+   flex row (label | picker); the label and picker are its direct children (the
+   block-level sp-theme handles theming, so there's no nested sp-theme wrapper).
+   align-items stays inert until it becomes inline-flex at M+; label↔picker spacing
+   comes from the label's padding-inline-end (below), not a flex gap. */
 .ax-lib-header__sort-picker {
   display: none;
   align-items: center;
   min-width: 200px;
-}
-
-/* sp-theme is the flex item that grows to fill the slot beside the label; the
-   picker inside it is width:100% (picker.css), so it fills the wrapper. */
-.ax-lib-header__sort-picker > sp-theme {
-  flex-grow: 1;
-  min-width: 0;
 }
 
 /* Figma 2211-239031 side label: neutral #505050, Regular 14px / 18px, flush.
@@ -126,10 +119,11 @@
 }
 
 /* Figma 2211-239031 "Picker (M)": Regular 14px / 18px text in a 32px-tall field.
-   The picker is inside sp-theme (not a direct flex item), so it fills via
-   width:100% from picker.css. Shared picker.css renders 16 / 20 at ~40px for
-   color-explore, so scope the Figma typography to this slot only. */
+   The picker is now the direct flex item beside the label, so it grows to fill
+   the slot. Shared picker.css renders 16 / 20 at ~40px for color-explore, so scope
+   the Figma typography to this slot only. */
 .ax-lib-header__sort-picker sp-picker.filter-picker {
+  flex-grow: 1;
   min-width: 0;
   --mod-picker-font-size: var(--body-font-size-s);
   --mod-picker-line-height: 18px;
