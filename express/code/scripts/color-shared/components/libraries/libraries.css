@@ -147,13 +147,36 @@
   align-items: center;
 }
 
+/* Figma 2215-243576 "Sort" action button (M): #e9e9e9 fill, no border, 8px radius,
+   14/18 text in #292929. Height (32px), font-size (14px), and the 10/6/12 icon and
+   text paddings already match Spectrum's size=m medium-scale defaults.
+   NOTE: sp-action-button reads --mod-actionbutton-* tokens (one word), NOT
+   --mod-button-*; the latter are silently ignored, which is why the default gray
+   border and square corners were showing. The label is Medium (500) in Figma but
+   Spectrum sets no weight on it, so set the weight here — it inherits across the
+   shadow boundary into the unstyled label. */
 .ax-lib-header__sort-action sp-action-button {
-  --mod-button-background-color-default: var(--ax-lib-sort-bg);
-  --mod-button-background-color-hover: var(--Palette-gray-200);
-  --mod-button-border-color-default: transparent;
-  --mod-button-border-color-hover: transparent;
-  --mod-button-content-color-default: var(--Alias-content-neutral-default);
-  --mod-button-content-color-hover: var(--Alias-content-neutral-default);
+  font-weight: var(--font-weight-medium);
+  --mod-actionbutton-border-radius: var(--Corner-radius-corner-radius-100);
+
+  /* Interaction states. Spectrum drives these by reassigning the *-default token
+     to the matching state token on :host(:hover), :host([active]) (pressed) and
+     :host(:focus-visible), so every state must be set or it falls back to the
+     Spectrum gray that doesn't match Figma's gray-100 resting fill. The palette
+     has no gray-300, so pressed steps to gray-400 for clearly perceptible
+     feedback (gray-100 -> gray-200 hover alone is nearly invisible). */
+  --mod-actionbutton-background-color-default: var(--ax-lib-sort-bg);
+  --mod-actionbutton-background-color-hover: var(--Palette-gray-200);
+  --mod-actionbutton-background-color-down: var(--Palette-gray-400);
+  --mod-actionbutton-background-color-focus: var(--Palette-gray-200);
+  --mod-actionbutton-border-color-default: transparent;
+  --mod-actionbutton-border-color-hover: transparent;
+  --mod-actionbutton-border-color-down: transparent;
+  --mod-actionbutton-border-color-focus: transparent;
+  --mod-actionbutton-content-color-default: var(--Alias-content-neutral-default);
+  --mod-actionbutton-content-color-hover: var(--Alias-content-neutral-default);
+  --mod-actionbutton-content-color-down: var(--Alias-content-neutral-default);
+  --mod-actionbutton-content-color-focus: var(--Alias-content-neutral-default);
 }
 
 .ax-lib-header__sort-action [slot='icon'] {
