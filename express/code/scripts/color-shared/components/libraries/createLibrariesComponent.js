@@ -209,15 +209,18 @@ export function createLibrariesComponent(options = {}) {
       return;
     }
 
+    const summary = createTag('div', { class: 'ax-libraries-summary' });
+
     if (view === LIBRARY_VIEW.LIBRARY) {
       applyDefaultExpansion();
       if (libraries.length > 0) {
-        container.appendChild(createExpandCollapseControl(expandAll, collapseAll, strings));
+        summary.appendChild(createExpandCollapseControl(expandAll, collapseAll, strings));
       }
     }
 
     renderLibraryList();
-    container.appendChild(list);
+    summary.appendChild(list);
+    container.appendChild(summary);
   }
 
   render();
