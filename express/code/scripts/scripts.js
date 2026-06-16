@@ -365,23 +365,28 @@ function preloadLCPImage(img) {
 // MEP/personalization can replace an LCP-section block with a fragment AFTER the early
 // preload above runs (during loadArea). Milo's fragment.js rewrites the fragment's media
 // URLs to absolute, then calls config.decorateArea(fragmentDoc, { fragmentLink }). Override
-// config.decorateArea so we re-run the same eager-load + preload on the replacement
-// fragment's first section — prioritizing the real LCP image rather than the now-removed
-// original. Guarded to the first hero-replacing fragment (decorateArea also runs for
-// gnav/footer fragments).
+// config.decorateArea so we eager-load + preload the replacement fragment's first-section
+// image — prioritizing the real LCP image rather than the now-removed original. We do this
+// BEFORE calling decorateArea: the media URLs are already absolute, so the preload points
+// at the final URL, and queuing it ahead of decorateArea's synchronous passes lets the
+// image fetch start sooner. Guarded to the first hero-replacing fragment (decorateArea also
+// runs for gnav/footer fragments).
 let fragmentLcpPreloaded = false;
 function decorateAreaWithLCP(area = document, options = {}) {
-  decorateArea(area, options);
   const { fragmentLink } = options;
-  if (!fragmentLink || fragmentLcpPreloaded) return;
-  const firstSection = document.querySelector('body > main > div:nth-child(1)');
-  if (!firstSection?.contains(fragmentLink)) return;
-  const section = area.querySelector('body > div') || area;
-  const images = section.querySelectorAll('img');
-  if (!images.length) return;
-  images.forEach(eagerLoad);
-  preloadLCPImage(images[0]);
-  fragmentLcpPreloaded = true;
+  if (fragmentLink && !fragmentLcpPreloaded) {
+    const firstSection = document.querySelector('body > main > div:nth-child(1)');
+    if (firstSection?.contains(fragmentLink)) {
+      const section = area.querySelector('body > div') || area;
+      const images = section.querySelectorAll('img');
+      if (images.length) {
+        images.forEach(eagerLoad);
+        preloadLCPImage(images[0]);
+        fragmentLcpPreloaded = true;
+      }
+    }
+  }
+  decorateArea(area, options);
 }
 CONFIG.decorateArea = decorateAreaWithLCP;
 
