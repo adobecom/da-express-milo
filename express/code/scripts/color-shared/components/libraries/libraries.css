@@ -288,6 +288,13 @@
   }
 }
 
+/* ── Summary (expand bar + accordion list) ──────────────────── */
+.ax-libraries-summary {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 /* ── Expand / collapse all (text links + divider) ───────────── */
 .ax-lib-expand-bar {
   display: flex;
