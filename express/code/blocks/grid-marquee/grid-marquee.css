@@ -577,3 +577,24 @@ main .section .grid-marquee.narrow h1 {
     --top-padding: var(--spacing-600);
   }
 }
+
+/* resume-builder variant */
+.grid-marquee.resume-builder .express-logo {
+  height: 18px;
+}
+
+.grid-marquee.resume-builder .headline a.button .text-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.grid-marquee.resume-builder .headline a.button .icon {
+  display: none;
+}
+
+@media screen and (min-width: 768px) {
+  .grid-marquee.resume-builder .headline .ctas {
+    margin-top: 0;
+  }
+}
