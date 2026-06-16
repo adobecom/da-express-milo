@@ -1,4 +1,4 @@
-import { createTag } from '../../scripts/utils.js';
+import { createTag, getLibs } from '../../scripts/utils.js';
 import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
@@ -21,6 +21,7 @@ let layoutInstance = null;
 let controlsMenu = null;
 let stripRenderer = null;
 let railUnsub = null;
+let cachedRailController = null;
 let controllerUnsubscribe = null;
 let historyHandler = null;
 
@@ -33,6 +34,7 @@ function cleanup() {
   controllerUnsubscribe = null;
   railUnsub?.();
   railUnsub = null;
+  cachedRailController = null;
   stripRenderer?.destroy();
   stripRenderer = null;
   controlsMenu?.destroy();
@@ -80,10 +82,12 @@ export default async function decorate(block) {
       ...(hasValidBaseColor && { baseColorIndex }),
     };
 
+    const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+    const { locale } = getConfig();
     const navLinks = [
-      { id: 'palette', label: blockStrings.navCreatePalette, href: '/create/color-wheel' },
-      { id: 'contrast', label: blockStrings.navContrastChecker, href: '/create/color-contrast-analyzer' },
-      { id: 'color-blindness', label: blockStrings.navColorBlindness, href: '/create/color-accessibility' },
+      { id: 'palette', label: blockStrings.navCreatePalette, href: `${locale.contentRoot}/create/color-wheel` },
+      { id: 'contrast', label: blockStrings.navContrastChecker, href: `${locale.contentRoot}/create/color-contrast-analyzer` },
+      { id: 'color-blindness', label: blockStrings.navColorBlindness, href: `${locale.contentRoot}/create/color-accessibility` },
     ];
     const controls = [
       { id: 'undo', label: blockStrings.controlUndo },
@@ -138,6 +142,7 @@ export default async function decorate(block) {
     });
 
     let syncingFromRail = false;
+    let syncingFromController = false;
     let restoringFromHistory = false;
     let pushingState = false;
 
@@ -180,10 +185,22 @@ export default async function decorate(block) {
     };
 
     const syncRailConflicts = () => {
-      railUnsub?.();
       const rail = canvas.querySelector('color-swatch-rail');
-      if (!rail?.controller?.subscribe) return;
-      railUnsub = rail.controller.subscribe((state) => {
+      const railController = rail?.controller;
+      if (!railController?.subscribe) {
+        railUnsub?.();
+        railUnsub = null;
+        cachedRailController = null;
+        return;
+      }
+      // Controller hasn't changed — already subscribed, nothing to do.
+      if (railController === cachedRailController) return;
+      railUnsub?.();
+      cachedRailController = railController;
+      railUnsub = railController.subscribe((state) => {
+        // Skip when this fired because we pushed an update from the main controller.
+        // computeAndSetConflictPairs was already called before stripRenderer.update().
+        if (syncingFromController) return;
         const colors = (state.swatches || []).map((s) => s.hex);
         computeAndSetConflictPairs(colors);
 
@@ -210,7 +227,9 @@ export default async function decorate(block) {
 
       computeAndSetConflictPairs(colors);
 
+      syncingFromController = true;
       stripRenderer?.update([{ ...initialPalette, colors }]);
+      syncingFromController = false;
       syncRailConflicts();
     });
 

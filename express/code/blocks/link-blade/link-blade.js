@@ -11,7 +11,11 @@ export const toggleChevronVisibility = (linksContainer, leftChev, rightChev) => 
   rightChev.setAttribute('aria-disabled', atEnd);
 };
 
-export function handleChevron(createTag, linksContainer, linksRow) {
+export function isCarouselNeeded(linksContainer) {
+  return linksContainer.scrollWidth > linksContainer.clientWidth;
+}
+
+export function buildCarousel(createTag, linksContainer, linksRow) {
   const leftChev = createTag('button', {
     class: 'link-blade-chevron left',
     'aria-label': 'Scroll left',
@@ -23,7 +27,6 @@ export function handleChevron(createTag, linksContainer, linksRow) {
     tabindex: '0',
   });
 
-  // Keyboard support handler
   const handleKeyDown = (e, direction) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
@@ -31,14 +34,7 @@ export function handleChevron(createTag, linksContainer, linksRow) {
     }
   };
 
-  // Initialize accessibility
-  linksContainer.setAttribute('role', 'navigation');
-  linksContainer.setAttribute('aria-label', 'Links list');
-  toggleChevronVisibility(linksContainer, leftChev, rightChev);
-
-  // Event listeners
   linksContainer.addEventListener('scroll', () => toggleChevronVisibility(linksContainer, leftChev, rightChev));
-  window.addEventListener('resize', () => toggleChevronVisibility(linksContainer, leftChev, rightChev));
 
   rightChev.addEventListener('click', () => {
     const newScrollPos = linksContainer.scrollLeft + 400;
@@ -56,11 +52,11 @@ export function handleChevron(createTag, linksContainer, linksRow) {
     });
   });
 
-  // Keyboard events
   rightChev.addEventListener('keydown', (e) => handleKeyDown(e, 'right'));
   leftChev.addEventListener('keydown', (e) => handleKeyDown(e, 'left'));
 
   linksRow.append(leftChev, rightChev);
+  return { leftChev, rightChev };
 }
 
 export default async function decorate(block) {
@@ -86,6 +82,8 @@ export default async function decorate(block) {
     linksContainer.classList.add('link-blade-links');
     linksContainer.setAttribute('tabindex', '0');
     linksContainer.setAttribute('aria-labelledby', 'link-blade-header');
+    linksContainer.setAttribute('role', 'navigation');
+    linksContainer.setAttribute('aria-label', 'Links list');
 
     // Process links
     const paragraphs = linksContainer.querySelectorAll('p');
@@ -108,5 +106,28 @@ export default async function decorate(block) {
     });
   }
 
-  handleChevron(createTag, linksContainer, linksRow);
+  // Defer carousel construction until after layout so dimensions are accurate
+  let carousel = null;
+
+  const syncCarousel = () => {
+    const needed = isCarouselNeeded(linksContainer);
+    linksContainer.classList.toggle('centered', !needed);
+
+    if (needed && !carousel) {
+      carousel = buildCarousel(createTag, linksContainer, linksRow);
+    }
+
+    if (carousel) {
+      if (needed) {
+        carousel.leftChev.classList.remove('force-hidden');
+        carousel.rightChev.classList.remove('force-hidden');
+        toggleChevronVisibility(linksContainer, carousel.leftChev, carousel.rightChev);
+      } else {
+        carousel.leftChev.classList.add('force-hidden');
+        carousel.rightChev.classList.add('force-hidden');
+      }
+    }
+  };
+
+  new ResizeObserver(syncCarousel).observe(linksContainer);
 }

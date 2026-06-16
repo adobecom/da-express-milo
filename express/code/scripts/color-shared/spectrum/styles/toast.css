@@ -31,8 +31,26 @@ sp-toast {
   font-size: 14px;
   line-height: 20px;
   min-width: 280px;
-  max-width: 400px;
+  max-width: 560px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ── Inline action button ─────────────────────────────────────────── */
+
+sp-toast sp-button[slot="action"] {
+  --spectrum-button-text-color-default: var(--color-white);
+  --spectrum-button-text-color-hover: var(--color-black);
+  --spectrum-button-text-color-down: var(--color-black);
+  --spectrum-button-text-color-focus: var(--color-black);
+  color: var(--color-white);
+  align-self: center;
+  transform: translateY(2px);
+}
+
+sp-toast sp-button[slot="action"]:hover,
+sp-toast sp-button[slot="action"]:focus,
+sp-toast sp-button[slot="action"]:active {
+  color: var(--color-black);
 }
 
 /* ── Variants ─────────────────────────────────────────────────────── */

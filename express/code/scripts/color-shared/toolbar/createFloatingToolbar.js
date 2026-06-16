@@ -27,6 +27,7 @@ const TOOLBAR_I18N_MAP = {
   paletteName: 'color-toolbar-palette-name',
   paletteNamePlaceholder: 'color-toolbar-palette-placeholder',
   ctaText: 'color-toolbar-cta',
+  ctaBaseUrl: 'color-toolbar-cta-base-url',
   urlCopiedToClipboard: 'color-toolbar-url-copied-to-clipboard',
   shareFailed: 'color-toolbar-share-failed',
   networkError: 'color-toolbar-network-error',
@@ -65,6 +66,7 @@ const DRAWER_I18N_MAP = {
   tagRemoveAriaLabel: 'color-drawer-tag-remove-aria-label',
   libraryCreatedToast: 'color-drawer-library-created-toast',
   createLibraryFailedToast: 'color-drawer-create-library-failed-toast',
+  viewInLibrary: 'color-drawer-view-in-library',
 };
 
 async function loadI18nStrings() {

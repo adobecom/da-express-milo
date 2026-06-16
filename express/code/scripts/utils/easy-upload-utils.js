@@ -349,6 +349,7 @@ export class EasyUpload {
     this.confirmTooltipMessages = {};
     this.confirmTooltipHideTimeout = null;
     this.uploadFinalized = false;
+    this.hasConsumedQrCode = false;
 
     this.asset = null;
     this.uploadAsset = null;
@@ -871,6 +872,7 @@ export class EasyUpload {
      */
   async initializeQRCode() {
     try {
+      this.markQrCodeFresh();
       this.showLoader();
       if (shouldForceQrFailure()) {
         throw new Error('Forced QR failure for testing');
@@ -902,6 +904,49 @@ export class EasyUpload {
   }
 
   /**
+     * Whether current QR code has already been consumed by a confirm action
+     * @returns {boolean}
+     */
+  isQrCodeConsumed() {
+    return this.hasConsumedQrCode;
+  }
+
+  markQrCodeConsumed() {
+    this.hasConsumedQrCode = true;
+  }
+
+  markQrCodeFresh() {
+    this.hasConsumedQrCode = false;
+  }
+
+  /**
+     * Reset upload session state while preserving pane listeners and bindings
+     * @returns {Promise<void>}
+     */
+  async resetUploadSession() {
+    if (this.qrRefreshInterval) {
+      clearTimeout(this.qrRefreshInterval);
+      this.qrRefreshInterval = null;
+    }
+
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+
+    this.stopUploadDetectionPolling();
+
+    if (this.versionReadyPromise) {
+      this.versionReadyPromise.reject(new Error('EasyUpload upload-session reset'));
+      this.versionReadyPromise = null;
+    }
+
+    this.uploadFinalized = false;
+    this.uploadDetected = false;
+    await this.cleanupAcpStorage();
+  }
+
+  /**
      * Refresh QR code with new upload URL
      * @returns {Promise<void>}
      */
@@ -922,6 +967,7 @@ export class EasyUpload {
   async handleConfirmImport() {
     this.updateConfirmButtonState(true);
     this.hideConfirmTooltip();
+    this.markQrCodeConsumed();
 
     try {
       if (!this.uploadService) {
@@ -961,11 +1007,9 @@ export class EasyUpload {
       if (disabled) {
         this.confirmButton.classList.add('disabled');
         this.confirmButton.setAttribute('aria-disabled', 'true');
-        this.confirmButton.style.pointerEvents = 'none';
       } else {
         this.confirmButton.classList.remove('disabled');
         this.confirmButton.removeAttribute('aria-disabled');
-        this.confirmButton.style.pointerEvents = 'auto';
       }
     }
   }
@@ -1002,7 +1046,7 @@ export class EasyUpload {
      */
   async setupQRCodeInterface() {
     try {
-      const dropzone = document.querySelector('.dropzone');
+      const dropzone = document.querySelector('.qr-code-container');
       const buttonContainer = dropzone?.querySelector('.button-container');
       await this.initializeQRCode();
       if (buttonContainer) {

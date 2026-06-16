@@ -4,6 +4,7 @@ import {
   getTagValues,
   addTagFromInput as addTagFromInputHelper,
   createTagPill,
+  capitalizeTagLabel,
   MAX_TAGS,
 } from './createTagField.js';
 import {
@@ -69,6 +70,7 @@ const DRAWER_DEFAULTS = {
   tagRemoveAriaLabel: 'Remove {{tag}}',
   libraryCreatedToast: "Library '{{name}}' created",
   createLibraryFailedToast: 'Something went wrong. Try again.',
+  viewInLibrary: 'View in Library',
 };
 
 const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
@@ -371,14 +373,15 @@ function createLibraryPickerField(
 function createKeywordSuggestions(keywords, { onSuggestionClick } = {}) {
   const wrapper = createTag('div', { class: 'ax-drawer-keyword-suggestions' });
   keywords.forEach((keyword) => {
-    const btn = createTag('button', { type: 'button', class: 'ax-tag-pill ax-drawer-tag-btn', 'aria-label': `Add ${keyword}` });
+    const labelText = capitalizeTagLabel(keyword);
+    const btn = createTag('button', { type: 'button', class: 'ax-tag-pill ax-drawer-tag-btn', 'aria-label': `Add ${labelText}` });
     const label = createTag('span', { class: 'ax-tag-pill-label', 'aria-hidden': 'true' });
-    label.textContent = keyword;
+    label.textContent = labelText;
     const icon = createSpectrumIcon('Add');
     icon.setAttribute('aria-hidden', 'true');
     icon.classList.add('ax-drawer-tag-btn-icon');
     btn.append(label, icon);
-    decorateAnalyticsAttributes(btn, { linkLabel: keyword });
+    decorateAnalyticsAttributes(btn, { linkLabel: labelText });
     if (onSuggestionClick) {
       btn.addEventListener('click', () => onSuggestionClick(keyword, btn));
     }
@@ -763,6 +766,7 @@ export async function createDrawer(options) {
     libraries: userLibraries,
     ccLibraryProvider,
     onLibraryCreated,
+    autoSave = false,
     i18n = {},
     deps = {},
   } = options;
@@ -847,6 +851,11 @@ export async function createDrawer(options) {
           label,
           libraryName: formData.library?.name ?? t.yourLibrary,
         }),
+        timeout: 6000,
+        action: {
+          label: t.viewInLibrary,
+          href: 'https://new.express.adobe.com/libraries',
+        },
       });
       await onSave?.(formData);
     } catch (err) {
@@ -892,7 +901,7 @@ export async function createDrawer(options) {
             '../utils/susiRedirect.js'
           );
           const colors = paletteData?.colors || [];
-          const paletteName = paletteData?.name || '';
+          const paletteName = nameInput?.value?.trim() || paletteData?.name || '';
           setSusiColorRedirect(buildColorSignInRedirectUrl(colors, paletteName, paletteData?.id));
           return triggerSignInFlow();
         },
@@ -928,6 +937,10 @@ export async function createDrawer(options) {
     isOpen = true;
 
     announceToScreenReader(t.title);
+
+    if (autoSave && isSignedIn) {
+      await save();
+    }
   }
 
   function destroy() {
