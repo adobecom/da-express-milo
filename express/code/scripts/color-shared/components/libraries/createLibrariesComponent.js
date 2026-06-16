@@ -213,7 +213,7 @@ export function createLibrariesComponent(options = {}) {
 
     if (view === LIBRARY_VIEW.LIBRARY) {
       applyDefaultExpansion();
-      if (libraries.length > 0) {
+      if (libraries.length > 1) {
         summary.appendChild(createExpandCollapseControl(expandAll, collapseAll, strings));
       }
     }
