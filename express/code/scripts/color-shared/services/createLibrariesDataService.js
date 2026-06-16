@@ -65,8 +65,9 @@ function parseThemeElement(element) {
     type: 'theme',
     name: element.name || 'Untitled theme',
     colors,
-    colorBlindSafe: Boolean(themeData?.tags?.includes?.('colorblind-safe')
-      || element.tags?.includes?.('colorblind-safe')),
+    // Color-blind-safe is stored as accessibility metadata inside the theme
+    // representation data (the only place that round-trips via the CC Library API).
+    colorBlindSafe: Boolean(themeData?.accessibilityData?.colorBlindSafe),
   };
 }
 
