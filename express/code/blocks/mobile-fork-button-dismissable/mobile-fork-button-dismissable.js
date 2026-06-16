@@ -1,6 +1,6 @@
 import { getLibs, getMobileOperatingSystem, getIconElementDeprecated, addTempWrapperDeprecated } from '../../scripts/utils.js';
 import { createFloatingButton } from '../../scripts/widgets/floating-cta.js';
-import { createMultiFunctionButton, androidCheck, collectFloatingButtonData, createMetadataMap } from '../../scripts/utils/mobile-fork-button-utils.js';
+import { createMultiFunctionButton, collectFloatingButtonData, createMetadataMap, SUPPORTED_MWEB_OS } from '../../scripts/utils/mobile-fork-button-utils.js';
 
 let createTag; let getMetadata;
 
