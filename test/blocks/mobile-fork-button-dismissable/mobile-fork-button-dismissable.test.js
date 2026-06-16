@@ -11,11 +11,7 @@ const imports = await Promise.all([
 ]);
 const { default: decorate } = imports[1];
 
-function setDocumentMetadata(
-  includeForkCta2 = true,
-  includForkCta3 = false,
-  includeEligibilityCheck = false,
-) {
+function setDocumentMetadata(includeForkCta2 = true, includForkCta3 = false, includeEligibilityCheck = false) {
   const metadata = {
     'floating-cta-live': 'Y',
     'show-floating-cta': 'yes',
