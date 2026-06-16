@@ -446,6 +446,28 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const popup = el.classList.contains('popup') || false;
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
+  if (isColor) {
+    try {
+      const orig = new URL(redirectUrl);
+      const colorPalette = orig.searchParams.get('colorPalette');
+      const colorReferrer = orig.searchParams.get('referrer');
+      const featureEnable = orig.searchParams.get('feature-enable');
+      const entryPoint = orig.searchParams.get('entryPoint');
+      if (colorPalette) {
+        destURL.searchParams.set('colorPalette', colorPalette);
+      }
+      if (colorReferrer) {
+        destURL.searchParams.set('referrer', colorReferrer);
+      }
+      if (featureEnable) {
+        destURL.searchParams.set('feature-enable', featureEnable);
+      }
+      if (entryPoint) {
+        destURL.searchParams.set('entryPoint', entryPoint);
+      }
+      destURL.hash = '';
+    } catch { /* ignore — destURL fallback is already set */ }
+  }
   const params = buildSUSIParams({
     client_id, variant, destURL, locale, title, popup, responseType: 'token',
   });
