@@ -345,10 +345,34 @@ function preloadLCPImage(img) {
   }
 }
 
-(function decorateLCPImage() {
+// LCP image decoration is driven by decorateArea (CC-style): the page's first section on
+// the main-doc pass, and the MEP/personalization replacement fragment's first section on
+// the fragment pass (Milo's fragment.js calls config.decorateArea(doc, { fragmentLink })
+// post-MEP, after rewriting the fragment's media URLs to absolute).
+let mainLcpDone = false;
+let fragmentLcpDone = false;
+function decorateAreaWithLCP(area = document, options = {}) {
+  decorateArea(area, options);
+  const { fragmentLink } = options;
+  if (fragmentLink) {
+    // Replacement fragment: prioritize its first-section image (the real LCP) instead of
+    // the now-removed original. Guarded to the first hero-replacing fragment in the LCP
+    // section (decorateArea also runs for gnav/footer fragments).
+    if (fragmentLcpDone) return;
+    const firstSection = document.querySelector('body > main > div:nth-child(1)');
+    if (!firstSection?.contains(fragmentLink)) return;
+    const section = area.querySelector('body > div') || area;
+    const images = section.querySelectorAll('img');
+    if (!images.length) return;
+    images.forEach(eagerLoad);
+    preloadLCPImage(images[0]);
+    fragmentLcpDone = true;
+    return;
+  }
+  if (mainLcpDone) return;
+  mainLcpDone = true;
   const firstSection = document.querySelector('body > main > div:nth-child(1)');
   if (!firstSection) return;
-
   const images = firstSection.querySelectorAll('img');
   if (images.length > 0) {
     images.forEach(eagerLoad);
@@ -360,28 +384,6 @@ function preloadLCPImage(img) {
       preloadLCPImage(lcpImg);
     }
   }
-}());
-
-// MEP/personalization can replace an LCP-section block with a fragment AFTER the early
-// preload above runs (during loadArea). Milo's fragment.js rewrites the fragment's media
-// URLs to absolute, then calls config.decorateArea(fragmentDoc, { fragmentLink }). Override
-// config.decorateArea so we re-run the same eager-load + preload on the replacement
-// fragment's first section — prioritizing the real LCP image rather than the now-removed
-// original. Guarded to the first hero-replacing fragment (decorateArea also runs for
-// gnav/footer fragments).
-let fragmentLcpPreloaded = false;
-function decorateAreaWithLCP(area = document, options = {}) {
-  decorateArea(area, options);
-  const { fragmentLink } = options;
-  if (!fragmentLink || fragmentLcpPreloaded) return;
-  const firstSection = document.querySelector('body > main > div:nth-child(1)');
-  if (!firstSection?.contains(fragmentLink)) return;
-  const section = area.querySelector('body > div') || area;
-  const images = section.querySelectorAll('img');
-  if (!images.length) return;
-  images.forEach(eagerLoad);
-  preloadLCPImage(images[0]);
-  fragmentLcpPreloaded = true;
 }
 CONFIG.decorateArea = decorateAreaWithLCP;
 
@@ -537,7 +539,7 @@ async function loadPage() {
     await replaceContent(document.querySelector('main'));
   }
   // Decorate the page with site specific needs.
-  decorateArea();
+  decorateAreaWithLCP();
 
   loadLana({ clientId: 'express' });
 
