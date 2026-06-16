@@ -1,6 +1,6 @@
 import { getLibs, getMobileOperatingSystem, getIconElementDeprecated, addTempWrapperDeprecated } from '../../scripts/utils.js';
 import { createFloatingButton } from '../../scripts/widgets/floating-cta.js';
-import { createMultiFunctionButton, collectFloatingButtonData, createMetadataMap, SUPPORTED_MWEB_OS } from '../../scripts/utils/mobile-fork-button-utils.js';
+import { createMultiFunctionButton, androidCheck, collectFloatingButtonData, createMetadataMap } from '../../scripts/utils/mobile-fork-button-utils.js';
 
 let createTag; let getMetadata;
 
@@ -36,20 +36,9 @@ function mWebOverlayScroll() {
   const mobileForkButton = document.querySelector('.mobile-fork-button.mweb-mobile-fork');
   if (mobileForkButton
     && window.getComputedStyle(mobileForkButton, null).display !== 'none') {
-    const scrollY = window.scrollY || 0;
-    document.body.dataset.scrollY = scrollY;
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
   } else {
-    const scrollY = parseInt(document.body.dataset.scrollY || '0', 10);
-    document.body.style.top = '';
-    document.body.style.position = '';
-    document.body.style.width = '';
     document.body.style.overflow = '';
-    window.scrollTo(0, scrollY);
-    delete document.body.dataset.scrollY;
   }
 }
 
@@ -76,7 +65,7 @@ function mWebCloseEvents() {
 }
 
 function mWebVariant() {
-  if (!SUPPORTED_MWEB_OS.includes(getMobileOperatingSystem())) return;
+  if (getMobileOperatingSystem() !== 'Android') return;
   mWebBuildElements();
   mWebCloseEvents();
   mWebOverlayScroll();
