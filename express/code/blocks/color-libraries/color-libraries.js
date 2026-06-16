@@ -6,7 +6,7 @@ import {
   LIBRARY_VIEW,
 } from '../../scripts/color-shared/components/libraries/createLibrariesComponent.js';
 import { fetchLibrariesWithElements } from '../../scripts/color-shared/services/createLibrariesDataService.js';
-import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
+import { loadIconsRail, loadTooltip } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import loadColorLibrariesPlaceholders from '../../scripts/color-shared/i18n/loadColorLibrariesPlaceholders.js';
 import { createSearchBar, createDeepLinkManager } from '../../scripts/color-shared/components/search-bar/index.js';
@@ -140,6 +140,10 @@ export default async function decorate(block) {
     loadMiloStyle(STRIP_CSS),
     loadMiloStyle(GRADIENT_STRIP_CSS),
     loadIconsRail(),
+    // Registers sp-overlay-trigger/sp-tooltip so the palette name tooltip
+    // behaves as a hover overlay (same as the Explore page) instead of
+    // rendering inline as a label.
+    loadTooltip(),
   ]);
 
   // IMS loads asynchronously; wait for the SDK before reading auth state,
