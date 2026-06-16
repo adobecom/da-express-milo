@@ -568,11 +568,6 @@ main .section .grid-marquee.resume-builder h1 {
   }
 }
 
-/* resume-builder variant */
-.grid-marquee.resume-builder .express-logo {
-  height: 18px;
-}
-
 .grid-marquee.resume-builder .headline a.button .text-group {
   display: flex;
   align-items: center;
