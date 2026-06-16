@@ -33,11 +33,15 @@ function createHeader(library, expanded, onToggle, strings) {
 }
 
 function createPanel(library, emit, expanded, strings) {
-  const panel = createTag('div', {
+  // `hidden` must only be added when collapsed. createTag calls setAttribute for
+  // every key, and setAttribute('hidden', undefined) yields hidden="undefined",
+  // which is a *present* attribute, hiding the panel even when expanded.
+  const panelAttrs = {
     class: 'ax-lib-accordion-panel',
     id: `ax-lib-panel-${library.id}`,
-    hidden: expanded ? undefined : '',
-  });
+  };
+  if (!expanded) panelAttrs.hidden = '';
+  const panel = createTag('div', panelAttrs);
 
   const grid = createTag('div', { class: 'palettes-grid ax-lib-items-grid' });
   (library.items || []).forEach((item) => {
