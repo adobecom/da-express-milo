@@ -10,6 +10,11 @@ export function updateImageUrl(url, maxDim) {
   }
 }
 
+export function createHeroImageSrcset(url) {
+  const widths = [400, 800, 1200, 1600];
+  return widths.map((w) => `${updateImageUrl(url, w)} ${w}w`).join(', ');
+}
+
 export function flattenOptionGroups(selector) {
   if (!selector?.optionGroups || !Array.isArray(selector.optionGroups)) {
     return [];
@@ -194,7 +199,11 @@ export async function createZazzleStore() {
     ]);
 
     const { locale } = getConfig();
-    const { language, region } = normalizeLocale(locale?.ietf);
+    const urlParams = new URLSearchParams(window.location.search);
+    const testRegion = urlParams.get('testRegion');
+    const { language, region } = testRegion
+      ? { language: 'en', region: testRegion.toLowerCase() }
+      : normalizeLocale(locale?.ietf);
 
     const store = createZazzlePDPStore({ language, region });
 

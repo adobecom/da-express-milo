@@ -333,7 +333,7 @@ function countOptions(attribute) {
 
 function buildPillElement(option, isSelected, index, setSize, activeIndex, handlers) {
   const { handleOptionClick, handleMiniPillKeyDown } = handlers;
-  const thumbnailUrl = updateImageUrl(option.imageUrl, 48);
+  const thumbnailUrl = updateImageUrl(option.imageUrl, 96);
 
   const pillContainer = document.createElement('div');
   pillContainer.className = 'pdpx-mini-pill-container';
@@ -717,7 +717,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
               ${group.title
       && html`<div class="pdpx-option-group-title">${group.title}</div>`} 
               ${(group.options || []).map((option) => {
-    const thumbnailUrl = updateImageUrl(option.imageUrl, 54);
+    const thumbnailUrl = updateImageUrl(option.imageUrl, 108);
     const isSelected = option.value === selectedOptionValue;
     const optionIndex = allOptions.findIndex((candidate) => candidate.value === option.value);
     return html`

@@ -8,7 +8,7 @@ import {
 } from '../../../scripts/vendors/htm-preact.min.js';
 import { useStore, useDrawer } from './Contexts.js';
 import axAccordionDecorate from '../../ax-accordion/ax-accordion.js';
-import { formatLargeNumberToK, sanitizeHtml, updateImageUrl, flattenOptionGroups } from '../utilities/utility-functions.js';
+import { formatLargeNumberToK, sanitizeHtml, updateImageUrl, flattenOptionGroups, createHeroImageSrcset } from '../utilities/utility-functions.js';
 import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 import { getLibs } from '../../../scripts/utils.js';
 
@@ -212,7 +212,8 @@ export function ProductImages() {
   }
 
   const { realviews = [], selectedRealview } = state;
-  const heroImageUrl = updateImageUrl(selectedRealview.url, 644);
+  const heroImageUrl = updateImageUrl(selectedRealview.url, 800);
+  const heroImageSrcset = createHeroImageSrcset(selectedRealview.url);
 
   // Preload the hero image on first render so the browser starts fetching immediately
   if (!hasPreloadedRef.current && heroImageUrl) {
@@ -221,6 +222,8 @@ export function ProductImages() {
     link.rel = 'preload';
     link.as = 'image';
     link.href = heroImageUrl;
+    link.setAttribute('imagesrcset', heroImageSrcset);
+    link.setAttribute('imagesizes', '(max-width: 600px) 100vw, 50vw');
     link.fetchPriority = 'high';
     document.head.appendChild(link);
   }
@@ -237,7 +240,7 @@ export function ProductImages() {
     container.innerHTML = '';
 
     realviews.forEach((realview) => {
-      const thumbnailUrl = updateImageUrl(realview.url, 76);
+      const thumbnailUrl = updateImageUrl(realview.url, 152);
       const isSelected = realview.id === selectedRealview.id;
 
       const button = document.createElement('button');
@@ -292,6 +295,8 @@ export function ProductImages() {
           class="pdpx-product-hero-image"
           id="pdpx-product-hero-image"
           src="${heroImageUrl}"
+          srcset="${heroImageSrcset}"
+          sizes="(max-width: 600px) 100vw, 50vw"
           alt="${selectedRealview.title}"
           fetchpriority="high"
           decoding="async"
@@ -641,7 +646,7 @@ function PaperTypeContent({ onClose }) {
 
     allOptions.forEach((option) => {
       const isSelected = option.value === selectedOptionValue;
-      const thumbUrl = updateImageUrl(option.imageUrl, 48);
+      const thumbUrl = updateImageUrl(option.imageUrl, 96);
 
       const pillContainer = document.createElement('div');
       pillContainer.className = 'pdpx-mini-pill-container';
@@ -773,7 +778,7 @@ function PaperTypeContent({ onClose }) {
       </div>
       <div class="pdpx-drawer-foot">
         <div class="pdpx-drawer-foot-info-container">
-          <img src="${updateImageUrl(selectedOption?.imageUrl, 48)}" alt="${selectedOption?.title || ''}" />
+          <img src="${updateImageUrl(selectedOption?.imageUrl, 96)}" alt="${selectedOption?.title || ''}" />
           <div class="pdpx-drawer-foot-info-text">
             <div class="pdpx-drawer-foot-info-name">${selectedOption?.title || ''}</div>
             ${selectedOption?.priceDelta && html`
