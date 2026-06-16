@@ -11,11 +11,7 @@ const imports = await Promise.all([
 ]);
 const { default: decorate } = imports[1];
 
-function setDocumentMetadata(
-  includeForkCta2 = true,
-  includForkCta3 = false,
-  includeEligibilityCheck = false,
-) {
+function setDocumentMetadata(includeForkCta2 = true, includForkCta3 = false) {
   const metadata = {
     'floating-cta-live': 'Y',
     'show-floating-cta': 'yes',
@@ -43,24 +39,12 @@ function setDocumentMetadata(
     metadata['cta-1-link'] = 'https://adobesparkpost-web.app.link/';
   }
 
-  if (includeEligibilityCheck) {
-    metadata['fork-eligibility-check'] = 'on';
-  }
-
   Object.entries(metadata).forEach(([name, content]) => {
     const meta = document.createElement('meta');
     meta.name = name;
     meta.content = content;
     document.head.appendChild(meta);
   });
-}
-
-function setMobileDom() {
-  document.body.dataset.device = 'mobile';
-  document.body.innerHTML = '<main><div class="section">'
-    + '<div class="mobile-fork-button-dismissable meta-powered"><div>mobile</div></div>'
-    + '</div></main>';
-  return document.querySelector('.mobile-fork-button-dismissable');
 }
 
 describe('Mobile Fork Button', () => {
@@ -112,7 +96,8 @@ describe('Mobile Fork Button', () => {
 
   it('renders button with both fork-cta-1 and fork-cta-2 metadata and fork-cta-3 metadata', async () => {
     setDocumentMetadata(true, true);
-    const b = setMobileDom();
+    await buildAutoBlocks();
+    const b = document.querySelector('.floating-button');
 
     await decorate(b);
 

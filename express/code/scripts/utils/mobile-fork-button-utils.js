@@ -4,7 +4,6 @@
  */
 
 export const LONG_TEXT_CUTOFF = 70;
-export const SUPPORTED_MWEB_OS = ['Android', 'iOS'];
 
 /**
  * Calculates the pixel width of text for a given font
