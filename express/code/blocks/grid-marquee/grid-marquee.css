@@ -16,7 +16,7 @@
 }
 
 main .section .grid-marquee h1 {
-  font-size: var(--heading-font-size-m);
+  font-size: 28px;
   padding-bottom: var(--spacing-100);
 }
 
@@ -37,16 +37,6 @@ main .section .grid-marquee h1 {
 }
 
 .grid-marquee .headline .ctas {
-  display: none;
-}
-
-.grid-marquee .headline a.button .text-group {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-100);
-}
-
-.grid-marquee .headline a.button .icon {
   display: none;
 }
 
@@ -355,6 +345,7 @@ main .section .grid-marquee.pricing-page h1 {
   }
   .grid-marquee .headline .ctas {
     display: flex;
+    margin-top: 16px;
     padding-top: 16px;
     justify-content: center;
     gap: 8px;
@@ -420,11 +411,11 @@ main .section .grid-marquee.pricing-page h1 {
     padding-bottom: 0;
   }
   main .section .grid-marquee .headline h1 {
-    font-size: var(--heading-font-size-xl);
+    font-size: 36px;
     font-weight: var(--heading-font-weight-extra);
   }
   .grid-marquee .headline .ctas {
-    padding-top: 24px;
+    padding-top: 16px;
   }
   .grid-marquee .headline a.button {
     border-width: 1px;
@@ -531,6 +522,27 @@ main .section .grid-marquee.pricing-page h1 {
   max-width: 666px;
   margin-inline: auto;
   text-align: center;
+}
+
+/* resume-builder variant */
+.grid-marquee.resume-builder .express-logo {
+  height: 18px;
+}
+
+.grid-marquee.resume-builder .headline a.button .text-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.grid-marquee.resume-builder .headline a.button .icon {
+  display: none;
+}
+
+@media screen and (min-width: 768px) {
+  .grid-marquee.resume-builder .headline .ctas {
+    margin-top: 0;
+  }
 }
 
 
