@@ -17,6 +17,8 @@ async function createTemplates(recipe, customProperties = null) {
   return templates;
 }
 
+
+
 const DEFAULT_TEMPLATE_DEST = 'https://adobesparkpost.app.link/8JaoEy0DrSb';
 
 async function createTemplatesContainer(recipe, queryParams = '', destinationUrl = '') {
