@@ -288,18 +288,16 @@ export default async function init(el) {
     const heading = headline.querySelector('h1, h2, h3, h4, h5, h6');
     ctas.forEach((cta) => {
       cta.classList.add('button');
-      if (el.classList.contains('resume-builder')) {
-        if (cta.querySelector('.icon')) return;
-        const icon = cta.parentElement?.querySelector(':scope > .icon');
-        const match = icon && iconRegex.exec(icon.className);
-        if (match?.[1]) {
-          const hasExistingGraphic = icon.querySelector('svg, img');
-          if (!hasExistingGraphic) icon.append(getIconElementDeprecated(match[1]));
-          const ctaText = cta.textContent.trim();
-          cta.textContent = '';
-          cta.title = cta.title || ctaText;
-          cta.append(createTag('div', { class: 'text-group' }, [icon, ctaText]));
-        }
+      if (cta.querySelector('.icon')) return;
+      const icon = cta.parentElement?.querySelector(':scope > .icon');
+      const match = icon && iconRegex.exec(icon.className);
+      if (match?.[1]) {
+        const hasExistingGraphic = icon.querySelector('svg, img');
+        if (!hasExistingGraphic) icon.append(getIconElementDeprecated(match[1]));
+        const ctaText = cta.textContent.trim();
+        cta.textContent = '';
+        cta.title = cta.title || ctaText;
+        cta.append(createTag('div', { class: 'text-group' }, [icon, ctaText]));
       }
       if (!cta.getAttribute('aria-label') && heading) {
         cta.setAttribute('aria-label', `${cta.textContent.trim()} ${heading.textContent.trim()}`);
@@ -330,17 +328,12 @@ export default async function init(el) {
   // Legacy mode: headline + background + items inside this block
   if (hasLegacyHeadline) {
     const [headline, background, ...items] = rows;
-    let logo;
-    if (el.classList.contains('resume-builder')) {
-      const brandingLogoName = getMetadata('inject-branding-logo')?.trim() || null;
-      logo = brandingLogoName
-        ? getIconElementDeprecated(brandingLogoName)
-        : getIconElementDeprecated('adobe-express-logo');
-    } else if (['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase())) {
-      logo = getIconElementDeprecated('cobrand-lockup-acrobat-express', '22px', 'Adobe Acrobat X Adobe Express co-brand logo', 'marquee-eyebrow-logo-wide');
-    } else {
-      logo = getIconElementDeprecated('adobe-express-logo');
-    }
+    const brandingLogoName = getMetadata('inject-branding-logo')?.trim()
+      || (['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase()) && 'cobrand-lockup-acrobat-express')
+      || null;
+    const logo = brandingLogoName
+      ? getIconElementDeprecated(brandingLogoName)
+      : getIconElementDeprecated('adobe-express-logo');
 
     logo.classList.add('express-logo');
 
