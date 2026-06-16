@@ -14,7 +14,7 @@
 /* Section padding (ported from template-x-carousel .v2 default) */
 .section:has(.template-x-carousel-loop) {
   padding-top: 0;
-  padding-bottom: 24px;
+  padding-bottom: var(--spacing-400);
 }
 
 /* headers — v2: no padding */
@@ -44,7 +44,7 @@
   order: 3;
   display: flex;
   justify-content: center;
-  margin: 16px auto 0;
+  margin: var(--spacing-300) auto 0;
   padding: 0;
 }
 
@@ -75,12 +75,12 @@
 
 .template-x-carousel-loop .templates-container::before {
   left: 0;
-  background: linear-gradient(270deg, rgba(255, 255, 255, 0.00) 0%, #FFF 82.69%);
+  background: linear-gradient(270deg, transparent 0%, var(--color-white) 82.69%);
 }
 
 .template-x-carousel-loop .templates-container::after {
   right: 0;
-  background: linear-gradient(90deg, rgba(255, 255, 255, 0.00) 0%, #FFF 82.69%);
+  background: linear-gradient(90deg, transparent 0%, var(--color-white) 82.69%);
 }
 
 /* The loop engine needs uniform-width items to compute offsets. */
@@ -144,9 +144,9 @@
 .template-x-carousel-loop .template .button-container {
   position: absolute;
   top: auto;
-  bottom: 4px;
-  left: 4px;
-  right: 4px;
+  bottom: var(--spacing-75);
+  left: var(--spacing-75);
+  right: var(--spacing-75);
   width: auto;
   max-width: none;
   min-height: auto;
@@ -156,7 +156,7 @@
   align-items: center;
   z-index: 2;
   border-radius: 8px;
-  padding: 16px;
+  padding: var(--spacing-300);
   background: rgba(255, 255, 255, 0.90);
   backdrop-filter: blur(6px);
   box-shadow: none;
