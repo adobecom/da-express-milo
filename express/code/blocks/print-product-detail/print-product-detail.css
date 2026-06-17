@@ -83,13 +83,23 @@
     height: 36px;
     width: 140px;
     border-radius: 4px;
+    &.pdpx-skeleton-option-control--tall {
+      height: 80px;
+      width: 100%;
+    }
   }
+}
+.pdpx-skeleton-accordion-section {
+  margin-top: var(--spacing-300);
 }
 .pdpx-skeleton-accordion-row {
   height: 44px;
   width: 100%;
   margin-bottom: 2px;
   border-radius: 4px;
+}
+.print-product-detail [aria-busy='true'] .pdpx-product-info-section-container {
+  min-height: 600px;
 }
 .pdpx-global-container {
   max-width: var(--block-wd-max-width);

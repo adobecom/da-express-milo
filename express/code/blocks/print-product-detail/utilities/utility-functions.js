@@ -36,6 +36,18 @@ export function formatPaperWeight(weight) {
   return { weight: weightFormatted, gsm: gsmFormatted };
 }
 
+export function extractInitialImageUrl(block) {
+  for (const row of block.children) {
+    const key = row.children[0]?.textContent?.trim();
+    if (key === 'heroImage') {
+      return row.children[1]?.querySelector('a')?.href
+        ?? row.children[1]?.textContent?.trim()
+        ?? null;
+    }
+  }
+  return null;
+}
+
 export function extractTemplateId(block) {
   const templateIdBlock = block.children[0].children[1].textContent;
   const urlParams = new URLSearchParams(window.location.search);

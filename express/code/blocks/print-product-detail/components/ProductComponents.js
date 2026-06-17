@@ -193,7 +193,7 @@ export function ProductHeader() {
                   onBlur=${hideTooltip}
                   onClick=${showTooltip}
                 >
-                  <img class="pdpx-compare-price-info-icon" src="/express/code/icons/info.svg" alt="" aria-hidden="true" />
+                  <img class="pdpx-compare-price-info-icon" src="/express/code/icons/info.svg" alt="" aria-hidden="true" width="18" height="18" />
                 </button>
                 ${tooltipVisible && html`
                   <div class="pdpx-info-tooltip-content" id="pdpx-info-tooltip-content" role="tooltip" style="display: block;">
@@ -216,7 +216,7 @@ export function ProductHeader() {
       </div>
       ${shippingEstimate && html`
         <div class="pdpx-delivery-estimate-pill">
-          <img class="pdpx-delivery-estimate-pill-icon" src="/express/code/icons/delivery-truck.svg" alt="" aria-hidden="true" />
+          <img class="pdpx-delivery-estimate-pill-icon" src="/express/code/icons/delivery-truck.svg" alt="" aria-hidden="true" width="32" height="17" />
           <span class="pdpx-delivery-estimate-pill-text" id="pdpx-delivery-estimate-pill-text">Estimated Delivery</span>
           <span class="pdpx-delivery-estimate-pill-date" id="pdpx-delivery-estimate-pill-date">${shippingEstimate}</span>
         </div>
@@ -225,12 +225,13 @@ export function ProductHeader() {
   `;
 }
 
-export function ProductImages() {
+export function ProductImages({ authoredImageUrl }) {
   const { state, actions } = useStore();
   const containerRef = useRef(null);
   const carouselCleanupRef = useRef(null);
   const hasPreloadedRef = useRef(false);
   const [heroImageLoaded, setHeroImageLoaded] = useState(false);
+  const [authoredImageLoaded, setAuthoredImageLoaded] = useState(false);
 
   const realviews = state?.realviews ?? [];
   const selectedRealview = state?.selectedRealview ?? null;
@@ -277,6 +278,7 @@ export function ProductImages() {
       img.className = 'pdpx-image-thumbnail-carousel-item-image';
       img.src = thumbnailUrl;
       img.alt = realview.title;
+      img.loading = 'lazy';
       img.setAttribute('data-image-type', realview.id);
       button.appendChild(img);
 
@@ -313,7 +315,22 @@ export function ProductImages() {
   if (!state || !selectedRealview) {
     return html`
       <div class="pdpx-product-images-container" id="pdpx-product-images-container">
-        <div class="pdpx-product-hero-image-container" data-skeleton="true"></div>
+        <div class="pdpx-product-hero-image-container" data-skeleton=${!authoredImageLoaded ? 'true' : undefined}>
+          ${authoredImageUrl ? html`<img
+            class="pdpx-product-hero-image"
+            src="${updateImageUrl(authoredImageUrl, 800)}"
+            srcset="${createHeroImageSrcset(authoredImageUrl)}"
+            sizes="(max-width: 600px) 100vw, 50vw"
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+            width="800"
+            height="800"
+            alt=""
+            style=${{ opacity: authoredImageLoaded ? 1 : 0, transition: 'opacity 200ms ease' }}
+            onLoad=${() => setAuthoredImageLoaded(true)}
+          />` : null}
+        </div>
         <div class="pdpx-skeleton-thumbnail-row">
           ${[0, 1, 2, 3, 4].map((i) => html`<div key=${i} class="pdpx-skeleton-thumbnail" data-skeleton="true"></div>`)}
         </div>
@@ -337,6 +354,8 @@ export function ProductImages() {
           fetchpriority="high"
           decoding="async"
           loading="eager"
+          width="800"
+          height="800"
           data-image-type="${selectedRealview.id}"
           style=${{ opacity: heroImageLoaded ? 1 : 0, transition: 'opacity 200ms ease' }}
           onLoad=${() => setHeroImageLoaded(true)}
@@ -473,11 +492,11 @@ export function CheckoutButton({ templateId }) {
         id="pdpx-checkout-button"
         href="${checkoutUrl}"
       >
-        <img class="pdpx-checkout-button-icon" src="/express/code/icons/print-icon.svg" alt="" aria-hidden="true" />
+        <img class="pdpx-checkout-button-icon" src="/express/code/icons/print-icon.svg" alt="" aria-hidden="true" width="22" height="22" />
         <span class="pdpx-checkout-button-text">Customize and print it</span>
       </a>
       <div class="pdpx-checkout-button-subhead">
-        <img class="pdpx-checkout-button-subhead-image" src="/express/code/icons/powered-by-zazzle.svg" alt="powered by zazzle" />
+        <img class="pdpx-checkout-button-subhead-image" src="/express/code/icons/powered-by-zazzle.svg" alt="powered by zazzle" width="123" height="14" />
         <a class="pdpx-checkout-button-subhead-link" href="https://www.zazzle.com/returns">Returns guaranteed</a>
         <span class="pdpx-checkout-button-subhead-text">through 100% satisfaction promise.</span>
       </div>

@@ -358,6 +358,7 @@ function buildPillElement(option, isSelected, index, setSize, activeIndex, handl
   img.className = 'pdpx-mini-pill-image';
   img.src = thumbnailUrl;
   img.alt = '';
+  img.loading = 'lazy';
   img.setAttribute('aria-hidden', 'true');
   button.appendChild(img);
 
@@ -744,6 +745,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
                         src="${thumbnailUrl}"
                         alt=""
                         aria-hidden="true"
+                        loading="lazy"
                       />
                     </div>
                     <div class="pdpx-pill-text-container">
