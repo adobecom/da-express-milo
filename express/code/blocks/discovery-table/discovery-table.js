@@ -218,8 +218,10 @@ function initCarousel(block) {
     const actualLabelW = labelTh.offsetWidth;
     // 32px = 16px block left padding + 16px right gap. Sizing each data column
     // 32px narrower than the viewport leaves the label col + one data col on
-    // screen, and a 16px gap between the last col and the device's right edge
-    // when fully scrolled (mirroring the left padding).
+    // screen, with a 16px gap between the last col and the device's right edge
+    // when fully scrolled (mirroring the left padding). For intermediate scroll
+    // positions the clip-path no longer insets the right, so the next column
+    // bleeds to the device edge instead of being clipped off.
     const dataColTarget = window.innerWidth - 32 - actualLabelW;
     dataColThs.forEach((th) => { th.style.width = `${dataColTarget}px`; });
     dataColW = dataColThs[0]?.offsetWidth ?? dataColTarget;

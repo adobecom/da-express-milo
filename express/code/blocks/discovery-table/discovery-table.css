@@ -311,12 +311,13 @@
      can't reveal off-screen columns. overflow:visible + clip-path clips based on
      the visual (post-transform) position, which is what we need here.
      clip-path does not create a scroll container, so position:sticky propagates.
-     The 16px right inset clips off the next column that would otherwise peek
-     into the gap, giving a clean 16px gap (and a card symmetric with the 16px
-     block left padding) that aligns with the section header's right edge. */
+     No right inset, so at intermediate scroll positions the next column bleeds
+     to the device's right edge instead of being clipped. The data column is
+     sized 32px narrower than the viewport (see JS) so the last column still
+     settles with a 16px gap to the device edge when fully scrolled. */
   .dt-table-container {
     overflow: visible;
-    clip-path: inset(0 16px 0 0 round var(--border-radius-table));
+    clip-path: inset(0 0 0 0 round var(--border-radius-table));
   }
 
   .dt-table {
