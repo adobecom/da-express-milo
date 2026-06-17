@@ -230,17 +230,14 @@ export function ProductImages({ authoredImageUrl }) {
   const containerRef = useRef(null);
   const carouselCleanupRef = useRef(null);
   const hasPreloadedRef = useRef(false);
-  const [heroImageLoaded, setHeroImageLoaded] = useState(false);
+  const [loadedHeroUrl, setLoadedHeroUrl] = useState(null);
   const [authoredImageLoaded, setAuthoredImageLoaded] = useState(false);
 
   const realviews = state?.realviews ?? [];
   const selectedRealview = state?.selectedRealview ?? null;
   const heroImageUrl = selectedRealview ? updateImageUrl(selectedRealview.url, 800) : null;
   const heroImageSrcset = selectedRealview ? createHeroImageSrcset(selectedRealview.url) : null;
-
-  useEffect(() => {
-    if (heroImageUrl) setHeroImageLoaded(false);
-  }, [heroImageUrl]);
+  const heroImageLoaded = heroImageUrl !== null && loadedHeroUrl === heroImageUrl;
 
   if (!hasPreloadedRef.current && heroImageUrl) {
     hasPreloadedRef.current = true;
@@ -358,7 +355,7 @@ export function ProductImages({ authoredImageUrl }) {
           height="800"
           data-image-type="${selectedRealview.id}"
           style=${{ opacity: heroImageLoaded ? 1 : 0, transition: 'opacity 200ms ease' }}
-          onLoad=${() => setHeroImageLoaded(true)}
+          onLoad=${() => setLoadedHeroUrl(heroImageUrl)}
         />
       </div>
       <div
