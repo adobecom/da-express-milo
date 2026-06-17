@@ -833,7 +833,16 @@ function sortAttributes(attributes, productType) {
 export function CustomizationInputs({ onRequestDrawer, productType }) {
   const { state } = useStore();
   if (!state) {
-    return null;
+    return html`
+      <div class="pdpx-customization-inputs-container" id="pdpx-customization-inputs-container">
+        ${[0, 1, 2, 3].map((i) => html`
+          <div key=${i} class="pdpx-skeleton-option-row">
+            <div class="pdpx-skeleton-option-label" data-skeleton="true"></div>
+            <div class="pdpx-skeleton-option-control" data-skeleton="true"></div>
+          </div>
+        `)}
+      </div>
+    `;
   }
   const productAttributes = sortAttributes(
     (state.attributes || [])

@@ -6,7 +6,6 @@ import {
   useEffect,
   useRef,
   useState,
-  Fragment,
 } from '../../scripts/vendors/htm-preact.min.js';
 import { StoreProvider, useStore, DrawerProvider, useDrawer } from './components/Contexts.js';
 import { ProductImages, ProductDetails, ProductHeader, CheckoutButton, Drawer, AssuranceLockup } from './components/ProductComponents.js';
@@ -18,15 +17,35 @@ function LoadingSkeleton() {
   return html`
     <div class="pdpx-global-container" aria-busy="true" aria-label="Loading product information">
       <div class="pdpx-product-images-container">
-        <div class="pdpx-product-hero-image-container" data-skeleton="true" style="height: 400px;"></div>
+        <div class="pdpx-product-hero-image-container" data-skeleton="true"></div>
+        <div class="pdpx-skeleton-thumbnail-row">
+          ${[0, 1, 2, 3, 4].map((i) => html`<div key=${i} class="pdpx-skeleton-thumbnail" data-skeleton="true"></div>`)}
+        </div>
       </div>
       <div class="pdpx-product-info-wrapper">
-        <div class="pdpx-product-info-heading-section-container">
-          <h1 class="pdpx-product-title" data-skeleton="true" style="height: 32px; width: 60%;"></h1>
-          <div class="pdpx-price-info-container" data-skeleton="true" style="height: 40px; width: 40%; margin-top: 16px;"></div>
+        <div class="pdpx-product-info-heading-section-wrapper">
+          <div class="pdpx-product-info-heading-section-container">
+            <div class="pdpx-title-and-ratings-container">
+              <div class="pdpx-product-title-container">
+                <div data-skeleton="true" style="height: 28px; width: 200px; margin-bottom: 8px;"></div>
+                <div data-skeleton="true" style="height: 28px; width: 120px;"></div>
+              </div>
+            </div>
+            <div class="pdpx-price-info-container" style="align-self: flex-start;">
+              <div data-skeleton="true" style="height: 24px; width: 100px;"></div>
+            </div>
+          </div>
+          <div class="pdpx-skeleton-pill" data-skeleton="true"></div>
         </div>
         <div class="pdpx-product-info-section-container">
-          <div class="pdpx-customization-inputs-container" data-skeleton="true" style="height: 300px; margin-top: 24px;"></div>
+          <div class="pdpx-customization-inputs-container">
+            ${[0, 1, 2, 3].map((i) => html`
+              <div key=${i} class="pdpx-skeleton-option-row">
+                <div class="pdpx-skeleton-option-label" data-skeleton="true"></div>
+                <div class="pdpx-skeleton-option-control" data-skeleton="true"></div>
+              </div>
+            `)}
+          </div>
         </div>
       </div>
     </div>
@@ -102,23 +121,14 @@ function PDPContent({ templateId }) {
     `;
   }
 
-  if (!state) {
-    return html`
-      <${Fragment}>
-        <${LoadingSkeleton} />
-        <${Drawer} />
-      </${Fragment}>
-    `;
-  }
-
   return html`
-      <div ref=${containerRef} class="pdpx-global-container" data-template-id="${templateId}">
+      <div ref=${containerRef} class="pdpx-global-container" data-template-id="${templateId}" aria-busy=${!state ? 'true' : undefined} aria-label=${!state ? 'Loading product information' : undefined}>
         <${ProductImages} />
         <div class="pdpx-product-info-wrapper">
           <${ProductHeader} />
           <div class="pdpx-product-info-section-container">
             <div class="pdpx-product-info-section" id="pdpx-product-info-section">
-              <${CustomizationInputs} onRequestDrawer=${handleDrawerRequest} productType=${state.productType} />
+              <${CustomizationInputs} onRequestDrawer=${handleDrawerRequest} productType=${state?.productType} />
               <${ProductDetails} />
               <${AssuranceLockup} />
               <${Drawer} />

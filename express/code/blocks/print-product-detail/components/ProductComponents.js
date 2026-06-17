@@ -95,7 +95,16 @@ export function ProductDetails() {
   }, [state]);
 
   if (!state) {
-    return null;
+    return html`
+      <div class="pdpx-product-details-section">
+        <div class="pdpx-product-details-section-title-container">
+          <span class="pdpx-product-details-section-title">Product Details</span>
+        </div>
+        <div>
+          ${[0, 1, 2].map((i) => html`<div key=${i} class="pdpx-skeleton-accordion-row" data-skeleton="true"></div>`)}
+        </div>
+      </div>
+    `;
   }
 
   return html`
@@ -115,7 +124,22 @@ export function ProductHeader() {
   const hideTooltip = useCallback(() => setTooltipVisible(false), []);
 
   if (!state) {
-    return null;
+    return html`
+      <div class="pdpx-product-info-heading-section-wrapper">
+        <div class="pdpx-product-info-heading-section-container">
+          <div class="pdpx-title-and-ratings-container">
+            <div class="pdpx-product-title-container">
+              <div data-skeleton="true" style="height: 28px; width: 200px; margin-bottom: 8px;"></div>
+              <div data-skeleton="true" style="height: 28px; width: 120px;"></div>
+            </div>
+          </div>
+          <div class="pdpx-price-info-container" style="align-self: flex-start;">
+            <div data-skeleton="true" style="height: 24px; width: 100px;"></div>
+          </div>
+        </div>
+        <div class="pdpx-skeleton-pill" data-skeleton="true"></div>
+      </div>
+    `;
   }
 
   const { title, pricing, shippingEstimate, reviewsStats } = state;
@@ -206,16 +230,17 @@ export function ProductImages() {
   const containerRef = useRef(null);
   const carouselCleanupRef = useRef(null);
   const hasPreloadedRef = useRef(false);
+  const [heroImageLoaded, setHeroImageLoaded] = useState(false);
 
-  if (!state || !state.selectedRealview) {
-    return null;
-  }
+  const realviews = state?.realviews ?? [];
+  const selectedRealview = state?.selectedRealview ?? null;
+  const heroImageUrl = selectedRealview ? updateImageUrl(selectedRealview.url, 800) : null;
+  const heroImageSrcset = selectedRealview ? createHeroImageSrcset(selectedRealview.url) : null;
 
-  const { realviews = [], selectedRealview } = state;
-  const heroImageUrl = updateImageUrl(selectedRealview.url, 800);
-  const heroImageSrcset = createHeroImageSrcset(selectedRealview.url);
+  useEffect(() => {
+    if (heroImageUrl) setHeroImageLoaded(false);
+  }, [heroImageUrl]);
 
-  // Preload the hero image on first render so the browser starts fetching immediately
   if (!hasPreloadedRef.current && heroImageUrl) {
     hasPreloadedRef.current = true;
     const link = document.createElement('link');
@@ -232,7 +257,6 @@ export function ProductImages() {
     actions.selectRealview(realview.id);
   };
 
-  // Build thumbnails imperatively to work with createSimpleCarousel
   useEffect(() => {
     if (!containerRef.current || !realviews.length) return undefined;
 
@@ -241,7 +265,7 @@ export function ProductImages() {
 
     realviews.forEach((realview) => {
       const thumbnailUrl = updateImageUrl(realview.url, 152);
-      const isSelected = realview.id === selectedRealview.id;
+      const isSelected = realview.id === selectedRealview?.id;
 
       const button = document.createElement('button');
       button.type = 'button';
@@ -277,20 +301,32 @@ export function ProductImages() {
     };
   }, [realviews.map((r) => `${r.id}:${r.url}`).join(',')]);
 
-  // Update selected state when selection changes
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !selectedRealview) return;
     const buttons = containerRef.current.querySelectorAll('.pdpx-image-thumbnail-carousel-item');
     buttons.forEach((btn) => {
       const id = btn.getAttribute('data-image-type');
-      const isSelected = id === selectedRealview.id;
-      btn.classList.toggle('selected', isSelected);
+      btn.classList.toggle('selected', id === selectedRealview.id);
     });
-  }, [selectedRealview.id]);
+  }, [selectedRealview?.id]);
+
+  if (!state || !selectedRealview) {
+    return html`
+      <div class="pdpx-product-images-container" id="pdpx-product-images-container">
+        <div class="pdpx-product-hero-image-container" data-skeleton="true"></div>
+        <div class="pdpx-skeleton-thumbnail-row">
+          ${[0, 1, 2, 3, 4].map((i) => html`<div key=${i} class="pdpx-skeleton-thumbnail" data-skeleton="true"></div>`)}
+        </div>
+      </div>
+    `;
+  }
 
   return html`
     <div class="pdpx-product-images-container" id="pdpx-product-images-container">
-      <div class="pdpx-product-hero-image-container">
+      <div
+        class="pdpx-product-hero-image-container"
+        data-skeleton=${!heroImageLoaded ? 'true' : undefined}
+      >
         <img
           class="pdpx-product-hero-image"
           id="pdpx-product-hero-image"
@@ -302,6 +338,8 @@ export function ProductImages() {
           decoding="async"
           loading="eager"
           data-image-type="${selectedRealview.id}"
+          style=${{ opacity: heroImageLoaded ? 1 : 0, transition: 'opacity 200ms ease' }}
+          onLoad=${() => setHeroImageLoaded(true)}
         />
       </div>
       <div
@@ -408,7 +446,13 @@ export function CheckoutButton({ templateId }) {
     });
   }, [outOfRegion]);
 
-  if (outOfRegion === null) return null;
+  if (outOfRegion === null) {
+    return html`
+      <div class="pdpx-checkout-button-container">
+        <div class="pdpx-checkout-button-cta-skeleton" data-skeleton="true"></div>
+      </div>
+    `;
+  }
 
   const defaultUrl = `https://new.express.adobe.com/design-remix/template/${templateId}`;
   const checkoutUrl = state?.expressProductSettings
