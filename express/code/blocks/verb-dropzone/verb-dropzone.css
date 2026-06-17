@@ -30,10 +30,11 @@ main .section .verb-dropzone p {
    ============================================================ */
 
 .verb-dropzone-area {
-  border: 1.043px dashed var(--Palette-gray-500);
+  border: none;
   border-radius: 24px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect width='100%25' height='100%25' rx='24' ry='24' fill='none' stroke='%23868686' stroke-width='1.043' stroke-dasharray='4%2C 4'/%3E%3C/svg%3E");
   padding: var(--spacing-500) var(--spacing-400);
-  background: var(--color-gray-100);
+  background-color: var(--color-gray-100);
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
@@ -41,7 +42,7 @@ main .section .verb-dropzone p {
   align-items: center;
   gap: 12px;
   cursor: pointer;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
+  transition: background-color 0.2s ease;
   box-sizing: border-box;
   width: 100%;
   min-height: var(--verb-dropzone-height);
@@ -61,13 +62,13 @@ main .section .verb-dropzone p {
   outline-offset: 2px;
 }
 
-/* dark overrides */
+/* dark overrides - adapted from unity-verb-marquee - not design approved */
 .verb-dropzone.dark .verb-dropzone-area,
 .verb-dropzone.mobile-dark .verb-dropzone-area,
 .verb-dropzone.tablet-dark .verb-dropzone-area,
 .verb-dropzone.desktop-dark .verb-dropzone-area {
-  background: #393939;
-  border-color: #8F8F8F;
+  background-color: #393939;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect width='100%25' height='100%25' rx='24' ry='24' fill='none' stroke='%238F8F8F' stroke-width='1.043' stroke-dasharray='4%2C 4'/%3E%3C/svg%3E");
   color: var(--color-white);
 }
 
@@ -83,8 +84,8 @@ main .section .verb-dropzone p {
 .verb-dropzone.mobile-dark .verb-dropzone-area.dragging,
 .verb-dropzone.tablet-dark .verb-dropzone-area.dragging,
 .verb-dropzone.desktop-dark .verb-dropzone-area.dragging {
-  border-color: #B8B8B8;
-  background: #4D4D4D;
+  background-color: #4D4D4D;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100%25' height='100%25'%3E%3Crect width='100%25' height='100%25' rx='24' ry='24' fill='none' stroke='%23B8B8B8' stroke-width='1.043' stroke-dasharray='4%2C 4'/%3E%3C/svg%3E");
 }
 
 .verb-dropzone.dragging-block {
