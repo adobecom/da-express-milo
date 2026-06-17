@@ -282,7 +282,6 @@ function buildDragOverlay(overlayText) {
 export default async function init(element) {
   ({ createTag, getConfig } = (await import(`${miloLibs}/utils/utils.js`)));
 
-  element.classList.add('con-block');
   if (isOldBrowser()) {
     window.location.href = EOLBrowserPage;
     return;
