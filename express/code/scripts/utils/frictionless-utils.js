@@ -418,7 +418,7 @@ export function executeQuickAction(
       exportConfig,
       contConfig,
     ),
-    'crop-video': () => ccEverywhere.quickAction.cropVideo(
+    'crop-video': () => ccEverywhere.quickAction.videoEncode(
       videoDocConfig,
       appConfig,
       exportConfig,
