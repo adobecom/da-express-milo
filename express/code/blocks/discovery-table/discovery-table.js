@@ -179,6 +179,7 @@ function initCarousel(block) {
   const prevBtn = block.querySelector('.dt-prev');
   const nextBtn = block.querySelector('.dt-next');
   const headerCover = block.querySelector('.dt-header-cover');
+  const headerCoverRight = block.querySelector('.dt-header-cover-right');
   const labelTh = table.querySelector('thead .dt-label-col');
   const dataColThs = Array.from(table.querySelectorAll('thead .dt-data-col'));
   const labelColCells = Array.from(table.querySelectorAll('.dt-label-col'));
@@ -197,6 +198,7 @@ function initCarousel(block) {
     table.style.transform = `translateX(-${offset}px)`;
     labelColCells.forEach((cell) => { cell.style.transform = `translateX(${offset}px)`; });
     if (headerCover) headerCover.style.transform = `translateX(${offset}px)`;
+    if (headerCoverRight) headerCoverRight.style.transform = `translateX(${offset + 300}px)`;
   }
 
   function setup() {
@@ -208,6 +210,7 @@ function initCarousel(block) {
       dataColThs.forEach((th) => { th.style.width = ''; });
       labelColCells.forEach((cell) => { cell.style.transform = ''; });
       if (headerCover) headerCover.style.transform = '';
+      if (headerCoverRight) headerCoverRight.style.transform = '';
       dataColW = 0;
       return;
     }
@@ -288,6 +291,7 @@ function initCarousel(block) {
     table.style.transition = 'none';
     labelColCells.forEach((cell) => { cell.style.transition = 'none'; });
     if (headerCover) headerCover.style.transition = 'none';
+    if (headerCoverRight) headerCoverRight.style.transition = 'none';
     current = 0;
     setup();
     updateNav();
@@ -296,6 +300,7 @@ function initCarousel(block) {
       table.style.transition = '';
       labelColCells.forEach((cell) => { cell.style.transition = ''; });
       if (headerCover) headerCover.style.transition = '';
+      if (headerCoverRight) headerCoverRight.style.transition = '';
     });
   });
 
@@ -331,6 +336,11 @@ export default function decorate(block) {
   headerCover.className = 'dt-header-cover';
   headerCover.setAttribute('aria-hidden', 'true');
   table.insertBefore(headerCover, table.tBodies[0]);
+
+  const headerCoverRight = document.createElement('div');
+  headerCoverRight.className = 'dt-header-cover-right';
+  headerCoverRight.setAttribute('aria-hidden', 'true');
+  table.insertBefore(headerCoverRight, table.tBodies[0]);
 
   initCarousel(block);
 }

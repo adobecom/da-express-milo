@@ -218,6 +218,26 @@
   background: var(--color-white);
 }
 
+.dt-header-cover-right {
+  position: sticky;
+  top: 80px;
+  height: 0;
+  width: 100%;
+  overflow: visible;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.dt-header-cover-right::before {
+  content: '';
+  display: block;
+  right: 0;
+  margin-top: calc(-1 * var(--dt-thead-h, 0px));
+  height: var(--dt-thead-h, 0px);
+  width: 80px;
+  background: var(--color-white);
+}
+
 /* Interior column dividers */
 .dt-table td.dt-data-col:not(.dt-last-col),
 .dt-table thead th.dt-data-col:not(.dt-last-col) {
@@ -313,7 +333,8 @@
     transition: transform 0.3s ease;
   }
 
-  .dt-header-cover {
+  .dt-header-cover,
+  .dt-header-cover-right {
     transition: transform 0.3s ease;
   }
 
