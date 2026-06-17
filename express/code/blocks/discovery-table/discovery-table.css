@@ -189,6 +189,23 @@
 .dt-table .dt-last-row.dt-first-col  { border-bottom-left-radius: var(--border-radius-table); }
 .dt-table .dt-last-row.dt-last-col   { border-bottom-right-radius: var(--border-radius-table); }
 
+/* Sticky white backdrop inserted as the first child of .dt-table-container,
+   before the <table>. Lives outside the table so it doesn't affect column
+   layout at all. As a block element it is naturally 100% container width.
+   height/margin-bottom mirror --dt-thead-h (set by JS) so it occupies zero
+   net layout space. Earlier in DOM order than the table at z-index 2, so the
+   real th cells (z-index 2–3, painted later) render on top; their border-radius
+   arcs show this white background instead of scrolling tbody content. */
+.dt-header-cover {
+  position: sticky;
+  top: calc(var(--gnav-offset-height) + var(--dt-section-header-h, 0px) + 1px);
+  height: calc(var(--dt-thead-h, 0px) - 1px);
+  margin-bottom: calc(-1 * (var(--dt-thead-h, 0px) - 1px));
+  background: var(--color-white);
+  z-index: 2;
+  pointer-events: none;
+}
+
 /* Interior column dividers */
 .dt-table td.dt-data-col:not(.dt-last-col),
 .dt-table thead th.dt-data-col:not(.dt-last-col) {

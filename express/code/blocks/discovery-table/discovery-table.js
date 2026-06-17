@@ -178,6 +178,7 @@ function initCarousel(block) {
   const sectionHeader = block.querySelector('.dt-section-header');
   const prevBtn = block.querySelector('.dt-prev');
   const nextBtn = block.querySelector('.dt-next');
+  const headerCover = block.querySelector('.dt-header-cover');
   const labelTh = table.querySelector('thead .dt-label-col');
   const dataColThs = Array.from(table.querySelectorAll('thead .dt-data-col'));
   const labelColCells = Array.from(table.querySelectorAll('.dt-label-col'));
@@ -187,6 +188,7 @@ function initCarousel(block) {
 
   function updateStickyOffsets() {
     block.style.setProperty('--dt-section-header-h', `${sectionHeader.offsetHeight}px`);
+    if (headerCover) block.style.setProperty('--dt-thead-h', `${table.tHead.offsetHeight}px`);
   }
 
   function applyTransform(index) {
@@ -318,6 +320,13 @@ export default function decorate(block) {
   block.innerHTML = '';
   block.append(sectionHeader, tableContainer);
 
-  labelCells(tableContainer.querySelector('.dt-table'));
+  const table = tableContainer.querySelector('.dt-table');
+  labelCells(table);
+
+  const headerCover = document.createElement('div');
+  headerCover.className = 'dt-header-cover';
+  headerCover.setAttribute('aria-hidden', 'true');
+  tableContainer.insertBefore(headerCover, table);
+
   initCarousel(block);
 }
