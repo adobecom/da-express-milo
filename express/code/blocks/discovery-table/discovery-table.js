@@ -196,6 +196,7 @@ function initCarousel(block) {
     const offset = index * dataColW;
     table.style.transform = `translateX(-${offset}px)`;
     labelColCells.forEach((cell) => { cell.style.transform = `translateX(${offset}px)`; });
+    if (headerCover) headerCover.style.transform = `translateX(${offset}px)`;
   }
 
   function setup() {
@@ -206,6 +207,7 @@ function initCarousel(block) {
       labelTh.style.width = '';
       dataColThs.forEach((th) => { th.style.width = ''; });
       labelColCells.forEach((cell) => { cell.style.transform = ''; });
+      if (headerCover) headerCover.style.transform = '';
       dataColW = 0;
       return;
     }
@@ -285,6 +287,7 @@ function initCarousel(block) {
     // Disable transition during resize snap to avoid visual jank.
     table.style.transition = 'none';
     labelColCells.forEach((cell) => { cell.style.transition = 'none'; });
+    if (headerCover) headerCover.style.transition = 'none';
     current = 0;
     setup();
     updateNav();
@@ -292,6 +295,7 @@ function initCarousel(block) {
     requestAnimationFrame(() => {
       table.style.transition = '';
       labelColCells.forEach((cell) => { cell.style.transition = ''; });
+      if (headerCover) headerCover.style.transition = '';
     });
   });
 

@@ -186,7 +186,7 @@
   border-bottom: 1px solid var(--color-gray-300);
 }
 
-.dt-table .dt-first-row.dt-first-col { border-top-left-radius: var(--border-radius-table); }
+.dt-table .dt-first-row.dt-first-col { border-top-left-radius: var(--border-radius-table); z-index: 6; }
 .dt-table .dt-first-row.dt-last-col  { border-top-right-radius: var(--border-radius-table); }
 .dt-table .dt-last-row.dt-first-col  { border-bottom-left-radius: var(--border-radius-table); }
 .dt-table .dt-last-row.dt-last-col   { border-bottom-right-radius: var(--border-radius-table); }
@@ -203,8 +203,9 @@
   position: sticky;
   top: 80px;
   height: 0;
+
   overflow: visible;
-  z-index: 1;
+  z-index: 4;
   pointer-events: none;
 }
 
@@ -213,7 +214,7 @@
   display: block;
   margin-top: calc(-1 * var(--dt-thead-h, 0px));
   height: var(--dt-thead-h, 0px);
-  width: 100vw;
+  width: 80px;
   background: var(--color-white);
 }
 
@@ -309,6 +310,10 @@
      so it sticks with the rest of the header row. */
   .dt-table .dt-label-col {
     background: var(--color-white);
+    transition: transform 0.3s ease;
+  }
+
+  .dt-header-cover {
     transition: transform 0.3s ease;
   }
 
