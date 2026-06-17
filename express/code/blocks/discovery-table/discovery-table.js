@@ -1,30 +1,35 @@
+import { getLibs } from '../../scripts/utils.js';
+
 const MOBILE_BREAKPOINT = 768;
 const SCROLL_PADDING_OFFSET = 6;
 
+let getConfig;
+let replaceKeyArray;
+
 // ── DOM builders ─────────────────────────────────────────────────────────────
 
-function buildCarouselNav(totalCols) {
+function buildCarouselNav(totalCols, labels) {
   const nav = document.createElement('div');
   nav.className = 'dt-carousel-nav';
   nav.setAttribute('role', 'group');
-  nav.setAttribute('aria-label', 'Navigate columns');
+  nav.setAttribute('aria-label', labels.nav);
 
   const prevBtn = document.createElement('button');
   prevBtn.className = 'dt-nav-btn dt-prev';
-  prevBtn.setAttribute('aria-label', 'Previous');
+  prevBtn.setAttribute('aria-label', labels.prev);
   prevBtn.disabled = true;
   prevBtn.innerHTML = '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#FFFFFF"/><path d="M17.3984 21.1996L12.5984 16.3996L17.3984 11.5996" stroke="#292929" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   const nextBtn = document.createElement('button');
   nextBtn.className = 'dt-nav-btn dt-next';
-  nextBtn.setAttribute('aria-label', 'Next');
+  nextBtn.setAttribute('aria-label', labels.next);
   nextBtn.innerHTML = '<svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true"><circle cx="16" cy="16" r="16" fill="#FFFFFF"/><path d="M14.6016 21.1996L19.4016 16.3996L14.6016 11.5996" stroke="#292929" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
   nav.append(prevBtn, nextBtn);
   return nav;
 }
 
-function buildSectionHeader(titleDiv, totalCols) {
+function buildSectionHeader(titleDiv, totalCols, labels) {
   const header = document.createElement('div');
   header.className = 'dt-section-header';
 
@@ -46,7 +51,7 @@ function buildSectionHeader(titleDiv, totalCols) {
   if (subtitleP) headerText.appendChild(subtitleP);
 
   header.appendChild(headerText);
-  header.appendChild(buildCarouselNav(totalCols));
+  header.appendChild(buildCarouselNav(totalCols, labels));
   return header;
 }
 
@@ -118,12 +123,21 @@ function buildDataTd(cellDiv, colIndex) {
   return td;
 }
 
-function buildTable(colHeaderDivs, dataRowDivs) {
+function buildTable(colHeaderDivs, dataRowDivs, captionText) {
   const container = document.createElement('div');
   container.className = 'dt-table-container';
 
   const table = document.createElement('table');
   table.className = 'dt-table';
+
+  // Semantic table title pulled from the section H2 — visually hidden but
+  // announced by screen readers as the table's accessible name.
+  if (captionText) {
+    const caption = document.createElement('caption');
+    caption.className = 'visually-hidden';
+    caption.textContent = captionText;
+    table.appendChild(caption);
+  }
 
   // thead — first div in the header row is the label-column header (e.g. "Feature"),
   // the rest are the data-column headers. This matches the data rows where the first
@@ -253,7 +267,7 @@ function initCarousel(block) {
 
 // ── Entry point ───────────────────────────────────────────────────────────────
 
-export default function decorate(block) {
+export default async function decorate(block) {
   const rows = Array.from(block.children);
   if (rows.length < 3) return; // title + col headers + at least 1 data row
 
@@ -264,8 +278,29 @@ export default function decorate(block) {
   // First child is the label-column header; the rest are data column headers.
   const totalDataCols = colHeaderDivs.length - 1;
 
-  const sectionHeader = buildSectionHeader(titleDiv, totalDataCols);
-  const tableContainer = buildTable(colHeaderDivs, dataRows);
+  // Localized aria-labels for the carousel controls (keys added to the
+  // placeholders sheet; English fallbacks below until they land).
+  await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
+    import(`${getLibs()}/features/placeholders.js`),
+  ]).then(([utils, placeholders]) => {
+    ({ getConfig } = utils);
+    ({ replaceKeyArray } = placeholders);
+  });
+  const [navLabel, prevLabel, nextLabel] = await replaceKeyArray(
+    ['discovery-table-nav-columns', 'discovery-table-prev-column', 'discovery-table-next-column'],
+    getConfig(),
+  );
+  const labels = {
+    nav: navLabel || 'Navigate columns',
+    prev: prevLabel || 'Previous column',
+    next: nextLabel || 'Next column',
+  };
+
+  const sectionHeader = buildSectionHeader(titleDiv, totalDataCols, labels);
+  const headingEl = sectionHeader.querySelector('h1,h2,h3,h4,h5,h6');
+  const captionText = headingEl?.textContent.trim() ?? '';
+  const tableContainer = buildTable(colHeaderDivs, dataRows, captionText);
 
   block.innerHTML = '';
   block.append(sectionHeader, tableContainer);
