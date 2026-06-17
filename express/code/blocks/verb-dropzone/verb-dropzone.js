@@ -466,7 +466,7 @@ export default async function init(element) {
     infoIcon.appendChild(infoIconSvg);
   }
   infoIcon.appendChild(createTag('span', { id: 'info-tooltip-text', class: 'hide' }, tooltipContent));
-  legalPart2El.append(infoIcon);
+  legalPart1El.append(infoIcon);
   legalText.append(legalPart1El, legalPart2El);
   footer.append(legalText);
 

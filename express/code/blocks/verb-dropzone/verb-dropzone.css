@@ -308,7 +308,8 @@ main .section .verb-dropzone p {
   border: none;
   outline: none;
   cursor: pointer;
-  margin-left: 4px;
+  margin-inline-start: 4px;
+  margin-block-end: 2px;
 }
 
 .verb-dropzone.dark .info-icon,
