@@ -326,7 +326,7 @@ export default function decorate(block) {
   const headerCover = document.createElement('div');
   headerCover.className = 'dt-header-cover';
   headerCover.setAttribute('aria-hidden', 'true');
-  tableContainer.insertBefore(headerCover, table);
+  table.insertBefore(headerCover, table.tBodies[0]);
 
   initCarousel(block);
 }

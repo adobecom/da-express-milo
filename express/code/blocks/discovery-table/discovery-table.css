@@ -96,6 +96,7 @@
      container, so position:sticky on thead th / .dt-label-col propagates
      to the page scroll ancestor rather than stopping here. */
   overflow: clip;
+ 
   border-radius: var(--border-radius-table);
 }
 
@@ -107,6 +108,7 @@
   border-spacing: 0;
   border-radius: var(--border-radius-table);
   background: var(--color-white);
+  height: 500px;
 }
 
 /* ── Column headers ──────────────────────────────────────────────────────── */
@@ -189,21 +191,30 @@
 .dt-table .dt-last-row.dt-first-col  { border-bottom-left-radius: var(--border-radius-table); }
 .dt-table .dt-last-row.dt-last-col   { border-bottom-right-radius: var(--border-radius-table); }
 
-/* Sticky white backdrop inserted as the first child of .dt-table-container,
-   before the <table>. Lives outside the table so it doesn't affect column
-   layout at all. As a block element it is naturally 100% container width.
-   height/margin-bottom mirror --dt-thead-h (set by JS) so it occupies zero
-   net layout space. Earlier in DOM order than the table at z-index 2, so the
-   real th cells (z-index 2–3, painted later) render on top; their border-radius
-   arcs show this white background instead of scrolling tbody content. */
+/* Sticky white backdrop inserted inside <table> between <thead> and <tbody>.
+   height:0 means the anonymous table row it creates has zero height — no gap
+   between thead and tbody. overflow:visible lets ::before paint outside it.
+   sticky top is set to thead-bottom (gnav + section-header + thead-h) so it
+   sticks exactly when the thead sticks. ::before extends upward by --dt-thead-h,
+   sitting over the thead in both the natural and sticky states. z-index:1 keeps
+   it above tbody rows (auto) but below the th cells (z-index 2–3), so their
+   transparent corner-radius arcs show this white instead of scrolling rows. */
 .dt-header-cover {
   position: sticky;
-  top: calc(var(--gnav-offset-height) + var(--dt-section-header-h, 0px) + 1px);
-  height: calc(var(--dt-thead-h, 0px) - 1px);
-  margin-bottom: calc(-1 * (var(--dt-thead-h, 0px) - 1px));
-  background: var(--color-white);
-  z-index: 2;
+  top: 80px;
+  height: 0;
+  overflow: visible;
+  z-index: 1;
   pointer-events: none;
+}
+
+.dt-header-cover::before {
+  content: '';
+  display: block;
+  margin-top: calc(-1 * var(--dt-thead-h, 0px));
+  height: var(--dt-thead-h, 0px);
+  width: 100vw;
+  background: var(--color-white);
 }
 
 /* Interior column dividers */
