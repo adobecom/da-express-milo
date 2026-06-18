@@ -1,5 +1,4 @@
 import { createTag } from '../../../utils.js';
-import { ACCESSIBILITY_ICON } from '../actionMenuIcons.js';
 
 export const PLUS_ICON = '<svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true"><path d="M6 1.5v9M1.5 6h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>';
 
@@ -14,10 +13,6 @@ export function createToggleIcon(expanded) {
     class: 'ax-lib-toggle-icon',
     'aria-hidden': 'true',
   }, expanded ? MINUS_ICON : PLUS_ICON);
-}
-
-export function createColorBlindIcon() {
-  return createTag('span', { class: 'action-icon', 'aria-hidden': 'true' }, ACCESSIBILITY_ICON);
 }
 
 export function createEmptySearchIcon() {
