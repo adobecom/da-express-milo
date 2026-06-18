@@ -36,20 +36,9 @@ function mWebOverlayScroll() {
   const mobileForkButton = document.querySelector('.mobile-fork-button.mweb-mobile-fork');
   if (mobileForkButton
     && window.getComputedStyle(mobileForkButton, null).display !== 'none') {
-    const scrollY = window.scrollY || 0;
-    document.body.dataset.scrollY = scrollY;
-    document.body.style.top = `-${scrollY}px`;
-    document.body.style.position = 'fixed';
-    document.body.style.width = '100%';
     document.body.style.overflow = 'hidden';
   } else {
-    const scrollY = parseInt(document.body.dataset.scrollY || '0', 10);
-    document.body.style.top = '';
-    document.body.style.position = '';
-    document.body.style.width = '';
     document.body.style.overflow = '';
-    window.scrollTo(0, scrollY);
-    delete document.body.dataset.scrollY;
   }
 }
 
@@ -85,7 +74,9 @@ function mWebVariant() {
 export default async function decorate(block) {
   ({ createTag, getMetadata } = await import(`${getLibs()}/utils/utils.js`));
   const eligibilityOn = getMetadata('fork-eligibility-check')?.toLowerCase()?.trim() === 'on';
-  if (eligibilityOn && !SUPPORTED_MWEB_OS.includes(getMobileOperatingSystem())) {
+  const os = getMobileOperatingSystem();
+  const shouldShowDismissable = eligibilityOn ? os === 'Android' : SUPPORTED_MWEB_OS.includes(os);
+  if (!shouldShowDismissable) {
     const { default: decorateNormal } = await import('../floating-button/floating-button.js');
     decorateNormal(block);
     return;
