@@ -30,7 +30,7 @@
   padding: 8px 16px 8px 0;
   position: sticky;
   top: var(--gnav-offset-height);
-  z-index: 5;
+  z-index: 1;
   background: white;
 
   border-left: 1px solid white
