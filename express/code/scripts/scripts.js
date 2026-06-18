@@ -375,15 +375,21 @@ let fragmentLcpPreloaded = false;
 function decorateAreaWithLCP(area = document, options = {}) {
   const { fragmentLink } = options;
   if (fragmentLink && !fragmentLcpPreloaded) {
-    const firstSection = document.querySelector('body > main > div:nth-child(1)');
-    if (firstSection?.querySelector('a.fragment') === fragmentLink) {
-      const section = area.querySelector('body > div') || area;
-      const images = section.querySelectorAll('img');
-      if (images.length) {
-        images.forEach(eagerLoad);
-        preloadLCPImage(images[0]);
-        fragmentLcpPreloaded = true;
+    try {
+      const firstSection = document.querySelector('body > main > div:nth-child(1)');
+      if (firstSection?.querySelector('a.fragment') === fragmentLink) {
+        const section = area.querySelector('body > div') || area;
+        // Promotes every image in the fragment's first section, not just the first —
+        // matches the early IIFE's behavior above for parity.
+        const images = section.querySelectorAll('img');
+        if (images.length) {
+          images.forEach(eagerLoad);
+          preloadLCPImage(images[0]);
+          fragmentLcpPreloaded = true;
+        }
       }
+    } catch (e) {
+      window.lana?.log(`MEP fragment LCP preload failed: ${e.message}`, { tags: 'lcp', severity: 'info' });
     }
   }
   decorateArea(area, options);

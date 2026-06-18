@@ -818,7 +818,6 @@ export function decorateArea(area = document) {
     lcpImg?.removeAttribute('loading');
   }());
 
-
   if (area.querySelectorAll(`${selector} a[href*="adobesparkpost.app.link"], ${selector} a[href*="adobesparkpost-web.app.link"]`).length) {
     // select links again to refresh reference
     // eslint-disable-next-line import/no-cycle
