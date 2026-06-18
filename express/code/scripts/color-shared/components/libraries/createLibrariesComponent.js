@@ -104,7 +104,7 @@ function createEmptyState(query, strings, emit) {
  * @param {Array} [options.libraries=[]]
  * @param {Object} [options.strings] - resolved placeholders
  * @param {Function} [options.emit]
- * @param {Object} [options.toolHrefs] - { contrast, colorBlindness }
+ * @param {Object} [options.toolHrefs] - { contrast, colorBlindness, colorWheel }
  */
 export function createLibrariesComponent(options = {}) {
   const {

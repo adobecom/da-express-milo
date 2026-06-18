@@ -1,7 +1,7 @@
 import { createTag } from '../../../utils.js';
 import { createPaletteStrip, PALETTE_STRIP_VARIANTS } from '../../palettes/palettes.js';
 import { gradientToBackgroundImage } from '../gradients/gradient-strip.js';
-import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
+import { decorateAnalyticsAttributes, navigateToColorTool } from '../../utils/utilities.js';
 import { createLibraryAccessibilityMenu } from './createLibraryAccessibilityMenu.js';
 import { createLibraryDownloadMenu } from './createLibraryDownloadMenu.js';
 
@@ -61,7 +61,14 @@ function buildActions(item, name, strings, emit, payload, toolHrefs) {
     defs.push({
       icon: createSpIconButton('sp-icon-edit'),
       label: interpolate(strings.librariesEditAria, { name }),
-      onClick: () => emit('item-edit', payload),
+      onClick: () => {
+        if (!toolHrefs.colorWheel || !item?.colors?.length) return;
+        navigateToColorTool(toolHrefs.colorWheel, {
+          colors: item.colors,
+          name: item.name,
+          tags: item.tags,
+        });
+      },
     });
   }
 
