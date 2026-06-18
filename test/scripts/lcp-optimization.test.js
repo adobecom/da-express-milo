@@ -212,18 +212,14 @@ describe('MEP fragment LCP preload', () => {
   let fragmentLcpPreloaded;
   const decorateFragmentLCP = (area, fragmentLink) => {
     if (!fragmentLink || fragmentLcpPreloaded) return;
-    try {
-      const firstSection = document.querySelector('body > main > div:nth-child(1)');
-      if (firstSection?.querySelector('a.fragment') !== fragmentLink) return;
-      const section = area.querySelector('body > div') || area;
-      const images = section.querySelectorAll('img');
-      if (!images.length) return;
-      images.forEach(eagerLoad);
-      preloadFirst(images[0]);
-      fragmentLcpPreloaded = true;
-    } catch {
-      // intentionally swallowed in production via window.lana?.log
-    }
+    const firstSection = document.querySelector('body > main > div:nth-child(1)');
+    if (firstSection?.querySelector('a.fragment') !== fragmentLink) return;
+    const section = area.querySelector('body > div') || area;
+    const images = section.querySelectorAll('img');
+    if (!images.length) return;
+    images.forEach(eagerLoad);
+    preloadFirst(images[0]);
+    fragmentLcpPreloaded = true;
   };
 
   const makeFragmentDoc = (innerHtml) => {
