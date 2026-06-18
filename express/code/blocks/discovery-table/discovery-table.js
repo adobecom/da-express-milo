@@ -210,7 +210,13 @@ function initCarousel(block) {
       dataColThs.forEach((th) => { th.style.width = ''; });
       labelColCells.forEach((cell) => { cell.style.transform = ''; });
       if (headerCover) headerCover.style.transform = '';
-      if (headerCoverRight) headerCoverRight.style.transform = '';
+      // Right cover's ::before is a left-anchored block; translate it by
+      // (table width − that block's width) so its right edge lands on the
+      // table's right edge, computed from the live table layout width.
+      if (headerCoverRight) {
+        const coverBlockW = parseFloat(getComputedStyle(headerCoverRight, '::before').width) || 0;
+        headerCoverRight.style.transform = `translateX(${table.offsetWidth - coverBlockW}px)`;
+      }
       dataColW = 0;
       return;
     }
