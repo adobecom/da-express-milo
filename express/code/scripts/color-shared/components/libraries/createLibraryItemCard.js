@@ -1,9 +1,9 @@
 import { createTag } from '../../../utils.js';
 import { createPaletteStrip, PALETTE_STRIP_VARIANTS } from '../../palettes/palettes.js';
-import { gradientToBackgroundImage } from '../gradients/gradient-strip.js';
 import { decorateAnalyticsAttributes, navigateToColorTool } from '../../utils/utilities.js';
 import { createLibraryAccessibilityMenu } from './createLibraryAccessibilityMenu.js';
 import { createLibraryDownloadMenu } from './createLibraryDownloadMenu.js';
+import { libraryGradientToBackgroundImage } from './libraryUtils.js';
 
 function interpolate(template, vars = {}) {
   return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
@@ -107,7 +107,7 @@ function createVisual(item, name, strings, onOpen) {
 
   if (item.type === 'gradient') {
     const gradientVisual = createTag('div', { class: 'gradient-strip-visual ax-lib-card__gradient' });
-    gradientVisual.style.backgroundImage = gradientToBackgroundImage(item);
+    gradientVisual.style.backgroundImage = libraryGradientToBackgroundImage(item);
     visual.appendChild(gradientVisual);
   } else {
     const strip = createPaletteStrip(
