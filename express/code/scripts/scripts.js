@@ -376,7 +376,7 @@ function decorateAreaWithLCP(area = document, options = {}) {
   const { fragmentLink } = options;
   if (fragmentLink && !fragmentLcpPreloaded) {
     const firstSection = document.querySelector('body > main > div:nth-child(1)');
-    if (firstSection?.contains(fragmentLink)) {
+    if (firstSection?.querySelector('a.fragment') === fragmentLink) {
       const section = area.querySelector('body > div') || area;
       const images = section.querySelectorAll('img');
       if (images.length) {
