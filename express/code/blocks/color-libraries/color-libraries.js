@@ -7,6 +7,11 @@ import {
 } from '../../scripts/color-shared/components/libraries/createLibrariesComponent.js';
 import { fetchLibrariesWithElements, deleteLibraryItem } from '../../scripts/color-shared/services/createLibrariesDataService.js';
 import { showLibraryDeleteAlertDialog } from '../../scripts/color-shared/components/libraries/createLibraryDeleteAlertDialog.js';
+import { openLibraryItemModal } from '../../scripts/color-shared/components/libraries/openLibraryItemModal.js';
+import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
+import loadColorModalPlaceholders from '../../scripts/color-shared/i18n/loadColorModalPlaceholders.js';
+import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
+import loadColorExplorePlaceholders from '../../scripts/color-shared/i18n/loadColorExplorePlaceholders.js';
 import { loadIconsRail, loadMenu, loadTooltip } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
@@ -30,6 +35,8 @@ let resizeHandler = null;
 let floatingSearchHandler = null;
 let goBackHandler = null;
 let deleteHandler = null;
+let openHandler = null;
+let modalManagerInstance = null;
 
 function interpolate(template, vars = {}) {
   return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
@@ -135,6 +142,12 @@ export default async function decorate(block) {
     block.removeEventListener('libraries:item-delete', deleteHandler);
     deleteHandler = null;
   }
+  if (openHandler) {
+    block.removeEventListener('libraries:item-open', openHandler);
+    openHandler = null;
+  }
+  modalManagerInstance?.destroy?.();
+  modalManagerInstance = null;
 
   componentInstance?.destroy();
   componentInstance = null;
@@ -145,6 +158,9 @@ export default async function decorate(block) {
   block.className = `${CSS_CLASSES.BLOCK} color-explore--libraries ${CSS_CLASSES.LOADING}`;
 
   const placeholders = await loadColorLibrariesPlaceholders();
+  const colorModalStringsPromise = loadColorModalPlaceholders();
+  const colorSwatchRailStringsPromise = loadColorSwatchRailPlaceholders();
+  const explorePlaceholdersPromise = loadColorExplorePlaceholders();
 
   const toolHrefs = {
     contrast: '/create/color-contrast-analyzer',
@@ -193,6 +209,8 @@ export default async function decorate(block) {
     trackColorBlockLoad('color-libraries');
     return;
   }
+
+  modalManagerInstance = createModalManager();
 
   const deepLinkManager = createDeepLinkManager({ enabled: true, queryParam: 'q' });
   let searchQuery = new URLSearchParams(window.location.search).get('q') || '';
@@ -298,6 +316,25 @@ export default async function decorate(block) {
     }
   };
   block.addEventListener('libraries:item-delete', deleteHandler);
+
+  openHandler = async (event) => {
+    const { item } = event.detail || {};
+    if (!item) return;
+
+    const [modalStrings, colorSwatchRailStrings, explorePlaceholders] = await Promise.all([
+      colorModalStringsPromise,
+      colorSwatchRailStringsPromise,
+      explorePlaceholdersPromise,
+    ]);
+
+    await openLibraryItemModal(item, modalManagerInstance, {
+      modalStrings,
+      colorSwatchRailStrings,
+      fallbackPaletteTitle: explorePlaceholders.modalDefaultPaletteTitle,
+      fallbackGradientTitle: explorePlaceholders.modalDefaultGradientTitle,
+    });
+  };
+  block.addEventListener('libraries:item-open', openHandler);
 
   try {
     await renderLibraries(block, searchQuery);

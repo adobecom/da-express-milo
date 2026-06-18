@@ -53,6 +53,31 @@ export function libraryGradientToDownloadData(item) {
 }
 
 /**
+ * Map a CC Libraries gradient item to createGradientModalContent shape.
+ * @param {Object} item - library gradient item
+ */
+export function libraryGradientToModalGradient(item) {
+  const stops = Array.isArray(item?.colorStops) ? item.colorStops : [];
+  const colorStops = stops.map((stop, index) => {
+    const fallbackPosition = stops.length > 1 ? index / (stops.length - 1) : 0;
+    const position = Number.isFinite(Number(stop?.offset)) ? Number(stop.offset) : fallbackPosition;
+    return {
+      color: stopColorToHex(stop?.color) || '#000000',
+      position,
+    };
+  });
+
+  return {
+    id: item?.id,
+    name: item?.name || 'Untitled gradient',
+    angle: item?.angle ?? 90,
+    gradient: item?.gradient,
+    colorStops,
+    tags: item?.tags,
+  };
+}
+
+/**
  * @param {Object} item - library theme item with colors
  */
 export function libraryThemeToDownloadData(item) {

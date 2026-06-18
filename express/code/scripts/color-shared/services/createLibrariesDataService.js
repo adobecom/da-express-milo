@@ -79,6 +79,7 @@ function parseGradientElement(element) {
     id: element.id,
     type: 'gradient',
     name: element.name || 'Untitled gradient',
+    angle: gradientData?.angle ?? 90,
     gradient: gradientData?.gradient,
     colorStops: gradientData?.stops,
   };
