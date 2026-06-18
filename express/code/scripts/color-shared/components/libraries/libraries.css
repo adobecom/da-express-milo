@@ -22,7 +22,7 @@
    Mobile-first: base styles target S; min-width queries layer on M and L. */
 .ax-lib-header {
   position: sticky;
-  top: 0;
+  top: var(--ax-lib-header-sticky-top, var(--global-height-nav, 0px));
   z-index: 3;
   width: 100%;
   background: var(--ax-lib-bg);
@@ -240,10 +240,8 @@
 
 /* ── M (tablet) and up ──────────────────────────────────────── */
 @media (min-width: 680px) {
-  .ax-lib-header {
-    position: static;
-  }
-
+  /* Header stays sticky on tablet/desktop; the count never collapses here
+     (the is-scrolled count-hide is scoped to mobile only). */
   .ax-lib-header__content {
     align-items: center;
     gap: var(--spacing-300);

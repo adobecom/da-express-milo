@@ -11,6 +11,17 @@ export const LIBRARY_SORT = {
 };
 
 const SCROLL_THRESHOLD = 8;
+const NAV_STICKY_SELECTORS = ['header.global-navigation', '.feds-localnav'];
+
+function getNavStickyOffset() {
+  return NAV_STICKY_SELECTORS.reduce((max, selector) => {
+    const el = document.querySelector(selector);
+    if (!el) return max;
+    const { bottom, height } = el.getBoundingClientRect();
+    if (height <= 0 || bottom <= 0) return max;
+    return Math.max(max, bottom);
+  }, 0);
+}
 
 function logSpectrumFailure(message, error) {
   window.lana?.log(`${message}: ${error?.message}`, {
@@ -51,6 +62,7 @@ export function createLibrariesHeader(options = {}) {
   let popoverOpen = false;
   let detachDocumentHandlers = null;
   let scrollFrame = 0;
+  let resizeHandler = null;
   let desktopPicker = null;
   let mobileButton = null;
   let mobileTriggerEl = null;
@@ -177,10 +189,16 @@ export function createLibrariesHeader(options = {}) {
     else openPopover();
   }
 
+  function syncStickyTop() {
+    const offset = getNavStickyOffset();
+    header.style.setProperty('--ax-lib-header-sticky-top', `${offset}px`);
+  }
+
   function onScroll() {
     if (scrollFrame) return;
     scrollFrame = window.requestAnimationFrame(() => {
       scrollFrame = 0;
+      syncStickyTop();
       header.classList.toggle('is-scrolled', window.scrollY > SCROLL_THRESHOLD);
     });
   }
@@ -264,7 +282,10 @@ export function createLibrariesHeader(options = {}) {
   })();
 
   // ── Scroll (sticky compact on S) ────────────────────────────
+  resizeHandler = () => syncStickyTop();
   window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', resizeHandler, { passive: true });
+  syncStickyTop();
   onScroll();
 
   return {
@@ -285,6 +306,8 @@ export function createLibrariesHeader(options = {}) {
       menu.removeEventListener('click', onMenuClick);
       menu.removeEventListener('change', onMenuChange);
       window.removeEventListener('scroll', onScroll);
+      if (resizeHandler) window.removeEventListener('resize', resizeHandler);
+      resizeHandler = null;
       if (scrollFrame) window.cancelAnimationFrame(scrollFrame);
       desktopPicker?.destroy?.();
       mobileButton?.destroy?.();

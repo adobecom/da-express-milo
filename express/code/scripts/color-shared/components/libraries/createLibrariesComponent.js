@@ -126,7 +126,6 @@ export function createLibrariesComponent(options = {}) {
   const container = createTag('section', {
     class: [
       'ax-libraries',
-      'explore-main-section',
       `ax-libraries--size-${sizeClass}`,
       `ax-libraries--view-${view}`,
     ].join(' '),
@@ -191,7 +190,6 @@ export function createLibrariesComponent(options = {}) {
   function render() {
     container.className = [
       'ax-libraries',
-      'explore-main-section',
       `ax-libraries--size-${sizeClass}`,
       `ax-libraries--view-${view}`,
     ].join(' ');
