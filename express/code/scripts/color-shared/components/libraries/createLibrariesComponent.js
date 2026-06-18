@@ -28,23 +28,32 @@ function createLoadingState() {
   const state = createTag('div', { class: 'ax-lib-loading', 'aria-busy': 'true' });
 
   const headerRow = createTag('div', { class: 'ax-lib-loading-header' });
+  const headerRight = createTag('div', { class: 'ax-lib-loading-header__right' });
+  headerRight.append(
+    createTag('div', { class: 'ax-lib-loading-bar ax-lib-loading-bar--count ax-lib-loading-shimmer' }),
+    createTag('div', { class: 'ax-lib-loading-chevron ax-lib-loading-shimmer' }),
+  );
   headerRow.append(
-    createTag('div', { class: 'ax-lib-loading-bar ax-lib-loading-bar--title' }),
-    createTag('div', { class: 'ax-lib-loading-bar ax-lib-loading-bar--count' }),
+    createTag('div', { class: 'ax-lib-loading-bar ax-lib-loading-bar--title ax-lib-loading-shimmer' }),
+    headerRight,
   );
   state.appendChild(headerRow);
 
   const grid = createTag('div', { class: 'palettes-grid ax-lib-items-grid ax-lib-loading-grid' });
   for (let i = 0; i < LOADING_SKELETON_CARDS; i += 1) {
     const card = createTag('div', { class: 'ax-lib-loading-card' });
-    const visual = createTag('div', { class: 'ax-lib-loading-card__visual' });
+    const visual = createTag('div', { class: 'ax-lib-loading-card__visual ax-lib-loading-shimmer' });
     const footer = createTag('div', { class: 'ax-lib-loading-card__footer' });
-    footer.appendChild(createTag('div', { class: 'ax-lib-loading-bar ax-lib-loading-bar--name' }));
+    const lines = createTag('div', { class: 'ax-lib-loading-card__lines' });
+    lines.append(
+      createTag('div', { class: 'ax-lib-loading-bar ax-lib-loading-bar--name ax-lib-loading-shimmer' }),
+      createTag('div', { class: 'ax-lib-loading-bar ax-lib-loading-bar--detail ax-lib-loading-shimmer' }),
+    );
     const dots = createTag('div', { class: 'ax-lib-loading-card__dots' });
     for (let d = 0; d < 5; d += 1) {
-      dots.appendChild(createTag('span', { class: 'ax-lib-loading-dot' }));
+      dots.appendChild(createTag('span', { class: 'ax-lib-loading-dot ax-lib-loading-shimmer' }));
     }
-    footer.appendChild(dots);
+    footer.append(lines, dots);
     card.append(visual, footer);
     grid.appendChild(card);
   }
