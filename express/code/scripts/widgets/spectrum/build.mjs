@@ -173,6 +173,17 @@ const newComponents = [
     ].join('\n'),
   },
   {
+    name: 'alert-dialog',
+    entry: [
+      "import '@spectrum-web-components/alert-dialog/sp-alert-dialog.js';",
+      "export * from '@spectrum-web-components/alert-dialog';",
+    ].join('\n'),
+    extraExternals: [
+      { match: /^@spectrum-web-components\/dialog(\/.*)?$/, target: './dialog.js' },
+      { match: /^@spectrum-web-components\/button(\/.*)?$/, target: './button.js' },
+    ],
+  },
+  {
     name: 'toast',
     entry: [
       "import '@spectrum-web-components/toast/sp-toast.js';",

@@ -136,3 +136,22 @@ export async function fetchLibrariesWithElements() {
     (lib) => lib.themeCount > 0 || lib.gradientCount > 0 || lib.items.length > 0,
   );
 }
+
+/**
+ * Delete a theme or gradient element from a CC Library.
+ * @param {string} libraryId
+ * @param {string} elementId
+ */
+export async function deleteLibraryItem(libraryId, elementId) {
+  if (!libraryId || !elementId) {
+    throw new Error('Library ID and element ID are required');
+  }
+
+  await serviceManager.init({ plugins: ['cclibrary'] });
+  const provider = await serviceManager.getProvider('cclibrary');
+  if (!provider) {
+    throw new Error('CC Library provider is unavailable');
+  }
+
+  await provider.deleteTheme(libraryId, elementId, { throwOnError: true });
+}

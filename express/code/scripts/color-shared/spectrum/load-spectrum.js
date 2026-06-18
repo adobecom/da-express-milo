@@ -317,6 +317,33 @@ export function loadDialog() {
 }
 
 /**
+ * Load alert dialog components (sp-alert-dialog) for centered modals.
+ */
+export function loadAlertDialog() {
+  if (!componentLoaded.alertDialog) {
+    componentLoaded.alertDialog = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/button.js`);
+        await import(`${DIST}/dialog.js`);
+        await import(`${DIST}/alert-dialog.js`);
+        await import(`${DIST}/icons-workflow.js`);
+        await waitForComponents([
+          'sp-theme',
+          'sp-alert-dialog',
+          'sp-button',
+          'sp-icon-delete',
+        ]);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.alertDialog;
+}
+
+/**
  * Load icons for color-swatch-rail (copy, add, delete, lock, accessibility, open-in). Tint and drag use Figma SVGs only — not Spectrum sp-icon-edit.
  */
 export async function loadIconsRail() {
