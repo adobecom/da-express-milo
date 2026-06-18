@@ -567,12 +567,18 @@ export default async function init(element) {
     document.body.append(dragOverlay);
     const hideDragOverlay = () => dragOverlay.classList.remove('is-dragging');
     let dragLeaveTimer = null;
+    let isBlockVisible = false;
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      isBlockVisible = entry.isIntersecting;
+    }, { threshold: 0 });
+    visibilityObserver.observe(element);
 
     dropzone.addEventListener('click', () => {
       fileInput.click();
     });
     document.addEventListener('dragenter', (e) => {
       if (!e.dataTransfer?.types?.includes('Files')) return;
+      if (!isBlockVisible) return;
       clearTimeout(dragLeaveTimer);
       dragOverlay.classList.add('is-dragging');
     });
