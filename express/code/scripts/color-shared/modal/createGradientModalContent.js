@@ -81,6 +81,7 @@ export function createGradientModalContent(gradient, opts = {}) {
     colorStops = [{ color: '#ccc', position: 0 }, { color: '#999', position: 1 }];
   }
   const title = gradient?.name || 'Gradient';
+  const showCreator = opts.showCreator !== false;
   const creatorName = normalizeCreatorName(
     opts.creatorName ?? gradient?.creator?.name ?? gradient?.creatorName,
   );
@@ -123,24 +124,26 @@ export function createGradientModalContent(gradient, opts = {}) {
   nameTagsSection.appendChild(h1);
 
   const thumbTags = createTag('div', { class: 'modal-palette-thumb-tags' });
-  const thumbContainer = createTag('div', { class: 'modal-thumbnail-container' });
-  const thumbnail = createTag('div', { class: 'modal-thumbnail' });
-  const thumbImg = createTag('img', {
-    class: 'thumbnail-image',
-    alt: thumbnailAlt,
-    src: creatorImageUrl,
-  });
-  if (creatorImageUrl === defaultCreatorImageUrl) {
-    thumbImg.addEventListener('error', function onErr() {
-      this.onerror = null;
+  if (showCreator) {
+    const thumbContainer = createTag('div', { class: 'modal-thumbnail-container' });
+    const thumbnail = createTag('div', { class: 'modal-thumbnail' });
+    const thumbImg = createTag('img', {
+      class: 'thumbnail-image',
+      alt: thumbnailAlt,
+      src: creatorImageUrl,
     });
+    if (creatorImageUrl === defaultCreatorImageUrl) {
+      thumbImg.addEventListener('error', function onErr() {
+        this.onerror = null;
+      });
+    }
+    thumbnail.appendChild(thumbImg);
+    const creatorNameEl = createTag('p', { class: 'modal-creator-name' });
+    creatorNameEl.textContent = creatorName;
+    thumbContainer.appendChild(thumbnail);
+    thumbContainer.appendChild(creatorNameEl);
+    thumbTags.appendChild(thumbContainer);
   }
-  thumbnail.appendChild(thumbImg);
-  const creatorNameEl = createTag('p', { class: 'modal-creator-name' });
-  creatorNameEl.textContent = creatorName;
-  thumbContainer.appendChild(thumbnail);
-  thumbContainer.appendChild(creatorNameEl);
-  thumbTags.appendChild(thumbContainer);
 
   const tagsContainer = createTag('div', {
     class: 'modal-tags-container',

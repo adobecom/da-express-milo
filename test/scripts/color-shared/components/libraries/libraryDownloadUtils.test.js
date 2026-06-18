@@ -3,6 +3,7 @@ import { expect } from '@esm-bundle/chai';
 import {
   libraryGradientStopToSwatch,
   libraryGradientToDownloadData,
+  libraryGradientToModalGradient,
   libraryItemToDownloadData,
   libraryThemeToDownloadData,
 } from '../../../../../express/code/scripts/color-shared/components/libraries/libraryDownloadUtils.js';
@@ -66,6 +67,50 @@ describe('libraryGradientToDownloadData', () => {
     expect(data.swatches).to.have.lengthOf(2);
     expect(data.swatches[0].offset).to.equal(0);
     expect(data.swatches[1].offset).to.equal(1);
+  });
+});
+
+describe('libraryGradientToModalGradient', () => {
+  it('maps CC Library stops to modal colorStops with position', () => {
+    const gradient = libraryGradientToModalGradient({
+      id: 'grad-1',
+      name: 'Sunset',
+      angle: 45,
+      colorStops: [
+        {
+          color: [{ mode: 'RGB', value: { r: 255, g: 0, b: 0 } }],
+          offset: 0,
+        },
+        {
+          color: [{ mode: 'RGB', value: { r: 0, g: 0, b: 255 } }],
+          offset: 1,
+        },
+      ],
+    });
+
+    expect(gradient.id).to.equal('grad-1');
+    expect(gradient.name).to.equal('Sunset');
+    expect(gradient.angle).to.equal(45);
+    expect(gradient.colorStops).to.deep.equal([
+      { color: '#ff0000', position: 0 },
+      { color: '#0000ff', position: 1 },
+    ]);
+  });
+
+  it('defaults angle to 90 and distributes missing offsets evenly', () => {
+    const gradient = libraryGradientToModalGradient({
+      name: 'Fade',
+      colorStops: [
+        { color: [{ mode: 'RGB', value: { r: 0, g: 0, b: 0 } }] },
+        { color: [{ mode: 'RGB', value: { r: 255, g: 255, b: 255 } }] },
+        { color: [{ mode: 'RGB', value: { r: 128, g: 128, b: 128 } }] },
+      ],
+    });
+
+    expect(gradient.angle).to.equal(90);
+    expect(gradient.colorStops[0].position).to.equal(0);
+    expect(gradient.colorStops[1].position).to.equal(0.5);
+    expect(gradient.colorStops[2].position).to.equal(1);
   });
 });
 
