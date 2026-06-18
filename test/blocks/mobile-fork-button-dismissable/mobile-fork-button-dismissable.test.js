@@ -158,7 +158,7 @@ describe('Mobile Fork Button', () => {
     expect(newWrapper).to.exist;
   });
 
-  it('renders dismissible overlay on iOS when fork-eligibility-check is on', async () => {
+  it('falls back to normal floating button on iOS when fork-eligibility-check is on', async () => {
     Object.defineProperty(navigator, 'userAgent', {
       value: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
       configurable: true,
@@ -168,9 +168,7 @@ describe('Mobile Fork Button', () => {
 
     await decorate(b);
 
-    const blockWrapper = document.querySelector('.floating-button.block');
-    expect(blockWrapper).to.exist;
-    const closeButton = blockWrapper.querySelector('.mweb-close');
-    expect(closeButton).to.exist;
+    const closeButton = document.querySelector('.mweb-close');
+    expect(closeButton).to.not.exist;
   });
 });
