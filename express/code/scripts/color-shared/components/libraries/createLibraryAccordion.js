@@ -32,7 +32,7 @@ function createHeader(library, expanded, onToggle, strings) {
   return header;
 }
 
-function createPanel(library, emit, expanded, strings) {
+function createPanel(library, emit, expanded, strings, toolHrefs) {
   // `hidden` must only be added when collapsed. createTag calls setAttribute for
   // every key, and setAttribute('hidden', undefined) yields hidden="undefined",
   // which is a *present* attribute, hiding the panel even when expanded.
@@ -45,7 +45,7 @@ function createPanel(library, emit, expanded, strings) {
 
   const grid = createTag('div', { class: 'palettes-grid ax-lib-items-grid' });
   (library.items || []).forEach((item) => {
-    grid.appendChild(createLibraryItemCard(item, { library, strings, emit }));
+    grid.appendChild(createLibraryItemCard(item, { library, strings, emit, toolHrefs }));
   });
 
   panel.appendChild(grid);
@@ -61,6 +61,7 @@ function createPanel(library, emit, expanded, strings) {
  * @param {Object} [options.strings] - resolved placeholders
  * @param {Function} [options.onToggle]
  * @param {Function} [options.emit]
+ * @param {Object} [options.toolHrefs] - { contrast, colorBlindness }
  */
 export function createLibraryAccordion(library, options = {}) {
   const {
@@ -70,6 +71,7 @@ export function createLibraryAccordion(library, options = {}) {
     strings = {},
     onToggle = () => {},
     emit = () => {},
+    toolHrefs = {},
   } = options;
 
   const sizeClass = getSizeClass(size);
@@ -85,7 +87,7 @@ export function createLibraryAccordion(library, options = {}) {
 
   accordion.append(
     createHeader(library, expanded, onToggle, strings),
-    createPanel(library, emit, expanded, strings),
+    createPanel(library, emit, expanded, strings, toolHrefs),
   );
 
   return {

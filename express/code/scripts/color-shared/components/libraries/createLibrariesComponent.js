@@ -104,6 +104,7 @@ function createEmptyState(query, strings, emit) {
  * @param {Array} [options.libraries=[]]
  * @param {Object} [options.strings] - resolved placeholders
  * @param {Function} [options.emit]
+ * @param {Object} [options.toolHrefs] - { contrast, colorBlindness }
  */
 export function createLibrariesComponent(options = {}) {
   const {
@@ -114,6 +115,7 @@ export function createLibrariesComponent(options = {}) {
     emit = () => {},
     searchBarEl = null,
     initialSort,
+    toolHrefs = {},
   } = options;
 
   let view = initialView;
@@ -165,6 +167,7 @@ export function createLibrariesComponent(options = {}) {
           emit('accordion-toggle', { id, expanded: next });
         },
         emit,
+        toolHrefs,
       });
       accordionInstances.set(library.id, instance);
       list.appendChild(instance.element);

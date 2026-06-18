@@ -2,6 +2,7 @@ import { createTag } from '../../../utils.js';
 import { createPaletteStrip, PALETTE_STRIP_VARIANTS } from '../../palettes/palettes.js';
 import { gradientToBackgroundImage } from '../gradients/gradient-strip.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
+import { createLibraryAccessibilityMenu } from './createLibraryAccessibilityMenu.js';
 
 function interpolate(template, vars = {}) {
   return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
@@ -32,27 +33,32 @@ function createActionButton({ icon, label, onClick }) {
   return btn;
 }
 
-function buildActions(item, name, strings, emit, payload) {
+function buildActions(item, name, strings, emit, payload, toolHrefs) {
   const isGradient = item.type === 'gradient';
-  const defs = [];
+  const actions = createTag('div', { class: 'ax-lib-card__actions' });
 
   if (!isGradient) {
-    defs.push({
-      icon: createSpIconButton('sp-icon-accessibility'),
-      label: interpolate(strings.librariesColorBlindAria, { name }),
-      onClick: () => emit('item-colorblind', payload),
+    const accessMenu = createLibraryAccessibilityMenu({
+      item,
+      strings,
+      toolHrefs,
     });
+    actions.appendChild(accessMenu.element);
   }
-  defs.push({
-    icon: createSpIconButton('sp-icon-download'),
-    label: interpolate(strings.librariesDownloadAria, { name }),
-    onClick: () => emit('item-download', payload),
-  });
-  defs.push({
-    icon: createSpIconButton('sp-icon-delete'),
-    label: interpolate(strings.librariesDeleteAria, { name }),
-    onClick: () => emit('item-delete', payload),
-  });
+
+  const defs = [
+    {
+      icon: createSpIconButton('sp-icon-download'),
+      label: interpolate(strings.librariesDownloadAria, { name }),
+      onClick: () => emit('item-download', payload),
+    },
+    {
+      icon: createSpIconButton('sp-icon-delete'),
+      label: interpolate(strings.librariesDeleteAria, { name }),
+      onClick: () => emit('item-delete', payload),
+    },
+  ];
+
   if (!isGradient) {
     defs.push({
       icon: createSpIconButton('sp-icon-edit'),
@@ -60,13 +66,13 @@ function buildActions(item, name, strings, emit, payload) {
       onClick: () => emit('item-edit', payload),
     });
   }
+
   defs.push({
     icon: createSpIconButton('sp-icon-open-in'),
     label: interpolate(strings.librariesOpenAria, { name }),
     onClick: () => emit('item-open', payload),
   });
 
-  const actions = createTag('div', { class: 'ax-lib-card__actions' });
   defs.forEach((def) => actions.appendChild(createActionButton(def)));
   return actions;
 }
@@ -128,7 +134,12 @@ function createVisual(item, name, strings, onOpen) {
  * @param {Function} [options.emit]
  */
 export function createLibraryItemCard(item, options = {}) {
-  const { library = {}, strings = {}, emit = () => {} } = options;
+  const {
+    library = {},
+    strings = {},
+    emit = () => {},
+    toolHrefs = {},
+  } = options;
   const name = item.name || strings.librariesDefaultName || '';
   const payload = { item, libraryId: library.id, libraryName: library.name };
 
@@ -149,7 +160,7 @@ export function createLibraryItemCard(item, options = {}) {
   subtitleEl.textContent = getSubtitle(item, strings);
   text.append(nameEl, subtitleEl);
 
-  info.append(text, buildActions(item, name, strings, emit, payload));
+  info.append(text, buildActions(item, name, strings, emit, payload, toolHrefs));
   card.appendChild(info);
 
   return card;

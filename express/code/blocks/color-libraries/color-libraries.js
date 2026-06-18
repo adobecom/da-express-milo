@@ -6,7 +6,7 @@ import {
   LIBRARY_VIEW,
 } from '../../scripts/color-shared/components/libraries/createLibrariesComponent.js';
 import { fetchLibrariesWithElements } from '../../scripts/color-shared/services/createLibrariesDataService.js';
-import { loadIconsRail, loadTooltip } from '../../scripts/color-shared/spectrum/load-spectrum.js';
+import { loadIconsRail, loadMenu, loadTooltip } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import loadColorLibrariesPlaceholders from '../../scripts/color-shared/i18n/loadColorLibrariesPlaceholders.js';
 import { createSearchBar, createDeepLinkManager } from '../../scripts/color-shared/components/search-bar/index.js';
@@ -135,11 +135,17 @@ export default async function decorate(block) {
 
   const placeholders = await loadColorLibrariesPlaceholders();
 
+  const toolHrefs = {
+    contrast: '/create/color-contrast-analyzer',
+    colorBlindness: '/create/color-accessibility',
+  };
+
   await Promise.all([
     loadMiloStyle(LIBRARIES_CSS),
     loadMiloStyle(STRIP_CSS),
     loadMiloStyle(GRADIENT_STRIP_CSS),
     loadIconsRail(),
+    loadMenu(),
     // Registers sp-overlay-trigger/sp-tooltip so the palette name tooltip
     // behaves as a hover overlay (same as the Explore page) instead of
     // rendering inline as a label.
@@ -210,6 +216,7 @@ export default async function decorate(block) {
     view: LIBRARY_VIEW.LOADING,
     strings: placeholders,
     searchBarEl: searchBarInstance.element,
+    toolHrefs,
     emit(event, detail) {
       block.dispatchEvent(new CustomEvent(`libraries:${event}`, { detail, bubbles: true }));
     },
