@@ -146,7 +146,8 @@ describe('Susi-light', async () => {
     const colorBlock = document.querySelector('.susi-light.simplified.color');
 
     before(async () => {
-      window['__susiColorRedirect'] = 'https://new.express.adobe.com/?colorPalette=test&referrer=express-colors&feature-enable=colors-product-entry&entryPoint=color-explorer#hash';
+      const redirectKey = '__susiColorRedirect';
+      window[redirectKey] = 'https://new.express.adobe.com/?colorPalette=test&referrer=express-colors&feature-enable=colors-product-entry&entryPoint=color-explorer#hash';
       await decorate(colorBlock);
       await delay(310);
     });
