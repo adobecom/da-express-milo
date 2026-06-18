@@ -149,6 +149,7 @@ export default async function decorate(block) {
   const toolHrefs = {
     contrast: '/create/color-contrast-analyzer',
     colorBlindness: '/create/color-accessibility',
+    colorWheel: '/create/color-wheel',
   };
 
   await Promise.all([

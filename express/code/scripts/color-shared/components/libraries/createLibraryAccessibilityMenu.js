@@ -11,7 +11,7 @@ function interpolate(template, vars = {}) {
  * @param {Object} options
  * @param {Object} options.item - theme item with colors, name, tags
  * @param {Object} options.strings - resolved placeholders
- * @param {Object} options.toolHrefs - { contrast, colorBlindness }
+ * @param {Object} options.toolHrefs - { contrast, colorBlindness, colorWheel }
  */
 export function createLibraryAccessibilityMenu({
   item,

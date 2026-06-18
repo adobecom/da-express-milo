@@ -61,7 +61,7 @@ function createPanel(library, emit, expanded, strings, toolHrefs) {
  * @param {Object} [options.strings] - resolved placeholders
  * @param {Function} [options.onToggle]
  * @param {Function} [options.emit]
- * @param {Object} [options.toolHrefs] - { contrast, colorBlindness }
+ * @param {Object} [options.toolHrefs] - { contrast, colorBlindness, colorWheel }
  */
 export function createLibraryAccordion(library, options = {}) {
   const {
