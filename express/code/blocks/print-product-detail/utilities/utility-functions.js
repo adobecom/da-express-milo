@@ -41,8 +41,8 @@ export function extractInitialImageUrl(block) {
     const key = row.children[0]?.textContent?.trim();
     if (key === 'heroImage') {
       return row.children[1]?.querySelector('a')?.href
-        ?? row.children[1]?.textContent?.trim()
-        ?? null;
+        || row.children[1]?.textContent?.trim()
+        || null;
     }
   }
   return null;
