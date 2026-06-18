@@ -5,8 +5,10 @@ import {
   LIBRARY_SIZE,
   LIBRARY_VIEW,
 } from '../../scripts/color-shared/components/libraries/createLibrariesComponent.js';
-import { fetchLibrariesWithElements } from '../../scripts/color-shared/services/createLibrariesDataService.js';
+import { fetchLibrariesWithElements, deleteLibraryItem } from '../../scripts/color-shared/services/createLibrariesDataService.js';
+import { showLibraryDeleteAlertDialog } from '../../scripts/color-shared/components/libraries/createLibraryDeleteAlertDialog.js';
 import { loadIconsRail, loadMenu, loadTooltip } from '../../scripts/color-shared/spectrum/load-spectrum.js';
+import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import loadColorLibrariesPlaceholders from '../../scripts/color-shared/i18n/loadColorLibrariesPlaceholders.js';
 import { createSearchBar, createDeepLinkManager } from '../../scripts/color-shared/components/search-bar/index.js';
@@ -27,6 +29,11 @@ let searchBarInstance = null;
 let resizeHandler = null;
 let floatingSearchHandler = null;
 let goBackHandler = null;
+let deleteHandler = null;
+
+function interpolate(template, vars = {}) {
+  return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
+}
 
 function getResponsiveSize() {
   if (typeof window === 'undefined') return LIBRARY_SIZE.L;
@@ -123,6 +130,10 @@ export default async function decorate(block) {
   if (goBackHandler) {
     block.removeEventListener('libraries:empty-go-back', goBackHandler);
     goBackHandler = null;
+  }
+  if (deleteHandler) {
+    block.removeEventListener('libraries:item-delete', deleteHandler);
+    deleteHandler = null;
   }
 
   componentInstance?.destroy();
@@ -254,6 +265,38 @@ export default async function decorate(block) {
     runSearch('');
   };
   block.addEventListener('libraries:empty-go-back', goBackHandler);
+
+  deleteHandler = async (event) => {
+    const { item, libraryId } = event.detail || {};
+    const itemId = item?.id;
+    if (!libraryId || !itemId) return;
+
+    const confirmed = await showLibraryDeleteAlertDialog({ item, strings: placeholders });
+    if (!confirmed) return;
+
+    const itemName = item?.name || placeholders.librariesDefaultName || '';
+    block.classList.add(CSS_CLASSES.LOADING);
+
+    try {
+      await deleteLibraryItem(libraryId, itemId);
+      showExpressToast({
+        variant: 'positive',
+        message: interpolate(placeholders.librariesDeleteSuccess, { name: itemName }),
+      });
+      await renderLibraries(block, searchQuery);
+    } catch (err) {
+      window.lana?.log(`color-libraries delete failed: ${err?.message}`, {
+        tags: 'color-libraries',
+        severity: 'error',
+      });
+      block.classList.remove(CSS_CLASSES.LOADING);
+      showExpressToast({
+        variant: 'negative',
+        message: placeholders.librariesDeleteError,
+      });
+    }
+  };
+  block.addEventListener('libraries:item-delete', deleteHandler);
 
   try {
     await renderLibraries(block, searchQuery);
