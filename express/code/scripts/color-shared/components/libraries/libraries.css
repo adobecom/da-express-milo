@@ -546,7 +546,8 @@
   z-index: 10;
   display: flex;
   flex-direction: column;
-  min-width: 220px;
+  width: max-content;
+  min-width: 0;
   padding: var(--spacing-100);
   background: var(--ax-lib-bg);
   border-radius: var(--Corner-radius-corner-radius-100);
@@ -558,8 +559,8 @@
 }
 
 .ax-lib-card__access-menu-list {
-  --mod-menu-item-label-inline-edge-to-content: var(--spacing-200);
-  --mod-menu-item-selectable-edge-to-text-not-selected: var(--spacing-200);
+  --mod-menu-item-label-inline-edge-to-content: var(--spectrum-component-edge-to-visual-only-200);
+  --mod-menu-item-selectable-edge-to-text-not-selected: var(--spectrum-component-edge-to-visual-only-200);
   --mod-menu-item-corner-radius: var(--Corner-radius-corner-radius-100);
   --mod-menu-item-focus-indicator-border-radius: var(--Corner-radius-corner-radius-100);
   --mod-menu-item-background-color-default: transparent;
@@ -568,8 +569,8 @@
   --mod-menu-item-background-color-down: var(--ax-lib-border);
 
   display: block;
-  inline-size: 100%;
-  width: 100%;
+  inline-size: max-content;
+  width: max-content;
   border: none;
   background: transparent;
   box-shadow: none;
@@ -578,6 +579,7 @@
 
 .ax-lib-card__access-menu-list sp-menu-item {
   background: transparent;
+  white-space: nowrap;
 }
 
 .ax-lib-card__access-menu-list sp-menu-item:hover {
