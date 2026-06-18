@@ -81,9 +81,18 @@ export async function createExpressTooltip(config) {
   let showTimer = null;
   let visible = false;
   let removeOutsideClickHandler = null;
+  let guardObserver = null;
+
+  function clearGuard() {
+    if (guardObserver) {
+      guardObserver.disconnect();
+      guardObserver = null;
+    }
+  }
 
   function hide() {
     clearTimeout(showTimer);
+    clearGuard();
     tooltip.removeAttribute('open');
     visible = false;
     removeOutsideClickHandler?.();
@@ -110,8 +119,27 @@ export async function createExpressTooltip(config) {
         hide();
         return;
       }
+      clearGuard();
       tooltip.setAttribute('open', '');
       visible = true;
+
+      // Spectrum's self-managed sp-overlay responds to the iOS-synthesized
+      // pointerleave/focus events that trail a tap and removes `open` before
+      // the user can read the tooltip. Guard against this for a short window:
+      // any external removal of `open` within GUARD_MS is immediately reversed.
+      // The guard is cleared by hide() so intentional closes are unaffected.
+      const GUARD_MS = 400;
+      const guardedAt = Date.now();
+      guardObserver = new MutationObserver(() => {
+        if (!visible || Date.now() - guardedAt >= GUARD_MS) {
+          clearGuard();
+          return;
+        }
+        tooltip.setAttribute('open', '');
+      });
+      guardObserver.observe(tooltip, { attributes: true, attributeFilter: ['open'] });
+      setTimeout(clearGuard, GUARD_MS);
+
       setTimeout(() => {
         const outsideHandler = (evt) => {
           const path = evt.composedPath?.() || [];
@@ -161,6 +189,7 @@ export async function createExpressTooltip(config) {
     destroy() {
       controller.abort();
       clearTimeout(showTimer);
+      clearGuard();
       removeOutsideClickHandler?.();
       ariaLink?.release();
       theme.remove();
