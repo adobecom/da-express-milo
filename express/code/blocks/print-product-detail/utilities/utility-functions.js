@@ -184,8 +184,9 @@ export async function addPrefetchLinks() {
   document.head.appendChild(preconnectLink2);
 }
 
+const SUPPORTED_REGIONS = new Set(['at', 'br', 'us', 'au', 'ca', 'gb', 'nz', 'de', 'ch', 'es', 'fr', 'be', 'jp', 'kr', 'nl', 'pt', 'se']);
+
 function normalizeLocale(ietf) {
-  const SUPPORTED_REGIONS = new Set(['at', 'br', 'us', 'au', 'ca', 'gb', 'nz', 'de', 'ch', 'es', 'fr', 'be', 'jp', 'kr', 'nl', 'pt', 'se']);
   const SUPPORTED_LANGUAGES = new Set(['en', 'de', 'es', 'fr', 'ja', 'ko', 'nl', 'pt', 'sv']);
   if (!ietf) {
     return { language: 'en', region: 'us' };
@@ -212,9 +213,10 @@ export async function createZazzleStore() {
 
     const { locale } = getConfig();
     const urlParams = new URLSearchParams(window.location.search);
-    const testRegion = urlParams.get('testRegion');
+    const rawTestRegion = urlParams.get('testRegion')?.toLowerCase();
+    const testRegion = rawTestRegion && SUPPORTED_REGIONS.has(rawTestRegion) ? rawTestRegion : null;
     const { language, region } = testRegion
-      ? { language: 'en', region: testRegion.toLowerCase() }
+      ? { language: 'en', region: testRegion }
       : normalizeLocale(locale?.ietf);
 
     const store = createZazzlePDPStore({ language, region });
