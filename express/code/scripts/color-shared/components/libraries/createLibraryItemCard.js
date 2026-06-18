@@ -1,7 +1,6 @@
 import { createTag } from '../../../utils.js';
 import { createPaletteStrip, PALETTE_STRIP_VARIANTS } from '../../palettes/palettes.js';
 import { gradientToBackgroundImage } from '../gradients/gradient-strip.js';
-import { createColorBlindIcon } from './libraryIcons.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
 
 function interpolate(template, vars = {}) {
@@ -39,7 +38,7 @@ function buildActions(item, name, strings, emit, payload) {
 
   if (!isGradient) {
     defs.push({
-      icon: createColorBlindIcon(),
+      icon: createSpIconButton('sp-icon-accessibility'),
       label: interpolate(strings.librariesColorBlindAria, { name }),
       onClick: () => emit('item-colorblind', payload),
     });

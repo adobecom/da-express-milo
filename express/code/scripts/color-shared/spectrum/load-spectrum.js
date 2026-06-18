@@ -325,6 +325,7 @@ export async function loadIconsRail() {
   // icons-workflow.js in this repo is the canonical source for rail icons.
   await import(`${DIST}/icons-workflow.js`);
   await waitForComponents([
+    'sp-icon-accessibility',
     'sp-icon-alert',
     'sp-icon-circle',
     'sp-icon-copy',

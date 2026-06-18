@@ -563,7 +563,8 @@
 .ax-lib-card__action sp-icon-download,
 .ax-lib-card__action sp-icon-delete,
 .ax-lib-card__action sp-icon-edit,
-.ax-lib-card__action sp-icon-open-in {
+.ax-lib-card__action sp-icon-open-in,
+.ax-lib-card__action sp-icon-accessibility {
   width: 20px;
   height: 20px;
   display: block;
