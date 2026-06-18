@@ -20,3 +20,4 @@ dev/
 actionlint
 .claude/worktrees/
 .claude/**.local.*
+.claude/hooks/auto-review-pr.sh
