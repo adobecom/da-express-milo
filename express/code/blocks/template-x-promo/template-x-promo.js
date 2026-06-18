@@ -451,7 +451,7 @@ function createDirectCarousel(block, templates, createTagFn) {
   };
 }
 
-/* c8 ignore next 59 */
+/* c8 ignore next 58 */
 async function handleOneUpFromApiData(block, templateData) {
   const parent = block.parentElement;
   parent.classList.add('one-up');
@@ -484,7 +484,6 @@ async function handleOneUpFromApiData(block, templateData) {
     replaceKey('free', getConfig()),
   ]);
 
-  console.log('editThisTemplateKey', editThisTemplateKey);
   const editThisTemplate = editThisTemplateKey ?? 'Edit this template';
   const freeLabel = freeKey && freeKey !== 'free' ? freeKey : 'Free';
 
