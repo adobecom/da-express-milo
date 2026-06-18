@@ -177,6 +177,7 @@ export function pickRandomPalette() {
 
 export const PARAM_NAME = 'color-palette';
 export const PARAM_PALETTE_NAME = 'color-palette-name';
+export const PARAM_PALETTE_TAGS = 'color-palette-tags';
 export const PARAM_BASE_COLOR = 'base-color';
 
 const HEX_3 = /^[0-9a-f]{3}$/i;
@@ -230,6 +231,18 @@ export function createColorPaletteParamApi() {
     return (raw && raw.trim()) || undefined;
   }
 
+  function getResolvedPaletteTags(urlOrString) {
+    let url;
+    try {
+      url = new URL(urlOrString || window.location.href);
+    } catch {
+      return [];
+    }
+    const raw = url.searchParams.get(PARAM_PALETTE_TAGS);
+    if (!raw || !raw.trim()) return [];
+    return raw.split(',').map((tag) => tag.trim()).filter(Boolean);
+  }
+
   function getBaseColor(urlOrString) {
     let url;
     try {
@@ -242,7 +255,7 @@ export function createColorPaletteParamApi() {
     return normalizeHex(raw.trim());
   }
 
-  function setOnUrl(url, colors, { merge = 'replace', name } = {}) {
+  function setOnUrl(url, colors, { merge = 'replace', name, tags } = {}) {
     const normalized = colors
       .map((c) => normalizeHex(c))
       .filter(Boolean)
@@ -263,17 +276,41 @@ export function createColorPaletteParamApi() {
     if (name) {
       url.searchParams.set(PARAM_PALETTE_NAME, name);
     }
+
+    if (Array.isArray(tags) && tags.length) {
+      const normalizedTags = tags
+        .map((tag) => String(tag || '').trim())
+        .filter(Boolean);
+      if (normalizedTags.length) {
+        url.searchParams.set(PARAM_PALETTE_TAGS, normalizedTags.join(','));
+      }
+    }
   }
 
   return {
     getResolvedPalette,
     getResolvedPaletteName,
+    getResolvedPaletteTags,
     getBaseColor,
     setOnUrl,
     PARAM_NAME,
     PARAM_PALETTE_NAME,
+    PARAM_PALETTE_TAGS,
     PARAM_BASE_COLOR,
   };
+}
+
+export function buildColorToolUrl(href, { colors, name, tags } = {}, base = window.location.origin) {
+  if (!colors?.length) return null;
+  const url = new URL(href, base);
+  createColorPaletteParamApi().setOnUrl(url, colors, { name, tags });
+  return url.toString();
+}
+
+export function navigateToColorTool(href, options = {}) {
+  const target = buildColorToolUrl(href, options);
+  if (!target) return;
+  window.location.href = target;
 }
 
 export function buildPaletteEditUrl(basePath, colors, name) {
