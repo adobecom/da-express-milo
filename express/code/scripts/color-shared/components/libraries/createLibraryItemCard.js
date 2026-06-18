@@ -3,6 +3,7 @@ import { createPaletteStrip, PALETTE_STRIP_VARIANTS } from '../../palettes/palet
 import { gradientToBackgroundImage } from '../gradients/gradient-strip.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
 import { createLibraryAccessibilityMenu } from './createLibraryAccessibilityMenu.js';
+import { createLibraryDownloadMenu } from './createLibraryDownloadMenu.js';
 
 function interpolate(template, vars = {}) {
   return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
@@ -46,12 +47,9 @@ function buildActions(item, name, strings, emit, payload, toolHrefs) {
     actions.appendChild(accessMenu.element);
   }
 
+  actions.appendChild(createLibraryDownloadMenu({ item, strings }).element);
+
   const defs = [
-    {
-      icon: createSpIconButton('sp-icon-download'),
-      label: interpolate(strings.librariesDownloadAria, { name }),
-      onClick: () => emit('item-download', payload),
-    },
     {
       icon: createSpIconButton('sp-icon-delete'),
       label: interpolate(strings.librariesDeleteAria, { name }),
