@@ -17,6 +17,6 @@ export default function decorate(block) {
   auxCol.className = 'font-generator-col font-generator-col--aux';
 
   grid.append(sideCol, mainCol, auxCol);
-  block.append(grid);
+  block.replaceChildren(grid);
   block.classList.remove('loading');
 }
