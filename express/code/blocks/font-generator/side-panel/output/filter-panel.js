@@ -173,8 +173,12 @@ function initCloseButton(panel) {
 }
 
 // Escape closes the drawer when it is open. No-op at >=1440px, where the panel
-// is inline and filtersOpen never gets set true.
+// is inline and filtersOpen never gets set true. Registered once per page
+// regardless of how many filter panels are mounted.
+let escapeListenerAttached = false;
 function initEscapeToClose() {
+  if (escapeListenerAttached) return;
+  escapeListenerAttached = true;
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && getState().filtersOpen) {
       setState({ filtersOpen: false });
@@ -191,10 +195,10 @@ export function createFilterPanel(config = {}) {
   populatePromo(panel, config);
   populateCategories(panel, config.categoryStyles ?? {});
   panel.classList.toggle('is-loading', getState().loading);
-  subscribe((state) => {
+  const unsubscribe = subscribe((state) => {
     syncOpenState(panel, state.filtersOpen);
     panel.classList.toggle('is-loading', state.loading);
   });
   initEscapeToClose();
-  return panel;
+  return { panel, unsubscribe };
 }
