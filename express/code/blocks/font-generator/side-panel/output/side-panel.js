@@ -1,8 +1,9 @@
-import { getState, subscribe } from '../../state.js';
+import { getState, setState, subscribe } from '../../state.js';
 
 const BASE_PATH = '/express/code/blocks/font-generator/side-panel';
-
 const STYLESHEET_HREF = `${BASE_PATH}/output/side-panel.css`;
+const MAX_LENGTH = 200;
+const DEBOUNCE_MS = 300;
 
 function injectStyles() {
   if (document.querySelector(`link[href="${STYLESHEET_HREF}"]`)) return;
@@ -12,14 +13,32 @@ function injectStyles() {
   document.head.appendChild(link);
 }
 
+function debounce(fn, ms) {
+  let timer;
+  return (...args) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn(...args), ms);
+  };
+}
+
+function updateUrlText(text) {
+  const url = new URL(window.location.href);
+  if (text) {
+    url.searchParams.set('text', text);
+  } else {
+    url.searchParams.delete('text');
+  }
+  window.history.replaceState(null, '', url);
+}
+
 const template = document.createElement('template');
 template.innerHTML = `<div class="font-generator-side">
   <div class="text-field">
     <div class="text-area-l-in-line">
       <div class="field">
-        <textarea class="label" placeholder="Type the preview text you want to get started..." maxlength="200"></textarea>
+        <textarea class="label" placeholder="Type the preview text you want to get started..." maxlength="${MAX_LENGTH}" aria-label="Preview text input"></textarea>
         <div class="counter-expander">
-          <div class="character-count">0/200</div>
+          <div class="character-count">0/${MAX_LENGTH}</div>
         </div>
         <div class="resize-handle" aria-hidden="true"></div>
       </div>
@@ -36,6 +55,9 @@ template.innerHTML = `<div class="font-generator-side">
 function buildSuggestionPill(text) {
   const pill = document.createElement('div');
   pill.className = 'tag-pills';
+  pill.setAttribute('role', 'button');
+  pill.setAttribute('tabindex', '0');
+  pill.setAttribute('aria-label', text);
   const tag = document.createElement('div');
   tag.className = 'tag-m';
   const content = document.createElement('div');
@@ -83,13 +105,30 @@ function initResizeHandle(panel) {
   });
 }
 
-function initTextAreaCounter(panel) {
+function syncCounter(textarea, counter) {
+  counter.textContent = `${textarea.value.length}/${textarea.maxLength}`;
+}
+
+function initTextInput(panel) {
   const textarea = panel.querySelector('textarea.label');
   const counter = panel.querySelector('.character-count');
   if (!textarea || !counter) return;
-  const max = textarea.maxLength;
+
+  // Restore state set by initFromUrl before this panel was created.
+  const initial = getState().previewText;
+  if (initial) {
+    textarea.value = initial;
+    syncCounter(textarea, counter);
+  }
+
+  const flush = debounce((value) => {
+    setState({ previewText: value });
+    updateUrlText(value);
+  }, DEBOUNCE_MS);
+
   textarea.addEventListener('input', () => {
-    counter.textContent = `${textarea.value.length}/${max}`;
+    syncCounter(textarea, counter);
+    flush(textarea.value);
   });
 }
 
@@ -98,13 +137,29 @@ function initSuggestionPills(panel) {
   const counter = panel.querySelector('.character-count');
   if (!textarea) return;
 
-  panel.querySelector('.tags-wrap')?.addEventListener('click', (e) => {
+  const activate = (pill) => {
+    const text = pill.querySelector('.div')?.textContent ?? '';
+    const truncated = text.slice(0, MAX_LENGTH);
+    textarea.value = truncated;
+    if (counter) syncCounter(textarea, counter);
+    setState({ previewText: truncated });
+    updateUrlText(truncated);
+  };
+
+  const wrap = panel.querySelector('.tags-wrap');
+  if (!wrap) return;
+
+  wrap.addEventListener('click', (e) => {
+    const pill = e.target.closest('.tag-pills');
+    if (pill) activate(pill);
+  });
+
+  wrap.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
     const pill = e.target.closest('.tag-pills');
     if (!pill) return;
-    const text = pill.querySelector('.div')?.textContent ?? '';
-    textarea.value = text;
-    if (counter) counter.textContent = `${text.length}/${textarea.maxLength}`;
-    textarea.dispatchEvent(new Event('input'));
+    e.preventDefault();
+    activate(pill);
   });
 }
 
@@ -112,7 +167,7 @@ export function createSidePanel(config = {}) {
   injectStyles();
   const panel = template.content.firstElementChild.cloneNode(true);
   initResizeHandle(panel);
-  initTextAreaCounter(panel);
+  initTextInput(panel);
   populateSuggestions(panel, config.suggestions);
   initSuggestionPills(panel);
   panel.classList.toggle('is-loading', getState().loading);

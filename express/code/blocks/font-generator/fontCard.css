@@ -1,0 +1,64 @@
+.font-card {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  min-height: 120px;
+  transition: box-shadow 0.15s ease;
+}
+
+.font-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.font-card-preview {
+  flex: 1;
+  overflow: hidden;
+  word-break: break-word;
+  line-height: 1.3;
+  padding-bottom: 12px;
+  color: #131313;
+}
+
+.font-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px solid #e9e9e9;
+  padding-top: 8px;
+  min-height: 32px;
+}
+
+.font-card-name {
+  font-family: "Adobe Clean Spectrum VF", Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #505050;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+.font-card-copy {
+  flex-shrink: 0;
+  padding: 4px 12px;
+  border: 1px solid #e9e9e9;
+  border-radius: 16px;
+  background: #ffffff;
+  font-family: "Adobe Clean Spectrum VF", Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: #131313;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background-color 0.1s ease;
+}
+
+.font-card-copy:hover {
+  background-color: #e9e9e9;
+}
