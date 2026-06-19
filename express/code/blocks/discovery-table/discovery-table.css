@@ -15,6 +15,7 @@
   --border-radius-table: 8px;
   --transition-standard: 0.15s ease-out;
   --gnav-offset-height: 40px;
+  --dt-sticky-offset: 0px;
 
   padding: 40px 0px 40px 16px;
 }
@@ -29,9 +30,10 @@
   gap: 16px;
   padding: 8px 16px 8px 0;
   position: sticky;
-  top: var(--gnav-offset-height);
+  top: calc(var(--gnav-offset-height) + var(--dt-sticky-offset, 0px));
   z-index: 1;
   background: white;
+  box-shadow: 0 2px 0 0 #fff;
 
   border-left: 1px solid white
 }
@@ -125,7 +127,8 @@
   border-bottom: 1px solid var(--color-gray-300);
   /* Borders on cells (not tr) so they travel with the sticky header row. */
   position: sticky;
-  top: calc(var(--gnav-offset-height) + var(--dt-section-header-h, 0px));
+  top: calc(var(--gnav-offset-height) + var(--dt-sticky-offset, 0px) + var(--dt-section-header-h, 0px));
+  transform: translateY(2px);
   z-index: 2;
 }
 
@@ -201,7 +204,7 @@
    transparent corner-radius arcs show this white instead of scrolling rows. */
 .dt-header-cover {
   position: sticky;
-  top: 80px;
+  top: calc(var(--gnav-offset-height) + var(--dt-sticky-offset, 0px) + var(--dt-section-header-h, 0px));
   height: 0;
 
   overflow: visible;
@@ -220,7 +223,7 @@
 
 .dt-header-cover-right {
   position: sticky;
-  top: 80px;
+  top: calc(var(--gnav-offset-height) + var(--dt-sticky-offset, 0px) + var(--dt-section-header-h, 0px));
   height: 0;
   width: 100%;
   overflow: visible;
@@ -253,10 +256,10 @@
 
 .dt-table th.dt-label-col {
   text-align: left;
-  
+  box-sizing: border-box;
   font-weight: normal;
   background: var(--color-white);
-  padding: 18px 24px;
+  padding: 16px;
   vertical-align: middle;
 }
 
@@ -289,7 +292,8 @@
 /* ── Data cells ──────────────────────────────────────────────────────────── */
 
 .dt-table td.dt-data-col {
-  padding: 18px 24px;
+  padding: 16px;
+  box-sizing: border-box;
   text-align: left;
   vertical-align: middle;
   font-size: 14px;
@@ -317,12 +321,17 @@
      settles with a 16px gap to the device edge when fully scrolled. */
   .dt-table-container {
     overflow: visible;
+    padding-top: 2px;
     clip-path: inset(0 0 0 0 round var(--border-radius-table));
   }
 
   .dt-table {
     table-layout: fixed;
     transition: transform 0.3s ease;
+  }
+
+  .dt-table thead tr {
+    padding-top: 2px;
   }
 
   /* Label column stays visually pinned via JS counter-transform.
@@ -352,9 +361,12 @@
   }
 
   .dt-table thead th,
-  .dt-table th.dt-label-col,
+  .dt-table th.dt-label-col {
+    padding: 12px 16px;
+    box-sizing: border-box;
+  }
   .dt-table td.dt-data-col {
-    padding: 16px 12px;
+    padding: 12px;
     box-sizing: border-box;
   }
 
@@ -389,18 +401,27 @@
 @media (min-width: 768px) {
 
   main .section.long-form .discovery-table {
-    padding: 0 var(--spacing-600) 0;
+    padding: 40px var(--spacing-600);
     width: var(--ax-grid-8-col-width);
     margin: 0 auto;
     box-sizing: border-box;
   }
 
-.dt-table td.dt-data-col,
-  .dt-table th.dt-label-col {
-    padding: var(--spacing-300) var(--spacing-200);
+  .dt-table {
+    table-layout: fixed;
   }
 
-  
+  .dt-table thead th,
+  .dt-table th.dt-label-col {
+    padding: 12px 16px;
+    box-sizing: border-box;
+  }
+
+  .dt-table td.dt-data-col {
+    padding: 12px 16px;
+    box-sizing: border-box;
+  }
+
   .discovery-table {
     padding: 40px 0;
   }
@@ -428,13 +449,40 @@
   }
 }
 
+@media (min-width: 900px) {
+  .discovery-table {
+    --gnav-offset-height: 63px;
+  }
+}
+
 @media (min-width: 1024px) {
   main .section.long-form .discovery-table {
     max-width: var(--ax-grid-7-col-width);
     margin-left: calc(var(--ax-grid-3-col-width) + var(--spacing-600) + var(--ax-grid-gutter));
     margin-right: auto;
-    padding: 0 var(--spacing-600) 0;
+    padding: 40px var(--spacing-600);
   }
+
+
+  .dt-table td.dt-data-col {
+    padding: 16px;
+    box-sizing: border-box;
+  }
+  .dt-table {
+    table-layout: auto;
+  }
+
+  .dt-table thead th,
+  .dt-table th.dt-label-col {
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .dt-table td.dt-data-col {
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
   .dt-table th.dt-label-col {
     width: 160px;
   }
@@ -448,6 +496,25 @@ line-height: 130%; /* 28.6px */
   }
 }
 
+
+/* ── Short table (≤ 5 rows): disable sticky header ───────────────────────── */
+
+.discovery-table.dt-short .dt-section-header {
+  position: relative;
+  top: auto;
+  box-shadow: none;
+}
+
+.discovery-table.dt-short .dt-table thead th {
+  position: relative;
+  top: auto;
+}
+
+.discovery-table.dt-short .dt-header-cover,
+.discovery-table.dt-short .dt-header-cover-right {
+  position: relative;
+  top: auto;
+}
 
 @media (min-width: 1680px) {
   main .section.long-form .discovery-table {

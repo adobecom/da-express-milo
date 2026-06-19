@@ -196,7 +196,10 @@ function initCarousel(block) {
     if (dataColW === 0) return;
     const offset = index * dataColW;
     table.style.transform = `translateX(-${offset}px)`;
-    labelColCells.forEach((cell) => { cell.style.transform = `translateX(${offset}px)`; });
+    labelColCells.forEach((cell) => {
+      const y = cell.closest('thead') ? ' translateY(2px)' : '';
+      cell.style.transform = `translateX(${offset}px)${y}`;
+    });
     if (headerCover) headerCover.style.transform = `translateX(${offset}px)`;
     if (headerCoverRight) headerCoverRight.style.transform = `translateX(${offset + 300}px)`;
   }
@@ -339,6 +342,8 @@ export default function decorate(block) {
 
   const table = tableContainer.querySelector('.dt-table');
   labelCells(table);
+
+  if (dataRows.length <= 5) block.classList.add('dt-short');
 
   const headerCover = document.createElement('div');
   headerCover.className = 'dt-header-cover';
