@@ -7,6 +7,7 @@ let state = {
   previewText: '',
   activeFilters: [],
   filtersOpen: false,
+  loading: false,
   layout: DEFAULT_LAYOUT,
   fontSize: DEFAULT_FONT_SIZE,
   activeFonts: [],
