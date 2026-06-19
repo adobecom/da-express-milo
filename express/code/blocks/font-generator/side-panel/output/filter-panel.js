@@ -1,5 +1,5 @@
 import { transformText, getFontById, getCategories } from '../../unicodeEngine.js';
-import { setState, subscribe } from '../../state.js';
+import { getState, setState, subscribe } from '../../state.js';
 
 const FONT_SHEET_PATH = '/express/code/blocks/font-generator/font-sheets/v2/v2.json';
 const BASE_PATH = '/express/code/blocks/font-generator/side-panel';
@@ -16,6 +16,9 @@ function injectStyles() {
 
 const template = document.createElement('template');
 template.innerHTML = `<div class="filter-panel">
+  <button class="filter-panel-close" type="button" aria-label="Close">
+    <svg class="filter-panel-close-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+  </button>
   <div class="div-2">
     <div class="categories-accordian">
       <div class="div-2">
@@ -160,13 +163,32 @@ function syncOpenState(panel, filtersOpen) {
   panel.classList.toggle('is-open', Boolean(filtersOpen));
 }
 
+// The close (×) button dismisses the drawer. Hidden via CSS at >=1440px.
+function initCloseButton(panel) {
+  panel.querySelector('.filter-panel-close')?.addEventListener('click', () => {
+    setState({ filtersOpen: false });
+  });
+}
+
+// Escape closes the drawer when it is open. No-op at >=1440px, where the panel
+// is inline and filtersOpen never gets set true.
+function initEscapeToClose() {
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && getState().filtersOpen) {
+      setState({ filtersOpen: false });
+    }
+  });
+}
+
 export function createFilterPanel(config = {}) {
   injectStyles();
   const panel = template.content.firstElementChild.cloneNode(true);
   initCategorySelection(panel);
   initAccordion(panel);
+  initCloseButton(panel);
   populatePromo(panel, config);
   populateCategories(panel, config.categoryStyles ?? {});
   subscribe((state) => syncOpenState(panel, state.filtersOpen));
+  initEscapeToClose();
   return panel;
 }

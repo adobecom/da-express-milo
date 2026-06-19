@@ -31,17 +31,32 @@ function extractContent(block) {
   };
 }
 
+async function getPlaceholder(key) {
+  const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+  const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
+  return replaceKey(key, getConfig());
+}
+
 // Async-enhances the trigger label from placeholders so it stays translatable;
 // keeps the authored fallback if the 'filter' placeholder is not defined.
 async function localizeFilterTrigger(button) {
   try {
-    const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
-    const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
-    const label = await replaceKey('filter', getConfig());
+    const label = await getPlaceholder('filter');
     if (label) {
       button.textContent = label;
       button.setAttribute('aria-label', label);
     }
+  } catch (e) {
+    // Placeholder lookup unavailable — keep the fallback label.
+  }
+}
+
+// The drawer close button is icon-only; localize its accessible name, keeping
+// the 'Close' fallback if the placeholder is undefined.
+async function localizeCloseButton(button) {
+  try {
+    const label = await getPlaceholder('close');
+    if (label) button.setAttribute('aria-label', label);
   } catch (e) {
     // Placeholder lookup unavailable — keep the fallback label.
   }
@@ -89,6 +104,9 @@ export default function decorate(block) {
     categoryStyles: CATEGORY_STYLES,
   });
   filterPanel.id = panelId;
+
+  const closeButton = filterPanel.querySelector('.filter-panel-close');
+  if (closeButton) localizeCloseButton(closeButton);
 
   sideCol.append(
     createSidePanel({ suggestions: content.suggestions }),
