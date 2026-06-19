@@ -466,7 +466,9 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
         destURL.searchParams.set('entryPoint', entryPoint);
       }
       destURL.hash = '';
-    } catch { /* ignore — destURL fallback is already set */ }
+    } catch { 
+      /* ignore — destURL fallback is already set */ 
+    }
   }
   const params = buildSUSIParams({
     client_id, variant, destURL, locale, title, popup, responseType: 'token',
