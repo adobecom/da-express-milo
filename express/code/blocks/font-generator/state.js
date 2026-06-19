@@ -6,6 +6,7 @@ import { INITIAL_VISIBLE_COUNT, DEFAULT_LAYOUT, DEFAULT_FONT_SIZE } from './type
 let state = {
   previewText: '',
   activeFilters: [],
+  filtersOpen: false,
   layout: DEFAULT_LAYOUT,
   fontSize: DEFAULT_FONT_SIZE,
   activeFonts: [],

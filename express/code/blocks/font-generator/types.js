@@ -128,10 +128,13 @@ export const FONT_SIZE_MAX = 48;
  *
  * `activeFonts` is derived — do not pass it to setState.
  * `visibleCount` resets to INITIAL_VISIBLE_COUNT whenever activeFilters changes.
+ * `filtersOpen` toggles the mobile/tablet filter panel; ignored at >=1440px
+ * where filters are inline.
  *
  * @typedef {{
  *   previewText: string;
  *   activeFilters: string[];
+ *   filtersOpen: boolean;
  *   layout: 'grid' | 'list';
  *   fontSize: number;
  *   activeFonts: FontDef[];
@@ -193,11 +196,13 @@ export const FONT_SIZE_MAX = 48;
  */
 
 /**
- * Filters initializer receives a NodeList because two instances are mounted:
- * one for desktop inline, one inside the mobile/tablet panel.
+ * A single filter panel instance (categories accordion + promo) is mounted in
+ * the side column. CSS repositions it per breakpoint: inline at >=1440px, a
+ * left drawer on tablet, a bottom sheet on mobile. Open/closed below 1440px is
+ * driven by state.filtersOpen, toggled from the Filter trigger button.
  *
  * @callback FiltersInit
- * @param {NodeListOf<HTMLElement>} elements
+ * @param {HTMLElement} element
  * @returns {void}
  */
 
