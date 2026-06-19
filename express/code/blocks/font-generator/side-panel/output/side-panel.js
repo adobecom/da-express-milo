@@ -1,3 +1,5 @@
+import { getState, setState, subscribe } from '../../state.js';
+
 const BASE_PATH = '/express/code/blocks/font-generator/side-panel';
 
 const STYLESHEET_HREF = `${BASE_PATH}/output/side-panel.css`;
@@ -113,5 +115,7 @@ export function createSidePanel(config = {}) {
   initTextAreaCounter(panel);
   populateSuggestions(panel, config.suggestions);
   initSuggestionPills(panel);
+  panel.classList.toggle('is-loading', getState().loading);
+  subscribe(({ loading }) => panel.classList.toggle('is-loading', loading));
   return panel;
 }

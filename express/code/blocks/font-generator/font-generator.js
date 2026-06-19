@@ -91,8 +91,9 @@ function createFilterTrigger(panelId) {
 }
 
 export default function decorate(block) {
-  setState({ loading: true });
-  subscribe(({ loading }) => block.classList.toggle('loading', loading));
+  const loading = new URLSearchParams(window.location.search).has('loading');
+  setState({ loading });
+  subscribe(({ loading: l }) => block.classList.toggle('loading', l));
 
   const content = extractContent(block);
 
@@ -127,5 +128,4 @@ export default function decorate(block) {
 
   grid.append(sideCol, mainCol, auxCol);
   block.replaceChildren(grid);
-  setState({ loading: false });
 }

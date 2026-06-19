@@ -1,7 +1,3 @@
-.font-generator.loading > div {
-  display: none;
-}
-
 /*
  * Up to 1440px the layout is a single column: the side panel (preview input +
  * suggestions) sits full-width on top of the results below it. At 1440px+ it

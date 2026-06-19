@@ -190,7 +190,11 @@ export function createFilterPanel(config = {}) {
   initCloseButton(panel);
   populatePromo(panel, config);
   populateCategories(panel, config.categoryStyles ?? {});
-  subscribe((state) => syncOpenState(panel, state.filtersOpen));
+  panel.classList.toggle('is-loading', getState().loading);
+  subscribe((state) => {
+    syncOpenState(panel, state.filtersOpen);
+    panel.classList.toggle('is-loading', state.loading);
+  });
   initEscapeToClose();
   return panel;
 }
