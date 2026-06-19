@@ -3,7 +3,11 @@ import { createSidePanel } from './side-panel/output/side-panel.js';
 import { createFilterPanel } from './side-panel/output/filter-panel.js';
 import { getState, setState, subscribe } from './state.js';
 
-const CATEGORY_STYLES = { all: 'bold-script', glitch: 'strikethrough', 'symbol': 'weights' };
+const CATEGORY_STYLES = {
+  all: { fontId: 'bold-script' },
+  glitch: { fontId: 'strikethrough' },
+  'symbol': { fontId: 'weights', fontSize: 12 },
+};
 
 let filterPanelCount = 0;
 

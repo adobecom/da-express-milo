@@ -59,7 +59,7 @@ async function fetchFontSheet() {
   return res.json();
 }
 
-function buildCategoryCell(stylizedText) {
+function buildCategoryCell(stylizedText, fontSize) {
   const cell = document.createElement('div');
   cell.className = 'font-category-cell';
   const inner = document.createElement('div');
@@ -67,6 +67,7 @@ function buildCategoryCell(stylizedText) {
   const label = document.createElement('div');
   label.className = 'label-3';
   label.textContent = stylizedText;
+  if (fontSize) label.style.fontSize = `${fontSize}px`;
   inner.append(label);
   cell.append(inner);
   return cell;
@@ -129,12 +130,13 @@ async function populateCategories(panel, categoryStyles = {}) {
   const sheet = await fetchFontSheet();
   if (!sheet?.fonts) return;
 
-  const allStyleId = categoryStyles.all;
-  if (allStyleId) {
-    const allFontDef = getFontById(sheet.fonts, allStyleId);
+  const allStyle = categoryStyles.all ?? {};
+  if (allStyle.fontId) {
+    const allFontDef = getFontById(sheet.fonts, allStyle.fontId);
     const allLabel = panel.querySelector('.font-category .label-2');
     if (allFontDef && allLabel) {
       allLabel.textContent = transformText(allLabel.textContent, allFontDef);
+      if (allStyle.fontSize) allLabel.style.fontSize = `${allStyle.fontSize}px`;
     }
   }
 
@@ -144,10 +146,10 @@ async function populateCategories(panel, categoryStyles = {}) {
 
   const cells = [];
   for (const { category, fontId } of categories) {
-    const overrideId = categoryStyles[category.toLowerCase()];
-    const resolvedFontDef = getFontById(sheet.fonts, overrideId ?? fontId);
+    const styleConfig = categoryStyles[category.toLowerCase()] ?? {};
+    const resolvedFontDef = getFontById(sheet.fonts, styleConfig.fontId ?? fontId);
     const stylizedText = resolvedFontDef ? transformText(category, resolvedFontDef) : category;
-    const cell = buildCategoryCell(stylizedText);
+    const cell = buildCategoryCell(stylizedText, styleConfig.fontSize);
     cell.addEventListener('click', () => selectCategory(panel, cell, category));
     grid.append(cell);
     cells.push(cell);
