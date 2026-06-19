@@ -191,9 +191,18 @@ function initAccordion(panel) {
   header.addEventListener('click', () => accordion.classList.toggle('is-collapsed'));
 }
 
-async function populateCategories(panel) {
+async function populateCategories(panel, categoryStyles = {}) {
   const sheet = await fetchFontSheet();
   if (!sheet?.fonts) return;
+
+  const allStyleId = categoryStyles.all;
+  if (allStyleId) {
+    const allFontDef = getFontById(sheet.fonts, allStyleId);
+    const allLabel = panel.querySelector('.font-category .label-2');
+    if (allFontDef && allLabel) {
+      allLabel.textContent = transformText(allLabel.textContent, allFontDef);
+    }
+  }
 
   const categories = getCategories(sheet.fonts);
   const grid = panel.querySelector('.descoped-categories');
@@ -201,8 +210,9 @@ async function populateCategories(panel) {
 
   const cells = [];
   for (const { category, fontId } of categories) {
-    const fontDef = getFontById(sheet.fonts, fontId);
-    const stylizedText = fontDef ? transformText(category, fontDef) : category;
+    const overrideId = categoryStyles[category.toLowerCase()];
+    const resolvedFontDef = getFontById(sheet.fonts, overrideId ?? fontId);
+    const stylizedText = resolvedFontDef ? transformText(category, resolvedFontDef) : category;
     const cell = buildCategoryCell(stylizedText);
     cell.addEventListener('click', () => selectCategory(panel, cell, category));
     grid.append(cell);
@@ -212,7 +222,7 @@ async function populateCategories(panel) {
   requestAnimationFrame(() => cells.forEach(fitLabelToCell));
 }
 
-export function createSidePanel() {
+export function createSidePanel(config = {}) {
   injectStyles();
   const panel = template.content.firstElementChild.cloneNode(true);
   initResizeHandle(panel);
@@ -220,6 +230,6 @@ export function createSidePanel() {
   initCategorySelection(panel);
   initSuggestionPills(panel);
   initAccordion(panel);
-  populateCategories(panel);
+  populateCategories(panel, config.categoryStyles ?? {});
   return panel;
 }

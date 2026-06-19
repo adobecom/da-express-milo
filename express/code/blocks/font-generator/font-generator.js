@@ -8,7 +8,7 @@ export default function decorate(block) {
 
   const sideCol = document.createElement('div');
   sideCol.className = 'font-generator-col font-generator-col--side';
-  sideCol.append(createSidePanel());
+  sideCol.append(createSidePanel({ categoryStyles: { all: 'bold-script', 'symbol text': 'weights' } }));
 
   const mainCol = document.createElement('div');
   mainCol.className = 'font-generator-col font-generator-col--main';
