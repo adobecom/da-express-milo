@@ -59,7 +59,7 @@ async function getDestURL(url) {
     if (['new.express.adobe.com', 'express.adobe.com'].includes(destURL.hostname)) {
       destURL.hostname = 'stage.projectx.corp.adobe.com';
     }
-    if (destURL.hostname === 'adobesparkpost.app.link') {
+    if (destURL.hostname === 'adobesparkpost.app.link' && !destURL.pathname.includes('/color-palette')) {
       destURL.pathname = '1F048UHIAVb';
     }
   }
