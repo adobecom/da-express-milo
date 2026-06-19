@@ -45,7 +45,7 @@
   .filter-panel {
     top: 0;
     right: auto;
-    width: min(360px, 85vw);
+    width: max(511px, 40vw);
     max-height: none;
     border-radius: 0 var(--spacing-radius-corner-radius-corner-radius-200)
       var(--spacing-radius-corner-radius-corner-radius-200) 0;
@@ -376,6 +376,8 @@
     var(--buttons-text-text-left-padding);
   position: relative;
   flex: 0 0 auto;
+
+  
 }
 
 .filter-panel .text {
