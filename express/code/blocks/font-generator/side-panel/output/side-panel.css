@@ -694,7 +694,15 @@
   font-style: var(--express-web-label-bold-label-m-font-style);
 }
 
-.font-generator-side .button {
+/*
+ * The promo CTA is an <a class="button">, so Milo's global button styles
+ * (`main a.button:any-link` and its :hover/:active/:focus rules in
+ * styles.css — specificity up to 0,3,2) match it and inject border-radius,
+ * margin, padding, display and an accent background. Mirror that selector
+ * shape with our two scoping ancestors to reach 0,4,1 and win the cascade;
+ * `all: unset` then clears the injected box-model/border so our pill renders.
+ */
+.font-generator-side .sticky-promo a.button:any-link {
   all: unset;
   box-sizing: border-box;
   display: inline-flex;
