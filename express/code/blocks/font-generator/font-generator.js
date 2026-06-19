@@ -66,6 +66,36 @@ async function localizeCloseButton(button) {
   }
 }
 
+async function localizeAccordionTitle(panel) {
+  try {
+    const label = await getPlaceholder('categories');
+    const title = panel.querySelector('.title');
+    if (title) title.textContent = label || 'Categories';
+  } catch (e) {
+    // keep fallback
+  }
+}
+
+async function localizeTryThese(panel) {
+  try {
+    const label = await getPlaceholder('try-these');
+    const wrapper = panel.querySelector('.text-wrapper');
+    if (wrapper) wrapper.textContent = label || 'Try these:';
+  } catch (e) {
+    // keep fallback
+  }
+}
+
+async function localizeTextareaPlaceholder(panel) {
+  try {
+    const label = await getPlaceholder('font-generator-placeholder');
+    const textarea = panel.querySelector('textarea.label');
+    if (textarea) textarea.placeholder = label || 'Type the preview text you want to get started...';
+  } catch (e) {
+    // keep fallback
+  }
+}
+
 // The Filter trigger lives outside the side-panel component. It toggles the
 // shared filter panel through state (state.filtersOpen); the panel subscribes
 // to that flag for its open/closed slide. Hidden via CSS at >=1440px where
@@ -82,18 +112,18 @@ function createFilterTrigger(panelId) {
   button.addEventListener('click', () => {
     setState({ filtersOpen: !getState().filtersOpen });
   });
-  subscribe(({ filtersOpen }) => {
+  const unsubscribe = subscribe(({ filtersOpen }) => {
     button.setAttribute('aria-expanded', String(Boolean(filtersOpen)));
   });
 
   localizeFilterTrigger(button);
-  return button;
+  return { button, unsubscribe };
 }
 
 export default function decorate(block) {
   const loading = new URLSearchParams(window.location.search).has('loading');
+  const unsubscribeBlock = subscribe(({ loading: l }) => block.classList.toggle('loading', l));
   setState({ loading });
-  subscribe(({ loading: l }) => block.classList.toggle('loading', l));
 
   const content = extractContent(block);
 
@@ -104,7 +134,7 @@ export default function decorate(block) {
   sideCol.className = 'font-generator-col font-generator-col--side';
 
   const panelId = `font-generator-filters-${(filterPanelCount += 1)}`;
-  const filterPanel = createFilterPanel({
+  const { panel: filterPanel, unsubscribe: unsubscribeFilter } = createFilterPanel({
     promoTitle: content.promoTitle,
     promoCta: content.promoCta,
     categoryStyles: CATEGORY_STYLES,
@@ -113,12 +143,17 @@ export default function decorate(block) {
 
   const closeButton = filterPanel.querySelector('.filter-panel-close');
   if (closeButton) localizeCloseButton(closeButton);
+  localizeAccordionTitle(filterPanel);
 
-  sideCol.append(
-    createSidePanel({ suggestions: content.suggestions }),
-    createFilterTrigger(panelId),
-    filterPanel,
-  );
+  const { panel: sidePanel, unsubscribe: unsubscribeSide } = createSidePanel({
+    suggestions: content.suggestions,
+  });
+  localizeTryThese(sidePanel);
+  localizeTextareaPlaceholder(sidePanel);
+
+  const { button: filterTrigger, unsubscribe: unsubscribeTrigger } = createFilterTrigger(panelId);
+
+  sideCol.append(sidePanel, filterTrigger, filterPanel);
 
   const mainCol = document.createElement('div');
   mainCol.className = 'font-generator-col font-generator-col--main';
@@ -128,4 +163,21 @@ export default function decorate(block) {
 
   grid.append(sideCol, mainCol, auxCol);
   block.replaceChildren(grid);
+
+  const cleanup = () => {
+    unsubscribeBlock();
+    unsubscribeFilter();
+    unsubscribeSide();
+    unsubscribeTrigger();
+  };
+  const parent = block.parentElement;
+  if (parent) {
+    const observer = new MutationObserver(() => {
+      if (!block.isConnected) {
+        cleanup();
+        observer.disconnect();
+      }
+    });
+    observer.observe(parent, { childList: true });
+  }
 }

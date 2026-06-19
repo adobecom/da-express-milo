@@ -1,4 +1,4 @@
-import { getState, setState, subscribe } from '../../state.js';
+import { getState, subscribe } from '../../state.js';
 
 const BASE_PATH = '/express/code/blocks/font-generator/side-panel';
 
@@ -116,6 +116,6 @@ export function createSidePanel(config = {}) {
   populateSuggestions(panel, config.suggestions);
   initSuggestionPills(panel);
   panel.classList.toggle('is-loading', getState().loading);
-  subscribe(({ loading }) => panel.classList.toggle('is-loading', loading));
-  return panel;
+  const unsubscribe = subscribe(({ loading }) => panel.classList.toggle('is-loading', loading));
+  return { panel, unsubscribe };
 }
