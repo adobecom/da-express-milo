@@ -470,6 +470,16 @@ const listenAlloy = () => {
 
 async function loadPage() {
   if (window.isTestEnv) return;
+
+  // Start the content-replace fetch in parallel with Milo utils so its network
+  // round-trip overlaps the eager bootstrap instead of adding a serial hop on the
+  // mobile LCP critical path. Execution order is unchanged (still awaited below).
+  const needsContentReplace = getMetadata('sheet-powered') === 'Y'
+    || window.location.href.includes('/express/templates/');
+  const replaceContentPromise = needsContentReplace
+    ? import('./utils/content-replace.js')
+    : null;
+
   const {
     loadArea,
     loadStyle,
@@ -509,8 +519,8 @@ async function loadPage() {
   // TODO remove metadata after we go live
   getMetadata('gnav-source') || document.head.append(createTag('meta', { name: 'gnav-source', content: `${config.locale.prefix}/express/localnav-express` }));
 
-  if (getMetadata('sheet-powered') === 'Y' || window.location.href.includes('/express/templates/')) {
-    const { default: replaceContent } = await import('./utils/content-replace.js');
+  if (replaceContentPromise) {
+    const { default: replaceContent } = await replaceContentPromise;
     await replaceContent(document.querySelector('main'));
   }
   // Decorate the page with site specific needs.
