@@ -204,10 +204,9 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding: 8px 8px 16px;
+  padding: 8px 0px 16px 8px;
   position: relative;
   align-self: stretch;
-  width: 100%;
   flex: 0 0 auto;
 }
 
@@ -423,6 +422,50 @@
   letter-spacing: 0;
   line-height: 18px;
   white-space: nowrap;
+}
+
+/* ─── Loading skeleton ────────────────────────────────────────────────────── */
+
+.filter-panel.is-loading .chevron,
+.filter-panel.is-loading .text-stack,
+.filter-panel.is-loading .font-category,
+.filter-panel.is-loading .font-category-cell,
+.filter-panel.is-loading .sticky-promo {
+  border-radius: var(--Corner-radius-corner-radius-200, 16px);
+  background: linear-gradient(90deg, var(--S2AC-Palette-gray-300, #DADADA) 0%, var(--S2AC-Palette-gray-400, #C6C6C6) 0%, var(--S2AC-Palette-gray-300, #DADADA) 100%), var(--white, #FFF);
+  box-shadow: 0 4px 12px 0 var(--Alias-drop-shadow-ambient, rgba(0, 0, 0, 0.08));
+}
+
+.filter-panel.is-loading .chevron {
+  width: 17px;
+  height: 18px;
+  padding: 0;
+  flex: 0 0 17px;
+  align-self: center;
+}
+
+.filter-panel.is-loading .text-stack {
+  width: 82px;
+  height: 18px;
+  padding: 0;
+  flex: 0 0 82px;
+  align-self: center;
+  margin-left: 7px;
+}
+
+.filter-panel.is-loading .chevron *,
+.filter-panel.is-loading .text-stack *,
+.filter-panel.is-loading .font-category *,
+.filter-panel.is-loading .font-category-cell *,
+.filter-panel.is-loading .sticky-promo * {
+  visibility: hidden;
+}
+
+/* `all: unset` on a.button resets visibility to `inherit`; since nothing sets
+   visibility on .sticky-promo itself the button stays visible as a black blob.
+   Re-apply with matching specificity (0,4,1) so this rule wins by cascade order. */
+.filter-panel.is-loading .sticky-promo a.button:any-link {
+  visibility: hidden;
 }
 
 /* Mobile-only sticky-promo tweaks. */

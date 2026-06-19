@@ -421,3 +421,15 @@
   width: 62px;
   height: 45px;
 }
+
+/* ─── Loading skeleton ────────────────────────────────────────────────────── */
+
+.font-generator-side.is-loading .text-field {
+  border-radius: var(--Corner-radius-corner-radius-200, 16px);
+  background: linear-gradient(90deg, var(--S2AC-Palette-gray-300, #DADADA) 0%, var(--S2AC-Palette-gray-400, #C6C6C6) 0%, var(--S2AC-Palette-gray-300, #DADADA) 100%), var(--white, #FFF);
+  box-shadow: 0 4px 12px 0 var(--Alias-drop-shadow-ambient, rgba(0, 0, 0, 0.08));
+}
+
+.font-generator-side.is-loading .text-field * {
+  visibility: hidden;
+}
