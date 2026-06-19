@@ -4,20 +4,14 @@ import { setState } from '../../state.js';
 const FONT_SHEET_PATH = '/express/code/blocks/font-generator/font-sheets/v2/v2.json';
 const BASE_PATH = '/express/code/blocks/font-generator/side-panel';
 
-const CSS_DEPS = [
-  `${BASE_PATH}/globals.css`,
-  `${BASE_PATH}/styleguide.css`,
-  `${BASE_PATH}/styles.css`,
-];
+const STYLESHEET_HREF = `${BASE_PATH}/output/side-panel.css`;
 
 function injectStyles() {
-  CSS_DEPS.forEach((href) => {
-    if (document.querySelector(`link[href="${href}"]`)) return;
-    const link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = href;
-    document.head.appendChild(link);
-  });
+  if (document.querySelector(`link[href="${STYLESHEET_HREF}"]`)) return;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = STYLESHEET_HREF;
+  document.head.appendChild(link);
 }
 
 const template = document.createElement('template');
@@ -34,15 +28,7 @@ template.innerHTML = `<div class="font-generator-side">
       <div class="suggestions-bar">
         <div class="text-wrapper">Try these:</div>
         <div class="tags-fade">
-          <div class="tags-wrap">
-            <div class="tag-pills"><div class="tag-m"><div class="content"><div class="text-container"><p class="div">The quick brown fox jumps over the lazy dog</p></div></div></div></div>
-            <div class="tag-pills"><div class="tag-m"><div class="content"><div class="text-container"><div class="div">ABCDEFGHIJKLMNOPQRSTUVWXYZ</div></div></div></div></div>
-            <div class="tag-pills"><div class="tag-m"><div class="content"><div class="text-container"><p class="div">Realigned equestrian fez bewilders picky monarch</p></div></div></div></div>
-            <div class="tag-pills"><div class="tag-m"><div class="content"><div class="text-container"><p class="div">Roger, hungry: ate 236 peaches &amp; cantaloupes in 1904!</p></div></div></div></div>
-            <div class="tag-pills"><div class="tag-m"><div class="content"><div class="text-container"><p class="div">Voix ambigu&#235; d&#39;un c&#339;ur qui au z&#233;phyr pr&#233;f&#232;re les jattes de kiwi</p></div></div></div></div>
-            <div class="tag-pills"><div class="tag-m"><div class="content"><div class="text-container"><p class="div">Victor jagt zw&#246;lf Boxk&#228;mpfer quer &#252;ber den gro&#223;en Sylter Deich</p></div></div></div></div>
-            <div class="tag-pills"><div class="tag-m"><div class="content"><div class="text-container"><p class="div">Quiere la boca exhausta vid, kiwi, pi&#241;a y fugaz jam&#243;n</p></div></div></div></div>
-          </div>
+          <div class="tags-wrap"></div>
         </div>
       </div>
     </div>
@@ -73,11 +59,11 @@ template.innerHTML = `<div class="font-generator-side">
   <div class="sticky-promo">
     <div class="font-icon-container">
       <img class="icon-group" src="${BASE_PATH}/icon-example.svg" alt="" aria-hidden="true" />
-      <div class="title-2">Looking for more fonts?</div>
+      <div class="title-2"></div>
     </div>
-    <button class="button" data-buttons-mode="m">
-      <div class="text-frame"><div class="text">Get Adobe Express Free</div></div>
-    </button>
+    <a class="button" data-buttons-mode="m">
+      <div class="text-frame"><div class="text"></div></div>
+    </a>
   </div>
 </div>`;
 
@@ -98,6 +84,43 @@ function buildCategoryCell(stylizedText) {
   inner.append(label);
   cell.append(inner);
   return cell;
+}
+
+function buildSuggestionPill(text) {
+  const pill = document.createElement('div');
+  pill.className = 'tag-pills';
+  const tag = document.createElement('div');
+  tag.className = 'tag-m';
+  const content = document.createElement('div');
+  content.className = 'content';
+  const container = document.createElement('div');
+  container.className = 'text-container';
+  const label = document.createElement('p');
+  label.className = 'div';
+  label.textContent = text;
+  container.append(label);
+  content.append(container);
+  tag.append(content);
+  pill.append(tag);
+  return pill;
+}
+
+function populateSuggestions(panel, suggestions = []) {
+  const wrap = panel.querySelector('.tags-wrap');
+  if (!wrap) return;
+  suggestions.forEach((text) => wrap.append(buildSuggestionPill(text)));
+}
+
+function populatePromo(panel, { promoTitle = '', promoCta = null } = {}) {
+  const title = panel.querySelector('.sticky-promo .title-2');
+  if (title) title.textContent = promoTitle;
+
+  const cta = panel.querySelector('.sticky-promo .button');
+  if (cta && promoCta) {
+    cta.href = promoCta.href;
+    const text = cta.querySelector('.text');
+    if (text) text.textContent = promoCta.text;
+  }
 }
 
 function fitLabelToCell(cell) {
@@ -228,6 +251,8 @@ export function createSidePanel(config = {}) {
   initResizeHandle(panel);
   initTextAreaCounter(panel);
   initCategorySelection(panel);
+  populateSuggestions(panel, config.suggestions);
+  populatePromo(panel, config);
   initSuggestionPills(panel);
   initAccordion(panel);
   populateCategories(panel, config.categoryStyles ?? {});
