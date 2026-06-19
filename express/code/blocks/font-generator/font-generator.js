@@ -1,7 +1,8 @@
 import { getLibs } from '../../scripts/utils.js';
 import { createSidePanel } from './side-panel/output/side-panel.js';
 import { createFilterPanel } from './side-panel/output/filter-panel.js';
-import { getState, setState, subscribe } from './state.js';
+import { getState, setState, subscribe, initFromUrl } from './state.js';
+import { createFontCardGrid } from './fontCardGrid.js';
 
 const CATEGORY_STYLES = {
   all: { fontId: 'bold-script' },
@@ -121,6 +122,9 @@ function createFilterTrigger(panelId) {
 }
 
 export default function decorate(block) {
+  // Restore URL state before any component reads from the store.
+  initFromUrl();
+
   const loading = new URLSearchParams(window.location.search).has('loading');
   const unsubscribeBlock = subscribe(({ loading: l }) => block.classList.toggle('loading', l));
   setState({ loading });
@@ -158,17 +162,21 @@ export default function decorate(block) {
   const mainCol = document.createElement('div');
   mainCol.className = 'font-generator-col font-generator-col--main';
 
-  const auxCol = document.createElement('div');
-  auxCol.className = 'font-generator-col font-generator-col--aux';
-
-  grid.append(sideCol, mainCol, auxCol);
+  grid.append(sideCol, mainCol);
   block.replaceChildren(grid);
+
+  let unsubscribeGrid = () => {};
+  createFontCardGrid().then(({ container, unsubscribe }) => {
+    unsubscribeGrid = unsubscribe;
+    mainCol.append(container);
+  });
 
   const cleanup = () => {
     unsubscribeBlock();
     unsubscribeFilter();
     unsubscribeSide();
     unsubscribeTrigger();
+    unsubscribeGrid();
   };
   const parent = block.parentElement;
   if (parent) {

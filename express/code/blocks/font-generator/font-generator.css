@@ -43,11 +43,7 @@
   }
 
   .font-generator-col--main {
-    grid-column: span 4;
-  }
-
-  .font-generator-col--aux {
-    grid-column: span 4;
+    grid-column: span 8;
   }
 
   .font-generator-filter-trigger {
