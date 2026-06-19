@@ -718,4 +718,45 @@
   }
 }
 
+/* ─── full-bleed variant ─────────────────────────────────────────────────── */
+
+/* Block stretches to section width so the viewport-bleed calc works correctly */
+.template-x-carousel-toolbar.full-bleed {
+  max-width: unset;
+  /* gallery expansion is now vertical-only; horizontal overflow goes to viewport */
+  padding-bottom: 0;
+}
+
+/* Gallery breaks out of its container to span the full viewport width */
+.template-x-carousel-toolbar.full-bleed .gallery {
+  /* Reset the existing negative-margin bleed and restore with viewport bleed */
+  margin-top: 0;
+  margin-right: 0;
+  margin-bottom: 0;
+  margin-left: calc(50% - 50vw);
+  width: 100vw;
+  padding-top: var(--template-expand-top-len);
+  padding-bottom: var(--template-expand-bot-len);
+  padding-left: var(--gallery-offset);
+  padding-right: var(--gallery-offset);
+  scroll-padding-left: var(--gallery-offset);
+}
+
+/* Nav buttons sit below the carousel, centered */
+.template-x-carousel-toolbar.full-bleed .gallery-control {
+  display: flex;
+  justify-content: center;
+  margin-top: var(--spacing-300);
+}
+
+/* ─── seo-links variant ──────────────────────────────────────────────────── */
+
+.template-x-carousel-toolbar.seo-links .seo-links-carousel {
+  padding: 0 var(--spacing-200);
+}
+
+.template-x-carousel-toolbar.seo-links .seo-links-carousel a.button.secondary {
+  margin: var(--spacing-80) 0;
+  white-space: nowrap;
+}
 
