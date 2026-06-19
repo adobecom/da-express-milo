@@ -3159,7 +3159,7 @@
     },
     {
       "id": "fading-effect",
-      "grouping": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Fading effect",
       "fontSupported": "gothic-a1",
       "type": "pattern-map",
@@ -3237,8 +3237,7 @@
           "5": "5",
           "6": "6",
           "7": "7",
-          "8": "8",
-          "9": "9"
+          "8": "8"
         },
         "specialCharacters": {
           "!": "!",
@@ -3274,13 +3273,15 @@
       },
       "missingCharacters": {
         "letters": [],
-        "numbers": [],
+        "numbers": [
+          "9"
+        ],
         "specialCharacters": []
       }
     },
     {
       "id": "arrows",
-      "grouping": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Arrows",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -3289,9 +3290,9 @@
         "hasStartPattern": true,
         "hasRepeatingMiddlePattern": true,
         "hasEndPattern": true,
-        "startPattern": "»»»",
-        "repeatingMiddlePattern": "»»",
-        "endPattern": "»»»",
+        "startPattern": "»»»»",
+        "repeatingMiddlePattern": "»»»",
+        "endPattern": "»»»»",
         "byCategory": {}
       },
       "characters": {
@@ -3401,7 +3402,7 @@
     },
     {
       "id": "cupido",
-      "grouping": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Cupido",
       "fontSupported": "gothic-a1",
       "type": "pattern-map",
@@ -3522,7 +3523,7 @@
     },
     {
       "id": "sparkles",
-      "grouping": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Sparkles",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -3643,7 +3644,7 @@
     },
     {
       "id": "finish",
-      "grouping": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Finish",
       "fontSupported": "gothic-a1",
       "type": "pattern-map",
@@ -3764,7 +3765,7 @@
     },
     {
       "id": "barcode",
-      "grouping": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Barcode",
       "fontSupported": "gothic-a1",
       "type": "pattern-map",
@@ -3885,7 +3886,7 @@
     },
     {
       "id": "weights",
-      "grouping": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Weights",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
