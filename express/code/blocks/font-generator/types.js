@@ -134,6 +134,7 @@ export const FONT_SIZE_MAX = 48;
  *   previewText: string;
  *   activeFilters: string[];
  *   filtersOpen: boolean;
+ *   loading: boolean;
  *   layout: 'grid' | 'list';
  *   fontSize: number;
  *   activeFonts: FontDef[];
