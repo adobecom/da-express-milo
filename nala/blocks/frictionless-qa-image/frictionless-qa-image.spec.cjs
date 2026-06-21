@@ -4,7 +4,7 @@ module.exports = {
     {
       tcid: '0',
       name: '@frictionless-qa-image Remove background',
-      path: '/drafts/nala/test-gen/frictionless-qa-image/fqa-image-remove-background',
+      path: '/drafts/nala/blocks/frictionless-qa-image/fqa-image-remove-background',
       data: {
         h1Text: 'Remove the background',
         p1Text: 'Easily remove the background from images in Adobe Express, the quick and easy create-anything app. Continue editing your image in Adobe Express to quickly change the background, add graphics, and more.',
@@ -17,7 +17,7 @@ module.exports = {
     {
       tcid: '1',
       name: '@frictionless-qa-image Resize image',
-      path: '/drafts/nala/test-gen/frictionless-qa-image/fqa-image-resize',
+      path: '/drafts/nala/blocks/frictionless-qa-image/fqa-image-resize',
       data: {
         h1Text: 'Free image resizer.',
         p1Text: 'Easily resize your images in one click using Adobe Express, the quick and easy create-anything app. Use the online photo resizer to instantly change the dimensions of any image to share across your social channels.',
@@ -30,7 +30,7 @@ module.exports = {
     {
       tcid: '2',
       name: '@frictionless-qa-image Convert to JPG',
-      path: '/drafts/nala/test-gen/frictionless-qa-image/fqa-image-convert-to-jpg',
+      path: '/drafts/nala/blocks/frictionless-qa-image/fqa-image-convert-to-jpg',
       data: {
         h1Text: 'PNG to JPG converter.',
         p1Text: 'Use our fast, easy, and free online image converter to convert from PNG to JPG in seconds',
@@ -43,7 +43,7 @@ module.exports = {
     {
       tcid: '3',
       name: '@frictionless-qa-image Convert to PNG',
-      path: '/drafts/nala/test-gen/frictionless-qa-image/fqa-image-convert-to-png',
+      path: '/drafts/nala/blocks/frictionless-qa-image/fqa-image-convert-to-png',
       data: {
         h1Text: 'Convert your JPG to PNG in a snap.',
         p1Text: 'Convert to PNG in seconds with the Adobe Express free online JPG to PNG converter.',
@@ -56,7 +56,7 @@ module.exports = {
     {
       tcid: '4',
       name: '@frictionless-qa-image Convert to SVG',
-      path: '/drafts/nala/test-gen/frictionless-qa-image/fqa-image-convert-to-svg',
+      path: '/drafts/nala/blocks/frictionless-qa-image/fqa-image-convert-to-svg',
       data: {
         h1Text: 'Convert a JPG to SVG for free online.',
         p1Text: 'The free JPG (JPEG) to SVG converter tool from Adobe Express lets you upload your JPEG image and convert it to a vector in seconds.',
@@ -69,7 +69,7 @@ module.exports = {
     {
       tcid: '5',
       name: '@frictionless-qa-image Crop image',
-      path: '/drafts/nala/test-gen/frictionless-qa-image/fqa-image-crop',
+      path: '/drafts/nala/blocks/frictionless-qa-image/fqa-image-crop',
       data: {
         h1Text: 'Free online image cropper.',
         p1Text: 'The online Crop image tool from Adobe Express transforms your images into the perfect size in seconds.',
@@ -82,7 +82,7 @@ module.exports = {
     {
       tcid: '6',
       name: '@frictionless-qa-image Change background',
-      path: '/drafts/nala/test-gen/frictionless-qa-image/fqa-image-change-background',
+      path: '/drafts/nala/blocks/frictionless-qa-image/fqa-image-change-background',
       data: {
         h1Text: 'Free AI background changer.',
         p1Text: 'Use the AI background changer to remove blurry or distracting backgrounds in an instant. Swap it out with tons of Adobe Express backgrounds, your own images, and more.',

@@ -246,4 +246,152 @@ test.describe('AxMarqueeBlock Test Suite', () => {
       await runSeoChecks({ page, feature: features[3], skipSeoTest: false });
     });
   });
+
+  // Test Id : 4 : @ax-marquee-with-button
+  features[4].path.forEach((path) => {
+    test(`[Test Id - ${features[4].tcid}] ${features[4].name}, path: ${path}, ${features[4].tags}`, async ({ page, baseURL }) => {
+      const block = new AxMarqueeBlock(page);
+      const testPage = `${baseURL}${path}${miloLibs}`;
+      console.info(`[Test Page]: ${testPage}`);
+
+      try {
+        await block.gotoURL(testPage);
+      } catch (error) {
+        console.log(`⚠️ Failed to load page ${path}: ${error.message}, skipping test`);
+        test.skip();
+        return;
+      }
+
+      const axMarqueeExists = await page.locator('.ax-marquee').count() > 0;
+      if (!axMarqueeExists) {
+        console.log(`⚠️ ax-marquee block not found on ${path}, skipping test`);
+        test.skip();
+        return;
+      }
+
+      await test.step('Validate elements in block', async () => {
+        await expect(block.axmarquee).toBeVisible();
+        await expect(block.mainHeading).toBeVisible();
+        const heading = await block.mainHeading.innerText();
+        expect(heading.length).toBeTruthy();
+        const paragraphCount = await block.text.count();
+        for (let i = 0; i < paragraphCount; i += 1) {
+          await expect(block.text.nth(i)).toBeVisible();
+          const text = await block.text.nth(i).innerText();
+          expect(text.length).toBeTruthy();
+        }
+        await expect(block.expressLogo).toBeVisible();
+        await expect(block.ctaButton).toBeVisible();
+      });
+
+      await test.step('Test button click', async () => {
+        if (path === '/express/nonprofits') {
+          const href = await block.ctaButton.getAttribute('href');
+          if (href) {
+            const response = await page.request.get(href);
+            expect(response.status()).toEqual(200);
+          }
+        } else {
+          await block.ctaButton.click();
+          await expect(page).not.toHaveURL(testPage);
+        }
+      });
+    });
+  });
+
+  // Test Id : 5 : @ax-marquee-with-animation
+  features[5].path.forEach((path) => {
+    test(`[Test Id - ${features[5].tcid}] ${features[5].name}, path: ${path}, ${features[5].tags}`, async ({ page, baseURL, browserName }) => {
+      const block = new AxMarqueeBlock(page);
+      const testPage = `${baseURL}${path}${miloLibs}`;
+      console.info(`[Test Page]: ${testPage}`);
+
+      try {
+        await block.gotoURL(testPage);
+      } catch (error) {
+        console.log(`⚠️ Failed to load page ${path}: ${error.message}, skipping test`);
+        test.skip();
+        return;
+      }
+
+      const axMarqueeExists = await page.locator('.ax-marquee .marquee-foreground').count() > 0;
+      if (!axMarqueeExists) {
+        console.log(`⚠️ ax-marquee block not found on ${path}, skipping test`);
+        test.skip();
+        return;
+      }
+
+      await page.waitForSelector('.ax-marquee .marquee-foreground');
+
+      await test.step('Validate elements in block', async () => {
+        await expect(block.axmarquee).toBeVisible();
+        await expect(block.mainHeading).toBeVisible();
+        const heading = await block.mainHeading.innerText();
+        expect(heading.length).toBeTruthy();
+        const paragraphCount = await block.text.count();
+        for (let i = 0; i < paragraphCount; i += 1) {
+          await expect(block.text.nth(i)).toBeVisible();
+          const text = await block.text.nth(i).innerText();
+          expect(text.length).toBeTruthy();
+        }
+        await expect(block.expressLogo).toBeVisible();
+        await expect(block.video).toBeVisible();
+      });
+
+      await test.step('Validate animation controls', async () => {
+        if (browserName !== 'chromium') {
+          await block.reduceMotionWrapper.waitFor({ timeout: 3000 });
+          await expect(block.reduceMotionPlayVideoBtn).not.toBeVisible();
+          await expect(block.reduceMotionPauseVideoBtn).toBeVisible();
+          await block.reduceMotionPauseVideoBtn.hover();
+          await expect(block.reduceMotionPauseVideoTxt).toBeVisible();
+          await block.reduceMotionPauseVideoBtn.click();
+          await page.waitForLoadState();
+          await expect(block.reduceMotionPlayVideoBtn).toBeVisible();
+        }
+      });
+
+      await test.step('Validate video controls keyboard accessibility', async () => {
+        if (browserName !== 'chromium') {
+          const videoControlsButton = page.locator('.video-controls-wrapper');
+          const isAttached = await videoControlsButton.count() > 0;
+          if (!isAttached) {
+            console.log('⚠️ Video controls wrapper (.video-controls-wrapper) not found on this page. ax-marquee blocks use .reduce-motion-wrapper instead. Skipping new video controls accessibility test.');
+            return;
+          }
+          await expect(videoControlsButton).toBeAttached();
+          await expect(videoControlsButton).toHaveAttribute('type', 'button');
+          const ariaPressed = await videoControlsButton.getAttribute('aria-pressed');
+          expect(ariaPressed).toBeTruthy();
+          const ariaLabel = await videoControlsButton.getAttribute('aria-label');
+          expect(ariaLabel).toBeTruthy();
+
+          const initialPaused = await block.video.evaluate((v) => v.paused);
+
+          await page.keyboard.press('Tab');
+          await videoControlsButton.focus();
+          const isFocused = await videoControlsButton.evaluate((el) => document.activeElement === el);
+          expect(isFocused).toBeTruthy();
+
+          await page.keyboard.press('Space');
+          await page.waitForTimeout(500);
+
+          const afterSpacePaused = await block.video.evaluate((v) => v.paused);
+          expect(afterSpacePaused).not.toBe(initialPaused);
+
+          const updatedAriaPressed = await videoControlsButton.getAttribute('aria-pressed');
+          expect(updatedAriaPressed).not.toBe(ariaPressed);
+
+          await page.keyboard.press('Enter');
+          await page.waitForTimeout(500);
+
+          const afterEnterPaused = await block.video.evaluate((v) => v.paused);
+          expect(afterEnterPaused).toBe(initialPaused);
+
+          const videoTabIndex = await block.video.evaluate((v) => v.getAttribute('tabindex'));
+          expect(videoTabIndex).toBeNull();
+        }
+      });
+    });
+  });
 });

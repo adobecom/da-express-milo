@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@ax-columns-fullsize-width-2-columns",
       "selector": "div.ax-columns.fullsize.width-2-columns",
-      "path": "/drafts/nala/test-gen/ax-columns/ax-columns-fullsize",
+      "path": "/drafts/nala/blocks/ax-columns/ax-columns-fullsize",
       "data": {
         "semantic": {
           "texts": [
@@ -101,7 +101,7 @@
       "tcid": "1",
       "name": "@ax-columns-fullsize-center-fullsize-center-width-2-columns",
       "selector": "div.ax-columns.fullsize-center.fullsize.center.width-2-columns",
-      "path": "/drafts/nala/test-gen/ax-columns/ax-columns-fullsize",
+      "path": "/drafts/nala/blocks/ax-columns/ax-columns-fullsize",
       "data": {
         "semantic": {
           "texts": [
@@ -142,7 +142,7 @@
               "selector": "a.quick-link.button.accent.xlarge.primaryCTA",
               "nth": 0,
               "text": "Create now",
-              "href": "/ofMwpW35Avb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-columns%2Fax-columns-fullsize&placement=ax-columns-2&locale=en-US&contentRegion=us",
+              "href": "/ofMwpW35Avb?url=%2Fdrafts%2Fnala%2Fblocks%2Fax-columns%2Fax-columns-fullsize&placement=ax-columns-2&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "Create now",
@@ -161,7 +161,7 @@
       "tcid": "2",
       "name": "@ax-columns-numbered-30-numbered-30-width-2-columns",
       "selector": "div.ax-columns.numbered-30.numbered.width-2-columns",
-      "path": "/drafts/nala/test-gen/ax-columns/ax-columns-numbered",
+      "path": "/drafts/nala/blocks/ax-columns/ax-columns-numbered",
       "data": {
         "semantic": {
           "texts": [
@@ -295,7 +295,7 @@
       "tcid": "3",
       "name": "@ax-columns-fullsize-two-ctas-width-2-columns",
       "selector": "div.ax-columns.fullsize.width-2-columns:has(.button-container.two-ctas)",
-      "path": "/drafts/nala/test-gen/ax-columns/ax-columns-fullsize-two-ctas",
+      "path": "/drafts/nala/blocks/ax-columns/ax-columns-fullsize-two-ctas",
       "data": {
         "semantic": {
           "texts": [
@@ -357,16 +357,69 @@
     {
       "tcid": "4",
       "name": "@ax-columns-center",
+      "selector": "div.ax-columns.center",
       "path": "/drafts/nala/blocks/ax-columns-center",
       "data": {
-        "h2Text": "3 of 10: A mini campaign",
-        "p1Text": "Once your long-form content is done,",
-        "p2Text": "Best for:",
-        "imageCount": 4
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "3 of 10: A mini campaign",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Once your long-form content is done, use Adobe Express to create the promotion for it. Mix images, text and graphics to make a series of social graphics that tease users about what\u2019s coming soon. You can even create posts with quotes from the piece itself, and the date the content will launch. Use Resize to make versions of your post in the correct aspect ratio for the various platforms you\u2019re creating for and maximize your efficiency.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 1,
+              "tag": "p",
+              "text": "Best for:",
+              "markup": "strong"
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_143e27c4fad87b848f7ceddd07b24335694a97963.png?width=750&format=png&optimize=medium",
+              "alt": "Icon: instagram"
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_143e27c4fad87b848f7ceddd07b24335694a97963.png?width=750&format=png&optimize=medium",
+              "alt": "Icon: facebook"
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_143e27c4fad87b848f7ceddd07b24335694a97963.png?width=750&format=png&optimize=medium",
+              "alt": "Icon: twitter"
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_143e27c4fad87b848f7ceddd07b24335694a97963.png?width=750&format=png&optimize=medium",
+              "alt": "Icon: youtube"
+            }
+          ],
+          "interactives": []
+        }
       },
       "tags": [
-        "@ax-column",
-        "@ax-column-center",
+        "@ax-columns",
+        "@ax-columns-center",
         "@express",
         "@smoke",
         "@regression",
@@ -376,18 +429,123 @@
     {
       "tcid": "5",
       "name": "@ax-columns-highlight",
-      "path": "/drafts/nala/blocks/ax-columns/ax-column-highlight",
+      "selector": "div.ax-columns.highlight",
+      "path": "/drafts/nala/blocks/ax-columns/ax-columns-highlight",
       "data": {
-        "h4Text": "Cambodian Children's Fund ",
-        "p1Text": "Check out the organization transforming the lives of marginalized children to create generational change",
-        "buttonText": "Watch now"
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h4",
+              "nth": 0,
+              "tag": "h4",
+              "text": "Cambodian Children\u2019s Fund",
+              "markup": "em>strong"
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Check out the organization transforming the lives of marginalized children to create generational change.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Watch now",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_191fa7df5e54b57c0579b9d38ef40bd810ca04bb7.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            }
+          ],
+          "interactives": [
+            {
+              "type": "video-link",
+              "selector": "a.button.accent",
+              "nth": 0,
+              "text": "Watch now",
+              "href": "/express/media_1bdeb527206079834097f5bde3296254c7bcccc60.m3u8",
+              "ariaLabel": "Watch now Cambodian Children\u2019s Fund",
+              "rel": "nofollow",
+              "title": "Watch now",
+              "target": null
+            }
+          ]
+        }
       },
       "tags": [
-        "@ax-column-highlight",
+        "@ax-columns-highlight",
         "@express",
         "@smoke",
         "@regression",
         "@t2"
+      ]
+    },
+    {
+      "tcid": "6",
+      "name": "@ax-columns-highlight-width-2-columns",
+      "selector": "div.ax-columns.highlight.width-2-columns",
+      "path": "/drafts/nala/blocks/ax-columns/ax-columns-highlight",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h4",
+              "nth": 0,
+              "tag": "h4",
+              "text": "Cambodian Children’s Fund",
+              "markup": "em>strong"
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Check out the organization transforming the lives of marginalized children to create generational change.",
+              "markup": null
+            },
+            {
+              "selector": "p.button-container",
+              "nth": 0,
+              "tag": "p",
+              "text": "Watch now",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_191fa7df5e54b57c0579b9d38ef40bd810ca04bb7.jpg?width=750&format=jpg&optimize=medium",
+              "alt": "Inserting image..."
+            }
+          ],
+          "interactives": [
+            {
+              "type": "video-link",
+              "selector": "a.button.accent",
+              "nth": 0,
+              "text": "Watch now",
+              "href": "/express/media_1bdeb527206079834097f5bde3296254c7bcccc60.m3u8",
+              "ariaLabel": "Watch now Cambodian Children’s Fund",
+              "rel": "nofollow",
+              "title": "Watch now",
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@ax-columns",
+        "@highlight-width-2-columns",
+        "@express"
       ]
     }
   ]

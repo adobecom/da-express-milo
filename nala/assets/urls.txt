@@ -1,170 +1,173 @@
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/app-ratings/app-ratings
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ai-credits-cards/pricing-cards-credits
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/app-ratings/app-ratings
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-columns/ax-columns-fullsize
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-columns/ax-columns-fullsize-two-ctas
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-columns/ax-columns-numbered
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-columns/ax-columns-highlight
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-columns/ax-columns-fullsize
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-columns/ax-columns-fullsize-two-ctas
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-columns/ax-columns-numbered
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-default
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-dark
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-short
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee/ax-marquee-narrow
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-default
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-dark
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-short
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-narrow
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee/ax-marquee-animation
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-panels/ax-panels
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-panels/ax-panels
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-marquee-dynamic-hero/ax-marquee-dynamic-hero
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-marquee-dynamic-hero/ax-marquee-dynamic-hero
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-table-of-contents/ax-table-of-contents
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-table-of-contents/ax-table-of-contents
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-banner/ax-banner-default
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-banner/ax-banner-light
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-banner/ax-banner-standout
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-banner/ax-banner-cool
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-banner/ax-banner-default
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-banner/ax-banner-light
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-banner/ax-banner-standout
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-banner/ax-banner-cool
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/banner-bg/banner-bg
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/banner-bg/banner-bg
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/blog-article-marquee/default
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/blog-feature-marquee/default
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/blog-posts/blog-posts
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/blog-posts/blog-posts
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/blog-posts-v2/blog-post-v2
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/blog-posts-v2/blog-post-v2
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-browse-by-category/ax-browse-by-category-default
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-browse-by-category/ax-browse-by-category-card
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-browse-by-category/ax-browse-by-category-fullwidth
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-browse-by-category/ax-browse-by-category-default
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-browse-by-category/ax-browse-by-category-card
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-browse-by-category/ax-browse-by-category-fullwidth
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-cards/cards-dark
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-cards/card-half-card
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-cards/ax-cards-default
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-cards/cards-dark
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-cards/card-half-card
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-cards/ax-cards-default
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/collapsible-cards/collapsible-card
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/collapsible-cards/collapsible-card
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/collapsible-rows/collapsible-rows
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/collapsible-rows/collapsible-rows
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color-wheel
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/content-toggle/content-toggle
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/content-toggle/content-toggle
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/content-toggle-v2/content-toggle-v2
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/content-toggle-v2/content-toggle-v2
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/cta-cards/cta-cards
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/cta-cards/cta-cards
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-quick-action
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-gen-ai
-https://main--da-express-milo--adobecom.aem.page/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-quick-action-gen-ai
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-gen-ai-upload
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-cta-carousel/cta-carousel-create
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-cta-carousel/cta-carousel-quick-action
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-cta-carousel/cta-carousel-gen-ai
+https://main--da-express-milo--adobecom.aem.page/drafts/nala/blocks/ax-cta-carousel/cta-carousel-quick-action-gen-ai
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-cta-carousel/cta-carousel-gen-ai-upload
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/embed/embed
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/embed/embed
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/faq/faq
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/faq/faq
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-feature-grid/4-cards
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-feature-grid/4-cards
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-feature-list/feature-list
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-feature-list/feature-list
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-floating-buttons/floating-buttons
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-floating-buttons/floating-buttons
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/floating-panel/floating-panel
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/floating-panel/floating-panel
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-remove-background
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-resize
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-convert-to-jpg
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-convert-to-png
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-convert-to-svg
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-crop
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/frictionless-qa-image/fqa-image-change-background
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/frictionless-qa-image/fqa-image-remove-background
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/frictionless-qa-image/fqa-image-resize
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/frictionless-qa-image/fqa-image-convert-to-jpg
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/frictionless-qa-image/fqa-image-convert-to-png
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/frictionless-qa-image/fqa-image-convert-to-svg
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/frictionless-qa-image/fqa-image-crop
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/frictionless-qa-image/fqa-image-change-background
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-fullscreen-marquee/fullscreen-marquee-image
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-fullscreen-marquee/fullscreen-marquee-video
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-fullscreen-marquee/fullscreen-marquee-image
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-fullscreen-marquee/fullscreen-marquee-video
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-gen-ai-cards/gen-ai-cards
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-gen-ai-cards/gen-ai-cards
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/headline/headline
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/headline/headline-business-hub
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/headline/headline
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/headline/headline-business-hub
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/highlight/highlight
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/highlight/highlight
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-blade/holiday-blade
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-blade/holiday-blade-still
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-blade/holiday-blade-premium
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-blade/holiday-blade-light
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-blade/holiday-blade-free
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/holiday-blade/holiday-blade-animated
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/holiday-blade/holiday-blade
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/holiday-blade/holiday-blade-still
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/holiday-blade/holiday-blade-premium
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/holiday-blade/holiday-blade-light
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/holiday-blade/holiday-blade-free
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/holiday-blade/holiday-blade-animated
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/hero-color
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/hero-color
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/hover-cards/hover-cards
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/hover-cards/hover-cards
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-how-to-cards/how-to-cards
-https://main--da-express-milo--adobecom.aem.page/drafts/nala/test-gen/ax-how-to-cards/how-to-cards-schema
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-how-to-cards/how-to-cards-center
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-how-to-cards/how-to-cards
+https://main--da-express-milo--adobecom.aem.page/drafts/nala/blocks/ax-how-to-cards/how-to-cards-schema
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-how-to-cards/how-to-cards-center
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-cards/how-to-cards-summary
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-steps-carousel/how-to-steps-carousel-image-schema
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/how-to-v3/how-to-v3
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-v3/how-to-v3
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/interactive-marquee/interactive-marquee
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/interactive-marquee/interactive-marquee-square
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/interactive-marquee/interactive-marquee-quad-dark 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/interactive-marquee/interactive-marquee-quad-dark-no-search
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/interactive-marquee/interactive-marquee-tall-dark
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/interactive-marquee/interactive-marquee-wide-dark
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/interactive-marquee/interactive-marquee
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/interactive-marquee/interactive-marquee-square
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/interactive-marquee/interactive-marquee-quad-dark 
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/interactive-marquee/interactive-marquee-quad-dark-no-search
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/interactive-marquee/interactive-marquee-tall-dark
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/interactive-marquee/interactive-marquee-wide-dark
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/link-blade/link-blade
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/link-blade/link-blade
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/link-list/link-list
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/link-list/link-list-shaded
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/link-list/link-list-noarrows
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/link-list/link-list-leftalign
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/link-list/link-list-large-shaded-centered
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/link-list/link-list-large
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/link-list/link-list-center
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/link-list/link-list
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/link-list/link-list-shaded
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/link-list/link-list-noarrows
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/link-list/link-list-leftalign
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/link-list/link-list-large-shaded-centered
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/link-list/link-list-large
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/link-list/link-list-center
 
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/list/list
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/list/list
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/login-page/login-page
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/make-a-project/make-a-project
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/make-a-project/make-a-project-centered
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/make-a-project/make-a-project
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/make-a-project/make-a-project-centered
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/page-list/page-list
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/page-list/page-list
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/playlist/playlist
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/playlist/playlist
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/pricing-cards/pricing-cards
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/pricing-cards/pricing-cards
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/pricing-table/pricing-table-1-col
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/pricing-table/pricing-table-2-col
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/pricing-table/pricing-table-3-col
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/pricing-table/pricing-table-1-col
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/pricing-table/pricing-table-2-col
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/pricing-table/pricing-table-3-col
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ai-credits-cards/pricing-cards-credits
+// https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ai-credits-cards/pricing-cards-credits
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/quick-action-hub/quick-action-hub
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/quick-action-hub/quick-action-hub
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ratings/ratings
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ratings/ratings-show-average
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ratings/ratings
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ratings/ratings-show-average
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/ax-ribbon-banner/ribbon-banner
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/ax-ribbon-banner/ribbon-banner
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/seo-nav/seo-nav
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/steps/steps
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/steps/steps-dark
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/steps/steps-highlight
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/steps/steps-schema
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/steps/steps
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/steps/steps-dark
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/steps/steps-highlight
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/steps/steps-schema
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/sticky-promo-bar/sticky-promo-bar
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/sticky-promo-bar/sticky-promo-bar-rounded
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/sticky-promo-bar/sticky-promo-bar-rounded-loadinbody
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/sticky-promo-bar/sticky-promo-bar
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/sticky-promo-bar/sticky-promo-bar-rounded
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/sticky-promo-bar/sticky-promo-bar-rounded-loadinbody
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/submit-email/submit-email
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/submit-email/submit-email
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/susi-light/susi-light
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/susi-light/susi-light-tabs
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/susi-light/susi-light
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/susi-light/susi-light-tabs
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/tabs-ax/tabs-ax
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/tabs-ax/tabs-ax-l-spacing
@@ -173,17 +176,17 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/tabs-ax/tabs
 https://main--da-express-milo--adobecom.aem.page/drafts/nala/blocks/tabs-ax/tabs-ax-s-spacing
 
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/text/text
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/text/text-block-2-up
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/text/text-center
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/text/text-lockup
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/text/text
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/text/text-block-2-up
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/text/text-center
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/text/text-lockup
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/toc-seo/toc-seo
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/toc-seo/toc-seo-blog
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/toggle-bar/toggle-bar
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/toggle-bar/toggle-bar-sticky
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/toggle-bar/toggle-bar-float-sticky
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/toggle-bar/toggle-bar
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/toggle-bar/toggle-bar-sticky
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/toggle-bar/toggle-bar-float-sticky
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/tutorials/tutorials
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/tutorials/tutorials-twoperrow
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/tutorials/tutorials
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/tutorials/tutorials-twoperrow
