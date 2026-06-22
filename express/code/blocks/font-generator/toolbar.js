@@ -133,7 +133,7 @@ export function createToolbar() {
   const sliderLabel = document.createElement('label');
   sliderLabel.className = 'toolbar-slider-label';
   sliderLabel.htmlFor = sliderId;
-  sliderLabel.textContent = 'Size';
+  sliderLabel.textContent = 'Preview font size';
 
   const sliderValue = document.createElement('span');
   sliderValue.className = 'toolbar-slider-value';
@@ -146,7 +146,7 @@ export function createToolbar() {
   slider.max = String(FONT_SIZE_MAX);
   slider.step = '1';
 
-  rightGroup.append(sliderLabel, sliderValue, slider);
+  rightGroup.append(sliderLabel, slider, sliderValue);
   toolbar.append(leftGroup, rightGroup);
 
   // ── State sync ───────────────────────────────────────────────────────────

@@ -23,20 +23,20 @@
   --desktop-title-s-line-height: 129.99999523162842%;
   --desktop-title-s-font-style: normal;
   --express-web-label-regular-label-m-font-family:
-    "Adobe Clean Spectrum VF", Helvetica;
+    var(--body-font-family);
   --express-web-label-regular-label-m-font-weight: 400;
   --express-web-label-regular-label-m-font-size: 14px;
   --express-web-label-regular-label-m-letter-spacing: 0px;
   --express-web-label-regular-label-m-line-height: 20px;
   --express-web-label-regular-label-m-font-style: normal;
-  --title-s-font-family: "Adobe Clean Spectrum VF", Helvetica;
+  --title-s-font-family: var(--body-font-family);
   --title-s-font-weight: 700;
   --title-s-font-size: 14px;
   --title-s-letter-spacing: 0px;
   --title-s-line-height: 18px;
   --title-s-font-style: normal;
   --express-web-label-bold-label-2xl-font-family:
-    "Adobe Clean Spectrum VF", Helvetica;
+    var(--body-font-family);
   --express-web-label-bold-label-2xl-font-weight: 700;
   --express-web-label-bold-label-2xl-font-size: 20px;
   --express-web-label-bold-label-2xl-letter-spacing: 0px;

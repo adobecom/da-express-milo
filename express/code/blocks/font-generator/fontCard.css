@@ -65,12 +65,12 @@
   border-radius: 6px;
   background: #131313;
   color: #ffffff;
-  font-family: "Adobe Clean Spectrum VF", Helvetica, sans-serif;
+  font-family: var(--body-font-family);
   font-size: 12px;
   font-weight: 400;
   line-height: 16px;
   white-space: nowrap;
-  pointer-events: none;
+  pointer-events: none; 
   opacity: 0;
   transition: opacity 0.1s ease;
   z-index: 10;
@@ -124,7 +124,7 @@
 }
 
 .font-card-copy-message {
-  font-family: "Adobe Clean Spectrum VF", Helvetica, sans-serif;
+  font-family: var(--body-font-family);
   font-size: 16px;
   font-weight: 700;
   color: #ffffff;
@@ -144,7 +144,7 @@
 }
 
 .font-card-name {
-  font-family: "Adobe Clean Spectrum VF", Helvetica, sans-serif;
+  font-family: var(--body-font-family);
   font-size: 12px;
   font-weight: 700;
   color: #505050;
@@ -166,7 +166,7 @@ main a.font-card-cta {
   border-radius: 24px;
   background: #000000d6;
   color: #ffffff;
-  font-family: "Adobe Clean Spectrum VF", Helvetica, sans-serif;
+  font-family: var(--body-font-family);
   font-size: 12px;
   font-weight: 700;
   line-height: 1;
