@@ -1,17 +1,27 @@
 .font-card {
-  position: relative;
   display: flex;
   flex-direction: column;
   background: #ffffff;
   border-radius: 12px;
-  padding: 16px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  min-height: 120px;
+  min-height: 304px;
+  overflow: hidden;
   transition: box-shadow 0.15s ease;
 }
 
 .font-card:hover {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ─── Body (preview area — overlay is bounded here) ──────────────────────── */
+
+.font-card-body {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 16px 12px;
+  overflow: hidden;
 }
 
 /* ─── Copy icon button (upper right) ─────────────────────────────────────── */
@@ -20,6 +30,7 @@
   position: absolute;
   top: 10px;
   right: 10px;
+  z-index: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -70,6 +81,11 @@
   opacity: 1;
 }
 
+/* Hide tooltip while the copied overlay is showing */
+.font-card.is-copied .font-card-copy-btn::after {
+  opacity: 0 !important;
+}
+
 /* ─── Preview text ────────────────────────────────────────────────────────── */
 
 .font-card-preview {
@@ -77,10 +93,42 @@
   overflow: hidden;
   word-break: break-word;
   line-height: 1.3;
-  padding-top: 4px;
   padding-right: 36px; /* clear the copy button */
-  padding-bottom: 12px;
   color: #131313;
+}
+
+/* ─── Copy success overlay ────────────────────────────────────────────────── */
+
+.font-card-copy-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--S2AC-Palette-transparent-black-700, rgba(0, 0, 0, 0.69));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  border-radius: inherit;
+}
+
+.font-card.is-copied .font-card-copy-overlay {
+  opacity: 1;
+}
+
+.font-card-check-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.font-card-copy-message {
+  font-family: "Adobe Clean Spectrum VF", Helvetica, sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
 }
 
 /* ─── Footer (font name + CTA link) ──────────────────────────────────────── */
@@ -91,7 +139,7 @@
   justify-content: space-between;
   gap: 8px;
   border-top: 1px solid #e9e9e9;
-  padding-top: 8px;
+  padding: 8px 16px 16px;
   min-height: 36px;
 }
 

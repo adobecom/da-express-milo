@@ -37,6 +37,46 @@ function makeCopyBtn() {
   return btn;
 }
 
+function makeCheckmarkSvg() {
+  const ns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(ns, 'svg');
+  svg.setAttribute('width', '80');
+  svg.setAttribute('height', '80');
+  svg.setAttribute('viewBox', '0 0 80 80');
+  svg.setAttribute('fill', 'none');
+  svg.setAttribute('aria-hidden', 'true');
+  svg.classList.add('font-card-check-icon');
+
+  const circle = document.createElementNS(ns, 'circle');
+  circle.setAttribute('cx', '40');
+  circle.setAttribute('cy', '40');
+  circle.setAttribute('r', '40');
+  circle.setAttribute('fill', 'white');
+
+  const path = document.createElementNS(ns, 'path');
+  path.setAttribute('d', 'M20 40L34 54L60 26');
+  path.setAttribute('stroke', '#292929');
+  path.setAttribute('stroke-width', '4');
+  path.setAttribute('stroke-linecap', 'round');
+  path.setAttribute('stroke-linejoin', 'round');
+
+  svg.append(circle, path);
+  return svg;
+}
+
+function makeCopyOverlay() {
+  const overlay = document.createElement('div');
+  overlay.className = 'font-card-copy-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+
+  const message = document.createElement('span');
+  message.className = 'font-card-copy-message';
+  message.textContent = 'Text Copied!';
+
+  overlay.append(makeCheckmarkSvg(), message);
+  return overlay;
+}
+
 function makeCtaLink(cardCta) {
   const a = document.createElement('a');
   a.className = 'font-card-cta';
@@ -76,14 +116,22 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta) {
   card.className = 'font-card';
   card.dataset.fontId = fontDef.id;
 
+  // Body wraps preview + copy btn so the overlay is bounded above the footer.
+  const body = document.createElement('div');
+  body.className = 'font-card-body';
+
   const copyBtn = makeCopyBtn();
+  let resetTimer = null;
   copyBtn.addEventListener('click', () => {
     const preview = card.querySelector('.font-card-preview');
     if (!preview) return;
     navigator.clipboard.writeText(preview.textContent).then(() => {
+      card.classList.add('is-copied');
       copyBtn.dataset.tooltip = COPIED_LABEL;
       copyBtn.setAttribute('aria-label', COPIED_LABEL);
-      setTimeout(() => {
+      clearTimeout(resetTimer);
+      resetTimer = setTimeout(() => {
+        card.classList.remove('is-copied');
         copyBtn.dataset.tooltip = COPY_LABEL;
         copyBtn.setAttribute('aria-label', COPY_LABEL);
       }, COPY_RESET_MS);
@@ -95,6 +143,8 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta) {
   preview.style.fontSize = `${fontSize}px`;
   preview.textContent = transformText(text, fontDef);
 
+  body.append(copyBtn, preview, makeCopyOverlay());
+
   const footer = document.createElement('div');
   footer.className = 'font-card-footer';
 
@@ -105,7 +155,7 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta) {
   footer.append(name);
   if (cardCta) footer.append(makeCtaLink(cardCta));
 
-  card.append(copyBtn, preview, footer);
+  card.append(body, footer);
 
   return card;
 }
