@@ -69,8 +69,11 @@ export async function createFontCardGrid(config = {}) {
 
   let prevFilterKey = '';
   let prevVisibleCount = -1;
+  // Track activeFilters reference so we can update activeFonts in state
+  // exactly once per filter change without triggering a render loop.
+  let prevActiveFilters = getState().activeFilters;
 
-  function render({ previewText, fontSize, activeFilters, visibleCount }) {
+  function render({ previewText, fontSize, activeFilters, visibleCount, layout }) {
     const filtered = getFilteredFonts(fonts, activeFilters);
     const visible = filtered.slice(0, visibleCount);
 
@@ -87,6 +90,16 @@ export async function createFontCardGrid(config = {}) {
       prevVisibleCount = visibleCount;
       grid.replaceChildren(...visible.map(({ id }) => cardMap.get(id).card));
       loadMoreBtn.hidden = filtered.length <= visibleCount;
+    }
+
+    // Layout toggle: single class drives the CSS grid switch.
+    grid.classList.toggle('is-list', layout === 'list');
+
+    // Keep activeFonts in sync for the toolbar count. setState triggers one
+    // more subscriber call but filter key won't change, so no loop.
+    if (activeFilters !== prevActiveFilters) {
+      prevActiveFilters = activeFilters;
+      setState({ activeFonts: filtered });
     }
   }
 

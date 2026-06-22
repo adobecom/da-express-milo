@@ -25,6 +25,11 @@
   }
 }
 
+/* Row (list) layout — single column regardless of breakpoint */
+.font-card-grid.is-list {
+  grid-template-columns: 1fr;
+}
+
 .font-card-load-more {
   padding: 10px 24px;
   border: 1px solid #e9e9e9;

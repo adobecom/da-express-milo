@@ -51,11 +51,11 @@ function makeCheckmarkSvg() {
   circle.setAttribute('cx', '40');
   circle.setAttribute('cy', '40');
   circle.setAttribute('r', '40');
-  circle.setAttribute('fill', 'white');
+  circle.setAttribute('fill', 'var(--color-green-900, #05834E)');
 
   const path = document.createElementNS(ns, 'path');
   path.setAttribute('d', 'M20 40L34 54L60 26');
-  path.setAttribute('stroke', '#292929');
+  path.setAttribute('stroke', 'white');
   path.setAttribute('stroke-width', '4');
   path.setAttribute('stroke-linecap', 'round');
   path.setAttribute('stroke-linejoin', 'round');
