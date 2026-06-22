@@ -53,8 +53,14 @@ export async function createFontCardGrid(config = {}) {
   const loadMoreBtn = document.createElement('button');
   loadMoreBtn.type = 'button';
   loadMoreBtn.className = 'font-card-load-more';
-  loadMoreBtn.textContent = 'Load more';
   loadMoreBtn.hidden = true;
+  const loadMoreIcon = document.createElement('span');
+  loadMoreIcon.className = 'load-more-icon';
+  loadMoreIcon.setAttribute('aria-hidden', 'true');
+  const loadMoreText = document.createElement('span');
+  loadMoreText.className = 'load-more-text';
+  loadMoreText.textContent = 'Load more';
+  loadMoreBtn.append(loadMoreIcon, loadMoreText);
 
   // Build all cards once upfront — never recreated, only updated.
   const { previewText: initText, fontSize: initSize } = getState();

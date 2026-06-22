@@ -54,7 +54,32 @@
   height: 20px;
 }
 
-/* CSS tooltip via data-tooltip + ::after */
+/* CSS tooltip via data-tooltip + ::after; caret via ::before */
+
+.font-card-copy-btn::before {
+  content: '';
+  position: absolute;
+  top: calc(100% + 1px);
+  right: 11px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #131313;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  z-index: 10;
+}
+
+.font-card-copy-btn:hover::before,
+.font-card-copy-btn:focus-visible::before {
+  opacity: 1;
+}
+
+.font-card.is-copied .font-card-copy-btn::before {
+  opacity: 0 !important;
+}
 
 .font-card-copy-btn::after {
   content: attr(data-tooltip);

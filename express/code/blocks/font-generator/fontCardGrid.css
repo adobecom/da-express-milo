@@ -31,6 +31,9 @@
 }
 
 .font-card-load-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   padding: 10px 24px;
   border: 1.5px solid #131313;
   border-radius: 24px;
@@ -41,6 +44,22 @@
   color: #131313;
   cursor: pointer;
   transition: background-color 0.1s ease;
+}
+
+.load-more-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  background-color: currentColor;
+  mask-image: url('/express/code/icons/plus-icon.svg');
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  -webkit-mask-image: url('/express/code/icons/plus-icon.svg');
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  flex-shrink: 0;
 }
 
 .font-card-load-more:hover {

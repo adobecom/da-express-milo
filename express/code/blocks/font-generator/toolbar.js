@@ -99,6 +99,11 @@ function makeLayoutBtn(layout, label, icon) {
   return btn;
 }
 
+function setSliderFill(sliderEl, value) {
+  const pct = ((value - FONT_SIZE_MIN) / (FONT_SIZE_MAX - FONT_SIZE_MIN)) * 100;
+  sliderEl.style.setProperty('--fill', `${pct}%`);
+}
+
 export function createToolbar() {
   injectStyles();
 
@@ -160,6 +165,7 @@ export function createToolbar() {
 
     slider.value = String(fontSize);
     sliderValue.textContent = `${fontSize}px`;
+    setSliderFill(slider, fontSize);
 
     count.textContent = `${activeFonts.length} styles`;
   }
@@ -186,6 +192,7 @@ export function createToolbar() {
   slider.addEventListener('input', () => {
     const value = Number(slider.value);
     sliderValue.textContent = `${value}px`;
+    setSliderFill(slider, value);
     flushSize(value);
   });
 
