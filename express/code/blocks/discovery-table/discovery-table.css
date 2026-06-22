@@ -25,7 +25,7 @@
 
 .dt-section-header {
   display: flex;
-  align-items: flex-start;
+  align-items: flex-end;
   justify-content: space-between;
   gap: 16px;
   padding: 8px 16px 8px 0;
@@ -62,7 +62,6 @@
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
-  padding-top: 3px;
 }
 
 .dt-nav-btn {
@@ -161,7 +160,6 @@
 
 .dt-table tbody td,
 .dt-table tbody th {
-  border-bottom: 1px solid var(--color-gray-200);
 }
 
 .dt-table tbody tr:nth-child(even) {
@@ -265,7 +263,6 @@
 
 .dt-table tbody th.dt-label-col {
   border-left: 1px solid var(--color-gray-300);
-  border-bottom: 1px solid var(--color-gray-200);
 }
 
 .dt-table tbody tr:nth-child(even) th.dt-label-col {
@@ -421,7 +418,7 @@
 
   .dt-table thead th,
   .dt-table th.dt-label-col {
-    padding: 12px;
+    padding: 16px;
     box-sizing: border-box;
   }
 
@@ -520,6 +517,22 @@ line-height: 130%; /* 28.6px */
   }
 }
 
+
+/* ── Single data column: no carousel, no shadow, 16px margins both sides ─── */
+
+@media (max-width: 767px) {
+  .discovery-table.dt-single-col {
+    padding-right: 16px;
+  }
+
+  .discovery-table.dt-single-col .dt-carousel-nav {
+    display: none !important;
+  }
+
+  .discovery-table.dt-single-col .dt-table .dt-label-col::after {
+    display: none;
+  }
+}
 
 /* ── Short table (≤ 5 rows): disable sticky header ───────────────────────── */
 

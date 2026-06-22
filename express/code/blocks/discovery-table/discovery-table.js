@@ -344,6 +344,7 @@ export default function decorate(block) {
   labelCells(table);
 
   if (dataRows.length <= 5) block.classList.add('dt-short');
+  if (totalDataCols === 1) block.classList.add('dt-single-col');
 
   const headerCover = document.createElement('div');
   headerCover.className = 'dt-header-cover';
