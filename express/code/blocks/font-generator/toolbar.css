@@ -18,7 +18,7 @@
 .toolbar-layout-group {
   display: flex;
   align-items: center;
-  gap: 0;
+  gap: 4px;
 }
 
 .toolbar-layout-btn {
@@ -29,18 +29,11 @@
   height: 36px;
   padding: 0;
   border: none;
+  border-radius: 8px;
   background: #e9e9e9;
   color: #131313;
   cursor: pointer;
   transition: background-color 0.1s ease, color 0.1s ease;
-}
-
-.toolbar-layout-btn:first-child {
-  border-radius: 8px 0 0 8px;
-}
-
-.toolbar-layout-btn:last-child {
-  border-radius: 0 8px 8px 0;
 }
 
 .toolbar-layout-btn.is-active {
@@ -95,8 +88,12 @@
   appearance: none;
   width: 120px;
   height: 4px;
-  border-radius: 2px;
-  background: #e9e9e9;
+  border-radius: 4px;
+  background: linear-gradient(
+    to right,
+    var(--Palette-gray-700, #505050) var(--fill, 11%),
+    var(--Alias-track-default, #DADADA) var(--fill, 11%)
+  );
   outline: none;
   cursor: pointer;
 }
@@ -107,15 +104,18 @@
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #131313;
+  background: #ffffff;
+  border: 2px solid #131313;
   cursor: pointer;
+  box-sizing: border-box;
 }
 
 .toolbar-slider::-moz-range-thumb {
   width: 16px;
   height: 16px;
-  border: none;
+  border: 2px solid #131313;
   border-radius: 50%;
-  background: #131313;
+  background: #ffffff;
   cursor: pointer;
+  box-sizing: border-box;
 }
