@@ -297,7 +297,7 @@ function initCarousel(block) {
   }
 
   container.addEventListener('pointerdown', (e) => {
-    if (dataColW === 0) return;
+    if (dataColW === 0 || totalCols <= 1) return; // desktop or single column — no swipe
     dragStartX = e.clientX;
     dragStartY = e.clientY;
     lastLiveDx = 0;
@@ -341,7 +341,7 @@ function initCarousel(block) {
   // scroll falls through to the page (no preventDefault).
   let wheelLock = false;
   container.addEventListener('wheel', (e) => {
-    if (dataColW === 0) return; // desktop — carousel inactive
+    if (dataColW === 0 || totalCols <= 1) return; // desktop or single column — carousel inactive
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY)
       ? e.deltaX
       : (e.shiftKey ? e.deltaY : 0);
