@@ -3,6 +3,7 @@ import { createSidePanel } from './side-panel/output/side-panel.js';
 import { createFilterPanel } from './side-panel/output/filter-panel.js';
 import { getState, setState, subscribe, initFromUrl } from './state.js';
 import { createFontCardGrid } from './fontCardGrid.js';
+import { createToolbar } from './toolbar.js';
 
 const CATEGORY_STYLES = {
   all: { fontId: 'bold-script' },
@@ -172,6 +173,9 @@ export default function decorate(block) {
   grid.append(sideCol, mainCol);
   block.replaceChildren(grid);
 
+  const { toolbar, unsubscribe: unsubscribeToolbar } = createToolbar();
+  mainCol.append(toolbar);
+
   let unsubscribeGrid = () => {};
   createFontCardGrid({ cardCta: content.cardCta }).then(({ container, unsubscribe }) => {
     unsubscribeGrid = unsubscribe;
@@ -183,6 +187,7 @@ export default function decorate(block) {
     unsubscribeFilter();
     unsubscribeSide();
     unsubscribeTrigger();
+    unsubscribeToolbar();
     unsubscribeGrid();
   };
   const parent = block.parentElement;

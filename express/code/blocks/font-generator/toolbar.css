@@ -1,0 +1,127 @@
+.font-generator-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  flex-wrap: wrap;
+}
+
+/* ─── Left group (layout buttons + count) ─────────────────────────────────── */
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbar-layout-group {
+  display: flex;
+  align-items: center;
+  gap: 0;
+}
+
+.toolbar-layout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1.5px solid #131313;
+  background: #e9e9e9;
+  color: #131313;
+  cursor: pointer;
+  transition: background-color 0.1s ease, border-color 0.1s ease, color 0.1s ease;
+}
+
+.toolbar-layout-btn:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.toolbar-layout-btn:last-child {
+  border-radius: 0 8px 8px 0;
+  border-left: none;
+}
+
+.toolbar-layout-btn.is-active {
+  background: #131313;
+  border-color: #ffffff;
+  color: #ffffff;
+}
+
+/* Adjacent inactive button needs its left border back when neighbor is active */
+.toolbar-layout-btn.is-active + .toolbar-layout-btn {
+  border-left: 1.5px solid #131313;
+}
+
+.toolbar-layout-btn svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+}
+
+.toolbar-count {
+  font-family: "Adobe Clean Spectrum VF", Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #505050;
+  white-space: nowrap;
+}
+
+/* ─── Right group (font size slider) ─────────────────────────────────────── */
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.toolbar-slider-label {
+  font-family: "Adobe Clean Spectrum VF", Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #131313;
+  white-space: nowrap;
+}
+
+.toolbar-slider-value {
+  font-family: "Adobe Clean Spectrum VF", Helvetica, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #505050;
+  min-width: 30px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.toolbar-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 4px;
+  border-radius: 2px;
+  background: #e9e9e9;
+  outline: none;
+  cursor: pointer;
+}
+
+.toolbar-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #131313;
+  cursor: pointer;
+}
+
+.toolbar-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: none;
+  border-radius: 50%;
+  background: #131313;
+  cursor: pointer;
+}
