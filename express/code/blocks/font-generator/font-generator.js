@@ -13,15 +13,19 @@ const CATEGORY_STYLES = {
 let filterPanelCount = 0;
 
 // Reads the side-panel copy from the authored block. The first paragraph holds
-// comma-separated preview suggestions; the link is the promo CTA; the remaining
+// comma-separated preview suggestions; the first link is the promo CTA; the
+// second link is the card CTA (rendered on every font card); the remaining
 // paragraph is the promo title. Order-independent so authoring stays forgiving.
 function extractContent(block) {
   const paragraphs = [...block.querySelectorAll('p')];
-  const ctaLink = block.querySelector('a');
+  const links = [...block.querySelectorAll('a')];
+  const ctaLink = links[0] ?? null;
+  const cardCtaLink = links[1] ?? null;
   const ctaParagraph = ctaLink?.closest('p');
+  const cardCtaParagraph = cardCtaLink?.closest('p');
   const suggestionsParagraph = paragraphs[0];
   const promoTitleParagraph = paragraphs.find(
-    (p) => p !== suggestionsParagraph && p !== ctaParagraph,
+    (p) => p !== suggestionsParagraph && p !== ctaParagraph && p !== cardCtaParagraph,
   );
 
   return {
@@ -32,6 +36,9 @@ function extractContent(block) {
     promoTitle: promoTitleParagraph?.textContent.trim() ?? '',
     promoCta: ctaLink
       ? { text: ctaLink.textContent.trim(), href: ctaLink.href }
+      : null,
+    cardCta: cardCtaLink
+      ? { text: cardCtaLink.textContent.trim(), href: cardCtaLink.href }
       : null,
   };
 }
@@ -166,7 +173,7 @@ export default function decorate(block) {
   block.replaceChildren(grid);
 
   let unsubscribeGrid = () => {};
-  createFontCardGrid().then(({ container, unsubscribe }) => {
+  createFontCardGrid({ cardCta: content.cardCta }).then(({ container, unsubscribe }) => {
     unsubscribeGrid = unsubscribe;
     mainCol.append(container);
   });

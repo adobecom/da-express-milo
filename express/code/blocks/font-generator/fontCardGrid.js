@@ -28,7 +28,7 @@ function getFilteredFonts(fonts, activeFilters) {
  *
  * @returns {Promise<{ container: HTMLElement, unsubscribe: function }>}
  */
-export async function createFontCardGrid() {
+export async function createFontCardGrid(config = {}) {
   injectStyles();
 
   const container = document.createElement('div');
@@ -58,10 +58,11 @@ export async function createFontCardGrid() {
 
   // Build all cards once upfront — never recreated, only updated.
   const { previewText: initText, fontSize: initSize } = getState();
+  const { cardCta } = config;
   /** @type {Map<string, { card: HTMLElement, fontDef: import('./types.js').FontDef }>} */
   const cardMap = new Map();
   fonts.forEach((fontDef) => {
-    const card = createFontCard(fontDef, initText, initSize);
+    const card = createFontCard(fontDef, initText, initSize, cardCta);
     card.setAttribute('role', 'listitem');
     cardMap.set(fontDef.id, { card, fontDef });
   });

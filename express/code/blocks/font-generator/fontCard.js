@@ -4,6 +4,9 @@ import { transformText } from './unicodeEngine.js';
 const BASE_PATH = '/express/code/blocks/font-generator';
 const STYLESHEET_HREF = `${BASE_PATH}/fontCard.css`;
 const DEFAULT_SAMPLE_TEXT = 'Hello';
+const COPY_LABEL = 'Copy text';
+const COPIED_LABEL = 'Copied!';
+const COPY_RESET_MS = 1500;
 
 let stylesInjected = false;
 
@@ -16,32 +19,76 @@ function injectStyles() {
   document.head.appendChild(link);
 }
 
-function copyToClipboard(text, btn, fontName) {
-  navigator.clipboard.writeText(text).then(() => {
-    btn.textContent = 'Copied!';
-    setTimeout(() => {
-      btn.textContent = 'Copy';
-      btn.setAttribute('aria-label', `Copy ${fontName}`);
-    }, 1500);
-  });
+function makeCopyBtn() {
+  const btn = document.createElement('button');
+  btn.type = 'button';
+  btn.className = 'font-card-copy-btn';
+  btn.setAttribute('aria-label', COPY_LABEL);
+  btn.dataset.tooltip = COPY_LABEL;
+
+  const icon = document.createElement('img');
+  icon.src = `${BASE_PATH}/copy.svg`;
+  icon.width = 20;
+  icon.height = 20;
+  icon.alt = '';
+  icon.setAttribute('aria-hidden', 'true');
+  btn.append(icon);
+
+  return btn;
+}
+
+function makeCtaLink(cardCta) {
+  const a = document.createElement('a');
+  a.className = 'font-card-cta';
+  a.href = cardCta.href;
+  a.target = '_blank';
+  a.rel = 'noopener noreferrer';
+
+  const icon = document.createElement('img');
+  icon.src = `${BASE_PATH}/external-link.svg`;
+  icon.width = 16;
+  icon.height = 16;
+  icon.alt = '';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.className = 'font-card-cta-icon';
+
+  const label = document.createElement('span');
+  label.textContent = cardCta.text;
+
+  a.append(icon, label);
+  return a;
 }
 
 /**
  * Creates a font preview card element. Purely presentational — no store subscription.
- * FontCardGrid is responsible for calling updateFontCard when state changes.
  *
  * @param {import('./types.js').FontDef} fontDef
  * @param {string} previewText
  * @param {number} fontSize
+ * @param {{ text: string; href: string } | null} [cardCta]
  * @returns {HTMLElement}
  */
-export function createFontCard(fontDef, previewText, fontSize) {
+export function createFontCard(fontDef, previewText, fontSize, cardCta) {
   injectStyles();
   const text = previewText || DEFAULT_SAMPLE_TEXT;
 
   const card = document.createElement('div');
   card.className = 'font-card';
   card.dataset.fontId = fontDef.id;
+
+  const copyBtn = makeCopyBtn();
+  copyBtn.addEventListener('click', () => {
+    const preview = card.querySelector('.font-card-preview');
+    if (!preview) return;
+    navigator.clipboard.writeText(preview.textContent).then(() => {
+      copyBtn.dataset.tooltip = COPIED_LABEL;
+      copyBtn.setAttribute('aria-label', COPIED_LABEL);
+      setTimeout(() => {
+        copyBtn.dataset.tooltip = COPY_LABEL;
+        copyBtn.setAttribute('aria-label', COPY_LABEL);
+      }, COPY_RESET_MS);
+    });
+  });
 
   const preview = document.createElement('div');
   preview.className = 'font-card-preview';
@@ -55,18 +102,10 @@ export function createFontCard(fontDef, previewText, fontSize) {
   name.className = 'font-card-name';
   name.textContent = fontDef.styleName;
 
-  const copyBtn = document.createElement('button');
-  copyBtn.type = 'button';
-  copyBtn.className = 'font-card-copy';
-  copyBtn.textContent = 'Copy';
-  copyBtn.setAttribute('aria-label', `Copy ${fontDef.styleName}`);
+  footer.append(name);
+  if (cardCta) footer.append(makeCtaLink(cardCta));
 
-  copyBtn.addEventListener('click', () => {
-    copyToClipboard(preview.textContent, copyBtn, fontDef.styleName);
-  });
-
-  footer.append(name, copyBtn);
-  card.append(preview, footer);
+  card.append(copyBtn, preview, footer);
 
   return card;
 }
