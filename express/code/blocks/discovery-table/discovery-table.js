@@ -325,10 +325,7 @@ function initCarousel(block) {
     const offset = raw < 0 ? raw * 0.3 : raw > max ? max + (raw - max) * 0.3 : raw;
 
     clearDragTransitions();
-    // Negate numerically, not as a string prefix: at the boundary `offset` is
-    // negative (rubber-band), and `-${offset}` would build invalid `--5px` —
-    // the table would freeze while the label kept moving and appear to detach.
-    table.style.transform = `translateX(${-offset}px)`;
+    table.style.transform = `translateX(-${offset}px)`;
     labelColCells.forEach((cell) => {
       const y = cell.closest('thead') ? ' translateY(2px)' : '';
       cell.style.transform = `translateX(${offset}px)${y}`;
@@ -356,13 +353,7 @@ function initCarousel(block) {
     setTimeout(() => { wheelLock = false; }, 400);
   }, { passive: false });
 
-  // On mobile, vertical scroll shows/hides the URL bar, firing resize with a
-  // changed height but identical width. Ignoring those keeps the carousel from
-  // snapping back to column 0 (and animating the label column) during scroll.
-  let lastWidth = window.innerWidth;
   window.addEventListener('resize', () => {
-    if (window.innerWidth === lastWidth) return;
-    lastWidth = window.innerWidth;
     // Disable transition during resize snap to avoid visual jank.
     table.style.transition = 'none';
     labelColCells.forEach((cell) => { cell.style.transition = 'none'; });
