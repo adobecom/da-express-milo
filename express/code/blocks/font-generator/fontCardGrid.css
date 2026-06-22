@@ -32,9 +32,9 @@
 
 .font-card-load-more {
   padding: 10px 24px;
-  border: 1px solid #e9e9e9;
+  border: 1.5px solid #131313;
   border-radius: 24px;
-  background: #ffffff;
+  background: transparent;
   font-family: "Adobe Clean Spectrum VF", Helvetica, sans-serif;
   font-size: 14px;
   font-weight: 700;
@@ -44,7 +44,7 @@
 }
 
 .font-card-load-more:hover {
-  background-color: #e9e9e9;
+  background-color: rgba(0, 0, 0, 0.06);
 }
 
 .font-card-load-more[hidden] {
