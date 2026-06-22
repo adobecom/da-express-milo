@@ -491,6 +491,7 @@ function SizeChartContent() {
         if (active) {
           setError(err);
         }
+        // eslint-disable-next-line compat/compat
         window.reportError?.(err);
       });
     return () => {
