@@ -1,6 +1,8 @@
+@import url('https://use.typekit.net/tfl4vww.css');
+
 .color-contrast-checker {
   --cc-swatch-size: 40px;
-  --cc-swatch-wrapper-padding: 2px;
+  --cc-swatch-wrapper-padding: var(--spacing-50);
   --cc-swatch-inner-radius: 4px;
   --cc-input-height: 40px;
   --cc-input-border-width: 2px;
@@ -18,7 +20,7 @@
   --cc-ratio-badge-padding-block: var(--spacing-75);
   --cc-preview-border-width: 1px;
   --cc-preview-large-line-height: 32px;
-  --cc-card-header-gap: 2px;
+  --cc-card-header-gap: var(--spacing-50);
   --cc-focus-ring-width: 2px;
   --cc-focus-ring-offset: 2px;
   --cc-focus-ring-color: var(--Alias-focus-indicator-default);
@@ -62,7 +64,7 @@
   --cc-icon-size-sm: 12px;
   --cc-icon-size-md: 20px;
   --cc-icon-size-lg: 32px;
-  --cc-btn-padding: 6px;
+  --cc-btn-padding: var(--spacing-80);
   --cc-btn-radius-sm: 4px;
   --cc-line-height-badge: 1.3;
 
@@ -88,8 +90,8 @@
   --cc-suggestion-preview-height: 48px;
   --cc-suggestion-preview-radius: 4px;
   --cc-suggestion-letter-size: 28px;
-  --cc-suggestion-letter-padding-top: 14px;
-  --cc-suggestion-letter-padding-bottom: 4px;
+  --cc-suggestion-letter-padding-top: var(--spacing-250);
+  --cc-suggestion-letter-padding-bottom: var(--spacing-75);
   --cc-suggestion-letter-padding-inline: 10px;
 
   /* Set Ratio Tab */
@@ -117,7 +119,7 @@
 
   /* Browser dots */
   --cc-browser-dot-size: 6px;
-  --cc-browser-dot-gap: 4px;
+  --cc-browser-dot-gap: var(--spacing-75);
   --cc-browser-dot-margin: 9px;
 
   /* Logo */
@@ -171,7 +173,7 @@
   --cc-field-gap: 7px;
   --cc-swap-container-height: 72px;
   --cc-swap-container-padding-top: 10px;
-  --cc-swap-container-padding-bottom: 4px;
+  --cc-swap-container-padding-bottom: var(--spacing-75);
 
   display: flex;
   flex-direction: row;
@@ -1152,9 +1154,9 @@
 }
 
 .cc-preview-heading {
-  font-family: 'FatFrank', sans-serif;
+  font-family: 'Poppins', sans-serif;
   font-size: var(--cc-preview-heading-mobile);
-  font-weight: var(--ax-body-weight);
+  font-weight: 900;
   line-height: 0.95;
   margin: var(--spacing-0);
   order: 1;
@@ -1238,6 +1240,21 @@
 }
 
 
+@media (max-width: 599px) {
+  /* Safari iOS: tight line-height can clip Poppins ascenders/descenders.
+     Raise to 1 so the line box fully contains the glyph on iOS. */
+  .cc-preview-heading {
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Prevent iOS viewport text-size adjustment from rescaling preview text. */
+  .cc-preview-frame {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+  }
+}
+
 @media (min-width: 600px) {
   .cc-color-column {
     flex: 1;
@@ -1279,7 +1296,6 @@
 
   .cc-preview-body-text {
     font-size: var(--cc-preview-body-size-tablet);
-    margin: var(--spacing-400) 0 !important;
   }
 
   .cc-preview-cta {
@@ -1324,7 +1340,6 @@
 
   .cc-preview-heading {
     font-size: var(--cc-preview-heading-desktop);
-    font-weight: var(--ax-body-weight);
   }
 
   .cc-ratio-bar {
