@@ -158,9 +158,6 @@
 
 /* ── Body rows ───────────────────────────────────────────────────────────── */
 
-.dt-table tbody td,
-.dt-table tbody th {
-}
 
 .dt-table tbody tr:nth-child(even) {
   background: var(--color-gray-100);
@@ -418,7 +415,7 @@
 
   .dt-table thead th,
   .dt-table th.dt-label-col {
-    padding: 16px;
+    padding: 12px 16px;
     box-sizing: border-box;
   }
 
@@ -451,10 +448,6 @@
 
   .dt-header-text p {
     font-size: 15px;
-  }
-
-  th.dt-label-col.dt-first-row.dt-first-col {
-    padding: 12px 16px;
   }
 }
 
