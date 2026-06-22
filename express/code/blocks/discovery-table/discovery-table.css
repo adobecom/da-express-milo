@@ -317,6 +317,10 @@
     overflow: visible;
     padding-top: 2px;
     clip-path: inset(0 0 0 0 round var(--border-radius-table));
+    /* pan-y: browser keeps vertical page scroll, JS owns horizontal swipes.
+       Without this the compositor claims the horizontal gesture and fires
+       pointercancel mid-drag — the carousel "catches" and won't follow. */
+    touch-action: pan-y;
   }
 
   .dt-table {

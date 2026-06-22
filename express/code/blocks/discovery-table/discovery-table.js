@@ -254,31 +254,87 @@ function initCarousel(block) {
 
   const SWIPE_THRESHOLD = 40;
 
-  // Pointer drag — covers both mouse drag and touch swipe in one path.
-  // (Native swipe is gone since there's no scroll container.) We only act on
-  // pointerup so we never preventDefault during the gesture, leaving vertical
-  // page scroll and link taps untouched.
+  // Pointer drag with live visual feedback.
+  // Direction is locked after 4px of movement: horizontal gestures get
+  // preventDefault (blocking page scroll) and drive a live transform so
+  // the column follows the finger. On release the nearest snap point wins.
   let dragStartX = 0;
   let dragStartY = 0;
   let dragging = false;
-  container.addEventListener('pointerdown', (e) => {
-    if (dataColW === 0) return; // desktop — carousel inactive
-    dragStartX = e.clientX;
-    dragStartY = e.clientY;
-    dragging = true;
-    // Capture so pointerup fires here even if the pointer leaves the container.
-    try { container.setPointerCapture(e.pointerId); } catch { /* ignore */ }
-  });
-  container.addEventListener('pointerup', (e) => {
+  let directionLocked = false;
+  let isHorizontalDrag = false;
+  let lastLiveDx = 0;
+
+  function clearDragTransitions() {
+    table.style.transition = 'none';
+    labelColCells.forEach((cell) => { cell.style.transition = 'none'; });
+    if (headerCover) headerCover.style.transition = 'none';
+    if (headerCoverRight) headerCoverRight.style.transition = 'none';
+  }
+
+  function restoreDragTransitions() {
+    table.style.transition = '';
+    labelColCells.forEach((cell) => { cell.style.transition = ''; });
+    if (headerCover) headerCover.style.transition = '';
+    if (headerCoverRight) headerCoverRight.style.transition = '';
+  }
+
+  // Shared end-of-drag logic for both pointerup and pointercancel.
+  // Uses lastLiveDx so pointercancel (which may have no clientX) still
+  // snaps to the correct column instead of always reverting to current.
+  function endDrag(dx) {
     if (!dragging) return;
     dragging = false;
-    const dx = dragStartX - e.clientX;
-    const dy = dragStartY - e.clientY;
-    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > SWIPE_THRESHOLD) {
-      goToCol(current + (dx > 0 ? 1 : -1));
+    if (!isHorizontalDrag) {
+      restoreDragTransitions();
+      return;
     }
+    // Restore transitions first, then let rAF flush so the snap animation
+    // starts from the live drag position rather than jumping from zero.
+    restoreDragTransitions();
+    const target = Math.abs(dx) > SWIPE_THRESHOLD ? current + (dx < 0 ? 1 : -1) : current;
+    requestAnimationFrame(() => goToCol(target));
+  }
+
+  container.addEventListener('pointerdown', (e) => {
+    if (dataColW === 0) return;
+    dragStartX = e.clientX;
+    dragStartY = e.clientY;
+    lastLiveDx = 0;
+    dragging = true;
+    directionLocked = false;
+    isHorizontalDrag = false;
+    try { container.setPointerCapture(e.pointerId); } catch { /* ignore */ }
   });
-  container.addEventListener('pointercancel', () => { dragging = false; });
+
+  container.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - dragStartX;
+    const dy = e.clientY - dragStartY;
+
+    if (!directionLocked && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
+      isHorizontalDrag = Math.abs(dx) >= Math.abs(dy);
+      directionLocked = true;
+    }
+    if (!isHorizontalDrag) return;
+    e.preventDefault();
+
+    lastLiveDx = dx;
+    const raw = current * dataColW - dx;
+    const max = (totalCols - 1) * dataColW;
+    const offset = raw < 0 ? raw * 0.3 : raw > max ? max + (raw - max) * 0.3 : raw;
+
+    clearDragTransitions();
+    table.style.transform = `translateX(-${offset}px)`;
+    labelColCells.forEach((cell) => {
+      const y = cell.closest('thead') ? ' translateY(2px)' : '';
+      cell.style.transform = `translateX(${offset}px)${y}`;
+    });
+    if (headerCover) headerCover.style.transform = `translateX(${offset}px)`;
+  }, { passive: false });
+
+  container.addEventListener('pointerup', (e) => endDrag(e.clientX - dragStartX));
+  container.addEventListener('pointercancel', () => endDrag(lastLiveDx));
 
   // Wheel / trackpad — map horizontal intent (deltaX, or shift+deltaY) to a
   // single column step, throttled so one gesture moves one column. Vertical
