@@ -1,4 +1,5 @@
 .font-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: #ffffff;
@@ -13,14 +14,76 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
+/* ─── Copy icon button (upper right) ─────────────────────────────────────── */
+
+.font-card-copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.font-card-copy-btn:hover {
+  background-color: #e9e9e9;
+}
+
+.font-card-copy-btn img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+/* CSS tooltip via data-tooltip + ::after */
+
+.font-card-copy-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #131313;
+  color: #ffffff;
+  font-family: "Adobe Clean Spectrum VF", Helvetica, sans-serif;
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  z-index: 10;
+}
+
+.font-card-copy-btn:hover::after,
+.font-card-copy-btn:focus-visible::after {
+  opacity: 1;
+}
+
+/* ─── Preview text ────────────────────────────────────────────────────────── */
+
 .font-card-preview {
   flex: 1;
   overflow: hidden;
   word-break: break-word;
   line-height: 1.3;
+  padding-top: 4px;
+  padding-right: 36px; /* clear the copy button */
   padding-bottom: 12px;
   color: #131313;
 }
+
+/* ─── Footer (font name + CTA link) ──────────────────────────────────────── */
 
 .font-card-footer {
   display: flex;
@@ -29,7 +92,7 @@
   gap: 8px;
   border-top: 1px solid #e9e9e9;
   padding-top: 8px;
-  min-height: 32px;
+  min-height: 36px;
 }
 
 .font-card-name {
@@ -44,21 +107,33 @@
   min-width: 0;
 }
 
-.font-card-copy {
+/* ─── CTA link (black pill button with external-link icon) ───────────────── */
+
+main a.font-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   flex-shrink: 0;
-  padding: 4px 12px;
-  border: 1px solid #e9e9e9;
-  border-radius: 16px;
-  background: #ffffff;
+  padding: 7px 14px 7px 10px;
+  border-radius: 24px;
+  background: #000000d6;
+  color: #ffffff;
   font-family: "Adobe Clean Spectrum VF", Helvetica, sans-serif;
   font-size: 12px;
   font-weight: 700;
-  color: #131313;
-  cursor: pointer;
+  line-height: 1;
   white-space: nowrap;
+  text-decoration: none;
   transition: background-color 0.1s ease;
 }
 
-.font-card-copy:hover {
-  background-color: #e9e9e9;
+.font-card-cta:hover {
+  background: #000000;
+}
+
+.font-card-cta-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
