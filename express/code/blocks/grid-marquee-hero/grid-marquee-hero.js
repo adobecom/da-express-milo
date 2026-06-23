@@ -26,7 +26,13 @@ function decorateHeadlineAsync(headline) {
 }
 
 export default async function init(el) {
-  if (el.querySelector(':scope > .foreground')) return;
+  if (
+    el.dataset.gridMarqueeHeroDecorated === 'true'
+    || el.dataset.gridMarqueeHeroDecorating === 'true'
+    || el.querySelector(':scope > .foreground')
+  ) return;
+  el.dataset.gridMarqueeHeroDecorating = 'true';
+  el.dataset.gridMarqueeHeroDecorated = 'true';
 
   const rows = [...el.querySelectorAll(':scope > div')];
   const [headline] = [rows[0]];
@@ -55,4 +61,5 @@ export default async function init(el) {
       decorateHeadlineAsync(headline);
     });
   }
+  delete el.dataset.gridMarqueeHeroDecorating;
 }

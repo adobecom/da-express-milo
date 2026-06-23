@@ -262,7 +262,13 @@ async function makeRatings(
 }
 
 export default async function init(el) {
-  if (el.querySelector(':scope > .foreground')) return;
+  if (
+    el.dataset.gridMarqueeDecorated === 'true'
+    || el.dataset.gridMarqueeDecorating === 'true'
+    || el.querySelector(':scope > .foreground')
+  ) return;
+  el.dataset.gridMarqueeDecorating = 'true';
+  el.dataset.gridMarqueeDecorated = 'true';
 
   const rows = [...el.querySelectorAll(':scope > div')];
   const hasLegacyHeadline = !!rows[0]?.querySelector('h1');
@@ -445,7 +451,7 @@ export default async function init(el) {
     }
   }
 
-  // Done
+  delete el.dataset.gridMarqueeDecorating;
 }
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape' && currDrawer) {

@@ -261,7 +261,13 @@ const appendToggleToGridMarquee = (toggle, cardsContainer) => {
 
 export default async function init(el) {
   ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
-  if (el.querySelector(':scope > .foreground')) return;
+  if (
+    el.dataset.gridMarqueeDecorated === 'true'
+    || el.dataset.gridMarqueeDecorating === 'true'
+    || el.querySelector(':scope > .foreground')
+  ) return;
+  el.dataset.gridMarqueeDecorating = 'true';
+  el.dataset.gridMarqueeDecorated = 'true';
 
   let rows = [...el.querySelectorAll(':scope > div')];
   let toggle;
@@ -292,4 +298,5 @@ export default async function init(el) {
   mediumMQ.addEventListener('change', () => {
     drawerOff();
   });
+  delete el.dataset.gridMarqueeDecorating;
 }

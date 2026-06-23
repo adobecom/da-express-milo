@@ -233,7 +233,13 @@ function makeRatings() {
 
 export default async function init(el) {
   ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
-  if (el.querySelector(':scope > .foreground')) return;
+  if (
+    el.dataset.gridMarqueeDecorated === 'true'
+    || el.dataset.gridMarqueeDecorating === 'true'
+    || el.querySelector(':scope > .foreground')
+  ) return;
+  el.dataset.gridMarqueeDecorating = 'true';
+  el.dataset.gridMarqueeDecorated = 'true';
 
   const rows = [...el.querySelectorAll(':scope > div')];
   const [headline, background, items, foreground] = [rows[0], rows[1], rows.slice(2), createTag('div', { class: 'foreground' })];
@@ -256,4 +262,5 @@ export default async function init(el) {
   mediumMQ.addEventListener('change', () => {
     drawerOff();
   });
+  delete el.dataset.gridMarqueeDecorating;
 }
