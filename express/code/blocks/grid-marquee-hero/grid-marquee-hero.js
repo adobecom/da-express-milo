@@ -26,6 +26,8 @@ function decorateHeadlineAsync(headline) {
 }
 
 export default async function init(el) {
+  if (el.querySelector(':scope > .foreground')) return;
+
   const rows = [...el.querySelectorAll(':scope > div')];
   const [headline] = [rows[0]];
 

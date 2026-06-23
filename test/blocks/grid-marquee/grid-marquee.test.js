@@ -99,4 +99,24 @@ describe('Grid Marquee - Legacy vs New Authoring', () => {
     expect(gm.querySelectorAll('.cards-container').length).to.equal(1);
     expect(gm.querySelectorAll('.background').length).to.equal(1);
   });
+
+  it('keeps decorated injected split-authoring content intact when decoration is invoked again', async () => {
+    document.body.innerHTML = newAuthoring;
+    const hero = document.querySelector('.grid-marquee-hero');
+    const gm = document.querySelector('.grid-marquee');
+    await decorateHero(hero);
+    await decorateGrid(gm);
+
+    const decoratedHeroHTML = hero.innerHTML;
+    const decoratedGridHTML = gm.innerHTML;
+    await decorateHero(hero);
+    await decorateGrid(gm);
+
+    expect(hero.innerHTML).to.equal(decoratedHeroHTML);
+    expect(gm.innerHTML).to.equal(decoratedGridHTML);
+    expect(hero.querySelectorAll(':scope > .foreground').length).to.equal(1);
+    expect(gm.querySelectorAll(':scope > .foreground').length).to.equal(1);
+    expect(gm.querySelectorAll('.cards-container').length).to.equal(1);
+    expect(gm.querySelectorAll('.background').length).to.equal(1);
+  });
 });
