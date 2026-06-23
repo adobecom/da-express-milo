@@ -161,6 +161,24 @@ describe('Frictionless Quick Action Block', () => {
     inputClickStub.restore();
   });
 
+  it('keeps easy upload controls on the vanilla dropzone click flow', async () => {
+    document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
+    const block = document.body.querySelector('.frictionless-quick-action');
+    block.querySelector(':scope > div:nth-child(3) > div:nth-child(2)').textContent = 'crop-image-easy-upload-control';
+    await init(block);
+
+    const dropzoneContainer = block.querySelector('.dropzone-container');
+    const inputElement = block.querySelector('input[type="file"]');
+    const inputClickStub = sinon.stub(inputElement, 'click');
+
+    dropzoneContainer.dispatchEvent(new MouseEvent('click'));
+
+    expect(inputClickStub.calledOnce).to.be.true;
+    expect(block.querySelector('.easy-upload-cta-row')).to.be.null;
+
+    inputClickStub.restore();
+  });
+
   it('should add the metadata and test if the logo got added', async () => {
     document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
     const block = document.body.querySelector('.frictionless-quick-action');
