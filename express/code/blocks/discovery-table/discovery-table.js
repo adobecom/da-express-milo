@@ -324,7 +324,10 @@ function initCarousel(block) {
     lastLiveDx = dx;
     const raw = current * dataColW - dx;
     const max = (totalCols - 1) * dataColW;
-    const offset = raw < 0 ? raw * 0.3 : raw > max ? max + (raw - max) * 0.3 : raw;
+    let offset;
+    if (raw < 0) offset = raw * 0.3;
+    else if (raw > max) offset = max + (raw - max) * 0.3;
+    else offset = raw;
 
     table.style.transform = `translateX(-${offset}px)`;
     labelColCells.forEach((cell) => {
@@ -343,9 +346,10 @@ function initCarousel(block) {
   let wheelLock = false;
   container.addEventListener('wheel', (e) => {
     if (!mobileLayout || totalCols <= 1) return; // desktop or single column — carousel inactive
-    const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY)
-      ? e.deltaX
-      : (e.shiftKey ? e.deltaY : 0);
+    let delta;
+    if (Math.abs(e.deltaX) > Math.abs(e.deltaY)) delta = e.deltaX;
+    else if (e.shiftKey) delta = e.deltaY;
+    else delta = 0;
     if (Math.abs(delta) < 10) return; // vertical scroll → let the page handle it
     e.preventDefault();
     if (wheelLock) return;
