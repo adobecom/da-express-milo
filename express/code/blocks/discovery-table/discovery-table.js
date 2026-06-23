@@ -23,7 +23,7 @@ function buildCarouselNav() {
   return nav;
 }
 
-function buildSectionHeader(titleDiv, totalCols) {
+function buildSectionHeader(titleDiv) {
   const header = document.createElement('div');
   header.className = 'dt-section-header';
 
