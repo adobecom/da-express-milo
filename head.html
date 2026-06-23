@@ -101,6 +101,25 @@
 
   flagMeta.content = 'true';
 </script>
+<script>
+  // Perf (templates LCP): discover the critical hero-chain modules during head parse,
+  // before scripts.js evaluates, so their fetches overlap the eager bootstrap instead of
+  // being found serially at loadArea (search-marquee is the LCP block). Same-origin only,
+  // scoped to templates pages so the global head stays unaffected elsewhere.
+  (() => {
+    if (!window.location.pathname.includes('/express/templates/')) return;
+    const hint = (href, rel, as) => {
+      const link = document.createElement('link');
+      link.rel = rel;
+      link.href = href;
+      if (as) link.as = as;
+      document.head.appendChild(link);
+    };
+    hint('/express/code/scripts/utils/content-replace.js', 'modulepreload');
+    hint('/express/code/blocks/search-marquee/search-marquee.js', 'modulepreload');
+    hint('/express/code/blocks/search-marquee/search-marquee.css', 'preload', 'style');
+  })();
+</script>
 <script src="/express/code/scripts/fallback.js" nomodule></script>
 <script src="/express/code/scripts/scripts.js" type="module"></script>
 <style>body { display: none; }</style>
