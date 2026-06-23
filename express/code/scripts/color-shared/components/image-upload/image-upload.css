@@ -25,6 +25,8 @@
 }
 
 .image-upload-dropzone-border-svg rect {
+  width: calc(100% - 1px);
+  height: calc(100% - 1px);
   stroke: var(--dropzone-border-color);
   stroke-width: 1px;
   stroke-dasharray: 4px 4px;
