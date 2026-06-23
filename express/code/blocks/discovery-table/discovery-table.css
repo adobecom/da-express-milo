@@ -5,7 +5,7 @@
   --border-radius-table: 8px;
   --gnav-offset-height: 40px;
   --dt-sticky-offset: 0px;
-  --cell-color: #464646
+  --cell-color: #464646;
   --font-color : #505050;
 
   padding: 40px 0 40px 16px;
@@ -421,10 +421,6 @@
     padding: 40px 0;
   }
 
-  .dt-carousel-nav {
-    display: none !important;
-  }
-
   .dt-table .dt-data-col {
     max-width: 232px;
   }
@@ -503,7 +499,7 @@
   }
 
   .discovery-table.dt-single-col .dt-carousel-nav {
-    display: none !important;
+    display: none;
   }
 
   .discovery-table.dt-single-col .dt-table .dt-label-col::after {
