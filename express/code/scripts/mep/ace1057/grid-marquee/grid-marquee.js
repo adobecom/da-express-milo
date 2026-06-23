@@ -261,6 +261,8 @@ const appendToggleToGridMarquee = (toggle, cardsContainer) => {
 
 export default async function init(el) {
   ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
+  if (el.querySelector(':scope > .foreground')) return;
+
   let rows = [...el.querySelectorAll(':scope > div')];
   let toggle;
 

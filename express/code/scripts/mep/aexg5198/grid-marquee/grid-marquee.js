@@ -233,6 +233,8 @@ function makeRatings() {
 
 export default async function init(el) {
   ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
+  if (el.querySelector(':scope > .foreground')) return;
+
   const rows = [...el.querySelectorAll(':scope > div')];
   const [headline, background, items, foreground] = [rows[0], rows[1], rows.slice(2), createTag('div', { class: 'foreground' })];
   const logo = getIconElementDeprecated('adobe-express-logo');
