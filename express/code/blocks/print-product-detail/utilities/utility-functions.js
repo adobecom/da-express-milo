@@ -40,9 +40,16 @@ export function extractInitialImageUrl(block) {
   for (const row of block.children) {
     const key = row.children[0]?.textContent?.trim();
     if (key === 'heroImage') {
-      return row.children[1]?.querySelector('a')?.href
+      const url = row.children[1]?.querySelector('a')?.href
         || row.children[1]?.textContent?.trim()
         || null;
+      if (!url) return null;
+      try {
+        const { protocol } = new URL(url);
+        return ['http:', 'https:'].includes(protocol) ? url : null;
+      } catch {
+        return null;
+      }
     }
   }
   return null;

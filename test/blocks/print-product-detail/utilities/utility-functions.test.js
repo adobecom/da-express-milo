@@ -87,4 +87,19 @@ describe('extractInitialImageUrl', () => {
     const block = document.createElement('div');
     expect(extractInitialImageUrl(block)).to.be.null;
   });
+
+  it('returns null for a javascript: URL', () => {
+    const block = makeBlock([['heroImage', 'javascript:alert(1)']]);
+    expect(extractInitialImageUrl(block)).to.be.null;
+  });
+
+  it('returns null for a data: URL', () => {
+    const block = makeBlock([['heroImage', 'data:text/html,<script>alert(1)</script>']]);
+    expect(extractInitialImageUrl(block)).to.be.null;
+  });
+
+  it('returns null for an unparseable URL string', () => {
+    const block = makeBlock([['heroImage', 'not a url']]);
+    expect(extractInitialImageUrl(block)).to.be.null;
+  });
 });
