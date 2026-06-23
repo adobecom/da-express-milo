@@ -16,6 +16,7 @@ function customReporter() {
   };
 }
 export default {
+  nodeResolve: true,
   coverageConfig: {
     exclude: [
       '**/mocks/**',
