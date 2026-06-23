@@ -331,7 +331,10 @@ function decorateBackground(block) {
       media.classList.add('backgroundimg');
       media.loading = 'eager';
       media.setAttribute('fetchpriority', 'high');
-      block.prepend(media);
+      // Prepend the whole <picture> (keep its webp <source>s) so the eager webp
+      // already in flight is what renders. Hoisting the bare <img> drops the
+      // sources, renders the PNG fallback, and forces a second image fetch.
+      block.prepend(picture);
     }
   } else {
     const href = mediaRow.querySelector('a')?.href;

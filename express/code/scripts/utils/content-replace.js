@@ -306,11 +306,31 @@ async function autoUpdatePage(main) {
 
   await Promise.all(Array.from(metaTags).map((meta) => sanitizeMeta(meta)));
 
-  main.innerHTML = main.innerHTML.replaceAll(regex, (match, p1) => {
+  // Substitute {{blades}} in place (text nodes + attributes) instead of reserializing
+  // main.innerHTML. The innerHTML round-trip destroys every node — including the eager,
+  // preloaded LCP <picture>/<img> — which cancels its in-flight fetch, resets it to
+  // loading="lazy", and forces a re-fetch. An in-place walk keeps node identity (the
+  // preload stays warm) while producing an identical final DOM.
+  const sub = (str) => str.replace(regex, (match, p1) => {
     if (!wl.includes(match.toLowerCase())) {
       return getMetadata(p1) ?? '';
     }
     return match;
+  });
+
+  const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (node.nodeValue.includes('{{')) {
+      node.nodeValue = sub(node.nodeValue);
+    }
+  }
+
+  main.querySelectorAll('*').forEach((el) => {
+    [...el.attributes].forEach((attr) => {
+      if (attr.value.includes('{{')) {
+        el.setAttribute(attr.name, sub(attr.value));
+      }
+    });
   });
 
   // handle link replacement on sheet-powered pages
