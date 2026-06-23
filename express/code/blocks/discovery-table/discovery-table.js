@@ -186,6 +186,9 @@ function initCarousel(block) {
   const totalCols = dataColThs.length;
   let current = 0;
   let dataColW = 0;
+  // Whether the mobile carousel layout (transforms + swipe) is live. Set in
+  // setup(); kept separate from dataColW so that value stays purely a measurement.
+  let mobileLayout = false;
 
   function updateStickyOffsets() {
     block.style.setProperty('--dt-section-header-h', `${sectionHeader.offsetHeight}px`);
@@ -193,7 +196,7 @@ function initCarousel(block) {
   }
 
   function applyTransform(index) {
-    if (dataColW === 0) return;
+    if (!mobileLayout) return;
     const offset = index * dataColW;
     table.style.transform = `translateX(-${offset}px)`;
     labelColCells.forEach((cell) => {
@@ -206,6 +209,7 @@ function initCarousel(block) {
 
   function setup() {
     const isMobile = window.innerWidth < MOBILE_BREAKPOINT;
+    mobileLayout = isMobile;
     if (!isMobile) {
       table.style.width = '';
       table.style.transform = '';
@@ -265,18 +269,15 @@ function initCarousel(block) {
   let isHorizontalDrag = false;
   let lastLiveDx = 0;
 
-  function clearDragTransitions() {
-    table.style.transition = 'none';
-    labelColCells.forEach((cell) => { cell.style.transition = 'none'; });
-    if (headerCover) headerCover.style.transition = 'none';
-    if (headerCoverRight) headerCoverRight.style.transition = 'none';
-  }
-
-  function restoreDragTransitions() {
-    table.style.transition = '';
-    labelColCells.forEach((cell) => { cell.style.transition = ''; });
-    if (headerCover) headerCover.style.transition = '';
-    if (headerCoverRight) headerCoverRight.style.transition = '';
+  // Toggle CSS transitions on every animated element at once. Disabled for
+  // instant follow during a live drag or resize snap, re-enabled afterward so
+  // button-nav and snap-back animate. Passing '' restores the stylesheet value.
+  function setTransitionsEnabled(enabled) {
+    const value = enabled ? '' : 'none';
+    table.style.transition = value;
+    labelColCells.forEach((cell) => { cell.style.transition = value; });
+    if (headerCover) headerCover.style.transition = value;
+    if (headerCoverRight) headerCoverRight.style.transition = value;
   }
 
   // Shared end-of-drag logic for both pointerup and pointercancel.
@@ -286,18 +287,18 @@ function initCarousel(block) {
     if (!dragging) return;
     dragging = false;
     if (!isHorizontalDrag) {
-      restoreDragTransitions();
+      setTransitionsEnabled(true);
       return;
     }
     // Restore transitions first, then let rAF flush so the snap animation
     // starts from the live drag position rather than jumping from zero.
-    restoreDragTransitions();
+    setTransitionsEnabled(true);
     const target = Math.abs(dx) > SWIPE_THRESHOLD ? current + (dx < 0 ? 1 : -1) : current;
     requestAnimationFrame(() => goToCol(target));
   }
 
   container.addEventListener('pointerdown', (e) => {
-    if (dataColW === 0 || totalCols <= 1) return; // desktop or single column — no swipe
+    if (!mobileLayout || totalCols <= 1) return; // desktop or single column — no swipe
     dragStartX = e.clientX;
     dragStartY = e.clientY;
     lastLiveDx = 0;
@@ -324,7 +325,7 @@ function initCarousel(block) {
     const max = (totalCols - 1) * dataColW;
     const offset = raw < 0 ? raw * 0.3 : raw > max ? max + (raw - max) * 0.3 : raw;
 
-    clearDragTransitions();
+    setTransitionsEnabled(false);
     table.style.transform = `translateX(-${offset}px)`;
     labelColCells.forEach((cell) => {
       const y = cell.closest('thead') ? ' translateY(2px)' : '';
@@ -341,7 +342,7 @@ function initCarousel(block) {
   // scroll falls through to the page (no preventDefault).
   let wheelLock = false;
   container.addEventListener('wheel', (e) => {
-    if (dataColW === 0 || totalCols <= 1) return; // desktop or single column — carousel inactive
+    if (!mobileLayout || totalCols <= 1) return; // desktop or single column — carousel inactive
     const delta = Math.abs(e.deltaX) > Math.abs(e.deltaY)
       ? e.deltaX
       : (e.shiftKey ? e.deltaY : 0);
@@ -354,21 +355,14 @@ function initCarousel(block) {
   }, { passive: false });
 
   window.addEventListener('resize', () => {
-    // Disable transition during resize snap to avoid visual jank.
-    table.style.transition = 'none';
-    labelColCells.forEach((cell) => { cell.style.transition = 'none'; });
-    if (headerCover) headerCover.style.transition = 'none';
-    if (headerCoverRight) headerCoverRight.style.transition = 'none';
+    // Disable transitions during the resize snap to avoid visual jank, then
+    // re-enable on the next frame once the new layout is in place.
+    setTransitionsEnabled(false);
     current = 0;
     setup();
     updateNav();
     updateStickyOffsets();
-    requestAnimationFrame(() => {
-      table.style.transition = '';
-      labelColCells.forEach((cell) => { cell.style.transition = ''; });
-      if (headerCover) headerCover.style.transition = '';
-      if (headerCoverRight) headerCoverRight.style.transition = '';
-    });
+    requestAnimationFrame(() => setTransitionsEnabled(true));
   });
 
   requestAnimationFrame(() => {
