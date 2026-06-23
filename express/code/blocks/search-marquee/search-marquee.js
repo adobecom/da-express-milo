@@ -590,9 +590,26 @@ async function decorateLinkList(block) {
   }
 }
 
-// Search UI + below-the-fold content. Runs after the block is loaded / body revealed; not on the
-// LCP path. Produces the same settled DOM as before — only the timing changed.
-async function enhanceSearchMarquee(block) {
+export default async function decorate(block) {
+  addTempWrapperDeprecated(block, 'search-marquee');
+
+  const mediaRow = block.querySelector('div:nth-of-type(2)');
+  const lcpImg = mediaRow?.querySelector('picture img');
+  if (lcpImg) {
+    lcpImg.loading = 'eager';
+    lcpImg.setAttribute('fetchpriority', 'high');
+    const imageUrl = lcpImg.currentSrc || lcpImg.src;
+    preloadLCPImage(imageUrl);
+  } else {
+    const href = mediaRow?.querySelector('a')?.href;
+    if (href) preloadLCPImage(href);
+  }
+
+  // Insert the LCP background image into the DOM before awaiting the Milo CDN imports so it
+  // paints as early as possible (cuts LCP element render delay). decorateBackground is
+  // synchronous and only needs `block`.
+  decorateBackground(block);
+
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`), decorateButtonsDeprecated(block)]).then(([utils, placeholders]) => {
     ({ createTag, getConfig, getMetadata } = utils);
     ({ replaceKey, replaceKeyArray } = placeholders);
@@ -611,32 +628,4 @@ async function enhanceSearchMarquee(block) {
   await buildSearchDropdown(block, searchBarWrapper);
   initSearchFunction(block, searchBarWrapper);
   await decorateLinkList(block);
-}
-
-export default async function decorate(block) {
-  addTempWrapperDeprecated(block, 'search-marquee');
-
-  const mediaRow = block.querySelector('div:nth-of-type(2)');
-  const lcpImg = mediaRow?.querySelector('picture img');
-  if (lcpImg) {
-    lcpImg.loading = 'eager';
-    lcpImg.setAttribute('fetchpriority', 'high');
-    const imageUrl = lcpImg.currentSrc || lcpImg.src;
-    preloadLCPImage(imageUrl);
-  } else {
-    const href = mediaRow?.querySelector('a')?.href;
-    if (href) preloadLCPImage(href);
-  }
-
-  // Insert the LCP background image into the DOM synchronously so the hero can paint as early as
-  // possible. decorateBackground is synchronous and only needs `block`.
-  decorateBackground(block);
-
-  // Resolve decorate now. Milo marks the block "loaded" and reveals the body (which is
-  // display:none until then) on this promise, so anything awaited here delays the LCP paint.
-  // Everything below is search functionality + below-the-fold content — none of it is the LCP —
-  // so it hydrates after reveal. Expose the promise so tests/callers can await full hydration.
-  block.searchMarqueeReady = enhanceSearchMarquee(block).catch((err) => {
-    window.lana?.log(`search-marquee enhancement failed: ${err?.message || err}`, { tags: 'search-marquee', severity: 'error' });
-  });
 }

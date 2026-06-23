@@ -21,8 +21,6 @@ describe('Search Marquee', () => {
   before(async () => {
     window.isTestEnv = true;
     await decorate(block);
-    // Search UI is hydrated after the block resolves (deferred off the LCP path).
-    await block.searchMarqueeReady;
   });
   it('has a hero h1', () => {
     expect(block.querySelector('div:first-of-type h1#hero-title')).to.exist;
@@ -153,7 +151,6 @@ describe('Search Marquee - marquee fused integration', () => {
 
     const marqueeBlock = document.querySelector('.search-marquee');
     await decorate(marqueeBlock);
-    await marqueeBlock.searchMarqueeReady;
 
     expect(marqueeBlock.querySelector('.express-logo')).to.exist;
   });
@@ -215,7 +212,6 @@ describe('Search Marquee - manual links', () => {
 
     // Then decorate search-marquee which will pick up the exported data
     await decorate(block);
-    await block.searchMarqueeReady;
 
     // Manual links should be rendered immediately since data was already available
     const carousel = block.querySelector('.carousel-container.manual-link-list');
@@ -268,8 +264,6 @@ describe('Search Marquee - manual links', () => {
 
     const marqueeBlock = document.querySelector('.search-marquee');
     await decorate(marqueeBlock);
-    // Wait for hydration so the subscription is set up before the link-list decorates.
-    await marqueeBlock.searchMarqueeReady;
 
     const linkBlock = document.querySelector('.link-list.marquee-fused');
     await decorateLinkList(linkBlock);
