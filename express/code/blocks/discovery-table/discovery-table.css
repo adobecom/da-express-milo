@@ -98,7 +98,6 @@
   border-spacing: 0;
   border-radius: var(--border-radius-table);
   background: var(--color-white);
-  height: 500px;
 }
 
 /* ── Column headers ──────────────────────────────────────────────────────── */
