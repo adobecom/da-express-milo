@@ -15,10 +15,9 @@ export function createHeroImageSrcset(url) {
   const widths = [400, 800, 1200, 1600];
   return widths
     .map((w) => {
-      const updatedUrl = updateImageUrl(url, w);
-      return updatedUrl ? `${updatedUrl} ${w}w` : null;
+      const updatedUrl = updateImageUrl(url, w) ?? `${url}?max_dim=${w}`;
+      return `${updatedUrl} ${w}w`;
     })
-    .filter(Boolean)
     .join(', ');
 }
 
