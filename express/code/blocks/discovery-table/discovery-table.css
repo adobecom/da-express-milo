@@ -1,23 +1,14 @@
 /* ── CSS custom properties ───────────────────────────────────────────────── */
 
 .discovery-table {
-  --color-gray-900: #1a1a1a;
-  --color-gray-700: #4a4a4a;
-  --color-gray-500: #6d6d6d;
-  --color-gray-325: #d0d0d0;
-  --color-gray-300: #dadada;
-  --color-gray-200: #ebebeb;
   --color-gray-100: #f9f9f9;
-  --color-gray-50: #F8F8F8;
-  --color-white: #fff;
-  --color-green-900: #05834e;
-  --color-neutral: #aaa;
   --border-radius-table: 8px;
-  --transition-standard: 0.15s ease-out;
   --gnav-offset-height: 40px;
   --dt-sticky-offset: 0px;
+  --cell-color: #464646
+  --font-color : #505050;
 
-  padding: 40px 0px 40px 16px;
+  padding: 40px 0 40px 16px;
 }
 
 
@@ -32,10 +23,9 @@
   position: sticky;
   top: calc(var(--gnav-offset-height) + var(--dt-sticky-offset, 0px));
   z-index: 1;
-  background: white;
-  box-shadow: 0 2px 0 0 #fff;
-
-  border-left: 1px solid white
+  background: var(--color-white);
+  box-shadow: 0 2px 0 0 var(--color-white);
+  border-left: 1px solid var(--color-white);
 }
 
 .dt-header-text h2,
@@ -78,7 +68,7 @@
 }
 
 .dt-nav-btn:hover:not(:disabled) circle {
-  fill: var(--color-gray-300);
+  fill: var(--color-gray-300-variant);
 }
 
 .dt-nav-btn:disabled {
@@ -97,7 +87,6 @@
      container, so position:sticky on thead th / .dt-label-col propagates
      to the page scroll ancestor rather than stopping here. */
   overflow: clip;
- 
   border-radius: var(--border-radius-table);
 }
 
@@ -122,8 +111,8 @@
   color: var(--color-gray-900);
   text-align: left;
   vertical-align: middle;
-  background: var(--color-gray-50);
-  border-bottom: 1px solid var(--color-gray-300);
+  background: var(--color-gray-100);
+  border-bottom: 1px solid var(--color-gray-300-variant);
   /* Borders on cells (not tr) so they travel with the sticky header row. */
   position: sticky;
   top: calc(var(--gnav-offset-height) + var(--dt-sticky-offset, 0px) + var(--dt-section-header-h, 0px));
@@ -132,9 +121,9 @@
 }
 
 .dt-table thead th.dt-label-col {
-  border-bottom: 1px solid var(--color-gray-300);
+  border-bottom: 1px solid var(--color-gray-300-variant);
   border-left: 1px solid var(--color-gray-300);
-  background: var(--color-gray-50);
+  background: var(--color-gray-100);
   z-index: 3;
 }
 
@@ -145,7 +134,6 @@
   font-weight: 700;
   line-height: 20px;
 }
- 
 
 .dt-col-price {
   display: block;
@@ -171,17 +159,17 @@
    nested inside a dt-first-row ancestor, which never exists). */
 .dt-table th.dt-first-row,
 .dt-table td.dt-first-row {
-  border-top: 1px solid var(--color-gray-300);
+  border-top: 1px solid var(--color-gray-300-variant);
 }
 
 
 .dt-table .dt-last-col {
-  border-right: 1px solid var(--color-gray-300);
+  border-right: 1px solid var(--color-gray-300-variant);
 }
 
 .dt-table th.dt-last-row,
 .dt-table td.dt-last-row {
-  border-bottom: 1px solid var(--color-gray-300);
+  border-bottom: 1px solid var(--color-gray-300-variant);
 }
 
 .dt-table .dt-first-row.dt-first-col { border-top-left-radius: var(--border-radius-table); z-index: 6; }
@@ -259,7 +247,7 @@
 }
 
 .dt-table tbody th.dt-label-col {
-  border-left: 1px solid var(--color-gray-300);
+  border-left: 1px solid var(--color-gray-300-variant);
 }
 
 .dt-table tbody tr:nth-child(even) th.dt-label-col {
@@ -278,7 +266,7 @@
   display: block;
   font-size: 12px;
   font-weight: 400;
-  color: var(--color-gray-500);
+  color: var(--font-color);
   margin-top: 3px;
   line-height: 1.5;
 }
@@ -291,7 +279,7 @@
   text-align: left;
   vertical-align: middle;
   font-size: 14px;
-  color: var(--color-gray-700);
+  color: var(--cell-color);
 }
 
 /* ── Mobile (< 768px) ────────────────────────────────────────────────────── */
@@ -358,7 +346,7 @@
     width: 110px;
   }
 
-  th.dt-label-col.dt-first-row.dt-first-col {
+  .dt-table th.dt-label-col.dt-first-row.dt-first-col {
     padding: 12px 16px;
   }
 
@@ -367,12 +355,13 @@
     padding: 12px 16px;
     box-sizing: border-box;
   }
+
   .dt-table td.dt-data-col {
     padding: 16px;
     box-sizing: border-box;
   }
 
-  th.dt-label-col.dt-first-col {
+  .dt-table th.dt-label-col.dt-first-col {
     padding: 16px 12px;
   }
 
@@ -469,18 +458,6 @@
     padding: 40px var(--spacing-600);
   }
 
-  .dt-table thead th {
-    padding: 16px;
-  }
-
-  .dt-table td.dt-data-col {
-    padding: 16px;
-    box-sizing: border-box;
-  }
-  .dt-table {
-    table-layout: auto;
-  }
-
   .dt-table thead th,
   .dt-table th.dt-label-col {
     padding: 16px;
@@ -488,12 +465,7 @@
   }
 
   .dt-table thead th {
-        transform: translateY(1px);
- 
-  }
-
-  th.dt-label-col.dt-first-row.dt-first-col {
-    padding: 16px;
+    transform: translateY(1px);
   }
 
   .dt-table td.dt-data-col {
@@ -501,16 +473,24 @@
     box-sizing: border-box;
   }
 
+  .dt-table {
+    table-layout: auto;
+  }
+
+  .dt-table th.dt-label-col.dt-first-row.dt-first-col {
+    padding: 16px;
+  }
+
   .dt-table th.dt-label-col {
     width: 160px;
   }
 
   .dt-header-text h2,
-  .dt-header-text h3 { 
-font-size: 22px;
-font-style: normal;
-font-weight: 700;
-line-height: 130%; /* 28.6px */
+  .dt-header-text h3 {
+    font-size: 22px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 130%; /* 28.6px */
   }
 }
 
@@ -552,6 +532,6 @@ line-height: 130%; /* 28.6px */
 
 @media (min-width: 1680px) {
   main .section.long-form .discovery-table {
-      margin: 0 auto;
+    margin: 0 auto;
   }
 }

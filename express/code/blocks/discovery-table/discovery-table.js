@@ -196,7 +196,7 @@ function initCarousel(block) {
   }
 
   function applyTransform(index) {
-    if (!mobileLayout) return;
+    if (!mobileLayout || dataColW === 0) return;
     const offset = index * dataColW;
     table.style.transform = `translateX(-${offset}px)`;
     labelColCells.forEach((cell) => {
@@ -309,13 +309,14 @@ function initCarousel(block) {
   });
 
   container.addEventListener('pointermove', (e) => {
-    if (!dragging) return;
+    if (!dragging || !mobileLayout) return;
     const dx = e.clientX - dragStartX;
     const dy = e.clientY - dragStartY;
 
     if (!directionLocked && (Math.abs(dx) > 4 || Math.abs(dy) > 4)) {
       isHorizontalDrag = Math.abs(dx) >= Math.abs(dy);
       directionLocked = true;
+      if (isHorizontalDrag) setTransitionsEnabled(false);
     }
     if (!isHorizontalDrag) return;
     e.preventDefault();
@@ -325,7 +326,6 @@ function initCarousel(block) {
     const max = (totalCols - 1) * dataColW;
     const offset = raw < 0 ? raw * 0.3 : raw > max ? max + (raw - max) * 0.3 : raw;
 
-    setTransitionsEnabled(false);
     table.style.transform = `translateX(-${offset}px)`;
     labelColCells.forEach((cell) => {
       const y = cell.closest('thead') ? ' translateY(2px)' : '';
