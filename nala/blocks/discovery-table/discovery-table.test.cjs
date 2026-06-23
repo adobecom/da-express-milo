@@ -19,6 +19,8 @@ test.describe('DiscoveryTableBlock Test Suite', () => {
       await expect(page).toHaveURL(testUrl);
     });
 
+    const isMobile = /mobile/i.test(test.info().project.name || '');
+
     await test.step('step-2: Verify block structure', async () => {
       await expect(block.block).toBeVisible();
       await expect(block.sectionHeader).toBeVisible();
@@ -34,18 +36,22 @@ test.describe('DiscoveryTableBlock Test Suite', () => {
     });
 
     await test.step('step-4: Verify carousel nav buttons', async () => {
-      await expect(block.carouselNav).toBeVisible();
-      await expect(block.prevBtn).toBeVisible();
-      await expect(block.nextBtn).toBeVisible();
-
-      // Prev button should be disabled at initial position
-      await expect(block.prevBtn).toBeDisabled();
-      await expect(block.nextBtn).toBeEnabled();
+      if (isMobile) {
+        await expect(block.carouselNav).toBeVisible();
+        await expect(block.prevBtn).toBeVisible();
+        await expect(block.nextBtn).toBeVisible();
+        await expect(block.prevBtn).toBeDisabled();
+        await expect(block.nextBtn).toBeEnabled();
+      } else {
+        await expect(block.carouselNav).not.toBeVisible();
+      }
     });
 
     await test.step('step-5: Verify next button advances and prev becomes enabled', async () => {
-      await block.nextBtn.click();
-      await expect(block.prevBtn).toBeEnabled();
+      if (isMobile) {
+        await block.nextBtn.click();
+        await expect(block.prevBtn).toBeEnabled();
+      }
     });
 
     await test.step('step-6: Accessibility validation', async () => {
