@@ -181,13 +181,27 @@ const LOGO_WHITE = 'adobe-express-logo-white';
 function injectLogo(block) {
   const injectRegularLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase());
   const injectPhotoLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-photo-logo')?.toLowerCase());
-
-  if (!injectRegularLogo && !injectPhotoLogo) return null;
+  const injectAcrobatLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase());
+  const injectRealMadridLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-real-madrid-logo')?.toLowerCase());
+  if (!injectRegularLogo
+    && !injectPhotoLogo && !injectAcrobatLogo && !injectRealMadridLogo) return null;
 
   let logo;
 
   if (injectPhotoLogo) {
     logo = getIconElementDeprecated('adobe-express-photos-logo');
+  } else if (injectAcrobatLogo) {
+    const logoName = 'cobrand-lockup-acrobat-express';
+    const logoSize = '22px';
+    const logoAlt = 'Adobe Acrobat X Adobe Express co-brand logo';
+    const logoClass = 'marquee-eyebrow-logo-wide';
+    logo = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
+  } else if (injectRealMadridLogo) {
+    const logoName = 'cobrand-lockup-real-madrid-logo';
+    const logoSize = '40px';
+    const logoAlt = 'Adobe X Real Madrid logo';
+    const logoClass = 'marquee-eyebrow-logo-large';
+    logo = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
   } else {
     const mediaQuery = window.matchMedia('(min-width: 900px)');
     logo = getIconElementDeprecated(block.classList.contains('dark') && mediaQuery.matches ? LOGO_WHITE : LOGO);

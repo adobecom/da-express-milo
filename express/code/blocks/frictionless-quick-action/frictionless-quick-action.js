@@ -72,6 +72,17 @@ function loadEasyUploadModule() {
   return easyUploadModulePromise;
 }
 
+function isEasyUploadVariantQuickAction(quickAction) {
+  return typeof quickAction === 'string' && quickAction.endsWith('-easy-upload-variant');
+}
+
+function getVanillaQuickActionForEasyUploadControl(quickAction) {
+  if (typeof quickAction !== 'string' || !quickAction.endsWith('-easy-upload-control')) {
+    return quickAction;
+  }
+  return EASY_UPLOAD_LEGACY_MAP[quickAction] || quickAction;
+}
+
 function isAuthFrictionlessUploadQuickAction(quickAction) {
   const isAuth = window.adobeIMS?.isSignedInUser();
   return isAuth && Object.values(AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS).includes(quickAction);
@@ -94,12 +105,9 @@ function frictionlessQAExperiment(
   appConfig.metaData.entryPoint = 'seo-quickaction-image-upload';
   switch (variant) {
     case 'qa-nba':
-      ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
-      break;
     case 'qa-in-product-control':
-      ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
-      break;
     case 'remove-background-fast-track-control':
+    case 'remove-background-focused-control':
       ccEverywhere.quickAction.removeBackground(docConfig, appConfig, exportConfig, contConfig);
       break;
     default:
@@ -229,6 +237,13 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
     receiveQuickActionErrors: true,
     callbacks: {
       onIntentChange: () => {
+        if (fromQrCode && easyUploadModulePromise) {
+          easyUploadModulePromise
+            .then(({ notifyEasyUploadSdkInitialization }) => (
+              notifyEasyUploadSdkInitialization?.(block)
+            ))
+            .catch((err) => window.lana?.log(`[FrictionlessQA] Failed to notify Easy Upload SDK init: ${err?.message || err}`, { severity: 'warning' }));
+        }
         quickActionContainer?.remove();
         fadeIn(uploadContainer);
         document.body.classList.add('editor-modal-loaded');
@@ -543,7 +558,7 @@ export function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, di
       routeSpecificParams = {
         locale: ietf,
         skipUploadStep: true,
-        ...(quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused && {
+        ...(quickAction === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocusedChallenger && {
           'edit-action': 'remove-bg',
           'l2-panel': 'backgrounds',
           'open-download': true,
@@ -710,22 +725,30 @@ async function performUploadAction(files, block, quickAction) {
 }
 
 async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCode = false) {
-  const urlParams = new URLSearchParams(window.location.search);
-  const urlVariant = urlParams.get('variant');
-  const variant = urlVariant || quickAction;
+  // edit-image easy-upload variants share the vanilla edit-image redirect journey
+  // (upload to ACP, hand off to the main editor on express.adobe.com).
+  const isEditImageEasyUpload = quickAction === 'edit-image-easy-upload-variant'
+    || quickAction === 'edit-image-easy-upload-control';
+  const normalizedQuickAction = isEditImageEasyUpload
+    ? FRICTIONLESS_UPLOAD_QUICK_ACTIONS.imageEditor
+    : getVanillaQuickActionForEasyUploadControl(quickAction);
 
-  let data = await processFilesForQuickAction(files, quickAction);
+  let data = await processFilesForQuickAction(files, normalizedQuickAction);
   if (!data[0]) {
-    const msg = await getErrorMsg(files, quickAction, replaceKey, getConfig);
+    const msg = await getErrorMsg(files, normalizedQuickAction, replaceKey, getConfig);
     showErrorToast(block, msg);
     return;
   }
 
   if (data.some((item) => !item)) {
-    const msg = await getErrorMsg(files, quickAction, replaceKey, getConfig);
+    const msg = await getErrorMsg(files, normalizedQuickAction, replaceKey, getConfig);
     showErrorToast(block, msg);
     data = data.filter((item) => item);
   }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const urlVariant = urlParams.get('variant');
+  const variant = urlVariant || normalizedQuickAction;
 
   const frictionlessAllowedQuickActions = Object.values(FRICTIONLESS_UPLOAD_QUICK_ACTIONS);
   if (frictionlessAllowedQuickActions.includes(variant)
@@ -734,7 +757,7 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCod
     return;
   }
 
-  startSDK(data, quickAction, block, fromQrCode);
+  startSDK(data, normalizedQuickAction, block, fromQrCode);
 }
 
 export function getFrictionlessTargetBaseUrl() { return frictionlessTargetBaseUrl; }
@@ -743,7 +766,7 @@ export function setupFrictionlessTargetBaseUrl(quickAction) {
   const urlParams = new URLSearchParams(window.location.search);
   const urlVariant = urlParams.get('variant');
   const variant = urlVariant || quickAction;
-  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocused) {
+  if (variant === FRICTIONLESS_UPLOAD_QUICK_ACTIONS.removeBackgroundFocusedChallenger) {
     const isStage = urlParams.get('hzenv') === 'stage';
     let stageFocusedUrl = `https://stage.projectx.corp.adobe.com${EXPRESS_ROUTE_PATHS.focusedEditor}`;
     const base = urlParams.get('base');
@@ -897,15 +920,19 @@ export default async function decorate(block) {
   };
   block.append(inputElement);
 
-  dropzoneContainer.addEventListener('click', (e) => {
-    e.preventDefault();
-    if (quickAction === 'generate-qr-code') {
-      document.body.dataset.suppressfloatingcta = 'true';
-      startSDK([''], quickAction, block);
-    } else {
-      inputElement.click();
-    }
-  });
+  // Easy Upload variants provide their own CTA click handling.
+  // Controls should continue to behave like vanilla quick-action pages.
+  if (!isEasyUploadVariantQuickAction(quickAction)) {
+    dropzoneContainer.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (quickAction === 'generate-qr-code') {
+        document.body.dataset.suppressfloatingcta = 'true';
+        startSDK([''], quickAction, block);
+      } else {
+        inputElement.click();
+      }
+    });
+  }
 
   function preventDefaults(e) {
     e.preventDefault();
@@ -990,8 +1017,19 @@ export default async function decorate(block) {
       fadeIn(uploadContainer);
       document.body.dataset.suppressfloatingcta = 'false';
       if (easyUploadModulePromise) {
-        easyUploadModulePromise.then(({ cleanupEasyUpload }) => cleanupEasyUpload?.())
-          .catch((err) => window.lana?.log(`[FrictionlessQA] Failed to cleanup Easy Upload: ${err?.message || err}`, { severity: 'warning' }));
+        // When cancel returns to the QR pane, keep Easy Upload listeners alive
+        // so pane-local controls (like the back button) remain functional.
+        const isQrPaneVisible = Boolean(
+          block.querySelector('.qr-code-container.dropzone-container:not(.hidden)'),
+        );
+        if (!isQrPaneVisible) {
+          easyUploadModulePromise.then(({ cleanupEasyUpload }) => cleanupEasyUpload?.())
+            .catch((err) => window.lana?.log(`[FrictionlessQA] Failed to cleanup Easy Upload: ${err?.message || err}`, { severity: 'warning' }));
+        } else {
+          easyUploadModulePromise
+            .then(({ refreshEasyUploadQrIfConsumed }) => refreshEasyUploadQrIfConsumed?.(block))
+            .catch((err) => window.lana?.log(`[FrictionlessQA] Failed to refresh consumed Easy Upload QR: ${err?.message || err}`, { severity: 'warning' }));
+        }
       }
     }
   }, { passive: true });

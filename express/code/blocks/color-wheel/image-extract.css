@@ -270,7 +270,7 @@
   position: relative;
   inset: auto;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
   min-height: 360px;
   height: 490px;
   background: #f3f3f3;
@@ -415,7 +415,8 @@
 
 .image-extract .color-extract-mood-dropdown {
   position: relative;
-  min-width: 64px;
+  min-width: 200px;
+
 }
 
 .image-extract .color-extract-mood-trigger {
@@ -572,8 +573,9 @@
 }
 
 .image-extract .color-extract-marker.is-active {
-  width: 56px;
-  height: 56px;
+  width: 80px;
+  height: 80px;
+  background: transparent;
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
   z-index: 10;
 }
@@ -610,6 +612,10 @@
   display: block;
 }
 
+.image-extract .color-extract-marker.is-active .color-extract-marker-zoom {
+  display: block;
+}
+
 /* ---- Magnified state (handle becomes zoom lens on drag) ---- */
 
 .image-extract .color-extract-marker.is-magnified {
@@ -619,6 +625,10 @@
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
   z-index: 20;
   transition: none;
+}
+
+.image-extract:has(.color-extract-marker.is-magnified) {
+  cursor: none;
 }
 
 .image-extract .color-extract-marker.is-magnified .color-extract-marker-zoom {
@@ -803,6 +813,15 @@
   .image-extract .color-extract-gradient-editor-col .gradient-editor-bar-wrap {
     min-height: 200px;
   }
+
+  .image-extract .color-extract-top-bar {
+     display: block
+  }
+
+  .image-extract .color-extract-mood-dropdown {
+    width: 100%
+  
+  }
 }
 
 @media (max-width: 600px) {
@@ -812,8 +831,8 @@
   }
 
   .image-extract .color-extract-marker.is-active {
-    width: 42px;
-    height: 42px;
+    width: 80px;
+    height: 80px;
   }
 
   .image-extract .color-extract-zoom {
