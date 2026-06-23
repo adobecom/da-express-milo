@@ -339,7 +339,7 @@ function decorateBackground(block) {
   } else {
     const href = mediaRow.querySelector('a')?.href;
     if (href) {
-      media = createTag('img');
+      media = document.createElement('img');
       media.src = href;
       media.classList.add('backgroundimg');
       media.loading = 'eager';
@@ -605,13 +605,17 @@ export default async function decorate(block) {
     if (href) preloadLCPImage(href);
   }
 
+  // Insert the LCP background image into the DOM before awaiting the Milo CDN imports so it
+  // paints as early as possible (cuts LCP element render delay). decorateBackground is
+  // synchronous and only needs `block`.
+  decorateBackground(block);
+
   await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`), decorateButtonsDeprecated(block)]).then(([utils, placeholders]) => {
     ({ createTag, getConfig, getMetadata } = utils);
     ({ replaceKey, replaceKeyArray } = placeholders);
   });
   config = getConfig();
   ({ prefix } = getConfig().locale);
-  decorateBackground(block);
   if (shouldInjectLogo(block)) {
     const brandingLogoName = getMetadata('inject-branding-logo')?.trim()
       || (LOGO_META_VALUES.includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase()) && 'cobrand-lockup-acrobat-express')
