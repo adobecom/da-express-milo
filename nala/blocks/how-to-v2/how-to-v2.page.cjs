@@ -19,9 +19,9 @@ export default class HowToV2 {
     this.detailText = page.locator('.how-to-v2 .detail-text');
 
     // Step titles and details
-    this.stepTitles = page.locator('.how-to-v2 h3 h3');
-    this.firstStepTitle = page.locator('.how-to-v2 h3 h3').first();
-    this.lastStepTitle = page.locator('.how-to-v2 h3 h3').last();
+    this.stepTitles = page.locator('.how-to-v2 .step-content > h3 > h3');
+    this.firstStepTitle = page.locator('.how-to-v2 .step-content > h3 > h3').first();
+    this.lastStepTitle = page.locator('.how-to-v2 .step-content > h3 > h3').last();
 
     // Media elements
     this.mediaPicture = page.locator('.how-to-v2 .media-container picture');
@@ -39,16 +39,16 @@ export default class HowToV2 {
 
   async getStepData(stepIndex) {
     const step = this.stepItems.nth(stepIndex);
-    // Get the text from the inner H3 (the one with actual content, not the wrapper)
-    const title = await step.locator('h3 h3').textContent();
-    const detail = await step.locator('.detail-text').textContent();
+    const rawTitle = await step.locator('.step-content > h3 > h3').textContent();
+    const rawDetail = await step.locator('.detail-text').textContent();
+    const normalize = (s) => (s || '').replace(/\s+/g, ' ').trim();
     const isExpanded = await step.getAttribute('aria-expanded') === 'true';
     const detailContainer = step.locator('.detail-container');
     const hasClosedClass = await detailContainer.evaluate((el) => el.classList.contains('closed'));
 
     return {
-      title,
-      detail,
+      title: normalize(rawTitle),
+      detail: normalize(rawDetail),
       isExpanded,
       isClosed: hasClosedClass,
     };
