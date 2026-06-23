@@ -529,6 +529,9 @@ async function loadPage() {
 
   loadLana({ clientId: 'express' });
 
+  // TODO this method should be removed about two weeks after going live
+  listenAlloy();
+
   // prevent milo gnav from loading
   const headerMeta = createTag('meta', { name: 'custom-header', content: 'on' });
   document.head.append(headerMeta);
@@ -542,6 +545,14 @@ async function loadPage() {
     import('./instrument.js').then((mod) => { mod.default(); });
   }
 
+  /* region based redirect to CN homepage */
+  const isAdobeOrigin = /^(www|color)\.(stage\.)?adobe\.com$/.test(window.location.hostname);
+  import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
+    if (country === 'cn' && isAdobeOrigin && !window.location.pathname.startsWith('/cn') && !window.isErrorPage) {
+      window.location.href = window.location.hostname.includes('stage') ? 'https://www.stage.adobe.com/cn' : 'https://www.adobe.com/cn';
+    }
+  });
+
   document.head.querySelectorAll('meta').forEach((meta) => {
     if (meta.content && meta.content.includes('--none--')) {
       meta.remove();
@@ -553,20 +564,6 @@ async function loadPage() {
   });
 
   await loadArea();
-
-  // Post-LCP work: not needed before the first paint (body reveal happens inside loadArea).
-  // Deferring keeps the alloy listener setup and the CN-redirect import off the LCP critical
-  // path so they don't contend for the main thread / bandwidth during the LCP window.
-  // TODO this method should be removed about two weeks after going live
-  listenAlloy();
-
-  /* region based redirect to CN homepage */
-  const isAdobeOrigin = /^(www|color)\.(stage\.)?adobe\.com$/.test(window.location.hostname);
-  import('./utils/location-utils.js').then(({ getCountry }) => getCountry()).then((country) => {
-    if (country === 'cn' && isAdobeOrigin && !window.location.pathname.startsWith('/cn') && !window.isErrorPage) {
-      window.location.href = window.location.hostname.includes('stage') ? 'https://www.stage.adobe.com/cn' : 'https://www.adobe.com/cn';
-    }
-  });
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));

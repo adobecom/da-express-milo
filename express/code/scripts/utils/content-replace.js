@@ -262,12 +262,10 @@ function replaceBladesInStr(str, replacements) {
   });
 }
 
-async function updateMetadataForTemplates(placeholdersReady) {
+async function updateMetadataForTemplates() {
   if (!['yes', 'true', 'on', 'Y'].includes(getMetadata('template-search-page'))) {
     return;
   }
-  // Only search pages reach here; ensure replaceKey is ready before getReplacementsFromSearch.
-  await placeholdersReady;
   const head = document.querySelector('head');
   if (head) {
     const replacements = await getReplacementsFromSearch();
@@ -308,31 +306,11 @@ async function autoUpdatePage(main) {
 
   await Promise.all(Array.from(metaTags).map((meta) => sanitizeMeta(meta)));
 
-  // Substitute blades in place (text nodes + attributes) instead of reserializing
-  // main.innerHTML. The full innerHTML round-trip is CPU-heavy on mobile and destroys
-  // every node — including the eager-preloaded LCP <img> and any Lit/Preact roots.
-  // An in-place walk keeps node identity (preload stays warm) while producing an
-  // identical final DOM.
-  const sub = (str) => str.replace(regex, (match, p1) => {
+  main.innerHTML = main.innerHTML.replaceAll(regex, (match, p1) => {
     if (!wl.includes(match.toLowerCase())) {
       return getMetadata(p1) ?? '';
     }
     return match;
-  });
-
-  const walker = document.createTreeWalker(main, NodeFilter.SHOW_TEXT);
-  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
-    if (node.nodeValue.includes('{{')) {
-      node.nodeValue = sub(node.nodeValue);
-    }
-  }
-
-  main.querySelectorAll('*').forEach((el) => {
-    [...el.attributes].forEach((attr) => {
-      if (attr.value.includes('{{')) {
-        el.setAttribute(attr.name, sub(attr.value));
-      }
-    });
   });
 
   // handle link replacement on sheet-powered pages
@@ -419,17 +397,12 @@ async function validatePage() {
 }
 
 export default async function replaceContent(main) {
-  // autoUpdatePage (the hero/LCP blade substitution) only needs getConfig/getMetadata, so it
-  // must not block on the placeholders.js import. Load placeholders in parallel and await it
-  // only where replaceKey is actually consumed (updateMetadataForTemplates on search pages,
-  // updateNonBladeContent), both of which run after the LCP-critical step.
-  ({ getConfig, getMetadata } = await import(`${getLibs()}/utils/utils.js`));
-  const placeholdersReady = import(`${getLibs()}/features/placeholders.js`).then((placeholdersMod) => {
+  await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]).then(([utils, placeholdersMod]) => {
+    ({ getConfig, getMetadata } = utils);
     ({ replaceKey } = placeholdersMod);
   });
-  await updateMetadataForTemplates(placeholdersReady);
+  await updateMetadataForTemplates();
   await autoUpdatePage(main);
-  await placeholdersReady;
   await updateNonBladeContent(main);
   validatePage();
 }
