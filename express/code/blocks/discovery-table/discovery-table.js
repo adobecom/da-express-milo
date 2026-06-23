@@ -2,7 +2,7 @@ const MOBILE_BREAKPOINT = 768;
 
 // ── DOM builders ─────────────────────────────────────────────────────────────
 
-function buildCarouselNav(totalCols) {
+function buildCarouselNav() {
   const nav = document.createElement('div');
   nav.className = 'dt-carousel-nav';
   nav.setAttribute('role', 'group');
@@ -43,7 +43,7 @@ function buildSectionHeader(titleDiv, totalCols) {
   if (subtitleP) headerText.appendChild(subtitleP);
 
   header.appendChild(headerText);
-  header.appendChild(buildCarouselNav(totalCols));
+  header.appendChild(buildCarouselNav());
   return header;
 }
 
