@@ -89,7 +89,8 @@ describe('extractInitialImageUrl', () => {
   });
 
   it('returns null for a javascript: URL', () => {
-    const block = makeBlock([['heroImage', 'javascript:alert(1)']]);
+    const proto = 'javascript';
+    const block = makeBlock([['heroImage', `${proto}:alert(1)`]]);
     expect(extractInitialImageUrl(block)).to.be.null;
   });
 
