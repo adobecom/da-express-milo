@@ -331,7 +331,10 @@ function decorateBackground(block) {
       media.classList.add('backgroundimg');
       media.loading = 'eager';
       media.setAttribute('fetchpriority', 'high');
-      block.prepend(media);
+      // Keep the <picture> (and its webp <source>s) so the eager webp preload is consumed.
+      // Hoisting the bare <img> drops the sources and renders the PNG fallback, wasting the
+      // preload and forcing a late second fetch of the LCP image.
+      block.prepend(picture);
     }
   } else {
     const href = mediaRow.querySelector('a')?.href;
