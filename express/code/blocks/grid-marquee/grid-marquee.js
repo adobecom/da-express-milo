@@ -9,6 +9,8 @@ import {
 } from '../../scripts/utils.js';
 
 let currDrawer = null;
+const decoratedGridMarquees = new WeakSet();
+const decoratingGridMarquees = new WeakSet();
 const largeMQ = window.matchMedia('(min-width: 1280px)');
 const mediumMQ = window.matchMedia('(min-width: 768px)');
 const reduceMotionMQ = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -262,17 +264,15 @@ async function makeRatings(
 }
 
 export default async function init(el) {
-  console.log('--------------------------------');
-  console.log('init grid-marquee', el);
-  console.log('el.dataset.gridMarqueeDecorated', el.dataset.gridMarqueeDecorated);
-  console.log('el.dataset.gridMarqueeDecorating', el.dataset.gridMarqueeDecorating);
-  console.log('el.querySelector(:scope > .foreground)', el.querySelector(':scope > .foreground'));
-  console.log('--------------------------------');
   if (
-    el.dataset.gridMarqueeDecorated === 'true'
+    decoratedGridMarquees.has(el)
+    || decoratingGridMarquees.has(el)
+    || el.dataset.gridMarqueeDecorated === 'true'
     || el.dataset.gridMarqueeDecorating === 'true'
     || el.querySelector(':scope > .foreground')
   ) return;
+  decoratingGridMarquees.add(el);
+  decoratedGridMarquees.add(el);
   el.dataset.gridMarqueeDecorating = 'true';
   el.dataset.gridMarqueeDecorated = 'true';
 
@@ -457,6 +457,7 @@ export default async function init(el) {
     }
   }
 
+  decoratingGridMarquees.delete(el);
   delete el.dataset.gridMarqueeDecorating;
 }
 document.addEventListener('keydown', (e) => {

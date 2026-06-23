@@ -1,6 +1,8 @@
 import { getIconElementDeprecated, createTag, formatDynamicCartLink } from '../../scripts/utils.js';
 
 // formatDynamicCartLink now imported from utils
+const decoratedGridMarqueeHeroes = new WeakSet();
+const decoratingGridMarqueeHeroes = new WeakSet();
 
 function decorateHeadline(headline) {
   headline.classList.add('headline');
@@ -27,10 +29,14 @@ function decorateHeadlineAsync(headline) {
 
 export default async function init(el) {
   if (
-    el.dataset.gridMarqueeHeroDecorated === 'true'
+    decoratedGridMarqueeHeroes.has(el)
+    || decoratingGridMarqueeHeroes.has(el)
+    || el.dataset.gridMarqueeHeroDecorated === 'true'
     || el.dataset.gridMarqueeHeroDecorating === 'true'
     || el.querySelector(':scope > .foreground')
   ) return;
+  decoratingGridMarqueeHeroes.add(el);
+  decoratedGridMarqueeHeroes.add(el);
   el.dataset.gridMarqueeHeroDecorating = 'true';
   el.dataset.gridMarqueeHeroDecorated = 'true';
 
@@ -61,5 +67,6 @@ export default async function init(el) {
       decorateHeadlineAsync(headline);
     });
   }
+  decoratingGridMarqueeHeroes.delete(el);
   delete el.dataset.gridMarqueeHeroDecorating;
 }
