@@ -262,6 +262,12 @@ async function makeRatings(
 }
 
 export default async function init(el) {
+  console.log('--------------------------------');
+  console.log('init grid-marquee', el);
+  console.log('el.dataset.gridMarqueeDecorated', el.dataset.gridMarqueeDecorated);
+  console.log('el.dataset.gridMarqueeDecorating', el.dataset.gridMarqueeDecorating);
+  console.log('el.querySelector(:scope > .foreground)', el.querySelector(':scope > .foreground'));
+  console.log('--------------------------------');
   if (
     el.dataset.gridMarqueeDecorated === 'true'
     || el.dataset.gridMarqueeDecorating === 'true'
