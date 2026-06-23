@@ -3,16 +3,23 @@ import { getLibs, createTag } from '../../../scripts/utils.js';
 export function updateImageUrl(url, maxDim) {
   try {
     const urlObj = new URL(url);
+    if (!['http:', 'https:'].includes(urlObj.protocol)) return null;
     urlObj.searchParams.set('max_dim', String(maxDim));
     return urlObj.toString();
   } catch {
-    return url;
+    return null;
   }
 }
 
 export function createHeroImageSrcset(url) {
   const widths = [400, 800, 1200, 1600];
-  return widths.map((w) => `${updateImageUrl(url, w)} ${w}w`).join(', ');
+  return widths
+    .map((w) => {
+      const updatedUrl = updateImageUrl(url, w);
+      return updatedUrl ? `${updatedUrl} ${w}w` : null;
+    })
+    .filter(Boolean)
+    .join(', ');
 }
 
 export function flattenOptionGroups(selector) {
