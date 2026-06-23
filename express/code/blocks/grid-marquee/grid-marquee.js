@@ -262,6 +262,8 @@ async function makeRatings(
 }
 
 export default async function init(el) {
+  if (el.querySelector(':scope > .foreground')) return;
+
   const rows = [...el.querySelectorAll(':scope > div')];
   const hasLegacyHeadline = !!rows[0]?.querySelector('h1');
   const foreground = createTag('div', { class: 'foreground' });

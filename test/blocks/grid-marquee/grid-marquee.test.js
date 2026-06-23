@@ -85,4 +85,18 @@ describe('Grid Marquee - Legacy vs New Authoring', () => {
     expect(h1InGM).to.not.exist;
     expect(cards).to.exist;
   });
+
+  it('keeps decorated injected content intact when decoration is invoked again', async () => {
+    document.body.innerHTML = oldAuthoring;
+    const gm = document.querySelector('.grid-marquee');
+    await decorateGrid(gm);
+
+    const decoratedHTML = gm.innerHTML;
+    await decorateGrid(gm);
+
+    expect(gm.innerHTML).to.equal(decoratedHTML);
+    expect(gm.querySelectorAll(':scope > .foreground').length).to.equal(1);
+    expect(gm.querySelectorAll('.cards-container').length).to.equal(1);
+    expect(gm.querySelectorAll('.background').length).to.equal(1);
+  });
 });
