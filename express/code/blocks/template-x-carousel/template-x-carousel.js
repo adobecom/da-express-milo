@@ -1,4 +1,4 @@
-import { getLibs, getMobileOperatingSystem, readBlockConfig } from '../../scripts/utils.js';
+import { getLibs, getMobileOperatingSystem, readBlockConfig, getIconElementDeprecated } from '../../scripts/utils.js';
 import { fetchResults, isValidTemplate } from '../../scripts/template-utils.js';
 import renderTemplate from '../template-x/template-rendering.js';
 import buildGallery from '../../scripts/widgets/gallery/gallery.js';
@@ -207,6 +207,10 @@ export default async function init(el) {
   }
 
   if (el.classList.contains('v2')) {
+    el.querySelectorAll('.button-container > a.button').forEach((cta) => {
+      cta.append(getIconElementDeprecated('arrow-up-right'));
+    });
+
     let rafId = null;
     const resizeObserver = new ResizeObserver(() => {
       if (rafId) cancelAnimationFrame(rafId);

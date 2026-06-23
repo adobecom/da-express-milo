@@ -14,6 +14,11 @@ body main .section:has(.wayfinder) {
     max-width: 1328px;
 }
 
+.wayfinder.template-page {
+  margin-top: 0;
+  margin-bottom: var(--spacing-300);
+}
+
 main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, main .wayfinder h5, main .wayfinder h6 {
   font-family: "Adobe Clean";
   font-size: 16px;
@@ -45,13 +50,10 @@ main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, 
     text-decoration: underline;
 }
 
-
-
 .wayfinder.gradient {
     color: var(--color-black);
     border: 2px solid var(--color-white);
 }
-
 
 .wayfinder .cta-row .button {
     height: fit-content;
