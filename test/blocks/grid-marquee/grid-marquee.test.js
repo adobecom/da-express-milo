@@ -98,6 +98,8 @@ describe('Grid Marquee - Legacy vs New Authoring', () => {
     expect(gm.querySelectorAll(':scope > .foreground').length).to.equal(1);
     expect(gm.querySelectorAll('.cards-container').length).to.equal(1);
     expect(gm.querySelectorAll('.background').length).to.equal(1);
+    expect(gm.dataset.gridMarqueeDecorated).to.equal('true');
+    expect(gm.dataset.gridMarqueeDecorating).to.be.undefined;
   });
 
   it('keeps decorated injected split-authoring content intact when decoration is invoked again', async () => {
@@ -118,5 +120,9 @@ describe('Grid Marquee - Legacy vs New Authoring', () => {
     expect(gm.querySelectorAll(':scope > .foreground').length).to.equal(1);
     expect(gm.querySelectorAll('.cards-container').length).to.equal(1);
     expect(gm.querySelectorAll('.background').length).to.equal(1);
+    expect(hero.dataset.gridMarqueeHeroDecorated).to.equal('true');
+    expect(hero.dataset.gridMarqueeHeroDecorating).to.be.undefined;
+    expect(gm.dataset.gridMarqueeDecorated).to.equal('true');
+    expect(gm.dataset.gridMarqueeDecorating).to.be.undefined;
   });
 });
