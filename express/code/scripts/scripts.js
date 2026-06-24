@@ -305,63 +305,8 @@ const CONFIG = {
 
 document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
 preDecorateSections(document);
-// LCP image decoration
-const eagerLoad = (img) => {
-  img?.setAttribute('loading', 'eager');
-  img?.setAttribute('fetchpriority', 'high');
-};
-
-function preloadLCPImage(img) {
-  // Build a preload that mirrors the <picture> responsive sources when available.
-  // currentSrc is empty at module-evaluation time (before layout), so we extract
-  // the best candidate from <source> srcset or fall back to img.src.
-  const picture = img?.closest('picture');
-  const link = document.createElement('link');
-  link.rel = 'preload';
-  link.as = 'image';
-  link.fetchPriority = 'high';
-
-  if (picture) {
-    const sources = [...picture.querySelectorAll('source')];
-    if (sources.length) {
-      // Use imagesrcset/imagesizes so the browser picks the right variant
-      link.type = sources[0].type || '';
-      link.imageSrcset = sources[0].srcset || '';
-      if (sources[0].sizes) link.imageSizes = sources[0].sizes;
-      if (sources[0].media) link.media = sources[0].media;
-    } else {
-      link.href = img.src;
-    }
-  } else {
-    link.href = img.src;
-  }
-
-  const key = link.href || link.imageSrcset;
-  const alreadyExists = key && (
-    document.querySelector(`link[rel="preload"][href="${key}"]`)
-    || document.querySelector(`link[rel="preload"][imagesrcset="${key}"]`)
-  );
-  if (key && !alreadyExists) {
-    document.head.appendChild(link);
-  }
-}
-
-(function decorateLCPImage() {
-  const firstSection = document.querySelector('body > main > div:nth-child(1)');
-  if (!firstSection) return;
-
-  const images = firstSection.querySelectorAll('img');
-  if (images.length > 0) {
-    images.forEach(eagerLoad);
-    preloadLCPImage(images[0]);
-  } else {
-    const lcpImg = document.querySelector('img');
-    if (lcpImg) {
-      eagerLoad(lcpImg);
-      preloadLCPImage(lcpImg);
-    }
-  }
-}());
+// LCP image decoration runs earlier, import-free, from scripts/lcp-preload.js (loaded in head.html
+// before this module) so it is not gated behind the static utils.js import.
 
 (function loadStyles() {
   const paths = [`${miloLibs}/styles/styles.css`];
