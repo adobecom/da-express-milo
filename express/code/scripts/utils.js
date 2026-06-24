@@ -478,6 +478,7 @@ export function preDecorateSections(area) {
       if (sectionRemove) section.remove();
       else if (sectionMeta.anchor) section.id = sectionMeta.anchor;
       else if (sectionMeta.padding) section.setAttribute('data-padding', 'none');
+      if (sectionMeta['max-width'] === '900') section.classList.add('max-width-900');
     }
   });
 
@@ -627,7 +628,7 @@ export function buildAutoBlocks() {
     const lastDiv = document.querySelector('main > div:last-of-type');
     const newDiv = document.createElement('div');
     lastDiv.insertAdjacentElement('afterend', newDiv);
-    const validButtonVersion = ['floating-button', 'multifunction-button', 'mobile-fork-button', 'mobile-fork-button-frictionless', 'mobile-fork-button-dismissable', 'mobile-fork-button-os-split'];
+    const validButtonVersion = ['floating-button', 'multifunction-button', 'mobile-fork-button', 'mobile-fork-button-frictionless', 'mobile-fork-button-dismissable', 'mobile-fork-button-os-split', 'mobile-fork-button-unity'];
     const device = document.body.dataset?.device;
     const blockName = getMetadata(`${device}-floating-cta`);
 

@@ -332,15 +332,21 @@
   --Global-Typography-Size-Label-Label-L: 16px;
   --Global-Typography-Line-height-Label-Label-L: 22px;
   --typography-label-l: 16px;
+  --typography-title-xs: 16px;
   --typography-title-2xs: 14px;
+  --typography-headings-xl: 28px;
+  --typography-body-s: 14px;
+  --typography-line-height-Title-xs: 22px;
   --typography-line-height-Title-2xs: 20px;
 
   /* Palette tokens */
   --Palette-gray-100: #E9E9E9;
   --Palette-gray-200: #E1E1E1;
   --Palette-gray-400: #C6C6C6;
+  --Palette-gray-500: #8F8F8F;
   --Palette-gray-600: #717171;
   --Palette-gray-700: #505050;
+  --Palette-gray-800: #292929;
   --Palette-gray-900: #131313;
   --Palette-gray-1000: #000000;
 
@@ -348,7 +354,7 @@
 
   /* Alias tokens */
   --Alias-focus-indicator-default: #4b75ff;
-  --Alias-content-neutral-default: #292929;
+  --Alias-content-neutral-default: var(--Palette-gray-800);
   --Alias-content-neutral-hover: #131313;
   --Alias-content-disabled-default: #C6C6C6;
   --Alias-content-typography-Title: var(--Palette-gray-900);
@@ -362,6 +368,7 @@
 
   /* Background/button semantic tokens */
   --Background-accent-default: var(--color-background-accent-default);
+  --Background-secondary-default: var(--Palette-gray-100);
   --Buttons-default: var(--S2-Buttons-Accent-Color-Default);
   --Buttons-hover: var(--S2-Buttons-Accent-Color-Hover);
 }
@@ -402,6 +409,8 @@
     --Global-Typography-Size-Body-Body-M: 18px;
     --typography-title-2xs: 16px;
     --typography-line-height-Title-2xs: 22px;
+    --typography-headings-xl: 36px;
+    --typography-body-s: 16px;
   }
 }
 
@@ -977,6 +986,7 @@ main .section.secondary {
   background-color: var(--color-gray-100);
 }
 
+
 main .section.panel {
   margin: 0 var(--spacing-600) var(--spacing-900) var(--spacing-600); 
   padding: var(--spacing-600) var(--spacing-500);
@@ -984,6 +994,13 @@ main .section.panel {
   border: 2px solid var(--color-white);
   background: var(--color-gray-100);
   box-shadow: 0 0 1px 0 rgba(0, 0, 0, 0.08), 0 1px 4px 0 rgba(0, 0, 0, 0.04), 0 2px 8px 0 rgba(0, 0, 0, 0.08);
+}
+
+
+main .section.max-width-900 {
+  max-width: 900px;
+  box-sizing: border-box;
+  margin-inline: auto;
 }
 
 @media (max-width: 899px) {
@@ -1001,10 +1018,18 @@ main .section.panel {
 }
 
 @media (min-width: 1800px) {
+
+
   main .section.panel {
     margin: 0 auto var(--spacing-900) auto;
     max-width: 1679px;
   }
+
+  main .section.max-width-900 {
+    max-width: 900px;
+    margin-inline: auto;
+  }
+  
 }
 
 /* Align link-list with template container when in modular-search */
