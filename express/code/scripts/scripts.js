@@ -305,8 +305,67 @@ const CONFIG = {
 
 document.body.dataset.device = navigator.userAgent.includes('Mobile') ? 'mobile' : 'desktop';
 preDecorateSections(document);
-// LCP image decoration runs earlier, import-free, from scripts/lcp-preload.js (loaded in head.html
-// before this module) so it is not gated behind the static utils.js import.
+
+// LCP image decoration
+const eagerLoad = (img) => {
+  img?.setAttribute('loading', 'eager');
+  img?.setAttribute('fetchpriority', 'high');
+};
+
+function preloadLCPImage(img) {
+  const picture = img?.closest('picture');
+  const link = document.createElement('link');
+  link.rel = 'preload';
+  link.as = 'image';
+  link.fetchPriority = 'high';
+
+  if (picture) {
+    const sources = [...picture.querySelectorAll('source')];
+    // Pick the source that matches THIS viewport. Using sources[0] unconditionally would
+    // grab the desktop `media="(min-width: 600px)"` variant and copy its media query onto
+    // the preload, so on mobile the preload never matched and the real image loaded at
+    // Low priority. A source without a media attribute matches everything.
+    const match = sources.find(
+      (source) => !source.media || window.matchMedia(source.media).matches,
+    );
+    if (match) {
+      link.type = match.type || '';
+      link.imageSrcset = match.srcset || '';
+      if (match.sizes) link.imageSizes = match.sizes;
+      // deliberately no link.media: we already resolved the match for this viewport
+    } else {
+      link.href = img.src;
+    }
+  } else {
+    link.href = img.src;
+  }
+
+  const key = link.href || link.imageSrcset;
+  const alreadyExists = key && (
+    document.querySelector(`link[rel="preload"][href="${key}"]`)
+    || document.querySelector(`link[rel="preload"][imagesrcset="${key}"]`)
+  );
+  if (key && !alreadyExists) {
+    document.head.appendChild(link);
+  }
+}
+
+(function decorateLCPImage() {
+  const firstSection = document.querySelector('body > main > div:nth-child(1)');
+  if (!firstSection) return;
+
+  const images = firstSection.querySelectorAll('img');
+  if (images.length > 0) {
+    images.forEach(eagerLoad);
+    preloadLCPImage(images[0]);
+  } else {
+    const lcpImg = document.querySelector('img');
+    if (lcpImg) {
+      eagerLoad(lcpImg);
+      preloadLCPImage(lcpImg);
+    }
+  }
+}());
 
 (function loadStyles() {
   const paths = [`${miloLibs}/styles/styles.css`];
