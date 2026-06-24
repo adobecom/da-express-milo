@@ -17,7 +17,7 @@ const imports = await Promise.all([
 const [{
   getLibs,
 }, _, {
-  default: decorate, SUSIUtils, DCTX_ID_MAP, resolveTabsPanelMinHeight, resolveTabsWrapperMinHeight,
+  default: decorate, SUSIUtils, DCTX_ID_MAP, resolveTabsPanelMinHeight,
   resolveModalWrapperProfile, resolveModalWrapperHeight, applyModalWrapperReserve,
 }] = imports;
 await import(`${getLibs()}/utils/utils.js`).then((mod) => {
@@ -185,11 +185,8 @@ describe('Susi-light', async () => {
       expect(block.style.getPropertyValue('--susi-tabs-panel-height').trim()).to.equal('521px');
       expect(resolveTabsPanelMinHeight(['standard', 'edu-express'])).to.equal(521);
       expect(resolveTabsPanelMinHeight(['standard', 'standard'])).to.equal(508);
-      expect(resolveTabsWrapperMinHeight(['standard', 'edu-express'])).to.equal(458);
       expect(resolveTabsPanelMinHeight(['edu-express', 'edu-express'])).to.equal(521);
-      expect(resolveTabsWrapperMinHeight(['edu-express', 'edu-express'])).to.equal(367);
       expect(resolveTabsPanelMinHeight([])).to.equal(521);
-      expect(resolveTabsWrapperMinHeight([])).to.equal(458);
     });
 
     it('allocates content into tabs', () => {

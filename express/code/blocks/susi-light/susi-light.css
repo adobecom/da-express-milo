@@ -1,31 +1,13 @@
-/* CLS min-height floors (not exact heights) — re-measure: /drafts/sircar/susi-light-copy */
+/* CLS fallback floors. Per-profile heights live in the JS (single source of truth). */
 :root {
   --susi-modal-width: 370px;
   --susi-tabs-width: 400px;
   --susi-tabs-panel-height: 521px;
-  --susi-tabs-panel-standard: 508px;
-  --susi-tabs-panel-edu-express: 521px;
   --susi-tabs-wrapper-standard: 458px;
   --susi-tabs-wrapper-edu-express: 367px;
-  --susi-tabs-panel-buffer: 0px;
   --susi-wrapper-standard: 484px;
-  --susi-wrapper-b2b-default: 484px;
-  --susi-wrapper-b2b-hed: 291px;
-  --susi-wrapper-b2b-business: 393px;
-  --susi-wrapper-b2b-email-first: 409px;
-  --susi-wrapper-b2b-email-only: 294px;
-  --susi-wrapper-edu-default: 484px;
-  --susi-wrapper-edu-hed: 333px;
-  --susi-wrapper-edu-business: 393px;
   --susi-wrapper-edu-express: 400px;
-  --susi-wrapper-student-default: 462px;
-  --susi-wrapper-student-hed: 422px;
-  --susi-wrapper-student-business: 422px;
-  --susi-wrapper-student-email-only: 294px;
-  --susi-wrapper-student: 422px;
   --susi-wrapper-simplified: 400px;
-  --susi-wrapper-legacy-edu-express: 545px;
-  --susi-wrapper-legacy-edu-hed: 477px;
   --susi-standard-padding: 24px;
 }
 

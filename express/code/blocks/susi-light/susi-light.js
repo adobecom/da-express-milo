@@ -357,10 +357,8 @@ const TABS_PANEL_HEIGHTS = {
 const TABS_PANEL_BUFFER = 0;
 const TABS_PANEL_FALLBACK = 521;
 
-const TABS_WRAPPER_HEIGHTS = {
-  standard: 458,
-  'edu-express': 367,
-};
+// Per-variant tab wrapper min-heights are owned by CSS
+// (--susi-tabs-wrapper-* in susi-light.css), applied statically per tabpanel.
 
 export function resolveTabsPanelMinHeight(variants) {
   const heights = variants
@@ -368,15 +366,6 @@ export function resolveTabsPanelMinHeight(variants) {
     .map((v) => TABS_PANEL_HEIGHTS[v] ?? TABS_PANEL_HEIGHTS.standard);
   if (!heights.length) return TABS_PANEL_FALLBACK;
   return Math.ceil(Math.max(...heights) + TABS_PANEL_BUFFER);
-}
-
-export function resolveTabsWrapperMinHeight(variants) {
-  const fallback = TABS_WRAPPER_HEIGHTS.standard;
-  const heights = variants
-    .filter(Boolean)
-    .map((v) => TABS_WRAPPER_HEIGHTS[v] ?? fallback);
-  if (!heights.length) return fallback;
-  return Math.max(...heights);
 }
 
 /** CLS: reserve tab panel slot from authoring row 2 variants. */
