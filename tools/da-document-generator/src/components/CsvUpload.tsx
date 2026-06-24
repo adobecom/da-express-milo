@@ -7,13 +7,12 @@ import { fetchProductFromTemplate } from '../api/zazzleApi';
 interface Props {
   rows: CsvRow[];
   onChange: (rows: CsvRow[]) => void;
-  placeholders?: string[];
   onReadinessChange?: (state: { dataComplete: boolean; idsValid: boolean; noDuplicates: boolean }) => void;
   disabled?: boolean;
 }
 
-const PLACEHOLDER_COLUMNS = ['product_id', 'url_slug', 'title', 'description'];
-const PLACEHOLDER_ROW: CsvRow = { _id: 'placeholder', product_id: '-', url_slug: '-', title: '-', description: '-' };
+const PLACEHOLDER_COLUMNS = ['product_id', 'product_type', 'url_slug', 'title', 'description'];
+const PLACEHOLDER_ROW: CsvRow = { _id: 'placeholder', product_id: '-', product_type: '-', url_slug: '-', title: '-', description: '-' };
 
 function computeSummary(rows: CsvRow[]): InputSummary {
   
@@ -45,21 +44,6 @@ function computeSummary(rows: CsvRow[]): InputSummary {
   return { total, duplicates, duplicateSlugs, missing, duplicateProductIdRowIds, duplicateSlugRowIds };
 }
 
-interface SchemaMatch {
-  missingFromCsv: string[];
-  extraInCsv: string[];
-  matchedCount: number;
-}
-
-function computeSchemaMatch(csvColumns: string[], templatePlaceholders: string[]): SchemaMatch {
-  const csvSet = new Set(csvColumns.filter((c) => c !== '_id'));
-  const placeholderSet = new Set(templatePlaceholders);
-  return {
-    missingFromCsv: templatePlaceholders.filter((p) => !csvSet.has(p)),
-    extraInCsv: csvColumns.filter((c) => c !== '_id' && c !== 'url_slug' && !placeholderSet.has(c)),
-    matchedCount: templatePlaceholders.filter((p) => csvSet.has(p)).length,
-  };
-}
 
 function buildZazzleMap(): Record<string, string> {
   return {
@@ -99,7 +83,7 @@ function ensureShortTitle(fields: string[], rows: CsvRow[]): { fields: string[];
   return { fields: normalizedFields, rows: normalizedRows };
 }
 
-export default function CsvUpload({ rows, onChange, placeholders = [], onReadinessChange, disabled = false }: Props) {
+export default function CsvUpload({ rows, onChange, onReadinessChange, disabled = false }: Props) {
   const [inputMode, setInputMode] = useState<'upload' | 'manual'>('manual');
   const [manualInput, setManualInput] = useState('');
   const [isDragging, setIsDragging] = useState(false);
@@ -120,7 +104,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
     ? columns
     : Object.keys(rows[0] ?? {}).filter((k) => k !== '_id');
   const tableColumns = hasData
-    ? [...baseCols, ...['url_slug', 'description'].filter((c) => !baseCols.includes(c))]
+    ? [...baseCols, ...['url_slug', 'description', 'product_type'].filter((c) => !baseCols.includes(c))]
     : PLACEHOLDER_COLUMNS;
   const visibleRows = hasData ? rows : [PLACEHOLDER_ROW];
 
@@ -252,14 +236,14 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
       .map((s) => s.trim())
       .filter(Boolean);
     if (!ids.length) return;
-    setColumns(['product_id', 'title', 'short_title', 'description', 'url_slug']);
+    setColumns(['product_id', 'product_type', 'title', 'short_title', 'description', 'url_slug']);
     setValidationStatus({});
     setValidateMsg(null);
     setHydrateMsg(null);
     setZazzleHydratedFields({});
     setZazzleReferenceValues({});
     setExpandedDiffCells({});
-    onChange(ids.map((id, i) => ({ _id: String(i), product_id: id, title: '', short_title: '', description: '', url_slug: '' })));
+    onChange(ids.map((id, i) => ({ _id: String(i), product_id: id, product_type: '', title: '', short_title: '', description: '', url_slug: '' })));
   }
 
   function handleFile(file: File) {
@@ -377,48 +361,6 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
         </div>
       )}
 
-      {hasData && placeholders.length > 0 && (() => {
-        const schemaMatch = computeSchemaMatch(tableColumns, placeholders);
-        const hasMismatch = schemaMatch.missingFromCsv.length > 0 || schemaMatch.extraInCsv.length > 0;
-        if (!hasMismatch) {
-          return (
-            <p className="text-xs font-medium text-green-600">
-              ✓ All {placeholders.length} template placeholder{placeholders.length !== 1 ? 's' : ''} matched
-            </p>
-          );
-        }
-        return (
-          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 flex flex-col gap-2.5">
-            <p className="text-xs font-semibold text-amber-800">Column / template mismatch</p>
-            {schemaMatch.missingFromCsv.length > 0 && (
-              <div className="flex flex-col gap-1">
-                <p className="text-xs text-amber-700">
-                  Missing from CSV — template expects {schemaMatch.missingFromCsv.length} more:
-                </p>
-                <div className="flex flex-wrap gap-1">
-                  {schemaMatch.missingFromCsv.map((p) => (
-                    <code key={p} className="text-xs bg-amber-100 border border-amber-300 text-amber-900 px-1.5 py-0.5 rounded">
-                      {p}
-                    </code>
-                  ))}
-                </div>
-              </div>
-            )}
-            {schemaMatch.extraInCsv.length > 0 && (
-              <div className="flex flex-col gap-1">
-                <p className="text-xs text-amber-700">Extra in CSV — not used by template:</p>
-                <div className="flex flex-wrap gap-1">
-                  {schemaMatch.extraInCsv.map((c) => (
-                    <code key={c} className="text-xs bg-amber-100 border border-amber-300 text-amber-900 px-1.5 py-0.5 rounded">
-                      {c}
-                    </code>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
 
       {hasData && (
         <div className="flex items-center gap-3 flex-wrap">

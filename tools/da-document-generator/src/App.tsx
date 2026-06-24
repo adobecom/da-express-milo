@@ -1,41 +1,62 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CsvUpload from './components/CsvUpload';
-import TemplateConfirm from './components/TemplateConfirm';
 import GeneratePanel from './components/GeneratePanel';
-import type { CsvRow, TemplateState } from './types';
+import { fetchSheet } from './api/daApi';
+import type { CsvRow, ProductTypeConfig } from './types';
 
-const INITIAL_TEMPLATE: TemplateState = {
-  status: 'idle',
-  html: null,
-  sourcePath: null,
-  outputDir: null,
-  outputDirValid: null,
-  outputDirError: null,
-  placeholders: [],
-  issues: [],
-};
+const CONFIG_SHEET = '/adobecom/da-express-milo/drafts/maxn/doc-generator-presets';
 
 export default function App() {
   const [rows, setRows] = useState<CsvRow[]>([]);
-  const [template, setTemplate] = useState<TemplateState>(INITIAL_TEMPLATE);
   const [csvReadiness, setCsvReadiness] = useState({ dataComplete: false, idsValid: false, noDuplicates: true });
   const [hasGeneratedResults, setHasGeneratedResults] = useState(false);
+  const [productTypeConfigs, setProductTypeConfigs] = useState<ProductTypeConfig[]>([]);
+  const [configLoading, setConfigLoading] = useState(true);
+  const [configError, setConfigError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetchSheet(CONFIG_SHEET)
+      .then((sheetRows) => {
+        setProductTypeConfigs(
+          sheetRows
+            .filter((r) => r['Product Type'] && r['Template Path'])
+            .map((r) => ({
+              productType: r['Product Type'],
+              templatePath: r['Template Path'],
+              outputDir: r['Output Directory'] ?? '',
+            })),
+        );
+      })
+      .catch((err) => {
+        const msg = err instanceof Error ? err.message : String(err);
+        const is403 = msg.startsWith('403');
+        const is404 = msg.startsWith('404');
+        setConfigError(
+          is403
+            ? '403 — Access Denied: You do not have access to the config sheet. Check your active Organization in DA and reload.'
+            : is404
+            ? '404 — Config sheet not found. Confirm the sheet path is correct.'
+            : `Error loading config: ${msg}`,
+        );
+      })
+      .finally(() => setConfigLoading(false));
+  }, []);
 
   const inputsReady = rows.length > 0;
-  const templateReady =
-    (template.status === 'ready' || template.status === 'warning') &&
-    template.outputDirValid === true;
-  const canGenerate = inputsReady && templateReady;
+  const allRowsHaveProductType = inputsReady && rows.every((r) => !!r.product_type?.trim());
+  const canGenerate = inputsReady;
 
   const generateBlockReason: string | undefined =
-    !csvReadiness.noDuplicates
-      ? 'Fix duplicate template IDs or URL slugs before generating'
+    !allRowsHaveProductType
+      ? 'Run Hydrate to assign product types before generating'
+      : !csvReadiness.noDuplicates
+      ? 'Fix duplicate product IDs or URL slugs before generating'
       : !csvReadiness.dataComplete && !csvReadiness.idsValid
-      ? 'Fill in missing data and validate all template IDs before generating'
+      ? 'Fill in missing data and validate all product IDs before generating'
       : !csvReadiness.dataComplete
       ? 'Fill in all missing data before generating'
       : !csvReadiness.idsValid
-      ? 'Validate all template IDs before generating'
+      ? 'Validate all product IDs before generating'
       : undefined;
 
   return (
@@ -43,17 +64,27 @@ export default function App() {
       <div className="p-6 flex flex-col gap-4">
         <h1 className="text-2xl font-semibold text-gray-900">DA Document Generator</h1>
 
-        <div className="grid grid-cols-1 gap-4">
-          <Panel step={1} title="Template" complete={templateReady} locked={hasGeneratedResults}>
-            <TemplateConfirm state={template} onChange={setTemplate} disabled={hasGeneratedResults} />
-          </Panel>
+        {configLoading && (
+          <p className="text-xs text-gray-400">Loading config…</p>
+        )}
+        {configError && (
+          <p className="text-xs text-red-500">{configError}</p>
+        )}
 
-          <Panel step={2} title="Product Data" complete={inputsReady} locked={hasGeneratedResults}>
-            <CsvUpload rows={rows} onChange={setRows} placeholders={template.placeholders} onReadinessChange={setCsvReadiness} disabled={hasGeneratedResults} />
+        <div className="grid grid-cols-1 gap-4">
+          <Panel step={1} title="Product Data" complete={inputsReady} locked={hasGeneratedResults}>
+            <CsvUpload rows={rows} onChange={setRows} onReadinessChange={setCsvReadiness} disabled={hasGeneratedResults} />
           </Panel>
         </div>
 
-        {canGenerate && <GeneratePanel rows={rows} template={template} generateBlockReason={generateBlockReason} onResultsChange={setHasGeneratedResults} />}
+        {canGenerate && (
+          <GeneratePanel
+            rows={rows}
+            productTypeConfigs={productTypeConfigs}
+            generateBlockReason={generateBlockReason}
+            onResultsChange={setHasGeneratedResults}
+          />
+        )}
       </div>
     </div>
   );

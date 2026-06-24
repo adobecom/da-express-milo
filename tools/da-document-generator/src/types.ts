@@ -10,17 +10,10 @@ export interface InputSummary {
   duplicateSlugRowIds: Set<string>;
 }
 
-export type TemplateStatus = 'idle' | 'loading' | 'ready' | 'warning' | 'invalid' | 'error';
-
-export interface TemplateState {
-  status: TemplateStatus;
-  html: string | null;
-  sourcePath: string | null;
-  outputDir: string | null;
-  outputDirValid: boolean | null;
-  outputDirError: string | null;
-  placeholders: string[];
-  issues: string[];
+export interface ProductTypeConfig {
+  productType: string;
+  templatePath: string;
+  outputDir: string;
 }
 
 export type RowStage =

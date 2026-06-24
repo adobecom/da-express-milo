@@ -8,13 +8,14 @@ import {
   getToken,
   daPathToPreviewUrl,
   daPathToLiveUrl,
+  cat,
 } from '../api/daApi';
 import { applyTemplate, rowToOutputPath, runGenerationQa, runPageQa } from '../lib/generate';
-import type { CsvRow, TemplateState, RowResult, QaResult } from '../types';
+import type { CsvRow, ProductTypeConfig, RowResult, QaResult } from '../types';
 
 interface Props {
   rows: CsvRow[];
-  template: TemplateState;
+  productTypeConfigs: ProductTypeConfig[];
   generateBlockReason?: string;
   onResultsChange?: (hasResults: boolean) => void;
 }
@@ -23,8 +24,7 @@ const CONCURRENCY = 3;
 
 type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing' | 'unpublishing' | 'deleting';
 
-export default function GeneratePanel({ rows, template, generateBlockReason, onResultsChange }: Props) {
-  const outputDir = template.outputDir ?? '';
+export default function GeneratePanel({ rows, productTypeConfigs, generateBlockReason, onResultsChange }: Props) {
   const [results, setResults] = useState<RowResult[]>([]);
   const [bulkOp, setBulkOp] = useState<BulkOp>('idle');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
@@ -37,6 +37,10 @@ export default function GeneratePanel({ rows, template, generateBlockReason, onR
 
   function toggleRowDetail(id: string) {
     setExpandedRowId((prev) => (prev === id ? null : id));
+  }
+
+  function lookupConfig(productType: string): ProductTypeConfig | undefined {
+    return productTypeConfigs.find((c) => c.productType === productType?.trim());
   }
 
   const running = bulkOp !== 'idle';
@@ -65,7 +69,7 @@ export default function GeneratePanel({ rows, template, generateBlockReason, onR
     let idx = 0;
     async function worker() {
       while (idx < queue.length) {
-         
+
         await fn(queue[idx++]);
       }
     }
@@ -73,22 +77,43 @@ export default function GeneratePanel({ rows, template, generateBlockReason, onR
   }
 
   async function handleGenerate() {
-    if (!template.html) return;
     setResults(
-      rows.map((row) => ({ id: row['_id'], path: rowToOutputPath(row, outputDir), stage: 'pending' })),
+      rows.map((row) => {
+        const cfg = lookupConfig(row.product_type ?? '');
+        return { id: row['_id'], path: cfg ? rowToOutputPath(row, cfg.outputDir) : '', stage: 'pending' };
+      }),
     );
     setBulkOp('generating');
 
+    const templateCache = new Map<string, string>();
     const queue = [...rows];
     let idx = 0;
 
     async function processRow(row: CsvRow) {
-      const path = rowToOutputPath(row, outputDir);
+      const cfg = lookupConfig(row.product_type ?? '');
+      if (!cfg) {
+        setResults((prev) =>
+          prev.map((r) =>
+            r.id === row['_id']
+              ? { ...r, stage: 'error', error: `No config found for product type: ${row.product_type || '(empty)'}` }
+              : r,
+          ),
+        );
+        return;
+      }
+
+      const path = rowToOutputPath(row, cfg.outputDir);
       setResults((prev) =>
-        prev.map((r) => (r.id === row['_id'] ? { ...r, stage: 'generating' } : r)),
+        prev.map((r) => (r.id === row['_id'] ? { ...r, path, stage: 'generating' } : r)),
       );
+
       try {
-        const html = applyTemplate(template.html!, row);
+        let templateHtml = templateCache.get(cfg.templatePath);
+        if (!templateHtml) {
+          templateHtml = await cat(cfg.templatePath);
+          templateCache.set(cfg.templatePath, templateHtml);
+        }
+        const html = applyTemplate(templateHtml, row);
         const qa = runGenerationQa(html);
         const res = await postDoc(path, html);
         setResults((prev) =>
@@ -108,7 +133,7 @@ export default function GeneratePanel({ rows, template, generateBlockReason, onR
 
     async function worker() {
       while (idx < queue.length) {
-         
+
         await processRow(queue[idx++]);
       }
     }
@@ -118,13 +143,24 @@ export default function GeneratePanel({ rows, template, generateBlockReason, onR
   }
 
   async function handleGenerateRow(rowId: string) {
-    if (!template.html) return;
     const row = rows.find((r) => r['_id'] === rowId);
     if (!row) return;
-    const path = rowToOutputPath(row, outputDir);
-    setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'generating' } : r));
+    const cfg = lookupConfig(row.product_type ?? '');
+    if (!cfg) {
+      setResults((prev) =>
+        prev.map((r) =>
+          r.id === rowId
+            ? { ...r, stage: 'error', error: `No config found for product type: ${row.product_type || '(empty)'}` }
+            : r,
+        ),
+      );
+      return;
+    }
+    const path = rowToOutputPath(row, cfg.outputDir);
+    setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, path, stage: 'generating' } : r));
     try {
-      const html = applyTemplate(template.html!, row);
+      const templateHtml = await cat(cfg.templatePath);
+      const html = applyTemplate(templateHtml, row);
       const qa = runGenerationQa(html);
       const res = await postDoc(path, html);
       setResults((prev) => prev.map((r) =>
@@ -319,17 +355,10 @@ export default function GeneratePanel({ rows, template, generateBlockReason, onR
     <div className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4">
       <div className="flex items-center gap-2">
         <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-gray-200 text-gray-600">
-          3
+          2
         </span>
         <h2 className="font-medium text-gray-900">Generate</h2>
       </div>
-
-      {outputDir && (
-        <p className="text-xs text-gray-400">
-          Documents will be written to{' '}
-          <code className="bg-gray-100 px-1 rounded font-mono">{outputDir}/{'{{url_slug}}'}</code>
-        </p>
-      )}
 
       <div className="flex items-center gap-3 flex-wrap">
         {results.length > 0 && !running && (
@@ -346,7 +375,7 @@ export default function GeneratePanel({ rows, template, generateBlockReason, onR
           <button
             type="button"
             onClick={handleGenerate}
-            disabled={running || !template.html || !!generateBlockReason}
+            disabled={running || !!generateBlockReason}
             className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
             {bulkOp === 'generating'
@@ -513,7 +542,7 @@ export default function GeneratePanel({ rows, template, generateBlockReason, onR
             <h3 className="font-semibold text-gray-900 text-base">Reset results?</h3>
             <p className="text-sm text-gray-500">
               This will clear all {results.length} result{results.length !== 1 ? 's' : ''} from this
-              view and unlock the template and data inputs. Documents already written to DA are not
+              view and unlock the data inputs. Documents already written to DA are not
               deleted — use the Delete button to remove them first.
             </p>
             <div className="flex gap-3 justify-end">
