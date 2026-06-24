@@ -1,6 +1,6 @@
 import { createTag } from '../../../utils.js';
 import { createLibraryAccordion } from './createLibraryAccordion.js';
-import { createLibrariesHeader } from './createLibrariesHeader.js';
+import { createLibrariesHeader, LIBRARY_SORT } from './createLibrariesHeader.js';
 import { getSizeClass } from './libraryUtils.js';
 import { createEmptySearchIcon } from './libraryIcons.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
@@ -22,6 +22,20 @@ const LOADING_SKELETON_CARDS = 6;
 
 function interpolate(template, vars = {}) {
   return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
+}
+
+/**
+ * Sort the libraries array in place to match the active sort control.
+ *   - NAME: case-insensitive A→Z by library name.
+ *   - LAST_MODIFIED: restore the order the API returned (it already sorts by
+ *     `-modified_date`), captured as `apiOrder` when the libraries were received.
+ */
+function sortLibrariesInPlace(libraries, sortKey) {
+  if (sortKey === LIBRARY_SORT.NAME) {
+    libraries.sort((a, b) => (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' }));
+    return;
+  }
+  libraries.sort((a, b) => (a.apiOrder ?? 0) - (b.apiOrder ?? 0));
 }
 
 function createLoadingState() {
@@ -131,8 +145,29 @@ export function createLibrariesComponent(options = {}) {
   let size = initialSize;
   let emptyQuery = '';
   let sizeClass = getSizeClass(size);
+  let currentSort = Object.values(LIBRARY_SORT).includes(initialSort)
+    ? initialSort
+    : LIBRARY_SORT.LAST_MODIFIED;
   const expandedState = new Map(libraries.map((lib) => [lib.id, Boolean(lib.expanded)]));
   const accordionInstances = new Map();
+
+  // Stamp the order the API delivered (already newest-first by modified_date) so
+  // the LAST_MODIFIED sort can restore it without an actual timestamp.
+  function captureApiOrder() {
+    libraries.forEach((lib, index) => { lib.apiOrder = index; });
+  }
+  captureApiOrder();
+
+  // The header emits `sort-change`; sorting lives here because this owns the
+  // libraries array and the render. Re-sort + re-render, then forward the event
+  // so the block can still react (analytics, etc.).
+  function handleHeaderEmit(event, detail) {
+    if (event === 'sort-change') {
+      if (Object.values(LIBRARY_SORT).includes(detail?.key)) currentSort = detail.key;
+      render();
+    }
+    emit(event, detail);
+  }
 
   const container = createTag('section', {
     class: [
@@ -148,8 +183,8 @@ export function createLibrariesComponent(options = {}) {
   const header = createLibrariesHeader({
     strings,
     searchBarEl,
-    emit,
-    initialSort,
+    emit: handleHeaderEmit,
+    initialSort: currentSort,
   });
 
   function applyDefaultExpansion() {
@@ -209,6 +244,10 @@ export function createLibrariesComponent(options = {}) {
     // Header (count + search + sort) is persistent across every view.
     container.appendChild(header.element);
 
+    // Order reflects the active sort before any view-specific rendering (so the
+    // default-expanded first library is the first in sorted order too).
+    sortLibrariesInPlace(libraries, currentSort);
+
     if (view === LIBRARY_VIEW.LOADING) {
       container.appendChild(createLoadingState());
       return;
@@ -240,6 +279,8 @@ export function createLibrariesComponent(options = {}) {
     render,
     setLibraries(nextLibraries) {
       libraries.splice(0, libraries.length, ...nextLibraries);
+      // Re-stamp: the incoming order is the API's last-modified order to restore.
+      captureApiOrder();
       const nextIds = new Set(nextLibraries.map((lib) => lib.id));
       [...expandedState.keys()].forEach((id) => {
         if (!nextIds.has(id)) expandedState.delete(id);
@@ -266,7 +307,10 @@ export function createLibrariesComponent(options = {}) {
       header.setCount(total);
     },
     setSort(key) {
+      if (Object.values(LIBRARY_SORT).includes(key)) currentSort = key;
+      // silent: updates the control's value without re-emitting sort-change.
       header.setSort(key);
+      render();
     },
     getSort() {
       return header.getSort();
