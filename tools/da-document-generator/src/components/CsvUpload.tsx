@@ -100,7 +100,7 @@ function ensureShortTitle(fields: string[], rows: CsvRow[]): { fields: string[];
 }
 
 export default function CsvUpload({ rows, onChange, placeholders = [], onReadinessChange, disabled = false }: Props) {
-  const [inputMode, setInputMode] = useState<'upload' | 'manual'>('upload');
+  const [inputMode, setInputMode] = useState<'upload' | 'manual'>('manual');
   const [manualInput, setManualInput] = useState('');
   const [isDragging, setIsDragging] = useState(false);
   const [hydrating, setHydrating] = useState(false);
@@ -280,17 +280,6 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
     <div className="flex flex-col gap-4">
       <div className="flex gap-2">
         <button
-          onClick={() => { if (!disabled) setInputMode('upload'); }}
-          disabled={disabled}
-          className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
-            disabled
-              ? `opacity-40 cursor-not-allowed ${inputMode === 'upload' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-200'}`
-              : `cursor-pointer ${inputMode === 'upload' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'}`
-          }`}
-        >
-          Upload File
-        </button>
-        <button
           onClick={() => { if (!disabled) setInputMode('manual'); }}
           disabled={disabled}
           className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
@@ -300,6 +289,17 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
           }`}
         >
           Enter IDs
+        </button>
+        <button
+          onClick={() => { if (!disabled) setInputMode('upload'); }}
+          disabled={disabled}
+          className={`text-xs px-3 py-1 rounded-full border font-medium transition-colors ${
+            disabled
+              ? `opacity-40 cursor-not-allowed ${inputMode === 'upload' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-200'}`
+              : `cursor-pointer ${inputMode === 'upload' ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-gray-500 border-gray-200 hover:border-gray-400'}`
+          }`}
+        >
+          Upload File
         </button>
       </div>
 
@@ -349,7 +349,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
             value={manualInput}
             onChange={(e) => { if (!disabled) setManualInput(e.target.value); }}
             disabled={disabled}
-            placeholder={'Paste product IDs, one per line or comma-separated\ne.g.\n150004762482726999\n150004762482726998'}
+            placeholder={'Paste product IDs, one per line or comma-separated, for example:\nurn:aaid:sc:VA6C2:56f7551c-a9f5-5e5a-ae74-3a0bcf8f1428\nurn:aaid:sc:VA6C2:7b3a902d-f1c4-4d8e-bc91-2e5a7f0c3d19\nurn:aaid:sc:VA6C2:b88c4843-e148-5314-b9d6-3b08a433772b'}
             rows={6}
             className="w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-700 font-mono resize-y focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:opacity-40 disabled:cursor-not-allowed"
           />

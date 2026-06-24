@@ -22,7 +22,8 @@ const STATUS_CARD: Record<string, string> = {
   error: 'bg-red-50 border-red-200',
 };
 
-const CONFIG_SHEET = '/adobecom/da-express-milo/doc-generator-presets';
+const CONFIG_SHEET_0 = '/adobecom/da-express-milo/doc-generator-presets';
+const CONFIG_SHEET = '/adobecom/da-express-milo/drafts/maxn/doc-generator-presets';
 
 function ExternalLinkIcon() {
   return (
