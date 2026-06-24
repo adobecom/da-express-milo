@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import CsvUpload from './components/CsvUpload';
 import GeneratePanel from './components/GeneratePanel';
+import TemplateOverridePanel from './components/TemplateOverridePanel';
 import { fetchSheet } from './api/daApi';
 import type { CsvRow, ProductTypeConfig } from './types';
 
@@ -13,6 +14,8 @@ export default function App() {
   const [productTypeConfigs, setProductTypeConfigs] = useState<ProductTypeConfig[]>([]);
   const [configLoading, setConfigLoading] = useState(true);
   const [configError, setConfigError] = useState<string | null>(null);
+  const [templateOverrideEnabled, setTemplateOverrideEnabled] = useState(false);
+  const [overrideConfig, setOverrideConfig] = useState<ProductTypeConfig | undefined>(undefined);
 
   useEffect(() => {
     fetchSheet(CONFIG_SHEET)
@@ -47,7 +50,9 @@ export default function App() {
   const canGenerate = inputsReady;
 
   const generateBlockReason: string | undefined =
-    !allRowsHaveProductType
+    templateOverrideEnabled && !overrideConfig
+      ? 'Select a valid template override or uncheck the override option to continue'
+      : !templateOverrideEnabled && !allRowsHaveProductType
       ? 'Run Hydrate to assign product types before generating'
       : !csvReadiness.noDuplicates
       ? 'Fix duplicate product IDs or URL slugs before generating'
@@ -78,9 +83,19 @@ export default function App() {
         </div>
 
         {canGenerate && (
+          <TemplateOverridePanel
+            enabled={templateOverrideEnabled}
+            onEnabledChange={setTemplateOverrideEnabled}
+            onOverrideChange={setOverrideConfig}
+            disabled={hasGeneratedResults}
+          />
+        )}
+
+        {canGenerate && (
           <GeneratePanel
             rows={rows}
             productTypeConfigs={productTypeConfigs}
+            overrideConfig={overrideConfig}
             generateBlockReason={generateBlockReason}
             onResultsChange={setHasGeneratedResults}
           />

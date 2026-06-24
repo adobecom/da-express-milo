@@ -16,6 +16,7 @@ import type { CsvRow, ProductTypeConfig, RowResult, QaResult } from '../types';
 interface Props {
   rows: CsvRow[];
   productTypeConfigs: ProductTypeConfig[];
+  overrideConfig?: ProductTypeConfig;
   generateBlockReason?: string;
   onResultsChange?: (hasResults: boolean) => void;
 }
@@ -24,7 +25,7 @@ const CONCURRENCY = 3;
 
 type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing' | 'unpublishing' | 'deleting';
 
-export default function GeneratePanel({ rows, productTypeConfigs, generateBlockReason, onResultsChange }: Props) {
+export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig, generateBlockReason, onResultsChange }: Props) {
   const [results, setResults] = useState<RowResult[]>([]);
   const [bulkOp, setBulkOp] = useState<BulkOp>('idle');
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
@@ -79,7 +80,7 @@ export default function GeneratePanel({ rows, productTypeConfigs, generateBlockR
   async function handleGenerate() {
     setResults(
       rows.map((row) => {
-        const cfg = lookupConfig(row.product_type ?? '');
+        const cfg = overrideConfig ?? lookupConfig(row.product_type ?? '');
         return { id: row['_id'], path: cfg ? rowToOutputPath(row, cfg.outputDir) : '', stage: 'pending' };
       }),
     );
@@ -90,7 +91,7 @@ export default function GeneratePanel({ rows, productTypeConfigs, generateBlockR
     let idx = 0;
 
     async function processRow(row: CsvRow) {
-      const cfg = lookupConfig(row.product_type ?? '');
+      const cfg = overrideConfig ?? lookupConfig(row.product_type ?? '');
       if (!cfg) {
         setResults((prev) =>
           prev.map((r) =>
@@ -145,7 +146,7 @@ export default function GeneratePanel({ rows, productTypeConfigs, generateBlockR
   async function handleGenerateRow(rowId: string) {
     const row = rows.find((r) => r['_id'] === rowId);
     if (!row) return;
-    const cfg = lookupConfig(row.product_type ?? '');
+    const cfg = overrideConfig ?? lookupConfig(row.product_type ?? '');
     if (!cfg) {
       setResults((prev) =>
         prev.map((r) =>
