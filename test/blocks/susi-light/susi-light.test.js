@@ -267,4 +267,25 @@ describe('Susi-light', async () => {
       expect(component.authParams.dctx_id).to.equal(DCTX_ID_MAP['context-edu'].stage);
     });
   });
+
+  describe('susi-light simplified color variant', () => {
+    const colorBlock = document.querySelector('.susi-light.simplified.color');
+
+    before(async () => {
+      const redirectKey = '__susiColorRedirect';
+      window[redirectKey] = 'https://new.express.adobe.com/?colorPalette=test&referrer=express-colors&feature-enable=colors-product-entry&entryPoint=color-explorer#hash';
+      await decorate(colorBlock);
+      await delay(310);
+    });
+
+    it('forwards color params to destURL', () => {
+      const component = colorBlock.querySelector('susi-sentry-light');
+      expect(component).to.exist;
+      const url = new URL(component.authParams.redirect_uri);
+      expect(url.searchParams.get('referrer')).to.equal('express-colors');
+      expect(url.searchParams.get('feature-enable')).to.equal('colors-product-entry');
+      expect(url.searchParams.get('entryPoint')).to.equal('color-explorer');
+      expect(component.authParams.redirect_uri).not.to.include('#');
+    });
+  });
 });
