@@ -86,7 +86,7 @@ function parseGradientElement(element) {
 }
 
 function parseElement(element) {
-  const type = element.type;
+  const { type } = element;
   if (type === GRADIENT_ELEMENT_TYPE || type === 'gradient') return parseGradientElement(element);
   if (type === THEME_ELEMENT_TYPE || type === 'colortheme') return parseThemeElement(element);
   return null;

@@ -300,7 +300,11 @@ export function createColorPaletteParamApi() {
   };
 }
 
-export function buildColorToolUrl(href, { colors, name, tags } = {}, base = window.location.origin) {
+export function buildColorToolUrl(
+  href,
+  { colors, name, tags } = {},
+  base = window.location.origin,
+) {
   if (!colors?.length) return null;
   const url = new URL(href, base);
   createColorPaletteParamApi().setOnUrl(url, colors, { name, tags });
