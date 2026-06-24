@@ -12,7 +12,7 @@
   "fonts": [
     {
       "id": "light-text-bubble",
-      "grouping": "Cool",
+      "category": "Cool",
       "styleName": "Light text bubble",
       "fontSupported": "noto-sans",
       "type": "direct-map",
@@ -133,7 +133,7 @@
     },
     {
       "id": "dark-text-bubble",
-      "grouping": "Cool",
+      "category": "Cool",
       "styleName": "Dark text bubble",
       "fontSupported": "noto-sans",
       "type": "direct-map",
@@ -254,7 +254,7 @@
     },
     {
       "id": "full-width",
-      "grouping": "Cool",
+      "category": "Cool",
       "styleName": "Full width",
       "fontSupported": "noto-sans",
       "type": "direct-map",
@@ -375,7 +375,7 @@
     },
     {
       "id": "diagonal-strikes",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Diagonal strikes",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -496,7 +496,7 @@
     },
     {
       "id": "acute-accents",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Acute Accents",
       "fontSupported": "noto-sans",
       "type": "direct-map",
@@ -617,7 +617,7 @@
     },
     {
       "id": "underline-with-dashes",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Underline with dashes",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -738,7 +738,7 @@
     },
     {
       "id": "metal-umalauts",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Metal Umalauts",
       "fontSupported": "noto-sans",
       "type": "direct-map",
@@ -859,7 +859,7 @@
     },
     {
       "id": "bandaid",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Bandaid",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -980,7 +980,7 @@
     },
     {
       "id": "strikethrough",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Strikethrough",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1101,7 +1101,7 @@
     },
     {
       "id": "x-cross",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "X cross",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1222,7 +1222,7 @@
     },
     {
       "id": "stroked",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Stroked",
       "fontSupported": "noto-sans",
       "type": "direct-map",
@@ -1343,7 +1343,7 @@
     },
     {
       "id": "lines-lines-lines",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Lines lines lines",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1464,7 +1464,7 @@
     },
     {
       "id": "shadow",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Shadow",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1585,7 +1585,7 @@
     },
     {
       "id": "wavy",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Wavy",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1706,7 +1706,7 @@
     },
     {
       "id": "double-underline",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Double underline",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1827,7 +1827,7 @@
     },
     {
       "id": "music-bars",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Music bars",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1948,7 +1948,7 @@
     },
     {
       "id": "all-the-way-up",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "All the way up",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2069,7 +2069,7 @@
     },
     {
       "id": "comet-tail",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Comet tail",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2190,7 +2190,7 @@
     },
     {
       "id": "hot",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Hot",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2311,7 +2311,7 @@
     },
     {
       "id": "weird-text",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Weird text",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2432,7 +2432,7 @@
     },
     {
       "id": "right-direction-above",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Right direction above",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2553,7 +2553,7 @@
     },
     {
       "id": "right-direction-under",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Right direction under",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2674,7 +2674,7 @@
     },
     {
       "id": "stacked-above",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Stacked above",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2795,7 +2795,7 @@
     },
     {
       "id": "cross-it-under",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Cross it under",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2916,7 +2916,7 @@
     },
     {
       "id": "rain-on-top",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Rain on top",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -3037,7 +3037,7 @@
     },
     {
       "id": "bubbles-on-top",
-      "grouping": "Glitch",
+      "category": "Glitch",
       "styleName": "Bubbles on top",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -3158,7 +3158,7 @@
     },
     {
       "id": "fading-effect",
-      "grouping": "Symbol text",
+      "category": "Symbol text",
       "styleName": "Fading effect",
       "fontSupported": "gothic-a1",
       "type": "pattern-map",
@@ -3279,7 +3279,7 @@
     },
     {
       "id": "arrows",
-      "grouping": "Symbol text",
+      "category": "Symbol text",
       "styleName": "Arrows",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -3400,7 +3400,7 @@
     },
     {
       "id": "cupido",
-      "grouping": "Symbol text",
+      "category": "Symbol text",
       "styleName": "Cupido",
       "fontSupported": "gothic-a1",
       "type": "pattern-map",
@@ -3521,7 +3521,7 @@
     },
     {
       "id": "sparkles",
-      "grouping": "Symbol text",
+      "category": "Symbol text",
       "styleName": "Sparkles",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -3642,7 +3642,7 @@
     },
     {
       "id": "finish",
-      "grouping": "Symbol text",
+      "category": "Symbol text",
       "styleName": "Finish",
       "fontSupported": "gothic-a1",
       "type": "pattern-map",
@@ -3763,7 +3763,7 @@
     },
     {
       "id": "barcode",
-      "grouping": "Symbol text",
+      "category": "Symbol text",
       "styleName": "Barcode",
       "fontSupported": "gothic-a1",
       "type": "pattern-map",
@@ -3884,7 +3884,7 @@
     },
     {
       "id": "weights",
-      "grouping": "Symbol text",
+      "category": "Symbol text",
       "styleName": "Weights",
       "fontSupported": "noto-sans",
       "type": "pattern-map",

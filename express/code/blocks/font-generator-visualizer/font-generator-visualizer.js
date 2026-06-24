@@ -57,7 +57,7 @@ function getMissingSummary(font) {
 function createHeaderRow() {
   const row = document.createElement('tr');
   [
-    'Grouping',
+    'Category',
     'Style name',
     'Supported font',
     'Type',
@@ -80,7 +80,7 @@ function createFontRow(font, previewText) {
   outputCell.style.fontFamily = `"${font.fontSupported}", var(--body-font-family), sans-serif`;
 
   row.append(
-    createCell(font.grouping),
+    createCell(font.category),
     createCell(font.styleName, 'font-generator-visualizer-style-name'),
     createCell(font.fontSupported),
     createCell(font.type),

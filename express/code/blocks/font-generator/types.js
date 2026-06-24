@@ -80,7 +80,7 @@ export const FONT_SIZE_MAX = 48;
  *
  * @typedef {{
  *   id: string;
- *   grouping: string;
+ *   category: string;
  *   styleName: string;
  *   fontSupported: string;
  *   type: FontType;

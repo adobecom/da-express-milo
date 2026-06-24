@@ -173,7 +173,7 @@ describe('font sheet transform', () => {
   it('tracks missing source characters', () => {
     const fadingEffect = fontByName['Fading effect'];
     const [syntheticMissingNumberFont] = transformRows([{
-      Grouping: 'Synthetic',
+      Category: 'Synthetic',
       Style_name: 'Missing Number',
       Style: `${output.sourceCharacters.letters.all}012345678${output.sourceCharacters.specialCharacters}`,
       'Font Supported': 'Noto Sans',
@@ -188,13 +188,13 @@ describe('font sheet transform', () => {
 
   it('handles alternate row endings, blank lines, and empty columns', () => {
     const fixture = [
-      'Grouping\tStyle_name\tStyle\tFont Supported',
+      'Category\tStyle_name\tStyle\tFont Supported',
       'Synthetic\tIdentity\tABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()-_=+[]{}<>?.,:;"`~\t',
       '',
     ].join('\r\n');
     const [row] = splitTabSeparatedRows(fixture);
 
-    expect(row.Grouping).to.equal('Synthetic');
+    expect(row.Category).to.equal('Synthetic');
     expect(row.Style_name).to.equal('Identity');
     expect(row['Font Supported']).to.equal('');
   });

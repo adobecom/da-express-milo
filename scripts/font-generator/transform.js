@@ -246,7 +246,7 @@ export function transformRows(rows) {
       const detected = detectStyle(row);
       return {
         id: slugify(row.Style_name),
-        grouping: row.Grouping,
+        category: row.Category,
         styleName: row.Style_name,
         fontSupported: toFontFamily(row['Font Supported']),
         type: detected.type,
