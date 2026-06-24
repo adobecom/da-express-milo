@@ -12,20 +12,20 @@ interface Props {
   disabled?: boolean;
 }
 
-const PLACEHOLDER_COLUMNS = ['template_id', 'url_slug', 'title', 'description'];
-const PLACEHOLDER_ROW: CsvRow = { _id: 'placeholder', template_id: '-', url_slug: '-', title: '-', description: '-' };
+const PLACEHOLDER_COLUMNS = ['product_id', 'url_slug', 'title', 'description'];
+const PLACEHOLDER_ROW: CsvRow = { _id: 'placeholder', product_id: '-', url_slug: '-', title: '-', description: '-' };
 
 function computeSummary(rows: CsvRow[]): InputSummary {
   
   const total = rows.length;
 
-  const templateIdMap: Record<string, string[]> = {};
+  const productIdMap: Record<string, string[]> = {};
   for (const r of rows) {
-    const id = r['template_id']?.trim();
-    if (id) (templateIdMap[id] ??= []).push(r._id);
+    const id = r['product_id']?.trim();
+    if (id) (productIdMap[id] ??= []).push(r._id);
   }
-  const duplicateTemplateIdRowIds = new Set(
-    Object.values(templateIdMap).filter((ids) => ids.length > 1).flat(),
+  const duplicateProductIdRowIds = new Set(
+    Object.values(productIdMap).filter((ids) => ids.length > 1).flat(),
   );
 
   const slugMap: Record<string, string[]> = {};
@@ -37,12 +37,12 @@ function computeSummary(rows: CsvRow[]): InputSummary {
     Object.values(slugMap).filter((ids) => ids.length > 1).flat(),
   );
 
-  const withId = rows.filter((r) => r['template_id']?.trim() && r['url_slug']?.trim());
+  const withId = rows.filter((r) => r['product_id']?.trim() && r['url_slug']?.trim());
   const missing = total - withId.length;
-  const duplicates = duplicateTemplateIdRowIds.size;
+  const duplicates = duplicateProductIdRowIds.size;
   const duplicateSlugs = duplicateSlugRowIds.size;
 
-  return { total, duplicates, duplicateSlugs, missing, duplicateTemplateIdRowIds, duplicateSlugRowIds };
+  return { total, duplicates, duplicateSlugs, missing, duplicateProductIdRowIds, duplicateSlugRowIds };
 }
 
 interface SchemaMatch {
@@ -87,7 +87,7 @@ function ensureShortTitle(fields: string[], rows: CsvRow[]): { fields: string[];
   let normalizedRows = rows;
 
   if (!hasTitle) {
-    const tidx = normalizedFields.indexOf('template_id');
+    const tidx = normalizedFields.indexOf('product_id');
     normalizedFields.splice(tidx >= 0 ? tidx + 1 : normalizedFields.length, 0, 'title');
     normalizedRows = normalizedRows.map((row) => ({ ...row, title: '' }));
   }
@@ -133,7 +133,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
     Object.values(validationStatus).every((v) => v === 'valid');
 
   const hasDuplicates =
-    summary.duplicateTemplateIdRowIds.size > 0 || summary.duplicateSlugRowIds.size > 0;
+    summary.duplicateProductIdRowIds.size > 0 || summary.duplicateSlugRowIds.size > 0;
 
   useEffect(() => {
     onReadinessChange?.({ dataComplete: allDataComplete, idsValid: allIdsValid, noDuplicates: !hasDuplicates });
@@ -147,8 +147,8 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
     const referenceValues: Record<string, { title?: string; description?: string }> = {};
     const updated = await Promise.all(
       rows.map(async (row) => {
-        if (!row.template_id?.trim()) return row;
-        const product = await fetchProductFromTemplate(row.template_id);
+        if (!row.product_id?.trim()) return row;
+        const product = await fetchProductFromTemplate(row.product_id);
         if (!product) return row;
         referenceValues[row._id] = {
           title: product.rootRawTitle,
@@ -198,7 +198,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
 
     await Promise.all(
       rows.map(async (row) => {
-        const id = row.template_id?.trim();
+        const id = row.product_id?.trim();
         if (!id) { results[row._id] = 'invalid'; return; }
         const product = await fetchProductFromTemplate(id);
         results[row._id] = product ? 'valid' : 'invalid';
@@ -252,14 +252,14 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
       .map((s) => s.trim())
       .filter(Boolean);
     if (!ids.length) return;
-    setColumns(['template_id', 'title', 'short_title', 'description', 'url_slug']);
+    setColumns(['product_id', 'title', 'short_title', 'description', 'url_slug']);
     setValidationStatus({});
     setValidateMsg(null);
     setHydrateMsg(null);
     setZazzleHydratedFields({});
     setZazzleReferenceValues({});
     setExpandedDiffCells({});
-    onChange(ids.map((id, i) => ({ _id: String(i), template_id: id, title: '', short_title: '', description: '', url_slug: '' })));
+    onChange(ids.map((id, i) => ({ _id: String(i), product_id: id, title: '', short_title: '', description: '', url_slug: '' })));
   }
 
   function handleFile(file: File) {
@@ -340,7 +340,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
           </p>
           <p className="text-xs text-gray-400 mt-1">
             Requires{' '}
-            <code className="bg-gray-100 px-1 rounded">template_id</code> column
+            <code className="bg-gray-100 px-1 rounded">product_id</code> column
           </p>
         </div>
       ) : (
@@ -349,7 +349,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
             value={manualInput}
             onChange={(e) => { if (!disabled) setManualInput(e.target.value); }}
             disabled={disabled}
-            placeholder={'Paste template IDs, one per line or comma-separated\ne.g.\n150004762482726999\n150004762482726998'}
+            placeholder={'Paste product IDs, one per line or comma-separated\ne.g.\n150004762482726999\n150004762482726998'}
             rows={6}
             className="w-full rounded-xl border border-gray-200 p-3 text-sm text-gray-700 font-mono resize-y focus:outline-none focus:ring-2 focus:ring-indigo-300 disabled:opacity-40 disabled:cursor-not-allowed"
           />
@@ -366,7 +366,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           <Stat label="Total" value={summary.total} />
           {summary.duplicates > 0 && (
-            <Stat label="Duplicate template_id values" value={summary.duplicates} color="orange" />
+            <Stat label="Duplicate product_id values" value={summary.duplicates} color="orange" />
           )}
           {summary.duplicateSlugs > 0 && (
             <Stat label="Duplicate url_slug values" value={summary.duplicateSlugs} color="orange" />
@@ -427,7 +427,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
             disabled={validating || hydrating || disabled}
             className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
-            {validating ? 'Validating…' : 'Validate Template IDs'}
+            {validating ? 'Validating…' : 'Validate Product IDs'}
           </button>
           {hasData && (
             <button
@@ -454,7 +454,7 @@ export default function CsvUpload({ rows, onChange, placeholders = [], onReadine
         rows={visibleRows}
         placeholder={!hasData}
         validationStatus={validationStatus}
-        duplicateTemplateIdRowIds={summary.duplicateTemplateIdRowIds}
+        duplicateProductIdRowIds={summary.duplicateProductIdRowIds}
         duplicateSlugRowIds={summary.duplicateSlugRowIds}
         zazzleHydratedFields={zazzleHydratedFields}
         zazzleReferenceValues={zazzleReferenceValues}
@@ -470,7 +470,7 @@ function DataTable({
   rows,
   placeholder,
   validationStatus = {},
-  duplicateTemplateIdRowIds = new Set(),
+  duplicateProductIdRowIds = new Set(),
   duplicateSlugRowIds = new Set(),
   zazzleHydratedFields = {},
   zazzleReferenceValues = {},
@@ -481,7 +481,7 @@ function DataTable({
   rows: CsvRow[];
   placeholder: boolean;
   validationStatus?: Record<string, 'valid' | 'invalid'>;
-  duplicateTemplateIdRowIds?: Set<string>;
+  duplicateProductIdRowIds?: Set<string>;
   duplicateSlugRowIds?: Set<string>;
   zazzleHydratedFields?: Record<string, string[]>;
   zazzleReferenceValues?: Record<string, { title?: string; description?: string }>;
@@ -507,9 +507,9 @@ function DataTable({
         <tbody>
           {rows.map((row) => {
             const status = validationStatus[row._id];
-            const isTemplateDup = duplicateTemplateIdRowIds.has(row._id);
+            const isProductIdDup = duplicateProductIdRowIds.has(row._id);
             const isSlugDup = duplicateSlugRowIds.has(row._id);
-            const isDup = isTemplateDup || isSlugDup;
+            const isDup = isProductIdDup || isSlugDup;
             const borderClass = isDup ? 'border-l-orange-400' :
               status === 'valid' ? 'border-l-green-400' :
               status === 'invalid' ? 'border-l-red-400' :
@@ -543,10 +543,10 @@ function DataTable({
                     <td key={col} className={`px-3 py-2 ${cellClass}`}>
                       <div className="flex flex-col">
                         <div className="flex items-center gap-1">
-                          {col === 'template_id' && isTemplateDup && (
-                            <span className="shrink-0 text-orange-500" title="Duplicate template ID"><DuplicateIcon /></span>
+                          {col === 'product_id' && isProductIdDup && (
+                            <span className="shrink-0 text-orange-500" title="Duplicate product ID"><DuplicateIcon /></span>
                           )}
-                          {col === 'template_id' && status && (
+                          {col === 'product_id' && status && (
                             <span className={`shrink-0 font-bold ${status === 'valid' ? 'text-green-500' : 'text-red-500'}`}>
                               {status === 'valid' ? '✓' : '✗'}
                             </span>
@@ -583,9 +583,9 @@ function DataTable({
                 })}
                 {(Object.keys(validationStatus).length > 0 || Object.keys(zazzleReferenceValues).length > 0) && (
                   <td className="px-3 py-2 text-center">
-                    {row.template_id?.trim() && (
+                    {row.product_id?.trim() && (
                       <a
-                        href={`https://www.zazzle.com/svc/partner/adobeexpress/v1/getproductfromtemplate?templateId=${encodeURIComponent(row.template_id.trim())}`}
+                        href={`https://www.zazzle.com/svc/partner/adobeexpress/v1/getproductfromtemplate?templateId=${encodeURIComponent(row.product_id.trim())}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-500 hover:text-blue-700 inline-flex items-center justify-center"

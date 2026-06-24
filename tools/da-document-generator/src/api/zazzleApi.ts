@@ -12,8 +12,8 @@ export interface ZazzleProduct {
   singularUnitLabel: string;
 }
 
-export async function fetchProductFromTemplate(templateId: string): Promise<ZazzleProduct | null> {
-  const url = `${ZAZZLE_API}/getproductfromtemplate?templateId=${encodeURIComponent(templateId)}`;
+export async function fetchProductFromTemplate(productId: string): Promise<ZazzleProduct | null> {
+  const url = `${ZAZZLE_API}/getproductfromtemplate?templateId=${encodeURIComponent(productId)}`;
   try {
     const resp = await fetch(url);
     if (!resp.ok) return null;

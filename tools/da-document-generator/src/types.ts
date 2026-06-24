@@ -6,7 +6,7 @@ export interface InputSummary {
   duplicates: number;
   duplicateSlugs: number;
   missing: number;
-  duplicateTemplateIdRowIds: Set<string>;
+  duplicateProductIdRowIds: Set<string>;
   duplicateSlugRowIds: Set<string>;
 }
 
