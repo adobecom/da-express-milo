@@ -2,7 +2,7 @@ import { expect } from '@esm-bundle/chai';
 
 import { transformText } from '../../../express/code/blocks/font-generator/unicodeEngine.js';
 
-const fontSheetResponse = await fetch('/express/code/blocks/font-generator/font-sheets/v1/v1.json');
+const fontSheetResponse = await fetch('/express/code/blocks/font-generator/font-sheets/font-styles.json');
 const fontSheet = await fontSheetResponse.json();
 const fontByName = Object.fromEntries(fontSheet.fonts.map((font) => [font.styleName, font]));
 const INSPECTION_SOURCE = 'ABC!!é🚀 09';

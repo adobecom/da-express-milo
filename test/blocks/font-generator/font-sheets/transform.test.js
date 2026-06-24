@@ -5,7 +5,7 @@ import {
   transformRows,
 } from '../../../../scripts/font-generator/transform.js';
 
-const csvResponse = await fetch('/scripts/font-generator/v2/v2.csv');
+const csvResponse = await fetch('/scripts/font-generator/font-styles.csv');
 const csv = await csvResponse.text();
 const rows = splitTabSeparatedRows(csv);
 const output = transformRows(rows);
