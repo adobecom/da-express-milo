@@ -97,7 +97,7 @@ describe('unicode engine', () => {
         styleName: 'Strikethrough',
         source,
         actual: transformText(source, getFont('Strikethrough')),
-        expected: '̶é̶̶!̶',
+        expected: 'é̶̶!',
       },
     ];
 
@@ -139,7 +139,7 @@ describe('unicode engine', () => {
         styleName: 'Arrows',
         source,
         actual: transformText(source, getFont('Arrows')),
-        expected: '»»»»A»»B»»C»»!»»!»»»',
+        expected: '»»»A»»B»»C»»!»»!»»»',
       },
       {
         styleName: 'Cupido',
@@ -151,7 +151,7 @@ describe('unicode engine', () => {
         styleName: 'Strikethrough',
         source,
         actual: transformText(source, getFont('Strikethrough')),
-        expected: '̶A̶̶B̶̶C̶̶!̶̶!̶',
+        expected: 'A̶̶B̶̶C̶̶!!',
       },
     ];
 
