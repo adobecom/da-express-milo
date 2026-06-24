@@ -14,6 +14,29 @@ const DEFAULT_LAYOUT_SPANS = {
 
 const TOOLBAR_VARIANTS = new Set(['inline', 'standalone', 'sticky', 'sticky-on-scroll']);
 
+const KB_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A']);
+const KB_ROLES = new Set([
+  'button', 'link', 'checkbox', 'menuitem', 'option',
+  'radio', 'tab', 'slider', 'spinbutton', 'textbox', 'combobox',
+]);
+
+function makeUndoRedoHandler(actionMenu) {
+  return (e) => {
+    if (!e.metaKey && !e.ctrlKey) return;
+    if (e.key !== 'z') return;
+    const el = document.activeElement;
+    if (el && el !== document.body && el !== document.documentElement) {
+      if (KB_TAGS.has(el.tagName)) return;
+      if (el.isContentEditable) return;
+      if (parseInt(el.getAttribute('tabindex') ?? '-1', 10) >= 0) return;
+      if (KB_ROLES.has(el.getAttribute('role'))) return;
+    }
+    e.preventDefault();
+    if (e.shiftKey) actionMenu.redo?.();
+    else actionMenu.undo?.();
+  };
+}
+
 const LAYOUT_DEPS = {
   critical: ['scripts/color-shared/shell/layouts/styles/color-tool-layout.css'],
   deferred: ['scripts/color-shared/action-menu.css'],
@@ -245,6 +268,7 @@ function createLayoutAPI(slots, shell, root) {
     actionMenu: null,
     toolbar: null,
     onPaletteChange: () => {},
+    kbCleanup: null,
   };
 
   const layout = {
@@ -278,6 +302,8 @@ function createLayoutAPI(slots, shell, root) {
 
     destroy() {
       state.destroyed = true;
+      state.kbCleanup?.();
+      state.kbCleanup = null;
       if (state.onPaletteChange) shell.context.off('palette', state.onPaletteChange);
       state.actionMenu?.destroy();
       state.toolbar?.destroy();
@@ -333,7 +359,14 @@ export default async function createColorToolLayout(container, config = {}) {
   // Each callback guards against early destroy so it never mutates a torn-down layout.
   layout.actionMenuReady = mountActionMenu(slots.topbar, actionMenuConfig, actionMenuModulePromise)
     .then((handle) => {
-      if (!state.destroyed) state.actionMenu = handle;
+      if (!state.destroyed) {
+        state.actionMenu = handle;
+        if (handle) {
+          const onKeyDown = makeUndoRedoHandler(handle);
+          document.addEventListener('keydown', onKeyDown);
+          state.kbCleanup = () => document.removeEventListener('keydown', onKeyDown);
+        }
+      }
       return handle;
     })
     .catch(() => null);

@@ -245,6 +245,11 @@ async function buildDefaultActionMenuConfig(strings) {
 const THEME_NAME = '';
 const HISTORY_EVENT = `${ACTION_MENU_ID}:history-index-changed`;
 const HISTORY_SKIP_SOURCES = new Set(['active-index', 'metadata', 'base-index']);
+const KB_INTERACTIVE_TAGS = new Set(['INPUT', 'TEXTAREA', 'SELECT', 'BUTTON', 'A']);
+const KB_INTERACTIVE_ROLES = new Set([
+  'button', 'link', 'checkbox', 'menuitem', 'option',
+  'radio', 'tab', 'slider', 'spinbutton', 'textbox', 'combobox',
+]);
 let harmonyCarouselCleanup = null;
 let harmonyStateUnsubscribe = null;
 let layoutInstance = null;
@@ -260,6 +265,7 @@ let primaryColorAdapter = null;
 let sidebarNaturalWidth = 0;
 let sidebarTransitionCleanup = null;
 let historyCleanup = null;
+let keyboardCleanup = null;
 let currentInitToken = 0;
 
 function swatchHexListFromState(state) {
@@ -832,6 +838,8 @@ function cleanup() {
   sidebarNaturalWidth = 0;
   historyCleanup?.();
   historyCleanup = null;
+  keyboardCleanup?.();
+  keyboardCleanup = null;
 }
 
 const VALID_TABS = ['primary-color', 'image', 'color-wheel'];
@@ -1127,6 +1135,23 @@ export default async function decorate(block) {
         document.removeEventListener(HISTORY_EVENT, onHistoryChange);
         clearTimeout(historyDebounceTimer);
       };
+
+      const onKeyDown = (e) => {
+        const el = document.activeElement;
+        if (el && el !== document.body && el !== document.documentElement) {
+          if (KB_INTERACTIVE_TAGS.has(el.tagName)) return;
+          if (el.isContentEditable) return;
+          if (parseInt(el.getAttribute('tabindex') ?? '-1', 10) >= 0) return;
+          if (KB_INTERACTIVE_ROLES.has(el.getAttribute('role'))) return;
+        }
+        if (e.key === ' ') {
+          e.preventDefault();
+          actionMenuApi?.generateRandom?.();
+        }
+        // Cmd/Ctrl+Z undo/redo handled by createColorToolLayout
+      };
+      document.addEventListener('keydown', onKeyDown);
+      keyboardCleanup = () => document.removeEventListener('keydown', onKeyDown);
 
       tabs.setPanelEntryFocus('primary-color', () => {
         primaryColorAdapter?.element?.shadowRoot?.querySelector('.bc-mode-trigger')?.focus();
