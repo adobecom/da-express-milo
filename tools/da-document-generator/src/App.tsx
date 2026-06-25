@@ -9,6 +9,7 @@ const CONFIG_SHEET = '/adobecom/da-express-milo/drafts/maxn/doc-generator-preset
 
 export default function App() {
   const [rows, setRows] = useState<CsvRow[]>([]);
+  const [selectedRows, setSelectedRows] = useState<CsvRow[]>([]);
   const [csvReadiness, setCsvReadiness] = useState({ dataComplete: false, idsValid: false, noDuplicates: true });
   const [hasGeneratedResults, setHasGeneratedResults] = useState(false);
   const [productTypeConfigs, setProductTypeConfigs] = useState<ProductTypeConfig[]>([]);
@@ -78,7 +79,7 @@ export default function App() {
 
         <div className="grid grid-cols-1 gap-4">
           <Panel step={1} title="Product Data" complete={inputsReady} locked={hasGeneratedResults}>
-            <CsvUpload rows={rows} onChange={setRows} onReadinessChange={setCsvReadiness} disabled={hasGeneratedResults} />
+            <CsvUpload rows={rows} onChange={setRows} onReadinessChange={setCsvReadiness} onSelectionChange={setSelectedRows} disabled={hasGeneratedResults} />
           </Panel>
         </div>
 
@@ -93,7 +94,7 @@ export default function App() {
 
         {canGenerate && (
           <GeneratePanel
-            rows={rows}
+            rows={selectedRows}
             productTypeConfigs={productTypeConfigs}
             overrideConfig={overrideConfig}
             generateBlockReason={generateBlockReason}

@@ -8,6 +8,7 @@ interface Props {
   rows: CsvRow[];
   onChange: (rows: CsvRow[]) => void;
   onReadinessChange?: (state: { dataComplete: boolean; idsValid: boolean; noDuplicates: boolean }) => void;
+  onSelectionChange?: (selectedRows: CsvRow[]) => void;
   disabled?: boolean;
 }
 
@@ -18,7 +19,7 @@ type ContentWarningType =
   | 'slug_isolated_char'
   | 'mojibake';
 
-type FilterKey = 'total' | 'missing' | 'duplicate_product_id' | 'duplicate_slug' | ContentWarningType;
+type FilterKey = 'total' | 'selected' | 'missing' | 'duplicate_product_id' | 'duplicate_slug' | ContentWarningType;
 
 const CONTENT_WARNING_LABELS: Record<ContentWarningType, string> = {
   title_too_long: 'Title exceeds 50 characters',
@@ -236,7 +237,7 @@ function computeRowWarningPriority(
   return 0;
 }
 
-export default function CsvUpload({ rows, onChange, onReadinessChange, disabled = false }: Props) {
+export default function CsvUpload({ rows, onChange, onReadinessChange, onSelectionChange, disabled = false }: Props) {
   const [inputMode, setInputMode] = useState<'upload' | 'manual'>('manual');
   const [manualInput, setManualInput] = useState('');
   const [isDragging, setIsDragging] = useState(false);
@@ -251,6 +252,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
   const [expandedDiffCells, setExpandedDiffCells] = useState<Record<string, boolean>>({});
   const [contentWarnings, setContentWarnings] = useState<ContentWarnings>({});
   const [activeFilter, setActiveFilter] = useState<FilterKey>('total');
+  const [checkedRowIds, setCheckedRowIds] = useState<Set<string>>(new Set());
   const fileRef = useRef<HTMLInputElement>(null);
 
   const summary = computeSummary(rows);
@@ -316,6 +318,8 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
   const filteredRows = useMemo(() => {
     if (activeFilter === 'total') return sortedRows;
     return sortedRows.filter((row) => {
+      if (activeFilter === 'selected')
+        return checkedRowIds.has(row._id);
       if (activeFilter === 'missing')
         return tableColumns.some((col) => !row[col]?.trim());
       if (activeFilter === 'duplicate_product_id')
@@ -325,11 +329,36 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
       return Object.values(contentWarnings[row._id] ?? {}).flat()
         .includes(activeFilter as ContentWarningType);
     });
-  }, [sortedRows, activeFilter, tableColumns, summary, contentWarnings]);
+  }, [sortedRows, activeFilter, tableColumns, summary, contentWarnings, checkedRowIds]);
 
   useEffect(() => {
     onReadinessChange?.({ dataComplete: allDataComplete, idsValid: allIdsValid, noDuplicates: !hasDuplicates });
   }, [allDataComplete, allIdsValid, hasDuplicates]);
+
+  // Reset checkbox defaults when new row data is loaded. Not triggered by validate/hydrate so
+  // user-adjusted checkboxes survive those operations.
+  useEffect(() => {
+    if (!hasData) { setCheckedRowIds(new Set()); return; }
+    const opts = {
+      tableColumns,
+      duplicateProductIdRowIds: summary.duplicateProductIdRowIds,
+      duplicateSlugRowIds: summary.duplicateSlugRowIds,
+      contentWarnings,
+      zazzleHydratedFields,
+      zazzleReferenceValues,
+    };
+    const defaulted = new Set(
+      rows
+        .filter((r) => computeRowWarningPriority(r, opts) === 0 && validationStatus[r._id] !== 'invalid')
+        .map((r) => r._id),
+    );
+    setCheckedRowIds(defaulted);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows]);
+
+  useEffect(() => {
+    onSelectionChange?.(rows.filter((r) => checkedRowIds.has(r._id)));
+  }, [checkedRowIds, rows]);
 
   async function handleHydrate() {
     setHydrating(true);
@@ -567,6 +596,11 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
             isSelected={activeFilter === 'total'}
             onClick={() => setActiveFilter('total')}
           />
+          <Stat
+            label="Selected" value={checkedRowIds.size} color="indigo"
+            isSelected={activeFilter === 'selected'}
+            onClick={() => setActiveFilter((p) => p === 'selected' ? 'total' : 'selected')}
+          />
           {summary.duplicates > 0 && (
             <Stat
               label="Duplicate product_id values" value={summary.duplicates} color="orange"
@@ -671,6 +705,14 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
         onToggleDiffCell={(key) => setExpandedDiffCells((prev) => ({ ...prev, [key]: !prev[key] }))}
         contentWarnings={contentWarnings}
         firstWarningIndex={activeFilter === 'total' ? firstWarningIndex : -1}
+        checkedRowIds={checkedRowIds}
+        onToggleCheck={(id) =>
+          setCheckedRowIds((prev) => {
+            const next = new Set(prev);
+            next.has(id) ? next.delete(id) : next.add(id);
+            return next;
+          })
+        }
       />
     </div>
   );
@@ -689,6 +731,8 @@ function DataTable({
   onToggleDiffCell,
   contentWarnings = {},
   firstWarningIndex = -1,
+  checkedRowIds = new Set(),
+  onToggleCheck,
 }: {
   columns: string[];
   rows: CsvRow[];
@@ -702,12 +746,15 @@ function DataTable({
   onToggleDiffCell?: (key: string) => void;
   contentWarnings?: ContentWarnings;
   firstWarningIndex?: number;
+  checkedRowIds?: Set<string>;
+  onToggleCheck?: (id: string) => void;
 }) {
   return (
     <div className={`overflow-auto rounded-xl border border-gray-200 max-h-[420px] ${placeholder ? 'opacity-40' : ''}`}>
       <table className="text-xs w-full min-w-max">
         <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
           <tr>
+            <th className="px-3 py-2 w-[40px]" />
             <th className="px-3 py-2 text-left font-medium text-gray-400 whitespace-nowrap w-[40px]">#</th>
             {columns.map((col) => (
               <th key={col} className="px-3 py-2 text-left font-medium text-gray-600 whitespace-nowrap">
@@ -744,6 +791,16 @@ function DataTable({
                 key={row._id}
                 className={`border-b border-gray-100 last:border-b-0 border-l-2 ${borderClass}${isSectionBoundary ? ' border-t-2 border-t-gray-300' : ''}`}
               >
+                <td className="px-3 py-2 w-[40px] text-center">
+                  {!placeholder && (
+                    <input
+                      type="checkbox"
+                      checked={checkedRowIds.has(row._id)}
+                      onChange={() => onToggleCheck?.(row._id)}
+                      className="cursor-pointer accent-indigo-600"
+                    />
+                  )}
+                </td>
                 <td className="px-3 py-2 text-gray-400 whitespace-nowrap w-[40px]">
                   {placeholder ? '—' : parseInt(row._id) + 1}
                 </td>
@@ -899,14 +956,14 @@ function Stat({
 }: {
   label: string;
   value: number;
-  color?: 'gray' | 'green' | 'yellow' | 'red' | 'orange';
+  color?: 'gray' | 'green' | 'yellow' | 'red' | 'orange' | 'indigo';
   isSelected?: boolean;
   onClick?: () => void;
 }) {
-  const bg = { gray: 'bg-gray-50', green: 'bg-green-50', yellow: 'bg-yellow-50', red: 'bg-red-50', orange: 'bg-orange-50' }[color];
-  const text = { gray: 'text-gray-900', green: 'text-gray-900', yellow: 'text-yellow-700', red: 'text-red-700', orange: 'text-orange-700' }[color];
-  const sub = { gray: 'text-gray-500', green: 'text-gray-500', yellow: 'text-yellow-600', red: 'text-red-600', orange: 'text-orange-600' }[color];
-  const ring = { gray: 'ring-gray-500', green: 'ring-green-500', yellow: 'ring-yellow-500', red: 'ring-red-500', orange: 'ring-orange-500' }[color];
+  const bg = { gray: 'bg-gray-50', green: 'bg-green-50', yellow: 'bg-yellow-50', red: 'bg-red-50', orange: 'bg-orange-50', indigo: 'bg-indigo-50' }[color];
+  const text = { gray: 'text-gray-900', green: 'text-gray-900', yellow: 'text-yellow-700', red: 'text-red-700', orange: 'text-orange-700', indigo: 'text-indigo-700' }[color];
+  const sub = { gray: 'text-gray-500', green: 'text-gray-500', yellow: 'text-yellow-600', red: 'text-red-600', orange: 'text-orange-600', indigo: 'text-indigo-500' }[color];
+  const ring = { gray: 'ring-gray-500', green: 'ring-green-500', yellow: 'ring-yellow-500', red: 'ring-red-500', orange: 'ring-orange-500', indigo: 'ring-indigo-500' }[color];
   return (
     <button
       type="button"
