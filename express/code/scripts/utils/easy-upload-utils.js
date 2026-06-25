@@ -614,7 +614,9 @@ export class EasyUpload {
 
       const urlGenerationPromise = Promise.race([
         (async () => {
+          console.log('[EasyUpload] generating presigned URL, quickAction:', this.quickAction);
           const presignedUrl = await this.generatePresignedUploadUrl();
+          console.log('[EasyUpload] presignedUrl result:', presignedUrl ? 'ok' : 'null/undefined');
           const mobileUrl = this.buildMobileUploadUrl(presignedUrl);
           return this.shortenUrl(mobileUrl);
         })(),
@@ -652,7 +654,9 @@ export class EasyUpload {
     const url = new URL(`https://${host}/uploadFromOtherDevice`);
     url.searchParams.set('upload_url', presignedUrl);
 
+    console.log('[EasyUpload] buildMobileUploadUrl, quickAction:', this.quickAction);
     const promoEntry = EasyUploadVariantsPromoidMap[this.quickAction];
+    console.log('[EasyUpload] promoEntry:', promoEntry);
     if (promoEntry) {
       url.searchParams.set('promoid', promoEntry.split('&')[0]);
       url.searchParams.set('mv', 'other');
