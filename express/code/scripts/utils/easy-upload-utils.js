@@ -652,6 +652,12 @@ export class EasyUpload {
     const url = new URL(`https://${host}/uploadFromOtherDevice`);
     url.searchParams.set('upload_url', presignedUrl);
 
+    const promoEntry = EasyUploadVariantsPromoidMap[this.quickAction];
+    if (promoEntry) {
+      url.searchParams.set('promoid', promoEntry.split('&')[0]);
+      url.searchParams.set('mv', 'other');
+    }
+
     return url.toString();
   }
 

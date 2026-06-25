@@ -1,6 +1,7 @@
 import { EasyUploadControls, EasyUploadVariants, EasyUploadVariantsPromoidMap } from '../../../scripts/utils/easy-upload-utils.js';
 import { getIconElementDeprecated, getLibs } from '../../../scripts/utils.js';
 import { adjustElementPosition } from '../../../scripts/widgets/tooltip.js';
+import { sendFrictionlessEventToAdobeAnaltics } from '../../../scripts/instrument.js';
 import {
   DEBUG_MODES,
   PLACEHOLDER_DEBUG_MODES,
@@ -546,6 +547,9 @@ function bindConfirmButton(qrPane) {
         easyUploadInstance.showConfirmTooltip?.('pending');
         return;
       }
+      sendFrictionlessEventToAdobeAnaltics(easyUploadInstance.block, 'select-confirm-upload-cta', {
+        custom: { qa: { upload_method: 'qr-code' } },
+      });
       await easyUploadInstance.handleConfirmImport();
     };
     trackListener(confirmButton, 'click', handleConfirmClick);
