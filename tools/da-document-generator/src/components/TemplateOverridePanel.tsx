@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { cat, checkDirectoryExists, fetchSheet, validateTemplate } from '../api/daApi';
 import type { DirectoryCheckResult } from '../api/daApi';
 import type { ProductTypeConfig } from '../types';
@@ -8,6 +8,9 @@ interface Props {
   onEnabledChange: (v: boolean) => void;
   onOverrideChange: (config: ProductTypeConfig | undefined) => void;
   disabled?: boolean;
+  configSheetPath: string;
+  onConfigSheetLoad: (path: string, configs: ProductTypeConfig[]) => void;
+  missingProductTypes?: string[];
 }
 
 interface TemplateOption {
@@ -27,6 +30,13 @@ interface ValidationState {
   issues: string[];
 }
 
+interface ConfigSheetValidation {
+  status: 'idle' | 'loading' | 'valid' | 'invalid' | 'error';
+  message: string | null;
+  missingColumns: string[];
+  rowCount: number;
+}
+
 const INITIAL_VALIDATION: ValidationState = {
   status: 'idle',
   html: null,
@@ -38,14 +48,23 @@ const INITIAL_VALIDATION: ValidationState = {
   issues: [],
 };
 
+const INITIAL_CONFIG_SHEET_VALIDATION: ConfigSheetValidation = {
+  status: 'idle',
+  message: null,
+  missingColumns: [],
+  rowCount: 0,
+};
+
+const REQUIRED_COLUMNS = ['Product Type', 'Template Path', 'Output Directory'];
+const OPTIONAL_COLUMNS = ['Product Name'];
+
 const STATUS_CARD: Record<string, string> = {
   ready: 'bg-green-50 border-green-200',
   warning: 'bg-yellow-50 border-yellow-200',
   invalid: 'bg-red-50 border-red-200',
   error: 'bg-red-50 border-red-200',
+  valid: 'bg-green-50 border-green-200',
 };
-
-const CONFIG_SHEET = '/adobecom/da-express-milo/drafts/maxn/doc-generator-presets';
 
 function ExternalLinkIcon() {
   return (
@@ -56,44 +75,124 @@ function ExternalLinkIcon() {
   );
 }
 
-export default function TemplateOverridePanel({ enabled, onEnabledChange, onOverrideChange, disabled = false }: Props) {
+export default function TemplateOverridePanel({
+  enabled,
+  onEnabledChange,
+  onOverrideChange,
+  disabled = false,
+  configSheetPath,
+  onConfigSheetLoad,
+  missingProductTypes = [],
+}: Props) {
   const [options, setOptions] = useState<TemplateOption[]>([]);
-  const [listLoading, setListLoading] = useState(true);
-  const [listError, setListError] = useState<string | null>(null);
   const [selected, setSelected] = useState<TemplateOption | null>(null);
   const [validation, setValidation] = useState<ValidationState>(INITIAL_VALIDATION);
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const validateConfigSheetRef = useRef<(path: string) => Promise<void>>(null!);
+  const initialConfigSheetPath = useRef(configSheetPath);
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const rows = await fetchSheet(CONFIG_SHEET);
-        const parsed: TemplateOption[] = rows
-          .filter((r) => r['Template Path'])
-          .map((r) => ({
-            productName: r['Product Name'] ?? '',
-            templatePath: r['Template Path'],
-            outputDir: r['Output Directory'] ?? '',
-          }));
-        setOptions(parsed);
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        const is403 = msg.startsWith('403');
-        const is404 = msg.startsWith('404');
-        setListError(
-          is403
-            ? '403 — Access Denied: You do not have access to the template config sheet. You may be signed in to the wrong Organization, check your active Organization in DA and try reloading.'
-            : is404
-            ? '404 — Not Found: The template config sheet could not be found. Confirm the sheet path is correct.'
-            : `Error loading template config: ${msg}`,
-        );
-      } finally {
-        setListLoading(false);
-      }
+  const [localPath, setLocalPath] = useState(configSheetPath);
+  const [configSheetValidation, setConfigSheetValidation] = useState<ConfigSheetValidation>(INITIAL_CONFIG_SHEET_VALIDATION);
+  const lastAttemptedPath = useRef(configSheetPath);
+
+  // Validate the config sheet path, update options + notify parent on success
+  async function validateConfigSheet(path: string) {
+    lastAttemptedPath.current = path;
+    if (!path.trim()) {
+      setConfigSheetValidation({ status: 'idle', message: null, missingColumns: [], rowCount: 0 });
+      return;
     }
-    load();
-  }, []);
+    setConfigSheetValidation({ status: 'loading', message: null, missingColumns: [], rowCount: 0 });
+    try {
+      const rows = await fetchSheet(path);
+
+      // Detect columns from all rows (in case first row is incomplete)
+      const allKeys = new Set<string>();
+      rows.forEach((r) => Object.keys(r).forEach((k) => allKeys.add(k)));
+
+      const missingRequired = REQUIRED_COLUMNS.filter((col) => !allKeys.has(col));
+      const missingOptional = OPTIONAL_COLUMNS.filter((col) => !allKeys.has(col));
+
+      if (missingRequired.length > 0) {
+        setConfigSheetValidation({
+          status: 'invalid',
+          message: `Missing required column${missingRequired.length > 1 ? 's' : ''}: ${missingRequired.join(', ')}`,
+          missingColumns: [...missingRequired, ...missingOptional],
+          rowCount: rows.length,
+        });
+        return;
+      }
+
+      const validRows = rows.filter((r) => r['Product Type'] && r['Template Path']);
+      if (validRows.length === 0) {
+        setConfigSheetValidation({
+          status: 'invalid',
+          message: 'Sheet has no valid product type entries',
+          missingColumns: missingOptional,
+          rowCount: 0,
+        });
+        return;
+      }
+
+      const parsedConfigs: ProductTypeConfig[] = validRows.map((r) => ({
+        productType: r['Product Type'],
+        templatePath: r['Template Path'],
+        outputDir: r['Output Directory'] ?? '',
+      }));
+
+      const parsedOptions: TemplateOption[] = rows
+        .filter((r) => r['Template Path'])
+        .map((r) => ({
+          productName: r['Product Name'] ?? '',
+          templatePath: r['Template Path'],
+          outputDir: r['Output Directory'] ?? '',
+        }));
+
+      setOptions(parsedOptions);
+      onConfigSheetLoad(path, parsedConfigs);
+      setConfigSheetValidation({
+        status: 'valid',
+        message: missingOptional.length > 0
+          ? `Optional column${missingOptional.length > 1 ? 's' : ''} not found: ${missingOptional.join(', ')} — template names will fall back to paths`
+          : null,
+        missingColumns: missingOptional,
+        rowCount: validRows.length,
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      const is403 = msg.startsWith('403');
+      const is404 = msg.startsWith('404');
+      setConfigSheetValidation({
+        status: 'invalid',
+        message: is403
+          ? '403 — Access denied: you may be in the wrong DA organization'
+          : is404
+          ? '404 — Sheet not found: confirm the path is correct'
+          : `Error: ${msg}`,
+        missingColumns: [],
+        rowCount: 0,
+      });
+    }
+  }
+
+  // Keep ref current so effects always call the latest version without needing it as a dep.
+  // useLayoutEffect runs before useEffect, so the ref is fresh when effects fire.
+  useLayoutEffect(() => {
+    validateConfigSheetRef.current = validateConfigSheet;
+  });
+
+  // Initial validation on mount
+  useEffect(() => {
+    validateConfigSheetRef.current(initialConfigSheetPath.current);
+  }, []); // refs are stable — no dep warnings
+
+  // Debounce re-validation on user input
+  useEffect(() => {
+    if (localPath === lastAttemptedPath.current) return;
+    const timer = setTimeout(() => { validateConfigSheetRef.current(localPath); }, 600);
+    return () => clearTimeout(timer);
+  }, [localPath]);
 
   useEffect(() => {
     function handler(e: MouseEvent) {
@@ -179,6 +278,8 @@ export default function TemplateOverridePanel({ enabled, onEnabledChange, onOver
 
   const showResult = validation.status !== 'idle' && validation.status !== 'loading';
   const templateValid = validation.status === 'ready' || validation.status === 'warning';
+  const configSheetValid = configSheetValidation.status === 'valid';
+  const showConfigSheetResult = configSheetValidation.status !== 'idle' && configSheetValidation.status !== 'loading';
 
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4">
@@ -194,6 +295,81 @@ export default function TemplateOverridePanel({ enabled, onEnabledChange, onOver
         </label>
         <span className="ml-auto text-gray-400 text-sm">{enabled ? '▼' : '▶'}</span>
       </div>
+
+      {/* Config sheet path — always visible */}
+      <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
+        <label className="text-xs font-medium text-gray-600">Config Sheet Path</label>
+        <input
+          type="text"
+          value={localPath}
+          onChange={(e) => setLocalPath(e.target.value)}
+          disabled={disabled}
+          placeholder="/org/repo/path/to/presets"
+          className={`w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+            disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'bg-white'
+          }`}
+        />
+
+        {configSheetValidation.status === 'loading' && (
+          <p className="text-xs text-gray-400 pl-1">Validating…</p>
+        )}
+
+        {showConfigSheetResult && (
+          <div className={`rounded-xl p-3 border flex flex-col gap-2 ${
+            configSheetValid ? STATUS_CARD.valid : STATUS_CARD.invalid
+          }`}>
+            <div className="flex items-center justify-between">
+              <a
+                href={`https://da.live/sheet#${localPath}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-gray-500 break-all hover:text-blue-600 font-mono inline-flex items-center gap-1"
+              >
+                {localPath}
+                <ExternalLinkIcon />
+              </a>
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ml-2 ${
+                configSheetValid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+              }`}>
+                {configSheetValid ? 'Valid' : 'Invalid'}
+              </span>
+            </div>
+
+            {configSheetValid && (
+              <p className="text-xs text-gray-500">
+                {configSheetValidation.rowCount} product type entr{configSheetValidation.rowCount === 1 ? 'y' : 'ies'}
+              </p>
+            )}
+
+            {configSheetValidation.message && (
+              <p className={`text-xs ${configSheetValid ? 'text-yellow-700' : 'text-red-600'}`}>
+                {configSheetValidation.message}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Missing product types warning */}
+      {!enabled && missingProductTypes.length > 0 && configSheetValid && (
+        <div className="rounded-xl p-3 border bg-red-50 border-red-200 flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-medium text-gray-600">Product Type Coverage</span>
+            <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Missing</span>
+          </div>
+          <p className="text-xs text-red-600">
+            The following product type{missingProductTypes.length > 1 ? 's are' : ' is'} in your data but not in the config sheet — rows with these types will fail to generate:
+          </p>
+          <div className="flex flex-wrap gap-1 mt-0.5">
+            {missingProductTypes.map((pt) => (
+              <code key={pt} className="text-xs bg-white border border-red-200 px-1.5 py-0.5 rounded text-red-700">
+                {pt}
+              </code>
+            ))}
+          </div>
+        </div>
+      )}
+
       <p className="text-xs text-gray-500">
         Optionally select a template to use for all documents, overriding per-product-type routing.
       </p>
@@ -201,14 +377,14 @@ export default function TemplateOverridePanel({ enabled, onEnabledChange, onOver
       {enabled && (
         <div className="flex flex-col gap-4 pt-2 border-t border-gray-100">
           <div className="flex flex-col gap-1" ref={dropdownRef}>
-            {listLoading && (
+            {configSheetValidation.status === 'loading' && (
               <p className="text-xs text-gray-400">Loading templates…</p>
             )}
-            {listError && (
-              <p className="text-xs text-red-500 pl-1">{listError}</p>
+            {!configSheetValid && showConfigSheetResult && (
+              <p className="text-xs text-red-500 pl-1">Fix the config sheet path above to load template options.</p>
             )}
 
-            {!listLoading && options.length > 0 && (
+            {configSheetValid && options.length > 0 && (
               <div className="relative group">
                 <button
                   type="button"
@@ -250,20 +426,6 @@ export default function TemplateOverridePanel({ enabled, onEnabledChange, onOver
                 )}
               </div>
             )}
-
-            <p className="text-xs text-gray-400 pl-1">
-              Template options are loaded from{' '}
-              <a
-                href={`https://da.live/sheet#${CONFIG_SHEET}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-mono text-gray-500 hover:text-blue-600 inline-flex items-center gap-0.5"
-              >
-                <code className="bg-gray-100 px-1 rounded">{CONFIG_SHEET}</code>
-                <ExternalLinkIcon />
-              </a>
-              {' '}— add new template document / output directory options directly in that sheet.
-            </p>
           </div>
 
           {showResult && (

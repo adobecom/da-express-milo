@@ -1,60 +1,42 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import CsvUpload from './components/CsvUpload';
 import GeneratePanel from './components/GeneratePanel';
 import TemplateOverridePanel from './components/TemplateOverridePanel';
-import { fetchSheet } from './api/daApi';
 import type { CsvRow, ProductTypeConfig } from './types';
 
-const CONFIG_SHEET = '/adobecom/da-express-milo/drafts/maxn/doc-generator-presets';
+export const DEFAULT_CONFIG_SHEET = '/adobecom/da-express-milo/doc-generator-presets';
 
 export default function App() {
   const [rows, setRows] = useState<CsvRow[]>([]);
   const [selectedRows, setSelectedRows] = useState<CsvRow[]>([]);
   const [csvReadiness, setCsvReadiness] = useState({ dataComplete: false, idsValid: false, noDuplicates: true });
   const [hasGeneratedResults, setHasGeneratedResults] = useState(false);
+  const [configSheetPath, setConfigSheetPath] = useState(DEFAULT_CONFIG_SHEET);
   const [productTypeConfigs, setProductTypeConfigs] = useState<ProductTypeConfig[]>([]);
-  const [configLoading, setConfigLoading] = useState(true);
-  const [configError, setConfigError] = useState<string | null>(null);
   const [templateOverrideEnabled, setTemplateOverrideEnabled] = useState(false);
   const [overrideConfig, setOverrideConfig] = useState<ProductTypeConfig | undefined>(undefined);
 
-  useEffect(() => {
-    fetchSheet(CONFIG_SHEET)
-      .then((sheetRows) => {
-        setProductTypeConfigs(
-          sheetRows
-            .filter((r) => r['Product Type'] && r['Template Path'])
-            .map((r) => ({
-              productType: r['Product Type'],
-              templatePath: r['Template Path'],
-              outputDir: r['Output Directory'] ?? '',
-            })),
-        );
-      })
-      .catch((err) => {
-        const msg = err instanceof Error ? err.message : String(err);
-        const is403 = msg.startsWith('403');
-        const is404 = msg.startsWith('404');
-        setConfigError(
-          is403
-            ? '403 — Access Denied: You do not have access to the config sheet. Check your active Organization in DA and reload.'
-            : is404
-            ? '404 — Config sheet not found. Confirm the sheet path is correct.'
-            : `Error loading config: ${msg}`,
-        );
-      })
-      .finally(() => setConfigLoading(false));
-  }, []);
+  function handleConfigSheetLoad(path: string, configs: ProductTypeConfig[]) {
+    setConfigSheetPath(path);
+    setProductTypeConfigs(configs);
+  }
 
   const inputsReady = rows.length > 0;
   const allRowsHaveProductType = inputsReady && rows.every((r) => !!r.product_type?.trim());
   const canGenerate = inputsReady;
+
+  const missingProductTypes = !templateOverrideEnabled && productTypeConfigs.length > 0
+    ? [...new Set(rows.map((r) => r.product_type?.trim()).filter(Boolean) as string[])]
+        .filter((pt) => !productTypeConfigs.some((c) => c.productType === pt))
+    : [];
 
   const generateBlockReason: string | undefined =
     templateOverrideEnabled && !overrideConfig
       ? 'Select a valid template override or uncheck the override option to continue'
       : !templateOverrideEnabled && !allRowsHaveProductType
       ? 'Run Hydrate to assign product types before generating'
+      : !templateOverrideEnabled && missingProductTypes.length > 0
+      ? `Config sheet missing entries for: ${missingProductTypes.join(', ')}`
       : !csvReadiness.noDuplicates
       ? 'Fix duplicate product IDs or URL slugs before generating'
       : !csvReadiness.dataComplete && !csvReadiness.idsValid
@@ -70,13 +52,6 @@ export default function App() {
       <div className="p-6 flex flex-col gap-4">
         <h1 className="text-2xl font-semibold text-gray-900">DA Document Generator</h1>
 
-        {configLoading && (
-          <p className="text-xs text-gray-400">Loading config…</p>
-        )}
-        {configError && (
-          <p className="text-xs text-red-500">{configError}</p>
-        )}
-
         <div className="grid grid-cols-1 gap-4">
           <Panel step={1} title="Product Data" complete={inputsReady} locked={hasGeneratedResults}>
             <CsvUpload rows={rows} onChange={setRows} onReadinessChange={setCsvReadiness} onSelectionChange={setSelectedRows} disabled={hasGeneratedResults} />
@@ -89,6 +64,9 @@ export default function App() {
             onEnabledChange={setTemplateOverrideEnabled}
             onOverrideChange={setOverrideConfig}
             disabled={hasGeneratedResults}
+            configSheetPath={configSheetPath}
+            onConfigSheetLoad={handleConfigSheetLoad}
+            missingProductTypes={missingProductTypes}
           />
         )}
 
