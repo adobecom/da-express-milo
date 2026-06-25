@@ -21,7 +21,7 @@
   width: 100%;
   max-width: var(--block-wd-grid-max-width);
   margin: 0 auto;
-  padding: 0 var(--spacing-400) var(--spacing-700);
+  padding: 0 var(--spacing-400);
   box-sizing: border-box;
 }
 
