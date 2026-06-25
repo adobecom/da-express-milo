@@ -147,7 +147,7 @@
 }
 
 .filter-panel .categories-accordian.is-collapsed .s-chevron {
-  transform: rotate(0deg);
+  transform: rotate(0deg) !important;
 }
 
 .filter-panel .spacing {

@@ -122,10 +122,15 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta) {
 
   const copyBtn = makeCopyBtn();
   let resetTimer = null;
+  let activeOverlay = null;
   copyBtn.addEventListener('click', () => {
     const preview = card.querySelector('.font-card-preview');
     if (!preview) return;
     navigator.clipboard.writeText(preview.textContent).then(() => {
+      activeOverlay?.remove();
+      activeOverlay = makeCopyOverlay();
+      body.append(activeOverlay);
+      void activeOverlay.offsetWidth; // force reflow so transition plays
       card.classList.add('is-copied');
       copyBtn.dataset.tooltip = COPIED_LABEL;
       copyBtn.setAttribute('aria-label', COPIED_LABEL);
@@ -134,6 +139,7 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta) {
         card.classList.remove('is-copied');
         copyBtn.dataset.tooltip = COPY_LABEL;
         copyBtn.setAttribute('aria-label', COPY_LABEL);
+        setTimeout(() => { activeOverlay?.remove(); activeOverlay = null; }, 200);
       }, COPY_RESET_MS);
     });
   });
@@ -143,7 +149,7 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta) {
   preview.style.fontSize = `${fontSize}px`;
   preview.textContent = transformText(text, fontDef);
 
-  body.append(copyBtn, preview, makeCopyOverlay());
+  body.append(copyBtn, preview);
 
   const footer = document.createElement('div');
   footer.className = 'font-card-footer';
