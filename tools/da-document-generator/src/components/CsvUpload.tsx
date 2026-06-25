@@ -18,6 +18,8 @@ type ContentWarningType =
   | 'slug_isolated_char'
   | 'mojibake';
 
+type FilterKey = 'total' | 'missing' | 'duplicate_product_id' | 'duplicate_slug' | ContentWarningType;
+
 const CONTENT_WARNING_LABELS: Record<ContentWarningType, string> = {
   title_too_long: 'Title exceeds 50 characters',
   slug_char_mismatch: 'Contains characters stripped from URL slug (e.g. &)',
@@ -197,6 +199,43 @@ function computeRowHasWarning(
   return false;
 }
 
+function computeRowWarningPriority(
+  row: CsvRow,
+  opts: {
+    tableColumns: string[];
+    duplicateProductIdRowIds: Set<string>;
+    duplicateSlugRowIds: Set<string>;
+    contentWarnings: ContentWarnings;
+    zazzleHydratedFields: Record<string, string[]>;
+    zazzleReferenceValues: Record<string, { title?: string; description?: string }>;
+  },
+): number {
+  const { tableColumns, duplicateProductIdRowIds, duplicateSlugRowIds,
+          contentWarnings, zazzleHydratedFields, zazzleReferenceValues } = opts;
+
+  if (tableColumns.some((col) => !row[col]?.trim())) return 1;
+  if (duplicateProductIdRowIds.has(row._id))          return 2;
+  if (duplicateSlugRowIds.has(row._id))               return 3;
+
+  const allWarns = Object.values(contentWarnings[row._id] ?? {}).flat();
+  if (allWarns.includes('title_too_long'))     return 4;
+  if (allWarns.includes('slug_char_mismatch')) return 5;
+  if (allWarns.includes('casing_issue'))       return 6;
+  if (allWarns.includes('slug_isolated_char')) return 7;
+  if (allWarns.includes('mojibake'))           return 8;
+
+  const ref = zazzleReferenceValues[row._id];
+  if (ref) {
+    const hydrated = zazzleHydratedFields[row._id] ?? [];
+    for (const col of ['title', 'short_title', 'description']) {
+      if (hydrated.includes(col)) continue;
+      const zRef = col === 'description' ? ref.description : ref.title;
+      if (zRef && row[col]?.trim() && row[col]?.trim() !== zRef.trim()) return 9;
+    }
+  }
+  return 0;
+}
+
 export default function CsvUpload({ rows, onChange, onReadinessChange, disabled = false }: Props) {
   const [inputMode, setInputMode] = useState<'upload' | 'manual'>('manual');
   const [manualInput, setManualInput] = useState('');
@@ -211,6 +250,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
   const [zazzleReferenceValues, setZazzleReferenceValues] = useState<Record<string, { title?: string; description?: string }>>({});
   const [expandedDiffCells, setExpandedDiffCells] = useState<Record<string, boolean>>({});
   const [contentWarnings, setContentWarnings] = useState<ContentWarnings>({});
+  const [activeFilter, setActiveFilter] = useState<FilterKey>('total');
   const fileRef = useRef<HTMLInputElement>(null);
 
   const summary = computeSummary(rows);
@@ -256,9 +296,36 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
       zazzleReferenceValues,
     };
     return [...visibleRows].sort(
-      (a, b) => Number(computeRowHasWarning(a, opts)) - Number(computeRowHasWarning(b, opts)),
+      (a, b) => computeRowWarningPriority(a, opts) - computeRowWarningPriority(b, opts),
     );
   }, [visibleRows, tableColumns, summary, contentWarnings, zazzleHydratedFields, zazzleReferenceValues]);
+
+  const firstWarningIndex = useMemo(() => {
+    if (!hasData) return -1;
+    const opts = {
+      tableColumns,
+      duplicateProductIdRowIds: summary.duplicateProductIdRowIds,
+      duplicateSlugRowIds: summary.duplicateSlugRowIds,
+      contentWarnings,
+      zazzleHydratedFields,
+      zazzleReferenceValues,
+    };
+    return sortedRows.findIndex((row) => computeRowWarningPriority(row, opts) > 0);
+  }, [sortedRows, tableColumns, summary, contentWarnings, zazzleHydratedFields, zazzleReferenceValues]);
+
+  const filteredRows = useMemo(() => {
+    if (activeFilter === 'total') return sortedRows;
+    return sortedRows.filter((row) => {
+      if (activeFilter === 'missing')
+        return tableColumns.some((col) => !row[col]?.trim());
+      if (activeFilter === 'duplicate_product_id')
+        return summary.duplicateProductIdRowIds.has(row._id);
+      if (activeFilter === 'duplicate_slug')
+        return summary.duplicateSlugRowIds.has(row._id);
+      return Object.values(contentWarnings[row._id] ?? {}).flat()
+        .includes(activeFilter as ContentWarningType);
+    });
+  }, [sortedRows, activeFilter, tableColumns, summary, contentWarnings]);
 
   useEffect(() => {
     onReadinessChange?.({ dataComplete: allDataComplete, idsValid: allIdsValid, noDuplicates: !hasDuplicates });
@@ -313,6 +380,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
     setZazzleReferenceValues(referenceValues);
     setExpandedDiffCells({});
     setContentWarnings(computeContentWarnings(updated));
+    setActiveFilter('total');
     onChange(updated);
     setHydrating(false);
   }
@@ -386,6 +454,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
     setZazzleReferenceValues({});
     setExpandedDiffCells({});
     setContentWarnings({});
+    setActiveFilter('total');
     onChange(ids.map((id, i) => ({ _id: String(i), product_id: id, product_type: '', title: '', short_title: '', description: '', url_slug: '' })));
   }
 
@@ -397,6 +466,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
     setZazzleReferenceValues({});
     setExpandedDiffCells({});
     setContentWarnings({});
+    setActiveFilter('total');
     if (file.name.endsWith('.xlsx')) {
       parseXlsx(file);
     } else {
@@ -492,30 +562,66 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
       )}
       {hasData && (
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <Stat label="Total" value={summary.total} />
+          <Stat
+            label="Total" value={summary.total}
+            isSelected={activeFilter === 'total'}
+            onClick={() => setActiveFilter('total')}
+          />
           {summary.duplicates > 0 && (
-            <Stat label="Duplicate product_id values" value={summary.duplicates} color="orange" />
+            <Stat
+              label="Duplicate product_id values" value={summary.duplicates} color="orange"
+              isSelected={activeFilter === 'duplicate_product_id'}
+              onClick={() => setActiveFilter((p) => p === 'duplicate_product_id' ? 'total' : 'duplicate_product_id')}
+            />
           )}
           {summary.duplicateSlugs > 0 && (
-            <Stat label="Duplicate url_slug values" value={summary.duplicateSlugs} color="orange" />
+            <Stat
+              label="Duplicate url_slug values" value={summary.duplicateSlugs} color="orange"
+              isSelected={activeFilter === 'duplicate_slug'}
+              onClick={() => setActiveFilter((p) => p === 'duplicate_slug' ? 'total' : 'duplicate_slug')}
+            />
           )}
           {summary.missing > 0 && (
-            <Stat label="Rows Missing Values" value={summary.missing} color="red" />
+            <Stat
+              label="Rows Missing Values" value={summary.missing} color="red"
+              isSelected={activeFilter === 'missing'}
+              onClick={() => setActiveFilter((p) => p === 'missing' ? 'total' : 'missing')}
+            />
           )}
           {(warningCounts.title_too_long ?? 0) > 0 && (
-            <Stat label="Long title (>50)" value={warningCounts.title_too_long!} color="yellow" />
+            <Stat
+              label="Long title (>50)" value={warningCounts.title_too_long!} color="yellow"
+              isSelected={activeFilter === 'title_too_long'}
+              onClick={() => setActiveFilter((p) => p === 'title_too_long' ? 'total' : 'title_too_long')}
+            />
           )}
           {(warningCounts.slug_char_mismatch ?? 0) > 0 && (
-            <Stat label="Title/slug mismatch" value={warningCounts.slug_char_mismatch!} color="yellow" />
+            <Stat
+              label="Title/slug mismatch" value={warningCounts.slug_char_mismatch!} color="yellow"
+              isSelected={activeFilter === 'slug_char_mismatch'}
+              onClick={() => setActiveFilter((p) => p === 'slug_char_mismatch' ? 'total' : 'slug_char_mismatch')}
+            />
           )}
           {(warningCounts.casing_issue ?? 0) > 0 && (
-            <Stat label="Casing issues" value={warningCounts.casing_issue!} color="yellow" />
+            <Stat
+              label="Casing issues" value={warningCounts.casing_issue!} color="yellow"
+              isSelected={activeFilter === 'casing_issue'}
+              onClick={() => setActiveFilter((p) => p === 'casing_issue' ? 'total' : 'casing_issue')}
+            />
           )}
           {(warningCounts.slug_isolated_char ?? 0) > 0 && (
-            <Stat label="Isolated slug token" value={warningCounts.slug_isolated_char!} color="yellow" />
+            <Stat
+              label="Isolated slug token" value={warningCounts.slug_isolated_char!} color="yellow"
+              isSelected={activeFilter === 'slug_isolated_char'}
+              onClick={() => setActiveFilter((p) => p === 'slug_isolated_char' ? 'total' : 'slug_isolated_char')}
+            />
           )}
           {(warningCounts.mojibake ?? 0) > 0 && (
-            <Stat label="Encoding issues" value={warningCounts.mojibake!} color="yellow" />
+            <Stat
+              label="Encoding issues" value={warningCounts.mojibake!} color="yellow"
+              isSelected={activeFilter === 'mojibake'}
+              onClick={() => setActiveFilter((p) => p === 'mojibake' ? 'total' : 'mojibake')}
+            />
           )}
         </div>
       )}
@@ -554,7 +660,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
       )}
       <DataTable
         columns={tableColumns}
-        rows={sortedRows}
+        rows={filteredRows}
         placeholder={!hasData}
         validationStatus={validationStatus}
         duplicateProductIdRowIds={summary.duplicateProductIdRowIds}
@@ -564,6 +670,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
         expandedDiffCells={expandedDiffCells}
         onToggleDiffCell={(key) => setExpandedDiffCells((prev) => ({ ...prev, [key]: !prev[key] }))}
         contentWarnings={contentWarnings}
+        firstWarningIndex={activeFilter === 'total' ? firstWarningIndex : -1}
       />
     </div>
   );
@@ -581,6 +688,7 @@ function DataTable({
   expandedDiffCells = {},
   onToggleDiffCell,
   contentWarnings = {},
+  firstWarningIndex = -1,
 }: {
   columns: string[];
   rows: CsvRow[];
@@ -593,6 +701,7 @@ function DataTable({
   expandedDiffCells?: Record<string, boolean>;
   onToggleDiffCell?: (key: string) => void;
   contentWarnings?: ContentWarnings;
+  firstWarningIndex?: number;
 }) {
   return (
     <div className={`overflow-auto rounded-xl border border-gray-200 max-h-[420px] ${placeholder ? 'opacity-40' : ''}`}>
@@ -611,19 +720,29 @@ function DataTable({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => {
+          {rows.map((row, index) => {
             const status = validationStatus[row._id];
             const isProductIdDup = duplicateProductIdRowIds.has(row._id);
             const isSlugDup = duplicateSlugRowIds.has(row._id);
             const isDup = isProductIdDup || isSlugDup;
-            const borderClass = isDup ? 'border-l-orange-400' :
-              status === 'valid' ? 'border-l-green-400' :
-              status === 'invalid' ? 'border-l-red-400' :
-              'border-l-transparent';
+            const rowHasAnyWarning = computeRowHasWarning(row, {
+              tableColumns: columns,
+              duplicateProductIdRowIds,
+              duplicateSlugRowIds,
+              contentWarnings,
+              zazzleHydratedFields,
+              zazzleReferenceValues,
+            });
+            const borderClass = isDup              ? 'border-l-orange-400' :
+              status === 'invalid'                 ? 'border-l-red-400'    :
+              rowHasAnyWarning                     ? 'border-l-yellow-400' :
+              status === 'valid'                   ? 'border-l-green-400'  :
+                                                     'border-l-transparent';
+            const isSectionBoundary = index === firstWarningIndex && firstWarningIndex > 0;
             return (
               <tr
                 key={row._id}
-                className={`border-b border-gray-100 last:border-b-0 border-l-2 ${borderClass}`}
+                className={`border-b border-gray-100 last:border-b-0 border-l-2 ${borderClass}${isSectionBoundary ? ' border-t-2 border-t-gray-300' : ''}`}
               >
                 <td className="px-3 py-2 text-gray-400 whitespace-nowrap w-[40px]">
                   {placeholder ? '—' : parseInt(row._id) + 1}
@@ -775,18 +894,29 @@ function Stat({
   label,
   value,
   color = 'gray',
+  isSelected = false,
+  onClick,
 }: {
   label: string;
   value: number;
   color?: 'gray' | 'green' | 'yellow' | 'red' | 'orange';
+  isSelected?: boolean;
+  onClick?: () => void;
 }) {
   const bg = { gray: 'bg-gray-50', green: 'bg-green-50', yellow: 'bg-yellow-50', red: 'bg-red-50', orange: 'bg-orange-50' }[color];
   const text = { gray: 'text-gray-900', green: 'text-gray-900', yellow: 'text-yellow-700', red: 'text-red-700', orange: 'text-orange-700' }[color];
   const sub = { gray: 'text-gray-500', green: 'text-gray-500', yellow: 'text-yellow-600', red: 'text-red-600', orange: 'text-orange-600' }[color];
+  const ring = { gray: 'ring-gray-500', green: 'ring-green-500', yellow: 'ring-yellow-500', red: 'ring-red-500', orange: 'ring-orange-500' }[color];
   return (
-    <div className={`${bg} rounded-lg p-3 text-center`}>
+    <button
+      type="button"
+      onClick={onClick}
+      className={`${bg} rounded-lg p-3 text-center w-full transition-all cursor-pointer ${
+        isSelected ? `ring-2 ring-offset-1 ${ring}` : 'hover:brightness-95'
+      }`}
+    >
       <p className={`text-xl font-semibold ${text}`}>{value}</p>
       <p className={`text-xs ${sub}`}>{label}</p>
-    </div>
+    </button>
   );
 }
