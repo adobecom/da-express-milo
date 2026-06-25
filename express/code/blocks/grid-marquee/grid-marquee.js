@@ -305,10 +305,11 @@ export default async function init(el) {
     });
     ctas[0].classList.add('primaryCTA');
     // Defer pricing formatting to idle time
-    const idleCb = (cb) => (
-      window.requestIdleCallback
-        ? window.requestIdleCallback(cb, { timeout: 3000 })
-        : setTimeout(cb, 3000)
+    // eslint-disable-next-line compat/compat
+    const idleCb = (cb) => (window.requestIdleCallback
+      // eslint-disable-next-line compat/compat
+      ? window.requestIdleCallback(cb, { timeout: 3000 })
+      : setTimeout(cb, 3000)
     );
     idleCb(() => {
       ctas.forEach((cta) => formatDynamicCartLink(cta));
