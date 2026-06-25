@@ -1,4 +1,5 @@
 {
+  "version": "v2",
   "sourceCharacters": {
     "letters": {
       "uppercase": "ABCDEFGHIJKLMNOPQRSTUVWXYZ",
@@ -12,7 +13,7 @@
   "fonts": [
     {
       "id": "light-text-bubble",
-      "category": "Cool",
+      "grouping": "Cool",
       "styleName": "Light text bubble",
       "fontSupported": "noto-sans",
       "type": "direct-map",
@@ -133,7 +134,7 @@
     },
     {
       "id": "dark-text-bubble",
-      "category": "Cool",
+      "grouping": "Cool",
       "styleName": "Dark text bubble",
       "fontSupported": "noto-sans",
       "type": "direct-map",
@@ -254,7 +255,7 @@
     },
     {
       "id": "full-width",
-      "category": "Cool",
+      "grouping": "Cool",
       "styleName": "Full width",
       "fontSupported": "noto-sans",
       "type": "direct-map",
@@ -375,7 +376,7 @@
     },
     {
       "id": "diagonal-strikes",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Diagonal strikes",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -496,7 +497,7 @@
     },
     {
       "id": "acute-accents",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Acute Accents",
       "fontSupported": "noto-sans",
       "type": "direct-map",
@@ -617,7 +618,7 @@
     },
     {
       "id": "underline-with-dashes",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Underline with dashes",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -738,7 +739,7 @@
     },
     {
       "id": "metal-umalauts",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Metal Umalauts",
       "fontSupported": "noto-sans",
       "type": "direct-map",
@@ -859,7 +860,7 @@
     },
     {
       "id": "bandaid",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Bandaid",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -980,7 +981,7 @@
     },
     {
       "id": "strikethrough",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Strikethrough",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1101,7 +1102,7 @@
     },
     {
       "id": "x-cross",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "X cross",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1222,7 +1223,7 @@
     },
     {
       "id": "stroked",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Stroked",
       "fontSupported": "noto-sans",
       "type": "direct-map",
@@ -1343,7 +1344,7 @@
     },
     {
       "id": "lines-lines-lines",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Lines lines lines",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1464,7 +1465,7 @@
     },
     {
       "id": "shadow",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Shadow",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1585,7 +1586,7 @@
     },
     {
       "id": "wavy",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Wavy",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1706,7 +1707,7 @@
     },
     {
       "id": "double-underline",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Double underline",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1827,7 +1828,7 @@
     },
     {
       "id": "music-bars",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Music bars",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -1948,7 +1949,7 @@
     },
     {
       "id": "all-the-way-up",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "All the way up",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2069,7 +2070,7 @@
     },
     {
       "id": "comet-tail",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Comet tail",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2190,7 +2191,7 @@
     },
     {
       "id": "hot",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Hot",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2311,7 +2312,7 @@
     },
     {
       "id": "weird-text",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Weird text",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2432,7 +2433,7 @@
     },
     {
       "id": "right-direction-above",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Right direction above",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2553,7 +2554,7 @@
     },
     {
       "id": "right-direction-under",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Right direction under",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2674,7 +2675,7 @@
     },
     {
       "id": "stacked-above",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Stacked above",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2795,7 +2796,7 @@
     },
     {
       "id": "cross-it-under",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Cross it under",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -2916,7 +2917,7 @@
     },
     {
       "id": "rain-on-top",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Rain on top",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -3037,7 +3038,7 @@
     },
     {
       "id": "bubbles-on-top",
-      "category": "Glitch",
+      "grouping": "Glitch",
       "styleName": "Bubbles on top",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -3158,7 +3159,7 @@
     },
     {
       "id": "fading-effect",
-      "category": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Fading effect",
       "fontSupported": "gothic-a1",
       "type": "pattern-map",
@@ -3236,8 +3237,7 @@
           "5": "5",
           "6": "6",
           "7": "7",
-          "8": "8",
-          "9": "9"
+          "8": "8"
         },
         "specialCharacters": {
           "!": "!",
@@ -3273,13 +3273,15 @@
       },
       "missingCharacters": {
         "letters": [],
-        "numbers": [],
+        "numbers": [
+          "9"
+        ],
         "specialCharacters": []
       }
     },
     {
       "id": "arrows",
-      "category": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Arrows",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -3288,9 +3290,9 @@
         "hasStartPattern": true,
         "hasRepeatingMiddlePattern": true,
         "hasEndPattern": true,
-        "startPattern": "»»»",
-        "repeatingMiddlePattern": "»»",
-        "endPattern": "»»»",
+        "startPattern": "»»»»",
+        "repeatingMiddlePattern": "»»»",
+        "endPattern": "»»»»",
         "byCategory": {}
       },
       "characters": {
@@ -3400,7 +3402,7 @@
     },
     {
       "id": "cupido",
-      "category": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Cupido",
       "fontSupported": "gothic-a1",
       "type": "pattern-map",
@@ -3521,7 +3523,7 @@
     },
     {
       "id": "sparkles",
-      "category": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Sparkles",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -3642,7 +3644,7 @@
     },
     {
       "id": "finish",
-      "category": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Finish",
       "fontSupported": "gothic-a1",
       "type": "pattern-map",
@@ -3763,7 +3765,7 @@
     },
     {
       "id": "barcode",
-      "category": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Barcode",
       "fontSupported": "gothic-a1",
       "type": "pattern-map",
@@ -3884,7 +3886,7 @@
     },
     {
       "id": "weights",
-      "category": "Symbol text",
+      "grouping": "Symbol",
       "styleName": "Weights",
       "fontSupported": "noto-sans",
       "type": "pattern-map",
@@ -3964,6 +3966,127 @@
           "7": "7",
           "8": "8",
           "9": "9"
+        },
+        "specialCharacters": {
+          "!": "!",
+          "@": "@",
+          "#": "#",
+          "$": "$",
+          "%": "%",
+          "^": "^",
+          "&": "&",
+          "*": "*",
+          "(": "(",
+          ")": ")",
+          "-": "-",
+          "_": "_",
+          "=": "=",
+          "+": "+",
+          "[": "[",
+          "]": "]",
+          "{": "{",
+          "}": "}",
+          "<": "<",
+          ">": ">",
+          "?": "?",
+          ".": ".",
+          ",": ",",
+          ":": ":",
+          ";": ";",
+          "'": "'",
+          "\"": "\"",
+          "`": "`",
+          "~": "~"
+        }
+      },
+      "missingCharacters": {
+        "letters": [],
+        "numbers": [],
+        "specialCharacters": []
+      }
+    },
+    {
+      "id": "bold-script",
+      "grouping": "Cool",
+      "styleName": "Bold script",
+      "fontSupported": "noto-sans",
+      "type": "direct-map",
+      "pattern": {
+        "placement": "none",
+        "hasStartPattern": false,
+        "hasRepeatingMiddlePattern": false,
+        "hasEndPattern": false,
+        "startPattern": "",
+        "repeatingMiddlePattern": "",
+        "endPattern": "",
+        "byCategory": {}
+      },
+      "characters": {
+        "letters": {
+          "A": "𝓐",
+          "B": "𝓑",
+          "C": "𝓒",
+          "D": "𝓓",
+          "E": "𝓔",
+          "F": "𝓕",
+          "G": "𝓖",
+          "H": "𝓗",
+          "I": "𝓘",
+          "J": "𝓙",
+          "K": "𝓚",
+          "L": "𝓛",
+          "M": "𝓜",
+          "N": "𝓝",
+          "O": "𝓞",
+          "P": "𝓟",
+          "Q": "𝓠",
+          "R": "𝓡",
+          "S": "𝓢",
+          "T": "𝓣",
+          "U": "𝓤",
+          "V": "𝓥",
+          "W": "𝓦",
+          "X": "𝓧",
+          "Y": "𝓨",
+          "Z": "𝓩",
+          "a": "𝓪",
+          "b": "𝓫",
+          "c": "𝓬",
+          "d": "𝓭",
+          "e": "𝓮",
+          "f": "𝓯",
+          "g": "𝓰",
+          "h": "𝓱",
+          "i": "𝓲",
+          "j": "𝓳",
+          "k": "𝓴",
+          "l": "𝓵",
+          "m": "𝓶",
+          "n": "𝓷",
+          "o": "𝓸",
+          "p": "𝓹",
+          "q": "𝓺",
+          "r": "𝓻",
+          "s": "𝓼",
+          "t": "𝓽",
+          "u": "𝓾",
+          "v": "𝓿",
+          "w": "𝔀",
+          "x": "𝔁",
+          "y": "𝔂",
+          "z": "𝔃"
+        },
+        "numbers": {
+          "0": "𝟎",
+          "1": "𝟏",
+          "2": "𝟐",
+          "3": "𝟑",
+          "4": "𝟒",
+          "5": "𝟓",
+          "6": "𝟔",
+          "7": "𝟕",
+          "8": "𝟖",
+          "9": "𝟗"
         },
         "specialCharacters": {
           "!": "!",

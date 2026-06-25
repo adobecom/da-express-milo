@@ -1,7 +1,7 @@
 import { transformText } from '../font-generator/unicodeEngine.js';
 
 const DEFAULT_PREVIEW_TEXT = 'ABC!!é🚀 09';
-const FONT_SHEET_URL = new URL('../font-generator/font-sheets/font-styles.json', import.meta.url);
+const FONT_SHEET_URL = new URL('../font-generator/font-sheets/v2/v2.json', import.meta.url);
 const PREVIEW_CHARACTERS = ['A', 'a', '0', '!'];
 
 // Adobe Fonts (Typekit) kit holding the supported families (Gothic A1, Noto
@@ -57,7 +57,7 @@ function getMissingSummary(font) {
 function createHeaderRow() {
   const row = document.createElement('tr');
   [
-    'Category',
+    'Grouping',
     'Style name',
     'Supported font',
     'Type',
@@ -80,7 +80,7 @@ function createFontRow(font, previewText) {
   outputCell.style.fontFamily = `"${font.fontSupported}", var(--body-font-family), sans-serif`;
 
   row.append(
-    createCell(font.category),
+    createCell(font.grouping),
     createCell(font.styleName, 'font-generator-visualizer-style-name'),
     createCell(font.fontSupported),
     createCell(font.type),
@@ -152,7 +152,7 @@ export default async function decorate(block) {
   const caption = createElement(
     'caption',
     '',
-    'Generated font sheet rows from font-styles.json with live unicodeEngine output',
+    'Generated font sheet rows from v1.json with live unicodeEngine output',
   );
   const thead = document.createElement('thead');
   const tbody = document.createElement('tbody');
@@ -174,7 +174,7 @@ export default async function decorate(block) {
       return { font, outputCell: rendered.outputCell };
     });
 
-    status.textContent = `${fontSheet.fonts.length} styles loaded.`;
+    status.textContent = `${fontSheet.fonts.length} styles loaded from ${fontSheet.version}.`;
     input.addEventListener('input', () => updateOutputs(rows, input.value));
   } catch (error) {
     status.textContent = error.message;

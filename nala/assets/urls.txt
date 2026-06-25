@@ -104,9 +104,6 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-cards
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-steps-carousel/how-to-steps-carousel-image-schema
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-v2/how-to-v2
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/how-to-v2/how-to-v2-no-background
-
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/how-to-v3/how-to-v3
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/interactive-marquee/interactive-marquee
