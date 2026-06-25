@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import type { CsvRow, InputSummary } from '../types';
@@ -9,6 +9,58 @@ interface Props {
   onChange: (rows: CsvRow[]) => void;
   onReadinessChange?: (state: { dataComplete: boolean; idsValid: boolean; noDuplicates: boolean }) => void;
   disabled?: boolean;
+}
+
+type ContentWarningType =
+  | 'title_too_long'
+  | 'slug_char_mismatch'
+  | 'casing_issue'
+  | 'slug_isolated_char'
+  | 'mojibake';
+
+const CONTENT_WARNING_LABELS: Record<ContentWarningType, string> = {
+  title_too_long: 'Title exceeds 50 characters',
+  slug_char_mismatch: 'Contains characters stripped from URL slug (e.g. &)',
+  casing_issue: 'Inconsistent capitalization (content word lowercase or conjunction capitalized mid-title)',
+  slug_isolated_char: 'Isolated single-character token in URL slug (e.g. mother-s-day)',
+  mojibake: 'Possible encoding issue (e.g. â€™ instead of apostrophe)',
+};
+
+type ContentWarnings = Record<string, Record<string, ContentWarningType[]>>;
+
+const STOP_WORDS = new Set([
+  'a', 'an', 'the', 'and', 'but', 'or', 'nor', 'for', 'so', 'yet',
+  'in', 'on', 'at', 'to', 'by', 'of', 'up', 'as', 'is', 'it', 'vs', 'via',
+]);
+
+function checkTitleTooLong(value: string): boolean {
+  return value.length > 50;
+}
+
+function checkSlugCharMismatch(value: string): boolean {
+  return /[^a-zA-Z0-9\s]/.test(value);
+}
+
+function checkCasingIssue(value: string): boolean {
+  const words = value.split(/\s+/).filter(Boolean);
+  if (words.length < 2) return false;
+  if (!/^[A-Z]/.test(words[0])) return false;
+  for (let i = 1; i < words.length; i++) {
+    const w = words[i];
+    if (!w || w.length < 2) continue;
+    const lower = w.toLowerCase();
+    if (!STOP_WORDS.has(lower) && /^[a-z]/.test(w)) return true;
+    if (STOP_WORDS.has(lower) && /^[A-Z]/.test(w)) return true;
+  }
+  return false;
+}
+
+function checkSlugIsolatedChar(slug: string): boolean {
+  return /(?:^|-)[a-z](?:-|$)/.test(slug);
+}
+
+function checkMojibake(value: string): boolean {
+  return /â€[^\s]|Ã[^\s]|Â[^\s]/.test(value);
 }
 
 const PLACEHOLDER_COLUMNS = ['product_id', 'product_type', 'url_slug', 'title', 'description'];
@@ -83,6 +135,68 @@ function ensureShortTitle(fields: string[], rows: CsvRow[]): { fields: string[];
   return { fields: normalizedFields, rows: normalizedRows };
 }
 
+function computeContentWarnings(rows: CsvRow[]): ContentWarnings {
+  const result: ContentWarnings = {};
+  for (const row of rows) {
+    const rowWarnings: Record<string, ContentWarningType[]> = {};
+
+    for (const col of ['title', 'short_title']) {
+      const val = row[col]?.trim();
+      if (!val) continue;
+      const w: ContentWarningType[] = [];
+      if (checkTitleTooLong(val))     w.push('title_too_long');
+      if (checkSlugCharMismatch(val)) w.push('slug_char_mismatch');
+      if (checkCasingIssue(val))      w.push('casing_issue');
+      if (checkMojibake(val))         w.push('mojibake');
+      if (w.length) rowWarnings[col] = w;
+    }
+
+    const slug = row['url_slug']?.trim();
+    if (slug && checkSlugIsolatedChar(slug)) {
+      rowWarnings['url_slug'] = ['slug_isolated_char'];
+    }
+
+    const desc = row['description']?.trim();
+    if (desc && checkMojibake(desc)) {
+      rowWarnings['description'] = [...(rowWarnings['description'] ?? []), 'mojibake'];
+    }
+
+    if (Object.keys(rowWarnings).length) result[row._id] = rowWarnings;
+  }
+  return result;
+}
+
+function computeRowHasWarning(
+  row: CsvRow,
+  opts: {
+    tableColumns: string[];
+    duplicateProductIdRowIds: Set<string>;
+    duplicateSlugRowIds: Set<string>;
+    contentWarnings: ContentWarnings;
+    zazzleHydratedFields: Record<string, string[]>;
+    zazzleReferenceValues: Record<string, { title?: string; description?: string }>;
+  },
+): boolean {
+  const { tableColumns, duplicateProductIdRowIds, duplicateSlugRowIds,
+          contentWarnings, zazzleHydratedFields, zazzleReferenceValues } = opts;
+
+  if (tableColumns.some((col) => !row[col]?.trim())) return true;
+  if (duplicateProductIdRowIds.has(row._id)) return true;
+  if (duplicateSlugRowIds.has(row._id)) return true;
+  if (Object.keys(contentWarnings[row._id] ?? {}).length > 0) return true;
+
+  const ref = zazzleReferenceValues[row._id];
+  if (ref) {
+    const hydrated = zazzleHydratedFields[row._id] ?? [];
+    for (const col of ['title', 'short_title', 'description']) {
+      if (hydrated.includes(col)) continue;
+      const zRef = col === 'description' ? ref.description : ref.title;
+      if (zRef && row[col]?.trim() && row[col]?.trim() !== zRef.trim()) return true;
+    }
+  }
+  return false;
+}
+
 export default function CsvUpload({ rows, onChange, onReadinessChange, disabled = false }: Props) {
   const [inputMode, setInputMode] = useState<'upload' | 'manual'>('manual');
   const [manualInput, setManualInput] = useState('');
@@ -96,6 +210,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
   const [zazzleHydratedFields, setZazzleHydratedFields] = useState<Record<string, string[]>>({});
   const [zazzleReferenceValues, setZazzleReferenceValues] = useState<Record<string, { title?: string; description?: string }>>({});
   const [expandedDiffCells, setExpandedDiffCells] = useState<Record<string, boolean>>({});
+  const [contentWarnings, setContentWarnings] = useState<ContentWarnings>({});
   const fileRef = useRef<HTMLInputElement>(null);
 
   const summary = computeSummary(rows);
@@ -118,6 +233,32 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
 
   const hasDuplicates =
     summary.duplicateProductIdRowIds.size > 0 || summary.duplicateSlugRowIds.size > 0;
+
+  const warningCounts = useMemo(() => {
+    const counts: Partial<Record<ContentWarningType, number>> = {};
+    for (const rowWarnings of Object.values(contentWarnings)) {
+      const seen = new Set<ContentWarningType>();
+      for (const cellW of Object.values(rowWarnings))
+        for (const w of cellW) seen.add(w);
+      for (const t of seen) counts[t] = (counts[t] ?? 0) + 1;
+    }
+    return counts;
+  }, [contentWarnings]);
+
+  const sortedRows = useMemo(() => {
+    if (!hasData) return visibleRows;
+    const opts = {
+      tableColumns,
+      duplicateProductIdRowIds: summary.duplicateProductIdRowIds,
+      duplicateSlugRowIds: summary.duplicateSlugRowIds,
+      contentWarnings,
+      zazzleHydratedFields,
+      zazzleReferenceValues,
+    };
+    return [...visibleRows].sort(
+      (a, b) => Number(computeRowHasWarning(a, opts)) - Number(computeRowHasWarning(b, opts)),
+    );
+  }, [visibleRows, tableColumns, summary, contentWarnings, zazzleHydratedFields, zazzleReferenceValues]);
 
   useEffect(() => {
     onReadinessChange?.({ dataComplete: allDataComplete, idsValid: allIdsValid, noDuplicates: !hasDuplicates });
@@ -171,6 +312,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
     setZazzleHydratedFields(hydratedFields);
     setZazzleReferenceValues(referenceValues);
     setExpandedDiffCells({});
+    setContentWarnings(computeContentWarnings(updated));
     onChange(updated);
     setHydrating(false);
   }
@@ -243,6 +385,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
     setZazzleHydratedFields({});
     setZazzleReferenceValues({});
     setExpandedDiffCells({});
+    setContentWarnings({});
     onChange(ids.map((id, i) => ({ _id: String(i), product_id: id, product_type: '', title: '', short_title: '', description: '', url_slug: '' })));
   }
 
@@ -253,6 +396,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
     setZazzleHydratedFields({});
     setZazzleReferenceValues({});
     setExpandedDiffCells({});
+    setContentWarnings({});
     if (file.name.endsWith('.xlsx')) {
       parseXlsx(file);
     } else {
@@ -358,6 +502,21 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
           {summary.missing > 0 && (
             <Stat label="Rows Missing Values" value={summary.missing} color="red" />
           )}
+          {(warningCounts.title_too_long ?? 0) > 0 && (
+            <Stat label="Long title (>50)" value={warningCounts.title_too_long!} color="yellow" />
+          )}
+          {(warningCounts.slug_char_mismatch ?? 0) > 0 && (
+            <Stat label="Title/slug mismatch" value={warningCounts.slug_char_mismatch!} color="yellow" />
+          )}
+          {(warningCounts.casing_issue ?? 0) > 0 && (
+            <Stat label="Casing issues" value={warningCounts.casing_issue!} color="yellow" />
+          )}
+          {(warningCounts.slug_isolated_char ?? 0) > 0 && (
+            <Stat label="Isolated slug token" value={warningCounts.slug_isolated_char!} color="yellow" />
+          )}
+          {(warningCounts.mojibake ?? 0) > 0 && (
+            <Stat label="Encoding issues" value={warningCounts.mojibake!} color="yellow" />
+          )}
         </div>
       )}
 
@@ -385,7 +544,9 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
         </div>
       )}
 
-      {hasData && Object.keys(zazzleHydratedFields).length > 0 && <ZazzleLegend />}
+      {hasData && (Object.keys(zazzleHydratedFields).length > 0 || Object.keys(contentWarnings).length > 0) && (
+        <ZazzleLegend showContentWarning={Object.keys(contentWarnings).length > 0} />
+      )}
       {disabled && hasData && (
         <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
           Data inputs are locked while results exist. Reset results in Step 3 to make changes.
@@ -393,7 +554,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
       )}
       <DataTable
         columns={tableColumns}
-        rows={visibleRows}
+        rows={sortedRows}
         placeholder={!hasData}
         validationStatus={validationStatus}
         duplicateProductIdRowIds={summary.duplicateProductIdRowIds}
@@ -402,6 +563,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, disabled 
         zazzleReferenceValues={zazzleReferenceValues}
         expandedDiffCells={expandedDiffCells}
         onToggleDiffCell={(key) => setExpandedDiffCells((prev) => ({ ...prev, [key]: !prev[key] }))}
+        contentWarnings={contentWarnings}
       />
     </div>
   );
@@ -418,6 +580,7 @@ function DataTable({
   zazzleReferenceValues = {},
   expandedDiffCells = {},
   onToggleDiffCell,
+  contentWarnings = {},
 }: {
   columns: string[];
   rows: CsvRow[];
@@ -429,6 +592,7 @@ function DataTable({
   zazzleReferenceValues?: Record<string, { title?: string; description?: string }>;
   expandedDiffCells?: Record<string, boolean>;
   onToggleDiffCell?: (key: string) => void;
+  contentWarnings?: ContentWarnings;
 }) {
   return (
     <div className={`overflow-auto rounded-xl border border-gray-200 max-h-[420px] ${placeholder ? 'opacity-40' : ''}`}>
@@ -476,11 +640,15 @@ function DataTable({
                   const valuesMatch = hasComparison && row[col]?.trim() === zazzleRef?.trim();
                   const diffKey = `${row._id}-${col}`;
                   const isDiffExpanded = expandedDiffCells[diffKey] ?? false;
+                  const cellWarnings = contentWarnings[row._id]?.[col] ?? [];
+                  const hasContentWarning = cellWarnings.length > 0;
                   const cellClass = isHydrated
                     ? 'bg-purple-50 text-purple-700'
                     : isEmpty
                       ? 'bg-red-50 text-red-400 italic'
-                      : 'text-gray-700';
+                      : hasContentWarning
+                        ? 'bg-yellow-50 text-yellow-800'
+                        : 'text-gray-700';
                   return (
                     <td key={col} className={`px-3 py-2 ${cellClass}`}>
                       <div className="flex flex-col">
@@ -495,6 +663,14 @@ function DataTable({
                           )}
                           {col === 'url_slug' && isSlugDup && (
                             <span className="shrink-0 text-orange-500" title="Duplicate URL slug"><DuplicateIcon /></span>
+                          )}
+                          {hasContentWarning && (
+                            <span
+                              className="shrink-0 text-yellow-600"
+                              title={cellWarnings.map((w) => CONTENT_WARNING_LABELS[w]).join(' · ')}
+                            >
+                              ⚠
+                            </span>
                           )}
                           {hasComparison && valuesMatch && (
                             <span className="shrink-0 text-green-500 font-bold" title="Matches Zazzle data">✓</span>
@@ -547,7 +723,7 @@ function DataTable({
   );
 }
 
-function ZazzleLegend() {
+function ZazzleLegend({ showContentWarning = false }: { showContentWarning?: boolean }) {
   return (
     <div className="flex items-center gap-4 text-xs text-gray-500 flex-wrap">
       <span className="font-medium text-gray-600">Legend:</span>
@@ -567,6 +743,12 @@ function ZazzleLegend() {
         <span className="text-orange-500"><DuplicateIcon /></span>
         Duplicate value
       </span>
+      {showContentWarning && (
+        <span className="flex items-center gap-1">
+          <span className="text-yellow-600 font-bold">⚠</span>
+          Content warning
+        </span>
+      )}
     </div>
   );
 }
