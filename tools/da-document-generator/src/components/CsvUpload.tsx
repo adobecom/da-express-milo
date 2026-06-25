@@ -713,6 +713,14 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
             return next;
           })
         }
+        onToggleAll={(ids, allChecked) =>
+          setCheckedRowIds((prev) => {
+            const next = new Set(prev);
+            if (allChecked) ids.forEach((id) => next.delete(id));
+            else ids.forEach((id) => next.add(id));
+            return next;
+          })
+        }
       />
     </div>
   );
@@ -733,6 +741,7 @@ function DataTable({
   firstWarningIndex = -1,
   checkedRowIds = new Set(),
   onToggleCheck,
+  onToggleAll,
 }: {
   columns: string[];
   rows: CsvRow[];
@@ -748,13 +757,28 @@ function DataTable({
   firstWarningIndex?: number;
   checkedRowIds?: Set<string>;
   onToggleCheck?: (id: string) => void;
+  onToggleAll?: (ids: string[], allCurrentlyChecked: boolean) => void;
 }) {
+  const nonPlaceholderRows = placeholder ? [] : rows.filter((r) => r._id !== 'placeholder');
+  const allVisibleChecked = nonPlaceholderRows.length > 0 && nonPlaceholderRows.every((r) => checkedRowIds.has(r._id));
+  const someVisibleChecked = nonPlaceholderRows.some((r) => checkedRowIds.has(r._id));
+
   return (
     <div className={`overflow-auto rounded-xl border border-gray-200 max-h-[420px] ${placeholder ? 'opacity-40' : ''}`}>
       <table className="text-xs w-full min-w-max">
         <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
-          <tr>
-            <th className="px-3 py-2 w-[40px]" />
+          <tr className="border-l-2 border-l-gray-50">
+            <th className="px-3 py-2 w-[40px] text-center">
+              {!placeholder && (
+                <input
+                  type="checkbox"
+                  checked={allVisibleChecked}
+                  ref={(el) => { if (el) el.indeterminate = someVisibleChecked && !allVisibleChecked; }}
+                  onChange={() => onToggleAll?.(nonPlaceholderRows.map((r) => r._id), allVisibleChecked)}
+                  className="cursor-pointer accent-indigo-600"
+                />
+              )}
+            </th>
             <th className="px-3 py-2 text-left font-medium text-gray-400 whitespace-nowrap w-[40px]">#</th>
             {columns.map((col) => (
               <th key={col} className="px-3 py-2 text-left font-medium text-gray-600 whitespace-nowrap">
@@ -789,7 +813,7 @@ function DataTable({
             return (
               <tr
                 key={row._id}
-                className={`border-b border-gray-100 last:border-b-0 border-l-2 ${borderClass}${isSectionBoundary ? ' border-t-2 border-t-gray-300' : ''}`}
+                className={`border-b border-gray-100 last:border-b-0 border-l-2 ${borderClass}${isSectionBoundary ? ' border-t-4 border-t-gray-300' : ''}`}
               >
                 <td className="px-3 py-2 w-[40px] text-center">
                   {!placeholder && (
@@ -830,7 +854,12 @@ function DataTable({
                       <div className="flex flex-col">
                         <div className="flex items-center gap-1">
                           {col === 'product_id' && isProductIdDup && (
-                            <span className="shrink-0 text-orange-500" title="Duplicate product ID"><DuplicateIcon /></span>
+                            <span className="relative group shrink-0 cursor-help text-orange-500">
+                              <DuplicateIcon />
+                              <span className="pointer-events-none absolute left-0 top-full z-20 mt-1 hidden w-36 rounded bg-gray-800 px-2 py-1.5 text-sm leading-snug text-white shadow-lg group-hover:block whitespace-normal">
+                                Duplicate product ID
+                              </span>
+                            </span>
                           )}
                           {col === 'product_id' && status && (
                             <span className={`shrink-0 font-bold ${status === 'valid' ? 'text-green-500' : 'text-red-500'}`}>
@@ -838,14 +867,19 @@ function DataTable({
                             </span>
                           )}
                           {col === 'url_slug' && isSlugDup && (
-                            <span className="shrink-0 text-orange-500" title="Duplicate URL slug"><DuplicateIcon /></span>
+                            <span className="relative group shrink-0 cursor-help text-orange-500">
+                              <DuplicateIcon />
+                              <span className="pointer-events-none absolute left-0 top-full z-20 mt-1 hidden w-36 rounded bg-gray-800 px-2 py-1.5 text-sm leading-snug text-white shadow-lg group-hover:block whitespace-normal">
+                                Duplicate URL slug
+                              </span>
+                            </span>
                           )}
                           {hasContentWarning && (
-                            <span
-                              className="shrink-0 text-yellow-600"
-                              title={cellWarnings.map((w) => CONTENT_WARNING_LABELS[w]).join(' · ')}
-                            >
+                            <span className="relative group shrink-0 cursor-help text-yellow-600">
                               ⚠
+                              <span className="pointer-events-none absolute left-0 top-full z-20 mt-1 hidden w-56 rounded bg-gray-800 px-2 py-1.5 text-sm leading-snug text-white shadow-lg group-hover:block whitespace-normal">
+                                {cellWarnings.map((w) => CONTENT_WARNING_LABELS[w]).join(' · ')}
+                              </span>
                             </span>
                           )}
                           {hasComparison && valuesMatch && (
@@ -963,13 +997,12 @@ function Stat({
   const bg = { gray: 'bg-gray-50', green: 'bg-green-50', yellow: 'bg-yellow-50', red: 'bg-red-50', orange: 'bg-orange-50', indigo: 'bg-indigo-50' }[color];
   const text = { gray: 'text-gray-900', green: 'text-gray-900', yellow: 'text-yellow-700', red: 'text-red-700', orange: 'text-orange-700', indigo: 'text-indigo-700' }[color];
   const sub = { gray: 'text-gray-500', green: 'text-gray-500', yellow: 'text-yellow-600', red: 'text-red-600', orange: 'text-orange-600', indigo: 'text-indigo-500' }[color];
-  const ring = { gray: 'ring-gray-500', green: 'ring-green-500', yellow: 'ring-yellow-500', red: 'ring-red-500', orange: 'ring-orange-500', indigo: 'ring-indigo-500' }[color];
   return (
     <button
       type="button"
       onClick={onClick}
       className={`${bg} rounded-lg p-3 text-center w-full transition-all cursor-pointer ${
-        isSelected ? `ring-2 ring-offset-1 ${ring}` : 'hover:brightness-95'
+        isSelected ? 'ring-2 ring-offset-1 ring-blue-500' : 'hover:brightness-95'
       }`}
     >
       <p className={`text-xl font-semibold ${text}`}>{value}</p>
