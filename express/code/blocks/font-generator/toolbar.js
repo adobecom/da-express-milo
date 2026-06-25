@@ -2,7 +2,8 @@
 import { getState, setState, subscribe } from './state.js';
 import { FONT_SIZE_MIN, FONT_SIZE_MAX } from './types.js';
 
-const STYLESHEET_HREF = '/express/code/blocks/font-generator/toolbar.css';
+const BLOCK_PATH = '/express/code/blocks/font-generator';
+const STYLESHEET_HREF = `${BLOCK_PATH}/toolbar.css`;
 const SLIDER_DEBOUNCE_MS = 60;
 
 let stylesInjected = false;
@@ -36,56 +37,14 @@ function updateUrlParams(update) {
   window.history.replaceState(null, '', url);
 }
 
-// ─── Icons (currentColor so CSS drives fill/stroke per button state) ──────────
+// ─── Icons (loaded from block directory) ──────────────────────────────────────
 
-function makeGridIcon() {
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('width', '16');
-  svg.setAttribute('height', '16');
-  svg.setAttribute('viewBox', '0 0 16 16');
-  svg.setAttribute('fill', 'none');
-  svg.setAttribute('aria-hidden', 'true');
-
-  [
-    [1, 1], [9, 1], [1, 9], [9, 9],
-  ].forEach(([x, y]) => {
-    const rect = document.createElementNS(ns, 'rect');
-    rect.setAttribute('x', x);
-    rect.setAttribute('y', y);
-    rect.setAttribute('width', '6');
-    rect.setAttribute('height', '6');
-    rect.setAttribute('rx', '1');
-    rect.setAttribute('stroke', 'currentColor');
-    rect.setAttribute('stroke-width', '1.5');
-    svg.append(rect);
-  });
-
-  return svg;
-}
-
-function makeRowIcon() {
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('width', '16');
-  svg.setAttribute('height', '16');
-  svg.setAttribute('viewBox', '0 0 16 16');
-  svg.setAttribute('fill', 'none');
-  svg.setAttribute('aria-hidden', 'true');
-
-  [[1, 2], [1, 9]].forEach(([x, y]) => {
-    const rect = document.createElementNS(ns, 'rect');
-    rect.setAttribute('x', x);
-    rect.setAttribute('y', y);
-    rect.setAttribute('width', '14');
-    rect.setAttribute('height', '5');
-    rect.setAttribute('rx', '1');
-    rect.setAttribute('stroke', 'currentColor');
-    rect.setAttribute('stroke-width', '1.5');
-    svg.append(rect);
-  });
-
-  return svg;
+function makeIcon(filename) {
+  const img = document.createElement('img');
+  img.src = `${BLOCK_PATH}/${filename}`;
+  img.alt = '';
+  img.setAttribute('aria-hidden', 'true');
+  return img;
 }
 
 function makeLayoutBtn(layout, label, icon) {
@@ -104,13 +63,13 @@ function setSliderFill(sliderEl, value) {
   sliderEl.style.setProperty('--fill', `${pct}%`);
 }
 
-export function createToolbar() {
+export function createToolbar({ panelId } = {}) {
   injectStyles();
 
   const toolbar = document.createElement('div');
   toolbar.className = 'font-generator-toolbar';
 
-  // ── Left: layout toggles + active font count ────────────────────────────
+  // ── Left: layout toggles + active font count + filter trigger ───────────
   const leftGroup = document.createElement('div');
   leftGroup.className = 'toolbar-left';
 
@@ -119,15 +78,35 @@ export function createToolbar() {
   btnGroup.setAttribute('role', 'group');
   btnGroup.setAttribute('aria-label', 'Card layout');
 
-  const gridBtn = makeLayoutBtn('grid', 'Grid view', makeGridIcon());
-  const rowBtn = makeLayoutBtn('list', 'Row view', makeRowIcon());
+  const gridBtn = makeLayoutBtn('grid', 'Grid view', makeIcon('grid.svg'));
+  const rowBtn = makeLayoutBtn('list', 'Row view', makeIcon('row.svg'));
   btnGroup.append(gridBtn, rowBtn);
 
   const count = document.createElement('span');
   count.className = 'toolbar-count';
   count.setAttribute('aria-live', 'polite');
 
+  let filterTrigger = null;
+  if (panelId) {
+    filterTrigger = document.createElement('button');
+    filterTrigger.type = 'button';
+    filterTrigger.className = 'font-generator-filter-trigger';
+    filterTrigger.setAttribute('aria-haspopup', 'true');
+    filterTrigger.setAttribute('aria-expanded', 'false');
+    filterTrigger.setAttribute('aria-controls', panelId);
+
+    const filterLabel = document.createElement('span');
+    filterLabel.className = 'filter-trigger-label';
+    filterLabel.textContent = 'Filter';
+    filterTrigger.append(makeIcon('filter.svg'), filterLabel);
+
+    filterTrigger.addEventListener('click', () => {
+      setState({ filtersOpen: !getState().filtersOpen });
+    });
+  }
+
   leftGroup.append(btnGroup, count);
+  if (filterTrigger) leftGroup.append(filterTrigger);
 
   // ── Right: font size slider ──────────────────────────────────────────────
   const rightGroup = document.createElement('div');
@@ -156,7 +135,7 @@ export function createToolbar() {
 
   // ── State sync ───────────────────────────────────────────────────────────
 
-  function syncState({ layout, fontSize, activeFonts }) {
+  function syncState({ layout, fontSize, activeFonts, filtersOpen }) {
     const isGrid = layout === 'grid';
     gridBtn.classList.toggle('is-active', isGrid);
     rowBtn.classList.toggle('is-active', !isGrid);
@@ -168,6 +147,10 @@ export function createToolbar() {
     setSliderFill(slider, fontSize);
 
     count.textContent = `${activeFonts.length} styles`;
+
+    if (filterTrigger) {
+      filterTrigger.setAttribute('aria-expanded', String(Boolean(filtersOpen)));
+    }
   }
 
   syncState(getState());
@@ -198,5 +181,5 @@ export function createToolbar() {
 
   const unsubscribe = subscribe(syncState);
 
-  return { toolbar, unsubscribe };
+  return { toolbar, filterTrigger, unsubscribe };
 }

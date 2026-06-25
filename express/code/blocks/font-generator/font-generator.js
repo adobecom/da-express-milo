@@ -56,7 +56,8 @@ async function localizeFilterTrigger(button) {
   try {
     const label = await getPlaceholder('filter');
     if (label) {
-      button.textContent = label;
+      const labelEl = button.querySelector('.filter-trigger-label');
+      if (labelEl) labelEl.textContent = label;
       button.setAttribute('aria-label', label);
     }
   } catch (e) {
@@ -105,29 +106,6 @@ async function localizeTextareaPlaceholder(panel) {
   }
 }
 
-// The Filter trigger lives outside the side-panel component. It toggles the
-// shared filter panel through state (state.filtersOpen); the panel subscribes
-// to that flag for its open/closed slide. Hidden via CSS at >=1440px where
-// filters are inline.
-function createFilterTrigger(panelId) {
-  const button = document.createElement('button');
-  button.type = 'button';
-  button.className = 'font-generator-filter-trigger';
-  button.textContent = 'Filter';
-  button.setAttribute('aria-haspopup', 'true');
-  button.setAttribute('aria-expanded', 'false');
-  button.setAttribute('aria-controls', panelId);
-
-  button.addEventListener('click', () => {
-    setState({ filtersOpen: !getState().filtersOpen });
-  });
-  const unsubscribe = subscribe(({ filtersOpen }) => {
-    button.setAttribute('aria-expanded', String(Boolean(filtersOpen)));
-  });
-
-  localizeFilterTrigger(button);
-  return { button, unsubscribe };
-}
 
 export default function decorate(block) {
   // Restore URL state before any component reads from the store.
@@ -163,9 +141,7 @@ export default function decorate(block) {
   localizeTryThese(sidePanel);
   localizeTextareaPlaceholder(sidePanel);
 
-  const { button: filterTrigger, unsubscribe: unsubscribeTrigger } = createFilterTrigger(panelId);
-
-  sideCol.append(sidePanel, filterTrigger, filterPanel);
+  sideCol.append(sidePanel, filterPanel);
 
   const mainCol = document.createElement('div');
   mainCol.className = 'font-generator-col font-generator-col--main';
@@ -173,7 +149,8 @@ export default function decorate(block) {
   grid.append(sideCol, mainCol);
   block.replaceChildren(grid);
 
-  const { toolbar, unsubscribe: unsubscribeToolbar } = createToolbar();
+  const { toolbar, filterTrigger, unsubscribe: unsubscribeToolbar } = createToolbar({ panelId });
+  if (filterTrigger) localizeFilterTrigger(filterTrigger);
   mainCol.append(toolbar);
 
   let unsubscribeGrid = () => {};
@@ -186,7 +163,6 @@ export default function decorate(block) {
     unsubscribeBlock();
     unsubscribeFilter();
     unsubscribeSide();
-    unsubscribeTrigger();
     unsubscribeToolbar();
     unsubscribeGrid();
   };
