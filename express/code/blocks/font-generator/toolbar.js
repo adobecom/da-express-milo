@@ -154,17 +154,18 @@ export function createToolbar({ panelId } = {}) {
   }
 
   syncState(getState());
+  updateUrlParams({ view: getState().layout });
 
   // ── Events ───────────────────────────────────────────────────────────────
 
   gridBtn.addEventListener('click', () => {
     setState({ layout: 'grid' });
-    updateUrlParams({ layout: 'grid' });
+    updateUrlParams({ view: 'grid' });
   });
 
   rowBtn.addEventListener('click', () => {
     setState({ layout: 'list' });
-    updateUrlParams({ layout: 'list' });
+    updateUrlParams({ view: 'list' });
   });
 
   const flushSize = debounce((value) => {

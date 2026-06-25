@@ -51,13 +51,17 @@ export function initFromUrl() {
   const params = new URLSearchParams(window.location.search);
   const text = params.get('text');
   const filters = params.get('filters');
-  const layout = params.get('layout');
+  const view = params.get('view');
   const fontSize = params.get('fontSize');
+
+  const defaultLayout = view === 'grid' || view === 'list'
+    ? view
+    : (window.matchMedia('(max-width: 899px)').matches ? 'list' : 'grid');
 
   setState({
     ...(text && { previewText: text }),
     ...(filters && { activeFilters: filters.split(',').filter(Boolean) }),
-    ...(layout === 'list' && { layout: 'list' }),
+    layout: defaultLayout,
     ...(fontSize && !Number.isNaN(+fontSize) && { fontSize: +fontSize }),
   });
 }

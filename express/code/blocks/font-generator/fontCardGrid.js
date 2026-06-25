@@ -75,6 +75,8 @@ export async function createFontCardGrid(config = {}) {
 
   let prevFilterKey = '';
   let prevVisibleCount = -1;
+  let prevPreviewText = initText;
+  let prevFontSize = initSize;
   // Track activeFilters reference so we can update activeFonts in state
   // exactly once per filter change without triggering a render loop.
   let prevActiveFilters = getState().activeFilters;
@@ -83,15 +85,27 @@ export async function createFontCardGrid(config = {}) {
     const filtered = getFilteredFonts(fonts, activeFilters);
     const visible = filtered.slice(0, visibleCount);
 
-    // Always update preview text for all currently visible cards.
-    visible.forEach(({ id }) => {
-      const entry = cardMap.get(id);
-      if (entry) updateFontCard(entry.card, entry.fontDef, previewText, fontSize);
-    });
+    const textOrSizeChanged = previewText !== prevPreviewText || fontSize !== prevFontSize;
+    const filterKey = activeFilters.join(',');
+    const visibleSetChanged = filterKey !== prevFilterKey || visibleCount !== prevVisibleCount;
+
+    // Re-run transformations only when text/size changed, or when the visible
+    // set changes (newly visible cards may carry stale content from a prior
+    // text/size update they missed while filtered out). Pure layout changes
+    // only toggle a CSS class and must not re-trigger transformation.
+    if (textOrSizeChanged || visibleSetChanged) {
+      if (textOrSizeChanged) {
+        prevPreviewText = previewText;
+        prevFontSize = fontSize;
+      }
+      visible.forEach(({ id }) => {
+        const entry = cardMap.get(id);
+        if (entry) updateFontCard(entry.card, entry.fontDef, previewText, fontSize);
+      });
+    }
 
     // Rebuild DOM list only when the visible set changes.
-    const filterKey = activeFilters.join(',');
-    if (filterKey !== prevFilterKey || visibleCount !== prevVisibleCount) {
+    if (visibleSetChanged) {
       prevFilterKey = filterKey;
       prevVisibleCount = visibleCount;
       grid.replaceChildren(...visible.map(({ id }) => cardMap.get(id).card));

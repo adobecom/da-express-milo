@@ -119,7 +119,7 @@ export const FONT_SIZE_MAX = 48;
  * URL param keys that are persisted across page loads.
  * Values are encoded/decoded by state.js initFromUrl / setState.
  *
- * @typedef {'text' | 'filters' | 'layout' | 'fontSize'} UrlParamKey
+ * @typedef {'text' | 'filters' | 'view' | 'fontSize'} UrlParamKey
  */
 
 /**
