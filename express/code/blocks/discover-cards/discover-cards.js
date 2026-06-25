@@ -63,11 +63,9 @@ function createControl(items, container, sectionLabel = 'cards') {
     prevButton.disabled = first === 0;
     nextButton.disabled = last === items.length - 1;
     dots.forEach((dot, i) => {
-      /* eslint-disable chai-friendly/no-unused-expressions */
       i === first ? dot.classList.add('curr') : dot.classList.remove('curr');
       i === first ? items[i].classList.add('curr') : items[i].classList.remove('curr');
       i > first && i <= last ? dot.classList.add('hide') : dot.classList.remove('hide');
-      /* eslint-disable chai-friendly/no-unused-expressions */
     });
     if (items.length === last - first + 1) {
       control.classList.add('hide');

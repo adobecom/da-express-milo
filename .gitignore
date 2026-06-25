@@ -20,3 +20,5 @@ dev/
 actionlint
 .claude/worktrees/
 .claude/**.local.*
+!.eslintrc-code-compatibility.js
+!.browserslistrc
