@@ -14,6 +14,12 @@
   min-width: 0;
 }
 
+@media (min-width: 900px) {
+  .font-generator-filter-trigger {
+    display: none;
+  }
+}
+
 @media (min-width: 1440px) {
   .font-generator-grid {
     grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -25,9 +31,5 @@
 
   .font-generator-col--main {
     grid-column: span 8;
-  }
-
-  .font-generator-filter-trigger {
-    display: none;
   }
 }
