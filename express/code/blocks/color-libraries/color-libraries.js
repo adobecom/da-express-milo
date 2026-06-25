@@ -17,7 +17,9 @@ import { showExpressToast } from '../../scripts/color-shared/spectrum/components
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import loadColorLibrariesPlaceholders from '../../scripts/color-shared/i18n/loadColorLibrariesPlaceholders.js';
 import { createSearchBar, createDeepLinkManager } from '../../scripts/color-shared/components/search-bar/index.js';
+import { decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
 import { ensureIms } from '../../libs/services/index.js';
+import { triggerSignInFlow } from '../../libs/services/middlewares/auth.middleware.js';
 
 const LIBRARIES_CSS = 'scripts/color-shared/components/libraries/libraries.css';
 const STRIP_CSS = 'scripts/color-shared/components/strips/color-strip.css';
@@ -205,7 +207,20 @@ export default async function decorate(block) {
 
   if (!isSignedIn) {
     block.classList.remove(CSS_CLASSES.LOADING);
-    container.appendChild(createTag('p', { class: 'color-libraries-sign-in' }, placeholders.librariesSignIn));
+    const signInLink = createTag('button', {
+      type: 'button',
+      class: 'color-libraries-sign-in__link',
+    }, placeholders.librariesSignIn);
+    decorateAnalyticsAttributes(signInLink, { linkLabel: 'Sign in to libraries' });
+    signInLink.addEventListener('click', async () => {
+      const { setSusiColorRedirect, buildLibrariesSignInRedirectUrl } = await import(
+        '../../scripts/color-shared/utils/susiRedirect.js'
+      );
+      setSusiColorRedirect(buildLibrariesSignInRedirectUrl());
+      await triggerSignInFlow();
+    });
+
+    container.appendChild(createTag('p', { class: 'color-libraries-sign-in' }, signInLink));
     trackColorBlockLoad('color-libraries');
     return;
   }
