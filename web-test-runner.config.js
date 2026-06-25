@@ -1,3 +1,4 @@
+import { importMapsPlugin } from '@web/dev-server-import-maps';
 import { defaultReporter } from '@web/test-runner';
 
 function customReporter() {
@@ -24,6 +25,7 @@ export default {
       '**/deps/**',
     ],
   },
+  plugins: [importMapsPlugin({})],
   reporters: [
     defaultReporter({ reportTestResults: true, reportTestProgress: true }),
     customReporter(),

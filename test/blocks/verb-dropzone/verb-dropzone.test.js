@@ -61,6 +61,10 @@ describe('verb-dropzone – DOM structure', () => {
 
   after(restoreGlobals);
 
+  it('adds con-block class to the element', () => {
+    expect(block.classList.contains('con-block')).to.be.true;
+  });
+
   it('renders a dropzone button with the correct id', () => {
     const dz = block.querySelector('#unity-upload');
     expect(dz).to.exist;

@@ -17,7 +17,7 @@ export const DEFAULT_FONT_SIZE = 16;
 export const FONT_SIZE_MIN = 12;
 export const FONT_SIZE_MAX = 48;
 
-// ─── Font data (font-styles.json) ────────────────────────────────────────────
+// ─── Font data (v1.json) ──────────────────────────────────────────────────────
 
 /**
  * Single-char → unicode-string replacement map.
@@ -75,12 +75,12 @@ export const FONT_SIZE_MAX = 48;
 
 /**
  * A single font definition. This is the unit consumed by unicodeEngine and FontCard.
- * Every font in font-styles.json has fully-populated `characters` maps for all three categories —
+ * Every font in v1.json has fully-populated `characters` maps for all three categories —
  * `missingCharacters` tracks gaps for informational use only.
  *
  * @typedef {{
  *   id: string;
- *   category: string;
+ *   grouping: string;
  *   styleName: string;
  *   fontSupported: string;
  *   type: FontType;
@@ -99,9 +99,10 @@ export const FONT_SIZE_MAX = 48;
  */
 
 /**
- * Root shape of the font sheet JSON (font-styles.json).
+ * Root shape of a versioned font sheet JSON (e.g. v1.json).
  *
  * @typedef {{
+ *   version: string;
  *   sourceCharacters: {
  *     letters: { uppercase: string; lowercase: string; all: string };
  *     numbers: string;
