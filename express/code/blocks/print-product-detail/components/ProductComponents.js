@@ -8,7 +8,7 @@ import {
 } from '../../../scripts/vendors/htm-preact.min.js';
 import { useStore, useDrawer } from './Contexts.js';
 import axAccordionDecorate from '../../ax-accordion/ax-accordion.js';
-import { formatLargeNumberToK, sanitizeHtml, updateImageUrl, flattenOptionGroups } from '../utilities/utility-functions.js';
+import { formatLargeNumberToK, sanitizeHtml, updateImageUrl, flattenOptionGroups, createHeroImageSrcset } from '../utilities/utility-functions.js';
 import createSimpleCarousel from '../../../scripts/widgets/simple-carousel.js';
 import { getLibs } from '../../../scripts/utils.js';
 
@@ -95,7 +95,16 @@ export function ProductDetails() {
   }, [state]);
 
   if (!state) {
-    return null;
+    return html`
+      <div class="pdpx-product-details-section">
+        <div class="pdpx-product-details-section-title-container">
+          <span class="pdpx-product-details-section-title">Product Details</span>
+        </div>
+        <div>
+          ${[0, 1, 2].map((i) => html`<div key=${i} class="pdpx-skeleton-accordion-row" data-skeleton="true"></div>`)}
+        </div>
+      </div>
+    `;
   }
 
   return html`
@@ -115,7 +124,22 @@ export function ProductHeader() {
   const hideTooltip = useCallback(() => setTooltipVisible(false), []);
 
   if (!state) {
-    return null;
+    return html`
+      <div class="pdpx-product-info-heading-section-wrapper">
+        <div class="pdpx-product-info-heading-section-container">
+          <div class="pdpx-title-and-ratings-container">
+            <div class="pdpx-product-title-container">
+              <div data-skeleton="true" style="height: 28px; width: 200px; margin-bottom: 8px;"></div>
+              <div data-skeleton="true" style="height: 28px; width: 120px;"></div>
+            </div>
+          </div>
+          <div class="pdpx-price-info-container" style="align-self: flex-start;">
+            <div data-skeleton="true" style="height: 24px; width: 100px;"></div>
+          </div>
+        </div>
+        <div class="pdpx-skeleton-pill" data-skeleton="true"></div>
+      </div>
+    `;
   }
 
   const { title, pricing, shippingEstimate, reviewsStats } = state;
@@ -169,7 +193,7 @@ export function ProductHeader() {
                   onBlur=${hideTooltip}
                   onClick=${showTooltip}
                 >
-                  <img class="pdpx-compare-price-info-icon" src="/express/code/icons/info.svg" alt="" aria-hidden="true" />
+                  <img class="pdpx-compare-price-info-icon" src="/express/code/icons/info.svg" alt="" aria-hidden="true" width="18" height="18" />
                 </button>
                 ${tooltipVisible && html`
                   <div class="pdpx-info-tooltip-content" id="pdpx-info-tooltip-content" role="tooltip" style="display: block;">
@@ -192,7 +216,7 @@ export function ProductHeader() {
       </div>
       ${shippingEstimate && html`
         <div class="pdpx-delivery-estimate-pill">
-          <img class="pdpx-delivery-estimate-pill-icon" src="/express/code/icons/delivery-truck.svg" alt="" aria-hidden="true" />
+          <img class="pdpx-delivery-estimate-pill-icon" src="/express/code/icons/delivery-truck.svg" alt="" aria-hidden="true" width="32" height="17" />
           <span class="pdpx-delivery-estimate-pill-text" id="pdpx-delivery-estimate-pill-text">Estimated Delivery</span>
           <span class="pdpx-delivery-estimate-pill-date" id="pdpx-delivery-estimate-pill-date">${shippingEstimate}</span>
         </div>
@@ -201,26 +225,28 @@ export function ProductHeader() {
   `;
 }
 
-export function ProductImages() {
+export function ProductImages({ authoredImageUrl }) {
   const { state, actions } = useStore();
   const containerRef = useRef(null);
   const carouselCleanupRef = useRef(null);
   const hasPreloadedRef = useRef(false);
+  const [loadedHeroUrl, setLoadedHeroUrl] = useState(null);
+  const [authoredImageLoaded, setAuthoredImageLoaded] = useState(false);
 
-  if (!state || !state.selectedRealview) {
-    return null;
-  }
+  const realviews = state?.realviews ?? [];
+  const selectedRealview = state?.selectedRealview ?? null;
+  const heroImageUrl = selectedRealview ? updateImageUrl(selectedRealview.url, 800) : null;
+  const heroImageSrcset = selectedRealview ? createHeroImageSrcset(selectedRealview.url) : null;
+  const heroImageLoaded = heroImageUrl !== null && loadedHeroUrl === heroImageUrl;
 
-  const { realviews = [], selectedRealview } = state;
-  const heroImageUrl = updateImageUrl(selectedRealview.url, 644);
-
-  // Preload the hero image on first render so the browser starts fetching immediately
   if (!hasPreloadedRef.current && heroImageUrl) {
     hasPreloadedRef.current = true;
     const link = document.createElement('link');
     link.rel = 'preload';
     link.as = 'image';
     link.href = heroImageUrl;
+    link.setAttribute('imagesrcset', heroImageSrcset);
+    link.setAttribute('imagesizes', '(max-width: 600px) 100vw, 50vw');
     link.fetchPriority = 'high';
     document.head.appendChild(link);
   }
@@ -229,7 +255,6 @@ export function ProductImages() {
     actions.selectRealview(realview.id);
   };
 
-  // Build thumbnails imperatively to work with createSimpleCarousel
   useEffect(() => {
     if (!containerRef.current || !realviews.length) return undefined;
 
@@ -237,8 +262,8 @@ export function ProductImages() {
     container.innerHTML = '';
 
     realviews.forEach((realview) => {
-      const thumbnailUrl = updateImageUrl(realview.url, 76);
-      const isSelected = realview.id === selectedRealview.id;
+      const thumbnailUrl = updateImageUrl(realview.url, 152);
+      const isSelected = realview.id === selectedRealview?.id;
 
       const button = document.createElement('button');
       button.type = 'button';
@@ -250,6 +275,7 @@ export function ProductImages() {
       img.className = 'pdpx-image-thumbnail-carousel-item-image';
       img.src = thumbnailUrl;
       img.alt = realview.title;
+      img.loading = 'lazy';
       img.setAttribute('data-image-type', realview.id);
       button.appendChild(img);
 
@@ -274,29 +300,62 @@ export function ProductImages() {
     };
   }, [realviews.map((r) => `${r.id}:${r.url}`).join(',')]);
 
-  // Update selected state when selection changes
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !selectedRealview) return;
     const buttons = containerRef.current.querySelectorAll('.pdpx-image-thumbnail-carousel-item');
     buttons.forEach((btn) => {
       const id = btn.getAttribute('data-image-type');
-      const isSelected = id === selectedRealview.id;
-      btn.classList.toggle('selected', isSelected);
+      btn.classList.toggle('selected', id === selectedRealview.id);
     });
-  }, [selectedRealview.id]);
+  }, [selectedRealview?.id]);
+
+  if (!state || !selectedRealview) {
+    return html`
+      <div class="pdpx-product-images-container" id="pdpx-product-images-container">
+        <div class="pdpx-product-hero-image-container" data-skeleton=${!authoredImageLoaded ? 'true' : undefined}>
+          ${authoredImageUrl ? html`<img
+            class="pdpx-product-hero-image"
+            src="${updateImageUrl(authoredImageUrl, 800)}"
+            srcset="${createHeroImageSrcset(authoredImageUrl)}"
+            sizes="(max-width: 600px) 100vw, 50vw"
+            fetchpriority="high"
+            loading="eager"
+            decoding="async"
+            width="800"
+            height="800"
+            alt=""
+            style=${{ opacity: authoredImageLoaded ? 1 : 0, transition: 'opacity 200ms ease' }}
+            onLoad=${() => setAuthoredImageLoaded(true)}
+          />` : null}
+        </div>
+        <div class="pdpx-skeleton-thumbnail-row">
+          ${[0, 1, 2, 3, 4].map((i) => html`<div key=${i} class="pdpx-skeleton-thumbnail" data-skeleton="true"></div>`)}
+        </div>
+      </div>
+    `;
+  }
 
   return html`
     <div class="pdpx-product-images-container" id="pdpx-product-images-container">
-      <div class="pdpx-product-hero-image-container">
+      <div
+        class="pdpx-product-hero-image-container"
+        data-skeleton=${!heroImageLoaded ? 'true' : undefined}
+      >
         <img
           class="pdpx-product-hero-image"
           id="pdpx-product-hero-image"
           src="${heroImageUrl}"
+          srcset="${heroImageSrcset}"
+          sizes="(max-width: 600px) 100vw, 50vw"
           alt="${selectedRealview.title}"
           fetchpriority="high"
           decoding="async"
           loading="eager"
+          width="800"
+          height="800"
           data-image-type="${selectedRealview.id}"
+          style=${{ opacity: heroImageLoaded ? 1 : 0, transition: 'opacity 200ms ease' }}
+          onLoad=${() => setLoadedHeroUrl(heroImageUrl)}
         />
       </div>
       <div
@@ -403,7 +462,13 @@ export function CheckoutButton({ templateId }) {
     });
   }, [outOfRegion]);
 
-  if (outOfRegion === null) return null;
+  if (outOfRegion === null) {
+    return html`
+      <div class="pdpx-checkout-button-container">
+        <div class="pdpx-checkout-button-cta-skeleton" data-skeleton="true"></div>
+      </div>
+    `;
+  }
 
   const defaultUrl = `https://new.express.adobe.com/design-remix/template/${templateId}`;
   const checkoutUrl = state?.expressProductSettings
@@ -424,11 +489,11 @@ export function CheckoutButton({ templateId }) {
         id="pdpx-checkout-button"
         href="${checkoutUrl}"
       >
-        <img class="pdpx-checkout-button-icon" src="/express/code/icons/print-icon.svg" alt="" aria-hidden="true" />
+        <img class="pdpx-checkout-button-icon" src="/express/code/icons/print-icon.svg" alt="" aria-hidden="true" width="22" height="22" />
         <span class="pdpx-checkout-button-text">Customize and print it</span>
       </a>
       <div class="pdpx-checkout-button-subhead">
-        <img class="pdpx-checkout-button-subhead-image" src="/express/code/icons/powered-by-zazzle.svg" alt="powered by zazzle" />
+        <img class="pdpx-checkout-button-subhead-image" src="/express/code/icons/powered-by-zazzle.svg" alt="powered by zazzle" width="123" height="14" />
         <a class="pdpx-checkout-button-subhead-link" href="https://www.zazzle.com/returns">Returns guaranteed</a>
         <span class="pdpx-checkout-button-subhead-text">through 100% satisfaction promise.</span>
       </div>
@@ -642,7 +707,7 @@ function PaperTypeContent({ onClose }) {
 
     allOptions.forEach((option) => {
       const isSelected = option.value === selectedOptionValue;
-      const thumbUrl = updateImageUrl(option.imageUrl, 48);
+      const thumbUrl = updateImageUrl(option.imageUrl, 96);
 
       const pillContainer = document.createElement('div');
       pillContainer.className = 'pdpx-mini-pill-container';
@@ -774,7 +839,7 @@ function PaperTypeContent({ onClose }) {
       </div>
       <div class="pdpx-drawer-foot">
         <div class="pdpx-drawer-foot-info-container">
-          <img src="${updateImageUrl(selectedOption?.imageUrl, 48)}" alt="${selectedOption?.title || ''}" />
+          <img src="${updateImageUrl(selectedOption?.imageUrl, 96)}" alt="${selectedOption?.title || ''}" />
           <div class="pdpx-drawer-foot-info-text">
             <div class="pdpx-drawer-foot-info-name">${selectedOption?.title || ''}</div>
             ${selectedOption?.priceDelta && html`
