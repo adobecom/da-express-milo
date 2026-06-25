@@ -14,11 +14,6 @@
   min-width: 0;
 }
 
-@media (min-width: 900px) {
-  .font-generator-filter-trigger {
-    display: none;
-  }
-}
 
 @media (min-width: 1440px) {
   .font-generator-grid {

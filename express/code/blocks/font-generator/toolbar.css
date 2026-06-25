@@ -154,6 +154,12 @@
   color: #131313;
 }
 
+@media (min-width: 900px) {
+  .font-generator-filter-trigger {
+    display: none;
+  }
+}
+
 /* ─── Responsive: slider wraps to its own row at ≤899px ──────────────────── */
 
 @media (max-width: 899px) {
