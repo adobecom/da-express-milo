@@ -297,7 +297,7 @@
 /* Hide toolbar when footer is in view — slides off-screen like floating-cta */
 .color-floating-toolbar-container.ax-toolbar-footer-hidden,
 .ax-toolbar-sticky-wrapper.ax-toolbar-footer-hidden {
-  transform: translateY(110%);
+  transform: translateY(130%);
   pointer-events: none;
   transition: transform 0.3s ease-in;
   animation: none;

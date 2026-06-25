@@ -22,7 +22,7 @@ import {
 } from './utils.js';
 
 // Add project-wide style path here.
-const STYLES = ['/express/code/styles/styles.css'];
+const STYLES = [];
 
 // Use 'https://milo.adobe.com/libs' if you cannot map '/libs' to milo's origin.
 const LIBS = '/libs';
@@ -33,7 +33,7 @@ const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
 if (jarvisVisibleMeta && ['mobile', 'desktop', 'on'].includes(jarvisVisibleMeta) && (
   (jarvisVisibleMeta === 'mobile' && !desktopViewport) || (jarvisVisibleMeta === 'desktop' && desktopViewport))) jarvisImmediatelyVisible = true;
 
-const prodDomains = ['business.adobe.com', 'www.adobe.com', 'color.adobe.com'];
+const prodDomains = ['business.adobe.com', 'www.adobe.com', 'color.adobe.com', 'helpx.adobe.com'];
 
 // Add any config options.
 const CONFIG = {
@@ -49,6 +49,7 @@ const CONFIG = {
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
       'color.adobe.com': 'color.stage.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     'www.stage.adobe.com': {
       'www.adobe.com': 'origin',
@@ -56,6 +57,7 @@ const CONFIG = {
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
       'color.adobe.com': 'color.stage.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     '--express-color--adobecom.(hlx|aem).(page|live)': {
       'color.adobe.com': 'origin',
@@ -63,6 +65,7 @@ const CONFIG = {
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     'color.stage.adobe.com': {
       'color.adobe.com': 'origin',
@@ -70,6 +73,7 @@ const CONFIG = {
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
   },
   jarvis: {
@@ -78,6 +82,7 @@ const CONFIG = {
     onDemand: !jarvisImmediatelyVisible,
   },
   imsClientId: 'AdobeExpressWeb',
+  iconsExcludeBlocks: ['unity', 'firefly-howto'],
   prodDomains,
   geoRouting: 'on',
   lingoProjectSuccessLogging: 'on',
@@ -360,6 +365,9 @@ function preloadLCPImage(img) {
 
 (function loadStyles() {
   const paths = [`${miloLibs}/styles/styles.css`];
+  if (getMetadata('theme') !== 'doodlebug') {
+    paths.push('/express/code/styles/styles.css');
+  }
   if (STYLES) { paths.push(STYLES); }
   paths.forEach((path) => {
     const link = document.createElement('link');

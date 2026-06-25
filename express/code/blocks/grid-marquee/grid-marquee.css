@@ -11,7 +11,8 @@
 .grid-marquee .express-logo {
   width: initial;
   height: 30px;
-  padding: 1rem 0 1rem;
+  padding: 2rem 0 1rem;
+  max-width: 340px;
 }
 
 main .section .grid-marquee h1 {
@@ -296,6 +297,13 @@ main .section .grid-marquee h1 {
   gap: var(--spacing-75);
 }
 
+.grid-marquee .ratings-metric,
+.grid-marquee .rating-visual {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-75);
+}
+
 .grid-marquee .ratings img {
   height: 35px;
   padding-left: var(--spacing-200);
@@ -318,7 +326,7 @@ main .section .grid-marquee.pricing-page h1 {
   line-height: 130%;
   text-align: center;
   padding-bottom: var(--padding-bottom);
- 
+
 }
 .grid-marquee.pricing-page .express-logo {
   padding: 0px 0px var(--spacing-300) 0px
@@ -499,7 +507,7 @@ main .section .grid-marquee.pricing-page h1 {
   .grid-marquee.pricing-page .headline {
     max-width: var(--ax-grid-6-col-width);
   }
-  
+
 }
 
 
@@ -509,7 +517,69 @@ main .section .grid-marquee.pricing-page h1 {
   }
 }
 
+/* narrow variant — centered headline + content, capped at 666px */
+.grid-marquee.resume-builder .foreground {
+  --top-padding: var(--spacing-300);
+  --bottom-padding: var(--spacing-400);
 
+  max-width: 666px;
+  margin-inline: auto;
+  text-align: center;
+  padding: var(--top-padding) var(--spacing-300) var(--bottom-padding);
+  box-sizing: content-box;
+}
 
+.grid-marquee.resume-builder .icon-adobe-brand-logo {
+  height: 20px;
+  padding-block-start: 0;
+  padding-block-end: var(--spacing-300);
+}
 
+.grid-marquee.resume-builder .headline {
+  padding: 0;
+}
 
+main .section .grid-marquee.resume-builder h1 {
+  font-size: var(--typography-headings-xl);
+  line-height: 104%;
+  font-weight: 900;
+  color: var(--color-content-neutral);
+}
+
+.grid-marquee.resume-builder .headline p {
+  font-size: var(--typography-body-s);
+  line-height: 130%;
+  color: var(--Alias-content-typography-Body);
+}
+
+.grid-marquee.resume-builder .headline .ctas {
+  margin-top: 0;
+}
+
+@media screen and (min-width: 600px) {
+  .grid-marquee.resume-builder .foreground {
+    --bottom-padding: var(--spacing-500);
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .grid-marquee.resume-builder .foreground {
+    --top-padding: var(--spacing-600);
+  }
+}
+
+.grid-marquee.resume-builder .headline a.button .text-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.grid-marquee.resume-builder .headline a.button .icon {
+  display: none;
+}
+
+@media screen and (min-width: 768px) {
+  .grid-marquee.resume-builder .headline .ctas {
+    margin-top: 0;
+  }
+}
