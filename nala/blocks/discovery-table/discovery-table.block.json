@@ -1,0 +1,30 @@
+{
+  "block": "discovery-table",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@discovery-table-default",
+      "selector": "div.discovery-table",
+      "path": "/drafts/nala/blocks/discovery-table/discovery-table",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": ".dt-nav-btn.dt-prev",
+              "nth": 0
+            },
+            {
+              "type": "button",
+              "selector": ".dt-nav-btn.dt-next",
+              "nth": 0
+            }
+          ]
+        }
+      },
+      "tags": "@discovery-table @express"
+    }
+  ]
+}
