@@ -232,7 +232,10 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
   const appConfig = {
     metaData: {
       isFrictionlessQa: 'true',
-      ...(quickActionId === 'caption-video' && { videoLanguage: selectedVideoLanguage }),
+      ...(quickActionId === 'caption-video' && { videoLanguage: selectedVideoLanguage })
+    },
+    analyticsData: {
+      ...(quickActionId === 'video-encode' && { entryPoint: "seo-quick-action-video-compress" })
     },
     receiveQuickActionErrors: true,
     callbacks: {
