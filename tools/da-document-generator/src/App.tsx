@@ -22,16 +22,18 @@ export default function App() {
   }
 
   const inputsReady = rows.length > 0;
-  const allRowsHaveProductType = inputsReady && rows.every((r) => !!r.product_type?.trim());
+  const allRowsHaveProductType = selectedRows.length > 0 && selectedRows.every((r) => !!r.product_type?.trim());
   const canGenerate = inputsReady;
 
   const missingProductTypes = !templateOverrideEnabled && productTypeConfigs.length > 0
-    ? [...new Set(rows.map((r) => r.product_type?.trim()).filter(Boolean) as string[])]
+    ? [...new Set(selectedRows.map((r) => r.product_type?.trim()).filter(Boolean) as string[])]
         .filter((pt) => !productTypeConfigs.some((c) => c.productType === pt))
     : [];
 
   const generateBlockReason: string | undefined =
-    templateOverrideEnabled && !overrideConfig
+    selectedRows.length === 0
+      ? 'Select at least one row to generate'
+      : templateOverrideEnabled && !overrideConfig
       ? 'Select a valid template override or uncheck the override option to continue'
       : !templateOverrideEnabled && !allRowsHaveProductType
       ? 'Run Hydrate to assign product types before generating'

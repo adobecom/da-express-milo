@@ -331,9 +331,21 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
     });
   }, [sortedRows, activeFilter, tableColumns, summary, contentWarnings, checkedRowIds]);
 
+  const selectedRowsList = rows.filter((r) => checkedRowIds.has(r._id));
+  const selectedDataComplete = selectedRowsList.length > 0 && selectedRowsList.every(
+    (row) => tableColumns.every((col) => !!row[col]?.trim()),
+  );
+  const selectedIdsValid =
+    selectedRowsList.length > 0 &&
+    selectedRowsList.every((r) => validationStatus[r._id] !== undefined) &&
+    selectedRowsList.every((r) => validationStatus[r._id] === 'valid');
+  const selectedHasDuplicates = selectedRowsList.some(
+    (r) => summary.duplicateProductIdRowIds.has(r._id) || summary.duplicateSlugRowIds.has(r._id),
+  );
+
   useEffect(() => {
-    onReadinessChange?.({ dataComplete: allDataComplete, idsValid: allIdsValid, noDuplicates: !hasDuplicates });
-  }, [allDataComplete, allIdsValid, hasDuplicates]);
+    onReadinessChange?.({ dataComplete: selectedDataComplete, idsValid: selectedIdsValid, noDuplicates: !selectedHasDuplicates });
+  }, [selectedDataComplete, selectedIdsValid, selectedHasDuplicates]);
 
   // Reset checkbox defaults when new row data is loaded. Not triggered by validate/hydrate so
   // user-adjusted checkboxes survive those operations.
