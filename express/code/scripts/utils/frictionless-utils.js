@@ -130,7 +130,8 @@ export const QA_CONFIGS = {
   'qa-nba': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'convert-to-gif': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'crop-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
-  'video-encode': { ...getBaseVideoCfg(VIDEO_FORMATS) },
+  'video-convert': { ...getBaseVideoCfg(VIDEO_FORMATS) },
+  'video-compress': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'trim-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'resize-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'merge-videos': getMergeVideosCfg(),
@@ -425,7 +426,13 @@ export function executeQuickAction(
       exportConfig,
       contConfig,
     ),
-    'video-encode': () => ccEverywhere.quickAction.videoEncode(
+    'video-convert': () => ccEverywhere.quickAction.videoEncode(
+      videoDocConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
+    'video-compress': () => ccEverywhere.quickAction.videoEncode(
       videoDocConfig,
       appConfig,
       exportConfig,
