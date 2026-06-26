@@ -9,7 +9,7 @@ export default async function decorate(block) {
   const rows = [...block.children];
 
   // Row 0: background color
-  const bgText = rows[0]?.querySelector(':scope > div > p')?.textContent?.trim();
+  const bgText = rows[0]?.querySelector(':scope > div')?.textContent?.trim();
   if (bgText) block.style.background = bgText;
   rows[0].remove();
 
