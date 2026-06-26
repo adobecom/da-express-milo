@@ -91,6 +91,32 @@ token rules and `references/grid-system.md` for the grid/container system.
   different sizes at different viewports (tokens do not auto-switch
   in Express — you must override per breakpoint).
 
+## CSS specificity pre-flight
+
+Before committing any CSS, verify these two rules won't be overridden by
+Express's global styles. Both come from `main .section` in `styles.css`
+and affect nearly every block.
+
+**Rule 1 — paragraph margins**: `main .section p { margin: var(--spacing-500) 0 }` = `(0,1,2)`.
+Any block rule that resets paragraph margins must have specificity ≥ `(0,2,1)`.
+Minimum pattern:
+```css
+/* (0,2,1) — beats (0,1,2) */
+.block-container .block-text p { margin: 0 }
+```
+Never use a single-class selector for `<p>` margins — it will lose silently.
+
+**Rule 2 — button background**: `main a.con-button.blue:any-link { background-color: ... }` = `(0,3,2)`.
+If the Figma button is not milo-blue, the block CSS must reach `(0,3,2)`
+and load after `styles.css` (block CSS always does):
+```css
+/* (0,3,2) + later cascade position = wins */
+main .block-header a.con-button.blue:any-link {
+  background-color: <token-or-value>;
+  border-color: <token-or-value>;
+}
+```
+
 ## CSS quality checklist
 
 - No `!important`.
