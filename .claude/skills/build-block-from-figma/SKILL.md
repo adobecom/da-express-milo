@@ -307,6 +307,13 @@ DOM.  Pattern from existing blocks:
 </main>
 ```
 
+> **EDS single-value cells**: when a row contains only one value (e.g. a
+> background color string, a card title), EDS delivers it as plain text
+> inside the cell `<div>` — no `<p>` wrapper. Write these cells as
+> `<div>value</div>`, not `<div><p>value</p></div>`, so that JS selectors
+> and tests match live behavior. See `references/eds-patterns.md` for the
+> full explanation and workaround pattern.
+
 Add a second mock `inject-logo.html` if the block supports logo
 injection via the `marquee-inject-logo` meta tag.
 
