@@ -32,6 +32,18 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [resetModalOpen, setResetModalOpen] = useState(false);
 
+  const previewRows = results.length === 0
+    ? rows.map((row) => {
+        const cfg = overrideConfig ?? productTypeConfigs.find((c) => c.productType === row.product_type?.trim());
+        return {
+          id: row['_id'],
+          path: cfg ? rowToOutputPath(row, cfg.outputDir) : '',
+          productType: row.product_type ?? '',
+          hasConfig: !!cfg,
+        };
+      })
+    : [];
+
   useEffect(() => {
     onResultsChange?.(results.some((r) => r.stage !== 'pending'));
   }, [results]);
@@ -464,19 +476,41 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
         )}
       </div>
 
-      {results.length > 0 && (
-        <div className="overflow-x-auto rounded-xl border border-gray-200 max-h-96 overflow-y-auto">
-          <table className="text-xs min-w-max">
-            <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
-              <tr>
-                <th className="px-3 py-2 text-left font-medium text-gray-600 min-w-[280px]">Path</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600 w-28">Issues</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600 w-28">Generate</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600 w-44">Preview</th>
-                <th className="px-3 py-2 text-left font-medium text-gray-600 w-52">Publish</th>
-              </tr>
-            </thead>
-            <tbody>
+      {(results.length > 0 || previewRows.length > 0) && (
+        <>
+          {results.length === 0 && (
+            <p className="text-sm text-gray-500">
+              Showing output paths for {previewRows.length} document{previewRows.length !== 1 ? 's' : ''} — click Generate to create them
+            </p>
+          )}
+          <div className="overflow-x-auto rounded-xl border border-gray-200 max-h-96 overflow-y-auto">
+            <table className="text-xs min-w-max">
+              <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
+                <tr>
+                  <th className="px-3 py-2 text-left font-medium text-gray-600 min-w-[280px]">Path</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-600 w-28">Issues</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-600 w-28">Generate</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-600 w-44">Preview</th>
+                  <th className="px-3 py-2 text-left font-medium text-gray-600 w-52">Publish</th>
+                </tr>
+              </thead>
+              <tbody>
+              {results.length === 0 && previewRows.map((pr) => (
+                <tr key={pr.id} className="border-b border-gray-100 opacity-60">
+                  <td className="px-3 py-2 font-mono whitespace-nowrap min-w-[280px]">
+                    {!pr.hasConfig
+                      ? <span className="text-amber-600 font-sans">No config for &ldquo;{pr.productType || '(none)'}&rdquo;</span>
+                      : <span className="text-gray-500">{pr.path}</span>
+                    }
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap"><span className="text-gray-300">—</span></td>
+                  <td className="px-3 py-2 whitespace-nowrap">
+                    <button type="button" disabled className="text-xs text-gray-300 font-medium cursor-not-allowed">Generate</button>
+                  </td>
+                  <td className="px-3 py-2 whitespace-nowrap"><span className="text-gray-300">—</span></td>
+                  <td className="px-3 py-2 whitespace-nowrap"><span className="text-gray-300">—</span></td>
+                </tr>
+              ))}
               {results.map((r) => (
                 <Fragment key={r.id}>
                   <tr className="border-b border-gray-100">
@@ -535,6 +569,7 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
             </tbody>
           </table>
         </div>
+        </>
       )}
 
       {resetModalOpen && (
