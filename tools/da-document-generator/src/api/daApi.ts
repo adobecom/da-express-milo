@@ -51,6 +51,17 @@ export async function postDoc(dest: string, html: string): Promise<PostDocRespon
   return resp.json() as Promise<PostDocResponse>;
 }
 
+export async function docExists(daPath: string): Promise<boolean> {
+  const t = getToken();
+  const headers: Record<string, string> = { 'cache-control': 'no-store' };
+  if (t) headers.Authorization = `Bearer ${t}`;
+  const path = daPath.endsWith('.html') ? daPath : `${daPath}.html`;
+  const resp = await fetch(`${DA_API}/source${path}`, { method: 'HEAD', headers });
+  if (resp.status === 404) return false;
+  if (resp.ok) return true;
+  throw new Error(`${resp.status}: ${daPath}`);
+}
+
 export async function cat(filePath: string): Promise<string> {
   const t = getToken();
   if (!t) throw new Error('DA token not set; set VITE_DA_TOKEN or run from DA.live');

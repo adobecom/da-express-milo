@@ -1,4 +1,4 @@
-import { useState, useEffect, Fragment } from 'react';
+import { useState, useEffect, useRef, Fragment } from 'react';
 import {
   postDoc,
   triggerPreview,
@@ -9,6 +9,7 @@ import {
   daPathToPreviewUrl,
   daPathToLiveUrl,
   cat,
+  docExists,
 } from '../api/daApi';
 import { applyTemplate, rowToOutputPath, runGenerationQa, runPageQa } from '../lib/generate';
 import type { CsvRow, ProductTypeConfig, RowResult, QaResult } from '../types';
@@ -24,6 +25,7 @@ interface Props {
 const CONCURRENCY = 3;
 
 type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing' | 'unpublishing' | 'deleting';
+type ExistenceCheck = 'checking' | 'exists' | 'not-found' | 'error';
 
 export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig, generateBlockReason, onResultsChange }: Props) {
   const [results, setResults] = useState<RowResult[]>([]);
@@ -31,6 +33,8 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
   const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
   const [resetModalOpen, setResetModalOpen] = useState(false);
+  const [existenceStatus, setExistenceStatus] = useState<Record<string, ExistenceCheck>>({});
+  const checkedPaths = useRef<Set<string>>(new Set());
 
   const previewRows = results.length === 0
     ? rows.map((row) => {
@@ -47,6 +51,34 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
   useEffect(() => {
     onResultsChange?.(results.some((r) => r.stage !== 'pending'));
   }, [results]);
+
+  useEffect(() => {
+    if (results.length > 0) return;
+    const toCheck = previewRows.filter(
+      (pr) => pr.hasConfig && pr.path && !checkedPaths.current.has(pr.path),
+    );
+    if (toCheck.length === 0) return;
+    toCheck.forEach((pr) => checkedPaths.current.add(pr.path));
+    setExistenceStatus((prev) => {
+      const next = { ...prev };
+      for (const pr of toCheck) next[pr.path] = 'checking';
+      return next;
+    });
+    const queue = [...toCheck];
+    let idx = 0;
+    async function worker() {
+      while (idx < queue.length) {
+        const pr = queue[idx++];
+        try {
+          const exists = await docExists(pr.path);
+          setExistenceStatus((prev) => ({ ...prev, [pr.path]: exists ? 'exists' : 'not-found' }));
+        } catch {
+          setExistenceStatus((prev) => ({ ...prev, [pr.path]: 'error' }));
+        }
+      }
+    }
+    void Promise.all(Array.from({ length: Math.min(CONCURRENCY, toCheck.length) }, worker));
+  }, [previewRows, results.length]);
 
   function toggleRowDetail(id: string) {
     setExpandedRowId((prev) => (prev === id ? null : id));
@@ -478,11 +510,19 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
 
       {(results.length > 0 || previewRows.length > 0) && (
         <>
-          {results.length === 0 && (
-            <p className="text-sm text-gray-500">
-              Showing output paths for {previewRows.length} document{previewRows.length !== 1 ? 's' : ''} — click Generate to create them
-            </p>
-          )}
+          {results.length === 0 && (() => {
+            const overwriteCount = previewRows.filter((pr) => existenceStatus[pr.path] === 'exists').length;
+            return (
+              <p className="text-sm text-gray-500">
+                Showing output paths for {previewRows.length} document{previewRows.length !== 1 ? 's' : ''} — click Generate to create them
+                {overwriteCount > 0 && (
+                  <span className="text-amber-600 font-medium ml-1">
+                    · {overwriteCount} will overwrite existing content
+                  </span>
+                )}
+              </p>
+            );
+          })()}
           <div className="overflow-x-auto rounded-xl border border-gray-200 max-h-96 overflow-y-auto">
             <table className="text-xs min-w-max">
               <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
@@ -500,7 +540,10 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
                   <td className="px-3 py-2 font-mono whitespace-nowrap min-w-[280px]">
                     {!pr.hasConfig
                       ? <span className="text-amber-600 font-sans">No config for &ldquo;{pr.productType || '(none)'}&rdquo;</span>
-                      : <span className="text-gray-500">{pr.path}</span>
+                      : <span className="inline-flex items-center gap-2">
+                          <span className="text-gray-500">{pr.path}</span>
+                          <ExistenceBadge status={existenceStatus[pr.path]} />
+                        </span>
                     }
                   </td>
                   <td className="px-3 py-2 whitespace-nowrap"><span className="text-gray-300">—</span></td>
@@ -515,12 +558,15 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
                 <Fragment key={r.id}>
                   <tr className="border-b border-gray-100">
                     <td className="px-3 py-2 font-mono text-gray-600 whitespace-nowrap min-w-[280px]">
-                      {r.editUrl ? (
-                        <a href={r.editUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center gap-1">
-                          {r.path}
-                          <ExternalLinkIcon />
-                        </a>
-                      ) : r.path}
+                      <span className="inline-flex items-center gap-2">
+                        {r.editUrl ? (
+                          <a href={r.editUrl} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline inline-flex items-center gap-1">
+                            {r.path}
+                            <ExternalLinkIcon />
+                          </a>
+                        ) : r.path}
+                        <ExistenceOutcomeBadge status={existenceStatus[r.path]} />
+                      </span>
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">
                       <QaIssueBadge
@@ -591,7 +637,7 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
               </button>
               <button
                 type="button"
-                onClick={() => { setResults([]); setResetModalOpen(false); }}
+                onClick={() => { setResults([]); setExistenceStatus({}); checkedPaths.current.clear(); setResetModalOpen(false); }}
                 className="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-xl hover:bg-gray-900 cursor-pointer transition-colors"
               >
                 Reset
@@ -779,4 +825,51 @@ function PublishPill({
     );
   }
   return <span className="text-gray-300">—</span>;
+}
+
+function ExistenceBadge({ status }: { status: ExistenceCheck | undefined }) {
+  if (status === 'checking') {
+    return (
+      <svg className="w-3 h-3 shrink-0 animate-spin text-gray-400 font-sans" viewBox="0 0 24 24" fill="none">
+        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+      </svg>
+    );
+  }
+  if (status === 'exists') {
+    return (
+      <span className="font-sans text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 whitespace-nowrap">
+        ↻ overwrite
+      </span>
+    );
+  }
+  if (status === 'error') {
+    return (
+      <span
+        className="font-sans text-[10px] font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5 cursor-help"
+        title="Existence check failed"
+      >
+        ?
+      </span>
+    );
+  }
+  return null;
+}
+
+function ExistenceOutcomeBadge({ status }: { status: ExistenceCheck | undefined }) {
+  if (status === 'exists') {
+    return (
+      <span className="font-sans text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 whitespace-nowrap">
+        ↻ Updated
+      </span>
+    );
+  }
+  if (status === 'not-found') {
+    return (
+      <span className="font-sans text-[10px] font-medium text-green-700 bg-green-50 border border-green-200 rounded px-1.5 py-0.5 whitespace-nowrap">
+        ✓ Created
+      </span>
+    );
+  }
+  return null;
 }
