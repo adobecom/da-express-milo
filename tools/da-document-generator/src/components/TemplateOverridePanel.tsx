@@ -313,7 +313,7 @@ export default function TemplateOverridePanel({
 
         {showConfigSheetResult && (
           <div className={`rounded-xl p-3 border flex flex-col gap-2 ${configSheetValid ? STATUS_CARD.valid : STATUS_CARD.invalid}`}>
-            {configSheetValid && (
+            {!configSheetValidation.message?.startsWith('404') && (
               <a
                 href={`https://da.live/sheet#${localPath}`}
                 target="_blank"
