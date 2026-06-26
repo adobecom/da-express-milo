@@ -1,4 +1,3 @@
-import { importMapsPlugin } from '@web/dev-server-import-maps';
 import { defaultReporter } from '@web/test-runner';
 
 function customReporter() {
@@ -25,15 +24,6 @@ export default {
       '**/deps/**',
     ],
   },
-  plugins: [importMapsPlugin({
-    inject: {
-      importMap: {
-        imports: {
-          '/express/code/blocks/font-generator/unicodeEngine.js': '/test/blocks/font-generator/mocks/unicodeEngine.js',
-        },
-      },
-    },
-  })],
   reporters: [
     defaultReporter({ reportTestResults: true, reportTestProgress: true }),
     customReporter(),
