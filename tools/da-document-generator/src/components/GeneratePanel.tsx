@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, Fragment } from 'react';
 import {
   postDoc,
+  createDocVersion,
   triggerPreview,
   triggerPublish,
   triggerUnpublish,
@@ -122,6 +123,7 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
   }
 
   async function handleGenerate() {
+    const existenceSnapshot = { ...existenceStatus };
     setResults(
       rows.map((row) => {
         const cfg = overrideConfig ?? lookupConfig(row.product_type ?? '');
@@ -160,6 +162,11 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
         }
         const html = applyTemplate(templateHtml, row);
         const qa = runGenerationQa(html);
+        if (existenceSnapshot[path] === 'exists') {
+          try {
+            await createDocVersion(path, 'Pre-generation backup');
+          } catch { /* best-effort: proceed with write even if versioning fails */ }
+        }
         const res = await postDoc(path, html);
         setResults((prev) =>
           prev.map((r) =>
@@ -207,6 +214,13 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
       const templateHtml = await cat(cfg.templatePath);
       const html = applyTemplate(templateHtml, row);
       const qa = runGenerationQa(html);
+      let existed = false;
+      try { existed = await docExists(path); } catch { /* skip versioning if check fails */ }
+      if (existed) {
+        try {
+          await createDocVersion(path, 'Pre-generation backup');
+        } catch { /* best-effort */ }
+      }
       const res = await postDoc(path, html);
       setResults((prev) => prev.map((r) =>
         r.id === rowId ? { ...r, stage: 'generated', qa, editUrl: res.source?.editUrl } : r,
@@ -846,7 +860,7 @@ function ExistenceBadge({ status }: { status: ExistenceCheck | undefined }) {
   if (status === 'exists') {
     return (
       <span className="font-sans text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 whitespace-nowrap">
-        ↻ overwrite
+        ↻ update
       </span>
     );
   }

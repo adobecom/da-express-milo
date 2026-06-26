@@ -51,6 +51,24 @@ export async function postDoc(dest: string, html: string): Promise<PostDocRespon
   return resp.json() as Promise<PostDocResponse>;
 }
 
+export async function createDocVersion(dest: string, label: string): Promise<void> {
+  const t = getToken();
+  if (!t) throw new Error('DA token not set; set VITE_DA_TOKEN or run from DA.live');
+  const path = dest.endsWith('.html') ? dest : `${dest}.html`;
+  const resp = await fetch(`${DA_API}/versionsource${path}`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${t}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ label }),
+  });
+  if (!resp.ok) {
+    const text = await resp.text();
+    throw new Error(`version ${dest}: ${resp.status}: ${text}`);
+  }
+}
+
 export async function docExists(daPath: string): Promise<boolean> {
   const t = getToken();
   const headers: Record<string, string> = { 'cache-control': 'no-store' };
