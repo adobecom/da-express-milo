@@ -208,6 +208,23 @@ If a breakpoint differs meaningfully from the Figma design:
 
 ---
 
+## Cleanup
+
+After the visual comparison phase is complete (all breakpoints assessed,
+obstacles documented), **delete all Playwright screenshots** taken during
+this session:
+
+```bash
+rm -rf .playwright-mcp/
+```
+
+Screenshots are disposable artefacts — they exist only to support the
+comparison loop and must not be left as untracked files in the repo.
+`.playwright-mcp/` is listed in `.gitignore`, but the directory will still
+show up in `git status` as untracked until it is removed.
+
+---
+
 ## Obstacles Encountered
 
 At the end of the visual comparison phase, compile a list of:
