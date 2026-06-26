@@ -106,17 +106,6 @@ Minimum pattern:
 ```
 Never use a single-class selector for `<p>` margins — it will lose silently.
 
-**Rule 2 — button background**: `main a.con-button.blue:any-link { background-color: ... }` = `(0,3,2)`.
-If the Figma button is not milo-blue, the block CSS must reach `(0,3,2)`
-and load after `styles.css` (block CSS always does):
-```css
-/* (0,3,2) + later cascade position = wins */
-main .block-header a.con-button.blue:any-link {
-  background-color: <token-or-value>;
-  border-color: <token-or-value>;
-}
-```
-
 ## CSS quality checklist
 
 - No `!important`.

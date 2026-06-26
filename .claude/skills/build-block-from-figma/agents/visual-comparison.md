@@ -98,12 +98,7 @@ For each breakpoint:
      marginBlock: getComputedStyle(p).marginBlock,
    }));
 
-   // Check CTA button background — blue means the block lost to
-   // main a.con-button.blue:any-link; must match Figma dark color
-   const btn = block.querySelector('a.con-button');
-   const btnBg = btn ? getComputedStyle(btn).backgroundColor : null;
-
-   return { pMargins, btnBg };
+   return { pMargins };
    ```
 
    **Failure conditions** (fix before passing the block):
@@ -112,16 +107,9 @@ For each breakpoint:
      Fix: add a second class to the selector, e.g.
      `.block-header .block-text p { margin: 0 }` (specificity `(0,2,1)`
      beats `(0,1,2)`).
-   - `btnBg` is `rgb(92, 92, 224)` (milo blue) when the Figma shows a dark
-     button — the block's CSS is losing to `main a.con-button.blue:any-link`
-     (specificity `(0,3,2)`). Fix: use `main .block-header a.con-button.blue:any-link`
-     to match the same specificity and win via cascade order (block CSS
-     loads after Express's global styles.css).
 
    **Never dismiss a color or spacing difference as "design system default"**
-   without first cross-referencing `get_variable_defs` from Phase 3. If the
-   Figma variable def shows a dark background on a CTA, the implementation
-   must also be dark — milo's blue is a default, not Express design intent.
+   without first cross-referencing `get_variable_defs` from Phase 3.
 9. **Load the cached Figma frame** for this breakpoint from
    `/tmp/build-block-figma/<viewport>.png` (saved during Phase 3).
    Do **not** re-fetch from the Figma MCP — the cached file is the

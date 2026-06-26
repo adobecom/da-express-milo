@@ -293,23 +293,6 @@ Fix: use 2 classes on the selector:
 .block-card .block-card-title { margin: 0 } /* (0,2,0) — WINS */
 ```
 
-**`main a.con-button.blue:any-link` (specificity `(0,3,2)`)**:
-```css
-/* from styles.css — turns all primary CTAs blue */
-main a.con-button.blue:any-link {
-  background-color: var(--color-accent);  /* milo blue */
-}
-```
-To apply a different button background (e.g. dark from Figma), match
-the same specificity and win via **cascade order** (block CSS loads after
-styles.css, so equal-specificity rules in block CSS win):
-```css
-main .block-header a.con-button.blue:any-link {
-  background-color: #292929;   /* (0,3,2) — equal specificity, wins via cascade */
-  border-color: #292929;
-}
-```
-
 ---
 
 ## Fluffyjaws MCP
