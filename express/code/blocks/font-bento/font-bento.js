@@ -10,8 +10,6 @@ export default async function decorate(block) {
 
   // Row 0: background color
   const bgText = rows[0]?.querySelector(':scope > div')?.textContent?.trim();
-  block.dataset.debugBg = bgText || 'EMPTY';
-  block.dataset.debugRow0 = rows[0]?.innerHTML?.substring(0, 100) || 'NONE';
   if (bgText) block.style.background = bgText;
   rows[0].remove();
 
@@ -36,10 +34,15 @@ export default async function decorate(block) {
     const cells = [...row.querySelectorAll(':scope > div')];
     const card = createTag('div', { class: `font-bento-card font-bento-card-${i + 1}` });
 
-    const titleP = cells[0]?.querySelector('p');
-    if (titleP) {
-      titleP.classList.add('font-bento-card-title');
-      card.append(titleP);
+    const titleCell = cells[0];
+    let titleEl = titleCell?.querySelector('p');
+    if (!titleEl && titleCell?.textContent?.trim()) {
+      titleEl = createTag('p');
+      titleEl.textContent = titleCell.textContent.trim();
+    }
+    if (titleEl) {
+      titleEl.classList.add('font-bento-card-title');
+      card.append(titleEl);
     }
 
     const picture = cells[1]?.querySelector('picture');
