@@ -31,6 +31,9 @@
   text-align: center;
   box-sizing: border-box;
   white-space: nowrap;
+}
+
+main .font-bento-header a.con-button.blue:any-link {
   background-color: #292929;
   border-color: #292929;
 }
