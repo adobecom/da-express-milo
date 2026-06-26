@@ -541,7 +541,14 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
                     {!pr.hasConfig
                       ? <span className="text-amber-600 font-sans">No config for &ldquo;{pr.productType || '(none)'}&rdquo;</span>
                       : <span className="inline-flex items-center gap-2">
-                          <span className="text-gray-500">{pr.path}</span>
+                          {existenceStatus[pr.path] === 'exists' ? (
+                            <a href={`https://da.live/edit#${pr.path}`} target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:underline inline-flex items-center gap-1">
+                              {pr.path}
+                              <ExternalLinkIcon />
+                            </a>
+                          ) : (
+                            <span className="text-gray-500">{pr.path}</span>
+                          )}
                           <ExistenceBadge status={existenceStatus[pr.path]} />
                         </span>
                     }
