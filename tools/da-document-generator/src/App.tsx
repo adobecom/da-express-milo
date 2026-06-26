@@ -12,6 +12,7 @@ export default function App() {
   const [csvReadiness, setCsvReadiness] = useState({ dataComplete: false, idsValid: false, noDuplicates: true });
   const [hasGeneratedResults, setHasGeneratedResults] = useState(false);
   const [configSheetPath, setConfigSheetPath] = useState(DEFAULT_CONFIG_SHEET);
+  const [configSheetStatus, setConfigSheetStatus] = useState<'idle' | 'loading' | 'valid' | 'invalid' | 'error'>('idle');
   const [productTypeConfigs, setProductTypeConfigs] = useState<ProductTypeConfig[]>([]);
   const [templateOverrideEnabled, setTemplateOverrideEnabled] = useState(false);
   const [overrideConfig, setOverrideConfig] = useState<ProductTypeConfig | undefined>(undefined);
@@ -23,7 +24,6 @@ export default function App() {
 
   const inputsReady = rows.length > 0;
   const allRowsHaveProductType = selectedRows.length > 0 && selectedRows.every((r) => !!r.product_type?.trim());
-  const canGenerate = inputsReady;
 
   const missingProductTypes = !templateOverrideEnabled && productTypeConfigs.length > 0
     ? [...new Set(selectedRows.map((r) => r.product_type?.trim()).filter(Boolean) as string[])]
@@ -35,6 +35,8 @@ export default function App() {
       ? 'Select at least one row to generate'
       : templateOverrideEnabled && !overrideConfig
       ? 'Select a valid template override or uncheck the override option to continue'
+      : !templateOverrideEnabled && (configSheetStatus === 'invalid' || configSheetStatus === 'error')
+      ? 'Config sheet is invalid — fix it before generating'
       : !templateOverrideEnabled && !allRowsHaveProductType
       ? 'Run Hydrate to assign product types before generating'
       : !templateOverrideEnabled && missingProductTypes.length > 0
@@ -61,6 +63,7 @@ export default function App() {
           disabled={hasGeneratedResults}
           configSheetPath={configSheetPath}
           onConfigSheetLoad={handleConfigSheetLoad}
+          onConfigSheetStatusChange={setConfigSheetStatus}
           missingProductTypes={missingProductTypes}
         />
 
@@ -70,15 +73,13 @@ export default function App() {
           </Panel>
         </div>
 
-        {canGenerate && (
-          <GeneratePanel
-            rows={selectedRows}
-            productTypeConfigs={productTypeConfigs}
-            overrideConfig={overrideConfig}
-            generateBlockReason={generateBlockReason}
-            onResultsChange={setHasGeneratedResults}
-          />
-        )}
+        <GeneratePanel
+          rows={selectedRows}
+          productTypeConfigs={productTypeConfigs}
+          overrideConfig={overrideConfig}
+          generateBlockReason={generateBlockReason}
+          onResultsChange={setHasGeneratedResults}
+        />
       </div>
     </div>
   );

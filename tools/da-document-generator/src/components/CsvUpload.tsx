@@ -632,7 +632,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
           )}
           {(warningCounts.slug_char_mismatch ?? 0) > 0 && (
             <Stat
-              label="Title/slug mismatch" value={warningCounts.slug_char_mismatch!} color="yellow"
+              label="Special chars in title" value={warningCounts.slug_char_mismatch!} color="yellow"
               isSelected={activeFilter === 'slug_char_mismatch'}
               onClick={() => setActiveFilter((p) => p === 'slug_char_mismatch' ? 'total' : 'slug_char_mismatch')}
             />

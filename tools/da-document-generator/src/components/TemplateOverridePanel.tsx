@@ -10,6 +10,7 @@ interface Props {
   disabled?: boolean;
   configSheetPath: string;
   onConfigSheetLoad: (path: string, configs: ProductTypeConfig[]) => void;
+  onConfigSheetStatusChange?: (status: ConfigSheetValidation['status']) => void;
   missingProductTypes?: string[];
 }
 
@@ -82,6 +83,7 @@ export default function TemplateOverridePanel({
   disabled = false,
   configSheetPath,
   onConfigSheetLoad,
+  onConfigSheetStatusChange,
   missingProductTypes = [],
 }: Props) {
   const [options, setOptions] = useState<TemplateOption[]>([]);
@@ -193,6 +195,10 @@ export default function TemplateOverridePanel({
     const timer = setTimeout(() => { validateConfigSheetRef.current(localPath); }, 600);
     return () => clearTimeout(timer);
   }, [localPath]);
+
+  useEffect(() => {
+    onConfigSheetStatusChange?.(configSheetValidation.status);
+  }, [configSheetValidation.status, onConfigSheetStatusChange]);
 
   useEffect(() => {
     function handler(e: MouseEvent) {
