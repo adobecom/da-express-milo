@@ -25,11 +25,12 @@
   margin: 0;
 }
 
-.font-bento-header .button {
+.font-bento-header :is(.button, .con-button) {
   display: block;
   width: 100%;
   text-align: center;
   box-sizing: border-box;
+  white-space: nowrap;
 }
 
 .font-bento-grid {
@@ -97,7 +98,7 @@
     justify-content: space-between;
   }
 
-  .font-bento-header .button {
+  .font-bento-header :is(.button, .con-button) {
     display: inline-block;
     width: auto;
   }
