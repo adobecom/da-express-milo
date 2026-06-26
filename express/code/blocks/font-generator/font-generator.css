@@ -1,57 +1,30 @@
-.font-generator {
-  --fg-sidebar-width: 477px;
-
-  padding: var(--spacing-600) var(--spacing-300);
+/*
+ * Up to 1440px the layout is a single column: the side panel (preview input +
+ * suggestions) sits full-width on top of the results below it. At 1440px+ it
+ * becomes the 12-column grid with the side panel as a 4-col rail.
+ */
+.font-generator-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-300, 16px);
+  background: var(--gray-75, #F3F3F3);
 }
 
-.font-generator .fg-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-400);
-  max-width: var(--block-wd-grid-max-width);
-  margin-inline: auto;
+.font-generator-col {
+  min-width: 0;
 }
 
-/* start placeholders — remove when sidebar and main are implemented */
-.font-generator .fg-sidebar p {
-  min-height: 200px;
-  border: 2px dashed var(--color-blue-600);
-  margin: 0;
-}
 
-.font-generator .fg-main p {
-  min-height: 1400px;
-  border: 2px dashed var(--color-purple-1000);
-  margin: 0;
-}
-/* end placeholders */
-
-/* Tablet */
-@media (min-width: 600px) {
-  .font-generator {
-    padding: var(--spacing-600) var(--spacing-500) var(--spacing-300) var(--spacing-500);
-  }
-}
-
-/* Desktop */
-@media (min-width: 1200px) {
-  .font-generator {
-    padding: var(--spacing-600);
+@media (min-width: 1440px) {
+  .font-generator-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 
-  .font-generator .fg-container {
-    flex-direction: row;
-    flex-wrap: nowrap;
+  .font-generator-col--side {
+    grid-column: span 4;
   }
 
-  .font-generator .fg-sidebar {
-    width: var(--fg-sidebar-width);
-    position: sticky;
-    top: calc(var(--global-height-nav) + var(--spacing-600));
-    align-self: flex-start;
-  }
-
-  .font-generator .fg-main {
-    flex: 1;
+  .font-generator-col--main {
+    grid-column: span 8;
   }
 }

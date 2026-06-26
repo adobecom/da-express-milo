@@ -82,7 +82,6 @@ const CONFIG = {
     onDemand: !jarvisImmediatelyVisible,
   },
   imsClientId: 'AdobeExpressWeb',
-  iconsExcludeBlocks: ['unity', 'firefly-howto'],
   prodDomains,
   geoRouting: 'on',
   lingoProjectSuccessLogging: 'on',

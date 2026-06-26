@@ -86,19 +86,17 @@ function buildAccordion(block, rows, stepsContent) {
 export default function decorate(block) {
   const rows = Array.from(block.children);
 
-  if (block.children[1].querySelector('img, a')) {
-    const backgroundRow = block.children[0];
-    const backgroundImage = backgroundRow.querySelector('img');
-    const backgroundURL = backgroundImage?.src;
+  const backgroundRow = block.children[0];
+  const backgroundImage = backgroundRow.querySelector('img');
+  const backgroundURL = backgroundImage?.src;
+  const hasBackground = !!backgroundURL;
+  const stepsContent = createTag('div', { class: 'steps-content' });
 
+  if (hasBackground) {
     rows.shift();
-
-    if (backgroundURL) {
-      block.style.setProperty('--background-image', `url('${backgroundURL}')`);
-    }
+    block.style.setProperty('--background-image', `url('${backgroundURL}')`);
   }
 
-  const stepsContent = createTag('div', { class: 'steps-content' });
   const mediaData = rows.shift();
   const mediaEl = mediaData.querySelector('picture') || mediaData.querySelector('a');
   block.removeChild(block.children[0]);

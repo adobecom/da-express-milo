@@ -25,15 +25,7 @@ export default {
       '**/deps/**',
     ],
   },
-  plugins: [importMapsPlugin({
-    inject: {
-      importMap: {
-        imports: {
-          '/express/code/blocks/font-generator/unicodeEngine.js': '/test/blocks/font-generator/mocks/unicodeEngine.js',
-        },
-      },
-    },
-  })],
+  plugins: [importMapsPlugin({})],
   reporters: [
     defaultReporter({ reportTestResults: true, reportTestProgress: true }),
     customReporter(),
