@@ -265,17 +265,6 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
     : PLACEHOLDER_COLUMNS;
   const visibleRows = hasData ? rows : [PLACEHOLDER_ROW];
 
-  const allDataComplete = hasData && rows.every(
-    (row) => tableColumns.every((col) => !!row[col]?.trim()),
-  );
-  const allIdsValid =
-    hasData &&
-    Object.keys(validationStatus).length === rows.length &&
-    Object.values(validationStatus).every((v) => v === 'valid');
-
-  const hasDuplicates =
-    summary.duplicateProductIdRowIds.size > 0 || summary.duplicateSlugRowIds.size > 0;
-
   const warningCounts = useMemo(() => {
     const counts: Partial<Record<ContentWarningType, number>> = {};
     for (const rowWarnings of Object.values(contentWarnings)) {
