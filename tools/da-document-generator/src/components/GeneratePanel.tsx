@@ -356,7 +356,7 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
     <div className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4">
       <div className="flex items-center gap-2">
         <span className="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 bg-gray-200 text-gray-600">
-          2
+          3
         </span>
         <h2 className="font-medium text-gray-900">Generate</h2>
       </div>

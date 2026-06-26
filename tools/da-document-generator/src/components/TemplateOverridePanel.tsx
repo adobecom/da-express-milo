@@ -69,8 +69,8 @@ const STATUS_CARD: Record<string, string> = {
 function ExternalLinkIcon() {
   return (
     <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 shrink-0">
-      <path d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"/>
-      <path d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z"/>
+      <path d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z" />
+      <path d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z" />
     </svg>
   );
 }
@@ -168,8 +168,8 @@ export default function TemplateOverridePanel({
         message: is403
           ? '403 — Access denied: you may be in the wrong DA organization'
           : is404
-          ? '404 — Sheet not found: confirm the path is correct'
-          : `Error: ${msg}`,
+            ? '404 — Sheet not found: confirm the path is correct'
+            : `Error: ${msg}`,
         missingColumns: [],
         rowCount: 0,
       });
@@ -232,8 +232,8 @@ export default function TemplateOverridePanel({
         placeholders: [],
         issues: [
           is403 ? 'Access denied — confirm you are in the correct DA organization'
-                : is404 ? 'Template not found — check the path and confirm you have access'
-                : `Fetch error: ${msg}`,
+            : is404 ? 'Template not found — check the path and confirm you have access'
+              : `Fetch error: ${msg}`,
         ],
       });
       onOverrideChange(undefined);
@@ -284,20 +284,18 @@ export default function TemplateOverridePanel({
   return (
     <div className="bg-white rounded-2xl border border-gray-200 p-6 flex flex-col gap-4">
       <div className="flex items-center gap-2">
-        <label className="flex items-center gap-2 cursor-pointer select-none">
-          <input
-            type="checkbox"
-            checked={enabled}
-            onChange={handleCheckbox}
-            className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-          />
-          <span className="font-medium text-gray-900">Override template</span>
-        </label>
-        <span className="ml-auto text-gray-400 text-sm">{enabled ? '▼' : '▶'}</span>
+        <span
+          className={`w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+            configSheetValid ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
+          }`}
+        >
+          {configSheetValid ? '✓' : 1}
+        </span>
+        <h2 className="font-medium text-gray-900">Config Sheet</h2>
       </div>
 
       {/* Config sheet path — always visible */}
-      <div className="flex flex-col gap-2 pt-2 border-t border-gray-100">
+      <div className="flex flex-col gap-2 border-gray-100">
         <label className="text-xs font-medium text-gray-600">Config Sheet Path</label>
         <input
           type="text"
@@ -305,9 +303,8 @@ export default function TemplateOverridePanel({
           onChange={(e) => setLocalPath(e.target.value)}
           disabled={disabled}
           placeholder="/org/repo/path/to/presets"
-          className={`w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-            disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'bg-white'
-          }`}
+          className={`w-full rounded-xl border border-gray-200 px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500 ${disabled ? 'opacity-50 cursor-not-allowed bg-gray-50' : 'bg-white'
+            }`}
         />
 
         {configSheetValidation.status === 'loading' && (
@@ -315,40 +312,60 @@ export default function TemplateOverridePanel({
         )}
 
         {showConfigSheetResult && (
-          <div className={`rounded-xl p-3 border flex flex-col gap-2 ${
-            configSheetValid ? STATUS_CARD.valid : STATUS_CARD.invalid
-          }`}>
-            <div className="flex items-center justify-between">
+          <div className={`rounded-xl p-3 border flex flex-col gap-2 ${configSheetValid ? STATUS_CARD.valid : STATUS_CARD.invalid}`}>
+            {configSheetValid && (
               <a
                 href={`https://da.live/sheet#${localPath}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs text-gray-500 break-all hover:text-blue-600 font-mono inline-flex items-center gap-1"
+                className="text-xs text-gray-400 break-all hover:text-blue-600 font-mono inline-flex items-center gap-1"
               >
                 {localPath}
                 <ExternalLinkIcon />
               </a>
-              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ml-2 ${
-                configSheetValid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-              }`}>
+            )}
+            <div className="flex items-center gap-2">
+              {configSheetValid ? (
+                <p className="text-xs text-gray-500">
+                  {configSheetValidation.rowCount} product type entr{configSheetValidation.rowCount === 1 ? 'y' : 'ies'}
+                </p>
+              ) : (
+                configSheetValidation.message && (
+                  <p className="text-xs text-red-600 flex-1">
+                    {configSheetValidation.message}
+                  </p>
+                )
+              )}
+              <span className={`text-xs font-semibold px-2 py-0.5 rounded-full shrink-0 ml-auto ${configSheetValid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                 {configSheetValid ? 'Valid' : 'Invalid'}
               </span>
             </div>
-
-            {configSheetValid && (
-              <p className="text-xs text-gray-500">
-                {configSheetValidation.rowCount} product type entr{configSheetValidation.rowCount === 1 ? 'y' : 'ies'}
-              </p>
-            )}
-
-            {configSheetValidation.message && (
-              <p className={`text-xs ${configSheetValid ? 'text-yellow-700' : 'text-red-600'}`}>
-                {configSheetValidation.message}
-              </p>
+            {configSheetValid && configSheetValidation.message && (
+              <p className="text-xs text-yellow-700">{configSheetValidation.message}</p>
             )}
           </div>
         )}
       </div>
+
+      <div className="flex flex-col gap-1 border-t border-gray-100 pt-2">
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={enabled}
+              onChange={handleCheckbox}
+              className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-xs font-medium text-gray-600">Override template</span>
+          </label>
+          <span className="ml-auto text-gray-400 text-sm">{enabled ? '▼' : '▶'}</span>
+        </div>
+        <p className="text-xs text-gray-500">
+          Optionally select a template to use for all documents, overriding per-product-type routing.
+        </p>
+      </div>
+
+
 
       {/* Missing product types warning */}
       {!enabled && missingProductTypes.length > 0 && configSheetValid && (
@@ -370,9 +387,7 @@ export default function TemplateOverridePanel({
         </div>
       )}
 
-      <p className="text-xs text-gray-500">
-        Optionally select a template to use for all documents, overriding per-product-type routing.
-      </p>
+
 
       {enabled && (
         <div className="flex flex-col gap-4 pt-2 border-t border-gray-100">
@@ -390,15 +405,14 @@ export default function TemplateOverridePanel({
                   type="button"
                   onClick={() => { if (!disabled) setIsOpen((o) => !o); }}
                   disabled={disabled}
-                  className={`w-full flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-sm bg-white focus:outline-none text-left transition-colors ${
-                    disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer focus:ring-2 focus:ring-blue-500'
-                  }`}
+                  className={`w-full flex items-center justify-between rounded-xl border border-gray-200 px-3 py-2 text-sm bg-white focus:outline-none text-left transition-colors ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer focus:ring-2 focus:ring-blue-500'
+                    }`}
                 >
                   <span className="font-medium text-gray-800">
                     {selected?.productName || selected?.templatePath || 'Select a template'}
                   </span>
                   <svg className="w-4 h-4 text-gray-400 shrink-0 ml-2" viewBox="0 0 16 16" fill="none">
-                    <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                    <path d="M4 6l4 4 4-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </button>
                 {disabled && (
@@ -413,9 +427,8 @@ export default function TemplateOverridePanel({
                       <li
                         key={opt.templatePath}
                         onClick={() => { setSelected(opt); setIsOpen(false); }}
-                        className={`px-3 py-2.5 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${
-                          selected?.templatePath === opt.templatePath ? 'bg-blue-50' : ''
-                        }`}
+                        className={`px-3 py-2.5 cursor-pointer hover:bg-gray-50 border-b border-gray-100 last:border-b-0 ${selected?.templatePath === opt.templatePath ? 'bg-blue-50' : ''
+                          }`}
                       >
                         <p className="text-sm font-medium text-gray-800">{opt.productName || opt.templatePath}</p>
                         <p className="text-xs text-gray-400 truncate mt-0.5"><span className="font-medium">Template Path:</span> {opt.templatePath}</p>
@@ -432,9 +445,8 @@ export default function TemplateOverridePanel({
             <div className={`rounded-xl p-4 border flex flex-col gap-3 ${STATUS_CARD[validation.status]}`}>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-gray-600">Template Path</span>
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                  templateValid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                }`}>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${templateValid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>
                   {templateValid ? 'Valid' : 'Invalid'}
                 </span>
               </div>
@@ -482,14 +494,12 @@ export default function TemplateOverridePanel({
           )}
 
           {validation.outputDir && validation.outputDirValid !== null && (
-            <div className={`rounded-xl p-4 border flex flex-col gap-3 ${
-              validation.outputDirValid ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
-            }`}>
+            <div className={`rounded-xl p-4 border flex flex-col gap-3 ${validation.outputDirValid ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'
+              }`}>
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium text-gray-600">Output Directory</span>
-                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${
-                  validation.outputDirValid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
-                }`}>
+                <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${validation.outputDirValid ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
+                  }`}>
                   {validation.outputDirValid ? 'Valid' : 'Invalid'}
                 </span>
               </div>

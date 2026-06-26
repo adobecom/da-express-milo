@@ -52,23 +52,21 @@ export default function App() {
       <div className="p-6 flex flex-col gap-4">
         <h1 className="text-2xl font-semibold text-gray-900">DA Document Generator</h1>
 
+        <TemplateOverridePanel
+          enabled={templateOverrideEnabled}
+          onEnabledChange={setTemplateOverrideEnabled}
+          onOverrideChange={setOverrideConfig}
+          disabled={hasGeneratedResults}
+          configSheetPath={configSheetPath}
+          onConfigSheetLoad={handleConfigSheetLoad}
+          missingProductTypes={missingProductTypes}
+        />
+
         <div className="grid grid-cols-1 gap-4">
-          <Panel step={1} title="Product Data" complete={inputsReady} locked={hasGeneratedResults}>
+          <Panel step={2} title="Product Data" complete={inputsReady} locked={hasGeneratedResults}>
             <CsvUpload rows={rows} onChange={setRows} onReadinessChange={setCsvReadiness} onSelectionChange={setSelectedRows} disabled={hasGeneratedResults} />
           </Panel>
         </div>
-
-        {canGenerate && (
-          <TemplateOverridePanel
-            enabled={templateOverrideEnabled}
-            onEnabledChange={setTemplateOverrideEnabled}
-            onOverrideChange={setOverrideConfig}
-            disabled={hasGeneratedResults}
-            configSheetPath={configSheetPath}
-            onConfigSheetLoad={handleConfigSheetLoad}
-            missingProductTypes={missingProductTypes}
-          />
-        )}
 
         {canGenerate && (
           <GeneratePanel
