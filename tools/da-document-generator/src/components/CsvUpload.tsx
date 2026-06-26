@@ -253,7 +253,9 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
   const [contentWarnings, setContentWarnings] = useState<ContentWarnings>({});
   const [activeFilter, setActiveFilter] = useState<FilterKey>('total');
   const [checkedRowIds, setCheckedRowIds] = useState<Set<string>>(new Set());
+  const [showExportMenu, setShowExportMenu] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
 
   const summary = computeSummary(rows);
   const hasData = rows.length > 0;
@@ -360,6 +362,17 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
   useEffect(() => {
     onSelectionChange?.(rows.filter((r) => checkedRowIds.has(r._id)));
   }, [checkedRowIds, rows]);
+
+  useEffect(() => {
+    if (!showExportMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showExportMenu]);
 
   async function handleHydrate() {
     setHydrating(true);
@@ -501,6 +514,31 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
       parseXlsx(file);
     } else {
       parseCsv(file);
+    }
+  }
+
+  function handleExport(format: 'csv' | 'xlsx') {
+    setShowExportMenu(false);
+    const filterLabel = activeFilter === 'total' ? 'all' : activeFilter.replace(/_/g, '-');
+    const date = new Date().toISOString().slice(0, 10);
+    const filename = `product-data-${filterLabel}-${date}`;
+    const exportData = filteredRows.map((row) =>
+      Object.fromEntries(tableColumns.map((col) => [col, row[col] ?? ''])),
+    );
+    if (format === 'csv') {
+      const csv = Papa.unparse(exportData, { columns: tableColumns });
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${filename}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } else {
+      const ws = XLSX.utils.json_to_sheet(exportData, { header: tableColumns });
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Product Data');
+      XLSX.writeFile(wb, `${filename}.xlsx`);
     }
   }
 
@@ -692,6 +730,44 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
         <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
           Data inputs are locked while results exist. Reset results in Step 3 to make changes.
         </p>
+      )}
+      {hasData && (
+        <div className="flex items-center justify-between">
+          <span className="text-sm font-medium text-gray-600">
+            Product Data
+            <span className="ml-1.5 text-gray-400 font-normal">
+              ({filteredRows.length} row{filteredRows.length !== 1 ? 's' : ''})
+            </span>
+          </span>
+          <div ref={exportMenuRef} className="relative">
+            <button
+              onClick={() => setShowExportMenu((p) => !p)}
+              className="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 cursor-pointer transition-colors flex items-center gap-1.5"
+            >
+              Export
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-gray-400">
+                <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+              </svg>
+            </button>
+            {showExportMenu && (
+              <div className="absolute right-0 mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                <button
+                  onClick={() => handleExport('csv')}
+                  className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer"
+                >
+                  Export as CSV
+                </button>
+                <div className="border-t border-gray-100" />
+                <button
+                  onClick={() => handleExport('xlsx')}
+                  className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 cursor-pointer"
+                >
+                  Export as XLSX
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
       )}
       <DataTable
         columns={tableColumns}
