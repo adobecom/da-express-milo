@@ -140,8 +140,14 @@ main .block-header a.con-button.blue:any-link {
   `&.is-open`.
 - Use `:is()` and `:has()` where they reduce duplication.
 - Selector chain depth ≤ 3.
-- Use **CSS logical properties** (`margin-inline`, `padding-block`,
-  `inset-inline-start`, etc.) instead of physical properties.
+- **Shorthand first, logical properties for single-axis only**: use
+  `padding` / `margin` shorthand when all four sides (or both vertical +
+  horizontal pairs) have values — `padding: var(--spacing-900) var(--spacing-600)`
+  is cleaner than two declarations. Reach for individual logical properties
+  (`padding-block`, `padding-inline`, `margin-inline`, `inset-inline-start`,
+  etc.) only when setting **one axis** without touching the other, e.g.
+  `padding-inline: var(--spacing-500)` inside a breakpoint override where
+  block padding stays the same.
 - No magic numbers — every value maps to a token or has an
   explanatory comment.
 - Scope block-level custom properties with a block-name prefix
