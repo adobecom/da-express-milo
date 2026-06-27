@@ -18,6 +18,7 @@ import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import loadColorLibrariesPlaceholders from '../../scripts/color-shared/i18n/loadColorLibrariesPlaceholders.js';
 import { createSearchBar, createDeepLinkManager } from '../../scripts/color-shared/components/search-bar/index.js';
 import { decorateAnalyticsAttributes } from '../../scripts/color-shared/utils/utilities.js';
+import { announceToScreenReader } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import { ensureIms } from '../../libs/services/index.js';
 import { triggerSignInFlow } from '../../libs/services/middlewares/auth.middleware.js';
 
@@ -104,7 +105,7 @@ function clearSearchUrl() {
   }
 }
 
-async function renderLibraries(block, searchQuery) {
+async function renderLibraries(block, searchQuery, strings = {}) {
   const allLibraries = await fetchLibrariesWithElements();
   // Count reflects the total saved libraries with content (not the filtered subset).
   componentInstance.setCount(allLibraries.filter(hasColorContent).length);
@@ -115,16 +116,24 @@ async function renderLibraries(block, searchQuery) {
   if (isSearch && filtered.length === 0) {
     componentInstance.setLibraries([]);
     componentInstance.setView(LIBRARY_VIEW.EMPTY, { query: searchQuery });
+    announceToScreenReader(interpolate(strings.librariesEmptyHeading, { query: searchQuery }));
   } else {
     componentInstance.setLibraries(filtered);
     componentInstance.setView(isSearch ? LIBRARY_VIEW.SEARCH_RESULT : LIBRARY_VIEW.LIBRARY);
+    if (isSearch) {
+      const template = filtered.length === 1
+        ? strings.librariesSearchResult
+        : strings.librariesSearchResults;
+      announceToScreenReader(interpolate(template, { count: filtered.length, query: searchQuery }));
+    }
   }
   block.classList.remove(CSS_CLASSES.LOADING);
 }
 
 function showLoadError(block, message) {
   block.classList.remove(CSS_CLASSES.LOADING);
-  block.appendChild(createTag('p', { class: 'color-libraries-error' }, message));
+  block.appendChild(createTag('p', { class: 'color-libraries-error', role: 'alert' }, message));
+  announceToScreenReader(message, 'assertive');
 }
 
 export default async function decorate(block) {
@@ -221,6 +230,7 @@ export default async function decorate(block) {
     });
 
     container.appendChild(createTag('p', { class: 'color-libraries-sign-in' }, signInLink));
+    announceToScreenReader(placeholders.librariesSignIn);
     trackColorBlockLoad('color-libraries');
     return;
   }
@@ -279,7 +289,7 @@ export default async function decorate(block) {
     block.classList.add(CSS_CLASSES.LOADING);
     searchQuery = query || '';
     try {
-      await renderLibraries(block, searchQuery);
+      await renderLibraries(block, searchQuery, placeholders);
     } catch (err) {
       window.lana?.log(`color-libraries search failed: ${err?.message}`, {
         tags: 'color-libraries',
@@ -317,7 +327,7 @@ export default async function decorate(block) {
         variant: 'positive',
         message: interpolate(placeholders.librariesDeleteSuccess, { name: itemName }),
       });
-      await renderLibraries(block, searchQuery);
+      await renderLibraries(block, searchQuery, placeholders);
     } catch (err) {
       window.lana?.log(`color-libraries delete failed: ${err?.message}`, {
         tags: 'color-libraries',
@@ -352,7 +362,7 @@ export default async function decorate(block) {
   block.addEventListener('libraries:item-open', openHandler);
 
   try {
-    await renderLibraries(block, searchQuery);
+    await renderLibraries(block, searchQuery, placeholders);
   } catch (err) {
     window.lana?.log(`color-libraries load failed: ${err?.message}`, {
       tags: 'color-libraries',

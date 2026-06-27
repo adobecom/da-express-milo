@@ -1,6 +1,8 @@
 import { createTag } from '../../../utils.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
 
+let actionMenuIdCounter = 0;
+
 function createSpIconButton(iconName) {
   const icon = document.createElement(iconName);
   icon.setAttribute('size', 'm');
@@ -66,12 +68,16 @@ export function createLibraryCardActionMenu({
   const wrapper = createTag('div', { class: 'ax-lib-card__action-menu' });
   const label = menuLabel || triggerLabel;
 
+  actionMenuIdCounter += 1;
+  const menuId = `ax-lib-action-menu-${actionMenuIdCounter}`;
+
   const trigger = createTag('button', {
     type: 'button',
     class: 'ax-lib-card__action',
     'aria-label': triggerLabel,
     'aria-haspopup': 'menu',
     'aria-expanded': 'false',
+    'aria-controls': menuId,
     'data-tooltip-content': triggerLabel,
   });
   trigger.appendChild(createSpIconButton(triggerIcon));
@@ -83,6 +89,7 @@ export function createLibraryCardActionMenu({
   });
 
   const menu = createTag('sp-menu', {
+    id: menuId,
     class: 'ax-lib-card__action-menu-list',
     size: 'm',
     role: 'menu',
@@ -169,8 +176,16 @@ export function createLibraryCardActionMenu({
     onSelect(value, { closePopover });
   }
 
+  // Close when focus leaves the menu entirely. This lets Tab from the open menu
+  // move to the next focusable card action (per the Figma a11y note) while the
+  // dropdown collapses instead of staying open behind the moved focus.
+  function onFocusOut(event) {
+    if (popoverOpen && !wrapper.contains(event.relatedTarget)) closePopover();
+  }
+
   trigger.addEventListener('click', onTriggerClick);
   menu.addEventListener('click', onMenuClick);
+  wrapper.addEventListener('focusout', onFocusOut);
 
   const menuApi = {
     element: wrapper,
@@ -180,6 +195,7 @@ export function createLibraryCardActionMenu({
       closePopover();
       trigger.removeEventListener('click', onTriggerClick);
       menu.removeEventListener('click', onMenuClick);
+      wrapper.removeEventListener('focusout', onFocusOut);
       wrapper.remove();
     },
   };

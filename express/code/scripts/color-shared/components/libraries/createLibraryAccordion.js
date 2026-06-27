@@ -17,7 +17,9 @@ function createHeader(library, expanded, onToggle, strings) {
   const copyControl = createTag('div', { class: 'ax-lib-accordion-copy-control' });
 
   const headingRow = createTag('div', { class: 'ax-lib-accordion-heading-row' });
-  const nameEl = createTag('span', { class: 'ax-lib-accordion-name' }, name);
+  // h2: section heading for each library. Carries a stable id so the matching
+  // panel can reference it via aria-labelledby.
+  const nameEl = createTag('h2', { class: 'ax-lib-accordion-name', id: `ax-lib-heading-${library.id}` }, name);
   const countEl = createTag('span', { class: 'ax-lib-accordion-count' }, formatLibraryCounts(library, strings));
   headingRow.append(nameEl, countEl);
 
@@ -39,6 +41,7 @@ function createPanel(library, emit, expanded, strings, toolHrefs) {
   const panelAttrs = {
     class: 'ax-lib-accordion-panel',
     id: `ax-lib-panel-${library.id}`,
+    'aria-labelledby': `ax-lib-heading-${library.id}`,
   };
   if (!expanded) panelAttrs.hidden = '';
   const panel = createTag('div', panelAttrs);

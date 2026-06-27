@@ -10,6 +10,10 @@ export const LIBRARY_SORT = {
   NAME: 'name',
 };
 
+function interpolate(template, vars = {}) {
+  return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
+}
+
 const SCROLL_THRESHOLD = 8;
 const NAV_STICKY_SELECTORS = ['header.global-navigation', '.feds-localnav'];
 
@@ -72,7 +76,9 @@ export function createLibrariesHeader(options = {}) {
   const content = createTag('div', { class: 'ax-lib-header__content' });
 
   const titleSearch = createTag('div', { class: 'ax-lib-header__title-search' });
-  const count = createTag('p', { class: 'ax-lib-header__count' });
+  // h1: page-level title for the libraries view (saved-count text). Class keeps
+  // the existing typography; global `main h1` resets the default heading margin.
+  const count = createTag('h1', { class: 'ax-lib-header__count' });
   const search = createTag('div', { class: 'ax-lib-header__search' });
   if (searchBarEl) search.appendChild(searchBarEl);
   titleSearch.append(count, search);
@@ -128,6 +134,16 @@ export function createLibrariesHeader(options = {}) {
     mobileTriggerEl?.setAttribute('aria-expanded', String(expanded));
   }
 
+  // The mobile sort trigger is icon-only, so fold the active value into its
+  // accessible name (e.g. "Sort libraries, Sort by Last modified") to mirror the
+  // visible label + value the desktop picker exposes natively.
+  function updateMobileSortLabel() {
+    if (!mobileTriggerEl) return;
+    const valueLabel = sortOptions.find((option) => option.key === currentSort)?.label || '';
+    const valueText = interpolate(strings.librariesSortValue, { value: valueLabel });
+    mobileTriggerEl.setAttribute('aria-label', `${strings.librariesSortAria}, ${valueText}`);
+  }
+
   function closePopover({ focusTrigger = false } = {}) {
     if (!popoverOpen) return;
     popoverOpen = false;
@@ -173,6 +189,7 @@ export function createLibrariesHeader(options = {}) {
     const changed = key !== currentSort;
     currentSort = key;
     syncMenuSelection();
+    updateMobileSortLabel();
     if (!fromPicker && desktopPicker?.setValue) {
       try {
         desktopPicker.setValue(key);
@@ -273,7 +290,7 @@ export function createLibrariesHeader(options = {}) {
       if (mobileTriggerEl) {
         mobileTriggerEl.setAttribute('aria-haspopup', 'listbox');
         mobileTriggerEl.setAttribute('aria-expanded', 'false');
-        mobileTriggerEl.setAttribute('aria-label', strings.librariesSortAria);
+        updateMobileSortLabel();
         decorateAnalyticsAttributes(mobileTriggerEl, { linkLabel: strings.librariesSortAria });
       }
     } catch (error) {
