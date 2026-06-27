@@ -204,6 +204,9 @@ function setupStickyBehavior(wrapper, options = {}) {
  * @param {boolean} [options.editPaletteName=false]
  * @param {string}  [options.editPaletteLink=null]
  * @param {Object}  [options.palette] - Pre-built palette; skips Kuler fetch when provided
+ * @param {boolean} [options.inModal=false] - When true, skips the page footer /
+ *   banner-bg "hide on scroll" observers (the toolbar is mounted inline inside a
+ *   modal, where that behavior would incorrectly translate it off-screen).
  * @returns {Promise<{ toolbar, palette, getLibraryContext, wrapper, mount, setVariant, destroy }>}
  */
 // eslint-disable-next-line import/prefer-default-export
@@ -223,6 +226,7 @@ export async function initFloatingToolbar(container, options = {}) {
     palette: providedPalette = null,
     deps = {},
     daaLh = null,
+    inModal = false,
   } = options;
 
   // 'raised' gives sticky visuals (band, shadow) without sticky positioning
@@ -375,7 +379,11 @@ export async function initFloatingToolbar(container, options = {}) {
     }
   };
 
-  if (typeof IntersectionObserver !== 'undefined') {
+  // In a modal the toolbar is mounted inline inside the dialog, so the page
+  // footer / banner-bg hide behavior (meant for the on-page sticky toolbar)
+  // must not run — otherwise a footer that is visible behind the modal applies
+  // `ax-toolbar-footer-hidden` (translateY(130%)) and shoves the toolbar down.
+  if (!inModal && typeof IntersectionObserver !== 'undefined') {
     const footer = document.querySelector('footer');
     if (footer) {
       footerIo = new IntersectionObserver((entries) => {

@@ -174,6 +174,7 @@ export function createGradientModalContent(gradient, opts = {}) {
     palette: paletteForToolbar,
     ctaText: strings.gradientCta,
     showPaletteName: false,
+    inModal: true,
   }).catch((err) => {
     window.lana?.log(`Floating toolbar init failed: ${err.message}`, {
       tags: 'color-modal,toolbar',

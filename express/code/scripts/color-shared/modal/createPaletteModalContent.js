@@ -440,6 +440,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
     type: 'palette',
     ctaText,
     showPaletteName: false,
+    inModal: true,
   }).catch((error) => {
     window.lana?.log(`Palette modal toolbar init failed: ${error?.message}`, {
       tags: 'color-modal,toolbar',
