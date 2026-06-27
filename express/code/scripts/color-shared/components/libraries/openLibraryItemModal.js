@@ -14,12 +14,15 @@ import { libraryGradientToModalGradient } from './libraryDownloadUtils.js';
  * @param {Object} options.colorSwatchRailStrings - resolved swatch rail placeholders
  * @param {string} [options.fallbackPaletteTitle]
  * @param {string} [options.fallbackGradientTitle]
+ * @param {number} [options.verticalMaxPerRow=10] - Max swatches per vertical
+ *   strip in the palette modal (matches the Explore page default).
  */
 export async function openLibraryItemModal(item, modalManager, {
   modalStrings = {},
   colorSwatchRailStrings = {},
   fallbackPaletteTitle = 'Palette',
   fallbackGradientTitle = 'Gradient',
+  verticalMaxPerRow = 10,
 } = {}) {
   if (!item || !modalManager) return;
 
@@ -44,5 +47,6 @@ export async function openLibraryItemModal(item, modalManager, {
     colorSwatchRailStrings,
     tags: item.tags,
     showCreator: false,
+    verticalMaxPerRow,
   });
 }
