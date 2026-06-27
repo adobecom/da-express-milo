@@ -504,6 +504,7 @@
   /* palettes.css hardcodes 80px; track the responsive strip height so the
      wrapper matches the swatch rail (avoids a gap below swatches on mobile). */
   height: var(--ax-lib-strip-height);
+  border: none;
 }
 
 .ax-lib-card__visual color-palette {
@@ -511,9 +512,9 @@
   width: 100%;
   --color-palette-margin-bottom: 0;
   --color-palette-border-radius: var(--Corner-radius-corner-radius-100);
-  --color-palette-border-width: 0.5px;
-  --color-palette-border-color: var(--Palette-gray-100);
-  --color-palette-active-border-color: var(--Palette-gray-100);
+  --color-palette-border-width: 1px;
+  --color-palette-border-color: #1f1f1f33;
+  --color-palette-active-border-color: #1f1f1f33;
   --color-palette-min-height: var(--ax-lib-strip-height);
 }
 
@@ -521,8 +522,7 @@
   width: 100%;
   height: var(--ax-lib-strip-height);
   border-radius: var(--Corner-radius-corner-radius-100);
-  outline: 1px solid rgba(31, 31, 31, 0.2);
-  outline-offset: -1px;
+  box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.2);
 }
 
 .ax-lib-card__badge {
