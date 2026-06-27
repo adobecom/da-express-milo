@@ -453,6 +453,10 @@
   flex-shrink: 0;
 }
 
+.ax-lib-accordion-panel {
+  padding-bottom: var(--spacing-600);
+}
+
 /* ── Item card (reuses existing color/gradient strip visual) ── */
 .ax-lib-card {
   display: flex;
