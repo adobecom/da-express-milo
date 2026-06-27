@@ -1,10 +1,6 @@
 import { navigateToColorTool } from '../../utils/utilities.js';
 import { createLibraryCardActionMenu } from './createLibraryCardActionMenu.js';
 
-function interpolate(template, vars = {}) {
-  return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
-}
-
 /**
  * Accessibility action menu for a library theme card.
  *
@@ -18,8 +14,7 @@ export function createLibraryAccessibilityMenu({
   strings = {},
   toolHrefs = {},
 } = {}) {
-  const name = item?.name || strings.librariesDefaultName || '';
-  const triggerLabel = interpolate(strings.librariesAccessibilityAria, { name });
+  const triggerLabel = strings.librariesAccessibilityTools;
 
   const menuItems = [
     {

@@ -3,10 +3,6 @@ import { announceToScreenReader } from '../../spectrum/index.js';
 import { createLibraryCardActionMenu } from './createLibraryCardActionMenu.js';
 import { libraryItemToDownloadData } from './libraryDownloadUtils.js';
 
-function interpolate(template, vars = {}) {
-  return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
-}
-
 function isIOSDevice() {
   if (typeof navigator === 'undefined') return false;
   return /iPad|iPhone|iPod/.test(navigator.userAgent)
@@ -71,8 +67,7 @@ export function createLibraryDownloadMenu({
   item,
   strings = {},
 } = {}) {
-  const name = item?.name || strings.librariesDefaultName || '';
-  const triggerLabel = interpolate(strings.librariesDownloadMenuAria, { name });
+  const triggerLabel = strings.librariesDownloadTrigger;
   const menuItems = buildDownloadItems(item, strings);
 
   const menu = createLibraryCardActionMenu({

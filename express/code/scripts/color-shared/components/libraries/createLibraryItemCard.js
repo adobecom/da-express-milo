@@ -4,9 +4,32 @@ import { decorateAnalyticsAttributes, navigateToColorTool } from '../../utils/ut
 import { createLibraryAccessibilityMenu } from './createLibraryAccessibilityMenu.js';
 import { createLibraryDownloadMenu } from './createLibraryDownloadMenu.js';
 import { libraryGradientToBackgroundImage } from './libraryUtils.js';
+import { libraryGradientToModalGradient } from './libraryDownloadUtils.js';
 
 function interpolate(template, vars = {}) {
   return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
+}
+
+// Hex codes for the item's palette, used in the preview accessible name.
+function getItemHexColors(item) {
+  if (item.type === 'gradient') {
+    const { colorStops } = libraryGradientToModalGradient(item);
+    return (colorStops || []).map((stop) => stop.color).filter(Boolean);
+  }
+  return (item.colors || []).filter(Boolean);
+}
+
+// Descriptive name for the palette preview (Figma "Preview" item). The "colour
+// blind safe" wording only appears when the matching badge is shown.
+function getPreviewLabel(item, name, strings) {
+  const colors = getItemHexColors(item).join(', ');
+  if (item.type === 'gradient') {
+    return interpolate(strings.librariesPreviewGradientAria, { name, colors });
+  }
+  if (item.colorBlindSafe) {
+    return interpolate(strings.librariesPreviewColorBlindThemeAria, { name, colors });
+  }
+  return interpolate(strings.librariesPreviewThemeAria, { name, colors });
 }
 
 function createSpIconButton(iconName) {
@@ -36,7 +59,11 @@ function createActionButton({ icon, label, onClick }) {
 
 function buildActions(item, name, strings, emit, payload, toolHrefs) {
   const isGradient = item.type === 'gradient';
-  const actions = createTag('div', { class: 'ax-lib-card__actions' });
+  const actions = createTag('div', {
+    class: 'ax-lib-card__actions',
+    role: 'group',
+    'aria-label': interpolate(strings.librariesCardActions, { name }),
+  });
 
   if (!isGradient) {
     const accessMenu = createLibraryAccessibilityMenu({
@@ -60,7 +87,7 @@ function buildActions(item, name, strings, emit, payload, toolHrefs) {
   if (!isGradient) {
     defs.push({
       icon: createSpIconButton('sp-icon-edit'),
-      label: interpolate(strings.librariesEditAria, { name }),
+      label: strings.librariesEditLabel,
       onClick: () => {
         if (!toolHrefs.colorWheel || !item?.colors?.length) return;
         navigateToColorTool(toolHrefs.colorWheel, {
@@ -74,7 +101,7 @@ function buildActions(item, name, strings, emit, payload, toolHrefs) {
 
   defs.push({
     icon: createSpIconButton('sp-icon-open-in'),
-    label: interpolate(strings.librariesOpenAria, { name }),
+    label: strings.librariesPreviewLabel,
     onClick: () => emit('item-open', payload),
   });
 
@@ -89,14 +116,17 @@ function getSubtitle(item, strings) {
 }
 
 function createVisual(item, name, strings, onOpen) {
-  const openLabel = interpolate(strings.librariesOpenAria, { name });
+  // The palette/gradient preview is the first focus target once the card is
+  // entered (Figma "Preview"). It starts at tabindex -1 and is promoted to the
+  // tab order by the card's drill-in handler; activating it opens the item.
+  const previewLabel = getPreviewLabel(item, name, strings);
   const visual = createTag('div', {
     class: 'ax-lib-card__visual',
     role: 'button',
-    tabindex: '0',
-    'aria-label': openLabel,
+    tabindex: '-1',
+    'aria-label': previewLabel,
   });
-  decorateAnalyticsAttributes(visual, { linkLabel: openLabel });
+  decorateAnalyticsAttributes(visual, { linkLabel: previewLabel });
   visual.addEventListener('click', onOpen);
   visual.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -148,18 +178,30 @@ export function createLibraryItemCard(item, options = {}) {
   const name = item.name || strings.librariesDefaultName || '';
   const payload = { item, libraryId: library.id, libraryName: library.name };
 
-  const card = createTag('article', {
+  const nameId = item.id ? `ax-lib-card-name-${item.id}` : '';
+  const hintId = item.id ? `ax-lib-card-hint-${item.id}` : '';
+  // The whole card is a single tab stop; pressing Enter drills into its controls.
+  const cardAttrs = {
     class: `ax-lib-card ax-lib-card--${item.type === 'gradient' ? 'gradient' : 'theme'}`,
     'data-item-id': item.id || '',
-    role: 'group',
-    'aria-label': name,
-  });
+    tabindex: '0',
+  };
+  // Name the card region from its h3 when an id is available; otherwise fall
+  // back to a direct label so the card still has an accessible name.
+  if (nameId) cardAttrs['aria-labelledby'] = nameId;
+  else cardAttrs['aria-label'] = name;
+  const card = createTag('article', cardAttrs);
 
-  card.appendChild(createVisual(item, name, strings, () => emit('item-open', payload)));
+  const openItem = () => emit('item-open', payload);
+  const visual = createVisual(item, name, strings, openItem);
+  card.appendChild(visual);
 
   const info = createTag('div', { class: 'ax-lib-card__info' });
   const text = createTag('div', { class: 'ax-lib-card__text' });
-  const nameEl = createTag('p', { class: 'ax-lib-card__name' });
+  // h3: card-level heading (palette / theme name) under the library h2. It is a
+  // heading for document structure only — not a tab stop (the card is).
+  const nameEl = createTag('h3', { class: 'ax-lib-card__name' });
+  if (nameId) nameEl.id = nameId;
   nameEl.textContent = name;
   const subtitleEl = createTag('p', { class: 'ax-lib-card__subtitle' });
   subtitleEl.textContent = getSubtitle(item, strings);
@@ -167,6 +209,53 @@ export function createLibraryItemCard(item, options = {}) {
 
   info.append(text, buildActions(item, name, strings, emit, payload, toolHrefs));
   card.appendChild(info);
+
+  // Screen-reader hint describing the drill-in interaction, announced after the
+  // card name via aria-describedby.
+  if (strings.librariesCardHint && hintId) {
+    const hint = createTag('span', { class: 'ax-lib-card__sr-only', id: hintId }, strings.librariesCardHint);
+    card.setAttribute('aria-describedby', hintId);
+    card.appendChild(hint);
+  }
+
+  // ── Composite focus model (drill-in) ────────────────────────────
+  // Tab lands on the card. Enter moves focus to the preview, then Tab walks the
+  // action buttons in order. Inner controls stay out of the page tab order until
+  // the card is entered; leaving the card resets it to a single tab stop.
+  const innerFocusables = [visual, ...card.querySelectorAll('.ax-lib-card__action')];
+  let entered = false;
+
+  function setEntered(next) {
+    if (entered === next) return;
+    entered = next;
+    innerFocusables.forEach((el) => el.setAttribute('tabindex', next ? '0' : '-1'));
+    card.setAttribute('tabindex', next ? '-1' : '0');
+  }
+
+  card.addEventListener('keydown', (e) => {
+    if (e.target === card && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      setEntered(true);
+      visual.focus();
+      return;
+    }
+    if (e.key === 'Escape' && entered) {
+      // Let an open action menu handle Escape first (it closes itself).
+      if (card.querySelector('.ax-lib-card__action-menu-popover:not([hidden])')) return;
+      e.preventDefault();
+      setEntered(false);
+      card.focus();
+    }
+  });
+
+  card.addEventListener('focusin', (e) => {
+    if (e.target === card) setEntered(false);
+    else setEntered(true);
+  });
+
+  card.addEventListener('focusout', (e) => {
+    if (!card.contains(e.relatedTarget)) setEntered(false);
+  });
 
   return card;
 }

@@ -39,7 +39,9 @@ function sortLibrariesInPlace(libraries, sortKey) {
 }
 
 function createLoadingState() {
-  const state = createTag('div', { class: 'ax-lib-loading', 'aria-busy': 'true' });
+  // Skeleton is purely decorative: aria-busy signals the loading state while
+  // aria-hidden keeps the shimmer placeholders out of the a11y tree.
+  const state = createTag('div', { class: 'ax-lib-loading', 'aria-busy': 'true', 'aria-hidden': 'true' });
 
   const headerRow = createTag('div', { class: 'ax-lib-loading-header' });
   const headerRight = createTag('div', { class: 'ax-lib-loading-header__right' });

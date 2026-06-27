@@ -21,7 +21,6 @@ import { loadAlertDialog } from '../load-spectrum.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import {
   trapFocus,
-  handleEscapeClose,
   disableBackgroundScroll,
   restoreBackgroundScroll,
 } from '../utils/a11y.js';
@@ -101,6 +100,9 @@ export async function showExpressAlertDialog(config) {
     const icon = document.createElement(confirmIcon);
     icon.setAttribute('slot', 'icon');
     icon.setAttribute('size', 's');
+    // Decorative: the button's text label already names the action, so keep the
+    // icon out of the accessibility tree (Figma: icon group = "n/a decorative").
+    icon.setAttribute('aria-hidden', 'true');
     confirmBtn.appendChild(icon);
   }
   confirmBtn.append(document.createTextNode(confirmLabel));
@@ -112,15 +114,24 @@ export async function showExpressAlertDialog(config) {
 
   const previousFocus = document.activeElement;
   let focusTrap = null;
-  let escHandler = null;
 
   return new Promise((resolve) => {
+    // Escape must always dismiss the alert dialog (Figma general note). Listen on
+    // the document in the capture phase so it fires regardless of where focus is
+    // and before any descendant could stop the event; stopPropagation keeps an
+    // underlying modal (if stacked) from also closing.
+    function onEscapeKeydown(event) {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      close(false);
+    }
+
     function cleanup(confirmed) {
       wrapper.style.display = 'none';
       focusTrap?.release();
-      escHandler?.release();
+      document.removeEventListener('keydown', onEscapeKeydown, true);
       focusTrap = null;
-      escHandler = null;
       restoreBackgroundScroll();
       theme.remove();
       if (previousFocus && typeof previousFocus.focus === 'function') {
@@ -136,7 +147,7 @@ export async function showExpressAlertDialog(config) {
     cancelBtn.addEventListener('click', () => close(false));
     confirmBtn.addEventListener('click', () => close(true));
 
-    escHandler = handleEscapeClose(wrapper, () => close(false));
+    document.addEventListener('keydown', onEscapeKeydown, true);
 
     disableBackgroundScroll();
     wrapper.style.display = '';
