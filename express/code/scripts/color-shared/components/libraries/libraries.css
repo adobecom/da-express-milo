@@ -453,6 +453,12 @@
   flex-shrink: 0;
 }
 
+/* .ax-lib-toggle-icon img {
+  width: 12px;
+  height: 12px;
+  display: block;
+} */
+
 .ax-lib-accordion-panel {
   padding-bottom: var(--spacing-600);
 }
@@ -706,6 +712,12 @@
   display: inline-flex;
   color: var(--ax-lib-heading-color);
   margin-bottom: var(--spacing-200);
+}
+
+.ax-lib-empty-icon img {
+  width: 140px;
+  height: 140px;
+  display: block;
 }
 
 .ax-lib-empty__heading {
