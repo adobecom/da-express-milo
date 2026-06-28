@@ -297,14 +297,69 @@ function createPaletteMetaSection(palette = {}, options = {}) {
 function setupSwatchColumnNav(container) {
   let colCache = [];
 
+  // The rail renders into shadow DOM and owns its own roving tabindex, so the
+  // grid cells live in `rail.shadowRoot`, not in this light-DOM container.
+  function getRail() {
+    return container.querySelector('color-swatch-rail');
+  }
+
+  // Re-assert the expected tab order so the FIRST color strip is the tab stop.
+  // On a cold first render (the libraries page has no rail on the page, so the
+  // component initialises only when the modal opens) a late re-render can leave
+  // a stray tabindex="0" on an inner action button (e.g. a "copy hex" button),
+  // which steals the first Tab and skips past the first strip. This clears those
+  // stray stops and restores the cell-level roving tabindex. Returns false until
+  // the rail's cells exist so the caller can retry. (On Explore the component is
+  // already warm, so this is a harmless no-op re-assert.)
+  function normalizeRailTabindex() {
+    const rail = getRail();
+    const root = rail?.shadowRoot;
+    if (!root) return false;
+    const cells = Array.from(
+      root.querySelectorAll('.swatch-column[data-swatch-index], .swatch-column--empty'),
+    );
+    if (!cells.length) return false;
+
+    const active = root.activeElement;
+    const focusedCellIdx = cells.findIndex((c) => c === active || c.contains(active));
+
+    // Nothing inside the rail is focused (fresh open / not in action mode):
+    // clear any stray tab stop the component left on an action button.
+    if (focusedCellIdx < 0) {
+      root.querySelectorAll('.swatch-column-focusable[tabindex="0"]')
+        .forEach((btn) => btn.setAttribute('tabindex', '-1'));
+    }
+
+    if (rail.orientation === 'vertical') {
+      // Roving tabindex: keep the focused/active cell, else the first cell.
+      const existing = cells.findIndex((c) => c.getAttribute('tabindex') === '0');
+      const activeIdx = focusedCellIdx >= 0 ? focusedCellIdx : (existing >= 0 ? existing : 0);
+      cells.forEach((cell, i) => cell.setAttribute('tabindex', i === activeIdx ? '0' : '-1'));
+    } else if (focusedCellIdx < 0) {
+      // Non-vertical: every strip is its own group and a valid tab stop.
+      cells.forEach((cell) => cell.setAttribute('tabindex', '0'));
+    }
+    return true;
+  }
+
   function initTabIndexes() {
-    colCache = Array.from(container.querySelectorAll('.swatch-column'));
-    if (!colCache.length) {
+    if (!normalizeRailTabindex()) {
       requestAnimationFrame(initTabIndexes);
       return;
     }
-    // Only the first column is in tab order; component owns Enter/Escape/Tab-in-action-mode
-    colCache.forEach((col, i) => col.setAttribute('tabindex', i === 0 ? '0' : '-1'));
+    // Re-assert once the component reports it has finished rendering, since the
+    // first render can be followed by a late re-render (icons/strings/tooltips).
+    // This keeps the first strip as the first tab stop, so that the first Tab
+    // press (from the dialog's neutral initial focus) lands on it. We do NOT
+    // move focus here — initial focus stays on the dialog by design.
+    (async () => {
+      try {
+        const rail = getRail();
+        await customElements.whenDefined('color-swatch-rail');
+        if (rail?.updateComplete) await rail.updateComplete;
+      } catch { /* noop */ }
+      normalizeRailTabindex();
+    })();
   }
 
   // CAPTURE: ArrowDown/Up navigates between columns from anywhere inside them
