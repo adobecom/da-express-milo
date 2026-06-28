@@ -1,8 +1,14 @@
-import { createTag } from '../../../utils.js';
+import { createTag, getIconElementDeprecated } from '../../../utils.js';
 import { createLibraryItemCard } from './createLibraryItemCard.js';
-import { createToggleIcon, PLUS_ICON, MINUS_ICON } from './libraryIcons.js';
 import { formatLibraryCounts, getSizeClass } from './libraryUtils.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
+
+function createToggleIcon(expanded) {
+  return createTag('span', {
+    class: 'ax-lib-toggle-icon',
+    'aria-hidden': 'true',
+  }, getIconElementDeprecated(expanded ? 'minus-icon-libraries' : 'plus-icon-libraries'));
+}
 
 function createHeader(library, expanded, onToggle, strings) {
   const name = library.name || strings.librariesDefaultName || '';
@@ -106,7 +112,7 @@ export function createLibraryAccordion(library, options = {}) {
         if (isOpen) panel.removeAttribute('hidden');
         else panel.setAttribute('hidden', '');
       }
-      if (icon) icon.innerHTML = isOpen ? MINUS_ICON : PLUS_ICON;
+      if (icon) icon.replaceChildren(getIconElementDeprecated(isOpen ? 'minus-icon-libraries' : 'plus-icon-libraries'));
     },
   };
 }

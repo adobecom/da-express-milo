@@ -1,8 +1,7 @@
-import { createTag } from '../../../utils.js';
+import { createTag, getIconElementDeprecated } from '../../../utils.js';
 import { createLibraryAccordion } from './createLibraryAccordion.js';
 import { createLibrariesHeader, LIBRARY_SORT } from './createLibrariesHeader.js';
 import { getSizeClass } from './libraryUtils.js';
-import { createEmptySearchIcon } from './libraryIcons.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
 
 export const LIBRARY_VIEW = {
@@ -104,7 +103,11 @@ function createExpandCollapseControl(onExpandAll, onCollapseAll, strings) {
 
 function createEmptyState(query, strings, emit) {
   const wrapper = createTag('div', { class: 'ax-lib-empty', role: 'status' });
-  wrapper.appendChild(createEmptySearchIcon());
+  wrapper.appendChild(createTag(
+    'span',
+    { class: 'ax-lib-empty-icon', 'aria-hidden': 'true' },
+    getIconElementDeprecated('S1_lin_AdobeExpress_NoSearchResults_140x140'),
+  ));
 
   const heading = createTag('p', { class: 'ax-lib-empty__heading' });
   heading.textContent = interpolate(strings.librariesEmptyHeading, { query });
