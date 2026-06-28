@@ -46,7 +46,9 @@ describe('loadColorLibrariesPlaceholders', () => {
         librariesSignIn: 'Connectez-vous pour voir vos bibliothèques.',
       });
       expect(result.librariesSignIn).to.equal('Connectez-vous pour voir vos bibliothèques.');
-      expect(result.librariesSearchPlaceholder).to.equal(DEFAULT_PLACEHOLDERS.librariesSearchPlaceholder);
+      expect(result.librariesSearchPlaceholder).to.equal(
+        DEFAULT_PLACEHOLDERS.librariesSearchPlaceholder,
+      );
     });
 
     it('does not mutate defaults', () => {
