@@ -114,14 +114,19 @@ function createEmptyState(query, strings, emit) {
   const description = createTag('p', { class: 'ax-lib-empty__description' });
   description.textContent = strings.librariesEmptyDescription;
 
-  const goBack = createTag('button', {
-    type: 'button',
-    class: 'ax-lib-empty__cta',
-  }, strings.librariesGoBack);
+  const text = createTag('div', { class: 'ax-lib-empty__text' });
+  text.append(heading, description);
+
+  const goBack = document.createElement('sp-button');
+  goBack.setAttribute('treatment', 'fill');
+  goBack.setAttribute('variant', 'accent');
+  goBack.setAttribute('size', 'l');
+  goBack.classList.add('ax-lib-empty__cta');
+  goBack.textContent = strings.librariesGoBack;
   decorateAnalyticsAttributes(goBack, { linkLabel: strings.librariesGoBack });
   goBack.addEventListener('click', () => emit('empty-go-back'));
 
-  wrapper.append(heading, description, goBack);
+  wrapper.append(text, goBack);
   return wrapper;
 }
 

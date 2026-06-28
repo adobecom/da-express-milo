@@ -12,7 +12,7 @@ import { createModalManager } from '../../scripts/color-shared/modal/createModal
 import loadColorModalPlaceholders from '../../scripts/color-shared/i18n/loadColorModalPlaceholders.js';
 import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
 import loadColorExplorePlaceholders from '../../scripts/color-shared/i18n/loadColorExplorePlaceholders.js';
-import { loadIconsRail, loadMenu, loadTooltip } from '../../scripts/color-shared/spectrum/load-spectrum.js';
+import { loadIconsRail, loadMenu, loadTooltip, loadButton } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import loadColorLibrariesPlaceholders from '../../scripts/color-shared/i18n/loadColorLibrariesPlaceholders.js';
@@ -185,6 +185,8 @@ export default async function decorate(block) {
     loadMiloStyle(GRADIENT_STRIP_CSS),
     loadIconsRail(),
     loadMenu(),
+    // Registers sp-button so the empty-search "go back to libraries" CTA upgrades.
+    loadButton(),
     // Registers sp-overlay-trigger/sp-tooltip so the palette name tooltip
     // behaves as a hover overlay (same as the Explore page) instead of
     // rendering inline as a label.
