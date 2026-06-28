@@ -268,7 +268,12 @@ export function createModalManager(strings = createColorModalPlaceholders()) {
       onClose: () => {
         contentView.destroy?.();
       },
-      initialFocusSelector: options.initialFocusSelector,
+      // Keep initial focus neutral (on the dialog itself, tabindex=-1) so the
+      // color strips are not focused by default; the first Tab then moves to the
+      // first strip (the first tabbable in the modal). Without this, the focus
+      // trap focuses the first tabbable on open, which — on the libraries page
+      // where the rail renders cold — is the toolbar, not a strip.
+      initialFocusSelector: options.initialFocusSelector || ((root) => root),
     });
     contentView.initNav?.();
   }
