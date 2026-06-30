@@ -236,6 +236,7 @@ function createPaletteLikeWidget(palette = {}, options = {}) {
 }
 
 function createPaletteMetaSection(palette = {}, options = {}) {
+  const showCreator = options.showCreator !== false;
   const creatorName = normalizeCreatorName(
     options.creatorName ?? palette?.creator?.name ?? palette?.creatorName,
   );
@@ -263,21 +264,23 @@ function createPaletteMetaSection(palette = {}, options = {}) {
 
   const thumbTagsRow = createTag('div', { class: 'modal-palette-thumb-tags' });
 
-  const thumbnailContainer = createTag('div', { class: 'modal-thumbnail-container' });
-  const thumbnailWrap = createTag('div', { class: 'modal-thumbnail' });
-  if (creatorImageUrl) {
-    const thumbnailImg = createTag('img', { class: 'thumbnail-image', alt: creatorName, src: creatorImageUrl });
-    thumbnailWrap.appendChild(thumbnailImg);
-  } else {
-    const initial = createTag('span', { class: 'thumbnail-initial', 'aria-hidden': 'true' });
-    initial.textContent = creatorName.charAt(0).toUpperCase();
-    thumbnailWrap.appendChild(initial);
+  if (showCreator) {
+    const thumbnailContainer = createTag('div', { class: 'modal-thumbnail-container' });
+    const thumbnailWrap = createTag('div', { class: 'modal-thumbnail' });
+    if (creatorImageUrl) {
+      const thumbnailImg = createTag('img', { class: 'thumbnail-image', alt: creatorName, src: creatorImageUrl });
+      thumbnailWrap.appendChild(thumbnailImg);
+    } else {
+      const initial = createTag('span', { class: 'thumbnail-initial', 'aria-hidden': 'true' });
+      initial.textContent = creatorName.charAt(0).toUpperCase();
+      thumbnailWrap.appendChild(initial);
+    }
+    const creatorNameEl = createTag('p', { class: 'modal-creator-name' });
+    creatorNameEl.textContent = creatorName;
+    thumbnailContainer.appendChild(thumbnailWrap);
+    thumbnailContainer.appendChild(creatorNameEl);
+    thumbTagsRow.appendChild(thumbnailContainer);
   }
-  const creatorNameEl = createTag('p', { class: 'modal-creator-name' });
-  creatorNameEl.textContent = creatorName;
-  thumbnailContainer.appendChild(thumbnailWrap);
-  thumbnailContainer.appendChild(creatorNameEl);
-  thumbTagsRow.appendChild(thumbnailContainer);
 
   const tagsContainer = createTag('div', { class: 'modal-tags-container', 'aria-label': 'Tags', role: 'list' });
   tags.forEach((tag) => {
@@ -292,62 +295,71 @@ function createPaletteMetaSection(palette = {}, options = {}) {
 }
 
 function setupSwatchColumnNav(container) {
-  let colCache = [];
+  // The rail renders into shadow DOM and owns its own roving tabindex, so the
+  // grid cells live in `rail.shadowRoot`, not in this light-DOM container.
+  function getRail() {
+    return container.querySelector('color-swatch-rail');
+  }
+
+  // Re-assert the expected tab order so the FIRST color strip is the tab stop.
+  // On a cold first render (the libraries page has no rail on the page, so the
+  // component initialises only when the modal opens) a late re-render can leave
+  // a stray tabindex="0" on an inner action button (e.g. a "copy hex" button),
+  // which steals the first Tab and skips past the first strip. This clears those
+  // stray stops and restores the cell-level roving tabindex. Returns false until
+  // the rail's cells exist so the caller can retry. (On Explore the component is
+  // already warm, so this is a harmless no-op re-assert.)
+  function normalizeRailTabindex() {
+    const rail = getRail();
+    const root = rail?.shadowRoot;
+    if (!root) return false;
+    const cells = Array.from(
+      root.querySelectorAll('.swatch-column[data-swatch-index], .swatch-column--empty'),
+    );
+    if (!cells.length) return false;
+
+    const active = root.activeElement;
+    const focusedCellIdx = cells.findIndex((c) => c === active || c.contains(active));
+
+    // Nothing inside the rail is focused (fresh open / not in action mode):
+    // clear any stray tab stop the component left on an action button.
+    if (focusedCellIdx < 0) {
+      root.querySelectorAll('.swatch-column-focusable[tabindex="0"]')
+        .forEach((btn) => btn.setAttribute('tabindex', '-1'));
+    }
+
+    if (rail.orientation === 'vertical') {
+      // Roving tabindex: keep the focused/active cell, else the first cell.
+      const existing = cells.findIndex((c) => c.getAttribute('tabindex') === '0');
+      const fallbackIdx = existing >= 0 ? existing : 0;
+      const activeIdx = focusedCellIdx >= 0 ? focusedCellIdx : fallbackIdx;
+      cells.forEach((cell, i) => cell.setAttribute('tabindex', i === activeIdx ? '0' : '-1'));
+    } else if (focusedCellIdx < 0) {
+      // Non-vertical: every strip is its own group and a valid tab stop.
+      cells.forEach((cell) => cell.setAttribute('tabindex', '0'));
+    }
+    return true;
+  }
 
   function initTabIndexes() {
-    colCache = Array.from(container.querySelectorAll('.swatch-column'));
-    if (!colCache.length) {
+    if (!normalizeRailTabindex()) {
       requestAnimationFrame(initTabIndexes);
       return;
     }
-    // Only the first column is in tab order; component owns Enter/Escape/Tab-in-action-mode
-    colCache.forEach((col, i) => col.setAttribute('tabindex', i === 0 ? '0' : '-1'));
+    // Re-assert once the component reports it has finished rendering, since the
+    // first render can be followed by a late re-render (icons/strings/tooltips).
+    // This keeps the first strip as the first tab stop, so that the first Tab
+    // press (from the dialog's neutral initial focus) lands on it. We do NOT
+    // move focus here — initial focus stays on the dialog by design.
+    (async () => {
+      try {
+        const rail = getRail();
+        await customElements.whenDefined('color-swatch-rail');
+        if (rail?.updateComplete) await rail.updateComplete;
+      } catch { /* noop */ }
+      normalizeRailTabindex();
+    })();
   }
-
-  // CAPTURE: ArrowDown/Up navigates between columns from anywhere inside them
-  // (including action-mode buttons). Fires before the component's own handlers.
-  container.addEventListener('keydown', (e) => {
-    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-    const cols = colCache;
-    const activeEl = document.activeElement;
-    const ctxIdx = cols.findIndex((c) => c === activeEl || c.contains(activeEl));
-    if (ctxIdx < 0) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-
-    const next = e.key === 'ArrowDown' ? ctxIdx + 1 : ctxIdx - 1;
-    if (next >= 0 && next < cols.length) {
-      // If in action mode, reset the button tabindexes before leaving
-      if (cols[ctxIdx] !== activeEl) {
-        cols[ctxIdx].querySelectorAll('.swatch-column-focusable')
-          .forEach((btn) => btn.setAttribute('tabindex', '-1'));
-      }
-      cols.forEach((c, i) => c.setAttribute('tabindex', i === next ? '0' : '-1'));
-      cols[next].focus();
-    }
-  }, true); // capture — fires before component handlers
-
-  // CAPTURE: Tab when focus is directly on a column (not action mode)
-  // → ensure only this column is tabindex=0 so Tab exits the rail instead of
-  //   moving to the next swatch-column (which the component leaves at tabindex=0).
-  container.addEventListener('keydown', (e) => {
-    if (e.key !== 'Tab') return;
-    const cols = colCache;
-    const idx = cols.indexOf(document.activeElement);
-    if (idx < 0) return; // in action mode — let component's Tab trap handle cycling
-    cols.forEach((c, i) => c.setAttribute('tabindex', i === idx ? '0' : '-1'));
-    // no preventDefault: Tab exits the rail to the next focusable section
-  }, true); // capture
-
-  // FOCUSIN: keep roving tabindex correct whenever focus lands on a column.
-  // This repairs any tabindex=0 reset the Lit component does on re-render.
-  container.addEventListener('focusin', (e) => {
-    const cols = colCache;
-    const idx = cols.indexOf(e.target);
-    if (idx < 0) return;
-    cols.forEach((c, i) => c.setAttribute('tabindex', i === idx ? '0' : '-1'));
-  });
 
   return { initTabIndexes };
 }
@@ -437,6 +449,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
     type: 'palette',
     ctaText,
     showPaletteName: false,
+    inModal: true,
   }).catch((error) => {
     window.lana?.log(`Palette modal toolbar init failed: ${error?.message}`, {
       tags: 'color-modal,toolbar',

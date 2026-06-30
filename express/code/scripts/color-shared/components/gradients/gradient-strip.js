@@ -1,7 +1,7 @@
 import { createTag } from '../../../utils.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
 
-function gradientToBackgroundImage(gradient) {
+export function gradientToBackgroundImage(gradient) {
   if (gradient.gradient && typeof gradient.gradient === 'string') {
     return gradient.gradient.replace(
       /linear-gradient\(\s*\d+deg/,
