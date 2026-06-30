@@ -1,5 +1,4 @@
-// ToDo: Replace with import from unicodeEngine.js
-let allFonts;
+import { allFonts } from './unicodeEngine.js';
 
 const DEFAULTS = {
   previewText: 'Type the preview text you want to get started...',
