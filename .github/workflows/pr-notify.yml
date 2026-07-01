@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Add label and send Slack notification
-        uses: actions/github-script@v7
+        uses: actions/github-script@v9
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL_PR }}
         with:
@@ -50,11 +50,15 @@ jobs:
             
             // Notify Slack
             if (process.env.SLACK_WEBHOOK) {
-              await fetch(process.env.SLACK_WEBHOOK, {
+              const res = await fetch(process.env.SLACK_WEBHOOK, {
                 method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   text: `🔔 <${pr.html_url}|${pr.title}> by ${pr.user.login}`
                 })
               });
+              if (!res.ok) {
+                core.warning(`Slack notification failed: ${res.status} ${await res.text()}`);
+              }
             }
 
