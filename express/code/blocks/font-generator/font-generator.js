@@ -106,7 +106,7 @@ async function localizeTextareaPlaceholder(panel) {
   }
 }
 
-export default function decorate(block) {
+export default async function decorate(block) {
   // Restore URL state before any component reads from the store.
   initFromUrl();
 

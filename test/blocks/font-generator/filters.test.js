@@ -8,23 +8,24 @@ const [{ getLibs }] = await Promise.all([
 await import(`${getLibs()}/utils/utils.js`).then((mod) => mod.setConfig({}));
 
 const [
-  { getState, setState, initFonts },
+  { getState, setState },
   { default: initFilters, createFontsIcon, buildPromo },
 ] = await Promise.all([
   import('../../../express/code/blocks/font-generator/state.js'),
   import('../../../express/code/blocks/font-generator/filters.js'),
 ]);
 
+const CHARS = { letters: {}, numbers: {}, specialCharacters: {} };
 const MOCK_FONTS = [
-  { name: 'Bold', category: 'bold', map: {} },
-  { name: 'Italic', category: 'italic', map: {} },
-  { name: 'Bold Italic', category: 'bold', map: {} },
-  { name: 'Strikethrough', category: 'strikethrough', map: {} },
+  { id: 'f1', grouping: 'bold', type: 'direct-map', styleName: 'Bold', characters: CHARS },
+  { id: 'f2', grouping: 'italic', type: 'direct-map', styleName: 'Italic', characters: CHARS },
+  { id: 'f3', grouping: 'bold', type: 'direct-map', styleName: 'Bold Italic', characters: CHARS },
+  { id: 'f4', grouping: 'strikethrough', type: 'direct-map', styleName: 'Strikethrough', characters: CHARS },
 ];
 // unique categories: bold, italic, strikethrough
 const UNIQUE_CATEGORIES = ['bold', 'italic', 'strikethrough'];
 
-initFonts(MOCK_FONTS);
+setState({ activeFonts: MOCK_FONTS });
 
 describe('filters / createFontsIcon', () => {
   it('returns an SVG element', () => {
