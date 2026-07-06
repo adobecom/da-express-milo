@@ -4,19 +4,31 @@ class FontGeneratorBlock {
     this.block = page.locator(selector).nth(nth);
 
     // Layout
-    this.container = this.block.locator('.fg-container');
-    this.sidebar = this.block.locator('.fg-sidebar');
-    this.main = this.block.locator('.fg-main');
+    this.grid = this.block.locator('.font-generator-grid');
+    this.sideCol = this.block.locator('.font-generator-col--side');
+    this.mainCol = this.block.locator('.font-generator-col--main');
 
-    // Filters (sidebar — desktop only)
-    this.sidebarFilters = this.sidebar.locator('.fg-filters');
-    this.filterList = this.block.locator('.fg-filter-list').first();
-    this.filterButtons = this.filterList.locator('.fg-filter-btn');
-    this.allFilterBtn = this.filterList.locator('.fg-filter-btn[data-category=""]');
-    this.categoryButtons = this.filterList.locator('.fg-filter-btn:not([data-category=""])');
+    // Side panel (preview input + suggestions)
+    this.sidePanel = this.sideCol.locator('.side-panel');
+    this.textarea = this.sidePanel.locator('textarea.label');
+    this.suggestions = this.sidePanel.locator('.suggestion-list');
 
-    // Accordion
-    this.accordionItem = this.block.locator('sp-accordion-item').first();
+    // Filter panel
+    this.filterPanel = this.sideCol.locator('.filter-panel');
+    this.filterPanelClose = this.filterPanel.locator('.filter-panel-close');
+    this.accordionItem = this.filterPanel.locator('sp-accordion-item').first();
+    this.categoryButtons = this.filterPanel.locator('.category-btn');
+
+    // Toolbar
+    this.toolbar = this.mainCol.locator('.toolbar');
+    this.filterTrigger = this.toolbar.locator('.filter-trigger');
+    this.layoutToggle = this.toolbar.locator('.layout-toggle');
+    this.fontSizeSlider = this.toolbar.locator('.font-size-slider');
+
+    // Font card grid
+    this.fontCardGrid = this.mainCol.locator('.font-card-grid');
+    this.fontCards = this.fontCardGrid.locator('.font-card');
+    this.loadMoreBtn = this.mainCol.locator('.font-card-load-more');
   }
 }
 
