@@ -115,10 +115,10 @@ describe('icon-carousel / controls', () => {
     expect(block.querySelector('.icon-carousel-next')).to.exist;
   });
 
-  it('nav buttons contain icon img', async () => {
+  it('nav buttons contain svg chevron', async () => {
     const block = await prepBlock('./mocks/default.html');
-    expect(block.querySelector('.icon-carousel-prev .icon-carousel-btn-icon')).to.exist;
-    expect(block.querySelector('.icon-carousel-next .icon-carousel-btn-icon')).to.exist;
+    expect(block.querySelector('.icon-carousel-prev svg')).to.exist;
+    expect(block.querySelector('.icon-carousel-next svg')).to.exist;
   });
 
   it('nav buttons have aria-label', async () => {
@@ -164,23 +164,15 @@ describe('icon-carousel / first row is header only', () => {
 });
 
 describe('icon-carousel / nav button icons', () => {
-  it('icon imgs carry the icon-carousel-btn-icon class', async () => {
+  it('each button contains exactly one svg', async () => {
     const block = await prepBlock('./mocks/default.html');
-    const icons = block.querySelectorAll('.icon-carousel-btn-icon');
-    expect(icons.length).to.equal(2);
+    expect(block.querySelectorAll('.icon-carousel-btn svg').length).to.equal(2);
   });
 
-  it('icon imgs are aria-hidden', async () => {
+  it('chevron svgs are aria-hidden', async () => {
     const block = await prepBlock('./mocks/default.html');
-    block.querySelectorAll('.icon-carousel-btn-icon').forEach((icon) => {
-      expect(icon.getAttribute('aria-hidden')).to.equal('true');
-    });
-  });
-
-  it('icon imgs have alt=""', async () => {
-    const block = await prepBlock('./mocks/default.html');
-    block.querySelectorAll('.icon-carousel-btn-icon').forEach((icon) => {
-      expect(icon.getAttribute('alt')).to.equal('');
+    block.querySelectorAll('.icon-carousel-btn svg').forEach((svg) => {
+      expect(svg.getAttribute('aria-hidden')).to.equal('true');
     });
   });
 });

@@ -1,15 +1,16 @@
-import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { getLibs } from '../../scripts/utils.js';
 import { debounce, throttle } from '../../scripts/utils/hofs.js';
 
 let createTag;
 
-function makeNavIcon(name) {
-  const icon = getIconElementDeprecated(name, 18, '', 'icon-carousel-btn-icon');
-  icon.setAttribute('width', '18');
-  icon.setAttribute('height', '18');
-  icon.setAttribute('alt', '');
-  icon.setAttribute('aria-hidden', 'true');
-  return icon;
+// Stroke-based chevrons (discover-cards style) scaled to 18×18.
+// stroke="currentColor" lets CSS color: control the tint — works for both
+// light and dark modes without filter hacks.
+const CHEVRON_LEFT = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 4L6 9L11 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const CHEVRON_RIGHT = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 4L12 9L7 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+function parseSVG(str) {
+  return new DOMParser().parseFromString(str, 'image/svg+xml').documentElement;
 }
 
 function buildControls(items, gallery) {
@@ -17,8 +18,8 @@ function buildControls(items, gallery) {
   const prevBtn = createTag('button', { class: 'icon-carousel-btn icon-carousel-prev', 'aria-label': 'Previous' });
   const nextBtn = createTag('button', { class: 'icon-carousel-btn icon-carousel-next', 'aria-label': 'Next' });
 
-  prevBtn.append(makeNavIcon('s2-chevron-left'));
-  nextBtn.append(makeNavIcon('s2-chevron-right'));
+  prevBtn.append(parseSVG(CHEVRON_LEFT));
+  nextBtn.append(parseSVG(CHEVRON_RIGHT));
 
   const len = items.length;
   const intersecting = items.map(() => false);
