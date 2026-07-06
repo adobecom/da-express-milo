@@ -63,7 +63,7 @@ function setSliderFill(sliderEl, value) {
   sliderEl.style.setProperty('--fill', `${pct}%`);
 }
 
-export function createToolbar({ panelId } = {}) {
+export default function createToolbar({ panelId } = {}) {
   injectStyles();
 
   const toolbar = document.createElement('div');

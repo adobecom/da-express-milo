@@ -1,5 +1,6 @@
 import { createTag, getLibs } from '../../scripts/utils.js';
-import { getState, setState, subscribe, getCategories } from './state.js';
+import { getState, setState, subscribe } from './state.js';
+import { getCategories } from './unicodeEngine.js';
 import { createExpressAccordion } from '../../scripts/color-shared/spectrum/index.js';
 
 const ADOBE_FONTS_HREF = 'https://fonts.adobe.com';

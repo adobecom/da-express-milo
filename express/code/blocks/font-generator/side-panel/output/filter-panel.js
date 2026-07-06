@@ -186,7 +186,7 @@ function initEscapeToClose() {
   });
 }
 
-export function createFilterPanel(config = {}) {
+export default function createFilterPanel(config = {}) {
   injectStyles();
   const panel = template.content.firstElementChild.cloneNode(true);
   // Guard against FOUC: hide until the stylesheet is ready, then let CSS take over.

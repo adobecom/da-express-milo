@@ -163,7 +163,7 @@ function initSuggestionPills(panel) {
   });
 }
 
-export function createSidePanel(config = {}) {
+export default function createSidePanel(config = {}) {
   injectStyles();
   const panel = template.content.firstElementChild.cloneNode(true);
   initResizeHandle(panel);

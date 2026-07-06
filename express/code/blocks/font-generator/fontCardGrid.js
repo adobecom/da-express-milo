@@ -28,7 +28,7 @@ function getFilteredFonts(fonts, activeFilters) {
  *
  * @returns {Promise<{ container: HTMLElement, unsubscribe: function }>}
  */
-export async function createFontCardGrid(config = {}) {
+export default async function createFontCardGrid(config = {}) {
   injectStyles();
 
   const container = document.createElement('div');

@@ -54,9 +54,8 @@ export function initFromUrl() {
   const view = params.get('view');
   const fontSize = params.get('fontSize');
 
-  const defaultLayout = view === 'grid' || view === 'list'
-    ? view
-    : (window.matchMedia('(max-width: 899px)').matches ? 'list' : 'grid');
+  const mobileLayout = window.matchMedia('(max-width: 899px)').matches ? 'list' : 'grid';
+  const defaultLayout = view === 'grid' || view === 'list' ? view : mobileLayout;
 
   setState({
     ...(text && { previewText: text }),
