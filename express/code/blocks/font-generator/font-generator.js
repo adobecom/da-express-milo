@@ -8,7 +8,7 @@ import { createToolbar } from './toolbar.js';
 const CATEGORY_STYLES = {
   all: { fontId: 'bold-script' },
   glitch: { fontId: 'strikethrough' },
-  'symbol': { fontId: 'weights', fontSize: 12 },
+  symbol: { fontId: 'weights', fontSize: 12 },
 };
 
 let filterPanelCount = 0;
@@ -105,7 +105,6 @@ async function localizeTextareaPlaceholder(panel) {
     // keep fallback
   }
 }
-
 
 export default function decorate(block) {
   // Restore URL state before any component reads from the store.
