@@ -232,7 +232,6 @@ export function detectStyle(row) {
 
 export function transformRows(rows) {
   return {
-    version: 'v2',
     sourceCharacters: {
       letters: {
         uppercase: UPPERCASE,
@@ -247,7 +246,7 @@ export function transformRows(rows) {
       const detected = detectStyle(row);
       return {
         id: slugify(row.Style_name),
-        grouping: row.Grouping,
+        category: row.Category,
         styleName: row.Style_name,
         fontSupported: toFontFamily(row['Font Supported']),
         type: detected.type,
@@ -261,9 +260,9 @@ export function transformRows(rows) {
 
 export async function writeFontSheet() {
   const { readFileSync, writeFileSync, mkdirSync } = await import('node:fs');
-  const csvUrl = new URL('./v2/v2.csv', import.meta.url);
+  const csvUrl = new URL('./font-styles.csv', import.meta.url);
   const jsonUrl = new URL(
-    '../../express/code/blocks/font-generator/font-sheets/v2/v2.json',
+    '../../express/code/blocks/font-generator/font-sheets/font-styles.json',
     import.meta.url,
   );
   const csv = readFileSync(csvUrl, 'utf8');
