@@ -100,8 +100,7 @@ function createSvgElement(iconName) {
 const getCTA = (verb) => {
   const verbConfig = LIMITS[verb];
   return window.mph?.[`verb-dropzone-${verb}-upload-cta`]
-    || window.mph?.[`verb-widget-cta-${verbConfig?.uploadType}`]
-    || 'Upload your resume';
+    || window.mph?.[`verb-widget-cta-${verbConfig?.uploadType}`];
 };
 
 function isMobileDevice() {
@@ -283,7 +282,6 @@ function buildDragOverlay(overlayText) {
 export default async function init(element) {
   ({ createTag, getConfig } = (await import(`${miloLibs}/utils/utils.js`)));
 
-  element.classList.add('con-block');
   if (isOldBrowser()) {
     window.location.href = EOLBrowserPage;
     return;
@@ -351,8 +349,8 @@ export default async function init(element) {
   }
   headingEl.id = 'verb-dropzone-heading';
   const subLine = createTag('p', { class: 'verb-dropzone-sub', id: 'file-upload-description' });
-  const dragDesktop = createTag('span', { class: 'verb-dropzone-subcopy-desktop' }, window.mph?.['verb-dropzone-subcopy-desktop'] || 'Click to upload or drag & drop! PDF, DOCX, or DOC, up to 20 MB');
-  const dragMobile = createTag('span', { class: 'verb-dropzone-subcopy-mobile' }, window.mph?.['verb-dropzone-subcopy-mobile'] || 'Tap to upload. PDF, DOCX, or DOC, up to 20 MB');
+  const dragDesktop = createTag('span', { class: 'verb-dropzone-subcopy-desktop' }, window.mph?.['verb-dropzone-subcopy-desktop']);
+  const dragMobile = createTag('span', { class: 'verb-dropzone-subcopy-mobile' }, window.mph?.['verb-dropzone-subcopy-mobile']);
   subLine.append(dragDesktop, dragMobile);
   dzContent.append(headingEl, subLine);
   dzInner.append(iconWrapper, dzContent);
@@ -433,10 +431,10 @@ export default async function init(element) {
   const touURL = window.mph?.['verb-widget-terms-of-use-url'] || `https://www.adobe.com${locale.prefix}/legal/terms.html`;
   const genAIurl = window.mph?.['verb-widget-genai-terms-url'] || `https://www.adobe.com${locale.prefix}/legal/licenses-terms/adobe-gen-ai-user-guidelines.html`;
   const mph = window.mph || {};
-  const legalPart1 = mph['verb-dropzone-legal'] || mph['verb-widget-legal'] || 'Your file will be securely handled by Adobe servers and deleted unless you sign in to save it.';
+  const legalPart1 = mph['verb-dropzone-legal'] || mph['verb-widget-legal'];
   const legalPart2 = limits?.genAI
-    ? (mph['verb-dropzone-legal-2-ai'] || mph['verb-widget-legal-2-ai'] || 'By using this service, you agree to the Adobe Terms of Use, Generative AI User Guidelines, and acknowledge the Privacy Policy.')
-    : (mph['verb-dropzone-legal-2'] || mph['verb-widget-legal-2'] || 'By using this service, you agree to the Adobe Terms of Use and acknowledge the Privacy Policy.');
+    ? (mph['verb-dropzone-legal-2-ai'] || mph['verb-widget-legal-2-ai'])
+    : (mph['verb-dropzone-legal-2'] || mph['verb-widget-legal-2']);
   const legalText = createTag('div', { class: 'verb-dropzone-legal' });
   const legalPart1El = createTag('p', {}, legalPart1);
   const legalPart2El = createTag('p', {}, legalPart2);
@@ -448,7 +446,7 @@ export default async function init(element) {
   ];
   legalPart2El.innerHTML = legalLinks.reduce(
     (html, [key, url]) => {
-      const linkText = key === 'verb-widget-genai-guidelines' ? 'Generative AI User Guidelines' : window.mph?.[key];
+      const linkText = window.mph?.[key];
       return linkText ? html.replace(linkText, createLegalLink(linkText, url)) : html;
     },
     legalPart2El.textContent,
@@ -467,7 +465,7 @@ export default async function init(element) {
     infoIcon.appendChild(infoIconSvg);
   }
   infoIcon.appendChild(createTag('span', { id: 'info-tooltip-text', class: 'hide' }, tooltipContent));
-  legalPart2El.append(infoIcon);
+  legalPart1El.append(infoIcon);
   legalText.append(legalPart1El, legalPart2El);
   footer.append(legalText);
 
@@ -565,16 +563,22 @@ export default async function init(element) {
     }
   };
   if (useFileUpload && fileInput) {
-    const dragOverlay = buildDragOverlay(window.mph?.['verb-dropzone-drag-overlay'] || 'Drop your file anywhere');
+    const dragOverlay = buildDragOverlay(window.mph?.['verb-dropzone-drag-overlay'] || '');
     document.body.append(dragOverlay);
     const hideDragOverlay = () => dragOverlay.classList.remove('is-dragging');
     let dragLeaveTimer = null;
+    let isBlockVisible = false;
+    const visibilityObserver = new IntersectionObserver(([entry]) => {
+      isBlockVisible = entry.isIntersecting;
+    }, { threshold: 0 });
+    visibilityObserver.observe(element);
 
     dropzone.addEventListener('click', () => {
       fileInput.click();
     });
     document.addEventListener('dragenter', (e) => {
       if (!e.dataTransfer?.types?.includes('Files')) return;
+      if (!isBlockVisible) return;
       clearTimeout(dragLeaveTimer);
       dragOverlay.classList.add('is-dragging');
     });

@@ -1,6 +1,5 @@
 import { createTag, getLibs } from '../../scripts/utils.js';
-import { getState, setState, subscribe } from './state.js';
-import { getCategories } from './unicodeEngine.js';
+import { getState, setState, subscribe, getCategories } from './state.js';
 import { createExpressAccordion } from '../../scripts/color-shared/spectrum/index.js';
 
 const ADOBE_FONTS_HREF = 'https://fonts.adobe.com';
@@ -110,7 +109,7 @@ export default async function init(els, { showCTA = true, onSelect } = {}) {
   if (!els || !els.length) return () => {};
 
   const [categories, strings] = await Promise.all([
-    Promise.resolve(getCategories(getState().activeFonts).map(({ category }) => category)),
+    Promise.resolve(getCategories()),
     fetchStrings({
       'fg-all': 'All',
       'fg-categories': 'Categories',
@@ -152,7 +151,6 @@ export default async function init(els, { showCTA = true, onSelect } = {}) {
       onSelect?.();
     });
 
-    syncFilterButtons(filterList, getState().activeFilters);
     const unsubscribe = subscribe(({ activeFilters }) => {
       syncFilterButtons(filterList, activeFilters);
     });

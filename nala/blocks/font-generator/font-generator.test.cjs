@@ -21,40 +21,66 @@ test.describe('FontGeneratorBlock Test Suite', () => {
 
     await test.step('step-2: Verify block structure', async () => {
       await expect(block.block).toBeVisible();
-      await expect(block.grid).toBeVisible();
-      await expect(block.sideCol).toBeVisible();
-      await expect(block.mainCol).toBeVisible();
+      await expect(block.container).toBeVisible();
+      await expect(block.sidebar).toBeVisible();
+      await expect(block.main).toBeVisible();
     });
 
-    await test.step('step-3: Verify side panel renders', async () => {
-      await expect(block.sidePanel).toBeVisible();
-      await expect(block.textarea).toBeVisible();
+    await test.step('step-3: Verify filter list renders', async () => {
+      await expect(block.sidebarFilters).toBeVisible();
+      await expect(block.filterList).toBeVisible();
+      await expect(block.allFilterBtn).toBeVisible();
+      await expect(block.categoryButtons.first()).toBeVisible();
     });
 
-    await test.step('step-4: Verify toolbar renders', async () => {
-      await expect(block.toolbar).toBeVisible();
-      await expect(block.filterTrigger).toBeVisible();
+    await test.step('step-4: Verify accordion label', async () => {
+      const label = await block.accordionItem.getAttribute('label');
+      expect(label).toBe('Categories');
     });
 
-    await test.step('step-5: Verify font card grid renders', async () => {
-      await expect(block.fontCardGrid).toBeVisible();
-      await expect(block.fontCards.first()).toBeVisible();
+    await test.step('step-5: Verify "All" button is selected by default', async () => {
+      await expect(block.allFilterBtn).toHaveAttribute('aria-pressed', 'true');
+      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '0');
+      await expect(block.allFilterBtn).toHaveClass(/is-selected/);
+
+      const catCount = await block.categoryButtons.count();
+      for (let i = 0; i < catCount; i += 1) {
+        await expect(block.categoryButtons.nth(i)).toHaveAttribute('aria-pressed', 'false');
+        await expect(block.categoryButtons.nth(i)).toHaveAttribute('tabindex', '-1');
+      }
     });
 
-    await test.step('step-6: Filter trigger opens the filter panel', async () => {
-      await block.filterTrigger.click();
-      await expect(block.filterPanel).toBeVisible();
+    await test.step('step-6: Clicking a category button selects it and deselects "All"', async () => {
+      const firstCat = block.categoryButtons.first();
+      await firstCat.click();
+
+      await expect(firstCat).toHaveAttribute('aria-pressed', 'true');
+      await expect(firstCat).toHaveAttribute('tabindex', '0');
+      await expect(firstCat).toHaveClass(/is-selected/);
+      await expect(block.allFilterBtn).toHaveAttribute('aria-pressed', 'false');
+      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '-1');
     });
 
-    await test.step('step-7: Filter panel close button closes the panel', async () => {
-      await block.filterPanelClose.click();
-      await expect(block.filterPanel).not.toBeVisible();
+    await test.step('step-7: Clicking the same category button again restores "All"', async () => {
+      const firstCat = block.categoryButtons.first();
+      await firstCat.click();
+
+      await expect(block.allFilterBtn).toHaveAttribute('aria-pressed', 'true');
+      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '0');
+      await expect(block.allFilterBtn).toHaveClass(/is-selected/);
+      await expect(firstCat).toHaveAttribute('aria-pressed', 'false');
     });
 
-    await test.step('step-8: Typing in textarea updates font card previews', async () => {
-      await block.textarea.fill('Hello world');
-      const firstCard = block.fontCards.first();
-      await expect(firstCard.locator('.font-card-preview')).toContainText('Hello world');
+    await test.step('step-8: Arrow key navigation moves focus between filter buttons', async () => {
+      await block.allFilterBtn.focus();
+      await page.keyboard.press('ArrowRight');
+
+      const firstCat = block.categoryButtons.first();
+      await expect(firstCat).toHaveAttribute('tabindex', '0');
+      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '-1');
+
+      await page.keyboard.press('ArrowLeft');
+      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '0');
     });
 
     await test.step('step-9: Accessibility validation', async () => {
