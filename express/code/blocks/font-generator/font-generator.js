@@ -13,34 +13,42 @@ const CATEGORY_STYLES = {
 
 let filterPanelCount = 0;
 
-// Reads the side-panel copy from the authored block. The first paragraph holds
-// comma-separated preview suggestions; the first link is the promo CTA; the
-// second link is the card CTA (rendered on every font card); the remaining
-// paragraph is the promo title. Order-independent so authoring stays forgiving.
-function extractContent(block) {
-  const paragraphs = [...block.querySelectorAll('p')];
-  const links = [...block.querySelectorAll('a')];
-  const ctaLink = links[0] ?? null;
-  const cardCtaLink = links[1] ?? null;
-  const ctaParagraph = ctaLink?.closest('p');
-  const cardCtaParagraph = cardCtaLink?.closest('p');
-  const suggestionsParagraph = paragraphs[0];
-  const promoTitleParagraph = paragraphs.find(
-    (p) => p !== suggestionsParagraph && p !== ctaParagraph && p !== cardCtaParagraph,
-  );
+const DEFAULTS = {
+  suggestions: [
+    'The quick brown fox jumps over the lazy dog',
+    'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
+    'Realigned equestrian fez bewilders picky monarch',
+  ],
+  promoTitle: 'Looking for more fonts?',
+  promoCta: {
+    text: 'Get Adobe Express Free',
+    href: 'https://www.adobe.com/express/templates/',
+  },
+  cardCta: {
+    text: 'Design With Style',
+    href: 'https://www.adobe.com/express/templates/',
+  },
+};
+
+function getContent() {
+  const meta = (key) => document.head.querySelector(`meta[name="${key}"]`)?.content || null;
+
+  const suggestionsRaw = meta('fg-suggestions');
+  const suggestions = suggestionsRaw
+    ? suggestionsRaw.split(',').map((s) => s.trim()).filter(Boolean)
+    : DEFAULTS.suggestions;
 
   return {
-    suggestions: (suggestionsParagraph?.textContent ?? '')
-      .split(',')
-      .map((entry) => entry.trim())
-      .filter(Boolean),
-    promoTitle: promoTitleParagraph?.textContent.trim() ?? '',
-    promoCta: ctaLink
-      ? { text: ctaLink.textContent.trim(), href: ctaLink.href }
-      : null,
-    cardCta: cardCtaLink
-      ? { text: cardCtaLink.textContent.trim(), href: cardCtaLink.href }
-      : null,
+    suggestions,
+    promoTitle: meta('fg-promo-title') ?? DEFAULTS.promoTitle,
+    promoCta: {
+      text: meta('fg-promo-cta-text') ?? DEFAULTS.promoCta.text,
+      href: meta('fg-promo-cta-href') ?? DEFAULTS.promoCta.href,
+    },
+    cardCta: {
+      text: meta('fg-card-cta-text') ?? DEFAULTS.cardCta.text,
+      href: meta('fg-card-cta-href') ?? DEFAULTS.cardCta.href,
+    },
   };
 }
 
@@ -114,7 +122,7 @@ export default async function decorate(block) {
   const unsubscribeBlock = subscribe(({ loading: l }) => block.classList.toggle('loading', l));
   setState({ loading });
 
-  const content = extractContent(block);
+  const content = getContent();
 
   const grid = document.createElement('div');
   grid.className = 'font-generator-grid';
