@@ -117,6 +117,10 @@ async function renderLibraries(block, searchQuery, strings = {}) {
     componentInstance.setLibraries([]);
     componentInstance.setView(LIBRARY_VIEW.EMPTY, { query: searchQuery });
     announceToScreenReader(interpolate(strings.librariesEmptyHeading, { query: searchQuery }));
+  } else if (!isSearch && filtered.length === 0) {
+    componentInstance.setLibraries([]);
+    componentInstance.setView(LIBRARY_VIEW.NO_CONTENT);
+    announceToScreenReader(strings.librariesNoContentHeading);
   } else {
     componentInstance.setLibraries(filtered);
     componentInstance.setView(isSearch ? LIBRARY_VIEW.SEARCH_RESULT : LIBRARY_VIEW.LIBRARY);

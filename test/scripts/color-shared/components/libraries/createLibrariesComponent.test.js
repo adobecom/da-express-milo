@@ -77,7 +77,36 @@ describe('createLibrariesComponent', () => {
     instance = createLibrariesComponent({ strings, libraries: [] });
     instance.setView(LIBRARY_VIEW.EMPTY, { query: 'missing' });
     expect(instance.element.querySelector('.ax-lib-empty')).to.exist;
+    expect(instance.element.querySelector('.ax-lib-empty--no-content')).to.not.exist;
     expect(instance.element.querySelector('.ax-lib-empty__heading').textContent).to.include('missing');
+  });
+
+  it('setView switches to no-content empty state', () => {
+    instance = createLibrariesComponent({
+      strings,
+      libraries: [],
+      toolHrefs: { colorWheel: '/create/color-wheel' },
+    });
+    instance.setView(LIBRARY_VIEW.NO_CONTENT);
+    expect(instance.element.classList.contains('ax-libraries--view-no-content')).to.be.true;
+    expect(instance.element.querySelector('.ax-lib-empty--no-content')).to.exist;
+    expect(instance.element.querySelector('.ax-lib-empty__heading').textContent)
+      .to.equal(strings.librariesNoContentHeading);
+    expect(instance.element.querySelector('.ax-lib-empty__description').textContent)
+      .to.equal(strings.librariesNoContentDescription);
+    expect(instance.element.querySelector('.ax-lib-empty__cta').textContent)
+      .to.equal(strings.librariesNoContentCta);
+  });
+
+  it('no-content CTA links to color wheel', () => {
+    instance = createLibrariesComponent({
+      strings,
+      libraries: [],
+      toolHrefs: { colorWheel: '/create/color-wheel' },
+    });
+    instance.setView(LIBRARY_VIEW.NO_CONTENT);
+    expect(instance.element.querySelector('.ax-lib-empty__cta').getAttribute('href'))
+      .to.equal('/create/color-wheel');
   });
 
   it('setView switches to search result state', () => {

@@ -8,6 +8,7 @@ export const LIBRARY_VIEW = {
   LIBRARY: 'library',
   SEARCH_RESULT: 'search-result',
   EMPTY: 'empty',
+  NO_CONTENT: 'no-content',
   LOADING: 'loading',
 };
 
@@ -101,7 +102,7 @@ function createExpandCollapseControl(onExpandAll, onCollapseAll, strings) {
   return bar;
 }
 
-function createEmptyState(query, strings, emit) {
+function createSearchEmptyState(query, strings, emit) {
   const wrapper = createTag('div', { class: 'ax-lib-empty', role: 'status' });
   wrapper.appendChild(createTag(
     'span',
@@ -127,6 +128,38 @@ function createEmptyState(query, strings, emit) {
   goBack.addEventListener('click', () => emit('empty-go-back'));
 
   wrapper.append(text, goBack);
+  return wrapper;
+}
+
+function createNoContentEmptyState(strings, toolHrefs) {
+  const wrapper = createTag('div', {
+    class: 'ax-lib-empty ax-lib-empty--no-content',
+    role: 'status',
+  });
+  wrapper.appendChild(createTag(
+    'span',
+    { class: 'ax-lib-empty-icon', 'aria-hidden': 'true' },
+    getIconElementDeprecated('SX_lin_AddColor_80'),
+  ));
+
+  const heading = createTag('p', { class: 'ax-lib-empty__heading' });
+  heading.textContent = strings.librariesNoContentHeading;
+  const description = createTag('p', { class: 'ax-lib-empty__description' });
+  description.textContent = strings.librariesNoContentDescription;
+
+  const text = createTag('div', { class: 'ax-lib-empty__text' });
+  text.append(heading, description);
+
+  const cta = document.createElement('sp-button');
+  cta.setAttribute('treatment', 'fill');
+  cta.setAttribute('variant', 'accent');
+  cta.setAttribute('size', 'l');
+  cta.classList.add('ax-lib-empty__cta');
+  cta.textContent = strings.librariesNoContentCta;
+  decorateAnalyticsAttributes(cta, { linkLabel: strings.librariesNoContentCta });
+  if (toolHrefs.colorWheel) cta.setAttribute('href', toolHrefs.colorWheel);
+
+  wrapper.append(text, cta);
   return wrapper;
 }
 
@@ -264,7 +297,12 @@ export function createLibrariesComponent(options = {}) {
     }
 
     if (view === LIBRARY_VIEW.EMPTY) {
-      container.appendChild(createEmptyState(emptyQuery, strings, emit));
+      container.appendChild(createSearchEmptyState(emptyQuery, strings, emit));
+      return;
+    }
+
+    if (view === LIBRARY_VIEW.NO_CONTENT) {
+      container.appendChild(createNoContentEmptyState(strings, toolHrefs));
       return;
     }
 

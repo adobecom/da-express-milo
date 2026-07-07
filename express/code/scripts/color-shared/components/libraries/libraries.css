@@ -8,7 +8,7 @@
   --ax-lib-body-color: var(--Alias-content-typography-body, #505050);
   --ax-lib-accent: var(--S2-Buttons-Accent-Color-Default);
   --ax-lib-header-height: 76px;
-  --ax-lib-strip-height: 80px;
+  --ax-lib-strip-height: 56px;
   --ax-lib-skeleton-base: var(--Palette-gray-100);
   --ax-lib-skeleton-shade: var(--Palette-gray-200);
   --ax-lib-sort-bg: var(--Palette-gray-100);
@@ -59,6 +59,11 @@
 }
 
 .ax-lib-header__count:empty {
+  display: none;
+}
+
+/* Mobile default: the sticky count collapses once scrolled (re-shown at tablet+). */
+.ax-lib-header.is-scrolled .ax-lib-header__count {
   display: none;
 }
 
@@ -247,61 +252,6 @@
   background: transparent;
 }
 
-/* Count hides only on mobile once the sticky header is scrolled */
-@media (max-width: 679px) {
-  .ax-lib-header.is-scrolled .ax-lib-header__count {
-    display: none;
-  }
-}
-
-/* ── M (tablet) and up ──────────────────────────────────────── */
-@media (min-width: 680px) {
-  /* Header stays sticky on tablet/desktop; the count never collapses here
-     (the is-scrolled count-hide is scoped to mobile only). */
-  .ax-lib-header__content {
-    align-items: center;
-    gap: var(--spacing-300);
-  }
-
-  .ax-lib-header__title-search {
-    flex-direction: row;
-    align-items: center;
-    gap: var(--spacing-300);
-  }
-
-  .ax-lib-header .ax-lib-header__count {
-    flex-shrink: 0;
-    padding-left: 0;
-  }
-
-  .ax-lib-header__search {
-    flex: 1 1 auto;
-    max-width: 460px;
-  }
-
-  .ax-lib-header__sort-picker {
-    display: inline-flex;
-  }
-
-  .ax-lib-header__sort-action,
-  .ax-lib-header__sort-popover {
-    display: none;
-  }
-}
-
-/* ── L (desktop) ────────────────────────────────────────────── */
-@media (min-width: 1200px) {
-  .ax-lib-header .ax-lib-header__count {
-    font-size: var(--body-font-size-m);
-    line-height: 22px;
-  }
-
-  .ax-lib-header__search {
-    flex: 0 0 408px;
-    max-width: 408px;
-  }
-}
-
 /* ── Summary (expand bar + accordion list) ──────────────────── */
 .ax-libraries-summary {
   display: flex;
@@ -312,22 +262,6 @@
   max-width: 599px;
   padding-top: var(--spacing-400);
   box-sizing: border-box;
-}
-
-@media (min-width: 600px) {
-  .ax-libraries-summary {
-    min-width: min(600px, 100%);
-    max-width: 1199px;
-  }
-}
-
-@media (min-width: 1200px) {
-  .ax-libraries-summary {
-    width: min(var(--block-wd-max-width), 100%);
-    min-width: min(1200px, 100%);
-    max-width: 1679px;
-    padding-top: var(--spacing-500);
-  }
 }
 
 /* ── Expand / collapse all (text links + divider) ───────────── */
@@ -438,6 +372,7 @@
 }
 
 .ax-lib-accordion-count {
+  display: none;
   font-size: var(--Global-Typography-Size-Body-Body-S);
   line-height: 1.3;
   color: var(--ax-lib-detail-color);
@@ -744,6 +679,11 @@
   color: var(--ax-lib-body-color);
 }
 
+.ax-lib-empty--no-content .ax-lib-empty__description {
+  width: 100%;
+  max-width: 100%;
+}
+
 /* Empty-state CTA matches the Figma "Button (Accent)" spec (identical across
    desktop/tablet/mobile): 24px radius, 42px height, 90px min-width, 18px/22px
    bold text, 20px horizontal padding. Fill/content colors come from the
@@ -759,21 +699,6 @@
   font-size: var(--body-font-size-l);
   font-weight: 700;
   line-height: 22px;
-}
-
-@media (min-width: 1200px) {
-  .ax-lib-empty {
-    padding-block: var(--spacing-800);
-  }
-
-  .ax-lib-empty .ax-lib-empty__heading {
-    font-size: 28px;
-    line-height: 32px;
-  }
-
-  .ax-lib-empty .ax-lib-empty__description {
-    font-size: 16px;
-  }
 }
 
 /* ── Loading skeleton (accordion header + card grid) ─────────── */
@@ -908,21 +833,105 @@
   }
 }
 
+/* ── Responsive ────────────────────────────────────────────────
+   Mobile-first. Base rules above target mobile (<600px); the two tiers
+   below layer on tablet (≥600px) and desktop (≥1200px). */
+
+/* ── Tablet (≥600px) ────────────────────────────────────────── */
+@media (min-width: 599px) {
+  /* Header stays sticky on tablet/desktop; the count never collapses here
+     (the is-scrolled count-hide is scoped to mobile only). */
+  .ax-lib-header__content {
+    align-items: center;
+    gap: var(--spacing-300);
+  }
+
+  .ax-lib-header__title-search {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-300);
+  }
+
+  .ax-lib-header .ax-lib-header__count {
+    flex-shrink: 0;
+    padding-left: 0;
+  }
+
+  .ax-lib-header.is-scrolled .ax-lib-header__count {
+    display: revert;
+  }
+
+  .ax-lib-header__search {
+    flex: 1 1 auto;
+    max-width: 460px;
+  }
+
+  .ax-lib-header__sort-picker {
+    display: inline-flex;
+  }
+
+  .ax-lib-header__sort-action,
+  .ax-lib-header__sort-popover {
+    display: none;
+  }
+
+  .ax-lib-accordion-count {
+    display: revert;
+  }
+
+  .ax-libraries-summary {
+    min-width: min(600px, 100%);
+    max-width: 1199px;
+  }
+
+  .ax-lib-empty--no-content .ax-lib-empty__description {
+    max-width: 392px;
+  }
+}
+
+/* ── Desktop (≥1200px) ──────────────────────────────────────── */
+@media (min-width: 1199px) {
+  .ax-libraries {
+    --ax-lib-strip-height: 80px;
+  }
+
+  .ax-lib-header .ax-lib-header__count {
+    font-size: var(--body-font-size-m);
+    line-height: 22px;
+  }
+
+  .ax-lib-header__search {
+    flex: 0 0 408px;
+    max-width: 408px;
+  }
+
+  .ax-libraries-summary {
+    width: min(var(--block-wd-max-width), 100%);
+    min-width: min(1200px, 100%);
+    max-width: 1679px;
+    padding-top: var(--spacing-500);
+  }
+
+  .ax-lib-empty {
+    padding-block: var(--spacing-800);
+  }
+
+  .ax-lib-empty .ax-lib-empty__heading {
+    font-size: 28px;
+    line-height: 32px;
+  }
+
+  .ax-lib-empty .ax-lib-empty__description {
+    font-size: 16px;
+  }
+
+  .ax-lib-empty--no-content .ax-lib-empty__description {
+    max-width: 448px;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .ax-lib-loading-shimmer {
     animation: none;
-  }
-}
-
-/* ── Responsive strip height + header ───────────────────────── */
-@media (max-width: 1199px) {
-  .ax-libraries {
-    --ax-lib-strip-height: 56px;
-  }
-}
-
-@media (max-width: 679px) {
-  .ax-lib-accordion-count {
-    display: none;
   }
 }
