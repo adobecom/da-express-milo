@@ -17,7 +17,7 @@ export const DEFAULT_FONT_SIZE = 16;
 export const FONT_SIZE_MIN = 12;
 export const FONT_SIZE_MAX = 48;
 
-// ─── Font data (font-styles.json) ────────────────────────────────────────────
+// ─── Font data (v1.json) ──────────────────────────────────────────────────────
 
 /**
  * Single-char → unicode-string replacement map.
@@ -75,12 +75,12 @@ export const FONT_SIZE_MAX = 48;
 
 /**
  * A single font definition. This is the unit consumed by unicodeEngine and FontCard.
- * Every font in font-styles.json has fully-populated `characters` maps for all three categories —
+ * Every font in v1.json has fully-populated `characters` maps for all three categories —
  * `missingCharacters` tracks gaps for informational use only.
  *
  * @typedef {{
  *   id: string;
- *   category: string;
+ *   grouping: string;
  *   styleName: string;
  *   fontSupported: string;
  *   type: FontType;
@@ -99,9 +99,10 @@ export const FONT_SIZE_MAX = 48;
  */
 
 /**
- * Root shape of the font sheet JSON (font-styles.json).
+ * Root shape of a versioned font sheet JSON (e.g. v1.json).
  *
  * @typedef {{
+ *   version: string;
  *   sourceCharacters: {
  *     letters: { uppercase: string; lowercase: string; all: string };
  *     numbers: string;
@@ -118,7 +119,7 @@ export const FONT_SIZE_MAX = 48;
  * URL param keys that are persisted across page loads.
  * Values are encoded/decoded by state.js initFromUrl / setState.
  *
- * @typedef {'text' | 'filters' | 'layout' | 'fontSize'} UrlParamKey
+ * @typedef {'text' | 'filters' | 'view' | 'fontSize'} UrlParamKey
  */
 
 /**
@@ -127,10 +128,14 @@ export const FONT_SIZE_MAX = 48;
  *
  * `activeFonts` is derived — do not pass it to setState.
  * `visibleCount` resets to INITIAL_VISIBLE_COUNT whenever activeFilters changes.
+ * `filtersOpen` toggles the mobile/tablet filter panel; ignored at >=1440px
+ * where filters are inline.
  *
  * @typedef {{
  *   previewText: string;
  *   activeFilters: string[];
+ *   filtersOpen: boolean;
+ *   loading: boolean;
  *   layout: 'grid' | 'list';
  *   fontSize: number;
  *   activeFonts: FontDef[];
@@ -192,11 +197,13 @@ export const FONT_SIZE_MAX = 48;
  */
 
 /**
- * Filters initializer receives a NodeList because two instances are mounted:
- * one for desktop inline, one inside the mobile/tablet panel.
+ * A single filter panel instance (categories accordion + promo) is mounted in
+ * the side column. CSS repositions it per breakpoint: inline at >=1440px, a
+ * left drawer on tablet, a bottom sheet on mobile. Open/closed below 1440px is
+ * driven by state.filtersOpen, toggled from the Filter trigger button.
  *
  * @callback FiltersInit
- * @param {NodeListOf<HTMLElement>} elements
+ * @param {HTMLElement} element
  * @returns {void}
  */
 

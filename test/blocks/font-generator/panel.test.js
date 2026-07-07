@@ -6,14 +6,9 @@ const [{ getLibs }] = await Promise.all([
 ]);
 await import(`${getLibs()}/utils/utils.js`).then((mod) => mod.setConfig({}));
 
-const [{ initFonts }, { default: initPanel }] = await Promise.all([
+const [, { default: initPanel }] = await Promise.all([
   import('../../../express/code/blocks/font-generator/state.js'),
   import('../../../express/code/blocks/font-generator/panel.js'),
-]);
-
-initFonts([
-  { name: 'Bold', category: 'bold', map: {} },
-  { name: 'Italic', category: 'italic', map: {} },
 ]);
 
 function makeBlock() {

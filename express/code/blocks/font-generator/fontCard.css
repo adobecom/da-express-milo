@@ -1,0 +1,212 @@
+.font-card {
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  min-height: 304px;
+  overflow: hidden;
+  transition: box-shadow 0.15s ease;
+}
+
+.font-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+/* ─── Body (preview area — overlay is bounded here) ──────────────────────── */
+
+.font-card-body {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 16px 16px 12px;
+  overflow: hidden;
+}
+
+/* ─── Copy icon button (upper right) ─────────────────────────────────────── */
+
+.font-card-copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.font-card-copy-btn:hover {
+  background-color: #e9e9e9;
+}
+
+.font-card-copy-btn img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+/* CSS tooltip via data-tooltip + ::after; caret via ::before */
+
+.font-card-copy-btn::before {
+  content: '';
+  position: absolute;
+  top: calc(100% + 1px);
+  right: 11px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid #131313;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  z-index: 10;
+}
+
+.font-card-copy-btn:hover::before,
+.font-card-copy-btn:focus-visible::before {
+  opacity: 1;
+}
+
+.font-card.is-copied .font-card-copy-btn::before {
+  opacity: 0 !important;
+}
+
+.font-card-copy-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: #131313;
+  color: #ffffff;
+  font-family: var(--body-font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none; 
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  z-index: 10;
+}
+
+.font-card-copy-btn:hover::after,
+.font-card-copy-btn:focus-visible::after {
+  opacity: 1;
+}
+
+/* Hide tooltip while the copied overlay is showing */
+.font-card.is-copied .font-card-copy-btn::after {
+  opacity: 0 !important;
+}
+
+/* ─── Preview text ────────────────────────────────────────────────────────── */
+
+.font-card-preview {
+  flex: 1;
+  overflow: hidden;
+  word-break: break-word;
+  line-height: 1.3;
+  padding-right: 36px; /* clear the copy button */
+  color: #131313;
+}
+
+/* ─── Copy success overlay ────────────────────────────────────────────────── */
+
+.font-card-copy-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--S2AC-Palette-transparent-black-700, rgba(0, 0, 0, 0.69));
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  border-radius: inherit;
+}
+
+.font-card.is-copied .font-card-copy-overlay {
+  opacity: 1;
+}
+
+.font-card-check-icon {
+  display: block;
+  flex-shrink: 0;
+}
+
+.font-card-copy-message {
+  font-family: var(--body-font-family);
+  font-size: 16px;
+  font-weight: 700;
+  color: #ffffff;
+  line-height: 1.2;
+}
+
+/* ─── Footer (font name + CTA link) ──────────────────────────────────────── */
+
+.font-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px solid #e9e9e9;
+  padding: 8px 16px 16px;
+  min-height: 36px;
+}
+
+.font-card-name {
+  font-family: var(--body-font-family);
+  font-size: 12px;
+  font-weight: 700;
+  color: #505050;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── CTA link (black pill button with external-link icon) ───────────────── */
+
+main a.font-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 7px 14px 7px 10px;
+  border-radius: 24px;
+  background: #000000d6;
+  color: #ffffff;
+  font-family: var(--body-font-family);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 0.1s ease;
+}
+
+.font-card-cta:hover {
+  background: #000000;
+}
+
+.font-card-cta-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
