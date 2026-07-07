@@ -128,6 +128,11 @@ describe('icon-carousel / controls', () => {
     expect(prev.getAttribute('aria-label')).to.be.a('string').with.length.greaterThan(0);
     expect(next.getAttribute('aria-label')).to.be.a('string').with.length.greaterThan(0);
   });
+
+  it('controls start hidden until observer confirms overflow', async () => {
+    const block = await prepBlock('./mocks/default.html');
+    expect(block.querySelector('.icon-carousel-controls').classList.contains('is-hidden')).to.be.true;
+  });
 });
 
 describe('icon-carousel / no-icon variant', () => {

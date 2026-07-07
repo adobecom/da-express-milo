@@ -104,6 +104,10 @@
   padding-top: var(--spacing-300);
 }
 
+.icon-carousel-controls.is-hidden {
+  display: none;
+}
+
 .icon-carousel-btn {
   width: var(--spacing-500);
   height: var(--spacing-500);

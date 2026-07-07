@@ -36,6 +36,8 @@ function buildControls(items, gallery) {
   nextBtn.addEventListener('click', () => pageInc(1));
 
   const update = debounce((first, last) => {
+    const allVisible = first === 0 && last === len - 1;
+    controls.classList.toggle('is-hidden', allVisible);
     prevBtn.disabled = first === 0;
     nextBtn.disabled = last === len - 1;
   }, 300);
@@ -51,6 +53,7 @@ function buildControls(items, gallery) {
 
   items.forEach((item) => observer.observe(item));
 
+  controls.classList.add('is-hidden');
   controls.append(prevBtn, nextBtn);
   return controls;
 }
