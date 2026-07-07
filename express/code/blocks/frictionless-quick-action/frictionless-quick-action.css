@@ -168,6 +168,10 @@ main .section .frictionless-quick-action .free-plan-widget img.icon.icon-checkma
     height: 1080px;
 }
 
+.frictionless-quick-action .quick-action-container#compress-image-container {
+    height: 1080px;
+}
+
 .frictionless-quick-action .quick-action-container#convert-to-gif-container {
     height: 770px;
 }
