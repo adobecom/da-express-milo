@@ -229,11 +229,6 @@ main .template-x.sixcols:not(.print) .masonry-col, main .template-x.fullwidth:no
   min-height: 700px;
 }
 
-.template-x.fullwidth:not(.horizontal) > .template-x-inner-wrapper,
-.template-x.sixcols:not(.horizontal) > .template-x-inner-wrapper {
-  min-height: 100vh;
-}
-
 .template-x[class*="lg-view"] > .template-x-inner-wrapper > .masonry-col {
   max-width: 335px;
   text-align: center;
