@@ -9,7 +9,6 @@ const miloLibs = process.env.MILO_LIBS || '';
 test.describe('FontGeneratorBlock Test Suite', () => {
   // Test Id : 0 : @font-generator-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
-    const { data } = features[0];
     const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
     const block = new FontGeneratorBlock(page, features[0].selector);
     console.info(`[Test Page]: ${testUrl}`);
@@ -20,49 +19,75 @@ test.describe('FontGeneratorBlock Test Suite', () => {
       await expect(page).toHaveURL(testUrl);
     });
 
-    await test.step('step-2: Verify block content', async () => {
+    await test.step('step-2: Verify block structure', async () => {
       await expect(block.block).toBeVisible();
-      const sem = data.semantic;
+      await expect(block.container).toBeVisible();
+      await expect(block.sidebar).toBeVisible();
+      await expect(block.main).toBeVisible();
+    });
 
-      for (const t of sem.texts) {
-        const locator = block.block.locator(t.selector).nth(t.nth || 0);
-        await expect(locator).toContainText(t.text);
-      }
+    await test.step('step-3: Verify filter list renders', async () => {
+      await expect(block.sidebarFilters).toBeVisible();
+      await expect(block.filterList).toBeVisible();
+      await expect(block.allFilterBtn).toBeVisible();
+      await expect(block.categoryButtons.first()).toBeVisible();
+    });
 
-      for (const m of sem.media) {
-        const locator = block.block.locator(m.selector).nth(m.nth || 0);
-        const isHiddenSelector = m.selector.includes('.isHidden');
-        const isPicture = m.tag === 'picture';
-        const target = isPicture ? locator.locator('img') : locator;
-        if (isHiddenSelector) {
-          await expect(target).toBeHidden();
-        } else {
-          await expect(target).toBeVisible();
-        }
-      }
+    await test.step('step-4: Verify accordion label', async () => {
+      const label = await block.accordionItem.getAttribute('label');
+      expect(label).toBe('Categories');
+    });
 
-      for (const iEl of sem.interactives) {
-        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
-        await expect(locator).toBeVisible({ timeout: 8000 });
-        if (iEl.type === 'link' && iEl.href) {
-          const href = await locator.getAttribute('href');
-          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
-            await expect(href).toBe(iEl.href);
-          } else {
-            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
-            const actualPath = new URL(href, 'https://dummy.base').pathname;
-            await expect(actualPath).toBe(expectedPath);
-          }
-        }
-        if (iEl.text) await expect(locator).toContainText(iEl.text);
+    await test.step('step-5: Verify "All" button is selected by default', async () => {
+      await expect(block.allFilterBtn).toHaveAttribute('aria-pressed', 'true');
+      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '0');
+      await expect(block.allFilterBtn).toHaveClass(/is-selected/);
+
+      const catCount = await block.categoryButtons.count();
+      for (let i = 0; i < catCount; i += 1) {
+        await expect(block.categoryButtons.nth(i)).toHaveAttribute('aria-pressed', 'false');
+        await expect(block.categoryButtons.nth(i)).toHaveAttribute('tabindex', '-1');
       }
     });
 
-    await test.step('step-3: Accessibility validation', async () => {
+    await test.step('step-6: Clicking a category button selects it and deselects "All"', async () => {
+      const firstCat = block.categoryButtons.first();
+      await firstCat.click();
+
+      await expect(firstCat).toHaveAttribute('aria-pressed', 'true');
+      await expect(firstCat).toHaveAttribute('tabindex', '0');
+      await expect(firstCat).toHaveClass(/is-selected/);
+      await expect(block.allFilterBtn).toHaveAttribute('aria-pressed', 'false');
+      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '-1');
+    });
+
+    await test.step('step-7: Clicking the same category button again restores "All"', async () => {
+      const firstCat = block.categoryButtons.first();
+      await firstCat.click();
+
+      await expect(block.allFilterBtn).toHaveAttribute('aria-pressed', 'true');
+      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '0');
+      await expect(block.allFilterBtn).toHaveClass(/is-selected/);
+      await expect(firstCat).toHaveAttribute('aria-pressed', 'false');
+    });
+
+    await test.step('step-8: Arrow key navigation moves focus between filter buttons', async () => {
+      await block.allFilterBtn.focus();
+      await page.keyboard.press('ArrowRight');
+
+      const firstCat = block.categoryButtons.first();
+      await expect(firstCat).toHaveAttribute('tabindex', '0');
+      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '-1');
+
+      await page.keyboard.press('ArrowLeft');
+      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '0');
+    });
+
+    await test.step('step-9: Accessibility validation', async () => {
       await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
     });
 
-    await test.step('step-4: SEO validation', async () => {
+    await test.step('step-10: SEO validation', async () => {
       await runSeoChecks({ page, feature: features[0], skipSeoTest: false });
     });
   });

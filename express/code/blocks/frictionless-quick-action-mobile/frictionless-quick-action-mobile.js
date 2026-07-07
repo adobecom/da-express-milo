@@ -93,6 +93,10 @@ export async function runQuickAction(quickActionId, data, block) {
       isFrictionlessQa: 'true',
       ...(quickActionId === 'caption-video' && { videoLanguage: selectedVideoLanguage }),
     },
+    analyticsData: {
+      ...(quickActionId === 'video-compress' && { entryPoint: 'seo-quick-action-video-compress' }),
+      ...(quickActionId === 'video-convert' && { entryPoint: 'seo-quick-action-video-convert' }),
+    },
     receiveQuickActionErrors: true,
     callbacks: {
       onIntentChange: () => {
