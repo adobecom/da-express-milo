@@ -1,3 +1,4 @@
+/* eslint-disable no-underscore-dangle -- _satellite is an Adobe global, not our naming */
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 
@@ -208,5 +209,91 @@ describe('Easy Upload module', () => {
 
     expect(markConsumedSpy.called).to.be.true;
     expect(refreshedByEvent).to.be.true;
+  });
+
+  it('fires the confirm-upload analytics event when an enabled confirm button is clicked', async () => {
+    const trackSpy = sinon.spy();
+    window._satellite = { track: trackSpy };
+
+    const block = buildEasyUploadBlock();
+    block.dataset.frictionlessgroup = 'image';
+    block.dataset.frictionlesstype = 'remove-background-easy-upload-variant';
+    sinon.stub(EasyUpload.prototype, 'initializeQRCode').resolves();
+    sinon.stub(EasyUpload.prototype, 'startUploadDetectionPolling');
+    sinon.stub(EasyUpload.prototype, 'handleConfirmImport').resolves();
+    sinon.stub(EasyUpload.prototype, 'isQrCodeConsumed').returns(false);
+
+    await setupEasyUploadUI({
+      quickAction: EasyUploadVariants.removeBackgroundEasyUploadVariant,
+      block,
+      getConfig: () => ({ codeRoot: '/express/code', env: { name: 'stage' } }),
+      loadStyle: sinon.stub().callsFake((href, callback) => callback?.()),
+      initializeUploadService: sinon.stub().resolves({}),
+      startSDKWithUnconvertedFiles: sinon.stub(),
+      createTag,
+      showErrorToast: sinon.stub(),
+    });
+
+    const secondaryCta = block.querySelector('.easy-upload-cta-row > p.button-container:nth-child(2) a.button');
+    secondaryCta.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    const qrReady = await waitFor(() => {
+      const qrPane = block.querySelector('.qr-code-container.dropzone-container');
+      return qrPane && qrPane.dataset.qrInitialized === 'true';
+    });
+    expect(qrReady).to.be.true;
+
+    const confirmButton = block.querySelector('.qr-code-container .confirm-import-button');
+    expect(confirmButton.dataset.easyUploadConfirmBound).to.equal('true');
+    // Simulate the upload being detected, which enables the button.
+    confirmButton.classList.remove('disabled');
+    confirmButton.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+    await waitFor(() => trackSpy.called);
+    expect(trackSpy.called).to.be.true;
+    const eventName = trackSpy.args[0][1]?.data?.web?.webInteraction?.name;
+    expect(eventName).to.equal('select-confirm-upload-cta');
+    expect(EasyUpload.prototype.handleConfirmImport.calledOnce).to.be.true;
+
+    delete window._satellite;
+  });
+
+  it('does not fire the confirm-upload analytics event when the confirm button is disabled', async () => {
+    const trackSpy = sinon.spy();
+    window._satellite = { track: trackSpy };
+
+    const block = buildEasyUploadBlock();
+    sinon.stub(EasyUpload.prototype, 'initializeQRCode').resolves();
+    sinon.stub(EasyUpload.prototype, 'startUploadDetectionPolling');
+    sinon.stub(EasyUpload.prototype, 'handleConfirmImport').resolves();
+    sinon.stub(EasyUpload.prototype, 'isQrCodeConsumed').returns(false);
+
+    await setupEasyUploadUI({
+      quickAction: EasyUploadVariants.removeBackgroundEasyUploadVariant,
+      block,
+      getConfig: () => ({ codeRoot: '/express/code', env: { name: 'stage' } }),
+      loadStyle: sinon.stub().callsFake((href, callback) => callback?.()),
+      initializeUploadService: sinon.stub().resolves({}),
+      startSDKWithUnconvertedFiles: sinon.stub(),
+      createTag,
+      showErrorToast: sinon.stub(),
+    });
+
+    const secondaryCta = block.querySelector('.easy-upload-cta-row > p.button-container:nth-child(2) a.button');
+    secondaryCta.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    await waitFor(() => {
+      const qrPane = block.querySelector('.qr-code-container.dropzone-container');
+      return qrPane && qrPane.dataset.qrInitialized === 'true';
+    });
+
+    const confirmButton = block.querySelector('.qr-code-container .confirm-import-button');
+    // Button remains disabled (upload not yet detected).
+    expect(confirmButton.classList.contains('disabled')).to.be.true;
+    confirmButton.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+
+    await new Promise((resolve) => { setTimeout(resolve, 10); });
+    expect(trackSpy.called).to.be.false;
+    expect(EasyUpload.prototype.handleConfirmImport.called).to.be.false;
+
+    delete window._satellite;
   });
 });

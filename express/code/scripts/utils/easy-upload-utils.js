@@ -32,20 +32,20 @@ export const EasyUploadControls = {
 };
 
 export const EasyUploadVariantsPromoidMap = {
-  [EasyUploadVariants.removeBackgroundEasyUploadVariant]: 'P3KMQHCX&mv=other',
-  [EasyUploadVariants.resizeImageEasyUploadVariant]: 'P3KMQHCX&mv=other',
-  [EasyUploadVariants.cropImageEasyUploadVariant]: 'P3KMQHCX&mv=other',
-  [EasyUploadControls.removeBackgroundEasyUploadControl]: 'NYTLQM3Y&mv=other',
-  [EasyUploadControls.resizeImageEasyUploadControl]: 'NYTLQM3Y&mv=other',
-  [EasyUploadControls.cropImageEasyUploadControl]: 'NYTLQM3Y&mv=other',
-  [EasyUploadControls.convertToJPEGEasyUploadControl]: 'NYTLQM3Y&mv=other',
-  [EasyUploadControls.convertToPNGEasyUploadControl]: 'NYTLQM3Y&mv=other',
-  [EasyUploadControls.convertToSVGEasyUploadControl]: 'NYTLQM3Y&mv=other',
-  [EasyUploadVariants.convertToJPEGEasyUploadVariant]: 'P3KMQHCX&mv=other',
-  [EasyUploadVariants.convertToPNGEasyUploadVariant]: 'P3KMQHCX&mv=other',
-  [EasyUploadVariants.convertToSVGEasyUploadVariant]: 'P3KMQHCX&mv=other',
-  [EasyUploadControls.editImageEasyUploadControl]: 'NYTLQM3Y&mv=other',
-  [EasyUploadVariants.editImageEasyUploadVariant]: 'P3KMQHCX&mv=other',
+  [EasyUploadVariants.removeBackgroundEasyUploadVariant]: 'P3KMQHCX',
+  [EasyUploadVariants.resizeImageEasyUploadVariant]: 'P3KMQHCX',
+  [EasyUploadVariants.cropImageEasyUploadVariant]: 'P3KMQHCX',
+  [EasyUploadControls.removeBackgroundEasyUploadControl]: 'NYTLQM3Y',
+  [EasyUploadControls.resizeImageEasyUploadControl]: 'NYTLQM3Y',
+  [EasyUploadControls.cropImageEasyUploadControl]: 'NYTLQM3Y',
+  [EasyUploadControls.convertToJPEGEasyUploadControl]: 'NYTLQM3Y',
+  [EasyUploadControls.convertToPNGEasyUploadControl]: 'NYTLQM3Y',
+  [EasyUploadControls.convertToSVGEasyUploadControl]: 'NYTLQM3Y',
+  [EasyUploadVariants.convertToJPEGEasyUploadVariant]: 'P3KMQHCX',
+  [EasyUploadVariants.convertToPNGEasyUploadVariant]: 'P3KMQHCX',
+  [EasyUploadVariants.convertToSVGEasyUploadVariant]: 'P3KMQHCX',
+  [EasyUploadControls.editImageEasyUploadControl]: 'NYTLQM3Y',
+  [EasyUploadVariants.editImageEasyUploadVariant]: 'P3KMQHCX',
 };
 
 const QR_CODE_CDN_URL = 'https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js';
@@ -614,9 +614,7 @@ export class EasyUpload {
 
       const urlGenerationPromise = Promise.race([
         (async () => {
-          console.log('[EasyUpload] generating presigned URL, quickAction:', this.quickAction);
           const presignedUrl = await this.generatePresignedUploadUrl();
-          console.log('[EasyUpload] presignedUrl result:', presignedUrl ? 'ok' : 'null/undefined');
           const mobileUrl = this.buildMobileUploadUrl(presignedUrl);
           return this.shortenUrl(mobileUrl);
         })(),
@@ -654,11 +652,9 @@ export class EasyUpload {
     const url = new URL(`https://${host}/uploadFromOtherDevice`);
     url.searchParams.set('upload_url', presignedUrl);
 
-    console.log('[EasyUpload] buildMobileUploadUrl, quickAction:', this.quickAction);
-    const promoEntry = EasyUploadVariantsPromoidMap[this.quickAction];
-    console.log('[EasyUpload] promoEntry:', promoEntry);
-    if (promoEntry) {
-      url.searchParams.set('promoid', promoEntry.split('&')[0]);
+    const promoid = EasyUploadVariantsPromoidMap[this.quickAction];
+    if (promoid) {
+      url.searchParams.set('promoid', promoid);
       url.searchParams.set('mv', 'other');
     }
 

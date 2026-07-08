@@ -757,6 +757,26 @@ async function startSDKWithUnconvertedFiles(files, quickAction, block, fromQrCod
     return;
   }
 
+  // Easy upload variants/controls hand off to the inline SDK rather than performUploadAction,
+  // so mirror the auth-frictionless completion event here once the files are processed.
+  /* c8 ignore next 15 */
+  if (quickAction?.includes('easy-upload')) {
+    sendFrictionlessEventToAdobeAnaltics(block, 'complete-quickaction-upload', {
+      event: {
+        subcategory: 'import',
+        subtype: 'content',
+        workflow: 'quickaction',
+        type: 'success',
+      },
+      custom: {
+        qa: {
+          location: 'seo',
+          upload_method: fromQrCode ? 'qr-code' : 'browse-device',
+        },
+      },
+    });
+  }
+
   startSDK(data, normalizedQuickAction, block, fromQrCode);
 }
 
