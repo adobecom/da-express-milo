@@ -29,6 +29,7 @@ const CSS_CLASSES = {
   BLOCK: 'color-explore',
   CONTAINER: 'color-explore-container',
   LOADING: 'is-loading',
+  SIGN_IN: 'color-libraries-signin',
 };
 
 let componentInstance = null;
@@ -225,6 +226,9 @@ export default async function decorate(block) {
       '../../scripts/color-shared/utils/susiRedirect.js'
     );
     setSusiColorRedirect(buildLibrariesSignInRedirectUrl());
+    // Marker so color-libraries.css can paint the responsive libraries backdrop
+    // behind the shared SUSI modal curtain (only on this page).
+    document.body.classList.add(CSS_CLASSES.SIGN_IN);
     trackColorBlockLoad('color-libraries');
     await triggerSignInFlow();
     return;
