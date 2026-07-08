@@ -1,0 +1,95 @@
+.transparent-image-marquee {
+  background: var(--color-black);
+  color: var(--color-white);
+  display: flex;
+  justify-content: center;
+  padding-inline: var(--spacing-500);
+}
+
+.transparent-image-marquee .foreground {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+  max-width: 1600px;
+  width: 100%;
+}
+
+.transparent-image-marquee .text-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+
+/* (0,2,0) beats main .section p (0,1,2) */
+.transparent-image-marquee .logo-eyebrow {
+  align-items: center;
+  display: flex;
+  gap: var(--spacing-75);
+  margin: 0;
+}
+
+.transparent-image-marquee .logo-eyebrow .icon img {
+  display: block;
+  height: 18px;
+  width: auto;
+}
+
+.transparent-image-marquee .text-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+}
+
+.transparent-image-marquee .text-container h2 {
+  color: var(--color-white);
+  font-size: var(--heading-font-size-l);
+  font-weight: var(--heading-font-weight-extra);
+  line-height: 1.04;
+  margin: 0;
+}
+
+/* (0,3,1) beats main .section p (0,1,2) */
+.transparent-image-marquee .text-content .text-container p {
+  color: var(--color-white);
+  font-size: var(--body-font-size-m);
+  line-height: 1.3;
+  margin: 0;
+}
+
+.transparent-image-marquee .image-container picture {
+  display: block;
+}
+
+.transparent-image-marquee .image-container img {
+  display: block;
+  height: auto;
+  width: 100%;
+}
+
+@media (min-width: 900px) {
+  .transparent-image-marquee {
+    align-items: flex-end;
+    padding-inline: var(--spacing-600);
+  }
+
+  .transparent-image-marquee .foreground {
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .transparent-image-marquee .text-content {
+    flex: 1;
+    max-width: 438px;
+    padding-block: var(--spacing-900);
+  }
+
+  .transparent-image-marquee .text-container h2 {
+    font-size: var(--heading-font-size-2xl);
+  }
+
+  .transparent-image-marquee .image-container {
+    align-self: flex-end;
+    flex-shrink: 0;
+    width: 788px;
+  }
+}
