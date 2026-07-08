@@ -35,7 +35,7 @@ export function init(container, { inputLabel = 'Preview text', placeholder = 'Ty
     class: 'fg-input',
     type: 'text',
     'aria-label': inputLabel,
-    maxlength: '200',
+    maxlength: '2200',
   });
   input.value = getState().previewText;
   input.placeholder = placeholder;

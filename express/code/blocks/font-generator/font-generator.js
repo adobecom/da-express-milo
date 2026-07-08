@@ -119,4 +119,7 @@ export default function decorate(block) {
   block.classList.remove('loading');
 
   emitAnalytics('font_generator_landing_impression');
+
+  // Warm up the ACP upload service ahead of the CTA click so its latency is hidden.
+  import('./fontTextUpload.js').then((mod) => mod.prewarmAcpUpload()).catch(() => {});
 }

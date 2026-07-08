@@ -112,12 +112,10 @@ export function createFontCard({
     handleOpenInExpress({ styleId: fontDef.id, glyphString: currentGlyph }, prodBaseUrl);
   });
 
-  // ── Assemble ─────────────────────────────────────────────────────────────
   actions.append(copyBtn, ctaBtn);
   footer.append(nameEl, actions);
   card.append(preview, footer);
 
-  // ── Update (called by FontCardGrid on state change) ───────────────────────
   function update({ previewText: newText, fontSize: newSize }) {
     currentGlyph = transformText(newText, fontDef);
     preview.textContent = currentGlyph;
