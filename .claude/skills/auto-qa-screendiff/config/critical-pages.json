@@ -5,7 +5,9 @@
       "repo": "da-express-milo",
       "stableBase": "https://main--da-express-milo--adobecom.aem.live",
       "branchBase": "https://{branch}--da-express-milo--adobecom.aem.live",
-      "prodHost": "www.adobe.com"
+      "prodHost": "www.adobe.com",
+      "kitchenSinkPath": "/docs/library/kitchen-sink/{block}",
+      "kitchenSinkBlocks": ["animation","app-banner","app-ratings","ax-accordion","ax-columns","ax-marquee","ax-marquee-dynamic-hero","ax-panels","ax-table-of-contents","banner","banner-bg","billing-radio","blog-article-marquee","blog-columns","blog-feature-marquee","blog-posts","blog-posts-v2","browse-by-category","browse-by-collaboration","cards","carousel-card-mobile","category-list","collapsible-card","collapsible-rows","color-how-to-carousel","colors-how-to-carousel","colors-seo-page","columns","comparison-table-v2","content-cards","content-toggle","content-toggle-v2","cta-cards","cta-carousel","drawer-cards","embed","faq","faqv2","feature-grid","feature-grid-desktop","feature-list","firefly-card","floating-button","floating-buttons","floating-panel","fragment","frictionless-quick-action","fullscreen-marquee","gen-ai-cards","gen-ai-row","grid-marquee","headline","hero-animation","hero-color","highlight","holiday-blade","hover-cards","how-to-cards","how-to-steps","how-to-steps-carousel","how-to-v2","how-to-v3","icon-list","image-list","interactive-marquee","layouts","legal","link-blade","link-list","list","logo-row","long-text","make-a-project","marquee","multifunctional-button","page-list","playlist","premium-plan","pricing-cards","pricing-cards-simplified-kitchen-sink","pricing-cards-v2","pricing-summary","pricing-table","promotion","puf","quick-action-cards","quick-action-hub","quotes","ratings","ribbon-banner","search-marquee","seo-nav","split-action","steps","sticky-promo-bar","submit-email","susi-light","table-ax","table-of-contents","table-of-contents-seo-feature","tabs-ax","template-list","template-x","template-x-carousel","template-x-carousel-toolbar","template-x-promo","test","toc","toc-seo","toggle-bar","tutorials","wayfinder","z-pattern"]
     },
     "color": {
       "org": "adobecom",

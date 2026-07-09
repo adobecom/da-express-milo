@@ -49,7 +49,9 @@ function add(projectKey, edsPath, matchedBlocks, source) {
   if (byKey.has(key)) {
     const e = byKey.get(key);
     e.matchedBlocks = [...new Set([...e.matchedBlocks, ...matchedBlocks])].sort();
-    if (source === 'curated') e.source = 'curated'; // curated wins as the label
+    // curated wins as the label, then kitchen-sink, then discovered
+    const rank = { curated: 2, 'kitchen-sink': 1, discovered: 0 };
+    if ((rank[source] ?? 0) > (rank[e.source] ?? 0)) e.source = source;
     return;
   }
   const { a, b } = urlsFor(projectKey, edsPath);
@@ -58,10 +60,10 @@ function add(projectKey, edsPath, matchedBlocks, source) {
   });
 }
 
-// 1. Curated affected pages.
+// 1. Curated + kitchen-sink affected pages (select-affected.mjs tags each with its source).
 const affected = JSON.parse(readFileSync(arg('--affected'), 'utf8'));
 for (const p of affected.pages) {
-  if (p.affected) add(p.project, p.edsPath, p.matchedBlocks || [], 'curated');
+  if (p.affected) add(p.project, p.edsPath, p.matchedBlocks || [], p.source || 'curated');
 }
 
 // 2. Discovered pages from each crawl file.
@@ -90,6 +92,7 @@ const out = {
   counts: {
     total: pages.length,
     curated: pages.filter((p) => p.source === 'curated').length,
+    kitchenSink: pages.filter((p) => p.source === 'kitchen-sink').length,
     discovered: pages.filter((p) => p.source === 'discovered').length,
   },
   viewports,
@@ -97,6 +100,6 @@ const out = {
 };
 writeFileSync(outPath, `${JSON.stringify(out, null, 2)}\n`);
 process.stdout.write(
-  `worklist: ${pages.length} pages (${out.counts.curated} curated + ${out.counts.discovered} discovered) `
-  + `× ${viewports.length} viewports → ${outPath}\n`,
+  `worklist: ${pages.length} pages (${out.counts.curated} curated + ${out.counts.kitchenSink} kitchen-sink `
+  + `+ ${out.counts.discovered} discovered) × ${viewports.length} viewports → ${outPath}\n`,
 );

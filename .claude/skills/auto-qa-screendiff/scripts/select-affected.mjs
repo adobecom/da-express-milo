@@ -13,7 +13,10 @@
  *   --mode select
  *     Reads the saved DA source for each page, extracts the blocks it uses,
  *     intersects with the affected blocks from resolve-changed-blocks, and
- *     writes affected-pages.json plus a human summary.
+ *     writes affected-pages.json plus a human summary. Also auto-adds the
+ *     kitchen-sink demo page (source: "kitchen-sink") for any affected block
+ *     that has one, per the manifest's `kitchenSinkBlocks` list — this is the
+ *     default no-crawl coverage for da-express-milo blocks.
  *
  * Usage:
  *   node select-affected.mjs --mode plan   --manifest <f> --pages-dir <d>
@@ -103,8 +106,40 @@ for (const page of manifest.pages) {
     entry.a = proj.stableBase + suffix;
     entry.b = branchBase + suffix;
     entry.viewports = ['chrome', 'ipad', 'iphone'];
+    entry.source = 'curated';
   }
   results.push(entry);
+}
+
+// Auto-add kitchen-sink demo pages for any affected block that has one —
+// zero-cost coverage (no crawl) for blocks the curated set doesn't happen to use.
+const ksProjectKey = Object.keys(manifest.projects)
+  .find((k) => manifest.projects[k].kitchenSinkBlocks);
+const ksProj = ksProjectKey && manifest.projects[ksProjectKey];
+if (ksProj) {
+  const ksSet = new Set(ksProj.kitchenSinkBlocks);
+  const curatedPaths = new Set(results.filter((r) => r.affected).map((r) => `${r.project}::${r.edsPath}`));
+  for (const block of changed.affectedBlocks || []) {
+    if (!ksSet.has(block)) continue;
+    const edsPath = ksProj.kitchenSinkPath.replace('{block}', block);
+    if (curatedPaths.has(`${ksProjectKey}::${edsPath}`)) continue; // already covered
+    const branchBase = ksProj.branchBase.replace('{branch}', branch);
+    results.push({
+      project: ksProjectKey,
+      label: `Kitchen sink: ${block}`,
+      edsPath,
+      daPath: null,
+      fetched: true,
+      blocksOnPage: [block],
+      matchedBlocks: [block],
+      affected: true,
+      reason: `kitchen-sink demo for changed block: ${block}`,
+      a: ksProj.stableBase + edsPath,
+      b: branchBase + edsPath,
+      viewports: ['chrome', 'ipad', 'iphone'],
+      source: 'kitchen-sink',
+    });
+  }
 }
 
 const affected = results.filter((r) => r.affected);
