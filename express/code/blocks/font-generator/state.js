@@ -1,4 +1,4 @@
-let allFonts = [];
+import { allFonts } from './unicodeEngine.js';
 
 const DEFAULTS = {
   previewText: 'Type the preview text you want to get started...',
@@ -18,15 +18,16 @@ const URL_PARAMS = {
 
 let state = {
   ...DEFAULTS,
-  activeFonts: [],
+  activeFonts: allFonts ?? [],
   visibleCount: VISIBLE_COUNT_DEFAULT,
 };
 
 const subscribers = new Set();
 
 function deriveActiveFonts(activeFilters) {
-  if (!activeFilters.length) return allFonts;
-  return allFonts.filter((font) => activeFilters.includes(font.category));
+  const fonts = allFonts ?? [];
+  if (!activeFilters.length) return fonts;
+  return fonts.filter((font) => activeFilters.includes(font.category));
 }
 
 function syncToUrl() {
@@ -112,14 +113,4 @@ export function initFromUrl() {
 
   state.activeFonts = deriveActiveFonts(state.activeFilters);
   state.visibleCount = VISIBLE_COUNT_DEFAULT;
-}
-
-export function initFonts(fonts) {
-  allFonts = fonts;
-  state.activeFonts = deriveActiveFonts(state.activeFilters);
-  notify();
-}
-
-export function getCategories() {
-  return [...new Set(allFonts.map((f) => f.category))];
 }

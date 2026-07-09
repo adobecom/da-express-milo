@@ -1,9 +1,10 @@
 .font-generator {
-  --fg-sidebar-width: 477px;
-  --fg-panel-width: 511px;
+  --fg-sidebar-width: 280px;
+  --fg-card-min-w: 280px;
+  --fg-radius: 8px;
+  --fg-transition: 120ms ease;
 
   padding: var(--spacing-600) var(--spacing-300);
-  background-color: var(--color-gray-150); /* ToDo: Ask if this should be authorable */
 }
 
 .font-generator .fg-container {
@@ -14,307 +15,272 @@
   margin-inline: auto;
 }
 
-/* start placeholders — remove when sidebar and main are implemented */
-.font-generator .fg-main p {
-  min-height: 1400px;
-  border: 2px dashed var(--color-purple-1000);
-  margin: 0;
+.font-generator .fg-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--spacing-200);
 }
-/* end placeholders */
 
-/* Filters */
-.font-generator .fg-filters {
+.font-generator .fg-layout-toggle {
+  display: flex;
+  gap: var(--spacing-100);
+}
+
+.font-generator .fg-layout-btn {
+  padding: var(--spacing-100) var(--spacing-200);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--fg-radius);
+  background: transparent;
+  cursor: pointer;
+  font-size: var(--type-body-s-size);
+  color: var(--color-gray-700);
+  transition: background var(--fg-transition), color var(--fg-transition);
+}
+
+.font-generator .fg-layout-btn--active,
+.font-generator .fg-layout-btn[aria-pressed='true'] {
+  background: var(--color-blue-800);
+  color: var(--color-white);
+  border-color: var(--color-blue-800);
+}
+
+.font-generator .fg-size-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-150);
+}
+
+.font-generator .fg-size-label {
+  font-size: var(--type-body-s-size);
+  color: var(--color-gray-700);
+  white-space: nowrap;
+}
+
+.font-generator .fg-size-slider {
+  width: 120px;
+  accent-color: var(--color-blue-800);
+}
+
+.font-generator .fg-size-display {
+  font-size: var(--type-body-s-size);
+  color: var(--color-gray-700);
+  min-width: 3ch;
+}
+
+.font-generator .fg-text-input {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-300);
+  gap: var(--spacing-100);
 }
 
-.font-generator .fg-filter-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-75);
+.font-generator .fg-input-label {
+  font-size: var(--type-body-s-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-800);
+}
+
+.font-generator .fg-input {
+  width: 100%;
+  padding: var(--spacing-200) var(--spacing-300);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--fg-radius);
+  font-size: var(--type-body-m-size);
+  color: var(--color-gray-900);
+  background: var(--color-white);
+  transition: border-color var(--fg-transition), box-shadow var(--fg-transition);
+}
+
+.font-generator .fg-input:focus-visible {
+  outline: none;
+  border-color: var(--color-blue-800);
+  box-shadow: 0 0 0 3px rgb(var(--color-blue-800-rgb) / 20%);
+}
+
+.font-generator .fg-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+}
+
+.font-generator .fg-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-100);
 }
 
 .font-generator .fg-filter-btn {
-  min-height: 48px;
-  min-width: 100px;
-  border: 1px solid transparent;
-  border-radius: var(--corner-radius-80);
-  background-color: var(--color-white);
-  overflow: hidden;
-  padding: var(--spacing-100) var(--spacing-75);
+  padding: var(--spacing-100) var(--spacing-200);
+  border: 1px solid var(--color-gray-300);
+  border-radius: 100px;
+  background: transparent;
   cursor: pointer;
+  font-size: var(--type-body-s-size);
+  color: var(--color-gray-700);
+  transition: background var(--fg-transition), color var(--fg-transition), border-color var(--fg-transition);
+}
+
+.font-generator .fg-filter-btn--active,
+.font-generator .fg-filter-btn[aria-pressed='true'] {
+  background: var(--color-blue-800);
+  color: var(--color-white);
+  border-color: var(--color-blue-800);
+}
+
+.font-generator .fg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--fg-card-min-w), 1fr));
+  gap: var(--spacing-300);
+}
+
+.font-generator .fg-grid.layout-list {
+  grid-template-columns: 1fr;
+}
+
+.font-generator .fg-card {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: var(--Global-Typography-Size-Label-Label-2XL);
-  line-height: var(--Global-Typography-Line-height-Label-Label-2XL);
-  text-align: center;
-  color: var(--Palette-gray-800);
-  position: relative;
-  font-family: var(--body-font-family);
+  flex-direction: column;
+  border: 1px solid var(--color-gray-200);
+  border-radius: var(--fg-radius);
+  overflow: hidden;
+  background: var(--color-white);
+  transition: box-shadow var(--fg-transition);
 }
 
-.font-generator .fg-filter-btn:hover {
-  background-color: var(--color-gray-100);
-  border-color: var(--color-black);
+.font-generator .fg-card:hover {
+  box-shadow: 0 4px 16px rgb(0 0 0 / 10%);
 }
 
-.font-generator .fg-filter-btn:focus-visible {
-  background-color: var(--color-gray-100);
-  border-color: var(--Buttons-default);
-  outline: none;
+.font-generator .fg-card-preview {
+  flex: 1;
+  margin: 0;
+  padding: var(--spacing-400) var(--spacing-300);
+  overflow-wrap: break-word;
+  word-break: break-all;
+  line-height: 1.3;
+  min-height: 80px;
+  font-family: inherit;
 }
 
-.font-generator .fg-filter-btn.is-selected {
-  border-color: var(--Buttons-Down);
-}
-
-.font-generator .fg-filter-btn.is-selected:focus-visible {
-  border-color: var(--Buttons-Down);
-  background-color: var(--color-white);
-}
-
-.font-generator .fg-filter-btn.is-selected:focus-visible::after {
-  content: '';
-  position: absolute;
-  right: -1px;
-  top: 0;
-  border-radius: 4px;
-  border: 1px solid var(--Buttons-default);
-  width: 100%;
-  height: calc(100% - 2px);
-}
-
-.font-generator .fg-filter-btn[data-category="Symbol text"] {
-  font-size: var(--Global-Typography-Size-Label-Label-S);
-  line-height: var(--Global-Typography-Line-height-Label-Label-S);
-}
-
-/* Accordion */
-.font-generator sp-accordion {
-  width: 100%;
-}
-
-.font-generator sp-accordion-item {
-  --mod-accordion-item-header-font-size: var(--body-font-size-s);
-  --mod-accordion-item-header-font-weight: 700;
-  --mod-accordion-item-header-color: var(--Palette-gray-800);
-  --mod-accordion-corner-radius: 7px;
-  --mod-accordion-background-color-hover: rgba(0, 0, 0, 0.09);
-  --mod-accordion-item-content-area-top-to-content: var(--spacing-100);
-  --mod-accordion-item-content-area-bottom-to-content: var(--spacing-300);
-  --mod-accordion-component-edge-to-text: var(--spacing-100);
-
-  border-block-start: none;
-  border-block-end: 1px solid var(--Palette-gray-200);
-}
-
-.font-generator sp-accordion-item:hover {
-  border-block-end-color: transparent;
-}
-
-.font-generator sp-accordion-item::part(indicator) {
-  color: var(--text-color-secondary);
-}
-
-.font-generator sp-accordion-item[open] {
-  border-block-end-color: transparent;
-}
-
-.font-generator .fg-panel sp-accordion-item {
-  border-block-end: none;
-}
-
-/* Promo */
-.font-generator .fg-promo {
+.font-generator .fg-card-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-300);
-  padding: var(--spacing-300);
-  background-color: var(--color-white);
-  border-radius: var(--Corner-radius-corner-radius-200);
-  overflow: hidden;
-  flex-shrink: 0;
+  gap: var(--spacing-200);
+  padding: var(--spacing-200) var(--spacing-300);
+  border-top: 1px solid var(--color-gray-100);
+  background: var(--color-gray-50);
 }
 
-.font-generator .fg-promo-left {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-100);
-  flex: 1;
-  min-width: 0;
-}
-
-.font-generator .fg-promo-icon {
-  display: none;
-  flex-shrink: 0;
-  color: var(--color-black);
-}
-
-.font-generator .fg-promo-text {
-  margin: 0;
-  font-size: var(--Global-Typography-Size-Label-Label-M);
-  line-height: var(--Global-Typography-Line-height-Label-Label-M);
-  font-weight: 700;
-  color: var(--Alias-content-typography-Title);
+.font-generator .fg-card-name {
+  font-size: var(--type-body-s-size);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-gray-700);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  min-width: 0;
 }
 
-main .font-generator a.button.primary.fg-promo-btn:any-link {
-  background-color: rgba(0, 0, 0, 0.84);
-  border: none;
-  margin: 0;
-  line-height: 1.3333333;
-}
-
-/* ── Temp panel trigger (remove with toolbar implementation) ──────── */
-.font-generator .fg-panel-trigger--temp {
-  display: inline-block;
-  margin-block-end: var(--spacing-300);
-  padding: var(--spacing-100) var(--spacing-300);
-  border: 1px solid var(--color-gray-300);
-  border-radius: var(--corner-radius-80);
-  background: var(--color-gray-100);
-  font-size: var(--body-font-size-s);
-  cursor: pointer;
-}
-
-/* ── Sidebar filters: desktop only ──────────────────────────────── */
-.font-generator .fg-sidebar .fg-filters {
-  display: none;
-}
-
-/* ── Overlay backdrop ────────────────────────────────────────────── */
-.font-generator .fg-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200; /* above nav and page content */
-  background-color: rgba(0, 0, 0, 0.44);
-  backdrop-filter: blur(10px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.font-generator.panel-open .fg-overlay {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* ── Panel / Tray ────────────────────────────────────────────────── */
-/* Mobile-first: tray slides up from bottom */
-.font-generator .fg-panel {
-  position: fixed;
-  inset-inline: 0;
-  inset-block-end: 0;
-  max-height: 90vh;
-  overflow-y: auto;
+.font-generator .fg-card-actions {
   display: flex;
-  flex-direction: column;
-  gap: var(--spacing-300);
-  background-color: var(--color-gray-150);
-  border-start-start-radius: var(--Corner-radius-corner-radius-200);
-  border-start-end-radius: var(--Corner-radius-corner-radius-200);
-  padding: var(--spacing-100) var(--spacing-300) var(--spacing-300);
-  transform: translateY(100%);
-  transition: transform 0.3s ease;
-}
-
-.font-generator.panel-open .fg-panel {
-  transform: none;
-}
-
-/* ── Drag handle (mobile tray only) ─────────────────────────────── */
-.font-generator .fg-tray-handle {
-  width: 80px;
-  height: 4px;
-  background-color: var(--color-gray-325);
-  border-radius: 8px;
-  align-self: center;
+  gap: var(--spacing-100);
   flex-shrink: 0;
-  cursor: grab;
 }
 
-/* ── Close button (tablet panel only) ───────────────────────────── */
-.font-generator .fg-panel-close {
-  display: none;
+.font-generator .fg-card-btn {
+  padding: var(--spacing-100) var(--spacing-200);
+  border-radius: var(--fg-radius);
+  font-size: var(--type-body-s-size);
+  cursor: pointer;
+  transition: background var(--fg-transition), color var(--fg-transition);
+  white-space: nowrap;
 }
 
-/* ── Tablet ───────────────────────────────────────────────────────── */
+.font-generator .fg-card-copy {
+  border: 1px solid var(--color-gray-300);
+  background: transparent;
+  color: var(--color-gray-700);
+}
+
+.font-generator .fg-card-copy:hover {
+  background: var(--color-gray-100);
+}
+
+.font-generator .fg-card-cta {
+  border: 1px solid var(--color-blue-800);
+  background: var(--color-blue-800);
+  color: var(--color-white);
+}
+
+.font-generator .fg-card-cta:hover {
+  background: var(--color-blue-900);
+  border-color: var(--color-blue-900);
+}
+
+.font-generator .fg-load-more-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-block-start: var(--spacing-400);
+}
+
+.font-generator .fg-load-more-btn {
+  padding: var(--spacing-200) var(--spacing-500);
+  border: 1px solid var(--color-gray-300);
+  border-radius: var(--fg-radius);
+  background: transparent;
+  font-size: var(--type-body-m-size);
+  color: var(--color-gray-700);
+  cursor: pointer;
+  transition: background var(--fg-transition);
+}
+
+.font-generator .fg-load-more-btn:hover {
+  background: var(--color-gray-100);
+}
+
+.font-generator.loading .fg-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--fg-card-min-w), 1fr));
+  gap: var(--spacing-300);
+}
+
+.font-generator.loading .fg-grid::before,
+.font-generator.loading .fg-grid::after {
+  content: '';
+  display: block;
+  height: 180px;
+  border-radius: var(--fg-radius);
+  background: linear-gradient(90deg, var(--color-gray-100) 25%, var(--color-gray-200) 50%, var(--color-gray-100) 75%);
+  background-size: 200% 100%;
+  animation: fg-shimmer 1.4s infinite;
+}
+
+@keyframes fg-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 @media (min-width: 600px) {
   .font-generator {
-    padding: var(--spacing-600) var(--spacing-500) var(--spacing-300) var(--spacing-500);
-  }
-
-  .font-generator .fg-panel {
-    inset-block: 0;
-    inset-inline-start: 0;
-    inset-inline-end: auto;
-    width: var(--fg-panel-width);
-    max-height: none;
-    border-radius: 0;
-    padding: var(--spacing-600) var(--spacing-500);
-    box-sizing: border-box;
-    box-shadow: 6px 0 16px -8px rgba(0, 0, 0, 0.08);
-    transform: translateX(calc(-1 * var(--fg-panel-width)));
-  }
-
-  .font-generator .fg-tray-handle {
-    display: none;
-  }
-
-  .font-generator .fg-panel-close {
-    display: flex;
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-end: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    color: var(--Palette-gray-800);
-  }
-
-  .font-generator .fg-panel-close svg {
-    height: 12px;
-    width: 12px;
-  }
-
-  .font-generator .fg-promo-icon {
-    display: block;
+    padding: var(--spacing-600) var(--spacing-500) var(--spacing-300);
   }
 }
 
-/* ── Desktop ──────────────────────────────────────────────────────── */
 @media (min-width: 1200px) {
   .font-generator {
     padding: var(--spacing-600);
   }
 
-  .font-generator .fg-panel-trigger--temp {
-    display: none;
-  }
-
-  .font-generator .fg-sidebar .fg-filters {
-    display: flex;
-  }
-
   .font-generator .fg-container {
     flex-direction: row;
     flex-wrap: nowrap;
+    align-items: flex-start;
   }
 
   .font-generator .fg-sidebar {
     width: var(--fg-sidebar-width);
+    flex-shrink: 0;
     position: sticky;
     top: calc(var(--global-height-nav) + var(--spacing-600));
     align-self: flex-start;
@@ -322,5 +288,6 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 
   .font-generator .fg-main {
     flex: 1;
+    min-width: 0;
   }
 }

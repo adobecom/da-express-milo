@@ -1,49 +1,103 @@
 import { createTag } from '../../scripts/utils.js';
-import { initFromUrl, initFonts, subscribe } from './state.js';
-import initFilters from './filters.js';
-import initPanel from './panel.js';
+import { initFromUrl, subscribe } from './state.js';
+import { init as initFontCardGrid } from './fontCardGrid.js';
+import { init as initTextInput } from './textInput.js';
+import { init as initToolbar } from './toolbar.js';
+import { init as initFilters } from './filters.js';
 
-export default async function decorate(block) {
-  // ToDo: Extract authored content from DOM
+function emitAnalytics(eventName) {
+  const send = () => {
+    window._satellite?.track('event', {
+      xdm: {},
+      data: {
+        eventType: 'web.webinteraction.linkClicks',
+        web: { webInteraction: { name: eventName, linkClicks: { value: 1 }, type: 'other' } },
+        _adobe_corpnew: { digitalData: { primaryEvent: { eventInfo: { eventName } } } },
+      },
+    });
+  };
+  if (window._satellite?.track) send();
+  else window.addEventListener('alloy_sendEvent', send, { once: true });
+}
+
+function readAuthoredConfig(block) {
+  const rows = block.querySelectorAll(':scope > div');
+  const config = {};
+  rows.forEach((row) => {
+    const [keyEl, valEl] = row.querySelectorAll(':scope > div');
+    if (!keyEl || !valEl) return;
+    const key = keyEl.textContent?.trim().toLowerCase();
+    const val = valEl.textContent?.trim();
+    if (!key || !val) return;
+    switch (key) {
+      case 'prod-base-url': config.prodBaseUrl = val; break;
+      case 'cta-label': config.ctaLabel = val; break;
+      case 'copy-label': config.copyLabel = val; break;
+      case 'load-more-label': config.loadMoreLabel = val; break;
+      case 'input-label': config.inputLabel = val; break;
+      case 'placeholder': config.placeholder = val; break;
+      case 'grid-label': config.gridLabel = val; break;
+      case 'list-label': config.listLabel = val; break;
+      case 'size-label': config.sizeLabel = val; break;
+      case 'filters': config.filterLabels = val.split(',').map((s) => s.trim()).filter(Boolean); break;
+      default: break;
+    }
+  });
+  return config;
+}
+
+export default function decorate(block) {
+  const config = readAuthoredConfig(block);
 
   initFromUrl();
 
-  let data;
-  try {
-    const resp = await fetch(new URL('./font-sheets/font-styles.json', import.meta.url).href);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    data = await resp.json();
-  } catch (e) {
-    window.lana?.log(`font-generator: failed to load font-styles.json: ${e?.message || e}`, { tags: 'font-generator', severity: 'error' });
-    return;
-  }
-  initFonts(data.fonts);
-
   block.innerHTML = '';
+  block.classList.add('loading');
+
   const container = createTag('section', { class: 'fg-container' });
-  const sidebar = createTag('div', { class: 'fg-sidebar' });
-  const main = createTag('div', { class: 'fg-main' });
 
-  // ToDo: Remove placeholder content
-  const placeholder = createTag('p', {}, 'Active filters: All');
-  subscribe(({ activeFilters }) => {
-    placeholder.textContent = `Active filters: ${activeFilters.length ? activeFilters.join(', ') : 'All'}`;
+  const toolbarEl = createTag('div', { class: 'fg-toolbar' });
+  initToolbar(toolbarEl, {
+    gridLabel: config.gridLabel,
+    listLabel: config.listLabel,
+    sizeLabel: config.sizeLabel,
   });
-  main.append(placeholder);
 
-  // Temp trigger for panel/tray testing — remove when toolbar is implemented
-  const tempTrigger = createTag('button', { class: 'fg-panel-trigger--temp' }, 'Open Filters');
-  main.prepend(tempTrigger);
+  const textInputEl = createTag('div', { class: 'fg-text-input' });
+  initTextInput(textInputEl, {
+    inputLabel: config.inputLabel,
+    placeholder: config.placeholder,
+  });
 
-  const filtersDesktop = createTag('div', { class: 'fg-filters' });
-  sidebar.appendChild(filtersDesktop);
-  container.append(sidebar, main);
-  block.appendChild(container);
+  const sidebar = createTag('aside', { class: 'fg-sidebar' });
+  if (config.filterLabels?.length) {
+    initFilters(sidebar, config.filterLabels);
+  }
 
-  const [, { open: openPanel }] = await Promise.all([
-    initFilters([filtersDesktop]),
-    initPanel(block),
-  ]);
+  const main = createTag('div', { class: 'fg-main' });
+  const cardGridEl = createTag('div', { class: 'fg-card-grid' });
+  main.append(cardGridEl);
 
-  tempTrigger.addEventListener('click', openPanel);
+  container.append(toolbarEl, textInputEl, sidebar, main);
+  block.append(container);
+
+  initFontCardGrid(cardGridEl, {
+    prodBaseUrl: config.prodBaseUrl,
+    labels: {
+      cta: config.ctaLabel,
+      copy: config.copyLabel,
+      loadMore: config.loadMoreLabel,
+    },
+  });
+
+  subscribe((state) => {
+    const grid = cardGridEl.querySelector('.fg-grid');
+    if (grid) grid.classList.toggle('layout-list', state.layout === 'list');
+  });
+
+  block.classList.remove('loading');
+
+  emitAnalytics('font_generator_landing_impression');
+
+  import('./fontTextUpload.js').then((mod) => mod.prewarmAcpUpload()).catch(() => {});
 }

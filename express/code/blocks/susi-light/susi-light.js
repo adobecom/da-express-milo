@@ -430,6 +430,7 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
 async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const rows = el.querySelectorAll(':scope > div > div');
   const isColor = el.classList.contains('color');
+  const isFontGenerator = el.classList.contains('font-generator');
 
   let redirectUrl;
   if (isColor) {
@@ -437,6 +438,11 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
       '../../scripts/color-shared/utils/susiRedirect.js'
     );
     redirectUrl = consumeSusiColorRedirect() || window.location.href;
+  } else if (isFontGenerator) {
+    const { consumeFontRedirect } = await import(
+      '../font-generator/fontRedirect.js'
+    );
+    redirectUrl = consumeFontRedirect() || window.location.href;
   } else {
     redirectUrl = rows[0]?.textContent?.trim();
   }
@@ -467,11 +473,20 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
       }
       destURL.hash = '';
     } catch { /* ignore — destURL fallback is already set */ }
+  } else if (isFontGenerator) {
+    try {
+      const orig = new URL(redirectUrl);
+      ['glyphString', 'styleId', 'referrer', 'feature-enable', 'entryPoint'].forEach((key) => {
+        const val = orig.searchParams.get(key);
+        if (val) destURL.searchParams.set(key, val);
+      });
+      destURL.hash = '';
+    } catch { /* ignore — destURL fallback is already set */ }
   }
   const params = buildSUSIParams({
     client_id, variant, destURL, locale, title, popup, responseType: 'token',
   });
-  if (!noRedirect && !isColor) {
+  if (!noRedirect && !isColor && !isFontGenerator) {
     redirectIfLoggedIn(params.destURL);
   }
   await SUSIUtils.loadSUSIScripts();

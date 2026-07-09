@@ -1,257 +1,161 @@
-// @import { FontDef } from './types.js'
-
-const MAX_INPUT_LENGTH = 200;
-
-const VALID_FONT_TYPES = new Set(['direct-map', 'pattern-map', 'literal-map']);
-
-// ─── Validation ───────────────────────────────────────────────────────────────
-
-function isPlainObject(value) {
-  if (value === null || typeof value !== 'object' || Array.isArray(value)) return false;
-  const proto = Object.getPrototypeOf(value);
-  return proto === Object.prototype || proto === null;
-}
-
-/**
- * Structural type guard — checks shape, not every character entry.
- * Call once per font load, not on every transform.
- *
- * @param {unknown} fontDef
- * @returns {fontDef is FontDef}
- */
-export function isValidFontDef(fontDef) {
-  if (!isPlainObject(fontDef)) return false;
-  if (typeof fontDef.id !== 'string' || fontDef.id.length === 0) return false;
-  if (!VALID_FONT_TYPES.has(fontDef.type)) return false;
-  if (!isPlainObject(fontDef.characters)) return false;
-  const { letters, numbers, specialCharacters } = fontDef.characters;
-  return isPlainObject(letters)
-    && isPlainObject(numbers)
-    && isPlainObject(specialCharacters);
-}
-
-// ─── Lookup map ───────────────────────────────────────────────────────────────
-
-/**
- * Merges the three character category maps into a single null-prototype object.
- * Null prototype prevents prototype-chain pollution (no __proto__, toString, etc.).
- *
- * @param {FontDef} fontDef
- * @returns {Record<string, string>}
- */
-function buildLookupMap(fontDef) {
-  const map = Object.create(null);
-  const { letters, numbers, specialCharacters } = fontDef.characters;
-  const sources = [letters, numbers, specialCharacters];
-  for (const source of sources) {
-    for (const key of Object.keys(source)) {
-      const value = source[key];
-      if (typeof key === 'string' && typeof value === 'string') {
-        map[key] = value;
-      }
+function buildMap(upperStart, lowerStart, digitStart = null, exceptions = {}) {
+  const map = {};
+  for (let i = 0; i < 26; i++) {
+    const upper = String.fromCharCode(65 + i);
+    const lower = String.fromCharCode(97 + i);
+    map[upper] = exceptions[upper] ?? String.fromCodePoint(upperStart + i);
+    map[lower] = exceptions[lower] ?? String.fromCodePoint(lowerStart + i);
+  }
+  if (digitStart !== null) {
+    for (let i = 0; i < 10; i++) {
+      const digit = String(i);
+      map[digit] = exceptions[digit] ?? String.fromCodePoint(digitStart + i);
     }
   }
   return map;
 }
 
-// ─── Pattern fallback ─────────────────────────────────────────────────────────
+export const allFonts = [
+  {
+    id: 'bold',
+    name: 'Bold',
+    category: 'serif',
+    map: buildMap(0x1D400, 0x1D41A, 0x1D7CE),
+  },
+  {
+    id: 'italic',
+    name: 'Italic',
+    category: 'serif',
 
-/**
- * Determines which character-map category an unmapped character belongs to
- * so we can apply the right decoration as a fallback.
- *
- * Regex tests only the single resolved character — user input is never used
- * as a pattern.
- *
- * @param {string} char - a single character (may be multi-code-unit for emoji)
- * @returns {'letters' | 'numbers' | 'specialCharacters'}
- */
-function resolveCategory(char) {
-  if (/^\p{N}$/u.test(char)) return 'numbers';
-  if (/^\p{L}$/u.test(char)) return 'letters';
-  return 'specialCharacters';
-}
+    map: buildMap(0x1D434, 0x1D44E, null, { h: '\u{210E}' }),
+  },
+  {
+    id: 'bold-italic',
+    name: 'Bold Italic',
+    category: 'serif',
+    map: buildMap(0x1D468, 0x1D482),
+  },
+  {
+    id: 'script',
+    name: 'Script',
+    category: 'script',
 
-/**
- * Extracts the combining decoration from a known source→output pair so it can
- * be applied to arbitrary unmapped characters of the same category.
- *
- * Works by locating the source character within its mapped output, then
- * slicing out whatever comes after it. Returns null when the mapped value
- * is a full substitution (direct-map), since no decoration can be derived.
- *
- * @param {string} sourceChar
- * @param {string} mappedValue
- * @returns {{ prefix: string; suffix: string } | null}
- */
-function deriveDecoration(sourceChar, mappedValue) {
-  const idx = mappedValue.indexOf(sourceChar);
-  if (idx === -1) return null;
-  return {
-    prefix: mappedValue.slice(0, idx),
-    suffix: mappedValue.slice(idx + sourceChar.length),
-  };
-}
+    map: buildMap(0x1D49C, 0x1D4B6, null, {
+      B: '\u{212C}',
+      E: '\u{2130}',
+      F: '\u{2131}',
+      H: '\u{210B}',
+      I: '\u{2110}',
+      L: '\u{2112}',
+      M: '\u{2133}',
+      R: '\u{211B}',
+      e: '\u{212F}',
+      g: '\u{210A}',
+      o: '\u{2134}',
+    }),
+  },
+  {
+    id: 'bold-script',
+    name: 'Bold Script',
+    category: 'script',
+    map: buildMap(0x1D4D0, 0x1D4EA),
+  },
+  {
+    id: 'fraktur',
+    name: 'Fraktur',
+    category: 'gothic',
+    map: buildMap(0x1D504, 0x1D51E, null, {
+      C: '\u{212D}', H: '\u{210C}', I: '\u{2111}', R: '\u{211C}', Z: '\u{2128}',
+    }),
+  },
+  {
+    id: 'double-struck',
+    name: 'Double-struck',
+    category: 'gothic',
+    map: buildMap(0x1D538, 0x1D552, 0x1D7D8, {
+      C: '\u{2102}',
+      H: '\u{210D}',
+      N: '\u{2115}',
+      P: '\u{2119}',
+      Q: '\u{211A}',
+      R: '\u{211D}',
+      Z: '\u{2124}',
+    }),
+  },
+  {
+    id: 'sans',
+    name: 'Sans-serif',
+    category: 'sans',
+    map: buildMap(0x1D5A0, 0x1D5BA, 0x1D7E2),
+  },
+  {
+    id: 'sans-bold',
+    name: 'Sans Bold',
+    category: 'sans',
+    map: buildMap(0x1D5D4, 0x1D5EE, 0x1D7EC),
+  },
+  {
+    id: 'sans-italic',
+    name: 'Sans Italic',
+    category: 'sans',
+    map: buildMap(0x1D608, 0x1D622),
+  },
+  {
+    id: 'sans-bold-italic',
+    name: 'Sans Bold Italic',
+    category: 'sans',
+    map: buildMap(0x1D63C, 0x1D656),
+  },
+  {
+    id: 'monospace',
+    name: 'Monospace',
+    category: 'mono',
+    map: buildMap(0x1D670, 0x1D68A, 0x1D7F6),
+  },
+  {
+    id: 'circled',
+    name: 'Circled',
+    category: 'effect',
 
-/**
- * Returns the decoration to apply to an unmapped character by sampling the
- * first entry of the relevant category map. Returns null when no coherent
- * decoration can be derived (direct-map fonts, or empty category).
- *
- * @param {FontDef} fontDef
- * @param {'letters' | 'numbers' | 'specialCharacters'} category
- * @returns {{ prefix: string; suffix: string } | null}
- */
-function getCategoryDecoration(fontDef, category) {
-  const categoryMap = fontDef.characters[category];
-  const entries = Object.entries(categoryMap);
-  if (entries.length === 0) return null;
-  const [sourceChar, mappedValue] = entries[0];
-  return deriveDecoration(sourceChar, mappedValue);
-}
+    map: buildMap(0x24B6, 0x24D0, null, {
+      0: '\u{24EA}',
+      1: '\u{2460}',
+      2: '\u{2461}',
+      3: '\u{2462}',
+      4: '\u{2463}',
+      5: '\u{2464}',
+      6: '\u{2465}',
+      7: '\u{2466}',
+      8: '\u{2467}',
+      9: '\u{2468}',
+    }),
+  },
+  {
+    id: 'fullwidth',
+    name: 'Fullwidth',
+    category: 'effect',
+    map: buildMap(0xFF21, 0xFF41, 0xFF10),
+  },
+  {
+    id: 'strikethrough',
+    name: 'Strikethrough',
+    category: 'effect',
 
-/**
- * Applies a category's decoration to an arbitrary character.
- * Returns the original character unchanged when no decoration is available.
- *
- * @param {string} char
- * @param {FontDef} fontDef
- * @returns {string}
- */
-function applyFallbackDecoration(char, fontDef) {
-  if (fontDef.type !== 'pattern-map') return char;
-  const category = resolveCategory(char);
-  const decoration = getCategoryDecoration(fontDef, category);
-  if (!decoration) return char;
-  return `${decoration.prefix}${char}${decoration.suffix}`;
-}
+    transform: (char) => (char === ' ' ? char : `${char}̶`),
+  },
+  {
+    id: 'underline',
+    name: 'Underline',
+    category: 'effect',
 
-/**
- * Whole-string pattern fonts keep character maps as identity values and store
- * their decoration in `fontDef.pattern`. Combining-mark fonts keep decoration
- * baked into each mapped character and should not receive this envelope.
- *
- * @param {FontDef} fontDef
- * @returns {boolean}
- */
-function usesWholeTextPattern(fontDef) {
-  if (fontDef.type !== 'pattern-map' || !isPlainObject(fontDef.pattern)) return false;
-  const {
-    hasStartPattern,
-    hasRepeatingMiddlePattern,
-    hasEndPattern,
-  } = fontDef.pattern;
-  const hasPattern = Boolean(
-    hasStartPattern
-      || hasRepeatingMiddlePattern
-      || hasEndPattern,
-  );
-  if (!hasPattern) return false;
+    transform: (char) => (char === ' ' ? char : `${char}̲`),
+  },
+];
 
-  return Object.values(fontDef.characters).every((categoryMap) => (
-    Object.entries(categoryMap).every(([sourceChar, mappedValue]) => mappedValue === sourceChar)
-  ));
-}
-
-/**
- * @param {string[]} mappedCharacters
- * @param {FontDef} fontDef
- * @returns {string}
- */
-function applyWholeTextPattern(mappedCharacters, fontDef) {
-  if (mappedCharacters.length === 0) return '';
-  const {
-    hasRepeatingMiddlePattern,
-    startPattern: maybeStartPattern,
-    repeatingMiddlePattern: maybeMiddlePattern,
-    endPattern: maybeEndPattern,
-  } = fontDef.pattern;
-  const startPattern = typeof maybeStartPattern === 'string' ? maybeStartPattern : '';
-  const middlePattern = typeof maybeMiddlePattern === 'string'
-    ? maybeMiddlePattern
-    : '';
-  const endPattern = typeof maybeEndPattern === 'string' ? maybeEndPattern : '';
-  const mappedValue = hasRepeatingMiddlePattern
-    ? mappedCharacters.join(middlePattern)
-    : mappedCharacters.join('');
-  return `${startPattern}${mappedValue}${endPattern}`;
-}
-
-// ─── Per-font memoization ───────────────────────────────────────────────────
-
-/**
- * Per-font derived data, keyed by the font object itself. transformText runs on
- * nearly every keystroke across many cards, so the lookup map and the
- * whole-text-pattern decision are computed once per font and reused instead of
- * rebuilt each call. A WeakMap keeps this transparent to callers (no enriched
- * font shape to thread through) and lets entries be collected with their font.
- *
- * @param {FontDef} fontDef
- * @returns {{ lookupMap: Record<string, string>, usesWholeText: boolean }}
- */
-const derivedByFont = new WeakMap();
-
-function getDerived(fontDef) {
-  const cached = derivedByFont.get(fontDef);
-  if (cached) return cached;
-  const derived = {
-    lookupMap: buildLookupMap(fontDef),
-    usesWholeText: usesWholeTextPattern(fontDef),
-  };
-  derivedByFont.set(fontDef, derived);
-  return derived;
-}
-
-// ─── Public API ───────────────────────────────────────────────────────────────
-
-/**
- * Transforms a string using the given font definition.
- *
- * - Characters present in the font's map are substituted directly.
- * - Whole-string patterns apply start/end wrappers and repeating separators
- *   from the generated font metadata.
- * - For pattern-map fonts, unmapped characters receive the same combining
- *   decoration as their category peers (e.g. an accented letter gets the
- *   same strike-through as plain ASCII letters).
- * - For direct-map and literal-map fonts, unmapped characters pass through.
- * - Returns the original text on invalid input rather than throwing.
- *
- * Input is capped at MAX_INPUT_LENGTH (200 chars) before processing.
- * User input is never used as a regex pattern.
- *
- * @param {string} text
- * @param {FontDef} fontDef
- * @returns {string}
- */
 export function transformText(text, fontDef) {
-  if (typeof text !== 'string') return '';
-  // text is guaranteed a string past the guard above.
-  if (!isValidFontDef(fontDef)) return text;
-
-  const safeText = text.length > MAX_INPUT_LENGTH ? text.slice(0, MAX_INPUT_LENGTH) : text;
-  const { lookupMap, usesWholeText } = getDerived(fontDef);
-
-  const mappedCharacters = [...safeText].map((char) => {
-    if (Object.prototype.hasOwnProperty.call(lookupMap, char)) return lookupMap[char];
-    return applyFallbackDecoration(char, fontDef);
-  });
-
-  if (usesWholeText) {
-    return applyWholeTextPattern(mappedCharacters, fontDef);
+  if (fontDef.transform) {
+    return [...text].map(fontDef.transform).join('');
   }
-
-  return mappedCharacters.join('');
-}
-
-/**
- * Finds a font definition by its slugified ID.
- * Returns undefined rather than throwing on bad input.
- *
- * @param {FontDef[]} fonts
- * @param {string} id
- * @returns {FontDef | undefined}
- */
-export function getFontById(fonts, id) {
-  if (!Array.isArray(fonts) || typeof id !== 'string' || id.length === 0) return undefined;
-  return fonts.find((f) => isValidFontDef(f) && f.id === id);
+  const { map } = fontDef;
+  return [...text].map((char) => map[char] ?? char).join('');
 }
