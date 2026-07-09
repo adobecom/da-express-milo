@@ -129,8 +129,11 @@ node $SKILL/scripts/capture.mjs --worklist .qa-screendiff/worklist.json \
 #   --limit N      cap pages    --viewports chrome,ipad   --timeout 45000
 ```
 Writes `a.png`/`b.png`/`diff.png` per page×viewport and `report/results.json`.
-Status per cell: `a-failed` · `b-failed` · `broken` (more failed blocks on B than
-A) · `diff` (pixels changed) · `ok`.
+Status per cell: `a-failed`/`b-failed` (nav error OR HTTP ≥400 — an unpreviewed
+branch's 404 is treated as a failure, not screenshotted as a normal page) ·
+`broken` (B has a broken block whose identity — block name / resource path —
+wasn't already broken on A; a like-for-like failure on both sides doesn't
+count) · `diff` (pixels changed) · `ok`.
 
 ### 6. Render the report (C9)
 ```bash
@@ -164,7 +167,14 @@ failed. Sabotaging the detection regex fails all rows (verified).
   changes register (Playwright's `getComparator` silently ignores size diffs —
   we use pixelmatch/pngjs instead).
 - **Broken-block probe** reads `data-block-status` + console errors + failed
-  `blocks/*.js|css` requests. `broken` only fires when B has MORE failures than A.
+  `blocks/*.js|css` requests. `broken` fires when B has a broken block *not
+  already broken on A* (compared by identity — block name or resource path —
+  not just count, so a different block breaking on B isn't masked by an
+  equal-or-lower total count).
+- **HTTP failures are real failures**: `page.goto()` only throws on navigation
+  errors, not on 404/500 responses, so an unpreviewed branch or a dead page is
+  explicitly checked for `status >= 400` and marked `a-failed`/`b-failed`
+  rather than screenshotted and scored as `ok`/`diff`.
 - **Rate limiting / origin throttling**: sustained request volume (a large
   crawl immediately followed by a large capture run) has been observed to
   progressively degrade captures — not random flakes, but a near-permanent

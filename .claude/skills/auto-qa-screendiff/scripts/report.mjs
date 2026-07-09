@@ -53,7 +53,10 @@ const flagged = data.results.filter((r) => r.status !== 'ok').length;
 
 const rows = ranked.map((r) => {
   const pct = r.diff ? `${(r.diff.ratio * 100).toFixed(2)}%` : '—';
-  const broken = [...new Set([...(r.b.brokenBlocks || []), ...(r.a.brokenBlocks || [])])];
+  // For a flagged regression, show only what's new to B; otherwise show the union for context.
+  const broken = r.status === 'broken' && r.newBroken
+    ? r.newBroken
+    : [...new Set([...(r.b.brokenBlocks || []), ...(r.a.brokenBlocks || [])])];
   return {
     project: r.project,
     edsPath: r.edsPath,
