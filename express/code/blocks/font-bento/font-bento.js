@@ -29,7 +29,7 @@ export default async function decorate(block) {
     const card = createTag('div', { class: 'font-bento-card' });
 
     const titleCell = cells[0];
-    let titleEl = titleCell?.querySelector('p');
+    let titleEl = titleCell?.firstElementChild ?? null;
     if (!titleEl && titleCell?.textContent?.trim()) {
       titleEl = createTag('p');
       titleEl.textContent = titleCell.textContent.trim();
