@@ -4,14 +4,14 @@
       "org": "adobecom",
       "repo": "da-express-milo",
       "stableBase": "https://main--da-express-milo--adobecom.aem.live",
-      "branchBase": "https://{branch}--da-express-milo--adobecom.aem.page",
+      "branchBase": "https://{branch}--da-express-milo--adobecom.aem.live",
       "prodHost": "www.adobe.com"
     },
     "color": {
       "org": "adobecom",
       "repo": "express-color",
       "stableBase": "https://main--express-color--adobecom.aem.live",
-      "branchBase": "https://{branch}--express-color--adobecom.aem.page",
+      "branchBase": "https://{branch}--express-color--adobecom.aem.live",
       "prodHost": "color.adobe.com"
     }
   },
