@@ -26,13 +26,27 @@ describe('Easy Upload promo attribution on page load', () => {
   const VIEW_EVENT = 'view-quickaction-upload-page';
   const QUICK_ACTION_CELL = ':scope > div:nth-child(3) > div:nth-child(2)';
 
-  function getViewEventQa(trackSpy) {
-    const call = trackSpy.getCalls().reverse().find(
+  function getViewEventCalls(trackSpy) {
+    return trackSpy.getCalls().filter(
       // eslint-disable-next-line no-underscore-dangle
       (c) => c.args?.[1]?.data?._adobe_corpnew?.sdm?.event?.pagename === VIEW_EVENT,
     );
+  }
+
+  function getViewEventQa(trackSpy) {
+    const call = getViewEventCalls(trackSpy).reverse().find(
+      // eslint-disable-next-line no-underscore-dangle
+      (c) => c.args?.[1]?.data?.eventType === 'web.webinteraction.linkClicks',
+    );
     // eslint-disable-next-line no-underscore-dangle
     return call?.args?.[1]?.data?._adobe_corpnew?.sdm?.custom?.qa;
+  }
+
+  function getPageViewCall(trackSpy) {
+    return getViewEventCalls(trackSpy).reverse().find(
+      // eslint-disable-next-line no-underscore-dangle
+      (c) => c.args?.[1]?.data?.eventType === 'web.webpagedetails.pageViews',
+    );
   }
 
   async function decorateWithQuickAction(quickAction) {
@@ -77,6 +91,36 @@ describe('Easy Upload promo attribution on page load', () => {
     expect(qa).to.not.be.undefined;
     expect(qa.promoid).to.be.undefined;
     expect(qa.mv).to.be.undefined;
+  });
+
+  it('fires a dedicated page-view beacon with the promo id for the variant arm', async () => {
+    const trackSpy = await decorateWithQuickAction('crop-image-easy-upload-variant');
+
+    const pageViewCall = getPageViewCall(trackSpy);
+    expect(pageViewCall).to.not.be.undefined;
+    const payload = pageViewCall.args[1];
+    expect(payload.xdm.eventType).to.equal('web.webpagedetails.pageViews');
+    // eslint-disable-next-line no-underscore-dangle
+    const qa = payload.data._adobe_corpnew.sdm.custom.qa;
+    expect(qa.promoid).to.equal('P3KMQHCX');
+    expect(qa.mv).to.equal('other');
+  });
+
+  it('fires a dedicated page-view beacon with the promo id for the control arm', async () => {
+    const trackSpy = await decorateWithQuickAction('crop-image-easy-upload-control');
+
+    const pageViewCall = getPageViewCall(trackSpy);
+    expect(pageViewCall).to.not.be.undefined;
+    // eslint-disable-next-line no-underscore-dangle
+    const qa = pageViewCall.args[1].data._adobe_corpnew.sdm.custom.qa;
+    expect(qa.promoid).to.equal('NYTLQM3Y');
+    expect(qa.mv).to.equal('other');
+  });
+
+  it('does not fire the page-view beacon for a vanilla quick action', async () => {
+    const trackSpy = await decorateWithQuickAction();
+
+    expect(getPageViewCall(trackSpy)).to.be.undefined;
   });
 });
 

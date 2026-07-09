@@ -1,7 +1,7 @@
 import { transformLinkToAnimation } from '../../scripts/utils/media.js';
 import { getLibs, getIconElementDeprecated, decorateButtonsDeprecated } from '../../scripts/utils.js';
 import { buildFreePlanWidget } from '../../scripts/widgets/free-plan.js';
-import { sendFrictionlessEventToAdobeAnaltics } from '../../scripts/instrument.js';
+import { sendFrictionlessEventToAdobeAnaltics, sendFrictionlessPageViewToAdobeAnaltics } from '../../scripts/instrument.js';
 import { createLocaleDropdownWrapper } from '../../scripts/widgets/frictionless-locale-dropdown.js';
 import { EasyUploadVariantsPromoidMap } from '../../scripts/utils/easy-upload-utils.js';
 import {
@@ -1103,11 +1103,14 @@ export default async function decorate(block) {
   // Tag the page-view impression with the Easy Upload experiment arm's promo id so
   // both variant and control arms are attributed at load, not only when the SDK launches.
   const promoAttribution = getEasyUploadPromoAttribution(quickAction);
-  sendFrictionlessEventToAdobeAnaltics(
-    block,
-    'view-quickaction-upload-page',
-    promoAttribution
-      ? { custom: { qa: { promoid: promoAttribution.promoid, mv: promoAttribution.mv } } }
-      : {},
-  );
+  const promoExtraProperties = promoAttribution
+    ? { custom: { qa: { promoid: promoAttribution.promoid, mv: promoAttribution.mv } } }
+    : {};
+  sendFrictionlessEventToAdobeAnaltics(block, 'view-quickaction-upload-page', promoExtraProperties);
+
+  // Easy Upload arms also emit a dedicated page-view beacon on load so the impression is
+  // visible in page-view reporting (not only as a link-click interaction).
+  if (promoAttribution) {
+    sendFrictionlessPageViewToAdobeAnaltics(block, 'view-quickaction-upload-page', promoExtraProperties);
+  }
 }

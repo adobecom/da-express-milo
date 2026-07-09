@@ -195,6 +195,50 @@ export function sendFrictionlessEventToAdobeAnaltics(block, eventName, extraProp
   safelyFireAnalyticsEvent(fireEvent);
 }
 
+// Emits a true page-view beacon (web.webpagedetails.pageViews) for frictionless pages,
+// keeping the qa/promoid payload at the same sdm.custom.qa path as the interaction event.
+export function sendFrictionlessPageViewToAdobeAnaltics(block, eventName, extraProperties = {}) {
+  const fireEvent = () => {
+    const {
+      event: extraEvent = {},
+      custom: extraCustom = {},
+    } = extraProperties;
+    const pageName = getPageName();
+    _satellite.track('event', {
+      xdm: {
+        eventType: 'web.webpagedetails.pageViews',
+        web: {
+          webPageDetails: {
+            name: pageName,
+            URL: loc.href,
+          },
+        },
+      },
+      data: {
+        eventType: 'web.webpagedetails.pageViews',
+        _adobe_corpnew: {
+          sdm: {
+            event: {
+              pagename: eventName,
+              url: loc.href,
+              ...extraEvent,
+            },
+            custom: {
+              ...extraCustom,
+              qa: {
+                group: block.dataset.frictionlessgroup ?? 'unknown',
+                type: block.dataset.frictionlesstype ?? 'unknown',
+                ...extraCustom.qa,
+              },
+            },
+          },
+        },
+      },
+    });
+  };
+  safelyFireAnalyticsEvent(fireEvent);
+}
+
 export async function trackViewTemplatePage(
   pageType,
   useCase,
