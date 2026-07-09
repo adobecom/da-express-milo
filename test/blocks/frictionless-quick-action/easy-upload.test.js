@@ -244,6 +244,7 @@ describe('Easy Upload module', () => {
 
     const confirmButton = block.querySelector('.qr-code-container .confirm-import-button');
     expect(confirmButton.dataset.easyUploadConfirmBound).to.equal('true');
+    expect(confirmButton.getAttribute('daa-ll')).to.equal('select-confirm-upload-cta');
     // Simulate the upload being detected, which enables the button.
     confirmButton.classList.remove('disabled');
     confirmButton.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));

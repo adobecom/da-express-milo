@@ -303,6 +303,7 @@ function buildQrPaneContent(createTag, onBack) {
       href: easyUploadPaneContent.primary.confirmHref || '#',
       class: 'button accent xlarge confirm-import-button disabled',
       'aria-describedby': confirmTooltipId,
+      'daa-ll': 'select-confirm-upload-cta',
     }, easyUploadPaneContent.primary.confirmLabel);
     const tooltipPopup = createTag('div', { class: 'tooltip-text', id: confirmTooltipId, role: 'tooltip' }, easyUploadPaneContent.primary.tooltipText);
     tooltipContainer.append(confirmButton, tooltipPopup);
