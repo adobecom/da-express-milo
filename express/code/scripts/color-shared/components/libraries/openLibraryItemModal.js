@@ -48,5 +48,8 @@ export async function openLibraryItemModal(item, modalManager, {
     tags: item.tags,
     showCreator: false,
     verticalMaxPerRow,
+    // Focus the dialog shell so the first Tab moves to the first strip, not the
+    // toolbar (which is the first tabbable when the swatch rail renders cold).
+    initialFocusSelector: (root) => root,
   });
 }

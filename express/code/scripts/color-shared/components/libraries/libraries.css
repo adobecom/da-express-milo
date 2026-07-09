@@ -1,11 +1,11 @@
 /* Libraries accordion shell — item cards reuse color-explore strips (color-palette, gradient visual) */
 
 .ax-libraries {
-  --ax-lib-bg: var(--Palette-white);
-  --ax-lib-border: var(--Palette-gray-75);
-  --ax-lib-heading-color: var(--Alias-content-typography-heading);
-  --ax-lib-detail-color: var(--Alias-content-typography-detail);
-  --ax-lib-body-color: var(--Alias-content-typography-body, #505050);
+  --ax-lib-bg: var(--color-white);
+  --ax-lib-border: var(--color-gray-150);
+  --ax-lib-heading-color: var(--Alias-content-typography-Heading);
+  --ax-lib-detail-color: var(--Alias-content-typography-Detail);
+  --ax-lib-body-color: var(--Alias-content-typography-Body, #505050);
   --ax-lib-accent: var(--S2-Buttons-Accent-Color-Default);
   --ax-lib-header-height: 76px;
   --ax-lib-strip-height: 56px;
@@ -373,7 +373,7 @@
 
 .ax-lib-accordion-count {
   display: none;
-  font-size: var(--Global-Typography-Size-Body-Body-S);
+  font-size: var(--typography-body-s);
   line-height: 1.3;
   color: var(--ax-lib-detail-color);
   white-space: nowrap;
@@ -476,7 +476,7 @@
   top: var(--spacing-100);
   right: var(--spacing-100);
   padding: var(--spacing-75) var(--spacing-200);
-  background: var(--Palette-white);
+  background: var(--color-white);
   color: var(--ax-lib-heading-color);
   font-size: var(--body-font-size-xs);
   font-weight: var(--font-weight-medium);
@@ -507,7 +507,7 @@
 
 .ax-lib-card__text .ax-lib-card__name {
   margin: 0;
-  font-size: var(--Global-Typography-Size-Body-Body-S);
+  font-size: var(--typography-body-s);
   font-weight: var(--font-weight-medium);
   line-height: 1.3;
   color: var(--ax-lib-heading-color);

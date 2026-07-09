@@ -2,6 +2,7 @@
 import { expect } from '@esm-bundle/chai';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
 import { createModalManager } from '../../../../express/code/scripts/color-shared/modal/createModalManager.js';
+import { trapFocus } from '../../../../express/code/scripts/color-shared/spectrum/utils/a11y.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
@@ -638,5 +639,50 @@ describe.skip('createModalManager', () => {
       manager.close();
       await new Promise((r) => setTimeout(r, 350));
     });
+  });
+});
+
+describe('trapFocus initial focus', () => {
+  let releaseTrap;
+
+  afterEach(() => {
+    releaseTrap?.release();
+    releaseTrap = null;
+  });
+
+  async function waitForFocus() {
+    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  }
+
+  it('focuses first tabbable when getInitialFocus is omitted', async () => {
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+    const firstTabbable = document.createElement('button');
+    firstTabbable.type = 'button';
+    root.appendChild(firstTabbable);
+    const secondTabbable = document.createElement('button');
+    secondTabbable.type = 'button';
+    root.appendChild(secondTabbable);
+
+    releaseTrap = trapFocus(root);
+    await waitForFocus();
+
+    expect(document.activeElement).to.equal(firstTabbable);
+    root.remove();
+  });
+
+  it('focuses dialog root when getInitialFocus returns root', async () => {
+    const root = document.createElement('div');
+    root.tabIndex = -1;
+    document.body.appendChild(root);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    root.appendChild(btn);
+
+    releaseTrap = trapFocus(root, { getInitialFocus: (el) => el });
+    await waitForFocus();
+
+    expect(document.activeElement).to.equal(root);
+    root.remove();
   });
 });

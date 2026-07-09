@@ -65,6 +65,10 @@ describe('openLibraryItemModal', () => {
       verticalMaxPerRow: 8,
       showCreator: false,
     });
+    const { initialFocusSelector } = modalManager.openPaletteSwatchesModal.firstCall.args[1];
+    expect(initialFocusSelector).to.be.a('function');
+    const sentinel = {};
+    expect(initialFocusSelector(sentinel)).to.equal(sentinel);
   });
 
   it('does not open palette modal when theme has no colors', async () => {

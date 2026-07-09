@@ -33,8 +33,8 @@
 .color-libraries-error {
   padding: var(--spacing-700) var(--spacing-400);
   text-align: center;
-  color: var(--Alias-content-typography-detail);
-  font-size: var(--Global-Typography-Size-Body-Body-S);
+  color: var(--Alias-content-typography-Detail);
+  font-size: var(--typography-body-s);
   line-height: 1.3;
 }
 
