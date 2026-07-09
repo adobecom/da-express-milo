@@ -11,8 +11,7 @@ export default async function decorate(block) {
   const textContent = createTag('div', { class: 'font-bento-text' });
 
   if (headerCell) {
-    const ctaArea = [...headerCell.children].find((el) =>
-      el.classList.contains('action-area') || el.classList.contains('button-container'));
+    const ctaArea = [...headerCell.children].find((el) => el.classList.contains('action-area') || el.classList.contains('button-container'));
     [...headerCell.children].forEach((el) => {
       if (el !== ctaArea) textContent.append(el);
     });
