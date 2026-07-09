@@ -108,7 +108,13 @@ async function captureOne(context, url) {
 
   const result = { url, ok: false };
   try {
-    await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
+    const response = await page.goto(url, { waitUntil: 'domcontentloaded', timeout });
+    // page.goto() only throws on navigation failures (DNS, timeout, aborted) —
+    // an unpreviewed branch or a dead page returns a normal 404/500 response
+    // that would otherwise get screenshotted and reported as ok/diff.
+    if (response && response.status() >= 400) {
+      throw new Error(`HTTP ${response.status()}`);
+    }
     await page.waitForLoadState('networkidle', { timeout }).catch(() => {});
     await autoScroll(page);
     const probe = await page.evaluate(() => {
@@ -134,6 +140,17 @@ async function captureOne(context, url) {
     await page.close();
   }
   return result;
+}
+
+// Normalize a brokenBlocks entry to an identity for A/B comparison — e.g.
+// "cta-carousel (unloaded)" and "429 https://…/blocks/cta-carousel/….js" both
+// key on "cta-carousel", so a like-for-like failure isn't mistaken for a new one.
+function brokenKey(entry) {
+  const resourceMatch = entry.match(/\/blocks\/([^/]+)\//);
+  if (resourceMatch) return resourceMatch[1];
+  const nameMatch = entry.match(/^(.*?) \(/);
+  if (nameMatch) return nameMatch[1];
+  return entry;
 }
 
 async function mapPool(items, n, fn) {
@@ -208,11 +225,11 @@ const results = await mapPool(cells, concurrency, async ({ page: p, vp }) => {
     };
   }
 
-  const brokenA = cell.a.brokenBlocks.length;
-  const brokenB = cell.b.brokenBlocks.length;
+  const brokenAKeys = new Set(cell.a.brokenBlocks.map(brokenKey));
+  const newBroken = cell.b.brokenBlocks.filter((entry) => !brokenAKeys.has(brokenKey(entry)));
   if (!a.ok) cell.status = 'a-failed';
   else if (!b.ok) cell.status = 'b-failed';
-  else if (brokenB > brokenA) cell.status = 'broken'; // new breakage on branch
+  else if (newBroken.length) { cell.status = 'broken'; cell.newBroken = newBroken; } // breakage new to B, by identity
   else if (cell.diff && cell.diff.ratio > 0) cell.status = 'diff';
 
   done += 1;
