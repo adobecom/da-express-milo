@@ -23,3 +23,7 @@ actionlint
 .playwright-mcp/
 !.eslintrc-code-compatibility.js
 !.browserslistrc
+
+# Auto-QA screen-diff working dir
+.qa-screendiff/
+.claude/skills/auto-qa-screendiff/node_modules/

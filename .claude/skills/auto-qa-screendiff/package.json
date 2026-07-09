@@ -1,0 +1,11 @@
+{
+  "name": "auto-qa-screendiff",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Skill-local deps for the auto-qa-screendiff capture/diff step. Playwright is resolved from the repo root.",
+  "dependencies": {
+    "pixelmatch": "5.3.0",
+    "pngjs": "7.0.0"
+  }
+}

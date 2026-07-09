@@ -1,9 +1,22 @@
 # Auto‑QA Screenshot Diff — Architecture (Prototype)
 
-**Status:** Draft / design only. No implementation yet.
-**Scope of this doc:** the *local‑branch* prototype. PR integration, S3, and
-full site-wide reverse indexing are explicitly **out of scope** (see §11).
+**Status:** IMPLEMENTED as the `auto-qa-screendiff` skill (C1–C9). PR integration
+and S3 remain out of scope (see §11); full `da-express-milo` reverse indexing is
+deliberately replaced by kitchen-sink/scoped discovery (see C5 + spike findings).
+**Scope of this doc:** the *local‑branch* prototype.
 **Owner:** (TBD)   **Branch this was drafted on:** `claude-auto-qa`
+
+> **Implementation map**
+> | Component | Where |
+> |---|---|
+> | C1 manifest | `config/critical-pages.json` |
+> | C2 changed blocks | `scripts/resolve-changed-blocks.mjs` |
+> | C3 page→blocks / C4 select | `scripts/select-affected.mjs` + `lib/da-crawl.mjs` |
+> | C5 DA-wide discovery | `scripts/crawl-affected.mjs` (spike ✅) |
+> | C6 worklist | `scripts/build-worklist.mjs` |
+> | C7 capture + diff / C8 broken-block | `scripts/capture.mjs` |
+> | C9 report | `scripts/report.mjs` + `templates/report.html` (customizable) |
+> | tests | `test/crawl-affected.integration.mjs` |
 
 ---
 
@@ -156,8 +169,17 @@ affectedPages = criticalPages.filter(p =>
 Each entry records **why** it was selected (which changed blocks it contains) so
 the report can explain itself.
 
-### C5 — DA-wide discovery for additional pages  *(SPIKE — do NOT build yet)*
+### C5 — DA-wide discovery for additional pages  *(SPIKE RUN ✅ — see auto-qa-c5-spike-findings.md)*
 Goal: beyond the curated list, find *other* pages that use the changed blocks.
+
+> **Spike outcome (2026-07-09):** viable. `admin.da.live/list` is scriptable with
+> the token (no MCP round-trips). Crawling `express-color` = 156 pages in ~9s and
+> found 108 new (localized) affected pages beyond the curated 6, with verified
+> accuracy and no false positives. Implemented in
+> `scripts/crawl-affected.mjs`. Refinements: exclude `/drafts/`, cache the
+> block→pages index, and do NOT full-crawl `da-express-milo` per run — prefer
+> kitchen-sink pages + curated set + scoped crawl. Full details and the answered
+> open questions are in `auto-qa-c5-spike-findings.md`.
 
 **Reality of the DA MCP:** there is **no component/full-text search**. The only
 primitives are:

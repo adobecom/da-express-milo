@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<!--
+  Auto-QA Screen-Diff report template.  CUSTOMIZE THIS FILE freely.
+  Token syntax (filled by scripts/report.mjs):
+    {{key}}    value, HTML-escaped
+    {{{key}}}  value, raw HTML
+  The block between the row markers below (BEGIN row / END row HTML comments)
+  is repeated once per result cell.  Do NOT write those literal markers anywhere
+  else in this file — the renderer matches the first occurrence.
+  Top-level tokens:  title, branch, base, generatedAt, summary, selfCheckBanner
+  Row tokens: project, edsPath, viewport, status, statusClass, source,
+              matchedBlocks, diffPct, diffRatio, sizeChanged, aUrl, bUrl,
+              aImg, bImg, diffImg, brokenList, noteHtml
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{title}}</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font: 14px/1.4 system-ui, sans-serif; margin: 0; background: #f6f7f9; color: #1a1a1a; }
+  header { padding: 16px 24px; background: #fff; border-bottom: 1px solid #e2e4e8; position: sticky; top: 0; z-index: 5; }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  .meta { color: #666; font-size: 12px; }
+  .summary { margin-top: 8px; font-size: 13px; }
+  .banner { background: #fff3cd; color: #664d03; padding: 6px 12px; border-radius: 6px; margin-top: 8px; display: inline-block; }
+  .controls { padding: 10px 24px; background: #fff; border-bottom: 1px solid #e2e4e8; position: sticky; top: 61px; z-index: 4; }
+  .controls input, .controls select { font: inherit; padding: 4px 8px; }
+  main { padding: 16px 24px; display: grid; gap: 14px; }
+  .cell { background: #fff; border: 1px solid #e2e4e8; border-radius: 8px; overflow: hidden; }
+  .cell-head { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid #eee; flex-wrap: wrap; }
+  .path { font-weight: 600; }
+  .tag { font-size: 11px; padding: 2px 7px; border-radius: 999px; background: #eef; color: #334; }
+  .badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; text-transform: uppercase; }
+  .st-a-failed, .st-b-failed { background: #6c1d1d; color: #fff; }
+  .st-broken { background: #b42318; color: #fff; }
+  .st-diff { background: #b54708; color: #fff; }
+  .st-ok { background: #067647; color: #fff; }
+  .pct { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 700; }
+  .imgs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 2px; background: #ddd; }
+  .imgs figure { margin: 0; background: #fff; }
+  .imgs figcaption { font-size: 11px; color: #666; padding: 4px 6px; }
+  .imgs a { display: block; }
+  .imgs img { width: 100%; height: 260px; object-fit: contain; object-position: top; background: repeating-conic-gradient(#f0f0f0 0% 25%, #fff 0% 50%) 50%/16px 16px; display: block; }
+  .broken { padding: 8px 12px; background: #fff5f5; border-top: 1px solid #fbdcdc; }
+  .broken ul { margin: 4px 0 0; padding-left: 18px; color: #b42318; }
+  .note { padding: 6px 12px; color: #b42318; font-size: 12px; }
+  a { color: inherit; }
+</style>
+</head>
+<body>
+<header>
+  <h1>{{title}}</h1>
+  <div class="meta">branch <strong>{{branch}}</strong> vs base <strong>{{base}}</strong> · generated {{generatedAt}}</div>
+  <div class="summary">{{{summary}}}</div>
+  {{{selfCheckBanner}}}
+</header>
+<div class="controls">
+  <label>filter path <input id="q" type="search" placeholder="/create/..." /></label>
+  <label>viewport
+    <select id="vp"><option value="">all</option><option>chrome</option><option>ipad</option><option>iphone</option></select>
+  </label>
+  <label><input id="flagged" type="checkbox" /> flagged only</label>
+</div>
+<main id="rows">
+<!-- BEGIN row -->
+  <section class="cell" data-status="{{status}}" data-viewport="{{viewport}}" data-path="{{project}}{{edsPath}}" data-ratio="{{diffRatio}}">
+    <div class="cell-head">
+      <span class="badge {{statusClass}}">{{status}}</span>
+      <span class="path">{{project}}{{edsPath}}</span>
+      <span class="tag">{{viewport}}</span>
+      <span class="tag">{{source}}</span>
+      <span class="tag">blocks: {{matchedBlocks}}</span>
+      <span class="pct">{{diffPct}} {{sizeChanged}}</span>
+    </div>
+    <div class="imgs">
+      <figure><figcaption>A · stable <a href="{{aUrl}}">↗</a></figcaption><a href="{{aImg}}"><img loading="lazy" src="{{aImg}}" alt="stable"></a></figure>
+      <figure><figcaption>B · branch <a href="{{bUrl}}">↗</a></figcaption><a href="{{bImg}}"><img loading="lazy" src="{{bImg}}" alt="branch"></a></figure>
+      <figure><figcaption>diff</figcaption><a href="{{diffImg}}"><img loading="lazy" src="{{diffImg}}" alt="diff"></a></figure>
+    </div>
+    {{{noteHtml}}}
+    <div class="broken"><strong>broken blocks:</strong><ul>{{{brokenList}}}</ul></div>
+  </section>
+<!-- END row -->
+</main>
+<script>
+  const q = document.getElementById('q');
+  const vp = document.getElementById('vp');
+  const flagged = document.getElementById('flagged');
+  const cells = [...document.querySelectorAll('.cell')];
+  // hide empty "broken blocks" panels
+  document.querySelectorAll('.broken').forEach((b) => { if (!b.querySelector('li')) b.remove(); });
+  function apply() {
+    const term = q.value.toLowerCase();
+    cells.forEach((c) => {
+      const okPath = c.dataset.path.toLowerCase().includes(term);
+      const okVp = !vp.value || c.dataset.viewport === vp.value;
+      const okFlag = !flagged.checked || c.dataset.status !== 'ok';
+      c.style.display = okPath && okVp && okFlag ? '' : 'none';
+    });
+  }
+  [q, vp, flagged].forEach((el) => el.addEventListener('input', apply));
+</script>
+</body>
+</html>

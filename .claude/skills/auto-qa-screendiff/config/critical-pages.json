@@ -1,0 +1,30 @@
+{
+  "projects": {
+    "express": {
+      "org": "adobecom",
+      "repo": "da-express-milo",
+      "stableBase": "https://main--da-express-milo--adobecom.aem.live",
+      "branchBase": "https://{branch}--da-express-milo--adobecom.aem.page",
+      "prodHost": "www.adobe.com"
+    },
+    "color": {
+      "org": "adobecom",
+      "repo": "express-color",
+      "stableBase": "https://main--express-color--adobecom.aem.live",
+      "branchBase": "https://{branch}--express-color--adobecom.aem.page",
+      "prodHost": "color.adobe.com"
+    }
+  },
+  "pages": [
+    { "project": "color", "daPath": "/index.html", "edsPath": "/", "label": "Color Home" },
+    { "project": "color", "daPath": "/explore.html", "edsPath": "/explore", "label": "Color Explore" },
+    { "project": "color", "daPath": "/create/color-wheel.html", "edsPath": "/create/color-wheel", "label": "Color Wheel" },
+    { "project": "color", "daPath": "/create/color-accessibility.html", "edsPath": "/create/color-accessibility", "label": "Color Accessibility" },
+    { "project": "color", "daPath": "/create/color-contrast-analyzer.html", "edsPath": "/create/color-contrast-analyzer", "label": "Contrast Analyzer" },
+    { "project": "color", "daPath": "/create/image.html", "edsPath": "/create/image", "label": "Extract Colors from Image" },
+    { "project": "color", "daPath": "/create/image-gradient.html", "edsPath": "/create/image-gradient", "label": "Image Gradient" },
+    { "project": "express", "daPath": "/index.html", "edsPath": "/", "label": "Express Root (DA index)" },
+    { "project": "express", "daPath": "/express/feature/image/remove-background.html", "edsPath": "/express/feature/image/remove-background", "label": "Remove Background (QA)" },
+    { "project": "express", "daPath": "/express/feature/image/crop.html", "edsPath": "/express/feature/image/crop", "label": "Crop Image (QA)" }
+  ]
+}
