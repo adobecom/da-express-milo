@@ -8,7 +8,11 @@
 .color-explore.color-explore--libraries {
   position: relative;
   width: 100%;
-  max-width: var(--block-wd-grid-max-width);
+
+  /* Cap the whole block (header + summary) at the same content width and center
+     it. Summary caps at --block-wd-max-width internally; matching the wrapper to
+     it keeps the header from growing wider than the summary on >1440px screens. */
+  max-width: var(--block-wd-max-width);
   margin: 0 auto;
   padding: 0;
   box-sizing: border-box;
@@ -20,7 +24,7 @@
 
 .color-explore.color-explore--libraries .color-explore-container {
   width: 100%;
-  max-width: var(--block-wd-grid-max-width);
+  max-width: var(--block-wd-max-width);
   margin: 0 auto;
   padding: 0 var(--spacing-400);
   box-sizing: border-box;
