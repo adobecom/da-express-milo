@@ -6,6 +6,7 @@
 @import '../../scripts/color-shared/components/libraries/libraries.css';
 
 .color-explore.color-explore--libraries {
+  position: relative;
   width: 100%;
   max-width: var(--block-wd-grid-max-width);
   margin: 0 auto;
@@ -38,12 +39,38 @@
   line-height: 1.3;
 }
 
-/* Responsive backdrop behind the SUSI sign-in modal for signed-out users.
-   Scoped to the libraries page via the body marker set in color-libraries.js;
-   `.modal-curtain` only exists while the milo modal is open, so the class
-   lingering after close has no visual effect. Mobile-first: smallest asset is
-   the base, wider assets layer on via min-width. */
-body.color-libraries-signin .modal-curtain {
+/* Signed-out state: give the block a real height so the sign-in region fills the
+   viewport below the global nav (otherwise it collapses to the short skeleton
+   height and the backdrop/card get cropped). The block sits after the header in
+   flow, so subtracting the nav height fills exactly down to the viewport bottom. */
+.color-explore.color-explore--libraries.color-libraries--signin {
+  min-height: calc(100vh - var(--global-height-nav, 0px));
+  min-height: calc(100svh - var(--global-height-nav, 0px));
+}
+
+/* Inline sign-in overlay for signed-out users. Rendered inside the block (not a
+   full-screen milo modal) so the popup and its backdrop stay within the libraries
+   area — the page nav and footer remain visible, matching the Figma. The overlay
+   fills the block, which sits behind it showing the skeleton chrome. Mobile-first:
+   the smallest backdrop asset is the base, wider assets layer on via min-width. */
+.color-libraries-signin-overlay {
+  position: absolute;
+
+  /* Full-bleed: span the whole viewport width so the backdrop covers the entire
+     screen width, while top/bottom keep the height within the block's area (so
+     the page nav + footer stay uncovered). The block is centred in the viewport,
+     so left:50% + translateX(-50%) aligns the 100vw layer to the viewport. */
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 100vw;
+  transform: translateX(-50%);
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: var(--spacing-500) var(--spacing-400);
   background-image: url('libraries-bg-images/768px.png');
   background-repeat: no-repeat;
   background-position: center;
@@ -51,32 +78,84 @@ body.color-libraries-signin .modal-curtain {
 }
 
 @media (min-width: 1024px) {
-  body.color-libraries-signin .modal-curtain {
+  .color-libraries-signin-overlay {
     background-image: url('libraries-bg-images/1024px.png');
   }
 }
 
 @media (min-width: 1200px) {
-  body.color-libraries-signin .modal-curtain {
+  .color-libraries-signin-overlay {
     background-image: url('libraries-bg-images/1200px.png');
   }
 }
 
 @media (min-width: 1440px) {
-  body.color-libraries-signin .modal-curtain {
+  .color-libraries-signin-overlay {
     background-image: url('libraries-bg-images/1440px.png');
   }
 }
 
 @media (min-width: 1679px) {
-  body.color-libraries-signin .modal-curtain {
+  .color-libraries-signin-overlay {
     background-image: url('libraries-bg-images/1679px.png');
   }
 }
 
 @media (min-width: 1920px) {
-  body.color-libraries-signin .modal-curtain {
+  .color-libraries-signin-overlay {
     background-image: url('libraries-bg-images/1920px.png');
+  }
+}
+
+/* White SUSI card centered on the backdrop. */
+.color-libraries-signin-card {
+  width: 370px;
+  max-width: 100%;
+  box-sizing: border-box;
+  padding: var(--spacing-500) var(--spacing-400) var(--spacing-400);
+  border-radius: 12px;
+  background: var(--color-white, #fff);
+  box-shadow: 0 4px 24px rgb(0 0 0 / 16%);
+}
+
+/* Neutralize the loaded fragment's section/fragment wrappers so only the card
+   chrome shows around the authored SUSI block. */
+.color-libraries-signin-card .section,
+.color-libraries-signin-card .fragment {
+  width: auto;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Mobile: the sign-in card becomes the block's own content — no floating card,
+   no full-screen backdrop, no forced viewport height — with inline padding that
+   matches the logged-in libraries view. The skeleton chrome is hidden since the
+   card is the block content here. */
+@media (max-width: 679px) {
+  .color-explore.color-explore--libraries.color-libraries--signin {
+    min-height: 0;
+  }
+
+  .color-explore--libraries.color-libraries--signin > sp-theme {
+    display: none;
+  }
+
+  .color-libraries-signin-overlay {
+    position: static;
+    width: 100%;
+    padding: var(--spacing-500) var(--spacing-300);
+    transform: none;
+    background: none;
+  }
+
+  .color-libraries-signin-card {
+    width: 100%;
+    max-width: none;
+    padding: 0;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
   }
 }
 

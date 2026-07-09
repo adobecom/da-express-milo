@@ -1,4 +1,4 @@
-import { createTag } from '../../scripts/utils.js';
+import { createTag, getLibs, getMetadata } from '../../scripts/utils.js';
 import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import {
   createLibrariesComponent,
@@ -19,7 +19,6 @@ import loadColorLibrariesPlaceholders from '../../scripts/color-shared/i18n/load
 import { createSearchBar, createDeepLinkManager } from '../../scripts/color-shared/components/search-bar/index.js';
 import { announceToScreenReader } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import { ensureIms } from '../../libs/services/index.js';
-import { triggerSignInFlow } from '../../libs/services/middlewares/auth.middleware.js';
 
 const LIBRARIES_CSS = 'scripts/color-shared/components/libraries/libraries.css';
 const STRIP_CSS = 'scripts/color-shared/components/strips/color-strip.css';
@@ -29,7 +28,9 @@ const CSS_CLASSES = {
   BLOCK: 'color-explore',
   CONTAINER: 'color-explore-container',
   LOADING: 'is-loading',
-  SIGN_IN: 'color-libraries-signin',
+  SIGN_IN_HOST: 'color-libraries--signin',
+  SIGN_IN_OVERLAY: 'color-libraries-signin-overlay',
+  SIGN_IN_CARD: 'color-libraries-signin-card',
 };
 
 let componentInstance = null;
@@ -221,16 +222,77 @@ export default async function decorate(block) {
   themeHost.appendChild(container);
 
   if (!isSignedIn) {
-    block.classList.remove(CSS_CLASSES.LOADING);
     const { setSusiColorRedirect, buildLibrariesSignInRedirectUrl } = await import(
       '../../scripts/color-shared/utils/susiRedirect.js'
     );
     setSusiColorRedirect(buildLibrariesSignInRedirectUrl());
-    // Marker so color-libraries.css can paint the responsive libraries backdrop
-    // behind the shared SUSI modal curtain (only on this page).
-    document.body.classList.add(CSS_CLASSES.SIGN_IN);
+
+    // Render the libraries page chrome (search header + skeleton grid) behind the
+    // sign-in overlay so the page matches the Figma layout instead of appearing
+    // blank. The search bar is non-interactive here — the overlay sits on top.
+    // The global page footer is Milo-rendered and already present.
+    searchBarInstance = await createSearchBar(
+      {
+        placeholder: placeholders.librariesSearchPlaceholder,
+        enableSuggestions: false,
+        enableAutocomplete: false,
+        enableStickyBehavior: false,
+      },
+      { onSubmit: () => {}, onClear: () => {} },
+    );
+    componentInstance = createLibrariesComponent({
+      size: getResponsiveSize(),
+      view: LIBRARY_VIEW.LOADING,
+      strings: placeholders,
+      searchBarEl: searchBarInstance.element,
+      toolHrefs,
+      emit() {},
+    });
+    container.appendChild(componentInstance.element);
+
+    resizeHandler = () => {
+      componentInstance?.setSize?.(getResponsiveSize());
+    };
+    window.addEventListener('resize', resizeHandler);
+
+    block.classList.remove(CSS_CLASSES.LOADING);
+
+    // Render the sign-in popup INLINE inside the block (not the shared full-screen
+    // milo modal, which is fixed at the body level and dims the whole viewport).
+    // The authored `susi-target` fragment is loaded via milo's fragment loader so
+    // the SUSI card keeps its authored content, while the overlay + backdrop stay
+    // within the block's area — the page nav and footer remain visible, per Figma.
+    const [susiPath] = (getMetadata('susi-target') || '').split('#');
+    if (susiPath) {
+      // Fill the viewport below the header so the sign-in region isn't cropped.
+      block.classList.add(CSS_CLASSES.SIGN_IN_HOST);
+      const overlay = createTag('div', { class: CSS_CLASSES.SIGN_IN_OVERLAY });
+      const card = createTag('div', { class: CSS_CLASSES.SIGN_IN_CARD });
+      const fragmentAnchor = createTag('a', { href: susiPath });
+      card.appendChild(fragmentAnchor);
+      overlay.appendChild(card);
+      block.appendChild(overlay);
+
+      // Sign-in gate: tapping the backdrop (outside the card) must never dismiss
+      // the SUSI popup — swallow those clicks so nothing behind reacts.
+      overlay.addEventListener('click', (e) => {
+        if (!card.contains(e.target)) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+      });
+      try {
+        const { default: getFragment } = await import(`${getLibs()}/blocks/fragment/fragment.js`);
+        await getFragment(fragmentAnchor);
+      } catch (err) {
+        window.lana?.log(`color-libraries sign-in overlay failed: ${err?.message}`, {
+          tags: 'color-libraries',
+          severity: 'error',
+        });
+      }
+    }
+
     trackColorBlockLoad('color-libraries');
-    await triggerSignInFlow();
     return;
   }
 
