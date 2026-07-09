@@ -1,8 +1,10 @@
 import { getLibs } from '../../scripts/utils.js';
 
 export default async function decorate(block) {
-  const { createTag } = await import(`${getLibs()}/utils/utils.js`);
-  const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
+  const [{ createTag }, { decorateButtons }] = await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
+    import(`${getLibs()}/utils/decorate.js`),
+  ]);
   await decorateButtons(block);
 
   // Row 0: section header (heading + body + CTA)
