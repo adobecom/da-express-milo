@@ -9,8 +9,13 @@
 #
 # Options:
 #   --base <branch>       diff base (default: stage)
+#   --head <ref>          diff/preview target (default: current checked-out
+#                         branch). Use to compare two refs without switching
+#                         branches, e.g. --base stage --head main.
 #   --discover [repos]    run DA-wide crawl; comma-separated repos
-#                         (default when flag present: express-color)
+#                         (default when flag present: express-color,da-express-milo;
+#                         da-express-milo is crawled English-only via --skip-locales
+#                         since it's a much larger repo)
 #   --no-capture          stop after the worklist (discovery only, no browser)
 #   --self                capture B from A's URL (smoke test / no branch preview)
 #   --limit <N>           cap number of pages captured
@@ -27,8 +32,9 @@ MANIFEST="$SCRIPT_DIR/config/critical-pages.json"
 WORK="$REPO_ROOT/.qa-screendiff"
 
 BASE="stage"
+HEAD_REF="HEAD"
 DO_DISCOVER=0
-DISCOVER_REPOS="express-color"
+DISCOVER_REPOS="express-color,da-express-milo"
 DO_CAPTURE=1
 SELF=""
 LIMIT=""
@@ -39,6 +45,7 @@ OPEN=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --base) BASE="$2"; shift 2;;
+    --head) HEAD_REF="$2"; shift 2;;
     --discover)
       DO_DISCOVER=1
       if [ $# -ge 2 ] && [ "${2#--}" = "$2" ]; then DISCOVER_REPOS="$2"; shift 2; else shift 1; fi;;
@@ -54,7 +61,7 @@ while [ $# -gt 0 ]; do
 done
 
 cd "$REPO_ROOT"
-BRANCH="$(git rev-parse --abbrev-ref HEAD)"
+BRANCH="$(git rev-parse --abbrev-ref "$HEAD_REF")"
 step() { printf '\n\033[1;36m▶ %s\033[0m\n' "$1"; }
 
 # --- token ---
@@ -68,7 +75,7 @@ export DA_TOKEN
 mkdir -p "$WORK/pages"
 
 step "1/6  Resolve changed blocks (base=$BASE, branch=$BRANCH)"
-node "$SCRIPT_DIR/scripts/resolve-changed-blocks.mjs" --base "$BASE" > "$WORK/changed-blocks.json"
+node "$SCRIPT_DIR/scripts/resolve-changed-blocks.mjs" --base "$BASE" --head "$HEAD_REF" > "$WORK/changed-blocks.json"
 node -e 'const j=require(process.argv[1]);console.log("   affected blocks("+j.affectedBlocks.length+"): "+(j.affectedBlocks.join(", ")||"(none)")+"  globalChange="+j.globalChange);' "$WORK/changed-blocks.json"
 
 step "2/6  Fetch critical pages + select affected"
@@ -93,13 +100,16 @@ if [ "$DO_DISCOVER" = "1" ]; then
     org=$(jq -r --arg r "$repo" '.projects | to_entries[] | select(.value.repo==$r) | .value.org' "$MANIFEST" | head -1)
     if [ -z "$org" ] || [ "$org" = "null" ]; then echo "   skip '$repo' (not in manifest)"; continue; fi
     out="$WORK/crawl-$repo.json"
+    SCOPE_ARGS=""
+    [ "$repo" = "da-express-milo" ] && SCOPE_ARGS="--skip-locales"
+    # shellcheck disable=SC2086
     node "$SCRIPT_DIR/scripts/crawl-affected.mjs" --org "$org" --repo "$repo" \
       --changed "$WORK/changed-blocks.json" --manifest "$MANIFEST" \
-      --out "$out" --exclude drafts --concurrency 10 | grep -E "affected pages:|crawl:" || true
+      --out "$out" --exclude drafts --concurrency 10 $SCOPE_ARGS | grep -E "affected pages:|crawl:" || true
     CRAWL_ARGS="$CRAWL_ARGS --crawl $out"
   done
 else
-  echo "   skipped (pass --discover to crawl; default repo: express-color)"
+  echo "   skipped (pass --discover to crawl; default repos: express-color,da-express-milo)"
 fi
 
 step "4/6  Build worklist"

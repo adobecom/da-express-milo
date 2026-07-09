@@ -13,7 +13,15 @@
  * Output: JSON on stdout.
  *
  * Usage:
- *   node resolve-changed-blocks.mjs [--base stage] [--repo-root <path>]
+ *   node resolve-changed-blocks.mjs [--base stage] [--head HEAD] [--repo-root <path>]
+ *
+ *   --head <ref>   compare base against this ref instead of the checked-out
+ *                  HEAD (e.g. --base stage --head main to diff stage vs main
+ *                  without switching branches).
+ *
+ * Diffs base vs. head directly (two-ref diff, not merge-base/triple-dot) so it
+ * gives correct results whichever side is actually ahead — triple-dot silently
+ * returns nothing when "head" is behind "base" rather than diverged from it.
  */
 
 import { execSync } from 'node:child_process';
@@ -28,6 +36,7 @@ function arg(name, fallback) {
 
 const repoRoot = path.resolve(arg('--repo-root', process.cwd()));
 const base = arg('--base', 'stage');
+const head = arg('--head', 'HEAD');
 const CODE_ROOT = 'express/code';
 const BLOCKS_DIR = `${CODE_ROOT}/blocks`;
 
@@ -46,10 +55,10 @@ function sh(cmd) {
 // 1. Changed files on this branch vs. base (committed changes).
 let changedFiles = [];
 try {
-  const out = sh(`git diff --name-only ${base}...HEAD`).trim();
+  const out = sh(`git diff --name-only ${base} ${head}`).trim();
   changedFiles = out ? out.split('\n') : [];
 } catch (e) {
-  process.stderr.write(`git diff failed against base '${base}': ${e.message}\n`);
+  process.stderr.write(`git diff failed against base '${base}' (head '${head}'): ${e.message}\n`);
   process.exit(1);
 }
 
@@ -150,7 +159,7 @@ if (hitKnownGlobal) {
 const sorted = (s) => [...s].sort();
 process.stdout.write(`${JSON.stringify({
   base,
-  branch: sh('git rev-parse --abbrev-ref HEAD').trim(),
+  branch: sh(`git rev-parse --abbrev-ref ${head}`).trim(),
   changedFileCount: changedFiles.length,
   changedFiles,
   directBlocks: sorted(directBlocks),
