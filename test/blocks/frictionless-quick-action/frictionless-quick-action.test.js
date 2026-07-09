@@ -20,6 +20,66 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
 const ogFetch = window.fetch;
 
+// Runs before the other suites on purpose: the "sdk starts on file drop" test leaves a
+// document.head MutationObserver active, which throws when later tests inject scripts.
+describe('Easy Upload promo attribution on page load', () => {
+  const VIEW_EVENT = 'view-quickaction-upload-page';
+  const QUICK_ACTION_CELL = ':scope > div:nth-child(3) > div:nth-child(2)';
+
+  function getViewEventQa(trackSpy) {
+    const call = trackSpy.getCalls().reverse().find(
+      // eslint-disable-next-line no-underscore-dangle
+      (c) => c.args?.[1]?.data?._adobe_corpnew?.sdm?.event?.pagename === VIEW_EVENT,
+    );
+    // eslint-disable-next-line no-underscore-dangle
+    return call?.args?.[1]?.data?._adobe_corpnew?.sdm?.custom?.qa;
+  }
+
+  async function decorateWithQuickAction(quickAction) {
+    const trackSpy = sinon.spy();
+    window._satellite = { track: trackSpy };
+    document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
+    const block = document.body.querySelector('.frictionless-quick-action');
+    if (quickAction) {
+      block.querySelector(QUICK_ACTION_CELL).textContent = quickAction;
+    }
+    await init(block);
+    return trackSpy;
+  }
+
+  afterEach(() => {
+    sinon.restore();
+    delete window._satellite;
+  });
+
+  it('tags the page-view event with the variant promo id on load', async () => {
+    const trackSpy = await decorateWithQuickAction('crop-image-easy-upload-variant');
+
+    const qa = getViewEventQa(trackSpy);
+    expect(qa).to.not.be.undefined;
+    expect(qa.promoid).to.equal('P3KMQHCX');
+    expect(qa.mv).to.equal('other');
+  });
+
+  it('tags the page-view event with the control promo id on load', async () => {
+    const trackSpy = await decorateWithQuickAction('crop-image-easy-upload-control');
+
+    const qa = getViewEventQa(trackSpy);
+    expect(qa).to.not.be.undefined;
+    expect(qa.promoid).to.equal('NYTLQM3Y');
+    expect(qa.mv).to.equal('other');
+  });
+
+  it('does not tag a promo id for a vanilla quick action', async () => {
+    const trackSpy = await decorateWithQuickAction();
+
+    const qa = getViewEventQa(trackSpy);
+    expect(qa).to.not.be.undefined;
+    expect(qa.promoid).to.be.undefined;
+    expect(qa.mv).to.be.undefined;
+  });
+});
+
 describe('Frictionless Quick Action Block', () => {
   afterEach(() => {
     sinon.restore();
