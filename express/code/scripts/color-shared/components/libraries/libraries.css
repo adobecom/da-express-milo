@@ -1,0 +1,937 @@
+/* Libraries accordion shell — item cards reuse color-explore strips (color-palette, gradient visual) */
+
+.ax-libraries {
+  --ax-lib-bg: var(--Palette-white);
+  --ax-lib-border: var(--Palette-gray-75);
+  --ax-lib-heading-color: var(--Alias-content-typography-heading);
+  --ax-lib-detail-color: var(--Alias-content-typography-detail);
+  --ax-lib-body-color: var(--Alias-content-typography-body, #505050);
+  --ax-lib-accent: var(--S2-Buttons-Accent-Color-Default);
+  --ax-lib-header-height: 76px;
+  --ax-lib-strip-height: 56px;
+  --ax-lib-skeleton-base: var(--Palette-gray-100);
+  --ax-lib-skeleton-shade: var(--Palette-gray-200);
+  --ax-lib-sort-bg: var(--Palette-gray-100);
+
+  background: var(--ax-lib-bg);
+  width: 100%;
+  padding: 0 0 var(--spacing-700);
+  box-sizing: border-box;
+}
+
+/* ── Library search header (count + search + sort) ──────────────
+   Mobile-first: base styles target S; min-width queries layer on M and L. */
+.ax-lib-header {
+  position: sticky;
+  top: var(--ax-lib-header-sticky-top, var(--global-height-nav, 0px));
+  z-index: 3;
+  width: 100%;
+  background: var(--ax-lib-bg);
+  border-bottom: 1px solid var(--border-subdued);
+  padding-block: var(--spacing-300);
+  box-sizing: border-box;
+}
+
+.ax-lib-header__content {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--spacing-200) var(--spacing-100);
+}
+
+.ax-lib-header__title-search {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  min-width: 0;
+}
+
+/* `.ax-lib-header` prefix raises specificity above Milo's global
+   `main .section p` margin so these header paragraphs stay flush. */
+.ax-lib-header .ax-lib-header__count {
+  margin: 0;
+  padding-left: var(--spacing-50);
+  font-size: var(--body-font-size-s);
+  font-weight: 700;
+  line-height: 20px;
+  color: var(--ax-lib-heading-color);
+  white-space: nowrap;
+}
+
+.ax-lib-header__count:empty {
+  display: none;
+}
+
+/* Mobile default: the sticky count collapses once scrolled (re-shown at tablet+). */
+.ax-lib-header.is-scrolled .ax-lib-header__count {
+  display: none;
+}
+
+.ax-lib-header__search {
+  width: 100%;
+  min-width: 0;
+}
+
+/* Reuse the shared search-bar component, but un-center it to fill the slot */
+.ax-lib-header__search .ax-color-search-bar-outer {
+  inline-size: 100%;
+  max-inline-size: none;
+  padding-inline: 0;
+  align-items: stretch;
+}
+
+.ax-lib-header__search .ax-color-search-bar-input {
+  block-size: 40px;
+}
+
+/* ── Sort control ───────────────────────────────────────────── */
+.ax-lib-header__sort {
+  position: relative;
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  min-height: var(--spacing-600);
+}
+
+/* L/M: spectrum-two sp-picker (filter picker) — hidden on S. This slot is the
+   flex row (label | picker); the label and picker are its direct children (the
+   block-level sp-theme handles theming, so there's no nested sp-theme wrapper).
+   align-items stays inert until it becomes inline-flex at M+; label↔picker spacing
+   comes from the label's padding-inline-end (below), not a flex gap. */
+.ax-lib-header__sort-picker {
+  display: none;
+  align-items: center;
+  min-width: 200px;
+}
+
+/* Figma 2211-239031 side label: neutral #505050, Regular 14px / 18px, flush.
+   12px (--spacing-200) of inline-end padding sets the gap to the picker now that
+   the slot no longer uses a flex gap. Outer-context host styles win over the
+   component's :host padding-inline for normal declarations, so padding-inline-end
+   applies (right side only; start stays 0). The --mod-fieldlabel-* custom props
+   pierce sp-field-label's shadow boundary. min-height:0 collapses the host
+   (default ~24px) to the text line so the slot's align-items:center centers the
+   label against the 32px picker, not its own box. */
+.ax-lib-header__sort-picker sp-field-label {
+  flex: 0 0 auto;
+  white-space: nowrap;
+  padding-inline-end: var(--spacing-200);
+  --mod-fieldlabel-font-size: var(--body-font-size-s);
+  --mod-fieldlabel-font-weight: 400;
+  --mod-fieldlabel-line-height: 18px;
+  --mod-fieldlabel-color: var(--Palette-gray-700);
+  --mod-fieldlabel-padding-block: 0;
+  --mod-fieldlabel-min-height: 0;
+}
+
+/* Figma 2211-239031 "Picker (M)": Regular 14px / 18px text in a 32px-tall field.
+   The picker is now the direct flex item beside the label, so it grows to fill
+   the slot. Shared picker.css renders 16 / 20 at ~40px for color-explore, so scope
+   the Figma typography to this slot only. */
+.ax-lib-header__sort-picker sp-picker.filter-picker {
+  flex-grow: 1;
+  min-width: 0;
+  --mod-picker-font-size: var(--body-font-size-s);
+  --mod-picker-line-height: 18px;
+
+  /* Suppress Spectrum's internal focus indicator; the rounded, offset ring is
+     supplied by the :focus-visible rule below to match the other controls. */
+  --mod-picker-focus-indicator-thickness: 0;
+  --mod-picker-focus-indicator-color: transparent;
+}
+
+.ax-lib-header__sort-picker sp-picker.filter-picker::part(button) {
+  min-height: var(--spacing-500);
+  padding-block: 7px;
+  font-size: var(--body-font-size-s);
+  line-height: 18px;
+}
+
+.ax-lib-header__sort-picker sp-picker.filter-picker::part(label) {
+  font-size: var(--body-font-size-s);
+  line-height: 18px;
+}
+
+/* Focus ring: match the rest of the libraries focus styles with an explicit
+   outline that has a corner radius and a 2px gap from the control (replacing the
+   browser's square default outline on the picker host). */
+.ax-lib-header__sort-picker sp-picker.filter-picker:focus,
+.ax-lib-header__sort-picker sp-picker.filter-picker:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+/* S: spectrum-two sp-action-button — hidden on L/M */
+.ax-lib-header__sort-action {
+  display: inline-flex;
+  align-items: center;
+}
+
+/* Figma 2215-243576 "Sort" action button (M): #e9e9e9 fill, no border, 8px radius,
+   14/18 text in #292929. Height (32px), font-size (14px), and the 10/6/12 icon and
+   text paddings already match Spectrum's size=m medium-scale defaults.
+   NOTE: sp-action-button reads --mod-actionbutton-* tokens (one word), NOT
+   --mod-button-*; the latter are silently ignored, which is why the default gray
+   border and square corners were showing. The label is Medium (500) in Figma but
+   Spectrum sets no weight on it, so set the weight here — it inherits across the
+   shadow boundary into the unstyled label. */
+.ax-lib-header__sort-action sp-action-button {
+  font-weight: var(--font-weight-medium);
+  --mod-actionbutton-border-radius: var(--Corner-radius-corner-radius-100);
+
+  /* Interaction states. Spectrum drives these by reassigning the *-default token
+     to the matching state token on :host(:hover), :host([active]) (pressed) and
+     :host(:focus-visible), so every state must be set or it falls back to the
+     Spectrum gray that doesn't match Figma's gray-100 resting fill. The palette
+     has no gray-300, so pressed steps to gray-400 for clearly perceptible
+     feedback (gray-100 -> gray-200 hover alone is nearly invisible). */
+  --mod-actionbutton-background-color-default: var(--ax-lib-sort-bg);
+  --mod-actionbutton-background-color-hover: var(--Palette-gray-200);
+  --mod-actionbutton-background-color-down: var(--Palette-gray-400);
+  --mod-actionbutton-background-color-focus: var(--Palette-gray-200);
+  --mod-actionbutton-border-color-default: transparent;
+  --mod-actionbutton-border-color-hover: transparent;
+  --mod-actionbutton-border-color-down: transparent;
+  --mod-actionbutton-border-color-focus: transparent;
+  --mod-actionbutton-content-color-default: var(--Alias-content-neutral-default);
+  --mod-actionbutton-content-color-hover: var(--Alias-content-neutral-default);
+  --mod-actionbutton-content-color-down: var(--Alias-content-neutral-default);
+  --mod-actionbutton-content-color-focus: var(--Alias-content-neutral-default);
+}
+
+.ax-lib-header__sort-action [slot='icon'] {
+  display: inline-flex;
+}
+
+.ax-lib-header__sort-action [slot='icon'] img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.ax-lib-header__sort-popover {
+  position: absolute;
+  top: calc(100% + var(--spacing-100));
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 180px;
+  padding: var(--spacing-100);
+  background: var(--ax-lib-bg);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-elevated-key);
+}
+
+.ax-lib-header__sort-popover[hidden] {
+  display: none;
+}
+
+.ax-lib-header .ax-lib-header__sort-heading {
+  margin: 0 0 var(--spacing-80);
+  padding: var(--spacing-80) var(--spacing-100) 0;
+  font-size: var(--body-font-size-xs);
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--ax-lib-detail-color);
+}
+
+/* spectrum-two single-select menu inside the popover card */
+.ax-lib-header__sort-menu {
+  --mod-menu-item-label-inline-edge-to-content: var(--spacing-200);
+  --mod-menu-item-selectable-edge-to-text-not-selected: var(--spacing-200);
+  --mod-menu-item-checkmark-width: 10px;
+  --mod-menu-item-text-to-control: 10px;
+  --mod-menu-item-corner-radius: var(--Corner-radius-corner-radius-100);
+  --mod-menu-item-focus-indicator-border-radius: var(--Corner-radius-corner-radius-100);
+
+  display: block;
+  inline-size: 100%;
+  border: none;
+  background: transparent;
+}
+
+/* ── Summary (expand bar + accordion list) ──────────────────── */
+.ax-libraries-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  min-width: min(320px, 100%);
+  max-width: 599px;
+  padding-top: var(--spacing-400);
+  box-sizing: border-box;
+}
+
+/* ── Expand / collapse all (text links + divider) ───────────── */
+.ax-lib-expand-bar {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  padding-bottom: var(--spacing-200);
+}
+
+.ax-lib-expand-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-200);
+}
+
+.ax-lib-expand-btn {
+  background: none;
+  border: none;
+  color: var(--ax-lib-accent);
+  cursor: pointer;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+  padding: var(--spacing-75) 0;
+}
+
+.ax-lib-expand-btn:hover {
+  text-decoration: underline;
+}
+
+.ax-lib-expand-btn:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+.ax-lib-expand-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border-subdued);
+}
+
+/* ── Accordion ──────────────────────────────────────────────── */
+.ax-libraries-list {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.ax-lib-accordion {
+  width: 100%;
+  border-top: 1px solid var(--ax-lib-border);
+}
+
+.ax-lib-accordion-header {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: var(--ax-lib-header-height);
+  padding: var(--spacing-400) var(--spacing-100);
+  background: var(--ax-lib-bg);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--body-font-family);
+  box-sizing: border-box;
+}
+
+.ax-lib-accordion-header:hover {
+  background: var(--ax-lib-border);
+}
+
+.ax-lib-accordion-header:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: -2px;
+}
+
+.ax-lib-accordion-header-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.ax-lib-accordion-copy-control {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-300);
+}
+
+.ax-lib-accordion-heading-row {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-300);
+  min-width: 0;
+}
+
+.ax-lib-accordion-name {
+  font-size: var(--Global-Typography-Size-Label-Label-L);
+  line-height: 1.3;
+  color: var(--ax-lib-heading-color);
+  font-weight: 400;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-lib-accordion-count {
+  display: none;
+  font-size: var(--Global-Typography-Size-Body-Body-S);
+  line-height: 1.3;
+  color: var(--ax-lib-detail-color);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.ax-lib-toggle-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-100);
+  color: var(--ax-lib-heading-color);
+  flex-shrink: 0;
+}
+
+/* .ax-lib-toggle-icon img {
+  width: 12px;
+  height: 12px;
+  display: block;
+} */
+
+.ax-lib-accordion-panel {
+  padding-bottom: var(--spacing-600);
+}
+
+/* ── Item card (reuses existing color/gradient strip visual) ── */
+.ax-lib-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+/* The whole card is a single tab stop (composite drill-in); give it the same
+   focus ring as the other interactive controls. */
+.ax-lib-card:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+}
+
+/* Visually hidden, screen-reader-only (used for the card's drill-in hint). */
+.ax-lib-card__sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ax-lib-card__visual {
+  position: relative;
+  width: 100%;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  overflow: hidden;
+  cursor: pointer;
+  display: flex;
+  align-items: stretch;
+}
+
+.ax-lib-card__visual:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+}
+
+.ax-lib-card__visual .color-shared-palette-strip {
+  width: 100%;
+  /* palettes.css hardcodes 80px; track the responsive strip height so the
+     wrapper matches the swatch rail (avoids a gap below swatches on mobile). */
+  height: var(--ax-lib-strip-height);
+  border: none;
+}
+
+.ax-lib-card__visual color-palette {
+  display: block;
+  width: 100%;
+  --color-palette-margin-bottom: 0;
+  --color-palette-border-radius: var(--Corner-radius-corner-radius-100);
+  --color-palette-border-width: 1px;
+  --color-palette-border-color: #1f1f1f33;
+  --color-palette-active-border-color: #1f1f1f33;
+  --color-palette-min-height: var(--ax-lib-strip-height);
+}
+
+.ax-lib-card__gradient {
+  width: 100%;
+  height: var(--ax-lib-strip-height);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.2);
+}
+
+.ax-lib-card__badge {
+  position: absolute;
+  top: var(--spacing-100);
+  right: var(--spacing-100);
+  padding: var(--spacing-75) var(--spacing-200);
+  background: var(--Palette-white);
+  color: var(--ax-lib-heading-color);
+  font-size: var(--body-font-size-xs);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.2;
+  border-radius: 5px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+.ax-lib-card__info {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-200);
+  width: 100%;
+  min-width: 0;
+}
+
+.ax-lib-card__text {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-50);
+  flex: 1;
+  min-width: 0;
+}
+
+.ax-lib-card__text .ax-lib-card__name {
+  margin: 0;
+  font-size: var(--Global-Typography-Size-Body-Body-S);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.3;
+  color: var(--ax-lib-heading-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-lib-card__text .ax-lib-card__subtitle {
+  margin: 0;
+  font-size: var(--body-font-size-xs);
+  line-height: 1.3;
+  color: var(--ax-lib-detail-color);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ax-lib-card__actions {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-80);
+  flex-shrink: 0;
+}
+
+.ax-lib-card__action-menu {
+  position: relative;
+}
+
+.ax-lib-card__action-menu-popover {
+  position: absolute;
+  top: calc(100% + var(--spacing-100));
+  left: 0;
+  right: auto;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  min-width: 0;
+  padding: var(--spacing-100);
+  background: var(--ax-lib-bg);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-elevated-key);
+}
+
+.ax-lib-card__action-menu-popover[hidden] {
+  display: none;
+}
+
+.ax-lib-card__action-menu-list {
+  --mod-menu-item-label-inline-edge-to-content: var(--spectrum-component-edge-to-visual-only-200);
+  --mod-menu-item-selectable-edge-to-text-not-selected: var(--spectrum-component-edge-to-visual-only-200);
+  --mod-menu-item-corner-radius: var(--Corner-radius-corner-radius-100);
+  --mod-menu-item-focus-indicator-border-radius: var(--Corner-radius-corner-radius-100);
+  --mod-menu-item-background-color-default: transparent;
+  --mod-menu-item-background-color-key-focus: transparent;
+  --mod-menu-item-background-color-hover: var(--ax-lib-border);
+  --mod-menu-item-background-color-down: var(--ax-lib-border);
+
+  display: block;
+  inline-size: max-content;
+  width: max-content;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.ax-lib-card__action-menu-list sp-menu-item {
+  background: transparent;
+  white-space: nowrap;
+}
+
+.ax-lib-card__action-menu-list sp-menu-item:hover {
+  background: var(--ax-lib-border);
+}
+
+.ax-lib-card__action-menu-list sp-menu-item:focus,
+.ax-lib-card__action-menu-list sp-menu-item:focus-visible,
+.ax-lib-card__action-menu-list sp-menu-item[focused],
+.ax-lib-card__action-menu-list sp-menu-item[aria-selected="true"] {
+  background: transparent;
+  font-weight: 400;
+}
+
+.ax-lib-card__action-menu .ax-lib-card__action[aria-expanded="true"] {
+  background: var(--ax-lib-border);
+}
+
+.ax-lib-card__action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-500);
+  height: var(--spacing-500);
+  padding: var(--spacing-80);
+  border: none;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  background: transparent;
+  color: var(--Alias-content-neutral-default);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.ax-lib-card__action:hover {
+  background: var(--ax-lib-border);
+}
+
+.ax-lib-card__action:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+}
+
+.ax-lib-card__action .action-icon,
+.ax-lib-card__action .action-icon svg,
+.ax-lib-card__action sp-icon-download,
+.ax-lib-card__action sp-icon-delete,
+.ax-lib-card__action sp-icon-edit,
+.ax-lib-card__action sp-icon-open-in,
+.ax-lib-card__action sp-icon-accessibility {
+  width: 20px;
+  height: 20px;
+  display: block;
+}
+
+/* ── Empty search state ─────────────────────────────────────── */
+.ax-lib-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: var(--spacing-300);
+  padding: var(--spacing-500) var(--spacing-400);
+}
+
+.ax-lib-empty-icon {
+  display: inline-flex;
+  color: var(--ax-lib-heading-color);
+}
+
+.ax-lib-empty-icon img {
+  width: 140px;
+  height: 140px;
+  display: block;
+}
+
+.ax-lib-empty__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-200);
+}
+
+/* `.ax-lib-empty` prefix raises specificity above Milo's global
+   `main .section p` margin so heading/description stay flush. */
+.ax-lib-empty .ax-lib-empty__heading {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 30px;
+  color: var(--ax-lib-heading-color);
+}
+
+.ax-lib-empty .ax-lib-empty__description {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.3;
+  color: var(--ax-lib-body-color);
+}
+
+.ax-lib-empty--no-content .ax-lib-empty__description {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Empty-state CTA matches the Figma "Button (Accent)" spec (identical across
+   desktop/tablet/mobile): 24px radius, 42px height, 90px min-width, 18px/22px
+   bold text, 20px horizontal padding. Fill/content colors come from the
+   sp-button accent variant. */
+.ax-lib-empty__cta {
+  --spectrum-button-border-radius: 24px;
+  --spectrum-button-height: 42px;
+
+  min-width: 90px;
+  border-radius: 24px;
+  padding: 0 20px;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-l);
+  font-weight: 700;
+  line-height: 22px;
+}
+
+/* ── Loading skeleton (accordion header + card grid) ─────────── */
+.ax-lib-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: 100%;
+}
+
+.ax-lib-loading-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-300);
+  min-height: var(--ax-lib-header-height);
+  padding: var(--spacing-400) var(--spacing-100);
+  border-top: 1px solid var(--ax-lib-border);
+  box-sizing: border-box;
+}
+
+.ax-lib-loading-header__right {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-300);
+  flex-shrink: 0;
+}
+
+.ax-lib-loading-chevron {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background-color: var(--ax-lib-skeleton-shade);
+}
+
+.ax-lib-loading-card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-75);
+}
+
+.ax-lib-loading-card__visual {
+  width: 100%;
+  height: var(--ax-lib-strip-height);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  border: 0.5px solid var(--Palette-gray-100);
+  background-color: var(--ax-lib-skeleton-shade);
+}
+
+.ax-lib-loading-card__footer {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-200);
+  min-height: 44px;
+}
+
+.ax-lib-loading-card__lines {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-75);
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ax-lib-loading-card__dots {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+@property --ax-lib-shimmer-pos {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+.ax-lib-loading-shimmer {
+  background-image: linear-gradient(
+    90deg,
+    var(--ax-lib-skeleton-base) 0%,
+    var(--ax-lib-skeleton-shade) var(--ax-lib-shimmer-pos),
+    var(--ax-lib-skeleton-base) 100%
+  );
+  animation: ax-lib-loading-shimmer-slide 1000ms ease-out 1ms infinite;
+}
+
+.ax-lib-loading-bar {
+  border-radius: var(--Corner-radius-corner-radius-500);
+  background-color: var(--ax-lib-skeleton-shade);
+}
+
+.ax-lib-loading-bar--title {
+  width: 200px;
+  height: 22px;
+}
+
+.ax-lib-loading-bar--count {
+  width: 158px;
+  height: 21px;
+}
+
+.ax-lib-loading-bar--name {
+  width: min(200px, 60%);
+  height: 18px;
+}
+
+.ax-lib-loading-bar--detail {
+  width: min(121px, 40%);
+  height: 12px;
+}
+
+.ax-lib-loading-dot {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: var(--ax-lib-skeleton-shade);
+}
+
+@keyframes ax-lib-loading-shimmer-slide {
+  0% {
+    --ax-lib-shimmer-pos: 0%;
+  }
+
+  50% {
+    --ax-lib-shimmer-pos: 50%;
+  }
+
+  100% {
+    --ax-lib-shimmer-pos: 100%;
+  }
+}
+
+/* ── Responsive ────────────────────────────────────────────────
+   Mobile-first. Base rules above target mobile (<600px); the two tiers
+   below layer on tablet (≥600px) and desktop (≥1200px). */
+
+/* ── Tablet (≥600px) ────────────────────────────────────────── */
+@media (min-width: 599px) {
+  /* Header stays sticky on tablet/desktop; the count never collapses here
+     (the is-scrolled count-hide is scoped to mobile only). */
+  .ax-lib-header__content {
+    align-items: center;
+    gap: var(--spacing-300);
+  }
+
+  .ax-lib-header__title-search {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-300);
+  }
+
+  .ax-lib-header .ax-lib-header__count {
+    flex-shrink: 0;
+    padding-left: 0;
+  }
+
+  .ax-lib-header.is-scrolled .ax-lib-header__count {
+    display: revert;
+  }
+
+  .ax-lib-header__search {
+    flex: 1 1 auto;
+    max-width: 460px;
+  }
+
+  .ax-lib-header__sort-picker {
+    display: inline-flex;
+  }
+
+  .ax-lib-header__sort-action,
+  .ax-lib-header__sort-popover {
+    display: none;
+  }
+
+  .ax-lib-accordion-count {
+    display: revert;
+  }
+
+  .ax-libraries-summary {
+    min-width: min(600px, 100%);
+    max-width: 1199px;
+  }
+
+  .ax-lib-empty--no-content .ax-lib-empty__description {
+    max-width: 392px;
+  }
+}
+
+/* ── Desktop (≥1200px) ──────────────────────────────────────── */
+@media (min-width: 1199px) {
+  .ax-libraries {
+    --ax-lib-strip-height: 80px;
+  }
+
+  .ax-lib-header .ax-lib-header__count {
+    font-size: var(--body-font-size-m);
+    line-height: 22px;
+  }
+
+  .ax-lib-header__search {
+    flex: 0 0 408px;
+    max-width: 408px;
+  }
+
+  .ax-libraries-summary {
+    width: min(var(--block-wd-max-width), 100%);
+    min-width: min(1200px, 100%);
+    max-width: 1679px;
+    padding-top: var(--spacing-500);
+  }
+
+  .ax-lib-empty {
+    padding-block: var(--spacing-800);
+  }
+
+  .ax-lib-empty .ax-lib-empty__heading {
+    font-size: 28px;
+    line-height: 32px;
+  }
+
+  .ax-lib-empty .ax-lib-empty__description {
+    font-size: 16px;
+  }
+
+  .ax-lib-empty--no-content .ax-lib-empty__description {
+    max-width: 448px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-lib-loading-shimmer {
+    animation: none;
+  }
+}
