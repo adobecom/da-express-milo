@@ -847,41 +847,7 @@ export function createStep(number, content) {
   return step;
 }
 
-// TEMP DEBUG (revert later): logs the promo id attached to the page-view analytics
-// event so the Easy Upload attribution fix can be verified without the analytics suite.
-/* eslint-disable no-underscore-dangle */
-function installEasyUploadPromoDebugLogger() {
-  if (window.__euPromoDebugInstalled) {
-    return;
-  }
-  window.__euPromoDebugInstalled = true;
-  window._satellite = window._satellite || {};
-  const originalTrack = window._satellite.track?.bind(window._satellite);
-  window._satellite.track = (type, payload) => {
-    try {
-      const sdm = payload?.data?._adobe_corpnew?.sdm;
-      if (sdm?.event?.pagename === 'view-quickaction-upload-page') {
-        const qa = sdm?.custom?.qa;
-        // eslint-disable-next-line no-console
-        console.log('[EU promo debug] view-quickaction-upload-page', {
-          promoid: qa?.promoid,
-          mv: qa?.mv,
-          type: qa?.type,
-        });
-      }
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn('[EU promo debug] failed to inspect payload', e);
-    }
-    return originalTrack?.(type, payload);
-  };
-}
-/* eslint-enable no-underscore-dangle */
-
 export default async function decorate(block) {
-  // TEMP DEBUG (revert later)
-  installEasyUploadPromoDebugLogger();
-
   const [utils, placeholders] = await Promise.all([import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
     decorateButtonsDeprecated(block)]);
