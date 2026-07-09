@@ -76,8 +76,8 @@ main .font-bento-header a.con-button.fill:any-link:hover {
   overflow: hidden;
 }
 
-.font-bento-card-1,
-.font-bento-card-6 {
+.font-bento-card-first,
+.font-bento-card-last {
   grid-column: 1 / -1;
 }
 
@@ -96,8 +96,8 @@ main .font-bento-header a.con-button.fill:any-link:hover {
   flex: 1;
 }
 
-.font-bento-card-1 .font-bento-card-media,
-.font-bento-card-6 .font-bento-card-media {
+.font-bento-card-first .font-bento-card-media,
+.font-bento-card-last .font-bento-card-media {
   aspect-ratio: 620 / 290;
 }
 
@@ -140,11 +140,11 @@ main .font-bento-header a.con-button.fill:any-link:hover {
     gap: var(--spacing-300);
   }
 
-  .font-bento-card-1 {
+  .font-bento-card-first {
     grid-column: 1 / 3;
   }
 
-  .font-bento-card-6 {
+  .font-bento-card-last {
     grid-column: 3 / 5;
   }
 }

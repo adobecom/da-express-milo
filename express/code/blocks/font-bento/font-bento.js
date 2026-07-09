@@ -22,9 +22,9 @@ export default async function decorate(block) {
 
   // Remaining rows: bento cards
   const grid = createTag('div', { class: 'font-bento-grid' });
-  [...block.children].forEach((row, i) => {
+  [...block.children].forEach((row) => {
     const cells = [...row.querySelectorAll(':scope > div')];
-    const card = createTag('div', { class: `font-bento-card font-bento-card-${i + 1}` });
+    const card = createTag('div', { class: 'font-bento-card' });
 
     const titleCell = cells[0];
     let titleEl = titleCell?.querySelector('p');
@@ -47,6 +47,10 @@ export default async function decorate(block) {
     row.remove();
     grid.append(card);
   });
+
+  const cards = [...grid.children];
+  if (cards.length > 0) cards[0].classList.add('font-bento-card-first');
+  if (cards.length > 1) cards[cards.length - 1].classList.add('font-bento-card-last');
 
   block.append(header, grid);
 }

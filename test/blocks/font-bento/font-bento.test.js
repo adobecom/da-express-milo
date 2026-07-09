@@ -67,10 +67,10 @@ describe('font-bento', () => {
     });
   });
 
-  it('first and last cards have numbered classes for wide layout', async () => {
+  it('first and last cards have positional classes for wide layout', async () => {
     const block = await prepBlock('./mocks/default.html');
-    expect(block.querySelector('.font-bento-card-1')).to.exist;
-    expect(block.querySelector('.font-bento-card-6')).to.exist;
+    expect(block.querySelector('.font-bento-card-first')).to.exist;
+    expect(block.querySelector('.font-bento-card-last')).to.exist;
   });
 
   it('removes original authored rows after decoration', async () => {
