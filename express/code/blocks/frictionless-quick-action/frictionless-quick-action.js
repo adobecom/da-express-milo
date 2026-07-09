@@ -3,6 +3,7 @@ import { getLibs, getIconElementDeprecated, decorateButtonsDeprecated } from '..
 import { buildFreePlanWidget } from '../../scripts/widgets/free-plan.js';
 import { sendFrictionlessEventToAdobeAnaltics } from '../../scripts/instrument.js';
 import { createLocaleDropdownWrapper } from '../../scripts/widgets/frictionless-locale-dropdown.js';
+import { EasyUploadVariantsPromoidMap } from '../../scripts/utils/easy-upload-utils.js';
 import {
   QA_CONFIGS,
   EXPERIMENTAL_VARIANTS,
@@ -81,6 +82,17 @@ function getVanillaQuickActionForEasyUploadControl(quickAction) {
     return quickAction;
   }
   return EASY_UPLOAD_LEGACY_MAP[quickAction] || quickAction;
+}
+
+// The map value is a URL-ready fragment ("<promoid>&mv=<mv>"); split it back into
+// discrete analytics dimensions so the impression matches the SDK launch payload.
+function getEasyUploadPromoAttribution(quickAction) {
+  const raw = EasyUploadVariantsPromoidMap[quickAction];
+  if (!raw) {
+    return null;
+  }
+  const [promoid, mvParam] = raw.split('&mv=');
+  return { promoid, mv: mvParam || 'other' };
 }
 
 function isAuthFrictionlessUploadQuickAction(quickAction) {
@@ -1088,5 +1100,14 @@ export default async function decorate(block) {
     block.prepend(logo);
   }
 
-  sendFrictionlessEventToAdobeAnaltics(block, 'view-quickaction-upload-page');
+  // Tag the page-view impression with the Easy Upload experiment arm's promo id so
+  // both variant and control arms are attributed at load, not only when the SDK launches.
+  const promoAttribution = getEasyUploadPromoAttribution(quickAction);
+  sendFrictionlessEventToAdobeAnaltics(
+    block,
+    'view-quickaction-upload-page',
+    promoAttribution
+      ? { custom: { qa: { promoid: promoAttribution.promoid, mv: promoAttribution.mv } } }
+      : {},
+  );
 }
