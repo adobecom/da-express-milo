@@ -216,26 +216,6 @@ export function loadPicker() {
 }
 
 /**
- * Load field-label component (sp-field-label) — a visible, focus-forwarding
- * label that associates with a field (e.g. sp-picker) via its `for` attribute.
- */
-export function loadFieldLabel() {
-  if (!componentLoaded.fieldLabel) {
-    componentLoaded.fieldLabel = (async () => {
-      await loadCoreDeps();
-      const guard = installRegistryGuard();
-      try {
-        await import(`${DIST}/field-label.js`);
-        await waitForComponents(['sp-theme', 'sp-field-label']);
-      } finally {
-        guard.restore();
-      }
-    })();
-  }
-  return componentLoaded.fieldLabel;
-}
-
-/**
  * Load button components (sp-button, sp-action-button, etc.).
  */
 export function loadButton() {
@@ -317,33 +297,6 @@ export function loadDialog() {
 }
 
 /**
- * Load alert dialog components (sp-alert-dialog) for centered modals.
- */
-export function loadAlertDialog() {
-  if (!componentLoaded.alertDialog) {
-    componentLoaded.alertDialog = (async () => {
-      await loadCoreDeps();
-      const guard = installRegistryGuard();
-      try {
-        await import(`${DIST}/button.js`);
-        await import(`${DIST}/dialog.js`);
-        await import(`${DIST}/alert-dialog.js`);
-        await import(`${DIST}/icons-workflow.js`);
-        await waitForComponents([
-          'sp-theme',
-          'sp-alert-dialog',
-          'sp-button',
-          'sp-icon-delete',
-        ]);
-      } finally {
-        guard.restore();
-      }
-    })();
-  }
-  return componentLoaded.alertDialog;
-}
-
-/**
  * Load icons for color-swatch-rail (copy, add, delete, lock, accessibility, open-in). Tint and drag use Figma SVGs only — not Spectrum sp-icon-edit.
  */
 export async function loadIconsRail() {
@@ -352,12 +305,10 @@ export async function loadIconsRail() {
   // icons-workflow.js in this repo is the canonical source for rail icons.
   await import(`${DIST}/icons-workflow.js`);
   await waitForComponents([
-    'sp-icon-accessibility',
     'sp-icon-alert',
     'sp-icon-circle',
     'sp-icon-copy',
     'sp-icon-delete',
-    'sp-icon-download',
     'sp-icon-edit',
     'sp-icon-filter',
     'sp-icon-open-in',

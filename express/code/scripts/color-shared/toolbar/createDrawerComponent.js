@@ -494,10 +494,6 @@ function buildThemePayload(palette, formData, t) {
           profileName: COLOR_PROFILE,
         }]),
         tags: formData.tags ?? [],
-        // Stored inside the representation data (not top-level) because the CC
-        // Library API only round-trips fields nested in `colortheme#data`.
-        // Drives the "Color blind safe" badge in the libraries grid.
-        ...(palette?.accessibilityData && { accessibilityData: palette.accessibilityData }),
       },
     }],
   };

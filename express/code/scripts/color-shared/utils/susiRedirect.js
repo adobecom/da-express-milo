@@ -12,10 +12,6 @@ export function consumeSusiColorRedirect() {
   return url || null;
 }
 
-export function buildLibrariesSignInRedirectUrl() {
-  return window.location.href;
-}
-
 function pageHasBlock(...classNames) {
   return classNames.some((cls) => document.querySelector(`.${cls}`));
 }

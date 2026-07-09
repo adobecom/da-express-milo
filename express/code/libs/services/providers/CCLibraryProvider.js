@@ -92,10 +92,8 @@ export default class CCLibraryProvider extends BaseProvider {
     return this.safeExecute(fn);
   }
 
-  async deleteTheme(libraryId, themeId, options = {}) {
-    const fn = () => this.#actions.deleteTheme(libraryId, themeId);
-    if (options.throwOnError) return fn();
-    return this.safeExecute(fn);
+  async deleteTheme(libraryId, themeId) {
+    return this.safeExecute(() => this.#actions.deleteTheme(libraryId, themeId));
   }
 
   async updateTheme(libraryId, elementId, payload) {
