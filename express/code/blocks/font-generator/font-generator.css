@@ -1,8 +1,31 @@
 /*
- * Up to 1440px the layout is a single column: the side panel (preview input +
- * suggestions) sits full-width on top of the results below it. At 1440px+ it
- * becomes the 12-column grid with the side panel as a 4-col rail.
+ * Up to 1200px the layout is a single column: the side panel (preview input +
+ * suggestions) sits full-width on top of the results below it. At 1200px+ it
+ * becomes the 12-column grid with the side panel as a sticky 4-col rail.
+ * Horizontal margins and the widescreen max-width follow the site's ax-grid
+ * tokens (styles.css) so they match the rest of Express: 20px < 600px, 32px
+ * 600-1199px, 40px 1200px+, capped to a 1600px-wide container at 1680px+.
  */
+.font-generator {
+  box-sizing: border-box;
+  padding-left: var(--ax-grid-margin, 20px);
+  padding-right: var(--ax-grid-margin, 20px);
+}
+
+@media (min-width: 1200px) {
+  .font-generator {
+    padding-bottom: var(--spacing-900, 80px);
+  }
+}
+
+@media (min-width: 1680px) {
+  .font-generator {
+    max-width: var(--ax-grid-container-width, 1600px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
 .font-generator-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -10,18 +33,26 @@
   background: var(--gray-75, #F3F3F3);
 }
 
+@media (max-width: 599px) {
+  .font-generator-grid {
+    gap: 24px;
+  }
+}
+
 .font-generator-col {
   min-width: 0;
 }
 
-
-@media (min-width: 1440px) {
+@media (min-width: 1200px) {
   .font-generator-grid {
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 
   .font-generator-col--side {
     grid-column: span 4;
+    position: sticky;
+    top: var(--spacing-400, 24px);
+    align-self: start;
   }
 
   .font-generator-col--main {

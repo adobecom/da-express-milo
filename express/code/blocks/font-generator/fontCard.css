@@ -3,14 +3,8 @@
   flex-direction: column;
   background: #ffffff;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   min-height: 304px;
   overflow: hidden;
-  transition: box-shadow 0.15s ease;
-}
-
-.font-card:hover {
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
 /* ─── Body (preview area — overlay is bounded here) ──────────────────────── */
@@ -20,8 +14,21 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 16px 16px 12px;
+  /* Top padding pushes the preview text to 64px from the card top, well clear
+     of the absolutely-positioned copy button so the two don't visually align. */
+  padding: 64px 16px 12px;
   overflow: hidden;
+}
+
+/* List view is a compact row, not a scaled-down grid card — pull the
+   preview text back up rather than keeping the grid view's 64px offset. */
+.font-card-grid.is-list .font-card {
+  min-height: 0;
+}
+
+.font-card-grid.is-list .font-card-body {
+  padding-top: 24px;
+  padding-bottom: 12px;
 }
 
 /* ─── Copy icon button (upper right) ─────────────────────────────────────── */

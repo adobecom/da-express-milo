@@ -190,6 +190,15 @@
   background: var(--gray-75, #F3F3F3);
 }
 
+/* Inline rail (1200px+): no side padding, so the column renders at its full
+   computed grid-track width instead of being squeezed by extra padding. */
+@media (min-width: 1200px) {
+  .font-generator-side {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
 .font-generator-side .text-field {
   display: flex;
   flex-direction: column;

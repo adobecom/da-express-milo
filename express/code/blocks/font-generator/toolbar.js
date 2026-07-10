@@ -146,7 +146,7 @@ export default function createToolbar({ panelId } = {}) {
     sliderValue.textContent = `${fontSize}px`;
     setSliderFill(slider, fontSize);
 
-    count.textContent = `${activeFonts.length} styles`;
+    count.textContent = `${activeFonts.length} unicode fonts`;
 
     if (filterTrigger) {
       filterTrigger.setAttribute('aria-expanded', String(Boolean(filtersOpen)));
