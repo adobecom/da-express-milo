@@ -1,6 +1,5 @@
 import { transformText, getFontById, getCategories } from '../../unicodeEngine.js';
 import { getState, setState, subscribe } from '../../state.js';
-import { getLibs } from '../../../../scripts/utils.js';
 import {
   trapFocus,
   disableBackgroundScroll,
@@ -59,23 +58,6 @@ template.innerHTML = `<div class="filter-panel">
     </a>
   </div>
 </div>`;
-
-// Async-enhances a hardcoded fallback string from placeholders; keeps the
-// fallback if the key is undefined, matching the pattern in font-generator.js.
-// replaceKey() echoes the humanized key back rather than a falsy value when
-// no placeholder is authored for it, so truthiness alone can't detect a miss
-// (worse for single-word keys like "all", whose "humanized" form is itself)
-// — treat that echo as "not found" so the authored fallback wins.
-async function getPlaceholder(key, fallback) {
-  try {
-    const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
-    const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
-    const value = await replaceKey(key, getConfig());
-    return value && value !== key.replaceAll('-', ' ') ? value : fallback;
-  } catch (e) {
-    return fallback;
-  }
-}
 
 async function fetchFontSheet() {
   const res = await fetch(FONT_SHEET_PATH);
@@ -150,10 +132,10 @@ function initAccordion(panel) {
   header.addEventListener('click', () => accordion.classList.toggle('is-collapsed'));
 }
 
-async function populateCategories(panel, categoryStyles = {}) {
+async function populateCategories(panel, categoryStyles = {}, allCategoryLabel = 'All') {
   const [sheet, allText] = await Promise.all([
     fetchFontSheet(),
-    getPlaceholder('all', 'All'),
+    allCategoryLabel,
   ]);
   if (!sheet?.fonts) return;
 
@@ -282,7 +264,7 @@ export default function createFilterPanel(config = {}) {
   initCloseButton(panel);
   initDragHandle(panel);
   populatePromo(panel, config);
-  populateCategories(panel, config.categoryStyles ?? {});
+  populateCategories(panel, config.categoryStyles ?? {}, config.allCategoryLabel);
   panel.classList.toggle('is-loading', getState().loading);
 
   const overlay = createOverlay();

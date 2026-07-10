@@ -1,9 +1,9 @@
-import { getLibs } from '../../scripts/utils.js';
 import createSidePanel from './side-panel/output/side-panel.js';
 import createFilterPanel from './side-panel/output/filter-panel.js';
 import { setState, subscribe, initFromUrl } from './state.js';
 import createFontCardGrid from './fontCardGrid.js';
 import createToolbar from './toolbar.js';
+import loadFontGeneratorPlaceholders from './placeholders.js';
 
 const CATEGORY_STYLES = {
   all: { fontId: 'bold-script' },
@@ -52,72 +52,32 @@ function getContent() {
   };
 }
 
-// replaceKey() echoes the humanized key back when no placeholder is authored
-// for it (e.g. "font-generator-placeholder" -> "font generator placeholder")
-// rather than returning null/undefined, so callers can't rely on truthiness
-// alone to detect a miss. Treat that echo as "not found" so authored fallback
-// text — the actual, most up-to-date copy — wins until the row exists.
-async function getPlaceholder(key) {
-  const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
-  const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
-  const value = await replaceKey(key, getConfig());
-  return value && value !== key.replaceAll('-', ' ') ? value : null;
+// Localizers below apply already-resolved strings from placeholders.js —
+// loadFontGeneratorPlaceholders() has already handled batching the lookup
+// and falling back to DEFAULT_PLACEHOLDERS, so these just apply the result.
+function localizeFilterTrigger(button, label) {
+  const labelEl = button.querySelector('.filter-trigger-label');
+  if (labelEl) labelEl.textContent = label;
+  button.setAttribute('aria-label', label);
 }
 
-// Async-enhances the trigger label from placeholders so it stays translatable;
-// keeps the authored fallback if the 'filter' placeholder is not defined.
-async function localizeFilterTrigger(button) {
-  try {
-    const label = await getPlaceholder('filter');
-    if (label) {
-      const labelEl = button.querySelector('.filter-trigger-label');
-      if (labelEl) labelEl.textContent = label;
-      button.setAttribute('aria-label', label);
-    }
-  } catch (e) {
-    // Placeholder lookup unavailable — keep the fallback label.
-  }
+function localizeCloseButton(button, label) {
+  button.setAttribute('aria-label', label);
 }
 
-// The drawer close button is icon-only; localize its accessible name, keeping
-// the 'Close' fallback if the placeholder is undefined.
-async function localizeCloseButton(button) {
-  try {
-    const label = await getPlaceholder('close');
-    if (label) button.setAttribute('aria-label', label);
-  } catch (e) {
-    // Placeholder lookup unavailable — keep the fallback label.
-  }
+function localizeAccordionTitle(panel, label) {
+  const title = panel.querySelector('.title');
+  if (title) title.textContent = label;
 }
 
-async function localizeAccordionTitle(panel) {
-  try {
-    const label = await getPlaceholder('categories');
-    const title = panel.querySelector('.title');
-    if (title) title.textContent = label || 'Categories';
-  } catch (e) {
-    // keep fallback
-  }
+function localizeTryThese(panel, label) {
+  const wrapper = panel.querySelector('.text-wrapper');
+  if (wrapper) wrapper.textContent = label;
 }
 
-async function localizeTryThese(panel) {
-  try {
-    const label = await getPlaceholder('try-these');
-    const wrapper = panel.querySelector('.text-wrapper');
-    if (wrapper) wrapper.textContent = label || 'Try these:';
-  } catch (e) {
-    // keep fallback
-  }
-}
-
-async function localizeTextareaPlaceholder(panel) {
-  try {
-    const label = await getPlaceholder('font-generator-placeholder');
-    const textarea = panel.querySelector('textarea.label');
-    if (textarea) textarea.placeholder = label || 'Type the preview text you want to get started...';
-  } catch (e) {
-    // keep fallback
-  }
+function localizeTextareaPlaceholder(panel, label) {
+  const textarea = panel.querySelector('textarea.label');
+  if (textarea) textarea.placeholder = label;
 }
 
 export default async function decorate(block) {
@@ -129,6 +89,10 @@ export default async function decorate(block) {
   setState({ loading });
 
   const content = getContent();
+  // Kicked off once here; awaited below once the DOM it localizes exists,
+  // and threaded into createFilterPanel for the 'All' category label, which
+  // needs it before the category cells are built.
+  const stringsPromise = loadFontGeneratorPlaceholders();
 
   const grid = document.createElement('div');
   grid.className = 'font-generator-grid';
@@ -145,18 +109,15 @@ export default async function decorate(block) {
     promoTitle: content.promoTitle,
     promoCta: content.promoCta,
     categoryStyles: CATEGORY_STYLES,
+    allCategoryLabel: stringsPromise.then((strings) => strings.allCategory),
   });
   filterPanel.id = panelId;
 
   const closeButton = filterPanel.querySelector('.filter-panel-close');
-  if (closeButton) localizeCloseButton(closeButton);
-  localizeAccordionTitle(filterPanel);
 
   const { panel: sidePanel, unsubscribe: unsubscribeSide } = createSidePanel({
     suggestions: content.suggestions,
   });
-  localizeTryThese(sidePanel);
-  localizeTextareaPlaceholder(sidePanel);
 
   sideCol.append(sidePanel, filterPanel, filterOverlay);
 
@@ -167,8 +128,15 @@ export default async function decorate(block) {
   block.replaceChildren(grid);
 
   const { toolbar, filterTrigger, unsubscribe: unsubscribeToolbar } = createToolbar({ panelId });
-  if (filterTrigger) localizeFilterTrigger(filterTrigger);
   mainCol.append(toolbar);
+
+  stringsPromise.then((strings) => {
+    if (filterTrigger) localizeFilterTrigger(filterTrigger, strings.filterTrigger);
+    if (closeButton) localizeCloseButton(closeButton, strings.closeFilters);
+    localizeAccordionTitle(filterPanel, strings.categories);
+    localizeTryThese(sidePanel, strings.tryThese);
+    localizeTextareaPlaceholder(sidePanel, strings.previewPlaceholder);
+  });
 
   let unsubscribeGrid = () => {};
   createFontCardGrid({ cardCta: content.cardCta }).then(({ container, unsubscribe }) => {
