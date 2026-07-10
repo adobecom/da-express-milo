@@ -282,19 +282,17 @@ const QR_CODE_CONFIG = {
   },
 };
 
-const FILE_TYPE_PATTERNS = {
-  'image/png': ['png'],
-  'image/jpeg': ['jpg', 'jpeg', 'jfif', 'exif'],
-  'image/gif': ['gif'],
-  'image/webp': ['webp'],
-  'image/svg+xml': ['svg'],
-  'image/bmp': ['bmp'],
-  'image/heic': ['heic'],
-  'video/mp4': ['mp4'],
-  'video/quicktime': ['mov'],
-  'video/x-msvideo': ['avi'],
-  'video/webm': ['webm'],
-};
+// Magic-byte signatures matched against the file's actual leading bytes.
+// `offset` is where the signature starts; used for container formats (WEBP/HEIC).
+const FILE_TYPE_SIGNATURES = [
+  { type: 'image/png', offset: 0, bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] },
+  { type: 'image/jpeg', offset: 0, bytes: [0xff, 0xd8, 0xff] },
+  { type: 'image/gif', offset: 0, bytes: [0x47, 0x49, 0x46, 0x38] }, // "GIF8"
+  { type: 'image/bmp', offset: 0, bytes: [0x42, 0x4d] }, // "BM"
+  { type: 'image/webp', offset: 0, bytes: [0x52, 0x49, 0x46, 0x46] }, // "RIFF" + "WEBP" @ 8
+  { type: 'image/webp', offset: 8, bytes: [0x57, 0x45, 0x42, 0x50] }, // "WEBP"
+  { type: 'image/heic', offset: 4, bytes: [0x66, 0x74, 0x79, 0x70] }, // "ftyp" box
+];
 
 /**
  * Generate UUID v4
@@ -527,20 +525,53 @@ export class EasyUpload {
   }
 
   /**
-   * Detect file type from content string by pattern matching
-   * @param {string} typeString - Content string to analyze
-   * @returns {string} Detected MIME type
+   * Detect MIME type from a file's actual leading bytes (magic numbers).
+   * Unlike text sniffing, this cannot misclassify binary content, and returns
+   * null for anything without a recognized image signature.
+   * @param {ArrayBuffer} buffer - Leading bytes of the file
+   * @returns {string|null} Detected MIME type, or null if unrecognized
    */
-  detectFileType(typeString) {
-    const lowerTypeString = typeString.toLowerCase();
+  detectFileTypeFromBytes(buffer) {
+    const bytes = new Uint8Array(buffer);
 
-    for (const [mimeType, patterns] of Object.entries(FILE_TYPE_PATTERNS)) {
-      if (patterns.some((pattern) => lowerTypeString.includes(pattern))) {
-        return mimeType;
-      }
+    for (const { type, offset, bytes: signature } of FILE_TYPE_SIGNATURES) {
+      const matches = signature.every((byte, i) => bytes[offset + i] === byte);
+      if (matches) return type;
     }
 
-    return 'image/jpeg';
+    // SVG is text-based (no binary magic number); sniff the leading markup.
+    const head = new TextDecoder().decode(bytes.slice(0, 64)).trimStart().toLowerCase();
+    if (head.startsWith('<svg') || head.startsWith('<?xml')) return 'image/svg+xml';
+
+    return null;
+  }
+
+  /**
+   * Verify a blob decodes as a complete, non-truncated image. A valid signature
+   * alone does not prove integrity (a truncated file keeps its header), so we
+   * actually decode the pixels.
+   * @param {Blob} blob - Image blob to validate
+   * @param {string} mimeType - Detected MIME type
+   * @returns {Promise<void>} Resolves if valid; throws if corrupted
+   * @throws {Error} If the image cannot be decoded
+   */
+  async validateImageIntegrity(blob, mimeType) {
+    // SVG can't be decoded via createImageBitmap reliably; a valid signature
+    // plus non-empty content is sufficient for the vector case.
+    if (mimeType === 'image/svg+xml') return;
+
+    let bitmap;
+    try {
+      bitmap = await createImageBitmap(blob);
+    } catch (error) {
+      throw new Error(`Corrupted or undecodable image: ${error?.message || error}`);
+    }
+
+    const { width, height } = bitmap;
+    bitmap.close?.();
+    if (!width || !height) {
+      throw new Error('Corrupted image: decoded to zero dimensions');
+    }
   }
 
   /**
@@ -560,8 +591,22 @@ export class EasyUpload {
       const blob = hasNativeDownloadAssetContent
         ? await this.uploadService.downloadAssetContent(this.asset)
         : await fallbackDownloadAssetContent(this.asset);
-      const typeString = await blob.slice(0, 50).text();
-      const detectedType = this.detectFileType(typeString);
+
+      if (!blob || blob.size === 0) {
+        throw new Error('Uploaded file is empty');
+      }
+
+      // Detect type from real bytes, not text — an unrecognized signature means
+      // the upload is not a supported image (or is corrupted).
+      const headerBuffer = await blob.slice(0, 64).arrayBuffer();
+      const detectedType = this.detectFileTypeFromBytes(headerBuffer);
+      if (!detectedType) {
+        throw new Error('Unrecognized or corrupted file: no valid image signature');
+      }
+
+      // Confirm the bytes actually decode as a complete image before handoff.
+      await this.validateImageIntegrity(blob, detectedType);
+
       const fileName = `upload_${Date.now()}_${generateUUID().substring(0, 8)}`;
 
       const file = new File([blob], fileName, { type: detectedType });

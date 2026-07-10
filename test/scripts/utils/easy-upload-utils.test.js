@@ -116,6 +116,117 @@ describe('EasyUpload failure handling', () => {
     expect(easyUpload.versionReadyPromise).to.be.null;
   });
 
+  describe('corrupted image detection', () => {
+    const FAILED_MSG = 'We are having trouble processing the file. Please try another file.';
+
+    function bytesToArrayBuffer(bytes) {
+      return new Uint8Array(bytes).buffer;
+    }
+
+    async function createValidPngBlob() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 2;
+      canvas.height = 2;
+      return new Promise((resolve) => {
+        canvas.toBlob(resolve, 'image/png');
+      });
+    }
+
+    function stubReadyDownload(instance, blob) {
+      sinon.stub(instance, 'waitForAssetVersionReady').resolves();
+      instance.versionReadyPromise = null;
+      instance.asset = {};
+      instance.uploadService = { downloadAssetContent: sinon.stub().resolves(blob) };
+    }
+
+    it('detects MIME type from magic bytes and rejects unknown content', () => {
+      const easyUpload = createInstance();
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+      )).to.equal('image/png');
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0xff, 0xd8, 0xff, 0xe0]),
+      )).to.equal('image/jpeg');
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]),
+      )).to.equal('image/gif');
+      // "RIFF....WEBP"
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50]),
+      )).to.equal('image/webp');
+      // No recognized signature => corrupted/unsupported
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0x00, 0x11, 0x22, 0x33, 0x44]),
+      )).to.be.null;
+    });
+
+    it('validateImageIntegrity rejects an undecodable image', async () => {
+      const easyUpload = createInstance();
+      // Valid PNG signature but garbage body -> cannot decode.
+      const corrupt = new Blob([new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00])], { type: 'image/png' });
+      let threw = false;
+      try {
+        await easyUpload.validateImageIntegrity(corrupt, 'image/png');
+      } catch (error) {
+        threw = true;
+        expect(error.message).to.contain('Corrupted');
+      }
+      expect(threw).to.be.true;
+    });
+
+    it('retrieveUploadedFile rejects an empty upload', async () => {
+      const easyUpload = createInstance();
+      stubReadyDownload(easyUpload, new Blob([]));
+      try {
+        await easyUpload.retrieveUploadedFile();
+        expect.fail('Expected retrieveUploadedFile to throw');
+      } catch (error) {
+        expect(error.message).to.contain('empty');
+      }
+    });
+
+    it('retrieveUploadedFile rejects content without a valid image signature', async () => {
+      const easyUpload = createInstance();
+      stubReadyDownload(easyUpload, new Blob([new Uint8Array([0, 1, 2, 3, 4, 5])]));
+      try {
+        await easyUpload.retrieveUploadedFile();
+        expect.fail('Expected retrieveUploadedFile to throw');
+      } catch (error) {
+        expect(error.message).to.contain('corrupted');
+      }
+    });
+
+    it('retrieveUploadedFile returns a typed File for a valid image', async () => {
+      const easyUpload = createInstance();
+      stubReadyDownload(easyUpload, await createValidPngBlob());
+      const file = await easyUpload.retrieveUploadedFile();
+      expect(file).to.be.instanceOf(File);
+      expect(file.type).to.equal('image/png');
+    });
+
+    it('shows the authored error tooltip when a corrupted file is confirmed', async () => {
+      const easyUpload = createInstance();
+      const tooltip = document.createElement('div');
+      tooltip.classList.add('hidden');
+      easyUpload.setConfirmTooltipConfig({
+        element: tooltip,
+        messages: { failed: FAILED_MSG },
+      });
+      sinon.stub(easyUpload, 'finalizeUpload').resolves();
+      sinon.stub(easyUpload, 'refreshQRCode').resolves();
+      sinon.stub(easyUpload, 'retrieveUploadedFile').rejects(
+        new Error('Unrecognized or corrupted file: no valid image signature'),
+      );
+
+      await easyUpload.handleConfirmImport();
+
+      expect(tooltip.textContent).to.equal(FAILED_MSG);
+      expect(tooltip.classList.contains('hidden')).to.be.false;
+      expect(tooltip.classList.contains('hover')).to.be.true;
+      expect(startSDKStub.called).to.be.false;
+    });
+  });
+
   it('propagates initializeBlockUpload failures during URL generation', async () => {
     const createAssetStub = sinon.stub().resolves({ links: {} });
     const initializeBlockUploadStub = sinon.stub().rejects(new Error('init failed'));
