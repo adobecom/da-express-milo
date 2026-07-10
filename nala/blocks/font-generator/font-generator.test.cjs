@@ -33,7 +33,7 @@ test.describe('FontGeneratorBlock Test Suite', () => {
 
     await test.step('step-4: Verify toolbar renders', async () => {
       await expect(block.toolbar).toBeVisible();
-      await expect(block.filterTrigger).toBeVisible();
+      await expect(block.count).toBeVisible();
     });
 
     await test.step('step-5: Verify font card grid renders', async () => {
@@ -41,14 +41,30 @@ test.describe('FontGeneratorBlock Test Suite', () => {
       await expect(block.fontCards.first()).toBeVisible();
     });
 
-    await test.step('step-6: Filter trigger opens the filter panel', async () => {
-      await block.filterTrigger.click();
-      await expect(block.filterPanel).toBeVisible();
+    // The filters have two interaction models: below 1200px they live in a
+    // drawer opened by the toolbar's filter trigger; at >=1200px they render
+    // inline in the sticky sidebar and the trigger is hidden.
+    await test.step('step-6: Filters are reachable for the current viewport', async () => {
+      if (await block.filterTrigger.isVisible()) {
+        await block.filterTrigger.click();
+        await expect(block.filterPanel).toBeVisible();
+        await expect(block.filterPanelClose).toBeVisible();
+        await block.filterPanelClose.click();
+        await expect(block.filterPanel).not.toBeVisible();
+      } else {
+        await expect(block.desktopFilters).toBeVisible();
+      }
     });
 
-    await test.step('step-7: Filter panel close button closes the panel', async () => {
-      await block.filterPanelClose.click();
-      await expect(block.filterPanel).not.toBeVisible();
+    await test.step('step-7: Selecting a category filters the card grid', async () => {
+      const allCount = await block.fontCards.count();
+      const glitchBtn = block.visibleFilterButtons.filter({ hasText: 'Glitch' });
+      // Opening the drawer (mobile) is required before its buttons are visible.
+      if (await block.filterTrigger.isVisible()) await block.filterTrigger.click();
+      await glitchBtn.first().click();
+      await expect(async () => {
+        expect(await block.fontCards.count()).toBeLessThan(allCount);
+      }).toPass();
     });
 
     await test.step('step-8: Typing in textarea updates font card previews', async () => {

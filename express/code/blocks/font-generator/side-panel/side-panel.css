@@ -380,7 +380,6 @@
 
 .font-generator-side .content {
   display: inline-flex;
-  min-width: 27px;
   height: 32px;
   align-items: center;
   justify-content: center;

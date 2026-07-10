@@ -14,6 +14,13 @@ const DEFAULTS = {
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
     'Realigned equestrian fez bewilders picky monarch',
   ],
+  promo: {
+    title: 'Looking for more fonts?',
+    cta: {
+      text: 'Go to Adobe Fonts',
+      href: 'https://fonts.adobe.com',
+    },
+  },
   cardCta: {
     text: 'Design With Style',
     href: 'https://www.adobe.com/express/templates/',
@@ -30,6 +37,13 @@ function getContent() {
 
   return {
     suggestions,
+    promo: {
+      title: meta('fg-promo-title') ?? DEFAULTS.promo.title,
+      cta: {
+        text: meta('fg-promo-cta-text') ?? DEFAULTS.promo.cta.text,
+        href: meta('fg-promo-cta-href') ?? DEFAULTS.promo.cta.href,
+      },
+    },
     cardCta: {
       text: meta('fg-card-cta-text') ?? DEFAULTS.cardCta.text,
       href: meta('fg-card-cta-href') ?? DEFAULTS.cardCta.href,
@@ -110,10 +124,14 @@ export default async function decorate(block) {
   });
   mainCol.append(gridContainer);
 
-  const teardownDesktopFilters = await initFilters([desktopFiltersEl], { showCTA: true });
+  const teardownDesktopFilters = await initFilters([desktopFiltersEl], {
+    showCTA: true,
+    promo: content.promo,
+  });
 
   const panelController = await initPanel(block, {
     panelId,
+    promo: content.promo,
     onOpenChange: (open) => filterTrigger.setAttribute('aria-expanded', String(open)),
   });
   filterTrigger.addEventListener('click', () => panelController.open());
