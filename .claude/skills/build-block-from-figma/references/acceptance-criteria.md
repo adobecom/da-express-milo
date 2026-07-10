@@ -91,21 +91,6 @@ token rules and `references/grid-system.md` for the grid/container system.
   different sizes at different viewports (tokens do not auto-switch
   in Express — you must override per breakpoint).
 
-## CSS specificity pre-flight
-
-Before committing any CSS, verify these two rules won't be overridden by
-Express's global styles. Both come from `main .section` in `styles.css`
-and affect nearly every block.
-
-**Rule 1 — paragraph margins**: `main .section p { margin: var(--spacing-500) 0 }` = `(0,1,2)`.
-Any block rule that resets paragraph margins must have specificity ≥ `(0,2,1)`.
-Minimum pattern:
-```css
-/* (0,2,1) — beats (0,1,2) */
-.block-container .block-text p { margin: 0 }
-```
-Never use a single-class selector for `<p>` margins — it will lose silently.
-
 ## CSS quality checklist
 
 - No `!important`.
@@ -129,14 +114,8 @@ Never use a single-class selector for `<p>` margins — it will lose silently.
   `&.is-open`.
 - Use `:is()` and `:has()` where they reduce duplication.
 - Selector chain depth ≤ 3.
-- **Shorthand first, logical properties for single-axis only**: use
-  `padding` / `margin` shorthand when all four sides (or both vertical +
-  horizontal pairs) have values — `padding: var(--spacing-900) var(--spacing-600)`
-  is cleaner than two declarations. Reach for individual logical properties
-  (`padding-block`, `padding-inline`, `margin-inline`, `inset-inline-start`,
-  etc.) only when setting **one axis** without touching the other, e.g.
-  `padding-inline: var(--spacing-500)` inside a breakpoint override where
-  block padding stays the same.
+- Use **CSS logical properties** (`margin-inline`, `padding-block`,
+  `inset-inline-start`, etc.) instead of physical properties.
 - No magic numbers — every value maps to a token or has an
   explanatory comment.
 - Scope block-level custom properties with a block-name prefix

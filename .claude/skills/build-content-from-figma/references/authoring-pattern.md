@@ -50,14 +50,6 @@ name + variants), and subsequent rows hold content.
 - Header: a single `<td colspan="2">` with `<p>block-name (variant-a, variant-b)</p>`.
   Variants in parentheses, comma-separated. No variants: `<p>block-name</p>`.
 
-> **DA colspan rule**: DA normalizes every table to have the same number of
-> columns across all rows, padding short rows with empty cells to match the
-> widest row. Any row that should span the full table width — the block name
-> header, a background color row, a section heading row, or any other
-> single-cell row — must use `colspan="N"` where N is the table's column
-> count. Omitting it causes DA to render an unexpected empty second cell,
-> which shifts content into the wrong column in the editor and in EDS delivery.
-
 ---
 
 ## Content rows — text column + stacked media column

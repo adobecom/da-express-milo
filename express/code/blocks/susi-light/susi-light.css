@@ -5,6 +5,7 @@
   --susi-standard-padding: 24px;
 }
 
+
 .susi-light {
   display: flex;
   width: 100%;
@@ -196,7 +197,6 @@
 .section.ax-login-page .susi-layout {
   background-color: var(--color-white);
   border-radius: 16px;
-  width: auto;
 }
 
 .section.ax-login-page .susi-light {

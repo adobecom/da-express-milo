@@ -84,32 +84,6 @@ For each breakpoint:
    Verify `flexDirection` matches the expected layout (column vs row)
    for this breakpoint. If it doesn't match, treat as a layout failure
    regardless of how the screenshot looks — the CSS breakpoint is wrong.
-
-9. **Express-specific computed value checks**: run these checks on every
-   block before declaring visual comparison done. These target known
-   Express global style conflicts that screenshots frequently miss.
-
-   ```js
-   const block = document.querySelector('.<block-name>');
-
-   // Check all <p> elements for 32px margin injected by main .section p
-   const pMargins = [...block.querySelectorAll('p')].map((p) => ({
-     text: p.textContent.slice(0, 40),
-     marginBlock: getComputedStyle(p).marginBlock,
-   }));
-
-   return { pMargins };
-   ```
-
-   **Failure conditions** (fix before passing the block):
-   - Any `<p>` has `marginBlock` that is not `0px` — the block's CSS
-     specificity is losing to `main .section p { margin: var(--spacing-500) 0 }`.
-     Fix: add a second class to the selector, e.g.
-     `.block-header .block-text p { margin: 0 }` (specificity `(0,2,1)`
-     beats `(0,1,2)`).
-
-   **Never dismiss a color or spacing difference as "design system default"**
-   without first cross-referencing `get_variable_defs` from Phase 3.
 9. **Load the cached Figma frame** for this breakpoint from
    `/tmp/build-block-figma/<viewport>.png` (saved during Phase 3).
    Do **not** re-fetch from the Figma MCP — the cached file is the
@@ -193,23 +167,6 @@ If a breakpoint differs meaningfully from the Figma design:
 - If after 5 passes there are still discrepancies, **stop iterating**
   and document the remaining issues in the **Obstacles Encountered**
   section.
-
----
-
-## Cleanup
-
-After the visual comparison phase is complete (all breakpoints assessed,
-obstacles documented), **delete all Playwright screenshots** taken during
-this session:
-
-```bash
-rm -rf .playwright-mcp/
-```
-
-Screenshots are disposable artefacts — they exist only to support the
-comparison loop and must not be left as untracked files in the repo.
-`.playwright-mcp/` is listed in `.gitignore`, but the directory will still
-show up in `git status` as untracked until it is removed.
 
 ---
 

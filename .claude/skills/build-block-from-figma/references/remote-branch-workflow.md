@@ -129,11 +129,6 @@ Use **git CLI** to commit and push to the feature branch on
    git push origin HEAD:<branch-name>
    ```
 
-   > **No debug commits**: use `console.log` in memory only. If a temporary
-   > `data-*` attribute or other debug marker is added to the DOM for
-   > tracing, remove it before committing. Debug commits that do land on the
-   > branch must be squashed before opening a PR.
-
 4. **Clean up** the temporary local branch:
    ```bash
    git checkout <previous-branch>
