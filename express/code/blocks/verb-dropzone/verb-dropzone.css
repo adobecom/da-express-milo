@@ -608,7 +608,7 @@ main .section .verb-dropzone p {
 
 @media screen and (min-width: 1200px) {
   .verb-dropzone {
-    padding: 0 var(--spacing-600) 40px;
+    padding: var(--spacing-100) var(--spacing-600) 40px;
   }
 
   /* Show desktop drag text, hide mobile drag text */
