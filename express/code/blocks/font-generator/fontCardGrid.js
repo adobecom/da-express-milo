@@ -3,7 +3,7 @@ import { getState, setState, subscribe } from './state.js';
 import { LOAD_MORE_STEP } from './types.js';
 import { createFontCard, updateFontCard } from './fontCard.js';
 
-const FONT_SHEET_PATH = '/express/code/blocks/font-generator/font-sheets/v2/v2.json';
+const FONT_SHEET_PATH = '/express/code/blocks/font-generator/font-sheets/font-styles.json';
 const STYLESHEET_HREF = '/express/code/blocks/font-generator/fontCardGrid.css';
 
 let stylesInjected = false;
@@ -19,11 +19,11 @@ function injectStyles() {
 
 function getFilteredFonts(fonts, activeFilters) {
   if (!activeFilters || activeFilters.length === 0) return fonts;
-  return fonts.filter((f) => activeFilters.includes(f.grouping));
+  return fonts.filter((f) => activeFilters.includes(f.category));
 }
 
 /**
- * Creates and mounts the font card grid. Loads v2.json, builds all cards once,
+ * Creates and mounts the font card grid. Loads font-styles.json, builds all cards once,
  * then updates them in-place on every state change — no card is ever recreated.
  *
  * @returns {Promise<{ container: HTMLElement, unsubscribe: function }>}

@@ -1,7 +1,13 @@
 import { transformText, getFontById, getCategories } from '../../unicodeEngine.js';
 import { getState, setState, subscribe } from '../../state.js';
+import { getLibs } from '../../../../scripts/utils.js';
+import {
+  trapFocus,
+  disableBackgroundScroll,
+  restoreBackgroundScroll,
+} from '../../../../scripts/color-shared/spectrum/utils/a11y.js';
 
-const FONT_SHEET_PATH = '/express/code/blocks/font-generator/font-sheets/v2/v2.json';
+const FONT_SHEET_PATH = '/express/code/blocks/font-generator/font-sheets/font-styles.json';
 const BASE_PATH = '/express/code/blocks/font-generator/side-panel';
 
 const STYLESHEET_HREF = `${BASE_PATH}/output/filter-panel.css`;
@@ -52,6 +58,18 @@ template.innerHTML = `<div class="filter-panel">
     </a>
   </div>
 </div>`;
+
+// Async-enhances a hardcoded fallback string from placeholders; keeps the
+// fallback if the key is undefined, matching the pattern in font-generator.js.
+async function getPlaceholder(key, fallback) {
+  try {
+    const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+    const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
+    return (await replaceKey(key, getConfig())) || fallback;
+  } catch (e) {
+    return fallback;
+  }
+}
 
 async function fetchFontSheet() {
   const res = await fetch(FONT_SHEET_PATH);
@@ -127,8 +145,14 @@ function initAccordion(panel) {
 }
 
 async function populateCategories(panel, categoryStyles = {}) {
-  const sheet = await fetchFontSheet();
+  const [sheet, allText] = await Promise.all([
+    fetchFontSheet(),
+    getPlaceholder('all', 'All'),
+  ]);
   if (!sheet?.fonts) return;
+
+  const allLabelEl = panel.querySelector('.font-category .label-2');
+  if (allLabelEl) allLabelEl.textContent = allText;
 
   const allStyle = categoryStyles.all ?? {};
   if (allStyle.fontId) {
@@ -158,11 +182,11 @@ async function populateCategories(panel, categoryStyles = {}) {
   requestAnimationFrame(() => cells.forEach(fitLabelToCell));
 }
 
-// Below 1440px the panel is a fixed sliding sheet/drawer; `is-open` (driven by
-// state.filtersOpen, toggled from the Filter button) controls the slide. At
-// 1440px+ CSS forces it visible inline and this class is a no-op.
-function syncOpenState(panel, filtersOpen) {
-  panel.classList.toggle('is-open', Boolean(filtersOpen));
+// The docked drawer (< 1440px) behaves like a modal while open: focus is
+// trapped inside it and the background can't scroll. At 1440px+ the panel is
+// inline and permanently visible, so none of that modal behavior applies.
+function isDockedDrawer() {
+  return !window.matchMedia('(min-width: 1440px)').matches;
 }
 
 // The close (×) button dismisses the drawer. Hidden via CSS at >=1440px.
@@ -203,10 +227,47 @@ export default function createFilterPanel(config = {}) {
   populatePromo(panel, config);
   populateCategories(panel, config.categoryStyles ?? {});
   panel.classList.toggle('is-loading', getState().loading);
+
+  // Focus trap / scroll lock only ever apply to this panel instance, so they
+  // live in this closure rather than the module-level helpers above.
+  let focusTrap = null;
+  let previouslyFocused = null;
+
+  function syncOpenState(filtersOpen) {
+    const isOpen = Boolean(filtersOpen);
+    panel.classList.toggle('is-open', isOpen);
+
+    if (!isDockedDrawer()) return;
+
+    if (isOpen && !focusTrap) {
+      previouslyFocused = document.activeElement;
+      disableBackgroundScroll();
+      focusTrap = trapFocus(panel);
+    } else if (!isOpen && focusTrap) {
+      restoreBackgroundScroll();
+      focusTrap.release();
+      focusTrap = null;
+      previouslyFocused?.focus();
+      previouslyFocused = null;
+    }
+  }
+
   const unsubscribe = subscribe((state) => {
-    syncOpenState(panel, state.filtersOpen);
+    syncOpenState(state.filtersOpen);
     panel.classList.toggle('is-loading', state.loading);
   });
   initEscapeToClose();
-  return { panel, unsubscribe };
+
+  return {
+    panel,
+    unsubscribe() {
+      unsubscribe();
+      // Release any active trap/lock if the panel is torn down while open.
+      if (focusTrap) {
+        restoreBackgroundScroll();
+        focusTrap.release();
+        focusTrap = null;
+      }
+    },
+  };
 }
