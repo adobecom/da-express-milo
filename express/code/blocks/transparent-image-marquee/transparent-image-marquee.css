@@ -20,17 +20,11 @@
   gap: var(--spacing-100);
 }
 
-/* (0,2,0) beats main .section p (0,1,2) */
-.transparent-image-marquee .logo-eyebrow {
-  align-items: center;
-  display: flex;
-  gap: var(--spacing-75);
-  margin: 0;
-}
-
-.transparent-image-marquee .logo-eyebrow .icon img {
+.transparent-image-marquee .text-content .express-logo {
+  align-self: flex-start;
   display: block;
-  height: 18px;
+  height: 30px;
+  margin-inline: 0;
   width: auto;
 }
 
@@ -75,6 +69,8 @@
   .transparent-image-marquee .foreground {
     align-items: center;
     flex-direction: row;
+    /* text left-pinned, image pinned to the right edge of the content area */
+    justify-content: space-between;
   }
 
   .transparent-image-marquee .text-content {

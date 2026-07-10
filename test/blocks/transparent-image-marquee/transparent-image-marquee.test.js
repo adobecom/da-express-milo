@@ -43,17 +43,20 @@ describe('transparent-image-marquee', () => {
     expect(block.querySelector('.image-container picture')).to.exist;
   });
 
-  it('adds logo icon to eyebrow paragraph', async () => {
+  it('injects the branding logo as a standalone element in text-content', async () => {
     const block = await prepBlock('./mocks/default.html');
-    const eyebrow = block.querySelector('.logo-eyebrow');
-    expect(eyebrow).to.exist;
-    expect(eyebrow.querySelector('.icon')).to.exist;
+    const logo = block.querySelector('.text-content > .express-logo');
+    expect(logo).to.exist;
+    expect(logo.tagName).to.equal('IMG');
   });
 
-  it('preserves eyebrow text from authored content', async () => {
+  it('keeps authored paragraphs as body copy, not merged with the logo', async () => {
     const block = await prepBlock('./mocks/default.html');
-    const eyebrow = block.querySelector('.logo-eyebrow');
-    expect(eyebrow.textContent).to.include('Adobe Express');
+    const logo = block.querySelector('.express-logo');
+    // logo carries no authored text — the subcopy stays in the text-container
+    expect(logo.textContent.trim()).to.equal('');
+    const paras = [...block.querySelectorAll('.text-container p')];
+    expect(paras.some((p) => p.textContent.includes('Create stylized text'))).to.be.true;
   });
 
   it('places heading inside text-container', async () => {
