@@ -1,326 +1,82 @@
+/*
+ * Up to 1200px the layout is a single column: the side panel (preview input +
+ * suggestions) sits full-width on top of the results below it. At 1200px+ it
+ * becomes the 12-column grid with the side panel as a sticky 4-col rail.
+ *
+ * The gray background lives on the block root so it stays edge-to-edge with
+ * the section; the horizontal margins and widescreen max-width (the site's
+ * ax-grid tokens, styles.css: 20px < 600px, 32px 600-1199px, 40px 1200px+,
+ * capped to a 1600px-wide container at 1680px+) are padding/max-width on the
+ * inner grid instead, so they inset the content without cropping the
+ * background — a bare padding on the block root left visible gaps of the
+ * page background on either side.
+ */
+/*
+ * Milo adds 60px of top padding to a section's first content wrapper by
+ * default (styles.css) — the text input should sit flush against the top of
+ * the viewport instead. That base rule carries the same :not() chain on
+ * .section for specificity, so this override repeats it (same pattern as
+ * cards.css/faq.css) rather than relying on every author remembering
+ * "Padding: none".
+ */
+.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):has(.font-generator):not([data-padding='none']) > .content:first-child {
+  padding-top: 0;
+}
+
 .font-generator {
-  --fg-sidebar-width: 477px;
-  --fg-panel-width: 511px;
-
-  padding: var(--spacing-600) var(--spacing-300);
-  background-color: var(--color-gray-150); /* ToDo: Ask if this should be authorable */
+  /* Matches discovery-table/comparison-table-v2's gnav-offset convention —
+     the gnav is sticky too, so the rail's sticky offset needs to clear it. */
+  --gnav-offset-height: 63px;
+  background: var(--gray-75, #F3F3F3);
 }
 
-.font-generator .fg-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-400);
-  max-width: var(--block-wd-grid-max-width);
-  margin-inline: auto;
-}
-
-/* start placeholders — remove when sidebar and main are implemented */
-.font-generator .fg-main p {
-  min-height: 1400px;
-  border: 2px dashed var(--color-purple-1000);
-  margin: 0;
-}
-/* end placeholders */
-
-/* Filters */
-.font-generator .fg-filters {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-300);
-}
-
-.font-generator .fg-filter-list {
+.font-generator-grid {
+  box-sizing: border-box;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-75);
+  grid-template-columns: 1fr;
+  gap: var(--spacing-300, 16px);
+  padding-left: var(--ax-grid-margin, 20px);
+  padding-right: var(--ax-grid-margin, 20px);
 }
 
-.font-generator .fg-filter-btn {
-  min-height: 48px;
-  min-width: 100px;
-  border: 1px solid transparent;
-  border-radius: var(--corner-radius-80);
-  background-color: var(--color-white);
-  overflow: hidden;
-  padding: var(--spacing-100) var(--spacing-75);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  font-size: var(--Global-Typography-Size-Label-Label-2XL);
-  line-height: var(--Global-Typography-Line-height-Label-Label-2XL);
-  text-align: center;
-  color: var(--Palette-gray-800);
-  position: relative;
-  font-family: var(--body-font-family);
+@media (min-width: 1200px) {
+  .font-generator-grid {
+    padding-bottom: var(--spacing-900, 80px);
+  }
 }
 
-.font-generator .fg-filter-btn:hover {
-  background-color: var(--color-gray-100);
-  border-color: var(--color-black);
+@media (min-width: 1680px) {
+  .font-generator-grid {
+    max-width: var(--ax-grid-container-width, 1600px);
+    margin-left: auto;
+    margin-right: auto;
+  }
 }
 
-.font-generator .fg-filter-btn:focus-visible {
-  background-color: var(--color-gray-100);
-  border-color: var(--Buttons-default);
-  outline: none;
+@media (max-width: 599px) {
+  .font-generator-grid {
+    gap: 24px;
+  }
 }
 
-.font-generator .fg-filter-btn.is-selected {
-  border-color: var(--Buttons-Down);
-}
-
-.font-generator .fg-filter-btn.is-selected:focus-visible {
-  border-color: var(--Buttons-Down);
-  background-color: var(--color-white);
-}
-
-.font-generator .fg-filter-btn.is-selected:focus-visible::after {
-  content: '';
-  position: absolute;
-  right: -1px;
-  top: 0;
-  border-radius: 4px;
-  border: 1px solid var(--Buttons-default);
-  width: 100%;
-  height: calc(100% - 2px);
-}
-
-.font-generator .fg-filter-btn[data-category="Symbol text"] {
-  font-size: var(--Global-Typography-Size-Label-Label-S);
-  line-height: var(--Global-Typography-Line-height-Label-Label-S);
-}
-
-/* Accordion */
-.font-generator sp-accordion {
-  width: 100%;
-}
-
-.font-generator sp-accordion-item {
-  --mod-accordion-item-header-font-size: var(--body-font-size-s);
-  --mod-accordion-item-header-font-weight: 700;
-  --mod-accordion-item-header-color: var(--Palette-gray-800);
-  --mod-accordion-corner-radius: 7px;
-  --mod-accordion-background-color-hover: rgba(0, 0, 0, 0.09);
-  --mod-accordion-item-content-area-top-to-content: var(--spacing-100);
-  --mod-accordion-item-content-area-bottom-to-content: var(--spacing-300);
-  --mod-accordion-component-edge-to-text: var(--spacing-100);
-
-  border-block-start: none;
-  border-block-end: 1px solid var(--Palette-gray-200);
-}
-
-.font-generator sp-accordion-item:hover {
-  border-block-end-color: transparent;
-}
-
-.font-generator sp-accordion-item::part(indicator) {
-  color: var(--text-color-secondary);
-}
-
-.font-generator sp-accordion-item[open] {
-  border-block-end-color: transparent;
-}
-
-.font-generator .fg-panel sp-accordion-item {
-  border-block-end: none;
-}
-
-/* Promo */
-.font-generator .fg-promo {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-300);
-  padding: var(--spacing-300);
-  background-color: var(--color-white);
-  border-radius: var(--Corner-radius-corner-radius-200);
-  overflow: hidden;
-  flex-shrink: 0;
-}
-
-.font-generator .fg-promo-left {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-100);
-  flex: 1;
+.font-generator-col {
   min-width: 0;
 }
 
-.font-generator .fg-promo-icon {
-  display: none;
-  flex-shrink: 0;
-  color: var(--color-black);
-}
-
-.font-generator .fg-promo-text {
-  margin: 0;
-  font-size: var(--Global-Typography-Size-Label-Label-M);
-  line-height: var(--Global-Typography-Line-height-Label-Label-M);
-  font-weight: 700;
-  color: var(--Alias-content-typography-Title);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-main .font-generator a.button.primary.fg-promo-btn:any-link {
-  background-color: rgba(0, 0, 0, 0.84);
-  border: none;
-  margin: 0;
-  line-height: 1.3333333;
-}
-
-/* ── Temp panel trigger (remove with toolbar implementation) ──────── */
-.font-generator .fg-panel-trigger--temp {
-  display: inline-block;
-  margin-block-end: var(--spacing-300);
-  padding: var(--spacing-100) var(--spacing-300);
-  border: 1px solid var(--color-gray-300);
-  border-radius: var(--corner-radius-80);
-  background: var(--color-gray-100);
-  font-size: var(--body-font-size-s);
-  cursor: pointer;
-}
-
-/* ── Sidebar filters: desktop only ──────────────────────────────── */
-.font-generator .fg-sidebar .fg-filters {
-  display: none;
-}
-
-/* ── Overlay backdrop ────────────────────────────────────────────── */
-.font-generator .fg-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 200; /* above nav and page content */
-  background-color: rgba(0, 0, 0, 0.44);
-  backdrop-filter: blur(10px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.font-generator.panel-open .fg-overlay {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/* ── Panel / Tray ────────────────────────────────────────────────── */
-/* Mobile-first: tray slides up from bottom */
-.font-generator .fg-panel {
-  position: fixed;
-  inset-inline: 0;
-  inset-block-end: 0;
-  max-height: 90vh;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-300);
-  background-color: var(--color-gray-150);
-  border-start-start-radius: var(--Corner-radius-corner-radius-200);
-  border-start-end-radius: var(--Corner-radius-corner-radius-200);
-  padding: var(--spacing-100) var(--spacing-300) var(--spacing-300);
-  transform: translateY(100%);
-  transition: transform 0.3s ease;
-}
-
-.font-generator.panel-open .fg-panel {
-  transform: none;
-}
-
-/* ── Drag handle (mobile tray only) ─────────────────────────────── */
-.font-generator .fg-tray-handle {
-  width: 80px;
-  height: 4px;
-  background-color: var(--color-gray-325);
-  border-radius: 8px;
-  align-self: center;
-  flex-shrink: 0;
-  cursor: grab;
-}
-
-/* ── Close button (tablet panel only) ───────────────────────────── */
-.font-generator .fg-panel-close {
-  display: none;
-}
-
-/* ── Tablet ───────────────────────────────────────────────────────── */
-@media (min-width: 600px) {
-  .font-generator {
-    padding: var(--spacing-600) var(--spacing-500) var(--spacing-300) var(--spacing-500);
-  }
-
-  .font-generator .fg-panel {
-    inset-block: 0;
-    inset-inline-start: 0;
-    inset-inline-end: auto;
-    width: var(--fg-panel-width);
-    max-height: none;
-    border-radius: 0;
-    padding: var(--spacing-600) var(--spacing-500);
-    box-sizing: border-box;
-    box-shadow: 6px 0 16px -8px rgba(0, 0, 0, 0.08);
-    transform: translateX(calc(-1 * var(--fg-panel-width)));
-  }
-
-  .font-generator .fg-tray-handle {
-    display: none;
-  }
-
-  .font-generator .fg-panel-close {
-    display: flex;
-    position: absolute;
-    inset-block-start: 0;
-    inset-inline-end: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    border: none;
-    background: transparent;
-    cursor: pointer;
-    align-items: center;
-    justify-content: center;
-    color: var(--Palette-gray-800);
-  }
-
-  .font-generator .fg-panel-close svg {
-    height: 12px;
-    width: 12px;
-  }
-
-  .font-generator .fg-promo-icon {
-    display: block;
-  }
-}
-
-/* ── Desktop ──────────────────────────────────────────────────────── */
 @media (min-width: 1200px) {
-  .font-generator {
-    padding: var(--spacing-600);
+  .font-generator-grid {
+    grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 
-  .font-generator .fg-panel-trigger--temp {
-    display: none;
-  }
-
-  .font-generator .fg-sidebar .fg-filters {
-    display: flex;
-  }
-
-  .font-generator .fg-container {
-    flex-direction: row;
-    flex-wrap: nowrap;
-  }
-
-  .font-generator .fg-sidebar {
-    width: var(--fg-sidebar-width);
+  .font-generator-col--side {
+    grid-column: span 4;
     position: sticky;
-    top: calc(var(--global-height-nav) + var(--spacing-600));
-    align-self: flex-start;
+    top: calc(var(--gnav-offset-height, 63px) - 16px);
+    align-self: start;
   }
 
-  .font-generator .fg-main {
-    flex: 1;
+  .font-generator-col--main {
+    grid-column: span 8;
   }
 }
