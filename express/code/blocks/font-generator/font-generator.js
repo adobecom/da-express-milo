@@ -1,15 +1,10 @@
 import createSidePanel from './side-panel/output/side-panel.js';
-import createFilterPanel from './side-panel/output/filter-panel.js';
+import initFilters from './filters.js';
+import initPanel from './panel.js';
 import { setState, subscribe, initFromUrl } from './state.js';
 import createFontCardGrid from './fontCardGrid.js';
 import createToolbar from './toolbar.js';
 import loadFontGeneratorPlaceholders from './placeholders.js';
-
-const CATEGORY_STYLES = {
-  all: { fontId: 'bold-script' },
-  glitch: { fontId: 'strikethrough' },
-  symbol: { fontId: 'weights', fontSize: 12 },
-};
 
 let filterPanelCount = 0;
 
@@ -19,11 +14,6 @@ const DEFAULTS = {
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
     'Realigned equestrian fez bewilders picky monarch',
   ],
-  promoTitle: 'Looking for more fonts?',
-  promoCta: {
-    text: 'Get Adobe Express Free',
-    href: 'https://www.adobe.com/express/templates/',
-  },
   cardCta: {
     text: 'Design With Style',
     href: 'https://www.adobe.com/express/templates/',
@@ -40,11 +30,6 @@ function getContent() {
 
   return {
     suggestions,
-    promoTitle: meta('fg-promo-title') ?? DEFAULTS.promoTitle,
-    promoCta: {
-      text: meta('fg-promo-cta-text') ?? DEFAULTS.promoCta.text,
-      href: meta('fg-promo-cta-href') ?? DEFAULTS.promoCta.href,
-    },
     cardCta: {
       text: meta('fg-card-cta-text') ?? DEFAULTS.cardCta.text,
       href: meta('fg-card-cta-href') ?? DEFAULTS.cardCta.href,
@@ -59,15 +44,6 @@ function localizeFilterTrigger(button, label) {
   const labelEl = button.querySelector('.filter-trigger-label');
   if (labelEl) labelEl.textContent = label;
   button.setAttribute('aria-label', label);
-}
-
-function localizeCloseButton(button, label) {
-  button.setAttribute('aria-label', label);
-}
-
-function localizeAccordionTitle(panel, label) {
-  const title = panel.querySelector('.title');
-  if (title) title.textContent = label;
 }
 
 function localizeTryThese(panel, label) {
@@ -89,37 +65,26 @@ export default async function decorate(block) {
   setState({ loading });
 
   const content = getContent();
-  // Kicked off once here; awaited below once the DOM it localizes exists,
-  // and threaded into createFilterPanel for the 'All' category label, which
-  // needs it before the category cells are built.
   const stringsPromise = loadFontGeneratorPlaceholders();
 
   const grid = document.createElement('div');
   grid.className = 'font-generator-grid';
 
+  // fg-sidebar drives filters.js/font-generator.css's desktop-inline-vs-
+  // mobile-panel visibility toggle (Megan Thomas, MWPW-189432).
   const sideCol = document.createElement('div');
-  sideCol.className = 'font-generator-col font-generator-col--side';
-
-  const panelId = `font-generator-filters-${(filterPanelCount += 1)}`;
-  const {
-    panel: filterPanel,
-    overlay: filterOverlay,
-    unsubscribe: unsubscribeFilter,
-  } = createFilterPanel({
-    promoTitle: content.promoTitle,
-    promoCta: content.promoCta,
-    categoryStyles: CATEGORY_STYLES,
-    allCategoryLabel: stringsPromise.then((strings) => strings.allCategory),
-  });
-  filterPanel.id = panelId;
-
-  const closeButton = filterPanel.querySelector('.filter-panel-close');
+  sideCol.className = 'font-generator-col font-generator-col--side fg-sidebar';
 
   const { panel: sidePanel, unsubscribe: unsubscribeSide } = createSidePanel({
     suggestions: content.suggestions,
   });
 
-  sideCol.append(sidePanel, filterPanel, filterOverlay);
+  // Desktop-inline filters instance; the mobile/tablet instance lives inside
+  // panel.js's own drawer, mounted separately below.
+  const desktopFiltersEl = document.createElement('div');
+  desktopFiltersEl.className = 'fg-filters';
+
+  sideCol.append(sidePanel, desktopFiltersEl);
 
   const mainCol = document.createElement('div');
   mainCol.className = 'font-generator-col font-generator-col--main';
@@ -127,29 +92,39 @@ export default async function decorate(block) {
   grid.append(sideCol, mainCol);
   block.replaceChildren(grid);
 
+  const panelId = `font-generator-filters-${(filterPanelCount += 1)}`;
   const { toolbar, filterTrigger, unsubscribe: unsubscribeToolbar } = createToolbar({ panelId });
   mainCol.append(toolbar);
 
   stringsPromise.then((strings) => {
-    if (filterTrigger) localizeFilterTrigger(filterTrigger, strings.filterTrigger);
-    if (closeButton) localizeCloseButton(closeButton, strings.closeFilters);
-    localizeAccordionTitle(filterPanel, strings.categories);
+    localizeFilterTrigger(filterTrigger, strings.filterTrigger);
     localizeTryThese(sidePanel, strings.tryThese);
     localizeTextareaPlaceholder(sidePanel, strings.previewPlaceholder);
   });
 
-  let unsubscribeGrid = () => {};
-  createFontCardGrid({ cardCta: content.cardCta }).then(({ container, unsubscribe }) => {
-    unsubscribeGrid = unsubscribe;
-    mainCol.append(container);
+  // filters.js reads activeFonts from the store once, at init — the font
+  // sheet must already be loaded (and activeFonts populated) before this
+  // runs, or the category list renders empty.
+  const { container: gridContainer, unsubscribe: unsubscribeGrid } = await createFontCardGrid({
+    cardCta: content.cardCta,
   });
+  mainCol.append(gridContainer);
+
+  const teardownDesktopFilters = await initFilters([desktopFiltersEl], { showCTA: true });
+
+  const panelController = await initPanel(block, {
+    panelId,
+    onOpenChange: (open) => filterTrigger.setAttribute('aria-expanded', String(open)),
+  });
+  filterTrigger.addEventListener('click', () => panelController.open());
 
   const cleanup = () => {
     unsubscribeBlock();
-    unsubscribeFilter();
     unsubscribeSide();
     unsubscribeToolbar();
     unsubscribeGrid();
+    teardownDesktopFilters();
+    panelController.destroy();
   };
   const parent = block.parentElement;
   if (parent) {

@@ -86,27 +86,22 @@ export default function createToolbar({ panelId } = {}) {
   count.className = 'toolbar-count';
   count.setAttribute('aria-live', 'polite');
 
-  let filterTrigger = null;
-  if (panelId) {
-    filterTrigger = document.createElement('button');
-    filterTrigger.type = 'button';
-    filterTrigger.className = 'font-generator-filter-trigger';
-    filterTrigger.setAttribute('aria-haspopup', 'true');
-    filterTrigger.setAttribute('aria-expanded', 'false');
-    filterTrigger.setAttribute('aria-controls', panelId);
+  // Open/close is owned by panel.js (an imperative open()/close() API, not
+  // shared store state) — the caller wires the click handler and keeps
+  // aria-expanded in sync via panel.js's onOpenChange callback.
+  const filterTrigger = document.createElement('button');
+  filterTrigger.type = 'button';
+  filterTrigger.className = 'font-generator-filter-trigger';
+  filterTrigger.setAttribute('aria-haspopup', 'true');
+  filterTrigger.setAttribute('aria-expanded', 'false');
+  if (panelId) filterTrigger.setAttribute('aria-controls', panelId);
 
-    const filterLabel = document.createElement('span');
-    filterLabel.className = 'filter-trigger-label';
-    filterLabel.textContent = 'Filter';
-    filterTrigger.append(makeIcon('filter.svg'), filterLabel);
+  const filterLabel = document.createElement('span');
+  filterLabel.className = 'filter-trigger-label';
+  filterLabel.textContent = 'Filter';
+  filterTrigger.append(makeIcon('filter.svg'), filterLabel);
 
-    filterTrigger.addEventListener('click', () => {
-      setState({ filtersOpen: !getState().filtersOpen });
-    });
-  }
-
-  leftGroup.append(btnGroup, count);
-  if (filterTrigger) leftGroup.append(filterTrigger);
+  leftGroup.append(btnGroup, count, filterTrigger);
 
   // ── Right: font size slider ──────────────────────────────────────────────
   const rightGroup = document.createElement('div');
@@ -135,7 +130,7 @@ export default function createToolbar({ panelId } = {}) {
 
   // ── State sync ───────────────────────────────────────────────────────────
 
-  function syncState({ layout, fontSize, activeFonts, filtersOpen }) {
+  function syncState({ layout, fontSize, activeFonts }) {
     const isGrid = layout === 'grid';
     gridBtn.classList.toggle('is-active', isGrid);
     rowBtn.classList.toggle('is-active', !isGrid);
@@ -147,10 +142,6 @@ export default function createToolbar({ panelId } = {}) {
     setSliderFill(slider, fontSize);
 
     count.textContent = `${activeFonts.length} unicode fonts`;
-
-    if (filterTrigger) {
-      filterTrigger.setAttribute('aria-expanded', String(Boolean(filtersOpen)));
-    }
   }
 
   syncState(getState());

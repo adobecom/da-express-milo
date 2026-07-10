@@ -1,13 +1,15 @@
 import { getLibs } from '../../scripts/utils.js';
 
 // English fallback copy, used until each row exists in the placeholders sheet.
+// Scoped to strings with no equivalent in filters.js/panel.js (Megan Thomas,
+// MWPW-189432), which own their own placeholder keys ('fg-all',
+// 'fg-categories', 'fg-cool', 'fg-glitch', 'fg-symbol', 'fg-filters',
+// 'fg-close-filters') via their own fetchStrings() — duplicating those here
+// would just be a second, conflicting source of truth for the same copy.
 export const DEFAULT_PLACEHOLDERS = Object.freeze({
   filterTrigger: 'Filter',
-  closeFilters: 'Close',
-  categories: 'Categories',
   tryThese: 'Try these:',
   previewPlaceholder: 'Type the preview text you want to get started...',
-  allCategory: 'All',
 });
 
 // Authored placeholder keys — namespaced to avoid collisions with other
@@ -15,11 +17,8 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
 // color-contrast-checker/utils/placeholders.js).
 const PLACEHOLDER_KEY_MAP = Object.freeze({
   filterTrigger: 'font-generator-filter',
-  closeFilters: 'font-generator-close',
-  categories: 'font-generator-categories',
   tryThese: 'font-generator-try-these',
   previewPlaceholder: 'font-generator-placeholder',
-  allCategory: 'font-generator-all',
 });
 
 // replaceKey()/replaceKeyArray() echo the humanized key back (e.g.
