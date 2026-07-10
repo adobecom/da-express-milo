@@ -167,6 +167,13 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
     min-width: 231px;
 }
 
+/* Out-specify styles.css `[data-block-status]:not(...) a.con-button.same-fcta`
+   (0,4,2) so the flex layout survives when same-fcta is added dynamically. */
+.easy-upload-initial .easy-upload-cta-row .button-container a.button.same-fcta,
+.easy-upload-initial .easy-upload-cta-row .button-container a.con-button.same-fcta {
+    display: flex;
+}
+
 .easy-upload-initial .easy-upload-cta-row .button-container .button .icon {
   width: 22px;
   height: 22px;
@@ -546,3 +553,4 @@ main .section p.qr-error-message {
     min-height: var(--frictionless-quick-action-video-height);
   }
 }
+
