@@ -7,7 +7,7 @@ class FontBentoBlock {
   }
 
   card(n) {
-    return this.block.locator(`.font-bento-card-${n}`);
+    return this.block.locator('.font-bento-card').nth(n - 1);
   }
 }
 

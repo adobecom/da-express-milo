@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@font-bento-default",
       "selector": "div.font-bento",
-      "path": "/drafts/methomas/font-bento",
+      "path": "/drafts/nala/blocks/font-bento",
       "data": {
         "semantic": {
           "texts": [
@@ -24,17 +24,17 @@
           ],
           "media": [
             {
-              "selector": ".font-bento-card-1 .font-bento-card-media picture",
+              "selector": ".font-bento-card-first .font-bento-card-media picture",
               "nth": 0,
               "tag": "picture"
             },
             {
-              "selector": ".font-bento-card-2 .font-bento-card-media picture",
+              "selector": ".font-bento-card:nth-child(2) .font-bento-card-media picture",
               "nth": 0,
               "tag": "picture"
             },
             {
-              "selector": ".font-bento-card-6 .font-bento-card-media picture",
+              "selector": ".font-bento-card-last .font-bento-card-media picture",
               "nth": 0,
               "tag": "picture"
             }
