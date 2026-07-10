@@ -3,7 +3,8 @@
   color: var(--color-white);
   display: flex;
   justify-content: center;
-  padding-inline: var(--spacing-500);
+  /* mobile: 40px top, 16px inline, 0 bottom */
+  padding: var(--spacing-600) var(--spacing-300) 0;
 }
 
 .transparent-image-marquee .foreground {
@@ -34,18 +35,20 @@
   gap: var(--spacing-100);
 }
 
+/* Express web/Headings/2XL — 32px (mobile/tablet), 45px (desktop), weight 900 */
 .transparent-image-marquee .text-container h2 {
   color: var(--color-white);
-  font-size: var(--heading-font-size-l);
+  font-size: var(--heading-font-size-ml);
   font-weight: var(--heading-font-weight-extra);
   line-height: 1.04;
   margin: 0;
 }
 
+/* Express web/Body/Body-S — 14px (mobile/tablet), 16px (desktop) */
 /* (0,3,1) beats main .section p (0,1,2) */
 .transparent-image-marquee .text-content .text-container p {
   color: var(--color-white);
-  font-size: var(--body-font-size-m);
+  font-size: var(--body-font-size-s);
   line-height: 1.3;
   margin: 0;
 }
@@ -54,9 +57,12 @@
   display: block;
 }
 
+/* Image renders at a fixed 3:2 ratio at every breakpoint (per Figma) */
 .transparent-image-marquee .image-container img {
+  aspect-ratio: 3 / 2;
   display: block;
   height: auto;
+  object-fit: cover;
   width: 100%;
 }
 
@@ -79,13 +85,21 @@
     padding-block: var(--spacing-900);
   }
 
-  .transparent-image-marquee .text-container h2 {
-    font-size: var(--heading-font-size-2xl);
-  }
-
+  /* 788px wide at 3:2 → 525px tall, matching the desktop Figma frame */
   .transparent-image-marquee .image-container {
     align-self: flex-end;
     flex-shrink: 0;
     width: 788px;
+  }
+}
+
+/* Desktop type scale: heading 45px, body 16px (Figma 1440px frame) */
+@media (min-width: 1200px) {
+  .transparent-image-marquee .text-container h2 {
+    font-size: var(--heading-font-size-2xl);
+  }
+
+  .transparent-image-marquee .text-content .text-container p {
+    font-size: var(--body-font-size-m);
   }
 }
