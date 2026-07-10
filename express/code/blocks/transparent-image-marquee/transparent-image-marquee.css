@@ -66,6 +66,17 @@
   width: 100%;
 }
 
+/* Light variant: dark text for use on a light authored background.
+   Pairs with the default (dark-texted) Adobe Express branding logo. */
+.transparent-image-marquee.light {
+  color: var(--color-black);
+}
+
+.transparent-image-marquee.light .text-container h2,
+.transparent-image-marquee.light .text-content .text-container p {
+  color: var(--color-black);
+}
+
 @media (min-width: 900px) {
   .transparent-image-marquee {
     align-items: flex-end;
