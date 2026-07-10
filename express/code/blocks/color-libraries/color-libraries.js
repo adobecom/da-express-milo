@@ -5,15 +5,7 @@ import {
   LIBRARY_SIZE,
   LIBRARY_VIEW,
 } from '../../scripts/color-shared/components/libraries/createLibrariesComponent.js';
-import { fetchLibrariesWithElements, deleteLibraryItem } from '../../scripts/color-shared/services/createLibrariesDataService.js';
-import { showLibraryDeleteAlertDialog } from '../../scripts/color-shared/components/libraries/createLibraryDeleteAlertDialog.js';
-import { openLibraryItemModal } from '../../scripts/color-shared/components/libraries/openLibraryItemModal.js';
-import { createModalManager } from '../../scripts/color-shared/modal/createModalManager.js';
-import loadColorModalPlaceholders from '../../scripts/color-shared/i18n/loadColorModalPlaceholders.js';
-import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
-import loadColorExplorePlaceholders from '../../scripts/color-shared/i18n/loadColorExplorePlaceholders.js';
 import { loadIconsRail, loadMenu, loadTooltip, loadButton } from '../../scripts/color-shared/spectrum/load-spectrum.js';
-import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import loadColorLibrariesPlaceholders from '../../scripts/color-shared/i18n/loadColorLibrariesPlaceholders.js';
 import { createSearchBar, createDeepLinkManager } from '../../scripts/color-shared/components/search-bar/index.js';
@@ -107,6 +99,7 @@ function clearSearchUrl() {
 }
 
 async function renderLibraries(block, searchQuery, strings = {}) {
+  const { fetchLibrariesWithElements } = await import('../../scripts/color-shared/services/createLibrariesDataService.js');
   const allLibraries = await fetchLibrariesWithElements();
   // Count reflects the total saved libraries with content (not the filtered subset).
   componentInstance.setCount(allLibraries.filter(hasColorContent).length);
@@ -174,9 +167,6 @@ export default async function decorate(block) {
   block.className = `${CSS_CLASSES.BLOCK} color-explore--libraries ${CSS_CLASSES.LOADING}`;
 
   const placeholders = await loadColorLibrariesPlaceholders();
-  const colorModalStringsPromise = loadColorModalPlaceholders();
-  const colorSwatchRailStringsPromise = loadColorSwatchRailPlaceholders();
-  const explorePlaceholdersPromise = loadColorExplorePlaceholders();
 
   const toolHrefs = {
     contrast: '/create/color-contrast-analyzer',
@@ -296,7 +286,11 @@ export default async function decorate(block) {
     return;
   }
 
-  modalManagerInstance = createModalManager();
+  // Prefetch the modal/swatch/explore i18n only for signed-in users (signed-out
+  // visitors return above and never open an item). openHandler awaits these.
+  const colorModalStringsPromise = import('../../scripts/color-shared/i18n/loadColorModalPlaceholders.js').then((m) => m.default());
+  const colorSwatchRailStringsPromise = import('../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js').then((m) => m.default());
+  const explorePlaceholdersPromise = import('../../scripts/color-shared/i18n/loadColorExplorePlaceholders.js').then((m) => m.default());
 
   const deepLinkManager = createDeepLinkManager({ enabled: true, queryParam: 'q' });
   let searchQuery = new URLSearchParams(window.location.search).get('q') || '';
@@ -376,11 +370,17 @@ export default async function decorate(block) {
     const itemId = item?.id;
     if (!libraryId || !itemId) return;
 
+    const { showLibraryDeleteAlertDialog } = await import('../../scripts/color-shared/components/libraries/createLibraryDeleteAlertDialog.js');
     const confirmed = await showLibraryDeleteAlertDialog({ item, strings: placeholders });
     if (!confirmed) return;
 
     const itemName = item?.name || placeholders.librariesDefaultName || '';
     block.classList.add(CSS_CLASSES.LOADING);
+
+    const [{ deleteLibraryItem }, { showExpressToast }] = await Promise.all([
+      import('../../scripts/color-shared/services/createLibrariesDataService.js'),
+      import('../../scripts/color-shared/spectrum/components/express-toast.js'),
+    ]);
 
     try {
       await deleteLibraryItem(libraryId, itemId);
@@ -407,7 +407,18 @@ export default async function decorate(block) {
     const { item } = event.detail || {};
     if (!item) return;
 
-    const [modalStrings, colorSwatchRailStrings, explorePlaceholders] = await Promise.all([
+    if (!modalManagerInstance) {
+      const { createModalManager } = await import('../../scripts/color-shared/modal/createModalManager.js');
+      modalManagerInstance = createModalManager();
+    }
+
+    const [
+      { openLibraryItemModal },
+      modalStrings,
+      colorSwatchRailStrings,
+      explorePlaceholders,
+    ] = await Promise.all([
+      import('../../scripts/color-shared/components/libraries/openLibraryItemModal.js'),
       colorModalStringsPromise,
       colorSwatchRailStringsPromise,
       explorePlaceholdersPromise,
