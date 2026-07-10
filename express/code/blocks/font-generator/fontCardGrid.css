@@ -3,23 +3,23 @@
   flex-direction: column;
   align-items: center;
   gap: 24px;
-  padding: 16px;
 }
 
 .font-card-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 12px;
+  gap: 8px;
   width: 100%;
 }
 
+/* Size L (2-up): 1200-1679px. Size XL/widescreen (3-up): 1680px+. */
 @media (min-width: 600px) {
   .font-card-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1680px) {
   .font-card-grid {
     grid-template-columns: repeat(3, 1fr);
   }

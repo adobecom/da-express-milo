@@ -52,10 +52,16 @@ function getContent() {
   };
 }
 
+// replaceKey() echoes the humanized key back when no placeholder is authored
+// for it (e.g. "font-generator-placeholder" -> "font generator placeholder")
+// rather than returning null/undefined, so callers can't rely on truthiness
+// alone to detect a miss. Treat that echo as "not found" so authored fallback
+// text — the actual, most up-to-date copy — wins until the row exists.
 async function getPlaceholder(key) {
   const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
   const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
-  return replaceKey(key, getConfig());
+  const value = await replaceKey(key, getConfig());
+  return value && value !== key.replaceAll('-', ' ') ? value : null;
 }
 
 // Async-enhances the trigger label from placeholders so it stays translatable;
@@ -131,7 +137,11 @@ export default async function decorate(block) {
   sideCol.className = 'font-generator-col font-generator-col--side';
 
   const panelId = `font-generator-filters-${(filterPanelCount += 1)}`;
-  const { panel: filterPanel, unsubscribe: unsubscribeFilter } = createFilterPanel({
+  const {
+    panel: filterPanel,
+    overlay: filterOverlay,
+    unsubscribe: unsubscribeFilter,
+  } = createFilterPanel({
     promoTitle: content.promoTitle,
     promoCta: content.promoCta,
     categoryStyles: CATEGORY_STYLES,
@@ -148,7 +158,7 @@ export default async function decorate(block) {
   localizeTryThese(sidePanel);
   localizeTextareaPlaceholder(sidePanel);
 
-  sideCol.append(sidePanel, filterPanel);
+  sideCol.append(sidePanel, filterPanel, filterOverlay);
 
   const mainCol = document.createElement('div');
   mainCol.className = 'font-generator-col font-generator-col--main';

@@ -22,6 +22,7 @@ function injectStyles() {
 
 const template = document.createElement('template');
 template.innerHTML = `<div class="filter-panel">
+  <div class="filter-panel-drag-handle" aria-hidden="true"></div>
   <button class="filter-panel-close" type="button" aria-label="Close">
     <svg class="filter-panel-close-icon" aria-hidden="true" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
   </button>
@@ -61,11 +62,16 @@ template.innerHTML = `<div class="filter-panel">
 
 // Async-enhances a hardcoded fallback string from placeholders; keeps the
 // fallback if the key is undefined, matching the pattern in font-generator.js.
+// replaceKey() echoes the humanized key back rather than a falsy value when
+// no placeholder is authored for it, so truthiness alone can't detect a miss
+// (worse for single-word keys like "all", whose "humanized" form is itself)
+// — treat that echo as "not found" so the authored fallback wins.
 async function getPlaceholder(key, fallback) {
   try {
     const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
     const { replaceKey } = await import(`${getLibs()}/features/placeholders.js`);
-    return (await replaceKey(key, getConfig())) || fallback;
+    const value = await replaceKey(key, getConfig());
+    return value && value !== key.replaceAll('-', ' ') ? value : fallback;
   } catch (e) {
     return fallback;
   }
@@ -182,21 +188,28 @@ async function populateCategories(panel, categoryStyles = {}) {
   requestAnimationFrame(() => cells.forEach(fitLabelToCell));
 }
 
-// The docked drawer (< 1440px) behaves like a modal while open: focus is
-// trapped inside it and the background can't scroll. At 1440px+ the panel is
+// The docked drawer (< 1200px) behaves like a modal while open: focus is
+// trapped inside it and the background can't scroll. At 1200px+ the panel is
 // inline and permanently visible, so none of that modal behavior applies.
 function isDockedDrawer() {
-  return !window.matchMedia('(min-width: 1440px)').matches;
+  return !window.matchMedia('(min-width: 1200px)').matches;
 }
 
-// The close (×) button dismisses the drawer. Hidden via CSS at >=1440px.
+// Below 600px the drawer is a bottom sheet dismissed by dragging its handle
+// down; at 600-1199px it's a side drawer dismissed by the close (×) button.
+function isBottomSheet() {
+  return !window.matchMedia('(min-width: 600px)').matches;
+}
+
+// The close (×) button dismisses the drawer. Hidden via CSS at >=1200px (and
+// on the mobile bottom sheet, where the drag handle takes over).
 function initCloseButton(panel) {
   panel.querySelector('.filter-panel-close')?.addEventListener('click', () => {
     setState({ filtersOpen: false });
   });
 }
 
-// Escape closes the drawer when it is open. No-op at >=1440px, where the panel
+// Escape closes the drawer when it is open. No-op at >=1200px, where the panel
 // is inline and filtersOpen never gets set true. Registered once per page
 // regardless of how many filter panels are mounted.
 let escapeListenerAttached = false;
@@ -208,6 +221,49 @@ function initEscapeToClose() {
       setState({ filtersOpen: false });
     }
   });
+}
+
+// Swipe-down-to-dismiss for the mobile bottom sheet. No-op at 600px+, where
+// the handle is hidden via CSS and this never receives a pointer event.
+function initDragHandle(panel) {
+  const handle = panel.querySelector('.filter-panel-drag-handle');
+  if (!handle) return;
+
+  function onDragStart(e) {
+    if (!isBottomSheet()) return;
+    const startY = e.touches?.[0]?.clientY ?? e.clientY;
+    const dragAc = new AbortController();
+
+    const onMove = (moveEvent) => {
+      const delta = (moveEvent.touches?.[0]?.clientY ?? moveEvent.clientY) - startY;
+      if (delta > 0) panel.style.transform = `translateY(${delta}px)`;
+    };
+
+    const onEnd = (endEvent) => {
+      const endY = endEvent.changedTouches?.[0]?.clientY ?? endEvent.clientY;
+      panel.style.transform = '';
+      if (endY - startY > 100) setState({ filtersOpen: false });
+      dragAc.abort();
+    };
+
+    window.addEventListener('touchmove', onMove, { passive: true, signal: dragAc.signal });
+    window.addEventListener('touchend', onEnd, { signal: dragAc.signal });
+    window.addEventListener('mousemove', onMove, { signal: dragAc.signal });
+    window.addEventListener('mouseup', onEnd, { signal: dragAc.signal });
+  }
+
+  handle.addEventListener('touchstart', onDragStart, { passive: true });
+  handle.addEventListener('mousedown', onDragStart);
+}
+
+// Dark scrim behind the docked drawer (< 1200px); clicking it closes the
+// drawer, same as the close button or Escape.
+function createOverlay() {
+  const overlay = document.createElement('div');
+  overlay.className = 'filter-panel-overlay';
+  overlay.setAttribute('aria-hidden', 'true');
+  overlay.addEventListener('click', () => setState({ filtersOpen: false }));
+  return overlay;
 }
 
 export default function createFilterPanel(config = {}) {
@@ -224,9 +280,12 @@ export default function createFilterPanel(config = {}) {
   initCategorySelection(panel);
   initAccordion(panel);
   initCloseButton(panel);
+  initDragHandle(panel);
   populatePromo(panel, config);
   populateCategories(panel, config.categoryStyles ?? {});
   panel.classList.toggle('is-loading', getState().loading);
+
+  const overlay = createOverlay();
 
   // Focus trap / scroll lock only ever apply to this panel instance, so they
   // live in this closure rather than the module-level helpers above.
@@ -236,6 +295,7 @@ export default function createFilterPanel(config = {}) {
   function syncOpenState(filtersOpen) {
     const isOpen = Boolean(filtersOpen);
     panel.classList.toggle('is-open', isOpen);
+    overlay.classList.toggle('is-open', isOpen);
 
     if (!isDockedDrawer()) return;
 
@@ -260,6 +320,7 @@ export default function createFilterPanel(config = {}) {
 
   return {
     panel,
+    overlay,
     unsubscribe() {
       unsubscribe();
       // Release any active trap/lock if the panel is torn down while open.

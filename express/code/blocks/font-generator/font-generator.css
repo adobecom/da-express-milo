@@ -1,27 +1,79 @@
 /*
- * Up to 1440px the layout is a single column: the side panel (preview input +
- * suggestions) sits full-width on top of the results below it. At 1440px+ it
- * becomes the 12-column grid with the side panel as a 4-col rail.
+ * Up to 1200px the layout is a single column: the side panel (preview input +
+ * suggestions) sits full-width on top of the results below it. At 1200px+ it
+ * becomes the 12-column grid with the side panel as a sticky 4-col rail.
+ *
+ * The gray background lives on the block root so it stays edge-to-edge with
+ * the section; the horizontal margins and widescreen max-width (the site's
+ * ax-grid tokens, styles.css: 20px < 600px, 32px 600-1199px, 40px 1200px+,
+ * capped to a 1600px-wide container at 1680px+) are padding/max-width on the
+ * inner grid instead, so they inset the content without cropping the
+ * background — a bare padding on the block root left visible gaps of the
+ * page background on either side.
  */
+/*
+ * Milo adds 60px of top padding to a section's first content wrapper by
+ * default (styles.css) — the text input should sit flush against the top of
+ * the viewport instead. That base rule carries the same :not() chain on
+ * .section for specificity, so this override repeats it (same pattern as
+ * cards.css/faq.css) rather than relying on every author remembering
+ * "Padding: none".
+ */
+.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):has(.font-generator):not([data-padding='none']) > .content:first-child {
+  padding-top: 0;
+}
+
+.font-generator {
+  /* Matches discovery-table/comparison-table-v2's gnav-offset convention —
+     the gnav is sticky too, so the rail's sticky offset needs to clear it. */
+  --gnav-offset-height: 63px;
+  background: var(--gray-75, #F3F3F3);
+}
+
 .font-generator-grid {
+  box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr;
   gap: var(--spacing-300, 16px);
-  background: var(--gray-75, #F3F3F3);
+  padding-left: var(--ax-grid-margin, 20px);
+  padding-right: var(--ax-grid-margin, 20px);
+}
+
+@media (min-width: 1200px) {
+  .font-generator-grid {
+    padding-bottom: var(--spacing-900, 80px);
+  }
+}
+
+@media (min-width: 1680px) {
+  .font-generator-grid {
+    max-width: var(--ax-grid-container-width, 1600px);
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+@media (max-width: 599px) {
+  .font-generator-grid {
+    gap: 24px;
+  }
 }
 
 .font-generator-col {
   min-width: 0;
 }
 
-
-@media (min-width: 1440px) {
+@media (min-width: 1200px) {
   .font-generator-grid {
     grid-template-columns: repeat(12, minmax(0, 1fr));
   }
 
   .font-generator-col--side {
     grid-column: span 4;
+    position: sticky;
+    top: calc(var(--gnav-offset-height, 63px) - 16px);
+    align-self: start;
   }
 
   .font-generator-col--main {

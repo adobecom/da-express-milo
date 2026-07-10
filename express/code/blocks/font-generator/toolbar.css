@@ -23,6 +23,13 @@
   gap: 4px;
 }
 
+/* Mobile shows the count summary only — no grid/list toggle. */
+@media (max-width: 599px) {
+  .toolbar-layout-group {
+    display: none;
+  }
+}
+
 .toolbar-layout-btn {
   display: inline-flex;
   align-items: center;
@@ -126,7 +133,7 @@
   box-sizing: border-box;
 }
 
-/* ─── Filter trigger (hidden at ≥1440px via font-generator.css) ───────────── */
+/* ─── Filter trigger (hidden at ≥1200px, once the filter panel is inline) ─── */
 
 .font-generator-filter-trigger {
   display: inline-flex;
@@ -154,7 +161,7 @@
   color: #131313;
 }
 
-@media (min-width: 900px) {
+@media (min-width: 1200px) {
   .font-generator-filter-trigger {
     display: none;
   }
