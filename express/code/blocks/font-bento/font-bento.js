@@ -1,9 +1,14 @@
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs, formatDynamicCartLink } from '../../scripts/utils.js';
 
 export default async function decorate(block) {
-  const [{ createTag }, { decorateButtons }] = await Promise.all([
+  const [
+    { createTag },
+    { decorateButtons },
+    { default: trackBranchParameters },
+  ] = await Promise.all([
     import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/utils/decorate.js`),
+    import('../../scripts/branchlinks.js'),
   ]);
   await decorateButtons(block);
 
@@ -18,7 +23,12 @@ export default async function decorate(block) {
       if (el !== ctaArea) textContent.append(el);
     });
     header.append(textContent);
-    if (ctaArea) header.append(ctaArea);
+    if (ctaArea) {
+      const ctaLinks = [...ctaArea.querySelectorAll('a')];
+      ctaLinks.forEach((a) => formatDynamicCartLink(a));
+      await trackBranchParameters(ctaLinks);
+      header.append(ctaArea);
+    }
   }
   block.firstElementChild.remove();
 
