@@ -11,7 +11,23 @@
  * background — a bare padding on the block root left visible gaps of the
  * page background on either side.
  */
+/*
+ * Milo adds 60px of top padding to a section's first content wrapper by
+ * default (styles.css) — the text input should sit flush against the top of
+ * the viewport instead. That base rule carries the same :not() chain on
+ * .section for specificity, so this override repeats it (same pattern as
+ * cards.css/faq.css) rather than relying on every author remembering
+ * "Padding: none".
+ */
+.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):has(.font-generator):not([data-padding='none']) > .content:first-child {
+  padding-top: 0;
+}
+
 .font-generator {
+  /* Matches discovery-table/comparison-table-v2's gnav-offset convention —
+     the gnav is sticky too, so the rail's sticky offset needs to clear it. */
+  --gnav-offset-height: 63px;
   background: var(--gray-75, #F3F3F3);
 }
 
@@ -56,7 +72,7 @@
   .font-generator-col--side {
     grid-column: span 4;
     position: sticky;
-    top: var(--spacing-400, 24px);
+    top: calc(var(--gnav-offset-height, 63px) - 16px);
     align-self: start;
   }
 
