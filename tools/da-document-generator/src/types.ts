@@ -52,3 +52,26 @@ export interface RowResult {
   liveUrl?: string;
   qa?: QaResult;
 }
+
+export interface ManagedDocIdentity {
+  productType?: string;
+  productId?: string;
+  generatedBatch?: string;
+  lastUpdated?: string;
+}
+
+export interface ManagedDoc extends RowResult {
+  /** Folder containing this doc, relative to the scanned root path (e.g. "/hoodie"). */
+  subDirectory: string;
+  identity: ManagedDocIdentity;
+  /** True if product-type or product-id metadata is missing (predates the metadata contract). */
+  needsBackfill: boolean;
+  title?: string;
+  shortTitle?: string;
+  description?: string;
+  editable: {
+    title: boolean;
+    shortTitle: boolean;
+    description: boolean;
+  };
+}

@@ -1,4 +1,9 @@
 import type { CsvRow, QaCheck, QaResult } from '../types';
+import { upsertMetadataBlockOnDoc, serializeDoc } from './metadata';
+
+/** Fields that get a `data-doc-key` DOM marker so Document Manager can edit them surgically. */
+export const EDITABLE_FIELD_KEYS = ['title', 'short_title', 'description'] as const;
+export type EditableFieldKey = typeof EDITABLE_FIELD_KEYS[number];
 
 export function applyTemplate(templateHtml: string, row: CsvRow): string {
   let html = templateHtml;
@@ -13,6 +18,51 @@ export function applyTemplate(templateHtml: string, row: CsvRow): string {
 export function rowToOutputPath(row: CsvRow, outputDir: string): string {
   const slug = row['url_slug']?.trim() || `doc-${row['_id']}`;
   return `${outputDir.replace(/\/$/, '')}/${slug}`;
+}
+
+/**
+ * Tags whichever leaf element currently holds each editable field's exact substituted value
+ * with `data-doc-key="<field>"` — annotating whatever the template already produced rather
+ * than requiring template authors to add anything. Document Manager's edit-write targets
+ * `[data-doc-key="key"]` directly instead of guessing DOM position.
+ */
+export function tagEditableFieldsOnDoc(doc: Document, values: Partial<Record<string, string>>): void {
+  for (const key of EDITABLE_FIELD_KEYS) {
+    const value = values[key]?.trim();
+    if (!value) continue;
+    const el = Array.from(doc.body.querySelectorAll('*')).find(
+      (node) => node.children.length === 0 && node.textContent?.trim() === value,
+    );
+    if (el && !el.hasAttribute('data-doc-key')) el.setAttribute('data-doc-key', key);
+  }
+}
+
+export function tagEditableFields(html: string, values: Partial<Record<string, string>>): string {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  tagEditableFieldsOnDoc(doc, values);
+  return serializeDoc(doc);
+}
+
+/**
+ * Runs once per generate, after `applyTemplate`, in a single DOMParser pass: tags the
+ * editable fields (see `tagEditableFieldsOnDoc`) and upserts identity/provenance metadata
+ * into the document's Metadata block. `generatedBatch` is set/overwritten only by Generate —
+ * a Document Manager edit later must never bump it, since it answers "which Generate run
+ * produced this templated content," not "when was this doc last touched by anyone."
+ */
+export function finalizeGeneratedDoc(html: string, row: CsvRow, opts: { generatedBatch: string }): string {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  tagEditableFieldsOnDoc(doc, row);
+
+  const entries: Record<string, string> = {
+    'generated-batch': opts.generatedBatch,
+    'last-updated': new Date().toISOString(),
+  };
+  if (row.product_type?.trim()) entries['product-type'] = row.product_type.trim();
+  if (row.product_id?.trim()) entries['product-id'] = row.product_id.trim();
+  upsertMetadataBlockOnDoc(doc, entries);
+
+  return serializeDoc(doc);
 }
 
 export function runGenerationQa(html: string): QaResult {

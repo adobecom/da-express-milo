@@ -11,6 +11,8 @@ For a full technical walkthrough of every module and how they interact, see [ARC
 3. **Select rows and generate** — choose which rows to include, then generate: the tool substitutes placeholders, runs a QA check for leftover placeholders, versions any existing document before overwriting it, and writes the resulting HTML to DA via the admin API.
 4. **Preview, publish, unpublish, or delete** — per row or in bulk. Publishing additionally fetches the live page and QA-checks it for a title, meta description, and OG image.
 
+The **Generate** tab covers steps 1–4 above. A second **Document Manager** tab lets you point at any DA folder and manage documents that already exist there — regardless of which session created them. It recursively lists every document under that folder, lets you filter/sort by sub-directory, generate batch, and status, and offers the same preview/publish/unpublish/delete/edit actions (individually or in bulk) sourced from what's actually in DA rather than from an in-memory batch.
+
 ## Usage
 
 ### From DA.live (typical)

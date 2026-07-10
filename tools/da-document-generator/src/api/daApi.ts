@@ -1,3 +1,5 @@
+import { runBatch, DEFAULT_CONCURRENCY } from '../lib/concurrency';
+
 const DA_API = 'https://admin.da.live';
 const HLX_ADMIN = 'https://admin.hlx.page';
 const BRANCH = 'main';
@@ -238,5 +240,36 @@ export async function deleteDocument(daPath: string, token: string): Promise<voi
     headers: { Authorization: `Bearer ${token}` },
   });
   if (!resp.ok) throw new Error(`delete ${daPath}: ${resp.status}`);
+}
+
+export interface PageStatus {
+  live: boolean;
+  preview: boolean;
+}
+
+export async function checkPageStatus(daPath: string, token: string): Promise<PageStatus> {
+  try {
+    const { org, repo, contentPath } = parseDAPath(daPath);
+    const resp = await fetch(`${HLX_ADMIN}/status/${org}/${repo}/${BRANCH}${contentPath}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!resp.ok) return { live: false, preview: false };
+    const data = await resp.json() as { live?: { status: number }; preview?: { status: number } };
+    return { live: data.live?.status === 200, preview: data.preview?.status === 200 };
+  } catch {
+    return { live: false, preview: false };
+  }
+}
+
+export async function batchCheckStatus(
+  paths: string[],
+  token: string,
+  concurrency: number = DEFAULT_CONCURRENCY,
+): Promise<Map<string, PageStatus>> {
+  const results = new Map<string, PageStatus>();
+  await runBatch(paths, async (p) => {
+    results.set(p, await checkPageStatus(p, token));
+  }, concurrency);
+  return results;
 }
 

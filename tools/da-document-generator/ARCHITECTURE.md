@@ -18,24 +18,37 @@ Everything runs client-side against three external APIs: the DA Admin API (`admi
 
 ## 3. Tech stack & project layout
 
-- **React 19 + TypeScript**, **Vite 8**, **Tailwind CSS v4** (via `@tailwindcss/vite`), **TanStack Query** (`QueryClientProvider` wraps the app in `src/main.tsx`, but no component currently issues a `useQuery` call — data fetching is done with plain `fetch`/async functions, not the query cache).
+- **React 19 + TypeScript**, **Vite 8**, **Tailwind CSS v4** (via `@tailwindcss/vite`), **TanStack Query** (`QueryClientProvider` wraps the app in `src/main.tsx`; the Document Manager tab's crawl is the first real `useQuery` consumer — see §14).
 - CSV parsing via `papaparse`; `.xlsx` parsing/export via `xlsx` (SheetJS).
 
 ```
 src/
-  App.tsx                        top-level state + step orchestration
+  App.tsx                        thin tab switcher: "Generate" vs "Document Manager" (no router)
   main.tsx                       token bootstrap, React root
   types.ts                       shared type definitions
   index.css                      Tailwind entry
   api/
-    daApi.ts                     DA Admin + AEM Admin API calls, URL/template helpers
+    daApi.ts                     DA Admin + AEM Admin API calls, URL/template helpers, page-status checks
+    crawl.ts                     recursive directory crawl + bounded-concurrency doc fetch/parse
     zazzleApi.ts                 Zazzle product lookup
+  hooks/
+    useDaDocumentActions.ts      shared preview/publish/unpublish/delete actions, per-row + bulk
   lib/
-    generate.ts                  template substitution, output path, QA checks
+    concurrency.ts                bounded-concurrency worker-pool helper (runBatch)
+    generate.ts                  template substitution, output path, QA checks, field-tagging, metadata finalize
+    metadata.ts                  read/upsert the authored EDS Metadata block
+    documentManager.ts           Document Manager data layer: parse/crawl/backfill/write
   components/
-    CsvUpload.tsx                Step 2: product data input, hydrate/validate, data table
-    TemplateOverridePanel.tsx    Step 1: config sheet + template override
-    GeneratePanel.tsx            Step 3: generate/preview/publish/unpublish/delete
+    CsvUpload.tsx                Generate tab, step 2: product data input, hydrate/validate, data table
+    TemplateOverridePanel.tsx    Generate tab, step 1: config sheet + template override
+    GeneratePanel.tsx            Generate tab, step 3: generate/preview/publish/unpublish/delete
+    GeneratorTab.tsx             orchestrates the three Generate-tab panels (former App.tsx body)
+    DocumentManagerTab.tsx       Document Manager tab: scan, filter/sort, bulk actions
+    DocumentManagerTable.tsx     Document Manager's row/column table + inline edit cells
+    BulkEditBar.tsx              Document Manager's bulk-action bar
+    BulkFieldEditModal.tsx       Document Manager's bulk field-edit modal
+    ConfirmModal.tsx             shared confirmation modal (reset/delete/etc.)
+    StatusPills.tsx              shared Generate/Preview/Publish pills + badges, keyed off RowResult
   sample_data/
     zazzle_getproduct_sample.json  example raw Zazzle API response (reference only)
 ```
@@ -77,7 +90,9 @@ any post-generate stage → deleting → pending (delete succeeds, row resets) |
 
 Note: `qa-fail` is defined in the type but the current generate/publish handlers always set `stage: 'generated'`/`'published'` with a `qa` result attached rather than ever setting `stage: 'qa-fail'` — QA failure is surfaced via the `qa.pass` flag and the Issues column, not a separate stage.
 
-## 6. Top-level orchestration (`src/App.tsx`)
+## 6. Top-level orchestration (`src/App.tsx` + `src/components/GeneratorTab.tsx`)
+
+`App.tsx` itself is now just a two-tab switcher (`activeTab: 'generate' | 'manage'`, plain `useState`, no router — see §14 for the second tab) rendering either `GeneratorTab` or `DocumentManagerTab`. Everything below in this section lives in `GeneratorTab.tsx` (the pre-tabs `App.tsx` body, moved verbatim).
 
 State owned here:
 
@@ -192,6 +207,8 @@ For `title`/`short_title`/`description` cells: purple background = hydrated this
 - **`rowToOutputPath(row, outputDir)`** — `outputDir/url_slug`, or `outputDir/doc-{_id}` if `url_slug` is blank.
 - **`runGenerationQa(html)`** — one check only: are there any `{{...}}` tokens left unsubstituted in the generated HTML. Run immediately after templating, before the document is written to DA.
 - **`runPageQa(pageHtml)`** — parses the HTML with `DOMParser` and checks four things: non-empty `<title>`, non-empty `<meta name="description">`, non-empty `<meta property="og:image">`, and (again) no leftover placeholders. Run after publish, against the fetched **live** page HTML — so it reflects what actually rendered, not just what was written to DA.
+- **`tagEditableFieldsOnDoc(doc, values)`** / **`tagEditableFields(html, values)`** — for each of `title`/`short_title`/`description`, finds the leaf element whose text content exactly matches the substituted value and tags it `data-doc-key="<field>"`, so Document Manager (§14) can target it surgically later instead of guessing DOM position. Annotates whatever the template already produced; requires no template authoring changes.
+- **`finalizeGeneratedDoc(html, row, {generatedBatch})`** — runs once per generate, right after `applyTemplate` and before `runGenerationQa`: does the field-tagging above, then upserts `product-type`/`product-id`/`generated-batch`/`last-updated` into the doc's authored Metadata block (via `src/lib/metadata.ts`'s `upsertMetadataBlockOnDoc`) in one `DOMParser` pass. This is the identity-metadata fix — see §14 for why it exists and the full key contract.
 
 ## 10. DA / AEM Admin API layer (`src/api/daApi.ts`)
 
@@ -224,17 +241,17 @@ Single function, `fetchProductFromTemplate(productId)`, calling `GET https://www
 
 ### Pre-generation preview
 
-Before anything is generated, `previewRows` (derived, not stored in state) shows every input row's would-be output path — resolved via the override config if set, else by looking up `productTypeConfigs` for the row's `product_type` — and whether a config was found at all. A background effect walks these paths through a small worker pool (`CONCURRENCY = 3`, tracked via a `checkedPaths` ref so a path is only ever checked once) calling `docExists` on each, populating `existenceStatus` so the table can show an "↻ update" badge for paths that already have content and warn the user about overwrites before they click Generate.
+Before anything is generated, `previewRows` (derived, not stored in state) shows every input row's would-be output path — resolved via the override config if set, else by looking up `productTypeConfigs` for the row's `product_type` — and whether a config was found at all. A background effect walks these paths through `runBatch` (`src/lib/concurrency.ts`, `CONCURRENCY = 3`, tracked via a `checkedPaths` ref so a path is only ever checked once) calling `docExists` on each, populating `existenceStatus` so the table can show an "↻ update" badge for paths that already have content and warn the user about overwrites before they click Generate.
 
 ### Generation
 
-- **Bulk** (`handleGenerate`): snapshots current `existenceStatus` up front (so later existence checks re-running for the same paths don't change already-decided overwrite behavior mid-run), initializes `results` to one `pending` row each, then processes the queue through `runBatch` (`CONCURRENCY = 3` worker pool, same pattern reused for preview/publish/unpublish/delete below). Per row: resolve config → resolve output path → fetch the template HTML (cached in a `Map` keyed by `templatePath` so a bulk run only fetches each distinct template once) → `applyTemplate` → `runGenerationQa` → if the path was known to already exist, best-effort `createDocVersion` (failures here are swallowed — versioning failing should not block the write) → `postDoc`.
-- **Single row** (`handleGenerateRow`): same steps, but no template cache (not needed for one row) and the existence check is done inline rather than from a snapshot.
+- **Bulk** (`handleGenerate`): snapshots current `existenceStatus` up front (so later existence checks re-running for the same paths don't change already-decided overwrite behavior mid-run), initializes `results` to one `pending` row each, computes one `generatedBatch` timestamp for the whole run, then processes the queue through a worker pool. Per row: resolve config → resolve output path → fetch the template HTML (cached in a `Map` keyed by `templatePath` so a bulk run only fetches each distinct template once) → `applyTemplate` → `finalizeGeneratedDoc` (field-tagging + metadata upsert, §9) → `runGenerationQa` → if the path was known to already exist, best-effort `createDocVersion` (failures here are swallowed — versioning failing should not block the write) → `postDoc`.
+- **Single row** (`handleGenerateRow`): same steps (with its own one-row `generatedBatch`), but no template cache (not needed for one row) and the existence check is done inline rather than from a snapshot.
 - A row with no matching config (no product-type entry and no override) is set straight to `stage: 'error'` with a message naming the missing product type.
 
 ### Preview / Publish / Unpublish / Delete
 
-All four follow the same shape as generation: a bulk handler using `runBatch` over the eligible subset of `results` (filtered by current `stage`), and a mirrored per-row handler for the row-level action button. Notable specifics:
+These four are no longer implemented locally in `GeneratePanel.tsx` — they're lifted into `src/hooks/useDaDocumentActions.ts`, a hook generic over any `RowResult`-shaped item, so both `GeneratePanel` and `DocumentManagerTab` (§14) call the same `previewRow`/`publishRow`/`unpublishRow`/`deleteRow` (+ `*Bulk` via `runBatch`) implementations. `GeneratePanel` calls `useDaDocumentActions<RowResult>(setResults, {afterDelete: (r) => ({id:r.id, path:r.path, stage:'pending'})})` — the `afterDelete` callback is what differs between the two callers: GeneratePanel resets a deleted row back to `pending` (so it stays visible as not-yet-generated), Document Manager (`afterDelete: () => undefined`) removes it from the list entirely, since the doc is just gone. `bulkOp` progress-label state (`'previewing'`/`'publishing'`/etc., driving button text like "Publishing… 3/5") stays local to each caller — it's UI bookkeeping, not a generic action concern. Notable specifics, unchanged from before the extraction:
 
 - **Publish** only targets rows in `previewed` stage. After `triggerPublish` succeeds, it best-effort fetches the row's live URL and runs `runPageQa` against the returned HTML, attaching the result to `qa` — but the row still transitions to `published` even if this fetch/QA step itself fails (publishing isn't rolled back for a QA-fetch failure).
 - **Unpublish** targets `published` rows, clears `liveUrl` on success.
@@ -252,10 +269,51 @@ All four follow the same shape as generation: a bulk handler using `runBatch` ov
 
 - **Reset Results** — clears local `results`/`existenceStatus` state and unlocks Steps 1–2. Explicitly does **not** delete any document already written to DA; the modal copy tells the user to use Delete first if that's the intent.
 - **Bulk Delete** — lists every path about to be deleted before confirming.
+- Both modals are now instances of the shared `src/components/ConfirmModal.tsx` (`{title, children, confirmLabel, confirmClassName, onConfirm, onCancel}`), not bespoke inline markup — Document Manager's delete confirmation (§14) reuses the same component.
 
-## 13. Current behavior worth knowing before extending this tool
+## 14. Document Manager tab (`DocumentManagerTab.tsx` + friends)
 
-- TanStack Query is installed and wired up (`QueryClientProvider` in `main.tsx`), but nothing in the app currently issues a query through it — all network calls are plain `async`/`fetch` functions called directly from event handlers and effects.
+### Why it exists
+
+The Generate tab's results table lives only in React state — refresh the page and it's gone. If an author needs to fix a mistake in an already-generated document (or just review/republish/delete documents from a previous session), there was no way to find them again short of hand-editing raw DA. Document Manager is a second top-level tab that crawls a user-specified DA folder, lists every document under it, and offers the same CRUD surface as the Generate tab — individually or in bulk — sourced from what's actually in DA rather than from an in-memory batch.
+
+### Identity metadata contract
+
+Two facts motivated this design: `product_type` never made it into generated document HTML before this feature (it was purely an in-memory CSV column used for template routing), and the product URN, while present in generated pages, exists only as unlabeled positional text (first row/second cell of the `print-product-detail` block) — not something a crawler can reliably key off.
+
+The fix, applied in `finalizeGeneratedDoc` (§9, called from `GeneratePanel`'s generate handlers): every newly-generated document gets these rows upserted into its authored EDS Metadata block (`div.metadata`, via `src/lib/metadata.ts`):
+
+| Key | Written by | Overwritten on |
+|---|---|---|
+| `product-type` | Generate | Generate only — identity shouldn't drift after creation |
+| `product-id` (the URN) | Generate | Generate only |
+| `generated-batch` | Generate | Every Generate run (bulk or single) — answers "which Generate run produced this templated content" |
+| `last-updated` | Generate **and** Document Manager | Every write, by either tool — there's no platform timestamp to lean on instead (DA's `/list` response has no timestamp; AEM's `/status.lastModified` is publish-time, not edit-time) |
+
+`generated-batch` and `last-updated` are deliberately separate: a Document Manager text edit doesn't re-template the doc, so it must never bump `generated-batch`, or "filter to just this generate run" would drift every time anyone touches the doc from the other tab.
+
+Documents created before this feature shipped have none of this metadata. Document Manager **self-heals** them lazily (never during the initial crawl/list, which would mean a Zazzle call per doc just to open a folder): `backfillIdentity` (in `src/lib/documentManager.ts`) recovers `product-id` via the positional legacy lookup, then `product-type` via an on-demand Zazzle lookup by that URN (`fetchProductFromTemplate`, the same call the Generate tab's Hydrate flow already makes), cached per session so re-touching docs sharing a URN never re-fetches.
+
+### Editable-field convention
+
+`title`/`short_title`/`description` are tagged with `data-doc-key="<field>"` by `tagEditableFieldsOnDoc` (§9) at generate time, on whichever leaf element's text matches the substituted value — no template-authoring change required. Document Manager's edit-write (`writeFieldValue`) targets `[data-doc-key="key"]` directly. Documents lacking the tag (legacy, or the heuristic couldn't find a unique match) render those fields **read-only**; the backfill action above also re-runs the tagging heuristic against the doc's current text using the freshly-fetched Zazzle values, retroactively making most legacy docs editable too. Breadcrumb is intentionally not editable — it would need surgical targeting of a specific `<li>` in a breadcrumb list rather than a single leaf element's text, deferred to a later phase.
+
+### Data layer (`src/api/crawl.ts`, `src/lib/documentManager.ts`)
+
+- `crawlDirectory(rootPath)` — bounded-concurrency BFS over `daApi.ts`'s single-level `listDirectory`, one level at a time (not an unbounded fan-out). A directory that fails to list is recorded in `errors` and skipped, never silently dropped.
+- `fetchAndParseDocs(paths, parse)` — fetches+parses each doc with the same bounded concurrency, discarding raw HTML immediately once reduced to a summary record (`ManagedDoc`) — retaining thousands of full HTML strings isn't viable at scale. Per-doc failures go to `errors`, same philosophy.
+- `crawlAndLoadDocs(rootPath)` composes both, then live-checks status via `daApi.ts`'s `checkPageStatus`/`batchCheckStatus` (new — hits `{HLX_ADMIN}/status/{org}/{repo}/{BRANCH}{contentPath}`) so the table reflects real publish/preview state rather than a stale guess.
+- This crawl-every-time approach is knowingly not viable at the team's ~50k-page target — a maintained index file (written incrementally by both Generate and Document Manager, read instead of crawled) is the designed-but-not-yet-built fix; the crawl code doesn't get thrown away when that lands, it becomes the index's "rebuild" path.
+
+### UI
+
+`DocumentManagerTab.tsx` owns the root-path input + explicit Scan/Rescan button (crawling is expensive enough that it's never triggered by a keystroke debounce, unlike the Config Sheet path field), sub-directory/batch/status/issues-only filters and sort (all in-memory over the already-crawled list — free, no extra fetches), selection, and the bulk-action bar (`BulkEditBar.tsx` → `useDaDocumentActions<ManagedDoc>`, plus a "Backfill Metadata" action and a bulk field-edit modal, `BulkFieldEditModal.tsx`). `DocumentManagerTable.tsx` renders the row/column grid, reusing `StatusPills.tsx`'s `PreviewPill`/`PublishPill`/`GeneratePill` (the last one doubles as the row-level Delete/Error affordance here, since a crawled doc's `stage` is never `'pending'`) for actions, with inline click-to-edit cells for the three editable fields.
+
+The crawl itself uses `useQuery` (`@tanstack/react-query`, `enabled: false`, `staleTime: Infinity`, fired only via `refetch()` from the Scan button) — the first real consumer of the query client that's been wired up in `main.tsx` since the app's inception. `staleTime: Infinity` is deliberate: at scale, an incidental background refetch on window refocus is a real cost, not a nicety, so rescanning is always an explicit user action. The `data → local state` sync happens by chaining `.then()` off the `refetch()` promise inside an effect keyed on `[rootPath, scanNonce]` (a nonce that increments on every Scan click, so re-scanning the same path still refires) rather than a second effect watching `data` directly — calling `setState` synchronously inside an effect body trips `eslint-plugin-react-hooks`'s `set-state-in-effect` rule; deferring it into the promise resolution avoids that while still being triggered by the `rootPath`/`scanNonce` change.
+
+## 15. Current behavior worth knowing before extending this tool
+
 - The template override dropdown is populated only from rows in the config sheet (any row with a `Template Path`, `Product Type` optional). There's no way to override to a template that isn't already listed in the sheet.
-- `handlePublish`'s eligibility filter (`stage === 'previewed' && r.qa?.pass`) is stricter than what `showPublishBtn`'s `counts.publishable` reflects (`stage === 'previewed'` only) — a row that failed generation-time QA will show up in the publishable count but won't actually be included when Publish runs.
+- `handlePublish`'s eligibility filter (`stage === 'previewed' && r.qa?.pass`) is stricter than what `showPublishBtn`'s `counts.publishable` reflects (`stage === 'previewed'` only) — a row that failed generation-time QA will show up in the publishable count but won't actually be included when Publish runs. Document Manager's bulk Publish has no such filter — it operates on whatever's selected.
 - `RowStage` includes a `'qa-fail'` value that no current code path ever assigns; QA failure is instead represented by `qa.pass === false` on a row that's otherwise `generated`/`published`.
+- Document Manager's `ManagedDoc.stage` defaults to `'generated'` after parsing (before the live status check resolves) — this doubles as "draft" in the UI, since a crawled doc that exists in DA but was never previewed/published has no more specific stage to represent it.

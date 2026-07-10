@@ -1,19 +1,20 @@
 import { useState, useEffect, useRef, Fragment } from 'react';
+import { postDoc, createDocVersion, cat, docExists } from '../api/daApi';
+import { applyTemplate, rowToOutputPath, runGenerationQa, finalizeGeneratedDoc } from '../lib/generate';
+import { runBatch, DEFAULT_CONCURRENCY } from '../lib/concurrency';
+import { useDaDocumentActions } from '../hooks/useDaDocumentActions';
+import ConfirmModal from './ConfirmModal';
 import {
-  postDoc,
-  createDocVersion,
-  triggerPreview,
-  triggerPublish,
-  triggerUnpublish,
-  deleteDocument,
-  getToken,
-  daPathToPreviewUrl,
-  daPathToLiveUrl,
-  cat,
-  docExists,
-} from '../api/daApi';
-import { applyTemplate, rowToOutputPath, runGenerationQa, runPageQa } from '../lib/generate';
-import type { CsvRow, ProductTypeConfig, RowResult, QaResult } from '../types';
+  GeneratePill,
+  PreviewPill,
+  PublishPill,
+  QaIssueBadge,
+  ExternalLinkIcon,
+  ExistenceBadge,
+  ExistenceOutcomeBadge,
+  type ExistenceCheck,
+} from './StatusPills';
+import type { CsvRow, ProductTypeConfig, RowResult } from '../types';
 
 interface Props {
   rows: CsvRow[];
@@ -23,10 +24,9 @@ interface Props {
   onResultsChange?: (hasResults: boolean) => void;
 }
 
-const CONCURRENCY = 3;
+const CONCURRENCY = DEFAULT_CONCURRENCY;
 
 type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing' | 'unpublishing' | 'deleting';
-type ExistenceCheck = 'checking' | 'exists' | 'not-found' | 'error';
 
 export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig, generateBlockReason, onResultsChange }: Props) {
   const [results, setResults] = useState<RowResult[]>([]);
@@ -36,6 +36,10 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
   const [resetModalOpen, setResetModalOpen] = useState(false);
   const [existenceStatus, setExistenceStatus] = useState<Record<string, ExistenceCheck>>({});
   const checkedPaths = useRef<Set<string>>(new Set());
+
+  const actions = useDaDocumentActions<RowResult>(setResults, {
+    afterDelete: (r) => ({ id: r.id, path: r.path, stage: 'pending' }),
+  });
 
   const previewRows = results.length === 0
     ? rows.map((row) => {
@@ -65,20 +69,14 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
       for (const pr of toCheck) next[pr.path] = 'checking';
       return next;
     });
-    const queue = [...toCheck];
-    let idx = 0;
-    async function worker() {
-      while (idx < queue.length) {
-        const pr = queue[idx++];
-        try {
-          const exists = await docExists(pr.path);
-          setExistenceStatus((prev) => ({ ...prev, [pr.path]: exists ? 'exists' : 'not-found' }));
-        } catch {
-          setExistenceStatus((prev) => ({ ...prev, [pr.path]: 'error' }));
-        }
+    void runBatch(toCheck, async (pr) => {
+      try {
+        const exists = await docExists(pr.path);
+        setExistenceStatus((prev) => ({ ...prev, [pr.path]: exists ? 'exists' : 'not-found' }));
+      } catch {
+        setExistenceStatus((prev) => ({ ...prev, [pr.path]: 'error' }));
       }
-    }
-    void Promise.all(Array.from({ length: Math.min(CONCURRENCY, toCheck.length) }, worker));
+    }, CONCURRENCY);
   }, [previewRows, results.length]);
 
   function toggleRowDetail(id: string) {
@@ -110,18 +108,6 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
     ).length,
   };
 
-  async function runBatch(items: RowResult[], fn: (r: RowResult) => Promise<void>) {
-    const queue = [...items];
-    let idx = 0;
-    async function worker() {
-      while (idx < queue.length) {
-
-        await fn(queue[idx++]);
-      }
-    }
-    await Promise.all(Array.from({ length: Math.min(CONCURRENCY, queue.length) }, worker));
-  }
-
   async function handleGenerate() {
     const existenceSnapshot = { ...existenceStatus };
     setResults(
@@ -132,6 +118,7 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
     );
     setBulkOp('generating');
 
+    const generatedBatch = new Date().toISOString();
     const templateCache = new Map<string, string>();
     const queue = [...rows];
     let idx = 0;
@@ -160,7 +147,7 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
           templateHtml = await cat(cfg.templatePath);
           templateCache.set(cfg.templatePath, templateHtml);
         }
-        const html = applyTemplate(templateHtml, row);
+        const html = finalizeGeneratedDoc(applyTemplate(templateHtml, row), row, { generatedBatch });
         const qa = runGenerationQa(html);
         if (existenceSnapshot[path] === 'exists') {
           try {
@@ -212,7 +199,9 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
     setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, path, stage: 'generating' } : r));
     try {
       const templateHtml = await cat(cfg.templatePath);
-      const html = applyTemplate(templateHtml, row);
+      const html = finalizeGeneratedDoc(applyTemplate(templateHtml, row), row, {
+        generatedBatch: new Date().toISOString(),
+      });
       const qa = runGenerationQa(html);
       let existed = false;
       try { existed = await docExists(path); } catch { /* skip versioning if check fails */ }
@@ -231,177 +220,37 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
     }
   }
 
-  async function handleDeleteRow(rowId: string, path: string) {
-    const token = getToken();
-    if (!token) return;
-    setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'deleting' } : r));
-    try {
-      await deleteDocument(path, token);
-      setResults((prev) => prev.map((r) =>
-        r.id === rowId ? { id: r.id, path: r.path, stage: 'pending' } : r,
-      ));
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'error', error: msg } : r));
-    }
-  }
-
   async function handleBulkDelete() {
-    const token = getToken();
-    if (!token) return;
     setDeleteModalOpen(false);
     const targets = results.filter((r) =>
       ['generated', 'qa-fail', 'previewing', 'previewed', 'publishing',
         'published', 'unpublishing', 'unpublished'].includes(r.stage),
     );
     setBulkOp('deleting');
-    await runBatch(targets, async (r) => {
-      setResults((prev) => prev.map((x) => x.id === r.id ? { ...x, stage: 'deleting' } : x));
-      try {
-        await deleteDocument(r.path, token);
-        setResults((prev) => prev.map((x) =>
-          x.id === r.id ? { id: x.id, path: x.path, stage: 'pending' } : x,
-        ));
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        setResults((prev) => prev.map((x) => x.id === r.id ? { ...x, stage: 'error', error: msg } : x));
-      }
-    });
+    await actions.deleteBulk(targets);
     setBulkOp('idle');
   }
 
   async function handlePreview() {
-    const token = getToken();
-    if (!token) return;
     const targets = results.filter((r) => r.stage === 'generated');
     setBulkOp('previewing');
-    await runBatch(targets, async (r) => {
-      setResults((prev) => prev.map((x) => (x.id === r.id ? { ...x, stage: 'previewing' } : x)));
-      try {
-        await triggerPreview(r.path, token);
-        setResults((prev) =>
-          prev.map((x) =>
-            x.id === r.id
-              ? { ...x, stage: 'previewed', previewUrl: daPathToPreviewUrl(r.path) }
-              : x,
-          ),
-        );
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        setResults((prev) =>
-          prev.map((x) => (x.id === r.id ? { ...x, stage: 'error', error: msg } : x)),
-        );
-      }
-    });
+    await actions.previewBulk(targets);
     setBulkOp('idle');
   }
 
   async function handlePublish() {
-    const token = getToken();
-    if (!token) return;
+    // Note: stricter than showPublishBtn's counts.publishable (stage === 'previewed' only) —
+    // rows that failed generation-time QA are intentionally excluded from the actual publish run.
     const targets = results.filter((r) => r.stage === 'previewed' && r.qa?.pass);
     setBulkOp('publishing');
-    await runBatch(targets, async (r) => {
-      setResults((prev) => prev.map((x) => (x.id === r.id ? { ...x, stage: 'publishing' } : x)));
-      try {
-        await triggerPublish(r.path, token);
-        const liveUrl = daPathToLiveUrl(r.path);
-        let qa: QaResult | undefined;
-        try {
-          const resp = await fetch(liveUrl);
-          const html = await resp.text();
-          qa = runPageQa(html);
-        } catch {
-          // QA fetch failed — page is still published, just no QA data
-        }
-        setResults((prev) =>
-          prev.map((x) =>
-            x.id === r.id
-              ? { ...x, stage: 'published', liveUrl, qa }
-              : x,
-          ),
-        );
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        setResults((prev) =>
-          prev.map((x) => (x.id === r.id ? { ...x, stage: 'error', error: msg } : x)),
-        );
-      }
-    });
+    await actions.publishBulk(targets);
     setBulkOp('idle');
   }
 
-  async function handlePreviewRow(rowId: string, path: string) {
-    const token = getToken();
-    if (!token) return;
-    setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'previewing' } : r));
-    try {
-      await triggerPreview(path, token);
-      setResults((prev) => prev.map((r) =>
-        r.id === rowId ? { ...r, stage: 'previewed', previewUrl: daPathToPreviewUrl(path) } : r,
-      ));
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'error', error: msg } : r));
-    }
-  }
-
-  async function handlePublishRow(rowId: string, path: string) {
-    const token = getToken();
-    if (!token) return;
-    setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'publishing' } : r));
-    try {
-      await triggerPublish(path, token);
-      const liveUrl = daPathToLiveUrl(path);
-      let qa: QaResult | undefined;
-      try {
-        const resp = await fetch(liveUrl);
-        const html = await resp.text();
-        qa = runPageQa(html);
-      } catch {
-        // QA fetch failed — page is still published
-      }
-      setResults((prev) => prev.map((r) =>
-        r.id === rowId ? { ...r, stage: 'published', liveUrl, qa } : r,
-      ));
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'error', error: msg } : r));
-    }
-  }
-
-  async function handleUnpublishRow(rowId: string, path: string) {
-    const token = getToken();
-    if (!token) return;
-    setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'unpublishing' } : r));
-    try {
-      await triggerUnpublish(path, token);
-      setResults((prev) => prev.map((r) =>
-        r.id === rowId ? { ...r, stage: 'unpublished', liveUrl: undefined } : r,
-      ));
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      setResults((prev) => prev.map((r) => r.id === rowId ? { ...r, stage: 'error', error: msg } : r));
-    }
-  }
-
   async function handleUnpublish() {
-    const token = getToken();
-    if (!token) return;
     const targets = results.filter((r) => r.stage === 'published');
     setBulkOp('unpublishing');
-    await runBatch(targets, async (r) => {
-      setResults((prev) => prev.map((x) => x.id === r.id ? { ...x, stage: 'unpublishing' } : x));
-      try {
-        await triggerUnpublish(r.path, token);
-        setResults((prev) => prev.map((x) =>
-          x.id === r.id ? { ...x, stage: 'unpublished', liveUrl: undefined } : x,
-        ));
-      } catch (err) {
-        const msg = err instanceof Error ? err.message : String(err);
-        setResults((prev) => prev.map((x) => x.id === r.id ? { ...x, stage: 'error', error: msg } : x));
-      }
-    });
+    await actions.unpublishBulk(targets);
     setBulkOp('idle');
   }
 
@@ -600,14 +449,14 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
                       <GeneratePill
                         result={r}
                         onGenerate={() => handleGenerateRow(r.id)}
-                        onDelete={() => handleDeleteRow(r.id, r.path)}
+                        onDelete={() => actions.deleteRow(r)}
                       />
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">
-                      <PreviewPill result={r} onPreview={() => handlePreviewRow(r.id, r.path)} />
+                      <PreviewPill result={r} onPreview={() => actions.previewRow(r)} />
                     </td>
                     <td className="px-3 py-2 whitespace-nowrap">
-                      <PublishPill result={r} onPublish={() => handlePublishRow(r.id, r.path)} onUnpublish={() => handleUnpublishRow(r.id, r.path)} />
+                      <PublishPill result={r} onPublish={() => actions.publishRow(r)} onUnpublish={() => actions.unpublishRow(r)} />
                     </td>
                   </tr>
                   {expandedRowId === r.id && r.qa && (
@@ -640,257 +489,42 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
       )}
 
       {resetModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-max max-w-[90vw] flex flex-col gap-4 shadow-xl">
-            <h3 className="font-semibold text-gray-900 text-base">Reset results?</h3>
-            <p className="text-sm text-gray-500">
-              This will clear all {results.length} result{results.length !== 1 ? 's' : ''} from this
-              view and unlock the data inputs. Documents already written to DA are not
-              deleted — use the Delete button to remove them first.
-            </p>
-            <div className="flex gap-3 justify-end">
-              <button
-                type="button"
-                onClick={() => setResetModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 cursor-pointer transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => { setResults([]); setExistenceStatus({}); checkedPaths.current.clear(); setResetModalOpen(false); }}
-                className="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-xl hover:bg-gray-900 cursor-pointer transition-colors"
-              >
-                Reset
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          title="Reset results?"
+          confirmLabel="Reset"
+          confirmClassName="px-4 py-2 bg-gray-800 text-white text-sm font-medium rounded-xl hover:bg-gray-900 cursor-pointer transition-colors"
+          onCancel={() => setResetModalOpen(false)}
+          onConfirm={() => { setResults([]); setExistenceStatus({}); checkedPaths.current.clear(); setResetModalOpen(false); }}
+        >
+          <p className="text-sm text-gray-500">
+            This will clear all {results.length} result{results.length !== 1 ? 's' : ''} from this
+            view and unlock the data inputs. Documents already written to DA are not
+            deleted — use the Delete button to remove them first.
+          </p>
+        </ConfirmModal>
       )}
 
       {deleteModalOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-2xl border border-gray-200 p-6 w-max max-w-[90vw] flex flex-col gap-4 shadow-xl">
-            <h3 className="font-semibold text-gray-900 text-base">
-              Delete {counts.deletable} document{counts.deletable !== 1 ? 's' : ''}?
-            </h3>
-            <p className="text-sm text-gray-500">
-              This will permanently delete the following documents from DA:
-            </p>
-            <ul className="text-xs font-mono text-gray-700 max-h-64 overflow-y-auto border border-gray-100 rounded-lg p-3 flex flex-col gap-1">
-              {results
-                .filter((r) =>
-                  ['generated', 'qa-fail', 'previewing', 'previewed', 'publishing',
-                    'published', 'unpublishing', 'unpublished'].includes(r.stage),
-                )
-                .map((r) => <li key={r.id} className="whitespace-nowrap">{r.path}</li>)}
-            </ul>
-            <div className="flex gap-3 justify-end">
-              <button
-                type="button"
-                onClick={() => setDeleteModalOpen(false)}
-                className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 cursor-pointer transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleBulkDelete}
-                className="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 cursor-pointer transition-colors"
-              >
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <ConfirmModal
+          title={`Delete ${counts.deletable} document${counts.deletable !== 1 ? 's' : ''}?`}
+          confirmLabel="Delete"
+          onCancel={() => setDeleteModalOpen(false)}
+          onConfirm={handleBulkDelete}
+        >
+          <p className="text-sm text-gray-500">
+            This will permanently delete the following documents from DA:
+          </p>
+          <ul className="text-xs font-mono text-gray-700 max-h-64 overflow-y-auto border border-gray-100 rounded-lg p-3 flex flex-col gap-1">
+            {results
+              .filter((r) =>
+                ['generated', 'qa-fail', 'previewing', 'previewed', 'publishing',
+                  'published', 'unpublishing', 'unpublished'].includes(r.stage),
+              )
+              .map((r) => <li key={r.id} className="whitespace-nowrap">{r.path}</li>)}
+          </ul>
+        </ConfirmModal>
       )}
     </div>
   );
 }
 
-function ExternalLinkIcon() {
-  return (
-    <svg viewBox="0 0 16 16" fill="currentColor" className="w-3 h-3 shrink-0">
-      <path d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z" />
-      <path d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z" />
-    </svg>
-  );
-}
-
-function QaIssueBadge({
-  qa,
-  expanded,
-  onToggle,
-}: {
-  qa?: QaResult;
-  expanded: boolean;
-  onToggle: () => void;
-}) {
-  if (!qa) return <span className="text-gray-300">—</span>;
-  const failCount = qa.checks.filter((c) => !c.pass).length;
-  return (
-    <button
-      type="button"
-      onClick={onToggle}
-      className={`font-medium flex items-center gap-1 cursor-pointer ${
-        qa.pass ? 'text-green-600 hover:text-green-800' : 'text-amber-700 hover:text-amber-900'
-      }`}
-    >
-      {qa.pass ? '✓ Pass' : `Issues (${failCount})`}
-      <span className="text-xs leading-none">{expanded ? '▲' : '▼'}</span>
-    </button>
-  );
-}
-
-function GeneratePill({
-  result,
-  onGenerate,
-  onDelete,
-}: {
-  result: RowResult;
-  onGenerate: () => void;
-  onDelete: () => void;
-}) {
-  const { stage, error } = result;
-  if (stage === 'generating') return <span className="text-blue-600 font-medium">Generating…</span>;
-  if (stage === 'deleting') return <span className="text-red-500 font-medium">Deleting…</span>;
-  if (stage === 'error') {
-    const codeMatch = error?.match(/^(\d{3})[:\s]/);
-    const code = codeMatch?.[1];
-    const label = code === '403' ? 'Access Denied'
-                : code === '404' ? 'Not Found'
-                : code === '500' ? 'Server Error'
-                : 'Error';
-    const display = code ? `${label} (${code})` : 'Error';
-    return <span className="text-red-600 font-medium cursor-help" title={error}>{display}</span>;
-  }
-  if (['generated', 'qa-fail', 'previewing', 'previewed', 'publishing',
-    'published', 'unpublishing', 'unpublished'].includes(stage)) {
-    return (
-      <button type="button" onClick={onDelete}
-        className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors cursor-pointer">
-        Delete
-      </button>
-    );
-  }
-  return (
-    <button type="button" onClick={onGenerate}
-      className="text-xs text-blue-500 hover:text-blue-700 font-medium transition-colors cursor-pointer">
-      Generate
-    </button>
-  );
-}
-
-function PreviewPill({ result, onPreview }: { result: RowResult; onPreview: () => void }) {
-  const { stage, previewUrl } = result;
-  if (stage === 'previewing') return <span className="text-indigo-500 font-medium">Previewing…</span>;
-  if (previewUrl) {
-    return (
-      <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="text-indigo-600 font-medium hover:underline inline-flex items-center gap-1">
-        ✓ aem.page
-        <ExternalLinkIcon />
-      </a>
-    );
-  }
-  if (stage === 'generated') {
-    return (
-      <button type="button" onClick={onPreview}
-        className="text-xs text-indigo-500 hover:text-indigo-700 font-medium transition-colors cursor-pointer">
-        Preview
-      </button>
-    );
-  }
-  return <span className="text-gray-300">—</span>;
-}
-
-function PublishPill({
-  result,
-  onPublish,
-  onUnpublish,
-}: {
-  result: RowResult;
-  onPublish: () => void;
-  onUnpublish: () => void;
-}) {
-  const { stage, liveUrl } = result;
-  if (stage === 'publishing') return <span className="text-green-500 font-medium">Publishing…</span>;
-  if (stage === 'unpublishing') return <span className="text-orange-500 font-medium">Unpublishing…</span>;
-  if (stage === 'unpublished') {
-    return (
-      <button type="button" onClick={onPublish}
-        className="text-xs text-green-600 hover:text-green-800 font-medium transition-colors cursor-pointer">
-        Publish
-      </button>
-    );
-  }
-  if (liveUrl) {
-    return (
-      <div className="flex items-center gap-2 whitespace-nowrap">
-        <a href={liveUrl} target="_blank" rel="noopener noreferrer" className="text-green-700 font-medium hover:underline inline-flex items-center gap-1">
-          ✓ aem.live
-          <ExternalLinkIcon />
-        </a>
-        <button type="button" onClick={onUnpublish}
-          className="text-xs text-red-500 hover:text-red-700 font-medium transition-colors cursor-pointer">
-          Unpublish
-        </button>
-      </div>
-    );
-  }
-  if (stage === 'previewed') {
-    return (
-      <button type="button" onClick={onPublish}
-        className="text-xs text-green-600 hover:text-green-800 font-medium transition-colors cursor-pointer">
-        Publish
-      </button>
-    );
-  }
-  return <span className="text-gray-300">—</span>;
-}
-
-function ExistenceBadge({ status }: { status: ExistenceCheck | undefined }) {
-  if (status === 'checking') {
-    return (
-      <svg className="w-3 h-3 shrink-0 animate-spin text-gray-400 font-sans" viewBox="0 0 24 24" fill="none">
-        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
-      </svg>
-    );
-  }
-  if (status === 'exists') {
-    return (
-      <span className="font-sans text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 whitespace-nowrap">
-        ↻ update
-      </span>
-    );
-  }
-  if (status === 'error') {
-    return (
-      <span
-        className="font-sans text-[10px] font-medium text-gray-400 bg-gray-50 border border-gray-200 rounded px-1.5 py-0.5 cursor-help"
-        title="Existence check failed"
-      >
-        ?
-      </span>
-    );
-  }
-  return null;
-}
-
-function ExistenceOutcomeBadge({ status }: { status: ExistenceCheck | undefined }) {
-  if (status === 'exists') {
-    return (
-      <span className="font-sans text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 whitespace-nowrap">
-        ↻ Updated
-      </span>
-    );
-  }
-  if (status === 'not-found') {
-    return (
-      <span className="font-sans text-[10px] font-medium text-green-700 bg-green-50 border border-green-200 rounded px-1.5 py-0.5 whitespace-nowrap">
-        ✓ Created
-      </span>
-    );
-  }
-  return null;
-}
