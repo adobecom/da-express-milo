@@ -1,7 +1,7 @@
-import { getState, setState, subscribe } from '../../state.js';
+import { getState, setState, subscribe } from '../state.js';
 
 const BASE_PATH = '/express/code/blocks/font-generator/side-panel';
-const STYLESHEET_HREF = `${BASE_PATH}/output/side-panel.css`;
+const STYLESHEET_HREF = `${BASE_PATH}/side-panel.css`;
 const MAX_LENGTH = 200;
 const DEBOUNCE_MS = 300;
 

@@ -1,4 +1,4 @@
-import createSidePanel from './side-panel/output/side-panel.js';
+import createSidePanel from './side-panel/side-panel.js';
 import initFilters from './filters.js';
 import initPanel from './panel.js';
 import { setState, subscribe, initFromUrl } from './state.js';
