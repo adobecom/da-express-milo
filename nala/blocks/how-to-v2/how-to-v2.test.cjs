@@ -135,6 +135,9 @@ test.describe('Express How To V2 Block test suite', () => {
     });
 
     await test.step('Verify accessibility', async () => {
+      // Wait for lite-youtube play button to fully hydrate before axe scans
+      await page.locator('.lty-playbtn[aria-label]').waitFor({ state: 'attached', timeout: 10000 });
+
       await runAccessibilityTest({ page, testScope: howToV2.howToV2 });
       console.log('Accessibility test completed successfully');
     });
