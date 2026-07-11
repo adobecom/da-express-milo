@@ -26,7 +26,7 @@
   width: 100%;
   max-width: var(--block-wd-max-width);
   margin: 0 auto;
-  padding: 0 var(--spacing-400);
+  padding: 0 var(--spacing-300);
   box-sizing: border-box;
 }
 
@@ -163,10 +163,9 @@
   }
 }
 
-/* Library item cards reuse explore strips inside the accordion grid */
 .color-explore--libraries .ax-lib-items-grid.palettes-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(280px, 1fr));
+  grid-template-columns: 1fr;
   gap: var(--spacing-400);
   width: 100%;
 }
@@ -176,18 +175,22 @@
   width: 100%;
 }
 
-@media (max-width: 1199px) {
+@media (min-width: 680px) {
+  .color-explore.color-explore--libraries .color-explore-container {
+    padding: 0 var(--spacing-500);
+  }
+
   .color-explore--libraries .ax-lib-items-grid.palettes-grid {
     grid-template-columns: repeat(2, minmax(260px, 1fr));
   }
 }
 
-@media (max-width: 679px) {
-  .color-explore--libraries .color-explore-container {
-    padding-inline: var(--spacing-300);
+@media (min-width: 1200px) {
+  .color-explore.color-explore--libraries .color-explore-container {
+    padding: 0 var(--spacing-600);
   }
 
   .color-explore--libraries .ax-lib-items-grid.palettes-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(3, minmax(280px, 1fr));
   }
 }

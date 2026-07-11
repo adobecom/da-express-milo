@@ -9,6 +9,7 @@ import { loadIconsRail, loadMenu, loadTooltip, loadButton } from '../../scripts/
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import loadColorLibrariesPlaceholders from '../../scripts/color-shared/i18n/loadColorLibrariesPlaceholders.js';
 import { createSearchBar, createDeepLinkManager } from '../../scripts/color-shared/components/search-bar/index.js';
+import { libraryGradientToModalGradient } from '../../scripts/color-shared/components/libraries/libraryDownloadUtils.js';
 import { announceToScreenReader } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import { ensureIms } from '../../libs/services/index.js';
 
@@ -52,16 +53,39 @@ function hasColorContent(library) {
     || (library.items?.length ?? 0) > 0;
 }
 
-function filterLibraries(libraries, query) {
+function getItemHexColors(item) {
+  if (item.type === 'gradient') {
+    return libraryGradientToModalGradient(item).colorStops
+      .map((stop) => stop.color)
+      .filter(Boolean);
+  }
+  return (item.colors || []).filter(Boolean);
+}
+
+function itemMatchesQuery(item, normalized, searchType) {
+  if (searchType === 'tag') {
+    return (item.tags || []).some((tag) => tag.toLowerCase().includes(normalized));
+  }
+  if (searchType === 'hex') {
+    const target = normalized.replace(/^#/, '');
+    return getItemHexColors(item)
+      .some((hex) => hex.toLowerCase().replace(/^#/, '').includes(target));
+  }
+  return item.name?.toLowerCase().includes(normalized);
+}
+
+function filterLibraries(libraries, query, searchType = 'term') {
   const withContent = libraries.filter(hasColorContent);
   const normalized = query.trim().toLowerCase();
   if (!normalized) return withContent;
 
   return withContent
     .map((library) => {
-      const nameMatch = library.name?.toLowerCase().includes(normalized);
+      // Only a plain term search matches the library's own name; tag/hex are item-level.
+      const nameMatch = searchType === 'term'
+        && library.name?.toLowerCase().includes(normalized);
       const matchedItems = (library.items || []).filter(
-        (item) => item.name?.toLowerCase().includes(normalized),
+        (item) => itemMatchesQuery(item, normalized, searchType),
       );
 
       if (nameMatch) {
@@ -98,12 +122,12 @@ function clearSearchUrl() {
   }
 }
 
-async function renderLibraries(block, searchQuery, strings = {}) {
+async function renderLibraries(block, searchQuery, strings = {}, searchType = 'term') {
   const { fetchLibrariesWithElements } = await import('../../scripts/color-shared/services/createLibrariesDataService.js');
   const allLibraries = await fetchLibrariesWithElements();
   // Count reflects the total saved libraries with content (not the filtered subset).
   componentInstance.setCount(allLibraries.filter(hasColorContent).length);
-  const filtered = filterLibraries(allLibraries, searchQuery);
+  const filtered = filterLibraries(allLibraries, searchQuery, searchType);
   const isSearch = Boolean(searchQuery);
   notifyResultsFound();
 
@@ -145,6 +169,7 @@ export default async function decorate(block) {
   }
   if (goBackHandler) {
     block.removeEventListener('libraries:empty-go-back', goBackHandler);
+    block.removeEventListener('libraries:reset-search', goBackHandler);
     goBackHandler = null;
   }
   if (deleteHandler) {
@@ -294,19 +319,31 @@ export default async function decorate(block) {
 
   const deepLinkManager = createDeepLinkManager({ enabled: true, queryParam: 'q' });
   let searchQuery = new URLSearchParams(window.location.search).get('q') || '';
+  // Term/Tag/Hex, set from the selected suggestion; deep-linked queries default to term.
+  let currentSearchType = 'term';
 
   searchBarInstance = await createSearchBar(
     {
       placeholder: placeholders.librariesSearchPlaceholder,
-      enableSuggestions: false,
-      enableAutocomplete: false,
+      enableSuggestions: true,
+      enableAutocomplete: true,
       enableStickyBehavior: false,
+      // Term/Tag/Hex dropdown, matching the Explore page.
+      suggestionsConfig: {
+        maxItems: 3,
+        showHeader: false,
+      },
+      autocompleteConfig: {
+        throttleDelay: 300,
+        debounceDelay: 500,
+        minLength: 2,
+      },
     },
     {
-      onSubmit: ({ query }) => {
+      onSubmit: ({ query, suggestion }) => {
         deepLinkManager.updateUrl(query);
         document.dispatchEvent(new CustomEvent('floating-search:submit', {
-          detail: { query },
+          detail: { query, searchType: suggestion?.type },
           bubbles: true,
         }));
       },
@@ -340,11 +377,12 @@ export default async function decorate(block) {
   };
   window.addEventListener('resize', resizeHandler);
 
-  const runSearch = async (query) => {
+  const runSearch = async (query, searchType = 'term') => {
     block.classList.add(CSS_CLASSES.LOADING);
     searchQuery = query || '';
+    currentSearchType = searchType || 'term';
     try {
-      await renderLibraries(block, searchQuery, placeholders);
+      await renderLibraries(block, searchQuery, placeholders, currentSearchType);
     } catch (err) {
       window.lana?.log(`color-libraries search failed: ${err?.message}`, {
         tags: 'color-libraries',
@@ -354,7 +392,10 @@ export default async function decorate(block) {
     }
   };
 
-  floatingSearchHandler = (e) => runSearch(e.detail?.query || '');
+  floatingSearchHandler = (e) => runSearch(
+    e.detail?.query || '',
+    e.detail?.searchType || e.detail?.suggestion?.type,
+  );
   document.addEventListener('floating-search:submit', floatingSearchHandler);
 
   goBackHandler = () => {
@@ -364,6 +405,7 @@ export default async function decorate(block) {
     runSearch('');
   };
   block.addEventListener('libraries:empty-go-back', goBackHandler);
+  block.addEventListener('libraries:reset-search', goBackHandler);
 
   deleteHandler = async (event) => {
     const { item, libraryId } = event.detail || {};
@@ -377,18 +419,50 @@ export default async function decorate(block) {
     const itemName = item?.name || placeholders.librariesDefaultName || '';
     block.classList.add(CSS_CLASSES.LOADING);
 
-    const [{ deleteLibraryItem }, { showExpressToast }] = await Promise.all([
+    const [
+      { deleteLibraryItem, restoreLibraryItem },
+      { showExpressToast },
+    ] = await Promise.all([
       import('../../scripts/color-shared/services/createLibrariesDataService.js'),
       import('../../scripts/color-shared/spectrum/components/express-toast.js'),
     ]);
 
+    const undoDelete = async () => {
+      block.classList.add(CSS_CLASSES.LOADING);
+      try {
+        await restoreLibraryItem(libraryId, item);
+        await renderLibraries(block, searchQuery, placeholders, currentSearchType);
+        showExpressToast({
+          variant: 'positive',
+          message: interpolate(placeholders.librariesRestoreSuccess, { name: itemName }),
+        });
+      } catch (err) {
+        window.lana?.log(`color-libraries undo delete failed: ${err?.message}`, {
+          tags: 'color-libraries',
+          severity: 'error',
+        });
+        block.classList.remove(CSS_CLASSES.LOADING);
+        showExpressToast({
+          variant: 'negative',
+          message: placeholders.librariesRestoreError,
+        });
+      }
+    };
+
     try {
       await deleteLibraryItem(libraryId, itemId);
-      showExpressToast({
+      const toast = await showExpressToast({
         variant: 'positive',
         message: interpolate(placeholders.librariesDeleteSuccess, { name: itemName }),
+        action: {
+          label: placeholders.librariesUndo,
+          onClick: () => {
+            toast?.close?.();
+            undoDelete();
+          },
+        },
       });
-      await renderLibraries(block, searchQuery, placeholders);
+      await renderLibraries(block, searchQuery, placeholders, currentSearchType);
     } catch (err) {
       window.lana?.log(`color-libraries delete failed: ${err?.message}`, {
         tags: 'color-libraries',

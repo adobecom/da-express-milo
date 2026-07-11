@@ -62,6 +62,20 @@
   display: none;
 }
 
+.ax-lib-header__count--interactive {
+  cursor: pointer;
+}
+
+.ax-lib-header__count--interactive:hover {
+  text-decoration: underline;
+}
+
+.ax-lib-header__count--interactive:focus-visible {
+  outline: 2px solid var(--ax-lib-heading-color);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 /* Mobile default: the sticky count collapses once scrolled (re-shown at tablet+). */
 .ax-lib-header.is-scrolled .ax-lib-header__count {
   display: none;
@@ -290,8 +304,11 @@
   padding: var(--spacing-75) 0;
 }
 
-.ax-lib-expand-btn:hover {
-  text-decoration: underline;
+/* Avoid sticky :hover on touch devices. */
+@media (hover: hover) and (pointer: fine) {
+  .ax-lib-expand-btn:hover {
+    text-decoration: underline;
+  }
 }
 
 .ax-lib-expand-btn:focus-visible {
@@ -332,8 +349,11 @@
   box-sizing: border-box;
 }
 
-.ax-lib-accordion-header:hover {
-  background: var(--ax-lib-border);
+/* Avoid sticky :hover on touch devices. */
+@media (hover: hover) and (pointer: fine) {
+  .ax-lib-accordion-header:hover {
+    background: var(--ax-lib-border);
+  }
 }
 
 .ax-lib-accordion-header:focus-visible {
@@ -378,6 +398,15 @@
   color: var(--ax-lib-detail-color);
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+/* Open accordion adopts the header hover treatment. */
+.ax-lib-accordion--open .ax-lib-accordion-name {
+  font-weight: var(--font-weight-medium);
+}
+
+.ax-lib-accordion--open .ax-lib-accordion-count {
+  color: var(--ax-lib-heading-color);
 }
 
 .ax-lib-toggle-icon {
@@ -476,7 +505,7 @@
   font-weight: var(--font-weight-medium);
   line-height: 1.2;
   border-radius: 5px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.16);
+  box-shadow: 0 0 0 1px rgba(31, 31, 31, 0.2);
   pointer-events: none;
   white-space: nowrap;
 }
@@ -546,6 +575,13 @@
   background: var(--ax-lib-bg);
   border-radius: var(--Corner-radius-corner-radius-100);
   box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-elevated-key);
+}
+
+/* Flipped when a left-aligned popover would overflow the viewport's right edge
+   (cards on the far right); anchors the popover's right edge to the trigger. */
+.ax-lib-card__action-menu-popover--align-right {
+  left: auto;
+  right: 0;
 }
 
 .ax-lib-card__action-menu-popover[hidden] {

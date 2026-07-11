@@ -118,7 +118,7 @@
   position: absolute;
   top: var(--spacing-200);
   right: var(--spacing-200);
-  background: var(--color-light-gray);
+  background: var(--color-white);
   border: none;
   padding: var(--spacing-100);
   cursor: pointer;

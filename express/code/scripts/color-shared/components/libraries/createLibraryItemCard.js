@@ -41,12 +41,13 @@ function createSpIconButton(iconName) {
   return wrap;
 }
 
-function createActionButton({ icon, label, onClick }) {
+function createActionButton({ icon, label, tooltip, onClick }) {
   const btn = createTag('button', {
     type: 'button',
     class: 'ax-lib-card__action',
     'aria-label': label,
-    'data-tooltip-content': label,
+    // Tooltip copy can be shorter than the aria-label (e.g. "Delete" vs "Delete {name}").
+    'data-tooltip-content': tooltip || label,
   });
   btn.appendChild(icon);
   decorateAnalyticsAttributes(btn, { linkLabel: label });
@@ -80,6 +81,7 @@ function buildActions(item, name, strings, emit, payload, toolHrefs) {
     {
       icon: createSpIconButton('sp-icon-delete'),
       label: interpolate(strings.librariesDeleteAria, { name }),
+      tooltip: isGradient ? strings.librariesDeleteGradientHeading : strings.librariesDeleteThemeHeading,
       onClick: () => emit('item-delete', payload),
     },
   ];

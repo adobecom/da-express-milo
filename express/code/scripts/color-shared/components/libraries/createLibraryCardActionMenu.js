@@ -123,12 +123,24 @@ export function createLibraryCardActionMenu({
     if (focusTrigger) trigger.focus?.();
   }
 
+  const ALIGN_RIGHT_CLASS = 'ax-lib-card__action-menu-popover--align-right';
+
+  function alignPopoverToViewport() {
+    popover.classList.remove(ALIGN_RIGHT_CLASS);
+    // Default (left-aligned) popover overflows the viewport for far-right cards;
+    // flip it to right-align so it opens inward instead of getting clipped.
+    if (popover.getBoundingClientRect().right > document.documentElement.clientWidth) {
+      popover.classList.add(ALIGN_RIGHT_CLASS);
+    }
+  }
+
   function openPopover({ focusMenu = false } = {}) {
     if (popoverOpen) return;
     menuCoordinator.closeOthers(menuApi);
     popoverOpen = true;
     popover.removeAttribute('hidden');
     setExpanded(true);
+    alignPopoverToViewport();
 
     const onDocumentClick = (event) => {
       if (!wrapper.contains(event.target)) closePopover();

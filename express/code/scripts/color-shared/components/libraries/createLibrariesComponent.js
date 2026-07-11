@@ -3,6 +3,7 @@ import { createLibraryAccordion } from './createLibraryAccordion.js';
 import { createLibrariesHeader, LIBRARY_SORT } from './createLibrariesHeader.js';
 import { getSizeClass } from './libraryUtils.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
+import { createExpressTooltip } from '../../spectrum/components/express-tooltip.js';
 
 export const LIBRARY_VIEW = {
   LIBRARY: 'library',
@@ -222,6 +223,51 @@ export function createLibrariesComponent(options = {}) {
 
   const list = createTag('div', { class: 'ax-libraries-list' });
 
+  // Hover tooltips for the card action buttons. Each appends a host to the body,
+  // so they must be torn down explicitly on re-render/destroy.
+  const tooltipControllers = new Map();
+  // Bumped before each rebuild so a stale async creation can detect it lost the
+  // race and discard itself.
+  let tooltipToken = 0;
+
+  function clearCardTooltips() {
+    tooltipControllers.forEach((controller) => controller?.destroy?.());
+    tooltipControllers.clear();
+  }
+
+  async function initCardTooltips(token) {
+    const buttons = list.querySelectorAll('.ax-lib-card__action[data-tooltip-content]');
+    for (const button of buttons) {
+      if (token !== tooltipToken) return;
+      const content = button.getAttribute('data-tooltip-content') || '';
+      if (content) {
+        try {
+          // eslint-disable-next-line no-await-in-loop
+          const tip = await createExpressTooltip({ targetEl: button, content, placement: 'top' });
+          if (token !== tooltipToken || !button.isConnected) {
+            tip?.destroy?.();
+            return;
+          }
+          tooltipControllers.set(button, tip);
+        } catch (err) {
+          // Tooltip is a progressive enhancement; the aria-label still names the button.
+        }
+      }
+    }
+  }
+
+  // Desktop-only: gate on hover-capable pointers so tooltips don't compete with
+  // the tap-to-open menu triggers on touch.
+  function scheduleCardTooltips() {
+    tooltipToken += 1;
+    clearCardTooltips();
+    if (typeof window === 'undefined') return;
+    const supportsHover = window.matchMedia?.('(hover: hover)')?.matches ?? true;
+    if (!supportsHover) return;
+    const token = tooltipToken;
+    window.requestAnimationFrame(() => { initCardTooltips(token).catch(() => {}); });
+  }
+
   // Built once so the live search bar keeps its listeners across view re-renders.
   const header = createLibrariesHeader({
     strings,
@@ -259,6 +305,8 @@ export function createLibrariesComponent(options = {}) {
       accordionInstances.set(library.id, instance);
       list.appendChild(instance.element);
     });
+
+    scheduleCardTooltips();
   }
 
   function expandAll() {
@@ -278,14 +326,21 @@ export function createLibrariesComponent(options = {}) {
   }
 
   function render() {
+    // Non-library views (loading/empty) never reach renderLibraryList, so clear here.
+    clearCardTooltips();
     container.className = [
       'ax-libraries',
       `ax-libraries--size-${sizeClass}`,
       `ax-libraries--view-${view}`,
     ].join(' ');
     container.replaceChildren();
-    // Header (count + search + sort) is persistent across every view.
-    container.appendChild(header.element);
+    // No header (search/count/sort) when there are no saved libraries.
+    if (view !== LIBRARY_VIEW.NO_CONTENT) {
+      container.appendChild(header.element);
+      header.setInteractive?.(
+        view === LIBRARY_VIEW.SEARCH_RESULT || view === LIBRARY_VIEW.EMPTY,
+      );
+    }
 
     // Order reflects the active sort before any view-specific rendering (so the
     // default-expanded first library is the first in sorted order too).
@@ -366,6 +421,8 @@ export function createLibrariesComponent(options = {}) {
     expandAll,
     collapseAll,
     destroy() {
+      tooltipToken += 1;
+      clearCardTooltips();
       header.destroy();
       container.remove();
     },

@@ -79,6 +79,17 @@ export function createLibrariesHeader(options = {}) {
   // h1: page-level title for the libraries view (saved-count text). Class keeps
   // the existing typography; global `main h1` resets the default heading margin.
   const count = createTag('h1', { class: 'ax-lib-header__count' });
+  const onCountActivate = () => {
+    if (count.classList.contains('ax-lib-header__count--interactive')) emit('reset-search');
+  };
+  const onCountKeydown = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      onCountActivate();
+    }
+  };
+  count.addEventListener('click', onCountActivate);
+  count.addEventListener('keydown', onCountKeydown);
   const search = createTag('div', { class: 'ax-lib-header__search' });
   if (searchBarEl) search.appendChild(searchBarEl);
   titleSearch.append(count, search);
@@ -310,6 +321,16 @@ export function createLibrariesHeader(options = {}) {
     setCount(total) {
       count.textContent = formatSavedCount(total, strings);
     },
+    setInteractive(isInteractive) {
+      count.classList.toggle('ax-lib-header__count--interactive', isInteractive);
+      if (isInteractive) {
+        count.setAttribute('role', 'button');
+        count.setAttribute('tabindex', '0');
+      } else {
+        count.removeAttribute('role');
+        count.removeAttribute('tabindex');
+      }
+    },
     setSort(key) {
       if (key && key !== currentSort && optionItems.has(key)) {
         applySort(key, { silent: true });
@@ -320,6 +341,8 @@ export function createLibrariesHeader(options = {}) {
     },
     destroy() {
       closePopover();
+      count.removeEventListener('click', onCountActivate);
+      count.removeEventListener('keydown', onCountKeydown);
       menu.removeEventListener('click', onMenuClick);
       menu.removeEventListener('change', onMenuChange);
       window.removeEventListener('scroll', onScroll);

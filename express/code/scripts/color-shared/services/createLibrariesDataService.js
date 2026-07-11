@@ -3,7 +3,11 @@ import {
   GRADIENT_ELEMENT_TYPE,
   THEME_ELEMENT_TYPE,
   THEME_REPRESENTATION_TYPE,
+  CC_LIBRARY_COLOR_MODE,
+  COLOR_PROFILE,
+  getClientInfo,
 } from '../../../libs/services/plugins/cclibrary/constants.js';
+import { libraryGradientToModalGradient } from '../components/libraries/libraryDownloadUtils.js';
 
 function channelToHex(value) {
   const int = Math.min(255, Math.max(0, Math.round(Number(value))));
@@ -136,6 +140,72 @@ export async function fetchLibrariesWithElements() {
   return libraries.filter(
     (lib) => lib.themeCount > 0 || lib.gradientCount > 0 || lib.items.length > 0,
   );
+}
+
+function hexToRgbObject(hex) {
+  if (typeof hex !== 'string') return { r: 0, g: 0, b: 0 };
+  let h = hex.startsWith('#') ? hex.slice(1) : hex;
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+  return {
+    r: Number.parseInt(h.substring(0, 2), 16) || 0,
+    g: Number.parseInt(h.substring(2, 4), 16) || 0,
+    b: Number.parseInt(h.substring(4, 6), 16) || 0,
+  };
+}
+
+// Rebuild the CC Library POST payload for a parsed theme item so a deleted
+// theme can be re-created (undo). Mirrors the drawer's save payload; tags and
+// color-blind-safe metadata live inside colortheme#data so they round-trip.
+function buildThemeRestorePayload(item) {
+  return {
+    name: item.name || 'Untitled theme',
+    type: THEME_ELEMENT_TYPE,
+    client: getClientInfo(),
+    representations: [{
+      rel: 'primary',
+      type: THEME_REPRESENTATION_TYPE,
+      'colortheme#data': {
+        swatches: (item.colors || []).map((hex) => [{
+          mode: CC_LIBRARY_COLOR_MODE.RGB,
+          value: hexToRgbObject(hex),
+          profileName: COLOR_PROFILE,
+        }]),
+        tags: item.tags || [],
+        ...(item.colorBlindSafe && { accessibilityData: { colorBlindSafe: true } }),
+      },
+    }],
+  };
+}
+
+/**
+ * Re-create a previously deleted theme or gradient in its library (undo delete).
+ * The restored element gets a new server-assigned id.
+ * @param {string} libraryId
+ * @param {Object} item - parsed library item (theme or gradient)
+ */
+export async function restoreLibraryItem(libraryId, item) {
+  if (!libraryId || !item) {
+    throw new Error('Library ID and item are required');
+  }
+
+  await serviceManager.init({ plugins: ['cclibrary'] });
+  const provider = await serviceManager.getProvider('cclibrary');
+  if (!provider) {
+    throw new Error('CC Library provider is unavailable');
+  }
+
+  if (item.type === 'gradient') {
+    const { angle, colorStops } = libraryGradientToModalGradient(item);
+    const payload = provider.buildGradientPayload({
+      name: item.name,
+      angle,
+      stops: colorStops.map((stop) => ({ color: stop.color, position: stop.position })),
+    });
+    await provider.saveGradient(libraryId, payload, { throwOnError: true });
+    return;
+  }
+
+  await provider.saveTheme(libraryId, buildThemeRestorePayload(item), { throwOnError: true });
 }
 
 /**
