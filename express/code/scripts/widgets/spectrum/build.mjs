@@ -328,6 +328,33 @@ const newComponents = [
       "export * from '@spectrum-web-components/badge';",
     ].join('\n'),
   },
+  {
+    name: 'accordion',
+    entry: [
+      "import '@spectrum-web-components/accordion/sp-accordion.js';",
+      "import '@spectrum-web-components/accordion/sp-accordion-item.js';",
+      "export * from '@spectrum-web-components/accordion';",
+    ].join('\n'),
+    skipExternals: ['./reactive-controllers.js'],
+    // Patch accordion-item CSS to add border-radius to #header:hover using the
+    // existing --mod-accordion-corner-radius variable (same one used by focus-visible).
+    extraPlugins: [
+      {
+        name: 'accordion-item-css-patch',
+        setup(b) {
+          b.onLoad({ filter: /accordion-item\.css\.js$/ }, async (args) => {
+            const { readFile } = await import('fs/promises');
+            let src = await readFile(args.path, 'utf8');
+            src = src.replace(
+              /(#header:hover\{background-color:[^}]+)(\})/,
+              '$1;border-radius:var(--mod-accordion-corner-radius,var(--spectrum-accordion-corner-radius))$2',
+            );
+            return { contents: src, loader: 'js' };
+          });
+        },
+      },
+    ],
+  },
 ];
 
 if (ICONS_CATALOG) {
@@ -398,7 +425,7 @@ for (const comp of newComponents) {
       format: 'esm',
       outfile: resolve(distDir, `${comp.name}.js`),
       minify: true,
-      plugins: [plugin],
+      plugins: [plugin, ...(comp.extraPlugins || [])],
       banner: { js: BANNER },
       legalComments: 'none',
     });

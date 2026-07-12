@@ -1,0 +1,16 @@
+{
+  "block": "font-generator",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@font-generator-default",
+      "selector": "div.font-generator",
+      "path": "/drafts/nala/test-gen/font-generator",
+      "tags": [
+        "@font-generator",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}
