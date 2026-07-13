@@ -241,6 +241,23 @@ describe('EasyUpload failure handling', () => {
       expect(easyUpload.confirmButton.classList.contains('disabled')).to.be.true;
     });
 
+    it('dismisses the confirm tooltip after QR refresh', async () => {
+      const easyUpload = createInstance();
+      const tooltip = document.createElement('div');
+      tooltip.classList.add('hover');
+      easyUpload.setConfirmTooltipConfig({
+        element: tooltip,
+        messages: { failed: FAILED_MSG },
+      });
+      sinon.stub(easyUpload, 'cleanup').resolves();
+      sinon.stub(easyUpload, 'initializeQRCode').resolves();
+
+      await easyUpload.refreshQRCode();
+      easyUpload.cleanup.restore();
+
+      expect(tooltip.classList.contains('hover')).to.be.false;
+    });
+
     it('enables Confirm only after the detected upload validates', async () => {
       const clock = sinon.useFakeTimers();
       const easyUpload = createInstance();

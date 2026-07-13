@@ -1044,6 +1044,7 @@ export class EasyUpload {
     try {
       await this.cleanup();
       await this.initializeQRCode();
+      this.hideConfirmTooltip();
       this.startUploadDetectionPolling();
     } catch (error) {
       window.lana?.log(`[EasyUpload] Failed to refresh QR code: ${error?.message || error}`, { severity: 'error' });
