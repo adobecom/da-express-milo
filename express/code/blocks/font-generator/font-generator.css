@@ -1,114 +1,40 @@
-/*
- * Up to 1200px the layout is a single column: the side panel (preview input +
- * suggestions) sits full-width on top of the results below it. At 1200px+ it
- * becomes the 12-column grid with the side panel as a sticky 4-col rail.
- *
- * The gray background lives on the block root so it stays edge-to-edge with
- * the section; the horizontal margins and widescreen max-width (the site's
- * ax-grid tokens, styles.css: 20px < 600px, 32px 600-1199px, 40px 1200px+,
- * capped to a 1600px-wide container at 1680px+) are padding/max-width on the
- * inner grid instead, so they inset the content without cropping the
- * background — a bare padding on the block root left visible gaps of the
- * page background on either side.
- */
-/*
- * Milo adds 60px of top padding to a section's first content wrapper by
- * default (styles.css) — the text input should sit flush against the top of
- * the viewport instead. That base rule carries the same :not() chain on
- * .section for specificity, so this override repeats it (same pattern as
- * cards.css/faq.css) rather than relying on every author remembering
- * "Padding: none".
- */
+/* Full-bleed block: drop Milo's default section top-padding and prose-width
+   content cap so the grid can span the section (same fix as ax-columns et al.). */
 .section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):has(.font-generator):not([data-padding='none']) > .content:first-child {
   padding-top: 0;
 }
 
-/*
- * Milo also caps a section's content wrapper at 375px/830px/1024px across
- * breakpoints (styles.css) by default — meant for prose-width text content,
- * not a full-bleed tool block. Same fix other full-bleed blocks use
- * (ax-columns, blog-posts-v2, etc.): override the max-width for whichever
- * section holds this block. Higher specificity than Milo's bare
- * `main .section>.content` rule, so it wins at every breakpoint without
- * needing to repeat each one.
- */
 main .section:has(.font-generator) > .content {
   max-width: unset;
 }
 
 .font-generator {
   --fg-sidebar-width: 477px;
-  /* Matches discovery-table/comparison-table-v2's gnav-offset convention —
-     the gnav is sticky too, so the rail's sticky offset needs to clear it. */
-  --gnav-offset-height: 63px;
+  --fg-panel-width: 511px;
+  --gnav-offset-height: 63px; /* sticky rail must clear the sticky gnav */
   background: var(--gray-75, #F3F3F3);
 }
 
+/* Layout: single column up to 1200px, then a sticky sidebar rail + results.
+   Insets live on the grid (not the block root) so the background stays full-bleed. */
 .font-generator-grid {
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--spacing-300, 16px);
-  padding-left: var(--ax-grid-margin, 20px);
-  padding-right: var(--ax-grid-margin, 20px);
-}
-
-@media (min-width: 1200px) {
-  .font-generator-grid {
-    padding-bottom: var(--spacing-900, 80px);
-  }
-}
-
-@media (min-width: 1680px) {
-  .font-generator-grid {
-    max-width: var(--ax-grid-container-width, 1600px);
-    margin-left: auto;
-    margin-right: auto;
-  }
-}
-
-@media (max-width: 599px) {
-  .font-generator-grid {
-    gap: 24px;
-  }
+  gap: 24px;
+  padding-inline: var(--ax-grid-margin, 20px);
 }
 
 .font-generator-col {
   min-width: 0;
 }
 
-@media (min-width: 1200px) {
-  .font-generator-grid {
-    grid-template-columns: var(--fg-sidebar-width) 1fr;
-  }
-
-  .font-generator-col--side {
-    position: sticky;
-    top: calc(var(--gnav-offset-height, 63px) - 16px);
-    align-self: start;
-  }
-}
-
-/* ─── Filters + panel (Megan Thomas, MWPW-189432) ──────────────────────────
- * Restored from font-generator.css@fdae73480, which was dropped in a later
- * squash-merge conflict. Adapted to the current grid-based outer layout
- * (.font-generator-grid/.font-generator-col--*) instead of the original
- * flexbox .fg-container/.fg-main, since that grid is already verified
- * against the MWPW-197454 design QA pass. Everything below this point is
- * otherwise unchanged from the original.
- */
-
-/* Desktop-inline filters live inside .fg-sidebar; hidden below 1200px in
-   favor of the mobile/tablet panel (see the fg-panel rules below). */
+/* Filters */
+/* Desktop-inline filters (inside .fg-sidebar) are hidden below 1200px in favor
+   of the mobile/tablet panel; shown inline at 1200px+ (see media queries). */
 .font-generator .fg-sidebar .fg-filters {
   display: none;
-}
-
-@media (min-width: 1200px) {
-  .font-generator .fg-sidebar .fg-filters {
-    display: flex;
-  }
 }
 
 .font-generator .fg-filters {
@@ -181,7 +107,7 @@ main .section:has(.font-generator) > .content {
   line-height: var(--Global-Typography-Line-height-Label-Label-S);
 }
 
-/* Accordion (Spectrum Web Component, via createExpressAccordion) */
+/* Accordion */
 .font-generator sp-accordion {
   width: 100%;
 }
@@ -261,7 +187,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   line-height: 1.3333333;
 }
 
-/* ── Overlay backdrop ────────────────────────────────────────────── */
+/* Overlay backdrop */
 .font-generator .fg-overlay {
   position: fixed;
   inset: 0;
@@ -278,8 +204,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   pointer-events: auto;
 }
 
-/* ── Panel / Tray ────────────────────────────────────────────────── */
-/* Mobile-first: tray slides up from bottom */
+/* Panel / tray — mobile-first: tray slides up from the bottom */
 .font-generator .fg-panel {
   position: fixed;
   inset-inline: 0;
@@ -301,7 +226,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   transform: none;
 }
 
-/* ── Drag handle (mobile tray only) ─────────────────────────────── */
+/* Drag handle — mobile tray only */
 .font-generator .fg-tray-handle {
   width: 80px;
   height: 4px;
@@ -312,23 +237,28 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   cursor: grab;
 }
 
-/* ── Close button (tablet panel only) ───────────────────────────── */
+/* Close button — tablet panel only */
 .font-generator .fg-panel-close {
   display: none;
 }
 
+/* ── Tablet ───────────────────────────────────────────────────────── */
 @media (min-width: 600px) {
+  .font-generator-grid {
+    gap: var(--spacing-300);
+  }
+
   .font-generator .fg-panel {
     inset-block: 0;
     inset-inline-start: 0;
     inset-inline-end: auto;
-    width: var(--fg-panel-width, 511px);
+    width: var(--fg-panel-width);
     max-height: none;
     border-radius: 0;
     padding: var(--spacing-600) var(--spacing-500);
     box-sizing: border-box;
     box-shadow: 6px 0 16px -8px rgba(0, 0, 0, 0.08);
-    transform: translateX(calc(-1 * var(--fg-panel-width, 511px)));
+    transform: translateX(calc(-1 * var(--fg-panel-width)));
   }
 
   .font-generator .fg-tray-handle {
@@ -358,5 +288,31 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 
   .font-generator .fg-promo-icon {
     display: block;
+  }
+}
+
+/* ── Desktop ──────────────────────────────────────────────────────── */
+@media (min-width: 1200px) {
+  .font-generator-grid {
+    grid-template-columns: var(--fg-sidebar-width) 1fr;
+    padding-bottom: var(--spacing-900);
+  }
+
+  .font-generator-col--side {
+    position: sticky;
+    top: calc(var(--gnav-offset-height) - 16px);
+    align-self: start;
+  }
+
+  .font-generator .fg-sidebar .fg-filters {
+    display: flex;
+  }
+}
+
+/* ── Widescreen ───────────────────────────────────────────────────── */
+@media (min-width: 1680px) {
+  .font-generator-grid {
+    max-width: var(--ax-grid-container-width, 1600px);
+    margin-inline: auto;
   }
 }

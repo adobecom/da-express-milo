@@ -3,7 +3,6 @@ import { getState, setState, subscribe } from './state.js';
 import { LOAD_MORE_STEP } from './types.js';
 import { createFontCard, updateFontCard } from './fontCard.js';
 
-const FONT_SHEET_PATH = '/express/code/blocks/font-generator/font-sheets/font-styles.json';
 const STYLESHEET_HREF = '/express/code/blocks/font-generator/fontCardGrid.css';
 
 let stylesInjected = false;
@@ -17,40 +16,22 @@ function injectStyles() {
   document.head.appendChild(link);
 }
 
-function getFilteredFonts(fonts, activeFilters) {
-  if (!activeFilters || activeFilters.length === 0) return fonts;
-  return fonts.filter((f) => activeFilters.includes(f.category));
-}
-
 /**
- * Creates and mounts the font card grid. Loads font-styles.json, builds all cards once,
- * then updates them in-place on every state change — no card is ever recreated.
+ * Creates and mounts the font card grid. Builds all cards once from the passed
+ * catalog, then updates them in-place on every state change — no card is ever
+ * recreated. The catalog is loaded by the block entry point (font-generator.js)
+ * and passed in via config.fonts; the grid never fetches.
  *
- * @returns {Promise<{ container: HTMLElement, unsubscribe: function }>}
+ * @param {{ cardCta?: object, fonts?: import('./types.js').FontDef[] }} [config]
+ * @returns {{ container: HTMLElement, unsubscribe: function }}
  */
-export default async function createFontCardGrid(config = {}) {
+export default function createFontCardGrid(config = {}) {
   injectStyles();
 
   const container = document.createElement('div');
   container.className = 'font-card-grid-container';
 
-  let fonts = [];
-  try {
-    const res = await fetch(FONT_SHEET_PATH);
-    const data = await res.json();
-    fonts = data.fonts ?? [];
-  } catch (e) {
-    // Font sheet failed to load — grid stays empty.
-    return { container, unsubscribe: () => {} };
-  }
-
-  // Publish the complete catalog (allFonts) alongside the filter-derived list
-  // (activeFonts) before the toolbar and filters read the store. allFonts is
-  // the stable source for the category taxonomy; activeFonts drives the count
-  // and grid. This split matters for a URL-restored filter: at this point
-  // activeFilters already contains the deep-linked category, so activeFonts is
-  // narrowed — but the category list must still reflect every category.
-  setState({ allFonts: fonts, activeFonts: getFilteredFonts(fonts, getState().activeFilters) });
+  const { cardCta, fonts = [] } = config;
 
   const grid = document.createElement('div');
   grid.className = 'font-card-grid';
@@ -70,7 +51,6 @@ export default async function createFontCardGrid(config = {}) {
 
   // Build all cards once upfront — never recreated, only updated.
   const { previewText: initText, fontSize: initSize } = getState();
-  const { cardCta } = config;
   /** @type {Map<string, { card: HTMLElement, fontDef: import('./types.js').FontDef }>} */
   const cardMap = new Map();
   fonts.forEach((fontDef) => {
@@ -83,13 +63,11 @@ export default async function createFontCardGrid(config = {}) {
   let prevVisibleCount = -1;
   let prevPreviewText = initText;
   let prevFontSize = initSize;
-  // Track activeFilters reference so we can update activeFonts in state
-  // exactly once per filter change without triggering a render loop.
-  let prevActiveFilters = getState().activeFilters;
 
-  function render({ previewText, fontSize, activeFilters, visibleCount, layout }) {
-    const filtered = getFilteredFonts(fonts, activeFilters);
-    const visible = filtered.slice(0, visibleCount);
+  // activeFonts is derived by the store (deriveActiveFonts) — the grid just
+  // reads it, so no filtering or activeFonts write-back happens here.
+  function render({ previewText, fontSize, activeFilters, activeFonts, visibleCount, layout }) {
+    const visible = activeFonts.slice(0, visibleCount);
 
     const textOrSizeChanged = previewText !== prevPreviewText || fontSize !== prevFontSize;
     const filterKey = activeFilters.join(',');
@@ -115,26 +93,19 @@ export default async function createFontCardGrid(config = {}) {
       prevFilterKey = filterKey;
       prevVisibleCount = visibleCount;
       grid.replaceChildren(...visible.map(({ id }) => cardMap.get(id).card));
-      loadMoreBtn.hidden = filtered.length <= visibleCount;
+      loadMoreBtn.hidden = activeFonts.length <= visibleCount;
     }
 
     // Layout toggle: single class drives the CSS grid switch.
     grid.classList.toggle('is-list', layout === 'list');
-
-    // Keep activeFonts in sync for the toolbar count. setState triggers one
-    // more subscriber call but filter key won't change, so no loop.
-    if (activeFilters !== prevActiveFilters) {
-      prevActiveFilters = activeFilters;
-      setState({ activeFonts: filtered });
-    }
   }
 
   loadMoreBtn.addEventListener('click', () => {
     setState({ visibleCount: getState().visibleCount + LOAD_MORE_STEP });
   });
 
-  render(getState());
-
+  // subscribe() fires immediately with the current snapshot — that first call
+  // performs the initial render.
   const unsubscribe = subscribe(render);
 
   container.append(grid, loadMoreBtn);

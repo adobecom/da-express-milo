@@ -27,7 +27,7 @@ function makeCopyBtn() {
   btn.dataset.tooltip = COPY_LABEL;
 
   const icon = document.createElement('img');
-  icon.src = `${BASE_PATH}/copy.svg`;
+  icon.src = '/express/code/icons/font-generator-copy.svg';
   icon.width = 20;
   icon.height = 20;
   icon.alt = '';
@@ -85,7 +85,7 @@ function makeCtaLink(cardCta) {
   a.rel = 'noopener noreferrer';
 
   const icon = document.createElement('img');
-  icon.src = `${BASE_PATH}/external-link.svg`;
+  icon.src = '/express/code/icons/font-generator-external-link.svg';
   icon.width = 16;
   icon.height = 16;
   icon.alt = '';

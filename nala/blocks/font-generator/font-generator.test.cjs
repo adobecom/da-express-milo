@@ -16,8 +16,9 @@ test.describe('FontGeneratorBlock Test Suite', () => {
     await test.step('step-1: Navigate to page', async () => {
       await page.goto(testUrl);
       await page.waitForLoadState('domcontentloaded');
-      // The block syncs its view state to the URL on load (e.g. ?view=grid),
-      // so match the base path and ignore any query string it appends.
+      // The block may sync non-default state to the URL on load (e.g. a
+      // responsive ?layout=list on small viewports), so match the base path
+      // and ignore any query string it appends.
       await expect(page).toHaveURL(new RegExp(`^${testUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\?.*)?$`));
     });
 
@@ -28,8 +29,8 @@ test.describe('FontGeneratorBlock Test Suite', () => {
       await expect(block.mainCol).toBeVisible();
     });
 
-    await test.step('step-3: Verify side panel renders', async () => {
-      await expect(block.sidePanel).toBeVisible();
+    await test.step('step-3: Verify text input renders', async () => {
+      await expect(block.textInput).toBeVisible();
       await expect(block.textarea).toBeVisible();
     });
 

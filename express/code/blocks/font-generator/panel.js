@@ -13,7 +13,7 @@ function createCloseSvg() {
   return new DOMParser().parseFromString(CLOSE_ICON_SVG, 'image/svg+xml').documentElement;
 }
 
-export default async function init(block, { onOpenChange, panelId, promo } = {}) {
+export default async function init(block, { onOpenChange, panelId } = {}) {
   const strings = await fetchStrings({ 'fg-filters': 'Filters', 'fg-close-filters': 'Close filters' });
 
   const overlay = createTag('div', { class: 'fg-overlay', 'aria-hidden': 'true', inert: '' });
@@ -36,7 +36,7 @@ export default async function init(block, { onOpenChange, panelId, promo } = {})
 
   const filtersEl = createTag('div', { class: 'fg-filters' });
 
-  panel.append(closeBtn, handle, filtersEl, buildPromo('button primary small fg-promo-btn', promo));
+  panel.append(closeBtn, handle, filtersEl, buildPromo('button primary small fg-promo-btn'));
   overlay.appendChild(panel);
   block.appendChild(overlay);
 

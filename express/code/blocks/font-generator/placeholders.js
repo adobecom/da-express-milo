@@ -10,6 +10,7 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   filterTrigger: 'Filter',
   tryThese: 'Try these:',
   previewPlaceholder: 'Type the preview text you want to get started...',
+  inputLabel: 'Preview text input',
 });
 
 // Authored placeholder keys — namespaced to avoid collisions with other
@@ -19,6 +20,7 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   filterTrigger: 'font-generator-filter',
   tryThese: 'font-generator-try-these',
   previewPlaceholder: 'font-generator-placeholder',
+  inputLabel: 'font-generator-input-label',
 });
 
 // replaceKey()/replaceKeyArray() echo the humanized key back (e.g.
