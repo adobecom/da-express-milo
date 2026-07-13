@@ -1,11 +1,8 @@
 // @import { FontDef, State } from './types.js'
-import {
-  getState, setState, subscribe, initFonts,
-} from './state.js';
+import { getState, setState, subscribe } from './state.js';
 import { LOAD_MORE_STEP } from './types.js';
 import { createFontCard, updateFontCard } from './fontCard.js';
 
-const FONT_SHEET_PATH = '/express/code/blocks/font-generator/font-sheets/font-styles.json';
 const STYLESHEET_HREF = '/express/code/blocks/font-generator/fontCardGrid.css';
 
 let stylesInjected = false;
@@ -20,31 +17,21 @@ function injectStyles() {
 }
 
 /**
- * Creates and mounts the font card grid. Loads font-styles.json, builds all cards once,
- * then updates them in-place on every state change — no card is ever recreated.
+ * Creates and mounts the font card grid. Builds all cards once from the passed
+ * catalog, then updates them in-place on every state change — no card is ever
+ * recreated. The catalog is loaded by the block entry point (font-generator.js)
+ * and passed in via config.fonts; the grid never fetches.
  *
- * @returns {Promise<{ container: HTMLElement, unsubscribe: function }>}
+ * @param {{ cardCta?: object, fonts?: import('./types.js').FontDef[] }} [config]
+ * @returns {{ container: HTMLElement, unsubscribe: function }}
  */
-export default async function createFontCardGrid(config = {}) {
+export default function createFontCardGrid(config = {}) {
   injectStyles();
 
   const container = document.createElement('div');
   container.className = 'font-card-grid-container';
 
-  let fonts = [];
-  try {
-    const res = await fetch(FONT_SHEET_PATH);
-    const data = await res.json();
-    fonts = data.fonts ?? [];
-  } catch (e) {
-    // Font sheet failed to load — grid stays empty.
-    return { container, unsubscribe: () => {} };
-  }
-
-  // Load the catalog into the store. state.js keeps activeFonts derived from
-  // activeFilters, so a URL-restored filter is applied immediately while the
-  // category list (built from the full catalog) still reflects every category.
-  initFonts(fonts);
+  const { cardCta, fonts = [] } = config;
 
   const grid = document.createElement('div');
   grid.className = 'font-card-grid';
@@ -64,7 +51,6 @@ export default async function createFontCardGrid(config = {}) {
 
   // Build all cards once upfront — never recreated, only updated.
   const { previewText: initText, fontSize: initSize } = getState();
-  const { cardCta } = config;
   /** @type {Map<string, { card: HTMLElement, fontDef: import('./types.js').FontDef }>} */
   const cardMap = new Map();
   fonts.forEach((fontDef) => {

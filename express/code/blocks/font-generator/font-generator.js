@@ -2,7 +2,7 @@ import { getMetadata } from '../../scripts/utils.js';
 import createTextInput from './textInput.js';
 import initFilters from './filters.js';
 import initPanel from './panel.js';
-import { setState, subscribe, initFromUrl } from './state.js';
+import { initFromUrl, initFonts } from './state.js';
 import createFontCardGrid from './fontCardGrid.js';
 import createToolbar from './toolbar.js';
 import loadFontGeneratorPlaceholders from './placeholders.js';
@@ -20,13 +20,6 @@ const DEFAULTS = {
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
     'Realigned equestrian fez bewilders picky monarch',
   ],
-  promo: {
-    title: 'Looking for more fonts?',
-    cta: {
-      text: 'Go to Adobe Fonts',
-      href: 'https://fonts.adobe.com',
-    },
-  },
   cardCta: {
     text: 'Design With Style',
     href: 'https://www.adobe.com/express/templates/',
@@ -41,13 +34,6 @@ function getContent() {
 
   return {
     suggestions,
-    promo: {
-      title: getMetadata('fg-promo-title') || DEFAULTS.promo.title,
-      cta: {
-        text: getMetadata('fg-promo-cta-text') || DEFAULTS.promo.cta.text,
-        href: getMetadata('fg-promo-cta-href') || DEFAULTS.promo.cta.href,
-      },
-    },
     cardCta: {
       text: getMetadata('fg-card-cta-text') || DEFAULTS.cardCta.text,
       href: getMetadata('fg-card-cta-href') || DEFAULTS.cardCta.href,
@@ -59,9 +45,18 @@ export default async function decorate(block) {
   // Restore URL state before any component reads from the store.
   initFromUrl();
 
-  const loading = new URLSearchParams(window.location.search).has('loading');
-  const unsubscribeBlock = subscribe(({ loading: l }) => block.classList.toggle('loading', l));
-  setState({ loading });
+  // Load the font catalog here in the block entry point, then hand it to the
+  // store; every component reads the catalog from the store, none fetch.
+  let fonts = [];
+  try {
+    const res = await fetch(new URL('./font-sheets/font-styles.json', import.meta.url).href);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    fonts = (await res.json()).fonts ?? [];
+  } catch (e) {
+    window.lana?.log(`font-generator: failed to load font-styles.json: ${e?.message || e}`, { tags: 'font-generator', severity: 'error' });
+    return;
+  }
+  initFonts(fonts);
 
   const content = getContent();
   // Await resolved copy before building any text-bearing component so the
@@ -100,29 +95,23 @@ export default async function decorate(block) {
   } = createToolbar({ panelId, strings });
   mainCol.append(toolbar);
 
-  // createFontCardGrid loads the font sheet and calls initFonts() to populate
-  // the catalog. It must run before initFilters, which reads getCategories()
-  // (backed by that catalog) to build the category list — otherwise the list
-  // renders empty.
-  const { container: gridContainer, unsubscribe: unsubscribeGrid } = await createFontCardGrid({
+  const { container: gridContainer, unsubscribe: unsubscribeGrid } = createFontCardGrid({
     cardCta: content.cardCta,
+    fonts,
   });
   mainCol.append(gridContainer);
 
   const teardownDesktopFilters = await initFilters([desktopFiltersEl], {
     showCTA: true,
-    promo: content.promo,
   });
 
   const panelController = await initPanel(block, {
     panelId,
-    promo: content.promo,
     onOpenChange: (open) => filterTrigger.setAttribute('aria-expanded', String(open)),
   });
   filterTrigger.addEventListener('click', () => panelController.open());
 
   const cleanup = () => {
-    unsubscribeBlock();
     unsubscribeTextInput();
     unsubscribeToolbar();
     unsubscribeGrid();

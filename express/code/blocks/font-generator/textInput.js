@@ -1,4 +1,4 @@
-import { getState, setState, subscribe } from './state.js';
+import { getState, setState } from './state.js';
 
 const BASE_PATH = '/express/code/blocks/font-generator';
 const STYLESHEET_HREF = `${BASE_PATH}/textInput.css`;
@@ -168,11 +168,5 @@ export default function createTextInput(config = {}) {
   const cancelPendingInput = initTextInput(panel);
   populateSuggestions(panel, config.suggestions);
   initSuggestionPills(panel, cancelPendingInput);
-  panel.classList.toggle('is-loading', getState().loading);
-  const unsubscribeLoading = subscribe(({ loading }) => panel.classList.toggle('is-loading', loading));
-  const unsubscribe = () => {
-    cancelPendingInput();
-    unsubscribeLoading();
-  };
-  return { panel, unsubscribe };
+  return { panel, unsubscribe: cancelPendingInput };
 }

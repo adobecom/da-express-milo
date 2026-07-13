@@ -15,7 +15,6 @@ const DEFAULTS = {
   activeFilters: [],
   layout: DEFAULT_LAYOUT,
   fontSize: DEFAULT_FONT_SIZE,
-  loading: false,
 };
 
 const URL_PARAMS = {
