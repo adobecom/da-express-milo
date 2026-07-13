@@ -154,6 +154,36 @@ describe('EasyUpload failure handling', () => {
       expect(easyUpload.detectFileTypeFromBytes(
         bytesToArrayBuffer([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50]),
       )).to.equal('image/webp');
+      // RIFF is also used by WAV and AVI and is not sufficient by itself.
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x41, 0x56, 0x45]),
+      )).to.be.null;
+      // ISO-BMFF's ftyp box is shared by HEIC, MP4, MOV, and AVIF.
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0, 0, 0, 0, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63]),
+      )).to.equal('image/heic');
+      // HEIC may use a generic mif1 major brand and a compatible HEIC brand.
+      expect(easyUpload.detectFileTypeFromBytes(bytesToArrayBuffer([
+        0, 0, 0, 0, 0x66, 0x74, 0x79, 0x70,
+        0x6d, 0x69, 0x66, 0x31, 0, 0, 0, 0,
+        0x68, 0x65, 0x69, 0x63,
+      ]))).to.equal('image/heic');
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0, 0, 0, 0, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6f, 0x6d]),
+      )).to.be.null;
+      // A generic HEIF-compatible AVIF is not HEIC.
+      expect(easyUpload.detectFileTypeFromBytes(bytesToArrayBuffer([
+        0, 0, 0, 0, 0x66, 0x74, 0x79, 0x70,
+        0x61, 0x76, 0x69, 0x66, 0, 0, 0, 0,
+        0x6d, 0x69, 0x66, 0x31,
+      ]))).to.be.null;
+      // An XML declaration does not make an arbitrary XML document an SVG.
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([...new TextEncoder().encode('<?xml version="1.0"?><root/>')]),
+      )).to.be.null;
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([...new TextEncoder().encode('<?xml version="1.0"?><!-- exported --><svg/>')]),
+      )).to.equal('image/svg+xml');
       // No recognized signature => corrupted/unsupported
       expect(easyUpload.detectFileTypeFromBytes(
         bytesToArrayBuffer([0x00, 0x11, 0x22, 0x33, 0x44]),
@@ -172,6 +202,43 @@ describe('EasyUpload failure handling', () => {
         expect(error.message).to.contain('Corrupted');
       }
       expect(threw).to.be.true;
+    });
+
+    it('validateImageIntegrity rejects truncated SVG markup', async () => {
+      const easyUpload = createInstance();
+      const corrupt = new Blob(['<svg><path>'], { type: 'image/svg+xml' });
+
+      try {
+        await easyUpload.validateImageIntegrity(corrupt, 'image/svg+xml');
+        expect.fail('Expected validateImageIntegrity to throw');
+      } catch (error) {
+        expect(error.message).to.contain('SVG');
+      }
+    });
+
+    it('does not require browser-native HEIC decoding', async () => {
+      const easyUpload = createInstance();
+      const createImageBitmapStub = sinon.stub(window, 'createImageBitmap').rejects(
+        new Error('HEIC decoder unavailable'),
+      );
+
+      await easyUpload.validateImageIntegrity(new Blob(['heic']), 'image/heic');
+
+      expect(createImageBitmapStub.called).to.be.false;
+    });
+
+    it('restarts upload polling with Confirm disabled after QR refresh', async () => {
+      const easyUpload = createInstance();
+      easyUpload.confirmButton.classList.remove('disabled');
+      sinon.stub(easyUpload, 'cleanup').resolves();
+      sinon.stub(easyUpload, 'initializeQRCode').resolves();
+      const startPollingSpy = sinon.spy(easyUpload, 'startUploadDetectionPolling');
+
+      await easyUpload.refreshQRCode();
+      easyUpload.cleanup.restore();
+
+      expect(startPollingSpy.calledOnce).to.be.true;
+      expect(easyUpload.confirmButton.classList.contains('disabled')).to.be.true;
     });
 
     it('retrieveUploadedFile rejects an empty upload', async () => {

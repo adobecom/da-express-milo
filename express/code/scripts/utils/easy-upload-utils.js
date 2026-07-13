@@ -283,15 +283,25 @@ const QR_CODE_CONFIG = {
 };
 
 // Magic-byte signatures matched against the file's actual leading bytes.
-// `offset` is where the signature starts; used for container formats (WEBP/HEIC).
+// Every check in an entry must match, which prevents generic container
+// signatures (such as RIFF and ISO-BMFF's ftyp box) from being misclassified.
 const FILE_TYPE_SIGNATURES = [
-  { type: 'image/png', offset: 0, bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] },
-  { type: 'image/jpeg', offset: 0, bytes: [0xff, 0xd8, 0xff] },
-  { type: 'image/gif', offset: 0, bytes: [0x47, 0x49, 0x46, 0x38] }, // "GIF8"
-  { type: 'image/bmp', offset: 0, bytes: [0x42, 0x4d] }, // "BM"
-  { type: 'image/webp', offset: 0, bytes: [0x52, 0x49, 0x46, 0x46] }, // "RIFF" + "WEBP" @ 8
-  { type: 'image/webp', offset: 8, bytes: [0x57, 0x45, 0x42, 0x50] }, // "WEBP"
-  { type: 'image/heic', offset: 4, bytes: [0x66, 0x74, 0x79, 0x70] }, // "ftyp" box
+  { type: 'image/png', checks: [{ offset: 0, bytes: [0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a] }] },
+  { type: 'image/jpeg', checks: [{ offset: 0, bytes: [0xff, 0xd8, 0xff] }] },
+  { type: 'image/gif', checks: [{ offset: 0, bytes: [0x47, 0x49, 0x46, 0x38] }] }, // "GIF8"
+  { type: 'image/bmp', checks: [{ offset: 0, bytes: [0x42, 0x4d] }] }, // "BM"
+  {
+    type: 'image/webp',
+    checks: [
+      { offset: 0, bytes: [0x52, 0x49, 0x46, 0x46] }, // "RIFF"
+      { offset: 8, bytes: [0x57, 0x45, 0x42, 0x50] }, // "WEBP"
+    ],
+  },
+  {
+    type: 'image/heic',
+    checks: [{ offset: 4, bytes: [0x66, 0x74, 0x79, 0x70] }], // "ftyp"
+    brands: ['heic', 'heix', 'hevc', 'hevx'],
+  },
 ];
 
 /**
@@ -534,14 +544,31 @@ export class EasyUpload {
   detectFileTypeFromBytes(buffer) {
     const bytes = new Uint8Array(buffer);
 
-    for (const { type, offset, bytes: signature } of FILE_TYPE_SIGNATURES) {
-      const matches = signature.every((byte, i) => bytes[offset + i] === byte);
-      if (matches) return type;
+    for (const { type, checks, brands } of FILE_TYPE_SIGNATURES) {
+      const matches = checks.every(({ offset, bytes: signature }) => (
+        signature.every((byte, i) => bytes[offset + i] === byte)
+      ));
+      let hasMatchingBrand = true;
+      if (matches && brands) {
+        // ISO-BMFF stores a major brand at byte 8 and compatible brands from
+        // byte 16 onward. Byte 12 is the minor version, not a brand.
+        const brandOffsets = [8];
+        for (let offset = 16; offset + 4 <= bytes.length; offset += 4) {
+          brandOffsets.push(offset);
+        }
+        hasMatchingBrand = brandOffsets.some((offset) => {
+          const brand = String.fromCharCode(...bytes.slice(offset, offset + 4));
+          return brands.includes(brand);
+        });
+      }
+
+      if (matches && hasMatchingBrand) return type;
     }
 
     // SVG is text-based (no binary magic number); sniff the leading markup.
-    const head = new TextDecoder().decode(bytes.slice(0, 64)).trimStart().toLowerCase();
-    if (head.startsWith('<svg') || head.startsWith('<?xml')) return 'image/svg+xml';
+    const head = new TextDecoder().decode(bytes).trimStart().toLowerCase();
+    const svgPrefix = /^(?:<\?xml[^>]*>\s*)?(?:(?:<!--[\s\S]*?-->|<!doctype\s+svg[^>]*>)\s*)*<svg(?:\s|\/?>)/;
+    if (svgPrefix.test(head)) return 'image/svg+xml';
 
     return null;
   }
@@ -556,9 +583,21 @@ export class EasyUpload {
    * @throws {Error} If the image cannot be decoded
    */
   async validateImageIntegrity(blob, mimeType) {
-    // SVG can't be decoded via createImageBitmap reliably; a valid signature
-    // plus non-empty content is sufficient for the vector case.
-    if (mimeType === 'image/svg+xml') return;
+    // SVG can't be decoded via createImageBitmap reliably, so parse the full
+    // document to reject truncated markup and non-SVG XML.
+    if (mimeType === 'image/svg+xml') {
+      const documentNode = new DOMParser().parseFromString(await blob.text(), 'image/svg+xml');
+      if (documentNode.querySelector('parsererror')
+        || documentNode.documentElement?.localName !== 'svg') {
+        throw new Error('Corrupted or invalid SVG image');
+      }
+      return;
+    }
+
+    // Most Chromium and Firefox environments cannot decode HEIC even though
+    // the downstream SDK supports it. Its container and brand checks above
+    // must remain the integrity gate until browser decoding is portable.
+    if (mimeType === 'image/heic') return;
 
     let bitmap;
     try {
@@ -598,7 +637,7 @@ export class EasyUpload {
 
       // Detect type from real bytes, not text — an unrecognized signature means
       // the upload is not a supported image (or is corrupted).
-      const headerBuffer = await blob.slice(0, 64).arrayBuffer();
+      const headerBuffer = await blob.slice(0, 512).arrayBuffer();
       const detectedType = this.detectFileTypeFromBytes(headerBuffer);
       if (!detectedType) {
         throw new Error('Unrecognized or corrupted file: no valid image signature');
@@ -999,6 +1038,7 @@ export class EasyUpload {
     try {
       await this.cleanup();
       await this.initializeQRCode();
+      this.startUploadDetectionPolling();
     } catch (error) {
       window.lana?.log(`[EasyUpload] Failed to refresh QR code: ${error?.message || error}`, { severity: 'error' });
     }
@@ -1114,6 +1154,7 @@ export class EasyUpload {
     }
 
     this.uploadDetected = false;
+    this.updateConfirmButtonState(true);
     const POLL_INTERVAL_MS = 2000;
     const MAX_POLL_TIME_MS = 30 * 60 * 1000;
     const startTime = Date.now();
