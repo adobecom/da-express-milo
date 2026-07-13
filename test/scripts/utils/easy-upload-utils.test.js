@@ -241,6 +241,53 @@ describe('EasyUpload failure handling', () => {
       expect(easyUpload.confirmButton.classList.contains('disabled')).to.be.true;
     });
 
+    it('enables Confirm only after the detected upload validates', async () => {
+      const clock = sinon.useFakeTimers();
+      const easyUpload = createInstance();
+      easyUpload.uploadAsset = {};
+      easyUpload.uploadService = {};
+      const file = new File(['file-content'], 'upload.png', { type: 'image/png' });
+      sinon.stub(easyUpload, 'prepareUploadedFileForConfirm').resolves(file);
+
+      easyUpload.startUploadDetectionPolling();
+      expect(easyUpload.confirmButton.classList.contains('disabled')).to.be.true;
+
+      await clock.tickAsync(2000);
+
+      expect(easyUpload.prepareUploadedFileForConfirm.calledOnce).to.be.true;
+      expect(easyUpload.confirmButton.classList.contains('disabled')).to.be.false;
+      expect(easyUpload.uploadDetectionInterval).to.be.null;
+    });
+
+    it('keeps Confirm disabled when the detected upload fails validation', async () => {
+      const clock = sinon.useFakeTimers();
+      const easyUpload = createInstance();
+      const tooltip = document.createElement('div');
+      tooltip.classList.add('hidden');
+      easyUpload.setConfirmTooltipConfig({
+        element: tooltip,
+        messages: { failed: FAILED_MSG },
+      });
+      easyUpload.uploadAsset = {};
+      easyUpload.uploadService = {};
+      sinon.stub(easyUpload, 'prepareUploadedFileForConfirm').callsFake(async () => {
+        easyUpload.uploadFinalized = true;
+        const error = new Error('Unrecognized or corrupted file: no valid image signature');
+        error.easyUploadStage = 'retrieve';
+        throw error;
+      });
+      const refreshSpy = sinon.stub(easyUpload, 'refreshQRCode').resolves();
+
+      easyUpload.startUploadDetectionPolling();
+      await clock.tickAsync(2000);
+
+      expect(easyUpload.confirmButton.classList.contains('disabled')).to.be.true;
+      expect(tooltip.textContent).to.equal(FAILED_MSG);
+      expect(tooltip.classList.contains('hover')).to.be.true;
+      expect(refreshSpy.calledOnce).to.be.true;
+      expect(easyUpload.uploadDetectionInterval).to.be.null;
+    });
+
     it('retrieveUploadedFile rejects an empty upload', async () => {
       const easyUpload = createInstance();
       stubReadyDownload(easyUpload, new Blob([]));

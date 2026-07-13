@@ -357,6 +357,8 @@ export class EasyUpload {
     this.confirmTooltipMessages = {};
     this.confirmTooltipHideTimeout = null;
     this.uploadFinalized = false;
+    this.validatedUploadedFile = null;
+    this.uploadValidationFailed = false;
     this.hasConsumedQrCode = false;
 
     this.asset = null;
@@ -440,6 +442,8 @@ export class EasyUpload {
    */
   async generatePresignedUploadUrl() {
     this.uploadFinalized = false;
+    this.validatedUploadedFile = null;
+    this.uploadValidationFailed = false;
     try {
       const hasNativeCreateAsset = typeof this.uploadService?.createAsset === 'function';
       const hasNativeInitializeBlockUpload = typeof this.uploadService?.initializeBlockUpload === 'function';
@@ -1027,6 +1031,8 @@ export class EasyUpload {
 
     this.uploadFinalized = false;
     this.uploadDetected = false;
+    this.validatedUploadedFile = null;
+    this.uploadValidationFailed = false;
     await this.cleanupAcpStorage();
   }
 
@@ -1055,21 +1061,7 @@ export class EasyUpload {
     this.markQrCodeConsumed();
 
     try {
-      if (!this.uploadService) {
-        throw new Error('Upload service not initialized');
-      }
-
-      if (!this.uploadFinalized) {
-        await this.finalizeUpload();
-      }
-    } catch (error) {
-      window.lana?.log(`[EasyUpload] Failed to finalize upload: ${error?.message || error}`, { severity: 'error' });
-      this.showConfirmTooltip('pending');
-      this.updateConfirmButtonState(false);
-      return;
-    }
-    try {
-      const file = await this.retrieveUploadedFile();
+      const file = await this.prepareUploadedFileForConfirm();
 
       if (file) {
         await this.startSDKWithUnconvertedFiles([file], this.quickAction, this.block, true);
@@ -1078,9 +1070,49 @@ export class EasyUpload {
       }
     } catch (error) {
       window.lana?.log(`[EasyUpload] Failed to confirm import: ${error?.message || error}`, { severity: 'error' });
+      if (error?.easyUploadStage === 'finalize') {
+        this.showConfirmTooltip('pending');
+        this.updateConfirmButtonState(false);
+        return;
+      }
       this.showConfirmTooltip('failed');
       this.refreshQRCode();
     }
+  }
+
+  /**
+     * Finalize, retrieve, and validate the uploaded file before enabling confirm.
+     * @returns {Promise<File>} Validated uploaded file
+     * @throws {Error} If the upload is not ready or cannot be decoded
+     */
+  async prepareUploadedFileForConfirm() {
+    if (this.validatedUploadedFile) {
+      return this.validatedUploadedFile;
+    }
+
+    if (!this.uploadService) {
+      throw new Error('Upload service not initialized');
+    }
+
+    if (!this.uploadFinalized) {
+      try {
+        await this.finalizeUpload();
+      } catch (error) {
+        error.easyUploadStage = 'finalize';
+        throw error;
+      }
+    }
+
+    let file;
+    try {
+      file = await this.retrieveUploadedFile();
+    } catch (error) {
+      error.easyUploadStage = 'retrieve';
+      throw error;
+    }
+    this.validatedUploadedFile = file;
+    this.uploadValidationFailed = false;
+    return file;
   }
 
   /**
@@ -1154,6 +1186,8 @@ export class EasyUpload {
     }
 
     this.uploadDetected = false;
+    this.validatedUploadedFile = null;
+    this.uploadValidationFailed = false;
     this.updateConfirmButtonState(true);
     const POLL_INTERVAL_MS = 2000;
     const MAX_POLL_TIME_MS = 30 * 60 * 1000;
@@ -1171,7 +1205,7 @@ export class EasyUpload {
           return;
         }
 
-        if (this.uploadFinalized) {
+        if (this.validatedUploadedFile) {
           this.uploadDetected = true;
           this.updateConfirmButtonState(false);
           clearInterval(this.uploadDetectionInterval);
@@ -1180,18 +1214,21 @@ export class EasyUpload {
         }
 
         try {
-          await this.finalizeUpload();
-        } catch (error) {
-          return;
-        }
-
-        if (this.uploadFinalized && !this.uploadDetected) {
+          await this.prepareUploadedFileForConfirm();
           this.uploadDetected = true;
-
           this.updateConfirmButtonState(false);
 
           clearInterval(this.uploadDetectionInterval);
           this.uploadDetectionInterval = null;
+        } catch (error) {
+          if (this.uploadFinalized) {
+            this.uploadValidationFailed = true;
+            this.updateConfirmButtonState(true);
+            this.showConfirmTooltip('failed');
+            clearInterval(this.uploadDetectionInterval);
+            this.uploadDetectionInterval = null;
+            this.refreshQRCode();
+          }
         }
       } catch (error) {
         window.lana?.log(`[EasyUpload] Polling error: ${error?.message || error}`, { severity: 'warning' });

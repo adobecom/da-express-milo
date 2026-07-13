@@ -529,6 +529,7 @@ main .section p.qr-error-message {
   cursor: not-allowed;
   background-color: var(--color-gray-200);
   color: var(--color-gray-500);
+  pointer-events: none;
 }
 
 @keyframes rotate-loader {
@@ -553,4 +554,3 @@ main .section p.qr-error-message {
     min-height: var(--frictionless-quick-action-video-height);
   }
 }
-
