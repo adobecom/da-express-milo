@@ -53,7 +53,7 @@ const AUDIO_FORMATS = [
 const AUDIO_MIME_TYPES = {
   mp3: 'audio/mpeg',
   wav: 'audio/wav',
-  m4a: 'audio/mp4'
+  m4a: 'audio/mp4',
 };
 
 // Configuration functions
@@ -179,7 +179,7 @@ export const QA_CONFIGS = {
     input_check: getHeicInputCheck(JPG, JPEG, WEBP, HEIC),
   },
   'audio-converter': { ...getBaseAudioCfg(AUDIO_FORMATS) },
-  'video-to-audio': { ...getBaseVideoCfg(VIDEO_FORMATS) }
+  'video-to-audio': { ...getBaseVideoCfg(VIDEO_FORMATS) },
 };
 
 // Experimental variants
@@ -519,7 +519,7 @@ export function executeQuickAction(
       appConfig,
       exportConfig,
       contConfig,
-    )
+    ),
   };
 
   const action = quickActionMap[quickActionId];

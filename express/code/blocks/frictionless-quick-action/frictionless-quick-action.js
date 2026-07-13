@@ -240,7 +240,7 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
       ...(quickActionId === 'video-compress' && { entryPoint: 'seo-quick-action-video-compress' }),
       ...(quickActionId === 'video-convert' && { entryPoint: 'seo-quick-action-video-convert' }),
       ...(quickActionId === 'audio-converter' && { entryPoint: 'seo-quick-action-audio-converter' }),
-      ...(quickActionId === 'video-to-audio' && { entryPoint: 'seo-quick-action-video-to-audio' })
+      ...(quickActionId === 'video-to-audio' && { entryPoint: 'seo-quick-action-video-to-audio' }),
     },
     receiveQuickActionErrors: true,
     callbacks: {
