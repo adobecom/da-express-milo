@@ -1,5 +1,5 @@
 // @import { State } from './types.js'
-import { getState, setState, subscribe } from './state.js';
+import { setState, subscribe } from './state.js';
 import { FONT_SIZE_MIN, FONT_SIZE_MAX } from './types.js';
 
 const BLOCK_PATH = '/express/code/blocks/font-generator';
@@ -23,18 +23,6 @@ function debounce(fn, ms) {
     clearTimeout(timer);
     timer = setTimeout(() => fn(...args), ms);
   };
-}
-
-function updateUrlParams(update) {
-  const url = new URL(window.location.href);
-  Object.entries(update).forEach(([key, value]) => {
-    if (value !== null && value !== undefined) {
-      url.searchParams.set(key, String(value));
-    } else {
-      url.searchParams.delete(key);
-    }
-  });
-  window.history.replaceState(null, '', url);
 }
 
 // ─── Icons (loaded from block directory) ──────────────────────────────────────
@@ -144,25 +132,13 @@ export default function createToolbar({ panelId } = {}) {
     count.textContent = `${activeFonts.length} unicode fonts`;
   }
 
-  syncState(getState());
-  updateUrlParams({ view: getState().layout });
-
   // ── Events ───────────────────────────────────────────────────────────────
+  // state.js owns URL sync centrally; these just write to the store.
 
-  gridBtn.addEventListener('click', () => {
-    setState({ layout: 'grid' });
-    updateUrlParams({ view: 'grid' });
-  });
+  gridBtn.addEventListener('click', () => setState({ layout: 'grid' }));
+  rowBtn.addEventListener('click', () => setState({ layout: 'list' }));
 
-  rowBtn.addEventListener('click', () => {
-    setState({ layout: 'list' });
-    updateUrlParams({ view: 'list' });
-  });
-
-  const flushSize = debounce((value) => {
-    setState({ fontSize: value });
-    updateUrlParams({ fontSize: value });
-  }, SLIDER_DEBOUNCE_MS);
+  const flushSize = debounce((value) => setState({ fontSize: value }), SLIDER_DEBOUNCE_MS);
 
   slider.addEventListener('input', () => {
     const value = Number(slider.value);

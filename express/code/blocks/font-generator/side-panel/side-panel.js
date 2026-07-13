@@ -13,16 +13,6 @@ function injectStyles() {
   document.head.appendChild(link);
 }
 
-function updateUrlText(text) {
-  const url = new URL(window.location.href);
-  if (text) {
-    url.searchParams.set('text', text);
-  } else {
-    url.searchParams.delete('text');
-  }
-  window.history.replaceState(null, '', url);
-}
-
 const template = document.createElement('template');
 template.innerHTML = `<div class="font-generator-side">
   <div class="text-field">
@@ -118,7 +108,6 @@ function initTextInput(panel) {
     clearTimeout(timer);
     timer = setTimeout(() => {
       setState({ previewText: value });
-      updateUrlText(value);
     }, DEBOUNCE_MS);
   };
 
@@ -142,7 +131,6 @@ function initSuggestionPills(panel, cancelPendingInput) {
     textarea.value = truncated;
     if (counter) syncCounter(textarea, counter);
     setState({ previewText: truncated });
-    updateUrlText(truncated);
   };
 
   const wrap = panel.querySelector('.tags-wrap');

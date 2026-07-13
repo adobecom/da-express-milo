@@ -119,29 +119,25 @@ export const FONT_SIZE_MAX = 48;
  * URL param keys that are persisted across page loads.
  * Values are encoded/decoded by state.js initFromUrl / setState.
  *
- * @typedef {'text' | 'filters' | 'view' | 'fontSize'} UrlParamKey
+ * @typedef {'text' | 'filters' | 'layout' | 'size'} UrlParamKey
  */
 
 /**
  * Complete application state. Managed exclusively by state.js.
  * Never construct or mutate this object outside the store.
  *
- * `allFonts` is the complete loaded catalog — the stable source for the
- * category taxonomy, set once when the font sheet loads and never filtered.
- * `activeFonts` is derived (the filter-narrowed subset of `allFonts`) and
- * drives the toolbar count and grid — do not pass it to setState.
+ * The full font catalog is held privately in state.js (set via initFonts) and
+ * exposed for the category taxonomy through getCategories(); it is not part of
+ * this snapshot. `activeFonts` is derived — the filter-narrowed subset that
+ * drives the toolbar count and grid — and must never be passed to setState.
  * `visibleCount` resets to INITIAL_VISIBLE_COUNT whenever activeFilters changes.
- * `filtersOpen` toggles the mobile/tablet filter panel; ignored at >=1440px
- * where filters are inline.
  *
  * @typedef {{
  *   previewText: string;
  *   activeFilters: string[];
- *   filtersOpen: boolean;
  *   loading: boolean;
  *   layout: 'grid' | 'list';
  *   fontSize: number;
- *   allFonts: FontDef[];
  *   activeFonts: FontDef[];
  *   visibleCount: number;
  * }} State
@@ -201,13 +197,13 @@ export const FONT_SIZE_MAX = 48;
  */
 
 /**
- * A single filter panel instance (categories accordion + promo) is mounted in
- * the side column. CSS repositions it per breakpoint: inline at >=1440px, a
- * left drawer on tablet, a bottom sheet on mobile. Open/closed below 1440px is
- * driven by state.filtersOpen, toggled from the Filter trigger button.
+ * Filters is a single component mounted in up to two places: the desktop-
+ * inline sidebar instance and the mobile/tablet drawer instance inside
+ * panel.js. Both are initialized by passing an array/NodeList of host
+ * elements; each subscribes to the store independently and stays in sync.
  *
  * @callback FiltersInit
- * @param {HTMLElement} element
+ * @param {NodeListOf<HTMLElement> | HTMLElement[]} elements
  * @returns {void}
  */
 

@@ -1,5 +1,7 @@
 // @import { FontDef, State } from './types.js'
-import { getState, setState, subscribe } from './state.js';
+import {
+  getState, setState, subscribe, initFonts,
+} from './state.js';
 import { LOAD_MORE_STEP } from './types.js';
 import { createFontCard, updateFontCard } from './fontCard.js';
 
@@ -15,11 +17,6 @@ function injectStyles() {
   link.rel = 'stylesheet';
   link.href = STYLESHEET_HREF;
   document.head.appendChild(link);
-}
-
-function getFilteredFonts(fonts, activeFilters) {
-  if (!activeFilters || activeFilters.length === 0) return fonts;
-  return fonts.filter((f) => activeFilters.includes(f.category));
 }
 
 /**
@@ -44,13 +41,10 @@ export default async function createFontCardGrid(config = {}) {
     return { container, unsubscribe: () => {} };
   }
 
-  // Publish the complete catalog (allFonts) alongside the filter-derived list
-  // (activeFonts) before the toolbar and filters read the store. allFonts is
-  // the stable source for the category taxonomy; activeFonts drives the count
-  // and grid. This split matters for a URL-restored filter: at this point
-  // activeFilters already contains the deep-linked category, so activeFonts is
-  // narrowed — but the category list must still reflect every category.
-  setState({ allFonts: fonts, activeFonts: getFilteredFonts(fonts, getState().activeFilters) });
+  // Load the catalog into the store. state.js keeps activeFonts derived from
+  // activeFilters, so a URL-restored filter is applied immediately while the
+  // category list (built from the full catalog) still reflects every category.
+  initFonts(fonts);
 
   const grid = document.createElement('div');
   grid.className = 'font-card-grid';
@@ -83,13 +77,11 @@ export default async function createFontCardGrid(config = {}) {
   let prevVisibleCount = -1;
   let prevPreviewText = initText;
   let prevFontSize = initSize;
-  // Track activeFilters reference so we can update activeFonts in state
-  // exactly once per filter change without triggering a render loop.
-  let prevActiveFilters = getState().activeFilters;
 
-  function render({ previewText, fontSize, activeFilters, visibleCount, layout }) {
-    const filtered = getFilteredFonts(fonts, activeFilters);
-    const visible = filtered.slice(0, visibleCount);
+  // activeFonts is derived by the store (deriveActiveFonts) — the grid just
+  // reads it, so no filtering or activeFonts write-back happens here.
+  function render({ previewText, fontSize, activeFilters, activeFonts, visibleCount, layout }) {
+    const visible = activeFonts.slice(0, visibleCount);
 
     const textOrSizeChanged = previewText !== prevPreviewText || fontSize !== prevFontSize;
     const filterKey = activeFilters.join(',');
@@ -115,26 +107,19 @@ export default async function createFontCardGrid(config = {}) {
       prevFilterKey = filterKey;
       prevVisibleCount = visibleCount;
       grid.replaceChildren(...visible.map(({ id }) => cardMap.get(id).card));
-      loadMoreBtn.hidden = filtered.length <= visibleCount;
+      loadMoreBtn.hidden = activeFonts.length <= visibleCount;
     }
 
     // Layout toggle: single class drives the CSS grid switch.
     grid.classList.toggle('is-list', layout === 'list');
-
-    // Keep activeFonts in sync for the toolbar count. setState triggers one
-    // more subscriber call but filter key won't change, so no loop.
-    if (activeFilters !== prevActiveFilters) {
-      prevActiveFilters = activeFilters;
-      setState({ activeFonts: filtered });
-    }
   }
 
   loadMoreBtn.addEventListener('click', () => {
     setState({ visibleCount: getState().visibleCount + LOAD_MORE_STEP });
   });
 
-  render(getState());
-
+  // subscribe() fires immediately with the current snapshot — that first call
+  // performs the initial render.
   const unsubscribe = subscribe(render);
 
   container.append(grid, loadMoreBtn);

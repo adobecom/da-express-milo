@@ -116,11 +116,10 @@ export default async function decorate(block) {
     localizeTextareaPlaceholder(sidePanel, strings.previewPlaceholder);
   });
 
-  // filters.js reads allFonts from the store once, at init, to build the
-  // category list — the font sheet must already be loaded (and allFonts
-  // populated) before this runs, or the category list renders empty. allFonts
-  // (not activeFonts) is used so a URL-restored filter can't narrow the
-  // catalog before the categories are derived.
+  // createFontCardGrid loads the font sheet and calls initFonts() to populate
+  // the catalog. It must run before initFilters, which reads getCategories()
+  // (backed by that catalog) to build the category list — otherwise the list
+  // renders empty.
   const { container: gridContainer, unsubscribe: unsubscribeGrid } = await createFontCardGrid({
     cardCta: content.cardCta,
   });

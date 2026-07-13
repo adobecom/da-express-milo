@@ -1,6 +1,5 @@
 import { createTag, getLibs } from '../../scripts/utils.js';
-import { getState, setState, subscribe } from './state.js';
-import { getCategories } from './unicodeEngine.js';
+import { getState, setState, subscribe, getCategories } from './state.js';
 import { createExpressAccordion } from '../../scripts/color-shared/spectrum/index.js';
 
 const DEFAULT_PROMO = {
@@ -93,16 +92,6 @@ function syncFilterButtons(filterList, activeFilters) {
   });
 }
 
-function updateUrlFilters(activeFilters) {
-  const url = new URL(window.location.href);
-  if (activeFilters.length) {
-    url.searchParams.set('filters', activeFilters.join(','));
-  } else {
-    url.searchParams.delete('filters');
-  }
-  window.history.replaceState(null, '', url);
-}
-
 function initArrowNav(filterList) {
   filterList.addEventListener('keydown', (e) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft'
@@ -123,7 +112,7 @@ export default async function init(els, { showCTA = true, onSelect, promo } = {}
   if (!els || !els.length) return () => {};
 
   const [categories, strings] = await Promise.all([
-    Promise.resolve(getCategories(getState().allFonts).map(({ category }) => category)),
+    Promise.resolve(getCategories()),
     fetchStrings({
       'fg-all': 'All',
       'fg-categories': 'Categories',
@@ -163,15 +152,11 @@ export default async function init(els, { showCTA = true, onSelect, promo } = {}
         next = activeFilters.includes(category) ? [] : [category];
       }
       setState({ activeFilters: next });
-      updateUrlFilters(next);
       onSelect?.();
     });
 
-    // Reflect any URL-restored activeFilters (e.g. ?filters=Glitch) on load;
-    // subscribe only fires on subsequent changes, so without this the
-    // selected button starts unstyled until the next state change.
-    syncFilterButtons(filterList, getState().activeFilters);
-
+    // subscribe() fires immediately with the current snapshot, so this also
+    // reflects any URL-restored activeFilters (e.g. ?filters=Glitch) on load.
     const unsubscribe = subscribe(({ activeFilters }) => {
       syncFilterButtons(filterList, activeFilters);
     });
