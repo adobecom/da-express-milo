@@ -4,7 +4,7 @@ module.exports = {
     {
       tcid: '0',
       name: '@font-generator default',
-      path: '/drafts/echen/font-generator',
+      path: '/drafts/nala/blocks/font-generator',
       selector: '.font-generator',
       data: {
         defaultPreviewText: 'The quick brown fox jumps over the lazy dog',

@@ -16,7 +16,9 @@ test.describe('FontGeneratorBlock Test Suite', () => {
     await test.step('step-1: Navigate to page', async () => {
       await page.goto(testUrl);
       await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(testUrl);
+      // The block syncs its view state to the URL on load (e.g. ?view=grid),
+      // so match the base path and ignore any query string it appends.
+      await expect(page).toHaveURL(new RegExp(`^${testUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\?.*)?$`));
     });
 
     await test.step('step-2: Verify block structure', async () => {
