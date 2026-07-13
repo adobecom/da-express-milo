@@ -93,6 +93,16 @@ function syncFilterButtons(filterList, activeFilters) {
   });
 }
 
+function updateUrlFilters(activeFilters) {
+  const url = new URL(window.location.href);
+  if (activeFilters.length) {
+    url.searchParams.set('filters', activeFilters.join(','));
+  } else {
+    url.searchParams.delete('filters');
+  }
+  window.history.replaceState(null, '', url);
+}
+
 function initArrowNav(filterList) {
   filterList.addEventListener('keydown', (e) => {
     if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft'
@@ -145,13 +155,15 @@ export default async function init(els, { showCTA = true, onSelect, promo } = {}
       const btn = e.target.closest('.fg-filter-btn');
       if (!btn) return;
       const { category } = btn.dataset;
+      let next;
       if (category === '') {
-        setState({ activeFilters: [] });
+        next = [];
       } else {
         const { activeFilters } = getState();
-        const next = activeFilters.includes(category) ? [] : [category];
-        setState({ activeFilters: next });
+        next = activeFilters.includes(category) ? [] : [category];
       }
+      setState({ activeFilters: next });
+      updateUrlFilters(next);
       onSelect?.();
     });
 

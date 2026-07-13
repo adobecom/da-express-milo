@@ -1,6 +1,12 @@
 // @import { State, StateUpdate, StateListener } from './types.js'
 
-import { INITIAL_VISIBLE_COUNT, DEFAULT_LAYOUT, DEFAULT_FONT_SIZE } from './types.js';
+import {
+  INITIAL_VISIBLE_COUNT,
+  DEFAULT_LAYOUT,
+  DEFAULT_FONT_SIZE,
+  FONT_SIZE_MIN,
+  FONT_SIZE_MAX,
+} from './types.js';
 
 /** @type {State} */
 let state = {
@@ -17,6 +23,12 @@ let state = {
 /** @type {Set<function>} */
 const listeners = new Set();
 
+function normalizeFontSize(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return undefined;
+  return Math.min(FONT_SIZE_MAX, Math.max(FONT_SIZE_MIN, Math.round(parsed)));
+}
+
 /** @returns {State} */
 export function getState() {
   return { ...state };
@@ -26,10 +38,17 @@ export function getState() {
  * @param {StateUpdate} update
  */
 export function setState(update) {
-  const filtersChanged = update.activeFilters !== undefined
-    && update.activeFilters !== state.activeFilters;
+  const normalizedUpdate = { ...update };
+  if (normalizedUpdate.fontSize !== undefined) {
+    const fontSize = normalizeFontSize(normalizedUpdate.fontSize);
+    if (fontSize === undefined) delete normalizedUpdate.fontSize;
+    else normalizedUpdate.fontSize = fontSize;
+  }
 
-  state = { ...state, ...update };
+  const filtersChanged = normalizedUpdate.activeFilters !== undefined
+    && normalizedUpdate.activeFilters !== state.activeFilters;
+
+  state = { ...state, ...normalizedUpdate };
 
   if (filtersChanged) {
     state = { ...state, visibleCount: INITIAL_VISIBLE_COUNT };
@@ -61,6 +80,6 @@ export function initFromUrl() {
     ...(text && { previewText: text }),
     ...(filters && { activeFilters: filters.split(',').filter(Boolean) }),
     layout: defaultLayout,
-    ...(fontSize && !Number.isNaN(+fontSize) && { fontSize: +fontSize }),
+    ...(fontSize && Number.isFinite(Number(fontSize)) && { fontSize }),
   });
 }
