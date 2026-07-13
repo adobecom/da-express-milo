@@ -126,7 +126,10 @@ export const FONT_SIZE_MAX = 48;
  * Complete application state. Managed exclusively by state.js.
  * Never construct or mutate this object outside the store.
  *
- * `activeFonts` is derived — do not pass it to setState.
+ * `allFonts` is the complete loaded catalog — the stable source for the
+ * category taxonomy, set once when the font sheet loads and never filtered.
+ * `activeFonts` is derived (the filter-narrowed subset of `allFonts`) and
+ * drives the toolbar count and grid — do not pass it to setState.
  * `visibleCount` resets to INITIAL_VISIBLE_COUNT whenever activeFilters changes.
  * `filtersOpen` toggles the mobile/tablet filter panel; ignored at >=1440px
  * where filters are inline.
@@ -138,6 +141,7 @@ export const FONT_SIZE_MAX = 48;
  *   loading: boolean;
  *   layout: 'grid' | 'list';
  *   fontSize: number;
+ *   allFonts: FontDef[];
  *   activeFonts: FontDef[];
  *   visibleCount: number;
  * }} State

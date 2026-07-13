@@ -51,7 +51,8 @@ All shared state lives in `state.js`. Components never share state with each oth
 | `activeFilters` | string[] | yes | empty = show all |
 | `layout` | `'grid'`\|`'list'` | yes | |
 | `fontSize` | number | yes | |
-| `activeFonts` | FontDef[] | no | derived — never set directly |
+| `allFonts` | FontDef[] | no | full catalog, set once on load — source for the category list |
+| `activeFonts` | FontDef[] | no | derived — the filter-narrowed subset of `allFonts` |
 | `visibleCount` | number | no | resets to 12 on filter change |
 
 ### Derived state

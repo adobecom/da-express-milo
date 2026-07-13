@@ -16,6 +16,7 @@ let state = {
   loading: false,
   layout: DEFAULT_LAYOUT,
   fontSize: DEFAULT_FONT_SIZE,
+  allFonts: [],
   activeFonts: [],
   visibleCount: INITIAL_VISIBLE_COUNT,
 };

@@ -123,7 +123,7 @@ export default async function init(els, { showCTA = true, onSelect, promo } = {}
   if (!els || !els.length) return () => {};
 
   const [categories, strings] = await Promise.all([
-    Promise.resolve(getCategories(getState().activeFonts).map(({ category }) => category)),
+    Promise.resolve(getCategories(getState().allFonts).map(({ category }) => category)),
     fetchStrings({
       'fg-all': 'All',
       'fg-categories': 'Categories',

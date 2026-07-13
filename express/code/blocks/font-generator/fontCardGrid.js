@@ -44,10 +44,13 @@ export default async function createFontCardGrid(config = {}) {
     return { container, unsubscribe: () => {} };
   }
 
-  // Keep the derived font list in sync before the toolbar and filters read
-  // it. This matters for a URL-restored filter: at this point activeFilters
-  // already contains the deep-linked category.
-  setState({ activeFonts: getFilteredFonts(fonts, getState().activeFilters) });
+  // Publish the complete catalog (allFonts) alongside the filter-derived list
+  // (activeFonts) before the toolbar and filters read the store. allFonts is
+  // the stable source for the category taxonomy; activeFonts drives the count
+  // and grid. This split matters for a URL-restored filter: at this point
+  // activeFilters already contains the deep-linked category, so activeFonts is
+  // narrowed — but the category list must still reflect every category.
+  setState({ allFonts: fonts, activeFonts: getFilteredFonts(fonts, getState().activeFilters) });
 
   const grid = document.createElement('div');
   grid.className = 'font-card-grid';
