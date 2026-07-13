@@ -44,6 +44,15 @@ class FontGeneratorBlock {
     this.fontCards = this.fontCardGrid.locator('.font-card');
     this.loadMoreBtn = this.mainCol.locator('.font-card-load-more');
   }
+
+  // Target a category filter by its stable data-category value. The visible
+  // button label is Unicode-transformed (e.g. Glitch renders as
+  // "G̶̶l̶̶i̶̶t̶̶c̶̶h̶̶"), so matching on visible text does not work — the raw
+  // category lives on data-category. :visible picks whichever of the two
+  // instances (desktop-inline vs. drawer) is currently on-screen.
+  categoryFilter(category) {
+    return this.block.locator(`.fg-filter-btn[data-category="${category}"]:visible`);
+  }
 }
 
 module.exports = FontGeneratorBlock;

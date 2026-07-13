@@ -57,20 +57,32 @@ test.describe('FontGeneratorBlock Test Suite', () => {
     });
 
     await test.step('step-7: Selecting a category filters the card grid', async () => {
-      const allCount = await block.fontCards.count();
-      const glitchBtn = block.visibleFilterButtons.filter({ hasText: 'Glitch' });
+      // The grid paginates (INITIAL_VISIBLE_COUNT cards at a time), so the
+      // rendered card count is capped and does not shrink on filter. The
+      // toolbar count reflects the full active (filtered) font set, so assert
+      // against that instead — it drops from the whole catalog to the subset.
+      const readCount = async () => {
+        const text = (await block.count.textContent()) ?? '';
+        return Number(text.match(/\d+/)?.[0] ?? NaN);
+      };
+      const totalCount = await readCount();
       // Opening the drawer (mobile) is required before its buttons are visible.
       if (await block.filterTrigger.isVisible()) await block.filterTrigger.click();
-      await glitchBtn.first().click();
+      await block.categoryFilter('Glitch').first().click();
       await expect(async () => {
-        expect(await block.fontCards.count()).toBeLessThan(allCount);
+        expect(await readCount()).toBeLessThan(totalCount);
       }).toPass();
     });
 
     await test.step('step-8: Typing in textarea updates font card previews', async () => {
+      // Every card renders the preview through a Unicode transform, so the
+      // preview never contains the raw typed string (e.g. "Hello" becomes
+      // "Ⓗⓔⓛⓛⓞ"). Assert the preview re-renders — its text must change from
+      // the prior sample once new input is typed.
+      const preview = block.fontCards.first().locator('.font-card-preview');
+      const before = (await preview.textContent()) ?? '';
       await block.textarea.fill('Hello world');
-      const firstCard = block.fontCards.first();
-      await expect(firstCard.locator('.font-card-preview')).toContainText('Hello world');
+      await expect(preview).not.toHaveText(before);
     });
 
     await test.step('step-9: Accessibility validation', async () => {
