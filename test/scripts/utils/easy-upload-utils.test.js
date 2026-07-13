@@ -305,6 +305,42 @@ describe('EasyUpload failure handling', () => {
       expect(easyUpload.uploadDetectionInterval).to.be.null;
     });
 
+    it('shows the failed tooltip when corruption is detected until QR refresh completes', async () => {
+      const clock = sinon.useFakeTimers();
+      const easyUpload = createInstance();
+      const tooltip = document.createElement('div');
+      tooltip.classList.add('hidden');
+      easyUpload.setConfirmTooltipConfig({
+        element: tooltip,
+        messages: { failed: FAILED_MSG },
+      });
+      easyUpload.uploadAsset = {};
+      easyUpload.uploadService = {};
+      sinon.stub(easyUpload, 'prepareUploadedFileForConfirm').callsFake(async () => {
+        easyUpload.uploadFinalized = true;
+        const error = new Error('Unrecognized or corrupted file: no valid image signature');
+        error.easyUploadStage = 'retrieve';
+        throw error;
+      });
+      sinon.stub(easyUpload, 'cleanup').resolves();
+      let resolveRefresh;
+      sinon.stub(easyUpload, 'initializeQRCode').returns(new Promise((resolve) => {
+        resolveRefresh = resolve;
+      }));
+
+      easyUpload.startUploadDetectionPolling();
+      await clock.tickAsync(2000);
+
+      expect(tooltip.textContent).to.equal(FAILED_MSG);
+      expect(tooltip.classList.contains('hover')).to.be.true;
+
+      resolveRefresh();
+      await Promise.resolve();
+
+      expect(tooltip.classList.contains('hover')).to.be.false;
+      easyUpload.cleanup.restore();
+    });
+
     it('retrieveUploadedFile rejects an empty upload', async () => {
       const easyUpload = createInstance();
       stubReadyDownload(easyUpload, new Blob([]));
