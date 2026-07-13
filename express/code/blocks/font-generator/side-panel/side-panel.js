@@ -13,14 +13,6 @@ function injectStyles() {
   document.head.appendChild(link);
 }
 
-function debounce(fn, ms) {
-  let timer;
-  return (...args) => {
-    clearTimeout(timer);
-    timer = setTimeout(() => fn(...args), ms);
-  };
-}
-
 function updateUrlText(text) {
   const url = new URL(window.location.href);
   if (text) {
@@ -112,7 +104,7 @@ function syncCounter(textarea, counter) {
 function initTextInput(panel) {
   const textarea = panel.querySelector('textarea.label');
   const counter = panel.querySelector('.character-count');
-  if (!textarea || !counter) return;
+  if (!textarea || !counter) return () => {};
 
   // Restore state set by initFromUrl before this panel was created.
   const initial = getState().previewText;
@@ -121,18 +113,24 @@ function initTextInput(panel) {
     syncCounter(textarea, counter);
   }
 
-  const flush = debounce((value) => {
-    setState({ previewText: value });
-    updateUrlText(value);
-  }, DEBOUNCE_MS);
+  let timer;
+  const flush = (value) => {
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      setState({ previewText: value });
+      updateUrlText(value);
+    }, DEBOUNCE_MS);
+  };
 
   textarea.addEventListener('input', () => {
     syncCounter(textarea, counter);
     flush(textarea.value);
   });
+
+  return () => clearTimeout(timer);
 }
 
-function initSuggestionPills(panel) {
+function initSuggestionPills(panel, cancelPendingInput) {
   const textarea = panel.querySelector('textarea.label');
   const counter = panel.querySelector('.character-count');
   if (!textarea) return;
@@ -140,6 +138,7 @@ function initSuggestionPills(panel) {
   const activate = (pill) => {
     const text = pill.querySelector('.div')?.textContent ?? '';
     const truncated = text.slice(0, MAX_LENGTH);
+    cancelPendingInput();
     textarea.value = truncated;
     if (counter) syncCounter(textarea, counter);
     setState({ previewText: truncated });
@@ -167,10 +166,14 @@ export default function createSidePanel(config = {}) {
   injectStyles();
   const panel = template.content.firstElementChild.cloneNode(true);
   initResizeHandle(panel);
-  initTextInput(panel);
+  const cancelPendingInput = initTextInput(panel);
   populateSuggestions(panel, config.suggestions);
-  initSuggestionPills(panel);
+  initSuggestionPills(panel, cancelPendingInput);
   panel.classList.toggle('is-loading', getState().loading);
-  const unsubscribe = subscribe(({ loading }) => panel.classList.toggle('is-loading', loading));
+  const unsubscribeLoading = subscribe(({ loading }) => panel.classList.toggle('is-loading', loading));
+  const unsubscribe = () => {
+    cancelPendingInput();
+    unsubscribeLoading();
+  };
   return { panel, unsubscribe };
 }
