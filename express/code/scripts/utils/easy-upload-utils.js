@@ -571,7 +571,7 @@ export class EasyUpload {
 
     // SVG is text-based (no binary magic number); sniff the leading markup.
     const head = new TextDecoder().decode(bytes).trimStart().toLowerCase();
-    const svgPrefix = /^(?:<\?xml[^>]*>\s*)?(?:(?:<!--[\s\S]*?-->|<!doctype\s+svg[^>]*>)\s*)*<svg(?:\s|\/?>)/;
+    const svgPrefix = /^(?:<\?xml[^>]*>\s*)?(?:(?:<!--(?:[^-]|-(?!->))*-->|<!doctype\s+svg[^>]*>)\s*)*<svg(?:\s|\/?>)/;
     if (svgPrefix.test(head)) return 'image/svg+xml';
 
     return null;
