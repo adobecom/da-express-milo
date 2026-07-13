@@ -44,6 +44,18 @@ const VIDEO_MIME_TYPES = {
   264: 'video/h264',
 };
 
+const AUDIO_FORMATS = [
+  'mp3',
+  'wav',
+  'm4a',
+];
+
+const AUDIO_MIME_TYPES = {
+  mp3: 'audio/mpeg',
+  wav: 'audio/wav',
+  m4a: 'audio/mp4'
+};
+
 // Configuration functions
 const getBaseImgCfg = (...types) => ({
   group: 'image',
@@ -61,6 +73,21 @@ const getBaseVideoCfg = (...types) => {
     input_check: (input) => {
       const supportedMimeTypes = formats
         .map((type) => VIDEO_MIME_TYPES[type])
+        .filter(Boolean);
+      return supportedMimeTypes.includes(input);
+    },
+  };
+};
+
+const getBaseAudioCfg = (...types) => {
+  const formats = Array.isArray(types[0]) ? types[0] : types;
+  return {
+    group: 'audio',
+    max_size: 1024 * 1024 * 1024,
+    accept: formats.map((type) => `.${type}`).join(', '),
+    input_check: (input) => {
+      const supportedMimeTypes = formats
+        .map((type) => AUDIO_MIME_TYPES[type])
         .filter(Boolean);
       return supportedMimeTypes.includes(input);
     },
@@ -151,6 +178,8 @@ export const QA_CONFIGS = {
     ...getBaseImgCfg(JPG, JPEG, WEBP, HEIC),
     input_check: getHeicInputCheck(JPG, JPEG, WEBP, HEIC),
   },
+  'audio-converter': { ...getBaseAudioCfg(AUDIO_FORMATS) },
+  'video-to-audio': { ...getBaseVideoCfg(VIDEO_FORMATS) }
 };
 
 // Experimental variants
@@ -224,7 +253,7 @@ export function fadeOut(element) {
 
 // Common document configurations
 export function createDocConfig(data, type = 'image') {
-  const dataType = type === 'video' ? 'blob' : 'base64';
+  const dataType = type === 'video' || type === 'audio' ? 'blob' : 'base64';
   return {
     asset: {
       data,
@@ -338,12 +367,11 @@ export async function createMobileExportConfig(
   editText,
 ) {
   const exportConfig = createDefaultExportConfig();
+  const isBlobBased = ['video', 'audio'].includes(QA_CONFIGS[quickAction].group);
   const result = [
     {
       ...exportConfig[0],
-      ...(QA_CONFIGS[quickAction].group === 'video'
-        ? {}
-        : { label: downloadText }),
+      ...(isBlobBased ? {} : { label: downloadText }),
     },
   ];
 
@@ -351,7 +379,7 @@ export async function createMobileExportConfig(
   if (exportConfig[1]) {
     result.push({
       ...exportConfig[1],
-      ...(QA_CONFIGS[quickAction].group === 'video' ? {} : { label: editText }),
+      ...(isBlobBased ? {} : { label: editText }),
     });
   }
 
@@ -480,6 +508,18 @@ export function executeQuickAction(
       exportConfig,
       contConfig,
     ),
+    'audio-converter': () => ccEverywhere.quickAction.audioConverter(
+      videoDocConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
+    'video-to-audio': () => ccEverywhere.quickAction.audioConverter(
+      videoDocConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    )
   };
 
   const action = quickActionMap[quickActionId];
@@ -508,8 +548,8 @@ export async function processFileForQuickAction(
   const maxSize = QA_CONFIGS[quickAction].max_size ?? 40 * 1024 * 1024;
 
   if (QA_CONFIGS[quickAction].input_check(file.type, file.name) && file.size <= maxSize) {
-    const isVideo = QA_CONFIGS[quickAction].group === 'video';
-    if (isVideo) {
+    const isBlobBased = ['video', 'audio'].includes(QA_CONFIGS[quickAction].group);
+    if (isBlobBased) {
       window.history.pushState({ hideFrictionlessQa: true }, '', '');
       return file;
     }

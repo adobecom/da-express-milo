@@ -227,7 +227,9 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
 
   const contConfig = createContainerConfig(quickActionId);
   const docConfig = createDocConfig(data[0], 'image');
-  const videoDocConfig = quickActionId === 'merge-videos' ? createMergeVideosDocConfig(data) : createDocConfig(data[0], 'video');
+  const videoDocConfig = quickActionId === 'merge-videos'
+    ? createMergeVideosDocConfig(data)
+    : createDocConfig(data[0], quickActionId === 'audio-convert' ? 'audio' : 'video');
 
   const appConfig = {
     metaData: {
@@ -237,6 +239,8 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
     analyticsData: {
       ...(quickActionId === 'video-compress' && { entryPoint: 'seo-quick-action-video-compress' }),
       ...(quickActionId === 'video-convert' && { entryPoint: 'seo-quick-action-video-convert' }),
+      ...(quickActionId === 'audio-converter' && { entryPoint: 'seo-quick-action-audio-converter' }),
+      ...(quickActionId === 'video-to-audio' && { entryPoint: 'seo-quick-action-video-to-audio' })
     },
     receiveQuickActionErrors: true,
     callbacks: {
