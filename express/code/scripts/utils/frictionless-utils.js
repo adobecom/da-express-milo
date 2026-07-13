@@ -48,12 +48,14 @@ const AUDIO_FORMATS = [
   'mp3',
   'wav',
   'm4a',
+  'aac',
 ];
 
 const AUDIO_MIME_TYPES = {
   mp3: 'audio/mpeg',
   wav: 'audio/wav',
   m4a: 'audio/mp4',
+  aac: 'audio/aac',
 };
 
 // Configuration functions
