@@ -1,7 +1,7 @@
-import { getState, setState, subscribe } from '../state.js';
+import { getState, setState, subscribe } from './state.js';
 
-const BASE_PATH = '/express/code/blocks/font-generator/side-panel';
-const STYLESHEET_HREF = `${BASE_PATH}/side-panel.css`;
+const BASE_PATH = '/express/code/blocks/font-generator';
+const STYLESHEET_HREF = `${BASE_PATH}/textInput.css`;
 const MAX_LENGTH = 200;
 const DEBOUNCE_MS = 300;
 
@@ -14,11 +14,11 @@ function injectStyles() {
 }
 
 const template = document.createElement('template');
-template.innerHTML = `<div class="font-generator-side">
+template.innerHTML = `<div class="font-generator-text-input">
   <div class="text-field">
     <div class="text-area-l-in-line">
       <div class="field">
-        <textarea class="label" maxlength="${MAX_LENGTH}" aria-label="Preview text input"></textarea>
+        <textarea class="label" maxlength="${MAX_LENGTH}"></textarea>
         <div class="counter-expander">
           <div class="character-count">0/${MAX_LENGTH}</div>
         </div>
@@ -152,12 +152,15 @@ function initSuggestionPills(panel, cancelPendingInput) {
 
 function applyStrings(panel, strings = {}) {
   const textarea = panel.querySelector('textarea.label');
-  if (textarea && strings.previewPlaceholder) textarea.placeholder = strings.previewPlaceholder;
+  if (textarea) {
+    if (strings.previewPlaceholder) textarea.placeholder = strings.previewPlaceholder;
+    if (strings.inputLabel) textarea.setAttribute('aria-label', strings.inputLabel);
+  }
   const tryThese = panel.querySelector('.text-wrapper');
   if (tryThese && strings.tryThese) tryThese.textContent = strings.tryThese;
 }
 
-export default function createSidePanel(config = {}) {
+export default function createTextInput(config = {}) {
   injectStyles();
   const panel = template.content.firstElementChild.cloneNode(true);
   applyStrings(panel, config.strings);

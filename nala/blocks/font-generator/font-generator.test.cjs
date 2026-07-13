@@ -29,8 +29,8 @@ test.describe('FontGeneratorBlock Test Suite', () => {
       await expect(block.mainCol).toBeVisible();
     });
 
-    await test.step('step-3: Verify side panel renders', async () => {
-      await expect(block.sidePanel).toBeVisible();
+    await test.step('step-3: Verify text input renders', async () => {
+      await expect(block.textInput).toBeVisible();
       await expect(block.textarea).toBeVisible();
     });
 

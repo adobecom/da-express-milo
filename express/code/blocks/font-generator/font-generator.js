@@ -1,5 +1,5 @@
 import { getMetadata } from '../../scripts/utils.js';
-import createSidePanel from './side-panel/side-panel.js';
+import createTextInput from './textInput.js';
 import initFilters from './filters.js';
 import initPanel from './panel.js';
 import { setState, subscribe, initFromUrl } from './state.js';
@@ -76,7 +76,7 @@ export default async function decorate(block) {
   const sideCol = document.createElement('div');
   sideCol.className = 'font-generator-col font-generator-col--side fg-sidebar';
 
-  const { panel: sidePanel, unsubscribe: unsubscribeSide } = createSidePanel({
+  const { panel: textInput, unsubscribe: unsubscribeTextInput } = createTextInput({
     suggestions: content.suggestions,
     strings,
   });
@@ -86,7 +86,7 @@ export default async function decorate(block) {
   const desktopFiltersEl = document.createElement('div');
   desktopFiltersEl.className = 'fg-filters';
 
-  sideCol.append(sidePanel, desktopFiltersEl);
+  sideCol.append(textInput, desktopFiltersEl);
 
   const mainCol = document.createElement('div');
   mainCol.className = 'font-generator-col font-generator-col--main';
@@ -123,7 +123,7 @@ export default async function decorate(block) {
 
   const cleanup = () => {
     unsubscribeBlock();
-    unsubscribeSide();
+    unsubscribeTextInput();
     unsubscribeToolbar();
     unsubscribeGrid();
     teardownDesktopFilters();

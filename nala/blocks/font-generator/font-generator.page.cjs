@@ -8,10 +8,10 @@ class FontGeneratorBlock {
     this.sideCol = this.block.locator('.font-generator-col--side');
     this.mainCol = this.block.locator('.font-generator-col--main');
 
-    // Side panel (preview input + suggestions)
-    this.sidePanel = this.sideCol.locator('.font-generator-side');
-    this.textarea = this.sidePanel.locator('textarea.label');
-    this.suggestionPills = this.sidePanel.locator('.tag-pills');
+    // Text input (preview input + suggestions)
+    this.textInput = this.sideCol.locator('.font-generator-text-input');
+    this.textarea = this.textInput.locator('textarea.label');
+    this.suggestionPills = this.textInput.locator('.tag-pills');
 
     // Desktop-inline filters — visible >=1200px, inside the sticky sidebar.
     this.desktopFilters = this.sideCol.locator('.fg-filters');
