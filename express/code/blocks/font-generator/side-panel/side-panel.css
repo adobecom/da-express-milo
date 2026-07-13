@@ -287,7 +287,7 @@
   width: 8px;
   height: 8px;
   cursor: se-resize;
-  background: url('/express/code/blocks/font-generator/side-panel/Resize-handle.svg') center / contain no-repeat;
+  background: url('/express/code/icons/font-generator-resize-handle.svg') center / contain no-repeat;
 }
 
 .font-generator-side .suggestions-bar {

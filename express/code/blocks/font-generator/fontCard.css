@@ -85,7 +85,7 @@
 }
 
 .font-card.is-copied .font-card-copy-btn::before {
-  opacity: 0 !important;
+  opacity: 0;
 }
 
 .font-card-copy-btn::after {
@@ -115,7 +115,7 @@
 
 /* Hide tooltip while the copied overlay is showing */
 .font-card.is-copied .font-card-copy-btn::after {
-  opacity: 0 !important;
+  opacity: 0;
 }
 
 /* ─── Preview text ────────────────────────────────────────────────────────── */

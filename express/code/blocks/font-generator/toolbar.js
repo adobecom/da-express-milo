@@ -29,7 +29,7 @@ function debounce(fn, ms) {
 
 function makeIcon(filename) {
   const img = document.createElement('img');
-  img.src = `${BLOCK_PATH}/${filename}`;
+  img.src = `/express/code/icons/font-generator-${filename}`;
   img.alt = '';
   img.setAttribute('aria-hidden', 'true');
   return img;
@@ -51,7 +51,7 @@ function setSliderFill(sliderEl, value) {
   sliderEl.style.setProperty('--fill', `${pct}%`);
 }
 
-export default function createToolbar({ panelId } = {}) {
+export default function createToolbar({ panelId, strings = {} } = {}) {
   injectStyles();
 
   const toolbar = document.createElement('div');
@@ -86,7 +86,10 @@ export default function createToolbar({ panelId } = {}) {
 
   const filterLabel = document.createElement('span');
   filterLabel.className = 'filter-trigger-label';
-  filterLabel.textContent = 'Filter';
+  if (strings.filterTrigger) {
+    filterLabel.textContent = strings.filterTrigger;
+    filterTrigger.setAttribute('aria-label', strings.filterTrigger);
+  }
   filterTrigger.append(makeIcon('filter.svg'), filterLabel);
 
   leftGroup.append(btnGroup, count, filterTrigger);

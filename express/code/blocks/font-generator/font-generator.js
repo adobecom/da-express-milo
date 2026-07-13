@@ -1,3 +1,4 @@
+import { getMetadata } from '../../scripts/utils.js';
 import createSidePanel from './side-panel/side-panel.js';
 import initFilters from './filters.js';
 import initPanel from './panel.js';
@@ -7,6 +8,11 @@ import createToolbar from './toolbar.js';
 import loadFontGeneratorPlaceholders from './placeholders.js';
 
 let filterPanelCount = 0;
+
+// Kick off the placeholder lookup at module load (mirrors color-extract.js's
+// placeholdersPromise) so it resolves before decorate needs it. Awaited up
+// front so components render with final copy — no English-then-swap flash.
+const placeholdersPromise = loadFontGeneratorPlaceholders();
 
 const DEFAULTS = {
   suggestions: [
@@ -28,9 +34,7 @@ const DEFAULTS = {
 };
 
 function getContent() {
-  const meta = (key) => document.head.querySelector(`meta[name="${key}"]`)?.content || null;
-
-  const suggestionsRaw = meta('fg-suggestions');
+  const suggestionsRaw = getMetadata('fg-suggestions');
   const suggestions = suggestionsRaw
     ? suggestionsRaw.split(',').map((s) => s.trim()).filter(Boolean)
     : DEFAULTS.suggestions;
@@ -38,36 +42,17 @@ function getContent() {
   return {
     suggestions,
     promo: {
-      title: meta('fg-promo-title') ?? DEFAULTS.promo.title,
+      title: getMetadata('fg-promo-title') || DEFAULTS.promo.title,
       cta: {
-        text: meta('fg-promo-cta-text') ?? DEFAULTS.promo.cta.text,
-        href: meta('fg-promo-cta-href') ?? DEFAULTS.promo.cta.href,
+        text: getMetadata('fg-promo-cta-text') || DEFAULTS.promo.cta.text,
+        href: getMetadata('fg-promo-cta-href') || DEFAULTS.promo.cta.href,
       },
     },
     cardCta: {
-      text: meta('fg-card-cta-text') ?? DEFAULTS.cardCta.text,
-      href: meta('fg-card-cta-href') ?? DEFAULTS.cardCta.href,
+      text: getMetadata('fg-card-cta-text') || DEFAULTS.cardCta.text,
+      href: getMetadata('fg-card-cta-href') || DEFAULTS.cardCta.href,
     },
   };
-}
-
-// Localizers below apply already-resolved strings from placeholders.js —
-// loadFontGeneratorPlaceholders() has already handled batching the lookup
-// and falling back to DEFAULT_PLACEHOLDERS, so these just apply the result.
-function localizeFilterTrigger(button, label) {
-  const labelEl = button.querySelector('.filter-trigger-label');
-  if (labelEl) labelEl.textContent = label;
-  button.setAttribute('aria-label', label);
-}
-
-function localizeTryThese(panel, label) {
-  const wrapper = panel.querySelector('.text-wrapper');
-  if (wrapper) wrapper.textContent = label;
-}
-
-function localizeTextareaPlaceholder(panel, label) {
-  const textarea = panel.querySelector('textarea.label');
-  if (textarea) textarea.placeholder = label;
 }
 
 export default async function decorate(block) {
@@ -79,7 +64,9 @@ export default async function decorate(block) {
   setState({ loading });
 
   const content = getContent();
-  const stringsPromise = loadFontGeneratorPlaceholders();
+  // Await resolved copy before building any text-bearing component so the
+  // user never sees English placeholder text swapped out (color-extract.js).
+  const strings = await placeholdersPromise;
 
   const grid = document.createElement('div');
   grid.className = 'font-generator-grid';
@@ -91,6 +78,7 @@ export default async function decorate(block) {
 
   const { panel: sidePanel, unsubscribe: unsubscribeSide } = createSidePanel({
     suggestions: content.suggestions,
+    strings,
   });
 
   // Desktop-inline filters instance; the mobile/tablet instance lives inside
@@ -107,14 +95,10 @@ export default async function decorate(block) {
   block.replaceChildren(grid);
 
   const panelId = `font-generator-filters-${(filterPanelCount += 1)}`;
-  const { toolbar, filterTrigger, unsubscribe: unsubscribeToolbar } = createToolbar({ panelId });
+  const {
+    toolbar, filterTrigger, unsubscribe: unsubscribeToolbar,
+  } = createToolbar({ panelId, strings });
   mainCol.append(toolbar);
-
-  stringsPromise.then((strings) => {
-    localizeFilterTrigger(filterTrigger, strings.filterTrigger);
-    localizeTryThese(sidePanel, strings.tryThese);
-    localizeTextareaPlaceholder(sidePanel, strings.previewPlaceholder);
-  });
 
   // createFontCardGrid loads the font sheet and calls initFonts() to populate
   // the catalog. It must run before initFilters, which reads getCategories()

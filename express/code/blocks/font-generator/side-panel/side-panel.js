@@ -18,14 +18,14 @@ template.innerHTML = `<div class="font-generator-side">
   <div class="text-field">
     <div class="text-area-l-in-line">
       <div class="field">
-        <textarea class="label" placeholder="Type the preview text you want to get started..." maxlength="${MAX_LENGTH}" aria-label="Preview text input"></textarea>
+        <textarea class="label" maxlength="${MAX_LENGTH}" aria-label="Preview text input"></textarea>
         <div class="counter-expander">
           <div class="character-count">0/${MAX_LENGTH}</div>
         </div>
         <div class="resize-handle" aria-hidden="true"></div>
       </div>
       <div class="suggestions-bar">
-        <div class="text-wrapper">Try these:</div>
+        <div class="text-wrapper"></div>
         <div class="tags-fade">
           <div class="tags-wrap"></div>
         </div>
@@ -150,9 +150,17 @@ function initSuggestionPills(panel, cancelPendingInput) {
   });
 }
 
+function applyStrings(panel, strings = {}) {
+  const textarea = panel.querySelector('textarea.label');
+  if (textarea && strings.previewPlaceholder) textarea.placeholder = strings.previewPlaceholder;
+  const tryThese = panel.querySelector('.text-wrapper');
+  if (tryThese && strings.tryThese) tryThese.textContent = strings.tryThese;
+}
+
 export default function createSidePanel(config = {}) {
   injectStyles();
   const panel = template.content.firstElementChild.cloneNode(true);
+  applyStrings(panel, config.strings);
   initResizeHandle(panel);
   const cancelPendingInput = initTextInput(panel);
   populateSuggestions(panel, config.suggestions);
