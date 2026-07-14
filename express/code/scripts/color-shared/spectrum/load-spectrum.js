@@ -537,6 +537,25 @@ export function loadTray() {
 }
 
 /**
+ * Load accordion components (sp-accordion, sp-accordion-item).
+ */
+export function loadAccordion() {
+  if (!componentLoaded.accordion) {
+    componentLoaded.accordion = (async () => {
+      await loadCoreDeps();
+      const guard = installRegistryGuard();
+      try {
+        await import(`${DIST}/accordion.js`);
+        await waitForComponents(['sp-theme', 'sp-accordion', 'sp-accordion-item']);
+      } finally {
+        guard.restore();
+      }
+    })();
+  }
+  return componentLoaded.accordion;
+}
+
+/**
  * Load tabs components (sp-tabs, sp-tab, sp-tab-panel).
  * Also loads action-button since tabs uses it for overflow navigation.
  */
