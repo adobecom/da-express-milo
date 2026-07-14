@@ -111,8 +111,7 @@
   }
 }
 
-/* White SUSI card centered on the backdrop. min-width:0 stops the flex item from
-   growing to the SUSI content's intrinsic width so it holds the 370px like PROD. */
+/* White SUSI card centered on the backdrop. */
 .color-libraries-signin-card {
   width: 370px;
   min-width: 0;
@@ -125,9 +124,7 @@
 }
 
 /* Neutralize the loaded fragment's section/fragment wrappers so only the card
-   chrome shows around the authored SUSI block. The SUSI content itself renders
-   inside a cross-origin IMS iframe (auth-light.identity.adobe.com) and cannot be
-   styled from here — its fonts/spacing/copy come from the SUSI config, not CSS. */
+   chrome shows around the authored SUSI block. */
 .color-libraries-signin-card .section,
 .color-libraries-signin-card .fragment {
   width: auto;
