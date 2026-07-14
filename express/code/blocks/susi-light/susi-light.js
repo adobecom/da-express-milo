@@ -16,6 +16,12 @@ export const DCTX_ID_MAP = {
     stage: 'v:2,s,bg:EDUExpressPurple,40262910-c9bd-11f0-8359-b30f8fb5b3f5',
     prod: 'v:2,s,bg:EDUExpressPurple,a6588140-c9bf-11f0-a941-d1bc629a24f2',
   },
+  // TODO(CCEX-234480): replace placeholder ids with the stage/prod dctx_id
+  // provided by the IMS/DCP team for the small-business contextual SUSI background.
+  'context-business': {
+    stage: 'v:2,s,dcp-r,bg:express2024,POC-BUSINESS-STAGE-ID',
+    prod: 'v:2,s,dcp-r,bg:express2024,POC-BUSINESS-PROD-ID',
+  },
 };
 
 const usp = new URLSearchParams(window.location.search);
