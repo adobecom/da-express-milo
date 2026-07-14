@@ -3,15 +3,6 @@ import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
 
 let actionMenuIdCounter = 0;
 
-function createSpIconButton(iconName) {
-  const icon = document.createElement(iconName);
-  icon.setAttribute('size', 'm');
-  icon.setAttribute('aria-hidden', 'true');
-  const wrap = createTag('span', { class: 'action-icon' });
-  wrap.appendChild(icon);
-  return wrap;
-}
-
 /**
  * Coordinates library card action menus so only one popover is open at a time.
  */
@@ -71,16 +62,21 @@ export function createLibraryCardActionMenu({
   actionMenuIdCounter += 1;
   const menuId = `ax-lib-action-menu-${actionMenuIdCounter}`;
 
-  const trigger = createTag('button', {
-    type: 'button',
+  // sp-action-button gives hover/focus states for free (no bespoke CSS needed).
+  const trigger = createTag('sp-action-button', {
+    quiet: '',
+    size: 'm',
     class: 'ax-lib-card__action',
-    'aria-label': triggerLabel,
+    label: triggerLabel,
     'aria-haspopup': 'menu',
     'aria-expanded': 'false',
     'aria-controls': menuId,
     'data-tooltip-content': triggerLabel,
   });
-  trigger.appendChild(createSpIconButton(triggerIcon));
+  const triggerIconEl = document.createElement(triggerIcon);
+  triggerIconEl.setAttribute('slot', 'icon');
+  triggerIconEl.setAttribute('aria-hidden', 'true');
+  trigger.appendChild(triggerIconEl);
   decorateAnalyticsAttributes(trigger, { linkLabel: triggerLabel });
 
   const popover = createTag('div', {

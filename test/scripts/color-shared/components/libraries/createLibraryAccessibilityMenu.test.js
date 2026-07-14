@@ -62,6 +62,6 @@ describe('createLibraryAccessibilityMenu', () => {
     });
 
     const trigger = menu.element.querySelector('.ax-lib-card__action');
-    expect(trigger.getAttribute('aria-label')).to.equal(strings.librariesAccessibilityTools);
+    expect(trigger.getAttribute('label')).to.equal(strings.librariesAccessibilityTools);
   });
 });

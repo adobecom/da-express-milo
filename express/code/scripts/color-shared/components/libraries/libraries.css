@@ -595,8 +595,8 @@
   --mod-menu-item-focus-indicator-border-radius: var(--Corner-radius-corner-radius-100);
   --mod-menu-item-background-color-default: transparent;
   --mod-menu-item-background-color-key-focus: transparent;
-  --mod-menu-item-background-color-hover: var(--ax-lib-border);
-  --mod-menu-item-background-color-down: var(--ax-lib-border);
+  --mod-menu-item-background-color-hover: var(--color-gray-150);
+  --mod-menu-item-background-color-down: var(--color-gray-150);
 
   display: block;
   inline-size: max-content;
@@ -613,7 +613,7 @@
 }
 
 .ax-lib-card__action-menu-list sp-menu-item:hover {
-  background: var(--ax-lib-border);
+  background: var(--color-gray-150);
 }
 
 .ax-lib-card__action-menu-list sp-menu-item:focus,
@@ -624,44 +624,19 @@
   font-weight: 400;
 }
 
-.ax-lib-card__action-menu .ax-lib-card__action[aria-expanded="true"] {
-  background: var(--ax-lib-border);
-}
-
 .ax-lib-card__action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--spacing-500);
-  height: var(--spacing-500);
-  padding: var(--spacing-80);
-  border: none;
-  border-radius: var(--Corner-radius-corner-radius-100);
-  background: transparent;
-  color: var(--Alias-content-neutral-default);
+  --mod-actionbutton-border-radius: var(--Corner-radius-corner-radius-100);
+  --mod-actionbutton-background-color-hover: var(--color-light-gray-2);
+  --mod-actionbutton-background-color-down: var(--color-gray-300-variant);
+  --mod-actionbutton-background-color-focus: var(--color-light-gray-2);
+  --mod-actionbutton-content-color-hover: var(--color-default-font);
+  --mod-actionbutton-content-color-down: var(--color-default-font);
+  --mod-actionbutton-content-color-focus: var(--color-default-font);
   cursor: pointer;
-  transition: background 0.15s ease;
 }
 
-.ax-lib-card__action:hover {
-  background: var(--ax-lib-border);
-}
-
-.ax-lib-card__action:focus-visible {
-  outline: 2px solid var(--color-blue-800);
-  outline-offset: 2px;
-}
-
-.ax-lib-card__action .action-icon,
-.ax-lib-card__action .action-icon svg,
-.ax-lib-card__action sp-icon-download,
-.ax-lib-card__action sp-icon-delete,
-.ax-lib-card__action sp-icon-edit,
-.ax-lib-card__action sp-icon-open-in,
-.ax-lib-card__action sp-icon-accessibility {
-  width: 20px;
-  height: 20px;
-  display: block;
+.ax-lib-card__action-menu sp-action-button.ax-lib-card__action[aria-expanded="true"] {
+  --mod-actionbutton-background-color-default: var(--color-light-gray-2);
 }
 
 /* ── Empty search state ─────────────────────────────────────── */

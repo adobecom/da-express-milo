@@ -31,6 +31,13 @@ const TOOLBAR_I18N_MAP = {
   urlCopiedToClipboard: 'color-toolbar-url-copied-to-clipboard',
   shareFailed: 'color-toolbar-share-failed',
   networkError: 'color-toolbar-network-error',
+  editTheme: 'color-toolbar-edit-theme',
+  editThemeAria: 'color-toolbar-edit-theme-aria',
+  saveChanges: 'color-toolbar-save-changes',
+  saveChangesAria: 'color-toolbar-save-changes-aria',
+  deleteTheme: 'color-toolbar-delete-theme',
+  deleteThemeAria: 'color-toolbar-delete-theme-aria',
+  saving: 'color-toolbar-saving',
 };
 
 const DRAWER_I18N_MAP = {
@@ -227,6 +234,10 @@ export async function initFloatingToolbar(container, options = {}) {
     deps = {},
     daaLh = null,
     inModal = false,
+    contentVariant = 'palette',
+    item = null,
+    toolHrefs = {},
+    librariesStrings = {},
   } = options;
 
   // 'raised' gives sticky visuals (band, shadow) without sticky positioning
@@ -244,6 +255,10 @@ export async function initFloatingToolbar(container, options = {}) {
     palette: finalPalette,
     type,
     variant,
+    contentVariant,
+    item,
+    toolHrefs,
+    librariesStrings,
     ctaText,
     mobileCTAText,
     showEdit,

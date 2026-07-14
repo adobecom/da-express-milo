@@ -265,6 +265,106 @@
   min-inline-size: var(--ax-toolbar-cta-min-width);
 }
 
+/* ── Library variant (saved-themes modal toolbar) ──────────────── */
+
+.ax-toolbar.ax-toolbar-library {
+  --ax-toolbar-row-gap: var(--spacing-200);
+
+  max-inline-size: none;
+  margin-inline: 0;
+  border-block-start: 1px solid var(--color-gray-150);
+  padding-block-start: var(--spacing-300);
+  box-shadow: none;
+}
+
+.ax-toolbar-lib-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.ax-toolbar-lib-name-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.ax-toolbar-lib-name-actions .ax-palette-name {
+  flex: 1 1 auto;
+  min-inline-size: var(--ax-palette-name-min-width);
+}
+
+.ax-toolbar-lib-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-80);
+  flex: 0 0 auto;
+}
+
+.ax-toolbar-lib-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  inline-size: 100%;
+}
+
+.ax-toolbar-lib-buttons sp-button {
+  inline-size: 100%;
+}
+
+/* SWC reads --mod-button-* above --spectrum-button-* (which is unresolved in the
+   modal), so drive the Edit theme hover fill through the mod token. */
+.ax-toolbar-lib-edit {
+  --mod-button-background-color-hover: var(--color-light-gray-2);
+}
+
+/* ── Tablet (600px+): edit + save share a row ── */
+@media (min-width: 600px) {
+  .ax-toolbar-lib-buttons {
+    flex-direction: row;
+  }
+
+  .ax-toolbar-lib-buttons sp-button {
+    flex: 1 1 0;
+  }
+}
+
+/* ── Desktop (1200px+): name/actions and buttons on a single row ── */
+@media (min-width: 1200px) {
+  .ax-toolbar-lib-main {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-300);
+    flex-wrap: nowrap;
+  }
+
+  .ax-toolbar-lib-name-actions {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+  }
+
+  /* Fixed-width name field on desktop, matching the standard toolbar; the action
+     buttons sit immediately after it, left-aligned. */
+  .ax-toolbar-lib-name-actions .ax-palette-name {
+    inline-size: var(--ax-palette-name-width-desktop);
+    flex: 0 0 auto;
+  }
+
+  .ax-toolbar-lib-buttons {
+    flex: 0 0 auto;
+    inline-size: auto;
+  }
+
+  .ax-toolbar-lib-buttons sp-button {
+    inline-size: auto;
+    flex: 0 0 auto;
+  }
+}
+
 /* ── Sticky host — reserves space in document flow ── */
 
 .ax-toolbar-sticky-host {

@@ -1,0 +1,49 @@
+/* Editable "libraries saved themes" modal content.
+   Reuses the palette modal's swatch-rail styles (modal-palette-content.css) and
+   the ax-drawer-tag-section tag field (drawer.css); this file adds the
+   in-modal tag section and the library toolbar wrapper.
+   (Color-mode HEX picker + code view are deferred to a future release.) */
+
+.ax-color-modal-content .modal-library-theme {
+  /* Tag-field tokens (defined on .ax-drawer-panel in drawer.css) redeclared so
+     the reused tag field renders correctly outside the drawer. */
+  --ax-tag-field-min-height: 56px;
+  --ax-tag-field-gap: 12px;
+  --ax-tag-pill-max-width: 224px;
+  --ax-tag-pill-min-width: 27px;
+  --ax-tag-pill-icon-size: 10px;
+  --ax-drawer-font-weight-medium: 500;
+  --ax-drawer-line-height-l: 20px;
+  --ax-drawer-line-height-s: 18px;
+  --ax-drawer-label-padding-block-l: 10px;
+  --ax-drawer-label-padding-block-s: 7px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--spacing-300);
+  inline-size: 100%;
+}
+
+/* ── Tags section ──────────────────────────────────────────────── */
+
+.ax-color-modal-content .modal-lib-tags {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  inline-size: 100%;
+}
+
+.ax-color-modal-content .modal-lib-tags .ax-drawer-tag-section {
+  inline-size: 100%;
+}
+
+/* Toolbar wrapper: the .ax-toolbar-library variant owns its own layout. */
+.ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
+  inline-size: 100%;
+}
+
+.ax-color-modal-content .modal-library-theme .modal-palette-toolbar > sp-theme,
+.ax-color-modal-content .modal-library-theme .modal-palette-toolbar .ax-toolbar {
+  inline-size: 100%;
+}

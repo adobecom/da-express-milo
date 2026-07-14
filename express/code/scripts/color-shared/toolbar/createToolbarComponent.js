@@ -2,11 +2,13 @@ import { announceToScreenReader } from '../spectrum/index.js';
 import { isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi, decorateAnalyticsAttributes } from '../utils/utilities.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
-import { createIconButton } from '../utils/icons.js';
+import { createIconButton, createSpectrumIcon } from '../utils/icons.js';
 import { createEventBus } from '../utils/createEventBus.js';
 import { createTag, getLibs } from '../../utils.js';
-import { loadButton, loadActionButton, loadTooltip } from '../spectrum/load-spectrum.js';
+import { loadButton, loadActionButton, loadTooltip, loadMenu } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
+import { createLibraryAccessibilityMenu } from '../components/libraries/createLibraryAccessibilityMenu.js';
+import { createLibraryDownloadMenu } from '../components/libraries/createLibraryDownloadMenu.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
 import { triggerSignInFlow, ensureIms, waitForSignedInUser } from '../../../libs/services/middlewares/auth.middleware.js';
@@ -39,6 +41,15 @@ const TOOLBAR_DEFAULTS = {
   urlCopiedToClipboard: 'URL copied to clipboard',
   shareFailed: 'Unable to share. Please try again.',
   networkError: 'Network request failed. Check your connection or try again.',
+  editTheme: 'Edit theme',
+  editThemeAria: 'Edit this color theme',
+  saveChanges: 'Save changes',
+  saveChangesAria: 'Save changes to this theme',
+  deleteTheme: 'Delete',
+  deleteThemeAria: 'Delete this theme',
+  saveChangesSuccess: 'Changes saved',
+  saveChangesFailed: 'Unable to save changes. Please try again.',
+  saving: 'Saving\u2026',
 };
 
 let toolbarInstanceCounter = 0;
@@ -420,10 +431,187 @@ async function applyLinkParamOverride(link) {
   return override || link;
 }
 
+/* ── Library toolbar variant ─────────────────────────────────── */
+
+function buildLibraryButtonGroup(t, emit, getPalette) {
+  const group = createTag('div', { class: 'ax-toolbar-lib-buttons' });
+
+  const editBtn = document.createElement('sp-button');
+  editBtn.setAttribute('variant', 'secondary');
+  editBtn.setAttribute('treatment', 'fill');
+  editBtn.setAttribute('size', 'l');
+  editBtn.classList.add('ax-toolbar-lib-edit');
+  const editIcon = createSpectrumIcon('Edit');
+  editIcon.setAttribute('slot', 'icon');
+  editBtn.append(editIcon, document.createTextNode(t.editTheme));
+  editBtn.setAttribute('aria-label', t.editThemeAria);
+  decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit theme' });
+  editBtn.addEventListener('click', () => emit('edit-theme', { palette: getPalette() }));
+
+  const saveBtn = document.createElement('sp-button');
+  saveBtn.setAttribute('variant', 'accent');
+  saveBtn.setAttribute('treatment', 'fill');
+  saveBtn.setAttribute('size', 'l');
+  saveBtn.classList.add('ax-toolbar-lib-save');
+  saveBtn.textContent = t.saveChanges;
+  saveBtn.setAttribute('aria-label', t.saveChangesAria);
+  // Starts disabled: enabled only once the name or tags become dirty.
+  saveBtn.setAttribute('disabled', '');
+  decorateAnalyticsAttributes(saveBtn, { linkLabel: 'Save changes' });
+  saveBtn.addEventListener('click', () => emit('save-changes', { palette: getPalette() }));
+
+  group.append(editBtn, saveBtn);
+  return { group, saveBtn };
+}
+
+function buildLibraryToolbar(options) {
+  const {
+    palette = {},
+    type = 'palette',
+    i18n = {},
+    item = {},
+    toolHrefs = {},
+    librariesStrings = {},
+    deps = {},
+  } = options;
+
+  const t = { ...TOOLBAR_DEFAULTS, ...i18n };
+  const { name = '' } = palette;
+  const nameInputId = `ax-palette-name-input-${toolbarInstanceCounter += 1}`;
+
+  const toolbar = createTag('div', {
+    class: 'ax-toolbar ax-toolbar-library',
+    role: 'toolbar',
+    'aria-label': interpolate(t.toolbarLabel, { type }),
+  });
+
+  const { on, emit } = createEventBus(toolbar, 'color-floating-toolbar');
+
+  const { nameField, nameInput } = buildPaletteNameField(name, true, t, nameInputId);
+
+  const getPaletteWithName = () => ({
+    ...palette,
+    name: nameInput?.value || palette.name || t.paletteNamePlaceholder,
+  });
+
+  const handleNameInput = () => {
+    palette.name = nameInput.value;
+    emit('namechange', { name: nameInput.value, palette: getPaletteWithName() });
+  };
+  nameInput.addEventListener('input', handleNameInput);
+
+  const nameAndActions = createTag('div', { class: 'ax-toolbar-lib-name-actions' });
+  const actions = createTag('div', { class: 'ax-toolbar-actions ax-toolbar-lib-actions' });
+
+  const shareBtn = createIconButton({
+    icon: 'ShareAndroid',
+    label: t.sharePalette,
+    size: 'm',
+    onClick: async () => {
+      const currentPalette = getPaletteWithName();
+      await handleShare({ name: currentPalette.name, colors: currentPalette.colors }, t);
+      emit('share', { palette: currentPalette });
+    },
+  });
+  decorateAnalyticsAttributes(shareBtn, { linkLabel: 'Share' });
+  attachTooltip(shareBtn, t.share);
+  actions.appendChild(shareBtn);
+
+  // Reuse the library card menus so download (ASE/JPEG) and accessibility
+  // (contrast / color-blindness) behave identically to the libraries grid.
+  const attachMenuTooltip = (menuEl) => {
+    const trigger = menuEl?.querySelector('.ax-lib-card__action');
+    if (trigger) attachTooltip(trigger, trigger.getAttribute('data-tooltip-content'));
+  };
+
+  const downloadMenu = createLibraryDownloadMenu({ item, strings: librariesStrings });
+  actions.appendChild(downloadMenu.element);
+  attachMenuTooltip(downloadMenu.element);
+
+  let accessMenu = null;
+  if (item.type !== 'gradient') {
+    accessMenu = createLibraryAccessibilityMenu({ item, strings: librariesStrings, toolHrefs });
+    actions.appendChild(accessMenu.element);
+    attachMenuTooltip(accessMenu.element);
+  }
+
+  const deleteBtn = createIconButton({
+    icon: 'Delete',
+    label: t.deleteThemeAria,
+    size: 'm',
+    onClick: () => emit('delete', { palette: getPaletteWithName() }),
+  });
+  decorateAnalyticsAttributes(deleteBtn, { linkLabel: 'Delete' });
+  attachTooltip(deleteBtn, t.deleteTheme);
+  actions.appendChild(deleteBtn);
+
+  nameAndActions.append(nameField, actions);
+
+  const { group: buttonGroup, saveBtn } = buildLibraryButtonGroup(t, emit, getPaletteWithName);
+
+  const main = createTag('div', { class: 'ax-toolbar-lib-main' });
+  main.append(nameAndActions, buttonGroup);
+  toolbar.appendChild(main);
+
+  const theme = createThemeWrapper();
+  theme.appendChild(toolbar);
+
+  const { loadDeps = () => {
+    Promise.all([loadButton(), loadActionButton(), loadTooltip(), loadMenu()]).catch((err) => {
+      window.lana?.log(`Spectrum load failed: ${err.message}`, {
+        tags: 'color-floating-toolbar,spectrum',
+        severity: 'error',
+      });
+    });
+  } } = deps;
+  loadDeps();
+
+  const api = {
+    element: theme,
+    on,
+    emit,
+    sticky: false,
+    getState: () => ({ palette: getPaletteWithName() }),
+    setSaveEnabled(enabled) {
+      if (enabled) saveBtn.removeAttribute('disabled');
+      else saveBtn.setAttribute('disabled', '');
+    },
+    setSaving(saving) {
+      if (saving) {
+        saveBtn.setAttribute('disabled', '');
+        saveBtn.textContent = t.saving;
+      } else {
+        saveBtn.textContent = t.saveChanges;
+      }
+    },
+    updateName(newName) {
+      palette.name = newName;
+      if (nameInput && nameInput.value !== newName) nameInput.value = newName;
+    },
+    updateSwatches(newColors) {
+      palette.colors = newColors;
+    },
+    setVariant() {},
+    closeDrawer() {},
+    destroy() {
+      nameInput?.removeEventListener('input', handleNameInput);
+      downloadMenu?.destroy?.();
+      accessMenu?.destroy?.();
+      theme.remove();
+    },
+  };
+
+  return api;
+}
+
 /* ── Main Export ──────────────────────────────────────────────── */
 
 // eslint-disable-next-line import/prefer-default-export
 export function createToolbar(options) {
+  if (options?.contentVariant === 'library') {
+    return buildLibraryToolbar(options);
+  }
+
   const {
     palette = {},
     type = 'palette',

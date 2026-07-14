@@ -64,6 +64,15 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   librariesCountThemes: '{count} themes',
   librariesCountGradient: '{count} gradient',
   librariesCountGradients: '{count} gradients',
+  librariesModalTags: 'Tags',
+  librariesModalTagsPlaceholder: 'Add a tag',
+  librariesModalTagHelp: 'Press Enter to add a tag',
+  librariesTagRemoveAria: 'Remove {tag}',
+  librariesModalPaletteAria: 'Color theme with {count} colors',
+  librariesModalActionsAria: 'Theme actions',
+  librariesModalSaveSuccess: 'Changes saved',
+  librariesModalSaveError: 'Unable to save changes. Please try again.',
+  librariesModalUntitledTheme: 'Untitled Theme',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -130,6 +139,15 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   librariesCountThemes: 'color-libraries-count-themes',
   librariesCountGradient: 'color-libraries-count-gradient',
   librariesCountGradients: 'color-libraries-count-gradients',
+  librariesModalTags: 'color-libraries-modal-tags',
+  librariesModalTagsPlaceholder: 'color-libraries-modal-tags-placeholder',
+  librariesModalTagHelp: 'color-libraries-modal-tag-help',
+  librariesTagRemoveAria: 'color-libraries-modal-tag-remove-aria',
+  librariesModalPaletteAria: 'color-libraries-modal-palette-aria',
+  librariesModalActionsAria: 'color-libraries-modal-actions-aria',
+  librariesModalSaveSuccess: 'color-libraries-modal-save-success',
+  librariesModalSaveError: 'color-libraries-modal-save-error',
+  librariesModalUntitledTheme: 'color-libraries-modal-untitled-theme',
 });
 
 export function createColorLibrariesPlaceholders(overrides = {}) {

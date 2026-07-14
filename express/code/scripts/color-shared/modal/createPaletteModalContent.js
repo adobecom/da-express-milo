@@ -21,7 +21,7 @@ export async function ensurePaletteContentStyles() {
   }
 }
 
-function getPaletteColors(palette = {}) {
+export function getPaletteColors(palette = {}) {
   if (Array.isArray(palette.colors) && palette.colors.length) {
     return palette.colors
       .map((c) => String(c || '').trim())
@@ -294,7 +294,7 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   return section;
 }
 
-function setupSwatchColumnNav(container) {
+export function setupSwatchColumnNav(container) {
   // The rail renders into shadow DOM and owns its own roving tabindex, so the
   // grid cells live in `rail.shadowRoot`, not in this light-DOM container.
   function getRail() {

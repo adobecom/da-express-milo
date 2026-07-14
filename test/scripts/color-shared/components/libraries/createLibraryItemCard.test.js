@@ -103,7 +103,7 @@ describe('createLibraryItemCard', () => {
     document.body.appendChild(card);
 
     const deleteBtn = [...card.querySelectorAll('.ax-lib-card__action')]
-      .find((btn) => btn.getAttribute('aria-label')?.includes('Delete'));
+      .find((btn) => btn.getAttribute('label')?.includes('Delete'));
     deleteBtn.click();
 
     expect(emit.calledOnceWith('item-delete', {

@@ -472,7 +472,7 @@ function positionDesktopPanel(panel, anchor) {
 
 /* ── Theme Payload ────────────────────────────────────────────── */
 
-function parseHexToRgb(hex) {
+export function parseHexToRgb(hex) {
   if (!hex || typeof hex !== 'string') return { r: 0, g: 0, b: 0 };
   let h = hex.startsWith('#') ? hex.slice(1) : hex;
   if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
@@ -483,7 +483,7 @@ function parseHexToRgb(hex) {
   };
 }
 
-function buildThemePayload(palette, formData, t) {
+export function buildThemePayload(palette, formData, t) {
   const colors = palette?.colors ?? [];
   return {
     name: formData.name || palette?.name || t.untitledTheme,

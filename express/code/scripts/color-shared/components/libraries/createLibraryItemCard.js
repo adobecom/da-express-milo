@@ -34,18 +34,18 @@ function getPreviewLabel(item, name, strings) {
 
 function createSpIconButton(iconName) {
   const icon = document.createElement(iconName);
-  icon.setAttribute('size', 'm');
+  icon.setAttribute('slot', 'icon');
   icon.setAttribute('aria-hidden', 'true');
-  const wrap = createTag('span', { class: 'action-icon' });
-  wrap.appendChild(icon);
-  return wrap;
+  return icon;
 }
 
 function createActionButton({ icon, label, tooltip, onClick }) {
-  const btn = createTag('button', {
-    type: 'button',
+  // sp-action-button gives hover/focus states for free (no bespoke CSS needed).
+  const btn = createTag('sp-action-button', {
+    quiet: '',
+    size: 'm',
     class: 'ax-lib-card__action',
-    'aria-label': label,
+    label,
     // Tooltip copy can be shorter than the aria-label (e.g. "Delete" vs "Delete {name}").
     'data-tooltip-content': tooltip || label,
   });

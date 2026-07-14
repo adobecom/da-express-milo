@@ -5,13 +5,13 @@ import {
   LIBRARY_SIZE,
   LIBRARY_VIEW,
 } from '../../scripts/color-shared/components/libraries/createLibrariesComponent.js';
-import { loadIconsRail, loadMenu, loadTooltip, loadButton } from '../../scripts/color-shared/spectrum/load-spectrum.js';
+import { loadIconsRail, loadMenu, loadTooltip, loadButton, loadActionButton } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import loadColorLibrariesPlaceholders from '../../scripts/color-shared/i18n/loadColorLibrariesPlaceholders.js';
 import { createSearchBar, createDeepLinkManager } from '../../scripts/color-shared/components/search-bar/index.js';
 import { libraryGradientToModalGradient } from '../../scripts/color-shared/components/libraries/libraryDownloadUtils.js';
 import { announceToScreenReader } from '../../scripts/color-shared/spectrum/utils/a11y.js';
-import { ensureIms } from '../../libs/services/index.js';
+import { ensureIms, serviceManager } from '../../libs/services/index.js';
 
 const LIBRARIES_CSS = 'scripts/color-shared/components/libraries/libraries.css';
 const STRIP_CSS = 'scripts/color-shared/components/strips/color-strip.css';
@@ -33,7 +33,24 @@ let floatingSearchHandler = null;
 let goBackHandler = null;
 let deleteHandler = null;
 let openHandler = null;
+let updatedHandler = null;
 let modalManagerInstance = null;
+let ccLibraryProviderInstance = null;
+
+async function getCcLibraryProvider() {
+  if (ccLibraryProviderInstance) return ccLibraryProviderInstance;
+  try {
+    if (!window.adobeIMS?.isSignedInUser()) return null;
+    await serviceManager.init({ plugins: ['cclibrary'] });
+    ccLibraryProviderInstance = await serviceManager.getProvider('cclibrary');
+  } catch (err) {
+    window.lana?.log(`color-libraries provider init failed: ${err?.message}`, {
+      tags: 'color-libraries', severity: 'error',
+    });
+    ccLibraryProviderInstance = null;
+  }
+  return ccLibraryProviderInstance;
+}
 
 function interpolate(template, vars = {}) {
   return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
@@ -180,8 +197,13 @@ export default async function decorate(block) {
     block.removeEventListener('libraries:item-open', openHandler);
     openHandler = null;
   }
+  if (updatedHandler) {
+    block.removeEventListener('libraries:item-updated', updatedHandler);
+    updatedHandler = null;
+  }
   modalManagerInstance?.destroy?.();
   modalManagerInstance = null;
+  ccLibraryProviderInstance = null;
 
   componentInstance?.destroy();
   componentInstance = null;
@@ -207,6 +229,8 @@ export default async function decorate(block) {
     loadMenu(),
     // Registers sp-button so the empty-search "go back to libraries" CTA upgrades.
     loadButton(),
+    // Registers sp-action-button used by the card action buttons + menu triggers.
+    loadActionButton(),
     // Registers sp-overlay-trigger/sp-tooltip so the palette name tooltip
     // behaves as a hover overlay (same as the Explore page) instead of
     // rendering inline as a label.
@@ -478,7 +502,7 @@ export default async function decorate(block) {
   block.addEventListener('libraries:item-delete', deleteHandler);
 
   openHandler = async (event) => {
-    const { item } = event.detail || {};
+    const { item, libraryId } = event.detail || {};
     if (!item) return;
 
     if (!modalManagerInstance) {
@@ -491,21 +515,38 @@ export default async function decorate(block) {
       modalStrings,
       colorSwatchRailStrings,
       explorePlaceholders,
+      ccLibraryProvider,
     ] = await Promise.all([
       import('../../scripts/color-shared/components/libraries/openLibraryItemModal.js'),
       colorModalStringsPromise,
       colorSwatchRailStringsPromise,
       explorePlaceholdersPromise,
+      getCcLibraryProvider(),
     ]);
 
     await openLibraryItemModal(item, modalManagerInstance, {
       modalStrings,
       colorSwatchRailStrings,
+      librariesStrings: placeholders,
+      libraryId,
+      ccLibraryProvider,
+      toolHrefs,
       fallbackPaletteTitle: explorePlaceholders.modalDefaultPaletteTitle,
       fallbackGradientTitle: explorePlaceholders.modalDefaultGradientTitle,
     });
   };
   block.addEventListener('libraries:item-open', openHandler);
+
+  // Re-render the grid after an in-modal "Save changes" so edited names/tags
+  // (and any downstream state like search matches) reflect the latest data.
+  updatedHandler = () => {
+    renderLibraries(block, searchQuery, placeholders, currentSearchType).catch((err) => {
+      window.lana?.log(`color-libraries refresh after update failed: ${err?.message}`, {
+        tags: 'color-libraries', severity: 'error',
+      });
+    });
+  };
+  block.addEventListener('libraries:item-updated', updatedHandler);
 
   try {
     await renderLibraries(block, searchQuery, placeholders);

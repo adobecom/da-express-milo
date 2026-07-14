@@ -20,6 +20,10 @@ import { libraryGradientToModalGradient } from './libraryDownloadUtils.js';
 export async function openLibraryItemModal(item, modalManager, {
   modalStrings = {},
   colorSwatchRailStrings = {},
+  librariesStrings = {},
+  libraryId = '',
+  ccLibraryProvider = null,
+  toolHrefs = {},
   fallbackPaletteTitle = 'Palette',
   fallbackGradientTitle = 'Gradient',
   verticalMaxPerRow = 10,
@@ -41,6 +45,20 @@ export async function openLibraryItemModal(item, modalManager, {
   }
 
   if (!item.colors?.length) return;
+
+  // Saved themes open the editable "libraries saved themes" modal (name + tags
+  // editing, Save changes / Edit theme). Falls back to the read-only palette
+  // modal when the CC Library context is unavailable (e.g. can't persist edits).
+  if (ccLibraryProvider && libraryId) {
+    return modalManager.openLibraryThemeModal(item, {
+      librariesStrings,
+      colorSwatchRailStrings,
+      libraryId,
+      ccLibraryProvider,
+      toolHrefs,
+      verticalMaxPerRow,
+    });
+  }
 
   return modalManager.openPaletteSwatchesModal(item, {
     modalStrings,

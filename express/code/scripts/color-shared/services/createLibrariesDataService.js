@@ -53,6 +53,24 @@ function swatchToHex(swatch) {
   return null;
 }
 
+function normalizeTagValue(tag) {
+  if (typeof tag === 'string') return tag.trim();
+  return String(tag?.tag ?? tag?.name ?? tag?.value ?? '').trim();
+}
+
+// Tags can live in the theme representation data, the representation's
+// `color:#tags` field, or on the element itself depending on which client saved
+// the theme; merge every source so the UI always reflects the saved tags.
+function extractThemeTags(element, themeData, rep) {
+  const sources = [themeData?.tags, rep?.['color:#tags'], element?.tags];
+  const merged = sources
+    .filter(Array.isArray)
+    .flat()
+    .map(normalizeTagValue)
+    .filter(Boolean);
+  return [...new Set(merged)];
+}
+
 function parseThemeElement(element) {
   const reps = element.representations ?? [];
   const rep = reps.find((r) => r?.['colortheme#data'])
@@ -69,7 +87,7 @@ function parseThemeElement(element) {
     type: 'theme',
     name: element.name || 'Untitled theme',
     colors,
-    tags: Array.isArray(themeData?.tags) ? themeData.tags.filter(Boolean) : [],
+    tags: extractThemeTags(element, themeData, rep),
     // Color-blind-safe is stored as accessibility metadata inside the theme
     // representation data (the only place that round-trips via the CC Library API).
     colorBlindSafe: Boolean(themeData?.accessibilityData?.colorBlindSafe),
