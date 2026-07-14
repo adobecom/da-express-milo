@@ -1,9 +1,6 @@
 /* Tooltip CSS */
 .tooltip button.hover.tooltip-text,
-.tooltip .tooltip-text.hover,
-/* `.pinned` keeps a programmatically-shown tooltip visible independently of
-   hover state, so mouseleave/blur handlers can't dismiss it. */
-.tooltip .tooltip-text.pinned {
+.tooltip .tooltip-text.hover {
     opacity: 1;
     pointer-events: all;
 }

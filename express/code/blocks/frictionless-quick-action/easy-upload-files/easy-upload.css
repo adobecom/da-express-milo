@@ -366,6 +366,14 @@ main  .easy-upload-confirm a.button:any-link {
   letter-spacing: 0;
 }
 
+/* Scoped to the confirm tooltip only: `.pinned` reveals the failure message
+   on its own (no hover) the moment a corrupted upload is detected, and stays
+   visible until dismissed. Kept in this block so no other tooltip is affected. */
+.easy-upload-confirm .tooltip-text.pinned {
+  opacity: 1;
+  pointer-events: all;
+}
+
 .easy-upload-confirm {
   padding-top: var(--spacing-300);
   margin: 0;
