@@ -408,6 +408,11 @@ export class EasyUpload {
     this.uploadDetected = false;
     this.validatedUploadedFile = null;
     this.hasConsumedQrCode = false;
+    // In-flight de-dupe for prepareUploadedFileForConfirm. The 2s detection
+    // poll and a confirm click can both call it; without this, overlapping
+    // calls would double-finalize the asset and spawn concurrent (leaking)
+    // version-ready polls.
+    this.preparePromise = null;
 
     this.asset = null;
     this.uploadAsset = null;
@@ -634,43 +639,67 @@ export class EasyUpload {
    * @throws {Error} If polling times out or max attempts reached
    */
   async waitForAssetVersionReady() {
+    // Never run two version polls at once: a leftover interval would be
+    // orphaned (its id overwritten) and keep hitting the versions endpoint
+    // forever, since the later poll's clearInterval targets a different id.
+    if (this.pollingInterval) {
+      clearInterval(this.pollingInterval);
+      this.pollingInterval = null;
+    }
+
     return new Promise((resolve, reject) => {
       this.versionReadyPromise = { resolve, reject };
       let pollAttempts = 0;
+      let checkInFlight = false;
+      let intervalId = null;
+      let timeoutId = null;
 
-      const timeoutId = setTimeout(() => {
-        if (this.pollingInterval) {
-          clearInterval(this.pollingInterval);
-        }
-        reject(new Error(`Polling timeout: Asset version not ready after ${ACP_STORAGE_CONFIG.POLLING_TIMEOUT_MS}ms`));
+      const finish = (fn, arg) => {
+        if (intervalId) clearInterval(intervalId);
+        if (this.pollingInterval === intervalId) this.pollingInterval = null;
+        clearTimeout(timeoutId);
+        fn(arg);
+      };
+
+      timeoutId = setTimeout(() => {
+        finish(reject, new Error(`Polling timeout: Asset version not ready after ${ACP_STORAGE_CONFIG.POLLING_TIMEOUT_MS}ms`));
       }, ACP_STORAGE_CONFIG.POLLING_TIMEOUT_MS);
 
-      this.pollingInterval = setInterval(async () => {
+      intervalId = setInterval(async () => {
+        // Skip this tick if the previous version fetch hasn't returned yet;
+        // otherwise a slow fetch would overlap itself.
+        if (checkInFlight) return;
+        checkInFlight = true;
         try {
           pollAttempts += 1;
 
-          const hasNativeGetAssetVersion = typeof this.uploadService?.getAssetVersion === 'function';
-          const version = hasNativeGetAssetVersion
-            ? await this.uploadService.getAssetVersion(this.asset)
-            : await fallbackGetAssetVersion(this.asset);
-          const success = isAssetVersionReady(version);
-
-          if (success) {
-            clearInterval(this.pollingInterval);
-            clearTimeout(timeoutId);
-            resolve();
-          } else if (pollAttempts >= ACP_STORAGE_CONFIG.MAX_POLLING_ATTEMPTS) {
-            clearInterval(this.pollingInterval);
-            clearTimeout(timeoutId);
-            reject(new Error(`Max polling attempts reached (${ACP_STORAGE_CONFIG.MAX_POLLING_ATTEMPTS}). Asset version: ${version}`));
+          let version = null;
+          try {
+            const hasNativeGetAssetVersion = typeof this.uploadService?.getAssetVersion === 'function';
+            version = hasNativeGetAssetVersion
+              ? await this.uploadService.getAssetVersion(this.asset)
+              : await fallbackGetAssetVersion(this.asset);
+          } catch (versionError) {
+            // A thrown version lookup means "not ready yet" here (e.g. the
+            // native service throws on an empty version list while the file is
+            // still landing). Treat it as not-ready and keep polling rather
+            // than aborting — the attempt/timeout guards below still bound it,
+            // and genuine content corruption is caught later by
+            // retrieveUploadedFile's integrity checks, not by this poll.
+            window.lana?.log(`[EasyUpload] Asset version not ready yet (attempt ${pollAttempts}): ${versionError?.message || versionError}`, { severity: 'info' });
           }
-        } catch (error) {
-          clearInterval(this.pollingInterval);
-          clearTimeout(timeoutId);
-          window.lana?.log(`[EasyUpload] Error during version polling: ${error?.message || error}`, { severity: 'warning' });
-          reject(error);
+
+          if (isAssetVersionReady(version)) {
+            finish(resolve);
+          } else if (pollAttempts >= ACP_STORAGE_CONFIG.MAX_POLLING_ATTEMPTS) {
+            finish(reject, new Error(`Max polling attempts reached (${ACP_STORAGE_CONFIG.MAX_POLLING_ATTEMPTS}). Asset version: ${version}`));
+          }
+        } finally {
+          checkInFlight = false;
         }
       }, ACP_STORAGE_CONFIG.SECOND_IN_MS);
+
+      this.pollingInterval = intervalId;
     });
   }
 
@@ -1186,6 +1215,7 @@ export class EasyUpload {
     this.uploadFinalized = false;
     this.uploadDetected = false;
     this.validatedUploadedFile = null;
+    this.preparePromise = null;
     await this.cleanupAcpStorage();
   }
 
@@ -1250,7 +1280,21 @@ export class EasyUpload {
     if (this.validatedUploadedFile) {
       return this.validatedUploadedFile;
     }
+    // Collapse concurrent callers onto a single attempt so finalize runs once
+    // and only one version-ready poll is ever in flight. Cleared on settle so
+    // a failed attempt can be retried by the next poll tick / confirm click.
+    if (this.preparePromise) {
+      return this.preparePromise;
+    }
+    this.preparePromise = this.runUploadedFilePreparation();
+    try {
+      return await this.preparePromise;
+    } finally {
+      this.preparePromise = null;
+    }
+  }
 
+  async runUploadedFilePreparation() {
     if (!this.uploadService) {
       throw new Error('Upload service not initialized');
     }

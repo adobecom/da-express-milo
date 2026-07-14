@@ -122,6 +122,87 @@ describe('EasyUpload failure handling', () => {
     expect(easyUpload.versionReadyPromise).to.be.null;
   });
 
+  it('collapses concurrent prepareUploadedFileForConfirm calls onto one attempt', async () => {
+    const easyUpload = createInstance();
+    const file = new File(['file-content'], 'upload.png', { type: 'image/png' });
+    const finalizeStub = sinon.stub(easyUpload, 'finalizeUpload').callsFake(async () => {
+      easyUpload.uploadFinalized = true;
+    });
+    const retrieveStub = sinon.stub(easyUpload, 'retrieveUploadedFile').resolves(file);
+
+    const [a, b, c] = await Promise.all([
+      easyUpload.prepareUploadedFileForConfirm(),
+      easyUpload.prepareUploadedFileForConfirm(),
+      easyUpload.prepareUploadedFileForConfirm(),
+    ]);
+
+    // Finalize runs once (no double-finalize) and the file is retrieved once.
+    expect(finalizeStub.calledOnce).to.be.true;
+    expect(retrieveStub.calledOnce).to.be.true;
+    expect(a).to.equal(file);
+    expect(b).to.equal(file);
+    expect(c).to.equal(file);
+    expect(easyUpload.preparePromise).to.be.null;
+  });
+
+  it('retries prepareUploadedFileForConfirm after a failed attempt', async () => {
+    const easyUpload = createInstance();
+    sinon.stub(easyUpload, 'finalizeUpload').resolves();
+    const retrieveStub = sinon.stub(easyUpload, 'retrieveUploadedFile');
+    retrieveStub.onFirstCall().rejects(new Error('not ready'));
+    const file = new File(['ok'], 'upload.png', { type: 'image/png' });
+    retrieveStub.onSecondCall().resolves(file);
+
+    let firstError;
+    try {
+      await easyUpload.prepareUploadedFileForConfirm();
+    } catch (error) {
+      firstError = error;
+    }
+    expect(firstError).to.be.an('error');
+    expect(easyUpload.preparePromise).to.be.null;
+
+    const result = await easyUpload.prepareUploadedFileForConfirm();
+    expect(result).to.equal(file);
+  });
+
+  it('waitForAssetVersionReady keeps polling when a version lookup throws, then resolves', async () => {
+    const clock = sinon.useFakeTimers();
+    const easyUpload = createInstance();
+    easyUpload.asset = {};
+    const getAssetVersion = sinon.stub();
+    getAssetVersion.onCall(0).rejects(new Error('No versions found for asset'));
+    getAssetVersion.onCall(1).resolves('0');
+    getAssetVersion.onCall(2).resolves('3');
+    easyUpload.uploadService = { getAssetVersion };
+
+    const readyPromise = easyUpload.waitForAssetVersionReady();
+    await clock.tickAsync(3000);
+    await readyPromise;
+
+    expect(getAssetVersion.callCount).to.equal(3);
+    // The interval is cleared once ready — nothing left running.
+    expect(easyUpload.pollingInterval).to.be.null;
+    clock.restore();
+  });
+
+  it('waitForAssetVersionReady clears any pre-existing poll before starting', async () => {
+    const clock = sinon.useFakeTimers();
+    const easyUpload = createInstance();
+    easyUpload.asset = {};
+    const stale = setInterval(() => {}, 1000);
+    easyUpload.pollingInterval = stale;
+    easyUpload.uploadService = { getAssetVersion: sinon.stub().resolves('1') };
+
+    const readyPromise = easyUpload.waitForAssetVersionReady();
+    // A new interval id replaced the stale one immediately.
+    expect(easyUpload.pollingInterval).to.not.equal(stale);
+    await clock.tickAsync(1000);
+    await readyPromise;
+    expect(easyUpload.pollingInterval).to.be.null;
+    clock.restore();
+  });
+
   describe('corrupted image detection', () => {
     const FAILED_MSG = 'We are having trouble processing the file. Please try another file.';
 

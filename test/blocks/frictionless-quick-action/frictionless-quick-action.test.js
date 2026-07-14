@@ -98,6 +98,11 @@ describe('Frictionless Quick Action Block', () => {
     const errorToast = document.querySelector('.error-toast');
     expect(errorToast).to.not.be.null;
     expect(errorToast.textContent).to.include('file size not supported');
+    // Setting the message must not wipe the icon and close button.
+    expect(errorToast.querySelector('.error-toast-message')?.textContent)
+      .to.include('file size not supported');
+    expect(errorToast.querySelector('button')).to.not.be.null;
+    expect(errorToast.querySelector('svg, img')).to.not.be.null;
   });
   it('handles popstate event correctly', async () => {
     document.body.innerHTML = await readFile({ path: './mocks/crop-image-quick-action.html' });
