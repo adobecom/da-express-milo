@@ -75,6 +75,11 @@ const DRAWER_DEFAULTS = {
 
 const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
 
+// On-site libraries page path (matches color.adobe.com/mythemes). Resolved
+// against the current origin so "View in library" opens the libraries page on
+// the same base URL instead of the external Express web app.
+const LIBRARIES_PAGE_PATH = '/mythemes';
+
 /* ── Authentication Helpers ──────────────────────────────────── */
 
 async function checkIsSignedIn() {
@@ -858,7 +863,7 @@ export async function createDrawer(options) {
         timeout: 6000,
         action: {
           label: t.viewInLibrary,
-          href: 'https://new.express.adobe.com/libraries',
+          href: LIBRARIES_PAGE_PATH,
         },
       });
       await onSave?.(formData);
