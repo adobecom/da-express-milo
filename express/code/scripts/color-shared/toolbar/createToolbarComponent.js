@@ -374,12 +374,12 @@ function buildCTAButton(getCTAText, onClick) {
   return ctaBtn;
 }
 
-function buildPaletteNameField(name, editPaletteName, t, inputId) {
+function buildPaletteNameField(name, editPaletteName, t, inputId, labelText) {
   const nameField = createTag('div', { class: 'ax-palette-name' });
   const nameLabel = createTag('label', {
     class: 'ax-palette-name-label',
     for: inputId,
-  }, t.paletteName);
+  }, labelText || t.paletteName);
   const inputAttrs = {
     type: 'text',
     id: inputId,
@@ -433,20 +433,23 @@ async function applyLinkParamOverride(link) {
 
 /* ── Library toolbar variant ─────────────────────────────────── */
 
-function buildLibraryButtonGroup(t, emit, getPalette) {
+function buildLibraryButtonGroup(t, emit, getPalette, { showEdit = true } = {}) {
   const group = createTag('div', { class: 'ax-toolbar-lib-buttons' });
 
-  const editBtn = document.createElement('sp-button');
-  editBtn.setAttribute('variant', 'secondary');
-  editBtn.setAttribute('treatment', 'fill');
-  editBtn.setAttribute('size', 'l');
-  editBtn.classList.add('ax-toolbar-lib-edit');
-  const editIcon = createSpectrumIcon('Edit');
-  editIcon.setAttribute('slot', 'icon');
-  editBtn.append(editIcon, document.createTextNode(t.editTheme));
-  editBtn.setAttribute('aria-label', t.editThemeAria);
-  decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit theme' });
-  editBtn.addEventListener('click', () => emit('edit-theme', { palette: getPalette() }));
+  if (showEdit) {
+    const editBtn = document.createElement('sp-button');
+    editBtn.setAttribute('variant', 'secondary');
+    editBtn.setAttribute('treatment', 'fill');
+    editBtn.setAttribute('size', 'l');
+    editBtn.classList.add('ax-toolbar-lib-edit');
+    const editIcon = createSpectrumIcon('Edit');
+    editIcon.setAttribute('slot', 'icon');
+    editBtn.append(editIcon, document.createTextNode(t.editTheme));
+    editBtn.setAttribute('aria-label', t.editThemeAria);
+    decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit theme' });
+    editBtn.addEventListener('click', () => emit('edit-theme', { palette: getPalette() }));
+    group.appendChild(editBtn);
+  }
 
   const saveBtn = document.createElement('sp-button');
   saveBtn.setAttribute('variant', 'accent');
@@ -460,7 +463,7 @@ function buildLibraryButtonGroup(t, emit, getPalette) {
   decorateAnalyticsAttributes(saveBtn, { linkLabel: 'Save changes' });
   saveBtn.addEventListener('click', () => emit('save-changes', { palette: getPalette() }));
 
-  group.append(editBtn, saveBtn);
+  group.appendChild(saveBtn);
   return { group, saveBtn };
 }
 
@@ -472,6 +475,8 @@ function buildLibraryToolbar(options) {
     item = {},
     toolHrefs = {},
     librariesStrings = {},
+    showEdit = true,
+    nameLabel = '',
     deps = {},
   } = options;
 
@@ -487,7 +492,7 @@ function buildLibraryToolbar(options) {
 
   const { on, emit } = createEventBus(toolbar, 'color-floating-toolbar');
 
-  const { nameField, nameInput } = buildPaletteNameField(name, true, t, nameInputId);
+  const { nameField, nameInput } = buildPaletteNameField(name, true, t, nameInputId, nameLabel);
 
   const getPaletteWithName = () => ({
     ...palette,
@@ -547,7 +552,12 @@ function buildLibraryToolbar(options) {
 
   nameAndActions.append(nameField, actions);
 
-  const { group: buttonGroup, saveBtn } = buildLibraryButtonGroup(t, emit, getPaletteWithName);
+  const { group: buttonGroup, saveBtn } = buildLibraryButtonGroup(
+    t,
+    emit,
+    getPaletteWithName,
+    { showEdit },
+  );
 
   const main = createTag('div', { class: 'ax-toolbar-lib-main' });
   main.append(nameAndActions, buttonGroup);

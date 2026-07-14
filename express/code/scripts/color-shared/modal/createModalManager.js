@@ -297,6 +297,30 @@ export function createModalManager(strings = createColorModalPlaceholders()) {
     contentView.initNav?.();
   }
 
+  async function openLibraryGradientModal(item = {}, gradientOptions = {}) {
+    const {
+      createLibraryGradientModalContent,
+      ensureLibraryGradientModalStyles,
+    } = await import('./createLibraryGradientModalContent.js');
+    await ensureLibraryGradientModalStyles();
+
+    const contentView = createLibraryGradientModalContent(item, {
+      ...gradientOptions,
+      requestClose: () => close(),
+    });
+    open({
+      title: (item?.name && String(item.name)) || strings.defaultTitle,
+      showTitle: false,
+      content: contentView.element,
+      onClose: () => {
+        contentView.destroy?.();
+      },
+      // Focus the dialog shell so the first Tab moves to the first strip.
+      initialFocusSelector: (body) => body,
+    });
+    contentView.initNav?.();
+  }
+
   async function openGradientModal(gradient = {}) {
     const {
       createGradientModalContent,
@@ -341,6 +365,7 @@ export function createModalManager(strings = createColorModalPlaceholders()) {
     openPaletteModal,
     openPaletteSwatchesModal,
     openLibraryThemeModal,
+    openLibraryGradientModal,
     openGradientModal,
     openContrastCheckerModal,
     close,

@@ -238,6 +238,7 @@ export async function initFloatingToolbar(container, options = {}) {
     item = null,
     toolHrefs = {},
     librariesStrings = {},
+    libraryNameLabel = '',
   } = options;
 
   // 'raised' gives sticky visuals (band, shadow) without sticky positioning
@@ -259,6 +260,7 @@ export async function initFloatingToolbar(container, options = {}) {
     item,
     toolHrefs,
     librariesStrings,
+    nameLabel: libraryNameLabel,
     ctaText,
     mobileCTAText,
     showEdit,

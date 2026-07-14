@@ -140,6 +140,9 @@ export default class CCLibraryProvider extends BaseProvider {
    * @param {string}  [options.type='linear'] - Gradient type
    * @param {Array<{color: string, position: number}>} options.stops
    *   Each stop has a CSS color string (hex or rgb/rgba) and a position (0-1 float).
+   * @param {Array<string>} [options.tags=[]] - Tags to persist with the gradient.
+   *   Stored inside `gradient#data` (not top-level) because the CC Library API
+   *   only round-trips fields nested in the representation data.
    * @returns {Object} Melville-ready element payload
    */
   // eslint-disable-next-line class-methods-use-this
@@ -150,6 +153,7 @@ export default class CCLibraryProvider extends BaseProvider {
     interpolation = 'linear',
     type = 'linear',
     stops = [],
+    tags = [],
   }) {
     return {
       name: name || 'Untitled gradient',
@@ -164,6 +168,7 @@ export default class CCLibraryProvider extends BaseProvider {
             angle,
             aspectRatio,
             type,
+            tags: Array.isArray(tags) ? tags : [],
             stops: stops.map((stop) => ({
               color: [
                 {

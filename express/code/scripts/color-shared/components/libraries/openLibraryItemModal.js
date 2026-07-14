@@ -31,6 +31,20 @@ export async function openLibraryItemModal(item, modalManager, {
   if (!item || !modalManager) return;
 
   if (item.type === 'gradient') {
+    // Saved gradients open the editable "libraries saved gradients" modal (name +
+    // tags editing, Save changes). Falls back to the read-only gradient modal when
+    // the CC Library context is unavailable (e.g. can't persist edits).
+    if (ccLibraryProvider && libraryId) {
+      return modalManager.openLibraryGradientModal(item, {
+        librariesStrings,
+        colorSwatchRailStrings,
+        libraryId,
+        ccLibraryProvider,
+        toolHrefs,
+        verticalMaxPerRow,
+      });
+    }
+
     await ensureGradientModalContentStyles();
     const gradient = libraryGradientToModalGradient(item);
     return modalManager.open({

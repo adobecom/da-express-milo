@@ -198,7 +198,7 @@ export default async function decorate(block) {
     openHandler = null;
   }
   if (updatedHandler) {
-    block.removeEventListener('libraries:item-updated', updatedHandler);
+    document.removeEventListener('libraries:item-updated', updatedHandler);
     updatedHandler = null;
   }
   modalManagerInstance?.destroy?.();
@@ -539,6 +539,9 @@ export default async function decorate(block) {
 
   // Re-render the grid after an in-modal "Save changes" so edited names/tags
   // (and any downstream state like search matches) reflect the latest data.
+  // The modal mounts on document.body (outside this block), so its
+  // `libraries:item-updated` event bubbles to `document`, not to `block`;
+  // listen on `document` so edits made in the modal refresh the grid.
   updatedHandler = () => {
     renderLibraries(block, searchQuery, placeholders, currentSearchType).catch((err) => {
       window.lana?.log(`color-libraries refresh after update failed: ${err?.message}`, {
@@ -546,7 +549,7 @@ export default async function decorate(block) {
       });
     });
   };
-  block.addEventListener('libraries:item-updated', updatedHandler);
+  document.addEventListener('libraries:item-updated', updatedHandler);
 
   try {
     await renderLibraries(block, searchQuery, placeholders);

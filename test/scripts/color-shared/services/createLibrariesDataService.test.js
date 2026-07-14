@@ -72,6 +72,7 @@ describe('createLibrariesDataService', () => {
           representations: [{
             'gradient#data': {
               angle: 45,
+              tags: ['sunset'],
               stops: [
                 { color: [{ mode: 'RGB', value: { r: 0, g: 0, b: 0 } }], offset: 0 },
               ],
@@ -97,6 +98,7 @@ describe('createLibrariesDataService', () => {
       type: 'gradient',
       angle: 45,
     });
+    expect(libraries[0].items[1].tags).to.deep.equal(['sunset']);
   });
 
   it('filters out libraries with no color content', async () => {

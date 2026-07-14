@@ -73,6 +73,9 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   librariesModalSaveSuccess: 'Changes saved',
   librariesModalSaveError: 'Unable to save changes. Please try again.',
   librariesModalUntitledTheme: 'Untitled Theme',
+  librariesModalGradientName: 'Gradient name',
+  librariesModalGradientAria: 'Gradient with {count} colors',
+  librariesModalGradientActionsAria: 'Gradient actions',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -148,6 +151,9 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   librariesModalSaveSuccess: 'color-libraries-modal-save-success',
   librariesModalSaveError: 'color-libraries-modal-save-error',
   librariesModalUntitledTheme: 'color-libraries-modal-untitled-theme',
+  librariesModalGradientName: 'color-libraries-modal-gradient-name',
+  librariesModalGradientAria: 'color-libraries-modal-gradient-aria',
+  librariesModalGradientActionsAria: 'color-libraries-modal-gradient-actions-aria',
 });
 
 export function createColorLibrariesPlaceholders(overrides = {}) {
