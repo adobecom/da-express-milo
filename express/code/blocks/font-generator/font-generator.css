@@ -18,7 +18,7 @@ main .section:has(.font-generator) > .content {
 
 /* Layout: single column up to 1200px, then a sticky sidebar rail + results.
    Insets live on the grid (not the block root) so the background stays full-bleed. */
-.font-generator-grid {
+.font-generator .fg-container {
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr;
@@ -26,7 +26,8 @@ main .section:has(.font-generator) > .content {
   padding-inline: var(--ax-grid-margin, 20px);
 }
 
-.font-generator-col {
+.font-generator .fg-sidebar,
+.font-generator .fg-main {
   min-width: 0;
 }
 
@@ -244,7 +245,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 
 /* ── Tablet ───────────────────────────────────────────────────────── */
 @media (min-width: 600px) {
-  .font-generator-grid {
+  .font-generator .fg-container {
     gap: var(--spacing-300);
   }
 
@@ -293,12 +294,12 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 
 /* ── Desktop ──────────────────────────────────────────────────────── */
 @media (min-width: 1200px) {
-  .font-generator-grid {
+  .font-generator .fg-container {
     grid-template-columns: var(--fg-sidebar-width) 1fr;
     padding-bottom: var(--spacing-900);
   }
 
-  .font-generator-col--side {
+  .font-generator .fg-sidebar {
     position: sticky;
     top: calc(var(--gnav-offset-height) - 16px);
     align-self: start;
@@ -311,7 +312,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 
 /* ── Widescreen ───────────────────────────────────────────────────── */
 @media (min-width: 1680px) {
-  .font-generator-grid {
+  .font-generator .fg-container {
     max-width: var(--ax-grid-container-width, 1600px);
     margin-inline: auto;
   }

@@ -1,4 +1,4 @@
-import { getMetadata } from '../../scripts/utils.js';
+import { createTag, getMetadata } from '../../scripts/utils.js';
 import createTextInput from './textInput.js';
 import initFilters from './filters.js';
 import initPanel from './panel.js';
@@ -63,13 +63,9 @@ export default async function decorate(block) {
   // user never sees English placeholder text swapped out (color-extract.js).
   const strings = await placeholdersPromise;
 
-  const grid = document.createElement('div');
-  grid.className = 'font-generator-grid';
-
-  // fg-sidebar drives filters.js/font-generator.css's desktop-inline-vs-
-  // mobile-panel visibility toggle (Megan Thomas, MWPW-189432).
-  const sideCol = document.createElement('div');
-  sideCol.className = 'font-generator-col font-generator-col--side fg-sidebar';
+  const container = createTag('section', { class: 'fg-container' });
+  const sidebar = createTag('div', { class: 'fg-sidebar' });
+  const main = createTag('div', { class: 'fg-main' });
 
   const { panel: textInput, unsubscribe: unsubscribeTextInput } = createTextInput({
     suggestions: content.suggestions,
@@ -77,29 +73,27 @@ export default async function decorate(block) {
   });
 
   // Desktop-inline filters instance; the mobile/tablet instance lives inside
-  // panel.js's own drawer, mounted separately below.
-  const desktopFiltersEl = document.createElement('div');
-  desktopFiltersEl.className = 'fg-filters';
+  // panel.js's own drawer, mounted separately below. .fg-sidebar drives
+  // filters.js/font-generator.css's desktop-inline-vs-mobile-panel visibility
+  // toggle (Megan Thomas, MWPW-189432).
+  const desktopFiltersEl = createTag('div', { class: 'fg-filters' });
 
-  sideCol.append(textInput, desktopFiltersEl);
+  sidebar.append(textInput, desktopFiltersEl);
 
-  const mainCol = document.createElement('div');
-  mainCol.className = 'font-generator-col font-generator-col--main';
-
-  grid.append(sideCol, mainCol);
-  block.replaceChildren(grid);
+  container.append(sidebar, main);
+  block.replaceChildren(container);
 
   const panelId = `font-generator-filters-${(filterPanelCount += 1)}`;
   const {
     toolbar, filterTrigger, unsubscribe: unsubscribeToolbar,
   } = createToolbar({ panelId, strings });
-  mainCol.append(toolbar);
+  main.append(toolbar);
 
   const { container: gridContainer, unsubscribe: unsubscribeGrid } = createFontCardGrid({
     cardCta: content.cardCta,
     fonts,
   });
-  mainCol.append(gridContainer);
+  main.append(gridContainer);
 
   const teardownDesktopFilters = await initFilters([desktopFiltersEl], {
     showCTA: true,

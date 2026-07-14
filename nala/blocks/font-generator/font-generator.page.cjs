@@ -4,9 +4,9 @@ class FontGeneratorBlock {
     this.block = page.locator(selector).nth(nth);
 
     // Layout
-    this.grid = this.block.locator('.font-generator-grid');
-    this.sideCol = this.block.locator('.font-generator-col--side');
-    this.mainCol = this.block.locator('.font-generator-col--main');
+    this.grid = this.block.locator('.fg-container');
+    this.sideCol = this.block.locator('.fg-sidebar');
+    this.mainCol = this.block.locator('.fg-main');
 
     // Text input (preview input + suggestions)
     this.textInput = this.sideCol.locator('.font-generator-text-input');
