@@ -397,6 +397,7 @@ export class EasyUpload {
     this.confirmTooltipElement = null;
     this.confirmTooltipMessages = {};
     this.confirmTooltipHideTimeout = null;
+    this.handleTooltipOutsideClick = null;
 
     // State engine. `state` is the single source of truth; the remaining
     // fields are data the states read (the finalize round-trip completed,
@@ -461,9 +462,9 @@ export class EasyUpload {
       case EasyUploadState.INVALID:
         this.uploadDetected = false;
         this.updateConfirmButtonState(true);
-        // Keep the failure message up (no auto-hide) so it is still on screen
-        // through the delay, then regenerate the QR code.
-        this.showConfirmTooltip('failed', { autoHide: false });
+        // Pin the failure message so it shows without hovering and stays up
+        // through the delay (dismissible by clicking outside), then regenerate.
+        this.showConfirmTooltip('failed', { autoHide: false, pin: true });
         this.scheduleInvalidUploadRefresh();
         break;
       default:
@@ -483,7 +484,17 @@ export class EasyUpload {
     }, INVALID_UPLOAD_DISPLAY_MS);
   }
 
-  showConfirmTooltip(messageKey, { autoHide = true } = {}) {
+  /**
+   * Show the confirm tooltip.
+   * @param {string} messageKey - Key into confirmTooltipMessages
+   * @param {object} [options]
+   * @param {boolean} [options.autoHide=true] - Auto-dismiss after a delay
+   * @param {boolean} [options.pin=false] - Show independently of hover state
+   *   (survives mouseleave/blur) and dismiss on an outside click instead. Used
+   *   for the corrupted-upload message so it stays put without hovering.
+   * @returns {boolean} Whether the tooltip was shown
+   */
+  showConfirmTooltip(messageKey, { autoHide = true, pin = false } = {}) {
     if (!this.confirmTooltipElement) {
       return false;
     }
@@ -493,9 +504,19 @@ export class EasyUpload {
     }
     this.confirmTooltipElement.textContent = message;
     this.confirmTooltipElement.classList.remove('hidden');
-    this.confirmTooltipElement.classList.add('hover');
     clearTimeout(this.confirmTooltipHideTimeout);
     this.confirmTooltipHideTimeout = null;
+
+    if (pin) {
+      // `.pinned` is a hover-independent visibility class the block's hover
+      // handlers never touch, so the message can't be yanked away on
+      // mouseleave. It is dismissed by clicking outside the tooltip.
+      this.confirmTooltipElement.classList.add('pinned');
+      this.attachTooltipOutsideDismiss();
+      return true;
+    }
+
+    this.confirmTooltipElement.classList.add('hover');
     if (autoHide) {
       this.confirmTooltipHideTimeout = setTimeout(() => {
         this.confirmTooltipElement?.classList.remove('hover');
@@ -507,6 +528,30 @@ export class EasyUpload {
   hideConfirmTooltip() {
     if (!this.confirmTooltipElement) return;
     this.confirmTooltipElement.classList.remove('hover');
+    this.confirmTooltipElement.classList.remove('pinned');
+    this.detachTooltipOutsideDismiss();
+  }
+
+  /**
+   * Dismiss a pinned tooltip when the user clicks anywhere outside of it.
+   * The pinned tooltip is only ever surfaced from a timer (upload polling) or
+   * after the confirm click has already finished propagating, so registering
+   * synchronously can't self-dismiss on the triggering click.
+   */
+  attachTooltipOutsideDismiss() {
+    this.detachTooltipOutsideDismiss();
+    this.handleTooltipOutsideClick = (event) => {
+      if (this.confirmTooltipElement?.contains(event.target)) return;
+      this.hideConfirmTooltip();
+    };
+    document.addEventListener('click', this.handleTooltipOutsideClick, true);
+  }
+
+  detachTooltipOutsideDismiss() {
+    if (this.handleTooltipOutsideClick) {
+      document.removeEventListener('click', this.handleTooltipOutsideClick, true);
+      this.handleTooltipOutsideClick = null;
+    }
   }
 
   /**
@@ -1388,6 +1433,7 @@ export class EasyUpload {
       this.invalidUploadRefreshTimeout = null;
     }
 
+    this.detachTooltipOutsideDismiss();
     this.stopUploadDetectionPolling();
 
     if (this.versionReadyPromise) {

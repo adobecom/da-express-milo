@@ -306,13 +306,47 @@ describe('EasyUpload failure handling', () => {
 
       expect(easyUpload.confirmButton.classList.contains('disabled')).to.be.true;
       expect(tooltip.textContent).to.equal(FAILED_MSG);
-      expect(tooltip.classList.contains('hover')).to.be.true;
+      // Shown via `.pinned` so it does not depend on hover state.
+      expect(tooltip.classList.contains('pinned')).to.be.true;
       expect(easyUpload.uploadDetectionInterval).to.be.null;
 
       // The refresh is deferred so the failure message stays on screen.
       expect(refreshSpy.called).to.be.false;
       await clock.tickAsync(5000);
       expect(refreshSpy.calledOnce).to.be.true;
+    });
+
+    it('dismisses the pinned failure tooltip when the user clicks outside it', async () => {
+      const clock = sinon.useFakeTimers();
+      const easyUpload = createInstance();
+      const tooltip = document.createElement('div');
+      tooltip.classList.add('hidden');
+      document.body.appendChild(tooltip);
+      easyUpload.setConfirmTooltipConfig({
+        element: tooltip,
+        messages: { failed: FAILED_MSG },
+      });
+      easyUpload.uploadAsset = {};
+      easyUpload.uploadService = {};
+      sinon.stub(easyUpload, 'prepareUploadedFileForConfirm').callsFake(async () => {
+        easyUpload.uploadFinalized = true;
+        const error = new Error('Unrecognized or corrupted file: no valid image signature');
+        error.easyUploadStage = 'retrieve';
+        throw error;
+      });
+      sinon.stub(easyUpload, 'refreshQRCode').resolves();
+
+      easyUpload.startUploadDetectionPolling();
+      await clock.tickAsync(2000);
+      expect(tooltip.classList.contains('pinned')).to.be.true;
+
+      // A click inside the tooltip must NOT dismiss it.
+      tooltip.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      expect(tooltip.classList.contains('pinned')).to.be.true;
+
+      // A click outside dismisses it.
+      document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      expect(tooltip.classList.contains('pinned')).to.be.false;
     });
 
     it('holds the failure message through the delay, then dismisses it once the refresh completes', async () => {
@@ -343,7 +377,7 @@ describe('EasyUpload failure handling', () => {
 
       // Corruption detected: message shown, refresh not started yet.
       expect(tooltip.textContent).to.equal(FAILED_MSG);
-      expect(tooltip.classList.contains('hover')).to.be.true;
+      expect(tooltip.classList.contains('pinned')).to.be.true;
 
       // Stop the completed refresh from starting a fresh poll during the test.
       sinon.stub(easyUpload, 'startUploadDetectionPolling');
@@ -351,12 +385,12 @@ describe('EasyUpload failure handling', () => {
       // Advance through the delay; the refresh starts but QR generation is
       // pending, so the failure message is still on screen.
       await clock.tickAsync(5000);
-      expect(tooltip.classList.contains('hover')).to.be.true;
+      expect(tooltip.classList.contains('pinned')).to.be.true;
 
       resolveRefresh();
       await clock.tickAsync(0);
 
-      expect(tooltip.classList.contains('hover')).to.be.false;
+      expect(tooltip.classList.contains('pinned')).to.be.false;
     });
 
     it('retrieveUploadedFile rejects an empty upload', async () => {
@@ -407,7 +441,7 @@ describe('EasyUpload failure handling', () => {
 
       expect(tooltip.textContent).to.equal(FAILED_MSG);
       expect(tooltip.classList.contains('hidden')).to.be.false;
-      expect(tooltip.classList.contains('hover')).to.be.true;
+      expect(tooltip.classList.contains('pinned')).to.be.true;
       expect(startSDKStub.called).to.be.false;
     });
   });
