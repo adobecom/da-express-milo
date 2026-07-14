@@ -50,6 +50,9 @@ export const EasyUploadVariantsPromoidMap = {
 
 const QR_CODE_CDN_URL = 'https://cdn.jsdelivr.net/npm/qr-code-styling@1.9.2/lib/qr-code-styling.js';
 const CONFIRM_TOOLTIP_AUTO_HIDE_DELAY = 4000;
+// How long the failure message stays on screen before the QR code is
+// regenerated, so the user can read what went wrong before it disappears.
+const INVALID_UPLOAD_DISPLAY_MS = 5000;
 
 const URL_SHORTENER_CONFIGS = {
   prod: {
@@ -322,6 +325,44 @@ function getUrlShortenerConfig(envName) {
 }
 
 /**
+ * Lifecycle states for a single QR-based upload session. The instance is
+ * always in exactly one of these; every UI side effect (button state,
+ * tooltip, refresh scheduling) is driven from state entry rather than from
+ * ad-hoc boolean flags scattered across the flow.
+ * @readonly
+ * @enum {string}
+ */
+export const EasyUploadState = {
+  IDLE: 'idle', // constructed, nothing generated yet
+  GENERATING: 'generating', // creating an asset / QR code
+  AWAITING_UPLOAD: 'awaiting-upload', // QR shown, polling for a mobile upload
+  READY: 'ready', // an upload arrived and validated; confirm enabled
+  INVALID: 'invalid', // an upload arrived but failed validation
+  CONFIRMING: 'confirming', // user confirmed; handing off to the SDK
+  ERROR: 'error', // QR generation failed
+};
+
+// Permitted transitions. The engine logs (but does not throw) on an
+// unexpected transition, so a late async callback can never wedge the UI in
+// an inconsistent state — the worst case is a warning in the logs.
+const EASY_UPLOAD_TRANSITIONS = {
+  [EasyUploadState.IDLE]: [EasyUploadState.GENERATING],
+  [EasyUploadState.GENERATING]: [EasyUploadState.AWAITING_UPLOAD, EasyUploadState.ERROR],
+  [EasyUploadState.AWAITING_UPLOAD]: [
+    EasyUploadState.READY, EasyUploadState.INVALID, EasyUploadState.GENERATING,
+  ],
+  [EasyUploadState.READY]: [
+    EasyUploadState.CONFIRMING, EasyUploadState.INVALID,
+    EasyUploadState.GENERATING, EasyUploadState.AWAITING_UPLOAD,
+  ],
+  [EasyUploadState.INVALID]: [EasyUploadState.GENERATING],
+  [EasyUploadState.CONFIRMING]: [
+    EasyUploadState.INVALID, EasyUploadState.READY, EasyUploadState.GENERATING,
+  ],
+  [EasyUploadState.ERROR]: [EasyUploadState.GENERATING],
+};
+
+/**
  * EasyUpload class for handling file uploads via QR code
  * Manages QR code generation, ACP storage, and file upload flow
  */
@@ -356,9 +397,15 @@ export class EasyUpload {
     this.confirmTooltipElement = null;
     this.confirmTooltipMessages = {};
     this.confirmTooltipHideTimeout = null;
+
+    // State engine. `state` is the single source of truth; the remaining
+    // fields are data the states read (the finalize round-trip completed,
+    // the validated file to hand off, whether an upload was detected).
+    this.state = EasyUploadState.IDLE;
+    this.invalidUploadRefreshTimeout = null;
     this.uploadFinalized = false;
+    this.uploadDetected = false;
     this.validatedUploadedFile = null;
-    this.uploadValidationFailed = false;
     this.hasConsumedQrCode = false;
 
     this.asset = null;
@@ -379,7 +426,64 @@ export class EasyUpload {
     this.confirmTooltipMessages = messages || {};
   }
 
-  showConfirmTooltip(messageKey) {
+  /**
+   * Move the session to a new state, running its entry side effects. Invalid
+   * transitions are logged and still applied so a stray callback can't lock
+   * the UI; the state table documents the intended flow.
+   * @param {string} nextState - One of EasyUploadState
+   */
+  transitionTo(nextState) {
+    if (this.state === nextState) return;
+    const allowed = EASY_UPLOAD_TRANSITIONS[this.state] || [];
+    if (!allowed.includes(nextState)) {
+      window.lana?.log(`[EasyUpload] Unexpected state transition: ${this.state} -> ${nextState}`, { severity: 'warning' });
+    }
+    this.state = nextState;
+    this.onEnterState(nextState);
+  }
+
+  /**
+   * Synchronous UI side effects for entering a state. Async work (generating
+   * or refreshing the QR code) is driven by the methods that call
+   * transitionTo, not from here.
+   * @param {string} state - The state just entered
+   */
+  onEnterState(state) {
+    switch (state) {
+      case EasyUploadState.AWAITING_UPLOAD:
+        this.uploadDetected = false;
+        this.updateConfirmButtonState(true);
+        break;
+      case EasyUploadState.READY:
+        this.uploadDetected = true;
+        this.updateConfirmButtonState(false);
+        break;
+      case EasyUploadState.INVALID:
+        this.uploadDetected = false;
+        this.updateConfirmButtonState(true);
+        // Keep the failure message up (no auto-hide) so it is still on screen
+        // through the delay, then regenerate the QR code.
+        this.showConfirmTooltip('failed', { autoHide: false });
+        this.scheduleInvalidUploadRefresh();
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * After an invalid upload, wait INVALID_UPLOAD_DISPLAY_MS with the error
+   * visible, then regenerate the QR code so the user can try again.
+   */
+  scheduleInvalidUploadRefresh() {
+    clearTimeout(this.invalidUploadRefreshTimeout);
+    this.invalidUploadRefreshTimeout = setTimeout(() => {
+      this.invalidUploadRefreshTimeout = null;
+      this.refreshQRCode();
+    }, INVALID_UPLOAD_DISPLAY_MS);
+  }
+
+  showConfirmTooltip(messageKey, { autoHide = true } = {}) {
     if (!this.confirmTooltipElement) {
       return false;
     }
@@ -391,9 +495,12 @@ export class EasyUpload {
     this.confirmTooltipElement.classList.remove('hidden');
     this.confirmTooltipElement.classList.add('hover');
     clearTimeout(this.confirmTooltipHideTimeout);
-    this.confirmTooltipHideTimeout = setTimeout(() => {
-      this.confirmTooltipElement?.classList.remove('hover');
-    }, CONFIRM_TOOLTIP_AUTO_HIDE_DELAY);
+    this.confirmTooltipHideTimeout = null;
+    if (autoHide) {
+      this.confirmTooltipHideTimeout = setTimeout(() => {
+        this.confirmTooltipElement?.classList.remove('hover');
+      }, CONFIRM_TOOLTIP_AUTO_HIDE_DELAY);
+    }
     return true;
   }
 
@@ -443,7 +550,6 @@ export class EasyUpload {
   async generatePresignedUploadUrl() {
     this.uploadFinalized = false;
     this.validatedUploadedFile = null;
-    this.uploadValidationFailed = false;
     try {
       const hasNativeCreateAsset = typeof this.uploadService?.createAsset === 'function';
       const hasNativeInitializeBlockUpload = typeof this.uploadService?.initializeBlockUpload === 'function';
@@ -624,11 +730,8 @@ export class EasyUpload {
    */
   async retrieveUploadedFile() {
     try {
+      // Rejection here propagates as a thrown error; no extra flag to check.
       await this.waitForAssetVersionReady();
-
-      if (this.versionReadyPromise?.isRejected) {
-        throw new Error('Asset version not ready');
-      }
 
       const hasNativeDownloadAssetContent = typeof this.uploadService?.downloadAssetContent === 'function';
       const blob = hasNativeDownloadAssetContent
@@ -944,7 +1047,7 @@ export class EasyUpload {
     }
 
     if (this.qrCodeContainer) {
-      this.qrCodeContainer.innerHTML = '';
+      this.qrCodeContainer.replaceChildren();
       this.qrCodeContainer.setAttribute('role', 'img');
       this.qrCodeContainer.setAttribute('aria-label', 'QR code — scan with your phone to upload a file');
       this.qrCode.append(this.qrCodeContainer);
@@ -960,6 +1063,7 @@ export class EasyUpload {
      */
   async initializeQRCode() {
     try {
+      this.transitionTo(EasyUploadState.GENERATING);
       this.markQrCodeFresh();
       this.showLoader();
       if (shouldForceQrFailure()) {
@@ -967,12 +1071,15 @@ export class EasyUpload {
       }
 
       const uploadUrl = await this.generateUploadUrl();
+      // A null URL means a generation is already in flight (isGeneratingUrl
+      // guard); that in-flight call owns the loader/QR, so leave state as-is.
       if (!uploadUrl) return;
       await this.displayQRCode(uploadUrl);
 
       this.scheduleQRRefresh();
     } catch (error) {
       window.lana?.log(`[EasyUpload] Failed to initialize QR code: ${error?.name} ${error?.message} code=${error?.code} status=${error?.statusCode}`, { severity: 'error' });
+      this.transitionTo(EasyUploadState.ERROR);
       this.showFailedQR();
       this.showErrorToast(this.block, 'Failed to generate QR code.');
     }
@@ -1029,20 +1136,24 @@ export class EasyUpload {
       this.versionReadyPromise = null;
     }
 
+    clearTimeout(this.invalidUploadRefreshTimeout);
+    this.invalidUploadRefreshTimeout = null;
     this.uploadFinalized = false;
     this.uploadDetected = false;
     this.validatedUploadedFile = null;
-    this.uploadValidationFailed = false;
     await this.cleanupAcpStorage();
   }
 
   /**
-     * Refresh QR code with new upload URL
+     * Regenerate the QR code for a fresh upload attempt. Uses
+     * resetUploadSession (not cleanup) so the confirm-button and unload
+     * listeners survive; cleanup is reserved for final teardown.
      * @returns {Promise<void>}
      */
   async refreshQRCode() {
     try {
-      await this.cleanup();
+      this.transitionTo(EasyUploadState.GENERATING);
+      await this.resetUploadSession();
       await this.initializeQRCode();
       this.hideConfirmTooltip();
       this.startUploadDetectionPolling();
@@ -1065,6 +1176,7 @@ export class EasyUpload {
       const file = await this.prepareUploadedFileForConfirm();
 
       if (file) {
+        this.transitionTo(EasyUploadState.CONFIRMING);
         await this.startSDKWithUnconvertedFiles([file], this.quickAction, this.block, true);
       } else {
         throw new Error('No file was uploaded');
@@ -1072,12 +1184,15 @@ export class EasyUpload {
     } catch (error) {
       window.lana?.log(`[EasyUpload] Failed to confirm import: ${error?.message || error}`, { severity: 'error' });
       if (error?.easyUploadStage === 'finalize') {
+        // Upload not yet finalized on the server — recoverable; let the user
+        // retry without regenerating the QR code.
         this.showConfirmTooltip('pending');
         this.updateConfirmButtonState(false);
         return;
       }
-      this.showConfirmTooltip('failed');
-      this.refreshQRCode();
+      // Corrupted/undecodable file: show the failure, hold it on screen, then
+      // regenerate the QR code (handled by the INVALID state).
+      this.transitionTo(EasyUploadState.INVALID);
     }
   }
 
@@ -1112,7 +1227,6 @@ export class EasyUpload {
       throw error;
     }
     this.validatedUploadedFile = file;
-    this.uploadValidationFailed = false;
     return file;
   }
 
@@ -1186,10 +1300,8 @@ export class EasyUpload {
       clearInterval(this.uploadDetectionInterval);
     }
 
-    this.uploadDetected = false;
     this.validatedUploadedFile = null;
-    this.uploadValidationFailed = false;
-    this.updateConfirmButtonState(true);
+    this.transitionTo(EasyUploadState.AWAITING_UPLOAD);
     const POLL_INTERVAL_MS = 2000;
     const MAX_POLL_TIME_MS = 30 * 60 * 1000;
     const startTime = Date.now();
@@ -1207,8 +1319,7 @@ export class EasyUpload {
         }
 
         if (this.validatedUploadedFile) {
-          this.uploadDetected = true;
-          this.updateConfirmButtonState(false);
+          this.transitionTo(EasyUploadState.READY);
           clearInterval(this.uploadDetectionInterval);
           this.uploadDetectionInterval = null;
           return;
@@ -1216,19 +1327,17 @@ export class EasyUpload {
 
         try {
           await this.prepareUploadedFileForConfirm();
-          this.uploadDetected = true;
-          this.updateConfirmButtonState(false);
-
           clearInterval(this.uploadDetectionInterval);
           this.uploadDetectionInterval = null;
+          this.transitionTo(EasyUploadState.READY);
         } catch (error) {
+          // Only treat this as a real failure once the upload has finalized;
+          // before that the poll is just waiting for the file to arrive.
           if (this.uploadFinalized) {
-            this.uploadValidationFailed = true;
-            this.updateConfirmButtonState(true);
-            this.showConfirmTooltip('failed');
             clearInterval(this.uploadDetectionInterval);
             this.uploadDetectionInterval = null;
-            this.refreshQRCode();
+            // INVALID shows the error, holds it, then regenerates the QR code.
+            this.transitionTo(EasyUploadState.INVALID);
           }
         }
       } catch (error) {
@@ -1272,6 +1381,11 @@ export class EasyUpload {
     if (this.confirmTooltipHideTimeout) {
       clearTimeout(this.confirmTooltipHideTimeout);
       this.confirmTooltipHideTimeout = null;
+    }
+
+    if (this.invalidUploadRefreshTimeout) {
+      clearTimeout(this.invalidUploadRefreshTimeout);
+      this.invalidUploadRefreshTimeout = null;
     }
 
     this.stopUploadDetectionPolling();

@@ -58,7 +58,8 @@ describe('EasyUpload failure handling', () => {
     expect(startSDKStub.called).to.be.false;
   });
 
-  it('refreshes the QR code when retrieving the uploaded file fails', async () => {
+  it('refreshes the QR code after a delay when retrieving the uploaded file fails', async () => {
+    const clock = sinon.useFakeTimers();
     const easyUpload = createInstance();
     sinon.stub(easyUpload, 'finalizeUpload').resolves();
     const refreshSpy = sinon.stub(easyUpload, 'refreshQRCode').resolves();
@@ -66,8 +67,13 @@ describe('EasyUpload failure handling', () => {
 
     await easyUpload.handleConfirmImport();
 
-    expect(refreshSpy.calledOnce).to.be.true;
+    // The failure is surfaced immediately; the QR code is only regenerated
+    // after the delay so the user can read what went wrong.
+    expect(refreshSpy.called).to.be.false;
     expect(startSDKStub.called).to.be.false;
+
+    await clock.tickAsync(5000);
+    expect(refreshSpy.calledOnce).to.be.true;
   });
 
   it('marks the QR code as consumed after confirm import is pressed', async () => {
@@ -301,11 +307,15 @@ describe('EasyUpload failure handling', () => {
       expect(easyUpload.confirmButton.classList.contains('disabled')).to.be.true;
       expect(tooltip.textContent).to.equal(FAILED_MSG);
       expect(tooltip.classList.contains('hover')).to.be.true;
-      expect(refreshSpy.calledOnce).to.be.true;
       expect(easyUpload.uploadDetectionInterval).to.be.null;
+
+      // The refresh is deferred so the failure message stays on screen.
+      expect(refreshSpy.called).to.be.false;
+      await clock.tickAsync(5000);
+      expect(refreshSpy.calledOnce).to.be.true;
     });
 
-    it('shows the failed tooltip when corruption is detected until QR refresh completes', async () => {
+    it('holds the failure message through the delay, then dismisses it once the refresh completes', async () => {
       const clock = sinon.useFakeTimers();
       const easyUpload = createInstance();
       const tooltip = document.createElement('div');
@@ -322,7 +332,7 @@ describe('EasyUpload failure handling', () => {
         error.easyUploadStage = 'retrieve';
         throw error;
       });
-      sinon.stub(easyUpload, 'cleanup').resolves();
+      sinon.stub(easyUpload, 'resetUploadSession').resolves();
       let resolveRefresh;
       sinon.stub(easyUpload, 'initializeQRCode').returns(new Promise((resolve) => {
         resolveRefresh = resolve;
@@ -331,14 +341,22 @@ describe('EasyUpload failure handling', () => {
       easyUpload.startUploadDetectionPolling();
       await clock.tickAsync(2000);
 
+      // Corruption detected: message shown, refresh not started yet.
       expect(tooltip.textContent).to.equal(FAILED_MSG);
       expect(tooltip.classList.contains('hover')).to.be.true;
 
+      // Stop the completed refresh from starting a fresh poll during the test.
+      sinon.stub(easyUpload, 'startUploadDetectionPolling');
+
+      // Advance through the delay; the refresh starts but QR generation is
+      // pending, so the failure message is still on screen.
+      await clock.tickAsync(5000);
+      expect(tooltip.classList.contains('hover')).to.be.true;
+
       resolveRefresh();
-      await Promise.resolve();
+      await clock.tickAsync(0);
 
       expect(tooltip.classList.contains('hover')).to.be.false;
-      easyUpload.cleanup.restore();
     });
 
     it('retrieveUploadedFile rejects an empty upload', async () => {
