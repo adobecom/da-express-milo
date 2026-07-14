@@ -111,25 +111,35 @@
   }
 }
 
-/* White SUSI card centered on the backdrop. */
+/* White SUSI card centered on the backdrop. min-width:0 stops the flex item from
+   growing to the SUSI content's intrinsic width so it holds the 370px like PROD. */
 .color-libraries-signin-card {
   width: 370px;
+  min-width: 0;
+  min-height: var(--susi-min-height, 462px);
   max-width: 100%;
   box-sizing: border-box;
-  padding: var(--spacing-500) var(--spacing-400) var(--spacing-400);
   border-radius: 12px;
   background: var(--color-white, #fff);
   box-shadow: 0 4px 24px rgb(0 0 0 / 16%);
 }
 
 /* Neutralize the loaded fragment's section/fragment wrappers so only the card
-   chrome shows around the authored SUSI block. */
+   chrome shows around the authored SUSI block. The SUSI content itself renders
+   inside a cross-origin IMS iframe (auth-light.identity.adobe.com) and cannot be
+   styled from here — its fonts/spacing/copy come from the SUSI config, not CSS. */
 .color-libraries-signin-card .section,
 .color-libraries-signin-card .fragment {
   width: auto;
   max-width: none;
   margin: 0;
   padding: 0;
+}
+
+/* Mirror the PROD SUSI modal's logo spacing (.dialog-modal .susi-light
+   .express-logo) so the inline card matches triggerSignInFlow's modal. */
+.color-libraries-signin-card .susi-light .express-logo {
+  padding-top: var(--spacing-500);
 }
 
 /* Mobile: the sign-in card becomes the block's own content — no floating card,
