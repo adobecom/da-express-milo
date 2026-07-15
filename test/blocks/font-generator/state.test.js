@@ -227,14 +227,14 @@ describe('font-generator/state', () => {
       expect(getState().activeFilters).to.deep.equal(['strikethrough']);
     });
 
-    it('reads layout=list from the layout param', () => {
-      window.history.pushState(null, '', '?layout=list');
+    it('reads view=list from the view param', () => {
+      window.history.pushState(null, '', '?view=list');
       initFromUrl();
       expect(getState().layout).to.equal('list');
     });
 
-    it('reads layout=grid from the layout param', () => {
-      window.history.pushState(null, '', '?layout=grid');
+    it('reads view=grid from the view param', () => {
+      window.history.pushState(null, '', '?view=grid');
       initFromUrl();
       expect(getState().layout).to.equal('grid');
     });
@@ -258,8 +258,8 @@ describe('font-generator/state', () => {
       expect(getState().layout).to.equal('list');
     });
 
-    it('ignores an unrecognised layout value', () => {
-      window.history.pushState(null, '', '?layout=carousel');
+    it('ignores an unrecognised view value', () => {
+      window.history.pushState(null, '', '?view=carousel');
       initFromUrl();
       expect(getState().layout).to.equal('grid');
     });
@@ -300,9 +300,9 @@ describe('font-generator/state', () => {
       expect(getUrlArg().searchParams.get('text')).to.equal('test text');
     });
 
-    it('writes the layout param', () => {
+    it('writes the view param', () => {
       setState({ layout: 'list' });
-      expect(getUrlArg().searchParams.get('layout')).to.equal('list');
+      expect(getUrlArg().searchParams.get('view')).to.equal('list');
     });
 
     it('writes the size param', () => {

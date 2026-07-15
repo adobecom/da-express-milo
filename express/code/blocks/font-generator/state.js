@@ -20,7 +20,7 @@ const DEFAULTS = {
 const URL_PARAMS = {
   previewText: 'text',
   activeFilters: 'filters',
-  layout: 'layout',
+  layout: 'view',
   fontSize: 'size',
 };
 

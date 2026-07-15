@@ -17,7 +17,7 @@ test.describe('FontGeneratorBlock Test Suite', () => {
       await page.goto(testUrl);
       await page.waitForLoadState('domcontentloaded');
       // The block may sync non-default state to the URL on load (e.g. a
-      // responsive ?layout=list on small viewports), so match the base path
+      // responsive ?view=list on small viewports), so match the base path
       // and ignore any query string it appends.
       await expect(page).toHaveURL(new RegExp(`^${testUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\?.*)?$`));
     });
