@@ -1,8 +1,8 @@
 import { getState, setState } from './state.js';
+import { DEFAULT_PLACEHOLDERS } from './placeholders.js';
 
 const BASE_PATH = '/express/code/blocks/font-generator';
 const STYLESHEET_HREF = `${BASE_PATH}/textInput.css`;
-const MAX_LENGTH = 200;
 const DEBOUNCE_MS = 300;
 const MIN_TEXTAREA_HEIGHT = 104; // matches textInput.css .label min-height
 
@@ -19,9 +19,9 @@ template.innerHTML = `<div class="font-generator-text-input">
   <div class="text-field">
     <div class="text-area-l-in-line">
       <div class="field">
-        <textarea class="label" maxlength="${MAX_LENGTH}"></textarea>
+        <textarea class="label"></textarea>
         <div class="counter-expander">
-          <div class="character-count">0/${MAX_LENGTH}</div>
+          <div class="character-count"></div>
         </div>
         <div class="resize-handle" aria-hidden="true"></div>
       </div>
@@ -108,12 +108,15 @@ function initTextInput(panel) {
   const counter = panel.querySelector('.character-count');
   if (!textarea || !counter) return () => {};
 
-  // Restore state set by initFromUrl before this panel was created.
+  // Restore state set by initFromUrl before this panel was created, truncating
+  // an overlong value (e.g. from a ?text= URL param) to the current limit.
   const initial = getState().previewText;
   if (initial) {
-    textarea.value = initial;
-    syncCounter(textarea, counter);
+    const truncated = initial.slice(0, textarea.maxLength);
+    textarea.value = truncated;
+    if (truncated !== initial) setState({ previewText: truncated });
   }
+  syncCounter(textarea, counter);
 
   let timer;
   const flush = (value) => {
@@ -138,7 +141,7 @@ function initSuggestionPills(panel, cancelPendingInput) {
 
   const activate = (pill) => {
     const text = pill.querySelector('.div')?.textContent ?? '';
-    const truncated = text.slice(0, MAX_LENGTH);
+    const truncated = text.slice(0, textarea.maxLength);
     cancelPendingInput();
     textarea.value = truncated;
     if (counter) syncCounter(textarea, counter);
@@ -175,6 +178,8 @@ function applyStrings(panel, strings = {}) {
 export default function createTextInput(config = {}) {
   injectStyles();
   const panel = template.content.firstElementChild.cloneNode(true);
+  const textarea = panel.querySelector('textarea.label');
+  textarea.maxLength = config.strings?.maxLength || DEFAULT_PLACEHOLDERS.maxLength;
   applyStrings(panel, config.strings);
   initResizeHandle(panel);
   const cancelPendingInput = initTextInput(panel);

@@ -61,6 +61,22 @@ describe('font-generator/textInput', () => {
     expect(panel.querySelector('.character-count').textContent).to.equal('8/200');
   });
 
+  it('uses maxLength from strings when provided', () => {
+    const { panel } = createTextInput({ strings: { maxLength: 10 } });
+    const ta = panel.querySelector('textarea.label');
+    expect(ta.maxLength).to.equal(10);
+    expect(panel.querySelector('.character-count').textContent).to.equal('0/10');
+  });
+
+  it('truncates an overlong restored previewText to the resolved limit', () => {
+    setState({ previewText: 'This value is way too long for a ten char limit' });
+    const { panel } = createTextInput({ strings: { maxLength: 10 } });
+    const ta = panel.querySelector('textarea.label');
+    expect(ta.value).to.equal('This value');
+    expect(panel.querySelector('.character-count').textContent).to.equal('10/10');
+    expect(getState().previewText).to.equal('This value');
+  });
+
   it('renders a suggestion pill per suggestion', () => {
     const { panel } = createTextInput({ suggestions: ['One', 'Two'] });
     expect(panel.querySelectorAll('.tag-pills').length).to.equal(2);
@@ -72,6 +88,15 @@ describe('font-generator/textInput', () => {
     panel.querySelector('.tag-pills').click();
     expect(panel.querySelector('textarea.label').value).to.equal('Pangram');
     expect(getState().previewText).to.equal('Pangram');
+    panel.remove();
+  });
+
+  it('truncates a suggestion pill to the resolved character limit', () => {
+    const { panel } = createTextInput({ suggestions: ['A pangram far too long'], strings: { maxLength: 10 } });
+    document.body.append(panel);
+    panel.querySelector('.tag-pills').click();
+    expect(panel.querySelector('textarea.label').value).to.equal('A pangram ');
+    expect(getState().previewText).to.equal('A pangram ');
     panel.remove();
   });
 
