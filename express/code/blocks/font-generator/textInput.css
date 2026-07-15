@@ -27,7 +27,6 @@
   width: 100%;
   align-items: flex-start;
   gap: var(--spacing-400);
-  padding: 16px;
   position: relative;
   background: var(--color-gray-150);
 }

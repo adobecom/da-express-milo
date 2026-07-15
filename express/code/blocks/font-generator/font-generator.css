@@ -1,34 +1,41 @@
-/* Full-bleed block: drop Milo's default section top-padding and prose-width
-   content cap so the grid can span the section (same fix as ax-columns et al.). */
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):has(.font-generator):not([data-padding='none']) > .content:first-child {
-  padding-top: 0;
-}
-
-main .section:has(.font-generator) > .content {
-  max-width: unset;
-}
-
 .font-generator {
   --fg-sidebar-width: 477px;
   --fg-panel-width: 511px;
-  --gnav-offset-height: 63px; /* sticky rail must clear the sticky gnav */
+
+  padding: var(--spacing-600) var(--spacing-300);
   background-color: var(--color-gray-150);
 }
 
 /* Layout: single column up to 1200px, then a sticky sidebar rail + results.
    Insets live on the grid (not the block root) so the background stays full-bleed. */
+.font-generator .fg-container.fg-loading {
+  display: none;
+}
+
 .font-generator .fg-container {
   box-sizing: border-box;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 24px;
-  padding-inline: var(--ax-grid-margin, 20px);
+  gap: var(--spacing-400);
+  max-width: var(--block-wd-grid-max-width);
+  margin-inline: auto;
 }
 
 .font-generator .fg-sidebar,
 .font-generator .fg-main {
   min-width: 0;
+}
+
+.font-generator .fg-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+}
+
+.font-generator .fg-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
 }
 
 /* Filters */
@@ -243,10 +250,257 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   display: none;
 }
 
+/* ── Skeleton loader ──────────────────────────────────────────────── */
+
+@keyframes fg-sk-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position:  200% center; }
+}
+
+@keyframes fg-sk-spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Dark shimmer — toolbar, sidebar, filters */
+.font-generator .fg-sk-text-input,
+.font-generator .fg-sk-layout-btn,
+.font-generator .fg-sk-count,
+.font-generator .fg-sk-slider,
+.font-generator .fg-sk-filter-label,
+.font-generator .fg-sk-filter-btn,
+.font-generator .fg-sk-promo {
+  background: linear-gradient(90deg, #dadada 25%, #ebebeb 50%, #dadada 75%);
+  background-size: 200% 100%;
+  animation: fg-sk-shimmer 1.5s linear infinite;
+}
+
+/* Light shimmer — card internals */
+.font-generator .fg-sk-copy-btn,
+.font-generator .fg-sk-preview,
+.font-generator .fg-sk-name {
+  background: linear-gradient(90deg, #ebebeb 25%, #f8f8f8 50%, #ebebeb 75%);
+  background-size: 200% 100%;
+  animation: fg-sk-shimmer 1.5s linear infinite;
+}
+
+/* Pending buttons — shared base */
+.font-generator .fg-sk-filter-trigger,
+.font-generator .fg-sk-cta,
+.font-generator .fg-sk-load-more {
+  background: rgba(0, 0, 0, 0.09);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.font-generator .fg-sk-filter-trigger::after,
+.font-generator .fg-sk-cta::after,
+.font-generator .fg-sk-load-more::after {
+  content: '';
+  border-radius: 50%;
+  border: 2px solid rgba(0, 0, 0, 0.12);
+  border-top-color: rgba(0, 0, 0, 0.75);
+  animation: fg-sk-spin 0.8s linear infinite;
+}
+
+.font-generator .fg-sk-filter-trigger::after,
+.font-generator .fg-sk-cta::after {
+  width: 18px;
+  height: 18px;
+}
+
+.font-generator .fg-sk-load-more::after {
+  width: 24px;
+  height: 24px;
+}
+
+/* Layout */
+.font-generator .fg-sk {
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--spacing-400);
+  max-width: var(--block-wd-grid-max-width);
+  margin-inline: auto;
+}
+
+.font-generator .fg-sk-sidebar,
+.font-generator .fg-sk-main {
+  min-width: 0;
+}
+
+.font-generator .fg-sk-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
+}
+
+.font-generator .fg-sk-text-input {
+  height: 200px;
+  border-radius: var(--Corner-radius-corner-radius-200);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.font-generator .fg-sk-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  align-items: center;
+}
+
+.font-generator .fg-sk-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.font-generator .fg-sk-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.font-generator .fg-sk-layout-btns {
+  display: none;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.font-generator .fg-sk-layout-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+}
+
+.font-generator .fg-sk-count {
+  flex: 1;
+  max-width: 200px;
+  height: 20px;
+  border-radius: 100px;
+}
+
+.font-generator .fg-sk-filter-trigger {
+  width: 78px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  margin-inline-start: auto;
+}
+
+.font-generator .fg-sk-toolbar-right {
+  width: 100%;
+}
+
+.font-generator .fg-sk-slider {
+  width: 100%;
+  max-width: 278px;
+  height: 32px;
+  border-radius: 100px;
+}
+
+.font-generator .fg-sk-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  width: 100%;
+}
+
+.font-generator .fg-sk-card {
+  background: var(--color-white);
+  border-radius: var(--Corner-radius-corner-radius-200);
+  min-height: 222px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.font-generator .fg-sk-card-body {
+  position: relative;
+  box-sizing: border-box;
+  height: 166px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 64px 16px 32px;
+}
+
+.font-generator .fg-sk-copy-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+}
+
+.font-generator .fg-sk-preview {
+  flex: none;
+  height: 62px;
+  border-radius: 8px;
+}
+
+.font-generator .fg-sk-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px 16px;
+}
+
+.font-generator .fg-sk-name {
+  flex: 1;
+  height: 18px;
+  border-radius: 100px;
+}
+
+.font-generator .fg-sk-cta {
+  width: 157px;
+  height: 32px;
+  border-radius: 16px;
+  flex-shrink: 0;
+}
+
+.font-generator .fg-sk-load-more {
+  width: 120px;
+  height: 38px;
+  border-radius: 24px;
+}
+
+.font-generator .fg-sk-filters {
+  display: none;
+  flex-direction: column;
+  gap: var(--spacing-300);
+}
+
+.font-generator .fg-sk-filter-label {
+  width: 60px;
+  height: 14px;
+  border-radius: var(--corner-radius-80);
+}
+
+.font-generator .fg-sk-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-75);
+}
+
+.font-generator .fg-sk-filter-btn {
+  min-height: 48px;
+  border-radius: var(--corner-radius-80, 8px);
+}
+
+.font-generator .fg-sk-promo {
+  height: 64px;
+  border-radius: var(--Corner-radius-corner-radius-200);
+}
+
 /* ── Tablet ───────────────────────────────────────────────────────── */
 @media (min-width: 600px) {
-  .font-generator .fg-container {
-    gap: var(--spacing-300);
+  .font-generator {
+    padding: var(--spacing-600) var(--spacing-500) var(--spacing-700) var(--spacing-500);
   }
 
   .font-generator .fg-panel {
@@ -294,14 +548,17 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 
 /* ── Desktop ──────────────────────────────────────────────────────── */
 @media (min-width: 1200px) {
+  .font-generator {
+    padding: var(--spacing-600) var(--spacing-600) var(--spacing-900);
+  }
+
   .font-generator .fg-container {
     grid-template-columns: var(--fg-sidebar-width) 1fr;
-    padding-bottom: var(--spacing-900);
   }
 
   .font-generator .fg-sidebar {
     position: sticky;
-    top: calc(var(--gnav-offset-height) - 16px);
+    top: calc(var(--global-height-nav) + var(--spacing-600));
     align-self: start;
   }
 
@@ -312,8 +569,67 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 
 /* ── Widescreen ───────────────────────────────────────────────────── */
 @media (min-width: 1680px) {
-  .font-generator .fg-container {
-    max-width: var(--ax-grid-container-width, 1600px);
-    margin-inline: auto;
+  .font-generator {
+    padding-block-end: calc(var(--spacing-800) + var(--spacing-600));
+  }
+}
+
+@media (min-width: 600px) {
+  .font-generator .fg-sk-layout-btns {
+    display: flex;
+  }
+
+  .font-generator .fg-sk-card {
+    min-height: 304px;
+  }
+
+  .font-generator .fg-sk-card-body {
+    height: 240px;
+  }
+
+  .font-generator .fg-sk-preview {
+    flex: 1;
+    height: auto;
+  }
+
+  .font-generator .fg-sk-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1200px) {
+  .font-generator .fg-sk {
+    grid-template-columns: var(--fg-sidebar-width) 1fr;
+  }
+
+  .font-generator .fg-sk-filter-trigger {
+    display: none;
+  }
+
+  .font-generator .fg-sk-filters {
+    display: flex;
+  }
+
+  .font-generator .fg-sk-toolbar {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-100);
+  }
+
+  .font-generator .fg-sk-toolbar-right {
+    width: auto;
+    margin-inline-start: auto;
+  }
+
+  .font-generator .fg-sk-slider {
+    width: 278px;
+    height: 20px;
+    max-width: none;
+  }
+}
+
+@media (min-width: 1680px) {
+  .font-generator .fg-sk-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
