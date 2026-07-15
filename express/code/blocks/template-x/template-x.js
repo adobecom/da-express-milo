@@ -1610,12 +1610,20 @@ async function decorateTemplates(block, props) {
         innerWrapper.classList.remove('masonry');
         innerWrapper.classList.add('flex-masonry');
         props.masonry = new Masonry(innerWrapper, cells);
+        // Reserve once the columns actually exist, and only on the first draw: redraws
+        // (resize, load-more) happen after the thumbnails have sizes of their own, when there
+        // is nothing left to reserve.
+        let reserved = false;
+        props.masonry.onDrawn = () => {
+          if (reserved) return;
+          reserved = true;
+          reserveGridHeight(block, innerWrapper, props.masonry.cells);
+        };
       } else {
         block.remove();
       }
 
       props.masonry.draw();
-      reserveGridHeight(block, innerWrapper, props.masonry.cells);
       window.addEventListener('resize', () => {
         props.masonry.draw();
       });

@@ -314,6 +314,10 @@ export class Masonry {
       this.wrapper.classList.add('template-list-complete');
     } else {
       this.wrapper.parentElement.classList.add('template-x-complete');
+      // draw() is not necessarily done when it returns -- setupColumns bails while the
+      // wrapper has no width (the body is display:none until load completes) and reschedules
+      // itself 200ms later. Callers that need the drawn columns have to be told, not assume.
+      this.onDrawn?.();
     }
   }
 }
