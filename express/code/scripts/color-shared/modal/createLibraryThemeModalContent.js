@@ -68,7 +68,9 @@ function createRailSection(
   railSection.appendChild(railWrap);
 
   // Bottom fade + scrolled-to-bottom toggle for tall (large) rails, matching the
-  // read-only palette modal behavior.
+  // read-only palette modal behavior. A ResizeObserver keeps the fade in sync as
+  // the rail reflows on viewport width changes (e.g. tablet <-> desktop).
+  let destroyRail = () => {};
   if (colorCountRange === 'large') {
     const updateFade = () => {
       const noOverflow = railWrap.scrollHeight <= railWrap.clientHeight;
@@ -77,17 +79,29 @@ function createRailSection(
       railSection.classList.toggle('scrolled-to-bottom', noOverflow || atBottom);
     };
     railWrap.addEventListener('scroll', updateFade, { passive: true });
+    let resizeObserver = null;
     (async () => {
       try {
         await customElements.whenDefined('color-swatch-rail');
         const rail = railWrap.querySelector('color-swatch-rail');
         if (rail?.updateComplete) await rail.updateComplete;
       } catch { /* noop */ }
-      requestAnimationFrame(updateFade);
+      requestAnimationFrame(() => {
+        updateFade();
+        resizeObserver = new ResizeObserver(updateFade);
+        resizeObserver.observe(railWrap);
+      });
     })();
+    destroyRail = () => {
+      railWrap.removeEventListener('scroll', updateFade);
+      resizeObserver?.disconnect();
+      resizeObserver = null;
+    };
   }
 
-  return { railSection, railWrap, railAdapter };
+  return {
+    railSection, railWrap, railAdapter, destroyRail,
+  };
 }
 
 /**
@@ -134,7 +148,7 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
   const root = createTag('main', { class: 'modal-content modal-library-theme', 'daa-lh': 'library-theme-modal' });
 
   const colorCount = normalizedPalette.colors.length;
-  const { railSection, railWrap } = createRailSection(
+  const { railSection, railWrap, destroyRail } = createRailSection(
     normalizedPalette,
     interpolate(strings.librariesModalPaletteAria, { count: colorCount }),
     colorSwatchRailStrings,
@@ -289,6 +303,7 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
     element: root,
     initNav: initTabIndexes,
     destroy: () => {
+      destroyRail();
       tagObserver?.disconnect();
       tagObserver = null;
       toolbarHandle?.destroy?.();
