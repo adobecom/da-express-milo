@@ -203,16 +203,13 @@
 }
 
 /* ── Tablet 2-column (≥854px, before it wraps to 1-column) ─────────
- * Cap the image — and therefore the block — at the Figma frame height
- * (409.5px wide × 273px tall). Below 854px the layout is stacked and
- * left uncapped so the image keeps its full-width 3:2 ratio. */
+ * Cap the image at the Figma frame size (409.5px wide × 273px tall) so
+ * it stops growing on wider tablets. The block itself grows to fit the
+ * text (taller with CTAs) rather than clipping it. Below 854px the
+ * layout is stacked and left uncapped so the image keeps full-width 3:2. */
 @media (min-width: 854px) and (max-width: 1199px) {
-  .transparent-image-marquee {
-    max-height: 273px;
-  }
-
   .transparent-image-marquee .image-container {
-    flex: 0 1 409.5px;
+    max-width: 409.5px;
     max-height: 273px;
   }
 
@@ -225,7 +222,6 @@
 @media (min-width: 1200px) {
   .transparent-image-marquee {
     padding: 0 var(--spacing-600);
-    max-height: 525px;
   }
 
   .transparent-image-marquee .foreground {
