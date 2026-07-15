@@ -10,6 +10,7 @@ describe('openLibraryItemModal', () => {
       open: sinon.stub().resolves(),
       openPaletteSwatchesModal: sinon.stub().resolves(),
       openLibraryGradientModal: sinon.stub().resolves(),
+      openLibraryThemeModal: sinon.stub().resolves(),
     };
   });
 
@@ -21,7 +22,8 @@ describe('openLibraryItemModal', () => {
     await openLibraryItemModal(null, modalManager);
     await openLibraryItemModal({ type: 'theme', colors: ['#fff'] }, null);
     expect(modalManager.open.called).to.be.false;
-    expect(modalManager.openPaletteSwatchesModal.called).to.be.false;
+    expect(modalManager.openLibraryThemeModal.called).to.be.false;
+    expect(modalManager.openLibraryGradientModal.called).to.be.false;
   });
 
   const gradientItem = () => ({
@@ -34,18 +36,15 @@ describe('openLibraryItemModal', () => {
     ],
   });
 
-  it('opens the read-only gradient modal when no CC Library context is available', async () => {
-    const item = gradientItem();
+  it('does not open any modal when CC Library context is missing', async () => {
+    await openLibraryItemModal(gradientItem(), modalManager);
+    await openLibraryItemModal({
+      id: 'theme-1', type: 'theme', name: 'Ocean', colors: ['#001122'],
+    }, modalManager);
 
-    await openLibraryItemModal(item, modalManager, {
-      modalStrings: { title: 'Modal' },
-      fallbackGradientTitle: 'Gradient',
-    });
-
-    expect(modalManager.open.calledOnce).to.be.true;
+    expect(modalManager.open.called).to.be.false;
     expect(modalManager.openLibraryGradientModal.called).to.be.false;
-    expect(modalManager.open.firstCall.args[0].title).to.equal('Sunset');
-    expect(modalManager.open.firstCall.args[0].content).to.be.a('function');
+    expect(modalManager.openLibraryThemeModal.called).to.be.false;
   });
 
   it('opens the editable library gradient modal when provider + libraryId are present', async () => {
@@ -71,7 +70,7 @@ describe('openLibraryItemModal', () => {
     });
   });
 
-  it('opens palette modal for theme items with colors', async () => {
+  it('opens the editable library theme modal for theme items with colors', async () => {
     const item = {
       id: 'theme-1',
       type: 'theme',
@@ -79,33 +78,35 @@ describe('openLibraryItemModal', () => {
       colors: ['#001122', '#334455'],
       tags: ['blue'],
     };
+    const ccLibraryProvider = { updateTheme: sinon.stub() };
 
     await openLibraryItemModal(item, modalManager, {
-      modalStrings: {},
       colorSwatchRailStrings: {},
+      libraryId: 'lib-1',
+      ccLibraryProvider,
       verticalMaxPerRow: 8,
     });
 
-    expect(modalManager.openPaletteSwatchesModal.calledOnce).to.be.true;
-    expect(modalManager.openPaletteSwatchesModal.firstCall.args[0]).to.equal(item);
-    expect(modalManager.openPaletteSwatchesModal.firstCall.args[1]).to.include({
+    expect(modalManager.openLibraryThemeModal.calledOnce).to.be.true;
+    expect(modalManager.openLibraryThemeModal.firstCall.args[0]).to.equal(item);
+    expect(modalManager.openLibraryThemeModal.firstCall.args[1]).to.include({
+      libraryId: 'lib-1',
+      ccLibraryProvider,
       verticalMaxPerRow: 8,
-      showCreator: false,
     });
-    const { initialFocusSelector } = modalManager.openPaletteSwatchesModal.firstCall.args[1];
-    expect(initialFocusSelector).to.be.a('function');
-    const sentinel = {};
-    expect(initialFocusSelector(sentinel)).to.equal(sentinel);
   });
 
-  it('does not open palette modal when theme has no colors', async () => {
+  it('does not open theme modal when theme has no colors', async () => {
     await openLibraryItemModal({
       id: 'theme-2',
       type: 'theme',
       name: 'Empty',
       colors: [],
-    }, modalManager);
+    }, modalManager, {
+      libraryId: 'lib-1',
+      ccLibraryProvider: { updateTheme: sinon.stub() },
+    });
 
-    expect(modalManager.openPaletteSwatchesModal.called).to.be.false;
+    expect(modalManager.openLibraryThemeModal.called).to.be.false;
   });
 });

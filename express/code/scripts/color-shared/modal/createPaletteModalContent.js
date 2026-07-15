@@ -236,7 +236,6 @@ function createPaletteLikeWidget(palette = {}, options = {}) {
 }
 
 function createPaletteMetaSection(palette = {}, options = {}) {
-  const showCreator = options.showCreator !== false;
   const creatorName = normalizeCreatorName(
     options.creatorName ?? palette?.creator?.name ?? palette?.creatorName,
   );
@@ -264,23 +263,21 @@ function createPaletteMetaSection(palette = {}, options = {}) {
 
   const thumbTagsRow = createTag('div', { class: 'modal-palette-thumb-tags' });
 
-  if (showCreator) {
-    const thumbnailContainer = createTag('div', { class: 'modal-thumbnail-container' });
-    const thumbnailWrap = createTag('div', { class: 'modal-thumbnail' });
-    if (creatorImageUrl) {
-      const thumbnailImg = createTag('img', { class: 'thumbnail-image', alt: creatorName, src: creatorImageUrl });
-      thumbnailWrap.appendChild(thumbnailImg);
-    } else {
-      const initial = createTag('span', { class: 'thumbnail-initial', 'aria-hidden': 'true' });
-      initial.textContent = creatorName.charAt(0).toUpperCase();
-      thumbnailWrap.appendChild(initial);
-    }
-    const creatorNameEl = createTag('p', { class: 'modal-creator-name' });
-    creatorNameEl.textContent = creatorName;
-    thumbnailContainer.appendChild(thumbnailWrap);
-    thumbnailContainer.appendChild(creatorNameEl);
-    thumbTagsRow.appendChild(thumbnailContainer);
+  const thumbnailContainer = createTag('div', { class: 'modal-thumbnail-container' });
+  const thumbnailWrap = createTag('div', { class: 'modal-thumbnail' });
+  if (creatorImageUrl) {
+    const thumbnailImg = createTag('img', { class: 'thumbnail-image', alt: creatorName, src: creatorImageUrl });
+    thumbnailWrap.appendChild(thumbnailImg);
+  } else {
+    const initial = createTag('span', { class: 'thumbnail-initial', 'aria-hidden': 'true' });
+    initial.textContent = creatorName.charAt(0).toUpperCase();
+    thumbnailWrap.appendChild(initial);
   }
+  const creatorNameEl = createTag('p', { class: 'modal-creator-name' });
+  creatorNameEl.textContent = creatorName;
+  thumbnailContainer.appendChild(thumbnailWrap);
+  thumbnailContainer.appendChild(creatorNameEl);
+  thumbTagsRow.appendChild(thumbnailContainer);
 
   const tagsContainer = createTag('div', { class: 'modal-tags-container', 'aria-label': 'Tags', role: 'list' });
   tags.forEach((tag) => {

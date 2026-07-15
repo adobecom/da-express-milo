@@ -335,11 +335,9 @@ export default async function decorate(block) {
     return;
   }
 
-  // Prefetch the modal/swatch/explore i18n only for signed-in users (signed-out
-  // visitors return above and never open an item). openHandler awaits these.
-  const colorModalStringsPromise = import('../../scripts/color-shared/i18n/loadColorModalPlaceholders.js').then((m) => m.default());
+  // Prefetch the swatch-rail i18n only for signed-in users (signed-out visitors
+  // return above and never open an item). openHandler awaits this.
   const colorSwatchRailStringsPromise = import('../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js').then((m) => m.default());
-  const explorePlaceholdersPromise = import('../../scripts/color-shared/i18n/loadColorExplorePlaceholders.js').then((m) => m.default());
 
   const deepLinkManager = createDeepLinkManager({ enabled: true, queryParam: 'q' });
   let searchQuery = new URLSearchParams(window.location.search).get('q') || '';
@@ -512,27 +510,20 @@ export default async function decorate(block) {
 
     const [
       { openLibraryItemModal },
-      modalStrings,
       colorSwatchRailStrings,
-      explorePlaceholders,
       ccLibraryProvider,
     ] = await Promise.all([
       import('../../scripts/color-shared/components/libraries/openLibraryItemModal.js'),
-      colorModalStringsPromise,
       colorSwatchRailStringsPromise,
-      explorePlaceholdersPromise,
       getCcLibraryProvider(),
     ]);
 
     await openLibraryItemModal(item, modalManagerInstance, {
-      modalStrings,
       colorSwatchRailStrings,
       librariesStrings: placeholders,
       libraryId,
       ccLibraryProvider,
       toolHrefs,
-      fallbackPaletteTitle: explorePlaceholders.modalDefaultPaletteTitle,
-      fallbackGradientTitle: explorePlaceholders.modalDefaultGradientTitle,
     });
   };
   block.addEventListener('libraries:item-open', openHandler);
