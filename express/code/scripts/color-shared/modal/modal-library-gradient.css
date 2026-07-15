@@ -76,10 +76,13 @@
   inline-size: 100%;
 }
 
+/* Fit 2 rows of tag pills, then scroll. */
 .ax-color-modal-content .modal-library-gradient .modal-lib-tags .ax-tag-field {
   overflow-y: auto;
-  max-height: 30vh;
-  max-height: 30dvh;
+  max-height: calc(
+    (2 * var(--spacing-500)) + var(--ax-tag-field-gap)
+    + (2 * var(--spacing-200)) + (2 * var(--border-width-2))
+  );
 }
 
 /* Toolbar wrapper: the .ax-toolbar-library variant owns its own layout. */
