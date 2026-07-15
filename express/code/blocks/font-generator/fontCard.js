@@ -150,24 +150,25 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
       clearTimeout(resetTimer);
       clearTimeout(overlayTimer);
       activeOverlay?.remove();
-      activeOverlay = makeCopyOverlay(copiedMessage);
+    navigator.clipboard.writeText(preview.textContent).then(() => {
+      clearTimeout(resetTimer);
+      clearTimeout(overlayTimer);
+      activeOverlay?.remove();
+      activeOverlay = makeCopyOverlay();
       body.append(activeOverlay);
       activeOverlay.getBoundingClientRect(); // force reflow so transition plays
       card.classList.add('is-copied');
-      copyBtn.dataset.tooltip = copiedLabel;
-      copyBtn.setAttribute('aria-label', copiedLabel);
-      announce(copiedMessage);
+      copyBtn.dataset.tooltip = COPIED_LABEL;
+      copyBtn.setAttribute('aria-label', COPIED_LABEL);
       resetTimer = setTimeout(() => {
         card.classList.remove('is-copied');
-        copyBtn.dataset.tooltip = copyLabel;
-        copyBtn.setAttribute('aria-label', copyLabel);
+        copyBtn.dataset.tooltip = COPY_LABEL;
+        copyBtn.setAttribute('aria-label', COPY_LABEL);
         overlayTimer = setTimeout(() => {
           activeOverlay?.remove();
           activeOverlay = null;
-        }, OVERLAY_FADE_MS);
+        }, 200);
       }, COPY_RESET_MS);
-    }).catch((e) => {
-      window.lana?.log(`font-generator: clipboard write failed: ${e?.message || e}`, { tags: 'font-generator', severity: 'info' });
     });
   });
 
