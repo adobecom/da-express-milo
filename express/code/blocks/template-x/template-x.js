@@ -8,7 +8,7 @@ import {
 } from '../../scripts/utils.js';
 import { titleCase } from '../../scripts/utils/string.js';
 import { createOptimizedPicture, transformLinkToAnimation } from '../../scripts/utils/media.js';
-import { Masonry } from '../../scripts/widgets/masonry.js';
+import { Masonry, computeMasonryHeight } from '../../scripts/widgets/masonry.js';
 import buildCarousel from '../../scripts/widgets/carousel.js';
 import {
   fetchTemplates,
@@ -21,7 +21,7 @@ import {
 } from '../../scripts/template-search-api-v3.js';
 import { fetchResults, isValidTemplate as isValidTemplateTaas } from '../../scripts/template-utils.js';
 import fetchAllTemplatesMetadata from '../../scripts/utils/all-templates-metadata.js';
-import renderTemplate from './template-rendering.js';
+import renderTemplate, { extractImageThumbnail } from './template-rendering.js';
 import isDarkOverlayReadable from '../../scripts/color-tools.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
 import buildGallery from '../../scripts/widgets/gallery/gallery.js';
@@ -80,6 +80,12 @@ async function getTemplates(response, fallbackMsg, props, options = {}) {
   return {
     fallbackMsg,
     templates,
+    // Same order as `templates`, so a cell's dimensions can be found by index without
+    // annotating the DOM. Skipped for `fullsize`, where getImageThumbnailSrc renders the full
+    // rendition instead of the thumbnail -- these dimensions would describe the wrong image.
+    thumbnailDims: variant?.includes('fullsize')
+      ? null
+      : filtered.map((template) => extractImageThumbnail(template.pages?.[0])),
   };
 }
 
@@ -174,6 +180,10 @@ async function fetchAndRenderTemplatesFromTaas(taasQuery, props, options = {}) {
   return {
     templates,
     total: res.metadata?.totalHits || templates.length,
+    // TAAS items use a different shape to the templates API; until their thumbnail dimensions
+    // are confirmed, these pages keep today's behavior (no height reservation) rather than
+    // risk reserving a wrong one.
+    thumbnailDims: null,
   };
 }
 
@@ -1512,6 +1522,52 @@ function decorateHoliday(block, props) {
   initExpandCollapseToolbar(block, templateTitle, toggle, toggleChev);
 }
 
+/**
+ * Hold the grid's final height from the moment it is drawn, so loading thumbnails grow into
+ * reserved space instead of pushing the page down.
+ *
+ * The block has no authored height and cannot know its size until the templates API responds;
+ * until the thumbnails decode, every cell is 0px tall, so the block grows from ~0 to its full
+ * height as they arrive. `.load-more` is `position: absolute; bottom: 0`, so it rides that
+ * growth down and every section below moves with it -- measured as the dominant layout shift
+ * on /express/templates/photo-collage (prod desktop CLS 0.08-0.19).
+ *
+ * Called right after draw(): the columns and cells exist with their real widths, but no
+ * thumbnail has loaded, so this runs before the shift rather than after it.
+ *
+ * The reservation is released once the thumbnails have loaded and the grid holds its own
+ * height, so a wrong prediction can never become a permanent gap (the PR #585/#600 failure).
+ */
+function reserveGridHeight(block, innerWrapper, props) {
+  const cells = props.templates;
+  const numCols = innerWrapper.querySelectorAll('.masonry-col').length;
+  const height = computeMasonryHeight(cells, props.thumbnailDims, numCols);
+  if (!(height > 0)) return;
+
+  innerWrapper.style.minHeight = `${Math.round(height)}px`;
+  const release = () => {
+    innerWrapper.style.removeProperty('min-height');
+  };
+  const images = block.querySelectorAll('.template-x-inner-wrapper .still-wrapper img');
+  if (!images.length) {
+    release();
+    return;
+  }
+  let pending = images.length;
+  const settle = () => {
+    pending -= 1;
+    if (pending <= 0) release();
+  };
+  images.forEach((img) => {
+    if (img.complete) {
+      settle();
+    } else {
+      img.addEventListener('load', settle, { once: true });
+      img.addEventListener('error', settle, { once: true });
+    }
+  });
+}
+
 async function decorateTemplates(block, props) {
   const impression = gatherPageImpression(props);
   updateImpressionCache(impression);
@@ -1565,6 +1621,7 @@ async function decorateTemplates(block, props) {
       }
 
       props.masonry.draw();
+      reserveGridHeight(block, innerWrapper, props);
       window.addEventListener('resize', () => {
         props.masonry.draw();
       });
@@ -1887,7 +1944,7 @@ async function buildTemplateList(block, props, type = []) {
   const isFirstSection = block.closest('.section') === document.querySelector('.section');
   const loadOptions = { isFirstLoad: isFirstSection };
 
-  const { templates, fallbackMsg, total } = props.taasQuery
+  const { templates, fallbackMsg, total, thumbnailDims } = props.taasQuery
     ? await fetchAndRenderTemplatesFromTaas(props.taasQuery, props, loadOptions)
     : await fetchAndRenderTemplates(props, loadOptions);
 
@@ -1900,6 +1957,12 @@ async function buildTemplateList(block, props, type = []) {
     renderFallbackMsgWrapper(block, props);
     const blockInnerWrapper = createTag('div', { class: 'template-x-inner-wrapper' });
     block.append(blockInnerWrapper);
+    // Kept index-aligned with props.templates, which accumulates across load-more batches.
+    // A misalignment here would pair cells with other cells' dimensions and reserve a wrong
+    // height, so the two must always be concatenated together.
+    props.thumbnailDims = (props.thumbnailDims || []).concat(
+      thumbnailDims || new Array(templates.length).fill(null),
+    );
     props.templates = props.templates.concat(templates);
     props.templates.forEach((template) => {
       blockInnerWrapper.append(template);

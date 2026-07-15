@@ -47,7 +47,7 @@ function extractComponentLinkHref(template) {
   return template._links?.['http://ns.adobe.com/adobecloud/rel/component']?.href;
 }
 
-function extractImageThumbnail(page) {
+export function extractImageThumbnail(page) {
   return page?.rendition?.image?.thumbnail;
 }
 
