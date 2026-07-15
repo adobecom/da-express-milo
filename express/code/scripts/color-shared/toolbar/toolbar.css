@@ -305,32 +305,25 @@
   flex: 0 0 auto;
 }
 
+/* Edit theme + Save changes always share a horizontal row (all breakpoints),
+   equal width (1fr columns), 40px tall, 12px gap. */
 .ax-toolbar-lib-buttons {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
   gap: var(--spacing-200);
   inline-size: 100%;
 }
 
 .ax-toolbar-lib-buttons sp-button {
   inline-size: 100%;
+  --spectrum-button-height: 40px;
 }
 
 /* SWC reads --mod-button-* above --spectrum-button-* (which is unresolved in the
    modal), so drive the Edit theme hover fill through the mod token. */
 .ax-toolbar-lib-edit {
   --mod-button-background-color-hover: var(--color-light-gray-2);
-}
-
-/* ── Tablet (600px+): edit + save share a row ── */
-@media (min-width: 600px) {
-  .ax-toolbar-lib-buttons {
-    flex-direction: row;
-  }
-
-  .ax-toolbar-lib-buttons sp-button {
-    flex: 1 1 0;
-  }
 }
 
 /* ── Desktop (1200px+): name/actions and buttons on a single row ── */
@@ -354,14 +347,11 @@
     flex: 0 0 auto;
   }
 
+  /* Content-sized on desktop; the equal 1fr columns make both buttons match the
+     wider label's width. */
   .ax-toolbar-lib-buttons {
     flex: 0 0 auto;
     inline-size: auto;
-  }
-
-  .ax-toolbar-lib-buttons sp-button {
-    inline-size: auto;
-    flex: 0 0 auto;
   }
 }
 

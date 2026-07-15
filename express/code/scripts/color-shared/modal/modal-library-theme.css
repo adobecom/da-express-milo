@@ -47,3 +47,9 @@
 .ax-color-modal-content .modal-library-theme .modal-palette-toolbar .ax-toolbar {
   inline-size: 100%;
 }
+
+/* modal-palette-content.css inflates accent buttons to 48px below 1200px; keep
+   the Edit theme + Save changes buttons at 40px across all breakpoints. */
+.ax-color-modal-content .ax-toolbar-lib-buttons sp-button[variant] {
+  --spectrum-button-height: 40px;
+}
