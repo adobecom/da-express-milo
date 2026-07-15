@@ -1,49 +1,117 @@
-import { createTag } from '../../scripts/utils.js';
-import { initFromUrl, initFonts, subscribe } from './state.js';
+import { createTag, getMetadata } from '../../scripts/utils.js';
+import createTextInput from './textInput.js';
 import initFilters from './filters.js';
 import initPanel from './panel.js';
+import { initFromUrl, initFonts } from './state.js';
+import createFontCardGrid from './fontCardGrid.js';
+import createToolbar from './toolbar.js';
+import loadFontGeneratorPlaceholders from './placeholders.js';
+
+let filterPanelCount = 0;
+
+// Kick off the placeholder lookup at module load (mirrors color-extract.js's
+// placeholdersPromise) so it resolves before decorate needs it. Awaited up
+// front so components render with final copy — no English-then-swap flash.
+const placeholdersPromise = loadFontGeneratorPlaceholders();
+
+const DEFAULTS = {
+  cardCtaHref: 'https://www.adobe.com/express/templates/',
+};
+
+function getContent(strings = {}) {
+  // Authored fg-suggestions metadata wins; otherwise the placeholder default
+  // (comma-separated) supplies localizable sample text.
+  const suggestionsRaw = getMetadata('fg-suggestions') || strings.suggestions || '';
+  const suggestions = suggestionsRaw.split(',').map((s) => s.trim()).filter(Boolean);
+
+  return {
+    suggestions,
+    cardCta: {
+      text: getMetadata('fg-card-cta-text') || strings.cardCtaText,
+      href: getMetadata('fg-card-cta-href') || DEFAULTS.cardCtaHref,
+    },
+  };
+}
 
 export default async function decorate(block) {
-  // ToDo: Extract authored content from DOM
-
+  // Restore URL state before any component reads from the store.
   initFromUrl();
 
-  let data;
+  // Load the font catalog here in the block entry point, then hand it to the
+  // store; every component reads the catalog from the store, none fetch.
+  let fonts = [];
   try {
-    const resp = await fetch(new URL('./font-sheets/font-styles.json', import.meta.url).href);
-    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-    data = await resp.json();
+    const res = await fetch(new URL('./font-sheets/font-styles.json', import.meta.url).href);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    fonts = (await res.json()).fonts ?? [];
   } catch (e) {
     window.lana?.log(`font-generator: failed to load font-styles.json: ${e?.message || e}`, { tags: 'font-generator', severity: 'error' });
     return;
   }
-  initFonts(data.fonts);
+  initFonts(fonts);
 
-  block.innerHTML = '';
+  // Await resolved copy before building any text-bearing component so the
+  // user never sees English placeholder text swapped out (color-extract.js).
+  const strings = await placeholdersPromise;
+  const content = getContent(strings);
+
   const container = createTag('section', { class: 'fg-container' });
   const sidebar = createTag('div', { class: 'fg-sidebar' });
   const main = createTag('div', { class: 'fg-main' });
 
-  // ToDo: Remove placeholder content
-  const placeholder = createTag('p', {}, 'Active filters: All');
-  subscribe(({ activeFilters }) => {
-    placeholder.textContent = `Active filters: ${activeFilters.length ? activeFilters.join(', ') : 'All'}`;
+  const { panel: textInput, unsubscribe: unsubscribeTextInput } = createTextInput({
+    suggestions: content.suggestions,
+    strings,
   });
-  main.append(placeholder);
 
-  // Temp trigger for panel/tray testing — remove when toolbar is implemented
-  const tempTrigger = createTag('button', { class: 'fg-panel-trigger--temp' }, 'Open Filters');
-  main.prepend(tempTrigger);
+  // Desktop-inline filters instance; the mobile/tablet instance lives inside
+  // the panel's own drawer, mounted separately below. .fg-sidebar drives the
+  // desktop-inline-vs-mobile-panel visibility toggle in font-generator.css.
+  const desktopFiltersEl = createTag('div', { class: 'fg-filters' });
 
-  const filtersDesktop = createTag('div', { class: 'fg-filters' });
-  sidebar.appendChild(filtersDesktop);
+  sidebar.append(textInput, desktopFiltersEl);
+
   container.append(sidebar, main);
-  block.appendChild(container);
+  block.replaceChildren(container);
 
-  const [, { open: openPanel }] = await Promise.all([
-    initFilters([filtersDesktop]),
-    initPanel(block),
-  ]);
+  const panelId = `font-generator-filters-${(filterPanelCount += 1)}`;
+  const {
+    toolbar, filterTrigger, unsubscribe: unsubscribeToolbar,
+  } = createToolbar({ panelId, strings });
+  main.append(toolbar);
 
-  tempTrigger.addEventListener('click', openPanel);
+  const { container: gridContainer, unsubscribe: unsubscribeGrid } = createFontCardGrid({
+    cardCta: content.cardCta,
+    fonts,
+    strings,
+  });
+  main.append(gridContainer);
+
+  const teardownDesktopFilters = await initFilters([desktopFiltersEl], {
+    showCTA: true,
+  });
+
+  const panelController = await initPanel(block, {
+    panelId,
+    onOpenChange: (open) => filterTrigger.setAttribute('aria-expanded', String(open)),
+  });
+  filterTrigger.addEventListener('click', () => panelController.open());
+
+  const cleanup = () => {
+    unsubscribeTextInput();
+    unsubscribeToolbar();
+    unsubscribeGrid();
+    teardownDesktopFilters();
+    panelController.destroy();
+  };
+  const parent = block.parentElement;
+  if (parent) {
+    const observer = new MutationObserver(() => {
+      if (!block.isConnected) {
+        cleanup();
+        observer.disconnect();
+      }
+    });
+    observer.observe(parent, { childList: true });
+  }
 }
