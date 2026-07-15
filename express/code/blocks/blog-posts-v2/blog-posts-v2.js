@@ -372,9 +372,10 @@ async function getHeroCard(post, dateFormatter, blogTag) {
 
   const pictureTag = imageWrapper.outerHTML;
   const dateMarkup = dateString ? `<p class="blog-card-date">${dateString}</p>` : '';
+  const tagMarkup = blogTag ? `<span class="blog-tag">${blogTag}</span>` : '';
   card.innerHTML = `<div class="blog-card-image">
     ${pictureTag}
-    <span class="blog-tag">${blogTag}</span>
+    ${tagMarkup}
     </div>
     <div class="blog-hero-card-body">
       <h3 class="blog-card-title">${filteredTitle}</h3>
@@ -400,9 +401,10 @@ function getCard(post, dateFormatter, blogTag) {
 
   const pictureTag = imageWrapper.outerHTML;
   const dateMarkup = dateString ? `<p class="blog-card-date">${dateString}</p>` : '';
+  const tagMarkup = blogTag ? `<span class="blog-tag">${blogTag}</span>` : '';
   card.innerHTML = `<div class="blog-card-image">
         ${pictureTag}
-        <span class="blog-tag">${blogTag}</span>
+        ${tagMarkup}
         </div>
         <section class="blog-card-body">
         <h3 class="blog-card-title">${filteredTitle}</h3>
@@ -436,12 +438,9 @@ function addRightChevronToViewAll(blockElement) {
   link.innerHTML = `${link.innerHTML} ${rightChevronSVGHTML}`;
 }
 
-function getBlogTag(block) {
+function getBlogTagOverride(block) {
   const activeSection = block.closest('.section.content-toggle-active');
-  if (activeSection?.dataset.toggle?.trim()) {
-    return activeSection.dataset.toggle.trim();
-  }
-  return 'Social Media';
+  return activeSection?.dataset.toggle?.trim() || null;
 }
 
 function updateBlogTags(block, tagValue) {
@@ -458,9 +457,8 @@ function observeContentToggleChanges(block) {
   const observer = new MutationObserver((mutations) => {
     mutations.forEach((mutation) => {
       if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
-        if (section.classList.contains('content-toggle-active')) {
-          const tagValue = section.dataset.toggle || 'Social Media';
-          updateBlogTags(block, tagValue);
+        if (section.classList.contains('content-toggle-active') && section.dataset.toggle) {
+          updateBlogTags(block, section.dataset.toggle.trim());
         }
       }
     });
@@ -495,17 +493,17 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0, gridModu
     getDateFormatter(newLanguage);
   }
 
-  const blogTag = getBlogTag(blogPostsElements);
+  const blogTagOverride = getBlogTagOverride(blogPostsElements);
 
   if (isHero) {
-    const card = await getHeroCard(posts[0], dateFormatter, blogTag);
+    const card = await getHeroCard(posts[0], dateFormatter, blogTagOverride || posts[0].category);
     blogPostsElements.prepend(card);
     images.push(card.querySelector('img'));
     count = 1;
   } else {
     for (let i = offset; i < posts.length && count < limit; i += 1) {
       const post = posts[i];
-      const card = getCard(post, dateFormatter, blogTag);
+      const card = getCard(post, dateFormatter, blogTagOverride || post.category);
       cards.append(card);
       images.push(card.querySelector('img'));
       count += 1;

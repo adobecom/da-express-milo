@@ -31,6 +31,7 @@ function preloadSUSILight() {
 
 function turnContentLinksIntoButtons() {
   document.querySelectorAll('.section > .content').forEach((content) => {
+    if (content.parentElement.classList.contains('ax-blog-posts-container')) return;
     const links = content.querySelectorAll('a');
     links.forEach((link) => {
       const linkText = link.textContent.trim();
