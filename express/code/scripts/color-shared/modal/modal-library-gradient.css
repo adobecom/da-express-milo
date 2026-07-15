@@ -33,6 +33,14 @@
   height: 156px;
 }
 
+/* Inner stroke: draw the stroke inside the gradient's rounded rect rather than
+   the editor's outer border, so it overlays the fill edge and doesn't grow the box. */
+.ax-color-modal-content .modal-library-gradient .modal-gradient-preview
+  .gradient-editor {
+  border: none;
+  box-shadow: inset 0 0 0 1px var(--color-gray-250);
+}
+
 @media (min-width: 1200px) {
   .ax-color-modal-content .modal-library-gradient .modal-gradient-preview
     .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive
@@ -105,10 +113,14 @@
 .ax-color-modal-content .modal-library-gradient .modal-lib-scroll {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-300);
+  gap: var(--spacing-200);
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  /* overflow-y:auto promotes overflow-x to auto; the gradient editor's edge
+     handles poke ~2px past the content box, so clip x to avoid a stray
+     horizontal scrollbar. */
+  overflow-x: hidden;
   inline-size: 100%;
 }
 
