@@ -26,9 +26,7 @@
   inline-size: 100%;
 }
 
-/* ── Gradient preview height ──────────────────────────────────────
-   Override the responsive strip tokens (200/300/400px) so the library
-   gradient preview is 156px on mobile + tablet and 250px on desktop. */
+/* Gradient preview: 156px on mobile + tablet, 250px on desktop. */
 .ax-color-modal-content .modal-library-gradient .modal-gradient-preview
   .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive
   .gradient-editor-bar-wrap {
@@ -43,9 +41,7 @@
   }
 }
 
-/* ── Stop rail height ─────────────────────────────────────────────
-   Gradient stop rail container: 248px on mobile + tablet, 158px on desktop
-   (overrides the palette modal's 200/248/264px + desktop aspect-ratio). */
+/* Stop rail: 248px on mobile + tablet, 158px on desktop. */
 .ax-color-modal-content .modal-library-gradient
   .modal-palette-container--color-rail .modal-color-rail-wrap {
   height: 248px;
@@ -62,6 +58,11 @@
   }
 }
 
+.ax-color-modal-container:has(.modal-library-gradient) {
+  max-height: 95vh;
+  max-height: 95dvh;
+}
+
 /* ── Tags section ──────────────────────────────────────────────── */
 
 .ax-color-modal-content .modal-library-gradient .modal-lib-tags {
@@ -73,6 +74,12 @@
 
 .ax-color-modal-content .modal-library-gradient .modal-lib-tags .ax-drawer-tag-section {
   inline-size: 100%;
+}
+
+.ax-color-modal-content .modal-library-gradient .modal-lib-tags .ax-tag-field {
+  overflow-y: auto;
+  max-height: 30vh;
+  max-height: 30dvh;
 }
 
 /* Toolbar wrapper: the .ax-toolbar-library variant owns its own layout. */

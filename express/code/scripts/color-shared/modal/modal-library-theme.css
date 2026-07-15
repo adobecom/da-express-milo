@@ -25,6 +25,11 @@
   inline-size: 100%;
 }
 
+.ax-color-modal-container:has(.modal-library-theme) {
+  max-height: 95vh;
+  max-height: 95dvh;
+}
+
 /* ── Tags section ──────────────────────────────────────────────── */
 
 .ax-color-modal-content .modal-lib-tags {
@@ -36,6 +41,12 @@
 
 .ax-color-modal-content .modal-lib-tags .ax-drawer-tag-section {
   inline-size: 100%;
+}
+
+.ax-color-modal-content .modal-library-theme .modal-lib-tags .ax-tag-field {
+  overflow-y: auto;
+  max-height: 30vh;
+  max-height: 30dvh;
 }
 
 /* Toolbar wrapper: the .ax-toolbar-library variant owns its own layout. */
