@@ -185,7 +185,9 @@
     min-width: 387px;
     justify-content: center;
     padding-block: var(--spacing-600);
-    margin: auto;
+    /* text column bottom-aligns with the image on tablet */
+    margin-top: auto;
+    margin-bottom: 0;
   }
 
   .transparent-image-marquee .text-content {
@@ -200,15 +202,35 @@
   }
 }
 
+/* ── Tablet 2-column (≥854px, before it wraps to 1-column) ─────────
+ * Cap the image — and therefore the block — at the Figma frame height
+ * (409.5px wide × 273px tall). Below 854px the layout is stacked and
+ * left uncapped so the image keeps its full-width 3:2 ratio. */
+@media (min-width: 854px) and (max-width: 1199px) {
+  .transparent-image-marquee {
+    max-height: 273px;
+  }
+
+  .transparent-image-marquee .image-container {
+    flex: 0 1 409.5px;
+    max-height: 273px;
+  }
+
+  .transparent-image-marquee .image-container img {
+    max-height: 273px;
+  }
+}
+
 /* ── Desktop (L / XL) ≥ 1200px: fixed 787.5px image ─────────────── */
 @media (min-width: 1200px) {
   .transparent-image-marquee {
     padding: 0 var(--spacing-600);
+    max-height: 525px;
   }
 
   .transparent-image-marquee .foreground {
     flex-wrap: nowrap;
-    align-items: stretch;
+    align-items: flex-end;
     gap: var(--spacing-400);
   }
 
@@ -216,6 +238,8 @@
     flex: 1 1 auto;
     min-width: 0;
     padding-block: var(--spacing-900);
+    /* text column vertically centers against the image on desktop+ */
+    margin: auto;
   }
 
   .transparent-image-marquee .text-content {
@@ -228,6 +252,7 @@
     align-self: flex-end;
     min-width: 600px;
     width: 787.5px;
+    max-height: 525px;
   }
 
   /* Desktop type scale: heading 45px, body 16px (Figma 1440px frame) */
