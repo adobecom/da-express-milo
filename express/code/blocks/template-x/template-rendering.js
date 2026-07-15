@@ -47,9 +47,19 @@ function extractComponentLinkHref(template) {
   return template._links?.['http://ns.adobe.com/adobecloud/rel/component']?.href;
 }
 
-export function extractImageThumbnail(page) {
+function extractImageThumbnail(page) {
   return page?.rendition?.image?.thumbnail;
 }
+
+/**
+ * A rendered card -> its thumbnail's intrinsic dimensions, for callers that need to size the
+ * grid before the thumbnails load.
+ *
+ * Keyed on the element rather than by index: populateTemplates swaps placeholder cards for a
+ * fresh <a> and drops empty rows, so any index into the original template list silently stops
+ * lining up with the cells actually in the DOM.
+ */
+export const templateThumbnailDims = new WeakMap();
 
 function getImageThumbnailSrc(renditionLinkHref, componentLinkHref, page) {
   const thumbnail = extractImageThumbnail(page);
@@ -728,5 +738,13 @@ export default async function renderTemplate(template, variant, properties, rend
 
   tmpltEl.append(renderStillWrapper(template, renderOptions));
   tmpltEl.append(renderHoverWrapper(template, customUrlConfig, properties));
+  // Not recorded for fullsize: getImageThumbnailSrc renders the full rendition there, so the
+  // thumbnail's dimensions would describe a different image than the one on screen.
+  if (!variants?.includes('fullsize')) {
+    const thumbnail = extractImageThumbnail(template.pages?.[0]);
+    if (thumbnail?.width > 0 && thumbnail?.height > 0) {
+      templateThumbnailDims.set(tmpltEl, thumbnail);
+    }
+  }
   return tmpltEl;
 }

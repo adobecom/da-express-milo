@@ -21,7 +21,7 @@ import {
 } from '../../scripts/template-search-api-v3.js';
 import { fetchResults, isValidTemplate as isValidTemplateTaas } from '../../scripts/template-utils.js';
 import fetchAllTemplatesMetadata from '../../scripts/utils/all-templates-metadata.js';
-import renderTemplate, { extractImageThumbnail } from './template-rendering.js';
+import renderTemplate, { templateThumbnailDims } from './template-rendering.js';
 import isDarkOverlayReadable from '../../scripts/color-tools.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
 import buildGallery from '../../scripts/widgets/gallery/gallery.js';
@@ -80,12 +80,6 @@ async function getTemplates(response, fallbackMsg, props, options = {}) {
   return {
     fallbackMsg,
     templates,
-    // Same order as `templates`, so a cell's dimensions can be found by index without
-    // annotating the DOM. Skipped for `fullsize`, where getImageThumbnailSrc renders the full
-    // rendition instead of the thumbnail -- these dimensions would describe the wrong image.
-    thumbnailDims: variant?.includes('fullsize')
-      ? null
-      : filtered.map((template) => extractImageThumbnail(template.pages?.[0])),
   };
 }
 
@@ -180,10 +174,6 @@ async function fetchAndRenderTemplatesFromTaas(taasQuery, props, options = {}) {
   return {
     templates,
     total: res.metadata?.totalHits || templates.length,
-    // TAAS items use a different shape to the templates API; until their thumbnail dimensions
-    // are confirmed, these pages keep today's behavior (no height reservation) rather than
-    // risk reserving a wrong one.
-    thumbnailDims: null,
   };
 }
 
@@ -1538,10 +1528,14 @@ function decorateHoliday(block, props) {
  * The reservation is released once the thumbnails have loaded and the grid holds its own
  * height, so a wrong prediction can never become a permanent gap (the PR #585/#600 failure).
  */
-function reserveGridHeight(block, innerWrapper, props) {
-  const cells = props.templates;
+function reserveGridHeight(block, innerWrapper, cells) {
   const numCols = innerWrapper.querySelectorAll('.masonry-col').length;
-  const height = computeMasonryHeight(cells, props.thumbnailDims, numCols);
+  // Resolved per cell rather than by index: populateTemplates rebuilds placeholder cards and
+  // drops empty rows, so the cells masonry drew are not always the elements renderTemplate
+  // returned. Cells with no entry (placeholders, webpage templates, TAAS) fall back to their
+  // measured height.
+  const dims = cells.map((cell) => templateThumbnailDims.get(cell) || null);
+  const height = computeMasonryHeight(cells, dims, numCols);
   if (!(height > 0)) return;
 
   innerWrapper.style.minHeight = `${Math.round(height)}px`;
@@ -1621,7 +1615,7 @@ async function decorateTemplates(block, props) {
       }
 
       props.masonry.draw();
-      reserveGridHeight(block, innerWrapper, props);
+      reserveGridHeight(block, innerWrapper, props.masonry.cells);
       window.addEventListener('resize', () => {
         props.masonry.draw();
       });
@@ -1944,7 +1938,7 @@ async function buildTemplateList(block, props, type = []) {
   const isFirstSection = block.closest('.section') === document.querySelector('.section');
   const loadOptions = { isFirstLoad: isFirstSection };
 
-  const { templates, fallbackMsg, total, thumbnailDims } = props.taasQuery
+  const { templates, fallbackMsg, total } = props.taasQuery
     ? await fetchAndRenderTemplatesFromTaas(props.taasQuery, props, loadOptions)
     : await fetchAndRenderTemplates(props, loadOptions);
 
@@ -1957,12 +1951,6 @@ async function buildTemplateList(block, props, type = []) {
     renderFallbackMsgWrapper(block, props);
     const blockInnerWrapper = createTag('div', { class: 'template-x-inner-wrapper' });
     block.append(blockInnerWrapper);
-    // Kept index-aligned with props.templates, which accumulates across load-more batches.
-    // A misalignment here would pair cells with other cells' dimensions and reserve a wrong
-    // height, so the two must always be concatenated together.
-    props.thumbnailDims = (props.thumbnailDims || []).concat(
-      thumbnailDims || new Array(templates.length).fill(null),
-    );
     props.templates = props.templates.concat(templates);
     props.templates.forEach((template) => {
       blockInnerWrapper.append(template);
