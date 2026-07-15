@@ -364,7 +364,8 @@ function preloadLCPImage(img) {
 }());
 
 let fragmentLcpPreloaded = false;
-function decorateAreaWithLCP(area = document, options = {}) {
+// eslint-disable-next-line import/prefer-default-export
+export function decorateAreaWithLCP(area = document, options = {}) {
   const { fragmentLink } = options;
   if (fragmentLink && !fragmentLcpPreloaded) {
     const firstSection = document.querySelector('body > main > div:nth-child(1)');
