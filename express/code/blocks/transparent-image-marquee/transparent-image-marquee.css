@@ -185,6 +185,7 @@
     min-width: 387px;
     justify-content: center;
     padding-block: var(--spacing-600);
+    margin: auto;
   }
 
   .transparent-image-marquee .text-content {
