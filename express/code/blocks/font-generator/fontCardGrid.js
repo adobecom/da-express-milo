@@ -22,7 +22,7 @@ function injectStyles() {
  * recreated. The catalog is loaded by the block entry point (font-generator.js)
  * and passed in via config.fonts; the grid never fetches.
  *
- * @param {{ cardCta?: object, fonts?: import('./types.js').FontDef[] }} [config]
+ * @param {{ cardCta?: object, fonts?: import('./types.js').FontDef[], strings?: object }} [config]
  * @returns {{ container: HTMLElement, unsubscribe: function }}
  */
 export default function createFontCardGrid(config = {}) {
@@ -31,7 +31,8 @@ export default function createFontCardGrid(config = {}) {
   const container = document.createElement('div');
   container.className = 'font-card-grid-container';
 
-  const { cardCta, fonts = [] } = config;
+  const { cardCta, fonts = [], strings = {} } = config;
+  const { sampleText } = strings;
 
   const grid = document.createElement('div');
   grid.className = 'font-card-grid';
@@ -46,7 +47,7 @@ export default function createFontCardGrid(config = {}) {
   loadMoreIcon.setAttribute('aria-hidden', 'true');
   const loadMoreText = document.createElement('span');
   loadMoreText.className = 'load-more-text';
-  loadMoreText.textContent = 'Load more';
+  if (strings.loadMore) loadMoreText.textContent = strings.loadMore;
   loadMoreBtn.append(loadMoreIcon, loadMoreText);
 
   // Build all cards once upfront — never recreated, only updated.
@@ -54,7 +55,7 @@ export default function createFontCardGrid(config = {}) {
   /** @type {Map<string, { card: HTMLElement, fontDef: import('./types.js').FontDef }>} */
   const cardMap = new Map();
   fonts.forEach((fontDef) => {
-    const card = createFontCard(fontDef, initText, initSize, cardCta);
+    const card = createFontCard(fontDef, initText, initSize, cardCta, strings);
     card.setAttribute('role', 'listitem');
     cardMap.set(fontDef.id, { card, fontDef });
   });
@@ -84,7 +85,7 @@ export default function createFontCardGrid(config = {}) {
       }
       visible.forEach(({ id }) => {
         const entry = cardMap.get(id);
-        if (entry) updateFontCard(entry.card, entry.fontDef, previewText, fontSize);
+        if (entry) updateFontCard(entry.card, entry.fontDef, previewText, fontSize, sampleText);
       });
     }
 

@@ -4,6 +4,7 @@ const BASE_PATH = '/express/code/blocks/font-generator';
 const STYLESHEET_HREF = `${BASE_PATH}/textInput.css`;
 const MAX_LENGTH = 200;
 const DEBOUNCE_MS = 300;
+const MIN_TEXTAREA_HEIGHT = 104; // matches textInput.css .label min-height
 
 function injectStyles() {
   if (document.querySelector(`link[href="${STYLESHEET_HREF}"]`)) return;
@@ -62,29 +63,40 @@ function populateSuggestions(panel, suggestions = []) {
   suggestions.forEach((text) => wrap.append(buildSuggestionPill(text)));
 }
 
+// Pointer Y from either a mouse or a touch event.
+function pointerY(e) {
+  return e.touches?.[0]?.clientY ?? e.clientY;
+}
+
 function initResizeHandle(panel) {
   const textarea = panel.querySelector('textarea.label');
   const handle = panel.querySelector('.resize-handle');
   if (!textarea || !handle) return;
 
-  handle.addEventListener('mousedown', (e) => {
-    const startY = e.clientY;
+  const onStart = (e) => {
+    const startY = pointerY(e);
     const startHeight = textarea.offsetHeight;
+    const ac = new AbortController();
+    const { signal } = ac;
 
     const onMove = (moveEvent) => {
-      const newHeight = Math.max(104, startHeight + (moveEvent.clientY - startY));
+      // Block the page from scrolling while a touch drag resizes the textarea.
+      if (moveEvent.cancelable) moveEvent.preventDefault();
+      const newHeight = Math.max(MIN_TEXTAREA_HEIGHT, startHeight + (pointerY(moveEvent) - startY));
       textarea.style.height = `${newHeight}px`;
     };
 
-    const onUp = () => {
-      document.removeEventListener('mousemove', onMove);
-      document.removeEventListener('mouseup', onUp);
-    };
+    const onEnd = () => ac.abort();
 
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-    e.preventDefault();
-  });
+    document.addEventListener('mousemove', onMove, { signal });
+    document.addEventListener('mouseup', onEnd, { signal });
+    document.addEventListener('touchmove', onMove, { passive: false, signal });
+    document.addEventListener('touchend', onEnd, { signal });
+    if (e.cancelable) e.preventDefault();
+  };
+
+  handle.addEventListener('mousedown', onStart);
+  handle.addEventListener('touchstart', onStart, { passive: false });
 }
 
 function syncCounter(textarea, counter) {

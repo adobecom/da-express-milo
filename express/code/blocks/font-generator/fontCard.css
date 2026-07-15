@@ -1,7 +1,7 @@
 .font-card {
   display: flex;
   flex-direction: column;
-  background: #ffffff;
+  background: var(--color-white);
   border-radius: 12px;
   min-height: 304px;
   overflow: hidden;
@@ -52,7 +52,7 @@
 }
 
 .font-card-copy-btn:hover {
-  background-color: #e9e9e9;
+  background-color: var(--color-light-gray);
 }
 
 .font-card-copy-btn img {
@@ -72,7 +72,7 @@
   height: 0;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-bottom: 5px solid #131313;
+  border-bottom: 5px solid var(--color-gray-950);
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.1s ease;
@@ -95,8 +95,8 @@
   right: 0;
   padding: 4px 8px;
   border-radius: 6px;
-  background: #131313;
-  color: #ffffff;
+  background: var(--color-gray-950);
+  color: var(--color-white);
   font-family: var(--body-font-family);
   font-size: 12px;
   font-weight: 400;
@@ -126,7 +126,7 @@
   word-break: break-word;
   line-height: 1.3;
   padding-right: 36px; /* clear the copy button */
-  color: #131313;
+  color: var(--color-gray-950);
 }
 
 /* ─── Copy success overlay ────────────────────────────────────────────────── */
@@ -159,7 +159,7 @@
   font-family: var(--body-font-family);
   font-size: 16px;
   font-weight: 700;
-  color: #ffffff;
+  color: var(--color-white);
   line-height: 1.2;
 }
 
@@ -170,7 +170,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  border-top: 1px solid #e9e9e9;
+  border-top: 1px solid var(--color-light-gray);
   padding: 8px 16px 16px;
   min-height: 36px;
 }
@@ -179,7 +179,7 @@
   font-family: var(--body-font-family);
   font-size: 12px;
   font-weight: 700;
-  color: #505050;
+  color: var(--color-dark-gray);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -197,7 +197,7 @@ main a.font-card-cta {
   padding: 7px 14px 7px 10px;
   border-radius: 24px;
   background: #000000d6;
-  color: #ffffff;
+  color: var(--color-white);
   font-family: var(--body-font-family);
   font-size: 12px;
   font-weight: 700;
@@ -208,7 +208,7 @@ main a.font-card-cta {
 }
 
 .font-card-cta:hover {
-  background: #000000;
+  background: var(--color-black);
 }
 
 .font-card-cta-icon {
@@ -216,4 +216,19 @@ main a.font-card-cta {
   width: 16px;
   height: 16px;
   flex-shrink: 0;
+}
+
+/* Off-screen polite live region — announces copy success to screen readers
+   (the visible overlay is aria-hidden / decorative). */
+.font-card-live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
 }

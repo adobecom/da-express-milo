@@ -1,12 +1,11 @@
 // @import { FontDef } from './types.js'
 import { transformText } from './unicodeEngine.js';
+import { DEFAULT_PLACEHOLDERS } from './placeholders.js';
 
 const BASE_PATH = '/express/code/blocks/font-generator';
 const STYLESHEET_HREF = `${BASE_PATH}/fontCard.css`;
-const DEFAULT_SAMPLE_TEXT = 'Hello';
-const COPY_LABEL = 'Copy text';
-const COPIED_LABEL = 'Copied!';
 const COPY_RESET_MS = 1500;
+const OVERLAY_FADE_MS = 200;
 
 let stylesInjected = false;
 
@@ -19,12 +18,28 @@ function injectStyles() {
   document.head.appendChild(link);
 }
 
-function makeCopyBtn() {
+// Single shared polite live region — the copy overlay itself is aria-hidden
+// (decorative), so success is announced to screen readers here instead.
+let liveRegion = null;
+function announce(message) {
+  if (!liveRegion) {
+    liveRegion = document.createElement('div');
+    liveRegion.className = 'font-card-live-region';
+    liveRegion.setAttribute('role', 'status');
+    liveRegion.setAttribute('aria-live', 'polite');
+    document.body.append(liveRegion);
+  }
+  // Clear first so an identical repeat message still re-announces.
+  liveRegion.textContent = '';
+  requestAnimationFrame(() => { liveRegion.textContent = message; });
+}
+
+function makeCopyBtn(copyLabel) {
   const btn = document.createElement('button');
   btn.type = 'button';
   btn.className = 'font-card-copy-btn';
-  btn.setAttribute('aria-label', COPY_LABEL);
-  btn.dataset.tooltip = COPY_LABEL;
+  btn.setAttribute('aria-label', copyLabel);
+  btn.dataset.tooltip = copyLabel;
 
   const icon = document.createElement('img');
   icon.src = '/express/code/icons/font-generator-copy.svg';
@@ -51,11 +66,11 @@ function makeCheckmarkSvg() {
   circle.setAttribute('cx', '40');
   circle.setAttribute('cy', '40');
   circle.setAttribute('r', '40');
-  circle.setAttribute('fill', 'var(--color-green-900, #05834E)');
+  circle.setAttribute('fill', 'var(--color-green-900)');
 
   const path = document.createElementNS(ns, 'path');
   path.setAttribute('d', 'M20 40L34 54L60 26');
-  path.setAttribute('stroke', 'white');
+  path.setAttribute('stroke', 'var(--color-white)');
   path.setAttribute('stroke-width', '4');
   path.setAttribute('stroke-linecap', 'round');
   path.setAttribute('stroke-linejoin', 'round');
@@ -64,16 +79,16 @@ function makeCheckmarkSvg() {
   return svg;
 }
 
-function makeCopyOverlay() {
+function makeCopyOverlay(message) {
   const overlay = document.createElement('div');
   overlay.className = 'font-card-copy-overlay';
   overlay.setAttribute('aria-hidden', 'true');
 
-  const message = document.createElement('span');
-  message.className = 'font-card-copy-message';
-  message.textContent = 'Text Copied!';
+  const label = document.createElement('span');
+  label.className = 'font-card-copy-message';
+  label.textContent = message;
 
-  overlay.append(makeCheckmarkSvg(), message);
+  overlay.append(makeCheckmarkSvg(), label);
   return overlay;
 }
 
@@ -106,11 +121,15 @@ function makeCtaLink(cardCta) {
  * @param {string} previewText
  * @param {number} fontSize
  * @param {{ text: string; href: string } | null} [cardCta]
+ * @param {object} [strings] resolved placeholder copy (DEFAULT_PLACEHOLDERS shape)
  * @returns {HTMLElement}
  */
-export function createFontCard(fontDef, previewText, fontSize, cardCta) {
+export function createFontCard(fontDef, previewText, fontSize, cardCta, strings = {}) {
   injectStyles();
-  const text = previewText || DEFAULT_SAMPLE_TEXT;
+  const {
+    copyLabel, copiedLabel, copiedMessage, sampleText,
+  } = { ...DEFAULT_PLACEHOLDERS, ...strings };
+  const text = previewText || sampleText;
 
   const card = document.createElement('div');
   card.className = 'font-card';
@@ -120,30 +139,35 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta) {
   const body = document.createElement('div');
   body.className = 'font-card-body';
 
-  const copyBtn = makeCopyBtn();
+  const copyBtn = makeCopyBtn(copyLabel);
   let resetTimer = null;
+  let overlayTimer = null;
   let activeOverlay = null;
   copyBtn.addEventListener('click', () => {
     const preview = card.querySelector('.font-card-preview');
     if (!preview) return;
     navigator.clipboard.writeText(preview.textContent).then(() => {
+      clearTimeout(resetTimer);
+      clearTimeout(overlayTimer);
       activeOverlay?.remove();
-      activeOverlay = makeCopyOverlay();
+      activeOverlay = makeCopyOverlay(copiedMessage);
       body.append(activeOverlay);
       activeOverlay.getBoundingClientRect(); // force reflow so transition plays
       card.classList.add('is-copied');
-      copyBtn.dataset.tooltip = COPIED_LABEL;
-      copyBtn.setAttribute('aria-label', COPIED_LABEL);
-      clearTimeout(resetTimer);
+      copyBtn.dataset.tooltip = copiedLabel;
+      copyBtn.setAttribute('aria-label', copiedLabel);
+      announce(copiedMessage);
       resetTimer = setTimeout(() => {
         card.classList.remove('is-copied');
-        copyBtn.dataset.tooltip = COPY_LABEL;
-        copyBtn.setAttribute('aria-label', COPY_LABEL);
-        setTimeout(() => {
+        copyBtn.dataset.tooltip = copyLabel;
+        copyBtn.setAttribute('aria-label', copyLabel);
+        overlayTimer = setTimeout(() => {
           activeOverlay?.remove();
           activeOverlay = null;
-        }, 200);
+        }, OVERLAY_FADE_MS);
       }, COPY_RESET_MS);
+    }).catch((e) => {
+      window.lana?.log(`font-generator: clipboard write failed: ${e?.message || e}`, { tags: 'font-generator', severity: 'info' });
     });
   });
 
@@ -176,9 +200,10 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta) {
  * @param {import('./types.js').FontDef} fontDef
  * @param {string} previewText
  * @param {number} fontSize
+ * @param {string} [sampleText] fallback shown when previewText is empty
  */
-export function updateFontCard(card, fontDef, previewText, fontSize) {
-  const text = previewText || DEFAULT_SAMPLE_TEXT;
+export function updateFontCard(card, fontDef, previewText, fontSize, sampleText) {
+  const text = previewText || sampleText || DEFAULT_PLACEHOLDERS.sampleText;
   const preview = card.querySelector('.font-card-preview');
   if (!preview) return;
   preview.textContent = transformText(text, fontDef);

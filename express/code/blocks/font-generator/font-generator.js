@@ -20,13 +20,10 @@ const DEFAULTS = {
     'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
     'Realigned equestrian fez bewilders picky monarch',
   ],
-  cardCta: {
-    text: 'Design With Style',
-    href: 'https://www.adobe.com/express/templates/',
-  },
+  cardCtaHref: 'https://www.adobe.com/express/templates/',
 };
 
-function getContent() {
+function getContent(strings = {}) {
   const suggestionsRaw = getMetadata('fg-suggestions');
   const suggestions = suggestionsRaw
     ? suggestionsRaw.split(',').map((s) => s.trim()).filter(Boolean)
@@ -35,8 +32,8 @@ function getContent() {
   return {
     suggestions,
     cardCta: {
-      text: getMetadata('fg-card-cta-text') || DEFAULTS.cardCta.text,
-      href: getMetadata('fg-card-cta-href') || DEFAULTS.cardCta.href,
+      text: getMetadata('fg-card-cta-text') || strings.cardCtaText,
+      href: getMetadata('fg-card-cta-href') || DEFAULTS.cardCtaHref,
     },
   };
 }
@@ -58,10 +55,10 @@ export default async function decorate(block) {
   }
   initFonts(fonts);
 
-  const content = getContent();
   // Await resolved copy before building any text-bearing component so the
   // user never sees English placeholder text swapped out (color-extract.js).
   const strings = await placeholdersPromise;
+  const content = getContent(strings);
 
   const container = createTag('section', { class: 'fg-container' });
   const sidebar = createTag('div', { class: 'fg-sidebar' });
@@ -73,9 +70,8 @@ export default async function decorate(block) {
   });
 
   // Desktop-inline filters instance; the mobile/tablet instance lives inside
-  // panel.js's own drawer, mounted separately below. .fg-sidebar drives
-  // filters.js/font-generator.css's desktop-inline-vs-mobile-panel visibility
-  // toggle (Megan Thomas, MWPW-189432).
+  // the panel's own drawer, mounted separately below. .fg-sidebar drives the
+  // desktop-inline-vs-mobile-panel visibility toggle in font-generator.css.
   const desktopFiltersEl = createTag('div', { class: 'fg-filters' });
 
   sidebar.append(textInput, desktopFiltersEl);
@@ -92,6 +88,7 @@ export default async function decorate(block) {
   const { container: gridContainer, unsubscribe: unsubscribeGrid } = createFontCardGrid({
     cardCta: content.cardCta,
     fonts,
+    strings,
   });
   main.append(gridContainer);
 

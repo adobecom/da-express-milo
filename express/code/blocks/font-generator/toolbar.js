@@ -1,6 +1,7 @@
 // @import { State } from './types.js'
 import { setState, subscribe } from './state.js';
 import { FONT_SIZE_MIN, FONT_SIZE_MAX } from './types.js';
+import { DEFAULT_PLACEHOLDERS } from './placeholders.js';
 
 const BLOCK_PATH = '/express/code/blocks/font-generator';
 const STYLESHEET_HREF = `${BLOCK_PATH}/toolbar.css`;
@@ -53,6 +54,7 @@ function setSliderFill(sliderEl, value) {
 
 export default function createToolbar({ panelId, strings = {} } = {}) {
   injectStyles();
+  const s = { ...DEFAULT_PLACEHOLDERS, ...strings };
 
   const toolbar = document.createElement('div');
   toolbar.className = 'font-generator-toolbar';
@@ -64,10 +66,10 @@ export default function createToolbar({ panelId, strings = {} } = {}) {
   const btnGroup = document.createElement('div');
   btnGroup.className = 'toolbar-layout-group';
   btnGroup.setAttribute('role', 'group');
-  btnGroup.setAttribute('aria-label', 'Card layout');
+  btnGroup.setAttribute('aria-label', s.layoutGroupLabel);
 
-  const gridBtn = makeLayoutBtn('grid', 'Grid view', makeIcon('grid.svg'));
-  const rowBtn = makeLayoutBtn('list', 'Row view', makeIcon('row.svg'));
+  const gridBtn = makeLayoutBtn('grid', s.gridViewLabel, makeIcon('grid.svg'));
+  const rowBtn = makeLayoutBtn('list', s.rowViewLabel, makeIcon('row.svg'));
   btnGroup.append(gridBtn, rowBtn);
 
   const count = document.createElement('span');
@@ -86,10 +88,8 @@ export default function createToolbar({ panelId, strings = {} } = {}) {
 
   const filterLabel = document.createElement('span');
   filterLabel.className = 'filter-trigger-label';
-  if (strings.filterTrigger) {
-    filterLabel.textContent = strings.filterTrigger;
-    filterTrigger.setAttribute('aria-label', strings.filterTrigger);
-  }
+  filterLabel.textContent = s.filterTrigger;
+  filterTrigger.setAttribute('aria-label', s.filterTrigger);
   filterTrigger.append(makeIcon('filter.svg'), filterLabel);
 
   leftGroup.append(btnGroup, count, filterTrigger);
@@ -103,7 +103,7 @@ export default function createToolbar({ panelId, strings = {} } = {}) {
   const sliderLabel = document.createElement('label');
   sliderLabel.className = 'toolbar-slider-label';
   sliderLabel.htmlFor = sliderId;
-  sliderLabel.textContent = 'Preview font size';
+  sliderLabel.textContent = s.fontSizeLabel;
 
   const sliderValue = document.createElement('span');
   sliderValue.className = 'toolbar-slider-value';
@@ -132,7 +132,7 @@ export default function createToolbar({ panelId, strings = {} } = {}) {
     sliderValue.textContent = `${fontSize}px`;
     setSliderFill(slider, fontSize);
 
-    count.textContent = `${activeFonts.length} unicode fonts`;
+    count.textContent = `${activeFonts.length} ${s.fontCountLabel}`;
   }
 
   // ── Events ───────────────────────────────────────────────────────────────

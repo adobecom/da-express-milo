@@ -13,7 +13,7 @@ main .section:has(.font-generator) > .content {
   --fg-sidebar-width: 477px;
   --fg-panel-width: 511px;
   --gnav-offset-height: 63px; /* sticky rail must clear the sticky gnav */
-  background: var(--gray-75, #F3F3F3);
+  background: var(--color-gray-150);
 }
 
 /* Layout: single column up to 1200px, then a sticky sidebar rail + results.
@@ -102,7 +102,6 @@ main .section:has(.font-generator) > .content {
   height: calc(100% - 2px);
 }
 
-/* Category renamed from "Symbol text" to "Symbol" in font-styles.csv. */
 .font-generator .fg-filter-btn[data-category="Symbol"] {
   font-size: var(--Global-Typography-Size-Label-Label-S);
   line-height: var(--Global-Typography-Line-height-Label-Label-S);

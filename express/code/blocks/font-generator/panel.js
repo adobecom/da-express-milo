@@ -14,7 +14,12 @@ function createCloseSvg() {
 }
 
 export default async function init(block, { onOpenChange, panelId } = {}) {
-  const strings = await fetchStrings({ 'fg-filters': 'Filters', 'fg-close-filters': 'Close filters' });
+  const strings = await fetchStrings({
+    'fg-filters': 'Filters',
+    'fg-close-filters': 'Close filters',
+    'fg-promo-title': 'Looking for more fonts?',
+    'fg-promo-cta': 'Go to Adobe Fonts',
+  });
 
   const overlay = createTag('div', { class: 'fg-overlay', 'aria-hidden': 'true', inert: '' });
 
@@ -36,7 +41,10 @@ export default async function init(block, { onOpenChange, panelId } = {}) {
 
   const filtersEl = createTag('div', { class: 'fg-filters' });
 
-  panel.append(closeBtn, handle, filtersEl, buildPromo('button primary small fg-promo-btn'));
+  panel.append(closeBtn, handle, filtersEl, buildPromo('button primary small fg-promo-btn', {
+    title: strings['fg-promo-title'],
+    cta: strings['fg-promo-cta'],
+  }));
   overlay.appendChild(panel);
   block.appendChild(overlay);
 
