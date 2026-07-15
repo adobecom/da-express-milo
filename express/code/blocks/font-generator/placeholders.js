@@ -11,6 +11,8 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   previewPlaceholder: 'Type the preview text you want to get started...',
   inputLabel: 'Preview text input',
   tryThese: 'Try these:',
+  // Comma-separated preview suggestions rendered as pills.
+  suggestions: 'The quick brown fox jumps over the lazy dog,ABCDEFGHIJKLMNOPQRSTUVWXYZ,Realigned equestrian fez bewilders picky monarch',
   // Toolbar
   filterTrigger: 'Filter',
   layoutGroupLabel: 'Card layout',
@@ -34,6 +36,7 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   previewPlaceholder: 'font-generator-placeholder',
   inputLabel: 'font-generator-input-label',
   tryThese: 'font-generator-try-these',
+  suggestions: 'font-generator-suggestions',
   filterTrigger: 'font-generator-filter',
   layoutGroupLabel: 'font-generator-layout-group',
   gridViewLabel: 'font-generator-grid-view',

@@ -41,6 +41,10 @@ describe('font-generator', () => {
     expect(block.querySelector('.fg-sidebar .fg-filters')).to.exist;
   });
 
+  it('renders preview suggestion pills from the resolved copy', () => {
+    expect(block.querySelectorAll('.fg-sidebar .tag-pills').length).to.be.greaterThan(0);
+  });
+
   it('main contains the toolbar and the card grid', () => {
     expect(block.querySelector('.fg-main .font-generator-toolbar')).to.exist;
     expect(block.querySelector('.fg-main .font-card-grid')).to.exist;

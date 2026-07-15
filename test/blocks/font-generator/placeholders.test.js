@@ -11,7 +11,7 @@ const { default: loadFontGeneratorPlaceholders, DEFAULT_PLACEHOLDERS } = await i
 // Every UI string the toolbar / card grid / input rely on. filters.js and
 // panel.js own their own fg-* keys, so those are intentionally not here.
 const EXPECTED_KEYS = [
-  'previewPlaceholder', 'inputLabel', 'tryThese', 'filterTrigger',
+  'previewPlaceholder', 'inputLabel', 'tryThese', 'suggestions', 'filterTrigger',
   'layoutGroupLabel', 'gridViewLabel', 'rowViewLabel', 'fontSizeLabel',
   'fontCountLabel', 'loadMore', 'copyLabel', 'copiedLabel',
   'copiedMessage', 'sampleText', 'cardCtaText',

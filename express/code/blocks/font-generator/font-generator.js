@@ -15,19 +15,14 @@ let filterPanelCount = 0;
 const placeholdersPromise = loadFontGeneratorPlaceholders();
 
 const DEFAULTS = {
-  suggestions: [
-    'The quick brown fox jumps over the lazy dog',
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-    'Realigned equestrian fez bewilders picky monarch',
-  ],
   cardCtaHref: 'https://www.adobe.com/express/templates/',
 };
 
 function getContent(strings = {}) {
-  const suggestionsRaw = getMetadata('fg-suggestions');
-  const suggestions = suggestionsRaw
-    ? suggestionsRaw.split(',').map((s) => s.trim()).filter(Boolean)
-    : DEFAULTS.suggestions;
+  // Authored fg-suggestions metadata wins; otherwise the placeholder default
+  // (comma-separated) supplies localizable sample text.
+  const suggestionsRaw = getMetadata('fg-suggestions') || strings.suggestions || '';
+  const suggestions = suggestionsRaw.split(',').map((s) => s.trim()).filter(Boolean);
 
   return {
     suggestions,
