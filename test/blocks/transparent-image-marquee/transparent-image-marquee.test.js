@@ -68,4 +68,55 @@ describe('transparent-image-marquee', () => {
     const block = await prepBlock('./mocks/default.html');
     expect(block.style.background).to.be.ok;
   });
+
+  it('keeps the dark treatment for a dark authored background', async () => {
+    const block = await prepBlock('./mocks/default.html');
+    expect(block.classList.contains('light')).to.be.false;
+  });
+});
+
+describe('transparent-image-marquee / CTAs + disclaimer', () => {
+  beforeEach(() => {
+    window.isTestEnv = true;
+  });
+
+  it('builds a cta-container with a button-group', async () => {
+    const block = await prepBlock('./mocks/with-ctas.html');
+    expect(block.querySelector('.cta-container')).to.exist;
+    expect(block.querySelector('.cta-container .button-group')).to.exist;
+  });
+
+  it('marks the strong-wrapped link as the primary CTA', async () => {
+    const block = await prepBlock('./mocks/with-ctas.html');
+    const primary = block.querySelector('.cta.primary');
+    expect(primary).to.exist;
+    expect(primary.tagName).to.equal('A');
+    expect(primary.textContent.trim()).to.equal('Get started');
+  });
+
+  it('marks the second link as the secondary CTA', async () => {
+    const block = await prepBlock('./mocks/with-ctas.html');
+    const secondary = block.querySelector('.cta.secondary');
+    expect(secondary).to.exist;
+    expect(secondary.textContent.trim()).to.equal('Learn more');
+  });
+
+  it('renders the trailing no-link paragraph as the disclaimer', async () => {
+    const block = await prepBlock('./mocks/with-ctas.html');
+    const disclaimer = block.querySelector('.cta-container .disclaimer');
+    expect(disclaimer).to.exist;
+    expect(disclaimer.textContent).to.include('No credit card');
+  });
+
+  it('keeps the subcopy in the text-container, not as a CTA or disclaimer', async () => {
+    const block = await prepBlock('./mocks/with-ctas.html');
+    const paras = [...block.querySelectorAll('.text-container p')];
+    expect(paras.some((p) => p.textContent.includes('Create stylized text'))).to.be.true;
+    expect(block.querySelector('.text-container .disclaimer')).to.not.exist;
+  });
+
+  it('activates the light treatment for a light authored background', async () => {
+    const block = await prepBlock('./mocks/with-ctas.html');
+    expect(block.classList.contains('light')).to.be.true;
+  });
 });

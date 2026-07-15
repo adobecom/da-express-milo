@@ -1,3 +1,16 @@
+/* ── Transparent Image Marquee ──────────────────────────────────────
+ * Spec: Font Generator SEO Page — Figma node 3763:178198
+ * Breakpoints follow the Figma devices:
+ *   Mobile  (S)  <  600px   1-column, image stacked below the text
+ *   Tablet  (M)  ≥  600px   2-column that wraps back to 1-column below
+ *                           ~853px (image scales 409.5px → 387px min)
+ *   Desktop (L)  ≥ 1200px   2-column with a fixed 787.5px image
+ * The image is anchored to the bottom edge of the block (no bottom
+ * padding) so the transparent PNG bleeds into the section below.
+ * Background color is authored as a single hex; the JS adds `.light`
+ * automatically when that color is light so text/borders flip.
+ * ------------------------------------------------------------------ */
+
 .transparent-image-marquee {
   background: var(--color-black);
   color: var(--color-white);
@@ -10,8 +23,16 @@
 .transparent-image-marquee .foreground {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-400);
+  align-items: center;
+  gap: var(--spacing-500);
   max-width: 1600px;
+  width: 100%;
+}
+
+.transparent-image-marquee .main-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-400);
   width: 100%;
 }
 
@@ -37,7 +58,7 @@
 
 /* Express web/Headings/2XL — 32px (mobile/tablet), 45px (desktop), weight 900 */
 .transparent-image-marquee .text-container h2 {
-  color: var(--color-white);
+  color: inherit;
   font-size: var(--heading-font-size-ml);
   font-weight: var(--heading-font-weight-extra);
   line-height: 1.04;
@@ -47,10 +68,72 @@
 /* Express web/Body/Body-S — 14px (mobile/tablet), 16px (desktop) */
 /* (0,3,1) beats main .section p (0,1,2) */
 .transparent-image-marquee .text-content .text-container p {
-  color: var(--color-white);
+  color: inherit;
   font-size: var(--body-font-size-s);
   line-height: 1.3;
   margin: 0;
+}
+
+/* ── CTAs + disclaimer ──────────────────────────────────────────── */
+.transparent-image-marquee .cta-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  align-items: flex-start;
+}
+
+.transparent-image-marquee .button-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-200);
+}
+
+.transparent-image-marquee .cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: 90px;
+  padding: 10px 20px;
+  border: 2px solid transparent;
+  border-radius: 24px;
+  font-family: var(--body-font-family);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 22px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.transparent-image-marquee .cta.primary {
+  background: #3b63fb;
+  color: var(--color-white);
+}
+
+.transparent-image-marquee .cta.primary:hover {
+  background: #274beb;
+}
+
+.transparent-image-marquee .cta.secondary {
+  background: transparent;
+  border-color: rgba(255, 255, 255, 0.17);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.transparent-image-marquee .cta.secondary:hover {
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.transparent-image-marquee .disclaimer {
+  color: inherit;
+  font-size: var(--body-font-size-s);
+  line-height: 1.3;
+  margin: 0;
+}
+
+/* ── image ──────────────────────────────────────────────────────── */
+.transparent-image-marquee .image-container {
+  width: 100%;
 }
 
 .transparent-image-marquee .image-container picture {
@@ -66,46 +149,87 @@
   width: 100%;
 }
 
-/* Light variant: dark text for use on a light authored background.
-   Pairs with the default (dark-texted) Adobe Express branding logo. */
+/* Light variant: dark text/borders for a light authored background.
+   Auto-applied by the JS from the authored hex luminance. */
 .transparent-image-marquee.light {
   color: var(--color-black);
 }
 
-.transparent-image-marquee.light .text-container h2,
-.transparent-image-marquee.light .text-content .text-container p {
-  color: var(--color-black);
+.transparent-image-marquee.light .cta.secondary {
+  border-color: rgba(0, 0, 0, 0.17);
+  color: rgba(0, 0, 0, 0.85);
 }
 
-@media (min-width: 900px) {
+.transparent-image-marquee.light .cta.secondary:hover {
+  border-color: rgba(0, 0, 0, 0.4);
+}
+
+/* ── Tablet (M) ≥ 600px: 2-column that wraps to 1-column ≤ ~853px ── */
+@media (min-width: 600px) {
   .transparent-image-marquee {
     align-items: flex-end;
-    padding-inline: var(--spacing-600);
+    padding: 0 var(--spacing-500);
   }
 
   .transparent-image-marquee .foreground {
-    align-items: center;
     flex-direction: row;
-    /* text left-pinned, image pinned to the right edge of the content area */
-    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--spacing-300);
+  }
+
+  /* Both columns want ≥387px; flex-wrap drops the image below the text
+     once two 387px columns no longer fit (≈853px viewport). */
+  .transparent-image-marquee .main-container {
+    flex: 1 1 387px;
+    min-width: 387px;
+    justify-content: center;
+    padding-block: var(--spacing-600);
   }
 
   .transparent-image-marquee .text-content {
-    flex: 1;
-    max-width: 438px;
-    padding-block: var(--spacing-900);
+    max-width: 338px;
   }
 
-  /* 788px wide at 3:2 → 525px tall, matching the desktop Figma frame */
   .transparent-image-marquee .image-container {
+    flex: 1 1 387px;
+    min-width: 387px;
     align-self: flex-end;
-    flex-shrink: 0;
-    width: 788px;
+    width: auto;
   }
 }
 
-/* Desktop type scale: heading 45px, body 16px (Figma 1440px frame) */
+/* ── Desktop (L / XL) ≥ 1200px: fixed 787.5px image ─────────────── */
 @media (min-width: 1200px) {
+  .transparent-image-marquee {
+    padding: 0 var(--spacing-600);
+  }
+
+  .transparent-image-marquee .foreground {
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: var(--spacing-400);
+  }
+
+  .transparent-image-marquee .main-container {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-block: var(--spacing-900);
+  }
+
+  .transparent-image-marquee .text-content {
+    max-width: 438px;
+  }
+
+  /* 787.5px wide at 3:2 → 525px tall, matching the desktop Figma frame */
+  .transparent-image-marquee .image-container {
+    flex: 0 0 auto;
+    align-self: flex-end;
+    min-width: 600px;
+    width: 787.5px;
+  }
+
+  /* Desktop type scale: heading 45px, body 16px (Figma 1440px frame) */
   .transparent-image-marquee .text-container h2 {
     font-size: var(--heading-font-size-2xl);
   }
