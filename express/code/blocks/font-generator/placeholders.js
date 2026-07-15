@@ -5,7 +5,6 @@ import { getLibs } from '../../scripts/utils.js';
 // accordion and drawer own their own copy ('fg-all', 'fg-categories',
 // 'fg-cool', 'fg-glitch', 'fg-symbol', 'fg-filters', 'fg-close-filters',
 // 'fg-promo-title', 'fg-promo-cta') via filters.js/panel.js fetchStrings() —
-// duplicating those here would be a second, conflicting source of truth.
 export const DEFAULT_PLACEHOLDERS = Object.freeze({
   // Input panel
   previewPlaceholder: 'Type the preview text you want to get started...',
