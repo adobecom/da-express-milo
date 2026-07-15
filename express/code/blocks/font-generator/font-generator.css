@@ -13,7 +13,7 @@ main .section:has(.font-generator) > .content {
   --fg-sidebar-width: 477px;
   --fg-panel-width: 511px;
   --gnav-offset-height: 63px; /* sticky rail must clear the sticky gnav */
-  background: var(--color-gray-150);
+  background-color: var(--color-gray-150);
 }
 
 /* Layout: single column up to 1200px, then a sticky sidebar rail + results.
@@ -187,7 +187,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   line-height: 1.3333333;
 }
 
-/* Overlay backdrop */
+/* ── Overlay backdrop ────────────────────────────────────────────── */
 .font-generator .fg-overlay {
   position: fixed;
   inset: 0;
@@ -204,7 +204,8 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   pointer-events: auto;
 }
 
-/* Panel / tray — mobile-first: tray slides up from the bottom */
+/* ── Panel / Tray ────────────────────────────────────────────────── */
+/* Mobile-first: tray slides up from bottom */
 .font-generator .fg-panel {
   position: fixed;
   inset-inline: 0;
@@ -226,7 +227,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   transform: none;
 }
 
-/* Drag handle — mobile tray only */
+/* ── Drag handle (mobile tray only) ─────────────────────────────── */
 .font-generator .fg-tray-handle {
   width: 80px;
   height: 4px;
@@ -237,7 +238,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   cursor: grab;
 }
 
-/* Close button — tablet panel only */
+/* ── Close button (tablet panel only) ───────────────────────────── */
 .font-generator .fg-panel-close {
   display: none;
 }
