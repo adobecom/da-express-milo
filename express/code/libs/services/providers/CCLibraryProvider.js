@@ -140,9 +140,7 @@ export default class CCLibraryProvider extends BaseProvider {
    * @param {string}  [options.type='linear'] - Gradient type
    * @param {Array<{color: string, position: number}>} options.stops
    *   Each stop has a CSS color string (hex or rgb/rgba) and a position (0-1 float).
-   * @param {Array<string>} [options.tags=[]] - Tags to persist with the gradient.
-   *   Stored inside `gradient#data` (not top-level) because the CC Library API
-   *   only round-trips fields nested in the representation data.
+   * @param {Array<string>} [options.tags=[]] - Tags to persist inside `gradient#data`.
    * @returns {Object} Melville-ready element payload
    */
   // eslint-disable-next-line class-methods-use-this

@@ -71,9 +71,6 @@ function extractThemeTags(element, themeData, rep) {
   return [...new Set(merged)];
 }
 
-// Gradient tags mirror the theme handling: they can live in the gradient
-// representation data (`gradient#data.tags`), the representation's `color:#tags`
-// field, or on the element itself; merge every source so the UI reflects them.
 function extractGradientTags(element, gradientData, rep) {
   const sources = [gradientData?.tags, rep?.['color:#tags'], element?.tags];
   const merged = sources

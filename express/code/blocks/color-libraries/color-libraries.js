@@ -537,11 +537,7 @@ export default async function decorate(block) {
   };
   block.addEventListener('libraries:item-open', openHandler);
 
-  // Re-render the grid after an in-modal "Save changes" so edited names/tags
-  // (and any downstream state like search matches) reflect the latest data.
-  // The modal mounts on document.body (outside this block), so its
-  // `libraries:item-updated` event bubbles to `document`, not to `block`;
-  // listen on `document` so edits made in the modal refresh the grid.
+  // Modal mounts on document.body, so its item-updated event reaches document, not block.
   updatedHandler = () => {
     renderLibraries(block, searchQuery, placeholders, currentSearchType).catch((err) => {
       window.lana?.log(`color-libraries refresh after update failed: ${err?.message}`, {

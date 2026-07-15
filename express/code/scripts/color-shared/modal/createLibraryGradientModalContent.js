@@ -237,9 +237,7 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
         stops: colorStops,
         tags,
       });
-      // The representation PUT (updateTheme) persists the gradient data (tags,
-      // stops) but NOT the element name; the name lives in element metadata and
-      // must be saved via the metadata endpoint.
+      // updateTheme persists gradient data (tags/stops); name lives in element metadata.
       await Promise.all([
         ccLibraryProvider.updateTheme(libraryId, item.id, payload),
         ccLibraryProvider.updateElementMetadata(libraryId, [{ id: item.id, name }]),

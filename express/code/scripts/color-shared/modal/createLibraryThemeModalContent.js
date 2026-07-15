@@ -218,9 +218,7 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
         { name, tags },
         { untitledTheme: strings.librariesModalUntitledTheme },
       );
-      // The representation PUT (updateTheme) persists the theme data (colors,
-      // tags) but NOT the element name; the name lives in element metadata and
-      // must be saved via the metadata endpoint.
+      // updateTheme persists theme data (colors/tags); name lives in element metadata.
       await Promise.all([
         ccLibraryProvider.updateTheme(libraryId, item.id, payload),
         ccLibraryProvider.updateElementMetadata(libraryId, [{ id: item.id, name }]),
