@@ -1,10 +1,28 @@
+/* ── Icon Carousel ──────────────────────────────────────────────────
+ * Spec: Font Generator SEO Page — Figma node 3739:169713
+ * Breakpoints follow the Figma devices:
+ *   Mobile  (S)  <  600px   side padding 16px
+ *   Tablet  (M)  ≥  600px   side padding 32px
+ *   Desktop (L)  ≥ 1200px   side padding 40px
+ * The gallery is full-bleed to the right edge of the viewport so that,
+ * once there are enough cards to scroll, a partial card is always
+ * visible at the right to signal the carousel is scrollable.
+ * ------------------------------------------------------------------ */
+
+/* Let the block span the full content width so the gallery can bleed
+ * all the way to the right edge of the viewport. */
+.section .icon-carousel-wrapper {
+  max-width: none;
+}
+
 .icon-carousel {
-  padding: var(--spacing-500) var(--spacing-350);
+  padding: var(--spacing-600) var(--spacing-300);
   box-sizing: border-box;
 }
 
 .icon-carousel-header {
-  margin-bottom: var(--spacing-400);
+  max-width: 553px;
+  margin-bottom: var(--spacing-500);
 }
 
 .icon-carousel-header h1,
@@ -13,7 +31,7 @@
 .icon-carousel-header h4 {
   font-size: var(--heading-font-size-m);
   font-weight: var(--heading-font-weight);
-  line-height: 1.25;
+  line-height: 1.04;
   margin: 0 0 var(--spacing-100) 0;
   color: var(--color-gray-800);
 }
@@ -23,17 +41,19 @@
   font-size: var(--body-font-size-m);
   color: var(--text-color-secondary);
   margin: 0;
-  line-height: var(--body-line-height);
+  line-height: 1.3;
 }
 
 .icon-carousel-gallery {
   display: flex;
-  gap: var(--spacing-300);
-  overflow-x: scroll;
+  gap: var(--spacing-100);
+  overflow-x: auto;
   scrollbar-width: none;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  scroll-padding: 0 var(--spacing-350);
+  /* Full-bleed: extend the scroll track to the right edge of the viewport. */
+  margin-right: calc(50% - 50vw);
+  padding-right: var(--spacing-300);
 }
 
 .icon-carousel-gallery::-webkit-scrollbar {
@@ -42,18 +62,13 @@
 
 .icon-carousel-card {
   flex: 0 0 auto;
-  width: calc(100vw - var(--spacing-700) - var(--spacing-300));
-  max-width: 320px;
-  min-width: 220px;
+  width: 310px;
+  min-height: 200px;
   background-color: var(--color-gray-100);
-  border-radius: 12px;
-  padding: var(--spacing-300);
+  border-radius: 16px;
+  padding: var(--spacing-400);
   box-sizing: border-box;
   scroll-snap-align: start;
-}
-
-.icon-carousel-card:first-child {
-  scroll-margin-left: var(--spacing-350);
 }
 
 .icon-carousel-card-icon {
@@ -64,7 +79,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: var(--spacing-300);
+  margin-bottom: var(--spacing-500);
   overflow: hidden;
   flex-shrink: 0;
 }
@@ -82,11 +97,11 @@
 .icon-carousel-card-body h4,
 .icon-carousel-card-body h5,
 .icon-carousel-card-body h6 {
-  font-size: var(--body-font-size-m);
+  font-size: var(--heading-font-size-xs);
   font-weight: 700;
   margin: 0 0 var(--spacing-100) 0;
   color: var(--color-gray-800);
-  line-height: 1.4;
+  line-height: 1.3;
 }
 
 /* Specificity bump to (0,0,2,1): overrides main .section p { margin: spacing/500 0 } */
@@ -94,14 +109,14 @@
   font-size: var(--body-font-size-s);
   color: var(--text-color-secondary);
   margin: 0;
-  line-height: var(--body-line-height);
+  line-height: 1.3;
 }
 
 .icon-carousel-controls {
   display: flex;
   justify-content: flex-end;
   gap: var(--spacing-100);
-  padding-top: var(--spacing-300);
+  padding-top: var(--spacing-500);
 }
 
 .icon-carousel-controls.is-hidden {
@@ -165,9 +180,25 @@
   flex-shrink: 0;
 }
 
+/* ── Tablet (M) ≥ 600px ─────────────────────────────────────────── */
 @media (min-width: 600px) {
   .icon-carousel {
     padding: var(--spacing-600) var(--spacing-500);
+  }
+
+  .icon-carousel-gallery {
+    padding-right: var(--spacing-500);
+  }
+
+  .icon-carousel-card {
+    width: 415px;
+  }
+}
+
+/* ── Desktop (L) ≥ 1200px ───────────────────────────────────────── */
+@media (min-width: 1200px) {
+  .icon-carousel {
+    padding: var(--spacing-900) var(--spacing-600);
   }
 
   .icon-carousel-header h1,
@@ -177,151 +208,26 @@
     font-size: var(--heading-font-size-l);
   }
 
-  .icon-carousel-card {
-    width: 280px;
-    max-width: 280px;
-  }
-
-  .icon-carousel-card:first-child {
-    scroll-margin-left: var(--spacing-500);
+  .icon-carousel .icon-carousel-header p {
+    font-size: var(--body-font-size-l);
   }
 
   .icon-carousel-gallery {
-    scroll-padding: 0 var(--spacing-500);
-  }
-}
-
-@media (min-width: 900px) {
-  .icon-carousel {
-    padding: var(--spacing-700) var(--spacing-600);
+    padding-right: var(--spacing-600);
   }
 
-  .icon-carousel-card {
-    width: auto;
-    flex: 1 0 240px;
-    max-width: 300px;
+  .icon-carousel-card-body h1,
+  .icon-carousel-card-body h2,
+  .icon-carousel-card-body h3,
+  .icon-carousel-card-body h4,
+  .icon-carousel-card-body h5,
+  .icon-carousel-card-body h6 {
+    font-size: var(--heading-font-size-s);
   }
 
-  .icon-carousel-card:first-child {
-    scroll-margin-left: var(--spacing-600);
+  .icon-carousel .icon-carousel-card-body p {
+    font-size: var(--body-font-size-m);
   }
-
-  .icon-carousel-gallery {
-    scroll-padding: 0 var(--spacing-600);
-  }
-}
-
-/* ── comparison variants ────────────────────────────────────────── */
-/*
- * v1  Roomier — more padding inside cards, larger radius, slightly deeper gray bg
- * v2  Compact — smaller heading, tighter padding + gaps, smaller icon
- * v3  Elevated — white cards with a drop shadow instead of a flat gray bg
- * v4  Bordered — white cards defined by a 1 px border, tighter radius
- * v5  Figma-spec — every value taken directly from Figma annotations
- *       card padding:    Spacing/Spacing-400 = 24px
- *       card gap:        32px (measured annotation)
- *       card radius:     16px (layer properties: Border)
- *       header → cards:  spacing/500 = 32px
- *       title → body:    Spacing/Spacing-100 = 8px
- *       icon size:       44px (proportioned from close-up screenshot)
- *       icon radius:     12px
- */
-
-/* v1 ── Roomier */
-.icon-carousel.v1 .icon-carousel-card {
-  background-color: var(--color-gray-150);
-  border-radius: 16px;
-  padding: var(--spacing-400);
-}
-
-.icon-carousel.v1 .icon-carousel-card-icon {
-  margin-bottom: var(--spacing-200);
-}
-
-.icon-carousel.v1.dark .icon-carousel-card {
-  background-color: var(--color-gray-900);
-}
-
-/* v2 ── Compact */
-.icon-carousel.v2 .icon-carousel-header h1,
-.icon-carousel.v2 .icon-carousel-header h2,
-.icon-carousel.v2 .icon-carousel-header h3,
-.icon-carousel.v2 .icon-carousel-header h4 {
-  font-size: var(--heading-font-size-s);
-}
-
-.icon-carousel.v2 .icon-carousel-gallery {
-  gap: var(--spacing-200);
-}
-
-.icon-carousel.v2 .icon-carousel-card {
-  min-width: 200px;
-  padding: var(--spacing-200);
-}
-
-.icon-carousel.v2 .icon-carousel-card-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
-  margin-bottom: var(--spacing-200);
-}
-
-/* v3 ── Elevated */
-.icon-carousel.v3 .icon-carousel-card {
-  background-color: var(--color-white);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.icon-carousel.v3.dark .icon-carousel-card {
-  background-color: var(--color-gray-800);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-}
-
-/* v4 ── Bordered */
-.icon-carousel.v4 .icon-carousel-card {
-  background-color: var(--color-white);
-  border: 1px solid var(--color-gray-250);
-  border-radius: 8px;
-}
-
-.icon-carousel.v4.dark .icon-carousel-card {
-  background-color: var(--color-gray-800);
-  border: 1px solid var(--color-gray-700);
-}
-
-/* v5 ── Figma-spec */
-.icon-carousel.v5 .icon-carousel-header {
-  margin-bottom: var(--spacing-500);
-}
-
-.icon-carousel.v5 .icon-carousel-gallery {
-  gap: var(--spacing-500);
-}
-
-.icon-carousel.v5 .icon-carousel-card {
-  background-color: var(--color-gray-150);
-  border-radius: 16px;
-  padding: var(--spacing-400);
-}
-
-.icon-carousel.v5 .icon-carousel-card-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  margin-bottom: var(--spacing-300);
-}
-
-.icon-carousel.v5 .icon-carousel-card-body h1,
-.icon-carousel.v5 .icon-carousel-card-body h2,
-.icon-carousel.v5 .icon-carousel-card-body h3,
-.icon-carousel.v5 .icon-carousel-card-body h4,
-.icon-carousel.v5 .icon-carousel-card-body h5,
-.icon-carousel.v5 .icon-carousel-card-body h6 {
-  margin-bottom: var(--spacing-100);
-}
-
-.icon-carousel.v5.dark .icon-carousel-card {
-  background-color: var(--color-gray-900);
 }
 
 /* ── no-subcopy variant ─────────────────────────────────────────── */
@@ -347,8 +253,9 @@
   color: var(--color-gray-350);
 }
 
+/* Card background in dark mode is 14% transparency white (transparent-white/200). */
 .icon-carousel.dark .icon-carousel-card {
-  background-color: var(--color-gray-800);
+  background-color: rgba(255, 255, 255, 0.14);
 }
 
 .icon-carousel.dark .icon-carousel-card-icon {
