@@ -349,9 +349,10 @@
   box-sizing: border-box;
 }
 
-/* Avoid sticky :hover on touch devices. */
+/* Avoid sticky :hover on touch devices. The gray hover background only applies
+   to closed accordions; an open accordion keeps its background on hover. */
 @media (hover: hover) and (pointer: fine) {
-  .ax-lib-accordion-header:hover {
+  .ax-lib-accordion:not(.ax-lib-accordion--open) .ax-lib-accordion-header:hover {
     background: var(--ax-lib-border);
   }
 }
@@ -400,13 +401,17 @@
   flex-shrink: 0;
 }
 
-/* Open accordion adopts the header hover treatment. */
-.ax-lib-accordion--open .ax-lib-accordion-name {
-  font-weight: var(--font-weight-medium);
-}
+/* An open accordion keeps its default typography; hovering an open accordion
+   emphasizes the name (bold) and count. Guarded so the state doesn't stick on
+   touch devices. */
+@media (hover: hover) and (pointer: fine) {
+  .ax-lib-accordion--open .ax-lib-accordion-header:hover .ax-lib-accordion-name {
+    font-weight: 700;
+  }
 
-.ax-lib-accordion--open .ax-lib-accordion-count {
-  color: var(--ax-lib-heading-color);
+  .ax-lib-accordion--open .ax-lib-accordion-header:hover .ax-lib-accordion-count {
+    color: var(--ax-lib-heading-color);
+  }
 }
 
 .ax-lib-toggle-icon {
