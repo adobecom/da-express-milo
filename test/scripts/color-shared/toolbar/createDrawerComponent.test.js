@@ -1129,6 +1129,33 @@ describe.skip('createDrawer', function drawerSuite() {
       await waitForClose();
     });
 
+    it('gradient save payload includes tags added via Enter key', async () => {
+      anchor = createAnchor();
+      const provider = createMockCCLibraryProvider();
+      const drawer = await createDrawer(defaultOptions({
+        anchorElement: anchor,
+        type: 'gradient',
+        paletteData: MOCK_GRADIENT,
+        libraries: MOCK_LIBRARIES,
+        ccLibraryProvider: provider,
+        deps: signedInDeps,
+      }));
+      await openDrawer(drawer);
+
+      const tagsInput = document.querySelector('.ax-drawer-tag-section input');
+      tagsInput.value = 'NewTag';
+      tagsInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+      const saveBtn = document.querySelector('.ax-drawer-save-btn');
+      saveBtn.click();
+      await new Promise((r) => setTimeout(r, 50));
+
+      const { tags } = provider.buildGradientPayload.firstCall.args[0];
+      expect(tags).to.include('NewTag');
+
+      await waitForClose();
+    });
+
     // Fix test MWPW-192264
     it.skip('save failure closes drawer and announces error to screen reader', async () => {
       anchor = createAnchor();

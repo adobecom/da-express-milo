@@ -554,6 +554,7 @@ async function executeSaveToLibrary(palette, palType, formData, ccLibProvider, t
         color: hex,
         position: arr.length > 1 ? i / (arr.length - 1) : 0,
       })),
+      tags: formData.tags ?? [],
     });
     await ccLibProvider.saveGradient(formData.libraryId, gradientPayload);
   } else {
