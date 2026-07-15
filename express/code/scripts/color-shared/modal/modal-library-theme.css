@@ -108,6 +108,35 @@
   inline-size: 100%;
 }
 
+/* ── Full-bleed footer divider (mobile + tablet; desktop unchanged) ── */
+@media (max-width: 1199px) {
+  .ax-color-modal-content .modal-library-theme {
+    gap: 0;
+  }
+
+  .ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
+    border-block-start: 1px solid var(--color-gray-150);
+  }
+
+  .ax-color-modal-content .modal-library-theme .ax-toolbar.ax-toolbar-library {
+    border-block-start: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
+    margin-inline: calc(-1 * var(--spacing-300));
+    padding-inline: var(--spacing-300);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1199px) {
+  .ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
+    margin-inline: calc(-1 * var(--spacing-400));
+    padding-inline: var(--spacing-400);
+  }
+}
+
 /* modal-palette-content.css inflates accent buttons to 48px below 1200px; keep
    the Edit theme + Save changes buttons at 40px across all breakpoints. */
 .ax-color-modal-content .ax-toolbar-lib-buttons sp-button[variant] {
