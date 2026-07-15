@@ -74,6 +74,7 @@ const DRAWER_I18N_MAP = {
   libraryCreatedToast: 'color-drawer-library-created-toast',
   createLibraryFailedToast: 'color-drawer-create-library-failed-toast',
   viewInLibrary: 'color-drawer-view-in-library',
+  viewInLibraryHref: 'color-drawer-view-in-library-href',
 };
 
 async function loadI18nStrings() {

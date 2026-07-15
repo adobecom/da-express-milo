@@ -71,14 +71,10 @@ const DRAWER_DEFAULTS = {
   libraryCreatedToast: "Library '{{name}}' created",
   createLibraryFailedToast: 'Something went wrong. Try again.',
   viewInLibrary: 'View in Library',
+  viewInLibraryHref: '/mythemes',
 };
 
 const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
-
-// On-site libraries page path (matches color.adobe.com/mythemes). Resolved
-// against the current origin so "View in library" opens the libraries page on
-// the same base URL instead of the external Express web app.
-const LIBRARIES_PAGE_PATH = '/mythemes';
 
 /* ── Authentication Helpers ──────────────────────────────────── */
 
@@ -863,7 +859,7 @@ export async function createDrawer(options) {
         timeout: 6000,
         action: {
           label: t.viewInLibrary,
-          href: LIBRARIES_PAGE_PATH,
+          href: t.viewInLibraryHref,
         },
       });
       await onSave?.(formData);
