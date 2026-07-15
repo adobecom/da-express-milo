@@ -690,6 +690,21 @@ function renderStillWrapper(template, renderOptions = {}) {
     alt: templateTitle,
   });
 
+  // The API response already carries the thumbnail's intrinsic dimensions, so give the
+  // browser an aspect ratio up front. Without it the img has no intrinsic size, its
+  // height:100% resolves to auto (i.e. 0) until the image decodes, and every card that
+  // loads grows the grid and shifts everything below it.
+  // Only stamp them when the src really is the thumbnail these dimensions describe:
+  // getImageThumbnailSrc falls back to the full rendition for fullsize/webpages, and
+  // describing that with thumbnail dimensions would itself cause a shift on load.
+  const thumbnail = variants?.includes('fullsize')
+    ? null
+    : extractImageThumbnail(template.pages[0]);
+  if (thumbnail?.width > 0 && thumbnail?.height > 0) {
+    img.setAttribute('width', thumbnail.width);
+    img.setAttribute('height', thumbnail.height);
+  }
+
   if (renderOptions.eager) {
     img.loading = 'eager';
     img.setAttribute('fetchpriority', 'high');

@@ -229,6 +229,30 @@ main .template-x.sixcols:not(.print) .masonry-col, main .template-x.fullwidth:no
   min-height: 700px;
 }
 
+/*
+ * Reserve space during the templates-API fetch window, when the block is empty and
+ * the inner wrapper does not exist yet. Applied to the block for that reason.
+ *
+ * Self-releasing: the :not(.template-x-complete) sits on the reserving rule itself, so
+ * once Masonry.draw adds template-x-complete the floor stops applying entirely and the
+ * block is sized purely by its real content. A grid shorter than the floor therefore
+ * collapses to its true height instead of leaving a permanent gap (the PR #600 bug).
+ *
+ * horizontal never gets template-x-complete, which would trap the floor forever.
+ * holiday is absolutely positioned; mini is excluded for safety.
+ */
+.template-x.fullwidth:not(.horizontal, .mini, .holiday, .template-x-complete),
+.template-x.sixcols:not(.horizontal, .mini, .holiday, .template-x-complete) {
+  min-height: 360px;
+}
+
+@media (min-width: 900px) {
+  .template-x.fullwidth:not(.horizontal, .mini, .holiday, .template-x-complete),
+  .template-x.sixcols:not(.horizontal, .mini, .holiday, .template-x-complete) {
+    min-height: 600px;
+  }
+}
+
 .template-x[class*="lg-view"] > .template-x-inner-wrapper > .masonry-col {
   max-width: 335px;
   text-align: center;
