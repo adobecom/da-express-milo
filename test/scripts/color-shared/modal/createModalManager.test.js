@@ -650,8 +650,12 @@ describe('trapFocus initial focus', () => {
     releaseTrap = null;
   });
 
-  async function waitForFocus() {
-    await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+  async function waitForFocus(expected) {
+    for (let i = 0; i < 50; i += 1) {
+      if (document.activeElement === expected) return;
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((r) => setTimeout(r, 20));
+    }
   }
 
   it('focuses first tabbable when getInitialFocus is omitted', async () => {
@@ -665,7 +669,7 @@ describe('trapFocus initial focus', () => {
     root.appendChild(secondTabbable);
 
     releaseTrap = trapFocus(root);
-    await waitForFocus();
+    await waitForFocus(firstTabbable);
 
     expect(document.activeElement).to.equal(firstTabbable);
     root.remove();
@@ -680,7 +684,7 @@ describe('trapFocus initial focus', () => {
     root.appendChild(btn);
 
     releaseTrap = trapFocus(root, { getInitialFocus: (el) => el });
-    await waitForFocus();
+    await waitForFocus(root);
 
     expect(document.activeElement).to.equal(root);
     root.remove();
