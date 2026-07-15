@@ -146,6 +146,7 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
   let tagObserver = null;
 
   const root = createTag('main', { class: 'modal-content modal-library-theme', 'daa-lh': 'library-theme-modal' });
+  const contentScroll = createTag('div', { class: 'modal-lib-scroll' });
 
   const colorCount = normalizedPalette.colors.length;
   const { railSection, railWrap, destroyRail } = createRailSection(
@@ -154,7 +155,7 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
     colorSwatchRailStrings,
     verticalMaxPerRow,
   );
-  root.appendChild(railSection);
+  contentScroll.appendChild(railSection);
   const { initTabIndexes } = setupSwatchColumnNav(railWrap);
 
   /* ── Editable tags (reused ax-drawer-tag-section) ── */
@@ -184,7 +185,8 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
     });
   });
   tagsSection.appendChild(tagsWrapper);
-  root.appendChild(tagsSection);
+  contentScroll.appendChild(tagsSection);
+  root.appendChild(contentScroll);
 
   /* ── Dirty tracking ── */
   function isDirty() {

@@ -140,6 +140,7 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
   let tagObserver = null;
 
   const root = createTag('main', { class: 'modal-content modal-library-gradient', 'daa-lh': 'library-gradient-modal' });
+  const contentScroll = createTag('div', { class: 'modal-lib-scroll' });
 
   /* ── Gradient preview (read-only, copyable handles) ── */
   const previewSection = createTag('section', { class: 'modal-palette-container' });
@@ -163,7 +164,7 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
   });
   previewWrap.appendChild(gradientEditor.element);
   previewSection.appendChild(previewWrap);
-  root.appendChild(previewSection);
+  contentScroll.appendChild(previewSection);
 
   /* ── Stop rail (hex + copy) ── */
   const { railSection, railWrap, railAdapter } = createRailSection(
@@ -172,7 +173,7 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
     colorSwatchRailStrings,
     verticalMaxPerRow,
   );
-  root.appendChild(railSection);
+  contentScroll.appendChild(railSection);
   const { initTabIndexes } = setupSwatchColumnNav(railWrap);
 
   /* ── Editable tags (reused ax-drawer-tag-section) ── */
@@ -202,7 +203,8 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
     });
   });
   tagsSection.appendChild(tagsWrapper);
-  root.appendChild(tagsSection);
+  contentScroll.appendChild(tagsSection);
+  root.appendChild(contentScroll);
 
   /* ── Dirty tracking (name + tags) ── */
   function isDirty() {

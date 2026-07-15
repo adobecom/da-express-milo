@@ -30,6 +30,56 @@
   max-height: 95dvh;
 }
 
+/* Only the content above the toolbar scrolls; the toolbar is a fixed footer so it
+   never jumps and the whole modal never grows a scrollbar. */
+.ax-color-modal-content:has(.modal-library-theme) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ax-color-modal-content .modal-library-theme {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.ax-color-modal-content .modal-library-theme .modal-lib-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  inline-size: 100%;
+}
+
+/* Swatch rail keeps its tablet/desktop height limit; on mobile it expands to fit
+   all swatches while the modal content scrolls beneath the fixed toolbar. */
+@media (max-width: 599px) {
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail .modal-color-rail-wrap {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range] sp-theme,
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail
+    .modal-color-rail-wrap[data-color-count-range] color-swatch-rail[orientation="stacked"] {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail::after {
+    display: none;
+  }
+}
+
 /* ── Tags section ──────────────────────────────────────────────── */
 
 .ax-color-modal-content .modal-lib-tags {
@@ -43,18 +93,11 @@
   inline-size: 100%;
 }
 
-/* Fit 2 rows of tag pills, then scroll. */
-.ax-color-modal-content .modal-library-theme .modal-lib-tags .ax-tag-field {
-  overflow-y: auto;
-  max-height: calc(
-    (2 * var(--spacing-500)) + var(--ax-tag-field-gap)
-    + (2 * var(--spacing-200)) + (2 * var(--border-width-2))
-  );
-}
-
-/* Toolbar wrapper: the .ax-toolbar-library variant owns its own layout. */
+/* Fixed toolbar footer; the content above it (.modal-lib-scroll) scrolls. */
 .ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
+  flex: 0 0 auto;
   inline-size: 100%;
+  background: var(--color-white);
 }
 
 .ax-color-modal-content .modal-library-theme .modal-palette-toolbar > sp-theme,
