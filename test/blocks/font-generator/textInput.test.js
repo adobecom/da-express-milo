@@ -49,6 +49,28 @@ describe('font-generator/textInput', () => {
     expect(panel.querySelector('.text-wrapper').textContent).to.equal(DEFAULT_PLACEHOLDERS.tryThese);
   });
 
+  it('renders a visible label from the placeholder, associated with the textarea', () => {
+    const { panel } = createTextInput({ strings: DEFAULT_PLACEHOLDERS });
+    const label = panel.querySelector('label.preview-text-label');
+    const ta = panel.querySelector('textarea.label');
+    expect(label).to.exist;
+    expect(label.textContent).to.equal(DEFAULT_PLACEHOLDERS.previewTextLabel);
+    expect(ta.id).to.have.length.greaterThan(0);
+    expect(label.getAttribute('for')).to.equal(ta.id);
+  });
+
+  it('honours an authored preview-text label', () => {
+    const strings = { ...DEFAULT_PLACEHOLDERS, previewTextLabel: 'Texto de vista previa' };
+    const { panel } = createTextInput({ strings });
+    expect(panel.querySelector('label.preview-text-label').textContent).to.equal('Texto de vista previa');
+  });
+
+  it('gives each instance a unique input id', () => {
+    const a = createTextInput().panel.querySelector('textarea.label').id;
+    const b = createTextInput().panel.querySelector('textarea.label').id;
+    expect(a).to.not.equal(b);
+  });
+
   it('shows the initial character count', () => {
     const { panel } = createTextInput();
     expect(panel.querySelector('.character-count').textContent).to.equal('0/200');
