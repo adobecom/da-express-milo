@@ -14,6 +14,7 @@ describe('createLibraryCardActionMenu', () => {
   ];
 
   afterEach(() => {
+    sinon.restore();
     document.body.innerHTML = '';
   });
 
@@ -105,6 +106,60 @@ describe('createLibraryCardActionMenu', () => {
       trigger.click();
       expect(popover.hasAttribute('hidden')).to.be.true;
       expect(trigger.getAttribute('aria-expanded')).to.equal('false');
+    });
+
+    it('flips the popover above the trigger when it would overflow the viewport bottom', async () => {
+      const viewportHeight = 800;
+      const triggerHeight = 32;
+      const triggerTop = viewportHeight - triggerHeight - 4;
+      const triggerBottom = triggerTop + triggerHeight;
+      const popoverHeight = 96;
+
+      Object.defineProperty(document.documentElement, 'clientHeight', {
+        configurable: true,
+        value: viewportHeight,
+      });
+
+      menu = createLibraryCardActionMenu({
+        triggerIcon: 'sp-icon-download',
+        triggerLabel: 'Download',
+        items,
+      });
+      document.body.appendChild(menu.element);
+
+      const trigger = menu.element.querySelector('.ax-lib-card__action');
+      const popover = menu.element.querySelector('.ax-lib-card__action-menu-popover');
+
+      sinon.stub(trigger, 'getBoundingClientRect').returns({
+        top: triggerTop,
+        bottom: triggerBottom,
+        left: 0,
+        right: 32,
+        width: 32,
+        height: triggerHeight,
+        x: 0,
+        y: triggerTop,
+        toJSON: () => ({}),
+      });
+
+      sinon.stub(popover, 'getBoundingClientRect').returns({
+        top: triggerBottom + 4,
+        bottom: triggerBottom + 4 + popoverHeight,
+        left: 0,
+        right: 160,
+        width: 160,
+        height: popoverHeight,
+        x: 0,
+        y: triggerBottom + 4,
+        toJSON: () => ({}),
+      });
+
+      trigger.click();
+
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      await (menu.element.querySelector('sp-menu').updateComplete ?? Promise.resolve());
+
+      expect(popover.classList.contains('ax-lib-card__action-menu-popover--align-up')).to.be.true;
     });
   });
 });

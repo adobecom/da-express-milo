@@ -3,6 +3,41 @@ import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
 
 let actionMenuIdCounter = 0;
 
+function getViewportRect() {
+  return {
+    top: 0,
+    left: 0,
+    right: document.documentElement.clientWidth,
+    bottom: document.documentElement.clientHeight,
+  };
+}
+
+function intersectRects(a, b) {
+  return {
+    top: Math.max(a.top, b.top),
+    left: Math.max(a.left, b.left),
+    right: Math.min(a.right, b.right),
+    bottom: Math.min(a.bottom, b.bottom),
+  };
+}
+
+/**
+ * Visible area the popover must fit within: the viewport intersected with every
+ * clipping ancestor (modal scroll areas, overflow:hidden shells, etc.).
+ */
+function getClipBoundaryRect(el) {
+  let boundary = getViewportRect();
+  let node = el.parentElement;
+  while (node && node !== document.body && node !== document.documentElement) {
+    const { overflow, overflowX, overflowY } = getComputedStyle(node);
+    if (/(auto|scroll|hidden|clip)/.test(`${overflow} ${overflowX} ${overflowY}`)) {
+      boundary = intersectRects(boundary, node.getBoundingClientRect());
+    }
+    node = node.parentElement;
+  }
+  return boundary;
+}
+
 /**
  * Coordinates library card action menus so only one popover is open at a time.
  */
@@ -120,14 +155,37 @@ export function createLibraryCardActionMenu({
   }
 
   const ALIGN_RIGHT_CLASS = 'ax-lib-card__action-menu-popover--align-right';
+  const ALIGN_UP_CLASS = 'ax-lib-card__action-menu-popover--align-up';
 
   function alignPopoverToViewport() {
-    popover.classList.remove(ALIGN_RIGHT_CLASS);
-    // Default (left-aligned) popover overflows the viewport for far-right cards;
-    // flip it to right-align so it opens inward instead of getting clipped.
-    if (popover.getBoundingClientRect().right > document.documentElement.clientWidth) {
+    popover.classList.remove(ALIGN_RIGHT_CLASS, ALIGN_UP_CLASS);
+
+    const boundary = getClipBoundaryRect(wrapper);
+    const triggerRect = trigger.getBoundingClientRect();
+
+    if (popover.getBoundingClientRect().right > boundary.right) {
       popover.classList.add(ALIGN_RIGHT_CLASS);
     }
+
+    const popoverRect = popover.getBoundingClientRect();
+    const measuredHeight = popoverRect.height;
+    const menuItemCount = menu.querySelectorAll('sp-menu-item').length;
+    const popoverHeight = measuredHeight || Math.max(menuItemCount * 32, 40) + 8;
+    const overflowsBottom = popoverRect.bottom > boundary.bottom
+      || (triggerRect.bottom + popoverHeight > boundary.bottom);
+    const spaceBelow = boundary.bottom - triggerRect.bottom;
+    const spaceAbove = triggerRect.top - boundary.top;
+    const fitsAbove = triggerRect.top - popoverHeight >= boundary.top;
+
+    if (overflowsBottom && (fitsAbove || spaceAbove > spaceBelow)) {
+      popover.classList.add(ALIGN_UP_CLASS);
+    }
+  }
+
+  function scheduleAlignPopover() {
+    alignPopoverToViewport();
+    requestAnimationFrame(() => alignPopoverToViewport());
+    (menu.updateComplete ?? Promise.resolve()).then(() => alignPopoverToViewport());
   }
 
   function openPopover({ focusMenu = false } = {}) {
@@ -136,7 +194,7 @@ export function createLibraryCardActionMenu({
     popoverOpen = true;
     popover.removeAttribute('hidden');
     setExpanded(true);
-    alignPopoverToViewport();
+    scheduleAlignPopover();
 
     const onDocumentClick = (event) => {
       if (!wrapper.contains(event.target)) closePopover();

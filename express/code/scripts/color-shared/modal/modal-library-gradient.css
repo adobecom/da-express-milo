@@ -169,11 +169,15 @@
   inline-size: 100%;
 }
 
-/* Fixed toolbar footer; the content above it (.modal-lib-scroll) scrolls. */
+/* Fixed toolbar footer; the content above it scrolls. */
 .ax-color-modal-content .modal-library-gradient .modal-palette-toolbar {
   flex: 0 0 auto;
   inline-size: 100%;
   background: var(--color-white);
+}
+
+.ax-color-modal-content .modal-library-gradient .ax-lib-card__action-menu {
+  z-index: 5;
 }
 
 .ax-color-modal-content .modal-library-gradient .modal-palette-toolbar > sp-theme,

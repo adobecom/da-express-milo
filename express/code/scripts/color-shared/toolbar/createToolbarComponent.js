@@ -249,11 +249,12 @@ async function handleSave(
 
 /* ── Tooltip Helper ──────────────────────────────────────────── */
 
-function attachTooltip(actionBtn, text) {
+function attachTooltip(actionBtn, text, { dismissOnActivate = false } = {}) {
   createExpressTooltip({
     targetEl: actionBtn,
     content: text,
     placement: 'top',
+    dismissOnActivate,
   }).catch(() => {});
 }
 
@@ -322,7 +323,7 @@ function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t) {
     });
     editBtn.classList.add('ax-edit-btn');
     decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit palette' });
-    attachTooltip(editBtn, t.edit);
+    attachTooltip(editBtn, t.edit, { dismissOnActivate: true });
     paletteSummary.appendChild(editBtn);
   }
   return paletteSummary;
@@ -348,7 +349,7 @@ function buildActionButtons(handlers, t) {
     onClick: handlers.onDownload,
   });
   decorateAnalyticsAttributes(downloadBtn, { linkLabel: 'Download' });
-  attachTooltip(downloadBtn, t.download);
+  attachTooltip(downloadBtn, t.download, { dismissOnActivate: true });
   actions.appendChild(downloadBtn);
 
   const ccLibBtn = createIconButton({
@@ -358,7 +359,7 @@ function buildActionButtons(handlers, t) {
     onClick: handlers.onSave,
   });
   decorateAnalyticsAttributes(ccLibBtn, { linkLabel: 'Save to library' });
-  attachTooltip(ccLibBtn, t.saveToLibrary);
+  attachTooltip(ccLibBtn, t.saveToLibrary, { dismissOnActivate: true });
   actions.appendChild(ccLibBtn);
 
   return { actions, ccLibBtn };
@@ -526,7 +527,9 @@ function buildLibraryToolbar(options) {
   // (contrast / color-blindness) behave identically to the libraries grid.
   const attachMenuTooltip = (menuEl) => {
     const trigger = menuEl?.querySelector('.ax-lib-card__action');
-    if (trigger) attachTooltip(trigger, trigger.getAttribute('data-tooltip-content'));
+    if (trigger) {
+      attachTooltip(trigger, trigger.getAttribute('data-tooltip-content'), { dismissOnActivate: true });
+    }
   };
 
   const downloadMenu = createLibraryDownloadMenu({ item, strings: librariesStrings });
@@ -547,7 +550,7 @@ function buildLibraryToolbar(options) {
     onClick: () => emit('delete', { palette: getPaletteWithName() }),
   });
   decorateAnalyticsAttributes(deleteBtn, { linkLabel: 'Delete' });
-  attachTooltip(deleteBtn, t.deleteTheme);
+  attachTooltip(deleteBtn, t.deleteTheme, { dismissOnActivate: true });
   actions.appendChild(deleteBtn);
 
   nameAndActions.append(nameField, actions);

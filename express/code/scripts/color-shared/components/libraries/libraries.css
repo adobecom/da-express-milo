@@ -564,6 +564,7 @@
 
 .ax-lib-card__action-menu {
   position: relative;
+  --ax-lib-bg: var(--color-white);
 }
 
 .ax-lib-card__action-menu-popover {
@@ -587,6 +588,14 @@
 .ax-lib-card__action-menu-popover--align-right {
   left: auto;
   right: 0;
+}
+
+/* Flipped above the trigger when the downward popover would overflow the bottom
+   of its clipping boundary (cards near the viewport bottom, or the toolbar in a
+   modal footer) so it stays in the visible area. */
+.ax-lib-card__action-menu-popover--align-up {
+  top: auto;
+  bottom: calc(100% + var(--spacing-100));
 }
 
 .ax-lib-card__action-menu-popover[hidden] {
