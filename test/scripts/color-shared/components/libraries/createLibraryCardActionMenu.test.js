@@ -156,7 +156,9 @@ describe('createLibraryCardActionMenu', () => {
 
       trigger.click();
 
-      await new Promise((resolve) => requestAnimationFrame(resolve));
+      await new Promise((resolve) => {
+        requestAnimationFrame(resolve);
+      });
       await (menu.element.querySelector('sp-menu').updateComplete ?? Promise.resolve());
 
       expect(popover.classList.contains('ax-lib-card__action-menu-popover--align-up')).to.be.true;

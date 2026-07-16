@@ -221,9 +221,14 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
       // updateTheme persists theme data (colors/tags); name lives in element metadata.
       // throwOnError so a network/API failure rejects here (rather than resolving
       // to null via safeExecute) and we surface the error toast instead of a false success.
+      const throwOpts = { throwOnError: true };
       await Promise.all([
-        ccLibraryProvider.updateTheme(libraryId, item.id, payload, { throwOnError: true }),
-        ccLibraryProvider.updateElementMetadata(libraryId, [{ id: item.id, name }], { throwOnError: true }),
+        ccLibraryProvider.updateTheme(libraryId, item.id, payload, throwOpts),
+        ccLibraryProvider.updateElementMetadata(
+          libraryId,
+          [{ id: item.id, name }],
+          throwOpts,
+        ),
       ]);
       originalName = name;
       originalTags = [...tags].sort();
