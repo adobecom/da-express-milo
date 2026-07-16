@@ -171,15 +171,18 @@ describe('createLibraryThemeModalContent', () => {
       await flush();
 
       expect(updateTheme.calledOnce).to.be.true;
-      const [libId, itemId, payload] = updateTheme.firstCall.args;
+      const [libId, itemId, payload, themeOpts] = updateTheme.firstCall.args;
       expect(libId).to.equal('lib-1');
       expect(itemId).to.equal('t1');
       expect(payload.name).to.equal('Ocean Blue');
+      // throwOnError ensures a real API failure rejects instead of silently "succeeding".
+      expect(themeOpts).to.deep.equal({ throwOnError: true });
 
       // The name persists via the metadata endpoint (representation PUT does not).
       expect(updateElementMetadata.calledOnce).to.be.true;
       expect(updateElementMetadata.firstCall.args[0]).to.equal('lib-1');
       expect(updateElementMetadata.firstCall.args[1]).to.deep.equal([{ id: 't1', name: 'Ocean Blue' }]);
+      expect(updateElementMetadata.firstCall.args[2]).to.deep.equal({ throwOnError: true });
 
       expect(toastSpy.calledWithMatch({ variant: 'positive' })).to.be.true;
       expect(updated.calledOnce).to.be.true;
@@ -238,7 +241,7 @@ describe('createLibraryThemeModalContent', () => {
   });
 
   describe('delete', () => {
-    it('emits libraries:item-delete and requests close', async () => {
+    it('emits libraries:item-delete without closing the modal (confirm happens in the block)', async () => {
       const item = { id: 't1', name: 'Ocean', colors: ['#001122'] };
       const requestClose = sinon.spy();
       const { content, fake } = await mountContent(item, { libraryId: 'lib-1', requestClose });
@@ -250,7 +253,8 @@ describe('createLibraryThemeModalContent', () => {
       expect(deleted.calledOnce).to.be.true;
       expect(deleted.firstCall.args[0].detail.item).to.equal(item);
       expect(deleted.firstCall.args[0].detail.libraryId).to.equal('lib-1');
-      expect(requestClose.calledOnce).to.be.true;
+      // The modal must stay open while the block shows the delete confirm dialog.
+      expect(requestClose.called).to.be.false;
       content.destroy();
     });
   });

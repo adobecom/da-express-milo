@@ -66,16 +66,24 @@ function buildActions(item, name, strings, emit, payload, toolHrefs) {
     'aria-label': interpolate(strings.librariesCardActions, { name }),
   });
 
+  // Keep the action-menu apis so the card can destroy them on teardown. Each menu
+  // registers itself into a module-level coordinator Set; without an explicit
+  // destroy() the detached menus (and their document listeners) leak on re-render.
+  const menuApis = [];
+
   if (!isGradient) {
     const accessMenu = createLibraryAccessibilityMenu({
       item,
       strings,
       toolHrefs,
     });
+    menuApis.push(accessMenu);
     actions.appendChild(accessMenu.element);
   }
 
-  actions.appendChild(createLibraryDownloadMenu({ item, strings }).element);
+  const downloadMenu = createLibraryDownloadMenu({ item, strings });
+  menuApis.push(downloadMenu);
+  actions.appendChild(downloadMenu.element);
 
   const defs = [
     {
@@ -108,7 +116,7 @@ function buildActions(item, name, strings, emit, payload, toolHrefs) {
   });
 
   defs.forEach((def) => actions.appendChild(createActionButton(def)));
-  return actions;
+  return { element: actions, menuApis };
 }
 
 function getSubtitle(item, strings) {
@@ -169,6 +177,7 @@ function createVisual(item, name, strings, onOpen) {
  * @param {Object} [options.library]
  * @param {Object} [options.strings] - resolved placeholders
  * @param {Function} [options.emit]
+ * @returns {{ element: HTMLElement, destroy: Function }}
  */
 export function createLibraryItemCard(item, options = {}) {
   const {
@@ -209,7 +218,8 @@ export function createLibraryItemCard(item, options = {}) {
   subtitleEl.textContent = getSubtitle(item, strings);
   text.append(nameEl, subtitleEl);
 
-  info.append(text, buildActions(item, name, strings, emit, payload, toolHrefs));
+  const { element: actionsEl, menuApis } = buildActions(item, name, strings, emit, payload, toolHrefs);
+  info.append(text, actionsEl);
   card.appendChild(info);
 
   // Screen-reader hint describing the drill-in interaction, announced after the
@@ -259,5 +269,13 @@ export function createLibraryItemCard(item, options = {}) {
     if (!card.contains(e.relatedTarget)) setEntered(false);
   });
 
-  return card;
+  return {
+    element: card,
+    destroy() {
+      // Unregister/close the action menus (coordinator Set + document listeners),
+      // then drop the card so re-renders don't retain detached subtrees.
+      menuApis.forEach((api) => api?.destroy?.());
+      card.remove();
+    },
+  };
 }

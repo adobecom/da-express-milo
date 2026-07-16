@@ -84,4 +84,18 @@ describe('createLibraryAccordion', () => {
     instance = createLibraryAccordion(sampleLibrary, { strings, searchResult: true });
     expect(instance.element.classList.contains('ax-lib-accordion--search-result')).to.be.true;
   });
+
+  it('destroy tears down cards (and their action menus) and detaches the accordion', () => {
+    instance = createLibraryAccordion(sampleLibrary, { expanded: true, strings });
+    document.body.appendChild(instance.element);
+
+    expect(instance.element.querySelectorAll('.ax-lib-card')).to.have.lengthOf(2);
+    expect(instance.element.querySelectorAll('.ax-lib-card__action-menu').length).to.be.greaterThan(0);
+
+    instance.destroy();
+
+    expect(instance.element.isConnected).to.be.false;
+    expect(instance.element.querySelector('.ax-lib-card')).to.be.null;
+    instance = null;
+  });
 });

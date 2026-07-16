@@ -183,6 +183,34 @@ describe('Color Libraries — search (signed-in)', () => {
     expect(new URL(window.location.href).searchParams.has('q')).to.be.false;
   });
 
+  // The item modal mounts on document.body (outside the block), so its
+  // libraries:item-delete event bubbles to document — never to the block. This
+  // confirms the block listens on document so modal-originated deletes are handled.
+  it('handles a delete event dispatched on document (modal path)', async () => {
+    document.dispatchEvent(new CustomEvent('libraries:item-delete', {
+      detail: {
+        item: { id: 'theme-ocean', name: 'Ocean Blue', type: 'theme' },
+        libraryId: 'urn:lib:brand',
+      },
+      bubbles: true,
+    }));
+
+    let dialog = null;
+    for (let i = 0; i < 100; i += 1) {
+      dialog = document.querySelector('sp-alert-dialog');
+      if (dialog) break;
+      // eslint-disable-next-line no-await-in-loop
+      await nextTask();
+    }
+
+    expect(dialog, 'delete confirmation dialog should appear').to.exist;
+
+    // Cancel to resolve the dialog promise and clean up the body-mounted overlay.
+    [...dialog.querySelectorAll('sp-button')]
+      .find((btn) => btn.textContent.includes('Cancel'))
+      ?.click();
+  });
+
   // Sorting itself lives in createLibrariesComponent/createLibrariesHeader and is
   // unit-tested there; this only confirms the block wires the control through.
   it('sort control reorders the rendered libraries by name', () => {

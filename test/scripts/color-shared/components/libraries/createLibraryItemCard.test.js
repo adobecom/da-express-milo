@@ -22,7 +22,7 @@ describe('createLibraryItemCard', () => {
 
   it('renders theme card with palette strip and accessibility actions', () => {
     const emit = sinon.spy();
-    const card = createLibraryItemCard({
+    const { element: card } = createLibraryItemCard({
       id: 'theme-1',
       type: 'theme',
       name: 'Ocean',
@@ -44,7 +44,7 @@ describe('createLibraryItemCard', () => {
   });
 
   it('renders gradient card with gradient visual and no accessibility menu', () => {
-    const card = createLibraryItemCard({
+    const { element: card } = createLibraryItemCard({
       id: 'grad-1',
       type: 'gradient',
       name: 'Sunset',
@@ -61,7 +61,7 @@ describe('createLibraryItemCard', () => {
   });
 
   it('sets preview aria-label from theme colors', () => {
-    const card = createLibraryItemCard({
+    const { element: card } = createLibraryItemCard({
       id: 'theme-2',
       type: 'theme',
       name: 'Ocean',
@@ -81,7 +81,7 @@ describe('createLibraryItemCard', () => {
       name: 'Forest',
       colors: ['#00FF00'],
     };
-    const card = createLibraryItemCard(item, { library, strings, emit, toolHrefs });
+    const { element: card } = createLibraryItemCard(item, { library, strings, emit, toolHrefs });
     card.querySelector('.ax-lib-card__visual').click();
 
     expect(emit.calledOnceWith('item-open', {
@@ -99,7 +99,7 @@ describe('createLibraryItemCard', () => {
       name: 'Forest',
       colors: ['#00FF00'],
     };
-    const card = createLibraryItemCard(item, { library, strings, emit, toolHrefs });
+    const { element: card } = createLibraryItemCard(item, { library, strings, emit, toolHrefs });
     document.body.appendChild(card);
 
     const deleteBtn = [...card.querySelectorAll('.ax-lib-card__action')]
@@ -111,5 +111,22 @@ describe('createLibraryItemCard', () => {
       libraryId: library.id,
       libraryName: library.name,
     })).to.be.true;
+  });
+
+  it('destroy removes the card and its action menus', () => {
+    const instance = createLibraryItemCard({
+      id: 'theme-5',
+      type: 'theme',
+      name: 'Ocean',
+      colors: ['#001122'],
+    }, { library, strings, toolHrefs });
+    document.body.appendChild(instance.element);
+
+    expect(instance.element.querySelectorAll('.ax-lib-card__action-menu').length).to.be.greaterThan(0);
+
+    instance.destroy();
+
+    expect(instance.element.isConnected).to.be.false;
+    expect(instance.element.querySelector('.ax-lib-card__action-menu')).to.be.null;
   });
 });

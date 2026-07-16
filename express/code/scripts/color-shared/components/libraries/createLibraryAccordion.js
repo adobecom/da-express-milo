@@ -53,12 +53,15 @@ function createPanel(library, emit, expanded, strings, toolHrefs) {
   const panel = createTag('div', panelAttrs);
 
   const grid = createTag('div', { class: 'palettes-grid ax-lib-items-grid' });
+  const cardInstances = [];
   (library.items || []).forEach((item) => {
-    grid.appendChild(createLibraryItemCard(item, { library, strings, emit, toolHrefs }));
+    const card = createLibraryItemCard(item, { library, strings, emit, toolHrefs });
+    cardInstances.push(card);
+    grid.appendChild(card.element);
   });
 
   panel.appendChild(grid);
-  return panel;
+  return { panel, cardInstances };
 }
 
 /**
@@ -94,9 +97,10 @@ export function createLibraryAccordion(library, options = {}) {
     'data-library-id': library.id || '',
   });
 
+  const { panel, cardInstances } = createPanel(library, emit, expanded, strings, toolHrefs);
   accordion.append(
     createHeader(library, expanded, onToggle, strings),
-    createPanel(library, emit, expanded, strings, toolHrefs),
+    panel,
   );
 
   return {
@@ -105,14 +109,18 @@ export function createLibraryAccordion(library, options = {}) {
       accordion.classList.toggle('ax-lib-accordion--open', isOpen);
       accordion.classList.toggle('ax-lib-accordion--closed', !isOpen);
       const header = accordion.querySelector('.ax-lib-accordion-header');
-      const panel = accordion.querySelector('.ax-lib-accordion-panel');
+      const panelEl = accordion.querySelector('.ax-lib-accordion-panel');
       const icon = accordion.querySelector('.ax-lib-toggle-icon');
       if (header) header.setAttribute('aria-expanded', String(isOpen));
-      if (panel) {
-        if (isOpen) panel.removeAttribute('hidden');
-        else panel.setAttribute('hidden', '');
+      if (panelEl) {
+        if (isOpen) panelEl.removeAttribute('hidden');
+        else panelEl.setAttribute('hidden', '');
       }
       if (icon) icon.replaceChildren(getIconElementDeprecated(isOpen ? 'minus-icon-libraries' : 'plus-icon-libraries'));
+    },
+    destroy() {
+      cardInstances.forEach((card) => card?.destroy?.());
+      accordion.remove();
     },
   };
 }

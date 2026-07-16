@@ -282,9 +282,18 @@ export function createLibrariesComponent(options = {}) {
     if (!anyExpanded) expandedState.set(libraries[0].id, true);
   }
 
-  function renderLibraryList() {
-    list.replaceChildren();
+  // Destroy accordions (and, through them, each card's action-menu apis) before
+  // discarding their DOM. list.replaceChildren() alone would strip the nodes but
+  // leave the menus registered in the module-level coordinator Set — a leak that
+  // grows on every search/sort/delete/undo/item-updated re-render.
+  function destroyAccordions() {
+    accordionInstances.forEach((instance) => instance?.destroy?.());
     accordionInstances.clear();
+  }
+
+  function renderLibraryList() {
+    destroyAccordions();
+    list.replaceChildren();
 
     libraries.forEach((library) => {
       const expanded = expandedState.get(library.id) ?? false;
@@ -326,8 +335,10 @@ export function createLibrariesComponent(options = {}) {
   }
 
   function render() {
-    // Non-library views (loading/empty) never reach renderLibraryList, so clear here.
+    // Non-library views (loading/empty) never reach renderLibraryList, so tear down
+    // tooltips and accordions (card action menus) here before rebuilding the container.
     clearCardTooltips();
+    destroyAccordions();
     container.className = [
       'ax-libraries',
       `ax-libraries--size-${sizeClass}`,
@@ -423,6 +434,7 @@ export function createLibrariesComponent(options = {}) {
     destroy() {
       tooltipToken += 1;
       clearCardTooltips();
+      destroyAccordions();
       header.destroy();
       container.remove();
     },

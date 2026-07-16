@@ -200,17 +200,20 @@ describe('createLibraryGradientModalContent', () => {
       expect(payloadArgs.tags).to.deep.equal(['warm', 'sky']);
 
       expect(provider.updateTheme.calledOnce).to.be.true;
-      const [libId, itemId, payload] = provider.updateTheme.firstCall.args;
+      const [libId, itemId, payload, themeOpts] = provider.updateTheme.firstCall.args;
       expect(libId).to.equal('lib-1');
       expect(itemId).to.equal('g1');
       expect(payload.name).to.equal('Sunset Glow');
       expect(payload.representations[0]['gradient#data'].tags).to.deep.equal(['warm', 'sky']);
+      // throwOnError ensures a real API failure rejects instead of silently "succeeding".
+      expect(themeOpts).to.deep.equal({ throwOnError: true });
 
       // The name persists via the metadata endpoint (representation PUT does not).
       expect(provider.updateElementMetadata.calledOnce).to.be.true;
-      const [metaLibId, metaElements] = provider.updateElementMetadata.firstCall.args;
+      const [metaLibId, metaElements, metaOpts] = provider.updateElementMetadata.firstCall.args;
       expect(metaLibId).to.equal('lib-1');
       expect(metaElements).to.deep.equal([{ id: 'g1', name: 'Sunset Glow' }]);
+      expect(metaOpts).to.deep.equal({ throwOnError: true });
 
       expect(toastSpy.calledWithMatch({ variant: 'positive' })).to.be.true;
       expect(updated.calledOnce).to.be.true;
@@ -243,7 +246,7 @@ describe('createLibraryGradientModalContent', () => {
   });
 
   describe('delete', () => {
-    it('emits libraries:item-delete and requests close', async () => {
+    it('emits libraries:item-delete without closing the modal (confirm happens in the block)', async () => {
       const item = gradientItem();
       const requestClose = sinon.spy();
       const { content, fake } = await mountContent(item, { libraryId: 'lib-1', requestClose });
@@ -255,7 +258,8 @@ describe('createLibraryGradientModalContent', () => {
       expect(deleted.calledOnce).to.be.true;
       expect(deleted.firstCall.args[0].detail.item).to.equal(item);
       expect(deleted.firstCall.args[0].detail.libraryId).to.equal('lib-1');
-      expect(requestClose.calledOnce).to.be.true;
+      // The modal must stay open while the block shows the delete confirm dialog.
+      expect(requestClose.called).to.be.false;
       content.destroy();
     });
   });

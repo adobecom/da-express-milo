@@ -190,7 +190,7 @@ export default async function decorate(block) {
     goBackHandler = null;
   }
   if (deleteHandler) {
-    block.removeEventListener('libraries:item-delete', deleteHandler);
+    document.removeEventListener('libraries:item-delete', deleteHandler);
     deleteHandler = null;
   }
   if (openHandler) {
@@ -438,6 +438,12 @@ export default async function decorate(block) {
     const confirmed = await showLibraryDeleteAlertDialog({ item, strings: placeholders });
     if (!confirmed) return;
 
+    // The delete may have originated from the item modal (mounted on document.body).
+    // The modal stays open while the confirm dialog is shown; close it now that the
+    // user confirmed so it doesn't linger over a deleted item. Card deletes have no
+    // open modal, so this is a no-op for them.
+    if (modalManagerInstance?.isOpen?.()) modalManagerInstance.close();
+
     const itemName = item?.name || placeholders.librariesDefaultName || '';
     block.classList.add(CSS_CLASSES.LOADING);
 
@@ -497,7 +503,10 @@ export default async function decorate(block) {
       });
     }
   };
-  block.addEventListener('libraries:item-delete', deleteHandler);
+  // Card deletes bubble block → document; modal deletes originate from the modal
+  // mounted on document.body (never inside block). Listen on document so both paths
+  // are handled (once each), matching the libraries:item-updated handler below.
+  document.addEventListener('libraries:item-delete', deleteHandler);
 
   openHandler = async (event) => {
     const { item, libraryId } = event.detail || {};

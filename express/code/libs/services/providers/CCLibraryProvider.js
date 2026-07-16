@@ -98,12 +98,26 @@ export default class CCLibraryProvider extends BaseProvider {
     return this.safeExecute(fn);
   }
 
-  async updateTheme(libraryId, elementId, payload) {
-    return this.safeExecute(() => this.#actions.updateTheme(libraryId, elementId, payload));
+  /**
+   * @param {Object} [options]
+   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI
+   *   (e.g. NETWORK_ERROR toast) instead of the save silently reporting success.
+   */
+  async updateTheme(libraryId, elementId, payload, options = {}) {
+    const fn = () => this.#actions.updateTheme(libraryId, elementId, payload);
+    if (options.throwOnError) return fn();
+    return this.safeExecute(fn);
   }
 
-  async updateElementMetadata(libraryId, elements) {
-    return this.safeExecute(() => this.#actions.updateElementMetadata(libraryId, elements));
+  /**
+   * @param {Object} [options]
+   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI
+   *   (e.g. NETWORK_ERROR toast) instead of the save silently reporting success.
+   */
+  async updateElementMetadata(libraryId, elements, options = {}) {
+    const fn = () => this.#actions.updateElementMetadata(libraryId, elements);
+    if (options.throwOnError) return fn();
+    return this.safeExecute(fn);
   }
 
   /**

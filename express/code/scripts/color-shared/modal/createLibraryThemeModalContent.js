@@ -116,7 +116,6 @@ function createRailSection(
  * @param {Object} [options.ccLibraryProvider]
  * @param {Object} [options.toolHrefs]
  * @param {Object} [options.librariesStrings] - resolved libraries placeholders
- * @param {Function} [options.requestClose] - closes the host modal
  */
 export function createLibraryThemeModalContent(item = {}, options = {}) {
   const {
@@ -126,7 +125,6 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
     librariesStrings = {},
     colorSwatchRailStrings = {},
     verticalMaxPerRow = 10,
-    requestClose = () => {},
     deps = {},
   } = options;
   const {
@@ -221,9 +219,11 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
         { untitledTheme: strings.librariesModalUntitledTheme },
       );
       // updateTheme persists theme data (colors/tags); name lives in element metadata.
+      // throwOnError so a network/API failure rejects here (rather than resolving
+      // to null via safeExecute) and we surface the error toast instead of a false success.
       await Promise.all([
-        ccLibraryProvider.updateTheme(libraryId, item.id, payload),
-        ccLibraryProvider.updateElementMetadata(libraryId, [{ id: item.id, name }]),
+        ccLibraryProvider.updateTheme(libraryId, item.id, payload, { throwOnError: true }),
+        ccLibraryProvider.updateElementMetadata(libraryId, [{ id: item.id, name }], { throwOnError: true }),
       ]);
       originalName = name;
       originalTags = [...tags].sort();
@@ -257,10 +257,12 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
   }
 
   function handleDelete() {
+    // Only signal the delete intent; the host block shows the confirm dialog and
+    // closes this modal once the user actually confirms. Closing here would dismiss
+    // the modal the moment the confirm dialog appears.
     root.dispatchEvent(new CustomEvent('libraries:item-delete', {
       detail: { item, libraryId }, bubbles: true,
     }));
-    requestClose();
   }
 
   function wireToolbar(api) {

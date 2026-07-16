@@ -280,10 +280,7 @@ export function createModalManager(strings = createColorModalPlaceholders()) {
     } = await import('./createLibraryThemeModalContent.js');
     await ensureLibraryThemeModalStyles();
 
-    const contentView = createLibraryThemeModalContent(item, {
-      ...themeOptions,
-      requestClose: () => close(),
-    });
+    const contentView = createLibraryThemeModalContent(item, themeOptions);
     open({
       title: (item?.name && String(item.name)) || strings.defaultTitle,
       showTitle: false,
@@ -304,10 +301,7 @@ export function createModalManager(strings = createColorModalPlaceholders()) {
     } = await import('./createLibraryGradientModalContent.js');
     await ensureLibraryGradientModalStyles();
 
-    const contentView = createLibraryGradientModalContent(item, {
-      ...gradientOptions,
-      requestClose: () => close(),
-    });
+    const contentView = createLibraryGradientModalContent(item, gradientOptions);
     open({
       title: (item?.name && String(item.name)) || strings.defaultTitle,
       showTitle: false,
