@@ -227,7 +227,9 @@ describe('Color Libraries — search (signed-in)', () => {
   it('sort control reorders the rendered libraries by name', () => {
     expect(accordionNames()).to.deep.equal(['Neutrals', 'Brand Colors']);
 
-    const nameItem = block.querySelector('sp-menu-item[value="name"]');
+    // Target the header's mobile sort menu, not the desktop picker's menu items
+    // (querySelector('sp-menu-item') would match the picker first once it loads).
+    const nameItem = block.querySelector('.ax-lib-header__sort-menu sp-menu-item[value="name"]');
     expect(nameItem).to.exist;
     nameItem.click();
 
