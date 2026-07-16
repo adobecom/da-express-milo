@@ -1,3 +1,14 @@
+/* Full-bleed block: drop Milo's default section top-padding and prose-width
+   content cap so the grid can span the section (same fix as ax-columns et al.). */
+.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):has(.font-generator):not([data-padding='none']) > .content:first-child {
+  padding-top: 0;
+}
+
+main .section:has(.font-generator) > .content {
+  max-width: unset;
+}
+
 .font-generator {
   --fg-sidebar-width: 477px;
   --fg-panel-width: 511px;
@@ -544,37 +555,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   .font-generator .fg-promo-icon {
     display: block;
   }
-}
 
-/* ── Desktop ──────────────────────────────────────────────────────── */
-@media (min-width: 1200px) {
-  .font-generator {
-    padding: var(--spacing-600) var(--spacing-600) var(--spacing-900);
-  }
-
-  .font-generator .fg-container {
-    grid-template-columns: var(--fg-sidebar-width) 1fr;
-  }
-
-  .font-generator .fg-sidebar {
-    position: sticky;
-    top: calc(var(--global-height-nav) + var(--spacing-600));
-    align-self: start;
-  }
-
-  .font-generator .fg-sidebar .fg-filters {
-    display: flex;
-  }
-}
-
-/* ── Widescreen ───────────────────────────────────────────────────── */
-@media (min-width: 1680px) {
-  .font-generator {
-    padding-block-end: calc(var(--spacing-800) + var(--spacing-600));
-  }
-}
-
-@media (min-width: 600px) {
   .font-generator .fg-sk-layout-btns {
     display: flex;
   }
@@ -597,7 +578,26 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   }
 }
 
+/* ── Desktop ──────────────────────────────────────────────────────── */
 @media (min-width: 1200px) {
+  .font-generator {
+    padding: var(--spacing-600) var(--spacing-600) var(--spacing-900);
+  }
+
+  .font-generator .fg-container {
+    grid-template-columns: var(--fg-sidebar-width) 1fr;
+  }
+
+  .font-generator .fg-sidebar {
+    position: sticky;
+    top: calc(var(--global-height-nav) + var(--spacing-600));
+    align-self: start;
+  }
+
+  .font-generator .fg-sidebar .fg-filters {
+    display: flex;
+  }
+
   .font-generator .fg-sk {
     grid-template-columns: var(--fg-sidebar-width) 1fr;
   }
@@ -628,7 +628,12 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   }
 }
 
+/* ── Widescreen ───────────────────────────────────────────────────── */
 @media (min-width: 1680px) {
+  .font-generator {
+    padding-block-end: calc(var(--spacing-800) + var(--spacing-600));
+  }
+
   .font-generator .fg-sk-grid {
     grid-template-columns: repeat(3, 1fr);
   }
