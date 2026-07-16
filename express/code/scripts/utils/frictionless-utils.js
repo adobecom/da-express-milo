@@ -52,10 +52,10 @@ const AUDIO_FORMATS = [
 ];
 
 const AUDIO_MIME_TYPES = {
-  mp3: 'audio/mpeg',
-  wav: 'audio/wav',
-  m4a: 'audio/mp4',
-  aac: 'audio/aac',
+  mp3: ['audio/mpeg'],
+  wav: ['audio/wav', 'audio/wave', 'audio/x-wav', 'audio/x-pn-wave'],
+  m4a: ['audio/mp4', 'audio/m4a', 'audio/x-m4a'],
+  aac: ['audio/aac', 'audio/x-aac'],
 };
 
 // Configuration functions
@@ -87,11 +87,17 @@ const getBaseAudioCfg = (...types) => {
     group: 'audio',
     max_size: 1024 * 1024 * 1024,
     accept: formats.map((type) => `.${type}`).join(', '),
-    input_check: (input) => {
-      const supportedMimeTypes = formats
-        .map((type) => AUDIO_MIME_TYPES[type])
-        .filter(Boolean);
-      return supportedMimeTypes.includes(input);
+    input_check: (input, fileName) => {
+      const supportedMimeTypes = formats.flatMap((type) => AUDIO_MIME_TYPES[type] || []);
+      if (supportedMimeTypes.includes(input)) return true;
+      // Browser/OS MIME sniffing for less common audio formats (m4a)
+      // is unreliable - empty, generic (application/octet-stream), or a variant
+      // we haven't listed - so fall back to the filename extension.
+      if (fileName) {
+        const ext = fileName.split('.').pop()?.toLowerCase();
+        return formats.includes(ext);
+      }
+      return false;
     },
   };
 };
