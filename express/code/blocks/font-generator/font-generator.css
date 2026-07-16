@@ -1,28 +1,43 @@
+/* Full-bleed block: drop Milo's default section top-padding and prose-width
+   content cap so the grid can span the section (same fix as ax-columns et al.). */
+.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):has(.font-generator):not([data-padding='none']) > .content:first-child {
+  padding-top: 0;
+}
+
+main .section:has(.font-generator) > .content {
+  max-width: unset;
+}
+
 .font-generator {
   --fg-sidebar-width: 477px;
   --fg-panel-width: 511px;
-
-  padding: var(--spacing-600) var(--spacing-300);
-  background-color: var(--color-gray-150); /* ToDo: Ask if this should be authorable */
+  --gnav-offset-height: 63px; /* sticky rail must clear the sticky gnav */
+  background-color: var(--color-gray-150);
 }
 
+/* Layout: single column up to 1200px, then a sticky sidebar rail + results.
+   Insets live on the grid (not the block root) so the background stays full-bleed. */
 .font-generator .fg-container {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-400);
-  max-width: var(--block-wd-grid-max-width);
-  margin-inline: auto;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  padding-inline: var(--ax-grid-margin, 20px);
 }
 
-/* start placeholders — remove when sidebar and main are implemented */
-.font-generator .fg-main p {
-  min-height: 1400px;
-  border: 2px dashed var(--color-purple-1000);
-  margin: 0;
+.font-generator .fg-sidebar,
+.font-generator .fg-main {
+  min-width: 0;
 }
-/* end placeholders */
 
 /* Filters */
+/* Desktop-inline filters (inside .fg-sidebar) are hidden below 1200px in favor
+   of the mobile/tablet panel; shown inline at 1200px+ (see media queries). */
+.font-generator .fg-sidebar .fg-filters {
+  display: none;
+}
+
 .font-generator .fg-filters {
   display: flex;
   flex-direction: column;
@@ -87,7 +102,7 @@
   height: calc(100% - 2px);
 }
 
-.font-generator .fg-filter-btn[data-category="Symbol text"] {
+.font-generator .fg-filter-btn[data-category="Symbol"] {
   font-size: var(--Global-Typography-Size-Label-Label-S);
   line-height: var(--Global-Typography-Line-height-Label-Label-S);
 }
@@ -172,23 +187,6 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   line-height: 1.3333333;
 }
 
-/* ── Temp panel trigger (remove with toolbar implementation) ──────── */
-.font-generator .fg-panel-trigger--temp {
-  display: inline-block;
-  margin-block-end: var(--spacing-300);
-  padding: var(--spacing-100) var(--spacing-300);
-  border: 1px solid var(--color-gray-300);
-  border-radius: var(--corner-radius-80);
-  background: var(--color-gray-100);
-  font-size: var(--body-font-size-s);
-  cursor: pointer;
-}
-
-/* ── Sidebar filters: desktop only ──────────────────────────────── */
-.font-generator .fg-sidebar .fg-filters {
-  display: none;
-}
-
 /* ── Overlay backdrop ────────────────────────────────────────────── */
 .font-generator .fg-overlay {
   position: fixed;
@@ -247,8 +245,8 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 
 /* ── Tablet ───────────────────────────────────────────────────────── */
 @media (min-width: 600px) {
-  .font-generator {
-    padding: var(--spacing-600) var(--spacing-500) var(--spacing-300) var(--spacing-500);
+  .font-generator .fg-container {
+    gap: var(--spacing-300);
   }
 
   .font-generator .fg-panel {
@@ -296,31 +294,26 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 
 /* ── Desktop ──────────────────────────────────────────────────────── */
 @media (min-width: 1200px) {
-  .font-generator {
-    padding: var(--spacing-600);
+  .font-generator .fg-container {
+    grid-template-columns: var(--fg-sidebar-width) 1fr;
+    padding-bottom: var(--spacing-900);
   }
 
-  .font-generator .fg-panel-trigger--temp {
-    display: none;
+  .font-generator .fg-sidebar {
+    position: sticky;
+    top: calc(var(--gnav-offset-height) - 16px);
+    align-self: start;
   }
 
   .font-generator .fg-sidebar .fg-filters {
     display: flex;
   }
+}
 
+/* ── Widescreen ───────────────────────────────────────────────────── */
+@media (min-width: 1680px) {
   .font-generator .fg-container {
-    flex-direction: row;
-    flex-wrap: nowrap;
-  }
-
-  .font-generator .fg-sidebar {
-    width: var(--fg-sidebar-width);
-    position: sticky;
-    top: calc(var(--global-height-nav) + var(--spacing-600));
-    align-self: flex-start;
-  }
-
-  .font-generator .fg-main {
-    flex: 1;
+    max-width: var(--ax-grid-container-width, 1600px);
+    margin-inline: auto;
   }
 }

@@ -1,0 +1,68 @@
+import { getLibs, formatDynamicCartLink } from '../../scripts/utils.js';
+
+export default async function decorate(block) {
+  const [
+    { createTag },
+    { decorateButtons },
+    { default: trackBranchParameters },
+  ] = await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
+    import(`${getLibs()}/utils/decorate.js`),
+    import('../../scripts/branchlinks.js'),
+  ]);
+  await decorateButtons(block);
+
+  // Row 0: section header (heading + body + CTA)
+  const headerCell = block.firstElementChild?.querySelector(':scope > div');
+  const header = createTag('div', { class: 'font-bento-header' });
+  const textContent = createTag('div', { class: 'font-bento-text' });
+
+  if (headerCell) {
+    const ctaArea = [...headerCell.children].find((el) => el.classList.contains('action-area') || el.classList.contains('button-container'));
+    [...headerCell.children].forEach((el) => {
+      if (el !== ctaArea) textContent.append(el);
+    });
+    header.append(textContent);
+    if (ctaArea) {
+      const ctaLinks = [...ctaArea.querySelectorAll('a')];
+      ctaLinks.forEach((a) => formatDynamicCartLink(a));
+      await trackBranchParameters(ctaLinks);
+      header.append(ctaArea);
+    }
+  }
+  block.firstElementChild.remove();
+
+  // Remaining rows: bento cards
+  const grid = createTag('div', { class: 'font-bento-grid' });
+  [...block.children].forEach((row) => {
+    const cells = [...row.querySelectorAll(':scope > div')];
+    const card = createTag('div', { class: 'font-bento-card' });
+
+    const titleCell = cells[0];
+    let titleEl = titleCell?.firstElementChild ?? null;
+    if (!titleEl && titleCell?.textContent?.trim()) {
+      titleEl = createTag('p');
+      titleEl.textContent = titleCell.textContent.trim();
+    }
+    if (titleEl) {
+      titleEl.classList.add('font-bento-card-title');
+      card.append(titleEl);
+    }
+
+    const picture = cells[1]?.querySelector('picture');
+    if (picture) {
+      const mediaWrap = createTag('div', { class: 'font-bento-card-media' });
+      mediaWrap.append(picture);
+      card.append(mediaWrap);
+    }
+
+    row.remove();
+    grid.append(card);
+  });
+
+  const cards = [...grid.children];
+  if (cards.length > 0) cards[0].classList.add('font-bento-card-first');
+  if (cards.length > 1) cards[cards.length - 1].classList.add('font-bento-card-last');
+
+  block.append(header, grid);
+}

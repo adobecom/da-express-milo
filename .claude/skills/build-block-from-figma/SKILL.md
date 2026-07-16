@@ -39,7 +39,7 @@ to read at the point it becomes relevant.
 ### references/
 | File | Purpose |
 |------|---------|
-| `design-tokens.md` | Express token system — `--color-*`, `--spacing-*`, `--body-font-size-*`, `--heading-font-size-*`, and font-family usage. |
+| `design-tokens.md` | Express token system + the Figma→token **mapping algorithm** (exact name match → in-category value match → new token / hardcoded), semantic-category guardrails, and the token-mapping report format. |
 | `grid-system.md` | Breakpoints, column counts, container variants, n-up layouts. |
 | `eds-patterns.md` | EDS block anatomy, Express utilities, CTA patterns, icon helpers, placeholder text. |
 | `acceptance-criteria.md` | JS/CSS rules, quality checklists, media-query syntax, token usage. |
@@ -163,17 +163,47 @@ Before writing any code:
 
 ## Phase 3 — Read Figma designs
 
-For each provided frame URL, call **both** tools:
+For each provided frame URL, call **all three** tools:
 
 1. **`get_screenshot`** — captures the visual appearance.
 2. **`get_design_context`** — extracts exact computed values (padding,
    gap, max-width, aspect-ratio, flex direction, font sizes, border-radius).
    Screenshots alone miss these values; `get_design_context` is the
    source of truth for any numeric property.
+3. **`get_variable_defs`** — returns the **named design-system variables**
+   Figma bound to each layer (e.g. `Palette/gray-100 → #E9E9E9`,
+   `Corner-radius/corner-radius-100 → 8px`). The variable **name** is what
+   lets you match against Express tokens by name rather than guessing from
+   the raw value. `get_design_context` gives value + property;
+   `get_variable_defs` gives the name — you need both to map tokens.
 
-> **Do not skip `get_design_context`.** Visual estimation from screenshots
-> is the leading cause of incorrect padding, wrong breakpoints, wrong
-> aspect-ratios, and mismatched max-widths in the initial implementation.
+> **Do not skip `get_design_context` or `get_variable_defs`.** Visual
+> estimation from screenshots is the leading cause of incorrect padding,
+> wrong breakpoints, wrong aspect-ratios, and mismatched max-widths. Mapping
+> from raw values without the Figma variable names is the leading cause of
+> picking the wrong same-valued token (e.g. a spacing token on a radius).
+
+### Figma tool error fallbacks
+
+These three errors are common with `?m=dev` links and large frames. Handle
+them rather than stalling; never guess a node ID to work around them.
+
+- **"Invalid node" / "node was not found"** — the node was moved, renamed,
+  or deleted (dev links go stale). Call `get_metadata` **without** a
+  `nodeId` to list the file's pages, drill in to locate the target, and if
+  it no longer exists ask the user for a fresh **Copy link to selection**
+  URL (or the correct file / branch).
+- **"You currently have nothing selected"** — the server is using the Figma
+  **desktop-app bridge** (live selection) instead of resolving the node
+  remotely, typically because the file isn't reachable via the MCP
+  account's remote API. Ask the user to open the file in the Figma
+  **desktop app** and select the target layer, then retry.
+- **`get_design_context` output exceeds the token limit** — the frame is
+  large. The token-mapping workflow only needs `get_variable_defs` (which
+  pairs each variable's name with its value) plus the screenshot, so
+  proceed with those. If you need specific computed values from the
+  oversized context, read the saved result file in chunks (or re-run
+  `get_design_context` on a smaller child node) rather than the whole frame.
 
 From `get_design_context` for each frame, extract and record:
 
@@ -188,9 +218,12 @@ From `get_design_context` for each frame, extract and record:
 - **Image aspect-ratio** and whether `border-radius` is `0` or non-zero.
 - **Gap values** between each level of nesting (block gap vs column gap
   vs element gap within a column).
-- Typography (font-size, weight, line-height), colours, and spacing —
-  match against Express CSS variables; always prefer a variable over a
-  hardcoded value.
+- Typography (font-size, weight, line-height), colours, spacing, and
+  radius — for each, capture **both** the Figma variable name (from
+  `get_variable_defs`) and the raw value (from `get_design_context`), then
+  resolve to an Express token using the mapping algorithm in
+  `references/design-tokens.md` (exact name match → in-category value match
+  → new token / hardcoded). Always prefer a token over a hardcoded value.
 
 If multiple frames are provided, explicitly note layout differences
 between breakpoints — these drive your CSS overrides. Pay particular
@@ -234,6 +267,24 @@ If an element (especially media — images, video, icons) appears in
 which do not.  Carry this inventory forward into Phase 4 as a
 checklist — the implementation must match element presence per
 breakpoint exactly.
+
+### Build the token-mapping table
+
+Using the Figma variable names (`get_variable_defs`) and raw values
+(`get_design_context`) gathered above, resolve every styled value to an
+Express token **now**, following the algorithm in
+`references/design-tokens.md`. Read `express/code/styles/styles.css` first
+if you have not already (Phase 2 step 3).
+
+Record each resolution so the Phase 9 token-mapping report writes itself.
+Carry forward in particular:
+
+- Every value that did **not** resolve via an exact name match.
+- Any proposed **new `:root` token** — these require user confirmation
+  before commit; raise them as soon as the table is built rather than at the
+  end.
+- Any value you had to **hardcode**, or any value-match you are unsure is
+  semantically correct (mark `review`).
 
 ---
 
@@ -306,6 +357,13 @@ DOM.  Pattern from existing blocks:
   </div>
 </main>
 ```
+
+> **EDS single-value cells**: when a row contains only one value (e.g. a
+> background color string, a card title), EDS delivers it as plain text
+> inside the cell `<div>` — no `<p>` wrapper. Write these cells as
+> `<div>value</div>`, not `<div><p>value</p></div>`, so that JS selectors
+> and tests match live behavior. See `references/eds-patterns.md` for the
+> full explanation and workaround pattern.
 
 Add a second mock `inject-logo.html` if the block supports logo
 injection via the `marquee-inject-logo` meta tag.
@@ -561,9 +619,17 @@ Output:
 2. **Feature branch** (remote-branch-mode only) — branch name, repo,
    and number of commits pushed.
 3. **Breakpoints implemented** and which Figma frames they correspond to.
-4. **CSS variables used** — list every Express token referenced.
-5. **Hardcoded values** — any Figma values with no matching token,
-   with an explanatory comment in the CSS.
+4. **Token-mapping report** — the table defined in
+   `references/design-tokens.md`. Note the count of clean exact-name
+   matches, then list every Figma variable/value that did **not** resolve
+   via an exact name match, with: Figma variable name, raw value, CSS
+   property, resolution (value-match → which token / new token / hardcoded),
+   and a **Needs decision?** column. Call out every `YES` and `review` row
+   explicitly — these are the items the user must adjudicate.
+5. **New tokens & hardcoded values** — any `:root` token you propose to add
+   (with name, value, and where added) and any Figma value left hardcoded
+   (with the explanatory CSS comment). New `:root` tokens must have been
+   confirmed with the user before commit.
 6. **Acceptance criteria checklist** — confirm each criterion from
    Phase 4 passes (or note exceptions with reasoning).
 7. **Unit test results** — number of tests, pass/fail, any skipped.
