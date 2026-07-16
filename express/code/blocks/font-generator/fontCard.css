@@ -1,0 +1,319 @@
+.font-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-white);
+  border-radius: 12px;
+  min-height: 304px;
+  overflow: hidden;
+}
+
+/* ─── Body (preview area — overlay is bounded here) ──────────────────────── */
+
+.font-card-body {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  /* Top padding pushes the preview text to 64px from the card top, well clear
+     of the absolutely-positioned copy button so the two don't visually align. */
+  padding: 64px 16px 12px;
+  overflow: hidden;
+}
+
+/* List view is a compact row, not a scaled-down grid card — pull the
+   preview text back up rather than keeping the grid view's 64px offset. */
+.font-card-grid.is-list .font-card {
+  min-height: 0;
+}
+
+.font-card-grid.is-list .font-card-body {
+  padding-top: 64px;
+  padding-bottom: 32px;
+}
+
+/* ─── Copy icon button (upper right) ─────────────────────────────────────── */
+
+.font-card-copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: background-color 0.1s ease;
+}
+
+.font-card-copy-btn:hover {
+  background-color: var(--color-light-gray);
+}
+
+.font-card-copy-btn img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+/* CSS tooltip via data-tooltip + ::after; caret via ::before */
+
+.font-card-copy-btn::before {
+  content: '';
+  position: absolute;
+  top: calc(100% + 1px);
+  right: 11px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid var(--color-gray-950);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  z-index: 10;
+}
+
+.font-card-copy-btn:hover::before,
+.font-card-copy-btn:focus-visible::before {
+  opacity: 1;
+}
+
+.font-card.is-copied .font-card-copy-btn::before {
+  opacity: 0;
+}
+
+.font-card-copy-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--color-gray-950);
+  color: var(--color-white);
+  font-family: var(--body-font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none; 
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  z-index: 10;
+}
+
+.font-card-copy-btn:hover::after,
+.font-card-copy-btn:focus-visible::after {
+  opacity: 1;
+}
+
+/* Hide tooltip while the copied overlay is showing */
+.font-card.is-copied .font-card-copy-btn::after {
+  opacity: 0;
+}
+
+/* ─── Preview text ────────────────────────────────────────────────────────── */
+
+.font-card-preview {
+  flex: 1;
+  overflow: hidden;
+  word-break: break-word;
+  line-height: 1.3;
+  padding-right: 36px; /* clear the copy button */
+  color: var(--color-gray-950);
+}
+
+/* ─── Copy overlay (hover "Copy text" prompt → "Text copied!" success) ────── */
+
+.font-card-copy-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--S2AC-Palette-transparent-black-700, rgba(0, 0, 0, 0.69));
+  opacity: 0;
+  pointer-events: none;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+  border-radius: inherit;
+}
+
+/* Hover reveals the "Copy text" affordance over the whole preview. */
+.font-card-body:hover .font-card-copy-overlay {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* The copied confirmation stays up (non-interactive) until it resets. */
+.font-card.is-copied .font-card-copy-overlay {
+  opacity: 1;
+  pointer-events: none;
+}
+
+/* Hide the resting top-right icon while the overlay covers the preview. */
+.font-card-body:hover .font-card-copy-btn {
+  opacity: 0;
+}
+
+.font-card-copy-prompt,
+.font-card-copy-success {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.font-card-copy-prompt {
+  gap: 8px;
+}
+
+.font-card-copy-success {
+  display: none;
+  gap: 16px;
+}
+
+/* Swap prompt → success once copied. */
+.font-card.is-copied .font-card-copy-prompt {
+  display: none;
+}
+
+.font-card.is-copied .font-card-copy-success {
+  display: flex;
+}
+
+.font-card-copy-prompt-icon {
+  display: block;
+  width: 36px;
+  height: 36px;
+  /* dark source icon → white on the dark overlay */
+  filter: brightness(0) invert(1);
+}
+
+.font-card-copy-prompt-label,
+.font-card-copy-message {
+  font-family: var(--body-font-family);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.3;
+  color: var(--color-white);
+}
+
+.font-card-check-icon {
+  display: block;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+}
+
+/* Success: pop the badge in, then draw the tick. */
+.font-card.is-copied .font-card-check-icon {
+  animation: font-card-check-pop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+.font-card-check-path {
+  stroke-dasharray: 60;
+  stroke-dashoffset: 60;
+}
+
+.font-card.is-copied .font-card-check-path {
+  animation: font-card-check-draw 0.3s ease-out 0.12s forwards;
+}
+
+@keyframes font-card-check-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@keyframes font-card-check-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .font-card.is-copied .font-card-check-icon,
+  .font-card.is-copied .font-card-check-path {
+    animation: none;
+  }
+
+  .font-card-check-path {
+    stroke-dashoffset: 0;
+  }
+}
+
+/* ─── Footer (font name + CTA link) ──────────────────────────────────────── */
+
+.font-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 1px solid var(--color-light-gray);
+  padding: 8px 16px 16px;
+  min-height: 36px;
+}
+
+.font-card-name {
+  font-family: var(--body-font-family);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-dark-gray);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── CTA link (black pill button with external-link icon) ───────────────── */
+
+main a.font-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  padding: 7px 14px 7px 10px;
+  border-radius: 24px;
+  background: #000000d6;
+  color: var(--color-white);
+  font-family: var(--body-font-family);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 0.1s ease;
+}
+
+.font-card-cta:hover {
+  background: var(--color-black);
+}
+
+.font-card-cta-icon {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+/* Off-screen polite live region — announces copy success to screen readers
+   (the visible overlay is aria-hidden / decorative). */
+.font-card-live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
