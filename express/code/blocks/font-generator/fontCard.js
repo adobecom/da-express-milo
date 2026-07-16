@@ -71,9 +71,10 @@ function makeCheckmarkSvg() {
 
   const path = document.createElementNS(ns, 'path');
   path.setAttribute('class', 'font-card-check-path');
-  path.setAttribute('d', 'M20 40L34 54L60 26');
+  // Short leg intentionally stubby; long leg sweeps up — resembles the icon.
+  path.setAttribute('d', 'M25 43L35 53L60 26');
   path.setAttribute('stroke', 'var(--color-white)');
-  path.setAttribute('stroke-width', '4');
+  path.setAttribute('stroke-width', '5');
   path.setAttribute('stroke-linecap', 'round');
   path.setAttribute('stroke-linejoin', 'round');
 

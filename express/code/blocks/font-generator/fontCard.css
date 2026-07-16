@@ -219,8 +219,8 @@
 }
 
 .font-card-check-path {
-  stroke-dasharray: 60;
-  stroke-dashoffset: 60;
+  stroke-dasharray: 52;
+  stroke-dashoffset: 52;
 }
 
 .font-card.is-copied .font-card-check-path {
