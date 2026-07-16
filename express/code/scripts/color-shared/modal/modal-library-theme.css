@@ -83,6 +83,34 @@
   }
 }
 
+/* Tablet: large palettes (6+) wrap their content and grow with it (no internal
+   scroll or bottom fade) while the modal content scrolls like mobile. Small
+   palettes keep their current fixed height (never shorter). */
+@media (min-width: 600px) and (max-width: 1199px) {
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] {
+    height: auto;
+    min-height: 264px;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] sp-theme,
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail
+    .modal-color-rail-wrap[data-color-count-range="large"] color-swatch-rail[orientation="stacked"] {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail:has(.modal-color-rail-wrap[data-color-count-range="large"])::after {
+    display: none;
+  }
+}
+
 /* ── Tags section ──────────────────────────────────────────────── */
 
 .ax-color-modal-content .modal-lib-tags {

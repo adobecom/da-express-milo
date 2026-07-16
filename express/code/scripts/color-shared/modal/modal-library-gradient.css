@@ -33,11 +33,15 @@
   height: 156px;
 }
 
-/* Inner stroke: draw the stroke inside the gradient's rounded rect rather than
-   the editor's outer border, so it overlays the fill edge and doesn't grow the box. */
+/* Inner stroke: on the bar (which carries the gradient fill) so it paints over
+   the fill edge; an inset shadow on .gradient-editor would sit under the bar. */
 .ax-color-modal-content .modal-library-gradient .modal-gradient-preview
   .gradient-editor {
   border: none;
+}
+
+.ax-color-modal-content .modal-library-gradient .modal-gradient-preview
+  .gradient-editor-bar {
   box-shadow: inset 0 0 0 1px var(--color-gray-250);
 }
 
@@ -88,6 +92,34 @@
 
   .ax-color-modal-content .modal-library-gradient
     .modal-palette-container--color-rail::after {
+    display: none;
+  }
+}
+
+/* Tablet: large rails (6+ stops) wrap their content and grow with it (no internal
+   scroll or bottom fade) while the modal content scrolls like mobile. Smaller
+   rails keep their current fixed height (never shorter). */
+@media (min-width: 600px) and (max-width: 1199px) {
+  .ax-color-modal-content .modal-library-gradient
+    .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] {
+    height: auto;
+    min-height: 248px;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .ax-color-modal-content .modal-library-gradient
+    .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] sp-theme,
+  .ax-color-modal-content .modal-library-gradient
+    .modal-palette-container--color-rail
+    .modal-color-rail-wrap[data-color-count-range="large"] color-swatch-rail[orientation="stacked"] {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .ax-color-modal-content .modal-library-gradient
+    .modal-palette-container--color-rail:has(.modal-color-rail-wrap[data-color-count-range="large"])::after {
     display: none;
   }
 }
