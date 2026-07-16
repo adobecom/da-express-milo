@@ -46,6 +46,18 @@ describe('Color Libraries — search (signed-in)', () => {
 
   const nextTask = () => new Promise((resolve) => { setTimeout(resolve, 0); });
 
+  async function waitForElement(selector, { timeout = 5000, message } = {}) {
+    const deadline = Date.now() + timeout;
+    while (Date.now() < deadline) {
+      const el = document.querySelector(selector);
+      if (el) return el;
+      // eslint-disable-next-line no-await-in-loop
+      await nextTask();
+    }
+    expect(null, message || `expected ${selector} to exist`).to.exist;
+    return null;
+  }
+
   // runSearch adds `is-loading` synchronously, then removes it once the async
   // render settles. Poll until it clears so assertions see the final view.
   async function settle() {
@@ -187,6 +199,11 @@ describe('Color Libraries — search (signed-in)', () => {
   // libraries:item-delete event bubbles to document — never to the block. This
   // confirms the block listens on document so modal-originated deletes are handled.
   it('handles a delete event dispatched on document (modal path)', async () => {
+    const { loadAlertDialog } = await import(
+      '../../../express/code/scripts/color-shared/spectrum/load-spectrum.js'
+    );
+    await loadAlertDialog();
+
     document.dispatchEvent(new CustomEvent('libraries:item-delete', {
       detail: {
         item: { id: 'theme-ocean', name: 'Ocean Blue', type: 'theme' },
@@ -195,15 +212,9 @@ describe('Color Libraries — search (signed-in)', () => {
       bubbles: true,
     }));
 
-    let dialog = null;
-    for (let i = 0; i < 100; i += 1) {
-      dialog = document.querySelector('sp-alert-dialog');
-      if (dialog) break;
-      // eslint-disable-next-line no-await-in-loop
-      await nextTask();
-    }
-
-    expect(dialog, 'delete confirmation dialog should appear').to.exist;
+    const dialog = await waitForElement('sp-alert-dialog', {
+      message: 'delete confirmation dialog should appear',
+    });
 
     // Cancel to resolve the dialog promise and clean up the body-mounted overlay.
     [...dialog.querySelectorAll('sp-button')]

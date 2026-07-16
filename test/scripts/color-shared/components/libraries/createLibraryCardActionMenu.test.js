@@ -108,7 +108,7 @@ describe('createLibraryCardActionMenu', () => {
       expect(trigger.getAttribute('aria-expanded')).to.equal('false');
     });
 
-    it('flips the popover above the trigger when it would overflow the viewport bottom', async () => {
+    it('flips the popover above the trigger when it would overflow the viewport bottom', () => {
       const viewportHeight = 800;
       const triggerHeight = 32;
       const triggerTop = viewportHeight - triggerHeight - 4;
@@ -156,11 +156,8 @@ describe('createLibraryCardActionMenu', () => {
 
       trigger.click();
 
-      await new Promise((resolve) => {
-        requestAnimationFrame(resolve);
-      });
-      await (menu.element.querySelector('sp-menu').updateComplete ?? Promise.resolve());
-
+      // scheduleAlignPopover measures and aligns synchronously on open; avoid awaiting
+      // sp-menu.updateComplete which can hang when the element is not upgraded.
       expect(popover.classList.contains('ax-lib-card__action-menu-popover--align-up')).to.be.true;
     });
   });
