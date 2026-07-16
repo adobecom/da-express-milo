@@ -51,9 +51,12 @@
   scrollbar-width: none;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  /* Full-bleed: extend the scroll track to the right edge of the viewport. */
-  margin-right: calc(50% - 50vw);
-  padding-right: var(--spacing-300);
+  /* Full-bleed: extend the scroll track to both edges of the viewport, then
+     re-inset the cards with padding so the first/last cards line up with the
+     header. scroll-padding keeps snapped cards aligned to that inset. */
+  margin-inline: calc(50% - 50vw);
+  padding-inline: var(--spacing-300);
+  scroll-padding-left: var(--spacing-300);
 }
 
 .icon-carousel-gallery::-webkit-scrollbar {
@@ -187,7 +190,8 @@
   }
 
   .icon-carousel-gallery {
-    padding-right: var(--spacing-500);
+    padding-inline: var(--spacing-500);
+    scroll-padding-left: var(--spacing-500);
   }
 
   .icon-carousel-card {
@@ -213,7 +217,8 @@
   }
 
   .icon-carousel-gallery {
-    padding-right: var(--spacing-600);
+    padding-inline: var(--spacing-600);
+    scroll-padding-left: var(--spacing-600);
   }
 
   .icon-carousel-card-body h1,
