@@ -261,5 +261,10 @@ export default function decorate(block) {
 
   // Restore URL state before any component reads from the store.
   initFromUrl();
+  // Deliberately not awaited/returned: Milo's loadSections hides the whole
+  // section via [data-status] until every block's decorate() promise
+  // resolves, so returning decorateAsync's promise here would keep the
+  // skeleton itself hidden until hydration finishes, defeating the point of
+  // showing a skeleton at all.
   decorateAsync(block);
 }
