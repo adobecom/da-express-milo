@@ -1,4 +1,5 @@
 import { expect } from '@esm-bundle/chai';
+import sinon from 'sinon';
 
 const [{ getLibs }] = await Promise.all([
   import('../../../express/code/scripts/utils.js'),
@@ -52,6 +53,36 @@ describe('font-generator/placeholders', () => {
     it('falls back to the default number when nothing is authored', async () => {
       const strings = await loadFontGeneratorPlaceholders();
       expect(strings.maxLength).to.equal(200);
+    });
+  });
+
+  describe('placeholders-stage overlay', () => {
+    it('leaves defaults untouched when the placeholders-stage metadata is absent', async () => {
+      const strings = await loadFontGeneratorPlaceholders();
+      expect(strings.maxLength).to.equal(200);
+    });
+
+    it('overlays an authored stage value when placeholders-stage is on', async function test() {
+      this.timeout(5000);
+      const meta = document.createElement('meta');
+      meta.name = 'placeholders-stage';
+      meta.content = 'on';
+      document.head.append(meta);
+
+      const fetchStub = sinon.stub(window, 'fetch');
+      fetchStub.withArgs(sinon.match(/placeholders-stage\.json/)).resolves({
+        ok: true,
+        json: async () => ({ data: [{ key: 'font-generator-max-length', value: '42' }] }),
+      });
+      fetchStub.callThrough();
+
+      try {
+        const strings = await loadFontGeneratorPlaceholders();
+        expect(strings.maxLength).to.equal(42);
+      } finally {
+        fetchStub.restore();
+        meta.remove();
+      }
     });
   });
 });
