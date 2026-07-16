@@ -62,11 +62,25 @@
   flex-direction: column;
   min-width: 112px;
   align-items: flex-end;
-  gap: var(--spacing-300);
   position: relative;
   align-self: stretch;
   width: 100%;
   flex: 0 0 auto;
+}
+
+/* Visible "Preview Text" label above the textarea (Component/M/Regular).
+   Owns the label→textarea spacing directly (the container's flex gap was
+   removed so it no longer double-spaces the field and suggestions bar). */
+.font-generator-text-input .preview-text-label {
+  align-self: stretch;
+  width: 100%;
+  text-align: left;
+  color: var(--color-dark-gray, #505050);
+  font-family: var(--body-font-family);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 18px;
 }
 
 .font-generator-text-input .field {
@@ -76,6 +90,7 @@
   align-self: stretch;
   width: 100%;
   border-radius: 9px;
+  margin-bottom: var(--spacing-300);
 }
 
 .font-generator-text-input .label {
