@@ -2,7 +2,9 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
-import { createDrawer, computeIsDirty } from '../../../../express/code/scripts/color-shared/toolbar/createDrawerComponent.js';
+import {
+  createDrawer, computeIsDirty, refreshBtnRowStacking,
+} from '../../../../express/code/scripts/color-shared/toolbar/createDrawerComponent.js';
 import { MOCK_PALETTE, MOCK_GRADIENT, MOCK_LIBRARIES } from './mocks/palette.js';
 import { createMockCCLibraryProvider } from './mocks/stubs.js';
 
@@ -1364,5 +1366,54 @@ describe('computeIsDirty', () => {
   it('color comparison is case-insensitive', () => {
     const lower = { ...savedItem, colors: ['#ff0000', '#00ff00'] };
     expect(computeIsDirty(lower, 'Sunset', ['warm', 'bold'])).to.be.false;
+  });
+});
+
+describe('refreshBtnRowStacking', () => {
+  afterEach(() => {
+    sinon.restore();
+    document.body.innerHTML = '';
+  });
+
+  function makeRow(availableWidth, gapPx) {
+    const row = document.createElement('div');
+    row.style.columnGap = `${gapPx}px`;
+    document.body.appendChild(row);
+    sinon.stub(row, 'getBoundingClientRect').returns({ width: availableWidth });
+    return row;
+  }
+
+  function makeButton(naturalWidth) {
+    const el = document.createElement('div');
+    sinon.stub(el, 'getBoundingClientRect').returns({ width: naturalWidth });
+    return el;
+  }
+
+  it('does not stack when both buttons fit within the row', () => {
+    const row = makeRow(300, 8);
+    refreshBtnRowStacking(row, makeButton(100), makeButton(150));
+    expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.false;
+  });
+
+  it('stacks when the combined natural width plus gap exceeds the row width', () => {
+    const row = makeRow(200, 8);
+    refreshBtnRowStacking(row, makeButton(120), makeButton(150));
+    expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.true;
+  });
+
+  it('un-stacks again once there is enough room (e.g. after a resize)', () => {
+    const row = makeRow(200, 8);
+    const btnA = makeButton(120);
+    const btnB = makeButton(150);
+    refreshBtnRowStacking(row, btnA, btnB);
+    expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.true;
+
+    row.getBoundingClientRect.returns({ width: 400 });
+    refreshBtnRowStacking(row, btnA, btnB);
+    expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.false;
+  });
+
+  it('is a no-op when row or buttons are missing', () => {
+    expect(() => refreshBtnRowStacking(null, null, null)).to.not.throw();
   });
 });

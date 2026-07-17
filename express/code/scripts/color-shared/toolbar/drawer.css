@@ -739,3 +739,19 @@
     transition: none;
   }
 }
+
+/* ── Make a copy / Save changes: stacked state ──────────────────
+   Applied via JS (createDrawerComponent.js) once the two buttons' measured
+   natural widths no longer fit their row (e.g. longer translated labels). */
+
+.ax-drawer-btn-row--stacked {
+  flex-direction: column;
+  align-self: stretch;
+  inline-size: 100%;
+}
+
+.ax-drawer-btn-row--stacked .ax-drawer-save-btn,
+.ax-drawer-btn-row--stacked .ax-drawer-savechanges-btn {
+  inline-size: 100%;
+  flex: 1 1 auto;
+}

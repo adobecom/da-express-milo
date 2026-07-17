@@ -774,7 +774,27 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
     tagsInputEl,
     saveBtnEl,
     saveChangesBtnEl,
+    btnRowEl: saveChangesBtnEl ? saveBtnEl.closest('.ax-drawer-btn-row') : null,
   };
+}
+
+// sp-button's overflow:hidden label zeroes out flexbox's auto-min-size, so
+// flex-wrap can't detect overflow on its own — measure the real natural width instead.
+function measureNaturalWidth(el) {
+  const { flex, maxInlineSize } = el.style;
+  el.style.flex = '0 0 auto';
+  el.style.maxInlineSize = 'none';
+  const { width } = el.getBoundingClientRect();
+  el.style.flex = flex;
+  el.style.maxInlineSize = maxInlineSize;
+  return width;
+}
+
+export function refreshBtnRowStacking(row, btnA, btnB) {
+  if (!row || !btnA || !btnB) return;
+  const gap = Number.parseFloat(getComputedStyle(row).columnGap) || 0;
+  const natural = measureNaturalWidth(btnA) + measureNaturalWidth(btnB) + gap;
+  row.classList.toggle('ax-drawer-btn-row--stacked', natural > row.getBoundingClientRect().width);
 }
 
 function attachDrawerToDOM(panel, curtain, mobile, anchor) {
@@ -874,6 +894,7 @@ export async function createDrawer(options) {
   let previousActiveElement = null;
   let tagsDirtyObserver = null;
   let removeNameDirtyListener = null;
+  let removeBtnRowResizeListener = null;
 
   function close() {
     if (!isOpen) return;
@@ -901,6 +922,8 @@ export async function createDrawer(options) {
     tagsDirtyObserver = null;
     removeNameDirtyListener?.();
     removeNameDirtyListener = null;
+    removeBtnRowResizeListener?.();
+    removeBtnRowResizeListener = null;
 
     const elementToFocus = previousActiveElement;
     previousActiveElement = null;
@@ -1068,6 +1091,14 @@ export async function createDrawer(options) {
 
     const posResult = attachDrawerToDOM(panelEl, curtainEl, mobile, anchorElement);
     removePositionHandler = posResult?.cleanup ?? null;
+
+    if (dom.btnRowEl) {
+      const { btnRowEl, saveBtnEl: copyBtnEl, saveChangesBtnEl: changesBtnEl } = dom;
+      const runStackingCheck = () => refreshBtnRowStacking(btnRowEl, copyBtnEl, changesBtnEl);
+      requestAnimationFrame(runStackingCheck);
+      window.addEventListener('resize', runStackingCheck);
+      removeBtnRowResizeListener = () => window.removeEventListener('resize', runStackingCheck);
+    }
 
     anchorElement?.classList.add('ax-drawer-anchor-active');
 
