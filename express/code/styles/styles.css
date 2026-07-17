@@ -374,6 +374,8 @@
 
   /* Background/button semantic tokens */
   --Background-accent-default: var(--color-background-accent-default);
+  --Background-Primary-Default: var(--Palette-gray-800);
+  --Background-Primary-Hover: var(--Palette-gray-900);
   --Background-secondary-default: var(--Palette-gray-100);
   --Buttons-default: var(--S2-Buttons-Accent-Color-Default);
   --Buttons-hover: var(--S2-Buttons-Accent-Color-Hover);
