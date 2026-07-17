@@ -2,7 +2,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
-import { createDrawer } from '../../../../express/code/scripts/color-shared/toolbar/createDrawerComponent.js';
+import { createDrawer, computeIsDirty } from '../../../../express/code/scripts/color-shared/toolbar/createDrawerComponent.js';
 import { MOCK_PALETTE, MOCK_GRADIENT, MOCK_LIBRARIES } from './mocks/palette.js';
 import { createMockCCLibraryProvider } from './mocks/stubs.js';
 
@@ -1323,5 +1323,47 @@ describe.skip('createDrawer', function drawerSuite() {
       expect(drawer.isOpen).to.be.false;
       await waitForClose();
     });
+  });
+});
+
+// Not nested under the describe.skip above (MWPW-192264 covers the DOM/focus-trap
+// suite) — computeIsDirty is a pure function so it can be verified independently.
+describe('computeIsDirty', () => {
+  const savedItem = {
+    name: 'Sunset',
+    colors: ['#FF0000', '#00FF00'],
+    tags: ['warm', 'bold'],
+    savedName: 'Sunset',
+    savedColors: ['#FF0000', '#00FF00'],
+  };
+
+  it('is not dirty when name/tags/colors all match the saved snapshot', () => {
+    expect(computeIsDirty(savedItem, 'Sunset', ['warm', 'bold'])).to.be.false;
+  });
+
+  it('is dirty when the name differs from savedName', () => {
+    expect(computeIsDirty(savedItem, 'Sunrise', ['warm', 'bold'])).to.be.true;
+  });
+
+  it('is dirty when tags are added', () => {
+    expect(computeIsDirty(savedItem, 'Sunset', ['warm', 'bold', 'new'])).to.be.true;
+  });
+
+  it('is dirty when tags are removed', () => {
+    expect(computeIsDirty(savedItem, 'Sunset', ['warm'])).to.be.true;
+  });
+
+  it('is not dirty when tags are reordered but unchanged as a set', () => {
+    expect(computeIsDirty(savedItem, 'Sunset', ['bold', 'warm'])).to.be.false;
+  });
+
+  it('is dirty when palette.colors (live, edited on canvas) differs from savedColors', () => {
+    const edited = { ...savedItem, colors: ['#0000FF', '#00FF00'] };
+    expect(computeIsDirty(edited, 'Sunset', ['warm', 'bold'])).to.be.true;
+  });
+
+  it('color comparison is case-insensitive', () => {
+    const lower = { ...savedItem, colors: ['#ff0000', '#00ff00'] };
+    expect(computeIsDirty(lower, 'Sunset', ['warm', 'bold'])).to.be.false;
   });
 });

@@ -235,4 +235,96 @@ describe('Color Libraries — search (signed-in)', () => {
 
     expect(accordionNames()).to.deep.equal(['Brand Colors', 'Neutrals']);
   });
+
+  // Saving/updating a theme happens on a color-tool page reached via a hard
+  // navigation from here. Pressing Back restores this page from the browser's
+  // bfcache instead of re-running decorate(), so without a pageshow listener
+  // the grid would keep showing pre-edit data indefinitely.
+  describe('bfcache restore (pageshow)', () => {
+    async function fireBfcachePageshow() {
+      const event = new Event('pageshow');
+      Object.defineProperty(event, 'persisted', { value: true });
+      window.dispatchEvent(event);
+      await settle();
+    }
+
+    it('refetches and re-renders library data when persisted is true', async () => {
+      const provider = await serviceManager.getProvider('cclibrary');
+      provider.fetchUserLibraries.resolves({
+        libraries: [...RAW_LIBRARIES, { library_urn: 'urn:lib:new', name: 'New Library' }],
+      });
+      provider.fetchLibraryElements.callsFake(async (id) => ({
+        elements: id === 'urn:lib:new'
+          ? [themeElement('theme-new', 'Fresh Theme', ['#00FF00'])]
+          : (ELEMENTS_BY_ID[id] || []),
+      }));
+
+      await fireBfcachePageshow();
+
+      expect(accordionNames()).to.include('New Library');
+      expect(block.querySelector('.ax-lib-header__count').textContent)
+        .to.equal('3 saved libraries');
+    });
+
+    it('does not refetch on a normal (non-bfcache) pageshow', async () => {
+      const provider = await serviceManager.getProvider('cclibrary');
+      const callCountBefore = provider.fetchUserLibraries.callCount;
+
+      const event = new Event('pageshow');
+      Object.defineProperty(event, 'persisted', { value: false });
+      window.dispatchEvent(event);
+      await settle();
+
+      expect(provider.fetchUserLibraries.callCount).to.equal(callCountBefore);
+    });
+
+    // The item modal mounts on document.body and is opened via `libraries:item-open`
+    // dispatched on the block. Its content closures were frozen in bfcache along
+    // with everything else, so a stale-open modal needs to be rebuilt — not just
+    // the grid behind it — once fresh data comes back.
+    it('rebuilds an open item modal with freshly fetched item data', async () => {
+      block.dispatchEvent(new CustomEvent('libraries:item-open', {
+        detail: {
+          item: {
+            id: 'theme-ocean', name: 'Ocean Blue', type: 'theme', colors: ['#0000FF'], tags: ['sea', 'water'],
+          },
+          libraryId: 'urn:lib:brand',
+        },
+        bubbles: true,
+      }));
+
+      async function waitForTagValues(expected, { timeout = 5000 } = {}) {
+        const deadline = Date.now() + timeout;
+        while (Date.now() < deadline) {
+          const modalEl = document.querySelector('.modal-library-theme');
+          if (modalEl) {
+            const values = [...modalEl.querySelectorAll('.ax-tag-pill')].map((p) => p.dataset.tagValue);
+            if (JSON.stringify(values) === JSON.stringify(expected)) return;
+          }
+          // eslint-disable-next-line no-await-in-loop
+          await nextTask();
+        }
+        expect.fail(`expected tag values ${JSON.stringify(expected)} within timeout, modal open: ${!!document.querySelector('.modal-library-theme')}`);
+      }
+
+      await waitForTagValues(['sea', 'water']);
+
+      // Simulate the save having happened on the color-tool page: same item id,
+      // new tags (and, since this fresh fetch also feeds the grid, a new library
+      // list — the modal-refresh path pulls the item out of this same fetch).
+      const provider = await serviceManager.getProvider('cclibrary');
+      provider.fetchLibraryElements.callsFake(async (id) => ({
+        elements: id === 'urn:lib:brand'
+          ? [
+            themeElement('theme-ocean', 'Ocean Blue', ['#0000FF'], ['refreshed']),
+            themeElement('theme-sunset', 'Sunset Warm', ['#FF8800'], ['warm']),
+          ]
+          : (ELEMENTS_BY_ID[id] || []),
+      }));
+
+      await fireBfcachePageshow();
+
+      await waitForTagValues(['refreshed']);
+    });
+  });
 });
