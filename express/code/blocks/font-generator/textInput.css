@@ -1,0 +1,270 @@
+/*
+ * Text input — self-contained styles, scoped to `.font-generator-text-input`.
+ * Consolidated from the Figma export; the export's page-wide reset is
+ * intentionally omitted so it can't clobber the host Express page.
+ */
+
+/* ─── Scoped reset ────────────────────────────────────────────────────────── */
+
+.font-generator-text-input,
+.font-generator-text-input * {
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-generator-text-input p,
+.font-generator-text-input div,
+.font-generator-text-input button,
+.font-generator-text-input textarea {
+  margin: 0;
+}
+
+/* ─── Component ───────────────────────────────────────────────────────────── */
+
+.font-generator-text-input {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  align-items: flex-start;
+  gap: var(--spacing-400);
+  padding: 16px;
+  position: relative;
+  background: var(--color-gray-150);
+}
+
+/* Inline rail (1200px+): no side padding, so the column renders at its full
+   computed grid-track width instead of being squeezed by extra padding. */
+@media (min-width: 1200px) {
+  .font-generator-text-input {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
+.font-generator-text-input .text-field {
+  display: flex;
+  flex-direction: column;
+  min-width: 280px;
+  align-items: flex-end;
+  gap: var(--spacing-300);
+  padding: var(--spacing-300);
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+  background-color: var(--color-white);
+  border-radius: var(--Corner-radius-corner-radius-200);
+  overflow: hidden;
+  box-shadow: 0px 4px 12px #00000014;
+}
+
+.font-generator-text-input .text-area-l-in-line {
+  display: flex;
+  flex-direction: column;
+  min-width: 112px;
+  align-items: flex-end;
+  gap: var(--spacing-300);
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+}
+
+.font-generator-text-input .field {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  border-radius: 9px;
+}
+
+.font-generator-text-input .label {
+  all: unset;
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-height: 104px;
+  resize: none;
+  padding: 0 0 28px;
+  font-family: var(--body-font-family);
+  font-weight: 400;
+  color: var(--color-dark-gray);
+  font-size: 16px;
+  line-height: 20px;
+  letter-spacing: 0;
+  font-style: normal;
+}
+
+.font-generator-text-input .label::placeholder {
+  color: var(--color-dark-gray);
+  opacity: 0.5;
+}
+
+.font-generator-text-input .counter-expander {
+  position: absolute;
+  bottom: -1px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  pointer-events: none;
+}
+
+.font-generator-text-input .character-count {
+  color: var(--color-gray-800-variant);
+  text-align: right;
+  leading-trim: both;
+  text-edge: cap;
+  font-size: var(--Global-Typography-Size-Label-Label-XS, 12px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--Global-Typography-Line-height-Label-Label-XS, 14px);
+  white-space: nowrap;
+}
+
+.font-generator-text-input .resize-handle {
+  position: absolute;
+  bottom: 2px;
+  right: 2px;
+  width: 8px;
+  height: 8px;
+  cursor: se-resize;
+  background: url('/express/code/icons/font-generator-resize-handle.svg') center / contain no-repeat;
+}
+
+.font-generator-text-input .suggestions-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: var(--spacing-300) 0 0;
+  position: relative;
+  align-self: stretch;
+  width: 100%;
+  flex: 0 0 auto;
+  border-top-width: 1px;
+  border-top-style: solid;
+  border-color: var(--color-light-gray);
+}
+
+.font-generator-text-input .text-wrapper {
+  display: flex;
+  align-items: center;
+  width: fit-content;
+  font-family: var(--body-font-family);
+  font-weight: 700;
+  color: var(--color-black);
+  font-size: 14px;
+  line-height: 130%;
+  white-space: nowrap;
+  position: relative;
+  letter-spacing: 0;
+  font-style: normal;
+}
+
+.font-generator-text-input .tags-fade {
+  border-radius: 0 0 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+}
+
+.font-generator-text-input .tags-fade::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 62px;
+  height: 100%;
+  background: linear-gradient(270deg, var(--color-gray-100) 0%, rgba(248, 248, 248, 0.00) 63.48%);
+  pointer-events: none;
+}
+
+.font-generator-text-input .tags-wrap {
+  gap: var(--spacing-75);
+  border-radius: 4px;
+  overflow-x: scroll;
+  display: flex;
+  align-items: center;
+  position: relative;
+  flex: 1;
+  flex-grow: 1;
+}
+
+.font-generator-text-input .tags-wrap::-webkit-scrollbar {
+  width: 0;
+  display: none;
+}
+
+.font-generator-text-input .tag-pills {
+  display: inline-flex;
+  align-items: flex-start;
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.font-generator-text-input .tag-m {
+  min-width: 27px;
+  max-width: 200px;
+  min-height: 32px;
+  background-color: var(--color-light-gray);
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  position: relative;
+  flex: 0 0 auto;
+  overflow: hidden;
+}
+
+.font-generator-text-input .content {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 var(--spacing-200);
+  border-radius: 8px;
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.font-generator-text-input .text-container {
+  display: inline-flex;
+  height: 32px;
+  align-items: center;
+  padding: 0;
+  position: relative;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.font-generator-text-input .div {
+  display: -webkit-box;
+  align-items: center;
+  max-width: 100%;
+  font-family: var(--body-font-family);
+  font-weight: 400;
+  color: var(--color-gray-800-variant);
+  font-size: 14px;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  position: relative;
+  letter-spacing: 0;
+  font-style: normal;
+}
+
+.font-generator-text-input .img {
+  position: absolute;
+  top: -6px;
+  right: 0;
+  width: 62px;
+  height: 45px;
+}
