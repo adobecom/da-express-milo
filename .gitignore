@@ -20,6 +20,7 @@ dev/
 actionlint
 .claude/worktrees/
 .claude/**.local.*
+.claude/hooks/auto-review-pr.sh
 .playwright-mcp/
 !.eslintrc-code-compatibility.js
 !.browserslistrc
