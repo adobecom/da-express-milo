@@ -216,6 +216,9 @@ export default async function decorate(block) {
         type: isMobileOrTabletViewport() ? 'nav-only' : 'full',
         activeId: 'contrast',
         getName: () => initialPalette.name,
+        paletteTags: initialPalette.tags,
+        paletteId: initialPalette.id,
+        paletteLibraryId: initialPalette.libraryId,
       },
     });
 

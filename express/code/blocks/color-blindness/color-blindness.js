@@ -133,6 +133,9 @@ export default async function decorate(block) {
         navLinks,
         controls,
         daaLh: 'color-blindness',
+        paletteTags: initialPalette.tags,
+        paletteId: initialPalette.id,
+        paletteLibraryId: initialPalette.libraryId,
       },
     });
 
