@@ -133,6 +133,7 @@ export default async function decorate(block) {
         navLinks,
         controls,
         daaLh: 'color-blindness',
+        getName: () => initialPalette.name,
         paletteTags: initialPalette.tags,
         paletteId: initialPalette.id,
         paletteLibraryId: initialPalette.libraryId,
