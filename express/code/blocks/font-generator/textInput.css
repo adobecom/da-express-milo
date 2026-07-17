@@ -86,7 +86,7 @@
   width: 100%;
   min-height: 104px;
   resize: none;
-  padding: 0 0 28px;
+  margin: 0 0 28px;
   font-family: var(--body-font-family);
   font-weight: 400;
   color: var(--color-dark-gray);
