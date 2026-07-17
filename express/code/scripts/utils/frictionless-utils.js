@@ -186,8 +186,14 @@ export const QA_CONFIGS = {
     ...getBaseImgCfg(JPG, JPEG, WEBP, HEIC),
     input_check: getHeicInputCheck(JPG, JPEG, WEBP, HEIC),
   },
-  'audio-converter': { ...getBaseAudioCfg(AUDIO_FORMATS) },
-  'video-to-audio': { ...getBaseVideoCfg('mov', 'mp4') },
+  'audio-converter': {
+    ...getBaseAudioCfg(AUDIO_FORMATS),
+    group: "audio",
+  },
+  'video-to-audio': {
+    ...getBaseVideoCfg('mov', 'mp4'),
+    group: "audio",
+  },
 };
 
 // Experimental variants
