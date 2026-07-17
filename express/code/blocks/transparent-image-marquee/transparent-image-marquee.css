@@ -47,6 +47,10 @@
   display: block;
   height: 30px;
   margin-inline: 0;
+  /* global .icon.icon-adobe-express-logo (styles.css) adds 1rem top/bottom
+     padding meant for nav contexts; reset it here so the default (non-white)
+     logo variant doesn't add 32px of extra height above the heading. */
+  padding: 0;
   width: auto;
 }
 
