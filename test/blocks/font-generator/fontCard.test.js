@@ -147,8 +147,8 @@ describe('font-generator/fontCard', () => {
         .to.equal(DEFAULT_PLACEHOLDERS.copyLabel);
       expect(overlay.querySelector('.font-card-copy-success .font-card-copy-message').textContent)
         .to.equal(DEFAULT_PLACEHOLDERS.copiedMessage);
-      // the animated tick carries its own class so CSS can draw it on
-      expect(overlay.querySelector('.font-card-check-path')).to.exist;
+      // the success badge is a static icon, popped in via CSS animation
+      expect(overlay.querySelector('.font-card-check-icon')).to.exist;
     });
 
     it('copies when the overlay (whole preview zone) is clicked, not just the button', async () => {

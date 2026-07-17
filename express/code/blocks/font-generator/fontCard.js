@@ -51,35 +51,16 @@ function makeCopyBtn(copyLabel) {
   return btn;
 }
 
-// Green success badge (56px per Figma). The tick is drawn on via CSS
-// (stroke-dashoffset), so the check path carries its own class.
+// Green success badge (56px per Figma).
 function makeCheckmarkSvg() {
-  const ns = 'http://www.w3.org/2000/svg';
-  const svg = document.createElementNS(ns, 'svg');
-  svg.setAttribute('width', '56');
-  svg.setAttribute('height', '56');
-  svg.setAttribute('viewBox', '0 0 80 80');
-  svg.setAttribute('fill', 'none');
-  svg.setAttribute('aria-hidden', 'true');
-  svg.classList.add('font-card-check-icon');
-
-  const circle = document.createElementNS(ns, 'circle');
-  circle.setAttribute('cx', '40');
-  circle.setAttribute('cy', '40');
-  circle.setAttribute('r', '40');
-  circle.setAttribute('fill', 'var(--color-green-700, #0BA45D)');
-
-  const path = document.createElementNS(ns, 'path');
-  path.setAttribute('class', 'font-card-check-path');
-  // Short leg intentionally stubby; long leg sweeps up — resembles the icon.
-  path.setAttribute('d', 'M25 43L35 53L60 26');
-  path.setAttribute('stroke', 'var(--color-white)');
-  path.setAttribute('stroke-width', '5');
-  path.setAttribute('stroke-linecap', 'round');
-  path.setAttribute('stroke-linejoin', 'round');
-
-  svg.append(circle, path);
-  return svg;
+  const icon = document.createElement('img');
+  icon.src = '/express/code/icons/font-generator-checkmark.svg';
+  icon.width = 56;
+  icon.height = 56;
+  icon.alt = '';
+  icon.setAttribute('aria-hidden', 'true');
+  icon.className = 'font-card-check-icon';
+  return icon;
 }
 
 function makeCopyPromptIcon() {
