@@ -1,5 +1,6 @@
 /* eslint-disable max-len, no-underscore-dangle, no-promise-executor-return */
 import { expect } from '@esm-bundle/chai';
+import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
 import { createModalManager } from '../../../../express/code/scripts/color-shared/modal/createModalManager.js';
 import { trapFocus } from '../../../../express/code/scripts/color-shared/spectrum/utils/a11y.js';
@@ -645,9 +646,20 @@ describe.skip('createModalManager', () => {
 describe('trapFocus initial focus', () => {
   let releaseTrap;
 
+  beforeEach(() => {
+    // requestAnimationFrame is throttled to ~1fps in background browser tabs
+    // (concurrent WTR sessions). Use queueMicrotask so trapFocus's rAF-based
+    // initial-focus scheduling resolves immediately under load.
+    sinon.stub(window, 'requestAnimationFrame').callsFake((cb) => {
+      queueMicrotask(() => cb(0));
+      return 0;
+    });
+  });
+
   afterEach(() => {
     releaseTrap?.release();
     releaseTrap = null;
+    sinon.restore();
   });
 
   async function waitForFocus(expected) {
