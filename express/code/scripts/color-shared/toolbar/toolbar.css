@@ -326,6 +326,17 @@
   --mod-button-background-color-hover: var(--color-light-gray-2);
 }
 
+/* Mobile/tablet only: stack Edit theme / Save changes when their labels no
+   longer fit the 1fr columns (JS-toggled, see refreshLibraryButtonsStacking),
+   instead of letting the button labels wrap and grow taller. Desktop (1200px+)
+   is untouched — its own rule below always keeps the buttons content-sized. */
+@media (max-width: 1199.98px) {
+  .ax-toolbar-lib-buttons--stacked {
+    grid-auto-flow: row;
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Desktop (1200px+): name/actions and buttons on a single row ── */
 @media (min-width: 1200px) {
   .ax-toolbar-lib-main {

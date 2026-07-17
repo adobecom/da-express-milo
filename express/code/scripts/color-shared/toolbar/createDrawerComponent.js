@@ -793,8 +793,13 @@ function measureNaturalWidth(el) {
 export function refreshBtnRowStacking(row, btnA, btnB) {
   if (!row || !btnA || !btnB) return;
   const gap = Number.parseFloat(getComputedStyle(row).columnGap) || 0;
-  const natural = measureNaturalWidth(btnA) + measureNaturalWidth(btnB) + gap;
-  row.classList.toggle('ax-drawer-btn-row--stacked', natural > row.getBoundingClientRect().width);
+  // Each button gets an equal share (flex: 1 1 0), not a share proportional to
+  // its own content — a short label can't "lend" room to a long sibling, so
+  // each must fit its own half independently rather than comparing the sum.
+  const itemWidth = (row.getBoundingClientRect().width - gap) / 2;
+  const shouldStack = measureNaturalWidth(btnA) > itemWidth
+    || measureNaturalWidth(btnB) > itemWidth;
+  row.classList.toggle('ax-drawer-btn-row--stacked', shouldStack);
 }
 
 function attachDrawerToDOM(panel, curtain, mobile, anchor) {

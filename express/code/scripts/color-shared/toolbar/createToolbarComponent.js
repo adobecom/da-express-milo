@@ -436,9 +436,10 @@ async function applyLinkParamOverride(link) {
 
 function buildLibraryButtonGroup(t, emit, getPalette, { showEdit = true } = {}) {
   const group = createTag('div', { class: 'ax-toolbar-lib-buttons' });
+  let editBtn = null;
 
   if (showEdit) {
-    const editBtn = document.createElement('sp-button');
+    editBtn = document.createElement('sp-button');
     editBtn.setAttribute('variant', 'secondary');
     editBtn.setAttribute('treatment', 'fill');
     editBtn.setAttribute('size', 'l');
@@ -465,7 +466,33 @@ function buildLibraryButtonGroup(t, emit, getPalette, { showEdit = true } = {}) 
   saveBtn.addEventListener('click', () => emit('save-changes', { palette: getPalette() }));
 
   group.appendChild(saveBtn);
-  return { group, saveBtn };
+  return {
+    group, saveBtn, editBtn,
+  };
+}
+
+// Grid item widths under grid-auto-columns:1fr stretch by default, so measuring
+// natural (single-line) width needs an explicit inline-size override to reveal it
+// — same idea as the drawer's Make a copy / Save changes stacking, adapted for grid.
+function measureNaturalGridItemWidth(el) {
+  const prevInlineSize = el.style.inlineSize;
+  el.style.inlineSize = 'max-content';
+  const { width } = el.getBoundingClientRect();
+  el.style.inlineSize = prevInlineSize;
+  return width;
+}
+
+export function refreshLibraryButtonsStacking(group, btnA, btnB) {
+  if (!group || !btnA || !btnB) return;
+  const gap = Number.parseFloat(getComputedStyle(group).columnGap) || 0;
+  // Each button gets an equal 1fr share, not a share proportional to its own
+  // content — so a short label can't "lend" room to a long sibling. Comparing
+  // the combined width against the total misses that; each button must fit its
+  // own half independently.
+  const columnWidth = (group.getBoundingClientRect().width - gap) / 2;
+  const shouldStack = measureNaturalGridItemWidth(btnA) > columnWidth
+    || measureNaturalGridItemWidth(btnB) > columnWidth;
+  group.classList.toggle('ax-toolbar-lib-buttons--stacked', shouldStack);
 }
 
 function buildLibraryToolbar(options) {
@@ -558,12 +585,20 @@ function buildLibraryToolbar(options) {
 
   nameAndActions.append(nameField, actions);
 
-  const { group: buttonGroup, saveBtn } = buildLibraryButtonGroup(
+  const { group: buttonGroup, saveBtn, editBtn } = buildLibraryButtonGroup(
     t,
     emit,
     getPaletteWithName,
     { showEdit },
   );
+
+  let removeButtonsStackingListener = null;
+  if (editBtn) {
+    const runStackingCheck = () => refreshLibraryButtonsStacking(buttonGroup, editBtn, saveBtn);
+    requestAnimationFrame(runStackingCheck);
+    window.addEventListener('resize', runStackingCheck);
+    removeButtonsStackingListener = () => window.removeEventListener('resize', runStackingCheck);
+  }
 
   const main = createTag('div', { class: 'ax-toolbar-lib-main' });
   main.append(nameAndActions, buttonGroup);
@@ -613,6 +648,7 @@ function buildLibraryToolbar(options) {
       nameInput?.removeEventListener('input', handleNameInput);
       downloadMenu?.destroy?.();
       accessMenu?.destroy?.();
+      removeButtonsStackingListener?.();
       theme.remove();
     },
   };

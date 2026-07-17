@@ -2,7 +2,9 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
-import { createToolbar } from '../../../../express/code/scripts/color-shared/toolbar/createToolbarComponent.js';
+import {
+  createToolbar, refreshLibraryButtonsStacking,
+} from '../../../../express/code/scripts/color-shared/toolbar/createToolbarComponent.js';
 import { consumeSusiColorRedirect } from '../../../../express/code/scripts/color-shared/utils/susiRedirect.js';
 import { MOCK_PALETTE, MOCK_GRADIENT } from './mocks/palette.js';
 import { createMockGetLibraryContext } from './mocks/stubs.js';
@@ -694,5 +696,63 @@ describe('createToolbar', () => {
       changeListeners.forEach((cb) => cb({ matches: true }));
       expect(ctaBtn.textContent).to.equal('Mobile CTA');
     });
+  });
+});
+
+describe('refreshLibraryButtonsStacking', () => {
+  afterEach(() => {
+    sinon.restore();
+    document.body.innerHTML = '';
+  });
+
+  function makeGroup(availableWidth, gapPx) {
+    const group = document.createElement('div');
+    group.style.columnGap = `${gapPx}px`;
+    document.body.appendChild(group);
+    sinon.stub(group, 'getBoundingClientRect').returns({ width: availableWidth });
+    return group;
+  }
+
+  function makeButton(naturalWidth) {
+    const el = document.createElement('div');
+    sinon.stub(el, 'getBoundingClientRect').returns({ width: naturalWidth });
+    return el;
+  }
+
+  it('does not stack when both buttons fit their own equal share of the group', () => {
+    const group = makeGroup(300, 12);
+    // columnWidth = (300 - 12) / 2 = 144
+    refreshLibraryButtonsStacking(group, makeButton(100), makeButton(140));
+    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.false;
+  });
+
+  it('stacks when both buttons exceed their equal share of the group', () => {
+    const group = makeGroup(200, 12);
+    // columnWidth = (200 - 12) / 2 = 94
+    refreshLibraryButtonsStacking(group, makeButton(120), makeButton(150));
+    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.true;
+  });
+
+  it('stacks when only one button exceeds its share, even if the combined width still fits the group', () => {
+    const group = makeGroup(300, 12);
+    // columnWidth = 144: a short sibling can't lend its unused space to a long one.
+    refreshLibraryButtonsStacking(group, makeButton(50), makeButton(200));
+    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.true;
+  });
+
+  it('un-stacks again once there is enough room (e.g. after a resize)', () => {
+    const group = makeGroup(200, 12);
+    const btnA = makeButton(120);
+    const btnB = makeButton(150);
+    refreshLibraryButtonsStacking(group, btnA, btnB);
+    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.true;
+
+    group.getBoundingClientRect.returns({ width: 400 });
+    refreshLibraryButtonsStacking(group, btnA, btnB);
+    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.false;
+  });
+
+  it('is a no-op when group or buttons are missing', () => {
+    expect(() => refreshLibraryButtonsStacking(null, null, null)).to.not.throw();
   });
 });
