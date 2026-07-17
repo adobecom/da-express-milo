@@ -53,6 +53,19 @@
   padding: var(--border-width-2);
 }
 
+/* Inner stroke on the gradient preview (explore + library modals): an inset
+   box-shadow on the bar (which carries the gradient fill), matching the explore
+   grid's .gradient-strip-visual. Drop the component's outer border so this is
+   the only stroke. */
+.ax-color-modal-content .modal-gradient-preview .gradient-editor {
+  border: none;
+}
+
+.ax-color-modal-content .modal-gradient-preview .gradient-editor-bar {
+  box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.2);
+  box-sizing: border-box;
+}
+
 .ax-color-modal-content .gradient-color-handles {
   position: absolute;
   left: 1px;

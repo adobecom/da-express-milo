@@ -146,6 +146,10 @@
     gap: 0;
   }
 
+  .ax-color-modal-content .modal-library-theme .modal-lib-scroll {
+    padding-block-end: var(--spacing-200);
+  }
+
   .ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
     border-block-start: 1px solid var(--color-gray-150);
   }

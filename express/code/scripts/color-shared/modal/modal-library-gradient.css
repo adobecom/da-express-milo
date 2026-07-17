@@ -33,18 +33,6 @@
   height: 156px;
 }
 
-/* Inner stroke: on the bar (which carries the gradient fill) so it paints over
-   the fill edge; an inset shadow on .gradient-editor would sit under the bar. */
-.ax-color-modal-content .modal-library-gradient .modal-gradient-preview
-  .gradient-editor {
-  border: none;
-}
-
-.ax-color-modal-content .modal-library-gradient .modal-gradient-preview
-  .gradient-editor-bar {
-  box-shadow: inset 0 0 0 1px var(--color-gray-250);
-}
-
 @media (min-width: 1200px) {
   .ax-color-modal-content .modal-library-gradient .modal-gradient-preview
     .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive
@@ -189,6 +177,10 @@
 @media (max-width: 1199px) {
   .ax-color-modal-content .modal-library-gradient {
     gap: 0;
+  }
+
+  .ax-color-modal-content .modal-library-gradient .modal-lib-scroll {
+    padding-block-end: var(--spacing-200);
   }
 
   .ax-color-modal-content .modal-library-gradient .modal-palette-toolbar {
