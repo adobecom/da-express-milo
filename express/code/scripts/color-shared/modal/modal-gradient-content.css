@@ -49,8 +49,9 @@
 .ax-color-modal-content .modal-palette-colors.modal-gradient-preview:has(.gradient-editor--layout-responsive) {
   height: auto;
   min-height: 0;
-  /* Keep room for gradient-editor focus outline so it doesn't clip at container edges. */
-  padding: var(--border-width-2);
+  /* Keep room for the gradient-editor focus outline (outline-offset 1px + 2px
+     width = 3px) so it isn't clipped at the scroll's top/bottom edges. */
+  padding: var(--spacing-75);
 }
 
 /* Inner stroke on the gradient preview (explore + library modals): an inset

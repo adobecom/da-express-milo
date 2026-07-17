@@ -138,10 +138,17 @@
   min-height: 0;
   overflow-y: auto;
   /* overflow-y:auto promotes overflow-x to auto; the gradient editor's edge
-     handles poke ~2px past the content box, so clip x to avoid a stray
-     horizontal scrollbar. */
+     handles poke past the content box, so clip x to avoid a stray horizontal
+     scrollbar. The scroller can't be overflow:visible (its sibling toolbar is a
+     sticky footer), so reserve an inline gutter instead: the edge handles'
+     focus rings and the gradient strip's focus outline paint into the gutter
+     rather than being clipped at the scroll edge. The negative margin keeps the
+     bar visually flush (no layout shift). */
   overflow-x: hidden;
-  inline-size: 100%;
+  box-sizing: border-box;
+  inline-size: auto;
+  padding-inline: var(--spacing-200);
+  margin-inline: calc(-1 * var(--spacing-200));
 }
 
 /* ── Tags section ──────────────────────────────────────────────── */
