@@ -13,8 +13,15 @@ describe('font-generator', () => {
   let block;
 
   before(async () => {
+    // Stub Typekit so loadWebFonts() resolves without loading the real
+    // use.typekit.net script (disallowed in unit tests).
+    window.Typekit = { load: ({ active }) => active?.() };
     block = document.querySelector('.font-generator');
     await decorate(block);
+  });
+
+  after(() => {
+    delete window.Typekit;
   });
 
   it('exports decorate as a function', () => {
