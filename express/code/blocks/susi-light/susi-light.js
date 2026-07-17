@@ -16,11 +16,9 @@ export const DCTX_ID_MAP = {
     stage: 'v:2,s,bg:EDUExpressPurple,40262910-c9bd-11f0-8359-b30f8fb5b3f5',
     prod: 'v:2,s,bg:EDUExpressPurple,a6588140-c9bf-11f0-a941-d1bc629a24f2',
   },
-  // TODO(CCEX-234480): replace placeholder ids with the stage/prod dctx_id
-  // provided by the IMS/DCP team for the small-business contextual SUSI background.
   'context-business': {
-    stage: 'v:2,s,dcp-r,bg:express2024,POC-BUSINESS-STAGE-ID',
-    prod: 'v:2,s,dcp-r,bg:express2024,POC-BUSINESS-PROD-ID',
+    stage: 'v:2,s,bg:CCEX2026,05194a50-81a0-11f1-b7d4-3b6a269d1b5a',
+    prod: 'v:2,s,bg:CCEX2026,22f335a0-81a4-11f1-a2c5-b37dc30b0d07',
   },
 };
 
@@ -520,6 +518,7 @@ function blurModalCurtain() {
 
 export default async function init(el) {
   ({ createTag, loadScript, getConfig, loadIms } = await import(`${getLibs()}/utils/utils.js`));
+  if (el.classList.contains('b2b')) el.classList.add('context-business'); //temp for test
   isStage = (usp.get('env') && usp.get('env') !== 'prod') || getConfig().env.name !== 'prod';
   const locale = getConfig().locale.ietf.toLowerCase();
   const { imsClientId } = getConfig();
