@@ -578,9 +578,7 @@ async function executeSaveToLibrary(palette, palType, formData, ccLibProvider, t
   return { success: true, label };
 }
 
-// Persists edits back to the originally-saved theme (libraryId/id already known)
-// instead of creating a new library element. Mirrors createLibraryThemeModalContent.js's
-// handleSaveChanges update path.
+// Updates the originally-saved theme instead of creating a new library element.
 async function executeUpdateExistingItem(palette, palType, formData, ccLibProvider, t) {
   const isContrast = palType === 'contrast';
   const colors = palette?.colors ?? [];
@@ -601,12 +599,8 @@ async function executeUpdateExistingItem(palette, palType, formData, ccLibProvid
   ]);
 }
 
-// Compares the drawer's current form state against the item's as-saved snapshot
-// (palette.savedColors/savedName/tags, frozen at page-load — see the color-wheel /
-// color-blindness / color-contrast-checker initialPalette construction) to decide
-// whether "Save changes" should be enabled. palette.colors reflects live canvas
-// edits (mutated in place by the toolbar's updateSwatches), so it's compared
-// against the frozen savedColors rather than re-read from the URL.
+// Compares live form state against palette.savedName/savedColors/tags (the
+// frozen as-loaded snapshot) to decide whether "Save changes" should enable.
 export function computeIsDirty(palette, currentName, currentTags) {
   const name = (currentName || '').trim();
   const nameChanged = name !== (palette?.savedName || '').trim();
@@ -1055,9 +1049,7 @@ export async function createDrawer(options) {
           getTagValues(tagsContainer),
         );
       };
-      // Colors may have already been edited on the canvas before the drawer was
-      // opened, so the initial disabled state must reflect that immediately —
-      // not just wait for a name/tag edit made inside the drawer itself.
+      // Colors may already be dirty from canvas edits made before opening.
       refreshSaveChangesEnabled();
       nameInput?.addEventListener('input', refreshSaveChangesEnabled);
       removeNameDirtyListener = () => nameInput

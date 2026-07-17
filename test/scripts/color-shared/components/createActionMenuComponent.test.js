@@ -148,10 +148,7 @@ describe('createActionMenuComponent', () => {
   });
 });
 
-// The nav-link click handler assigns window.location.href directly, so it can't
-// be exercised via a real click without navigating the test page away. Its URL
-// construction is extracted into this pure function specifically so it can be
-// verified without that risk.
+// Extracted from the click handler (which navigates directly) to test without a real navigation.
 describe('buildNavLinkTarget', () => {
   const base = 'https://example.com/create/color-wheel';
 

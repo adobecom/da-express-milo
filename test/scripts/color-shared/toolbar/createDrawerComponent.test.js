@@ -1326,8 +1326,7 @@ describe.skip('createDrawer', function drawerSuite() {
   });
 });
 
-// Not nested under the describe.skip above (MWPW-192264 covers the DOM/focus-trap
-// suite) — computeIsDirty is a pure function so it can be verified independently.
+// Not nested under the describe.skip above (MWPW-192264) — pure function, testable directly.
 describe('computeIsDirty', () => {
   const savedItem = {
     name: 'Sunset',

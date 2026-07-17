@@ -50,10 +50,7 @@ export async function loadStyles() {
   }
 }
 
-// Builds the destination URL for a nav-link click, carrying the current in-app
-// palette (colors/name/tags) plus the saved-item context (id/libraryId, when
-// present) forward to the next color tool. Extracted as a pure function so the
-// URL construction can be unit tested without triggering a real navigation.
+// Extracted so the URL construction is testable without a real navigation.
 export function buildNavLinkTarget(href, base, colors, { name, tags, id, libraryId } = {}) {
   const url = new URL(href, base);
   createColorPaletteParamApi().setOnUrl(url, colors, {

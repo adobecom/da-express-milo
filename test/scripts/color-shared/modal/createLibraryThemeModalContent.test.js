@@ -101,9 +101,6 @@ describe('createLibraryThemeModalContent', () => {
       content.destroy();
     });
 
-    // Regression guard: the modal's Accessibility tools / Edit theme links need
-    // libraryId (alongside item.id) to land on the destination page's URL so the
-    // save drawer can offer "Save changes" back to this same item.
     it('passes libraryId through to the toolbar options', async () => {
       const item = { id: 't1', name: 'Ocean', colors: ['#001122'] };
       const { content, initStub } = await mountContent(item, { libraryId: 'lib-1' });

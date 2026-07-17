@@ -236,10 +236,6 @@ describe('Color Libraries — search (signed-in)', () => {
     expect(accordionNames()).to.deep.equal(['Brand Colors', 'Neutrals']);
   });
 
-  // Saving/updating a theme happens on a color-tool page reached via a hard
-  // navigation from here. Pressing Back restores this page from the browser's
-  // bfcache instead of re-running decorate(), so without a pageshow listener
-  // the grid would keep showing pre-edit data indefinitely.
   describe('bfcache restore (pageshow)', () => {
     async function fireBfcachePageshow() {
       const event = new Event('pageshow');
@@ -278,10 +274,6 @@ describe('Color Libraries — search (signed-in)', () => {
       expect(provider.fetchUserLibraries.callCount).to.equal(callCountBefore);
     });
 
-    // The item modal mounts on document.body and is opened via `libraries:item-open`
-    // dispatched on the block. Its content closures were frozen in bfcache along
-    // with everything else, so a stale-open modal needs to be rebuilt — not just
-    // the grid behind it — once fresh data comes back.
     it('rebuilds an open item modal with freshly fetched item data', async () => {
       block.dispatchEvent(new CustomEvent('libraries:item-open', {
         detail: {
@@ -309,9 +301,7 @@ describe('Color Libraries — search (signed-in)', () => {
 
       await waitForTagValues(['sea', 'water']);
 
-      // Simulate the save having happened on the color-tool page: same item id,
-      // new tags (and, since this fresh fetch also feeds the grid, a new library
-      // list — the modal-refresh path pulls the item out of this same fetch).
+      // Simulate a save on the color-tool page: same item id, new tags.
       const provider = await serviceManager.getProvider('cclibrary');
       provider.fetchLibraryElements.callsFake(async (id) => ({
         elements: id === 'urn:lib:brand'

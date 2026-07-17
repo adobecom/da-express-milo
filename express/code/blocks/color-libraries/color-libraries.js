@@ -37,9 +37,7 @@ let updatedHandler = null;
 let pageshowHandler = null;
 let modalManagerInstance = null;
 let ccLibraryProviderInstance = null;
-// Tracks the item/library shown in an open item modal so a bfcache pageshow
-// restore can rebuild it with fresh data (createModalManager has no getter for
-// "what's currently open" — see pageshowHandler below).
+// Tracks the open item modal's content so pageshowHandler can rebuild it.
 let currentOpenItem = null;
 let currentOpenLibraryId = null;
 
@@ -563,14 +561,8 @@ export default async function decorate(block) {
   };
   document.addEventListener('libraries:item-updated', updatedHandler);
 
-  // Saving/updating a theme happens on a color-tool page (color-wheel, contrast
-  // checker, color blindness), reached via a hard navigation from here. Pressing
-  // Back then restores this page from the browser's bfcache rather than
-  // re-running decorate(), so the grid would otherwise keep showing pre-edit
-  // data. Refetch and re-render whenever the page is revived from bfcache. If
-  // an item modal was left open, it's showing the same pre-edit snapshot (its
-  // closures were frozen in bfcache too) — rebuild it with the fresh item once
-  // the refetch lands, or leave it closed if the item no longer exists.
+  // Bfcache restore after a color-tool save: refresh the grid, and rebuild an
+  // open item modal with fresh data since its content was frozen in bfcache too.
   pageshowHandler = async (event) => {
     if (!event.persisted) return;
 
@@ -581,9 +573,7 @@ export default async function decorate(block) {
     if (!reopenItem) return;
 
     modalManagerInstance.close();
-    // close() clears its content on a 300ms timer; wait it out before mounting
-    // fresh content into the same reused shell, otherwise that pending timer
-    // would wipe out the content we're about to mount.
+    // close() clears content on a 300ms timer; wait it out before reopening.
     await new Promise((resolve) => { setTimeout(resolve, 320); });
 
     const freshLibrary = allLibraries?.find((lib) => lib.id === reopenLibraryId);
