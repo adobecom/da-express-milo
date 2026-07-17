@@ -26,6 +26,13 @@
   inline-size: 100%;
 }
 
+/* 16px strip corners: override the component's --Corner-radius-bar (8px) so the
+   editor, bar-wrap, bar fill/stroke, and focus outline all round consistently. */
+.ax-color-modal-content .modal-library-gradient .modal-gradient-preview
+  .gradient-editor {
+  --Corner-radius-bar: var(--spacing-300);
+}
+
 /* Gradient preview: 156px on mobile + tablet, 250px on desktop. */
 .ax-color-modal-content .modal-library-gradient .modal-gradient-preview
   .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive
