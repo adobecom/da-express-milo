@@ -981,7 +981,15 @@ export async function createDrawer(options) {
     try {
       await executeUpdateExistingItem(paletteData, paletteType, formData, ccLibraryProvider, t);
       close();
-      showExpressToast({ variant: 'positive', message: t.changesSaved });
+      showExpressToast({
+        variant: 'positive',
+        message: t.changesSaved,
+        timeout: 6000,
+        action: {
+          label: t.viewInLibrary,
+          href: t.viewInLibraryHref,
+        },
+      });
       announceToScreenReader(t.changesSaved);
       await onSave?.(formData);
     } catch (err) {
