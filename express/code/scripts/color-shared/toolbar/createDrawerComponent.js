@@ -44,6 +44,10 @@ const DRAWER_DEFAULTS = {
   tags: 'Tags',
   tagsPlaceholder: 'Enter or select from below',
   saveToLibrary: 'Save to library',
+  makeCopy: 'Make a copy',
+  saveChanges: 'Save changes',
+  changesSaved: 'Changes saved',
+  saveChangesFailed: 'Unable to save changes. Please try again.',
   signInToSave: 'Sign in to save',
   myLibrary: 'My library',
   createNewLibrary: 'Create a new library',
@@ -574,8 +578,58 @@ async function executeSaveToLibrary(palette, palType, formData, ccLibProvider, t
   return { success: true, label };
 }
 
+// Persists edits back to the originally-saved theme (libraryId/id already known)
+// instead of creating a new library element. Mirrors createLibraryThemeModalContent.js's
+// handleSaveChanges update path.
+async function executeUpdateExistingItem(palette, palType, formData, ccLibProvider, t) {
+  const isContrast = palType === 'contrast';
+  const colors = palette?.colors ?? [];
+  let savePalette = palette;
+  if (isContrast && colors.length === 2) {
+    const [fg, bg] = colors;
+    savePalette = { ...palette, colors: [fg, fg, bg, bg, bg] };
+  }
+  const payload = buildThemePayload(savePalette, formData, t);
+  if (isContrast && palette?.accessibilityData) {
+    payload.accessibilityData = palette.accessibilityData;
+  }
+  const name = formData.name || palette?.name || t.untitledTheme;
+  const throwOpts = { throwOnError: true };
+  await Promise.all([
+    ccLibProvider.updateTheme(palette.libraryId, palette.id, payload, throwOpts),
+    ccLibProvider.updateElementMetadata(palette.libraryId, [{ id: palette.id, name }], throwOpts),
+  ]);
+}
+
+// Compares the drawer's current form state against the item's as-saved snapshot
+// (palette.savedColors/savedName/tags, frozen at page-load — see the color-wheel /
+// color-blindness / color-contrast-checker initialPalette construction) to decide
+// whether "Save changes" should be enabled. palette.colors reflects live canvas
+// edits (mutated in place by the toolbar's updateSwatches), so it's compared
+// against the frozen savedColors rather than re-read from the URL.
+export function computeIsDirty(palette, currentName, currentTags) {
+  const name = (currentName || '').trim();
+  const nameChanged = name !== (palette?.savedName || '').trim();
+
+  const tags = [...currentTags].sort();
+  const originalTags = [...(palette?.tags || [])].map(String).sort();
+  const tagsChanged = tags.length !== originalTags.length
+    || tags.some((tag, i) => tag !== originalTags[i]);
+
+  const normalize = (h) => (typeof h === 'string' ? h.trim().toUpperCase() : '');
+  const colors = (palette?.colors || []).map(normalize);
+  const originalColors = (palette?.savedColors || []).map(normalize);
+  const colorsChanged = colors.length !== originalColors.length
+    || colors.some((c, i) => c !== originalColors[i]);
+
+  return nameChanged || tagsChanged || colorsChanged;
+}
+
 function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedIn, callbacks, t) {
-  const { onClose, onSave, onSignIn, onLibraryCreated } = callbacks;
+  const {
+    onClose, onSave, onSaveChanges, onSignIn, onLibraryCreated,
+  } = callbacks;
+  const isEditingSavedItem = Boolean(palette?.id && palette?.libraryId);
 
   const curtain = createCurtain(
     'ax-drawer-curtain',
@@ -615,7 +669,9 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   const libraryPicker = createLibraryPickerField(
     t.saveTo,
     libs,
-    libs[0]?.id,
+    (isEditingSavedItem && libs.some((l) => l.id === palette.libraryId))
+      ? palette.libraryId
+      : libs[0]?.id,
     ccLibProvider,
     isSignedIn,
     onLibraryCreated,
@@ -671,20 +727,47 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   });
 
   const saveBtnEl = document.createElement('sp-button');
-  saveBtnEl.setAttribute('variant', 'accent');
   saveBtnEl.setAttribute('size', mobile ? 'xl' : 'm');
   saveBtnEl.classList.add('ax-drawer-save-btn');
 
-  if (isSignedIn) {
+  let saveChangesBtnEl = null;
+
+  if (isSignedIn && isEditingSavedItem) {
+    saveBtnEl.setAttribute('variant', 'secondary');
+    saveBtnEl.classList.add('ax-drawer-copy-btn');
+    saveBtnEl.textContent = t.makeCopy;
+    saveBtnEl.dataset.idleLabel = t.makeCopy;
+    saveBtnEl.addEventListener('click', onSave);
+    decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Make a copy' });
+
+    saveChangesBtnEl = document.createElement('sp-button');
+    saveChangesBtnEl.setAttribute('variant', 'accent');
+    saveChangesBtnEl.setAttribute('size', mobile ? 'xl' : 'm');
+    saveChangesBtnEl.classList.add('ax-drawer-savechanges-btn');
+    saveChangesBtnEl.textContent = t.saveChanges;
+    saveChangesBtnEl.dataset.idleLabel = t.saveChanges;
+    saveChangesBtnEl.disabled = true;
+    saveChangesBtnEl.addEventListener('click', onSaveChanges);
+    decorateAnalyticsAttributes(saveChangesBtnEl, { linkLabel: 'Save changes' });
+
+    const btnRow = createTag('div', { class: 'ax-drawer-btn-row' });
+    btnRow.append(saveBtnEl, saveChangesBtnEl);
+    content.appendChild(btnRow);
+  } else if (isSignedIn) {
+    saveBtnEl.setAttribute('variant', 'accent');
     saveBtnEl.textContent = t.saveToLibrary;
+    saveBtnEl.dataset.idleLabel = t.saveToLibrary;
     saveBtnEl.addEventListener('click', onSave);
     decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Save to library' });
+    content.appendChild(saveBtnEl);
   } else {
+    saveBtnEl.setAttribute('variant', 'accent');
     saveBtnEl.textContent = t.signInToSave;
+    saveBtnEl.dataset.idleLabel = t.signInToSave;
     saveBtnEl.addEventListener('click', onSignIn);
     decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Sign in to save' });
+    content.appendChild(saveBtnEl);
   }
-  content.appendChild(saveBtnEl);
 
   theme.appendChild(content);
 
@@ -696,6 +779,7 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
     tagsContainerEl,
     tagsInputEl,
     saveBtnEl,
+    saveChangesBtnEl,
   };
 }
 
@@ -794,6 +878,8 @@ export async function createDrawer(options) {
   let removeSwipeHandler = null;
   let removePositionHandler = null;
   let previousActiveElement = null;
+  let tagsDirtyObserver = null;
+  let removeNameDirtyListener = null;
 
   function close() {
     if (!isOpen) return;
@@ -817,6 +903,10 @@ export async function createDrawer(options) {
     removeOutsideClickHandler = null;
     libraryPickerRef?.destroy();
     libraryPickerRef = null;
+    tagsDirtyObserver?.disconnect();
+    tagsDirtyObserver = null;
+    removeNameDirtyListener?.();
+    removeNameDirtyListener = null;
 
     const elementToFocus = previousActiveElement;
     previousActiveElement = null;
@@ -879,7 +969,42 @@ export async function createDrawer(options) {
     } finally {
       if (saveBtnEl) {
         saveBtnEl.disabled = false;
-        saveBtnEl.textContent = t.saveToLibrary;
+        saveBtnEl.textContent = saveBtnEl.dataset.idleLabel || t.saveToLibrary;
+      }
+    }
+  }
+
+  async function saveChanges() {
+    const formData = collectFormData(libraryPickerRef, tagsContainer, nameInput);
+    if (!ccLibraryProvider || !paletteData?.id || !paletteData?.libraryId) return;
+
+    const saveChangesBtnEl = panelEl?.querySelector('.ax-drawer-savechanges-btn');
+    if (saveChangesBtnEl) {
+      saveChangesBtnEl.disabled = true;
+      saveChangesBtnEl.textContent = t.saving;
+    }
+
+    try {
+      await executeUpdateExistingItem(paletteData, paletteType, formData, ccLibraryProvider, t);
+      close();
+      showExpressToast({ variant: 'positive', message: t.changesSaved });
+      announceToScreenReader(t.changesSaved);
+      await onSave?.(formData);
+    } catch (err) {
+      window.lana?.log(`Save changes failed: ${err.message}`, {
+        tags: 'color-floating-toolbar,drawer',
+        severity: 'error',
+      });
+      showExpressToast({ variant: 'negative', message: t.saveChangesFailed });
+      announceToScreenReader(t.saveChangesFailed);
+    } finally {
+      if (saveChangesBtnEl) {
+        saveChangesBtnEl.textContent = saveChangesBtnEl.dataset.idleLabel || t.saveChanges;
+        saveChangesBtnEl.disabled = !computeIsDirty(
+          paletteData,
+          nameInput?.value,
+          getTagValues(tagsContainer),
+        );
       }
     }
   }
@@ -902,6 +1027,7 @@ export async function createDrawer(options) {
       {
         onClose: close,
         onSave: save,
+        onSaveChanges: saveChanges,
         onSignIn: async () => {
           const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
             '../utils/susiRedirect.js'
@@ -920,6 +1046,25 @@ export async function createDrawer(options) {
     nameInput = dom.nameInputEl;
     libraryPickerRef = dom.libraryPicker;
     tagsContainer = dom.tagsContainerEl;
+
+    if (dom.saveChangesBtnEl) {
+      const refreshSaveChangesEnabled = () => {
+        dom.saveChangesBtnEl.disabled = !computeIsDirty(
+          paletteData,
+          nameInput?.value,
+          getTagValues(tagsContainer),
+        );
+      };
+      // Colors may have already been edited on the canvas before the drawer was
+      // opened, so the initial disabled state must reflect that immediately —
+      // not just wait for a name/tag edit made inside the drawer itself.
+      refreshSaveChangesEnabled();
+      nameInput?.addEventListener('input', refreshSaveChangesEnabled);
+      removeNameDirtyListener = () => nameInput
+        ?.removeEventListener('input', refreshSaveChangesEnabled);
+      tagsDirtyObserver = new MutationObserver(refreshSaveChangesEnabled);
+      tagsDirtyObserver.observe(tagsContainer, { childList: true });
+    }
 
     const posResult = attachDrawerToDOM(panelEl, curtainEl, mobile, anchorElement);
     removePositionHandler = posResult?.cleanup ?? null;

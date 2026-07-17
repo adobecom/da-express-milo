@@ -478,6 +478,7 @@ function buildLibraryToolbar(options) {
     librariesStrings = {},
     showEdit = true,
     nameLabel = '',
+    libraryId,
     deps = {},
   } = options;
 
@@ -538,7 +539,9 @@ function buildLibraryToolbar(options) {
 
   let accessMenu = null;
   if (item.type !== 'gradient') {
-    accessMenu = createLibraryAccessibilityMenu({ item, strings: librariesStrings, toolHrefs });
+    accessMenu = createLibraryAccessibilityMenu({
+      item, strings: librariesStrings, toolHrefs, libraryId,
+    });
     actions.appendChild(accessMenu.element);
     attachMenuTooltip(accessMenu.element);
   }

@@ -76,6 +76,7 @@ function buildActions(item, name, strings, emit, payload, toolHrefs) {
       item,
       strings,
       toolHrefs,
+      libraryId: payload.libraryId,
     });
     menuApis.push(accessMenu);
     actions.appendChild(accessMenu.element);
@@ -104,6 +105,8 @@ function buildActions(item, name, strings, emit, payload, toolHrefs) {
           colors: item.colors,
           name: item.name,
           tags: item.tags,
+          id: item.id,
+          libraryId: payload.libraryId,
         });
       },
     });

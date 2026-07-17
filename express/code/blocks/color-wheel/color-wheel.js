@@ -489,11 +489,12 @@ async function buildHarmonySelector(controller, strings = {}) {
   return section;
 }
 
-function paletteFromThemeState(state) {
+function paletteFromThemeState(state, extra = {}) {
   const colors = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
   return {
     colors: colors.length ? colors : ['#FF0000'],
     name: state?.name || THEME_NAME,
+    ...extra,
   };
 }
 
@@ -906,7 +907,10 @@ export default async function decorate(block) {
     window.addEventListener('drop', earlyPreventFileDrop);
 
     try {
-      const [strings, { getResolvedPalette, getResolvedPaletteName }] = await Promise.all([
+      const [strings, {
+        getResolvedPalette, getResolvedPaletteName, getResolvedPaletteTags,
+        getResolvedItemId, getResolvedLibraryId,
+      }] = await Promise.all([
         loadPlaceholders(),
         Promise.resolve(createColorPaletteParamApi()),
         loadHeavyModules(),
@@ -921,10 +925,23 @@ export default async function decorate(block) {
       }
       const section = createTag('section');
       block.appendChild(section);
-      const initialPalette = currentPalette || {
-        name: getResolvedPaletteName() || THEME_NAME,
-        colors: getResolvedPalette(),
-      };
+      const savedItemId = getResolvedItemId();
+      const savedLibraryId = getResolvedLibraryId();
+      const initialPalette = currentPalette || (() => {
+        const name = getResolvedPaletteName() || THEME_NAME;
+        const colors = getResolvedPalette();
+        return {
+          name,
+          colors,
+          tags: getResolvedPaletteTags(),
+          ...(savedItemId && savedLibraryId && {
+            id: savedItemId,
+            libraryId: savedLibraryId,
+            savedColors: [...colors],
+            savedName: name,
+          }),
+        };
+      })();
 
       const controller = new ColorThemeExpressController({
         swatches: initialPalette.colors,
@@ -1236,7 +1253,15 @@ export default async function decorate(block) {
       });
 
       paletteUnsubscribe = controller.subscribe((state) => {
-        currentPalette = paletteFromThemeState(state);
+        currentPalette = paletteFromThemeState(state, {
+          tags: initialPalette.tags,
+          ...(initialPalette.id && initialPalette.libraryId && {
+            id: initialPalette.id,
+            libraryId: initialPalette.libraryId,
+            savedColors: initialPalette.savedColors,
+            savedName: initialPalette.savedName,
+          }),
+        });
         layoutInstance?.context?.set('palette', currentPalette);
         const baseIdx = state.baseColorIndex ?? 0;
         const baseHex = state.swatches?.[baseIdx]?.hex;

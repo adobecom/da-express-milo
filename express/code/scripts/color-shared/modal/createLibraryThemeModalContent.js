@@ -258,6 +258,8 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
       colors: normalizedPalette.colors,
       name: currentName || item.name,
       tags: getTagValues(tagsContainer),
+      id: item.id,
+      libraryId,
     });
   }
 
@@ -297,6 +299,7 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
     item,
     toolHrefs,
     librariesStrings: strings,
+    libraryId,
   }).then((handle) => {
     toolbarHandle = handle;
     wireToolbar(handle?.toolbar);

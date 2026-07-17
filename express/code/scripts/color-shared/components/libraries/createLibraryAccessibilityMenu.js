@@ -8,11 +8,13 @@ import { createLibraryCardActionMenu } from './createLibraryCardActionMenu.js';
  * @param {Object} options.item - theme item with colors, name, tags
  * @param {Object} options.strings - resolved placeholders
  * @param {Object} options.toolHrefs - { contrast, colorBlindness, colorWheel }
+ * @param {string} [options.libraryId] - id of the library this item belongs to
  */
 export function createLibraryAccessibilityMenu({
   item,
   strings = {},
   toolHrefs = {},
+  libraryId,
 } = {}) {
   const triggerLabel = strings.librariesAccessibilityTools;
 
@@ -41,6 +43,8 @@ export function createLibraryAccessibilityMenu({
         colors: item.colors,
         name: item.name,
         tags: item.tags,
+        id: item.id,
+        libraryId,
       });
     },
   });

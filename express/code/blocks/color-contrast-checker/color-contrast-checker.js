@@ -23,9 +23,15 @@ function getDefaultConfig() {
 }
 
 function getPalette() {
-  const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
+  const {
+    getResolvedPalette, getResolvedPaletteName, getResolvedPaletteTags,
+    getResolvedItemId, getResolvedLibraryId,
+  } = createColorPaletteParamApi();
   const colors = getResolvedPalette();
   const name = getResolvedPaletteName() || '';
+  const tags = getResolvedPaletteTags();
+  const savedItemId = getResolvedItemId();
+  const savedLibraryId = getResolvedLibraryId();
 
   const dataService = createContrastDataService();
   const { brightest, darkest } = dataService.findBrightestAndDarkest(colors);
@@ -35,13 +41,22 @@ function getPalette() {
     background: darkest || colors[1],
     colors,
     name,
+    tags,
+    ...(savedItemId && savedLibraryId && {
+      id: savedItemId,
+      libraryId: savedLibraryId,
+      savedColors: [...colors],
+      savedName: name,
+    }),
   };
 }
 
 async function mountContrastChecker(slot, { config, layout, initialPalette }) {
   const container = createTag('div', { class: 'color-contrast-checker-container' });
   const dataService = createContrastDataService();
-  const { foreground, background, name, colors } = initialPalette;
+  const {
+    foreground, background, name, colors, tags, id, libraryId, savedColors, savedName,
+  } = initialPalette;
   const { context, actionMenu } = layout;
 
   const rendererConfig = {
@@ -84,6 +99,10 @@ async function mountContrastChecker(slot, { config, layout, initialPalette }) {
       selectedForeground: detail.foreground,
       selectedBackground: detail.background,
       name,
+      tags,
+      ...(id && libraryId && {
+        id, libraryId, savedColors, savedName,
+      }),
       accessibilityData: { wcagLevel: dataService.getWCAGLevel(detail) },
     });
   });
@@ -175,6 +194,14 @@ export default async function decorate(block) {
       palette: {
         colors: initialPalette.colors,
         name: initialPalette.name,
+        tags: initialPalette.tags,
+        ...(initialPalette.id && initialPalette.libraryId
+          && {
+            id: initialPalette.id,
+            libraryId: initialPalette.libraryId,
+            savedColors: initialPalette.savedColors,
+            savedName: initialPalette.savedName,
+          }),
       },
       toolbar: {
         daaLh: 'color-contrast-checker',

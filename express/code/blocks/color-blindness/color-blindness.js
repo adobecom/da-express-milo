@@ -75,7 +75,8 @@ export default async function decorate(block) {
     block.appendChild(section);
 
     const {
-      getResolvedPalette, getResolvedPaletteName, getBaseColor,
+      getResolvedPalette, getResolvedPaletteName, getResolvedPaletteTags,
+      getResolvedItemId, getResolvedLibraryId, getBaseColor,
     } = createColorPaletteParamApi();
     const paletteColors = getResolvedPalette();
     const baseColorHex = getBaseColor();
@@ -83,11 +84,21 @@ export default async function decorate(block) {
       ? paletteColors.findIndex((c) => c.toUpperCase() === baseColorHex.toUpperCase())
       : -1;
     const hasValidBaseColor = baseColorIndex >= 0;
+    const savedItemId = getResolvedItemId();
+    const savedLibraryId = getResolvedLibraryId();
+    const paletteName = getResolvedPaletteName() || '';
     const initialPalette = {
-      name: getResolvedPaletteName() || '',
+      name: paletteName,
       colors: paletteColors,
+      tags: getResolvedPaletteTags(),
       accessibilityData: { colorBlindSafe: isColorBlindSafe(paletteColors) },
       ...(hasValidBaseColor && { baseColorIndex }),
+      ...(savedItemId && savedLibraryId && {
+        id: savedItemId,
+        libraryId: savedLibraryId,
+        savedColors: [...paletteColors],
+        savedName: paletteName,
+      }),
     };
 
     const { getConfig } = await import(`${getLibs()}/utils/utils.js`);

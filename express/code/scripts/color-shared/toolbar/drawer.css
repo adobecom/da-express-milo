@@ -548,6 +548,18 @@
   --mod-button-border-radius: var(--ax-drawer-save-border-radius);
 }
 
+.ax-drawer-btn-row {
+  display: flex;
+  gap: var(--spacing-100);
+  inline-size: 100%;
+}
+
+.ax-drawer-btn-row .ax-drawer-save-btn,
+.ax-drawer-btn-row .ax-drawer-savechanges-btn {
+  inline-size: auto;
+  flex: 1 1 0;
+}
+
 /* ── Mobile drawer overrides ────────────────────── */
 
 .ax-drawer-mobile .ax-drawer-tag-btn-icon {
@@ -677,6 +689,18 @@
     inline-size: auto;
     min-inline-size: 108px;
     align-self: flex-start;
+  }
+
+  .ax-drawer-btn-row {
+    align-self: flex-start;
+    inline-size: auto;
+  }
+
+  .ax-drawer-btn-row .ax-drawer-save-btn,
+  .ax-drawer-btn-row .ax-drawer-savechanges-btn {
+    inline-size: auto;
+    min-inline-size: 108px;
+    flex: 0 0 auto;
   }
 
   @supports (anchor-name: --ax-drawer-anchor) {
