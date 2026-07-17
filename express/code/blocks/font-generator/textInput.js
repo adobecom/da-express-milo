@@ -100,7 +100,8 @@ function initResizeHandle(panel) {
 }
 
 function syncCounter(textarea, counter) {
-  counter.textContent = `${textarea.value.length}/${textarea.maxLength}`;
+  const { length } = textarea.value;
+  counter.textContent = `${length.toLocaleString()}/${textarea.maxLength.toLocaleString()}`;
 }
 
 function initTextInput(panel) {

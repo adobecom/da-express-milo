@@ -29,12 +29,12 @@ describe('font-generator/textInput', () => {
   beforeEach(() => setState({ previewText: '' }));
   afterEach(() => sinon.restore());
 
-  it('builds the text input panel with a 200-char textarea', () => {
+  it('builds the text input panel with a 2000-char textarea', () => {
     const { panel } = createTextInput();
     expect(panel.classList.contains('font-generator-text-input')).to.be.true;
     const ta = panel.querySelector('textarea.label');
     expect(ta).to.exist;
-    expect(ta.maxLength).to.equal(200);
+    expect(ta.maxLength).to.equal(2000);
   });
 
   it('applies placeholder and aria-label from strings', () => {
@@ -51,14 +51,14 @@ describe('font-generator/textInput', () => {
 
   it('shows the initial character count', () => {
     const { panel } = createTextInput();
-    expect(panel.querySelector('.character-count').textContent).to.equal('0/200');
+    expect(panel.querySelector('.character-count').textContent).to.equal('0/2,000');
   });
 
   it('restores previewText and its count from the store', () => {
     setState({ previewText: 'Restored' });
     const { panel } = createTextInput();
     expect(panel.querySelector('textarea.label').value).to.equal('Restored');
-    expect(panel.querySelector('.character-count').textContent).to.equal('8/200');
+    expect(panel.querySelector('.character-count').textContent).to.equal('8/2,000');
   });
 
   it('uses maxLength from strings when provided', () => {
@@ -113,7 +113,15 @@ describe('font-generator/textInput', () => {
     const ta = panel.querySelector('textarea.label');
     ta.value = 'abc';
     ta.dispatchEvent(new Event('input'));
-    expect(panel.querySelector('.character-count').textContent).to.equal('3/200');
+    expect(panel.querySelector('.character-count').textContent).to.equal('3/2,000');
+  });
+
+  it('formats counts of 1,000 or more with thousands separators', () => {
+    const { panel } = createTextInput({ strings: { maxLength: 2200 } });
+    const ta = panel.querySelector('textarea.label');
+    ta.value = 'a'.repeat(1234);
+    ta.dispatchEvent(new Event('input'));
+    expect(panel.querySelector('.character-count').textContent).to.equal('1,234/2,200');
   });
 
   it('debounced typing updates previewText in the store', () => {

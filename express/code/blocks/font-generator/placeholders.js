@@ -13,7 +13,7 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   // Comma-separated preview suggestions rendered as pills.
   suggestions: 'The quick brown fox jumps over the lazy dog,ABCDEFGHIJKLMNOPQRSTUVWXYZ,Realigned equestrian fez bewilders picky monarch',
   // Max characters allowed in the preview text input.
-  maxLength: 200,
+  maxLength: 2000,
   // Toolbar
   filterTrigger: 'Filter',
   layoutGroupLabel: 'Card layout',

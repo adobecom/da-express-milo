@@ -45,13 +45,13 @@ describe('font-generator/placeholders', () => {
   });
 
   describe('maxLength', () => {
-    it('defaults to 200', () => {
-      expect(DEFAULT_PLACEHOLDERS.maxLength).to.equal(200);
+    it('defaults to 2000', () => {
+      expect(DEFAULT_PLACEHOLDERS.maxLength).to.equal(2000);
     });
 
     it('falls back to the default number when nothing is authored', async () => {
       const strings = await loadFontGeneratorPlaceholders();
-      expect(strings.maxLength).to.equal(200);
+      expect(strings.maxLength).to.equal(2000);
     });
   });
 });
