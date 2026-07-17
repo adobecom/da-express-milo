@@ -1389,24 +1389,17 @@ describe('refreshBtnRowStacking', () => {
     return el;
   }
 
-  it('does not stack when both buttons fit their own equal share of the row', () => {
+  it('does not stack when the combined natural width fits the row (content-sized, not equal-split)', () => {
     const row = makeRow(300, 8);
-    // itemWidth = (300 - 8) / 2 = 146
-    refreshBtnRowStacking(row, makeButton(100), makeButton(140));
+    // A short label and a long label sitting side by side, each at its own
+    // natural width — not forced into equal halves.
+    refreshBtnRowStacking(row, makeButton(50), makeButton(200));
     expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.false;
   });
 
-  it('stacks when both buttons exceed their equal share of the row', () => {
+  it('stacks when the combined natural width plus gap exceeds the row width', () => {
     const row = makeRow(200, 8);
-    // itemWidth = (200 - 8) / 2 = 96
     refreshBtnRowStacking(row, makeButton(120), makeButton(150));
-    expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.true;
-  });
-
-  it('stacks when only one button exceeds its share, even if the combined width still fits the row', () => {
-    const row = makeRow(300, 8);
-    // itemWidth = 146: a short sibling can't lend its unused space to a long one.
-    refreshBtnRowStacking(row, makeButton(50), makeButton(200));
     expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.true;
   });
 

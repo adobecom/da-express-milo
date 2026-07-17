@@ -562,7 +562,8 @@
 .ax-drawer-btn-row .ax-drawer-save-btn,
 .ax-drawer-btn-row .ax-drawer-savechanges-btn {
   inline-size: auto;
-  flex: 1 1 0;
+  min-inline-size: 108px;
+  flex: 0 0 auto;
 }
 
 /* ── Mobile drawer overrides ────────────────────── */

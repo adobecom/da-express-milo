@@ -778,28 +778,28 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   };
 }
 
-// sp-button's overflow:hidden label zeroes out flexbox's auto-min-size, so
-// flex-wrap can't detect overflow on its own — measure the real natural width instead.
+// Buttons are content-sized (flex: 0 0 auto), so their rendered width is
+// normally already their natural width — except once --stacked is applied,
+// which forces inline-size:100%. Force a natural-size read regardless of the
+// row's current state so re-checks (e.g. on resize) don't read the stacked
+// full-width size back as "natural" and oscillate.
 function measureNaturalWidth(el) {
-  const { flex, maxInlineSize } = el.style;
+  const { flex, maxInlineSize, inlineSize } = el.style;
   el.style.flex = '0 0 auto';
   el.style.maxInlineSize = 'none';
+  el.style.inlineSize = 'max-content';
   const { width } = el.getBoundingClientRect();
   el.style.flex = flex;
   el.style.maxInlineSize = maxInlineSize;
+  el.style.inlineSize = inlineSize;
   return width;
 }
 
 export function refreshBtnRowStacking(row, btnA, btnB) {
   if (!row || !btnA || !btnB) return;
   const gap = Number.parseFloat(getComputedStyle(row).columnGap) || 0;
-  // Each button gets an equal share (flex: 1 1 0), not a share proportional to
-  // its own content — a short label can't "lend" room to a long sibling, so
-  // each must fit its own half independently rather than comparing the sum.
-  const itemWidth = (row.getBoundingClientRect().width - gap) / 2;
-  const shouldStack = measureNaturalWidth(btnA) > itemWidth
-    || measureNaturalWidth(btnB) > itemWidth;
-  row.classList.toggle('ax-drawer-btn-row--stacked', shouldStack);
+  const natural = measureNaturalWidth(btnA) + measureNaturalWidth(btnB) + gap;
+  row.classList.toggle('ax-drawer-btn-row--stacked', natural > row.getBoundingClientRect().width);
 }
 
 function attachDrawerToDOM(panel, curtain, mobile, anchor) {
@@ -1097,14 +1097,6 @@ export async function createDrawer(options) {
     const posResult = attachDrawerToDOM(panelEl, curtainEl, mobile, anchorElement);
     removePositionHandler = posResult?.cleanup ?? null;
 
-    if (dom.btnRowEl) {
-      const { btnRowEl, saveBtnEl: copyBtnEl, saveChangesBtnEl: changesBtnEl } = dom;
-      const runStackingCheck = () => refreshBtnRowStacking(btnRowEl, copyBtnEl, changesBtnEl);
-      requestAnimationFrame(runStackingCheck);
-      window.addEventListener('resize', runStackingCheck);
-      removeBtnRowResizeListener = () => window.removeEventListener('resize', runStackingCheck);
-    }
-
     anchorElement?.classList.add('ax-drawer-anchor-active');
 
     const interactions = setupDrawerInteractions(
@@ -1120,6 +1112,17 @@ export async function createDrawer(options) {
     escHandler = interactions.escHandler;
     removeSwipeHandler = interactions.swipeCleanup;
     removeOutsideClickHandler = interactions.outsideClickCleanup;
+
+    if (dom.btnRowEl) {
+      const { btnRowEl, saveBtnEl: copyBtnEl, saveChangesBtnEl: changesBtnEl } = dom;
+      const runStackingCheck = () => refreshBtnRowStacking(btnRowEl, copyBtnEl, changesBtnEl);
+      // Runs after setupDrawerInteractions has scheduled its own rAF to add
+      // .ax-drawer-open — queuing ours only once that's already registered
+      // ensures we measure after the panel is actually open, not before.
+      requestAnimationFrame(() => requestAnimationFrame(runStackingCheck));
+      window.addEventListener('resize', runStackingCheck);
+      removeBtnRowResizeListener = () => window.removeEventListener('resize', runStackingCheck);
+    }
 
     isOpen = true;
 
