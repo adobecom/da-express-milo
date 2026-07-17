@@ -188,11 +188,11 @@ export const QA_CONFIGS = {
   },
   'audio-converter': {
     ...getBaseAudioCfg(AUDIO_FORMATS),
-    group: "audio",
+    group: 'audio',
   },
   'video-to-audio': {
     ...getBaseVideoCfg('mov', 'mp4'),
-    group: "audio",
+    group: 'audio',
   },
 };
 
