@@ -554,6 +554,10 @@
   inline-size: 100%;
 }
 
+.ax-drawer-copy-btn {
+  --mod-button-background-color-hover: var(--color-light-gray-2);
+}
+
 .ax-drawer-btn-row .ax-drawer-save-btn,
 .ax-drawer-btn-row .ax-drawer-savechanges-btn {
   inline-size: auto;
