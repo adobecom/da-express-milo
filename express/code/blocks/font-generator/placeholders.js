@@ -61,21 +61,6 @@ function isResolvedPlaceholder(value, key) {
   return value && value !== key.replaceAll('-', ' ');
 }
 
-function applyResolvedValue(strings, prop, value) {
-  strings[prop] = prop === 'maxLength' ? (parseInt(value, 10) || strings.maxLength) : value;
-}
-
-// replaceKey()/replaceKeyArray() only ever fetch the default placeholders.json
-// — the placeholders-stage metadata flag is wired solely into Milo's {{key}}
-// DOM-token flow (decoratePlaceholders/getPlaceholderPaths in utils.js), which
-// font-generator doesn't use. Mirror that flag here so authors can stage
-// unreleased font-generator copy on non-prod environments the same way.
-async function loadStageOverlay(config, fetchPlaceholders, getMetadata) {
-  if (config.env?.name === 'prod' || getMetadata('placeholders-stage') !== 'on') return null;
-  const placeholderPath = `${config.locale.contentRoot}/placeholders-stage.json`;
-  return fetchPlaceholders({ config, placeholderPath });
-}
-
 /**
  * Resolves every font-generator placeholder string in a single batched
  * lookup, falling back to DEFAULT_PLACEHOLDERS for any key not yet authored
@@ -85,30 +70,22 @@ async function loadStageOverlay(config, fetchPlaceholders, getMetadata) {
  */
 export default async function loadFontGeneratorPlaceholders() {
   try {
-    const [{ getConfig, getMetadata }, { replaceKeyArray, fetchPlaceholders }] = await Promise.all([
+    const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
       import(`${getLibs()}/utils/utils.js`),
       import(`${getLibs()}/features/placeholders.js`),
     ]);
 
-    const config = getConfig();
     const keys = Object.values(PLACEHOLDER_KEY_MAP);
-    const values = await replaceKeyArray(keys, config);
+    const values = await replaceKeyArray(keys, getConfig());
     const strings = { ...DEFAULT_PLACEHOLDERS };
 
     Object.entries(PLACEHOLDER_KEY_MAP).forEach(([prop, key], index) => {
       const value = values[index];
       if (!isResolvedPlaceholder(value, key)) return;
-      applyResolvedValue(strings, prop, value);
+      // maxLength is authored as a plain number string; every other
+      // placeholder is used verbatim as display copy.
+      strings[prop] = prop === 'maxLength' ? (parseInt(value, 10) || DEFAULT_PLACEHOLDERS.maxLength) : value;
     });
-
-    const stagePlaceholders = await loadStageOverlay(config, fetchPlaceholders, getMetadata)
-      .catch(() => null);
-    if (stagePlaceholders) {
-      Object.entries(PLACEHOLDER_KEY_MAP).forEach(([prop, key]) => {
-        const value = stagePlaceholders[key];
-        if (value !== undefined) applyResolvedValue(strings, prop, value);
-      });
-    }
 
     return strings;
   } catch {
