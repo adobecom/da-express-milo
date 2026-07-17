@@ -556,6 +556,7 @@
 
 .ax-drawer-copy-btn {
   --mod-button-background-color-hover: var(--color-light-gray-2);
+  --mod-button-background-color-focus: var(--color-gray-300-variant);
 }
 
 .ax-drawer-btn-row .ax-drawer-save-btn,
