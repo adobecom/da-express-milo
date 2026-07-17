@@ -1,0 +1,532 @@
+/* ── CSS custom properties ───────────────────────────────────────────────── */
+
+.discovery-table {
+  --color-gray-100: #f9f9f9;
+  --border-radius-table: 8px;
+  --gnav-offset-height: 40px;
+  --dt-sticky-offset: 0px;
+  --cell-color: #464646;
+  --font-color : #505050;
+
+  padding: 40px 0 40px 16px;
+}
+
+
+/* ── Section header ──────────────────────────────────────────────────────── */
+
+.dt-section-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 8px 16px 8px 0;
+  position: sticky;
+  top: calc(var(--gnav-offset-height) + var(--dt-sticky-offset, 0px));
+  z-index: 1;
+  background: var(--color-white);
+  box-shadow: 0 2px 0 0 var(--color-white);
+  border-left: 1px solid var(--color-white);
+}
+
+.dt-header-text h2,
+.dt-header-text h3 {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  line-height: 1.2;
+  letter-spacing: -0.2px;
+}
+
+.dt-header-text p {
+  font-size: 14px;
+  color: var(--color-gray-500);
+  margin-top: 6px;
+  line-height: 1.55;
+  max-width: 480px;
+}
+
+/* ── Carousel nav (mobile only, shown via media query) ───────────────────── */
+
+.dt-carousel-nav {
+  display: none;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.dt-nav-btn {
+  all: unset;
+  cursor: pointer;
+  height: 2rem;
+  box-shadow: 0 2px 8px 0 #00000029;
+  border-radius: 50px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.dt-nav-btn:focus {
+  outline: revert;
+}
+
+.dt-nav-btn:hover:not(:disabled) circle {
+  fill: var(--color-gray-300-variant);
+}
+
+.dt-nav-btn:disabled {
+  cursor: auto;
+}
+
+.dt-nav-btn:disabled path {
+  stroke: var(--color-gray-300);
+}
+
+
+/* ── Table container ─────────────────────────────────────────────────────── */
+
+.dt-table-container {
+  /* overflow:clip clips paint to border-radius without creating a scroll
+     container, so position:sticky on thead th / .dt-label-col propagates
+     to the page scroll ancestor rather than stopping here. */
+  overflow: clip;
+  border-radius: var(--border-radius-table);
+}
+
+/* ── Table base ──────────────────────────────────────────────────────────── */
+
+.dt-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: var(--border-radius-table);
+  background: var(--color-white);
+}
+
+/* ── Column headers ──────────────────────────────────────────────────────── */
+
+.dt-table thead th {
+  padding: 16px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  text-align: left;
+  vertical-align: middle;
+  background: var(--color-gray-100);
+  border-bottom: 1px solid var(--color-gray-300-variant);
+  /* Borders on cells (not tr) so they travel with the sticky header row. */
+  position: sticky;
+  top: calc(var(--gnav-offset-height) + var(--dt-sticky-offset, 0px) + var(--dt-section-header-h, 0px));
+  transform: translateY(2px);
+  z-index: 2;
+}
+
+.dt-table thead th.dt-label-col {
+  border-bottom: 1px solid var(--color-gray-300-variant);
+  border-left: 1px solid var(--color-gray-300);
+  background: var(--color-gray-100);
+  z-index: 3;
+}
+
+.dt-table thead th.dt-label-col,
+.dt-table .dt-first-row {
+  color: var(--Content-neutral-subdued-default, #464646);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.dt-col-price {
+  display: block;
+  color: var(--Content-neutral-subdued-default, #464646);
+  font-size: 14px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 130%; /* 18.2px */
+}
+
+/* ── Body rows ───────────────────────────────────────────────────────────── */
+
+
+.dt-table tbody tr:nth-child(even) {
+  background: var(--color-gray-100);
+}
+
+/* ── Position-based borders & corners ───────────────────────────────────── */
+/* dt-first-row / dt-last-row / dt-first-col / dt-last-col are stamped by JS */
+
+/* dt-first-row / dt-last-row are stamped on the cell itself, so the selector
+   must be th.dt-first-row — not .dt-first-row th (which would look for a th
+   nested inside a dt-first-row ancestor, which never exists). */
+.dt-table th.dt-first-row,
+.dt-table td.dt-first-row {
+  border-top: 1px solid var(--color-gray-300-variant);
+}
+
+
+.dt-table .dt-last-col {
+  border-right: 1px solid var(--color-gray-300-variant);
+}
+
+.dt-table th.dt-last-row,
+.dt-table td.dt-last-row {
+  border-bottom: 1px solid var(--color-gray-300-variant);
+}
+
+.dt-table .dt-first-row.dt-first-col { border-top-left-radius: var(--border-radius-table); z-index: 6; }
+.dt-table .dt-first-row.dt-last-col  { border-top-right-radius: var(--border-radius-table); }
+.dt-table .dt-last-row.dt-first-col  { border-bottom-left-radius: var(--border-radius-table); }
+.dt-table .dt-last-row.dt-last-col   { border-bottom-right-radius: var(--border-radius-table); }
+
+/* Sticky white backdrop inserted inside <table> between <thead> and <tbody>.
+   height:0 means the anonymous table row it creates has zero height — no gap
+   between thead and tbody. overflow:visible lets ::before paint outside it.
+   sticky top is set to thead-bottom (gnav + section-header + thead-h) so it
+   sticks exactly when the thead sticks. ::before extends upward by --dt-thead-h,
+   sitting over the thead in both the natural and sticky states. z-index:1 keeps
+   it above tbody rows (auto) but below the th cells (z-index 2–3), so their
+   transparent corner-radius arcs show this white instead of scrolling rows. */
+.dt-header-cover {
+  position: sticky;
+  top: calc(var(--gnav-offset-height) + var(--dt-sticky-offset, 0px) + var(--dt-section-header-h, 0px));
+  height: 0;
+
+  overflow: visible;
+  z-index: 4;
+  pointer-events: none;
+}
+
+.dt-header-cover::before {
+  content: '';
+  display: block;
+  margin-top: calc(-1 * var(--dt-thead-h, 0px));
+  height: var(--dt-thead-h, 0px);
+  width: 80px;
+  background: var(--color-white);
+}
+
+.dt-header-cover-right {
+  position: sticky;
+  top: calc(var(--gnav-offset-height) + var(--dt-sticky-offset, 0px) + var(--dt-section-header-h, 0px));
+  height: 0;
+  width: 100%;
+  overflow: visible;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.dt-header-cover-right::before {
+  content: '';
+  display: block;
+  right: 0;
+  margin-top: calc(-1 * var(--dt-thead-h, 0px));
+  height: var(--dt-thead-h, 0px);
+  width: 80px;
+  background: var(--color-white);
+}
+
+/* Interior column dividers */
+.dt-table td.dt-data-col:not(.dt-last-col),
+.dt-table thead th.dt-data-col:not(.dt-last-col) {
+  border-right: 1px solid var(--color-gray-200);
+}
+
+.dt-table td.dt-data-col[data-col="0"],
+.dt-table thead th.dt-data-col[data-col="0"] {
+  border-left: 1px solid var(--color-gray-200);
+}
+
+/* ── Row header cell ─────────────────────────────────────────────────────── */
+
+.dt-table th.dt-label-col {
+  text-align: left;
+  box-sizing: border-box;
+  font-weight: normal;
+  background: var(--color-white);
+  padding: 16px;
+  vertical-align: middle;
+}
+
+.dt-table tbody th.dt-label-col {
+  border-left: 1px solid var(--color-gray-300-variant);
+}
+
+.dt-table tbody tr:nth-child(even) th.dt-label-col {
+  background: var(--color-gray-100);
+}
+
+.dt-row-primary {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-gray-900);
+  line-height: 1.4;
+}
+
+.dt-row-secondary {
+  display: block;
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--font-color);
+  margin-top: 3px;
+  line-height: 1.5;
+}
+
+/* ── Data cells ──────────────────────────────────────────────────────────── */
+
+.dt-table td.dt-data-col {
+  padding: 16px;
+  box-sizing: border-box;
+  text-align: left;
+  vertical-align: middle;
+  font-size: 14px;
+  color: var(--cell-color);
+}
+
+/* ── Mobile (< 768px) ────────────────────────────────────────────────────── */
+/* The table container keeps overflow:clip (same as desktop) so
+   position:sticky on thead th propagates to the page viewport naturally.
+   Horizontal column navigation uses transform:translateX on the table;
+   .dt-label-col cells get a counter-transform to stay pinned at the left. */
+
+@media (max-width: 767px) {
+  .dt-carousel-nav {
+    display: flex;
+  }
+
+  /* overflow:clip clips based on layout position (pre-transform), so transforms
+     can't reveal off-screen columns. overflow:visible + clip-path clips based on
+     the visual (post-transform) position, which is what we need here.
+     clip-path does not create a scroll container, so position:sticky propagates.
+     No right inset, so at intermediate scroll positions the next column bleeds
+     to the device's right edge instead of being clipped. The data column is
+     sized 32px narrower than the viewport (see JS) so the last column still
+     settles with a 16px gap to the device edge when fully scrolled. */
+  .dt-table-container {
+    overflow: visible;
+    padding-top: 2px;
+    clip-path: inset(0 0 0 0 round var(--border-radius-table));
+    /* pan-y: browser keeps vertical page scroll, JS owns horizontal swipes.
+       Without this the compositor claims the horizontal gesture and fires
+       pointercancel mid-drag — the carousel "catches" and won't follow. */
+    touch-action: pan-y;
+  }
+
+  .dt-table {
+    table-layout: fixed;
+    transition: transform 0.3s ease;
+  }
+
+  .dt-table thead tr {
+    padding-top: 2px;
+  }
+
+  /* Label column stays visually pinned via JS counter-transform.
+     position:relative is only on tbody cells (needed for ::after shadow);
+     the thead label cell inherits position:sticky from the global thead th rule
+     so it sticks with the rest of the header row. */
+  .dt-table .dt-label-col {
+    background: var(--color-white);
+    transition: transform 0.3s ease;
+  }
+
+  .dt-header-cover,
+  .dt-header-cover-right {
+    transition: transform 0.3s ease;
+  }
+
+  .dt-table tbody .dt-label-col {
+    position: relative;
+  }
+
+  .dt-table tbody tr:nth-child(even) .dt-label-col {
+    background: var(--color-gray-100);
+  }
+
+  .dt-table th.dt-label-col {
+    width: 110px;
+  }
+
+  .dt-table th.dt-label-col.dt-first-row.dt-first-col {
+    padding: 12px 16px;
+  }
+
+  .dt-table thead th,
+  .dt-table th.dt-label-col {
+    padding: 12px 16px;
+    box-sizing: border-box;
+  }
+
+  .dt-table td.dt-data-col {
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .dt-table th.dt-label-col.dt-first-col {
+    padding: 16px 12px;
+  }
+
+  /* Shadow at the right edge of the label column */
+  .dt-table .dt-label-col::after {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 0;
+    width: 16px;
+    height: 100%;
+    background: linear-gradient(270deg, rgb(0 0 0 / 0%) 45.63%, rgb(0 0 0 / 4%) 100%);
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  .dt-header-text h2,
+  .dt-header-text h3 {
+    color: var(--Alias-content-typography-Title, #131313);
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 28.6px;
+  }
+
+  .dt-header-text p {
+    display: none;
+  }
+}
+
+/* ── Tablet & desktop (≥ 768px) ──────────────────────────────────────────── */
+
+@media (min-width: 768px) {
+
+  main .section.long-form .discovery-table {
+    padding: 40px var(--spacing-600);
+    width: var(--ax-grid-8-col-width);
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+  .dt-table {
+    table-layout: fixed;
+  }
+
+  .dt-table thead th,
+  .dt-table th.dt-label-col {
+    padding: 12px 16px;
+    box-sizing: border-box;
+  }
+
+  .dt-table td.dt-data-col {
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .discovery-table {
+    padding: 40px 0;
+  }
+
+  .dt-table .dt-data-col {
+    max-width: 232px;
+  }
+
+  .dt-table th.dt-label-col {
+    width: 120px;
+  }
+
+  .dt-header-text h2,
+  .dt-header-text h3 {
+    font-size: 22px;
+    letter-spacing: -0.4px;
+  }
+
+  .dt-header-text p {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 900px) {
+  .discovery-table {
+    --gnav-offset-height: 63px;
+  }
+}
+
+@media (min-width: 1024px) {
+  main .section.long-form .discovery-table {
+    max-width: var(--ax-grid-7-col-width);
+    margin-left: calc(var(--ax-grid-3-col-width) + var(--spacing-600) + var(--ax-grid-gutter));
+    margin-right: auto;
+    padding: 40px var(--spacing-600);
+  }
+
+  .dt-table thead th,
+  .dt-table th.dt-label-col {
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .dt-table thead th {
+    transform: translateY(1px);
+  }
+
+  .dt-table td.dt-data-col {
+    padding: 16px;
+    box-sizing: border-box;
+  }
+
+  .dt-table {
+    table-layout: auto;
+  }
+
+  .dt-table th.dt-label-col.dt-first-row.dt-first-col {
+    padding: 16px;
+  }
+
+  .dt-table th.dt-label-col {
+    width: 160px;
+  }
+
+  .dt-header-text h2,
+  .dt-header-text h3 {
+    font-size: 22px;
+    font-style: normal;
+    font-weight: 700;
+    line-height: 130%; /* 28.6px */
+  }
+}
+
+
+/* ── Single data column: no carousel, no shadow, 16px margins both sides ─── */
+
+@media (max-width: 767px) {
+  .discovery-table.dt-single-col {
+    padding-right: 16px;
+  }
+
+  .discovery-table.dt-single-col .dt-carousel-nav {
+    display: none;
+  }
+
+  .discovery-table.dt-single-col .dt-table .dt-label-col::after {
+    display: none;
+  }
+}
+
+/* ── Short table (≤ 5 rows): disable sticky header ───────────────────────── */
+
+.discovery-table.dt-short .dt-section-header {
+  position: relative;
+  top: auto;
+  box-shadow: none;
+}
+
+.discovery-table.dt-short .dt-table thead th {
+  position: relative;
+  top: auto;
+}
+
+.discovery-table.dt-short .dt-header-cover,
+.discovery-table.dt-short .dt-header-cover-right {
+  position: relative;
+  top: auto;
+}
+
+@media (min-width: 1680px) {
+  main .section.long-form .discovery-table {
+    margin: 0 auto;
+  }
+}

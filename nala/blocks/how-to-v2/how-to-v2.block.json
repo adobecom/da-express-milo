@@ -1,0 +1,64 @@
+{
+  "block": "how-to-v2",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@how-to-v2-default",
+      "selector": "div.how-to-v2",
+      "path": "/drafts/nala/blocks/how-to-v2/how-to-v2",
+      "data": {
+        "hasBackground": true,
+        "semantic": {
+          "texts": [
+            {
+              "selector": "li.step h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Upload media."
+            }
+          ],
+          "media": [
+            {
+              "selector": ".media-container lite-youtube",
+              "nth": 0,
+              "tag": "lite-youtube",
+              "videoid": "L7_MTvB-1hw"
+            }
+          ],
+          "interactives": []
+        }
+      },
+      "tags": ["@how-to-v2", "@default", "@accordion", "@steps", "@express", "@smoke", "@regression", "@t1"]
+    },
+    {
+      "tcid": "1",
+      "name": "@how-to-v2-no-background",
+      "selector": "div.how-to-v2",
+      "path": "/drafts/nala/blocks/how-to-v2/how-to-v2-no-background",
+      "data": {
+        "hasBackground": false,
+        "semantic": {
+          "texts": [
+            {
+              "selector": "li.step h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Upload media."
+            }
+          ],
+          "media": [
+            {
+              "selector": ".media-container picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": null,
+              "alt": null
+            }
+          ],
+          "interactives": []
+        }
+      },
+      "tags": ["@how-to-v2", "@no-background", "@accordion", "@steps", "@express", "@regression"]
+    }
+  ]
+}

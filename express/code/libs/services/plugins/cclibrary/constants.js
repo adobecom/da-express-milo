@@ -73,6 +73,7 @@ export const CLIENT_APP = 'AdobeExpress';
  */
 export function getClientInfo() {
   const userId = window.adobeUserProfile?.userId?.split('@')[0] || 'unknown';
+  // eslint-disable-next-line compat/compat
   const platform = window.navigator?.userAgentData?.platform
     || window.navigator?.platform
     || 'unknown';
