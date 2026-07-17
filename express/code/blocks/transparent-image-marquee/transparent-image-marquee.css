@@ -190,8 +190,11 @@
     margin-bottom: 0;
   }
 
+  /* Figma spec (Text-content): max-width 500px. Only reachable in the
+     1-column stacked state (main-container is full width there); the
+     854-1199 2-column state overrides this narrower below. */
   .transparent-image-marquee .text-content {
-    max-width: 338px;
+    max-width: 500px;
   }
 
   .transparent-image-marquee .image-container {
@@ -208,6 +211,12 @@
  * text (taller with CTAs) rather than clipping it. Below 854px the
  * layout is stacked and left uncapped so the image keeps full-width 3:2. */
 @media (min-width: 854px) and (max-width: 1199px) {
+  /* Narrower than the 500px spec max since the image column now shares
+     the row; keeps the approved side-by-side proportions from R1. */
+  .transparent-image-marquee .text-content {
+    max-width: 338px;
+  }
+
   .transparent-image-marquee .image-container {
     max-width: 409.5px;
     max-height: 273px;
