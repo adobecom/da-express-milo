@@ -1,5 +1,6 @@
 import { getState, setState } from './state.js';
 import { DEFAULT_PLACEHOLDERS } from './placeholders.js';
+import { attachRovingTabIndex } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 
 const BASE_PATH = '/express/code/blocks/font-generator';
 const STYLESHEET_HREF = `${BASE_PATH}/textInput.css`;
@@ -44,7 +45,6 @@ function buildSuggestionPill(text) {
   const pill = document.createElement('div');
   pill.className = 'tag-pills';
   pill.setAttribute('role', 'button');
-  pill.setAttribute('tabindex', '0');
   pill.setAttribute('aria-label', text);
   const tag = document.createElement('div');
   tag.className = 'tag-m';
@@ -65,7 +65,13 @@ function buildSuggestionPill(text) {
 function populateSuggestions(panel, suggestions = []) {
   const wrap = panel.querySelector('.tags-wrap');
   if (!wrap) return;
-  suggestions.forEach((text) => wrap.append(buildSuggestionPill(text)));
+  const pills = suggestions.map((text) => {
+    const pill = buildSuggestionPill(text);
+    wrap.append(pill);
+    return pill;
+  });
+  // Tab lands on the first pill; Arrow/Home/End then rove between the rest.
+  attachRovingTabIndex(wrap, pills);
 }
 
 // Pointer Y from either a mouse or a touch event.
@@ -197,6 +203,17 @@ export default function createTextInput(config = {}) {
     const inputId = `font-generator-preview-input-${instanceId}`;
     textarea.id = inputId;
     previewLabel.htmlFor = inputId;
+  }
+
+  // Name the pill toolbar after the visible "Try these:" label rather than
+  // duplicating that copy into a new aria-label.
+  const tryThese = panel.querySelector('.text-wrapper');
+  const tagsWrap = panel.querySelector('.tags-wrap');
+  if (tryThese && tagsWrap) {
+    const tryTheseId = `font-generator-try-these-${instanceId}`;
+    tryThese.id = tryTheseId;
+    tagsWrap.setAttribute('role', 'toolbar');
+    tagsWrap.setAttribute('aria-labelledby', tryTheseId);
   }
 
   applyStrings(panel, config.strings);

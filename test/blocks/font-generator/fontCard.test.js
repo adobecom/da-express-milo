@@ -70,6 +70,25 @@ describe('font-generator/fontCard', () => {
       const btn = createFontCard(FONT, 'Hello', 16, null, strings).querySelector('.font-card-copy-btn');
       expect(btn.getAttribute('aria-label')).to.equal('Copiar');
     });
+
+    it('renders the desktop hover overlay with the copy label as its message', () => {
+      const card = createFontCard(FONT, 'Hello', 16);
+      const overlay = card.querySelector('.font-card-hover-overlay');
+      expect(overlay).to.exist;
+      expect(overlay.querySelector('.font-card-overlay-message').textContent)
+        .to.equal(DEFAULT_PLACEHOLDERS.copyLabel);
+    });
+
+    it('names the card after the font style, overriding name-from-content', () => {
+      expect(createFontCard(FONT, 'Hello', 16).getAttribute('aria-label')).to.equal('Bold');
+    });
+
+    it('keeps the card and its interactive children out of the normal tab order', () => {
+      const card = createFontCard(FONT, 'Hello', 16, CTA);
+      expect(card.tabIndex).to.equal(-1);
+      expect(card.querySelector('.font-card-copy-btn').tabIndex).to.equal(-1);
+      expect(card.querySelector('.font-card-cta').tabIndex).to.equal(-1);
+    });
   });
 
   describe('updateFontCard', () => {
@@ -134,7 +153,7 @@ describe('font-generator/fontCard', () => {
       const card = createFontCard(FONT, 'Hello', 16);
       await clickCopy(card);
       expect(card.classList.contains('is-copied')).to.be.true;
-      expect(card.querySelector('.font-card-copy-overlay')).to.exist;
+      expect(card.querySelector('.font-card-success-overlay')).to.exist;
       expect(card.querySelector('.font-card-copy-btn').getAttribute('aria-label'))
         .to.equal(DEFAULT_PLACEHOLDERS.copiedLabel);
     });
@@ -161,7 +180,7 @@ describe('font-generator/fontCard', () => {
       const card = createFontCard(FONT, 'Hello', 16);
       await clickCopy(card);
       await clickCopy(card);
-      expect(card.querySelectorAll('.font-card-copy-overlay').length).to.equal(1);
+      expect(card.querySelectorAll('.font-card-success-overlay').length).to.equal(1);
     });
 
     it('logs and does not mark copied when the clipboard write rejects', async () => {
@@ -174,6 +193,96 @@ describe('font-generator/fontCard', () => {
       expect(card.classList.contains('is-copied')).to.be.false;
       expect(logSpy.calledOnce).to.be.true;
       window.lana = originalLana;
+    });
+  });
+
+  describe('cell keyboard nav', () => {
+    let card;
+
+    afterEach(() => card?.remove());
+
+    it('Enter on the wrapper moves focus to the copy button and enters the cell', () => {
+      card = createFontCard(FONT, 'Hello', 16, CTA);
+      document.body.append(card);
+      const copyBtn = card.querySelector('.font-card-copy-btn');
+      card.focus();
+      card.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      expect(document.activeElement).to.equal(copyBtn);
+      expect(copyBtn.tabIndex).to.equal(0);
+      expect(card.querySelector('.font-card-cta').tabIndex).to.equal(0);
+      expect(card.tabIndex).to.equal(-1);
+    });
+
+    it('a direct click into the copy button enters the cell without Enter', () => {
+      card = createFontCard(FONT, 'Hello', 16, CTA);
+      document.body.append(card);
+      const copyBtn = card.querySelector('.font-card-copy-btn');
+      const cta = card.querySelector('.font-card-cta');
+      copyBtn.focus();
+      // document.activeElement updates synchronously regardless of whether
+      // this document has real OS-level focus, but the corresponding
+      // focusin event does not reliably fire without it — which a
+      // concurrent (multi-iframe) test run can't guarantee any single
+      // document has. Dispatch it explicitly so this test exercises the
+      // listener's own logic rather than depending on that environment
+      // detail (a real click in a real, focused, single-tab browser always
+      // fires it naturally).
+      copyBtn.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      expect(card.tabIndex).to.equal(-1);
+      expect(copyBtn.tabIndex).to.equal(0);
+      expect(cta.tabIndex).to.equal(0);
+    });
+
+    it('Escape from inside the cell returns focus to the wrapper', () => {
+      card = createFontCard(FONT, 'Hello', 16, CTA);
+      document.body.append(card);
+      const copyBtn = card.querySelector('.font-card-copy-btn');
+      copyBtn.focus();
+      copyBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+      expect(document.activeElement).to.equal(card);
+      expect(card.tabIndex).to.equal(0);
+      expect(copyBtn.tabIndex).to.equal(-1);
+      expect(card.querySelector('.font-card-cta').tabIndex).to.equal(-1);
+    });
+
+    it('Tab past the last child (CTA) exits back to the wrapper', () => {
+      card = createFontCard(FONT, 'Hello', 16, CTA);
+      document.body.append(card);
+      const cta = card.querySelector('.font-card-cta');
+      cta.focus();
+      cta.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+      expect(document.activeElement).to.equal(card);
+      expect(card.tabIndex).to.equal(0);
+    });
+
+    it('Shift+Tab before the first child (copy button) exits back to the wrapper', () => {
+      card = createFontCard(FONT, 'Hello', 16, CTA);
+      document.body.append(card);
+      const copyBtn = card.querySelector('.font-card-copy-btn');
+      copyBtn.focus();
+      copyBtn.dispatchEvent(new KeyboardEvent('keydown', {
+        key: 'Tab', shiftKey: true, bubbles: true, cancelable: true,
+      }));
+      expect(document.activeElement).to.equal(card);
+      expect(card.tabIndex).to.equal(0);
+    });
+
+    it('Tab from the copy button exits directly when there is no CTA link', () => {
+      card = createFontCard(FONT, 'Hello', 16);
+      document.body.append(card);
+      const copyBtn = card.querySelector('.font-card-copy-btn');
+      copyBtn.focus();
+      copyBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+      expect(document.activeElement).to.equal(card);
+    });
+
+    it('Tab from the copy button to the CTA does not exit (only past the last child)', () => {
+      card = createFontCard(FONT, 'Hello', 16, CTA);
+      document.body.append(card);
+      const copyBtn = card.querySelector('.font-card-copy-btn');
+      copyBtn.focus();
+      copyBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true }));
+      expect(document.activeElement).to.not.equal(card);
     });
   });
 });

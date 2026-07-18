@@ -11,8 +11,9 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   inputLabel: 'Preview text input',
   previewTextLabel: 'Preview Text',
   tryThese: 'Try these:',
-  // Comma-separated preview suggestions rendered as pills.
-  suggestions: 'The quick brown fox jumps over the lazy dog,ABCDEFGHIJKLMNOPQRSTUVWXYZ,Realigned equestrian fez bewilders picky monarch',
+  // Semicolon-separated preview suggestions rendered as pills (semicolons,
+  // not commas, so a suggestion can itself contain a comma).
+  suggestions: 'The quick brown fox jumps over the lazy dog;ABCDEFGHIJKLMNOPQRSTUVWXYZ;Realigned equestrian fez bewilders picky monarch;Roger, hungry: ate 236 peaches & cantaloupes in 1904!',
   // Max characters allowed in the preview text input.
   maxLength: 2000,
   // Toolbar
@@ -27,7 +28,7 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   copyLabel: 'Copy text',
   copiedLabel: 'Copied!',
   copiedMessage: 'Text Copied!',
-  sampleText: 'Hello',
+  sampleText: 'Type the preview text you want to get started...', // Same as previewPlaceholder
   cardCtaText: 'Design With Style',
 });
 

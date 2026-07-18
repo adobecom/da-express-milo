@@ -112,7 +112,6 @@
 
 .font-generator-text-input .label::placeholder {
   color: var(--color-dark-gray);
-  opacity: 0.5;
 }
 
 .font-generator-text-input .counter-expander {
@@ -199,7 +198,15 @@
 .font-generator-text-input .tags-wrap {
   gap: var(--spacing-75);
   border-radius: 4px;
+  /* Reserve room for the focus ring's -1px bleed (below) on every edge —
+     without it, the ring gets clipped top/bottom, and left/right at the
+     scroll extremes. */
+  padding: 1px;
   overflow-x: scroll;
+  /* Explicit, not left to default: setting overflow-x alone makes the spec
+     compute overflow-y as auto (not visible), which without this would let
+     the 1px ring bleed enable a spurious vertical scrollbar. */
+  overflow-y: hidden;
   display: flex;
   align-items: center;
   position: relative;
@@ -217,6 +224,11 @@
   align-items: flex-start;
   position: relative;
   flex: 0 0 auto;
+  cursor: pointer;
+}
+
+.font-generator-text-input .tag-pills:focus-visible {
+  outline: none;
 }
 
 .font-generator-text-input .tag-m {
@@ -224,12 +236,36 @@
   max-width: 200px;
   min-height: 32px;
   background-color: var(--color-light-gray);
+  border: 1px solid transparent;
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
   position: relative;
   flex: 0 0 auto;
   overflow: hidden;
+}
+
+/* Hover / active / focus all darken the fill; active adds the pill's own
+   border, and focus adds the offset ring below. The two combine on their
+   own (no separate "focus active" rule needed) when both apply at once —
+   e.g. pressing Enter/Space while the pill has keyboard focus. */
+.font-generator-text-input .tag-pills:hover .tag-m,
+.font-generator-text-input .tag-pills:active .tag-m,
+.font-generator-text-input .tag-pills:focus-visible .tag-m {
+  background-color: var(--color-gray-300-variant);
+}
+
+.font-generator-text-input .tag-pills:active .tag-m {
+  border-color: var(--Buttons-default);
+}
+
+.font-generator-text-input .tag-pills:focus-visible::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border: 1px solid var(--Buttons-Down);
+  border-radius: 9px;
+  pointer-events: none;
 }
 
 .font-generator-text-input .content {

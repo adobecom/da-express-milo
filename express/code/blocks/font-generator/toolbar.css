@@ -132,6 +132,19 @@
   box-sizing: border-box;
 }
 
+/* The range input itself takes focus, not the thumb — outline is suppressed
+   on .toolbar-slider above, so the ring is drawn on the thumb pseudo-element
+   instead, offset outward like the S2 slider handle's focus-ring spec. */
+.toolbar-slider:focus-visible::-webkit-slider-thumb {
+  outline: 1px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
+.toolbar-slider:focus-visible::-moz-range-thumb {
+  outline: 1px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
 /* ─── Filter trigger (hidden at ≥1200px, once the filter panel is inline) ─── */
 
 .font-generator-filter-trigger {
@@ -139,14 +152,14 @@
   align-items: center;
   gap: 6px;
   margin-left: auto;
-  padding: 7px 12px;
+  padding: 6px 12px 6px 10px;
   border: none;
   border-radius: 8px;
   background: var(--color-gray-250);
   color: var(--color-gray-950);
   font-family: var(--body-font-family);
   font-size: 14px;
-  font-weight: 700;
+  font-weight: 500;
   line-height: 18px;
   cursor: pointer;
   white-space: nowrap;

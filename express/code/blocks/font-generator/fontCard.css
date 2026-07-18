@@ -2,9 +2,14 @@
   display: flex;
   flex-direction: column;
   background: var(--color-white);
-  border-radius: 12px;
-  min-height: 304px;
+  border-radius: var(--Corner-radius-corner-radius-100);
   overflow: hidden;
+}
+
+.font-card:focus-visible {
+  outline: 2px solid var(--Buttons-default);
+  outline-offset: 4px;
+  border-radius: 7px;
 }
 
 /* ─── Body (preview area — overlay is bounded here) ──────────────────────── */
@@ -14,18 +19,13 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  /* Top padding pushes the preview text to 64px from the card top, well clear
-     of the absolutely-positioned copy button so the two don't visually align. */
-  padding: 64px 16px 12px;
+  padding: var(--spacing-800) var(--spacing-300) var(--spacing-500);
   overflow: hidden;
+  cursor: pointer;
 }
 
 /* List view is a compact row, not a scaled-down grid card — pull the
    preview text back up rather than keeping the grid view's 64px offset. */
-.font-card-grid.is-list .font-card {
-  min-height: 0;
-}
-
 .font-card-grid.is-list .font-card-body {
   padding-top: 64px;
   padding-bottom: 32px;
@@ -48,11 +48,6 @@
   border-radius: 50%;
   background: transparent;
   cursor: pointer;
-  transition: background-color 0.1s ease;
-}
-
-.font-card-copy-btn:hover {
-  background-color: var(--color-light-gray);
 }
 
 .font-card-copy-btn img {
@@ -79,7 +74,8 @@
   z-index: 10;
 }
 
-.font-card-copy-btn:hover::before,
+/* Keyboard-only — the desktop hover overlay on .font-card-body already
+   covers the mouse-hover affordance, so the button itself doesn't need one. */
 .font-card-copy-btn:focus-visible::before {
   opacity: 1;
 }
@@ -108,7 +104,6 @@
   z-index: 10;
 }
 
-.font-card-copy-btn:hover::after,
 .font-card-copy-btn:focus-visible::after {
   opacity: 1;
 }
@@ -121,43 +116,94 @@
 /* ─── Preview text ────────────────────────────────────────────────────────── */
 
 .font-card-preview {
-  flex: 1;
+  flex: none;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
   overflow: hidden;
   word-break: break-word;
   line-height: 1.3;
+  /* Reserve the full 2-line height even when the text only fills 1 line,
+     so cards don't shrink to fit shorter previews. em ties this to the
+     element's own font-size, which is set dynamically per card. */
+  min-height: 2.6em;
   padding-right: 36px; /* clear the copy button */
   color: var(--color-gray-950);
 }
 
-/* ─── Copy success overlay ────────────────────────────────────────────────── */
+@media (min-width: 600px) {
+  .font-card-preview {
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    min-height: 5.2em;
+  }
+}
 
-.font-card-copy-overlay {
+/* ─── Copy success / hover overlays ──────────────────────────────────────── */
+
+.font-card-success-overlay,
+.font-card-hover-overlay {
   position: absolute;
   inset: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  background: var(--S2AC-Palette-transparent-black-700, rgba(0, 0, 0, 0.69));
+  gap: var(--spacing-300);
+  background: rgba(0, 0, 0, 0.69);
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
   border-radius: inherit;
 }
 
-.font-card.is-copied .font-card-copy-overlay {
+/* Sits above the hover overlay so a click's success state isn't masked by it. */
+.font-card-success-overlay {
+  z-index: 3;
+}
+
+.font-card-hover-overlay {
+  z-index: 2;
+  gap: var(--spacing-100);
+}
+
+.font-card.is-copied .font-card-success-overlay {
   opacity: 1;
+}
+
+/* Desktop-only affordance — mobile/tablet get no mouse hover. */
+@media (hover: hover) and (min-width: 1200px) {
+  .font-card-body:hover .font-card-hover-overlay {
+    opacity: 1;
+  }
+}
+
+/* Both overlays share a translucent background, so the hover overlay would
+   otherwise bleed through the copy overlay while the mouse is still over
+   the card. Must come after the :hover rule above to win the tie. */
+.font-card.is-copied .font-card-hover-overlay {
+  opacity: 0;
 }
 
 .font-card-check-icon {
   display: block;
   flex-shrink: 0;
+  width: 56px;
+  height: 56px;
 }
 
-.font-card-copy-message {
+.font-card-hover-icon {
+  display: block;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+}
+
+.font-card-overlay-message {
   font-family: var(--body-font-family);
-  font-size: 16px;
+  font-size: var(--Global-Typography-Size-Label-Label-M);
   font-weight: 700;
   color: var(--color-white);
   line-height: 1.2;
@@ -170,16 +216,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  border-top: 1px solid var(--color-light-gray);
-  padding: 8px 16px 16px;
+  padding: var(--spacing-300);
   min-height: 36px;
 }
 
 .font-card-name {
   font-family: var(--body-font-family);
-  font-size: 12px;
+  font-size: var(--Global-Typography-Size-Label-Label-M);
   font-weight: 700;
-  color: var(--color-dark-gray);
+  color: var(--Alias-content-typography-Title);
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -211,6 +256,11 @@ main a.font-card-cta {
   background: var(--color-black);
 }
 
+.font-card-cta:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 4px;
+}
+
 .font-card-cta-icon {
   display: block;
   width: 16px;
@@ -231,4 +281,11 @@ main a.font-card-cta {
   clip: rect(0 0 0 0);
   clip-path: inset(50%);
   white-space: nowrap;
+}
+
+/* ─── Tablet ───────────────── */
+@media (min-width: 600px) {
+  .font-card {
+    border-radius: var(--Corner-radius-corner-radius-200);
+  }
 }

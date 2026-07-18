@@ -63,7 +63,14 @@
 }
 
 .font-card-load-more:hover {
-  background-color: rgba(0, 0, 0, 0.06);
+  background-color: var(--Palette-gray-200);
+}
+
+.font-card-load-more:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 4px;
+  border-radius: 28px;
+  background-color: var(--Palette-gray-200);
 }
 
 .font-card-load-more[hidden] {

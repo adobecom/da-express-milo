@@ -13,9 +13,11 @@
 export const INITIAL_VISIBLE_COUNT = 12;
 export const LOAD_MORE_STEP = 12;
 export const DEFAULT_LAYOUT = /** @type {'grid'} */ ('grid');
-export const DEFAULT_FONT_SIZE = 16;
-export const FONT_SIZE_MIN = 12;
-export const FONT_SIZE_MAX = 48;
+export const DEFAULT_FONT_SIZE = 40;
+export const DEFAULT_FONT_SIZE_MOBILE = 28;
+export const FONT_SIZE_MOBILE_BREAKPOINT = 600;
+export const FONT_SIZE_MIN = 8;
+export const FONT_SIZE_MAX = 100;
 
 // ─── Font data (font-styles.json) ─────────────────────────────────────────────
 
