@@ -39,6 +39,7 @@ function makeCopyBtn(copyLabel) {
   btn.type = 'button';
   btn.className = 'font-card-copy-btn';
   btn.setAttribute('aria-label', copyLabel);
+  btn.setAttribute('daa-ll', copyLabel);
   btn.dataset.tooltip = copyLabel;
 
   const icon = document.createElement('img');
@@ -98,6 +99,7 @@ function makeCtaLink(cardCta) {
   a.href = cardCta.href;
   a.target = '_blank';
   a.rel = 'noopener noreferrer';
+  a.setAttribute('daa-ll', cardCta.text);
 
   const icon = document.createElement('img');
   icon.src = '/express/code/icons/font-generator-external-link.svg';
@@ -156,11 +158,13 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
       card.classList.add('is-copied');
       copyBtn.dataset.tooltip = copiedLabel;
       copyBtn.setAttribute('aria-label', copiedLabel);
+      copyBtn.setAttribute('daa-ll', copiedLabel);
       announce(copiedMessage);
       resetTimer = setTimeout(() => {
         card.classList.remove('is-copied');
         copyBtn.dataset.tooltip = copyLabel;
         copyBtn.setAttribute('aria-label', copyLabel);
+        copyBtn.setAttribute('daa-ll', copyLabel);
         overlayTimer = setTimeout(() => {
           activeOverlay?.remove();
           activeOverlay = null;

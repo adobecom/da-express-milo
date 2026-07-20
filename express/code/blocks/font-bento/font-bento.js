@@ -25,7 +25,10 @@ export default async function decorate(block) {
     header.append(textContent);
     if (ctaArea) {
       const ctaLinks = [...ctaArea.querySelectorAll('a')];
-      ctaLinks.forEach((a) => formatDynamicCartLink(a));
+      ctaLinks.forEach((a) => {
+        formatDynamicCartLink(a);
+        a.setAttribute('daa-ll', a.textContent.trim());
+      });
       await trackBranchParameters(ctaLinks);
       header.append(ctaArea);
     }

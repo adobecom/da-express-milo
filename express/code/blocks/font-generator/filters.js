@@ -46,6 +46,7 @@ export function buildPromo(btnClass, { title, cta } = {}) {
     class: btnClass,
     target: '_blank',
     rel: 'noopener noreferrer',
+    'daa-ll': cta,
   }, cta);
 
   const promo = createTag('div', { class: 'fg-promo' });
