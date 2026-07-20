@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@how-to-cards-cards-count-4",
       "selector": "div.how-to-cards.cards-count-4",
-      "path": "/drafts/nala/test-gen/ax-how-to-cards/how-to-cards",
+      "path": "/drafts/nala/blocks/ax-how-to-cards/how-to-cards",
       "data": {
         "semantic": {
           "texts": [
@@ -145,7 +145,7 @@
       "tcid": "1",
       "name": "@how-to-cards-center-cards-count-2",
       "selector": "div.how-to-cards.center.cards-count-2",
-      "path": "/drafts/nala/test-gen/ax-how-to-cards/how-to-cards-center",
+      "path": "/drafts/nala/blocks/ax-how-to-cards/how-to-cards-center",
       "data": {
         "semantic": {
           "texts": [

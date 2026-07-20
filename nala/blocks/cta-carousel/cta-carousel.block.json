@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@cta-carousel-create",
       "selector": "div.cta-carousel.create",
-      "path": "/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create",
+      "path": "/drafts/nala/blocks/ax-cta-carousel/cta-carousel-create",
       "data": {
         "semantic": {
           "texts": [
@@ -286,7 +286,7 @@
               "selector": "a.quick-link.con-button.blue",
               "nth": 0,
               "text": "Create now",
-              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Instagram+square+post&width=1080&height=1080&unit=px",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/blocks/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Instagram+square+post&width=1080&height=1080&unit=px",
               "ariaLabel": "instagram square post create now",
               "rel": "nofollow",
               "title": null,
@@ -297,7 +297,7 @@
               "selector": "a.quick-link.con-button.blue",
               "nth": 1,
               "text": "Create now",
-              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Flyer&width=5&height=11&unit=in",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/blocks/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Flyer&width=5&height=11&unit=in",
               "ariaLabel": "flyer create now",
               "rel": "nofollow",
               "title": null,
@@ -308,7 +308,7 @@
               "selector": "a.quick-link.con-button.blue",
               "nth": 2,
               "text": "Create now",
-              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Instagram+story&width=1080&height=1920&unit=px",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/blocks/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Instagram+story&width=1080&height=1920&unit=px",
               "ariaLabel": "instagram story create now",
               "rel": "nofollow",
               "title": null,
@@ -319,7 +319,7 @@
               "selector": "a.quick-link.con-button.blue",
               "nth": 3,
               "text": "Create now",
-              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=TikTok+video&width=1080&height=1080&unit=px",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/blocks/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=TikTok+video&width=1080&height=1080&unit=px",
               "ariaLabel": "tiktok video create now",
               "rel": "nofollow",
               "title": null,
@@ -330,7 +330,7 @@
               "selector": "a.quick-link.con-button.blue",
               "nth": 4,
               "text": "Create now",
-              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=500x500px&width=500&height=500&unit=px",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/blocks/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=500x500px&width=500&height=500&unit=px",
               "ariaLabel": "500x500px create now",
               "rel": "nofollow",
               "title": null,
@@ -352,7 +352,7 @@
               "selector": "a.quick-link.con-button.blue",
               "nth": 5,
               "text": "Create now",
-              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Facebook+post&width=1080&height=1080&unit=px",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/blocks/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Facebook+post&width=1080&height=1080&unit=px",
               "ariaLabel": "facebook post create now",
               "rel": "nofollow",
               "title": null,
@@ -363,7 +363,7 @@
               "selector": "a.quick-link.con-button.blue",
               "nth": 6,
               "text": "Create now",
-              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Instagram+reel&width=1080&height=1920&unit=px",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/blocks/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Instagram+reel&width=1080&height=1920&unit=px",
               "ariaLabel": "instagram reel create now",
               "rel": "nofollow",
               "title": null,
@@ -374,7 +374,7 @@
               "selector": "a.quick-link.con-button.blue",
               "nth": 7,
               "text": "Create now",
-              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Poster&width=11&height=17&unit=in",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/blocks/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=Poster&width=11&height=17&unit=in",
               "ariaLabel": "poster create now",
               "rel": "nofollow",
               "title": null,
@@ -385,7 +385,7 @@
               "selector": "a.quick-link.con-button.blue",
               "nth": 8,
               "text": "Create now",
-              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=YouTube+thumbnail&width=1280&height=720&unit=px",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/blocks/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=YouTube+thumbnail&width=1280&height=720&unit=px",
               "ariaLabel": "youtube thumbnail create now",
               "rel": "nofollow",
               "title": null,
@@ -396,7 +396,7 @@
               "selector": "a.quick-link.con-button.blue",
               "nth": 9,
               "text": "Create now",
-              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=YouTube+video&width=1920&height=1080&unit=px",
+              "href": "/c4bWARQhWAb?category=templates&url=/drafts/nala/blocks/ax-cta-carousel/cta-carousel-create&placement=cta-carousel&locale=en-US&contentRegion=us&q=YouTube+video&width=1920&height=1080&unit=px",
               "ariaLabel": "youtube video create now",
               "rel": "nofollow",
               "title": null,
@@ -448,7 +448,7 @@
       "tcid": "1",
       "name": "@cta-carousel-gen-ai-upload",
       "selector": "div.cta-carousel.gen-ai.upload",
-      "path": "/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-gen-ai-upload",
+      "path": "/drafts/nala/blocks/ax-cta-carousel/cta-carousel-gen-ai-upload",
       "data": {
         "semantic": {
           "texts": [
@@ -688,7 +688,7 @@
       "tcid": "2",
       "name": "@cta-carousel-gen-ai",
       "selector": "div.cta-carousel.gen-ai",
-      "path": "/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-gen-ai",
+      "path": "/drafts/nala/blocks/ax-cta-carousel/cta-carousel-gen-ai",
       "data": {
         "semantic": {
           "texts": [
@@ -932,7 +932,7 @@
       "tcid": "3",
       "name": "@cta-carousel-quick-action",
       "selector": "div.cta-carousel.quick-action",
-      "path": "/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-quick-action",
+      "path": "/drafts/nala/blocks/ax-cta-carousel/cta-carousel-quick-action",
       "data": {
         "semantic": {
           "texts": [
@@ -1204,7 +1204,7 @@
       "tcid": "4",
       "name": "@cta-carousel-quick-action-gen-ai",
       "selector": "div.cta-carousel.quick-action.gen-ai",
-      "path": "/drafts/nala/test-gen/ax-cta-carousel/cta-carousel-quick-action-gen-ai",
+      "path": "/drafts/nala/blocks/ax-cta-carousel/cta-carousel-quick-action-gen-ai",
       "data": {
         "semantic": {
           "texts": [
