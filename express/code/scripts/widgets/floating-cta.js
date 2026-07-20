@@ -1,4 +1,5 @@
 import { getLibs, getLottie, lazyLoadLottiePlayer, createTag, getMobileOperatingSystem, getIconElementDeprecated } from '../utils.js';
+import { setDaaLL } from '../utils/analytics.js';
 import BlockMediator from '../block-mediator.min.js';
 
 export const hideScrollArrow = (floatButtonWrapper, lottieScrollButton) => {
@@ -84,9 +85,11 @@ function makeCTAFromSheet(block, data) {
   const audienceSpecificText = audience && ['desktop', 'mobile'].includes(audience) ? data.mainCta[`${audience}Text`] : null;
   const buttonContainer = createTag('div', { class: 'button-container' });
   const ctaText = audienceSpecificText || data.mainCta.text;
-  const ctaFromSheet = createTag('a', { href: audienceSpecificUrl || data.mainCta.href, title: ctaText, 'daa-ll': ctaText });
+  const ctaFromSheet = createTag('a', { href: audienceSpecificUrl || data.mainCta.href, title: ctaText });
   ctaFromSheet.textContent = ctaText;
+  setDaaLL(ctaFromSheet, ctaText);
   buttonContainer.append(ctaFromSheet);
+  block.setAttribute('daa-lh', 'floating-cta');
   block.append(buttonContainer);
 
   return ctaFromSheet;
