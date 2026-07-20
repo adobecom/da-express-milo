@@ -1,64 +1,9 @@
 import { getLibs } from '../../scripts/utils.js';
-import { debounce, throttle } from '../../scripts/utils/hofs.js';
+import buildGallery from '../../scripts/widgets/gallery/gallery.js';
 
 let createTag;
 let getConfig;
 let replaceKey;
-
-// Stroke-based chevrons (discover-cards style) scaled to 18×18.
-// stroke="currentColor" lets CSS color: control the tint — works for both
-// light and dark modes without filter hacks.
-const CHEVRON_LEFT = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M11 4L6 9L11 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const CHEVRON_RIGHT = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M7 4L12 9L7 14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-
-function parseSVG(str) {
-  return new DOMParser().parseFromString(str, 'image/svg+xml').documentElement;
-}
-
-function buildControls(items, gallery, labels) {
-  const controls = createTag('div', { class: 'icon-carousel-controls' });
-  const prevBtn = createTag('button', { class: 'icon-carousel-btn icon-carousel-prev', 'aria-label': labels.prev });
-  const nextBtn = createTag('button', { class: 'icon-carousel-btn icon-carousel-next', 'aria-label': labels.next });
-
-  prevBtn.append(parseSVG(CHEVRON_LEFT));
-  nextBtn.append(parseSVG(CHEVRON_RIGHT));
-
-  const len = items.length;
-  const intersecting = items.map(() => false);
-
-  const pageInc = throttle((inc) => {
-    const first = intersecting.indexOf(true);
-    if (first === -1) return;
-    const next = first + inc;
-    if (next < 0 || next >= len) return;
-    items[next].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
-  }, 200);
-
-  prevBtn.addEventListener('click', () => pageInc(-1));
-  nextBtn.addEventListener('click', () => pageInc(1));
-
-  const update = debounce((first, last) => {
-    const allVisible = first === 0 && last === len - 1;
-    controls.classList.toggle('is-hidden', allVisible);
-    prevBtn.disabled = first === 0;
-    nextBtn.disabled = last === len - 1;
-  }, 300);
-
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach((e) => {
-      intersecting[items.indexOf(e.target)] = e.isIntersecting;
-    });
-    const first = intersecting.indexOf(true);
-    const last = intersecting.lastIndexOf(true);
-    if (first !== -1) update(first, last);
-  }, { root: gallery, threshold: 1, rootMargin: '0px 16px 0px 16px' });
-
-  items.forEach((item) => observer.observe(item));
-
-  controls.classList.add('is-hidden');
-  controls.append(prevBtn, nextBtn);
-  return controls;
-}
 
 export default async function decorate(block) {
   ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
@@ -81,9 +26,9 @@ export default async function decorate(block) {
   if (heading) header.append(heading);
   if (subtitle) header.append(subtitle);
 
-  const gallery = createTag('div', { class: 'icon-carousel-gallery', role: 'region' });
-  // A region landmark needs an accessible name. Prefer the authored heading;
-  // fall back to a localized label so the region is never left unnamed.
+  const gallery = createTag('div', { class: 'icon-carousel-gallery' });
+  // buildGallery marks this container role="group" aria-roledescription="carousel";
+  // give that grouping an accessible name from the heading, or a localized fallback.
   gallery.setAttribute('aria-label', heading ? heading.textContent.trim() : (regionLabel || 'Feature highlights'));
 
   cardRows.forEach((row) => {
@@ -113,10 +58,12 @@ export default async function decorate(block) {
   });
 
   const cards = [...gallery.querySelectorAll('.icon-carousel-card')];
-  const controls = buildControls(cards, gallery, {
-    prev: prevLabel || 'Previous',
-    next: nextLabel || 'Next',
-  });
+  // Reuse the shared gallery widget for prev/next + IntersectionObserver +
+  // hide-when-all-visible; the control is re-skinned in CSS.
+  const { control } = await buildGallery(cards, gallery);
+  // The widget hardcodes English aria-labels; swap in the localized placeholders.
+  control.querySelector('.prev')?.setAttribute('aria-label', prevLabel || 'Previous');
+  control.querySelector('.next')?.setAttribute('aria-label', nextLabel || 'Next');
 
-  block.replaceChildren(header, gallery, controls);
+  block.replaceChildren(header, gallery, control);
 }

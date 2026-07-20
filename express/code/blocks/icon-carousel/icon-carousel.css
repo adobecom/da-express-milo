@@ -112,72 +112,42 @@
   line-height: 1.3;
 }
 
-.icon-carousel-controls {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--spacing-100);
+/* ── Controls ───────────────────────────────────────────────────────
+ * The prev/next control comes from the shared gallery widget
+ * (scripts/widgets/gallery/gallery.js), which already handles paging,
+ * the IntersectionObserver, and hiding itself when all cards fit. Its
+ * base styles live in the widget's gallery.css; the rules below only
+ * re-skin the buttons to match this block's design. */
+.icon-carousel .gallery-control {
   padding-top: var(--spacing-500);
 }
 
-.icon-carousel-controls.is-hidden {
-  display: none;
-}
-
-.icon-carousel-btn {
+.icon-carousel .gallery-control button {
   width: var(--spacing-500);
   height: var(--spacing-500);
-  padding: var(--spacing-80);
-  border: none;
-  border-radius: 100px;
-  background: var(--color-white);
-  color: var(--color-gray-800);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
   box-shadow:
     0 0 1px rgba(0, 0, 0, 0.08),
     0 1px 4px rgba(0, 0, 0, 0.04),
     0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: background 150ms ease-out, box-shadow 150ms ease-out;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: 1;
-  appearance: none;
-  -webkit-appearance: none;
+  transition: box-shadow 150ms ease-out;
 }
 
-.icon-carousel-btn:hover:not(:disabled) {
-  background: var(--color-gray-325);
+.icon-carousel .gallery-control button svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.icon-carousel .gallery-control button:hover:not(:disabled) {
   box-shadow:
     0 0 2px rgba(0, 0, 0, 0.12),
     0 2px 6px rgba(0, 0, 0, 0.04),
     0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-.icon-carousel-btn:active:not(:disabled) {
-  background: var(--color-gray-350-variant);
-  transition: background 50ms ease-out;
-}
-
-.icon-carousel-btn:focus {
-  outline: none;
-}
-
-.icon-carousel-btn:focus-visible {
+.icon-carousel .gallery-control button:focus-visible {
   outline: 2px solid var(--color-background-accent-default);
-  outline-offset: -4px;
-}
-
-.icon-carousel-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.icon-carousel-btn svg {
-  display: block;
-  flex-shrink: 0;
+  outline-offset: 2px;
 }
 
 /* ── Tablet (M) ≥ 600px ─────────────────────────────────────────── */
@@ -277,7 +247,5 @@
   color: var(--color-white);
 }
 
-.icon-carousel.dark .icon-carousel-btn {
-  background: var(--color-white);
-  color: var(--color-gray-800);
-}
+/* The widget's control SVG is a white circle with a dark chevron, so the
+   buttons need no dark-mode override — they stay legible on the black bg. */
