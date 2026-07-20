@@ -6,6 +6,10 @@ const STYLESHEET_HREF = `${BASE_PATH}/textInput.css`;
 const DEBOUNCE_MS = 300;
 const MIN_TEXTAREA_HEIGHT = 104; // matches textInput.css .label min-height
 
+// Unique-id counter so each instance's visible label associates with its own
+// textarea (avoids duplicate ids if more than one input is ever rendered).
+let instanceId = 0;
+
 function injectStyles() {
   if (document.querySelector(`link[href="${STYLESHEET_HREF}"]`)) return;
   const link = document.createElement('link');
@@ -18,6 +22,7 @@ const template = document.createElement('template');
 template.innerHTML = `<div class="font-generator-text-input">
   <div class="text-field">
     <div class="text-area-l-in-line">
+      <label class="preview-text-label"></label>
       <div class="field">
         <textarea class="label"></textarea>
         <div class="counter-expander">
@@ -172,6 +177,8 @@ function applyStrings(panel, strings = {}) {
     if (strings.previewPlaceholder) textarea.placeholder = strings.previewPlaceholder;
     if (strings.inputLabel) textarea.setAttribute('aria-label', strings.inputLabel);
   }
+  const previewLabel = panel.querySelector('.preview-text-label');
+  if (previewLabel && strings.previewTextLabel) previewLabel.textContent = strings.previewTextLabel;
   const tryThese = panel.querySelector('.text-wrapper');
   if (tryThese && strings.tryThese) tryThese.textContent = strings.tryThese;
 }
@@ -181,6 +188,17 @@ export default function createTextInput(config = {}) {
   const panel = template.content.firstElementChild.cloneNode(true);
   const textarea = panel.querySelector('textarea.label');
   textarea.maxLength = config.strings?.maxLength || DEFAULT_PLACEHOLDERS.maxLength;
+
+  // Associate the visible "Preview Text" label with the textarea so it names
+  // the field programmatically (clicking the label also focuses the input).
+  instanceId += 1;
+  const previewLabel = panel.querySelector('.preview-text-label');
+  if (textarea && previewLabel) {
+    const inputId = `font-generator-preview-input-${instanceId}`;
+    textarea.id = inputId;
+    previewLabel.htmlFor = inputId;
+  }
+
   applyStrings(panel, config.strings);
   initResizeHandle(panel);
   const cancelPendingInput = initTextInput(panel);
