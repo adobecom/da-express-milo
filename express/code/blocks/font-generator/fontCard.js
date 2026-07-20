@@ -1,11 +1,16 @@
 // @import { FontDef } from './types.js'
 import { transformText } from './unicodeEngine.js';
 import { DEFAULT_PLACEHOLDERS } from './placeholders.js';
+import { setDaaLL, setDaaLH } from '../../scripts/utils/analytics.js';
 
 const BASE_PATH = '/express/code/blocks/font-generator';
 const STYLESHEET_HREF = `${BASE_PATH}/fontCard.css`;
 const COPY_RESET_MS = 1500;
 const OVERLAY_FADE_MS = 200;
+// Stable, locale-independent analytics labels for the copy control so daa-ll
+// reporting stays consistent across locales (aria-label/tooltip remain localized).
+const COPY_LL = 'Copy';
+const COPIED_LL = 'Copied';
 
 let stylesInjected = false;
 
@@ -39,7 +44,7 @@ function makeCopyBtn(copyLabel) {
   btn.type = 'button';
   btn.className = 'font-card-copy-btn';
   btn.setAttribute('aria-label', copyLabel);
-  btn.setAttribute('daa-ll', copyLabel);
+  setDaaLL(btn, COPY_LL);
   btn.dataset.tooltip = copyLabel;
 
   const icon = document.createElement('img');
@@ -99,7 +104,7 @@ function makeCtaLink(cardCta) {
   a.href = cardCta.href;
   a.target = '_blank';
   a.rel = 'noopener noreferrer';
-  a.setAttribute('daa-ll', cardCta.text);
+  setDaaLL(a, cardCta.text);
 
   const icon = document.createElement('img');
   icon.src = '/express/code/icons/font-generator-external-link.svg';
@@ -136,6 +141,8 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
   const card = document.createElement('div');
   card.className = 'font-card';
   card.dataset.fontId = fontDef.id;
+  // Per-card scope so identical link labels (Copy / CTA) stay distinct per card.
+  setDaaLH(card, fontDef.styleName, { fallback: 'Font' });
 
   // Body wraps preview + copy btn so the overlay is bounded above the footer.
   const body = document.createElement('div');
@@ -158,13 +165,13 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
       card.classList.add('is-copied');
       copyBtn.dataset.tooltip = copiedLabel;
       copyBtn.setAttribute('aria-label', copiedLabel);
-      copyBtn.setAttribute('daa-ll', copiedLabel);
+      setDaaLL(copyBtn, COPIED_LL);
       announce(copiedMessage);
       resetTimer = setTimeout(() => {
         card.classList.remove('is-copied');
         copyBtn.dataset.tooltip = copyLabel;
         copyBtn.setAttribute('aria-label', copyLabel);
-        copyBtn.setAttribute('daa-ll', copyLabel);
+        setDaaLL(copyBtn, COPY_LL);
         overlayTimer = setTimeout(() => {
           activeOverlay?.remove();
           activeOverlay = null;

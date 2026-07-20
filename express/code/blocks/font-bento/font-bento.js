@@ -1,4 +1,5 @@
 import { getLibs, formatDynamicCartLink } from '../../scripts/utils.js';
+import { setDaaLL } from '../../scripts/utils/analytics.js';
 
 export default async function decorate(block) {
   const [
@@ -11,6 +12,7 @@ export default async function decorate(block) {
     import('../../scripts/branchlinks.js'),
   ]);
   await decorateButtons(block);
+  block.setAttribute('daa-lh', 'font-bento');
 
   // Row 0: section header (heading + body + CTA)
   const headerCell = block.firstElementChild?.querySelector(':scope > div');
@@ -27,7 +29,7 @@ export default async function decorate(block) {
       const ctaLinks = [...ctaArea.querySelectorAll('a')];
       ctaLinks.forEach((a) => {
         formatDynamicCartLink(a);
-        a.setAttribute('daa-ll', a.textContent.trim());
+        setDaaLL(a, a.textContent);
       });
       await trackBranchParameters(ctaLinks);
       header.append(ctaArea);

@@ -1,6 +1,7 @@
 import { createTag, getLibs } from '../../scripts/utils.js';
 import { getState, setState, subscribe, getCategories } from './state.js';
 import { createExpressAccordion } from '../../scripts/color-shared/spectrum/index.js';
+import { setDaaLL } from '../../scripts/utils/analytics.js';
 
 const ADOBE_FONTS_HREF = 'https://fonts.adobe.com';
 
@@ -46,8 +47,8 @@ export function buildPromo(btnClass, { title, cta } = {}) {
     class: btnClass,
     target: '_blank',
     rel: 'noopener noreferrer',
-    'daa-ll': cta,
   }, cta);
+  setDaaLL(link, cta);
 
   const promo = createTag('div', { class: 'fg-promo' });
   promo.append(left, link);

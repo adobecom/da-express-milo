@@ -256,6 +256,7 @@ async function decorateAsync(block) {
 }
 
 export default function decorate(block) {
+  block.setAttribute('daa-lh', 'font-generator');
   block.replaceChildren(createSkeleton());
   if (new URLSearchParams(window.location.search).has('fg-skeleton')) return;
 
