@@ -2,8 +2,8 @@
  * Spec: Font Generator SEO Page — Figma node 3763:178198
  * Breakpoints follow the Figma devices:
  *   Mobile  (S)  <  600px   1-column, image stacked below the text
- *   Tablet  (M)  ≥  600px   2-column that wraps back to 1-column below
- *                           ~853px (image scales 409.5px → 387px min)
+ *   Tablet  (M)  ≥  600px   2-column that wraps back to 1-column when
+ *                           two columns no longer fit (--tim-column-min)
  *   Desktop (L)  ≥ 1200px   2-column with a fixed 787.5px image
  * The image is anchored to the bottom edge of the block (no bottom
  * padding) so the transparent PNG bleeds into the section below.
@@ -12,6 +12,17 @@
  * ------------------------------------------------------------------ */
 
 .transparent-image-marquee {
+  /* Figma-derived layout sizes, named so the shared values stay in sync. */
+  --tim-column-min: 387px;         /* min width of each column before it wraps */
+  --tim-text-max: 500px;           /* text column cap, 1-column tablet */
+  --tim-text-tablet-max: 338px;    /* text column cap, 2-column tablet */
+  --tim-text-desktop-max: 438px;   /* text column cap, desktop */
+  --tim-image-tablet-w: 409.5px;   /* capped image, 2-column tablet */
+  --tim-image-tablet-h: 273px;
+  --tim-image-desktop-min-w: 600px;
+  --tim-image-desktop-w: 787.5px;  /* fixed desktop image (3:2 → 525px tall) */
+  --tim-image-desktop-h: 525px;
+
   background: var(--color-black);
   color: var(--color-white);
   display: flex;
@@ -110,12 +121,12 @@
 }
 
 .transparent-image-marquee .cta.primary {
-  background: #3b63fb;
+  background: var(--Buttons-default);
   color: var(--color-white);
 }
 
 .transparent-image-marquee .cta.primary:hover {
-  background: #274beb;
+  background: var(--Buttons-hover);
 }
 
 .transparent-image-marquee .cta.secondary {
@@ -182,11 +193,11 @@
     gap: var(--spacing-300);
   }
 
-  /* Both columns want ≥387px; flex-wrap drops the image below the text
-     once two 387px columns no longer fit (≈853px viewport). */
+  /* Both columns want ≥var(--tim-column-min); flex-wrap drops the image
+     below the text once two columns no longer fit. */
   .transparent-image-marquee .main-container {
-    flex: 1 1 387px;
-    min-width: 387px;
+    flex: 1 1 var(--tim-column-min);
+    min-width: var(--tim-column-min);
     justify-content: center;
     padding-block: var(--spacing-600);
     /* text column bottom-aligns with the image on tablet */
@@ -196,38 +207,38 @@
 
   /* Figma spec (Text-content): max-width 500px. Only reachable in the
      1-column stacked state (main-container is full width there); the
-     854-1199 2-column state overrides this narrower below. */
+     2-column tablet state overrides this narrower below. */
   .transparent-image-marquee .text-content {
-    max-width: 500px;
+    max-width: var(--tim-text-max);
   }
 
   .transparent-image-marquee .image-container {
-    flex: 1 1 387px;
-    min-width: 387px;
+    flex: 1 1 var(--tim-column-min);
+    min-width: var(--tim-column-min);
     align-self: flex-end;
     width: auto;
   }
 }
 
-/* ── Tablet 2-column (≥854px, before it wraps to 1-column) ─────────
- * Cap the image at the Figma frame size (409.5px wide × 273px tall) so
- * it stops growing on wider tablets. The block itself grows to fit the
- * text (taller with CTAs) rather than clipping it. Below 854px the
- * layout is stacked and left uncapped so the image keeps full-width 3:2. */
-@media (min-width: 854px) and (max-width: 1199px) {
+/* ── Tablet 2-column (≥900px, before it wraps to 1-column) ─────────
+ * Cap the image at the Figma frame size so it stops growing on wider
+ * tablets. The block itself grows to fit the text (taller with CTAs)
+ * rather than clipping it. Below this the layout is stacked and left
+ * uncapped so the image keeps full-width 3:2. */
+@media (min-width: 900px) and (max-width: 1199px) {
   /* Narrower than the 500px spec max since the image column now shares
      the row; keeps the approved side-by-side proportions from R1. */
   .transparent-image-marquee .text-content {
-    max-width: 338px;
+    max-width: var(--tim-text-tablet-max);
   }
 
   .transparent-image-marquee .image-container {
-    max-width: 409.5px;
-    max-height: 273px;
+    max-width: var(--tim-image-tablet-w);
+    max-height: var(--tim-image-tablet-h);
   }
 
   .transparent-image-marquee .image-container img {
-    max-height: 273px;
+    max-height: var(--tim-image-tablet-h);
   }
 }
 
@@ -252,16 +263,16 @@
   }
 
   .transparent-image-marquee .text-content {
-    max-width: 438px;
+    max-width: var(--tim-text-desktop-max);
   }
 
-  /* 787.5px wide at 3:2 → 525px tall, matching the desktop Figma frame */
+  /* Fixed desktop image at 3:2, matching the desktop Figma frame */
   .transparent-image-marquee .image-container {
     flex: 0 0 auto;
     align-self: flex-end;
-    min-width: 600px;
-    width: 787.5px;
-    max-height: 525px;
+    min-width: var(--tim-image-desktop-min-w);
+    width: var(--tim-image-desktop-w);
+    max-height: var(--tim-image-desktop-h);
   }
 
   /* Desktop type scale: heading 45px, body 16px (Figma 1440px frame) */
