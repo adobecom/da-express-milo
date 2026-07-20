@@ -202,6 +202,20 @@
   }
 }
 
+/* ── Widescreen (XL) ≥ 1440px ───────────────────────────────────────
+ * Inset the content 160px from the left edge; the gallery still bleeds
+ * to the right edge so a partial card keeps signalling the scroll. */
+@media (min-width: 1440px) {
+  .icon-carousel {
+    padding-left: 160px;
+  }
+
+  .icon-carousel-gallery {
+    padding-inline-start: 160px;
+    scroll-padding-left: 160px;
+  }
+}
+
 /* ── no-subcopy variant ─────────────────────────────────────────── */
 
 .icon-carousel.no-subcopy .icon-carousel-header p {
