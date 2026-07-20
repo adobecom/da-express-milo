@@ -13,13 +13,15 @@
 }
 
 .icon-carousel {
-  padding: var(--spacing-600) var(--spacing-300);
+  --icon-carousel-inset: var(--spacing-300);
+  padding: var(--spacing-600) 0;
   box-sizing: border-box;
 }
 
 .icon-carousel-header {
   max-width: 553px;
   margin-bottom: var(--spacing-500);
+  margin-inline: var(--icon-carousel-inset);
 }
 
 .icon-carousel-header h1,
@@ -48,12 +50,12 @@
   scrollbar-width: none;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  /* Full-bleed: extend the scroll track to both edges of the viewport, then
-     re-inset the cards with padding so the first/last cards line up with the
-     header. scroll-padding keeps snapped cards aligned to that inset. */
-  margin-inline: calc(50% - 50vw);
-  padding-inline: var(--spacing-300);
-  scroll-padding-left: var(--spacing-300);
+  /* Cards share the header's left inset so they always stay aligned; the
+     track bleeds only to the right viewport edge so a partial card keeps
+     signalling the scroll. scroll-padding keeps snapped cards aligned. */
+  margin-inline-end: calc(50% - 50vw);
+  padding-inline-start: var(--icon-carousel-inset);
+  scroll-padding-left: var(--icon-carousel-inset);
 }
 
 .icon-carousel-gallery::-webkit-scrollbar {
@@ -120,6 +122,7 @@
  * re-skin the buttons to match this block's design. */
 .icon-carousel .gallery-control {
   padding-top: var(--spacing-500);
+  padding-inline: var(--icon-carousel-inset);
 }
 
 .icon-carousel .gallery-control button {
@@ -153,12 +156,7 @@
 /* ── Tablet (M) ≥ 600px ─────────────────────────────────────────── */
 @media (min-width: 600px) {
   .icon-carousel {
-    padding: var(--spacing-600) var(--spacing-500);
-  }
-
-  .icon-carousel-gallery {
-    padding-inline: var(--spacing-500);
-    scroll-padding-left: var(--spacing-500);
+    --icon-carousel-inset: var(--spacing-500);
   }
 
   .icon-carousel-card {
@@ -169,7 +167,8 @@
 /* ── Desktop (L) ≥ 1200px ───────────────────────────────────────── */
 @media (min-width: 1200px) {
   .icon-carousel {
-    padding: var(--spacing-900) var(--spacing-600);
+    --icon-carousel-inset: var(--spacing-600);
+    padding: var(--spacing-900) 0;
   }
 
   .icon-carousel-header h1,
@@ -181,11 +180,6 @@
 
   .icon-carousel .icon-carousel-header p {
     font-size: var(--body-font-size-l);
-  }
-
-  .icon-carousel-gallery {
-    padding-inline: var(--spacing-600);
-    scroll-padding-left: var(--spacing-600);
   }
 
   .icon-carousel-card-body h1,
@@ -207,12 +201,7 @@
  * to the right edge so a partial card keeps signalling the scroll. */
 @media (min-width: 1440px) {
   .icon-carousel {
-    padding-left: 160px;
-  }
-
-  .icon-carousel-gallery {
-    padding-inline-start: 160px;
-    scroll-padding-left: 160px;
+    --icon-carousel-inset: 160px;
   }
 }
 
