@@ -35,6 +35,12 @@ test.describe('IconCarouselBlock Test Suite', () => {
       await expect(block.cardBodies.first()).toBeVisible();
     });
 
+    await test.step('step-4b: Gallery carousel group has an accessible name', async () => {
+      await expect(block.gallery).toHaveAttribute('role', 'group');
+      const label = await block.gallery.getAttribute('aria-label');
+      expect(label && label.trim().length).toBeTruthy();
+    });
+
     await test.step('step-5: Verify card icons are present', async () => {
       await expect(block.cardIcons.first()).toBeVisible();
     });
@@ -88,6 +94,29 @@ test.describe('IconCarouselBlock Test Suite', () => {
     await test.step('step-4: Nav buttons are visible in dark mode', async () => {
       await expect(block.prevBtn).toBeVisible();
       await expect(block.nextBtn).toBeVisible();
+    });
+  });
+
+  // Test Id : 2 : @icon-carousel-widescreen
+  test(`[Test Id - ${features[2].tcid}] ${features[2].name} ${features[2].tags}`, async ({ page, baseURL }) => {
+    const testUrl = `${baseURL}${features[2].path}${miloLibs}`;
+    const block = new IconCarouselBlock(page, features[2].selector);
+    const { leftBuffer } = features[2].data;
+
+    await test.step('step-1: Navigate at a widescreen viewport', async () => {
+      await page.setViewportSize({ width: 1600, height: 900 });
+      await page.goto(testUrl);
+      await page.waitForLoadState('domcontentloaded');
+    });
+
+    await test.step('step-2: Block and gallery are visible', async () => {
+      await expect(block.block).toBeVisible();
+      await expect(block.gallery).toBeVisible();
+    });
+
+    await test.step(`step-3: Content is inset ${leftBuffer} from the left`, async () => {
+      await expect(block.block).toHaveCSS('padding-left', leftBuffer);
+      await expect(block.gallery).toHaveCSS('padding-left', leftBuffer);
     });
   });
 });

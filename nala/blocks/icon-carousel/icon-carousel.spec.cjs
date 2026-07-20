@@ -17,5 +17,13 @@ module.exports = {
       data: {},
       tags: '@icon-carousel @express @regression @t2',
     },
+    {
+      tcid: '2',
+      name: '@icon-carousel widescreen left buffer',
+      path: '/drafts/echen/icon-carousel',
+      selector: '.icon-carousel',
+      data: { leftBuffer: '160px' },
+      tags: '@icon-carousel @express @regression @t3',
+    },
   ],
 };
