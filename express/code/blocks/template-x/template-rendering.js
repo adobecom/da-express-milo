@@ -536,6 +536,18 @@ function applyExperimentalCtas(template, cta, btnContainer) {
 
   if (!cta1Url && !cta2Url && !cta1Text && !cta2Text) return null;
 
+  // Premium and animated (and print/video) templates must always default to
+  // the control experience — the single "Edit this template" CTA pointing at
+  // the branch URL — regardless of any test/variant CTA metadata that Target
+  // injects page-wide. Only free static templates opt into the experiment.
+  const isFreeStatic = !variants?.includes('flyer')
+    && !variants?.includes('t-shirt')
+    && !variants?.includes('print')
+    && template.licensingCategory === 'free'
+    && !containsVideo(template.pages);
+
+  if (!isFreeStatic) return null;
+
   if (cta1Url) {
     cta.href = appendTemplateId(sanitizeExternalCtaUrl(cta1Url), template);
   }
@@ -545,14 +557,8 @@ function applyExperimentalCtas(template, cta, btnContainer) {
     cta.setAttribute('aria-label', `${cta1Text} ${getTemplateTitle(template)}`);
   }
 
-  const isFreeStatic = !variants?.includes('flyer')
-    && !variants?.includes('t-shirt')
-    && !variants?.includes('print')
-    && template.licensingCategory === 'free'
-    && !containsVideo(template.pages);
-
   let secondaryCta = null;
-  if (isFreeStatic && cta2Url) {
+  if (cta2Url) {
     const btnTitle = cta2Text || '';
     secondaryCta = createTag('a', {
       href: appendTemplateId(sanitizeExternalCtaUrl(cta2Url), template),
