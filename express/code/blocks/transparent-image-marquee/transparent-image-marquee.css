@@ -15,7 +15,6 @@
   /* Figma-derived layout sizes, named so the shared values stay in sync. */
   --tim-column-min: 387px;         /* min width of each column before it wraps */
   --tim-text-max: 500px;           /* text column cap, 1-column tablet */
-  --tim-text-tablet-max: 338px;    /* text column cap, 2-column tablet */
   --tim-text-desktop-max: 438px;   /* text column cap, desktop */
   --tim-image-tablet-w: 409.5px;   /* capped image, 2-column tablet */
   --tim-image-tablet-h: 273px;
@@ -44,6 +43,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-400);
+  box-sizing: border-box;
   width: 100%;
 }
 
@@ -200,14 +200,17 @@
     min-width: var(--tim-column-min);
     justify-content: center;
     padding-block: var(--spacing-600);
+    /* Figma: text column gets spacing-900 right padding (gap to the image)
+       instead of a fixed max-width cap. */
+    padding-inline-end: var(--spacing-900);
     /* text column bottom-aligns with the image on tablet */
     margin-top: auto;
     margin-bottom: 0;
   }
 
-  /* Figma spec (Text-content): max-width 500px. Only reachable in the
-     1-column stacked state (main-container is full width there); the
-     2-column tablet state overrides this narrower below. */
+  /* Figma spec (Text-content): max-width 500px. In the 2-column tablet state
+     the column's spacing-900 right padding constrains the text before this cap
+     is reached; when stacked, the text fills up to 500px. */
   .transparent-image-marquee .text-content {
     max-width: var(--tim-text-max);
   }
@@ -226,12 +229,6 @@
  * rather than clipping it. Below this the layout is stacked and left
  * uncapped so the image keeps full-width 3:2. */
 @media (min-width: 900px) and (max-width: 1199px) {
-  /* Narrower than the 500px spec max since the image column now shares
-     the row; keeps the approved side-by-side proportions from R1. */
-  .transparent-image-marquee .text-content {
-    max-width: var(--tim-text-tablet-max);
-  }
-
   .transparent-image-marquee .image-container {
     max-width: var(--tim-image-tablet-w);
     max-height: var(--tim-image-tablet-h);
@@ -258,6 +255,8 @@
     flex: 1 1 auto;
     min-width: 0;
     padding-block: var(--spacing-900);
+    /* desktop uses the text-content max-width cap + foreground gap; no tablet inset */
+    padding-inline-end: 0;
     /* text column vertically centers against the image on desktop+ */
     margin: auto;
   }
