@@ -9,9 +9,12 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   // Input panel
   previewPlaceholder: 'Type the preview text you want to get started...',
   inputLabel: 'Preview text input',
+  previewTextLabel: 'Preview Text',
   tryThese: 'Try these:',
   // Comma-separated preview suggestions rendered as pills.
   suggestions: 'The quick brown fox jumps over the lazy dog,ABCDEFGHIJKLMNOPQRSTUVWXYZ,Realigned equestrian fez bewilders picky monarch',
+  // Max characters allowed in the preview text input.
+  maxLength: 2000,
   // Toolbar
   filterTrigger: 'Filter',
   layoutGroupLabel: 'Card layout',
@@ -34,8 +37,10 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
 const PLACEHOLDER_KEY_MAP = Object.freeze({
   previewPlaceholder: 'font-generator-placeholder',
   inputLabel: 'font-generator-input-label',
+  previewTextLabel: 'font-generator-preview-text-label',
   tryThese: 'font-generator-try-these',
   suggestions: 'font-generator-suggestions',
+  maxLength: 'font-generator-max-length',
   filterTrigger: 'font-generator-filter',
   layoutGroupLabel: 'font-generator-layout-group',
   gridViewLabel: 'font-generator-grid-view',
@@ -78,7 +83,10 @@ export default async function loadFontGeneratorPlaceholders() {
 
     Object.entries(PLACEHOLDER_KEY_MAP).forEach(([prop, key], index) => {
       const value = values[index];
-      if (isResolvedPlaceholder(value, key)) strings[prop] = value;
+      if (!isResolvedPlaceholder(value, key)) return;
+      // maxLength is authored as a plain number string; every other
+      // placeholder is used verbatim as display copy.
+      strings[prop] = prop === 'maxLength' ? (parseInt(value, 10) || DEFAULT_PLACEHOLDERS.maxLength) : value;
     });
 
     return strings;
