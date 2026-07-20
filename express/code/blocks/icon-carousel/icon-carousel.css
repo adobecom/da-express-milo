@@ -1,12 +1,9 @@
 /* ── Icon Carousel ──────────────────────────────────────────────────
- * Spec: Font Generator SEO Page — Figma node 3739:169713
- * Breakpoints follow the Figma devices:
- *   Mobile  (S)  <  600px   side padding 16px
- *   Tablet  (M)  ≥  600px   side padding 32px
- *   Desktop (L)  ≥ 1200px   side padding 40px
- * The gallery is full-bleed to the right edge of the viewport so that,
- * once there are enough cards to scroll, a partial card is always
- * visible at the right to signal the carousel is scrollable.
+ * A horizontally scrollable row of feature cards with prev/next
+ * controls. The gallery is full-bleed to the right edge of the
+ * viewport so that, once there are enough cards to scroll, a partial
+ * card is always visible at the right to signal the carousel is
+ * scrollable.
  * ------------------------------------------------------------------ */
 
 /* Let the block span the full content width so the gallery can bleed

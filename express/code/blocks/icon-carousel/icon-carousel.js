@@ -2,6 +2,8 @@ import { getLibs } from '../../scripts/utils.js';
 import { debounce, throttle } from '../../scripts/utils/hofs.js';
 
 let createTag;
+let getConfig;
+let replaceKey;
 
 // Stroke-based chevrons (discover-cards style) scaled to 18×18.
 // stroke="currentColor" lets CSS color: control the tint — works for both
@@ -13,10 +15,10 @@ function parseSVG(str) {
   return new DOMParser().parseFromString(str, 'image/svg+xml').documentElement;
 }
 
-function buildControls(items, gallery) {
+function buildControls(items, gallery, labels) {
   const controls = createTag('div', { class: 'icon-carousel-controls' });
-  const prevBtn = createTag('button', { class: 'icon-carousel-btn icon-carousel-prev', 'aria-label': 'Previous' });
-  const nextBtn = createTag('button', { class: 'icon-carousel-btn icon-carousel-next', 'aria-label': 'Next' });
+  const prevBtn = createTag('button', { class: 'icon-carousel-btn icon-carousel-prev', 'aria-label': labels.prev });
+  const nextBtn = createTag('button', { class: 'icon-carousel-btn icon-carousel-next', 'aria-label': labels.next });
 
   prevBtn.append(parseSVG(CHEVRON_LEFT));
   nextBtn.append(parseSVG(CHEVRON_RIGHT));
@@ -59,10 +61,17 @@ function buildControls(items, gallery) {
 }
 
 export default async function decorate(block) {
-  ({ createTag } = await import(`${getLibs()}/utils/utils.js`));
+  ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
+  ({ replaceKey } = await import(`${getLibs()}/features/placeholders.js`));
 
   const rows = [...block.querySelectorAll(':scope > div')];
   if (!rows.length) return;
+
+  const [prevLabel, nextLabel, regionLabel] = await Promise.all([
+    replaceKey('icon-carousel-previous', getConfig()),
+    replaceKey('icon-carousel-next', getConfig()),
+    replaceKey('icon-carousel-label', getConfig()),
+  ]);
 
   const [headerRow, ...cardRows] = rows;
 
@@ -73,7 +82,9 @@ export default async function decorate(block) {
   if (subtitle) header.append(subtitle);
 
   const gallery = createTag('div', { class: 'icon-carousel-gallery', role: 'region' });
-  if (heading) gallery.setAttribute('aria-label', heading.textContent.trim());
+  // A region landmark needs an accessible name. Prefer the authored heading;
+  // fall back to a localized label so the region is never left unnamed.
+  gallery.setAttribute('aria-label', heading ? heading.textContent.trim() : (regionLabel || 'Feature highlights'));
 
   cardRows.forEach((row) => {
     const cells = [...row.querySelectorAll(':scope > div')];
@@ -102,7 +113,10 @@ export default async function decorate(block) {
   });
 
   const cards = [...gallery.querySelectorAll('.icon-carousel-card')];
-  const controls = buildControls(cards, gallery);
+  const controls = buildControls(cards, gallery, {
+    prev: prevLabel || 'Previous',
+    next: nextLabel || 'Next',
+  });
 
   block.replaceChildren(header, gallery, controls);
 }
