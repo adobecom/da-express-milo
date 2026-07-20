@@ -174,6 +174,7 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
   const preview = document.createElement('div');
   preview.className = 'font-card-preview';
   preview.style.fontSize = `${fontSize}px`;
+  preview.style.fontFamily = `"${fontDef.fontSupported}", var(--body-font-family), sans-serif`;
   preview.textContent = transformText(text, fontDef);
 
   body.append(copyBtn, preview);
