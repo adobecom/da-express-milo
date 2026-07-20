@@ -64,6 +64,8 @@ export default async function decorate(block) {
   // The widget hardcodes English aria-labels; swap in the localized placeholders.
   control.querySelector('.prev')?.setAttribute('aria-label', prevLabel || 'Previous');
   control.querySelector('.next')?.setAttribute('aria-label', nextLabel || 'Next');
+  // Chevron SVGs are decorative; the buttons already carry accessible labels.
+  control.querySelectorAll('svg').forEach((svg) => svg.setAttribute('aria-hidden', 'true'));
 
   block.replaceChildren(header, gallery, control);
 }
