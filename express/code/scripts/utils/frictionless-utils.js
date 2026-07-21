@@ -269,7 +269,7 @@ export function fadeOut(element) {
 
 // Common document configurations
 export function createDocConfig(data, type = 'image') {
-  const dataType = type === 'video' || type === 'audio' ? 'blob' : 'base64';
+  const dataType = ['audio', 'video'].includes(type) ? 'blob' : 'base64';
   return {
     asset: {
       data,
@@ -653,4 +653,13 @@ export async function initProgressBar(replaceKey, getConfig) {
 
 export function isSafari() {
   return getWebBrowser() === 'Safari';
+}
+
+export function getVideoConfig(quickActionId, data) {
+  if (quickActionId === 'merge-videos') {
+    return createMergeVideosDocConfig(data);
+  } else if (quickActionId === 'audio-converter') {
+    return createDocConfig(data[0], 'audio');
+  }
+  return createDocConfig(data[0], 'video');
 }

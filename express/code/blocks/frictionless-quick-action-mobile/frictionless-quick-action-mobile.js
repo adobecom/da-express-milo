@@ -20,6 +20,7 @@ import {
   loadAndInitializeCCEverywhere,
   getErrorMsg,
   shouldShowVideoQuickActionPickerForMobile,
+  getVideoConfig
 } from '../../scripts/utils/frictionless-utils.js';
 
 let replaceKey; let getConfig;
@@ -86,7 +87,7 @@ export async function runQuickAction(quickActionId, data, block) {
 
   const contConfig = createContainerConfig(quickActionId);
   const docConfig = createDocConfig(data[0], 'image');
-  const videoDocConfig = quickActionId === 'merge-videos' ? createMergeVideosDocConfig(data) : createDocConfig(data[0], quickActionId === 'audio-converter' ? 'audio' : 'video');
+  const videoDocConfig = getVideoConfig(quickActionId, data)
 
   const appConfig = {
     metaData: {

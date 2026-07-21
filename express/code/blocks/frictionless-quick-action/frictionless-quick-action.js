@@ -22,6 +22,7 @@ import {
   EXPRESS_ROUTE_PATHS,
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
   AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
+  getVideoConfig
 } from '../../scripts/utils/frictionless-utils.js';
 
 let createTag;
@@ -230,9 +231,7 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
 
   const contConfig = createContainerConfig(quickActionId);
   const docConfig = createDocConfig(data[0], 'image');
-  const videoDocConfig = quickActionId === 'merge-videos'
-    ? createMergeVideosDocConfig(data)
-    : createDocConfig(data[0], quickActionId === 'audio-converter' ? 'audio' : 'video');
+  const videoDocConfig = getVideoConfig(quickActionId, data);
 
   const appConfig = {
     metaData: {
