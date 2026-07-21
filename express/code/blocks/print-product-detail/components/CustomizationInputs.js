@@ -333,7 +333,7 @@ function countOptions(attribute) {
 
 function buildPillElement(option, isSelected, index, setSize, activeIndex, handlers) {
   const { handleOptionClick, handleMiniPillKeyDown } = handlers;
-  const thumbnailUrl = updateImageUrl(option.imageUrl, 48);
+  const thumbnailUrl = updateImageUrl(option.imageUrl, 96);
 
   const pillContainer = document.createElement('div');
   pillContainer.className = 'pdpx-mini-pill-container';
@@ -358,6 +358,7 @@ function buildPillElement(option, isSelected, index, setSize, activeIndex, handl
   img.className = 'pdpx-mini-pill-image';
   img.src = thumbnailUrl;
   img.alt = '';
+  img.loading = 'lazy';
   img.setAttribute('aria-hidden', 'true');
   button.appendChild(img);
 
@@ -717,7 +718,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
               ${group.title
       && html`<div class="pdpx-option-group-title">${group.title}</div>`} 
               ${(group.options || []).map((option) => {
-    const thumbnailUrl = updateImageUrl(option.imageUrl, 54);
+    const thumbnailUrl = updateImageUrl(option.imageUrl, 108);
     const isSelected = option.value === selectedOptionValue;
     const optionIndex = allOptions.findIndex((candidate) => candidate.value === option.value);
     return html`
@@ -744,6 +745,7 @@ export function ThumbnailSelector({ attribute, onRequestDrawer, productType }) {
                         src="${thumbnailUrl}"
                         alt=""
                         aria-hidden="true"
+                        loading="lazy"
                       />
                     </div>
                     <div class="pdpx-pill-text-container">
@@ -833,7 +835,16 @@ function sortAttributes(attributes, productType) {
 export function CustomizationInputs({ onRequestDrawer, productType }) {
   const { state } = useStore();
   if (!state) {
-    return null;
+    return html`
+      <div class="pdpx-customization-inputs-container" id="pdpx-customization-inputs-container">
+        ${[0, 1, 2, 3].map((i) => html`
+          <div key=${i} class="pdpx-skeleton-option-row">
+            <div class="pdpx-skeleton-option-label" data-skeleton="true"></div>
+            <div class="pdpx-skeleton-option-control" data-skeleton="true"></div>
+          </div>
+        `)}
+      </div>
+    `;
   }
   const productAttributes = sortAttributes(
     (state.attributes || [])

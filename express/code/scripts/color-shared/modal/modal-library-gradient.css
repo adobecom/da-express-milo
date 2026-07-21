@@ -1,0 +1,221 @@
+/* Editable "libraries saved gradients" modal content.
+   Reuses the gradient modal preview (modal-gradient-content.css + gradient-editor.css),
+   the palette modal's swatch-rail styles (modal-palette-content.css), and the
+   ax-drawer-tag-section tag field (drawer.css); this file adds the in-modal tag
+   section and the library toolbar wrapper.
+   (Color-mode HEX picker + code view and the "Edit" button are intentionally omitted.) */
+
+.ax-color-modal-content .modal-library-gradient {
+  /* Tag-field tokens (defined on .ax-drawer-panel in drawer.css) redeclared so
+     the reused tag field renders correctly outside the drawer. */
+  --ax-tag-field-min-height: 56px;
+  --ax-tag-field-gap: 12px;
+  --ax-tag-pill-max-width: 224px;
+  --ax-tag-pill-min-width: 27px;
+  --ax-tag-pill-icon-size: 10px;
+  --ax-drawer-font-weight-medium: 500;
+  --ax-drawer-line-height-l: 20px;
+  --ax-drawer-line-height-s: 18px;
+  --ax-drawer-label-padding-block-l: 10px;
+  --ax-drawer-label-padding-block-s: 7px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--spacing-300);
+  inline-size: 100%;
+}
+
+/* 16px strip corners: override the component's --Corner-radius-bar (8px) so the
+   editor, bar-wrap, bar fill/stroke, and focus outline all round consistently. */
+.ax-color-modal-content .modal-library-gradient .modal-gradient-preview
+  .gradient-editor {
+  --Corner-radius-bar: var(--spacing-300);
+}
+
+/* Gradient preview: 156px on mobile + tablet, 250px on desktop. */
+.ax-color-modal-content .modal-library-gradient .modal-gradient-preview
+  .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive
+  .gradient-editor-bar-wrap {
+  height: 156px;
+}
+
+@media (min-width: 1200px) {
+  .ax-color-modal-content .modal-library-gradient .modal-gradient-preview
+    .gradient-editor--layout-responsive.gradient-editor--size-strip-responsive
+    .gradient-editor-bar-wrap {
+    height: 250px;
+  }
+}
+
+/* Stop rail: 248px on tablet, 158px on desktop; expands to fit all stops on
+   mobile, where the modal content scrolls beneath the sticky toolbar. */
+.ax-color-modal-content .modal-library-gradient
+  .modal-palette-container--color-rail .modal-color-rail-wrap {
+  height: 248px;
+  min-height: 248px;
+}
+
+@media (min-width: 1200px) {
+  .ax-color-modal-content .modal-library-gradient
+    .modal-palette-container--color-rail .modal-color-rail-wrap {
+    height: 158px;
+    min-height: 158px;
+    aspect-ratio: auto;
+    max-height: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .ax-color-modal-content .modal-library-gradient
+    .modal-palette-container--color-rail .modal-color-rail-wrap {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .ax-color-modal-content .modal-library-gradient
+    .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range] sp-theme,
+  .ax-color-modal-content .modal-library-gradient
+    .modal-palette-container--color-rail
+    .modal-color-rail-wrap[data-color-count-range] color-swatch-rail[orientation="stacked"] {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .ax-color-modal-content .modal-library-gradient
+    .modal-palette-container--color-rail::after {
+    display: none;
+  }
+}
+
+/* Tablet: large rails (6+ stops) wrap their content and grow with it (no internal
+   scroll or bottom fade) while the modal content scrolls like mobile. Smaller
+   rails keep their current fixed height (never shorter). */
+@media (min-width: 600px) and (max-width: 1199px) {
+  .ax-color-modal-content .modal-library-gradient
+    .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] {
+    height: auto;
+    min-height: 248px;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .ax-color-modal-content .modal-library-gradient
+    .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] sp-theme,
+  .ax-color-modal-content .modal-library-gradient
+    .modal-palette-container--color-rail
+    .modal-color-rail-wrap[data-color-count-range="large"] color-swatch-rail[orientation="stacked"] {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .ax-color-modal-content .modal-library-gradient
+    .modal-palette-container--color-rail:has(.modal-color-rail-wrap[data-color-count-range="large"])::after {
+    display: none;
+  }
+}
+
+.ax-color-modal-container:has(.modal-library-gradient) {
+  max-height: 95vh;
+  max-height: 95dvh;
+}
+
+/* Only the content above the toolbar scrolls; the toolbar is a fixed footer so it
+   never jumps and the whole modal never grows a scrollbar. */
+.ax-color-modal-content:has(.modal-library-gradient) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ax-color-modal-content .modal-library-gradient {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.ax-color-modal-content .modal-library-gradient .modal-lib-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  /* overflow-y:auto promotes overflow-x to auto; the gradient editor's edge
+     handles poke past the content box, so clip x to avoid a stray horizontal
+     scrollbar. The scroller can't be overflow:visible (its sibling toolbar is a
+     sticky footer), so reserve an inline gutter instead: the edge handles'
+     focus rings and the gradient strip's focus outline paint into the gutter
+     rather than being clipped at the scroll edge. The negative margin keeps the
+     bar visually flush (no layout shift). */
+  overflow-x: hidden;
+  box-sizing: border-box;
+  inline-size: auto;
+  padding-inline: var(--spacing-200);
+  margin-inline: calc(-1 * var(--spacing-200));
+}
+
+/* ── Tags section ──────────────────────────────────────────────── */
+
+.ax-color-modal-content .modal-library-gradient .modal-lib-tags {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  inline-size: 100%;
+}
+
+.ax-color-modal-content .modal-library-gradient .modal-lib-tags .ax-drawer-tag-section {
+  inline-size: 100%;
+}
+
+/* Fixed toolbar footer; the content above it scrolls. */
+.ax-color-modal-content .modal-library-gradient .modal-palette-toolbar {
+  flex: 0 0 auto;
+  inline-size: 100%;
+  background: var(--color-white);
+}
+
+.ax-color-modal-content .modal-library-gradient .ax-lib-card__action-menu {
+  z-index: 5;
+}
+
+.ax-color-modal-content .modal-library-gradient .modal-palette-toolbar > sp-theme,
+.ax-color-modal-content .modal-library-gradient .modal-palette-toolbar .ax-toolbar {
+  inline-size: 100%;
+}
+
+/* ── Full-bleed footer divider (mobile + tablet; desktop unchanged) ── */
+@media (max-width: 1199px) {
+  .ax-color-modal-content .modal-library-gradient {
+    gap: 0;
+  }
+
+  .ax-color-modal-content .modal-library-gradient .modal-lib-scroll {
+    padding-block-end: var(--spacing-200);
+  }
+
+  .ax-color-modal-content .modal-library-gradient .modal-palette-toolbar {
+    border-block-start: 1px solid var(--color-gray-150);
+  }
+
+  .ax-color-modal-content .modal-library-gradient .ax-toolbar.ax-toolbar-library {
+    border-block-start: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .ax-color-modal-content .modal-library-gradient .modal-palette-toolbar {
+    margin-inline: calc(-1 * var(--spacing-300));
+    padding-inline: var(--spacing-300);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1199px) {
+  .ax-color-modal-content .modal-library-gradient .modal-palette-toolbar {
+    margin-inline: calc(-1 * var(--spacing-400));
+    padding-inline: var(--spacing-400);
+  }
+}

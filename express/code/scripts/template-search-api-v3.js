@@ -189,7 +189,9 @@ export function trackSearch(eventName, searchID = generateSearchId()) {
   });
 
   // eslint-disable-next-line no-undef
-  const impression = cleanPayload(structuredClone(BlockMediator.get('templateSearchSpecs')), eventName);
+  const specsSnapshot = BlockMediator.get('templateSearchSpecs');
+  // eslint-disable-next-line compat/compat
+  const impression = cleanPayload(typeof structuredClone !== 'undefined' ? structuredClone(specsSnapshot) : JSON.parse(JSON.stringify(specsSnapshot)), eventName);
   if (!impression.custom_ui_location) impression.custom_ui_location = 'seo';
   function fireEvent() {
     _satellite.track('event', {

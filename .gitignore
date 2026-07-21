@@ -20,3 +20,6 @@ dev/
 actionlint
 .claude/worktrees/
 .claude/**.local.*
+.playwright-mcp/
+!.eslintrc-code-compatibility.js
+!.browserslistrc

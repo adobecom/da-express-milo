@@ -16,6 +16,7 @@
     "lint:fix": "npm run lint:js -- --fix && npm run lint:css --fix",
     "lint:js": "eslint .",
     "lint:css": "stylelint 'blocks/**/*.css' 'express/code/styles/*.css'",
+    "build:font-sheets": "node scripts/font-generator/transform.js",
     "build:spectrum": "node express/code/scripts/widgets/spectrum/build.mjs",
     "build:spectrum:icons-catalog": "ICONS_CATALOG=1 node express/code/scripts/widgets/spectrum/build.mjs"
   },
@@ -36,7 +37,8 @@
     "@esm-bundle/chai": "4.3.4-fix.0",
     "@octokit/rest": "^20.0.2",
     "@playwright/test": "^1.52.0",
-    "@spectrum-web-components/badge": "^1.11.2",
+    "@spectrum-web-components/action-button": "^1.11.2",
+    "@spectrum-web-components/alert-dialog": "^1.11.2",
     "@spectrum-web-components/base": "^1.11.2",
     "@spectrum-web-components/button": "^1.11.2",
     "@spectrum-web-components/color-area": "^1.11.2",
@@ -60,7 +62,7 @@
     "@spectrum-web-components/toast": "^1.11.2",
     "@spectrum-web-components/tooltip": "^1.11.2",
     "@spectrum-web-components/tray": "^1.11.2",
-    "@web/dev-server-import-maps": "^0.0.6",
+    "@web/dev-server-import-maps": "^0.2.1",
     "@web/test-runner": "^0.18.2",
     "@web/test-runner-commands": "^0.9.0",
     "axe-core": "^4.10.3",
@@ -85,6 +87,7 @@
     "stylelint-config-standard": "25.0.0"
   },
   "dependencies": {
+    "@spectrum-web-components/accordion": "^1.12.1",
     "@spectrum-web-components/action-button": "^1.11.0",
     "@spectrum-web-components/tags": "^1.11.0",
     "@spectrum-web-components/toast": "^1.11.0"

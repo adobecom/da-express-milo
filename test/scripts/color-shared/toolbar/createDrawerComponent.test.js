@@ -2,7 +2,9 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
-import { createDrawer } from '../../../../express/code/scripts/color-shared/toolbar/createDrawerComponent.js';
+import {
+  createDrawer, computeIsDirty, refreshBtnRowStacking,
+} from '../../../../express/code/scripts/color-shared/toolbar/createDrawerComponent.js';
 import { MOCK_PALETTE, MOCK_GRADIENT, MOCK_LIBRARIES } from './mocks/palette.js';
 import { createMockCCLibraryProvider } from './mocks/stubs.js';
 
@@ -1129,6 +1131,33 @@ describe.skip('createDrawer', function drawerSuite() {
       await waitForClose();
     });
 
+    it('gradient save payload includes tags added via Enter key', async () => {
+      anchor = createAnchor();
+      const provider = createMockCCLibraryProvider();
+      const drawer = await createDrawer(defaultOptions({
+        anchorElement: anchor,
+        type: 'gradient',
+        paletteData: MOCK_GRADIENT,
+        libraries: MOCK_LIBRARIES,
+        ccLibraryProvider: provider,
+        deps: signedInDeps,
+      }));
+      await openDrawer(drawer);
+
+      const tagsInput = document.querySelector('.ax-drawer-tag-section input');
+      tagsInput.value = 'NewTag';
+      tagsInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+
+      const saveBtn = document.querySelector('.ax-drawer-save-btn');
+      saveBtn.click();
+      await new Promise((r) => setTimeout(r, 50));
+
+      const { tags } = provider.buildGradientPayload.firstCall.args[0];
+      expect(tags).to.include('NewTag');
+
+      await waitForClose();
+    });
+
     // Fix test MWPW-192264
     it.skip('save failure closes drawer and announces error to screen reader', async () => {
       anchor = createAnchor();
@@ -1296,5 +1325,128 @@ describe.skip('createDrawer', function drawerSuite() {
       expect(drawer.isOpen).to.be.false;
       await waitForClose();
     });
+  });
+});
+
+// Not nested under the describe.skip above (MWPW-192264) — pure function, testable directly.
+describe('computeIsDirty', () => {
+  const savedItem = {
+    name: 'Sunset',
+    colors: ['#FF0000', '#00FF00'],
+    tags: ['warm', 'bold'],
+    savedName: 'Sunset',
+    savedColors: ['#FF0000', '#00FF00'],
+  };
+
+  it('is not dirty when name/tags/colors all match the saved snapshot', () => {
+    expect(computeIsDirty(savedItem, 'Sunset', ['warm', 'bold'])).to.be.false;
+  });
+
+  it('is dirty when the name differs from savedName', () => {
+    expect(computeIsDirty(savedItem, 'Sunrise', ['warm', 'bold'])).to.be.true;
+  });
+
+  it('is dirty when tags are added', () => {
+    expect(computeIsDirty(savedItem, 'Sunset', ['warm', 'bold', 'new'])).to.be.true;
+  });
+
+  it('is dirty when tags are removed', () => {
+    expect(computeIsDirty(savedItem, 'Sunset', ['warm'])).to.be.true;
+  });
+
+  it('is not dirty when tags are reordered but unchanged as a set', () => {
+    expect(computeIsDirty(savedItem, 'Sunset', ['bold', 'warm'])).to.be.false;
+  });
+
+  it('is dirty when palette.colors (live, edited on canvas) differs from savedColors', () => {
+    const edited = { ...savedItem, colors: ['#0000FF', '#00FF00'] };
+    expect(computeIsDirty(edited, 'Sunset', ['warm', 'bold'])).to.be.true;
+  });
+
+  it('color comparison is case-insensitive', () => {
+    const lower = { ...savedItem, colors: ['#ff0000', '#00ff00'] };
+    expect(computeIsDirty(lower, 'Sunset', ['warm', 'bold'])).to.be.false;
+  });
+});
+
+describe('refreshBtnRowStacking', () => {
+  let rectStub;
+  let rafStub;
+
+  beforeEach(() => {
+    // getBoundingClientRect is stubbed on the prototype rather than the
+    // instance: measureNaturalHeight measures a cloneNode(true) of each
+    // button, and clones don't inherit instance-level sinon stubs. Keying
+    // the fake off dataset (which cloneNode does copy) and each call's own
+    // inline-size lets the same stub answer correctly for both the live
+    // button and its temporary clone.
+    rectStub = sinon.stub(Element.prototype, 'getBoundingClientRect').callsFake(function fakeRect() {
+      const isMaxContent = this.style.inlineSize === 'max-content';
+      const height = Number(isMaxContent ? this.dataset.natural : this.dataset.squeezed);
+      return { height };
+    });
+    // Real requestAnimationFrame is throttled/paused in backgrounded tabs,
+    // which this suite's tab can be when many test files run concurrently —
+    // that hung measureNaturalHeight's await past mocha's timeout. The
+    // decision logic under test doesn't depend on real frame timing, so
+    // resolve on the next microtask instead.
+    rafStub = sinon.stub(window, 'requestAnimationFrame').callsFake((cb) => {
+      Promise.resolve().then(cb);
+      return 0;
+    });
+  });
+
+  afterEach(() => {
+    rectStub.restore();
+    rafStub.restore();
+    sinon.restore();
+    document.body.innerHTML = '';
+  });
+
+  function makeRow() {
+    const row = document.createElement('div');
+    document.body.appendChild(row);
+    return row;
+  }
+
+  // A button whose live rendered height is `squeezedHeight` under its current
+  // (possibly wrap-constrained) width, but `naturalHeight` once
+  // measureNaturalHeight's clone sets inline-size: max-content to reveal the
+  // unwrapped single-line height. Appended to `row` since measureNaturalHeight
+  // reads el.parentElement to place its measurement clone.
+  function makeButton(row, naturalHeight, squeezedHeight = naturalHeight) {
+    const el = document.createElement('div');
+    el.dataset.natural = String(naturalHeight);
+    el.dataset.squeezed = String(squeezedHeight);
+    row.appendChild(el);
+    return el;
+  }
+
+  it('does not stack when both buttons render at their natural single-line height', async () => {
+    const row = makeRow();
+    await refreshBtnRowStacking(row, makeButton(row, 40), makeButton(row, 40));
+    expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.false;
+  });
+
+  it('stacks when either button wraps (rendered height exceeds its natural single-line height)', async () => {
+    const row = makeRow();
+    await refreshBtnRowStacking(row, makeButton(row, 40), makeButton(row, 40, 80));
+    expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.true;
+  });
+
+  it('un-stacks again once there is enough room (e.g. after a resize)', async () => {
+    const row = makeRow();
+    const btnA = makeButton(row, 40);
+    const btnB = makeButton(row, 40, 80);
+    await refreshBtnRowStacking(row, btnA, btnB);
+    expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.true;
+
+    btnB.dataset.squeezed = '40';
+    await refreshBtnRowStacking(row, btnA, btnB);
+    expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.false;
+  });
+
+  it('is a no-op when row or buttons are missing', async () => {
+    await refreshBtnRowStacking(null, null, null);
   });
 });
