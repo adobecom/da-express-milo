@@ -33,13 +33,6 @@ main .section .simple-marquee h2 {
   font-size: 1rem;
 }
 
-.simple-marquee .headline .eyebrow {
-  font-weight: var(--subheading-font-weight);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  padding-bottom: var(--spacing-100);
-}
-
 .simple-marquee .headline .ctas {
   display: none;
 }

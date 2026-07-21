@@ -1,15 +1,14 @@
 # Simple Marquee
 
 ## Overview
-- Renders the headline/eyebrow/body-copy/CTA marquee layout of `grid-marquee` **without** the interactive card grid, drawers, ratings, or app-store logic.
+- Renders the headline/body-copy/CTA marquee layout of `grid-marquee` **without** the interactive card grid, drawers, ratings, or app-store logic.
 - Provides authoring teams a dedicated, clearly-named block for the content-only marquee layout they were previously mis-authoring `grid-marquee` for.
-- Centered layout with optional eyebrow, optional logo, a heading, body copy, and 1-2 CTA buttons over an optional background/media image.
+- Centered layout with a branding logo, a heading, body copy, and 1-2 CTA buttons over an optional background/media image.
 
 ## Authoring Model
 The block is a single-column table named `simple-marquee`.
 
 - **Content row** (required): holds the marquee copy in this order:
-  - Optional eyebrow — any short text/paragraph authored *before* the heading; it receives the `eyebrow` class.
   - Heading — `h1`–`h6`.
   - Body copy — one or more paragraphs.
   - CTAs — 1-2 links in a trailing paragraph. The first link becomes the `primaryCTA`; the wrapping paragraph becomes `.ctas`.
@@ -23,10 +22,10 @@ The block is a single-column table named `simple-marquee`.
 | ![background](media.png) |
 
 ## Logo Injection
-Optional logo, matching the `grid-marquee` branding metadata contract:
-- `inject-branding-logo` metadata — injects the named icon.
+A branding logo is always injected above the heading, matching the `grid-marquee` contract:
+- `inject-branding-logo` metadata — injects the named icon (e.g. `adobe-express-logo`, `cobrand-lockup-acrobat-express`).
 - `marquee-inject-acrobat-logo` (`on`/`yes`) — injects `cobrand-lockup-acrobat-express`.
-- `marquee-inject-logo` (`on`/`yes`) — injects the default `adobe-express-logo`.
+- Otherwise the default `adobe-express-logo` is injected.
 
 ## Styling
 - All selectors are scoped under `.simple-marquee`.

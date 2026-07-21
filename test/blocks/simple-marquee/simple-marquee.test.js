@@ -25,8 +25,7 @@ describe('Simple Marquee', () => {
     const foreground = block.querySelector('.foreground');
     const headline = block.querySelector('.headline');
     const h1 = block.querySelector('.headline h1');
-    const eyebrow = block.querySelector('.headline .eyebrow');
-    const body = block.querySelector('.headline p:not(.eyebrow):not(.ctas)');
+    const body = block.querySelector('.headline p:not(.ctas)');
     const ctas = block.querySelector('.headline .ctas');
     const buttons = block.querySelectorAll('.headline a.button');
 
@@ -34,8 +33,7 @@ describe('Simple Marquee', () => {
     expect(headline).to.exist;
     expect(foreground.contains(headline)).to.be.true;
     expect(h1).to.exist;
-    expect(eyebrow).to.exist;
-    expect(eyebrow.textContent.trim()).to.equal('Adobe Express');
+    expect(block.querySelector('.express-logo')).to.exist;
     expect(body).to.exist;
     expect(ctas).to.exist;
     expect(buttons.length).to.equal(2);
