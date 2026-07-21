@@ -5,8 +5,6 @@ import { showAppModal, isAppModalDismissed } from './expressAppModal.js';
 const APP_BRANCH_URL = 'https://adobesparkpost.app.link/new';
 const PROD_EDITOR_URL = 'https://new.express.adobe.com/new';
 const STAGE_EDITOR_URL = 'https://stage.projectx.corp.adobe.com/new';
-
-
 function resolveEditorUrl() {
   const params = new URLSearchParams(window.location.search);
   if (params.get('hzenv') !== 'stage') return PROD_EDITOR_URL;
