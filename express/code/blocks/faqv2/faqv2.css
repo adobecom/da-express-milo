@@ -5,6 +5,10 @@
   height: auto;
 }
 
+.faqv2.expandable {
+  padding-inline: var(--spacing-300);
+}
+
 .faqv2-wrapper {
   margin: 0 auto var(--spacing-80) auto;
   border-radius: var(--spacing-100);
@@ -543,6 +547,7 @@
   .faqv2.expandable {
     width: unset;
     max-width: 1024px;
+    padding-inline: 0;
   }
 
   .faqv2.expandable.longform .faqv2-content {
