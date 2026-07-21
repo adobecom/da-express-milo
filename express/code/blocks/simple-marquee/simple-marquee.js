@@ -35,25 +35,44 @@ function decorateHeadline(headline) {
     return headline;
   }
 
-  ctas[0].parentElement.classList.add('ctas');
+  // Gather every CTA into one flex row so they align horizontally regardless of
+  // how they were authored (one paragraph, separate paragraphs, or wrapped in
+  // strong/em for primary/secondary emphasis).
+  const ctaContainer = createTag('div', { class: 'ctas' });
+  const wrappers = [];
+
   ctas.forEach((cta) => {
+    wrappers.push(cta.closest('p') || cta.parentElement);
     cta.classList.add('button');
-    if (cta.querySelector('.icon')) return;
-    const icon = cta.parentElement?.querySelector(':scope > .icon');
-    const match = icon && iconRegex.exec(icon.className);
-    if (match?.[1]) {
-      const hasExistingGraphic = icon.querySelector('svg, img');
-      if (!hasExistingGraphic) icon.append(getIconElementDeprecated(match[1]));
-      const ctaText = cta.textContent.trim();
-      cta.textContent = '';
-      cta.title = cta.title || ctaText;
-      cta.append(createTag('div', { class: 'text-group' }, [icon, ctaText]));
+    if (!cta.querySelector('.icon')) {
+      const icon = cta.parentElement?.querySelector(':scope > .icon');
+      const match = icon && iconRegex.exec(icon.className);
+      if (match?.[1]) {
+        const hasExistingGraphic = icon.querySelector('svg, img');
+        if (!hasExistingGraphic) icon.append(getIconElementDeprecated(match[1]));
+        const ctaText = cta.textContent.trim();
+        cta.textContent = '';
+        cta.title = cta.title || ctaText;
+        cta.append(createTag('div', { class: 'text-group' }, [icon, ctaText]));
+      }
     }
     if (!cta.getAttribute('aria-label') && heading) {
       cta.setAttribute('aria-label', `${cta.textContent.trim()} ${heading.textContent.trim()}`);
     }
+    ctaContainer.append(cta);
   });
+
   ctas[0].classList.add('primaryCTA');
+
+  // Place the CTA row after the copy, then drop now-empty author wrappers.
+  const cell = heading?.parentElement ?? headline;
+  cell.append(ctaContainer);
+  wrappers.forEach((wrapper) => {
+    if (wrapper && wrapper !== ctaContainer && !wrapper.textContent.trim()
+      && !wrapper.querySelector('img, picture, svg')) {
+      wrapper.remove();
+    }
+  });
   return headline;
 }
 
