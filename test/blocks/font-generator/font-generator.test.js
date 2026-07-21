@@ -1,5 +1,6 @@
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
+import { waitFor } from '../../helpers/waitfor.js';
 
 const imports = await Promise.all([import('../../../express/code/scripts/utils.js'), import('../../../express/code/scripts/scripts.js')]);
 const { getLibs } = imports[0];
@@ -17,7 +18,12 @@ describe('font-generator', () => {
     // use.typekit.net script (disallowed in unit tests).
     window.Typekit = { load: ({ active }) => active?.() };
     block = document.querySelector('.font-generator');
-    await decorate(block);
+    // decorate() shows the skeleton synchronously and hydrates in the
+    // background (see font-generator.js) — it does not return a promise
+    // callers can await, so wait for the skeleton to be swapped for the
+    // real content instead.
+    decorate(block);
+    await waitFor(() => !block.querySelector('.fg-sk'));
   });
 
   after(() => {

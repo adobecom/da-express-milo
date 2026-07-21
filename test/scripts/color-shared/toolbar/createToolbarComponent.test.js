@@ -2,7 +2,9 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
-import { createToolbar } from '../../../../express/code/scripts/color-shared/toolbar/createToolbarComponent.js';
+import {
+  createToolbar, refreshLibraryButtonsStacking,
+} from '../../../../express/code/scripts/color-shared/toolbar/createToolbarComponent.js';
 import { consumeSusiColorRedirect } from '../../../../express/code/scripts/color-shared/utils/susiRedirect.js';
 import { MOCK_PALETTE, MOCK_GRADIENT } from './mocks/palette.js';
 import { createMockGetLibraryContext } from './mocks/stubs.js';
@@ -694,5 +696,58 @@ describe('createToolbar', () => {
       changeListeners.forEach((cb) => cb({ matches: true }));
       expect(ctaBtn.textContent).to.equal('Mobile CTA');
     });
+  });
+});
+
+describe('refreshLibraryButtonsStacking', () => {
+  afterEach(() => {
+    sinon.restore();
+    document.body.innerHTML = '';
+  });
+
+  function makeGroup() {
+    const group = document.createElement('div');
+    document.body.appendChild(group);
+    return group;
+  }
+
+  // Simulates a button whose rendered height is `squeezedHeight` under its
+  // current (constrained) width, but `naturalHeight` once the measurement
+  // helper temporarily sets inline-size: max-content to reveal the unwrapped height.
+  function makeButton(naturalHeight, squeezedHeight = naturalHeight) {
+    const el = document.createElement('div');
+    sinon.stub(el, 'getBoundingClientRect').callsFake(() => ({
+      height: el.style.inlineSize === 'max-content' ? naturalHeight : squeezedHeight,
+    }));
+    return el;
+  }
+
+  it('does not stack when both buttons render at their natural single-line height', () => {
+    const group = makeGroup();
+    refreshLibraryButtonsStacking(group, makeButton(40), makeButton(40));
+    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.false;
+  });
+
+  it('stacks when either button wraps (rendered height exceeds its natural single-line height)', () => {
+    const group = makeGroup();
+    refreshLibraryButtonsStacking(group, makeButton(40), makeButton(40, 80));
+    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.true;
+  });
+
+  it('un-stacks again once there is enough room (e.g. after a resize)', () => {
+    const group = makeGroup();
+    const btnA = makeButton(40);
+    const btnB = makeButton(40, 80);
+    refreshLibraryButtonsStacking(group, btnA, btnB);
+    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.true;
+
+    btnB.getBoundingClientRect.restore();
+    sinon.stub(btnB, 'getBoundingClientRect').callsFake(() => ({ height: 40 }));
+    refreshLibraryButtonsStacking(group, btnA, btnB);
+    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.false;
+  });
+
+  it('is a no-op when group or buttons are missing', () => {
+    expect(() => refreshLibraryButtonsStacking(null, null, null)).to.not.throw();
   });
 });

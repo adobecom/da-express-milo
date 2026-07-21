@@ -548,6 +548,24 @@
   --mod-button-border-radius: var(--ax-drawer-save-border-radius);
 }
 
+.ax-drawer-btn-row {
+  display: flex;
+  gap: var(--spacing-100);
+  inline-size: 100%;
+}
+
+.ax-drawer-copy-btn {
+  --mod-button-background-color-hover: var(--color-light-gray-2);
+  --mod-button-background-color-focus: var(--color-gray-300-variant);
+}
+
+.ax-drawer-btn-row .ax-drawer-save-btn,
+.ax-drawer-btn-row .ax-drawer-savechanges-btn {
+  inline-size: auto;
+  min-inline-size: 108px;
+  flex: 1 1 0;
+}
+
 /* ── Mobile drawer overrides ────────────────────── */
 
 .ax-drawer-mobile .ax-drawer-tag-btn-icon {
@@ -709,4 +727,20 @@
   .ax-drawer-panel.ax-drawer-dragging {
     transition: none;
   }
+}
+
+/* ── Make a copy / Save changes: stacked state ──────────────────
+   Applied via JS (createDrawerComponent.js) once the two buttons' measured
+   natural widths no longer fit their row (e.g. longer translated labels). */
+
+.ax-drawer-btn-row--stacked {
+  flex-direction: column;
+  align-self: stretch;
+  inline-size: 100%;
+}
+
+.ax-drawer-btn-row--stacked .ax-drawer-save-btn,
+.ax-drawer-btn-row--stacked .ax-drawer-savechanges-btn {
+  inline-size: 100%;
+  flex: 1 1 auto;
 }
