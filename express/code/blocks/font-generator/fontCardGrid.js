@@ -2,6 +2,7 @@
 import { getState, setState, subscribe } from './state.js';
 import { LOAD_MORE_STEP } from './types.js';
 import { createFontCard, updateFontCard } from './fontCard.js';
+import handleOpenInExpress from './expressHandoff.js';
 
 const STYLESHEET_HREF = '/express/code/blocks/font-generator/fontCardGrid.css';
 
@@ -103,6 +104,23 @@ export default function createFontCardGrid(config = {}) {
 
   loadMoreBtn.addEventListener('click', () => {
     setState({ visibleCount: getState().visibleCount + LOAD_MORE_STEP });
+  });
+
+  grid.addEventListener('click', (e) => {
+    const cta = e.target.closest('.font-card-cta');
+    if (!cta) return;
+    e.preventDefault();
+    const cardEl = cta.closest('.font-card');
+    const entry = cardEl && cardMap.get(cardEl.dataset.fontId);
+    if (!entry) return;
+    const { previewText, fontSize } = getState();
+    handleOpenInExpress({
+      styleId: entry.fontDef.id,
+      text: previewText || sampleText || '',
+      fontSupported: entry.fontDef.fontSupported,
+      fontSize,
+      strings,
+    });
   });
 
   // subscribe() fires immediately with the current snapshot — that first call
