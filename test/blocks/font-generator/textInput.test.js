@@ -130,6 +130,31 @@ describe('font-generator/textInput', () => {
     panel.remove();
   });
 
+  it('marks a clicked pill is-active and clears it from the previously active pill', () => {
+    const { panel } = createTextInput({ suggestions: ['One', 'Two'] });
+    document.body.append(panel);
+    const [first, second] = panel.querySelectorAll('.tag-pills');
+    first.click();
+    expect(first.classList.contains('is-active')).to.be.true;
+    second.click();
+    expect(first.classList.contains('is-active')).to.be.false;
+    expect(second.classList.contains('is-active')).to.be.true;
+    panel.remove();
+  });
+
+  it('clears the active pill when the preview text is edited directly', () => {
+    const { panel } = createTextInput({ suggestions: ['One'] });
+    document.body.append(panel);
+    const pill = panel.querySelector('.tag-pills');
+    pill.click();
+    expect(pill.classList.contains('is-active')).to.be.true;
+    const ta = panel.querySelector('textarea.label');
+    ta.value = 'Something else';
+    ta.dispatchEvent(new Event('input'));
+    expect(pill.classList.contains('is-active')).to.be.false;
+    panel.remove();
+  });
+
   describe('suggestion pills — single tab stop with arrow-key nav', () => {
     it('names the toolbar after the visible "try these" label', () => {
       const { panel } = createTextInput({ strings: DEFAULT_PLACEHOLDERS, suggestions: ['One', 'Two'] });

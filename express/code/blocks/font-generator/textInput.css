@@ -184,15 +184,36 @@
   flex-grow: 1;
 }
 
+/* Fades are shown/hidden via .fade-left/.fade-right (toggled in JS based on
+   scroll position), not unconditionally — a fade should only hint at more
+   content on the side where there actually is more to scroll to. z-index
+   lifts them above .tags-wrap regardless of DOM/paint order. */
+.font-generator-text-input .tags-fade::before,
 .font-generator-text-input .tags-fade::after {
   content: '';
   position: absolute;
   top: 0;
-  right: 0;
   width: 62px;
   height: 100%;
-  background: linear-gradient(270deg, var(--color-gray-100) 0%, rgba(248, 248, 248, 0.00) 63.48%);
+  opacity: 0;
+  transition: opacity 0.15s ease;
   pointer-events: none;
+  z-index: 1;
+}
+
+.font-generator-text-input .tags-fade::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--color-gray-100) 0%, rgba(248, 248, 248, 0.00) 63.48%);
+}
+
+.font-generator-text-input .tags-fade::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--color-gray-100) 0%, rgba(248, 248, 248, 0.00) 63.48%);
+}
+
+.font-generator-text-input .tags-fade.fade-left::before,
+.font-generator-text-input .tags-fade.fade-right::after {
+  opacity: 1;
 }
 
 .font-generator-text-input .tags-wrap {
@@ -248,14 +269,17 @@
 /* Hover / active / focus all darken the fill; active adds the pill's own
    border, and focus adds the offset ring below. The two combine on their
    own (no separate "focus active" rule needed) when both apply at once —
-   e.g. pressing Enter/Space while the pill has keyboard focus. */
+   e.g. pressing Enter/Space while the pill has keyboard focus. "Active" here
+   is the selected-pill state tracked in JS (.is-active), not the browser's
+   :active (mouse-down) pseudo-class — the pill stays active until another
+   pill is picked or the preview text is edited. */
 .font-generator-text-input .tag-pills:hover .tag-m,
-.font-generator-text-input .tag-pills:active .tag-m,
+.font-generator-text-input .tag-pills.is-active .tag-m,
 .font-generator-text-input .tag-pills:focus-visible .tag-m {
   background-color: var(--color-gray-300-variant);
 }
 
-.font-generator-text-input .tag-pills:active .tag-m {
+.font-generator-text-input .tag-pills.is-active .tag-m {
   border-color: var(--Buttons-default);
 }
 

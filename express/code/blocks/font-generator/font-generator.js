@@ -215,6 +215,9 @@ async function decorateAsync(block) {
     cardCta: content.cardCta,
     fonts,
     strings,
+    // Scrolled into view on a filter change so the toolbar (not just the
+    // grid) is back in view — see fontCardGrid.js.
+    scrollTarget: toolbar,
   });
 
   main.append(toolbar, gridContainer);

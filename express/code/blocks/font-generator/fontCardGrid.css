@@ -3,6 +3,14 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-300);
+  /* Excludes every descendant (cards, the grid, the load-more button) from
+     the page's scroll anchoring — set here rather than just on .font-card-grid
+     because anchoring would otherwise still pick a card or the load-more
+     button itself as the anchor node. Without this, growing the grid (Load
+     more) or rebuilding it (a filter change) makes the browser shift
+     scrollTop to hold that node's viewport position, which either strands
+     new cards above the fold or randomly jumps the page. */
+  overflow-anchor: none;
 }
 
 .font-card-grid {
