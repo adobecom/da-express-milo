@@ -1,6 +1,8 @@
 .section .simple-marquee {
   max-width: initial;
   text-align: center;
+  position: relative;
+  overflow: hidden;
 }
 
 .simple-marquee .express-logo {
