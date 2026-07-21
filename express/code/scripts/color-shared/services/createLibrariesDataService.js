@@ -1,0 +1,257 @@
+import { serviceManager } from '../../../libs/services/index.js';
+import {
+  GRADIENT_ELEMENT_TYPE,
+  THEME_ELEMENT_TYPE,
+  THEME_REPRESENTATION_TYPE,
+  CC_LIBRARY_COLOR_MODE,
+  COLOR_PROFILE,
+  getClientInfo,
+} from '../../../libs/services/plugins/cclibrary/constants.js';
+import { libraryGradientToModalGradient } from '../components/libraries/libraryDownloadUtils.js';
+
+function channelToHex(value) {
+  const int = Math.min(255, Math.max(0, Math.round(Number(value))));
+  return Number.isNaN(int) ? '00' : int.toString(16).padStart(2, '0');
+}
+
+function rgbObjectToHex(rgb) {
+  if (!rgb || rgb.r == null || rgb.g == null || rgb.b == null) return null;
+  return `#${channelToHex(rgb.r)}${channelToHex(rgb.g)}${channelToHex(rgb.b)}`;
+}
+
+function withHash(hex) {
+  if (typeof hex !== 'string' || !hex) return null;
+  return hex.startsWith('#') ? hex : `#${hex}`;
+}
+
+/**
+ * Resolve a single CC Libraries swatch to a hex string.
+ * Themes saved via the drawer store each swatch as an array of color-mode
+ * entries, e.g. `[{ mode: 'RGB', value: { r, g, b }, profileName }]` (0-255).
+ * Also tolerates plain hex strings, `{ hex }`, and Kuler-style `{ values: [r,g,b] }` (0-1).
+ */
+function swatchToHex(swatch) {
+  if (!swatch) return null;
+  if (typeof swatch === 'string') return withHash(swatch);
+
+  if (Array.isArray(swatch)) {
+    const rgbEntry = swatch.find((entry) => String(entry?.mode).toUpperCase() === 'RGB')
+      ?? swatch[0];
+    return rgbObjectToHex(rgbEntry?.value);
+  }
+
+  if (typeof swatch.hex === 'string') return withHash(swatch.hex);
+  if (typeof swatch.color === 'string') return withHash(swatch.color);
+  if (swatch.value && typeof swatch.value === 'object') return rgbObjectToHex(swatch.value);
+  if (typeof swatch.value === 'string') return withHash(swatch.value);
+
+  if (Array.isArray(swatch.values) && swatch.values.length >= 3) {
+    const [r, g, b] = swatch.values;
+    return rgbObjectToHex({ r: Number(r) * 255, g: Number(g) * 255, b: Number(b) * 255 });
+  }
+
+  return null;
+}
+
+function normalizeTagValue(tag) {
+  if (typeof tag === 'string') return tag.trim();
+  return String(tag?.tag ?? tag?.name ?? tag?.value ?? '').trim();
+}
+
+// Tags can live in the theme representation data, the representation's
+// `color:#tags` field, or on the element itself depending on which client saved
+// the theme; merge every source so the UI always reflects the saved tags.
+function extractThemeTags(element, themeData, rep) {
+  const sources = [themeData?.tags, rep?.['color:#tags'], element?.tags];
+  const merged = sources
+    .filter(Array.isArray)
+    .flat()
+    .map(normalizeTagValue)
+    .filter(Boolean);
+  return [...new Set(merged)];
+}
+
+function extractGradientTags(element, gradientData, rep) {
+  const sources = [gradientData?.tags, rep?.['color:#tags'], element?.tags];
+  const merged = sources
+    .filter(Array.isArray)
+    .flat()
+    .map(normalizeTagValue)
+    .filter(Boolean);
+  return [...new Set(merged)];
+}
+
+function parseThemeElement(element) {
+  const reps = element.representations ?? [];
+  const rep = reps.find((r) => r?.['colortheme#data'])
+    ?? reps.find((r) => r?.type === THEME_REPRESENTATION_TYPE)
+    ?? reps[0];
+  const themeData = rep?.['colortheme#data'];
+  const swatches = themeData?.swatches ?? rep?.['color:#rgb'] ?? [];
+  const colors = (Array.isArray(swatches) ? swatches : [])
+    .map(swatchToHex)
+    .filter(Boolean);
+
+  return {
+    id: element.id,
+    type: 'theme',
+    name: element.name || 'Untitled theme',
+    colors,
+    tags: extractThemeTags(element, themeData, rep),
+    // Color-blind-safe is stored as accessibility metadata inside the theme
+    // representation data (the only place that round-trips via the CC Library API).
+    colorBlindSafe: Boolean(themeData?.accessibilityData?.colorBlindSafe),
+  };
+}
+
+function parseGradientElement(element) {
+  const rep = element.representations?.[0];
+  const gradientData = rep?.['gradient#data'];
+  return {
+    id: element.id,
+    type: 'gradient',
+    name: element.name || 'Untitled gradient',
+    angle: gradientData?.angle ?? 90,
+    gradient: gradientData?.gradient,
+    colorStops: gradientData?.stops,
+    tags: extractGradientTags(element, gradientData, rep),
+  };
+}
+
+function parseElement(element) {
+  const { type } = element;
+  if (type === GRADIENT_ELEMENT_TYPE || type === 'gradient') return parseGradientElement(element);
+  if (type === THEME_ELEMENT_TYPE || type === 'colortheme') return parseThemeElement(element);
+  return null;
+}
+
+function buildLibraryModel(library, elements) {
+  const items = (elements || []).map(parseElement).filter(Boolean);
+  const themeCount = items.filter((i) => i.type === 'theme').length;
+  const gradientCount = items.filter((i) => i.type === 'gradient').length;
+
+  return {
+    id: library.library_urn ?? library.id,
+    name: library.name,
+    themeCount,
+    gradientCount,
+    items,
+  };
+}
+
+/**
+ * Fetch user libraries with color themes and gradients for the Libraries UI.
+ */
+export async function fetchLibrariesWithElements() {
+  await serviceManager.init({ plugins: ['cclibrary'] });
+  const provider = await serviceManager.getProvider('cclibrary');
+  if (!provider) return [];
+
+  const result = await provider.fetchUserLibraries({}, { throwOnError: true });
+  const rawLibraries = result?.libraries ?? [];
+
+  const libraries = await Promise.all(
+    rawLibraries.map(async (library) => {
+      const id = library.library_urn ?? library.id;
+      try {
+        const elementsResult = await provider.fetchLibraryElements(id);
+        return buildLibraryModel(library, elementsResult?.elements);
+      } catch (err) {
+        window.lana?.log(`Libraries fetch elements failed for ${id}: ${err?.message}`, {
+          tags: 'color-libraries',
+          severity: 'warning',
+        });
+        return buildLibraryModel(library, []);
+      }
+    }),
+  );
+
+  return libraries.filter(
+    (lib) => lib.themeCount > 0 || lib.gradientCount > 0 || lib.items.length > 0,
+  );
+}
+
+function hexToRgbObject(hex) {
+  if (typeof hex !== 'string') return { r: 0, g: 0, b: 0 };
+  let h = hex.startsWith('#') ? hex.slice(1) : hex;
+  if (h.length === 3) h = h.split('').map((c) => c + c).join('');
+  return {
+    r: Number.parseInt(h.substring(0, 2), 16) || 0,
+    g: Number.parseInt(h.substring(2, 4), 16) || 0,
+    b: Number.parseInt(h.substring(4, 6), 16) || 0,
+  };
+}
+
+// Rebuild the CC Library POST payload for a parsed theme item so a deleted
+// theme can be re-created (undo). Mirrors the drawer's save payload; tags and
+// color-blind-safe metadata live inside colortheme#data so they round-trip.
+function buildThemeRestorePayload(item) {
+  return {
+    name: item.name || 'Untitled theme',
+    type: THEME_ELEMENT_TYPE,
+    client: getClientInfo(),
+    representations: [{
+      rel: 'primary',
+      type: THEME_REPRESENTATION_TYPE,
+      'colortheme#data': {
+        swatches: (item.colors || []).map((hex) => [{
+          mode: CC_LIBRARY_COLOR_MODE.RGB,
+          value: hexToRgbObject(hex),
+          profileName: COLOR_PROFILE,
+        }]),
+        tags: item.tags || [],
+        ...(item.colorBlindSafe && { accessibilityData: { colorBlindSafe: true } }),
+      },
+    }],
+  };
+}
+
+/**
+ * Re-create a previously deleted theme or gradient in its library (undo delete).
+ * The restored element gets a new server-assigned id.
+ * @param {string} libraryId
+ * @param {Object} item - parsed library item (theme or gradient)
+ */
+export async function restoreLibraryItem(libraryId, item) {
+  if (!libraryId || !item) {
+    throw new Error('Library ID and item are required');
+  }
+
+  await serviceManager.init({ plugins: ['cclibrary'] });
+  const provider = await serviceManager.getProvider('cclibrary');
+  if (!provider) {
+    throw new Error('CC Library provider is unavailable');
+  }
+
+  if (item.type === 'gradient') {
+    const { angle, colorStops } = libraryGradientToModalGradient(item);
+    const payload = provider.buildGradientPayload({
+      name: item.name,
+      angle,
+      stops: colorStops.map((stop) => ({ color: stop.color, position: stop.position })),
+    });
+    await provider.saveGradient(libraryId, payload, { throwOnError: true });
+    return;
+  }
+
+  await provider.saveTheme(libraryId, buildThemeRestorePayload(item), { throwOnError: true });
+}
+
+/**
+ * Delete a theme or gradient element from a CC Library.
+ * @param {string} libraryId
+ * @param {string} elementId
+ */
+export async function deleteLibraryItem(libraryId, elementId) {
+  if (!libraryId || !elementId) {
+    throw new Error('Library ID and element ID are required');
+  }
+
+  await serviceManager.init({ plugins: ['cclibrary'] });
+  const provider = await serviceManager.getProvider('cclibrary');
+  if (!provider) {
+    throw new Error('CC Library provider is unavailable');
+  }
+
+  await provider.deleteTheme(libraryId, elementId, { throwOnError: true });
+}
