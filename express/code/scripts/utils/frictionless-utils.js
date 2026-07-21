@@ -139,6 +139,7 @@ export const QA_CONFIGS = {
   'caption-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'edit-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
+  'compress-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
   'remove-background-fast-track-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'remove-background-fast-track-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'remove-background-focused-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
@@ -403,6 +404,12 @@ export function executeQuickAction(
       contConfig,
     ),
     'remove-background': () => ccEverywhere.quickAction.removeBackground(
+      docConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
+    'compress-image': () => ccEverywhere.quickAction.compressImage(
       docConfig,
       appConfig,
       exportConfig,
