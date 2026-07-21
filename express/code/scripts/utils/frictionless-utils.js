@@ -8,6 +8,7 @@ const WEBP = 'webp';
 const HEIC = 'heic';
 const MOV = 'mov';
 const MP4 = 'mp4';
+const BLOB_BASED_FILE_TYPES = ['audio', 'video'];
 
 const VIDEO_FORMATS = [
   'mov',
@@ -269,7 +270,7 @@ export function fadeOut(element) {
 
 // Common document configurations
 export function createDocConfig(data, type = 'image') {
-  const dataType = ['audio', 'video'].includes(type) ? 'blob' : 'base64';
+  const dataType = isBlobBasedFileType(type) ? 'blob' : 'base64';
   return {
     asset: {
       data,
@@ -331,6 +332,10 @@ function getWebBrowser() {
   return 'Unknown';
 }
 
+function isBlobBasedFileType(fileType) {
+  return BLOB_BASED_FILE_TYPES.includes(fileType)
+}
+
 // Common container configuration
 export function createContainerConfig(quickAction) {
   return {
@@ -383,7 +388,7 @@ export async function createMobileExportConfig(
   editText,
 ) {
   const exportConfig = createDefaultExportConfig();
-  const isBlobBased = ['video', 'audio'].includes(QA_CONFIGS[quickAction].group);
+  const isBlobBased = isBlobBasedFileType(QA_CONFIGS[quickAction].group);
   const result = [
     {
       ...exportConfig[0],
@@ -564,7 +569,7 @@ export async function processFileForQuickAction(
   const maxSize = QA_CONFIGS[quickAction].max_size ?? 40 * 1024 * 1024;
 
   if (QA_CONFIGS[quickAction].input_check(file.type, file.name) && file.size <= maxSize) {
-    const isBlobBased = ['video', 'audio'].includes(QA_CONFIGS[quickAction].group);
+    const isBlobBased = isBlobBasedFileType(QA_CONFIGS[quickAction].group);
     if (isBlobBased) {
       window.history.pushState({ hideFrictionlessQa: true }, '', '');
       return file;
