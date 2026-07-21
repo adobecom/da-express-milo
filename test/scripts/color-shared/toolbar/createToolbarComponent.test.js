@@ -701,6 +701,7 @@ describe('createToolbar', () => {
 
 describe('refreshLibraryButtonsStacking', () => {
   let rectStub;
+  let rafStub;
 
   beforeEach(() => {
     // getBoundingClientRect is stubbed on the prototype rather than the
@@ -714,10 +715,20 @@ describe('refreshLibraryButtonsStacking', () => {
       const height = Number(isMaxContent ? this.dataset.natural : this.dataset.squeezed);
       return { height };
     });
+    // Real requestAnimationFrame is throttled/paused in backgrounded tabs,
+    // which this suite's tab can be when many test files run concurrently —
+    // that hung measureNaturalGridItemHeight's await past mocha's timeout.
+    // The decision logic under test doesn't depend on real frame timing, so
+    // resolve on the next microtask instead.
+    rafStub = sinon.stub(window, 'requestAnimationFrame').callsFake((cb) => {
+      Promise.resolve().then(cb);
+      return 0;
+    });
   });
 
   afterEach(() => {
     rectStub.restore();
+    rafStub.restore();
     sinon.restore();
     document.body.innerHTML = '';
   });
