@@ -1,6 +1,8 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { getState, setState, subscribe, initFromUrl } from '../../../express/code/blocks/font-generator/state.js';
+import {
+  getState, setState, subscribe, initFromUrl, initFonts, getCategories,
+} from '../../../express/code/blocks/font-generator/state.js';
 
 describe('font-generator/state', () => {
   let replaceStateStub;
@@ -38,10 +40,6 @@ describe('font-generator/state', () => {
       expect(getState().visibleCount).to.equal(12);
     });
 
-    // TODO: unskip once unicodeEngine.js is merged and allFonts is populated
-    it.skip('returns all fonts when no filters are active', () => {
-      expect(getState().activeFonts).to.have.length(4);
-    });
     it('returns a copy — direct mutation does not affect the store', () => {
       const state = getState();
       state.previewText = 'mutated';
@@ -69,6 +67,19 @@ describe('font-generator/state', () => {
       expect(getState().fontSize).to.equal(32);
     });
 
+    it('clamps fontSize into the supported range', () => {
+      setState({ fontSize: 999 });
+      expect(getState().fontSize).to.equal(48);
+      setState({ fontSize: 1 });
+      expect(getState().fontSize).to.equal(12);
+    });
+
+    it('ignores a non-numeric fontSize', () => {
+      setState({ fontSize: 40 });
+      setState({ fontSize: 'huge' });
+      expect(getState().fontSize).to.equal(40);
+    });
+
     it('updates visibleCount when set directly', () => {
       setState({ visibleCount: 24 });
       expect(getState().visibleCount).to.equal(24);
@@ -78,21 +89,6 @@ describe('font-generator/state', () => {
       setState({ previewText: 'partial' });
       expect(getState().layout).to.equal('grid');
       expect(getState().fontSize).to.equal(32);
-    });
-
-    // TODO: unskip once unicodeEngine.js is merged and allFonts is populated
-    it.skip('derives activeFonts filtered by category when activeFilters changes', () => {
-      setState({ activeFilters: ['bold'] });
-      const { activeFonts } = getState();
-      expect(activeFonts.length).to.be.greaterThan(0);
-      expect(activeFonts.every((f) => f.category === 'bold')).to.be.true;
-    });
-
-    // TODO: unskip once unicodeEngine.js is merged and allFonts is populated
-    it.skip('returns all fonts when activeFilters is reset to empty', () => {
-      setState({ activeFilters: ['italic'] });
-      setState({ activeFilters: [] });
-      expect(getState().activeFonts).to.have.length(4);
     });
 
     it('resets visibleCount to 12 when filters change', () => {
@@ -203,6 +199,12 @@ describe('font-generator/state', () => {
   // ── initFromUrl ───────────────────────────────────────────────────────────
 
   describe('initFromUrl', () => {
+    beforeEach(() => {
+      // Default to a desktop viewport so an absent layout param resolves to
+      // grid; individual tests override for the small-viewport case.
+      sinon.stub(window, 'matchMedia').returns({ matches: false });
+    });
+
     afterEach(() => {
       window.history.pushState(null, '', window.location.pathname);
     });
@@ -225,14 +227,14 @@ describe('font-generator/state', () => {
       expect(getState().activeFilters).to.deep.equal(['strikethrough']);
     });
 
-    it('reads layout=list from the layout param', () => {
-      window.history.pushState(null, '', '?layout=list');
+    it('reads view=list from the view param', () => {
+      window.history.pushState(null, '', '?view=list');
       initFromUrl();
       expect(getState().layout).to.equal('list');
     });
 
-    it('reads layout=grid from the layout param', () => {
-      window.history.pushState(null, '', '?layout=grid');
+    it('reads view=grid from the view param', () => {
+      window.history.pushState(null, '', '?view=grid');
       initFromUrl();
       expect(getState().layout).to.equal('grid');
     });
@@ -243,8 +245,21 @@ describe('font-generator/state', () => {
       expect(getState().fontSize).to.equal(36);
     });
 
-    it('ignores an unrecognised layout value', () => {
-      window.history.pushState(null, '', '?layout=carousel');
+    it('defaults layout to grid on wide viewports when the param is absent', () => {
+      window.history.pushState(null, '', '?unrelated=true');
+      initFromUrl();
+      expect(getState().layout).to.equal('grid');
+    });
+
+    it('defaults layout to list on small viewports when the param is absent', () => {
+      window.matchMedia.returns({ matches: true });
+      window.history.pushState(null, '', '?unrelated=true');
+      initFromUrl();
+      expect(getState().layout).to.equal('list');
+    });
+
+    it('ignores an unrecognised view value', () => {
+      window.history.pushState(null, '', '?view=carousel');
       initFromUrl();
       expect(getState().layout).to.equal('grid');
     });
@@ -253,21 +268,6 @@ describe('font-generator/state', () => {
       window.history.pushState(null, '', '?size=large');
       initFromUrl();
       expect(getState().fontSize).to.equal(32);
-    });
-
-    // TODO: unskip once unicodeEngine.js is merged and allFonts is populated
-    it.skip('derives activeFonts from filters read in the URL', () => {
-      window.history.pushState(null, '', '?filters=italic');
-      initFromUrl();
-      const { activeFonts } = getState();
-      expect(activeFonts.every((f) => f.category === 'italic')).to.be.true;
-    });
-
-    // TODO: unskip once unicodeEngine.js is merged and allFonts is populated
-    it.skip('shows all fonts when no filters param is present', () => {
-      window.history.pushState(null, '', '?layout=list');
-      initFromUrl();
-      expect(getState().activeFonts).to.have.length(4);
     });
 
     it('sets visibleCount to 12 after reading URL', () => {
@@ -300,9 +300,9 @@ describe('font-generator/state', () => {
       expect(getUrlArg().searchParams.get('text')).to.equal('test text');
     });
 
-    it('writes the layout param', () => {
+    it('writes the view param', () => {
       setState({ layout: 'list' });
-      expect(getUrlArg().searchParams.get('layout')).to.equal('list');
+      expect(getUrlArg().searchParams.get('view')).to.equal('list');
     });
 
     it('writes the size param', () => {
@@ -323,6 +323,41 @@ describe('font-generator/state', () => {
     it('omits the text param when previewText is empty', () => {
       setState({ previewText: '' });
       expect(getUrlArg().searchParams.has('text')).to.be.false;
+    });
+  });
+
+  // ── Font catalog (initFonts / getCategories / derived activeFonts) ──────────
+
+  describe('font catalog', () => {
+    const FONTS = [
+      { id: 'a', category: 'bold' },
+      { id: 'b', category: 'italic' },
+      { id: 'c', category: 'bold' },
+    ];
+
+    beforeEach(() => initFonts(FONTS));
+    afterEach(() => initFonts([]));
+
+    it('getCategories returns unique categories in first-seen order', () => {
+      expect(getCategories()).to.deep.equal(['bold', 'italic']);
+    });
+
+    it('derives activeFonts as the full catalog when no filters are active', () => {
+      setState({ activeFilters: [] });
+      expect(getState().activeFonts).to.have.length(3);
+    });
+
+    it('derives activeFonts narrowed to the active category', () => {
+      setState({ activeFilters: ['bold'] });
+      const { activeFonts } = getState();
+      expect(activeFonts).to.have.length(2);
+      expect(activeFonts.every((f) => f.category === 'bold')).to.be.true;
+    });
+
+    it('returns activeFonts to the full catalog when filters are cleared', () => {
+      setState({ activeFilters: ['italic'] });
+      setState({ activeFilters: [] });
+      expect(getState().activeFonts).to.have.length(3);
     });
   });
 });
