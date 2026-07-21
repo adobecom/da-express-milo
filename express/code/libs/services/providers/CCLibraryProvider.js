@@ -92,16 +92,32 @@ export default class CCLibraryProvider extends BaseProvider {
     return this.safeExecute(fn);
   }
 
-  async deleteTheme(libraryId, themeId) {
-    return this.safeExecute(() => this.#actions.deleteTheme(libraryId, themeId));
+  async deleteTheme(libraryId, themeId, options = {}) {
+    const fn = () => this.#actions.deleteTheme(libraryId, themeId);
+    if (options.throwOnError) return fn();
+    return this.safeExecute(fn);
   }
 
-  async updateTheme(libraryId, elementId, payload) {
-    return this.safeExecute(() => this.#actions.updateTheme(libraryId, elementId, payload));
+  /**
+   * @param {Object} [options]
+   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI
+   *   (e.g. NETWORK_ERROR toast) instead of the save silently reporting success.
+   */
+  async updateTheme(libraryId, elementId, payload, options = {}) {
+    const fn = () => this.#actions.updateTheme(libraryId, elementId, payload);
+    if (options.throwOnError) return fn();
+    return this.safeExecute(fn);
   }
 
-  async updateElementMetadata(libraryId, elements) {
-    return this.safeExecute(() => this.#actions.updateElementMetadata(libraryId, elements));
+  /**
+   * @param {Object} [options]
+   * @param {boolean} [options.throwOnError] - If true, errors are thrown so callers can show UI
+   *   (e.g. NETWORK_ERROR toast) instead of the save silently reporting success.
+   */
+  async updateElementMetadata(libraryId, elements, options = {}) {
+    const fn = () => this.#actions.updateElementMetadata(libraryId, elements);
+    if (options.throwOnError) return fn();
+    return this.safeExecute(fn);
   }
 
   /**
@@ -138,6 +154,7 @@ export default class CCLibraryProvider extends BaseProvider {
    * @param {string}  [options.type='linear'] - Gradient type
    * @param {Array<{color: string, position: number}>} options.stops
    *   Each stop has a CSS color string (hex or rgb/rgba) and a position (0-1 float).
+   * @param {Array<string>} [options.tags=[]] - Tags to persist inside `gradient#data`.
    * @returns {Object} Melville-ready element payload
    */
   // eslint-disable-next-line class-methods-use-this
@@ -148,6 +165,7 @@ export default class CCLibraryProvider extends BaseProvider {
     interpolation = 'linear',
     type = 'linear',
     stops = [],
+    tags = [],
   }) {
     return {
       name: name || 'Untitled gradient',
@@ -162,6 +180,7 @@ export default class CCLibraryProvider extends BaseProvider {
             angle,
             aspectRatio,
             type,
+            tags: Array.isArray(tags) ? tags : [],
             stops: stops.map((stop) => ({
               color: [
                 {

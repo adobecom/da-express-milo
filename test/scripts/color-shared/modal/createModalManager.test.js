@@ -1,7 +1,9 @@
 /* eslint-disable max-len, no-underscore-dangle, no-promise-executor-return */
 import { expect } from '@esm-bundle/chai';
+import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
 import { createModalManager } from '../../../../express/code/scripts/color-shared/modal/createModalManager.js';
+import { trapFocus } from '../../../../express/code/scripts/color-shared/spectrum/utils/a11y.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
@@ -638,5 +640,65 @@ describe.skip('createModalManager', () => {
       manager.close();
       await new Promise((r) => setTimeout(r, 350));
     });
+  });
+});
+
+describe('trapFocus initial focus', () => {
+  let releaseTrap;
+
+  beforeEach(() => {
+    // requestAnimationFrame is throttled to ~1fps in background browser tabs
+    // (concurrent WTR sessions). Use queueMicrotask so trapFocus's rAF-based
+    // initial-focus scheduling resolves immediately under load.
+    sinon.stub(window, 'requestAnimationFrame').callsFake((cb) => {
+      queueMicrotask(() => cb(0));
+      return 0;
+    });
+  });
+
+  afterEach(() => {
+    releaseTrap?.release();
+    releaseTrap = null;
+    sinon.restore();
+  });
+
+  async function waitForFocus(expected) {
+    for (let i = 0; i < 50; i += 1) {
+      if (document.activeElement === expected) return;
+      // eslint-disable-next-line no-await-in-loop
+      await new Promise((r) => setTimeout(r, 20));
+    }
+  }
+
+  it('focuses first tabbable when getInitialFocus is omitted', async () => {
+    const root = document.createElement('div');
+    document.body.appendChild(root);
+    const firstTabbable = document.createElement('button');
+    firstTabbable.type = 'button';
+    root.appendChild(firstTabbable);
+    const secondTabbable = document.createElement('button');
+    secondTabbable.type = 'button';
+    root.appendChild(secondTabbable);
+
+    releaseTrap = trapFocus(root);
+    await waitForFocus(firstTabbable);
+
+    expect(document.activeElement).to.equal(firstTabbable);
+    root.remove();
+  });
+
+  it('focuses dialog root when getInitialFocus returns root', async () => {
+    const root = document.createElement('div');
+    root.tabIndex = -1;
+    document.body.appendChild(root);
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    root.appendChild(btn);
+
+    releaseTrap = trapFocus(root, { getInitialFocus: (el) => el });
+    await waitForFocus(root);
+
+    expect(document.activeElement).to.equal(root);
+    root.remove();
   });
 });
