@@ -229,7 +229,7 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
   const docConfig = createDocConfig(data[0], 'image');
   const videoDocConfig = quickActionId === 'merge-videos'
     ? createMergeVideosDocConfig(data)
-    : createDocConfig(data[0], quickActionId === 'audio-convert' ? 'audio' : 'video');
+    : createDocConfig(data[0], quickActionId === 'audio-converter' ? 'audio' : 'video');
 
   const appConfig = {
     metaData: {
