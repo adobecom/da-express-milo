@@ -1370,7 +1370,35 @@ describe('computeIsDirty', () => {
 });
 
 describe('refreshBtnRowStacking', () => {
+  let rectStub;
+  let rafStub;
+
+  beforeEach(() => {
+    // getBoundingClientRect is stubbed on the prototype rather than the
+    // instance: measureNaturalHeight measures a cloneNode(true) of each
+    // button, and clones don't inherit instance-level sinon stubs. Keying
+    // the fake off dataset (which cloneNode does copy) and each call's own
+    // inline-size lets the same stub answer correctly for both the live
+    // button and its temporary clone.
+    rectStub = sinon.stub(Element.prototype, 'getBoundingClientRect').callsFake(function fakeRect() {
+      const isMaxContent = this.style.inlineSize === 'max-content';
+      const height = Number(isMaxContent ? this.dataset.natural : this.dataset.squeezed);
+      return { height };
+    });
+    // Real requestAnimationFrame is throttled/paused in backgrounded tabs,
+    // which this suite's tab can be when many test files run concurrently —
+    // that hung measureNaturalHeight's await past mocha's timeout. The
+    // decision logic under test doesn't depend on real frame timing, so
+    // resolve on the next microtask instead.
+    rafStub = sinon.stub(window, 'requestAnimationFrame').callsFake((cb) => {
+      Promise.resolve().then(cb);
+      return 0;
+    });
+  });
+
   afterEach(() => {
+    rectStub.restore();
+    rafStub.restore();
     sinon.restore();
     document.body.innerHTML = '';
   });
@@ -1381,43 +1409,44 @@ describe('refreshBtnRowStacking', () => {
     return row;
   }
 
-  // Simulates a button whose rendered height is `squeezedHeight` under its
-  // current (constrained) width, but `naturalHeight` once measureNaturalHeight
-  // temporarily sets inline-size: max-content to reveal the unwrapped height.
-  function makeButton(naturalHeight, squeezedHeight = naturalHeight) {
+  // A button whose live rendered height is `squeezedHeight` under its current
+  // (possibly wrap-constrained) width, but `naturalHeight` once
+  // measureNaturalHeight's clone sets inline-size: max-content to reveal the
+  // unwrapped single-line height. Appended to `row` since measureNaturalHeight
+  // reads el.parentElement to place its measurement clone.
+  function makeButton(row, naturalHeight, squeezedHeight = naturalHeight) {
     const el = document.createElement('div');
-    sinon.stub(el, 'getBoundingClientRect').callsFake(() => ({
-      height: el.style.inlineSize === 'max-content' ? naturalHeight : squeezedHeight,
-    }));
+    el.dataset.natural = String(naturalHeight);
+    el.dataset.squeezed = String(squeezedHeight);
+    row.appendChild(el);
     return el;
   }
 
-  it('does not stack when both buttons render at their natural single-line height', () => {
+  it('does not stack when both buttons render at their natural single-line height', async () => {
     const row = makeRow();
-    refreshBtnRowStacking(row, makeButton(40), makeButton(40));
+    await refreshBtnRowStacking(row, makeButton(row, 40), makeButton(row, 40));
     expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.false;
   });
 
-  it('stacks when either button wraps (rendered height exceeds its natural single-line height)', () => {
+  it('stacks when either button wraps (rendered height exceeds its natural single-line height)', async () => {
     const row = makeRow();
-    refreshBtnRowStacking(row, makeButton(40), makeButton(40, 80));
+    await refreshBtnRowStacking(row, makeButton(row, 40), makeButton(row, 40, 80));
     expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.true;
   });
 
-  it('un-stacks again once there is enough room (e.g. after a resize)', () => {
+  it('un-stacks again once there is enough room (e.g. after a resize)', async () => {
     const row = makeRow();
-    const btnA = makeButton(40);
-    const btnB = makeButton(40, 80);
-    refreshBtnRowStacking(row, btnA, btnB);
+    const btnA = makeButton(row, 40);
+    const btnB = makeButton(row, 40, 80);
+    await refreshBtnRowStacking(row, btnA, btnB);
     expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.true;
 
-    btnB.getBoundingClientRect.restore();
-    sinon.stub(btnB, 'getBoundingClientRect').callsFake(() => ({ height: 40 }));
-    refreshBtnRowStacking(row, btnA, btnB);
+    btnB.dataset.squeezed = '40';
+    await refreshBtnRowStacking(row, btnA, btnB);
     expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.false;
   });
 
-  it('is a no-op when row or buttons are missing', () => {
-    expect(() => refreshBtnRowStacking(null, null, null)).to.not.throw();
+  it('is a no-op when row or buttons are missing', async () => {
+    await refreshBtnRowStacking(null, null, null);
   });
 });

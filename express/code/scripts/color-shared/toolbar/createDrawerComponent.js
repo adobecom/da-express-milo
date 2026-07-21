@@ -779,32 +779,58 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
 }
 
 // Predicting overflow from width math (equal-share vs combined, gap, sp-button's
-// own padding/min-width) proved fragile across several edge cases. Instead,
-// directly observe the outcome: does this button's current (squeezed) height
-// exceed the height it renders at with unlimited width (i.e. did its label
-// actually wrap to a second line)?
-function measureNaturalHeight(el) {
-  const { flex, maxInlineSize, inlineSize } = el.style;
-  el.style.flex = '0 0 auto';
-  el.style.maxInlineSize = 'none';
-  el.style.inlineSize = 'max-content';
-  const { height } = el.getBoundingClientRect();
-  el.style.flex = flex;
-  el.style.maxInlineSize = maxInlineSize;
-  el.style.inlineSize = inlineSize;
+// own padding/min-width) proved fragile across several edge cases. Directly
+// observing rendered height instead (current vs natural) is more robust, but
+// the *live* button's internal label layout turns out to lock in from its
+// first render — verified that neither large explicit widths nor several
+// animation frames of waiting ever unstick an already-wrapped label in place.
+// A fresh, temporarily-detached clone renders its own first layout correctly,
+// so measure natural height that way on every check — caching it per-element
+// was tried but a measurement taken mid-transition (e.g. right as the panel
+// crosses a width breakpoint) could bake in a wrong value forever, causing
+// stacking to silently stop updating on later resizes.
+async function measureNaturalHeight(el) {
+  const clone = el.cloneNode(true);
+  clone.style.position = 'fixed';
+  clone.style.visibility = 'hidden';
+  clone.style.insetInlineStart = '-9999px';
+  clone.style.insetBlockStart = '0';
+  clone.style.inlineSize = 'max-content';
+  clone.style.flex = 'none';
+  // Appended within the same ancestor (not document.body) so it inherits the
+  // sp-theme/panel's CSS custom properties — measuring detached from that
+  // context yields a slightly different (smaller) height than the real
+  // in-context single-line height, enough to false-trigger stacking.
+  // position:fixed keeps it out of the row's own flex layout regardless.
+  el.parentElement.appendChild(clone);
+  // A freshly-connected custom element needs at least one frame before its
+  // shadow DOM reflects final content/sizing.
+  await new Promise((resolve) => { requestAnimationFrame(resolve); });
+  const { height } = clone.getBoundingClientRect();
+  clone.remove();
   return height;
 }
 
-export function refreshBtnRowStacking(row, btnA, btnB) {
+export async function refreshBtnRowStacking(row, btnA, btnB) {
   if (!row || !btnA || !btnB) return;
-  // Re-measure as if side by side — a previous --stacked pass gives each
-  // button the full row width, which would always look single-line.
+  const [naturalHeightA, naturalHeightB] = await Promise.all([
+    measureNaturalHeight(btnA),
+    measureNaturalHeight(btnB),
+  ]);
+  // Deciding from whatever layout is currently applied is unreliable: once
+  // stacked, buttons get the full row width and may no longer wrap, which
+  // would read as "fits" and unstack them — but unstacking narrows each
+  // button back to a half-share width, re-wrapping the label with nothing
+  // left to catch it. Force the equal-share layout before measuring so the
+  // decision reflects the width the buttons will actually have.
   row.classList.remove('ax-drawer-btn-row--stacked');
-
-  const naturalHeightA = measureNaturalHeight(btnA);
-  const naturalHeightB = measureNaturalHeight(btnB);
-  const shouldStack = btnA.getBoundingClientRect().height > naturalHeightA + 1
-    || btnB.getBoundingClientRect().height > naturalHeightB + 1;
+  // Compare against the larger of the two natural heights, not each button's
+  // own — a flex/grid row equalizes both buttons to the taller one's height,
+  // so a shorter-natural sibling would otherwise always look "wrapped" once
+  // stretched to match, even with nothing actually wrapping.
+  const naturalHeight = Math.max(naturalHeightA, naturalHeightB);
+  const shouldStack = btnA.getBoundingClientRect().height > naturalHeight + 1
+    || btnB.getBoundingClientRect().height > naturalHeight + 1;
 
   row.classList.toggle('ax-drawer-btn-row--stacked', shouldStack);
 }
