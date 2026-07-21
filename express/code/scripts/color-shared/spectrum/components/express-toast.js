@@ -97,7 +97,7 @@ export async function showExpressToast(config) {
     button.setAttribute('variant', 'secondary');
     button.setAttribute('treatment', 'outline');
     button.setAttribute('static-color', 'white');
-    button.setAttribute('size', 's');
+    button.setAttribute('size', 'm');
     button.textContent = action.label;
     if (action.href) {
       button.setAttribute('href', action.href);
