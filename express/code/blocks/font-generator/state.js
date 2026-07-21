@@ -1,25 +1,33 @@
+// @import { State, StateUpdate, StateListener } from './types.js'
+
+import {
+  INITIAL_VISIBLE_COUNT,
+  DEFAULT_LAYOUT,
+  DEFAULT_FONT_SIZE,
+  FONT_SIZE_MIN,
+  FONT_SIZE_MAX,
+} from './types.js';
+
 let allFonts = [];
 
 const DEFAULTS = {
-  previewText: 'Type the preview text you want to get started...',
+  previewText: '',
   activeFilters: [],
-  layout: 'grid',
-  fontSize: 48,
+  layout: DEFAULT_LAYOUT,
+  fontSize: DEFAULT_FONT_SIZE,
 };
-
-const VISIBLE_COUNT_DEFAULT = 12;
 
 const URL_PARAMS = {
   previewText: 'text',
   activeFilters: 'filters',
-  layout: 'layout',
+  layout: 'view',
   fontSize: 'size',
 };
 
 let state = {
   ...DEFAULTS,
   activeFonts: [],
-  visibleCount: VISIBLE_COUNT_DEFAULT,
+  visibleCount: INITIAL_VISIBLE_COUNT,
 };
 
 const subscribers = new Set();
@@ -27,6 +35,14 @@ const subscribers = new Set();
 function deriveActiveFonts(activeFilters) {
   if (!activeFilters.length) return allFonts;
   return allFonts.filter((font) => activeFilters.includes(font.category));
+}
+
+// Clamp to the slider's supported range and round to a whole px; reject
+// non-numeric input so a bad URL param (?size=large) can't poison the store.
+function normalizeFontSize(value) {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) return undefined;
+  return Math.min(FONT_SIZE_MAX, Math.max(FONT_SIZE_MIN, Math.round(parsed)));
 }
 
 function syncToUrl() {
@@ -59,6 +75,7 @@ function syncToUrl() {
   window.history.replaceState(null, '', url);
 }
 
+/** @returns {State} */
 export function getState() {
   return {
     ...state,
@@ -72,24 +89,44 @@ function notify() {
   subscribers.forEach((cb) => cb(snapshot));
 }
 
+/** @param {StateUpdate} updates */
 export function setState(updates) {
-  const filtersChanged = 'activeFilters' in updates;
-  state = { ...state, ...updates };
+  const next = { ...updates };
+
+  if (next.fontSize !== undefined) {
+    const size = normalizeFontSize(next.fontSize);
+    if (size === undefined) delete next.fontSize;
+    else next.fontSize = size;
+  }
+
+  const filtersChanged = 'activeFilters' in next;
+  state = { ...state, ...next };
 
   if (filtersChanged) {
     state.activeFonts = deriveActiveFonts(state.activeFilters);
-    state.visibleCount = VISIBLE_COUNT_DEFAULT;
+    state.visibleCount = INITIAL_VISIBLE_COUNT;
   }
 
   syncToUrl();
   notify();
 }
 
+/**
+ * @param {StateListener} callback
+ * @returns {() => void} unsubscribe
+ */
 export function subscribe(callback) {
   if (typeof callback !== 'function') return () => {};
   subscribers.add(callback);
   callback(getState());
   return () => subscribers.delete(callback);
+}
+
+// No layout param → default to list on narrow viewports (where the grid/list
+// toggle is hidden and a single column reads better) and grid otherwise.
+function resolveDefaultLayout() {
+  const prefersList = window.matchMedia?.('(max-width: 899px)')?.matches;
+  return prefersList ? 'list' : DEFAULTS.layout;
 }
 
 export function initFromUrl() {
@@ -102,16 +139,16 @@ export function initFromUrl() {
   if (filters) state.activeFilters = filters.split(',').filter(Boolean);
 
   const layout = params.get(URL_PARAMS.layout);
-  if (layout === 'grid' || layout === 'list') state.layout = layout;
+  state.layout = layout === 'grid' || layout === 'list' ? layout : resolveDefaultLayout();
 
   const fontSize = params.get(URL_PARAMS.fontSize);
   if (fontSize !== null) {
-    const parsed = Number(fontSize);
-    if (!Number.isNaN(parsed)) state.fontSize = parsed;
+    const size = normalizeFontSize(fontSize);
+    if (size !== undefined) state.fontSize = size;
   }
 
   state.activeFonts = deriveActiveFonts(state.activeFilters);
-  state.visibleCount = VISIBLE_COUNT_DEFAULT;
+  state.visibleCount = INITIAL_VISIBLE_COUNT;
 }
 
 export function initFonts(fonts) {

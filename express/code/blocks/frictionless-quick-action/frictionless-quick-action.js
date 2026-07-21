@@ -121,7 +121,10 @@ function showErrorToast(block, msg) {
   const hideToast = () => toast.classList.add('hide');
   if (!toast) {
     toast = createTag('div', { class: 'error-toast hide' });
-    toast.prepend(getIconElementDeprecated('error'));
+    toast.append(getIconElementDeprecated('error'));
+    // Dedicated text node so updating the message doesn't wipe the icon and
+    // close button (setting toast.textContent would remove all children).
+    toast.append(createTag('span', { class: 'error-toast-message' }));
     const close = createTag(
       'button',
       {},
@@ -131,7 +134,7 @@ function showErrorToast(block, msg) {
     toast.append(close);
     block.append(toast);
   }
-  toast.textContent = msg;
+  toast.querySelector('.error-toast-message').textContent = msg;
   toast.classList.remove('hide');
   clearTimeout(timeoutId);
   timeoutId = setTimeout(hideToast, 6000);
