@@ -543,15 +543,22 @@ function applyExperimentalCtas(template, cta, btnContainer) {
 
   if (!cta1Url && !cta2Url && !cta1Text && !cta2Text) return null;
 
-  // Premium and animated (and print/video) templates must always default to
-  // the control experience — the single "Edit this template" CTA pointing at
-  // the branch URL — regardless of any test/variant CTA metadata that Target
-  // injects page-wide. Only free static templates opt into the experiment.
+  // Premium, animated, and video templates must always default to the control
+  // experience — the single "Edit this template" CTA pointing at the branch URL
+  // — regardless of any test/variant CTA metadata Target injects page-wide.
+  // Only free, still templates opt into the experiment. "animated" is a distinct
+  // value in the authoritative `behaviors` array (separate from "video" and
+  // "still", guaranteed present by isValidBehaviors), so it must be excluded
+  // explicitly — containsVideo only covers the video rendition, not animation.
+  const behaviors = Array.isArray(template.behaviors) ? template.behaviors : [];
+  const isAnimatedOrVideo = behaviors.includes('animated')
+    || behaviors.includes('video')
+    || containsVideo(template.pages);
   const isFreeStatic = !variants?.includes('flyer')
     && !variants?.includes('t-shirt')
     && !variants?.includes('print')
     && template.licensingCategory === 'free'
-    && !containsVideo(template.pages);
+    && !isAnimatedOrVideo;
 
   if (!isFreeStatic) return null;
 
