@@ -1,0 +1,134 @@
+.section .simple-marquee {
+  max-width: initial;
+  text-align: center;
+}
+
+.simple-marquee .express-logo {
+  width: initial;
+  height: 30px;
+  padding: 2rem 0 1rem;
+  max-width: 340px;
+}
+
+main .section .simple-marquee h1,
+main .section .simple-marquee h2 {
+  font-size: var(--heading-font-size-m);
+  padding-bottom: var(--spacing-100);
+}
+
+.simple-marquee strong,
+.simple-marquee a,
+.simple-marquee button {
+  font-family: var(--body-font-family);
+}
+
+.simple-marquee .headline {
+  padding-bottom: var(--spacing-400);
+  max-width: 340px;
+  margin: 0 auto;
+}
+
+.simple-marquee .headline p {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.simple-marquee .headline .eyebrow {
+  font-weight: var(--subheading-font-weight);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding-bottom: var(--spacing-100);
+}
+
+.simple-marquee .headline .ctas {
+  display: none;
+}
+
+.simple-marquee .headline a:not(.primaryCTA) {
+  background-color: var(--color-black);
+  border-color: var(--color-black);
+}
+
+.simple-marquee .background {
+  width: 100%;
+}
+
+.simple-marquee .background img {
+  position: absolute;
+  top: 50%;
+  object-fit: fill;
+  width: 250%;
+  transform: translate(-50%, -35%);
+  max-height: 600px;
+  max-width: 1200px;
+}
+
+.simple-marquee .foreground {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+@media screen and (min-width: 768px) {
+  .simple-marquee .background img {
+    max-width: 1500px;
+    max-height: 1200px;
+  }
+
+  .simple-marquee .headline {
+    max-width: 1200px;
+    padding-left: var(--spacing-500);
+    padding-right: var(--spacing-500);
+  }
+
+  .simple-marquee .headline .ctas {
+    display: flex;
+    margin-top: 16px;
+    padding-top: 16px;
+    justify-content: center;
+    gap: 8px;
+  }
+
+  .simple-marquee .headline a.button {
+    margin: 0;
+  }
+}
+
+@media screen and (min-width: 1280px) {
+  .simple-marquee .express-logo {
+    padding-top: 40px;
+  }
+
+  .simple-marquee .background img {
+    max-height: 600px;
+    max-width: 1800px;
+  }
+
+  .simple-marquee .headline {
+    max-width: 1600px;
+    padding-bottom: 40px;
+  }
+
+  .simple-marquee .headline.no-cta {
+    padding-bottom: 0;
+  }
+
+  main .section .simple-marquee .headline h1,
+  main .section .simple-marquee .headline h2 {
+    font-size: var(--heading-font-size-xl);
+    font-weight: var(--heading-font-weight-extra);
+  }
+
+  .simple-marquee .headline .ctas {
+    padding-top: 24px;
+  }
+
+  .simple-marquee .headline a.button {
+    border-width: 1px;
+    padding: 12px 24px 13px 24px;
+    font-size: var(--body-font-size-l);
+    border-radius: 50px;
+    line-height: 23.4px;
+  }
+}
