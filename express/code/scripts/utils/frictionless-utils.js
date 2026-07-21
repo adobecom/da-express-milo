@@ -6,6 +6,8 @@ const JPEG = 'jpeg';
 const PNG = 'png';
 const WEBP = 'webp';
 const HEIC = 'heic';
+const MOV = 'mov';
+const MP4 = 'mp4';
 
 const VIDEO_FORMATS = [
   'mov',
@@ -191,7 +193,7 @@ export const QA_CONFIGS = {
     group: 'audio',
   },
   'video-to-audio': {
-    ...getBaseVideoCfg('mov', 'mp4'),
+    ...getBaseVideoCfg(MOV, MP4),
     group: 'audio',
   },
 };

@@ -86,7 +86,7 @@ export async function runQuickAction(quickActionId, data, block) {
 
   const contConfig = createContainerConfig(quickActionId);
   const docConfig = createDocConfig(data[0], 'image');
-  const videoDocConfig = quickActionId === 'merge-videos' ? createMergeVideosDocConfig(data) : createDocConfig(data[0], 'video');
+  const videoDocConfig = quickActionId === 'merge-videos' ? createMergeVideosDocConfig(data) : createDocConfig(data[0], quickActionId === 'audio-converter' ? 'audio' : 'video');
 
   const appConfig = {
     metaData: {
