@@ -48,6 +48,7 @@
   border-radius: 50%;
   background: transparent;
   cursor: pointer;
+  transition: opacity 0.2s ease;
 }
 
 .font-card-copy-btn img {
@@ -128,7 +129,6 @@
      so cards don't shrink to fit shorter previews. em ties this to the
      element's own font-size, which is set dynamically per card. */
   min-height: 2.6em;
-  padding-right: 36px; /* clear the copy button */
   color: var(--color-gray-950);
 }
 
@@ -138,6 +138,14 @@
     line-clamp: 4;
     min-height: 5.2em;
   }
+}
+
+/* List view is a compact row — stay at the 2-line clamp even at widths
+   where grid view has expanded to 4. */
+.font-card-grid.is-list .font-card-preview {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  min-height: 2.6em;
 }
 
 /* ─── Copy success / hover overlays ──────────────────────────────────────── */
@@ -172,10 +180,16 @@
   opacity: 1;
 }
 
-/* Desktop-only affordance — mobile/tablet get no mouse hover. */
+/* Desktop-only affordance — mobile/tablet get no mouse hover. The overlay's
+   background is translucent (rgba alpha 0.69), so without this the copy
+   button would still show faintly through it instead of disappearing. */
 @media (hover: hover) and (min-width: 1200px) {
   .font-card-body:hover .font-card-hover-overlay {
     opacity: 1;
+  }
+
+  .font-card-body:hover .font-card-copy-btn {
+    opacity: 0;
   }
 }
 
@@ -234,7 +248,6 @@
   justify-content: space-between;
   gap: 8px;
   padding: var(--spacing-300);
-  min-height: 36px;
 }
 
 .font-card-name {
@@ -253,17 +266,17 @@
 
 main a.font-card-cta {
   display: inline-flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 6px;
   flex-shrink: 0;
-  padding: 7px 14px 7px 10px;
+  padding: 6px 16px 6px 14px;
   border-radius: 24px;
   background: #000000d6;
   color: var(--color-white);
   font-family: var(--body-font-family);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 700;
-  line-height: 1;
+  line-height: 18px;
   white-space: nowrap;
   text-decoration: none;
   transition: background-color 0.1s ease;
@@ -280,8 +293,8 @@ main a.font-card-cta {
 
 .font-card-cta-icon {
   display: block;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   flex-shrink: 0;
 }
 

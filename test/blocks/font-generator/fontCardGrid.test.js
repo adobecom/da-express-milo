@@ -97,6 +97,50 @@ describe('font-generator/fontCardGrid', () => {
     unsubscribe();
   });
 
+  describe('scrolling back to the top on a filter change', () => {
+    it('scrolls the scrollTarget into view when the filter changes', () => {
+      const scrollTarget = document.createElement('div');
+      const scrollIntoView = sinon.stub(scrollTarget, 'scrollIntoView');
+      const { unsubscribe } = mount(makeFonts(6), { scrollTarget });
+      setState({ activeFilters: ['bold'] });
+      expect(scrollIntoView.calledOnce).to.be.true;
+      expect(scrollIntoView.firstCall.args[0]).to.include({ block: 'start' });
+      unsubscribe();
+    });
+
+    it('does not scroll on the initial render, even if activeFilters starts non-empty', () => {
+      initFonts(makeFonts(6));
+      setState({
+        activeFilters: ['bold'], previewText: 'Hi', fontSize: 20, layout: 'grid',
+      });
+      const scrollTarget = document.createElement('div');
+      const scrollIntoView = sinon.stub(scrollTarget, 'scrollIntoView');
+      const { unsubscribe } = createFontCardGrid({
+        fonts: makeFonts(6), cardCta: null, scrollTarget,
+      });
+      expect(scrollIntoView.called).to.be.false;
+      unsubscribe();
+    });
+
+    it('does not scroll when Load more reveals more cards', () => {
+      const scrollTarget = document.createElement('div');
+      const scrollIntoView = sinon.stub(scrollTarget, 'scrollIntoView');
+      const fonts = makeFonts(INITIAL_VISIBLE_COUNT + LOAD_MORE_STEP);
+      const { container, unsubscribe } = mount(fonts, { scrollTarget });
+      container.querySelector('.font-card-load-more').click();
+      expect(scrollIntoView.called).to.be.false;
+      unsubscribe();
+    });
+
+    it('falls back to scrolling the grid container when no scrollTarget is given', () => {
+      const { container, unsubscribe } = mount(makeFonts(6));
+      const scrollIntoView = sinon.stub(container, 'scrollIntoView');
+      setState({ activeFilters: ['bold'] });
+      expect(scrollIntoView.calledOnce).to.be.true;
+      unsubscribe();
+    });
+  });
+
   it('toggles list layout via the is-list class', () => {
     const { container, unsubscribe } = mount(makeFonts(2));
     const grid = container.querySelector('.font-card-grid');

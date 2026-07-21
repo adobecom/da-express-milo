@@ -46,7 +46,7 @@ export default function createFontCardGrid(config = {}) {
   const container = document.createElement('div');
   container.className = 'font-card-grid-container';
 
-  const { cardCta, fonts = [], strings = {} } = config;
+  const { cardCta, fonts = [], strings = {}, scrollTarget } = config;
   const { sampleText } = strings;
 
   const grid = document.createElement('div');
@@ -79,6 +79,9 @@ export default function createFontCardGrid(config = {}) {
   let prevVisibleCount = -1;
   let prevPreviewText = initText;
   let prevFontSize = initSize;
+  // Guards the very first render (e.g. activeFilters restored from a
+  // ?filters= URL param) from being mistaken for a user-driven filter change.
+  let isFirstRender = true;
 
   // Single tab stop into the grid — visibleCards/currentIndex track which
   // card that is. Kept in sync by the focusin listener below regardless of
@@ -138,6 +141,9 @@ export default function createFontCardGrid(config = {}) {
 
     const textOrSizeChanged = previewText !== prevPreviewText || fontSize !== prevFontSize;
     const filterKey = activeFilters.join(',');
+    // Distinct from visibleSetChanged below: only a *filter* change should
+    // scroll back to the top — "Load more" (a visibleCount change) must not.
+    const filterChanged = !isFirstRender && filterKey !== prevFilterKey;
     const visibleSetChanged = filterKey !== prevFilterKey || visibleCount !== prevVisibleCount;
 
     // Re-run transformations only when text/size changed, or when the visible
@@ -175,8 +181,16 @@ export default function createFontCardGrid(config = {}) {
       });
     }
 
+    // A new filter starts browsing over from the top. Scrolls to the toolbar
+    // (above the grid), not the grid itself, so it's back in view too —
+    // its scroll-margin-top (toolbar.css) keeps it clear of the fixed nav.
+    if (filterChanged) {
+      (scrollTarget ?? container).scrollIntoView({ block: 'start', behavior: 'smooth' });
+    }
+
     // Layout toggle: single class drives the CSS grid switch.
     grid.classList.toggle('is-list', layout === 'list');
+    isFirstRender = false;
   }
 
   loadMoreBtn.addEventListener('click', () => {

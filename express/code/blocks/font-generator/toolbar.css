@@ -3,6 +3,13 @@
   flex-flow: column nowrap;
   justify-content: space-between;
   gap: var(--spacing-100);
+  /* Lets scrollIntoView (used to return to the toolbar on a filter change,
+     see fontCardGrid.js) stop with the toolbar clear of the fixed nav
+     instead of tucked underneath it. Below 1200px the fixed nav is the
+     shorter local nav (--feds-localnav-height), not the full desktop
+     nav — using --global-height-nav here too would overshoot and leave
+     extra empty space above the toolbar. */
+  scroll-margin-top: calc(var(--feds-localnav-height) + var(--spacing-300));
 }
 
 /* ─── Left group (layout buttons + count) ─────────────────────────────────── */
@@ -136,12 +143,12 @@
    on .toolbar-slider above, so the ring is drawn on the thumb pseudo-element
    instead, offset outward like the S2 slider handle's focus-ring spec. */
 .toolbar-slider:focus-visible::-webkit-slider-thumb {
-  outline: 1px solid var(--color-focus-ring-strong);
+  outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: 2px;
 }
 
 .toolbar-slider:focus-visible::-moz-range-thumb {
-  outline: 1px solid var(--color-focus-ring-strong);
+  outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: 2px;
 }
 
@@ -176,6 +183,9 @@
 @media (min-width: 1200px) {
   .font-generator-toolbar {
     flex-flow: row wrap;
+    /* The fixed nav is the full-height desktop nav here, not the local
+       nav — see the base rule above. */
+    scroll-margin-top: calc(var(--global-height-nav) + var(--spacing-300));
   }
 
   .font-generator-filter-trigger {
