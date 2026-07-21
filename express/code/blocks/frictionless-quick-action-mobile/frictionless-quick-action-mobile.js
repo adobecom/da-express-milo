@@ -13,14 +13,13 @@ import {
   selectElementByTagPrefix,
   createContainerConfig,
   createDocConfig,
-  createMergeVideosDocConfig,
   createMobileExportConfig,
   executeQuickAction,
   processFilesForQuickAction,
   loadAndInitializeCCEverywhere,
   getErrorMsg,
   shouldShowVideoQuickActionPickerForMobile,
-  getVideoConfig
+  getVideoConfig,
 } from '../../scripts/utils/frictionless-utils.js';
 
 let replaceKey; let getConfig;
@@ -87,7 +86,7 @@ export async function runQuickAction(quickActionId, data, block) {
 
   const contConfig = createContainerConfig(quickActionId);
   const docConfig = createDocConfig(data[0], 'image');
-  const videoDocConfig = getVideoConfig(quickActionId, data)
+  const videoDocConfig = getVideoConfig(quickActionId, data);
 
   const appConfig = {
     metaData: {

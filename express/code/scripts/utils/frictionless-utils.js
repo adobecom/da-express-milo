@@ -268,6 +268,10 @@ export function fadeOut(element) {
   }, 200);
 }
 
+function isBlobBasedFileType(fileType) {
+  return BLOB_BASED_FILE_TYPES.includes(fileType);
+}
+
 // Common document configurations
 export function createDocConfig(data, type = 'image') {
   const dataType = isBlobBasedFileType(type) ? 'blob' : 'base64';
@@ -330,10 +334,6 @@ function getWebBrowser() {
   }
 
   return 'Unknown';
-}
-
-function isBlobBasedFileType(fileType) {
-  return BLOB_BASED_FILE_TYPES.includes(fileType)
 }
 
 // Common container configuration
@@ -663,7 +663,8 @@ export function isSafari() {
 export function getVideoConfig(quickActionId, data) {
   if (quickActionId === 'merge-videos') {
     return createMergeVideosDocConfig(data);
-  } else if (quickActionId === 'audio-converter') {
+  }
+  if (quickActionId === 'audio-converter') {
     return createDocConfig(data[0], 'audio');
   }
   return createDocConfig(data[0], 'video');

@@ -9,7 +9,6 @@ import {
   fadeIn,
   fadeOut,
   createDocConfig,
-  createMergeVideosDocConfig,
   createContainerConfig,
   selectElementByTagPrefix,
   createDefaultExportConfig,
@@ -22,7 +21,7 @@ import {
   EXPRESS_ROUTE_PATHS,
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
   AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
-  getVideoConfig
+  getVideoConfig,
 } from '../../scripts/utils/frictionless-utils.js';
 
 let createTag;
