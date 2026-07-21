@@ -16,71 +16,76 @@ test.describe('FontGeneratorBlock Test Suite', () => {
     await test.step('step-1: Navigate to page', async () => {
       await page.goto(testUrl);
       await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(testUrl);
+      // The block may sync non-default state to the URL on load (e.g. a
+      // responsive ?view=list on small viewports), so match the base path
+      // and ignore any query string it appends.
+      await expect(page).toHaveURL(new RegExp(`^${testUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\?.*)?$`));
     });
 
     await test.step('step-2: Verify block structure', async () => {
       await expect(block.block).toBeVisible();
-      await expect(block.container).toBeVisible();
-      await expect(block.sidebar).toBeVisible();
-      await expect(block.main).toBeVisible();
+      await expect(block.grid).toBeVisible();
+      await expect(block.sideCol).toBeVisible();
+      await expect(block.mainCol).toBeVisible();
     });
 
-    await test.step('step-3: Verify filter list renders', async () => {
-      await expect(block.sidebarFilters).toBeVisible();
-      await expect(block.filterList).toBeVisible();
-      await expect(block.allFilterBtn).toBeVisible();
-      await expect(block.categoryButtons.first()).toBeVisible();
+    await test.step('step-3: Verify text input renders', async () => {
+      await expect(block.textInput).toBeVisible();
+      await expect(block.textarea).toBeVisible();
     });
 
-    await test.step('step-4: Verify accordion label', async () => {
-      const label = await block.accordionItem.getAttribute('label');
-      expect(label).toBe('Categories');
+    await test.step('step-4: Verify toolbar renders', async () => {
+      await expect(block.toolbar).toBeVisible();
+      await expect(block.count).toBeVisible();
     });
 
-    await test.step('step-5: Verify "All" button is selected by default', async () => {
-      await expect(block.allFilterBtn).toHaveAttribute('aria-pressed', 'true');
-      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '0');
-      await expect(block.allFilterBtn).toHaveClass(/is-selected/);
+    await test.step('step-5: Verify font card grid renders', async () => {
+      await expect(block.fontCardGrid).toBeVisible();
+      await expect(block.fontCards.first()).toBeVisible();
+    });
 
-      const catCount = await block.categoryButtons.count();
-      for (let i = 0; i < catCount; i += 1) {
-        await expect(block.categoryButtons.nth(i)).toHaveAttribute('aria-pressed', 'false');
-        await expect(block.categoryButtons.nth(i)).toHaveAttribute('tabindex', '-1');
+    // The filters have two interaction models: below 1200px they live in a
+    // drawer opened by the toolbar's filter trigger; at >=1200px they render
+    // inline in the sticky sidebar and the trigger is hidden.
+    await test.step('step-6: Filters are reachable for the current viewport', async () => {
+      if (await block.filterTrigger.isVisible()) {
+        await block.filterTrigger.click();
+        await expect(block.filterPanel).toBeVisible();
+        await expect(block.filterPanelClose).toBeVisible();
+        await block.filterPanelClose.click();
+        await expect(block.filterPanel).not.toBeVisible();
+      } else {
+        await expect(block.desktopFilters).toBeVisible();
       }
     });
 
-    await test.step('step-6: Clicking a category button selects it and deselects "All"', async () => {
-      const firstCat = block.categoryButtons.first();
-      await firstCat.click();
-
-      await expect(firstCat).toHaveAttribute('aria-pressed', 'true');
-      await expect(firstCat).toHaveAttribute('tabindex', '0');
-      await expect(firstCat).toHaveClass(/is-selected/);
-      await expect(block.allFilterBtn).toHaveAttribute('aria-pressed', 'false');
-      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '-1');
+    await test.step('step-7: Selecting a category filters the card grid', async () => {
+      // The grid paginates (INITIAL_VISIBLE_COUNT cards at a time), so the
+      // rendered card count is capped and does not shrink on filter. The
+      // toolbar count reflects the full active (filtered) font set, so assert
+      // against that instead — it drops from the whole catalog to the subset.
+      const readCount = async () => {
+        const text = (await block.count.textContent()) ?? '';
+        return Number(text.match(/\d+/)?.[0] ?? NaN);
+      };
+      const totalCount = await readCount();
+      // Opening the drawer (mobile) is required before its buttons are visible.
+      if (await block.filterTrigger.isVisible()) await block.filterTrigger.click();
+      await block.categoryFilter('Glitch').first().click();
+      await expect(async () => {
+        expect(await readCount()).toBeLessThan(totalCount);
+      }).toPass();
     });
 
-    await test.step('step-7: Clicking the same category button again restores "All"', async () => {
-      const firstCat = block.categoryButtons.first();
-      await firstCat.click();
-
-      await expect(block.allFilterBtn).toHaveAttribute('aria-pressed', 'true');
-      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '0');
-      await expect(block.allFilterBtn).toHaveClass(/is-selected/);
-      await expect(firstCat).toHaveAttribute('aria-pressed', 'false');
-    });
-
-    await test.step('step-8: Arrow key navigation moves focus between filter buttons', async () => {
-      await block.allFilterBtn.focus();
-      await page.keyboard.press('ArrowRight');
-
-      const firstCat = block.categoryButtons.first();
-      await expect(firstCat).toHaveAttribute('tabindex', '0');
-      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '-1');
-
-      await page.keyboard.press('ArrowLeft');
-      await expect(block.allFilterBtn).toHaveAttribute('tabindex', '0');
+    await test.step('step-8: Typing in textarea updates font card previews', async () => {
+      // Every card renders the preview through a Unicode transform, so the
+      // preview never contains the raw typed string (e.g. "Hello" becomes
+      // "Ⓗⓔⓛⓛⓞ"). Assert the preview re-renders — its text must change from
+      // the prior sample once new input is typed.
+      const preview = block.fontCards.first().locator('.font-card-preview');
+      const before = (await preview.textContent()) ?? '';
+      await block.textarea.fill('Hello world');
+      await expect(preview).not.toHaveText(before);
     });
 
     await test.step('step-9: Accessibility validation', async () => {

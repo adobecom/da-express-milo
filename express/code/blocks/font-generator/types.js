@@ -17,7 +17,7 @@ export const DEFAULT_FONT_SIZE = 16;
 export const FONT_SIZE_MIN = 12;
 export const FONT_SIZE_MAX = 48;
 
-// ─── Font data (font-styles.json) ────────────────────────────────────────────
+// ─── Font data (font-styles.json) ─────────────────────────────────────────────
 
 /**
  * Single-char → unicode-string replacement map.
@@ -75,8 +75,8 @@ export const FONT_SIZE_MAX = 48;
 
 /**
  * A single font definition. This is the unit consumed by unicodeEngine and FontCard.
- * Every font in font-styles.json has fully-populated `characters` maps for all three categories —
- * `missingCharacters` tracks gaps for informational use only.
+ * Every font in font-styles.json has fully-populated `characters` maps for all three
+ * categories — `missingCharacters` tracks gaps for informational use only.
  *
  * @typedef {{
  *   id: string;
@@ -99,7 +99,8 @@ export const FONT_SIZE_MAX = 48;
  */
 
 /**
- * Root shape of the font sheet JSON (font-styles.json).
+ * Root shape of font-styles.json, generated from font-styles.csv by
+ * scripts/font-generator/transform.js.
  *
  * @typedef {{
  *   sourceCharacters: {
@@ -118,14 +119,17 @@ export const FONT_SIZE_MAX = 48;
  * URL param keys that are persisted across page loads.
  * Values are encoded/decoded by state.js initFromUrl / setState.
  *
- * @typedef {'text' | 'filters' | 'layout' | 'fontSize'} UrlParamKey
+ * @typedef {'text' | 'filters' | 'view' | 'size'} UrlParamKey
  */
 
 /**
  * Complete application state. Managed exclusively by state.js.
  * Never construct or mutate this object outside the store.
  *
- * `activeFonts` is derived — do not pass it to setState.
+ * The full font catalog is held privately in state.js (set via initFonts) and
+ * exposed for the category taxonomy through getCategories(); it is not part of
+ * this snapshot. `activeFonts` is derived — the filter-narrowed subset that
+ * drives the toolbar count and grid — and must never be passed to setState.
  * `visibleCount` resets to INITIAL_VISIBLE_COUNT whenever activeFilters changes.
  *
  * @typedef {{
@@ -192,11 +196,13 @@ export const FONT_SIZE_MAX = 48;
  */
 
 /**
- * Filters initializer receives a NodeList because two instances are mounted:
- * one for desktop inline, one inside the mobile/tablet panel.
+ * Filters is a single component mounted in up to two places: the desktop-
+ * inline sidebar instance and the mobile/tablet drawer instance inside
+ * panel.js. Both are initialized by passing an array/NodeList of host
+ * elements; each subscribes to the store independently and stays in sync.
  *
  * @callback FiltersInit
- * @param {NodeListOf<HTMLElement>} elements
+ * @param {NodeListOf<HTMLElement> | HTMLElement[]} elements
  * @returns {void}
  */
 

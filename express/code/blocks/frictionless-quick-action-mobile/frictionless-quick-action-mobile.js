@@ -96,6 +96,7 @@ export async function runQuickAction(quickActionId, data, block) {
     analyticsData: {
       ...(quickActionId === 'video-compress' && { entryPoint: 'seo-quick-action-video-compress' }),
       ...(quickActionId === 'video-convert' && { entryPoint: 'seo-quick-action-video-convert' }),
+      ...(quickActionId === 'compress-image' && { entryPoint: 'seo-quick-action-compress-image' }),
     },
     receiveQuickActionErrors: true,
     callbacks: {

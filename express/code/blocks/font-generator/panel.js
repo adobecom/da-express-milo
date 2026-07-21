@@ -13,8 +13,13 @@ function createCloseSvg() {
   return new DOMParser().parseFromString(CLOSE_ICON_SVG, 'image/svg+xml').documentElement;
 }
 
-export default async function init(block) {
-  const strings = await fetchStrings({ 'fg-filters': 'Filters', 'fg-close-filters': 'Close filters' });
+export default async function init(block, { onOpenChange, panelId } = {}) {
+  const strings = await fetchStrings({
+    'fg-filters': 'Filters',
+    'fg-close-filters': 'Close filters',
+    'fg-promo-title': 'Looking for more fonts?',
+    'fg-promo-cta': 'Go to Adobe Fonts',
+  });
 
   const overlay = createTag('div', { class: 'fg-overlay', 'aria-hidden': 'true', inert: '' });
 
@@ -24,6 +29,7 @@ export default async function init(block) {
     'aria-modal': 'true',
     'aria-label': strings['fg-filters'],
     tabindex: '-1',
+    ...(panelId ? { id: panelId } : {}),
   });
 
   // Close button — tablet panel only (hidden on mobile via CSS)
@@ -35,7 +41,10 @@ export default async function init(block) {
 
   const filtersEl = createTag('div', { class: 'fg-filters' });
 
-  panel.append(closeBtn, handle, filtersEl, buildPromo('button primary small fg-promo-btn'));
+  panel.append(closeBtn, handle, filtersEl, buildPromo('button primary small fg-promo-btn', {
+    title: strings['fg-promo-title'],
+    cta: strings['fg-promo-cta'],
+  }));
   overlay.appendChild(panel);
   block.appendChild(overlay);
 
@@ -60,6 +69,7 @@ export default async function init(block) {
     panel.style.transform = '';
     previouslyFocused?.focus();
     previouslyFocused = null;
+    onOpenChange?.(false);
   }
 
   function open() {
@@ -73,6 +83,7 @@ export default async function init(block) {
     panel.focus();
     focusTrap = trapFocus(panel);
     escapeRelease = handleEscapeClose(panel, close);
+    onOpenChange?.(true);
   }
 
   // Filters inside the panel: no strip CTA — the panel has its own card CTA above

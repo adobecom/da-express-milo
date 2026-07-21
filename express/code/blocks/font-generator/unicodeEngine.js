@@ -228,10 +228,12 @@ export function transformText(text, fontDef) {
   // text is guaranteed a string past the guard above.
   if (!isValidFontDef(fontDef)) return text;
 
-  const safeText = text.length > MAX_INPUT_LENGTH ? text.slice(0, MAX_INPUT_LENGTH) : text;
+  // Spread first so the cap counts Unicode code points, not UTF-16 code
+  // units. String#slice could otherwise leave a lone surrogate at the limit.
+  const safeText = [...text].slice(0, MAX_INPUT_LENGTH);
   const { lookupMap, usesWholeText } = getDerived(fontDef);
 
-  const mappedCharacters = [...safeText].map((char) => {
+  const mappedCharacters = safeText.map((char) => {
     if (Object.prototype.hasOwnProperty.call(lookupMap, char)) return lookupMap[char];
     return applyFallbackDecoration(char, fontDef);
   });
