@@ -124,11 +124,17 @@
   line-clamp: 2;
   overflow: hidden;
   word-break: break-word;
-  line-height: 1.3;
-  /* Reserve the full 2-line height even when the text only fills 1 line,
-     so cards don't shrink to fit shorter previews. em ties this to the
-     element's own font-size, which is set dynamically per card. */
-  min-height: 2.6em;
+  /* --fc-line-height is set per card by fontCard.js from fontDef.previewLineHeight
+     (measured at build time — see measurePreviewLineHeights.js). Heavy
+     "Glitch" styles get a much taller line box so their combining-mark
+     stacks, which paint above/below the base glyph, don't get clipped by
+     this element's own overflow: hidden. */
+  line-height: var(--fc-line-height, 1.1);
+  /* Small fixed nudge for the half-leading -webkit-line-clamp doesn't
+     reserve above the first line the way normal block flow reserves it
+     between every other line. Flat rather than scaled to --fc-line-height
+     — a scaled value over-padded most cards. */
+  padding-top: 5px;
   color: var(--color-gray-950);
 }
 
@@ -136,7 +142,6 @@
   .font-card-preview {
     -webkit-line-clamp: 4;
     line-clamp: 4;
-    min-height: 5.2em;
   }
 }
 
@@ -145,7 +150,17 @@
 .font-card-grid.is-list .font-card-preview {
   -webkit-line-clamp: 2;
   line-clamp: 2;
-  min-height: 2.6em;
+}
+
+/* comet-tail and weird-text measure previewLineHeight around 8x-10x normal
+   -- even a single line already makes for a very tall card, so clamp these
+   two to 1 line in every view instead of the usual 2/4/2. Specificity here
+   (not media-query order) is what makes this win over the base/tablet+/
+   list-view rules above in all three of them. */
+.font-card[data-font-id="comet-tail"] .font-card-preview,
+.font-card[data-font-id="weird-text"] .font-card-preview {
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
 }
 
 /* ─── Copy success / hover overlays ──────────────────────────────────────── */
@@ -317,5 +332,14 @@ main a.font-card-cta {
 @media (min-width: 600px) {
   .font-card {
     border-radius: var(--Corner-radius-corner-radius-200);
+  }
+
+  /* Static, not derived from --fc-line-height: every tablet/desktop grid
+     card reserves the same fixed floor regardless of style, matching the
+     skeleton's own tablet+ card sizing (font-generator.css's .fg-sk-card).
+     :not(.is-list) excludes list view, which keeps no reserved floor at
+     any width. */
+  .font-card-grid:not(.is-list) .font-card {
+    min-height: 304px;
   }
 }

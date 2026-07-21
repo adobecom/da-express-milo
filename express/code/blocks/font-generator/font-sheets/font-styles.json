@@ -129,7 +129,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.127
     },
     {
       "id": "dark-text-bubble",
@@ -250,7 +251,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.127
     },
     {
       "id": "full-width",
@@ -371,7 +373,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.1
     },
     {
       "id": "diagonal-strikes",
@@ -492,7 +495,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.127
     },
     {
       "id": "acute-accents",
@@ -613,7 +617,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.378
     },
     {
       "id": "underline-with-dashes",
@@ -734,7 +739,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.543
     },
     {
       "id": "metal-umalauts",
@@ -855,7 +861,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.337
     },
     {
       "id": "bandaid",
@@ -976,7 +983,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 2.16
     },
     {
       "id": "strikethrough",
@@ -1097,7 +1105,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.127
     },
     {
       "id": "x-cross",
@@ -1218,7 +1227,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.794
     },
     {
       "id": "stroked",
@@ -1339,7 +1349,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.127
     },
     {
       "id": "lines-lines-lines",
@@ -1460,7 +1471,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 2.146
     },
     {
       "id": "shadow",
@@ -1581,7 +1593,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.127
     },
     {
       "id": "wavy",
@@ -1702,7 +1715,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.127
     },
     {
       "id": "double-underline",
@@ -1823,7 +1837,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.472
     },
     {
       "id": "music-bars",
@@ -1944,7 +1959,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.624
     },
     {
       "id": "all-the-way-up",
@@ -2065,7 +2081,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.664
     },
     {
       "id": "comet-tail",
@@ -2186,7 +2203,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 8.273
     },
     {
       "id": "hot",
@@ -2307,7 +2325,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.865
     },
     {
       "id": "weird-text",
@@ -2428,7 +2447,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 9.835
     },
     {
       "id": "right-direction-above",
@@ -2549,7 +2569,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.695
     },
     {
       "id": "right-direction-under",
@@ -2670,7 +2691,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.664
     },
     {
       "id": "stacked-above",
@@ -2791,7 +2813,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.356
     },
     {
       "id": "cross-it-under",
@@ -2912,7 +2935,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.626
     },
     {
       "id": "rain-on-top",
@@ -3033,7 +3057,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.641
     },
     {
       "id": "bubbles-on-top",
@@ -3154,7 +3179,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.755
     },
     {
       "id": "fading-effect",
@@ -3275,7 +3301,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.317
     },
     {
       "id": "weights",
@@ -3396,7 +3423,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.317
     },
     {
       "id": "arrows",
@@ -3517,7 +3545,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.127
     },
     {
       "id": "cupido",
@@ -3638,7 +3667,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.211
     },
     {
       "id": "sparkles",
@@ -3759,7 +3789,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.194
     },
     {
       "id": "finish",
@@ -3880,7 +3911,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.229
     },
     {
       "id": "barcode",
@@ -4001,7 +4033,8 @@
         "letters": [],
         "numbers": [],
         "specialCharacters": []
-      }
+      },
+      "previewLineHeight": 1.225
     }
   ]
 }

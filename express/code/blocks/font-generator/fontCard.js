@@ -7,6 +7,10 @@ const STYLESHEET_HREF = `${BASE_PATH}/fontCard.css`;
 const COPY_RESET_MS = 1500;
 const OVERLAY_FADE_MS = 200;
 
+// Fallback for fontDefs without a baked-in previewLineHeight, e.g. the
+// minimal fixtures fontCard.test.js constructs by hand.
+const DEFAULT_LINE_HEIGHT = 1.1;
+
 let stylesInjected = false;
 
 function injectStyles() {
@@ -216,6 +220,10 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
   const card = document.createElement('div');
   card.className = 'font-card';
   card.dataset.fontId = fontDef.id;
+  // Read by fontCard.css to size .font-card-preview's line-height/min-height
+  // per style — see measurePreviewLineHeights.js for how previewLineHeight
+  // is measured.
+  card.style.setProperty('--fc-line-height', (fontDef.previewLineHeight ?? DEFAULT_LINE_HEIGHT).toFixed(3));
   // Roving tabindex — the grid (fontCardGrid.js) manages which single card
   // is the tab stop. aria-label overrides name-from-content so arrow-key
   // navigation announces the style name, not the (often garbled) preview text.

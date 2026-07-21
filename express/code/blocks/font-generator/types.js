@@ -97,6 +97,7 @@ export const FONT_SIZE_MAX = 100;
  *     numbers: string[];
  *     specialCharacters: string[];
  *   };
+ *   previewLineHeight: number;
  * }} FontDef
  */
 
