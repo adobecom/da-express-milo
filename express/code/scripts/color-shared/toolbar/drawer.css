@@ -563,7 +563,7 @@
 .ax-drawer-btn-row .ax-drawer-savechanges-btn {
   inline-size: auto;
   min-inline-size: 108px;
-  flex: 0 0 auto;
+  flex: 1 1 0;
 }
 
 /* ── Mobile drawer overrides ────────────────────── */
@@ -695,18 +695,6 @@
     inline-size: auto;
     min-inline-size: 108px;
     align-self: flex-start;
-  }
-
-  .ax-drawer-btn-row {
-    align-self: flex-start;
-    inline-size: auto;
-  }
-
-  .ax-drawer-btn-row .ax-drawer-save-btn,
-  .ax-drawer-btn-row .ax-drawer-savechanges-btn {
-    inline-size: auto;
-    min-inline-size: 108px;
-    flex: 0 0 auto;
   }
 
   @supports (anchor-name: --ax-drawer-anchor) {

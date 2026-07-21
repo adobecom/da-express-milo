@@ -1375,42 +1375,44 @@ describe('refreshBtnRowStacking', () => {
     document.body.innerHTML = '';
   });
 
-  function makeRow(availableWidth, gapPx) {
+  function makeRow() {
     const row = document.createElement('div');
-    row.style.columnGap = `${gapPx}px`;
     document.body.appendChild(row);
-    sinon.stub(row, 'getBoundingClientRect').returns({ width: availableWidth });
     return row;
   }
 
-  function makeButton(naturalWidth) {
+  // Simulates a button whose rendered height is `squeezedHeight` under its
+  // current (constrained) width, but `naturalHeight` once measureNaturalHeight
+  // temporarily sets inline-size: max-content to reveal the unwrapped height.
+  function makeButton(naturalHeight, squeezedHeight = naturalHeight) {
     const el = document.createElement('div');
-    sinon.stub(el, 'getBoundingClientRect').returns({ width: naturalWidth });
+    sinon.stub(el, 'getBoundingClientRect').callsFake(() => ({
+      height: el.style.inlineSize === 'max-content' ? naturalHeight : squeezedHeight,
+    }));
     return el;
   }
 
-  it('does not stack when the combined natural width fits the row (content-sized, not equal-split)', () => {
-    const row = makeRow(300, 8);
-    // A short label and a long label sitting side by side, each at its own
-    // natural width — not forced into equal halves.
-    refreshBtnRowStacking(row, makeButton(50), makeButton(200));
+  it('does not stack when both buttons render at their natural single-line height', () => {
+    const row = makeRow();
+    refreshBtnRowStacking(row, makeButton(40), makeButton(40));
     expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.false;
   });
 
-  it('stacks when the combined natural width plus gap exceeds the row width', () => {
-    const row = makeRow(200, 8);
-    refreshBtnRowStacking(row, makeButton(120), makeButton(150));
+  it('stacks when either button wraps (rendered height exceeds its natural single-line height)', () => {
+    const row = makeRow();
+    refreshBtnRowStacking(row, makeButton(40), makeButton(40, 80));
     expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.true;
   });
 
   it('un-stacks again once there is enough room (e.g. after a resize)', () => {
-    const row = makeRow(200, 8);
-    const btnA = makeButton(120);
-    const btnB = makeButton(150);
+    const row = makeRow();
+    const btnA = makeButton(40);
+    const btnB = makeButton(40, 80);
     refreshBtnRowStacking(row, btnA, btnB);
     expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.true;
 
-    row.getBoundingClientRect.returns({ width: 400 });
+    btnB.getBoundingClientRect.restore();
+    sinon.stub(btnB, 'getBoundingClientRect').callsFake(() => ({ height: 40 }));
     refreshBtnRowStacking(row, btnA, btnB);
     expect(row.classList.contains('ax-drawer-btn-row--stacked')).to.be.false;
   });

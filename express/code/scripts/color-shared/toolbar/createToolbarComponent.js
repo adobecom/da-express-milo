@@ -471,27 +471,29 @@ function buildLibraryButtonGroup(t, emit, getPalette, { showEdit = true } = {}) 
   };
 }
 
-// Grid item widths under grid-auto-columns:1fr stretch by default, so measuring
-// natural (single-line) width needs an explicit inline-size override to reveal it
-// — same idea as the drawer's Make a copy / Save changes stacking, adapted for grid.
-function measureNaturalGridItemWidth(el) {
+// Predicting overflow from width math (equal 1fr share, gap, sp-button's own
+// padding/min-width) proved fragile. Instead, directly observe the outcome:
+// does this button's current (squeezed) height exceed the height it renders
+// at with unlimited width (i.e. did its label actually wrap to a second line)?
+function measureNaturalGridItemHeight(el) {
   const prevInlineSize = el.style.inlineSize;
   el.style.inlineSize = 'max-content';
-  const { width } = el.getBoundingClientRect();
+  const { height } = el.getBoundingClientRect();
   el.style.inlineSize = prevInlineSize;
-  return width;
+  return height;
 }
 
 export function refreshLibraryButtonsStacking(group, btnA, btnB) {
   if (!group || !btnA || !btnB) return;
-  const gap = Number.parseFloat(getComputedStyle(group).columnGap) || 0;
-  // Each button gets an equal 1fr share, not a share proportional to its own
-  // content — so a short label can't "lend" room to a long sibling. Comparing
-  // the combined width against the total misses that; each button must fit its
-  // own half independently.
-  const columnWidth = (group.getBoundingClientRect().width - gap) / 2;
-  const shouldStack = measureNaturalGridItemWidth(btnA) > columnWidth
-    || measureNaturalGridItemWidth(btnB) > columnWidth;
+  // Re-measure as if side by side — a previous --stacked pass gives each
+  // button the full group width, which would always look single-line.
+  group.classList.remove('ax-toolbar-lib-buttons--stacked');
+
+  const naturalHeightA = measureNaturalGridItemHeight(btnA);
+  const naturalHeightB = measureNaturalGridItemHeight(btnB);
+  const shouldStack = btnA.getBoundingClientRect().height > naturalHeightA + 1
+    || btnB.getBoundingClientRect().height > naturalHeightB + 1;
+
   group.classList.toggle('ax-toolbar-lib-buttons--stacked', shouldStack);
 }
 

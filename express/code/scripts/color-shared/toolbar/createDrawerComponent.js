@@ -778,28 +778,35 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   };
 }
 
-// Buttons are content-sized (flex: 0 0 auto), so their rendered width is
-// normally already their natural width — except once --stacked is applied,
-// which forces inline-size:100%. Force a natural-size read regardless of the
-// row's current state so re-checks (e.g. on resize) don't read the stacked
-// full-width size back as "natural" and oscillate.
-function measureNaturalWidth(el) {
+// Predicting overflow from width math (equal-share vs combined, gap, sp-button's
+// own padding/min-width) proved fragile across several edge cases. Instead,
+// directly observe the outcome: does this button's current (squeezed) height
+// exceed the height it renders at with unlimited width (i.e. did its label
+// actually wrap to a second line)?
+function measureNaturalHeight(el) {
   const { flex, maxInlineSize, inlineSize } = el.style;
   el.style.flex = '0 0 auto';
   el.style.maxInlineSize = 'none';
   el.style.inlineSize = 'max-content';
-  const { width } = el.getBoundingClientRect();
+  const { height } = el.getBoundingClientRect();
   el.style.flex = flex;
   el.style.maxInlineSize = maxInlineSize;
   el.style.inlineSize = inlineSize;
-  return width;
+  return height;
 }
 
 export function refreshBtnRowStacking(row, btnA, btnB) {
   if (!row || !btnA || !btnB) return;
-  const gap = Number.parseFloat(getComputedStyle(row).columnGap) || 0;
-  const natural = measureNaturalWidth(btnA) + measureNaturalWidth(btnB) + gap;
-  row.classList.toggle('ax-drawer-btn-row--stacked', natural > row.getBoundingClientRect().width);
+  // Re-measure as if side by side — a previous --stacked pass gives each
+  // button the full row width, which would always look single-line.
+  row.classList.remove('ax-drawer-btn-row--stacked');
+
+  const naturalHeightA = measureNaturalHeight(btnA);
+  const naturalHeightB = measureNaturalHeight(btnB);
+  const shouldStack = btnA.getBoundingClientRect().height > naturalHeightA + 1
+    || btnB.getBoundingClientRect().height > naturalHeightB + 1;
+
+  row.classList.toggle('ax-drawer-btn-row--stacked', shouldStack);
 }
 
 function attachDrawerToDOM(panel, curtain, mobile, anchor) {

@@ -705,49 +705,44 @@ describe('refreshLibraryButtonsStacking', () => {
     document.body.innerHTML = '';
   });
 
-  function makeGroup(availableWidth, gapPx) {
+  function makeGroup() {
     const group = document.createElement('div');
-    group.style.columnGap = `${gapPx}px`;
     document.body.appendChild(group);
-    sinon.stub(group, 'getBoundingClientRect').returns({ width: availableWidth });
     return group;
   }
 
-  function makeButton(naturalWidth) {
+  // Simulates a button whose rendered height is `squeezedHeight` under its
+  // current (constrained) width, but `naturalHeight` once the measurement
+  // helper temporarily sets inline-size: max-content to reveal the unwrapped height.
+  function makeButton(naturalHeight, squeezedHeight = naturalHeight) {
     const el = document.createElement('div');
-    sinon.stub(el, 'getBoundingClientRect').returns({ width: naturalWidth });
+    sinon.stub(el, 'getBoundingClientRect').callsFake(() => ({
+      height: el.style.inlineSize === 'max-content' ? naturalHeight : squeezedHeight,
+    }));
     return el;
   }
 
-  it('does not stack when both buttons fit their own equal share of the group', () => {
-    const group = makeGroup(300, 12);
-    // columnWidth = (300 - 12) / 2 = 144
-    refreshLibraryButtonsStacking(group, makeButton(100), makeButton(140));
+  it('does not stack when both buttons render at their natural single-line height', () => {
+    const group = makeGroup();
+    refreshLibraryButtonsStacking(group, makeButton(40), makeButton(40));
     expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.false;
   });
 
-  it('stacks when both buttons exceed their equal share of the group', () => {
-    const group = makeGroup(200, 12);
-    // columnWidth = (200 - 12) / 2 = 94
-    refreshLibraryButtonsStacking(group, makeButton(120), makeButton(150));
-    expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.true;
-  });
-
-  it('stacks when only one button exceeds its share, even if the combined width still fits the group', () => {
-    const group = makeGroup(300, 12);
-    // columnWidth = 144: a short sibling can't lend its unused space to a long one.
-    refreshLibraryButtonsStacking(group, makeButton(50), makeButton(200));
+  it('stacks when either button wraps (rendered height exceeds its natural single-line height)', () => {
+    const group = makeGroup();
+    refreshLibraryButtonsStacking(group, makeButton(40), makeButton(40, 80));
     expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.true;
   });
 
   it('un-stacks again once there is enough room (e.g. after a resize)', () => {
-    const group = makeGroup(200, 12);
-    const btnA = makeButton(120);
-    const btnB = makeButton(150);
+    const group = makeGroup();
+    const btnA = makeButton(40);
+    const btnB = makeButton(40, 80);
     refreshLibraryButtonsStacking(group, btnA, btnB);
     expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.true;
 
-    group.getBoundingClientRect.returns({ width: 400 });
+    btnB.getBoundingClientRect.restore();
+    sinon.stub(btnB, 'getBoundingClientRect').callsFake(() => ({ height: 40 }));
     refreshLibraryButtonsStacking(group, btnA, btnB);
     expect(group.classList.contains('ax-toolbar-lib-buttons--stacked')).to.be.false;
   });
