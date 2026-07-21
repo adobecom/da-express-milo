@@ -270,7 +270,14 @@ function normalizeEncodedAmpersands(value) {
 }
 
 function sanitizeExternalCtaUrl(url) {
-  return ensureAbsoluteUrl(normalizeEncodedAmpersands(url));
+  const normalized = normalizeEncodedAmpersands(url);
+  // Experiment CTAs authored as root-relative paths resolve against the host
+  // serving the page (e.g. a QA/EDS branch host), not the Express app. Force
+  // them onto new.express.adobe.com so the test destinations are stable
+  // regardless of where the page is served. Protocol-relative ("//host") and
+  // absolute URLs are left untouched.
+  if (/^\/(?!\/)/.test(normalized)) return `https://new.express.adobe.com${normalized}`;
+  return ensureAbsoluteUrl(normalized);
 }
 
 function appendTemplateId(url, template) {
@@ -536,6 +543,25 @@ function applyExperimentalCtas(template, cta, btnContainer) {
 
   if (!cta1Url && !cta2Url && !cta1Text && !cta2Text) return null;
 
+  // Premium, animated, and video templates must always default to the control
+  // experience — the single "Edit this template" CTA pointing at the branch URL
+  // — regardless of any test/variant CTA metadata Target injects page-wide.
+  // Only free, still templates opt into the experiment. "animated" is a distinct
+  // value in the authoritative `behaviors` array (separate from "video" and
+  // "still", guaranteed present by isValidBehaviors), so it must be excluded
+  // explicitly — containsVideo only covers the video rendition, not animation.
+  const behaviors = Array.isArray(template.behaviors) ? template.behaviors : [];
+  const isAnimatedOrVideo = behaviors.includes('animated')
+    || behaviors.includes('video')
+    || containsVideo(template.pages);
+  const isFreeStatic = !variants?.includes('flyer')
+    && !variants?.includes('t-shirt')
+    && !variants?.includes('print')
+    && template.licensingCategory === 'free'
+    && !isAnimatedOrVideo;
+
+  if (!isFreeStatic) return null;
+
   if (cta1Url) {
     cta.href = appendTemplateId(sanitizeExternalCtaUrl(cta1Url), template);
   }
@@ -545,14 +571,8 @@ function applyExperimentalCtas(template, cta, btnContainer) {
     cta.setAttribute('aria-label', `${cta1Text} ${getTemplateTitle(template)}`);
   }
 
-  const isFreeStatic = !variants?.includes('flyer')
-    && !variants?.includes('t-shirt')
-    && !variants?.includes('print')
-    && template.licensingCategory === 'free'
-    && !containsVideo(template.pages);
-
   let secondaryCta = null;
-  if (isFreeStatic && cta2Url) {
+  if (cta2Url) {
     const btnTitle = cta2Text || '';
     secondaryCta = createTag('a', {
       href: appendTemplateId(sanitizeExternalCtaUrl(cta2Url), template),
