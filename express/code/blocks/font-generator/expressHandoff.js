@@ -29,7 +29,9 @@ const FEATURE_FLAGS = ['font-generator-product-entry'];
 const FONT_FAMILY_BY_ID = { 'noto-sans': 'Noto Sans', 'gothic-a1': 'Gothic A1' };
 const DEFAULT_FONT_FAMILY = 'Noto Sans';
 
-function applyFontHandoffParams(url, { styleId, text, fontSupported, fontSize }) {
+function applyFontHandoffParams(url, {
+  styleId, text, fontSupported, fontSize, referrer,
+}) {
   url.searchParams.set('glyphString', text);
   url.searchParams.set('styleId', styleId);
   url.searchParams.set('width', CANVAS_WIDTH);
@@ -38,7 +40,10 @@ function applyFontHandoffParams(url, { styleId, text, fontSupported, fontSize })
   url.searchParams.set('aspectRatioLock', 'true');
   url.searchParams.set('fontFamily', FONT_FAMILY_BY_ID[fontSupported] ?? DEFAULT_FONT_FAMILY);
   if (fontSize) url.searchParams.set('fontSize', String(fontSize));
-  url.searchParams.set('referrer', '<refferer>');
+  // Placeholder-driven (font-generator-handoff-referrer) — overrides the
+  // document.referrer that getTrackingAppendedURL sets. Skipped when unset so
+  // an author can blank the sheet row to fall back to that default.
+  if (referrer) url.searchParams.set('referrer', referrer);
   url.searchParams.set('entryPoint', 'font-generator');
   url.searchParams.set('feature-enable', FEATURE_FLAGS.join(','));
   url.searchParams.set('category', 'yourStuff');
@@ -104,7 +109,9 @@ async function openInApp({ strings = {}, ...params }) {
 export default async function handleOpenInExpress({
   styleId, text, fontSupported, fontSize, strings,
 }) {
-  const params = { styleId, text, fontSupported, fontSize };
+  const params = {
+    styleId, text, fontSupported, fontSize, referrer: strings?.handoffReferrer,
+  };
   emitAnalytics('font_generator_apply_to_editor_start');
 
   if (getMobileOperatingSystem() === 'iOS') {

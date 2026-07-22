@@ -34,6 +34,9 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   appModalTitle: 'Continue in the app',
   appModalBody: 'Not all features are available in web. Download the free Adobe Express app to get full access.',
   appModalCta: 'Get free app',
+  // Attribution referrer forwarded to the Express editor on handoff; authored
+  // via the font-generator-handoff-referrer placeholder row.
+  handoffReferrer: 'express-font-generator',
 });
 
 // Authored placeholder keys — namespaced to avoid collisions with other
@@ -61,6 +64,7 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   appModalTitle: 'font-generator-app-modal-title',
   appModalBody: 'font-generator-app-modal-body',
   appModalCta: 'font-generator-app-modal-cta',
+  handoffReferrer: 'font-generator-handoff-referrer',
 });
 
 // replaceKey()/replaceKeyArray() echo the humanized key back (e.g.
