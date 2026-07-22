@@ -63,12 +63,22 @@ export function getTagValues(container) {
 
 /* ── State sync ───────────────────────────────────────────────── */
 
-export function syncTagFieldState(field, input, tagsContainer, helpText) {
+export function syncTagFieldState(
+  field,
+  input,
+  tagsContainer,
+  helpText,
+  { activateOnFocusOnly = false } = {},
+) {
   const hasTags = tagsContainer.children.length > 0;
   const hasFocus = field.contains(document.activeElement);
+  // When activateOnFocusOnly, the field only looks "selected" (dark border) and
+  // reveals its help text once the user focuses it — pre-filled tags no longer
+  // force the active state on open.
+  const active = activateOnFocusOnly ? hasFocus : (hasFocus || hasTags);
 
-  field.classList.toggle('ax-tag-field-active', hasFocus || hasTags);
-  field.classList.toggle('ax-tag-field-has-tags', hasTags);
+  field.classList.toggle('ax-tag-field-active', active);
+  field.classList.toggle('ax-tag-field-has-tags', activateOnFocusOnly ? false : hasTags);
 
   if (hasTags || input.value.trim()) {
     input.removeAttribute('placeholder');
@@ -77,7 +87,7 @@ export function syncTagFieldState(field, input, tagsContainer, helpText) {
   }
 
   if (helpText) {
-    helpText.hidden = !(hasFocus || hasTags);
+    helpText.hidden = activateOnFocusOnly ? !hasFocus : !(hasFocus || hasTags);
   }
 }
 
@@ -108,6 +118,7 @@ export function addTagFromInput(input, tagsContainer, { onStateChange, removeLab
 export function createTagField(label, tags, placeholder, {
   helpTextStr,
   removeLabel,
+  activateOnFocusOnly = false,
 } = {}) {
   const wrapper = createTag('div', { class: 'ax-drawer-tag-section' });
 
@@ -137,7 +148,13 @@ export function createTagField(label, tags, placeholder, {
     hidden: '',
   }, helpTextStr || '');
 
-  const doSync = () => syncTagFieldState(field, input, tagsContainer, helpText);
+  const doSync = () => syncTagFieldState(
+    field,
+    input,
+    tagsContainer,
+    helpText,
+    { activateOnFocusOnly },
+  );
 
   (tags ?? []).forEach((t) => {
     const text = normalizeTagText(t);

@@ -50,13 +50,29 @@ export async function loadStyles() {
   }
 }
 
-async function createNav(navLinks, activeId, getColors, getName) {
+// Extracted so the URL construction is testable without a real navigation.
+export function buildNavLinkTarget(href, base, colors, { name, tags, id, libraryId } = {}) {
+  const url = new URL(href, base);
+  createColorPaletteParamApi().setOnUrl(url, colors, {
+    name, tags, id, libraryId,
+  });
+  return url.toString();
+}
+
+async function createNav(
+  navLinks,
+  activeId,
+  getColors,
+  getName,
+  paletteTags,
+  paletteId,
+  paletteLibraryId,
+) {
   const list = Array.isArray(navLinks) ? navLinks : [];
   const nav = createTag('nav', { class: 'action-menu-nav', 'aria-label': 'Color palette tools' });
   const ul = createTag('ul');
   const linkElements = [];
   let activeIndex = -1;
-  const paletteApi = createColorPaletteParamApi();
 
   for (let index = 0; index < list.length; index += 1) {
     const link = list[index];
@@ -78,10 +94,13 @@ async function createNav(navLinks, activeId, getColors, getName) {
         if (!colors?.length) return;
         e.preventDefault();
         try {
-          const url = new URL(linkEl.href, window.location.href);
           const name = typeof getName === 'function' ? getName() : undefined;
-          paletteApi.setOnUrl(url, colors, { name });
-          window.location.href = url.toString();
+          window.location.href = buildNavLinkTarget(linkEl.href, window.location.href, colors, {
+            name,
+            tags: paletteTags,
+            id: paletteId,
+            libraryId: paletteLibraryId,
+          });
         } catch {
           window.location.href = linkEl.href;
         }
@@ -304,6 +323,9 @@ export async function createActionMenuComponent(options = {}) {
     onGenerateRandom,
     transformPalette,
     getName,
+    paletteTags,
+    paletteId,
+    paletteLibraryId,
     enableState = true,
     daaLh = null,
   } = options;
@@ -353,7 +375,15 @@ export async function createActionMenuComponent(options = {}) {
 
   if (type !== 'controls-only') {
     const processedLinks = await applyNavLinkParamOverrides(navLinks);
-    sections.push(await createNav(processedLinks, activeId, getCurrentPaletteFn, getName));
+    sections.push(await createNav(
+      processedLinks,
+      activeId,
+      getCurrentPaletteFn,
+      getName,
+      paletteTags,
+      paletteId,
+      paletteLibraryId,
+    ));
   }
   if (type !== 'nav-only') {
     sections.push(await createControls(

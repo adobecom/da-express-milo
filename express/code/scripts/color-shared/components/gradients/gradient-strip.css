@@ -32,8 +32,7 @@
   flex-shrink: 0;
   border-radius: var(--Corner-radius-corner-radius-100);
   box-sizing: border-box;
-  outline: 1px solid rgba(31, 31, 31, 0.2);
-  outline-offset: -1px;
+  box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.2);
 }
 
 .gradient-strip .gradient-strip-info {
