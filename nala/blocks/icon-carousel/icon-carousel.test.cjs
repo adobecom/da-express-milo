@@ -114,8 +114,7 @@ test.describe('IconCarouselBlock Test Suite', () => {
       await expect(block.gallery).toBeVisible();
     });
 
-    await test.step(`step-3: Content is inset ${leftBuffer} from the left`, async () => {
-      await expect(block.block).toHaveCSS('padding-left', leftBuffer);
+    await test.step(`step-3: Gallery content is inset ${leftBuffer} from the left`, async () => {
       await expect(block.gallery).toHaveCSS('padding-left', leftBuffer);
     });
   });

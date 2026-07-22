@@ -30,6 +30,9 @@ export default async function decorate(block) {
   // buildGallery marks this container role="group" aria-roledescription="carousel";
   // give that grouping an accessible name from the heading, or a localized fallback.
   gallery.setAttribute('aria-label', heading ? heading.textContent.trim() : (regionLabel || 'Feature highlights'));
+  // The gallery is a horizontal scroll container (overflow-x: auto); make it
+  // keyboard-focusable so keyboard users can scroll it (axe scrollable-region-focusable).
+  gallery.setAttribute('tabindex', '0');
 
   cardRows.forEach((row) => {
     const cells = [...row.querySelectorAll(':scope > div')];
