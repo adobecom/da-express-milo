@@ -16,9 +16,13 @@ async function getGitHubPRBranchLiveUrl() {
     ? prReference.split('/')[2]
     : null;
 
-  const prBranch = prHeadReference
+  // AEM Live hostnames are always lowercase, so the branch segment must be
+  // too — otherwise the browser navigates to the lowercased host while
+  // assertions built from this URL (e.g. toHaveURL) keep the original case
+  // and never match.
+  const prBranch = (prHeadReference
     ? prHeadReference.replace(/\//g, '-')
-    : prReference.split('/')[2].replace(/\//g, '-');
+    : prReference.split('/')[2].replace(/\//g, '-')).toLowerCase();
 
   // get the org and repo
   const repository = process.env.GITHUB_REPOSITORY;

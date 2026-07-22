@@ -173,7 +173,6 @@ function buildOriginalLayout(block, typographyClasses = {}, viewMoreText = 'View
 
   const toggleButton = createTag('a', { class: 'collapsible-row-toggle-btn button' });
   toggleButton.textContent = viewMoreText;
-  // eslint-disable-next-line chai-friendly/no-unused-expressions
   collapsibleRows.length > 4 && block.append(toggleButton);
 
   toggleButton.addEventListener('click', () => {

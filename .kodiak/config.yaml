@@ -18,7 +18,6 @@ notifications:
           tool_type:
             - "grype" # Exclude SBOM tickets which duplicate findings already created by snyk
       fields:
-        customfield_11800: MWPW-164516 # Jira epic security tickets will be assigned to.
         customfield_12900: # Team to whom tickets will be assigned
           value: Express dev
         watchers: # Everyone who is an admin on your repository should be a watcher.

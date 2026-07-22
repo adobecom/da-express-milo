@@ -3,11 +3,22 @@ import { getLibs, createTag } from '../../../scripts/utils.js';
 export function updateImageUrl(url, maxDim) {
   try {
     const urlObj = new URL(url);
+    if (!['http:', 'https:'].includes(urlObj.protocol)) return null;
     urlObj.searchParams.set('max_dim', String(maxDim));
     return urlObj.toString();
   } catch {
-    return url;
+    return null;
   }
+}
+
+export function createHeroImageSrcset(url) {
+  const widths = [400, 800, 1200, 1600];
+  return widths
+    .map((w) => {
+      const updatedUrl = updateImageUrl(url, w) ?? `${url}?max_dim=${w}`;
+      return `${updatedUrl} ${w}w`;
+    })
+    .join(', ');
 }
 
 export function flattenOptionGroups(selector) {
@@ -29,6 +40,25 @@ export function formatPaperWeight(weight) {
   const weightFormatted = `${weightValue}lb weight`;
   const gsmFormatted = gsmValue?.replace('gsm', ' GSM');
   return { weight: weightFormatted, gsm: gsmFormatted };
+}
+
+export function extractInitialImageUrl(block) {
+  for (const row of block.children) {
+    const key = row.children[0]?.textContent?.trim();
+    if (key === 'heroImage') {
+      const url = row.children[1]?.querySelector('a')?.href
+        || row.children[1]?.textContent?.trim()
+        || null;
+      if (!url) return null;
+      try {
+        const { protocol } = new URL(url);
+        return ['http:', 'https:'].includes(protocol) ? url : null;
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
 }
 
 export function extractTemplateId(block) {
@@ -167,8 +197,9 @@ export async function addPrefetchLinks() {
   document.head.appendChild(preconnectLink2);
 }
 
+const SUPPORTED_REGIONS = new Set(['at', 'br', 'us', 'au', 'ca', 'gb', 'nz', 'de', 'ch', 'es', 'fr', 'be', 'jp', 'kr', 'nl', 'pt', 'se']);
+
 function normalizeLocale(ietf) {
-  const SUPPORTED_REGIONS = new Set(['at', 'br', 'us', 'au', 'ca', 'gb', 'nz', 'de', 'ch', 'es', 'fr', 'be', 'jp', 'kr', 'nl', 'pt', 'se']);
   const SUPPORTED_LANGUAGES = new Set(['en', 'de', 'es', 'fr', 'ja', 'ko', 'nl', 'pt', 'sv']);
   if (!ietf) {
     return { language: 'en', region: 'us' };
@@ -194,7 +225,12 @@ export async function createZazzleStore() {
     ]);
 
     const { locale } = getConfig();
-    const { language, region } = normalizeLocale(locale?.ietf);
+    const urlParams = new URLSearchParams(window.location.search);
+    const rawTestRegion = urlParams.get('testRegion')?.toLowerCase();
+    const testRegion = rawTestRegion && SUPPORTED_REGIONS.has(rawTestRegion) ? rawTestRegion : null;
+    const { language, region } = testRegion
+      ? { language: 'en', region: testRegion }
+      : normalizeLocale(locale?.ietf);
 
     const store = createZazzlePDPStore({ language, region });
 

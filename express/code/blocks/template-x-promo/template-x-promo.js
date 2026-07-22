@@ -451,7 +451,7 @@ function createDirectCarousel(block, templates, createTagFn) {
   };
 }
 
-/* c8 ignore next 55 */
+/* c8 ignore next 58 */
 async function handleOneUpFromApiData(block, templateData) {
   const parent = block.parentElement;
   parent.classList.add('one-up');
@@ -479,16 +479,22 @@ async function handleOneUpFromApiData(block, templateData) {
   const imgWrapper = createTag('div', { class: 'image-wrapper' });
   imgWrapper.append(img);
 
+  const [editThisTemplateKey, freeKey] = await Promise.all([
+    replaceKey('edit-this-template', getConfig()),
+    replaceKey('free', getConfig()),
+  ]);
+
+  const editThisTemplate = editThisTemplateKey ?? 'Edit this template';
+  const freeLabel = freeKey && freeKey !== 'free' ? freeKey : 'Free';
+
   if (metadata.isFree) {
     const freeTag = createTag('span', { class: 'free-tag' });
-    freeTag.textContent = 'Free';
+    freeTag.textContent = freeLabel;
     imgWrapper.append(freeTag);
   } else if (metadata.isPremium) {
     const premiumIcon = getIconElementDeprecated('premium');
     imgWrapper.append(premiumIcon);
   }
-
-  const editThisTemplate = await replaceKey('edit-this-template', getConfig()) ?? 'Edit this template';
 
   const imageLink = createTag('a', {
     href: metadata.editUrl,
@@ -769,7 +775,7 @@ const initializeUtilities = async () => {
   const libsPath = getLibs() || '../../scripts';
   try {
     const [utils, placeholders] = await Promise.all([
-      import(`${libsPath}/utils.js`),
+      import(`${libsPath}/utils/utils.js`),
       import(`${libsPath}/features/placeholders.js`),
     ]);
 

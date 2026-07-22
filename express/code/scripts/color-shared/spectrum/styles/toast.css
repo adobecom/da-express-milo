@@ -44,7 +44,6 @@ sp-toast sp-button[slot="action"] {
   --spectrum-button-text-color-focus: var(--color-black);
   color: var(--color-white);
   align-self: center;
-  transform: translateY(2px);
 }
 
 sp-toast sp-button[slot="action"]:hover,

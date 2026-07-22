@@ -48,6 +48,7 @@ module.exports = {
   },
   plugins: [
     'chai-friendly',
+    'compat',
   ],
   ignorePatterns: [
     '*.min.js',

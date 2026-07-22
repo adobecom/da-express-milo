@@ -28,6 +28,7 @@ export {
   loadBadge,
   loadTray,
   loadTabs,
+  loadAccordion,
 } from './load-spectrum.js';
 
 // ── Components ───────────────────────────────────────────────────────
@@ -46,6 +47,7 @@ export { createExpressColorArea } from './components/express-color-area.js';
 export { createExpressColorSlider } from './components/express-color-slider.js';
 export { createExpressSlider } from './components/express-slider.js';
 export { createExpressTabs } from './components/express-tabs.js';
+export { createExpressAccordion } from './components/express-accordion.js';
 
 // ── Utilities ────────────────────────────────────────────────────────
 export { createThemeWrapper, wrapInTheme } from './utils/theme.js';

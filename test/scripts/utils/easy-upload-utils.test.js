@@ -58,7 +58,8 @@ describe('EasyUpload failure handling', () => {
     expect(startSDKStub.called).to.be.false;
   });
 
-  it('refreshes the QR code when retrieving the uploaded file fails', async () => {
+  it('refreshes the QR code after a delay when retrieving the uploaded file fails', async () => {
+    const clock = sinon.useFakeTimers();
     const easyUpload = createInstance();
     sinon.stub(easyUpload, 'finalizeUpload').resolves();
     const refreshSpy = sinon.stub(easyUpload, 'refreshQRCode').resolves();
@@ -66,8 +67,13 @@ describe('EasyUpload failure handling', () => {
 
     await easyUpload.handleConfirmImport();
 
-    expect(refreshSpy.calledOnce).to.be.true;
+    // The failure is surfaced immediately; the QR code is only regenerated
+    // after the delay so the user can read what went wrong.
+    expect(refreshSpy.called).to.be.false;
     expect(startSDKStub.called).to.be.false;
+
+    await clock.tickAsync(5000);
+    expect(refreshSpy.calledOnce).to.be.true;
   });
 
   it('marks the QR code as consumed after confirm import is pressed', async () => {
@@ -114,6 +120,411 @@ describe('EasyUpload failure handling', () => {
     expect(easyUpload.uploadDetected).to.be.false;
     expect(versionReject.calledOnce).to.be.true;
     expect(easyUpload.versionReadyPromise).to.be.null;
+  });
+
+  it('collapses concurrent prepareUploadedFileForConfirm calls onto one attempt', async () => {
+    const easyUpload = createInstance();
+    const file = new File(['file-content'], 'upload.png', { type: 'image/png' });
+    const finalizeStub = sinon.stub(easyUpload, 'finalizeUpload').callsFake(async () => {
+      easyUpload.uploadFinalized = true;
+    });
+    const retrieveStub = sinon.stub(easyUpload, 'retrieveUploadedFile').resolves(file);
+
+    const [a, b, c] = await Promise.all([
+      easyUpload.prepareUploadedFileForConfirm(),
+      easyUpload.prepareUploadedFileForConfirm(),
+      easyUpload.prepareUploadedFileForConfirm(),
+    ]);
+
+    // Finalize runs once (no double-finalize) and the file is retrieved once.
+    expect(finalizeStub.calledOnce).to.be.true;
+    expect(retrieveStub.calledOnce).to.be.true;
+    expect(a).to.equal(file);
+    expect(b).to.equal(file);
+    expect(c).to.equal(file);
+    expect(easyUpload.preparePromise).to.be.null;
+  });
+
+  it('retries prepareUploadedFileForConfirm after a failed attempt', async () => {
+    const easyUpload = createInstance();
+    sinon.stub(easyUpload, 'finalizeUpload').resolves();
+    const retrieveStub = sinon.stub(easyUpload, 'retrieveUploadedFile');
+    retrieveStub.onFirstCall().rejects(new Error('not ready'));
+    const file = new File(['ok'], 'upload.png', { type: 'image/png' });
+    retrieveStub.onSecondCall().resolves(file);
+
+    let firstError;
+    try {
+      await easyUpload.prepareUploadedFileForConfirm();
+    } catch (error) {
+      firstError = error;
+    }
+    expect(firstError).to.be.an('error');
+    expect(easyUpload.preparePromise).to.be.null;
+
+    const result = await easyUpload.prepareUploadedFileForConfirm();
+    expect(result).to.equal(file);
+  });
+
+  it('waitForAssetVersionReady keeps polling when a version lookup throws, then resolves', async () => {
+    const clock = sinon.useFakeTimers();
+    const easyUpload = createInstance();
+    easyUpload.asset = {};
+    const getAssetVersion = sinon.stub();
+    getAssetVersion.onCall(0).rejects(new Error('No versions found for asset'));
+    getAssetVersion.onCall(1).resolves('0');
+    getAssetVersion.onCall(2).resolves('3');
+    easyUpload.uploadService = { getAssetVersion };
+
+    const readyPromise = easyUpload.waitForAssetVersionReady();
+    await clock.tickAsync(3000);
+    await readyPromise;
+
+    expect(getAssetVersion.callCount).to.equal(3);
+    // The interval is cleared once ready — nothing left running.
+    expect(easyUpload.pollingInterval).to.be.null;
+    clock.restore();
+  });
+
+  it('waitForAssetVersionReady clears any pre-existing poll before starting', async () => {
+    const clock = sinon.useFakeTimers();
+    const easyUpload = createInstance();
+    easyUpload.asset = {};
+    const stale = setInterval(() => {}, 1000);
+    easyUpload.pollingInterval = stale;
+    easyUpload.uploadService = { getAssetVersion: sinon.stub().resolves('1') };
+
+    const readyPromise = easyUpload.waitForAssetVersionReady();
+    // A new interval id replaced the stale one immediately.
+    expect(easyUpload.pollingInterval).to.not.equal(stale);
+    await clock.tickAsync(1000);
+    await readyPromise;
+    expect(easyUpload.pollingInterval).to.be.null;
+    clock.restore();
+  });
+
+  describe('corrupted image detection', () => {
+    const FAILED_MSG = 'We are having trouble processing the file. Please try another file.';
+
+    function bytesToArrayBuffer(bytes) {
+      return new Uint8Array(bytes).buffer;
+    }
+
+    async function createValidPngBlob() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 2;
+      canvas.height = 2;
+      return new Promise((resolve) => {
+        canvas.toBlob(resolve, 'image/png');
+      });
+    }
+
+    function stubReadyDownload(instance, blob) {
+      sinon.stub(instance, 'waitForAssetVersionReady').resolves();
+      instance.versionReadyPromise = null;
+      instance.asset = {};
+      instance.uploadService = { downloadAssetContent: sinon.stub().resolves(blob) };
+    }
+
+    it('detects MIME type from magic bytes and rejects unknown content', () => {
+      const easyUpload = createInstance();
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+      )).to.equal('image/png');
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0xff, 0xd8, 0xff, 0xe0]),
+      )).to.equal('image/jpeg');
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0x47, 0x49, 0x46, 0x38, 0x39, 0x61]),
+      )).to.equal('image/gif');
+      // "RIFF....WEBP"
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x45, 0x42, 0x50]),
+      )).to.equal('image/webp');
+      // RIFF is also used by WAV and AVI and is not sufficient by itself.
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0x52, 0x49, 0x46, 0x46, 0, 0, 0, 0, 0x57, 0x41, 0x56, 0x45]),
+      )).to.be.null;
+      // ISO-BMFF's ftyp box is shared by HEIC, MP4, MOV, and AVIF.
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0, 0, 0, 0, 0x66, 0x74, 0x79, 0x70, 0x68, 0x65, 0x69, 0x63]),
+      )).to.equal('image/heic');
+      // HEIC may use a generic mif1 major brand and a compatible HEIC brand.
+      expect(easyUpload.detectFileTypeFromBytes(bytesToArrayBuffer([
+        0, 0, 0, 0, 0x66, 0x74, 0x79, 0x70,
+        0x6d, 0x69, 0x66, 0x31, 0, 0, 0, 0,
+        0x68, 0x65, 0x69, 0x63,
+      ]))).to.equal('image/heic');
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0, 0, 0, 0, 0x66, 0x74, 0x79, 0x70, 0x69, 0x73, 0x6f, 0x6d]),
+      )).to.be.null;
+      // A generic HEIF-compatible AVIF is not HEIC.
+      expect(easyUpload.detectFileTypeFromBytes(bytesToArrayBuffer([
+        0, 0, 0, 0, 0x66, 0x74, 0x79, 0x70,
+        0x61, 0x76, 0x69, 0x66, 0, 0, 0, 0,
+        0x6d, 0x69, 0x66, 0x31,
+      ]))).to.be.null;
+      // An XML declaration does not make an arbitrary XML document an SVG.
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([...new TextEncoder().encode('<?xml version="1.0"?><root/>')]),
+      )).to.be.null;
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([...new TextEncoder().encode('<?xml version="1.0"?><!-- exported --><svg/>')]),
+      )).to.equal('image/svg+xml');
+      // No recognized signature => corrupted/unsupported
+      expect(easyUpload.detectFileTypeFromBytes(
+        bytesToArrayBuffer([0x00, 0x11, 0x22, 0x33, 0x44]),
+      )).to.be.null;
+    });
+
+    it('validateImageIntegrity rejects an undecodable image', async () => {
+      const easyUpload = createInstance();
+      // Valid PNG signature but garbage body -> cannot decode.
+      const corrupt = new Blob([new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00])], { type: 'image/png' });
+      let threw = false;
+      try {
+        await easyUpload.validateImageIntegrity(corrupt, 'image/png');
+      } catch (error) {
+        threw = true;
+        expect(error.message).to.contain('Corrupted');
+      }
+      expect(threw).to.be.true;
+    });
+
+    it('validateImageIntegrity rejects truncated SVG markup', async () => {
+      const easyUpload = createInstance();
+      const corrupt = new Blob(['<svg><path>'], { type: 'image/svg+xml' });
+
+      try {
+        await easyUpload.validateImageIntegrity(corrupt, 'image/svg+xml');
+        expect.fail('Expected validateImageIntegrity to throw');
+      } catch (error) {
+        expect(error.message).to.contain('SVG');
+      }
+    });
+
+    it('does not require browser-native HEIC decoding', async () => {
+      const easyUpload = createInstance();
+      const createImageBitmapStub = sinon.stub(window, 'createImageBitmap').rejects(
+        new Error('HEIC decoder unavailable'),
+      );
+
+      await easyUpload.validateImageIntegrity(new Blob(['heic']), 'image/heic');
+
+      expect(createImageBitmapStub.called).to.be.false;
+    });
+
+    it('restarts upload polling with Confirm disabled after QR refresh', async () => {
+      const easyUpload = createInstance();
+      easyUpload.confirmButton.classList.remove('disabled');
+      sinon.stub(easyUpload, 'cleanup').resolves();
+      sinon.stub(easyUpload, 'initializeQRCode').resolves();
+      const startPollingSpy = sinon.spy(easyUpload, 'startUploadDetectionPolling');
+
+      await easyUpload.refreshQRCode();
+      easyUpload.cleanup.restore();
+
+      expect(startPollingSpy.calledOnce).to.be.true;
+      expect(easyUpload.confirmButton.classList.contains('disabled')).to.be.true;
+    });
+
+    it('dismisses the confirm tooltip after QR refresh', async () => {
+      const easyUpload = createInstance();
+      const tooltip = document.createElement('div');
+      tooltip.classList.add('hover');
+      easyUpload.setConfirmTooltipConfig({
+        element: tooltip,
+        messages: { failed: FAILED_MSG },
+      });
+      sinon.stub(easyUpload, 'cleanup').resolves();
+      sinon.stub(easyUpload, 'initializeQRCode').resolves();
+
+      await easyUpload.refreshQRCode();
+      easyUpload.cleanup.restore();
+
+      expect(tooltip.classList.contains('hover')).to.be.false;
+    });
+
+    it('enables Confirm only after the detected upload validates', async () => {
+      const clock = sinon.useFakeTimers();
+      const easyUpload = createInstance();
+      easyUpload.uploadAsset = {};
+      easyUpload.uploadService = {};
+      const file = new File(['file-content'], 'upload.png', { type: 'image/png' });
+      sinon.stub(easyUpload, 'prepareUploadedFileForConfirm').resolves(file);
+
+      easyUpload.startUploadDetectionPolling();
+      expect(easyUpload.confirmButton.classList.contains('disabled')).to.be.true;
+
+      await clock.tickAsync(2000);
+
+      expect(easyUpload.prepareUploadedFileForConfirm.calledOnce).to.be.true;
+      expect(easyUpload.confirmButton.classList.contains('disabled')).to.be.false;
+      expect(easyUpload.uploadDetectionInterval).to.be.null;
+    });
+
+    it('keeps Confirm disabled when the detected upload fails validation', async () => {
+      const clock = sinon.useFakeTimers();
+      const easyUpload = createInstance();
+      const tooltip = document.createElement('div');
+      tooltip.classList.add('hidden');
+      easyUpload.setConfirmTooltipConfig({
+        element: tooltip,
+        messages: { failed: FAILED_MSG },
+      });
+      easyUpload.uploadAsset = {};
+      easyUpload.uploadService = {};
+      sinon.stub(easyUpload, 'prepareUploadedFileForConfirm').callsFake(async () => {
+        easyUpload.uploadFinalized = true;
+        const error = new Error('Unrecognized or corrupted file: no valid image signature');
+        error.easyUploadStage = 'retrieve';
+        throw error;
+      });
+      const refreshSpy = sinon.stub(easyUpload, 'refreshQRCode').resolves();
+
+      easyUpload.startUploadDetectionPolling();
+      await clock.tickAsync(2000);
+
+      expect(easyUpload.confirmButton.classList.contains('disabled')).to.be.true;
+      expect(tooltip.textContent).to.equal(FAILED_MSG);
+      // Shown via `.pinned` so it does not depend on hover state.
+      expect(tooltip.classList.contains('pinned')).to.be.true;
+      expect(easyUpload.uploadDetectionInterval).to.be.null;
+
+      // The refresh is deferred so the failure message stays on screen.
+      expect(refreshSpy.called).to.be.false;
+      await clock.tickAsync(5000);
+      expect(refreshSpy.calledOnce).to.be.true;
+    });
+
+    it('dismisses the pinned failure tooltip when the user clicks outside it', async () => {
+      const clock = sinon.useFakeTimers();
+      const easyUpload = createInstance();
+      const tooltip = document.createElement('div');
+      tooltip.classList.add('hidden');
+      document.body.appendChild(tooltip);
+      easyUpload.setConfirmTooltipConfig({
+        element: tooltip,
+        messages: { failed: FAILED_MSG },
+      });
+      easyUpload.uploadAsset = {};
+      easyUpload.uploadService = {};
+      sinon.stub(easyUpload, 'prepareUploadedFileForConfirm').callsFake(async () => {
+        easyUpload.uploadFinalized = true;
+        const error = new Error('Unrecognized or corrupted file: no valid image signature');
+        error.easyUploadStage = 'retrieve';
+        throw error;
+      });
+      sinon.stub(easyUpload, 'refreshQRCode').resolves();
+
+      easyUpload.startUploadDetectionPolling();
+      await clock.tickAsync(2000);
+      expect(tooltip.classList.contains('pinned')).to.be.true;
+
+      // A click inside the tooltip must NOT dismiss it.
+      tooltip.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      expect(tooltip.classList.contains('pinned')).to.be.true;
+
+      // A click outside dismisses it.
+      document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+      expect(tooltip.classList.contains('pinned')).to.be.false;
+    });
+
+    it('holds the failure message through the delay, then dismisses it once the refresh completes', async () => {
+      const clock = sinon.useFakeTimers();
+      const easyUpload = createInstance();
+      const tooltip = document.createElement('div');
+      tooltip.classList.add('hidden');
+      easyUpload.setConfirmTooltipConfig({
+        element: tooltip,
+        messages: { failed: FAILED_MSG },
+      });
+      easyUpload.uploadAsset = {};
+      easyUpload.uploadService = {};
+      sinon.stub(easyUpload, 'prepareUploadedFileForConfirm').callsFake(async () => {
+        easyUpload.uploadFinalized = true;
+        const error = new Error('Unrecognized or corrupted file: no valid image signature');
+        error.easyUploadStage = 'retrieve';
+        throw error;
+      });
+      sinon.stub(easyUpload, 'resetUploadSession').resolves();
+      let resolveRefresh;
+      sinon.stub(easyUpload, 'initializeQRCode').returns(new Promise((resolve) => {
+        resolveRefresh = resolve;
+      }));
+
+      easyUpload.startUploadDetectionPolling();
+      await clock.tickAsync(2000);
+
+      // Corruption detected: message shown, refresh not started yet.
+      expect(tooltip.textContent).to.equal(FAILED_MSG);
+      expect(tooltip.classList.contains('pinned')).to.be.true;
+
+      // Stop the completed refresh from starting a fresh poll during the test.
+      sinon.stub(easyUpload, 'startUploadDetectionPolling');
+
+      // Advance through the delay; the refresh starts but QR generation is
+      // pending, so the failure message is still on screen.
+      await clock.tickAsync(5000);
+      expect(tooltip.classList.contains('pinned')).to.be.true;
+
+      resolveRefresh();
+      await clock.tickAsync(0);
+
+      expect(tooltip.classList.contains('pinned')).to.be.false;
+    });
+
+    it('retrieveUploadedFile rejects an empty upload', async () => {
+      const easyUpload = createInstance();
+      stubReadyDownload(easyUpload, new Blob([]));
+      try {
+        await easyUpload.retrieveUploadedFile();
+        expect.fail('Expected retrieveUploadedFile to throw');
+      } catch (error) {
+        expect(error.message).to.contain('empty');
+      }
+    });
+
+    it('retrieveUploadedFile rejects content without a valid image signature', async () => {
+      const easyUpload = createInstance();
+      stubReadyDownload(easyUpload, new Blob([new Uint8Array([0, 1, 2, 3, 4, 5])]));
+      try {
+        await easyUpload.retrieveUploadedFile();
+        expect.fail('Expected retrieveUploadedFile to throw');
+      } catch (error) {
+        expect(error.message).to.contain('corrupted');
+      }
+    });
+
+    it('retrieveUploadedFile returns a typed File for a valid image', async () => {
+      const easyUpload = createInstance();
+      stubReadyDownload(easyUpload, await createValidPngBlob());
+      const file = await easyUpload.retrieveUploadedFile();
+      expect(file).to.be.instanceOf(File);
+      expect(file.type).to.equal('image/png');
+    });
+
+    it('shows the authored error tooltip when a corrupted file is confirmed', async () => {
+      const easyUpload = createInstance();
+      const tooltip = document.createElement('div');
+      tooltip.classList.add('hidden');
+      easyUpload.setConfirmTooltipConfig({
+        element: tooltip,
+        messages: { failed: FAILED_MSG },
+      });
+      sinon.stub(easyUpload, 'finalizeUpload').resolves();
+      sinon.stub(easyUpload, 'refreshQRCode').resolves();
+      sinon.stub(easyUpload, 'retrieveUploadedFile').rejects(
+        new Error('Unrecognized or corrupted file: no valid image signature'),
+      );
+
+      await easyUpload.handleConfirmImport();
+
+      expect(tooltip.textContent).to.equal(FAILED_MSG);
+      expect(tooltip.classList.contains('hidden')).to.be.false;
+      expect(tooltip.classList.contains('pinned')).to.be.true;
+      expect(startSDKStub.called).to.be.false;
+    });
   });
 
   it('propagates initializeBlockUpload failures during URL generation', async () => {

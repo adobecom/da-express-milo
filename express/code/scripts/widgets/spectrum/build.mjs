@@ -173,6 +173,17 @@ const newComponents = [
     ].join('\n'),
   },
   {
+    name: 'alert-dialog',
+    entry: [
+      "import '@spectrum-web-components/alert-dialog/sp-alert-dialog.js';",
+      "export * from '@spectrum-web-components/alert-dialog';",
+    ].join('\n'),
+    extraExternals: [
+      { match: /^@spectrum-web-components\/dialog(\/.*)?$/, target: './dialog.js' },
+      { match: /^@spectrum-web-components\/button(\/.*)?$/, target: './button.js' },
+    ],
+  },
+  {
     name: 'toast',
     entry: [
       "import '@spectrum-web-components/toast/sp-toast.js';",
@@ -271,6 +282,7 @@ const newComponents = [
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-filter.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-switch-vertical.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-close.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-accessibility.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-checkmark-circle.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-image.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-lock.js';",
@@ -326,6 +338,40 @@ const newComponents = [
     entry: [
       "import '@spectrum-web-components/badge/sp-badge.js';",
       "export * from '@spectrum-web-components/badge';",
+    ].join('\n'),
+  },
+  {
+    name: 'accordion',
+    entry: [
+      "import '@spectrum-web-components/accordion/sp-accordion.js';",
+      "import '@spectrum-web-components/accordion/sp-accordion-item.js';",
+      "export * from '@spectrum-web-components/accordion';",
+    ].join('\n'),
+    skipExternals: ['./reactive-controllers.js'],
+    // Patch accordion-item CSS to add border-radius to #header:hover using the
+    // existing --mod-accordion-corner-radius variable (same one used by focus-visible).
+    extraPlugins: [
+      {
+        name: 'accordion-item-css-patch',
+        setup(b) {
+          b.onLoad({ filter: /accordion-item\.css\.js$/ }, async (args) => {
+            const { readFile } = await import('fs/promises');
+            let src = await readFile(args.path, 'utf8');
+            src = src.replace(
+              /(#header:hover\{background-color:[^}]+)(\})/,
+              '$1;border-radius:var(--mod-accordion-corner-radius,var(--spectrum-accordion-corner-radius))$2',
+            );
+            return { contents: src, loader: 'js' };
+          });
+        },
+      },
+    ],
+  },
+  {
+    name: 'field-label',
+    entry: [
+      "import '@spectrum-web-components/field-label/sp-field-label.js';",
+      "export * from '@spectrum-web-components/field-label';",
     ].join('\n'),
   },
 ];
@@ -398,7 +444,7 @@ for (const comp of newComponents) {
       format: 'esm',
       outfile: resolve(distDir, `${comp.name}.js`),
       minify: true,
-      plugins: [plugin],
+      plugins: [plugin, ...(comp.extraPlugins || [])],
       banner: { js: BANNER },
       legalComments: 'none',
     });

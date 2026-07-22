@@ -75,6 +75,10 @@ main .wayfinder h1, main .wayfinder h2, main .wayfinder h3, main .wayfinder h4, 
     font-size: 16px;
 }
 
+.wayfinder .text-row a {
+  font-weight: unset;
+}
+
 .wayfinder .cta-row strong .button {
     background-color: var(--color-info-accent);
     color: var(--color-white);

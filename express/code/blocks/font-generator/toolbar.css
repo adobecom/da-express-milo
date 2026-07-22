@@ -1,0 +1,179 @@
+.font-generator-toolbar {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: space-between;
+  gap: var(--spacing-100);
+}
+
+/* ─── Left group (layout buttons + count) ─────────────────────────────────── */
+
+.toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  min-width: 0;
+}
+
+.toolbar-layout-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Mobile shows the count summary only — no grid/list toggle. */
+@media (max-width: 599px) {
+  .toolbar-layout-group {
+    display: none;
+  }
+}
+
+.toolbar-layout-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-light-gray);
+  color: var(--color-gray-950);
+  cursor: pointer;
+  transition: background-color 0.1s ease, color 0.1s ease;
+}
+
+.toolbar-layout-btn.is-active {
+  background: var(--color-gray-950);
+  color: var(--color-white);
+}
+
+.toolbar-layout-btn img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.toolbar-layout-btn.is-active img {
+  filter: brightness(0) invert(1);
+}
+
+.toolbar-count {
+  color: var(--color-gray-950);
+  font-family: var(--body-font-family);
+  font-size: var(--Global-Typography-Size-Title-Title-2XS, 16px);
+  font-style: normal;
+  font-weight: 700;
+  line-height: var(--Global-Typography-Line-height-Title-Title-2XS, 22px);
+  white-space: nowrap;
+}
+
+/* ─── Right group (font size slider) ─────────────────────────────────────── */
+
+.toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  padding-block: var(--spacing-100);
+}
+
+.toolbar-slider-label,
+.toolbar-slider-value {
+  color: var(--color-dark-gray);
+  font-family: var(--body-font-family);
+  font-size: var(--Font-size-100, 14px);
+  font-style: normal;
+  font-weight: 400;
+  line-height: var(--Line-height-100, 18px);
+  letter-spacing: var(--Letter-spacing, 0);
+  white-space: nowrap;
+}
+
+.toolbar-slider-value {
+  min-width: 30px;
+  text-align: right;
+}
+
+.toolbar-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 120px;
+  height: 4px;
+  border-radius: 4px;
+  background: linear-gradient(
+    to right,
+    var(--color-dark-gray) var(--fill, 11%),
+    var(--color-gray-300-variant) var(--fill, 11%)
+  );
+  outline: none;
+  cursor: pointer;
+}
+
+.toolbar-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--color-white);
+  border: 2px solid var(--color-gray-950);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.toolbar-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-gray-950);
+  border-radius: 50%;
+  background: var(--color-white);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+/* ─── Filter trigger (hidden at ≥1200px, once the filter panel is inline) ─── */
+
+.font-generator-filter-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 7px 12px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-gray-250);
+  color: var(--color-gray-950);
+  font-family: var(--body-font-family);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 18px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.font-generator-filter-trigger svg {
+  display: block;
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--color-gray-950);
+}
+
+@media (min-width: 1200px) {
+  .font-generator-toolbar {
+    flex-flow: row wrap;
+  }
+
+  .font-generator-filter-trigger {
+    display: none;
+  }
+}
+
+/* ─── Responsive: slider wraps to its own row at ≤899px ──────────────────── */
+
+@media (max-width: 899px) {
+  .toolbar-count {
+    font-size: 14px;
+  }
+}

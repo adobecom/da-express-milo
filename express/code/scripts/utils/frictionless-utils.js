@@ -130,6 +130,8 @@ export const QA_CONFIGS = {
   'qa-nba': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'convert-to-gif': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'crop-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
+  'video-convert': { ...getBaseVideoCfg(VIDEO_FORMATS) },
+  'video-compress': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'trim-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'resize-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'merge-videos': getMergeVideosCfg(),
@@ -137,6 +139,7 @@ export const QA_CONFIGS = {
   'caption-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'edit-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'edit-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
+  'compress-image': { ...getBaseImgCfg(JPG, JPEG, PNG, WEBP) },
   'remove-background-fast-track-variant': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'remove-background-fast-track-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'remove-background-focused-control': { ...getBaseImgCfg(JPG, JPEG, PNG) },
@@ -406,6 +409,12 @@ export function executeQuickAction(
       exportConfig,
       contConfig,
     ),
+    'compress-image': () => ccEverywhere.quickAction.compressImage(
+      docConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
     'generate-qr-code': () => ccEverywhere.quickAction.generateQRCode(
       {},
       appConfig,
@@ -419,6 +428,18 @@ export function executeQuickAction(
       contConfig,
     ),
     'crop-video': () => ccEverywhere.quickAction.cropVideo(
+      videoDocConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
+    'video-convert': () => ccEverywhere.quickAction.videoEncode(
+      videoDocConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
+    'video-compress': () => ccEverywhere.quickAction.videoEncode(
       videoDocConfig,
       appConfig,
       exportConfig,

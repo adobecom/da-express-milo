@@ -185,6 +185,7 @@ export default function useSeo(templateId) {
         }
       })
       .catch((error) => {
+        // eslint-disable-next-line compat/compat
         window.reportError?.(error);
       });
 
