@@ -422,7 +422,7 @@ const MODAL_WRAPPER_FALLBACK_PX = {
   'student-hed': 422,
   'student-business': 422,
   'student-email-only': 294,
-  'legacy-edu-express': 545,
+  'legacy-edu-express': 520,
   'legacy-edu-hed': 477,
   simplified: 400,
 };

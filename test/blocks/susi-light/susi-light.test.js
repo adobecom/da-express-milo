@@ -126,7 +126,7 @@ describe('Susi-light', async () => {
       expect(resolveModalWrapperProfile(el('susi-light'), 'AdobeExpressWeb')).to.equal('legacy-edu-express');
       expect(resolveModalWrapperProfile(el('susi-light'), 'AdobeExpressWeb_HED')).to.equal('legacy-edu-hed');
       expect(resolveModalWrapperProfile(el('susi-light'), 'AdobeExpressWeb_Business')).to.equal('edu-business');
-      expect(resolveModalWrapperHeight(el('susi-light'), 'AdobeExpressWeb')).to.equal(545);
+      expect(resolveModalWrapperHeight(el('susi-light'), 'AdobeExpressWeb')).to.equal(520);
       expect(resolveModalWrapperHeight(el('susi-light'), 'AdobeExpressWeb_HED')).to.equal(477);
     });
 
@@ -134,7 +134,7 @@ describe('Susi-light', async () => {
       const block = el('susi-light');
       applyModalWrapperReserve(block, 'AdobeExpressWeb');
       expect(block.dataset.susiWrapperProfile).to.equal('legacy-edu-express');
-      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('545px');
+      expect(block.style.getPropertyValue('--susi-modal-wrapper-height').trim()).to.equal('520px');
     });
 
     it('applyModalWrapperReserve sets legacy HED bare block height', () => {
