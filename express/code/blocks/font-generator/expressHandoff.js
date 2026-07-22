@@ -61,9 +61,7 @@ async function buildWebUrl(params) {
   return applyFontHandoffParams(url, params).toString();
 }
 
-// iOS/Android mweb: a Branch link opening the app (installed or deferred) at the
-// editor, else the app store. The dest URL (with the preview text) rides along
-// in the platform deep-link params so the app receives it too.
+// iOS: a Branch link opening the app (installed or deferred) at the editor, else the App Store.
 async function buildAppBranchUrl(params) {
   const { getTrackingAppendedURL } = await import('../../scripts/branchlinks.js');
   const url = new URL(await getTrackingAppendedURL(APP_BRANCH_URL, {
@@ -75,7 +73,7 @@ async function buildAppBranchUrl(params) {
   // Branch reserved keys route the app to the editor; $desktop_url is the no-app fallback.
   // Keys are appended literally (searchParams would encode '$'); value single-encoded for Branch.
   const sep = url.search ? '&' : '?';
-  return `${url.toString()}${sep}$deeplink_path=${dest}&$ios_deeplink_path=${dest}&$android_deeplink_path=${dest}&$desktop_url=${dest}`;
+  return `${url.toString()}${sep}$deeplink_path=${dest}&$ios_deeplink_path=${dest}&$desktop_url=${dest}`;
 }
 
 function emitAnalytics(eventName) {
@@ -116,10 +114,7 @@ export default async function handleOpenInExpress({
   };
   emitAnalytics('font_generator_apply_to_editor_start');
 
-  // Mobile web hands off to the app via Branch (which carries the preview text
-  // in its deep-link params); desktop opens the web editor below.
-  const os = getMobileOperatingSystem();
-  if (os === 'iOS' || os === 'Android') {
+  if (getMobileOperatingSystem() === 'iOS') {
     await openInApp({ ...params, strings });
     return;
   }
