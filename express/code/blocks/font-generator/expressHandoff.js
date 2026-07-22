@@ -51,6 +51,14 @@ function applyFontHandoffParams(url, {
   return url;
 }
 
+// The editor handoff URL without the async tracking decoration — used as the
+// CTA's href so hover / "copy link" / open-in-new-tab reflect where a click
+// actually lands. The click handler still routes through handleOpenInExpress
+// for the tracking params and OS-aware app/new-tab handling.
+export function buildEditorHandoffUrl(params) {
+  return applyFontHandoffParams(new URL(resolveEditorUrl()), params).toString();
+}
+
 // Web: the editor /new URL with tracking + handoff params.
 async function buildWebUrl(params) {
   const { getTrackingAppendedURL } = await import('../../scripts/branchlinks.js');

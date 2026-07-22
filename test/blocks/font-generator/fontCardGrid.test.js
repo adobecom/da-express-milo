@@ -97,6 +97,28 @@ describe('font-generator/fontCardGrid', () => {
     unsubscribe();
   });
 
+  describe('CTA href reflects the real handoff destination', () => {
+    const cardCta = { text: 'Design With Style', href: 'https://www.adobe.com/express/templates/' };
+
+    it('points the CTA at the editor handoff URL, not the authored template link', () => {
+      const { container, unsubscribe } = mount(makeFonts(1), { cardCta });
+      const cta = container.querySelector('.font-card-cta');
+      const url = new URL(cta.href);
+      expect(`${url.origin}${url.pathname}`).to.equal('https://new.express.adobe.com/new');
+      expect(url.searchParams.get('glyphString')).to.equal('Hi'); // mount's previewText
+      expect(url.searchParams.get('styleId')).to.equal('f0');
+      unsubscribe();
+    });
+
+    it('updates the CTA href when the preview text changes', () => {
+      const { container, unsubscribe } = mount(makeFonts(1), { cardCta });
+      const cta = container.querySelector('.font-card-cta');
+      setState({ previewText: 'Bonjour' });
+      expect(new URL(cta.href).searchParams.get('glyphString')).to.equal('Bonjour');
+      unsubscribe();
+    });
+  });
+
   describe('scrolling back to the top on a filter change', () => {
     it('scrolls the scrollTarget into view when the filter changes', () => {
       const scrollTarget = document.createElement('div');
