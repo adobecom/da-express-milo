@@ -3,7 +3,6 @@ import { getMobileOperatingSystem } from '../../scripts/utils.js';
 import { showAppModal, isAppModalDismissed } from './expressAppModal.js';
 
 const APP_BRANCH_URL = 'https://adobesparkpost.app.link/new';
-const APP_BRANCH_WEB_URL = 'https://adobesparkpost-web.app.link/new';
 const PROD_EDITOR_URL = 'https://new.express.adobe.com/new';
 const STAGE_EDITOR_URL = 'https://stage.projectx.corp.adobe.com/new';
 function resolveEditorUrl() {
@@ -77,25 +76,6 @@ async function buildAppBranchUrl(params) {
   return `${url.toString()}${sep}$deeplink_path=${dest}&$ios_deeplink_path=${dest}&$desktop_url=${dest}`;
 }
 
-// Android web: a web-only Branch link ($web_only) that always opens the browser
-// — never the installed app — then redirects to the editor. Keeps Android on the
-// same web experience as desktop while conserving the preview text, which the
-// app would otherwise drop when Android App Links hand it the raw editor URL.
-async function buildWebOnlyBranchUrl(params) {
-  const { getTrackingAppendedURL } = await import('../../scripts/branchlinks.js');
-  const url = new URL(await getTrackingAppendedURL(APP_BRANCH_WEB_URL, {
-    placement: 'font-generator',
-    isSearchOverride: true,
-  }));
-  const destUrl = applyFontHandoffParams(new URL(resolveEditorUrl()), params).toString();
-  const dest = encodeURIComponent(destUrl);
-  // $web_only forces the browser (no app); $fallback_url is where Branch sends
-  // it — the editor URL with the preview text. Appended literally: searchParams
-  // would encode '$'; value single-encoded for Branch.
-  const sep = url.search ? '&' : '?';
-  return `${url.toString()}${sep}$web_only=true&$fallback_url=${dest}`;
-}
-
 function emitAnalytics(eventName) {
   const send = () => {
     window._satellite?.track('event', {
@@ -134,8 +114,7 @@ export default async function handleOpenInExpress({
   };
   emitAnalytics('font_generator_apply_to_editor_start');
 
-  const os = getMobileOperatingSystem();
-  if (os === 'iOS') {
+  if (getMobileOperatingSystem() === 'iOS') {
     await openInApp({ ...params, strings });
     return;
   }
@@ -149,12 +128,7 @@ export default async function handleOpenInExpress({
   }
   newTab.opener = null;
   try {
-    // Android forces the browser via a web-only Branch link so the installed
-    // app can't intercept the navigation and drop the preview text; desktop
-    // opens the editor URL directly.
-    newTab.location = os === 'Android'
-      ? await buildWebOnlyBranchUrl(params)
-      : await buildWebUrl(params);
+    newTab.location = await buildWebUrl(params);
     emitAnalytics('font_generator_apply_to_editor_success');
   } catch (err) {
     newTab.close();
