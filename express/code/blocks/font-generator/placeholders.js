@@ -30,7 +30,7 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   copiedMessage: 'Text Copied!',
   sampleText: 'Type the preview text you want to get started...', // Same as previewPlaceholder
   cardCtaText: 'Design With Style',
-  // App-download modal (iOS mweb)
+  // App-download modal (iOS + Android mweb)
   appModalTitle: 'Continue in the app',
   appModalBody: 'Not all features are available in web. Download the free Adobe Express app to get full access.',
   appModalCta: 'Get free app',
