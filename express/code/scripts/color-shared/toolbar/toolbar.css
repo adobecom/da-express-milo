@@ -265,6 +265,107 @@
   min-inline-size: var(--ax-toolbar-cta-min-width);
 }
 
+/* ── Library variant (saved-themes modal toolbar) ──────────────── */
+
+.ax-toolbar.ax-toolbar-library {
+  --ax-toolbar-row-gap: var(--spacing-200);
+
+  max-inline-size: none;
+  margin-inline: 0;
+  border-block-start: 1px solid var(--color-gray-150);
+  padding-block-start: var(--spacing-300);
+  box-shadow: none;
+}
+
+.ax-toolbar-lib-main {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.ax-toolbar-lib-name-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+  inline-size: 100%;
+  min-inline-size: 0;
+}
+
+.ax-toolbar-lib-name-actions .ax-palette-name {
+  flex: 1 1 auto;
+  min-inline-size: var(--ax-palette-name-min-width);
+}
+
+.ax-toolbar-lib-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-80);
+  flex: 0 0 auto;
+}
+
+/* Edit theme + Save changes always share a horizontal row (all breakpoints),
+   equal width (1fr columns), 40px tall, 12px gap. */
+.ax-toolbar-lib-buttons {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: var(--spacing-200);
+  inline-size: 100%;
+}
+
+.ax-toolbar-lib-buttons sp-button {
+  inline-size: 100%;
+  --spectrum-button-height: 40px;
+}
+
+/* SWC reads --mod-button-* above --spectrum-button-* (which is unresolved in the
+   modal), so drive the Edit theme hover fill through the mod token. */
+.ax-toolbar-lib-edit {
+  --mod-button-background-color-hover: var(--color-light-gray-2);
+}
+
+/* Mobile/tablet only: stack Edit theme / Save changes when their labels no
+   longer fit the 1fr columns (JS-toggled, see refreshLibraryButtonsStacking),
+   instead of letting the button labels wrap and grow taller. Desktop (1200px+)
+   is untouched — its own rule below always keeps the buttons content-sized. */
+@media (max-width: 1199.98px) {
+  .ax-toolbar-lib-buttons--stacked {
+    grid-auto-flow: row;
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Desktop (1200px+): name/actions and buttons on a single row ── */
+@media (min-width: 1200px) {
+  .ax-toolbar-lib-main {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-300);
+    flex-wrap: nowrap;
+  }
+
+  .ax-toolbar-lib-name-actions {
+    flex: 1 1 auto;
+    justify-content: flex-start;
+  }
+
+  /* Fixed-width name field on desktop, matching the standard toolbar; the action
+     buttons sit immediately after it, left-aligned. */
+  .ax-toolbar-lib-name-actions .ax-palette-name {
+    inline-size: var(--ax-palette-name-width-desktop);
+    flex: 0 0 auto;
+  }
+
+  /* Content-sized on desktop; the equal 1fr columns make both buttons match the
+     wider label's width. */
+  .ax-toolbar-lib-buttons {
+    flex: 0 0 auto;
+    inline-size: auto;
+  }
+}
+
 /* ── Sticky host — reserves space in document flow ── */
 
 .ax-toolbar-sticky-host {
