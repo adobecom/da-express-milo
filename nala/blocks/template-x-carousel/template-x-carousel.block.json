@@ -1,0 +1,22 @@
+{
+  "block": "template-x-carousel",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@template-x-carousel default",
+      "selector": ".template-x-carousel",
+      "path": "/drafts/nala/blocks/template-x-carousel/template-x-carousel",
+      "tags": [
+        "@express",
+        "@smoke",
+        "@regression",
+        "@template-x-carousel"
+      ],
+      "data": {
+        "heading": "Celebrate an occasion.",
+        "description": "Lorem ipsum dolor sit amet consectetur.",
+        "viewAllText": "View All"
+      }
+    }
+  ]
+}

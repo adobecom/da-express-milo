@@ -69,8 +69,8 @@ function handleYear2PricingToken(pricingArea, y2p, priceSuffix) {
     } else {
       year2PricingToken.textContent = '';
     }
-  } catch (e) {
-    window.lana.log(e);
+  } catch (error) {
+    window.lana?.log(`Failed to handle year 2 pricing token: ${error}`, { tags: 'simplified-pricing-cards', severity: 'error' });
   }
 }
 

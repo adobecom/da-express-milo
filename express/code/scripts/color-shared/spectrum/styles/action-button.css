@@ -1,0 +1,57 @@
+/* ============================================================================
+   Express Action Button Override Styles
+   Matches Express design tokens for Spectrum action buttons.
+   ============================================================================ */
+
+sp-action-button {
+  --mod-button-border-radius: var(--corner-radius-100, 8px);
+  --mod-button-font-family: var(--body-font-family);
+  --mod-button-line-height: var(--line-height-100, 18px);
+  --mod-button-background-color-default: var(--color-white);
+  --mod-button-background-color-hover: var(--color-light-gray);
+  --mod-button-border-color-default: var(--color-gray-300, #DADADA);
+  --mod-button-border-color-hover: var(--color-gray-800-variant);
+  --mod-button-content-color-default: var(--color-gray-800-variant);
+  --mod-button-content-color-hover: var(--color-gray-800-variant);
+  --mod-button-animation-duration: 0.15s;
+  font-family: var(--body-font-family);
+}
+
+sp-action-button[size="s"] {
+  min-block-size: 28px;
+  font-size: var(--body-font-size-xs, 12px);
+}
+
+sp-action-button[size="m"] {
+  min-block-size: 32px;
+  font-size: var(--body-font-size-s, 14px);
+}
+
+sp-action-button[size="l"] {
+  min-block-size: 40px;
+  font-size: var(--body-font-size-m, 16px);
+}
+
+sp-action-button[quiet] {
+  --mod-button-background-color-default: transparent;
+  --mod-button-background-color-hover: var(--color-light-gray);
+  --mod-button-border-color-default: transparent;
+}
+
+sp-action-button[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  sp-action-button {
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  sp-action-button:focus-visible {
+    outline-width: 3px;
+  }
+}

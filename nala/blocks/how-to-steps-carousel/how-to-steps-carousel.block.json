@@ -74,6 +74,20 @@
         "@image-schema",
         "@express"
       ]
+    },
+    {
+      "tcid": "1",
+      "name": "@how-to-steps-carousel-schema-image",
+      "path": [
+        "/drafts/nala/blocks/how-to-steps-carousel/how-to-steps-carousel-schema-image"
+      ],
+      "tags": [
+        "@express",
+        "@smoke",
+        "@regression",
+        "@how-to-steps-carousel",
+        "@nopr"
+      ]
     }
   ]
 }

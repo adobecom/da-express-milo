@@ -179,7 +179,7 @@ async function formatDynamicCartLink(a) {
     const newTrialHref = buildUrl(url, country, language, getConfig, offerId);
     a.href = newTrialHref;
   } catch (error) {
-    window.lana.log(`Failed to fetch prices for page plan: ${error}`);
+    window.lana?.log(`Failed to format dynamic cart link: ${error}`, { tags: 'drawer-cards', severity: 'error' });
   }
   a.style.visibility = 'visible';
   return a;

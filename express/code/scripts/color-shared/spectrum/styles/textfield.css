@@ -1,0 +1,129 @@
+/* ============================================================================
+   Express Text Field Override Styles
+   Matches Express design tokens for Color Explorer text inputs.
+   ============================================================================ */
+
+/* ── Base ─────────────────────────────────────────────────────────── */
+
+.ax-spectrum-textfield {
+  position: relative;
+  display: inline-flex;
+  inline-size: 100%;
+}
+
+.ax-spectrum-textfield > sp-textfield {
+  inline-size: 100%;
+}
+
+.ax-spectrum-textfield--with-leading {
+  --ax-spectrum-textfield-leading-size: var(--cc-color-swatch-size, 18px);
+  --ax-spectrum-textfield-leading-inline-offset: var(--spacing-200, 12px);
+  --ax-spectrum-textfield-leading-gap: var(--spacing-100, 8px);
+}
+
+.ax-spectrum-textfield--with-leading > sp-textfield {
+  --mod-textfield-spacing-inline:
+    calc(
+      var(--ax-spectrum-textfield-leading-inline-offset)
+      + var(--ax-spectrum-textfield-leading-size)
+      + var(--ax-spectrum-textfield-leading-gap)
+    );
+}
+
+.ax-spectrum-textfield__leading {
+  position: absolute;
+  inset-inline-start: var(--ax-spectrum-textfield-leading-inline-offset);
+  inset-block-end:
+    calc((var(--spectrum-textfield-height) - var(--ax-spectrum-textfield-leading-size)) / 2);
+  inline-size: var(--ax-spectrum-textfield-leading-size);
+  block-size: var(--ax-spectrum-textfield-leading-size);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.ax-spectrum-textfield__leading > * {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+sp-textfield {
+  --spectrum-textfield-border-radius: 8px;
+  font-family: var(--body-font-family);
+}
+
+/* ── Size overrides ───────────────────────────────────────────────── */
+
+sp-textfield[size="s"] {
+  --spectrum-textfield-height: 28px;
+  font-size: 12px;
+}
+
+sp-textfield[size="m"] {
+  --spectrum-textfield-height: 32px;
+  font-size: 14px;
+}
+
+sp-textfield[size="l"] {
+  --spectrum-textfield-height: 40px;
+  font-size: 16px;
+}
+
+sp-textfield[size="xl"] {
+  --spectrum-textfield-height: 48px;
+  font-size: 18px;
+}
+
+/* ── Focus ────────────────────────────────────────────────────────── */
+
+sp-textfield:focus-within {
+  --spectrum-textfield-border-color-focus: var(--color-info-accent);
+}
+
+sp-textfield:focus-visible {
+  outline: 2px solid var(--color-info-accent);
+  outline-offset: 2px;
+}
+
+/* ── Invalid ──────────────────────────────────────────────────────── */
+
+sp-textfield[invalid] {
+  --spectrum-textfield-border-color-default: var(--color-negative);
+}
+
+/* ── Disabled ─────────────────────────────────────────────────────── */
+
+sp-textfield[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* ── Quiet variant ────────────────────────────────────────────────── */
+
+sp-textfield[quiet] {
+  --spectrum-textfield-border-radius: 0;
+}
+
+/* ── Multiline (textarea) ─────────────────────────────────────────── */
+
+sp-textfield[multiline] {
+  --spectrum-textfield-height: auto;
+  min-height: 80px;
+}
+
+/* ── Accessibility ────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  sp-textfield {
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  sp-textfield:focus-within {
+    outline-width: 3px;
+  }
+}

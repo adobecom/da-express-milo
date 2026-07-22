@@ -1,0 +1,365 @@
+{
+  "block": "quick-action-hub",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@quick-action-hub-default",
+      "selector": "div.quick-action-hub",
+      "path": "/drafts/nala/test-gen/quick-action-hub/quick-action-hub",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Edit images, videos, and PDFs in just a few clicks.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Fast and free editing for videos, images, and more is just a click away with our Quick Actions. Resize content, convert files, and add animated effects in seconds.",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Photo",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 1,
+              "tag": "h3",
+              "text": "Video",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 2,
+              "tag": "h3",
+              "text": "File",
+              "markup": null
+            },
+            {
+              "selector": "h3",
+              "nth": 3,
+              "tag": "h3",
+              "text": "QR Code",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-crop",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/crop.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-crop",
+              "nth": 1,
+              "tag": "img",
+              "src": "/express/code/icons/crop.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-trim",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/trim.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-merge",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/merge.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-create-pdf",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/create-pdf.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-export-pdf",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/export-pdf.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-combine-pdf",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/combine-pdf.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-edit-pdf",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/edit-pdf.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-organize-pdf",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/organize-pdf.svg",
+              "alt": null
+            },
+            {
+              "selector": "video",
+              "nth": 0,
+              "tag": "video",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": "img.accessibility-control.icon-pause-video",
+              "nth": 0,
+              "tag": "img",
+              "src": "https://main--federal--adobecom.aem.live/federal/assets/svgs/accessibility-pause.svg",
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "Remove background",
+              "href": "/tools/remove-background",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 1,
+              "text": "Resize image",
+              "href": "/tools/image-resize",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 2,
+              "text": "Convert to JPG",
+              "href": "/tools/convert-to-jpg",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 3,
+              "text": "Convert to PNG",
+              "href": "/tools/convert-to-png",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 4,
+              "text": "Convert to SVG",
+              "href": "/tools/convert-to-svg",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 5,
+              "text": "Crop image",
+              "href": "/tools/image-crop",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 6,
+              "text": "Convert Video to GIF",
+              "href": "/tools/convert-to-gif",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 7,
+              "text": "Convert Video to MP4",
+              "href": "/tools/convert-to-mp4",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 8,
+              "text": "Crop video",
+              "href": "/tools/crop-video",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 9,
+              "text": "Trim video",
+              "href": "/tools/trim-video",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 10,
+              "text": "Resize video",
+              "href": "/tools/resize-video",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 11,
+              "text": "Merge videos",
+              "href": "/tools/merge-videos",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 12,
+              "text": "Create PDF",
+              "href": "/sp/tools/convert-to-pdf",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 13,
+              "text": "Export PDF",
+              "href": "/sp/tools/export-pdf",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 14,
+              "text": "Combine PDF",
+              "href": "/sp/tools/combine-pdf",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 15,
+              "text": "Convert PDF",
+              "href": "/sp/tools/convert-to-pdf",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 16,
+              "text": "Edit PDF",
+              "href": "/sp/tools/edit-pdf",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 17,
+              "text": "Organize PDF",
+              "href": "/sp/tools/organize-pdf",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 18,
+              "text": "Create QR Code",
+              "href": "/tools/qr-code-generator",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "button.video-controls-wrapper",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "pause animation",
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@quick-action-hub",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

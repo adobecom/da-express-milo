@@ -1,11 +1,11 @@
 main .section:has(.page-list) > div {
   max-width: 1000px;
-  padding-left: 16px;
-  padding-right: 16px;
+  padding-left: var(--spacing-300);
+  padding-right: var(--spacing-300);
 }
 
 main .section:has(.page-list) h2 {
-  margin-top: 80px;
+  margin-top: var(--spacing-800);
   text-align: left;
 }
 
@@ -17,7 +17,7 @@ main .page-list {
   text-align: left;
   columns: 235px;
   margin: auto;
-  margin-bottom: 64px;
+  margin-bottom: var(--spacing-700);
 }
 
 main .page-list p {

@@ -205,6 +205,7 @@ async function getReplacementsFromSearch() {
     phformat,
     topics,
     q,
+    ckgid,
   } = params;
   if (!tasks && !phformat) {
     return null;
@@ -222,6 +223,7 @@ async function getReplacementsFromSearch() {
   const sanitizedTasksx = tasksx?.match(exp) ? '' : tasksx;
   const sanitizedTopics = topics?.match(exp) ? '' : topics;
   const sanitizedQuery = q?.match(exp) ? '' : q;
+  const sanitizedCkgId = ckgid?.match(exp) ? '' : ckgid;
 
   const tasksPair = Object.entries(categories).find((cat) => cat[1] === sanitizedTasks);
   const xTasksPair = Object.entries(xCategories).find((cat) => cat[1] === sanitizedTasksx);
@@ -229,6 +231,11 @@ async function getReplacementsFromSearch() {
   let translatedTasks = xTasksPair?.[1] ? xTasksPair[0].toLowerCase() : sanitizedTasksx;
   if (!translatedTasks) {
     translatedTasks = tasksPair?.[1] ? tasksPair[0].toLowerCase() : sanitizedTasks;
+  }
+  // CKG searches already include a fully qualified query phrase in `topics`/`q`.
+  // Appending translated tasks duplicates terms in page title, marquee heading, and breadcrumbs.
+  if (sanitizedCkgId) {
+    translatedTasks = '';
   }
   return {
     '{{queryTasks}}': sanitizedTasks || '',
@@ -246,7 +253,7 @@ async function getReplacementsFromSearch() {
 const bladeRegex = /\{\{[a-zA-Z_-]+\}\}/g;
 
 function replaceBladesInStr(str, replacements) {
-  if (!replacements) return str;
+  if (!replacements || str === null) return str;
   return str.replaceAll(bladeRegex, (match) => {
     if (match in replacements) {
       return replacements[match];
@@ -314,8 +321,8 @@ async function autoUpdatePage(main) {
         a.href = getMetadata(url.hash.replace('#', ''));
         url = new URL(a.href);
       }
-    } catch (e) {
-      window.lana?.log(`Error while attempting to replace link ${a.href}: ${e}`);
+    } catch (error) {
+      window.lana?.log(`Error while attempting to replace link ${a.href}: ${error?.message || error?.detail || error}`, { tags: 'utils, content-replace, autoUpdatePage', severity: 'error' });
     }
   });
 }

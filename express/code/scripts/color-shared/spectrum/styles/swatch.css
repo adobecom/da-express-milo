@@ -1,0 +1,7 @@
+/**
+ * Express override styles for sp-swatch / sp-swatch-group
+ */
+
+sp-swatch {
+  cursor: pointer;
+}

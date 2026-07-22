@@ -34,6 +34,10 @@ export function updatePillsByCKG(block, carouselDiv) {
 export default function decorate(block) {
   addTempWrapperDeprecated(block, 'seo-nav');
 
+  if (block.classList.contains('v2')) {
+    block.closest('.seo-nav-wrapper')?.classList.add('v2-wrapper');
+  }
+
   const links = [...block.querySelectorAll('p')];
   const seoCopy = block.querySelectorAll('div')[block.querySelectorAll('div').length - 1];
   const carouselDiv = block.querySelector('div:nth-of-type(2) > div');

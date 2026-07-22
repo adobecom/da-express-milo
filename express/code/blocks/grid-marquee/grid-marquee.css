@@ -11,12 +11,13 @@
 .grid-marquee .express-logo {
   width: initial;
   height: 30px;
-  padding: 1rem 0 1rem;
+  padding: 2rem 0 1rem;
+  max-width: 340px;
 }
 
 main .section .grid-marquee h1 {
   font-size: var(--heading-font-size-m);
-  padding-bottom: 8px;
+  padding-bottom: var(--spacing-100);
 }
 
 .grid-marquee strong,
@@ -26,7 +27,7 @@ main .section .grid-marquee h1 {
 }
 
 .grid-marquee .headline {
-  padding-bottom: 24px;
+  padding-bottom: var(--spacing-400);
   max-width: 340px;
 }
 
@@ -81,7 +82,7 @@ main .section .grid-marquee h1 {
   display: grid;
   grid-template-columns: repeat(2, max-content);
   grid-template-rows: auto;
-  gap: 8px;
+  gap: var(--spacing-100);
   justify-content: center;
   justify-items: center;
   margin: auto;
@@ -89,8 +90,8 @@ main .section .grid-marquee h1 {
 
 .grid-marquee .card {
   width: 170px;
-  padding: 8px;
-  border-radius: 8px;
+  padding: var(--spacing-100);
+  border-radius: var(--spacing-100);
   border: 1px solid #fff;
   background: linear-gradient(170.96deg, rgba(255, 255, 255, 0.6) 18.95%, rgba(255, 255, 255, 0.2) 99.73%);
   text-align: left;
@@ -101,7 +102,7 @@ main .section .grid-marquee h1 {
 .grid-marquee .face {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--spacing-100);
 }
 
 .grid-marquee .face p {
@@ -111,13 +112,13 @@ main .section .grid-marquee h1 {
 
 .grid-marquee .face strong {
   font-size: 1rem;
-  font-weight: 700;
-  padding: 0 4px;
+  font-weight: var(--subheading-font-weight);
+  padding: 0 var(--spacing-75);
   display: inline-block;
 }
 
 .grid-marquee .face img {
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   width: var(--m-img-w);
 }
 
@@ -126,9 +127,9 @@ main .section .grid-marquee h1 {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  border-radius: 16px 16px 0 0;
-  padding-top: 16px;
+  gap: var(--spacing-100);
+  border-radius: var(--spacing-300) var(--spacing-300) 0 0;
+  padding-top: var(--spacing-300);
   position: fixed;
   left: 0;
   bottom: 0;
@@ -154,7 +155,7 @@ main .section .grid-marquee h1 {
 }
 
 .grid-marquee .drawer .title-row {
-  padding: 0px 16px 12px;
+  padding: 0px var(--spacing-300) var(--spacing-200);
   font-size: 1.125rem;
   display: flex;
   align-items: center;
@@ -167,7 +168,7 @@ main .section .grid-marquee h1 {
 }
 
 .grid-marquee .drawer .title-row strong {
-  font-weight: 700;
+  font-weight: var(--subheading-font-weight);
 }
 
 .grid-marquee .drawer .video-container {
@@ -177,13 +178,13 @@ main .section .grid-marquee h1 {
   display: flex;
   justify-content: center;
   width: 100%;
-  padding: 16px 0;
+  padding: var(--spacing-300) 0;
   cursor: pointer;
   background: none;
 }
 
 .grid-marquee .drawer video {
-  border-radius: 8px;
+  border-radius: var(--spacing-100);
   width: 328px;
   z-index: 0;
 }
@@ -200,7 +201,7 @@ main .section .grid-marquee h1 {
 }
 
 .grid-marquee .panel .drawer-cta {
-  padding: 16px;
+  padding: var(--spacing-300);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -208,7 +209,7 @@ main .section .grid-marquee h1 {
 
 .grid-marquee .panel .drawer-cta .text-group {
   display: flex;
-  gap: 16px;
+  gap: var(--spacing-300);
   align-items: center;
 }
 
@@ -219,12 +220,12 @@ main .section .grid-marquee h1 {
 .grid-marquee .grid-marquee-label {
   font-style: normal;
   border-radius: 7px;
-  background-color: #e9e9e9;
+  background-color: var(--color-light-gray);
   color: #292929;
   font-size: var(--body-font-size-xs);
   text-overflow: ellipsis;
   font-weight: 500;
-  padding: 4px 9px;
+  padding: var(--spacing-75) 9px;
   text-align: center;
 }
 
@@ -246,21 +247,21 @@ main .section .grid-marquee h1 {
 }
 
 .grid-marquee .drawer [role='tablist'] {
-  padding: 0 0 8px 16px;
+  padding: 0 0 var(--spacing-100) var(--spacing-300);
 }
 
 .grid-marquee .drawer [role='tab'] {
   background-color: initial;
   border: initial;
-  border-radius: 16px;
-  padding: 8px 12px;
+  border-radius: var(--spacing-300);
+  padding: var(--spacing-100) var(--spacing-200);
   font-size: var(--body-font-size-s);
   color: #292929;
   cursor: pointer;
 }
 .grid-marquee .drawer [role='tab'][aria-selected='true'] {
   background-color: #e1e1e1;
-  font-weight: 700;
+  font-weight: var(--subheading-font-weight);
   cursor: initial;
 }
 
@@ -285,20 +286,27 @@ main .section .grid-marquee h1 {
   justify-content: center;
   flex-wrap: wrap;
   align-items: center;
-  padding-top: 40px;
-  gap: 12px 48px;
+  padding-top: var(--spacing-600);
+  gap: var(--spacing-200) var(--spacing-700);
   min-height: 39px;
 }
 
 .grid-marquee .ratings-container {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--spacing-75);
+}
+
+.grid-marquee .ratings-metric,
+.grid-marquee .rating-visual {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-75);
 }
 
 .grid-marquee .ratings img {
   height: 35px;
-  padding-left: 12px;
+  padding-left: var(--spacing-200);
   margin: 0;
 }
 
@@ -318,10 +326,10 @@ main .section .grid-marquee.pricing-page h1 {
   line-height: 130%;
   text-align: center;
   padding-bottom: var(--padding-bottom);
- 
+
 }
 .grid-marquee.pricing-page .express-logo {
-  padding: 0px 0px 16px 0px
+  padding: 0px 0px var(--spacing-300) 0px
 }
 
 
@@ -404,6 +412,7 @@ main .section .grid-marquee.pricing-page h1 {
   }
   main .section .grid-marquee .headline h1 {
     font-size: var(--heading-font-size-xl);
+    font-weight: var(--heading-font-weight-extra);
   }
   .grid-marquee .headline .ctas {
     padding-top: 24px;
@@ -498,7 +507,7 @@ main .section .grid-marquee.pricing-page h1 {
   .grid-marquee.pricing-page .headline {
     max-width: var(--ax-grid-6-col-width);
   }
-  
+
 }
 
 
@@ -508,7 +517,69 @@ main .section .grid-marquee.pricing-page h1 {
   }
 }
 
+/* narrow variant — centered headline + content, capped at 666px */
+.grid-marquee.resume-builder .foreground {
+  --top-padding: var(--spacing-300);
+  --bottom-padding: var(--spacing-400);
 
+  max-width: 666px;
+  margin-inline: auto;
+  text-align: center;
+  padding: var(--top-padding) var(--spacing-300) var(--bottom-padding);
+  box-sizing: content-box;
+}
 
+.grid-marquee.resume-builder .icon-adobe-brand-logo {
+  height: 20px;
+  padding-block-start: 0;
+  padding-block-end: var(--spacing-300);
+}
 
+.grid-marquee.resume-builder .headline {
+  padding: 0;
+}
 
+main .section .grid-marquee.resume-builder h1 {
+  font-size: var(--typography-headings-xl);
+  line-height: 104%;
+  font-weight: 900;
+  color: var(--color-content-neutral);
+}
+
+.grid-marquee.resume-builder .headline p {
+  font-size: var(--typography-body-s);
+  line-height: 130%;
+  color: var(--Alias-content-typography-Body);
+}
+
+.grid-marquee.resume-builder .headline .ctas {
+  margin-top: 0;
+}
+
+@media screen and (min-width: 600px) {
+  .grid-marquee.resume-builder .foreground {
+    --bottom-padding: var(--spacing-500);
+  }
+}
+
+@media screen and (min-width: 1200px) {
+  .grid-marquee.resume-builder .foreground {
+    --top-padding: var(--spacing-600);
+  }
+}
+
+.grid-marquee.resume-builder .headline a.button .text-group {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+}
+
+.grid-marquee.resume-builder .headline a.button .icon {
+  display: none;
+}
+
+@media screen and (min-width: 768px) {
+  .grid-marquee.resume-builder .headline .ctas {
+    margin-top: 0;
+  }
+}

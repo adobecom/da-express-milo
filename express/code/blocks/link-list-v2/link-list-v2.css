@@ -47,6 +47,9 @@
   color: var(--color-gray-900);
   margin-bottom: 20px;
   padding-left: 0;
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .section.ax-link-list-v2-container .link-list-v2 p.button-container {

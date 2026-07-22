@@ -58,6 +58,7 @@ export async function createPicker({
   }
 
   const labelId = `${id}-label`;
+  const inputId = `${id}-input`;
   if (label) {
     const labelEl = createTag('label', {
       class: `picker-label${required ? ' required' : ''}`,
@@ -114,6 +115,7 @@ export async function createPicker({
     type: 'hidden',
     name: name || id,
     value: currentValue,
+    id: inputId,
   });
 
   const statusRegion = createTag('div', {
@@ -271,6 +273,17 @@ export async function createPicker({
       e.preventDefault();
       if (isOpen && focusedOptionIndex >= 0) {
         opts[focusedOptionIndex]?.click();
+        if (!maintainFocusAfterChange) {
+          setTimeout(() => {
+            const focusable = Array.from(document.querySelectorAll(
+              'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex="0"]',
+            ));
+            const myIdx = focusable.indexOf(buttonWrapper);
+            if (myIdx >= 0) {
+              focusable[myIdx + 1]?.focus();
+            }
+          }, 0);
+        }
       } else {
         toggleDropdown();
       }
@@ -306,7 +319,16 @@ export async function createPicker({
       updateFocusedOption();
     } else if (e.key === 'Tab') {
       if (isOpen) {
-        closeDropdown();
+        const atBoundary = !e.shiftKey
+          ? focusedOptionIndex >= opts.length - 1
+          : focusedOptionIndex <= 0;
+        if (atBoundary) {
+          closeDropdown();
+        } else {
+          e.preventDefault();
+          focusedOptionIndex += e.shiftKey ? -1 : 1;
+          updateFocusedOption();
+        }
       }
     }
   });

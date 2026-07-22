@@ -15,7 +15,7 @@ const META_FIXTURES = {
   category: 'Enterprise',
   headline: 'Test title',
   'og:title': 'Test title fallback',
-  'sub-heading': 'Lorem ipsum dolor sit amet consectetur. Mauris elementum ullamcorper dignissim sodales tempus. A a nam ut facilisi nunc. Convallis morbi faucibus vulputate proin cras lectus interdum risus diam. Lacus semper sit magnis pellentesque.',
+  subheading: 'Lorem ipsum dolor sit amet consectetur. Mauris elementum ullamcorper dignissim sodales tempus. A a nam ut facilisi nunc. Convallis morbi faucibus vulputate proin cras lectus interdum risus diam. Lacus semper sit magnis pellentesque.',
   author: 'Adobe Express',
   'publication-date': '10/20/2025',
   description: 'Get the lowdown on the hottest graphic design trends predicted for 2025.',
@@ -84,7 +84,7 @@ describe('Blog Article Marquee block', () => {
     const expectedProductName = META_FIXTURES.author;
     const expectedProductDate = META_FIXTURES['publication-date'];
     const expectedEyebrow = META_FIXTURES.category;
-    const expectedSubcopy = META_FIXTURES['sub-heading'];
+    const expectedSubcopy = META_FIXTURES.subheading;
     const expectedHeadline = META_FIXTURES.headline;
 
     const eyebrow = contentColumn.querySelector('.blog-article-marquee-eyebrow');
@@ -197,6 +197,31 @@ describe('Blog Article Marquee block', () => {
     expect(highlight).to.exist;
     const buttonContainer = block.querySelector('.button-container');
     expect(buttonContainer).to.not.exist;
+  });
+
+  it('formats a unix timestamp publication date using the locale formatter', async () => {
+    const block = document.getElementById('blog-article-marquee-block');
+    const dateMeta = document.head.querySelector('meta[name="publication-date"]');
+    dateMeta?.setAttribute('content', '1729382400');
+
+    await decorate(block);
+
+    const productDate = block.querySelector('.blog-article-marquee-product-date');
+    expect(productDate).to.exist;
+    const expected = Intl.DateTimeFormat('en-US', {
+      day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'UTC',
+    }).format(new Date(1729382400 * 1000));
+    expect(productDate.textContent.trim()).to.equal(expected);
+  });
+
+  it('suppresses the date element when publication date is unparseable', async () => {
+    const block = document.getElementById('blog-article-marquee-block');
+    const dateMeta = document.head.querySelector('meta[name="publication-date"]');
+    dateMeta?.setAttribute('content', 'not-a-date');
+
+    await decorate(block);
+
+    expect(block.querySelector('.blog-article-marquee-product-date')).to.not.exist;
   });
 
   it('omits product highlight when product metadata is absent', async () => {

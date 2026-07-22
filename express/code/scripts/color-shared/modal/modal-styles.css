@@ -1,0 +1,365 @@
+@import url("./modal-base.css");
+
+:root {
+  --Alias-border-subtle: rgba(0, 0, 0, 0.08);
+  --Alias-border-subtle-hover: rgba(0, 0, 0, 0.05);
+  --Alias-overlay-curtain: rgba(0, 0, 0, 0.5);
+  --Elevation-Dialog: 0 4px 16px rgba(0, 0, 0, 0.16);
+  --Elevation-Tray: 0 -6px 16px -8px rgba(0, 0, 0, 0.1);
+  --Elevation-Drawer: 0 -4px 24px rgba(0, 0, 0, 0.2);
+  --Modal-close-shadow: 0 0 2px rgba(0, 0, 0, 0.12);
+  --Elevation-handle: 0 0 12px 0 rgba(0, 0, 0, 0.16);
+  --Font-size-600: 25px;
+  --Font-weight-medium: 500;
+}
+
+.visually-hidden,
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.ax-color-modal-curtain {
+  background-color: rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease-out;
+  z-index: 9998;
+}
+
+.ax-color-modal-curtain:has(.ax-color-modal-container.ax-color-modal-open) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@supports (backdrop-filter: blur(10px)) {
+  .ax-color-modal-curtain {
+    background-color: var(--Alias-overlay-curtain);
+    backdrop-filter: blur(10px);
+  }
+}
+
+.ax-color-modal-curtain.hidden {
+  opacity: 0;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+.ax-color-modal-curtain.ax-color-modal-closing {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.ax-color-modal-container {
+  left: 50%;
+  transform: translateX(-50%) translateY(100%);
+  width: 100%;
+  max-width: 600px;
+  background: var(--color-white);
+  border-radius: 20px 20px 0 0;
+  box-shadow: var(--Elevation-Drawer);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  transition: transform 0.3s ease-out;
+  height: auto;
+  max-height: min(764px, 100vh);
+}
+
+.ax-color-modal-container.ax-color-modal-open {
+  transform: translateX(-50%) translateY(var(--drawer-drag-y));
+}
+
+.ax-color-modal-container.ax-color-modal-dragging {
+  transition: none;
+}
+
+.ax-color-modal-container.ax-color-modal-closing {
+  transform: translateX(-50%) translateY(100%);
+}
+
+.ax-color-modal-container.hidden {
+  display: none;
+  visibility: hidden;
+}
+
+.ax-color-modal-handle {
+  width: 80px;
+  height: 4px;
+  background: var(--color-gray-325);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  margin: var(--spacing-100) auto 0 auto;
+  flex-shrink: 0;
+}
+
+.ax-color-modal-container:focus {
+  outline: none;
+}
+
+.ax-color-modal-title {
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+  font-weight: var(--ax-heading-weight);
+  line-height: 1.3;
+  color: var(--color-default-font);
+}
+
+/* Close button: hidden on mobile; shown from 600px. */
+.ax-color-modal-close {
+  position: absolute;
+  top: var(--spacing-200);
+  right: var(--spacing-200);
+  background: var(--color-light-gray);
+  border: none;
+  padding: var(--spacing-100);
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--Corner-radius-corner-radius-500);
+  box-shadow: var(--Modal-close-shadow);
+  transition: background-color 0.2s;
+  z-index: 10000;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--color-gray-800-variant);
+  box-sizing: border-box;
+}
+
+@media (max-width: 599px) {
+  button.ax-color-modal-close,
+  .ax-color-modal-container .ax-color-modal-close {
+    display: none;
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
+
+.ax-color-modal-close > * {
+  width: 24px;
+  height: 24px;
+  display: block;
+  color: var(--color-gray-800-variant);
+}
+
+.ax-color-modal-close:hover {
+  background-color: var(--color-light-gray-2);
+}
+
+.ax-color-modal-close:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+}
+
+.ax-color-modal-cancel:focus-visible,
+.ax-color-modal-confirm:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+}
+
+.ax-color-modal-content {
+  padding: 0 var(--spacing-300) var(--spacing-300);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.ax-color-modal-content-fallback {
+  padding: var(--spacing-300);
+  color: var(--color-dark-gray);
+  font-size: var(--ax-body-s-size);
+}
+
+.ax-color-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-200);
+  padding: var(--spacing-200);
+  flex-shrink: 0;
+  border-top: 1px solid var(--color-light-gray-2);
+}
+
+.ax-color-modal-cancel,
+.ax-color-modal-confirm {
+  padding: var(--spacing-200) var(--spacing-400);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  font-size: var(--ax-body-s-size);
+  font-weight: var(--Font-weight-medium);
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.ax-color-modal-cancel {
+  background-color: var(--color-white);
+  color: var(--color-dark-gray);
+  border-color: var(--color-gray-300-variant);
+}
+
+.ax-color-modal-confirm {
+  background-color: var(--S2-Buttons-Accent-Color-Default);
+  color: var(--color-white);
+}
+
+body.ax-color-modal-open {
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+.cc-modal-contrast-checker {
+  width: 100%;
+}
+
+@media (min-width: 600px) {
+  .ax-color-modal-curtain {
+    overflow: visible;
+  }
+
+  .ax-color-modal-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    border-radius: 20px;
+    width: min(536px, 95vw);
+    max-width: 536px;
+    max-height: 90vh;
+    height: auto;
+    overflow: visible;
+    transition: none;
+    padding-bottom: 0;
+  }
+
+  .ax-color-modal-container.ax-color-modal-open {
+    transform: translate(-50%, -50%);
+  }
+
+  .ax-color-modal-container.ax-color-modal-closing {
+    transition: transform 0.3s ease-in, opacity 0.3s ease-in;
+    transform: translate(-50%, -50%) scale(0.98);
+    opacity: 0;
+  }
+
+  .ax-color-modal-close {
+    display: flex;
+    top: -14px;
+    right: -14px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.375rem;
+    box-shadow: var(--Modal-close-shadow-tablet);
+  }
+
+  .ax-color-modal-content {
+    padding: var(--spacing-400);
+    flex: 0 1 auto;
+    min-height: 0;
+    max-height: min(764px, calc(90vh - 48px));
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+}
+
+@media (min-width: 1200px) {
+  .ax-color-modal-container {
+    border-radius: var(--Corner-radius-corner-radius-200);
+    box-shadow: var(--Elevation-Dialog);
+    transition: none;
+    padding: var(--spacing-500);
+    width: clamp(898px, 87.5vw, min(var(--block-wd-grid-max-width), 95vw));
+    max-width: 898px;
+    height: auto;
+    min-height: auto;
+    max-height: 90vh;
+    overflow: visible;
+  }
+
+  .ax-color-modal-title {
+    font-size: 24px;
+    line-height: 1.3;
+  }
+
+  .ax-color-modal-close {
+    width: 40px;
+    height: 40px;
+    font-size: 1.5rem;
+    box-shadow: var(--Modal-close-shadow-desktop);
+    transition: background-color 0.2s;
+  }
+
+  .ax-color-modal-content {
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--spacing-200);
+    width: 100%;
+    flex: 0 1 auto;
+    min-height: 0;
+    max-height: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ax-color-modal-content::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ax-color-modal-actions {
+    padding: 0;
+  }
+
+  .ax-color-modal-cancel,
+  .ax-color-modal-confirm {
+    transition: background-color 0.2s, color 0.2s;
+  }
+
+  .ax-color-modal-cancel:hover {
+    background-color: var(--color-gray-100);
+    border-color: var(--color-gray-400-variant);
+  }
+
+  .ax-color-modal-confirm:hover {
+    background-color: var(--S2-Buttons-Accent-Color-Hover);
+  }
+}
+
+@media (min-width: 1200px) and (max-height: 768px) {
+  .ax-color-modal-container {
+    max-height: 85vh;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ax-color-modal-container {
+    transition: none;
+  }
+
+  .ax-color-modal-curtain {
+    transition: none;
+  }
+
+  .ax-color-modal-close {
+    transition: none;
+  }
+}

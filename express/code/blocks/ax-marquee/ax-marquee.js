@@ -47,8 +47,7 @@ async function handlePrice(block, tokenType = '((pricing))', responseFieldName =
     const response = await fetchPlanOnePlans(priceEl?.href);
     newContainer.innerHTML = response[responseFieldName];
   } catch (error) {
-    window.lana.log('Failed to fetch prices for page plan');
-    window.lana.log(error);
+    window.lana?.log(`Failed to fetch prices for page plan: ${error}`, { tags: 'ax-marquee', severity: 'error' });
   }
   return newContainer;
 }

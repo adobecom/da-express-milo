@@ -1,9 +1,9 @@
 name: Merge to Main
 
 on:
-  # Run every 4 hours
+  # Run every 2 hours
   schedule:
-    - cron: '0 */4 * * *'
+    - cron: '0 */2 * * *'
   # Allow manual triggering
   workflow_dispatch:
   # Allow triggering via repository dispatch

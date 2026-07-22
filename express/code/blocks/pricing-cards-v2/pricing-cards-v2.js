@@ -93,8 +93,8 @@ function handlePriceToken(pricingArea, priceToken = YEAR_2_PRICING_TOKEN, newPri
         p.innerHTML = p.innerHTML.replaceAll(priceToken, '');
       }
     });
-  } catch (e) {
-    window.lana.log(e);
+  } catch (error) {
+    window.lana?.log(`Failed to handle-pricing-token: ${error}`, { tags: 'pricing-cards-v2', severity: 'error' });
   }
 }
 
@@ -543,6 +543,7 @@ export default async function init(el) {
       });
 
       if (displayChanged && parentSection.offsetHeight > 0) {
+        // eslint-disable-next-line no-console
         console.log('Section display changed, equalizing heights');
         equalizeHeights(el);
       }

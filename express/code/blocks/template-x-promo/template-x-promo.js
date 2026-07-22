@@ -451,7 +451,7 @@ function createDirectCarousel(block, templates, createTagFn) {
   };
 }
 
-/* c8 ignore next 55 */
+/* c8 ignore next 58 */
 async function handleOneUpFromApiData(block, templateData) {
   const parent = block.parentElement;
   parent.classList.add('one-up');
@@ -479,16 +479,22 @@ async function handleOneUpFromApiData(block, templateData) {
   const imgWrapper = createTag('div', { class: 'image-wrapper' });
   imgWrapper.append(img);
 
+  const [editThisTemplateKey, freeKey] = await Promise.all([
+    replaceKey('edit-this-template', getConfig()),
+    replaceKey('free', getConfig()),
+  ]);
+
+  const editThisTemplate = editThisTemplateKey ?? 'Edit this template';
+  const freeLabel = freeKey && freeKey !== 'free' ? freeKey : 'Free';
+
   if (metadata.isFree) {
     const freeTag = createTag('span', { class: 'free-tag' });
-    freeTag.textContent = 'Free';
+    freeTag.textContent = freeLabel;
     imgWrapper.append(freeTag);
   } else if (metadata.isPremium) {
     const premiumIcon = getIconElementDeprecated('premium');
     imgWrapper.append(premiumIcon);
   }
-
-  const editThisTemplate = await replaceKey('edit-this-template', getConfig()) ?? 'Edit this template';
 
   const imageLink = createTag('a', {
     href: metadata.editUrl,
@@ -515,7 +521,7 @@ async function handleOneUpFromApiData(block, templateData) {
 }
 
 /* c8 ignore next 41 */
-async function createTemplateElementForCarousel(templateData) {
+async function createTemplateElementForCarousel(templateData, isFullsize) {
   const { default: renderTemplate } = await import('../template-x/template-rendering.js');
 
   const singlePageTemplate = {
@@ -523,7 +529,7 @@ async function createTemplateElementForCarousel(templateData) {
     pages: templateData.pages ? [templateData.pages[0]] : [],
   };
 
-  const templateEl = await renderTemplate(singlePageTemplate, [], {});
+  const templateEl = await renderTemplate(singlePageTemplate, isFullsize ? ['fullsize'] : [], {});
 
   templateEl.classList.add('template');
 
@@ -561,21 +567,24 @@ async function createDesktopLayout(block, templates) {
   try {
     const currentHoveredElementRef = { current: null };
     const eventListeners = new Map();
-    const templateElements = await Promise.all(
-      templates.map((template) => createTemplateElementForCarousel(template)),
-    );
 
     const parent = block.parentElement;
     parent.classList.add('multiple-up');
 
     const templateCount = templates.length;
+    let isFullsize = false;
     if (templateCount === 2) {
       parent.classList.add('two-up');
+      isFullsize = true;
     } else if (templateCount === 3) {
       parent.classList.add('three-up');
     } else if (templateCount >= 4) {
       parent.classList.add('four-up');
     }
+
+    const templateElements = await Promise.all(
+      templates.map((template) => createTemplateElementForCarousel(template, isFullsize)),
+    );
 
     const addTrackedListener = (element, event, handler) => {
       element.addEventListener(event, handler);
@@ -709,21 +718,24 @@ export async function createCustomCarousel(block, templates) {
   try {
     const currentHoveredElementRef = { current: null };
     const eventListeners = new Map();
-    const templateElements = await Promise.all(
-      templates.map((template) => createTemplateElementForCarousel(template)),
-    );
 
     const parent = block.parentElement;
     parent.classList.add('multiple-up');
+    let isFullsize = false;
 
     const templateCount = templates.length;
     if (templateCount === 2) {
       parent.classList.add('two-up');
+      isFullsize = true;
     } else if (templateCount === 3) {
       parent.classList.add('three-up');
     } else if (templateCount >= 4) {
       parent.classList.add('four-up');
     }
+
+    const templateElements = await Promise.all(
+      templates.map((template) => createTemplateElementForCarousel(template, isFullsize)),
+    );
 
     const addTrackedListener = (element, event, handler) => {
       element.addEventListener(event, handler);
@@ -763,7 +775,7 @@ const initializeUtilities = async () => {
   const libsPath = getLibs() || '../../scripts';
   try {
     const [utils, placeholders] = await Promise.all([
-      import(`${libsPath}/utils.js`),
+      import(`${libsPath}/utils/utils.js`),
       import(`${libsPath}/features/placeholders.js`),
     ]);
 

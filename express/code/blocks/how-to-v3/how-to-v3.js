@@ -155,9 +155,8 @@ export default function decorate(block) {
           document.head.appendChild(script);
         }
       }
-    } catch (e) {
-      // eslint-disable-next-line no-unused-expressions
-      window.lana?.log(`how-to-v3 schema error: ${e?.message || e}`);
+    } catch (error) {
+      window.lana?.log(`how-to-v3 schema error: ${error?.message || error}`, { tags: 'how-to-v3', severity: 'error' });
     }
   }
 }

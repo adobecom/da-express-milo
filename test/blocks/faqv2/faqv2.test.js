@@ -206,6 +206,40 @@ describe('FAQv2', () => {
     expect(block.style.display).to.equal('none');
   });
 
+  it('should skip empty rows in a mixed content block (expandable layout)', async () => {
+    const mixedExpandable = `
+      <div class="faqv2 expandable">
+        <div><div>Frequently Asked Questions</div></div>
+        <div><div>Question 1</div><div>Answer 1</div></div>
+        <div><div></div><div></div></div>
+        <div><div>Question 2</div><div>Answer 2</div></div>
+      </div>
+    `;
+    document.body.innerHTML = mixedExpandable;
+    const block = document.querySelector('.faqv2');
+    await decorate(block);
+
+    const wrappers = block.querySelectorAll('.faqv2-wrapper');
+    expect(wrappers.length).to.equal(2);
+  });
+
+  it('should skip empty rows in a mixed content block (original layout)', async () => {
+    const mixedBody = `
+      <div class="faqv2">
+        <div><div>Question 1</div><div>Answer 1</div></div>
+        <div><div></div><div></div></div>
+        <div><div>Question 2</div><div>Answer 2</div></div>
+        <div><div></div><div></div></div>
+      </div>
+    `;
+    document.body.innerHTML = mixedBody;
+    const block = document.querySelector('.faqv2');
+    await decorate(block);
+
+    const accordions = block.querySelectorAll('.faqv2-accordion');
+    expect(accordions.length).to.equal(2);
+  });
+
   it('should hide block when there is no content (original layout)', async () => {
     const emptyBody = `
       <div class="faqv2">

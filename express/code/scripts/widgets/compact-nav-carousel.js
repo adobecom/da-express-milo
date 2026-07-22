@@ -16,6 +16,7 @@ const prevSVGHTML = `<svg width="32" height="32" viewBox="0 0 32 32" fill="none"
 </svg>`;
 
 const smalLViewport = 600;
+const SCROLL_BUFFER = 10;
 let createTag; let loadStyle;
 let getConfig;
 
@@ -27,9 +28,6 @@ function adjustCompactNavPosition(platform) {
 }
 
 function initializeCarousel(selector, parent) {
-  let sign = 1;
-  let scrolling = false;
-
   const carouselContent = selector
     ? parent.querySelectorAll(selector)
     : parent.querySelectorAll(':scope > *');
@@ -80,41 +78,49 @@ function initializeCarousel(selector, parent) {
   container.append(platform, control);
   parent.append(container);
 
-  const elements = platform.querySelectorAll(selector);
+  const elements = Array.from(platform.querySelectorAll(selector || ':scope > *'));
+  if (!elements.length) return;
 
-  const updateCarousel = () => {
-    if (scrolling) return;
-    scrolling = true;
-    const elementWidth = elements[0].offsetWidth;
-    platform.scrollBy({
-      left: (sign * elementWidth),
+  const clampIndex = (idx) => Math.min(Math.max(idx, 0), elements.length - 1);
+  const getCurrentIndex = () => {
+    const scrollLeft = platform.scrollLeft + SCROLL_BUFFER;
+    const tolerance = 2;
+    return clampIndex(elements.reduce((current, el, idx) => (
+      el.offsetLeft - tolerance <= scrollLeft ? idx : current
+    ), 0));
+  };
+
+  const scrollToIndex = (idx) => {
+    const targetIndex = clampIndex(idx);
+    const target = elements[targetIndex];
+    if (!target) return;
+    const targetLeft = Math.max(target.offsetLeft - SCROLL_BUFFER, 0);
+    platform.scrollTo({
+      left: targetLeft,
       behavior: 'smooth',
-    });
-
-    setTimeout(() => {
-      scrolling = false;
-    }, 300);
-
-    elements.forEach((el) => {
-      el.addEventListener('focus', () => {
-        el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-        updateCarousel();
-      });
     });
   };
 
+  const stepCarousel = (delta) => {
+    scrollToIndex(getCurrentIndex() + delta);
+  };
+
   faderLeft.addEventListener('click', () => {
-    sign = -1;
-    updateCarousel();
+    stepCarousel(-1);
   });
 
   faderRight.addEventListener('click', () => {
-    sign = 1;
-    updateCarousel();
+    stepCarousel(1);
+  });
+
+  elements.forEach((el, idx) => {
+    el.addEventListener('focus', () => {
+      scrollToIndex(idx);
+    });
   });
 
   window.addEventListener('resize', debounce(() => {
-    updateCarousel();
+    scrollToIndex(getCurrentIndex());
   }));
 
   platform.addEventListener('scroll', () => {

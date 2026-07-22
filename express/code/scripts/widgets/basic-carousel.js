@@ -65,11 +65,13 @@ function initializeCarousel(selector, parent) {
 
   const arrowLeft = createTag('a', {
     class: 'button basic-carousel-arrow basic-carousel-arrow-left',
+    role: 'button',
     'aria-label': 'Scroll carousel left',
     tabindex: '0',
   });
   const arrowRight = createTag('a', {
     class: 'button basic-carousel-arrow basic-carousel-arrow-right',
+    role: 'button',
     'aria-label': 'Scroll carousel right',
     tabindex: '0',
   });
@@ -121,6 +123,7 @@ function initializeCarousel(selector, parent) {
     playPauseControl = createTag('div', { class: 'basic-carousel-play-pause' });
     playPauseButton = createTag('a', {
       class: 'button basic-carousel-control basic-carousel-play-pause-button paused',
+      role: 'button',
       'aria-label': 'Play carousel',
       'daa-ll': 'Play carousel',
       tabindex: '0',
@@ -309,8 +312,8 @@ function initializeCarousel(selector, parent) {
             tooltip.classList.add('display-tooltip');
             setTimeout(() => tooltip.classList.remove('display-tooltip'), 2000);
           }
-        }).catch((err) => {
-          window.lana?.log('Failed to copy link:', err);
+        }).catch((error) => {
+          window.lana?.log(`Failed to copy link: ${error?.message || error?.detail || error}`, { tags: 'basic-carousel, copyLink', severity: 'error' });
         });
         return;
       }

@@ -40,7 +40,7 @@ async function fetchLinkList() {
       return {
         parent: formattedTasks,
         ckgID: ckgItem.metadata.ckgId,
-        displayValue: sanitizeHTML(ckgItem.canonicalName),
+        displayValue: ckgItem.canonicalName,
         value: sanitizeHTML(ckgItem.metadata.link),
       };
     });
@@ -53,12 +53,22 @@ function isSearch(pathname) {
   return searchRegex.test(pathname);
 }
 
+function replaceTextInNode(node, search, replacement) {
+  if (node.nodeType === Node.TEXT_NODE) {
+    if (node.textContent.includes(search)) {
+      node.textContent = node.textContent.replaceAll(search, replacement);
+    }
+  } else {
+    node.childNodes.forEach((child) => replaceTextInNode(child, search, replacement));
+  }
+}
+
 function replaceLinkPill(linkPill, data) {
   const clone = linkPill.cloneNode(true);
   if (data) {
     const a = clone.querySelector('a');
-    a.textContent = a.textContent.replaceAll('Default', data['short-title']);
-    a.title = a.textContent.replaceAll('Default', data['short-title']);
+    replaceTextInNode(a, 'Default', data['short-title']);
+    a.title = a.textContent;
     a.href = a.href.replace('/express/templates/default', data.url);
   }
   if (data?.url && isSearch(data.url)) {
@@ -137,13 +147,11 @@ async function updateLinkList(container, linkPill, list) {
     if (!isSearch(d.pathname)) {
       const pageData = {
         url: sanitizeHTML(`${prefix}${d.pathname}`),
-        'short-title': sanitizeHTML(d.displayValue),
+        'short-title': d.displayValue,
       };
 
       clone = replaceLinkPill(linkPill, pageData);
       const innerLink = clone.querySelector('a');
-      innerLink.textContent = innerLink.textContent.replaceAll('Default', sanitizeHTML(d.displayValue));
-      innerLink.title = innerLink.textContent.replaceAll('Default', sanitizeHTML(d.displayValue));
       innerLink.href = innerLink.href.replace('/express/templates/default', sanitizeHTML(d.pathname));
       if (innerLink) {
         const url = new URL(innerLink.href, window.location.href);
@@ -161,12 +169,12 @@ async function updateLinkList(container, linkPill, list) {
       searchParams.set('tasksx', currentTasksX);
       searchParams.set('phformat', sanitizeHTML(getMetadata('placeholder-format') || ''));
       searchParams.set('topics', topicsQuery);
-      searchParams.set('q', sanitizeHTML(d.displayValue));
+      searchParams.set('q', d.displayValue);
       searchParams.set('ckgid', sanitizeHTML(d.ckgID));
       searchParams.set('searchId', generateSearchId());
       const pageData = {
         url: `${prefix}/express/templates/search?${searchParams.toString()}`,
-        'short-title': sanitizeHTML(d.displayValue),
+        'short-title': d.displayValue,
       };
 
       clone = replaceLinkPill(linkPill, pageData);
@@ -248,34 +256,43 @@ async function lazyLoadSEOLinkList() {
 
 async function lazyLoadSearchMarqueeLinklist() {
   await fetchLinkList();
+
   const searchMarquee = document.querySelector('.search-marquee');
 
   if (searchMarquee) {
     const linkListContainer = searchMarquee.querySelector(
       '.carousel-container > .carousel-platform',
     );
+
     if (linkListContainer) {
       const linkListTemplate = linkListContainer
         .querySelector('p')
         .cloneNode(true);
 
       const linkListData = [];
+      const shortTitle = getMetadata('short-title');
 
-      if (ckgData && getMetadata('short-title')) {
+      if (ckgData && shortTitle) {
         ckgData.forEach((row) => {
           linkListData.push({
             ckgID: row.ckgID,
-            shortTitle: getMetadata('short-title'),
-            tasks: row.parent, // parent tasks
+            shortTitle,
+            tasks: row.parent,
             displayValue: row.displayValue,
             pathname: row.value,
           });
         });
+      } else {
+        window.lana?.log('template-ckg: Missing ckgData or short-title metadata - pills will not be populated', { tags: 'template-ckg, lazyLoadSearchMarqueeLinklist', errorType: 'i', severity: 'info' });
       }
 
       await updateLinkList(linkListContainer, linkListTemplate, linkListData);
       linkListContainer.parentElement.classList.add('appear');
+    } else {
+      window.lana?.log('template-ckg: No carousel container found in search-marquee', { tags: 'template-ckg, lazyLoadSearchMarqueeLinklist', errorType: 'i', severity: 'info' });
     }
+  } else {
+    window.lana?.log('template-ckg: No .search-marquee element found on page', { tags: 'template-ckg, lazyLoadSearchMarqueeLinklist', errorType: 'i', severity: 'info' });
   }
 }
 

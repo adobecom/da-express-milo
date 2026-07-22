@@ -1,0 +1,7 @@
+/**
+ * Express override styles for sp-color-slider
+ */
+
+sp-color-slider {
+  cursor: pointer;
+}

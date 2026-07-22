@@ -159,7 +159,8 @@ export async function createFloatingButton(block, audience, data) {
     .filter((a) => (
       a.textContent.trim() === aTag.textContent.trim()
         || (new URL(a.href).pathname === aTagURL.pathname && new URL(a.href).hash === aTagURL.hash))
-        && !a.parentElement.parentElement.classList.contains('floating-button'));
+        && !a.parentElement.parentElement.classList.contains('floating-button')
+        && !a.closest('.cta-carousel'));
   sameUrlCTAs.forEach((cta) => {
     cta.classList.add('same-fcta');
   });

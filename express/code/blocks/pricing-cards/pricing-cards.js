@@ -216,8 +216,8 @@ function handlePriceToken(pricingArea, priceToken = YEAR_2_PRICING_TOKEN, newPri
     } else {
       year2PricingToken.textContent = '';
     }
-  } catch (e) {
-    window.lana.log(e);
+  } catch (error) {
+    window.lana?.log(`Failed to handle pricing token: ${error}`, { tags: 'pricing-cards', severity: 'error' });
   }
 }
 

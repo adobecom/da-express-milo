@@ -60,6 +60,7 @@ function addImagePreconnects(imageUrl) {
       });
     }
   } catch (e) {
+    // eslint-disable-next-line no-console
     console.error(e);
   }
 }
@@ -112,7 +113,7 @@ function setBackgroundFromRow(block, row) {
   const { pathname } = url;
   const optimalWidth = getOptimalImageSize();
   const width = getDisplayImageWidth(block, optimalWidth);
-  const optimizedImageUrl = `${pathname}?width=${width}&format=webp&optimize=medium`;
+  const optimizedImageUrl = `${pathname}?width=${width}&format=webply&optimize=medium`;
   block.style.setProperty('--bg-image', `url("${optimizedImageUrl}")`);
 
   preloadImage(optimizedImageUrl);
@@ -150,7 +151,7 @@ function classifyAndOptimizeCells(block, rows) {
       const { pathname } = srcUrl;
       const optimalWidth = getOptimalImageSize();
       const displayWidth = getDisplayImageWidth(block, optimalWidth);
-      const newSrc = `${pathname}?width=${displayWidth}&format=webp&optimize=medium`;
+      const newSrc = `${pathname}?width=${displayWidth}&format=webply&optimize=medium`;
       if (img.src !== newSrc) img.src = newSrc;
       img.setAttribute('width', displayWidth);
       img.setAttribute('height', Math.round(displayWidth * IMAGE_ASPECT_RATIO));
@@ -299,6 +300,7 @@ export default async function decorate(block) {
           u.searchParams.set('acom-input', value);
           nextUrlStr = u.toString();
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error(err);
         }
       }

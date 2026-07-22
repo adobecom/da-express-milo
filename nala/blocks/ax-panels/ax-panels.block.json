@@ -1,0 +1,73 @@
+{
+  "block": "ax-panels",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@ax-panels-default",
+      "selector": "div.ax-panels",
+      "path": "/drafts/nala/test-gen/ax-panels/ax-panels",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": ".ax-panels-heading-container h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Easily get started in Adobe Express.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "button[role='tab'] .icon",
+              "nth": 0,
+              "tag": "span",
+              "src": null,
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "tab",
+              "selector": "button[role='tab']",
+              "nth": 0,
+              "text": "Templates",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button[role='tab']",
+              "nth": 1,
+              "text": "Upload Content",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button[role='tab']",
+              "nth": 2,
+              "text": "AI",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@ax-panels",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

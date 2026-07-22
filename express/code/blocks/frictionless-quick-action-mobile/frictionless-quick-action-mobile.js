@@ -19,6 +19,7 @@ import {
   processFilesForQuickAction,
   loadAndInitializeCCEverywhere,
   getErrorMsg,
+  shouldShowVideoQuickActionPickerForMobile,
 } from '../../scripts/utils/frictionless-utils.js';
 
 let replaceKey; let getConfig;
@@ -91,6 +92,10 @@ export async function runQuickAction(quickActionId, data, block) {
     metaData: {
       isFrictionlessQa: 'true',
       ...(quickActionId === 'caption-video' && { videoLanguage: selectedVideoLanguage }),
+    },
+    analyticsData: {
+      ...(quickActionId === 'video-compress' && { entryPoint: 'seo-quick-action-video-compress' }),
+      ...(quickActionId === 'video-convert' && { entryPoint: 'seo-quick-action-video-convert' }),
     },
     receiveQuickActionErrors: true,
     callbacks: {
@@ -283,11 +288,22 @@ export default async function decorate(block) {
     accept: QA_CONFIGS[quickAction].accept,
     ...(quickAction === 'merge-videos' && { multiple: true }),
   });
-  inputElement.onchange = () => {
-    if (quickAction === 'merge-videos' && inputElement.files.length > 1) {
+  inputElement.onchange = async () => {
+    const file = inputElement.files[0];
+    if (shouldShowVideoQuickActionPickerForMobile(quickAction, file)) {
+      if (!file) return;
+      inputElement.value = '';
+      try {
+        const { default: showVideoQuickActionPicker } = await import(
+          '../video-quick-action-picker/video-quick-action-picker.js'
+        );
+        await showVideoQuickActionPicker(file, block, { startSDKWithUnconvertedFiles });
+      } catch (e) {
+        showErrorToast(block, await replaceKey('upload-media-error', getConfig()));
+      }
+    } else if (quickAction === 'merge-videos' && inputElement.files.length > 1) {
       startSDKWithUnconvertedFiles(inputElement.files, quickAction, block);
     } else {
-      const file = inputElement.files[0];
       startSDKWithUnconvertedFiles([file], quickAction, block);
     }
   };
@@ -323,7 +339,7 @@ export default async function decorate(block) {
   block.dataset.frictionlessgroup = QA_CONFIGS[quickAction].group ?? 'image';
 
   import('../../scripts/instrument.js').then(({ sendFrictionlessEventToAdobeAnaltics }) => {
-    sendFrictionlessEventToAdobeAnaltics(block);
+    sendFrictionlessEventToAdobeAnaltics(block, 'view-quickaction-upload-page');
   });
   return block;
 }

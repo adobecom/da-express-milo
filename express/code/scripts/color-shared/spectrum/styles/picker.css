@@ -1,0 +1,193 @@
+/*
+ * Express Picker — Spectrum 2 theme overrides
+ *
+ * Scoped to .filter-picker (set by express-picker.js) where possible.
+ * Uses --mod-* tokens for shadow DOM internals and ::part() for layout detail.
+ * sp-menu / sp-popover are global because Spectrum's overlay system teleports
+ * them to <body>, outside the picker's DOM subtree.
+ */
+
+/* ---- Host: geometry, background, border, text via --mod tokens ---- */
+sp-picker.filter-picker {
+  --mod-picker-min-height: var(--spacing-600);
+  --mod-picker-border-radius: 9px;
+  --mod-picker-min-width: var(--express-picker-min-width, 144px);
+  --mod-picker-font-family: var(--body-font-family, var(--spectrum-sans-font-family-stack, sans-serif));
+  --mod-picker-font-size: var(--body-font-size-m, 14px);
+  --mod-picker-line-height: var(--spacing-350, 1.3);
+  --mod-picker-font-weight: 400;
+  --mod-picker-spacing-top-to-text: 0;
+  --mod-picker-spacing-bottom-to-text: 0;
+  --mod-picker-focus-indicator-color: var(--color-blue-800);
+  --mod-picker-focus-indicator-thickness: var(--border-width-2);
+  --mod-picker-focus-indicator-border-radius: var(--mod-picker-border-radius);
+
+  --mod-picker-background-color: var(--color-light-gray);
+  --mod-picker-background-color-default: var(--color-light-gray);
+  --mod-picker-background-color-hover: var(--color-gray-250);
+  --mod-picker-background-color-key-focus: var(--color-light-gray);
+  --mod-picker-background-color-active: var(--color-gray-250);
+  --mod-picker-background-color-disabled: var(--color-gray-200);
+
+  --mod-picker-border-width: 0;
+  --mod-picker-border-color: transparent;
+  --mod-picker-border-color-hover: transparent;
+  --mod-picker-border-color-key-focus: transparent;
+
+  --mod-picker-font-color: var(--color-gray-800-variant);
+  --mod-picker-font-color-hover: var(--color-gray-800-variant);
+  --mod-picker-font-color-key-focus: var(--color-gray-800-variant);
+
+  --mod-picker-icon-color: var(--color-gray-800-variant);
+  --mod-picker-icon-color-hover: var(--color-gray-800-variant);
+  --mod-picker-icon-color-key-focus: var(--color-gray-800-variant);
+
+  width: var(--express-picker-width, 100%);
+  max-width: var(--express-picker-max-width, none);
+  box-sizing: border-box;
+}
+
+/* Explore layout: picker should fill the filter slot width */
+.color-explore .filters-desktop .filter-dropdown sp-picker.filter-picker {
+  width: 100%;
+  min-width: 0;
+  --mod-picker-focus-indicator-thickness: 0;
+  --mod-picker-focus-indicator-color: transparent;
+}
+
+.color-explore .filters-desktop .filter-dropdown sp-picker.filter-picker:focus,
+.color-explore .filters-desktop .filter-dropdown sp-picker.filter-picker:focus-visible {
+  outline: none;
+}
+
+sp-picker.filter-picker[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ---- Shadow parts: layout detail not covered by --mod tokens ---- */
+sp-picker.filter-picker::part(button) {
+  display: flex;
+  align-items: center;
+  min-height: var(--spacing-600);
+  padding: 10px 15px;
+  border-radius: 9px;
+  font-family: var(--body-font-family);
+  font-size: var(--body-font-size-m);
+  line-height: var(--spacing-350);
+  box-sizing: border-box;
+  outline: none; /* focus ring comes from Spectrum picker internals */
+}
+
+sp-picker.filter-picker::part(label) {
+  display: flex;
+  align-items: center;
+  padding-block-start: 0;
+  padding-block-end: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--body-font-size-m);
+  line-height: var(--spacing-350);
+}
+
+sp-picker.filter-picker::part(icon),
+sp-picker.filter-picker::part(chevron) {
+  width: var(--spacing-200);
+  height: var(--spacing-200);
+  margin-left: 7px;
+  flex-shrink: 0;
+}
+
+/* ---- Popover / menu — global defaults for light-DOM menus (non-picker uses) ---- */
+sp-menu {
+  --mod-menu-background-color: var(--color-white);
+  --mod-menu-item-corner-radius: var(--Corner-radius-corner-radius-100);
+  --mod-menu-item-focus-indicator-border-radius: var(--Corner-radius-corner-radius-100);
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+sp-menu-item {
+  --mod-menu-item-min-height: var(--spacing-500);
+  --mod-menu-item-font-color: var(--color-gray-800-variant);
+  --mod-menu-item-background-color-hover: var(--color-gray-150);
+  --mod-menu-item-background-color-key-focus: var(--color-gray-150);
+  --mod-menu-item-corner-radius: var(--Corner-radius-corner-radius-100);
+  --mod-menu-item-focus-indicator-border-radius: var(--Corner-radius-corner-radius-100);
+  font-family: var(--body-font-family);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+sp-menu-item[selected],
+sp-menu-item[aria-selected="true"] {
+  --mod-menu-item-background-color: var(--color-white);
+  font-weight: 400;
+}
+
+sp-menu-item[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ---- Tablet (600px+) ---- */
+@media (min-width: 600px) {
+  sp-picker.filter-picker {
+    --mod-picker-min-height: var(--spacing-500);
+    --mod-picker-border-radius: var(--Corner-radius-corner-radius-100);
+    --mod-picker-font-size: var(--body-font-size-s, 13px);
+    --mod-picker-line-height: var(--spacing-325, 1.25);
+  }
+
+  sp-picker.filter-picker::part(button) {
+    min-height: var(--spacing-500);
+    padding: 0 11px 0 12px;
+    border-radius: var(--Corner-radius-corner-radius-100);
+    font-size: var(--body-font-size-s);
+    line-height: var(--spacing-325);
+  }
+
+  sp-picker.filter-picker::part(label) {
+    font-size: var(--body-font-size-s);
+    line-height: var(--spacing-325);
+  }
+
+  sp-picker.filter-picker::part(icon),
+  sp-picker.filter-picker::part(chevron) {
+    width: 10px;
+    height: 10px;
+    margin-left: var(--spacing-80);
+  }
+}
+
+/* ---- Loading / error states ---- */
+sp-picker.filter-picker[pending] {
+  opacity: 0.6;
+  cursor: wait;
+}
+
+sp-picker.filter-picker[invalid] {
+  outline: 2px solid var(--color-negative);
+  outline-offset: 2px;
+}
+
+/* ---- Reduced motion ---- */
+@media (prefers-reduced-motion: reduce) {
+  sp-picker.filter-picker,
+  sp-menu,
+  sp-menu-item {
+    transition: none;
+    animation: none;
+  }
+}
+
+/* ---- High contrast ---- */
+@media (prefers-contrast: high) {
+  sp-picker.filter-picker {
+    --mod-picker-border-width: 2px;
+    --mod-picker-border-color: var(--color-gray-800);
+    --mod-picker-focus-indicator-thickness: 3px;
+  }
+}

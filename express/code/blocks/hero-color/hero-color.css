@@ -18,7 +18,7 @@ main .hero-color .svg-container {
 }
 
 main .hero-color .description-container {
-  margin: 16px 0 32px 0;
+  margin: var(--spacing-300) 0 var(--spacing-500) 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -34,7 +34,7 @@ main .hero-color .text-container {
 }
 
 main .hero-color .text-container h1 {
-  margin: 0 0 16px;
+  margin: 0 0 var(--spacing-300);
   font-size: var(--heading-font-size-l);
   text-align: left;
 }
@@ -46,7 +46,7 @@ main .hero-color .text-container h2 {
 }
 
 main .hero-color .text-container p {
-  margin: 0 0 32px;
+  margin: 0 0 var(--spacing-500);
   font-size: var(--body-font-size-l);
 }
 
@@ -82,7 +82,7 @@ main .hero-color .hidden-svg {
 
 @media screen and (min-width: 600px) {
   main .hero-color .text-container {
-    padding: 32px;
+    padding: var(--spacing-500);
   }
 }
 

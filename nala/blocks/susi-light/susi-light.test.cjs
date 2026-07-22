@@ -4,11 +4,13 @@ const SusiLightBlock = require('./susi-light.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
+const miloLibs = process.env.MILO_LIBS || '';
+
 test.describe('SusiLightBlock Test Suite', () => {
   // Test Id : 0 : @susi-light-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
-    const testUrl = `${baseURL}${features[0].path}`;
+    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
     const block = new SusiLightBlock(page, features[0].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -69,7 +71,7 @@ test.describe('SusiLightBlock Test Suite', () => {
   // Test Id : 1 : @susi-light-tabs
   test(`[Test Id - ${features[1].tcid}] ${features[1].name} ${features[1].tags}`, async ({ page, baseURL }) => {
     const { data } = features[1];
-    const testUrl = `${baseURL}${features[1].path}`;
+    const testUrl = `${baseURL}${features[1].path}${miloLibs}`;
     const block = new SusiLightBlock(page, features[1].selector);
     console.info(`[Test Page]: ${testUrl}`);
 

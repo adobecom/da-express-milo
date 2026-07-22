@@ -1,8 +1,12 @@
 .ax-marquee-dynamic-hero {
-  padding: var(--spacing-600) 20px;
+  padding: var(--spacing-600) var(--spacing-350);
   min-width: 320px;
   box-sizing: border-box;
   text-align: left;
+
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 main .ax-marquee-dynamic-hero p.button-container {
@@ -62,7 +66,7 @@ main .ax-marquee-dynamic-hero p.button-container {
 /* Hide original video controls when accessibility controls are present */
 .ax-marquee-dynamic-hero .video-container video {
   pointer-events: none;
-  border-radius: 16px;
+  border-radius: var(--spacing-300);
 }
 
 .ax-marquee-dynamic-hero .video-controls-wrapper {
@@ -88,32 +92,35 @@ main .ax-marquee-dynamic-hero p.button-container {
 .ax-marquee-dynamic-hero div:has(picture) picture {
   display: block;
   width: 100%;
-  border-radius: 16px;
+  border-radius: var(--spacing-300);
 }
 
-.ax-marquee-dynamic-hero div:has(picture) picture img {
-  width: 100%;
-  height: auto;
-  border-radius: 16px;
-  max-width: 835px;
-}
+  .ax-marquee-dynamic-hero div:has(picture) picture img {
+    width: 100%;
+    height: auto;
+    border-radius: var(--spacing-300);
+    max-width: 835px;
+  }
 
 
 .ax-marquee-dynamic-hero .button-container a.button {
   background-color: var(--color-background-accent-default);
   padding-top: var(--spacing-200);
   padding-bottom: var(--spacing-200);
-  border-radius: 22px;
+  border-radius: 24px;
   width: 183px;
   font-size: var(--body-font-size-m);
   font-style: normal;
-  font-weight: 700;
+  font-weight: var(--subheading-font-weight);
   line-height: 125%;
 }
 
 .ax-marquee-dynamic-hero [class*="heading"]:first-of-type {
   font-size: var(--heading-font-size-l);
   text-align: left;
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
 }
 
 .ax-marquee-dynamic-hero [class*="heading"]:first-of-type + p {
@@ -121,6 +128,12 @@ main .ax-marquee-dynamic-hero p.button-container {
   margin-bottom: var(--spacing-400);
   font-size: var(--body-font-size-m);
   text-align: left;
+}
+
+@media (min-width: 900px) {
+  .ax-marquee-dynamic-hero .button-container.free-plan-container a.button.same-fcta {
+    display: flex;
+  }
 }
 
 /* Media query for ax-columns-dynamic-hero on tablet */

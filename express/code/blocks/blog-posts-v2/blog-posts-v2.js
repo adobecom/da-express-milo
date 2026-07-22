@@ -14,6 +14,13 @@ let blogResults;
 let blogResultsLoaded;
 let blogIndex;
 
+export function resetBlogCache() {
+  blogResults = null;
+  blogResultsLoaded = null;
+  blogIndex = null;
+  blogPosts.length = 0;
+}
+
 async function fetchBlogIndex(locales) {
   const jointData = [];
   const urls = locales.map((l) => `${l}/express/learn/blog/query-index.json`);
@@ -41,7 +48,13 @@ async function fetchBlogIndex(locales) {
 }
 
 function getFeatured(index, urls) {
-  const paths = urls.map((url) => new URL(url).pathname.split('.')[0]);
+  const paths = urls.map((url) => {
+    try {
+      return new URL(url).pathname.split('.')[0];
+    } catch {
+      return url.split('.')[0];
+    }
+  });
   const results = [];
   paths.forEach((path) => {
     const post = index.byPath[path];
@@ -57,6 +70,38 @@ function isDuplicate(path) {
   return blogPosts.includes(path);
 }
 
+function getFiltersFromConfig(config) {
+  const filters = {};
+  const filterNames = ['tags', 'author', 'category'];
+  for (const name of Object.keys(config)) {
+    if (filterNames.includes(name)) {
+      const vals = config[name];
+      const valuesArray = Array.isArray(vals) ? vals : [vals];
+      filters[name] = valuesArray.map((e) => e.toLowerCase().trim());
+    }
+  }
+  return filters;
+}
+
+function evaluatePostFilters(post, filters) {
+  let matchedAll = true;
+  const failedFilters = [];
+  Object.keys(filters).forEach((name) => {
+    const values = filters[name];
+    const postValue = String(post[name] || '').toLowerCase();
+    const matched = values.some((val) => postValue.includes(val));
+    if (!matched) {
+      matchedAll = false;
+      failedFilters.push(name);
+    }
+  });
+
+  return {
+    matchedAll,
+    failedFilters,
+  };
+}
+
 function filterBlogPosts(config, index) {
   const result = [];
 
@@ -70,36 +115,11 @@ function filterBlogPosts(config, index) {
   }
 
   if (!config.featuredOnly) {
-    /* filter posts by tag and author */
-    const f = {};
-    for (const name of Object.keys(config)) {
-      const filterNames = ['tags', 'author', 'category'];
-      if (filterNames.includes(name)) {
-        const vals = config[name];
-        let v = vals;
-        if (!Array.isArray(vals)) {
-          v = [vals];
-        }
-        f[name] = v.map((e) => e.toLowerCase().trim());
-      }
-    }
+    const filters = getFiltersFromConfig(config);
     const limit = config['page-size'] || 12;
     let numMatched = 0;
-    /* filter and ignore if already in result */
     const feed = index.data.filter((post) => {
-      let matchedAll = true;
-      for (const name of Object.keys(f)) {
-        let matched = false;
-        f[name].forEach((val) => {
-          if (post[name] && post[name].toLowerCase().includes(val)) {
-            matched = true;
-          }
-        });
-        if (!matched) {
-          matchedAll = false;
-          break;
-        }
-      }
+      let { matchedAll } = evaluatePostFilters(post, filters);
       if (matchedAll && numMatched < limit) {
         if (!isDuplicate(post.path)) {
           blogPosts.push(post.path);
@@ -117,24 +137,132 @@ function filterBlogPosts(config, index) {
   return result;
 }
 
-// Given a block element, construct a config object from all the links that children of the block.
+function getSafeHrefFromText(text) {
+  const trimmed = text && text.trim();
+  if (!trimmed) {
+    return null;
+  }
+
+  try {
+    const url = new URL(trimmed, window.location.href);
+    if (url.protocol === 'http:' || url.protocol === 'https:') {
+      return url.href;
+    }
+  } catch (error) {
+    window.lana?.log(`Failed to get href from text: ${error}`, { tags: 'blog-posts-v2', severity: 'error' });
+    return null;
+  }
+  return null;
+}
+
+function normalizeConfigUrls(config) {
+  const normalized = { ...config };
+  if (normalized.featured) {
+    if (Array.isArray(normalized.featured)) {
+      normalized.featured = normalized.featured.map((url) => {
+        try {
+          return new URL(url).pathname;
+        } catch {
+          return url;
+        }
+      });
+    } else {
+      try {
+        normalized.featured = new URL(normalized.featured).pathname;
+      } catch {
+        // Keep as is if not a valid URL
+      }
+    }
+  }
+  return normalized;
+}
+
 function getBlogPostsConfig(block) {
   let config = {};
 
   const rows = [...block.children];
   const firstRow = [...rows[0].children];
 
+  if (block.classList.contains('spreadsheet-powered')) {
+    [...block.querySelectorAll('a')].forEach((a) => {
+      const safeHref = getSafeHrefFromText(a.innerText);
+      if (safeHref) {
+        a.href = safeHref;
+      } else {
+        a.removeAttribute('href');
+      }
+    });
+  }
+
   if (rows.length === 1 && firstRow.length === 1) {
-    /* handle links */
-    const links = [...block.querySelectorAll('a')].map((a) => a.href);
+    const links = [...block.querySelectorAll('a')].map((a) => {
+      try {
+        return new URL(a.href).pathname;
+      } catch {
+        return a.href;
+      }
+    });
     config = {
       featured: links,
       featuredOnly: true,
     };
   } else {
     config = readBlockConfig(block);
+    config = normalizeConfigUrls(config);
   }
+
   return config;
+}
+
+function extractHeadingContent(block) {
+  const hasIncludeHeading = block.classList.contains('include-heading');
+  if (!hasIncludeHeading) return null;
+
+  const rows = [...block.children];
+  if (rows.length === 0) return null;
+
+  const firstRow = rows[0];
+  const cells = [...firstRow.children];
+  const headingContent = {
+    headingElement: null,
+    viewAllParagraph: null,
+  };
+  if (cells[0]) {
+    const heading = cells[0].querySelector('h1, h2, h3, h4, h5, h6');
+    if (heading) {
+      headingContent.headingElement = heading.cloneNode(true);
+    }
+    const paragraphs = cells[0].querySelectorAll('p');
+    paragraphs.forEach((p) => {
+      const link = p.querySelector('a');
+      if (link && !headingContent.viewAllParagraph) {
+        headingContent.viewAllParagraph = p.cloneNode(true);
+      }
+    });
+  }
+  if (!headingContent.viewAllParagraph && cells[1]) {
+    const link = cells[1].querySelector('a');
+    if (link) {
+      const p = cells[1].querySelector('p');
+      if (p && p.contains(link)) {
+        headingContent.viewAllParagraph = p.cloneNode(true);
+      } else {
+        const newP = document.createElement('p');
+        newP.appendChild(link.cloneNode(true));
+        headingContent.viewAllParagraph = newP;
+      }
+    }
+  }
+
+  if (headingContent.headingElement) {
+    headingContent.headingElement.classList.add('header');
+    if (!headingContent.viewAllParagraph) {
+      headingContent.headingElement.classList.add('no-view-all');
+    }
+  }
+  firstRow.remove();
+
+  return headingContent;
 }
 
 async function filterAllBlogPostsOnPage() {
@@ -150,9 +278,14 @@ async function filterAllBlogPostsOnPage() {
       const locales = [getConfig().locale.prefix];
       const allBlogLinks = document.querySelectorAll('.blog-posts-v2 a');
       allBlogLinks.forEach((l) => {
-        const blogLocale = getLocale(getConfig().locales, new URL(l).pathname).prefix;
-        if (!locales.includes(blogLocale)) {
-          locales.push(blogLocale);
+        try {
+          const pathname = l.pathname || new URL(l.href).pathname;
+          const blogLocale = getLocale(getConfig().locales, pathname).prefix;
+          if (!locales.includes(blogLocale)) {
+            locales.push(blogLocale);
+          }
+        } catch (error) {
+          window.lana?.log(`Invalid blog post URL: ${l.href}: ${error}`, { tags: 'blog-posts-v2', severity: 'error' });
         }
       });
 
@@ -185,7 +318,6 @@ async function getFilteredResults(config) {
   return (matchingResult);
 }
 
-// Translates the Read More string into the local language
 async function getReadMoreString() {
   let readMoreString = await replaceKey('read-more', getConfig());
   if (readMoreString === 'read more') {
@@ -202,12 +334,20 @@ async function getReadMoreString() {
   return readMoreString;
 }
 
-// Given a post, get all the required parameters from it to construct a card or hero card
 function getCardParameters(post, dateFormatter) {
   const path = post.path.split('.')[0];
   const { title, teaser, image } = post;
-  const publicationDate = new Date(post.date * 1000);
-  const dateString = dateFormatter.format(publicationDate);
+  const normalizedDate = typeof post.date === 'string' ? post.date.trim() : post.date;
+  const hasTimestamp = (typeof normalizedDate === 'number' && Number.isFinite(normalizedDate))
+    || (typeof normalizedDate === 'string' && /^\d+$/.test(normalizedDate));
+  const timestamp = hasTimestamp ? Number(normalizedDate) : NaN;
+  let dateString = '';
+  if (Number.isFinite(timestamp) && timestamp > 0) {
+    const publicationDate = new Date(timestamp * 1000);
+    if (!Number.isNaN(publicationDate.getTime())) {
+      dateString = dateFormatter.format(publicationDate);
+    }
+  }
   const filteredTitle = title.replace(/(\s?)(｜|\|)(\s?Adobe\sExpress\s?)$/g, '');
   const imagePath = image.split('?')[0].split('_')[1];
   return {
@@ -215,8 +355,7 @@ function getCardParameters(post, dateFormatter) {
   };
 }
 
-// For configs with a single featuredd post, get a hero sized card
-async function getHeroCard(post, dateFormatter) {
+async function getHeroCard(post, dateFormatter, blogTag) {
   const readMoreString = await getReadMoreString();
   const {
     path, title, teaser, dateString, filteredTitle, imagePath,
@@ -228,26 +367,25 @@ async function getHeroCard(post, dateFormatter) {
     href: path,
   });
 
-  // Create image wrapper and tag
   const imageWrapper = createTag('div', { class: 'image-wrapper' });
   imageWrapper.appendChild(heroPicture);
 
   const pictureTag = imageWrapper.outerHTML;
+  const dateMarkup = dateString ? `<p class="blog-card-date">${dateString}</p>` : '';
   card.innerHTML = `<div class="blog-card-image">
     ${pictureTag}
-    <span class="blog-tag">Social Media</span>
+    <span class="blog-tag">${blogTag}</span>
     </div>
     <div class="blog-hero-card-body">
       <h3 class="blog-card-title">${filteredTitle}</h3>
       <p class="blog-card-teaser">${teaser}</p>
-      <p class="blog-card-date">${dateString}</p>
+      ${dateMarkup}
       <p class="blog-card-cta button-container">
         <a href="${path}" title="${readMoreString}" class="button accent">${readMoreString}</a></p>
     </div>`;
   return card;
 }
-// For configs with more than one post, get regular cards
-function getCard(post, dateFormatter) {
+function getCard(post, dateFormatter, blogTag) {
   const {
     path, title, teaser, dateString, filteredTitle, imagePath,
   } = getCardParameters(post, dateFormatter);
@@ -257,23 +395,22 @@ function getCard(post, dateFormatter) {
     href: path,
   });
 
-  // Create image wrapper and tag
   const imageWrapper = createTag('div', { class: 'image-wrapper' });
   imageWrapper.appendChild(cardPicture);
 
   const pictureTag = imageWrapper.outerHTML;
+  const dateMarkup = dateString ? `<p class="blog-card-date">${dateString}</p>` : '';
   card.innerHTML = `<div class="blog-card-image">
         ${pictureTag}
-        <span class="blog-tag">Social Media</span>
+        <span class="blog-tag">${blogTag}</span>
         </div>
         <section class="blog-card-body">
         <h3 class="blog-card-title">${filteredTitle}</h3>
         <p class="blog-card-teaser">${teaser}</p>
-        <p class="blog-card-date">${dateString}</p>
+        ${dateMarkup}
         </section>`;
   return card;
 }
-// Cached language and dateFormatter since creating a Dateformatter is an expensive operation
 let language;
 let dateFormatter;
 
@@ -299,13 +436,48 @@ function addRightChevronToViewAll(blockElement) {
   link.innerHTML = `${link.innerHTML} ${rightChevronSVGHTML}`;
 }
 
-// Given a blog post element and a config, append all posts defined in the config to blogPosts
-async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
-  const posts = await getFilteredResults(config);
-  // If a blog config has only one featured item, then build the item as a hero card.
-  const isHero = config.featured && config.featured.length === 1;
+function getBlogTag(block) {
+  const activeSection = block.closest('.section.content-toggle-active');
+  if (activeSection?.dataset.toggle?.trim()) {
+    return activeSection.dataset.toggle.trim();
+  }
+  return 'Social Media';
+}
 
-  const limit = config['page-size'] || 12;
+function updateBlogTags(block, tagValue) {
+  const blogTags = block.querySelectorAll('.blog-tag');
+  blogTags.forEach((tag) => {
+    tag.textContent = tagValue;
+  });
+}
+
+function observeContentToggleChanges(block) {
+  const section = block.closest('.section[data-toggle]');
+  if (!section) return;
+
+  const observer = new MutationObserver((mutations) => {
+    mutations.forEach((mutation) => {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+        if (section.classList.contains('content-toggle-active')) {
+          const tagValue = section.dataset.toggle || 'Social Media';
+          updateBlogTags(block, tagValue);
+        }
+      }
+    });
+  });
+
+  observer.observe(section, { attributes: true, attributeFilter: ['class'] });
+}
+
+let createLoadMoreElement;
+
+async function decorateBlogPosts(blogPostsElements, config, offset = 0, gridModule = null) {
+  const posts = await getFilteredResults(config);
+  posts.sort((a, b) => new Date(b.date) - new Date(a.date));
+  const isHero = config.featured && config.featured.length === 1;
+  const isGrid = blogPostsElements.classList.contains('grid');
+
+  const limit = isGrid ? gridModule.GRID_PAGE_SIZE : (config['page-size'] || 12);
 
   let cards = blogPostsElements.querySelector('.blog-cards');
   if (!cards) {
@@ -323,32 +495,70 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0) {
     getDateFormatter(newLanguage);
   }
 
+  const blogTag = getBlogTag(blogPostsElements);
+
   if (isHero) {
-    const card = await getHeroCard(posts[0], dateFormatter);
+    const card = await getHeroCard(posts[0], dateFormatter, blogTag);
     blogPostsElements.prepend(card);
     images.push(card.querySelector('img'));
     count = 1;
   } else {
     for (let i = offset; i < posts.length && count < limit; i += 1) {
       const post = posts[i];
-      const card = getCard(post, dateFormatter);
+      const card = getCard(post, dateFormatter, blogTag);
       cards.append(card);
       images.push(card.querySelector('img'));
       count += 1;
     }
   }
 
-  if (posts.length > pageEnd && config['load-more']) {
-    const loadMore = createTag('a', { class: 'load-more button secondary', href: '#' });
-    loadMore.innerHTML = config['load-more'];
-    blogPostsElements.append(loadMore);
-    loadMore.addEventListener('click', (event) => {
-      event.preventDefault();
-      loadMore.remove();
-      decorateBlogPosts(blogPostsElements, config, pageEnd);
+  if (posts.length > pageEnd) {
+    const loadMore = await createLoadMoreElement({
+      isGrid,
+      gridModule,
+      config,
+      blogPostsElements,
+      pageEnd,
+    });
+
+    if (loadMore) {
+      blogPostsElements.append(loadMore);
+    }
+  }
+
+  return posts.length > 0;
+}
+
+createLoadMoreElement = async ({
+  isGrid,
+  gridModule,
+  config,
+  blogPostsElements,
+  pageEnd,
+}) => {
+  if (isGrid && gridModule) {
+    return gridModule.createGridLoadMore({
+      createTag,
+      replaceKey,
+      getConfig,
+      onLoadMore: () => decorateBlogPosts(blogPostsElements, config, pageEnd, gridModule),
     });
   }
-}
+
+  if (!config['load-more']) {
+    return null;
+  }
+
+  const loadMore = createTag('a', { class: 'load-more button secondary', href: '#' });
+  loadMore.innerHTML = config['load-more'];
+  loadMore.addEventListener('click', (event) => {
+    event.preventDefault();
+    loadMore.remove();
+    decorateBlogPosts(blogPostsElements, config, pageEnd);
+  });
+
+  return loadMore;
+};
 
 function checkStructure(element, querySelectors) {
   let matched = false;
@@ -365,17 +575,14 @@ export default async function decorate(block) {
     ({ replaceKey } = placeholders);
   });
 
-  /* localize view all */
+  const headingContent = extractHeadingContent(block);
   const viewAllLink = block?.parentElement?.querySelector('.content a');
 
   if (viewAllLink) {
     const linkText = viewAllLink.textContent;
-
-    // Check if link text contains a placeholder token like ((view-more)) or ((view-all))
     const placeholderMatch = linkText.match(/\(\((.*?)\)\)/);
 
     if (placeholderMatch) {
-      // Extract the placeholder key and fetch its translation
       const placeholderKey = placeholderMatch[1];
       const translation = await replaceKey(placeholderKey, getConfig());
 
@@ -383,7 +590,6 @@ export default async function decorate(block) {
         viewAllLink.textContent = `${translation.charAt(0).toUpperCase()}${translation.slice(1)}`;
       }
     } else if (linkText.toLowerCase().includes('view')) {
-      // Plain text like "view all" - translate it
       const viewAll = await replaceKey('view all', getConfig());
 
       if (viewAll) {
@@ -393,9 +599,16 @@ export default async function decorate(block) {
   }
 
   addTempWrapperDeprecated(block, 'blog-posts');
+
+  const isGrid = block.classList.contains('grid');
+  let gridModule;
+  if (isGrid) {
+    gridModule = await import('./blog-posts-v2-grid.js');
+    await gridModule.loadGridStyles();
+  }
+
   const config = getBlogPostsConfig(block);
 
-  // wrap p in parent section
   if (checkStructure(block.parentNode, ['h2 + p + p + div.blog-posts', 'h2 + p + div.blog-posts', 'h2 + div.blog-posts'])) {
     const wrapper = createTag('div', { class: 'blog-posts-decoration' });
     block.parentNode.insertBefore(wrapper, block);
@@ -407,5 +620,36 @@ export default async function decorate(block) {
 
   addRightChevronToViewAll(block);
 
-  await decorateBlogPosts(block, config);
+  const hasPosts = await decorateBlogPosts(block, config, 0, gridModule);
+
+  if (headingContent) {
+    if (!hasPosts) {
+      const section = block.closest('.section');
+      if (section) {
+        section.style.display = 'none';
+      }
+    } else {
+      const headerWrapper = createTag('div', { class: 'blog-posts-header' });
+
+      if (headingContent.headingElement) {
+        headerWrapper.appendChild(headingContent.headingElement);
+      }
+
+      if (headingContent.viewAllParagraph) {
+        const link = headingContent.viewAllParagraph.querySelector('a');
+        if (link) {
+          const rightChevronSVGHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16" fill="none">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M5.46967 2.86029C5.76256 2.5674 6.23744 2.5674 6.53033 2.86029L11.0303 7.3603C11.3232 7.65319 11.3232 8.12806 11.0303 8.42095L6.53033 
+            12.921C6.23744 13.2138 5.76256 13.2138 5.46967 12.921C5.17678 12.6281 5.17678 12.1532 5.46967 11.8603L9.43934 7.89062L5.46967 3.92096C5.17678 3.62806 5.17678 3.15319 5.46967 2.86029Z" fill="#292929"/>
+          </svg>`;
+          link.innerHTML = `${link.innerHTML} ${rightChevronSVGHTML}`;
+        }
+        headerWrapper.appendChild(headingContent.viewAllParagraph);
+      }
+
+      block.prepend(headerWrapper);
+    }
+  }
+
+  observeContentToggleChanges(block);
 }

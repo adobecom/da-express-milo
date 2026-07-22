@@ -1,0 +1,71 @@
+{
+  "block": "login-page",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@login-page-default",
+      "selector": "div.login-page",
+      "path": "/drafts/nala/blocks/login-page/login-page",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "hidden": true,
+              "src": "./media_1319b23fad9d6b37f5a9db2e2188d064ec01b2c15.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "hidden": true,
+              "src": "./media_1573f5eec37e07ed916f35c6682ca80244353907e.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_1392ea0ae7b54101d9b3fafe8dad0812e18ebe9bd.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "hidden": true,
+              "src": "./media_1be04add7d3f059b9c1d287907fb348c17e4b2d2f.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 4,
+              "tag": "picture",
+              "hidden": true,
+              "src": "./media_178303c266406ee8ac622a3f3446a43c9360ae0c0.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 5,
+              "tag": "picture",
+              "hidden": true,
+              "src": "./media_14742839b58ad5388cf537167ff81511b09c92984.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@login-page",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

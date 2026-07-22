@@ -73,8 +73,8 @@ export default async function decorate(block) {
     );
     try {
       await formatSalesPhoneNumber(phoneNumberTags);
-    } catch (e) {
-      window.lana?.log('faq.js - error fetching sales phones numbers:', e.message);
+    } catch (error) {
+      window.lana?.log(`Error fetching sales phones numbers: ${error}`, { tags: 'faq', severity: 'error' });
     }
   }
 }

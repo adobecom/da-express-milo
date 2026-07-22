@@ -1,0 +1,86 @@
+.gallery-loop {
+  --loop-active-scale: 1.08;
+
+  position: relative;
+}
+
+.gallery-loop-viewport {
+  overflow: hidden;
+  /* room for the centered item to scale up without clipping */
+  padding-block: calc((var(--loop-active-scale) - 1) * var(--template-height, 300px) / 2);
+  /* allow vertical page scroll while we capture horizontal drags */
+  touch-action: pan-y;
+  outline: none;
+}
+
+.gallery-loop-viewport:focus-visible {
+  outline: revert;
+}
+
+.gallery-loop-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  will-change: transform;
+  transition: transform .3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.gallery-loop-track--static {
+  justify-content: center;
+  width: 100%;
+}
+
+/* Structural only — the consuming block owns the spotlight scale/opacity
+   aesthetic (via .gallery-loop-item / .active), keyed to --loop-active-scale. */
+.gallery-loop-item {
+  flex: 0 0 auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gallery-loop-track,
+  .gallery-loop-item {
+    transition: none;
+  }
+}
+
+/* Visually-hidden live region for the "X of N" position announcement. */
+.gallery-loop-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* Prev/Next control — self-contained so the engine needs no extra stylesheet. */
+.gallery-control {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--spacing-100);
+  align-items: center;
+}
+
+.gallery-control.hide {
+  display: none;
+}
+
+.gallery-control button {
+  all: unset;
+  cursor: pointer;
+  height: 2rem;
+  box-shadow: 0 2px 8px 0 #00000029;
+  border-radius: 50px;
+}
+
+.gallery-control button:focus-visible {
+  outline: revert;
+}
+
+.gallery-control button:hover circle {
+  fill: var(--color-gray-300);
+}

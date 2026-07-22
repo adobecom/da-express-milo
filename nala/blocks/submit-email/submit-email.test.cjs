@@ -4,11 +4,18 @@ const SubmitEmailBlock = require('./submit-email.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
+const miloLibs = process.env.MILO_LIBS || '';
+
+function normalizePathForComparison(pathname) {
+  if (!pathname || pathname === '/') return '/';
+  return pathname.replace(/\/index\.html$/i, '/').replace(/\.html$/i, '').replace(/\/$/, '');
+}
+
 test.describe('SubmitEmailBlock Test Suite', () => {
   // Test Id : 0 : @submit-email-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
-    const testUrl = `${baseURL}${features[0].path}`;
+    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
     const block = new SubmitEmailBlock(page, features[0].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
@@ -49,7 +56,7 @@ test.describe('SubmitEmailBlock Test Suite', () => {
           } else {
             const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
             const actualPath = new URL(href, 'https://dummy.base').pathname;
-            await expect(actualPath).toBe(expectedPath);
+            await expect(normalizePathForComparison(actualPath)).toBe(normalizePathForComparison(expectedPath));
           }
         }
         if (iEl.text) await expect(locator).toContainText(iEl.text);

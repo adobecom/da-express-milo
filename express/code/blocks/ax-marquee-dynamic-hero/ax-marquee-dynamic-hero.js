@@ -62,7 +62,7 @@ async function setupVideoControls(block) {
 
     await createAccessibilityVideoControls(videoElement);
   } catch (error) {
-    window.lana?.log('Error creating video controls:', error);
+    window.lana?.log(`Error creating video controls: ${error}`, { tags: 'ax-marquee-dynamic-hero', severity: 'error' });
   }
 }
 

@@ -1,0 +1,475 @@
+{
+  "block": "make-a-project",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@make-a-project-default",
+      "selector": "div.make-a-project",
+      "path": "/drafts/nala/test-gen/make-a-project/make-a-project",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "What will you create today?",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_163e63e8f72698b0849ca8f23713520a10e808510.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "img.icon.icon-flyer",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/flyer.svg",
+              "alt": null
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_1dbaf0a607e5cb048fb4e0fe61f8745654a4b3fbf.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 2,
+              "tag": "picture",
+              "src": "./media_10a746810dbedcd56c6219ec54b93330b55e6d106.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 3,
+              "tag": "picture",
+              "src": "./media_1345e2fdef8b715121a3351ca5a0c9412ad920f16.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 4,
+              "tag": "picture",
+              "src": "./media_14586c8677ae9e4e52b0a6b15b292a9b0e89435b4.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 5,
+              "tag": "picture",
+              "src": "./media_10d8ac9c04d80cbf3a82a5af2cbcb53149de3cba7.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 6,
+              "tag": "picture",
+              "src": "./media_10d8ac9c04d80cbf3a82a5af2cbcb53149de3cba7.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "picture",
+              "nth": 7,
+              "tag": "picture",
+              "src": "./media_10d8ac9c04d80cbf3a82a5af2cbcb53149de3cba7.jpg?width=750&format=jpg&optimize=medium",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 0,
+              "text": "Custom size",
+              "href": "/new?width=1080&height=1920&unit=px&aspectRatioLock=true&category=templates&taskID=standard-size-portrait&assetCollection=ccx%2Feditor%2Ftemplate%2FInstagram-Story-",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 0,
+              "text": "Flyer",
+              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a",
+              "nth": 2,
+              "text": "Logo",
+              "href": "/express-apps/logo-maker/?locale=en",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": "_blank"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 1,
+              "text": "Instagram Reel",
+              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 2,
+              "text": "Social post",
+              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 3,
+              "text": "Social story",
+              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 4,
+              "text": "TikTok video",
+              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 5,
+              "text": "TikTok video",
+              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 6,
+              "text": "TikTok video",
+              "href": "/c4bWARQhWAb?category=templates&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@make-a-project",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@make-a-project-centered-dark",
+      "selector": "div.make-a-project.centered.dark",
+      "path": "/drafts/nala/test-gen/make-a-project/make-a-project-centered",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h2",
+              "nth": 0,
+              "tag": "h2",
+              "text": "Make a free project with Adobe Express.",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 0,
+              "tag": "li",
+              "text": "Custom size",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 1,
+              "tag": "li",
+              "text": "Social post",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 2,
+              "tag": "li",
+              "text": "Social story",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 3,
+              "tag": "li",
+              "text": "Logo",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 4,
+              "tag": "li",
+              "text": "Flyer",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 5,
+              "tag": "li",
+              "text": "Social ad",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 6,
+              "tag": "li",
+              "text": "Poster",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 7,
+              "tag": "li",
+              "text": "Banner",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 8,
+              "tag": "li",
+              "text": "YouTube thumbnail",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 9,
+              "tag": "li",
+              "text": "Business card",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img.icon.icon-flyer",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/flyer.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-flyer",
+              "nth": 1,
+              "tag": "img",
+              "src": "/express/code/icons/flyer.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-banner",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/banner.svg",
+              "alt": null
+            },
+            {
+              "selector": "img.icon.icon-banner",
+              "nth": 1,
+              "tag": "img",
+              "src": "/express/code/icons/banner.svg",
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 0,
+              "text": "Custom size",
+              "href": "/9LyEhTIh0pb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project-centered&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 1,
+              "text": "Social post",
+              "href": "/GHuvbhBi0pb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project-centered&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 2,
+              "text": "Social story",
+              "href": "/AGf5zhzi0pb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project-centered&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 3,
+              "text": "Logo",
+              "href": "/wK5RVTEi0pb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project-centered&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 4,
+              "text": "Flyer",
+              "href": "/UQb0bOHi0pb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project-centered&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 5,
+              "text": "Social ad",
+              "href": "/tLR57sKi0pb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project-centered&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 6,
+              "text": "Poster",
+              "href": "/d6Lwx9zi7pb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project-centered&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 7,
+              "text": "Banner",
+              "href": "/64ubgMMi0pb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project-centered&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 8,
+              "text": "YouTube thumbnail",
+              "href": "/6Hvc8wJi7pb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project-centered&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            },
+            {
+              "type": "link",
+              "selector": "a.quick-link",
+              "nth": 9,
+              "text": "Business card",
+              "href": "/S22GAUNi7pb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fmake-a-project%2Fmake-a-project-centered&placement=make-a-project&locale=en-US&contentRegion=us",
+              "ariaLabel": null,
+              "rel": "nofollow",
+              "title": null,
+              "target": "_self"
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@make-a-project",
+        "@centered-dark",
+        "@express"
+      ]
+    }
+  ]
+}

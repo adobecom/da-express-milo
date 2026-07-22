@@ -1,0 +1,180 @@
+{
+  "block": "playlist",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@playlist-default",
+      "selector": "div.playlist",
+      "path": "/drafts/nala/test-gen/playlist/playlist",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h5.session-title",
+              "nth": 0,
+              "tag": "h5",
+              "text": "Session 1",
+              "markup": null
+            },
+            {
+              "selector": "h4.session-description",
+              "nth": 0,
+              "tag": "h4",
+              "text": "Creatively Engage Your Audience on Social.",
+              "markup": null
+            },
+            {
+              "selector": "h5.session-title",
+              "nth": 1,
+              "tag": "h5",
+              "text": "Session 2",
+              "markup": null
+            },
+            {
+              "selector": "h4.session-description",
+              "nth": 1,
+              "tag": "h4",
+              "text": "Build Your Brand.",
+              "markup": null
+            },
+            {
+              "selector": "h3.video-player-video-title",
+              "nth": 0,
+              "tag": "h3",
+              "text": "Build your brand with Melissa King.",
+              "markup": null
+            },
+            {
+              "selector": "p.video-player-video-list-heading",
+              "nth": 0,
+              "tag": "p",
+              "text": "Session 2 Clips",
+              "markup": null
+            },
+            {
+              "selector": "span.video-button-duration",
+              "nth": 0,
+              "tag": "span",
+              "text": "21:01",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1f7a8f817ed77d05e67d2dd8e024d66e3d0ef7d6c.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "picture",
+              "nth": 1,
+              "tag": "picture",
+              "src": "./media_13b20e5b4f83cf9bfa19ada79e722e27b56b4d9a0.png?width=750&format=png&optimize=medium",
+              "alt": "Inserting image..."
+            },
+            {
+              "selector": "video.video-player-inline-player",
+              "nth": 0,
+              "tag": "video",
+              "src": null,
+              "alt": null
+            },
+            {
+              "selector": "img.video-player-button-previous-img",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/adobe-express-video-previous.svg",
+              "alt": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.carousel-left-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.carousel-right-trigger",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-left",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Left",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "a.button.carousel-arrow.carousel-arrow-right",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": "Carousel Right",
+              "target": "_blank"
+            },
+            {
+              "type": "button",
+              "selector": "video.video-player-inline-player",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.video-player-button-previous",
+              "nth": 0,
+              "text": "",
+              "href": "#",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.video-player-button-next.button.accent",
+              "nth": 0,
+              "text": "Next clip",
+              "href": "#",
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@playlist",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

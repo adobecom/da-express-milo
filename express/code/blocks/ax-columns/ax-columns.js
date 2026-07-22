@@ -181,13 +181,27 @@ const LOGO_WHITE = 'adobe-express-logo-white';
 function injectLogo(block) {
   const injectRegularLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase());
   const injectPhotoLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-photo-logo')?.toLowerCase());
-
-  if (!injectRegularLogo && !injectPhotoLogo) return null;
+  const injectAcrobatLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase());
+  const injectRealMadridLogo = ['on', 'yes'].includes(getMetadata('marquee-inject-real-madrid-logo')?.toLowerCase());
+  if (!injectRegularLogo
+    && !injectPhotoLogo && !injectAcrobatLogo && !injectRealMadridLogo) return null;
 
   let logo;
 
   if (injectPhotoLogo) {
     logo = getIconElementDeprecated('adobe-express-photos-logo');
+  } else if (injectAcrobatLogo) {
+    const logoName = 'cobrand-lockup-acrobat-express';
+    const logoSize = '22px';
+    const logoAlt = 'Adobe Acrobat X Adobe Express co-brand logo';
+    const logoClass = 'marquee-eyebrow-logo-wide';
+    logo = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
+  } else if (injectRealMadridLogo) {
+    const logoName = 'cobrand-lockup-real-madrid-logo';
+    const logoSize = '40px';
+    const logoAlt = 'Adobe X Real Madrid logo';
+    const logoClass = 'marquee-eyebrow-logo-large';
+    logo = getIconElementDeprecated(logoName, logoSize, logoAlt, logoClass);
   } else {
     const mediaQuery = window.matchMedia('(min-width: 900px)');
     logo = getIconElementDeprecated(block.classList.contains('dark') && mediaQuery.matches ? LOGO_WHITE : LOGO);
@@ -209,16 +223,27 @@ function injectLogo(block) {
 
 const decoratePrimaryCTARow = (rowNum, cellNum, cell) => {
   if (rowNum + cellNum !== 0) return;
-  const content = cell.querySelector('p > em');
-  if (!content) return;
-  const links = content.querySelectorAll('a');
+  const italicAnchor = cell.querySelector('p > em > a');
+  if (!italicAnchor) return;
+  const boldAnchor = italicAnchor.parentElement?.previousElementSibling?.querySelector('a');
+  const block = cell.closest('.ax-columns');
+
+  if (boldAnchor && block?.className.includes('fullsize')) {
+    boldAnchor.classList.add('button', 'accent', 'xlarge', 'primaryCTA');
+    BlockMediator.set('primaryCtaUrl', boldAnchor.href);
+    italicAnchor.classList.add('button', 'primary', 'reverse', 'xlarge');
+    boldAnchor.parentElement?.replaceWith(boldAnchor);
+    italicAnchor.parentElement?.replaceWith(italicAnchor);
+    boldAnchor.closest('p')?.classList.add('button-container', 'two-ctas');
+    return;
+  }
+
+  const links = italicAnchor.parentElement?.querySelectorAll('a');
   if (links.length < 2) return;
-  content.classList.add('phone-number-cta-row');
-  links[0].classList.add('button');
-  links[0].classList.add('xlarge');
-  links[0].classList.add('trial-cta');
+  italicAnchor.parentElement?.classList.add('phone-number-cta-row');
+  links[0].classList.add('button', 'xlarge', 'trial-cta');
   links[1].classList.add('phone');
-  content.parentElement.prepend(links[0]);
+  italicAnchor.closest('p')?.prepend(links[0]);
 };
 
 function addHeaderClass(block, size) {
@@ -285,6 +310,7 @@ function addImagePreconnects(imageUrl) {
       if (!existingPreconnect) {
         const link = document.createElement('link');
         link.rel = 'preconnect';
+        link.fetchPriority = 'high';
         link.href = url.origin;
         link.crossOrigin = 'anonymous';
         document.head.appendChild(link);
@@ -331,7 +357,7 @@ export default async function decorate(block) {
       const url = new URL(bgImg.src, window.location.href);
       const { pathname } = url;
       const width = getOptimalImageSize();
-      const optimizedImageUrl = `${pathname}?width=${width}&format=webp&optimize=medium`;
+      const optimizedImageUrl = `${pathname}?width=${width}&format=webply&optimize=medium`;
 
       // Set CSS variable for the optimized background image
       block.style.setProperty('--bg-image', `url("${optimizedImageUrl}")`);
@@ -445,6 +471,12 @@ export default async function decorate(block) {
         } else if (aTag.classList.contains('light')) {
           aTag.classList.replace('accent', 'primary');
         }
+        if (!aTag.getAttribute('aria-label')) {
+          const header = cell.querySelector('h1, h2, h3, h4, h5, h6');
+          if (header) {
+            aTag.setAttribute('aria-label', `${aTag.textContent.trim()} ${header.textContent.trim()}`);
+          }
+        }
       }
 
       // handle history events
@@ -492,7 +524,7 @@ export default async function decorate(block) {
             const optimalWidth = getOptimalImageSize();
 
             // Update src with better size and format
-            const newSrc = `${pathname}?width=${optimalWidth}&format=webp&optimize=medium`;
+            const newSrc = `${pathname}?width=${optimalWidth}&format=webply&optimize=medium`;
             if (img.src !== newSrc) {
               img.src = newSrc;
             }
@@ -514,6 +546,7 @@ export default async function decorate(block) {
             if (preloadImg?.src && !document.querySelector(`link[href="${preloadImg.src}"]`)) {
               const link = document.createElement('link');
               link.rel = 'preload';
+              link.fetchPriority = 'high';
               link.as = 'image';
               link.href = preloadImg.src;
               document.head.appendChild(link);
@@ -713,8 +746,8 @@ export default async function decorate(block) {
   if (phoneNumberTags.length > 0) {
     try {
       await formatSalesPhoneNumber(phoneNumberTags);
-    } catch (e) {
-      window.lana?.log('ax-columns.js - error fetching sales phones numbers:', e.message);
+    } catch (error) {
+      window.lana?.log(`Error fetching sales phones numbers: ${error.message}`, { tags: 'ax-columns', severity: 'error' });
     }
   }
 

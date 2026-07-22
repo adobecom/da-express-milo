@@ -101,4 +101,14 @@ describe('How-to-cards', () => {
     expect(bl.querySelector('div').classList.contains('text')).to.be.true;
     expect(bl.querySelector('div h2')).to.exist;
   });
+
+  it('supports summary variant without carousel and numbers', async () => {
+    const bl = await init(blocks[2]);
+    const cardsContainer = bl.querySelector('.cards-container');
+    expect(cardsContainer).to.exist;
+    expect(cardsContainer.classList.contains('gallery')).to.be.false;
+    expect(bl.querySelector('.gallery-control')).to.not.exist;
+    expect(bl.querySelectorAll('.number').length).to.equal(0);
+    expect(bl.querySelectorAll('.step-icon').length).to.equal(3);
+  });
 });

@@ -1,12 +1,24 @@
+import { getMetadata } from '../../scripts/utils.js';
+
 export default function decorate(el) {
+  // metadata-triggered variant: only decorate when the page opts in via the
+  // 'enable-wayfinder-promo' metadata; otherwise remove the block entirely.
+  if (el.classList.contains('metadata-triggered')) {
+    const enabled = ['yes', 'y', 'on', 'true']
+      .includes(getMetadata('enable-wayfinder-promo')?.toLowerCase().trim());
+    if (!enabled) {
+      el.remove();
+      return;
+    }
+  }
+
   const rows = el.querySelectorAll(':scope > div');
   const firstRowContent = rows[0].textContent.trim();
 
   const lastRow = rows[rows.length - 1];
   const bgValue = lastRow?.textContent.trim();
-  // Regex: matches linear-gradient, radial-gradient, hex, rgb, rgba, hsl, color names (basic)
-  const bgPattern = /^(linear-gradient\(|radial-gradient\(|#([0-9a-fA-F]{3,8})$|^rgb\(|^rgba\(|^hsl\(|^hsla\(|^[a-zA-Z]+$)/;
-  if (bgValue && bgPattern.test(bgValue)) {
+  const bgPattern = /^(linear-gradient\(|radial-gradient\(|#[0-9a-fA-F]{3,8}$|rgb\(|rgba\(|hsl\(|hsla\()/;
+  if (bgValue && bgPattern.test(bgValue) && !lastRow.querySelector('a')) {
     if (bgValue.startsWith('linear-gradient') || bgValue.startsWith('radial-gradient')) {
       el.style.background = bgValue;
     } else {

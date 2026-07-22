@@ -1,0 +1,64 @@
+{
+  "block": "color-wheel",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@color-wheel",
+      "selector": "div.color-wheel",
+      "path": "/drafts/nala/blocks/color-wheel",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "h1",
+              "nth": 0,
+              "tag": "h1",
+              "text": "Color palette generator and color wheel tool.",
+              "markup": null
+            },
+            {
+              "selector": "p",
+              "nth": 0,
+              "tag": "p",
+              "text": "Use the color palette generator to create harmonious color schemes for any project. Choose a base color, apply a color harmony, and generate a balanced palette instantly.",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "img",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/icons/adobe-express-logo.svg",
+              "alt": "adobe-express-logo"
+            },
+            {
+              "selector": ".color-wheel-harmony-option[data-harmony-value='CUSTOM'] img",
+              "nth": 0,
+              "tag": "img",
+              "src": "/express/code/blocks/color-wheel/harmony-thumbnails/custom.png",
+              "alt": ""
+            }
+          ],
+          "interactives": [
+            {
+              "type": "link",
+              "selector": ".action-menu-link.contrast-link",
+              "nth": 0,
+              "text": null,
+              "href": "/express/colors/contrast-checker",
+              "ariaLabel": "contrast checker",
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@express",
+        "@color"
+      ]
+    }
+  ]
+}

@@ -361,14 +361,21 @@
   border-color: var(--color-gray-400);
 }
 
-.ratings form textarea:required:placeholder-shown ~ [type='submit'] {
+.ratings form [type='submit'][aria-disabled='true'],
+.ratings form [type='submit'][aria-disabled='true']:hover,
+.ratings form [type='submit'][aria-disabled='true']:focus,
+.ratings form [type='submit'][aria-disabled='true']:focus:hover,
+.ratings form [type='submit'][aria-disabled='true']:active {
   background-color: #f0f0f0;
   border-color: #f0f0f0;
   color: #b9b9b9;
-  outline: none;
-  box-shadow: none;
   cursor: default;
   -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+}
+
+.ratings form [type='submit']:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-info-accent);
 }
 
 /* Custom styling for the native range input, with cross-browser compatibility */

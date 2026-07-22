@@ -9,6 +9,7 @@ import {
   submitRating,
   buildSchema,
   fetchRatingsData,
+  getAndValidateImsToken,
 } from '../../scripts/utils/ratings-utils.js';
 
 let createTag;
@@ -34,6 +35,13 @@ export default async function decorate(block) {
   await Promise.all([import(`${getLibs()}/utils/utils.js`), decorateButtonsDeprecated(block)]).then(([utils]) => {
     ({ createTag, getConfig } = utils);
   });
+
+  // Check for valid IMS token before showing ratings block
+  const token = await getAndValidateImsToken('ratings block initialization');
+  if (!token) {
+    block.remove();
+    return;
+  }
 
   let submitButtonText;
   let submissionTitle;
@@ -85,6 +93,12 @@ export default async function decorate(block) {
     const scrollAnchor = block.querySelector('.ratings-scroll-anchor');
     const commentBox = block.querySelector('.slider-comment');
     const timerAnimation = createTag('div', { class: 'timer' });
+    const syncSubmitDisabledState = () => {
+      const shouldDisable = textarea.hasAttribute('required') && textarea.value.trim() === '';
+      if (shouldDisable === (submit.getAttribute('aria-disabled') === 'true')) return;
+      if (shouldDisable) submit.setAttribute('aria-disabled', 'true');
+      else submit.removeAttribute('aria-disabled');
+    };
     // Countdown timer to auto-submit
     const countdown = (bool) => {
       if (bool) {
@@ -103,7 +117,7 @@ export default async function decorate(block) {
           } else {
             clearInterval(window.ratingSubmitCountdown);
             window.ratingSubmitCountdown = null;
-            submit.click();
+            if (submit.getAttribute('aria-disabled') !== 'true') submit.click();
           }
         }, 920);
       } else if (window.ratingSubmitCountdown) {
@@ -156,6 +170,7 @@ export default async function decorate(block) {
         `${input.value},${textarea.value}`,
       );
       updateSliderStyle(input.value);
+      syncSubmitDisabledState();
     };
     // Slider event listeners.
     input.addEventListener('input', () => updateSliderValue(false));
@@ -222,7 +237,9 @@ export default async function decorate(block) {
         `ccxActionRatingsFeedback${sheetCamelCase}`,
         `${input.value},${textarea.value}`,
       );
+      syncSubmitDisabledState();
     });
+    textarea.addEventListener('input', syncSubmitDisabledState);
     const ccxActionRatingsFeedback = localStorage.getItem(
       `ccxActionRatingsFeedback${sheetCamelCase}`,
     );
@@ -237,6 +254,7 @@ export default async function decorate(block) {
         updateSliderValue();
       }
     }
+    syncSubmitDisabledState();
   }
 
   // Decorates the rating Form and Slider HTML.
@@ -312,6 +330,7 @@ export default async function decorate(block) {
     // Form-submit event listener.
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+      if (form.querySelector('[type=submit]')?.getAttribute('aria-disabled') === 'true') return;
       const rating = input.value;
       const comment = form.querySelector('#comment').value;
       await submitRating(sheet, rating, comment);
@@ -348,10 +367,10 @@ export default async function decorate(block) {
       if (stars && stars instanceof Node) {
         headingWrapper.appendChild(stars);
       } else {
-        window.lana?.log('Invalid stars element returned from getCurrentRatingStars', { tags: 'ratings' });
+        window.lana?.log('Invalid stars element returned from getCurrentRatingStars', { tags: 'ratings', severity: 'error' });
       }
     } catch (error) {
-      window.lana?.log('Error creating rating stars:', error, { tags: 'ratings' });
+      window.lana?.log(`Error creating rating stars: ${error?.message || error}`, { tags: 'ratings', severity: 'error' });
     }
     block.appendChild(headingWrapper);
     const textAndCTA = createTag('div', { class: 'no-slider' });

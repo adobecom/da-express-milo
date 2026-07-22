@@ -1,0 +1,81 @@
+/* ============================================================================
+   Express Tag Override Styles — Spectrum 2 Tag (M)
+   Aligned with Figma S2 Tag component (node 126170:2053).
+   ============================================================================ */
+
+/* ── Base ─────────────────────────────────────────────────────────── */
+
+sp-tag {
+  --spectrum-tag-border-radius: var(--Corner-radius-corner-radius-100);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  font-family: var(--body-font-family);
+  font-size: var(--ax-body-xs-size);
+  font-weight: var(--Font-weight-medium);
+  line-height: var(--line-height-100);
+  height: 32px;
+  min-height: 32px;
+  min-width: 27px;
+  max-width: 224px;
+  padding: 0 var(--spacing-200);
+  background: var(--color-light-gray);
+  color: var(--color-gray-800-variant);
+  border: none;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--spacing-200);
+  box-sizing: border-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Selected state ───────────────────────────────────────────────── */
+
+sp-tag[selected] {
+  background: var(--S2-Buttons-Accent-Color-Default);
+  color: var(--color-white);
+}
+
+/* ── Hover ────────────────────────────────────────────────────────── */
+
+sp-tag:hover:not([disabled]) {
+  background: var(--color-light-gray-2);
+}
+
+sp-tag[selected]:hover:not([disabled]) {
+  background: var(--S2-Buttons-Accent-Color-Hover);
+}
+
+/* ── Focus ────────────────────────────────────────────────────────── */
+
+sp-tag:focus-visible {
+  outline: 2px solid var(--color-blue-800);
+  outline-offset: 2px;
+}
+
+/* ── Disabled ─────────────────────────────────────────────────────── */
+
+sp-tag[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Deletable / removable ────────────────────────────────────────── */
+
+/* ── Accessibility ────────────────────────────────────────────────── */
+
+@media (prefers-reduced-motion: reduce) {
+  sp-tag {
+    transition: none !important;
+  }
+}
+
+@media (prefers-contrast: high) {
+  sp-tag {
+    box-shadow: inset 0 0 0 2px var(--color-gray-800-variant);
+  }
+
+  sp-tag:focus-visible {
+    outline-width: 3px;
+  }
+}

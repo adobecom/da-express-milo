@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Template X Carousel Breadcrumb Test</title>
+    <meta name="short-title" content="Template Carousel Breadcrumb Demo" />
+    <link rel="stylesheet" href="/express/code/styles/styles.css" />
+    <link rel="stylesheet" href="/express/code/blocks/template-x-carousel/template-x-carousel.css" />
+    <style>
+      body {
+        font-family: 'Adobe Clean', 'Helvetica Neue', Arial, sans-serif;
+        background-color: #f5f5f5;
+        margin: 0;
+        padding: 0;
+      }
+
+      main {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 48px 24px 96px;
+      }
+
+      .section {
+        margin-bottom: 48px;
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="section">
+        <div class="default-content-wrapper">
+          <p>This page validates breadcrumb decoration for the Template X Carousel block.</p>
+        </div>
+        <div class="template-x-carousel bc block" data-block-name="template-x-carousel" data-block-status="loading">
+          <div>
+            <div>
+              <h2 id="template-carousel-breadcrumb-test">Explore featured card templates</h2>
+              <p>Use the carousel below to browse cards and verify breadcrumb styling above the block.</p>
+            </div>
+          </div>
+          <div>
+            <div>tasks=card&amp;orderBy=-remixCount&amp;limit=8&amp;collection=default</div>
+          </div>
+          <div>
+            <p><a href="/express/templates/cards">View all card templates</a></p>
+          </div>
+          <div>
+            <div>source=breadcrumb-test</div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <script type="module" src="/express/code/scripts/scripts.js"></script>
+  </body>
+</html>

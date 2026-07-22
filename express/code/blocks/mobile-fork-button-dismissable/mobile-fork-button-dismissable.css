@@ -1,113 +1,113 @@
 main  .floating-button-wrapper.mobile-fork-button, main .mobile-fork-button {
-    z-index: 10;
-    --mfb-font-size: 16px;
+  z-index: 10;
+  --mfb-font-size: var(--body-font-size-m);
 }
 
 .feds-localnav--active ~ main .floating-button-wrapper.mobile-fork-button {
-    z-index: 8;
+  z-index: 8;
 }
 
 main .mobile-fork-button.long-text {
-    --mfb-font-size: 14px;
+  --mfb-font-size: 14px;
 }
 main .mobile-fork-button.mweb-mobile-fork::after {
-    content: '';
-    position: fixed;
-    pointer-events: initial;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: rgba(0, 0, 0, .44);
+  content: '';
+  position: fixed;
+  pointer-events: initial;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, .44);
 }
 
 main .mobile-fork-button a.mweb-close {
-    position: absolute;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 11;
-    top: -8px;
-    right: -8px;
-    width: 32px;
-    height: 32px;
-    background-color: #fff;
-    border-radius: 50px;
-    box-shadow: 0px 0px 12px 0px #00000029;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 11;
+  top: -8px;
+  right: -8px;
+  width: 32px;
+  height: 32px;
+  background-color: var(--color-white);
+  border-radius: 50px;
+  box-shadow: 0px 0px 12px 0px #00000029;
 }
 
 main .mobile-gating-text {
-    height: fit-content;
-    margin: auto;
-    text-align: left;
-    flex-grow: 1;
-    font-weight: 400;
-    font-size: var(--mfb-font-size);
+  height: fit-content;
+  margin: auto;
+  text-align: left;
+  flex-grow: 1;
+  font-weight: 400;
+  font-size: var(--mfb-font-size);
 }
 main .mobile-fork-button .floating-button .mobile-gating-row .mobile-gating-icon-empty,
 main .mobile-gating-text, main .mobile-fork-button .floating-button .mobile-gating-row .icon{
-    width: 22px;
-    height: 22px;
-    margin: auto;
+  width: 22px;
+  height: 22px;
+  margin: auto;
 }
 
 main .mobile-fork-button  .mobile-gating-header-row .mobile-gating-exit {
-    border-radius: 24px;
-    margin-left: auto;
-    width: 24px;
-    height: 24px;
-    font-size: var(--body-font-size-xs);
-    background: var(--Palette-sx-gray-100, var(--color-gray-200));
+  border-radius: 24px;
+  margin-left: auto;
+  width: 24px;
+  height: 24px;
+  font-size: var(--body-font-size-xs);
+  background: var(--Palette-sx-gray-100, var(--color-gray-200));
 }
 
 main  .mobile-fork-button .floating-button.block {
-    background-color: var(--color-white);
-    border-radius: 28px;
-    box-shadow: 0px 0px 12px 0px #00000029;
-    padding: 16px;
-    width: calc(100% - 16px);
-    margin: 5px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
+  background-color: var(--color-white);
+  border-radius: 28px;
+  box-shadow: 0px 0px 12px 0px #00000029;
+  padding: var(--spacing-300);
+  width: calc(100% - 16px);
+  margin: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
 }
 
 main .mobile-gating-row {
-    display: flex;
-    gap: 10px;
-    min-height: 40px;
+  display: flex;
+  gap: 10px;
+  min-height: 40px;
 }
 
 main .mobile-gating-header {
-    font-size: var(--type-heading-xxs-lh);
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 8px;
+  font-size: var(--type-heading-xxs-lh);
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: var(--spacing-100);
 }
 
 main .mobile-fork-button .floating-button a.button:any-link {
-    border-radius: 20px;
-    font-size: var(--mfb-font-size);
-    min-width: 150px;
-    margin: auto;
-    width: 50%;
-    color: var(--color-white);
-    background-color: var(--color-info-accent);
-    border-color: var(--color-info-accent);
+  border-radius: 20px;
+  font-size: var(--mfb-font-size);
+  min-width: 150px;
+  margin: auto;
+  width: 50%;
+  color: var(--color-white);
+  background-color: var(--color-info-accent);
+  border-color: var(--color-info-accent);
 }
 
 main .mobile-fork-button .floating-button a.button:any-link.accent {
-    color: var(--color-var(--color-white));
-    background-color: var(--color-info-accent);
-    border-color: var(--color-info-accent);
+  color: var(--color-var(--color-white));
+  background-color: var(--color-info-accent);
+  border-color: var(--color-info-accent);
 }
 
 main .mobile-fork-button .floating-button a.button:any-link.outline {
-    background-color: var(--color-white);
-    border: 2px solid var(--Border-Extra-subdued-default, var(--color-gray-200));
-    color: var(--color-black);
+  background-color: var(--color-white);
+  border: 2px solid var(--Border-Extra-subdued-default, var(--color-gray-200));
+  color: var(--color-black);
 }
 
 main .mobile-fork-button.floating-button--hidden .floating-button.block {
-    margin-bottom: -10px
+  margin-bottom: -10px
 }

@@ -3,6 +3,7 @@
 import { getLibs } from './utils.js';
 import BlockMediator from './block-mediator.min.js';
 import { memoize } from './utils/hofs.js';
+import { isValidBehaviors } from './template-utils.js';
 
 let getConfig;
 
@@ -188,7 +189,9 @@ export function trackSearch(eventName, searchID = generateSearchId()) {
   });
 
   // eslint-disable-next-line no-undef
-  const impression = cleanPayload(structuredClone(BlockMediator.get('templateSearchSpecs')), eventName);
+  const specsSnapshot = BlockMediator.get('templateSearchSpecs');
+  // eslint-disable-next-line compat/compat
+  const impression = cleanPayload(typeof structuredClone !== 'undefined' ? structuredClone(specsSnapshot) : JSON.parse(JSON.stringify(specsSnapshot)), eventName);
   if (!impression.custom_ui_location) impression.custom_ui_location = 'seo';
   function fireEvent() {
     _satellite.track('event', {
@@ -348,12 +351,6 @@ async function fetchTemplatesWithToolbar(props) {
   // ultimate fallback in case no fallback locale is authored
   response = await fetchSearchUrl({ ...props, filters: {}, q: '' });
   return { response, fallbackMsg: await getFallbackMsg() };
-}
-
-function isValidBehaviors(behaviors) {
-  const collectivelyExhausiveBehaviors = ['animated', 'video', 'still'];
-  return behaviors.some((b) => collectivelyExhausiveBehaviors.includes(b))
-        && (!behaviors.includes('still') || !(behaviors.includes('video') || behaviors.includes('animated')));
 }
 
 export function isValidTemplate(template) {

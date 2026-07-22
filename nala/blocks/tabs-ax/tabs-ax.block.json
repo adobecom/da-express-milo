@@ -1,0 +1,375 @@
+{
+  "block": "tabs-ax",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@tabs-ax-default",
+      "selector": "div.tabs-ax",
+      "path": "/drafts/nala/blocks/tabs-ax/tabs-ax",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": [
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 0,
+              "text": "Individuals and Teams",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 1,
+              "text": "Enterprises",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 2,
+              "text": "Students",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 3,
+              "text": "Educators",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 4,
+              "text": "Nonprofits",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@tabs-ax",
+        "@default",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "1",
+      "name": "@tabs-ax-l-spacing",
+      "selector": "div.tabs-ax.l-spacing",
+      "path": "/drafts/nala/blocks/tabs-ax/tabs-ax-l-spacing",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": [
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 0,
+              "text": "Individuals and Teams",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 1,
+              "text": "Enterprises",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 2,
+              "text": "Students",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 3,
+              "text": "Educators",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 4,
+              "text": "Nonprofits",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@tabs-ax",
+        "@l-spacing",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "2",
+      "name": "@tabs-ax-m-spacing",
+      "selector": "div.tabs-ax.m-spacing",
+      "path": "/drafts/nala/blocks/tabs-ax/tabs-ax-m-spacing",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": [
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 0,
+              "text": "Individuals and Teams",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 1,
+              "text": "Enterprises",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 2,
+              "text": "Students",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 3,
+              "text": "Educators",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 4,
+              "text": "Nonprofits",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@tabs-ax",
+        "@m-spacing",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "3",
+      "name": "@tabs-ax-pill-ax-m-spacing",
+      "selector": "div.tabs-ax.pill.ax.m-spacing",
+      "path": "/drafts/nala/blocks/tabs-ax/tabs-ax-pills-ax-m-spacing",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": [
+            {
+              "type": "tab",
+              "selector": "button.m-pill",
+              "nth": 0,
+              "text": "Individuals and Teams",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.m-pill",
+              "nth": 1,
+              "text": "Enterprises",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.m-pill",
+              "nth": 2,
+              "text": "Students",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.m-pill",
+              "nth": 3,
+              "text": "Educators",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.m-pill",
+              "nth": 4,
+              "text": "Nonprofits",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@tabs-ax",
+        "@pill-ax-m-spacing",
+        "@express"
+      ]
+    },
+    {
+      "tcid": "4",
+      "name": "@tabs-ax-s-spacing",
+      "selector": "div.tabs-ax.s-spacing",
+      "path": "/drafts/nala/blocks/tabs-ax/tabs-ax-s-spacing",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": [
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 0,
+              "text": "Individuals and Teams",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 1,
+              "text": "Enterprises",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 2,
+              "text": "Students",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 3,
+              "text": "Educators",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "button.heading-xs",
+              "nth": 4,
+              "text": "Nonprofits",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@tabs-ax",
+        "@s-spacing",
+        "@express"
+      ]
+    }
+  ]
+}

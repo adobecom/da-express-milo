@@ -2,7 +2,13 @@ import { expect } from '@esm-bundle/chai';
 import { readFile } from '@web/test-runner-commands';
 import sinon from 'sinon';
 import { mockRes } from '../blocks/test-utilities.js';
-import { setLibs, hideQuickActionsOnDevices, getIconElementDeprecated, convertToInlineSVG } from '../../express/code/scripts/utils.js';
+import {
+  setLibs,
+  hideQuickActionsOnDevices,
+  getIconElementDeprecated,
+  convertToInlineSVG,
+  getContentRoot,
+} from '../../express/code/scripts/utils.js';
 import { transformLinkToAnimation } from '../../express/code/scripts/utils/media.js';
 
 describe('Libs', () => {
@@ -45,6 +51,14 @@ describe('Libs', () => {
     };
     const libs = setLibs('/libs', location);
     expect(libs).to.equal('https://awesome--milo--forkedowner.aem.live/libs');
+  });
+
+  it('Uses stage libs on stage', () => {
+    const location = {
+      hostname: 'www.stage.adobe.com',
+    };
+    const libs = setLibs('/libs', location);
+    expect(libs).to.equal('/libs');
   });
 });
 
@@ -218,8 +232,8 @@ describe('transformLinkToAnimation', () => {
 
     const result = transformLinkToAnimation(invalidLink);
     expect(result).to.be.null;
-    expect(window.lana.log.calledOnce).to.be.true;
-    expect(window.lana.log.firstCall.args[0]).to.equal('Invalid video URL in transformLinkToAnimation:');
+    expect(window.lana?.log.calledOnce).to.be.true;
+    expect(window.lana?.log.firstCall.args[0]).to.equal('Invalid video URL in transformLinkToAnimation:');
 
     // Restore original lana and URL
     window.lana = originalLana;
@@ -245,10 +259,32 @@ describe('transformLinkToAnimation', () => {
 
     const result = transformLinkToAnimation(problematicLink);
     expect(result).to.be.null;
-    expect(window.lana.log.calledOnce).to.be.true;
-    expect(window.lana.log.firstCall.args[0]).to.equal('Error in transformLinkToAnimation:');
+    expect(window.lana?.log.calledOnce).to.be.true;
+    expect(window.lana?.log.firstCall.args[0]).to.equal('Error in transformLinkToAnimation:');
 
     // Restore original lana
     window.lana = originalLana;
+  });
+});
+
+describe('getContentRoot', () => {
+  const tests = [
+    ['https://main--express-color--adobecom.aem.page/', ''],
+    ['https://main--express-color--adobecom.aem.live/', ''],
+    ['https://color.stage.adobe.com', ''],
+    ['https://color.adobe.com', ''],
+    ['https://main--da-express-milo--adobecom.aem.page/', '/express'],
+    ['https://main--da-express-milo--adobecom.aem.live/', '/express'],
+    ['https://www.stage.adobe.com/', '/express'],
+    ['https://www.adobe.com/', '/express'],
+    ['http://localhost:3000', '/express'],
+  ];
+
+  tests.forEach(([url, expected]) => {
+    it(`Sets content root for ${url}`, () => {
+      const location = new URL(url);
+      const contentRoot = getContentRoot(location);
+      expect(contentRoot).to.equal(expected);
+    });
   });
 });

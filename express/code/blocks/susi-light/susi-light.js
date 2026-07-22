@@ -16,6 +16,10 @@ export const DCTX_ID_MAP = {
     stage: 'v:2,s,bg:EDUExpressPurple,40262910-c9bd-11f0-8359-b30f8fb5b3f5',
     prod: 'v:2,s,bg:EDUExpressPurple,a6588140-c9bf-11f0-a941-d1bc629a24f2',
   },
+  'context-business': {
+    stage: 'v:2,s,bg:CCEX2026,1f6b5da0-84f5-11f1-a200-01707558ef03',
+    prod: 'v:2,s,bg:CCEX2026,4239e360-84f5-11f1-a2c5-b37dc30b0d07',
+  },
 };
 
 const usp = new URLSearchParams(window.location.search);
@@ -28,12 +32,12 @@ const onRedirect = (e) => {
     window.location.assign(e.detail);
   }, 100);
 };
-const onError = (e) => {
-  window.lana?.log('on error:', e);
+const onError = (error) => {
+  window.lana?.log(`on error: ${error?.message || error?.detail || error}`, { tags: 'susi-light', severity: 'error' });
 };
 
-const onAuthFailed = (e) => {
-  window.lana?.log(`on auth failed: ${e.detail}`);
+const onAuthFailed = (error) => {
+  window.lana?.log(`on auth failed: ${error?.message || error?.detail || error}`, { tags: 'susi-light, susi-auth-failed', severity: 'error' });
 };
 // easier to mock in unit test
 export const SUSIUtils = {
@@ -51,15 +55,15 @@ async function getDestURL(url) {
   try {
     const appended = await getTrackingAppendedURL(url);
     destURL = new URL(appended);
-  } catch (err) {
-    window.lana?.log(`invalid redirect uri for susi-light: ${url}`);
+  } catch (error) {
+    window.lana?.log(`invalid redirect uri for susi-light: ${url}: ${error?.message || error?.detail || error}`, { tags: 'susi-light, susi-invalid-redirect-uri', severity: 'error' });
     destURL = new URL('https://new.express.adobe.com');
   }
   if (isStage) {
     if (['new.express.adobe.com', 'express.adobe.com'].includes(destURL.hostname)) {
       destURL.hostname = 'stage.projectx.corp.adobe.com';
     }
-    if (destURL.hostname === 'adobesparkpost.app.link') {
+    if (destURL.hostname === 'adobesparkpost.app.link' && !destURL.pathname.includes('/color-palette')) {
       destURL.pathname = '1F048UHIAVb';
     }
   }
@@ -150,7 +154,9 @@ function redirectIfLoggedIn(destURL) {
         /* c8 ignore next */
         window.adobeIMS?.isSignedInUser() && goDest();
       })
-      .catch((e) => { window.lana?.log(`Unable to load IMS in susi-light: ${e}`); });
+      .catch((error) => {
+        window.lana?.log(`Unable to load IMS in susi-light: ${error?.message || error?.detail || error}`, { tags: 'susi-light, susi-load-ims-failed', severity: 'error' });
+      });
   }
 }
 
@@ -433,16 +439,49 @@ async function buildSUSITabs(el, locale, imsClientId, noRedirect) {
 
 async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const rows = el.querySelectorAll(':scope > div > div');
-  const redirectUrl = rows[0]?.textContent?.trim();
+  const isColor = el.classList.contains('color');
+
+  let redirectUrl;
+  if (isColor) {
+    const { consumeSusiColorRedirect } = await import(
+      '../../scripts/color-shared/utils/susiRedirect.js'
+    );
+    redirectUrl = consumeSusiColorRedirect() || window.location.href;
+  } else {
+    redirectUrl = rows[0]?.textContent?.trim();
+  }
+
   const client_id = rows[1]?.textContent?.trim() || (imsClientId ?? 'AdobeExpressWeb');
   const title = rows[2]?.textContent?.trim();
   const popup = el.classList.contains('popup') || false;
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
+  if (isColor) {
+    try {
+      const orig = new URL(redirectUrl);
+      const colorPalette = orig.searchParams.get('colorPalette');
+      const colorReferrer = orig.searchParams.get('referrer');
+      const featureEnable = orig.searchParams.get('feature-enable');
+      const entryPoint = orig.searchParams.get('entryPoint');
+      if (colorPalette) {
+        destURL.searchParams.set('colorPalette', colorPalette);
+      }
+      if (colorReferrer) {
+        destURL.searchParams.set('referrer', colorReferrer);
+      }
+      if (featureEnable) {
+        destURL.searchParams.set('feature-enable', featureEnable);
+      }
+      if (entryPoint) {
+        destURL.searchParams.set('entryPoint', entryPoint);
+      }
+      destURL.hash = '';
+    } catch { /* ignore — destURL fallback is already set */ }
+  }
   const params = buildSUSIParams({
     client_id, variant, destURL, locale, title, popup, responseType: 'token',
   });
-  if (!noRedirect) {
+  if (!noRedirect && !isColor) {
     redirectIfLoggedIn(params.destURL);
   }
   await SUSIUtils.loadSUSIScripts();

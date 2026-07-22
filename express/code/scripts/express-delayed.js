@@ -75,8 +75,8 @@ export default async function loadDelayed() {
     turnContentLinksIntoButtons();
     preloadSUSILight();
     return null;
-  } catch (err) {
-    window.lana?.log(`Express-Delayed Error: ${err}`);
+  } catch (error) {
+    window.lana?.log(`Express-Delayed Error: ${error?.message || error?.detail || error}`, { tags: 'express-delayed', severity: 'error' });
     return null;
   }
 }

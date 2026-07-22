@@ -19,6 +19,7 @@ import {
   updateImpressionCache,
   generateSearchId,
 } from '../../scripts/template-search-api-v3.js';
+import { fetchResults, isValidTemplate as isValidTemplateTaas } from '../../scripts/template-utils.js';
 import fetchAllTemplatesMetadata from '../../scripts/utils/all-templates-metadata.js';
 import renderTemplate from './template-rendering.js';
 import isDarkOverlayReadable from '../../scripts/color-tools.js';
@@ -50,26 +51,30 @@ function handlelize(str) {
     .toLowerCase();
 }
 
-async function getTemplates(response, fallbackMsg, props) {
+const EAGER_LOAD_COUNT = 4;
+
+async function getTemplates(response, fallbackMsg, props, options = {}) {
+  const { isFirstLoad = false } = options;
   const filtered = response.items.filter((item) => isValidTemplate(item));
-  // Sort templates based on templateOrder if present
   if (props.templateOrder?.length > 0) {
     filtered.sort((a, b) => {
       const indexA = props.templateOrder.indexOf(a.id);
       const indexB = props.templateOrder.indexOf(b.id);
-      // If both templates are in templateOrder, sort by their position
       if (indexA !== -1 && indexB !== -1) {
         return indexA - indexB;
       }
-      // If only one template is in templateOrder, put it first
       if (indexA !== -1) return -1;
       if (indexB !== -1) return 1;
-      // For templates not in templateOrder, maintain their original order
       return 0;
     });
   }
   const templates = await Promise.all(
-    filtered.map(async (template) => renderTemplate(template, variant, props)),
+    filtered.map(async (template, index) => {
+      const renderOptions = {
+        eager: isFirstLoad && index < EAGER_LOAD_COUNT,
+      };
+      return renderTemplate(template, variant, props, renderOptions);
+    }),
   );
   await Promise.all(templates);
   return {
@@ -78,7 +83,7 @@ async function getTemplates(response, fallbackMsg, props) {
   };
 }
 
-async function fetchAndRenderTemplates(props) {
+async function fetchAndRenderTemplates(props, options = {}) {
   const [{ response, fallbackMsg }] = await Promise.all(
     [fetchTemplates(props)],
   );
@@ -97,7 +102,79 @@ async function fetchAndRenderTemplates(props) {
 
   props.total = response.metadata.totalHits;
   // eslint-disable-next-line no-return-await
-  return await getTemplates(response, fallbackMsg, props);
+  return await getTemplates(response, fallbackMsg, props, options);
+}
+
+/**
+ * TAAS (Template-as-a-Service) approach for fetching templates
+ * Uses fetchResults from template-utils.js with a recipe query string
+ */
+async function fetchAndRenderTemplatesFromTaas(taasQuery, props, options = {}) {
+  const { isFirstLoad = false } = options;
+  const queryParams = new URLSearchParams(taasQuery);
+  if (props?.start) queryParams.set('start', props.start);
+
+  // Apply toolbar filter/sort overrides so user selections affect TAAS results
+  if (props?.filters?.premium && props.filters.premium !== 'all') {
+    queryParams.set('license', props.filters.premium.toLowerCase() === 'false' ? 'free' : 'premium');
+  } else if (props?.filters?.premium === 'all') {
+    queryParams.delete('license');
+  }
+  if (props?.filters?.animated && props.filters.animated !== 'all') {
+    queryParams.set('behaviors', props.filters.animated.toLowerCase() === 'false' ? 'still' : 'animated');
+  } else if (props?.filters?.animated === 'all') {
+    queryParams.delete('behaviors');
+  }
+  if (props?.sort) {
+    const sortToOrderBy = {
+      'Most Viewed': '-remixCount',
+      'Rare & Original': 'remixCount',
+      'Newest to Oldest': '-createDate',
+      'Oldest to Newest': 'createDate',
+    };
+    if (sortToOrderBy[props.sort]) {
+      queryParams.set('orderBy', sortToOrderBy[props.sort]);
+    } else {
+      queryParams.delete('orderBy');
+    }
+  }
+
+  const res = await fetchResults(queryParams.toString());
+
+  if (!res || !res.items || !Array.isArray(res.items)) {
+    return { templates: null };
+  }
+
+  // eslint-disable-next-line no-underscore-dangle
+  if ('_links' in res && res._links?.next?.href) {
+    // eslint-disable-next-line no-underscore-dangle
+    const nextHref = res._links.next.href;
+    const isFullUrl = nextHref.startsWith('http');
+    const queryString = isFullUrl ? new URL(nextHref).search : nextHref;
+    const params = new URLSearchParams(queryString);
+    const startParam = params.get('start');
+
+    if (startParam && props) {
+      props.start = startParam.split(',').join(',');
+    }
+  } else if (props) {
+    props.start = '';
+  }
+
+  const filteredItems = res.items.filter((item) => isValidTemplateTaas(item));
+  const templates = await Promise.all(
+    filteredItems.map((item, index) => {
+      const renderOptions = {
+        eager: isFirstLoad && index < EAGER_LOAD_COUNT,
+      };
+      return renderTemplate(item, variant, props, renderOptions);
+    }),
+  );
+  templates.forEach((tplt) => tplt.classList.add('template'));
+  return {
+    templates,
+    total: res.metadata?.totalHits || templates.length,
+  };
 }
 
 async function processContentRow(block, props) {
@@ -217,6 +294,8 @@ function constructProps(block) {
     textColor: '#FFFFFF',
     loadedOtherCategoryCounts: false,
     templateOrder: [],
+    taasQuery: '',
+    hideJumpToCategories: false,
   };
   Array.from(block.children).forEach((row) => {
     const cols = row.querySelectorAll('div');
@@ -229,12 +308,11 @@ function constructProps(block) {
       if (value.toLowerCase() === 'null') {
         value = '';
       }
-
       if (key && value) {
-        // FIXME: facebook-post
-        // Handle template order
         if (key === 'template order') {
           props.templateOrder = value.split(',').map((id) => id.trim());
+        } else if (key === 'hidejumptocategories' || key === 'hide jump to categories') {
+          props.hideJumpToCategories = ['yes', 'true', 'on'].includes(value.toLowerCase());
         } else if (['tasks', 'topics', 'locales', 'behaviors'].includes(key) || (['premium', 'animated'].includes(key) && value.toLowerCase() !== 'all')) {
           props.filters[camelize(key)] = value;
         } else if (['yes', 'true', 'on', 'no', 'false', 'off'].includes(value.toLowerCase())) {
@@ -328,12 +406,41 @@ function adjustTemplateDimensions(block, props, tmplt, isPlaceholder) {
   overlayCell.remove();
 }
 
+function assignTemplateCardRegions(tmplt) {
+  const [mediaArea, contentArea] = tmplt.querySelectorAll(':scope > div');
+  mediaArea?.classList.add('template-card-media');
+  contentArea?.classList.add('template-card-content');
+  return { mediaArea, contentArea };
+}
+
+function updateTemplateCardStructure(block) {
+  const innerWrapper = block.querySelector('.template-x-inner-wrapper');
+  if (!innerWrapper) return;
+  const templates = Array.from(innerWrapper.querySelectorAll('.template'));
+  templates.forEach((card) => {
+    card.classList.remove('is-first-card', 'is-last-card', 'is-second-last-card', 'is-second-card');
+  });
+  if (!templates.length) return;
+  const lastIndex = templates.length - 1;
+  templates[0].classList.add('is-first-card');
+  if (templates.length > 1) {
+    templates[1].classList.add('is-second-card');
+  }
+  templates[lastIndex].classList.add('is-last-card');
+  if (templates.length > 1) {
+    templates[lastIndex - 1].classList.add('is-second-last-card');
+  }
+}
+
 function populateTemplates(block, props, templates) {
+  const innerWrapper = block.querySelector('.template-x-inner-wrapper');
   for (let tmplt of templates) {
-    const isPlaceholder = tmplt.querySelector(':scope > div:first-of-type > img[src*=".svg"], :scope > div:first-of-type > svg');
-    const linkContainer = tmplt.querySelector(':scope > div:nth-of-type(2)');
-    const rowWithLinkInFirstCol = tmplt.querySelector(':scope > div:first-of-type > a');
-    const innerWrapper = block.querySelector('.template-x-inner-wrapper');
+    const { mediaArea, contentArea } = assignTemplateCardRegions(tmplt);
+    const placeholderImg = mediaArea?.querySelector(':scope > img[src*=".svg"]');
+    const placeholderSvg = mediaArea?.querySelector(':scope > svg');
+    const isPlaceholder = placeholderImg || placeholderSvg;
+    const linkContainer = contentArea || tmplt.querySelector(':scope > div:nth-of-type(2)');
+    const rowWithLinkInFirstCol = mediaArea?.querySelector(':scope > a');
 
     if (innerWrapper && linkContainer) {
       const link = linkContainer.querySelector(':scope a');
@@ -370,6 +477,7 @@ function populateTemplates(block, props, templates) {
       tmplt.classList.add('placeholder');
     }
   }
+  updateTemplateCardStructure(block);
 }
 
 function updateLoadMoreButton(props, loadMore) {
@@ -405,11 +513,14 @@ async function build2by2(parentContainer, block) {
   } else {
     block.append(control);
   }
+  updateTemplateCardStructure(block);
 }
 
 // WIP
 async function decorateNewTemplates(block, props, options = { reDrawMasonry: false }) {
-  const { templates: newTemplates } = await fetchAndRenderTemplates(props);
+  const { templates: newTemplates } = props.taasQuery
+    ? await fetchAndRenderTemplatesFromTaas(props.taasQuery, props)
+    : await fetchAndRenderTemplates(props);
   updateImpressionCache({ result_count: props.total });
   const loadMore = block.parentElement.querySelector('.load-more');
 
@@ -601,6 +712,12 @@ async function decorateFunctionsContainer(block, functions) {
     .querySelector('.current-option-animated')
     .textContent = `${staticP} ${versusShorthand} ${animated}`;
 
+  Array.from(functionContainerMobile.children).forEach((wrapper, index) => {
+    if (index === 0) {
+      wrapper.classList.add('drawer-first-filter');
+    }
+  });
+
   drawerInnerWrapper.append(
     functionContainerMobile.children[0],
     functionContainerMobile.children[1],
@@ -700,9 +817,13 @@ async function decorateCategoryList(block, props) {
   const categoriesToggle = getIconElementDeprecated('drop-down-arrow');
   const categoriesListHeading = createTag('div', { class: 'category-list-heading' });
   const categoriesList = createTag('ul', { class: 'category-list' });
+  categoriesListHeading.append(getIconElementDeprecated('template-search'));
+  let jumpToCategory;
+  if (!props.hideJumpToCategories) {
+    jumpToCategory = await replaceKey('jump-to-category', getConfig());
+    categoriesListHeading.append(jumpToCategory);
+  }
 
-  const jumpToCategory = await replaceKey('jump-to-category', getConfig());
-  categoriesListHeading.append(getIconElementDeprecated('template-search'), jumpToCategory);
   categoriesToggleWrapper.append(categoriesToggle);
   categoriesDesktopWrapper.append(categoriesToggleWrapper, categoriesListHeading, categoriesList);
 
@@ -899,8 +1020,9 @@ function initDrawer(block, props, toolBar) {
       applyButton.classList.remove('transparent');
       functionWrappers.forEach((wrapper) => {
         const button = wrapper.querySelector('.button-wrapper');
-        if (button) {
-          button.style.maxHeight = `${button.nextElementSibling.offsetHeight}px`;
+        const optionsWrapper = wrapper.querySelector('.options-wrapper');
+        if (button && optionsWrapper) {
+          button.style.maxHeight = `${optionsWrapper.offsetHeight}px`;
         }
       });
     }, 100);
@@ -1027,8 +1149,8 @@ async function initFilterSort(block, props, toolBar) {
     buttons.forEach((button) => {
       const wrapper = button.parentElement;
       const currentOption = wrapper.querySelector('span.current-option');
-      const optionsList = button.nextElementSibling;
-      const options = optionsList.querySelectorAll('.option-button');
+      const optionsList = wrapper.querySelector('.options-wrapper');
+      const options = optionsList?.querySelectorAll('.option-button') || [];
 
       button.addEventListener('click', () => {
         existingProps = { ...props, filters: { ...props.filters } };
@@ -1205,10 +1327,15 @@ function toggleMasonryView(block, props, button, toggleButtons) {
 }
 
 const views = ['sm', 'md', 'lg'];
+const MOBILE_TEMPLATE_VIEW_BREAKPOINT = 901;
 function getInitialViewIndex(props) {
-  const authoredViewIndex = views.findIndex(
-    (size) => props.initialTemplateView?.toLowerCase().trim() === size,
-  );
+  const isMobileViewport = window.innerWidth < MOBILE_TEMPLATE_VIEW_BREAKPOINT;
+  const authoredMobileView = props.initialTemplateViewMobile?.toLowerCase().trim();
+  const authoredDefaultView = props.initialTemplateView?.toLowerCase().trim();
+  const selectedView = isMobileViewport && authoredMobileView
+    ? authoredMobileView
+    : authoredDefaultView;
+  const authoredViewIndex = views.findIndex((size) => selectedView === size);
   return authoredViewIndex === -1 ? 0 : authoredViewIndex;
 }
 
@@ -1266,8 +1393,8 @@ async function decorateToolbar(block, props) {
     const { getGnavHeight } = await import(`${getLibs()}/blocks/global-navigation/utilities/utilities.js`);
     const gnavHeight = getGnavHeight();
     tBarWrapper.style.top = `${gnavHeight}px`;
-  } catch (e) {
-    window.lana?.log(`Error getting gnav height ${e}`);
+  } catch (error) {
+    window.lana?.log(`Error getting gnav height: ${error?.message || error?.detail || error}`, { tags: 'template-x', severity: 'error' });
   }
 
   tBarWrapper.append(tBar);
@@ -1463,8 +1590,6 @@ async function decorateTemplates(block, props) {
 }
 
 async function decorateBreadcrumbs(block) {
-  // breadcrumbs are desktop-only
-  if (document.body.dataset.device !== 'desktop') return;
   const { default: getBreadcrumbs } = await import('./breadcrumbs.js');
   const breadcrumbs = await getBreadcrumbs(createTag, getMetadata, getConfig);
   if (breadcrumbs) block.prepend(breadcrumbs);
@@ -1759,7 +1884,16 @@ async function buildTemplateList(block, props, type = []) {
     await processContentRow(block, props);
   }
 
-  const { templates, fallbackMsg } = await fetchAndRenderTemplates(props);
+  const isFirstSection = block.closest('.section') === document.querySelector('.section');
+  const loadOptions = { isFirstLoad: isFirstSection };
+
+  const { templates, fallbackMsg, total } = props.taasQuery
+    ? await fetchAndRenderTemplatesFromTaas(props.taasQuery, props, loadOptions)
+    : await fetchAndRenderTemplates(props, loadOptions);
+
+  if (total !== undefined) {
+    props.total = total;
+  }
 
   if (templates?.length > 0) {
     props.fallbackMsg = fallbackMsg;
@@ -1773,8 +1907,7 @@ async function buildTemplateList(block, props, type = []) {
 
     await decorateTemplates(block, props);
   } else {
-    window.lana.log(`failed to load templates with props: ${JSON.stringify(props)}`, { tags: 'templates-api' });
-
+    window.lana?.log(`failed to load templates with props: ${JSON.stringify(props)}`, { tags: 'template-x, templates-api', severity: 'error' });
     if (getConfig().env.name === 'prod') {
       block.remove();
     } else {
@@ -1824,6 +1957,10 @@ async function buildTemplateList(block, props, type = []) {
           tabConfigs,
         ), { passive: true });
       });
+      if (tabBtns.length > 0) {
+        tabBtns.forEach((btn) => btn.classList.remove('template-tab-button-first'));
+        tabBtns[0].classList.add('template-tab-button-first');
+      }
 
       if (activeTabIndex < 0 && tabBtns.length > 0) {
         tabBtns[0].classList.add('active');
@@ -1856,7 +1993,9 @@ async function buildTemplateList(block, props, type = []) {
 
   if (templates && props.toolBar) {
     await decorateToolbar(block, props);
-    if (!block.classList.contains(TWO_ROW)) await decorateCategoryList(block, props);
+    if (!block.classList.contains(TWO_ROW) && !props.hideJumpToCategories) {
+      await decorateCategoryList(block, props);
+    }
   }
 
   if (props.toolBar && props.searchBar) {
