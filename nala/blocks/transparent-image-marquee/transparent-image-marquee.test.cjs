@@ -67,6 +67,10 @@ test.describe('TransparentImageMarqueeBlock Test Suite', () => {
       await expect(block.heading).toBeVisible();
       await expect(block.image).toBeVisible();
     });
+
+    await test.step('step-4: Accessibility validation (light variant color contrast)', async () => {
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
+    });
   });
 
   // Test Id : 2 : @transparent-image-marquee-cta-variations
@@ -90,13 +94,13 @@ test.describe('TransparentImageMarqueeBlock Test Suite', () => {
     });
 
     await test.step('step-3: A primary CTA is a visible link', async () => {
-      const primary = scope.locator('.cta.primary').first();
+      const primary = scope.locator('a.con-button.blue').first();
       await expect(primary).toBeVisible();
       await expect(primary).toHaveAttribute('href', /.+/);
     });
 
     await test.step('step-4: A secondary CTA is a visible link', async () => {
-      const secondary = scope.locator('.cta.secondary').first();
+      const secondary = scope.locator('a.con-button.outline').first();
       await expect(secondary).toBeVisible();
       await expect(secondary).toHaveAttribute('href', /.+/);
     });

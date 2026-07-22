@@ -14,11 +14,11 @@ class TransparentImageMarqueeBlock {
     this.heading = this.textContainer.locator('h1, h2, h3, h4, h5, h6').first();
     this.bodyText = this.textContainer.locator('p').first();
 
-    // CTAs + disclaimer
+    // CTAs + disclaimer (milo con-buttons: blue = primary, outline = secondary)
     this.ctaContainer = this.mainContainer.locator('.cta-container');
     this.buttonGroup = this.ctaContainer.locator('.button-group');
-    this.primaryCta = this.ctaContainer.locator('.cta.primary');
-    this.secondaryCta = this.ctaContainer.locator('.cta.secondary');
+    this.primaryCta = this.buttonGroup.locator('a.con-button.blue');
+    this.secondaryCta = this.buttonGroup.locator('a.con-button.outline');
     this.disclaimer = this.ctaContainer.locator('.disclaimer');
 
     // Image

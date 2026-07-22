@@ -7,8 +7,9 @@
  *   Desktop (L)  ≥ 1200px   2-column with a fixed 787.5px image
  * The image is anchored to the bottom edge of the block (no bottom
  * padding) so the transparent PNG bleeds into the section below.
- * Background color is authored as a single hex; the JS adds `.light`
- * automatically when that color is light so text/borders flip.
+ * Background color is authored as a single hex; the JS adds `.light` or `.dark`
+ * automatically from that color's luminance so text and milo con-button
+ * treatments flip to stay readable.
  * ------------------------------------------------------------------ */
 
 .transparent-image-marquee {
@@ -101,42 +102,37 @@
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-200);
+  /* Left-align the buttons under the heading/body; width:100% keeps the row
+     constrained to the column so a long CTA wraps/stacks inside it instead of
+     shrink-to-fitting past the column into the image. */
+  justify-content: flex-start;
+  width: 100%;
 }
 
-.transparent-image-marquee .cta {
+/* milo's decorateButtons wraps each CTA anchor in an .action-area <p>; strip its
+   default block spacing so the flex gap alone controls the layout. */
+.transparent-image-marquee .button-group .action-area {
+  display: flex;
+  max-width: 100%;
+  margin: 0;
+}
+
+/* Buttons are milo con-buttons (blue/outline, button-l): color + pill shape come
+   from styles.css, and the .dark/.light block class flips the treatment. We only
+   override sizing so the pill is 40px tall (per design; milo's default is ~36px)
+   and long labels wrap + stay inside the column rather than ellipsis-truncating
+   (milo's con-button default is overflow:hidden; text-overflow:ellipsis). */
+.transparent-image-marquee a.con-button:any-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
-  min-width: 90px;
-  padding: 10px 20px;
-  border: 2px solid transparent;
-  border-radius: 24px;
-  font-family: var(--body-font-family);
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 22px;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.transparent-image-marquee .cta.primary {
-  background: var(--Buttons-default);
-  color: var(--color-white);
-}
-
-.transparent-image-marquee .cta.primary:hover {
-  background: var(--Buttons-hover);
-}
-
-.transparent-image-marquee .cta.secondary {
-  background: transparent;
-  border-color: rgba(255, 255, 255, 0.17);
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.transparent-image-marquee .cta.secondary:hover {
-  border-color: rgba(255, 255, 255, 0.4);
+  min-height: 40px;
+  max-width: 100%;
+  margin: 0;
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
 }
 
 .transparent-image-marquee .disclaimer {
@@ -144,6 +140,19 @@
   font-size: var(--body-font-size-s);
   line-height: 1.3;
   margin: 0;
+}
+
+/* Mobile: when the CTAs are too long to sit on one line the JS adds .long-cta;
+   both buttons then expand to fill the foreground width and stack as equal
+   full-width buttons, rather than one full-width + one content-width button. */
+@media (max-width: 599px) {
+  .transparent-image-marquee .button-group.long-cta .action-area {
+    flex: 1 1 100%;
+  }
+
+  .transparent-image-marquee .button-group.long-cta a.con-button:any-link {
+    width: 100%;
+  }
 }
 
 /* ── image ──────────────────────────────────────────────────────── */
@@ -164,19 +173,13 @@
   width: 100%;
 }
 
-/* Light variant: dark text/borders for a light authored background.
-   Auto-applied by the JS from the authored hex luminance. */
+/* Light variant: dark text for a light authored background. Auto-applied by the
+   JS from the authored background luminance. The milo con-button rules key off
+   the block's .dark/.light class for the button treatment (blue stays blue; the
+   outline button flips between a transparent/white-border dark treatment and a
+   solid white light treatment), so no per-variant CTA overrides are needed. */
 .transparent-image-marquee.light {
   color: var(--color-black);
-}
-
-.transparent-image-marquee.light .cta.secondary {
-  border-color: rgba(0, 0, 0, 0.17);
-  color: rgba(0, 0, 0, 0.85);
-}
-
-.transparent-image-marquee.light .cta.secondary:hover {
-  border-color: rgba(0, 0, 0, 0.4);
 }
 
 /* ── Tablet (M) ≥ 600px: 2-column that wraps to 1-column ≤ ~853px ── */

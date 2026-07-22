@@ -72,6 +72,7 @@ describe('transparent-image-marquee', () => {
   it('keeps the dark treatment for a dark authored background', async () => {
     const block = await prepBlock('./mocks/default.html');
     expect(block.classList.contains('light')).to.be.false;
+    expect(block.classList.contains('dark')).to.be.true;
   });
 });
 
@@ -86,19 +87,24 @@ describe('transparent-image-marquee / CTAs + disclaimer', () => {
     expect(block.querySelector('.cta-container .button-group')).to.exist;
   });
 
-  it('marks the strong-wrapped link as the primary CTA', async () => {
+  it('decorates the strong-wrapped link as the primary (blue) con-button', async () => {
     const block = await prepBlock('./mocks/with-ctas.html');
-    const primary = block.querySelector('.cta.primary');
+    const primary = block.querySelector('.button-group a.con-button.blue');
     expect(primary).to.exist;
     expect(primary.tagName).to.equal('A');
     expect(primary.textContent.trim()).to.equal('Get started');
   });
 
-  it('marks the second link as the secondary CTA', async () => {
+  it('decorates the em-wrapped link as the secondary (outline) con-button', async () => {
     const block = await prepBlock('./mocks/with-ctas.html');
-    const secondary = block.querySelector('.cta.secondary');
+    const secondary = block.querySelector('.button-group a.con-button.outline');
     expect(secondary).to.exist;
     expect(secondary.textContent.trim()).to.equal('Learn more');
+  });
+
+  it('does not leave the secondary CTA mis-tagged as supplemental text', async () => {
+    const block = await prepBlock('./mocks/with-ctas.html');
+    expect(block.querySelector('.button-group .supplemental-text')).to.not.exist;
   });
 
   it('renders the trailing no-link paragraph as the disclaimer', async () => {

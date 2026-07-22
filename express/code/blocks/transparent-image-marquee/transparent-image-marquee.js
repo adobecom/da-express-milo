@@ -3,8 +3,10 @@ import {
   fixIcons,
   getMetadata,
   formatDynamicCartLink,
+  getLibs,
 } from '../../scripts/utils.js';
 import trackBranchParameters from '../../scripts/branchlinks.js';
+import isDarkOverlayReadable from '../../scripts/color-tools.js';
 
 // Mirror the existing marquee branding-logo injection (see grid-marquee):
 // authors opt in via `inject-branding-logo` (explicit icon name) or the
@@ -18,17 +20,37 @@ function getBrandingLogo() {
   return logo;
 }
 
-// Decide whether an authored background hex is "light" (needs dark text) using
-// perceived luminance (ITU-R BT.601). Supports #RGB and #RRGGBB. Anything we
-// can't parse falls back to the default dark treatment.
-function isLightColor(value) {
-  const hex = value?.replace('#', '').trim() ?? '';
-  const full = hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex;
-  if (full.length !== 6 || /[^0-9a-f]/i.test(full)) return false;
-  const r = parseInt(full.slice(0, 2), 16);
-  const g = parseInt(full.slice(2, 4), 16);
-  const b = parseInt(full.slice(4, 6), 16);
-  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.6;
+// A CTA is "long" when the buttons can't sit on a single line, so they stack.
+// Measure each button's natural (nowrap) width off-screen — a clone keeps the
+// check independent of any width the .long-cta rule applies, so toggling never
+// changes the measurement and can't oscillate.
+function ctasFitOneLine(buttonGroup, buttons) {
+  const available = buttonGroup.clientWidth;
+  if (!available) return true;
+  const styles = getComputedStyle(buttonGroup);
+  const gap = parseFloat(styles.columnGap || styles.gap) || 0;
+  let total = gap * Math.max(buttons.length - 1, 0);
+  buttons.forEach((btn) => {
+    const clone = btn.cloneNode(true);
+    clone.style.cssText = 'position:absolute;visibility:hidden;width:auto;max-width:none;white-space:nowrap;';
+    buttonGroup.append(clone);
+    total += clone.getBoundingClientRect().width;
+    clone.remove();
+  });
+  return total <= available;
+}
+
+// On mobile a long CTA forces the buttons to stack; when that happens both fill
+// the foreground width (see .long-cta in the CSS) instead of one full-width and
+// one content-width button. Re-run on resize so the state tracks the viewport.
+function watchStackedCtas(buttonGroup) {
+  const sync = () => {
+    const buttons = [...buttonGroup.querySelectorAll('a.con-button')];
+    buttonGroup.classList.toggle('long-cta', buttons.length > 0 && !ctasFitOneLine(buttonGroup, buttons));
+  };
+  sync();
+  new ResizeObserver(sync).observe(buttonGroup);
+  document.fonts?.ready.then(sync);
 }
 
 export default async function decorate(block) {
@@ -44,20 +66,22 @@ export default async function decorate(block) {
   const heading = textEls.find((el) => /^H[1-6]$/.test(el.tagName));
   const paras = textEls.filter((el) => el.tagName === 'P');
 
-  // Authored CTAs are links; a primary CTA is wrapped in <strong>. Paragraphs
-  // with no link before the first CTA are body copy; a no-link paragraph after
-  // the CTAs is the disclaimer line.
-  const links = [...textCell.querySelectorAll('a')];
-  const primaryLink = links.find((a) => a.closest('strong')) || links[0];
-  const secondaryLink = links.find((a) => a !== primaryLink);
+  // Link-bearing paragraphs are CTAs (milo decorateButtons turns them into
+  // con-buttons). No-link paragraphs before the first CTA are body copy; a
+  // no-link paragraph after the CTAs is the disclaimer line.
   const firstCtaIdx = paras.findIndex((p) => p.querySelector('a'));
 
   const bodyParas = [];
+  const ctaParas = [];
   const disclaimerParas = [];
   paras.forEach((p, i) => {
-    if (p.querySelector('a')) return;
-    if (firstCtaIdx === -1 || i < firstCtaIdx) bodyParas.push(p);
-    else disclaimerParas.push(p);
+    if (p.querySelector('a')) {
+      ctaParas.push(p);
+    } else if (firstCtaIdx === -1 || i < firstCtaIdx) {
+      bodyParas.push(p);
+    } else {
+      disclaimerParas.push(p);
+    }
   });
 
   const textContainer = document.createElement('div');
@@ -74,19 +98,26 @@ export default async function decorate(block) {
   mainContainer.className = 'main-container';
   mainContainer.append(textContent);
 
-  if (primaryLink || disclaimerParas.length) {
+  let buttonGroup = null;
+  if (ctaParas.length || disclaimerParas.length) {
     const ctaContainer = document.createElement('div');
     ctaContainer.className = 'cta-container';
 
-    if (primaryLink) {
-      const buttonGroup = document.createElement('div');
+    if (ctaParas.length) {
+      buttonGroup = document.createElement('div');
       buttonGroup.className = 'button-group';
-      primaryLink.classList.add('cta', 'primary');
-      buttonGroup.append(primaryLink);
-      if (secondaryLink) {
-        secondaryLink.classList.add('cta', 'secondary');
-        buttonGroup.append(secondaryLink);
-      }
+      ctaParas.forEach((p) => buttonGroup.append(p));
+
+      // Milo styles: a <strong>-wrapped link becomes the primary (blue) button,
+      // an <em>-wrapped link the secondary (outline) button, sized to button-l.
+      const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
+      decorateButtons(buttonGroup, 'button-l');
+      // decorateButtons tags each action-area's next sibling as supplemental
+      // text; when two CTAs are adjacent that mis-tags the second button's
+      // paragraph, so clear it within our own button group.
+      buttonGroup.querySelectorAll('.supplemental-text')
+        .forEach((el) => el.classList.remove('supplemental-text', 'body-xl'));
+
       ctaContainer.append(buttonGroup);
     }
 
@@ -109,17 +140,25 @@ export default async function decorate(block) {
   block.textContent = '';
   if (bgColor) {
     block.style.background = bgColor;
-    // A single authored hex activates the light (dark-text) treatment when the
-    // color is light; dark backgrounds keep the default light-text treatment.
-    if (isLightColor(bgColor)) block.classList.add('light');
+    // isDarkOverlayReadable(bg) is true when a dark overlay is legible on the
+    // background, i.e. the background is light — so flip to the .light
+    // (dark-text) treatment; otherwise use the .dark (light-text) treatment.
+    const light = isDarkOverlayReadable(bgColor);
+    block.classList.toggle('light', light);
+    block.classList.toggle('dark', !light);
   }
   block.append(foreground);
 
   fixIcons(block);
 
-  const ctaLinks = [primaryLink, secondaryLink].filter(Boolean);
+  // Now the block is in the DOM, classify the CTAs so long ones fill the width
+  // when they stack (mobile).
+  if (buttonGroup) watchStackedCtas(buttonGroup);
+
+  const ctaLinks = [...block.querySelectorAll('.button-group a.con-button')];
   if (ctaLinks.length) {
     await trackBranchParameters(ctaLinks);
+    const primaryLink = block.querySelector('.button-group a.con-button.blue');
     if (primaryLink) await formatDynamicCartLink(primaryLink);
   }
 }
