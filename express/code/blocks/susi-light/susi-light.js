@@ -17,8 +17,8 @@ export const DCTX_ID_MAP = {
     prod: 'v:2,s,bg:EDUExpressPurple,a6588140-c9bf-11f0-a941-d1bc629a24f2',
   },
   'context-business': {
-    stage: 'v:2,s,bg:CCEX2026,1f6b5da0-84f5-11f1-a200-01707558ef03',
-    prod: 'v:2,s,bg:CCEX2026,4239e360-84f5-11f1-a2c5-b37dc30b0d07',
+    stage: 'v:2,s,bg:CCEX2026,6a8de3c0-85b3-11f1-b513-f509ef954a9d',
+    prod: 'v:2,s,bg:CCEX2026,8efe80c0-85b3-11f1-be7b-b53b097617ac',
   },
 };
 
