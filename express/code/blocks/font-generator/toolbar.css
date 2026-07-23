@@ -25,7 +25,7 @@
 .toolbar-layout-group {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--spacing-75);
 }
 
 /* Mobile shows the count summary only — no grid/list toggle. */
@@ -80,7 +80,7 @@
 .toolbar-right {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--spacing-100);
   flex-shrink: 0;
   padding-block: var(--spacing-100);
 }
@@ -157,9 +157,9 @@
 .font-generator-filter-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--spacing-80);
   margin-left: auto;
-  padding: 6px 12px 6px 10px;
+  padding: var(--spacing-80) var(--spacing-200) var(--spacing-80) 10px;
   border: none;
   border-radius: 8px;
   background: var(--color-gray-250);
