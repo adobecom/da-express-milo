@@ -6,6 +6,8 @@ const JPEG = 'jpeg';
 const PNG = 'png';
 const WEBP = 'webp';
 const HEIC = 'heic';
+const MOV = 'mov';
+const MP4 = 'mp4';
 
 const VIDEO_FORMATS = [
   'mov',
@@ -130,8 +132,8 @@ export const QA_CONFIGS = {
   'qa-nba': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'convert-to-gif': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'crop-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
-  'video-convert': { ...getBaseVideoCfg(VIDEO_FORMATS) },
-  'video-compress': { ...getBaseVideoCfg(VIDEO_FORMATS) },
+  'video-convert': { ...getBaseVideoCfg([MOV, MP4]) },
+  'video-compress': { ...getBaseVideoCfg([MOV, MP4]) },
   'trim-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'resize-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'merge-videos': getMergeVideosCfg(),
