@@ -35,25 +35,30 @@ export async function showAppModal({ title, body, ctaLabel, appUrl }) {
   ]);
 
   const wrapper = createTag('div', { class: 'fg-app-modal' });
-  wrapper.append(getIconElementDeprecated('adobe-express-logo'));
+
+  const header = createTag('div', { class: 'fg-app-modal-header' });
+  // Decorative next to the title text, so it's hidden from the accessibility tree.
+  header.append(getIconElementDeprecated('adobe-express', 22, ''));
 
   const titleEl = createTag('h2', { class: 'fg-app-modal-title' });
   titleEl.textContent = title;
+  header.append(titleEl);
 
   const bodyEl = createTag('p', { class: 'fg-app-modal-body' });
   bodyEl.textContent = body;
 
   // A real anchor so tapping is a top-level navigation to the Branch link — the reliable way for
-  // Branch to hand off to the app / App Store on iOS.
+  // Branch to hand off to the app / App Store on iOS. No 'button' class — the dark pill treatment
+  // is fully custom, styled below rather than layered on Milo's default button look.
   const cta = createTag('a', {
-    class: 'fg-app-modal-cta button',
+    class: 'fg-app-modal-cta',
     href: appUrl,
     target: '_blank',
     rel: 'noopener',
   });
   cta.textContent = ctaLabel;
 
-  wrapper.append(titleEl, bodyEl, cta);
+  wrapper.append(header, bodyEl, cta);
 
   const modal = await getModal(null, {
     id: 'fg-app-modal',
@@ -61,6 +66,12 @@ export async function showAppModal({ title, body, ctaLabel, appUrl }) {
     content: wrapper,
     closeEvent: 'closeModal',
   });
+
+  // Milo's modal auto-focuses the first focusable element in the dialog on open — since the CTA
+  // is the only one here, that's the CTA, which reads oddly as a pre-highlighted button the
+  // instant the modal appears. Redirect that initial focus to the close button instead, the
+  // conventional dialog default; the CTA still focuses normally via real Tab navigation.
+  modal?.querySelector('.dialog-close')?.focus({ preventScroll: true });
 
   // "hide it for the session if the user hides it": flag once the modal leaves the DOM (close
   // button, overlay click, or Esc all remove it), so further taps this session skip the modal.
