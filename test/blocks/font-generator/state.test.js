@@ -69,9 +69,9 @@ describe('font-generator/state', () => {
 
     it('clamps fontSize into the supported range', () => {
       setState({ fontSize: 999 });
-      expect(getState().fontSize).to.equal(48);
+      expect(getState().fontSize).to.equal(100);
       setState({ fontSize: 1 });
-      expect(getState().fontSize).to.equal(12);
+      expect(getState().fontSize).to.equal(8);
     });
 
     it('ignores a non-numeric fontSize', () => {
@@ -200,9 +200,14 @@ describe('font-generator/state', () => {
 
   describe('initFromUrl', () => {
     beforeEach(() => {
-      // Default to a desktop viewport so an absent layout param resolves to
-      // grid; individual tests override for the small-viewport case.
-      sinon.stub(window, 'matchMedia').returns({ matches: false });
+      // Default every query to a desktop viewport — max-width (layout)
+      // false means "not narrow" (grid), min-width (fontSize) true means
+      // "at least 600px" (40). Individual tests override matches for a
+      // specific query string via .withArgs(), or blanket-override via
+      // .returns() when a test only cares about one of the two defaults.
+      sinon.stub(window, 'matchMedia').callsFake((query) => ({
+        matches: query.includes('min-width'),
+      }));
     });
 
     afterEach(() => {
@@ -252,10 +257,23 @@ describe('font-generator/state', () => {
     });
 
     it('defaults layout to list on small viewports when the param is absent', () => {
-      window.matchMedia.returns({ matches: true });
+      window.matchMedia.withArgs('(max-width: 899px)').returns({ matches: true });
       window.history.pushState(null, '', '?unrelated=true');
       initFromUrl();
       expect(getState().layout).to.equal('list');
+    });
+
+    it('defaults fontSize to 40 on desktop/tablet viewports when the param is absent', () => {
+      window.history.pushState(null, '', '?unrelated=true');
+      initFromUrl();
+      expect(getState().fontSize).to.equal(40);
+    });
+
+    it('defaults fontSize to 28 on mobile viewports when the param is absent', () => {
+      window.matchMedia.withArgs('(min-width: 600px)').returns({ matches: false });
+      window.history.pushState(null, '', '?unrelated=true');
+      initFromUrl();
+      expect(getState().fontSize).to.equal(28);
     });
 
     it('ignores an unrecognised view value', () => {
@@ -264,10 +282,10 @@ describe('font-generator/state', () => {
       expect(getState().layout).to.equal('grid');
     });
 
-    it('ignores a non-numeric size param', () => {
+    it('falls back to the responsive default for a non-numeric size param', () => {
       window.history.pushState(null, '', '?size=large');
       initFromUrl();
-      expect(getState().fontSize).to.equal(32);
+      expect(getState().fontSize).to.equal(40);
     });
 
     it('sets visibleCount to 12 after reading URL', () => {
@@ -276,14 +294,14 @@ describe('font-generator/state', () => {
       expect(getState().visibleCount).to.equal(12);
     });
 
-    it('leaves unchanged keys at their current values when params are absent', () => {
+    it('leaves unrelated keys unchanged, but resolves fontSize to its responsive default, when params are absent', () => {
       window.history.pushState(null, '', '?unrelated=true');
       initFromUrl();
       const state = getState();
       expect(state.previewText).to.equal('Hello World');
       expect(state.activeFilters).to.deep.equal([]);
       expect(state.layout).to.equal('grid');
-      expect(state.fontSize).to.equal(32);
+      expect(state.fontSize).to.equal(40);
     });
   });
 

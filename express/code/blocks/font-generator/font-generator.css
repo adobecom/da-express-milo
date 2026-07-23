@@ -64,7 +64,7 @@ main .section:has(.font-generator) > .content {
 
 .font-generator .fg-filter-list {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: var(--spacing-75);
 }
 
@@ -154,10 +154,6 @@ main .section:has(.font-generator) > .content {
 
 .font-generator sp-accordion-item[open] {
   border-block-end-color: transparent;
-}
-
-.font-generator .fg-panel sp-accordion-item {
-  border-block-end: none;
 }
 
 /* Promo */
@@ -512,6 +508,10 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 @media (min-width: 600px) {
   .font-generator {
     padding: var(--spacing-600) var(--spacing-500) var(--spacing-700) var(--spacing-500);
+  }
+
+  .font-generator .fg-filter-list {
+    grid-template-columns: repeat(3, 1fr);
   }
 
   .font-generator .fg-panel {

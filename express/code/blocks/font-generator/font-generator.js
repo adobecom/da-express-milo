@@ -149,9 +149,10 @@ function createSkeleton() {
 
 function getContent(strings = {}) {
   // Authored fg-suggestions metadata wins; otherwise the placeholder default
-  // (comma-separated) supplies localizable sample text.
+  // (semicolon-separated, so a suggestion can itself contain a comma) supplies
+  // localizable sample text.
   const suggestionsRaw = getMetadata('fg-suggestions') || strings.suggestions || '';
-  const suggestions = suggestionsRaw.split(',').map((s) => s.trim()).filter(Boolean);
+  const suggestions = suggestionsRaw.split(';').map((s) => s.trim()).filter(Boolean);
 
   return {
     suggestions,
@@ -214,6 +215,9 @@ async function decorateAsync(block) {
     cardCta: content.cardCta,
     fonts,
     strings,
+    // Scrolled into view on a filter change so the toolbar (not just the
+    // grid) is back in view — see fontCardGrid.js.
+    scrollTarget: toolbar,
   });
 
   main.append(toolbar, gridContainer);

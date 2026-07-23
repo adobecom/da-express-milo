@@ -97,6 +97,50 @@ describe('font-generator/fontCardGrid', () => {
     unsubscribe();
   });
 
+  describe('scrolling back to the top on a filter change', () => {
+    it('scrolls the scrollTarget into view when the filter changes', () => {
+      const scrollTarget = document.createElement('div');
+      const scrollIntoView = sinon.stub(scrollTarget, 'scrollIntoView');
+      const { unsubscribe } = mount(makeFonts(6), { scrollTarget });
+      setState({ activeFilters: ['bold'] });
+      expect(scrollIntoView.calledOnce).to.be.true;
+      expect(scrollIntoView.firstCall.args[0]).to.include({ block: 'start' });
+      unsubscribe();
+    });
+
+    it('does not scroll on the initial render, even if activeFilters starts non-empty', () => {
+      initFonts(makeFonts(6));
+      setState({
+        activeFilters: ['bold'], previewText: 'Hi', fontSize: 20, layout: 'grid',
+      });
+      const scrollTarget = document.createElement('div');
+      const scrollIntoView = sinon.stub(scrollTarget, 'scrollIntoView');
+      const { unsubscribe } = createFontCardGrid({
+        fonts: makeFonts(6), cardCta: null, scrollTarget,
+      });
+      expect(scrollIntoView.called).to.be.false;
+      unsubscribe();
+    });
+
+    it('does not scroll when Load more reveals more cards', () => {
+      const scrollTarget = document.createElement('div');
+      const scrollIntoView = sinon.stub(scrollTarget, 'scrollIntoView');
+      const fonts = makeFonts(INITIAL_VISIBLE_COUNT + LOAD_MORE_STEP);
+      const { container, unsubscribe } = mount(fonts, { scrollTarget });
+      container.querySelector('.font-card-load-more').click();
+      expect(scrollIntoView.called).to.be.false;
+      unsubscribe();
+    });
+
+    it('falls back to scrolling the grid container when no scrollTarget is given', () => {
+      const { container, unsubscribe } = mount(makeFonts(6));
+      const scrollIntoView = sinon.stub(container, 'scrollIntoView');
+      setState({ activeFilters: ['bold'] });
+      expect(scrollIntoView.calledOnce).to.be.true;
+      unsubscribe();
+    });
+  });
+
   it('toggles list layout via the is-list class', () => {
     const { container, unsubscribe } = mount(makeFonts(2));
     const grid = container.querySelector('.font-card-grid');
@@ -121,5 +165,121 @@ describe('font-generator/fontCardGrid', () => {
     const { unsubscribe } = mount(makeFonts(2));
     unsubscribe();
     expect(() => setState({ layout: 'list' })).to.not.throw();
+  });
+
+  describe('roving tabindex across cards', () => {
+    it('makes only the first visible card a tab stop', () => {
+      const { container, unsubscribe } = mount(makeFonts(3));
+      const cards = container.querySelectorAll('.font-card');
+      expect(cards[0].tabIndex).to.equal(0);
+      expect(cards[1].tabIndex).to.equal(-1);
+      expect(cards[2].tabIndex).to.equal(-1);
+      unsubscribe();
+    });
+
+    it('ArrowRight moves focus and the tab stop to the next card', () => {
+      const { container, unsubscribe } = mount(makeFonts(3));
+      document.body.append(container);
+      const cards = container.querySelectorAll('.font-card');
+      cards[0].focus();
+      cards[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      expect(document.activeElement).to.equal(cards[1]);
+      expect(cards[0].tabIndex).to.equal(-1);
+      expect(cards[1].tabIndex).to.equal(0);
+      container.remove();
+      unsubscribe();
+    });
+
+    it('ArrowLeft from the first card does not move past the start', () => {
+      const { container, unsubscribe } = mount(makeFonts(3));
+      document.body.append(container);
+      const cards = container.querySelectorAll('.font-card');
+      cards[0].focus();
+      cards[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowLeft', bubbles: true }));
+      expect(document.activeElement).to.equal(cards[0]);
+      container.remove();
+      unsubscribe();
+    });
+
+    it('End moves focus to the last card, Home back to the first', () => {
+      const { container, unsubscribe } = mount(makeFonts(4));
+      document.body.append(container);
+      const cards = container.querySelectorAll('.font-card');
+      cards[0].focus();
+      cards[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true }));
+      expect(document.activeElement).to.equal(cards[3]);
+      cards[3].dispatchEvent(new KeyboardEvent('keydown', { key: 'Home', bubbles: true }));
+      expect(document.activeElement).to.equal(cards[0]);
+      container.remove();
+      unsubscribe();
+    });
+
+    // Forcing list view pins the column count to 1 regardless of the test
+    // browser's viewport width, so Up/Down here is equivalent to Left/Right.
+    it('ArrowDown/ArrowUp move by one row', () => {
+      const { container, unsubscribe } = mount(makeFonts(3));
+      setState({ layout: 'list' });
+      document.body.append(container);
+      const cards = container.querySelectorAll('.font-card');
+      cards[0].focus();
+      cards[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true }));
+      expect(document.activeElement).to.equal(cards[1]);
+      cards[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true }));
+      expect(document.activeElement).to.equal(cards[0]);
+      container.remove();
+      unsubscribe();
+    });
+
+    it('arrow keys do not act while focus is inside an entered cell', () => {
+      const { container, unsubscribe } = mount(makeFonts(3));
+      document.body.append(container);
+      const cards = container.querySelectorAll('.font-card');
+      const copyBtn = cards[0].querySelector('.font-card-copy-btn');
+      copyBtn.focus();
+      copyBtn.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+      expect(document.activeElement).to.equal(copyBtn);
+      container.remove();
+      unsubscribe();
+    });
+
+    it('a direct click on a card’s copy button moves the tab stop to that card', () => {
+      const { container, unsubscribe } = mount(makeFonts(3));
+      document.body.append(container);
+      const cards = container.querySelectorAll('.font-card');
+      const copyBtn = cards[2].querySelector('.font-card-copy-btn');
+      copyBtn.focus();
+      // document.activeElement updates synchronously regardless of whether
+      // this document has real OS-level focus, but the corresponding
+      // focusin event does not reliably fire without it — which a
+      // concurrent (multi-iframe) test run can't guarantee any single
+      // document has. Dispatch it explicitly so this test exercises the
+      // listener's own logic rather than depending on that environment
+      // detail (a real click in a real, focused, single-tab browser always
+      // fires it naturally).
+      copyBtn.dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      expect(cards[0].tabIndex).to.equal(-1);
+      // card2 is "entered" — its own wrapper tabindex stays -1 while its
+      // copy button (now the focused element) is the tabbable one.
+      expect(cards[2].tabIndex).to.equal(-1);
+      expect(copyBtn.tabIndex).to.equal(0);
+      container.remove();
+      unsubscribe();
+    });
+
+    it('re-clamps the tab stop when the visible set shrinks past it', () => {
+      const { container, unsubscribe } = mount(makeFonts(5)); // bold at 0,2,4
+      document.body.append(container);
+      const cards = container.querySelectorAll('.font-card');
+      cards[4].focus();
+      // See the "direct click" test above — focusin needs an explicit
+      // nudge in a concurrent/unfocused-document test run.
+      cards[4].dispatchEvent(new FocusEvent('focusin', { bubbles: true }));
+      setState({ activeFilters: ['bold'] });
+      const remaining = container.querySelectorAll('.font-card');
+      expect(remaining.length).to.equal(3);
+      expect(remaining[remaining.length - 1].tabIndex).to.equal(0);
+      container.remove();
+      unsubscribe();
+    });
   });
 });

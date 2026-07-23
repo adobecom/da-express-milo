@@ -88,11 +88,73 @@ test.describe('FontGeneratorBlock Test Suite', () => {
       await expect(preview).not.toHaveText(before);
     });
 
-    await test.step('step-9: Accessibility validation', async () => {
+    await test.step('step-9: Toolbar layout buttons are a single tab stop with arrow-key nav', async () => {
+      // The grid/list toggle is hidden below 600px (see toolbar.css) — only
+      // meaningful to test on viewports where it's actually shown.
+      if (!(await block.layoutGroup.isVisible())) return;
+      await block.gridButton.focus();
+      await expect(block.gridButton).toBeFocused();
+      await expect(block.listButton).not.toBeFocused();
+      await page.keyboard.press('ArrowRight');
+      await expect(block.listButton).toBeFocused();
+    });
+
+    await test.step('step-10: Suggestion pills are a single tab stop with arrow-key nav', async () => {
+      const pills = block.suggestionPills;
+      await expect(block.suggestionsToolbar).toHaveAttribute('role', 'toolbar');
+      await pills.first().focus();
+      await expect(pills.first()).toBeFocused();
+      await page.keyboard.press('ArrowRight');
+      await expect(pills.nth(1)).toBeFocused();
+      await page.keyboard.press('Home');
+      await expect(pills.first()).toBeFocused();
+    });
+
+    await test.step('step-11: Font card grid — arrow keys move between cells, Enter/Escape enter and exit', async () => {
+      const firstCard = block.fontCards.first();
+      const secondCard = block.fontCards.nth(1);
+      const copyBtn = block.cardCopyBtnAt(0);
+
+      await firstCard.focus();
+      await expect(firstCard).toBeFocused();
+      await page.keyboard.press('ArrowRight');
+      await expect(secondCard).toBeFocused();
+      await page.keyboard.press('ArrowLeft');
+      await expect(firstCard).toBeFocused();
+
+      // Enter "enters" the cell — focus moves to its first interactive child.
+      await page.keyboard.press('Enter');
+      await expect(copyBtn).toBeFocused();
+
+      // Escape exits back to the cell wrapper; arrow nav resumes from there.
+      await page.keyboard.press('Escape');
+      await expect(firstCard).toBeFocused();
+    });
+
+    await test.step('step-12: Tab past the last interactive child in an entered cell exits back to the cell', async () => {
+      const firstCard = block.fontCards.first();
+      const copyBtn = block.cardCopyBtnAt(0);
+      const cta = block.cardCtaAt(0);
+
+      await firstCard.focus();
+      await page.keyboard.press('Enter');
+      await expect(copyBtn).toBeFocused();
+
+      if (await cta.count()) {
+        await page.keyboard.press('Tab');
+        await expect(cta).toBeFocused();
+        await page.keyboard.press('Tab');
+      } else {
+        await page.keyboard.press('Tab');
+      }
+      await expect(firstCard).toBeFocused();
+    });
+
+    await test.step('step-13: Accessibility validation', async () => {
       await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
     });
 
-    await test.step('step-10: SEO validation', async () => {
+    await test.step('step-14: SEO validation', async () => {
       await runSeoChecks({ page, feature: features[0], skipSeoTest: false });
     });
   });

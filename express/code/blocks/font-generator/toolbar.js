@@ -52,6 +52,23 @@ function setSliderFill(sliderEl, value) {
   sliderEl.style.setProperty('--fill', `${pct}%`);
 }
 
+// Single tab stop for the pair — arrow keys move focus between them.
+// Mirrors filters.js's initArrowNav; tabindex itself is kept in sync with
+// the active layout in syncState below, not here.
+function initLayoutArrowNav(group) {
+  group.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft'
+      && e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+    const btns = [...group.querySelectorAll('.toolbar-layout-btn')];
+    const idx = btns.indexOf(e.target);
+    if (idx === -1) return;
+    e.preventDefault();
+    const forward = e.key === 'ArrowRight' || e.key === 'ArrowDown';
+    const next = btns[(idx + (forward ? 1 : -1) + btns.length) % btns.length];
+    next.focus();
+  });
+}
+
 export default function createToolbar({ panelId, strings = {} } = {}) {
   injectStyles();
   const s = { ...DEFAULT_PLACEHOLDERS, ...strings };
@@ -71,6 +88,7 @@ export default function createToolbar({ panelId, strings = {} } = {}) {
   const gridBtn = makeLayoutBtn('grid', s.gridViewLabel, makeIcon('grid.svg'));
   const rowBtn = makeLayoutBtn('list', s.rowViewLabel, makeIcon('row.svg'));
   btnGroup.append(gridBtn, rowBtn);
+  initLayoutArrowNav(btnGroup);
 
   const count = document.createElement('span');
   count.className = 'toolbar-count';
@@ -121,18 +139,29 @@ export default function createToolbar({ panelId, strings = {} } = {}) {
 
   // ── State sync ───────────────────────────────────────────────────────────
 
-  function syncState({ layout, fontSize, activeFonts }) {
+  function syncState({
+    layout, fontSize, activeFonts, activeFilters,
+  }) {
     const isGrid = layout === 'grid';
     gridBtn.classList.toggle('is-active', isGrid);
     rowBtn.classList.toggle('is-active', !isGrid);
     gridBtn.setAttribute('aria-pressed', String(isGrid));
     rowBtn.setAttribute('aria-pressed', String(!isGrid));
+    // Single tab stop — Tab lands on whichever button reflects the active
+    // layout; arrow keys (initLayoutArrowNav) move focus to the other one.
+    gridBtn.setAttribute('tabindex', isGrid ? '0' : '-1');
+    rowBtn.setAttribute('tabindex', isGrid ? '-1' : '0');
 
     slider.value = String(fontSize);
-    sliderValue.textContent = `${fontSize}px`;
+    sliderValue.textContent = fontSize;
     setSliderFill(slider, fontSize);
 
-    count.textContent = `${activeFonts.length} ${s.fontCountLabel}`;
+    // activeFilters is single-select (0 or 1 category) — name it in the
+    // count so a filtered result reads as a confirmation, not just a number.
+    const [category] = activeFilters;
+    count.textContent = category
+      ? `${activeFonts.length} ${category} ${s.fontCountLabel}`
+      : `${activeFonts.length} ${s.fontCountLabel}`;
   }
 
   // ── Events ───────────────────────────────────────────────────────────────
@@ -145,7 +174,7 @@ export default function createToolbar({ panelId, strings = {} } = {}) {
 
   slider.addEventListener('input', () => {
     const value = Number(slider.value);
-    sliderValue.textContent = `${value}px`;
+    sliderValue.textContent = value;
     setSliderFill(slider, value);
     flushSize(value);
   });
