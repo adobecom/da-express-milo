@@ -12,7 +12,7 @@
  * treatments flip to stay readable.
  * ------------------------------------------------------------------ */
 
-.transparent-img-marquee {
+.transparent-image-marquee {
   /* Figma-derived layout sizes, named so the shared values stay in sync. */
   --tim-column-min: 387px;         /* min width of each column before it wraps */
   --tim-text-max: 500px;           /* text column cap, 1-column tablet */
@@ -31,7 +31,7 @@
   padding: var(--spacing-600) var(--spacing-300) 0;
 }
 
-.transparent-img-marquee .foreground {
+.transparent-image-marquee .foreground {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -40,7 +40,7 @@
   width: 100%;
 }
 
-.transparent-img-marquee .main-container {
+.transparent-image-marquee .main-container {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-400);
@@ -48,13 +48,13 @@
   width: 100%;
 }
 
-.transparent-img-marquee .text-content {
+.transparent-image-marquee .text-content {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-100);
 }
 
-.transparent-img-marquee .text-content .express-logo {
+.transparent-image-marquee .text-content .express-logo {
   align-self: flex-start;
   display: block;
   height: 30px;
@@ -66,14 +66,14 @@
   width: auto;
 }
 
-.transparent-img-marquee .text-container {
+.transparent-image-marquee .text-container {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-100);
 }
 
 /* Express web/Headings/2XL — 32px (mobile/tablet), 45px (desktop), weight 900 */
-.transparent-img-marquee .text-container h2 {
+.transparent-image-marquee .text-container h2 {
   color: inherit;
   font-size: var(--heading-font-size-ml);
   font-weight: var(--heading-font-weight-extra);
@@ -83,7 +83,7 @@
 
 /* Express web/Body/Body-S — 14px (mobile/tablet), 16px (desktop) */
 /* (0,3,1) beats main .section p (0,1,2) */
-.transparent-img-marquee .text-content .text-container p {
+.transparent-image-marquee .text-content .text-container p {
   color: inherit;
   font-size: var(--body-font-size-s);
   line-height: 1.3;
@@ -91,14 +91,14 @@
 }
 
 /* ── CTAs + disclaimer ──────────────────────────────────────────── */
-.transparent-img-marquee .cta-container {
+.transparent-image-marquee .cta-container {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-100);
   align-items: flex-start;
 }
 
-.transparent-img-marquee .button-group {
+.transparent-image-marquee .button-group {
   display: flex;
   flex-wrap: wrap;
   gap: var(--spacing-200);
@@ -111,7 +111,7 @@
 
 /* milo's decorateButtons wraps each CTA anchor in an .action-area <p>; strip its
    default block spacing so the flex gap alone controls the layout. */
-.transparent-img-marquee .button-group .action-area {
+.transparent-image-marquee .button-group .action-area {
   display: flex;
   max-width: 100%;
   margin: 0;
@@ -122,7 +122,7 @@
    override sizing so the pill is 40px tall (per design; milo's default is ~36px)
    and long labels wrap + stay inside the column rather than ellipsis-truncating
    (milo's con-button default is overflow:hidden; text-overflow:ellipsis). */
-.transparent-img-marquee a.con-button:any-link {
+.transparent-image-marquee a.con-button:any-link {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -135,7 +135,7 @@
   white-space: normal;
 }
 
-.transparent-img-marquee .disclaimer {
+.transparent-image-marquee .disclaimer {
   color: inherit;
   font-size: var(--body-font-size-s);
   line-height: 1.3;
@@ -146,26 +146,26 @@
    both buttons then expand to fill the foreground width and stack as equal
    full-width buttons, rather than one full-width + one content-width button. */
 @media (max-width: 599px) {
-  .transparent-img-marquee .button-group.long-cta .action-area {
+  .transparent-image-marquee .button-group.long-cta .action-area {
     flex: 1 1 100%;
   }
 
-  .transparent-img-marquee .button-group.long-cta a.con-button:any-link {
+  .transparent-image-marquee .button-group.long-cta a.con-button:any-link {
     width: 100%;
   }
 }
 
 /* ── image ──────────────────────────────────────────────────────── */
-.transparent-img-marquee .image-container {
+.transparent-image-marquee .image-container {
   width: 100%;
 }
 
-.transparent-img-marquee .image-container picture {
+.transparent-image-marquee .image-container picture {
   display: block;
 }
 
 /* Image renders at a fixed 3:2 ratio at every breakpoint (per Figma) */
-.transparent-img-marquee .image-container img {
+.transparent-image-marquee .image-container img {
   aspect-ratio: 3 / 2;
   display: block;
   height: auto;
@@ -178,14 +178,14 @@
    the block's .dark/.light class for the button treatment (blue stays blue),
    but milo's default outline con-button fills solid white on a light background,
    so the light variant overrides it below to a transparent, black-outlined pill. */
-.transparent-img-marquee.light {
+.transparent-image-marquee.light {
   color: var(--color-black);
 }
 
 /* Drop milo's solid-white fill from the secondary (outline) CTA in the light
    variant so it reads as a transparent, black-outlined pill against the light
    authored background. */
-.transparent-img-marquee.light a.con-button.outline:any-link {
+.transparent-image-marquee.light a.con-button.outline:any-link {
   background-color: transparent;
   border-color: var(--color-black);
   color: var(--color-black);
@@ -193,12 +193,12 @@
 
 /* ── Tablet (M) ≥ 600px: 2-column that wraps to 1-column ≤ ~853px ── */
 @media (min-width: 600px) {
-  .transparent-img-marquee {
+  .transparent-image-marquee {
     align-items: flex-end;
     padding: 0 var(--spacing-500);
   }
 
-  .transparent-img-marquee .foreground {
+  .transparent-image-marquee .foreground {
     flex-direction: row;
     flex-wrap: wrap;
     align-items: flex-end;
@@ -207,7 +207,7 @@
 
   /* Both columns want ≥var(--tim-column-min); flex-wrap drops the image
      below the text once two columns no longer fit. */
-  .transparent-img-marquee .main-container {
+  .transparent-image-marquee .main-container {
     flex: 1 1 var(--tim-column-min);
     min-width: var(--tim-column-min);
     justify-content: center;
@@ -223,11 +223,11 @@
   /* Figma spec (Text-content): max-width 500px. In the 2-column tablet state
      the column's spacing-900 right padding constrains the text before this cap
      is reached; when stacked, the text fills up to 500px. */
-  .transparent-img-marquee .text-content {
+  .transparent-image-marquee .text-content {
     max-width: var(--tim-text-max);
   }
 
-  .transparent-img-marquee .image-container {
+  .transparent-image-marquee .image-container {
     flex: 1 1 var(--tim-column-min);
     min-width: var(--tim-column-min);
     align-self: flex-end;
@@ -241,29 +241,29 @@
  * rather than clipping it. Below this the layout is stacked and left
  * uncapped so the image keeps full-width 3:2. */
 @media (min-width: 900px) and (max-width: 1199px) {
-  .transparent-img-marquee .image-container {
+  .transparent-image-marquee .image-container {
     max-width: var(--tim-image-tablet-w);
     max-height: var(--tim-image-tablet-h);
   }
 
-  .transparent-img-marquee .image-container img {
+  .transparent-image-marquee .image-container img {
     max-height: var(--tim-image-tablet-h);
   }
 }
 
 /* ── Desktop (L / XL) ≥ 1200px: fixed 787.5px image ─────────────── */
 @media (min-width: 1200px) {
-  .transparent-img-marquee {
+  .transparent-image-marquee {
     padding: 0 var(--spacing-600);
   }
 
-  .transparent-img-marquee .foreground {
+  .transparent-image-marquee .foreground {
     flex-wrap: nowrap;
     align-items: flex-end;
     gap: var(--spacing-400);
   }
 
-  .transparent-img-marquee .main-container {
+  .transparent-image-marquee .main-container {
     flex: 1 1 auto;
     min-width: 0;
     padding-block: var(--spacing-900);
@@ -273,12 +273,12 @@
     margin: auto;
   }
 
-  .transparent-img-marquee .text-content {
+  .transparent-image-marquee .text-content {
     max-width: var(--tim-text-desktop-max);
   }
 
   /* Fixed desktop image at 3:2, matching the desktop Figma frame */
-  .transparent-img-marquee .image-container {
+  .transparent-image-marquee .image-container {
     flex: 0 0 auto;
     align-self: flex-end;
     min-width: var(--tim-image-desktop-min-w);
@@ -287,11 +287,11 @@
   }
 
   /* Desktop type scale: heading 45px, body 16px (Figma 1440px frame) */
-  .transparent-img-marquee .text-container h2 {
+  .transparent-image-marquee .text-container h2 {
     font-size: var(--heading-font-size-2xl);
   }
 
-  .transparent-img-marquee .text-content .text-container p {
+  .transparent-image-marquee .text-content .text-container p {
     font-size: var(--body-font-size-m);
   }
 }
