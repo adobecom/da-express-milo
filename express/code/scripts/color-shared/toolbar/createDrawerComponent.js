@@ -1033,6 +1033,7 @@ export async function createDrawer(options) {
         action: {
           label: t.viewInLibrary,
           href: t.viewInLibraryHref,
+          sameTab: true,
         },
       });
       await onSave?.(formData);
@@ -1076,6 +1077,7 @@ export async function createDrawer(options) {
         action: {
           label: t.viewInLibrary,
           href: t.viewInLibraryHref,
+          sameTab: true,
         },
       });
       announceToScreenReader(t.changesSaved);
