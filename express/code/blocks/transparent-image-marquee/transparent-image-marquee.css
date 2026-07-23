@@ -175,10 +175,19 @@
 
 /* Light variant: dark text for a light authored background. Auto-applied by the
    JS from the authored background luminance. The milo con-button rules key off
-   the block's .dark/.light class for the button treatment (blue stays blue; the
-   outline button flips between a transparent/white-border dark treatment and a
-   solid white light treatment), so no per-variant CTA overrides are needed. */
+   the block's .dark/.light class for the button treatment (blue stays blue),
+   but milo's default outline con-button fills solid white on a light background,
+   so the light variant overrides it below to a transparent, black-outlined pill. */
 .transparent-image-marquee.light {
+  color: var(--color-black);
+}
+
+/* Drop milo's solid-white fill from the secondary (outline) CTA in the light
+   variant so it reads as a transparent, black-outlined pill against the light
+   authored background. */
+.transparent-image-marquee.light a.con-button.outline:any-link {
+  background-color: transparent;
+  border-color: var(--color-black);
   color: var(--color-black);
 }
 
