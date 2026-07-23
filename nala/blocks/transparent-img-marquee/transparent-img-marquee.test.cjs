@@ -1,13 +1,13 @@
 const { test, expect } = require('@playwright/test');
-const { features } = require('./transparent-image-marquee.spec.cjs');
-const TransparentImageMarqueeBlock = require('./transparent-image-marquee.page.cjs');
+const { features } = require('./transparent-img-marquee.spec.cjs');
+const TransparentImageMarqueeBlock = require('./transparent-img-marquee.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
 const miloLibs = process.env.MILO_LIBS || '';
 
 test.describe('TransparentImageMarqueeBlock Test Suite', () => {
-  // Test Id : 0 : @transparent-image-marquee-default
+  // Test Id : 0 : @transparent-img-marquee-default
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
     const block = new TransparentImageMarqueeBlock(page, features[0].selector);
@@ -48,7 +48,7 @@ test.describe('TransparentImageMarqueeBlock Test Suite', () => {
     });
   });
 
-  // Test Id : 1 : @transparent-image-marquee-light
+  // Test Id : 1 : @transparent-img-marquee-light
   test(`[Test Id - ${features[1].tcid}] ${features[1].name} ${features[1].tags}`, async ({ page, baseURL }) => {
     const testUrl = `${baseURL}${features[1].path}${miloLibs}`;
     const block = new TransparentImageMarqueeBlock(page, features[1].selector);
@@ -73,7 +73,7 @@ test.describe('TransparentImageMarqueeBlock Test Suite', () => {
     });
   });
 
-  // Test Id : 2 : @transparent-image-marquee-cta-variations
+  // Test Id : 2 : @transparent-img-marquee-cta-variations
   test(`[Test Id - ${features[2].tcid}] ${features[2].name} ${features[2].tags}`, async ({ page, baseURL }) => {
     const testUrl = `${baseURL}${features[2].path}${miloLibs}`;
     const block = new TransparentImageMarqueeBlock(page, features[2].selector);
@@ -86,7 +86,7 @@ test.describe('TransparentImageMarqueeBlock Test Suite', () => {
     // The CTA-variations page demonstrates several marquee blocks (primary
     // only, two CTAs, with a disclaimer), so assert each variation exists
     // somewhere on the page rather than within a single block.
-    const scope = page.locator('.transparent-image-marquee');
+    const scope = page.locator('.transparent-img-marquee');
 
     await test.step('step-2: Block and CTA container render', async () => {
       await expect(block.block).toBeVisible();
