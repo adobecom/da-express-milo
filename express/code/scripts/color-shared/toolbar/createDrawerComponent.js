@@ -207,6 +207,7 @@ function setupCreateLibraryHandler(
   closePopover,
   onLibraryCreated,
   t,
+  onChange = () => {},
 ) {
   createBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -233,6 +234,7 @@ function setupCreateLibraryHandler(
         createInput.value = '';
         renderMenuItems();
         closePopover();
+        onChange();
         announceToScreenReader(interpolate(t.libraryCreated, { name: newLib.name }));
         showExpressToast({
           variant: 'positive',
@@ -274,6 +276,7 @@ function createLibraryPickerField(
   isSignedIn,
   onLibraryCreated,
   t,
+  onChange = () => {},
 ) {
   if (!isSignedIn) {
     return createDisabledLibraryPicker(label, t);
@@ -316,6 +319,7 @@ function createLibraryPickerField(
     menu.querySelectorAll('sp-menu-item').forEach((mi) => mi.removeAttribute('selected'));
     item.setAttribute('selected', '');
     closePopover();
+    onChange();
   }
 
   function renderMenuItems() {
@@ -359,6 +363,7 @@ function createLibraryPickerField(
     closePopover,
     onLibraryCreated,
     t,
+    onChange,
   );
 
   renderMenuItems();
@@ -619,9 +624,17 @@ export function computeIsDirty(palette, currentName, currentTags) {
   return nameChanged || tagsChanged || colorsChanged;
 }
 
+// "Save changes" updates the original item, so it applies only when the content
+// is dirty AND the originally-selected library is still chosen — picking a
+// different library is semantically a copy (Make a copy stays enabled).
+export function computeSaveChangesEnabled(palette, currentName, currentTags, currentLibraryId) {
+  if (!computeIsDirty(palette, currentName, currentTags)) return false;
+  return currentLibraryId === palette?.libraryId;
+}
+
 function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedIn, callbacks, t) {
   const {
-    onClose, onSave, onSaveChanges, onSignIn, onLibraryCreated,
+    onClose, onSave, onSaveChanges, onSignIn, onLibraryCreated, onLibraryChange,
   } = callbacks;
   const isEditingSavedItem = Boolean(palette?.id && palette?.libraryId);
 
@@ -670,6 +683,7 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
     isSignedIn,
     onLibraryCreated,
     t,
+    onLibraryChange,
   );
   formFields.appendChild(libraryPicker.wrapper);
 
@@ -933,6 +947,18 @@ export async function createDrawer(options) {
   let tagsDirtyObserver = null;
   let removeNameDirtyListener = null;
   let removeBtnRowResizeListener = null;
+  // Reassigned in open() once the Save changes button exists; the library
+  // picker's onChange calls through this ref so it always hits the latest.
+  let refreshSaveChangesEnabled = () => {};
+
+  function isSaveChangesEnabled() {
+    return computeSaveChangesEnabled(
+      paletteData,
+      nameInput?.value,
+      getTagValues(tagsContainer),
+      libraryPickerRef?.value,
+    );
+  }
 
   function close() {
     if (!isOpen) return;
@@ -962,6 +988,7 @@ export async function createDrawer(options) {
     removeNameDirtyListener = null;
     removeBtnRowResizeListener?.();
     removeBtnRowResizeListener = null;
+    refreshSaveChangesEnabled = () => {};
 
     const elementToFocus = previousActiveElement;
     previousActiveElement = null;
@@ -1063,11 +1090,7 @@ export async function createDrawer(options) {
     } finally {
       if (saveChangesBtnEl) {
         saveChangesBtnEl.textContent = saveChangesBtnEl.dataset.idleLabel || t.saveChanges;
-        saveChangesBtnEl.disabled = !computeIsDirty(
-          paletteData,
-          nameInput?.value,
-          getTagValues(tagsContainer),
-        );
+        saveChangesBtnEl.disabled = !isSaveChangesEnabled();
       }
     }
   }
@@ -1101,6 +1124,7 @@ export async function createDrawer(options) {
           return triggerSignInFlow();
         },
         onLibraryCreated,
+        onLibraryChange: () => refreshSaveChangesEnabled(),
       },
       t,
     );
@@ -1111,12 +1135,8 @@ export async function createDrawer(options) {
     tagsContainer = dom.tagsContainerEl;
 
     if (dom.saveChangesBtnEl) {
-      const refreshSaveChangesEnabled = () => {
-        dom.saveChangesBtnEl.disabled = !computeIsDirty(
-          paletteData,
-          nameInput?.value,
-          getTagValues(tagsContainer),
-        );
+      refreshSaveChangesEnabled = () => {
+        dom.saveChangesBtnEl.disabled = !isSaveChangesEnabled();
       };
       // Colors may already be dirty from canvas edits made before opening.
       refreshSaveChangesEnabled();
