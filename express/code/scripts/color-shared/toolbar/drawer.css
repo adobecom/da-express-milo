@@ -239,6 +239,13 @@
   align-items: flex-start;
   gap: var(--ax-tag-field-gap);
   min-block-size: var(--ax-tag-field-min-height);
+  /* Cap at 3 pill rows, then scroll: 3 rows + 2 gaps + padding + border. Uses the
+     inherited gap var so it adapts to each scope (drawer 6px, modal 12px). */
+  max-block-size: calc(
+    (3 * var(--spacing-500)) + (2 * var(--ax-tag-field-gap))
+    + (2 * var(--spacing-200)) + (2 * var(--border-width-2))
+  );
+  overflow-y: auto;
   padding: var(--spacing-200);
   background: var(--color-white);
   border: var(--border-width-2) solid var(--color-gray-300-variant);
