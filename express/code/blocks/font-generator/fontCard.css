@@ -269,7 +269,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
+  gap: var(--spacing-100);
   padding: var(--spacing-300);
 }
 
@@ -290,9 +290,9 @@
 main a.font-card-cta {
   display: inline-flex;
   align-items: flex-start;
-  gap: 6px;
+  gap: var(--spacing-80);
   flex-shrink: 0;
-  padding: 6px 16px 6px 14px;
+  padding: var(--spacing-80) var(--spacing-300) var(--spacing-80) var(--spacing-250);
   border-radius: 24px;
   background: #000000d6;
   color: var(--color-white);

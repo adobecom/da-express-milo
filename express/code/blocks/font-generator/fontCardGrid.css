@@ -16,7 +16,7 @@
 .font-card-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 8px;
+  gap: var(--spacing-100);
   width: 100%;
 }
 
@@ -41,8 +41,8 @@
 .font-card-load-more {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 24px;
+  gap: var(--spacing-100);
+  padding: 10px var(--spacing-400);
   border: 1.5px solid var(--color-gray-950);
   border-radius: 24px;
   background: transparent;
