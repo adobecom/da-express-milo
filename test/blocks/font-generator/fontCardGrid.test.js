@@ -100,13 +100,14 @@ describe('font-generator/fontCardGrid', () => {
   describe('CTA href reflects the real handoff destination', () => {
     const cardCta = { text: 'Design With Style', href: 'https://www.adobe.com/express/templates/' };
 
-    it('points the CTA at the editor handoff URL, not the authored template link', () => {
+    it('points the CTA at the Branch handoff link (prod), not the authored template link', () => {
       const { container, unsubscribe } = mount(makeFonts(1), { cardCta });
       const cta = container.querySelector('.font-card-cta');
       const url = new URL(cta.href);
-      expect(`${url.origin}${url.pathname}`).to.equal('https://new.express.adobe.com/new');
+      expect(`${url.origin}${url.pathname}`).to.equal('https://adobesparkpost.app.link/V3Tavfhr04b');
       expect(url.searchParams.get('glyphString')).to.equal('Hi'); // mount's previewText
       expect(url.searchParams.get('styleId')).to.equal('f0');
+      expect(url.searchParams.get('feature-enable')).to.equal('font-generator-product-entry');
       unsubscribe();
     });
 

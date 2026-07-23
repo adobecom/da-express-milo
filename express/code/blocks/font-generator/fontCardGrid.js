@@ -50,11 +50,11 @@ export default function createFontCardGrid(config = {}) {
   const { cardCta, fonts = [], strings = {}, scrollTarget } = config;
   const { sampleText } = strings;
 
-  // Keep each CTA's href pointed at where a click actually lands — the editor
+  // Keep each CTA's href pointed at where a click actually lands — the Branch
   // handoff URL for this card and the current preview text/size — so hover,
   // "copy link", and open-in-new-tab match the real destination instead of the
   // authored template link the anchor was built with. The click handler below
-  // still intercepts to add tracking and OS-aware app/new-tab routing.
+  // still intercepts for OS-aware routing (iOS app prompt vs. new tab).
   const syncCtaHref = (card, fontDef, previewText, fontSize) => {
     const cta = card.querySelector('.font-card-cta');
     if (!cta) return;
@@ -63,7 +63,6 @@ export default function createFontCardGrid(config = {}) {
       text: previewText || sampleText || '',
       fontSupported: fontDef.fontSupported,
       fontSize,
-      referrer: strings?.handoffReferrer,
     });
   };
 
