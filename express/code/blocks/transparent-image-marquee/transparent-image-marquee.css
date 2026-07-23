@@ -183,32 +183,33 @@
   color: var(--color-black);
 }
 
-/* Secondary (outline) CTA, light variant — SoT "quiet" secondary button:
-   transparent (no fill/border) at rest, gray fill only on hover/down, blue
-   focus ring. milo only defines a solid-white rest state, so all four states
-   are set here. Grays map to the SoT tokens: rest transparent, hover #e1e1e1
-   (--color-gray-250), down #dadada (--color-gray-300-variant). */
+/* Secondary (outline) CTA, light variant — outline/ghost secondary button:
+   transparent fill with a black border at rest (no solid fill), gray fill on
+   hover/down, blue focus ring. The border is kept in every state so the pill
+   stays defined; milo only defines a solid-white rest state, so all four states
+   are set here. Grays map to the SoT tokens: hover #e1e1e1 (--color-gray-250),
+   down #dadada (--color-gray-300-variant). */
 .transparent-image-marquee.light a.con-button.outline:any-link {
   background-color: transparent;
-  border-color: transparent;
+  border-color: var(--color-black);
   color: var(--color-black);
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:hover {
   background-color: var(--color-gray-250);
-  border-color: var(--color-gray-250);
+  border-color: var(--color-black);
   color: var(--color-black);
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:active {
   background-color: var(--color-gray-300-variant);
-  border-color: var(--color-gray-300-variant);
+  border-color: var(--color-black);
   color: var(--color-black);
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:focus {
   background-color: transparent;
-  border-color: transparent;
+  border-color: var(--color-black);
   color: var(--color-black);
   box-shadow: 0 0 0 2px var(--color-white),
     0 0 0 4px var(--color-info-accent-hover);
