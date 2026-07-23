@@ -38,7 +38,7 @@ export async function showAppModal({ title, body, ctaLabel, appUrl }) {
 
   const header = createTag('div', { class: 'fg-app-modal-header' });
   // Decorative next to the title text, so it's hidden from the accessibility tree.
-  header.append(getIconElementDeprecated('adobe-express-logo', 22, ''));
+  header.append(getIconElementDeprecated('adobe-express', 22, ''));
 
   const titleEl = createTag('h2', { class: 'fg-app-modal-title' });
   titleEl.textContent = title;

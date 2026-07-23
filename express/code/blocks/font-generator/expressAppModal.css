@@ -31,7 +31,7 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--spacing-400, 24px);
+  gap: var(--spacing-100, 8px);
   padding: var(--spacing-300, 16px);
   color: var(--color-white);
 }
@@ -80,12 +80,12 @@
   font-family: var(--body-font-family);
   font-weight: var(--heading-font-weight-medium, 700);
   font-size: 1.125rem;
+  margin-top: 8px;
   line-height: 20px;
   color: var(--color-white);
   text-decoration: none;
 }
 
-.fg-app-modal-cta:hover,
-.fg-app-modal-cta:focus-visible {
+.fg-app-modal-cta:hover {
   background: var(--fg-app-modal-accent-hover);
 }
