@@ -183,33 +183,33 @@
   color: var(--color-black);
 }
 
-/* Secondary (outline) CTA, light variant — SoT "Secondary Static Black" outline
-   button. The #292929 border and label (--color-gray-800-variant, the SoT
-   neutral-content shade) stay constant in every state; the hover/down feedback
-   is a translucent-black overlay fill, not a solid gray, and the border does NOT
-   darken. Fills: hover #00000026, down #0000001f (SoT Secondary Static Black
-   Hover/Down). Rest is transparent (border only); focus adds a blue ring. */
+/* Secondary (outline) CTA, light variant — outline secondary button. The border
+   is a constant light gray (--color-gray-400, #b6b6b6 — the closest styles.css
+   token to the design's #b2b9c4) in every state; it does NOT darken on hover.
+   The label stays the SoT neutral-content shade #292929 (--color-gray-800-variant),
+   and hover/down feedback is a translucent-black overlay fill: hover #00000026,
+   down #0000001f. Rest is transparent (border only); focus adds a blue ring. */
 .transparent-image-marquee.light a.con-button.outline:any-link {
   background-color: transparent;
-  border-color: var(--color-gray-800-variant);
+  border-color: var(--color-gray-400);
   color: var(--color-gray-800-variant);
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:hover {
   background-color: #00000026;
-  border-color: var(--color-gray-800-variant);
+  border-color: var(--color-gray-400);
   color: var(--color-gray-800-variant);
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:active {
   background-color: #0000001f;
-  border-color: var(--color-gray-800-variant);
+  border-color: var(--color-gray-400);
   color: var(--color-gray-800-variant);
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:focus {
   background-color: transparent;
-  border-color: var(--color-gray-800-variant);
+  border-color: var(--color-gray-400);
   color: var(--color-gray-800-variant);
   box-shadow: 0 0 0 2px var(--color-white),
     0 0 0 4px var(--color-info-accent-hover);
