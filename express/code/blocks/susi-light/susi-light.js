@@ -16,6 +16,10 @@ export const DCTX_ID_MAP = {
     stage: 'v:2,s,bg:EDUExpressPurple,40262910-c9bd-11f0-8359-b30f8fb5b3f5',
     prod: 'v:2,s,bg:EDUExpressPurple,a6588140-c9bf-11f0-a941-d1bc629a24f2',
   },
+  'context-business': {
+    stage: 'v:2,s,bg:CCEX2026,6a8de3c0-85b3-11f1-b513-f509ef954a9d',
+    prod: 'v:2,s,bg:CCEX2026,8efe80c0-85b3-11f1-be7b-b53b097617ac',
+  },
 };
 
 const usp = new URLSearchParams(window.location.search);
@@ -277,6 +281,7 @@ async function buildB2B(el, locale, imsClientId, noRedirect) {
     susiConfigs.layout = 'emailOnly';
   }
   const params = buildSUSIParams(susiConfigs);
+  params.context = 'context-business';
   if (!noRedirect) {
     redirectIfLoggedIn(params.destURL);
   }
