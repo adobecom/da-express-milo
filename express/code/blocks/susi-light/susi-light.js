@@ -235,6 +235,7 @@ async function buildEdu(el, locale, imsClientId, noRedirect) {
   const params = buildSUSIParams({
     client_id, variant, destURL, locale, title, el,
   });
+  params.context = 'context-business';
   if (!noRedirect) {
     redirectIfLoggedIn(params.destURL);
   }
@@ -524,7 +525,6 @@ function blurModalCurtain() {
 
 export default async function init(el) {
   ({ createTag, loadScript, getConfig, loadIms } = await import(`${getLibs()}/utils/utils.js`));
-  if (el.classList.contains('b2b')) el.classList.add('context-business'); // TEMP preview only — remove before merge (DA authors this class)
   isStage = (usp.get('env') && usp.get('env') !== 'prod') || getConfig().env.name !== 'prod';
   const locale = getConfig().locale.ietf.toLowerCase();
   const { imsClientId } = getConfig();
