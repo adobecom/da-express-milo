@@ -67,6 +67,12 @@ export async function showAppModal({ title, body, ctaLabel, appUrl }) {
     closeEvent: 'closeModal',
   });
 
+  // Milo's modal auto-focuses the first focusable element in the dialog on open — since the CTA
+  // is the only one here, that's the CTA, which reads oddly as a pre-highlighted button the
+  // instant the modal appears. Redirect that initial focus to the close button instead, the
+  // conventional dialog default; the CTA still focuses normally via real Tab navigation.
+  modal?.querySelector('.dialog-close')?.focus({ preventScroll: true });
+
   // "hide it for the session if the user hides it": flag once the modal leaves the DOM (close
   // button, overlay click, or Esc all remove it), so further taps this session skip the modal.
   if (modal) {
