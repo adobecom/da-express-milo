@@ -235,7 +235,6 @@ async function buildEdu(el, locale, imsClientId, noRedirect) {
   const params = buildSUSIParams({
     client_id, variant, destURL, locale, title, el,
   });
-  params.context = 'context-business';
   if (!noRedirect) {
     redirectIfLoggedIn(params.destURL);
   }
@@ -288,6 +287,7 @@ async function buildB2B(el, locale, imsClientId, noRedirect) {
     susiConfigs.layout = 'emailOnly';
   }
   const params = buildSUSIParams(susiConfigs);
+  params.context = 'context-business';
   if (!noRedirect) {
     redirectIfLoggedIn(params.destURL);
   }
