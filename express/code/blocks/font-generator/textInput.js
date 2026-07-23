@@ -5,7 +5,6 @@ import { attachRovingTabIndex } from '../../scripts/color-shared/spectrum/utils/
 const BASE_PATH = '/express/code/blocks/font-generator';
 const STYLESHEET_HREF = `${BASE_PATH}/textInput.css`;
 const DEBOUNCE_MS = 300;
-const MIN_TEXTAREA_HEIGHT = 104; // matches textInput.css .label min-height
 
 // Unique-id counter so each instance's visible label associates with its own
 // textarea (avoids duplicate ids if more than one input is ever rendered).
@@ -87,13 +86,17 @@ function initResizeHandle(panel) {
   const onStart = (e) => {
     const startY = pointerY(e);
     const startHeight = textarea.offsetHeight;
+    // Read fresh per drag (not a hardcoded duplicate of the CSS value) so
+    // this can never silently drift out of sync with --fg-textinput-height
+    // the way a copy-pasted JS constant did before.
+    const minHeight = parseFloat(getComputedStyle(textarea).getPropertyValue('--fg-textinput-height')) || startHeight;
     const ac = new AbortController();
     const { signal } = ac;
 
     const onMove = (moveEvent) => {
       // Block the page from scrolling while a touch drag resizes the textarea.
       if (moveEvent.cancelable) moveEvent.preventDefault();
-      const newHeight = Math.max(MIN_TEXTAREA_HEIGHT, startHeight + (pointerY(moveEvent) - startY));
+      const newHeight = Math.max(minHeight, startHeight + (pointerY(moveEvent) - startY));
       textarea.style.height = `${newHeight}px`;
     };
 
