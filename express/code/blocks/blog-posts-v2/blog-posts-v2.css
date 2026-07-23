@@ -354,9 +354,10 @@ main .blog-posts-v2 .card .card-body p {
 
 main .section:has(.blog-posts-v2)>.content {
   display: flex;
-  justify-content: space-between;
-  align-items: end;
-  gap: var(--spacing-400);
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: var(--spacing-200);
   max-width: var(--block-wd-grid-max-width);
 }
 .blog-posts-v2 .blog-posts-header a {
@@ -364,10 +365,18 @@ main .section:has(.blog-posts-v2)>.content {
   font-size: var(--body-font-size-s);
   font-weight: var(--body-font-weight);
   line-height: var(--body-line-height);
-  display: flex;
-  justify-content: space-between;
+  display: inline-flex;
+  justify-content: flex-start;
   align-items: center;
   gap: var(--spacing-75);
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--S2-Buttons-Accent-Color-Default);
+  text-decoration: none;
 }
 
 main .section:has(.blog-posts-v2)>.content p {
@@ -378,10 +387,19 @@ main .section:has(.blog-posts-v2)>.content p {
 }
 
 main .section:has(.blog-posts-v2)>.content a {
-  display: flex;
-  justify-content: space-between;
+  display: inline-flex;
+  justify-content: flex-start;
   align-items: center;
   gap: var(--spacing-75);
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--S2-Buttons-Accent-Color-Default);
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .section.ax-blog-posts-container>.content a {
@@ -406,6 +424,13 @@ main .section:has(.blog-posts-v2)>.content>h3 {
     padding-right: var(--spacing-500);
     padding-left: var(--spacing-500);
     max-width: 1199px;
+  }
+
+  main .section:has(.blog-posts-v2)>.content {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: end;
+    gap: var(--spacing-400);
   }
 
   main .blog-posts-v2 .blog-posts-header {
@@ -485,7 +510,7 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   }
 
   main .blog-posts-v2 {
-    max-width: var(--block-wd-max-width);
+    max-width: unset;
     margin-right: auto;
     margin-left: auto;
   }

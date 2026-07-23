@@ -372,9 +372,10 @@ async function getHeroCard(post, dateFormatter, blogTag) {
 
   const pictureTag = imageWrapper.outerHTML;
   const dateMarkup = dateString ? `<p class="blog-card-date">${dateString}</p>` : '';
+  const tagMarkup = blogTag ? `<span class="blog-tag">${blogTag}</span>` : '';
   card.innerHTML = `<div class="blog-card-image">
     ${pictureTag}
-    <span class="blog-tag">${blogTag}</span>
+    ${tagMarkup}
     </div>
     <div class="blog-hero-card-body">
       <h3 class="blog-card-title">${filteredTitle}</h3>
@@ -400,9 +401,10 @@ function getCard(post, dateFormatter, blogTag) {
 
   const pictureTag = imageWrapper.outerHTML;
   const dateMarkup = dateString ? `<p class="blog-card-date">${dateString}</p>` : '';
+  const tagMarkup = blogTag ? `<span class="blog-tag">${blogTag}</span>` : '';
   card.innerHTML = `<div class="blog-card-image">
         ${pictureTag}
-        <span class="blog-tag">${blogTag}</span>
+        ${tagMarkup}
         </div>
         <section class="blog-card-body">
         <h3 class="blog-card-title">${filteredTitle}</h3>
@@ -430,18 +432,18 @@ function addRightChevronToViewAll(blockElement) {
 
   const rightChevronSVGHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16" fill="none">
       <path fill-rule="evenodd" clip-rule="evenodd" d="M5.46967 2.86029C5.76256 2.5674 6.23744 2.5674 6.53033 2.86029L11.0303 7.3603C11.3232 7.65319 11.3232 8.12806 11.0303 8.42095L6.53033 
-      12.921C6.23744 13.2138 5.76256 13.2138 5.46967 12.921C5.17678 12.6281 5.17678 12.1532 5.46967 11.8603L9.43934 7.89062L5.46967 3.92096C5.17678 3.62806 5.17678 3.15319 5.46967 2.86029Z" fill="#292929"/>
+      12.921C6.23744 13.2138 5.76256 13.2138 5.46967 12.921C5.17678 12.6281 5.17678 12.1532 5.46967 11.8603L9.43934 7.89062L5.46967 3.92096C5.17678 3.62806 5.17678 3.15319 5.46967 2.86029Z" fill="currentColor"/>
     </svg>`;
 
   link.innerHTML = `${link.innerHTML} ${rightChevronSVGHTML}`;
 }
 
-function getBlogTag(block) {
+function getBlogTag(block, post) {
   const activeSection = block.closest('.section.content-toggle-active');
   if (activeSection?.dataset.toggle?.trim()) {
     return activeSection.dataset.toggle.trim();
   }
-  return 'Social Media';
+  return post?.category?.trim() || '';
 }
 
 function updateBlogTags(block, tagValue) {
@@ -495,17 +497,16 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0, gridModu
     getDateFormatter(newLanguage);
   }
 
-  const blogTag = getBlogTag(blogPostsElements);
-
   if (isHero) {
-    const card = await getHeroCard(posts[0], dateFormatter, blogTag);
+    const heroTag = getBlogTag(blogPostsElements, posts[0]);
+    const card = await getHeroCard(posts[0], dateFormatter, heroTag);
     blogPostsElements.prepend(card);
     images.push(card.querySelector('img'));
     count = 1;
   } else {
     for (let i = offset; i < posts.length && count < limit; i += 1) {
       const post = posts[i];
-      const card = getCard(post, dateFormatter, blogTag);
+      const card = getCard(post, dateFormatter, getBlogTag(blogPostsElements, post));
       cards.append(card);
       images.push(card.querySelector('img'));
       count += 1;
@@ -640,7 +641,7 @@ export default async function decorate(block) {
         if (link) {
           const rightChevronSVGHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16" fill="none">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M5.46967 2.86029C5.76256 2.5674 6.23744 2.5674 6.53033 2.86029L11.0303 7.3603C11.3232 7.65319 11.3232 8.12806 11.0303 8.42095L6.53033 
-            12.921C6.23744 13.2138 5.76256 13.2138 5.46967 12.921C5.17678 12.6281 5.17678 12.1532 5.46967 11.8603L9.43934 7.89062L5.46967 3.92096C5.17678 3.62806 5.17678 3.15319 5.46967 2.86029Z" fill="#292929"/>
+            12.921C6.23744 13.2138 5.76256 13.2138 5.46967 12.921C5.17678 12.6281 5.17678 12.1532 5.46967 11.8603L9.43934 7.89062L5.46967 3.92096C5.17678 3.62806 5.17678 3.15319 5.46967 2.86029Z" fill="currentColor"/>
           </svg>`;
           link.innerHTML = `${link.innerHTML} ${rightChevronSVGHTML}`;
         }
