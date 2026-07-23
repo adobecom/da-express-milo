@@ -30,6 +30,13 @@ describe('font-generator/fontCard', () => {
       expect(card.dataset.fontId).to.equal('bold-1');
     });
 
+    it('scopes the card with a daa-lh from the font style name and labels the CTA', () => {
+      const card = createFontCard(FONT, 'Hello', 24, CTA);
+      expect(card.getAttribute('daa-lh')).to.equal('Bold');
+      expect(card.querySelector('.font-card-copy-btn').getAttribute('daa-ll')).to.equal('Copy');
+      expect(card.querySelector('.font-card-cta').getAttribute('daa-ll')).to.equal('Design With Style');
+    });
+
     it('renders the transformed preview text at the given size', () => {
       const preview = createFontCard(FONT, 'Hello', 24).querySelector('.font-card-preview');
       expect(preview).to.exist;
