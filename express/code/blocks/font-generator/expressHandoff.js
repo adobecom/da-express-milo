@@ -78,7 +78,8 @@ export default async function handleOpenInExpress({
   emitAnalytics('font_generator_apply_to_editor_start');
 
   // iOS keeps the "continue in the app" prompt; its CTA is the same Branch link.
-  if (getMobileOperatingSystem() === 'iOS') {
+  // FORCE_IOS_DEBUG: hardcoded true for local testing — revert before committing.
+  if (true || getMobileOperatingSystem() === 'iOS') {
     await openInApp({ ...params, strings });
     return;
   }

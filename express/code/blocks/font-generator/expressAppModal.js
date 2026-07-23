@@ -35,25 +35,30 @@ export async function showAppModal({ title, body, ctaLabel, appUrl }) {
   ]);
 
   const wrapper = createTag('div', { class: 'fg-app-modal' });
-  wrapper.append(getIconElementDeprecated('adobe-express-logo'));
+
+  const header = createTag('div', { class: 'fg-app-modal-header' });
+  // Decorative next to the title text, so it's hidden from the accessibility tree.
+  header.append(getIconElementDeprecated('adobe-express-logo', 22, ''));
 
   const titleEl = createTag('h2', { class: 'fg-app-modal-title' });
   titleEl.textContent = title;
+  header.append(titleEl);
 
   const bodyEl = createTag('p', { class: 'fg-app-modal-body' });
   bodyEl.textContent = body;
 
   // A real anchor so tapping is a top-level navigation to the Branch link — the reliable way for
-  // Branch to hand off to the app / App Store on iOS.
+  // Branch to hand off to the app / App Store on iOS. No 'button' class — the dark pill treatment
+  // is fully custom, styled below rather than layered on Milo's default button look.
   const cta = createTag('a', {
-    class: 'fg-app-modal-cta button',
+    class: 'fg-app-modal-cta',
     href: appUrl,
     target: '_blank',
     rel: 'noopener',
   });
   cta.textContent = ctaLabel;
 
-  wrapper.append(titleEl, bodyEl, cta);
+  wrapper.append(header, bodyEl, cta);
 
   const modal = await getModal(null, {
     id: 'fg-app-modal',
