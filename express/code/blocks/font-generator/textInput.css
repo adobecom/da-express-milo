@@ -94,13 +94,16 @@
 }
 
 .font-generator-text-input .label {
+  --fg-textinput-height: 62px;
+  --fg-counter-height: 8px;
+
   all: unset;
   box-sizing: border-box;
   display: block;
   width: 100%;
-  min-height: 104px;
+  min-height: var(--fg-textinput-height);
   resize: none;
-  margin: 0 0 28px;
+  margin-block-end: calc(var(--spacing-300) + var(--fg-counter-height));
   font-family: var(--body-font-family);
   font-weight: 400;
   color: var(--color-dark-gray);
@@ -126,12 +129,10 @@
 .font-generator-text-input .character-count {
   color: var(--color-gray-800-variant);
   text-align: right;
-  leading-trim: both;
-  text-edge: cap;
-  font-size: var(--Global-Typography-Size-Label-Label-XS, 12px);
+  font-size: var(--Global-Typography-Size-Label-Label-XS);
   font-style: normal;
   font-weight: 400;
-  line-height: var(--Global-Typography-Line-height-Label-Label-XS, 14px);
+  line-height: var(--fg-counter-height); /* Force 8px height to match figma in place of unknown leading-trim and text-edge properties */
   white-space: nowrap;
 }
 

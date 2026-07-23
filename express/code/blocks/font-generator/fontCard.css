@@ -195,6 +195,14 @@
   opacity: 1;
 }
 
+/* The success overlay's background is translucent (rgba alpha 0.69), so
+   without this the copy button would still show faintly through it on tap
+   — tablet/mobile have no hover state to hide it via the desktop rule
+   below, and this state can be reached from a tap on any viewport. */
+.font-card.is-copied .font-card-copy-btn {
+  opacity: 0;
+}
+
 /* Desktop-only affordance — mobile/tablet get no mouse hover. The overlay's
    background is translucent (rgba alpha 0.69), so without this the copy
    button would still show faintly through it instead of disappearing. */

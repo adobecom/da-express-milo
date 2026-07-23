@@ -163,7 +163,15 @@ function initTagsFade(panel) {
   const ac = new AbortController();
   wrap.addEventListener('scroll', update, { passive: true, signal: ac.signal });
   window.addEventListener('resize', update, { signal: ac.signal });
-  update();
+  // createTextInput builds this panel while its ancestor container still has
+  // font-generator.js's fg-loading class (display: none), and doesn't lose it
+  // until a couple of awaits later — so wrap has no layout box yet here, and
+  // scrollWidth/clientWidth would both read 0. A ResizeObserver's first
+  // callback fires as soon as the element is actually measurable, whenever
+  // that ends up being, rather than guessing a fixed delay.
+  const ro = new ResizeObserver(update);
+  ro.observe(wrap);
+  ac.signal.addEventListener('abort', () => ro.disconnect());
 
   return () => ac.abort();
 }
