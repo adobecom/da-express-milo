@@ -177,18 +177,41 @@
    JS from the authored background luminance. The milo con-button rules key off
    the block's .dark/.light class for the button treatment (blue stays blue),
    but milo's default outline con-button fills solid white on a light background,
-   so the light variant overrides it below to a transparent, black-outlined pill. */
+   so the light variant overrides the secondary CTA below to the SoT "quiet"
+   secondary treatment. */
 .transparent-image-marquee.light {
   color: var(--color-black);
 }
 
-/* Drop milo's solid-white fill from the secondary (outline) CTA in the light
-   variant so it reads as a transparent, black-outlined pill against the light
-   authored background. */
+/* Secondary (outline) CTA, light variant — SoT "quiet" secondary button:
+   transparent (no fill/border) at rest, gray fill only on hover/down, blue
+   focus ring. milo only defines a solid-white rest state, so all four states
+   are set here. Grays map to the SoT tokens: rest transparent, hover #e1e1e1
+   (--color-gray-250), down #dadada (--color-gray-300-variant). */
 .transparent-image-marquee.light a.con-button.outline:any-link {
   background-color: transparent;
-  border-color: var(--color-black);
+  border-color: transparent;
   color: var(--color-black);
+}
+
+.transparent-image-marquee.light a.con-button.outline:any-link:hover {
+  background-color: var(--color-gray-250);
+  border-color: var(--color-gray-250);
+  color: var(--color-black);
+}
+
+.transparent-image-marquee.light a.con-button.outline:any-link:active {
+  background-color: var(--color-gray-300-variant);
+  border-color: var(--color-gray-300-variant);
+  color: var(--color-black);
+}
+
+.transparent-image-marquee.light a.con-button.outline:any-link:focus {
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--color-black);
+  box-shadow: 0 0 0 2px var(--color-white),
+    0 0 0 4px var(--color-info-accent-hover);
 }
 
 /* ── Tablet (M) ≥ 600px: 2-column that wraps to 1-column ≤ ~853px ── */
