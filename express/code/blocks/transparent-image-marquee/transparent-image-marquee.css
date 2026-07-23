@@ -183,13 +183,12 @@
   color: var(--color-black);
 }
 
-/* Secondary (outline) CTA, light variant — outline secondary button:
-   transparent fill with a neutral border at rest (no solid fill), gray fill on
-   hover/down, blue focus ring. The border is kept in every state so the pill
-   stays defined. Border + label track the SoT neutral-content shades rather
-   than pure black — rest #292929 (--color-gray-800-variant), hover/down/focus
-   #131313 (--color-gray-950) — and the hover/down fills use the SoT grays
-   #e1e1e1 (--color-gray-250) and #dadada (--color-gray-300-variant). */
+/* Secondary (outline) CTA, light variant — SoT "Secondary Static Black" outline
+   button. The #292929 border and label (--color-gray-800-variant, the SoT
+   neutral-content shade) stay constant in every state; the hover/down feedback
+   is a translucent-black overlay fill, not a solid gray, and the border does NOT
+   darken. Fills: hover #00000026, down #0000001f (SoT Secondary Static Black
+   Hover/Down). Rest is transparent (border only); focus adds a blue ring. */
 .transparent-image-marquee.light a.con-button.outline:any-link {
   background-color: transparent;
   border-color: var(--color-gray-800-variant);
@@ -197,21 +196,21 @@
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:hover {
-  background-color: var(--color-gray-250);
-  border-color: var(--color-gray-950);
-  color: var(--color-gray-950);
+  background-color: #00000026;
+  border-color: var(--color-gray-800-variant);
+  color: var(--color-gray-800-variant);
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:active {
-  background-color: var(--color-gray-300-variant);
-  border-color: var(--color-gray-950);
-  color: var(--color-gray-950);
+  background-color: #0000001f;
+  border-color: var(--color-gray-800-variant);
+  color: var(--color-gray-800-variant);
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:focus {
   background-color: transparent;
-  border-color: var(--color-gray-950);
-  color: var(--color-gray-950);
+  border-color: var(--color-gray-800-variant);
+  color: var(--color-gray-800-variant);
   box-shadow: 0 0 0 2px var(--color-white),
     0 0 0 4px var(--color-info-accent-hover);
 }
