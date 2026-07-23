@@ -7,7 +7,8 @@ import { showAppModal, isAppModalDismissed } from './expressAppModal.js';
 // the express.adobe.com/new destination with the static canvas/category params
 // baked in — which is what makes the handoff conserve the text on mobile, where
 // the raw editor URL did not. We only append the dynamic, per-card params.
-const BRANCH_LINK_PROD = 'https://adobesparkpost.app.link/V3Tavfhr04b';
+//const BRANCH_LINK_PROD = 'https://adobesparkpost.app.link/V3Tavfhr04b';
+const BRANCH_LINK_PROD = 'https://adobesparkpost.test-app.link/5Nq0ZDWc04b';
 // Stage uses Branch's test domain (test-app.link) + a separate link id.
 const BRANCH_LINK_STAGE = 'https://adobesparkpost.test-app.link/5Nq0ZDWc04b';
 
