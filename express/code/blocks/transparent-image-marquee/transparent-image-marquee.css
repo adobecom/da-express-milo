@@ -183,92 +183,88 @@
   color: var(--color-black);
 }
 
-/* Primary (blue) CTA focus — applies in both variants (blue stays blue
-   regardless of .light/.dark). milo's shared default (styles.css) draws the
-   focus ring as a white 2px layer directly against the button, then a blue
-   4px ring beyond it — per SoT this button has no white ring at all, just
-   the blue ring offset 2px from the button with a transparent gap (no fill)
-   in between. box-shadow: none cancels milo's ring since box-shadow isn't a
-   shorthand — a higher-specificity rule that omits it wouldn't clear it. */
+/* Focus ring — shared by every CTA in this block (blue primary + both outline
+   secondary variants), pulled from the Figma SoT "Focus Ring Background"
+   layer used across S2 buttons: a 2px --color-focus-ring-strong (#4b75ff)
+   border offset 2px from the button, with a translucent-white halo
+   (11%-opacity) filling the gap in between. box-shadow: none/override on
+   each :focus rule below cancels milo's own shared con-button box-shadow
+   (styles.css) — those rules still match here, and without this their ring
+   would win the cascade for that property since ours replaces box-shadow's
+   *value* rather than the whole rule. */
 .transparent-image-marquee a.con-button.blue:any-link:focus {
-  outline: 2px solid var(--color-info-accent-hover);
+  outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: 2px;
-  box-shadow: none;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.11);
 }
 
-/* Secondary (outline) CTA, light variant — outline secondary button, per SoT
-   "Button secondary, static black". Rest: black text/icon, border black at
-   22%-opacity (#00000038). Hover/down lighten the border to gray
-   (--color-gray-400, #b6b6b6 — the closest styles.css token to the design's
-   #b2b9c4) with a translucent-black overlay fill: hover #00000026, down
-   #0000001f. Focus keeps the same 22%-opacity black stroke and adds a
-   #000000 12%-opacity fill (#0000001f); the white+blue outer ring is
-   unchanged (QA-confirmed correct as-is). */
+/* Secondary (outline) CTA, light variant — per the Figma SoT "Button
+   (Secondary, Static black)" component: no border at all, just a
+   translucent black background that steps down through default (22%,
+   #00000038) / hover (15%, #00000026) / down (12%, #0000001f). Text stays a
+   constant 93%-opacity black (#000000ed) in every state — it does not shift
+   to a different gray on hover/down. Focus keeps the same fill as down (12%)
+   and adds the shared ring above. border-color: transparent (not omitted)
+   because the shared base rule still gives every con-button a 2px
+   border-width/style — transparent keeps that box model without drawing a
+   visible line. */
 .transparent-image-marquee.light a.con-button.outline:any-link {
-  background-color: transparent;
-  border-color: #00000038;
-  color: var(--color-black);
+  background-color: #00000038;
+  border-color: transparent;
+  color: #000000ed;
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:hover {
   background-color: #00000026;
-  border-color: var(--color-gray-400);
-  color: var(--color-gray-800-variant);
+  border-color: transparent;
+  color: #000000ed;
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:active {
   background-color: #0000001f;
-  border-color: var(--color-gray-400);
-  color: var(--color-gray-800-variant);
+  border-color: transparent;
+  color: #000000ed;
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:focus {
   background-color: #0000001f;
-  border-color: #00000038;
-  color: var(--color-black);
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-white),
-    0 0 0 4px var(--color-info-accent-hover);
+  border-color: transparent;
+  color: #000000ed;
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.11);
 }
 
-/* Secondary (outline) CTA, dark variant — outline secondary button on the dark
-   authored background, per SoT "Button secondary, static white". milo's rest
-   state (transparent fill, white label) is right, but its solid white border
-   needs to drop to 22%-opacity white (#ffffff38) to match SoT — that same
-   22%-opacity stroke holds across hover/active/focus too (only the fill
-   opacity changes between states); a solid white border on any of them would
-   read as a stray white outline against the transparent rest state. Focus's
-   outer ring is offset 2px from the button with a transparent gap (no fill)
-   in between, unlike the light variant's opaque white+blue ring above. */
+/* Secondary (outline) CTA, dark variant — per the Figma SoT "Button
+   (Secondary, Static white)" component: no border, translucent white
+   background stepping through default (21%, #ffffff36) / hover (17%,
+   #ffffff2b) / down (14%, #ffffff24). Text stays solid white in every state.
+   Focus keeps the same fill as hover (17%) and adds the shared ring above. */
 .transparent-image-marquee.dark a.con-button.outline:any-link {
-  background-color: transparent;
-  border-color: #ffffff38;
+  background-color: #ffffff36;
+  border-color: transparent;
   color: var(--color-white);
 }
 
 .transparent-image-marquee.dark a.con-button.outline:any-link:hover {
   background-color: #ffffff2b;
-  border-color: #ffffff38;
+  border-color: transparent;
   color: var(--color-white);
 }
 
 .transparent-image-marquee.dark a.con-button.outline:any-link:active {
   background-color: #ffffff24;
-  border-color: #ffffff38;
+  border-color: transparent;
   color: var(--color-white);
 }
 
 .transparent-image-marquee.dark a.con-button.outline:any-link:focus {
   background-color: #ffffff2b;
-  border-color: #ffffff38;
+  border-color: transparent;
   color: var(--color-white);
-  outline: 2px solid var(--color-info-accent-hover);
+  outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: 2px;
-  /* Cancels milo's shared con-button.outline:focus box-shadow (styles.css) —
-     that rule isn't dark-scoped, still matches here, and without this its
-     own white+blue ring box-shadow would win the cascade for this property
-     since our rule no longer declares one. */
-  box-shadow: none;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.11);
 }
 
 /* ── Tablet (M) ≥ 600px: 2-column that wraps to 1-column ≤ ~853px ── */
