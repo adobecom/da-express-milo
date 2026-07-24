@@ -63,7 +63,12 @@ export default async function decorate(block) {
   const cards = [...gallery.querySelectorAll('.icon-carousel-card')];
   // Reuse the shared gallery widget for prev/next + IntersectionObserver +
   // hide-when-all-visible; the control is re-skinned in CSS.
-  const { control } = await buildGallery(cards, gallery);
+  // At the >=1440px breakpoint the 160px left inset (--icon-carousel-inset)
+  // keeps the previously-first card ~37% visible after paging forward, which
+  // at the widget's default 10% threshold pins its "first visible card" index
+  // on the stale card and stalls the next button after one click. A higher
+  // threshold (as template-x-carousel-toolbar also uses) clears that margin.
+  const { control } = await buildGallery(cards, gallery, { intersectionThreshold: 0.5 });
   // The widget hardcodes English aria-labels; swap in the localized placeholders.
   control.querySelector('.prev')?.setAttribute('aria-label', prevLabel || 'Previous');
   control.querySelector('.next')?.setAttribute('aria-label', nextLabel || 'Next');
