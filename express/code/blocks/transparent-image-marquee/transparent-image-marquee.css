@@ -198,73 +198,77 @@
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.11);
 }
 
-/* Secondary (outline) CTA, light variant — per the Figma SoT "Button
-   (Secondary, Static black)" component: no border at all, just a
-   translucent black background that steps down through default (22%,
-   #00000038) / hover (15%, #00000026) / down (12%, #0000001f). Text stays a
-   constant 93%-opacity black (#000000ed) in every state — it does not shift
-   to a different gray on hover/down. Focus keeps the same fill as down (12%)
-   and adds the shared ring above. border-color: transparent (not omitted)
-   because the shared base rule still gives every con-button a 2px
-   border-width/style — transparent keeps that box model without drawing a
-   visible line. */
+/* Secondary CTA, light variant — per the Figma SoT "Button (Secondary,
+   Static black)" component, Style=Outline (the transparent variant, not the
+   filled "Style=Fill" one): a real 2px border, transparent at rest, using
+   the same opacity ladder as the fill: default 22% (#00000038), hover 15%
+   (#00000026), down 12% (#0000001f) border, paired with its own (slightly
+   different) background fill per state — default transparent, hover 9%
+   (#00000017), down 12% (#0000001f). Text stays a constant 93%-opacity
+   black (#000000ed) in every state. Focus reuses the down fill+border (12%)
+   and adds the shared ring, offset 6px instead of 4 — enough to clear this
+   variant's own 2px border (the borderless Fill variant's ring sits at 4px;
+   see the shared blue-button rule above). */
 .transparent-image-marquee.light a.con-button.outline:any-link {
-  background-color: #00000038;
-  border-color: transparent;
+  background-color: transparent;
+  border-color: #00000038;
   color: #000000ed;
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:hover {
-  background-color: #00000026;
-  border-color: transparent;
+  background-color: #00000017;
+  border-color: #00000026;
   color: #000000ed;
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:active {
   background-color: #0000001f;
-  border-color: transparent;
+  border-color: #0000001f;
   color: #000000ed;
 }
 
 .transparent-image-marquee.light a.con-button.outline:any-link:focus {
   background-color: #0000001f;
-  border-color: transparent;
+  border-color: #0000001f;
   color: #000000ed;
   outline: 2px solid var(--color-focus-ring-strong);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.11);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.11);
 }
 
-/* Secondary (outline) CTA, dark variant — per the Figma SoT "Button
-   (Secondary, Static white)" component: no border, translucent white
-   background stepping through default (21%, #ffffff36) / hover (17%,
-   #ffffff2b) / down (14%, #ffffff24). Text stays solid white in every state.
-   Focus keeps the same fill as hover (17%) and adds the shared ring above. */
+/* Secondary CTA, dark variant — per the Figma SoT "Button (Secondary,
+   Static white)" component, Style=Outline: a real 2px border, transparent
+   at rest, using the same opacity ladder as the fill: default 21%
+   (#ffffff36), hover 17% (#ffffff2b), down 14% (#ffffff24) border, paired
+   with its own background fill per state — default transparent, hover 17%
+   (#ffffff2b), down 11% (#ffffff1c). Text stays solid white in every state.
+   Focus reuses the hover fill+border (17%) and adds the shared ring, offset
+   6px (see the light variant above for why). */
 .transparent-image-marquee.dark a.con-button.outline:any-link {
-  background-color: #ffffff36;
-  border-color: transparent;
+  background-color: transparent;
+  border-color: #ffffff36;
   color: var(--color-white);
 }
 
 .transparent-image-marquee.dark a.con-button.outline:any-link:hover {
   background-color: #ffffff2b;
-  border-color: transparent;
+  border-color: #ffffff2b;
   color: var(--color-white);
 }
 
 .transparent-image-marquee.dark a.con-button.outline:any-link:active {
-  background-color: #ffffff24;
-  border-color: transparent;
+  background-color: #ffffff1c;
+  border-color: #ffffff24;
   color: var(--color-white);
 }
 
 .transparent-image-marquee.dark a.con-button.outline:any-link:focus {
   background-color: #ffffff2b;
-  border-color: transparent;
+  border-color: #ffffff2b;
   color: var(--color-white);
   outline: 2px solid var(--color-focus-ring-strong);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.11);
+  outline-offset: 4px;
+  box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.11);
 }
 
 /* ── Tablet (M) ≥ 600px: 2-column that wraps to 1-column ≤ ~853px ── */
