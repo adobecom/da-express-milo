@@ -57,6 +57,20 @@ describe('icon-carousel / structure', () => {
     expect(gallery.getAttribute('aria-label')).to.include('Lorem ipsum');
   });
 
+  it('wraps content in a labeled section landmark', async () => {
+    const block = await prepBlock('./mocks/default.html');
+    const heading = block.querySelector('.icon-carousel-header h2');
+    const section = block.querySelector(':scope > section');
+    expect(section).to.exist;
+    expect(section.getAttribute('aria-label')).to.equal(heading.textContent.trim());
+  });
+
+  it('gallery is not part of the tab order', async () => {
+    const block = await prepBlock('./mocks/default.html');
+    const gallery = block.querySelector('.icon-carousel-gallery');
+    expect(gallery.getAttribute('tabindex')).to.equal('-1');
+  });
+
   it('renders correct number of cards', async () => {
     const block = await prepBlock('./mocks/default.html');
     const cards = block.querySelectorAll('.icon-carousel-card');

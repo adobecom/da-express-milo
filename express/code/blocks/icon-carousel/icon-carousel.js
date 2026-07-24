@@ -26,13 +26,17 @@ export default async function decorate(block) {
   if (heading) header.append(heading);
   if (subtitle) header.append(subtitle);
 
+  const headingText = heading ? heading.textContent.trim() : '';
+
+  const section = createTag('section', { 'aria-label': headingText || regionLabel || 'Feature highlights' });
+
   const gallery = createTag('div', { class: 'icon-carousel-gallery' });
-  // buildGallery marks this container role="group" aria-roledescription="carousel";
-  // give that grouping an accessible name from the heading, or a localized fallback.
-  gallery.setAttribute('aria-label', heading ? heading.textContent.trim() : (regionLabel || 'Feature highlights'));
-  // The gallery is a horizontal scroll container (overflow-x: auto); make it
-  // keyboard-focusable so keyboard users can scroll it (axe scrollable-region-focusable).
-  gallery.setAttribute('tabindex', '0');
+  // buildGallery marks this container role="group" aria-roledescription="carousel".
+  gallery.setAttribute('aria-label', headingText || regionLabel || 'Feature highlights');
+  // Chromium auto-focuses scrollable overflow containers even with no tabindex
+  // set; opt out explicitly since the prev/next buttons already provide full
+  // keyboard control over scrolling.
+  gallery.setAttribute('tabindex', '-1');
 
   cardRows.forEach((row) => {
     const cells = [...row.querySelectorAll(':scope > div')];
@@ -70,10 +74,11 @@ export default async function decorate(block) {
   // threshold (as template-x-carousel-toolbar also uses) clears that margin.
   const { control } = await buildGallery(cards, gallery, { intersectionThreshold: 0.5 });
   // The widget hardcodes English aria-labels; swap in the localized placeholders.
-  control.querySelector('.prev')?.setAttribute('aria-label', prevLabel || 'Previous');
-  control.querySelector('.next')?.setAttribute('aria-label', nextLabel || 'Next');
+  control.querySelector('.prev')?.setAttribute('aria-label', prevLabel || 'Previous slide');
+  control.querySelector('.next')?.setAttribute('aria-label', nextLabel || 'Next slide');
   // Chevron SVGs are decorative; the buttons already carry accessible labels.
   control.querySelectorAll('svg').forEach((svg) => svg.setAttribute('aria-hidden', 'true'));
 
-  block.replaceChildren(header, gallery, control);
+  section.append(header, gallery, control);
+  block.replaceChildren(section);
 }
