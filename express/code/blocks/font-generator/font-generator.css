@@ -358,7 +358,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 .font-generator .fg-sk-toolbar {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--spacing-100);
   width: 100%;
 }
 
@@ -372,7 +372,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 
 .font-generator .fg-sk-layout-btns {
   display: none;
-  gap: 4px;
+  gap: var(--spacing-75);
   flex-shrink: 0;
 }
 
@@ -412,7 +412,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 .font-generator .fg-sk-grid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 8px;
+  gap: var(--spacing-100);
   width: 100%;
 }
 
@@ -432,7 +432,7 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
-  padding: 64px 16px 32px;
+  padding: var(--spacing-800) var(--spacing-300) var(--spacing-500);
 }
 
 .font-generator .fg-sk-copy-btn {
@@ -453,8 +453,8 @@ main .font-generator a.button.primary.fg-promo-btn:any-link {
 .font-generator .fg-sk-card-footer {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px 16px;
+  gap: var(--spacing-100);
+  padding: var(--spacing-100) var(--spacing-300) var(--spacing-300);
 }
 
 .font-generator .fg-sk-name {

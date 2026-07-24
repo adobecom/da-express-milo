@@ -2,6 +2,7 @@
 import { getState, setState, subscribe } from './state.js';
 import { LOAD_MORE_STEP } from './types.js';
 import { createFontCard, updateFontCard } from './fontCard.js';
+import handleOpenInExpress, { buildEditorHandoffUrl } from './expressHandoff.js';
 
 const STYLESHEET_HREF = '/express/code/blocks/font-generator/fontCardGrid.css';
 
@@ -48,6 +49,22 @@ export default function createFontCardGrid(config = {}) {
 
   const { cardCta, fonts = [], strings = {}, scrollTarget } = config;
   const { sampleText } = strings;
+
+  // Keep each CTA's href pointed at where a click actually lands — the Branch
+  // handoff URL for this card and the current preview text/size — so hover,
+  // "copy link", and open-in-new-tab match the real destination instead of the
+  // authored template link the anchor was built with. The click handler below
+  // still intercepts for OS-aware routing (iOS app prompt vs. new tab).
+  const syncCtaHref = (card, fontDef, previewText, fontSize) => {
+    const cta = card.querySelector('.font-card-cta');
+    if (!cta) return;
+    cta.href = buildEditorHandoffUrl({
+      styleId: fontDef.id,
+      text: previewText || sampleText || '',
+      fontSupported: fontDef.fontSupported,
+      fontSize,
+    });
+  };
 
   const grid = document.createElement('div');
   grid.className = 'font-card-grid';
@@ -157,7 +174,9 @@ export default function createFontCardGrid(config = {}) {
       }
       visible.forEach(({ id }) => {
         const entry = cardMap.get(id);
-        if (entry) updateFontCard(entry.card, entry.fontDef, previewText, fontSize, sampleText);
+        if (!entry) return;
+        updateFontCard(entry.card, entry.fontDef, previewText, fontSize, sampleText);
+        syncCtaHref(entry.card, entry.fontDef, previewText, fontSize);
       });
     }
 
@@ -195,6 +214,23 @@ export default function createFontCardGrid(config = {}) {
 
   loadMoreBtn.addEventListener('click', () => {
     setState({ visibleCount: getState().visibleCount + LOAD_MORE_STEP });
+  });
+
+  grid.addEventListener('click', (e) => {
+    const cta = e.target.closest('.font-card-cta');
+    if (!cta) return;
+    e.preventDefault();
+    const cardEl = cta.closest('.font-card');
+    const entry = cardEl && cardMap.get(cardEl.dataset.fontId);
+    if (!entry) return;
+    const { previewText, fontSize } = getState();
+    handleOpenInExpress({
+      styleId: entry.fontDef.id,
+      text: previewText || sampleText || '',
+      fontSupported: entry.fontDef.fontSupported,
+      fontSize,
+      strings,
+    });
   });
 
   // subscribe() fires immediately with the current snapshot — that first call
