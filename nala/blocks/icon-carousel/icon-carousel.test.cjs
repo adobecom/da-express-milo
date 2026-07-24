@@ -58,8 +58,13 @@ test.describe('IconCarouselBlock Test Suite', () => {
     await test.step('step-8: Next button advances the carousel', async () => {
       const isDisabled = await block.nextBtn.isDisabled();
       if (!isDisabled) {
+        // Assert the gallery actually scrolled, not just that the button
+        // stayed enabled — a stale intersection index can leave the button
+        // enabled while the click is a no-op.
+        const scrollLeftBefore = await block.gallery.evaluate((el) => el.scrollLeft);
         await block.nextBtn.click();
         await expect(block.nextBtn).not.toBeDisabled();
+        await expect.poll(() => block.gallery.evaluate((el) => el.scrollLeft)).toBeGreaterThan(scrollLeftBefore);
       }
     });
 
@@ -116,6 +121,20 @@ test.describe('IconCarouselBlock Test Suite', () => {
 
     await test.step(`step-3: Gallery content is inset ${leftBuffer} from the left`, async () => {
       await expect(block.gallery).toHaveCSS('padding-left', leftBuffer);
+    });
+
+    await test.step('step-4: Next button advances past the second card', async () => {
+      // Regression check: at this breakpoint the large left inset used to
+      // leave the previously-first card >10% visible after one click, which
+      // pinned the shared gallery widget's "first visible card" index and
+      // made every next-click after the first a no-op.
+      if (await block.nextBtn.isDisabled()) return;
+      await block.nextBtn.click();
+      const scrollLeftAfterFirstClick = await block.gallery.evaluate((el) => el.scrollLeft);
+      if (await block.nextBtn.isDisabled()) return;
+      await block.nextBtn.click();
+      await expect.poll(() => block.gallery.evaluate((el) => el.scrollLeft))
+        .toBeGreaterThan(scrollLeftAfterFirstClick);
     });
   });
 });
