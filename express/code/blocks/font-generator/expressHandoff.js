@@ -1,6 +1,6 @@
 /* eslint-disable no-underscore-dangle */
 import { getMobileOperatingSystem } from '../../scripts/utils.js';
-import { showAppModal, isAppModalDismissed } from './expressAppModal.js';
+import showAppModal from './expressAppModal.js';
 
 // Pre-configured Branch links. Their Branch-dashboard config owns the
 // platform routing (deep-link into the app on mobile, else the web editor) and
@@ -58,11 +58,8 @@ function emitAnalytics(eventName) {
 
 async function openInApp({ strings = {}, ...params }) {
   const appUrl = buildEditorHandoffUrl(params);
-  // Already dismissed this session: skip the modal but still route to the app.
-  if (isAppModalDismissed()) {
-    window.location.assign(appUrl);
-    return;
-  }
+  // Always show the prompt on iOS — the CTA is the only way in from here (closing it
+  // shouldn't silently drop the user straight into the app/app-store on a later click).
   await showAppModal({
     title: strings.appModalTitle,
     body: strings.appModalBody,

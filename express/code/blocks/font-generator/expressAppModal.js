@@ -12,13 +12,6 @@ function injectStyles() {
   document.head.appendChild(link);
 }
 
-// Session-only: once the user closes the modal, don't re-show it for the rest of this page session
-// (resets on the next load). Never persisted — the modal shows again on the next visit.
-let dismissedThisSession = false;
-export function isAppModalDismissed() {
-  return dismissedThisSession;
-}
-
 /**
  * Opens the "continue in the app" modal (Milo modal block) with code-built, placeholder-driven
  * content. The CTA is a Branch link that opens the Express app if installed, else the App Store.
@@ -26,7 +19,7 @@ export function isAppModalDismissed() {
  * @param {{ title: string, body: string, ctaLabel: string, appUrl: string }} opts
  * @returns {Promise<HTMLElement | undefined>}
  */
-export async function showAppModal({ title, body, ctaLabel, appUrl }) {
+export default async function showAppModal({ title, body, ctaLabel, appUrl }) {
   injectStyles();
 
   const [{ getModal }, { createTag }] = await Promise.all([
@@ -75,18 +68,6 @@ export async function showAppModal({ title, body, ctaLabel, appUrl }) {
   // instant the modal appears. Redirect that initial focus to the close button instead, the
   // conventional dialog default; the CTA still focuses normally via real Tab navigation.
   modal?.querySelector('.dialog-close')?.focus({ preventScroll: true });
-
-  // "hide it for the session if the user hides it": flag once the modal leaves the DOM (close
-  // button, overlay click, or Esc all remove it), so further taps this session skip the modal.
-  if (modal) {
-    const observer = new MutationObserver(() => {
-      if (!modal.isConnected) {
-        dismissedThisSession = true;
-        observer.disconnect();
-      }
-    });
-    observer.observe(document.body, { childList: true, subtree: true });
-  }
 
   return modal;
 }
