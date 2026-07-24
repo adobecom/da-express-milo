@@ -60,9 +60,12 @@ export async function showAppModal({ title, body, ctaLabel, appUrl }) {
 
   wrapper.append(header, bodyEl, cta);
 
+  // 'curtain-off' is Milo modal.js's built-in switch: it skips the dark page curtain *and*
+  // the body scroll-lock it would otherwise add. The Figma spec shows this as a non-blocking
+  // bottom toast (no dimmed backdrop, page still scrollable behind it), not a full modal.
   const modal = await getModal(null, {
     id: 'fg-app-modal',
-    class: 'fg-app-modal-dialog',
+    class: 'curtain-off',
     content: wrapper,
     closeEvent: 'closeModal',
   });

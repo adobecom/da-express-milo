@@ -1,6 +1,6 @@
 /* One-off accent from the Figma spec — no matching global token (closest,
    --color-background-accent-default, is a different blue: #5258E4). */
-.dialog-modal.fg-app-modal-dialog {
+.dialog-modal#fg-app-modal {
   --fg-app-modal-accent: #3b63fb;
   --fg-app-modal-accent-hover: #2f52d6;
 
@@ -19,11 +19,11 @@
 
 /* Recolor Milo's built-in close button (rendered by modal.js) for the dark theme —
    no new close-button markup needed here. */
-.fg-app-modal-dialog .dialog-close circle {
+#fg-app-modal .dialog-close circle {
   fill: transparent;
 }
 
-.fg-app-modal-dialog .dialog-close line {
+#fg-app-modal .dialog-close line {
   stroke: var(--color-white);
 }
 
@@ -47,6 +47,11 @@
   width: 22px;
   height: 22px;
   flex-shrink: 0;
+  border-radius: 18%;
+  /* The icon's own background (#000b1d) is identical to the modal background, so without a
+     stroke the mark reads as if it has no edge; inset box-shadow (not border/outline) so it
+     follows the icon's rounded corners on every browser, incl. older iOS Safari. */
+  box-shadow: inset 0 0 0 0.5px rgb(255 255 255 / 40%);
 }
 
 .fg-app-modal-title {
