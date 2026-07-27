@@ -2,6 +2,8 @@
 import { getState, setState, subscribe } from './state.js';
 import { LOAD_MORE_STEP } from './types.js';
 import { createFontCard, updateFontCard } from './fontCard.js';
+import { DEFAULT_PLACEHOLDERS } from './placeholders.js';
+import { setDaaLL } from '../../scripts/utils/analytics.js';
 
 const STYLESHEET_HREF = '/express/code/blocks/font-generator/fontCardGrid.css';
 
@@ -38,10 +40,12 @@ export default function createFontCardGrid(config = {}) {
   grid.className = 'font-card-grid';
   grid.setAttribute('role', 'list');
 
+  const loadMoreLabel = strings.loadMore || DEFAULT_PLACEHOLDERS.loadMore;
   const loadMoreBtn = document.createElement('button');
   loadMoreBtn.type = 'button';
   loadMoreBtn.className = 'font-card-load-more';
   loadMoreBtn.hidden = true;
+  setDaaLL(loadMoreBtn, loadMoreLabel);
   const loadMoreIcon = document.createElement('span');
   loadMoreIcon.className = 'load-more-icon';
   loadMoreIcon.setAttribute('aria-hidden', 'true');

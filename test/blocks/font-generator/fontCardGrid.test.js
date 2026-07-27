@@ -90,6 +90,18 @@ describe('font-generator/fontCardGrid', () => {
     unsubscribe();
   });
 
+  it('sets a daa-ll on the load-more button from strings', () => {
+    const { container, unsubscribe } = mount(makeFonts(2), { strings: { loadMore: 'More!' } });
+    expect(container.querySelector('.font-card-load-more').getAttribute('daa-ll')).to.equal('More');
+    unsubscribe();
+  });
+
+  it('falls back to the default load-more label for daa-ll when none is authored', () => {
+    const { container, unsubscribe } = mount(makeFonts(2));
+    expect(container.querySelector('.font-card-load-more').getAttribute('daa-ll')).to.equal('Load more');
+    unsubscribe();
+  });
+
   it('filters the visible cards to the active category', () => {
     const { container, unsubscribe } = mount(makeFonts(6)); // 3 bold, 3 italic
     setState({ activeFilters: ['bold'] });

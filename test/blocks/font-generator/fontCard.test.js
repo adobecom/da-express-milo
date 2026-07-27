@@ -34,13 +34,13 @@ describe('font-generator/fontCard', () => {
       const card = createFontCard(FONT, 'Hello', 24, CTA);
       expect(card.getAttribute('daa-lh')).to.equal('Bold');
       expect(card.querySelector('.font-card-copy-btn').getAttribute('daa-ll')).to.equal('Copy');
-      expect(card.querySelector('.font-card-cta').getAttribute('daa-ll')).to.equal('Design With Style');
+      expect(card.querySelector('.font-card-cta').getAttribute('daa-ll')).to.equal('Design With Style Bold');
     });
 
     it('preserves a localized, non-Latin CTA label instead of collapsing it to "link"', () => {
       const cta = { text: '有スタイルでデザイン', href: 'https://www.adobe.com/express/templates/' };
       const card = createFontCard(FONT, 'Hello', 24, cta);
-      expect(card.querySelector('.font-card-cta').getAttribute('daa-ll')).to.equal(cta.text);
+      expect(card.querySelector('.font-card-cta').getAttribute('daa-ll')).to.equal(`${cta.text} ${FONT.styleName}`);
     });
 
     it('renders the transformed preview text at the given size', () => {

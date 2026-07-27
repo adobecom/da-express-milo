@@ -98,13 +98,15 @@ function makeCopyOverlay(message) {
   return overlay;
 }
 
-function makeCtaLink(cardCta) {
+function makeCtaLink(cardCta, styleName) {
   const a = document.createElement('a');
   a.className = 'font-card-cta';
   a.href = cardCta.href;
   a.target = '_blank';
   a.rel = 'noopener noreferrer';
-  setDaaLL(a, cardCta.text);
+  // Include the font style so the CTA's daa-ll is self-identifying even
+  // without cross-referencing the card's daa-lh scope.
+  setDaaLL(a, `${cardCta.text} ${styleName}`);
 
   const icon = document.createElement('img');
   icon.src = '/express/code/icons/font-generator-external-link.svg';
@@ -196,7 +198,7 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
   name.textContent = fontDef.styleName;
 
   footer.append(name);
-  if (cardCta) footer.append(makeCtaLink(cardCta));
+  if (cardCta) footer.append(makeCtaLink(cardCta, fontDef.styleName));
 
   card.append(body, footer);
 
