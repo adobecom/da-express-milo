@@ -71,12 +71,13 @@
   box-shadow: 0px 4px 6px #00000014;
 }
 
-.font-generator-text-input .text-field:focus-within {
+/* Focus and "Active" (focused + has real text, per the design) are written as
+   mutually exclusive :has() conditions — not one overriding the other by
+   specificity — so exactly one of the ring/border ever applies, never both. */
+.font-generator-text-input .text-field:focus-within:has(.label:placeholder-shown) {
   box-shadow: 0 0 0 2px var(--Buttons-Down), 0px 4px 6px #00000014;
 }
 
-/* Once there's real (non-placeholder) text, the design swaps the ring for a
-   solid border so the field reads calmer while actively in use. */
 .font-generator-text-input .text-field:focus-within:has(.label:not(:placeholder-shown)) {
   border-color: var(--color-gray-950);
   box-shadow: 0px 4px 6px #00000014;
