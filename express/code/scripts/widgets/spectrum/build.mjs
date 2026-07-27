@@ -173,6 +173,17 @@ const newComponents = [
     ].join('\n'),
   },
   {
+    name: 'alert-dialog',
+    entry: [
+      "import '@spectrum-web-components/alert-dialog/sp-alert-dialog.js';",
+      "export * from '@spectrum-web-components/alert-dialog';",
+    ].join('\n'),
+    extraExternals: [
+      { match: /^@spectrum-web-components\/dialog(\/.*)?$/, target: './dialog.js' },
+      { match: /^@spectrum-web-components\/button(\/.*)?$/, target: './button.js' },
+    ],
+  },
+  {
     name: 'toast',
     entry: [
       "import '@spectrum-web-components/toast/sp-toast.js';",
@@ -271,6 +282,7 @@ const newComponents = [
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-filter.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-switch-vertical.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-close.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-accessibility.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-checkmark-circle.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-image.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-lock.js';",
@@ -354,6 +366,13 @@ const newComponents = [
         },
       },
     ],
+  },
+  {
+    name: 'field-label',
+    entry: [
+      "import '@spectrum-web-components/field-label/sp-field-label.js';",
+      "export * from '@spectrum-web-components/field-label';",
+    ].join('\n'),
   },
 ];
 
