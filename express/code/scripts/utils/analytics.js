@@ -2,14 +2,18 @@ const DEFAULT_HEADER_SELECTOR = '[data-analytics-header], h1, h2, h3';
 const DEFAULT_LINK_SELECTOR = 'a[href], button';
 
 function sanitizeHeaderText(s, fallback) {
-  const raw = String(s ?? '').replace(/[^a-zA-Z0-9\s]/g, '').trim().substring(0, 20);
+  const raw = String(s ?? '')
+    .replace(/[^\p{L}\p{N}\s]/gu, '')
+    .trim()
+    .substring(0, 20)
+    .trim();
   return raw || fallback || 'Section';
 }
 
 const DAA_LL_MAX = 30;
 
 function sanitizeLinkLabel(s) {
-  return String(s ?? '').replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, ' ').trim();
+  return String(s ?? '').replace(/[^\p{L}\p{N}\s]/gu, '').replace(/\s+/g, ' ').trim();
 }
 
 export function getAnalyticsHeaderFromDom(container, options = {}) {
@@ -42,7 +46,7 @@ export function getNextLinkIndexInContainer(container, options = {}) {
  */
 export function setDaaLL(element, label) {
   if (!element || typeof element.setAttribute !== 'function') return '';
-  const value = sanitizeLinkLabel(label).substring(0, DAA_LL_MAX) || 'link';
+  const value = sanitizeLinkLabel(label).substring(0, DAA_LL_MAX).trim() || 'link';
   element.setAttribute('daa-ll', value);
   return value;
 }

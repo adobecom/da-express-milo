@@ -7,10 +7,10 @@ const BASE_PATH = '/express/code/blocks/font-generator';
 const STYLESHEET_HREF = `${BASE_PATH}/fontCard.css`;
 const COPY_RESET_MS = 1500;
 const OVERLAY_FADE_MS = 200;
-// Stable, locale-independent analytics labels for the copy control so daa-ll
-// reporting stays consistent across locales (aria-label/tooltip remain localized).
+// Stable, locale-independent analytics label for the copy control so daa-ll
+// reporting stays consistent across locales and copy states (aria-label/tooltip
+// remain localized and reflect the current state).
 const COPY_LL = 'Copy';
-const COPIED_LL = 'Copied';
 
 let stylesInjected = false;
 
@@ -165,13 +165,11 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
       card.classList.add('is-copied');
       copyBtn.dataset.tooltip = copiedLabel;
       copyBtn.setAttribute('aria-label', copiedLabel);
-      setDaaLL(copyBtn, COPIED_LL);
       announce(copiedMessage);
       resetTimer = setTimeout(() => {
         card.classList.remove('is-copied');
         copyBtn.dataset.tooltip = copyLabel;
         copyBtn.setAttribute('aria-label', copyLabel);
-        setDaaLL(copyBtn, COPY_LL);
         overlayTimer = setTimeout(() => {
           activeOverlay?.remove();
           activeOverlay = null;

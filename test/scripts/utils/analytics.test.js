@@ -22,10 +22,26 @@ describe('Analytics daa attributes', () => {
       expect(a.getAttribute('daa-ll')).to.have.length(30);
     });
 
+    it('trims a trailing partial word left by the length cap', () => {
+      const a = document.createElement('a');
+      setDaaLL(a, `${'a'.repeat(29)} ${'b'.repeat(5)}`);
+      expect(a.getAttribute('daa-ll')).to.equal('a'.repeat(29));
+    });
+
     it('falls back to "link" when nothing survives sanitizing', () => {
       const a = document.createElement('a');
       setDaaLL(a, '@#$%');
       expect(a.getAttribute('daa-ll')).to.equal('link');
+    });
+
+    it('preserves accented and non-Latin labels instead of mangling or collapsing them', () => {
+      const a = document.createElement('a');
+      setDaaLL(a, 'Café Déjà Vu');
+      expect(a.getAttribute('daa-ll')).to.equal('Café Déjà Vu');
+
+      const b = document.createElement('a');
+      setDaaLL(b, '日本語のリンク');
+      expect(b.getAttribute('daa-ll')).to.equal('日本語のリンク');
     });
 
     it('returns "" and no-ops on an invalid element', () => {
@@ -45,6 +61,12 @@ describe('Analytics daa attributes', () => {
       const el = document.createElement('div');
       setDaaLH(el, '', { fallback: 'Font' });
       expect(el.getAttribute('daa-lh')).to.equal('Font');
+    });
+
+    it('preserves accented and non-Latin scope names', () => {
+      const el = document.createElement('div');
+      setDaaLH(el, 'Fuente Redonda');
+      expect(el.getAttribute('daa-lh')).to.equal('Fuente Redonda');
     });
 
     it('returns "" and no-ops on an invalid element', () => {

@@ -37,6 +37,12 @@ describe('font-generator/fontCard', () => {
       expect(card.querySelector('.font-card-cta').getAttribute('daa-ll')).to.equal('Design With Style');
     });
 
+    it('preserves a localized, non-Latin CTA label instead of collapsing it to "link"', () => {
+      const cta = { text: '有スタイルでデザイン', href: 'https://www.adobe.com/express/templates/' };
+      const card = createFontCard(FONT, 'Hello', 24, cta);
+      expect(card.querySelector('.font-card-cta').getAttribute('daa-ll')).to.equal(cta.text);
+    });
+
     it('renders the transformed preview text at the given size', () => {
       const preview = createFontCard(FONT, 'Hello', 24).querySelector('.font-card-preview');
       expect(preview).to.exist;
@@ -144,6 +150,13 @@ describe('font-generator/fontCard', () => {
       expect(card.querySelector('.font-card-copy-overlay')).to.exist;
       expect(card.querySelector('.font-card-copy-btn').getAttribute('aria-label'))
         .to.equal(DEFAULT_PLACEHOLDERS.copiedLabel);
+    });
+
+    it('keeps daa-ll stable across the copy/copied state so the metric does not fragment', async () => {
+      const card = createFontCard(FONT, 'Hello', 16);
+      const btn = card.querySelector('.font-card-copy-btn');
+      await clickCopy(card);
+      expect(btn.getAttribute('daa-ll')).to.equal('Copy');
     });
 
     it('announces success through a polite live region', async () => {
