@@ -16,7 +16,7 @@ export function createFontsIcon() {
 const CATEGORY_CONFIG = {
   Cool: { label: 'ⓒⓞⓞⓛ', ariaKey: 'fg-cool' },
   Glitch: { label: 'G̶̶l̶̶i̶̶t̶̶c̶̶h̶̶', ariaKey: 'fg-glitch' },
-  'Symbol text': { label: '❚█══Symbol══█❚', ariaKey: 'fg-symbol' },
+  Symbol: { label: '❚█══Symbol══█❚', ariaKey: 'fg-symbol' },
 };
 
 export async function fetchStrings(keyFallbackMap) {
@@ -32,23 +32,21 @@ export async function fetchStrings(keyFallbackMap) {
   }));
 }
 
-export function buildPromo(btnClass) {
+export function buildPromo(btnClass, { title, cta } = {}) {
   const icon = createFontsIcon();
   icon.classList.add('fg-promo-icon');
 
-  // ToDo: update after authoring sync
-  const text = createTag('p', { class: 'fg-promo-text' }, 'Looking for more fonts?');
+  const text = createTag('p', { class: 'fg-promo-text' }, title);
 
   const left = createTag('div', { class: 'fg-promo-left' });
   left.append(icon, text);
 
-  // ToDo: update after authoring sync
   const link = createTag('a', {
     href: ADOBE_FONTS_HREF,
     class: btnClass,
     target: '_blank',
     rel: 'noopener noreferrer',
-  }, 'Go to Adobe Fonts');
+  }, cta);
 
   const promo = createTag('div', { class: 'fg-promo' });
   promo.append(left, link);
@@ -116,8 +114,11 @@ export default async function init(els, { showCTA = true, onSelect } = {}) {
       'fg-cool': 'Cool',
       'fg-glitch': 'Glitch',
       'fg-symbol': 'Symbol text',
+      'fg-promo-title': 'Looking for more fonts?',
+      'fg-promo-cta': 'Go to Adobe Fonts',
     }),
   ]);
+  const promoStrings = { title: strings['fg-promo-title'], cta: strings['fg-promo-cta'] };
 
   const cleanups = await Promise.all([...els].map(async (el) => {
     const filterList = buildFilterList(categories, strings);
@@ -132,7 +133,7 @@ export default async function init(els, { showCTA = true, onSelect } = {}) {
     });
 
     if (showCTA) {
-      el.append(accordion, buildPromo('button primary medium fg-promo-btn'));
+      el.append(accordion, buildPromo('button primary medium fg-promo-btn', promoStrings));
     } else {
       el.append(accordion);
     }
@@ -141,16 +142,19 @@ export default async function init(els, { showCTA = true, onSelect } = {}) {
       const btn = e.target.closest('.fg-filter-btn');
       if (!btn) return;
       const { category } = btn.dataset;
+      let next;
       if (category === '') {
-        setState({ activeFilters: [] });
+        next = [];
       } else {
         const { activeFilters } = getState();
-        const next = activeFilters.includes(category) ? [] : [category];
-        setState({ activeFilters: next });
+        next = activeFilters.includes(category) ? [] : [category];
       }
+      setState({ activeFilters: next });
       onSelect?.();
     });
 
+    // subscribe() fires immediately with the current snapshot, so this also
+    // reflects any URL-restored activeFilters (e.g. ?filters=Glitch) on load.
     const unsubscribe = subscribe(({ activeFilters }) => {
       syncFilterButtons(filterList, activeFilters);
     });

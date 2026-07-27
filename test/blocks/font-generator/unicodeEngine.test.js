@@ -252,6 +252,14 @@ describe('unicode engine', () => {
     });
   });
 
+  it('caps input by Unicode code points without splitting emoji', () => {
+    const source = `${'A'.repeat(MAX_INPUT_LENGTH - 1)}🚀`;
+    const actual = transformText(source, getFont('Light text bubble'));
+
+    expect([...actual]).to.have.length(MAX_INPUT_LENGTH);
+    expect(actual).to.equal(`${'Ⓐ'.repeat(MAX_INPUT_LENGTH - 1)}🚀`);
+  });
+
   it('transforms 200-character input across every style within the performance budget', () => {
     const source = 'ABCxyz123!'.repeat(20);
     const start = performance.now();

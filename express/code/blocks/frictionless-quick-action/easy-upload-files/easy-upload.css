@@ -167,6 +167,13 @@ main .section .qr-code-dropzone-content .easy-upload-secondary .tooltip {
     min-width: 231px;
 }
 
+/* Out-specify styles.css `[data-block-status]:not(...) a.con-button.same-fcta`
+   (0,4,2) so the flex layout survives when same-fcta is added dynamically. */
+.easy-upload-initial .easy-upload-cta-row .button-container a.button.same-fcta,
+.easy-upload-initial .easy-upload-cta-row .button-container a.con-button.same-fcta {
+    display: flex;
+}
+
 .easy-upload-initial .easy-upload-cta-row .button-container .button .icon {
   width: 22px;
   height: 22px;
@@ -359,6 +366,14 @@ main  .easy-upload-confirm a.button:any-link {
   letter-spacing: 0;
 }
 
+/* Scoped to the confirm tooltip only: `.pinned` reveals the failure message
+   on its own (no hover) the moment a corrupted upload is detected, and stays
+   visible until dismissed. Kept in this block so no other tooltip is affected. */
+.easy-upload-confirm .tooltip-text.pinned {
+  opacity: 1;
+  pointer-events: all;
+}
+
 .easy-upload-confirm {
   padding-top: var(--spacing-300);
   margin: 0;
@@ -522,6 +537,7 @@ main .section p.qr-error-message {
   cursor: not-allowed;
   background-color: var(--color-gray-200);
   color: var(--color-gray-500);
+  pointer-events: none;
 }
 
 @keyframes rotate-loader {

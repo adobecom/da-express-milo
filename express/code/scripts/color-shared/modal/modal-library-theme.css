@@ -1,0 +1,180 @@
+/* Editable "libraries saved themes" modal content.
+   Reuses the palette modal's swatch-rail styles (modal-palette-content.css) and
+   the ax-drawer-tag-section tag field (drawer.css); this file adds the
+   in-modal tag section and the library toolbar wrapper.
+   (Color-mode HEX picker + code view are deferred to a future release.) */
+
+.ax-color-modal-content .modal-library-theme {
+  /* Tag-field tokens (defined on .ax-drawer-panel in drawer.css) redeclared so
+     the reused tag field renders correctly outside the drawer. */
+  --ax-tag-field-min-height: 56px;
+  --ax-tag-field-gap: 12px;
+  --ax-tag-pill-max-width: 224px;
+  --ax-tag-pill-min-width: 27px;
+  --ax-tag-pill-icon-size: 10px;
+  --ax-drawer-font-weight-medium: 500;
+  --ax-drawer-line-height-l: 20px;
+  --ax-drawer-line-height-s: 18px;
+  --ax-drawer-label-padding-block-l: 10px;
+  --ax-drawer-label-padding-block-s: 7px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: var(--spacing-300);
+  inline-size: 100%;
+}
+
+.ax-color-modal-container:has(.modal-library-theme) {
+  max-height: 95vh;
+  max-height: 95dvh;
+}
+
+/* Only the content above the toolbar scrolls; the toolbar is a fixed footer so it
+   never jumps and the whole modal never grows a scrollbar. */
+.ax-color-modal-content:has(.modal-library-theme) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ax-color-modal-content .modal-library-theme {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.ax-color-modal-content .modal-library-theme .modal-lib-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  /* overflow-y:auto promotes overflow-x to auto; clip x so nested rail/handle
+     overflow never triggers a stray horizontal scrollbar. */
+  overflow-x: hidden;
+  inline-size: 100%;
+}
+
+/* Swatch rail keeps its tablet/desktop height limit; on mobile it expands to fit
+   all swatches while the modal content scrolls beneath the fixed toolbar. */
+@media (max-width: 599px) {
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail .modal-color-rail-wrap {
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range] sp-theme,
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail
+    .modal-color-rail-wrap[data-color-count-range] color-swatch-rail[orientation="stacked"] {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail::after {
+    display: none;
+  }
+}
+
+/* Tablet: large palettes (6+) wrap their content and grow with it (no internal
+   scroll or bottom fade) while the modal content scrolls like mobile. Small
+   palettes keep their current fixed height (never shorter). */
+@media (min-width: 600px) and (max-width: 1199px) {
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] {
+    height: auto;
+    min-height: 264px;
+    max-height: none;
+    overflow: visible;
+  }
+
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] sp-theme,
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail
+    .modal-color-rail-wrap[data-color-count-range="large"] color-swatch-rail[orientation="stacked"] {
+    flex: 0 0 auto;
+    height: auto;
+    min-height: 0;
+  }
+
+  .ax-color-modal-content .modal-library-theme
+    .modal-palette-container--color-rail:has(.modal-color-rail-wrap[data-color-count-range="large"])::after {
+    display: none;
+  }
+}
+
+/* ── Tags section ──────────────────────────────────────────────── */
+
+.ax-color-modal-content .modal-lib-tags {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  inline-size: 100%;
+}
+
+.ax-color-modal-content .modal-lib-tags .ax-drawer-tag-section {
+  inline-size: 100%;
+}
+
+/* Fixed toolbar footer; the content above it scrolls. */
+.ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
+  flex: 0 0 auto;
+  inline-size: 100%;
+  background: var(--color-white);
+}
+
+.ax-color-modal-content .modal-library-theme .ax-lib-card__action-menu {
+  z-index: 5;
+}
+
+.ax-color-modal-content .modal-library-theme .modal-palette-toolbar > sp-theme,
+.ax-color-modal-content .modal-library-theme .modal-palette-toolbar .ax-toolbar {
+  inline-size: 100%;
+}
+
+/* ── Full-bleed footer divider (mobile + tablet; desktop unchanged) ── */
+@media (max-width: 1199px) {
+  .ax-color-modal-content .modal-library-theme {
+    gap: 0;
+  }
+
+  .ax-color-modal-content .modal-library-theme .modal-lib-scroll {
+    padding-block-end: var(--spacing-200);
+  }
+
+  .ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
+    border-block-start: 1px solid var(--color-gray-150);
+  }
+
+  .ax-color-modal-content .modal-library-theme .ax-toolbar.ax-toolbar-library {
+    border-block-start: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
+    margin-inline: calc(-1 * var(--spacing-300));
+    padding-inline: var(--spacing-300);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1199px) {
+  .ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
+    margin-inline: calc(-1 * var(--spacing-400));
+    padding-inline: var(--spacing-400);
+  }
+}
+
+/* modal-palette-content.css inflates accent buttons to 48px below 1200px; keep
+   the Edit theme + Save changes buttons at 40px across all breakpoints. */
+.ax-color-modal-content .ax-toolbar-lib-buttons sp-button[variant] {
+  --spectrum-button-height: 40px;
+}
