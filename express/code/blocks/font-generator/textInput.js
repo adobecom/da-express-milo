@@ -118,6 +118,18 @@ function syncCounter(textarea, counter) {
   counter.textContent = `${length.toLocaleString()}/${textarea.maxLength.toLocaleString()}`;
 }
 
+// "Active" (design QA's darker border) is triggered by clicking/tapping into
+// the field, not by typing — keyboard-only focus (e.g. Tab) instead gets the
+// plain focus ring. .is-active is set on pointerdown so it's already applied
+// by the time focus lands, and cleared on blur so tabbing away resets it.
+function initActiveState(panel) {
+  const textarea = panel.querySelector('textarea.label');
+  const field = panel.querySelector('.text-field');
+  if (!textarea || !field) return;
+  textarea.addEventListener('pointerdown', () => field.classList.add('is-active'));
+  textarea.addEventListener('blur', () => field.classList.remove('is-active'));
+}
+
 function initTextInput(panel) {
   const textarea = panel.querySelector('textarea.label');
   const counter = panel.querySelector('.character-count');
@@ -260,6 +272,7 @@ export default function createTextInput(config = {}) {
 
   applyStrings(panel, config.strings);
   initResizeHandle(panel);
+  initActiveState(panel);
   const cancelPendingInput = initTextInput(panel);
   populateSuggestions(panel, config.suggestions);
   initSuggestionPills(panel, cancelPendingInput);

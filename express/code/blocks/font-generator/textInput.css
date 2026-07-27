@@ -71,14 +71,15 @@
   box-shadow: 0px 4px 6px #00000014;
 }
 
-/* Focus and "Active" (focused + has real text, per the design) are written as
-   mutually exclusive :has() conditions — not one overriding the other by
-   specificity — so exactly one of the ring/border ever applies, never both. */
-.font-generator-text-input .text-field:focus-within:has(.label:placeholder-shown) {
+/* Focus (ring) and Active (dark border) are mutually exclusive: .is-active is
+   toggled in JS on pointerdown/blur (see textInput.js), so a keyboard-only
+   focus (e.g. Tab) gets the ring, while a click/tap gets the dark border —
+   regardless of whether the field has text yet. */
+.font-generator-text-input .text-field:focus-within:not(.is-active) {
   box-shadow: 0 0 0 2px var(--Buttons-Down), 0px 4px 6px #00000014;
 }
 
-.font-generator-text-input .text-field:focus-within:has(.label:not(:placeholder-shown)) {
+.font-generator-text-input .text-field.is-active {
   border-color: var(--color-gray-950);
   box-shadow: 0px 4px 6px #00000014;
 }
