@@ -33,10 +33,11 @@ export default async function decorate(block) {
   const gallery = createTag('div', { class: 'icon-carousel-gallery' });
   // buildGallery marks this container role="group" aria-roledescription="carousel".
   gallery.setAttribute('aria-label', headingText || regionLabel || 'Feature highlights');
-  // Chromium auto-focuses scrollable overflow containers even with no tabindex
-  // set; opt out explicitly since the prev/next buttons already provide full
-  // keyboard control over scrolling.
-  gallery.setAttribute('tabindex', '-1');
+  // Keyboard users must be able to reach and scroll this region directly
+  // (axe scrollable-region-focusable / WCAG 2.1.1); a focused, overflowing
+  // element scrolls natively via arrow keys. Cards themselves carry no
+  // tabindex, so they stay out of the tab order.
+  gallery.setAttribute('tabindex', '0');
 
   cardRows.forEach((row) => {
     const cells = [...row.querySelectorAll(':scope > div')];
@@ -79,6 +80,19 @@ export default async function decorate(block) {
   // Chevron SVGs are decorative; the buttons already carry accessible labels.
   control.querySelectorAll('svg').forEach((svg) => svg.setAttribute('aria-hidden', 'true'));
 
-  section.append(header, gallery, control);
+  // Gallery's own box is static; a plain outline on it can't hug just the
+  // first card at rest and then track the flush-left edge once scrolled.
+  // This sibling is a decorative overlay whose position CSS recomputes from
+  // the --scrolled class below, independent of the gallery's own box.
+  const galleryWrap = createTag('div', { class: 'icon-carousel-gallery-wrap' });
+  const galleryRing = createTag('div', { class: 'icon-carousel-gallery-ring', 'aria-hidden': 'true' });
+  const updateScrolledState = () => {
+    galleryWrap.classList.toggle('icon-carousel-gallery-wrap--scrolled', gallery.scrollLeft > 0);
+  };
+  updateScrolledState();
+  gallery.addEventListener('scroll', updateScrolledState, { passive: true });
+  galleryWrap.append(gallery, galleryRing);
+
+  section.append(header, galleryWrap, control);
   block.replaceChildren(section);
 }

@@ -65,10 +65,45 @@ describe('icon-carousel / structure', () => {
     expect(section.getAttribute('aria-label')).to.equal(heading.textContent.trim());
   });
 
-  it('gallery is not part of the tab order', async () => {
+  it('gallery is keyboard-focusable to scroll it', async () => {
     const block = await prepBlock('./mocks/default.html');
     const gallery = block.querySelector('.icon-carousel-gallery');
-    expect(gallery.getAttribute('tabindex')).to.equal('-1');
+    expect(gallery.getAttribute('tabindex')).to.equal('0');
+  });
+
+  it('cards are not individually tabbable', async () => {
+    const block = await prepBlock('./mocks/default.html');
+    const cards = block.querySelectorAll('.icon-carousel-card');
+    cards.forEach((card) => expect(card.hasAttribute('tabindex')).to.be.false);
+  });
+
+  it('gallery has a decorative focus-ring sibling', async () => {
+    const block = await prepBlock('./mocks/default.html');
+    const gallery = block.querySelector('.icon-carousel-gallery');
+    const ring = block.querySelector('.icon-carousel-gallery-ring');
+    expect(ring).to.exist;
+    expect(ring.getAttribute('aria-hidden')).to.equal('true');
+    expect(gallery.nextElementSibling).to.equal(ring);
+  });
+
+  it('marks the wrap as scrolled once scrollLeft moves off zero', async () => {
+    const block = await prepBlock('./mocks/default.html');
+    const gallery = block.querySelector('.icon-carousel-gallery');
+    const wrap = block.querySelector('.icon-carousel-gallery-wrap');
+    // No stylesheet is loaded in this harness, so the gallery has no real
+    // overflow and the browser clamps scrollLeft back to 0; override the
+    // property so the listener's `gallery.scrollLeft > 0` check is testable
+    // without depending on actual layout.
+    let mockScrollLeft = 0;
+    Object.defineProperty(gallery, 'scrollLeft', { get: () => mockScrollLeft, configurable: true });
+
+    expect(wrap.classList.contains('icon-carousel-gallery-wrap--scrolled')).to.be.false;
+    mockScrollLeft = 50;
+    gallery.dispatchEvent(new Event('scroll'));
+    expect(wrap.classList.contains('icon-carousel-gallery-wrap--scrolled')).to.be.true;
+    mockScrollLeft = 0;
+    gallery.dispatchEvent(new Event('scroll'));
+    expect(wrap.classList.contains('icon-carousel-gallery-wrap--scrolled')).to.be.false;
   });
 
   it('renders correct number of cards', async () => {
