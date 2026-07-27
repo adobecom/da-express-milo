@@ -281,7 +281,6 @@ async function buildB2B(el, locale, imsClientId, noRedirect) {
     susiConfigs.layout = 'emailOnly';
   }
   const params = buildSUSIParams(susiConfigs);
-  params.context = 'context-business';
   if (!noRedirect) {
     redirectIfLoggedIn(params.destURL);
   }
