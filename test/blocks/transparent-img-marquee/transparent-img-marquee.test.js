@@ -3,19 +3,19 @@ import { expect } from '@esm-bundle/chai';
 
 const imports = await Promise.all([
   import('../../../express/code/scripts/scripts.js'),
-  import('../../../express/code/blocks/transparent-image-marquee/transparent-image-marquee.js'),
+  import('../../../express/code/blocks/transparent-img-marquee/transparent-img-marquee.js'),
 ]);
 
 const { default: decorate } = imports[1];
 
 async function prepBlock(filePath) {
   document.body.innerHTML = await readFile({ path: filePath });
-  const block = document.querySelector('.transparent-image-marquee');
+  const block = document.querySelector('.transparent-img-marquee');
   await decorate(block);
   return block;
 }
 
-describe('transparent-image-marquee', () => {
+describe('transparent-img-marquee', () => {
   beforeEach(() => {
     window.isTestEnv = true;
   });
@@ -76,7 +76,7 @@ describe('transparent-image-marquee', () => {
   });
 });
 
-describe('transparent-image-marquee / CTAs + disclaimer', () => {
+describe('transparent-img-marquee / CTAs + disclaimer', () => {
   beforeEach(() => {
     window.isTestEnv = true;
   });
