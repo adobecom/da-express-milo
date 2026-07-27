@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>textInput states harness</title>
+<link rel="stylesheet" href="/express/code/styles/styles.css" />
+<style>
+  body { padding: 60px; background: #efefef; }
+  .row { display: flex; gap: 24px; margin-bottom: 24px; }
+  .row .font-generator-text-input { width: 340px; }
+  label.tag { font: 12px monospace; display: block; margin-bottom: 4px; }
+</style>
+</head>
+<body>
+<div id="default"></div>
+<div id="hover"></div>
+<div id="focus"></div>
+<div id="active"></div>
+<div id="disabled"></div>
+<script type="module">
+  import createTextInput from '/express/code/blocks/font-generator/textInput.js';
+  import { DEFAULT_PLACEHOLDERS } from '/express/code/blocks/font-generator/placeholders.js';
+
+  function mount(id) {
+    const { panel } = createTextInput({ strings: DEFAULT_PLACEHOLDERS, suggestions: ['Sample suggestion one', 'Sample two'] });
+    document.getElementById(id).append(panel);
+    return panel;
+  }
+
+  mount('default');
+  mount('hover');
+  mount('focus').querySelector('textarea').focus();
+  const activePanel = mount('active');
+  const activeTa = activePanel.querySelector('textarea');
+  activeTa.focus();
+  activeTa.value = "I'm writing something";
+  const disabledPanel = mount('disabled');
+  disabledPanel.querySelector('textarea').disabled = true;
+
+  window.__ready = true;
+</script>
+</body>
+</html>
