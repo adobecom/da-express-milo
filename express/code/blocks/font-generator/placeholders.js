@@ -11,8 +11,9 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   inputLabel: 'Preview text input',
   previewTextLabel: 'Preview Text',
   tryThese: 'Try these:',
-  // Comma-separated preview suggestions rendered as pills.
-  suggestions: 'The quick brown fox jumps over the lazy dog,ABCDEFGHIJKLMNOPQRSTUVWXYZ,Realigned equestrian fez bewilders picky monarch',
+  // Semicolon-separated preview suggestions rendered as pills (semicolons,
+  // not commas, so a suggestion can itself contain a comma).
+  suggestions: 'The quick brown fox jumps over the lazy dog;ABCDEFGHIJKLMNOPQRSTUVWXYZ;Realigned equestrian fez bewilders picky monarch;Roger, hungry: ate 236 peaches & cantaloupes in 1904!',
   // Max characters allowed in the preview text input.
   maxLength: 2000,
   // Toolbar
@@ -27,8 +28,12 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   copyLabel: 'Copy text',
   copiedLabel: 'Copied!',
   copiedMessage: 'Text Copied!',
-  sampleText: 'Hello',
+  sampleText: 'Type the preview text you want to get started...', // Same as previewPlaceholder
   cardCtaText: 'Design With Style',
+  // App-download modal (iOS mweb)
+  appModalTitle: 'Continue in the app',
+  appModalBody: 'Not all features are available in web. Download the free Adobe Express app to get full access.',
+  appModalCta: 'Get free app',
 });
 
 // Authored placeholder keys — namespaced to avoid collisions with other
@@ -53,6 +58,9 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   copiedMessage: 'font-generator-copied-message',
   sampleText: 'font-generator-sample-text',
   cardCtaText: 'font-generator-card-cta',
+  appModalTitle: 'font-generator-app-modal-title',
+  appModalBody: 'font-generator-app-modal-body',
+  appModalCta: 'font-generator-app-modal-cta',
 });
 
 // replaceKey()/replaceKeyArray() echo the humanized key back (e.g.
