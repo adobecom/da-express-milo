@@ -9,7 +9,6 @@ import {
   fadeIn,
   fadeOut,
   createDocConfig,
-  createMergeVideosDocConfig,
   createContainerConfig,
   selectElementByTagPrefix,
   createDefaultExportConfig,
@@ -22,6 +21,7 @@ import {
   EXPRESS_ROUTE_PATHS,
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
   AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
+  getVideoConfig,
 } from '../../scripts/utils/frictionless-utils.js';
 
 let createTag;
@@ -121,7 +121,10 @@ function showErrorToast(block, msg) {
   const hideToast = () => toast.classList.add('hide');
   if (!toast) {
     toast = createTag('div', { class: 'error-toast hide' });
-    toast.prepend(getIconElementDeprecated('error'));
+    toast.append(getIconElementDeprecated('error'));
+    // Dedicated text node so updating the message doesn't wipe the icon and
+    // close button (setting toast.textContent would remove all children).
+    toast.append(createTag('span', { class: 'error-toast-message' }));
     const close = createTag(
       'button',
       {},
@@ -131,7 +134,7 @@ function showErrorToast(block, msg) {
     toast.append(close);
     block.append(toast);
   }
-  toast.textContent = msg;
+  toast.querySelector('.error-toast-message').textContent = msg;
   toast.classList.remove('hide');
   clearTimeout(timeoutId);
   timeoutId = setTimeout(hideToast, 6000);
@@ -227,12 +230,19 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
 
   const contConfig = createContainerConfig(quickActionId);
   const docConfig = createDocConfig(data[0], 'image');
-  const videoDocConfig = quickActionId === 'merge-videos' ? createMergeVideosDocConfig(data) : createDocConfig(data[0], 'video');
+  const videoDocConfig = getVideoConfig(quickActionId, data);
 
   const appConfig = {
     metaData: {
       isFrictionlessQa: 'true',
       ...(quickActionId === 'caption-video' && { videoLanguage: selectedVideoLanguage }),
+    },
+    analyticsData: {
+      ...(quickActionId === 'video-compress' && { entryPoint: 'seo-quick-action-video-compress' }),
+      ...(quickActionId === 'video-convert' && { entryPoint: 'seo-quick-action-video-convert' }),
+      ...(quickActionId === 'audio-converter' && { entryPoint: 'seo-quick-action-audio-converter' }),
+      ...(quickActionId === 'video-to-audio' && { entryPoint: 'seo-quick-action-video-to-audio' }),
+      ...(quickActionId === 'compress-image' && { entryPoint: 'seo-quick-action-compress-image' }),
     },
     receiveQuickActionErrors: true,
     callbacks: {

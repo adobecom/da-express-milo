@@ -2,11 +2,13 @@ import { announceToScreenReader } from '../spectrum/index.js';
 import { isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi, decorateAnalyticsAttributes } from '../utils/utilities.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
-import { createIconButton } from '../utils/icons.js';
+import { createIconButton, createSpectrumIcon } from '../utils/icons.js';
 import { createEventBus } from '../utils/createEventBus.js';
 import { createTag, getLibs } from '../../utils.js';
-import { loadButton, loadActionButton, loadTooltip } from '../spectrum/load-spectrum.js';
+import { loadButton, loadActionButton, loadTooltip, loadMenu } from '../spectrum/load-spectrum.js';
 import { createThemeWrapper } from '../spectrum/utils/theme.js';
+import { createLibraryAccessibilityMenu } from '../components/libraries/createLibraryAccessibilityMenu.js';
+import { createLibraryDownloadMenu } from '../components/libraries/createLibraryDownloadMenu.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
 import { triggerSignInFlow, ensureIms, waitForSignedInUser } from '../../../libs/services/middlewares/auth.middleware.js';
@@ -39,6 +41,15 @@ const TOOLBAR_DEFAULTS = {
   urlCopiedToClipboard: 'URL copied to clipboard',
   shareFailed: 'Unable to share. Please try again.',
   networkError: 'Network request failed. Check your connection or try again.',
+  editTheme: 'Edit theme',
+  editThemeAria: 'Edit this color theme',
+  saveChanges: 'Save changes',
+  saveChangesAria: 'Save changes to this theme',
+  deleteTheme: 'Delete',
+  deleteThemeAria: 'Delete this theme',
+  saveChangesSuccess: 'Changes saved',
+  saveChangesFailed: 'Unable to save changes. Please try again.',
+  saving: 'Saving\u2026',
 };
 
 let toolbarInstanceCounter = 0;
@@ -238,11 +249,12 @@ async function handleSave(
 
 /* ── Tooltip Helper ──────────────────────────────────────────── */
 
-function attachTooltip(actionBtn, text) {
+function attachTooltip(actionBtn, text, { dismissOnActivate = false } = {}) {
   createExpressTooltip({
     targetEl: actionBtn,
     content: text,
     placement: 'top',
+    dismissOnActivate,
   }).catch(() => {});
 }
 
@@ -311,7 +323,7 @@ function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t) {
     });
     editBtn.classList.add('ax-edit-btn');
     decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit palette' });
-    attachTooltip(editBtn, t.edit);
+    attachTooltip(editBtn, t.edit, { dismissOnActivate: true });
     paletteSummary.appendChild(editBtn);
   }
   return paletteSummary;
@@ -337,7 +349,7 @@ function buildActionButtons(handlers, t) {
     onClick: handlers.onDownload,
   });
   decorateAnalyticsAttributes(downloadBtn, { linkLabel: 'Download' });
-  attachTooltip(downloadBtn, t.download);
+  attachTooltip(downloadBtn, t.download, { dismissOnActivate: true });
   actions.appendChild(downloadBtn);
 
   const ccLibBtn = createIconButton({
@@ -347,7 +359,7 @@ function buildActionButtons(handlers, t) {
     onClick: handlers.onSave,
   });
   decorateAnalyticsAttributes(ccLibBtn, { linkLabel: 'Save to library' });
-  attachTooltip(ccLibBtn, t.saveToLibrary);
+  attachTooltip(ccLibBtn, t.saveToLibrary, { dismissOnActivate: true });
   actions.appendChild(ccLibBtn);
 
   return { actions, ccLibBtn };
@@ -363,12 +375,12 @@ function buildCTAButton(getCTAText, onClick) {
   return ctaBtn;
 }
 
-function buildPaletteNameField(name, editPaletteName, t, inputId) {
+function buildPaletteNameField(name, editPaletteName, t, inputId, labelText) {
   const nameField = createTag('div', { class: 'ax-palette-name' });
   const nameLabel = createTag('label', {
     class: 'ax-palette-name-label',
     for: inputId,
-  }, t.paletteName);
+  }, labelText || t.paletteName);
   const inputAttrs = {
     type: 'text',
     id: inputId,
@@ -420,10 +432,270 @@ async function applyLinkParamOverride(link) {
   return override || link;
 }
 
+/* ── Library toolbar variant ─────────────────────────────────── */
+
+function buildLibraryButtonGroup(t, emit, getPalette, { showEdit = true } = {}) {
+  const group = createTag('div', { class: 'ax-toolbar-lib-buttons' });
+  let editBtn = null;
+
+  if (showEdit) {
+    editBtn = document.createElement('sp-button');
+    editBtn.setAttribute('variant', 'secondary');
+    editBtn.setAttribute('treatment', 'fill');
+    editBtn.setAttribute('size', 'l');
+    editBtn.classList.add('ax-toolbar-lib-edit');
+    const editIcon = createSpectrumIcon('Edit');
+    editIcon.setAttribute('slot', 'icon');
+    editBtn.append(editIcon, document.createTextNode(t.editTheme));
+    editBtn.setAttribute('aria-label', t.editThemeAria);
+    decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit theme' });
+    editBtn.addEventListener('click', () => emit('edit-theme', { palette: getPalette() }));
+    group.appendChild(editBtn);
+  }
+
+  const saveBtn = document.createElement('sp-button');
+  saveBtn.setAttribute('variant', 'accent');
+  saveBtn.setAttribute('treatment', 'fill');
+  saveBtn.setAttribute('size', 'l');
+  saveBtn.classList.add('ax-toolbar-lib-save');
+  saveBtn.textContent = t.saveChanges;
+  saveBtn.setAttribute('aria-label', t.saveChangesAria);
+  // Starts disabled: enabled only once the name or tags become dirty.
+  saveBtn.setAttribute('disabled', '');
+  decorateAnalyticsAttributes(saveBtn, { linkLabel: 'Save changes' });
+  saveBtn.addEventListener('click', () => emit('save-changes', { palette: getPalette() }));
+
+  group.appendChild(saveBtn);
+  return {
+    group, saveBtn, editBtn,
+  };
+}
+
+// Predicting overflow from width math (equal 1fr share, gap, sp-button's own
+// padding/min-width) proved fragile. Directly observing rendered height instead
+// (current vs natural) is more robust, but the *live* button's internal label
+// layout turns out to lock in from its first render — verified that neither
+// large explicit widths nor several animation frames of waiting ever unstick
+// an already-wrapped label in place. A fresh, temporarily-detached clone
+// renders its own first layout correctly, so measure natural height that way
+// on every check — caching it per-element was tried but a measurement taken
+// mid-transition (e.g. right as the panel crosses a width breakpoint) could
+// bake in a wrong value forever, causing stacking to silently stop updating
+// on later resizes.
+async function measureNaturalGridItemHeight(el) {
+  const clone = el.cloneNode(true);
+  clone.style.position = 'fixed';
+  clone.style.visibility = 'hidden';
+  clone.style.insetInlineStart = '-9999px';
+  clone.style.insetBlockStart = '0';
+  clone.style.inlineSize = 'max-content';
+  // Appended within the same ancestor (not document.body) so it inherits the
+  // sp-theme/panel's CSS custom properties — measuring detached from that
+  // context yields a slightly different (smaller) height than the real
+  // in-context single-line height, enough to false-trigger stacking.
+  // position:fixed keeps it out of the group's own grid layout regardless.
+  el.parentElement.appendChild(clone);
+  // A freshly-connected custom element needs at least one frame before its
+  // shadow DOM reflects final content/sizing.
+  await new Promise((resolve) => { requestAnimationFrame(resolve); });
+  const { height } = clone.getBoundingClientRect();
+  clone.remove();
+  return height;
+}
+
+export async function refreshLibraryButtonsStacking(group, btnA, btnB) {
+  if (!group || !btnA || !btnB) return;
+  const [naturalHeightA, naturalHeightB] = await Promise.all([
+    measureNaturalGridItemHeight(btnA),
+    measureNaturalGridItemHeight(btnB),
+  ]);
+  // Deciding from whatever layout is currently applied is unreliable: once
+  // stacked, buttons get the full grid-row width and may no longer wrap,
+  // which would read as "fits" and unstack them — but unstacking narrows
+  // each button back to a 1fr share, re-wrapping the label with nothing
+  // left to catch it. Force the equal-share layout before measuring so the
+  // decision reflects the width the buttons will actually have.
+  group.classList.remove('ax-toolbar-lib-buttons--stacked');
+  // Compare against the larger of the two natural heights, not each button's
+  // own — the grid row equalizes both buttons to the taller one's height, so
+  // a shorter-natural sibling (e.g. a variant with slightly less intrinsic
+  // height) would otherwise always look "wrapped" once stretched to match.
+  const naturalHeight = Math.max(naturalHeightA, naturalHeightB);
+  const shouldStack = btnA.getBoundingClientRect().height > naturalHeight + 1
+    || btnB.getBoundingClientRect().height > naturalHeight + 1;
+
+  group.classList.toggle('ax-toolbar-lib-buttons--stacked', shouldStack);
+}
+
+function buildLibraryToolbar(options) {
+  const {
+    palette = {},
+    type = 'palette',
+    i18n = {},
+    item = {},
+    toolHrefs = {},
+    librariesStrings = {},
+    showEdit = true,
+    nameLabel = '',
+    libraryId,
+    deps = {},
+  } = options;
+
+  const t = { ...TOOLBAR_DEFAULTS, ...i18n };
+  const { name = '' } = palette;
+  const nameInputId = `ax-palette-name-input-${toolbarInstanceCounter += 1}`;
+
+  const toolbar = createTag('div', {
+    class: 'ax-toolbar ax-toolbar-library',
+    role: 'toolbar',
+    'aria-label': interpolate(t.toolbarLabel, { type }),
+  });
+
+  const { on, emit } = createEventBus(toolbar, 'color-floating-toolbar');
+
+  const { nameField, nameInput } = buildPaletteNameField(name, true, t, nameInputId, nameLabel);
+
+  const getPaletteWithName = () => ({
+    ...palette,
+    name: nameInput?.value || palette.name || t.paletteNamePlaceholder,
+  });
+
+  const handleNameInput = () => {
+    palette.name = nameInput.value;
+    emit('namechange', { name: nameInput.value, palette: getPaletteWithName() });
+  };
+  nameInput.addEventListener('input', handleNameInput);
+
+  const nameAndActions = createTag('div', { class: 'ax-toolbar-lib-name-actions' });
+  const actions = createTag('div', { class: 'ax-toolbar-actions ax-toolbar-lib-actions' });
+
+  const shareBtn = createIconButton({
+    icon: 'ShareAndroid',
+    label: t.sharePalette,
+    size: 'm',
+    onClick: async () => {
+      const currentPalette = getPaletteWithName();
+      await handleShare({ name: currentPalette.name, colors: currentPalette.colors }, t);
+      emit('share', { palette: currentPalette });
+    },
+  });
+  decorateAnalyticsAttributes(shareBtn, { linkLabel: 'Share' });
+  attachTooltip(shareBtn, t.share);
+  actions.appendChild(shareBtn);
+
+  // Reuse the library card menus so download (ASE/JPEG) and accessibility
+  // (contrast / color-blindness) behave identically to the libraries grid.
+  const attachMenuTooltip = (menuEl) => {
+    const trigger = menuEl?.querySelector('.ax-lib-card__action');
+    if (trigger) {
+      attachTooltip(trigger, trigger.getAttribute('data-tooltip-content'), { dismissOnActivate: true });
+    }
+  };
+
+  const downloadMenu = createLibraryDownloadMenu({ item, strings: librariesStrings });
+  actions.appendChild(downloadMenu.element);
+  attachMenuTooltip(downloadMenu.element);
+
+  let accessMenu = null;
+  if (item.type !== 'gradient') {
+    accessMenu = createLibraryAccessibilityMenu({
+      item, strings: librariesStrings, toolHrefs, libraryId,
+    });
+    actions.appendChild(accessMenu.element);
+    attachMenuTooltip(accessMenu.element);
+  }
+
+  const deleteBtn = createIconButton({
+    icon: 'Delete',
+    label: t.deleteThemeAria,
+    size: 'm',
+    onClick: () => emit('delete', { palette: getPaletteWithName() }),
+  });
+  decorateAnalyticsAttributes(deleteBtn, { linkLabel: 'Delete' });
+  attachTooltip(deleteBtn, t.deleteTheme, { dismissOnActivate: true });
+  actions.appendChild(deleteBtn);
+
+  nameAndActions.append(nameField, actions);
+
+  const { group: buttonGroup, saveBtn, editBtn } = buildLibraryButtonGroup(
+    t,
+    emit,
+    getPaletteWithName,
+    { showEdit },
+  );
+
+  let removeButtonsStackingListener = null;
+  if (editBtn) {
+    const runStackingCheck = () => refreshLibraryButtonsStacking(buttonGroup, editBtn, saveBtn);
+    requestAnimationFrame(runStackingCheck);
+    window.addEventListener('resize', runStackingCheck);
+    removeButtonsStackingListener = () => window.removeEventListener('resize', runStackingCheck);
+  }
+
+  const main = createTag('div', { class: 'ax-toolbar-lib-main' });
+  main.append(nameAndActions, buttonGroup);
+  toolbar.appendChild(main);
+
+  const theme = createThemeWrapper();
+  theme.appendChild(toolbar);
+
+  const { loadDeps = () => {
+    Promise.all([loadButton(), loadActionButton(), loadTooltip(), loadMenu()]).catch((err) => {
+      window.lana?.log(`Spectrum load failed: ${err.message}`, {
+        tags: 'color-floating-toolbar,spectrum',
+        severity: 'error',
+      });
+    });
+  } } = deps;
+  loadDeps();
+
+  const api = {
+    element: theme,
+    on,
+    emit,
+    sticky: false,
+    getState: () => ({ palette: getPaletteWithName() }),
+    setSaveEnabled(enabled) {
+      if (enabled) saveBtn.removeAttribute('disabled');
+      else saveBtn.setAttribute('disabled', '');
+    },
+    setSaving(saving) {
+      if (saving) {
+        saveBtn.setAttribute('disabled', '');
+        saveBtn.textContent = t.saving;
+      } else {
+        saveBtn.textContent = t.saveChanges;
+      }
+    },
+    updateName(newName) {
+      palette.name = newName;
+      if (nameInput && nameInput.value !== newName) nameInput.value = newName;
+    },
+    updateSwatches(newColors) {
+      palette.colors = newColors;
+    },
+    setVariant() {},
+    closeDrawer() {},
+    destroy() {
+      nameInput?.removeEventListener('input', handleNameInput);
+      downloadMenu?.destroy?.();
+      accessMenu?.destroy?.();
+      removeButtonsStackingListener?.();
+      theme.remove();
+    },
+  };
+
+  return api;
+}
+
 /* ── Main Export ──────────────────────────────────────────────── */
 
 // eslint-disable-next-line import/prefer-default-export
 export function createToolbar(options) {
+  if (options?.contentVariant === 'library') {
+    return buildLibraryToolbar(options);
+  }
+
   const {
     palette = {},
     type = 'palette',
