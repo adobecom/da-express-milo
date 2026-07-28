@@ -6,6 +6,14 @@ type Tab = 'generate' | 'manage';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('generate');
+  // Mount each tab lazily on first visit, then keep it mounted so its React
+  // state survives tab switches (only the active tab is shown).
+  const [mountedTabs, setMountedTabs] = useState<Set<Tab>>(() => new Set<Tab>(['generate']));
+
+  function selectTab(tab: Tab) {
+    setActiveTab(tab);
+    setMountedTabs((prev) => (prev.has(tab) ? prev : new Set(prev).add(tab)));
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -13,15 +21,24 @@ export default function App() {
         <h1 className="text-2xl font-semibold text-gray-900">DA Document Generator</h1>
 
         <div className="flex gap-1.5">
-          <TabButton active={activeTab === 'generate'} onClick={() => setActiveTab('generate')}>
+          <TabButton active={activeTab === 'generate'} onClick={() => selectTab('generate')}>
             Generate
           </TabButton>
-          <TabButton active={activeTab === 'manage'} onClick={() => setActiveTab('manage')}>
+          <TabButton active={activeTab === 'manage'} onClick={() => selectTab('manage')}>
             Document Manager
           </TabButton>
         </div>
 
-        {activeTab === 'generate' ? <GeneratorTab /> : <DocumentManagerTab />}
+        {mountedTabs.has('generate') && (
+          <div className={activeTab === 'generate' ? 'flex flex-col gap-4' : 'hidden'}>
+            <GeneratorTab />
+          </div>
+        )}
+        {mountedTabs.has('manage') && (
+          <div className={activeTab === 'manage' ? undefined : 'hidden'}>
+            <DocumentManagerTab />
+          </div>
+        )}
       </div>
     </div>
   );
