@@ -133,15 +133,16 @@ function initSearchFunction(block, searchBarWrapper) {
   document.addEventListener('click', handleDocumentClick, { passive: true });
 
   const redirectSearch = async () => {
-    const { 'search-destination': searchDestination } = blockConfig;
+    const { 'search-destination': searchDestination, 'search-param-name': searchParamName } = blockConfig;
 
     // If destination is authored, use simple redirect with query param
     if (searchDestination && searchDestination.trim() !== '') {
       trackSearch('search-inspire');
 
       const searchQuery = searchBar.value || '';
+      const paramName = searchParamName?.trim() || 'q';
       const separator = searchDestination.includes('?') ? '&' : '?';
-      const targetLocation = `${searchDestination}${separator}q=${encodeURIComponent(searchQuery)}`;
+      const targetLocation = `${searchDestination}${separator}${paramName}=${encodeURIComponent(searchQuery)}`;
 
       window.location.assign(targetLocation);
     }
