@@ -1557,6 +1557,7 @@ main .section.long-form-blog .milo-video {
 }
 
 @media (min-width: 768px) {
+  main .section.long-form .template-x,
   main .section.long-form .content,
   main .section.long-form .text .foreground {
     padding: 0 var(--spacing-600) 0;

@@ -3402,3 +3402,19 @@ main .template-x.tworow .template-2x2-col .template .still-wrapper img:not(.icon
   color: var(--color-black);
   border: none;
 }
+
+
+  main .section.long-form .template-x {
+   padding: 0 var(--spacing-600) 0;
+    width: var(--ax-grid-8-col-width);
+    margin: 0 auto;
+    box-sizing: border-box;
+  }
+
+    main .section.long-form .template-x .masonry-col {
+      max-width: 150px;
+    }
+
+    main .section.long-form .template-x.sixcols:not(.horizontal):not(.print) .template {
+      width: 130px;
+    }
