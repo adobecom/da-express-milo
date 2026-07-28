@@ -66,7 +66,7 @@
    pseudo-element, so it isn't clipped by this element's own `overflow: hidden`
    and automatically follows its border-radius. */
 
-.font-generator-text-input .text-field:hover:not(:focus-within) {
+.font-generator-text-input .text-field:hover:not(:has(.label:focus)) {
   border-color: var(--color-gray-400-variant);
   box-shadow: 0px 4px 6px #00000014;
 }
@@ -75,7 +75,7 @@
    toggled in JS on pointerdown/blur (see textInput.js), so a keyboard-only
    focus (e.g. Tab) gets the ring, while a click/tap gets the dark border —
    regardless of whether the field has text yet. */
-.font-generator-text-input .text-field:focus-within:not(.is-active) {
+.font-generator-text-input .text-field:has(.label:focus):not(.is-active) {
   box-shadow: 0 0 0 2px var(--Buttons-Down), 0px 4px 6px #00000014;
 }
 
