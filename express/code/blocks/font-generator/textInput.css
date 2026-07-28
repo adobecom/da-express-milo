@@ -72,9 +72,8 @@
 }
 
 /* Focus (ring) and Active (dark border) are mutually exclusive: .is-active is
-   toggled in JS on pointerdown/blur (see textInput.js), so a keyboard-only
-   focus (e.g. Tab) gets the ring, while a click/tap gets the dark border —
-   regardless of whether the field has text yet. */
+   toggled in JS on pointerdown/input/blur (see textInput.js), so keyboard
+   focus gets the ring until the user starts typing. */
 .font-generator-text-input .text-field:has(.label:focus):not(.is-active) {
   box-shadow: 0 0 0 2px var(--Buttons-Down), 0px 4px 6px #00000014;
 }

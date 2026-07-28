@@ -119,14 +119,15 @@ function syncCounter(textarea, counter) {
 }
 
 // "Active" (design QA's darker border) is triggered by clicking/tapping into
-// the field, not by typing — keyboard-only focus (e.g. Tab) instead gets the
-// plain focus ring. .is-active is set on pointerdown so it's already applied
-// by the time focus lands, and cleared on blur so tabbing away resets it.
+// the field, or by typing once the textarea has keyboard focus. .is-active is
+// set on pointerdown so it's already applied by the time focus lands, and
+// cleared on blur so tabbing away resets it.
 function initActiveState(panel) {
   const textarea = panel.querySelector('textarea.label');
   const field = panel.querySelector('.text-field');
   if (!textarea || !field) return;
   textarea.addEventListener('pointerdown', () => field.classList.add('is-active'));
+  textarea.addEventListener('input', () => field.classList.add('is-active'));
   textarea.addEventListener('blur', () => field.classList.remove('is-active'));
 }
 

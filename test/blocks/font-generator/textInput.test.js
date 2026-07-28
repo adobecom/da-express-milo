@@ -232,6 +232,21 @@ describe('font-generator/textInput', () => {
     expect(panel.querySelector('.character-count').textContent).to.equal('1,234/2,200');
   });
 
+  it('activates the text field when typing after keyboard focus', () => {
+    const { panel } = createTextInput();
+    document.body.append(panel);
+    const field = panel.querySelector('.text-field');
+    const ta = panel.querySelector('textarea.label');
+    ta.focus();
+    expect(field.classList.contains('is-active')).to.be.false;
+    ta.value = 'Typed';
+    ta.dispatchEvent(new Event('input'));
+    expect(field.classList.contains('is-active')).to.be.true;
+    ta.blur();
+    expect(field.classList.contains('is-active')).to.be.false;
+    panel.remove();
+  });
+
   it('debounced typing updates previewText in the store', () => {
     const clock = sinon.useFakeTimers();
     const { panel } = createTextInput();
