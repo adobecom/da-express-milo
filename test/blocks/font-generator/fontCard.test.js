@@ -59,6 +59,15 @@ describe('font-generator/fontCard', () => {
       expect(cta.textContent).to.contain(CTA.text);
     });
 
+    it('describes the CTA with the style name via aria-describedby', () => {
+      const card = createFontCard(FONT, 'Hello', 16, CTA);
+      const cta = card.querySelector('.font-card-cta');
+      const name = card.querySelector('.font-card-name');
+      expect(name.id).to.not.be.empty;
+      expect(cta.getAttribute('aria-describedby')).to.equal(name.id);
+      expect(card.querySelector(`#${name.id}`).textContent).to.equal(FONT.styleName);
+    });
+
     it('labels the copy button from the default placeholders', () => {
       const btn = createFontCard(FONT, 'Hello', 16).querySelector('.font-card-copy-btn');
       expect(btn.getAttribute('aria-label')).to.equal(DEFAULT_PLACEHOLDERS.copyLabel);
