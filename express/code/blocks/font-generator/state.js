@@ -4,6 +4,8 @@ import {
   INITIAL_VISIBLE_COUNT,
   DEFAULT_LAYOUT,
   DEFAULT_FONT_SIZE,
+  DEFAULT_FONT_SIZE_MOBILE,
+  FONT_SIZE_MOBILE_BREAKPOINT,
   FONT_SIZE_MIN,
   FONT_SIZE_MAX,
 } from './types.js';
@@ -129,6 +131,13 @@ function resolveDefaultLayout() {
   return prefersList ? 'list' : DEFAULTS.layout;
 }
 
+// No size param → default to a smaller preview size below the mobile
+// breakpoint, where the toolbar and font cards have much less width to work with.
+function resolveDefaultFontSize() {
+  const prefersDesktop = window.matchMedia?.(`(min-width: ${FONT_SIZE_MOBILE_BREAKPOINT}px)`)?.matches ?? true;
+  return prefersDesktop ? DEFAULTS.fontSize : DEFAULT_FONT_SIZE_MOBILE;
+}
+
 export function initFromUrl() {
   const params = new URLSearchParams(window.location.search);
 
@@ -142,10 +151,8 @@ export function initFromUrl() {
   state.layout = layout === 'grid' || layout === 'list' ? layout : resolveDefaultLayout();
 
   const fontSize = params.get(URL_PARAMS.fontSize);
-  if (fontSize !== null) {
-    const size = normalizeFontSize(fontSize);
-    if (size !== undefined) state.fontSize = size;
-  }
+  const size = fontSize !== null ? normalizeFontSize(fontSize) : undefined;
+  state.fontSize = size !== undefined ? size : resolveDefaultFontSize();
 
   state.activeFonts = deriveActiveFonts(state.activeFilters);
   state.visibleCount = INITIAL_VISIBLE_COUNT;
