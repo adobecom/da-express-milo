@@ -517,16 +517,51 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
     }
   }
 
+  // Build the per-row "Errors"/"Warnings" text shown in exports, reusing the same
+  // signals the table already computes (missing/duplicate/invalid = hard errors;
+  // content warnings = advisory). Reflects currently-computed state: invalid IDs
+  // require Validate, content warnings require Hydrate.
+  function computeRowIssues(row: CsvRow): { errors: string; warnings: string } {
+    const errors: string[] = [];
+    const missingCols = tableColumns.filter((col) => !row[col]?.trim());
+    if (missingCols.length > 0) errors.push(`Missing: ${missingCols.join(', ')}`);
+    if (summary.duplicateProductIdRowIds.has(row._id)) errors.push('Duplicate product ID');
+    if (summary.duplicateSlugRowIds.has(row._id)) errors.push('Duplicate URL slug');
+    if (validationStatus[row._id] === 'invalid') errors.push('Invalid product ID');
+
+    const warnings: string[] = [];
+    const rowWarnings = contentWarnings[row._id];
+    if (rowWarnings) {
+      for (const [col, types] of Object.entries(rowWarnings))
+        for (const type of types) warnings.push(`${col}: ${CONTENT_WARNING_LABELS[type]}`);
+    }
+    return { errors: errors.join('; '), warnings: warnings.join('; ') };
+  }
+
   function handleExport(format: 'csv' | 'xlsx') {
     setShowExportMenu(false);
     const filterLabel = activeFilter === 'total' ? 'all' : activeFilter.replace(/_/g, '-');
     const date = new Date().toISOString().slice(0, 10);
     const filename = `product-data-${filterLabel}-${date}`;
-    const exportData = filteredRows.map((row) =>
-      Object.fromEntries(tableColumns.map((col) => [col, row[col] ?? ''])),
-    );
+    // Append issue columns; pick names that don't collide with uploaded columns.
+    const uniqueCol = (name: string) => {
+      let col = name;
+      while (tableColumns.includes(col)) col = `Export ${col}`;
+      return col;
+    };
+    const errorCol = uniqueCol('Errors');
+    const warningCol = uniqueCol('Warnings');
+    const exportColumns = [...tableColumns, errorCol, warningCol];
+    const exportData = filteredRows.map((row) => {
+      const { errors, warnings } = computeRowIssues(row);
+      return {
+        ...Object.fromEntries(tableColumns.map((col) => [col, row[col] ?? ''])),
+        [errorCol]: errors,
+        [warningCol]: warnings,
+      };
+    });
     if (format === 'csv') {
-      const csv = Papa.unparse(exportData, { columns: tableColumns });
+      const csv = Papa.unparse(exportData, { columns: exportColumns });
       const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -535,7 +570,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
       a.click();
       URL.revokeObjectURL(url);
     } else {
-      const ws = XLSX.utils.json_to_sheet(exportData, { header: tableColumns });
+      const ws = XLSX.utils.json_to_sheet(exportData, { header: exportColumns });
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, 'Product Data');
       XLSX.writeFile(wb, `${filename}.xlsx`);
