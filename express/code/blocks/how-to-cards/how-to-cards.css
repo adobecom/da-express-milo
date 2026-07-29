@@ -159,7 +159,7 @@
   }
 
   .how-to-cards.cards-count-4 .card {
-    width: calc((100% - var(--spacing-700)) / 4);
+    width: calc((100% - var(--spacing-800)) / 4);
   }
 
   .how-to-cards .cards-container {
@@ -207,7 +207,7 @@
 /* Desktop: when exactly 3 cards, make each take 1/3 of container */
 @media (min-width: 900px) {
   .how-to-cards .card {
-    width: calc((100% - var(--spacing-500)) / 3);
+    width: calc((100% - var(--spacing-800)) / 3);
   }
 }
 
