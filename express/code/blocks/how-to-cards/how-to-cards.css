@@ -10,6 +10,7 @@
   --status-curr-width: 30px;
   --block-padding: var(--spacing-600);
   --side-padding: 20px;
+  --gallery-first-item-margin: 0px;
   padding: var(--block-padding) 0px var(--block-padding) 0px;
 }
 
@@ -128,16 +129,18 @@
   width: calc((100% - var(--spacing-600)));
 }
 
+.how-to-cards .gallery--item:first-of-type {
+  margin-left: var(--gallery-first-item-margin);
+}
 
 @media (min-width: 480px) {
   .how-to-cards .card {
     width: 322px;
   }
 
-  .how-to-cards .gallery--item:first-of-type {
-  margin-left: 20px;
-}
-
+  .how-to-cards {
+    --gallery-first-item-margin: 20px;
+  }
 }
 
 @media (min-width: 768px) {
@@ -146,6 +149,7 @@
     box-sizing: border-box;
     --block-padding: var(--spacing-900);
     --side-padding: var(--spacing-500);
+    --gallery-first-item-margin: var(--spacing-500);
   }
 
   .how-to-cards.cards-count-4 .cards-container ,
@@ -153,11 +157,6 @@
   .how-to-cards.cards-count-6 .cards-container {
     width: 100vw;
   }
-
-    .how-to-cards .gallery--item:first-of-type {
-    margin-left: var(--spacing-500);
-  }
-
 }
 
 
@@ -165,8 +164,8 @@
   .how-to-cards .card {
     width: calc((100% - var(--spacing-800)) / 3);
   }
-  .how-to-cards .gallery--item:first-of-type {
-    margin-left: var(--spacing-500);
+  .how-to-cards {
+    --gallery-first-item-margin: var(--spacing-500);
   }
 }
 
@@ -174,6 +173,7 @@
 @media (min-width: 1280px) {
   .how-to-cards{
     --side-padding: var(--spacing-600);
+    --gallery-first-item-margin: var(--spacing-600);
   }
 }
 
@@ -182,6 +182,7 @@
     max-width: var(--block-wd-grid-max-width);
     margin: auto;
     box-sizing: border-box;
+    --gallery-first-item-margin: 40px;
   }
 
   .how-to-cards.cards-count-4 .card {
@@ -195,10 +196,6 @@
   .how-to-cards.cards-count-4 .cards-container {
     width: unset
   }
-
-    .how-to-cards .gallery--item:first-of-type {
-      margin-left: 40px;
-    }
 }
 
 @media (min-width: 1680px) {
