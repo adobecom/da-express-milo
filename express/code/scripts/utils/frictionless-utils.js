@@ -6,6 +6,9 @@ const JPEG = 'jpeg';
 const PNG = 'png';
 const WEBP = 'webp';
 const HEIC = 'heic';
+const MOV = 'mov';
+const MP4 = 'mp4';
+const BLOB_BASED_FILE_TYPES = ['audio', 'video'];
 
 const VIDEO_FORMATS = [
   'mov',
@@ -44,6 +47,20 @@ const VIDEO_MIME_TYPES = {
   264: 'video/h264',
 };
 
+const AUDIO_FORMATS = [
+  'mp3',
+  'wav',
+  'm4a',
+  'aac',
+];
+
+const AUDIO_MIME_TYPES = {
+  mp3: ['audio/mpeg'],
+  wav: ['audio/wav', 'audio/wave', 'audio/x-wav', 'audio/x-pn-wave'],
+  m4a: ['audio/mp4', 'audio/m4a', 'audio/x-m4a'],
+  aac: ['audio/aac', 'audio/x-aac'],
+};
+
 // Configuration functions
 const getBaseImgCfg = (...types) => ({
   group: 'image',
@@ -63,6 +80,27 @@ const getBaseVideoCfg = (...types) => {
         .map((type) => VIDEO_MIME_TYPES[type])
         .filter(Boolean);
       return supportedMimeTypes.includes(input);
+    },
+  };
+};
+
+const getBaseAudioCfg = (...types) => {
+  const formats = Array.isArray(types[0]) ? types[0] : types;
+  return {
+    group: 'audio',
+    max_size: 1024 * 1024 * 1024,
+    accept: formats.map((type) => `.${type}`).join(', '),
+    input_check: (input, fileName) => {
+      const supportedMimeTypes = formats.flatMap((type) => AUDIO_MIME_TYPES[type] || []);
+      if (supportedMimeTypes.includes(input)) return true;
+      // Browser/OS MIME sniffing for less common audio formats (m4a)
+      // is unreliable - empty, generic (application/octet-stream), or a variant
+      // we haven't listed - so fall back to the filename extension.
+      if (fileName) {
+        const ext = fileName.split('.').pop()?.toLowerCase();
+        return formats.includes(ext);
+      }
+      return false;
     },
   };
 };
@@ -130,8 +168,8 @@ export const QA_CONFIGS = {
   'qa-nba': { ...getBaseImgCfg(JPG, JPEG, PNG) },
   'convert-to-gif': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'crop-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
-  'video-convert': { ...getBaseVideoCfg(VIDEO_FORMATS) },
-  'video-compress': { ...getBaseVideoCfg(VIDEO_FORMATS) },
+  'video-convert': { ...getBaseVideoCfg([MOV, MP4]) },
+  'video-compress': { ...getBaseVideoCfg([MOV, MP4]) },
   'trim-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'resize-video': { ...getBaseVideoCfg(VIDEO_FORMATS) },
   'merge-videos': getMergeVideosCfg(),
@@ -151,6 +189,14 @@ export const QA_CONFIGS = {
   'heic-to-png': {
     ...getBaseImgCfg(JPG, JPEG, WEBP, HEIC),
     input_check: getHeicInputCheck(JPG, JPEG, WEBP, HEIC),
+  },
+  'audio-converter': {
+    ...getBaseAudioCfg(AUDIO_FORMATS),
+    group: 'audio',
+  },
+  'video-to-audio': {
+    ...getBaseVideoCfg(MOV, MP4),
+    group: 'audio',
   },
 };
 
@@ -223,9 +269,13 @@ export function fadeOut(element) {
   }, 200);
 }
 
+function isBlobBasedFileType(fileType) {
+  return BLOB_BASED_FILE_TYPES.includes(fileType);
+}
+
 // Common document configurations
 export function createDocConfig(data, type = 'image') {
-  const dataType = type === 'video' ? 'blob' : 'base64';
+  const dataType = isBlobBasedFileType(type) ? 'blob' : 'base64';
   return {
     asset: {
       data,
@@ -339,12 +389,11 @@ export async function createMobileExportConfig(
   editText,
 ) {
   const exportConfig = createDefaultExportConfig();
+  const isBlobBased = isBlobBasedFileType(QA_CONFIGS[quickAction].group);
   const result = [
     {
       ...exportConfig[0],
-      ...(QA_CONFIGS[quickAction].group === 'video'
-        ? {}
-        : { label: downloadText }),
+      ...(isBlobBased ? {} : { label: downloadText }),
     },
   ];
 
@@ -352,7 +401,7 @@ export async function createMobileExportConfig(
   if (exportConfig[1]) {
     result.push({
       ...exportConfig[1],
-      ...(QA_CONFIGS[quickAction].group === 'video' ? {} : { label: editText }),
+      ...(isBlobBased ? {} : { label: editText }),
     });
   }
 
@@ -487,6 +536,18 @@ export function executeQuickAction(
       exportConfig,
       contConfig,
     ),
+    'audio-converter': () => ccEverywhere.quickAction.audioConverter(
+      videoDocConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
+    'video-to-audio': () => ccEverywhere.quickAction.audioConverter(
+      videoDocConfig,
+      appConfig,
+      exportConfig,
+      contConfig,
+    ),
   };
 
   const action = quickActionMap[quickActionId];
@@ -515,8 +576,8 @@ export async function processFileForQuickAction(
   const maxSize = QA_CONFIGS[quickAction].max_size ?? 40 * 1024 * 1024;
 
   if (QA_CONFIGS[quickAction].input_check(file.type, file.name) && file.size <= maxSize) {
-    const isVideo = QA_CONFIGS[quickAction].group === 'video';
-    if (isVideo) {
+    const isBlobBased = isBlobBasedFileType(QA_CONFIGS[quickAction].group);
+    if (isBlobBased) {
       window.history.pushState({ hideFrictionlessQa: true }, '', '');
       return file;
     }
@@ -604,4 +665,14 @@ export async function initProgressBar(replaceKey, getConfig) {
 
 export function isSafari() {
   return getWebBrowser() === 'Safari';
+}
+
+export function getVideoConfig(quickActionId, data) {
+  if (quickActionId === 'merge-videos') {
+    return createMergeVideosDocConfig(data);
+  }
+  if (quickActionId === 'audio-converter') {
+    return createDocConfig(data[0], 'audio');
+  }
+  return createDocConfig(data[0], 'video');
 }

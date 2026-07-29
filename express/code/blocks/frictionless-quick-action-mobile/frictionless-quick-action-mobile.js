@@ -13,13 +13,13 @@ import {
   selectElementByTagPrefix,
   createContainerConfig,
   createDocConfig,
-  createMergeVideosDocConfig,
   createMobileExportConfig,
   executeQuickAction,
   processFilesForQuickAction,
   loadAndInitializeCCEverywhere,
   getErrorMsg,
   shouldShowVideoQuickActionPickerForMobile,
+  getVideoConfig,
 } from '../../scripts/utils/frictionless-utils.js';
 
 let replaceKey; let getConfig;
@@ -86,7 +86,7 @@ export async function runQuickAction(quickActionId, data, block) {
 
   const contConfig = createContainerConfig(quickActionId);
   const docConfig = createDocConfig(data[0], 'image');
-  const videoDocConfig = quickActionId === 'merge-videos' ? createMergeVideosDocConfig(data) : createDocConfig(data[0], 'video');
+  const videoDocConfig = getVideoConfig(quickActionId, data);
 
   const appConfig = {
     metaData: {
@@ -96,6 +96,8 @@ export async function runQuickAction(quickActionId, data, block) {
     analyticsData: {
       ...(quickActionId === 'video-compress' && { entryPoint: 'seo-quick-action-video-compress' }),
       ...(quickActionId === 'video-convert' && { entryPoint: 'seo-quick-action-video-convert' }),
+      ...(quickActionId === 'audio-converter' && { entryPoint: 'seo-quick-action-audio-converter' }),
+      ...(quickActionId === 'video-to-audio' && { entryPoint: 'seo-quick-action-video-to-audio' }),
       ...(quickActionId === 'compress-image' && { entryPoint: 'seo-quick-action-compress-image' }),
     },
     receiveQuickActionErrors: true,
