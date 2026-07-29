@@ -15,6 +15,7 @@ export const initialFormData = {
   orderBy: '',
   // filters
   language: '',
+  locales: '',
   tasks: '',
   topics: [['']],
   license: '',
@@ -68,6 +69,12 @@ function diffForms(form1, form2) {
 export function recipe2Form(recipe) {
   const params = new URLSearchParams(recipe);
   const formData = structuredClone(initialFormData);
+  params.getAll('filters').forEach((filter) => {
+    const [, key, value] = /^([^=]+)==(.+)$/.exec(filter) || [];
+    if (key === 'applicableRegions') {
+      formData.locales = value;
+    }
+  });
   if (params.has('collectionId')) {
     if (params.get('collectionId') === defaultCollectionId) {
       formData.collection = 'default';
@@ -105,6 +112,7 @@ export function recipe2Form(recipe) {
   if (params.get('orderBy')) formData.orderBy = params.get('orderBy');
   if (params.get('q')) formData.q = params.get('q');
   if (params.get('language')) formData.language = params.get('language');
+  if (params.get('locales')) formData.locales = params.get('locales');
   if (params.get('tasks')) formData.tasks = params.get('tasks');
   if (params.get('topics')) {
     formData.topics = params
@@ -180,6 +188,7 @@ export function form2Recipe(formData) {
   const start = formData.start ? `start=${formData.start}` : '';
   const q = formData.q ? `q=${formData.q}` : '';
   const language = formData.language ? `language=${formData.language}` : '';
+  const locales = formData.locales ? `locales=${formData.locales}` : '';
   const tasks = formData.tasks ? `tasks=${formData.tasks}` : '';
   const joinedTopics = joinTopics(formData.topics);
   const topics = joinedTopics ? `topics=${joinedTopics}` : '';
@@ -196,6 +205,7 @@ export function form2Recipe(formData) {
     topics,
     tasks,
     language,
+    locales,
     license,
     behaviors,
     orderBy,

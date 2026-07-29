@@ -125,8 +125,8 @@ main .blog-posts-v2.grid .blog-card p.blog-card-teaser {
 
 @media (min-width: 1024px) {
   .section.ax-blog-posts-container:has(.blog-posts-v2.grid) {
-    padding-top: var(--spacing-900);
-    padding-bottom: var(--spacing-900);
+    padding-top: var(--spacing-600);
+    padding-bottom: var(--spacing-600);
     max-width: var(--block-wd-grid-max-width);
     margin-left: auto;
     margin-right: auto;

@@ -1,5 +1,11 @@
 /* eslint-disable import/named, import/extensions */
 import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import {
+  FACEBOOK_ICON_PATH_D,
+  LINKEDIN_ICON_PATH_D,
+  TWITTER_ICON_PATH_D,
+  COPYLINK_ICON_PATH_D,
+} from './toc-seo-icons.js';
 
 const CONFIG = {
   breakpoints: {
@@ -8,14 +14,10 @@ const CONFIG = {
   selectors: {
     startElement: '.section div.highlight, .blog-article-marquee',
     section: 'main .section',
-    headers: ['main .section.long-form .content h2', 'main .section.long-form .content h3', 'main .section.long-form .content h4'],
+    longFormSection: 'main .section.long-form',
+    headers: 'main .section.long-form .content h2, main .section.long-form .content h3, main .section.long-form .content h4',
     navigation: '.global-navigation, header',
     stopElement: '.faqv2, .ax-link-list-v2-container, .ax-blog-posts-container, .banner-bg, footer',
-  },
-  scrollOffset: {
-    mobile: 75,
-    tablet: 75,
-    desktop: 120,
   },
   aria: {
     navigation: 'Table of Contents',
@@ -24,15 +26,7 @@ const CONFIG = {
 
 let createTag;
 let getMetadata;
-let hasPrimedFirstTocClick = false;
-let pendingTocTarget = null;
-let pendingScrollTimeout = null;
-let scrollEndListenerInitialized = false;
 
-/**
- * Checks if current viewport is desktop
- * @returns {boolean} True if desktop viewport (≥ 1024px)
- */
 function isDesktop() {
   return window.innerWidth >= CONFIG.breakpoints.desktop;
 }
@@ -66,7 +60,8 @@ function buildBlockConfig(block) {
   });
 
   // Validate and set defaults
-  const title = config['toc-title'] || 'Table of Contents';
+  // Strip trailing colon — some authors accidentally append ":" to the title label.
+  const title = (config['toc-title'] || 'Table of Contents').replace(/:$/, '');
   const ariaLabel = config['toc-aria-label'] || 'Table of Contents Navigation';
   const rawStopElement = config.stopElement || config['stop-element'] || config['toc-stop-element'];
   const stopElement = rawStopElement && !rawStopElement.startsWith('.')
@@ -95,10 +90,6 @@ function buildBlockConfig(block) {
   }), { title, ariaLabel, stopElement });
 }
 
-/**
- * Creates the main TOC container
- * @returns {HTMLElement} TOC container element
- */
 function createContainer() {
   return createTag('div', {
     class: 'toc-container ax-grid-col-12',
@@ -107,11 +98,6 @@ function createContainer() {
   });
 }
 
-/**
- * Creates the TOC title button with chevron icon
- * @param {string} titleText - Title text content
- * @returns {HTMLElement} Title button element
- */
 function createTitleBar(titleText) {
   const titleBar = createTag('button', {
     class: 'toc-title',
@@ -169,13 +155,6 @@ function createContentList(config) {
 }
 
 /**
- * Facebook icon path (inlined so CSS fill applies; <use href="external.svg"> does not inherit).
- */
-const FACEBOOK_ICON_PATH_D = 'M9.99088 2.47955e-05C4.47063 2.47955e-05 0 4.50533 0 10.0671C0 15.014 3.58205 19.2286 8.43587 20V12.9681H5.89789V10.0615H8.43587V7.82561C8.43587 5.29907 9.92979 3.91282 12.2123 3.91282C12.9565 3.91841 13.7007 3.98549 14.4337 4.10846V6.5847H13.1897C12.4011 6.4785 11.6736 7.03747 11.5681 7.83121C11.5514 7.93741 11.5514 8.0492 11.5681 8.15541V10.0615H14.3449L13.9006 12.9681H11.5625V20C17.0161 19.1336 20.737 13.9799 19.8762 8.49079C19.1098 3.59421 14.9113 -0.0111542 9.99088 2.47955e-05Z';
-const LINKEDIN_ICON_PATH_D = 'M0 1.44321V18.5565C0.0111888 19.3621 0.671329 20.011 1.47692 19.9999H18.5231C19.3287 20.011 19.9888 19.3621 20 18.5565V1.44321C19.9888 0.637621 19.3287 -0.0113316 18.5231 -0.000143051H1.47692C0.671329 -0.0113316 0.0111888 0.637621 0 1.44321ZM5.93007 17.046H2.96503V7.50196H5.93007V17.046ZM7.79301 7.50196H10.6294V8.80545H10.6685C11.2448 7.81524 12.3189 7.22223 13.4657 7.2614C16.4699 7.2614 17.0238 9.24182 17.0238 11.8096V17.046H14.0811V12.4027C14.0811 11.2838 14.0811 9.87398 12.5371 9.87398C10.993 9.87398 10.758 11.0768 10.758 12.3075V17.0292H7.79301V7.50196ZM4.47552 2.7579C5.42657 2.77468 6.18741 3.5579 6.17063 4.50895C6.15385 5.46 5.37063 6.22084 4.41958 6.20405C3.47413 6.18727 2.71888 5.42084 2.72448 4.47538C2.72448 3.52433 3.49091 2.7579 4.44196 2.7579C4.45315 2.7579 4.46434 2.7579 4.47552 2.7579Z';
-const TWITTER_ICON_PATH_D = 'M10 20C15.5228 20 20 15.5228 20 10C20 4.47715 15.5228 0 10 0C4.47715 0 0 4.47715 0 10C0 15.5228 4.47715 20 10 20ZM4.44434 15.5557L8.78223 10.6221L4.44434 4.44434H7.75293L10.6221 8.5293L14.2129 4.44434H15.1934L11.0566 9.14941L15.5557 15.5557H12.2471L9.21777 11.2412L5.4248 15.5557H4.44434ZM14.2139 14.8662L10.5449 9.73145L10.1055 9.11621L7.2832 5.16602H5.77832L9.27539 10.0615L9.71484 10.6768L12.708 14.8662H14.2139Z';
-const COPYLINK_ICON_PATH_D = 'M10 0C15.5228 0 20 4.47715 20 10C20 15.5228 15.5228 20 10 20C4.47715 20 0 15.5228 0 10C0 4.47715 4.47715 0 10 0ZM11.7676 7.52539C10.4008 6.15857 8.1852 6.15859 6.81836 7.52539L3.98926 10.3535C2.62257 11.7204 2.62247 13.9369 3.98926 15.3037L4.69629 16.0107C6.06307 17.3775 8.27964 17.3774 9.64648 16.0107C10.0369 15.6203 10.0367 14.9872 9.64648 14.5967C9.25596 14.2062 8.62295 14.2062 8.23242 14.5967C7.64677 15.1822 6.6971 15.182 6.11133 14.5967L5.4043 13.8887C4.81851 13.3029 4.81851 12.3534 5.4043 11.7676L8.23242 8.93945C8.81821 8.3537 9.76774 8.35368 10.3535 8.93945L10.707 9.29297C11.0975 9.68344 11.7306 9.68334 12.1211 9.29297C12.5116 8.90244 12.5116 8.26943 12.1211 7.87891L11.7676 7.52539ZM15.3037 3.98926C13.9369 2.62247 11.7204 2.62257 10.3535 3.98926C9.96308 4.37969 9.96325 5.01277 10.3535 5.40332C10.744 5.79384 11.3771 5.79384 11.7676 5.40332C12.3532 4.81783 13.3029 4.81803 13.8887 5.40332L14.5967 6.11133C15.182 6.6971 15.1822 7.64677 14.5967 8.23242L11.7676 11.0605C11.1818 11.6463 10.2323 11.6463 9.64648 11.0605L9.29297 10.707C8.90249 10.3166 8.26944 10.3167 7.87891 10.707C7.48838 11.0976 7.48838 11.7306 7.87891 12.1211L8.23242 12.4746C9.59924 13.8414 11.8148 13.8414 13.1816 12.4746L16.0107 9.64648C17.3774 8.27964 17.3775 6.06308 16.0107 4.69629L15.3037 3.98926Z';
-/**
  * Creates an inline SVG icon so CSS fill applies (external <use> does not inherit in browsers).
  * @param {string} iconClass - Class name for the icon (e.g. 'icon-social_icon_facebook_toc-seo')
  * @param {string} pathD - SVG path d attribute
@@ -195,10 +174,6 @@ function createInlineSocialIcon(iconClass, pathD, size = 20) {
   return svg;
 }
 
-/**
- * Creates social sharing icons section
- * @returns {HTMLElement} Social icons container
- */
 function createSocialIcons() {
   const url = encodeURIComponent(window.location.href);
   const title = encodeURIComponent(document.querySelector('h1')?.textContent || '');
@@ -256,10 +231,6 @@ function createSocialIcons() {
 // MOBILE/TABLET BEHAVIOR (< 1024px)
 // ============================================================================
 
-/**
- * Creates floating "back to TOC" button for mobile
- * @returns {HTMLElement} Floating button element
- */
 function createFloatingButton() {
   const button = createTag('button', {
     class: 'toc-floating-button',
@@ -339,53 +310,48 @@ function setupFloatingButton(floatingButton, tocContainer) {
 }
 
 /**
- * Scrolls to target header with proper offset for mobile/tablet
- * @param {string} fullText - Full text content of target header
+ * Tracks the active TOC link based on scroll position. The last header whose
+ * top edge is at or above the scroll offset threshold is the active section.
+ * Header matching is built lazily on first call so Milo's section decoration
+ * (which adds the `.content` and `long-form` classes) has completed. Called
+ * once at init (post Phase 6 insertion) to prime hash-navigation active state,
+ * then on every scroll event thereafter.
+ * @param {HTMLElement} content - TOC content element containing links
+ * @returns {{ onScroll: Function }} Handler for the consolidated scroll listener
  */
-function scrollToHeader(fullText) {
-  const headers = document.querySelectorAll(CONFIG.selectors.headers);
-  const targetHeader = Array.from(headers).find((h) => {
-    const headerContent = h.textContent.trim();
-    const searchText = fullText.replace('...', '').trim();
-    return headerContent.includes(searchText);
-  });
+function setupActiveLinks(content) {
+  let pairs = null;
 
-  if (targetHeader) {
-    const headerRect = targetHeader.getBoundingClientRect();
-    // Use desktop offset on desktop, mobile/tablet offset otherwise
-    const offset = isDesktop() ? CONFIG.scrollOffset.desktop : CONFIG.scrollOffset.mobile;
-    const scrollDistance = headerRect.top + window.pageYOffset - offset;
-
-    window.scrollTo({
-      top: Math.max(0, scrollDistance),
-      behavior: 'smooth',
-    });
+  function getPairs() {
+    if (!pairs || !pairs.length) {
+      const allHeaders = Array.from(document.querySelectorAll(CONFIG.selectors.headers));
+      pairs = Array.from(content.querySelectorAll('.toc-link')).reduce((acc, link) => {
+        const searchText = link.dataset.fullText.replace('...', '').trim();
+        const header = allHeaders.find((h) => h.textContent.trim().includes(searchText));
+        if (header) acc.push({ header, link });
+        return acc;
+      }, []);
+    }
+    return pairs;
   }
+
+  function update() {
+    const currentPairs = getPairs();
+    if (!currentPairs.length) return;
+    let activeLink = null;
+    for (const { header, link } of currentPairs) {
+      // Mark active once the header clears the top 30% of the viewport (~nav + reading buffer).
+      if (header.getBoundingClientRect().top <= window.innerHeight * 0.3) {
+        activeLink = link;
+      }
+    }
+
+    content.querySelectorAll('.toc-link').forEach((l) => l.classList.toggle('active', l === activeLink));
+  }
+
+  return { onScroll: update };
 }
 
-function ensureScrollEndListener() {
-  if (scrollEndListenerInitialized) return;
-  scrollEndListenerInitialized = true;
-
-  const handleScrollEnd = () => {
-    if (!pendingTocTarget) return;
-    if (pendingScrollTimeout) window.clearTimeout(pendingScrollTimeout);
-    pendingScrollTimeout = window.setTimeout(() => {
-      scrollToHeader(pendingTocTarget);
-      pendingTocTarget = null;
-      pendingScrollTimeout = null;
-    }, 140);
-  };
-
-  window.addEventListener('scroll', handleScrollEnd, { passive: true });
-}
-
-/**
- * Sets up toggle behavior for mobile/tablet
- * @param {HTMLElement} container - TOC container
- * @param {HTMLElement} titleBar - Title button element
- * @param {HTMLElement} content - Content element
- */
 function setupToggle(container, titleBar, content) {
   // Click handler - simple and direct
   titleBar.addEventListener('click', () => {
@@ -394,56 +360,47 @@ function setupToggle(container, titleBar, content) {
     content.setAttribute('aria-hidden', (!isOpen).toString());
   });
 
-  // Keyboard accessibility
   titleBar.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
-      const isOpen = container.classList.toggle('open');
-      titleBar.setAttribute('aria-expanded', isOpen.toString());
-      content.setAttribute('aria-hidden', (!isOpen).toString());
+      titleBar.click();
     }
   });
 }
 
 /**
- * Sets up navigation behavior for links
+ * Sets up navigation behavior for links. Header matching is deferred to click
+ * time (and cached per link) so Milo's section decoration — which adds the
+ * `.content` and `long-form` classes — has completed before we query the DOM.
  * @param {HTMLElement} content - Content element with links
  */
 function setupNavigation(content) {
-  const links = content.querySelectorAll('.toc-link');
-  const firstLink = links[0];
+  const cache = new Map();
 
-  links.forEach((link) => {
-    // Prevent focus outline on mouse click
+  content.querySelectorAll('.toc-link').forEach((link) => {
     link.addEventListener('mousedown', (e) => {
       e.preventDefault();
     });
 
-    // Handle click
     link.addEventListener('click', (e) => {
       e.preventDefault();
-      if (!hasPrimedFirstTocClick && firstLink) {
-        hasPrimedFirstTocClick = true;
-        ensureScrollEndListener();
-        pendingTocTarget = link.dataset.fullText;
-        const { fullText: firstText } = firstLink.dataset;
-        scrollToHeader(firstText);
-        link.blur();
-        return;
+      if (!cache.has(link)) {
+        const searchText = link.dataset.fullText.replace('...', '').trim();
+        const allHeaders = document.querySelectorAll(CONFIG.selectors.headers);
+        const matched = Array.from(allHeaders).find(
+          (h) => h.textContent.trim().includes(searchText),
+        ) || null;
+        cache.set(link, matched);
       }
-
-      const { fullText } = link.dataset;
-      scrollToHeader(fullText);
-      // Remove focus after navigation
+      const header = cache.get(link);
+      if (header) {
+        header.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
       link.blur();
     });
   });
 }
 
-/**
- * Opens social media sharing in popup windows
- * @param {Event} e - Click event
- */
 function openSocialPopup(e) {
   const target = e.target.closest('a');
   if (!target) return;
@@ -503,10 +460,6 @@ async function copyToClipboard(button) {
   }
 }
 
-/**
- * Sets up social sharing functionality
- * @param {HTMLElement} socialContainer - Social icons container
- */
 function setupSocialSharing(socialContainer) {
   // Share links
   socialContainer.querySelectorAll('[data-href]').forEach((link) => {
@@ -536,6 +489,34 @@ function setupSocialSharing(socialContainer) {
 // DESKTOP BEHAVIOR (≥ 1024px)
 // ============================================================================
 
+const NAV_FALLBACK_HEIGHT = 100; // safe fallback when no fixed/sticky nav is detected
+const NAV_CLEARANCE_BUFFER = 15; // gap between nav bottom and TOC top edge
+
+/**
+ * Returns the clearance needed below fixed/sticky elements pinned at the top of the viewport.
+ * Only elements that are currently stuck at the top (rect.top ≤ 1) are counted.
+ * @returns {number} Pixels from viewport top the TOC should clear
+ */
+function getTopBarClearance() {
+  const candidates = [
+    CONFIG.selectors.navigation,
+    '.ribbon-banner',
+    '.feds-promo-wrapper',
+  ];
+  let maxBottom = 0;
+  candidates.forEach((sel) => {
+    document.querySelectorAll(sel).forEach((el) => {
+      const pos = getComputedStyle(el).position;
+      if (pos !== 'fixed' && pos !== 'sticky') return;
+      const rect = el.getBoundingClientRect();
+      if (rect.top <= 1 && rect.height > 0) {
+        maxBottom = Math.max(maxBottom, rect.bottom);
+      }
+    });
+  });
+  return (maxBottom || NAV_FALLBACK_HEIGHT) + NAV_CLEARANCE_BUFFER;
+}
+
 /**
  * Calculates and sets the desktop TOC position based on start element and scroll
  * @param {HTMLElement} tocContainer - TOC container element
@@ -543,52 +524,23 @@ function setupSocialSharing(socialContainer) {
 function updateDesktopPosition(tocContainer) {
   if (!isDesktop()) return;
 
-  const startElement = document.querySelector(CONFIG.selectors.startElement);
-  if (!startElement) return;
+  const longFormEl = document.querySelector(CONFIG.selectors.longFormSection);
+  if (!longFormEl) return;
 
-  // Calculate and cache the initial absolute position if not already stored
-  if (!tocContainer.dataset.initialTop) {
-    const startRect = startElement.getBoundingClientRect();
-    const startBottom = window.pageYOffset + startRect.bottom;
-    tocContainer.dataset.initialTop = startBottom + 34;
-  }
+  const minTopPosition = getTopBarClearance();
+  const sectionPaddingTop = parseFloat(getComputedStyle(longFormEl).paddingTop) || 0;
+  let topPosition = Math.max(
+    longFormEl.getBoundingClientRect().top + sectionPaddingTop,
+    minTopPosition,
+  );
 
-  const initialTop = parseFloat(tocContainer.dataset.initialTop);
-  const scrollY = window.pageYOffset;
-
-  // Calculate desired top position (115px from viewport top when fixed)
-  const fixedTopPosition = 115;
-  const minTopPosition = 115; // Never position higher than this
-
-  // Calculate the current top position:
-  // Before scrolling past the initial position, TOC should appear to stay with content
-  // After scrolling past, it should stick to the viewport
-  let topPosition;
-  if (scrollY >= initialTop - fixedTopPosition) {
-    // Scrolled past: stick to viewport
-    topPosition = fixedTopPosition;
-  } else {
-    // Not scrolled past yet: calculate position relative to viewport
-    topPosition = initialTop - scrollY;
-  }
-
-  // Ensure we never position higher than the minimum
-  topPosition = Math.max(topPosition, minTopPosition);
-
-  // Check if there's a stop element we shouldn't scroll past
   const stopSelector = tocContainer.dataset.stopSelector || CONFIG.selectors.stopElement;
   const stopElement = stopSelector
     ? Array.from(document.querySelectorAll(stopSelector)).find((el) => el.offsetHeight > 0)
     : null;
-  if (stopElement && scrollY > 0) {
+  if (stopElement && window.pageYOffset > 0) {
     const stopRect = stopElement.getBoundingClientRect();
-    const stopTop = stopRect.top; // Position relative to viewport
-    const tocHeight = tocContainer.offsetHeight;
-    // If the TOC would overlap with the stop element, limit its position
-    // We want: topPosition + tocHeight <= stopTop
-    // So: topPosition <= stopTop - tocHeight
-    const maxTopPosition = stopTop - tocHeight - 20; // 20px buffer
-
+    const maxTopPosition = stopRect.top - tocContainer.offsetHeight - 20;
     if (topPosition > maxTopPosition && stopRect.height > 0) {
       topPosition = maxTopPosition;
     }
@@ -596,87 +548,50 @@ function updateDesktopPosition(tocContainer) {
 
   tocContainer.style.setProperty('--toc-top-position', `${topPosition}px`);
   tocContainer.classList.add('toc-desktop');
-}
 
-/**
- * Updates active link based on current scroll position
- * @param {HTMLElement} tocContainer - TOC container element
- */
-let sectionNodeList;
-function updateActiveLink(tocContainer) {
-  if (!isDesktop()) return;
-  if (!updateActiveLink.headers) {
-    sectionNodeList = document.querySelectorAll(CONFIG.selectors.section);
-    updateActiveLink.tocLinks = tocContainer.querySelectorAll('.toc-link');
-    updateActiveLink.tocTitle = tocContainer.querySelector('.toc-title');
-  }
-
-  const { tocLinks, tocTitle } = updateActiveLink;
-  if (!sectionNodeList.length || !tocLinks.length) return;
-
-  // Get TOC title position for offset
-  const tocTitleRect = tocTitle ? tocTitle.getBoundingClientRect() : { top: 200 };
-  const offset = tocTitleRect.top + 20;
-
-  let activeHeader = null;
-  let minDistance = Infinity;
-
-  // Find the header closest to the offset position
-  sectionNodeList.forEach((sectionNode) => {
-    const rect = sectionNode.getBoundingClientRect();
-    const distance = Math.abs(rect.top - offset);
-
-    if (rect.top <= offset && distance < minDistance) {
-      minDistance = distance;
-      activeHeader = sectionNode;
-    }
-  });
-
-  // Add active class to matching link
-  if (activeHeader) {
-    const headerText = activeHeader.textContent.trim();
-    const activeLink = Array.from(tocLinks).find((link) => {
-      const fullText = link.dataset.fullText || link.textContent.trim();
-      return fullText.includes(headerText) || headerText.includes(fullText.replace('...', '').trim());
-    });
-
-    if (activeLink) {
-      // Remove active class from all links
-      tocLinks.forEach((link) => link.classList.remove('active'));
-      activeLink.classList.add('active');
-    }
+  const contentEl = tocContainer.querySelector('.toc-content');
+  if (contentEl) {
+    tocContainer.classList.toggle('toc-scrollable', contentEl.scrollHeight > contentEl.clientHeight);
   }
 }
 
 /**
- * Sets up desktop positioning and active link tracking
+ * Sets up desktop positioning
  * @param {HTMLElement} tocContainer - TOC container element
  * @returns {Object} Update functions for consolidated handlers
  */
 function setupDesktop(tocContainer) {
-  // Initial position (only if already on desktop)
   if (isDesktop()) {
-    tocContainer.style.visibility = 'hidden';
-    updateDesktopPosition(tocContainer);
-    tocContainer.style.visibility = 'visible';
-    updateActiveLink(tocContainer);
+    const tryShow = () => {
+      if (document.querySelector(CONFIG.selectors.longFormSection)) {
+        requestAnimationFrame(() => updateDesktopPosition(tocContainer));
+        return;
+      }
+      // section-metadata may not have decorated yet — watch for the long-form class
+      const root = document.querySelector('main') || document.body;
+      const observer = new MutationObserver(() => {
+        if (document.querySelector(CONFIG.selectors.longFormSection)) {
+          observer.disconnect();
+          requestAnimationFrame(() => updateDesktopPosition(tocContainer));
+        }
+      });
+      observer.observe(root, { subtree: true, attributeFilter: ['class'] });
+    };
+
+    if (document.readyState === 'complete') {
+      tryShow();
+    } else {
+      window.addEventListener('load', tryShow, { once: true });
+    }
   }
 
-  // Always return handlers, they check viewport internally
   return {
     onScroll: () => {
-      if (isDesktop()) {
-        updateDesktopPosition(tocContainer);
-        updateActiveLink(tocContainer);
-      }
+      if (isDesktop()) updateDesktopPosition(tocContainer);
     },
     onResize: () => {
-      // Always reset cached position on resize to ensure correct positioning
-      delete tocContainer.dataset.initialTop;
-
       if (isDesktop()) {
         updateDesktopPosition(tocContainer);
-        updateActiveLink(tocContainer);
       } else {
         tocContainer.classList.remove('toc-desktop');
         tocContainer.classList.remove('toc-desktop-fixed');
@@ -736,10 +651,6 @@ function setupConsolidatedHandlers(updateFunctions) {
 // INITIALIZATION
 // ============================================================================
 
-/**
- * Initializes required utilities and dependencies
- * @returns {Promise<Object>} Object containing createTag and getMetadata functions
- */
 async function initializeDependencies() {
   try {
     const utils = await import(`${getLibs()}/utils/utils.js`);
@@ -801,9 +712,9 @@ export default async function decorate(block) {
     container.appendChild(socialIcons);
 
     // Phase 5: Setup behaviors
-    // Navigation and Social: All viewports
     setupNavigation(content);
     setupSocialSharing(socialIcons);
+    const activeLinksHandlers = setupActiveLinks(content);
 
     // Phase 6: Insert TOC after start element
     const startElement = document.querySelector(CONFIG.selectors.startElement);
@@ -813,11 +724,14 @@ export default async function decorate(block) {
       window.lana?.log('TOC: No start element found', { tags: 'toc-seo', severity: 'error' });
     }
 
+    // Prime active link for hash navigation; one RAF after insertion lets layout settle.
+    requestAnimationFrame(() => activeLinksHandlers.onScroll());
+
     // Phase 7: Insert floating button and setup behavior (mobile/tablet only)
     document.body.appendChild(floatingButton);
     const floatingButtonUpdate = setupFloatingButton(floatingButton, container);
 
-    // Phase 8: Setup desktop positioning and active link tracking
+    // Phase 8: Setup desktop positioning
     const desktopHandlers = setupDesktop(container);
 
     // Phase 8b: Handle desktop → mobile/tablet transitions so TOC defaults open
@@ -837,12 +751,10 @@ export default async function decorate(block) {
 
     // Phase 9: Setup consolidated, optimized event handlers
     const updateFunctions = [
-      // Floating button update (has onScroll and onResize)
       { onScroll: floatingButtonUpdate, onResize: floatingButtonUpdate },
-      // Desktop handlers (has onScroll and onResize)
       desktopHandlers,
-      // Responsive handlers for mobile default state
       responsiveHandlers,
+      activeLinksHandlers,
     ];
 
     setupConsolidatedHandlers(updateFunctions);

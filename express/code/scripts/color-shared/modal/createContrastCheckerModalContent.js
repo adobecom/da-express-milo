@@ -18,6 +18,45 @@ let stylesLoaded = false;
 
 const cellContent = new WeakMap();
 
+const DEFAULT_STRINGS = Object.freeze({
+  modalTitle: 'See contrast for your full palette',
+  modalEmptyMessage: 'At least 2 colors are needed to compare contrast.',
+  modalLevelPickerLabel: 'WCAG Contrast Level',
+  modalBgSelectorLabel: 'Select background color',
+  largeText: 'Large text',
+  smallText: 'Small text',
+  modalIconsAndUi: 'Icons and UI',
+  modalRatioLabel: 'Ratio:',
+  modalRowBackgroundLabel: 'Background',
+  modalMatrixAria: 'Contrast comparison matrix',
+  modalForegroundAria: 'Foreground: {hex}',
+  modalBackgroundAria: 'Background: {hex}',
+  modalCardGridAria: 'Contrast results for background {hex}',
+  modalBgChangeAnnounce: 'Background color {hex} selected, showing {count} foreground options',
+  modalTabChangeAnnounce: 'Showing results for {tab}, {count} passing combinations',
+  modalLevelChangeAnnounce: '{level} level selected, {count} passing combinations',
+  modalCellAriaSameColor: '{fg} on {bg}, same color, contrast ratio 1.00 : 1, fails {level}',
+  modalCellAriaPass: '{fg} on {bg}, contrast ratio {ratio}, passes {level} for {tab}',
+  modalCellAriaFail: '{fg} on {bg}, contrast ratio {ratio}, fails {level} for {tab}',
+  modalCellTooltipPass: 'Pass {ratio}',
+  modalCellTooltipFail: 'Low contrast {ratio}',
+  modalCardAriaPass: '{fg} on {bg}, ratio {ratio}, passes {level}',
+  modalCardAriaFail: '{fg} on {bg}, ratio {ratio}, fails {level}',
+});
+
+function format(template, vars) {
+  return String(template).replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? vars[k] : `{${k}}`));
+}
+
+function resolveStrings(overrides) {
+  if (!overrides) return DEFAULT_STRINGS;
+  const merged = { ...DEFAULT_STRINGS };
+  Object.keys(DEFAULT_STRINGS).forEach((key) => {
+    if (overrides[key]) merged[key] = overrides[key];
+  });
+  return merged;
+}
+
 export async function ensureContrastContentStyles() {
   if (stylesLoaded) return;
   try {
@@ -174,7 +213,7 @@ function createCellContent(tab) {
   return { fragment: frag, textEl, iconEl };
 }
 
-function buildCell(fgIdx, bgIdx, colors, state, matrix, sizeClass, dataService) {
+function buildCell(fgIdx, bgIdx, colors, state, matrix, sizeClass, dataService, strings) {
   const cell = createTag('div', {
     class: `cc-modal-cell cc-modal-cell--${sizeClass}`,
     role: 'gridcell',
@@ -192,9 +231,9 @@ function buildCell(fgIdx, bgIdx, colors, state, matrix, sizeClass, dataService) 
     cell.setAttribute('tabindex', '0');
     cell.setAttribute(
       'aria-label',
-      `${fgHex} on ${bgHex}, same color, contrast ratio 1.00 : 1, fails ${state.activeLevel}`,
+      format(strings.modalCellAriaSameColor, { fg: fgHex, bg: bgHex, level: state.activeLevel }),
     );
-    setCellTooltipText(cell, `Low contrast ${formatRatio(1)}`);
+    setCellTooltipText(cell, format(strings.modalCellTooltipFail, { ratio: formatRatio(1) }));
     return cell;
   }
 
@@ -206,7 +245,13 @@ function buildCell(fgIdx, bgIdx, colors, state, matrix, sizeClass, dataService) 
   cell.setAttribute('tabindex', '0');
   cell.setAttribute(
     'aria-label',
-    `${fgHex} on ${bgHex}, contrast ratio ${formatRatio(ratio)}, ${pass ? 'passes' : 'fails'} ${state.activeLevel} for ${state.activeTab.replace('-', ' ')}`,
+    format(pass ? strings.modalCellAriaPass : strings.modalCellAriaFail, {
+      fg: fgHex,
+      bg: bgHex,
+      ratio: formatRatio(ratio),
+      level: state.activeLevel,
+      tab: state.activeTab.replace('-', ' '),
+    }),
   );
 
   if (pass) {
@@ -225,11 +270,16 @@ function buildCell(fgIdx, bgIdx, colors, state, matrix, sizeClass, dataService) 
     cell.classList.add('cc-modal-cell--fail');
   }
 
-  setCellTooltipText(cell, pass ? `Pass ${formatRatio(ratio)}` : `Low contrast ${formatRatio(ratio)}`);
+  setCellTooltipText(
+    cell,
+    format(pass ? strings.modalCellTooltipPass : strings.modalCellTooltipFail, {
+      ratio: formatRatio(ratio),
+    }),
+  );
   return cell;
 }
 
-function updateAllCells(container, colors, state, matrix) {
+function updateAllCells(container, colors, state, matrix, strings) {
   // Update column headers: "Aa" for text tabs, star icon for icons-ui
   const colHeaders = container.querySelectorAll('.cc-modal-col-header');
   colHeaders.forEach((header) => {
@@ -252,7 +302,11 @@ function updateAllCells(container, colors, state, matrix) {
     if (fgIdx === bgIdx) {
       cell.setAttribute(
         'aria-label',
-        `${colors[fgIdx]} on ${colors[bgIdx]}, same color, contrast ratio 1.00 : 1, fails ${state.activeLevel}`,
+        format(strings.modalCellAriaSameColor, {
+          fg: colors[fgIdx],
+          bg: colors[bgIdx],
+          level: state.activeLevel,
+        }),
       );
       return;
     }
@@ -267,10 +321,21 @@ function updateAllCells(container, colors, state, matrix) {
 
     cell.setAttribute(
       'aria-label',
-      `${fgHex} on ${bgHex}, contrast ratio ${formatRatio(result.ratio)}, ${pass ? 'passes' : 'fails'} ${state.activeLevel} for ${state.activeTab.replace('-', ' ')}`,
+      format(pass ? strings.modalCellAriaPass : strings.modalCellAriaFail, {
+        fg: fgHex,
+        bg: bgHex,
+        ratio: formatRatio(result.ratio),
+        level: state.activeLevel,
+        tab: state.activeTab.replace('-', ' '),
+      }),
     );
 
-    setCellTooltipText(cell, pass ? `Pass ${formatRatio(result.ratio)}` : `Low contrast ${formatRatio(result.ratio)}`);
+    setCellTooltipText(
+      cell,
+      format(pass ? strings.modalCellTooltipPass : strings.modalCellTooltipFail, {
+        ratio: formatRatio(result.ratio),
+      }),
+    );
 
     cell.classList.remove('cc-modal-cell--pass', 'cc-modal-cell--fail');
     cell.style.backgroundColor = '';
@@ -304,7 +369,7 @@ function updateAllCells(container, colors, state, matrix) {
 
 // ── Desktop Matrix Layout ─────────────────────────────────────────
 
-function buildMatrixLayout(colors, state, matrix, dataService) {
+function buildMatrixLayout(colors, state, matrix, dataService, strings) {
   const sizeClass = getCellSize(colors.length);
   const cellSizes = { S: 34, M: 58, L: 80 };
   const cellSize = cellSizes[sizeClass];
@@ -316,7 +381,7 @@ function buildMatrixLayout(colors, state, matrix, dataService) {
   const grid = createTag('div', {
     class: 'cc-modal-grid',
     role: 'grid',
-    'aria-label': 'Contrast comparison matrix',
+    'aria-label': strings.modalMatrixAria,
   });
   grid.style.gridTemplateColumns = `auto repeat(${colCount}, ${cellSize}px)`;
 
@@ -333,7 +398,7 @@ function buildMatrixLayout(colors, state, matrix, dataService) {
     const header = createTag('div', {
       class: `cc-modal-col-header${isIconTab ? ' cc-modal-col-header--icon' : ''}`,
       role: 'columnheader',
-      'aria-label': `Foreground: ${hex}`,
+      'aria-label': format(strings.modalForegroundAria, { hex }),
     });
     if (isIconTab) {
       header.innerHTML = ICON_STAR_SVG;
@@ -353,20 +418,22 @@ function buildMatrixLayout(colors, state, matrix, dataService) {
     const rowTitle = createTag('div', {
       class: 'cc-modal-row-title',
       role: 'rowheader',
-      'aria-label': `Background: ${bgHex}`,
+      'aria-label': format(strings.modalBackgroundAria, { hex: bgHex }),
     });
     const swatch = createTag('div', { class: 'cc-modal-row-swatch' });
     swatch.style.backgroundColor = bgHex;
     if (isLightBackground(bgHex, dataService)) {
       swatch.style.border = '0.5px solid rgba(31, 31, 31, 0.2)';
     }
-    const label = createTag('span', { class: 'cc-modal-row-label' }, 'Background');
+    const label = createTag('span', { class: 'cc-modal-row-label' }, strings.modalRowBackgroundLabel);
     rowTitle.append(swatch, label);
     grid.appendChild(rowTitle);
 
     // Cells
     colors.forEach((_, fgIdx) => {
-      grid.appendChild(buildCell(fgIdx, bgIdx, colors, state, matrix, sizeClass, dataService));
+      grid.appendChild(
+        buildCell(fgIdx, bgIdx, colors, state, matrix, sizeClass, dataService, strings),
+      );
     });
   });
 
@@ -381,7 +448,7 @@ function buildMatrixLayout(colors, state, matrix, dataService) {
 
 // ── Tablet/Mobile Card Layout ─────────────────────────────────────
 
-function buildCard(fgIdx, bgIdx, colors, state, matrix, dataService) {
+function buildCard(fgIdx, bgIdx, colors, state, matrix, dataService, strings) {
   const fgHex = colors[fgIdx];
   const bgHex = colors[bgIdx];
 
@@ -395,7 +462,12 @@ function buildCard(fgIdx, bgIdx, colors, state, matrix, dataService) {
   const card = createTag('div', {
     class: 'cc-modal-card',
     role: 'listitem',
-    'aria-label': `${fgHex} on ${bgHex}, ratio ${formatRatio(ratio)}, ${pass ? 'passes' : 'fails'} ${state.activeLevel}`,
+    'aria-label': format(pass ? strings.modalCardAriaPass : strings.modalCardAriaFail, {
+      fg: fgHex,
+      bg: bgHex,
+      ratio: formatRatio(ratio),
+      level: state.activeLevel,
+    }),
   });
 
   // Swatch
@@ -440,7 +512,7 @@ function buildCard(fgIdx, bgIdx, colors, state, matrix, dataService) {
   ratioIcon.innerHTML = pass ? ICON_CHECK_SVG : ICON_CROSS_SVG;
   ratioLine.append(
     ratioIcon,
-    createTag('span', { class: 'cc-modal-card-ratio-label' }, 'Ratio:'),
+    createTag('span', { class: 'cc-modal-card-ratio-label' }, strings.modalRatioLabel),
     createTag('span', { class: 'cc-modal-card-ratio-value' }, formatRatio(ratio)),
   );
 
@@ -449,23 +521,23 @@ function buildCard(fgIdx, bgIdx, colors, state, matrix, dataService) {
   return card;
 }
 
-function buildCardGrid(colors, state, matrix, dataService) {
+function buildCardGrid(colors, state, matrix, dataService, strings) {
   const grid = createTag('div', {
     class: 'cc-modal-card-grid',
     role: 'list',
-    'aria-label': `Contrast results for background ${colors[state.selectedBgIndex]}`,
+    'aria-label': format(strings.modalCardGridAria, { hex: colors[state.selectedBgIndex] }),
   });
 
   const bgIdx = state.selectedBgIndex;
   for (let fgIdx = 0; fgIdx < colors.length; fgIdx += 1) {
-    grid.appendChild(buildCard(fgIdx, bgIdx, colors, state, matrix, dataService));
+    grid.appendChild(buildCard(fgIdx, bgIdx, colors, state, matrix, dataService, strings));
   }
   return grid;
 }
 
-function buildBackgroundSelector(colors, state, onSelect) {
+function buildBackgroundSelector(colors, state, onSelect, strings) {
   const container = createTag('div', { class: 'cc-modal-bg-selector' });
-  container.appendChild(createTag('span', { class: 'cc-modal-bg-label' }, 'Select background color'));
+  container.appendChild(createTag('span', { class: 'cc-modal-bg-label' }, strings.modalBgSelectorLabel));
 
   const swatchesContainer = createTag('div', { class: 'cc-modal-bg-swatches' });
   container.appendChild(swatchesContainer);
@@ -497,12 +569,12 @@ function updateBgSwatches(container, selectedIdx) {
   }
 }
 
-function buildCardLayout(colors, state, matrix, dataService) {
+function buildCardLayout(colors, state, matrix, dataService, strings) {
   const wrapper = createTag('div', { class: 'cc-modal-cards' });
   let cardGrid = null;
 
   function rerenderCards() {
-    const newGrid = buildCardGrid(colors, state, matrix, dataService);
+    const newGrid = buildCardGrid(colors, state, matrix, dataService, strings);
     if (cardGrid) {
       cardGrid.replaceWith(newGrid);
     } else {
@@ -516,9 +588,12 @@ function buildCardLayout(colors, state, matrix, dataService) {
     updateBgSwatches(bgSelector, idx);
     rerenderCards();
     announceToScreenReader(
-      `Background color ${colors[idx]} selected, showing ${colors.length - 1} foreground options`,
+      format(strings.modalBgChangeAnnounce, {
+        hex: colors[idx],
+        count: colors.length - 1,
+      }),
     );
-  });
+  }, strings);
 
   wrapper.appendChild(bgSelector);
   rerenderCards();
@@ -527,7 +602,7 @@ function buildCardLayout(colors, state, matrix, dataService) {
 
 // ── Header ────────────────────────────────────────────────────────
 
-async function buildHeader(colors, state, onTabChange, onLevelChange) {
+async function buildHeader(colors, state, onTabChange, onLevelChange, strings) {
   const header = createTag('div', { class: 'cc-modal-header' });
 
   // Title wrap
@@ -535,7 +610,7 @@ async function buildHeader(colors, state, onTabChange, onLevelChange) {
   titleWrap.appendChild(createTag('h2', {
     class: 'cc-modal-title',
     id: 'cc-modal-title-id',
-  }, 'See contrast for your full palette'));
+  }, strings.modalTitle));
 
   // Palette strip (desktop only)
   const strip = createTag('div', { class: 'cc-modal-palette-strip' });
@@ -550,7 +625,7 @@ async function buildHeader(colors, state, onTabChange, onLevelChange) {
   // Level picker + Tabs wrapper for desktop
   const { createExpressPicker } = await import('../spectrum/components/express-picker.js');
   const levelPicker = await createExpressPicker({
-    label: 'WCAG Contrast Level',
+    label: strings.modalLevelPickerLabel,
     value: state.activeLevel,
     size: 's',
     options: [
@@ -565,7 +640,7 @@ async function buildHeader(colors, state, onTabChange, onLevelChange) {
 
   const levelWrap = createTag('div', { class: 'cc-modal-level-wrap' });
   levelWrap.append(
-    createTag('span', { class: 'cc-modal-level-label' }, 'WCAG Contrast Level'),
+    createTag('span', { class: 'cc-modal-level-label' }, strings.modalLevelPickerLabel),
     levelPicker.element,
   );
 
@@ -576,9 +651,9 @@ async function buildHeader(colors, state, onTabChange, onLevelChange) {
     size: 'm',
     quiet: true,
     tabs: [
-      { label: 'Large text', value: 'large-text', iconSlotHtml: ICON_TEXT_SVG },
-      { label: 'Small text', value: 'small-text', iconSlotHtml: ICON_ALIGN_SVG },
-      { label: 'Icons and UI', value: 'icons-ui', iconSlotHtml: ICON_SHAPES_SVG },
+      { label: strings.largeText, value: 'large-text', iconSlotHtml: ICON_TEXT_SVG },
+      { label: strings.smallText, value: 'small-text', iconSlotHtml: ICON_ALIGN_SVG },
+      { label: strings.modalIconsAndUi, value: 'icons-ui', iconSlotHtml: ICON_SHAPES_SVG },
     ],
     onSelectionChange: ({ selected }) => {
       state.activeTab = selected;
@@ -614,9 +689,10 @@ function countPassing(colors, state, matrix) {
 // ── Main Factory ──────────────────────────────────────────────────
 
 export function createContrastCheckerModalContent(palette, options = {}) {
+  const strings = resolveStrings(options.strings);
   const colors = normalizeColors(palette);
   if (colors.length < 2) {
-    const el = createTag('div', { class: 'cc-modal-empty' }, 'At least 2 colors are needed to compare contrast.');
+    const el = createTag('div', { class: 'cc-modal-empty' }, strings.modalEmptyMessage);
     return { element: el, destroy() {} };
   }
 
@@ -666,7 +742,7 @@ export function createContrastCheckerModalContent(palette, options = {}) {
       matrixLayout?.destroyTooltip?.();
       contentArea.innerHTML = '';
       cardLayout = null;
-      matrixLayout = buildMatrixLayout(colors, state, contrastMatrix, dataService);
+      matrixLayout = buildMatrixLayout(colors, state, contrastMatrix, dataService, strings);
       contentArea.appendChild(matrixLayout);
     }
 
@@ -674,7 +750,7 @@ export function createContrastCheckerModalContent(palette, options = {}) {
       matrixLayout?.destroyTooltip?.();
       contentArea.innerHTML = '';
       matrixLayout = null;
-      cardLayout = buildCardLayout(colors, state, contrastMatrix, dataService);
+      cardLayout = buildCardLayout(colors, state, contrastMatrix, dataService, strings);
       contentArea.appendChild(cardLayout);
     }
 
@@ -682,28 +758,38 @@ export function createContrastCheckerModalContent(palette, options = {}) {
       if (!cardLayout) return;
       const parent = cardLayout.parentNode;
       if (!parent) return;
-      const newLayout = buildCardLayout(colors, state, contrastMatrix, dataService);
+      const newLayout = buildCardLayout(colors, state, contrastMatrix, dataService, strings);
       parent.replaceChild(newLayout, cardLayout);
       cardLayout = newLayout;
     }
 
     const onTabChange = (tab) => {
-      const tabLabels = { 'large-text': 'large text', 'small-text': 'small text', 'icons-ui': 'icons and UI' };
+      const tabLabels = {
+        'large-text': strings.largeText,
+        'small-text': strings.smallText,
+        'icons-ui': strings.modalIconsAndUi,
+      };
       element.dataset.tab = tab;
-      if (matrixLayout) updateAllCells(matrixLayout, colors, state, contrastMatrix);
+      if (matrixLayout) updateAllCells(matrixLayout, colors, state, contrastMatrix, strings);
       if (cardLayout) rerenderCardLayout();
       const passCount = countPassing(colors, state, contrastMatrix);
-      announceToScreenReader(`Showing results for ${tabLabels[tab]}, ${passCount} passing combinations`);
+      announceToScreenReader(format(strings.modalTabChangeAnnounce, {
+        tab: tabLabels[tab],
+        count: passCount,
+      }));
     };
 
     const onLevelChange = (level) => {
-      if (matrixLayout) updateAllCells(matrixLayout, colors, state, contrastMatrix);
+      if (matrixLayout) updateAllCells(matrixLayout, colors, state, contrastMatrix, strings);
       if (cardLayout) rerenderCardLayout();
       const passCount = countPassing(colors, state, contrastMatrix);
-      announceToScreenReader(`${level} level selected, ${passCount} passing combinations`);
+      announceToScreenReader(format(strings.modalLevelChangeAnnounce, {
+        level,
+        count: passCount,
+      }));
     };
 
-    headerRef = await buildHeader(colors, state, onTabChange, onLevelChange);
+    headerRef = await buildHeader(colors, state, onTabChange, onLevelChange, strings);
     element.appendChild(headerRef.element);
     element.appendChild(contentArea);
 

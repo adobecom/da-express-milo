@@ -63,6 +63,8 @@ function getTabbableAdjacentTo(el, reverse = false) {
  * @param {'auto'|'compact'} [config.direction='auto']
  * @param {Array<{label: string, value: string, disabled?: boolean, spIcon?: string, iconSlotHtml?: string}>} [config.tabs=[]]
  * @param {Function} [config.onSelectionChange] — ({ selected }) when tab changes
+ * @param {boolean|string[]} [config.enterPanelOnTab=false] — move forward Tab from
+ * selected tabs into the panel
  * @returns {Promise<{
  *   element: HTMLElement,
  *   tabsEl: HTMLElement,
@@ -82,6 +84,7 @@ export async function createExpressTabs(config = {}) {
     direction = 'auto',
     tabs: tabConfigs = [],
     onSelectionChange,
+    enterPanelOnTab = false,
   } = config;
 
   await loadTabs();
@@ -117,16 +120,36 @@ export async function createExpressTabs(config = {}) {
 
   const panelEntryFocusMap = new Map();
 
+  function shouldEnterPanelOnTab(selectedValue) {
+    if (enterPanelOnTab === true) return true;
+    return Array.isArray(enterPanelOnTab) && enterPanelOnTab.includes(selectedValue);
+  }
+
+  function focusSelectedPanelEntry() {
+    const { selected: selectedValue } = tabsEl;
+    const customFn = panelEntryFocusMap.get(selectedValue);
+    if (customFn) {
+      customFn();
+      return;
+    }
+    const panel = tabsEl.querySelector(`sp-tab-panel[value="${selectedValue}"]`);
+    getFirstTabbable(panel)?.focus();
+  }
+
   const controller = new AbortController();
   const { signal } = controller;
 
   if (onSelectionChange) {
-    tabsEl.addEventListener('change', (e) => {
-      onSelectionChange({ selected: e.target.selected });
+    let lastSelected = selected ?? null;
+    tabsEl.addEventListener('change', () => {
+      const current = tabsEl.selected;
+      if (!current || current === lastSelected) return;
+      lastSelected = current;
+      onSelectionChange({ selected: current });
     }, { signal });
   }
 
-  // Tab skips the panel; Enter enters the panel.
+  // Tab skips the panel by default; selected tabs can opt into panel entry.
   theme.addEventListener('keydown', (e) => {
     const path = e.composedPath();
     const isOnTab = path.some((node) => node.tagName === 'SP-TAB');
@@ -135,18 +158,13 @@ export async function createExpressTabs(config = {}) {
 
     if (e.key === 'Tab') {
       e.preventDefault();
+      if (!e.shiftKey && shouldEnterPanelOnTab(tabsEl.selected)) {
+        requestAnimationFrame(focusSelectedPanelEntry);
+        return;
+      }
       getTabbableAdjacentTo(theme, e.shiftKey)?.focus();
     } else if (e.key === 'Enter') {
-      requestAnimationFrame(() => {
-        const { selected } = tabsEl;
-        const customFn = panelEntryFocusMap.get(selected);
-        if (customFn) {
-          customFn();
-          return;
-        }
-        const panel = tabsEl.querySelector(`sp-tab-panel[value="${selected}"]`);
-        getFirstTabbable(panel)?.focus();
-      });
+      requestAnimationFrame(focusSelectedPanelEntry);
     }
   }, { capture: true, signal });
 

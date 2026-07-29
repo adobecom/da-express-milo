@@ -12,6 +12,10 @@ export function consumeSusiColorRedirect() {
   return url || null;
 }
 
+export function buildLibrariesSignInRedirectUrl() {
+  return window.location.href;
+}
+
 function pageHasBlock(...classNames) {
   return classNames.some((cls) => document.querySelector(`.${cls}`));
 }
@@ -22,10 +26,12 @@ export function buildColorSignInRedirectUrl(colors, name, id = null) {
   if (pageHasBlock('color-explore')) {
     const url = new URL(window.location.href);
     if (id) url.searchParams.set('id', id);
+    url.searchParams.set('pendingSave', '1');
     return url.toString();
   }
 
   const url = new URL(window.location.href);
   setOnUrl(url, colors, { name });
+  url.searchParams.set('pendingSave', '1');
   return url.toString();
 }

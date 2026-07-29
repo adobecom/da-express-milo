@@ -181,12 +181,7 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
   railWrapEl.style.gridColumn = '2';
   railWrapEl.style.gridRow = '1 / -1';
 
-  const titleUnsubs = [];
-  const getCurrentHexes = () => {
-    const state = controller?.getState?.();
-    return (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
-  };
-
+  const titleCells = [];
   TYPE_ORDER.forEach((type, rowIndex) => {
     const gridRow = rowIndex + 2;
     const titleCell = createTag('div', {
@@ -203,20 +198,24 @@ function createFourRowsColorBlindnessTitlesOnly(controller, containerEl, railWra
     titleCell.style.gridRow = String(gridRow);
     titleCell.appendChild(label);
     containerEl.appendChild(titleCell);
+    titleCells.push({ titleCell, type });
+  });
+  refreshColorBlindnessLabelTooltips(containerEl);
 
-    const updatePassFail = () => {
-      const hexes = getCurrentHexes();
+  // Single subscription updates all title cells — avoids 3 independent getConflictPairs
+  // calls per frame (was one subscription per type, each calling getConflictPairs separately).
+  const updateAllTitles = (state) => {
+    const hexes = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
+    titleCells.forEach(({ titleCell, type }) => {
       const pairs = hexes.length ? getConflictPairs(hexes, type) : [];
       titleCell.classList.toggle('pass', pairs.length === 0);
       titleCell.classList.toggle('fail', pairs.length > 0);
-    };
-    updatePassFail();
-    const unsub = controller?.subscribe?.(updatePassFail);
-    if (unsub) titleUnsubs.push(unsub);
-  });
-  refreshColorBlindnessLabelTooltips(containerEl);
+    });
+  };
+  const titleUnsub = controller?.subscribe?.(updateAllTitles);
+
   containerEl.unsubFourRowsTitles = () => {
-    titleUnsubs.forEach((fn) => fn?.());
+    titleUnsub?.();
     clearTooltipDestroys(containerEl);
   };
 }
@@ -258,12 +257,50 @@ function createMobileCBLayout(
     const allColors = (state?.swatches || []).map((s) => s?.hex).filter(Boolean);
     if (!allColors.length) return;
     const colors = allColors.slice(0, maxColumns);
-    rowsWrap.innerHTML = '';
 
     const conflictsByType = {};
     TYPE_ORDER.forEach((type) => {
       conflictsByType[type] = getConflictingIndices(getConflictPairs(colors, type));
     });
+
+    // In-place update when row count matches — avoids DOM teardown at 12 Hz
+    if (rowsWrap.children.length === colors.length) {
+      colors.forEach((hex, colorIndex) => {
+        const row = rowsWrap.children[colorIndex];
+        const paletteCell = row.querySelector('.strip-cb-mobile-row__palette');
+        if (paletteCell) {
+          paletteCell.style.backgroundColor = hex;
+          paletteCell.classList.toggle('super-light', isSuperLight(hex));
+          paletteCell.setAttribute('aria-label', (colorEditStrings?.editColorWithHexAria || 'Edit color {hex}').replace('{hex}', hex.toUpperCase()));
+          const hexLabel = paletteCell.querySelector('.strip-cb-mobile-row__hex');
+          if (hexLabel) {
+            hexLabel.style.color = getContrastTextColor(hex);
+            hexLabel.textContent = hex.toUpperCase();
+          }
+        }
+        const simCells = row.querySelectorAll('.strip-cb-mobile-row__sim');
+        TYPE_ORDER.forEach((type, typeIndex) => {
+          const sim = simulateHex(hex, type);
+          const simCell = simCells[typeIndex];
+          if (!simCell) return;
+          simCell.style.backgroundColor = sim;
+          simCell.style.setProperty('--cb-conflict-icon-color', getContrastTextColor(sim));
+          simCell.classList.toggle('super-light', isSuperLight(sim));
+          simCell.setAttribute('aria-label', `${sim.toUpperCase()} ${cb.labels[type]}`);
+          const isConflicting = conflictsByType[type].has(colorIndex);
+          const wasConflicting = simCell.classList.contains('conflict');
+          if (isConflicting !== wasConflicting) {
+            simCell.classList.toggle('conflict', isConflicting);
+            simCell.querySelector('.strip-color-blindness-swatch__conflict-icon')?.remove();
+            if (isConflicting) simCell.appendChild(createConflictIcon(cb.conflictIconAria));
+          }
+        });
+      });
+      return;
+    }
+
+    // Full rebuild on count change
+    rowsWrap.innerHTML = '';
 
     colors.forEach((hex, colorIndex) => {
       const row = createTag('div', { class: 'strip-cb-mobile-row' });
@@ -575,6 +612,7 @@ export function createStripContainerRenderer(options) {
   let activeColorEditor = null;
   let isEditorOpening = false;
   const cleanupHandlers = [];
+  let liveAdapters = [];
 
   function resolveAnchorRect(anchorElement, anchorRectFromDetail) {
     if (anchorRectFromDetail && Number.isFinite(anchorRectFromDetail.left)) {
@@ -850,22 +888,38 @@ export function createStripContainerRenderer(options) {
     container.classList.add('color-explorer-strip-container', 'strip-container');
     if (colorBlindness) container.classList.add('color-explorer-strip-container--color-blindness');
     listElement = container;
+    liveAdapters = [];
 
     const data = getData().slice(0, orientations.length);
     data.forEach((palette, index) => {
       const adapter = createSwatchRailAdapter(palette, railOptions(orientations[index]));
+      liveAdapters.push(adapter);
       appendStrip(adapter, orientations[index]);
     });
   }
 
   function update(newData) {
     if (!listElement || isEditorOpening) return;
+    const data = (Array.isArray(newData) ? newData : getData()).slice(0, orientations.length);
+
+    // When adapter count matches, push new colors through each adapter's controller
+    // instead of tearing down and rebuilding the DOM. At 12 Hz during drag this
+    // avoids destroying/recreating Lit elements, swatch-rail subscriptions, and
+    // color-blindness layout DOM on every frame.
+    if (liveAdapters.length === data.length
+      && liveAdapters.every((a) => typeof a.update === 'function')) {
+      data.forEach((palette, i) => liveAdapters[i].update(palette));
+      return;
+    }
+
+    // Full rebuild: swatch count changed or adapters were destroyed.
     closeActiveColorEditor();
     cleanupHandlers.splice(0).forEach((fn) => fn());
     listElement.innerHTML = '';
-    const data = (Array.isArray(newData) ? newData : getData()).slice(0, orientations.length);
+    liveAdapters = [];
     data.forEach((palette, index) => {
       const adapter = createSwatchRailAdapter(palette, railOptions(orientations[index]));
+      liveAdapters.push(adapter);
       appendStrip(adapter, orientations[index]);
     });
   }
@@ -873,6 +927,7 @@ export function createStripContainerRenderer(options) {
   function destroy() {
     closeActiveColorEditor();
     cleanupHandlers.splice(0).forEach((fn) => fn());
+    liveAdapters = [];
     listElement = null;
   }
 

@@ -1,4 +1,12 @@
-import { getLibs, yieldToMain, getMobileOperatingSystem, getIconElementDeprecated, createTag, formatDynamicCartLink } from '../../scripts/utils.js';
+import {
+  getLibs,
+  yieldToMain,
+  getMobileOperatingSystem,
+  getIconElementDeprecated,
+  createTag,
+  formatDynamicCartLink,
+  getMetadata,
+} from '../../scripts/utils.js';
 
 let currDrawer = null;
 const largeMQ = window.matchMedia('(min-width: 1280px)');
@@ -210,9 +218,16 @@ async function makeRating(
   await trackBranchParameters([storeLink]);
 
   const star = getIconElementDeprecated('star');
-  star.setAttribute('role', 'img');
-  star.setAttribute('aria-label', starsPlaceholder);
-  return createTag('div', { class: 'ratings-container' }, [score, star, cnt, storeLink]);
+  const ratingsLabel = `${score} ${starsPlaceholder}, ${cnt}`;
+  const ratingsText = createTag('span', {
+    class: 'ratings-metric',
+    role: 'group',
+    'aria-label': ratingsLabel,
+  }, [
+    createTag('span', { class: 'rating-visual', 'aria-hidden': 'true' }, [score, star]),
+    createTag('span', { 'aria-hidden': 'true' }, cnt),
+  ]);
+  return createTag('div', { class: 'ratings-container' }, [ratingsText, storeLink]);
 }
 
 async function makeRatings(
@@ -270,15 +285,31 @@ export default async function init(el) {
       return headline;
     }
     ctas[0].parentElement.classList.add('ctas');
+    const heading = headline.querySelector('h1, h2, h3, h4, h5, h6');
     ctas.forEach((cta) => {
       cta.classList.add('button');
+      if (cta.querySelector('.icon')) return;
+      const icon = cta.parentElement?.querySelector(':scope > .icon');
+      const match = icon && iconRegex.exec(icon.className);
+      if (match?.[1]) {
+        const hasExistingGraphic = icon.querySelector('svg, img');
+        if (!hasExistingGraphic) icon.append(getIconElementDeprecated(match[1]));
+        const ctaText = cta.textContent.trim();
+        cta.textContent = '';
+        cta.title = cta.title || ctaText;
+        cta.append(createTag('div', { class: 'text-group' }, [icon, ctaText]));
+      }
+      if (!cta.getAttribute('aria-label') && heading) {
+        cta.setAttribute('aria-label', `${cta.textContent.trim()} ${heading.textContent.trim()}`);
+      }
     });
     ctas[0].classList.add('primaryCTA');
     // Defer pricing formatting to idle time
-    const idleCb = (cb) => (
-      window.requestIdleCallback
-        ? window.requestIdleCallback(cb, { timeout: 3000 })
-        : setTimeout(cb, 3000)
+    // eslint-disable-next-line compat/compat
+    const idleCb = (cb) => (window.requestIdleCallback
+      // eslint-disable-next-line compat/compat
+      ? window.requestIdleCallback(cb, { timeout: 3000 })
+      : setTimeout(cb, 3000)
     );
     idleCb(() => {
       ctas.forEach((cta) => formatDynamicCartLink(cta));
@@ -298,7 +329,13 @@ export default async function init(el) {
   // Legacy mode: headline + background + items inside this block
   if (hasLegacyHeadline) {
     const [headline, background, ...items] = rows;
-    const logo = getIconElementDeprecated('adobe-express-logo');
+    const brandingLogoName = getMetadata('inject-branding-logo')?.trim()
+      || (['on', 'yes'].includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase()) && 'cobrand-lockup-acrobat-express')
+      || null;
+    const logo = brandingLogoName
+      ? getIconElementDeprecated(brandingLogoName)
+      : getIconElementDeprecated('adobe-express-logo');
+
     logo.classList.add('express-logo');
 
     background.classList.add('background');

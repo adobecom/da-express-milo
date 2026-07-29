@@ -159,6 +159,9 @@ async function mountActionMenu(topbarSlot, actionMenuConfig, modulePromise) {
     onGenerateRandom: actionMenuConfig.onGenerateRandom,
     transformPalette: actionMenuConfig.transformPalette,
     getName: actionMenuConfig.getName,
+    paletteTags: actionMenuConfig.paletteTags,
+    paletteId: actionMenuConfig.paletteId,
+    paletteLibraryId: actionMenuConfig.paletteLibraryId,
     enableState: actionMenuConfig.enableState !== false,
     daaLh: actionMenuConfig.daaLh,
   });

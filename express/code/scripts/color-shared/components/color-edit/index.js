@@ -11,7 +11,7 @@ import { trapFocus, disableBackgroundScroll, restoreBackgroundScroll } from '../
 import { DEFAULT_PLACEHOLDERS as COLOR_EDIT_DEFAULTS } from '../../i18n/loadColorEditPlaceholders.js';
 import '../base-color/index.js';
 
-const COLOR_MODES = ['HEX', 'RGB'];
+const COLOR_MODES = ['HEX', 'RGB', 'HSB', 'Lab'];
 
 class ColorEdit extends LitElement {
   static get styles() {

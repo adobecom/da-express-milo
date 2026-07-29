@@ -16,11 +16,12 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 const { default: decorate } = await import('../../../express/code/blocks/ax-columns/ax-columns.js');
 
 // eslint-disable-next-line max-len
-const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList, notHighlight, numbered30, offer, offerIcon, picture, video, marquee, fullsizeTwoButtons] = await Promise.all(
+const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList, notHighlight, numbered30, offer, offerIcon, picture, video, marquee, fullsizeTwoButtons, injectLogo] = await Promise.all(
   [readFile({ path: './mocks/button-light.html' }), readFile({ path: './mocks/color.html' }), readFile({ path: './mocks/fullsize.html' }), readFile({ path: './mocks/highlight.html' }),
     readFile({ path: './mocks/icon.html' }), readFile({ path: './mocks/icon-with-sibling.html' }), readFile({ path: './mocks/icon-list.html' }), readFile({ path: './mocks/not-highlight.html' }), readFile({ path: './mocks/numbered-30.html' }),
     readFile({ path: './mocks/offer.html' }), readFile({ path: './mocks/offer-icon.html' }), readFile({ path: './mocks/picture.html' }), readFile({ path: './mocks/video.html' }),
-    readFile({ path: './mocks/marquee.html' }), readFile({ path: './mocks/fullsize-two-buttons.html' })],
+    readFile({ path: './mocks/marquee.html' }), readFile({ path: './mocks/fullsize-two-buttons.html' }),
+    readFile({ path: './mocks/inject-logo.html' })],
 );
 
 describe('Columns', () => {
@@ -183,5 +184,49 @@ describe('Columns', () => {
     const secondaryButton = buttons[1];
     expect(secondaryButton.classList.contains('primary')).to.be.true;
     expect(secondaryButton.classList.contains('reverse')).to.be.true;
+  });
+});
+
+describe('Logo injection', () => {
+  function addMeta(name, content) {
+    const meta = document.createElement('meta');
+    meta.name = name;
+    meta.content = content;
+    document.head.appendChild(meta);
+  }
+
+  afterEach(() => {
+    document.head.querySelectorAll('meta[name^="marquee-inject"]').forEach((m) => m.remove());
+  });
+
+  it('Should inject the regular logo when marquee-inject-logo is on', async () => {
+    document.body.innerHTML = injectLogo;
+    addMeta('marquee-inject-logo', 'on');
+    const block = document.querySelector('.ax-columns');
+    await decorate(block);
+    const logo = block.querySelector('.express-logo');
+    expect(logo).to.exist;
+    expect(logo.classList.contains('icon-adobe-express-logo')).to.be.true;
+  });
+
+  it('Should inject the photo logo when marquee-inject-photo-logo is on', async () => {
+    document.body.innerHTML = injectLogo;
+    addMeta('marquee-inject-photo-logo', 'on');
+    const block = document.querySelector('.ax-columns');
+    await decorate(block);
+    const logo = block.querySelector('.express-logo');
+    expect(logo).to.exist;
+    expect(logo.classList.contains('icon-adobe-express-photos-logo')).to.be.true;
+  });
+
+  it('Should inject the acrobat co-brand logo when marquee-inject-acrobat-logo is on', async () => {
+    document.body.innerHTML = injectLogo;
+    addMeta('marquee-inject-acrobat-logo', 'on');
+    const block = document.querySelector('.ax-columns');
+    await decorate(block);
+    const logo = block.querySelector('.express-logo');
+    expect(logo).to.exist;
+    expect(logo.classList.contains('marquee-eyebrow-logo-wide')).to.be.true;
+    expect(logo.alt).to.equal('Adobe Acrobat X Adobe Express co-brand logo');
   });
 });

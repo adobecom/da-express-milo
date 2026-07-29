@@ -1837,7 +1837,12 @@ function HarmonyAdapter(theme, setSwatch) {
             color = _colorSet.swatches[i];
             if (!region || !color) { continue; }
             if (i == _changedColorIndex) { continue; }
-            if (i === _colorSet.baseColorIndex) { continue; }
+            // Skip the base only when called from _updateBaseColor (_changedColorIndex === -1),
+            // where the controller already wrote the base hex before calling onBaseColorChange().
+            // When a non-base swatch moves, moveToColor() shifts the scheme's internal base
+            // point but never writes back to _colorSet.swatches[baseColorIndex] — omitting it
+            // here means theme.swatches[baseColorIndex] stays frozen while all others rotate.
+            if (i === _colorSet.baseColorIndex && _changedColorIndex === -1) { continue; }
             derivedColor = region.derivedColor();
 
             const colorToAllSpaces = hsvToAllSpacesDenormalized([colorwheel.artisticToScientificSmooth(derivedColor.angle()), derivedColor.radius() * 100, derivedColor.height() * 100]);

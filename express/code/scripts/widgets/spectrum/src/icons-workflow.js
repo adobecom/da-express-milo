@@ -23,3 +23,4 @@ import '@spectrum-web-components/icons-workflow/icons/sp-icon-close-circle.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-switch.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-add.js';
 import '@spectrum-web-components/icons-workflow/icons/sp-icon-close.js';
+import '@spectrum-web-components/icons-workflow/icons/sp-icon-accessibility.js';

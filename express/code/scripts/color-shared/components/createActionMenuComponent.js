@@ -50,13 +50,29 @@ export async function loadStyles() {
   }
 }
 
-async function createNav(navLinks, activeId, getColors, getName) {
+// Extracted so the URL construction is testable without a real navigation.
+export function buildNavLinkTarget(href, base, colors, { name, tags, id, libraryId } = {}) {
+  const url = new URL(href, base);
+  createColorPaletteParamApi().setOnUrl(url, colors, {
+    name, tags, id, libraryId,
+  });
+  return url.toString();
+}
+
+async function createNav(
+  navLinks,
+  activeId,
+  getColors,
+  getName,
+  paletteTags,
+  paletteId,
+  paletteLibraryId,
+) {
   const list = Array.isArray(navLinks) ? navLinks : [];
   const nav = createTag('nav', { class: 'action-menu-nav', 'aria-label': 'Color palette tools' });
   const ul = createTag('ul');
   const linkElements = [];
   let activeIndex = -1;
-  const paletteApi = createColorPaletteParamApi();
 
   for (let index = 0; index < list.length; index += 1) {
     const link = list[index];
@@ -78,10 +94,13 @@ async function createNav(navLinks, activeId, getColors, getName) {
         if (!colors?.length) return;
         e.preventDefault();
         try {
-          const url = new URL(linkEl.href, window.location.href);
           const name = typeof getName === 'function' ? getName() : undefined;
-          paletteApi.setOnUrl(url, colors, { name });
-          window.location.href = url.toString();
+          window.location.href = buildNavLinkTarget(linkEl.href, window.location.href, colors, {
+            name,
+            tags: paletteTags,
+            id: paletteId,
+            libraryId: paletteLibraryId,
+          });
         } catch {
           window.location.href = linkEl.href;
         }
@@ -229,38 +248,42 @@ async function createControls(
         controlContainer.append(btn);
         break;
       }
-      case 'expand':
+      case 'expand': {
         if (typeof onExpand !== 'function') break;
+        const expandedLabel = control.expandedLabel || control.label;
+        let isExpanded = false;
         btn = createTag(
           'button',
           {
             class: `${control.id}-btn color-action-button`,
             'aria-label': control.label,
-            'aria-pressed': false,
             tabindex: '0',
           },
           ICON_MAP[control.id].maximize,
         );
         decorateAnalyticsAttributes(btn, { linkLabel: control.label });
         controlContainer.append(btn);
+        let expandTooltip = null;
         btn.addEventListener('click', () => {
-          const oldIsPressed = btn.getAttribute('aria-pressed') === 'true';
-          const isPressed = !oldIsPressed;
-          onExpand(isPressed);
-          btn.setAttribute('aria-pressed', isPressed);
+          isExpanded = !isExpanded;
+          const nextLabel = isExpanded ? expandedLabel : control.label;
+          onExpand(isExpanded);
+          btn.setAttribute('aria-label', nextLabel);
           if (type === 'full') {
             const containerEl = btn.closest('.action-menu-full');
-            containerEl?.classList.toggle('expanded', isPressed);
+            containerEl?.classList.toggle('expanded', isExpanded);
           }
-          btn.innerHTML = ICON_MAP[control.id][isPressed ? 'minimize' : 'maximize'];
+          btn.innerHTML = ICON_MAP[control.id][isExpanded ? 'minimize' : 'maximize'];
+          expandTooltip?.setContent(nextLabel);
         });
-        await createExpressTooltip({
+        expandTooltip = await createExpressTooltip({
           targetEl: btn,
           content: control.label,
           placement: 'top',
           disableAria: true,
         });
         break;
+      }
       default:
         break;
     }
@@ -300,6 +323,9 @@ export async function createActionMenuComponent(options = {}) {
     onGenerateRandom,
     transformPalette,
     getName,
+    paletteTags,
+    paletteId,
+    paletteLibraryId,
     enableState = true,
     daaLh = null,
   } = options;
@@ -324,7 +350,9 @@ export async function createActionMenuComponent(options = {}) {
     handleGenerateRandomState = state.onGenerateRandom;
     pushStateFn = state.addOnePaletteToHistory;
     getCurrentPaletteFn = state.getCurrentPalette;
-    state.init();
+    if (type !== 'controls-only') {
+      state.init();
+    }
   }
 
   function handleUndo() {
@@ -347,7 +375,15 @@ export async function createActionMenuComponent(options = {}) {
 
   if (type !== 'controls-only') {
     const processedLinks = await applyNavLinkParamOverrides(navLinks);
-    sections.push(await createNav(processedLinks, activeId, getCurrentPaletteFn, getName));
+    sections.push(await createNav(
+      processedLinks,
+      activeId,
+      getCurrentPaletteFn,
+      getName,
+      paletteTags,
+      paletteId,
+      paletteLibraryId,
+    ));
   }
   if (type !== 'nav-only') {
     sections.push(await createControls(

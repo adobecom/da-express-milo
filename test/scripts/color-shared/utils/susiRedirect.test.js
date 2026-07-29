@@ -4,6 +4,7 @@ import sinon from 'sinon';
 import {
   setSusiColorRedirect,
   consumeSusiColorRedirect,
+  buildLibrariesSignInRedirectUrl,
   buildColorSignInRedirectUrl,
 } from '../../../../express/code/scripts/color-shared/utils/susiRedirect.js';
 
@@ -59,6 +60,17 @@ describe('consumeSusiColorRedirect', () => {
   });
 });
 
+describe('buildLibrariesSignInRedirectUrl', () => {
+  it('returns the current page URL', () => {
+    window.history.replaceState({}, '', '/create/colors/libraries?q=brand');
+
+    const result = buildLibrariesSignInRedirectUrl();
+    const url = new URL(result);
+    expect(url.pathname).to.equal('/create/colors/libraries');
+    expect(url.searchParams.get('q')).to.equal('brand');
+  });
+});
+
 describe('buildColorSignInRedirectUrl', () => {
   const colors = ['#FF0000', '#00FF00', '#0000FF'];
   const name = 'My Palette';
@@ -94,6 +106,42 @@ describe('buildColorSignInRedirectUrl', () => {
     const result = buildColorSignInRedirectUrl(colors, name);
     const url = new URL(result);
     expect(url.pathname).to.equal('/color-explore');
+  });
+
+  it('includes gradient id param when on color-explore page and id is provided', () => {
+    const el = document.createElement('div');
+    el.className = 'color-explore';
+    document.body.appendChild(el);
+
+    window.history.replaceState({}, '', '/color-explore');
+
+    const result = buildColorSignInRedirectUrl(colors, name, 'gradient-abc-123');
+    const url = new URL(result);
+    expect(url.searchParams.get('id')).to.equal('gradient-abc-123');
+  });
+
+  it('omits id param when on color-explore page but no id is provided', () => {
+    const el = document.createElement('div');
+    el.className = 'color-explore';
+    document.body.appendChild(el);
+
+    window.history.replaceState({}, '', '/color-explore');
+
+    const result = buildColorSignInRedirectUrl(colors, name);
+    const url = new URL(result);
+    expect(url.searchParams.has('id')).to.be.false;
+  });
+
+  it('omits id param when id is an empty string', () => {
+    const el = document.createElement('div');
+    el.className = 'color-explore';
+    document.body.appendChild(el);
+
+    window.history.replaceState({}, '', '/color-explore');
+
+    const result = buildColorSignInRedirectUrl(colors, name, '');
+    const url = new URL(result);
+    expect(url.searchParams.has('id')).to.be.false;
   });
 
   it('uses current page URL for color-extract', () => {

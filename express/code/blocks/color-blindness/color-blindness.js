@@ -1,4 +1,4 @@
-import { createTag } from '../../scripts/utils.js';
+import { createTag, getLibs } from '../../scripts/utils.js';
 import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
@@ -17,10 +17,18 @@ import '../../scripts/color-shared/components/color-wheel-express/index.js';
 const ACTION_MENU_ID = 'action-menu-color-blindness';
 const HISTORY_EVENT = `${ACTION_MENU_ID}:history-index-changed`;
 
+// A palette is color-blind safe when no two colors conflict under any of the
+// simulated CVD types. Surfaced via the palette context so a theme saved from
+// here is tagged `colorblind-safe` (drives the libraries grid badge).
+function isColorBlindSafe(colors) {
+  return TYPE_ORDER.every((type) => getConflictPairs(colors, type).length === 0);
+}
+
 let layoutInstance = null;
 let controlsMenu = null;
 let stripRenderer = null;
 let railUnsub = null;
+let cachedRailController = null;
 let controllerUnsubscribe = null;
 let historyHandler = null;
 
@@ -33,6 +41,7 @@ function cleanup() {
   controllerUnsubscribe = null;
   railUnsub?.();
   railUnsub = null;
+  cachedRailController = null;
   stripRenderer?.destroy();
   stripRenderer = null;
   controlsMenu?.destroy();
@@ -66,7 +75,8 @@ export default async function decorate(block) {
     block.appendChild(section);
 
     const {
-      getResolvedPalette, getResolvedPaletteName, getBaseColor,
+      getResolvedPalette, getResolvedPaletteName, getResolvedPaletteTags,
+      getResolvedItemId, getResolvedLibraryId, getBaseColor,
     } = createColorPaletteParamApi();
     const paletteColors = getResolvedPalette();
     const baseColorHex = getBaseColor();
@@ -74,16 +84,29 @@ export default async function decorate(block) {
       ? paletteColors.findIndex((c) => c.toUpperCase() === baseColorHex.toUpperCase())
       : -1;
     const hasValidBaseColor = baseColorIndex >= 0;
+    const savedItemId = getResolvedItemId();
+    const savedLibraryId = getResolvedLibraryId();
+    const paletteName = getResolvedPaletteName() || '';
     const initialPalette = {
-      name: getResolvedPaletteName() || '',
+      name: paletteName,
       colors: paletteColors,
+      tags: getResolvedPaletteTags(),
+      accessibilityData: { colorBlindSafe: isColorBlindSafe(paletteColors) },
       ...(hasValidBaseColor && { baseColorIndex }),
+      ...(savedItemId && savedLibraryId && {
+        id: savedItemId,
+        libraryId: savedLibraryId,
+        savedColors: [...paletteColors],
+        savedName: paletteName,
+      }),
     };
 
+    const { getConfig } = await import(`${getLibs()}/utils/utils.js`);
+    const { locale } = getConfig();
     const navLinks = [
-      { id: 'palette', label: blockStrings.navCreatePalette, href: '/create/color-wheel' },
-      { id: 'contrast', label: blockStrings.navContrastChecker, href: '/create/color-contrast-analyzer' },
-      { id: 'color-blindness', label: blockStrings.navColorBlindness, href: '/create/color-accessibility' },
+      { id: 'palette', label: blockStrings.navCreatePalette, href: `${locale.contentRoot}/create/color-wheel` },
+      { id: 'contrast', label: blockStrings.navContrastChecker, href: `${locale.contentRoot}/create/color-contrast-analyzer` },
+      { id: 'color-blindness', label: blockStrings.navColorBlindness, href: `${locale.contentRoot}/create/color-accessibility` },
     ];
     const controls = [
       { id: 'undo', label: blockStrings.controlUndo },
@@ -110,6 +133,10 @@ export default async function decorate(block) {
         navLinks,
         controls,
         daaLh: 'color-blindness',
+        getName: () => initialPalette.name,
+        paletteTags: initialPalette.tags,
+        paletteId: initialPalette.id,
+        paletteLibraryId: initialPalette.libraryId,
       },
     });
 
@@ -138,6 +165,7 @@ export default async function decorate(block) {
     });
 
     let syncingFromRail = false;
+    let syncingFromController = false;
     let restoringFromHistory = false;
     let pushingState = false;
 
@@ -177,15 +205,28 @@ export default async function decorate(block) {
       });
       conflicts.setConflicts(allPairs.length > 0);
       wheelEl.conflictPairs = allPairs;
+      return allPairs.length === 0;
     };
 
     const syncRailConflicts = () => {
-      railUnsub?.();
       const rail = canvas.querySelector('color-swatch-rail');
-      if (!rail?.controller?.subscribe) return;
-      railUnsub = rail.controller.subscribe((state) => {
+      const railController = rail?.controller;
+      if (!railController?.subscribe) {
+        railUnsub?.();
+        railUnsub = null;
+        cachedRailController = null;
+        return;
+      }
+      // Controller hasn't changed — already subscribed, nothing to do.
+      if (railController === cachedRailController) return;
+      railUnsub?.();
+      cachedRailController = railController;
+      railUnsub = railController.subscribe((state) => {
+        // Skip when this fired because we pushed an update from the main controller.
+        // computeAndSetConflictPairs was already called before stripRenderer.update().
+        if (syncingFromController) return;
         const colors = (state.swatches || []).map((s) => s.hex);
-        computeAndSetConflictPairs(colors);
+        const cbSafe = computeAndSetConflictPairs(colors);
 
         const currentColors = (controller.getState()?.swatches || []).map((s) => s.hex);
         syncingFromRail = true;
@@ -197,7 +238,11 @@ export default async function decorate(block) {
           }
         });
         if (anyChanged) {
-          layoutInstance.context.set('palette', { ...initialPalette, colors });
+          layoutInstance.context.set('palette', {
+            ...initialPalette,
+            colors,
+            accessibilityData: { colorBlindSafe: cbSafe },
+          });
         }
         syncingFromRail = false;
       });
@@ -206,11 +251,16 @@ export default async function decorate(block) {
     controllerUnsubscribe = controller.subscribe((state) => {
       if (syncingFromRail) return;
       const colors = (state.swatches || []).map((s) => s.hex);
-      layoutInstance.context.set('palette', { ...initialPalette, colors });
+      const cbSafe = computeAndSetConflictPairs(colors);
+      layoutInstance.context.set('palette', {
+        ...initialPalette,
+        colors,
+        accessibilityData: { colorBlindSafe: cbSafe },
+      });
 
-      computeAndSetConflictPairs(colors);
-
+      syncingFromController = true;
       stripRenderer?.update([{ ...initialPalette, colors }]);
+      syncingFromController = false;
       syncRailConflicts();
     });
 

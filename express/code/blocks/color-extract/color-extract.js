@@ -7,10 +7,16 @@ import parseBlockConfig from './helpers/parseConfig.js';
 import createHistoryManager from './helpers/historyManager.js';
 import { createUploadDropzone } from '../../scripts/color-shared/components/image-upload/image-upload.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
-import { decorateAnalyticsAttributes, createColorPaletteParamApi, PARAM_NAME } from '../../scripts/color-shared/utils/utilities.js';
+import { decorateAnalyticsAttributes, createColorPaletteParamApi, PARAM_NAME, isMobileOrTabletViewport } from '../../scripts/color-shared/utils/utilities.js';
 import loadColorExtractPlaceholders, { DEFAULT_PLACEHOLDERS as COLOR_EXTRACT_DEFAULTS } from '../../scripts/color-shared/i18n/loadColorExtractPlaceholders.js';
 import loadImageUploadPlaceholders, { DEFAULT_PLACEHOLDERS as IMAGE_UPLOAD_DEFAULTS } from '../../scripts/color-shared/i18n/loadImageUploadPlaceholders.js';
 import loadColorSwatchRailPlaceholders, { DEFAULT_PLACEHOLDERS as COLOR_SWATCH_RAIL_DEFAULTS } from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
+import {
+  isFileDrag, preventDefaults, drawImageToCanvas,
+  samplePalette, syncMarkersToImage,
+} from '../../scripts/color-shared/utils/imageExtractUtils.js';
+import buildSuggestedImages from '../../scripts/color-shared/components/image-extract/buildSuggestedImages.js';
+import { buildDragOverlay, buildLoadingOverlay } from '../../scripts/color-shared/components/image-extract/buildExtractOverlays.js';
 
 const placeholdersPromise = Promise.all([
   loadColorExtractPlaceholders(),
@@ -49,8 +55,6 @@ function injectStylesheet(href) {
 }
 
 const LOGO = 'adobe-express-logo';
-const EXTRACT_CANVAS_MAX = 320;
-const ICON_HAND = '<svg xmlns="http://www.w3.org/2000/svg" width="65" height="65" viewBox="0 0 65 65" fill="none"><path d="M53.3013 16.6594C52.1413 16.4619 51.009 16.5983 49.9624 16.9506V14.1204C49.9624 10.3118 46.8648 7.21412 43.0562 7.21412C41.7855 7.21412 40.7714 7.56801 39.957 8.1496C38.735 6.20165 36.5836 4.89404 34.1187 4.89404C30.9798 4.89404 28.3542 7.011 27.5171 9.88331C26.784 9.6175 26.0048 9.4485 25.1812 9.4485C21.3726 9.4485 18.2749 12.5461 18.2749 16.3547V28.3677C17.2244 27.0236 15.7537 26.1111 14.0633 25.8128C12.2383 25.4827 10.407 25.8985 8.90263 26.9553C7.38871 28.0122 6.38261 29.596 6.06206 31.4114C5.74152 33.23 6.14777 35.0613 7.20463 36.5752L16.1421 49.3023C22.128 57.0401 27.7203 60.1028 35.9405 60.1028C36.1182 60.1028 36.296 60.1028 36.4769 60.0996C46.9568 60.0076 54.4121 52.2825 56.4117 39.4729L58.9476 24.6289C59.5855 20.8743 57.0527 17.3006 53.3013 16.6594ZM51.6001 38.689C49.9719 49.1277 44.4431 55.1548 36.4165 55.2246C29.5103 55.3008 25.1653 53.0029 20.0681 46.4109L11.1973 33.7791C10.8863 33.3347 10.7657 32.7952 10.8609 32.2588C10.9561 31.7256 11.2512 31.2591 11.6956 30.948C12.6128 30.3069 13.8823 30.5259 14.5298 31.4527L18.7193 37.4004C19.4968 38.5017 21.0171 38.7747 22.1152 37.9907C22.7246 37.5623 23.0476 36.9037 23.1098 36.2158C23.1332 36.2007 23.1499 36.1484 23.1499 35.9976V16.3547C23.1499 15.2344 24.0608 14.3235 25.1812 14.3235C26.3015 14.3235 27.2124 15.2344 27.2124 16.3547V28.5676C27.2124 29.9133 28.3042 31.0051 29.6499 31.0051C30.9956 31.0051 32.0874 29.9133 32.0874 28.5676V11.8003C32.0874 10.6799 32.9983 9.76904 34.1187 9.76904C35.239 9.76904 36.1499 10.6799 36.1499 11.8003V28.1487C36.1499 29.4944 37.2417 30.5862 38.5874 30.5862C39.9331 30.5862 41.0249 29.4944 41.0249 28.1487V14.1203C41.0249 13 41.9358 12.0891 43.0562 12.0891C44.1765 12.0891 45.0874 13 45.0874 14.1203V23.1308C45.0874 23.2292 45.0846 23.7547 45.0846 23.7547L44.1638 29.1452C43.9385 30.4719 44.8303 31.7319 46.157 31.9572C47.4614 32.2016 48.7405 31.2939 48.969 29.9641L50.137 23.1245C50.3242 22.0231 51.3367 21.2773 52.4824 21.4646C53.5838 21.6518 54.3296 22.7055 54.1423 23.81L51.6001 38.689Z" fill="#131313"/></svg>';
 
 /* ---------- Lightweight controller for extract ---------- */
 
@@ -137,76 +141,6 @@ function injectLogo() {
   return logo;
 }
 
-function preventDefaults(event) {
-  event.preventDefault();
-  event.stopPropagation();
-}
-
-function isFileDrag(e) {
-  return e.dataTransfer?.types?.includes('Files');
-}
-
-/**
- * Sync the markers overlay to the actual rendered image area.
- *
- * Why this exists: the img element may be larger than the visible image
- * (object-fit: contain leaves dead space), or the bgWrapper may be taller
- * than the image (min-height on mobile). Without sync, markers map to the
- * wrong area and appear shifted.
- *
- * Falls back to CSS inset: 16px if the image hasn't laid out yet.
- */
-function syncMarkersToImage(overlay, container) {
-  const img = container.querySelector('img');
-  if (!img || !img.naturalWidth || !img.naturalHeight) return;
-
-  const containerRect = container.getBoundingClientRect();
-  const imgRect = img.getBoundingClientRect();
-
-  // Guard: layout not settled yet — leave CSS fallback in place
-  if (!imgRect.width || !imgRect.height || !containerRect.width || !containerRect.height) return;
-
-  const imgRatio = img.naturalWidth / img.naturalHeight;
-  const boxW = imgRect.width;
-  const boxH = imgRect.height;
-  const boxRatio = boxW / boxH;
-
-  let renderW;
-  let renderH;
-  let offsetX;
-  let offsetY;
-
-  if (imgRatio > boxRatio) {
-    renderW = boxW;
-    renderH = boxW / imgRatio;
-    offsetX = 0;
-    offsetY = (boxH - renderH) / 2;
-  } else {
-    renderH = boxH;
-    renderW = boxH * imgRatio;
-    offsetX = (boxW - renderW) / 2;
-    offsetY = 0;
-  }
-
-  // Guard: computed size too small — image probably hasn't loaded yet
-  if (renderW < 10 || renderH < 10) return;
-
-  // Absolute children are positioned relative to the padding box.
-  // getBoundingClientRect returns the border box, so subtract the border.
-  const cs = getComputedStyle(container);
-  const borderL = parseFloat(cs.borderLeftWidth) || 0;
-  const borderT = parseFloat(cs.borderTopWidth) || 0;
-
-  const relLeft = (imgRect.left - containerRect.left - borderL) + offsetX;
-  const relTop = (imgRect.top - containerRect.top - borderT) + offsetY;
-
-  overlay.style.inset = 'auto';
-  overlay.style.left = `${relLeft}px`;
-  overlay.style.top = `${relTop}px`;
-  overlay.style.width = `${renderW}px`;
-  overlay.style.height = `${renderH}px`;
-}
-
 function getContentRows(rows) {
   const configKeys = new Set(['variant', 'maxcolors', 'enableimageupload', 'enableurlinput']);
   return rows.filter((row) => {
@@ -215,65 +149,6 @@ function getContentRows(rows) {
     const key = cells[0].textContent.trim().toLowerCase().replace(/\s+/g, '');
     return !configKeys.has(key);
   });
-}
-
-function drawImageToCanvas(image) {
-  const ratio = image.naturalHeight / image.naturalWidth || 1;
-  const width = Math.min(EXTRACT_CANVAS_MAX, image.naturalWidth);
-  const height = Math.round(width * ratio);
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-  return canvas;
-}
-
-function toHex(r, g, b) {
-  /* eslint-disable no-bitwise */
-  return `#${((1 << 24) | (r << 16) | (g << 8) | b).toString(16).slice(1).toUpperCase()}`;
-  /* eslint-enable no-bitwise */
-}
-
-function samplePalette(context, width, height, count) {
-  const imageData = context.getImageData(0, 0, width, height).data;
-  const pixels = imageData.length / 4;
-  const step = Math.max(1, Math.floor(pixels / count));
-  const colors = [];
-  for (let i = 0; i < count; i += 1) {
-    const offset = Math.min(i * step * 4, imageData.length - 4);
-    colors.push(toHex(imageData[offset], imageData[offset + 1], imageData[offset + 2]));
-  }
-  return colors;
-}
-
-function extractPaletteFromImageElement(image, swatchCount) {
-  if (!image?.naturalWidth || !image?.naturalHeight) return null;
-  try {
-    const maxWidth = 160;
-    const ratio = image.naturalHeight / image.naturalWidth || 1;
-    const width = Math.min(maxWidth, image.naturalWidth);
-    const height = Math.round(width * ratio);
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = height;
-    canvas.getContext('2d').drawImage(image, 0, 0, width, height);
-    return samplePalette(canvas.getContext('2d'), width, height, swatchCount);
-  } catch { return null; }
-}
-
-function applyPaletteToChips(colors, chips) {
-  if (!colors || !chips?.length) return;
-  colors.forEach((hex, i) => { if (chips[i]) chips[i].style.background = hex; });
-}
-
-function getPictureSource(picture) {
-  const img = picture?.querySelector('img');
-  const source = picture?.querySelector('source');
-  const directSrc = img?.currentSrc || img?.getAttribute('src') || img?.dataset?.src || img?.dataset?.lazySrc;
-  if (directSrc) return directSrc;
-  const srcset = source?.getAttribute('srcset') || img?.getAttribute('srcset') || img?.dataset?.srcset;
-  if (!srcset) return '';
-  return srcset.split(',')[0].trim().split(' ')[0];
 }
 
 /* ---------- Dropzone (uses shared createUploadDropzone) ---------- */
@@ -330,109 +205,22 @@ function createColorExtractDropzone(block, config, onImageReady, strings = {}) {
     });
   }
 
+  // The file input's change event calls the internal handleFile directly (bypassing the
+  // wrapped dz.handleFile), so block.is-loading is never set via that path. This covers
+  // both "Upload your image" click and the toolbar's "Replace image" button, both of
+  // which trigger the OS file picker via dz.input.click().
+  // Capture phase on the container fires before the input's own listener, which does
+  // input.value = '' — clearing input.files before any later same-element handlers see it.
+  dz.container.addEventListener('change', (e) => {
+    if (e.target !== dz.input) return;
+    const file = e.target.files?.[0];
+    if (file?.type?.startsWith('image/')) {
+      block.classList.add('is-loading');
+      emitBlockEvent(block, EVENTS.IMAGE_UPLOAD, { file });
+    }
+  }, { capture: true });
+
   return dz;
-}
-
-/* ---------- Suggested images ---------- */
-
-function buildSuggestedImages(row, onSelect, strings = COLOR_EXTRACT_DEFAULTS) {
-  const wrapper = createTag('div', { class: 'color-extract-suggestions' });
-  const label = row?.children?.[0] || createTag('div', {}, strings.noImageTryOurs);
-  label.classList.add('color-extract-suggestions-label');
-  wrapper.append(label);
-
-  const list = row?.children?.[1] || createTag('div');
-  list.classList.add('color-extract-suggestions-list');
-
-  const pictures = [...(row?.querySelectorAll('picture') || [])];
-  list.replaceChildren();
-  pictures.forEach((picture) => {
-    const button = createTag('button', {
-      class: 'color-extract-suggestion',
-      type: 'button',
-      'aria-label': strings.useThisImage,
-      'aria-pressed': 'false',
-    });
-    decorateAnalyticsAttributes(button, { linkLabel: 'Use this image' });
-    const preview = createTag('div', { class: 'color-extract-suggestion-preview' });
-    const palette = createTag('div', { class: 'color-extract-suggestion-bar' }, [
-      createTag('span', { class: 'color-extract-suggestion-chip is-1' }),
-      createTag('span', { class: 'color-extract-suggestion-chip is-2' }),
-      createTag('span', { class: 'color-extract-suggestion-chip is-3' }),
-      createTag('span', { class: 'color-extract-suggestion-chip is-4' }),
-      createTag('span', { class: 'color-extract-suggestion-chip is-5' }),
-    ]);
-    const src = getPictureSource(picture);
-    preview.append(picture.cloneNode(true), palette);
-    button.append(preview);
-    const chips = [...palette.querySelectorAll('.color-extract-suggestion-chip')];
-    const previewImage = preview.querySelector('img');
-    if (previewImage) previewImage.draggable = false;
-    const hydratePalette = async () => {
-      const imgEl = previewImage?.naturalWidth ? previewImage : null;
-      const loadImg = () => {
-        if (imgEl) return Promise.resolve(imgEl);
-        if (!src) return Promise.resolve(null);
-        return new Promise((resolve) => {
-          const img = new Image();
-          img.crossOrigin = 'anonymous';
-          img.onload = () => resolve(img);
-          img.onerror = () => resolve(null);
-          img.src = src;
-        });
-      };
-      const img = await loadImg();
-      if (!img) return;
-      try {
-        const maxWidth = EXTRACT_CANVAS_MAX;
-        const ratio = img.naturalHeight / img.naturalWidth || 1;
-        const w = Math.min(maxWidth, img.naturalWidth);
-        const h = Math.round(w * ratio);
-        const canvas = document.createElement('canvas');
-        canvas.width = w;
-        canvas.height = h;
-        const context = canvas.getContext('2d');
-        context.drawImage(img, 0, 0, w, h);
-        const imageData = context.getImageData(0, 0, w, h);
-        const { extractColorsFromImage } = await import('./helpers/extractWorker.js');
-        const result = await extractColorsFromImage(imageData, w, h, chips.length);
-        applyPaletteToChips(result.colors, chips);
-      } catch (err) {
-        window.lana?.log(`Color Extract: extraction failed — ${err?.message}`, { tags: 'color-extract', severity: 'error' });
-        applyPaletteToChips(extractPaletteFromImageElement(img, chips.length), chips);
-        await showExtractionError();
-      }
-    };
-    const scheduleHydrate = () => {
-      if (window.requestIdleCallback) {
-        requestIdleCallback(hydratePalette, { timeout: 8000 });
-      } else {
-        setTimeout(hydratePalette, 100);
-      }
-    };
-    if (previewImage?.complete && previewImage.naturalWidth) scheduleHydrate();
-    else if (previewImage) previewImage.addEventListener('load', scheduleHydrate, { once: true });
-    else scheduleHydrate();
-
-    button.addEventListener('click', () => {
-      list.querySelectorAll('.color-extract-suggestion.is-selected').forEach((item) => {
-        item.classList.remove('is-selected');
-        item.setAttribute('aria-pressed', 'false');
-      });
-      button.classList.add('is-selected');
-      button.setAttribute('aria-pressed', 'true');
-      const img = preview.querySelector('img');
-      if (img?.complete && img.naturalWidth) {
-        onSelect(img, src);
-      } else if (img) {
-        img.addEventListener('load', () => onSelect(img, src), { once: true });
-      }
-    });
-    list.append(button);
-  });
-
-  wrapper.append(list);
-  return wrapper;
 }
 
 /* ---------- Edit stage (palette) ---------- */
@@ -478,6 +266,7 @@ function buildEditStage(copyRow, imageRow) {
 function createFloatingToolbarMount(controller, variant) {
   const container = createTag('div', { class: 'color-extract-floating-toolbar-mount' });
   let toolbarHandle = null;
+  let mqCleanup = null;
   let mounted = false;
 
   function sync() {
@@ -487,6 +276,8 @@ function createFloatingToolbarMount(controller, variant) {
   }
 
   function destroy() {
+    mqCleanup?.();
+    mqCleanup = null;
     toolbarHandle?.destroy?.();
     toolbarHandle = null;
     mounted = false;
@@ -509,15 +300,27 @@ function createFloatingToolbarMount(controller, variant) {
         ...(variant === VARIANTS.GRADIENT ? { angle: 90 } : {}),
       };
 
+      const initialVariant = isMobileOrTabletViewport() ? 'sticky' : 'sticky-on-scroll';
+
       toolbarHandle = await initFloatingToolbar(container, {
         type: variant === VARIANTS.GRADIENT ? 'gradient' : 'palette',
-        variant: 'sticky',
+        variant: initialVariant,
         standaloneAppearance: 'raised',
         palette,
         showEdit: true,
         showPaletteName: true,
         editPaletteName: true,
       });
+
+      const mq = window.matchMedia('(max-width: 1199px)');
+      const onBreakpointChange = (e) => {
+        toolbarHandle?.setVariant(e.matches ? 'sticky' : 'sticky-on-scroll', {
+          reserveContainer: container,
+          reserveSpace: false,
+        });
+      };
+      mq.addEventListener('change', onBreakpointChange);
+      mqCleanup = () => mq.removeEventListener('change', onBreakpointChange);
 
       controller.subscribe(() => sync());
     } catch (err) {
@@ -550,75 +353,96 @@ function buildLandingStage(imageRow, strings = COLOR_EXTRACT_DEFAULTS) {
   return { stage, content };
 }
 
-function buildDragOverlay(strings = COLOR_EXTRACT_DEFAULTS) {
-  const overlay = createTag('div', { class: 'color-extract-drag-overlay', 'aria-hidden': 'true' });
-  const icon = createTag('div', { class: 'color-extract-drag-icon' }, ICON_HAND);
-  overlay.append(icon);
-  overlay.append(createTag('p', { class: 'color-extract-drag-text' }, strings.dropOverlayText));
-  return overlay;
-}
-
-function buildLoadingOverlay(strings = COLOR_EXTRACT_DEFAULTS) {
-  const overlay = createTag('div', { class: 'color-extract-loading-overlay', 'aria-live': 'polite' });
-  const content = createTag('div', { class: 'color-extract-loading-content' });
-  const label = createTag('p', { class: 'color-extract-loading-label' }, strings.uploadingImage);
-  const track = createTag('div', { class: 'color-extract-loading-track' });
-  const bar = createTag('div', { class: 'color-extract-loading-bar' });
-  track.append(bar);
-  content.append(label, track);
-  overlay.append(content);
-  return overlay;
-}
-
 /* ---------- Shared drag wiring ---------- */
 
 function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) {
   const ac = new AbortController();
   const { signal } = ac;
-  let dragCounter = 0;
   const clearDrag = () => {
-    dragCounter = 0;
     block.classList.remove('is-dragging');
   };
   const isBlockInViewport = () => {
     const rect = block.getBoundingClientRect();
     return rect.bottom > 0 && rect.top < window.innerHeight;
   };
+  // On macOS Chrome, dataTransfer.types is empty during dragleave for cross-monitor
+  // external file drags, so isFileDrag() returns false and the overlay gets stuck.
+  // Debounce clearDrag on null-relatedTarget dragleave: cancel if dragover fires within
+  // 200ms (drag still in browser); otherwise clear. Shadow DOM crossings also fire
+  // dragleave with null relatedTarget — the follow-up dragover cancels those.
+  let clearDragTimer = null;
+  const cancelClear = () => {
+    if (clearDragTimer !== null) {
+      clearTimeout(clearDragTimer);
+      clearDragTimer = null;
+    }
+  };
+  const scheduleClear = () => {
+    cancelClear();
+    clearDragTimer = setTimeout(() => {
+      clearDragTimer = null;
+      clearDrag();
+    }, 200);
+  };
+
+  // Hoist before event listeners so the capture drop handler can reference it
+  const dropzoneEl = dropzone.container?.querySelector('.image-upload-dropzone');
+
+  // Suppress drag-and-drop while the OS file picker is open. input.click() triggers
+  // a click event on the input; window.focus fires when the picker is dismissed.
+  let isPickerOpen = false;
+  dropzone.input?.addEventListener('click', () => { isPickerOpen = true; }, { signal });
+  dropzone.input?.addEventListener('change', () => { isPickerOpen = false; }, { signal });
+  window.addEventListener('focus', () => { isPickerOpen = false; }, { signal });
+
   window.addEventListener('dragenter', (e) => {
+    if (isPickerOpen) return;
+    cancelClear();
     if (isBlockInViewport() && isFileDrag(e)) {
       preventDefaults(e);
-      dragCounter += 1;
       block.classList.add('is-dragging');
     }
   }, { signal });
   window.addEventListener('dragover', (e) => {
+    cancelClear();
     if (isBlockInViewport() && isFileDrag(e)) {
       preventDefaults(e);
     }
   }, { signal });
   window.addEventListener('dragleave', (e) => {
     preventDefaults(e);
-    if (isFileDrag(e)) {
-      dragCounter -= 1;
-      if (dragCounter <= 0) clearDrag();
-    }
+    if (!e.relatedTarget) scheduleClear();
   }, { signal });
   window.addEventListener('dragend', (e) => {
     preventDefaults(e);
+    cancelClear();
     clearDrag();
   }, { signal });
+  // Use capture phase so Spectrum web components calling stopPropagation on 'drop'
+  // in the edit stage cannot block this handler. Capture fires top-down before any
+  // element's bubble handler. We must NOT call stopPropagation here — the event must
+  // continue down so the dropzone's own handler can process the file. When the drop
+  // landed on the dropzone itself we skip handleFile to avoid double-processing.
   window.addEventListener('drop', (e) => {
-    if (!isBlockInViewport() || !isFileDrag(e)) {
+    cancelClear();
+    if (isPickerOpen || !isBlockInViewport() || !isFileDrag(e)) {
       clearDrag();
       return;
     }
-    preventDefaults(e);
-    dropzone.handleFile(e.dataTransfer.files[0]);
+    e.preventDefault(); // allow drop — no stopPropagation, event must reach the target
+    const onDropzone = !!dropzoneEl && (e.target === dropzoneEl || dropzoneEl.contains(e.target));
+    if (!onDropzone) dropzone.handleFile(e.dataTransfer.files[0]);
     setTimeout(clearDrag, 200);
+  }, { capture: true, signal });
+  window.addEventListener('blur', () => {
+    cancelClear();
+    clearDrag();
   }, { signal });
-  window.addEventListener('blur', clearDrag, { signal });
   document.addEventListener('visibilitychange', () => {
-    if (document.hidden) clearDrag();
+    if (document.hidden) {
+      cancelClear();
+      clearDrag();
+    }
   }, { signal });
   // Sync is-dragging and is-loading from block to body-level overlays
   const syncObserver = new MutationObserver(() => {
@@ -628,6 +452,7 @@ function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) 
   syncObserver.observe(block, { attributes: true, attributeFilter: ['class'] });
   const detach = () => {
     ac.abort();
+    cancelClear();
     if (dragOverlay) dragOverlay.remove();
     if (loadingOverlay) loadingOverlay.remove();
     syncObserver.disconnect();
@@ -643,6 +468,28 @@ function attachWindowDragHandlers(block, dropzone, dragOverlay, loadingOverlay) 
 }
 
 /* ---------- Palette variant ---------- */
+
+function createGoToLanding(block, getDropzone, s, floatingToolbar, history, onReset) {
+  return function goToLanding() {
+    block.classList.remove('has-image', 'is-loading');
+    getDropzone().container.classList.remove('has-image');
+    if (s.markerResizeObserver) s.markerResizeObserver.disconnect();
+    if (s.resizeHandler) window.removeEventListener('resize', s.resizeHandler);
+    if (s.markers) {
+      s.markers.destroy();
+      s.markers = null;
+    }
+    floatingToolbar.destroy();
+    history.clear();
+    s.currentCanvas = null;
+    s.currentSrc = null;
+    onReset?.();
+    block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
+      el.classList.remove('is-selected');
+      el.setAttribute('aria-pressed', 'false');
+    });
+  };
+}
 
 function hoistLandingDecorations(block, landing) {
   const marqueeWrapper = block.closest('.color-extract-marquee-wrapper');
@@ -731,7 +578,7 @@ function renderColorVariant(block, rows, config, strings = {}) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     try {
-      const { extractColorsFromImage } = await import('./helpers/extractWorker.js');
+      const { extractColorsFromImage } = await import('../../scripts/color-shared/utils/extractWorker.js');
       const result = await extractColorsFromImage(
         imageData,
         canvas.width,
@@ -804,30 +651,14 @@ function renderColorVariant(block, rows, config, strings = {}) {
 
   const floatingToolbar = createFloatingToolbarMount(controller, VARIANTS.PALETTE);
 
-  const popstateAc = new AbortController();
-
-  function goToLanding() {
-    block.classList.remove('has-image', 'is-loading');
-    if (markerResizeObserver) markerResizeObserver.disconnect();
-    if (resizeHandler) window.removeEventListener('resize', resizeHandler);
-    if (markers) {
-      markers.destroy();
-      markers = null;
-    }
-    floatingToolbar.destroy();
-    history.clear();
-    currentCanvas = null;
-    currentSrc = null;
-    popstateAc.abort();
-    block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
-      el.classList.remove('is-selected');
-      el.setAttribute('aria-pressed', 'false');
-    });
-  }
-
   async function onImageReady(image, src) {
-    window.history.pushState({ colorExtract: 'results' }, '');
+    if (window.history.state?.colorExtract === 'results') {
+      window.history.replaceState({ colorExtract: 'results' }, '');
+    } else {
+      window.history.pushState({ colorExtract: 'results' }, '');
+    }
     currentSrc = src;
+    try { sessionStorage.setItem('color-extract-image-src', src); } catch { /* quota exceeded — image won't be restored after sign-in */ }
     edit.setBackground(src);
     history.clear();
 
@@ -854,6 +685,17 @@ function renderColorVariant(block, rows, config, strings = {}) {
     { colorExtractStrings, imageUploadStrings },
   );
 
+  const goToLanding = createGoToLanding(block, () => dropzone, {
+    get markers() { return markers; },
+    set markers(v) { markers = v; },
+    get markerResizeObserver() { return markerResizeObserver; },
+    get resizeHandler() { return resizeHandler; },
+    get currentCanvas() { return currentCanvas; },
+    set currentCanvas(v) { currentCanvas = v; },
+    get currentSrc() { return currentSrc; },
+    set currentSrc(v) { currentSrc = v; },
+  }, floatingToolbar, history);
+
   async function addColorToImage() {
     if (!currentCanvas || !markers) return;
     const totalLimit = DEFAULTS.MAX_TOTAL_COLORS;
@@ -877,12 +719,18 @@ function renderColorVariant(block, rows, config, strings = {}) {
   }
 
   function handleSuggestionClick(imgEl, src) {
-    block.classList.add('has-image');
-    onImageReady(imgEl, src);
+    dropzone.handleUrl(src);
   }
 
   const suggestions = resolvedConfig.enableUrlInput
-    ? buildSuggestedImages(rows[0], handleSuggestionClick, colorExtractStrings)
+    ? buildSuggestedImages(rows[0], handleSuggestionClick, {
+      strings: colorExtractStrings,
+      onError: async (err) => {
+        window.lana?.log(`Color Extract: extraction failed — ${err?.message}`, { tags: 'color-extract', severity: 'error' });
+        await showExtractionError();
+      },
+      decorateButton: (btn) => decorateAnalyticsAttributes(btn, { linkLabel: 'Use this image' }),
+    })
     : null;
   const landing = buildLandingStage(rows[2], colorExtractStrings);
   const dragOverlay = buildDragOverlay(colorExtractStrings);
@@ -911,7 +759,12 @@ function renderColorVariant(block, rows, config, strings = {}) {
       const railAdapter = createSwatchRailAdapter(controller, {
         orientation: 'stacked',
         swatchFeatures: {
-          copy: true, hexCode: true, trash: true, minSwatches: 2, editColorDisabled: true,
+          copy: true,
+          hexCode: true,
+          trash: true,
+          minSwatches: 2,
+          editColorDisabled: true,
+          copyFromHex: false,
         },
         strings: colorSwatchRailStrings,
       });
@@ -980,7 +833,21 @@ function renderColorVariant(block, rows, config, strings = {}) {
     const paletteName = getResolvedPaletteName();
     controller.setState({ swatches: colors.map((hex) => ({ hex })), baseColorIndex: 0 });
     if (paletteName) controller.setMetadata({ name: paletteName });
-    edit.bgWrapper.replaceWith(dropzone.container);
+
+    const storedSrc = sessionStorage.getItem('color-extract-image-src');
+    sessionStorage.removeItem('color-extract-image-src');
+    if (storedSrc) {
+      const img = new Image();
+      img.onload = async () => {
+        currentSrc = storedSrc;
+        edit.setBackground(storedSrc);
+        currentCanvas = drawImageToCanvas(img);
+        await setupMarkers(currentCanvas);
+      };
+      img.src = storedSrc;
+    } else {
+      edit.bgWrapper.replaceWith(dropzone.container);
+    }
     block.classList.add('has-image');
     window.history.replaceState({ colorExtract: 'results' }, '');
     floatingToolbar.mount();
@@ -990,7 +857,7 @@ function renderColorVariant(block, rows, config, strings = {}) {
     if (block.classList.contains('has-image') && e.state?.colorExtract !== 'results') {
       goToLanding();
     }
-  }, { signal: popstateAc.signal });
+  });
 }
 
 /* ---------- Gradient edit stage ---------- */
@@ -1175,7 +1042,7 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
     const ctx = canvas.getContext('2d');
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     try {
-      const { extractColorsFromImage } = await import('./helpers/extractWorker.js');
+      const { extractColorsFromImage } = await import('../../scripts/color-shared/utils/extractWorker.js');
       const result = await extractColorsFromImage(
         imageData,
         canvas.width,
@@ -1255,31 +1122,14 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
   }
 
   const floatingToolbar = createFloatingToolbarMount(swatchController, VARIANTS.GRADIENT);
-  const popstateAc = new AbortController();
-
-  function goToLanding() {
-    block.classList.remove('has-image', 'is-loading');
-    if (markerResizeObserver) markerResizeObserver.disconnect();
-    if (resizeHandler) window.removeEventListener('resize', resizeHandler);
-    if (markers) {
-      markers.destroy();
-      markers = null;
-    }
-    floatingToolbar.destroy();
-    history.clear();
-    currentCanvas = null;
-    currentSrc = null;
-    popstateAc.abort();
-    gradientEditor.setGradient(initialGradient);
-    block.querySelectorAll('.color-extract-suggestion.is-selected').forEach((el) => {
-      el.classList.remove('is-selected');
-      el.setAttribute('aria-pressed', 'false');
-    });
-  }
-
   async function onImageReady(image, src) {
-    window.history.pushState({ colorExtract: 'results' }, '');
+    if (window.history.state?.colorExtract === 'results') {
+      window.history.replaceState({ colorExtract: 'results' }, '');
+    } else {
+      window.history.pushState({ colorExtract: 'results' }, '');
+    }
     currentSrc = src;
+    try { sessionStorage.setItem('color-extract-image-src', src); } catch { /* quota exceeded — image won't be restored after sign-in */ }
     edit.setBackground(src);
     history.clear();
 
@@ -1304,6 +1154,17 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
     onImageReady,
     { colorExtractStrings, imageUploadStrings },
   );
+
+  const goToLanding = createGoToLanding(block, () => dropzone, {
+    get markers() { return markers; },
+    set markers(v) { markers = v; },
+    get markerResizeObserver() { return markerResizeObserver; },
+    get resizeHandler() { return resizeHandler; },
+    get currentCanvas() { return currentCanvas; },
+    set currentCanvas(v) { currentCanvas = v; },
+    get currentSrc() { return currentSrc; },
+    set currentSrc(v) { currentSrc = v; },
+  }, floatingToolbar, history, () => gradientEditor.setGradient(initialGradient));
 
   async function addColorToImage() {
     if (!currentCanvas || !markers || !gradientEditor) return;
@@ -1341,12 +1202,19 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
   }
 
   function handleSuggestionClick(imgEl, src) {
-    block.classList.add('has-image');
-    onImageReady(imgEl, src);
+    dropzone.handleUrl(src);
   }
 
   const suggestions = resolvedConfig.enableUrlInput
-    ? buildSuggestedImages(rows[0], handleSuggestionClick, colorExtractStrings)
+    ? buildSuggestedImages(rows[0], handleSuggestionClick, {
+      strings: colorExtractStrings,
+      variant: 'gradient',
+      onError: async (err) => {
+        window.lana?.log(`Color Extract: extraction failed — ${err?.message}`, { tags: 'color-extract', severity: 'error' });
+        await showExtractionError();
+      },
+      decorateButton: (btn) => decorateAnalyticsAttributes(btn, { linkLabel: 'Use this image' }),
+    })
     : null;
   const landing = buildLandingStage(rows[2], colorExtractStrings);
   const dragOverlay = buildDragOverlay(colorExtractStrings);
@@ -1373,7 +1241,12 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
       const railAdapter = createSwatchRailAdapter(swatchController, {
         orientation: 'stacked',
         swatchFeatures: {
-          copy: true, hexCode: true, trash: true, minSwatches: 2, editColorDisabled: true,
+          copy: true,
+          hexCode: true,
+          trash: true,
+          minSwatches: 2,
+          editColorDisabled: true,
+          copyFromHex: false,
         },
         strings: colorSwatchRailStrings,
       });
@@ -1448,7 +1321,21 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
     const gradientData = { type: 'linear', angle: 90, colorStops };
     gradientEditor.setGradient(gradientData);
     syncSwatchesFromGradient(gradientData);
-    edit.bgWrapper.replaceWith(dropzone.container);
+
+    const storedSrc = sessionStorage.getItem('color-extract-image-src');
+    sessionStorage.removeItem('color-extract-image-src');
+    if (storedSrc) {
+      const img = new Image();
+      img.onload = async () => {
+        currentSrc = storedSrc;
+        edit.setBackground(storedSrc);
+        currentCanvas = drawImageToCanvas(img);
+        await setupMarkers(currentCanvas);
+      };
+      img.src = storedSrc;
+    } else {
+      edit.bgWrapper.replaceWith(dropzone.container);
+    }
     block.classList.add('has-image');
     window.history.replaceState({ colorExtract: 'results' }, '');
     floatingToolbar.mount();
@@ -1458,11 +1345,12 @@ async function renderGradientVariant(block, rows, config, strings = {}) {
     if (block.classList.contains('has-image') && e.state?.colorExtract !== 'results') {
       goToLanding();
     }
-  }, { signal: popstateAc.signal });
+  });
 }
 
 export default async function decorate(block) {
   injectStylesheet(new URL('../../scripts/color-shared/components/image-upload/image-upload.css', import.meta.url).href);
+  injectStylesheet(new URL('../../scripts/color-shared/components/image-extract/buildExtractOverlays.css', import.meta.url).href);
   const rows = [...block.children];
   const config = parseBlockConfig(rows);
   const contentRows = getContentRows(rows);
@@ -1485,4 +1373,17 @@ export default async function decorate(block) {
     await renderGradientVariant(block, contentRows, config, strings);
   }
   trackColorBlockLoad('color-extract');
+
+  const syncFloatingCta = () => {
+    const inResults = block.classList.contains('has-image');
+    document.querySelectorAll('.floating-button-wrapper').forEach((el) => {
+      el.classList.toggle('floating-button--hidden', inResults);
+      el.toggleAttribute('aria-hidden', inResults);
+      el.toggleAttribute('inert', inResults);
+    });
+  };
+
+  const ctaObserver = new MutationObserver(syncFloatingCta);
+  ctaObserver.observe(block, { attributeFilter: ['class'] });
+  syncFloatingCta();
 }

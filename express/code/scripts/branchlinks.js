@@ -176,7 +176,6 @@ export async function getTrackingAppendedURL(url, options = {}) {
     }
   }
 
-  // eslint-disable-next-line chai-friendly/no-unused-expressions
   experimentStatus === 'active' && setParams('expid', `${experiment.id}-${experiment.selectedVariant}`);
 
   appending.search = urlParams.toString();

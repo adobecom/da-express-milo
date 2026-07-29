@@ -184,12 +184,10 @@ main .section:has(.how-to-v2) .content em {
   margin-right: auto;
 }
 
-@media (min-width: 400px) {
-  main:has(.how-to-v2) .content {
-    max-width: unset;
-    margin-left: 20px;
-    margin-right: 20px;
-  }
+main:has(.how-to-v2) .content {
+  max-width: unset;
+  margin-left: 20px;
+  margin-right: 20px;
 }
 
 @media (min-width: 768px) {

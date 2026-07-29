@@ -233,6 +233,7 @@ export const style = css`
         --mod-textfield-border-color: var(--color-gray-300-variant);
         --mod-textfield-background-color: var(--color-white);
         --mod-textfield-border-color-hover: var(--color-gray-400-variant);
+        --mod-textfield-placeholder-font-size: var(--body-font-size-m);
     }
 
     .ce-sr-only {

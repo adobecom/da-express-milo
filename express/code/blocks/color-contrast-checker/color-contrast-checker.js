@@ -1,4 +1,4 @@
-import { createTag } from '../../scripts/utils.js';
+import { createTag, getLibs } from '../../scripts/utils.js';
 import { trackColorBlockLoad } from '../../scripts/instrument.js';
 import createColorToolLayout from '../../scripts/color-shared/shell/layouts/createColorToolLayout.js';
 import { createContrastRenderer } from './factory/createContrastRenderer.js';
@@ -23,9 +23,15 @@ function getDefaultConfig() {
 }
 
 function getPalette() {
-  const { getResolvedPalette, getResolvedPaletteName } = createColorPaletteParamApi();
+  const {
+    getResolvedPalette, getResolvedPaletteName, getResolvedPaletteTags,
+    getResolvedItemId, getResolvedLibraryId,
+  } = createColorPaletteParamApi();
   const colors = getResolvedPalette();
   const name = getResolvedPaletteName() || '';
+  const tags = getResolvedPaletteTags();
+  const savedItemId = getResolvedItemId();
+  const savedLibraryId = getResolvedLibraryId();
 
   const dataService = createContrastDataService();
   const { brightest, darkest } = dataService.findBrightestAndDarkest(colors);
@@ -35,13 +41,22 @@ function getPalette() {
     background: darkest || colors[1],
     colors,
     name,
+    tags,
+    ...(savedItemId && savedLibraryId && {
+      id: savedItemId,
+      libraryId: savedLibraryId,
+      savedColors: [...colors],
+      savedName: name,
+    }),
   };
 }
 
 async function mountContrastChecker(slot, { config, layout, initialPalette }) {
   const container = createTag('div', { class: 'color-contrast-checker-container' });
   const dataService = createContrastDataService();
-  const { foreground, background, name, colors } = initialPalette;
+  const {
+    foreground, background, name, colors, tags, id, libraryId, savedColors, savedName,
+  } = initialPalette;
   const { context, actionMenu } = layout;
 
   const rendererConfig = {
@@ -84,6 +99,10 @@ async function mountContrastChecker(slot, { config, layout, initialPalette }) {
       selectedForeground: detail.foreground,
       selectedBackground: detail.background,
       name,
+      tags,
+      ...(id && libraryId && {
+        id, libraryId, savedColors, savedName,
+      }),
       accessibilityData: { wcagLevel: dataService.getWCAGLevel(detail) },
     });
   });
@@ -140,11 +159,13 @@ export default async function decorate(block) {
   block.dataset.blockStatus = 'loading';
 
   const { preview } = parseContent(block);
-  const [strings, colorEditStrings, baseColorStrings] = await Promise.all([
+  const [{ getConfig }, strings, colorEditStrings, baseColorStrings] = await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
     loadContrastCheckerPlaceholders(),
     loadColorEditPlaceholders(),
     loadBaseColorPlaceholders(),
   ]);
+  const { locale } = getConfig();
 
   const destroyInstance = () => {
     checkerInstance?.destroy();
@@ -173,6 +194,14 @@ export default async function decorate(block) {
       palette: {
         colors: initialPalette.colors,
         name: initialPalette.name,
+        tags: initialPalette.tags,
+        ...(initialPalette.id && initialPalette.libraryId
+          && {
+            id: initialPalette.id,
+            libraryId: initialPalette.libraryId,
+            savedColors: initialPalette.savedColors,
+            savedName: initialPalette.savedName,
+          }),
       },
       toolbar: {
         daaLh: 'color-contrast-checker',
@@ -182,11 +211,14 @@ export default async function decorate(block) {
         editPaletteName: false,
       },
       actionMenu: {
-        ...createDefaultActionMenuConfig(strings),
+        ...createDefaultActionMenuConfig(strings, locale.contentRoot),
         id: 'color-contrast-checker-menu',
         type: isMobileOrTabletViewport() ? 'nav-only' : 'full',
         activeId: 'contrast',
         getName: () => initialPalette.name,
+        paletteTags: initialPalette.tags,
+        paletteId: initialPalette.id,
+        paletteLibraryId: initialPalette.libraryId,
       },
     });
 

@@ -99,7 +99,7 @@ export function themeToGradient(theme) {
 
   return {
     id: theme.id,
-    name: theme.name || 'Unnamed Theme',
+    name: (theme.name || 'Unnamed Theme').replace(/\\u([0-9A-Fa-f]{4})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16))),
     type: 'linear',
     angle: 90,
     colorStops,
