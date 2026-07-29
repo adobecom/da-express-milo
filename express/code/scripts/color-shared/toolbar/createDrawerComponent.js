@@ -44,6 +44,10 @@ const DRAWER_DEFAULTS = {
   tags: 'Tags',
   tagsPlaceholder: 'Enter or select from below',
   saveToLibrary: 'Save to library',
+  makeCopy: 'Make a copy',
+  saveChanges: 'Save changes',
+  changesSaved: 'Changes saved',
+  saveChangesFailed: 'Unable to save changes. Please try again.',
   signInToSave: 'Sign in to save',
   myLibrary: 'My library',
   createNewLibrary: 'Create a new library',
@@ -71,6 +75,7 @@ const DRAWER_DEFAULTS = {
   libraryCreatedToast: "Library '{{name}}' created",
   createLibraryFailedToast: 'Something went wrong. Try again.',
   viewInLibrary: 'View in Library',
+  viewInLibraryHref: '/mythemes',
 };
 
 const DRAWER_CSS_PATH = 'scripts/color-shared/toolbar/drawer.css';
@@ -202,6 +207,7 @@ function setupCreateLibraryHandler(
   closePopover,
   onLibraryCreated,
   t,
+  onChange = () => {},
 ) {
   createBtn.addEventListener('click', async (e) => {
     e.stopPropagation();
@@ -228,6 +234,7 @@ function setupCreateLibraryHandler(
         createInput.value = '';
         renderMenuItems();
         closePopover();
+        onChange();
         announceToScreenReader(interpolate(t.libraryCreated, { name: newLib.name }));
         showExpressToast({
           variant: 'positive',
@@ -269,6 +276,7 @@ function createLibraryPickerField(
   isSignedIn,
   onLibraryCreated,
   t,
+  onChange = () => {},
 ) {
   if (!isSignedIn) {
     return createDisabledLibraryPicker(label, t);
@@ -311,6 +319,7 @@ function createLibraryPickerField(
     menu.querySelectorAll('sp-menu-item').forEach((mi) => mi.removeAttribute('selected'));
     item.setAttribute('selected', '');
     closePopover();
+    onChange();
   }
 
   function renderMenuItems() {
@@ -354,6 +363,7 @@ function createLibraryPickerField(
     closePopover,
     onLibraryCreated,
     t,
+    onChange,
   );
 
   renderMenuItems();
@@ -467,7 +477,7 @@ function positionDesktopPanel(panel, anchor) {
 
 /* ── Theme Payload ────────────────────────────────────────────── */
 
-function parseHexToRgb(hex) {
+export function parseHexToRgb(hex) {
   if (!hex || typeof hex !== 'string') return { r: 0, g: 0, b: 0 };
   let h = hex.startsWith('#') ? hex.slice(1) : hex;
   if (h.length === 3) h = h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
@@ -478,7 +488,7 @@ function parseHexToRgb(hex) {
   };
 }
 
-function buildThemePayload(palette, formData, t) {
+export function buildThemePayload(palette, formData, t) {
   const colors = palette?.colors ?? [];
   return {
     name: formData.name || palette?.name || t.untitledTheme,
@@ -494,6 +504,10 @@ function buildThemePayload(palette, formData, t) {
           profileName: COLOR_PROFILE,
         }]),
         tags: formData.tags ?? [],
+        // Stored inside the representation data (not top-level) because the CC
+        // Library API only round-trips fields nested in `colortheme#data`.
+        // Drives the "Color blind safe" badge in the libraries grid.
+        ...(palette?.accessibilityData && { accessibilityData: palette.accessibilityData }),
       },
     }],
   };
@@ -549,6 +563,7 @@ async function executeSaveToLibrary(palette, palType, formData, ccLibProvider, t
         color: hex,
         position: arr.length > 1 ? i / (arr.length - 1) : 0,
       })),
+      tags: formData.tags ?? [],
     });
     await ccLibProvider.saveGradient(formData.libraryId, gradientPayload);
   } else {
@@ -568,8 +583,60 @@ async function executeSaveToLibrary(palette, palType, formData, ccLibProvider, t
   return { success: true, label };
 }
 
+// Updates the originally-saved theme instead of creating a new library element.
+async function executeUpdateExistingItem(palette, palType, formData, ccLibProvider, t) {
+  const isContrast = palType === 'contrast';
+  const colors = palette?.colors ?? [];
+  let savePalette = palette;
+  if (isContrast && colors.length === 2) {
+    const [fg, bg] = colors;
+    savePalette = { ...palette, colors: [fg, fg, bg, bg, bg] };
+  }
+  const payload = buildThemePayload(savePalette, formData, t);
+  if (isContrast && palette?.accessibilityData) {
+    payload.accessibilityData = palette.accessibilityData;
+  }
+  const name = formData.name || palette?.name || t.untitledTheme;
+  const throwOpts = { throwOnError: true };
+  await Promise.all([
+    ccLibProvider.updateTheme(palette.libraryId, palette.id, payload, throwOpts),
+    ccLibProvider.updateElementMetadata(palette.libraryId, [{ id: palette.id, name }], throwOpts),
+  ]);
+}
+
+// Compares live form state against palette.savedName/savedColors/tags (the
+// frozen as-loaded snapshot) to decide whether "Save changes" should enable.
+export function computeIsDirty(palette, currentName, currentTags) {
+  const name = (currentName || '').trim();
+  const nameChanged = name !== (palette?.savedName || '').trim();
+
+  const tags = [...currentTags].sort();
+  const originalTags = [...(palette?.tags || [])].map(String).sort();
+  const tagsChanged = tags.length !== originalTags.length
+    || tags.some((tag, i) => tag !== originalTags[i]);
+
+  const normalize = (h) => (typeof h === 'string' ? h.trim().toUpperCase() : '');
+  const colors = (palette?.colors || []).map(normalize);
+  const originalColors = (palette?.savedColors || []).map(normalize);
+  const colorsChanged = colors.length !== originalColors.length
+    || colors.some((c, i) => c !== originalColors[i]);
+
+  return nameChanged || tagsChanged || colorsChanged;
+}
+
+// "Save changes" updates the original item, so it applies only when the content
+// is dirty AND the originally-selected library is still chosen — picking a
+// different library is semantically a copy (Make a copy stays enabled).
+export function computeSaveChangesEnabled(palette, currentName, currentTags, currentLibraryId) {
+  if (!computeIsDirty(palette, currentName, currentTags)) return false;
+  return currentLibraryId === palette?.libraryId;
+}
+
 function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedIn, callbacks, t) {
-  const { onClose, onSave, onSignIn, onLibraryCreated } = callbacks;
+  const {
+    onClose, onSave, onSaveChanges, onSignIn, onLibraryCreated, onLibraryChange,
+  } = callbacks;
+  const isEditingSavedItem = Boolean(palette?.id && palette?.libraryId);
 
   const curtain = createCurtain(
     'ax-drawer-curtain',
@@ -609,11 +676,14 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   const libraryPicker = createLibraryPickerField(
     t.saveTo,
     libs,
-    libs[0]?.id,
+    (isEditingSavedItem && libs.some((l) => l.id === palette.libraryId))
+      ? palette.libraryId
+      : libs[0]?.id,
     ccLibProvider,
     isSignedIn,
     onLibraryCreated,
     t,
+    onLibraryChange,
   );
   formFields.appendChild(libraryPicker.wrapper);
 
@@ -665,20 +735,47 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
   });
 
   const saveBtnEl = document.createElement('sp-button');
-  saveBtnEl.setAttribute('variant', 'accent');
   saveBtnEl.setAttribute('size', mobile ? 'xl' : 'm');
   saveBtnEl.classList.add('ax-drawer-save-btn');
 
-  if (isSignedIn) {
+  let saveChangesBtnEl = null;
+
+  if (isSignedIn && isEditingSavedItem) {
+    saveBtnEl.setAttribute('variant', 'secondary');
+    saveBtnEl.classList.add('ax-drawer-copy-btn');
+    saveBtnEl.textContent = t.makeCopy;
+    saveBtnEl.dataset.idleLabel = t.makeCopy;
+    saveBtnEl.addEventListener('click', onSave);
+    decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Make a copy' });
+
+    saveChangesBtnEl = document.createElement('sp-button');
+    saveChangesBtnEl.setAttribute('variant', 'accent');
+    saveChangesBtnEl.setAttribute('size', mobile ? 'xl' : 'm');
+    saveChangesBtnEl.classList.add('ax-drawer-savechanges-btn');
+    saveChangesBtnEl.textContent = t.saveChanges;
+    saveChangesBtnEl.dataset.idleLabel = t.saveChanges;
+    saveChangesBtnEl.disabled = true;
+    saveChangesBtnEl.addEventListener('click', onSaveChanges);
+    decorateAnalyticsAttributes(saveChangesBtnEl, { linkLabel: 'Save changes' });
+
+    const btnRow = createTag('div', { class: 'ax-drawer-btn-row' });
+    btnRow.append(saveBtnEl, saveChangesBtnEl);
+    content.appendChild(btnRow);
+  } else if (isSignedIn) {
+    saveBtnEl.setAttribute('variant', 'accent');
     saveBtnEl.textContent = t.saveToLibrary;
+    saveBtnEl.dataset.idleLabel = t.saveToLibrary;
     saveBtnEl.addEventListener('click', onSave);
     decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Save to library' });
+    content.appendChild(saveBtnEl);
   } else {
+    saveBtnEl.setAttribute('variant', 'accent');
     saveBtnEl.textContent = t.signInToSave;
+    saveBtnEl.dataset.idleLabel = t.signInToSave;
     saveBtnEl.addEventListener('click', onSignIn);
     decorateAnalyticsAttributes(saveBtnEl, { linkLabel: 'Sign in to save' });
+    content.appendChild(saveBtnEl);
   }
-  content.appendChild(saveBtnEl);
 
   theme.appendChild(content);
 
@@ -690,7 +787,66 @@ function buildDrawerDOM(mobile, titleId, palette, libs, ccLibProvider, isSignedI
     tagsContainerEl,
     tagsInputEl,
     saveBtnEl,
+    saveChangesBtnEl,
+    btnRowEl: saveChangesBtnEl ? saveBtnEl.closest('.ax-drawer-btn-row') : null,
   };
+}
+
+// Predicting overflow from width math (equal-share vs combined, gap, sp-button's
+// own padding/min-width) proved fragile across several edge cases. Directly
+// observing rendered height instead (current vs natural) is more robust, but
+// the *live* button's internal label layout turns out to lock in from its
+// first render — verified that neither large explicit widths nor several
+// animation frames of waiting ever unstick an already-wrapped label in place.
+// A fresh, temporarily-detached clone renders its own first layout correctly,
+// so measure natural height that way on every check — caching it per-element
+// was tried but a measurement taken mid-transition (e.g. right as the panel
+// crosses a width breakpoint) could bake in a wrong value forever, causing
+// stacking to silently stop updating on later resizes.
+async function measureNaturalHeight(el) {
+  const clone = el.cloneNode(true);
+  clone.style.position = 'fixed';
+  clone.style.visibility = 'hidden';
+  clone.style.insetInlineStart = '-9999px';
+  clone.style.insetBlockStart = '0';
+  clone.style.inlineSize = 'max-content';
+  clone.style.flex = 'none';
+  // Appended within the same ancestor (not document.body) so it inherits the
+  // sp-theme/panel's CSS custom properties — measuring detached from that
+  // context yields a slightly different (smaller) height than the real
+  // in-context single-line height, enough to false-trigger stacking.
+  // position:fixed keeps it out of the row's own flex layout regardless.
+  el.parentElement.appendChild(clone);
+  // A freshly-connected custom element needs at least one frame before its
+  // shadow DOM reflects final content/sizing.
+  await new Promise((resolve) => { requestAnimationFrame(resolve); });
+  const { height } = clone.getBoundingClientRect();
+  clone.remove();
+  return height;
+}
+
+export async function refreshBtnRowStacking(row, btnA, btnB) {
+  if (!row || !btnA || !btnB) return;
+  const [naturalHeightA, naturalHeightB] = await Promise.all([
+    measureNaturalHeight(btnA),
+    measureNaturalHeight(btnB),
+  ]);
+  // Deciding from whatever layout is currently applied is unreliable: once
+  // stacked, buttons get the full row width and may no longer wrap, which
+  // would read as "fits" and unstack them — but unstacking narrows each
+  // button back to a half-share width, re-wrapping the label with nothing
+  // left to catch it. Force the equal-share layout before measuring so the
+  // decision reflects the width the buttons will actually have.
+  row.classList.remove('ax-drawer-btn-row--stacked');
+  // Compare against the larger of the two natural heights, not each button's
+  // own — a flex/grid row equalizes both buttons to the taller one's height,
+  // so a shorter-natural sibling would otherwise always look "wrapped" once
+  // stretched to match, even with nothing actually wrapping.
+  const naturalHeight = Math.max(naturalHeightA, naturalHeightB);
+  const shouldStack = btnA.getBoundingClientRect().height > naturalHeight + 1
+    || btnB.getBoundingClientRect().height > naturalHeight + 1;
+
+  row.classList.toggle('ax-drawer-btn-row--stacked', shouldStack);
 }
 
 function attachDrawerToDOM(panel, curtain, mobile, anchor) {
@@ -788,6 +944,21 @@ export async function createDrawer(options) {
   let removeSwipeHandler = null;
   let removePositionHandler = null;
   let previousActiveElement = null;
+  let tagsDirtyObserver = null;
+  let removeNameDirtyListener = null;
+  let removeBtnRowResizeListener = null;
+  // Reassigned in open() once the Save changes button exists; the library
+  // picker's onChange calls through this ref so it always hits the latest.
+  let refreshSaveChangesEnabled = () => {};
+
+  function isSaveChangesEnabled() {
+    return computeSaveChangesEnabled(
+      paletteData,
+      nameInput?.value,
+      getTagValues(tagsContainer),
+      libraryPickerRef?.value,
+    );
+  }
 
   function close() {
     if (!isOpen) return;
@@ -811,6 +982,13 @@ export async function createDrawer(options) {
     removeOutsideClickHandler = null;
     libraryPickerRef?.destroy();
     libraryPickerRef = null;
+    tagsDirtyObserver?.disconnect();
+    tagsDirtyObserver = null;
+    removeNameDirtyListener?.();
+    removeNameDirtyListener = null;
+    removeBtnRowResizeListener?.();
+    removeBtnRowResizeListener = null;
+    refreshSaveChangesEnabled = () => {};
 
     const elementToFocus = previousActiveElement;
     previousActiveElement = null;
@@ -854,7 +1032,8 @@ export async function createDrawer(options) {
         timeout: 6000,
         action: {
           label: t.viewInLibrary,
-          href: 'https://new.express.adobe.com/libraries',
+          href: t.viewInLibraryHref,
+          sameTab: true,
         },
       });
       await onSave?.(formData);
@@ -873,7 +1052,47 @@ export async function createDrawer(options) {
     } finally {
       if (saveBtnEl) {
         saveBtnEl.disabled = false;
-        saveBtnEl.textContent = t.saveToLibrary;
+        saveBtnEl.textContent = saveBtnEl.dataset.idleLabel || t.saveToLibrary;
+      }
+    }
+  }
+
+  async function saveChanges() {
+    const formData = collectFormData(libraryPickerRef, tagsContainer, nameInput);
+    if (!ccLibraryProvider || !paletteData?.id || !paletteData?.libraryId) return;
+
+    const saveChangesBtnEl = panelEl?.querySelector('.ax-drawer-savechanges-btn');
+    if (saveChangesBtnEl) {
+      saveChangesBtnEl.disabled = true;
+      saveChangesBtnEl.textContent = t.saving;
+    }
+
+    try {
+      await executeUpdateExistingItem(paletteData, paletteType, formData, ccLibraryProvider, t);
+      close();
+      showExpressToast({
+        variant: 'positive',
+        message: t.changesSaved,
+        timeout: 6000,
+        action: {
+          label: t.viewInLibrary,
+          href: t.viewInLibraryHref,
+          sameTab: true,
+        },
+      });
+      announceToScreenReader(t.changesSaved);
+      await onSave?.(formData);
+    } catch (err) {
+      window.lana?.log(`Save changes failed: ${err.message}`, {
+        tags: 'color-floating-toolbar,drawer',
+        severity: 'error',
+      });
+      showExpressToast({ variant: 'negative', message: t.saveChangesFailed });
+      announceToScreenReader(t.saveChangesFailed);
+    } finally {
+      if (saveChangesBtnEl) {
+        saveChangesBtnEl.textContent = saveChangesBtnEl.dataset.idleLabel || t.saveChanges;
+        saveChangesBtnEl.disabled = !isSaveChangesEnabled();
       }
     }
   }
@@ -896,6 +1115,7 @@ export async function createDrawer(options) {
       {
         onClose: close,
         onSave: save,
+        onSaveChanges: saveChanges,
         onSignIn: async () => {
           const { setSusiColorRedirect, buildColorSignInRedirectUrl } = await import(
             '../utils/susiRedirect.js'
@@ -906,6 +1126,7 @@ export async function createDrawer(options) {
           return triggerSignInFlow();
         },
         onLibraryCreated,
+        onLibraryChange: () => refreshSaveChangesEnabled(),
       },
       t,
     );
@@ -914,6 +1135,19 @@ export async function createDrawer(options) {
     nameInput = dom.nameInputEl;
     libraryPickerRef = dom.libraryPicker;
     tagsContainer = dom.tagsContainerEl;
+
+    if (dom.saveChangesBtnEl) {
+      refreshSaveChangesEnabled = () => {
+        dom.saveChangesBtnEl.disabled = !isSaveChangesEnabled();
+      };
+      // Colors may already be dirty from canvas edits made before opening.
+      refreshSaveChangesEnabled();
+      nameInput?.addEventListener('input', refreshSaveChangesEnabled);
+      removeNameDirtyListener = () => nameInput
+        ?.removeEventListener('input', refreshSaveChangesEnabled);
+      tagsDirtyObserver = new MutationObserver(refreshSaveChangesEnabled);
+      tagsDirtyObserver.observe(tagsContainer, { childList: true });
+    }
 
     const posResult = attachDrawerToDOM(panelEl, curtainEl, mobile, anchorElement);
     removePositionHandler = posResult?.cleanup ?? null;
@@ -933,6 +1167,17 @@ export async function createDrawer(options) {
     escHandler = interactions.escHandler;
     removeSwipeHandler = interactions.swipeCleanup;
     removeOutsideClickHandler = interactions.outsideClickCleanup;
+
+    if (dom.btnRowEl) {
+      const { btnRowEl, saveBtnEl: copyBtnEl, saveChangesBtnEl: changesBtnEl } = dom;
+      const runStackingCheck = () => refreshBtnRowStacking(btnRowEl, copyBtnEl, changesBtnEl);
+      // Runs after setupDrawerInteractions has scheduled its own rAF to add
+      // .ax-drawer-open — queuing ours only once that's already registered
+      // ensures we measure after the panel is actually open, not before.
+      requestAnimationFrame(() => requestAnimationFrame(runStackingCheck));
+      window.addEventListener('resize', runStackingCheck);
+      removeBtnRowResizeListener = () => window.removeEventListener('resize', runStackingCheck);
+    }
 
     isOpen = true;
 

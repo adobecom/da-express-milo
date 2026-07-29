@@ -15,14 +15,10 @@ main .section .discover-cards {
 }
 
 .discover-cards .subtitle {
-    padding-bottom: var(--spacing-500);
-    margin: 0;
-}
-
-.discover-cards .sub-header {
     font-weight: 400;
     font-size: var(--ax-body-s-size);
     text-align: center;
+    padding-bottom: var(--spacing-500);
     margin: var(--spacing-350) 0 var(--spacing-100) 0;
     padding-left: var(--spacing-350);
     padding-right: var(--spacing-350);
@@ -129,6 +125,7 @@ main .section .discover-cards {
 .discover-cards .center-title {
     text-align: center;
     font-size: var(--heading-font-size-m);
+    font-weight: var(--heading-font-weight);
     padding: 0 var(--spacing-300) var(--spacing-300);
 }
 .discover-cards .gallery-control {
@@ -151,6 +148,7 @@ main .section .discover-cards {
 .discover-cards .cards-container .card .text-content .header {
     text-align: left;
     font-size: var(--ax-heading-l-size);
+    font-weight: var(--heading-font-weight);
     margin-top: 17px;
 }
 .discover-cards .cards-container .card .text-content .body {

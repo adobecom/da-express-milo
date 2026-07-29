@@ -266,6 +266,28 @@ describe('CCLibraryProvider - delegation & errors', () => {
       expect(result).to.be.null;
     });
 
+    it('updateTheme rejects when fetch throws and throwOnError is set', async () => {
+      fetchStub.rejects(new Error('Network error'));
+      let rejected = false;
+      try {
+        await provider.updateTheme('lib-1', 'elem-1', { data: true }, { throwOnError: true });
+      } catch (err) {
+        rejected = true;
+      }
+      expect(rejected).to.be.true;
+    });
+
+    it('updateElementMetadata rejects when fetch throws and throwOnError is set', async () => {
+      fetchStub.rejects(new Error('Network error'));
+      let rejected = false;
+      try {
+        await provider.updateElementMetadata('lib-1', [{ id: 'e1' }], { throwOnError: true });
+      } catch (err) {
+        rejected = true;
+      }
+      expect(rejected).to.be.true;
+    });
+
     it('fetchUserLibraries returns null when fetch throws', async () => {
       fetchStub.rejects(new Error('Network error'));
       const result = await provider.fetchUserLibraries();
