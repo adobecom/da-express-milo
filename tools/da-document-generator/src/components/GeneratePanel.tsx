@@ -36,6 +36,7 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
   const [resetModalOpen, setResetModalOpen] = useState(false);
   const [existenceStatus, setExistenceStatus] = useState<Record<string, ExistenceCheck>>({});
   const checkedPaths = useRef<Set<string>>(new Set());
+  const [includeDuplicates, setIncludeDuplicates] = useState(false);
 
   const actions = useDaDocumentActions<RowResult>(setResults, {
     afterDelete: (r) => ({ id: r.id, path: r.path, stage: 'pending' }),
@@ -87,6 +88,23 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
     return productTypeConfigs.find((c) => c.productType === productType?.trim());
   }
 
+  // Existing-document handling: a row whose output path already exists in DA is
+  // excluded from the Generate set by default. The "include duplicates" checkbox
+  // opts them back in (they overwrite the existing doc, with a version backup).
+  const rowOutputPath = (row: CsvRow) => {
+    const cfg = overrideConfig ?? lookupConfig(row.product_type ?? '');
+    return cfg ? rowToOutputPath(row, cfg.outputDir) : '';
+  };
+  const rowAlreadyExists = (row: CsvRow) => existenceStatus[rowOutputPath(row)] === 'exists';
+  const existingCount = rows.filter(rowAlreadyExists).length;
+  const rowsToGenerate = includeDuplicates ? rows : rows.filter((r) => !rowAlreadyExists(r));
+  const activePreview = previewRows.filter((pr) => includeDuplicates || existenceStatus[pr.path] !== 'exists');
+  const excludedPreview = includeDuplicates ? [] : previewRows.filter((pr) => existenceStatus[pr.path] === 'exists');
+  const allExistingBlockReason = !generateBlockReason && rows.length > 0 && rowsToGenerate.length === 0
+    ? 'All selected documents already exist — enable “include duplicates” to overwrite them'
+    : undefined;
+  const effectiveBlockReason = generateBlockReason ?? allExistingBlockReason;
+
   const running = bulkOp !== 'idle';
 
   const counts = {
@@ -111,7 +129,7 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
   async function handleGenerate() {
     const existenceSnapshot = { ...existenceStatus };
     setResults(
-      rows.map((row) => {
+      rowsToGenerate.map((row) => {
         const cfg = overrideConfig ?? lookupConfig(row.product_type ?? '');
         return { id: row['_id'], path: cfg ? rowToOutputPath(row, cfg.outputDir) : '', stage: 'pending' };
       }),
@@ -120,7 +138,7 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
 
     const generatedBatch = new Date().toISOString();
     const templateCache = new Map<string, string>();
-    const queue = [...rows];
+    const queue = [...rowsToGenerate];
     let idx = 0;
 
     async function processRow(row: CsvRow) {
@@ -283,16 +301,16 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
           <button
             type="button"
             onClick={handleGenerate}
-            disabled={running || !!generateBlockReason}
+            disabled={running || !!effectiveBlockReason}
             className="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-xl hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
             {bulkOp === 'generating'
-              ? `Generating… ${counts.generated + counts.error} / ${rows.length}`
-              : `Generate ${rows.length} document${rows.length !== 1 ? 's' : ''}`}
+              ? `Generating… ${counts.generated + counts.error} / ${results.length}`
+              : `Generate ${rowsToGenerate.length} document${rowsToGenerate.length !== 1 ? 's' : ''}`}
           </button>
-          {generateBlockReason && (
+          {effectiveBlockReason && (
             <div className="absolute bottom-full left-0 mb-1.5 px-2.5 py-1.5 bg-gray-800 text-white text-xs rounded-lg whitespace-nowrap opacity-0 group-hover:opacity-100 pointer-events-none z-10 transition-opacity duration-150">
-              {generateBlockReason}
+              {effectiveBlockReason}
             </div>
           )}
         </div>
@@ -373,19 +391,32 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
 
       {(results.length > 0 || previewRows.length > 0) && (
         <>
-          {results.length === 0 && (() => {
-            const overwriteCount = previewRows.filter((pr) => existenceStatus[pr.path] === 'exists').length;
-            return (
+          {results.length === 0 && (
+            <div className="flex flex-col gap-2">
               <p className="text-sm text-gray-500">
-                Showing output paths for {previewRows.length} document{previewRows.length !== 1 ? 's' : ''} — click Generate to create them
-                {overwriteCount > 0 && (
+                Showing output paths for {activePreview.length} document{activePreview.length !== 1 ? 's' : ''} — click Generate to create them
+                {includeDuplicates && existingCount > 0 && (
                   <span className="text-amber-600 font-medium ml-1">
-                    · {overwriteCount} will overwrite existing content
+                    · {existingCount} will overwrite existing content
                   </span>
                 )}
               </p>
-            );
-          })()}
+              {existingCount > 0 && (
+                <label className="flex items-center gap-2 cursor-pointer select-none w-fit">
+                  <input
+                    type="checkbox"
+                    checked={includeDuplicates}
+                    onChange={(e) => setIncludeDuplicates(e.target.checked)}
+                    className="w-4 h-4 rounded border-gray-300 accent-indigo-600"
+                  />
+                  <span className="text-xs font-medium text-gray-600">
+                    Include {existingCount} document{existingCount !== 1 ? 's' : ''} that already exist{existingCount === 1 ? 's' : ''} (overwrite)
+                  </span>
+                </label>
+              )}
+            </div>
+          )}
+          {(results.length > 0 || activePreview.length > 0) && (
           <div className="overflow-x-auto rounded-xl border border-gray-200 max-h-96 overflow-y-auto">
             <table className="text-xs min-w-max">
               <thead className="bg-gray-50 border-b border-gray-200 sticky top-0">
@@ -398,7 +429,7 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
                 </tr>
               </thead>
               <tbody>
-              {results.length === 0 && previewRows.map((pr) => (
+              {results.length === 0 && activePreview.map((pr) => (
                 <tr key={pr.id} className="border-b border-gray-100 opacity-60">
                   <td className="px-3 py-2 font-mono whitespace-nowrap min-w-[280px]">
                     {!pr.hasConfig
@@ -485,6 +516,25 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
             </tbody>
           </table>
         </div>
+          )}
+        {results.length === 0 && excludedPreview.length > 0 && (
+          <div className="flex flex-col gap-1.5">
+            <p className="text-sm text-gray-500">
+              <span className="font-medium text-gray-600">{excludedPreview.length}</span> excluded — already exist in DA
+            </p>
+            <div className="rounded-xl border border-gray-200 bg-gray-50 divide-y divide-gray-100 max-h-64 overflow-y-auto">
+              {excludedPreview.map((pr) => (
+                <div key={pr.id} className="px-3 py-2 flex items-center gap-2 text-xs font-mono opacity-60">
+                  <a href={`https://da.live/edit#${pr.path}`} target="_blank" rel="noopener noreferrer" className="text-amber-600 hover:underline inline-flex items-center gap-1">
+                    {pr.path}
+                    <ExternalLinkIcon />
+                  </a>
+                  <ExistenceBadge status={existenceStatus[pr.path]} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         </>
       )}
 
