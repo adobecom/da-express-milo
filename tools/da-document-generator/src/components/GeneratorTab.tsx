@@ -2,6 +2,7 @@ import { useState } from 'react';
 import CsvUpload from './CsvUpload';
 import GeneratePanel from './GeneratePanel';
 import TemplateOverridePanel from './TemplateOverridePanel';
+import { useBeforeUnload } from '../hooks/useBeforeUnload';
 import type { CsvRow, ProductTypeConfig } from '../types';
 
 export const DEFAULT_CONFIG_SHEET = '/adobecom/da-express-milo/doc-generator-presets';
@@ -16,6 +17,10 @@ export default function GeneratorTab() {
   const [productTypeConfigs, setProductTypeConfigs] = useState<ProductTypeConfig[]>([]);
   const [templateOverrideEnabled, setTemplateOverrideEnabled] = useState(false);
   const [overrideConfig, setOverrideConfig] = useState<ProductTypeConfig | undefined>(undefined);
+
+  // Warn before leaving the page once product rows have been loaded, so an
+  // author doesn't lose uploaded data or generate results by closing/reloading.
+  useBeforeUnload(rows.length > 0);
 
   function handleConfigSheetLoad(path: string, configs: ProductTypeConfig[]) {
     setConfigSheetPath(path);

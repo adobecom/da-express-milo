@@ -4,6 +4,7 @@ import { crawlAndLoadDocs, backfillIdentity, writeFieldValue } from '../lib/docu
 import type { CrawlError, DocFetchError } from '../api/crawl';
 import type { EditableFieldKey } from '../lib/generate';
 import { useDaDocumentActions } from '../hooks/useDaDocumentActions';
+import { useBeforeUnload } from '../hooks/useBeforeUnload';
 import ConfirmModal from './ConfirmModal';
 import DocumentManagerTable, { type SortField } from './DocumentManagerTable';
 import BulkEditBar from './BulkEditBar';
@@ -31,6 +32,10 @@ export default function DocumentManagerTab() {
   const [busy, setBusy] = useState(false);
   const [dismissedErrors, setDismissedErrors] = useState(false);
   const [hasScanned, setHasScanned] = useState(false);
+
+  // Warn before leaving the page once a scan has loaded documents, so an author
+  // doesn't lose a crawl (and any inline edits) by closing/reloading.
+  useBeforeUnload(docs.length > 0);
 
   const { isFetching, refetch } = useQuery({
     queryKey: ['dm-crawl', rootPath],
