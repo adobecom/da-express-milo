@@ -6,7 +6,14 @@ let loadStyle;
 let getConfig;
 const iconRegex = /icon-([^\s]+)/;
 
-const scrollPadding = 16;
+const scrollPadding = 32;
+
+function scrollWithOffset(target, container, offset = scrollPadding) {
+  const containerRect = container.getBoundingClientRect();
+  const targetRect = target.getBoundingClientRect();
+  const left = targetRect.left - containerRect.left + container.scrollLeft - offset;
+  container.scrollTo({ left, behavior: 'smooth' });
+}
 
 function createChevronButton(direction, ariaLabel) {
   const button = createTag('button', {
@@ -37,7 +44,7 @@ function createControl(items, container) {
     if (first === -1) return; // middle of swapping only page
     if (first + inc < 0 || first + inc >= len) return; // no looping
     const target = items[(first + inc + len) % len];
-    target.scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+    scrollWithOffset(target, container);
   }, 200);
   prevButton.addEventListener('click', () => pageInc(-1));
   nextButton.addEventListener('click', () => pageInc(1));
