@@ -46,6 +46,67 @@ default only holds when nothing in Figma requires overriding a
 
 ---
 
+## `section-metadata`'s `background` key
+
+A section can have its own background — solid color, gradient, or image —
+independent of anything inside the block. This is read generically by
+Milo core's `section-metadata.js` (`handleBackground`/`applyBackground`),
+not by the block itself. **A block's own JS/CSS having no background
+reference does not mean the section renders on plain white by design** —
+it may just mean this key was never authored.
+
+- **Value is a color/gradient string** (hex, `rgb()`/`rgba()`, or a CSS
+  gradient) in the cell text → becomes `section.style.background`
+  directly.
+- **Multiple values, pipe-delimited** (`color1 | color2` or
+  `color1 | color2 | color3`) → responsive breakpoints: one value applies
+  at all sizes, two split mobile vs. tablet+desktop, three split
+  mobile/tablet/desktop individually.
+- **Value is an image** (a `<picture>` in the value cell instead of text)
+  → inserted as the section's background image instead of a CSS color.
+
+```html
+<table>
+  <tbody>
+    <tr><td colspan="2"><p>section-metadata</p></td></tr>
+    <tr><td>background</td><td>#f8f8f8</td></tr>
+  </tbody>
+</table>
+```
+
+### When to add it
+
+Before concluding a section needs no `background` key, check both of these
+— don't skip just because the block's own resolved structure (Phase 2)
+didn't mention one:
+
+1. **Does the Figma section have a real background?** Compare the frame's
+   fill behind the *whole section* (not a card, icon, or media slot inside
+   the block) against `--color-white`/transparent. A visible color,
+   gradient, or photo behind the entire section is a signal this key is
+   needed.
+2. **Does the block already hardcode it instead?** Some blocks break this
+   convention and set their own section-level background directly in CSS
+   or JS rather than relying on `section-metadata`. Check before
+   double-authoring:
+   ```bash
+   grep -n "^\.block-name\s*{" -A5 express/code/blocks/<block-name>/<block-name>.css
+   ```
+   Look specifically at the selector matching the block's **outer** class
+   (e.g. `.block-name { background: ... }`), not a nested card/child
+   selector (`.block-name-card { background: ... }`) — those style
+   internal elements, not the section. If the outer selector already
+   hardcodes a background, don't author a `section-metadata` background
+   row for it; that would be redundant at best and could visually
+   conflict at worst.
+
+If a real section background exists in Figma and the block doesn't
+already hardcode it, author the `section-metadata` block above — in the
+same section `<div>` as the content block, as a sibling, exactly like the
+`style` key example below.
+
+---
+
 ## `section-metadata`'s `style` key
 
 Every section-level style modifier — spacing tokens, one-off named

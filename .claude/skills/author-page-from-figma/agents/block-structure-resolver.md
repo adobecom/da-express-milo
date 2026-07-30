@@ -112,6 +112,14 @@ prefer under-splitting (fewer, larger `<td>`s) over guessing a
 `rowspan` that isn't clearly evidenced by the fetched structure, and
 flag the uncertainty in the Phase 10 summary.
 
+**Also check for a sibling `.section-metadata` div** in the fetched
+markup, alongside the block's own outer div (both are direct children
+of the same section wrapper). If present, its rows — especially a
+`background` key — are section-level config, not part of the block's
+own table; note them separately as evidence the real page uses this
+mechanism. See `references/metadata-conventions.md` for what the
+`background` key means and when to author it.
+
 ### Undocumented variants
 
 `block.json`'s variant list is not guaranteed to be exhaustive — it

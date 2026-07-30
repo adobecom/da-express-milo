@@ -48,6 +48,12 @@ set, then pour the Figma content into it.
 > - **`metadata` and `section-metadata` are not interchangeable** —
 >   one is page-wide, one is per-section. See
 >   `references/metadata-conventions.md`.
+> - **A section's own background (color/gradient/image behind the whole
+>   section, not a card or media slot) is usually not part of the
+>   block's own table** — it goes through `section-metadata`'s
+>   `background` key instead. A block whose code has no background
+>   reference at all is exactly the case this is most likely to be
+>   missed for. See `references/metadata-conventions.md`.
 > - The HTML references assets using their final `content.da.live`
 >   URLs (dot-prefixed shadow folder convention).
 > - Link URLs use `https://www.adobe.com/` as a placeholder. Link
@@ -277,6 +283,13 @@ Solid colors, gradients, and semi-transparent values are plain text
 in the media column — no download needed (`#1a1a1a`,
 `linear-gradient(135deg, #1a1a1a, #2d2d2d)`, `rgb(255 255 255 / 0)`).
 
+This is the block's **own** background cell (part of its resolved table
+structure from Phase 2, for blocks that author one). It's a separate
+mechanism from the section-level `background` in `section-metadata` —
+see `references/metadata-conventions.md`. A block can need either, both,
+or neither; don't assume the Figma section background belongs here just
+because this section exists.
+
 ---
 
 ## Phase 6 — Build HTML document
@@ -348,11 +361,13 @@ variants confirmed → `<p>block-name</p>` with no parentheses.
 No `metadata` or `section-metadata` block needed by default — **but
 check first**: if Phase 2 found the block calls `getMetadata()` for
 something Figma's design implies a non-default value for (e.g. a logo
-variant, a feature toggle), or the user requests a section-level style
-(spacing, a named style), author it per
+variant, a feature toggle), the user requests a section-level style
+(spacing, a named style), or **the Figma section has a real background
+that the block doesn't already hardcode in its own CSS**, author it per
 `references/metadata-conventions.md`. Don't skip this check just
 because it wasn't explicitly requested — a block can silently render
-with the wrong default if a `metadata`-driven value is missing.
+with the wrong default (or a missing background) if a metadata-driven
+value is missing.
 
 ### Save HTML to disk
 
