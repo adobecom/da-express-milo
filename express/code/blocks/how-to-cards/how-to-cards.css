@@ -138,10 +138,9 @@
 .how-to-cards .gallery {
   display: flex;
   flex-wrap: nowrap;
-  gap: var(--spacing-300);
+  gap: 8px;
   overflow-x: scroll;
   scrollbar-width: none;
-  /* scroll-snap-type: x mandatory; */
   scroll-behavior: smooth;
   padding: 0;
   margin: 0;
@@ -253,6 +252,13 @@
   .how-to-cards {
     --gallery-first-item-margin: 20px;
   }
+
+    .how-to-cards .card:last-child {
+  margin-right: 16px;
+}
+  .how-to-cards .gallery-control {
+    padding-right: 16px;
+  }
 }
 
 @media (min-width: 768px) {
@@ -264,10 +270,21 @@
     --gallery-first-item-margin: var(--spacing-500);
   }
 
+  .how-to-cards .gallery {
+    gap : var(--spacing-300);
+  }
+
   .how-to-cards.cards-count-4 .cards-container,
   .how-to-cards.cards-count-5 .cards-container,
   .how-to-cards.cards-count-6 .cards-container {
     width: 100vw;
+  }
+
+    .how-to-cards .card:last-child {
+  margin-right: 32px;
+}
+  .how-to-cards .gallery-control {
+    padding-right: 32px;
   }
 }
 
@@ -296,6 +313,9 @@
     --gallery-first-item-margin: var(--spacing-600);
   }
 
+  .how-to-cards .card:last-child {
+  margin-right: 40px;
+}
   .how-to-cards .gallery-control {
     padding-right: 40px;
   }
