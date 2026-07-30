@@ -273,12 +273,20 @@
 
 
 @media (min-width: 900px) {
-  .how-to-cards .card {
-    width: calc((100% - var(--spacing-800)) / 3);
+      .how-to-cards .card {
+    min-width: 295px;
   }
+
+  .how-to-cards.cards-count-3 .card {
+    width: 517px;
+  }
+
+  
   .how-to-cards {
     --gallery-first-item-margin: var(--spacing-500);
   }
+
+
 }
 
 
@@ -291,6 +299,11 @@
     .how-to-cards .gallery-control {
     padding-right: 40px;
   }
+
+    .how-to-cards.card-count-3 .card {
+    /* width: calc((100% - var(--spacing-800)) / 3); */
+    width: 545px;
+   } 
 }
 
 @media (min-width: 1440px) {
@@ -301,9 +314,10 @@
     --gallery-first-item-margin: 40px;
   }
 
-    .how-to-cards.cards-count-3 .card {
-    width: calc((100% - var(--spacing-900)) / 3);
-  }
+  .how-to-cards.card-count-3 .card {
+    /* width: calc((100% - var(--spacing-800)) / 3); */
+    width: 557px;
+   } 
 
   .how-to-cards.cards-count-4 .card {
     width: calc((100% - var(--spacing-1000)) / 4);
