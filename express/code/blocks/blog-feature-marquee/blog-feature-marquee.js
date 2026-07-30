@@ -55,6 +55,7 @@ async function fetchBlogIndex(locale) {
     return { data, byPath };
   } catch (error) {
     window.lana?.log('blog-feature-marquee: failed to fetch blog index', {
+      tags: 'blog-feature-marquee',
       error,
       severity: 'error',
     });
@@ -76,6 +77,7 @@ function filterFeaturedPosts(index, config, max) {
         if (post) results.push(post);
       } catch (error) {
         window.lana?.log('blog-feature-marquee: invalid featured article URL', {
+          tags: 'blog-feature-marquee',
           url,
           error,
           severity: 'warning',

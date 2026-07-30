@@ -628,7 +628,7 @@ export class EasyUpload {
 
       return extractLinkHref(this.uploadAsset._links, LINK_REL.BLOCK_TRANSFER);
     } catch (error) {
-      window.lana?.log(`[EasyUpload] Failed to generate upload URL: ${error?.name} ${error?.message} code=${error?.code} status=${error?.statusCode}`, { severity: 'error' });
+      window.lana?.log(`[EasyUpload] Failed to generate upload URL: ${error?.name} ${error?.message} code=${error?.code} status=${error?.statusCode}`, { tags: 'easy-upload-utils', severity: 'error' });
       throw error;
     }
   }
@@ -833,7 +833,7 @@ export class EasyUpload {
 
       return file;
     } catch (error) {
-      window.lana?.log(`[EasyUpload] Failed to retrieve uploaded file: ${error?.message || error}`, { severity: 'error' });
+      window.lana?.log(`[EasyUpload] Failed to retrieve uploaded file: ${error?.message || error}`, { tags: 'easy-upload-utils', severity: 'error' });
       throw error;
     }
   }
@@ -854,7 +854,7 @@ export class EasyUpload {
       this.asset = null;
       this.uploadAsset = null;
     } catch (error) {
-      window.lana?.log(`[EasyUpload] Error during ACP Storage cleanup: ${error?.message || error}`, { severity: 'warning' });
+      window.lana?.log(`[EasyUpload] Error during ACP Storage cleanup: ${error?.message || error}`, { tags: 'easy-upload-utils', severity: 'warning' });
     }
   }
 
@@ -870,7 +870,7 @@ export class EasyUpload {
       let timeoutId;
       const timeoutPromise = new Promise((_, reject) => {
         timeoutId = setTimeout(() => {
-          window.lana?.log('[EasyUpload] URL generation timed out', { severity: 'error' });
+          window.lana?.log('[EasyUpload] URL generation timed out', { tags: 'easy-upload-utils', severity: 'error' });
           reject(new Error(`QR code generation timed out after ${QR_CODE_CONFIG.GENERATION_TIMEOUT / 1000} seconds`));
         }, QR_CODE_CONFIG.GENERATION_TIMEOUT);
       });
@@ -888,6 +888,7 @@ export class EasyUpload {
         }),
       ]).catch((error) => {
         window.lana?.log(`[EasyUpload] Failed in URL generation promise: ${error?.message || error}`, {
+          tags: 'easy-upload-utils',
           severity: 'error',
           error,
         });
@@ -961,7 +962,7 @@ export class EasyUpload {
       });
 
       if (!response.ok) {
-        window.lana?.log(`[EasyUpload] Failed to shorten URL (HTTP error), using original: ${response.status} ${response.statusText}`, { severity: 'warning' });
+        window.lana?.log(`[EasyUpload] Failed to shorten URL (HTTP error), using original: ${response.status} ${response.statusText}`, { tags: 'easy-upload-utils', severity: 'warning' });
         return longUrl;
       }
 
@@ -970,10 +971,10 @@ export class EasyUpload {
         return data.data;
       }
 
-      window.lana?.log(`[EasyUpload] Failed to shorten URL (unexpected response), using original: ${JSON.stringify(data)}`, { severity: 'warning' });
+      window.lana?.log(`[EasyUpload] Failed to shorten URL (unexpected response), using original: ${JSON.stringify(data)}`, { tags: 'easy-upload-utils', severity: 'warning' });
       return longUrl;
     } catch (error) {
-      window.lana?.log(`[EasyUpload] Error shortening URL, using original: ${error instanceof Error ? error.message : String(error)}`, { severity: 'warning' });
+      window.lana?.log(`[EasyUpload] Error shortening URL, using original: ${error instanceof Error ? error.message : String(error)}`, { tags: 'easy-upload-utils', severity: 'warning' });
       return longUrl;
     }
   }
@@ -1233,7 +1234,7 @@ export class EasyUpload {
       this.hideConfirmTooltip();
       this.startUploadDetectionPolling();
     } catch (error) {
-      window.lana?.log(`[EasyUpload] Failed to refresh QR code: ${error?.message || error}`, { severity: 'error' });
+      window.lana?.log(`[EasyUpload] Failed to refresh QR code: ${error?.message || error}`, { tags: 'easy-upload-utils', severity: 'error' });
     }
   }
 
@@ -1350,7 +1351,7 @@ export class EasyUpload {
       e.preventDefault();
       e.stopPropagation();
       this.handleConfirmImport().catch((error) => {
-        window.lana?.log(`[EasyUpload] Unhandled error in handleConfirmImport: ${error?.message || error}`, { severity: 'error' });
+        window.lana?.log(`[EasyUpload] Unhandled error in handleConfirmImport: ${error?.message || error}`, { tags: 'easy-upload-utils', severity: 'error' });
       });
     };
     confirmButton.addEventListener('click', this.handleConfirmClick);
@@ -1375,7 +1376,7 @@ export class EasyUpload {
         buttonContainer.appendChild(confirmButton);
       }
     } catch (error) {
-      window.lana?.log(`[EasyUpload] Failed to setup QR code interface: ${error?.message || error}`, { severity: 'error' });
+      window.lana?.log(`[EasyUpload] Failed to setup QR code interface: ${error?.message || error}`, { tags: 'easy-upload-utils', severity: 'error' });
       throw error;
     }
   }
@@ -1430,7 +1431,7 @@ export class EasyUpload {
           }
         }
       } catch (error) {
-        window.lana?.log(`[EasyUpload] Polling error: ${error?.message || error}`, { severity: 'warning' });
+        window.lana?.log(`[EasyUpload] Polling error: ${error?.message || error}`, { tags: 'easy-upload-utils', severity: 'warning' });
       }
     }, POLL_INTERVAL_MS);
   }
