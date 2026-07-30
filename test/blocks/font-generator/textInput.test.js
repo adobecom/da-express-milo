@@ -242,7 +242,7 @@ describe('font-generator/textInput', () => {
     ta.value = 'Typed';
     ta.dispatchEvent(new Event('input'));
     expect(field.classList.contains('is-active')).to.be.true;
-    ta.blur();
+    ta.dispatchEvent(new FocusEvent('blur', { bubbles: true, cancelable: true }));
     expect(field.classList.contains('is-active')).to.be.false;
     panel.remove();
   });
