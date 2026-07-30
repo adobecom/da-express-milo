@@ -15,6 +15,57 @@ function scrollWithOffset(target, container, offset = scrollPadding) {
   container.scrollTo({ left, behavior: 'smooth' });
 }
 
+function isFullyInView(item, container) {
+  const itemRect = item.getBoundingClientRect();
+  const containerRect = container.getBoundingClientRect();
+  if (
+    !itemRect.width
+    || !itemRect.height
+    || !containerRect.width
+    || !containerRect.height
+  ) return false;
+  const tolerance = 1;
+  return itemRect.left >= containerRect.left - tolerance
+    && itemRect.right <= containerRect.right + tolerance
+    && itemRect.top >= containerRect.top - tolerance
+    && itemRect.bottom <= containerRect.bottom + tolerance;
+}
+
+function areEdgeItemsFullyInView(items, container) {
+  if (!items.length) return false;
+  return isFullyInView(items[0], container)
+    && isFullyInView(items[items.length - 1], container);
+}
+
+function getFullyFittableCardCount(items, container, fallbackCount = items.length) {
+  const containerWidth = container.clientWidth || container.getBoundingClientRect().width;
+  if (!containerWidth) return fallbackCount;
+
+  const { columnGap, gap } = getComputedStyle(container);
+  const itemGap = parseFloat(columnGap || gap) || 0;
+  let usedWidth = 0;
+  let fitCount = 0;
+
+  for (const item of items) {
+    const itemWidth = item.offsetWidth || item.getBoundingClientRect().width;
+    if (!itemWidth) return fallbackCount;
+
+    const { marginLeft, marginRight } = getComputedStyle(item);
+    const outerWidth = itemWidth + (parseFloat(marginLeft) || 0) + (parseFloat(marginRight) || 0);
+    const nextWidth = usedWidth + (fitCount ? itemGap : 0) + outerWidth;
+    if (nextWidth > containerWidth + 1) break;
+    usedWidth = nextWidth;
+    fitCount += 1;
+  }
+
+  return Math.max(1, fitCount);
+}
+
+function getClicksToFullyShowLastCard(items, container, fallbackCount) {
+  const fitCount = getFullyFittableCardCount(items, container, fallbackCount);
+  return Math.max(0, items.length - fitCount);
+}
+
 function createChevronButton(direction, ariaLabel) {
   const button = createTag('button', {
     class: `${direction} chevron-control`,
@@ -42,28 +93,41 @@ function createControl(items, container) {
   const pageInc = throttle((inc) => {
     const first = intersecting.indexOf(true);
     if (first === -1) return; // middle of swapping only page
-    if (first + inc < 0 || first + inc >= len) return; // no looping
-    const target = items[(first + inc + len) % len];
+    const visibleCount = Math.max(1, intersecting.lastIndexOf(true) - first + 1);
+    const maxFirst = getClicksToFullyShowLastCard(items, container, visibleCount);
+    const targetIndex = Math.max(0, Math.min(maxFirst, first + inc));
+    if (targetIndex === first) return; // no looping
+    const target = items[targetIndex];
     scrollWithOffset(target, container);
   }, 200);
   prevButton.addEventListener('click', () => pageInc(-1));
   nextButton.addEventListener('click', () => pageInc(1));
 
-  const dots = items.map(() => {
+  const dots = [];
+  const createDot = () => {
     const dot = createTag('div', { class: 'dot' });
     status.append(dot);
     return dot;
-  });
+  };
+  const syncDots = (visibleCount) => {
+    const clickCount = getClicksToFullyShowLastCard(items, container, visibleCount);
+    const dotCount = clickCount + 1;
+    while (dots.length < dotCount) dots.push(createDot());
+    while (dots.length > dotCount) dots.pop().remove();
+  };
+  syncDots();
 
   const updateDOM = debounce((first, last) => {
+    const visibleCount = Math.max(1, last - first + 1);
+    const maxFirst = getClicksToFullyShowLastCard(items, container, visibleCount);
+    syncDots(visibleCount);
     prevButton.disabled = first === 0;
-    nextButton.disabled = last === items.length - 1;
+    nextButton.disabled = first >= maxFirst;
     dots.forEach((dot, i) => {
-      i === first ? dot.classList.add('curr') : dot.classList.remove('curr');
+      i === Math.min(first, maxFirst) ? dot.classList.add('curr') : dot.classList.remove('curr');
       i === first ? items[i].classList.add('curr') : items[i].classList.remove('curr');
-      i > first && i <= last ? dot.classList.add('hide') : dot.classList.remove('hide');
     });
-    if (items.length === last - first + 1) {
+    if (areEdgeItemsFullyInView(items, container)) {
       control.classList.add('hide');
       container.classList.add('gallery--all-displayed');
     } else {
