@@ -15,7 +15,7 @@
 }
 
 .how-to-cards:has(.gallery-control.hide) {
-  padding: var(--block-padding)  var(--side-padding) var(--block-padding) 0px;
+  padding: var(--block-padding) var(--side-padding) var(--block-padding) 0px;
 }
 
 .how-to-cards:has(.gallery-control.hide) .cards-container {
@@ -212,7 +212,7 @@
 }
 
 .how-to-cards .gallery-control button.next .chevron-icon {
-  transform:rotate(90deg) translate(0px, -1px);
+  transform: rotate(90deg) translate(0px, -1px);
 }
 
 .how-to-cards .gallery-control button:disabled .chevron-icon {
@@ -264,8 +264,8 @@
     --gallery-first-item-margin: var(--spacing-500);
   }
 
-  .how-to-cards.cards-count-4 .cards-container ,
-  .how-to-cards.cards-count-5 .cards-container ,
+  .how-to-cards.cards-count-4 .cards-container,
+  .how-to-cards.cards-count-5 .cards-container,
   .how-to-cards.cards-count-6 .cards-container {
     width: 100vw;
   }
@@ -273,7 +273,7 @@
 
 
 @media (min-width: 900px) {
-      .how-to-cards .card {
+  .how-to-cards .card {
     min-width: 295px;
   }
 
@@ -281,7 +281,7 @@
     width: 517px;
   }
 
-  
+
   .how-to-cards {
     --gallery-first-item-margin: var(--spacing-500);
   }
@@ -291,19 +291,19 @@
 
 
 @media (min-width: 1280px) {
-  .how-to-cards{
+  .how-to-cards {
     --side-padding: var(--spacing-600);
     --gallery-first-item-margin: var(--spacing-600);
   }
 
-    .how-to-cards .gallery-control {
+  .how-to-cards .gallery-control {
     padding-right: 40px;
   }
 
-    .how-to-cards.card-count-3 .card {
+  .how-to-cards.card-count-3 .card {
     /* width: calc((100% - var(--spacing-800)) / 3); */
     width: 545px;
-   } 
+  }
 }
 
 @media (min-width: 1440px) {
@@ -317,7 +317,7 @@
   .how-to-cards.card-count-3 .card {
     /* width: calc((100% - var(--spacing-800)) / 3); */
     width: 557px;
-   } 
+  }
 
   .how-to-cards.cards-count-4 .card {
     width: calc((100% - var(--spacing-1000)) / 4);
@@ -326,8 +326,9 @@
 
 
   .how-to-cards .cards-container {
-    width: 100vw; 
+    width: 100vw;
   }
+
   .how-to-cards.cards-count-3 .cards-container,
   .how-to-cards.cards-count-4 .cards-container {
     width: unset
@@ -350,6 +351,6 @@
   }
 
   .how-to-cards.cards-count-6 .cards-container {
-    width: 100vw; 
+    width: 100vw;
   }
 }
