@@ -277,13 +277,7 @@
 
     .how-to-cards.cards-count-3 .card {
     width: 295px;
-  }
-
-  .how-to-cards.cards-count-4 .cards-container,
-  .how-to-cards.cards-count-5 .cards-container,
-  .how-to-cards.cards-count-6 .cards-container {
-    width: 100vw;
-  }
+  } 
 
   .how-to-cards .card:last-child {
     margin-right: 32px;
@@ -353,9 +347,7 @@
     width: 382px;
   }
 
-  .how-to-cards .cards-container {
-    width: 100vw;
-  }
+ 
 
   .how-to-cards.cards-count-3 .cards-container,
   .how-to-cards.cards-count-4 .cards-container {
@@ -378,7 +370,5 @@
     width: 301px;
   }
 
-  .how-to-cards.cards-count-6 .cards-container {
-    width: 100vw;
-  }
+ 
 }
