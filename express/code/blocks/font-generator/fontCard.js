@@ -1,12 +1,17 @@
 // @import { FontDef } from './types.js'
 import { transformText } from './unicodeEngine.js';
 import { DEFAULT_PLACEHOLDERS } from './placeholders.js';
+import { setDaaLL, setDaaLH } from '../../scripts/utils/analytics.js';
 import initCellKeyboardNav from './cardKeyboardNav.js';
 
 const BASE_PATH = '/express/code/blocks/font-generator';
 const STYLESHEET_HREF = `${BASE_PATH}/fontCard.css`;
 const COPY_RESET_MS = 1500;
 const OVERLAY_FADE_MS = 200;
+// Stable, locale-independent analytics label for the copy control so daa-ll
+// reporting stays consistent across locales and copy states (aria-label/tooltip
+// remain localized and reflect the current state).
+const COPY_LL = 'Copy';
 
 // Fallback for fontDefs without a baked-in previewLineHeight, e.g. the
 // minimal fixtures fontCard.test.js constructs by hand.
@@ -44,6 +49,7 @@ function makeCopyBtn(copyLabel) {
   btn.type = 'button';
   btn.className = 'font-card-copy-btn';
   btn.setAttribute('aria-label', copyLabel);
+  setDaaLL(btn, COPY_LL);
   btn.dataset.tooltip = copyLabel;
   // Out of the normal tab order until the card is "entered" (see
   // initCellKeyboardNav below) — the grid is a single tab stop.
@@ -105,12 +111,15 @@ function makeHoverOverlay(message) {
   return overlay;
 }
 
-function makeCtaLink(cardCta) {
+function makeCtaLink(cardCta, styleName) {
   const a = document.createElement('a');
   a.className = 'font-card-cta';
   a.href = cardCta.href;
   a.target = '_blank';
   a.rel = 'noopener noreferrer';
+  // Include the font style so the CTA's daa-ll is self-identifying even
+  // without cross-referencing the card's daa-lh scope.
+  setDaaLL(a, `${cardCta.text} ${styleName}`);
   // Same rationale as the copy button — see initCellKeyboardNav.
   a.tabIndex = -1;
 
@@ -149,6 +158,8 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
   const card = document.createElement('div');
   card.className = 'font-card';
   card.dataset.fontId = fontDef.id;
+  // Per-card scope so identical link labels (Copy / CTA) stay distinct per card.
+  setDaaLH(card, fontDef.styleName, { fallback: 'Font' });
   // Read by fontCard.css to size .font-card-preview's line-height/min-height
   // per style — see measurePreviewLineHeights.js for how previewLineHeight
   // is measured.
@@ -223,7 +234,7 @@ export function createFontCard(fontDef, previewText, fontSize, cardCta, strings 
   name.textContent = fontDef.styleName;
 
   footer.append(name);
-  if (cardCta) footer.append(makeCtaLink(cardCta));
+  if (cardCta) footer.append(makeCtaLink(cardCta, fontDef.styleName));
 
   card.append(body, footer);
   initCellKeyboardNav(card);
