@@ -253,9 +253,10 @@
     --gallery-first-item-margin: 20px;
   }
 
-    .how-to-cards .card:last-child {
-  margin-right: 16px;
-}
+  .how-to-cards .card:last-child {
+    margin-right: 16px;
+  }
+
   .how-to-cards .gallery-control {
     padding-right: 16px;
   }
@@ -271,7 +272,7 @@
   }
 
   .how-to-cards .gallery {
-    gap : var(--spacing-300);
+    gap: var(--spacing-300);
   }
 
   .how-to-cards.cards-count-4 .cards-container,
@@ -280,9 +281,10 @@
     width: 100vw;
   }
 
-    .how-to-cards .card:last-child {
-  margin-right: 32px;
-}
+  .how-to-cards .card:last-child {
+    margin-right: 32px;
+  }
+
   .how-to-cards .gallery-control {
     padding-right: 32px;
   }
@@ -314,8 +316,9 @@
   }
 
   .how-to-cards .card:last-child {
-  margin-right: 40px;
-}
+    margin-right: 40px;
+  }
+
   .how-to-cards .gallery-control {
     padding-right: 40px;
   }
