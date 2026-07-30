@@ -6,9 +6,15 @@ let loadStyle;
 let getConfig;
 const iconRegex = /icon-([^\s]+)/;
 
-const scrollPadding = 32;
+const scrollPaddingFallback = 32;
 
-function scrollWithOffset(target, container, offset = scrollPadding) {
+function getScrollPadding(container) {
+  const root = container.closest('.how-to-cards') || container;
+  const value = getComputedStyle(root).getPropertyValue('--gallery-first-item-margin');
+  return parseFloat(value) || scrollPaddingFallback;
+}
+
+function scrollWithOffset(target, container, offset = getScrollPadding(container)) {
   const containerRect = container.getBoundingClientRect();
   const targetRect = target.getBoundingClientRect();
   const left = targetRect.left - containerRect.left + container.scrollLeft - offset;
@@ -157,7 +163,11 @@ function createControl(items, container) {
 
   const scrollObserver = new IntersectionObserver((entries) => {
     reactToChange(entries);
-  }, { root: container, threshold: 1, rootMargin: `0px ${scrollPadding}px 0px ${scrollPadding}px` });
+  }, {
+    root: container,
+    threshold: 1,
+    rootMargin: `0px ${getScrollPadding(container)}px 0px ${getScrollPadding(container)}px`,
+  });
 
   items.forEach((item) => scrollObserver.observe(item));
 
