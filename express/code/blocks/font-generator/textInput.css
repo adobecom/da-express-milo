@@ -52,9 +52,62 @@
   width: 100%;
   flex: 0 0 auto;
   background-color: var(--color-white);
+  /* Reserved (not `none`) so Hover/Active only swap border-color, rather than
+     adding a border where none existed and shifting the field's content by 1px. */
+  border: 1px solid transparent;
   border-radius: var(--Corner-radius-corner-radius-200);
   overflow: hidden;
   box-shadow: 0px 4px 12px #00000014;
+}
+
+/* ─── States ───────────────────────────────────────────────────────────────
+   Design QA (MWPW-202072) added Hover/Active/Focus/Disabled to the text-field
+   component. The ring is a second box-shadow rather than a bordered
+   pseudo-element, so it isn't clipped by this element's own `overflow: hidden`
+   and automatically follows its border-radius. */
+
+.font-generator-text-input .text-field:hover:not(:has(.label:focus)) {
+  border-color: var(--color-gray-400-variant);
+  box-shadow: 0px 4px 6px #00000014;
+}
+
+/* Focus (ring) and Active (dark border) are mutually exclusive: .is-active is
+   toggled in JS on pointerdown/input/blur (see textInput.js), so keyboard
+   focus gets the ring until the user starts typing. */
+.font-generator-text-input .text-field:has(.label:focus):not(.is-active) {
+  box-shadow: 0 0 0 2px var(--Buttons-Down), 0px 4px 6px #00000014;
+}
+
+.font-generator-text-input .text-field.is-active {
+  border-color: var(--color-gray-950);
+  box-shadow: 0px 4px 6px #00000014;
+}
+
+.font-generator-text-input .text-field:has(.label:disabled) {
+  background-color: var(--color-light-gray);
+  border-color: transparent;
+  box-shadow: 0px 4px 6px #00000014;
+}
+
+.font-generator-text-input .text-field:has(.label:disabled) .preview-text-label,
+.font-generator-text-input .text-field:has(.label:disabled) .label,
+.font-generator-text-input .text-field:has(.label:disabled) .label::placeholder,
+.font-generator-text-input .text-field:has(.label:disabled) .character-count,
+.font-generator-text-input .text-field:has(.label:disabled) .text-wrapper {
+  color: var(--color-gray-400-variant);
+}
+
+.font-generator-text-input .text-field:has(.label:disabled) .suggestions-bar {
+  border-top-color: var(--color-gray-300-variant);
+}
+
+.font-generator-text-input .text-field:has(.label:disabled) .resize-handle,
+.font-generator-text-input .text-field:has(.label:disabled) .tag-pills {
+  pointer-events: none;
+}
+
+.font-generator-text-input .label:disabled {
+  cursor: not-allowed;
 }
 
 .font-generator-text-input .text-area-l-in-line {
@@ -106,7 +159,7 @@
   margin-block-end: calc(var(--spacing-300) + var(--fg-counter-height));
   font-family: var(--body-font-family);
   font-weight: 400;
-  color: var(--color-dark-gray);
+  color: var(--color-gray-800-variant);
   font-size: 16px;
   line-height: 20px;
   letter-spacing: 0;

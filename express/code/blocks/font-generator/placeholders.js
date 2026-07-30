@@ -2,9 +2,11 @@ import { getLibs } from '../../scripts/utils.js';
 
 // English fallback copy, used until each row exists in the placeholders sheet.
 // Scoped to strings owned by the toolbar, card grid, and input; the filter
-// accordion and drawer own their own copy ('fg-all', 'fg-categories',
-// 'fg-cool', 'fg-glitch', 'fg-symbol', 'fg-filters', 'fg-close-filters',
-// 'fg-promo-title', 'fg-promo-cta') via filters.js/panel.js fetchStrings() —
+// accordion and drawer own their own copy ('font-generator-all',
+// 'font-generator-categories', 'font-generator-cool', 'font-generator-glitch',
+// 'font-generator-symbol', 'font-generator-filters',
+// 'font-generator-close-filters', 'font-generator-promo-title',
+// 'font-generator-promo-cta') via filters.js/panel.js fetchStrings() —
 export const DEFAULT_PLACEHOLDERS = Object.freeze({
   // Input panel
   previewPlaceholder: 'Type the preview text you want to get started...',
