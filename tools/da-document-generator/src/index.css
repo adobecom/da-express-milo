@@ -3,3 +3,13 @@
 body {
   margin: 0;
 }
+
+/* Hide scrollbars on per-cell horizontal-scroll containers so table row heights stay
+   uniform. Content still scrolls via trackpad / shift-wheel. */
+.no-scrollbar {
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE/Edge */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;              /* Chrome/Safari */
+}

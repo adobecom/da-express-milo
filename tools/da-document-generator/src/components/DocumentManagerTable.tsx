@@ -32,7 +32,7 @@ const SORT_COLUMNS: { field: SortField; label: string }[] = [
 // Fixed column widths shared by the header and every row so a single CSS grid template
 // keeps them aligned while the body is virtualized (see DocumentRow). Deriving the
 // template + total width from one array keeps them from drifting apart.
-const COLUMN_WIDTHS = [44, 300, 140, 120, 170, 170, 100, 130, 120, 180, 150, 240, 110, 140, 72];
+const COLUMN_WIDTHS = [44, 460, 200, 200, 210, 210, 120, 440, 150, 320, 280, 400, 130, 210, 80];
 const GRID_TEMPLATE = COLUMN_WIDTHS.map((w) => `${w}px`).join(' ');
 const TOTAL_WIDTH = COLUMN_WIDTHS.reduce((a, b) => a + b, 0);
 
@@ -162,7 +162,7 @@ const DocumentRow = memo(function DocumentRow({
           className="cursor-pointer"
         />
       </div>
-      <div className="px-3 py-2 font-mono truncate" title={doc.path}>
+      <div className="px-3 py-2 font-mono overflow-x-auto whitespace-nowrap no-scrollbar" title={doc.path}>
         <a
           href={doc.editUrl ?? `https://da.live/edit#${doc.path}`}
           target="_blank"
@@ -173,36 +173,36 @@ const DocumentRow = memo(function DocumentRow({
           <ExternalLinkIcon />
         </a>
       </div>
-      <div className="px-3 py-2 text-gray-500 truncate">{doc.subDirectory}</div>
-      <div className="px-3 py-2 text-gray-700 truncate">{doc.identity.productType ?? '—'}</div>
-      <div className="px-3 py-2 text-gray-500 truncate">
+      <div className="px-3 py-2 text-gray-500 overflow-x-auto whitespace-nowrap no-scrollbar">{doc.subDirectory}</div>
+      <div className="px-3 py-2 text-gray-700 overflow-x-auto whitespace-nowrap no-scrollbar">{doc.identity.productType ?? '—'}</div>
+      <div className="px-3 py-2 text-gray-500 overflow-x-auto whitespace-nowrap no-scrollbar">
         {doc.identity.generatedBatch ? new Date(doc.identity.generatedBatch).toLocaleString() : '—'}
       </div>
-      <div className="px-3 py-2 text-gray-500 truncate">
+      <div className="px-3 py-2 text-gray-500 overflow-x-auto whitespace-nowrap no-scrollbar">
         {doc.identity.lastUpdated ? new Date(doc.identity.lastUpdated).toLocaleString() : '—'}
       </div>
       <div className="px-3 py-2 truncate">
         <StatusLabel doc={doc} />
       </div>
-      <div className="px-3 py-2 font-mono text-gray-400 truncate" title={doc.identity.productId}>
+      <div className="px-3 py-2 font-mono text-gray-400 overflow-x-auto whitespace-nowrap no-scrollbar" title={doc.identity.productId}>
         {doc.identity.productId ?? '—'}
       </div>
       <div className="px-3 py-2">
         {doc.needsBackfill ? (
-          <span className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5">
+          <span className="text-[10px] font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded px-1.5 py-0.5 whitespace-nowrap">
             Missing metadata
           </span>
         ) : (
           <span className="text-gray-300">—</span>
         )}
       </div>
-      <div className="px-3 py-2 text-gray-700 min-w-0">
+      <div className="px-3 py-2 text-gray-700 min-w-0 overflow-x-auto whitespace-nowrap no-scrollbar">
         <EditableCell value={doc.title} editable={doc.editable.title} onSave={(v) => onEditField(doc, 'title', v)} />
       </div>
-      <div className="px-3 py-2 text-gray-700 min-w-0">
+      <div className="px-3 py-2 text-gray-700 min-w-0 overflow-x-auto whitespace-nowrap no-scrollbar">
         <EditableCell value={doc.shortTitle} editable={doc.editable.shortTitle} onSave={(v) => onEditField(doc, 'short_title', v)} />
       </div>
-      <div className="px-3 py-2 text-gray-500 min-w-0">
+      <div className="px-3 py-2 text-gray-500 min-w-0 overflow-x-auto whitespace-nowrap no-scrollbar">
         <EditableCell value={doc.description} editable={doc.editable.description} onSave={(v) => onEditField(doc, 'description', v)} />
       </div>
       <div className="px-3 py-2">
@@ -234,7 +234,7 @@ function EditableCell({
 
   if (!editable) {
     return (
-      <span className="text-gray-400 truncate block" title="Not editable — backfill or regenerate to enable editing">
+      <span className="text-gray-400 whitespace-nowrap" title="Not editable — backfill or regenerate to enable editing">
         {value ?? '—'}
       </span>
     );
@@ -245,7 +245,7 @@ function EditableCell({
       <button
         type="button"
         onClick={() => { setDraft(value ?? ''); setError(null); setEditing(true); }}
-        className="text-left w-full truncate hover:bg-blue-50 rounded px-1 -mx-1 cursor-text"
+        className="text-left whitespace-nowrap hover:bg-blue-50 rounded px-1 -mx-1 cursor-text"
       >
         {value || <span className="text-gray-300">Click to edit</span>}
       </button>
