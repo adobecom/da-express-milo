@@ -72,8 +72,11 @@
   gap: var(--spacing-100);
 }
 
-/* Express web/Headings/2XL — 32px (mobile/tablet), 45px (desktop), weight 900 */
-.transparent-img-marquee .text-container h2 {
+/* Express web/Headings/2XL — 32px (mobile/tablet), 45px (desktop), weight 900
+   Styled by heading level, not just h2: the authored heading can be h1-h6
+   (e.g. h1 when this block leads an SEO page), and it must still match this
+   visual style regardless of tag. */
+.transparent-img-marquee .text-container :is(h1, h2, h3, h4, h5, h6) {
   color: inherit;
   font-size: var(--heading-font-size-ml);
   font-weight: var(--heading-font-weight-extra);
@@ -375,7 +378,7 @@
   }
 
   /* Desktop type scale: heading 45px, body 16px (Figma 1440px frame) */
-  .transparent-img-marquee .text-container h2 {
+  .transparent-img-marquee .text-container :is(h1, h2, h3, h4, h5, h6) {
     font-size: var(--heading-font-size-2xl);
   }
 

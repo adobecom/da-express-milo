@@ -61,10 +61,14 @@
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
   /* Cards share the header's left inset so they always stay aligned; the
-     track bleeds only to the right viewport edge so a partial card keeps
-     signalling the scroll. scroll-padding keeps snapped cards aligned. */
-  padding-inline-start: var(--icon-carousel-inset);
-  scroll-padding-left: var(--icon-carousel-inset);
+     track bleeds past the right viewport edge so a partial card keeps
+     signalling the scroll. The matching trailing inset means that once the
+     last card is reached there's no more room to bleed into, so it lands
+     flush with the viewport margin instead of the browser clamping mid-card
+     against the edge. scroll-padding keeps snapped cards aligned on both
+     sides. */
+  padding-inline: var(--icon-carousel-inset);
+  scroll-padding-inline: var(--icon-carousel-inset);
 }
 
 .icon-carousel-gallery::-webkit-scrollbar {
