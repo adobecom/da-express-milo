@@ -66,6 +66,8 @@ export interface ManagedDoc extends RowResult {
   identity: ManagedDocIdentity;
   /** True if product-type or product-id metadata is missing (predates the metadata contract). */
   needsBackfill: boolean;
+  /** True if the publish/preview status check failed (rate-limited/unreachable) — the real state is unknown, not "draft". */
+  statusUnknown?: boolean;
   title?: string;
   shortTitle?: string;
   description?: string;

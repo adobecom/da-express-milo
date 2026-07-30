@@ -1,5 +1,6 @@
 import { crawlDirectory, fetchAndParseDocs, type CrawlError, type DocFetchError } from '../api/crawl';
-import { batchCheckStatus, getToken, daPathToLiveUrl, daPathToPreviewUrl, cat, postDoc } from '../api/daApi';
+import { batchCheckStatus, getToken, daPathToLiveUrl, daPathToPreviewUrl, cat, postDoc, type PageStatus } from '../api/daApi';
+import { CRAWL_CONCURRENCY, STATUS_CONCURRENCY } from './concurrency';
 import { fetchProductFromTemplate, type ZazzleProduct } from '../api/zazzleApi';
 import { readMetadataBlockFromDoc, upsertMetadataBlockOnDoc, serializeDoc } from './metadata';
 import { tagEditableFieldsOnDoc, type EditableFieldKey } from './generate';
@@ -89,25 +90,38 @@ export interface CrawlAndLoadResult {
  * never silently dropped from the result.
  */
 export async function crawlAndLoadDocs(rootPath: string): Promise<CrawlAndLoadResult> {
-  const crawl = await crawlDirectory(rootPath);
-  const { records, errors: fetchErrors } = await fetchAndParseDocs(
-    crawl.docs.map((d) => d.path),
-    (html, path) => parseDocRecord(html, path, rootPath),
-  );
-
+  const crawl = await crawlDirectory(rootPath, { concurrency: CRAWL_CONCURRENCY });
+  const paths = crawl.docs.map((d) => d.path);
   const token = getToken();
-  if (token && records.length > 0) {
-    const statuses = await batchCheckStatus(records.map((r) => r.path), token);
-    for (const record of records) {
-      const status = statuses.get(record.path);
-      if (!status) continue;
-      if (status.live) {
-        record.stage = 'published';
-        record.liveUrl = daPathToLiveUrl(record.path);
-      } else if (status.preview) {
-        record.stage = 'previewed';
-        record.previewUrl = daPathToPreviewUrl(record.path);
-      }
+
+  // Fetch/parse each doc and live-check publish/preview status concurrently. Status only
+  // needs the paths (already known from the crawl), so it doesn't wait on parsing — this
+  // overlaps the two per-doc passes instead of running them back to back.
+  const [{ records, errors: fetchErrors }, statuses] = await Promise.all([
+    fetchAndParseDocs(
+      paths,
+      (html, path) => parseDocRecord(html, path, rootPath),
+      { concurrency: CRAWL_CONCURRENCY },
+    ),
+    token && paths.length > 0
+      ? batchCheckStatus(paths, token, STATUS_CONCURRENCY)
+      : Promise.resolve(new Map<string, PageStatus>()),
+  ]);
+
+  for (const record of records) {
+    const status = statuses.get(record.path);
+    if (!status) continue;
+    if (!status.ok) {
+      // Status check failed (e.g. rate-limited after retries) — don't mislabel as "draft".
+      record.statusUnknown = true;
+      continue;
+    }
+    if (status.live) {
+      record.stage = 'published';
+      record.liveUrl = daPathToLiveUrl(record.path);
+    } else if (status.preview) {
+      record.stage = 'previewed';
+      record.previewUrl = daPathToPreviewUrl(record.path);
     }
   }
 

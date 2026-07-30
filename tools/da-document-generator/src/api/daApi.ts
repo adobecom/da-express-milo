@@ -1,4 +1,4 @@
-import { runBatch, DEFAULT_CONCURRENCY } from '../lib/concurrency';
+import { runBatch, DEFAULT_CONCURRENCY, sleep } from '../lib/concurrency';
 
 const DA_API = 'https://admin.da.live';
 const HLX_ADMIN = 'https://admin.hlx.page';
@@ -245,20 +245,42 @@ export async function deleteDocument(daPath: string, token: string): Promise<voi
 export interface PageStatus {
   live: boolean;
   preview: boolean;
+  /** False when the status check failed (rate-limited/unreachable); live/preview are then not meaningful. */
+  ok: boolean;
 }
 
 export async function checkPageStatus(daPath: string, token: string): Promise<PageStatus> {
-  try {
-    const { org, repo, contentPath } = parseDAPath(daPath);
-    const resp = await fetch(`${HLX_ADMIN}/status/${org}/${repo}/${BRANCH}${contentPath}`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (!resp.ok) return { live: false, preview: false };
-    const data = await resp.json() as { live?: { status: number }; preview?: { status: number } };
-    return { live: data.live?.status === 200, preview: data.preview?.status === 200 };
-  } catch {
-    return { live: false, preview: false };
+  const { org, repo, contentPath } = parseDAPath(daPath);
+  const url = `${HLX_ADMIN}/status/${org}/${repo}/${BRANCH}${contentPath}`;
+  const MAX_ATTEMPTS = 4;
+  for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    try {
+      const resp = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
+      // Rate-limited or transient server error — back off and retry rather than silently
+      // reporting the doc as "not published" (the AEM admin API throttles aggressively).
+      if (resp.status === 429 || resp.status >= 500) {
+        if (attempt < MAX_ATTEMPTS - 1) {
+          const retryAfter = Number(resp.headers.get('retry-after'));
+          const backoffMs = Number.isFinite(retryAfter) && retryAfter > 0
+            ? retryAfter * 1000
+            : 400 * 2 ** attempt;
+          await sleep(backoffMs + Math.random() * 300);
+          continue;
+        }
+        return { live: false, preview: false, ok: false };
+      }
+      if (!resp.ok) return { live: false, preview: false, ok: false };
+      const data = await resp.json() as { live?: { status: number }; preview?: { status: number } };
+      return { live: data.live?.status === 200, preview: data.preview?.status === 200, ok: true };
+    } catch {
+      if (attempt < MAX_ATTEMPTS - 1) {
+        await sleep(400 * 2 ** attempt + Math.random() * 300);
+        continue;
+      }
+      return { live: false, preview: false, ok: false };
+    }
   }
+  return { live: false, preview: false, ok: false };
 }
 
 export async function batchCheckStatus(

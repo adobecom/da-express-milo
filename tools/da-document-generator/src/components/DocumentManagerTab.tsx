@@ -13,10 +13,11 @@ import type { ManagedDoc } from '../types';
 
 const LEGACY_BATCH = '(legacy / no batch)';
 const ALL = 'all';
+const DEFAULT_ROOT_PATH = '/adobecom/da-express-milo/express/print';
 
 export default function DocumentManagerTab() {
-  const [rootPathInput, setRootPathInput] = useState('');
-  const [rootPath, setRootPath] = useState<string | null>(null);
+  const [rootPathInput, setRootPathInput] = useState(DEFAULT_ROOT_PATH);
+  const [rootPath, setRootPath] = useState<string | null>(DEFAULT_ROOT_PATH);
   const [scanNonce, setScanNonce] = useState(0);
   const [docs, setDocs] = useState<ManagedDoc[]>([]);
   const [crawlErrors, setCrawlErrors] = useState<(CrawlError | DocFetchError)[]>([]);
@@ -196,7 +197,7 @@ export default function DocumentManagerTab() {
           type="text"
           value={rootPathInput}
           onChange={(e) => setRootPathInput(e.target.value)}
-          placeholder="/org/repo/path/to/folder"
+          placeholder={DEFAULT_ROOT_PATH}
           className="flex-1 min-w-[280px] max-w-md h-9 px-3 border border-gray-300 rounded-lg text-sm font-mono"
         />
         <button
@@ -230,6 +231,16 @@ export default function DocumentManagerTab() {
           </button>
         </div>
       )}
+
+      {hasScanned && !isFetching && (() => {
+        const unknownCount = docs.filter((d) => d.statusUnknown).length;
+        if (unknownCount === 0) return null;
+        return (
+          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
+            Publish status couldn&apos;t be determined for {unknownCount} document{unknownCount !== 1 ? 's' : ''} (the status service rate-limited or was unreachable). Those rows show <strong>Unknown</strong> — click Rescan to retry.
+          </div>
+        );
+      })()}
 
       {hasScanned && !isFetching && (
         <>

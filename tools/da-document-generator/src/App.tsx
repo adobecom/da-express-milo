@@ -6,9 +6,10 @@ type Tab = 'generate' | 'manage';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<Tab>('generate');
-  // Mount each tab lazily on first visit, then keep it mounted so its React
-  // state survives tab switches (only the active tab is shown).
-  const [mountedTabs, setMountedTabs] = useState<Set<Tab>>(() => new Set<Tab>(['generate']));
+  // Mount both tabs up front (only the active one is shown) so their React state
+  // survives tab switches AND the Document Manager can pre-warm its scan on page
+  // load — its table is ready before the author first opens that tab.
+  const [mountedTabs, setMountedTabs] = useState<Set<Tab>>(() => new Set<Tab>(['generate', 'manage']));
 
   function selectTab(tab: Tab) {
     setActiveTab(tab);
