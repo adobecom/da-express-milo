@@ -275,6 +275,10 @@
     gap: var(--spacing-300);
   }
 
+    .how-to-cards.cards-count-3 .card {
+    width: 295px;
+  }
+
   .how-to-cards.cards-count-4 .cards-container,
   .how-to-cards.cards-count-5 .cards-container,
   .how-to-cards.cards-count-6 .cards-container {
@@ -296,16 +300,13 @@
     min-width: 295px;
   }
 
-  .how-to-cards.cards-count-3 .card {
-    width: 517px;
-  }
-
+  .how-to-cards.cards-count-3 .card { 
+      width: 437px;
+    }
 
   .how-to-cards {
     --gallery-first-item-margin: var(--spacing-500);
   }
-
-
 }
 
 
@@ -323,9 +324,16 @@
     padding-right: 40px;
   }
 
-  .how-to-cards.card-count-3 .card {
-    /* width: calc((100% - var(--spacing-800)) / 3); */
-    width: 545px;
+  .how-to-cards.cards-count-3 .card { 
+      width: 437px;
+    }
+
+  .how-to-cards .card {
+      width: 322px;
+    } 
+
+    .how-to-cards .gallery {
+    gap: var(--spacing-400);
   }
 }
 
@@ -337,16 +345,13 @@
     --gallery-first-item-margin: 40px;
   }
 
-  .how-to-cards.card-count-3 .card {
-    /* width: calc((100% - var(--spacing-800)) / 3); */
-    width: 557px;
+  .how-to-cards.cards-count-3 .card { 
+    width: 517px;
   }
 
   .how-to-cards.cards-count-4 .card {
-    width: calc((100% - var(--spacing-1000)) / 4);
+    width: 382px;
   }
-
-
 
   .how-to-cards .cards-container {
     width: 100vw;
