@@ -301,6 +301,10 @@
     --gallery-first-item-margin: 40px;
   }
 
+    .how-to-cards.cards-count-3 .card {
+    width: calc((100% - var(--spacing-900)) / 3);
+  }
+
   .how-to-cards.cards-count-4 .card {
     width: calc((100% - var(--spacing-1000)) / 4);
   }

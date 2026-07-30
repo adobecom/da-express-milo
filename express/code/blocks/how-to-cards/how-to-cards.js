@@ -89,7 +89,6 @@ function createControl(items, container) {
 
   const intersecting = Array.from(items).fill(false);
 
-  const len = items.length;
   const pageInc = throttle((inc) => {
     const first = intersecting.indexOf(true);
     if (first === -1) return; // middle of swapping only page
@@ -125,7 +124,9 @@ function createControl(items, container) {
     nextButton.disabled = first >= maxFirst;
     dots.forEach((dot, i) => {
       i === Math.min(first, maxFirst) ? dot.classList.add('curr') : dot.classList.remove('curr');
-      i === first ? items[i].classList.add('curr') : items[i].classList.remove('curr');
+    });
+    items.forEach((item, i) => {
+      i === first ? item.classList.add('curr') : item.classList.remove('curr');
     });
     if (areEdgeItemsFullyInView(items, container)) {
       control.classList.add('hide');
@@ -137,13 +138,21 @@ function createControl(items, container) {
     control.classList.remove('loading');
   }, 300);
 
+  const updateFromState = () => {
+    const [first, last] = [intersecting.indexOf(true), intersecting.lastIndexOf(true)];
+    if (first === -1) {
+      syncDots();
+      return;
+    }
+    updateDOM(first, last);
+  };
+  window.addEventListener('resize', debounce(updateFromState, 300));
+
   const reactToChange = (entries) => {
     entries.forEach((entry) => {
       intersecting[items.indexOf(entry.target)] = entry.isIntersecting;
     });
-    const [first, last] = [intersecting.indexOf(true), intersecting.lastIndexOf(true)];
-    if (first === -1) return; // middle of swapping only page
-    updateDOM(first, last);
+    updateFromState();
   };
 
   const scrollObserver = new IntersectionObserver((entries) => {
