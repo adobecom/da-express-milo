@@ -25,7 +25,6 @@ main .section > .content:has( + .how-to-v2) h2 {
 }
 
 .how-to-v2 ol li {
-  padding: var(--spacing-100) 0;
   cursor: pointer;
   transition: all 0.21s;
   display: flex;
@@ -125,6 +124,13 @@ main .section:has(.how-to-v2) .content em {
   padding: 0 var(--spacing-400);
 }
 
+@media (max-width: 1199px) {
+  .how-to-v2.no-background-image .steps-content .media-container {
+    padding-left: 0;
+    padding-right: 0;
+  }
+}
+
 .how-to-v2 .steps-content .media-container::before {
   content: '';
   position: absolute;
@@ -143,15 +149,20 @@ main .section:has(.how-to-v2) .content em {
   background-position: center;
 }
 
-.how-to-v2 .ol.steps {
+.how-to-v2 ol.steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-300);
   margin: var(--spacing-200) 0 0;
   padding: 0;
 }
 
-.how-to-v2 ol.steps .step .step-content:has(.detail-container.closed) h3:not(:has(picture), :has(.milo-video)):hover {
+/* Hover only shows on non-expanded steps (Figma: Open?=No). Highlights the
+   whole row — indicator bar and text alike — not just the title text. */
+.how-to-v2 ol.steps .step:has(.detail-container.closed):not(:has(picture), :has(.milo-video)):hover {
   background-color: var(--color-gray-100);
-  margin: -8px 0 -8px -16px; 
-  padding: 8px 0 8px 16px;
+  border-radius: var(--Corner-radius-corner-radius-100);
+  transition: background-color 0.3s ease-out;
 }
 
 .how-to-v2 .video-container {
