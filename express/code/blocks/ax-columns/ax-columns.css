@@ -270,8 +270,6 @@ main .section .ax-columns.enterprise .column h2 {
 .ax-columns .column-picture {
   margin: var(--spacing-300) 0;
   position: relative;
-  padding-left: var(--spacing-100);
-  padding-right: var(--spacing-100);
   transition: transform 0.3s ease;
 }
 
@@ -731,11 +729,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   font-size: var(--body-font-size-m);
 }
 
-.ax-columns .column {
-  padding-left: var(--spacing-500);
-  padding-right: var(--spacing-500);
-}
-
 .ax-columns.fullsize .column-picture,
 .ax-columns.fullsize .hero-animation-overlay {
   order: -1;
@@ -765,8 +758,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 .ax-columns .column.column-picture {
-  padding-left: var(--spacing-100);
-  padding-right: var(--spacing-100);
   margin: auto;
 }
 
