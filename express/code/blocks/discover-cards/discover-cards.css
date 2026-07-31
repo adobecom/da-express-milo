@@ -369,6 +369,7 @@ main .section .discover-cards {
   grid-area: 1 / 1;
   min-width: 0;
   overflow: hidden;
+  transition: visibility 0s linear 175ms;
 }
 .discover-cards.flip .flip-card-back {
   width: 100%;
@@ -377,6 +378,21 @@ main .section .discover-cards {
   transform: rotateY(180deg);
   position: relative;
   overflow: visible;
+  visibility: hidden;
+}
+
+/*
+ * Safari and Firefox ignore backface-visibility on grid items, so the away-facing
+ * face bleeds through the visible one. The .flip-card-front / .flip-card-back rules
+ * above toggle each face's visibility instead; the transition delay swaps them at the
+ * 175ms midpoint of the 350ms rotation so the flip animation is preserved.
+ */
+.discover-cards.flip .card.is-flipped .flip-card-front {
+  visibility: hidden;
+}
+
+.discover-cards.flip .card.is-flipped .flip-card-back {
+  visibility: visible;
 }
 
 .discover-cards.flip .flip-card-back .scrollable-content {
