@@ -139,7 +139,12 @@ test.describe('IconCarouselBlock Test Suite', () => {
     });
 
     await test.step(`step-2: Inset scales to ${expectedInset} at rest, and the track still bleeds to the true right edge`, async () => {
-      await expect(block.gallery).toHaveCSS('padding-left', expectedInset);
+      // WebKit's calc() can be off by a thousandth of a pixel (e.g.
+      // "160.000031px" vs "160px") on this viewport-scaled value, so match
+      // numerically with a tolerance instead of the exact CSS string.
+      await expect.poll(() => block.gallery.evaluate(
+        (el) => parseFloat(getComputedStyle(el).paddingLeft),
+      )).toBeCloseTo(parseFloat(expectedInset), 1);
       const cardLeft = await block.firstCard.evaluate((el) => el.getBoundingClientRect().left);
       expect(Math.round(cardLeft)).toBe(Math.round(parseFloat(expectedInset)));
       const lastCardRight = await block.cards.last().evaluate((el) => el.getBoundingClientRect().right);

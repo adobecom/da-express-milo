@@ -212,8 +212,11 @@ main .section:has(.how-to-v2) .content em {
 }
 
 /* Hover only shows on non-expanded steps (Figma: Open?=No). Highlights the
-   whole row — indicator bar and text alike — not just the title text. */
-.how-to-v2 ol.steps .step:has(.detail-container.closed):not(:has(picture), :has(.milo-video)):hover {
+   whole row — indicator bar and text alike — not just the title text.
+   The picture/video exclusion only looks at the title (h3), not the whole
+   step, so steps with plain-text titles still hover-highlight even when
+   their (collapsed) detail body holds an image or video. */
+.how-to-v2 ol.steps .step:has(.detail-container.closed):not(:has(h3 picture), :has(h3 .milo-video)):hover {
   background-color: var(--color-gray-100);
   border-radius: var(--Corner-radius-corner-radius-100);
   transition: background-color 0.3s ease-out;
