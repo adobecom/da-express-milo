@@ -384,12 +384,23 @@
   --Buttons-default: var(--S2-Buttons-Accent-Color-Default);
   --Buttons-hover: var(--S2-Buttons-Accent-Color-Hover);
   --Buttons-Down: var(--Palette-blue-1000);
+
+  /* New Grid Tokens */
+  --Grid-container-padding-side: var(--spacing-300);
+  --Grid-grid-gutter: var(--spacing-100);
+  --section-padding-xl: var(--spacing-600);
+  
 }
 
 @media (min-width: 600px) {
   :root {
     --ax-grid-margin: var(--spacing-500);
     --ax-grid-gutter: 16px;
+
+    /* New Grid Tokens */
+    --Grid-container-padding-side: var(--spacing-500);
+    --Grid-grid-gutter: var(--spacing-300);
+    --section-padding-xl: var(--spacing-600);
   }
 }
 
@@ -424,6 +435,11 @@
     --typography-line-height-Title-2xs: 22px;
     --typography-headings-xl: 36px;
     --typography-body-s: 16px;
+
+    /* New Grid Tokens */
+    --Grid-container-padding-side: var(--spacing-600);
+    --Grid-grid-gutter: var(--spacing-400);
+    --section-padding-xl: var(--spacing-900);
   }
 }
 

@@ -226,7 +226,7 @@ main .section .ax-columns.enterprise .column h2 {
 .section>.ax-columns p.button-container,
 .section>.ax-columns .con-button {
   margin: 0;
-  margin-top: var(--spacing-600);
+  margin-top: var(--spacing-500);
 }
 
 .section>.ax-columns .button-container a {
