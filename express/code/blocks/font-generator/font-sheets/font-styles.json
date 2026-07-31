@@ -14,7 +14,7 @@
       "id": "light-text-bubble",
       "category": "Cool",
       "styleName": "Light text bubble",
-      "fontSupported": "noto-sans",
+      "fontSupported": "source-han-sans-jp",
       "type": "direct-map",
       "pattern": {
         "placement": "none",
@@ -130,13 +130,13 @@
         "numbers": [],
         "specialCharacters": []
       },
-      "previewLineHeight": 1.1
+      "previewLineHeight": 1.102
     },
     {
       "id": "dark-text-bubble",
       "category": "Cool",
       "styleName": "Dark text bubble",
-      "fontSupported": "noto-sans",
+      "fontSupported": "source-han-sans-jp",
       "type": "direct-map",
       "pattern": {
         "placement": "none",
@@ -252,13 +252,13 @@
         "numbers": [],
         "specialCharacters": []
       },
-      "previewLineHeight": 1.1
+      "previewLineHeight": 1.102
     },
     {
       "id": "full-width",
       "category": "Cool",
       "styleName": "Full width",
-      "fontSupported": "noto-sans",
+      "fontSupported": "source-han-sans-jp",
       "type": "direct-map",
       "pattern": {
         "placement": "none",
@@ -374,7 +374,7 @@
         "numbers": [],
         "specialCharacters": []
       },
-      "previewLineHeight": 1.132
+      "previewLineHeight": 1.1
     },
     {
       "id": "diagonal-strikes",
@@ -3308,7 +3308,7 @@
       "id": "weights",
       "category": "Symbol",
       "styleName": "Weights",
-      "fontSupported": "noto-sans",
+      "fontSupported": "gothic-a1",
       "type": "pattern-map",
       "pattern": {
         "placement": "start+end",
@@ -3424,7 +3424,7 @@
         "numbers": [],
         "specialCharacters": []
       },
-      "previewLineHeight": 1.299
+      "previewLineHeight": 1.222
     },
     {
       "id": "arrows",

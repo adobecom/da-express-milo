@@ -19,7 +19,12 @@ function resolveBranchLink() {
 }
 
 const FEATURE_FLAGS = ['font-generator-product-entry'];
-const FONT_FAMILY_BY_ID = { 'noto-sans': 'Noto Sans', 'gothic-a1': 'Gothic A1' };
+const FONT_FAMILY_BY_ID = {
+  'noto-sans': 'Noto Sans',
+  'gothic-a1': 'Gothic A1',
+  // Styles whose editor doesn't support Noto Sans map here instead (MWPW-202743).
+  'source-han-sans-jp': 'Source Han Sans JP',
+};
 const DEFAULT_FONT_FAMILY = 'Noto Sans';
 
 // The dynamic per-card params appended to the Branch link. Everything else
