@@ -137,8 +137,6 @@ main .section .ax-columns.enterprise .column h2 {
 .ax-columns.light,
 .ax-columns.fullsize.center {
   max-width: var(--block-sm-max-width);
-  padding-left: 0;
-  padding-right: 0;
 }
 
 .section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
@@ -795,7 +793,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 /* Custom color variant */
-
 .ax-columns.color .img-wrapper {
   height: 345px;
   width: 345px;
