@@ -102,13 +102,13 @@ test.describe('IconCarouselBlock Test Suite', () => {
     });
   });
 
-  // Test Id : 2 : @icon-carousel-widescreen
+  // Test Id : 2 : @icon-carousel-desktop-widescreen-inset
   test(`[Test Id - ${features[2].tcid}] ${features[2].name} ${features[2].tags}`, async ({ page, baseURL }) => {
     const testUrl = `${baseURL}${features[2].path}${miloLibs}`;
     const block = new IconCarouselBlock(page, features[2].selector);
     const { leftBuffer } = features[2].data;
 
-    await test.step('step-1: Navigate at a widescreen viewport', async () => {
+    await test.step('step-1: Navigate at a desktop/widescreen viewport', async () => {
       await page.setViewportSize({ width: 1600, height: 900 });
       await page.goto(testUrl);
       await page.waitForLoadState('domcontentloaded');
@@ -120,14 +120,45 @@ test.describe('IconCarouselBlock Test Suite', () => {
     });
 
     await test.step(`step-3: Gallery content is inset ${leftBuffer} from the left`, async () => {
+      // Desktop (>=1200px) through 1680px viewport share this flat inset;
+      // beyond 1680px it scales instead (see tcid 3).
       await expect(block.gallery).toHaveCSS('padding-left', leftBuffer);
+    });
+  });
+
+  // Test Id : 3 : @icon-carousel-inset-scales-ultrawide
+  test(`[Test Id - ${features[3].tcid}] ${features[3].name} ${features[3].tags}`, async ({ page, baseURL }) => {
+    const testUrl = `${baseURL}${features[3].path}${miloLibs}`;
+    const block = new IconCarouselBlock(page, features[3].selector);
+    const { viewportWidth, expectedInset } = features[3].data;
+
+    await test.step('step-1: Navigate at an ultrawide viewport', async () => {
+      await page.setViewportSize({ width: viewportWidth, height: 1000 });
+      await page.goto(testUrl);
+      await page.waitForLoadState('domcontentloaded');
+    });
+
+    await test.step(`step-2: Inset scales to ${expectedInset} at rest, and the track still bleeds to the true right edge`, async () => {
+      await expect(block.gallery).toHaveCSS('padding-left', expectedInset);
+      const cardLeft = await block.firstCard.evaluate((el) => el.getBoundingClientRect().left);
+      expect(Math.round(cardLeft)).toBe(Math.round(parseFloat(expectedInset)));
+      const lastCardRight = await block.cards.last().evaluate((el) => el.getBoundingClientRect().right);
+      expect(lastCardRight).toBeGreaterThan(viewportWidth);
+    });
+
+    await test.step(`step-3: Fully scrolled, the last card mirrors the same ${expectedInset} gap on the right`, async () => {
+      await block.gallery.evaluate((el) => {
+        el.style.scrollBehavior = 'auto';
+        el.scrollLeft = el.scrollWidth;
+      });
+      const lastCardRight = await block.cards.last().evaluate((el) => el.getBoundingClientRect().right);
+      expect(Math.round(viewportWidth - lastCardRight)).toBe(Math.round(parseFloat(expectedInset)));
     });
 
     await test.step('step-4: Next button advances past the second card', async () => {
-      // Regression check: at this breakpoint the large left inset used to
-      // leave the previously-first card >10% visible after one click, which
-      // pinned the shared gallery widget's "first visible card" index and
-      // made every next-click after the first a no-op.
+      // Regression check: a large inset here can leave the previously-first
+      // card >10% visible after one click, stalling the next button.
+      await block.gallery.evaluate((el) => { el.scrollLeft = 0; });
       if (await block.nextBtn.isDisabled()) return;
       await block.nextBtn.click();
       const scrollLeftAfterFirstClick = await block.gallery.evaluate((el) => el.scrollLeft);

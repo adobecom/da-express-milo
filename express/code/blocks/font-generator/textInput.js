@@ -48,9 +48,6 @@ function buildSuggestionPill(text) {
   const tag = document.createElement('div');
   tag.className = 'tag-m';
   const content = document.createElement('div');
-  // Named tag-content, not the generic "content" — that class is claimed
-  // globally (main .section .content p margin rules etc.) and collided with
-  // this pill's inner layout.
   content.className = 'tag-content';
   const container = document.createElement('div');
   container.className = 'text-container';

@@ -73,9 +73,8 @@
 }
 
 /* Express web/Headings/2XL — 32px (mobile/tablet), 45px (desktop), weight 900
-   Styled by heading level, not just h2: the authored heading can be h1-h6
-   (e.g. h1 when this block leads an SEO page), and it must still match this
-   visual style regardless of tag. */
+   Matches any heading level — this block can lead with an h1 (e.g. on an
+   SEO page), not just h2. */
 .transparent-img-marquee .text-container :is(h1, h2, h3, h4, h5, h6) {
   color: inherit;
   font-size: var(--heading-font-size-ml);

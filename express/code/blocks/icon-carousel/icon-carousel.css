@@ -60,13 +60,8 @@
   scrollbar-width: none;
   scroll-snap-type: x mandatory;
   scroll-behavior: smooth;
-  /* Cards share the header's left inset so they always stay aligned; the
-     track bleeds past the right viewport edge so a partial card keeps
-     signalling the scroll. The matching trailing inset means that once the
-     last card is reached there's no more room to bleed into, so it lands
-     flush with the viewport margin instead of the browser clamping mid-card
-     against the edge. scroll-padding keeps snapped cards aligned on both
-     sides. */
+  /* Trailing inset mirrors the leading one so the last card stops flush
+     with the viewport margin instead of bleeding past it once scrolled. */
   padding-inline: var(--icon-carousel-inset);
   scroll-padding-inline: var(--icon-carousel-inset);
 }
@@ -210,7 +205,9 @@
 /* ── Desktop (L) ≥ 1200px ───────────────────────────────────────── */
 @media (min-width: 1200px) {
   .icon-carousel {
-    --icon-carousel-inset: var(--spacing-600);
+    /* Flat 40px through 1680px viewport width, then scales so the content
+       area stays capped at 1600px. */
+    --icon-carousel-inset: max(var(--spacing-600), calc((100vw - 1600px) / 2));
     padding: var(--spacing-900) 0;
   }
 
@@ -236,15 +233,6 @@
 
   .icon-carousel .icon-carousel-card-body p {
     font-size: var(--body-font-size-m);
-  }
-}
-
-/* ── Widescreen (XL) ≥ 1440px ───────────────────────────────────────
- * Inset the content 160px from the left edge; the gallery still bleeds
- * to the right edge so a partial card keeps signalling the scroll. */
-@media (min-width: 1440px) {
-  .icon-carousel {
-    --icon-carousel-inset: 160px;
   }
 }
 
