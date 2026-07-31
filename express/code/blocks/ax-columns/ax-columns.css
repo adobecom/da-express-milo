@@ -137,6 +137,8 @@ main .section .ax-columns.enterprise .column h2 {
 .ax-columns.light,
 .ax-columns.fullsize.center {
   max-width: var(--block-sm-max-width);
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
@@ -226,7 +228,7 @@ main .section .ax-columns.enterprise .column h2 {
 .section>.ax-columns p.button-container,
 .section>.ax-columns .con-button {
   margin: 0;
-  margin-top: var(--spacing-500);
+  margin-top: var(--spacing-600);
 }
 
 .section>.ax-columns .button-container a {
@@ -268,6 +270,8 @@ main .section .ax-columns.enterprise .column h2 {
 .ax-columns .column-picture {
   margin: var(--spacing-300) 0;
   position: relative;
+  padding-left: var(--spacing-100);
+  padding-right: var(--spacing-100);
   transition: transform 0.3s ease;
 }
 
@@ -727,6 +731,11 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   font-size: var(--body-font-size-m);
 }
 
+.ax-columns .column {
+  padding-left: var(--spacing-500);
+  padding-right: var(--spacing-500);
+}
+
 .ax-columns.fullsize .column-picture,
 .ax-columns.fullsize .hero-animation-overlay {
   order: -1;
@@ -756,6 +765,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 .ax-columns .column.column-picture {
+  padding-left: var(--spacing-100);
+  padding-right: var(--spacing-100);
   margin: auto;
 }
 
@@ -793,6 +804,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 /* Custom color variant */
+
 .ax-columns.color .img-wrapper {
   height: 345px;
   width: 345px;
@@ -1886,5 +1898,55 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
 @media screen and (max-width: 1200px) {
   main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
     padding-top: 10px;
+  }
+}
+
+/* Temporary styles for the Font Generator SEO page's ax-columns instance.
+   Not a long-term variant — remove once a permanent layout solution lands. */
+.section .ax-columns.temporary-font-generator-styles p.button-container a.button,
+.section .ax-columns.temporary-font-generator-styles a.con-button {
+  background-color: var(--Background-Primary-Default);
+  border-color: var(--Background-Primary-Default);
+  border-radius: 999px;
+  color: var(--color-white);
+}
+
+.section .ax-columns.temporary-font-generator-styles p.button-container a.button:hover,
+.section .ax-columns.temporary-font-generator-styles p.button-container a.button:active,
+.section .ax-columns.temporary-font-generator-styles a.con-button:hover,
+.section .ax-columns.temporary-font-generator-styles a.con-button:active {
+  background-color: var(--Background-Primary-Hover);
+  border-color: var(--Background-Primary-Hover);
+}
+
+@media (max-width: 1199px) {
+  .section .ax-columns.temporary-font-generator-styles h3 {
+    font-size: var(--typography-headings-xl);
+  }
+}
+
+@media (max-width: 600px) {
+  .ax-columns.temporary-font-generator-styles {
+    max-width: unset;
+    padding-left: var(--Grid-container-padding-side);
+    padding-right: var(--Grid-container-padding-side);
+    padding-top: var(--section-padding-xl);
+    padding-bottom: var(--section-padding-xl);
+  }
+
+  .section .ax-columns.temporary-font-generator-styles>div {
+    padding-top: 0;
+    padding-bottom: 0;
+    gap: var(--spacing-700);
+  }
+
+  .section .ax-columns.temporary-font-generator-styles .column {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .section>.ax-columns.temporary-font-generator-styles p.button-container,
+  .section>.ax-columns.temporary-font-generator-styles .con-button {
+    margin-top: var(--spacing-500);
   }
 }
