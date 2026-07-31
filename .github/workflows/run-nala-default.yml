@@ -93,3 +93,23 @@ jobs:
             playwright-report/
           retention-days: 30
           if-no-files-found: ignore
+
+  # Single aggregate check for branch protection. `needs.run-nala-tests.result`
+  # collapses the whole shard matrix to one value: 'success' only if every shard
+  # passed. Make THIS job the required status check so the shard count can change
+  # without ever touching branch protection again.
+  nala-gate:
+    name: Nala Tests Gate
+    if: always()
+    needs: run-nala-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all shards passed
+        run: |
+          result="${{ needs.run-nala-tests.result }}"
+          echo "Aggregate shard result: $result"
+          if [[ "$result" != "success" ]]; then
+            echo "One or more Nala shards did not pass."
+            exit 1
+          fi
+          echo "All Nala shards passed."
