@@ -23,7 +23,9 @@ const FONT_FAMILY_BY_ID = {
   'noto-sans': 'Noto Sans',
   'gothic-a1': 'Gothic A1',
   // Styles whose editor doesn't support Noto Sans map here instead (MWPW-202743).
-  'source-han-sans-jp': 'Source Han Sans JP',
+  // Key is the Adobe Fonts kit slug (source-han-sans-japanese); value is the
+  // family name the Express editor expects (Source Han Sans JP).
+  'source-han-sans-japanese': 'Source Han Sans JP',
 };
 const DEFAULT_FONT_FAMILY = 'Noto Sans';
 
