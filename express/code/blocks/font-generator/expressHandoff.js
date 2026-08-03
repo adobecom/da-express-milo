@@ -9,7 +9,7 @@ import showAppModal from './expressAppModal.js';
 // the raw editor URL did not. We only append the dynamic, per-card params.
 const BRANCH_LINK_PROD = 'https://adobesparkpost.app.link/0lAvVTo1b5b';
 // Stage uses Branch's test domain (test-app.link) + a separate link id.
-const BRANCH_LINK_STAGE = 'https://adobesparkpost.test-app.link/5Nq0ZDWc04b';
+const BRANCH_LINK_STAGE = 'https://adobesparkpost.app.link/zS9Zumyee5b';
 
 // Gated on the same ?hzenv=stage override the rest of the block uses to target
 // stage (see how the editor host was resolved previously).
