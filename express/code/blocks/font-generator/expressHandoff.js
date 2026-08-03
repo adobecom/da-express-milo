@@ -19,7 +19,14 @@ function resolveBranchLink() {
 }
 
 const FEATURE_FLAGS = ['font-generator-product-entry'];
-const FONT_FAMILY_BY_ID = { 'noto-sans': 'Noto Sans', 'gothic-a1': 'Gothic A1' };
+const FONT_FAMILY_BY_ID = {
+  'noto-sans': 'Noto Sans',
+  'gothic-a1': 'Gothic A1',
+  // Styles whose editor doesn't support Noto Sans map here instead (MWPW-202743).
+  // Key is the Adobe Fonts kit slug (source-han-sans-japanese); value is the
+  // family name the Express editor expects (Source Han Sans JP).
+  'source-han-sans-japanese': 'Source Han Sans JP',
+};
 const DEFAULT_FONT_FAMILY = 'Noto Sans';
 
 // The dynamic per-card params appended to the Branch link. Everything else
