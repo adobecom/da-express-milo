@@ -14,6 +14,12 @@ function getScrollPadding(container) {
   return parseFloat(value) || scrollPaddingFallback;
 }
 
+function getSidePadding(container) {
+  const root = container.closest('.how-to-cards') || container;
+  const value = getComputedStyle(root).getPropertyValue('--side-padding');
+  return parseFloat(value) || 0;
+}
+
 function scrollWithOffset(target, container, offset = getScrollPadding(container)) {
   const containerRect = container.getBoundingClientRect();
   const targetRect = target.getBoundingClientRect();
@@ -31,8 +37,11 @@ function isFullyInView(item, container) {
     || !containerRect.height
   ) return false;
   const tolerance = 1;
+  // The rightmost visible card must clear its trailing --side-padding gap to
+  // qualify as fully in view, matching the block's end padding.
+  const sidePadding = getSidePadding(container);
   return itemRect.left >= containerRect.left - tolerance
-    && itemRect.right <= containerRect.right + tolerance
+    && itemRect.right + sidePadding <= containerRect.right + tolerance
     && itemRect.top >= containerRect.top - tolerance
     && itemRect.bottom <= containerRect.bottom + tolerance;
 }
