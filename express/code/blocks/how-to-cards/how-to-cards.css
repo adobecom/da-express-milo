@@ -8,6 +8,10 @@
   --radius-pill: 50px;
   --status-dot-size: 6px;
   --status-curr-width: 30px;
+  /* Duration of the current-dot fill reveal. Blog-feature-marquee drives this
+     from its autoplay interval as a progress bar; how-to-cards has no autoplay,
+     so it runs once as a fill-in on selection. */
+  --how-to-cards-dot-fill-duration: 0.6s;
   --block-padding: var(--spacing-600);
   --side-padding: 20px;
   --gallery-first-item-margin: 20px;
@@ -231,15 +235,68 @@
 }
 
 .how-to-cards .gallery-control .status .dot {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50px;
   width: var(--status-dot-size);
   height: var(--status-dot-size);
   background-color: var(--color-gray-600);
+  flex-shrink: 0;
+  transition: width 0.4s ease-out, background-color 0.4s ease-out;
+}
+
+.how-to-cards .gallery-control .status .dot::before {
+  content: '';
+  width: var(--status-dot-size);
+  height: var(--status-dot-size);
+  border-radius: 50px;
+  background-color: var(--color-black);
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
 }
 
 .how-to-cards .gallery-control .status .dot.curr {
   width: var(--status-curr-width);
-  background-color: var(--color-black);
+  justify-content: flex-start;
+  background-color: var(--color-gray-300);
+}
+
+.how-to-cards .gallery-control .status .dot.curr::before {
+  opacity: 1;
+  animation: how-to-cards-dot-fill var(--how-to-cards-dot-fill-duration) ease-out 0s forwards;
+}
+
+@keyframes how-to-cards-dot-fill {
+  0% {
+    width: var(--status-dot-size);
+    opacity: 0;
+  }
+
+  15% {
+    width: calc(var(--status-curr-width) * 0.3);
+    opacity: 1;
+  }
+
+  100% {
+    width: var(--status-curr-width);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .how-to-cards .gallery-control .status .dot,
+  .how-to-cards .gallery-control .status .dot::before {
+    transition: none;
+  }
+
+  .how-to-cards .gallery-control .status .dot.curr::before {
+    width: var(--status-curr-width);
+    animation: none;
+  }
 }
 
 
