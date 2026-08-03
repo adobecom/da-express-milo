@@ -62,7 +62,7 @@
 }
 
 .how-to-cards .card:last-child {
-  margin-right: calc(2 * var(--side-padding));
+  margin-right: 16px;
 }
 
 .how-to-cards .card p {
@@ -336,8 +336,7 @@
 
 @media (min-width: 1440px) {
   .how-to-cards {
-    max-width: var(--block-wd-grid-max-width);
-    margin: auto;
+    max-width: unset;
     box-sizing: border-box;
     --gallery-first-item-margin: 40px;
   }
@@ -345,12 +344,6 @@
   .how-to-cards.cards-count-3 .card { 
     width: 517px;
   }
-
-  .how-to-cards.cards-count-4 .card {
-    width: 382px;
-  }
-
- 
 
   .how-to-cards.cards-count-3 .cards-container,
   .how-to-cards.cards-count-4 .cards-container {
