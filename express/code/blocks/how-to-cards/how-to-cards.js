@@ -141,9 +141,20 @@ function createControl(items, container) {
     const itemGap = parseFloat(columnGap || gap) || 0;
     return cardWidth + itemGap;
   };
-  const maxScroll = () => Math.max(0, container.scrollWidth - container.clientWidth);
-  const atEnd = () => Math.ceil(container.scrollLeft + container.clientWidth)
-    >= container.scrollWidth - 1;
+  // The last card carries a decorative trailing margin-right. The container can
+  // scroll into it, but it reveals no content, so it must be excluded from the
+  // overflow measurement — otherwise, when every card already fits, that phantom
+  // whitespace reads as a second page and the control shows (notably >=1680px,
+  // where the block caps and the cards exactly fill it).
+  const tailGap = () => {
+    const last = items[items.length - 1];
+    return last ? parseFloat(getComputedStyle(last).marginRight) || 0 : 0;
+  };
+  const maxScroll = () => Math.max(
+    0,
+    container.scrollWidth - container.clientWidth - tailGap(),
+  );
+  const atEnd = () => container.scrollLeft >= maxScroll() - 1;
   const pageCount = () => {
     const step = getStep();
     if (step <= 0 || maxScroll() <= 1) return 1;
@@ -190,7 +201,9 @@ function createControl(items, container) {
 
   const goToPip = (index) => {
     const target = Math.max(0, Math.min(count - 1, index));
-    container.scrollTo({ left: target * getStep(), behavior: 'smooth' });
+    // Clamp to the content end so the last pip lands the last card flush at the
+    // edge rather than scrolling into the trailing whitespace.
+    container.scrollTo({ left: Math.min(target * getStep(), maxScroll()), behavior: 'smooth' });
   };
   prevButton.addEventListener('click', () => goToPip(pip - 1));
   nextButton.addEventListener('click', () => goToPip(pip + 1));
