@@ -19,7 +19,7 @@
 }
 
 .how-to-cards:has(.gallery-control.hide) {
-  padding: var(--block-padding) 0 var(--block-padding) 0px;
+  padding: var(--block-padding) 0px var(--block-padding) 0px;
 }
 
 .how-to-cards:has(.gallery-control.hide) .cards-container {
