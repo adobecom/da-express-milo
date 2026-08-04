@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mini Editor Widget — Demo</title>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f3f3f3;
+      font-family: adobe-clean, 'Segoe UI', system-ui, sans-serif;
+    }
+
+    #mount {
+      width: 688px;
+      max-width: 92vw;
+    }
+
+    /* Demo-only preview styling — the widget itself owns no preview visuals. */
+    .demo-quote {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      gap: 24px;
+      aspect-ratio: 16 / 9;
+      padding: 48px;
+      text-align: center;
+      background: linear-gradient(135deg, #7fd4ff 0%, #8e5bff 100%);
+      transition: background 0.25s ease;
+    }
+
+    .demo-quote p {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 700;
+      color: #131313;
+      max-width: 22ch;
+    }
+
+    .demo-quote cite {
+      font-style: normal;
+      font-size: 15px;
+      color: #292929;
+    }
+  </style>
+</head>
+<body>
+  <div id="mount"></div>
+
+  <script type="module">
+    import createMiniEditorWidget from './mini-editor-widget.js';
+
+    const BACKGROUNDS = [
+      { label: 'Sky', css: 'linear-gradient(135deg, #7fd4ff 0%, #8e5bff 100%)', swatch: '#7fd4ff' },
+      { label: 'Violet', css: 'linear-gradient(135deg, #8e5bff 0%, #c86dd7 100%)', swatch: '#8e5bff' },
+      { label: 'Sand', css: 'linear-gradient(135deg, #f5d7a1 0%, #c9a27e 100%)', swatch: '#c9a27e' },
+      { label: 'Forest', css: 'linear-gradient(135deg, #7fce9b 0%, #2f7d5b 100%)', swatch: '#2f7d5b' },
+      { label: 'Ink', css: 'linear-gradient(135deg, #4a4a4a 0%, #111 100%)', swatch: '#111111' },
+    ];
+
+    const FONTS = [
+      { id: 'serif', label: 'A', ariaLabel: 'Serif', fontFamily: 'Georgia, "Times New Roman", serif', selected: true },
+      { id: 'sans', label: 'A', ariaLabel: 'Sans serif', fontFamily: 'adobe-clean, sans-serif' },
+      { id: 'script', label: 'A', ariaLabel: 'Script', fontFamily: '"Brush Script MT", cursive' },
+    ];
+
+    // Build a simple preview element (the caller's content).
+    const preview = document.createElement('div');
+    preview.className = 'demo-quote';
+    const quote = document.createElement('p');
+    quote.textContent = '"Most folks are about as happy as they make up their minds to be."';
+    const author = document.createElement('cite');
+    author.textContent = '- Abraham Lincoln -';
+    preview.append(quote, author);
+
+    const editor = await createMiniEditorWidget({
+      content: preview,
+      strings: {
+        actionsLabel: 'Editor actions',
+        fontGroupLabel: 'Font',
+        backgroundsLabel: 'Background',
+      },
+      topActions: [
+        { id: 'share', type: 'button', label: 'Share', onClick: () => console.log('share') },
+        { id: 'edit', type: 'action', iconOnly: true, ariaLabel: 'Edit', onClick: () => console.log('edit') },
+        { id: 'download', type: 'action', iconOnly: true, ariaLabel: 'Download', onClick: () => console.log('download') },
+      ],
+      fontOptions: FONTS.map((f) => ({
+        ...f,
+        onSelect: (id) => { quote.style.fontFamily = f.fontFamily; console.log('font', id); },
+      })),
+      backgrounds: {
+        colors: BACKGROUNDS.map((b) => b.swatch),
+        labels: BACKGROUNDS.map((b) => b.label),
+        selected: ['0'],
+        onChange: ({ index }) => {
+          if (index >= 0) preview.style.background = BACKGROUNDS[index].css;
+        },
+      },
+    });
+
+    document.getElementById('mount').appendChild(editor.element);
+  </script>
+</body>
+</html>
