@@ -21,6 +21,10 @@ describe('How-to-v2', () => {
       expect(val).to.include('bg.jpg');
     });
 
+    it('does not add the no-background-image class', () => {
+      expect(blocks[0].classList.contains('no-background-image')).to.be.false;
+    });
+
     it('creates a steps-content container with a media-container', () => {
       const stepsContent = blocks[0].querySelector('.steps-content');
       expect(stepsContent).to.exist;
@@ -78,6 +82,10 @@ describe('How-to-v2', () => {
   describe('no background — blocks[1]', () => {
     it('does not set --background-image CSS custom property', () => {
       expect(blocks[1].style.getPropertyValue('--background-image')).to.equal('');
+    });
+
+    it('adds the no-background-image class', () => {
+      expect(blocks[1].classList.contains('no-background-image')).to.be.true;
     });
 
     it('creates a steps-content container with a media-container', () => {
