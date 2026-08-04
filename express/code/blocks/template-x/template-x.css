@@ -2435,8 +2435,7 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   main .section.long-form .template-x:not(.fullwidth) {
     width: var(--ax-grid-8-col-width);
     margin: 0 auto;
-    padding: 0 var(--spacing-600) 0;
-    box-sizing: content-box;
+    box-sizing: border-box;
   }
 }
 
