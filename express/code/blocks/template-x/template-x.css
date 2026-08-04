@@ -2428,19 +2428,30 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
 }
 
 /* Discover / long-form pages: constrain template-x so the masonry
-   recalculates column count against the narrower content width. */
-main .section.long-form .template-x:not(.fullwidth) {
-  max-width: var(--ax-grid-7-col-width);
-  margin: 0 auto;
-  padding: 0 var(--spacing-600) 0;
-  box-sizing: border-box;
+   recalculates column count against the narrower content width.
+   Mirrors the breakpoints used for main .section.long-form .content
+   in styles.css so the masonry stays aligned with the surrounding text. */
+@media (min-width: 768px) {
+  main .section.long-form .template-x:not(.fullwidth) {
+    width: var(--ax-grid-8-col-width);
+    margin: 0 auto;
+    padding: 0 var(--spacing-600) 0;
+    box-sizing: content-box;
+  }
 }
 
-@media (max-width: 600px) {
+@media (min-width: 1024px) {
   main .section.long-form .template-x:not(.fullwidth) {
-    max-width: none;
+    /* Desktop: 7 columns, shifted right to accommodate fixed TOC */
+    max-width: var(--ax-grid-7-col-width);
+    margin-left: calc(var(--ax-grid-3-col-width) + var(--spacing-600) + var(--ax-grid-gutter));
+    margin-right: auto;
+  }
+}
+
+@media (min-width: 1680px) {
+  main .section.long-form .template-x:not(.fullwidth) {
     margin: 0 auto;
-    padding: 0;
   }
 }
 
