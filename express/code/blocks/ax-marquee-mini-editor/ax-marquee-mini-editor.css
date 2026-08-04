@@ -1,0 +1,169 @@
+.ax-marquee-mini-editor {
+  padding: var(--spacing-600) var(--spacing-350);
+  min-width: 320px;
+  box-sizing: border-box;
+  text-align: left;
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+/* ── Left content ───────────────────────────────────────────────────────── */
+main .ax-marquee-mini-editor p.button-container {
+  margin-top: 0;
+  text-align: left;
+}
+
+.ax-marquee-mini-editor .free-plan-container {
+  text-align: left;
+}
+
+.ax-marquee-mini-editor .button-container.free-plan-container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.ax-marquee-mini-editor .button-container.free-plan-container a {
+  margin-bottom: 0;
+  text-align: center;
+  justify-content: center;
+}
+
+@media (min-width: 600px) {
+  .ax-marquee-mini-editor .button-container.free-plan-container {
+    flex-direction: row;
+    align-items: center;
+    gap: var(--spacing-300);
+  }
+
+  .ax-marquee-mini-editor .free-plan-widget {
+    margin-top: 0;
+  }
+
+  .ax-marquee-mini-editor .button-container.free-plan-container a {
+    margin-bottom: var(--spacing-400);
+  }
+}
+
+.ax-marquee-mini-editor .free-plan-widget {
+  margin-top: var(--spacing-400);
+}
+
+.ax-marquee-mini-editor > img.express-logo,
+.ax-marquee-mini-editor div:has(h1, h2, h3) img.express-logo {
+  width: 164px;
+  margin: 0;
+  padding-top: var(--spacing-600);
+  display: block;
+}
+
+.ax-marquee-mini-editor .button-container a.button {
+  background-color: var(--color-background-accent-default);
+  padding-top: var(--spacing-200);
+  padding-bottom: var(--spacing-200);
+  border-radius: 24px;
+  width: 183px;
+  font-size: var(--body-font-size-m);
+  font-style: normal;
+  font-weight: var(--subheading-font-weight);
+  line-height: 125%;
+}
+
+.ax-marquee-mini-editor [class*="heading"]:first-of-type {
+  font-size: var(--heading-font-size-l);
+  text-align: left;
+  hyphens: none;
+  overflow-wrap: normal;
+  word-break: normal;
+}
+
+.ax-marquee-mini-editor [class*="heading"]:first-of-type + p {
+  margin-top: var(--spacing-300);
+  margin-bottom: var(--spacing-400);
+  font-size: var(--body-font-size-m);
+  text-align: left;
+}
+
+/* ── Right column: mini editor ──────────────────────────────────────────── */
+.ax-marquee-mini-editor .mini-editor-col {
+  display: flex;
+  justify-content: center;
+}
+
+.ax-marquee-mini-editor .mini-editor {
+  width: 100%;
+  max-width: 480px;
+}
+
+/* Tall portrait preview image sits on the recolorable canvas. */
+.ax-marquee-mini-editor .mini-editor-canvas {
+  max-height: 60vh;
+}
+
+.ax-marquee-mini-editor .mini-editor-content picture,
+.ax-marquee-mini-editor .mini-editor-content img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* ── Responsive: stack on tablet/mobile, split on desktop ───────────────── */
+@media (min-width: 768px) and (max-width: 899px) {
+  .ax-marquee-mini-editor {
+    padding: var(--spacing-600) var(--spacing-500);
+  }
+
+  .ax-marquee-mini-editor > div {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 1023px) {
+  .ax-marquee-mini-editor.hero-top-mobile,
+  .ax-marquee-mini-editor.hero-top-mobile > div {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ax-marquee-mini-editor.hero-top-mobile > div > div.mini-editor-col {
+    order: -1;
+  }
+
+  .ax-marquee-mini-editor.hero-top-mobile > div > div:nth-child(1) {
+    order: 1;
+  }
+
+  .ax-marquee-mini-editor.hero-top-mobile > img.express-logo {
+    order: 0;
+    margin: 0 auto;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ax-marquee-mini-editor {
+    padding: var(--spacing-900) var(--spacing-600);
+    max-width: 1440px;
+    margin: 0 auto;
+  }
+
+  .ax-marquee-mini-editor > div {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--spacing-600);
+  }
+
+  .ax-marquee-mini-editor > div > div:first-child {
+    flex: 0 0 auto;
+    max-width: 50%;
+  }
+
+  .ax-marquee-mini-editor > div > div.mini-editor-col {
+    flex: 1;
+  }
+}
