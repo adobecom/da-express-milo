@@ -1301,7 +1301,7 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
 
 .template-x .api-templates-toolbar .wrapper-functions .functions-container .options-wrapper .option-button:focus-visible {
   outline: 2px solid var(--color-info-accent);
-  outline-offset: 2px;
+  outline-offset: -2px;
   border-radius: 8px;
 }
 
