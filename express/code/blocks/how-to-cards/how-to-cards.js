@@ -50,13 +50,20 @@ function createControl(items, container) {
     0,
     container.scrollWidth - container.clientWidth - tailGap(),
   );
-  const atEnd = () => container.scrollLeft >= maxScroll() - 1;
+  // Sub-pixel layout rounding (widths/gaps from getBoundingClientRect summed
+  // across several cards) routinely leaves maxScroll a hair past an exact
+  // multiple of step. atEnd() and pageCount() must resolve that slop the same
+  // way, or a near-exact fit manufactures a redundant last pip that sits on
+  // top of the real one and traps navigation at the end.
+  const EDGE_SLOP = 1;
+  const atEnd = () => container.scrollLeft >= maxScroll() - EDGE_SLOP;
   const pageCount = () => {
     const step = getStep();
-    if (step <= 0 || maxScroll() <= 1) return 1;
+    const overflow = maxScroll();
+    if (step <= 0 || overflow <= EDGE_SLOP) return 1;
     // Any real overflow yields at least two pips; a partial trailing step still
     // gets its own pip so the remaining content is always reachable.
-    return Math.ceil(maxScroll() / step) + 1;
+    return Math.ceil((overflow - EDGE_SLOP) / step) + 1;
   };
   const pipAt = (count) => {
     if (count <= 1) return 0;
