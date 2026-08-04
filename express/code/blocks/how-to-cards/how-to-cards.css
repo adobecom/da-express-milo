@@ -61,14 +61,6 @@
   gap: var(--spacing-300);
 }
 
-.how-to-cards .cards-container {
-  padding-left: var(--side-padding);
-}
-
-.how-to-cards .card:last-child {
-  margin-right: 16px;
-}
-
 .how-to-cards .card p {
   font-size: var(--body-font-size-s);
   text-align: left;
@@ -133,12 +125,6 @@
   width: 295px;
 }
 
-.how-to-cards .gallery--item:first-of-type {
-  margin-left: var(--gallery-first-item-margin);
-}
-
-
-
 .how-to-cards .gallery {
   display: flex;
   flex-wrap: nowrap;
@@ -146,7 +132,7 @@
   overflow-x: scroll;
   scrollbar-width: none;
   scroll-behavior: smooth;
-  padding: 0;
+  padding: 0 var(--gallery-first-item-margin);
   margin: 0;
   scroll-padding: 0 var(--spacing-300);
 }
@@ -310,10 +296,6 @@
     --gallery-first-item-margin: 20px;
   }
 
-  .how-to-cards .card:last-child {
-    margin-right: 16px;
-  }
-
   .how-to-cards .gallery-control {
     padding-right: 16px;
   }
@@ -335,10 +317,6 @@
     .how-to-cards.cards-count-3 .card {
     width: 295px;
   } 
-
-  .how-to-cards .card:last-child {
-    margin-right: 32px;
-  }
 
   .how-to-cards .gallery-control {
     padding-right: 32px;
@@ -368,10 +346,6 @@
   .how-to-cards {
     --side-padding: var(--spacing-600);
     --gallery-first-item-margin: var(--spacing-600);
-  }
-
-  .how-to-cards .card:last-child {
-    margin-right: 40px;
   }
 
   .how-to-cards .gallery-control {
@@ -423,4 +397,47 @@
   }
 
  
+}
+
+/* ---------------------------------------------------------------------------
+ * 4-up desktop responsiveness
+ *
+ * Cards stretch to fill the carousel span inside a 40px total side margin
+ * (20px each side), clamped to a 295-385px width. The carousel caps at 1600px,
+ * where the four cards reach their ~385px max. Below ~1247px the cards hit their
+ * 295px min-width and overflow, so the shared gallery widget reveals its
+ * controls. Those two breakpoints are emergent from the sizing budget
+ * (2*20 padding + 3*8 gap = 64px, card = (width - 64) / 4), not media queries.
+ *
+ * The side inset is the gallery's own padding (not card margins) so the last
+ * card carries no trailing margin: the moment the pinned-295 cards encroach the
+ * inset the widget's overflow check registers it and shows the control, rather
+ * than waiting for a card to be clipped past a trailing margin.
+ * ------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+  .how-to-cards.cards-count-4 {
+    /* max-width: 1600px; */
+    margin-inline: auto;
+  }
+
+  /* .how-to-cards.cards-count-4 .gallery {
+    gap: 8px;
+    padding-left: 20px;
+    padding-right: 20px;
+  } */
+
+  .how-to-cards.cards-count-4 .card {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 295px;
+    max-width: 385px;
+  }
+
+  /* .how-to-cards.cards-count-4 .gallery--item:first-of-type {
+    margin-left: 0;
+  } */
+
+  /* .how-to-cards.cards-count-4 .card:last-child {
+    margin-right: 0;
+  } */
 }
