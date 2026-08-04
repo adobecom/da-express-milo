@@ -338,6 +338,66 @@ function trackColorPageLoad() {
   }
 }
 
+function trackExpressFeaturePageLoad() {
+  try {
+    if (getMetadata('pagetype') !== 'font-generator') return;
+
+    const eventName = 'view-acom-express-features';
+    let refDomain = '';
+    let previousPagename = '';
+    try {
+      const referrerUrl = new URL(document.referrer);
+      refDomain = referrerUrl.hostname;
+      previousPagename = referrerUrl.pathname;
+    } catch { /* no referrer or invalid */ }
+
+    const fireEvent = () => {
+      _satellite.track('event', {
+        xdm: {},
+        data: {
+          eventType: 'web.webinteraction.linkClicks',
+          web: {
+            webInteraction: {
+              name: eventName,
+              linkClicks: { value: 1 },
+              type: 'other',
+            },
+          },
+          _adobe_corpnew: {
+            sdm: {
+              event: {
+                pagename: eventName,
+                url: loc.href,
+                subcategory: 'operations',
+                type: 'render',
+                subtype: 'acom',
+                workflow: 'lifecycle',
+              },
+              custom: {
+                aa: {
+                  page_name: getPageName(),
+                  ref_domain: refDomain,
+                  previous_pagename: previousPagename,
+                },
+                link: {
+                  page_url: loc.href,
+                  page_type: 'fonts',
+                },
+                ui: {
+                  location: pathname,
+                },
+              },
+            },
+          },
+        },
+      });
+    };
+    safelyFireAnalyticsEvent(fireEvent);
+  } catch (error) {
+    window.lana?.log(`Failed to track express feature page load: ${error}`, { tags: 'express-features, analytics', errorType: 'e', severity: 'warning', sampleRate: '1' });
+  }
+}
+
 export function trackColorBlockLoad(blockType) {
   try {
     const eventName = 'view-color-block';
@@ -576,6 +636,7 @@ export default async function martechLoadedCB() {
   decorateAnalyticsEvents();
   trackTemplatePageLoad();
   trackColorPageLoad();
+  trackExpressFeaturePageLoad();
 
   // TODO Start of section to be removed after Jingle finishes adding xlg to old express Repo
   // this piece of code is necessary for the ratings block atm so that the right user
