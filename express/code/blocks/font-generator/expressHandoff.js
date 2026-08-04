@@ -7,9 +7,9 @@ import showAppModal from './expressAppModal.js';
 // the express.adobe.com/new destination with the static canvas/category params
 // baked in — which is what makes the handoff conserve the text on mobile, where
 // the raw editor URL did not. We only append the dynamic, per-card params.
-const BRANCH_LINK_PROD = 'https://adobesparkpost.app.link/V3Tavfhr04b';
+const BRANCH_LINK_PROD = 'https://adobesparkpost.app.link/0lAvVTo1b5b';
 // Stage uses Branch's test domain (test-app.link) + a separate link id.
-const BRANCH_LINK_STAGE = 'https://adobesparkpost.test-app.link/5Nq0ZDWc04b';
+const BRANCH_LINK_STAGE = 'https://adobesparkpost.app.link/zS9Zumyee5b';
 
 // Gated on the same ?hzenv=stage override the rest of the block uses to target
 // stage (see how the editor host was resolved previously).
@@ -19,7 +19,14 @@ function resolveBranchLink() {
 }
 
 const FEATURE_FLAGS = ['font-generator-product-entry'];
-const FONT_FAMILY_BY_ID = { 'noto-sans': 'Noto Sans', 'gothic-a1': 'Gothic A1' };
+const FONT_FAMILY_BY_ID = {
+  'noto-sans': 'Noto Sans',
+  'gothic-a1': 'Gothic A1',
+  // Styles whose editor doesn't support Noto Sans map here instead (MWPW-202743).
+  // Key is the Adobe Fonts kit slug (source-han-sans-japanese); value is the
+  // family name the Express editor expects (Source Han Sans JP).
+  'source-han-sans-japanese': 'Source Han Sans JP',
+};
 const DEFAULT_FONT_FAMILY = 'Noto Sans';
 
 // The dynamic per-card params appended to the Branch link. Everything else
