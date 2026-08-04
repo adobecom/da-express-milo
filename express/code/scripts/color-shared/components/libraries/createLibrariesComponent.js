@@ -3,7 +3,7 @@ import { createLibraryAccordion } from './createLibraryAccordion.js';
 import { createLibrariesHeader, LIBRARY_SORT } from './createLibrariesHeader.js';
 import { getSizeClass } from './libraryUtils.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
-import { createExpressTooltip } from '../../spectrum/components/express-tooltip.js';
+import { createExpressTooltip } from '../../../shared/spectrum/components/express-tooltip.js';
 
 export const LIBRARY_VIEW = {
   LIBRARY: 'library',

@@ -2,7 +2,7 @@ import { serviceManager } from '../../../libs/services/index.js';
 import { createToolbar } from './createToolbarComponent.js';
 import { createTag, getLibs } from '../../utils.js';
 import loadMiloStyle from '../utils/loadMiloStyle.js';
-import { showExpressToast } from '../spectrum/components/express-toast.js';
+import { showExpressToast } from '../../shared/spectrum/components/express-toast.js';
 
 const NETWORK_ERROR_CODE = 'NETWORK_ERROR';
 const NETWORK_ERROR_MESSAGE = 'Network request failed. Check your connection or try again.';

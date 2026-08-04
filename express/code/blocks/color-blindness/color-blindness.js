@@ -5,7 +5,7 @@ import { createColorConflictsAdapter } from '../../scripts/color-shared/adapters
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
 import { createStripContainerRenderer } from '../../scripts/color-shared/renderers/createStripContainerRenderer.js';
 import { getConflictPairs, TYPE_ORDER } from '../../scripts/color-shared/services/createColorBlindnessService.js';
-import { announceToScreenReader } from '../../scripts/color-shared/spectrum/utils/a11y.js';
+import { announceToScreenReader } from '../../scripts/shared/spectrum/utils/a11y.js';
 import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
 import adoptHeadline from '../../scripts/color-shared/utils/adoptHeadline.js';
 import loadColorBlindnessPlaceholders from '../../scripts/color-shared/i18n/loadColorBlindnessPlaceholders.js';

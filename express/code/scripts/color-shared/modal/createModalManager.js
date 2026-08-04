@@ -1,6 +1,6 @@
 import { createTag } from '../../utils.js';
 import loadMiloStyle from '../utils/loadMiloStyle.js';
-import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
+import { announceToScreenReader, trapFocus, handleEscapeClose } from '../../shared/spectrum/index.js';
 import { createSpectrumIcon } from '../utils/icons.js';
 import { addSwipeToClose, saveFocusedElement, restoreFocusedElement, getNextOverlayZIndex, interpolate } from '../utils/utilities.js';
 import { createColorModalPlaceholders } from '../i18n/loadColorModalPlaceholders.js';

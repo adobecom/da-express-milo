@@ -1,5 +1,5 @@
 import { createTag, getLibs } from '../../../scripts/utils.js';
-import { createExpressTooltip } from '../../../scripts/color-shared/spectrum/components/express-tooltip.js';
+import { createExpressTooltip } from '../../../scripts/shared/spectrum/components/express-tooltip.js';
 import { UNDO_ICON, REDO_ICON } from '../../../scripts/color-shared/components/actionMenuIcons.js';
 import { decorateAnalyticsAttributes } from '../../../scripts/color-shared/utils/utilities.js';
 import { DEFAULT_PLACEHOLDERS as COLOR_EXTRACT_DEFAULTS } from '../../../scripts/color-shared/i18n/loadColorExtractPlaceholders.js';

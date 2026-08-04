@@ -56,7 +56,7 @@ module.exports = {
     '*.config.js',
     '**/templates-as-a-service/library/',
     'express/code/libs/color-components/**',
-    'express/code/scripts/color-shared/spectrum/**',
+    'express/code/scripts/shared/spectrum/**',
     'express/code/scripts/color-shared/components/**',
     'express/code/scripts/widgets/**',
   ],

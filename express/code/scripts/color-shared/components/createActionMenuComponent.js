@@ -1,9 +1,9 @@
 /* eslint-disable import/prefer-default-export */
 import { createTag, getLibs } from '../../utils.js';
 import loadMiloStyle from '../utils/loadMiloStyle.js';
-import { createExpressButton, createExpressTooltip } from '../spectrum/index.js';
+import { createExpressButton, createExpressTooltip } from '../../shared/spectrum/index.js';
 import { createActionMenuState } from './createActionMenuState.js';
-import { attachRovingTabIndex } from '../spectrum/utils/a11y.js';
+import { attachRovingTabIndex } from '../../shared/spectrum/utils/a11y.js';
 import { createColorPaletteParamApi, decorateAnalyticsAttributes } from '../utils/utilities.js';
 import {
   COLOR_ICON,

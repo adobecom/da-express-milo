@@ -1,8 +1,8 @@
 import { createTag } from '../../utils.js';
 import { createPaletteStrip, PALETTE_STRIP_VARIANTS } from './palettes.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
-import { announceToScreenReader, clearScreenReaderAnnouncement } from '../spectrum/utils/a11y.js';
-import { wrapInTheme } from '../spectrum/utils/theme.js';
+import { announceToScreenReader, clearScreenReaderAnnouncement } from '../../shared/spectrum/utils/a11y.js';
+import { wrapInTheme } from '../../shared/spectrum/utils/theme.js';
 import { decorateAnalyticsAttributes } from '../utils/utilities.js';
 
 export const FIGMA_STRIP_NODES = {

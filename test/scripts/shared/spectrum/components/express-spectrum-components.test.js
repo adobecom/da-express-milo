@@ -1,8 +1,8 @@
 import { expect } from '@esm-bundle/chai';
-import createExpressActionButton from '../../../../../express/code/scripts/color-shared/spectrum/components/express-action-button.js';
-import { createExpressTag } from '../../../../../express/code/scripts/color-shared/spectrum/components/express-tag.js';
-import { createExpressTextfield } from '../../../../../express/code/scripts/color-shared/spectrum/components/express-textfield.js';
-import { createExpressPicker } from '../../../../../express/code/scripts/color-shared/spectrum/components/express-picker.js';
+import createExpressActionButton from '../../../../../express/code/scripts/shared/spectrum/components/express-action-button.js';
+import { createExpressTag } from '../../../../../express/code/scripts/shared/spectrum/components/express-tag.js';
+import { createExpressTextfield } from '../../../../../express/code/scripts/shared/spectrum/components/express-textfield.js';
+import { createExpressPicker } from '../../../../../express/code/scripts/shared/spectrum/components/express-picker.js';
 
 describe('Express Spectrum component wrappers', () => {
   afterEach(() => {

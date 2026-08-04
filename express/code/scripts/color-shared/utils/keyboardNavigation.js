@@ -1,4 +1,4 @@
-import { handleEscapeClose } from '../spectrum/utils/a11y.js';
+import { handleEscapeClose } from '../../shared/spectrum/utils/a11y.js';
 
 /**
  * @typedef {Object} KeyboardNavigationOptions

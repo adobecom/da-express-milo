@@ -1,8 +1,8 @@
 import { createTag, getIconElementDeprecated } from '../../../utils.js';
 import { decorateAnalyticsAttributes } from '../../utils/utilities.js';
-import { loadFieldLabel, loadMenu } from '../../spectrum/load-spectrum.js';
-import { createExpressPicker } from '../../spectrum/components/express-picker.js';
-import createExpressActionButton from '../../spectrum/components/express-action-button.js';
+import { loadFieldLabel, loadMenu } from '../../../shared/spectrum/load-spectrum.js';
+import { createExpressPicker } from '../../../shared/spectrum/components/express-picker.js';
+import createExpressActionButton from '../../../shared/spectrum/components/express-action-button.js';
 import { formatSavedCount } from './libraryUtils.js';
 
 export const LIBRARY_SORT = {

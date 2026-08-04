@@ -15,7 +15,7 @@ How Spectrum Web Components v2 is loaded and used by Color Explorer.
 
 ## System Architecture
 
-The Spectrum 2 system lives in `express/code/scripts/color-shared/spectrum/`:
+The Spectrum 2 system lives in `express/code/scripts/shared/spectrum/`:
 
 ```
 spectrum/

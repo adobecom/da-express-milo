@@ -17,7 +17,7 @@ import { loadColorSlider } from '../load-spectrum.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
 
-const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/color-slider.css';
+const STYLES_PATH = '/express/code/scripts/shared/spectrum/styles/color-slider.css';
 
 /**
  * Create an Express color slider.

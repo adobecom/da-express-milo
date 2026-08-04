@@ -23,7 +23,7 @@ import { loadPicker } from '../load-spectrum.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
 
-const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/picker.css';
+const STYLES_PATH = '/express/code/scripts/shared/spectrum/styles/picker.css';
 
 const DEFAULT_MENU_TOKENS = {
   '--mod-menu-item-label-inline-edge-to-content': '12px',

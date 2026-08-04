@@ -5,12 +5,12 @@ import {
   LIBRARY_SIZE,
   LIBRARY_VIEW,
 } from '../../scripts/color-shared/components/libraries/createLibrariesComponent.js';
-import { loadIconsRail, loadMenu, loadTooltip, loadButton, loadActionButton } from '../../scripts/color-shared/spectrum/load-spectrum.js';
+import { loadIconsRail, loadMenu, loadTooltip, loadButton, loadActionButton } from '../../scripts/shared/spectrum/load-spectrum.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
 import loadColorLibrariesPlaceholders from '../../scripts/color-shared/i18n/loadColorLibrariesPlaceholders.js';
 import { createSearchBar, createDeepLinkManager } from '../../scripts/color-shared/components/search-bar/index.js';
 import { libraryGradientToModalGradient } from '../../scripts/color-shared/components/libraries/libraryDownloadUtils.js';
-import { announceToScreenReader } from '../../scripts/color-shared/spectrum/utils/a11y.js';
+import { announceToScreenReader } from '../../scripts/shared/spectrum/utils/a11y.js';
 import { ensureIms, serviceManager } from '../../libs/services/index.js';
 
 const LIBRARIES_CSS = 'scripts/color-shared/components/libraries/libraries.css';
@@ -464,7 +464,7 @@ export default async function decorate(block) {
       { showExpressToast },
     ] = await Promise.all([
       import('../../scripts/color-shared/services/createLibrariesDataService.js'),
-      import('../../scripts/color-shared/spectrum/components/express-toast.js'),
+      import('../../scripts/shared/spectrum/components/express-toast.js'),
     ]);
 
     const undoDelete = async () => {

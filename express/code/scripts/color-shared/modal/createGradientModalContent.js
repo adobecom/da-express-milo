@@ -2,7 +2,7 @@ import { createTag } from '../../utils.js';
 import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createGradientEditor } from '../components/gradients/gradient-editor.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
-import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
+import { createExpressTooltip } from '../../shared/spectrum/components/express-tooltip.js';
 import { createColorModalPlaceholders } from '../i18n/loadColorModalPlaceholders.js';
 import { interpolate } from '../utils/utilities.js';
 

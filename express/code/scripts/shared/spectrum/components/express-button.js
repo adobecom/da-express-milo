@@ -20,7 +20,7 @@ import { loadButton } from '../load-spectrum.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
 
-const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/button.css';
+const STYLES_PATH = '/express/code/scripts/shared/spectrum/styles/button.css';
 
 /**
  * Variant mapping — Express names to Spectrum attributes.

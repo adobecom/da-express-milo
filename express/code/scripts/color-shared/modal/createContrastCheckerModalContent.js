@@ -1,8 +1,8 @@
 import { createTag } from '../../utils.js';
 import loadMiloStyle from '../utils/loadMiloStyle.js';
-import { announceToScreenReader } from '../spectrum/utils/a11y.js';
-import { loadTooltip } from '../spectrum/load-spectrum.js';
-import { createThemeWrapper } from '../spectrum/utils/theme.js';
+import { announceToScreenReader } from '../../shared/spectrum/utils/a11y.js';
+import { loadTooltip } from '../../shared/spectrum/load-spectrum.js';
+import { createThemeWrapper } from '../../shared/spectrum/utils/theme.js';
 
 const STYLE_PATH = 'scripts/color-shared/modal/modal-contrast-content.css';
 
@@ -543,7 +543,7 @@ function buildBackgroundSelector(colors, state, onSelect, strings) {
   container.appendChild(swatchesContainer);
 
   (async () => {
-    const { createExpressSwatchGroup } = await import('../spectrum/components/express-swatch-group.js');
+    const { createExpressSwatchGroup } = await import('../../shared/spectrum/components/express-swatch-group.js');
     const swatchGroup = await createExpressSwatchGroup({
       colors,
       selects: 'single',
@@ -623,7 +623,7 @@ async function buildHeader(colors, state, onTabChange, onLevelChange, strings) {
   header.appendChild(titleWrap);
 
   // Level picker + Tabs wrapper for desktop
-  const { createExpressPicker } = await import('../spectrum/components/express-picker.js');
+  const { createExpressPicker } = await import('../../shared/spectrum/components/express-picker.js');
   const levelPicker = await createExpressPicker({
     label: strings.modalLevelPickerLabel,
     value: state.activeLevel,
@@ -645,7 +645,7 @@ async function buildHeader(colors, state, onTabChange, onLevelChange, strings) {
   );
 
   // Tabs
-  const { createExpressTabs } = await import('../spectrum/components/express-tabs.js');
+  const { createExpressTabs } = await import('../../shared/spectrum/components/express-tabs.js');
   const tabs = await createExpressTabs({
     selected: state.activeTab,
     size: 'm',

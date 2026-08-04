@@ -1,4 +1,4 @@
-import { showExpressAlertDialog } from '../../spectrum/components/express-alert-dialog.js';
+import { showExpressAlertDialog } from '../../../shared/spectrum/components/express-alert-dialog.js';
 
 function interpolate(template, vars = {}) {
   return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));

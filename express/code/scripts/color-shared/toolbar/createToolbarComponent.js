@@ -1,12 +1,12 @@
-import { announceToScreenReader } from '../spectrum/index.js';
+import { announceToScreenReader } from '../../shared/spectrum/index.js';
 import { isMobileViewport, buildPaletteEditUrl, createColorPaletteParamApi, decorateAnalyticsAttributes } from '../utils/utilities.js';
-import { showExpressToast } from '../spectrum/components/express-toast.js';
-import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
+import { showExpressToast } from '../../shared/spectrum/components/express-toast.js';
+import { createExpressTooltip } from '../../shared/spectrum/components/express-tooltip.js';
 import { createIconButton, createSpectrumIcon } from '../utils/icons.js';
 import { createEventBus } from '../utils/createEventBus.js';
 import { createTag, getLibs } from '../../utils.js';
-import { loadButton, loadActionButton, loadTooltip, loadMenu } from '../spectrum/load-spectrum.js';
-import { createThemeWrapper } from '../spectrum/utils/theme.js';
+import { loadButton, loadActionButton, loadTooltip, loadMenu } from '../../shared/spectrum/load-spectrum.js';
+import { createThemeWrapper } from '../../shared/spectrum/utils/theme.js';
 import { createLibraryAccessibilityMenu } from '../components/libraries/createLibraryAccessibilityMenu.js';
 import { createLibraryDownloadMenu } from '../components/libraries/createLibraryDownloadMenu.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';

@@ -3,10 +3,10 @@ import { LitElement, html } from '../../../deps/lit-all.min.js';
 import { getContrastTextColor, isSuperLight } from '../../utils/ColorConversions.js';
 import { getFirstFocusableInGroup } from '../../utils/util.js';
 import { style } from './styles.css.js';
-import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
-import { loadIconsRail } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
-import { createExpressTooltip } from '../../../../scripts/color-shared/spectrum/components/express-tooltip.js';
-import { announceToScreenReader, clearScreenReaderAnnouncement } from '../../../../scripts/color-shared/spectrum/utils/a11y.js';
+import { showExpressToast } from '../../../../scripts/shared/spectrum/components/express-toast.js';
+import { loadIconsRail } from '../../../../scripts/shared/spectrum/load-spectrum.js';
+import { createExpressTooltip } from '../../../../scripts/shared/spectrum/components/express-tooltip.js';
+import { announceToScreenReader, clearScreenReaderAnnouncement } from '../../../../scripts/shared/spectrum/utils/a11y.js';
 import {
   TYPE_ORDER,
   getConflictPairs,

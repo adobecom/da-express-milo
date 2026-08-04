@@ -1,9 +1,9 @@
 import { LitElement, html } from '../../../../libs/deps/lit-all.min.js';
 import { style } from './styles.css.js';
-import { loadBadge, loadTooltip } from '../../spectrum/load-spectrum.js';
+import { loadBadge, loadTooltip } from '../../../shared/spectrum/load-spectrum.js';
 import { DEFAULT_SHARED_PLACEHOLDERS as CB_DEFAULTS } from '../../i18n/loadColorBlindnessPlaceholders.js';
 
-const TOOLTIP_CSS_PATH = '/express/code/scripts/color-shared/spectrum/styles/tooltip.css';
+const TOOLTIP_CSS_PATH = '/express/code/scripts/shared/spectrum/styles/tooltip.css';
 
 class ColorConflicts extends LitElement {
   static shadowRootOptions = { ...LitElement.shadowRootOptions, delegatesFocus: true };

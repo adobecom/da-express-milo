@@ -1,5 +1,5 @@
 import { serviceManager } from '../../../../libs/services/index.js';
-import { announceToScreenReader } from '../../spectrum/index.js';
+import { announceToScreenReader } from '../../../shared/spectrum/index.js';
 import { createLibraryCardActionMenu } from './createLibraryCardActionMenu.js';
 import { libraryItemToDownloadData } from './libraryDownloadUtils.js';
 

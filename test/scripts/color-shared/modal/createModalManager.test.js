@@ -3,7 +3,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
 import { createModalManager } from '../../../../express/code/scripts/color-shared/modal/createModalManager.js';
-import { trapFocus } from '../../../../express/code/scripts/color-shared/spectrum/utils/a11y.js';
+import { trapFocus } from '../../../../express/code/scripts/shared/spectrum/utils/a11y.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 

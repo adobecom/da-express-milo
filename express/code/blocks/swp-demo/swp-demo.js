@@ -22,7 +22,7 @@ import {
   createExpressSearch,
   createExpressTextfield,
   createExpressMenu,
-} from '../../scripts/color-shared/spectrum/index.js';
+} from '../../scripts/shared/spectrum/index.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────
 

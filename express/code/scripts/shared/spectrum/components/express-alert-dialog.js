@@ -26,7 +26,7 @@ import {
 } from '../utils/a11y.js';
 import { loadOverrideStyles } from './style-loader.js';
 
-const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/alert-dialog.css';
+const STYLES_PATH = '/express/code/scripts/shared/spectrum/styles/alert-dialog.css';
 
 let dialogIdCounter = 0;
 

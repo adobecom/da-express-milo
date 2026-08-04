@@ -1,14 +1,14 @@
 import { createTag } from '../../../scripts/utils.js';
 import createBaseRenderer from '../../../scripts/color-shared/renderers/createBaseRenderer.js';
-import { announceToScreenReader } from '../../../scripts/color-shared/spectrum/index.js';
+import { announceToScreenReader } from '../../../scripts/shared/spectrum/index.js';
 import { ensureHash, isMobileOrTabletViewport, isMobileViewport } from '../../../scripts/color-shared/utils/utilities.js';
 import { generateTints, hexToRgb, rgbToHsv, hsvToRgb, rgbToHex } from '../utils/contrastUtils.js';
 import createSuggestionsTab from './components/createSuggestionsTab.js';
 import createSetRatioTab from './components/createSetRatioTab.js';
 import { createColorInput } from './components/createColorInput.js';
-import { createExpressTabs } from '../../../scripts/color-shared/spectrum/components/express-tabs.js';
-import { loadActionButton, loadBadge, loadTooltip } from '../../../scripts/color-shared/spectrum/load-spectrum.js';
-import { createThemeWrapper } from '../../../scripts/color-shared/spectrum/utils/theme.js';
+import { createExpressTabs } from '../../../scripts/shared/spectrum/components/express-tabs.js';
+import { loadActionButton, loadBadge, loadTooltip } from '../../../scripts/shared/spectrum/load-spectrum.js';
+import { createThemeWrapper } from '../../../scripts/shared/spectrum/utils/theme.js';
 import { createContrastCheckerPlaceholders } from '../utils/placeholders.js';
 import { FAIL, createDefaultActionMenuConfig } from '../utils/contrastConstants.js';
 import { createColorChannelSliderAdapter } from '../../../scripts/color-shared/adapters/litComponentAdapters.js';
