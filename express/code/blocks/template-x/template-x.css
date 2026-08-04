@@ -2436,6 +2436,14 @@ main .section.long-form .template-x:not(.fullwidth) {
   box-sizing: border-box;
 }
 
+@media (max-width: 600px) {
+  main .section.long-form .template-x:not(.fullwidth) {
+    max-width: none;
+    margin: 0 auto;
+    padding: 0;
+  }
+}
+
 nav ol.templates-breadcrumbs {
   list-style: none;
   margin: 0;
