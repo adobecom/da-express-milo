@@ -2436,10 +2436,6 @@ main .section.long-form .template-x:not(.fullwidth) {
   box-sizing: border-box;
 }
 
-
-/* main .section.long-form .template-x.sixcols:not(.horizontal):not(.print) .template {
-  width: 135px;
-} */
 nav ol.templates-breadcrumbs {
   list-style: none;
   margin: 0;
