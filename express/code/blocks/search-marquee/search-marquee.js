@@ -86,7 +86,13 @@ function initSearchFunction(block, searchBarWrapper) {
     e.stopPropagation();
     searchBar.scrollIntoView({ behavior: 'smooth' });
     searchDropdown.classList.remove('hidden');
+    searchBar.setAttribute('aria-expanded', 'true');
   }, { passive: true });
+
+  searchBar.addEventListener('focus', () => {
+    searchDropdown.classList.remove('hidden');
+    searchBar.setAttribute('aria-expanded', 'true');
+  });
 
   searchBar.addEventListener('keyup', () => {
     if (searchBar.value !== '') {
@@ -111,8 +117,23 @@ function initSearchFunction(block, searchBarWrapper) {
     const { target } = e;
     if (target !== searchBarWrapper && !searchBarWrapper.contains(target)) {
       searchDropdown.classList.add('hidden');
+      searchBar.setAttribute('aria-expanded', 'false');
     }
   }, { passive: true });
+
+  searchBarWrapper.addEventListener('focusout', (e) => {
+    if (!searchBarWrapper.contains(e.relatedTarget)) {
+      searchDropdown.classList.add('hidden');
+      searchBar.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  clearBtn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      clearBtn.click();
+    }
+  });
 
   const trimInput = (tasks, input) => {
     let alteredInput = input;
@@ -279,10 +300,15 @@ function initSearchFunction(block, searchBarWrapper) {
 async function decorateSearchFunctions(block) {
   const searchBarWrapper = createTag('div', { class: 'search-bar-wrapper' });
   const searchForm = createTag('form', { class: 'search-form' });
+  const searchPlaceholder = await replaceKey('template-search-placeholder', config) || 'Search for over 50,000 templates';
   const searchBar = createTag('input', {
     class: 'search-bar',
     type: 'text',
-    placeholder: await replaceKey('template-search-placeholder', config) || 'Search for over 50,000 templates',
+    placeholder: searchPlaceholder,
+    'aria-label': searchPlaceholder,
+    role: 'searchbox',
+    'aria-autocomplete': 'list',
+    'aria-expanded': 'false',
     enterKeyHint: await replaceKey('search', config) || 'Search',
   });
 
@@ -291,6 +317,9 @@ async function decorateSearchFunctions(block) {
   searchIcon.loading = 'lazy';
   const searchClearIcon = getIconElementDeprecated('search-clear');
   searchClearIcon.loading = 'lazy';
+  searchClearIcon.setAttribute('role', 'button');
+  searchClearIcon.setAttribute('tabindex', '0');
+  searchClearIcon.setAttribute('aria-label', 'Clear search');
   searchBarWrapper.append(searchIcon, searchClearIcon);
   searchBarWrapper.append(searchForm);
 

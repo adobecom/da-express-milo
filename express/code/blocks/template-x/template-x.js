@@ -624,7 +624,13 @@ async function makeTemplateFunctions() {
 
     entry[1].elements.wrapper.subElements = {
       button: {
-        wrapper: createTag('div', { class: `button-wrapper button-wrapper-${entry[0]}` }),
+        wrapper: createTag('div', {
+          class: `button-wrapper button-wrapper-${entry[0]}`,
+          role: 'button',
+          tabindex: '0',
+          'aria-expanded': 'false',
+          'aria-haspopup': 'listbox',
+        }),
         subElements: {
           iconHolder: createTag('span', { class: 'icon-holder' }),
           textSpan: createTag('span', { class: `current-option current-option-${entry[0]}` }),
@@ -632,10 +638,16 @@ async function makeTemplateFunctions() {
         },
       },
       options: {
-        wrapper: createTag('div', { class: `options-wrapper options-wrapper-${entry[0]}` }),
+        wrapper: createTag('div', { class: `options-wrapper options-wrapper-${entry[0]}`, role: 'listbox' }),
         subElements: Object.entries(entry[1].placeholders).map((option, subIndex) => {
           const icon = getIconElementDeprecated(entry[1].icons[subIndex]);
-          const optionButton = createTag('div', { class: 'option-button', 'data-value': option[1] });
+          const optionButton = createTag('div', {
+            class: 'option-button',
+            'data-value': option[1],
+            role: 'option',
+            tabindex: '0',
+            'aria-selected': 'false',
+          });
           [optionButton.textContent] = option;
           optionButton.prepend(icon);
           return optionButton;
@@ -983,10 +995,12 @@ function updateOptionsStatus(block, props, toolBar) {
         options.forEach((o) => {
           if (option !== o) {
             o.classList.remove('active');
+            o.setAttribute('aria-selected', 'false');
           }
         });
 
         option.classList.add('active');
+        option.setAttribute('aria-selected', 'true');
       }
     });
 
@@ -1158,17 +1172,27 @@ async function initFilterSort(block, props, toolBar) {
           buttons.forEach((b) => {
             if (button !== b) {
               b.parentElement.classList.remove('opened');
+              b.setAttribute('aria-expanded', 'false');
             }
           });
 
           wrapper.classList.toggle('opened');
+          button.setAttribute('aria-expanded', String(wrapper.classList.contains('opened')));
         }
       }, { passive: true });
+
+      button.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          button.click();
+        }
+      });
 
       options.forEach((option) => {
         const updateOptions = () => {
           buttons.forEach((b) => {
             b.parentElement.classList.remove('opened');
+            b.setAttribute('aria-expanded', 'false');
           });
 
           if (currentOption) {
@@ -1178,12 +1202,14 @@ async function initFilterSort(block, props, toolBar) {
           options.forEach((o) => {
             if (option !== o) {
               o.classList.remove('active');
+              o.setAttribute('aria-selected', 'false');
             }
           });
           option.classList.add('active');
+          option.setAttribute('aria-selected', 'true');
         };
 
-        option.addEventListener('click', async (e) => {
+        const activateOption = async (e) => {
           e.stopPropagation();
           updateOptions();
           updateQuery(wrapper, props, option);
@@ -1205,6 +1231,15 @@ async function initFilterSort(block, props, toolBar) {
             await redrawTemplates(block, props, toolBar);
             trackSearch('view-search-result', BlockMediator.get('templateSearchSpecs').search_id);
           }
+        };
+
+        option.addEventListener('click', activateOption);
+
+        option.addEventListener('keydown', async (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            await activateOption(e);
+          }
         });
       });
 
@@ -1212,6 +1247,7 @@ async function initFilterSort(block, props, toolBar) {
         const { target } = e;
         if (target !== wrapper && !wrapper.contains(target) && !button.classList.contains('in-drawer')) {
           wrapper.classList.remove('opened');
+          button.setAttribute('aria-expanded', 'false');
         }
       }, { passive: true });
     });
@@ -1297,6 +1333,7 @@ function toggleMasonryView(block, props, button, toggleButtons) {
     toggleButtons.forEach((b) => {
       if (b !== button) {
         b.classList.remove('active');
+        b.setAttribute('aria-pressed', 'false');
       }
     });
 
@@ -1307,6 +1344,7 @@ function toggleMasonryView(block, props, button, toggleButtons) {
       }
     });
     button.classList.add('active');
+    button.setAttribute('aria-pressed', 'true');
     block.classList.add(`${button.dataset.view}-view`);
     blockWrapper.classList.add(`${button.dataset.view}-view`);
 
@@ -1367,11 +1405,11 @@ function initToolbarShadow(toolbar) {
 
 function buildViewsWrapper() {
   const viewsWrapper = createTag('div', { class: 'views' });
-  const smView = createTag('a', { class: 'view-toggle-button small-view', 'data-view': 'sm' });
+  const smView = createTag('button', { type: 'button', class: 'view-toggle-button small-view', 'data-view': 'sm', 'aria-label': 'Small grid', 'aria-pressed': 'false' });
   smView.append(getIconElementDeprecated('small_grid'));
-  const mdView = createTag('a', { class: 'view-toggle-button medium-view', 'data-view': 'md' });
+  const mdView = createTag('button', { type: 'button', class: 'view-toggle-button medium-view', 'data-view': 'md', 'aria-label': 'Medium grid', 'aria-pressed': 'false' });
   mdView.append(getIconElementDeprecated('medium_grid'));
-  const lgView = createTag('a', { class: 'view-toggle-button large-view', 'data-view': 'lg' });
+  const lgView = createTag('button', { type: 'button', class: 'view-toggle-button large-view', 'data-view': 'lg', 'aria-label': 'Large grid', 'aria-pressed': 'false' });
   lgView.append(getIconElementDeprecated('large_grid'));
   viewsWrapper.append(smView, mdView, lgView);
   return viewsWrapper;
@@ -1627,6 +1665,11 @@ function importSearchBar(block, blockMediator) {
         }, 500);
       }, { passive: true });
 
+      searchBar.addEventListener('focus', () => {
+        searchWrapper.classList.remove('collapsed');
+        searchDropdown.classList.remove('hidden');
+      });
+
       searchBar.addEventListener('keyup', () => {
         if (searchBar.value !== '') {
           clearBtn.style.display = 'inline-block';
@@ -1658,6 +1701,18 @@ function importSearchBar(block, blockMediator) {
           clearBtn.style.display = 'none';
         }
       }, { passive: true });
+
+      searchWrapper.addEventListener('focusout', (event) => {
+        if (!searchWrapper.contains(event.relatedTarget)) {
+          searchWrapper.classList.add('collapsed');
+          searchDropdown.classList.add('hidden');
+          searchBar.value = '';
+          suggestionsList.innerHTML = '';
+          trendsContainer.classList.remove('hidden');
+          suggestionsContainer.classList.add('hidden');
+          clearBtn.style.display = 'none';
+        }
+      });
 
       const redirectSearch = async () => {
         const xTaskNameMapping = await replaceKey('x-task-name-mapping', getConfig());
