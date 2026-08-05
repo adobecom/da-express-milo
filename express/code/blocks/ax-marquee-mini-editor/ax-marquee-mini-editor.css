@@ -124,41 +124,73 @@ main .ax-marquee-mini-editor p.button-container {
   max-height: 420px;
 }
 
-/* ── Editable greeting bars overlaid on the image's pill bars ────────────── */
-.ax-marquee-mini-editor .me-bar {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  box-sizing: border-box;
-  padding: 0 4%;
-  color: var(--spectrum-gray-900, #131313);
-  font-family: var(--body-font-family, adobe-clean, sans-serif);
-  font-weight: 700;
-  white-space: nowrap;
-  overflow: hidden;
-  cursor: text;
-  border-radius: 999px;
+/* ── Editable greeting overlaid on the image ────────────────────────────── */
+.ax-marquee-mini-editor .me-title,
+.ax-marquee-mini-editor .me-field-value {
   outline: none;
+  cursor: text;
 }
 
-.ax-marquee-mini-editor .me-bar:focus-visible {
+.ax-marquee-mini-editor .me-title:focus-visible,
+.ax-marquee-mini-editor .me-field-value:focus-visible {
   outline: 2px solid var(--spectrum-blue-800, #3b63fb);
   outline-offset: 2px;
+  border-radius: 4px;
 }
 
-.ax-marquee-mini-editor .me-bar-title {
+/* Big "Happy Birthday" display title in the open area above the pills. */
+.ax-marquee-mini-editor .me-title {
+  position: absolute;
+  top: 4%;
+  left: 14%;
+  width: 72%;
+  text-align: center;
+  color: #b5651d;
+  font-family: georgia, "times new roman", serif;
+  font-style: italic;
+  font-weight: 700;
+  font-size: 46px;
+  line-height: 1;
+}
+
+/* FROM / TO fill fields sitting on the image's pill bars. */
+.ax-marquee-mini-editor .me-field {
+  position: absolute;
+  left: 15%;
+  height: 5.4%;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-sizing: border-box;
+  padding: 0 4%;
+  overflow: hidden;
+  font-family: var(--body-font-family, adobe-clean, sans-serif);
+  white-space: nowrap;
+}
+
+.ax-marquee-mini-editor .me-from {
   top: 31.2%;
-  left: 15%;
   width: 52%;
-  height: 5.2%;
-  font-size: 13px;
 }
 
-.ax-marquee-mini-editor .me-bar-signature {
+.ax-marquee-mini-editor .me-to {
   top: 37.4%;
-  left: 15%;
   width: 46%;
-  height: 5.2%;
+}
+
+.ax-marquee-mini-editor .me-field-label {
+  flex: 0 0 auto;
+  color: #c17a43;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.ax-marquee-mini-editor .me-field-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  color: #5c3d2e;
   font-size: 11px;
   font-weight: 600;
 }

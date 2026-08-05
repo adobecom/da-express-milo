@@ -13,9 +13,12 @@ const PREVIEW_IMG = '/express/code/blocks/ax-marquee-mini-editor/img/birthday-cu
 const PALETTE = ['#FDE9DE', '#F9D7C4', '#C9E7FF', '#E6D7FF', '#D8F0DC', '#131313'];
 
 const LABEL_KEYS = ['share', 'edit', 'download', 'background', 'editor-actions'];
-// Default editable greeting text overlaid on the preview image's two pill bars.
-const BAR_TITLE_TEXT = 'Happy Birthday';
-const BAR_SIGNATURE_TEXT = 'From ___ To ___';
+// Editable greeting overlaid on the preview: a big title + two labelled fill fields.
+const TITLE_TEXT = 'Happy Birthday';
+const FIELDS = [
+  { cls: 'me-from', label: 'FROM :', aria: 'From' },
+  { cls: 'me-to', label: 'TO:', aria: 'To' },
+];
 
 let getConfig;
 let getMetadata;
@@ -57,31 +60,42 @@ function applyCanvasBg(root, color) {
   if (canvas) canvas.style.background = color;
 }
 
-/** One editable greeting bar positioned over a pill in the preview image. */
-function makeEditableBar(cls, text, ariaLabel) {
-  const bar = createTag('div', {
-    class: `me-bar ${cls}`,
+/** An editable text region (contenteditable) with common a11y attributes. */
+function makeEditable(cls, text, ariaLabel) {
+  const el = createTag('div', {
+    class: cls,
     contenteditable: 'true',
     role: 'textbox',
     spellcheck: 'false',
     'aria-label': ariaLabel,
   });
-  bar.textContent = text;
-  return bar;
+  if (text) el.textContent = text;
+  return el;
 }
 
 /**
- * Build the preview: the bundled image plus two editable greeting bars
- * overlaid on the image's pill bars. Returned element is the widget `content`.
+ * Build the preview: the bundled image plus an editable "Happy Birthday" title
+ * and two labelled FROM/TO fields (fixed label + editable value) positioned over
+ * the image's pill bars. Returned element is the widget `content`.
  */
 function buildPreview() {
   const preview = createTag('div', { class: 'me-preview' });
   const img = createTag('img', {
     class: 'me-preview-img', src: PREVIEW_IMG, alt: '', loading: 'lazy',
   });
-  const bar1 = makeEditableBar('me-bar-title', BAR_TITLE_TEXT, BAR_TITLE_TEXT);
-  const bar2 = makeEditableBar('me-bar-signature', BAR_SIGNATURE_TEXT, BAR_SIGNATURE_TEXT);
-  preview.append(img, bar1, bar2);
+
+  const title = makeEditable('me-title', TITLE_TEXT, TITLE_TEXT);
+
+  const fields = FIELDS.map(({ cls, label, aria }) => {
+    const field = createTag('div', { class: `me-field ${cls}` });
+    const labelEl = createTag('span', { class: 'me-field-label' });
+    labelEl.textContent = label;
+    const value = makeEditable('me-field-value', '', aria);
+    field.append(labelEl, value);
+    return field;
+  });
+
+  preview.append(img, title, ...fields);
   return preview;
 }
 
