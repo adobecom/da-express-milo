@@ -209,9 +209,11 @@ main .ax-marquee-mini-editor p.button-container {
   height: 30px;
 }
 
+/* The S2 download glyph fills only ~50% of its viewBox and the action-button
+   hard-caps the slotted icon width at 20px, so scale the glyph up visually to
+   match the share/edit icons. */
 .ax-marquee-mini-editor .mini-editor-actions sp-theme[data-action-id="download"] [slot="icon"] img {
-  width: 34px;
-  height: 34px;
+  transform: scale(1.7);
 }
 
 .ax-marquee-mini-editor .mini-editor-actions sp-theme[data-action-id="edit"] [slot="icon"] img {
