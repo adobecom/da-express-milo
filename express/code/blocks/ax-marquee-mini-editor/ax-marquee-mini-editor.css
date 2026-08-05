@@ -114,6 +114,25 @@ main .ax-marquee-mini-editor p.button-container {
   object-fit: contain;
 }
 
+/* Normalize action-bar icon glyph sizes. The S2 share/download icons carry
+   built-in padding (20px glyph in a 32 viewBox), so render them larger than
+   the tighter edit icon so all three glyphs read at the same visual size. */
+.ax-marquee-mini-editor .mini-editor-actions sp-theme[data-action-id="share"] [slot="icon"] img,
+.ax-marquee-mini-editor .mini-editor-actions sp-theme[data-action-id="download"] [slot="icon"] img {
+  width: 26px;
+  height: 26px;
+}
+
+.ax-marquee-mini-editor .mini-editor-actions sp-theme[data-action-id="edit"] [slot="icon"] img {
+  width: 18px;
+  height: 18px;
+}
+
+/* Consistent casing for the Share label (placeholder text may be lowercase). */
+.ax-marquee-mini-editor .mini-editor-actions sp-button {
+  text-transform: capitalize;
+}
+
 /* ── Responsive: stack on tablet/mobile, split on desktop ───────────────── */
 @media (min-width: 768px) and (max-width: 899px) {
   .ax-marquee-mini-editor {
