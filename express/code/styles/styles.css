@@ -805,6 +805,64 @@ main .dark a.con-button.outline:any-link:focus {
   color: var(--color-info-accent-hover);
 }
 
+/* Black fill button ("Button Primary" in the Figma SoT). Authorable the milo
+   way via a `#_button-fill` href hash (milo's decorateButtons strips the hash
+   and adds the `fill` class) or a `fill` class applied by a block. Declared
+   after the blue/outline variants so it wins at equal specificity when they
+   combine (e.g. `con-button blue fill`). Uses the S2 Background/Primary tokens
+   so it matches the SoT (#292929 default, #131313 hover/down). */
+main a.con-button.fill:any-link,
+main a.button.fill:any-link {
+  color: var(--color-white);
+  background-color: var(--Background-Primary-Default);
+  border-color: var(--Background-Primary-Default);
+}
+
+main a.con-button.fill:any-link:hover,
+main a.con-button.fill:any-link:active,
+main a.button.fill:any-link:hover,
+main a.button.fill:any-link:active {
+  background-color: var(--Background-Primary-Hover);
+  border-color: var(--Background-Primary-Hover);
+}
+
+main a.con-button.fill:focus,
+main a.button.fill:focus {
+  background-color: var(--Background-Primary-Hover);
+  border-color: var(--Background-Primary-Hover);
+  color: var(--color-white);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-white),
+    0 0 0 4px var(--color-focus-ring-strong);
+}
+
+/* On dark sections the black fill inverts to a white button (SoT "Primary
+   Static White"), mirroring the existing `.button.dark` white-on-dark CTA. */
+main .dark a.con-button.fill:any-link,
+main .dark a.button.fill:any-link {
+  color: var(--Background-Primary-Default);
+  background-color: var(--color-white);
+  border-color: var(--color-white);
+}
+
+main .dark a.con-button.fill:any-link:hover,
+main .dark a.con-button.fill:any-link:active,
+main .dark a.button.fill:any-link:hover,
+main .dark a.button.fill:any-link:active {
+  color: var(--Background-Primary-Default);
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-100);
+}
+
+main .dark a.con-button.fill:focus,
+main .dark a.button.fill:focus {
+  color: var(--Background-Primary-Default);
+  background-color: var(--color-white);
+  border-color: var(--color-white);
+  box-shadow: 0 0 0 2px var(--Background-Primary-Default),
+    0 0 0 4px var(--color-white);
+}
+
 main a.button.wide,
 main a.con-button.wide {
   display: block;

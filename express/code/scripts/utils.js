@@ -358,6 +358,17 @@ export async function decorateButtonsDeprecated(el, size) {
             $a.classList.add('button', 'accent', 'light');
             $twoup.classList.add('button-container');
           }
+          // Universal black fill button, authored the milo way via a
+          // `#_button-fill` hash on the href. The blocks that reach this
+          // fallback (ax-columns, banner, fullscreen-marquee, link-list) bypass
+          // milo's decorateButtons, which would normally strip this hash and add
+          // the class — so honor it here. Additive and hash-gated: no effect on
+          // existing content, which never carries this hash.
+          if ($a.classList.contains('button') && originalHref.includes('#_button-fill')) {
+            $a.classList.remove('accent');
+            $a.classList.add('fill');
+            $a.setAttribute('href', $a.href.replace('#_button-fill', ''));
+          }
         }
         if (linkText.startsWith('{{icon-') && linkText.endsWith('}}')) {
           const $iconName = /{{icon-([\w-]+)}}/g.exec(linkText)[1];
