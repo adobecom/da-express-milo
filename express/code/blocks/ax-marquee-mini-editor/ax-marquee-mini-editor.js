@@ -12,6 +12,11 @@ const PREVIEW_IMG = '/express/code/blocks/ax-marquee-mini-editor/img/birthday-cu
 // preview image. Baked in for now; make authorable later.
 const PALETTE = ['#FDE9DE', '#F9D7C4', '#C9E7FF', '#E6D7FF', '#D8F0DC', '#131313'];
 
+// Adobe Express project the actions hand off to. The current editor state
+// (text + selected background) is appended as query params; the reading of
+// those params lives in a different codebase.
+const EXPRESS_BASE_URL = 'https://express.adobe.com/id/urn:aaid:sc:AP:bce988bc-4430-5490-b0ad-1aa6b3273ae9?category=search';
+
 const LABEL_KEYS = ['share', 'edit', 'download', 'background', 'editor-actions'];
 // Editable greeting overlaid on the preview: a big title + two labelled fill fields.
 const TITLE_TEXT = 'Happy Birthday';
@@ -99,6 +104,25 @@ function buildPreview() {
   return preview;
 }
 
+/**
+ * Build the Adobe Express hand-off URL, capturing the current editor state
+ * (title + FROM/TO text, selected background, and which action was used) as
+ * query params on the target project URL.
+ */
+function buildExpressUrl(action, preview, background) {
+  const url = new URL(EXPRESS_BASE_URL);
+  const text = (sel) => preview.querySelector(sel)?.textContent.trim() || '';
+  const params = {
+    action,
+    title: text('.me-title'),
+    from: text('.me-from .me-field-value'),
+    to: text('.me-to .me-field-value'),
+    bg: background,
+  };
+  Object.entries(params).forEach(([k, v]) => { if (v) url.searchParams.set(k, v); });
+  return url.toString();
+}
+
 /** Swap the authored media column for the mini editor, with a bundled preview image. */
 async function setupMiniEditor(block) {
   const row = block.querySelector(':scope > div');
@@ -110,6 +134,12 @@ async function setupMiniEditor(block) {
 
   const preview = buildPreview();
   const [defaultBg] = PALETTE;
+  let currentBg = defaultBg;
+
+  // Hand off to Adobe Express with the current state as URL params.
+  const openInExpress = (action) => () => {
+    window.open(buildExpressUrl(action, preview, currentBg), '_blank', 'noopener');
+  };
 
   const labels = await replaceKeyArray(LABEL_KEYS, getConfig());
   const [shareLabel, editLabel, downloadLabel, backgroundLabel, actionsLabel] = labels;
@@ -118,15 +148,17 @@ async function setupMiniEditor(block) {
     content: preview,
     strings: { actionsLabel, backgroundsLabel: backgroundLabel },
     topActions: [
-      { id: 'share', type: 'button', label: shareLabel },
-      { id: 'edit', type: 'action', iconOnly: true, ariaLabel: editLabel },
-      { id: 'download', type: 'action', iconOnly: true, ariaLabel: downloadLabel },
+      { id: 'share', type: 'button', label: shareLabel, onClick: openInExpress('share') },
+      { id: 'edit', type: 'action', iconOnly: true, ariaLabel: editLabel, onClick: openInExpress('edit') },
+      { id: 'download', type: 'action', iconOnly: true, ariaLabel: downloadLabel, onClick: openInExpress('download') },
     ],
     backgrounds: {
       colors: PALETTE,
       selected: ['0'],
       onChange: ({ index }) => {
-        if (index >= 0) applyCanvasBg(editor.element, PALETTE[index]);
+        if (index < 0) return;
+        currentBg = PALETTE[index];
+        applyCanvasBg(editor.element, currentBg);
       },
     },
   });
