@@ -4,6 +4,10 @@ import { normalizeHeadings } from '../../scripts/utils/decorate.js';
 
 let createTag;
 
+/**
+ * @deprecated Use `banner-bg` instead. Do not author new pages with
+ * this block; it is kept only for existing content.
+ */
 export default async function decorate(block) {
   await Promise.all([import(`${getLibs()}/utils/utils.js`), decorateButtonsDeprecated(block)]).then(([utils]) => {
     ({ createTag } = utils);
