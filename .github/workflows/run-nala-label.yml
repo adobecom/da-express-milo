@@ -44,6 +44,8 @@ jobs:
         run: npm ci --no-fund --prefer-offline
 
       - name: Install Playwright (chromium)
+        # Normally fast; fail fast if a package mirror stalls so a re-run recovers.
+        timeout-minutes: 5
         run: npx playwright install chromium
 
       - name: Set execute permission for nalarun.sh

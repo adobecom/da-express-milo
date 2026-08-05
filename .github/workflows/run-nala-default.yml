@@ -58,6 +58,10 @@ jobs:
         run: npm ci --no-fund --prefer-offline
 
       - name: Install Playwright (all browsers)
+        # Normally ~40s. A hung Ubuntu package mirror (via --with-deps) can
+        # otherwise stall this step until the 30-min job timeout, wasting a
+        # runner and failing the whole PR. Fail fast so a re-run recovers.
+        timeout-minutes: 5
         run: npx playwright install --with-deps
 
       - name: Set execute permission for pr.run.sh
