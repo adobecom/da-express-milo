@@ -273,10 +273,8 @@ export async function checkPageStatus(daPath: string, token: string): Promise<Pa
       const data = await resp.json() as { live?: { status: number }; preview?: { status: number } };
       return { live: data.live?.status === 200, preview: data.preview?.status === 200, ok: true };
     } catch {
-      if (attempt < MAX_ATTEMPTS - 1) {
-        await sleep(400 * 2 ** attempt + Math.random() * 300);
-        continue;
-      }
+      // Network / CORS failure — the endpoint is unreachable from this origin, so retrying
+      // is futile (and, at scale, catastrophically slow). Fail fast; the caller marks it Unknown.
       return { live: false, preview: false, ok: false };
     }
   }

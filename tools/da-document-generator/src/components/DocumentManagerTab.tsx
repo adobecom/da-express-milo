@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { crawlAndLoadDocs, backfillIdentity, writeFieldValue } from '../lib/documentManager';
+import { scanDocs, backfillIdentity, writeFieldValue, type ScanPhase } from '../lib/documentManager';
 import type { CrawlError, DocFetchError } from '../api/crawl';
 import type { EditableFieldKey } from '../lib/generate';
 import { useDaDocumentActions } from '../hooks/useDaDocumentActions';
@@ -14,6 +13,30 @@ import type { ManagedDoc } from '../types';
 const LEGACY_BATCH = '(legacy / no batch)';
 const ALL = 'all';
 const DEFAULT_ROOT_PATH = '/adobecom/da-express-milo/express/print';
+
+function ScanProgressBar({ progress }: { progress: { phase: ScanPhase; done: number; total: number } }) {
+  const { phase, done, total } = progress;
+  const label = phase === 'discovering'
+    ? 'Discovering documents…'
+    : phase === 'loading'
+      ? `Loading details… ${done} / ${total}`
+      : `Checking status… ${done} / ${total}`;
+  const pct = total > 0 ? Math.round((done / total) * 100) : null;
+  return (
+    <div className="flex flex-col gap-1.5">
+      <div className="flex items-center justify-between text-sm text-gray-500">
+        <span>{label}</span>
+        {pct !== null && <span className="tabular-nums">{pct}%</span>}
+      </div>
+      <div className="h-1.5 w-full rounded-full bg-gray-100 overflow-hidden">
+        <div
+          className={`h-full rounded-full bg-blue-500 ${pct === null ? 'w-1/3 animate-pulse' : 'transition-[width] duration-200'}`}
+          style={pct !== null ? { width: `${pct}%` } : undefined}
+        />
+      </div>
+    </div>
+  );
+}
 
 export default function DocumentManagerTab() {
   const [rootPathInput, setRootPathInput] = useState(DEFAULT_ROOT_PATH);
@@ -38,12 +61,8 @@ export default function DocumentManagerTab() {
   // doesn't lose a crawl (and any inline edits) by closing/reloading.
   useBeforeUnload(docs.length > 0);
 
-  const { isFetching, refetch } = useQuery({
-    queryKey: ['dm-crawl', rootPath],
-    queryFn: () => crawlAndLoadDocs(rootPath!),
-    enabled: false,
-    staleTime: Infinity,
-  });
+  const [scanProgress, setScanProgress] = useState<{ phase: ScanPhase; done: number; total: number } | null>(null);
+  const scanning = scanProgress !== null;
 
   const actions = useDaDocumentActions<ManagedDoc>(setDocs, { afterDelete: () => undefined });
 
@@ -54,21 +73,52 @@ export default function DocumentManagerTab() {
     setScanNonce((n) => n + 1);
   }
 
-  // Deferring the setState calls to the refetch() promise's resolution (rather than calling
-  // them synchronously in the effect body) keeps this a "trigger an external fetch" effect,
-  // not a "derive state from state" effect — and lets scanNonce force a rescan of the same path.
+  // Run the segmented scan whenever the path changes or Rescan bumps scanNonce. A per-run
+  // scanId (bumped in cleanup) makes a superseded or unmounted scan's callbacks no-ops.
   useEffect(() => {
     if (rootPath === null) return;
-    void refetch().then((result) => {
-      if (result.data) {
-        setDocs(result.data.docs);
-        setCrawlErrors(result.data.errors);
+    let stale = false;
+    void scanDocs(rootPath, {
+      onDiscovered: (placeholders) => {
+        if (stale) return;
+        setDocs(placeholders);
         setSelected(new Set());
         setDismissedErrors(false);
+      },
+      onRecords: (records) => {
+        if (stale) return;
+        const byPath = new Map(records.map((r) => [r.path, r]));
+        setDocs((prev) => prev.map((d) => byPath.get(d.path) ?? d));
+      },
+      onStatuses: (updates) => {
+        if (stale) return;
+        const byPath = new Map(updates.map((u) => [u.path, u]));
+        setDocs((prev) => prev.map((d) => {
+          const u = byPath.get(d.path);
+          return u ? { ...d, ...u } : d;
+        }));
+      },
+      onProgress: (phase, done, total) => {
+        if (stale) return;
+        setScanProgress({ phase, done, total });
+      },
+      cancelled: () => stale,
+    }).then(
+      ({ errors }) => {
+        if (stale) return;
+        setCrawlErrors(errors);
         setHasScanned(true);
-      }
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        setScanProgress(null);
+      },
+      (err: unknown) => {
+        if (stale) return;
+        setCrawlErrors([{ dirPath: rootPath, message: err instanceof Error ? err.message : String(err) }]);
+        setHasScanned(true);
+        setScanProgress(null);
+      },
+    );
+    // Abort the in-flight scan when a rescan starts or the component unmounts.
+    return () => { stale = true; };
   }, [rootPath, scanNonce]);
 
   const subDirectories = useMemo(
@@ -203,23 +253,21 @@ export default function DocumentManagerTab() {
         <button
           type="button"
           onClick={handleScan}
-          disabled={isFetching || !rootPathInput.trim()}
+          disabled={scanning || !rootPathInput.trim()}
           className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-xl hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
         >
-          {isFetching ? 'Scanning…' : rootPath === rootPathInput.trim() && hasScanned ? 'Rescan' : 'Scan'}
+          {scanning ? 'Scanning…' : rootPath === rootPathInput.trim() && hasScanned ? 'Rescan' : 'Scan'}
         </button>
-        {hasScanned && !isFetching && (
+        {hasScanned && !scanning && (
           <span className="text-sm text-gray-500">{docs.length} document{docs.length !== 1 ? 's' : ''} found</span>
         )}
       </div>
 
-      {!hasScanned && !isFetching && (
+      {!hasScanned && !scanning && (
         <p className="text-sm text-gray-500">Enter a DA folder path above and click Scan to load its documents.</p>
       )}
 
-      {isFetching && (
-        <p className="text-sm text-gray-500">Scanning… this may take a while for large folders.</p>
-      )}
+      {scanning && scanProgress && <ScanProgressBar progress={scanProgress} />}
 
       {crawlErrors.length > 0 && !dismissedErrors && (
         <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
@@ -232,7 +280,7 @@ export default function DocumentManagerTab() {
         </div>
       )}
 
-      {hasScanned && !isFetching && (() => {
+      {hasScanned && !scanning && (() => {
         const unknownCount = docs.filter((d) => d.statusUnknown).length;
         if (unknownCount === 0) return null;
         return (
@@ -242,7 +290,7 @@ export default function DocumentManagerTab() {
         );
       })()}
 
-      {hasScanned && !isFetching && (
+      {(docs.length > 0 || hasScanned) && (
         <>
           <div className="flex items-center gap-3 flex-wrap text-sm">
             <FilterSelect label="Sub-directory" value={subDirFilter} onChange={setSubDirFilter} options={subDirectories} />

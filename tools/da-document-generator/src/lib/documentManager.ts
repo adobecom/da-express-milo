@@ -1,6 +1,6 @@
-import { crawlDirectory, fetchAndParseDocs, type CrawlError, type DocFetchError } from '../api/crawl';
-import { batchCheckStatus, getToken, daPathToLiveUrl, daPathToPreviewUrl, cat, postDoc, type PageStatus } from '../api/daApi';
-import { CRAWL_CONCURRENCY, STATUS_CONCURRENCY } from './concurrency';
+import { crawlDirectory, type CrawlError, type DocFetchError } from '../api/crawl';
+import { checkPageStatus, getToken, daPathToLiveUrl, daPathToPreviewUrl, cat, postDoc } from '../api/daApi';
+import { CRAWL_CONCURRENCY, STATUS_CONCURRENCY, runBatch } from './concurrency';
 import { fetchProductFromTemplate, type ZazzleProduct } from '../api/zazzleApi';
 import { readMetadataBlockFromDoc, upsertMetadataBlockOnDoc, serializeDoc } from './metadata';
 import { tagEditableFieldsOnDoc, type EditableFieldKey } from './generate';
@@ -78,54 +78,127 @@ export function parseDocRecord(html: string, path: string, rootPath: string): Ma
   };
 }
 
-export interface CrawlAndLoadResult {
-  docs: ManagedDoc[];
-  errors: (CrawlError | DocFetchError)[];
+export type ScanPhase = 'discovering' | 'loading' | 'checking';
+
+export interface StatusUpdate {
+  path: string;
+  stage?: ManagedDoc['stage'];
+  statusUnknown?: boolean;
+  liveUrl?: string;
+  previewUrl?: string;
+}
+
+export interface ScanCallbacks {
+  /** Placeholder rows (path + sub-directory) available immediately after discovery. */
+  onDiscovered: (docs: ManagedDoc[], total: number) => void;
+  /** A batch of fully-parsed metadata records, to merge into the rows by path. */
+  onRecords: (records: ManagedDoc[]) => void;
+  /** A batch of publish/preview status results (or Unknown), to merge into the rows by path. */
+  onStatuses: (updates: StatusUpdate[]) => void;
+  onProgress: (phase: ScanPhase, done: number, total: number) => void;
+  /** Return true to abort — checked between async steps so a rescan/unmount stops work. */
+  cancelled: () => boolean;
+}
+
+const FLUSH_SIZE = 25;
+// If this many status checks fail with zero successes, treat the status endpoint as
+// unreachable (e.g. CORS-blocked) and mark the rest Unknown without more network calls.
+const STATUS_FAILURE_CIRCUIT = 10;
+
+function placeholderDoc(path: string, rootPath: string): ManagedDoc {
+  return {
+    id: path,
+    path,
+    stage: 'generated',
+    subDirectory: computeSubDirectory(path, rootPath),
+    identity: {},
+    needsBackfill: false,
+    editable: { title: false, shortTitle: false, description: false },
+  };
 }
 
 /**
- * Crawls `rootPath`, parses every doc found into a `ManagedDoc`, then live-checks
- * publish/preview status for whatever was found so the table reflects real state rather
- * than a stale guess. A crawl/fetch failure for one subtree/doc is surfaced in `errors`,
- * never silently dropped from the result.
+ * Segmented, progressive scan: (1) discover paths and emit placeholder rows immediately,
+ * (2) fetch/parse each doc's metadata in batches, (3) live-check publish/preview status
+ * last — deferred and resilient (fast-fail + circuit breaker) so a blocked or slow status
+ * endpoint can never hang the scan. Progress and partial results stream via callbacks; the
+ * caller aborts an in-flight scan by flipping `cancelled()`.
  */
-export async function crawlAndLoadDocs(rootPath: string): Promise<CrawlAndLoadResult> {
+export async function scanDocs(
+  rootPath: string,
+  cb: ScanCallbacks,
+): Promise<{ errors: (CrawlError | DocFetchError)[] }> {
+  // Phase 1 — discovery. Emit placeholder rows the moment paths are known.
+  cb.onProgress('discovering', 0, 0);
   const crawl = await crawlDirectory(rootPath, { concurrency: CRAWL_CONCURRENCY });
+  if (cb.cancelled()) return { errors: crawl.errors };
   const paths = crawl.docs.map((d) => d.path);
+  const total = paths.length;
+  cb.onDiscovered(paths.map((p) => placeholderDoc(p, rootPath)), total);
+
+  // Phase 2 — metadata (heavy per-doc fetch/parse), streamed in batches. Row updates and
+  // progress fire at the flush cadence (not per doc) to avoid a re-render on every document.
+  const fetchErrors: DocFetchError[] = [];
+  let parsed = 0;
+  let recBuf: ManagedDoc[] = [];
+  cb.onProgress('loading', 0, total);
+  await runBatch(paths, async (path) => {
+    if (cb.cancelled()) return;
+    try {
+      recBuf.push(parseDocRecord(await cat(path), path, rootPath));
+    } catch (err) {
+      fetchErrors.push({ path, message: err instanceof Error ? err.message : String(err) });
+    }
+    parsed++;
+    if (recBuf.length >= FLUSH_SIZE || parsed === total) {
+      cb.onRecords(recBuf);
+      recBuf = [];
+      cb.onProgress('loading', parsed, total);
+    }
+  }, CRAWL_CONCURRENCY);
+  if (cb.cancelled()) return { errors: [...crawl.errors, ...fetchErrors] };
+
+  // Phase 3 — status (deferred, resilient). Fast-fail per call, plus a circuit breaker so a
+  // wholly-unreachable endpoint marks the rest Unknown instead of probing every doc.
   const token = getToken();
-
-  // Fetch/parse each doc and live-check publish/preview status concurrently. Status only
-  // needs the paths (already known from the crawl), so it doesn't wait on parsing — this
-  // overlaps the two per-doc passes instead of running them back to back.
-  const [{ records, errors: fetchErrors }, statuses] = await Promise.all([
-    fetchAndParseDocs(
-      paths,
-      (html, path) => parseDocRecord(html, path, rootPath),
-      { concurrency: CRAWL_CONCURRENCY },
-    ),
-    token && paths.length > 0
-      ? batchCheckStatus(paths, token, STATUS_CONCURRENCY)
-      : Promise.resolve(new Map<string, PageStatus>()),
-  ]);
-
-  for (const record of records) {
-    const status = statuses.get(record.path);
-    if (!status) continue;
-    if (!status.ok) {
-      // Status check failed (e.g. rate-limited after retries) — don't mislabel as "draft".
-      record.statusUnknown = true;
-      continue;
-    }
-    if (status.live) {
-      record.stage = 'published';
-      record.liveUrl = daPathToLiveUrl(record.path);
-    } else if (status.preview) {
-      record.stage = 'previewed';
-      record.previewUrl = daPathToPreviewUrl(record.path);
-    }
+  if (token && total > 0) {
+    let checked = 0;
+    let failures = 0;
+    let successes = 0;
+    let aborted = false;
+    let statBuf: StatusUpdate[] = [];
+    cb.onProgress('checking', 0, total);
+    await runBatch(paths, async (path) => {
+      if (cb.cancelled()) return;
+      let update: StatusUpdate;
+      if (aborted) {
+        update = { path, statusUnknown: true };
+      } else {
+        const s = await checkPageStatus(path, token);
+        if (s.ok) {
+          successes++;
+          update = s.live
+            ? { path, stage: 'published', liveUrl: daPathToLiveUrl(path) }
+            : s.preview
+              ? { path, stage: 'previewed', previewUrl: daPathToPreviewUrl(path) }
+              : { path }; // definitively not published/previewed — stays Draft
+        } else {
+          failures++;
+          update = { path, statusUnknown: true };
+          if (successes === 0 && failures >= STATUS_FAILURE_CIRCUIT) aborted = true;
+        }
+      }
+      statBuf.push(update);
+      checked++;
+      if (statBuf.length >= FLUSH_SIZE || checked === total) {
+        cb.onStatuses(statBuf);
+        statBuf = [];
+        cb.onProgress('checking', checked, total);
+      }
+    }, STATUS_CONCURRENCY);
   }
 
-  return { docs: records, errors: [...crawl.errors, ...fetchErrors] };
+  return { errors: [...crawl.errors, ...fetchErrors] };
 }
 
 const zazzleCache = new Map<string, ZazzleProduct | null>();
