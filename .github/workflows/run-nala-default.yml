@@ -21,8 +21,13 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
+      # Don't cancel the other shards when one fails — we want the full picture.
+      fail-fast: false
       matrix:
         node-version: [24.x]
+        # Split the suite across parallel runner jobs. Playwright's --shard
+        # deterministically partitions tests, so 4 shards ≈ 4x throughput.
+        shard: [1, 2, 3, 4]
 
     steps:
       - name: Checkout repository
@@ -52,8 +57,8 @@ jobs:
       - name: Install dependencies
         run: npm ci --no-fund --prefer-offline
 
-      - name: Install Playwright (chromium)
-        run: npx playwright install chromium
+      - name: Install Playwright (all browsers)
+        run: npx playwright install --with-deps
 
       - name: Set execute permission for pr.run.sh
         run: chmod +x ./nala/utils/pr.run.sh
@@ -61,6 +66,10 @@ jobs:
       - name: Run Nala Tests
         run: ./nala/utils/pr.run.sh
         env:
+          # PR gate: full cross-browser matrix, sharded across parallel jobs
+          # so wall-clock stays low even with all three browsers.
+          NALA_PROJECTS: --project=express-live-chromium --project=express-live-firefox --project=express-live-webkit
+          SHARD: ${{ matrix.shard }}/4
           labels: ${{ join(github.event.pull_request.labels.*.name, ' ') }}
           branch: ${{ github.event.pull_request.head.ref }}
           repoName: ${{ github.repository }}
@@ -77,10 +86,30 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: nala-test-results-${{ github.run_number }}
+          name: nala-test-results-${{ github.run_number }}-shard${{ matrix.shard }}
           path: |
             test-results/
             test-html-results/
             playwright-report/
           retention-days: 30
           if-no-files-found: ignore
+
+  # Single aggregate check for branch protection. `needs.run-nala-tests.result`
+  # collapses the whole shard matrix to one value: 'success' only if every shard
+  # passed. Make THIS job the required status check so the shard count can change
+  # without ever touching branch protection again.
+  nala-gate:
+    name: Nala Tests Gate
+    if: always()
+    needs: run-nala-tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify all shards passed
+        run: |
+          result="${{ needs.run-nala-tests.result }}"
+          echo "Aggregate shard result: $result"
+          if [[ "$result" != "success" ]]; then
+            echo "One or more Nala shards did not pass."
+            exit 1
+          fi
+          echo "All Nala shards passed."

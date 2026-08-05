@@ -87,19 +87,26 @@ echo "*******************************"
 # Move to repo root
 cd "$GITHUB_ACTION_PATH" || exit
 
-# Install dependencies
-npm ci
-npx playwright install --with-deps
+# Dependencies and browsers are installed by the calling workflow steps.
+# (Re-installing here duplicated `npm ci` and pulled every browser + OS deps
+# on every run, adding several minutes for no benefit.)
 
-# Run Playwright tests on all browsers
-echo "*** Running tests on Chromium + Firefox + WebKit ***"
+# Browsers to run. Default: chromium only (fast PR gate). Override with
+# NALA_PROJECTS to run the full cross-browser matrix, e.g.
+# "--project=express-live-chromium --project=express-live-firefox --project=express-live-webkit"
+PROJECTS="${NALA_PROJECTS:---project=express-live-chromium}"
+
+# Optional sharding across parallel runner jobs, e.g. SHARD="1/4"
+SHARD_ARG=""
+[[ -n "$SHARD" ]] && SHARD_ARG="--shard=$SHARD"
+
+# Run Playwright tests
+echo "*** Running tests on projects: ${PROJECTS} ${SHARD_ARG:-"(no shard)"} ***"
 echo "*** Excluding monitoring tests (@monitoring) ***"
 npx playwright test \
   --config=./playwright.config.cjs \
   ${TAGS} ${EXCLUDE_TAGS} ${EXCLUDE_MONITORING} ${REPORTER} \
-  --project=express-live-chromium \
-  --project=express-live-firefox \
-  --project=express-live-webkit || EXIT_STATUS=$?
+  ${PROJECTS} ${SHARD_ARG} || EXIT_STATUS=$?
 
 # Exit status
 if [ $EXIT_STATUS -ne 0 ]; then

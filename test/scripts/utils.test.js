@@ -8,6 +8,7 @@ import {
   getIconElementDeprecated,
   convertToInlineSVG,
   getContentRoot,
+  decorateButtonsDeprecated,
 } from '../../express/code/scripts/utils.js';
 import { transformLinkToAnimation } from '../../express/code/scripts/utils/media.js';
 
@@ -286,5 +287,29 @@ describe('getContentRoot', () => {
       const contentRoot = getContentRoot(location);
       expect(contentRoot).to.equal(expected);
     });
+  });
+});
+
+describe('decorateButtonsDeprecated #_button-<name> handling', () => {
+  before(() => {
+    setLibs('/test/scripts/mocks/libs', { hostname: 'prod.example.com', search: '' });
+  });
+
+  it('strips a #_button-<name> suffix from the href and adds the matching class', async () => {
+    document.body.innerHTML = '<div class="ax-columns"><p><strong><a href="https://www.adobe.com/#_button-fill">CTA</a></strong></p></div>';
+    const block = document.querySelector('.ax-columns');
+    await decorateButtonsDeprecated(block);
+    const link = block.querySelector('a');
+    expect(link.href).to.equal('https://www.adobe.com/');
+    expect(link.classList.contains('fill')).to.be.true;
+  });
+
+  it('leaves a href without a #_button-<name> suffix unchanged', async () => {
+    document.body.innerHTML = '<div class="ax-columns"><p><strong><a href="https://www.adobe.com/">CTA</a></strong></p></div>';
+    const block = document.querySelector('.ax-columns');
+    await decorateButtonsDeprecated(block);
+    const link = block.querySelector('a');
+    expect(link.href).to.equal('https://www.adobe.com/');
+    expect(link.classList.contains('fill')).to.be.false;
   });
 });
