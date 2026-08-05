@@ -103,24 +103,83 @@ main .ax-marquee-mini-editor p.button-container {
   max-height: 460px;
 }
 
-.ax-marquee-mini-editor .mini-editor-content picture,
-.ax-marquee-mini-editor .mini-editor-content img {
+/* Center the preview (image + editable bars) in the canvas. */
+.ax-marquee-mini-editor .mini-editor-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ax-marquee-mini-editor .me-preview {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+}
+
+.ax-marquee-mini-editor .me-preview-img {
   display: block;
   width: auto;
   max-width: 100%;
   height: auto;
   max-height: 420px;
-  margin: 0 auto;
-  object-fit: contain;
 }
 
-/* Normalize action-bar icon glyph sizes. The S2 share/download icons carry
-   built-in padding (20px glyph in a 32 viewBox), so render them larger than
-   the tighter edit icon so all three glyphs read at the same visual size. */
-.ax-marquee-mini-editor .mini-editor-actions sp-theme[data-action-id="share"] [slot="icon"] img,
+/* ── Editable greeting bars overlaid on the image's pill bars ────────────── */
+.ax-marquee-mini-editor .me-bar {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  padding: 0 4%;
+  color: var(--spectrum-gray-900, #131313);
+  font-family: var(--body-font-family, adobe-clean, sans-serif);
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  cursor: text;
+  border-radius: 999px;
+  outline: none;
+}
+
+.ax-marquee-mini-editor .me-bar:focus-visible {
+  outline: 2px solid var(--spectrum-blue-800, #3b63fb);
+  outline-offset: 2px;
+}
+
+.ax-marquee-mini-editor .me-bar-title {
+  top: 31.2%;
+  left: 15%;
+  width: 52%;
+  height: 5.2%;
+  font-size: 13px;
+}
+
+.ax-marquee-mini-editor .me-bar-signature {
+  top: 37.4%;
+  left: 15%;
+  width: 46%;
+  height: 5.2%;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ── Action-bar buttons + icons ─────────────────────────────────────────── */
+.ax-marquee-mini-editor .mini-editor-actions sp-action-button {
+  min-block-size: 40px;
+  min-inline-size: 40px;
+}
+
+/* Normalize action-icon glyph sizes. The S2 share/download icons carry built-in
+   padding (glyph fills only ~50% of a 32 viewBox), so render them larger than
+   the tight edit icon (fills ~96%) so all three glyphs read the same size. */
+.ax-marquee-mini-editor .mini-editor-actions sp-theme[data-action-id="share"] [slot="icon"] img {
+  width: 30px;
+  height: 30px;
+}
+
 .ax-marquee-mini-editor .mini-editor-actions sp-theme[data-action-id="download"] [slot="icon"] img {
-  width: 26px;
-  height: 26px;
+  width: 34px;
+  height: 34px;
 }
 
 .ax-marquee-mini-editor .mini-editor-actions sp-theme[data-action-id="edit"] [slot="icon"] img {
@@ -128,9 +187,10 @@ main .ax-marquee-mini-editor p.button-container {
   height: 18px;
 }
 
-/* Consistent casing for the Share label (placeholder text may be lowercase). */
+/* Consistent casing + vertical centering for the Share label. */
 .ax-marquee-mini-editor .mini-editor-actions sp-button {
   text-transform: capitalize;
+  --mod-button-line-height: 1;
 }
 
 /* ── Responsive: stack on tablet/mobile, split on desktop ───────────────── */

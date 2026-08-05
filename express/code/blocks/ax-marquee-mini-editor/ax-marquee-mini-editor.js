@@ -13,6 +13,9 @@ const PREVIEW_IMG = '/express/code/blocks/ax-marquee-mini-editor/img/birthday-cu
 const PALETTE = ['#FDE9DE', '#F9D7C4', '#C9E7FF', '#E6D7FF', '#D8F0DC', '#131313'];
 
 const LABEL_KEYS = ['share', 'edit', 'download', 'background', 'editor-actions'];
+// Default editable greeting text overlaid on the preview image's two pill bars.
+const BAR_TITLE_TEXT = 'Happy Birthday';
+const BAR_SIGNATURE_TEXT = 'From ___ To ___';
 
 let getConfig;
 let getMetadata;
@@ -54,6 +57,34 @@ function applyCanvasBg(root, color) {
   if (canvas) canvas.style.background = color;
 }
 
+/** One editable greeting bar positioned over a pill in the preview image. */
+function makeEditableBar(cls, text, ariaLabel) {
+  const bar = createTag('div', {
+    class: `me-bar ${cls}`,
+    contenteditable: 'true',
+    role: 'textbox',
+    spellcheck: 'false',
+    'aria-label': ariaLabel,
+  });
+  bar.textContent = text;
+  return bar;
+}
+
+/**
+ * Build the preview: the bundled image plus two editable greeting bars
+ * overlaid on the image's pill bars. Returned element is the widget `content`.
+ */
+function buildPreview() {
+  const preview = createTag('div', { class: 'me-preview' });
+  const img = createTag('img', {
+    class: 'me-preview-img', src: PREVIEW_IMG, alt: '', loading: 'lazy',
+  });
+  const bar1 = makeEditableBar('me-bar-title', BAR_TITLE_TEXT, BAR_TITLE_TEXT);
+  const bar2 = makeEditableBar('me-bar-signature', BAR_SIGNATURE_TEXT, BAR_SIGNATURE_TEXT);
+  preview.append(img, bar1, bar2);
+  return preview;
+}
+
 /** Swap the authored media column for the mini editor, with a bundled preview image. */
 async function setupMiniEditor(block) {
   const row = block.querySelector(':scope > div');
@@ -63,7 +94,7 @@ async function setupMiniEditor(block) {
   const cells = [...row.children];
   const mediaCol = cells[1] || row.appendChild(createTag('div'));
 
-  const preview = createTag('img', { src: PREVIEW_IMG, alt: '', loading: 'lazy' });
+  const preview = buildPreview();
   const [defaultBg] = PALETTE;
 
   const labels = await replaceKeyArray(LABEL_KEYS, getConfig());
