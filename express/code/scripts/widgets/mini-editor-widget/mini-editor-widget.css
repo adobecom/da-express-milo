@@ -73,6 +73,21 @@
   min-inline-size: 40px;
 }
 
+/* Uniform icon sizing across the action bar — slotted <img> icons have
+   varying intrinsic sizes, so pin them to the Spectrum icon size. */
+.mini-editor [slot="icon"] {
+  display: inline-flex;
+  align-items: center;
+}
+
+.mini-editor [slot="icon"] img,
+.mini-editor [slot="icon"] svg {
+  inline-size: 20px;
+  block-size: 20px;
+  object-fit: contain;
+  display: block;
+}
+
 /* ── Center canvas ──────────────────────────────────────────────────────── */
 .mini-editor-canvas {
   position: relative;

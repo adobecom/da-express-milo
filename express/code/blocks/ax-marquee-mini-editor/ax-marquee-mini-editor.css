@@ -95,19 +95,22 @@ main .ax-marquee-mini-editor p.button-container {
 
 .ax-marquee-mini-editor .mini-editor {
   width: 100%;
-  max-width: 480px;
+  max-width: 380px;
 }
 
 /* Tall portrait preview image sits on the recolorable canvas. */
 .ax-marquee-mini-editor .mini-editor-canvas {
-  max-height: 60vh;
+  max-height: 460px;
 }
 
 .ax-marquee-mini-editor .mini-editor-content picture,
 .ax-marquee-mini-editor .mini-editor-content img {
   display: block;
-  width: 100%;
+  width: auto;
+  max-width: 100%;
   height: auto;
+  max-height: 420px;
+  margin: 0 auto;
   object-fit: contain;
 }
 

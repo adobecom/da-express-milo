@@ -1,9 +1,12 @@
-import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { getLibs, getIconElementDeprecated, createTag } from '../../scripts/utils.js';
 import { addFreePlanWidget } from '../../scripts/widgets/free-plan.js';
 import createMiniEditorWidget from '../../scripts/widgets/mini-editor-widget/mini-editor-widget.js';
 
 const MARQUEE_INJECT_LOGO = 'marquee-inject-logo';
 const LOGO_INJECT_VALUES = ['on', 'yes'];
+
+// Bundled demo preview image (transparent PNG) shown inside the editor canvas.
+const PREVIEW_IMG = '/express/code/blocks/ax-marquee-mini-editor/img/birthday-cupcake.png';
 
 // Default background palette (theme-appropriate pastels) applied behind the
 // preview image. Baked in for now; make authorable later.
@@ -51,12 +54,16 @@ function applyCanvasBg(root, color) {
   if (canvas) canvas.style.background = color;
 }
 
-/** Swap the authored media column for the mini editor, with the image as preview. */
+/** Swap the authored media column for the mini editor, with a bundled preview image. */
 async function setupMiniEditor(block) {
-  const mediaCol = block.querySelector('div:has(picture)');
-  if (!mediaCol) return;
+  const row = block.querySelector(':scope > div');
+  if (!row) return;
 
-  const preview = mediaCol.querySelector('picture') || mediaCol.querySelector('img');
+  // cells[0] = authored content (left, the hero); cells[1] = media column.
+  const cells = [...row.children];
+  const mediaCol = cells[1] || row.appendChild(createTag('div'));
+
+  const preview = createTag('img', { src: PREVIEW_IMG, alt: '', loading: 'lazy' });
   const [defaultBg] = PALETTE;
 
   const labels = await replaceKeyArray(LABEL_KEYS, getConfig());
