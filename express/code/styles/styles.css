@@ -805,67 +805,170 @@ main .dark a.con-button.outline:any-link:focus {
   color: var(--color-info-accent-hover);
 }
 
-/* Black fill button ("Button Primary" in the Figma SoT). Authorable the milo
-   way via a `#_button-fill` href hash (milo's decorateButtons strips the hash
-   and adds the `fill` class) or a `fill` class applied by a block. Declared
-   after the blue/outline variants so it wins at equal specificity when they
-   combine (e.g. `con-button blue fill`). Uses the S2 Background/Primary tokens
-   so it matches the SoT (#292929 default, #131313 hover/down). */
-main a.con-button.fill:any-link,
-main a.button.fill:any-link {
+/* ═══════════════════════════════════════════════════════════════════════════
+   Spectrum-2 (S2) button system — opt-in namespace.
+
+   The global con-button/button rules above intentionally match the LEGACY look
+   (old #5c5ce0 blue, legacy focus ring). To render the design-reviewed
+   Spectrum-2 CTAs instead, opt a block or section in with the `s2` class
+   (block variant, e.g. `ax-columns s2`, or section-metadata style "s2"). Every
+   rule below is scoped under `.s2`, so nothing outside an opted-in scope
+   changes — no regression to existing buttons.
+
+   Values come from the Figma SoT (Background/Accent, Background/Primary) plus
+   the QA-approved transparent-img-marquee outline ladder and focus ring. Covers
+   milo `.con-button.{blue,outline,fill}` and the legacy `.button.{accent,fill}`
+   the decorateButtonsDeprecated fallback emits, so exception blocks (ax-columns)
+   benefit too. `.dark` (on the same block/section or a descendant) flips each
+   variant. The black fill is authorable via a `#_button-fill` href hash.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Accent / primary blue — proper S2 blue (#3b63fb), not the legacy #5c5ce0.
+   Stays blue on dark sections, per the SoT. */
+main .s2 a.con-button.blue:any-link,
+main .s2 a.button.accent:any-link {
+  color: var(--color-white);
+  background-color: var(--S2-Buttons-Accent-Color-Default);
+  border-color: var(--S2-Buttons-Accent-Color-Default);
+}
+
+main .s2 a.con-button.blue:any-link:hover,
+main .s2 a.con-button.blue:any-link:active,
+main .s2 a.button.accent:any-link:hover,
+main .s2 a.button.accent:any-link:active {
+  background-color: var(--S2-Buttons-Accent-Color-Hover);
+  border-color: var(--S2-Buttons-Accent-Color-Hover);
+}
+
+/* Black fill — SoT "Button Primary" (#292929 / #131313 hover-down). */
+main .s2 a.con-button.fill:any-link,
+main .s2 a.button.fill:any-link {
   color: var(--color-white);
   background-color: var(--Background-Primary-Default);
   border-color: var(--Background-Primary-Default);
 }
 
-main a.con-button.fill:any-link:hover,
-main a.con-button.fill:any-link:active,
-main a.button.fill:any-link:hover,
-main a.button.fill:any-link:active {
+main .s2 a.con-button.fill:any-link:hover,
+main .s2 a.con-button.fill:any-link:active,
+main .s2 a.button.fill:any-link:hover,
+main .s2 a.button.fill:any-link:active {
   background-color: var(--Background-Primary-Hover);
   border-color: var(--Background-Primary-Hover);
 }
 
-/* Focus ring follows the design-reviewed S2 SoT "Focus Ring Background"
-   treatment shipped in transparent-img-marquee (QA-approved): a 2px
-   --color-focus-ring-strong (#4b75ff) outline offset 2px from the button, with
-   an 11%-white halo filling the gap. Same ring in light and dark. */
-main a.con-button.fill:focus,
-main a.button.fill:focus {
-  background-color: var(--Background-Primary-Hover);
-  border-color: var(--Background-Primary-Hover);
-  color: var(--color-white);
-  outline: 2px solid var(--color-focus-ring-strong);
-  outline-offset: 2px;
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.11);
-}
-
-/* On dark sections the black fill inverts to a white button (SoT "Primary
-   Static White"), mirroring the existing `.button.dark` white-on-dark CTA. */
-main .dark a.con-button.fill:any-link,
-main .dark a.button.fill:any-link {
+/* Fill inverts to a white button on dark sections (SoT "Primary Static White"). */
+main .s2.dark a.con-button.fill:any-link,
+main .s2 .dark a.con-button.fill:any-link,
+main .s2.dark a.button.fill:any-link,
+main .s2 .dark a.button.fill:any-link {
   color: var(--Background-Primary-Default);
   background-color: var(--color-white);
   border-color: var(--color-white);
 }
 
-main .dark a.con-button.fill:any-link:hover,
-main .dark a.con-button.fill:any-link:active,
-main .dark a.button.fill:any-link:hover,
-main .dark a.button.fill:any-link:active {
+main .s2.dark a.con-button.fill:any-link:hover,
+main .s2.dark a.con-button.fill:any-link:active,
+main .s2 .dark a.con-button.fill:any-link:hover,
+main .s2 .dark a.con-button.fill:any-link:active,
+main .s2.dark a.button.fill:any-link:hover,
+main .s2.dark a.button.fill:any-link:active,
+main .s2 .dark a.button.fill:any-link:hover,
+main .s2 .dark a.button.fill:any-link:active {
   color: var(--Background-Primary-Default);
   background-color: var(--color-gray-100);
   border-color: var(--color-gray-100);
 }
 
-main .dark a.con-button.fill:focus,
-main .dark a.button.fill:focus {
-  color: var(--Background-Primary-Default);
-  background-color: var(--color-white);
-  border-color: var(--color-white);
+/* Outline / secondary — design-reviewed ladder from transparent-img-marquee.
+   Light: translucent-black border + fill, 93%-black text. */
+main .s2 a.con-button.outline:any-link {
+  background-color: transparent;
+  border-color: #00000038;
+  color: #000000ed;
+}
+
+main .s2 a.con-button.outline:any-link:hover {
+  background-color: #00000017;
+  border-color: #00000026;
+  color: #000000ed;
+}
+
+main .s2 a.con-button.outline:any-link:active {
+  background-color: #0000001f;
+  border-color: #0000001f;
+  color: #000000ed;
+}
+
+/* Outline on dark: translucent-white stroke + fill, white text (per QA). */
+main .s2.dark a.con-button.outline:any-link,
+main .s2 .dark a.con-button.outline:any-link {
+  background-color: transparent;
+  border-color: #ffffff38;
+  color: var(--color-white);
+}
+
+main .s2.dark a.con-button.outline:any-link:hover,
+main .s2 .dark a.con-button.outline:any-link:hover {
+  background-color: #ffffff2b;
+  border-color: #ffffff38;
+  color: var(--color-white);
+}
+
+main .s2.dark a.con-button.outline:any-link:active,
+main .s2 .dark a.con-button.outline:any-link:active {
+  background-color: #ffffff1c;
+  border-color: #ffffff24;
+  color: var(--color-white);
+}
+
+/* Shared S2 focus ring for every variant (SoT "Focus Ring Background",
+   QA-approved in transparent-img-marquee): a 2px --color-focus-ring-strong
+   (#4b75ff) outline offset 2px, with an 11%-white halo. Per-variant rules below
+   keep each button's pressed fill on focus; dark-outline drops the halo. */
+main .s2 a.con-button:any-link:focus,
+main .s2 a.button:any-link:focus {
   outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.11);
+}
+
+main .s2 a.con-button.blue:any-link:focus,
+main .s2 a.button.accent:any-link:focus {
+  background-color: var(--S2-Buttons-Accent-Color-Hover);
+  border-color: var(--S2-Buttons-Accent-Color-Hover);
+  color: var(--color-white);
+}
+
+main .s2 a.con-button.fill:any-link:focus,
+main .s2 a.button.fill:any-link:focus {
+  background-color: var(--Background-Primary-Hover);
+  border-color: var(--Background-Primary-Hover);
+  color: var(--color-white);
+}
+
+main .s2.dark a.con-button.fill:any-link:focus,
+main .s2 .dark a.con-button.fill:any-link:focus,
+main .s2.dark a.button.fill:any-link:focus,
+main .s2 .dark a.button.fill:any-link:focus {
+  background-color: var(--color-white);
+  border-color: var(--color-white);
+  color: var(--Background-Primary-Default);
+}
+
+main .s2 a.con-button.outline:any-link:focus {
+  background-color: #0000001f;
+  border-color: #0000001f;
+  color: #000000ed;
+}
+
+/* Outline-on-dark focus: hold the hover stroke/fill and drop the halo per QA
+   ("no fill between the outside of the button and the focus ring"). */
+main .s2.dark a.con-button.outline:any-link:focus,
+main .s2 .dark a.con-button.outline:any-link:focus {
+  background-color: #ffffff2b;
+  border-color: #ffffff38;
+  color: var(--color-white);
+  box-shadow: none;
 }
 
 main a.button.wide,
