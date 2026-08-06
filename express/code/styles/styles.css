@@ -826,14 +826,18 @@ main a.button.fill:any-link:active {
   border-color: var(--Background-Primary-Hover);
 }
 
+/* Focus ring follows the design-reviewed S2 SoT "Focus Ring Background"
+   treatment shipped in transparent-img-marquee (QA-approved): a 2px
+   --color-focus-ring-strong (#4b75ff) outline offset 2px from the button, with
+   an 11%-white halo filling the gap. Same ring in light and dark. */
 main a.con-button.fill:focus,
 main a.button.fill:focus {
   background-color: var(--Background-Primary-Hover);
   border-color: var(--Background-Primary-Hover);
   color: var(--color-white);
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-white),
-    0 0 0 4px var(--color-focus-ring-strong);
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.11);
 }
 
 /* On dark sections the black fill inverts to a white button (SoT "Primary
@@ -859,9 +863,9 @@ main .dark a.button.fill:focus {
   color: var(--Background-Primary-Default);
   background-color: var(--color-white);
   border-color: var(--color-white);
-  outline: none;
-  box-shadow: 0 0 0 2px var(--color-focus-ring-strong),
-    0 0 0 4px var(--color-white);
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.11);
 }
 
 main a.button.wide,
