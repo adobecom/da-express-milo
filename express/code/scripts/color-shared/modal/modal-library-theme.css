@@ -2,7 +2,7 @@
    Reuses the palette modal's swatch-rail styles (modal-palette-content.css) and
    the ax-drawer-tag-section tag field (drawer.css); this file adds the
    in-modal tag section and the library toolbar wrapper.
-   (Color-mode HEX picker + code view are deferred to a future release.) */
+   Color mode + Copy-as-code header: see .modal-color-modes-header rules below. */
 
 .ax-color-modal-content .modal-library-theme {
   /* Tag-field tokens (defined on .ax-drawer-panel in drawer.css) redeclared so

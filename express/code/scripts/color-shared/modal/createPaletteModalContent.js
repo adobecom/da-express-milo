@@ -4,8 +4,15 @@ import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { decorateAnalyticsAttributes } from '../utils/utilities.js';
+import { createColorModesHeader } from './createColorModesHeader.js';
+import { getPreferredColorMode } from '../utils/colorModePreference.js';
+import { createColorStrip } from '../toolbar/colorStrip.js';
 
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
+const STRIP_DEFAULTS = {
+  swatchLabel: 'Color {index}: {hex}',
+  swatchStripLabel: '{count} colors in {type}',
+};
 
 let contentStylesLoaded = false;
 export async function ensurePaletteContentStyles() {
@@ -14,6 +21,14 @@ export async function ensurePaletteContentStyles() {
     await Promise.all([
       loadMiloStyle('scripts/color-shared/modal/modal-palette-content.css'),
       loadMiloStyle('scripts/color-shared/components/strips/color-strip.css'),
+      loadMiloStyle('scripts/color-shared/modal/modal-color-modes-header.css'),
+      // The color-modes header's "Copy as code" menu and the palette-summary
+      // strip reuse ax-lib-card__action-menu* (libraries.css) and ax-swatch*
+      // (toolbar.css) — normally only loaded by the Library modal / toolbar
+      // footer respectively. Load them directly here instead of depending on
+      // initFloatingToolbar's async init to have already applied them.
+      loadMiloStyle('scripts/color-shared/components/libraries/libraries.css'),
+      loadMiloStyle('scripts/color-shared/toolbar/toolbar.css'),
     ]);
     contentStylesLoaded = true;
   } catch {
@@ -401,6 +416,26 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
     ...(Number.isFinite(verticalMaxPerRow) ? { verticalMaxPerRow } : {}),
     ...(colorSwatchRailStrings ? { strings: colorSwatchRailStrings } : {}),
   });
+  railAdapter.rail.colorMode = getPreferredColorMode();
+
+  const colorModesHeader = createColorModesHeader(
+    { name: palette?.name ?? 'Palette', colors: normalizedPalette.colors },
+    {
+      type: 'palette',
+      strings: modalStrings,
+      onModeChange: (mode) => { railAdapter.rail.colorMode = mode; },
+    },
+  );
+  root.appendChild(colorModesHeader.element);
+
+  // Mobile/tablet-only condensed strip above the full swatch list (Figma:
+  // "Add palette summary above color strips on color palettes"). Hidden at
+  // desktop via CSS (modal-palette-content.css) since the L layout doesn't
+  // need it.
+  const paletteSummaryStrip = createTag('div', { class: 'modal-palette-summary-strip', 'aria-hidden': 'true' });
+  paletteSummaryStrip.appendChild(createColorStrip(normalizedPalette.colors, 'palette', null, STRIP_DEFAULTS));
+  root.appendChild(paletteSummaryStrip);
+
   railWrap.appendChild(railAdapter.element);
   railSection.appendChild(railWrap);
   root.appendChild(railSection);
@@ -457,8 +492,10 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   return {
     element: root,
     initNav: initTabIndexes,
+    waitForColorModesReady: () => colorModesHeader.waitForReady(),
     destroy: () => {
       railAdapter.destroy?.();
+      colorModesHeader.destroy?.();
     },
   };
 }

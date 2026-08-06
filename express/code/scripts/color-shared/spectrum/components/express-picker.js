@@ -86,6 +86,9 @@ async function withRetry(task, attempts = 3) {
  * @param {boolean}   [config.disabled]  — disable the picker
  * @param {Object.<string,string>} [config.menuTokens]
  *   optional CSS token overrides for picker menu internals
+ * @param {string}    [config.ariaLabel=`Filter by ${label}`]
+ *   accessible name for the trigger — must be final at construction time (see
+ *   note above the aria-label assignment below; it cannot be changed later)
  * @returns {Promise<{element: HTMLElement, getValue: () => string,
  *   setValue: (v:string) => void, destroy: () => void}>}
  */
@@ -100,6 +103,7 @@ export async function createExpressPicker(config) {
     id,
     disabled = false,
     menuTokens = {},
+    ariaLabel = `Filter by ${label}`,
   } = config;
 
   // 1. Ensure Spectrum picker components are loaded
@@ -120,7 +124,10 @@ export async function createExpressPicker(config) {
   const picker = document.createElement('sp-picker');
   if (id) picker.id = `express-picker-${id}`;
   picker.setAttribute('label', label);
-  picker.setAttribute('aria-label', `Filter by ${label}`);
+  // Set once, before this connects — a vendored PendingStateController caches
+  // whatever aria-label is present at first connectedCallback and re-applies
+  // it on every later Lit update, so setting/changing it after mount is a no-op.
+  picker.setAttribute('aria-label', ariaLabel);
   picker.setAttribute('size', 'm');
   picker.setAttribute('placement', placement);
   picker.placement = placement;

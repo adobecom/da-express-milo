@@ -62,8 +62,10 @@ async function mountContent(item, options = {}) {
     },
   });
   document.body.appendChild(content.element);
-  // Let the `initFloatingToolbar(...).then(...)` microtask wire the toolbar.
+  // Let the `initFloatingToolbar(...).then(...)` microtask wire the toolbar,
+  // and let the color-modes header's async sp-picker mount finish.
   await flush();
+  await content.waitForColorModesReady?.();
   return {
     content, fake, initStub, toastSpy,
   };
@@ -83,6 +85,16 @@ function createProvider() {
 }
 
 describe('createLibraryGradientModalContent', () => {
+  beforeEach(() => {
+    // requestAnimationFrame is throttled to ~1fps in background browser tabs
+    // (concurrent WTR sessions). Use queueMicrotask so the color-modes header's
+    // express-picker retry loops resolve immediately under load.
+    sinon.stub(window, 'requestAnimationFrame').callsFake((cb) => {
+      queueMicrotask(() => cb(0));
+      return 0;
+    });
+  });
+
   afterEach(() => {
     document.body.innerHTML = '';
     sinon.restore();
@@ -112,6 +124,30 @@ describe('createLibraryGradientModalContent', () => {
       expect(element.querySelector('.modal-palette-container--color-rail')).to.exist;
       expect(element.querySelector('.modal-lib-tags .ax-drawer-tag-section')).to.exist;
       expect(element.querySelector('.modal-palette-toolbar')).to.exist;
+      content.destroy();
+    });
+
+    it('renders a color-modes header above the preview with a picker and a codes menu', async () => {
+      const { content } = await mountContent(gradientItem());
+      const { element } = content;
+      const header = element.querySelector('.modal-color-modes-header');
+      const preview = element.querySelector('.modal-gradient-preview');
+      expect(header).to.exist;
+      expect(header.querySelectorAll('.modal-color-mode-picker sp-menu-item')).to.have.length(4);
+      expect(header.querySelectorAll('.modal-codes-menu sp-menu-item')).to.have.length(4);
+      // eslint-disable-next-line no-bitwise
+      expect(header.compareDocumentPosition(preview) & Node.DOCUMENT_POSITION_FOLLOWING)
+        .to.be.above(0);
+      content.destroy();
+    });
+
+    it('propagates color-mode picker selections to the stop swatch rail', async () => {
+      const { content } = await mountContent(gradientItem());
+      const { element } = content;
+      const picker = element.querySelector('.modal-color-mode-picker sp-picker');
+      picker.value = 'Lab';
+      picker.dispatchEvent(new Event('change'));
+      expect(element.querySelector('color-swatch-rail').colorMode).to.equal('Lab');
       content.destroy();
     });
 

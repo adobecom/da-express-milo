@@ -243,3 +243,123 @@ describe('color-swatch-rail icon order', () => {
     expect(trashIdx).to.be.lessThan(dragIdx);
   });
 });
+
+describe('color-swatch-rail color modes', () => {
+  let rail;
+
+  afterEach(() => {
+    rail?.remove();
+    rail = null;
+  });
+
+  async function renderRail(colorMode, orientation = 'vertical') {
+    rail = document.createElement('color-swatch-rail');
+    rail.swatches = [{ hex: '#FF0000' }];
+    rail.lockedByIndex = new Set();
+    rail.tintIndex = null;
+    rail.swatchFeatures = {
+      copy: true, copyFromHex: false, colorPicker: false, hexCode: true, baseColor: false,
+    };
+    rail.orientation = orientation;
+    rail.colorMode = colorMode;
+    document.body.appendChild(rail);
+    await rail.updateComplete;
+    return rail;
+  }
+
+  it('HEX mode (default): renders a single static hex label, no multi-row block', async () => {
+    await renderRail('HEX');
+    expect(rail.shadowRoot.querySelector('.hex-code-multi')).to.equal(null);
+    expect(rail.shadowRoot.querySelector('.hex-code--static').textContent.trim()).to.equal('#FF0000');
+  });
+
+  it('RGB mode: renders one row per channel with correct values', async () => {
+    await renderRail('RGB');
+    const rows = [...rail.shadowRoot.querySelectorAll('.hex-code-row')];
+    expect(rows).to.have.length(3);
+    const values = rows.map((row) => ({
+      label: row.querySelector('.hex-code-row__label').textContent.trim(),
+      value: row.querySelector('.hex-code-row__value').textContent.trim(),
+    }));
+    expect(values).to.deep.equal([
+      { label: 'R', value: '255' },
+      { label: 'G', value: '0' },
+      { label: 'B', value: '0' },
+    ]);
+  });
+
+  it('HSB mode: renders H/S/B rows for pure red', async () => {
+    await renderRail('HSB');
+    const rows = [...rail.shadowRoot.querySelectorAll('.hex-code-row')];
+    const values = rows.map((row) => ({
+      label: row.querySelector('.hex-code-row__label').textContent.trim(),
+      value: row.querySelector('.hex-code-row__value').textContent.trim(),
+    }));
+    expect(values).to.deep.equal([
+      { label: 'H', value: '0' },
+      { label: 'S', value: '100' },
+      { label: 'B', value: '100' },
+    ]);
+  });
+
+  it('Lab mode: renders L/a/b rows', async () => {
+    await renderRail('Lab');
+    const rows = [...rail.shadowRoot.querySelectorAll('.hex-code-row')];
+    expect(rows).to.have.length(3);
+    expect(rows.map((row) => row.querySelector('.hex-code-row__label').textContent.trim()))
+      .to.deep.equal(['L', 'a', 'b']);
+  });
+
+  it('clicking a channel value (no icon) copies just that value, not the full code', async () => {
+    await renderRail('RGB');
+    const originalWriteText = navigator.clipboard?.writeText;
+    let copiedText = null;
+    navigator.clipboard.writeText = (text) => {
+      copiedText = text;
+      return Promise.resolve();
+    };
+
+    const rows = [...rail.shadowRoot.querySelectorAll('.hex-code-row')];
+    const greenRow = rows[1];
+    const valueBtn = greenRow.querySelector('.hex-code-row__value');
+    expect(valueBtn.tagName).to.equal('BUTTON');
+    expect(greenRow.querySelector('.icon-button')).to.equal(null);
+    valueBtn.click();
+    await new Promise((r) => { setTimeout(r, 0); });
+
+    expect(copiedText).to.equal('0');
+
+    if (originalWriteText) navigator.clipboard.writeText = originalWriteText;
+  });
+
+  it('the single bottom copy-icon button copies the full comma-joined code', async () => {
+    await renderRail('RGB');
+    const originalWriteText = navigator.clipboard?.writeText;
+    let copiedText = null;
+    navigator.clipboard.writeText = (text) => {
+      copiedText = text;
+      return Promise.resolve();
+    };
+
+    const copyAllBtn = rail.shadowRoot.querySelector('.hex-code-multi__copy-all');
+    expect(copyAllBtn).to.exist;
+    copyAllBtn.click();
+    await new Promise((r) => { setTimeout(r, 0); });
+
+    expect(copiedText).to.equal('255, 0, 0');
+
+    if (originalWriteText) navigator.clipboard.writeText = originalWriteText;
+  });
+
+  it('renders exactly one copy-icon button per swatch in multi-value mode', async () => {
+    await renderRail('RGB');
+    expect(rail.shadowRoot.querySelectorAll('.hex-code-multi__copy-all')).to.have.length(1);
+    expect(rail.shadowRoot.querySelectorAll('.hex-code-multi .icon-button')).to.have.length(1);
+  });
+
+  it('stacked orientation also renders the multi-row breakdown', async () => {
+    await renderRail('RGB', 'stacked');
+    const rows = [...rail.shadowRoot.querySelectorAll('.hex-code-row')];
+    expect(rows).to.have.length(3);
+  });
+});

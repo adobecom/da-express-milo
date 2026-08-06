@@ -5,6 +5,7 @@ import { announceToScreenReader } from '../../spectrum/utils/a11y.js';
 import { showExpressToast } from '../../spectrum/components/express-toast.js';
 import { createGradientEditorPlaceholders } from '../../i18n/loadGradientEditorPlaceholders.js';
 import { interpolate } from '../../utils/utilities.js';
+import { safeClipboardWrite } from '../../../../libs/services/plugins/download/actions/helpers.js';
 
 const DEFAULT_HEX = '#808080';
 const DEFAULT_STOPS = [
@@ -101,34 +102,6 @@ const EVENT_PREFIX = 'gradient-editor:';
 function hexForA11y(hex) {
   const h = typeof hex === 'string' && hex.startsWith('#') ? hex : `#${String(hex || '808080').replace(/^#/, '')}`;
   return h.toUpperCase();
-}
-
-/**
- * Copy text to clipboard. Tries Clipboard API, then execCommand fallback (e.g. demo / non-secure).
- * @param {string} text
- * @returns {Promise<boolean>} true if copy succeeded
- */
-function copyTextToClipboard(text) {
-  if (navigator.clipboard?.writeText) {
-    return navigator.clipboard.writeText(text).then(() => true).catch(() => false);
-  }
-  return new Promise((resolve) => {
-    try {
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      ta.setAttribute('readonly', '');
-      ta.style.position = 'absolute';
-      ta.style.left = '-9999px';
-      document.body.appendChild(ta);
-      ta.select();
-      ta.setSelectionRange(0, text.length);
-      const ok = document.execCommand('copy');
-      ta.remove();
-      resolve(!!ok);
-    } catch (e) {
-      resolve(false);
-    }
-  });
 }
 
 const KEYBOARD_STEP = 0.01;
@@ -733,7 +706,7 @@ export function createGradientEditor(initialGradient, options = {}) {
         );
         if (copyable) {
           const copyHex = typeof stop.color === 'string' ? stop.color : sampledHex;
-          copyTextToClipboard(copyHex).then((ok) => {
+          safeClipboardWrite(copyHex, 'gradient-stop').then((ok) => {
             if (ok) {
               announceToScreenReader(strings.copySuccessSr, 'polite');
               showCopiedTooltipFeedback(handle);
@@ -855,7 +828,7 @@ export function createGradientEditor(initialGradient, options = {}) {
             );
             if (copyable) {
               const copyHex = typeof stop.color === 'string' ? stop.color : sampledHex;
-              copyTextToClipboard(copyHex).then((ok) => {
+              safeClipboardWrite(copyHex, 'gradient-stop').then((ok) => {
                 if (ok) {
                   announceToScreenReader('Color copied', 'polite');
                   showCopiedTooltipFeedback(handle);
