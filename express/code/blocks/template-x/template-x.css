@@ -2436,7 +2436,7 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
     width: var(--ax-grid-8-col-width);
     margin: 0 auto;
     box-sizing: border-box;
-            padding: 0 var(--spacing-600) 0;
+    padding: 0 var(--spacing-600) 0;
   }
 }
 
@@ -2446,7 +2446,7 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
     max-width: var(--ax-grid-7-col-width);
     margin-left: calc(var(--ax-grid-3-col-width) + var(--spacing-600) + var(--ax-grid-gutter));
     margin-right: auto;
-            padding: 0 var(--spacing-600) 0;
+    padding: 0 var(--spacing-600) 0;
   }
 }
 
