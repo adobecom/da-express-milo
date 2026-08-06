@@ -859,7 +859,8 @@ main .dark a.button.fill:focus {
   color: var(--Background-Primary-Default);
   background-color: var(--color-white);
   border-color: var(--color-white);
-  box-shadow: 0 0 0 2px var(--Background-Primary-Default),
+  outline: none;
+  box-shadow: 0 0 0 2px var(--color-focus-ring-strong),
     0 0 0 4px var(--color-white);
 }
 
