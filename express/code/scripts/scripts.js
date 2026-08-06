@@ -371,7 +371,7 @@ let fragmentLcpPreloaded = false;
 // name once its buttons are verified; when every block is verified, retire this
 // gate and make s2 the default. Authors can still opt a single block in by
 // adding the `s2` variant in the block's name row.
-const S2_BUTTON_BLOCKS = ['ax-columns'];
+const S2_BUTTON_BLOCKS = ['ax-columns', 'transparent-img-marquee', 'comparison-table-v2', 'blog-columns'];
 
 // eslint-disable-next-line import/prefer-default-export
 export function decorateAreaWithLCP(area = document, options = {}) {

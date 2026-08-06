@@ -880,42 +880,45 @@ main .s2 .dark a.button.fill:any-link:active {
 }
 
 /* Outline / secondary — design-reviewed ladder from transparent-img-marquee.
+   Authorable via a `#_button-outline` href hash (milo also produces `outline`
+   from an `<em>` link). Covers milo `.con-button.outline` and legacy
+   `.button.outline` (the fallback emits the latter for exception blocks).
    Light: translucent-black border + fill, 93%-black text. */
-main .s2 a.con-button.outline:any-link {
+main .s2 a:is(.con-button, .button).outline:any-link {
   background-color: transparent;
   border-color: #00000038;
   color: #000000ed;
 }
 
-main .s2 a.con-button.outline:any-link:hover {
+main .s2 a:is(.con-button, .button).outline:any-link:hover {
   background-color: #00000017;
   border-color: #00000026;
   color: #000000ed;
 }
 
-main .s2 a.con-button.outline:any-link:active {
+main .s2 a:is(.con-button, .button).outline:any-link:active {
   background-color: #0000001f;
   border-color: #0000001f;
   color: #000000ed;
 }
 
 /* Outline on dark: translucent-white stroke + fill, white text (per QA). */
-main .s2.dark a.con-button.outline:any-link,
-main .s2 .dark a.con-button.outline:any-link {
+main .s2.dark a:is(.con-button, .button).outline:any-link,
+main .s2 .dark a:is(.con-button, .button).outline:any-link {
   background-color: transparent;
   border-color: #ffffff38;
   color: var(--color-white);
 }
 
-main .s2.dark a.con-button.outline:any-link:hover,
-main .s2 .dark a.con-button.outline:any-link:hover {
+main .s2.dark a:is(.con-button, .button).outline:any-link:hover,
+main .s2 .dark a:is(.con-button, .button).outline:any-link:hover {
   background-color: #ffffff2b;
   border-color: #ffffff38;
   color: var(--color-white);
 }
 
-main .s2.dark a.con-button.outline:any-link:active,
-main .s2 .dark a.con-button.outline:any-link:active {
+main .s2.dark a:is(.con-button, .button).outline:any-link:active,
+main .s2 .dark a:is(.con-button, .button).outline:any-link:active {
   background-color: #ffffff1c;
   border-color: #ffffff24;
   color: var(--color-white);
@@ -955,7 +958,7 @@ main .s2 .dark a.button.fill:any-link:focus {
   color: var(--Background-Primary-Default);
 }
 
-main .s2 a.con-button.outline:any-link:focus {
+main .s2 a:is(.con-button, .button).outline:any-link:focus {
   background-color: #0000001f;
   border-color: #0000001f;
   color: #000000ed;
@@ -963,8 +966,8 @@ main .s2 a.con-button.outline:any-link:focus {
 
 /* Outline-on-dark focus: hold the hover stroke/fill and drop the halo per QA
    ("no fill between the outside of the button and the focus ring"). */
-main .s2.dark a.con-button.outline:any-link:focus,
-main .s2 .dark a.con-button.outline:any-link:focus {
+main .s2.dark a:is(.con-button, .button).outline:any-link:focus,
+main .s2 .dark a:is(.con-button, .button).outline:any-link:focus {
   background-color: #ffffff2b;
   border-color: #ffffff38;
   color: var(--color-white);

@@ -1325,15 +1325,8 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
 }
 
 
-.comparison-table-v2 a.con-button.fill:any-link {
-  background: var(--text-color);
-  border-color: var(--text-color);
-  color: var(--color-white);
-}
-
-.comparison-table-v2 a.con-button.fill:hover {
-  background-color: var(--color-gray-700);
-}
+/* Black-fill CTA now comes from the shared `.s2 .con-button.fill` rules in
+   styles.css (this block is on the S2_BUTTON_BLOCKS whitelist). */
 
 @keyframes scaleSlideIn {
   from {

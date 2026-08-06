@@ -142,16 +142,8 @@ main .section .blog-columns p {
   box-sizing: border-box;
 }
 
-.blog-columns a.con-button.blue.fill:any-link {
-  background-color: var(--color-default-font);
-  border-color: var(--color-default-font);
-  color: var(--color-white);
-}
-
-.blog-columns a.con-button.blue.fill:hover {
-  background-color: var(--color-gray-700);
-  border-color: var(--color-gray-700);
-}
+/* Black-fill CTA now comes from the shared `.s2 .con-button.fill` rules in
+   styles.css (this block is on the S2_BUTTON_BLOCKS whitelist). */
 
 @media (min-width: 800px) {
   .blog-columns {

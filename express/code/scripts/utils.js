@@ -358,16 +358,23 @@ export async function decorateButtonsDeprecated(el, size) {
             $a.classList.add('button', 'accent', 'light');
             $twoup.classList.add('button-container');
           }
-          // Universal black fill button, authored the milo way via a
-          // `#_button-fill` hash on the href. The blocks that reach this
-          // fallback (ax-columns, banner, fullscreen-marquee, link-list) bypass
-          // milo's decorateButtons, which would normally strip this hash and add
-          // the class — so honor it here. Additive and hash-gated: no effect on
-          // existing content, which never carries this hash.
-          if ($a.classList.contains('button') && originalHref.includes('#_button-fill')) {
-            $a.classList.remove('accent');
-            $a.classList.add('fill');
-            $a.setAttribute('href', $a.href.replace('#_button-fill', ''));
+          // Custom button variants authored the milo way via `#_button-<class>`
+          // hashes on the href (e.g. `#_button-fill`, `#_button-outline`). The
+          // blocks that reach this fallback (ax-columns, banner,
+          // fullscreen-marquee, link-list) bypass milo's decorateButtons, which
+          // would normally strip these hashes and add the classes — so replicate
+          // that here: add each class, strip the hash, and drop the default
+          // `accent` when an explicit fill/outline variant is requested.
+          // Additive and hash-gated: no effect on content without these hashes.
+          if ($a.classList.contains('button')) {
+            const customClasses = [...originalHref.matchAll(/#_button-([a-zA-Z-]+)/g)];
+            customClasses.forEach(([token, cls]) => {
+              $a.classList.add(cls);
+              $a.setAttribute('href', $a.href.replace(token, ''));
+            });
+            if ($a.classList.contains('fill') || $a.classList.contains('outline')) {
+              $a.classList.remove('accent');
+            }
           }
         }
         if (linkText.startsWith('{{icon-') && linkText.endsWith('}}')) {
