@@ -1049,6 +1049,61 @@ export const style = css`
     cursor: default;
     padding-left: var(--hex-code-static-padding-left);
   }
+
+  .bottom-info--multi {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 2px;
+  }
+  .hex-code-multi {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 2px;
+  }
+  .hex-code-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    color: var(--swatch-text-color);
+    text-shadow: var(--swatch-text-shadow);
+  }
+  .hex-code-row__label {
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 18px;
+    width: 14px;
+    flex-shrink: 0;
+    text-transform: uppercase;
+  }
+  /* The value itself is the copy target (click the number, no icon) — only
+     the full-code button below the rows gets an icon. */
+  .hex-code-row__value {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 18px;
+    color: inherit;
+    text-shadow: inherit;
+    text-align: start;
+    cursor: pointer;
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .hex-code-multi__copy-all {
+    align-self: flex-start;
+    flex-shrink: 0;
+    width: 24px;
+    height: 24px;
+    margin-top: 2px;
+  }
   .icon-button {
     background: none;
     border: none;

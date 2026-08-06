@@ -1,0 +1,115 @@
+/* Shared "Color mode" dropdown + "Copy as code" menu header.
+   Used by createColorModesHeader.js across all four modal content builders
+   (Explore palette/gradient, Library theme/gradient) — one stylesheet instead
+   of duplicating rules per modal variant. */
+
+.modal-color-modes-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-200);
+  padding-block-end: var(--spacing-200);
+}
+
+.modal-color-mode-field {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+  min-inline-size: 0;
+}
+
+.modal-color-mode-label {
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 18px;
+  color: var(--color-dark-gray);
+  white-space: nowrap;
+}
+
+/* Mount point for the real sp-picker (Figma "Component wrapper") — colors and
+   typography come from spectrum/styles/picker.css's --mod-picker-* tokens on
+   sp-picker.filter-picker, loaded automatically by createExpressPicker. Width
+   is set here (not as a JS-computed inline style) so it can be overridden
+   per breakpoint below. */
+.modal-color-mode-picker {
+  flex-shrink: 0;
+  max-inline-size: 100%;
+}
+
+.modal-color-mode-picker sp-picker.filter-picker {
+  width: 144px;
+  min-width: 144px;
+}
+
+.modal-codes-menu {
+  flex-shrink: 0;
+}
+
+.modal-codes-icon-fallback {
+  display: inline-flex;
+}
+
+/* Mobile/tablet: "Color mode" label on its own line, with the picker and the
+   Codes button sharing the row below — the picker grows to fill the
+   remaining space, the Codes button stays a fixed size at the end.
+   .modal-color-mode-field stops being a box (display:contents) so its
+   label/picker children become direct flex items of the header, wrapping
+   (flex-wrap, forced by the label's 100% flex-basis) into a label row and a
+   picker+Codes row that align as their own flex-wrap group. */
+@media (max-width: 1199px) {
+  .modal-color-modes-header {
+    flex-wrap: wrap;
+    /* .modal-content uses align-items:flex-start (not stretch), so this flex
+       item does not size to the container's width on its own — without an
+       explicit width here it shrink-wraps to its content, leaving the picker
+       nothing to grow into (same root cause as .modal-palette-summary-strip
+       below). */
+    inline-size: 100%;
+  }
+
+  .modal-color-mode-field {
+    display: contents;
+  }
+
+  .modal-color-mode-label {
+    flex: 1 1 100%;
+  }
+
+  .modal-color-mode-picker {
+    flex: 1 1 auto;
+    min-inline-size: 0;
+  }
+
+  .modal-color-mode-picker sp-picker.filter-picker {
+    width: 100%;
+    min-width: 0;
+  }
+}
+
+/* Mobile/tablet-only condensed "Palette summary" strip mounted above the full
+   swatch list (createPaletteModalContent.js / createLibraryThemeModalContent.js).
+   Hidden at desktop (>=1200px) — the Figma L layout doesn't include it. */
+.modal-palette-summary-strip {
+  display: none;
+}
+
+@media (max-width: 1199px) {
+  .modal-palette-summary-strip {
+    display: block;
+    /* .modal-content uses align-items:flex-start (not stretch), so this flex
+       item does not size to the container's width on its own — without an
+       explicit width here, its 100%-width child below has nothing to resolve
+       against and collapses to 0. */
+    inline-size: 100%;
+    margin-block-end: var(--spacing-200);
+  }
+
+  .modal-palette-summary-strip .ax-swatch-strip {
+    inline-size: 100%;
+    max-inline-size: 100%;
+    block-size: 24px;
+    outline: 1px solid rgba(31, 31, 31, 0.2);
+    outline-offset: -1px;
+    border-radius: var(--Corner-radius-corner-radius-100);
+  }
+}

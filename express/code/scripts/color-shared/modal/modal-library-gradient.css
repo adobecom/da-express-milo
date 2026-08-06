@@ -3,7 +3,8 @@
    the palette modal's swatch-rail styles (modal-palette-content.css), and the
    ax-drawer-tag-section tag field (drawer.css); this file adds the in-modal tag
    section and the library toolbar wrapper.
-   (Color-mode HEX picker + code view and the "Edit" button are intentionally omitted.) */
+   Color mode + Copy-as-code header: see .modal-color-modes-header rules
+   (modal-color-modes-header.css). The "Edit" button is intentionally omitted. */
 
 .ax-color-modal-content .modal-library-gradient {
   /* Tag-field tokens (defined on .ax-drawer-panel in drawer.css) redeclared so

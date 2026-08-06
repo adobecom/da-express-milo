@@ -52,14 +52,26 @@ async function mountContent(item, options = {}) {
     },
   });
   document.body.appendChild(content.element);
-  // Let the `initFloatingToolbar(...).then(...)` microtask wire the toolbar.
+  // Let the `initFloatingToolbar(...).then(...)` microtask wire the toolbar,
+  // and let the color-modes header's async sp-picker mount finish.
   await flush();
+  await content.waitForColorModesReady?.();
   return {
     content, fake, initStub, navSpy, toastSpy,
   };
 }
 
 describe('createLibraryThemeModalContent', () => {
+  beforeEach(() => {
+    // requestAnimationFrame is throttled to ~1fps in background browser tabs
+    // (concurrent WTR sessions). Use queueMicrotask so the color-modes header's
+    // express-picker retry loops resolve immediately under load.
+    sinon.stub(window, 'requestAnimationFrame').callsFake((cb) => {
+      queueMicrotask(() => cb(0));
+      return 0;
+    });
+  });
+
   afterEach(() => {
     document.body.innerHTML = '';
     sinon.restore();
@@ -88,6 +100,36 @@ describe('createLibraryThemeModalContent', () => {
       expect(element.querySelector('.modal-palette-container--color-rail')).to.exist;
       expect(element.querySelector('.modal-lib-tags .ax-drawer-tag-section')).to.exist;
       expect(element.querySelector('.modal-palette-toolbar')).to.exist;
+      content.destroy();
+    });
+
+    it('renders a color-modes header with a picker and a codes menu', async () => {
+      const { content } = await mountContent({ id: 't1', name: 'Ocean', colors: ['#001122', '#334455'] });
+      const { element } = content;
+      const header = element.querySelector('.modal-color-modes-header');
+      expect(header).to.exist;
+      expect(header.querySelectorAll('.modal-color-mode-picker sp-menu-item')).to.have.length(4);
+      expect(header.querySelectorAll('.modal-codes-menu sp-menu-item')).to.have.length(4);
+      content.destroy();
+    });
+
+    it('propagates color-mode picker selections to the swatch rail', async () => {
+      const { content } = await mountContent({ id: 't1', name: 'Ocean', colors: ['#001122', '#334455'] });
+      const { element } = content;
+      const picker = element.querySelector('.modal-color-mode-picker sp-picker');
+      picker.value = 'RGB';
+      picker.dispatchEvent(new Event('change'));
+      expect(element.querySelector('color-swatch-rail').colorMode).to.equal('RGB');
+      content.destroy();
+    });
+
+    it('renders a hidden condensed palette-summary strip above the rail', async () => {
+      const { content } = await mountContent({ id: 't1', name: 'Ocean', colors: ['#001122', '#334455'] });
+      const { element } = content;
+      const strip = element.querySelector('.modal-palette-summary-strip');
+      expect(strip).to.exist;
+      expect(strip.getAttribute('aria-hidden')).to.equal('true');
+      expect(strip.querySelectorAll('.ax-swatch')).to.have.length(2);
       content.destroy();
     });
 

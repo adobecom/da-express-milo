@@ -671,8 +671,39 @@ export function renderPantoneJPEG(themeData) {
 
 // ── Clipboard helpers ───────────────────────────────────────────────
 
+async function tryClipboardApi(text) {
+  if (!navigator.clipboard?.writeText) return false;
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// execCommand fallback for environments where the Clipboard API is unavailable/blocked
+// (e.g. non-secure contexts, some in-app browsers).
+function tryClipboardFallback(text) {
+  try {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    textarea.setSelectionRange(0, text.length);
+    const copied = document.execCommand('copy');
+    textarea.remove();
+    return Boolean(copied);
+  } catch {
+    return false;
+  }
+}
+
 /**
- * Safely writes text to clipboard with error logging to Lana
+ * Safely writes text to clipboard (Clipboard API, then execCommand fallback),
+ * with error logging to Lana.
  * @param {string} text - The text to copy to clipboard
  * @param {string} [context='clipboard'] - Context for logging (e.g., 'CSS', 'SCSS')
  * @param {Object} [options={}] - Additional options
@@ -682,16 +713,15 @@ export function renderPantoneJPEG(themeData) {
  */
 export async function safeClipboardWrite(text, context = 'clipboard', options = {}) {
   const { throwOnError = false } = options;
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch (err) {
-    window.lana?.log(`Clipboard write failed [${context}]: ${err.message}`, {
-      tags: 'download-service,clipboard',
-    });
-    if (throwOnError) {
-      throw err;
-    }
-    return false;
+  const copied = (await tryClipboardApi(text)) || tryClipboardFallback(text);
+  if (copied) return true;
+
+  const err = new Error('clipboard_copy_failed');
+  window.lana?.log(`Clipboard write failed [${context}]: ${err.message}`, {
+    tags: 'download-service,clipboard',
+  });
+  if (throwOnError) {
+    throw err;
   }
+  return false;
 }

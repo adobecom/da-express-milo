@@ -5,6 +5,9 @@ import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { createColorModalPlaceholders } from '../i18n/loadColorModalPlaceholders.js';
 import { interpolate } from '../utils/utilities.js';
+import { createColorModesHeader } from './createColorModesHeader.js';
+import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
+import { getPreferredColorMode } from '../utils/colorModePreference.js';
 
 function parseLinearGradient(css) {
   const linear = /linear-gradient\s*\(\s*(\d+)deg\s*,\s*([^)]+)\s*\)/i.exec(css);
@@ -88,7 +91,7 @@ export function createGradientModalContent(gradient, opts = {}) {
   const defaultCreatorImageUrl = `${codeRoot}/${CREATOR_PLACEHOLDER_PATH}`;
   const creatorImageUrl = opts.creatorImageUrl ?? gradient?.creator?.imageUrl
     ?? gradient?.creatorImageUrl ?? defaultCreatorImageUrl;
-  const tags = opts.tags || ['Color', 'Gradient'];
+  const description = opts.description ?? gradient?.description ?? '';
 
   const main = createTag('main', { class: 'modal-content', 'daa-lh': 'color-gradient-modal' });
 
@@ -117,6 +120,38 @@ export function createGradientModalContent(gradient, opts = {}) {
   containerSection.appendChild(previewWrap);
   main.appendChild(containerSection);
 
+  // Palette-container: a read-only swatch strip of the gradient's stop colors,
+  // below the draggable preview bar (Figma: "Palette-container" under the
+  // gradient preview). Reuses the same rail the palette modal uses, so it
+  // gets the Color Modes multi-channel breakdown for free.
+  const stopColors = colorStops.map((s) => s.color);
+  const railSection = createTag('section', {
+    class: 'modal-palette-container modal-palette-container--color-rail',
+    'aria-label': interpolate(strings.gradientPaletteAria, { count: stopColors.length }),
+  });
+  const railWrap = createTag('div', { class: 'modal-color-rail-wrap strip-container', 'data-color-count-range': stopColors.length <= 5 ? 'small' : 'large' });
+  const railAdapter = createSwatchRailAdapter({ colors: stopColors }, {
+    orientation: 'vertical-responsive',
+    swatchFeatures: {
+      copy: true, copyFromHex: false, colorPicker: false, hexCode: true, baseColor: false,
+    },
+  });
+  railAdapter.rail.colorMode = getPreferredColorMode();
+  railWrap.appendChild(railAdapter.element);
+  railSection.appendChild(railWrap);
+  main.appendChild(railSection);
+
+  const colorModesHeader = createColorModesHeader(
+    { name: gradient?.name ?? 'Gradient', colors: stopColors },
+    {
+      type: 'gradient',
+      strings: opts.modalStrings,
+      onModeChange: (mode) => { railAdapter.rail.colorMode = mode; },
+      onDestroy: () => railAdapter.destroy?.(),
+    },
+  );
+  main.insertBefore(colorModesHeader.element, containerSection);
+
   const nameTagsSection = createTag('section', { class: 'modal-palette-name-tags' });
   const h1 = createTag('h1', { class: 'modal-palette-name' });
   h1.textContent = title;
@@ -142,17 +177,11 @@ export function createGradientModalContent(gradient, opts = {}) {
   thumbContainer.appendChild(creatorNameEl);
   thumbTags.appendChild(thumbContainer);
 
-  const tagsContainer = createTag('div', {
-    class: 'modal-tags-container',
-    'aria-label': strings.gradientTagsAria,
-    role: 'list',
-  });
-  tags.forEach((tag) => {
-    const tagEl = createTag('span', { class: 'modal-tag', role: 'listitem' });
-    tagEl.textContent = tag;
-    tagsContainer.appendChild(tagEl);
-  });
-  thumbTags.appendChild(tagsContainer);
+  if (description) {
+    const descriptionEl = createTag('p', { class: 'modal-gradient-description' });
+    descriptionEl.textContent = description;
+    thumbTags.appendChild(descriptionEl);
+  }
   nameTagsSection.appendChild(thumbTags);
   main.appendChild(nameTagsSection);
 
@@ -182,6 +211,11 @@ export function createGradientModalContent(gradient, opts = {}) {
   // Handle tooltips are already managed inside `createGradientEditor`.
   // Attaching a second tooltip layer here causes overlapping hover/copy states.
 
+  // This builder returns a bare element (no lifecycle object) — piggyback a
+  // readiness hook for the async color-mode sp-picker mount the same way, so
+  // callers/tests can await it without a wrapper object.
+  main.waitForColorModesReady = () => colorModesHeader.waitForReady();
+
   return main;
 }
 
@@ -205,6 +239,14 @@ export async function ensureGradientModalContentStyles() {
   if (gradientModalContentStylesLoaded) return;
   try {
     await loadMiloStyle('scripts/color-shared/modal/modal-gradient-content.css');
+    await loadMiloStyle('scripts/color-shared/modal/modal-color-modes-header.css');
+    // The color-modes header's "Copy as code" menu and the stop-swatch rail
+    // reuse ax-lib-card__action-menu* (libraries.css) and ax-swatch*
+    // (toolbar.css) — normally only loaded by the Library modal / toolbar
+    // footer respectively. Load them directly here instead of depending on
+    // initFloatingToolbar's async init to have already applied them.
+    await loadMiloStyle('scripts/color-shared/components/libraries/libraries.css');
+    await loadMiloStyle('scripts/color-shared/toolbar/toolbar.css');
     if (!isStylesheetInDocument('gradient-editor.css')) {
       await loadMiloStyle('scripts/color-shared/components/gradients/gradient-editor.css');
     }

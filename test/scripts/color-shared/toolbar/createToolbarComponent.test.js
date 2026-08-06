@@ -2,6 +2,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
+import { serviceManager } from '../../../../express/code/libs/services/core/ServiceManager.js';
 import {
   createToolbar, refreshLibraryButtonsStacking,
 } from '../../../../express/code/scripts/color-shared/toolbar/createToolbarComponent.js';
@@ -342,36 +343,50 @@ describe('createToolbar', () => {
       delete window.lana;
     });
 
-    // Fix test MWPW-192264
-    it.skip('on("download", cb) fires when Download button clicked', async () => {
+    it('download menu exposes ASE/JPEG/Pantone JPEG/PNG for palettes', async () => {
+      const toolbar = createToolbar(defaultOptions());
+      document.body.appendChild(toolbar.element);
+
+      const items = [...toolbar.element.querySelectorAll('.ax-download-menu sp-menu-item')]
+        .map((i) => i.getAttribute('value'));
+      expect(items).to.deep.equal(['ase', 'jpeg', 'pantoneJpeg', 'png']);
+    });
+
+    it('download menu exposes PNG/SVG for gradients', async () => {
+      const toolbar = createToolbar(defaultOptions({ type: 'gradient', palette: MOCK_GRADIENT }));
+      document.body.appendChild(toolbar.element);
+
+      const items = [...toolbar.element.querySelectorAll('.ax-download-menu sp-menu-item')]
+        .map((i) => i.getAttribute('value'));
+      expect(items).to.deep.equal(['png', 'svg']);
+    });
+
+    it('on("download", cb) fires with the selected format when a download item is clicked', async () => {
+      const downloadJPEG = sinon.stub().resolves({ fileName: 'foo.jpeg' });
+      sinon.stub(serviceManager, 'getProvider').resolves({ downloadJPEG });
+
       const toolbar = createToolbar(defaultOptions());
       document.body.appendChild(toolbar.element);
 
       const cb = sinon.stub();
       toolbar.on('download', cb);
 
-      const downloadBtn = toolbar.element.querySelector('sp-action-button[label="Download this color palette"]');
-      downloadBtn.click();
-      await new Promise((r) => setTimeout(r, 50));
+      const trigger = toolbar.element.querySelector('.ax-download-menu sp-action-button');
+      trigger.click();
+      const jpegItem = [...toolbar.element.querySelectorAll('.ax-download-menu sp-menu-item')]
+        .find((i) => i.getAttribute('value') === 'jpeg');
+      jpegItem.click();
+      await new Promise((r) => { setTimeout(r, 50); });
 
-      expect(cb.calledOnce).to.be.true;
+      expect(downloadJPEG.calledOnce).to.equal(true);
+      expect(cb.calledOnce).to.equal(true);
       expect(cb.firstCall.args[0]).to.have.property('palette');
+      expect(cb.firstCall.args[0].format).to.equal('jpeg');
     });
 
-    it('on("download", cb) fires when Download button clicked with gradient type', async () => {
-      const fakeGrad = { addColorStop: sinon.stub() };
-      const fakeCtx = {
-        createLinearGradient: sinon.stub().returns(fakeGrad),
-        fillRect: sinon.stub(),
-        fillStyle: '',
-      };
-      sinon.stub(HTMLCanvasElement.prototype, 'getContext').returns(fakeCtx);
-      sinon.stub(HTMLCanvasElement.prototype, 'toBlob').callsFake((cb) => {
-        cb(new Blob(['img'], { type: 'image/jpeg' }));
-      });
-      sinon.stub(URL, 'createObjectURL').returns('blob:fake');
-      sinon.stub(URL, 'revokeObjectURL');
-      sinon.stub(HTMLAnchorElement.prototype, 'click');
+    it('on("download", cb) fires with the selected format for gradient type', async () => {
+      const downloadPNG = sinon.stub().resolves({ fileName: 'foo.png' });
+      sinon.stub(serviceManager, 'getProvider').resolves({ downloadPNG });
 
       const toolbar = createToolbar(defaultOptions({
         type: 'gradient',
@@ -382,12 +397,40 @@ describe('createToolbar', () => {
       const cb = sinon.stub();
       toolbar.on('download', cb);
 
-      const downloadBtn = toolbar.element.querySelector('sp-action-button[label="Download this color palette"]');
-      downloadBtn.click();
-      await new Promise((r) => setTimeout(r, 100));
+      const trigger = toolbar.element.querySelector('.ax-download-menu sp-action-button');
+      trigger.click();
+      const pngItem = [...toolbar.element.querySelectorAll('.ax-download-menu sp-menu-item')]
+        .find((i) => i.getAttribute('value') === 'png');
+      pngItem.click();
+      await new Promise((r) => { setTimeout(r, 50); });
 
-      expect(cb.calledOnce).to.be.true;
+      expect(downloadPNG.calledOnce).to.equal(true);
+      expect(cb.calledOnce).to.equal(true);
       expect(cb.firstCall.args[0]).to.have.property('palette');
+    });
+
+    it('shows an error toast and does not emit "download" when the provider rejects', async () => {
+      const downloadJPEG = sinon.stub().rejects(new Error('network down'));
+      sinon.stub(serviceManager, 'getProvider').resolves({ downloadJPEG });
+      const lanaStub = sinon.stub();
+      window.lana = { log: lanaStub };
+
+      const toolbar = createToolbar(defaultOptions());
+      document.body.appendChild(toolbar.element);
+
+      const cb = sinon.stub();
+      toolbar.on('download', cb);
+
+      const trigger = toolbar.element.querySelector('.ax-download-menu sp-action-button');
+      trigger.click();
+      const jpegItem = [...toolbar.element.querySelectorAll('.ax-download-menu sp-menu-item')]
+        .find((i) => i.getAttribute('value') === 'jpeg');
+      jpegItem.click();
+      await new Promise((r) => { setTimeout(r, 50); });
+
+      expect(cb.called).to.equal(false);
+      expect(lanaStub.calledOnce).to.equal(true);
+      delete window.lana;
     });
 
     it('on("save", cb) fires when CC Library button clicked', async () => {

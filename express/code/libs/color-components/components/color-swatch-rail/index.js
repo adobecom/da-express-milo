@@ -1,12 +1,14 @@
 
 import { LitElement, html } from '../../../deps/lit-all.min.js';
 import { getContrastTextColor, isSuperLight } from '../../utils/ColorConversions.js';
+import { rgbToAllSpacesDenormalized } from '../../utils/harmony/ColorConversions.js';
 import { getFirstFocusableInGroup } from '../../utils/util.js';
 import { style } from './styles.css.js';
 import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
 import { loadIconsRail } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createExpressTooltip } from '../../../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { announceToScreenReader, clearScreenReaderAnnouncement } from '../../../../scripts/color-shared/spectrum/utils/a11y.js';
+import { safeClipboardWrite } from '../../../services/plugins/download/actions/helpers.js';
 import {
   TYPE_ORDER,
   getConflictPairs,
@@ -23,6 +25,28 @@ const MAX_SWATCHES_FOUR_ROWS = 20;
 
 const FOUR_ROWS_ROWS = 4;
 const DEFAULT_VERTICAL_MAX_PER_ROW = 5;
+const COLOR_MODE_CHANNELS = {
+  RGB: [['R', 'rgb', 'r'], ['G', 'rgb', 'g'], ['B', 'rgb', 'b']],
+  HSB: [['H', 'hsv', 'h'], ['S', 'hsv', 's'], ['B', 'hsv', 'v']],
+  Lab: [['L', 'lab', 'l'], ['a', 'lab', 'a'], ['b', 'lab', 'b']],
+};
+
+function hexToRgbArray(hex) {
+  const clean = String(hex || '').replace('#', '');
+  const full = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean;
+  const num = parseInt(full, 16);
+  if (full.length !== 6 || Number.isNaN(num)) return [0, 0, 0];
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255]; // eslint-disable-line no-bitwise
+}
+
+/** Returns per-channel {label, value} rows for a non-HEX color mode, or null for HEX/unknown modes. */
+function getColorModeRows(hex, mode) {
+  const channels = COLOR_MODE_CHANNELS[mode];
+  if (!channels) return null;
+  const spaces = rgbToAllSpacesDenormalized(hexToRgbArray(hex));
+  return channels.map(([label, space, key]) => ({ label, value: String(spaces[space][key]) }));
+}
+
 const TINT_BAND_STOPS = [
   { id: 'tint-1', mode: 'white', baseWeight: 0.2 },
   { id: 'tint-2', mode: 'white', baseWeight: 0.4 },
@@ -182,6 +206,7 @@ export class ColorSwatchRail extends LitElement {
       hexCopyFirstRowOnly: { type: Boolean, reflect: true, attribute: 'hex-copy-first-row-only' },
       hideBaseColorBadge: { type: Boolean, attribute: 'hide-base-color-badge' },
       hideLock: { type: Boolean, attribute: 'hide-lock' },
+      colorMode: { type: String, attribute: 'color-mode' },
       strings: { attribute: false },
     };
   }
@@ -200,6 +225,7 @@ export class ColorSwatchRail extends LitElement {
     this.hexCopyFirstRowOnly = false;
     this.hideBaseColorBadge = false;
     this.hideLock = false;
+    this.colorMode = 'HEX';
     this.strings = SWATCH_RAIL_DEFAULTS;
     this._controllerUnsubscribe = null;
     this.swatches = [];
@@ -462,47 +488,38 @@ export class ColorSwatchRail extends LitElement {
     }
   }
 
-  _copyTextFallback(text) {
-    try {
-      const textarea = document.createElement('textarea');
-      textarea.value = text;
-      textarea.setAttribute('readonly', '');
-      textarea.style.position = 'absolute';
-      textarea.style.left = '-9999px';
-      document.body.appendChild(textarea);
-      textarea.select();
-      textarea.setSelectionRange(0, text.length);
-      const copied = document.execCommand('copy');
-      textarea.remove();
-      return Boolean(copied);
-    } catch {
-      return false;
-    }
-  }
-
-  async _copyText(text) {
-    if (navigator.clipboard?.writeText) {
-      try {
-        await navigator.clipboard.writeText(text);
-        return true;
-      } catch {
-        // Fallback supports environments where Clipboard API is unavailable/blocked.
-      }
-    }
-    return this._copyTextFallback(text);
-  }
-
   async _handleCopy(hex) {
     if (!hex) return;
     const s = this.strings || SWATCH_RAIL_DEFAULTS;
     try {
-      const copied = await this._copyText(hex);
+      const copied = await safeClipboardWrite(hex, 'swatch-hex');
       if (!copied) throw new Error('clipboard_copy_failed');
       showExpressToast({ message: s.copiedToast || SWATCH_RAIL_DEFAULTS.copiedToast, variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
       announceToScreenReader(s.copiedToast || SWATCH_RAIL_DEFAULTS.copiedToast);
     } catch (error) {
       showExpressToast({ message: s.copyFailedToast || SWATCH_RAIL_DEFAULTS.copyFailedToast, variant: 'negative', timeout: 2000 });
     }
+  }
+
+  _renderColorModeRows(rows) {
+    const s = this.strings || SWATCH_RAIL_DEFAULTS;
+    const channelTemplate = s.copyChannelValue || SWATCH_RAIL_DEFAULTS.copyChannelValue;
+    const labelCopyCode = s.copyHex || SWATCH_RAIL_DEFAULTS.copyHex;
+    const fullCode = rows.map((row) => row.value).join(', ');
+    return html`
+      <div class="hex-code-multi">
+        ${rows.map((row) => {
+          const label = channelTemplate.replace('{channel}', row.label);
+          return html`
+            <div class="hex-code-row">
+              <span class="hex-code-row__label" aria-hidden="true">${row.label}</span>
+              <button type="button" class="hex-code-row__value swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(row.value, e.currentTarget)} aria-label="${label}" title="${label}">${row.value}</button>
+            </div>
+          `;
+        })}
+        <button type="button" class="icon-button icon-button--copy hex-code-multi__copy-all swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(fullCode, e.currentTarget)} aria-label="${labelCopyCode}" title="${labelCopyCode}">${icon('copy')}</button>
+      </div>
+    `;
   }
 
   _handleLock(index) {
@@ -1302,6 +1319,9 @@ export class ColorSwatchRail extends LitElement {
       const isTintSelected = tintMode && resolvedTintIndex != null && index === resolvedTintIndex;
       const tintBands = isTintSelected ? this._buildTintBands(swatch.hex) : [];
       const showEdit = (f.colorPicker || f.editTint) && !editDisabled;
+      const colorModeRows = !showEdit && !f.copyFromHex
+        ? getColorModeRows(swatch.hex, this.colorMode)
+        : null;
       const atMinSwatches = f.minSwatches != null && swatches.length <= f.minSwatches;
       
       
@@ -1388,7 +1408,7 @@ export class ColorSwatchRail extends LitElement {
       const stackedContent = html`
         <div class="bottom-info bottom-info--stacked" part="bottom-info">
           ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-          ${f.hexCode ? ((showEdit || f.copyFromHex) ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>` : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`) : ''}
+          ${f.hexCode ? ((showEdit || f.copyFromHex) ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>` : (colorModeRows ? this._renderColorModeRows(colorModeRows) : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`)) : ''}
         </div>
         ${stackedIcons}
       `;
@@ -1457,16 +1477,18 @@ export class ColorSwatchRail extends LitElement {
               ${topRightIcons}
             </div>
           ` : html`<div class="stacked-row">${stackedContent}</div>`}
-          ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
+          ${!isStacked ? html`<div class="bottom-info ${colorModeRows ? 'bottom-info--multi' : ''}" part="bottom-info">
             ${showEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
             ${f.hexCode && showHexCopyForThisSwatch ? (
-              showEdit || f.copyFromHex
-                ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>`
-                : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`
+              colorModeRows
+                ? this._renderColorModeRows(colorModeRows)
+                : (showEdit || f.copyFromHex
+                  ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>`
+                  : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`)
             ) : ''}
-            <div class="bottom-info__actions">
+            ${!colorModeRows ? html`<div class="bottom-info__actions">
               ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="${labelCopyHex}" title="${labelCopyHex}">${icon('copy')}</button>` : ''}
-            </div>
+            </div>` : ''}
           </div>` : ''}
           ${showAddLeftHere ? html`<div class="add-slot add-slot--column add-slot--column-left">
             <button type="button" class="icon-button icon-button--add swatch-column-focusable" part="add-button" tabindex="-1" @click=${() => this._handleAddAt(index, 'left')} aria-label="${labelAddColorLeft}" title="${labelAddColorLeft}">${icon('add')}</button>

@@ -3,6 +3,9 @@ import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
 import { getPaletteColors, setupSwatchColumnNav } from './createPaletteModalContent.js';
+import { createColorModesHeader } from './createColorModesHeader.js';
+import { getPreferredColorMode } from '../utils/colorModePreference.js';
+import { createColorStrip } from '../toolbar/colorStrip.js';
 import {
   createTagField,
   getTagValues,
@@ -17,12 +20,19 @@ function interpolate(template, vars = {}) {
   return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
 }
 
+const STRIP_DEFAULTS = {
+  swatchLabel: 'Color {index}: {hex}',
+  swatchStripLabel: '{count} colors in {type}',
+};
+
 const LIBRARY_THEME_STYLES = [
   'scripts/color-shared/modal/modal-palette-content.css',
   'scripts/color-shared/components/strips/color-strip.css',
   'scripts/color-shared/toolbar/drawer.css',
+  'scripts/color-shared/toolbar/toolbar.css',
   'scripts/color-shared/components/libraries/libraries.css',
   'scripts/color-shared/modal/modal-library-theme.css',
+  'scripts/color-shared/modal/modal-color-modes-header.css',
 ];
 
 let stylesLoaded = false;
@@ -147,12 +157,31 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
   const contentScroll = createTag('div', { class: 'modal-lib-scroll' });
 
   const colorCount = normalizedPalette.colors.length;
-  const { railSection, railWrap, destroyRail } = createRailSection(
+  const { railSection, railWrap, railAdapter, destroyRail } = createRailSection(
     normalizedPalette,
     interpolate(strings.librariesModalPaletteAria, { count: colorCount }),
     colorSwatchRailStrings,
     verticalMaxPerRow,
   );
+  railAdapter.rail.colorMode = getPreferredColorMode();
+
+  const colorModesHeader = createColorModesHeader(
+    { name: item?.name ?? 'Palette', colors: normalizedPalette.colors },
+    {
+      type: 'palette',
+      strings,
+      onModeChange: (mode) => { railAdapter.rail.colorMode = mode; },
+    },
+  );
+  contentScroll.appendChild(colorModesHeader.element);
+
+  // Mobile/tablet-only condensed strip above the full swatch list (Figma:
+  // "Add palette summary above color strips on color palettes"). Hidden at
+  // desktop via CSS since the L layout doesn't need it.
+  const paletteSummaryStrip = createTag('div', { class: 'modal-palette-summary-strip', 'aria-hidden': 'true' });
+  paletteSummaryStrip.appendChild(createColorStrip(normalizedPalette.colors, 'palette', null, STRIP_DEFAULTS));
+  contentScroll.appendChild(paletteSummaryStrip);
+
   contentScroll.appendChild(railSection);
   const { initTabIndexes } = setupSwatchColumnNav(railWrap);
 
@@ -312,8 +341,10 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
   return {
     element: root,
     initNav: initTabIndexes,
+    waitForColorModesReady: () => colorModesHeader.waitForReady(),
     destroy: () => {
       destroyRail();
+      colorModesHeader.destroy();
       tagObserver?.disconnect();
       tagObserver = null;
       toolbarHandle?.destroy?.();
