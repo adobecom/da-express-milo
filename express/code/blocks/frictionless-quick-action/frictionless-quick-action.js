@@ -598,6 +598,9 @@ export function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, di
       variant: quickAction,
       width: dimensions?.width,
       height: dimensions?.height,
+      qaSourcePage: window.location.pathname.includes('change-background')
+        ? 'change-background'
+        : 'remove-background',
     };
   }
 
