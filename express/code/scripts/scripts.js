@@ -364,6 +364,15 @@ function preloadLCPImage(img) {
 }());
 
 let fragmentLcpPreloaded = false;
+
+// Rollout gate for the Spectrum-2 (s2) button system. Blocks listed here get the
+// `s2` class applied centrally — no per-page authoring needed — so they render
+// the proper S2 CTA styling (see the `.s2` rules in styles.css). Add a block
+// name once its buttons are verified; when every block is verified, retire this
+// gate and make s2 the default. Authors can still opt a single block in by
+// adding the `s2` variant in the block's name row.
+const S2_BUTTON_BLOCKS = ['ax-columns'];
+
 // eslint-disable-next-line import/prefer-default-export
 export function decorateAreaWithLCP(area = document, options = {}) {
   const { fragmentLink } = options;
@@ -380,6 +389,9 @@ export function decorateAreaWithLCP(area = document, options = {}) {
     }
   }
   decorateArea(area, options);
+  S2_BUTTON_BLOCKS.forEach((name) => {
+    area.querySelectorAll(`.${name}`).forEach((block) => block.classList.add('s2'));
+  });
 }
 CONFIG.decorateArea = decorateAreaWithLCP;
 
