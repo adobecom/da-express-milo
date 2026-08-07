@@ -24,7 +24,7 @@ jobs:
       # Don't cancel the other shards when one fails — we want the full picture.
       fail-fast: false
       matrix:
-        node-version: [20.x]
+        node-version: [24.x]
         # Split the suite across parallel runner jobs. Playwright's --shard
         # deterministically partitions tests, so 4 shards ≈ 4x throughput.
         shard: [1, 2, 3, 4]
@@ -58,6 +58,12 @@ jobs:
         run: npm ci --no-fund --prefer-offline
 
       - name: Install Playwright (all browsers)
+        # Normally ~40s, but a slow Ubuntu package mirror (via --with-deps) has
+        # been observed dragging this to ~7min while still succeeding. A truly
+        # hung mirror would otherwise stall until the 30-min job timeout,
+        # wasting a runner and failing the whole PR. Cap above the slow-but-fine
+        # ceiling so a genuine hang fails fast and a re-run recovers.
+        timeout-minutes: 10
         run: npx playwright install --with-deps
 
       - name: Set execute permission for pr.run.sh
