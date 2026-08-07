@@ -306,7 +306,7 @@ async function decorateSearchFunctions(block) {
     type: 'text',
     placeholder: searchPlaceholder,
     'aria-label': searchPlaceholder,
-    role: 'searchbox',
+    role: 'combobox',
     'aria-autocomplete': 'list',
     'aria-expanded': 'false',
     enterKeyHint: await replaceKey('search', config) || 'Search',

@@ -645,7 +645,7 @@ async function makeTemplateFunctions() {
             class: 'option-button',
             'data-value': option[1],
             role: 'option',
-            tabindex: '0',
+            tabindex: subIndex === 0 ? '0' : '-1',
             'aria-selected': 'false',
           });
           [optionButton.textContent] = option;
@@ -967,6 +967,12 @@ function closeDrawer(toolBar) {
   }, 500);
 }
 
+function setActiveOptionTabIndex(options, activeOption) {
+  options.forEach((option) => {
+    option.setAttribute('tabindex', option === activeOption ? '0' : '-1');
+  });
+}
+
 function updateOptionsStatus(block, props, toolBar) {
   const wrappers = toolBar.querySelectorAll('.function-wrapper');
   const waysOfSort = {
@@ -1001,6 +1007,7 @@ function updateOptionsStatus(block, props, toolBar) {
 
         option.classList.add('active');
         option.setAttribute('aria-selected', 'true');
+        setActiveOptionTabIndex(options, option);
       }
     });
 
@@ -1207,6 +1214,7 @@ async function initFilterSort(block, props, toolBar) {
           });
           option.classList.add('active');
           option.setAttribute('aria-selected', 'true');
+          setActiveOptionTabIndex(options, option);
         };
 
         const activateOption = async (e) => {
@@ -1239,7 +1247,24 @@ async function initFilterSort(block, props, toolBar) {
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             await activateOption(e);
+            return;
           }
+
+          const rovingKeys = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
+          if (!rovingKeys.includes(e.key)) return;
+          e.preventDefault();
+
+          const optionsArr = [...options];
+          const currentIndex = optionsArr.indexOf(option);
+          let nextIndex = currentIndex;
+          if (e.key === 'ArrowDown') nextIndex = Math.min(optionsArr.length - 1, currentIndex + 1);
+          else if (e.key === 'ArrowUp') nextIndex = Math.max(0, currentIndex - 1);
+          else if (e.key === 'Home') nextIndex = 0;
+          else if (e.key === 'End') nextIndex = optionsArr.length - 1;
+
+          const nextOption = optionsArr[nextIndex];
+          setActiveOptionTabIndex(options, nextOption);
+          nextOption.focus();
         });
       });
 
