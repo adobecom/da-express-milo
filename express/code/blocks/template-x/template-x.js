@@ -1062,6 +1062,8 @@ function initDrawer(block, props, toolBar) {
     const button = wrapper.querySelector('.button-wrapper');
     let maxHeight;
     if (button) {
+      button.setAttribute('aria-expanded', String(!wrapper.classList.contains('collapsed')));
+
       const wrapperMaxHeightGrabbed = setInterval(() => {
         if (wrapper.offsetHeight > 0) {
           maxHeight = `${wrapper.offsetHeight}px`;
@@ -1076,7 +1078,17 @@ function initDrawer(block, props, toolBar) {
         if (btnWrapper) {
           const minHeight = `${btnWrapper.offsetHeight - 8}px`;
           wrapper.classList.toggle('collapsed');
-          wrapper.style.maxHeight = wrapper.classList.contains('collapsed') ? minHeight : maxHeight;
+          const isCollapsed = wrapper.classList.contains('collapsed');
+          wrapper.style.maxHeight = isCollapsed ? minHeight : maxHeight;
+          button.setAttribute('aria-expanded', String(!isCollapsed));
+
+          const options = wrapper.querySelectorAll('.option-button');
+          if (isCollapsed) {
+            options.forEach((option) => option.setAttribute('tabindex', '-1'));
+          } else {
+            const activeOption = wrapper.querySelector('.option-button.active') || options[0];
+            if (activeOption) setActiveOptionTabIndex(options, activeOption);
+          }
         }
       });
     }
@@ -1428,13 +1440,17 @@ function initToolbarShadow(toolbar) {
   });
 }
 
-function buildViewsWrapper() {
+async function buildViewsWrapper() {
+  const [smLabel, mdLabel, lgLabel] = await replaceKeyArray(
+    ['view-toggle-small-grid', 'view-toggle-medium-grid', 'view-toggle-large-grid'],
+    getConfig(),
+  );
   const viewsWrapper = createTag('div', { class: 'views' });
-  const smView = createTag('button', { type: 'button', class: 'view-toggle-button small-view', 'data-view': 'sm', 'aria-label': 'Small grid', 'aria-pressed': 'false' });
+  const smView = createTag('button', { type: 'button', class: 'view-toggle-button small-view', 'data-view': 'sm', 'aria-label': smLabel || 'Small grid', 'aria-pressed': 'false' });
   smView.append(getIconElementDeprecated('small_grid'));
-  const mdView = createTag('button', { type: 'button', class: 'view-toggle-button medium-view', 'data-view': 'md', 'aria-label': 'Medium grid', 'aria-pressed': 'false' });
+  const mdView = createTag('button', { type: 'button', class: 'view-toggle-button medium-view', 'data-view': 'md', 'aria-label': mdLabel || 'Medium grid', 'aria-pressed': 'false' });
   mdView.append(getIconElementDeprecated('medium_grid'));
-  const lgView = createTag('button', { type: 'button', class: 'view-toggle-button large-view', 'data-view': 'lg', 'aria-label': 'Large grid', 'aria-pressed': 'false' });
+  const lgView = createTag('button', { type: 'button', class: 'view-toggle-button large-view', 'data-view': 'lg', 'aria-label': lgLabel || 'Large grid', 'aria-pressed': 'false' });
   lgView.append(getIconElementDeprecated('large_grid'));
   viewsWrapper.append(smView, mdView, lgView);
   return viewsWrapper;
@@ -1465,7 +1481,7 @@ async function decorateToolbar(block, props) {
   contentWrapper.append(sectionHeading);
 
   if (tBar) {
-    const viewsWrapper = buildViewsWrapper();
+    const viewsWrapper = await buildViewsWrapper();
 
     const functionsObj = await makeTemplateFunctions();
     const functions = await decorateFunctionsContainer(block, functionsObj);
