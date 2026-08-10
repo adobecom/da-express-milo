@@ -9,7 +9,6 @@ import {
   fadeIn,
   fadeOut,
   createDocConfig,
-  createMergeVideosDocConfig,
   createContainerConfig,
   selectElementByTagPrefix,
   createDefaultExportConfig,
@@ -22,6 +21,7 @@ import {
   EXPRESS_ROUTE_PATHS,
   EXPERIMENTAL_VARIANTS_PROMOID_MAP,
   AUTH_FRICTIONLESS_UPLOAD_QUICK_ACTIONS,
+  getVideoConfig,
 } from '../../scripts/utils/frictionless-utils.js';
 
 let createTag;
@@ -199,7 +199,7 @@ async function maybeHandleEasyUploadQuickAction(
       return true;
     }
   } catch (error) {
-    window.lana?.log(`[FrictionlessQA] Failed to route Easy Upload quick action: ${error?.message || error}`, { severity: 'error' });
+    window.lana?.log(`[FrictionlessQA] Failed to route Easy Upload quick action: ${error?.message || error}`, { tags: 'frictionless-quick-action', severity: 'error' });
     const fallbackHandled = runLegacyEasyUploadFallback(
       quickActionId,
       docConfig,
@@ -230,7 +230,7 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
 
   const contConfig = createContainerConfig(quickActionId);
   const docConfig = createDocConfig(data[0], 'image');
-  const videoDocConfig = quickActionId === 'merge-videos' ? createMergeVideosDocConfig(data) : createDocConfig(data[0], 'video');
+  const videoDocConfig = getVideoConfig(quickActionId, data);
 
   const appConfig = {
     metaData: {
@@ -240,6 +240,9 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
     analyticsData: {
       ...(quickActionId === 'video-compress' && { entryPoint: 'seo-quick-action-video-compress' }),
       ...(quickActionId === 'video-convert' && { entryPoint: 'seo-quick-action-video-convert' }),
+      ...(quickActionId === 'audio-converter' && { entryPoint: 'seo-quick-action-audio-converter' }),
+      ...(quickActionId === 'video-to-audio' && { entryPoint: 'seo-quick-action-video-to-audio' }),
+      ...(quickActionId === 'compress-image' && { entryPoint: 'seo-quick-action-compress-image' }),
     },
     receiveQuickActionErrors: true,
     callbacks: {
@@ -1064,7 +1067,7 @@ export default async function decorate(block) {
       });
     }
   } catch (e) {
-    window.lana?.log(`Easy upload module failed to load in frictionless-quick-action: ${e?.message}`);
+    window.lana?.log(`Easy upload module failed to load in frictionless-quick-action: ${e?.message}`, { tags: 'frictionless-quick-action', severity: 'error' });
   }
 
   if (
