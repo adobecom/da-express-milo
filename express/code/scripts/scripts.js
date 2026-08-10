@@ -373,6 +373,12 @@ let fragmentLcpPreloaded = false;
 // adding the `s2` variant in the block's name row.
 const S2_BUTTON_BLOCKS = ['ax-columns', 'transparent-img-marquee', 'comparison-table-v2', 'blog-columns'];
 
+function applyS2ButtonClasses(area) {
+  S2_BUTTON_BLOCKS.forEach((name) => {
+    area.querySelectorAll(`.${name}`).forEach((block) => block.classList.add('s2'));
+  });
+}
+
 // eslint-disable-next-line import/prefer-default-export
 export function decorateAreaWithLCP(area = document, options = {}) {
   const { fragmentLink } = options;
@@ -389,9 +395,11 @@ export function decorateAreaWithLCP(area = document, options = {}) {
     }
   }
   decorateArea(area, options);
-  S2_BUTTON_BLOCKS.forEach((name) => {
-    area.querySelectorAll(`.${name}`).forEach((block) => block.classList.add('s2'));
-  });
+  // Milo's core loadArea() never calls config.decorateArea for the main
+  // document — only its fragment block does, for fragment content (see
+  // libs/blocks/fragment/fragment.js). Blocks authored directly on the page
+  // (the common case) are classed explicitly after loadArea() in loadPage().
+  applyS2ButtonClasses(area);
 }
 CONFIG.decorateArea = decorateAreaWithLCP;
 
@@ -586,6 +594,7 @@ async function loadPage() {
   });
 
   await loadArea();
+  applyS2ButtonClasses(document);
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));
