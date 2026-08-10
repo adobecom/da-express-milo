@@ -922,15 +922,10 @@ main .s2 a:is(.con-button, .button).outline:not(.fill):any-link {
   color: #000000ed;
 }
 
-main .s2 a:is(.con-button, .button).outline:not(.fill):any-link:hover {
+main .s2 a:is(.con-button, .button).outline:not(.fill):any-link:hover,
+main .s2 a:is(.con-button, .button).outline:not(.fill):any-link:active {
   background-color: #00000017;
   border-color: #00000026;
-  color: #000000ed;
-}
-
-main .s2 a:is(.con-button, .button).outline:not(.fill):any-link:active {
-  background-color: #0000001f;
-  border-color: #0000001f;
   color: #000000ed;
 }
 
@@ -943,16 +938,11 @@ main .s2 .dark a:is(.con-button, .button).outline:not(.fill):any-link {
 }
 
 main .s2.dark a:is(.con-button, .button).outline:not(.fill):any-link:hover,
-main .s2 .dark a:is(.con-button, .button).outline:not(.fill):any-link:hover {
-  background-color: #ffffff2b;
-  border-color: #ffffff38;
-  color: var(--color-white);
-}
-
+main .s2 .dark a:is(.con-button, .button).outline:not(.fill):any-link:hover,
 main .s2.dark a:is(.con-button, .button).outline:not(.fill):any-link:active,
 main .s2 .dark a:is(.con-button, .button).outline:not(.fill):any-link:active {
-  background-color: #ffffff1c;
-  border-color: #ffffff24;
+  background-color: #ffffff2b;
+  border-color: #ffffff38;
   color: var(--color-white);
 }
 
