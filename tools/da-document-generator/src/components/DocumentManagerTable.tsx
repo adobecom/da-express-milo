@@ -1,9 +1,10 @@
-import { memo, useRef, useState } from 'react';
+import { memo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import type { ManagedDoc } from '../types';
 import type { DaDocumentActions } from '../hooks/useDaDocumentActions';
 import type { EditableFieldKey } from '../lib/generate';
-import { GeneratePill, PreviewPill, PublishPill, ExternalLinkIcon } from './StatusPills';
+import { GeneratePill, PreviewPill, PublishPill, GmcBothEnvStatus, ExternalLinkIcon } from './StatusPills';
+import EditableTextCell from './ui/EditableTextCell';
 
 export type SortField = 'path' | 'subDirectory' | 'productType' | 'batch' | 'lastUpdated' | 'status';
 
@@ -32,7 +33,8 @@ const SORT_COLUMNS: { field: SortField; label: string }[] = [
 // Fixed column widths shared by the header and every row so a single CSS grid template
 // keeps them aligned while the body is virtualized (see DocumentRow). Deriving the
 // template + total width from one array keeps them from drifting apart.
-const COLUMN_WIDTHS = [44, 460, 200, 200, 210, 210, 120, 440, 150, 320, 280, 400, 130, 210, 80];
+// GMC Status (index 14) is wider now that it stacks both test + prod (GmcBothEnvStatus).
+const COLUMN_WIDTHS = [44, 460, 200, 200, 210, 210, 120, 440, 150, 320, 280, 400, 130, 210, 200, 80];
 const GRID_TEMPLATE = COLUMN_WIDTHS.map((w) => `${w}px`).join(' ');
 const TOTAL_WIDTH = COLUMN_WIDTHS.reduce((a, b) => a + b, 0);
 
@@ -95,6 +97,7 @@ export default function DocumentManagerTable({
           <div className="px-3 py-2 font-medium text-gray-600">Description</div>
           <div className="px-3 py-2 font-medium text-gray-600">Preview</div>
           <div className="px-3 py-2 font-medium text-gray-600">Publish</div>
+          <div className="px-3 py-2 font-medium text-gray-600">GMC Status</div>
           <div className="px-3 py-2 font-medium text-gray-600">Delete</div>
         </div>
 
@@ -197,13 +200,13 @@ const DocumentRow = memo(function DocumentRow({
         )}
       </div>
       <div className="px-3 py-2 text-gray-700 min-w-0 overflow-x-auto whitespace-nowrap no-scrollbar">
-        <EditableCell value={doc.title} editable={doc.editable.title} onSave={(v) => onEditField(doc, 'title', v)} />
+        <EditableTextCell value={doc.title} editable={doc.editable.title} onSave={(v) => onEditField(doc, 'title', v)} />
       </div>
       <div className="px-3 py-2 text-gray-700 min-w-0 overflow-x-auto whitespace-nowrap no-scrollbar">
-        <EditableCell value={doc.shortTitle} editable={doc.editable.shortTitle} onSave={(v) => onEditField(doc, 'short_title', v)} />
+        <EditableTextCell value={doc.shortTitle} editable={doc.editable.shortTitle} onSave={(v) => onEditField(doc, 'short_title', v)} />
       </div>
       <div className="px-3 py-2 text-gray-500 min-w-0 overflow-x-auto whitespace-nowrap no-scrollbar">
-        <EditableCell value={doc.description} editable={doc.editable.description} onSave={(v) => onEditField(doc, 'description', v)} />
+        <EditableTextCell value={doc.description} editable={doc.editable.description} onSave={(v) => onEditField(doc, 'description', v)} />
       </div>
       <div className="px-3 py-2">
         <PreviewPill result={doc} onPreview={() => actions.previewRow(doc)} />
@@ -212,77 +215,14 @@ const DocumentRow = memo(function DocumentRow({
         <PublishPill result={doc} onPublish={() => actions.publishRow(doc)} onUnpublish={() => actions.unpublishRow(doc)} />
       </div>
       <div className="px-3 py-2">
+        <GmcBothEnvStatus gmc={doc.gmc} />
+      </div>
+      <div className="px-3 py-2">
         <GeneratePill result={doc} onGenerate={() => {}} onDelete={() => actions.deleteRow(doc)} />
       </div>
     </div>
   );
 });
-
-function EditableCell({
-  value,
-  editable,
-  onSave,
-}: {
-  value?: string;
-  editable: boolean;
-  onSave: (value: string) => Promise<void>;
-}) {
-  const [editing, setEditing] = useState(false);
-  const [draft, setDraft] = useState(value ?? '');
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  if (!editable) {
-    return (
-      <span className="text-gray-400 whitespace-nowrap" title="Not editable — backfill or regenerate to enable editing">
-        {value ?? '—'}
-      </span>
-    );
-  }
-
-  if (!editing) {
-    return (
-      <button
-        type="button"
-        onClick={() => { setDraft(value ?? ''); setError(null); setEditing(true); }}
-        className="text-left whitespace-nowrap hover:bg-blue-50 rounded px-1 -mx-1 cursor-text"
-      >
-        {value || <span className="text-gray-300">Click to edit</span>}
-      </button>
-    );
-  }
-
-  async function commit() {
-    if (draft === (value ?? '')) { setEditing(false); return; }
-    setSaving(true);
-    try {
-      await onSave(draft);
-      setEditing(false);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
-    } finally {
-      setSaving(false);
-    }
-  }
-
-  return (
-    <div className="flex flex-col gap-0.5">
-      <input
-        autoFocus
-        value={draft}
-        disabled={saving}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={() => void commit()}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') { e.preventDefault(); void commit(); }
-          if (e.key === 'Escape') { setEditing(false); setDraft(value ?? ''); setError(null); }
-        }}
-        className="w-full border border-blue-300 rounded px-1 py-0.5 text-xs"
-      />
-      {error && <span className="text-red-600 text-[10px]">{error}</span>}
-    </div>
-  );
-}
 
 function StatusLabel({ doc }: { doc: ManagedDoc }) {
   const { stage } = doc;

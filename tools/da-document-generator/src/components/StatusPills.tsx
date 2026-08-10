@@ -1,4 +1,4 @@
-import type { RowResult } from '../types';
+import type { RowResult, GmcEnvState } from '../types';
 
 export type ExistenceCheck = 'checking' | 'exists' | 'not-found' | 'error';
 
@@ -140,6 +140,63 @@ export function PublishPill({
     );
   }
   return <span className="text-gray-300">—</span>;
+}
+
+// Final value set per GMC-Status-Sync-PRD.md §8 — collapses Google's active/pending/disapproved/
+// unknown plus our own `stale` flag down to five author-facing states. This single-env chip is the
+// reusable core: the main-page column composes two of them (GmcBothEnvStatus) and the submit
+// dialog reuses it for each row's current-env status.
+export function GmcStatusChip({ state }: { state?: GmcEnvState }) {
+  if (!state) return <span className="text-gray-400">Not submitted</span>;
+  if (state.status === 'live') return <span className="text-green-700 font-medium">Live</span>;
+  if (state.status === 'disapproved') {
+    return (
+      <span className="text-red-700 font-medium cursor-help" title={state.message || 'Disapproved'}>
+        Disapproved
+      </span>
+    );
+  }
+  if (state.status === 'error') {
+    return (
+      <span className="text-red-600 font-medium cursor-help" title={state.message || 'Error'}>
+        Error
+      </span>
+    );
+  }
+  return <span className="text-amber-600 font-medium">Pending</span>;
+}
+
+// The main-page status column shows both environments at once now that submit-env selection lives
+// in the dialog (GMC-Submit-Dialog-PRD.md §5).
+export function GmcBothEnvStatus({ gmc }: { gmc?: { test?: GmcEnvState; prod?: GmcEnvState } }) {
+  return (
+    <div className="flex flex-col gap-0.5 text-[11px]">
+      <span className="flex items-center gap-1">
+        <span className="text-gray-400 w-7 shrink-0">test</span>
+        <GmcStatusChip state={gmc?.test} />
+      </span>
+      <span className="flex items-center gap-1">
+        <span className="text-gray-400 w-7 shrink-0">prod</span>
+        <GmcStatusChip state={gmc?.prod} />
+      </span>
+    </div>
+  );
+}
+
+// Provenance marker: this field's value came from Zazzle rather than the authored DA doc — verify
+// before submit (GMC-Submit-Dialog-PRD.md §7). Provenance only, never a blocker.
+export function ProvenanceBadge({ title = 'Sourced from Zazzle — verify before submit' }: { title?: string }) {
+  return (
+    <span title={title} aria-label="Sourced from Zazzle" className="inline-flex items-center text-amber-500 cursor-help align-middle">
+      <svg viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5" aria-hidden="true">
+        <path
+          fillRule="evenodd"
+          d="M8.5 2.9a1.7 1.7 0 0 1 3 0l6 10.4A1.7 1.7 0 0 1 16 15.8H4a1.7 1.7 0 0 1-1.5-2.5l6-10.4ZM10 7a.75.75 0 0 0-.75.75v3a.75.75 0 0 0 1.5 0v-3A.75.75 0 0 0 10 7Zm0 7a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z"
+          clipRule="evenodd"
+        />
+      </svg>
+    </span>
+  );
 }
 
 export function ExistenceBadge({ status }: { status: ExistenceCheck | undefined }) {

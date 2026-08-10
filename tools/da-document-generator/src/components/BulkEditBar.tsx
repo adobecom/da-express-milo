@@ -1,6 +1,7 @@
 interface Props {
   selectedCount: number;
   canBackfill: boolean;
+  canSubmitGmc: boolean;
   busy: boolean;
   onPreview: () => void;
   onPublish: () => void;
@@ -8,12 +9,14 @@ interface Props {
   onDelete: () => void;
   onBackfill: () => void;
   onEditField: () => void;
+  onSubmitGmc: () => void;
   onClearSelection: () => void;
 }
 
 export default function BulkEditBar({
   selectedCount,
   canBackfill,
+  canSubmitGmc,
   busy,
   onPreview,
   onPublish,
@@ -21,6 +24,7 @@ export default function BulkEditBar({
   onDelete,
   onBackfill,
   onEditField,
+  onSubmitGmc,
   onClearSelection,
 }: Props) {
   if (selectedCount === 0) return null;
@@ -77,6 +81,15 @@ export default function BulkEditBar({
           className="px-3.5 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
         >
           Unpublish
+        </button>
+        <button
+          type="button"
+          disabled={busy || !canSubmitGmc}
+          onClick={onSubmitGmc}
+          title={canSubmitGmc ? undefined : 'Select at least one published document to submit to GMC'}
+          className="px-3.5 py-1.5 bg-teal-600 text-white text-xs font-medium rounded-lg hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
+        >
+          Submit to GMC
         </button>
         <button
           type="button"

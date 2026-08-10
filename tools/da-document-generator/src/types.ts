@@ -60,6 +60,18 @@ export interface ManagedDocIdentity {
   lastUpdated?: string;
 }
 
+export type GmcEnv = 'test' | 'prod';
+
+export type GmcStatus = 'pending' | 'live' | 'disapproved' | 'error';
+
+export interface GmcEnvState {
+  status: GmcStatus;
+  lastSubmittedAt?: string;
+  lastCheckedAt?: string;
+  /** Failure/disapproval reason, shown on hover — see GMC-Status-Sync-PRD.md §9. */
+  message?: string;
+}
+
 export interface ManagedDoc extends RowResult {
   /** Folder containing this doc, relative to the scanned root path (e.g. "/hoodie"). */
   subDirectory: string;
@@ -75,5 +87,10 @@ export interface ManagedDoc extends RowResult {
     title: boolean;
     shortTitle: boolean;
     description: boolean;
+  };
+  /** Per-environment GMC submission state. Absence of a given env's entry means "Not submitted". */
+  gmc?: {
+    test?: GmcEnvState;
+    prod?: GmcEnvState;
   };
 }
