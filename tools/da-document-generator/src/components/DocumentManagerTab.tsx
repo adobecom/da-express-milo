@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { scanDocs, backfillIdentity, writeFieldValue, type ScanPhase } from '../lib/documentManager';
+import { checkGmcStatus } from '../lib/gmcSubmit';
+import { getToken } from '../api/daApi';
 import type { CrawlError, DocFetchError } from '../api/crawl';
 import type { EditableFieldKey } from '../lib/generate';
 import { useDaDocumentActions } from '../hooks/useDaDocumentActions';
@@ -8,12 +10,12 @@ import ConfirmModal from './ConfirmModal';
 import DocumentManagerTable, { type SortField } from './DocumentManagerTable';
 import BulkEditBar from './BulkEditBar';
 import BulkFieldEditModal from './BulkFieldEditModal';
-import type { ManagedDoc } from '../types';
+import GmcSubmitDialog from './gmc/GmcSubmitDialog';
+import type { ManagedDoc, GmcEnv, GmcEnvState } from '../types';
 
 const LEGACY_BATCH = '(legacy / no batch)';
 const ALL = 'all';
 const DEFAULT_ROOT_PATH = '/adobecom/da-express-milo/express/print';
-
 function ScanProgressBar({ progress }: { progress: { phase: ScanPhase; done: number; total: number } }) {
   const { phase, done, total } = progress;
   const label = phase === 'discovering'
@@ -56,6 +58,8 @@ export default function DocumentManagerTab() {
   const [busy, setBusy] = useState(false);
   const [dismissedErrors, setDismissedErrors] = useState(false);
   const [hasScanned, setHasScanned] = useState(false);
+  const [gmcDialogOpen, setGmcDialogOpen] = useState(false);
+  const [gmcMessage, setGmcMessage] = useState<string | null>(null);
 
   // Warn before leaving the page once a scan has loaded documents, so an author
   // doesn't lose a crawl (and any inline edits) by closing/reloading.
@@ -188,6 +192,7 @@ export default function DocumentManagerTab() {
 
   const selectedDocs = docs.filter((d) => selected.has(d.path));
   const canBackfill = selectedDocs.some((d) => d.needsBackfill);
+  const canSubmitGmc = selectedDocs.some((d) => d.stage === 'published' && !!d.identity.productId);
 
   async function withBusy(fn: () => Promise<void>) {
     setBusy(true);
@@ -234,6 +239,29 @@ export default function DocumentManagerTab() {
       }
     }
     return { succeeded, skipped };
+  }
+
+  function applyGmcUpdates(env: GmcEnv, updates: Map<string, GmcEnvState>) {
+    setDocs((prev) => prev.map((d) => {
+      const update = updates.get(d.path);
+      if (!update) return d;
+      return { ...d, gmc: { ...d.gmc, [env]: update } };
+    }));
+  }
+
+  // Status now lives per-env in the column, so a check refreshes both test and prod in one go
+  // (GMC-Submit-Dialog-PRD.md §5). Each env is a separate diagnostics call.
+  async function handleCheckGmcStatus() {
+    const token = getToken();
+    if (!token) return;
+    const targets = selected.size > 0 ? selectedDocs : docs;
+    await withBusy(async () => {
+      for (const env of ['test', 'prod'] as GmcEnv[]) {
+        const { updates } = await checkGmcStatus(targets, env, token);
+        applyGmcUpdates(env, updates);
+      }
+      setGmcMessage(`Checked GMC status (test + prod) for ${targets.length} row${targets.length !== 1 ? 's' : ''}`);
+    });
   }
 
   return (
@@ -302,9 +330,22 @@ export default function DocumentManagerTab() {
             </label>
           </div>
 
+          <div className="flex items-center gap-3 flex-wrap text-sm">
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => void handleCheckGmcStatus()}
+              className="px-3.5 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors border border-gray-300"
+            >
+              {selected.size > 0 ? `Check GMC status (${selected.size} selected)` : `Check GMC status (all ${docs.length})`}
+            </button>
+            {gmcMessage && <span className="text-gray-500">{gmcMessage}</span>}
+          </div>
+
           <BulkEditBar
             selectedCount={selected.size}
             canBackfill={canBackfill}
+            canSubmitGmc={canSubmitGmc}
             busy={busy}
             onPreview={() => withBusy(() => actions.previewBulk(selectedDocs))}
             onPublish={() => withBusy(() => actions.publishBulk(selectedDocs))}
@@ -312,6 +353,7 @@ export default function DocumentManagerTab() {
             onDelete={() => setDeleteModalOpen(true)}
             onBackfill={handleBackfill}
             onEditField={() => setFieldEditModalOpen(true)}
+            onSubmitGmc={() => setGmcDialogOpen(true)}
             onClearSelection={() => setSelected(new Set())}
           />
 
@@ -349,6 +391,15 @@ export default function DocumentManagerTab() {
           docs={selectedDocs}
           onApply={handleBulkEditField}
           onClose={() => { setFieldEditModalOpen(false); setSelected(new Set()); }}
+        />
+      )}
+
+      {gmcDialogOpen && (
+        <GmcSubmitDialog
+          selectedDocs={selectedDocs}
+          onClose={() => setGmcDialogOpen(false)}
+          onResults={(env, updates) => { applyGmcUpdates(env, updates); setSelected(new Set()); }}
+          onDocUpdated={(doc) => setDocs((prev) => prev.map((d) => (d.path === doc.path ? doc : d)))}
         />
       )}
     </div>

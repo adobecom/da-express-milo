@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import Modal from './ui/Modal';
 
 interface Props {
   title: string;
@@ -7,6 +8,8 @@ interface Props {
   confirmClassName?: string;
   onConfirm: () => void;
   onCancel: () => void;
+  /** Bump when nested above another modal (e.g. the prod-submit confirm over the GMC dialog). */
+  zClassName?: string;
 }
 
 export default function ConfirmModal({
@@ -16,13 +19,16 @@ export default function ConfirmModal({
   confirmClassName = 'px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-xl hover:bg-red-700 cursor-pointer transition-colors',
   onConfirm,
   onCancel,
+  zClassName,
 }: Props) {
   return (
-    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 w-max max-w-[90vw] flex flex-col gap-4 shadow-xl">
-        <h3 className="font-semibold text-gray-900 text-base">{title}</h3>
-        {children}
-        <div className="flex gap-3 justify-end">
+    <Modal
+      title={title}
+      size="auto"
+      zClassName={zClassName}
+      onClose={onCancel}
+      footer={
+        <>
           <button
             type="button"
             onClick={onCancel}
@@ -33,8 +39,10 @@ export default function ConfirmModal({
           <button type="button" onClick={onConfirm} className={confirmClassName}>
             {confirmLabel}
           </button>
-        </div>
-      </div>
-    </div>
+        </>
+      }
+    >
+      {children}
+    </Modal>
   );
 }

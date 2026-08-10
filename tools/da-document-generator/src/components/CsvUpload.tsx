@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import type { CsvRow, InputSummary } from '../types';
-import { fetchProductFromTemplate } from '../api/zazzleApi';
+import { lookupProductFromTemplate } from '../api/zazzleApi';
 
 interface Props {
   rows: CsvRow[];
@@ -383,7 +383,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
     const updated = await Promise.all(
       rows.map(async (row) => {
         if (!row.product_id?.trim()) return row;
-        const product = await fetchProductFromTemplate(row.product_id);
+        const product = await lookupProductFromTemplate(row.product_id);
         if (!product) return row;
         referenceValues[row._id] = {
           title: product.rootRawTitle,
@@ -437,7 +437,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
       rows.map(async (row) => {
         const id = row.product_id?.trim();
         if (!id) { results[row._id] = 'invalid'; return; }
-        const product = await fetchProductFromTemplate(id);
+        const product = await lookupProductFromTemplate(id);
         results[row._id] = product ? 'valid' : 'invalid';
       }),
     );

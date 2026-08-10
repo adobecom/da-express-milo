@@ -1,7 +1,7 @@
 import { crawlDirectory, type CrawlError, type DocFetchError } from '../api/crawl';
 import { checkPageStatus, getToken, daPathToLiveUrl, daPathToPreviewUrl, cat, postDoc } from '../api/daApi';
 import { CRAWL_CONCURRENCY, STATUS_CONCURRENCY, runBatch } from './concurrency';
-import { fetchProductFromTemplate, type ZazzleProduct } from '../api/zazzleApi';
+import { lookupProductFromTemplate } from '../api/zazzleApi';
 import { readMetadataBlockFromDoc, upsertMetadataBlockOnDoc, serializeDoc } from './metadata';
 import { tagEditableFieldsOnDoc, type EditableFieldKey } from './generate';
 import type { ManagedDoc, ManagedDocIdentity } from '../types';
@@ -86,6 +86,26 @@ export interface StatusUpdate {
   statusUnknown?: boolean;
   liveUrl?: string;
   previewUrl?: string;
+}
+
+/** Applies live-checked publish/preview status onto already-parsed records, in place. */
+function applyLiveStatus(records: ManagedDoc[], statuses: Map<string, PageStatus>): void {
+  for (const record of records) {
+    const status = statuses.get(record.path);
+    if (!status) continue;
+    if (!status.ok) {
+      // Status check failed (e.g. rate-limited after retries) — don't mislabel as "draft".
+      record.statusUnknown = true;
+      continue;
+    }
+    if (status.live) {
+      record.stage = 'published';
+      record.liveUrl = daPathToLiveUrl(record.path);
+    } else if (status.preview) {
+      record.stage = 'previewed';
+      record.previewUrl = daPathToPreviewUrl(record.path);
+    }
+  }
 }
 
 export interface ScanCallbacks {
@@ -201,27 +221,23 @@ export async function scanDocs(
   return { errors: [...crawl.errors, ...fetchErrors] };
 }
 
-const zazzleCache = new Map<string, ZazzleProduct | null>();
-
-async function lookupZazzleProduct(productId: string): Promise<ZazzleProduct | null> {
-  if (zazzleCache.has(productId)) return zazzleCache.get(productId) ?? null;
-  const product = await fetchProductFromTemplate(productId);
-  zazzleCache.set(productId, product);
-  return product;
-}
-
 /**
  * Self-heals a document that predates the metadata contract: recovers `product-type` via an
  * on-demand Zazzle lookup keyed by the (already-known or positionally-extracted) URN, writes
  * the identity metadata and re-tags editable fields against the doc's current text, and
  * persists the result. Returns `undefined` if there's no URN to look up or Zazzle has no
  * matching product — the caller should leave the row's `needsBackfill` flag as-is in that case.
+ *
+ * `force` bypasses the session template cache (see {@link refetchZazzleInfo}).
  */
-export async function backfillIdentity(target: ManagedDoc): Promise<ManagedDoc | undefined> {
+export async function backfillIdentity(
+  target: ManagedDoc,
+  { force = false }: { force?: boolean } = {},
+): Promise<ManagedDoc | undefined> {
   const productId = target.identity.productId;
   if (!productId) return undefined;
 
-  const product = await lookupZazzleProduct(productId);
+  const product = await lookupProductFromTemplate(productId, { force });
   if (!product) return undefined;
 
   const html = await cat(target.path);
@@ -239,6 +255,17 @@ export async function backfillIdentity(target: ManagedDoc): Promise<ManagedDoc |
   await postDoc(target.path, serializeDoc(doc));
 
   return { ...target, ...deriveFields(doc) };
+}
+
+/**
+ * Per-row "Refetch Zazzle info": re-pulls the template response for a single doc, bypassing the
+ * session cache, and re-applies title/description/identity metadata. Same mechanics as
+ * {@link backfillIdentity} but always hits the network — used to recover a row whose earlier
+ * lookup failed transiently or whose Zazzle data has since changed. Returns `undefined` (no
+ * write) when the doc has no URN or Zazzle still has no matching product.
+ */
+export async function refetchZazzleInfo(target: ManagedDoc): Promise<ManagedDoc | undefined> {
+  return backfillIdentity(target, { force: true });
 }
 
 /**
