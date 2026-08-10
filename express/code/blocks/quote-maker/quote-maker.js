@@ -10,6 +10,7 @@ import {
   disableBackgroundScroll,
   restoreBackgroundScroll,
 } from '../../scripts/color-shared/spectrum/utils/a11y.js';
+import showCopyToast from '../../scripts/utils/copy-toast.js';
 
 let createTag;
 
@@ -17,7 +18,9 @@ const TEMPLATE_LIMIT = 8;
 const DECO_CARD_COUNT = 8;
 const TABLET_BREAKPOINT = 1199;
 
-const FONT_OPTIONS = [
+// Fallback used only if the Typekit kit fails to load or exposes no fonts
+// (network failure, ad blocker, or API shape change) — see buildFontOptions.
+const FALLBACK_FONT_OPTIONS = [
   { label: 'Sans', font: '"Cal Sans", "Inter", sans-serif' },
   { label: 'Serif', font: '"Source Serif 4", Georgia, serif', italic: true },
   { label: 'Script', font: '"Dancing Script", cursive', italic: true },
@@ -59,9 +62,60 @@ function loadWebFonts() {
   });
 }
 
-async function copyToClipboard(text) {
+// Turns a Typekit family slug ("gothic-a1", "source-han-sans-japanese") into
+// a human label ("Gothic A1", "Source Han Sans Japanese") for the font pill/
+// buttons — Typekit's font list exposes no display name, only this slug.
+function familySlugToLabel(family) {
+  return family
+    .split('-')
+    .map((part) => (part.length <= 2 ? part.toUpperCase() : part[0].toUpperCase() + part.slice(1)))
+    .join(' ');
+}
+
+/**
+ * Reads the fonts the loaded Typekit kit actually exposes (window.Typekit
+ * .fonts.fonts — each entry's `family` is both its slug and the exact CSS
+ * font-family name Typekit registered, confirmed via document.fonts) and
+ * turns them into FONT_OPTIONS entries, instead of a hand-authored list that
+ * can silently drift from whatever the kit (ADOBE_FONTS_KIT_ID) actually
+ * contains. Variants of the same family (weight/style) collapse into one
+ * option that offers italic/bold if any variant of that family has it.
+ * Falls back to FALLBACK_FONT_OPTIONS if the kit failed to load or exposes
+ * nothing, so the UI still has font choices to show.
+ */
+function buildFontOptions() {
+  const entries = window.Typekit?.fonts?.fonts;
+  if (!Array.isArray(entries) || !entries.length) return FALLBACK_FONT_OPTIONS;
+
+  const byFamily = new Map();
+  entries.forEach(({ family, weight, style }) => {
+    if (!family) return;
+    const existing = byFamily.get(family) || { italic: false, bold: false };
+    if (style === 'italic') existing.italic = true;
+    if (weight === '700' || weight === 'bold') existing.bold = true;
+    byFamily.set(family, existing);
+  });
+  if (!byFamily.size) return FALLBACK_FONT_OPTIONS;
+
+  return Array.from(byFamily, ([family, { italic, bold }]) => {
+    const option = { label: familySlugToLabel(family), font: `"${family}", var(--body-font-family, sans-serif)` };
+    if (italic) option.italic = true;
+    if (bold) option.weight = '700';
+    return option;
+  });
+}
+
+/**
+ * Copies the quote and, when present, its author (as "quote — author") so
+ * pasted text always carries attribution instead of the quote alone. Shows
+ * the shared bottom toast on success, per Figma node 0-19315 — every copy
+ * action on the page uses this same toast, not just quote-maker's own.
+ */
+async function copyQuoteToClipboard(quote, author) {
+  const text = author ? `${quote} — ${author}` : quote;
   try {
     await navigator.clipboard.writeText(text);
+    showCopyToast('Quote copied to clipboard');
     return true;
   } catch {
     return false;
@@ -153,34 +207,31 @@ async function fetchCardBackgrounds(props) {
   return res.items
     .filter((item) => isValidTemplate(item))
     .slice(0, props.limit)
-    .map((item, index) => {
+    .map((item) => {
       const page = item.pages?.[0];
       /* eslint-disable no-underscore-dangle */
       const renditionHref = item._links?.['http://ns.adobe.com/adobecloud/rel/rendition']?.href;
       const componentHref = item._links?.['http://ns.adobe.com/adobecloud/rel/component']?.href;
       /* eslint-enable no-underscore-dangle */
       const bg = getImageThumbnailSrc(renditionHref, componentHref, page);
-      return {
-        id: item.id,
-        bg,
-        theme: index % 2 === 0 ? 'light' : 'dark',
-      };
+      return { id: item.id, bg };
     })
     .filter((card) => !!card.bg);
 }
 
 /**
- * Pairs each fetched background card with a quote (and a font, cycling
- * through FONT_OPTIONS) so every card/quote/font combination is stable and
- * reusable across the main widget, the desktop decorative cards, and the
- * tablet/mobile carousel — all three read from this same list.
+ * Pairs each fetched background card with a quote so every card/quote
+ * combination is stable and reusable across the main widget, the desktop
+ * decorative cards, and the tablet/mobile carousel — all three read from
+ * this same list. Font is deliberately not part of this pairing: every
+ * decorative card uses one fixed style (see .qm-deco-quote), only the
+ * editor's own widget has a font choice — see buildFontControl.
  */
 function buildCardSet(cards, quotes) {
   return cards.map((card, i) => ({
     card,
     quote: quotes[i % quotes.length].quote,
     author: quotes[i % quotes.length].author,
-    font: FONT_OPTIONS[i % FONT_OPTIONS.length],
   }));
 }
 
@@ -236,14 +287,14 @@ function buildFontButton(opt, index, onPick) {
   return btn;
 }
 
-function buildFontControl(block, onSelect) {
+function buildFontControl(block, fontOptions, onSelect) {
   const control = createTag('button', {
     type: 'button',
     class: 'qm-control qm-control--font',
     'aria-expanded': 'false',
   });
   const pill = createTag('span', { class: 'qm-pill' });
-  pill.textContent = FONT_OPTIONS[0].label;
+  pill.textContent = fontOptions[0].label;
   const label = createTag('span', { class: 'qm-control-label' });
   label.textContent = 'Font style';
   control.append(pill, label);
@@ -261,8 +312,12 @@ function buildFontControl(block, onSelect) {
 
   function selectFont(opt) {
     block.style.setProperty('--qm-quote-font', opt.font);
+    block.style.setProperty('--qm-quote-font-style', opt.italic ? 'italic' : 'normal');
+    block.style.setProperty('--qm-quote-font-weight', opt.weight || 'normal');
     pill.textContent = opt.label;
     pill.style.fontFamily = opt.font;
+    pill.style.fontStyle = opt.italic ? 'italic' : 'normal';
+    pill.style.fontWeight = opt.weight || 'normal';
     [panel, sheetGrid].forEach((container) => {
       container.querySelectorAll('.qm-font').forEach((f) => {
         const isMatch = f.dataset.font === opt.font;
@@ -276,10 +331,17 @@ function buildFontControl(block, onSelect) {
     selectFont(opt);
     onSelect?.(opt);
   };
-  FONT_OPTIONS.forEach((opt, index) => {
+  fontOptions.forEach((opt, index) => {
     panel.append(buildFontButton(opt, index, onPick));
     sheetGrid.append(buildFontButton(opt, index, onPick));
   });
+
+  // Applies fontOptions[0] as --qm-quote-font immediately, instead of
+  // leaving the block on its CSS default (--body-font-family) until the
+  // user's first click — the first .qm-font button already renders
+  // is-selected, so the quote itself should match on load, not just the
+  // control's own affordances.
+  selectFont(fontOptions[0]);
 
   control.addEventListener('click', () => {
     const isOpen = block.getAttribute('data-qm-panel') === 'fonts';
@@ -301,7 +363,6 @@ function buildSwatchButton(card, index, onPick) {
     type: 'button',
     class: `qm-swatch-btn${index === 0 ? ' is-selected' : ''}`,
     'data-bg': card.bg,
-    'data-theme': card.theme,
     role: 'option',
     'aria-selected': index === 0 ? 'true' : 'false',
     'aria-label': `Background ${index + 1}`,
@@ -322,8 +383,13 @@ function buildColorControl(block, cards, onSelect) {
     'aria-expanded': 'false',
   });
   const swatch = createTag('span', { class: 'qm-swatch' });
-  const label = createTag('span', { class: 'qm-control-label' });
-  label.textContent = 'Background colour';
+  // "colour" drops on mobile (label reads "Background" only there) — kept
+  // as a separate span hidden via CSS rather than swapping textContent, so
+  // there's no JS branching on viewport width for what's purely a label fit.
+  const label = createTag('span', { class: 'qm-control-label' }, [
+    'Background',
+    createTag('span', { class: 'qm-control-label-suffix' }, [' colour']),
+  ]);
   control.append(swatch, label);
 
   const panel = createTag('div', {
@@ -339,9 +405,8 @@ function buildColorControl(block, cards, onSelect) {
     'aria-label': 'Background colour',
   });
 
-  function selectSwatch(bg, theme) {
+  function selectSwatch(bg) {
     block.style.setProperty('--qm-card-bg', `url("${bg}")`);
-    block.setAttribute('data-qm-theme', theme);
     swatch.style.backgroundImage = `url("${bg}")`;
     [panel, sheetGrid].forEach((container) => {
       container.querySelectorAll('.qm-swatch-btn').forEach((s) => {
@@ -353,7 +418,7 @@ function buildColorControl(block, cards, onSelect) {
   }
 
   const onPick = (card) => {
-    selectSwatch(card.bg, card.theme);
+    selectSwatch(card.bg);
     onSelect?.(card);
   };
   cards.forEach((card, index) => {
@@ -434,7 +499,7 @@ function buildBottomSheet(block, kind, title, contentEl) {
   return { overlay, onPanelChange };
 }
 
-function buildWidget(block, cardSet) {
+function buildWidget(block, cardSet, fontOptions) {
   const widget = createTag('div', { class: 'quote-maker-widget' });
   const card = createTag('div', { class: 'qm-card' });
 
@@ -461,7 +526,7 @@ function buildWidget(block, cardSet) {
   widget.append(card);
 
   const doCopy = async () => {
-    const ok = await copyToClipboard(quoteEl.textContent);
+    const ok = await copyQuoteToClipboard(quoteEl.textContent, authorEl.textContent);
     if (ok) {
       quoteWrap.classList.add('is-copied');
       setTimeout(() => quoteWrap.classList.remove('is-copied'), 1200);
@@ -477,7 +542,6 @@ function buildWidget(block, cardSet) {
 
   if (first.card) {
     block.style.setProperty('--qm-card-bg', `url("${first.card.bg}")`);
-    block.setAttribute('data-qm-theme', first.card.theme);
   }
 
   // Set by init() once the arc carousel exists, so picking a font/colour
@@ -492,7 +556,7 @@ function buildWidget(block, cardSet) {
     panel: fontPanel,
     sheetGrid: fontSheetGrid,
     selectFont,
-  } = buildFontControl(block, (font) => onFontOrColourPick({ font }));
+  } = buildFontControl(block, fontOptions, (font) => onFontOrColourPick({ font }));
   const {
     control: colourControl,
     panel: colourPanel,
@@ -539,7 +603,7 @@ function buildWidget(block, cardSet) {
       quoteEl.textContent = quote;
       authorEl.textContent = author || '';
       authorEl.style.display = author ? '' : 'none';
-      if (bgCard) selectSwatch(bgCard.bg, bgCard.theme);
+      if (bgCard) selectSwatch(bgCard.bg);
       if (font) selectFont(font);
     },
     onFontOrColourChange: (listener) => { onFontOrColourPick = listener; },
@@ -547,19 +611,16 @@ function buildWidget(block, cardSet) {
 }
 
 function buildDecoCard(entry, useQuote) {
-  const {
-    card, quote, author, font,
-  } = entry;
-  const deco = createTag('div', { class: 'qm-deco', 'data-theme': card.theme, tabindex: '-1' });
+  const { card, quote, author } = entry;
+  const deco = createTag('div', { class: 'qm-deco', tabindex: '-1' });
   const cardWrap = createTag('div', { class: 'qm-deco-card-wrap' });
   const inner = createTag('div', {
     class: 'qm-deco-card',
     style: `background-image:url("${card.bg}")`,
   });
-  const quoteP = createTag('p', {
-    class: 'qm-deco-quote',
-    style: `font-family:${font.font};${font.italic ? 'font-style:italic;' : ''}`,
-  });
+  // Fixed font/style for every card — see .qm-deco-quote in CSS — so no
+  // per-instance font styling here; only the editor's own selection varies.
+  const quoteP = createTag('p', { class: 'qm-deco-quote' });
   quoteP.textContent = quote;
   inner.append(quoteP);
   if (author) {
@@ -577,9 +638,9 @@ function buildDecoCard(entry, useQuote) {
     type: 'button',
     class: 'qm-deco-copy',
     'aria-label': 'Copy quote',
-  }, [getIconElementDeprecated('copy')]);
+  }, [getIconElementDeprecated('copy-quote')]);
   copyBtn.addEventListener('click', async () => {
-    const ok = await copyToClipboard(quote);
+    const ok = await copyQuoteToClipboard(quote, author);
     if (ok) {
       copyBtn.classList.add('is-copied');
       setTimeout(() => copyBtn.classList.remove('is-copied'), 1200);
@@ -612,6 +673,8 @@ function buildDecoCards(cardSet, useQuote) {
  * what makes the 1s transform transition on .qm-arc-card actually animate
  * a visible slide/rotate between roles instead of an instant content pop.
  */
+const ROLE_CLASSES = ['qm-arc-card--prev', 'qm-arc-card--center', 'qm-arc-card--next', 'qm-arc-card--stage-prev', 'qm-arc-card--stage-next'];
+
 function buildArcCard(onActivate) {
   const el = createTag('div', {
     class: 'qm-arc-card',
@@ -625,38 +688,92 @@ function buildArcCard(onActivate) {
   el.addEventListener('click', () => onActivate(el));
 
   function render(entry) {
-    el.dataset.theme = entry.card.theme;
     el.style.backgroundImage = `url("${entry.card.bg}")`;
     quoteP.textContent = entry.quote;
-    quoteP.style.fontFamily = entry.font.font;
-    quoteP.style.fontStyle = entry.font.italic ? 'italic' : '';
+    // entry.font is the carousel-wide selected font (see buildArcCarousel's
+    // selectedFont/withFont) when one has been picked — applies to every
+    // role (prev/centre/next), not just centre. Falls back to the fixed
+    // default (CSS) font, same as the decorative cards, until then.
+    quoteP.style.fontFamily = entry.font?.font || '';
+    quoteP.style.fontStyle = entry.font?.italic ? 'italic' : '';
+    quoteP.style.fontWeight = entry.font?.weight || '';
     authorP.textContent = entry.author || '';
     authorP.style.display = entry.author ? '' : 'none';
   }
 
-  function setRole(role, { instant = false } = {}) {
-    // The recycled card (the one that just left the deck at one edge to
-    // re-enter, with new content, at the other edge) needs to land in its
-    // new role's position without visibly sliding there — so its role
-    // change is applied with the transition switched off for one frame,
-    // then restored, rather than animating over the 1s duration like the
-    // other two cards' prev<->centre<->next moves.
-    if (instant) el.style.transition = 'none';
-    el.classList.remove('qm-arc-card--prev', 'qm-arc-card--center', 'qm-arc-card--next');
-    el.classList.add(`qm-arc-card--${role}`);
+  function setInteractivity(role) {
     el.setAttribute('aria-selected', String(role === 'center'));
     el.setAttribute('tabindex', role === 'center' ? '0' : '-1');
     el.style.cursor = role === 'center' ? 'default' : 'pointer';
     el.style.pointerEvents = role === 'center' ? 'none' : 'auto';
-    if (instant) {
-      el.getBoundingClientRect(); // force reflow so the instant jump commits
-      el.style.transition = '';
-    }
+  }
+
+  // Recycling a card (see goNext/goPrev) is a two-step move so it animates
+  // rotating in from beyond the edge instead of popping straight into its
+  // final prev/next slot: first jump instantly (no transition) to a
+  // further-out "stage" position with the new content, then — once that
+  // jump has committed — hand off to a normal, transitioned setRole() to
+  // the real prev/next class, which now has somewhere real to animate from.
+  function stageAt(stageRole) {
+    el.style.transition = 'none';
+    el.classList.remove(...ROLE_CLASSES);
+    el.classList.add(`qm-arc-card--${stageRole}`);
+    el.getBoundingClientRect(); // force reflow so the instant jump commits
+    el.style.transition = '';
+  }
+
+  function setRole(role) {
+    el.classList.remove(...ROLE_CLASSES);
+    el.classList.add(`qm-arc-card--${role}`);
+    setInteractivity(role);
   }
 
   return {
-    el, render, setRole,
+    el, render, setRole, stageAt,
   };
+}
+
+/**
+ * The non-interactive 4th card used purely to show the outgoing card's
+ * exit: when a card is recycled from prev to next (or vice versa), its OLD
+ * content would otherwise just vanish (the same DOM element is instantly
+ * staged off-screen with new content — see stageAt). This ghost briefly
+ * takes over that old content and role position, then transitions further
+ * outward while fading out, so the exit reads as one continuous circular
+ * motion alongside the other two cards' moves instead of a hard cut.
+ * aria-hidden + pointer-events: none — it's decorative only, never one of
+ * the 3 clickable/tabbable cards.
+ */
+function buildArcGhost() {
+  const el = createTag('div', { class: 'qm-arc-card qm-arc-ghost', 'aria-hidden': 'true' });
+  const quoteP = createTag('p', { class: 'qm-arc-quote' });
+  const authorP = createTag('p', { class: 'qm-arc-author' });
+  el.append(quoteP, authorP);
+
+  function playExit(entry, fromRole) {
+    el.style.backgroundImage = `url("${entry.card.bg}")`;
+    quoteP.textContent = entry.quote;
+    // entry.font carries the carousel-wide selected font here too (see
+    // buildArcCarousel's withFont), so the outgoing ghost matches whatever
+    // font the other 3 cards are currently showing.
+    quoteP.style.fontFamily = entry.font?.font || '';
+    quoteP.style.fontStyle = entry.font?.italic ? 'italic' : '';
+    quoteP.style.fontWeight = entry.font?.weight || '';
+    authorP.textContent = entry.author || '';
+    authorP.style.display = entry.author ? '' : 'none';
+
+    el.style.transition = 'none';
+    el.classList.remove('qm-arc-card--exit-prev', 'qm-arc-card--exit-next', 'qm-arc-ghost--visible');
+    el.classList.add(`qm-arc-card--${fromRole}`, 'qm-arc-ghost--visible');
+    el.getBoundingClientRect(); // force reflow so the starting position commits
+    el.style.transition = '';
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      el.classList.remove(`qm-arc-card--${fromRole}`);
+      el.classList.add(`qm-arc-card--exit-${fromRole}`);
+    }));
+  }
+
+  return { el, playExit };
 }
 
 /**
@@ -676,10 +793,18 @@ function buildArcCarousel(cardSet, useQuote) {
   const total = cardSet.length;
   let activeIndex = 0;
   // The centre card can be patched independently of cardSet (e.g. the
-  // widget's own font/colour controls, which apply on top of whichever
-  // entry is currently active) — centreOverride holds that patch and is
-  // reset whenever navigation moves a *different* entry into the centre.
+  // widget's own colour control, which applies on top of whichever entry is
+  // currently active) — centreOverride holds that patch and is reset
+  // whenever navigation moves a *different* entry into the centre. Font is
+  // deliberately NOT part of this: once picked, it's a carousel-wide choice
+  // (see selectedFont below), not tied to any one entry/role.
   let centreOverride = null;
+  // Persists across navigation (unlike centreOverride) and applies to every
+  // card — prev/next/ghost included, not just centre — so picking a font
+  // once keeps showing on whichever entries rotate into view afterwards.
+  let selectedFont = null;
+
+  const withFont = (entry) => (selectedFont ? { ...entry, font: selectedFont } : entry);
 
   const onActivate = (el) => {
     if (el.classList.contains('qm-arc-card--prev')) goPrev(); // eslint-disable-line no-use-before-define
@@ -688,6 +813,7 @@ function buildArcCarousel(cardSet, useQuote) {
   const cardA = buildArcCard(onActivate);
   const cardB = buildArcCard(onActivate);
   const cardC = buildArcCard(onActivate);
+  const ghost = buildArcGhost();
   // roles[i] tracks which role each of cardA/B/C currently occupies, so
   // navigation can rotate them without re-deriving role from DOM classes.
   const cards = [cardA, cardB, cardC];
@@ -698,75 +824,102 @@ function buildArcCarousel(cardSet, useQuote) {
   }
 
   function centerEntry() {
-    return { ...cardSet[activeIndex], ...centreOverride };
+    return withFont({ ...cardSet[activeIndex], ...centreOverride });
   }
 
   function renderAll() {
     const prevIndex = ((activeIndex - 1) % total + total) % total;
     const nextIndex = (activeIndex + 1) % total;
-    cards[roles.indexOf('prev')].render(cardSet[prevIndex]);
+    cards[roles.indexOf('prev')].render(withFont(cardSet[prevIndex]));
     cards[roles.indexOf('center')].render(centerEntry());
-    cards[roles.indexOf('next')].render(cardSet[nextIndex]);
+    cards[roles.indexOf('next')].render(withFont(cardSet[nextIndex]));
   }
 
   function goNext() {
+    const prevIndexBefore = ((activeIndex - 1) % total + total) % total;
     activeIndex = (activeIndex + 1) % total;
     centreOverride = null;
     // The card that was centre slides to prev; the card that was next
     // slides into centre (both keep their existing content — that's what
     // the 1s CSS transition actually animates). The card that was prev is
-    // recycled: it jumps instantly (no transition) to the next position
-    // with new content, rather than visibly sliding across the centre.
+    // recycled to become the new next — but its OLD content doesn't just
+    // vanish: the ghost plays a visible exit (continuing further left,
+    // fading out) with that old content, while the real card is silently
+    // restaged with new content to enter from the right. Both read as one
+    // continuous circular motion since they run concurrently.
+    ghost.playExit(withFont(cardSet[prevIndexBefore]), 'prev');
     const recycled = cards[roles.indexOf('prev')];
     cards[roles.indexOf('center')].setRole('prev');
     cards[roles.indexOf('next')].setRole('center');
-    recycled.setRole('next', { instant: true });
     roles = roles.map((role) => ({ center: 'prev', next: 'center', prev: 'next' }[role]));
     const newNextIndex = (activeIndex + 1) % total;
-    recycled.render(cardSet[newNextIndex]);
+    recycled.render(withFont(cardSet[newNextIndex]));
+    recycled.stageAt('stage-next');
+    // Double rAF: the stage jump needs an actual painted frame before the
+    // transitioned move starts, or the browser can coalesce both class
+    // changes into one paint and skip the animation entirely.
+    requestAnimationFrame(() => requestAnimationFrame(() => recycled.setRole('next')));
     cards[roles.indexOf('center')].render(centerEntry());
     useQuote(cardSet[activeIndex]);
   }
 
   function goPrev() {
+    const nextIndexBefore = (activeIndex + 1) % total;
     activeIndex = ((activeIndex - 1) % total + total) % total;
     centreOverride = null;
     // Mirror of goNext: centre slides to next, prev slides into centre,
-    // and the card that was next is recycled — instantly, new content —
-    // to become the new prev.
+    // and the card that was next is recycled — staged further out, then
+    // transitioned in — to become the new prev, while the ghost plays its
+    // old content exiting further right.
+    ghost.playExit(withFont(cardSet[nextIndexBefore]), 'next');
     const recycled = cards[roles.indexOf('next')];
     cards[roles.indexOf('center')].setRole('next');
     cards[roles.indexOf('prev')].setRole('center');
-    recycled.setRole('prev', { instant: true });
     roles = roles.map((role) => ({ center: 'next', prev: 'center', next: 'prev' }[role]));
     const newPrevIndex = ((activeIndex - 1) % total + total) % total;
-    recycled.render(cardSet[newPrevIndex]);
+    recycled.render(withFont(cardSet[newPrevIndex]));
+    recycled.stageAt('stage-prev');
+    requestAnimationFrame(() => requestAnimationFrame(() => recycled.setRole('prev')));
     cards[roles.indexOf('center')].render(centerEntry());
     useQuote(cardSet[activeIndex]);
   }
 
   // Applied from the widget's font/colour pickers (see buildWidget) so
-  // selecting a font or background there updates the arc's centre card
-  // exactly as it already updates the desktop widget's own .qm-card.
+  // selecting a font or background there updates the arc carousel exactly
+  // as it already updates the desktop widget's own .qm-card. A font patch
+  // is carousel-wide (re-renders all 3 visible cards, see renderFont
+  // below); a colour/quote/author patch stays centre-only via
+  // centreOverride, same as before.
+  function renderFont() {
+    cards[roles.indexOf('prev')].render(withFont(cardSet[((activeIndex - 1) % total + total) % total]));
+    cards[roles.indexOf('center')].render(centerEntry());
+    cards[roles.indexOf('next')].render(withFont(cardSet[(activeIndex + 1) % total]));
+  }
+
   function updateCentre(patch) {
+    if (patch.font) {
+      selectedFont = patch.font;
+      renderFont();
+      return;
+    }
     centreOverride = { ...centreOverride, ...patch };
     cards[roles.indexOf('center')].render(centerEntry());
   }
 
   applyRoles();
   renderAll();
-  root.append(cardA.el, cardB.el, cardC.el);
+  root.append(ghost.el, cardA.el, cardB.el, cardC.el);
 
   const prevBtn = createTag('button', {
     type: 'button',
     class: 'qm-arc-nav qm-arc-nav--prev',
     'aria-label': 'Previous template',
-  }, [getIconElementDeprecated('s2-chevron-left')]);
+  }, [getIconElementDeprecated('arc-nav-left')]);
   const nextBtn = createTag('button', {
     type: 'button',
     class: 'qm-arc-nav qm-arc-nav--next',
     'aria-label': 'Next template',
-  }, [getIconElementDeprecated('s2-chevron-right')]);
+  }, [getIconElementDeprecated('arc-nav-right')]);
   root.append(prevBtn, nextBtn);
 
   prevBtn.addEventListener('click', goPrev);
@@ -788,14 +941,15 @@ export default async function init(block) {
 
   const quotes = getPageQuotes();
 
-  loadWebFonts();
-
   try {
-    const cards = await fetchCardBackgrounds(props);
+    const [cards] = await Promise.all([fetchCardBackgrounds(props), loadWebFonts()]);
     if (!cards.length || !quotes.length) {
       block.closest('.section')?.remove();
       return;
     }
+    // Built only once loadWebFonts() has resolved, so this reflects whatever
+    // families the Typekit kit actually loaded rather than a guessed list.
+    const fontOptions = buildFontOptions();
     const cardSet = buildCardSet(cards, quotes);
     // Same 9 entries (the widget's own + the 8 desktop decorations) power
     // the tablet/mobile arc carousel, so it cycles through the identical
@@ -803,7 +957,7 @@ export default async function init(block) {
     const arcCardSet = [cardSet[0], ...cardSet.slice(1, 1 + DECO_CARD_COUNT)];
 
     const stage = createTag('div', { class: 'quote-maker-stage' });
-    const { widget, useQuote, onFontOrColourChange } = buildWidget(block, cardSet);
+    const { widget, useQuote, onFontOrColourChange } = buildWidget(block, cardSet, fontOptions);
     const decorations = buildDecoCards(cardSet, useQuote);
     const { root: arcCarousel, updateCentre } = buildArcCarousel(arcCardSet, useQuote);
     onFontOrColourChange(updateCentre);
@@ -819,12 +973,39 @@ export default async function init(block) {
     stage.append(widget);
     block.append(stage);
 
-    const isSmallViewport = () => window.innerWidth <= TABLET_BREAKPOINT;
+    // On a touch/coarse-pointer device (tablet, phone), use the shorter of
+    // width/height rather than window.innerWidth alone — a physical
+    // device's short axis is orientation-independent, so this keeps the
+    // same tablet from flipping into the desktop zig-zag layout just
+    // because rotating to landscape made innerWidth exceed the breakpoint.
+    // Plain mouse/desktop windows don't have a fixed physical "short side"
+    // (resizing changes both dimensions independently), so they keep the
+    // simple width-only check — otherwise a short-but-wide desktop browser
+    // window would wrongly be treated as a tablet.
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+    const isSmallViewport = () => {
+      const size = isTouchDevice
+        ? Math.min(window.innerWidth, window.innerHeight)
+        : window.innerWidth;
+      return size <= TABLET_BREAKPOINT;
+    };
     const syncViewportMode = () => {
       block.classList.toggle('qm-carousel-mode', isSmallViewport());
     };
     syncViewportMode();
     window.addEventListener('resize', syncViewportMode);
+
+    // "Create a design" buttons on the page's collapsible-rows quotes (see
+    // collapsible-rows.js) dispatch this instead of importing quote-maker
+    // directly, since the two blocks are otherwise unrelated. Scrolls the
+    // editor into view and swaps in the copied quote/author, on whichever
+    // of the desktop widget or the tablet/mobile carousel is active.
+    document.addEventListener('quote-maker:use-quote', (e) => {
+      const { quote, author } = e.detail;
+      useQuote({ quote, author });
+      updateCentre({ quote, author });
+      block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
   } catch (error) {
     window.lana?.log(`Error in quote-maker: ${error?.message || error}`, {
       tags: 'quote-maker',
