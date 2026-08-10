@@ -31,11 +31,20 @@ export default async function showCopyToast(message) {
   ]);
   container.append(toast);
 
-  requestAnimationFrame(() => toast.classList.add('is-visible'));
-
   const remove = () => {
     toast.classList.remove('is-visible');
     toast.addEventListener('transitionend', () => toast.remove(), { once: true });
   };
+
+  const closeBtn = createTag('button', {
+    type: 'button',
+    class: 'copy-toast-close',
+    'aria-label': 'Close',
+  });
+  closeBtn.addEventListener('click', remove);
+  toast.append(closeBtn);
+
+  requestAnimationFrame(() => toast.classList.add('is-visible'));
+
   setTimeout(remove, 5000);
 }
