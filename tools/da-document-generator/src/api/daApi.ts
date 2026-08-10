@@ -20,6 +20,17 @@ export function daPathToLiveUrl(daPath: string): string {
   return `https://${BRANCH}--${repo}--${org}.aem.live${contentPath}`;
 }
 
+export function daPathToProdUrl(daPath: string): string {
+  const { org, repo, contentPath } = parseDAPath(daPath);
+  // Production host binding is specific to this EDS site (adobe.com/express);
+  // the live origin serves www.adobe.com with the content path preserved 1:1.
+  if (org === 'adobecom' && repo === 'da-express-milo') {
+    return `https://www.adobe.com${contentPath}`;
+  }
+  // Unknown org/repo → no known prod binding; fall back to the live origin URL.
+  return daPathToLiveUrl(daPath);
+}
+
 let token: string | null = null;
 
 export function getToken(): string | null {

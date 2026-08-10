@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, Fragment } from 'react';
-import { postDoc, createDocVersion, cat, docExists } from '../api/daApi';
+import { postDoc, createDocVersion, cat, docExists, daPathToProdUrl } from '../api/daApi';
 import { applyTemplate, rowToOutputPath, runGenerationQa, finalizeGeneratedDoc } from '../lib/generate';
 import { runBatch, DEFAULT_CONCURRENCY } from '../lib/concurrency';
 import { useDaDocumentActions } from '../hooks/useDaDocumentActions';
@@ -14,7 +14,7 @@ import {
   ExistenceOutcomeBadge,
   type ExistenceCheck,
 } from './StatusPills';
-import type { CsvRow, ProductTypeConfig, RowResult } from '../types';
+import type { CsvRow, ProductTypeConfig, RowResult, RowStage } from '../types';
 
 interface Props {
   rows: CsvRow[];
@@ -26,7 +26,14 @@ interface Props {
 
 const CONCURRENCY = DEFAULT_CONCURRENCY;
 
+// Stages at which the source document exists in DA (i.e. a document link is valid).
+const DOC_EXISTS_STAGES: ReadonlySet<RowStage> = new Set<RowStage>([
+  'generated', 'previewing', 'previewed', 'publishing', 'published', 'unpublishing', 'unpublished',
+]);
+
 type BulkOp = 'idle' | 'generating' | 'previewing' | 'publishing' | 'unpublishing' | 'deleting';
+
+type UrlExportKind = 'document' | 'preview' | 'live' | 'prod';
 
 export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig, generateBlockReason, onResultsChange }: Props) {
   const [results, setResults] = useState<RowResult[]>([]);
@@ -37,6 +44,8 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
   const [existenceStatus, setExistenceStatus] = useState<Record<string, ExistenceCheck>>({});
   const checkedPaths = useRef<Set<string>>(new Set());
   const [includeDuplicates, setIncludeDuplicates] = useState(false);
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
 
   const actions = useDaDocumentActions<RowResult>(setResults, {
     afterDelete: (r) => ({ id: r.id, path: r.path, stage: 'pending' }),
@@ -80,8 +89,49 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
     }, CONCURRENCY);
   }, [previewRows, results.length]);
 
+  useEffect(() => {
+    if (!showExportMenu) return;
+    const handler = (e: MouseEvent) => {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(e.target as Node)) {
+        setShowExportMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [showExportMenu]);
+
   function toggleRowDetail(id: string) {
     setExpandedRowId((prev) => (prev === id ? null : id));
+  }
+
+  function collectUrls(kind: UrlExportKind): string[] {
+    switch (kind) {
+      case 'document':
+        return results
+          .filter((r) => r.editUrl || DOC_EXISTS_STAGES.has(r.stage))
+          .map((r) => r.editUrl ?? `https://da.live/edit#${r.path}`);
+      case 'preview':
+        return results.filter((r) => r.previewUrl).map((r) => r.previewUrl!);
+      case 'live':
+        return results.filter((r) => r.liveUrl).map((r) => r.liveUrl!);
+      case 'prod':
+        return results.filter((r) => r.liveUrl).map((r) => daPathToProdUrl(r.path));
+    }
+  }
+
+  function handleExportUrls(kind: UrlExportKind) {
+    setShowExportMenu(false);
+    const urls = collectUrls(kind);
+    if (urls.length === 0) return; // options with 0 are disabled; this is a guard
+    const label = { document: 'document', preview: 'preview', live: 'published-aem', prod: 'published-adobe' }[kind];
+    const date = new Date().toISOString().slice(0, 10);
+    const blob = new Blob([`${urls.join('\n')}\n`], { type: 'text/plain;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${label}-urls-${date}.txt`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   function lookupConfig(productType: string): ProductTypeConfig | undefined {
@@ -379,13 +429,58 @@ export default function GeneratePanel({ rows, productTypeConfigs, overrideConfig
           </span>
         )}
 
-        {results.length > 0 && !running && (
-          <p className="text-sm text-gray-500 ml-auto">
-            {counts.generated > 0 && <span className="text-green-600 font-medium">{counts.generated} generated </span>}
-            {counts.previewed > 0 && <span className="text-indigo-600 font-medium">{counts.previewed} previewed </span>}
-            {counts.published > 0 && <span className="text-green-700 font-medium">{counts.published} published </span>}
-            {counts.error > 0 && <span className="text-red-600 font-medium">{counts.error} error</span>}
-          </p>
+        {results.length > 0 && (
+          <div className="ml-auto flex items-center gap-3">
+            {!running && (
+              <p className="text-sm text-gray-500">
+                {counts.generated > 0 && <span className="text-green-600 font-medium">{counts.generated} generated </span>}
+                {counts.previewed > 0 && <span className="text-indigo-600 font-medium">{counts.previewed} previewed </span>}
+                {counts.published > 0 && <span className="text-green-700 font-medium">{counts.published} published </span>}
+                {counts.error > 0 && <span className="text-red-600 font-medium">{counts.error} error</span>}
+              </p>
+            )}
+            <div ref={exportMenuRef} className="relative">
+              <button
+                type="button"
+                onClick={() => setShowExportMenu((p) => !p)}
+                className="text-sm font-medium px-3 py-1.5 rounded-lg border border-gray-200 bg-white hover:bg-gray-50 text-gray-700 cursor-pointer transition-colors flex items-center gap-1.5"
+              >
+                Export URLs
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4 text-gray-400">
+                  <path fillRule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
+                </svg>
+              </button>
+              {showExportMenu && (() => {
+                const opts: { kind: UrlExportKind; label: string }[] = [
+                  { kind: 'document', label: 'Document links' },
+                  { kind: 'preview', label: 'Preview links (.aem.page)' },
+                  { kind: 'live', label: 'Published (.aem.live)' },
+                  { kind: 'prod', label: 'Published (adobe.com)' },
+                ];
+                return (
+                  <div className="absolute right-0 mt-1 w-60 bg-white border border-gray-200 rounded-lg shadow-lg z-10 overflow-hidden">
+                    {opts.map(({ kind, label }, i) => {
+                      const count = collectUrls(kind).length;
+                      return (
+                        <Fragment key={kind}>
+                          {i > 0 && <div className="border-t border-gray-100" />}
+                          <button
+                            type="button"
+                            disabled={count === 0}
+                            onClick={() => handleExportUrls(kind)}
+                            className="w-full text-left px-4 py-2.5 text-sm flex items-center justify-between text-gray-700 hover:bg-gray-50 cursor-pointer disabled:text-gray-300 disabled:hover:bg-white disabled:cursor-not-allowed"
+                          >
+                            <span>{label}</span>
+                            <span className="text-gray-400">{count}</span>
+                          </button>
+                        </Fragment>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
         )}
       </div>
 
