@@ -111,6 +111,9 @@ function initSearchFunction(block, searchBarWrapper) {
     if (e.key === 'ArrowDown' || e.keyCode === 40) {
       e.preventDefault();
       cycleThroughSuggestions(block);
+    } else if (e.key === 'Escape') {
+      searchDropdown.classList.add('hidden');
+      searchBar.setAttribute('aria-expanded', 'false');
     }
   });
 
@@ -261,6 +264,15 @@ function initSearchFunction(block, searchBarWrapper) {
         li.addEventListener('keydown', async (e) => {
           if (e.key === 'Enter' || e.keyCode === 13) {
             await handleSubmitInteraction(item, index);
+          }
+        });
+
+        li.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            searchDropdown.classList.add('hidden');
+            searchBar.setAttribute('aria-expanded', 'false');
+            searchBar.focus();
           }
         });
 

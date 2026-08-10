@@ -1196,7 +1196,13 @@ async function initFilterSort(block, props, toolBar) {
           });
 
           wrapper.classList.toggle('opened');
-          button.setAttribute('aria-expanded', String(wrapper.classList.contains('opened')));
+          const isOpen = wrapper.classList.contains('opened');
+          button.setAttribute('aria-expanded', String(isOpen));
+
+          if (isOpen) {
+            const activeOption = optionsList?.querySelector('.option-button.active') || options[0];
+            activeOption?.focus();
+          }
         }
       }, { passive: true });
 
@@ -1256,6 +1262,14 @@ async function initFilterSort(block, props, toolBar) {
         option.addEventListener('click', activateOption);
 
         option.addEventListener('keydown', async (e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            wrapper.classList.remove('opened');
+            button.setAttribute('aria-expanded', 'false');
+            button.focus();
+            return;
+          }
+
           if (e.key === 'Enter' || e.key === ' ') {
             e.preventDefault();
             await activateOption(e);
@@ -1287,6 +1301,14 @@ async function initFilterSort(block, props, toolBar) {
           button.setAttribute('aria-expanded', 'false');
         }
       }, { passive: true });
+
+      wrapper.addEventListener('focusout', (e) => {
+        if (button.classList.contains('in-drawer')) return;
+        if (!e.relatedTarget || !wrapper.contains(e.relatedTarget)) {
+          wrapper.classList.remove('opened');
+          button.setAttribute('aria-expanded', 'false');
+        }
+      });
     });
 
     if (applyFilterButton) {
