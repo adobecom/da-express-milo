@@ -88,26 +88,6 @@ export interface StatusUpdate {
   previewUrl?: string;
 }
 
-/** Applies live-checked publish/preview status onto already-parsed records, in place. */
-function applyLiveStatus(records: ManagedDoc[], statuses: Map<string, PageStatus>): void {
-  for (const record of records) {
-    const status = statuses.get(record.path);
-    if (!status) continue;
-    if (!status.ok) {
-      // Status check failed (e.g. rate-limited after retries) — don't mislabel as "draft".
-      record.statusUnknown = true;
-      continue;
-    }
-    if (status.live) {
-      record.stage = 'published';
-      record.liveUrl = daPathToLiveUrl(record.path);
-    } else if (status.preview) {
-      record.stage = 'previewed';
-      record.previewUrl = daPathToPreviewUrl(record.path);
-    }
-  }
-}
-
 export interface ScanCallbacks {
   /** Placeholder rows (path + sub-directory) available immediately after discovery. */
   onDiscovered: (docs: ManagedDoc[], total: number) => void;
