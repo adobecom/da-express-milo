@@ -430,7 +430,10 @@ export default async function decorate(block) {
   if (ctaNode) {
     ctaNode.querySelectorAll('a').forEach((link) => {
       link.classList.add('button-xl');
-      if (!link.classList.contains('con-button')) link.classList.add('con-button');
+      // A plain link (no bold/italic wrapping) never passes through milo's
+      // decorateButtons, which only matches `em a, strong a, p > a strong` —
+      // so it reaches here without a type class. Default it to blue.
+      if (!link.classList.contains('con-button')) link.classList.add('con-button', 'blue');
       const customClasses = link.href && [...link.href.matchAll(/#_button-([a-zA-Z-]+)/g)];
       if (customClasses) {
         customClasses.forEach((match) => {
