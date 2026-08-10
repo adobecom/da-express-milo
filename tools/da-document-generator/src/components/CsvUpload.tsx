@@ -341,6 +341,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
   // Reset checkbox defaults when new row data is loaded. Not triggered by validate/hydrate so
   // user-adjusted checkboxes survive those operations.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional: reset checkbox selection when a new CSV's rows load (see note above); deriving during render would drop user edits
     if (!hasData) { setCheckedRowIds(new Set()); return; }
     const opts = {
       tableColumns,
@@ -821,7 +822,8 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
         onToggleCheck={(id) =>
           setCheckedRowIds((prev) => {
             const next = new Set(prev);
-            next.has(id) ? next.delete(id) : next.add(id);
+            if (next.has(id)) next.delete(id);
+            else next.add(id);
             return next;
           })
         }
