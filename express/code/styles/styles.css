@@ -185,7 +185,7 @@
   --Content-disabled-default: var(--color-gray-350-variant);
   /* current ax-grid system */
   --ax-grid-margin: var(--spacing-350);
-  --ax-grid-gutter: 8px;
+  --ax-grid-gutter: var(--Grid-grid-gutter);
   --ax-grid-container-width: 100%;
   --ax-grid-column-width: calc((var(--ax-grid-container-width) - var(--ax-grid-gutter) * 11) / 12);
   --ax-grid-1-col-width: calc(var(--ax-grid-column-width) * 1 + var(--ax-grid-gutter) * 0);
@@ -384,19 +384,30 @@
   --Buttons-default: var(--S2-Buttons-Accent-Color-Default);
   --Buttons-hover: var(--S2-Buttons-Accent-Color-Hover);
   --Buttons-Down: var(--Palette-blue-1000);
+
+  /* New Grid Tokens */
+  --Grid-container-padding-side: var(--spacing-300);
+  --Grid-grid-gutter: var(--spacing-100);
+  --section-padding-xl: var(--spacing-600);
+  
 }
 
 @media (min-width: 600px) {
   :root {
     --ax-grid-margin: var(--spacing-500);
-    --ax-grid-gutter: 16px;
+    --ax-grid-gutter: var(--Grid-grid-gutter);
+
+    /* New Grid Tokens */
+    --Grid-container-padding-side: var(--spacing-500);
+    --Grid-grid-gutter: var(--spacing-300);
+    --section-padding-xl: var(--spacing-600);
   }
 }
 
 @media (min-width: 1200px) {
   :root {
     --ax-grid-margin: var(--spacing-600);
-    --ax-grid-gutter: 24px;
+    --ax-grid-gutter: var(--Grid-grid-gutter);
     
     /* Express Typography Desktop Overrides */
     --ax-heading-xxxl-size: 80px;
@@ -424,6 +435,11 @@
     --typography-line-height-Title-2xs: 22px;
     --typography-headings-xl: 36px;
     --typography-body-s: 16px;
+
+    /* New Grid Tokens */
+    --Grid-container-padding-side: var(--spacing-600);
+    --Grid-grid-gutter: var(--spacing-400);
+    --section-padding-xl: var(--spacing-900);
   }
 }
 
