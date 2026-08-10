@@ -133,13 +133,18 @@ main .section .blog-columns p {
   line-height: var(--heading-line-height);
 }
 
-.blog-columns a.con-button.blue:any-link {
+.blog-columns a.con-button:any-link {
   margin: var(--spacing-400) 0 0;
   font-size: var(--ax-body-m-size);
   line-height: 22px;
-  border: 0px;
   min-width: 108px;
   box-sizing: border-box;
+}
+
+/* Only the solid-fill variants (blue, fill) drop their border — outline needs
+   its border-width intact for the .s2 outline stroke to render. */
+.blog-columns a.con-button:is(.blue, .fill):any-link {
+  border: 0px;
 }
 
 @media (min-width: 800px) {
