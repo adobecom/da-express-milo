@@ -1,6 +1,7 @@
 import { getLibs, decorateButtonsDeprecated, addTempWrapperDeprecated } from '../../scripts/utils.js';
 import { fetchRelevantRows } from '../../scripts/utils/relevant.js';
 import { splitAndAddVariantsWithDash } from '../../scripts/utils/decorate.js';
+import { processBlockTypography } from '../../scripts/typography-utils.js';
 
 let replaceKey;
 let getConfig;
@@ -269,6 +270,9 @@ export default async function decorate(block) {
   }
 
   normalizeHeadings(block, ['h3']);
+  // Typography classes must be applied after heading normalization: normalizeHeadings replaces
+  // heading tags via outerHTML, which would otherwise wipe an earlier-applied ax-heading-* class.
+  processBlockTypography(block, 'h3');
 
   const links = [...block.querySelectorAll('p.button-container')];
   if (links.length) {

@@ -8,9 +8,7 @@ import {
 
 import { decorateSocialIcons } from '../../scripts/utils/icons.js';
 import { addHeaderSizing, formatSalesPhoneNumber } from '../../scripts/utils/location-utils.js';
-import {
-  splitAndAddVariantsWithDash,
-} from '../../scripts/utils/decorate.js';
+import { splitAndAddVariantsWithTypography } from '../../scripts/typography-utils.js';
 import { addFreePlanWidget } from '../../scripts/widgets/free-plan.js';
 import { displayVideoModal, hideVideoModal, isVideoLink } from '../../scripts/widgets/video.js';
 import BlockMediator from '../../scripts/block-mediator.min.js';
@@ -341,7 +339,7 @@ export default async function decorate(block) {
 
   if (document.body.dataset.device === 'mobile') replaceHyphensInText(block);
   const colorProperties = extractProperties(block);
-  splitAndAddVariantsWithDash(block);
+  splitAndAddVariantsWithTypography(block);
   decorateSocialIcons(block);
   await decorateButtonsDeprecated(block, 'button-xxl');
 

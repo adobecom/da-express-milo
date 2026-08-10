@@ -16,12 +16,12 @@ await import(`${getLibs()}/utils/utils.js`).then((mod) => {
 const { default: decorate } = await import('../../../express/code/blocks/ax-columns/ax-columns.js');
 
 // eslint-disable-next-line max-len
-const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList, notHighlight, numbered30, offer, offerIcon, picture, video, marquee, fullsizeTwoButtons, injectLogo] = await Promise.all(
+const [buttonLight, color, fullsize, highlight, icon, iconWithSibling, iconList, notHighlight, numbered30, offer, offerIcon, picture, video, marquee, fullsizeTwoButtons, injectLogo, headingSize] = await Promise.all(
   [readFile({ path: './mocks/button-light.html' }), readFile({ path: './mocks/color.html' }), readFile({ path: './mocks/fullsize.html' }), readFile({ path: './mocks/highlight.html' }),
     readFile({ path: './mocks/icon.html' }), readFile({ path: './mocks/icon-with-sibling.html' }), readFile({ path: './mocks/icon-list.html' }), readFile({ path: './mocks/not-highlight.html' }), readFile({ path: './mocks/numbered-30.html' }),
     readFile({ path: './mocks/offer.html' }), readFile({ path: './mocks/offer-icon.html' }), readFile({ path: './mocks/picture.html' }), readFile({ path: './mocks/video.html' }),
     readFile({ path: './mocks/marquee.html' }), readFile({ path: './mocks/fullsize-two-buttons.html' }),
-    readFile({ path: './mocks/inject-logo.html' })],
+    readFile({ path: './mocks/inject-logo.html' }), readFile({ path: './mocks/heading-size.html' })],
 );
 
 describe('Columns', () => {
@@ -184,6 +184,17 @@ describe('Columns', () => {
     const secondaryButton = buttons[1];
     expect(secondaryButton.classList.contains('primary')).to.be.true;
     expect(secondaryButton.classList.contains('reverse')).to.be.true;
+  });
+
+  it('Should apply an authored heading-size variant to every heading in the block', async () => {
+    document.body.innerHTML = headingSize;
+    const columns = document.querySelector('.ax-columns');
+    await decorate(columns);
+
+    const h1 = columns.querySelector('h1');
+    const h3 = columns.querySelector('h3');
+    expect(h1.classList.contains('ax-heading-l')).to.be.true;
+    expect(h3.classList.contains('ax-heading-l')).to.be.true;
   });
 });
 

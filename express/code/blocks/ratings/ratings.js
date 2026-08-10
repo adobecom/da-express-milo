@@ -1,5 +1,6 @@
 import { getLibs, getLottie, lazyLoadLottiePlayer, toClassName, getIconElementDeprecated, decorateButtonsDeprecated } from '../../scripts/utils.js';
 import { splitAndAddVariantsWithDash } from '../../scripts/utils/decorate.js';
+import { isExpressTypographyClass, isMiloTypographyClass } from '../../scripts/typography-utils.js';
 import {
   createStarRating,
   populateStars,
@@ -32,6 +33,11 @@ export async function getCurrentRatingStars(ratingAverage = 5, ratingTotal = 0, 
 
 export default async function decorate(block) {
   splitAndAddVariantsWithDash(block);
+  // The heading is synthesized later (decorateRatingSlider/decorateCannotRateBlock discard the
+  // authored heading entirely), so capture any authored typography variant from the block itself
+  // now and re-apply it to whichever heading element gets created.
+  const headingTypographyClasses = Array.from(block.classList)
+    .filter((cls) => isExpressTypographyClass(cls) || isMiloTypographyClass(cls));
   await Promise.all([import(`${getLibs()}/utils/utils.js`), decorateButtonsDeprecated(block)]).then(([utils]) => {
     ({ createTag, getConfig } = utils);
   });
@@ -262,6 +268,7 @@ export default async function decorate(block) {
     const headingWrapper = createTag('div', { class: 'ratings-heading' });
     const heading = createTag(headingTag, { id: toClassName(title) });
     heading.textContent = title;
+    heading.classList.add(...headingTypographyClasses);
     headingWrapper.appendChild(heading);
     const stars = await getCurrentRatingStars(
       ratingAverage,
@@ -356,6 +363,7 @@ export default async function decorate(block) {
     const headingWrapper = createTag('div', { class: 'ratings-heading' });
     const heading = createTag(headingTag, { id: toClassName(title) });
     heading.textContent = title;
+    heading.classList.add(...headingTypographyClasses);
     headingWrapper.appendChild(heading);
     try {
       const stars = await getCurrentRatingStars(

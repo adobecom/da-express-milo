@@ -428,4 +428,23 @@ describe('Ratings Block - slider interactions', () => {
     expect(block.querySelector('form')).to.not.exist;
     expect(block.querySelector('.no-slider')).to.exist;
   });
+
+  it('applies an authored heading-size variant to the synthesized slider heading', async () => {
+    block.classList.add('ax-heading-l');
+    await decorate(block);
+    await waitForSlider(block);
+
+    const heading = block.querySelector('.ratings-heading h3');
+    expect(heading.classList.contains('ax-heading-l')).to.be.true;
+  });
+
+  it('applies an authored heading-size variant to the synthesized cannot-rate heading', async () => {
+    localStorage.setItem('ccxActionRatings', 'nala-test-ratings');
+    block.classList.add('ax-heading-l');
+    await decorate(block);
+    await waitForNoSlider(block);
+
+    const heading = block.querySelector('.ratings-heading h3');
+    expect(heading.classList.contains('ax-heading-l')).to.be.true;
+  });
 });
