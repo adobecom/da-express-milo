@@ -142,9 +142,6 @@ main .section .blog-columns p {
   box-sizing: border-box;
 }
 
-/* Black-fill CTA now comes from the shared `.s2 .con-button.fill` rules in
-   styles.css (this block is on the S2_BUTTON_BLOCKS whitelist). */
-
 @media (min-width: 800px) {
   .blog-columns {
     padding: var(--spacing-600) var(--spacing-500);

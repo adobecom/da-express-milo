@@ -1324,10 +1324,6 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
   text-decoration-skip-ink: auto;
 }
 
-
-/* Black-fill CTA now comes from the shared `.s2 .con-button.fill` rules in
-   styles.css (this block is on the S2_BUTTON_BLOCKS whitelist). */
-
 @keyframes scaleSlideIn {
   from {
     transform: translateY(-100%) scaleY(0.8);

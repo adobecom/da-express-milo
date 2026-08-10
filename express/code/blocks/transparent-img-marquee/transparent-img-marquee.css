@@ -183,13 +183,6 @@
   color: var(--color-black);
 }
 
-/* The blue-primary focus ring and the light/dark outline (secondary) CTA
-   ladders now come from the shared `.s2` button system in styles.css — this
-   block is on the S2_BUTTON_BLOCKS whitelist, and those rules were ported
-   verbatim from here (the QA-approved SoT values), so the treatment is
-   unchanged. The block's `.light`/`.dark` classes map 1:1 to the `.s2`
-   light/dark rules. */
-
 /* ── Tablet (M) ≥ 600px: 2-column that wraps to 1-column ≤ ~853px ── */
 @media (min-width: 600px) {
   .transparent-img-marquee {
