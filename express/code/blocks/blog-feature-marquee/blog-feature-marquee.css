@@ -557,12 +557,4 @@ main .section .blog-feature-marquee p {
   .blog-feature-marquee {
     padding: var(--spacing-600) var(--spacing-600);
   }
-
-  .blog-feature-marquee .blog-feature-marquee-content h1, .blog-feature-marquee .blog-feature-marquee-content h2 {
-    font-size: var(--heading-font-size-2xl);
-  }
-
-  .blog-feature-marquee .blog-feature-marquee-subcopy {
-    font-size: var(--ax-body-l-size);
-  }
 }
