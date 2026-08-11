@@ -205,10 +205,14 @@
   /* Based on Figma design system values */
   
   /* Express Heading Typography Variables */
-  --ax-heading-xxxl-size: 44px;
-  --ax-heading-xxxl-lh: 55px;
-  --ax-heading-xxl-size: 36px;
-  --ax-heading-xxl-lh: 45px;
+  /* xxxl/xxl corrected to match the Figma SoT "Express Updated Typography Values" Mobile/Tablet
+     Heading table (3XL=40/2XL=32) — MWPW-202729. The prior values (44/36) didn't match any Figma
+     tier at this breakpoint. Figma also defines a 4XL (48 mobile / 72 desktop) tier above 3XL that
+     Express has no equivalent for yet — not added here, flag separately if needed. */
+  --ax-heading-xxxl-size: 40px;
+  --ax-heading-xxxl-lh: 50px;
+  --ax-heading-xxl-size: 32px;
+  --ax-heading-xxl-lh: 40px;
   --ax-heading-xl-size: 28px;
   --ax-heading-xl-lh: 35px;
   --ax-heading-l-size: 24px;
@@ -249,7 +253,10 @@
   --ax-detail-s-lh: 12px;
 
   /* Express Typography Weights */
-  --ax-heading-weight: 700;
+  /* Heading weight corrected to 900 (Black) — MWPW-202729. Every "Express web/Headings/*" entry in
+     the Figma SoT uses font-weight/Font-weight-variance/Heading-default (Black/Display Black, both
+     numeric weight 900); Express's own token was Bold (700), visibly too light against the SoT. */
+  --ax-heading-weight: 900;
   --ax-body-weight: 400;
   --ax-body-weight-bold: 700;
   --ax-detail-weight: 700;
@@ -410,8 +417,11 @@
     --ax-grid-gutter: var(--Grid-grid-gutter);
     
     /* Express Typography Desktop Overrides */
-    --ax-heading-xxxl-size: 80px;
-    --ax-heading-xxxl-lh: 88px;
+    /* xxxl corrected to match Figma's Desktop/Desktop XL Heading table 3XL tier (52px) —
+       MWPW-202729. Also fixes the line-height ratio (was 88/80=1.1, an outlier vs every other
+       tier's 1.25) to the same 1.25 the rest of the ladder uses (52 * 1.25 = 65). */
+    --ax-heading-xxxl-size: 52px;
+    --ax-heading-xxxl-lh: 65px;
     --ax-heading-xxl-size: 44px;
     --ax-heading-xxl-lh: 55px;
     --ax-heading-xl-size: 36px;
