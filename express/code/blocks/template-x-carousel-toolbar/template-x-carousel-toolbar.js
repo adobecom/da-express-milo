@@ -19,12 +19,14 @@ const fromScratchFallbackLink = 'https://adobesparkpost.app.link/c4bWARQhWAb';
 
 async function createTemplates(recipe, customProperties = null) {
   const res = await fetchResults(recipe);
+  const validItems = res.items.filter((item) => isValidTemplate(item));
   const templates = await Promise.all(
-    res.items
-      .filter((item) => isValidTemplate(item))
-      .map((item) => renderTemplate(item, undefined, customProperties)),
+    validItems.map((item) => renderTemplate(item, undefined, customProperties)),
   );
-  templates.forEach((tplt) => tplt.classList.add('template'));
+  templates.forEach((tplt, i) => {
+    tplt.classList.add('template');
+    tplt.dataset.templateId = validItems[i]?.id ?? '';
+  });
   return templates;
 }
 
@@ -489,13 +491,17 @@ export default async function init(el) {
   [{ createTag, getConfig }, { replaceKey, replaceKeyArray }] = await Promise.all([import(`${getLibs()}/utils/utils.js`), import(`${getLibs()}/features/placeholders.js`)]);
   authoredLoggedOutUrl = null;
   authoredLoggedInUrl = null;
-  const [toolbar, recipeRow] = el.children;
+  const isFullBleed = el.classList.contains('full-bleed');
+  const isSeoLinks = el.classList.contains('seo-links');
   const includesSearchBar = el.classList.contains('search-bar');
+
+  // Capture row references before any DOM manipulation (el.children is live)
+  const [toolbar, recipeRow, ...additionalRows] = el.children;
 
   const heading = toolbar.querySelector('h1,h2,h3');
   if (heading) {
     heading.classList.add('heading');
-    if (includesSearchBar) {
+    if (includesSearchBar || isSeoLinks) {
       heading.classList.add('centered-heading');
     }
     el.prepend(heading);
@@ -504,6 +510,62 @@ export default async function init(el) {
   if (includesSearchBar) {
     toolbar.classList.add('search-bar');
   }
+
+  // SEO-links variant: search bar + link-button carousel, no templates
+  if (isSeoLinks) {
+    el.classList.add('search-bar');
+    toolbar.classList.add('search-bar');
+    try {
+      const [
+        ,
+        {
+          trackSearch: importedTrackSearch,
+          updateImpressionCache: importedUpdateImpressionCache,
+          generateSearchId: importedGenerateSearchId,
+        },
+      ] = await Promise.all([
+        import('../../scripts/block-mediator.min.js'),
+        import('../../scripts/template-search-api-v3.js'),
+      ]);
+      trackSearch = importedTrackSearch;
+      updateImpressionCache = importedUpdateImpressionCache;
+      generateSearchId = importedGenerateSearchId;
+
+      // Collect authored link rows (all rows after toolbar row)
+      const allLinkRows = recipeRow ? [recipeRow, ...additionalRows] : [...additionalRows];
+      const links = [];
+      allLinkRows.forEach((row) => {
+        row.querySelectorAll('a').forEach((a) => links.push(a));
+        row.remove();
+      });
+
+      // Build SEO link-button carousel
+      const linksContainer = createTag('div', { class: 'seo-links-carousel' });
+      links.forEach((a) => {
+        a.classList.add('button', 'small', 'secondary');
+        const p = createTag('p');
+        p.append(a);
+        linksContainer.append(p);
+      });
+      const { default: buildCarousel } = await import('../../scripts/widgets/carousel.js');
+      buildCarousel('p', linksContainer);
+
+      const searchBarWrapper = await createSearchBarWrapper();
+      await buildSearchDropdown(searchBarWrapper);
+      toolbar.append(searchBarWrapper);
+      initSearchFunction(el, searchBarWrapper);
+      el.append(linksContainer);
+    } catch (error) {
+      window.lana?.log(`Error in template-x-carousel-toolbar (seo-links): ${error?.message || error?.detail || error}`, { tags: 'template-x-carousel-toolbar', severity: 'error' });
+      if (getConfig().env.name === 'prod') {
+        el.remove();
+      } else {
+        el.textContent = 'Error loading SEO links, please refresh the page or try again later.';
+      }
+    }
+    return;
+  }
+
   const recipe = recipeRow.textContent.trim();
   recipeRow.remove();
 
@@ -519,6 +581,22 @@ export default async function init(el) {
     else return;
     row.remove();
   });
+
+  // Full-bleed variant: parse configured hover-CTA row, clean up empty toolbar
+  let fullBleedCtaHref = '';
+  let fullBleedCtaText = '';
+  if (isFullBleed) {
+    const ctaRow = [...el.children].find((c) => c !== toolbar && !c.matches('h1,h2,h3'));
+    if (ctaRow) {
+      const ctaLink = ctaRow.querySelector('a');
+      if (ctaLink) {
+        fullBleedCtaHref = ctaLink.href;
+        fullBleedCtaText = ctaLink.textContent.trim();
+      }
+      ctaRow.remove();
+    }
+    if (!toolbar.textContent.trim()) toolbar.remove();
+  }
 
   // Extract optional 3rd paragraph from authored content for search-bar variant
   let optionalLabel = null;
@@ -555,8 +633,30 @@ export default async function init(el) {
       sortSetup,
     ] = await Promise.all([
       createTemplatesContainer(recipe, el, includesSearchBar),
-      extractSort(recipe),
+      isFullBleed ? Promise.resolve(null) : extractSort(recipe),
     ]);
+
+    // Full-bleed variant: replace hover CTAs with configured link + templateId, nav below carousel
+    if (isFullBleed) {
+      templatesContainer.querySelectorAll('.template').forEach((tplt) => {
+        const id = tplt.dataset.templateId;
+        const separator = fullBleedCtaHref.includes('?') ? '&' : '?';
+        const href = fullBleedCtaHref
+          ? `${fullBleedCtaHref}${id ? `${separator}templateId=${encodeURIComponent(id)}` : ''}`
+          : '';
+        const btn = tplt.querySelector('.button-container a.button');
+        if (btn && href) {
+          btn.href = href;
+          btn.textContent = fullBleedCtaText;
+        }
+        const ctaLink = tplt.querySelector('.cta-link');
+        if (ctaLink && href) ctaLink.href = href;
+        tplt.querySelector('.share-icon-wrapper')?.remove();
+      });
+      el.append(templatesContainer, galleryControl);
+      return;
+    }
+
     const { sortOptions, defaultIndex, sortPlaceholderText } = sortSetup;
 
     const dropdown = createDropdown(

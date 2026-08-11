@@ -2,209 +2,289 @@
 name: nala-test-generation
 description: >
   Generates Nala E2E tests for a block or page. Creates the standard
-  3-file structure (spec, test, page object) matching the patterns used
-  in nala/blocks/. Requires a block name and one or more test page paths.
+  4-file structure (block.json, spec, test, page object) matching the
+  pattern produced by `npm run nala-test-gen`. Optionally creates a
+  minimal DA test page for the block.
 ---
 
 # Nala Test Generation Skill
 
 Nala is the E2E testing framework used in `adobecom/da-express-milo`.
-Tests live under `nala/blocks/<block-name>/` and follow a strict 3-file
-structure.  This skill generates all three files.
+Tests live under `nala/blocks/<block-name>/` and follow a strict 4-file
+structure that matches the output of `npm run nala-test-gen`.
 
 ---
 
 ## Inputs
 
-Ask the user to provide:
-
-| Input | Required | Example |
-|-------|----------|---------|
-| **Block name** (kebab-case) | Yes | `ax-marquee`, `color-headline` |
-| **Test page paths** | At least one | `/express/colors/red` |
-| **Tags** | No (defaults shown below) | `@smoke @regression` |
-| **What to test** | No | "pill carousel, arrow buttons" |
+| Input | Required | Notes |
+|-------|----------|-------|
+| **Block name** (kebab-case) | Yes | e.g. `ax-marquee`, `font-generator` |
+| **Test page path** | No — ask | Relative path e.g. `/drafts/nala/test-gen/font-generator`. If not provided, offer to create the page (see Phase 2). |
 
 ---
 
-## File structure
+## Phase 1 — Collect inputs
+
+Ask for the block name if not provided.
+
+Then ask about the test page:
+
+> Do you have an existing test page path, or should I create one?
+> - **I have a path** — provide the relative path (e.g. `/drafts/nala/test-gen/font-generator`)
+> - **Create it for me** — I'll build a minimal DA page and give you the path
+
+If the user provides a path, skip to Phase 3.
+If the user wants a page created, continue to Phase 2.
+
+---
+
+## Phase 2 — Create the DA test page (optional)
+
+The test page is a minimal EDS document containing just the block under test
+with a lorem ipsum sentence. It is uploaded to DA under:
 
 ```
-nala/blocks/<block-name>/
-  <block-name>.spec.js   ← feature config: test IDs, paths, tags
-  <block-name>.test.js   ← Playwright test assertions
-  <block-name>.page.js   ← page object: block locators
+adobecom / da-express-milo / drafts/nala/test-gen/<block-name>.html
 ```
 
+The nala path (used in `block.json`) will be:
+```
+/drafts/nala/test-gen/<block-name>
+```
+
+### 2a. Build the HTML
+
+The document uses the standard EDS block authoring table format.
+The first table row names the block; the second row contains a single
+lorem ipsum sentence as placeholder content.
+
+```html
+<!DOCTYPE html>
+<html>
+  <head><title><block-name></title></head>
+  <body>
+    <header></header>
+    <main>
+      <div>
+        <table>
+          <tbody>
+            <tr><td><block-name></td></tr>
+            <tr><td>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+    <footer></footer>
+  </body>
+</html>
+```
+
+Save to `/tmp/da-upload/drafts/nala/test-gen/<block-name>.html`.
+
+### 2b. Check DA auth token
+
+```bash
+da-auth-helper token >/dev/null 2>&1 && echo "Token OK" || echo "No token"
+```
+
+If no token, instruct the user to:
+1. Install: `npm install -g github:adobe-rnd/da-auth-helper`
+2. Log in: `da-auth-helper login` (opens browser — choose the **Skyline** profile)
+3. Verify: `da-auth-helper token`
+
+### 2c. Upload HTML to DA
+
+```bash
+TOKEN=$(da-auth-helper token 2>/dev/null)
+
+curl -s -w "\n%{http_code}" -X POST \
+  "https://admin.da.live/source/adobecom/da-express-milo/drafts/nala/test-gen/<block-name>.html" \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: text/html" \
+  --data-binary @/tmp/da-upload/drafts/nala/test-gen/<block-name>.html
+```
+
+Expect **200** or **201**.
+
+### 2d. Preview the page
+
+```bash
+curl -s -w "\n%{http_code}" -X POST \
+  "https://admin.hlx.page/preview/adobecom/da-express-milo/main/drafts/nala/test-gen/<block-name>" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+Report the preview URL:
+```
+Preview: https://main--da-express-milo--adobecom.aem.page/drafts/nala/test-gen/<block-name>
+```
+
+The nala path for `block.json` is: `/drafts/nala/test-gen/<block-name>`
+
 ---
 
-## 1. Read existing examples first
+## Phase 3 — Generate the 4 nala test files
 
-Before generating, read **2 existing Nala test suites** from `nala/blocks/`
-to understand the current conventions in this repo.  Good examples:
-- `nala/blocks/ckg-link-list/` (carousel/interactive)
-- `nala/blocks/color-headline/` (simpler, good spec.js pattern)
+Files go in `nala/blocks/<block-name>/`. All files use **CommonJS** (`.cjs`).
 
----
+### 3a. `<block-name>.block.json`
 
-## 2. Generate `<block-name>.spec.js`
+This is the data source. The spec file reads from it; do not duplicate data.
 
-Feature config — one entry per test scenario:
-
-```js
-module.exports = {
-  name: '<Block Name> block',
-  features: [
+```json
+{
+  "block": "<block-name>",
+  "variants": [
     {
-      tcid: '0',
-      name: '@<block-name>',
-      path: '/express/<page-path>',
-      tags: '@express @regression @<block-name>',
-    },
-    // Add more features for locale, variant, or device-specific tests
-    {
-      tcid: '1',
-      name: '@<block-name>-locale',
-      path: '/de/express/<page-path>',
-      tags: '@express @regression @<block-name> @locale',
-    },
-  ],
-};
-```
-
-- `tcid` is a sequential integer string starting at `'0'`.
-- `name` starts with `@<block-name>` (enables `npm run nala stage @<block-name>` to filter).
-- `tags` includes `@express @regression @<block-name>` at minimum.
-- `path` is always a relative path — **never a full URL**.
-
----
-
-## 3. Generate `<block-name>.page.js`
-
-Page object — locators only, no assertions:
-
-```js
-export default class <ClassName> {
-  constructor(page) {
-    this.page = page;
-    // Block root
-    this.<blockCamel> = page.locator('.<block-name>');
-    // Key child elements (derive from Figma or DOM inspection)
-    this.heading = page.locator('.<block-name> h1, .<block-name> h2').first();
-    this.ctaButton = page.locator('.<block-name> a.button').first();
-    this.image = page.locator('.<block-name> img').first();
-    // Interactive elements (if applicable)
-    // this.nextArrow = page.locator('.<block-name> .arrow-right');
-  }
+      "tcid": "0",
+      "name": "@<block-name>-default",
+      "selector": "div.<block-name>",
+      "path": "<test-page-path>",
+      "data": {
+        "semantic": {
+          "texts": [],
+          "media": [],
+          "interactives": []
+        }
+      },
+      "tags": [
+        "@<block-name>",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
 }
 ```
 
-- Only locators in this file — no `expect`, no `await page.goto`.
-- Name locators after what they represent (`.heading`, `.ctaButton`), not
-  after their implementation (`.divFirstChild`).
+`texts`, `media`, and `interactives` start empty — they are populated as
+the block gains real content. The test loops over them automatically.
 
----
-
-## 4. Generate `<block-name>.test.js`
-
-Playwright tests — import from spec and page files:
+### 3b. `<block-name>.spec.cjs`
 
 ```js
-import { expect, test } from '@playwright/test';
-import { features } from './<block-name>.spec.js';
-import <ClassName> from './<block-name>.page.js';
+const schema = require('./<block-name>.block.json');
 
-let block;
+module.exports = { features: schema.variants };
+```
 
-test.describe('<Block Name> Block Test Suite', () => {
-  test.beforeEach(async ({ page }) => {
-    block = new <ClassName>(page);
-  });
+### 3c. `<block-name>.page.cjs`
 
-  test(`[Test Id - ${features[0].tcid}] ${features[0].name},${features[0].tags}`, async ({ page, baseURL }) => {
-    await test.step('Go to <block-name> test page', async () => {
-      await page.goto(`${baseURL}${features[0].path}`);
+Minimal page object. Locators are added here as the block is implemented.
+
+```js
+class <ClassName>Block {
+  constructor(page, selector = '.<block-name>', nth = 0) {
+    this.page = page;
+    this.block = page.locator(selector).nth(nth);
+  }
+}
+module.exports = <ClassName>Block;
+```
+
+`<ClassName>` is the PascalCase version of the block name
+(e.g. `font-generator` → `FontGenerator`).
+
+### 3d. `<block-name>.test.cjs`
+
+One test per variant in the block.json. Each test follows the standard
+4-step template: navigate → verify block content (driven by `data.semantic`)
+→ accessibility → SEO.
+
+```js
+const { test, expect } = require('@playwright/test');
+const { features } = require('./<block-name>.spec.cjs');
+const <ClassName>Block = require('./<block-name>.page.cjs');
+const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
+const { runSeoChecks } = require('../../libs/seo-check.cjs');
+
+const miloLibs = process.env.MILO_LIBS || '';
+
+test.describe('<ClassName>Block Test Suite', () => {
+  // Test Id : 0 : @<block-name>-default
+  test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
+    const { data } = features[0];
+    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
+    const block = new <ClassName>Block(page, features[0].selector);
+    console.info(`[Test Page]: ${testUrl}`);
+
+    await test.step('step-1: Navigate to page', async () => {
+      await page.goto(testUrl);
       await page.waitForLoadState('domcontentloaded');
-      await expect(page).toHaveURL(`${baseURL}${features[0].path}`);
+      await expect(page).toHaveURL(testUrl);
     });
 
-    await test.step('Verify block is visible', async () => {
-      await block.<blockCamel>.scrollIntoViewIfNeeded();
-      await expect(block.<blockCamel>).toBeVisible();
-    });
+    await test.step('step-2: Verify block content', async () => {
+      await expect(block.block).toBeVisible();
+      const sem = data.semantic;
 
-    await test.step('Verify heading content', async () => {
-      await expect(block.heading).toBeVisible();
-      const text = await block.heading.innerText();
-      expect(text.length).toBeTruthy();
-    });
-
-    await test.step('Verify CTA is present and has href', async () => {
-      if (await block.ctaButton.count() > 0) {
-        await expect(block.ctaButton).toBeVisible();
-        await expect(block.ctaButton).toHaveAttribute('href');
+      for (const t of sem.texts) {
+        const locator = block.block.locator(t.selector).nth(t.nth || 0);
+        await expect(locator).toContainText(t.text);
       }
+
+      for (const m of sem.media) {
+        const locator = block.block.locator(m.selector).nth(m.nth || 0);
+        const isHiddenSelector = m.selector.includes('.isHidden');
+        const isPicture = m.tag === 'picture';
+        const target = isPicture ? locator.locator('img') : locator;
+        if (isHiddenSelector) {
+          await expect(target).toBeHidden();
+        } else {
+          await expect(target).toBeVisible();
+        }
+      }
+
+      for (const iEl of sem.interactives) {
+        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
+        await expect(locator).toBeVisible({ timeout: 8000 });
+        if (iEl.type === 'link' && iEl.href) {
+          const href = await locator.getAttribute('href');
+          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
+            await expect(href).toBe(iEl.href);
+          } else {
+            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
+            const actualPath = new URL(href, 'https://dummy.base').pathname;
+            await expect(actualPath).toBe(expectedPath);
+          }
+        }
+        if (iEl.text) await expect(locator).toContainText(iEl.text);
+      }
+    });
+
+    await test.step('step-3: Accessibility validation', async () => {
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
+    });
+
+    await test.step('step-4: SEO validation', async () => {
+      await runSeoChecks({ page, feature: features[0], skipSeoTest: false });
     });
   });
 });
 ```
 
-### Test step conventions
-- Each logical check is a `test.step` with a descriptive label.
-- Check element count before asserting on optional elements
-  (`if (await locator.count() > 0)`).
-- Use `page.waitForLoadState('domcontentloaded')` after navigation.
-- Add `page.waitForTimeout(2000)` only before interactions that need
-  animation to settle (e.g. carousel transitions) — not as a general delay.
-- For interactive elements (buttons, carousels), test the state change
-  (before click → after click).
+For blocks with multiple variants, generate one `test(...)` block per entry
+in `schema.variants`, following the same 4-step template each time.
 
 ---
 
-## 5. Anti-patterns to avoid
+## Phase 4 — Verify tests locally
 
-```js
-// ❌ Hard-coded full URLs
-await page.goto('https://stage--da-express-milo--adobecom.aem.page/express/');
+Always run against the local dev server — the block code is not on main/stage.
 
-// ✅ Environment-agnostic paths via baseURL fixture
-await page.goto(`${baseURL}/express/`);
-
-// ❌ Fixed wait times
-await page.waitForTimeout(5000);
-
-// ✅ Wait for specific conditions
-await page.waitForLoadState('networkidle');
-await expect(element).toBeVisible();
-
-// ❌ Brittle nth-child selectors
-page.locator('div > div:nth-child(2) > p:first-child')
-
-// ✅ Semantic/class selectors
-page.locator('.<block-name> .cta a').first()
-```
-
----
-
-## 6. Running the generated tests
+If port 3000 is not listening, start it first: `aem up --port 3000 &`
 
 ```bash
-# Run all tests for this block
-npm run nala stage @<block-name>
-
-# Run smoke tests only
-npm run nala stage @<block-name> @smoke
-
-# Run on a specific environment
-npm run nala prod @<block-name>
+npm run nala local @<block-name>
 ```
 
 ---
 
-## 7. Summary
+## Phase 5 — Summary
 
-After generating, output:
-1. The three file paths created.
-2. The test IDs and what each one covers.
-3. Any elements or interactions you assumed from the block name — ask
-   the user to confirm they match the actual block's content.
+Report:
+1. The four file paths created under `nala/blocks/<block-name>/`.
+2. The test page path used (provided or newly created).
+3. A note that `data.semantic.texts`, `media`, and `interactives` in
+   `block.json` are empty scaffolds — populate them as the block is built.

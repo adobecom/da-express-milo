@@ -1,6 +1,6 @@
 import { getLibs, getMobileOperatingSystem, getIconElementDeprecated, addTempWrapperDeprecated } from '../../scripts/utils.js';
 import { createFloatingButton } from '../../scripts/widgets/floating-cta.js';
-import { createMultiFunctionButton, androidCheck, collectFloatingButtonData, createMetadataMap } from '../../scripts/utils/mobile-fork-button-utils.js';
+import { createMultiFunctionButton, collectFloatingButtonData, createMetadataMap, SUPPORTED_MWEB_OS } from '../../scripts/utils/mobile-fork-button-utils.js';
 
 let createTag; let getMetadata;
 
@@ -65,7 +65,7 @@ function mWebCloseEvents() {
 }
 
 function mWebVariant() {
-  if (getMobileOperatingSystem() !== 'Android') return;
+  if (!SUPPORTED_MWEB_OS.includes(getMobileOperatingSystem())) return;
   mWebBuildElements();
   mWebCloseEvents();
   mWebOverlayScroll();
@@ -73,7 +73,10 @@ function mWebVariant() {
 
 export default async function decorate(block) {
   ({ createTag, getMetadata } = await import(`${getLibs()}/utils/utils.js`));
-  if (!androidCheck(getMetadata, getMobileOperatingSystem)) {
+  const eligibilityOn = getMetadata('fork-eligibility-check')?.toLowerCase()?.trim() === 'on';
+  const os = getMobileOperatingSystem();
+  const shouldShowDismissable = eligibilityOn ? os === 'Android' : SUPPORTED_MWEB_OS.includes(os);
+  if (!shouldShowDismissable) {
     const { default: decorateNormal } = await import('../floating-button/floating-button.js');
     decorateNormal(block);
     return;

@@ -7,6 +7,7 @@
 
 .susi-light {
   display: flex;
+  width: 100%;
   align-items: center;
   justify-content: center;
   line-height: initial;
@@ -15,6 +16,7 @@
 
 .susi-layout {
   display: flex;
+  width: 100%;
   flex-direction: column;
   align-items: center;
   text-align: center;
@@ -40,7 +42,7 @@
   font-size: var(--body-font-size-s);
   text-align: center;
   font-weight: 700;
-  color: #292929;
+  color: var(--color-gray-800-variant);
 }
 
 .susi-layout .footer a {
@@ -79,7 +81,7 @@
   display: flex;
   flex-direction: column;
   font-size: var(--body-font-size-s);
-  background-color: #f3f3f3;
+  background-color: var(--color-gray-150);
 }
 
 /* tabs styles */
@@ -88,7 +90,7 @@
   border-radius: 8px;
   padding: 4px;
   display: flex;
-  gap: 4px;
+  gap: var(--spacing-75);
   background-color: var(--susi-grey);
 }
 
@@ -103,7 +105,7 @@
   font-size: var(--body-font-size-xs);
   font-weight: 700;
   background-color: var(--susi-grey);
-  color: #222222;
+  color: var(--color-gray-900);
   line-height: 130%;
   cursor: pointer;
 }
@@ -137,6 +139,10 @@
   width: var(--susi-modal-width);
 }
 
+.susi-light.color .susi-wrapper {
+  width: 100%;
+}
+
 /* student styles */
 .susi-light.student .student-check {
   margin-top: var(--spacing-300);
@@ -164,7 +170,7 @@
   font-size: var(--body-font-size-s);
   padding: 0 var(--susi-standard-padding);
   line-height: 1.3;
-  color: #464646;
+  color: var(--color-gray-700-variant);
 }
 
 /* modal styles */
@@ -190,14 +196,17 @@
 .section.ax-login-page .susi-layout {
   background-color: var(--color-white);
   border-radius: 16px;
+  width: auto;
 }
 
 .section.ax-login-page .susi-light {
   padding-bottom: var(--spacing-700);
 }
+
 .section.ax-login-page .susi-light.b2b {
   width: var(--susi-modal-width);
 }
+
 .section.ax-login-page .susi-layout .footer {
   border-radius: 8px;
 }
@@ -212,6 +221,7 @@
     position: absolute;
     padding-top: 30px;
   }
+
   .section.ax-login-page .susi-layout .footer {
     border-radius: 0 0 16px 16px;
   }

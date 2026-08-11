@@ -152,7 +152,7 @@ export function createColorDataService(config) {
         if (kuler) {
           let raw = null;
           if (config.variant === 'gradients') {
-            raw = await kuler.exploreGradients({ filter: 'public', sort: 'create_time', time: 'month' });
+            raw = await kuler.exploreGradients({ filter: 'public', sort: 'create_time', time: 'all' });
             // eslint-disable-next-line no-console
             console.log('[DataService] Kuler gradients raw response:', raw);
             const items = raw?.gradients || raw?.themes || raw?.items
@@ -165,7 +165,7 @@ export function createColorDataService(config) {
               return data;
             }
           } else if (config.variant === 'strips' || config.variant === 'palettes') {
-            raw = await kuler.exploreThemes({ filter: 'public', sort: 'create_time', time: 'month' });
+            raw = await kuler.exploreThemes({ filter: 'public', sort: 'create_time', time: 'all' });
             // eslint-disable-next-line no-console
             console.log('[DataService] Kuler themes raw response:', raw);
             const items = raw?.themes || raw?.items || (Array.isArray(raw) ? raw : null);

@@ -462,6 +462,9 @@ export default async function decorate(block) {
           } else {
             allData = await activeDataService.fetchData();
           }
+          if (!isSearchActive) {
+            allData = activeDataService.filter({ sort: 'most-popular' });
+          }
           visibleCount = alignToFullRow(
             Math.min(config.initialLoad, allData.length),
             allData.length,
@@ -638,6 +641,9 @@ export default async function decorate(block) {
             }
           } else {
             allData = await activeDataService.fetchData();
+          }
+          if (!isSearchActive) {
+            allData = activeDataService.filter({ sort: 'most-popular' });
           }
           const alignedCount = Math.min(config.initialLoad, allData.length);
           visibleCount = alignToFullRow(alignedCount, allData.length);

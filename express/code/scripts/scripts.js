@@ -82,6 +82,7 @@ const CONFIG = {
     onDemand: !jarvisImmediatelyVisible,
   },
   imsClientId: 'AdobeExpressWeb',
+  iconsExcludeBlocks: ['unity', 'firefly-howto'],
   prodDomains,
   geoRouting: 'on',
   lingoProjectSuccessLogging: 'on',
@@ -361,6 +362,26 @@ function preloadLCPImage(img) {
     }
   }
 }());
+
+let fragmentLcpPreloaded = false;
+// eslint-disable-next-line import/prefer-default-export
+export function decorateAreaWithLCP(area = document, options = {}) {
+  const { fragmentLink } = options;
+  if (fragmentLink && !fragmentLcpPreloaded) {
+    const firstSection = document.querySelector('body > main > div:nth-child(1)');
+    if (firstSection?.querySelector('a.fragment') === fragmentLink) {
+      const section = area.querySelector('body > div') || area;
+      const images = section.querySelectorAll('img');
+      if (images.length) {
+        images.forEach(eagerLoad);
+        preloadLCPImage(images[0]);
+        fragmentLcpPreloaded = true;
+      }
+    }
+  }
+  decorateArea(area, options);
+}
+CONFIG.decorateArea = decorateAreaWithLCP;
 
 (function loadStyles() {
   const paths = [`${miloLibs}/styles/styles.css`];

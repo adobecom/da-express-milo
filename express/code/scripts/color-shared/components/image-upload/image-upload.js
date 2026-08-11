@@ -68,8 +68,8 @@ export function createUploadDropzone(options = {}) {
   const borderRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
   borderRect.setAttribute('x', '0.5');
   borderRect.setAttribute('y', '0.5');
-  borderRect.setAttribute('width', 'calc(100% - 1px)');
-  borderRect.setAttribute('height', 'calc(100% - 1px)');
+  borderRect.setAttribute('width', '100%');
+  borderRect.setAttribute('height', '100%');
   borderRect.setAttribute('rx', '16');
   borderRect.setAttribute('ry', '16');
   borderRect.setAttribute('fill', 'none');

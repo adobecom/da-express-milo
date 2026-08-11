@@ -1,0 +1,357 @@
+.font-card {
+  display: flex;
+  flex-direction: column;
+  background: var(--color-white);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  overflow: hidden;
+}
+
+.font-card:focus-visible {
+  outline: 2px solid var(--Buttons-default);
+  outline-offset: 4px;
+  border-radius: 7px;
+}
+
+/* ─── Body (preview area — overlay is bounded here) ──────────────────────── */
+
+.font-card-body {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: var(--spacing-800) var(--spacing-300) var(--spacing-500);
+  overflow: hidden;
+  cursor: pointer;
+}
+
+/* List view is a compact row, not a scaled-down grid card — pull the
+   preview text back up rather than keeping the grid view's 64px offset. */
+.font-card-grid.is-list .font-card-body {
+  padding-top: 64px;
+  padding-bottom: 32px;
+}
+
+/* ─── Copy icon button (upper right) ─────────────────────────────────────── */
+
+.font-card-copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.font-card-copy-btn img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+/* CSS tooltip via data-tooltip + ::after; caret via ::before */
+
+.font-card-copy-btn::before {
+  content: '';
+  position: absolute;
+  top: calc(100% + 1px);
+  right: 11px;
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-bottom: 5px solid var(--color-gray-950);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  z-index: 10;
+}
+
+/* Keyboard-only — the desktop hover overlay on .font-card-body already
+   covers the mouse-hover affordance, so the button itself doesn't need one. */
+.font-card-copy-btn:focus-visible::before {
+  opacity: 1;
+}
+
+.font-card.is-copied .font-card-copy-btn::before {
+  opacity: 0;
+}
+
+.font-card-copy-btn::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: var(--color-gray-950);
+  color: var(--color-white);
+  font-family: var(--body-font-family);
+  font-size: 12px;
+  font-weight: 400;
+  line-height: 16px;
+  white-space: nowrap;
+  pointer-events: none; 
+  opacity: 0;
+  transition: opacity 0.1s ease;
+  z-index: 10;
+}
+
+.font-card-copy-btn:focus-visible::after {
+  opacity: 1;
+}
+
+/* Hide tooltip while the copied overlay is showing */
+.font-card.is-copied .font-card-copy-btn::after {
+  opacity: 0;
+}
+
+/* ─── Preview text ────────────────────────────────────────────────────────── */
+
+.font-card-preview {
+  flex: none;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+  word-break: break-word;
+  /* --fc-line-height is set per card by fontCard.js from fontDef.previewLineHeight
+     (measured at build time — see measurePreviewLineHeights.js). Heavy
+     "Glitch" styles get a much taller line box so their combining-mark
+     stacks, which paint above/below the base glyph, don't get clipped by
+     this element's own overflow: hidden. */
+  line-height: var(--fc-line-height, 1.1);
+  /* Small fixed nudge for the half-leading -webkit-line-clamp doesn't
+     reserve above the first line the way normal block flow reserves it
+     between every other line. Flat rather than scaled to --fc-line-height
+     — a scaled value over-padded most cards. */
+  padding-top: 5px;
+  /* Mirror at the bottom: line-clamp cuts overflow at the box edge, so a
+     descender on the last visible line (e.g. full-width "ｇ") lands right on
+     the clip boundary. This flat reserve keeps it from shaving. */
+  padding-bottom: 4px;
+  color: var(--color-gray-950);
+}
+
+@media (min-width: 600px) {
+  .font-card-preview {
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+  }
+}
+
+/* List view is a compact row — stay at the 2-line clamp even at widths
+   where grid view has expanded to 4. */
+.font-card-grid.is-list .font-card-preview {
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+/* comet-tail and weird-text measure previewLineHeight around 8x-10x normal
+   -- even a single line already makes for a very tall card, so clamp these
+   two to 1 line in every view instead of the usual 2/4/2. Specificity here
+   (not media-query order) is what makes this win over the base/tablet+/
+   list-view rules above in all three of them. */
+.font-card[data-font-id="comet-tail"] .font-card-preview,
+.font-card[data-font-id="weird-text"] .font-card-preview {
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
+}
+
+/* ─── Copy success / hover overlays ──────────────────────────────────────── */
+
+.font-card-success-overlay,
+.font-card-hover-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-300);
+  background: rgba(0, 0, 0, 0.69);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  border-radius: inherit;
+}
+
+/* Sits above the hover overlay so a click's success state isn't masked by it. */
+.font-card-success-overlay {
+  z-index: 3;
+}
+
+.font-card-hover-overlay {
+  z-index: 2;
+  gap: var(--spacing-100);
+}
+
+.font-card.is-copied .font-card-success-overlay {
+  opacity: 1;
+}
+
+/* The success overlay's background is translucent (rgba alpha 0.69), so
+   without this the copy button would still show faintly through it on tap
+   — tablet/mobile have no hover state to hide it via the desktop rule
+   below, and this state can be reached from a tap on any viewport. */
+.font-card.is-copied .font-card-copy-btn {
+  opacity: 0;
+}
+
+/* Desktop-only affordance — mobile/tablet get no mouse hover. The overlay's
+   background is translucent (rgba alpha 0.69), so without this the copy
+   button would still show faintly through it instead of disappearing. */
+@media (hover: hover) and (min-width: 1200px) {
+  .font-card-body:hover .font-card-hover-overlay {
+    opacity: 1;
+  }
+
+  .font-card-body:hover .font-card-copy-btn {
+    opacity: 0;
+  }
+}
+
+/* Both overlays share a translucent background, so the hover overlay would
+   otherwise bleed through the copy overlay while the mouse is still over
+   the card. Must come after the :hover rule above to win the tie. */
+.font-card.is-copied .font-card-hover-overlay {
+  opacity: 0;
+}
+
+.font-card-check-icon {
+  display: block;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+}
+
+.font-card-hover-icon {
+  display: block;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  filter: brightness(0) invert(1);
+}
+
+.font-card-overlay-message {
+  font-family: var(--body-font-family);
+  font-size: var(--Global-Typography-Size-Label-Label-M);
+  font-weight: 700;
+  color: var(--color-white);
+  line-height: 1.2;
+}
+
+/* Success: pop the badge in. */
+.font-card.is-copied .font-card-check-icon {
+  animation: font-card-check-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+@keyframes font-card-check-pop {
+  0% { transform: scale(0.4); opacity: 0; }
+  60% { transform: scale(1.08); opacity: 1; }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .font-card.is-copied .font-card-check-icon {
+    animation: none;
+  }
+}
+
+/* ─── Footer (font name + CTA link) ──────────────────────────────────────── */
+
+.font-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-100);
+  padding: var(--spacing-300);
+}
+
+.font-card-name {
+  font-family: var(--body-font-family);
+  font-size: var(--Global-Typography-Size-Label-Label-M);
+  font-weight: 700;
+  color: var(--Alias-content-typography-Title);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ─── CTA link (black pill button with external-link icon) ───────────────── */
+
+main a.font-card-cta {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: var(--spacing-80);
+  flex-shrink: 0;
+  padding: var(--spacing-80) var(--spacing-300) var(--spacing-80) var(--spacing-250);
+  border-radius: 24px;
+  background: #000000d6;
+  color: var(--color-white);
+  font-family: var(--body-font-family);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 18px;
+  white-space: nowrap;
+  text-decoration: none;
+  transition: background-color 0.1s ease;
+}
+
+.font-card-cta:hover {
+  background: var(--color-black);
+}
+
+.font-card-cta:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 4px;
+}
+
+.font-card-cta-icon {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+
+/* Off-screen polite live region — announces copy success to screen readers
+   (the visible overlay is aria-hidden / decorative). */
+.font-card-live-region {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ─── Tablet ───────────────── */
+@media (min-width: 600px) {
+  .font-card {
+    border-radius: var(--Corner-radius-corner-radius-200);
+  }
+
+  /* Static, not derived from --fc-line-height: every tablet/desktop grid
+     card reserves the same fixed floor regardless of style, matching the
+     skeleton's own tablet+ card sizing (font-generator.css's .fg-sk-card).
+     :not(.is-list) excludes list view, which keeps no reserved floor at
+     any width. */
+  .font-card-grid:not(.is-list) .font-card {
+    min-height: 304px;
+  }
+}
