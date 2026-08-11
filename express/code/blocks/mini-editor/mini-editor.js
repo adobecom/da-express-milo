@@ -109,7 +109,7 @@ function buildFontOptions() {
  * Copies the quote and, when present, its author (as "quote — author") so
  * pasted text always carries attribution instead of the quote alone. Shows
  * the shared bottom toast on success, per Figma node 0-19315 — every copy
- * action on the page uses this same toast, not just quote-maker's own.
+ * action on the page uses this same toast, not just mini-editor's own.
  */
 async function copyQuoteToClipboard(quote, author) {
   const text = author ? `${quote} — ${author}` : quote;
@@ -224,7 +224,7 @@ async function fetchCardBackgrounds(props) {
  * combination is stable and reusable across the main widget, the desktop
  * decorative cards, and the tablet/mobile carousel — all three read from
  * this same list. Font is deliberately not part of this pairing: every
- * decorative card uses one fixed style (see .qm-deco-quote), only the
+ * decorative card uses one fixed style (see .me-deco-quote), only the
  * editor's own widget has a font choice — see buildFontControl.
  */
 function buildCardSet(cards, quotes) {
@@ -248,13 +248,13 @@ function decorateCta(header) {
 }
 
 function buildLogo() {
-  return createTag('div', { class: 'quote-maker-logo', 'aria-hidden': 'true' }, [
+  return createTag('div', { class: 'mini-editor-logo', 'aria-hidden': 'true' }, [
     getIconElementDeprecated('adobe-express-logo'),
   ]);
 }
 
 function buildContentHeader(props) {
-  const header = createTag('div', { class: 'quote-maker-header' });
+  const header = createTag('div', { class: 'mini-editor-header' });
   header.append(buildLogo());
   if (props.contentRow) {
     header.append(...props.contentRow.childNodes);
@@ -276,7 +276,7 @@ function buildFontButton(opt, index, onPick) {
   ].join('');
   const btn = createTag('button', {
     type: 'button',
-    class: `qm-font${index === 0 ? ' is-selected' : ''}`,
+    class: `me-font${index === 0 ? ' is-selected' : ''}`,
     style,
     'data-font': opt.font,
     role: 'option',
@@ -290,36 +290,36 @@ function buildFontButton(opt, index, onPick) {
 function buildFontControl(block, fontOptions, onSelect) {
   const control = createTag('button', {
     type: 'button',
-    class: 'qm-control qm-control--font',
+    class: 'me-control me-control--font',
     'aria-expanded': 'false',
   });
-  const pill = createTag('span', { class: 'qm-pill' });
+  const pill = createTag('span', { class: 'me-pill' });
   pill.textContent = fontOptions[0].label;
-  const label = createTag('span', { class: 'qm-control-label' });
+  const label = createTag('span', { class: 'me-control-label' });
   label.textContent = 'Font style';
   control.append(pill, label);
 
   const panel = createTag('div', {
-    class: 'qm-row qm-row--fonts',
+    class: 'me-row me-row--fonts',
     role: 'listbox',
     'aria-label': 'Font style',
   });
   const sheetGrid = createTag('div', {
-    class: 'qm-sheet-grid qm-sheet-grid--fonts',
+    class: 'me-sheet-grid me-sheet-grid--fonts',
     role: 'listbox',
     'aria-label': 'Font style',
   });
 
   function selectFont(opt) {
-    block.style.setProperty('--qm-quote-font', opt.font);
-    block.style.setProperty('--qm-quote-font-style', opt.italic ? 'italic' : 'normal');
-    block.style.setProperty('--qm-quote-font-weight', opt.weight || 'normal');
+    block.style.setProperty('--me-quote-font', opt.font);
+    block.style.setProperty('--me-quote-font-style', opt.italic ? 'italic' : 'normal');
+    block.style.setProperty('--me-quote-font-weight', opt.weight || 'normal');
     pill.textContent = opt.label;
     pill.style.fontFamily = opt.font;
     pill.style.fontStyle = opt.italic ? 'italic' : 'normal';
     pill.style.fontWeight = opt.weight || 'normal';
     [panel, sheetGrid].forEach((container) => {
-      container.querySelectorAll('.qm-font').forEach((f) => {
+      container.querySelectorAll('.me-font').forEach((f) => {
         const isMatch = f.dataset.font === opt.font;
         f.classList.toggle('is-selected', isMatch);
         f.setAttribute('aria-selected', String(isMatch));
@@ -336,16 +336,16 @@ function buildFontControl(block, fontOptions, onSelect) {
     sheetGrid.append(buildFontButton(opt, index, onPick));
   });
 
-  // Applies fontOptions[0] as --qm-quote-font immediately, instead of
+  // Applies fontOptions[0] as --me-quote-font immediately, instead of
   // leaving the block on its CSS default (--body-font-family) until the
-  // user's first click — the first .qm-font button already renders
+  // user's first click — the first .me-font button already renders
   // is-selected, so the quote itself should match on load, not just the
   // control's own affordances.
   selectFont(fontOptions[0]);
 
   control.addEventListener('click', () => {
-    const isOpen = block.getAttribute('data-qm-panel') === 'fonts';
-    block.setAttribute('data-qm-panel', isOpen ? 'none' : 'fonts');
+    const isOpen = block.getAttribute('data-me-panel') === 'fonts';
+    block.setAttribute('data-me-panel', isOpen ? 'none' : 'fonts');
     control.setAttribute('aria-expanded', String(!isOpen));
   });
 
@@ -361,14 +361,14 @@ function buildFontControl(block, fontOptions, onSelect) {
 function buildSwatchButton(card, index, onPick) {
   const btn = createTag('button', {
     type: 'button',
-    class: `qm-swatch-btn${index === 0 ? ' is-selected' : ''}`,
+    class: `me-swatch-btn${index === 0 ? ' is-selected' : ''}`,
     'data-bg': card.bg,
     role: 'option',
     'aria-selected': index === 0 ? 'true' : 'false',
     'aria-label': `Background ${index + 1}`,
   });
   const fill = createTag('span', {
-    class: 'qm-swatch-fill',
+    class: 'me-swatch-fill',
     style: `background-image:url("${card.bg}")`,
   });
   btn.append(fill);
@@ -379,37 +379,37 @@ function buildSwatchButton(card, index, onPick) {
 function buildColorControl(block, cards, onSelect) {
   const control = createTag('button', {
     type: 'button',
-    class: 'qm-control qm-control--colour',
+    class: 'me-control me-control--colour',
     'aria-expanded': 'false',
   });
-  const swatch = createTag('span', { class: 'qm-swatch' });
+  const swatch = createTag('span', { class: 'me-swatch' });
   // "colour" drops on mobile (label reads "Background" only there) — kept
   // as a separate span hidden via CSS rather than swapping textContent, so
   // there's no JS branching on viewport width for what's purely a label fit.
-  const label = createTag('span', { class: 'qm-control-label' }, [
+  const label = createTag('span', { class: 'me-control-label' }, [
     'Background',
-    createTag('span', { class: 'qm-control-label-suffix' }, [' colour']),
+    createTag('span', { class: 'me-control-label-suffix' }, [' colour']),
   ]);
   control.append(swatch, label);
 
   const panel = createTag('div', {
-    class: 'qm-row qm-row--colour',
+    class: 'me-row me-row--colour',
     role: 'listbox',
     'aria-label': 'Background colour',
   });
   // All fetched backgrounds (not just the desktop decoration subset), same
   // as the desktop inline row — the sheet's grid scrolls to fit them all.
   const sheetGrid = createTag('div', {
-    class: 'qm-sheet-grid qm-sheet-grid--colour',
+    class: 'me-sheet-grid me-sheet-grid--colour',
     role: 'listbox',
     'aria-label': 'Background colour',
   });
 
   function selectSwatch(bg) {
-    block.style.setProperty('--qm-card-bg', `url("${bg}")`);
+    block.style.setProperty('--me-card-bg', `url("${bg}")`);
     swatch.style.backgroundImage = `url("${bg}")`;
     [panel, sheetGrid].forEach((container) => {
-      container.querySelectorAll('.qm-swatch-btn').forEach((s) => {
+      container.querySelectorAll('.me-swatch-btn').forEach((s) => {
         const isMatch = s.dataset.bg === bg;
         s.classList.toggle('is-selected', isMatch);
         s.setAttribute('aria-selected', String(isMatch));
@@ -429,8 +429,8 @@ function buildColorControl(block, cards, onSelect) {
   if (cards[0]) swatch.style.backgroundImage = `url("${cards[0].bg}")`;
 
   control.addEventListener('click', () => {
-    const isOpen = block.getAttribute('data-qm-panel') === 'colour';
-    block.setAttribute('data-qm-panel', isOpen ? 'none' : 'colour');
+    const isOpen = block.getAttribute('data-me-panel') === 'colour';
+    block.setAttribute('data-me-panel', isOpen ? 'none' : 'colour');
     control.setAttribute('aria-expanded', String(!isOpen));
   });
 
@@ -442,22 +442,22 @@ function buildColorControl(block, cards, onSelect) {
 /**
  * Mobile-only bottom sheet (<=767px) for the font/colour pickers, per Figma
  * frames 0-18589/0-18658. Reuses the same open/close/focus-trap/scroll-lock
- * pattern as font-generator's panel.js. Driven by the same `data-qm-panel`
+ * pattern as font-generator's panel.js. Driven by the same `data-me-panel`
  * attribute the tablet/desktop inline row already uses — CSS alone decides
  * whether that attribute shows the inline row or this sheet at a given
  * breakpoint, so there's no JS branching on viewport width here.
  */
 function buildBottomSheet(block, kind, title, contentEl) {
-  const overlay = createTag('div', { class: 'qm-sheet-overlay', 'aria-hidden': 'true', inert: '' });
+  const overlay = createTag('div', { class: 'me-sheet-overlay', 'aria-hidden': 'true', inert: '' });
   const sheet = createTag('div', {
-    class: 'qm-sheet',
+    class: 'me-sheet',
     role: 'dialog',
     'aria-modal': 'true',
     'aria-label': title,
     tabindex: '-1',
   });
-  const handle = createTag('div', { class: 'qm-sheet-handle', 'aria-hidden': 'true' });
-  const titleEl = createTag('p', { class: 'qm-sheet-title' });
+  const handle = createTag('div', { class: 'me-sheet-handle', 'aria-hidden': 'true' });
+  const titleEl = createTag('p', { class: 'me-sheet-title' });
   titleEl.textContent = title;
   sheet.append(handle, titleEl, contentEl);
   overlay.append(sheet);
@@ -467,12 +467,12 @@ function buildBottomSheet(block, kind, title, contentEl) {
   let previouslyFocused = null;
 
   function close() {
-    if (block.getAttribute('data-qm-panel') !== kind) return;
-    block.setAttribute('data-qm-panel', 'none');
+    if (block.getAttribute('data-me-panel') !== kind) return;
+    block.setAttribute('data-me-panel', 'none');
   }
 
   function onPanelChange() {
-    const isOpen = block.getAttribute('data-qm-panel') === kind;
+    const isOpen = block.getAttribute('data-me-panel') === kind;
     overlay.classList.toggle('is-open', isOpen);
     overlay.setAttribute('aria-hidden', String(!isOpen));
     if (isOpen) {
@@ -500,25 +500,25 @@ function buildBottomSheet(block, kind, title, contentEl) {
 }
 
 function buildWidget(block, cardSet, fontOptions) {
-  const widget = createTag('div', { class: 'quote-maker-widget' });
-  const card = createTag('div', { class: 'qm-card' });
+  const widget = createTag('div', { class: 'mini-editor-widget' });
+  const card = createTag('div', { class: 'me-card' });
 
   const quoteWrap = createTag('div', {
-    class: 'qm-quote-wrap',
+    class: 'me-quote-wrap',
     role: 'button',
     tabindex: '0',
     'aria-label': 'Copy quote to clipboard',
   });
-  const quoteEl = createTag('p', { class: 'qm-quote' });
+  const quoteEl = createTag('p', { class: 'me-quote' });
   const first = cardSet[0] || { quote: '', author: '' };
   quoteEl.textContent = first.quote;
 
-  const tip = createTag('span', { class: 'qm-tip', 'aria-hidden': 'true' }, [
-    createTag('span', { class: 'qm-tip-box' }, ['Click to copy quote']),
+  const tip = createTag('span', { class: 'me-tip', 'aria-hidden': 'true' }, [
+    createTag('span', { class: 'me-tip-box' }, ['Click to copy quote']),
   ]);
   quoteWrap.append(quoteEl, tip);
 
-  const authorEl = createTag('p', { class: 'qm-author' });
+  const authorEl = createTag('p', { class: 'me-author' });
   authorEl.textContent = first.author;
   authorEl.style.display = first.author ? '' : 'none';
 
@@ -541,16 +541,16 @@ function buildWidget(block, cardSet, fontOptions) {
   });
 
   if (first.card) {
-    block.style.setProperty('--qm-card-bg', `url("${first.card.bg}")`);
+    block.style.setProperty('--me-card-bg', `url("${first.card.bg}")`);
   }
 
   // Set by init() once the arc carousel exists, so picking a font/colour
   // here also updates the carousel's centre card on tablet/mobile — not
-  // just the desktop widget's own .qm-card (which the CSS vars above
+  // just the desktop widget's own .me-card (which the CSS vars above
   // already cover regardless of listener wiring).
   let onFontOrColourPick = () => {};
 
-  const controls = createTag('div', { class: 'qm-controls' });
+  const controls = createTag('div', { class: 'me-controls' });
   const {
     control: fontControl,
     panel: fontPanel,
@@ -569,7 +569,7 @@ function buildWidget(block, cardSet, fontOptions) {
   );
   controls.append(fontControl, colourControl);
 
-  const panelWrap = createTag('div', { class: 'qm-panel' });
+  const panelWrap = createTag('div', { class: 'me-panel' });
   panelWrap.append(fontPanel, colourPanel);
 
   const fontSheet = buildBottomSheet(block, 'fonts', 'Choose a font style', fontSheetGrid);
@@ -577,21 +577,21 @@ function buildWidget(block, cardSet, fontOptions) {
 
   widget.append(controls, panelWrap, fontSheet.overlay, colourSheet.overlay);
 
-  // Single MutationObserver on data-qm-panel drives both sheets (mobile) and
+  // Single MutationObserver on data-me-panel drives both sheets (mobile) and
   // the aria-expanded state on both trigger buttons (all breakpoints) — the
-  // inline row's own visibility is pure CSS (`[data-qm-panel='fonts']`).
+  // inline row's own visibility is pure CSS (`[data-me-panel='fonts']`).
   const panelObserver = new MutationObserver(() => {
-    const openPanel = block.getAttribute('data-qm-panel');
+    const openPanel = block.getAttribute('data-me-panel');
     fontControl.setAttribute('aria-expanded', String(openPanel === 'fonts'));
     colourControl.setAttribute('aria-expanded', String(openPanel === 'colour'));
     fontSheet.onPanelChange();
     colourSheet.onPanelChange();
   });
-  panelObserver.observe(block, { attributes: true, attributeFilter: ['data-qm-panel'] });
+  panelObserver.observe(block, { attributes: true, attributeFilter: ['data-me-panel'] });
 
   document.addEventListener('click', (e) => {
     if (!widget.contains(e.target)) {
-      block.setAttribute('data-qm-panel', 'none');
+      block.setAttribute('data-me-panel', 'none');
     }
   });
 
@@ -612,31 +612,31 @@ function buildWidget(block, cardSet, fontOptions) {
 
 function buildDecoCard(entry, useQuote) {
   const { card, quote, author } = entry;
-  const deco = createTag('div', { class: 'qm-deco', tabindex: '-1' });
-  const cardWrap = createTag('div', { class: 'qm-deco-card-wrap' });
+  const deco = createTag('div', { class: 'me-deco', tabindex: '-1' });
+  const cardWrap = createTag('div', { class: 'me-deco-card-wrap' });
   const inner = createTag('div', {
-    class: 'qm-deco-card',
+    class: 'me-deco-card',
     style: `background-image:url("${card.bg}")`,
   });
-  // Fixed font/style for every card — see .qm-deco-quote in CSS — so no
+  // Fixed font/style for every card — see .me-deco-quote in CSS — so no
   // per-instance font styling here; only the editor's own selection varies.
-  const quoteP = createTag('p', { class: 'qm-deco-quote' });
+  const quoteP = createTag('p', { class: 'me-deco-quote' });
   quoteP.textContent = quote;
   inner.append(quoteP);
   if (author) {
-    const authorP = createTag('p', { class: 'qm-deco-author' });
+    const authorP = createTag('p', { class: 'me-deco-author' });
     authorP.textContent = author;
     inner.append(authorP);
   }
 
-  const actions = createTag('div', { class: 'qm-deco-actions' });
-  const useBtn = createTag('button', { type: 'button', class: 'qm-deco-use' });
+  const actions = createTag('div', { class: 'me-deco-actions' });
+  const useBtn = createTag('button', { type: 'button', class: 'me-deco-use' });
   useBtn.textContent = 'Use this quote';
   useBtn.addEventListener('click', () => useQuote(entry));
 
   const copyBtn = createTag('button', {
     type: 'button',
-    class: 'qm-deco-copy',
+    class: 'me-deco-copy',
     'aria-label': 'Copy quote',
   }, [getIconElementDeprecated('copy-quote')]);
   copyBtn.addEventListener('click', async () => {
@@ -654,12 +654,12 @@ function buildDecoCard(entry, useQuote) {
 }
 
 function buildDecoCards(cardSet, useQuote) {
-  const wrap = createTag('div', { class: 'quote-maker-decorations', 'aria-hidden': 'true' });
+  const wrap = createTag('div', { class: 'mini-editor-decorations', 'aria-hidden': 'true' });
   // cardSet[0] powers the main widget; decorative cards use the rest.
   const decoEntries = cardSet.slice(1, 1 + DECO_CARD_COUNT);
   decoEntries.forEach((entry, i) => {
     const deco = buildDecoCard(entry, useQuote);
-    deco.classList.add(`qm-deco--${i + 1}`);
+    deco.classList.add(`me-deco--${i + 1}`);
     wrap.append(deco);
   });
   return wrap;
@@ -670,20 +670,20 @@ function buildDecoCards(cardSet, useQuote) {
  * slot (which would only ever swap content, never actually move — nothing
  * to transition), each of these 3 elements keeps its own content across a
  * navigation and is reassigned to a *different role's position* — that's
- * what makes the 1s transform transition on .qm-arc-card actually animate
+ * what makes the 1s transform transition on .me-arc-card actually animate
  * a visible slide/rotate between roles instead of an instant content pop.
  */
-const ROLE_CLASSES = ['qm-arc-card--prev', 'qm-arc-card--center', 'qm-arc-card--next', 'qm-arc-card--stage-prev', 'qm-arc-card--stage-next'];
+const ROLE_CLASSES = ['me-arc-card--prev', 'me-arc-card--center', 'me-arc-card--next', 'me-arc-card--stage-prev', 'me-arc-card--stage-next'];
 
 function buildArcCard(onActivate) {
   const el = createTag('div', {
-    class: 'qm-arc-card',
+    class: 'me-arc-card',
     role: 'option',
     'aria-selected': 'false',
     tabindex: '-1',
   });
-  const quoteP = createTag('p', { class: 'qm-arc-quote' });
-  const authorP = createTag('p', { class: 'qm-arc-author' });
+  const quoteP = createTag('p', { class: 'me-arc-quote' });
+  const authorP = createTag('p', { class: 'me-arc-author' });
   el.append(quoteP, authorP);
   el.addEventListener('click', () => onActivate(el));
 
@@ -717,14 +717,14 @@ function buildArcCard(onActivate) {
   function stageAt(stageRole) {
     el.style.transition = 'none';
     el.classList.remove(...ROLE_CLASSES);
-    el.classList.add(`qm-arc-card--${stageRole}`);
+    el.classList.add(`me-arc-card--${stageRole}`);
     el.getBoundingClientRect(); // force reflow so the instant jump commits
     el.style.transition = '';
   }
 
   function setRole(role) {
     el.classList.remove(...ROLE_CLASSES);
-    el.classList.add(`qm-arc-card--${role}`);
+    el.classList.add(`me-arc-card--${role}`);
     setInteractivity(role);
   }
 
@@ -745,9 +745,9 @@ function buildArcCard(onActivate) {
  * the 3 clickable/tabbable cards.
  */
 function buildArcGhost() {
-  const el = createTag('div', { class: 'qm-arc-card qm-arc-ghost', 'aria-hidden': 'true' });
-  const quoteP = createTag('p', { class: 'qm-arc-quote' });
-  const authorP = createTag('p', { class: 'qm-arc-author' });
+  const el = createTag('div', { class: 'me-arc-card me-arc-ghost', 'aria-hidden': 'true' });
+  const quoteP = createTag('p', { class: 'me-arc-quote' });
+  const authorP = createTag('p', { class: 'me-arc-author' });
   el.append(quoteP, authorP);
 
   function playExit(entry, fromRole) {
@@ -763,13 +763,13 @@ function buildArcGhost() {
     authorP.style.display = entry.author ? '' : 'none';
 
     el.style.transition = 'none';
-    el.classList.remove('qm-arc-card--exit-prev', 'qm-arc-card--exit-next', 'qm-arc-ghost--visible');
-    el.classList.add(`qm-arc-card--${fromRole}`, 'qm-arc-ghost--visible');
+    el.classList.remove('me-arc-card--exit-prev', 'me-arc-card--exit-next', 'me-arc-ghost--visible');
+    el.classList.add(`me-arc-card--${fromRole}`, 'me-arc-ghost--visible');
     el.getBoundingClientRect(); // force reflow so the starting position commits
     el.style.transition = '';
     requestAnimationFrame(() => requestAnimationFrame(() => {
-      el.classList.remove(`qm-arc-card--${fromRole}`);
-      el.classList.add(`qm-arc-card--exit-${fromRole}`);
+      el.classList.remove(`me-arc-card--${fromRole}`);
+      el.classList.add(`me-arc-card--exit-${fromRole}`);
     }));
   }
 
@@ -782,14 +782,14 @@ function buildArcGhost() {
  * *role* (and therefore which fixed CSS position/rotation) each of the 3
  * existing card elements occupies, so every navigation is a real transform
  * change on real elements — driven entirely by the 1s CSS transition on
- * .qm-arc-card, not a JS-animated or instantly-popped content swap. Only
+ * .me-arc-card, not a JS-animated or instantly-popped content swap. Only
  * the card moving furthest (the one leaving `next` on a "next" click, or
  * leaving `prev` on a "prev" click) needs its content replaced, since it's
  * re-entering the deck one step further round; the other two just carry
  * their existing content into their new role.
  */
 function buildArcCarousel(cardSet, useQuote) {
-  const root = createTag('div', { class: 'qm-arc' });
+  const root = createTag('div', { class: 'me-arc' });
   const total = cardSet.length;
   let activeIndex = 0;
   // The centre card can be patched independently of cardSet (e.g. the
@@ -807,8 +807,8 @@ function buildArcCarousel(cardSet, useQuote) {
   const withFont = (entry) => (selectedFont ? { ...entry, font: selectedFont } : entry);
 
   const onActivate = (el) => {
-    if (el.classList.contains('qm-arc-card--prev')) goPrev(); // eslint-disable-line no-use-before-define
-    else if (el.classList.contains('qm-arc-card--next')) goNext(); // eslint-disable-line no-use-before-define
+    if (el.classList.contains('me-arc-card--prev')) goPrev(); // eslint-disable-line no-use-before-define
+    else if (el.classList.contains('me-arc-card--next')) goNext(); // eslint-disable-line no-use-before-define
   };
   const cardA = buildArcCard(onActivate);
   const cardB = buildArcCard(onActivate);
@@ -886,7 +886,7 @@ function buildArcCarousel(cardSet, useQuote) {
 
   // Applied from the widget's font/colour pickers (see buildWidget) so
   // selecting a font or background there updates the arc carousel exactly
-  // as it already updates the desktop widget's own .qm-card. A font patch
+  // as it already updates the desktop widget's own .me-card. A font patch
   // is carousel-wide (re-renders all 3 visible cards, see renderFont
   // below); a colour/quote/author patch stays centre-only via
   // centreOverride, same as before.
@@ -912,12 +912,12 @@ function buildArcCarousel(cardSet, useQuote) {
 
   const prevBtn = createTag('button', {
     type: 'button',
-    class: 'qm-arc-nav qm-arc-nav--prev',
+    class: 'me-arc-nav me-arc-nav--prev',
     'aria-label': 'Previous template',
   }, [getIconElementDeprecated('arc-nav-left')]);
   const nextBtn = createTag('button', {
     type: 'button',
-    class: 'qm-arc-nav qm-arc-nav--next',
+    class: 'me-arc-nav me-arc-nav--next',
     'aria-label': 'Next template',
   }, [getIconElementDeprecated('arc-nav-right')]);
   root.append(prevBtn, nextBtn);
@@ -933,7 +933,7 @@ export default async function init(block) {
 
   const props = constructProps(block);
   block.innerHTML = '';
-  block.setAttribute('data-qm-panel', 'none');
+  block.setAttribute('data-me-panel', 'none');
 
   const header = buildContentHeader(props);
   block.append(header);
@@ -956,7 +956,7 @@ export default async function init(block) {
     // set of quote/background/font combinations as the desktop zig-zag.
     const arcCardSet = [cardSet[0], ...cardSet.slice(1, 1 + DECO_CARD_COUNT)];
 
-    const stage = createTag('div', { class: 'quote-maker-stage' });
+    const stage = createTag('div', { class: 'mini-editor-stage' });
     const { widget, useQuote, onFontOrColourChange } = buildWidget(block, cardSet, fontOptions);
     const decorations = buildDecoCards(cardSet, useQuote);
     const { root: arcCarousel, updateCentre } = buildArcCarousel(arcCardSet, useQuote);
@@ -966,10 +966,10 @@ export default async function init(block) {
     // bottom edge, per the Figma reference, without extending past it.
     header.append(decorations);
     // The arc carousel is inserted inside the widget, in the same flow slot
-    // as .qm-card (which .qm-carousel-mode hides), rather than as a sibling
+    // as .me-card (which .me-carousel-mode hides), rather than as a sibling
     // of the widget in the stage — the stage's flex row would otherwise
-    // squeeze both side by side instead of the arc taking .qm-card's place.
-    widget.querySelector('.qm-card').after(arcCarousel);
+    // squeeze both side by side instead of the arc taking .me-card's place.
+    widget.querySelector('.me-card').after(arcCarousel);
     stage.append(widget);
     block.append(stage);
 
@@ -990,25 +990,25 @@ export default async function init(block) {
       return size <= TABLET_BREAKPOINT;
     };
     const syncViewportMode = () => {
-      block.classList.toggle('qm-carousel-mode', isSmallViewport());
+      block.classList.toggle('me-carousel-mode', isSmallViewport());
     };
     syncViewportMode();
     window.addEventListener('resize', syncViewportMode);
 
     // "Create a design" buttons on the page's collapsible-rows quotes (see
-    // collapsible-rows.js) dispatch this instead of importing quote-maker
+    // collapsible-rows.js) dispatch this instead of importing mini-editor
     // directly, since the two blocks are otherwise unrelated. Scrolls the
     // editor into view and swaps in the copied quote/author, on whichever
     // of the desktop widget or the tablet/mobile carousel is active.
-    document.addEventListener('quote-maker:use-quote', (e) => {
+    document.addEventListener('mini-editor:use-quote', (e) => {
       const { quote, author } = e.detail;
       useQuote({ quote, author });
       updateCentre({ quote, author });
       block.scrollIntoView({ behavior: 'smooth', block: 'center' });
     });
   } catch (error) {
-    window.lana?.log(`Error in quote-maker: ${error?.message || error}`, {
-      tags: 'quote-maker',
+    window.lana?.log(`Error in mini-editor: ${error?.message || error}`, {
+      tags: 'mini-editor',
       severity: 'error',
     });
     block.closest('.section')?.remove();
