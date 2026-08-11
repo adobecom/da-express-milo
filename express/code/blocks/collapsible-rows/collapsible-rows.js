@@ -158,7 +158,11 @@ function buildTableLayout(block, typographyClasses = {}, hasMiniEditor = false) 
       subHeaderEl.classList.add(...typographyClasses.body);
     }
     subHeaderAccordion.append(subHeaderEl);
-    const quoteActions = buildQuoteActions(headerEl.textContent.trim(), subHeaderEl.textContent.trim(), hasMiniEditor);
+    const quoteActions = buildQuoteActions(
+      headerEl.textContent.trim(),
+      subHeaderEl.textContent.trim(),
+      hasMiniEditor,
+    );
     if (quoteActions) subHeaderAccordion.append(quoteActions);
 
     headerEl.addEventListener('click', () => {
@@ -226,7 +230,11 @@ function buildOriginalLayout(
       subHeaderEl.classList.add(...typographyClasses.body);
     }
     accordion.append(subHeaderEl);
-    const quoteActions = buildQuoteActions(headerEl.textContent.trim(), subHeaderEl.textContent.trim(), hasMiniEditor);
+    const quoteActions = buildQuoteActions(
+      headerEl.textContent.trim(),
+      subHeaderEl.textContent.trim(),
+      hasMiniEditor,
+    );
     if (quoteActions) accordion.append(quoteActions);
   });
 

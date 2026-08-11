@@ -289,16 +289,21 @@ function buildWidget(root, a11y, cardSet, fontOptions) {
     class: 'me-quote-wrap',
     role: 'button',
     tabindex: '0',
-    'aria-label': 'Copy quote to clipboard',
+    'aria-describedby': 'me-quote-wrap-hint',
   });
   const quoteEl = createTag('p', { class: 'me-quote' });
   const first = cardSet[0] || { quote: '', author: '' };
   quoteEl.textContent = first.quote;
 
+  // aria-describedby (not aria-label) so the accessible name stays the
+  // visible quote text itself — an aria-label here would replace it
+  // entirely, leaving screen reader users with "Copy quote to clipboard,
+  // button" and no indication of which quote (see label-content-name-mismatch).
+  const hint = createTag('span', { id: 'me-quote-wrap-hint', class: 'sr-only' }, ['Copy quote to clipboard']);
   const tip = createTag('span', { class: 'me-tip', 'aria-hidden': 'true' }, [
     createTag('span', { class: 'me-tip-box' }, ['Click to copy quote']),
   ]);
-  quoteWrap.append(quoteEl, tip);
+  quoteWrap.append(quoteEl, hint, tip);
 
   const authorEl = createTag('p', { class: 'me-author' });
   authorEl.textContent = first.author;
@@ -441,7 +446,11 @@ function buildDecoCard(a11y, entry, useQuote) {
 }
 
 function buildDecoCards(a11y, cardSet, useQuote) {
-  const wrap = createTag('div', { class: 'mini-editor-decorations', 'aria-hidden': 'true' });
+  // Not aria-hidden: unlike a purely decorative background image, each card
+  // here holds two real, focusable actions ("Use this quote" / "Copy quote")
+  // — hiding the wrapper from assistive tech would leave those buttons in
+  // the tab order but silently unannounced (see aria-hidden-focus).
+  const wrap = createTag('div', { class: 'mini-editor-decorations' });
   // cardSet[0] powers the main widget; decorative cards use the rest.
   const decoEntries = cardSet.slice(1, 1 + DECO_CARD_COUNT);
   decoEntries.forEach((entry, i) => {
@@ -577,6 +586,15 @@ function buildArcGhost() {
  */
 function buildArcCarousel(cardSet, useQuote, defaultFont) {
   const root = createTag('div', { class: 'me-arc' });
+  // Each .me-arc-card has role="option" (see buildArcCard), which axe
+  // requires to sit inside a role="listbox" parent (see
+  // aria-required-parent) — but that parent may only contain option/group
+  // children (aria-required-children), and .me-arc itself also holds the
+  // prev/next nav buttons as direct children. listboxRole wraps just the
+  // ghost + 3 cards so both rules are satisfied; display: contents keeps it
+  // out of layout so .me-arc-card's `position: absolute` (in CSS) still
+  // resolves against .me-arc, not this wrapper.
+  const listboxRole = createTag('div', { class: 'me-arc-listbox', role: 'listbox', 'aria-label': 'Template' });
   const total = cardSet.length;
   let activeIndex = 0;
   // The centre card can be patched independently of cardSet (e.g. the
@@ -698,7 +716,8 @@ function buildArcCarousel(cardSet, useQuote, defaultFont) {
 
   applyRoles();
   renderAll();
-  root.append(ghost.el, cardA.el, cardB.el, cardC.el);
+  listboxRole.append(ghost.el, cardA.el, cardB.el, cardC.el);
+  root.append(listboxRole);
 
   const prevBtn = createTag('button', {
     type: 'button',

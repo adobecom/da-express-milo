@@ -556,6 +556,14 @@ p.me-deco-author {
   clip-path: inset(calc(-1 * var(--me-arc-extra-h)) 0);
 }
 
+/* ARIA-only grouping for the 3 option cards + ghost (see buildArcCarousel) —
+   display: contents keeps it out of layout entirely, so each .me-arc-card's
+   position: absolute below still resolves against .me-arc, not this
+   wrapper, exactly as if the wrapper weren't there. */
+.me-arc-listbox {
+  display: contents;
+}
+
 .me-carousel-mode .mini-editor-decorations {
   display: none;
 }
