@@ -575,7 +575,7 @@ function buildArcGhost() {
  * re-entering the deck one step further round; the other two just carry
  * their existing content into their new role.
  */
-function buildArcCarousel(cardSet, useQuote) {
+function buildArcCarousel(cardSet, useQuote, defaultFont) {
   const root = createTag('div', { class: 'me-arc' });
   const total = cardSet.length;
   let activeIndex = 0;
@@ -589,7 +589,10 @@ function buildArcCarousel(cardSet, useQuote) {
   // Persists across navigation (unlike centreOverride) and applies to every
   // card — prev/next/ghost included, not just centre — so picking a font
   // once keeps showing on whichever entries rotate into view afterwards.
-  let selectedFont = null;
+  // Seeded with the first font option so the carousel renders that font on
+  // load, matching the desktop widget card (which the --me-quote-font CSS
+  // variable already applies to via buildFontControl's initial selectFont).
+  let selectedFont = defaultFont || null;
 
   const withFont = (entry) => (selectedFont ? { ...entry, font: selectedFont } : entry);
 
@@ -760,7 +763,7 @@ export default async function createMiniEditorWidget(config = {}) {
     widget, useQuote, onFontOrColourChange, destroy: destroyWidget,
   } = buildWidget(root, a11y, cardSet, fontOptions);
   const decorations = buildDecoCards(a11y, cardSet, useQuote);
-  const { root: arcCarousel, updateCentre } = buildArcCarousel(arcCardSet, useQuote);
+  const { root: arcCarousel, updateCentre } = buildArcCarousel(arcCardSet, useQuote, fontOptions[0]);
   onFontOrColourChange(updateCentre);
 
   // The arc carousel is inserted inside the widget, in the same flow slot
