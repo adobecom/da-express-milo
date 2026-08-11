@@ -245,6 +245,7 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
   const [hydrateMsg, setHydrateMsg] = useState<string | null>(null);
   const [validating, setValidating] = useState(false);
   const [validateMsg, setValidateMsg] = useState<string | null>(null);
+  const [validateUnreachable, setValidateUnreachable] = useState(false);
   const [validationStatus, setValidationStatus] = useState<Record<string, 'valid' | 'invalid'>>({});
   const [columns, setColumns] = useState<string[]>([]);
   const [zazzleHydratedFields, setZazzleHydratedFields] = useState<Record<string, string[]>>({});
@@ -413,11 +414,14 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
     );
     const changedCount = updated.filter((row, i) => row !== rows[i]).length;
     const refCount = Object.keys(referenceValues).length;
+    const anyProductIds = rows.some((r) => r.product_id?.trim());
     setHydrateMsg(
       changedCount > 0
         ? `Updated ${changedCount} row${changedCount === 1 ? '' : 's'} from Zazzle`
         : refCount > 0
         ? 'All fields already complete — Zazzle data loaded for comparison'
+        : anyProductIds
+        ? 'Could not reach Zazzle — this origin may be blocked (CORS). Try localhost or the .aem.live URL.'
         : 'No matching Zazzle data found',
     );
     setZazzleHydratedFields(hydratedFields);
@@ -432,12 +436,15 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
   async function handleValidate() {
     setValidating(true);
     setValidateMsg(null);
+    setValidateUnreachable(false);
     const results: Record<string, 'valid' | 'invalid'> = {};
+    let attempted = 0;
 
     await Promise.all(
       rows.map(async (row) => {
         const id = row.product_id?.trim();
         if (!id) { results[row._id] = 'invalid'; return; }
+        attempted++;
         const product = await lookupProductFromTemplate(id);
         results[row._id] = product ? 'valid' : 'invalid';
       }),
@@ -447,6 +454,10 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
     const validCount = Object.values(results).filter((v) => v === 'valid').length;
     const invalidCount = Object.values(results).filter((v) => v === 'invalid').length;
     setValidateMsg(`${validCount} valid, ${invalidCount} invalid`);
+    // Every real product ID came back empty — that is almost always a blocked origin (Zazzle's CORS
+    // allowlist doesn't include this .da.live origin) rather than every ID actually being invalid.
+    // Surface the real cause instead of a wall of red ✗.
+    setValidateUnreachable(attempted > 0 && validCount === 0);
     setValidating(false);
   }
 
@@ -756,6 +767,16 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
           )}
           {validateMsg && <span className="text-xs text-gray-500">{validateMsg}</span>}
           {hydrateMsg && <span className="text-xs text-gray-500">{hydrateMsg}</span>}
+        </div>
+      )}
+
+      {validateUnreachable && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 text-sm text-amber-800">
+          <strong>Couldn&apos;t reach Zazzle from this origin.</strong> None of the product IDs could
+          be validated — with real IDs that is almost always a CORS/allowlist block from the current
+          origin, not invalid IDs. Run the tool from <code>localhost</code> or the{' '}
+          <code>.aem.live</code> URL, or have this origin restored in Zazzle&apos;s allowlist. The red
+          ✗ marks reflect the failed requests, not the IDs themselves.
         </div>
       )}
 

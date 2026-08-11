@@ -28,7 +28,7 @@ export async function fetchProductFromTemplate(productId: string): Promise<Zazzl
   }
 }
 
-const templateCache = new Map<string, ZazzleProduct | null>();
+const templateCache = new Map<string, ZazzleProduct>();
 
 /**
  * Session-scoped memoized wrapper over {@link fetchProductFromTemplate}, keyed by product URN.
@@ -39,6 +39,11 @@ const templateCache = new Map<string, ZazzleProduct | null>();
  *
  * Pass `{ force: true }` to bypass and refresh the cached entry — used by the per-row
  * "Refetch Zazzle info" action to re-pull after an edit on Zazzle's side or a transient failure.
+ *
+ * Only successful lookups are cached. A `null` — product genuinely not found, OR an
+ * unreachable/CORS-blocked request that {@link fetchProductFromTemplate} swallowed to `null` — is
+ * deliberately NOT cached, so a retry re-hits the network instead of returning a stale failure, and
+ * a failed Document Manager backfill can't poison Generate-tab validation for the same URN.
  */
 export async function lookupProductFromTemplate(
   productId: string,
@@ -46,7 +51,7 @@ export async function lookupProductFromTemplate(
 ): Promise<ZazzleProduct | null> {
   if (!force && templateCache.has(productId)) return templateCache.get(productId) ?? null;
   const product = await fetchProductFromTemplate(productId);
-  templateCache.set(productId, product);
+  if (product) templateCache.set(productId, product);
   return product;
 }
 
