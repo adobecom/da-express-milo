@@ -56,10 +56,6 @@
   z-index: 1;
 }
 
-.mini-editor-header p {
-  margin: 0 !important;
-}
-
 .mini-editor-logo {
   display: flex;
   align-items: center;
@@ -81,8 +77,11 @@
   color: #222;
 }
 
+/* margin: 0 needs !important to beat main .section .content p / main .section p
+   in styles.css (3 classes + tag vs. our 1 class + tag) — without it those
+   rules' margin: var(--spacing-500) 0 wins and blows out the header spacing. */
 .mini-editor-header p {
-  margin: 0;
+  margin: 0 !important;
   max-width: 437px;
   font-size: var(--body-font-size-m, 1rem);
   color: var(--color-typography-body, #505050);
@@ -106,6 +105,23 @@
 @media (width <= 767px) {
   .mini-editor {
     padding: var(--spacing-500) var(--spacing-300);
+    /* Smaller card than tablet — per Figma mobile frame 0-18684, only a
+       small edge of the neighbouring templates should be visible. Since
+       the container is now 100vw everywhere (see .me-arc in
+       mini-editor-widget.css), how much of each side card actually shows
+       follows naturally from the smaller mobile viewport, not a separately
+       tuned peek amount. --me-arc-slide recalculated for this card size the
+       same way as the base rule:
+       327/2*cos(8)+270/2*sin(8) + 327/2 ≈ 344px; +10px safety margin.
+       --me-arc-lift/--me-arc-extra-h likewise recalculated for 327x270.
+       Defined on .mini-editor (not .me-arc) so .mini-editor-widget can
+       also read --me-arc-card-w — see .me-carousel-mode .mini-editor-widget. */
+    --me-arc-card-w: 327px;
+    --me-arc-card-h: 270px;
+    --me-arc-slide: 354px;
+    --me-arc-lift: 24px;
+    --me-arc-extra-h: 50px;
+    --me-arc-gap: var(--spacing-100);
   }
 
   /* Mobile header is left-aligned (not centred) per Figma frame 0-18684,
@@ -138,25 +154,5 @@
      is marked hidden in the Hero Mobile frame. */
   .mini-editor-header p:has(a.button) {
     display: none;
-  }
-
-  .mini-editor {
-    /* Smaller card than tablet — per Figma mobile frame 0-18684, only a
-       small edge of the neighbouring templates should be visible. Since
-       the container is now 100vw everywhere (see .me-arc in
-       mini-editor-widget.css), how much of each side card actually shows
-       follows naturally from the smaller mobile viewport, not a separately
-       tuned peek amount. --me-arc-slide recalculated for this card size the
-       same way as the base rule:
-       327/2*cos(8)+270/2*sin(8) + 327/2 ≈ 344px; +10px safety margin.
-       --me-arc-lift/--me-arc-extra-h likewise recalculated for 327x270.
-       Defined on .mini-editor (not .me-arc) so .mini-editor-widget can
-       also read --me-arc-card-w — see .me-carousel-mode .mini-editor-widget. */
-    --me-arc-card-w: 327px;
-    --me-arc-card-h: 270px;
-    --me-arc-slide: 354px;
-    --me-arc-lift: 24px;
-    --me-arc-extra-h: 50px;
-    --me-arc-gap: var(--spacing-100);
   }
 }

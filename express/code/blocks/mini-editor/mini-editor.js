@@ -59,7 +59,13 @@ function getPageQuotes() {
     }).filter((q) => !!q.quote);
   }
 
-  const rawRows = main.querySelectorAll('.collapsible-rows > div');
+  // The .expandable (table-layout) variant reserves its first two raw rows
+  // for a background image and a section title (see collapsible-rows.js
+  // buildTableLayout's rows.shift() calls) — those aren't quotes, and this
+  // raw fallback has no way to tell them apart from real quote rows before
+  // collapsible-rows decorates. Skip it there; the decorated-row path above
+  // already handles that variant correctly once it has decorated.
+  const rawRows = main.querySelectorAll('.collapsible-rows:not(.expandable) > div');
   return Array.from(rawRows, (row) => {
     const cols = row.querySelectorAll(':scope > div');
     return {
@@ -95,8 +101,9 @@ function constructProps(block) {
     }
     // Content row: heading/subcopy/CTA authored in the first column,
     // regardless of whether DA left a trailing empty second column.
-    if (!props.contentRow && cols[0]?.textContent.trim()) {
-      props.contentRow = cols[0];
+    const [firstCol] = cols;
+    if (!props.contentRow && firstCol?.textContent.trim()) {
+      props.contentRow = firstCol;
     }
   });
 
