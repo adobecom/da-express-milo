@@ -1868,22 +1868,27 @@ main .section.no-h2-margin .content h2 {
 /* Based on Figma design system values - matches Milo's consonant typography pattern */
 
 /* Express Heading Classes */
-.ax-heading-xxxl,
-.ax-heading-xxl,
-.ax-heading-xl,
-.ax-heading-l,
-.ax-heading-m,
-.ax-heading-s,
-.ax-heading-xs,
-.ax-heading-xxs {
+/* MWPW-202729: scoped to :is(h1..h6) - these classes are meant to style actual headings only. If
+   an .ax-heading-* class ends up on a non-heading tag (e.g. collapsible-rows reuses whatever tag an
+   author wrote for its accordion trigger, which may be a <span> or <p>, not a real heading), it
+   intentionally gets none of this styling; give that element a real heading tag instead of relying
+   on the class alone. */
+:is(h1, h2, h3, h4, h5, h6).ax-heading-xxxl,
+:is(h1, h2, h3, h4, h5, h6).ax-heading-xxl,
+:is(h1, h2, h3, h4, h5, h6).ax-heading-xl,
+:is(h1, h2, h3, h4, h5, h6).ax-heading-l,
+:is(h1, h2, h3, h4, h5, h6).ax-heading-m,
+:is(h1, h2, h3, h4, h5, h6).ax-heading-s,
+:is(h1, h2, h3, h4, h5, h6).ax-heading-xs,
+:is(h1, h2, h3, h4, h5, h6).ax-heading-xxs {
   margin: 0;
   font-weight: var(--ax-heading-weight);
   font-family: var(--body-font-family);
 }
 
-/* MWPW-202729: font-size/line-height for the authored heading-size override live in their own,
-   deliberately over-specified rule below rather than !important, so this stays ordinary cascade
-   (in principle still beatable by something even more specific, unlike !important).
+/* font-size/line-height for the authored heading-size override live in their own, deliberately
+   over-specified rule below rather than !important, so this stays ordinary cascade (in principle
+   still beatable by something even more specific, unlike !important).
    `:not(#_)` is a no-op filter (id `_` is never authored) purely to add one ID's worth of
    specificity - the only heading rule in this codebase that outranks plain classes is the
    `:lang(ja) #hero h1.heading-long`-style family (id + 2 classes); everything else is class/type
@@ -1891,42 +1896,42 @@ main .section.no-h2-margin .content h2 {
    guessing at ever-deeper competing selectors. Re-run the same audit (grep block CSS for `#` or long
    compound selectors touching h1-h6) before assuming this still wins if a future block introduces
    something more specific. */
-.ax-heading-xxxl.ax-heading-xxxl.ax-heading-xxxl:not(#_) {
+:is(h1, h2, h3, h4, h5, h6).ax-heading-xxxl.ax-heading-xxxl.ax-heading-xxxl:not(#_) {
   font-size: var(--ax-heading-xxxl-size);
   line-height: var(--ax-heading-xxxl-lh);
 }
 
-.ax-heading-xxl.ax-heading-xxl.ax-heading-xxl:not(#_) {
+:is(h1, h2, h3, h4, h5, h6).ax-heading-xxl.ax-heading-xxl.ax-heading-xxl:not(#_) {
   font-size: var(--ax-heading-xxl-size);
   line-height: var(--ax-heading-xxl-lh);
 }
 
-.ax-heading-xl.ax-heading-xl.ax-heading-xl:not(#_) {
+:is(h1, h2, h3, h4, h5, h6).ax-heading-xl.ax-heading-xl.ax-heading-xl:not(#_) {
   font-size: var(--ax-heading-xl-size);
   line-height: var(--ax-heading-xl-lh);
 }
 
-.ax-heading-l.ax-heading-l.ax-heading-l:not(#_) {
+:is(h1, h2, h3, h4, h5, h6).ax-heading-l.ax-heading-l.ax-heading-l:not(#_) {
   font-size: var(--ax-heading-l-size);
   line-height: var(--ax-heading-l-lh);
 }
 
-.ax-heading-m.ax-heading-m.ax-heading-m:not(#_) {
+:is(h1, h2, h3, h4, h5, h6).ax-heading-m.ax-heading-m.ax-heading-m:not(#_) {
   font-size: var(--ax-heading-m-size);
   line-height: var(--ax-heading-m-lh);
 }
 
-.ax-heading-s.ax-heading-s.ax-heading-s:not(#_) {
+:is(h1, h2, h3, h4, h5, h6).ax-heading-s.ax-heading-s.ax-heading-s:not(#_) {
   font-size: var(--ax-heading-s-size);
   line-height: var(--ax-heading-s-lh);
 }
 
-.ax-heading-xs.ax-heading-xs.ax-heading-xs:not(#_) {
+:is(h1, h2, h3, h4, h5, h6).ax-heading-xs.ax-heading-xs.ax-heading-xs:not(#_) {
   font-size: var(--ax-heading-xs-size);
   line-height: var(--ax-heading-xs-lh);
 }
 
-.ax-heading-xxs.ax-heading-xxs.ax-heading-xxs:not(#_) {
+:is(h1, h2, h3, h4, h5, h6).ax-heading-xxs.ax-heading-xxs.ax-heading-xxs:not(#_) {
   font-size: var(--ax-heading-xxs-size);
   line-height: var(--ax-heading-xxs-lh);
 }
