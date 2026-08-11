@@ -3,6 +3,12 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { mockRes } from '../test-utilities.js';
 
+// Must be set before scripts.js is imported below: it makes loadPage() bail out
+// so its deferred page-init side effects (external IMS script, a fire-and-forget
+// getCountry() that rejects against the mock config) don't leak into tests and
+// fail unrelated cases under load.
+window.isTestEnv = true;
+
 const imports = await Promise.all([import('../../../express/code/scripts/utils.js'), import('../../../express/code/scripts/scripts.js')]);
 const { setLibs, getLibs } = imports[0];
 // Point getLibs() at the local mocks so dynamic imports inside the block
@@ -15,6 +21,19 @@ const [{ default: decorate }] = await Promise.all([import('../../../express/code
 document.body.innerHTML = await readFile({ path: './mocks/body.html' });
 const mockAPIResposne = JSON.parse(await readFile({ path: './mocks/template-utils.json' }));
 const defaultBody = document.body.innerHTML;
+
+// The search submit handler awaits a dynamic import(samplerum.js) before it
+// calls t_locationAssign, so the redirect happens asynchronously and its
+// timing varies (cold module fetch, CI load). Poll instead of a fixed delay.
+const waitUntil = async (predicate, { timeout = 2000, interval = 10 } = {}) => {
+  const start = Date.now();
+  while (!predicate()) {
+    if (Date.now() - start > timeout) return false;
+    // eslint-disable-next-line no-await-in-loop
+    await new Promise((r) => { setTimeout(r, interval); });
+  }
+  return true;
+};
 const searchBarBody = `
 <main>
   <div class="section" data-status="decorated" data-idx="2">
@@ -44,11 +63,19 @@ describe('template-x-carousel-toolbar', () => {
       if (url.includes('/express-search-api')) return mockRes({ payload: mockAPIResposne });
       return {};
     });
+    // Keep a persistent redirect stub for the whole suite. The block's search
+    // submit falls back to a real window.location.assign() when t_locationAssign
+    // is missing (template-x-carousel-toolbar.js). A late/leaked async redirect
+    // firing after a test tore down its stub would then navigate the test iframe
+    // for real, wiping the page and breaking later tests. A suite-wide stub means
+    // a stray redirect is always harmlessly captured, never a real navigation.
+    window.t_locationAssign = sinon.stub();
     block = document.querySelector('.template-x-carousel-toolbar');
     await decorate(block);
   });
   after(() => {
     window.fetch = oldFetch;
+    delete window.t_locationAssign;
   });
 
   afterEach(() => {
@@ -108,12 +135,11 @@ describe('template-x-carousel-toolbar', () => {
     beforeEach(async () => {
       document.body.innerHTML = searchBarBody;
       block = document.querySelector('.template-x-carousel-toolbar');
-      window.t_locationAssign = sinon.stub();
+      window.t_locationAssign.resetHistory();
       await decorate(block);
     });
 
     afterEach(() => {
-      delete window.t_locationAssign;
       document.body.innerHTML = defaultBody;
     });
 
@@ -209,12 +235,11 @@ describe('template-x-carousel-toolbar', () => {
 </main>`;
         document.body.innerHTML = authoredBody;
         block = document.querySelector('.template-x-carousel-toolbar');
-        window.t_locationAssign = sinon.stub();
+        window.t_locationAssign.resetHistory();
         await decorate(block);
       });
 
       afterEach(() => {
-        delete window.t_locationAssign;
         delete window.adobeIMS;
         document.body.innerHTML = defaultBody;
       });
@@ -231,8 +256,10 @@ describe('template-x-carousel-toolbar', () => {
         window.adobeIMS = { isSignedInUser: () => false };
         const searchForm = block.querySelector('.search-form');
         block.querySelector('input.search-bar').value = 'poster';
+        // Ignore any redirect leaked from a prior test's async submit.
+        window.t_locationAssign.resetHistory();
         searchForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-        await new Promise((r) => { setTimeout(r, 50); });
+        await waitUntil(() => window.t_locationAssign.called);
         expect(window.t_locationAssign.calledOnce).to.be.true;
         expect(window.t_locationAssign.firstCall.args[0]).to.equal(
           CUSTOM_OUT_URL.replace('<category>', encodeURIComponent('poster')),
@@ -243,8 +270,10 @@ describe('template-x-carousel-toolbar', () => {
         window.adobeIMS = { isSignedInUser: () => true };
         const searchForm = block.querySelector('.search-form');
         block.querySelector('input.search-bar').value = 'poster';
+        // Ignore any redirect leaked from a prior test's async submit.
+        window.t_locationAssign.resetHistory();
         searchForm.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
-        await new Promise((r) => { setTimeout(r, 50); });
+        await waitUntil(() => window.t_locationAssign.called);
         expect(window.t_locationAssign.calledOnce).to.be.true;
         expect(window.t_locationAssign.firstCall.args[0]).to.equal(
           CUSTOM_IN_URL.replace('<category>', encodeURIComponent('poster')),
