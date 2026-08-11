@@ -1,27 +1,27 @@
-.quote-maker {
-  --qm-card-bg: none;
-  --qm-quote-font: var(--body-font-family);
-  --qm-quote-font-style: normal;
-  --qm-quote-font-weight: normal;
-  /* Arc carousel sizing (tablet/mobile) — defined here, not on .qm-arc
-     itself, so .quote-maker-widget (a sibling of .qm-arc, not a
-     descendant) can also read --qm-arc-card-w to keep its own max-width
+.mini-editor {
+  --me-card-bg: none;
+  --me-quote-font: var(--body-font-family);
+  --me-quote-font-style: normal;
+  --me-quote-font-weight: normal;
+  /* Arc carousel sizing (tablet/mobile) — defined here, not on .me-arc
+     itself, so .mini-editor-widget (a sibling of .me-arc, not a
+     descendant) can also read --me-arc-card-w to keep its own max-width
      in lockstep with the carousel's card size at every breakpoint. See
-     .qm-carousel-mode .quote-maker-widget below and the mobile media
+     .me-carousel-mode .mini-editor-widget below and the mobile media
      query for the per-breakpoint overrides. */
-  --qm-arc-card-w: 542px;
-  --qm-arc-card-h: 350px;
+  --me-arc-card-w: 542px;
+  --me-arc-card-h: 350px;
   /* Extra height below the centre card's own box: rotation pivots from
      each side card's own centre (transform-origin never changes between
      roles, so the transition can't swing through the centre card at any
-     point along the path), then a translateY compensation (--qm-arc-lift)
+     point along the path), then a translateY compensation (--me-arc-lift)
      pulls the whole card down so its bottom-inner corner lines up with
      the centre card's bottom edge instead of sitting ~39px above it. That
      same downward shift pushes the outer-bottom corner ~76px below the
      unrotated baseline, so the container needs that much extra room
      beneath the card to avoid clipping it. */
-  --qm-arc-extra-h: 80px;
-  --qm-arc-lift: 39px;
+  --me-arc-extra-h: 80px;
+  --me-arc-lift: 39px;
   /* translateX distance from centre for the side cards' own centrepoint —
      must clear (cardW/2 * cos(8deg) + cardH/2 * sin(8deg)) + centreCardW/2
      at every point along the rotation, not just at rest. Verified clear
@@ -29,13 +29,13 @@
      linear-time worst case exists in the first ~2% of progress —
      ease-in-out compresses that window to well under a rendered frame.
      542/2*cos(8)+350/2*sin(8)+542/2 ≈ 564px; +10px margin. */
-  --qm-arc-slide: 574px;
+  --me-arc-slide: 574px;
   /* Visible gap between the carousel card and the font/colour controls
      below — --spacing-200 (12px) on tablet/desktop, matching the gap
      between the desktop widget's own card and its controls; overridden
      to --spacing-100 (8px) on mobile per Figma's "Edit widget Stacked"
      frame (node 0-18697), which uses a tighter gap at that size. */
-  --qm-arc-gap: var(--spacing-300);
+  --me-arc-gap: var(--spacing-300);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -45,7 +45,7 @@
   gap: var(--spacing-500);
 }
 
-.quote-maker-header {
+.mini-editor-header {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -56,23 +56,23 @@
   z-index: 1;
 }
 
-.quote-maker-header p {
+.mini-editor-header p {
   margin: 0 !important;
 }
 
-.quote-maker-logo {
+.mini-editor-logo {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.quote-maker-logo img {
+.mini-editor-logo img {
   height: 20px;
   width: auto;
 }
 
-.quote-maker-header h1,
-.quote-maker-header h2 {
+.mini-editor-header h1,
+.mini-editor-header h2 {
   margin: 0;
   font-size: var(--heading-font-size-l, 2.25rem);
   font-weight: var(--heading-font-weight-extra, 900);
@@ -81,7 +81,7 @@
   color: #222;
 }
 
-.quote-maker-header p {
+.mini-editor-header p {
   margin: 0;
   max-width: 437px;
   font-size: var(--body-font-size-m, 1rem);
@@ -92,7 +92,7 @@
    (.ax-marquee-dynamic-hero .button-container a.button) so both entry
    points to the editor use the same button treatment. Selector needs to
    out-specificity main a.button.accent:any-link in styles.css. */
-.quote-maker-header p a.button.accent:any-link {
+.mini-editor-header p a.button.accent:any-link {
   background-color: var(--color-background-accent-default);
   padding-top: var(--spacing-200);
   padding-bottom: var(--spacing-200);
@@ -103,14 +103,14 @@
   line-height: 125%;
 }
 
-.quote-maker-stage {
+.mini-editor-stage {
   position: relative;
   display: flex;
   justify-content: center;
   width: 100%;
 }
 
-.quote-maker-widget {
+.mini-editor-widget {
   position: relative;
   z-index: 1;
   display: flex;
@@ -120,7 +120,7 @@
   max-width: 542px;
 }
 
-.qm-card {
+.me-card {
   position: relative;
   width: 100%;
   height: 350px;
@@ -128,7 +128,7 @@
   box-sizing: border-box;
   padding: var(--spacing-350);
   border-radius: 16px;
-  background-image: var(--qm-card-bg);
+  background-image: var(--me-card-bg);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -140,7 +140,7 @@
   transition: background-image 0.35s ease;
 }
 
-.qm-quote-wrap {
+.me-quote-wrap {
   position: relative;
   box-sizing: border-box;
   max-width: 322px;
@@ -151,17 +151,17 @@
   transition: background-color 0.18s ease, border-color 0.18s ease;
 }
 
-.qm-quote-wrap:hover,
-.qm-quote-wrap:focus-visible {
+.me-quote-wrap:hover,
+.me-quote-wrap:focus-visible {
   background: rgb(255 255 255 / 20%);
   border-color: rgb(255 255 255 / 30%);
 }
 
-.qm-quote {
+.me-quote {
   margin: 0;
-  font-family: var(--qm-quote-font);
-  font-style: var(--qm-quote-font-style);
-  font-weight: var(--qm-quote-font-weight);
+  font-family: var(--me-quote-font);
+  font-style: var(--me-quote-font-style);
+  font-weight: var(--me-quote-font-weight);
   font-size: 20px;
   line-height: 26px;
   text-align: center;
@@ -169,27 +169,27 @@
   color: #131313;
 }
 
-.qm-author {
+.me-author {
   /* Absolutely positioned (not in-flow with margin-top) so it doesn't share
-     .qm-card's flex centering group with .qm-quote-wrap — otherwise a short
+     .me-card's flex centering group with .me-quote-wrap — otherwise a short
      quote pulls the author up with it instead of the author staying a
-     fixed offset from the card's bottom edge. Matches .qm-arc-author,
+     fixed offset from the card's bottom edge. Matches .me-arc-author,
      which already gets this right. */
   position: absolute;
   left: 50%;
   bottom: var(--spacing-200);
   transform: translateX(-50%);
   margin: 0;
-  font-family: var(--qm-quote-font);
-  font-style: var(--qm-quote-font-style);
-  font-weight: var(--qm-quote-font-weight);
+  font-family: var(--me-quote-font);
+  font-style: var(--me-quote-font-style);
+  font-weight: var(--me-quote-font-weight);
   font-size: 16px;
   text-align: center;
   white-space: nowrap;
   color: #505050;
 }
 
-.qm-tip {
+.me-tip {
   position: absolute;
   bottom: calc(100% + 4px);
   left: 50%;
@@ -200,13 +200,13 @@
   z-index: 2;
 }
 
-.qm-quote-wrap:hover .qm-tip,
-.qm-quote-wrap:focus-visible .qm-tip {
+.me-quote-wrap:hover .me-tip,
+.me-quote-wrap:focus-visible .me-tip {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
 
-.qm-tip-box {
+.me-tip-box {
   display: block;
   max-width: 160px;
   padding: 4px 10px;
@@ -219,26 +219,26 @@
   white-space: nowrap;
 }
 
-.qm-quote-wrap.is-copied .qm-tip-box::before {
+.me-quote-wrap.is-copied .me-tip-box::before {
   content: 'Copied!';
 }
 
-.qm-quote-wrap.is-copied .qm-tip-box {
+.me-quote-wrap.is-copied .me-tip-box {
   font-size: 0;
 }
 
-.qm-quote-wrap.is-copied .qm-tip-box::before {
+.me-quote-wrap.is-copied .me-tip-box::before {
   font-size: 12px;
 }
 
-.qm-controls {
+.me-controls {
   display: flex;
   align-items: stretch;
   gap: var(--spacing-80);
   width: 100%;
 }
 
-.qm-control {
+.me-control {
   flex: 1 1 0;
   min-width: 0;
   height: 58px;
@@ -256,16 +256,16 @@
   transition: background-color 0.15s ease;
 }
 
-.qm-control--colour {
+.me-control--colour {
   padding: var(--spacing-200);
 }
 
-.qm-control:hover,
-.qm-control[aria-expanded='true'] {
+.me-control:hover,
+.me-control[aria-expanded='true'] {
   background: var(--color-gray-300-variant, #dadada);
 }
 
-.qm-pill {
+.me-pill {
   /* text-overflow: ellipsis has no effect on flex-laid-out content (the
      centering this needs no longer clips with a visible "…", just a hard
      cut on both sides) — block + line-height/text-align gets the same
@@ -288,7 +288,7 @@
   text-overflow: ellipsis;
 }
 
-.qm-swatch {
+.me-swatch {
   align-self: center;
   width: 34px;
   height: 34px;
@@ -300,7 +300,7 @@
   box-shadow: 0 1px 4px rgb(0 0 0 / 4%);
 }
 
-.qm-control-label {
+.me-control-label {
   flex-shrink: 0;
   font-weight: var(--heading-font-weight-medium, 700);
   font-size: 14px;
@@ -308,7 +308,7 @@
   white-space: nowrap;
 }
 
-.qm-panel {
+.me-panel {
   position: relative;
   width: 100%;
   height: 65px;
@@ -316,7 +316,7 @@
   overflow: hidden;
 }
 
-.qm-row {
+.me-row {
   position: absolute;
   top: 4px;
   left: 0;
@@ -332,23 +332,23 @@
   transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
 }
 
-.quote-maker[data-qm-panel='fonts'] .qm-row--fonts,
-.quote-maker[data-qm-panel='colour'] .qm-row--colour {
+.mini-editor[data-me-panel='fonts'] .me-row--fonts,
+.mini-editor[data-me-panel='colour'] .me-row--colour {
   transform: translateY(0);
 }
 
-.qm-row--fonts {
+.me-row--fonts {
   gap: var(--spacing-75);
   padding: var(--spacing-80) var(--spacing-300) var(--spacing-80) var(--spacing-80);
   overflow-x: auto;
   scrollbar-width: none;
 }
 
-.qm-row--fonts::-webkit-scrollbar {
+.me-row--fonts::-webkit-scrollbar {
   display: none;
 }
 
-.qm-font {
+.me-font {
   flex: 0 0 auto;
   min-width: 46px;
   height: 46px;
@@ -361,13 +361,13 @@
   cursor: pointer;
 }
 
-.qm-font.is-selected {
+.me-font.is-selected {
   background: #fff;
   border-radius: 10px;
   box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
 }
 
-.qm-row--colour {
+.me-row--colour {
   justify-content: space-between;
   gap: var(--spacing-100);
   padding: 0 var(--spacing-250);
@@ -375,11 +375,11 @@
   scrollbar-width: none;
 }
 
-.qm-row--colour::-webkit-scrollbar {
+.me-row--colour::-webkit-scrollbar {
   display: none;
 }
 
-.qm-swatch-btn {
+.me-swatch-btn {
   position: relative;
   flex: 0 0 auto;
   width: 28px;
@@ -393,16 +393,16 @@
   transition: transform 0.12s ease;
 }
 
-.qm-swatch-btn:hover {
+.me-swatch-btn:hover {
   transform: scale(1.08);
 }
 
-.qm-swatch-btn.is-selected {
+.me-swatch-btn.is-selected {
   border: 2px solid #3b63fb;
   box-shadow: 0 2px 6px rgb(0 0 0 / 4%), 0 4px 12px rgb(0 0 0 / 8%);
 }
 
-.qm-swatch-fill {
+.me-swatch-fill {
   position: absolute;
   inset: 0;
   border-radius: 999px;
@@ -410,13 +410,13 @@
   background-position: center;
 }
 
-.quote-maker-decorations {
+.mini-editor-decorations {
   /* Anchored to the header (not the stage) so cards can start a little below
      the header's top edge and extend down to the editor's bottom edge —
      the stage's own box only covers the editor's height, which isn't tall
      enough to reach up alongside the header per the Figma reference. The
      stage height below is the widget's fixed height (350px card + controls);
-     the gap matches the header/stage flex gap on .quote-maker. */
+     the gap matches the header/stage flex gap on .mini-editor. */
   position: absolute;
   top: var(--spacing-700);
   right: 0;
@@ -427,14 +427,14 @@
   display: none;
 }
 
-.qm-deco {
+.me-deco {
   position: absolute;
   width: 180px;
   pointer-events: auto;
 }
 
-.qm-deco-card-wrap {
-  /* Positioned so .qm-deco-actions's `top: 100%` resolves against the card
+.me-deco-card-wrap {
+  /* Positioned so .me-deco-actions's `top: 100%` resolves against the card
      itself (not the ancestor). The padding-bottom extends this wrap's own
      hoverable box down through the gap and the actions row, so moving the
      pointer from the card down into the buttons never exits the hover
@@ -449,27 +449,27 @@
  * (right, for the left side) edge clears the 271px-wide widget by ~90px,
  * and a "far" column ~90px past the near column's outer edge. Each column
  * holds two 180px-wide cards spaced ~230px apart vertically. Positioned
- * from the bottom (not the top) since .quote-maker-decorations' bottom edge
+ * from the bottom (not the top) since .mini-editor-decorations' bottom edge
  * reliably lines up with the editor's bottom edge regardless of how tall
  * the header's authored copy is — its top edge doesn't. The lowest card in
  * each column sits with its own bottom flush at 0 so nothing crosses below
  * the editor's bottom edge.
  */
-.qm-deco--1 { left: calc(50% - 811px); bottom: 496px; transform: rotate(1.5deg); }
-.qm-deco--2 { left: calc(50% - 541px); bottom: 360px; transform: rotate(-1.5deg); }
-.qm-deco--3 { left: calc(50% - 811px); bottom: 160px; transform: rotate(2deg); }
-.qm-deco--4 { left: calc(50% - 541px); bottom: 0; transform: rotate(-2deg); }
-.qm-deco--5 { left: calc(50% + 631px); bottom: 496px; transform: rotate(-1.5deg); }
-.qm-deco--6 { left: calc(50% + 361px); bottom: 360px; transform: rotate(1.5deg); }
-.qm-deco--7 { left: calc(50% + 631px); bottom: 160px; transform: rotate(-2deg); }
-.qm-deco--8 { left: calc(50% + 361px); bottom: 0; transform: rotate(2deg); }
+.me-deco--1 { left: calc(50% - 811px); bottom: 496px; transform: rotate(1.5deg); }
+.me-deco--2 { left: calc(50% - 541px); bottom: 360px; transform: rotate(-1.5deg); }
+.me-deco--3 { left: calc(50% - 811px); bottom: 160px; transform: rotate(2deg); }
+.me-deco--4 { left: calc(50% - 541px); bottom: 0; transform: rotate(-2deg); }
+.me-deco--5 { left: calc(50% + 631px); bottom: 496px; transform: rotate(-1.5deg); }
+.me-deco--6 { left: calc(50% + 361px); bottom: 360px; transform: rotate(1.5deg); }
+.me-deco--7 { left: calc(50% + 631px); bottom: 160px; transform: rotate(-2deg); }
+.me-deco--8 { left: calc(50% + 361px); bottom: 0; transform: rotate(2deg); }
 
-.qm-deco:hover,
-.qm-deco:focus-within {
+.me-deco:hover,
+.me-deco:focus-within {
   z-index: 5;
 }
 
-.qm-deco-card {
+.me-deco-card {
   position: relative;
   width: 100%;
   height: 148px;
@@ -495,10 +495,10 @@
  * author is absolutely positioned near the bottom instead of sharing a
  * centering group with the quote, matching that same Figma reference.
  */
-/* p.qm-deco-quote (not just .qm-deco-quote): .quote-maker-header p — these
+/* p.me-deco-quote (not just .me-deco-quote): .mini-editor-header p — these
    cards are descendants of the header, see init()'s comment on why — is
    otherwise equally or more specific and, being a <p>, matches these too. */
-p.qm-deco-quote {
+p.me-deco-quote {
   display: -webkit-box;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 4;
@@ -530,13 +530,13 @@ p.qm-deco-quote {
 
 /* Reserves the author's own line height + bottom offset out of the quote's
    box only when an author is actually present (see buildDecoCard — the
-   .qm-deco-author element is omitted otherwise), so a long quote can never
+   .me-deco-author element is omitted otherwise), so a long quote can never
    clamp down into visually overlapping the absolutely-positioned author. */
-.qm-deco-card:has(.qm-deco-author) p.qm-deco-quote {
+.me-deco-card:has(.me-deco-author) p.me-deco-quote {
   height: 104px;
 }
 
-p.qm-deco-author {
+p.me-deco-author {
   position: absolute;
   left: 50%;
   bottom: 12px;
@@ -554,8 +554,8 @@ p.qm-deco-author {
   text-overflow: ellipsis;
 }
 
-.qm-deco-actions {
-  /* Fixed px offset, not a percentage — .qm-deco-card-wrap's own
+.me-deco-actions {
+  /* Fixed px offset, not a percentage — .me-deco-card-wrap's own
      padding-bottom (the hover hit-box buffer) would otherwise be counted
      twice if this used `top: 100%`, since that percentage resolves against
      the wrap's full padding box. 148px card height + 11px*2 padding
@@ -572,14 +572,14 @@ p.qm-deco-author {
   transition: opacity 0.18s ease;
 }
 
-.qm-deco:hover .qm-deco-actions,
-.qm-deco:focus-within .qm-deco-actions {
+.me-deco:hover .me-deco-actions,
+.me-deco:focus-within .me-deco-actions {
   opacity: 1;
   pointer-events: auto;
 }
 
-.qm-deco-use,
-.qm-deco-copy {
+.me-deco-use,
+.me-deco-copy {
   height: 32px;
   box-sizing: border-box;
   background: #e9e9e9;
@@ -590,7 +590,7 @@ p.qm-deco-author {
   transition: background-color 0.15s ease;
 }
 
-.qm-deco-use {
+.me-deco-use {
   display: inline-flex;
   align-items: center;
   padding: 7px 12px;
@@ -598,7 +598,7 @@ p.qm-deco-author {
   white-space: nowrap;
 }
 
-.qm-deco-copy {
+.me-deco-copy {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -606,23 +606,23 @@ p.qm-deco-author {
   padding: 7px;
 }
 
-.qm-deco-copy img {
+.me-deco-copy img {
   display: block;
   width: 18px;
   height: 18px;
 }
 
-.qm-deco-use:hover,
-.qm-deco-copy:hover {
+.me-deco-use:hover,
+.me-deco-copy:hover {
   background: #dcdcdc;
 }
 
-.qm-deco-copy.is-copied {
+.me-deco-copy.is-copied {
   background: #bfe9cb;
 }
 
 @media (width >= 1200px) {
-  .quote-maker-decorations {
+  .mini-editor-decorations {
     display: block;
   }
 }
@@ -631,54 +631,54 @@ p.qm-deco-author {
  * Tablet/mobile carousel --------------------------------------------------
  * Below 1200px the desktop decorative cards and the fixed widget give way
  * to exactly 3 slots: prev / centre / next (buildArcCarousel in
- * quote-maker.js re-renders each slot's content on every arrow click — it
+ * mini-editor.js re-renders each slot's content on every arrow click — it
  * does not keep the full 8/9-card deck in the DOM, so nothing off-screen is
  * ever clickable). The container spans the full viewport width so the side
  * cards can show as much of themselves as possible with no empty gutter on
  * either edge — how much actually shows is however much fits outside the
  * centre card within that width, not a fixed reveal amount.
  */
-.qm-arc {
-  /* Sizing variables (--qm-arc-card-w etc.) are defined on .quote-maker,
+.me-arc {
+  /* Sizing variables (--me-arc-card-w etc.) are defined on .mini-editor,
      not here — see that rule for why. */
   position: relative;
   display: none;
   align-items: flex-start;
   justify-content: center;
   width: 100vw;
-  margin: 0 calc(50% - 50vw) var(--qm-arc-gap);
-  height: var(--qm-arc-card-h);
-  clip-path: inset(calc(-1 * var(--qm-arc-extra-h)) 0);
+  margin: 0 calc(50% - 50vw) var(--me-arc-gap);
+  height: var(--me-arc-card-h);
+  clip-path: inset(calc(-1 * var(--me-arc-extra-h)) 0);
 }
 
-.qm-carousel-mode .quote-maker-decorations {
+.me-carousel-mode .mini-editor-decorations {
   display: none;
 }
 
-.qm-carousel-mode .qm-card {
+.me-carousel-mode .me-card {
   display: none;
 }
 
-.qm-carousel-mode .qm-arc {
+.me-carousel-mode .me-arc {
   display: flex;
 }
 
 /* The widget's own max-width (542px, matching the tablet card size) only
-   happens to equal --qm-arc-card-w on tablet — on mobile the card shrinks
-   to 327px but the widget didn't, so .qm-controls/.qm-panel below the
+   happens to equal --me-arc-card-w on tablet — on mobile the card shrinks
+   to 327px but the widget didn't, so .me-controls/.me-panel below the
    carousel were rendering wider than the visible editor card above them.
    Tying the widget's width to the same variable keeps them in lockstep at
    every breakpoint instead of matching by coincidence at just one. */
-.qm-carousel-mode .quote-maker-widget {
-  max-width: var(--qm-arc-card-w, 542px);
+.me-carousel-mode .mini-editor-widget {
+  max-width: var(--me-arc-card-w, 542px);
 }
 
-.qm-arc-card {
+.me-arc-card {
   position: absolute;
   top: 0;
-  left: calc(50% - (var(--qm-arc-card-w) / 2));
-  width: var(--qm-arc-card-w);
-  height: var(--qm-arc-card-h);
+  left: calc(50% - (var(--me-arc-card-w) / 2));
+  width: var(--me-arc-card-w);
+  height: var(--me-arc-card-h);
   box-sizing: border-box;
   padding: var(--spacing-350);
   border: 0.5px solid rgb(255 255 255 / 66%);
@@ -702,39 +702,39 @@ p.qm-deco-author {
   user-select: none;
 }
 
-.qm-arc-card--center {
+.me-arc-card--center {
   z-index: 3;
   cursor: default;
 }
 
-.qm-arc-card--prev,
-.qm-arc-card--next {
+.me-arc-card--prev,
+.me-arc-card--next {
   z-index: 1;
   cursor: pointer;
 }
 
-.qm-arc-card--prev {
-  transform: translateX(calc(-1 * var(--qm-arc-slide))) translateY(var(--qm-arc-lift)) rotate(-8deg);
+.me-arc-card--prev {
+  transform: translateX(calc(-1 * var(--me-arc-slide))) translateY(var(--me-arc-lift)) rotate(-8deg);
 }
 
-.qm-arc-card--next {
-  transform: translateX(var(--qm-arc-slide)) translateY(var(--qm-arc-lift)) rotate(8deg);
+.me-arc-card--next {
+  transform: translateX(var(--me-arc-slide)) translateY(var(--me-arc-lift)) rotate(8deg);
 }
 
-/* Off-screen staging position for a recycled card (see quote-maker.js
+/* Off-screen staging position for a recycled card (see mini-editor.js
    setRole's `instant` path) — parked further out than the resting
    prev/next spot, same rotation, so the very next transition (turning off
    `instant`) animates it rotating in from beyond the edge instead of
    popping directly into its final slot. */
-.qm-arc-card--stage-prev {
-  transform: translateX(calc(-2 * var(--qm-arc-slide))) translateY(var(--qm-arc-lift)) rotate(-8deg);
+.me-arc-card--stage-prev {
+  transform: translateX(calc(-2 * var(--me-arc-slide))) translateY(var(--me-arc-lift)) rotate(-8deg);
 }
 
-.qm-arc-card--stage-next {
-  transform: translateX(calc(2 * var(--qm-arc-slide))) translateY(var(--qm-arc-lift)) rotate(8deg);
+.me-arc-card--stage-next {
+  transform: translateX(calc(2 * var(--me-arc-slide))) translateY(var(--me-arc-lift)) rotate(8deg);
 }
 
-/* Ghost: a 4th, non-interactive card (see buildArcGhost in quote-maker.js)
+/* Ghost: a 4th, non-interactive card (see buildArcGhost in mini-editor.js)
    that plays the outgoing card's visible exit — continuing further out on
    its own side while fading — so the recycled real card's old content
    doesn't just vanish when it's silently restaged to enter from the
@@ -742,31 +742,31 @@ p.qm-deco-author {
    invisible; JS toggles it to the plain --prev/--next resting class first
    (so it appears exactly where the real card just was) then immediately
    to --exit-prev/--exit-next, which is what's actually transitioned. */
-.qm-arc-ghost {
+.me-arc-ghost {
   z-index: 0;
   pointer-events: none;
   opacity: 0;
   cursor: default;
 }
 
-.qm-arc-ghost.qm-arc-ghost--visible {
+.me-arc-ghost.me-arc-ghost--visible {
   opacity: 1;
 }
 
-.qm-arc-card--exit-prev {
-  transform: translateY(calc(-1 * var(--qm-arc-lift))) translateX(calc(-2 * var(--qm-arc-slide)))rotate(0deg);
+.me-arc-card--exit-prev {
+  transform: translateY(calc(-1 * var(--me-arc-lift))) translateX(calc(-2 * var(--me-arc-slide)))rotate(0deg);
 }
 
-.qm-arc-card--exit-next {
-  transform: translateX(calc(2 * var(--qm-arc-slide))) translateY(var(--qm-arc-lift)) rotate(8deg);
+.me-arc-card--exit-next {
+  transform: translateX(calc(2 * var(--me-arc-slide))) translateY(var(--me-arc-lift)) rotate(8deg);
 }
 
-.qm-arc-ghost.qm-arc-ghost--visible.qm-arc-card--exit-prev,
-.qm-arc-ghost.qm-arc-ghost--visible.qm-arc-card--exit-next {
+.me-arc-ghost.me-arc-ghost--visible.me-arc-card--exit-prev,
+.me-arc-ghost.me-arc-ghost--visible.me-arc-card--exit-next {
   opacity: 0;
 }
 
-.qm-arc-quote {
+.me-arc-quote {
   margin: 0;
   font-size: 16px;
   line-height: 1.2;
@@ -775,7 +775,7 @@ p.qm-deco-author {
   color: #131313;
 }
 
-.qm-arc-author {
+.me-arc-author {
   position: absolute;
   left: 50%;
   bottom: var(--spacing-200);
@@ -786,7 +786,7 @@ p.qm-deco-author {
   color: #505050;
 }
 
-.qm-arc-nav {
+.me-arc-nav {
   position: absolute;
   top: 50%;
   z-index: 3;
@@ -805,7 +805,7 @@ p.qm-deco-author {
   backdrop-filter: blur(8px);
 }
 
-.qm-arc-nav img {
+.me-arc-nav img {
   width: 20px;
   height: 20px;
 }
@@ -813,29 +813,29 @@ p.qm-deco-author {
 /* Nudged past the centre card's edge (not flush on it) per Figma's
    drag-arrows frame, where each button sits centred slightly outside the
    card boundary rather than straddling it evenly. */
-.qm-arc-nav--prev {
-  left: calc(50% - (var(--qm-arc-card-w) / 2) - var(--spacing-400));
+.me-arc-nav--prev {
+  left: calc(50% - (var(--me-arc-card-w) / 2) - var(--spacing-400));
 }
 
-.qm-arc-nav--next {
-  right: calc(50% - (var(--qm-arc-card-w) / 2) - var(--spacing-400));
+.me-arc-nav--next {
+  right: calc(50% - (var(--me-arc-card-w) / 2) - var(--spacing-400));
 }
 
 /*
  * Mobile bottom sheet -----------------------------------------------------
  * <=767px only: the font/colour pickers become a slide-up sheet instead of
  * the inline expanding row above, per Figma frames 0-18589/0-18658. Driven
- * by the same data-qm-panel attribute as the inline row — see .qm-row
+ * by the same data-me-panel attribute as the inline row — see .me-row
  * above for the tablet/desktop behaviour, hidden below at this breakpoint.
  */
-.qm-sheet-overlay {
+.me-sheet-overlay {
   position: fixed;
   inset: 0;
   z-index: 1200;
   display: none;
 }
 
-.qm-sheet {
+.me-sheet {
   position: absolute;
   inset-inline: 0;
   inset-block-end: 0;
@@ -852,11 +852,11 @@ p.qm-deco-author {
   transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.qm-sheet-overlay.is-open .qm-sheet {
+.me-sheet-overlay.is-open .me-sheet {
   transform: translateY(0);
 }
 
-.qm-sheet-handle {
+.me-sheet-handle {
   width: 50px;
   height: 4px;
   margin: var(--spacing-100) auto 0;
@@ -865,28 +865,28 @@ p.qm-deco-author {
   flex-shrink: 0;
 }
 
-.qm-sheet-title {
+.me-sheet-title {
   margin: 0;
   font-weight: var(--heading-font-weight-medium, 700);
   font-size: 16px;
   text-align: center;
 }
 
-.qm-sheet-grid {
+.me-sheet-grid {
   display: grid;
   gap: var(--spacing-200);
 }
 
-.qm-sheet-grid--fonts {
+.me-sheet-grid--fonts {
   grid-template-columns: repeat(2, 1fr);
 }
 
-.qm-sheet-grid--fonts .qm-font {
+.me-sheet-grid--fonts .me-font {
   width: 100%;
   height: 52px;
 }
 
-.qm-sheet-grid--colour {
+.me-sheet-grid--colour {
   grid-auto-flow: column;
   grid-template-rows: repeat(2, 46px);
   grid-auto-columns: 46px;
@@ -895,11 +895,11 @@ p.qm-deco-author {
   scrollbar-width: none;
 }
 
-.qm-sheet-grid--colour::-webkit-scrollbar {
+.me-sheet-grid--colour::-webkit-scrollbar {
   display: none;
 }
 
-.qm-sheet-grid--colour .qm-swatch-btn {
+.me-sheet-grid--colour .me-swatch-btn {
   width: 32px;
   height: 32px;
   align-self: center;
@@ -907,89 +907,89 @@ p.qm-deco-author {
 }
 
 @media (width <= 767px) {
-  .quote-maker {
+  .mini-editor {
     padding: var(--spacing-500) var(--spacing-300);
   }
 
   /* "Background colour" control label reads "Background" only at this
      width — narrower control column has less room for the full label. */
-  .qm-control-label-suffix {
+  .me-control-label-suffix {
     display: none;
   }
 
   /* Mobile header is left-aligned (not centred) per Figma frame 0-18684,
      with a larger logo lockup and a darker, looser-line-height heading. */
-  .quote-maker-header {
+  .mini-editor-header {
     align-items: flex-start;
     text-align: left;
     gap: var(--spacing-300);
   }
 
-  .quote-maker-logo {
+  .mini-editor-logo {
     justify-content: flex-start;
   }
 
-  .quote-maker-logo img {
+  .mini-editor-logo img {
     height: 29px;
   }
 
-  .quote-maker-header h1,
-  .quote-maker-header h2 {
+  .mini-editor-header h1,
+  .mini-editor-header h2 {
     line-height: 1.04;
     color: #131313;
   }
 
-  .quote-maker-header p {
+  .mini-editor-header p {
     max-width: none;
   }
 
   /* CTA is hidden on mobile — "Button and free messaging" (node 0-18691)
      is marked hidden in the Hero Mobile frame. */
-  .quote-maker-header p:has(a.button) {
+  .mini-editor-header p:has(a.button) {
     display: none;
   }
 
-  .qm-quote {
+  .me-quote {
     font-size: 16px;
   }
 
-  .quote-maker {
+  .mini-editor {
     /* Smaller card than tablet — per Figma mobile frame 0-18684, only a
        small edge of the neighbouring templates should be visible. Since
-       the container is now 100vw everywhere (see .qm-arc above), how much
+       the container is now 100vw everywhere (see .me-arc above), how much
        of each side card actually shows follows naturally from the smaller
-       mobile viewport, not a separately tuned peek amount. --qm-arc-slide
+       mobile viewport, not a separately tuned peek amount. --me-arc-slide
        recalculated for this card size the same way as the base rule:
        327/2*cos(8)+270/2*sin(8) + 327/2 ≈ 344px; +10px safety margin.
-       --qm-arc-lift/--qm-arc-extra-h likewise recalculated for 327x270.
-       Defined on .quote-maker (not .qm-arc) so .quote-maker-widget can
-       also read --qm-arc-card-w — see .qm-carousel-mode .quote-maker-widget. */
-    --qm-arc-card-w: 327px;
-    --qm-arc-card-h: 270px;
-    --qm-arc-slide: 354px;
-    --qm-arc-lift: 24px;
-    --qm-arc-extra-h: 50px;
-    --qm-arc-gap: var(--spacing-100);
+       --me-arc-lift/--me-arc-extra-h likewise recalculated for 327x270.
+       Defined on .mini-editor (not .me-arc) so .mini-editor-widget can
+       also read --me-arc-card-w — see .me-carousel-mode .mini-editor-widget. */
+    --me-arc-card-w: 327px;
+    --me-arc-card-h: 270px;
+    --me-arc-slide: 354px;
+    --me-arc-lift: 24px;
+    --me-arc-extra-h: 50px;
+    --me-arc-gap: var(--spacing-100);
   }
 
-  .qm-arc-quote {
+  .me-arc-quote {
     font-size: 14px;
   }
 
-  .qm-arc-nav {
+  .me-arc-nav {
     width: 40px;
     height: 40px;
   }
 
-  .qm-controls {
+  .me-controls {
     gap: var(--spacing-250);
   }
 
-  .qm-panel {
+  .me-panel {
     display: none;
   }
 
-  .qm-sheet-overlay {
+  .me-sheet-overlay {
     display: block;
   }
 }

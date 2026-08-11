@@ -7,24 +7,24 @@ let getConfig;
 let replaceKey;
 
 /**
- * Name of the custom event a quote-maker block on the same page listens
- * for (see quote-maker.js) to jump its editor to this exact quote/author
+ * Name of the custom event a mini-editor block on the same page listens
+ * for (see mini-editor.js) to jump its editor to this exact quote/author
  * and scroll it into view — the two blocks are otherwise unrelated, so a
  * DOM event keeps them decoupled instead of importing one into the other.
  */
-const USE_QUOTE_EVENT = 'quote-maker:use-quote';
+const USE_QUOTE_EVENT = 'mini-editor:use-quote';
 
 /**
  * Builds the "Copy quote" / "Create a design" action pair added below each
  * quote row's text, per Figma node 0-19592. Copy uses the same "quote —
- * author" format and shared bottom toast as quote-maker's own copy
+ * author" format and shared bottom toast as mini-editor's own copy
  * actions, so every copy affordance on the page behaves identically.
- * "Create a design" only makes sense when a quote-maker block is present
+ * "Create a design" only makes sense when a mini-editor block is present
  * on the page to receive the USE_QUOTE_EVENT it dispatches, so the whole
  * action pair is skipped otherwise.
  */
-function buildQuoteActions(quote, author, hasQuoteMaker) {
-  if (!hasQuoteMaker) return null;
+function buildQuoteActions(quote, author, hasMiniEditor) {
+  if (!hasMiniEditor) return null;
 
   const actions = createTag('div', { class: 'collapsible-row-actions' });
 
@@ -91,7 +91,7 @@ function createContentElement(html, baseClass, options = {}) {
   return element;
 }
 
-function buildTableLayout(block, typographyClasses = {}, hasQuoteMaker = false) {
+function buildTableLayout(block, typographyClasses = {}, hasMiniEditor = false) {
   const parentDiv = block.closest('.section');
   parentDiv?.classList.add('collapsible-rows-grey-bg', 'collapsible-section-padding');
 
@@ -158,7 +158,7 @@ function buildTableLayout(block, typographyClasses = {}, hasQuoteMaker = false) 
       subHeaderEl.classList.add(...typographyClasses.body);
     }
     subHeaderAccordion.append(subHeaderEl);
-    const quoteActions = buildQuoteActions(headerEl.textContent.trim(), subHeaderEl.textContent.trim(), hasQuoteMaker);
+    const quoteActions = buildQuoteActions(headerEl.textContent.trim(), subHeaderEl.textContent.trim(), hasMiniEditor);
     if (quoteActions) subHeaderAccordion.append(quoteActions);
 
     headerEl.addEventListener('click', () => {
@@ -177,7 +177,7 @@ function buildOriginalLayout(
   typographyClasses = {},
   viewMoreText = 'View more',
   viewLessText = 'View less',
-  hasQuoteMaker = false,
+  hasMiniEditor = false,
 ) {
   const collapsibleRows = [];
   const rows = Array.from(block.children);
@@ -226,7 +226,7 @@ function buildOriginalLayout(
       subHeaderEl.classList.add(...typographyClasses.body);
     }
     accordion.append(subHeaderEl);
-    const quoteActions = buildQuoteActions(headerEl.textContent.trim(), subHeaderEl.textContent.trim(), hasQuoteMaker);
+    const quoteActions = buildQuoteActions(headerEl.textContent.trim(), subHeaderEl.textContent.trim(), hasMiniEditor);
     if (quoteActions) accordion.append(quoteActions);
   });
 
@@ -301,19 +301,19 @@ export default async function decorate(block) {
   const typographyClasses = extractTypographyClasses(block);
 
   const isExpandableVariant = block.classList.contains('expandable');
-  // "Create a design" only does something when a quote-maker block exists
+  // "Create a design" only does something when a mini-editor block exists
   // on the page to receive its event — checked against the raw authored
   // DOM (not decorated state), since block decoration order across blocks
   // on a page isn't guaranteed.
-  const hasQuoteMaker = !!document.querySelector('.quote-maker');
+  const hasMiniEditor = !!document.querySelector('.mini-editor');
 
   if (isExpandableVariant) {
-    buildTableLayout(block, typographyClasses, hasQuoteMaker);
+    buildTableLayout(block, typographyClasses, hasMiniEditor);
   } else {
     const [viewMoreText, viewLessText] = await Promise.all([
       replaceKey('view-more', getConfig()),
       replaceKey('view-less', getConfig()),
     ]);
-    buildOriginalLayout(block, typographyClasses, viewMoreText || 'View more', viewLessText || 'View less', hasQuoteMaker);
+    buildOriginalLayout(block, typographyClasses, viewMoreText || 'View more', viewLessText || 'View less', hasMiniEditor);
   }
 }

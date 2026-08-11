@@ -10,7 +10,7 @@ let container;
  * auto-dismisses after 5s. Deliberately not the Spectrum `showExpressToast`
  * (express-toast.js) — that pulls in the full Spectrum Web Components
  * machinery, which is disproportionate for a single plain-text toast shared
- * across unrelated blocks (quote-maker, collapsible-rows).
+ * across unrelated blocks (mini-editor, collapsible-rows).
  */
 export default async function showCopyToast(message) {
   if (!createTag) {
