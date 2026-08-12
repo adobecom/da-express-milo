@@ -236,6 +236,11 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
     metaData: {
       isFrictionlessQa: 'true',
       ...(quickActionId === 'caption-video' && { videoLanguage: selectedVideoLanguage }),
+      ...(quickActionId === 'remove-background' && {
+        qaSourcePage: window.location.pathname.includes('change-background')
+          ? 'change-background'
+          : 'remove-background',
+      }),
     },
     analyticsData: {
       ...(quickActionId === 'video-compress' && { entryPoint: 'seo-quick-action-video-compress' }),
