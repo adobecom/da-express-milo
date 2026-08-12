@@ -70,11 +70,11 @@
 .mini-editor-header h1,
 .mini-editor-header h2 {
   margin: 0;
-  font-size: var(--heading-font-size-l, 2.25rem);
-  font-weight: var(--heading-font-weight-extra, 900);
+  font-size: var(--heading-font-size-l);
+  font-weight: var(--heading-font-weight-extra);
   line-height: 32px;
   letter-spacing: -1px;
-  color: #222;
+  color: var(--color-content-neutral);
 }
 
 /* margin: 0 needs !important to beat main .section .content p / main .section p
@@ -83,8 +83,8 @@
 .mini-editor-header p {
   margin: 0 !important;
   max-width: 437px;
-  font-size: var(--body-font-size-m, 1rem);
-  color: var(--color-typography-body, #505050);
+  font-size: var(--body-font-size-m);
+  color: var(--Alias-content-typography-Body);
 }
 
 /* Matches the "Design with your quote" CTA on the discover page hero
@@ -143,7 +143,7 @@
   .mini-editor-header h1,
   .mini-editor-header h2 {
     line-height: 1.04;
-    color: #131313;
+    color: var(--Alias-content-typography-Heading);
   }
 
   .mini-editor-header p {
