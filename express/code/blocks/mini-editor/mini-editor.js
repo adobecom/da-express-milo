@@ -158,10 +158,6 @@ export default async function init(block) {
   loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-widget/mini-editor-widget.css`);
 
   const props = constructProps(block);
-  // codeRoot lets the background loader resolve bundled static images against
-  // the deploy path when no collectionId is authored (see
-  // mini-editor-background-loader).
-  props.codeRoot = getConfig().codeRoot;
   block.innerHTML = '';
 
   const header = buildContentHeader(props);
@@ -171,8 +167,9 @@ export default async function init(block) {
   const quotes = getPageQuotes();
 
   try {
-    // Backgrounds and fonts load in parallel — each loader owns its own
-    // source selection (static vs fetched cards / Typekit vs fallback fonts).
+    // Backgrounds and fonts load in parallel — the font loader owns its own
+    // source selection (Typekit vs fallback fonts); backgrounds always fetch
+    // from the template service.
     const [cards, fontOptions] = await Promise.all([
       getCardBackgrounds(props),
       getFontOptions(),

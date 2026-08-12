@@ -7,15 +7,31 @@ import { waitFor } from '../../helpers/waitfor.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
+function validTemplate(id) {
+  return {
+    id,
+    status: 'approved',
+    customLinks: { branchUrl: 'https://example.com' },
+    behaviors: ['still'],
+    pages: [{ rendition: { image: { thumbnail: { componentId: 'abc' } } } }],
+    _links: {
+      'http://ns.adobe.com/adobecloud/rel/rendition': { href: `https://cdn/rendition/${id}` },
+      'http://ns.adobe.com/adobecloud/rel/component': { href: `https://cdn/component/${id}` },
+    },
+  };
+}
+
+// getCardBackgrounds always fetches (see mini-editor-background-loader.js) —
+// this default response gives every test a non-empty card set to mount the
+// widget with, unless a test overrides fetchStub for its own scenario.
+const defaultTemplateItems = Array.from({ length: 8 }, (_, i) => validTemplate(`urn:${i}`));
+
 describe('mini-editor', () => {
   let fetchStub;
 
   beforeEach(() => {
     window.Typekit = { load: ({ active }) => active?.() };
-    // getCardBackgrounds only calls fetch when a collectionId is authored —
-    // none of these tests author one, so this stub exists purely as a safety
-    // net against an accidental real network call.
-    fetchStub = sinon.stub(window, 'fetch').resolves({ json: async () => ({ items: [] }) });
+    fetchStub = sinon.stub(window, 'fetch').resolves({ json: async () => ({ items: defaultTemplateItems }) });
   });
 
   afterEach(() => {
@@ -102,7 +118,7 @@ describe('mini-editor', () => {
     block.append(limitRow);
     await init(block);
     await waitFor(() => !!block.querySelector('.mini-editor-decorations'));
-    // Default TEMPLATE_LIMIT (8) static cards minus the one powering the main
+    // Default TEMPLATE_LIMIT (8) fetched cards minus the one powering the main
     // widget leaves 7 decorative cards, since the invalid limit was ignored.
     expect(block.querySelectorAll('.mini-editor-decorations .me-deco')).to.have.length(7);
   });
