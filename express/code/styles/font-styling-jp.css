@@ -1,12 +1,15 @@
 /*
  * MWPW-203933: JP Discover page font styling.
- * Legacy heading/body size tokens run larger than the Figma-approved JP
- * scale, and their line-heights are too tight for Adobe Clean Han glyphs,
- * hurting legibility. Discover long-form content actually spans two
- * independent typography systems (the legacy --heading/body-font-size-*
- * tokens, and the --Global-Typography-Size-* tokens read by the
- * long-form/long-form-blog article styles) so both need overriding for
- * the fix to reach the whole page.
+ * https://www.figma.com/design/7FqFRFff85hPkBNpU2WFrc/Discover-Page (mobile
+ * node 7101-70835, desktop node 7643-98563) gives two confirmed heading
+ * tiers - mobile xs/s/m/l/xl = 16/18/20/24/28, desktop (>=1200px) =
+ * 18/20/24/28/36, both at 900 weight / 125% line-height. That exactly
+ * matches this file's existing --ax-heading-* and --Global-Typography-
+ * Size-Headings-*/Body-Body-M tokens (native, unmodified, at both
+ * breakpoints) - so those systems are already correct and must NOT be
+ * touched here. The mismatch is isolated to the legacy
+ * --heading/body-font-size-* tokens, which have no responsive tiers at
+ * all; this file gives them the same two-tier treatment.
  * Toggle: page/domain metadata `font-styling: jp` (see scripts.js loadStyles()).
  */
 :root {
@@ -21,19 +24,23 @@
   --heading-font-size-xxxl: 44px;
 
   --body-font-size-xs: 14px;
-
-  --Global-Typography-Size-Headings-Heading-L: 24px;
-  --Global-Typography-Size-Headings-Heading-XL: 28px;
-  --Global-Typography-Size-Body-Body-M: 16px;
 }
 
-/* styles.css re-escalates these same tokens above 1200px; freeze them at
-   the JP-approved sizes so the desktop breakpoint doesn't revert the fix. */
 @media (min-width: 1200px) {
   :root {
-    --Global-Typography-Size-Headings-Heading-L: 24px;
-    --Global-Typography-Size-Headings-Heading-XL: 28px;
-    --Global-Typography-Size-Body-Body-M: 16px;
+    --heading-font-size-xs: 18px;
+    --heading-font-size-s: 20px;
+    --heading-font-size-m: 24px;
+    --heading-font-size-ml: 24px;
+    --heading-font-size-l: 28px;
+    --heading-font-size-xl: 36px;
+    --heading-font-size-xxl: 44px;
+    --heading-font-size-xxxl: 80px;
+
+    --body-font-size-s: 16px;
+    --body-font-size-m: 18px;
+    --body-font-size-l: 20px;
+    --body-font-size-xl: 22px;
   }
 }
 
