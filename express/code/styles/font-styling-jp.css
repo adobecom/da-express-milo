@@ -2,9 +2,11 @@
  * MWPW-203933: JP Discover page font styling.
  * Legacy heading/body size tokens run larger than the Figma-approved JP
  * scale, and their line-heights are too tight for Adobe Clean Han glyphs,
- * hurting legibility. Redefining the tokens here lets every block that
- * already consumes them (discover-cards, blog template, template-x, etc.)
- * pick up the JP scale with no per-block authoring.
+ * hurting legibility. Discover long-form content actually spans two
+ * independent typography systems (the legacy --heading/body-font-size-*
+ * tokens, and the --Global-Typography-Size-* tokens read by the
+ * long-form/long-form-blog article styles) so both need overriding for
+ * the fix to reach the whole page.
  * Toggle: page/domain metadata `font-styling: jp` (see scripts.js loadStyles()).
  */
 :root {
@@ -19,6 +21,20 @@
   --heading-font-size-xxxl: 44px;
 
   --body-font-size-xs: 14px;
+
+  --Global-Typography-Size-Headings-Heading-L: 24px;
+  --Global-Typography-Size-Headings-Heading-XL: 28px;
+  --Global-Typography-Size-Body-Body-M: 16px;
+}
+
+/* styles.css re-escalates these same tokens above 1200px; freeze them at
+   the JP-approved sizes so the desktop breakpoint doesn't revert the fix. */
+@media (min-width: 1200px) {
+  :root {
+    --Global-Typography-Size-Headings-Heading-L: 24px;
+    --Global-Typography-Size-Headings-Heading-XL: 28px;
+    --Global-Typography-Size-Body-Body-M: 16px;
+  }
 }
 
 /* blog.css sets a hardcoded size/line-height on .section h3 that doesn't
@@ -28,5 +44,16 @@
 }
 
 .discover-cards.flip .flip-card-front :is(h1, h2, h3, h4, h5, h6):not(#_) {
+  line-height: 125%;
+}
+
+/* main .section.long-form hardcodes line-height instead of reading a
+   token, so the size fix above needs a matching line-height override here. */
+main .section.long-form .content :is(p, ul, ol):not(#_) {
+  line-height: 1.5;
+}
+
+main .section.long-form.long-form-blog .content h2:not(#_),
+main .section.long-form.long-form-blog .content :is(h3, h4, h5, h6):not(#_) {
   line-height: 125%;
 }
