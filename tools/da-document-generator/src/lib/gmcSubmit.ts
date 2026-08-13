@@ -10,7 +10,7 @@ import {
 import type { ManagedDoc, GmcEnv, GmcEnvState, GmcStatus } from '../types';
 
 // sync-products (actions/lib/validate.js) hard-rejects the whole call above this.
-export const MAX_GMC_CHUNK = 50;
+export const MAX_GMC_CHUNK = 100;
 
 export function chunkRows<T>(items: T[], size = MAX_GMC_CHUNK): T[][] {
   const chunks: T[][] = [];
