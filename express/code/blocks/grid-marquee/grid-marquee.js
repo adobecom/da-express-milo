@@ -165,6 +165,18 @@ function addCardInteractions(card, drawer, lazyCB) {
   });
 }
 
+function getPosterSrc(img) {
+  if (img.currentSrc) return img.currentSrc;
+  const sources = [...(img.closest('picture')?.querySelectorAll('source[type="image/webp"]') || [])];
+  const match = sources.find((source) => !source.media || window.matchMedia(source.media).matches);
+  const candidate = match?.srcset.split(',')[0].trim().split(/\s+/)[0];
+  if (candidate) return new URL(candidate, window.location.href).href;
+  if (!img.src) return '';
+  const url = new URL(img.src, window.location.href);
+  if (url.searchParams.get('format') === 'png') url.searchParams.set('format', 'webply');
+  return url.href;
+}
+
 function toCard(drawer) {
   const titleText = drawer.querySelector('strong').textContent.trim();
   const [face, ...panels] = [...drawer.querySelectorAll(':scope > div')];
@@ -183,7 +195,7 @@ function toCard(drawer) {
   }, [face, drawer]);
 
   face.classList.add('face');
-  const lazyCB = () => decorateDrawer(videoAnchor.href, face.querySelector('img').src, titleText, panels, panelsFrag, drawer);
+  const lazyCB = () => decorateDrawer(videoAnchor.href, getPosterSrc(face.querySelector('img')), titleText, panels, panelsFrag, drawer);
   addCardInteractions(card, drawer, lazyCB);
   drawer.classList.add('drawer', 'hide');
   drawer.id = `drawer-${titleText}`;
