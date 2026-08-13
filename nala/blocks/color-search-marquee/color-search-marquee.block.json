@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@color-search-marquee-default",
       "selector": "div.color-search-marquee",
-      "path": "/drafts/nala/blocks/color/color-search-marquee",
+      "path": "/drafts/nala/blocks/color/color-search-marquee?martech=off",
       "data": {
         "semantic": {
           "texts": [
