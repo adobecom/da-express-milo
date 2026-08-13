@@ -47,6 +47,22 @@ let createTag;
 let getIconElementDeprecated;
 
 const DECO_CARD_COUNT = 8;
+const DECO_QUOTE_CHAR_LIMIT = 216;
+const EDITOR_QUOTE_CHAR_LIMIT = 248;
+
+/**
+ * Truncates display text at a whole-word boundary within `limit` characters,
+ * appending "…" — never mid-word. Display-only: callers keep the original,
+ * untruncated string for copy-to-clipboard and accessible names, so nothing
+ * a user actually acts on is ever silently shortened.
+ */
+function truncateQuote(quote, limit) {
+  if (quote.length <= limit) return quote;
+  const cut = quote.slice(0, limit);
+  const lastSpace = cut.lastIndexOf(' ');
+  const trimmed = lastSpace > 0 ? cut.slice(0, lastSpace) : cut;
+  return `${trimmed}…`;
+}
 
 /**
  * True at the same <=767px width mini-editor-widget.css switches the inline
@@ -358,17 +374,36 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
   });
   const quoteEl = createTag('p', { class: 'me-quote' });
   const first = cardSet[0] || { quote: '', author: '' };
-  quoteEl.textContent = first.quote;
+  // The full, untruncated quote — kept separate from quoteEl's own display
+  // text (which truncates at EDITOR_QUOTE_CHAR_LIMIT) so copy-to-clipboard
+  // and the accessible name below always use the complete text, never the
+  // "…"-shortened version sighted users see on a long quote.
+  let currentQuote = first.quote;
+  const renderQuote = (quote) => {
+    currentQuote = quote;
+    const truncated = truncateQuote(quote, EDITOR_QUOTE_CHAR_LIMIT);
+    quoteEl.textContent = truncated;
+    // Only needed once the display text is actually shortened — leaving
+    // this off otherwise keeps aria-describedby (below) as the sole
+    // accessible-name influence, same as before, for the common case.
+    if (truncated === quote) quoteWrap.removeAttribute('aria-label');
+    else quoteWrap.setAttribute('aria-label', quote);
+  };
 
   // aria-describedby (not aria-label) so the accessible name stays the
   // visible quote text itself — an aria-label here would replace it
   // entirely, leaving screen reader users with "Copy quote to clipboard,
   // button" and no indication of which quote (see label-content-name-mismatch).
+  // Overridden with an explicit aria-label (see renderQuote above) only
+  // when the visible text is truncated, so the accessible name is always
+  // the full quote in that case instead of the shortened text it would
+  // otherwise default to.
   const hint = createTag('span', { id: 'me-quote-wrap-hint', class: 'sr-only' }, ['Copy quote to clipboard']);
   const tip = createTag('span', { class: 'me-tip', 'aria-hidden': 'true' }, [
     createTag('span', { class: 'me-tip-box' }, ['Click to copy quote']),
   ]);
   quoteWrap.append(quoteEl, hint, tip);
+  renderQuote(first.quote);
 
   const authorEl = createTag('p', { class: 'me-author' });
   authorEl.textContent = first.author;
@@ -384,7 +419,9 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
   widget.append(buildMiniEditorActions(topActions));
 
   const doCopy = async () => {
-    const ok = await a11y.copyQuoteToClipboard(quoteEl.textContent, authorEl.textContent);
+    // currentQuote (not quoteEl.textContent) — the full quote, even when
+    // the visible text is truncated (see renderQuote).
+    const ok = await a11y.copyQuoteToClipboard(currentQuote, authorEl.textContent);
     if (ok) {
       quoteWrap.classList.add('is-copied');
       setTimeout(() => quoteWrap.classList.remove('is-copied'), 1200);
@@ -467,7 +504,7 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
     useQuote: ({
       quote, author, card: bgCard, font,
     }) => {
-      quoteEl.textContent = quote;
+      renderQuote(quote);
       authorEl.textContent = author || '';
       authorEl.style.display = author ? '' : 'none';
       if (bgCard) selectSwatch(bgCard.bg);
@@ -485,30 +522,47 @@ function buildDecoCard(a11y, entry, useQuote) {
   const { card, quote, author } = entry;
   const deco = createTag('div', { class: 'me-deco', tabindex: '-1' });
   const cardWrap = createTag('div', { class: 'me-deco-card-wrap' });
-  const inner = createTag('div', {
-    class: 'me-deco-card',
+  // .me-deco-card is the outer sizing/rotation box and anchors the actions
+  // row below it (`top: 100%`, see CSS) — it must stay unclipped for that,
+  // so the background image + rounded-corner clipping live one level in,
+  // on .me-deco-card-inner, instead of on this element directly like before
+  // (when the card's fixed height made the two concerns interchangeable).
+  const inner = createTag('div', { class: 'me-deco-card' });
+  const clipped = createTag('div', {
+    class: 'me-deco-card-inner',
     style: `background-image:url("${card.bg}")`,
   });
+  inner.append(clipped);
   // Fixed font/style for every card — see .me-deco-quote in CSS — so no
   // per-instance font styling here; only the editor's own selection varies.
+  // Display text only truncates at DECO_QUOTE_CHAR_LIMIT (buildCardSet in
+  // mini-editor.js already prefers quotes under this limit for these cards,
+  // so this is a rarely-hit fallback) — `quote` itself stays untruncated
+  // below, for useQuote/copy/aria so nothing a user acts on is ever
+  // silently shortened.
   const quoteP = createTag('p', { class: 'me-deco-quote' });
-  quoteP.textContent = quote;
-  inner.append(quoteP);
+  quoteP.textContent = truncateQuote(quote, DECO_QUOTE_CHAR_LIMIT);
+  clipped.append(quoteP);
   if (author) {
     const authorP = createTag('p', { class: 'me-deco-author' });
     authorP.textContent = author;
-    inner.append(authorP);
+    clipped.append(authorP);
   }
 
   const actions = createTag('div', { class: 'me-deco-actions' });
-  const useBtn = createTag('button', { type: 'button', class: 'me-deco-use' });
+  const attribution = author ? `"${quote}" — ${author}` : `"${quote}"`;
+  const useBtn = createTag('button', {
+    type: 'button',
+    class: 'me-deco-use',
+    'aria-label': `Use this quote: ${attribution}`,
+  });
   useBtn.textContent = 'Use this quote';
   useBtn.addEventListener('click', () => useQuote(entry));
 
   const copyBtn = createTag('button', {
     type: 'button',
     class: 'me-deco-copy',
-    'aria-label': 'Copy quote',
+    'aria-label': `Copy quote: ${attribution}`,
   }, [createTag('sp-icon-copy', { class: 'me-deco-copy-icon', 'aria-hidden': 'true' })]);
   copyBtn.addEventListener('click', async () => {
     const ok = await a11y.copyQuoteToClipboard(quote, author);
@@ -519,10 +573,29 @@ function buildDecoCard(a11y, entry, useQuote) {
   });
 
   actions.append(useBtn, copyBtn);
-  cardWrap.append(inner, actions);
+  // Child of .me-deco-card (not a sibling in cardWrap) so its `top: 100%`
+  // (see CSS) resolves against the card's own actual height — which now
+  // varies with quote length (see .me-deco-card's min-height) — instead of
+  // a fixed pixel guess that only ever matched the card's old fixed height.
+  inner.append(actions);
+  cardWrap.append(inner);
   deco.append(cardWrap);
   return deco;
 }
+
+// Cards 1-8 (see buildDecoCards) group into 4 vertical columns of 2, each
+// its own flex container (see .me-deco-col--* in CSS) so a column's cards
+// space apart via `gap` — which adapts as a card's own height varies with
+// its quote length — rather than the fixed-pixel absolute positions this
+// replaced. Column membership mirrors the original zig-zag exactly: cards
+// 1/3 and 5/7 were always the "far" columns (bigger inter-card gap), 2/4
+// and 6/8 the "near" columns (smaller gap) — see the far/near CSS classes.
+const DECO_COLUMNS = [
+  { cardIndexes: [0, 2], className: 'me-deco-col--far-left' },
+  { cardIndexes: [1, 3], className: 'me-deco-col--near-left' },
+  { cardIndexes: [4, 6], className: 'me-deco-col--far-right' },
+  { cardIndexes: [5, 7], className: 'me-deco-col--near-right' },
+];
 
 function buildDecoCards(a11y, cardSet, useQuote) {
   // Not aria-hidden: unlike a purely decorative background image, each card
@@ -532,10 +605,15 @@ function buildDecoCards(a11y, cardSet, useQuote) {
   const wrap = createTag('div', { class: 'mini-editor-decorations' });
   // cardSet[0] powers the main widget; decorative cards use the rest.
   const decoEntries = cardSet.slice(1, 1 + DECO_CARD_COUNT);
-  decoEntries.forEach((entry, i) => {
+  const decos = decoEntries.map((entry, i) => {
     const deco = buildDecoCard(a11y, entry, useQuote);
     deco.classList.add(`me-deco--${i + 1}`);
-    wrap.append(deco);
+    return deco;
+  });
+  DECO_COLUMNS.forEach(({ cardIndexes, className }) => {
+    const col = createTag('div', { class: `me-deco-col ${className}` });
+    cardIndexes.forEach((idx) => { if (decos[idx]) col.append(decos[idx]); });
+    if (col.children.length) wrap.append(col);
   });
   return wrap;
 }
@@ -564,7 +642,17 @@ function buildArcCard(onActivate) {
 
   function render(entry) {
     el.style.backgroundImage = `url("${entry.card.bg}")`;
-    quoteP.textContent = entry.quote;
+    // Display text truncates at EDITOR_QUOTE_CHAR_LIMIT (same limit as the
+    // main widget's own quote — see renderQuote in buildWidget), applied
+    // uniformly regardless of this card's current role (prev/centre/next
+    // share one render path). role="option"'s accessible name defaults to
+    // this same text content, so an explicit aria-label carries the full
+    // quote whenever it's actually shortened — never just the truncated
+    // text — matching the same full-text-preserved rule as everywhere else.
+    const truncated = truncateQuote(entry.quote, EDITOR_QUOTE_CHAR_LIMIT);
+    quoteP.textContent = truncated;
+    if (truncated === entry.quote) el.removeAttribute('aria-label');
+    else el.setAttribute('aria-label', entry.author ? `${entry.quote} — ${entry.author}` : entry.quote);
     // entry.font is the carousel-wide selected font (see buildArcCarousel's
     // selectedFont/withFont) when one has been picked — applies to every
     // role (prev/centre/next), not just centre. Falls back to the fixed
@@ -627,7 +715,11 @@ function buildArcGhost() {
 
   function playExit(entry, fromRole) {
     el.style.backgroundImage = `url("${entry.card.bg}")`;
-    quoteP.textContent = entry.quote;
+    // Same display truncation as the 3 real cards (see buildArcCard's
+    // render) — purely cosmetic here since this ghost is aria-hidden and
+    // never one of the tabbable/clickable cards, but its fixed-size card
+    // shouldn't overflow with a long quote mid-exit either.
+    quoteP.textContent = truncateQuote(entry.quote, EDITOR_QUOTE_CHAR_LIMIT);
     // entry.font carries the carousel-wide selected font here too (see
     // buildArcCarousel's withFont), so the outgoing ghost matches whatever
     // font the other 3 cards are currently showing.

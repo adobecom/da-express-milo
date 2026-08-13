@@ -116,6 +116,12 @@ function constructProps(block) {
   return props;
 }
 
+// Above this, a decorative card (.me-deco-quote) would need to truncate —
+// see truncateQuote in mini-editor-widget.js. Quote SELECTION (which quote
+// goes on which card) prefers staying under this so a deco card only ever
+// truncates when there's truly no untruncated quote left to give it.
+const DECO_QUOTE_CHAR_LIMIT = 216;
+
 /**
  * Pairs each fetched background card with a quote so every card/quote
  * combination is stable and reusable across the main widget, the desktop
@@ -123,13 +129,38 @@ function constructProps(block) {
  * this same list. Font is deliberately not part of this pairing: every
  * decorative card uses one fixed style (see .me-deco-quote), only the
  * editor's own widget has a font choice — see buildFontControl.
+ *
+ * cardSet[0] (the main widget's own card, no character limit — see
+ * DECO_QUOTE_CHAR_LIMIT's own truncation in the widget) always gets the
+ * first authored quote, same as before. For the decorative cards
+ * (cardSet[1..]), quotes at or under DECO_QUOTE_CHAR_LIMIT are cycled
+ * through first — every short quote gets used at least once before any
+ * long quote is reused — since a card only needs to fall back to a long,
+ * truncated quote once every short one has already been given a card.
  */
 function buildCardSet(cards, quotes) {
-  return cards.map((card, i) => ({
-    card,
-    quote: quotes[i % quotes.length].quote,
-    author: quotes[i % quotes.length].author,
-  }));
+  const decoSlotCount = Math.max(0, cards.length - 1);
+  const [firstQuote] = quotes;
+  const shortQuotes = quotes.filter((q) => q.quote.length <= DECO_QUOTE_CHAR_LIMIT);
+  const longQuotes = quotes.filter((q) => q.quote.length > DECO_QUOTE_CHAR_LIMIT);
+
+  // Round-robins `pool` to exactly `count` entries — used to fill deco
+  // slots with short quotes first, reusing each one only after every other
+  // short quote already has a slot, then the same for long quotes.
+  const takeRoundRobin = (pool, count) => Array.from(
+    { length: Math.min(count, pool.length ? count : 0) },
+    (_, i) => pool[i % pool.length],
+  );
+
+  const decoQuotes = shortQuotes.length >= decoSlotCount
+    ? takeRoundRobin(shortQuotes, decoSlotCount)
+    : [...takeRoundRobin(shortQuotes, shortQuotes.length),
+      ...takeRoundRobin(longQuotes, decoSlotCount - shortQuotes.length)];
+
+  return cards.map((card, i) => {
+    const { quote, author } = i === 0 ? firstQuote : decoQuotes[i - 1];
+    return { card, quote, author };
+  });
 }
 
 /**
