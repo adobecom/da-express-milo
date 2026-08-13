@@ -65,6 +65,7 @@ export default function DocumentManagerTab() {
   const [hasScanned, setHasScanned] = useState(false);
   const [gmcDialogOpen, setGmcDialogOpen] = useState(false);
   const [gmcMessage, setGmcMessage] = useState<string | null>(null);
+  const [checkingGmc, setCheckingGmc] = useState<Set<string>>(new Set());
   const [showExportMenu, setShowExportMenu] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
 
@@ -271,6 +272,24 @@ export default function DocumentManagerTab() {
     });
   }
 
+  // Per-row status check triggered by clicking the check icon in a table row.
+  async function handleCheckGmcStatusRow(doc: ManagedDoc, env: GmcEnv) {
+    const token = getToken();
+    if (!token) return;
+    const key = `${doc.path}:${env}`;
+    setCheckingGmc((prev) => new Set([...prev, key]));
+    try {
+      const { updates } = await checkGmcStatus([doc], env, token);
+      applyGmcUpdates(env, updates);
+    } finally {
+      setCheckingGmc((prev) => {
+        const next = new Set(prev);
+        next.delete(key);
+        return next;
+      });
+    }
+  }
+
   useEffect(() => {
     if (!showExportMenu) return;
     const handler = (e: MouseEvent) => {
@@ -465,6 +484,8 @@ export default function DocumentManagerTab() {
             onSort={handleSort}
             actions={actions}
             onEditField={handleEditField}
+            checkingGmc={checkingGmc}
+            onCheckGmcStatus={handleCheckGmcStatusRow}
           />
         </>
       )}
