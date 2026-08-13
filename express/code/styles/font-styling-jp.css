@@ -10,6 +10,11 @@
  * touched here. The mismatch is isolated to the legacy
  * --heading/body-font-size-* tokens, which have no responsive tiers at
  * all; this file gives them the same two-tier treatment.
+ * Breakpoints: the JP spec has only TWO type tiers - mobile (320-599) and
+ * tablet (600-1199) are identical (Figma nodes 7319-154859 == 7868-41979;
+ * they differ only in grid/padding, not type), so the base :root block
+ * covers both and >=1200px (node 7643-98563) is the only step-up. Do not
+ * add a 600-1199 tier - it would just duplicate the base values.
  * Toggle: page/domain metadata `font-styling: jp` (see scripts.js loadStyles()).
  */
 :root {
