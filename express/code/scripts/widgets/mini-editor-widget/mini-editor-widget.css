@@ -45,6 +45,62 @@
   transition: background-image 0.35s ease;
 }
 
+/* Top-right hover action bar (edit/share/download), per Figma node 1099-5050.
+   Anchored to .mini-editor-widget (not .me-card) so the same element/CSS
+   rule works unchanged in both the desktop card layout and the tablet/mobile
+   arc carousel — see the .me-carousel-mode tie-in below for why the
+   top-right corner still lines up with the visible card in both cases. */
+.me-actions {
+  position: absolute;
+  top: var(--spacing-300);
+  right: var(--spacing-300);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-80);
+  padding: var(--spacing-80);
+  border-radius: 16px;
+  background: var(--transparent-white-400);
+  border: 1px solid var(--transparent-white-500);
+  -webkit-backdrop-filter: blur(2.5px);
+  backdrop-filter: blur(2.5px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.mini-editor-widget:hover .me-actions,
+.mini-editor-widget:focus-within .me-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.me-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: var(--spacing-80);
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+}
+
+/* sp-icon-* (see TOP_ACTION_DEFS in mini-editor-widget.js) sizes/colours
+   itself via these CSS custom property hooks — no Spectrum theme/design
+   tokens required, so a plain 20px/#292929 override here is enough. */
+.me-action-icon {
+  --mod-icon-size: 20px;
+  --mod-icon-color: #292929;
+}
+
+.me-action:hover {
+  background: var(--color-gray-150);
+}
+
 .me-quote-wrap {
   position: relative;
   box-sizing: border-box;
@@ -575,6 +631,16 @@ p.me-deco-author {
 
 .me-carousel-mode .me-arc {
   display: flex;
+}
+
+/* Touch devices have no hover, so the action bar stays always-visible here
+   instead of hidden-until-hover — .me-carousel-mode already encodes this
+   file's one definition of "tablet or mobile" (see syncViewportMode in
+   mini-editor-widget.js), so this reuses it rather than a second, possibly
+   divergent breakpoint check. */
+.me-carousel-mode .me-actions {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* The widget's own max-width (542px, matching the tablet card size) only

@@ -209,6 +209,63 @@ describe('mini-editor-widget', () => {
     });
   });
 
+  describe('topActions bar (edit/share/download)', () => {
+    it('renders one button per supplied action, top-right of the widget, in order', async () => {
+      const { root } = await mount({
+        topActions: [
+          { type: 'edit', onClick: () => {} },
+          { type: 'share', onClick: () => {} },
+          { type: 'download', onClick: () => {} },
+        ],
+      });
+      const bar = root.querySelector('.mini-editor-widget > .me-actions');
+      expect(bar).to.exist;
+      const buttons = bar.querySelectorAll('.me-action');
+      expect(buttons.length).to.equal(3);
+      expect([...buttons].map((b) => b.className)).to.deep.equal([
+        'me-action me-action--edit',
+        'me-action me-action--share',
+        'me-action me-action--download',
+      ]);
+    });
+
+    it('renders only the types supplied', async () => {
+      const { root } = await mount({ topActions: [{ type: 'share', onClick: () => {} }] });
+      const bar = root.querySelector('.me-actions');
+      expect(bar.querySelectorAll('.me-action').length).to.equal(1);
+      expect(bar.querySelector('.me-action--share')).to.exist;
+      expect(bar.querySelector('.me-action--edit')).to.not.exist;
+    });
+
+    it('invokes the matching onClick when each action button is clicked', async () => {
+      const onEdit = sinon.spy();
+      const onShare = sinon.spy();
+      const onDownload = sinon.spy();
+      const { root } = await mount({
+        topActions: [
+          { type: 'edit', onClick: onEdit },
+          { type: 'share', onClick: onShare },
+          { type: 'download', onClick: onDownload },
+        ],
+      });
+
+      root.querySelector('.me-action--edit').click();
+      root.querySelector('.me-action--share').click();
+      root.querySelector('.me-action--download').click();
+
+      expect(onEdit.calledOnce).to.be.true;
+      expect(onShare.calledOnce).to.be.true;
+      expect(onDownload.calledOnce).to.be.true;
+    });
+
+    it('renders an empty bar and does not throw when topActions is omitted', async () => {
+      const { root } = await mount();
+      const bar = root.querySelector('.me-actions');
+      expect(bar).to.exist;
+      expect(bar.querySelectorAll('.me-action').length).to.equal(0);
+    });
+  });
+
   describe('syncViewportMode', () => {
     it('adds me-carousel-mode when the viewport is at or below the tablet breakpoint', async () => {
       const { root, editor } = await mount();

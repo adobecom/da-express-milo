@@ -23,8 +23,8 @@ and the cross-block `mini-editor:use-quote` event wiring.
 > Spectrum-based `mini-editor-widget` proposed in adobecom/da-express-milo#680
 > (`content`, `topActions`, `fontOptions`, `backgrounds`, …) but keeps this
 > project's existing pixel-identical vanilla UI rather than the Spectrum
-> rendering. `topActions` is accepted for API parity and is currently unused
-> (the present design has no top action bar) — pass `[]`.
+> rendering. `topActions` now renders the top-right hover action bar (Figma
+> node 1099-5050) — see the Config table below.
 
 ## Usage
 
@@ -33,7 +33,11 @@ import createMiniEditorWidget from '../../scripts/widgets/mini-editor-widget/min
 
 const editor = await createMiniEditorWidget({
   root: block,          // element the widget sets state attrs / CSS vars / mode class on
-  topActions: [],       // reserved; none rendered yet
+  topActions: [         // top-right hover action bar (Figma node 1099-5050)
+    { type: 'edit', onClick: onEdit },
+    { type: 'share', onClick: onShare },
+    { type: 'download', onClick: onDownload },
+  ],
   fontOptions,          // [{ label, font, italic, weight }]
   backgrounds: {        // our fetched card set + paired quotes
     cardSet: [{ card: { id, bg }, quote, author }, ...],
@@ -64,7 +68,7 @@ loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-widget/mini-edito
 | Key           | Type          | Notes |
 |---------------|---------------|-------|
 | `root`        | `HTMLElement` | Element the widget sets `data-me-panel`, `--me-*` custom properties, and the `me-carousel-mode` class on. In the block this is the `.mini-editor` block element (which also defines the `--me-*` layout tokens in `mini-editor.css`). |
-| `topActions`  | `Array`       | Reserved top-bar action descriptors, mirroring PR #680. **Not rendered yet** — pass `[]`. |
+| `topActions`  | `Array`       | Top-right hover action bar (Figma node 1099-5050): `[{ type: 'edit'\|'share'\|'download', onClick }, ...]`. Only the types supplied are rendered, in the given order — pass `[]` (or omit) to render none. Always visible on tablet/mobile (no hover); fades in on hover/focus-within on desktop. |
 | `fontOptions` | `Array`       | `{ label, font, italic, weight }`. First entry is applied on load (selected). Single-select. |
 | `backgrounds` | `Object`      | `{ cardSet, decoCount }`. `cardSet` is `[{ card: { id, bg }, quote, author }, ...]`; `cardSet[0]` powers the main widget and the rest (up to `decoCount`, default 8) power the decorations / arc. |
 | `a11y`        | `Object`      | `{ trapFocus, handleEscapeClose, disableBackgroundScroll, restoreBackgroundScroll, copyQuoteToClipboard }`. |

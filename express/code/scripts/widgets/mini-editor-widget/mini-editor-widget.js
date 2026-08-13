@@ -11,8 +11,13 @@
  * event wiring, so a block only has to fetch data and mount the result.
  *
  * UI/UX is intentionally identical to the original in-block implementation —
- * this widget is an extraction of that surface, not a redesign. It does NOT
- * depend on Spectrum Web Components.
+ * this widget is an extraction of that surface, not a redesign. It is plain
+ * vanilla DOM with one exception: the top-right action bar (`topActions`,
+ * Figma node 1099-5050) renders real Spectrum Web Components icons
+ * (`sp-icon-*`), lazily loaded from `../spectrum/dist/icons-workflow.js`
+ * only when `topActions` is non-empty — no `<sp-theme>`/Spectrum design
+ * tokens are required, since the icons are sized/coloured directly via their
+ * own `--mod-icon-size`/`--mod-icon-color` CSS hooks (see mini-editor-widget.css).
  *
  * Usage:
  *   import createMiniEditorWidget from
@@ -21,7 +26,11 @@
  *   const editor = await createMiniEditorWidget({
  *     root: block,          // element the widget sets state attrs/vars on
  *     content: headerEl,    // authored heading/subcopy/CTA lockup
- *     topActions: [],       // reserved (none rendered yet)
+ *     topActions: [         // top-right hover action bar (Figma 1099-5050)
+ *       { type: 'edit', onClick: onEdit },
+ *       { type: 'share', onClick: onShare },
+ *       { type: 'download', onClick: onDownload },
+ *     ],
  *     fontOptions: [...],   // { label, font, italic, weight }
  *     backgrounds: {        // our fetched card set + quotes
  *       cardSet: [{ card: { id, bg }, quote, author }, ...],
@@ -281,7 +290,46 @@ function buildBottomSheet(root, a11y, kind, title, contentEl) {
   return { overlay, onPanelChange };
 }
 
-function buildWidget(root, a11y, cardSet, fontOptions) {
+// Fixed per Figma node 1099-5050 — topActions only ever picks which of these
+// 3 to show and supplies their handler, it doesn't define new icons/labels.
+// Tag names are real Spectrum Web Components icons (see the dynamic import
+// in createMiniEditorWidget) — all 3 are already part of the curated
+// icons-workflow bundle (scripts/widgets/spectrum/build.mjs).
+const TOP_ACTION_DEFS = {
+  edit: { label: 'Edit', icon: 'sp-icon-edit' },
+  share: { label: 'Share', icon: 'sp-icon-share-android' },
+  download: { label: 'Download', icon: 'sp-icon-download' },
+};
+
+/**
+ * Top-right hover action bar, per Figma node 1099-5050. Callback props (not
+ * events) — matches this file's existing intra-widget wiring
+ * (onSelect/onFontOrColourChange) rather than the CustomEvent used for
+ * mini-editor:use-quote, which exists only to decouple separate blocks.
+ * `topActions` is `[{ type: 'edit'|'share'|'download', onClick }, ...]` —
+ * only the types actually supplied are rendered, in the given order.
+ * Icon elements must be Spectrum custom elements already registered by the
+ * time this runs — see the icons-workflow.js dynamic import in
+ * createMiniEditorWidget, which awaits before calling buildWidget.
+ */
+function buildMiniEditorActions(topActions = []) {
+  const bar = createTag('div', { class: 'me-actions' });
+  topActions.forEach(({ type, onClick }) => {
+    const def = TOP_ACTION_DEFS[type];
+    if (!def) return;
+    const icon = createTag(def.icon, { class: 'me-action-icon', 'aria-hidden': 'true' });
+    const btn = createTag('button', {
+      type: 'button',
+      class: `me-action me-action--${type}`,
+      'aria-label': def.label,
+    }, [icon]);
+    btn.addEventListener('click', () => onClick?.());
+    bar.append(btn);
+  });
+  return bar;
+}
+
+function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
   const widget = createTag('div', { class: 'mini-editor-widget' });
   const card = createTag('div', { class: 'me-card' });
 
@@ -311,6 +359,12 @@ function buildWidget(root, a11y, cardSet, fontOptions) {
 
   card.append(quoteWrap, authorEl);
   widget.append(card);
+
+  // Sibling of .me-card/.me-arc, not nested inside .me-card, so the same
+  // element and top-right CSS anchor (against .mini-editor-widget) work
+  // unchanged whether the desktop card or the tablet/mobile arc carousel is
+  // the one currently visible.
+  widget.append(buildMiniEditorActions(topActions));
 
   const doCopy = async () => {
     const ok = await a11y.copyQuoteToClipboard(quoteEl.textContent, authorEl.textContent);
@@ -741,8 +795,9 @@ function buildArcCarousel(cardSet, useQuote, defaultFont) {
  * @param {Object} config
  * @param {HTMLElement} config.root — element the widget sets state attributes,
  *   CSS custom properties, and the `me-carousel-mode` class on (the block).
- * @param {Array} [config.topActions=[]] — reserved top-bar action descriptors;
- *   none are rendered yet (the current design has no top action bar).
+ * @param {Array} [config.topActions=[]] — top-right hover action bar (Figma
+ *   node 1099-5050): `[{ type: 'edit'|'share'|'download', onClick }, ...]`.
+ *   Only the types supplied are rendered, in the given order.
  * @param {Array} config.fontOptions — `{ label, font, italic, weight }` list.
  * @param {Object} config.backgrounds — `{ cardSet, decoCount }` where cardSet
  *   is `[{ card: { id, bg }, quote, author }, ...]`.
@@ -756,16 +811,21 @@ function buildArcCarousel(cardSet, useQuote, defaultFont) {
 export default async function createMiniEditorWidget(config = {}) {
   const {
     root,
+    topActions = [],
     fontOptions,
     backgrounds,
     a11y,
     deps,
   } = config;
-  // topActions is accepted for API parity with the proposed widget (PR #680)
-  // but the current design has no top action bar, so it is intentionally not
-  // read here — callers pass [].
 
   ({ createTag, getIconElementDeprecated } = deps);
+
+  // topActions' icons are real Spectrum Web Components custom elements
+  // (sp-icon-*, see TOP_ACTION_DEFS) — only loaded when actually used, so
+  // callers that don't pass topActions don't pay for the Spectrum bundle.
+  if (topActions.length) {
+    await import('../spectrum/dist/icons-workflow.js');
+  }
 
   const { cardSet } = backgrounds;
   const decoCount = backgrounds.decoCount ?? DECO_CARD_COUNT;
@@ -780,7 +840,7 @@ export default async function createMiniEditorWidget(config = {}) {
   const stage = createTag('div', { class: 'mini-editor-stage' });
   const {
     widget, useQuote, onFontOrColourChange, destroy: destroyWidget,
-  } = buildWidget(root, a11y, cardSet, fontOptions);
+  } = buildWidget(root, a11y, cardSet, fontOptions, topActions);
   const decorations = buildDecoCards(a11y, cardSet, useQuote);
   const { root: arcCarousel, updateCentre } = buildArcCarousel(arcCardSet, useQuote, fontOptions[0]);
   onFontOrColourChange(updateCentre);
