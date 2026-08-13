@@ -237,9 +237,7 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
       isFrictionlessQa: 'true',
       ...(quickActionId === 'caption-video' && { videoLanguage: selectedVideoLanguage }),
       ...(quickActionId === 'remove-background' && {
-        qaSourcePage: window.location.pathname.includes('change-background')
-          ? 'change-background'
-          : 'remove-background',
+        qaSourcePage: getMetadata('qa-source-page') || 'remove-background',
       }),
     },
     analyticsData: {
@@ -603,9 +601,7 @@ export function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, di
       variant: quickAction,
       width: dimensions?.width,
       height: dimensions?.height,
-      qaSourcePage: window.location.pathname.includes('change-background')
-        ? 'change-background'
-        : 'remove-background',
+      qaSourcePage: getMetadata('qa-source-page') || 'remove-background',
     };
   }
 
