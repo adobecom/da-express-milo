@@ -54,13 +54,27 @@
   line-height: 125%;
 }
 
-/* main .section.long-form hardcodes line-height instead of reading a
-   token, so the size fix above needs a matching line-height override here. */
-main .section.long-form .content :is(p, ul, ol):not(#_) {
-  line-height: 1.5;
+/* --- .section.long-form heading re-point ---
+   long-form binds each heading level to a token one tier below the JP text
+   style the design assigns it (verified in Figma: h2 -> Headings/L but reads
+   --heading-font-size-m; h3 -> Headings/M but reads --heading-font-size-s),
+   and the .long-form-blog variant swaps in a third token system on top. So
+   redefining root vars can't hit the spec without moving every other block
+   that shares those tokens. Re-point each level at the token matching its JP
+   text style instead; values resolve via the JP vars above -
+   L=24/28, M=20/24, S=18/20 (mobile / >=1200px):
+     h2 -> Headings/L, h3 -> Headings/M, h4-h6 keep Headings/S (base rule).
+   Scoped to non-blog long-form (the discover layout confirmed in Figma); the
+   .long-form-blog variant intentionally uses a larger heading scale. */
+main .section.long-form:not(.long-form-blog) .content h2 {
+  font-size: var(--heading-font-size-l);
 }
 
-main .section.long-form.long-form-blog .content h2:not(#_),
-main .section.long-form.long-form-blog .content :is(h3, h4, h5, h6):not(#_) {
-  line-height: 125%;
+main .section.long-form:not(.long-form-blog) .content h3 {
+  font-size: var(--heading-font-size-m);
+}
+
+/* long-form hardcodes body line-height (130%); JP Body/M is 1.5. */
+main .section.long-form .content :is(p, ul, ol):not(#_) {
+  line-height: 1.5;
 }
