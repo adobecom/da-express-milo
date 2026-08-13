@@ -5,7 +5,7 @@
  * tiers - mobile xs/s/m/l/xl = 16/18/20/24/28, desktop (>=1200px) =
  * 18/20/24/28/36, both at 900 weight / 125% line-height. That exactly
  * matches this file's existing --ax-heading-* and --Global-Typography-
- * Size-Headings-*/Body-Body-M tokens (native, unmodified, at both
+ * Size-Headings and Body-Body-M tokens (native, unmodified, at both
  * breakpoints) - so those systems are already correct and must NOT be
  * touched here. The mismatch is isolated to the legacy
  * --heading/body-font-size-* tokens, which have no responsive tiers at
