@@ -42,7 +42,14 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/collapsibl
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/collapsible-rows/collapsible-rows
 
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color-wheel
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-blindness
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-contrast-checker
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-explore
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-extract-gradient
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-extract-palette
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-headline
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-search-marquee
+https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-wheel
 
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/test-gen/content-toggle/content-toggle
 
