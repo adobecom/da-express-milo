@@ -849,6 +849,60 @@ main :where(.s2) a.button:any-link {
   margin: 0;
 }
 
+/* ─── S2 size ladder (Figma SoT) ─────────────────────────────────────────────
+   Figma button sizes S/M/L/XL → font-size 12/14/16/18, fixed line-height
+   16/16/18/20, and top+bottom padding 4/7/10/13. Figma measures that padding to
+   the border-box edge with the 2px stroke sitting INSIDE it, and Express buttons
+   always carry a 2px solid border (var(--spacing-50)) in content-box — so CSS
+   padding-top/bottom = Figma pad − 2px, which lands the exact Figma heights:
+   S 24 / M 30 / L 38 / XL 46. The fixed-px line-height is the key fix: it's what
+   keeps the label vertically centred in the button.
+
+   Size-class mapping (per design sign-off): default + button-l = M, small = S,
+   large / button-xl = L, xlarge / button-xxl = XL. Only font-size, line-height
+   and vertical padding are set here — horizontal padding and radius stay from
+   the base con-button rules. */
+main .s2 a.con-button:any-link,
+main .s2 a.button:any-link {
+  font-size: var(--body-font-size-s); /* 14px — M */
+  line-height: 16px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+main .s2 a.button.small:any-link,
+main .s2 a.con-button.small:any-link,
+main .s2 .small a.con-button:any-link {
+  font-size: var(--body-font-size-xs); /* 12px — S */
+  line-height: 16px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+}
+
+main .s2 a.button.large:any-link,
+main .s2 a.con-button.large:any-link,
+main .s2 a.con-button.button-xl:any-link,
+main .s2 a.con-button.xl-button:any-link,
+main .s2 .button-xl a.con-button:any-link,
+main .s2 .xl-button a.con-button:any-link {
+  font-size: var(--body-font-size-m); /* 16px — L */
+  line-height: 18px;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+main .s2 a.button.xlarge:any-link,
+main .s2 a.con-button.xlarge:any-link,
+main .s2 a.con-button.button-xxl:any-link,
+main .s2 a.con-button.xxl-button:any-link,
+main .s2 .button-xxl a.con-button:any-link,
+main .s2 .xxl-button a.con-button:any-link {
+  font-size: var(--body-font-size-l); /* 18px — XL */
+  line-height: 20px;
+  padding-top: 11px;
+  padding-bottom: 11px;
+}
+
 /* Accent / primary blue — proper S2 blue (#3b63fb), not the legacy #5c5ce0.
    Stays blue on dark sections, per the SoT. */
 main .s2 a.con-button.blue:any-link,
