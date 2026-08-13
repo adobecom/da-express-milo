@@ -7,8 +7,10 @@
  * carousel — plus the shared font/background controls (inline expanding rows
  * on tablet/desktop, bottom sheets on mobile). The caller supplies the data
  * (content header, font options, background cards, quotes); the widget owns
- * all rendering, interaction, animation, and the cross-block "use this quote"
- * event wiring, so a block only has to fetch data and mount the result.
+ * all rendering, interaction, and animation, so a block only has to fetch
+ * data and mount the result. Pass `decorations: false` to skip the
+ * decorative cards / arc carousel entirely and render just the centre editor
+ * card, e.g. for a host that shows the widget inside a modal.
  *
  * UI/UX is intentionally identical to the original in-block implementation —
  * this widget is an extraction of that surface, not a redesign. It is plain
@@ -39,16 +41,23 @@
  *   });
  *   stageParent.append(editor.stage);
  *   headerEl.append(editor.decorations);
- *
- * The event listener that swaps a quote/author (and optionally background /
- * font) into the editor — dispatched by collapsible-rows' "Create a design"
- * button as `mini-editor:use-quote` — is registered inside the widget.
  */
 
 let createTag;
 let getIconElementDeprecated;
 
 const DECO_CARD_COUNT = 8;
+
+/**
+ * True at the same <=767px width mini-editor-widget.css switches the inline
+ * font/colour row for the mobile bottom sheet. Checked live (not cached) at
+ * each click site that needs it, since panelMode itself is a static string
+ * baked in at widget creation and can't otherwise react to a resize/rotation
+ * while a host (e.g. the modal) stays open across it.
+ */
+function isMobileSheetWidth() {
+  return window.matchMedia('(width <= 767px)').matches;
+}
 
 /**
  * Builds one font-option button. Used to populate both the tablet/desktop
@@ -75,7 +84,7 @@ function buildFontButton(opt, index, onPick) {
   return btn;
 }
 
-function buildFontControl(root, fontOptions, onSelect) {
+function buildFontControl(root, fontOptions, onSelect, panelMode) {
   const control = createTag('button', {
     type: 'button',
     class: 'me-control me-control--font',
@@ -133,6 +142,12 @@ function buildFontControl(root, fontOptions, onSelect) {
 
   control.addEventListener('click', () => {
     const isOpen = root.getAttribute('data-me-panel') === 'fonts';
+    // In always-open-inline mode (the modal, tablet/desktop only — mobile
+    // falls back to the normal bottom-sheet toggle below), one panel must
+    // always stay open — clicking the already-open control's own trigger is
+    // a no-op instead of collapsing to 'none', since there is no "both
+    // closed" state for this host to fall back to.
+    if (panelMode === 'always-open-inline' && isOpen && !isMobileSheetWidth()) return;
     root.setAttribute('data-me-panel', isOpen ? 'none' : 'fonts');
     control.setAttribute('aria-expanded', String(!isOpen));
   });
@@ -164,7 +179,7 @@ function buildSwatchButton(card, index, onPick) {
   return btn;
 }
 
-function buildColorControl(root, cards, onSelect) {
+function buildColorControl(root, cards, onSelect, panelMode) {
   const control = createTag('button', {
     type: 'button',
     class: 'me-control me-control--colour',
@@ -218,6 +233,8 @@ function buildColorControl(root, cards, onSelect) {
 
   control.addEventListener('click', () => {
     const isOpen = root.getAttribute('data-me-panel') === 'colour';
+    // See buildFontControl's identical guard for always-open-inline mode.
+    if (panelMode === 'always-open-inline' && isOpen && !isMobileSheetWidth()) return;
     root.setAttribute('data-me-panel', isOpen ? 'none' : 'colour');
     control.setAttribute('aria-expanded', String(!isOpen));
   });
@@ -329,7 +346,7 @@ function buildMiniEditorActions(topActions = []) {
   return bar;
 }
 
-function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
+function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
   const widget = createTag('div', { class: 'mini-editor-widget' });
   const card = createTag('div', { class: 'me-card' });
 
@@ -397,7 +414,7 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
     panel: fontPanel,
     sheetGrid: fontSheetGrid,
     selectFont,
-  } = buildFontControl(root, fontOptions, (font) => onFontOrColourPick({ font }));
+  } = buildFontControl(root, fontOptions, (font) => onFontOrColourPick({ font }), panelMode);
   const {
     control: colourControl,
     panel: colourPanel,
@@ -407,6 +424,7 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
     root,
     cardSet.map((c) => c.card),
     (bgCard) => onFontOrColourPick({ card: bgCard }),
+    panelMode,
   );
   controls.append(fontControl, colourControl);
 
@@ -431,6 +449,13 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
   panelObserver.observe(root, { attributes: true, attributeFilter: ['data-me-panel'] });
 
   const onDocClick = (e) => {
+    // always-open-inline (the modal) on tablet/desktop: one of font/colour
+    // always stays open — including against the very "Create a design"
+    // click that opens the modal in the first place, which document-click-
+    // bubbles here same as any other outside click. Mobile falls back to
+    // the normal bottom-sheet behaviour (close on outside click), same as
+    // the inline block.
+    if (panelMode === 'always-open-inline' && !isMobileSheetWidth()) return;
     if (!widget.contains(e.target)) {
       root.setAttribute('data-me-panel', 'none');
     }
@@ -805,6 +830,21 @@ function buildArcCarousel(cardSet, useQuote, defaultFont) {
  *   own: `{ trapFocus, handleEscapeClose, disableBackgroundScroll,
  *   restoreBackgroundScroll, copyQuoteToClipboard }`.
  * @param {Object} [config.deps] — `{ createTag, getIconElementDeprecated }`.
+ * @param {boolean} [config.decorations=true] — when `false`, the desktop
+ *   zig-zag decorative cards and the tablet/mobile arc carousel are never
+ *   built at all (not built-then-hidden) — only the centre editor card
+ *   renders, at every breakpoint. For a host that only ever shows the
+ *   widget in isolation (e.g. a modal), so it never pays for DOM/listeners
+ *   it will never display.
+ * @param {'always-open-inline'} [config.panelMode] — when set, the font/
+ *   colour controls behave differently from the default (collapsible,
+ *   bottom-sheet-on-mobile) inline row: one of the two starts open (font)
+ *   and stays open at every breakpoint/width — clicking its own trigger
+ *   again is a no-op instead of collapsing to neither. The CSS-driven
+ *   mobile bottom sheet must be suppressed by the host's own stylesheet
+ *   (see mini-editor-modal.css) since it's still built either way. Used by
+ *   the "Create a design" modal, where the empty space below the card
+ *   exists only to host this panel.
  * @returns {Promise<{ stage, decorations, useQuote, updateCentre,
  *   syncViewportMode, destroy }>}
  */
@@ -816,6 +856,8 @@ export default async function createMiniEditorWidget(config = {}) {
     backgrounds,
     a11y,
     deps,
+    decorations: decorationsEnabled = true,
+    panelMode,
   } = config;
 
   ({ createTag, getIconElementDeprecated } = deps);
@@ -830,63 +872,69 @@ export default async function createMiniEditorWidget(config = {}) {
   const { cardSet } = backgrounds;
   const decoCount = backgrounds.decoCount ?? DECO_CARD_COUNT;
 
-  root.setAttribute('data-me-panel', 'none');
-
-  // Same entries (the widget's own + the desktop decorations) power the
-  // tablet/mobile arc carousel, so it cycles through the identical set of
-  // quote/background/font combinations as the desktop zig-zag.
-  const arcCardSet = [cardSet[0], ...cardSet.slice(1, 1 + decoCount)];
+  // always-open-inline (the modal) starts with the font panel open and
+  // keeps one of font/colour open at all times — see buildFontControl /
+  // buildColorControl's matching click-guard. Not on mobile widths, where
+  // this host falls back to the normal bottom sheet (nothing open until
+  // tapped), same as everywhere else this flag doesn't apply.
+  const startsOpen = panelMode === 'always-open-inline' && !isMobileSheetWidth();
+  root.setAttribute('data-me-panel', startsOpen ? 'fonts' : 'none');
 
   const stage = createTag('div', { class: 'mini-editor-stage' });
   const {
     widget, useQuote, onFontOrColourChange, destroy: destroyWidget,
-  } = buildWidget(root, a11y, cardSet, fontOptions, topActions);
-  const decorations = buildDecoCards(a11y, cardSet, useQuote);
-  const { root: arcCarousel, updateCentre } = buildArcCarousel(arcCardSet, useQuote, fontOptions[0]);
-  onFontOrColourChange(updateCentre);
-
-  // The arc carousel is inserted inside the widget, in the same flow slot
-  // as .me-card (which .me-carousel-mode hides), rather than as a sibling
-  // of the widget in the stage — the stage's flex row would otherwise
-  // squeeze both side by side instead of the arc taking .me-card's place.
-  widget.querySelector('.me-card').after(arcCarousel);
+  } = buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode);
   stage.append(widget);
 
-  // On a touch/coarse-pointer device (tablet, phone), use the shorter of
-  // width/height rather than window.innerWidth alone — a physical device's
-  // short axis is orientation-independent, so this keeps the same tablet
-  // from flipping into the desktop zig-zag layout just because rotating to
-  // landscape made innerWidth exceed the breakpoint. Plain mouse/desktop
-  // windows don't have a fixed physical "short side" (resizing changes both
-  // dimensions independently), so they keep the simple width-only check —
-  // otherwise a short-but-wide desktop browser window would wrongly be
-  // treated as a tablet.
-  const TABLET_BREAKPOINT = 1199;
-  const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
-  const isSmallViewport = () => {
-    const size = isTouchDevice
-      ? Math.min(window.innerWidth, window.innerHeight)
-      : window.innerWidth;
-    return size <= TABLET_BREAKPOINT;
-  };
-  const syncViewportMode = () => {
-    root.classList.toggle('me-carousel-mode', isSmallViewport());
-  };
-  syncViewportMode();
-  window.addEventListener('resize', syncViewportMode);
+  let decorations;
+  let updateCentre = () => {};
+  let syncViewportMode = () => {};
+  let removeResizeListener = () => {};
 
-  // "Create a design" buttons on the page's collapsible-rows quotes (see
-  // collapsible-rows.js) dispatch this instead of importing the mini-editor
-  // directly, since the two blocks are otherwise unrelated. Scrolls the
-  // editor into view and swaps in the copied quote/author, on whichever of
-  // the desktop widget or the tablet/mobile carousel is active.
-  const onUseQuoteEvent = (e) => {
-    const { quote, author } = e.detail;
-    useQuote({ quote, author });
-    updateCentre({ quote, author });
-    root.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
-  document.addEventListener('mini-editor:use-quote', onUseQuoteEvent);
+  if (decorationsEnabled) {
+    // Same entries (the widget's own + the desktop decorations) power the
+    // tablet/mobile arc carousel, so it cycles through the identical set of
+    // quote/background/font combinations as the desktop zig-zag.
+    const arcCardSet = [cardSet[0], ...cardSet.slice(1, 1 + decoCount)];
+    decorations = buildDecoCards(a11y, cardSet, useQuote);
+    const { root: arcCarousel, updateCentre: updateArcCentre } = buildArcCarousel(
+      arcCardSet,
+      useQuote,
+      fontOptions[0],
+    );
+    updateCentre = updateArcCentre;
+    onFontOrColourChange(updateCentre);
+
+    // The arc carousel is inserted inside the widget, in the same flow slot
+    // as .me-card (which .me-carousel-mode hides), rather than as a sibling
+    // of the widget in the stage — the stage's flex row would otherwise
+    // squeeze both side by side instead of the arc taking .me-card's place.
+    widget.querySelector('.me-card').after(arcCarousel);
+
+    // On a touch/coarse-pointer device (tablet, phone), use the shorter of
+    // width/height rather than window.innerWidth alone — a physical device's
+    // short axis is orientation-independent, so this keeps the same tablet
+    // from flipping into the desktop zig-zag layout just because rotating to
+    // landscape made innerWidth exceed the breakpoint. Plain mouse/desktop
+    // windows don't have a fixed physical "short side" (resizing changes both
+    // dimensions independently), so they keep the simple width-only check —
+    // otherwise a short-but-wide desktop browser window would wrongly be
+    // treated as a tablet.
+    const TABLET_BREAKPOINT = 1199;
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+    const isSmallViewport = () => {
+      const size = isTouchDevice
+        ? Math.min(window.innerWidth, window.innerHeight)
+        : window.innerWidth;
+      return size <= TABLET_BREAKPOINT;
+    };
+    syncViewportMode = () => {
+      root.classList.toggle('me-carousel-mode', isSmallViewport());
+    };
+    syncViewportMode();
+    window.addEventListener('resize', syncViewportMode);
+    removeResizeListener = () => window.removeEventListener('resize', syncViewportMode);
+  }
 
   return {
     stage,
@@ -896,8 +944,7 @@ export default async function createMiniEditorWidget(config = {}) {
     syncViewportMode,
     destroy: () => {
       destroyWidget();
-      window.removeEventListener('resize', syncViewportMode);
-      document.removeEventListener('mini-editor:use-quote', onUseQuoteEvent);
+      removeResizeListener();
     },
   };
 }

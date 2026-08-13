@@ -7,6 +7,7 @@ import {
 } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import showCopyToast from '../../scripts/utils/copy-toast.js';
 import createMiniEditorWidget from '../../scripts/widgets/mini-editor-widget/mini-editor-widget.js';
+import createMiniEditorModal from '../../scripts/widgets/mini-editor-modal/mini-editor-modal.js';
 import getCardBackgrounds from './mini-editor-background-loader.js';
 import getFontOptions from './mini-editor-fonts-loader.js';
 
@@ -16,6 +17,11 @@ let getConfig;
 
 const TEMPLATE_LIMIT = 8;
 const DECO_CARD_COUNT = 8;
+
+// Module-level (not a DOM query) so two mini-editor blocks decorating
+// concurrently on the same page can't both pass an empty check before either
+// has appended its modal — only the first init() call builds one.
+let modalPromise = null;
 
 /**
  * Copies the quote and, when present, its author (as "quote — author") so
@@ -156,6 +162,7 @@ function buildContentHeader(props) {
 export default async function init(block) {
   ({ createTag, loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`));
   loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-widget/mini-editor-widget.css`);
+  loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-modal/mini-editor-modal.css`);
 
   const props = constructProps(block);
   block.innerHTML = '';
@@ -190,6 +197,14 @@ export default async function init(block) {
       return;
     }
     const cardSet = buildCardSet(cards, quotes);
+    const a11y = {
+      trapFocus,
+      handleEscapeClose,
+      disableBackgroundScroll,
+      restoreBackgroundScroll,
+      copyQuoteToClipboard,
+    };
+    const deps = { createTag, getIconElementDeprecated };
 
     const editor = await createMiniEditorWidget({
       root: block,
@@ -203,14 +218,8 @@ export default async function init(block) {
       ],
       fontOptions,
       backgrounds: { cardSet, decoCount: DECO_CARD_COUNT },
-      a11y: {
-        trapFocus,
-        handleEscapeClose,
-        disableBackgroundScroll,
-        restoreBackgroundScroll,
-        copyQuoteToClipboard,
-      },
-      deps: { createTag, getIconElementDeprecated },
+      a11y,
+      deps,
     });
 
     // Decorations are appended to the header (not the stage) so they can be
@@ -218,6 +227,24 @@ export default async function init(block) {
     // bottom edge, per the Figma reference, without extending past it.
     header.append(editor.decorations);
     themeHost.append(editor.stage);
+
+    // "Create a design" on collapsible-rows' quotes (see collapsible-rows.js)
+    // opens this modal — showing just the centre editor card, identically
+    // across desktop/tablet/mobile — instead of scrolling to this inline
+    // block. One modal per page regardless of how many mini-editor blocks
+    // are authored (modalPromise, not a DOM query, so two blocks decorating
+    // concurrently can't both build one), reusing this block's own fetched
+    // cards/fonts.
+    modalPromise ??= createMiniEditorModal({
+      fontOptions,
+      backgrounds: { cardSet, decoCount: DECO_CARD_COUNT },
+      a11y,
+      deps,
+    }).then((modal) => {
+      document.body.append(modal.el);
+      return modal;
+    });
+    await modalPromise;
   } catch (error) {
     window.lana?.log(`Error in mini-editor: ${error?.message || error}`, {
       tags: 'mini-editor',

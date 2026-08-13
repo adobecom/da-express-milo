@@ -2,11 +2,26 @@
    Mini Editor Widget
    The editing surface: desktop widget card + zig-zag decorative previews, the
    tablet/mobile arc carousel, the shared font/background controls (inline rows
-   + mobile bottom sheets). Layout tokens (--me-*), the block padding/gap, and
-   the header live in the host block's own stylesheet (mini-editor.css); this
+   + mobile bottom sheets). Arc-sizing tokens, the block padding/gap, and the
+   header live in the host block's own stylesheet (mini-editor.css); this
    stylesheet consumes those tokens. UI is intentionally identical to the
    original in-block implementation — no Spectrum dependency.
    ============================================================================ */
+
+/* --me-card-bg / --me-quote-font* defaults: shared by every host of this
+   widget (the .mini-editor block AND the "Create a design" modal's own card
+   root, see mini-editor-modal.css) — unlike the arc-sizing tokens and block
+   layout below them in mini-editor.css's own .mini-editor rule, which only
+   apply when decorations are enabled. buildFontControl/buildColorControl set
+   these inline once a font/background is picked; these are just the
+   before-first-paint fallback. */
+.mini-editor,
+.me-modal-card-root {
+  --me-card-bg: none;
+  --me-quote-font: var(--body-font-family);
+  --me-quote-font-style: normal;
+  --me-quote-font-weight: normal;
+}
 
 .mini-editor-stage {
   position: relative;
@@ -193,6 +208,13 @@
 }
 
 .me-controls {
+  /* Stays above .me-sheet-overlay (z-index 1200 below) — otherwise, while a
+     bottom sheet is open, a tap on the *other* trigger button lands on the
+     open sheet's own full-screen backdrop instead of the button underneath
+     it (same stacking context, sheet painted later), closing that sheet
+     instead of switching straight to the one just tapped. */
+  position: relative;
+  z-index: 1201;
   display: flex;
   align-items: stretch;
   gap: var(--spacing-80);
@@ -295,7 +317,9 @@
 }
 
 .mini-editor[data-me-panel='fonts'] .me-row--fonts,
-.mini-editor[data-me-panel='colour'] .me-row--colour {
+.mini-editor[data-me-panel='colour'] .me-row--colour,
+.me-modal-card-root[data-me-panel='fonts'] .me-row--fonts,
+.me-modal-card-root[data-me-panel='colour'] .me-row--colour {
   transform: translateY(0);
 }
 

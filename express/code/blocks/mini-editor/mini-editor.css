@@ -1,8 +1,8 @@
+/* --me-card-bg / --me-quote-font* defaults live in mini-editor-widget.css
+   (shared with the "Create a design" modal's card root) — this rule only
+   adds the arc-sizing tokens and block-level layout that only apply here,
+   where decorations are enabled. */
 .mini-editor {
-  --me-card-bg: none;
-  --me-quote-font: var(--body-font-family);
-  --me-quote-font-style: normal;
-  --me-quote-font-weight: normal;
   /* Arc carousel sizing (tablet/mobile) — defined here, not on .me-arc
      itself, so .mini-editor-widget (a sibling of .me-arc, not a
      descendant) can also read --me-arc-card-w to keep its own max-width
