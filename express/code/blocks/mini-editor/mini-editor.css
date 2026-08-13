@@ -45,6 +45,20 @@
   gap: var(--spacing-500);
 }
 
+/* sp-theme (see mini-editor.js) is a real element sitting between .mini-editor
+   and its header/stage content, so the flex layout that used to live
+   directly on .mini-editor's children needs to be replicated here — sp-theme
+   has no default block/flex display of its own (per the Spectrum docs at
+   scripts/widgets/spectrum/ADDING-A-COMPONENT.md). Padding/box-sizing stay
+   on .mini-editor itself; only the child layout moves. */
+.mini-editor > sp-theme {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: var(--spacing-500);
+}
+
 .mini-editor-header {
   display: flex;
   flex-direction: column;

@@ -164,8 +164,19 @@ export default async function init(block) {
   props.codeRoot = getConfig().codeRoot;
   block.innerHTML = '';
 
+  // Wraps the block's whole rendered output in Spectrum's own theme host so
+  // its design-token CSS custom properties (--spectrum-*) are actually
+  // defined for descendants — without it, the topActions icons (real
+  // Spectrum Web Components, see mini-editor-widget.js) fall back to
+  // unstyled defaults and don't match the intended look.
+  await import('../../scripts/widgets/spectrum/dist/theme.js');
+  const themeHost = createTag('sp-theme', {
+    system: 'spectrum-two', color: 'light', scale: 'medium', dir: 'ltr',
+  });
+  block.append(themeHost);
+
   const header = buildContentHeader(props);
-  block.append(header);
+  themeHost.append(header);
   decorateCta(header);
 
   const quotes = getPageQuotes();
@@ -185,8 +196,14 @@ export default async function init(block) {
 
     const editor = await createMiniEditorWidget({
       root: block,
-      // No top action bar in the current design — reserved by the widget API.
-      topActions: [],
+      // Placeholder handlers — real edit/share/download behavior (deep-link
+      // to the Express editor, Web Share API, image export) is follow-up
+      // work; this only wires the widget's hover action bar to something.
+      topActions: [
+        { type: 'edit', onClick: () => console.info('mini-editor: edit action not yet implemented') },
+        { type: 'share', onClick: () => console.info('mini-editor: share action not yet implemented') },
+        { type: 'download', onClick: () => console.info('mini-editor: download action not yet implemented') },
+      ],
       fontOptions,
       backgrounds: { cardSet, decoCount: DECO_CARD_COUNT },
       a11y: {
@@ -203,7 +220,7 @@ export default async function init(block) {
     // positioned to span from just below the header down to the editor's
     // bottom edge, per the Figma reference, without extending past it.
     header.append(editor.decorations);
-    block.append(editor.stage);
+    themeHost.append(editor.stage);
   } catch (error) {
     window.lana?.log(`Error in mini-editor: ${error?.message || error}`, {
       tags: 'mini-editor',
