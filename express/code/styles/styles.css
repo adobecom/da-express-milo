@@ -849,58 +849,58 @@ main :where(.s2) a.button:any-link {
   margin: 0;
 }
 
-/* ─── S2 size ladder (Figma SoT) ─────────────────────────────────────────────
-   Figma button sizes S/M/L/XL → font-size 12/14/16/18, fixed line-height
-   16/16/18/20, and top+bottom padding 4/7/10/13. Figma measures that padding to
-   the border-box edge with the 2px stroke sitting INSIDE it, and Express buttons
-   always carry a 2px solid border (var(--spacing-50)) in content-box — so CSS
-   padding-top/bottom = Figma pad − 2px, which lands the exact Figma heights:
-   S 24 / M 30 / L 38 / XL 46. The fixed-px line-height is the key fix: it's what
-   keeps the label vertically centred in the button.
+/* ─── S2 responsive size (Figma SoT) ─────────────────────────────────────────
+   The Figma S2 button scales with the viewport — one button shown under four
+   breakpoint modes (mobile/tablet/desktop/XL), NOT four size variants. Across
+   mobile→tablet→desktop→XL: font-size 12→14→16→18, line-height 16→16→18→20, and
+   the `Text/top-padding` variable 4→7→10→13.
 
-   Size-class mapping (per design sign-off): default + button-l = M, small = S,
-   large / button-xl = L, xlarge / button-xxl = XL. Only font-size, line-height
-   and vertical padding are set here — horizontal padding and radius stay from
-   the base con-button rules. */
+   Figma measures that padding to the border-box edge with the 2px stroke sitting
+   INSIDE it, and Express buttons always carry a 2px solid border
+   (var(--spacing-50)) in content-box — so CSS padding-top/bottom = Figma pad − 2
+   (2→5→8→11), which lands the exact Figma heights 24→30→38→46. The fixed-px
+   line-height is the key fix: it keeps the label vertically centred.
+
+   Scales by viewport only, so authored size classes (small / button-xl /
+   button-xxl …) no longer differentiate S2 button size — this is the single
+   responsive S2 button. Only font-size/line-height/vertical padding are set;
+   horizontal padding and radius stay from the base con-button rules. */
 main .s2 a.con-button:any-link,
 main .s2 a.button:any-link {
-  font-size: var(--body-font-size-s); /* 14px — M */
-  line-height: 16px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
-
-main .s2 a.button.small:any-link,
-main .s2 a.con-button.small:any-link,
-main .s2 .small a.con-button:any-link {
-  font-size: var(--body-font-size-xs); /* 12px — S */
+  font-size: var(--body-font-size-xs); /* 12px — mobile */
   line-height: 16px;
   padding-top: 2px;
   padding-bottom: 2px;
 }
 
-main .s2 a.button.large:any-link,
-main .s2 a.con-button.large:any-link,
-main .s2 a.con-button.button-xl:any-link,
-main .s2 a.con-button.xl-button:any-link,
-main .s2 .button-xl a.con-button:any-link,
-main .s2 .xl-button a.con-button:any-link {
-  font-size: var(--body-font-size-m); /* 16px — L */
-  line-height: 18px;
-  padding-top: 8px;
-  padding-bottom: 8px;
+@media (min-width: 600px) {
+  main .s2 a.con-button:any-link,
+  main .s2 a.button:any-link {
+    font-size: var(--body-font-size-s); /* 14px — tablet */
+    line-height: 16px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
 }
 
-main .s2 a.button.xlarge:any-link,
-main .s2 a.con-button.xlarge:any-link,
-main .s2 a.con-button.button-xxl:any-link,
-main .s2 a.con-button.xxl-button:any-link,
-main .s2 .button-xxl a.con-button:any-link,
-main .s2 .xxl-button a.con-button:any-link {
-  font-size: var(--body-font-size-l); /* 18px — XL */
-  line-height: 20px;
-  padding-top: 11px;
-  padding-bottom: 11px;
+@media (min-width: 1200px) {
+  main .s2 a.con-button:any-link,
+  main .s2 a.button:any-link {
+    font-size: var(--body-font-size-m); /* 16px — desktop */
+    line-height: 18px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+
+@media (min-width: 1680px) {
+  main .s2 a.con-button:any-link,
+  main .s2 a.button:any-link {
+    font-size: var(--body-font-size-l); /* 18px — XL */
+    line-height: 20px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+  }
 }
 
 /* Accent / primary blue — proper S2 blue (#3b63fb), not the legacy #5c5ce0.
