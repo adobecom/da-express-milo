@@ -21,7 +21,6 @@
 import createMiniEditorWidget from '../mini-editor-widget/mini-editor-widget.js';
 
 let createTag;
-let getIconElementDeprecated;
 
 const OPEN_DURATION = 250;
 const CLOSE_DURATION = 150;
@@ -49,7 +48,12 @@ export default async function createMiniEditorModal(config = {}) {
     trapFocus, handleEscapeClose, disableBackgroundScroll, restoreBackgroundScroll,
   } = a11y;
 
-  ({ createTag, getIconElementDeprecated } = deps);
+  ({ createTag } = deps);
+
+  // sp-icon-close is a real Spectrum Web Components custom element (same
+  // pattern as topActions' sp-icon-edit/share/download in
+  // mini-editor-widget.js) — load its definition before using the tag.
+  await import('../spectrum/dist/icons-workflow.js');
 
   const overlay = createTag('div', { class: 'me-modal-overlay', 'aria-hidden': 'true', inert: '' });
   const dialog = createTag('div', {
@@ -64,7 +68,7 @@ export default async function createMiniEditorModal(config = {}) {
     type: 'button',
     class: 'me-modal-close',
     'aria-label': 'Close',
-  }, [getIconElementDeprecated('close-black')]);
+  }, [createTag('sp-icon-close', { class: 'me-modal-close-icon', 'aria-hidden': 'true' })]);
   dialog.append(cardWrap, closeBtn);
   overlay.append(dialog);
 

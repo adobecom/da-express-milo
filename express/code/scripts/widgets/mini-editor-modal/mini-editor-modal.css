@@ -90,9 +90,12 @@ html {
   backdrop-filter: blur(8px);
 }
 
-.me-modal-close img {
-  width: 20px;
-  height: 20px;
+/* sp-icon-close sizes/colours itself via these CSS custom property hooks —
+   same pattern as mini-editor-widget.css's .me-action-icon, no Spectrum
+   theme/design tokens required. */
+.me-modal-close-icon {
+  --mod-icon-size: 20px;
+  --mod-icon-color: #292929;
 }
 
 .me-modal-close:hover {

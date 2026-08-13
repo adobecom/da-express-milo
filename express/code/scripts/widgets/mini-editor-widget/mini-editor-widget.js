@@ -509,7 +509,7 @@ function buildDecoCard(a11y, entry, useQuote) {
     type: 'button',
     class: 'me-deco-copy',
     'aria-label': 'Copy quote',
-  }, [getIconElementDeprecated('copy-quote')]);
+  }, [createTag('sp-icon-copy', { class: 'me-deco-copy-icon', 'aria-hidden': 'true' })]);
   copyBtn.addEventListener('click', async () => {
     const ok = await a11y.copyQuoteToClipboard(quote, author);
     if (ok) {
@@ -862,10 +862,11 @@ export default async function createMiniEditorWidget(config = {}) {
 
   ({ createTag, getIconElementDeprecated } = deps);
 
-  // topActions' icons are real Spectrum Web Components custom elements
-  // (sp-icon-*, see TOP_ACTION_DEFS) — only loaded when actually used, so
-  // callers that don't pass topActions don't pay for the Spectrum bundle.
-  if (topActions.length) {
+  // topActions' icons and the decorative cards' "Copy quote" icon
+  // (sp-icon-copy, see buildDecoCard) are real Spectrum Web Components
+  // custom elements — only loaded when actually used, so a caller with no
+  // topActions and decorations: false doesn't pay for the Spectrum bundle.
+  if (topActions.length || decorationsEnabled) {
     await import('../spectrum/dist/icons-workflow.js');
   }
 

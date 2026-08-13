@@ -592,10 +592,12 @@ p.me-deco-author {
   padding: 7px;
 }
 
-.me-deco-copy img {
-  display: block;
-  width: 18px;
-  height: 18px;
+/* sp-icon-copy (see buildDecoCard) sizes/colours itself via these CSS
+   custom property hooks — same pattern as .me-action-icon above, no
+   Spectrum theme/design tokens required. */
+.me-deco-copy-icon {
+  --mod-icon-size: 18px;
+  --mod-icon-color: var(--Alias-content-neutral-default);
 }
 
 .me-deco-use:hover,
