@@ -47,7 +47,8 @@ https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-explore
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-extract-gradient
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-extract-palette
-https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-headline
+https://main--da-express-milo--adobecom.aem.page/drafts/nala/blocks/color/color-headline-extract
+https://main--da-express-milo--adobecom.aem.page/drafts/nala/blocks/color/color-headline-tools
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-search-marquee
 https://main--da-express-milo--adobecom.aem.live/drafts/nala/blocks/color/color-wheel
 
