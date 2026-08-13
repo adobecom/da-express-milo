@@ -1,0 +1,28 @@
+{
+  "block": "color-extract",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@color-extract-palette",
+      "selector": "div.color-extract.palette",
+      "path": "/drafts/nala/blocks/color/color-extract-palette",
+      "tags": ["@color-extract", "@color-extract-palette", "@express"],
+      "result": ".ax-swatch"
+    },
+    {
+      "tcid": "1",
+      "name": "@color-extract-gradient",
+      "selector": "div.color-extract.gradient",
+      "path": "/drafts/nala/blocks/color/color-extract-gradient",
+      "tags": ["@color-extract", "@color-extract-gradient", "@express"],
+      "result": ".gradient-editor"
+    },
+    {
+      "tcid": "2",
+      "name": "@color-extract-palette-sample",
+      "selector": "div.color-extract.palette",
+      "path": "/drafts/nala/blocks/color/color-extract-palette",
+      "tags": ["@color-extract", "@color-extract-sample", "@express"]
+    }
+  ]
+}
