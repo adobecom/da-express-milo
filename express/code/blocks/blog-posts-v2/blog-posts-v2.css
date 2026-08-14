@@ -17,7 +17,7 @@
   transform: translateX(-50%);
   width: 100vw;
   height: 100%;
-  background-color: var(--color-white);
+  background-color: var(--color-gray-100);
   z-index: -1;
 }
 
@@ -421,7 +421,6 @@ main .section:has(.blog-posts-v2)>.content>h3 {
 
 @media (min-width: 768px) {
   .section.ax-blog-posts-container {
-    padding-top: var(--spacing-900);
     padding-right: var(--spacing-500);
     padding-left: var(--spacing-500);
     max-width: 1199px;
