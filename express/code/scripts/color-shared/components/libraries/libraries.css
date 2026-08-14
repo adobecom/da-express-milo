@@ -577,7 +577,11 @@
   flex-direction: column;
   width: max-content;
   min-width: 0;
-  padding: var(--spacing-100);
+  /* Horizontal is 0, not var(--spacing-100) — same split sp-picker's own
+     internal popover uses (see picker.css). sp-menu-item ships its own
+     :host margin (reserving room for its focus ring), so authoring
+     horizontal padding here on top of that margin double-spaced the edges. */
+  padding: var(--spacing-100) 0;
   background: var(--ax-lib-bg);
   border-radius: var(--Corner-radius-corner-radius-100);
   box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-elevated-key);
@@ -612,18 +616,35 @@
   --mod-menu-item-background-color-hover: var(--color-gray-150);
   --mod-menu-item-background-color-down: var(--color-gray-150);
 
-  display: block;
+  display: flex;
   inline-size: max-content;
   width: max-content;
   border: none;
   background: transparent;
   box-shadow: none;
   padding: 0;
+  gap: 2px;
 }
 
+/* Same "S" size padding as .modal-color-mode-picker sp-menu-item
+   (picker.css), minus that one's +19px not-selected compensation — this
+   menu has no persistent checked state, so there's no checkmark ever
+   reserving space to compensate for on either edge. Margin also matches
+   that picker's sp-picker sp-menu-item rule (8px) — overriding sp-menu-item's
+   own native :host margin (4px, sized for its focus ring), same as that
+   rule already does. */
 .ax-lib-card__action-menu-list sp-menu-item {
   background: transparent;
   white-space: nowrap;
+  padding-block: 4px;
+  padding-inline-end: 9px;
+  margin-inline: 8px;
+  /* This sp-menu-item list sits inside this sp-menu's own overflow:auto with
+     no reserved padding (see picker.css's identical fix on
+     .modal-color-mode-picker sp-menu-item for the full explanation) — an
+     outward-drawn ring on the first/last item gets clipped at that boundary.
+     Draw it inward instead. */
+  --spectrum-menu-item-focus-indicator-offset: -4px;
 }
 
 .ax-lib-card__action-menu-list sp-menu-item:hover {

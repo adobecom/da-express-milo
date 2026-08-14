@@ -4,6 +4,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
 import { createColorLibrariesPlaceholders } from '../../../../express/code/scripts/color-shared/i18n/loadColorLibrariesPlaceholders.js';
+import { serviceManager } from '../../../../express/code/libs/services/core/ServiceManager.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
@@ -134,10 +135,28 @@ describe('createLibraryGradientModalContent', () => {
       const preview = element.querySelector('.modal-gradient-preview');
       expect(header).to.exist;
       expect(header.querySelectorAll('.modal-color-mode-picker sp-menu-item')).to.have.length(4);
-      expect(header.querySelectorAll('.modal-codes-menu sp-menu-item')).to.have.length(4);
+      // Only CSS — LESS/SASS/XML have no gradient-aware export (see createColorModesHeader.js).
+      expect(header.querySelectorAll('.modal-codes-menu sp-menu-item')).to.have.length(1);
       // eslint-disable-next-line no-bitwise
       expect(header.compareDocumentPosition(preview) & Node.DOCUMENT_POSITION_FOLLOWING)
         .to.be.above(0);
+      content.destroy();
+    });
+
+    it('caps the swatch rail at 10 stops, but shows every stop in the gradient preview bar', async () => {
+      const manyStopsItem = gradientItem({
+        colorStops: Array.from({ length: 13 }, (_, i) => ({
+          color: [{ mode: 'RGB', value: { r: i, g: i, b: i } }],
+          offset: i / 12,
+        })),
+      });
+      const { content } = await mountContent(manyStopsItem);
+      const { element } = content;
+      const rail = element.querySelector('color-swatch-rail');
+      await customElements.whenDefined('color-swatch-rail');
+      await rail.updateComplete;
+      expect(rail.swatches).to.have.length(10);
+      expect(element.querySelectorAll('.gradient-editor-handle')).to.have.length(13);
       content.destroy();
     });
 
@@ -148,6 +167,31 @@ describe('createLibraryGradientModalContent', () => {
       picker.value = 'Lab';
       picker.dispatchEvent(new Event('change'));
       expect(element.querySelector('color-swatch-rail').colorMode).to.equal('Lab');
+      content.destroy();
+    });
+
+    it('passes each stop\'s real offset to Copy as CSS — not an evenly-spaced index (regression: the header\'s palette used to be built from flat colors only, dropping colorStops\' real positions)', async () => {
+      const exportCSS = sinon.stub().resolves({ format: 'CSS', output: '', clipboardSuccess: true });
+      sinon.stub(serviceManager, 'getProvider').resolves({ exportCSS });
+
+      const item = gradientItem({
+        colorStops: [
+          { color: [{ mode: 'RGB', value: { r: 255, g: 255, b: 255 } }], offset: 0 },
+          { color: [{ mode: 'RGB', value: { r: 64, g: 107, b: 15 } }], offset: 0.2 },
+          { color: [{ mode: 'RGB', value: { r: 0, g: 0, b: 0 } }], offset: 1 },
+        ],
+      });
+      const { content } = await mountContent(item);
+      const { element } = content;
+
+      element.querySelector('.modal-codes-menu sp-action-button').click();
+      const cssItem = [...element.querySelectorAll('.modal-codes-menu sp-menu-item')]
+        .find((i) => i.getAttribute('value') === 'css');
+      cssItem.click();
+      await flush();
+
+      expect(exportCSS.calledOnce).to.be.true;
+      expect(exportCSS.firstCall.args[0].swatches[1].offset).to.equal(0.2);
       content.destroy();
     });
 

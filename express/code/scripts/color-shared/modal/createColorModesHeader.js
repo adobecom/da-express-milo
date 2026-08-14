@@ -27,45 +27,56 @@ const EXPORT_FORMATS = [
   { value: 'xml', label: 'Copy as XML', method: 'exportXML' },
 ];
 
-const hasIcon = (tagName) => Boolean(window.customElements?.get(tagName));
-const SVG_NS = 'http://www.w3.org/2000/svg';
+// Figma's gradient Codes menu shows only "Copy as CSS" — LESS/SASS/XML have no
+// gradient-aware branch in DownloadActions.js (exportAsSCSS/exportAsLESS
+// always call buildVariableSwatches, exportAsXML always writes a <palette>),
+// so for a gradient they'd emit each stop as an independent named color/
+// variable with no offset — losing the one thing that makes it a gradient
+// instead of a palette. Only exportAsCSS has real gradient handling
+// (linear-gradient()), matching what the design intentionally exposes here.
+const GRADIENT_EXPORT_FORMATS = EXPORT_FORMATS.filter((f) => f.value === 'css');
 
-function buildSvgIcon({ viewBox, size, paths }) {
-  const svg = document.createElementNS(SVG_NS, 'svg');
-  svg.setAttribute('width', String(size));
-  svg.setAttribute('height', String(size));
-  svg.setAttribute('viewBox', viewBox);
-  svg.setAttribute('fill', 'none');
-  paths.forEach((d) => {
-    const path = document.createElementNS(SVG_NS, 'path');
-    path.setAttribute('d', d);
-    path.setAttribute('stroke', 'currentColor');
-    path.setAttribute('stroke-width', '1.5');
-    path.setAttribute('stroke-linecap', 'round');
-    path.setAttribute('stroke-linejoin', 'round');
-    svg.appendChild(path);
-  });
-  return svg;
+// exportAsXML is RGB/hex-only (see the copyAsCode comment below) — hide it
+// whenever the selected mode has no XML representation.
+const MODES_WITHOUT_XML = new Set(['HSB', 'Lab']);
+
+function getExportFormats(type, mode) {
+  const formats = type === 'gradient' ? GRADIENT_EXPORT_FORMATS : EXPORT_FORMATS;
+  return MODES_WITHOUT_XML.has(mode) ? formats.filter((f) => f.value !== 'xml') : formats;
 }
 
-// sp-icon-code isn't in this project's pruned Spectrum icon bundle — fall back
-// to an inline "</>" glyph so the button is never blank.
 function createCodesIcon() {
-  if (hasIcon('sp-icon-code')) {
-    const el = document.createElement('sp-icon-code');
-    el.setAttribute('aria-hidden', 'true');
-    return el;
-  }
-  const span = createTag('span', { class: 'modal-codes-icon-fallback', 'aria-hidden': 'true' });
-  span.appendChild(buildSvgIcon({
-    viewBox: '0 0 20 20',
-    size: 18,
-    paths: ['M7 5L2 10L7 15', 'M13 5L18 10L13 15'],
-  }));
-  return span;
+  const el = document.createElement('sp-icon-code');
+  el.setAttribute('aria-hidden', 'true');
+  return el;
 }
 
-async function copyAsCode(palette, type, format, t) {
+// Last-resort fallback if createExpressPicker fails to load (flaky network,
+// blocked dynamic import, custom-element registration race) — same pattern
+// as createFiltersComponent.js's createDesktopSelectFallback, so a picker
+// failure degrades to a working native control instead of an empty slot.
+export function createModeSelectFallback(options, currentValue, ariaLabel, onChange) {
+  const select = createTag('select', { class: 'modal-color-mode-select-fallback', 'aria-label': ariaLabel });
+  options.forEach((opt) => {
+    const optionEl = document.createElement('option');
+    optionEl.value = opt.value;
+    optionEl.textContent = opt.label;
+    if (opt.value === currentValue) optionEl.selected = true;
+    select.appendChild(optionEl);
+  });
+  const onSelectChange = () => onChange(select.value);
+  select.addEventListener('change', onSelectChange);
+  return {
+    element: select,
+    setValue(value) { select.value = value; },
+    destroy() {
+      select.removeEventListener('change', onSelectChange);
+      select.remove();
+    },
+  };
+}
+
+async function copyAsCode(palette, type, format, t, mode) {
   const entry = EXPORT_FORMATS.find((f) => f.value === format);
   if (!entry) return;
   try {
@@ -74,7 +85,11 @@ async function copyAsCode(palette, type, format, t) {
       ...(type === 'gradient' ? { assetType: 'gradient' } : {}),
     };
     const provider = await serviceManager.getProvider('download');
-    const result = await provider?.[entry.method]?.(themeData);
+    // Every export method emits only the currently-selected Color mode
+    // instead of every mode at once (see DownloadActions.js). exportXML is
+    // HEX/RGB-only — HSB/Lab have no XML representation, so the Codes menu
+    // never offers XML in those modes (getExportFormats above).
+    const result = await provider?.[entry.method]?.(themeData, mode);
     showExpressToast({
       message: result?.clipboardSuccess ? t.copiedToast : t.copyFailedToast,
       variant: result?.clipboardSuccess ? 'positive' : 'negative',
@@ -144,6 +159,7 @@ export function createColorModesHeader(palette, options = {}) {
         onChange: ({ value }) => {
           currentMode = value;
           setPreferredColorMode(value);
+          codesMenu.setItems(getExportFormats(type, currentMode));
           onModeChange?.(value);
         },
       });
@@ -159,6 +175,20 @@ export function createColorModesHeader(palette, options = {}) {
         tags: 'color-modal,picker',
         severity: 'warning',
       });
+      if (!destroyed) {
+        modePicker = createModeSelectFallback(
+          VALID_COLOR_MODES.map((mode) => ({ value: mode, label: mode })),
+          currentMode,
+          t.colorModeLabel,
+          (value) => {
+            currentMode = value;
+            setPreferredColorMode(value);
+            codesMenu.setItems(getExportFormats(type, currentMode));
+            onModeChange?.(value);
+          },
+        );
+        modePickerSlot.appendChild(modePicker.element);
+      }
     }
   })();
 
@@ -166,6 +196,7 @@ export function createColorModesHeader(palette, options = {}) {
     if (currentMode !== mode) {
       currentMode = mode;
       modePicker?.setValue(mode);
+      codesMenu.setItems(getExportFormats(type, currentMode));
       onModeChange?.(mode);
     }
   });
@@ -184,9 +215,9 @@ export function createColorModesHeader(palette, options = {}) {
       btn.appendChild(iconEl);
       return btn;
     },
-    items: EXPORT_FORMATS,
+    items: getExportFormats(type, currentMode),
     onSelect: async (format, { closePopover }) => {
-      await copyAsCode(palette, type, format, t);
+      await copyAsCode(palette, type, format, t, currentMode);
       closePopover({ focusTrigger: true });
     },
   });

@@ -7,8 +7,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: var(--spacing-200);
-  padding-block-end: var(--spacing-200);
+  column-gap: var(--spacing-100);
 }
 
 .modal-color-mode-field {
@@ -22,8 +21,9 @@
   font-size: 14px;
   font-weight: 400;
   line-height: 18px;
-  color: var(--color-dark-gray);
+  color: var(--Palette-gray-700);
   white-space: nowrap;
+  padding-block: 7px;
 }
 
 /* Mount point for the real sp-picker (Figma "Component wrapper") — colors and
@@ -45,8 +45,18 @@
   flex-shrink: 0;
 }
 
-.modal-codes-icon-fallback {
-  display: inline-flex;
+/* picker.css's own mobile default (<600px) is --body-font-size-m (16px), matching
+   Figma's larger pickers elsewhere (e.g. Explore filters) — the Color mode picker
+   should stay at the same 14px (--body-font-size-s) it already uses from 600px up. */
+@media (max-width: 599px) {
+  .modal-color-mode-picker sp-picker.filter-picker {
+    --mod-picker-font-size: var(--body-font-size-s);
+  }
+
+  .modal-color-mode-picker sp-picker.filter-picker::part(button),
+  .modal-color-mode-picker sp-picker.filter-picker::part(label) {
+    font-size: var(--body-font-size-s);
+  }
 }
 
 /* Mobile/tablet: "Color mode" label on its own line, with the picker and the
@@ -101,7 +111,6 @@
        explicit width here, its 100%-width child below has nothing to resolve
        against and collapses to 0. */
     inline-size: 100%;
-    margin-block-end: var(--spacing-200);
   }
 
   .modal-palette-summary-strip .ax-swatch-strip {

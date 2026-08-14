@@ -1,7 +1,7 @@
 
 import { LitElement, html } from '../../../deps/lit-all.min.js';
 import { getContrastTextColor, isSuperLight } from '../../utils/ColorConversions.js';
-import { rgbToAllSpacesDenormalized } from '../../utils/harmony/ColorConversions.js';
+import { getColorModeChannels } from '../../utils/colorModeChannels.js';
 import { getFirstFocusableInGroup } from '../../utils/util.js';
 import { style } from './styles.css.js';
 import { showExpressToast } from '../../../../scripts/color-shared/spectrum/components/express-toast.js';
@@ -25,27 +25,6 @@ const MAX_SWATCHES_FOUR_ROWS = 20;
 
 const FOUR_ROWS_ROWS = 4;
 const DEFAULT_VERTICAL_MAX_PER_ROW = 5;
-const COLOR_MODE_CHANNELS = {
-  RGB: [['R', 'rgb', 'r'], ['G', 'rgb', 'g'], ['B', 'rgb', 'b']],
-  HSB: [['H', 'hsv', 'h'], ['S', 'hsv', 's'], ['B', 'hsv', 'v']],
-  Lab: [['L', 'lab', 'l'], ['a', 'lab', 'a'], ['b', 'lab', 'b']],
-};
-
-function hexToRgbArray(hex) {
-  const clean = String(hex || '').replace('#', '');
-  const full = clean.length === 3 ? clean.split('').map((c) => c + c).join('') : clean;
-  const num = parseInt(full, 16);
-  if (full.length !== 6 || Number.isNaN(num)) return [0, 0, 0];
-  return [(num >> 16) & 255, (num >> 8) & 255, num & 255]; // eslint-disable-line no-bitwise
-}
-
-/** Returns per-channel {label, value} rows for a non-HEX color mode, or null for HEX/unknown modes. */
-function getColorModeRows(hex, mode) {
-  const channels = COLOR_MODE_CHANNELS[mode];
-  if (!channels) return null;
-  const spaces = rgbToAllSpacesDenormalized(hexToRgbArray(hex));
-  return channels.map(([label, space, key]) => ({ label, value: String(spaces[space][key]) }));
-}
 
 const TINT_BAND_STOPS = [
   { id: 'tint-1', mode: 'white', baseWeight: 0.2 },
@@ -329,7 +308,8 @@ export class ColorSwatchRail extends LitElement {
     const tooltipRelevantChange = changedProperties.has('orientation')
       || changedProperties.has('swatchFeatures')
       || changedProperties.has('hexCopyFirstRowOnly')
-      || changedProperties.has('embedded');
+      || changedProperties.has('embedded')
+      || changedProperties.has('colorMode');
     if (this._tooltipsInitialized && tooltipRelevantChange) {
       this._scheduleTooltipsRefresh();
     }
@@ -501,22 +481,37 @@ export class ColorSwatchRail extends LitElement {
     }
   }
 
-  _renderColorModeRows(rows) {
+  /**
+   * @param {{inline?: boolean}} [config] - inline: single row (stacked/mobile-tablet
+   *   layout), no own copy-all button — that layout already has a copy icon in
+   *   stacked-row__icons, which copies the joined code instead of the hex in this mode.
+   */
+  _renderColorModeRows(rows, { inline = false } = {}) {
     const s = this.strings || SWATCH_RAIL_DEFAULTS;
     const channelTemplate = s.copyChannelValue || SWATCH_RAIL_DEFAULTS.copyChannelValue;
-    const labelCopyCode = s.copyHex || SWATCH_RAIL_DEFAULTS.copyHex;
+    const rowsMarkup = rows.map((row) => {
+      const label = channelTemplate.replace('{channel}', row.label);
+      return html`
+        <div class="hex-code-row">
+          <span class="hex-code-row__label" aria-hidden="true">${row.label}</span>
+          <button type="button" class="hex-code-row__value swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(row.value, e.currentTarget)} aria-label="${label}" title="${label}">${row.value}</button>
+        </div>
+      `;
+    });
+
+    if (inline) {
+      return html`<div class="hex-code-multi hex-code-multi--inline">${rowsMarkup}</div>`;
+    }
+
+    // This button only ever renders in a non-HEX mode (colorModeRows is null
+    // for HEX), and it copies every channel joined together, not a hex
+    // string — "Copy all values" (not "Copy hex", and not mode-specific
+    // either, unlike each individual row's own "Copy {channel} value").
+    const labelCopyCode = s.copyAllValues || SWATCH_RAIL_DEFAULTS.copyAllValues;
     const fullCode = rows.map((row) => row.value).join(', ');
     return html`
       <div class="hex-code-multi">
-        ${rows.map((row) => {
-          const label = channelTemplate.replace('{channel}', row.label);
-          return html`
-            <div class="hex-code-row">
-              <span class="hex-code-row__label" aria-hidden="true">${row.label}</span>
-              <button type="button" class="hex-code-row__value swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(row.value, e.currentTarget)} aria-label="${label}" title="${label}">${row.value}</button>
-            </div>
-          `;
-        })}
+        ${rowsMarkup}
         <button type="button" class="icon-button icon-button--copy hex-code-multi__copy-all swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(fullCode, e.currentTarget)} aria-label="${labelCopyCode}" title="${labelCopyCode}">${icon('copy')}</button>
       </div>
     `;
@@ -1320,8 +1315,17 @@ export class ColorSwatchRail extends LitElement {
       const tintBands = isTintSelected ? this._buildTintBands(swatch.hex) : [];
       const showEdit = (f.colorPicker || f.editTint) && !editDisabled;
       const colorModeRows = !showEdit && !f.copyFromHex
-        ? getColorModeRows(swatch.hex, this.colorMode)
+        ? getColorModeChannels(swatch.hex, this.colorMode)
         : null;
+      // Stacked layout (mobile/tablet) has one pre-existing copy icon in
+      // stacked-row__icons rather than a second one inside the color-mode
+      // rows — it copies this joined code instead of the hex when present.
+      const colorModeFullCode = colorModeRows ? colorModeRows.map((row) => row.value).join(', ') : null;
+      // Same button copies hex in HEX mode and the joined per-channel code in
+      // any other mode, so its label must switch to match what's copied.
+      const labelCopyStacked = colorModeFullCode
+        ? (s.copyAllValues || sFallback.copyAllValues)
+        : labelCopyHex;
       const atMinSwatches = f.minSwatches != null && swatches.length <= f.minSwatches;
       
       
@@ -1387,7 +1391,7 @@ export class ColorSwatchRail extends LitElement {
             >${baseColorIcon}</button>
           ` : ''}
           ${isBaseReadOnly ? html`<span class="base-color-badge base-color-badge--active base-color-badge--readonly" aria-label="${labelBaseColor}">${icon('baseColorTarget')}</span>` : ''}
-          ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="${labelCopyHex}" title="${labelCopyHex}">${icon('copy')}</button>` : ''}
+          ${f.copy ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(colorModeFullCode ?? swatch.hex, e.currentTarget)} aria-label="${labelCopyStacked}" title="${labelCopyStacked}">${icon('copy')}</button>` : ''}
           ${f.lock && !this.hideLock ? html`<button type="button" class="icon-button icon-button--lock swatch-column-focusable" tabindex="-1" @click=${() => this._handleLock(index)} aria-label=${isLocked ? labelUnlockColor : labelLockColor} title=${isLocked ? labelUnlockColor : labelLockColor}>${icon(isLocked ? 'lockClosed' : 'lockOpen')}</button>` : ''}
           ${f.editTint && showEdit ? html`<button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="${labelEditTint}" title=${swatch.hex.toUpperCase()}>${icon('editTint')}</button>` : ''}
           ${f.trash ? html`<button type="button" class="icon-button icon-button--trash swatch-column-focusable" tabindex="-1" @click=${() => this._handleTrash(index)} aria-label="${labelDeleteColor}" title="${labelDeleteColor}" ?disabled=${trashDisabled} aria-disabled="${trashDisabled}">${icon('trash')}</button>` : ''}
@@ -1408,7 +1412,7 @@ export class ColorSwatchRail extends LitElement {
       const stackedContent = html`
         <div class="bottom-info bottom-info--stacked" part="bottom-info">
           ${showEdit ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
-          ${f.hexCode ? ((showEdit || f.copyFromHex) ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>` : (colorModeRows ? this._renderColorModeRows(colorModeRows) : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`)) : ''}
+          ${f.hexCode ? ((showEdit || f.copyFromHex) ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>` : (colorModeRows ? this._renderColorModeRows(colorModeRows, { inline: true }) : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`)) : ''}
         </div>
         ${stackedIcons}
       `;
@@ -1425,11 +1429,20 @@ export class ColorSwatchRail extends LitElement {
         opts.cornerClass || ''
       ].filter(Boolean).join(' ');
 
+      // In a non-HEX mode, describe the swatch by its per-channel values
+      // (e.g. "R 228, G 220, B 209") instead of the hex template below —
+      // the hex itself isn't what's currently shown or copied for this swatch.
+      const modeChannels = this.colorMode !== 'HEX'
+        ? getColorModeChannels(swatch.hex, this.colorMode)
+        : null;
+      const colorDescription = modeChannels
+        ? modeChannels.map((c) => `${c.label} ${c.value}`).join(', ')
+        : swatch.hex;
       const stripAriaLabel = orientation === 'vertical'
-        ? colorStripTemplate.replace('{hex}', swatch.hex)
+        ? (modeChannels ? colorDescription : colorStripTemplate.replace('{hex}', colorDescription))
         : colorPositionTemplate
             .replace('{index}', String(index + 1))
-            .replace('{hex}', swatch.hex);
+            .replace('{hex}', colorDescription);
       const tintAndShadeAriaLabel = tintAndShadeTemplate.replace('{index}', String(index + 1));
       return html`
         <div class="${swatchClasses}"

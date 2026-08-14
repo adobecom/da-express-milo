@@ -2,6 +2,15 @@
 import { expect } from '@esm-bundle/chai';
 import { createGradientEditor } from '../../../../../express/code/scripts/color-shared/components/gradients/gradient-editor.js';
 
+async function loadRealGradientEditorCSS() {
+  const res = await fetch('/express/code/scripts/color-shared/components/gradients/gradient-editor.css');
+  const text = await res.text();
+  const style = document.createElement('style');
+  style.textContent = text;
+  document.head.appendChild(style);
+  return style;
+}
+
 const SAMPLE_GRADIENT = {
   type: 'linear',
   angle: 90,
@@ -214,6 +223,121 @@ describe('createGradientEditor', () => {
         }
         if (wrapper.parentNode) wrapper.remove();
       }
+    });
+  });
+
+  describe('color mode-aware copying', () => {
+    async function clickAndCapture(handle) {
+      let capturedText = null;
+      const originalWriteText = navigator.clipboard?.writeText;
+      navigator.clipboard.writeText = (text) => {
+        capturedText = text;
+        return Promise.resolve();
+      };
+      handle.click();
+      await Promise.resolve();
+      await Promise.resolve();
+      if (originalWriteText) navigator.clipboard.writeText = originalWriteText;
+      return capturedText;
+    }
+
+    afterEach(() => {
+      if (wrapper?.parentNode) wrapper.remove();
+    });
+
+    it('copies the same raw, unit-less value as the swatch rail\'s per-channel breakdown (not a formatted rgba() string) when created with colorMode: "RGB"', async () => {
+      // Regression test: this used to go through formatSwatchInMode (helpers.js),
+      // which wraps RGB as "rgba(r, g, b, 1)" — a real CSS-ready string, but one
+      // that reads as a mismatch against the swatch rail immediately below the
+      // gradient bar, which shows the same stop as bare "255, 0, 0".
+      editor = createGradientEditor(SAMPLE_GRADIENT, {
+        layout: 'responsive', size: 'strip-responsive', draggable: false, copyable: true, colorMode: 'RGB',
+      });
+      wrapper = editor.element;
+      document.body.appendChild(wrapper);
+      const handle = wrapper.querySelector('.gradient-editor-handle');
+      expect(handle.getAttribute('aria-label')).to.equal('Copy 255, 0, 0');
+      expect(await clickAndCapture(handle)).to.equal('255, 0, 0');
+    });
+
+    it('copies HSB with no % suffixes, matching the swatch rail\'s H/S/B rows exactly', async () => {
+      editor = createGradientEditor(SAMPLE_GRADIENT, {
+        layout: 'responsive', size: 'strip-responsive', draggable: false, copyable: true, colorMode: 'HSB',
+      });
+      wrapper = editor.element;
+      document.body.appendChild(wrapper);
+      const handle = wrapper.querySelector('.gradient-editor-handle');
+      expect(await clickAndCapture(handle)).to.equal('0, 100, 100');
+    });
+
+    it('copies Lab with no % suffixes, matching the swatch rail\'s L/a/b rows exactly', async () => {
+      editor = createGradientEditor(SAMPLE_GRADIENT, {
+        layout: 'responsive', size: 'strip-responsive', draggable: false, copyable: true, colorMode: 'Lab',
+      });
+      wrapper = editor.element;
+      document.body.appendChild(wrapper);
+      const handle = wrapper.querySelector('.gradient-editor-handle');
+      const copied = await clickAndCapture(handle);
+      expect(copied).to.not.include('%');
+    });
+
+    it('setColorMode() switches what a later click copies, and updates the aria-label to match', async () => {
+      editor = createGradientEditor(SAMPLE_GRADIENT, {
+        layout: 'responsive', size: 'strip-responsive', draggable: false, copyable: true,
+      });
+      wrapper = editor.element;
+      document.body.appendChild(wrapper);
+
+      // Regression test: this used to always copy the hex, regardless of
+      // whatever color mode was selected in the modal's Color mode picker.
+      editor.setColorMode('RGB');
+      const rgbHandle = wrapper.querySelector('.gradient-editor-handle');
+      expect(rgbHandle.getAttribute('aria-label')).to.equal('Copy 255, 0, 0');
+      expect(await clickAndCapture(rgbHandle)).to.equal('255, 0, 0');
+
+      editor.setColorMode('HEX');
+      const hexHandle = wrapper.querySelector('.gradient-editor-handle');
+      expect(hexHandle.getAttribute('aria-label')).to.equal('Copy #FF0000');
+      expect(await clickAndCapture(hexHandle)).to.equal('#ff0000');
+    });
+  });
+
+  describe('edge-position handle shift (real CSS)', () => {
+    let styleTag;
+
+    beforeEach(async () => {
+      styleTag = await loadRealGradientEditorCSS();
+    });
+
+    afterEach(() => {
+      styleTag?.remove();
+    });
+
+    it('shifts every handle that is really at 0% the same way — not just whichever one happens to be :last-child in the DOM', () => {
+      // Regression test: multiple stops can legitimately share a position
+      // (e.g. coincident stops for a hard color-stop edge). The old
+      // :first-child/:last-child CSS assumed DOM order matched left/right
+      // edge position, so a stop at 0% that wasn't the *first* DOM child (and
+      // was instead :last-child) got the "flush against the right edge"
+      // -9px shift instead of the "flush against the left edge" +9px one —
+      // pushing it further past the left edge instead of back into view.
+      editor = createGradientEditor({
+        type: 'linear',
+        angle: 90,
+        colorStops: [
+          { color: '#ff0000', position: 0 },
+          { color: '#00ff00', position: 0 },
+          { color: '#0000ff', position: 0 },
+        ],
+      }, { layout: 'responsive', size: 'strip-responsive', draggable: false, copyable: true });
+      wrapper = editor.element;
+      document.body.appendChild(wrapper);
+
+      const handles = [...wrapper.querySelectorAll('.gradient-editor-handle')];
+      expect(handles).to.have.length(3);
+      const transforms = handles.map((h) => getComputedStyle(h).transform);
+      // translateX(9px) as a matrix: matrix(1, 0, 0, 1, 9, 0)
+      transforms.forEach((t) => expect(t).to.equal('matrix(1, 0, 0, 1, 9, 0)'));
     });
   });
 });

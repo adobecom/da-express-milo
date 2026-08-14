@@ -68,6 +68,15 @@ describe('libraryGradientToDownloadData', () => {
     expect(data.swatches[0].offset).to.equal(0);
     expect(data.swatches[1].offset).to.equal(1);
   });
+
+  it('does not cap stops — the exported file should reflect every real stop, not just what the swatch rail can display', () => {
+    const colorStops = Array.from({ length: 14 }, (_, i) => ({
+      color: [{ mode: 'RGB', value: { r: i, g: i, b: i } }],
+      offset: i / 13,
+    }));
+    const data = libraryGradientToDownloadData({ name: 'Long', colorStops });
+    expect(data.swatches).to.have.lengthOf(14);
+  });
 });
 
 describe('libraryGradientToModalGradient', () => {
@@ -111,6 +120,15 @@ describe('libraryGradientToModalGradient', () => {
     expect(gradient.colorStops[0].position).to.equal(0);
     expect(gradient.colorStops[1].position).to.equal(0.5);
     expect(gradient.colorStops[2].position).to.equal(1);
+  });
+
+  it('does not cap stops — the gradient editor and grid card preview should reflect every real stop; only the swatch rail (a separate, later cap) can\'t show more than 10', () => {
+    const colorStops = Array.from({ length: 15 }, (_, i) => ({
+      color: [{ mode: 'RGB', value: { r: i, g: i, b: i } }],
+      offset: i / 14,
+    }));
+    const gradient = libraryGradientToModalGradient({ name: 'Long', colorStops });
+    expect(gradient.colorStops).to.have.lengthOf(15);
   });
 });
 

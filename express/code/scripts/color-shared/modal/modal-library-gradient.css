@@ -31,7 +31,7 @@
    editor, bar-wrap, bar fill/stroke, and focus outline all round consistently. */
 .ax-color-modal-content .modal-library-gradient .modal-gradient-preview
   .gradient-editor {
-  --Corner-radius-bar: var(--spacing-300);
+  --Corner-radius-bar: var(--Corner-radius-corner-radius-200);
 }
 
 /* Gradient preview: 156px on mobile + tablet, 250px on desktop. */
@@ -49,7 +49,7 @@
   }
 }
 
-/* Stop rail: 248px on tablet, 158px on desktop; expands to fit all stops on
+/* Stop rail: 248px on tablet, 160px on desktop; expands to fit all stops on
    mobile, where the modal content scrolls beneath the sticky toolbar. */
 .ax-color-modal-content .modal-library-gradient
   .modal-palette-container--color-rail .modal-color-rail-wrap {
@@ -58,10 +58,21 @@
 }
 
 @media (min-width: 1200px) {
+  /* The [data-color-count-range] qualifier isn't for targeting — the rail
+     wrap always has this attribute once rendered — it's there so this
+     selector's specificity beats modal-palette-content.css's same-breakpoint
+     "large" rule outright, instead of the two depending on which stylesheet's
+     <link> happens to land in <head> last (LIBRARY_GRADIENT_STYLES loads both
+     via Promise.all, with no guaranteed insertion order).
+     160px (not 158px) — see modal-gradient-content.css's matching rule for
+     why: a 3-row RGB/HSB/Lab swatch-column's own content needs exactly
+     160px, and min-height:auto won't let it shrink below that, so 158px
+     let it overflow .swatch-rail's overflow:hidden by 2px, clipping the
+     bottom of its (inset) focus ring. */
   .ax-color-modal-content .modal-library-gradient
-    .modal-palette-container--color-rail .modal-color-rail-wrap {
-    height: 158px;
-    min-height: 158px;
+    .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range] {
+    height: 160px;
+    min-height: 160px;
     aspect-ratio: auto;
     max-height: none;
   }

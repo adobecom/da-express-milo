@@ -29,8 +29,11 @@ function parseLinearGradient(css) {
   return { angle, colorStops };
 }
 
-const CREATOR_PLACEHOLDER_PATH = 'scripts/color-shared/modal/images/creator-placeholder.png';
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
+// The swatch rail (color-swatch-rail/index.js) is built around a hard 10-swatch
+// ceiling (its own MAX_SWATCHES) — this modal doesn't support more than that,
+// so a gradient with extra stops should just have them dropped, not overflow.
+const MAX_GRADIENT_STOPS = 10;
 
 function normalizeCreatorName(rawValue) {
   if (typeof rawValue === 'string' && rawValue.trim()) return rawValue.trim();
@@ -61,7 +64,6 @@ export async function attachGradientHandleTooltips(
 
 export function createGradientModalContent(gradient, opts = {}) {
   const strings = opts.strings ?? createColorModalPlaceholders();
-  const codeRoot = opts.codeRoot || '/express/code';
   let angle = gradient?.angle ?? 90;
   let colorStops = gradient?.colorStops || [];
   const gradientCss = gradient?.gradient;
@@ -88,9 +90,11 @@ export function createGradientModalContent(gradient, opts = {}) {
     opts.creatorName ?? gradient?.creator?.name ?? gradient?.creatorName,
   );
   const thumbnailAlt = opts.thumbnailAlt ?? creatorName;
-  const defaultCreatorImageUrl = `${codeRoot}/${CREATOR_PLACEHOLDER_PATH}`;
+  // No image-file placeholder here — matches createPaletteModalContent.js's
+  // creator thumbnail, which falls back to a letter-initial avatar (below)
+  // instead of a static placeholder image when there's no real creator image.
   const creatorImageUrl = opts.creatorImageUrl ?? gradient?.creator?.imageUrl
-    ?? gradient?.creatorImageUrl ?? defaultCreatorImageUrl;
+    ?? gradient?.creatorImageUrl ?? null;
   const description = opts.description ?? gradient?.description ?? '';
 
   const main = createTag('main', { class: 'modal-content', 'daa-lh': 'color-gradient-modal' });
@@ -115,6 +119,7 @@ export function createGradientModalContent(gradient, opts = {}) {
     draggable: false,
     copyable: true,
     ariaLabel: interpolate(strings.gradientPreviewAria, { count: colorStops.length }),
+    colorMode: getPreferredColorMode(),
   });
   previewWrap.appendChild(gradientEditor.element);
   containerSection.appendChild(previewWrap);
@@ -123,8 +128,13 @@ export function createGradientModalContent(gradient, opts = {}) {
   // Palette-container: a read-only swatch strip of the gradient's stop colors,
   // below the draggable preview bar (Figma: "Palette-container" under the
   // gradient preview). Reuses the same rail the palette modal uses, so it
-  // gets the Color Modes multi-channel breakdown for free.
-  const stopColors = colorStops.map((s) => s.color);
+  // gets the Color Modes multi-channel breakdown for free. Capped at
+  // MAX_GRADIENT_STOPS — unlike the gradient editor above (and the toolbar's
+  // download/copy-as-code data below), which show/export every real stop,
+  // the swatch rail (color-swatch-rail/index.js) is built around a hard
+  // 10-swatch ceiling (its own MAX_SWATCHES) and doesn't support more.
+  const swatchStops = colorStops.slice(0, MAX_GRADIENT_STOPS);
+  const stopColors = swatchStops.map((s) => s.color);
   const railSection = createTag('section', {
     class: 'modal-palette-container modal-palette-container--color-rail',
     'aria-label': interpolate(strings.gradientPaletteAria, { count: stopColors.length }),
@@ -135,6 +145,7 @@ export function createGradientModalContent(gradient, opts = {}) {
     swatchFeatures: {
       copy: true, copyFromHex: false, colorPicker: false, hexCode: true, baseColor: false,
     },
+    ...(Number.isFinite(opts.verticalMaxPerRow) ? { verticalMaxPerRow: opts.verticalMaxPerRow } : {}),
   });
   railAdapter.rail.colorMode = getPreferredColorMode();
   railWrap.appendChild(railAdapter.element);
@@ -142,11 +153,14 @@ export function createGradientModalContent(gradient, opts = {}) {
   main.appendChild(railSection);
 
   const colorModesHeader = createColorModesHeader(
-    { name: gradient?.name ?? 'Gradient', colors: stopColors },
+    { name: gradient?.name ?? 'Gradient', colors: stopColors, colorStops },
     {
       type: 'gradient',
       strings: opts.modalStrings,
-      onModeChange: (mode) => { railAdapter.rail.colorMode = mode; },
+      onModeChange: (mode) => {
+        railAdapter.rail.colorMode = mode;
+        gradientEditor.setColorMode(mode);
+      },
       onDestroy: () => railAdapter.destroy?.(),
     },
   );
@@ -157,20 +171,27 @@ export function createGradientModalContent(gradient, opts = {}) {
   h1.textContent = title;
   nameTagsSection.appendChild(h1);
 
+  // Unlike the palette modal's thumb-tags row (thumbnail + an always-present
+  // tags container), this row's second child (.modal-gradient-description)
+  // is usually absent — real gradient descriptions are essentially always
+  // empty — leaving the thumbnail as the sole flex child. The CSS pushes it
+  // right via margin-left: auto rather than order, since order needs a
+  // second child to reorder against.
   const thumbTags = createTag('div', { class: 'modal-palette-thumb-tags' });
   const thumbContainer = createTag('div', { class: 'modal-thumbnail-container' });
   const thumbnail = createTag('div', { class: 'modal-thumbnail' });
-  const thumbImg = createTag('img', {
-    class: 'thumbnail-image',
-    alt: thumbnailAlt,
-    src: creatorImageUrl,
-  });
-  if (creatorImageUrl === defaultCreatorImageUrl) {
-    thumbImg.addEventListener('error', function onErr() {
-      this.onerror = null;
+  if (creatorImageUrl) {
+    const thumbImg = createTag('img', {
+      class: 'thumbnail-image',
+      alt: thumbnailAlt,
+      src: creatorImageUrl,
     });
+    thumbnail.appendChild(thumbImg);
+  } else {
+    const initial = createTag('span', { class: 'thumbnail-initial', 'aria-hidden': 'true' });
+    initial.textContent = creatorName.charAt(0).toUpperCase();
+    thumbnail.appendChild(initial);
   }
-  thumbnail.appendChild(thumbImg);
   const creatorNameEl = createTag('p', { class: 'modal-creator-name' });
   creatorNameEl.textContent = creatorName;
   thumbContainer.appendChild(thumbnail);
@@ -193,6 +214,7 @@ export function createGradientModalContent(gradient, opts = {}) {
     name: gradient?.name ?? 'Gradient',
     angle: angle || 90,
     colors: colorStops.map((s) => s.color),
+    colorStops,
   };
 
   initFloatingToolbar(toolbarMount, {

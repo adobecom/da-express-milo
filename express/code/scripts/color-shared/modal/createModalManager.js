@@ -34,6 +34,9 @@ export function createModalManager(strings = createColorModalPlaceholders()) {
   let escHandler = null;
   let focusTrap = null;
   let closeTimeoutId = null;
+  // Set by the capture-phase listener in initShell() when Escape is pressed
+  // while a nested sp-picker dropdown (e.g. the Color mode picker) is open.
+  let suppressNextEscapeClose = false;
 
   function close() {
     if (!isOpen) return;
@@ -105,6 +108,19 @@ export function createModalManager(strings = createColorModalPlaceholders()) {
       if (Date.now() - openedAt < 500) return;
       close();
     });
+
+    // sp-picker (e.g. the Color mode picker) closes its own open dropdown on
+    // Escape internally, but doesn't stop the event from continuing to bubble
+    // — without this, the same keypress also closes the whole modal. Capture
+    // phase runs before that internal handling, so this is the only point
+    // where checking .open still reflects the pre-Escape state; by the time
+    // the escape handler below runs (bubble phase), the picker has already
+    // closed itself and .open would read false either way.
+    overlay.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        suppressNextEscapeClose = Array.from(overlay.querySelectorAll('sp-picker')).some((p) => p.open);
+      }
+    }, true);
 
     container = createTag('div', { class: 'ax-color-modal-container' });
     bodyEl = createTag('div', { class: 'ax-color-modal-content' });
@@ -205,7 +221,13 @@ export function createModalManager(strings = createColorModalPlaceholders()) {
     isOpen = true;
     announceToScreenReader(interpolate(strings.announceOpened, { title }), 'assertive');
 
-    escHandler = handleEscapeClose(overlay, close);
+    escHandler = handleEscapeClose(overlay, () => {
+      if (suppressNextEscapeClose) {
+        suppressNextEscapeClose = false;
+        return;
+      }
+      close();
+    });
     focusTrap = trapFocus(overlay, { getInitialFocus: initialFocusSelector });
 
     /* Force reflow so the browser records translateY(100%) before the open class fires. */

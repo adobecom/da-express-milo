@@ -417,6 +417,7 @@ export default async function decorate(block) {
               description: item.description ?? '',
               onLikeToggle: async ({ id, liked }) => activeDataService.toggleLike({ id, liked }),
               strings: modalStrings,
+              verticalMaxPerRow: config.swatchVerticalMaxPerRow,
             });
           },
         });

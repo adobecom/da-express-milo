@@ -263,6 +263,21 @@
 .ax-toolbar-main > sp-button {
   flex: 1 0 100%;
   min-inline-size: var(--ax-toolbar-cta-min-width);
+  /* sp-button's own #label is align-self:start, not centered — it relies on
+     --mod-button-top-to-text/-bottom-to-text padding summing exactly to the
+     button's content height to *look* centered. That sum falls short of this
+     button's actual height (a few px short at every breakpoint we use: l-size
+     mobile/tablet and desktop alike), and since the label isn't truly
+     flex-centered, 100% of that shortfall piles up below the text instead of
+     splitting evenly. Recompute both paddings from the button's own live
+     height/line-height so the label is exactly centered regardless of
+     breakpoint. --spectrum-button-line-height is unitless (e.g. "1.2"); "1em"
+     resolves it at the point var() is finally substituted into #label's own
+     padding-block-* (see button.js), i.e. against the label's real font-size,
+     not sp-button's own --spectrum-button-font-size token (which doesn't
+     match #label's rendered size and would throw the math off if used here). */
+  --mod-button-top-to-text: calc((var(--spectrum-button-height) - (var(--spectrum-button-line-height) * 1em)) / 2);
+  --mod-button-bottom-to-text: var(--mod-button-top-to-text);
 }
 
 /* ── Library variant (saved-themes modal toolbar) ──────────────── */

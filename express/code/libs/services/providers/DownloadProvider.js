@@ -56,24 +56,36 @@ export default class DownloadProvider extends BaseProvider {
     return this.safeExecute(() => this.#actions.downloadRecolorSVG(data));
   }
 
-  /** @param {Object} themeData */
-  async exportCSS(themeData) {
-    return this.safeExecute(() => this.#actions.exportCSS(themeData));
+  /**
+   * @param {Object} themeData
+   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode] - currently-selected Color mode
+   */
+  async exportCSS(themeData, mode) {
+    return this.safeExecute(() => this.#actions.exportCSS(themeData, mode));
   }
 
-  /** @param {Object} themeData */
-  async exportSCSS(themeData) {
-    return this.safeExecute(() => this.#actions.exportSCSS(themeData));
+  /**
+   * @param {Object} themeData
+   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode]
+   */
+  async exportSCSS(themeData, mode) {
+    return this.safeExecute(() => this.#actions.exportSCSS(themeData, mode));
   }
 
-  /** @param {Object} themeData */
-  async exportLESS(themeData) {
-    return this.safeExecute(() => this.#actions.exportLESS(themeData));
+  /**
+   * @param {Object} themeData
+   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode]
+   */
+  async exportLESS(themeData, mode) {
+    return this.safeExecute(() => this.#actions.exportLESS(themeData, mode));
   }
 
-  /** @param {Object} themeData */
-  async exportXML(themeData) {
-    return this.safeExecute(() => this.#actions.exportXML(themeData));
+  /**
+   * @param {Object} themeData
+   * @param {'HEX'|'RGB'} [mode]
+   */
+  async exportXML(themeData, mode) {
+    return this.safeExecute(() => this.#actions.exportXML(themeData, mode));
   }
 }
 

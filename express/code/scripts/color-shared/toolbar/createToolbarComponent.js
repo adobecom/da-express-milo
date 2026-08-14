@@ -10,6 +10,7 @@ import { createThemeWrapper } from '../spectrum/utils/theme.js';
 import { createLibraryAccessibilityMenu } from '../components/libraries/createLibraryAccessibilityMenu.js';
 import { createLibraryDownloadMenu } from '../components/libraries/createLibraryDownloadMenu.js';
 import { createLibraryCardActionMenu } from '../components/libraries/createLibraryCardActionMenu.js';
+import { isIOSDevice } from '../components/libraries/libraryDownloadUtils.js';
 import { createColorStrip } from './colorStrip.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
@@ -54,7 +55,6 @@ const TOOLBAR_DEFAULTS = {
   saving: 'Saving\u2026',
   downloadAsASE: 'Download as ASE',
   downloadAsJPEG: 'Download as JPEG',
-  downloadAsPantoneJPEG: 'Download as Pantone JPEG',
   downloadAsPNG: 'Download as PNG',
   downloadAsSVG: 'Download as SVG',
   downloadFailed: 'Download failed. Please try again.',
@@ -156,17 +156,9 @@ async function handleOpenInExpress({ id, name, colors }, prodBaseUrl) {
   await openInExpress({ id, name, colors }, prodBaseUrl);
 }
 
-function isIOSDevice() {
-  if (typeof navigator === 'undefined') return false;
-  return /iPad|iPhone|iPod/.test(navigator.userAgent)
-    || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
-
 const PALETTE_DOWNLOAD_FORMATS = [
   { value: 'ase', method: 'downloadASE', labelKey: 'downloadAsASE' },
   { value: 'jpeg', method: 'downloadJPEG', labelKey: 'downloadAsJPEG' },
-  { value: 'pantoneJpeg', method: 'downloadPantoneJPEG', labelKey: 'downloadAsPantoneJPEG' },
-  { value: 'png', method: 'downloadPNG', labelKey: 'downloadAsPNG' },
 ];
 
 const GRADIENT_DOWNLOAD_FORMATS = [
@@ -184,6 +176,7 @@ function buildDownloadMenu(type, getPalette, t, onDownloaded) {
   const menu = createLibraryCardActionMenu({
     triggerIcon: 'sp-icon-download',
     triggerLabel: t.downloadPalette,
+    tooltipLabel: t.download,
     items: formats.map((f) => ({ value: f.value, label: t[f.labelKey] })),
     onSelect: async (value, { closePopover }) => {
       const entry = formats.find((f) => f.value === value);
@@ -267,6 +260,17 @@ function attachTooltip(actionBtn, text, { dismissOnActivate = false } = {}) {
   }).catch(() => {});
 }
 
+// createLibraryCardActionMenu's own trigger button (Codes/Download/etc.) is
+// nested inside a theme-wrapper div, not returned directly, so its tooltip has
+// to be attached to the actual trigger found inside the menu's element rather
+// than the menu wrapper itself.
+function attachMenuTooltip(menuEl) {
+  const trigger = menuEl?.querySelector('.ax-lib-card__action');
+  if (trigger) {
+    attachTooltip(trigger, trigger.getAttribute('data-tooltip-content'), { dismissOnActivate: true });
+  }
+}
+
 /* ── DOM Builders ────────────────────────────────────────────── */
 
 function createSwatchBand(colors, type, angle) {
@@ -322,6 +326,7 @@ function buildActionButtons(handlers, t, type, getPalette) {
 
   const downloadMenu = buildDownloadMenu(type, getPalette, t, handlers.onDownloaded);
   actions.appendChild(downloadMenu.element);
+  attachMenuTooltip(downloadMenu.element);
 
   const ccLibBtn = createIconButton({
     icon: 'CCLibrary',
@@ -556,13 +561,6 @@ function buildLibraryToolbar(options) {
 
   // Reuse the library card menus so download (ASE/JPEG) and accessibility
   // (contrast / color-blindness) behave identically to the libraries grid.
-  const attachMenuTooltip = (menuEl) => {
-    const trigger = menuEl?.querySelector('.ax-lib-card__action');
-    if (trigger) {
-      attachTooltip(trigger, trigger.getAttribute('data-tooltip-content'), { dismissOnActivate: true });
-    }
-  };
-
   const downloadMenu = createLibraryDownloadMenu({ item, strings: librariesStrings });
   actions.appendChild(downloadMenu.element);
   attachMenuTooltip(downloadMenu.element);

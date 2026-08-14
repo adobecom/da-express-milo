@@ -19,6 +19,12 @@ function interpolate(template, vars = {}) {
   return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));
 }
 
+// The swatch rail (color-swatch-rail/index.js) is built around a hard
+// 10-swatch ceiling (its own MAX_SWATCHES) and doesn't support more — the
+// gradient editor above it and the toolbar's download/copy-as-code data have
+// no such limit, so only the rail's own input gets capped.
+const MAX_SWATCH_RAIL_STOPS = 10;
+
 const LIBRARY_GRADIENT_STYLES = [
   'scripts/color-shared/modal/modal-palette-content.css',
   'scripts/color-shared/components/strips/color-strip.css',
@@ -132,7 +138,7 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
   if (!colorStops.length) {
     colorStops = [{ color: '#cccccc', position: 0 }, { color: '#999999', position: 1 }];
   }
-  const stopColors = colorStops.map((s) => s.color);
+  const stopColors = colorStops.slice(0, MAX_SWATCH_RAIL_STOPS).map((s) => s.color);
 
   let originalName = (item.name || '').trim();
   let originalTags = [...(item.tags || [])].map(String).sort();
@@ -163,6 +169,7 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
     draggable: false,
     copyable: true,
     ariaLabel: interpolate(strings.librariesModalGradientAria, { count: colorStops.length }),
+    colorMode: getPreferredColorMode(),
   });
   previewWrap.appendChild(gradientEditor.element);
   previewSection.appendChild(previewWrap);
@@ -178,11 +185,14 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
 
   /* ── Color mode + Copy as code ── */
   const colorModesHeader = createColorModesHeader(
-    { name: item?.name ?? 'Gradient', colors: stopColors },
+    { name: item?.name ?? 'Gradient', colors: stopColors, colorStops },
     {
       type: 'gradient',
       strings,
-      onModeChange: (mode) => { railAdapter.rail.colorMode = mode; },
+      onModeChange: (mode) => {
+        railAdapter.rail.colorMode = mode;
+        gradientEditor.setColorMode(mode);
+      },
     },
   );
   contentScroll.appendChild(colorModesHeader.element);
