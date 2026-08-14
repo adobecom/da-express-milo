@@ -332,6 +332,25 @@ function buildMiniEditorActions(topActions = []) {
 function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
   const widget = createTag('div', { class: 'mini-editor-widget' });
   const card = createTag('div', { class: 'me-card' });
+  const first = cardSet[0] || { quote: '', author: '' };
+  let contentModel = {
+    quote: first.quote,
+    author: first.author || '',
+    backgroundUrl: first.card?.bg || '',
+    font: {
+      family: fontOptions[0]?.font || 'sans-serif',
+      style: fontOptions[0]?.italic ? 'italic' : 'normal',
+      weight: fontOptions[0]?.weight || 'normal',
+    },
+  };
+
+  const updateContentModel = (patch) => {
+    contentModel = {
+      ...contentModel,
+      ...patch,
+      font: patch.font ? { ...contentModel.font, ...patch.font } : contentModel.font,
+    };
+  };
 
   const quoteWrap = createTag('div', {
     class: 'me-quote-wrap',
@@ -340,7 +359,6 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
     'aria-describedby': 'me-quote-wrap-hint',
   });
   const quoteEl = createTag('p', { class: 'me-quote' });
-  const first = cardSet[0] || { quote: '', author: '' };
   quoteEl.textContent = first.quote;
 
   // aria-describedby (not aria-label) so the accessible name stays the
@@ -442,13 +460,40 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
     useQuote: ({
       quote, author, card: bgCard, font,
     }) => {
+      updateContentModel({
+        quote,
+        author: author || '',
+        ...(bgCard ? { backgroundUrl: bgCard.bg } : {}),
+        ...(font ? {
+          font: {
+            family: font.font,
+            style: font.italic ? 'italic' : 'normal',
+            weight: font.weight || 'normal',
+          },
+        } : {}),
+      });
       quoteEl.textContent = quote;
       authorEl.textContent = author || '';
       authorEl.style.display = author ? '' : 'none';
       if (bgCard) selectSwatch(bgCard.bg);
       if (font) selectFont(font);
     },
-    onFontOrColourChange: (listener) => { onFontOrColourPick = listener; },
+    getContentModel: () => ({ ...contentModel, font: { ...contentModel.font } }),
+    onFontOrColourChange: (listener) => {
+      onFontOrColourPick = (patch) => {
+        if (patch.font) {
+          updateContentModel({
+            font: {
+              family: patch.font.font,
+              style: patch.font.italic ? 'italic' : 'normal',
+              weight: patch.font.weight || 'normal',
+            },
+          });
+        }
+        if (patch.card) updateContentModel({ backgroundUrl: patch.card.bg });
+        listener(patch);
+      };
+    },
     destroy: () => {
       panelObserver.disconnect();
       document.removeEventListener('click', onDocClick);
@@ -805,7 +850,7 @@ function buildArcCarousel(cardSet, useQuote, defaultFont) {
  *   own: `{ trapFocus, handleEscapeClose, disableBackgroundScroll,
  *   restoreBackgroundScroll, copyQuoteToClipboard }`.
  * @param {Object} [config.deps] — `{ createTag, getIconElementDeprecated }`.
- * @returns {Promise<{ stage, decorations, useQuote, updateCentre,
+ * @returns {Promise<{ stage, decorations, useQuote, updateCentre, getContentModel,
  *   syncViewportMode, destroy }>}
  */
 export default async function createMiniEditorWidget(config = {}) {
@@ -839,7 +884,7 @@ export default async function createMiniEditorWidget(config = {}) {
 
   const stage = createTag('div', { class: 'mini-editor-stage' });
   const {
-    widget, useQuote, onFontOrColourChange, destroy: destroyWidget,
+    widget, useQuote, getContentModel, onFontOrColourChange, destroy: destroyWidget,
   } = buildWidget(root, a11y, cardSet, fontOptions, topActions);
   const decorations = buildDecoCards(a11y, cardSet, useQuote);
   const { root: arcCarousel, updateCentre } = buildArcCarousel(arcCardSet, useQuote, fontOptions[0]);
@@ -893,6 +938,7 @@ export default async function createMiniEditorWidget(config = {}) {
     decorations,
     useQuote,
     updateCentre,
+    getContentModel,
     syncViewportMode,
     destroy: () => {
       destroyWidget();

@@ -3,6 +3,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../express/code/scripts/utils.js';
 import init from '../../../express/code/blocks/mini-editor/mini-editor.js';
+import MiniEditorCardExporter from '../../../express/code/scripts/utils/mini-editor-card-export.js';
 import { waitFor } from '../../helpers/waitfor.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
@@ -32,11 +33,17 @@ describe('mini-editor', () => {
   beforeEach(() => {
     window.Typekit = { load: ({ active }) => active?.() };
     fetchStub = sinon.stub(window, 'fetch').resolves({ json: async () => ({ items: defaultTemplateItems }) });
+    sinon.stub(window, 'requestAnimationFrame').callsFake((callback) => {
+      callback(performance.now());
+      return 1;
+    });
   });
 
   afterEach(() => {
     delete window.Typekit;
-    fetchStub.restore();
+    delete window.lana;
+    delete window.placeholders;
+    sinon.restore();
     document.body.innerHTML = '';
   });
 
@@ -78,6 +85,56 @@ describe('mini-editor', () => {
     await waitFor(() => !!block.querySelector('.me-quote'));
     expect(block.querySelector('.me-quote').textContent).to.equal('"Patience is bitter, but its fruit is sweet."');
     expect(block.querySelector('.me-author').textContent).to.equal('Jean-Jacques Rousseau');
+  });
+
+  it('downloads the content model once after rapid clicks', async () => {
+    const block = await decorateWithBody();
+    const downloadStub = sinon.stub(MiniEditorCardExporter, 'download').resolves();
+
+    const downloadButton = block.querySelector('.me-action--download');
+    downloadButton.click();
+    downloadButton.click();
+    await waitFor(() => downloadStub.calledOnce);
+
+    expect(downloadStub.calledOnce).to.be.true;
+    expect(downloadStub.firstCall.args[0]).to.deep.include({
+      quote: '"Patience is bitter, but its fruit is sweet."',
+      author: 'Jean-Jacques Rousseau',
+    });
+    expect(downloadStub.firstCall.args[0].backgroundUrl).to.match(/\/image1\.jpg$/);
+    expect(downloadButton.disabled).to.be.false;
+    expect(downloadButton.hasAttribute('aria-busy')).to.be.false;
+  });
+
+  it('downloads the latest model after carousel navigation', async () => {
+    const block = await decorateWithBody();
+    const downloadStub = sinon.stub(MiniEditorCardExporter, 'download').resolves();
+
+    block.querySelector('.me-arc-nav--next').click();
+    block.querySelector('.me-action--download').click();
+    await waitFor(() => downloadStub.calledOnce);
+
+    expect(downloadStub.firstCall.args[0]).to.deep.include({
+      quote: '"Adopt the pace of nature: her secret is patience."',
+      author: 'Ralph Waldo Emerson',
+    });
+    expect(downloadStub.firstCall.args[0].backgroundUrl).to.match(/\/image2\.jpg$/);
+  });
+
+  it('logs and shows a localized negative toast when download fails', async () => {
+    const block = await decorateWithBody();
+    window.placeholders = { 'screenshot-download-failed': 'Unable to download this design.' };
+    window.lana = { log: sinon.spy() };
+    sinon.stub(MiniEditorCardExporter, 'download').rejects(new Error('render failed'));
+
+    block.querySelector('.me-action--download').click();
+    await waitFor(() => !!document.querySelector('sp-toast'));
+
+    const toast = document.querySelector('sp-toast');
+    expect(toast.textContent).to.equal('Unable to download this design.');
+    expect(toast.getAttribute('variant')).to.equal('negative');
+    expect(window.lana.log.calledWithMatch('Mini-editor download failed: render failed')).to.be.true;
+    expect(document.body.contains(block)).to.be.true;
   });
 
   it('removes the whole section when no quotes are authored on the page', async () => {
