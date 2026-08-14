@@ -97,9 +97,12 @@ function triggerDownload(blob, filename) {
 }
 
 function supportsWorkerRendering() {
-  if (!window.Worker || !window.OffscreenCanvas || !window.createImageBitmap) return false;
+  // Safari without OffscreenCanvas uses the main-thread Canvas fallback below.
+  // eslint-disable-next-line compat/compat
+  const OffscreenCanvasConstructor = window.OffscreenCanvas;
+  if (!window.Worker || !OffscreenCanvasConstructor || !window.createImageBitmap) return false;
   try {
-    return !!new OffscreenCanvas(1, 1).getContext('2d');
+    return !!new OffscreenCanvasConstructor(1, 1).getContext('2d');
   } catch {
     return false;
   }

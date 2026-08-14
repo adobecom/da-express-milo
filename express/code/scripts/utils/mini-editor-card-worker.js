@@ -11,7 +11,12 @@ globalThis.addEventListener('message', async ({ data }) => {
     const response = await fetch(data.backgroundUrl, { mode: 'cors', credentials: 'omit' });
     if (!response.ok) throw new Error(`Background request failed with status ${response.status}`);
     const source = await createImageBitmap(await response.blob());
-    const canvas = new OffscreenCanvas(MINI_EDITOR_EXPORT_WIDTH, MINI_EDITOR_EXPORT_HEIGHT);
+    // The worker is only created after the main thread detects OffscreenCanvas support.
+    // eslint-disable-next-line compat/compat
+    const canvas = new globalThis.OffscreenCanvas(
+      MINI_EDITOR_EXPORT_WIDTH,
+      MINI_EDITOR_EXPORT_HEIGHT,
+    );
     const context = canvas.getContext('2d');
     if (!context) throw new Error('OffscreenCanvas 2D context is unavailable');
     drawCoverImage(context, source);

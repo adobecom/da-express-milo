@@ -101,7 +101,7 @@ describe('mini-editor', () => {
       quote: '"Patience is bitter, but its fruit is sweet."',
       author: 'Jean-Jacques Rousseau',
     });
-    expect(downloadStub.firstCall.args[0].backgroundUrl).to.match(/\/image1\.jpg$/);
+    expect(downloadStub.firstCall.args[0].backgroundUrl).to.equal('https://cdn/rendition/urn:0');
     expect(downloadButton.disabled).to.be.false;
     expect(downloadButton.hasAttribute('aria-busy')).to.be.false;
   });
@@ -118,7 +118,7 @@ describe('mini-editor', () => {
       quote: '"Adopt the pace of nature: her secret is patience."',
       author: 'Ralph Waldo Emerson',
     });
-    expect(downloadStub.firstCall.args[0].backgroundUrl).to.match(/\/image2\.jpg$/);
+    expect(downloadStub.firstCall.args[0].backgroundUrl).to.equal('https://cdn/rendition/urn:1');
   });
 
   it('logs and shows a localized negative toast when download fails', async () => {
