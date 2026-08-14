@@ -727,12 +727,14 @@ p.me-deco-author {
   justify-content: center;
   overflow: hidden;
   box-shadow: 0 5px 6px rgb(0 0 0 / 12%), 0 16px 16px rgb(0 0 0 / 8%);
-  /* transform-origin is fixed at the card's own centre for every role, and
-     never changes between roles — only transform itself is animated. That
-     keeps the transition a single smooth translate+rotate interpolation
-     that stays clear of the centre card throughout, instead of a
-     corner/bottom pivot whose intermediate frames aren't guaranteed clear. */
-  transform-origin: 50% 50%;
+  /* transform-origin sits far below the card, on the shared carousel
+     circle's own centre (--me-arc-origin-y below this card's vertical
+     centre) — fixed for every role, never changing between roles, so each
+     role's transform is a single rotate() with nothing else to interpolate.
+     Rotating about that one distant point is what keeps every card's
+     bottom edge on the circle throughout a transition, not just at rest —
+     see --me-arc-origin-y in mini-editor.css. */
+  transform-origin: 50% calc(50% + var(--me-arc-origin-y));
   transition: transform 1s ease-in-out, opacity 1s ease-in-out;
   -webkit-user-select: none;
   user-select: none;
@@ -750,24 +752,28 @@ p.me-deco-author {
 }
 
 .me-arc-card--prev {
-  transform: translateX(calc(-1 * var(--me-arc-slide))) translateY(var(--me-arc-lift)) rotate(-8deg);
+  transform: rotate(-8deg);
 }
 
 .me-arc-card--next {
-  transform: translateX(var(--me-arc-slide)) translateY(var(--me-arc-lift)) rotate(8deg);
+  transform: rotate(8deg);
 }
 
 /* Off-screen staging position for a recycled card (see mini-editor-widget.js
    setRole's `instant` path) — parked further out than the resting
-   prev/next spot, same rotation, so the very next transition (turning off
-   `instant`) animates it rotating in from beyond the edge instead of
-   popping directly into its final slot. */
+   prev/next spot, same rotation direction but twice the swing, so the very
+   next transition (turning off `instant`) animates it rotating in from
+   beyond the edge instead of popping directly into its final slot. Since
+   every role rotates about the same distant --me-arc-origin-y point (see
+   .me-arc-card), doubling the *centre-point* displacement to 2x the
+   resting prev/next distance means doubling sin(angle), not the angle
+   itself: asin(2 * sin(8deg)) ≈ 16.1615deg. */
 .me-arc-card--stage-prev {
-  transform: translateX(calc(-2 * var(--me-arc-slide))) translateY(var(--me-arc-lift)) rotate(-8deg);
+  transform: rotate(-16.1615deg);
 }
 
 .me-arc-card--stage-next {
-  transform: translateX(calc(2 * var(--me-arc-slide))) translateY(var(--me-arc-lift)) rotate(8deg);
+  transform: rotate(16.1615deg);
 }
 
 /* Ghost: a 4th, non-interactive card (see buildArcGhost in
@@ -790,11 +796,11 @@ p.me-deco-author {
 }
 
 .me-arc-card--exit-prev {
-  transform: translateY(calc(-1 * var(--me-arc-lift))) translateX(calc(-2 * var(--me-arc-slide)))rotate(0deg);
+  transform: rotate(-16.1615deg);
 }
 
 .me-arc-card--exit-next {
-  transform: translateX(calc(2 * var(--me-arc-slide))) translateY(var(--me-arc-lift)) rotate(8deg);
+  transform: rotate(16.1615deg);
 }
 
 .me-arc-ghost.me-arc-ghost--visible.me-arc-card--exit-prev,

@@ -11,25 +11,27 @@
      mobile media query below for the per-breakpoint overrides. */
   --me-arc-card-w: 542px;
   --me-arc-card-h: 350px;
-  /* Extra height below the centre card's own box: rotation pivots from
-     each side card's own centre (transform-origin never changes between
-     roles, so the transition can't swing through the centre card at any
-     point along the path), then a translateY compensation (--me-arc-lift)
-     pulls the whole card down so its bottom-inner corner lines up with
-     the centre card's bottom edge instead of sitting ~39px above it. That
-     same downward shift pushes the outer-bottom corner ~76px below the
-     unrotated baseline, so the container needs that much extra room
-     beneath the card to avoid clipping it. */
+  /* Extra height below the centre card's own box: the side cards pivot
+     around --me-arc-origin-y (a point on the shared carousel circle, far
+     below the card — see .me-arc-card's transform-origin), so their
+     outer-bottom corner swings ~76px below the unrotated baseline at rest.
+     The container needs that much extra room beneath the card to avoid
+     clipping it. */
   --me-arc-extra-h: 80px;
-  --me-arc-lift: 39px;
-  /* translateX distance from centre for the side cards' own centrepoint —
-     must clear (cardW/2 * cos(8deg) + cardH/2 * sin(8deg)) + centreCardW/2
-     at every point along the rotation, not just at rest. Verified clear
-     in practice (browser-scrubbed at 100/300/500ms) even though a
-     linear-time worst case exists in the first ~2% of progress —
-     ease-in-out compresses that window to well under a rendered frame.
-     542/2*cos(8)+350/2*sin(8)+542/2 ≈ 564px; +10px margin. */
-  --me-arc-slide: 574px;
+  /* Distance from the card's own vertical centre down to the shared
+     carousel circle's centre — every role (prev/centre/next, plus the
+     further-out stage/exit positions used mid-transition) rotates about
+     this same point via a single rotate() (see .me-arc-card's
+     transform-origin and the --me-arc-card--* rules below), so the bottom
+     edge of every card stays on that one circle at every point along a
+     transition — not just at the resting prev/centre/next positions.
+     Independent translateX/translateY/rotate interpolation (the previous
+     approach) couldn't guarantee that: each component eases on its own
+     timeline, so the combined path bows off the circle mid-transition.
+     Chosen so the prev/next resting spots land ~574px either side of
+     centre, matching the pre-existing peek amount: 574 / sin(8deg) ≈
+     4124px. */
+  --me-arc-origin-y: 4124px;
   /* Visible gap between the carousel card and the font/colour controls
      below — --spacing-200 (12px) on tablet/desktop, matching the gap
      between the desktop widget's own card and its controls; overridden
@@ -124,16 +126,15 @@
        the container is now 100vw everywhere (see .me-arc in
        mini-editor-widget.css), how much of each side card actually shows
        follows naturally from the smaller mobile viewport, not a separately
-       tuned peek amount. --me-arc-slide recalculated for this card size the
-       same way as the base rule:
-       327/2*cos(8)+270/2*sin(8) + 327/2 ≈ 344px; +10px safety margin.
-       --me-arc-lift/--me-arc-extra-h likewise recalculated for 327x270.
-       Defined on .mini-editor (not .me-arc) so .mini-editor-widget can
-       also read --me-arc-card-w — see .me-carousel-mode .mini-editor-widget. */
+       tuned peek amount. --me-arc-origin-y recalculated for this card size
+       the same way as the base rule (354 / sin(8deg) ≈ 2544px, so the
+       prev/next resting spots still land ~354px either side of centre);
+       --me-arc-extra-h likewise recalculated for 327x270. Defined on
+       .mini-editor (not .me-arc) so .mini-editor-widget can also read
+       --me-arc-card-w — see .me-carousel-mode .mini-editor-widget. */
     --me-arc-card-w: 327px;
     --me-arc-card-h: 270px;
-    --me-arc-slide: 354px;
-    --me-arc-lift: 24px;
+    --me-arc-origin-y: 2544px;
     --me-arc-extra-h: 50px;
     --me-arc-gap: var(--spacing-100);
   }
