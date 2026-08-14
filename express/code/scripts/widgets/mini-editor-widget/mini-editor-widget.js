@@ -372,7 +372,7 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
     tabindex: '0',
     'aria-describedby': 'me-quote-wrap-hint',
   });
-  const quoteEl = createTag('p', { class: 'me-quote' });
+  const quoteEl = createTag('div', { class: 'me-quote' });
   const first = cardSet[0] || { quote: '', author: '' };
   // The full, untruncated quote — kept separate from quoteEl's own display
   // text (which truncates at EDITOR_QUOTE_CHAR_LIMIT) so copy-to-clipboard
@@ -405,7 +405,7 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
   quoteWrap.append(quoteEl, hint, tip);
   renderQuote(first.quote);
 
-  const authorEl = createTag('p', { class: 'me-author' });
+  const authorEl = createTag('div', { class: 'me-author' });
   authorEl.textContent = first.author;
   authorEl.style.display = first.author ? '' : 'none';
 

@@ -153,7 +153,7 @@
      which already gets this right. */
   position: absolute;
   left: 50%;
-  bottom: var(--spacing-200);
+  bottom: 20px;
   transform: translateX(-50%);
   margin: 0;
   font-family: var(--me-quote-font);
@@ -483,13 +483,13 @@
   /* Was a fixed height: 148px on the (then-combined) card element — now a
      minimum only, matching that original look for short quotes, so the
      card can grow taller (width unchanged) as a quote's length approaches
-     DECO_QUOTE_CHAR_LIMIT instead of ever clipping its own text. Flex
-     column so the quote/author flow naturally and the card's own height is
-     just "however tall its content needs" — the quote is the one flexible
-     item (see p.me-deco-quote's flex/centering below), the author a fixed
-     item pinned to the bottom via margin-top: auto, matching the original
-     design where the author sits at a fixed offset from the card's bottom
-     edge regardless of how short the quote above it is. */
+     DECO_QUOTE_CHAR_LIMIT instead of ever clipping its own text. Positioned
+     (not static) so p.me-deco-author below can anchor to this element's own
+     box via position: absolute, per Figma node 54:7695/54:7699 — the author
+     sits at a fixed offset from the card's bottom edge regardless of quote
+     length, same pattern as .me-author/.me-arc-author elsewhere in this
+     file. */
+  position: relative;
   min-height: 148px;
   box-sizing: border-box;
   display: flex;
@@ -520,16 +520,18 @@
    is otherwise equally or more specific and, being a <p>, matches these too. */
 p.me-deco-quote {
   /* The one flexible item in .me-deco-card-inner — grows/shrinks with the
-     available space above the bottom-pinned author (see p.me-deco-author),
-     and centers its own (possibly multi-line) text within whatever space
-     it ends up with, so a short quote still sits vertically centered in
-     the card above the author, not glued to the top. */
+     available space and centers its own (possibly multi-line) text within
+     it, so a short quote still sits vertically centered in the card, not
+     glued to the top. padding-bottom reserves room for p.me-deco-author,
+     which is absolutely positioned below and so isn't otherwise accounted
+     for in this flex column's own height. */
   display: flex;
   flex: 1 0 auto;
   align-items: center;
   justify-content: center;
   width: 100%;
   margin: 0;
+  padding-bottom: 20px;
   color: var(--Alias-content-typography-Heading);
   text-align: center;
   font-family: var(--body-font-family);
@@ -540,18 +542,18 @@ p.me-deco-quote {
   word-break: break-word;
 }
 
-/* Pinned to the card's bottom edge via margin-top: auto — matches the
-   original design (an absolutely-positioned author at a fixed bottom
-   offset) without needing that positioning now that the card's own height
-   varies with the quote above it: auto margin pushes this fixed-size item
-   to the end of the flex column regardless of how tall the card grows. */
+/* Absolutely positioned at a fixed offset from the card's bottom edge, per
+   Figma node 54:7695/54:7699 (author: bottom: 18.46px on a 149px-tall
+   card) — same pattern as .me-author/.me-arc-author elsewhere in this
+   file. Anchors against .me-deco-card-inner (position: relative above),
+   independent of the quote's own height, so it stays put whether the card
+   grows taller for a longer quote or not. */
 p.me-deco-author {
-  flex-shrink: 0;
-  margin: auto 0 0;
-  /* Guarantees a minimum gap above the author even when the quote grows
-     tall enough to nearly reach the bottom on its own — margin-top: auto
-     alone would let that gap shrink toward 0 in that case. */
-  padding-top: 8px;
+  position: absolute;
+  left: 50%;
+  bottom: 12px;
+  transform: translateX(-50%);
+  margin: 0;
   width: 100%;
   max-width: calc(100% - 22px);
   overflow: hidden;
