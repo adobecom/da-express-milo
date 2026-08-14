@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@color-contrast-checker-default",
       "selector": "div.color-contrast-checker",
-      "path": "/drafts/nala/blocks/color/color-contrast-checker?color-palette=424242,FF98BB,BA1650,CCCCCC,056C5C",
+      "path": "/drafts/nala/blocks/color/color-contrast-checker?color-palette=424242,FF98BB,BA1650,CCCCCC,056C5C&martech=off",
       "data": {
         "semantic": {
           "texts": [
