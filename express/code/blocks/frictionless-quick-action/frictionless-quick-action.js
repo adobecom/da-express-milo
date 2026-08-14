@@ -236,6 +236,9 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
     metaData: {
       isFrictionlessQa: 'true',
       ...(quickActionId === 'caption-video' && { videoLanguage: selectedVideoLanguage }),
+      ...(quickActionId === 'remove-background' && {
+        qaSourcePage: getMetadata('qa-source-page') || 'remove-background',
+      }),
     },
     analyticsData: {
       ...(quickActionId === 'video-compress' && { entryPoint: 'seo-quick-action-video-compress' }),
@@ -598,6 +601,7 @@ export function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, di
       variant: quickAction,
       width: dimensions?.width,
       height: dimensions?.height,
+      qaSourcePage: getMetadata('qa-source-page') || 'remove-background',
     };
   }
 

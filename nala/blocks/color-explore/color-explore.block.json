@@ -1,0 +1,1286 @@
+{
+  "block": "color-explore",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@color-explore-palettes-color-explore--strips",
+      "selector": "div.color-explore.palettes.color-explore--strips",
+      "path": "/drafts/nala/blocks/color/color-explore?martech=off",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "span.results-count",
+              "nth": 0,
+              "tag": "span",
+              "text": "Color palettes",
+              "markup": null
+            },
+            {
+              "selector": "span.filters-mobile__btn-label",
+              "nth": 0,
+              "tag": "span",
+              "text": "Filter",
+              "markup": null
+            },
+            {
+              "selector": "span.filters-mobile__btn-label",
+              "nth": 1,
+              "tag": "span",
+              "text": "Sort",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 0,
+              "tag": "p",
+              "text": "color theme_Screenshot 2026-05-04 at 10",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 1,
+              "tag": "p",
+              "text": "color theme_Screenshot 2026-07-09 alle 11",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 2,
+              "tag": "p",
+              "text": "sentinela triade",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 3,
+              "tag": "p",
+              "text": "color theme_Sabrina_07",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 4,
+              "tag": "p",
+              "text": "Dining room of a canteen or cafeteria",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 5,
+              "tag": "p",
+              "text": "TEK RENK",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 6,
+              "tag": "p",
+              "text": "color theme_Sabrina_Shooting Benicarlo",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 7,
+              "tag": "p",
+              "text": "My Color Theme",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 9,
+              "tag": "p",
+              "text": "palette",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 10,
+              "tag": "p",
+              "text": "Home blue",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 14,
+              "tag": "p",
+              "text": "sentinela Mono",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 15,
+              "tag": "p",
+              "text": "sentinela quad",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 18,
+              "tag": "p",
+              "text": "TerTerreNuances",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 19,
+              "tag": "p",
+              "text": "sentinela analogo",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 20,
+              "tag": "p",
+              "text": "Home blue warm",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 22,
+              "tag": "p",
+              "text": "TenThingsIHateAboutYou",
+              "markup": null
+            },
+            {
+              "selector": "p.color-card-name",
+              "nth": 23,
+              "tag": "p",
+              "text": "TEK RENKK",
+              "markup": null
+            },
+            {
+              "selector": "span.button-text",
+              "nth": 0,
+              "tag": "span",
+              "text": "Load more",
+              "markup": null
+            }
+          ],
+          "media": [],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 0,
+              "text": "color theme_Screenshot 2026-05-04 at 10",
+              "href": null,
+              "ariaLabel": "Palette: color theme_Screenshot 2026-05-04 at 10",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit color theme_Screenshot 2026-05-04 at 10",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 1,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 1,
+              "text": "color theme_Screenshot 2026-07-09 alle 11",
+              "href": null,
+              "ariaLabel": "Palette: color theme_Screenshot 2026-07-09 alle 11",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 1,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 2,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit color theme_Screenshot 2026-07-09 alle 11",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 3,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 2,
+              "text": "sentinela triade",
+              "href": null,
+              "ariaLabel": "Palette: sentinela triade",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 2,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 4,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit sentinela triade",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 5,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 3,
+              "text": "color theme_Sabrina_07",
+              "href": null,
+              "ariaLabel": "Palette: color theme_Sabrina_07",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 3,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 6,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit color theme_Sabrina_07",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 7,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 4,
+              "text": "Dining room of a canteen or cafeteria",
+              "href": null,
+              "ariaLabel": "Palette: Dining room of a canteen or cafeteria",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 4,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 8,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit Dining room of a canteen or cafeteria",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 9,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 5,
+              "text": "TEK RENK",
+              "href": null,
+              "ariaLabel": "Palette: TEK RENK",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 5,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 10,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit TEK RENK",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 11,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 6,
+              "text": "color theme_Sabrina_Shooting Benicarlo",
+              "href": null,
+              "ariaLabel": "Palette: color theme_Sabrina_Shooting Benicarlo",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 6,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 12,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit color theme_Sabrina_Shooting Benicarlo",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 13,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 7,
+              "text": "My Color Theme",
+              "href": null,
+              "ariaLabel": "Palette: My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 7,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 14,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 15,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 8,
+              "text": "My Color Theme",
+              "href": null,
+              "ariaLabel": "Palette: My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 8,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 16,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 17,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 9,
+              "text": "palette",
+              "href": null,
+              "ariaLabel": "Palette: palette",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 9,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 18,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit palette",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 19,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 10,
+              "text": "Home blue",
+              "href": null,
+              "ariaLabel": "Palette: Home blue",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 10,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 20,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit Home blue",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 21,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 11,
+              "text": "My Color Theme",
+              "href": null,
+              "ariaLabel": "Palette: My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 11,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 22,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 23,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 12,
+              "text": "My Color Theme",
+              "href": null,
+              "ariaLabel": "Palette: My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 12,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 24,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 25,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 13,
+              "text": "My Color Theme",
+              "href": null,
+              "ariaLabel": "Palette: My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 13,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 26,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 27,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 14,
+              "text": "sentinela Mono",
+              "href": null,
+              "ariaLabel": "Palette: sentinela Mono",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 14,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 28,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit sentinela Mono",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 29,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 15,
+              "text": "sentinela quad",
+              "href": null,
+              "ariaLabel": "Palette: sentinela quad",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 15,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 30,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit sentinela quad",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 31,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 16,
+              "text": "My Color Theme",
+              "href": null,
+              "ariaLabel": "Palette: My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 16,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 32,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 33,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 17,
+              "text": "My Color Theme",
+              "href": null,
+              "ariaLabel": "Palette: My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 17,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 34,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit My Color Theme",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 35,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 18,
+              "text": "TerTerreNuances",
+              "href": null,
+              "ariaLabel": "Palette: TerTerreNuances",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 18,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 36,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit TerTerreNuances",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 37,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 19,
+              "text": "sentinela analogo",
+              "href": null,
+              "ariaLabel": "Palette: sentinela analogo",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 19,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 38,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit sentinela analogo",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 39,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 20,
+              "text": "Home blue warm",
+              "href": null,
+              "ariaLabel": "Palette: Home blue warm",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 20,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 40,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit Home blue warm",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 41,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 21,
+              "text": "palette",
+              "href": null,
+              "ariaLabel": "Palette: palette",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 21,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 42,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit palette",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 43,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 22,
+              "text": "TenThingsIHateAboutYou",
+              "href": null,
+              "ariaLabel": "Palette: TenThingsIHateAboutYou",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 22,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 44,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit TenThingsIHateAboutYou",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 45,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card",
+              "nth": 23,
+              "text": "TEK RENKK",
+              "href": null,
+              "ariaLabel": "Palette: TEK RENKK",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.color-card-visual",
+              "nth": 23,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 46,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Edit TEK RENKK",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.color-card-action-btn",
+              "nth": 47,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Open",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.load-more-btn",
+              "nth": 0,
+              "text": "Load more",
+              "href": null,
+              "ariaLabel": "Load more gradients",
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        },
+        "desktopFilters": [
+          {
+            "name": "Content type",
+            "dropdownNth": 0,
+            "items": [
+              {
+                "text": "Color palettes"
+              },
+              {
+                "text": "Color gradients"
+              }
+            ]
+          },
+          {
+            "name": "Sort",
+            "dropdownNth": 1,
+            "items": [
+              {
+                "text": "Most popular"
+              },
+              {
+                "text": "All"
+              },
+              {
+                "text": "Most used"
+              },
+              {
+                "text": "Random"
+              }
+            ]
+          },
+          {
+            "name": "Time range",
+            "dropdownNth": 2,
+            "items": [
+              {
+                "text": "All time"
+              },
+              {
+                "text": "This month"
+              },
+              {
+                "text": "This week"
+              }
+            ]
+          }
+        ]
+      },
+      "tags": [
+        "@color-explore",
+        "@palettes-color-explore--strips",
+        "@express"
+      ]
+    }
+  ]
+}
