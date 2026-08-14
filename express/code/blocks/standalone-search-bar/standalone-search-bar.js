@@ -120,6 +120,8 @@ function initSearchFunction(block, searchBarWrapper) {
         e.preventDefault();
         cycleThroughSuggestions(block, 0); // Focus first suggestion
       }
+    } else if (e.key === 'Escape') {
+      searchDropdown.classList.add('hidden');
     }
   });
 
@@ -235,6 +237,10 @@ function initSearchFunction(block, searchBarWrapper) {
 
             if (e.key === 'Enter' || e.keyCode === 13) {
               await handleSubmitInteraction({ query: currentQuery });
+            } else if (e.key === 'Escape') {
+              e.preventDefault();
+              searchDropdown.classList.add('hidden');
+              searchBar.focus();
             } else if (e.key === 'Tab') {
               e.preventDefault();
               const nextIndex = e.shiftKey ? currentIndex - 1 : currentIndex + 1;
