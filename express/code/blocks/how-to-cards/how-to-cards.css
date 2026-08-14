@@ -128,7 +128,7 @@
 .how-to-cards .gallery {
   display: flex;
   flex-wrap: nowrap;
-  gap: 8px;
+  gap: var(--spacing-100);
   overflow-x: scroll;
   scrollbar-width: none;
   scroll-behavior: smooth;
@@ -297,7 +297,7 @@
   }
 
   .how-to-cards .gallery-control {
-    padding-right: 16px;
+    padding-right: var(--spacing-300);
   }
 }
 
@@ -319,7 +319,7 @@
   } 
 
   .how-to-cards .gallery-control {
-    padding-right: 32px;
+    padding-right: var(--spacing-500);
   }
 }
 
@@ -349,7 +349,7 @@
   }
 
   .how-to-cards .gallery-control {
-    padding-right: 40px;
+    padding-right: var(--spacing-600);
   }
 
   .how-to-cards.cards-count-3 .card { 
@@ -416,15 +416,8 @@
  * ------------------------------------------------------------------------- */
 @media (min-width: 768px) {
   .how-to-cards.cards-count-4 {
-    /* max-width: 1600px; */
     margin-inline: auto;
   }
-
-  /* .how-to-cards.cards-count-4 .gallery {
-    gap: 8px;
-    padding-left: 20px;
-    padding-right: 20px;
-  } */
 
   .how-to-cards.cards-count-4 .card {
     flex: 1 1 0;
@@ -432,12 +425,4 @@
     min-width: 295px;
     max-width: 385px;
   }
-
-  /* .how-to-cards.cards-count-4 .gallery--item:first-of-type {
-    margin-left: 0;
-  } */
-
-  /* .how-to-cards.cards-count-4 .card:last-child {
-    margin-right: 0;
-  } */
 }
