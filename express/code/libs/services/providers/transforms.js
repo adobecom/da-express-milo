@@ -112,6 +112,7 @@ export function themeToGradient(theme) {
       imageUrl: null, // avatar not in API; UI falls back to placeholder
     },
     tags,
+    description: theme.description || '',
     href: theme.href || null,
     _source: 'kuler',
     _theme: theme,
@@ -190,6 +191,7 @@ export function gradientApiResponseToGradient(apiData) {
       imageUrl: null, // avatar not in API; UI falls back to placeholder
     },
     tags,
+    description: apiData.description || '',
     href: apiData.href || null,
     hasNextPage: apiData.hasNextPage,
     _source: 'kuler-gradient',
@@ -227,10 +229,33 @@ export function hexToNormalizedRGB(hex) {
 /**
  * Convert a toolbar palette (hex color array) to the themeData format
  * expected by the download plugin's rendering helpers.
- * @param {{ name?: string, colors?: string[] }} palette
+ *
+ * When `colorStops` is present (gradients), each swatch keeps its real
+ * `offset`/`midpoint` so gradient-aware exports (SVG/PNG/CSS) reproduce the
+ * actual stop positions instead of spacing them evenly by index.
+ *
+ * @param {{ name?: string, colors?: string[],
+ *   colorStops?: { color: string, position?: number, midpoint?: number }[] }} palette
  * @returns {Object} themeData with name, swatches, and colorMode
  */
 export function paletteToThemeData(palette) {
+  const colorStops = Array.isArray(palette.colorStops) ? palette.colorStops : null;
+
+  if (colorStops?.length) {
+    const total = colorStops.length;
+    return {
+      name: palette.name || 'My Color Theme',
+      swatches: colorStops.map((stop, index) => ({
+        rgb: hexToNormalizedRGB(stop.color),
+        offset: Number.isFinite(Number(stop.position))
+          ? Number(stop.position)
+          : (total > 1 ? index / (total - 1) : 0),
+        midpoint: stop.midpoint ?? 0.5,
+      })),
+      colorMode: 'rgb',
+    };
+  }
+
   return {
     name: palette.name || 'My Color Theme',
     swatches: (palette.colors || []).map((hex) => ({ rgb: hexToNormalizedRGB(hex) })),

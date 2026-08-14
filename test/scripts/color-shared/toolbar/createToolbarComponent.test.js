@@ -343,13 +343,13 @@ describe('createToolbar', () => {
       delete window.lana;
     });
 
-    it('download menu exposes ASE/JPEG/Pantone JPEG/PNG for palettes', async () => {
+    it('download menu exposes only ASE/JPEG for palettes', async () => {
       const toolbar = createToolbar(defaultOptions());
       document.body.appendChild(toolbar.element);
 
       const items = [...toolbar.element.querySelectorAll('.ax-download-menu sp-menu-item')]
         .map((i) => i.getAttribute('value'));
-      expect(items).to.deep.equal(['ase', 'jpeg', 'pantoneJpeg', 'png']);
+      expect(items).to.deep.equal(['ase', 'jpeg']);
     });
 
     it('download menu exposes PNG/SVG for gradients', async () => {
@@ -407,6 +407,64 @@ describe('createToolbar', () => {
       expect(downloadPNG.calledOnce).to.equal(true);
       expect(cb.calledOnce).to.equal(true);
       expect(cb.firstCall.args[0]).to.have.property('palette');
+    });
+
+    it('passes each stop\'s real offset to the download provider — not an evenly-spaced index (regression: SVG/PNG downloads used to ignore colorStops and always space stops evenly)', async () => {
+      const downloadSVG = sinon.stub().resolves({ fileName: 'foo.svg' });
+      sinon.stub(serviceManager, 'getProvider').resolves({ downloadSVG });
+
+      const gradientWithRealStops = {
+        ...MOCK_GRADIENT,
+        colorStops: [
+          { color: '#FF6B35', position: 0 },
+          { color: '#F7C59F', position: 0.2 },
+          { color: '#EFEFD0', position: 1 },
+        ],
+      };
+      const toolbar = createToolbar(defaultOptions({
+        type: 'gradient',
+        palette: gradientWithRealStops,
+      }));
+      document.body.appendChild(toolbar.element);
+
+      const trigger = toolbar.element.querySelector('.ax-download-menu sp-action-button');
+      trigger.click();
+      const svgItem = [...toolbar.element.querySelectorAll('.ax-download-menu sp-menu-item')]
+        .find((i) => i.getAttribute('value') === 'svg');
+      svgItem.click();
+      await new Promise((r) => { setTimeout(r, 50); });
+
+      expect(downloadSVG.calledOnce).to.equal(true);
+      expect(downloadSVG.firstCall.args[0].swatches[1].offset).to.equal(0.2);
+    });
+
+    it('passes each stop\'s real offset to the PNG download provider too — downloadAsPNG reads the same themeData.swatches as SVG', async () => {
+      const downloadPNG = sinon.stub().resolves({ fileName: 'foo.png' });
+      sinon.stub(serviceManager, 'getProvider').resolves({ downloadPNG });
+
+      const gradientWithRealStops = {
+        ...MOCK_GRADIENT,
+        colorStops: [
+          { color: '#FF6B35', position: 0 },
+          { color: '#F7C59F', position: 0.2 },
+          { color: '#EFEFD0', position: 1 },
+        ],
+      };
+      const toolbar = createToolbar(defaultOptions({
+        type: 'gradient',
+        palette: gradientWithRealStops,
+      }));
+      document.body.appendChild(toolbar.element);
+
+      const trigger = toolbar.element.querySelector('.ax-download-menu sp-action-button');
+      trigger.click();
+      const pngItem = [...toolbar.element.querySelectorAll('.ax-download-menu sp-menu-item')]
+        .find((i) => i.getAttribute('value') === 'png');
+      pngItem.click();
+      await new Promise((r) => { setTimeout(r, 50); });
+
+      expect(downloadPNG.calledOnce).to.equal(true);
+      expect(downloadPNG.firstCall.args[0].swatches[1].offset).to.equal(0.2);
     });
 
     it('shows an error toast and does not emit "download" when the provider rejects', async () => {

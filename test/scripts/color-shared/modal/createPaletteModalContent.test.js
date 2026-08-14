@@ -85,4 +85,16 @@ describe('getPaletteColors', () => {
     expect(getPaletteColors({ colorStops: [{ color: '#111111' }, { color: '222222' }] }))
       .to.deep.equal(['#111111', '#222222']);
   });
+
+  it('caps at 10 colors — the modal (and its swatch rail) doesn\'t support more than that', () => {
+    const colors = Array.from({ length: 14 }, (_, i) => `#${String(i).padStart(6, '0')}`);
+    const result = getPaletteColors({ colors });
+    expect(result).to.have.length(10);
+    expect(result).to.deep.equal(colors.slice(0, 10));
+  });
+
+  it('caps at 10 colors via the colorStops fallback too', () => {
+    const colorStops = Array.from({ length: 12 }, (_, i) => ({ color: `#${String(i).padStart(6, '0')}` }));
+    expect(getPaletteColors({ colorStops })).to.have.length(10);
+  });
 });

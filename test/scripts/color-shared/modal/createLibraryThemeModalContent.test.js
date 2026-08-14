@@ -70,6 +70,10 @@ describe('createLibraryThemeModalContent', () => {
       queueMicrotask(() => cb(0));
       return 0;
     });
+    // colorModePreference.js persists to localStorage, which survives across
+    // test files in the same run — reset it so these tests don't inherit
+    // whatever mode another file's test last left selected.
+    localStorage.removeItem('express-color-mode');
   });
 
   afterEach(() => {

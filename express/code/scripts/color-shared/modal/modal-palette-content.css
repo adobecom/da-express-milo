@@ -507,6 +507,7 @@
 
 .ax-color-modal-content .modal-palette-toolbar {
   width: 100%;
+  box-sizing: border-box;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -779,19 +780,44 @@
   }
 
 
+  /* Height matches content (each row a natural ~48px) up to the 5-swatch max
+     for this bucket, instead of always stretching to a fixed 248px — with
+     the Color Modes multi-channel rows, forcing 3-4 swatches to fill that
+     fixed height made each row noticeably oversized (see the rail rule below,
+     which used to stretch to flex:1 1 0/height:100% to fill it). */
   .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="small"] {
-    height: 248px;
-    min-height: 248px;
+    height: auto;
+    min-height: 0;
+    max-height: 248px;
   }
 
-  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="small"] color-swatch-rail[orientation="stacked"] {
-    flex: 1 1 0;
-    height: 100%;
+  /* The intervening sp-theme wrapper (see the unconditional "must stretch"
+     rule above) uses flex:1 1 0 — a flex-basis:0 grow-to-fill that depends on
+     the wrap having a definite height to grow into. With the wrap now auto-
+     height (content-sized) for this bucket, that grow-fill becomes circular
+     and collapses sp-theme (and the wrap along with it) to 0px, which is what
+     broke the rail's rounded-corner clip. Match the rail's own override here
+     so sp-theme sizes to its child's content instead of trying to grow. */
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="small"] sp-theme,
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] sp-theme {
+    flex: 0 0 auto;
+    height: auto;
+  }
+
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="small"] color-swatch-rail[orientation="stacked"],
+  .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] color-swatch-rail[orientation="stacked"] {
+    flex: 0 0 auto;
+    height: auto;
   }
 
   .ax-color-modal-content .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range="large"] {
-    height: 264px;
-    min-height: 264px;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .ax-color-modal-content .modal-palette-container--color-rail:has(.modal-color-rail-wrap[data-color-count-range="large"])::after {
+    display: none;
   }
 }
 
@@ -817,6 +843,48 @@
     height: auto;
     min-height: 200px;
     flex-shrink: 0;
+  }
+}
+
+@media (max-width: 1199px) {
+  .ax-color-modal-content .modal-palette-name-tags {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .ax-color-modal-content .modal-palette-toolbar {
+    position: sticky;
+    bottom: 0;
+    /* .swatch-column bumps to z-index:1 on :focus-within — without this the
+       toolbar (z-index:auto) loses the stack to a focused column scrolled
+       underneath it. */
+    z-index: 2;
+    background: var(--color-white);
+    border-block-start: 1px solid var(--color-gray-150);
+    padding-block-start: var(--spacing-300);
+  }
+}
+
+@media (max-width: 599px) {
+  .ax-color-modal-content .modal-palette-toolbar {
+    width: calc(100% + 2 * var(--spacing-300));
+    margin-inline: calc(-1 * var(--spacing-300));
+    padding-inline: var(--spacing-300);
+    padding-block-end: var(--spacing-300);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1199px) {
+  .ax-color-modal-content .modal-palette-toolbar {
+    width: calc(100% + 2 * var(--spacing-400));
+    /* Without this, the "min-width:600px { max-width:100% }" rule above
+       clamps this overflow straight back down to 100%. */
+    max-width: none;
+    margin-inline: calc(-1 * var(--spacing-400));
+    padding-inline: var(--spacing-500);
+    padding-block-end: var(--spacing-400);
+    border-end-start-radius: 20px;
+    border-end-end-radius: 20px;
   }
 }
 

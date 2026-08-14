@@ -6,6 +6,7 @@ import { showExpressToast } from '../../spectrum/components/express-toast.js';
 import { createGradientEditorPlaceholders } from '../../i18n/loadGradientEditorPlaceholders.js';
 import { interpolate } from '../../utils/utilities.js';
 import { safeClipboardWrite } from '../../../../libs/services/plugins/download/actions/helpers.js';
+import { getColorModeChannels } from '../../../../libs/color-components/utils/colorModeChannels.js';
 
 const DEFAULT_HEX = '#808080';
 const DEFAULT_STOPS = [
@@ -122,9 +123,27 @@ export function createGradientEditor(initialGradient, options = {}) {
     strings = createGradientEditorPlaceholders(),
     showMockDebug = false,
     showMockHandlesOrder = false,
+    colorMode: initialColorMode = 'HEX',
     onChange,
     onColorClick,
   } = options;
+
+  let currentColorMode = initialColorMode;
+
+  /** Returns the copy-ready string for the active color mode, or the hex itself in HEX mode. */
+  function getCopyValue(hex) {
+    if (currentColorMode === 'HEX' || !hex) return hex;
+    const channels = getColorModeChannels(hex, currentColorMode);
+    if (!channels) return hex;
+    return channels.map((channel) => channel.value).join(', ');
+  }
+
+  /** aria-label for a copyable handle: "Copy {hex}" in HEX mode, "Copy {mode value}" otherwise. */
+  function getCopyHandleLabel(hex) {
+    return currentColorMode === 'HEX'
+      ? interpolate(strings.copyHandleAria, { hex: hexForA11y(hex) })
+      : interpolate(strings.copyValueAria, { value: getCopyValue(hex) });
+  }
 
   const layout = optLayout;
   let resolvedSize = size;
@@ -273,7 +292,12 @@ export function createGradientEditor(initialGradient, options = {}) {
 
   function attachSpectrumCopyTooltip(handle, hex) {
     if (!copyable || !handle || !hex) return;
-    const copyLabel = interpolate(strings.copyLabel, { hex: String(hex).replace(/^#/, '').toUpperCase() });
+    // In HEX mode this reads "Copy #AABBCC" (the original wording); in any
+    // other mode it copies (and must say) the mode's formatted value instead,
+    // e.g. "Copy rgba(170, 187, 204, 1)" — not the hex it's built from.
+    const copyLabel = currentColorMode === 'HEX'
+      ? interpolate(strings.copyLabel, { hex: String(hex).replace(/^#/, '').toUpperCase() })
+      : interpolate(strings.copyValueAria, { value: getCopyValue(hex) });
     handle.removeAttribute('title');
     ensureExpressTooltipFactory()
       .then((createExpressTooltip) => {
@@ -678,7 +702,7 @@ export function createGradientEditor(initialGradient, options = {}) {
     if (showColorHandles) {
       const positionPct = Math.round((stop.position ?? 0) * 100);
       const hex = typeof stop.color === 'string' ? stop.color : DEFAULT_HEX;
-      const handleLabel = copyable ? interpolate(strings.copyHandleAria, { hex: hexForA11y(hex) }) : interpolate(strings.handleAria, { hex: hexForA11y(hex) });
+      const handleLabel = copyable ? getCopyHandleLabel(hex) : interpolate(strings.handleAria, { hex: hexForA11y(hex) });
       const handle = createTag('button', {
         type: 'button',
         class: 'gradient-editor-handle',
@@ -705,7 +729,7 @@ export function createGradientEditor(initialGradient, options = {}) {
           Math.round((stop.position ?? 0) * 100),
         );
         if (copyable) {
-          const copyHex = typeof stop.color === 'string' ? stop.color : sampledHex;
+          const copyHex = getCopyValue(typeof stop.color === 'string' ? stop.color : sampledHex);
           safeClipboardWrite(copyHex, 'gradient-stop').then((ok) => {
             if (ok) {
               announceToScreenReader(strings.copySuccessSr, 'polite');
@@ -775,7 +799,7 @@ export function createGradientEditor(initialGradient, options = {}) {
   setMockDebug(null, null);
   updateMockHandlesOrder();
 
-  return {
+  const api = {
     element: wrapper,
     getGradient: () => ({ ...data, midpoints: [...midpoints] }),
     setGradient: (gradient) => {
@@ -800,7 +824,7 @@ export function createGradientEditor(initialGradient, options = {}) {
         if (showColorHandles) {
           const positionPct = Math.round((stop.position ?? 0) * 100);
           const hex = typeof stop.color === 'string' ? stop.color : DEFAULT_HEX;
-          const handleLabel = interpolate(strings.handleAria, { hex: hexForA11y(hex) });
+          const handleLabel = copyable ? getCopyHandleLabel(hex) : interpolate(strings.handleAria, { hex: hexForA11y(hex) });
           const handle = createTag('button', {
             type: 'button',
             class: 'gradient-editor-handle',
@@ -827,13 +851,13 @@ export function createGradientEditor(initialGradient, options = {}) {
               Math.round((stop.position ?? 0) * 100),
             );
             if (copyable) {
-              const copyHex = typeof stop.color === 'string' ? stop.color : sampledHex;
+              const copyHex = getCopyValue(typeof stop.color === 'string' ? stop.color : sampledHex);
               safeClipboardWrite(copyHex, 'gradient-stop').then((ok) => {
                 if (ok) {
-                  announceToScreenReader('Color copied', 'polite');
+                  announceToScreenReader(strings.copySuccessSr, 'polite');
                   showCopiedTooltipFeedback(handle);
                 } else {
-                  announceToScreenReader('Copy failed', 'polite');
+                  announceToScreenReader(strings.copyFailedSr, 'polite');
                 }
               });
             }
@@ -911,11 +935,22 @@ export function createGradientEditor(initialGradient, options = {}) {
     },
     on,
     emit,
+    // Color mode is closure-captured (getCopyValue/getCopyHandleLabel/
+    // attachSpectrumCopyTooltip read it live), but the handle aria-labels and
+    // tooltip content are set once at creation time — so switching mode has
+    // to force a full handle rebuild via setGradient to pick up the change,
+    // the same way editing a stop's color does.
+    setColorMode: (mode) => {
+      if (!mode || mode === currentColorMode) return;
+      currentColorMode = mode;
+      api.setGradient(api.getGradient());
+    },
     destroy: () => {
       clearHandleTooltips();
       wrapper?.remove();
     },
   };
+  return api;
 }
 
 let gradientEditorStylesLoaded = false;

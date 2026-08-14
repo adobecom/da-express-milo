@@ -12,6 +12,7 @@ import {
   buildVariableSwatches,
   denormRGB,
   doesThemeHavePantoneColorCodes,
+  formatSwatchInMode,
   getClassName,
   getDownloadedImageName,
   getLinearGradientColorStops,
@@ -19,7 +20,6 @@ import {
   performDownload,
   renderPantoneJPEG,
   renderThemeJPEG,
-  rgbToHsl,
   safeClipboardWrite,
   validateSwatches,
   writeASE,
@@ -190,44 +190,35 @@ export class ExportActions extends BaseActionGroup {
 
   /**
    * @param {import('./helpers.js').ThemeData} themeData
+   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode='RGB'] - the currently-selected
+   *   Color mode; only this mode's values are emitted (see formatSwatchInMode)
    * @returns {Promise<{format: string, output: string}>}
    * @throws {ValidationError}
    */
   // eslint-disable-next-line class-methods-use-this
-  async exportAsCSS(themeData) {
+  async exportAsCSS(themeData, mode = 'RGB') {
     validateSwatches(themeData, DownloadTopics.EXPORT.CSS);
 
     let output = '';
 
     if (themeData.assetType === 'gradient') {
       const gradientCSS = getLinearGradientCSS(themeData.swatches);
-      output += '/* Gradient in Hex */\n';
-      output += `linear-gradient(to right, ${gradientCSS.linearGradientDataHEX});\n`;
-      output += '\n/* Gradient in RGBA */\n';
-      output += `linear-gradient(to right, ${gradientCSS.linearGradientDataRGBA});\n`;
+      // HSB itself has no valid CSS gradient-stop syntax (no hsb()/hsv()
+      // function), so its stops use hsl() instead — same as colorweb's own
+      // "Copy as CSS".
+      const dataByMode = {
+        HEX: gradientCSS.linearGradientDataHEX,
+        RGB: gradientCSS.linearGradientDataRGBA,
+        Lab: gradientCSS.linearGradientDataLAB,
+        HSB: gradientCSS.linearGradientDataHSL,
+      };
+      output += `linear-gradient(to right, ${dataByMode[mode] ?? dataByMode.RGB});\n`;
     } else {
       const cls = getClassName(themeData.name);
-
-      output += '/* Color Theme Swatches in Hex */\n';
       themeData.swatches.forEach((swatch, i) => {
-        const { r, g, b } = denormRGB(swatch);
-        const hex = [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
-        output += `.${cls}-${i + 1}-hex { color: #${hex}; }\n`;
-      });
-
-      output += '\n/* Color Theme Swatches in RGBA */\n';
-      themeData.swatches.forEach((swatch, i) => {
-        const { r, g, b } = denormRGB(swatch);
-        output += `.${cls}-${i + 1}-rgba { color: rgba(${r}, ${g}, ${b}, 1); }\n`;
-      });
-
-      output += '\n/* Color Theme Swatches in HSLA */\n';
-      themeData.swatches.forEach((swatch, i) => {
-        const hsl = rgbToHsl(swatch.rgb);
-        const h = Math.round(hsl.h * 360);
-        const s = Math.round(hsl.s * 100);
-        const l = Math.round(hsl.l * 100);
-        output += `.${cls}-${i + 1}-hsla { color: hsla(${h}, ${s}%, ${l}%, 1); }\n`;
+        const { suffix, value, isFunctionalColor } = formatSwatchInMode(swatch, mode);
+        const prop = isFunctionalColor ? 'color' : '--hsb';
+        output += `.${cls}-${i + 1}-${suffix} { ${prop}: ${value}; }\n`;
       });
     }
 
@@ -237,37 +228,42 @@ export class ExportActions extends BaseActionGroup {
 
   /**
    * @param {import('./helpers.js').ThemeData} themeData
+   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode='RGB']
    * @returns {Promise<{format: string, output: string}>}
    * @throws {ValidationError}
    */
   // eslint-disable-next-line class-methods-use-this
-  async exportAsSCSS(themeData) {
+  async exportAsSCSS(themeData, mode = 'RGB') {
     validateSwatches(themeData, DownloadTopics.EXPORT.SCSS);
-    const output = buildVariableSwatches(themeData.swatches, themeData.name, '$');
+    const output = buildVariableSwatches(themeData.swatches, themeData.name, '$', mode);
     const clipboardSuccess = await safeClipboardWrite(output, 'SCSS');
     return { format: 'SCSS', output, clipboardSuccess };
   }
 
   /**
    * @param {import('./helpers.js').ThemeData} themeData
+   * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode='RGB']
    * @returns {Promise<{format: string, output: string}>}
    * @throws {ValidationError}
    */
   // eslint-disable-next-line class-methods-use-this
-  async exportAsLESS(themeData) {
+  async exportAsLESS(themeData, mode = 'RGB') {
     validateSwatches(themeData, DownloadTopics.EXPORT.LESS);
-    const output = buildVariableSwatches(themeData.swatches, themeData.name, '@');
+    const output = buildVariableSwatches(themeData.swatches, themeData.name, '@', mode);
     const clipboardSuccess = await safeClipboardWrite(output, 'LESS');
     return { format: 'LESS', output, clipboardSuccess };
   }
 
   /**
    * @param {import('./helpers.js').ThemeData} themeData
+   * @param {'HEX'|'RGB'} [mode='RGB'] - only HEX/RGB are valid (no XML
+   *   representation exists for HSB/Lab, so those are excluded from the
+   *   Codes menu entirely — see createColorModesHeader.js)
    * @returns {Promise<{format: string, output: string}>}
    * @throws {ValidationError}
    */
   // eslint-disable-next-line class-methods-use-this
-  async exportAsXML(themeData) {
+  async exportAsXML(themeData, mode = 'RGB') {
     validateSwatches(themeData, DownloadTopics.EXPORT.XML);
 
     const cls = getClassName(themeData.name);
@@ -275,8 +271,13 @@ export class ExportActions extends BaseActionGroup {
 
     themeData.swatches.forEach((swatch, i) => {
       const { r, g, b } = denormRGB(swatch);
-      const hex = [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
-      output += `<color name='${cls}-${i + 1}' rgb='${hex}' r='${r}' g='${g}' b='${b}' />\n`;
+      const name = `${cls}-${i + 1}`;
+      if (mode === 'HEX') {
+        const hex = [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
+        output += `<color name='${name}' hex='${hex}' />\n`;
+      } else {
+        output += `<color name='${name}' r='${r}' g='${g}' b='${b}' />\n`;
+      }
     });
 
     output += '</palette>';

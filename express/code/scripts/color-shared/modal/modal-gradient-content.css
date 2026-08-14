@@ -33,9 +33,6 @@
   width: 100%;
   height: 200px;
   border-radius: 8px;
-  /* Inset so edge handles (0% / 100% with translate -50%) stay inside; handle ring = 22px → 11px half */
-  padding-left: 11px;
-  padding-right: 11px;
   box-sizing: border-box;
 }
 
@@ -49,9 +46,6 @@
 .ax-color-modal-content .modal-palette-colors.modal-gradient-preview:has(.gradient-editor--layout-responsive) {
   height: auto;
   min-height: 0;
-  /* Keep room for the gradient-editor focus outline (outline-offset 1px + 2px
-     width = 3px) so it isn't clipped at the scroll's top/bottom edges. */
-  padding: var(--spacing-75);
 }
 
 /* Inner stroke on the gradient preview (explore + library modals): an inset
@@ -59,7 +53,19 @@
    grid's .gradient-strip-visual. Drop the component's outer border so this is
    the only stroke. */
 .ax-color-modal-content .modal-gradient-preview .gradient-editor {
+  --Corner-radius-bar: var(--Corner-radius-corner-radius-200);
   border: none;
+}
+
+/* Stacked orientation (mobile/tablet)'s .swatch-column:first-child/:last-child
+   corner rounding is driven entirely by --figma-strip-radius, with no
+   fallback — modal-palette-content.css sets this for the palette modal's own
+   rail, but this file never mirrored it for the gradient modal's, so the
+   var() resolved to nothing and the corners silently went square. Desktop's
+   vertical orientation was unaffected since it uses a different, always-
+   defined token (--Corner-radius-corner-radius-200) instead. */
+.ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-container--color-rail .modal-color-rail-wrap color-swatch-rail {
+  --figma-strip-radius: 8px;
 }
 
 .ax-color-modal-content .modal-gradient-preview .gradient-editor-bar {
@@ -244,6 +250,24 @@
   pointer-events: none;
 }
 
+.ax-color-modal-content .modal-thumbnail .thumbnail-initial {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background-color: #8F8F8F;
+  color: var(--color-white);
+  font-family: var(--body-font-family);
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 700;
+  line-height: 30px;
+  text-transform: uppercase;
+  border-radius: 50%;
+  user-select: none;
+}
+
 .ax-color-modal-content .modal-creator-name {
   font-family: 'Adobe Clean', sans-serif;
   font-size: 12px;
@@ -257,6 +281,7 @@
 
 .ax-color-modal-content .modal-palette-toolbar {
   width: 100%;
+  box-sizing: border-box;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -526,8 +551,16 @@
     justify-content: space-between;
   }
 
+  /* margin-left: auto (not just order — see createGradientModalContent.js's
+     matching comment) pushes the thumbnail right on its own, since it's the
+     only flex child whenever there's no description (i.e. almost always —
+     real gradient descriptions are essentially always empty). order:1 alone
+     is a no-op with nothing to reorder against, unlike the palette modal's
+     tags container, which is always present (defaults to ['Color',
+     'Palette'] even when the palette has no tags of its own). */
   .ax-color-modal-content .modal-thumbnail-container {
     order: 1;
+    margin-left: auto;
   }
 
   .ax-color-modal-content .modal-palette-container,
@@ -584,6 +617,48 @@
   }
 }
 
+@media (max-width: 1199px) {
+  .ax-color-modal-content .modal-palette-name-tags {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .ax-color-modal-content .modal-palette-toolbar {
+    position: sticky;
+    bottom: 0;
+    /* .swatch-column bumps to z-index:1 on :focus-within — without this the
+       toolbar (z-index:auto) loses the stack to a focused column scrolled
+       underneath it. */
+    z-index: 2;
+    background: var(--color-white);
+    border-block-start: 1px solid var(--color-gray-150);
+    padding-block-start: var(--spacing-300);
+  }
+}
+
+@media (max-width: 599px) {
+  .ax-color-modal-content .modal-palette-toolbar {
+    width: calc(100% + 2 * var(--spacing-300));
+    margin-inline: calc(-1 * var(--spacing-300));
+    padding-inline: var(--spacing-300);
+    padding-block-end: var(--spacing-300);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1199px) {
+  .ax-color-modal-content .modal-palette-toolbar {
+    width: calc(100% + 2 * var(--spacing-400));
+    /* Without this, the "min-width:600px { max-width:550px }" rule above
+       clamps this overflow straight back down to 550px. */
+    max-width: none;
+    margin-inline: calc(-1 * var(--spacing-400));
+    padding-inline: var(--spacing-500);
+    padding-block-end: var(--spacing-400);
+    border-end-start-radius: 20px;
+    border-end-end-radius: 20px;
+  }
+}
+
 @media (min-width: 1200px) {
   .ax-color-modal-content .modal-content {
     overflow: visible;
@@ -594,6 +669,58 @@
   .ax-color-modal-content .modal-palette-thumb-tags {
     width: 100%;
     max-width: 100%;
+  }
+
+  /* Stop rail (swatch columns): fixed 160px on desktop, matching the Library
+     gradient modal's own rail (modal-library-gradient.css) — this one has no
+     dedicated wrapper class like .modal-library-gradient, so it's scoped via
+     the daa-lh set on this modal's <main> instead. Without this, it falls
+     through to modal-palette-content.css's shared aspect-ratio-based sizing,
+     which is meant for the palette modal's rail, not the gradient one.
+     160px (not 158px) because a 3-row RGB/HSB/Lab swatch-column's own
+     content (3 * 32px rows + 12px top/bottom padding) is exactly 160px —
+     min-height:auto's flexbox "automatic minimum size" won't let it shrink
+     below that, so 158px let the column overflow .swatch-rail's
+     overflow:hidden by 2px, clipping the bottom of its (inset) focus ring.
+     The [data-color-count-range] qualifier isn't for targeting — the rail
+     wrap always has this attribute once rendered — it's there so this
+     selector's specificity (5 class/attribute selectors) beats
+     modal-palette-content.css's same-breakpoint "large" rule (4 selectors)
+     outright, instead of the two depending on which stylesheet's <link>
+     happens to land in <head> last (they're fetched via Promise.all with no
+     guaranteed order). */
+  .ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range] {
+    height: 160px;
+    min-height: 160px;
+    aspect-ratio: auto;
+    max-height: none;
+    /* Unlike modal-palette-content.css, this file never gives the wrap a flex
+       context of its own — it only ever gets one as an accidental side effect
+       of modal-palette-content.css happening to already be loaded (e.g. a
+       palette modal was opened earlier in the session). Without it, the
+       158px height above is real but inert: sp-theme/color-swatch-rail are
+       plain block children that just sit at their own content height inside
+       it. That's easy to miss testing HSB/RGB/Lab, whose multi-channel rows
+       are naturally tall enough to reach ~158px on content size alone, but
+       HEX mode's single hex-code row is only ~56px tall, leaving the rest of
+       the box visibly empty. */
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range] sp-theme {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-container--color-rail .modal-color-rail-wrap[data-color-count-range] sp-theme color-swatch-rail {
+    flex: 1;
+    min-height: 0;
+    width: 100%;
+    height: 100%;
   }
 
   .ax-color-modal-content .modal-palette-name-tags {

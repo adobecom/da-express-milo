@@ -195,6 +195,21 @@ describe('color-swatch-rail _scheduleTooltipsRefresh', () => {
 
     expect(rail._tooltipRefreshRafId).to.equal(null);
   });
+
+  it('refreshes tooltips when colorMode changes, so per-channel copy buttons stop showing the previous mode\'s stale tooltip text', async () => {
+    const rail = createRail();
+    document.body.appendChild(rail);
+    await rail.updateComplete;
+
+    let refreshCount = 0;
+    rail._scheduleTooltipsRefresh = () => { refreshCount += 1; };
+
+    rail.colorMode = 'HSB';
+    await rail.updateComplete;
+
+    expect(refreshCount).to.be.greaterThan(0);
+    rail.remove();
+  });
 });
 
 describe('color-swatch-rail icon order', () => {
@@ -273,6 +288,37 @@ describe('color-swatch-rail color modes', () => {
     expect(rail.shadowRoot.querySelector('.hex-code--static').textContent.trim()).to.equal('#FF0000');
   });
 
+  it('HEX mode: swatch-column aria-label uses the hex template', async () => {
+    await renderRail('HEX');
+    const column = rail.shadowRoot.querySelector('.swatch-column');
+    expect(column.getAttribute('aria-label')).to.equal('#FF0000 color strip');
+  });
+
+  it('RGB mode: swatch-column aria-label is "R {value}, G {value}, B {value}" — not the hex template', async () => {
+    await renderRail('RGB');
+    const column = rail.shadowRoot.querySelector('.swatch-column');
+    expect(column.getAttribute('aria-label')).to.equal('R 255, G 0, B 0');
+  });
+
+  it('HSB mode: swatch-column aria-label follows the same "Label value" pattern', async () => {
+    await renderRail('HSB');
+    const column = rail.shadowRoot.querySelector('.swatch-column');
+    expect(column.getAttribute('aria-label')).to.equal('H 0, S 100, B 100');
+  });
+
+  it('Lab mode: swatch-column aria-label follows the same "Label value" pattern', async () => {
+    await renderRail('Lab');
+    const column = rail.shadowRoot.querySelector('.swatch-column');
+    const label = column.getAttribute('aria-label');
+    expect(label).to.match(/^L -?\d+(\.\d+)?, a -?\d+(\.\d+)?, b -?\d+(\.\d+)?$/);
+  });
+
+  it('stacked orientation, non-HEX mode: aria-label keeps the "Color {index}, " position prefix ahead of the channel values', async () => {
+    await renderRail('RGB', 'stacked');
+    const column = rail.shadowRoot.querySelector('.swatch-column');
+    expect(column.getAttribute('aria-label')).to.equal('Color 1, R 255, G 0, B 0');
+  });
+
   it('RGB mode: renders one row per channel with correct values', async () => {
     await renderRail('RGB');
     const rows = [...rail.shadowRoot.querySelectorAll('.hex-code-row')];
@@ -308,6 +354,14 @@ describe('color-swatch-rail color modes', () => {
     expect(rows).to.have.length(3);
     expect(rows.map((row) => row.querySelector('.hex-code-row__label').textContent.trim()))
       .to.deep.equal(['L', 'a', 'b']);
+  });
+
+  it('Lab mode: does not visually force the lowercase "a"/"b" labels to uppercase', async () => {
+    await renderRail('Lab');
+    const labels = [...rail.shadowRoot.querySelectorAll('.hex-code-row__label')];
+    labels.forEach((label) => {
+      expect(getComputedStyle(label).textTransform).to.equal('none');
+    });
   });
 
   it('clicking a channel value (no icon) copies just that value, not the full code', async () => {
@@ -357,9 +411,80 @@ describe('color-swatch-rail color modes', () => {
     expect(rail.shadowRoot.querySelectorAll('.hex-code-multi .icon-button')).to.have.length(1);
   });
 
-  it('stacked orientation also renders the multi-row breakdown', async () => {
+  it('stacked orientation (mobile/tablet) renders channels in a single inline row', async () => {
     await renderRail('RGB', 'stacked');
     const rows = [...rail.shadowRoot.querySelectorAll('.hex-code-row')];
     expect(rows).to.have.length(3);
+    expect(rail.shadowRoot.querySelector('.hex-code-multi--inline')).to.exist;
+  });
+
+  it('stacked orientation has no per-swatch copy-all button (reuses the existing stacked-row icon)', async () => {
+    await renderRail('RGB', 'stacked');
+    expect(rail.shadowRoot.querySelector('.hex-code-multi__copy-all')).to.equal(null);
+    expect(rail.shadowRoot.querySelector('.stacked-row__icons .icon-button--copy')).to.exist;
+  });
+
+  it('stacked orientation: the existing stacked-row copy icon copies the joined code, not the hex', async () => {
+    await renderRail('RGB', 'stacked');
+    const originalWriteText = navigator.clipboard?.writeText;
+    let copiedText = null;
+    navigator.clipboard.writeText = (text) => {
+      copiedText = text;
+      return Promise.resolve();
+    };
+
+    rail.shadowRoot.querySelector('.stacked-row__icons .icon-button--copy').click();
+    await new Promise((r) => { setTimeout(r, 0); });
+
+    expect(copiedText).to.equal('255, 0, 0');
+
+    if (originalWriteText) navigator.clipboard.writeText = originalWriteText;
+  });
+
+  it('stacked orientation in HEX mode: the existing stacked-row copy icon still copies the hex', async () => {
+    await renderRail('HEX', 'stacked');
+    const originalWriteText = navigator.clipboard?.writeText;
+    let copiedText = null;
+    navigator.clipboard.writeText = (text) => {
+      copiedText = text;
+      return Promise.resolve();
+    };
+
+    rail.shadowRoot.querySelector('.stacked-row__icons .icon-button--copy').click();
+    await new Promise((r) => { setTimeout(r, 0); });
+
+    expect(copiedText).to.equal('#FF0000');
+
+    if (originalWriteText) navigator.clipboard.writeText = originalWriteText;
+  });
+
+  it('the bottom copy-icon button says "Copy all values" (not mode-specific, and not "Copy hex") whenever it copies the joined mode code', async () => {
+    await renderRail('RGB');
+    const copyAllBtn = rail.shadowRoot.querySelector('.hex-code-multi__copy-all');
+    expect(copyAllBtn.getAttribute('aria-label')).to.equal('Copy all values');
+    expect(copyAllBtn.getAttribute('title')).to.equal('Copy all values');
+  });
+
+  it('the bottom copy-icon button says "Copy all values" for HSB/Lab too', async () => {
+    await renderRail('HSB');
+    const hsbBtn = rail.shadowRoot.querySelector('.hex-code-multi__copy-all');
+    expect(hsbBtn.getAttribute('aria-label')).to.equal('Copy all values');
+
+    await renderRail('Lab');
+    const labBtn = rail.shadowRoot.querySelector('.hex-code-multi__copy-all');
+    expect(labBtn.getAttribute('aria-label')).to.equal('Copy all values');
+  });
+
+  it('stacked orientation: the copy icon says "Copy all values" too, since it copies the joined code in non-HEX modes', async () => {
+    await renderRail('RGB', 'stacked');
+    const stackedCopyBtn = rail.shadowRoot.querySelector('.stacked-row__icons .icon-button--copy');
+    expect(stackedCopyBtn.getAttribute('aria-label')).to.equal('Copy all values');
+    expect(stackedCopyBtn.getAttribute('title')).to.equal('Copy all values');
+  });
+
+  it('stacked orientation in HEX mode: the copy icon\'s label stays "Copy hex", since it still copies the hex', async () => {
+    await renderRail('HEX', 'stacked');
+    const stackedCopyBtn = rail.shadowRoot.querySelector('.stacked-row__icons .icon-button--copy');
+    expect(stackedCopyBtn.getAttribute('aria-label')).to.equal('Copy hex');
   });
 });

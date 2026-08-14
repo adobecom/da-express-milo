@@ -10,6 +10,8 @@ import {
   ROW_ASSETS,
 } from '../constants.js';
 import { ValidationError } from '../../../core/Errors.js';
+import { rgbToAllSpacesDenormalized } from '../../../../color-components/utils/harmony/ColorConversions.js';
+import { rgbToHSL } from '../../../../color-components/utils/ColorConversions.js';
 
 /**
  * @typedef {{ r: number, g: number, b: number }} RGBColor
@@ -83,29 +85,36 @@ export function getDownloadedImageName(description, mimeType) {
 // ── Color conversion / formatting helpers ───────────────────────────
 
 /**
- * @param {RGBColor} rgb
- * @returns {HSLColor}
+ * Formats one swatch's color in the given UI-facing display mode, using the
+ * same conversion + rounding (rgbToAllSpacesDenormalized) the Color mode
+ * dropdown and swatch rail already use — so exported code always matches
+ * what's on screen. There's no native CSS color() function for HSB/HSV, so
+ * HSB mode uses hsl() instead (same substitution getLinearGradientCSS's
+ * HSB stops already make, for the same reason).
+ * @param {Swatch} swatch
+ * @param {'HEX'|'RGB'|'HSB'|'Lab'} mode
+ * @returns {{ suffix: string, value: string, isFunctionalColor: boolean }}
  */
-export function rgbToHsl(rgb) {
-  const { r, g, b } = rgb;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  const l = (max + min) / 2;
-  let h = 0;
-  let s = 0;
-
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break;
-      case g: h = ((b - r) / d + 2) / 6; break;
-      case b: h = ((r - g) / d + 4) / 6; break;
-      default: break;
+export function formatSwatchInMode(swatch, mode) {
+  const { r, g, b } = denormRGB(swatch);
+  const spaces = rgbToAllSpacesDenormalized([r, g, b]);
+  switch (mode) {
+    case 'HSB': {
+      const { hue, saturation, lightness } = rgbToHSL(swatch.rgb.r, swatch.rgb.g, swatch.rgb.b);
+      return {
+        suffix: 'hsl',
+        value: `hsl(${Math.round(hue)}, ${Math.round(saturation)}%, ${Math.round(lightness)}%)`,
+        isFunctionalColor: true,
+      };
     }
+    case 'Lab':
+      return { suffix: 'lab', value: `lab(${spaces.lab.l}% ${spaces.lab.a} ${spaces.lab.b})`, isFunctionalColor: true };
+    case 'HEX':
+      return { suffix: 'hex', value: `#${spaces.hex}`, isFunctionalColor: true };
+    case 'RGB':
+    default:
+      return { suffix: 'rgba', value: `rgba(${spaces.rgb.r}, ${spaces.rgb.g}, ${spaces.rgb.b}, 1)`, isFunctionalColor: true };
   }
-
-  return { h, s, l };
 }
 
 /**
@@ -152,32 +161,16 @@ export function validateSwatches(themeData, topic) {
  * @param {Swatch[]} swatches
  * @param {string} themeName
  * @param {string} prefix - Variable prefix (e.g. '$' for SCSS, '@' for LESS)
+ * @param {'HEX'|'RGB'|'HSB'|'Lab'} [mode='RGB'] - only this mode's values are emitted
  * @returns {string}
  */
-export function buildVariableSwatches(swatches, themeName, prefix) {
+export function buildVariableSwatches(swatches, themeName, prefix, mode = 'RGB') {
   const cls = getClassName(themeName);
   let output = '';
 
-  output += '/* Color Theme Swatches in Hex */\n';
   swatches.forEach((swatch, i) => {
-    const { r, g, b } = denormRGB(swatch);
-    const hex = [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
-    output += `${prefix}${cls}-${i + 1}-hex: #${hex};\n`;
-  });
-
-  output += '\n/* Color Theme Swatches in RGBA */\n';
-  swatches.forEach((swatch, i) => {
-    const { r, g, b } = denormRGB(swatch);
-    output += `${prefix}${cls}-${i + 1}-rgba: rgba(${r}, ${g}, ${b}, 1);\n`;
-  });
-
-  output += '\n/* Color Theme Swatches in HSLA */\n';
-  swatches.forEach((swatch, i) => {
-    const hsl = rgbToHsl(swatch.rgb);
-    const h = Math.round(hsl.h * 360);
-    const s = Math.round(hsl.s * 100);
-    const l = Math.round(hsl.l * 100);
-    output += `${prefix}${cls}-${i + 1}-hsla: hsla(${h}, ${s}%, ${l}%, 1);\n`;
+    const { suffix, value } = formatSwatchInMode(swatch, mode);
+    output += `${prefix}${cls}-${i + 1}-${suffix}: ${value};\n`;
   });
 
   return output;
@@ -461,35 +454,48 @@ export function getLinearGradientColorStops(stops) {
 }
 
 /**
+ * Builds the linear-gradient() stop lists for every display mode in one
+ * pass (they all share the same midpoint/color-hint math). HSB itself has no
+ * valid CSS gradient-stop syntax (no hsb()/hsv() function, and hsl()'s third
+ * channel is lightness, not brightness/value — not interchangeable), so the
+ * HSB mode's stops use hsl() instead, same as colorweb's own "Copy as CSS".
  * @param {Swatch[]} stops
- * @returns {GradientCSS}
+ * @returns {GradientCSS & { linearGradientDataLAB: string, linearGradientDataHSL: string }}
  */
 export function getLinearGradientCSS(stops) {
   let linearGradientDataRGBA = '';
   let linearGradientDataHEX = '';
+  let linearGradientDataLAB = '';
+  let linearGradientDataHSL = '';
   let prevOffset = 0;
 
   stops.forEach((stop, index) => {
-    const r = Math.round(stop.rgb.r * 255);
-    const g = Math.round(stop.rgb.g * 255);
-    const b = Math.round(stop.rgb.b * 255);
-    const hex = [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
-    const rgba = `rgba(${r}, ${g}, ${b}, 1)`;
+    const hex = formatSwatchInMode(stop, 'HEX').value;
+    const rgba = formatSwatchInMode(stop, 'RGB').value;
+    const lab = formatSwatchInMode(stop, 'Lab').value;
+    const { hue, saturation, lightness } = rgbToHSL(stop.rgb.r, stop.rgb.g, stop.rgb.b);
+    const hsl = `hsl(${Math.round(hue)}, ${Math.round(saturation)}%, ${Math.round(lightness)}%)`;
     const pct = stop.offset * 100;
 
     if (index === 0) {
       linearGradientDataRGBA += `${rgba} ${pct}%`;
-      linearGradientDataHEX += `#${hex} ${pct}%`;
+      linearGradientDataHEX += `${hex} ${pct}%`;
+      linearGradientDataLAB += `${lab} ${pct}%`;
+      linearGradientDataHSL += `${hsl} ${pct}%`;
     } else {
       const distance = pct - prevOffset;
       const midpointPos = prevOffset + distance * stop.midpoint;
       linearGradientDataRGBA += `, ${midpointPos}%, ${rgba} ${pct}%`;
-      linearGradientDataHEX += `, ${midpointPos}%, #${hex} ${pct}%`;
+      linearGradientDataHEX += `, ${midpointPos}%, ${hex} ${pct}%`;
+      linearGradientDataLAB += `, ${midpointPos}%, ${lab} ${pct}%`;
+      linearGradientDataHSL += `, ${midpointPos}%, ${hsl} ${pct}%`;
     }
     prevOffset = pct;
   });
 
-  return { linearGradientDataRGBA, linearGradientDataHEX };
+  return {
+    linearGradientDataRGBA, linearGradientDataHEX, linearGradientDataLAB, linearGradientDataHSL,
+  };
 }
 
 /**
@@ -500,9 +506,19 @@ export function getLinearGradientCSS(stops) {
 export function buildLinearGradientSVG(stops, svgSize) {
   const colorStops = getLinearGradientColorStops(stops);
 
-  let svg = '<svg xmlns="http://www.w3.org/2000/svg"';
+  let svg = '<svg xmlns="http://www.w3.org/2000/svg" ';
   svg += 'xmlns:xlink="http://www.w3.org/1999/xlink"';
-  svg += ` width="${svgSize.width}" height="${svgSize.height}">\n`;
+  svg += ` width="${svgSize.width}" height="${svgSize.height}"`;
+  // viewBox + a percentage-sized rect (instead of a hardcoded pixel size
+  // matching width/height) is what makes the file actually scalable: without
+  // it, changing just the width/height attribute (or an editor resizing the
+  // artboard) leaves the rect pinned at its original absolute size in the
+  // top-left corner instead of stretching to fill the new dimensions.
+  // preserveAspectRatio="none" is required too: the default ("xMidYMid meet")
+  // still letterboxes/centers a square viewBox's content when width and
+  // height are changed to a non-square ratio, instead of stretching to fill —
+  // this is meant purely as a fill background, so it should always fill.
+  svg += ` viewBox="0 0 ${svgSize.width} ${svgSize.height}" preserveAspectRatio="none">\n`;
   svg += '<defs>\n';
   svg += '<linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">';
 
@@ -512,7 +528,7 @@ export function buildLinearGradientSVG(stops, svgSize) {
   });
 
   svg += '</linearGradient>\n</defs>\n';
-  svg += `<rect width="${svgSize.width}" height="${svgSize.height}" fill="url(#gradient)"/>\n`;
+  svg += '<rect width="100%" height="100%" fill="url(#gradient)"/>\n';
   svg += '</svg>';
 
   return svg;

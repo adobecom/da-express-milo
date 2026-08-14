@@ -2,7 +2,10 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { serviceManager } from '../../../../express/code/libs/services/core/ServiceManager.js';
-import { createColorModesHeader } from '../../../../express/code/scripts/color-shared/modal/createColorModesHeader.js';
+import {
+  createColorModesHeader,
+  createModeSelectFallback,
+} from '../../../../express/code/scripts/color-shared/modal/createColorModesHeader.js';
 import { setPreferredColorMode } from '../../../../express/code/scripts/color-shared/utils/colorModePreference.js';
 
 const palette = { name: 'Jolly rancher palette', colors: ['#FF0000', '#00FF00'] };
@@ -113,12 +116,18 @@ describe('createColorModesHeader', () => {
     ]);
   });
 
-  it('renders a visible codes icon even when sp-icon-code is not registered', async () => {
+  it('renders only "Copy as CSS" for gradients — LESS/SASS/XML have no gradient-aware export', async () => {
+    await mount(palette, { type: 'gradient' });
+    codesTrigger(header).click();
+    const items = codesItems(header);
+    expect(items.map((i) => i.getAttribute('value'))).to.deep.equal(['css']);
+    expect(items.map((i) => i.textContent)).to.deep.equal(['Copy as CSS']);
+  });
+
+  it('renders the real sp-icon-code Spectrum icon', async () => {
     await mount(palette, { type: 'palette' });
     const trigger = codesTrigger(header);
-    // sp-icon-code is not in this project's pruned Spectrum bundle; the inline
-    // SVG fallback must be present so the button is never blank.
-    expect(trigger.querySelector('svg, sp-icon-code')).to.exist;
+    expect(trigger.querySelector('sp-icon-code')).to.exist;
   });
 
   it('selecting a codes format calls the download provider export method and copies to clipboard', async () => {
@@ -133,6 +142,21 @@ describe('createColorModesHeader', () => {
 
     expect(exportCSS.calledOnce).to.equal(true);
     expect(exportCSS.firstCall.args[0]).to.include({ name: 'Jolly rancher palette' });
+    expect(exportCSS.firstCall.args[1]).to.equal('HEX');
+  });
+
+  it('passes the currently-selected color mode to the export call, not just the default', async () => {
+    const exportCSS = sinon.stub().resolves({ format: 'CSS', output: '', clipboardSuccess: true });
+    sinon.stub(serviceManager, 'getProvider').resolves({ exportCSS });
+
+    await mount(palette, { type: 'palette' });
+    selectMode(header, 'HSB');
+    codesTrigger(header).click();
+    const cssItem = codesItems(header).find((i) => i.getAttribute('value') === 'css');
+    cssItem.click();
+    await new Promise((r) => { setTimeout(r, 0); });
+
+    expect(exportCSS.firstCall.args[1]).to.equal('HSB');
   });
 
   it('marks themeData as a gradient asset when type is gradient', async () => {
@@ -151,5 +175,54 @@ describe('createColorModesHeader', () => {
   it('destroy() tears down the picker and codes menu without throwing', async () => {
     await mount(palette, { type: 'palette' });
     expect(() => header.destroy()).to.not.throw();
+  });
+});
+
+describe('createModeSelectFallback', () => {
+  let fallback;
+
+  afterEach(() => {
+    fallback?.destroy?.();
+    fallback = null;
+  });
+
+  const options = [
+    { value: 'HEX', label: 'HEX' },
+    { value: 'RGB', label: 'RGB' },
+  ];
+
+  it('renders a native select with the given options and initial value selected', () => {
+    fallback = createModeSelectFallback(options, 'RGB', 'Color mode', () => {});
+    expect(fallback.element.tagName).to.equal('SELECT');
+    expect(fallback.element.getAttribute('aria-label')).to.equal('Color mode');
+    expect(fallback.element.value).to.equal('RGB');
+    expect([...fallback.element.options].map((o) => o.value)).to.deep.equal(['HEX', 'RGB']);
+  });
+
+  it('calls onChange with the newly selected value', () => {
+    const onChange = sinon.stub();
+    fallback = createModeSelectFallback(options, 'HEX', 'Color mode', onChange);
+    fallback.element.value = 'RGB';
+    fallback.element.dispatchEvent(new Event('change'));
+    expect(onChange.calledWith('RGB')).to.equal(true);
+  });
+
+  it('setValue() updates the select without emitting a change event', () => {
+    const onChange = sinon.stub();
+    fallback = createModeSelectFallback(options, 'HEX', 'Color mode', onChange);
+    fallback.setValue('RGB');
+    expect(fallback.element.value).to.equal('RGB');
+    expect(onChange.called).to.equal(false);
+  });
+
+  it('destroy() removes the element and stops emitting onChange', () => {
+    const onChange = sinon.stub();
+    document.body.appendChild((fallback = createModeSelectFallback(options, 'HEX', 'Color mode', onChange)).element);
+    const { element } = fallback;
+    fallback.destroy();
+    expect(element.isConnected).to.equal(false);
+    element.value = 'RGB';
+    element.dispatchEvent(new Event('change'));
+    expect(onChange.called).to.equal(false);
   });
 });

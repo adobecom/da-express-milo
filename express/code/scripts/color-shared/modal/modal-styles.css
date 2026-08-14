@@ -180,6 +180,14 @@
   box-sizing: border-box;
 }
 
+/* Reclaimed as the sticky toolbar's own padding-block-end (see
+   modal-palette-content.css / modal-gradient-content.css). */
+@media (max-width: 1199px) {
+  .ax-color-modal-content:has(.modal-palette-toolbar) {
+    padding-bottom: 0;
+  }
+}
+
 .ax-color-modal-content-fallback {
   padding: var(--spacing-300);
   color: var(--color-dark-gray);
@@ -325,18 +333,20 @@ body.ax-color-modal-open {
     display: none;
   }
 
-  /* Palette/gradient modals render the floating toolbar flush to the content
-     edge, and this scroll container clips (overflow-x: hidden / overflow-y: auto).
-     Reserve a small gutter so the CTA / action button :focus-visible rings are
-     not clipped on the right and bottom; the negative margin keeps the content
-     visually flush (no layout shift). */
+  /* Palette/gradient modals render the floating toolbar and the color-modes
+     header (Copy as code button) flush to the content edge, and this scroll
+     container clips (overflow-x: hidden / overflow-y: auto). Reserve a small
+     gutter so :focus-visible rings aren't clipped on any edge — including
+     top (the Codes menu trigger sits flush against the top of this same
+     scroll container); the negative margin keeps the content visually flush
+     (no layout shift). */
   .ax-color-modal-content:has(.modal-palette-toolbar) {
     width: auto;
     box-sizing: border-box;
     padding-inline: var(--spacing-100);
     margin-inline: calc(-1 * var(--spacing-100));
-    padding-bottom: var(--spacing-100);
-    margin-bottom: calc(-1 * var(--spacing-100));
+    padding-block: var(--spacing-100);
+    margin-block: calc(-1 * var(--spacing-100));
   }
 
   .ax-color-modal-actions {

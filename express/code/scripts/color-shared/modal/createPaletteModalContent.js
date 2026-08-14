@@ -9,6 +9,10 @@ import { getPreferredColorMode } from '../utils/colorModePreference.js';
 import { createColorStrip } from '../toolbar/colorStrip.js';
 
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';
+// The swatch rail (color-swatch-rail/index.js) is built around a hard 10-swatch
+// ceiling (its own MAX_SWATCHES) — this modal doesn't support more than that,
+// so a palette with extra colors should just have them dropped, not overflow.
+const MAX_PALETTE_COLORS = 10;
 const STRIP_DEFAULTS = {
   swatchLabel: 'Color {index}: {hex}',
   swatchStripLabel: '{count} colors in {type}',
@@ -41,13 +45,15 @@ export function getPaletteColors(palette = {}) {
     return palette.colors
       .map((c) => String(c || '').trim())
       .filter(Boolean)
-      .map((c) => (c.startsWith('#') ? c : `#${c}`));
+      .map((c) => (c.startsWith('#') ? c : `#${c}`))
+      .slice(0, MAX_PALETTE_COLORS);
   }
   if (Array.isArray(palette.colorStops) && palette.colorStops.length) {
     return palette.colorStops
       .map((s) => String(s?.color || '').trim())
       .filter(Boolean)
-      .map((c) => (c.startsWith('#') ? c : `#${c}`));
+      .map((c) => (c.startsWith('#') ? c : `#${c}`))
+      .slice(0, MAX_PALETTE_COLORS);
   }
   return [];
 }
