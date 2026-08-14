@@ -60,6 +60,17 @@
   transition: background-image 0.35s ease;
 }
 
+/* Whole-card focus ring, per Figma node 54:8144 ("Interactive Widget",
+   Property 1=Focus) — shown when keyboard focus lands anywhere inside the
+   card (the quote button or an action button), not just on the card itself
+   (which isn't focusable). outline (not the Figma reference's absolutely
+   positioned border div) so it doesn't need extra markup and never affects
+   layout. */
+.me-card:focus-within {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
 /* Top-right hover action bar (edit/share/download), per Figma node 1099-5050.
    Anchored to .mini-editor-widget (not .me-card) so the same element/CSS
    rule works unchanged in both the desktop card layout and the tablet/mobile
@@ -131,6 +142,14 @@
 .me-quote-wrap:focus-visible {
   background: rgb(255 255 255 / 20%);
   border-color: rgb(255 255 255 / 30%);
+}
+
+/* Adds the blue keyboard-focus ring on top of the shared hover/focus frosted
+   treatment above, per Figma node 54:8728 ("Quote text", state=Focus) —
+   Focus there is Hover's look plus this ring, not a separate treatment. */
+.me-quote-wrap:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
 }
 
 .me-quote {
@@ -248,6 +267,15 @@
   background: var(--S2AC-Palette-gray-300);
 }
 
+/* Per Figma node 54:8489 ("Widget Action Buttons", State=Focus) — the
+   keyboard-focus ring replaces the hover/expanded background change above
+   (focus keeps the Default background) rather than stacking with it. */
+.me-control:focus-visible {
+  background: var(--color-gray-150);
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
 .me-pill {
   /* text-overflow: ellipsis has no effect on flex-laid-out content (the
      centering this needs no longer clips with a visible "…", just a hard
@@ -347,6 +375,12 @@
   cursor: pointer;
 }
 
+/* Per Figma node 54:8516 ("Font Selector", state=Focus). */
+.me-font:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
 .me-font.is-selected {
   background: var(--color-white);
   border-radius: 10px;
@@ -381,6 +415,14 @@
 
 .me-swatch-btn:hover {
   transform: scale(1.08);
+}
+
+/* Per Figma node 54:8539 ("Colour Selector", property1=Focus) — ring sits
+   flush on the swatch's own edge (no outline-offset), unlike the other
+   controls' offset rings, matching that reference exactly. */
+.me-swatch-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 0;
 }
 
 .me-swatch-btn.is-selected {
@@ -635,6 +677,16 @@ p.me-deco-author {
   background: #dcdcdc;
 }
 
+/* No dedicated focus variant for these two in Figma (the "Quote Hero Card"
+   component only defines Default/Hover) — added for keyboard-focus
+   visibility, consistent with the ring treatment used on every other
+   interactive element in this file. */
+.me-deco-use:focus-visible,
+.me-deco-copy:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
 .me-deco-copy.is-copied {
   background: #bfe9cb;
 }
@@ -845,6 +897,20 @@ p.me-deco-author {
   cursor: pointer;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
+  transition: background-color 0.15s ease;
+}
+
+/* No dedicated hover/focus variant in Figma's "drag-arrows" component
+   (Default only, since these primarily serve touch devices) — darkened
+   hover + a focus-visible ring added for mouse/keyboard use, consistent
+   with every other interactive element in this file. */
+.me-arc-nav:hover {
+  background: rgb(0 0 0 / 32%);
+}
+
+.me-arc-nav:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
 }
 
 .me-arc-nav img {
