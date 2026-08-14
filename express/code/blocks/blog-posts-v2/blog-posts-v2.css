@@ -411,16 +411,17 @@ main .section:has(.blog-posts-v2)>.content a>span {
 }
 
 main .section:has(.blog-posts-v2)>.content>h2 {
-  margin-top: var(--spacing-900);
+  margin-top: 0;
 }
 
 main .section:has(.blog-posts-v2)>.content>h3 {
   font-size: var(--heading-font-size-m);
-  margin-top: var(--spacing-800);
+  margin-top: 0;
 }
 
 @media (min-width: 768px) {
   .section.ax-blog-posts-container {
+    padding-top: var(--spacing-900);
     padding-right: var(--spacing-500);
     padding-left: var(--spacing-500);
     max-width: 1199px;
