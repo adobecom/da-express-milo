@@ -312,24 +312,35 @@ const TOP_ACTION_DEFS = {
  * time this runs — see the icons-workflow.js dynamic import in
  * createMiniEditorWidget, which awaits before calling buildWidget.
  */
-function buildMiniEditorActions(topActions = []) {
+async function buildMiniEditorActions(topActions = []) {
   const bar = createTag('div', { class: 'me-actions' });
-  topActions.forEach(({ type, onClick }) => {
+  const menuApis = [];
+  const supportedActions = topActions.filter(({ type }) => TOP_ACTION_DEFS[type]);
+  for (const { type, onClick, shareMenu } of supportedActions) {
     const def = TOP_ACTION_DEFS[type];
-    if (!def) return;
     const icon = createTag(def.icon, { class: 'me-action-icon', 'aria-hidden': 'true' });
     const btn = createTag('button', {
       type: 'button',
       class: `me-action me-action--${type}`,
       'aria-label': def.label,
     }, [icon]);
-    btn.addEventListener('click', () => onClick?.());
-    bar.append(btn);
-  });
+    if (shareMenu) {
+      const { default: createShareMenuWidget } = await import(
+        '../share-menu-widget/share-menu-widget.js'
+      );
+      const menuApi = await createShareMenuWidget({ trigger: btn, ...shareMenu });
+      menuApis.push(menuApi);
+      bar.append(menuApi.element);
+    } else {
+      btn.addEventListener('click', () => onClick?.());
+      bar.append(btn);
+    }
+  }
+  bar.destroy = () => menuApis.forEach((api) => api.destroy());
   return bar;
 }
 
-function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
+async function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
   const widget = createTag('div', { class: 'mini-editor-widget' });
   const card = createTag('div', { class: 'me-card' });
   const first = cardSet[0] || { quote: '', author: '' };
@@ -382,7 +393,8 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
   // element and top-right CSS anchor (against .mini-editor-widget) work
   // unchanged whether the desktop card or the tablet/mobile arc carousel is
   // the one currently visible.
-  widget.append(buildMiniEditorActions(topActions));
+  const actions = await buildMiniEditorActions(topActions);
+  widget.append(actions);
 
   const doCopy = async () => {
     const ok = await a11y.copyQuoteToClipboard(quoteEl.textContent, authorEl.textContent);
@@ -495,6 +507,7 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
       };
     },
     destroy: () => {
+      actions.destroy();
       panelObserver.disconnect();
       document.removeEventListener('click', onDocClick);
     },
@@ -865,9 +878,7 @@ export default async function createMiniEditorWidget(config = {}) {
 
   ({ createTag, getIconElementDeprecated } = deps);
 
-  // topActions' icons are real Spectrum Web Components custom elements
-  // (sp-icon-*, see TOP_ACTION_DEFS) — only loaded when actually used, so
-  // callers that don't pass topActions don't pay for the Spectrum bundle.
+  // topActions' icons are real Spectrum Web Components, loaded only when used.
   if (topActions.length) {
     await import('../spectrum/dist/icons-workflow.js');
   }
@@ -885,9 +896,13 @@ export default async function createMiniEditorWidget(config = {}) {
   const stage = createTag('div', { class: 'mini-editor-stage' });
   const {
     widget, useQuote, getContentModel, onFontOrColourChange, destroy: destroyWidget,
-  } = buildWidget(root, a11y, cardSet, fontOptions, topActions);
+  } = await buildWidget(root, a11y, cardSet, fontOptions, topActions);
   const decorations = buildDecoCards(a11y, cardSet, useQuote);
-  const { root: arcCarousel, updateCentre } = buildArcCarousel(arcCardSet, useQuote, fontOptions[0]);
+  const { root: arcCarousel, updateCentre } = buildArcCarousel(
+    arcCardSet,
+    useQuote,
+    fontOptions[0],
+  );
   onFontOrColourChange(updateCentre);
 
   // The arc carousel is inserted inside the widget, in the same flow slot

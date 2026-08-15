@@ -93,6 +93,7 @@ const ORIGINAL_EXTERNALS = [
   // SWC overlay stack → original dist/ files
   { match: /^@spectrum-web-components\/overlay(\/.*)?$/, target: './overlay.js' },
   { match: /^@spectrum-web-components\/popover(\/.*)?$/, target: './popover.js' },
+  { match: /^@spectrum-web-components\/menu\/sp-menu-group\.js$/, target: null },
   { match: /^@spectrum-web-components\/menu(\/.*)?$/, target: './menu.js' },
   { match: /^@spectrum-web-components\/picker(\/.*)?$/, target: './picker.js' },
 ];
@@ -138,6 +139,13 @@ function createExternalPlugin(skipTargets = []) {
 /* ------------------------------------------------------------------ */
 const newComponents = [
   {
+    name: 'icon',
+    entry: [
+      "import '@spectrum-web-components/icon/sp-icon.js';",
+      "export * from '@spectrum-web-components/icon';",
+    ].join('\n'),
+  },
+  {
     name: 'icons-ui',
     entry: [
       "import '@spectrum-web-components/icons-ui/icons/sp-icon-chevron100.js';",
@@ -163,6 +171,10 @@ const newComponents = [
       "import '@spectrum-web-components/tooltip/sp-tooltip.js';",
       "export * from '@spectrum-web-components/tooltip';",
     ].join('\n'),
+  },
+  {
+    name: 'menu-group',
+    entry: "import '@spectrum-web-components/menu/sp-menu-group.js';",
   },
   {
     name: 'dialog',
@@ -287,6 +299,7 @@ const newComponents = [
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-image.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-lock.js';",
       "import '@spectrum-web-components/icons-workflow/icons/sp-icon-lock-open.js';",
+      "import '@spectrum-web-components/icons-workflow/icons/sp-icon-more.js';",
     ].join('\n'),
   },
   {

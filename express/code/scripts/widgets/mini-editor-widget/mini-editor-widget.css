@@ -97,7 +97,8 @@
   --mod-icon-color: #292929;
 }
 
-.me-action:hover {
+.me-action:hover,
+.me-action[aria-expanded='true'] {
   background: var(--color-gray-150);
 }
 

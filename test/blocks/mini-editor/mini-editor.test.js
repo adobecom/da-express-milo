@@ -43,6 +43,8 @@ describe('mini-editor', () => {
     delete window.Typekit;
     delete window.lana;
     delete window.placeholders;
+    delete navigator.share;
+    delete navigator.canShare;
     sinon.restore();
     document.body.innerHTML = '';
   });
@@ -119,6 +121,53 @@ describe('mini-editor', () => {
       author: 'Ralph Waldo Emerson',
     });
     expect(downloadStub.firstCall.args[0].backgroundUrl).to.equal('https://cdn/rendition/urn:1');
+  });
+
+  it('uses the generic menu and shares a fresh PNG from More options', async () => {
+    window.placeholders = {
+      'mini-editor-share-image': 'Share image',
+      'share-menu-whatsapp': 'WhatsApp',
+      'mini-editor-copy-image': 'Copy image',
+      'share-menu-more-options': 'More options',
+    };
+    const blob = new Blob(['png'], { type: 'image/png' });
+    const createBlobStub = sinon.stub(MiniEditorCardExporter, 'createCardBlob').resolves(blob);
+    const shareStub = sinon.stub().resolves();
+    Object.defineProperty(navigator, 'share', { configurable: true, value: shareStub });
+    Object.defineProperty(navigator, 'canShare', {
+      configurable: true,
+      value: sinon.stub().returns(true),
+    });
+    const block = await decorateWithBody();
+
+    block.querySelector('.me-action--share').click();
+    const menu = block.querySelector('.share-menu-list');
+    expect(menu).to.exist;
+    expect(menu.querySelectorAll('sp-menu-item')).to.have.length(3);
+    expect(menu.querySelector('sp-menu-group [slot="header"]').textContent).to.equal('Share image');
+    const whatsAppIcon = menu.querySelector('sp-menu-item[value="whatsapp"] sp-icon');
+    expect(whatsAppIcon.src).to.contain('/express/code/icons/S2_Icon_WhatsApp_20_N.svg');
+    expect(whatsAppIcon.size).to.equal('m');
+    expect(menu.querySelector('sp-menu-item[value="copy"] sp-icon-image')).to.exist;
+    expect(menu.querySelector('sp-menu-item[value="more"] sp-icon-more')).to.exist;
+
+    menu.querySelector('sp-menu-item[value="more"]').click();
+    await waitFor(() => shareStub.calledOnce);
+    expect(block.querySelector('.me-action--share').getAttribute('aria-expanded'))
+      .to.equal('true');
+
+    block.querySelector('.me-arc-nav--next').click();
+    menu.querySelector('sp-menu-item[value="more"]').click();
+    await waitFor(() => shareStub.calledTwice);
+
+    expect(createBlobStub.calledTwice).to.be.true;
+    expect(createBlobStub.secondCall.args[0].backgroundUrl)
+      .to.equal('https://cdn/rendition/urn:1');
+    const [shareData] = shareStub.firstCall.args;
+    expect(shareData.title).to.equal('Share image');
+    expect(shareData.files).to.have.length(1);
+    expect(shareData.files[0].name).to.equal('quote-card.png');
+    expect(shareData.files[0].type).to.equal('image/png');
   });
 
   it('logs and shows a localized negative toast when download fails', async () => {
