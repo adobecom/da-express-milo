@@ -243,8 +243,24 @@ export function createColorModesHeader(palette, options = {}) {
   // otherwise leak the colorMode subscription. Self-clean once detached, same
   // pattern used elsewhere in this modal family (see the rail fade observer in
   // createPaletteModalContent.js).
+  //
+  // This observer starts watching immediately, synchronously, right here —
+  // but `header` isn't connected to the document yet at this point (the
+  // caller builds the whole modal content tree detached, then inserts it
+  // once everything else is ready). On a slow/throttled connection that gap
+  // can be long, and any *unrelated* mutation elsewhere on the page fires
+  // this callback too — without the `everConnected` guard, the first such
+  // mutation would see `!document.contains(header)` (true, but only because
+  // it hasn't been inserted *yet*, not because it was removed) and tear
+  // everything down before the modal ever opens. Only treat it as a real
+  // removal once we've actually observed `header` connected at least once.
+  let everConnected = false;
   const detachObserver = new MutationObserver(() => {
-    if (!document.contains(header)) {
+    if (document.contains(header)) {
+      everConnected = true;
+      return;
+    }
+    if (everConnected) {
       destroy();
       detachObserver.disconnect();
     }
