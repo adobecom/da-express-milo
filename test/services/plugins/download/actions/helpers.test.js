@@ -3,7 +3,9 @@ import { expect } from '@esm-bundle/chai';
 import {
   buildLinearGradientSVG,
   buildVariableSwatches,
+  escapeXmlAttr,
   formatSwatchInMode,
+  getClassName,
   getLinearGradientCSS,
 } from '../../../../../../express/code/libs/services/plugins/download/actions/helpers.js';
 
@@ -43,6 +45,28 @@ describe('formatSwatchInMode', () => {
     expect(formatSwatchInMode(swatch, 'nonsense')).to.deep.equal({
       suffix: 'rgba', value: 'rgba(217, 159, 89, 1)', isFunctionalColor: true,
     });
+  });
+});
+
+describe('getClassName', () => {
+  it('replaces spaces with a single hyphen, preserving case', () => {
+    expect(getClassName('Jolly Rancher')).to.equal('Jolly-Rancher');
+  });
+
+  it('regression: strips apostrophes and other CSS-unsafe characters instead of leaving them in the class name', () => {
+    expect(getClassName("Tom's Palette")).to.equal('Tom-s-Palette');
+    expect(getClassName('a<b&c')).to.equal('a-b-c');
+  });
+
+  it('falls back to a default for empty/nullish names', () => {
+    expect(getClassName('')).to.equal('colortheme-color');
+    expect(getClassName(undefined)).to.equal('colortheme-color');
+  });
+});
+
+describe('escapeXmlAttr', () => {
+  it('escapes &, \', and < so the result is safe inside a single-quoted XML attribute', () => {
+    expect(escapeXmlAttr(`Tom's & <Palette>`)).to.equal('Tom&apos;s &amp; &lt;Palette>');
   });
 });
 

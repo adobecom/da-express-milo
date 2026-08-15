@@ -176,6 +176,30 @@ describe('createColorModesHeader', () => {
     await mount(palette, { type: 'palette' });
     expect(() => header.destroy()).to.not.throw();
   });
+
+  it('regression: an unrelated body mutation before the header is inserted must not tear it down (was a real bug on slow first loads)', async () => {
+    // Build the header but do NOT insert it yet — this recreates the real
+    // gap where the caller builds the whole modal content tree detached,
+    // then inserts it once everything else is ready. The self-cleaning
+    // MutationObserver starts watching document.body immediately at
+    // construction, before that insertion happens.
+    header = createColorModesHeader(palette, { type: 'palette' });
+
+    // An unrelated mutation elsewhere on the page, while the header is still
+    // detached — previously mistaken for "the header was removed" and the
+    // whole component was torn down before the modal ever opened.
+    const decoy = document.createElement('div');
+    document.body.appendChild(decoy);
+    decoy.remove();
+    await new Promise((resolve) => { queueMicrotask(resolve); });
+
+    // Now really insert it, same as the real caller would.
+    document.body.appendChild(header.element);
+    await header.waitForReady();
+
+    expect(header.element.querySelector('.modal-codes-menu')).to.exist;
+    expect(pickerElement(header)).to.exist;
+  });
 });
 
 describe('createModeSelectFallback', () => {

@@ -134,5 +134,12 @@ describe('ExportActions — Color mode scoping (Copy as CSS/SCSS/LESS)', () => {
         expect(doc.querySelectorAll('color').length).to.equal(themeData.swatches.length);
       });
     });
+
+    it('regression: a theme name with an apostrophe still produces valid, parseable XML', async () => {
+      const named = { name: "Tom's Palette", swatches: themeData.swatches };
+      const { output } = await actions.exportAsXML(named, 'RGB');
+      const doc = new DOMParser().parseFromString(output, 'application/xml');
+      expect(doc.querySelector('parsererror'), `XML parse error in:\n${output}`).to.equal(null);
+    });
   });
 });
