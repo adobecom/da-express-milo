@@ -123,9 +123,21 @@ export function formatSwatchInMode(swatch, mode) {
  */
 export function getClassName(name) {
   return (
-    name?.replaceAll(' ', '-')
+    name?.replace(/[^0-9a-zA-Z]+/g, '-')
     || 'colortheme-color'
   );
+}
+
+/**
+ * Escapes a string for safe use inside a single-quoted XML attribute value.
+ * @param {string} value
+ * @returns {string}
+ */
+export function escapeXmlAttr(value) {
+  return String(value)
+    .replaceAll('&', '&amp;')
+    .replaceAll("'", '&apos;')
+    .replaceAll('<', '&lt;');
 }
 
 /**

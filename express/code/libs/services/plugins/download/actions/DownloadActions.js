@@ -12,6 +12,7 @@ import {
   buildVariableSwatches,
   denormRGB,
   doesThemeHavePantoneColorCodes,
+  escapeXmlAttr,
   formatSwatchInMode,
   getClassName,
   getDownloadedImageName,
@@ -216,9 +217,8 @@ export class ExportActions extends BaseActionGroup {
     } else {
       const cls = getClassName(themeData.name);
       themeData.swatches.forEach((swatch, i) => {
-        const { suffix, value, isFunctionalColor } = formatSwatchInMode(swatch, mode);
-        const prop = isFunctionalColor ? 'color' : '--hsb';
-        output += `.${cls}-${i + 1}-${suffix} { ${prop}: ${value}; }\n`;
+        const { suffix, value } = formatSwatchInMode(swatch, mode);
+        output += `.${cls}-${i + 1}-${suffix} { color: ${value}; }\n`;
       });
     }
 
@@ -271,7 +271,7 @@ export class ExportActions extends BaseActionGroup {
 
     themeData.swatches.forEach((swatch, i) => {
       const { r, g, b } = denormRGB(swatch);
-      const name = `${cls}-${i + 1}`;
+      const name = escapeXmlAttr(`${cls}-${i + 1}`);
       if (mode === 'HEX') {
         const hex = [r, g, b].map((v) => v.toString(16).padStart(2, '0')).join('').toUpperCase();
         output += `<color name='${name}' hex='${hex}' />\n`;
