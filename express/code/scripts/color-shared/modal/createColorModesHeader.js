@@ -135,6 +135,34 @@ export function createColorModesHeader(palette, options = {}) {
   let modePicker = null;
   let destroyed = false;
 
+  // Built before the picker/subscription below — their callbacks reference
+  // codesMenu (to refresh which formats are offered when the mode changes),
+  // and on a slow/uncached load those callbacks can fire before this
+  // function finishes running, which would throw a TDZ ReferenceError if
+  // codesMenu weren't already initialized by then.
+  const codesMenu = createLibraryCardActionMenu({
+    triggerLabel: t.codesToggleLabel,
+    renderTrigger: () => {
+      const btn = createTag('sp-action-button', {
+        quiet: '',
+        size: 'm',
+        class: 'ax-lib-card__action',
+        label: t.codesToggleLabel,
+      });
+      const iconEl = createCodesIcon();
+      iconEl.setAttribute('slot', 'icon');
+      btn.appendChild(iconEl);
+      return btn;
+    },
+    items: getExportFormats(type, currentMode),
+    onSelect: async (format, { closePopover }) => {
+      await copyAsCode(palette, type, format, t, currentMode);
+      closePopover({ focusTrigger: true });
+    },
+  });
+  codesMenu.element.classList.add('modal-codes-menu');
+  header.appendChild(codesMenu.element);
+
   // sp-picker/sp-menu-item give us Spectrum's real checkmark-on-selected,
   // typography, and popover sizing "for free" instead of a bespoke popover
   // (see spectrum/components/express-picker.js, already used by the page's
@@ -200,29 +228,6 @@ export function createColorModesHeader(palette, options = {}) {
       onModeChange?.(mode);
     }
   });
-
-  const codesMenu = createLibraryCardActionMenu({
-    triggerLabel: t.codesToggleLabel,
-    renderTrigger: () => {
-      const btn = createTag('sp-action-button', {
-        quiet: '',
-        size: 'm',
-        class: 'ax-lib-card__action',
-        label: t.codesToggleLabel,
-      });
-      const iconEl = createCodesIcon();
-      iconEl.setAttribute('slot', 'icon');
-      btn.appendChild(iconEl);
-      return btn;
-    },
-    items: getExportFormats(type, currentMode),
-    onSelect: async (format, { closePopover }) => {
-      await copyAsCode(palette, type, format, t, currentMode);
-      closePopover({ focusTrigger: true });
-    },
-  });
-  codesMenu.element.classList.add('modal-codes-menu');
-  header.appendChild(codesMenu.element);
 
   function destroy() {
     if (destroyed) return;

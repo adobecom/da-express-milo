@@ -68,6 +68,18 @@
   --figma-strip-radius: 8px;
 }
 
+/* This modal's rail always grows with its content instead of scrolling
+   internally (see the rail height rules below), so it never needs the
+   "more content below" fade hint — but that fade rule itself lives in
+   modal-palette-content.css, unscoped by breakpoint, and matches this
+   modal's identical class names whenever that file happens to already be
+   loaded (e.g. a palette was opened earlier in the same session). The extra
+   [daa-lh] attribute selector guarantees this wins regardless of which of
+   the two files' <link> tags lands in <head> last. */
+.ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-container--color-rail:has(.modal-color-rail-wrap[data-color-count-range="large"])::after {
+  display: none;
+}
+
 .ax-color-modal-content .modal-gradient-preview .gradient-editor-bar {
   box-shadow: inset 0 0 0 1px rgba(31, 31, 31, 0.2);
   box-sizing: border-box;
