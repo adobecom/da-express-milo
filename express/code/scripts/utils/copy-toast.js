@@ -17,6 +17,11 @@ export default async function showCopyToast(message) {
     let getConfig;
     ({ createTag, loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`));
     loadStyle(`${getConfig().codeRoot}/scripts/utils/copy-toast.css`);
+    // sp-icon-checkmark-circle-outline / sp-icon-close are real Spectrum
+    // Web Components custom elements (same pattern as
+    // mini-editor-widget.js's topActions) — load their definitions once,
+    // before first use.
+    await import(`${getConfig().codeRoot}/scripts/widgets/spectrum/dist/icons-workflow.js`);
   }
   if (!container) {
     container = createTag('div', { class: 'copy-toast-container', role: 'status', 'aria-live': 'polite' });
@@ -26,7 +31,7 @@ export default async function showCopyToast(message) {
   container.querySelectorAll('.copy-toast').forEach((t) => t.remove());
 
   const toast = createTag('div', { class: 'copy-toast' }, [
-    createTag('span', { class: 'copy-toast-icon', 'aria-hidden': 'true' }),
+    createTag('sp-icon-checkmark-circle-outline', { class: 'copy-toast-icon', 'aria-hidden': 'true' }),
     createTag('span', { class: 'copy-toast-message' }, [message]),
   ]);
   container.append(toast);
@@ -40,7 +45,7 @@ export default async function showCopyToast(message) {
     type: 'button',
     class: 'copy-toast-close',
     'aria-label': 'Close',
-  });
+  }, [createTag('sp-icon-close', { class: 'copy-toast-close-icon', 'aria-hidden': 'true' })]);
   closeBtn.addEventListener('click', remove);
   toast.append(closeBtn);
 

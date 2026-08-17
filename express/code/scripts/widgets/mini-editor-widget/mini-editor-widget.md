@@ -73,6 +73,8 @@ loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-widget/mini-edito
 | `backgrounds` | `Object`      | `{ cardSet, decoCount }`. `cardSet` is `[{ card: { id, bg }, quote, author }, ...]`; `cardSet[0]` powers the main widget and the rest (up to `decoCount`, default 8) power the decorations / arc. |
 | `a11y`        | `Object`      | `{ trapFocus, handleEscapeClose, disableBackgroundScroll, restoreBackgroundScroll, copyQuoteToClipboard }`. |
 | `deps`        | `Object`      | `{ createTag, getIconElementDeprecated }` from the host's utils. |
+| `decorations` | `boolean`     | Default `true`. Pass `false` to skip building the desktop zig-zag decorative cards and the tablet/mobile arc carousel entirely — only the centre editor card renders, at every breakpoint. `decorations`/`updateCentre`/`syncViewportMode` on the returned object are then a no-op/`undefined`. Used by the "Create a design" modal. |
+| `panelMode`   | `'always-open-inline'` | Optional. When set, the font/colour controls stay as an inline row and one of the two is always open (font by default) — no collapsing to neither, no mobile bottom sheet. The host's own stylesheet must still hide the bottom-sheet CSS itself (see mini-editor-modal.css); this only changes the JS toggle behaviour and initial `data-me-panel` value. Used by the "Create a design" modal. |
 
 ## Returns
 
@@ -85,13 +87,4 @@ loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-widget/mini-edito
 - `updateCentre(patch)` — patch the arc carousel's centre card (`{ quote, author }`,
   `{ card }`, or carousel-wide `{ font }`).
 - `syncViewportMode()` — re-evaluate the desktop/carousel breakpoint (also runs on resize).
-- `destroy()` — remove listeners (resize, outside-click, the `mini-editor:use-quote`
-  document listener) and the panel MutationObserver.
-
-## Events
-
-The widget listens on `document` for `mini-editor:use-quote`
-(`{ detail: { quote, author } }`) — dispatched by the collapsible-rows block's
-"Create a design" button — and swaps that quote/author into the editor, then
-scrolls the root into view. The two blocks stay decoupled via this event
-instead of importing one into the other.
+- `destroy()` — remove listeners (resize, outside-click) and the panel MutationObserver.

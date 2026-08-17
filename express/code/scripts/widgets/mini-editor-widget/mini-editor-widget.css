@@ -2,11 +2,26 @@
    Mini Editor Widget
    The editing surface: desktop widget card + zig-zag decorative previews, the
    tablet/mobile arc carousel, the shared font/background controls (inline rows
-   + mobile bottom sheets). Layout tokens (--me-*), the block padding/gap, and
-   the header live in the host block's own stylesheet (mini-editor.css); this
+   + mobile bottom sheets). Arc-sizing tokens, the block padding/gap, and the
+   header live in the host block's own stylesheet (mini-editor.css); this
    stylesheet consumes those tokens. UI is intentionally identical to the
    original in-block implementation — no Spectrum dependency.
    ============================================================================ */
+
+/* --me-card-bg / --me-quote-font* defaults: shared by every host of this
+   widget (the .mini-editor block AND the "Create a design" modal's own card
+   root, see mini-editor-modal.css) — unlike the arc-sizing tokens and block
+   layout below them in mini-editor.css's own .mini-editor rule, which only
+   apply when decorations are enabled. buildFontControl/buildColorControl set
+   these inline once a font/background is picked; these are just the
+   before-first-paint fallback. */
+.mini-editor,
+.me-modal-card-root {
+  --me-card-bg: none;
+  --me-quote-font: var(--body-font-family);
+  --me-quote-font-style: normal;
+  --me-quote-font-weight: normal;
+}
 
 .mini-editor-stage {
   position: relative;
@@ -43,6 +58,17 @@
   justify-content: center;
   overflow: hidden;
   transition: background-image 0.35s ease;
+}
+
+/* Whole-card focus ring, per Figma node 54:8144 ("Interactive Widget",
+   Property 1=Focus) — shown when keyboard focus lands anywhere inside the
+   card (the quote button or an action button), not just on the card itself
+   (which isn't focusable). outline (not the Figma reference's absolutely
+   positioned border div) so it doesn't need extra markup and never affects
+   layout. */
+.me-card:focus-within {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
 }
 
 /* Top-right hover action bar (edit/share/download), per Figma node 1099-5050.
@@ -119,6 +145,14 @@
   border-color: rgb(255 255 255 / 30%);
 }
 
+/* Adds the blue keyboard-focus ring on top of the shared hover/focus frosted
+   treatment above, per Figma node 54:8728 ("Quote text", state=Focus) —
+   Focus there is Hover's look plus this ring, not a separate treatment. */
+.me-quote-wrap:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
 .me-quote {
   margin: 0;
   font-family: var(--me-quote-font);
@@ -139,7 +173,7 @@
      which already gets this right. */
   position: absolute;
   left: 50%;
-  bottom: var(--spacing-200);
+  bottom: 20px;
   transform: translateX(-50%);
   margin: 0;
   font-family: var(--me-quote-font);
@@ -194,6 +228,13 @@
 }
 
 .me-controls {
+  /* Stays above .me-sheet-overlay (z-index 1200 below) — otherwise, while a
+     bottom sheet is open, a tap on the *other* trigger button lands on the
+     open sheet's own full-screen backdrop instead of the button underneath
+     it (same stacking context, sheet painted later), closing that sheet
+     instead of switching straight to the one just tapped. */
+  position: relative;
+  z-index: 1201;
   display: flex;
   align-items: stretch;
   gap: var(--spacing-80);
@@ -225,6 +266,15 @@
 .me-control:hover,
 .me-control[aria-expanded='true'] {
   background: var(--S2AC-Palette-gray-300);
+}
+
+/* Per Figma node 54:8489 ("Widget Action Buttons", State=Focus) — the
+   keyboard-focus ring replaces the hover/expanded background change above
+   (focus keeps the Default background) rather than stacking with it. */
+.me-control:focus-visible {
+  background: var(--color-gray-150);
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
 }
 
 .me-pill {
@@ -296,7 +346,9 @@
 }
 
 .mini-editor[data-me-panel='fonts'] .me-row--fonts,
-.mini-editor[data-me-panel='colour'] .me-row--colour {
+.mini-editor[data-me-panel='colour'] .me-row--colour,
+.me-modal-card-root[data-me-panel='fonts'] .me-row--fonts,
+.me-modal-card-root[data-me-panel='colour'] .me-row--colour {
   transform: translateY(0);
 }
 
@@ -322,6 +374,12 @@
   font-size: var(--Global-Typography-Size-Label-Label-L);
   white-space: nowrap;
   cursor: pointer;
+}
+
+/* Per Figma node 54:8516 ("Font Selector", state=Focus). */
+.me-font:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
 }
 
 .me-font.is-selected {
@@ -360,6 +418,14 @@
   transform: scale(1.08);
 }
 
+/* Per Figma node 54:8539 ("Colour Selector", property1=Focus) — ring sits
+   flush on the swatch's own edge (no outline-offset), unlike the other
+   controls' offset rings, matching that reference exactly. */
+.me-swatch-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 0;
+}
+
 .me-swatch-btn.is-selected {
   border: 2px solid var(--S2-Buttons-Accent-Color-Default);
   box-shadow: var(--Drop-shadow-emphasized-hover);
@@ -390,42 +456,55 @@
   display: none;
 }
 
-.me-deco {
+/*
+ * 4 columns of 2 cards each, desktop only (see the >=1200px block below).
+ * Matches the Figma reference's two-column-per-side zig-zag: a "near"
+ * column, whose card's inner (right, for the left side) edge clears the
+ * 271px-wide widget by ~90px, and a "far" column ~90px past the near
+ * column's outer edge. Each column is its own flex container (cards
+ * stacked via `gap`, not fixed pixel positions) so a card's height can vary
+ * with its quote length (see p.me-deco-quote/DECO_QUOTE_CHAR_LIMIT) without
+ * the two cards in a column ever overlapping — the old fixed-height,
+ * fixed-`bottom`-per-card layout couldn't safely do that. Columns anchor
+ * from the bottom (not the top) since .mini-editor-decorations' bottom edge
+ * reliably lines up with the editor's bottom edge regardless of how tall
+ * the header's authored copy is — its top edge doesn't.
+ */
+.me-deco-col {
   position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 180px;
+}
+
+.me-deco-col--far-left { left: calc(50% - 811px); bottom: 160px; gap: 188px; }
+.me-deco-col--near-left { left: calc(50% - 541px); bottom: 0; gap: 212px; }
+.me-deco-col--far-right { left: calc(50% + 631px); bottom: 160px; gap: 188px; }
+.me-deco-col--near-right { left: calc(50% + 361px); bottom: 0; gap: 212px; }
+
+.me-deco {
   width: 180px;
   pointer-events: auto;
 }
 
+.me-deco--1 { transform: rotate(1.5deg); }
+.me-deco--2 { transform: rotate(1.5deg); }
+.me-deco--3 { transform: rotate(2deg); }
+.me-deco--4 { transform: rotate(-2deg); }
+.me-deco--5 { transform: rotate(-1.5deg); }
+.me-deco--6 { transform: rotate(-1.5deg); }
+.me-deco--7 { transform: rotate(-2deg); }
+.me-deco--8 { transform: rotate(2deg); }
+
 .me-deco-card-wrap {
-  /* Positioned so .me-deco-actions's `top: 100%` resolves against the card
-     itself (not the ancestor). The padding-bottom extends this wrap's own
-     hoverable box down through the gap and the actions row, so moving the
-     pointer from the card down into the buttons never exits the hover
-     target — :hover/:focus-within stays live the whole way down. */
+  /* The padding-bottom extends this wrap's own hoverable box down through
+     the gap and the actions row below the card (see .me-deco-card /
+     .me-deco-actions), so moving the pointer from the card down into the
+     buttons never exits the hover target — :hover/:focus-within stays live
+     the whole way down, regardless of how tall the card itself grows. */
   position: relative;
   padding-bottom: 54px;
 }
-
-/*
- * 4 slots per side, desktop only (see the >=1200px block below). Matches the
- * Figma reference's two-column zig-zag: a "near" column, whose card's inner
- * (right, for the left side) edge clears the 271px-wide widget by ~90px,
- * and a "far" column ~90px past the near column's outer edge. Each column
- * holds two 180px-wide cards spaced ~230px apart vertically. Positioned
- * from the bottom (not the top) since .mini-editor-decorations' bottom edge
- * reliably lines up with the editor's bottom edge regardless of how tall
- * the header's authored copy is — its top edge doesn't. The lowest card in
- * each column sits with its own bottom flush at 0 so nothing crosses below
- * the editor's bottom edge.
- */
-.me-deco--1 { left: calc(50% - 811px); bottom: 496px; transform: rotate(1.5deg); }
-.me-deco--2 { left: calc(50% - 541px); bottom: 360px; transform: rotate(1.5deg); }
-.me-deco--3 { left: calc(50% - 811px); bottom: 160px; transform: rotate(2deg); }
-.me-deco--4 { left: calc(50% - 541px); bottom: 0; transform: rotate(-2deg); }
-.me-deco--5 { left: calc(50% + 631px); bottom: 496px; transform: rotate(-1.5deg); }
-.me-deco--6 { left: calc(50% + 361px); bottom: 360px; transform: rotate(-1.5deg); }
-.me-deco--7 { left: calc(50% + 631px); bottom: 160px; transform: rotate(-2deg); }
-.me-deco--8 { left: calc(50% + 361px); bottom: 0; transform: rotate(2deg); }
 
 .me-deco:hover,
 .me-deco:focus-within {
@@ -433,10 +512,32 @@
 }
 
 .me-deco-card {
+  /* Outer sizing/rotation box — unclipped (unlike .me-deco-card-inner
+     below) so .me-deco-actions can anchor at `top: 100%` against this
+     element's own actual height without being clipped off. */
   position: relative;
   width: 100%;
-  height: 148px;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.me-deco-card-inner {
+  width: 100%;
+  /* Was a fixed height: 148px on the (then-combined) card element — now a
+     minimum only, matching that original look for short quotes, so the
+     card can grow taller (width unchanged) as a quote's length approaches
+     DECO_QUOTE_CHAR_LIMIT instead of ever clipping its own text. Positioned
+     (not static) so p.me-deco-author below can anchor to this element's own
+     box via position: absolute, per Figma node 54:7695/54:7699 — the author
+     sits at a fixed offset from the card's bottom edge regardless of quote
+     length, same pattern as .me-author/.me-arc-author elsewhere in this
+     file. */
+  position: relative;
+  min-height: 148px;
   box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   padding: 11px;
   border: 0.5px solid var(--Palette-transparent-white-700);
   border-radius: 17px;
@@ -445,41 +546,35 @@
   background-repeat: no-repeat;
   overflow: hidden;
   box-shadow: 0 5px 6px rgb(0 0 0 / 12%), 0 16px 16px rgb(0 0 0 / 8%);
-  -webkit-user-select: none;
-  user-select: none;
 }
 
 /*
  * Fixed, uniform styling for every card regardless of which font/theme the
  * fetched template itself uses — the editor (not these decorative previews)
- * is where a different font/colour actually applies. Quote is the card's
- * only flex item (per Figma node 0-18559) and centers itself vertically
- * within the full card height, independent of the author line below —
- * author is absolutely positioned near the bottom instead of sharing a
- * centering group with the quote, matching that same Figma reference.
+ * is where a different font/colour actually applies. Sizes to its own text
+ * content (no fixed height/line-clamp) since DECO_QUOTE_CHAR_LIMIT already
+ * caps how much text it can ever hold — see truncateQuote in
+ * mini-editor-widget.js — so .me-deco-card-inner (a flex column) simply
+ * grows to fit instead of a second, independent CSS-level clamp fighting
+ * that already-bounded text.
  */
 /* p.me-deco-quote (not just .me-deco-quote): .mini-editor-header p — these
    cards are descendants of the header, see the block's init comment on why —
    is otherwise equally or more specific and, being a <p>, matches these too. */
 p.me-deco-quote {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 4;
-  line-clamp: 4;
-  /* Fixed height (not flex: 1 / padding) — -webkit-box's intrinsic height
-     from -webkit-line-clamp ignores flex-shrink and reduced-by-padding
-     space alike, so only an explicit height reliably caps it at what
-     actually fits: full 126px content area when no author line needs
-     room, or that minus the author's own reserved space (see the
-     :has() override below) when one is present. */
+  /* The one flexible item in .me-deco-card-inner — grows/shrinks with the
+     available space and centers its own (possibly multi-line) text within
+     it, so a short quote still sits vertically centered in the card, not
+     glued to the top. padding-bottom reserves room for p.me-deco-author,
+     which is absolutely positioned below and so isn't otherwise accounted
+     for in this flex column's own height. */
+  display: flex;
+  flex: 1 0 auto;
+  align-items: center;
+  justify-content: center;
   width: 100%;
-  height: 126px;
-  /* -webkit-box has no justify-content equivalent of its own — this centers
-     the (possibly fewer-than-clamped) lines of text within the box's own
-     height, which is what actually centers the quote in the card. */
-  -webkit-box-pack: center;
   margin: 0;
-  overflow: hidden;
+  padding-bottom: 20px;
   color: var(--Alias-content-typography-Heading);
   text-align: center;
   font-family: var(--body-font-family);
@@ -488,25 +583,23 @@ p.me-deco-quote {
   font-weight: var(--heading-font-weight-regular);
   line-height: 1.25;
   word-break: break-word;
-  align-content: center;
 }
 
-/* Reserves the author's own line height + bottom offset out of the quote's
-   box only when an author is actually present (see buildDecoCard — the
-   .me-deco-author element is omitted otherwise), so a long quote can never
-   clamp down into visually overlapping the absolutely-positioned author. */
-.me-deco-card:has(.me-deco-author) p.me-deco-quote {
-  height: 104px;
-}
-
+/* Absolutely positioned at a fixed offset from the card's bottom edge, per
+   Figma node 54:7695/54:7699 (author: bottom: 18.46px on a 149px-tall
+   card) — same pattern as .me-author/.me-arc-author elsewhere in this
+   file. Anchors against .me-deco-card-inner (position: relative above),
+   independent of the quote's own height, so it stays put whether the card
+   grows taller for a longer quote or not. */
 p.me-deco-author {
   position: absolute;
   left: 50%;
   bottom: 12px;
   transform: translateX(-50%);
+  margin: 0;
+  width: 100%;
   max-width: calc(100% - 22px);
   overflow: hidden;
-  margin: 0;
   color: var(--Alias-content-typography-Heading);
   text-align: center;
   font-family: var(--body-font-family);
@@ -518,13 +611,16 @@ p.me-deco-author {
 }
 
 .me-deco-actions {
-  /* Fixed px offset, not a percentage — .me-deco-card-wrap's own
-     padding-bottom (the hover hit-box buffer) would otherwise be counted
-     twice if this used `top: 100%`, since that percentage resolves against
-     the wrap's full padding box. 148px card height + 11px*2 padding
-     (border-box, so included) + 8px gap. */
+  /* A percentage now correctly resolves against .me-deco-card's own actual
+     height — unlike the old fixed px offset this replaced, which only
+     matched the card's previous fixed height and broke as soon as
+     .me-deco-card-inner (and so .me-deco-card, which wraps it at 100%
+     width/auto height) could grow taller for a longer quote. .me-deco-card
+     is a plain unclipped box (no padding/border of its own), so `top: 100%`
+     lands exactly at .me-deco-card-inner's bottom edge with no
+     padding-box double-counting to correct for. */
   position: absolute;
-  top: 170px;
+  top: calc(100% + var(--spacing-100));
   left: 50%;
   transform: translateX(-50%);
   display: flex;
@@ -569,15 +665,27 @@ p.me-deco-author {
   padding: 7px;
 }
 
-.me-deco-copy img {
-  display: block;
-  width: 18px;
-  height: 18px;
+/* sp-icon-copy (see buildDecoCard) sizes/colours itself via these CSS
+   custom property hooks — same pattern as .me-action-icon above, no
+   Spectrum theme/design tokens required. */
+.me-deco-copy-icon {
+  --mod-icon-size: 18px;
+  --mod-icon-color: var(--Alias-content-neutral-default);
 }
 
 .me-deco-use:hover,
 .me-deco-copy:hover {
   background: #dcdcdc;
+}
+
+/* No dedicated focus variant for these two in Figma (the "Quote Hero Card"
+   component only defines Default/Hover) — added for keyboard-focus
+   visibility, consistent with the ring treatment used on every other
+   interactive element in this file. */
+.me-deco-use:focus-visible,
+.me-deco-copy:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
 }
 
 .me-deco-copy.is-copied {
@@ -672,12 +780,14 @@ p.me-deco-author {
   justify-content: center;
   overflow: hidden;
   box-shadow: 0 5px 6px rgb(0 0 0 / 12%), 0 16px 16px rgb(0 0 0 / 8%);
-  /* transform-origin is fixed at the card's own centre for every role, and
-     never changes between roles — only transform itself is animated. That
-     keeps the transition a single smooth translate+rotate interpolation
-     that stays clear of the centre card throughout, instead of a
-     corner/bottom pivot whose intermediate frames aren't guaranteed clear. */
-  transform-origin: 50% 50%;
+  /* transform-origin sits far below the card, on the shared carousel
+     circle's own centre (--me-arc-origin-y below this card's vertical
+     centre) — fixed for every role, never changing between roles, so each
+     role's transform is a single rotate() with nothing else to interpolate.
+     Rotating about that one distant point is what keeps every card's
+     bottom edge on the circle throughout a transition, not just at rest —
+     see --me-arc-origin-y in mini-editor.css. */
+  transform-origin: 50% calc(50% + var(--me-arc-origin-y));
   transition: transform 1s ease-in-out, opacity 1s ease-in-out;
   -webkit-user-select: none;
   user-select: none;
@@ -695,24 +805,28 @@ p.me-deco-author {
 }
 
 .me-arc-card--prev {
-  transform: translateX(calc(-1 * var(--me-arc-slide))) translateY(var(--me-arc-lift)) rotate(-8deg);
+  transform: rotate(-8deg);
 }
 
 .me-arc-card--next {
-  transform: translateX(var(--me-arc-slide)) translateY(var(--me-arc-lift)) rotate(8deg);
+  transform: rotate(8deg);
 }
 
 /* Off-screen staging position for a recycled card (see mini-editor-widget.js
    setRole's `instant` path) — parked further out than the resting
-   prev/next spot, same rotation, so the very next transition (turning off
-   `instant`) animates it rotating in from beyond the edge instead of
-   popping directly into its final slot. */
+   prev/next spot, same rotation direction but twice the swing, so the very
+   next transition (turning off `instant`) animates it rotating in from
+   beyond the edge instead of popping directly into its final slot. Since
+   every role rotates about the same distant --me-arc-origin-y point (see
+   .me-arc-card), doubling the *centre-point* displacement to 2x the
+   resting prev/next distance means doubling sin(angle), not the angle
+   itself: asin(2 * sin(8deg)) ≈ 16.1615deg. */
 .me-arc-card--stage-prev {
-  transform: translateX(calc(-2 * var(--me-arc-slide))) translateY(var(--me-arc-lift)) rotate(-8deg);
+  transform: rotate(-16.1615deg);
 }
 
 .me-arc-card--stage-next {
-  transform: translateX(calc(2 * var(--me-arc-slide))) translateY(var(--me-arc-lift)) rotate(8deg);
+  transform: rotate(16.1615deg);
 }
 
 /* Ghost: a 4th, non-interactive card (see buildArcGhost in
@@ -735,11 +849,11 @@ p.me-deco-author {
 }
 
 .me-arc-card--exit-prev {
-  transform: translateY(calc(-1 * var(--me-arc-lift))) translateX(calc(-2 * var(--me-arc-slide)))rotate(0deg);
+  transform: rotate(-16.1615deg);
 }
 
 .me-arc-card--exit-next {
-  transform: translateX(calc(2 * var(--me-arc-slide))) translateY(var(--me-arc-lift)) rotate(8deg);
+  transform: rotate(16.1615deg);
 }
 
 .me-arc-ghost.me-arc-ghost--visible.me-arc-card--exit-prev,
@@ -784,6 +898,20 @@ p.me-deco-author {
   cursor: pointer;
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
+  transition: background-color 0.15s ease;
+}
+
+/* No dedicated hover/focus variant in Figma's "drag-arrows" component
+   (Default only, since these primarily serve touch devices) — darkened
+   hover + a focus-visible ring added for mouse/keyboard use, consistent
+   with every other interactive element in this file. */
+.me-arc-nav:hover {
+  background: rgb(0 0 0 / 32%);
+}
+
+.me-arc-nav:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
 }
 
 .me-arc-nav img {
