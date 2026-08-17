@@ -91,6 +91,7 @@ const CONFIG = {
   faasCloseModalAfterSubmit: 'on',
   locales: {
     '': { ietf: 'en-US', tk: 'jdq5hay.css' },
+    ara: { ietf: 'ar', tk: 'nwq1mna.css', dir: 'rtl' },
     br: { ietf: 'pt-BR', tk: 'inq1xob.css' },
     // eslint-disable-next-line max-len
     // TODO check that this ietf is ok to use everywhere. It's different in the old project zh-Hans-CN
