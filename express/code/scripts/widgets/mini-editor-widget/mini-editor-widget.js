@@ -331,26 +331,56 @@ const TOP_ACTION_DEFS = {
  * time this runs — see the icons-workflow.js dynamic import in
  * createMiniEditorWidget, which awaits before calling buildWidget.
  */
-function buildMiniEditorActions(topActions = []) {
+async function buildMiniEditorActions(topActions = []) {
   const bar = createTag('div', { class: 'me-actions' });
-  topActions.forEach(({ type, onClick }) => {
+  const menuApis = [];
+  const supportedActions = topActions.filter(({ type }) => TOP_ACTION_DEFS[type]);
+  for (const { type, onClick, shareMenu } of supportedActions) {
     const def = TOP_ACTION_DEFS[type];
-    if (!def) return;
     const icon = createTag(def.icon, { class: 'me-action-icon', 'aria-hidden': 'true' });
     const btn = createTag('button', {
       type: 'button',
       class: `me-action me-action--${type}`,
       'aria-label': def.label,
     }, [icon]);
-    btn.addEventListener('click', () => onClick?.());
-    bar.append(btn);
-  });
+    if (shareMenu) {
+      const { default: createShareMenuWidget } = await import(
+        '../share-menu-widget/share-menu-widget.js'
+      );
+      const menuApi = await createShareMenuWidget({ trigger: btn, ...shareMenu });
+      menuApis.push(menuApi);
+      bar.append(menuApi.element);
+    } else {
+      btn.addEventListener('click', () => onClick?.());
+      bar.append(btn);
+    }
+  }
+  bar.destroy = () => menuApis.forEach((api) => api.destroy());
   return bar;
 }
 
-function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
+async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
   const widget = createTag('div', { class: 'mini-editor-widget' });
   const card = createTag('div', { class: 'me-card' });
+  const first = cardSet[0] || { quote: '', author: '' };
+  let contentModel = {
+    quote: first.quote,
+    author: first.author || '',
+    backgroundUrl: first.card?.bg || '',
+    font: {
+      family: fontOptions[0]?.font || 'sans-serif',
+      style: fontOptions[0]?.italic ? 'italic' : 'normal',
+      weight: fontOptions[0]?.weight || 'normal',
+    },
+  };
+
+  const updateContentModel = (patch) => {
+    contentModel = {
+      ...contentModel,
+      ...patch,
+      font: patch.font ? { ...contentModel.font, ...patch.font } : contentModel.font,
+    };
+  };
 
   const quoteWrap = createTag('div', {
     class: 'me-quote-wrap',
@@ -359,7 +389,6 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
     'aria-describedby': 'me-quote-wrap-hint',
   });
   const quoteEl = createTag('div', { class: 'me-quote' });
-  const first = cardSet[0] || { quote: '', author: '' };
   // The full, untruncated quote — kept separate from quoteEl's own display
   // text (which truncates at EDITOR_QUOTE_CHAR_LIMIT) so copy-to-clipboard
   // and the accessible name below always use the complete text, never the
@@ -402,7 +431,8 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
   // element and top-right CSS anchor (against .mini-editor-widget) work
   // unchanged whether the desktop card or the tablet/mobile arc carousel is
   // the one currently visible.
-  widget.append(buildMiniEditorActions(topActions));
+  const actions = await buildMiniEditorActions(topActions);
+  widget.append(actions);
 
   const doCopy = async () => {
     // currentQuote (not quoteEl.textContent) — the full quote, even when
@@ -491,14 +521,42 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
     useQuote: ({
       quote, author, card: bgCard, font,
     }) => {
+      updateContentModel({
+        quote,
+        author: author || '',
+        ...(bgCard ? { backgroundUrl: bgCard.bg } : {}),
+        ...(font ? {
+          font: {
+            family: font.font,
+            style: font.italic ? 'italic' : 'normal',
+            weight: font.weight || 'normal',
+          },
+        } : {}),
+      });
       renderQuote(quote);
       authorEl.textContent = author || '';
       authorEl.style.display = author ? '' : 'none';
       if (bgCard) selectSwatch(bgCard.bg);
       if (font) selectFont(font);
     },
-    onFontOrColourChange: (listener) => { onFontOrColourPick = listener; },
+    getContentModel: () => ({ ...contentModel, font: { ...contentModel.font } }),
+    onFontOrColourChange: (listener) => {
+      onFontOrColourPick = (patch) => {
+        if (patch.font) {
+          updateContentModel({
+            font: {
+              family: patch.font.font,
+              style: patch.font.italic ? 'italic' : 'normal',
+              weight: patch.font.weight || 'normal',
+            },
+          });
+        }
+        if (patch.card) updateContentModel({ backgroundUrl: patch.card.bg });
+        listener(patch);
+      };
+    },
     destroy: () => {
+      actions.destroy();
       panelObserver.disconnect();
       document.removeEventListener('click', onDocClick);
     },
@@ -969,7 +1027,7 @@ function buildArcCarousel(cardSet, useQuote, defaultFont, a11y) {
  *   (see mini-editor-modal.css) since it's still built either way. Used by
  *   the "Create a design" modal, where the empty space below the card
  *   exists only to host this panel.
- * @returns {Promise<{ stage, decorations, useQuote, updateCentre,
+ * @returns {Promise<{ stage, decorations, useQuote, updateCentre, getContentModel,
  *   syncViewportMode, destroy }>}
  */
 export default async function createMiniEditorWidget(config = {}) {
@@ -1007,8 +1065,8 @@ export default async function createMiniEditorWidget(config = {}) {
 
   const stage = createTag('div', { class: 'mini-editor-stage' });
   const {
-    widget, useQuote, onFontOrColourChange, destroy: destroyWidget,
-  } = buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode);
+    widget, useQuote, getContentModel, onFontOrColourChange, destroy: destroyWidget,
+  } = await buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode);
   stage.append(widget);
 
   let decorations;
@@ -1096,6 +1154,7 @@ export default async function createMiniEditorWidget(config = {}) {
     decorations,
     useQuote,
     updateCentre,
+    getContentModel,
     syncViewportMode,
     destroy: () => {
       destroyWidget();

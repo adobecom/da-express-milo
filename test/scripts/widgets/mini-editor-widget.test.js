@@ -60,8 +60,25 @@ describe('mini-editor-widget', () => {
     expect(editor.decorations).to.be.instanceOf(HTMLElement);
     expect(editor.useQuote).to.be.a('function');
     expect(editor.updateCentre).to.be.a('function');
+    expect(editor.getContentModel).to.be.a('function');
     expect(editor.syncViewportMode).to.be.a('function');
     expect(editor.destroy).to.be.a('function');
+  });
+
+  it('exposes a defensive snapshot of the initial edited content', async () => {
+    const { editor } = await mount();
+    const model = editor.getContentModel();
+    expect(model).to.deep.equal({
+      quote: 'Quote number 0',
+      author: 'Author 0',
+      backgroundUrl: '/img/image0.jpg',
+      font: { family: fontOptions[0].font, style: 'normal', weight: 'normal' },
+    });
+
+    model.quote = 'Changed outside';
+    model.font.family = 'Changed outside';
+    expect(editor.getContentModel().quote).to.equal('Quote number 0');
+    expect(editor.getContentModel().font.family).to.equal(fontOptions[0].font);
   });
 
   it('renders the first card set entry into the main widget card', async () => {
@@ -94,13 +111,24 @@ describe('mini-editor-widget', () => {
   });
 
   it('applies a picked font to the CSS variables and marks it selected', async () => {
-    const { root } = await mount();
+    const { root, editor } = await mount();
     const serifBtn = Array.from(root.querySelectorAll('.me-row--fonts .me-font'))
       .find((b) => b.textContent === 'Serif');
     serifBtn.click();
     expect(root.style.getPropertyValue('--me-quote-font')).to.equal(fontOptions[1].font);
     expect(root.style.getPropertyValue('--me-quote-font-style')).to.equal('italic');
     expect(serifBtn.classList.contains('is-selected')).to.be.true;
+    expect(editor.getContentModel().font).to.deep.equal({
+      family: fontOptions[1].font,
+      style: 'italic',
+      weight: 'normal',
+    });
+  });
+
+  it('updates the model when a background is picked', async () => {
+    const { root, editor } = await mount();
+    root.querySelectorAll('.me-row--colour .me-swatch-btn')[2].click();
+    expect(editor.getContentModel().backgroundUrl).to.equal('/img/image2.jpg');
   });
 
   it('opens the matching panel and toggles aria-expanded when a control is clicked', async () => {
@@ -128,6 +156,10 @@ describe('mini-editor-widget', () => {
     expect(root.querySelector('.me-quote').textContent).to.equal('Swapped in');
     expect(root.querySelector('.me-author').textContent).to.equal('Someone Else');
     expect(root.querySelector('.me-author').style.display).to.equal('');
+    expect(editor.getContentModel()).to.include({
+      quote: 'Swapped in',
+      author: 'Someone Else',
+    });
   });
 
   it('useQuote hides the author line when no author is given', async () => {
@@ -169,12 +201,17 @@ describe('mini-editor-widget', () => {
 
   describe('arc carousel (tablet/mobile)', () => {
     it('navigating next updates the centre card and fires useQuote for the new active entry', async () => {
-      const { root } = await mount();
+      const { root, editor } = await mount();
       const nextBtn = root.querySelector('.me-arc-nav--next');
       const centerBefore = root.querySelector('.me-arc-card--center .me-arc-quote').textContent;
       nextBtn.click();
       const centerAfter = root.querySelector('.me-arc-card--center .me-arc-quote').textContent;
       expect(centerAfter).to.not.equal(centerBefore);
+      expect(editor.getContentModel()).to.include({
+        quote: 'Quote number 1',
+        author: '',
+        backgroundUrl: '/img/image1.jpg',
+      });
     });
 
     it('navigating prev then next returns to the original centre entry', async () => {

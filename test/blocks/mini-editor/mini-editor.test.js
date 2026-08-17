@@ -3,6 +3,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../express/code/scripts/utils.js';
 import init from '../../../express/code/blocks/mini-editor/mini-editor.js';
+import MiniEditorCardExporter from '../../../express/code/scripts/utils/mini-editor-card-export.js';
 import { waitFor } from '../../helpers/waitfor.js';
 
 setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
@@ -32,11 +33,19 @@ describe('mini-editor', () => {
   beforeEach(() => {
     window.Typekit = { load: ({ active }) => active?.() };
     fetchStub = sinon.stub(window, 'fetch').resolves({ json: async () => ({ items: defaultTemplateItems }) });
+    sinon.stub(window, 'requestAnimationFrame').callsFake((callback) => {
+      callback(performance.now());
+      return 1;
+    });
   });
 
   afterEach(() => {
     delete window.Typekit;
-    fetchStub.restore();
+    delete window.lana;
+    delete window.placeholders;
+    delete navigator.share;
+    delete navigator.canShare;
+    sinon.restore();
     document.body.innerHTML = '';
   });
 
@@ -78,6 +87,103 @@ describe('mini-editor', () => {
     await waitFor(() => !!block.querySelector('.me-quote'));
     expect(block.querySelector('.me-quote').textContent).to.equal('"Patience is bitter, but its fruit is sweet."');
     expect(block.querySelector('.me-author').textContent).to.equal('Jean-Jacques Rousseau');
+  });
+
+  it('downloads the content model once after rapid clicks', async () => {
+    const block = await decorateWithBody();
+    const downloadStub = sinon.stub(MiniEditorCardExporter, 'download').resolves();
+
+    const downloadButton = block.querySelector('.me-action--download');
+    downloadButton.click();
+    downloadButton.click();
+    await waitFor(() => downloadStub.calledOnce);
+
+    expect(downloadStub.calledOnce).to.be.true;
+    expect(downloadStub.firstCall.args[0]).to.deep.include({
+      quote: '"Patience is bitter, but its fruit is sweet."',
+      author: 'Jean-Jacques Rousseau',
+    });
+    expect(downloadStub.firstCall.args[0].backgroundUrl).to.equal('https://cdn/rendition/urn:0');
+    expect(downloadButton.disabled).to.be.false;
+    expect(downloadButton.hasAttribute('aria-busy')).to.be.false;
+  });
+
+  it('downloads the latest model after carousel navigation', async () => {
+    const block = await decorateWithBody();
+    const downloadStub = sinon.stub(MiniEditorCardExporter, 'download').resolves();
+
+    block.querySelector('.me-arc-nav--next').click();
+    block.querySelector('.me-action--download').click();
+    await waitFor(() => downloadStub.calledOnce);
+
+    expect(downloadStub.firstCall.args[0]).to.deep.include({
+      quote: '"Adopt the pace of nature: her secret is patience."',
+      author: 'Ralph Waldo Emerson',
+    });
+    expect(downloadStub.firstCall.args[0].backgroundUrl).to.equal('https://cdn/rendition/urn:1');
+  });
+
+  it('uses the generic menu and shares a fresh PNG from More options', async () => {
+    window.placeholders = {
+      'mini-editor-share-image': 'Share image',
+      'share-menu-whatsapp': 'WhatsApp',
+      'mini-editor-copy-image': 'Copy image',
+      'share-menu-more-options': 'More options',
+    };
+    const blob = new Blob(['png'], { type: 'image/png' });
+    const createBlobStub = sinon.stub(MiniEditorCardExporter, 'createCardBlob').resolves(blob);
+    const shareStub = sinon.stub().resolves();
+    Object.defineProperty(navigator, 'share', { configurable: true, value: shareStub });
+    Object.defineProperty(navigator, 'canShare', {
+      configurable: true,
+      value: sinon.stub().returns(true),
+    });
+    const block = await decorateWithBody();
+
+    block.querySelector('.me-action--share').click();
+    const menu = block.querySelector('.share-menu-list');
+    expect(menu).to.exist;
+    expect(menu.querySelectorAll('sp-menu-item')).to.have.length(3);
+    expect(menu.querySelector('sp-menu-group [slot="header"]').textContent).to.equal('Share image');
+    const whatsAppIcon = menu.querySelector('sp-menu-item[value="whatsapp"] sp-icon');
+    expect(whatsAppIcon.src).to.contain('/express/code/icons/S2_Icon_WhatsApp_20_N.svg');
+    expect(whatsAppIcon.size).to.equal('m');
+    expect(menu.querySelector('sp-menu-item[value="copy"] sp-icon-image')).to.exist;
+    expect(menu.querySelector('sp-menu-item[value="more"] sp-icon-more')).to.exist;
+
+    menu.querySelector('sp-menu-item[value="more"]').click();
+    await waitFor(() => shareStub.calledOnce);
+    expect(block.querySelector('.me-action--share').getAttribute('aria-expanded'))
+      .to.equal('true');
+
+    block.querySelector('.me-arc-nav--next').click();
+    menu.querySelector('sp-menu-item[value="more"]').click();
+    await waitFor(() => shareStub.calledTwice);
+
+    expect(createBlobStub.calledTwice).to.be.true;
+    expect(createBlobStub.secondCall.args[0].backgroundUrl)
+      .to.equal('https://cdn/rendition/urn:1');
+    const [shareData] = shareStub.firstCall.args;
+    expect(shareData.title).to.equal('Share image');
+    expect(shareData.files).to.have.length(1);
+    expect(shareData.files[0].name).to.equal('quote-card.png');
+    expect(shareData.files[0].type).to.equal('image/png');
+  });
+
+  it('logs and shows a localized negative toast when download fails', async () => {
+    const block = await decorateWithBody();
+    window.placeholders = { 'screenshot-download-failed': 'Unable to download this design.' };
+    window.lana = { log: sinon.spy() };
+    sinon.stub(MiniEditorCardExporter, 'download').rejects(new Error('render failed'));
+
+    block.querySelector('.me-action--download').click();
+    await waitFor(() => !!document.querySelector('sp-toast'));
+
+    const toast = document.querySelector('sp-toast');
+    expect(toast.textContent).to.equal('Unable to download this design.');
+    expect(toast.getAttribute('variant')).to.equal('negative');
+    expect(window.lana.log.calledWithMatch('Mini-editor download failed: render failed')).to.be.true;
+    expect(document.body.contains(block)).to.be.true;
   });
 
   it('removes the whole section when no quotes are authored on the page', async () => {
