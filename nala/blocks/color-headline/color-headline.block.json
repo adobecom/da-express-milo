@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@color-headline-tools",
       "selector": "div.color-headline.tools",
-      "path": "/drafts/nala/blocks/color/color-headline-tools",
+      "path": "/drafts/nala/blocks/color/color-headline-tools?martech=off",
       "data": {
         "semantic": {
           "texts": [
@@ -46,7 +46,7 @@
       "tcid": "1",
       "name": "@color-headline-extract",
       "selector": "div.color-headline.extract",
-      "path": "/drafts/nala/blocks/color/color-headline-extract",
+      "path": "/drafts/nala/blocks/color/color-headline-extract?martech=off",
       "data": {
         "semantic": {
           "texts": [
