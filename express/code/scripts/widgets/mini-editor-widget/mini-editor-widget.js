@@ -286,10 +286,6 @@ function buildBottomSheet(root, a11y, kind, title, contentEl) {
   sheet.append(handle, titleEl, contentEl);
   overlay.append(sheet);
 
-  let focusTrap = null;
-  let escapeRelease = null;
-  let previouslyFocused = null;
-
   function close() {
     if (root.getAttribute('data-me-panel') !== kind) return;
     root.setAttribute('data-me-panel', 'none');
@@ -301,20 +297,10 @@ function buildBottomSheet(root, a11y, kind, title, contentEl) {
     overlay.setAttribute('aria-hidden', String(!isOpen));
     if (isOpen) {
       overlay.removeAttribute('inert');
-      previouslyFocused = document.activeElement;
       disableBackgroundScroll();
-      sheet.focus();
-      focusTrap = trapFocus(sheet);
-      escapeRelease = handleEscapeClose(sheet, close);
     } else {
       overlay.setAttribute('inert', '');
       restoreBackgroundScroll();
-      focusTrap?.release();
-      focusTrap = null;
-      escapeRelease?.release();
-      escapeRelease = null;
-      previouslyFocused?.focus();
-      previouslyFocused = null;
     }
   }
 
@@ -482,6 +468,7 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
     colourControl.setAttribute('aria-expanded', String(openPanel === 'colour'));
     fontSheet.onPanelChange();
     colourSheet.onPanelChange();
+
   });
   panelObserver.observe(root, { attributes: true, attributeFilter: ['data-me-panel'] });
 
@@ -628,17 +615,59 @@ function buildDecoCards(a11y, cardSet, useQuote) {
  */
 const ROLE_CLASSES = ['me-arc-card--prev', 'me-arc-card--center', 'me-arc-card--next', 'me-arc-card--stage-prev', 'me-arc-card--stage-next'];
 
-function buildArcCard(onActivate) {
+function buildArcCard(onActivate, a11y) {
   const el = createTag('div', {
     class: 'me-arc-card',
     role: 'option',
     'aria-selected': 'false',
     tabindex: '-1',
+    'aria-describedby': 'me-arc-card-hint',
   });
-  const quoteP = createTag('p', { class: 'me-arc-quote' });
-  const authorP = createTag('p', { class: 'me-arc-author' });
-  el.append(quoteP, authorP);
-  el.addEventListener('click', () => onActivate(el));
+  // quoteP/authorP live inside quoteWrap (not directly in el) purely so the
+  // centre role can reuse .me-quote-wrap's existing CSS (frosted
+  // hover/focus background, tip visibility, is-copied state) via a
+  // descendant selector off el's own :hover/:focus-visible — see
+  // .me-arc-card--center:hover .me-quote-wrap in the CSS. quoteWrap itself
+  // has no role/tabindex/listeners of its own: el (role="option", already
+  // the roving-tabindex focus target for prev/centre/next) stays the one
+  // real interactive element, so this never nests two focusable elements.
+  const quoteP = createTag('div', { class: 'me-arc-quote' });
+  const authorP = createTag('div', { class: 'me-arc-author' });
+  const quoteWrap = createTag('div', { class: 'me-quote-wrap' });
+  const hint = createTag('span', { id: 'me-arc-card-hint', class: 'sr-only' }, ['Copy quote to clipboard']);
+  const tip = createTag('span', { class: 'me-tip', 'aria-hidden': 'true' }, [
+    createTag('span', { class: 'me-tip-box' }, ['Click to copy quote']),
+  ]);
+  quoteWrap.append(quoteP, hint, tip);
+  el.append(quoteWrap, authorP);
+
+
+  // currentQuote/currentAuthor (not quoteP.textContent) — the full quote,
+  // even when the visible text is truncated (see render below), same
+  // reasoning as buildWidget's own currentQuote.
+  let currentQuote = '';
+  let currentAuthor = '';
+  const doCopy = async () => {
+    const ok = await a11y.copyQuoteToClipboard(currentQuote, currentAuthor);
+    if (ok) {
+      quoteWrap.classList.add('is-copied');
+      setTimeout(() => quoteWrap.classList.remove('is-copied'), 1200);
+    }
+  };
+
+  // Centre copies its quote on click/Enter/Space (same action as
+  // .me-quote-wrap on desktop); prev/next instead navigate via onActivate,
+  // same as before this card ever supported copying.
+  quoteWrap.addEventListener('click', () => {
+    if (el.classList.contains('me-arc-card--center')) doCopy();
+    else onActivate(el);
+  });
+  quoteWrap.addEventListener('keydown', (e) => {
+    if (el.classList.contains('me-arc-card--center') && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      doCopy();
+    }
+  });
 
   function render(entry) {
     el.style.backgroundImage = `url("${entry.card.bg}")`;
@@ -649,6 +678,8 @@ function buildArcCard(onActivate) {
     // this same text content, so an explicit aria-label carries the full
     // quote whenever it's actually shortened — never just the truncated
     // text — matching the same full-text-preserved rule as everywhere else.
+    currentQuote = entry.quote;
+    currentAuthor = entry.author || '';
     const truncated = truncateQuote(entry.quote, EDITOR_QUOTE_CHAR_LIMIT);
     quoteP.textContent = truncated;
     if (truncated === entry.quote) el.removeAttribute('aria-label');
@@ -664,11 +695,12 @@ function buildArcCard(onActivate) {
     authorP.style.display = entry.author ? '' : 'none';
   }
 
+  // Every role is now interactive (centre copies its quote on click/Enter,
+  // same as .me-quote-wrap; prev/next still navigate via onActivate above),
+  // unlike before centre was inert (cursor: default, pointer-events: none).
   function setInteractivity(role) {
     el.setAttribute('aria-selected', String(role === 'center'));
-    el.setAttribute('tabindex', role === 'center' ? '0' : '-1');
-    el.style.cursor = role === 'center' ? 'default' : 'pointer';
-    el.style.pointerEvents = role === 'center' ? 'none' : 'auto';
+    el.setAttribute('tabindex', '0');
   }
 
   // Recycling a card (see goNext/goPrev) is a two-step move so it animates
@@ -755,7 +787,7 @@ function buildArcGhost() {
  * re-entering the deck one step further round; the other two just carry
  * their existing content into their new role.
  */
-function buildArcCarousel(cardSet, useQuote, defaultFont) {
+function buildArcCarousel(cardSet, useQuote, defaultFont, a11y) {
   const root = createTag('div', { class: 'me-arc' });
   // Each .me-arc-card has role="option" (see buildArcCard), which axe
   // requires to sit inside a role="listbox" parent (see
@@ -789,9 +821,9 @@ function buildArcCarousel(cardSet, useQuote, defaultFont) {
     if (el.classList.contains('me-arc-card--prev')) goPrev(); // eslint-disable-line no-use-before-define
     else if (el.classList.contains('me-arc-card--next')) goNext(); // eslint-disable-line no-use-before-define
   };
-  const cardA = buildArcCard(onActivate);
-  const cardB = buildArcCard(onActivate);
-  const cardC = buildArcCard(onActivate);
+  const cardA = buildArcCard(onActivate, a11y);
+  const cardB = buildArcCard(onActivate, a11y);
+  const cardC = buildArcCard(onActivate, a11y);
   const ghost = buildArcGhost();
   // roles[i] tracks which role each of cardA/B/C currently occupies, so
   // navigation can rotate them without re-deriving role from DOM classes.
@@ -994,6 +1026,7 @@ export default async function createMiniEditorWidget(config = {}) {
       arcCardSet,
       useQuote,
       fontOptions[0],
+      a11y,
     );
     updateCentre = updateArcCentre;
     onFontOrColourChange(updateCentre);

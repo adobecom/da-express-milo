@@ -138,8 +138,19 @@
   transition: background-color 0.18s ease, border-color 0.18s ease;
 }
 
-.me-quote-wrap:hover,
-.me-quote-wrap:focus-visible {
+/* .me-arc-card--center:hover/:focus-visible .me-quote-wrap: the arc
+   carousel's quoteWrap (see buildArcCard in mini-editor-widget.js) has no
+   role/tabindex/listeners of its own — el (the card, already role="option")
+   is the one real interactive/focusable element, so this keys off el's own
+   :hover/:focus-visible via a descendant selector rather than a second
+   hoverable/focusable target nested inside it. Scoped to --center only:
+   prev/next keep the same .me-quote-wrap markup for structural/CSS parity
+   but never get this treatment, since hovering/focusing them navigates
+   instead of copying (see onActivate in buildArcCard). */
+.me-card .me-quote-wrap:hover,
+.me-card .me-quote-wrap:focus-visible,
+.me-arc-card--center .me-quote-wrap:hover,
+.me-arc-card--center .me-quote-wrap:focus-visible {
   background: rgb(255 255 255 / 20%);
   border-color: rgb(255 255 255 / 30%);
 }
@@ -147,7 +158,8 @@
 /* Adds the blue keyboard-focus ring on top of the shared hover/focus frosted
    treatment above, per Figma node 54:8728 ("Quote text", state=Focus) —
    Focus there is Hover's look plus this ring, not a separate treatment. */
-.me-quote-wrap:focus-visible {
+.me-card .me-quote-wrap:focus-visible,
+.me-arc-card--center .me-quote-wrap:focus-visible {
   outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: 2px;
 }
@@ -195,8 +207,10 @@
   z-index: 2;
 }
 
-.me-quote-wrap:hover .me-tip,
-.me-quote-wrap:focus-visible .me-tip {
+.me-card .me-quote-wrap:hover .me-tip,
+.me-card .me-quote-wrap:focus-visible .me-tip,
+.me-arc-card--center .me-quote-wrap:hover .me-tip,
+.me-arc-card--center .me-quote-wrap:focus-visible .me-tip {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
@@ -212,18 +226,6 @@
   line-height: var(--Global-Typography-Line-height-Label-Label-M);
   text-align: center;
   white-space: nowrap;
-}
-
-.me-quote-wrap.is-copied .me-tip-box::before {
-  content: 'Copied!';
-}
-
-.me-quote-wrap.is-copied .me-tip-box {
-  font-size: 0;
-}
-
-.me-quote-wrap.is-copied .me-tip-box::before {
-  font-size: 12px;
 }
 
 .me-controls {
@@ -794,7 +796,9 @@ p.me-deco-author {
 
 .me-arc-card--center {
   z-index: 3;
-  cursor: default;
+  cursor: pointer;
+  transition: transform 1s ease-in-out, opacity 1s ease-in-out,
+    background-color 0.18s ease, border-color 0.18s ease;
 }
 
 .me-arc-card--prev,
