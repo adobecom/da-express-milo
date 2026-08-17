@@ -1,3 +1,22 @@
+/* Visually hidden but still announced — used for the hint spans in
+   mini-editor-widget.js (e.g. #me-quote-wrap-hint) and the landmark's
+   viewport-suffix span in mini-editor.js (wireLandmark). Scoped to both
+   .mini-editor (the inline block) and .me-modal-card-root (the "Create a
+   design" modal's own root, see mini-editor-modal.js) — every sr-only
+   element in this widget is a descendant of one or the other. */
+.mini-editor .sr-only,
+.me-modal-card-root .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* --me-card-bg / --me-quote-font* defaults live in mini-editor-widget.css
    (shared with the "Create a design" modal's card root) — this rule only
    adds the arc-sizing tokens and block-level layout that only apply here,

@@ -24,6 +24,18 @@ function buildRecipe(props) {
   return params.toString();
 }
 
+function getTemplateTitle(item) {
+  if (item && item['dc:title'] && item['dc:title']['i-default']) {
+    return item['dc:title']['i-default'];
+  }
+
+  if (item && item.topics && item.topics.length) {
+    return item.topics[0];
+  }
+
+  return '';
+}
+
 /**
  * Returns the mini-editor's background-card collection as `[{ id, bg }, ...]`,
  * fetched live from the template service.
@@ -49,7 +61,7 @@ export default async function getCardBackgrounds(props) {
       const componentHref = item._links?.['http://ns.adobe.com/adobecloud/rel/component']?.href;
       /* eslint-enable no-underscore-dangle */
       const bg = getImageThumbnailSrc(renditionHref, componentHref, page);
-      return { id: item.id, bg };
+      return { id: item.id, bg, title: getTemplateTitle(item) };
     })
     .filter((card) => !!card.bg);
 }
