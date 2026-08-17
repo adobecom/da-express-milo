@@ -6,6 +6,8 @@ import {
   restoreBackgroundScroll,
 } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import showCopyToast from '../../scripts/utils/copy-toast.js';
+import MiniEditorCardExporter from '../../scripts/utils/mini-editor-card-export.js';
+import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 import createMiniEditorWidget from '../../scripts/widgets/mini-editor-widget/mini-editor-widget.js';
 import createMiniEditorModal from '../../scripts/widgets/mini-editor-modal/mini-editor-modal.js';
 import getCardBackgrounds from './mini-editor-background-loader.js';
@@ -14,6 +16,7 @@ import getFontOptions from './mini-editor-fonts-loader.js';
 let createTag;
 let loadStyle;
 let getConfig;
+let replaceKey;
 
 const TEMPLATE_LIMIT = 8;
 const DECO_CARD_COUNT = 8;
@@ -37,6 +40,34 @@ async function copyQuoteToClipboard(quote, author) {
     return true;
   } catch {
     return false;
+  }
+}
+
+async function downloadCard(block, editor) {
+  const downloadButton = block.querySelector('.me-action--download');
+  if (downloadButton?.disabled) return;
+
+  try {
+    if (downloadButton) {
+      downloadButton.disabled = true;
+      downloadButton.setAttribute('aria-busy', 'true');
+      await new Promise(requestAnimationFrame);
+    }
+    const model = editor?.getContentModel();
+    if (!model) throw new Error('Mini-editor content model is unavailable');
+    await MiniEditorCardExporter.download(model);
+  } catch (error) {
+    window.lana?.log(`Mini-editor download failed: ${error?.message || error}`, {
+      tags: 'mini-editor,download',
+      severity: 'error',
+    });
+    const message = await replaceKey('screenshot-download-failed', getConfig());
+    await showExpressToast({ message, variant: 'negative' });
+  } finally {
+    if (downloadButton) {
+      downloadButton.disabled = false;
+      downloadButton.removeAttribute('aria-busy');
+    }
   }
 }
 
@@ -192,6 +223,7 @@ function buildContentHeader(props) {
 
 export default async function init(block) {
   ({ createTag, loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`));
+  ({ replaceKey } = await import(`${getLibs()}/features/placeholders.js`));
   loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-widget/mini-editor-widget.css`);
   loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-modal/mini-editor-modal.css`);
 
@@ -239,13 +271,12 @@ export default async function init(block) {
 
     const editor = await createMiniEditorWidget({
       root: block,
-      // Placeholder handlers — real edit/share/download behavior (deep-link
-      // to the Express editor, Web Share API, image export) is follow-up
-      // work; this only wires the widget's hover action bar to something.
+      // Placeholder handlers — real edit/share behavior (deep-link to the
+      // Express editor and Web Share API) is follow-up work.
       topActions: [
         { type: 'edit', onClick: () => console.info('mini-editor: edit action not yet implemented') },
         { type: 'share', onClick: () => console.info('mini-editor: share action not yet implemented') },
-        { type: 'download', onClick: () => console.info('mini-editor: download action not yet implemented') },
+        { type: 'download', onClick: () => downloadCard(block, editor) },
       ],
       fontOptions,
       backgrounds: { cardSet, decoCount: DECO_CARD_COUNT },
