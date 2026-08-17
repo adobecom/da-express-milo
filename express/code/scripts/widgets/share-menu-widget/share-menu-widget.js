@@ -95,7 +95,7 @@ export default async function createShareMenuWidget({
   sectionHeader.textContent = strings.heading;
   group.append(sectionHeader);
 
-  actions.forEach((action) => {
+  actions.forEach((action, index) => {
     const label = strings[`action:${action.value}`];
     const item = createTag('sp-menu-item', {
       value: action.value,

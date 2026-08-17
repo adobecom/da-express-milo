@@ -75,6 +75,175 @@ function isMobileSheetWidth() {
   return window.matchMedia('(width <= 767px)').matches;
 }
 
+// On a touch/coarse-pointer device (tablet, phone), use the shorter of
+// width/height rather than window.innerWidth alone — a physical device's
+// short axis is orientation-independent, so this keeps the same tablet from
+// flipping into the desktop zig-zag layout just because rotating to
+// landscape made innerWidth exceed the breakpoint. Plain mouse/desktop
+// windows don't have a fixed physical "short side" (resizing changes both
+// dimensions independently), so they keep the simple width-only check —
+// otherwise a short-but-wide desktop browser window would wrongly be
+// treated as a tablet. Checked live (not cached), same rationale as
+// isMobileSheetWidth above — this also gates whether the keyboard-only
+// "Skip quote suggestions" CTA (only meaningful for reaching the desktop
+// zig-zag deco cards, which don't exist in arc/carousel mode) is built at
+// all, so it must react to the same breakpoint the carousel mode itself does.
+const TABLET_BREAKPOINT = 1199;
+function isSmallViewport() {
+  const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+  const size = isTouchDevice
+    ? Math.min(window.innerWidth, window.innerHeight)
+    : window.innerWidth;
+  return size <= TABLET_BREAKPOINT;
+}
+
+/**
+ * Wires roving-tabindex keyboard navigation across a row of `role="option"`
+ * buttons (the font row's .me-font buttons, the colour row's .me-swatch-btn
+ * buttons) — only one option is ever a real Tab stop at a time (tabindex 0,
+ * the rest -1), Left/Right arrows move that stop between siblings, and Tab
+ * from the current stop always exits the row via `onTabOut` rather than
+ * advancing to the next sibling. This is deliberate, not just "how roving
+ * tabindex usually works": `control`'s own explicit tabindex (9/10, see
+ * buildFontControl/buildColorControl) sits in this widget's page-wide
+ * sequential numbering (1-10+, see buildMiniEditorActions/getQuoteWrap),
+ * while these options default to tabindex 0/-1 — mixing the two means a
+ * plain Tab press from a tabindex=0 option would resume the browser's
+ * *global* ascending-tabindex sweep (landing wherever the next positive
+ * tabindex element on the page is, not necessarily this row's intended
+ * next stop), so `onTabOut` is called explicitly with `preventDefault()`
+ * instead of ever letting native Tab traversal decide.
+ */
+function wireOptionRowRoving(panel, optionSelector, onTabOut) {
+  function optionsOf() {
+    return [...panel.querySelectorAll(optionSelector)];
+  }
+
+  // Every option starts at tabindex=-1 (not a Tab stop) except whichever one
+  // is already the current selection, so opening the row never introduces
+  // more than the one roving Tab stop the pattern expects.
+  function initTabindexes() {
+    const options = optionsOf();
+    const selectedIndex = Math.max(0, options.findIndex((o) => o.classList.contains('is-selected')));
+    options.forEach((opt, i) => { opt.tabIndex = i === selectedIndex ? 0 : -1; });
+  }
+  initTabindexes();
+
+  function focusOption(index) {
+    const options = optionsOf();
+    if (!options.length) return;
+    const clamped = ((index % options.length) + options.length) % options.length;
+    options.forEach((opt, i) => { opt.tabIndex = i === clamped ? 0 : -1; });
+    options[clamped].focus();
+  }
+
+  panel.addEventListener('keydown', (e) => {
+    const options = optionsOf();
+    const currentIndex = options.indexOf(document.activeElement);
+    if (currentIndex === -1) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusOption(currentIndex + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusOption(currentIndex - 1);
+    } else if (e.key === 'Tab' && !e.shiftKey) {
+      e.preventDefault();
+      onTabOut();
+    }
+  });
+
+  // Re-run after a click-driven selection change (see selectFont/selectSwatch
+  // callers) so the roving Tab stop follows whichever option is now
+  // is-selected, instead of staying on whatever was current before the click.
+  return { focusFirst: () => focusOption(0), syncTabindexes: initTabindexes };
+}
+
+// Same focusable-element set as this codebase's shared a11y.js FOCUSABLE
+// (not imported directly — that module's copy is private/unexported), used
+// below purely to find where real page tab order resumes after this widget.
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'area[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+/**
+ * First element in true document order, matching FOCUSABLE_SELECTOR, that
+ * sits entirely after `root` (i.e. not a descendant of it) — used by the
+ * Skip-quote-suggestions CTA (below) to jump past the *whole* `.mini-editor`
+ * block on Enter/Space, landing wherever the page's own natural Tab order
+ * would go next, rather than merely skipping the deco cards within it.
+ */
+function findNextFocusableAfter(root) {
+  const candidates = [...document.querySelectorAll(FOCUSABLE_SELECTOR)];
+  return candidates.find((el) => {
+    if (root.contains(el)) return false;
+    // DOCUMENT_POSITION_FOLLOWING (4): true only when el comes after root in
+    // the document, filtering out anything before .mini-editor on the page.
+    return !!(root.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+}
+
+/**
+ * Keyboard-only "Skip quote suggestions" CTA, per Figma node 54:11762. Not a
+ * normal Tab stop (tabindex=-1 at rest, never visible) — it only exists to
+ * bridge keyboard traversal from the font/colour controls to the desktop
+ * zig-zag deco cards (see createMiniEditorWidget's setDecoChainTarget),
+ * appearing solely when Tab lands here from the colour control or its open
+ * row of swatches (see buildColorControl's onTabOut). Tab moves on into the
+ * deco cards' own guided chain; Enter/Space does the opposite — it skips
+ * past the *entire* .mini-editor block (not just the deco chain), landing
+ * on whatever the page's real Tab order has next after this widget, via
+ * findNextFocusableAfter.
+ */
+function buildSkipQuoteSuggestionsCta(root) {
+  const element = createTag('button', {
+    type: 'button',
+    class: 'me-skip-suggestions',
+    tabindex: '-1',
+  });
+  element.textContent = 'Skip quote suggestions';
+
+  // Set once the deco cards exist (see createMiniEditorWidget) — Tab moves
+  // on into them; Enter/Space (below) skips past the whole block instead.
+  let onTabOut = null;
+
+  function hide() {
+    element.classList.remove('is-visible');
+    element.tabIndex = -1;
+  }
+
+  function show() {
+    element.classList.add('is-visible');
+    element.tabIndex = 0;
+    element.focus();
+  }
+
+  element.addEventListener('blur', hide);
+  element.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      hide();
+      findNextFocusableAfter(root)?.focus();
+    } else if (e.key === 'Tab' && !e.shiftKey && onTabOut) {
+      e.preventDefault();
+      onTabOut();
+    }
+  });
+
+  return {
+    element,
+    show,
+    hide,
+    setTabOutTarget: (fn) => { onTabOut = fn; },
+  };
+}
+
 /**
  * Builds one font-option button. Used to populate both the tablet/desktop
  * inline row and the mobile bottom-sheet grid from the same fontOptions
@@ -94,23 +263,37 @@ function buildFontButton(opt, index, onPick) {
     'data-font': opt.font,
     role: 'option',
     'aria-selected': index === 0 ? 'true' : 'false',
+    // Explicit (not left to default from textContent) so buildFontControl's
+    // own accessible name can read it back the same way buildColorControl
+    // reads a swatch's aria-label — see selectFont below.
+    'aria-label': opt.label,
   });
   btn.textContent = opt.label;
   btn.addEventListener('click', () => onPick(opt));
   return btn;
 }
 
-function buildFontControl(root, fontOptions, onSelect, panelMode) {
+function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOptions) {
   const control = createTag('button', {
     type: 'button',
+    tabIndex: 9,
     class: 'me-control me-control--font',
     'aria-expanded': 'false',
   });
-  const pill = createTag('span', { class: 'me-pill' });
+  const pill = createTag('span', { class: 'me-pill', 'aria-label': fontOptions[0].label });
   pill.textContent = fontOptions[0].label;
   const label = createTag('span', { class: 'me-control-label' });
   label.textContent = 'Font style';
   control.append(pill, label);
+
+  // Accessible name is "Font style" + whichever option is currently
+  // selected — same pattern as buildColorControl's updateAccessibleName.
+  function updateAccessibleName(fontName) {
+    const name = `Font style ${fontName}`;
+    control.setAttribute('aria-label', name);
+    control.title = name;
+  }
+  updateAccessibleName(fontOptions[0].label);
 
   const panel = createTag('div', {
     class: 'me-row me-row--fonts',
@@ -123,11 +306,13 @@ function buildFontControl(root, fontOptions, onSelect, panelMode) {
     'aria-label': 'Font style',
   });
 
+  let roving;
   function selectFont(opt) {
     root.style.setProperty('--me-quote-font', opt.font);
     root.style.setProperty('--me-quote-font-style', opt.italic ? 'italic' : 'normal');
     root.style.setProperty('--me-quote-font-weight', opt.weight || 'normal');
     pill.textContent = opt.label;
+    pill.setAttribute('aria-label', opt.label);
     pill.style.fontFamily = opt.font;
     pill.style.fontStyle = opt.italic ? 'italic' : 'normal';
     pill.style.fontWeight = opt.weight || 'normal';
@@ -138,6 +323,8 @@ function buildFontControl(root, fontOptions, onSelect, panelMode) {
         f.setAttribute('aria-selected', String(isMatch));
       });
     });
+    updateAccessibleName(opt.label);
+    roving?.syncTabindexes();
   }
 
   const onPick = (opt) => {
@@ -156,6 +343,10 @@ function buildFontControl(root, fontOptions, onSelect, panelMode) {
   // control's own affordances.
   selectFont(fontOptions[0]);
 
+  // Desktop inline row only (see wireOptionRowRoving) — the mobile bottom
+  // sheet's own grid keeps native default tab order, out of scope here.
+  roving = wireOptionRowRoving(panel, '.me-font', () => onTabOutOfOptions?.());
+
   control.addEventListener('click', () => {
     const isOpen = root.getAttribute('data-me-panel') === 'fonts';
     // In always-open-inline mode (the modal, tablet/desktop only — mobile
@@ -168,6 +359,37 @@ function buildFontControl(root, fontOptions, onSelect, panelMode) {
     control.setAttribute('aria-expanded', String(!isOpen));
   });
 
+  // Esc closes the open row and returns focus to the trigger — same
+  // always-open-inline guard as the click handler above (that mode keeps
+  // one of font/colour open at all times, so there's no "closed" state for
+  // Esc to fall back to there either).
+  function closeAndReturnFocus() {
+    if (panelMode === 'always-open-inline' && !isMobileSheetWidth()) return;
+    root.setAttribute('data-me-panel', 'none');
+    control.setAttribute('aria-expanded', 'false');
+    control.focus();
+  }
+  panel.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAndReturnFocus();
+  });
+
+  // Enter/Space on the trigger itself opens the row via the click handler
+  // above (native <button> behaviour). Tab, once the row is open, moves
+  // straight to the first option instead of wherever native tab order would
+  // otherwise land — the options themselves default to tabindex=-1 (see
+  // wireOptionRowRoving), so without this the row would look open but be
+  // unreachable by keyboard.
+  control.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAndReturnFocus();
+      return;
+    }
+    if (e.key !== 'Tab' || e.shiftKey) return;
+    if (root.getAttribute('data-me-panel') !== 'fonts' || isMobileSheetWidth()) return;
+    e.preventDefault();
+    roving.focusFirst();
+  });
+
   return {
     control, panel, sheetGrid, selectFont,
   };
@@ -178,13 +400,20 @@ function buildFontControl(root, fontOptions, onSelect, panelMode) {
  * row and the mobile bottom-sheet grid, same rationale as buildFontButton.
  */
 function buildSwatchButton(card, index, onPick) {
+  // card.title comes from the template service (see getTemplateTitle in
+  // mini-editor-background-loader.js) and is the name shown for this
+  // background everywhere else it's referenced — the colour control's own
+  // accessible name (see buildColorControl) reads it back off this same
+  // button so both always agree. Falls back to the old positional label
+  // only for the rare template with no title/topic to derive one from.
+  const name = card.title || `Background ${index + 1}`;
   const btn = createTag('button', {
     type: 'button',
     class: `me-swatch-btn${index === 0 ? ' is-selected' : ''}`,
     'data-bg': card.bg,
     role: 'option',
     'aria-selected': index === 0 ? 'true' : 'false',
-    'aria-label': `Background ${index + 1}`,
+    'aria-label': name,
   });
   const fill = createTag('span', {
     class: 'me-swatch-fill',
@@ -195,11 +424,12 @@ function buildSwatchButton(card, index, onPick) {
   return btn;
 }
 
-function buildColorControl(root, cards, onSelect, panelMode) {
+function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
   const control = createTag('button', {
     type: 'button',
     class: 'me-control me-control--colour',
     'aria-expanded': 'false',
+    tabIndex: 10,
   });
   const swatch = createTag('span', { class: 'me-swatch' });
   // "colour" drops on mobile (label reads "Background" only there) — kept
@@ -210,6 +440,19 @@ function buildColorControl(root, cards, onSelect, panelMode) {
     createTag('span', { class: 'me-control-label-suffix' }, [' colour']),
   ]);
   control.append(swatch, label);
+
+  // Accessible name is "Background colour" + whichever swatch is currently
+  // selected (see updateAccessibleName below, called from selectSwatch) —
+  // read back off that swatch's own aria-label (see buildSwatchButton) so
+  // the two always agree, rather than duplicating card.title's fallback
+  // logic here. aria-label (not the visible `label` above) carries this,
+  // since it overrides visible text content for the accessible name;
+  // title mirrors it so the native tooltip matches exactly.
+  function updateAccessibleName(swatchName) {
+    const name = `Background colour${swatchName ? ` ${swatchName}` : ''}`;
+    control.setAttribute('aria-label', name);
+    control.title = name;
+  }
 
   const panel = createTag('div', {
     class: 'me-row me-row--colour',
@@ -224,16 +467,23 @@ function buildColorControl(root, cards, onSelect, panelMode) {
     'aria-label': 'Background colour',
   });
 
+  let roving;
   function selectSwatch(bg) {
     root.style.setProperty('--me-card-bg', `url("${bg}")`);
     swatch.style.backgroundImage = `url("${bg}")`;
+    let selectedName = '';
     [panel, sheetGrid].forEach((container) => {
       container.querySelectorAll('.me-swatch-btn').forEach((s) => {
         const isMatch = s.dataset.bg === bg;
         s.classList.toggle('is-selected', isMatch);
         s.setAttribute('aria-selected', String(isMatch));
+        // Both containers hold an equivalent match for the same bg (see
+        // cards.forEach below) — either's aria-label is the same name.
+        if (isMatch) selectedName = s.getAttribute('aria-label') || '';
       });
     });
+    updateAccessibleName(selectedName);
+    roving?.syncTabindexes();
   }
 
   const onPick = (card) => {
@@ -245,7 +495,20 @@ function buildColorControl(root, cards, onSelect, panelMode) {
     sheetGrid.append(buildSwatchButton(card, index, onPick));
   });
 
-  if (cards[0]) swatch.style.backgroundImage = `url("${cards[0].bg}")`;
+  if (cards[0]) {
+    swatch.style.backgroundImage = `url("${cards[0].bg}")`;
+    updateAccessibleName(cards[0].title || 'Background 1');
+  }
+
+  // Same rationale as buildFontControl's roving — Tab from any swatch (not
+  // just the current one) always exits via onTabOut (the Skip-quote-
+  // suggestions CTA on desktop, or straight past .mini-editor on small
+  // viewports where that CTA doesn't exist — see buildWidget's wiring),
+  // never advances between swatches (that's Left/Right's job). This inline
+  // row is shown down to the small-app-frame/arc breakpoint, not just
+  // desktop widths — only the narrower <=767px bottom sheet replaces it
+  // (see isMobileSheetWidth), so this wiring applies at both.
+  roving = wireOptionRowRoving(panel, '.me-swatch-btn', () => onTabOut?.());
 
   control.addEventListener('click', () => {
     const isOpen = root.getAttribute('data-me-panel') === 'colour';
@@ -253,6 +516,44 @@ function buildColorControl(root, cards, onSelect, panelMode) {
     if (panelMode === 'always-open-inline' && isOpen && !isMobileSheetWidth()) return;
     root.setAttribute('data-me-panel', isOpen ? 'none' : 'colour');
     control.setAttribute('aria-expanded', String(!isOpen));
+  });
+
+  // Esc closes the open row and returns focus to the trigger — same
+  // always-open-inline guard as the click handler above (that mode keeps
+  // one of font/colour open at all times, so there's no "closed" state for
+  // Esc to fall back to there either).
+  function closeAndReturnFocus() {
+    if (panelMode === 'always-open-inline' && !isMobileSheetWidth()) return;
+    root.setAttribute('data-me-panel', 'none');
+    control.setAttribute('aria-expanded', 'false');
+    control.focus();
+  }
+  panel.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeAndReturnFocus();
+  });
+
+  // Tab off the trigger itself — whether or not its row is open — always
+  // goes via onTabOut (same destination as tabbing out of the open row's own
+  // swatches, see above): the colour control is the last of the two
+  // pickers, so nothing else in this control->options chain follows it.
+  // isMobileSheetWidth (<=767px, narrower than the small-app-frame/arc
+  // breakpoint) is the one range this is skipped for — the bottom sheet's
+  // own focus handling takes over there instead.
+  control.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAndReturnFocus();
+      return;
+    }
+    if (e.key !== 'Tab' || e.shiftKey) return;
+    if (isMobileSheetWidth()) return;
+    const isOpen = root.getAttribute('data-me-panel') === 'colour';
+    if (isOpen) {
+      e.preventDefault();
+      roving.focusFirst();
+    } else {
+      e.preventDefault();
+      onTabOut?.();
+    }
   });
 
   return {
@@ -286,10 +587,6 @@ function buildBottomSheet(root, a11y, kind, title, contentEl) {
   sheet.append(handle, titleEl, contentEl);
   overlay.append(sheet);
 
-  let focusTrap = null;
-  let escapeRelease = null;
-  let previouslyFocused = null;
-
   function close() {
     if (root.getAttribute('data-me-panel') !== kind) return;
     root.setAttribute('data-me-panel', 'none');
@@ -301,20 +598,10 @@ function buildBottomSheet(root, a11y, kind, title, contentEl) {
     overlay.setAttribute('aria-hidden', String(!isOpen));
     if (isOpen) {
       overlay.removeAttribute('inert');
-      previouslyFocused = document.activeElement;
       disableBackgroundScroll();
-      sheet.focus();
-      focusTrap = trapFocus(sheet);
-      escapeRelease = handleEscapeClose(sheet, close);
     } else {
       overlay.setAttribute('inert', '');
       restoreBackgroundScroll();
-      focusTrap?.release();
-      focusTrap = null;
-      escapeRelease?.release();
-      escapeRelease = null;
-      previouslyFocused?.focus();
-      previouslyFocused = null;
     }
   }
 
@@ -349,13 +636,17 @@ async function buildMiniEditorActions(topActions = []) {
   const bar = createTag('div', { class: 'me-actions' });
   const menuApis = [];
   const supportedActions = topActions.filter(({ type }) => TOP_ACTION_DEFS[type]);
-  for (const { type, onClick, shareMenu } of supportedActions) {
+  const baseTabIndex = 5;
+  for (const [index, { type, onClick, shareMenu }] of supportedActions.entries()) {
     const def = TOP_ACTION_DEFS[type];
     const icon = createTag(def.icon, { class: 'me-action-icon', 'aria-hidden': 'true' });
     const btn = createTag('button', {
+      tabIndex: baseTabIndex + index,
       type: 'button',
       class: `me-action me-action--${type}`,
       'aria-label': def.label,
+      // Native tooltip matches the accessible name exactly, per a11y spec.
+      title: def.label,
     }, [icon]);
     if (shareMenu) {
       const { default: createShareMenuWidget } = await import(
@@ -373,7 +664,7 @@ async function buildMiniEditorActions(topActions = []) {
   return bar;
 }
 
-async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
+async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode, decorationsEnabled) {
   const widget = createTag('div', { class: 'mini-editor-widget' });
   const card = createTag('div', { class: 'me-card' });
   const first = cardSet[0] || { quote: '', author: '' };
@@ -399,8 +690,7 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   const quoteWrap = createTag('div', {
     class: 'me-quote-wrap',
     role: 'button',
-    tabindex: '0',
-    'aria-describedby': 'me-quote-wrap-hint',
+    tabindex: '8',
   });
   const quoteEl = createTag('div', { class: 'me-quote' });
   // The full, untruncated quote — kept separate from quoteEl's own display
@@ -410,28 +700,17 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   let currentQuote = first.quote;
   const renderQuote = (quote) => {
     currentQuote = quote;
-    const truncated = truncateQuote(quote, EDITOR_QUOTE_CHAR_LIMIT);
-    quoteEl.textContent = truncated;
-    // Only needed once the display text is actually shortened — leaving
-    // this off otherwise keeps aria-describedby (below) as the sole
-    // accessible-name influence, same as before, for the common case.
-    if (truncated === quote) quoteWrap.removeAttribute('aria-label');
-    else quoteWrap.setAttribute('aria-label', quote);
+    quoteEl.textContent = truncateQuote(quote, EDITOR_QUOTE_CHAR_LIMIT);
+    // Accessible name is always "Click to copy quote: {full quote}" — the
+    // untruncated quote appended, regardless of whether the visible text
+    // itself is truncated.
+    quoteWrap.setAttribute('aria-label', `Click to copy quote: ${quote}`);
   };
 
-  // aria-describedby (not aria-label) so the accessible name stays the
-  // visible quote text itself — an aria-label here would replace it
-  // entirely, leaving screen reader users with "Copy quote to clipboard,
-  // button" and no indication of which quote (see label-content-name-mismatch).
-  // Overridden with an explicit aria-label (see renderQuote above) only
-  // when the visible text is truncated, so the accessible name is always
-  // the full quote in that case instead of the shortened text it would
-  // otherwise default to.
-  const hint = createTag('span', { id: 'me-quote-wrap-hint', class: 'sr-only' }, ['Copy quote to clipboard']);
   const tip = createTag('span', { class: 'me-tip', 'aria-hidden': 'true' }, [
     createTag('span', { class: 'me-tip-box' }, ['Click to copy quote']),
   ]);
-  quoteWrap.append(quoteEl, hint, tip);
+  quoteWrap.append(quoteEl, tip);
   renderQuote(first.quote);
 
   const authorEl = createTag('div', { class: 'me-author' });
@@ -475,13 +754,28 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   // already cover regardless of listener wiring).
   let onFontOrColourPick = () => {};
 
+  // Keyboard-only "Skip quote suggestions" CTA, per Figma node 54:11762 — see
+  // buildSkipQuoteSuggestionsCta below. Its only purpose is to bridge Tab
+  // traversal from the colour control/swatches to the desktop zig-zag deco
+  // cards (see createMiniEditorWidget's setDecoChainTarget wiring), so it's
+  // never built at all when those don't exist: on small viewports (the arc
+  // carousel replaces them, see .me-carousel-mode) or when a host opted out
+  // of decorations entirely (e.g. the "Create a design" modal).
+  const skipCta = (!decorationsEnabled || isSmallViewport()) ? null : buildSkipQuoteSuggestionsCta(root);
+
   const controls = createTag('div', { class: 'me-controls' });
   const {
     control: fontControl,
     panel: fontPanel,
     sheetGrid: fontSheetGrid,
     selectFont,
-  } = buildFontControl(root, fontOptions, (font) => onFontOrColourPick({ font }), panelMode);
+  } = buildFontControl(
+    root,
+    fontOptions,
+    (font) => onFontOrColourPick({ font }),
+    panelMode,
+    () => colourControl.focus(),
+  );
   const {
     control: colourControl,
     panel: colourPanel,
@@ -492,6 +786,12 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
     cardSet.map((c) => c.card),
     (bgCard) => onFontOrColourPick({ card: bgCard }),
     panelMode,
+    // No Skip-quote-suggestions CTA to hand off to on small viewports (see
+    // skipCta above — the deco cards it bridges to don't exist there, the
+    // arc carousel replaces them) — Tab out of the colour control/swatches
+    // goes straight past the whole .mini-editor block instead, same
+    // destination the CTA's own Enter/Space would otherwise land on.
+    () => (skipCta ? skipCta.show() : findNextFocusableAfter(root)?.focus()),
   );
   controls.append(fontControl, colourControl);
 
@@ -502,6 +802,7 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   const colourSheet = buildBottomSheet(root, a11y, 'colour', 'Choose a background colour', colourSheetGrid);
 
   widget.append(controls, panelWrap, fontSheet.overlay, colourSheet.overlay);
+  if (skipCta) widget.append(skipCta.element);
 
   // Single MutationObserver on data-me-panel drives both sheets (mobile) and
   // the aria-expanded state on both trigger buttons (all breakpoints) — the
@@ -512,6 +813,7 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
     colourControl.setAttribute('aria-expanded', String(openPanel === 'colour'));
     fontSheet.onPanelChange();
     colourSheet.onPanelChange();
+
   });
   panelObserver.observe(root, { attributes: true, attributeFilter: ['data-me-panel'] });
 
@@ -568,6 +870,10 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
         listener(patch);
       };
     },
+    // Wired by createMiniEditorWidget once the deco cards exist (buildWidget
+    // itself has no knowledge of them — see buildSkipQuoteSuggestionsCta).
+    // A no-op when skipCta wasn't built at all (small viewport).
+    setDecoChainTarget: (fn) => skipCta?.setTabOutTarget(fn),
     destroy: () => {
       actions.destroy();
       panelObserver.disconnect();
@@ -598,11 +904,11 @@ function buildDecoCard(a11y, entry, useQuote) {
   // so this is a rarely-hit fallback) — `quote` itself stays untruncated
   // below, for useQuote/copy/aria so nothing a user acts on is ever
   // silently shortened.
-  const quoteP = createTag('p', { class: 'me-deco-quote' });
+  const quoteP = createTag('div', { class: 'me-deco-quote' });
   quoteP.textContent = truncateQuote(quote, DECO_QUOTE_CHAR_LIMIT);
   clipped.append(quoteP);
   if (author) {
-    const authorP = createTag('p', { class: 'me-deco-author' });
+    const authorP = createTag('div', { class: 'me-deco-author' });
     authorP.textContent = author;
     clipped.append(authorP);
   }
@@ -615,7 +921,14 @@ function buildDecoCard(a11y, entry, useQuote) {
     'aria-label': `Use this quote: ${attribution}`,
   });
   useBtn.textContent = 'Use this quote';
-  useBtn.addEventListener('click', () => useQuote(entry));
+  useBtn.addEventListener('click', () => {
+    useQuote(entry);
+    // Announced here (not inside useQuote itself, shared with the arc
+    // carousel's own prev/next navigation) — the arc's centre card gets its
+    // own position-based announcement instead (see buildArcCarousel), so
+    // this only fires for this specific "Use this quote" action.
+    a11y.announceToScreenReader(`Quote changed to: ${attribution}`);
+  });
 
   const copyBtn = createTag('button', {
     type: 'button',
@@ -676,6 +989,45 @@ function buildDecoCards(a11y, cardSet, useQuote) {
   return wrap;
 }
 
+// Keyboard traversal order for the deco cards' actions once reached via the
+// Skip-quote-suggestions CTA — deliberately not DOM/visual order (which is
+// 1,3,2,4,5,7,6,8, see DECO_COLUMNS): this is the order design specified for
+// this guided chain specifically.
+const DECO_TAB_CHAIN_ORDER = [2, 4, 6, 8, 1, 3, 5, 7];
+
+/**
+ * Chains Tab across every .me-deco-use/.me-deco-copy pair, in
+ * DECO_TAB_CHAIN_ORDER rather than DOM order, and returns a function that
+ * focuses the very first button in that chain (deco-2's "Use this quote") —
+ * the entry point wired to the Skip-quote-suggestions CTA's Tab handler (see
+ * createMiniEditorWidget). Every button in the chain gets an explicit
+ * tabindex=-1: like the font/colour rows' roving options (see
+ * wireOptionRowRoving), these buttons default to tabindex=0, which the
+ * browser visits only after every explicit positive-tabindex element on the
+ * page (see this widget's 1-10+ sequence) — left at the default, a plain Tab
+ * off the last button in the chain would jump to whatever tabindex=0/default
+ * element is next in the document instead of anywhere in this chain, and a
+ * shift+Tab back into the chain from outside would land on an arbitrary
+ * button instead of consistently re-entering where intended.
+ */
+function wireDecoTabChain(decorations) {
+  const buttons = DECO_TAB_CHAIN_ORDER.flatMap((cardNum) => {
+    const card = decorations.querySelector(`.me-deco--${cardNum}`);
+    return [card.querySelector('.me-deco-use'), card.querySelector('.me-deco-copy')];
+  });
+  buttons.forEach((btn, i) => {
+    btn.tabIndex = -1;
+    btn.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab' || e.shiftKey) return;
+      const next = buttons[i + 1];
+      if (!next) return;
+      e.preventDefault();
+      next.focus();
+    });
+  });
+  return () => buttons[0]?.focus();
+}
+
 /**
  * Builds one of the three carousel cards. Unlike a fixed prev/centre/next
  * slot (which would only ever swap content, never actually move — nothing
@@ -686,31 +1038,80 @@ function buildDecoCards(a11y, cardSet, useQuote) {
  */
 const ROLE_CLASSES = ['me-arc-card--prev', 'me-arc-card--center', 'me-arc-card--next', 'me-arc-card--stage-prev', 'me-arc-card--stage-next'];
 
-function buildArcCard(onActivate) {
+function buildArcCard(onActivate, a11y, tabIndex) {
   const el = createTag('div', {
     class: 'me-arc-card',
     role: 'option',
     'aria-selected': 'false',
-    tabindex: '-1',
+    tabindex: tabIndex,
+    'aria-describedby': 'me-arc-card-hint',
   });
-  const quoteP = createTag('p', { class: 'me-arc-quote' });
-  const authorP = createTag('p', { class: 'me-arc-author' });
-  el.append(quoteP, authorP);
-  el.addEventListener('click', () => onActivate(el));
+  // quoteP/authorP live inside quoteWrap (not directly in el) purely so the
+  // centre role can reuse .me-quote-wrap's existing CSS (frosted
+  // hover/focus background, tip visibility, is-copied state) via a
+  // descendant selector off el's own :hover/:focus-visible — see
+  // .me-arc-card--center:hover .me-quote-wrap in the CSS. quoteWrap itself
+  // has no role/tabindex/listeners of its own: el (role="option", already
+  // the roving-tabindex focus target for prev/centre/next) stays the one
+  // real interactive element, so this never nests two focusable elements.
+  const quoteP = createTag('div', { class: 'me-arc-quote' });
+  const authorP = createTag('div', { class: 'me-arc-author' });
+  const quoteWrap = createTag('div', { class: 'me-quote-wrap', tabIndex: (tabIndex == -1 ? -1 : 8) });
+  const hint = createTag('span', { id: 'me-arc-card-hint', class: 'sr-only' }, ['Copy quote to clipboard']);
+  const tip = createTag('span', { class: 'me-tip', 'aria-hidden': 'true' }, [
+    createTag('span', { class: 'me-tip-box' }, ['Click to copy quote']),
+  ]);
+  quoteWrap.append(quoteP, hint, tip);
+  el.append(quoteWrap, authorP);
+
+
+  // currentQuote/currentAuthor (not quoteP.textContent) — the full quote,
+  // even when the visible text is truncated (see render below), same
+  // reasoning as buildWidget's own currentQuote.
+  let currentQuote = '';
+  let currentAuthor = '';
+  const doCopy = async () => {
+    const ok = await a11y.copyQuoteToClipboard(currentQuote, currentAuthor);
+    if (ok) {
+      quoteWrap.classList.add('is-copied');
+      setTimeout(() => quoteWrap.classList.remove('is-copied'), 1200);
+    }
+  };
+
+  // Centre copies its quote on click/Enter/Space (same action as
+  // .me-quote-wrap on desktop); prev/next instead navigate via onActivate,
+  // same as before this card ever supported copying.
+  quoteWrap.addEventListener('click', () => {
+    if (el.classList.contains('me-arc-card--center')) doCopy();
+    else onActivate(el);
+  });
+  quoteWrap.addEventListener('keydown', (e) => {
+    if (el.classList.contains('me-arc-card--center') && (e.key === 'Enter' || e.key === ' ')) {
+      e.preventDefault();
+      doCopy();
+    }
+  });
 
   function render(entry) {
     el.style.backgroundImage = `url("${entry.card.bg}")`;
     // Display text truncates at EDITOR_QUOTE_CHAR_LIMIT (same limit as the
     // main widget's own quote — see renderQuote in buildWidget), applied
     // uniformly regardless of this card's current role (prev/centre/next
-    // share one render path). role="option"'s accessible name defaults to
-    // this same text content, so an explicit aria-label carries the full
-    // quote whenever it's actually shortened — never just the truncated
-    // text — matching the same full-text-preserved rule as everywhere else.
+    // share one render path).
+    currentQuote = entry.quote;
+    currentAuthor = entry.author || '';
     const truncated = truncateQuote(entry.quote, EDITOR_QUOTE_CHAR_LIMIT);
     quoteP.textContent = truncated;
-    if (truncated === entry.quote) el.removeAttribute('aria-label');
-    else el.setAttribute('aria-label', entry.author ? `${entry.quote} — ${entry.author}` : entry.quote);
+    // el's own accessible name (role="option") is always quote + author,
+    // regardless of role — the untruncated quote appended, never just the
+    // shortened display text.
+    el.setAttribute('aria-label', entry.author ? `${entry.quote} — ${entry.author}` : entry.quote);
+    // quoteWrap's own name is the click-to-copy action, same pattern as
+    // buildWidget's desktop .me-quote-wrap (see renderQuote there) — only
+    // meaningful while this card is centre (only centre copies on
+    // click/Enter, see doCopy above), but harmless to set on every role
+    // since prev/next's quoteWrap isn't a separate Tab stop anyway.
+    quoteWrap.setAttribute('aria-label', `Click to copy quote: ${entry.quote}`);
     // entry.font is the carousel-wide selected font (see buildArcCarousel's
     // selectedFont/withFont) when one has been picked — applies to every
     // role (prev/centre/next), not just centre. Falls back to the fixed
@@ -722,11 +1123,11 @@ function buildArcCard(onActivate) {
     authorP.style.display = entry.author ? '' : 'none';
   }
 
+  // Every role is now interactive (centre copies its quote on click/Enter,
+  // same as .me-quote-wrap; prev/next still navigate via onActivate above),
+  // unlike before centre was inert (cursor: default, pointer-events: none).
   function setInteractivity(role) {
     el.setAttribute('aria-selected', String(role === 'center'));
-    el.setAttribute('tabindex', role === 'center' ? '0' : '-1');
-    el.style.cursor = role === 'center' ? 'default' : 'pointer';
-    el.style.pointerEvents = role === 'center' ? 'none' : 'auto';
   }
 
   // Recycling a card (see goNext/goPrev) is a two-step move so it animates
@@ -813,7 +1214,7 @@ function buildArcGhost() {
  * re-entering the deck one step further round; the other two just carry
  * their existing content into their new role.
  */
-function buildArcCarousel(cardSet, useQuote, defaultFont) {
+function buildArcCarousel(cardSet, useQuote, defaultFont, a11y) {
   const root = createTag('div', { class: 'me-arc' });
   // Each .me-arc-card has role="option" (see buildArcCard), which axe
   // requires to sit inside a role="listbox" parent (see
@@ -847,9 +1248,9 @@ function buildArcCarousel(cardSet, useQuote, defaultFont) {
     if (el.classList.contains('me-arc-card--prev')) goPrev(); // eslint-disable-line no-use-before-define
     else if (el.classList.contains('me-arc-card--next')) goNext(); // eslint-disable-line no-use-before-define
   };
-  const cardA = buildArcCard(onActivate);
-  const cardB = buildArcCard(onActivate);
-  const cardC = buildArcCard(onActivate);
+  const cardA = buildArcCard(onActivate, a11y, -1);
+  const cardB = buildArcCard(onActivate, a11y, 2);
+  const cardC = buildArcCard(onActivate, a11y, -1);
   const ghost = buildArcGhost();
   // roles[i] tracks which role each of cardA/B/C currently occupies, so
   // navigation can rotate them without re-deriving role from DOM classes.
@@ -870,6 +1271,16 @@ function buildArcCarousel(cardSet, useQuote, defaultFont) {
     cards[roles.indexOf('prev')].render(withFont(cardSet[prevIndex]));
     cards[roles.indexOf('center')].render(centerEntry());
     cards[roles.indexOf('next')].render(withFont(cardSet[nextIndex]));
+  }
+
+  // "X of N" (1-indexed) after every navigation — the carousel is circular
+  // (goNext/goPrev wrap with modulo), so without an explicit position a
+  // screen-reader user has no way to tell they've looped back around to
+  // where they started. Only relevant here (the arc/small-viewport
+  // carousel) — the desktop zig-zag has no notion of a single "current"
+  // position to announce.
+  function announcePosition() {
+    a11y.announceToScreenReader(`${activeIndex + 1} of ${total}`);
   }
 
   function goNext() {
@@ -898,6 +1309,7 @@ function buildArcCarousel(cardSet, useQuote, defaultFont) {
     requestAnimationFrame(() => requestAnimationFrame(() => recycled.setRole('next')));
     cards[roles.indexOf('center')].render(centerEntry());
     useQuote(cardSet[activeIndex]);
+    announcePosition();
   }
 
   function goPrev() {
@@ -919,6 +1331,7 @@ function buildArcCarousel(cardSet, useQuote, defaultFont) {
     requestAnimationFrame(() => requestAnimationFrame(() => recycled.setRole('prev')));
     cards[roles.indexOf('center')].render(centerEntry());
     useQuote(cardSet[activeIndex]);
+    announcePosition();
   }
 
   // Applied from the widget's font/colour pickers (see buildWidget) so
@@ -951,12 +1364,14 @@ function buildArcCarousel(cardSet, useQuote, defaultFont) {
   const prevBtn = createTag('button', {
     type: 'button',
     class: 'me-arc-nav me-arc-nav--prev',
-    'aria-label': 'Previous template',
+    tabindex: 3,
+    'aria-label': 'previous quote',
   }, [getIconElementDeprecated('arc-nav-left')]);
   const nextBtn = createTag('button', {
     type: 'button',
     class: 'me-arc-nav me-arc-nav--next',
-    'aria-label': 'Next template',
+    'aria-label': 'next quote',
+    tabindex: 4,
   }, [getIconElementDeprecated('arc-nav-right')]);
   root.append(prevBtn, nextBtn);
 
@@ -1033,8 +1448,9 @@ export default async function createMiniEditorWidget(config = {}) {
 
   const stage = createTag('div', { class: 'mini-editor-stage' });
   const {
-    widget, useQuote, getContentModel, onFontOrColourChange, destroy: destroyWidget,
-  } = await buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode);
+    widget, useQuote, getContentModel, onFontOrColourChange, setDecoChainTarget,
+    destroy: destroyWidget,
+  } = await buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode, decorationsEnabled);
   stage.append(widget);
 
   let decorations;
@@ -1048,10 +1464,14 @@ export default async function createMiniEditorWidget(config = {}) {
     // quote/background/font combinations as the desktop zig-zag.
     const arcCardSet = [cardSet[0], ...cardSet.slice(1, 1 + decoCount)];
     decorations = buildDecoCards(a11y, cardSet, useQuote);
+    // Only meaningful on desktop (see buildSkipQuoteSuggestionsCta) — a
+    // no-op call when the CTA wasn't built (small viewport).
+    setDecoChainTarget(wireDecoTabChain(decorations));
     const { root: arcCarousel, updateCentre: updateArcCentre } = buildArcCarousel(
       arcCardSet,
       useQuote,
       fontOptions[0],
+      a11y,
     );
     updateCentre = updateArcCentre;
     onFontOrColourChange(updateCentre);
@@ -1062,24 +1482,36 @@ export default async function createMiniEditorWidget(config = {}) {
     // squeeze both side by side instead of the arc taking .me-card's place.
     widget.querySelector('.me-card').after(arcCarousel);
 
-    // On a touch/coarse-pointer device (tablet, phone), use the shorter of
-    // width/height rather than window.innerWidth alone — a physical device's
-    // short axis is orientation-independent, so this keeps the same tablet
-    // from flipping into the desktop zig-zag layout just because rotating to
-    // landscape made innerWidth exceed the breakpoint. Plain mouse/desktop
-    // windows don't have a fixed physical "short side" (resizing changes both
-    // dimensions independently), so they keep the simple width-only check —
-    // otherwise a short-but-wide desktop browser window would wrongly be
-    // treated as a tablet.
-    const TABLET_BREAKPOINT = 1199;
-    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
-    const isSmallViewport = () => {
-      const size = isTouchDevice
-        ? Math.min(window.innerWidth, window.innerHeight)
-        : window.innerWidth;
-      return size <= TABLET_BREAKPOINT;
+    // The zig-zag columns (.me-deco-col--far-left etc., see
+    // mini-editor-widget.css) sit at fixed pixel offsets from centre, so
+    // between the >=1200px breakpoint and whatever width those offsets
+    // actually need (~1622px+ for the far columns), the outer cards run past
+    // the viewport edge — clipped by `main`'s overflow-x: clip, invisible but
+    // still in the tab order. Hide (not just visually clip) any card whose
+    // box no longer fits so it also drops out of the tab order, re-checked
+    // on first load and on every resize since it depends on viewport width,
+    // not just the >=1200px/<=1199px carousel-mode switch below.
+    const decoCard1 = decorations.querySelector('.me-deco--1');
+    const decoCard3 = decorations.querySelector('.me-deco--3');
+    const decoCard5 = decorations.querySelector('.me-deco--5');
+    const decoCard7 = decorations.querySelector('.me-deco--7');
+    const syncDecoClipping = () => {
+      if (window.innerWidth < 1625) {
+        decoCard1.classList.add('hidden');
+        decoCard3.classList.add('hidden');
+        decoCard5.classList.add('hidden');
+        decoCard7.classList.add('hidden');
+      } else {
+        decoCard1.classList.remove('hidden');
+        decoCard3.classList.remove('hidden');
+        decoCard5.classList.remove('hidden');
+        decoCard7.classList.remove('hidden');
+
+      }
     };
+
     syncViewportMode = () => {
+      syncDecoClipping();
       root.classList.toggle('me-carousel-mode', isSmallViewport());
     };
     syncViewportMode();

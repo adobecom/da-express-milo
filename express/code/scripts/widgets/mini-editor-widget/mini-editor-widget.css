@@ -60,17 +60,6 @@
   transition: background-image 0.35s ease;
 }
 
-/* Whole-card focus ring, per Figma node 54:8144 ("Interactive Widget",
-   Property 1=Focus) — shown when keyboard focus lands anywhere inside the
-   card (the quote button or an action button), not just on the card itself
-   (which isn't focusable). outline (not the Figma reference's absolutely
-   positioned border div) so it doesn't need extra markup and never affects
-   layout. */
-.me-card:focus-within {
-  outline: 2px solid var(--color-focus-ring-strong);
-  outline-offset: 2px;
-}
-
 /* Top-right hover action bar (edit/share/download), per Figma node 1099-5050.
    Anchored to .mini-editor-widget (not .me-card) so the same element/CSS
    rule works unchanged in both the desktop card layout and the tablet/mobile
@@ -139,8 +128,19 @@
   transition: background-color 0.18s ease, border-color 0.18s ease;
 }
 
-.me-quote-wrap:hover,
-.me-quote-wrap:focus-visible {
+/* .me-arc-card--center:hover/:focus-visible .me-quote-wrap: the arc
+   carousel's quoteWrap (see buildArcCard in mini-editor-widget.js) has no
+   role/tabindex/listeners of its own — el (the card, already role="option")
+   is the one real interactive/focusable element, so this keys off el's own
+   :hover/:focus-visible via a descendant selector rather than a second
+   hoverable/focusable target nested inside it. Scoped to --center only:
+   prev/next keep the same .me-quote-wrap markup for structural/CSS parity
+   but never get this treatment, since hovering/focusing them navigates
+   instead of copying (see onActivate in buildArcCard). */
+.me-card .me-quote-wrap:hover,
+.me-card .me-quote-wrap:focus-visible,
+.me-arc-card--center .me-quote-wrap:hover,
+.me-arc-card--center .me-quote-wrap:focus-visible {
   background: rgb(255 255 255 / 20%);
   border-color: rgb(255 255 255 / 30%);
 }
@@ -148,7 +148,8 @@
 /* Adds the blue keyboard-focus ring on top of the shared hover/focus frosted
    treatment above, per Figma node 54:8728 ("Quote text", state=Focus) —
    Focus there is Hover's look plus this ring, not a separate treatment. */
-.me-quote-wrap:focus-visible {
+.me-card .me-quote-wrap:focus-visible,
+.me-arc-card--center .me-quote-wrap:focus-visible {
   outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: 2px;
 }
@@ -182,7 +183,7 @@
   font-size: var(--Global-Typography-Size-Label-Label-L);
   text-align: center;
   white-space: nowrap;
-  color: var(--Alias-content-typography-Body);
+  color: var(--Palette-gray-700);
 }
 
 .me-tip {
@@ -196,8 +197,10 @@
   z-index: 2;
 }
 
-.me-quote-wrap:hover .me-tip,
-.me-quote-wrap:focus-visible .me-tip {
+.me-card .me-quote-wrap:hover .me-tip,
+.me-card .me-quote-wrap:focus-visible .me-tip,
+.me-arc-card--center .me-quote-wrap:hover .me-tip,
+.me-arc-card--center .me-quote-wrap:focus-visible .me-tip {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
 }
@@ -213,18 +216,6 @@
   line-height: var(--Global-Typography-Line-height-Label-Label-M);
   text-align: center;
   white-space: nowrap;
-}
-
-.me-quote-wrap.is-copied .me-tip-box::before {
-  content: 'Copied!';
-}
-
-.me-quote-wrap.is-copied .me-tip-box {
-  font-size: 0;
-}
-
-.me-quote-wrap.is-copied .me-tip-box::before {
-  font-size: 12px;
 }
 
 .me-controls {
@@ -439,6 +430,37 @@
   background-position: center;
 }
 
+/* Keyboard-only "Skip quote suggestions" CTA, per Figma node 54:11762 — see
+   buildSkipQuoteSuggestionsCta in mini-editor-widget.js. Off-screen (not
+   display: none, which would drop it from the accessibility tree and make
+   .focus() a no-op) until its .is-visible class is added the moment Tab
+   focus actually lands on it; disappears again on blur or Enter, same as
+   any other skip-link pattern. */
+.me-skip-suggestions {
+  position: absolute;
+  top: -9999px;
+  z-index: 5;
+  box-sizing: border-box;
+  padding: 13px var(--spacing-300);
+  border: 2px solid #292929;
+  border-radius: 24px;
+  background: var(--color-white);
+  color: #292929;
+  font-size: 18px;
+  font-weight: bold;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.me-skip-suggestions.is-visible {
+  top: calc(100% + var(--spacing-100));
+}
+
+.me-skip-suggestions:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
 .mini-editor-decorations {
   /* Anchored to the header (not the stage) so cards can start a little below
      the header's top edge and extend down to the editor's bottom edge —
@@ -558,14 +580,14 @@
  * grows to fit instead of a second, independent CSS-level clamp fighting
  * that already-bounded text.
  */
-/* p.me-deco-quote (not just .me-deco-quote): .mini-editor-header p — these
+/* .me-deco-quote (not just .me-deco-quote): .mini-editor-header p — these
    cards are descendants of the header, see the block's init comment on why —
    is otherwise equally or more specific and, being a <p>, matches these too. */
-p.me-deco-quote {
+.me-deco-quote {
   /* The one flexible item in .me-deco-card-inner — grows/shrinks with the
      available space and centers its own (possibly multi-line) text within
      it, so a short quote still sits vertically centered in the card, not
-     glued to the top. padding-bottom reserves room for p.me-deco-author,
+     glued to the top. padding-bottom reserves room for .me-deco-author,
      which is absolutely positioned below and so isn't otherwise accounted
      for in this flex column's own height. */
   display: flex;
@@ -574,14 +596,13 @@ p.me-deco-quote {
   justify-content: center;
   width: 100%;
   margin: 0;
-  padding-bottom: 20px;
   color: var(--Alias-content-typography-Heading);
   text-align: center;
   font-family: var(--body-font-family);
   font-size: var(--Global-Typography-Size-Label-Label-S);
   font-style: normal;
   font-weight: var(--heading-font-weight-regular);
-  line-height: 1.25;
+  line-height: 110%;
   word-break: break-word;
 }
 
@@ -591,10 +612,10 @@ p.me-deco-quote {
    file. Anchors against .me-deco-card-inner (position: relative above),
    independent of the quote's own height, so it stays put whether the card
    grows taller for a longer quote or not. */
-p.me-deco-author {
+.me-deco-author {
   position: absolute;
   left: 50%;
-  bottom: 12px;
+  bottom: 8px;
   transform: translateX(-50%);
   margin: 0;
   width: 100%;
@@ -608,6 +629,7 @@ p.me-deco-author {
   font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
+  line-height: 12px;
 }
 
 .me-deco-actions {
@@ -795,7 +817,9 @@ p.me-deco-author {
 
 .me-arc-card--center {
   z-index: 3;
-  cursor: default;
+  cursor: pointer;
+  transition: transform 1s ease-in-out, opacity 1s ease-in-out,
+    background-color 0.18s ease, border-color 0.18s ease;
 }
 
 .me-arc-card--prev,
@@ -863,8 +887,8 @@ p.me-deco-author {
 
 .me-arc-quote {
   margin: 0;
-  font-size: var(--Global-Typography-Size-Label-Label-L);
-  line-height: 1.2;
+  font-size: 18px;
+  line-height: var(--Global-Typography-Line-height-Label-Label-L);
   text-align: center;
   word-break: break-word;
   color: var(--Alias-content-typography-Heading);
@@ -876,9 +900,11 @@ p.me-deco-author {
   bottom: var(--spacing-200);
   transform: translateX(-50%);
   margin: 0;
-  font-size: var(--Global-Typography-Size-Label-Label-S);
+  font-size: 16px;
+  line-height: 22px;
   white-space: nowrap;
-  color: var(--Alias-content-typography-Body);
+  color: var(--Palette-gray-700);
+  bottom: 24px;
 }
 
 .me-arc-nav {
@@ -1030,6 +1056,10 @@ p.me-deco-author {
     font-size: var(--Global-Typography-Size-Label-Label-M);
   }
 
+  .me-arc-author {
+    font-size: var(--Global-Typography-Size-Label-Label-S);
+  }
+
   .me-arc-nav {
     width: 40px;
     height: 40px;
@@ -1046,4 +1076,8 @@ p.me-deco-author {
   .me-sheet-overlay {
     display: block;
   }
+}
+
+.hidden {
+  display: none;
 }

@@ -4,6 +4,7 @@ import {
   handleEscapeClose,
   disableBackgroundScroll,
   restoreBackgroundScroll,
+  announceToScreenReader,
 } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import showCopyToast from '../../scripts/utils/copy-toast.js';
 import MiniEditorCardExporter from '../../scripts/utils/mini-editor-card-export.js';
@@ -221,6 +222,41 @@ function buildContentHeader(props) {
   return header;
 }
 
+/**
+ * Makes the block itself a discoverable, named landmark: role="region"
+ * labelled by its own authored heading (h1 or h2, see buildContentHeader),
+ * so a screen-reader user jumping the page's landmark/region list lands
+ * here with that heading as the name, same as any other named section.
+ * On the small-app-frame/arc breakpoint (see .me-carousel-mode, toggled by
+ * mini-editor-widget.js's syncViewportMode), " Quotes Carousel" is appended
+ * to that name — the widget becomes a carousel there, so the landmark name
+ * should say so, kept in sync reactively via the same class the widget
+ * itself already maintains on resize rather than duplicating its breakpoint
+ * logic here.
+ */
+function wireLandmark(block, header) {
+  const heading = header.querySelector('h1, h2');
+  if (!heading) return;
+  const uid = `mini-editor-${Math.random().toString(36).slice(2, 8)}`;
+  if (!heading.id) heading.id = `${uid}-heading`;
+
+  // aria-labelledby concatenates the text content of every referenced id in
+  // order, so the suffix span's own text only needs to change (see
+  // syncSuffix) — the block's aria-labelledby value itself never has to be
+  // recomputed. sr-only (not aria-hidden) since this text IS part of the
+  // landmark's name, just never meant to render visibly for sighted users.
+  const suffix = createTag('span', { id: `${uid}-suffix`, class: 'sr-only' });
+  heading.append(suffix);
+  block.setAttribute('role', 'region');
+  block.setAttribute('aria-labelledby', `${heading.id} ${suffix.id}`);
+
+  function syncSuffix() {
+    suffix.textContent = block.classList.contains('me-carousel-mode') ? 'Quotes Carousel' : '';
+  }
+  syncSuffix();
+  new MutationObserver(syncSuffix).observe(block, { attributes: true, attributeFilter: ['class'] });
+}
+
 export default async function init(block) {
   ({ createTag, loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`));
   ({ replaceKey } = await import(`${getLibs()}/features/placeholders.js`));
@@ -266,6 +302,7 @@ export default async function init(block) {
       disableBackgroundScroll,
       restoreBackgroundScroll,
       copyQuoteToClipboard,
+      announceToScreenReader,
     };
     const deps = { createTag, getIconElementDeprecated };
 
@@ -354,6 +391,7 @@ export default async function init(block) {
     // bottom edge, per the Figma reference, without extending past it.
     header.append(editor.decorations);
     themeHost.append(editor.stage);
+    wireLandmark(block, header);
 
     // "Create a design" on collapsible-rows' quotes (see collapsible-rows.js)
     // opens this modal — showing just the centre editor card, identically
@@ -379,4 +417,7 @@ export default async function init(block) {
     });
     block.closest('.section')?.remove();
   }
+
+  const miniEditor = document.querySelector('.mini-editor');
+  miniEditor.querySelector('.mini-editor-header a.quick-link').tabIndex = 1;
 }
