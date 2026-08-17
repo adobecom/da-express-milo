@@ -904,11 +904,11 @@ function buildDecoCard(a11y, entry, useQuote) {
   // so this is a rarely-hit fallback) — `quote` itself stays untruncated
   // below, for useQuote/copy/aria so nothing a user acts on is ever
   // silently shortened.
-  const quoteP = createTag('p', { class: 'me-deco-quote' });
+  const quoteP = createTag('div', { class: 'me-deco-quote' });
   quoteP.textContent = truncateQuote(quote, DECO_QUOTE_CHAR_LIMIT);
   clipped.append(quoteP);
   if (author) {
-    const authorP = createTag('p', { class: 'me-deco-author' });
+    const authorP = createTag('div', { class: 'me-deco-author' });
     authorP.textContent = author;
     clipped.append(authorP);
   }

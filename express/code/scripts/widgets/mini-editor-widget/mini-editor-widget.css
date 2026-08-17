@@ -183,7 +183,7 @@
   font-size: var(--Global-Typography-Size-Label-Label-L);
   text-align: center;
   white-space: nowrap;
-  color: var(--Alias-content-typography-Body);
+  color: var(--Palette-gray-700);
 }
 
 .me-tip {
@@ -580,14 +580,14 @@
  * grows to fit instead of a second, independent CSS-level clamp fighting
  * that already-bounded text.
  */
-/* p.me-deco-quote (not just .me-deco-quote): .mini-editor-header p — these
+/* .me-deco-quote (not just .me-deco-quote): .mini-editor-header p — these
    cards are descendants of the header, see the block's init comment on why —
    is otherwise equally or more specific and, being a <p>, matches these too. */
-p.me-deco-quote {
+.me-deco-quote {
   /* The one flexible item in .me-deco-card-inner — grows/shrinks with the
      available space and centers its own (possibly multi-line) text within
      it, so a short quote still sits vertically centered in the card, not
-     glued to the top. padding-bottom reserves room for p.me-deco-author,
+     glued to the top. padding-bottom reserves room for .me-deco-author,
      which is absolutely positioned below and so isn't otherwise accounted
      for in this flex column's own height. */
   display: flex;
@@ -596,14 +596,13 @@ p.me-deco-quote {
   justify-content: center;
   width: 100%;
   margin: 0;
-  padding-bottom: 20px;
   color: var(--Alias-content-typography-Heading);
   text-align: center;
   font-family: var(--body-font-family);
   font-size: var(--Global-Typography-Size-Label-Label-S);
   font-style: normal;
   font-weight: var(--heading-font-weight-regular);
-  line-height: 1.25;
+  line-height: 110%;
   word-break: break-word;
 }
 
@@ -613,10 +612,10 @@ p.me-deco-quote {
    file. Anchors against .me-deco-card-inner (position: relative above),
    independent of the quote's own height, so it stays put whether the card
    grows taller for a longer quote or not. */
-p.me-deco-author {
+.me-deco-author {
   position: absolute;
   left: 50%;
-  bottom: 12px;
+  bottom: 8px;
   transform: translateX(-50%);
   margin: 0;
   width: 100%;
@@ -630,6 +629,7 @@ p.me-deco-author {
   font-weight: 600;
   white-space: nowrap;
   text-overflow: ellipsis;
+  line-height: 12px;
 }
 
 .me-deco-actions {
@@ -887,8 +887,8 @@ p.me-deco-author {
 
 .me-arc-quote {
   margin: 0;
-  font-size: var(--Global-Typography-Size-Label-Label-L);
-  line-height: 1.2;
+  font-size: 18px;
+  line-height: var(--Global-Typography-Line-height-Label-Label-L);
   text-align: center;
   word-break: break-word;
   color: var(--Alias-content-typography-Heading);
@@ -900,9 +900,11 @@ p.me-deco-author {
   bottom: var(--spacing-200);
   transform: translateX(-50%);
   margin: 0;
-  font-size: var(--Global-Typography-Size-Label-Label-S);
+  font-size: 16px;
+  line-height: 22px;
   white-space: nowrap;
-  color: var(--Alias-content-typography-Body);
+  color: var(--Palette-gray-700);
+  bottom: 24px;
 }
 
 .me-arc-nav {
@@ -1052,6 +1054,10 @@ p.me-deco-author {
 
   .me-arc-quote {
     font-size: var(--Global-Typography-Size-Label-Label-M);
+  }
+
+  .me-arc-author {
+    font-size: var(--Global-Typography-Size-Label-Label-S);
   }
 
   .me-arc-nav {
