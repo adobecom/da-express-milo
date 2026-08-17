@@ -11,8 +11,11 @@ class ColorExploreBlock {
     this.filterDropdowns = this.desktopFilters.locator('.filter-dropdown');
   }
 
+  // WebKit is consistently slower than Chromium/Firefox to finish decorating
+  // these color-shared blocks in CI (observed up to ~20s vs ~2-10s), so this
+  // needs real headroom above the 15s expect-timeout default.
   async waitReady() {
-    await this.blockReady.waitFor({ state: 'attached', timeout: 15000 });
+    await this.blockReady.waitFor({ state: 'attached', timeout: 30000 });
   }
 
   // The <sp-picker> trigger for the dropdown at the given index.
