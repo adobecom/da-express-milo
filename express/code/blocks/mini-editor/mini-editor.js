@@ -379,4 +379,7 @@ export default async function init(block) {
     });
     block.closest('.section')?.remove();
   }
+
+  const miniEditor = document.querySelector('.mini-editor');
+  miniEditor.querySelector('.mini-editor-header a.quick-link').tabIndex = 1;
 }

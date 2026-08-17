@@ -75,6 +75,175 @@ function isMobileSheetWidth() {
   return window.matchMedia('(width <= 767px)').matches;
 }
 
+// On a touch/coarse-pointer device (tablet, phone), use the shorter of
+// width/height rather than window.innerWidth alone — a physical device's
+// short axis is orientation-independent, so this keeps the same tablet from
+// flipping into the desktop zig-zag layout just because rotating to
+// landscape made innerWidth exceed the breakpoint. Plain mouse/desktop
+// windows don't have a fixed physical "short side" (resizing changes both
+// dimensions independently), so they keep the simple width-only check —
+// otherwise a short-but-wide desktop browser window would wrongly be
+// treated as a tablet. Checked live (not cached), same rationale as
+// isMobileSheetWidth above — this also gates whether the keyboard-only
+// "Skip quote suggestions" CTA (only meaningful for reaching the desktop
+// zig-zag deco cards, which don't exist in arc/carousel mode) is built at
+// all, so it must react to the same breakpoint the carousel mode itself does.
+const TABLET_BREAKPOINT = 1199;
+function isSmallViewport() {
+  const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+  const size = isTouchDevice
+    ? Math.min(window.innerWidth, window.innerHeight)
+    : window.innerWidth;
+  return size <= TABLET_BREAKPOINT;
+}
+
+/**
+ * Wires roving-tabindex keyboard navigation across a row of `role="option"`
+ * buttons (the font row's .me-font buttons, the colour row's .me-swatch-btn
+ * buttons) — only one option is ever a real Tab stop at a time (tabindex 0,
+ * the rest -1), Left/Right arrows move that stop between siblings, and Tab
+ * from the current stop always exits the row via `onTabOut` rather than
+ * advancing to the next sibling. This is deliberate, not just "how roving
+ * tabindex usually works": `control`'s own explicit tabindex (9/10, see
+ * buildFontControl/buildColorControl) sits in this widget's page-wide
+ * sequential numbering (1-10+, see buildMiniEditorActions/getQuoteWrap),
+ * while these options default to tabindex 0/-1 — mixing the two means a
+ * plain Tab press from a tabindex=0 option would resume the browser's
+ * *global* ascending-tabindex sweep (landing wherever the next positive
+ * tabindex element on the page is, not necessarily this row's intended
+ * next stop), so `onTabOut` is called explicitly with `preventDefault()`
+ * instead of ever letting native Tab traversal decide.
+ */
+function wireOptionRowRoving(panel, optionSelector, onTabOut) {
+  function optionsOf() {
+    return [...panel.querySelectorAll(optionSelector)];
+  }
+
+  // Every option starts at tabindex=-1 (not a Tab stop) except whichever one
+  // is already the current selection, so opening the row never introduces
+  // more than the one roving Tab stop the pattern expects.
+  function initTabindexes() {
+    const options = optionsOf();
+    const selectedIndex = Math.max(0, options.findIndex((o) => o.classList.contains('is-selected')));
+    options.forEach((opt, i) => { opt.tabIndex = i === selectedIndex ? 0 : -1; });
+  }
+  initTabindexes();
+
+  function focusOption(index) {
+    const options = optionsOf();
+    if (!options.length) return;
+    const clamped = ((index % options.length) + options.length) % options.length;
+    options.forEach((opt, i) => { opt.tabIndex = i === clamped ? 0 : -1; });
+    options[clamped].focus();
+  }
+
+  panel.addEventListener('keydown', (e) => {
+    const options = optionsOf();
+    const currentIndex = options.indexOf(document.activeElement);
+    if (currentIndex === -1) return;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      focusOption(currentIndex + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      focusOption(currentIndex - 1);
+    } else if (e.key === 'Tab' && !e.shiftKey) {
+      e.preventDefault();
+      onTabOut();
+    }
+  });
+
+  // Re-run after a click-driven selection change (see selectFont/selectSwatch
+  // callers) so the roving Tab stop follows whichever option is now
+  // is-selected, instead of staying on whatever was current before the click.
+  return { focusFirst: () => focusOption(0), syncTabindexes: initTabindexes };
+}
+
+// Same focusable-element set as this codebase's shared a11y.js FOCUSABLE
+// (not imported directly — that module's copy is private/unexported), used
+// below purely to find where real page tab order resumes after this widget.
+const FOCUSABLE_SELECTOR = [
+  'a[href]',
+  'area[href]',
+  'button:not([disabled])',
+  'input:not([disabled])',
+  'select:not([disabled])',
+  'textarea:not([disabled])',
+  '[tabindex]:not([tabindex="-1"])',
+].join(', ');
+
+/**
+ * First element in true document order, matching FOCUSABLE_SELECTOR, that
+ * sits entirely after `root` (i.e. not a descendant of it) — used by the
+ * Skip-quote-suggestions CTA (below) to jump past the *whole* `.mini-editor`
+ * block on Enter/Space, landing wherever the page's own natural Tab order
+ * would go next, rather than merely skipping the deco cards within it.
+ */
+function findNextFocusableAfter(root) {
+  const candidates = [...document.querySelectorAll(FOCUSABLE_SELECTOR)];
+  return candidates.find((el) => {
+    if (root.contains(el)) return false;
+    // DOCUMENT_POSITION_FOLLOWING (4): true only when el comes after root in
+    // the document, filtering out anything before .mini-editor on the page.
+    return !!(root.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
+  });
+}
+
+/**
+ * Keyboard-only "Skip quote suggestions" CTA, per Figma node 54:11762. Not a
+ * normal Tab stop (tabindex=-1 at rest, never visible) — it only exists to
+ * bridge keyboard traversal from the font/colour controls to the desktop
+ * zig-zag deco cards (see createMiniEditorWidget's setDecoChainTarget),
+ * appearing solely when Tab lands here from the colour control or its open
+ * row of swatches (see buildColorControl's onTabOut). Tab moves on into the
+ * deco cards' own guided chain; Enter/Space does the opposite — it skips
+ * past the *entire* .mini-editor block (not just the deco chain), landing
+ * on whatever the page's real Tab order has next after this widget, via
+ * findNextFocusableAfter.
+ */
+function buildSkipQuoteSuggestionsCta(root) {
+  const element = createTag('button', {
+    type: 'button',
+    class: 'me-skip-suggestions',
+    tabindex: '-1',
+  });
+  element.textContent = 'Skip quote suggestions';
+
+  // Set once the deco cards exist (see createMiniEditorWidget) — Tab moves
+  // on into them; Enter/Space (below) skips past the whole block instead.
+  let onTabOut = null;
+
+  function hide() {
+    element.classList.remove('is-visible');
+    element.tabIndex = -1;
+  }
+
+  function show() {
+    element.classList.add('is-visible');
+    element.tabIndex = 0;
+    element.focus();
+  }
+
+  element.addEventListener('blur', hide);
+  element.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      hide();
+      findNextFocusableAfter(root)?.focus();
+    } else if (e.key === 'Tab' && !e.shiftKey && onTabOut) {
+      e.preventDefault();
+      onTabOut();
+    }
+  });
+
+  return {
+    element,
+    show,
+    hide,
+    setTabOutTarget: (fn) => { onTabOut = fn; },
+  };
+}
+
 /**
  * Builds one font-option button. Used to populate both the tablet/desktop
  * inline row and the mobile bottom-sheet grid from the same fontOptions
@@ -100,9 +269,10 @@ function buildFontButton(opt, index, onPick) {
   return btn;
 }
 
-function buildFontControl(root, fontOptions, onSelect, panelMode) {
+function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOptions) {
   const control = createTag('button', {
     type: 'button',
+    tabIndex: 9,
     class: 'me-control me-control--font',
     'aria-expanded': 'false',
   });
@@ -123,6 +293,7 @@ function buildFontControl(root, fontOptions, onSelect, panelMode) {
     'aria-label': 'Font style',
   });
 
+  let roving;
   function selectFont(opt) {
     root.style.setProperty('--me-quote-font', opt.font);
     root.style.setProperty('--me-quote-font-style', opt.italic ? 'italic' : 'normal');
@@ -138,6 +309,7 @@ function buildFontControl(root, fontOptions, onSelect, panelMode) {
         f.setAttribute('aria-selected', String(isMatch));
       });
     });
+    roving?.syncTabindexes();
   }
 
   const onPick = (opt) => {
@@ -156,6 +328,10 @@ function buildFontControl(root, fontOptions, onSelect, panelMode) {
   // control's own affordances.
   selectFont(fontOptions[0]);
 
+  // Desktop inline row only (see wireOptionRowRoving) — the mobile bottom
+  // sheet's own grid keeps native default tab order, out of scope here.
+  roving = wireOptionRowRoving(panel, '.me-font', () => onTabOutOfOptions?.());
+
   control.addEventListener('click', () => {
     const isOpen = root.getAttribute('data-me-panel') === 'fonts';
     // In always-open-inline mode (the modal, tablet/desktop only — mobile
@@ -166,6 +342,19 @@ function buildFontControl(root, fontOptions, onSelect, panelMode) {
     if (panelMode === 'always-open-inline' && isOpen && !isMobileSheetWidth()) return;
     root.setAttribute('data-me-panel', isOpen ? 'none' : 'fonts');
     control.setAttribute('aria-expanded', String(!isOpen));
+  });
+
+  // Enter/Space on the trigger itself opens the row via the click handler
+  // above (native <button> behaviour). Tab, once the row is open, moves
+  // straight to the first option instead of wherever native tab order would
+  // otherwise land — the options themselves default to tabindex=-1 (see
+  // wireOptionRowRoving), so without this the row would look open but be
+  // unreachable by keyboard.
+  control.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || e.shiftKey) return;
+    if (root.getAttribute('data-me-panel') !== 'fonts' || isMobileSheetWidth()) return;
+    e.preventDefault();
+    roving.focusFirst();
   });
 
   return {
@@ -195,11 +384,12 @@ function buildSwatchButton(card, index, onPick) {
   return btn;
 }
 
-function buildColorControl(root, cards, onSelect, panelMode) {
+function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
   const control = createTag('button', {
     type: 'button',
     class: 'me-control me-control--colour',
     'aria-expanded': 'false',
+    tabIndex: 10,
   });
   const swatch = createTag('span', { class: 'me-swatch' });
   // "colour" drops on mobile (label reads "Background" only there) — kept
@@ -224,6 +414,7 @@ function buildColorControl(root, cards, onSelect, panelMode) {
     'aria-label': 'Background colour',
   });
 
+  let roving;
   function selectSwatch(bg) {
     root.style.setProperty('--me-card-bg', `url("${bg}")`);
     swatch.style.backgroundImage = `url("${bg}")`;
@@ -234,6 +425,7 @@ function buildColorControl(root, cards, onSelect, panelMode) {
         s.setAttribute('aria-selected', String(isMatch));
       });
     });
+    roving?.syncTabindexes();
   }
 
   const onPick = (card) => {
@@ -247,12 +439,42 @@ function buildColorControl(root, cards, onSelect, panelMode) {
 
   if (cards[0]) swatch.style.backgroundImage = `url("${cards[0].bg}")`;
 
+  // Same rationale as buildFontControl's roving — Tab from any swatch (not
+  // just the current one) always exits via onTabOut (the Skip-quote-
+  // suggestions CTA on desktop, or straight past .mini-editor on small
+  // viewports where that CTA doesn't exist — see buildWidget's wiring),
+  // never advances between swatches (that's Left/Right's job). This inline
+  // row is shown down to the small-app-frame/arc breakpoint, not just
+  // desktop widths — only the narrower <=767px bottom sheet replaces it
+  // (see isMobileSheetWidth), so this wiring applies at both.
+  roving = wireOptionRowRoving(panel, '.me-swatch-btn', () => onTabOut?.());
+
   control.addEventListener('click', () => {
     const isOpen = root.getAttribute('data-me-panel') === 'colour';
     // See buildFontControl's identical guard for always-open-inline mode.
     if (panelMode === 'always-open-inline' && isOpen && !isMobileSheetWidth()) return;
     root.setAttribute('data-me-panel', isOpen ? 'none' : 'colour');
     control.setAttribute('aria-expanded', String(!isOpen));
+  });
+
+  // Tab off the trigger itself — whether or not its row is open — always
+  // goes via onTabOut (same destination as tabbing out of the open row's own
+  // swatches, see above): the colour control is the last of the two
+  // pickers, so nothing else in this control->options chain follows it.
+  // isMobileSheetWidth (<=767px, narrower than the small-app-frame/arc
+  // breakpoint) is the one range this is skipped for — the bottom sheet's
+  // own focus handling takes over there instead.
+  control.addEventListener('keydown', (e) => {
+    if (e.key !== 'Tab' || e.shiftKey) return;
+    if (isMobileSheetWidth()) return;
+    const isOpen = root.getAttribute('data-me-panel') === 'colour';
+    if (isOpen) {
+      e.preventDefault();
+      roving.focusFirst();
+    } else {
+      e.preventDefault();
+      onTabOut?.();
+    }
   });
 
   return {
@@ -335,10 +557,12 @@ async function buildMiniEditorActions(topActions = []) {
   const bar = createTag('div', { class: 'me-actions' });
   const menuApis = [];
   const supportedActions = topActions.filter(({ type }) => TOP_ACTION_DEFS[type]);
-  for (const { type, onClick, shareMenu } of supportedActions) {
+  const baseTabIndex = 5;
+  for (const [index, { type, onClick, shareMenu }] of supportedActions.entries()) {
     const def = TOP_ACTION_DEFS[type];
     const icon = createTag(def.icon, { class: 'me-action-icon', 'aria-hidden': 'true' });
     const btn = createTag('button', {
+      tabIndex: baseTabIndex + index,
       type: 'button',
       class: `me-action me-action--${type}`,
       'aria-label': def.label,
@@ -359,7 +583,7 @@ async function buildMiniEditorActions(topActions = []) {
   return bar;
 }
 
-async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
+async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode, decorationsEnabled) {
   const widget = createTag('div', { class: 'mini-editor-widget' });
   const card = createTag('div', { class: 'me-card' });
   const first = cardSet[0] || { quote: '', author: '' };
@@ -385,7 +609,7 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   const quoteWrap = createTag('div', {
     class: 'me-quote-wrap',
     role: 'button',
-    tabindex: '0',
+    tabindex: '8',
     'aria-describedby': 'me-quote-wrap-hint',
   });
   const quoteEl = createTag('div', { class: 'me-quote' });
@@ -461,13 +685,28 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   // already cover regardless of listener wiring).
   let onFontOrColourPick = () => {};
 
+  // Keyboard-only "Skip quote suggestions" CTA, per Figma node 54:11762 — see
+  // buildSkipQuoteSuggestionsCta below. Its only purpose is to bridge Tab
+  // traversal from the colour control/swatches to the desktop zig-zag deco
+  // cards (see createMiniEditorWidget's setDecoChainTarget wiring), so it's
+  // never built at all when those don't exist: on small viewports (the arc
+  // carousel replaces them, see .me-carousel-mode) or when a host opted out
+  // of decorations entirely (e.g. the "Create a design" modal).
+  const skipCta = (!decorationsEnabled || isSmallViewport()) ? null : buildSkipQuoteSuggestionsCta(root);
+
   const controls = createTag('div', { class: 'me-controls' });
   const {
     control: fontControl,
     panel: fontPanel,
     sheetGrid: fontSheetGrid,
     selectFont,
-  } = buildFontControl(root, fontOptions, (font) => onFontOrColourPick({ font }), panelMode);
+  } = buildFontControl(
+    root,
+    fontOptions,
+    (font) => onFontOrColourPick({ font }),
+    panelMode,
+    () => colourControl.focus(),
+  );
   const {
     control: colourControl,
     panel: colourPanel,
@@ -478,6 +717,12 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
     cardSet.map((c) => c.card),
     (bgCard) => onFontOrColourPick({ card: bgCard }),
     panelMode,
+    // No Skip-quote-suggestions CTA to hand off to on small viewports (see
+    // skipCta above — the deco cards it bridges to don't exist there, the
+    // arc carousel replaces them) — Tab out of the colour control/swatches
+    // goes straight past the whole .mini-editor block instead, same
+    // destination the CTA's own Enter/Space would otherwise land on.
+    () => (skipCta ? skipCta.show() : findNextFocusableAfter(root)?.focus()),
   );
   controls.append(fontControl, colourControl);
 
@@ -488,6 +733,7 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   const colourSheet = buildBottomSheet(root, a11y, 'colour', 'Choose a background colour', colourSheetGrid);
 
   widget.append(controls, panelWrap, fontSheet.overlay, colourSheet.overlay);
+  if (skipCta) widget.append(skipCta.element);
 
   // Single MutationObserver on data-me-panel drives both sheets (mobile) and
   // the aria-expanded state on both trigger buttons (all breakpoints) — the
@@ -555,6 +801,10 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
         listener(patch);
       };
     },
+    // Wired by createMiniEditorWidget once the deco cards exist (buildWidget
+    // itself has no knowledge of them — see buildSkipQuoteSuggestionsCta).
+    // A no-op when skipCta wasn't built at all (small viewport).
+    setDecoChainTarget: (fn) => skipCta?.setTabOutTarget(fn),
     destroy: () => {
       actions.destroy();
       panelObserver.disconnect();
@@ -663,6 +913,45 @@ function buildDecoCards(a11y, cardSet, useQuote) {
   return wrap;
 }
 
+// Keyboard traversal order for the deco cards' actions once reached via the
+// Skip-quote-suggestions CTA — deliberately not DOM/visual order (which is
+// 1,3,2,4,5,7,6,8, see DECO_COLUMNS): this is the order design specified for
+// this guided chain specifically.
+const DECO_TAB_CHAIN_ORDER = [2, 4, 6, 8, 1, 3, 5, 7];
+
+/**
+ * Chains Tab across every .me-deco-use/.me-deco-copy pair, in
+ * DECO_TAB_CHAIN_ORDER rather than DOM order, and returns a function that
+ * focuses the very first button in that chain (deco-2's "Use this quote") —
+ * the entry point wired to the Skip-quote-suggestions CTA's Tab handler (see
+ * createMiniEditorWidget). Every button in the chain gets an explicit
+ * tabindex=-1: like the font/colour rows' roving options (see
+ * wireOptionRowRoving), these buttons default to tabindex=0, which the
+ * browser visits only after every explicit positive-tabindex element on the
+ * page (see this widget's 1-10+ sequence) — left at the default, a plain Tab
+ * off the last button in the chain would jump to whatever tabindex=0/default
+ * element is next in the document instead of anywhere in this chain, and a
+ * shift+Tab back into the chain from outside would land on an arbitrary
+ * button instead of consistently re-entering where intended.
+ */
+function wireDecoTabChain(decorations) {
+  const buttons = DECO_TAB_CHAIN_ORDER.flatMap((cardNum) => {
+    const card = decorations.querySelector(`.me-deco--${cardNum}`);
+    return [card.querySelector('.me-deco-use'), card.querySelector('.me-deco-copy')];
+  });
+  buttons.forEach((btn, i) => {
+    btn.tabIndex = -1;
+    btn.addEventListener('keydown', (e) => {
+      if (e.key !== 'Tab' || e.shiftKey) return;
+      const next = buttons[i + 1];
+      if (!next) return;
+      e.preventDefault();
+      next.focus();
+    });
+  });
+  return () => buttons[0]?.focus();
+}
+
 /**
  * Builds one of the three carousel cards. Unlike a fixed prev/centre/next
  * slot (which would only ever swap content, never actually move — nothing
@@ -673,12 +962,12 @@ function buildDecoCards(a11y, cardSet, useQuote) {
  */
 const ROLE_CLASSES = ['me-arc-card--prev', 'me-arc-card--center', 'me-arc-card--next', 'me-arc-card--stage-prev', 'me-arc-card--stage-next'];
 
-function buildArcCard(onActivate, a11y) {
+function buildArcCard(onActivate, a11y, tabIndex) {
   const el = createTag('div', {
     class: 'me-arc-card',
     role: 'option',
     'aria-selected': 'false',
-    tabindex: '-1',
+    tabindex: tabIndex,
     'aria-describedby': 'me-arc-card-hint',
   });
   // quoteP/authorP live inside quoteWrap (not directly in el) purely so the
@@ -691,7 +980,7 @@ function buildArcCard(onActivate, a11y) {
   // real interactive element, so this never nests two focusable elements.
   const quoteP = createTag('div', { class: 'me-arc-quote' });
   const authorP = createTag('div', { class: 'me-arc-author' });
-  const quoteWrap = createTag('div', { class: 'me-quote-wrap' });
+  const quoteWrap = createTag('div', { class: 'me-quote-wrap', tabIndex: (tabIndex == -1 ? -1 : 8) });
   const hint = createTag('span', { id: 'me-arc-card-hint', class: 'sr-only' }, ['Copy quote to clipboard']);
   const tip = createTag('span', { class: 'me-tip', 'aria-hidden': 'true' }, [
     createTag('span', { class: 'me-tip-box' }, ['Click to copy quote']),
@@ -758,7 +1047,6 @@ function buildArcCard(onActivate, a11y) {
   // unlike before centre was inert (cursor: default, pointer-events: none).
   function setInteractivity(role) {
     el.setAttribute('aria-selected', String(role === 'center'));
-    el.setAttribute('tabindex', '0');
   }
 
   // Recycling a card (see goNext/goPrev) is a two-step move so it animates
@@ -879,9 +1167,9 @@ function buildArcCarousel(cardSet, useQuote, defaultFont, a11y) {
     if (el.classList.contains('me-arc-card--prev')) goPrev(); // eslint-disable-line no-use-before-define
     else if (el.classList.contains('me-arc-card--next')) goNext(); // eslint-disable-line no-use-before-define
   };
-  const cardA = buildArcCard(onActivate, a11y);
-  const cardB = buildArcCard(onActivate, a11y);
-  const cardC = buildArcCard(onActivate, a11y);
+  const cardA = buildArcCard(onActivate, a11y, -1);
+  const cardB = buildArcCard(onActivate, a11y, 2);
+  const cardC = buildArcCard(onActivate, a11y, -1);
   const ghost = buildArcGhost();
   // roles[i] tracks which role each of cardA/B/C currently occupies, so
   // navigation can rotate them without re-deriving role from DOM classes.
@@ -983,12 +1271,14 @@ function buildArcCarousel(cardSet, useQuote, defaultFont, a11y) {
   const prevBtn = createTag('button', {
     type: 'button',
     class: 'me-arc-nav me-arc-nav--prev',
+    tabindex: 3,
     'aria-label': 'Previous template',
   }, [getIconElementDeprecated('arc-nav-left')]);
   const nextBtn = createTag('button', {
     type: 'button',
     class: 'me-arc-nav me-arc-nav--next',
     'aria-label': 'Next template',
+    tabindex: 4,
   }, [getIconElementDeprecated('arc-nav-right')]);
   root.append(prevBtn, nextBtn);
 
@@ -1065,8 +1355,9 @@ export default async function createMiniEditorWidget(config = {}) {
 
   const stage = createTag('div', { class: 'mini-editor-stage' });
   const {
-    widget, useQuote, getContentModel, onFontOrColourChange, destroy: destroyWidget,
-  } = await buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode);
+    widget, useQuote, getContentModel, onFontOrColourChange, setDecoChainTarget,
+    destroy: destroyWidget,
+  } = await buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode, decorationsEnabled);
   stage.append(widget);
 
   let decorations;
@@ -1080,6 +1371,9 @@ export default async function createMiniEditorWidget(config = {}) {
     // quote/background/font combinations as the desktop zig-zag.
     const arcCardSet = [cardSet[0], ...cardSet.slice(1, 1 + decoCount)];
     decorations = buildDecoCards(a11y, cardSet, useQuote);
+    // Only meaningful on desktop (see buildSkipQuoteSuggestionsCta) — a
+    // no-op call when the CTA wasn't built (small viewport).
+    setDecoChainTarget(wireDecoTabChain(decorations));
     const { root: arcCarousel, updateCentre: updateArcCentre } = buildArcCarousel(
       arcCardSet,
       useQuote,
@@ -1095,23 +1389,6 @@ export default async function createMiniEditorWidget(config = {}) {
     // squeeze both side by side instead of the arc taking .me-card's place.
     widget.querySelector('.me-card').after(arcCarousel);
 
-    // On a touch/coarse-pointer device (tablet, phone), use the shorter of
-    // width/height rather than window.innerWidth alone — a physical device's
-    // short axis is orientation-independent, so this keeps the same tablet
-    // from flipping into the desktop zig-zag layout just because rotating to
-    // landscape made innerWidth exceed the breakpoint. Plain mouse/desktop
-    // windows don't have a fixed physical "short side" (resizing changes both
-    // dimensions independently), so they keep the simple width-only check —
-    // otherwise a short-but-wide desktop browser window would wrongly be
-    // treated as a tablet.
-    const TABLET_BREAKPOINT = 1199;
-    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
-    const isSmallViewport = () => {
-      const size = isTouchDevice
-        ? Math.min(window.innerWidth, window.innerHeight)
-        : window.innerWidth;
-      return size <= TABLET_BREAKPOINT;
-    };
     // The zig-zag columns (.me-deco-col--far-left etc., see
     // mini-editor-widget.css) sit at fixed pixel offsets from centre, so
     // between the >=1200px breakpoint and whatever width those offsets

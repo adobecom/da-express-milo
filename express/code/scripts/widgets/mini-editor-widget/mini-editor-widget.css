@@ -60,17 +60,6 @@
   transition: background-image 0.35s ease;
 }
 
-/* Whole-card focus ring, per Figma node 54:8144 ("Interactive Widget",
-   Property 1=Focus) — shown when keyboard focus lands anywhere inside the
-   card (the quote button or an action button), not just on the card itself
-   (which isn't focusable). outline (not the Figma reference's absolutely
-   positioned border div) so it doesn't need extra markup and never affects
-   layout. */
-.me-card:focus-within {
-  outline: 2px solid var(--color-focus-ring-strong);
-  outline-offset: 2px;
-}
-
 /* Top-right hover action bar (edit/share/download), per Figma node 1099-5050.
    Anchored to .mini-editor-widget (not .me-card) so the same element/CSS
    rule works unchanged in both the desktop card layout and the tablet/mobile
@@ -439,6 +428,37 @@
   border-radius: var(--Corner-radius-corner-radius-500);
   background-size: cover;
   background-position: center;
+}
+
+/* Keyboard-only "Skip quote suggestions" CTA, per Figma node 54:11762 — see
+   buildSkipQuoteSuggestionsCta in mini-editor-widget.js. Off-screen (not
+   display: none, which would drop it from the accessibility tree and make
+   .focus() a no-op) until its .is-visible class is added the moment Tab
+   focus actually lands on it; disappears again on blur or Enter, same as
+   any other skip-link pattern. */
+.me-skip-suggestions {
+  position: absolute;
+  top: -9999px;
+  z-index: 5;
+  box-sizing: border-box;
+  padding: 13px var(--spacing-300);
+  border: 2px solid #292929;
+  border-radius: 24px;
+  background: var(--color-white);
+  color: #292929;
+  font-size: 18px;
+  font-weight: bold;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.me-skip-suggestions.is-visible {
+  top: calc(100% + var(--spacing-100));
+}
+
+.me-skip-suggestions:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
 }
 
 .mini-editor-decorations {
