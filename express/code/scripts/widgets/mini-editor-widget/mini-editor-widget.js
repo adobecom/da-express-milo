@@ -7,8 +7,10 @@
  * carousel — plus the shared font/background controls (inline expanding rows
  * on tablet/desktop, bottom sheets on mobile). The caller supplies the data
  * (content header, font options, background cards, quotes); the widget owns
- * all rendering, interaction, animation, and the cross-block "use this quote"
- * event wiring, so a block only has to fetch data and mount the result.
+ * all rendering, interaction, and animation, so a block only has to fetch
+ * data and mount the result. Pass `decorations: false` to skip the
+ * decorative cards / arc carousel entirely and render just the centre editor
+ * card, e.g. for a host that shows the widget inside a modal.
  *
  * UI/UX is intentionally identical to the original in-block implementation —
  * this widget is an extraction of that surface, not a redesign. It is plain
@@ -39,16 +41,39 @@
  *   });
  *   stageParent.append(editor.stage);
  *   headerEl.append(editor.decorations);
- *
- * The event listener that swaps a quote/author (and optionally background /
- * font) into the editor — dispatched by collapsible-rows' "Create a design"
- * button as `mini-editor:use-quote` — is registered inside the widget.
  */
 
 let createTag;
 let getIconElementDeprecated;
 
 const DECO_CARD_COUNT = 8;
+const DECO_QUOTE_CHAR_LIMIT = 216;
+const EDITOR_QUOTE_CHAR_LIMIT = 248;
+
+/**
+ * Truncates display text at a whole-word boundary within `limit` characters,
+ * appending "…" — never mid-word. Display-only: callers keep the original,
+ * untruncated string for copy-to-clipboard and accessible names, so nothing
+ * a user actually acts on is ever silently shortened.
+ */
+function truncateQuote(quote, limit) {
+  if (quote.length <= limit) return quote;
+  const cut = quote.slice(0, limit);
+  const lastSpace = cut.lastIndexOf(' ');
+  const trimmed = lastSpace > 0 ? cut.slice(0, lastSpace) : cut;
+  return `${trimmed}…`;
+}
+
+/**
+ * True at the same <=767px width mini-editor-widget.css switches the inline
+ * font/colour row for the mobile bottom sheet. Checked live (not cached) at
+ * each click site that needs it, since panelMode itself is a static string
+ * baked in at widget creation and can't otherwise react to a resize/rotation
+ * while a host (e.g. the modal) stays open across it.
+ */
+function isMobileSheetWidth() {
+  return window.matchMedia('(width <= 767px)').matches;
+}
 
 /**
  * Builds one font-option button. Used to populate both the tablet/desktop
@@ -75,7 +100,7 @@ function buildFontButton(opt, index, onPick) {
   return btn;
 }
 
-function buildFontControl(root, fontOptions, onSelect) {
+function buildFontControl(root, fontOptions, onSelect, panelMode) {
   const control = createTag('button', {
     type: 'button',
     class: 'me-control me-control--font',
@@ -133,6 +158,12 @@ function buildFontControl(root, fontOptions, onSelect) {
 
   control.addEventListener('click', () => {
     const isOpen = root.getAttribute('data-me-panel') === 'fonts';
+    // In always-open-inline mode (the modal, tablet/desktop only — mobile
+    // falls back to the normal bottom-sheet toggle below), one panel must
+    // always stay open — clicking the already-open control's own trigger is
+    // a no-op instead of collapsing to 'none', since there is no "both
+    // closed" state for this host to fall back to.
+    if (panelMode === 'always-open-inline' && isOpen && !isMobileSheetWidth()) return;
     root.setAttribute('data-me-panel', isOpen ? 'none' : 'fonts');
     control.setAttribute('aria-expanded', String(!isOpen));
   });
@@ -164,7 +195,7 @@ function buildSwatchButton(card, index, onPick) {
   return btn;
 }
 
-function buildColorControl(root, cards, onSelect) {
+function buildColorControl(root, cards, onSelect, panelMode) {
   const control = createTag('button', {
     type: 'button',
     class: 'me-control me-control--colour',
@@ -218,6 +249,8 @@ function buildColorControl(root, cards, onSelect) {
 
   control.addEventListener('click', () => {
     const isOpen = root.getAttribute('data-me-panel') === 'colour';
+    // See buildFontControl's identical guard for always-open-inline mode.
+    if (panelMode === 'always-open-inline' && isOpen && !isMobileSheetWidth()) return;
     root.setAttribute('data-me-panel', isOpen ? 'none' : 'colour');
     control.setAttribute('aria-expanded', String(!isOpen));
   });
@@ -329,7 +362,7 @@ function buildMiniEditorActions(topActions = []) {
   return bar;
 }
 
-function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
+function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode) {
   const widget = createTag('div', { class: 'mini-editor-widget' });
   const card = createTag('div', { class: 'me-card' });
   const first = cardSet[0] || { quote: '', author: '' };
@@ -358,20 +391,39 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
     tabindex: '0',
     'aria-describedby': 'me-quote-wrap-hint',
   });
-  const quoteEl = createTag('p', { class: 'me-quote' });
-  quoteEl.textContent = first.quote;
+  const quoteEl = createTag('div', { class: 'me-quote' });
+  // The full, untruncated quote — kept separate from quoteEl's own display
+  // text (which truncates at EDITOR_QUOTE_CHAR_LIMIT) so copy-to-clipboard
+  // and the accessible name below always use the complete text, never the
+  // "…"-shortened version sighted users see on a long quote.
+  let currentQuote = first.quote;
+  const renderQuote = (quote) => {
+    currentQuote = quote;
+    const truncated = truncateQuote(quote, EDITOR_QUOTE_CHAR_LIMIT);
+    quoteEl.textContent = truncated;
+    // Only needed once the display text is actually shortened — leaving
+    // this off otherwise keeps aria-describedby (below) as the sole
+    // accessible-name influence, same as before, for the common case.
+    if (truncated === quote) quoteWrap.removeAttribute('aria-label');
+    else quoteWrap.setAttribute('aria-label', quote);
+  };
 
   // aria-describedby (not aria-label) so the accessible name stays the
   // visible quote text itself — an aria-label here would replace it
   // entirely, leaving screen reader users with "Copy quote to clipboard,
   // button" and no indication of which quote (see label-content-name-mismatch).
+  // Overridden with an explicit aria-label (see renderQuote above) only
+  // when the visible text is truncated, so the accessible name is always
+  // the full quote in that case instead of the shortened text it would
+  // otherwise default to.
   const hint = createTag('span', { id: 'me-quote-wrap-hint', class: 'sr-only' }, ['Copy quote to clipboard']);
   const tip = createTag('span', { class: 'me-tip', 'aria-hidden': 'true' }, [
     createTag('span', { class: 'me-tip-box' }, ['Click to copy quote']),
   ]);
   quoteWrap.append(quoteEl, hint, tip);
+  renderQuote(first.quote);
 
-  const authorEl = createTag('p', { class: 'me-author' });
+  const authorEl = createTag('div', { class: 'me-author' });
   authorEl.textContent = first.author;
   authorEl.style.display = first.author ? '' : 'none';
 
@@ -385,7 +437,9 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
   widget.append(buildMiniEditorActions(topActions));
 
   const doCopy = async () => {
-    const ok = await a11y.copyQuoteToClipboard(quoteEl.textContent, authorEl.textContent);
+    // currentQuote (not quoteEl.textContent) — the full quote, even when
+    // the visible text is truncated (see renderQuote).
+    const ok = await a11y.copyQuoteToClipboard(currentQuote, authorEl.textContent);
     if (ok) {
       quoteWrap.classList.add('is-copied');
       setTimeout(() => quoteWrap.classList.remove('is-copied'), 1200);
@@ -415,7 +469,7 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
     panel: fontPanel,
     sheetGrid: fontSheetGrid,
     selectFont,
-  } = buildFontControl(root, fontOptions, (font) => onFontOrColourPick({ font }));
+  } = buildFontControl(root, fontOptions, (font) => onFontOrColourPick({ font }), panelMode);
   const {
     control: colourControl,
     panel: colourPanel,
@@ -425,6 +479,7 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
     root,
     cardSet.map((c) => c.card),
     (bgCard) => onFontOrColourPick({ card: bgCard }),
+    panelMode,
   );
   controls.append(fontControl, colourControl);
 
@@ -449,6 +504,13 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
   panelObserver.observe(root, { attributes: true, attributeFilter: ['data-me-panel'] });
 
   const onDocClick = (e) => {
+    // always-open-inline (the modal) on tablet/desktop: one of font/colour
+    // always stays open — including against the very "Create a design"
+    // click that opens the modal in the first place, which document-click-
+    // bubbles here same as any other outside click. Mobile falls back to
+    // the normal bottom-sheet behaviour (close on outside click), same as
+    // the inline block.
+    if (panelMode === 'always-open-inline' && !isMobileSheetWidth()) return;
     if (!widget.contains(e.target)) {
       root.setAttribute('data-me-panel', 'none');
     }
@@ -472,7 +534,7 @@ function buildWidget(root, a11y, cardSet, fontOptions, topActions) {
           },
         } : {}),
       });
-      quoteEl.textContent = quote;
+      renderQuote(quote);
       authorEl.textContent = author || '';
       authorEl.style.display = author ? '' : 'none';
       if (bgCard) selectSwatch(bgCard.bg);
@@ -505,31 +567,48 @@ function buildDecoCard(a11y, entry, useQuote) {
   const { card, quote, author } = entry;
   const deco = createTag('div', { class: 'me-deco', tabindex: '-1' });
   const cardWrap = createTag('div', { class: 'me-deco-card-wrap' });
-  const inner = createTag('div', {
-    class: 'me-deco-card',
+  // .me-deco-card is the outer sizing/rotation box and anchors the actions
+  // row below it (`top: 100%`, see CSS) — it must stay unclipped for that,
+  // so the background image + rounded-corner clipping live one level in,
+  // on .me-deco-card-inner, instead of on this element directly like before
+  // (when the card's fixed height made the two concerns interchangeable).
+  const inner = createTag('div', { class: 'me-deco-card' });
+  const clipped = createTag('div', {
+    class: 'me-deco-card-inner',
     style: `background-image:url("${card.bg}")`,
   });
+  inner.append(clipped);
   // Fixed font/style for every card — see .me-deco-quote in CSS — so no
   // per-instance font styling here; only the editor's own selection varies.
+  // Display text only truncates at DECO_QUOTE_CHAR_LIMIT (buildCardSet in
+  // mini-editor.js already prefers quotes under this limit for these cards,
+  // so this is a rarely-hit fallback) — `quote` itself stays untruncated
+  // below, for useQuote/copy/aria so nothing a user acts on is ever
+  // silently shortened.
   const quoteP = createTag('p', { class: 'me-deco-quote' });
-  quoteP.textContent = quote;
-  inner.append(quoteP);
+  quoteP.textContent = truncateQuote(quote, DECO_QUOTE_CHAR_LIMIT);
+  clipped.append(quoteP);
   if (author) {
     const authorP = createTag('p', { class: 'me-deco-author' });
     authorP.textContent = author;
-    inner.append(authorP);
+    clipped.append(authorP);
   }
 
   const actions = createTag('div', { class: 'me-deco-actions' });
-  const useBtn = createTag('button', { type: 'button', class: 'me-deco-use' });
+  const attribution = author ? `"${quote}" — ${author}` : `"${quote}"`;
+  const useBtn = createTag('button', {
+    type: 'button',
+    class: 'me-deco-use',
+    'aria-label': `Use this quote: ${attribution}`,
+  });
   useBtn.textContent = 'Use this quote';
   useBtn.addEventListener('click', () => useQuote(entry));
 
   const copyBtn = createTag('button', {
     type: 'button',
     class: 'me-deco-copy',
-    'aria-label': 'Copy quote',
-  }, [getIconElementDeprecated('copy-quote')]);
+    'aria-label': `Copy quote: ${attribution}`,
+  }, [createTag('sp-icon-copy', { class: 'me-deco-copy-icon', 'aria-hidden': 'true' })]);
   copyBtn.addEventListener('click', async () => {
     const ok = await a11y.copyQuoteToClipboard(quote, author);
     if (ok) {
@@ -539,10 +618,29 @@ function buildDecoCard(a11y, entry, useQuote) {
   });
 
   actions.append(useBtn, copyBtn);
-  cardWrap.append(inner, actions);
+  // Child of .me-deco-card (not a sibling in cardWrap) so its `top: 100%`
+  // (see CSS) resolves against the card's own actual height — which now
+  // varies with quote length (see .me-deco-card's min-height) — instead of
+  // a fixed pixel guess that only ever matched the card's old fixed height.
+  inner.append(actions);
+  cardWrap.append(inner);
   deco.append(cardWrap);
   return deco;
 }
+
+// Cards 1-8 (see buildDecoCards) group into 4 vertical columns of 2, each
+// its own flex container (see .me-deco-col--* in CSS) so a column's cards
+// space apart via `gap` — which adapts as a card's own height varies with
+// its quote length — rather than the fixed-pixel absolute positions this
+// replaced. Column membership mirrors the original zig-zag exactly: cards
+// 1/3 and 5/7 were always the "far" columns (bigger inter-card gap), 2/4
+// and 6/8 the "near" columns (smaller gap) — see the far/near CSS classes.
+const DECO_COLUMNS = [
+  { cardIndexes: [0, 2], className: 'me-deco-col--far-left' },
+  { cardIndexes: [1, 3], className: 'me-deco-col--near-left' },
+  { cardIndexes: [4, 6], className: 'me-deco-col--far-right' },
+  { cardIndexes: [5, 7], className: 'me-deco-col--near-right' },
+];
 
 function buildDecoCards(a11y, cardSet, useQuote) {
   // Not aria-hidden: unlike a purely decorative background image, each card
@@ -552,10 +650,15 @@ function buildDecoCards(a11y, cardSet, useQuote) {
   const wrap = createTag('div', { class: 'mini-editor-decorations' });
   // cardSet[0] powers the main widget; decorative cards use the rest.
   const decoEntries = cardSet.slice(1, 1 + DECO_CARD_COUNT);
-  decoEntries.forEach((entry, i) => {
+  const decos = decoEntries.map((entry, i) => {
     const deco = buildDecoCard(a11y, entry, useQuote);
     deco.classList.add(`me-deco--${i + 1}`);
-    wrap.append(deco);
+    return deco;
+  });
+  DECO_COLUMNS.forEach(({ cardIndexes, className }) => {
+    const col = createTag('div', { class: `me-deco-col ${className}` });
+    cardIndexes.forEach((idx) => { if (decos[idx]) col.append(decos[idx]); });
+    if (col.children.length) wrap.append(col);
   });
   return wrap;
 }
@@ -584,7 +687,17 @@ function buildArcCard(onActivate) {
 
   function render(entry) {
     el.style.backgroundImage = `url("${entry.card.bg}")`;
-    quoteP.textContent = entry.quote;
+    // Display text truncates at EDITOR_QUOTE_CHAR_LIMIT (same limit as the
+    // main widget's own quote — see renderQuote in buildWidget), applied
+    // uniformly regardless of this card's current role (prev/centre/next
+    // share one render path). role="option"'s accessible name defaults to
+    // this same text content, so an explicit aria-label carries the full
+    // quote whenever it's actually shortened — never just the truncated
+    // text — matching the same full-text-preserved rule as everywhere else.
+    const truncated = truncateQuote(entry.quote, EDITOR_QUOTE_CHAR_LIMIT);
+    quoteP.textContent = truncated;
+    if (truncated === entry.quote) el.removeAttribute('aria-label');
+    else el.setAttribute('aria-label', entry.author ? `${entry.quote} — ${entry.author}` : entry.quote);
     // entry.font is the carousel-wide selected font (see buildArcCarousel's
     // selectedFont/withFont) when one has been picked — applies to every
     // role (prev/centre/next), not just centre. Falls back to the fixed
@@ -647,7 +760,11 @@ function buildArcGhost() {
 
   function playExit(entry, fromRole) {
     el.style.backgroundImage = `url("${entry.card.bg}")`;
-    quoteP.textContent = entry.quote;
+    // Same display truncation as the 3 real cards (see buildArcCard's
+    // render) — purely cosmetic here since this ghost is aria-hidden and
+    // never one of the tabbable/clickable cards, but its fixed-size card
+    // shouldn't overflow with a long quote mid-exit either.
+    quoteP.textContent = truncateQuote(entry.quote, EDITOR_QUOTE_CHAR_LIMIT);
     // entry.font carries the carousel-wide selected font here too (see
     // buildArcCarousel's withFont), so the outgoing ghost matches whatever
     // font the other 3 cards are currently showing.
@@ -850,6 +967,21 @@ function buildArcCarousel(cardSet, useQuote, defaultFont) {
  *   own: `{ trapFocus, handleEscapeClose, disableBackgroundScroll,
  *   restoreBackgroundScroll, copyQuoteToClipboard }`.
  * @param {Object} [config.deps] — `{ createTag, getIconElementDeprecated }`.
+ * @param {boolean} [config.decorations=true] — when `false`, the desktop
+ *   zig-zag decorative cards and the tablet/mobile arc carousel are never
+ *   built at all (not built-then-hidden) — only the centre editor card
+ *   renders, at every breakpoint. For a host that only ever shows the
+ *   widget in isolation (e.g. a modal), so it never pays for DOM/listeners
+ *   it will never display.
+ * @param {'always-open-inline'} [config.panelMode] — when set, the font/
+ *   colour controls behave differently from the default (collapsible,
+ *   bottom-sheet-on-mobile) inline row: one of the two starts open (font)
+ *   and stays open at every breakpoint/width — clicking its own trigger
+ *   again is a no-op instead of collapsing to neither. The CSS-driven
+ *   mobile bottom sheet must be suppressed by the host's own stylesheet
+ *   (see mini-editor-modal.css) since it's still built either way. Used by
+ *   the "Create a design" modal, where the empty space below the card
+ *   exists only to host this panel.
  * @returns {Promise<{ stage, decorations, useQuote, updateCentre, getContentModel,
  *   syncViewportMode, destroy }>}
  */
@@ -861,77 +993,86 @@ export default async function createMiniEditorWidget(config = {}) {
     backgrounds,
     a11y,
     deps,
+    decorations: decorationsEnabled = true,
+    panelMode,
   } = config;
 
   ({ createTag, getIconElementDeprecated } = deps);
 
-  // topActions' icons are real Spectrum Web Components custom elements
-  // (sp-icon-*, see TOP_ACTION_DEFS) — only loaded when actually used, so
-  // callers that don't pass topActions don't pay for the Spectrum bundle.
-  if (topActions.length) {
+  // topActions' icons and the decorative cards' "Copy quote" icon
+  // (sp-icon-copy, see buildDecoCard) are real Spectrum Web Components
+  // custom elements — only loaded when actually used, so a caller with no
+  // topActions and decorations: false doesn't pay for the Spectrum bundle.
+  if (topActions.length || decorationsEnabled) {
     await import('../spectrum/dist/icons-workflow.js');
   }
 
   const { cardSet } = backgrounds;
   const decoCount = backgrounds.decoCount ?? DECO_CARD_COUNT;
 
-  root.setAttribute('data-me-panel', 'none');
-
-  // Same entries (the widget's own + the desktop decorations) power the
-  // tablet/mobile arc carousel, so it cycles through the identical set of
-  // quote/background/font combinations as the desktop zig-zag.
-  const arcCardSet = [cardSet[0], ...cardSet.slice(1, 1 + decoCount)];
+  // always-open-inline (the modal) starts with the font panel open and
+  // keeps one of font/colour open at all times — see buildFontControl /
+  // buildColorControl's matching click-guard. Not on mobile widths, where
+  // this host falls back to the normal bottom sheet (nothing open until
+  // tapped), same as everywhere else this flag doesn't apply.
+  const startsOpen = panelMode === 'always-open-inline' && !isMobileSheetWidth();
+  root.setAttribute('data-me-panel', startsOpen ? 'fonts' : 'none');
 
   const stage = createTag('div', { class: 'mini-editor-stage' });
   const {
     widget, useQuote, getContentModel, onFontOrColourChange, destroy: destroyWidget,
-  } = buildWidget(root, a11y, cardSet, fontOptions, topActions);
-  const decorations = buildDecoCards(a11y, cardSet, useQuote);
-  const { root: arcCarousel, updateCentre } = buildArcCarousel(arcCardSet, useQuote, fontOptions[0]);
-  onFontOrColourChange(updateCentre);
-
-  // The arc carousel is inserted inside the widget, in the same flow slot
-  // as .me-card (which .me-carousel-mode hides), rather than as a sibling
-  // of the widget in the stage — the stage's flex row would otherwise
-  // squeeze both side by side instead of the arc taking .me-card's place.
-  widget.querySelector('.me-card').after(arcCarousel);
+  } = buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode);
   stage.append(widget);
 
-  // On a touch/coarse-pointer device (tablet, phone), use the shorter of
-  // width/height rather than window.innerWidth alone — a physical device's
-  // short axis is orientation-independent, so this keeps the same tablet
-  // from flipping into the desktop zig-zag layout just because rotating to
-  // landscape made innerWidth exceed the breakpoint. Plain mouse/desktop
-  // windows don't have a fixed physical "short side" (resizing changes both
-  // dimensions independently), so they keep the simple width-only check —
-  // otherwise a short-but-wide desktop browser window would wrongly be
-  // treated as a tablet.
-  const TABLET_BREAKPOINT = 1199;
-  const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
-  const isSmallViewport = () => {
-    const size = isTouchDevice
-      ? Math.min(window.innerWidth, window.innerHeight)
-      : window.innerWidth;
-    return size <= TABLET_BREAKPOINT;
-  };
-  const syncViewportMode = () => {
-    root.classList.toggle('me-carousel-mode', isSmallViewport());
-  };
-  syncViewportMode();
-  window.addEventListener('resize', syncViewportMode);
+  let decorations;
+  let updateCentre = () => {};
+  let syncViewportMode = () => {};
+  let removeResizeListener = () => {};
 
-  // "Create a design" buttons on the page's collapsible-rows quotes (see
-  // collapsible-rows.js) dispatch this instead of importing the mini-editor
-  // directly, since the two blocks are otherwise unrelated. Scrolls the
-  // editor into view and swaps in the copied quote/author, on whichever of
-  // the desktop widget or the tablet/mobile carousel is active.
-  const onUseQuoteEvent = (e) => {
-    const { quote, author } = e.detail;
-    useQuote({ quote, author });
-    updateCentre({ quote, author });
-    root.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  };
-  document.addEventListener('mini-editor:use-quote', onUseQuoteEvent);
+  if (decorationsEnabled) {
+    // Same entries (the widget's own + the desktop decorations) power the
+    // tablet/mobile arc carousel, so it cycles through the identical set of
+    // quote/background/font combinations as the desktop zig-zag.
+    const arcCardSet = [cardSet[0], ...cardSet.slice(1, 1 + decoCount)];
+    decorations = buildDecoCards(a11y, cardSet, useQuote);
+    const { root: arcCarousel, updateCentre: updateArcCentre } = buildArcCarousel(
+      arcCardSet,
+      useQuote,
+      fontOptions[0],
+    );
+    updateCentre = updateArcCentre;
+    onFontOrColourChange(updateCentre);
+
+    // The arc carousel is inserted inside the widget, in the same flow slot
+    // as .me-card (which .me-carousel-mode hides), rather than as a sibling
+    // of the widget in the stage — the stage's flex row would otherwise
+    // squeeze both side by side instead of the arc taking .me-card's place.
+    widget.querySelector('.me-card').after(arcCarousel);
+
+    // On a touch/coarse-pointer device (tablet, phone), use the shorter of
+    // width/height rather than window.innerWidth alone — a physical device's
+    // short axis is orientation-independent, so this keeps the same tablet
+    // from flipping into the desktop zig-zag layout just because rotating to
+    // landscape made innerWidth exceed the breakpoint. Plain mouse/desktop
+    // windows don't have a fixed physical "short side" (resizing changes both
+    // dimensions independently), so they keep the simple width-only check —
+    // otherwise a short-but-wide desktop browser window would wrongly be
+    // treated as a tablet.
+    const TABLET_BREAKPOINT = 1199;
+    const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
+    const isSmallViewport = () => {
+      const size = isTouchDevice
+        ? Math.min(window.innerWidth, window.innerHeight)
+        : window.innerWidth;
+      return size <= TABLET_BREAKPOINT;
+    };
+    syncViewportMode = () => {
+      root.classList.toggle('me-carousel-mode', isSmallViewport());
+    };
+    syncViewportMode();
+    window.addEventListener('resize', syncViewportMode);
+    removeResizeListener = () => window.removeEventListener('resize', syncViewportMode);
+  }
 
   return {
     stage,
@@ -942,8 +1083,7 @@ export default async function createMiniEditorWidget(config = {}) {
     syncViewportMode,
     destroy: () => {
       destroyWidget();
-      window.removeEventListener('resize', syncViewportMode);
-      document.removeEventListener('mini-editor:use-quote', onUseQuoteEvent);
+      removeResizeListener();
     },
   };
 }

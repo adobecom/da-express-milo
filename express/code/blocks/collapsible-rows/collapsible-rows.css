@@ -126,6 +126,29 @@ main .section .collapsible-row-sub-header p:last-of-type {
   filter: brightness(0) invert(1);
 }
 
+/* Icon-only on mobile — "Copy quote" needs the label at tablet/desktop
+   widths where the pill has room, but on mobile the icon alone is enough
+   and the text just crowds the "Create a design" pill beside it. The
+   accessible name still comes from the (now sr-only) label text, so this
+   is a visual change only — see buildQuoteActions in collapsible-rows.js. */
+@media (max-width: 767px) {
+  .collapsible-row-action--copy span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .collapsible-row-action--copy {
+    padding: 7px;
+  }
+}
+
 .collapsible-rows .collapsible-row-toggle-btn {
     display: block;
     width: fit-content;
