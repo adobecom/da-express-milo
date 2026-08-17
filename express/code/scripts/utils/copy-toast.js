@@ -1,4 +1,5 @@
 import { getLibs } from '../utils.js';
+import { announceToScreenReader } from '../color-shared/spectrum/utils/a11y.js';
 
 let createTag;
 let loadStyle;
@@ -11,6 +12,15 @@ let container;
  * (express-toast.js) — that pulls in the full Spectrum Web Components
  * machinery, which is disproportionate for a single plain-text toast shared
  * across unrelated blocks (mini-editor, collapsible-rows).
+ *
+ * The message is announced via announceToScreenReader (see a11y.js), not
+ * via aria-live/role="status" on this container — that was tried first but
+ * confirmed silent in real screen-reader testing: the container is created
+ * AND its first toast (already carrying the message) appended in the same
+ * synchronous call, on every invocation, so an AT never observes a prior
+ * "registered, empty" state to diff the new text against. announceToScreenReader
+ * avoids exactly this by pre-registering its own empty live region up front
+ * and only setting its text on a later tick.
  */
 export default async function showCopyToast(message) {
   if (!createTag) {
@@ -24,10 +34,11 @@ export default async function showCopyToast(message) {
     await import(`${getConfig().codeRoot}/scripts/widgets/spectrum/dist/icons-workflow.js`);
   }
   if (!container) {
-    container = createTag('div', { class: 'copy-toast-container', role: 'status', 'aria-live': 'polite' });
+    container = createTag('div', { class: 'copy-toast-container' });
     document.body.append(container);
   }
 
+  announceToScreenReader(message);
   container.querySelectorAll('.copy-toast').forEach((t) => t.remove());
 
   const toast = createTag('div', { class: 'copy-toast' }, [
