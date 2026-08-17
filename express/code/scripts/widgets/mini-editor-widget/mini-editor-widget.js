@@ -1054,7 +1054,36 @@ export default async function createMiniEditorWidget(config = {}) {
         : window.innerWidth;
       return size <= TABLET_BREAKPOINT;
     };
+    // The zig-zag columns (.me-deco-col--far-left etc., see
+    // mini-editor-widget.css) sit at fixed pixel offsets from centre, so
+    // between the >=1200px breakpoint and whatever width those offsets
+    // actually need (~1622px+ for the far columns), the outer cards run past
+    // the viewport edge — clipped by `main`'s overflow-x: clip, invisible but
+    // still in the tab order. Hide (not just visually clip) any card whose
+    // box no longer fits so it also drops out of the tab order, re-checked
+    // on first load and on every resize since it depends on viewport width,
+    // not just the >=1200px/<=1199px carousel-mode switch below.
+    const decoCard1 = decorations.querySelector('.me-deco--1');
+    const decoCard3 = decorations.querySelector('.me-deco--3');
+    const decoCard5 = decorations.querySelector('.me-deco--5');
+    const decoCard7 = decorations.querySelector('.me-deco--7');
+    const syncDecoClipping = () => {
+      if (window.innerWidth < 1625) {
+        decoCard1.classList.add('hidden');
+        decoCard3.classList.add('hidden');
+        decoCard5.classList.add('hidden');
+        decoCard7.classList.add('hidden');
+      } else {
+        decoCard1.classList.remove('hidden');
+        decoCard3.classList.remove('hidden');
+        decoCard5.classList.remove('hidden');
+        decoCard7.classList.remove('hidden');
+
+      }
+    };
+
     syncViewportMode = () => {
+      syncDecoClipping();
       root.classList.toggle('me-carousel-mode', isSmallViewport());
     };
     syncViewportMode();

@@ -170,4 +170,8 @@
   .mini-editor-header p:has(a.button) {
     display: none;
   }
+
+  .hidden {
+    display: none;
+  }
 }

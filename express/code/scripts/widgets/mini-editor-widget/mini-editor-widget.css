@@ -1050,3 +1050,7 @@ p.me-deco-author {
     display: block;
   }
 }
+
+.hidden {
+  display: none;
+}
