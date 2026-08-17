@@ -21,6 +21,7 @@ test.describe('ColorExtractBlock Test Suite', () => {
       });
 
       await test.step('step-2: Landing stage before upload', async () => {
+        await block.waitReady();
         await expect(block.block).toBeVisible();
         await expect(block.landing).toBeVisible();
         await expect(block.dropzone).toBeVisible();
@@ -70,6 +71,7 @@ test.describe('ColorExtractBlock Test Suite', () => {
     });
 
     await test.step('step-2: Pick a sample image and verify edit stage', async () => {
+      await block.waitReady();
       await expect(block.samples.first()).toBeVisible();
       await block.pickSample(0);
       await expect(block.editStage).toBeVisible({ timeout: 15000 });

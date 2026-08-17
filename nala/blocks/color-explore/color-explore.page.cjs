@@ -2,11 +2,17 @@ class ColorExploreBlock {
   constructor(page, selector = '.color-explore', nth = 0) {
     this.page = page;
     this.block = page.locator(selector).nth(nth);
+    // Same block, but only once EDS has finished decorating it (JS wired up).
+    this.blockReady = page.locator(`${selector}[data-block-status="loaded"]`).nth(nth);
 
     // Desktop filter controls (visible at >= 600px). Each dropdown wraps a
     // Spectrum <sp-picker> whose <sp-menu-item>s are hidden until it is opened.
     this.desktopFilters = this.block.locator('.filters-desktop');
     this.filterDropdowns = this.desktopFilters.locator('.filter-dropdown');
+  }
+
+  async waitReady() {
+    await this.blockReady.waitFor({ state: 'attached', timeout: 15000 });
   }
 
   // The <sp-picker> trigger for the dropdown at the given index.
