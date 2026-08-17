@@ -24,7 +24,7 @@
               "markup": null
             },
             {
-              "selector": "li.card.gallery--item.curr",
+              "selector": "li.card.gallery--item",
               "nth": 0,
               "tag": "li",
               "text": "1 Get started for free. Go to Adobe Express and sign into your Adobe account. If you don’t have one, you can quickly create a free account.",
@@ -150,7 +150,7 @@
         "semantic": {
           "texts": [
             {
-              "selector": "li.card.gallery--item.curr",
+              "selector": "li.card.gallery--item",
               "nth": 0,
               "tag": "li",
               "text": "1 Get started for free. Go to Adobe Express and sign into your Adobe account. If you don’t have one, you can quickly create a free account.",
