@@ -8,7 +8,10 @@ function correctCenterAlignment(plat) {
   plat.parentElement.style.maxWidth = `${plat.offsetWidth}px`;
 }
 
-function isAtRightmostScroll(element) {
+// "End" is the logical end of the content (last item), regardless of which
+// physical side that lands on once `flex-direction: row` mirrors under RTL.
+function isAtEndOfScroll(element, rtl) {
+  if (rtl) return element.scrollLeft <= -(element.scrollWidth - element.clientWidth - 10);
   return element.scrollLeft + element.clientWidth >= element.scrollWidth - 10;
 }
 
@@ -35,12 +38,23 @@ function initToggleTriggers(parent) {
   const rightTrigger = parent.querySelector('.carousel-right-trigger');
   const platform = parent.querySelector('.carousel-platform');
 
+  // Under `dir="rtl"`, `flex-direction: row` mirrors the platform's children:
+  // the first item (adjacent to leftTrigger) renders on the physical right,
+  // and the last item (adjacent to rightTrigger) renders on the physical
+  // left. The fader/arrow controls stay pinned to their physical side, so
+  // which trigger should drive which control needs to flip accordingly.
+  const rtl = window.getComputedStyle(platform).direction === 'rtl';
+  const startControl = rtl ? rightControl : leftControl;
+  const endControl = rtl ? leftControl : rightControl;
+  const startFaderClass = rtl ? 'right-fader' : 'left-fader';
+  const endFaderClass = rtl ? 'left-fader' : 'right-fader';
+
   // If flex container has a gap, add negative margins to compensate
   const gap = window.getComputedStyle(platform, null).getPropertyValue('gap');
   if (gap !== 'normal') {
     const gapInt = parseInt(gap.replace('px', ''), 10);
-    leftTrigger.style.marginRight = `-${gapInt + 1}px`;
-    rightTrigger.style.marginLeft = `-${gapInt + 1}px`;
+    leftTrigger.style.marginInlineEnd = `-${gapInt + 1}px`;
+    rightTrigger.style.marginInlineStart = `-${gapInt + 1}px`;
   }
 
   // intersection observer to toggle right arrow and gradient
@@ -50,38 +64,38 @@ function initToggleTriggers(parent) {
     entries.forEach((entry) => {
       if (entry.target === leftTrigger) {
         if (entry.isIntersecting) {
-          leftControl.classList.add('arrow-hidden');
-          platform.classList.remove('left-fader');
+          startControl.classList.add('arrow-hidden');
+          platform.classList.remove(startFaderClass);
         } else {
-          leftControl.classList.remove('arrow-hidden');
-          platform.classList.add('left-fader');
+          startControl.classList.remove('arrow-hidden');
+          platform.classList.add(startFaderClass);
         }
       }
 
       if (entry.target === rightTrigger) {
-        if (entry.isIntersecting || isAtRightmostScroll(platform)) {
-          rightControl.classList.add('arrow-hidden');
-          platform.classList.remove('right-fader');
+        if (entry.isIntersecting || isAtEndOfScroll(platform, rtl)) {
+          endControl.classList.add('arrow-hidden');
+          platform.classList.remove(endFaderClass);
         } else {
-          rightControl.classList.remove('arrow-hidden');
-          platform.classList.add('right-fader');
+          endControl.classList.remove('arrow-hidden');
+          platform.classList.add(endFaderClass);
         }
       }
     });
   };
 
   // Also handle scroll events to ensure proper state updates
-  const updateRightArrowState = () => {
-    if (isAtRightmostScroll(platform)) {
-      rightControl.classList.add('arrow-hidden');
-      platform.classList.remove('right-fader');
+  const updateEndArrowState = () => {
+    if (isAtEndOfScroll(platform, rtl)) {
+      endControl.classList.add('arrow-hidden');
+      platform.classList.remove(endFaderClass);
     } else {
-      rightControl.classList.remove('arrow-hidden');
-      platform.classList.add('right-fader');
+      endControl.classList.remove('arrow-hidden');
+      platform.classList.add(endFaderClass);
     }
   };
 
-  platform.addEventListener('scroll', throttle(updateRightArrowState, 100));
+  platform.addEventListener('scroll', throttle(updateEndArrowState, 100));
 
   const options = { threshold: 0, root: parent };
   const slideObserver = new IntersectionObserver(onSlideIntersect, options);

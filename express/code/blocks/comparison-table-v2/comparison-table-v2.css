@@ -513,11 +513,11 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
   font-style: normal;
   font-weight: var(--ax-heading-weight);
   line-height: var(--spacing-350);
-  padding-left: 36px;
+  padding-inline-start: 36px;
 }
 
 .comparison-table-v2 .table-container.no-accordion .toggle-button :is(h2, h3, h4, h5, h6) {
-  padding-left: 0;
+  padding-inline-start: 0;
 }
 
 /* Table styles - Mobile */
@@ -705,7 +705,7 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
   width: var(--dropdown-width);
   z-index: 100;
   left: 0;
-  text-align: left;
+  text-align: start;
   border-radius: var(--border-radius-10);
   color: var(--color-white);
   overflow: hidden;
@@ -998,7 +998,7 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
 
 
   .comparison-table-v2 .ctv2-th .ctv2-th-header {
-    text-align: left
+    text-align: start
   }
 
 
@@ -1013,10 +1013,10 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
 
 
   .comparison-table-v2 .feature-cell-header {
-    text-align: left;
+    text-align: start;
     padding: 0;
-    margin-right: var(--spacing-100);
-    margin-left: 0;
+    margin-inline-end: var(--spacing-100);
+    margin-inline-start: 0;
     box-sizing: border-box;
     width: var(--header-cell-width);
   }
@@ -1031,9 +1031,9 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
     padding-right: var(--spacing-400);
     flex-wrap: nowrap;
     max-width: 1300px;
-    text-align: left;
+    text-align: start;
     display: flex;
-    margin-left: calc(var(--spacing-50) * -1);
+    margin-inline-start: calc(var(--spacing-50) * -1);
     border: 0.25px solid transparent;
   }
 
@@ -1045,7 +1045,7 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
     opacity: 0;
     flex-grow: 1;
     display: flex;
-    margin-right: var(--spacing-100);
+    margin-inline-end: var(--spacing-100);
     width: var(--header-cell-width);
     transition:
       opacity var(--transition-fade),
@@ -1103,14 +1103,14 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
     width: var(--header-cell-width);
     justify-content: flex-end;
     align-items: flex-start;
-    text-align: left;
+    text-align: start;
     padding-bottom: var(--spacing-100);
     font-style: normal;
     font-weight: var(--ax-heading-weight);
     line-height: var(--heading-line-height);
     display: flex;
     box-sizing: border-box;
-    margin-right: var(--spacing-200);
+    margin-inline-end: var(--spacing-200);
   }
 
   .comparison-table-v2 .sticky-header .plan-cell {
@@ -1149,8 +1149,8 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
   .comparison-table-v2 .table-container .toggle-button h4,
   .comparison-table-v2 .table-container .toggle-button h5,
   .comparison-table-v2 .table-container .toggle-button h6 {
-    text-align: left;
-    padding-left: 0;
+    text-align: start;
+    padding-inline-start: 0;
   }
 
   .comparison-table-v2 table {
