@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { startTransition, useEffect, useMemo, useRef, useState } from 'react';
 import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import type { CsvRow, InputSummary } from '../types';
@@ -425,26 +425,31 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
       done++;
       if (done % 25 === 0 || done === total) setHydrateProgress({ done, total });
     }, ZAZZLE_LOOKUP_CONCURRENCY);
-    setHydrateProgress(null);
     const changedCount = updated.filter((row, i) => row !== rows[i]).length;
     const refCount = Object.keys(referenceValues).length;
     const anyProductIds = rows.some((r) => r.product_id?.trim());
-    setHydrateMsg(
-      changedCount > 0
-        ? `Updated ${changedCount} row${changedCount === 1 ? '' : 's'} from Zazzle`
-        : refCount > 0
-        ? 'All fields already complete — Zazzle data loaded for comparison'
-        : anyProductIds
-        ? 'Could not reach Zazzle — this origin may be blocked (CORS). Try localhost or the .aem.live URL.'
-        : 'No matching Zazzle data found',
-    );
-    setZazzleHydratedFields(hydratedFields);
-    setZazzleReferenceValues(referenceValues);
-    setExpandedDiffCells({});
-    setContentWarnings(computeContentWarnings(updated));
-    setActiveFilter('total');
-    onChange(updated);
-    setHydrating(false);
+    // Apply the heavy result (re-sort + re-render of up to several thousand rows) as a low-priority
+    // transition: React time-slices it and keeps the page interactive instead of hard-freezing
+    // ("Page Unresponsive"). The counter stays live during the fetch loop above; it clears here.
+    startTransition(() => {
+      setHydrateMsg(
+        changedCount > 0
+          ? `Updated ${changedCount} row${changedCount === 1 ? '' : 's'} from Zazzle`
+          : refCount > 0
+          ? 'All fields already complete — Zazzle data loaded for comparison'
+          : anyProductIds
+          ? 'Could not reach Zazzle — this origin may be blocked (CORS). Try localhost or the .aem.live URL.'
+          : 'No matching Zazzle data found',
+      );
+      setZazzleHydratedFields(hydratedFields);
+      setZazzleReferenceValues(referenceValues);
+      setExpandedDiffCells({});
+      setContentWarnings(computeContentWarnings(updated));
+      setActiveFilter('total');
+      onChange(updated);
+      setHydrateProgress(null);
+      setHydrating(false);
+    });
   }
 
   async function handleValidate() {
