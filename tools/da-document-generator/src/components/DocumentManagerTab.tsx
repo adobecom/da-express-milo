@@ -12,6 +12,7 @@ import DocumentManagerTable, { type SortField } from './DocumentManagerTable';
 import BulkEditBar from './BulkEditBar';
 import BulkFieldEditModal from './BulkFieldEditModal';
 import GmcSubmitDialog from './gmc/GmcSubmitDialog';
+import EnvToggle from './ui/EnvToggle';
 import type { ManagedDoc, GmcEnv, GmcEnvState } from '../types';
 
 const LEGACY_BATCH = '(legacy / no batch)';
@@ -66,6 +67,8 @@ export default function DocumentManagerTab() {
   const [gmcDialogOpen, setGmcDialogOpen] = useState(false);
   const [gmcMessage, setGmcMessage] = useState<string | null>(null);
   const [checkingGmc, setCheckingGmc] = useState<Set<string>>(new Set());
+  const [bulkCheckEnv, setBulkCheckEnv] = useState<GmcEnv>('test');
+  const [checkingGmcBulk, setCheckingGmcBulk] = useState(false);
   const [showExportMenu, setShowExportMenu] = useState(false);
   const exportMenuRef = useRef<HTMLDivElement>(null);
 
@@ -257,19 +260,20 @@ export default function DocumentManagerTab() {
     }));
   }
 
-  // Status now lives per-env in the column, so a check refreshes both test and prod in one go
-  // (GMC-Submit-Dialog-PRD.md §5). Each env is a separate diagnostics call.
   async function handleCheckGmcStatus() {
     const token = getToken();
     if (!token) return;
     const targets = selected.size > 0 ? selectedDocs : docs;
-    await withBusy(async () => {
-      for (const env of ['test', 'prod'] as GmcEnv[]) {
-        const { updates } = await checkGmcStatus(targets, env, token);
-        applyGmcUpdates(env, updates);
-      }
-      setGmcMessage(`Checked GMC status (test + prod) for ${targets.length} row${targets.length !== 1 ? 's' : ''}`);
-    });
+    setCheckingGmcBulk(true);
+    try {
+      await withBusy(async () => {
+        const { updates } = await checkGmcStatus(targets, bulkCheckEnv, token);
+        applyGmcUpdates(bulkCheckEnv, updates);
+        setGmcMessage(`Checked GMC status (${bulkCheckEnv}) for ${targets.length} row${targets.length !== 1 ? 's' : ''}`);
+      });
+    } finally {
+      setCheckingGmcBulk(false);
+    }
   }
 
   // Per-row status check triggered by clicking the check icon in a table row.
@@ -447,13 +451,20 @@ export default function DocumentManagerTab() {
           </div>
 
           <div className="flex items-center gap-3 flex-wrap text-sm">
+            <EnvToggle value={bulkCheckEnv} onChange={setBulkCheckEnv} disabled={busy} />
             <button
               type="button"
               disabled={busy}
               onClick={() => void handleCheckGmcStatus()}
-              className="px-3.5 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors border border-gray-300"
+              className="px-3.5 py-1.5 bg-gray-100 text-gray-700 text-xs font-medium rounded-lg hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors border border-gray-300 inline-flex items-center gap-1.5"
             >
-              {selected.size > 0 ? `Check GMC status (${selected.size} selected)` : `Check GMC status (all ${docs.length})`}
+              {checkingGmcBulk && (
+                <svg className="w-3 h-3 animate-spin" viewBox="0 0 24 24" fill="none">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
+                </svg>
+              )}
+              {checkingGmcBulk ? 'Checking…' : 'Check GMC status'}
             </button>
             {gmcMessage && <span className="text-gray-500">{gmcMessage}</span>}
           </div>

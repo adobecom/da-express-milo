@@ -163,15 +163,15 @@ export function GmcStatusChip({
     : state.status === 'live' ? 'Live'
     : state.status === 'disapproved' ? 'Disapproved'
     : state.status === 'error' ? 'Error'
+    : state.status === 'not-pushed' ? 'Not pushed to GMC'
     : 'Pending';
   const color = !state ? 'text-gray-400'
     : state.status === 'live' ? 'text-green-700'
     : state.status === 'disapproved' ? 'text-red-700'
     : state.status === 'error' ? 'text-red-600'
+    : state.status === 'not-pushed' ? 'text-gray-500'
     : 'text-amber-600';
-  const title = state && (state.status === 'disapproved' || state.status === 'error')
-    ? state.message || label
-    : undefined;
+  const title = state?.message ? state.message : undefined;
 
   if (!onCheck) return <span className={`font-medium ${color}`} title={title || disabledReason}>{label}</span>;
   return (

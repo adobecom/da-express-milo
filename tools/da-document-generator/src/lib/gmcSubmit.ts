@@ -1,5 +1,6 @@
 import { lookupProductFromTemplate, fetchProductPricing } from '../api/zazzleApi';
 import { GMC_LOCALES, DEFAULT_GMC_LOCALE } from '../api/gmcLocales';
+import { runBatch, DEFAULT_CONCURRENCY } from './concurrency';
 import {
   syncProducts,
   fetchDiagnostics,
@@ -11,6 +12,9 @@ import type { ManagedDoc, GmcEnv, GmcEnvState, GmcStatus } from '../types';
 
 // sync-products (actions/lib/validate.js) hard-rejects the whole call above this.
 export const MAX_GMC_CHUNK = 100;
+
+// diagnostics (actions/lib/validate.js) separately hard-rejects above this limit
+export const MAX_DIAGNOSTICS_CHUNK = 100;
 
 export function chunkRows<T>(items: T[], size = MAX_GMC_CHUNK): T[][] {
   const chunks: T[][] = [];
@@ -189,40 +193,38 @@ export async function submitAssembledRows(
 }
 
 // ---------------------------------------------------------------------------
-// Diagnostics / status check (unchanged from v1) — GMC-Status-Sync-PRD.md §8
+// Diagnostics / status check — GMC-Status-Sync-PRD.md §8 (contract rewritten server-side since;
+// this section no longer matches that PRD — see `GmcDiagnosticResult` in gmcApi.ts)
 // ---------------------------------------------------------------------------
 
+function disapprovedCountriesMessage(result: GmcDiagnosticResult): string | undefined {
+  const countries = [...new Set(
+    result.statusPerReportingContext?.flatMap((s) => s.disapprovedCountries ?? []) ?? [],
+  )];
+  return countries.length ? `Rejected in ${countries.join(', ')}` : undefined;
+}
+
 function mapDiagnosticResult(result: GmcDiagnosticResult): { status: GmcStatus; message?: string } {
-  if (!result.ok) {
-    return { status: 'error', message: result.message || result.reason || 'Diagnostics fetch failed' };
-  }
-  // A stale result means "don't yet trust this value as final" regardless of which bucket
-  // Google reported — collapsed into Pending, see GMC-Status-Sync-PRD.md §8.
-  if (result.stale) return { status: 'pending' };
-  if (result.status === 'active') return { status: 'live' };
-  if (result.status === 'disapproved') {
-    return { status: 'disapproved', message: result.issues?.[0]?.description };
+  const status = result.aggregatedReportingContextStatus;
+  if (status === 'ELIGIBLE' || status === 4) return { status: 'live' };
+  if (status === 'ELIGIBLE_LIMITED' || status === 3) return { status: 'live', message: disapprovedCountriesMessage(result) };
+  if (status === 'PENDING' || status === 2) return { status: 'pending' };
+  if (status === 'NOT_ELIGIBLE_OR_DISAPPROVED' || status === 1) {
+    return { status: 'disapproved', message: disapprovedCountriesMessage(result) };
   }
   return { status: 'pending' };
 }
 
 export interface GmcCheckOutcome {
   updates: Map<string, GmcEnvState>;
-  /** Rows skipped because they've never been submitted in this env — checking them would just
-   * surface a meaningless NOT_FOUND, not real signal. */
-  skippedNeverSubmitted: number;
+  skippedMissingProductId: number;
 }
 
-/**
- * Diagnostics is only meaningful for rows already submitted in this env — a row that's still
- * "Not submitted" would just come back NOT_FOUND, indistinguishable from a real error. Those are
- * silently excluded (counted in `skippedNeverSubmitted`) rather than checked.
- */
 export async function checkGmcStatus(docs: ManagedDoc[], env: GmcEnv, token: string): Promise<GmcCheckOutcome> {
-  const eligible = docs.filter((d) => d.gmc?.[env] && d.identity.productId);
-  const skippedNeverSubmitted = docs.length - eligible.length;
+  const eligible = docs.filter((d) => d.identity.productId);
+  const skippedMissingProductId = docs.length - eligible.length;
   const updates = new Map<string, GmcEnvState>();
-  if (eligible.length === 0) return { updates, skippedNeverSubmitted };
+  if (eligible.length === 0) return { updates, skippedMissingProductId };
 
   const byOfferId = new Map<string, ManagedDoc>();
   for (const doc of eligible) {
@@ -230,13 +232,37 @@ export async function checkGmcStatus(docs: ManagedDoc[], env: GmcEnv, token: str
   }
 
   const now = new Date().toISOString();
-  const response = await fetchDiagnostics(env, [...byOfferId.keys()], token);
-  for (const result of response.results) {
-    const doc = byOfferId.get(result.offerId);
-    if (!doc) continue;
-    const { status, message } = mapDiagnosticResult(result);
-    updates.set(doc.path, { status, message, lastCheckedAt: now, lastSubmittedAt: doc.gmc?.[env]?.lastSubmittedAt });
-  }
+  const chunks = chunkRows([...byOfferId.keys()], MAX_DIAGNOSTICS_CHUNK);
+  await runBatch(chunks, async (offerIds) => {
+    try {
+      const response = await fetchDiagnostics(env, offerIds, token);
+      for (const result of response.results) {
+        const doc = byOfferId.get(result.offerId);
+        if (!doc) continue;
+        const { status, message } = mapDiagnosticResult(result);
+        updates.set(doc.path, { status, message, lastCheckedAt: now, lastSubmittedAt: doc.gmc?.[env]?.lastSubmittedAt });
+      }
+      // Explicitly-requested offerIds GMC has no record of at all — confirmed absent, not just
+      // unchecked (see `not-pushed` in types.ts).
+      for (const offerId of response.missingOfferIds ?? []) {
+        const doc = byOfferId.get(offerId);
+        if (!doc) continue;
+        updates.set(doc.path, { status: 'not-pushed', lastCheckedAt: now, lastSubmittedAt: doc.gmc?.[env]?.lastSubmittedAt });
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      for (const offerId of offerIds) {
+        const doc = byOfferId.get(offerId);
+        if (!doc) continue;
+        updates.set(doc.path, {
+          status: 'error',
+          lastCheckedAt: now,
+          lastSubmittedAt: doc.gmc?.[env]?.lastSubmittedAt,
+          message: `Rate limited or unreachable — retry later (${message})`,
+        });
+      }
+    }
+  }, DEFAULT_CONCURRENCY);
 
-  return { updates, skippedNeverSubmitted };
+  return { updates, skippedMissingProductId };
 }
