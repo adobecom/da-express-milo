@@ -1041,6 +1041,31 @@
   justify-self: center;
 }
 
+.light-mode .me-deco-quote {
+  color: var(--Alias-content-typography-Heading)
+}
+
+.light-mode .me-arc-quote {
+  color: var(--Alias-content-typography-Heading)
+}
+
+.light-mode .me-deco-author {
+  color: var(--Palette-gray-700);
+}
+
+.light-mode .me-arc-author {
+  color: var(--Palette-gray-700);
+}
+
+.light-mode .me-quote {
+  color: var(--Alias-content-typography-Heading)
+}
+
+.light-mode .me-author {
+  color: var(--Palette-gray-700);
+}
+
+
 @media (width <= 767px) {
   /* "Background colour" control label reads "Background" only at this
      width — narrower control column has less room for the full label. */

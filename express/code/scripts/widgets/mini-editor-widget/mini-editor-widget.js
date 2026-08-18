@@ -713,6 +713,15 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   quoteWrap.append(quoteEl, tip);
   renderQuote(first.quote);
 
+  // Mirrors the light-mode/dark-mode class the deco/arc cards apply per their
+  // own card.mode (see buildDecoCards/buildArcCard's render) so the desktop
+  // .me-card's text/control contrast follows the same per-background mode.
+  const setCardMode = (mode) => {
+    card.classList.remove('light-mode', 'dark-mode');
+    if (mode) card.classList.add(`${mode}-mode`);
+  };
+  setCardMode(first.card?.mode);
+
   const authorEl = createTag('div', { class: 'me-author' });
   authorEl.textContent = first.author;
   authorEl.style.display = first.author ? '' : 'none';
@@ -851,7 +860,10 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
       renderQuote(quote);
       authorEl.textContent = author || '';
       authorEl.style.display = author ? '' : 'none';
-      if (bgCard) selectSwatch(bgCard.bg);
+      if (bgCard) {
+        selectSwatch(bgCard.bg);
+        setCardMode(bgCard.mode);
+      }
       if (font) selectFont(font);
     },
     getContentModel: () => ({ ...contentModel, font: { ...contentModel.font } }),
@@ -866,7 +878,10 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
             },
           });
         }
-        if (patch.card) updateContentModel({ backgroundUrl: patch.card.bg });
+        if (patch.card) {
+          updateContentModel({ backgroundUrl: patch.card.bg });
+          setCardMode(patch.card.mode);
+        }
         listener(patch);
       };
     },
@@ -979,6 +994,7 @@ function buildDecoCards(a11y, cardSet, useQuote) {
   const decos = decoEntries.map((entry, i) => {
     const deco = buildDecoCard(a11y, entry, useQuote);
     deco.classList.add(`me-deco--${i + 1}`);
+    deco.classList.add(`${entry.card.mode}-mode`);
     return deco;
   });
   DECO_COLUMNS.forEach(({ cardIndexes, className }) => {
@@ -1121,6 +1137,7 @@ function buildArcCard(onActivate, a11y, tabIndex) {
     quoteP.style.fontWeight = entry.font?.weight || '';
     authorP.textContent = entry.author || '';
     authorP.style.display = entry.author ? '' : 'none';
+    el.classList.add(`${entry.card.mode}-mode`)
   }
 
   // Every role is now interactive (centre copies its quote on click/Enter,

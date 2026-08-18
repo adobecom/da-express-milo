@@ -27,6 +27,47 @@ function buildRecipe(props) {
   return params.toString();
 }
 
+/**
+ * Determines whether an image's dominant colors are overall 'light' or 'dark'.
+ *
+ * @param {Array} colors - Array of color objects with coverage and RGB values.
+ * @returns {'light' | 'dark'}
+ */
+function getImageColorMode(item) {
+  const page = item.pages?.[0];
+  const colors = page.extractedColors;
+  if (!colors?.length) {
+    return 'light'; // fallback
+  }
+
+  let weightedBrightness = 0;
+  let totalCoverage = 0;
+
+  for (const color of colors) {
+    if (color.mode !== 'RGB' || !color.value) {
+      continue;
+    }
+
+    const { r, g, b } = color.value;
+    const coverage = color.coverage ?? 0;
+
+    // Perceived brightness (0-255)
+    const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+
+    weightedBrightness += brightness * coverage;
+    totalCoverage += coverage;
+  }
+
+  if (totalCoverage === 0) {
+    return 'light';
+  }
+
+  const averageBrightness = weightedBrightness / totalCoverage;
+
+  // 128 is the midpoint of the 0-255 brightness range
+  return averageBrightness < 128 ? 'dark' : 'light';
+}
+
 function extractImagePreview(page) {
   return page?.rendition?.image?.preview;
 }
@@ -75,7 +116,7 @@ export default async function getCardBackgrounds(props) {
     .map((item) => {
       /* eslint-enable no-underscore-dangle */
       const bg = getImageSrc(item);
-      return { id: item.id, bg, title: getTemplateTitle(item) };
+      return { id: item.id, bg, title: getTemplateTitle(item), mode: getImageColorMode(item) };
     })
     .filter((card) => !!card.bg);
 }
