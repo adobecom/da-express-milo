@@ -520,6 +520,15 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
   padding-inline-start: 0;
 }
 
+/* The centered layout above uses padding-inline-start to optically balance
+   the title against the icon on the opposite side. RTL instead pushes the
+   title flush to the table's trailing (right) edge, so that offset and the
+   centering both need to be turned off. */
+[dir="rtl"] .comparison-table-v2 .table-container .toggle-button :is(h2, h3, h4, h5, h6) {
+  text-align: right;
+  padding-inline-start: 0;
+}
+
 /* Table styles - Mobile */
 .comparison-table-v2 table,
 .comparison-table-v2 table td,
@@ -541,6 +550,10 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
   box-sizing: content-box;
   text-align: center;
   padding: var(--spacing-200) var(--spacing-300) 0 var(--spacing-300);
+}
+
+[dir="rtl"] .comparison-table-v2 .feature-cell-header {
+  text-align: right;
 }
 
 .comparison-table-v2 .feature-cell {
@@ -602,6 +615,11 @@ main .comparison-table-v2 .sticky-header .plan-cell-wrapper:not(:has(p))> :is(h2
   text-align: center;
   font-family: var(--body-font-family);
   font-size: var(--ax-body-xs-size);
+}
+
+[dir="rtl"] .comparison-table-v2 table tbody th,
+[dir="rtl"] .comparison-table-v2 .ctv2-th .ctv2-th-header {
+  text-align: right;
 }
 
 
