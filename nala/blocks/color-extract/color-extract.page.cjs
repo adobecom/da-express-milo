@@ -30,8 +30,11 @@ class ColorExtractBlock {
 
   // Gate interactions on the block being fully decorated — otherwise the upload
   // change-handler may not be wired yet and the file is silently dropped.
+  // WebKit is consistently slower than Chromium/Firefox to finish decorating
+  // these color-shared blocks in CI (observed up to ~20s vs ~2-10s), so this
+  // needs real headroom above the 15s expect-timeout default.
   async waitReady() {
-    await this.blockReady.waitFor({ state: 'attached', timeout: 15000 });
+    await this.blockReady.waitFor({ state: 'attached', timeout: 30000 });
   }
 
   async uploadImage() {
