@@ -48,7 +48,10 @@ function ScanProgressBar({ progress }: { progress: { phase: ScanPhase; done: num
 
 export default function DocumentManagerTab() {
   const [rootPathInput, setRootPathInput] = useState(DEFAULT_ROOT_PATH);
-  const [rootPath, setRootPath] = useState<string | null>(DEFAULT_ROOT_PATH);
+  // Starts null so the scan is manual — kicked off by the Scan button via handleScan — rather than
+  // running automatically on mount. rootPathInput stays pre-filled with DEFAULT_ROOT_PATH so the
+  // user only has to click Scan.
+  const [rootPath, setRootPath] = useState<string | null>(null);
   const [scanNonce, setScanNonce] = useState(0);
   const [docs, setDocs] = useState<ManagedDoc[]>([]);
   const [crawlErrors, setCrawlErrors] = useState<(CrawlError | DocFetchError)[]>([]);
