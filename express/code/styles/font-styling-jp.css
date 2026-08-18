@@ -84,6 +84,6 @@ main .section.long-form .content :is(p, ul, ol):not(#_) {
   line-height: 1.5;
 }
 
-.ax-marquee h1:not(#_):not(.heading-long):not(.heading-very-long):not(.heading-x-long) {
+.section .ax-marquee-dynamic-hero [class*="heading"]:first-of-type{
   font-size: var(--heading-font-size-xl);
 }
