@@ -84,16 +84,6 @@ main .section.long-form .content :is(p, ul, ol):not(#_) {
   line-height: 1.5;
 }
 
-/* --- hero/marquee H1 re-point ---
-   Per design (Jira MWPW-203933 comment): hero/marquee H1 is 28px on
-   mobile/tablet, stepping up to 36px on desktop - exactly the JP
-   Headings/XL tier above. ax-marquee.css carries a pre-existing
-   :lang(ja) h1 override (flat --heading-font-size-l, no responsive step)
-   that predates this JP scale; it has the same specificity as this rule
-   but, as block CSS, loads after this file, so it wins by source order.
-   :not(#_) escalates specificity to override it without !important.
-   Scoped off the heading-long/-very-long/-x-long variants, which
-   intentionally downsize further to fit long JP titles. */
 .ax-marquee h1:not(#_):not(.heading-long):not(.heading-very-long):not(.heading-x-long) {
   font-size: var(--heading-font-size-xl);
 }
