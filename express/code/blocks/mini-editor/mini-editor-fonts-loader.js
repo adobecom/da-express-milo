@@ -28,7 +28,7 @@ const FALLBACK_FONT_OPTIONS = [
 // load the JS embed kit (works cross-domain) instead of the CSS endpoint
 // (which 412s off non-allow-listed domains), and resolve on active/inactive
 // so callers await real font readiness, not just script load.
-const ADOBE_FONTS_KIT_ID = 'iqd6egj';
+const ADOBE_FONTS_KIT_ID = 'bxg0yug';
 
 function loadWebFonts() {
   return new Promise((resolve) => {

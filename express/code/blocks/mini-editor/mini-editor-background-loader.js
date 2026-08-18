@@ -13,6 +13,9 @@
 import {
   fetchResults,
   isValidTemplate,
+  getTemplateTitle,
+  extractRenditionLinkHref,
+  extractComponentLinkHref,
   getImageThumbnailSrc,
 } from '../../scripts/template-utils.js';
 
@@ -24,16 +27,31 @@ function buildRecipe(props) {
   return params.toString();
 }
 
-function getTemplateTitle(item) {
-  if (item && item['dc:title'] && item['dc:title']['i-default']) {
-    return item['dc:title']['i-default'];
+function extractImagePreview(page) {
+  return page?.rendition?.image?.preview;
+}
+
+export function getImageSrc(item) {
+  const page = item.pages?.[0];
+  /* eslint-disable no-underscore-dangle */
+  const renditionHref = extractRenditionLinkHref(item);
+  if (!renditionHref) {
+    const componentHref = extractComponentLinkHref(item);
+    return getImageThumbnailSrc(renditionHref, componentHref, page);
   }
 
-  if (item && item.topics && item.topics.length) {
-    return item.topics[0];
-  }
+  const preview = extractImagePreview(page);
+  const {
+    mediaType,
+    componentId,
+    width,
+    height,
+  } = preview;
 
-  return '';
+  return renditionHref.replace(
+    '{&page,size,type,fragment}',
+    `&size=${Math.max(width, height)}&type=${mediaType}&fragment=id=${componentId}`,
+  );
 }
 
 /**
@@ -55,12 +73,8 @@ export default async function getCardBackgrounds(props) {
     .filter((item) => isValidTemplate(item))
     .slice(0, props.limit)
     .map((item) => {
-      const page = item.pages?.[0];
-      /* eslint-disable no-underscore-dangle */
-      const renditionHref = item._links?.['http://ns.adobe.com/adobecloud/rel/rendition']?.href;
-      const componentHref = item._links?.['http://ns.adobe.com/adobecloud/rel/component']?.href;
       /* eslint-enable no-underscore-dangle */
-      const bg = getImageThumbnailSrc(renditionHref, componentHref, page);
+      const bg = getImageSrc(item);
       return { id: item.id, bg, title: getTemplateTitle(item) };
     })
     .filter((card) => !!card.bg);
