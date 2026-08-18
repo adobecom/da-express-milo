@@ -199,7 +199,7 @@ async function maybeHandleEasyUploadQuickAction(
       return true;
     }
   } catch (error) {
-    window.lana?.log(`[FrictionlessQA] Failed to route Easy Upload quick action: ${error?.message || error}`, { severity: 'error' });
+    window.lana?.log(`[FrictionlessQA] Failed to route Easy Upload quick action: ${error?.message || error}`, { tags: 'frictionless-quick-action', severity: 'error' });
     const fallbackHandled = runLegacyEasyUploadFallback(
       quickActionId,
       docConfig,
@@ -236,6 +236,9 @@ export async function runQuickAction(quickActionId, data, block, fromQrCode = fa
     metaData: {
       isFrictionlessQa: 'true',
       ...(quickActionId === 'caption-video' && { videoLanguage: selectedVideoLanguage }),
+      ...(quickActionId === 'remove-background' && {
+        qaSourcePage: getMetadata('qa-source-page') || 'remove-background',
+      }),
     },
     analyticsData: {
       ...(quickActionId === 'video-compress' && { entryPoint: 'seo-quick-action-video-compress' }),
@@ -598,6 +601,7 @@ export function buildSearchParamsForEditorUrl(pathname, assetId, quickAction, di
       variant: quickAction,
       width: dimensions?.width,
       height: dimensions?.height,
+      qaSourcePage: getMetadata('qa-source-page') || 'remove-background',
     };
   }
 
@@ -1067,7 +1071,7 @@ export default async function decorate(block) {
       });
     }
   } catch (e) {
-    window.lana?.log(`Easy upload module failed to load in frictionless-quick-action: ${e?.message}`);
+    window.lana?.log(`Easy upload module failed to load in frictionless-quick-action: ${e?.message}`, { tags: 'frictionless-quick-action', severity: 'error' });
   }
 
   if (
