@@ -1,4 +1,5 @@
 import type { GmcLocale } from './gmcLocales';
+import { sleep } from '../lib/concurrency';
 
 const ZAZZLE_API = 'https://www.zazzle.com/svc/partner/adobeexpress/v1';
 
@@ -16,16 +17,33 @@ export interface ZazzleProduct {
   productOption: string;
 }
 
+// Zazzle sits behind Fastly and rate-limits bursts (429); 5xx are transient. Honor a Retry-After
+// header if present, else exponential backoff with jitter. Shared by the two Zazzle GET helpers.
+const ZAZZLE_MAX_ATTEMPTS = 4;
+function zazzleBackoffMs(resp: Response, attempt: number): number {
+  const retryAfter = Number(resp.headers.get('retry-after'));
+  const base = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : 500 * 2 ** attempt;
+  return base + Math.random() * 300;
+}
+
 export async function fetchProductFromTemplate(productId: string): Promise<ZazzleProduct | null> {
   const url = `${ZAZZLE_API}/getproductfromtemplate?templateId=${encodeURIComponent(productId)}`;
-  try {
-    const resp = await fetch(url);
-    if (!resp.ok) return null;
-    const json = await resp.json() as { success: boolean; data?: { product?: ZazzleProduct } };
-    return json.data?.product ?? null;
-  } catch {
-    return null;
+  for (let attempt = 0; attempt < ZAZZLE_MAX_ATTEMPTS; attempt++) {
+    try {
+      const resp = await fetch(url);
+      // Rate-limited / transient — back off and retry rather than mislabeling the URN invalid.
+      if (resp.status === 429 || resp.status >= 500) {
+        if (attempt < ZAZZLE_MAX_ATTEMPTS - 1) { await sleep(zazzleBackoffMs(resp, attempt)); continue; }
+        return null;
+      }
+      if (!resp.ok) return null;        // genuine 4xx (e.g. not found) — no retry
+      const json = await resp.json() as { success: boolean; data?: { product?: ZazzleProduct } };
+      return json.data?.product ?? null;
+    } catch {
+      return null;                      // network/CORS — fail fast (see checkPageStatus rationale)
+    }
   }
+  return null;
 }
 
 const templateCache = new Map<string, ZazzleProduct>();
@@ -90,26 +108,33 @@ export async function fetchProductPricing(
     client: 'js',
   });
   const url = `${ZAZZLE_API}/getproductpricing?${params.toString()}`;
-  try {
-    const resp = await fetch(url);
-    if (!resp.ok) return null;
-    const json = await resp.json() as {
-      success: boolean;
-      data?: {
-        unitPrice?: number;
-        discountProductItems?: { priceAdjusted?: number; discountEnd?: string }[];
+  for (let attempt = 0; attempt < ZAZZLE_MAX_ATTEMPTS; attempt++) {
+    try {
+      const resp = await fetch(url);
+      if (resp.status === 429 || resp.status >= 500) {
+        if (attempt < ZAZZLE_MAX_ATTEMPTS - 1) { await sleep(zazzleBackoffMs(resp, attempt)); continue; }
+        return null;
+      }
+      if (!resp.ok) return null;
+      const json = await resp.json() as {
+        success: boolean;
+        data?: {
+          unitPrice?: number;
+          discountProductItems?: { priceAdjusted?: number; discountEnd?: string }[];
+        };
       };
-    };
-    const data = json.data;
-    if (data?.unitPrice == null) return null;
-    const pricing: ZazzlePricing = { unitPrice: data.unitPrice };
-    const discount = data.discountProductItems?.[0];
-    if (discount?.priceAdjusted != null && discount.discountEnd && new Date(discount.discountEnd).getTime() > Date.now()) {
-      pricing.salePrice = discount.priceAdjusted;
-      pricing.saleEndDate = discount.discountEnd;
+      const data = json.data;
+      if (data?.unitPrice == null) return null;
+      const pricing: ZazzlePricing = { unitPrice: data.unitPrice };
+      const discount = data.discountProductItems?.[0];
+      if (discount?.priceAdjusted != null && discount.discountEnd && new Date(discount.discountEnd).getTime() > Date.now()) {
+        pricing.salePrice = discount.priceAdjusted;
+        pricing.saleEndDate = discount.discountEnd;
+      }
+      return pricing;
+    } catch {
+      return null;
     }
-    return pricing;
-  } catch {
-    return null;
   }
+  return null;
 }

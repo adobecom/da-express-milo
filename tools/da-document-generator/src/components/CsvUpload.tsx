@@ -3,6 +3,7 @@ import Papa from 'papaparse';
 import * as XLSX from 'xlsx';
 import type { CsvRow, InputSummary } from '../types';
 import { lookupProductFromTemplate } from '../api/zazzleApi';
+import { runBatch, ZAZZLE_LOOKUP_CONCURRENCY } from '../lib/concurrency';
 
 interface Props {
   rows: CsvRow[];
@@ -247,6 +248,8 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
   const [validateMsg, setValidateMsg] = useState<string | null>(null);
   const [validateUnreachable, setValidateUnreachable] = useState(false);
   const [validationStatus, setValidationStatus] = useState<Record<string, 'valid' | 'invalid'>>({});
+  const [validateProgress, setValidateProgress] = useState<{ done: number; total: number } | null>(null);
+  const [hydrateProgress, setHydrateProgress] = useState<{ done: number; total: number } | null>(null);
   const [columns, setColumns] = useState<string[]>([]);
   const [zazzleHydratedFields, setZazzleHydratedFields] = useState<Record<string, string[]>>({});
   const [zazzleReferenceValues, setZazzleReferenceValues] = useState<Record<string, { title?: string; description?: string }>>({});
@@ -382,36 +385,47 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
     const zazzleMap = buildZazzleMap();
     const hydratedFields: Record<string, string[]> = {};
     const referenceValues: Record<string, { title?: string; description?: string }> = {};
-    const updated = await Promise.all(
-      rows.map(async (row) => {
-        if (!row.product_id?.trim()) return row;
-        const product = await lookupProductFromTemplate(row.product_id);
-        if (!product) return row;
-        referenceValues[row._id] = {
-          title: product.rootRawTitle,
-          description: product.description,
-        };
-        const hasMissing = tableColumns.some((col) => !row[col]?.trim());
-        if (!hasMissing) return row;
-        const filled = { ...row };
-        const newlyHydrated: string[] = [];
-        for (const col of tableColumns) {
-          if (!filled[col]?.trim()) {
-            const zKey = zazzleMap[col];
-            if (zKey) {
-              filled[col] = String((product as unknown as Record<string, unknown>)[zKey] ?? '');
-              newlyHydrated.push(col);
+    const updated = [...rows];
+    const total = rows.length;
+    let done = 0;
+    setHydrateProgress({ done: 0, total });
+    // Bounded concurrency (not an unbounded Promise.all) so a large URN list doesn't blow past the
+    // browser's request cap / Zazzle's rate limit; index-based so `updated` stays in row order.
+    await runBatch([...rows.keys()], async (i) => {
+      const row = rows[i];
+      const id = row.product_id?.trim();
+      if (id) {
+        const product = await lookupProductFromTemplate(id);
+        if (product) {
+          referenceValues[row._id] = {
+            title: product.rootRawTitle,
+            description: product.description,
+          };
+          if (tableColumns.some((col) => !row[col]?.trim())) {
+            const filled = { ...row };
+            const newlyHydrated: string[] = [];
+            for (const col of tableColumns) {
+              if (!filled[col]?.trim()) {
+                const zKey = zazzleMap[col];
+                if (zKey) {
+                  filled[col] = String((product as unknown as Record<string, unknown>)[zKey] ?? '');
+                  newlyHydrated.push(col);
+                }
+              }
             }
+            if (!filled['url_slug']?.trim() && filled['short_title']?.trim()) {
+              filled['url_slug'] = slugify(filled['short_title']);
+              if (!newlyHydrated.includes('url_slug')) newlyHydrated.push('url_slug');
+            }
+            hydratedFields[row._id] = newlyHydrated;
+            updated[i] = filled;
           }
         }
-        if (!filled['url_slug']?.trim() && filled['short_title']?.trim()) {
-          filled['url_slug'] = slugify(filled['short_title']);
-          if (!newlyHydrated.includes('url_slug')) newlyHydrated.push('url_slug');
-        }
-        hydratedFields[row._id] = newlyHydrated;
-        return filled;
-      }),
-    );
+      }
+      done++;
+      if (done % 25 === 0 || done === total) setHydrateProgress({ done, total });
+    }, ZAZZLE_LOOKUP_CONCURRENCY);
+    setHydrateProgress(null);
     const changedCount = updated.filter((row, i) => row !== rows[i]).length;
     const refCount = Object.keys(referenceValues).length;
     const anyProductIds = rows.some((r) => r.product_id?.trim());
@@ -438,17 +452,26 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
     setValidateMsg(null);
     setValidateUnreachable(false);
     const results: Record<string, 'valid' | 'invalid'> = {};
+    const total = rows.length;
     let attempted = 0;
+    let done = 0;
+    setValidateProgress({ done: 0, total });
 
-    await Promise.all(
-      rows.map(async (row) => {
-        const id = row.product_id?.trim();
-        if (!id) { results[row._id] = 'invalid'; return; }
+    // Bounded concurrency (not an unbounded Promise.all) so a large URN list doesn't blow past the
+    // browser's request cap / Zazzle's rate limit; fetchProductFromTemplate retries any 429s.
+    await runBatch(rows, async (row) => {
+      const id = row.product_id?.trim();
+      if (!id) {
+        results[row._id] = 'invalid';
+      } else {
         attempted++;
         const product = await lookupProductFromTemplate(id);
         results[row._id] = product ? 'valid' : 'invalid';
-      }),
-    );
+      }
+      done++;
+      if (done % 25 === 0 || done === total) setValidateProgress({ done, total });
+    }, ZAZZLE_LOOKUP_CONCURRENCY);
+    setValidateProgress(null);
 
     setValidationStatus(results);
     const validCount = Object.values(results).filter((v) => v === 'valid').length;
@@ -754,7 +777,9 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
             disabled={validating || hydrating || disabled}
             className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
-            {validating ? 'Validating…' : 'Validate Product IDs'}
+            {validating
+              ? (validateProgress ? `Validating… ${validateProgress.done.toLocaleString()} / ${validateProgress.total.toLocaleString()}` : 'Validating…')
+              : 'Validate Product IDs'}
           </button>
           {hasData && (
             <button
@@ -762,7 +787,9 @@ export default function CsvUpload({ rows, onChange, onReadinessChange, onSelecti
               disabled={hydrating || validating || disabled}
               className="self-start text-sm font-medium px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors"
             >
-              {hydrating ? 'Hydrating…' : 'Hydrate from Zazzle'}
+              {hydrating
+                ? (hydrateProgress ? `Hydrating… ${hydrateProgress.done.toLocaleString()} / ${hydrateProgress.total.toLocaleString()}` : 'Hydrating…')
+                : 'Hydrate from Zazzle'}
             </button>
           )}
           {validateMsg && <span className="text-xs text-gray-500">{validateMsg}</span>}
