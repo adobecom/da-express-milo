@@ -37,8 +37,21 @@ function toEntry(preview: GmcRowPreview): GmcSubmitEntry | null {
   return { path: preview.path, offerId: preview.offerId, row: preview.row };
 }
 
+function toRetryEntry(preview: GmcRowPreview): GmcSubmitEntry | null {
+  if (!preview.row || !preview.offerId) return null;
+  const { doc, row } = preview;
+  return {
+    path: preview.path,
+    offerId: preview.offerId,
+    row: { ...row, title: doc.title || row.title, description: doc.description || row.description },
+  };
+}
+
 export default function GmcSubmitDialog({ selectedDocs, onClose, onResults, onDocUpdated }: Props) {
-  const publishedDocs = useMemo(() => selectedDocs.filter((d) => d.stage === 'published'), [selectedDocs]);
+  const eligibleDocs = useMemo(
+    () => selectedDocs.filter((d) => d.stage === 'published' && d.identity.productId),
+    [selectedDocs],
+  );
 
   const [env, setEnv] = useState<GmcEnv>('test');
   const [phase, setPhase] = useState<Phase>('review');
@@ -46,12 +59,12 @@ export default function GmcSubmitDialog({ selectedDocs, onClose, onResults, onDo
   // and fills in progressively as assembly resolves.
   const [previews, setPreviews] = useState<Map<string, GmcRowPreview>>(() => {
     const map = new Map<string, GmcRowPreview>();
-    for (const doc of publishedDocs) {
+    for (const doc of eligibleDocs) {
       map.set(doc.path, { path: doc.path, doc, productType: doc.identity.productType || UNKNOWN_TYPE });
     }
     return map;
   });
-  const [loadingPaths, setLoadingPaths] = useState<Set<string>>(() => new Set(publishedDocs.map((d) => d.path)));
+  const [loadingPaths, setLoadingPaths] = useState<Set<string>>(() => new Set(eligibleDocs.map((d) => d.path)));
   const [countryByPath, setCountryByPath] = useState<Map<string, string[]>>(new Map());
   const [progress, setProgress] = useState<GmcSubmitProgress | null>(null);
   const [updates, setUpdates] = useState<Map<string, GmcEnvState>>(new Map());
@@ -70,7 +83,7 @@ export default function GmcSubmitDialog({ selectedDocs, onClose, onResults, onDo
     if (startedRef.current) return;
     startedRef.current = true;
     void runBatch(
-      publishedDocs,
+      eligibleDocs,
       async (doc) => {
         let preview: GmcRowPreview;
         try {
@@ -92,11 +105,11 @@ export default function GmcSubmitDialog({ selectedDocs, onClose, onResults, onDo
       },
       GMC_ASSEMBLE_CONCURRENCY,
     );
-  }, [publishedDocs]);
+  }, [eligibleDocs]);
 
   const groups = useMemo(() => {
     const byType = new Map<string, GmcRowPreview[]>();
-    for (const doc of publishedDocs) {
+    for (const doc of eligibleDocs) {
       const preview = previews.get(doc.path);
       if (!preview) continue;
       const list = byType.get(preview.productType);
@@ -104,7 +117,7 @@ export default function GmcSubmitDialog({ selectedDocs, onClose, onResults, onDo
       else byType.set(preview.productType, [preview]);
     }
     return [...byType.entries()].sort((a, b) => a[0].localeCompare(b[0]));
-  }, [publishedDocs, previews]);
+  }, [eligibleDocs, previews]);
 
   const resolvableEntries = useMemo(
     () => [...previews.values()].map(toEntry).filter((entry): entry is GmcSubmitEntry => entry !== null),
@@ -130,7 +143,7 @@ export default function GmcSubmitDialog({ selectedDocs, onClose, onResults, onDo
 
   const loadingCount = loadingPaths.size;
   const readyCount = resolvableEntries.length;
-  const publishedCount = publishedDocs.length;
+  const eligibleCount = eligibleDocs.length;
 
   // Paths eligible for selection/bulk-country — a blocked row can't be submitted so it's excluded.
   const submittablePaths = useMemo(
@@ -231,21 +244,14 @@ export default function GmcSubmitDialog({ selectedDocs, onClose, onResults, onDo
   async function handleRetry() {
     const token = getToken();
     if (!token) return;
-    const erroredDocs = errored.map((e) => e.preview.doc);
-    if (erroredDocs.length === 0) return;
+    const erroredPaths = new Set(errored.map((e) => e.preview.path));
+    if (erroredPaths.size === 0) return;
     setRetrying(true);
     try {
-      const reassembled: GmcRowPreview[] = [];
-      await runBatch(
-        erroredDocs,
-        async (doc) => {
-          const preview = await assembleGmcPreview(doc);
-          reassembled.push(preview);
-          setPreviews((prev) => new Map(prev).set(preview.path, preview));
-        },
-        GMC_ASSEMBLE_CONCURRENCY,
-      );
-      const entries = reassembled.map(toEntry).filter((entry): entry is GmcSubmitEntry => entry !== null);
+      const entries = [...previews.values()]
+        .filter((preview) => erroredPaths.has(preview.path))
+        .map(toRetryEntry)
+        .filter((entry): entry is GmcSubmitEntry => entry !== null);
       if (entries.length === 0) return;
       const retryUpdates = await submitAssembledRows(entries, env, token);
       setUpdates((prev) => {
@@ -334,10 +340,10 @@ export default function GmcSubmitDialog({ selectedDocs, onClose, onResults, onDo
           </span>
         </div>
 
-        {publishedCount < selectedDocs.length && (
+        {eligibleCount < selectedDocs.length && (
           <div className="rounded-lg border border-amber-200 bg-amber-50 text-amber-800 text-xs px-3 py-2">
-            Only published documents can be submitted to GMC — {publishedCount} of {selectedDocs.length} selected
-            documents are published.
+            Only published documents with a product ID can be submitted to GMC — {eligibleCount} of{' '}
+            {selectedDocs.length} selected documents qualify.
           </div>
         )}
 
@@ -347,7 +353,7 @@ export default function GmcSubmitDialog({ selectedDocs, onClose, onResults, onDo
               <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
               <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z" />
             </svg>
-            Loading product data… ({publishedCount - loadingCount}/{publishedCount})
+            Loading product data… ({eligibleCount - loadingCount}/{eligibleCount})
           </div>
         )}
 

@@ -62,7 +62,7 @@ export interface ManagedDocIdentity {
 
 export type GmcEnv = 'test' | 'prod';
 
-export type GmcStatus = 'pending' | 'live' | 'disapproved' | 'error';
+export type GmcStatus = 'pending' | 'live' | 'disapproved' | 'error' | 'not-pushed';
 
 export interface GmcEnvState {
   status: GmcStatus;

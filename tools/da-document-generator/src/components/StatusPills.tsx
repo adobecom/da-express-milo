@@ -1,4 +1,4 @@
-import type { RowResult, GmcEnvState } from '../types';
+import type { RowResult, GmcEnvState, GmcEnv } from '../types';
 
 export type ExistenceCheck = 'checking' | 'exists' | 'not-found' | 'error';
 
@@ -145,39 +145,79 @@ export function PublishPill({
 // Final value set per GMC-Status-Sync-PRD.md §8 — collapses Google's active/pending/disapproved/
 // unknown plus our own `stale` flag down to five author-facing states. This single-env chip is the
 // reusable core: the main-page column composes two of them (GmcBothEnvStatus) and the submit
-// dialog reuses it for each row's current-env status.
-export function GmcStatusChip({ state }: { state?: GmcEnvState }) {
-  if (!state) return <span className="text-gray-400">Not submitted</span>;
-  if (state.status === 'live') return <span className="text-green-700 font-medium">Live</span>;
-  if (state.status === 'disapproved') {
-    return (
-      <span className="text-red-700 font-medium cursor-help" title={state.message || 'Disapproved'}>
-        Disapproved
-      </span>
-    );
-  }
-  if (state.status === 'error') {
-    return (
-      <span className="text-red-600 font-medium cursor-help" title={state.message || 'Error'}>
-        Error
-      </span>
-    );
-  }
-  return <span className="text-amber-600 font-medium">Pending</span>;
+// dialog reuses it for each row's current-env status
+export function GmcStatusChip({
+  state,
+  checking,
+  onCheck,
+  disabledReason,
+}: {
+  state?: GmcEnvState;
+  checking?: boolean;
+  onCheck?: () => void;
+  disabledReason?: string;
+}) {
+  if (checking) return <span className="text-gray-400 font-medium">Checking…</span>;
+
+  const label = !state ? (onCheck ? 'Check status' : disabledReason || 'Not submitted')
+    : state.status === 'live' ? 'Live'
+    : state.status === 'disapproved' ? 'Disapproved'
+    : state.status === 'error' ? 'Error'
+    : state.status === 'not-pushed' ? 'Not pushed to GMC'
+    : 'Pending';
+  const color = !state ? 'text-gray-400'
+    : state.status === 'live' ? 'text-green-700'
+    : state.status === 'disapproved' ? 'text-red-700'
+    : state.status === 'error' ? 'text-red-600'
+    : state.status === 'not-pushed' ? 'text-gray-500'
+    : 'text-amber-600';
+  const title = state?.message ? state.message : undefined;
+
+  if (!onCheck) return <span className={`font-medium ${color}`} title={title || disabledReason}>{label}</span>;
+  return (
+    <button
+      type="button"
+      onClick={onCheck}
+      title={title || 'Re-check GMC status for this row'}
+      className={`font-medium transition-colors cursor-pointer hover:underline ${color}`}
+    >
+      {label}
+    </button>
+  );
 }
 
 // The main-page status column shows both environments at once now that submit-env selection lives
 // in the dialog (GMC-Submit-Dialog-PRD.md §5).
-export function GmcBothEnvStatus({ gmc }: { gmc?: { test?: GmcEnvState; prod?: GmcEnvState } }) {
+export function GmcBothEnvStatus({
+  gmc,
+  checking,
+  onCheck,
+  disabledReason,
+}: {
+  gmc?: { test?: GmcEnvState; prod?: GmcEnvState };
+  checking?: { test?: boolean; prod?: boolean };
+  onCheck?: (env: GmcEnv) => void;
+  disabledReason?: string;
+}) {
   return (
     <div className="flex flex-col gap-0.5 text-[11px]">
       <span className="flex items-center gap-1">
         <span className="text-gray-400 w-7 shrink-0">test</span>
-        <GmcStatusChip state={gmc?.test} />
+        <GmcStatusChip
+          state={gmc?.test}
+          checking={checking?.test}
+          onCheck={onCheck && (() => onCheck('test'))}
+          disabledReason={disabledReason}
+        />
       </span>
       <span className="flex items-center gap-1">
         <span className="text-gray-400 w-7 shrink-0">prod</span>
-        <GmcStatusChip state={gmc?.prod} />
+        <GmcStatusChip
+          state={gmc?.prod}
+          checking={checking?.prod}
+          onCheck={onCheck && (() => onCheck('prod'))}
+          disabledReason={disabledReason}
+        />
       </span>
     </div>
   );

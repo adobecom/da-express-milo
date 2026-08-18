@@ -86,30 +86,27 @@ export interface GmcSyncResult {
   failedItems: { productId: string; reason: string }[];
 }
 
-export type GmcDiagnosticResult =
-  | {
-      offerId: string;
-      ok: true;
-      status: 'active' | 'pending' | 'disapproved' | 'unknown';
-      issues: { code: string; severity: string; resolution: string; attribute: string; description: string }[];
-      name: string;
-      stale?: boolean;
-    }
-  | {
-      offerId: string;
-      ok: false;
-      status: 'error';
-      code?: string;
-      statusCode?: string;
-      reason?: string;
-      message: string;
-    };
+export interface GmcStatusPerContext {
+  reportingContext: string;
+  approvedCountries?: string[];
+  pendingCountries?: string[];
+  disapprovedCountries?: string[];
+}
+
+export interface GmcDiagnosticResult {
+  offerId: string;
+  aggregatedReportingContextStatus: string | number;
+  statusPerReportingContext: GmcStatusPerContext[];
+}
 
 export interface GmcDiagnosticsResponse {
   env: GmcEnv;
   accountId: string;
+  dataSource: string;
   offerCount: number;
-  counts: { active: number; pending: number; disapproved: number; unknown: number; error: number };
+  requestedOfferCount?: number;
+  missingOfferIds?: string[];
+  counts: { active: number; limited: number; pending: number; disapproved: number; unknown: number; error: number };
   itemIssueTop: unknown[];
   results: GmcDiagnosticResult[];
 }

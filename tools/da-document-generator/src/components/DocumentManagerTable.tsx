@@ -1,6 +1,6 @@
 import { memo, useRef } from 'react';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import type { ManagedDoc } from '../types';
+import type { ManagedDoc, GmcEnv } from '../types';
 import type { DaDocumentActions } from '../hooks/useDaDocumentActions';
 import type { EditableFieldKey } from '../lib/generate';
 import { GeneratePill, PreviewPill, PublishPill, GmcBothEnvStatus, ExternalLinkIcon } from './StatusPills';
@@ -19,6 +19,9 @@ interface Props {
   onSort: (field: SortField) => void;
   actions: DaDocumentActions<ManagedDoc>;
   onEditField: (doc: ManagedDoc, key: EditableFieldKey, value: string) => Promise<void>;
+  /** Keyed by `${path}:${env}` — rows currently mid-flight for a per-row GMC status check. */
+  checkingGmc: Set<string>;
+  onCheckGmcStatus: (doc: ManagedDoc, env: GmcEnv) => void;
 }
 
 const SORT_COLUMNS: { field: SortField; label: string }[] = [
@@ -49,6 +52,8 @@ export default function DocumentManagerTable({
   onSort,
   actions,
   onEditField,
+  checkingGmc,
+  onCheckGmcStatus,
 }: Props) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const virtualizer = useVirtualizer({
@@ -114,6 +119,8 @@ export default function DocumentManagerTable({
               onToggleSelect={onToggleSelect}
               actions={actions}
               onEditField={onEditField}
+              checkingGmc={checkingGmc}
+              onCheckGmcStatus={onCheckGmcStatus}
             />
           ))}
         </div>
@@ -131,6 +138,8 @@ interface RowProps {
   onToggleSelect: (path: string) => void;
   actions: DaDocumentActions<ManagedDoc>;
   onEditField: (doc: ManagedDoc, key: EditableFieldKey, value: string) => Promise<void>;
+  checkingGmc: Set<string>;
+  onCheckGmcStatus: (doc: ManagedDoc, env: GmcEnv) => void;
 }
 
 const DocumentRow = memo(function DocumentRow({
@@ -142,6 +151,8 @@ const DocumentRow = memo(function DocumentRow({
   onToggleSelect,
   actions,
   onEditField,
+  checkingGmc,
+  onCheckGmcStatus,
 }: RowProps) {
   return (
     <div
@@ -215,7 +226,16 @@ const DocumentRow = memo(function DocumentRow({
         <PublishPill result={doc} onPublish={() => actions.publishRow(doc)} onUnpublish={() => actions.unpublishRow(doc)} />
       </div>
       <div className="px-3 py-2">
-        <GmcBothEnvStatus gmc={doc.gmc} />
+        <GmcBothEnvStatus
+          gmc={doc.gmc}
+          checking={{ test: checkingGmc.has(`${doc.path}:test`), prod: checkingGmc.has(`${doc.path}:prod`) }}
+          onCheck={doc.identity.productId && doc.stage === 'published' ? (env) => onCheckGmcStatus(doc, env) : undefined}
+          disabledReason={
+            !doc.identity.productId ? 'Missing product id'
+              : doc.stage !== 'published' ? 'Not published — nothing to check yet'
+                : undefined
+          }
+        />
       </div>
       <div className="px-3 py-2">
         <GeneratePill result={doc} onGenerate={() => {}} onDelete={() => actions.deleteRow(doc)} />
