@@ -8,13 +8,18 @@
   --radius-pill: 50px;
   --status-dot-size: 6px;
   --status-curr-width: 30px;
+  /* Duration of the current-dot fill reveal. Blog-feature-marquee drives this
+     from its autoplay interval as a progress bar; how-to-cards has no autoplay,
+     so it runs once as a fill-in on selection. */
+  --how-to-cards-dot-fill-duration: 0.6s;
   --block-padding: var(--spacing-600);
   --side-padding: 20px;
+  --gallery-first-item-margin: 20px;
   padding: var(--block-padding) 0px var(--block-padding) 0px;
 }
 
 .how-to-cards:has(.gallery-control.hide) {
-  padding: var(--block-padding)  var(--side-padding) var(--block-padding) 0px;
+  padding: var(--block-padding) 0px var(--block-padding) 0px;
 }
 
 .how-to-cards:has(.gallery-control.hide) .cards-container {
@@ -54,14 +59,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-300);
-}
-
-.how-to-cards .cards-container {
-  padding-left: var(--side-padding);
-}
-
-.how-to-cards .card:last-child {
-  margin-right: calc(2 * var(--side-padding));
 }
 
 .how-to-cards .card p {
@@ -123,91 +120,19 @@
   transition: color .1s linear;
 }
 
-@media (min-width: 480px) {
-  .how-to-cards .card {
-    width: 322px;
-  }
-}
-
-@media (min-width: 768px) {
-  .how-to-cards {
-    max-width: var(--block-wd-max-width);
-    box-sizing: border-box;
-    --block-padding: var(--spacing-900);
-    --side-padding: var(--spacing-500);
-  }
-
-  .how-to-cards.cards-count-4 .cards-container ,
-  .how-to-cards.cards-count-5 .cards-container ,
-  .how-to-cards.cards-count-6 .cards-container {
-    width: 100vw;
-  }
-
-}
-
-@media (min-width: 1280px) {
-  .how-to-cards{
-    --side-padding: var(--spacing-600);
-  }
-}
-
-@media (min-width: 1440px) {
-  .how-to-cards {
-    max-width: var(--block-wd-grid-max-width);
-    margin: auto;
-    box-sizing: border-box;
-  }
-
-  .how-to-cards.cards-count-4 .card {
-    width: calc((100% - var(--spacing-700)) / 4);
-  }
-
-  .how-to-cards .cards-container {
-    width: 100vw; 
-  }
-  .how-to-cards.cards-count-3 .cards-container,
-  .how-to-cards.cards-count-4 .cards-container {
-    width: unset
-  }
-}
-
-@media (min-width: 1680px) {
-  .how-to-cards {
-    margin: auto;
-    max-width: 1680px;
-  }
-
-  .how-to-cards .card {
-    width: 382px;
-  }
-
-  .how-to-cards.cards-count-6 .card,
-  .how-to-cards.cards-count-5 .card {
-    width: 301px;
-  }
-
-  .how-to-cards.cards-count-6 .cards-container {
-    width: 100vw; 
-  }
-}
-
-
-/* Desktop: when exactly 3 cards, make each take 1/3 of container */
-@media (min-width: 900px) {
-  .how-to-cards.cards-count-3 .card {
-    width: calc((100% - var(--spacing-500)) / 3);
-  }
+.how-to-cards .gallery--item {
+  scroll-snap-align: start;
+  width: 295px;
 }
 
 .how-to-cards .gallery {
   display: flex;
   flex-wrap: nowrap;
-  gap: var(--spacing-300);
+  gap: var(--spacing-100);
   overflow-x: scroll;
   scrollbar-width: none;
-  /* scroll-snap-type: x mandatory; */
   scroll-behavior: smooth;
-  padding: 0;
+  padding: 0 var(--gallery-first-item-margin);
   margin: 0;
   scroll-padding: 0 var(--spacing-300);
 }
@@ -220,11 +145,6 @@
 
 .how-to-cards .gallery.center.gallery--all-displayed {
   justify-content: center;
-}
-
-.how-to-cards .gallery--item {
-  scroll-snap-align: start;
-  width: calc(100% - var(--spacing-300));
 }
 
 .how-to-cards .gallery-control {
@@ -281,7 +201,7 @@
 }
 
 .how-to-cards .gallery-control button.next .chevron-icon {
-  transform:rotate(90deg) translate(0px, -1px);
+  transform: rotate(90deg) translate(0px, -1px);
 }
 
 .how-to-cards .gallery-control button:disabled .chevron-icon {
@@ -301,13 +221,208 @@
 }
 
 .how-to-cards .gallery-control .status .dot {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 50px;
   width: var(--status-dot-size);
   height: var(--status-dot-size);
   background-color: var(--color-gray-600);
+  flex-shrink: 0;
+  transition: width 0.4s ease-out, background-color 0.4s ease-out;
+}
+
+.how-to-cards .gallery-control .status .dot::before {
+  content: '';
+  width: var(--status-dot-size);
+  height: var(--status-dot-size);
+  border-radius: 50px;
+  background-color: var(--color-black);
+  flex-shrink: 0;
+  opacity: 0;
+  transition: opacity 0.4s ease-out;
 }
 
 .how-to-cards .gallery-control .status .dot.curr {
   width: var(--status-curr-width);
-  background-color: var(--color-black);
+  justify-content: flex-start;
+  background-color: var(--color-gray-300);
+}
+
+.how-to-cards .gallery-control .status .dot.curr::before {
+  opacity: 1;
+  animation: how-to-cards-dot-fill var(--how-to-cards-dot-fill-duration) ease-out 0s forwards;
+}
+
+@keyframes how-to-cards-dot-fill {
+  0% {
+    width: var(--status-dot-size);
+    opacity: 0;
+  }
+
+  15% {
+    width: calc(var(--status-curr-width) * 0.3);
+    opacity: 1;
+  }
+
+  100% {
+    width: var(--status-curr-width);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .how-to-cards .gallery-control .status .dot,
+  .how-to-cards .gallery-control .status .dot::before {
+    transition: none;
+  }
+
+  .how-to-cards .gallery-control .status .dot.curr::before {
+    width: var(--status-curr-width);
+    animation: none;
+  }
+}
+
+
+
+@media (min-width: 480px) {
+  .how-to-cards .card {
+    width: 295px;
+  }
+
+  .how-to-cards {
+    --gallery-first-item-margin: 20px;
+  }
+
+  .how-to-cards .gallery-control {
+    padding-right: var(--spacing-300);
+  }
+}
+
+@media (min-width: 768px) {
+  .how-to-cards {
+    max-width: var(--block-wd-max-width);
+    box-sizing: border-box;
+    --block-padding: var(--spacing-900);
+    --side-padding: var(--spacing-500);
+    --gallery-first-item-margin: var(--spacing-500);
+  }
+
+  .how-to-cards .gallery {
+    gap: var(--spacing-300);
+  }
+
+    .how-to-cards.cards-count-3 .card {
+    width: 295px;
+  } 
+
+  .how-to-cards .gallery-control {
+    padding-right: var(--spacing-500);
+  }
+}
+
+
+@media (min-width: 900px) {
+ 
+     .how-to-cards .card { 
+      width: 322px;
+    }
+
+  .how-to-cards.cards-count-3 .card { 
+      width: 437px;
+    }
+
+ 
+
+  .how-to-cards {
+    --gallery-first-item-margin: var(--spacing-500);
+  }
+}
+
+
+@media (min-width: 1280px) {
+  .how-to-cards {
+    --side-padding: var(--spacing-600);
+    --gallery-first-item-margin: var(--spacing-600);
+  }
+
+  .how-to-cards .gallery-control {
+    padding-right: var(--spacing-600);
+  }
+
+  .how-to-cards.cards-count-3 .card { 
+      width: 437px;
+    }
+
+  .how-to-cards .card {
+      width: 322px;
+    } 
+
+    .how-to-cards .gallery {
+    gap: var(--spacing-400);
+  }
+}
+
+@media (min-width: 1440px) {
+  .how-to-cards {
+    max-width: unset;
+    box-sizing: border-box;
+    --gallery-first-item-margin: 40px;
+  }
+
+  .how-to-cards.cards-count-3 .card { 
+    width: 517px;
+  }
+
+  .how-to-cards.cards-count-3 .cards-container,
+  .how-to-cards.cards-count-4 .cards-container {
+    width: unset
+  }
+}
+
+@media (min-width: 1680px) {
+  .how-to-cards {
+    margin: auto;
+    max-width: 1680px;
+  }
+
+  .how-to-cards .card {
+    width: 382px;
+  }
+  .how-to-cards.cards-count-6 .card,
+  .how-to-cards.cards-count-5 .card {
+    width: 301px;
+  }
+
+ 
+}
+
+/* ---------------------------------------------------------------------------
+ * 4-up desktop responsiveness
+ *
+ * Cards stretch to fill the carousel span inside a 40px total side margin
+ * (20px each side), clamped to a 295-385px width. The carousel caps at 1600px,
+ * where the four cards reach their ~385px max. Below ~1247px the cards hit their
+ * 295px min-width and overflow, so the shared gallery widget reveals its
+ * controls. Those two breakpoints are emergent from the sizing budget
+ * (2*20 padding + 3*8 gap = 64px, card = (width - 64) / 4), not media queries.
+ *
+ * The side inset is the gallery's own padding (not card margins) so the last
+ * card carries no trailing margin: the moment the pinned-295 cards encroach the
+ * inset the widget's overflow check registers it and shows the control, rather
+ * than waiting for a card to be clipped past a trailing margin.
+ * ------------------------------------------------------------------------- */
+@media (min-width: 768px) {
+  .how-to-cards.cards-count-4 {
+    margin-inline: auto;
+  }
+
+  .how-to-cards.cards-count-4 .card {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 295px;
+    max-width: 385px;
+  }
 }
