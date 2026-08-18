@@ -19,6 +19,7 @@ test.describe('ColorHeadlineBlock Test Suite', () => {
     });
 
     await test.step('step-2: Verify block content', async () => {
+      await block.waitReady();
       await expect(block.block).toBeVisible();
       const sem = data.semantic;
 
@@ -79,6 +80,7 @@ test.describe('ColorHeadlineBlock Test Suite', () => {
     });
 
     await test.step('step-2: Verify block content', async () => {
+      await block.waitReady();
       await expect(block.block).toBeVisible();
       const sem = data.semantic;
 
