@@ -5,10 +5,14 @@ import type { GmcEnv } from '../types';
 // apihost "adobeioruntime.net" (the actual action-invocation domain — adobeio-static.net is the
 // static-asset/UI hosting domain, a different thing). No action name here: gmcFetch() appends
 // `/${action}` itself. Override via VITE_GMC_API_BASE for local dev (`aio app dev`/`aio app run`)
-// or a prod namespace once one exists. See GMC-Status-Sync-PRD.md §10.
 const DEFAULT_BASE_URL = 'https://14257-pdpgmcsync-stage.adobeioruntime.net/api/v1/web/gmc-feed-sync';
 
-function getBaseUrl(): string {
+const DEFAULT_PROD_BASE_URL = 'https://14257-pdpgmcsync.adobeioruntime.net/api/v1/web/gmc-feed-sync';
+
+function getBaseUrl(env: GmcEnv): string {
+  if (env === 'prod') {
+    return import.meta.env.VITE_GMC_API_BASE_PROD || DEFAULT_PROD_BASE_URL;
+  }
   return import.meta.env.VITE_GMC_API_BASE || DEFAULT_BASE_URL;
 }
 
@@ -113,6 +117,7 @@ export interface GmcDiagnosticsResponse {
 
 async function gmcFetch<T>(
   action: 'sync-products' | 'diagnostics',
+  env: GmcEnv,
   body: Record<string, unknown>,
   token: string,
 ): Promise<T> {
@@ -122,7 +127,7 @@ async function gmcFetch<T>(
     Authorization: `Bearer ${token}`,
   };
   if (orgId) headers['x-gw-ims-org-id'] = orgId;
-  const resp = await fetch(`${getBaseUrl()}/${action}`, {
+  const resp = await fetch(`${getBaseUrl(env)}/${action}`, {
     method: 'POST',
     headers,
     body: JSON.stringify(body),
@@ -135,9 +140,9 @@ async function gmcFetch<T>(
 }
 
 export async function syncProducts(env: GmcEnv, products: GmcSyncRow[], token: string): Promise<GmcSyncResult> {
-  return gmcFetch<GmcSyncResult>('sync-products', { env, products }, token);
+  return gmcFetch<GmcSyncResult>('sync-products', env, { env, products }, token);
 }
 
 export async function fetchDiagnostics(env: GmcEnv, offerIds: string[], token: string): Promise<GmcDiagnosticsResponse> {
-  return gmcFetch<GmcDiagnosticsResponse>('diagnostics', { env, offerIds }, token);
+  return gmcFetch<GmcDiagnosticsResponse>('diagnostics', env, { env, offerIds }, token);
 }
