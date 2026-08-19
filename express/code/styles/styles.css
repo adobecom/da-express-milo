@@ -540,7 +540,7 @@ main .content h2 {
 
 main ol,
 main ul {
-  text-align: left;
+  text-align: start;
 }
 
 main a,
