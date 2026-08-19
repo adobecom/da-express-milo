@@ -1,4 +1,17 @@
+import { getMetadata } from '../../scripts/utils.js';
+
 export default function decorate(el) {
+  // metadata-triggered variant: only decorate when the page opts in via the
+  // 'enable-wayfinder-promo' metadata; otherwise remove the block entirely.
+  if (el.classList.contains('metadata-triggered')) {
+    const enabled = ['yes', 'y', 'on', 'true']
+      .includes(getMetadata('enable-wayfinder-promo')?.toLowerCase().trim());
+    if (!enabled) {
+      el.remove();
+      return;
+    }
+  }
+
   const rows = el.querySelectorAll(':scope > div');
   const firstRowContent = rows[0].textContent.trim();
 

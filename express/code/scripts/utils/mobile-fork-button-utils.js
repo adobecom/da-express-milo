@@ -4,6 +4,7 @@
  */
 
 export const LONG_TEXT_CUTOFF = 70;
+export const SUPPORTED_MWEB_OS = ['Android', 'iOS'];
 
 /**
  * Calculates the pixel width of text for a given font
@@ -79,7 +80,7 @@ export function createToolData(
   index,
   useFrictionless = false,
   metadataPrefix = '',
-  enableMobileFqaUpload = useFrictionless,
+  uploadTargetId = '',
 ) {
   const prefix = `${metadataPrefix}fork-cta-${index}`;
   // Metadata lookup with optional frictionless fallback
@@ -99,10 +100,10 @@ export function createToolData(
   const aTag = createTag('a', { title: textMetadata, href: hrefMetadata });
 
   // Special handler for frictionless upload
-  if (enableMobileFqaUpload && hrefMetadata.toLowerCase().trim() === '#mobile-fqa-upload') {
+  if (uploadTargetId && hrefMetadata.toLowerCase().trim() === `#${uploadTargetId}`) {
     aTag.addEventListener('click', (e) => {
       e.preventDefault();
-      document.getElementById('mobile-fqa-upload').click();
+      document.getElementById(uploadTargetId).click();
     });
   }
 
@@ -128,6 +129,7 @@ export function collectFloatingButtonData(
   getIconElementDeprecated,
   useFrictionless = false,
   extraMainCtaProps = {},
+  uploadTargetId = '',
 ) {
   const metadataMap = createMetadataMap();
   const getMetadataLocal = (key) => metadataMap[key];
@@ -159,6 +161,8 @@ export function collectFloatingButtonData(
       metadataMap,
       i,
       useFrictionless,
+      '',
+      uploadTargetId,
     );
     if (toolData) {
       data.tools.push(toolData);
@@ -184,6 +188,7 @@ export function collectOsSplitFloatingButtonData(
   getIconElementDeprecated,
   platform,
   extraMainCtaProps = {},
+  uploadTargetId = '',
 ) {
   const metadataMap = createMetadataMap();
   const getMetadataLocal = (key) => metadataMap[key];
@@ -232,7 +237,7 @@ export function collectOsSplitFloatingButtonData(
       i,
       false,
       metadataPrefix,
-      true,
+      uploadTargetId,
     );
     if (toolData) {
       data.tools.push(toolData);

@@ -8,6 +8,7 @@ let replaceKeyArray; let config;
 let prefix;
 const MANUAL_LINKS_STORE = 'searchMarqueeManualLinks';
 const MANUAL_LINKS_TIMEOUT = 30000;
+let searchDropdownInstanceCount = 0;
 
 function preloadLCPImage(imageUrl) {
   if (!imageUrl || document.head.querySelector(`link[rel="preload"][href="${imageUrl}"]`)) return;
@@ -86,7 +87,13 @@ function initSearchFunction(block, searchBarWrapper) {
     e.stopPropagation();
     searchBar.scrollIntoView({ behavior: 'smooth' });
     searchDropdown.classList.remove('hidden');
+    searchBar.setAttribute('aria-expanded', 'true');
   }, { passive: true });
+
+  searchBar.addEventListener('focus', () => {
+    searchDropdown.classList.remove('hidden');
+    searchBar.setAttribute('aria-expanded', 'true');
+  });
 
   searchBar.addEventListener('keyup', () => {
     if (searchBar.value !== '') {
@@ -104,6 +111,9 @@ function initSearchFunction(block, searchBarWrapper) {
     if (e.key === 'ArrowDown' || e.keyCode === 40) {
       e.preventDefault();
       cycleThroughSuggestions(block);
+    } else if (e.key === 'Escape') {
+      searchDropdown.classList.add('hidden');
+      searchBar.setAttribute('aria-expanded', 'false');
     }
   });
 
@@ -111,8 +121,23 @@ function initSearchFunction(block, searchBarWrapper) {
     const { target } = e;
     if (target !== searchBarWrapper && !searchBarWrapper.contains(target)) {
       searchDropdown.classList.add('hidden');
+      searchBar.setAttribute('aria-expanded', 'false');
     }
   }, { passive: true });
+
+  searchBarWrapper.addEventListener('focusout', (e) => {
+    if (!searchBarWrapper.contains(e.relatedTarget)) {
+      searchDropdown.classList.add('hidden');
+      searchBar.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  clearBtn.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      clearBtn.click();
+    }
+  });
 
   const trimInput = (tasks, input) => {
     let alteredInput = input;
@@ -229,7 +254,7 @@ function initSearchFunction(block, searchBarWrapper) {
     const searchBarVal = searchBar.value.toLowerCase();
     if (suggestions && !(suggestions.length <= 1 && suggestions[0]?.query === searchBarVal)) {
       suggestions.forEach((item, index) => {
-        const li = createTag('li', { tabindex: 0 });
+        const li = createTag('li', { tabindex: 0, role: 'option', 'aria-selected': 'false' });
         const valRegEx = new RegExp(searchBar.value, 'i');
         li.innerHTML = item.query.replace(valRegEx, `<b>${searchBarVal}</b>`);
         li.addEventListener('click', async () => {
@@ -239,6 +264,15 @@ function initSearchFunction(block, searchBarWrapper) {
         li.addEventListener('keydown', async (e) => {
           if (e.key === 'Enter' || e.keyCode === 13) {
             await handleSubmitInteraction(item, index);
+          }
+        });
+
+        li.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape') {
+            e.preventDefault();
+            searchDropdown.classList.add('hidden');
+            searchBar.setAttribute('aria-expanded', 'false');
+            searchBar.focus();
           }
         });
 
@@ -279,10 +313,19 @@ function initSearchFunction(block, searchBarWrapper) {
 async function decorateSearchFunctions(block) {
   const searchBarWrapper = createTag('div', { class: 'search-bar-wrapper' });
   const searchForm = createTag('form', { class: 'search-form' });
+  const searchPlaceholder = await replaceKey('template-search-placeholder', config) || 'Search for over 50,000 templates';
+  searchDropdownInstanceCount += 1;
+  const dropdownId = `search-marquee-dropdown-${searchDropdownInstanceCount}`;
   const searchBar = createTag('input', {
     class: 'search-bar',
     type: 'text',
-    placeholder: await replaceKey('template-search-placeholder', config) || 'Search for over 50,000 templates',
+    placeholder: searchPlaceholder,
+    'aria-label': searchPlaceholder,
+    role: 'combobox',
+    'aria-autocomplete': 'list',
+    'aria-expanded': 'false',
+    'aria-haspopup': 'listbox',
+    'aria-controls': dropdownId,
     enterKeyHint: await replaceKey('search', config) || 'Search',
   });
 
@@ -291,8 +334,11 @@ async function decorateSearchFunctions(block) {
   searchIcon.loading = 'lazy';
   const searchClearIcon = getIconElementDeprecated('search-clear');
   searchClearIcon.loading = 'lazy';
-  searchBarWrapper.append(searchIcon, searchClearIcon);
-  searchBarWrapper.append(searchForm);
+  searchClearIcon.setAttribute('role', 'button');
+  searchClearIcon.setAttribute('tabindex', '0');
+  searchClearIcon.setAttribute('aria-label', await replaceKey('search-clear-label', config) || 'Clear search');
+  searchBarWrapper.append(searchIcon, searchForm, searchClearIcon);
+  searchBarWrapper.dataset.dropdownId = dropdownId;
 
   block.insertBefore(searchBarWrapper, block.querySelector('div:nth-of-type(2)'));
   return searchBarWrapper;
@@ -350,11 +396,11 @@ function decorateBackground(block) {
 
 async function buildSearchDropdown(block, searchBarWrapper) {
   if (!searchBarWrapper) return;
-  const dropdownContainer = createTag('div', { class: 'search-dropdown-container hidden' });
+  const dropdownContainer = createTag('div', { class: 'search-dropdown-container hidden', id: searchBarWrapper.dataset.dropdownId });
   const trendsContainer = createTag('div', { class: 'trends-container' });
   const suggestionsContainer = createTag('div', { class: 'suggestions-container hidden' });
   const suggestionsTitle = createTag('p', { class: 'dropdown-title' });
-  const suggestionsList = createTag('ul', { class: 'suggestions-list' });
+  const suggestionsList = createTag('ul', { class: 'suggestions-list', role: 'listbox' });
 
   const fromScratchLink = block.querySelector('a');
   const [trendsTitle, searchTrends, searchSuggestionsTitle] = await replaceKeyArray(['search-trends-title', 'search-trends', 'search-suggestions-title'], config);
@@ -610,7 +656,10 @@ export default async function decorate(block) {
   ({ prefix } = getConfig().locale);
   decorateBackground(block);
   if (shouldInjectLogo(block)) {
-    const logo = getIconElementDeprecated('adobe-express-logo');
+    const brandingLogoName = getMetadata('inject-branding-logo')?.trim()
+      || (LOGO_META_VALUES.includes(getMetadata('marquee-inject-acrobat-logo')?.toLowerCase()) && 'cobrand-lockup-acrobat-express')
+      || null;
+    const logo = getIconElementDeprecated(brandingLogoName || 'adobe-express-logo');
     logo.classList.add('express-logo');
     block.prepend(logo);
   }

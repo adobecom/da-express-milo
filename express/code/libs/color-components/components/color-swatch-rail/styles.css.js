@@ -936,7 +936,7 @@ export const style = css`
   }
 
   
-  .swatch-column.base-color {
+  .swatch-column.base-color:not(.swatch-column--drag-over) {
     outline: none;
   }
 

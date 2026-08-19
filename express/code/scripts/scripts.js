@@ -33,7 +33,7 @@ const desktopViewport = window.matchMedia('(min-width: 900px)').matches;
 if (jarvisVisibleMeta && ['mobile', 'desktop', 'on'].includes(jarvisVisibleMeta) && (
   (jarvisVisibleMeta === 'mobile' && !desktopViewport) || (jarvisVisibleMeta === 'desktop' && desktopViewport))) jarvisImmediatelyVisible = true;
 
-const prodDomains = ['business.adobe.com', 'www.adobe.com', 'color.adobe.com'];
+const prodDomains = ['business.adobe.com', 'www.adobe.com', 'color.adobe.com', 'helpx.adobe.com'];
 
 // Add any config options.
 const CONFIG = {
@@ -49,6 +49,7 @@ const CONFIG = {
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
       'color.adobe.com': 'color.stage.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     'www.stage.adobe.com': {
       'www.adobe.com': 'origin',
@@ -56,6 +57,7 @@ const CONFIG = {
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
       'color.adobe.com': 'color.stage.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     '--express-color--adobecom.(hlx|aem).(page|live)': {
       'color.adobe.com': 'origin',
@@ -63,6 +65,7 @@ const CONFIG = {
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
     'color.stage.adobe.com': {
       'color.adobe.com': 'origin',
@@ -70,6 +73,7 @@ const CONFIG = {
       'commerce.adobe.com': 'commerce-stg.adobe.com',
       'new.express.adobe.com': 'stage.projectx.corp.adobe.com',
       'express.adobe.com': 'stage.projectx.corp.adobe.com',
+      'helpx.adobe.com': 'helpx.stage.adobe.com',
     },
   },
   jarvis: {
@@ -78,6 +82,7 @@ const CONFIG = {
     onDemand: !jarvisImmediatelyVisible,
   },
   imsClientId: 'AdobeExpressWeb',
+  iconsExcludeBlocks: ['unity', 'firefly-howto'],
   prodDomains,
   geoRouting: 'on',
   lingoProjectSuccessLogging: 'on',
@@ -357,6 +362,26 @@ function preloadLCPImage(img) {
     }
   }
 }());
+
+let fragmentLcpPreloaded = false;
+// eslint-disable-next-line import/prefer-default-export
+export function decorateAreaWithLCP(area = document, options = {}) {
+  const { fragmentLink } = options;
+  if (fragmentLink && !fragmentLcpPreloaded) {
+    const firstSection = document.querySelector('body > main > div:nth-child(1)');
+    if (firstSection?.querySelector('a.fragment') === fragmentLink) {
+      const section = area.querySelector('body > div') || area;
+      const images = section.querySelectorAll('img');
+      if (images.length) {
+        images.forEach(eagerLoad);
+        preloadLCPImage(images[0]);
+        fragmentLcpPreloaded = true;
+      }
+    }
+  }
+  decorateArea(area, options);
+}
+CONFIG.decorateArea = decorateAreaWithLCP;
 
 (function loadStyles() {
   const paths = [`${miloLibs}/styles/styles.css`];

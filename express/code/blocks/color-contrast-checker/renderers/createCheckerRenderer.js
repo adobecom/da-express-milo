@@ -36,6 +36,77 @@ function attachTooltip(actionBtn, text, placement = 'top') {
     placement,
   }, text);
   actionBtn.appendChild(tooltip);
+
+  // iOS Safari: sp-tooltip[self-managed] relies on focus/blur which iOS
+  // clears immediately after a tap on non-input elements, causing the
+  // tooltip to flash and vanish. Block touch pointer events so Spectrum's
+  // overlay doesn't auto-manage, then use click (fires after the iOS
+  // focus/blur sequence settles) with a MutationObserver guard to keep
+  // `open` set until the user taps elsewhere.
+  if ('ontouchstart' in window) {
+    let outsideCloseHandler = null;
+    let guardObserver = null;
+
+    const blockTouchPointer = (e) => {
+      if (e.pointerType === 'touch') e.stopImmediatePropagation();
+    };
+    actionBtn.addEventListener('pointerenter', blockTouchPointer, { capture: true });
+    actionBtn.addEventListener('pointerleave', blockTouchPointer, { capture: true });
+
+    const clearGuard = () => {
+      if (guardObserver) {
+        guardObserver.disconnect();
+        guardObserver = null;
+      }
+    };
+
+    const removeOutsideHandler = () => {
+      if (outsideCloseHandler) {
+        document.removeEventListener('touchstart', outsideCloseHandler, true);
+        outsideCloseHandler = null;
+      }
+    };
+
+    const hideTooltip = () => {
+      clearGuard();
+      tooltip.removeAttribute('open');
+      removeOutsideHandler();
+    };
+
+    actionBtn.addEventListener('click', () => {
+      if (tooltip.hasAttribute('open')) {
+        hideTooltip();
+        return;
+      }
+
+      clearGuard();
+      tooltip.setAttribute('open', '');
+
+      // Spectrum's self-managed overlay can still respond to trailing iOS
+      // pointer/focus events and remove `open` before the user can read
+      // the tooltip. Guard against this for a short window.
+      const GUARD_MS = 400;
+      const guardedAt = Date.now();
+      guardObserver = new MutationObserver(() => {
+        if (Date.now() - guardedAt >= GUARD_MS) {
+          clearGuard();
+          return;
+        }
+        tooltip.setAttribute('open', '');
+      });
+      guardObserver.observe(tooltip, { attributes: true, attributeFilter: ['open'] });
+      setTimeout(clearGuard, GUARD_MS);
+
+      setTimeout(() => {
+        outsideCloseHandler = (ev) => {
+          if (!actionBtn.contains(ev.target)) {
+            hideTooltip();
+          }
+        };
+        document.addEventListener('touchstart', outsideCloseHandler, { capture: true });
+      }, 0);
+    });
+  }
 }
 
 function createTooltipLabelButton(label, tooltip, className = 'cc-summary-label') {

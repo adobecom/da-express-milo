@@ -16,6 +16,10 @@ export const DCTX_ID_MAP = {
     stage: 'v:2,s,bg:EDUExpressPurple,40262910-c9bd-11f0-8359-b30f8fb5b3f5',
     prod: 'v:2,s,bg:EDUExpressPurple,a6588140-c9bf-11f0-a941-d1bc629a24f2',
   },
+  'context-business': {
+    stage: 'v:2,s,bg:CCEX2026,fc1e76f0-9167-11f1-a9b0-29d697c01ae6',
+    prod: 'v:2,s,bg:CCEX2026,ea8e92e0-9166-11f1-a9b9-d34066769dc6',
+  },
 };
 
 const usp = new URLSearchParams(window.location.search);
@@ -59,7 +63,7 @@ async function getDestURL(url) {
     if (['new.express.adobe.com', 'express.adobe.com'].includes(destURL.hostname)) {
       destURL.hostname = 'stage.projectx.corp.adobe.com';
     }
-    if (destURL.hostname === 'adobesparkpost.app.link') {
+    if (destURL.hostname === 'adobesparkpost.app.link' && !destURL.pathname.includes('/color-palette')) {
       destURL.pathname = '1F048UHIAVb';
     }
   }
@@ -446,6 +450,28 @@ async function buildSimplifiedSusi(el, locale, imsClientId, noRedirect) {
   const popup = el.classList.contains('popup') || false;
   const variant = 'standard';
   const destURL = await getDestURL(redirectUrl);
+  if (isColor) {
+    try {
+      const orig = new URL(redirectUrl);
+      const colorPalette = orig.searchParams.get('colorPalette');
+      const colorReferrer = orig.searchParams.get('referrer');
+      const featureEnable = orig.searchParams.get('feature-enable');
+      const entryPoint = orig.searchParams.get('entryPoint');
+      if (colorPalette) {
+        destURL.searchParams.set('colorPalette', colorPalette);
+      }
+      if (colorReferrer) {
+        destURL.searchParams.set('referrer', colorReferrer);
+      }
+      if (featureEnable) {
+        destURL.searchParams.set('feature-enable', featureEnable);
+      }
+      if (entryPoint) {
+        destURL.searchParams.set('entryPoint', entryPoint);
+      }
+      destURL.hash = '';
+    } catch { /* ignore — destURL fallback is already set */ }
+  }
   const params = buildSUSIParams({
     client_id, variant, destURL, locale, title, popup, responseType: 'token',
   });

@@ -134,6 +134,21 @@ describe('CCLibraryProvider - gradient payload', () => {
       expect(result.name).to.equal('Untitled gradient');
     });
 
+    it('should nest tags inside gradient#data so they round-trip', () => {
+      const result = provider.buildGradientPayload({
+        name: 'Tagged',
+        stops: [],
+        tags: ['warm', 'sunset'],
+      });
+
+      expect(result.representations[0]['gradient#data'].tags).to.deep.equal(['warm', 'sunset']);
+    });
+
+    it('should default tags to an empty array when omitted', () => {
+      const result = provider.buildGradientPayload({ name: 'No Tags', stops: [] });
+      expect(result.representations[0]['gradient#data'].tags).to.deep.equal([]);
+    });
+
     it('should parse hex color stops correctly', () => {
       const result = provider.buildGradientPayload({
         name: 'Hex Test',

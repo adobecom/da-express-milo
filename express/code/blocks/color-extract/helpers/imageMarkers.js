@@ -331,6 +331,8 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
     marker.el.setAttribute('aria-valuetext', hex);
     controller.setSwatchHex(index, hex);
     updateConnectors();
+    const zc = marker.el.querySelector('.color-extract-marker-zoom');
+    if (zc) renderMagnification(zc, canvas, cx, cy);
     if (options.onMoodOverride) options.onMoodOverride(MOODS.CUSTOM);
   }
 
@@ -358,6 +360,12 @@ export default function createImageMarkers(imageContainer, canvas, controller, o
     el.addEventListener('focus', () => {
       keyboardSnapshotPending = true;
       setActiveMarker(index);
+      const { cx, cy } = pctToCanvas(marker.pctX, marker.pctY);
+      const zc = marker.el.querySelector('.color-extract-marker-zoom');
+      if (zc) renderMagnification(zc, canvas, cx, cy);
+    });
+    el.addEventListener('blur', () => {
+      marker.el.classList.remove('is-active');
     });
 
     markers.push(marker);

@@ -1,0 +1,130 @@
+import { getLibs } from '../../scripts/utils.js';
+
+const LIMITS = {};
+
+export const localeMap = {
+  '': 'en-us',
+  br: 'pt-br',
+  ca: 'en-us',
+  ca_fr: 'fr-fr',
+  mx: 'es-es',
+  la: 'es-es',
+  africa: 'en-us',
+  za: 'en-us',
+  be_nl: 'nl-nl',
+  be_fr: 'fr-fr',
+  be_en: 'en-us',
+  cz: 'cs-cz',
+  cy_en: 'en-us',
+  dk: 'da-dk',
+  de: 'de-de',
+  ee: 'en-us',
+  es: 'es-es',
+  fr: 'fr-fr',
+  gr_en: 'en-us',
+  gr_el: 'en-us',
+  ie: 'en-us',
+  il_en: 'en-us',
+  il_he: 'en-us',
+  it: 'it-it',
+  lv: 'en-us',
+  lt: 'en-us',
+  lu_de: 'de-de',
+  lu_en: 'en-us',
+  lu_fr: 'fr-fr',
+  hu: 'en-us',
+  mt: 'en-us',
+  mena_en: 'en-us',
+  mena_ar: 'en-us',
+  nl: 'nl-nl',
+  no: 'nb-no',
+  at: 'de-de',
+  pl: 'pl-pl',
+  pt: 'pt-br',
+  ro: 'ro-ro',
+  ch_de: 'de-de',
+  si: 'en-us',
+  sk: 'en-us',
+  ch_fr: 'fr-fr',
+  fi: 'fi-fi',
+  se: 'sv-se',
+  ch_it: 'it-it',
+  tr: 'tr-tr',
+  uk: 'en-gb',
+  bg: 'en-us',
+  ru: 'ru-ru',
+  ua: 'en-us',
+  au: 'en-gb',
+  hk_en: 'en-us',
+  in: 'en-us',
+  in_hi: 'hi-in',
+  nz: 'en-gb',
+  hk_zh: 'zh-tw',
+  tw: 'zh-tw',
+  jp: 'ja-jp',
+  kr: 'ko-kr',
+  ae_en: 'en-us',
+  ae_ar: 'en-us',
+  sa_en: 'en-us',
+  sa_ar: 'en-us',
+  th_en: 'en-us',
+  th_th: 'th-th',
+  sg: 'en-us',
+  cl: 'es-es',
+  co: 'es-es',
+  ar: 'es-es',
+  cr: 'es-es',
+  pr: 'es-es',
+  ec: 'es-es',
+  pe: 'es-es',
+  eg_en: 'en-us',
+  eg_ar: 'en-us',
+  gt: 'es-es',
+  id_en: 'en-us',
+  id_id: 'id-id',
+  ph_en: 'en-us',
+  ph_fil: 'en-us',
+  my_en: 'en-us',
+  my_ms: 'en-us',
+  kw_en: 'en-us',
+  kw_ar: 'en-us',
+  ng: 'en-us',
+  qa_en: 'en-us',
+  qa_ar: 'en-us',
+  vn_en: 'en-us',
+  vn_vi: 'en-us',
+};
+
+export function getUnityLibs(location, prodLibs = '/unitylibs') {
+  const { hostname, search } = location || window.location;
+  if (!['.aem.', '.hlx.', '.stage.', 'local', '.da.'].some((i) => hostname.includes(i))) return prodLibs;
+  const branch = new URLSearchParams(search).get('unitylibs') || 'main';
+  if (!/^[a-zA-Z0-9_-]+$/.test(branch)) throw new Error('Invalid branch name.');
+  if (branch === 'main' && hostname.includes('.stage.')) return prodLibs;
+  return `https://${branch}${branch.includes('--') ? '' : '--unity--adobecom'}.aem.live/unitylibs`;
+}
+
+export default async function init(el) {
+  const { userAgent } = navigator;
+  const mobileApp = /iPad|iPhone|iPod|android/i.test(userAgent);
+
+  if (!window.adobeIMS) {
+    import(`${getLibs()}/utils/utils.js`).then(({ loadIms }) => loadIms()).catch(() => {});
+  }
+
+  const element = el.querySelector('span');
+  const verbDropzone = el.closest('.section')?.querySelector('.verb-dropzone');
+  if (!element && !verbDropzone) return;
+  const unitylibs = getUnityLibs();
+  if (verbDropzone) {
+    const { LIMITS: VERB_DROPZONE_LIMITS } = await import('../verb-dropzone/verb-dropzone.js');
+    Object.assign(LIMITS, VERB_DROPZONE_LIMITS);
+  }
+  const verb = (verbDropzone && [...verbDropzone.classList].find((cn) => LIMITS[cn])) || element.classList[1].replace('icon-', '');
+  if (mobileApp && LIMITS[verb]?.mobileApp) return;
+  const langFromPath = window.location.pathname.split('/')[1];
+  const languageCode = localeMap[langFromPath] ? localeMap[langFromPath].split('-')[0] : 'en';
+  const languageRegion = localeMap[langFromPath] ? localeMap[langFromPath].split('-')[1] : 'us';
+  const { default: wfinit } = await import(`${unitylibs}/core/workflow/workflow.js`);
+  await wfinit(el, 'express', unitylibs, 'v2', languageRegion, languageCode);
+}

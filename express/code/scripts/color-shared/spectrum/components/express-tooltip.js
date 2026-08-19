@@ -40,6 +40,7 @@ export async function createExpressTooltip(config) {
     delay = 300,
     disableAria = false,
     preserveLineBreaks = false,
+    dismissOnActivate = false,
   } = config;
 
   await loadTooltip();
@@ -81,24 +82,39 @@ export async function createExpressTooltip(config) {
   let showTimer = null;
   let visible = false;
   let removeOutsideClickHandler = null;
+  let guardObserver = null;
+
+  function clearGuard() {
+    if (guardObserver) {
+      guardObserver.disconnect();
+      guardObserver = null;
+    }
+  }
 
   function hide() {
     clearTimeout(showTimer);
+    clearGuard();
     tooltip.removeAttribute('open');
     visible = false;
     removeOutsideClickHandler?.();
     removeOutsideClickHandler = null;
   }
 
+  // Don't show while the trigger's popover is open so the tooltip never
+  // overlaps the menu it just launched.
+  const popoverOpen = () => targetEl.getAttribute('aria-expanded') === 'true';
+
   function show() {
+    if (popoverOpen()) return;
     clearTimeout(showTimer);
     showTimer = setTimeout(() => {
+      if (popoverOpen()) return;
       tooltip.setAttribute('open', '');
       visible = true;
     }, delay);
   }
 
-  if (isTouchDevice) {
+  if (isTouchDevice && !dismissOnActivate) {
     const blockTouchPointer = (e) => {
       if (e.pointerType === 'touch') e.stopImmediatePropagation();
     };
@@ -110,8 +126,27 @@ export async function createExpressTooltip(config) {
         hide();
         return;
       }
+      clearGuard();
       tooltip.setAttribute('open', '');
       visible = true;
+
+      // Spectrum's self-managed sp-overlay responds to the iOS-synthesized
+      // pointerleave/focus events that trail a tap and removes `open` before
+      // the user can read the tooltip. Guard against this for a short window:
+      // any external removal of `open` within GUARD_MS is immediately reversed.
+      // The guard is cleared by hide() so intentional closes are unaffected.
+      const GUARD_MS = 400;
+      const guardedAt = Date.now();
+      guardObserver = new MutationObserver(() => {
+        if (!visible || Date.now() - guardedAt >= GUARD_MS) {
+          clearGuard();
+          return;
+        }
+        tooltip.setAttribute('open', '');
+      });
+      guardObserver.observe(tooltip, { attributes: true, attributeFilter: ['open'] });
+      setTimeout(clearGuard, GUARD_MS);
+
       setTimeout(() => {
         const outsideHandler = (evt) => {
           const path = evt.composedPath?.() || [];
@@ -124,9 +159,16 @@ export async function createExpressTooltip(config) {
       }, 0);
     };
     targetEl.addEventListener('click', toggleTouch, { signal });
-  } else {
+  } else if (!isTouchDevice) {
     targetEl.addEventListener('pointerenter', show, { signal });
     targetEl.addEventListener('pointerleave', hide, { signal });
+  }
+
+  // Action triggers (buttons that run a command or open a popover) hide the
+  // tooltip on activation: on touch this prevents the tap-shown tooltip from
+  // lingering, and everywhere it clears the tooltip before its popover appears.
+  if (dismissOnActivate) {
+    targetEl.addEventListener('click', hide, { signal });
   }
 
   if (!isTouchDevice) {
@@ -150,6 +192,8 @@ export async function createExpressTooltip(config) {
   return {
     element: theme,
 
+    hide,
+
     setContent(text) {
       if (preserveLineBreaksNode) {
         preserveLineBreaksNode.textContent = text;
@@ -161,6 +205,7 @@ export async function createExpressTooltip(config) {
     destroy() {
       controller.abort();
       clearTimeout(showTimer);
+      clearGuard();
       removeOutsideClickHandler?.();
       ariaLink?.release();
       theme.remove();

@@ -140,8 +140,12 @@ export async function createExpressTabs(config = {}) {
   const { signal } = controller;
 
   if (onSelectionChange) {
-    tabsEl.addEventListener('change', (e) => {
-      onSelectionChange({ selected: e.target.selected });
+    let lastSelected = selected ?? null;
+    tabsEl.addEventListener('change', () => {
+      const current = tabsEl.selected;
+      if (!current || current === lastSelected) return;
+      lastSelected = current;
+      onSelectionChange({ selected: current });
     }, { signal });
   }
 

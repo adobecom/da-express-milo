@@ -35,6 +35,8 @@ export default async function decorate(block) {
     createTag,
     getIconElementDeprecated,
     metadataPrefix,
+    {},
+    'mobile-fqa-upload',
   );
   const blockWrapper = await createMultiFunctionButton(
     createTag,

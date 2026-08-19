@@ -213,110 +213,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   display: none;
 }
 
-/* ---- Drag overlay (appended to document.body to escape contain:layout) ---- */
-
-.color-extract-drag-overlay {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(47px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-  z-index: 50;
-}
-
-.color-extract-drag-overlay.is-dragging {
-  opacity: 1;
-}
-
-.color-extract-drag-icon {
-  width: 65px;
-  height: 65px;
-  color: var(--color-extract-text);
-}
-
-.color-extract-drag-icon svg {
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-
-.color-extract-drag-text {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 400;
-  color: var(--color-extract-text);
-}
-
-/* ---- Full-screen loading overlay ---- */
-
-.color-extract-loading-overlay {
-  position: fixed;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(47px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-  z-index: 50;
-}
-
-.color-extract-loading-overlay.is-loading {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.color-extract-loading-overlay .color-extract-loading-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  width: 192px;
-}
-
-.color-extract-loading-overlay .color-extract-loading-label {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 400;
-  line-height: 22px;
-  color: var(--palette-gray-700);
-  text-align: center;
-  white-space: nowrap;
-}
-
-.color-extract-loading-overlay .color-extract-loading-track {
-  width: 100%;
-  height: 10px;
-  border-radius: 5px;
-  background: var(--color-gray-300-variant);
-  overflow: hidden;
-}
-
-.color-extract-loading-overlay .color-extract-loading-bar {
-  height: 100%;
-  width: 0;
-  border-radius: 5px;
-  background: var(--color-background-accent-default);
-}
-
-.color-extract-loading-overlay.is-loading .color-extract-loading-bar {
-  animation: color-extract-loading-progress 1s ease-out forwards;
-}
-
-@keyframes color-extract-loading-progress {
-  0% { width: 0; }
-  100% { width: 100%; }
-}
-
 /* ---- Typography ---- */
 
 .color-extract .color-extract-edit-copy .icon.icon-adobe-express-logo {
@@ -688,6 +584,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   justify-content: space-between;
   gap: 6px;
   width: 100%;
+  min-width: 200px;
   height: 32px;
   padding: 0 11px 0 12px;
   background: var(--color-extract-gray-300);
@@ -756,7 +653,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  gap: 8px;
+  gap: var(--spacing-100);
   width: 100%;
   padding: 8px 16px;
   background: none;
@@ -854,8 +751,9 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 }
 
 .color-extract .color-extract-marker.is-active {
-  width: 42px;
-  height: 42px;
+  width: 60px;
+  height: 60px;
+  background: transparent;
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
   z-index: 10;
 }
@@ -892,6 +790,10 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   display: block;
 }
 
+.color-extract .color-extract-marker.is-active .color-extract-marker-zoom {
+  display: block;
+}
+
 /* ---- Magnified state (handle becomes the zoom lens on drag) ---- */
 
 .color-extract .color-extract-marker.is-magnified {
@@ -901,6 +803,10 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.95), 0 0 17px rgba(0, 0, 0, 0.16);
   z-index: 20;
   transition: none;
+}
+
+.color-extract:has(.color-extract-marker.is-magnified) {
+  cursor: none;
 }
 
 .color-extract .color-extract-marker.is-magnified .color-extract-marker-zoom {
@@ -993,7 +899,6 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   .section:has(.color-extract-marquee-wrapper) {
     align-items: center;
     min-height: 800px;
-    padding-inline: 0;
   }
 
   .color-extract .color-extract-landing {
@@ -1029,6 +934,7 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
 
   .color-extract .color-extract-mood-dropdown {
     width: fit-content;
+    min-width: 64px;
     max-width: 330px;
   }
 
@@ -1038,8 +944,8 @@ body:has(.color-headline.extract) .color-extract .color-extract-landing-bg {
   }
 
   .color-extract .color-extract-marker.is-active {
-    width: 56px;
-    height: 56px;
+    width: 80px;
+    height: 80px;
   }
 
   .color-extract .color-extract-marker.is-magnified {

@@ -312,6 +312,12 @@ export async function decorateButtonsDeprecated(el, size) {
   if (!el.closest('.ax-columns') && !el.closest('.banner') && !el.closest('.fullscreen-marquee') && !el.closest('.link-list')) decorateButtons(el, size);
   // DO NOT add any more exceptions above. We should be removing the exceptions and not adding more.
   el.querySelectorAll(':scope a:not(.con-button, .social-link)').forEach(($a) => {
+    // Mirrors decorateButtons' own #_button-<name> handling (milo's utils/decorate.js)
+    // since this deprecated path never calls it for these blocks.
+    [...$a.href.matchAll(/#_button-([a-zA-Z-]+)/g)].forEach((match) => {
+      $a.href = $a.href.replace(match[0], '');
+      $a.classList.add(match[1]);
+    });
     const originalHref = $a.href;
     const linkText = $a.textContent.trim();
     if ($a.children.length > 0) {
@@ -478,6 +484,7 @@ export function preDecorateSections(area) {
       if (sectionRemove) section.remove();
       else if (sectionMeta.anchor) section.id = sectionMeta.anchor;
       else if (sectionMeta.padding) section.setAttribute('data-padding', 'none');
+      if (sectionMeta['max-width'] === '900') section.classList.add('max-width-900');
     }
   });
 
@@ -627,7 +634,7 @@ export function buildAutoBlocks() {
     const lastDiv = document.querySelector('main > div:last-of-type');
     const newDiv = document.createElement('div');
     lastDiv.insertAdjacentElement('afterend', newDiv);
-    const validButtonVersion = ['floating-button', 'multifunction-button', 'mobile-fork-button', 'mobile-fork-button-frictionless', 'mobile-fork-button-dismissable', 'mobile-fork-button-os-split'];
+    const validButtonVersion = ['floating-button', 'multifunction-button', 'mobile-fork-button', 'mobile-fork-button-frictionless', 'mobile-fork-button-dismissable', 'mobile-fork-button-os-split', 'mobile-fork-button-unity'];
     const device = document.body.dataset?.device;
     const blockName = getMetadata(`${device}-floating-cta`);
 
