@@ -75,7 +75,7 @@ main .list > div > div > :last-child {
 
 main .list {
     list-style: none;
-    text-align: left;
+    text-align: start;
     box-sizing: border-box;
 }
 
@@ -96,7 +96,7 @@ main .list ol li::before {
     height: 2.25rem;
     line-height: 2rem;
     width: 2.25rem;
-    left: -4em;
+    inset-inline-start: -4em;
     display: inline-block;
     position: absolute;
     text-align: center;
