@@ -381,6 +381,18 @@ export default async function decorate(block) {
 
   if (isExpandableVariant) {
     buildTableLayout(block);
+    // If this FAQ lives inside a content-toggle-v2 tab panel, the panel may
+    // still be `display: none` when the default item auto-opens above,
+    // so `content.scrollHeight` reads 0 and the max-height animation
+    // collapses to nothing. Recalculate once the panel is actually shown.
+    document.addEventListener('content-toggle:activated', (event) => {
+      const panel = event?.detail?.panel;
+      if (!panel || !panel.contains(block)) return;
+      const openContent = block.querySelector('.faqv2-content.open');
+      if (openContent) {
+        openContent.style.maxHeight = `${openContent.scrollHeight}px`;
+      }
+    });
   } else {
     await buildOriginalLayout(block);
   }
