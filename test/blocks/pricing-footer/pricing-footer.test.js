@@ -92,13 +92,15 @@ describe('Pricing Footer', () => {
     }
   });
 
-  const applyCardWidths = (widths) => {
+  const applyCardWidths = (widths, height = 300) => {
     const content = block.previousElementSibling;
     const cards = content ? content.querySelectorAll('merch-card') : [];
     widths.forEach((width, index) => {
       const card = cards[index];
       if (card) {
-        card.getBoundingClientRect = () => ({ width });
+        // A rendered merch-card reports both width and height; the block waits
+        // for a non-zero height before trusting the measurement.
+        card.getBoundingClientRect = () => ({ width, height });
       }
     });
   };
