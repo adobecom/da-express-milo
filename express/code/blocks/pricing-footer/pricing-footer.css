@@ -4,6 +4,13 @@
   margin-left: auto;
   box-sizing: content-box;
   margin-right: auto;
+  transition: opacity 0.2s ease;
+}
+
+/* Hidden by JS only while the final width is being measured, so the footer
+   never flashes at the merch cards' pre-render width. */
+.pricing-footer.is-measuring {
+  opacity: 0;
 }
 
 .pricing-footer > div {

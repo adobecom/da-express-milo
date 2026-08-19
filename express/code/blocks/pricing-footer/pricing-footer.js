@@ -48,10 +48,17 @@ function getMerchCardWidth(el) {
           const cardStyles = window.getComputedStyle(card);
           return {
             width: rect.width,
+            height: rect.height,
             marginLeft: parseFloat(cardStyles.marginLeft || '0') || 0,
             marginRight: parseFloat(cardStyles.marginRight || '0') || 0,
           };
         });
+
+        // merch-card is an async custom element; before it renders it reports
+        // a near-zero box. Applying a width from that produces the "very low
+        // width" flash, so wait for a real layout and let the observer retry.
+        const cardsRendered = cardMeasurements.every((m) => m.width > 1 && m.height > 1);
+        if (!cardsRendered) return;
 
         // PHASE 2: CALCULATE - No DOM access
         const totalWidth = cardMeasurements.reduce((acc, measurement, index) => {
@@ -86,6 +93,8 @@ function getMerchCardWidth(el) {
           el.classList.add(`card-count-${cardCount}`);
 
           el.style.maxWidth = `${targetWidth}px`;
+          // Reveal now that the footer is at its final measured width.
+          el.classList.remove('is-measuring');
         });
       }
 
@@ -109,6 +118,10 @@ export default function init(el) {
   const columns = Array.from(firstRow.children);
   el.innerHTML = '';
   el.classList.add('ax-grid-container', 'small-gap');
+  // Hide until the first trustworthy width is measured so the footer never
+  // paints at the pre-render width. Added via JS so a failed script load
+  // still leaves the footer visible.
+  el.classList.add('is-measuring');
 
   columns
     .filter((column) => column.innerHTML.trim() !== '')
@@ -126,6 +139,10 @@ export default function init(el) {
   requestAnimationFrame(() => {
     requestAnimationFrame(runWidthCalculation);
   });
+
+  // Safety net: never leave the footer hidden if the merch cards never
+  // render (e.g. offer load failure) — reveal at its natural width instead.
+  el.revealTimer = setTimeout(() => el.classList.remove('is-measuring'), 1200);
 
   // Setup observers with proper cleanup
   if (window.ResizeObserver) {
@@ -148,6 +165,10 @@ export default function init(el) {
     if (el.resizeHandler) {
       window.removeEventListener('resize', el.resizeHandler);
       el.resizeHandler = null;
+    }
+    if (el.revealTimer) {
+      clearTimeout(el.revealTimer);
+      el.revealTimer = null;
     }
   };
 }

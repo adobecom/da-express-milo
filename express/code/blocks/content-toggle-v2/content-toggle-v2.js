@@ -60,7 +60,12 @@ function initButton(block, buttons, sections, index, initiallyHasTabParam) {
     if (activeButton !== buttons[index]) {
       setActiveButton(index);
       if (updateUrl) updateURLParameter(index + 1); // write 1-based index to URL
-      let newlyActiveSection = null;
+      // A single toggle value can map to several sibling sections (e.g. a
+      // merch section, an faqv2 section and a list section all tagged
+      // `Toggle: Individuals`). Collect every one that becomes active so each
+      // gets its own activation event below — a single "last active section"
+      // would leave the other panels' dependent blocks unnotified.
+      const newlyActiveSections = [];
       sections.forEach((section) => {
         // Ensure no lingering native hidden attribute (iOS Safari may skip CSS loads)
         if (section.hasAttribute('hidden')) section.removeAttribute('hidden');
@@ -76,7 +81,7 @@ function initButton(block, buttons, sections, index, initiallyHasTabParam) {
         } else {
           section.removeAttribute('inert');
         }
-        if (isActive) newlyActiveSection = section;
+        if (isActive) newlyActiveSections.push(section);
         // ARIA: manage tabpanel hidden state
         section.setAttribute('aria-hidden', (!isActive).toString());
       });
@@ -90,13 +95,17 @@ function initButton(block, buttons, sections, index, initiallyHasTabParam) {
             behavior: 'auto',
           });
         }
-        // Nudge dependent blocks (e.g., comparison-table-v2) to recalc layout on activation
-        if (newlyActiveSection) {
+        // Nudge dependent blocks (e.g., comparison-table-v2, faqv2) to recalc
+        // layout on activation — one event per newly revealed section so a
+        // dependent block is always notified about its own panel.
+        if (newlyActiveSections.length) {
           window.dispatchEvent(new Event('resize'));
-          document.dispatchEvent(new CustomEvent('content-toggle:activated', {
-            detail: { panel: newlyActiveSection },
-            bubbles: true,
-          }));
+          newlyActiveSections.forEach((section) => {
+            document.dispatchEvent(new CustomEvent('content-toggle:activated', {
+              detail: { panel: section },
+              bubbles: true,
+            }));
+          });
         }
       });
     }
