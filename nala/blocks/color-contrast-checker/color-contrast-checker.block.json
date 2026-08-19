@@ -1,0 +1,425 @@
+{
+  "block": "color-contrast-checker",
+  "variants": [
+    {
+      "tcid": "0",
+      "name": "@color-contrast-checker-default",
+      "selector": "div.color-contrast-checker",
+      "path": "/drafts/nala/blocks/color/color-contrast-checker?color-palette=424242,FF98BB,BA1650,CCCCCC,056C5C&martech=off",
+      "data": {
+        "semantic": {
+          "texts": [
+            {
+              "selector": "p.cc-set-ratio-field-help",
+              "nth": 0,
+              "tag": "p",
+              "text": "Enter a value between 1 and 20",
+              "markup": null
+            },
+            {
+              "selector": "span.cc-set-ratio-separator",
+              "nth": 0,
+              "tag": "span",
+              "text": ": 1",
+              "markup": null
+            },
+            {
+              "selector": "li",
+              "nth": 2,
+              "tag": "li",
+              "text": "Contrast checker",
+              "markup": null
+            },
+            {
+              "selector": "h2.cc-preview-heading",
+              "nth": 0,
+              "tag": "h2",
+              "text": "We are Roadie",
+              "markup": null
+            },
+            {
+              "selector": "p.cc-preview-body-text",
+              "nth": 0,
+              "tag": "p",
+              "text": "Roadie is full service pottery and ceramics studio offering workshops and classes for ceramicists of all skill levels.",
+              "markup": null
+            },
+            {
+              "selector": "span.cc-preview-cta",
+              "nth": 0,
+              "tag": "span",
+              "text": "Shop now",
+              "markup": null
+            }
+          ],
+          "media": [
+            {
+              "selector": "picture",
+              "nth": 0,
+              "tag": "picture",
+              "src": "./media_1cea8529745014d1fd7783c7ecc22a7bc19a5145f.png?width=750&format=png&optimize=medium",
+              "alt": ""
+            },
+            {
+              "selector": "svg",
+              "nth": 6,
+              "tag": "svg",
+              "src": null,
+              "alt": null,
+              "useHref": null,
+              "context": null
+            }
+          ],
+          "interactives": [
+            {
+              "type": "button",
+              "selector": "sp-action-button.cc-ratio-label-text",
+              "nth": 0,
+              "text": "Contrast ratioEnsure your color choices meet WCAG compliance",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button.cc-contrast-ratio-badge-trigger",
+              "nth": 0,
+              "text": ": 1",
+              "href": null,
+              "ariaLabel": "Contrast ratio 10.73 : 1",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.cc-compare-link",
+              "nth": 0,
+              "text": "Compare entire palette",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": "input.ax-color-input__input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": "input.cc-tint-value-input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Foreground color: Tint value",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button",
+              "nth": 2,
+              "text": "Swap",
+              "href": null,
+              "ariaLabel": "Swap foreground and background colors",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": "input.ax-color-input__input",
+              "nth": 1,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": "input.cc-tint-value-input",
+              "nth": 1,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Background color: Tint value",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "sp-tab",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "sp-tab",
+              "nth": 1,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "tab",
+              "selector": "sp-tab",
+              "nth": 2,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-tab-panel",
+              "nth": 0,
+              "text": "Category",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button.cc-summary-label",
+              "nth": 0,
+              "text": "AAMust meet a ratio of 3:1",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button.cc-summary-label",
+              "nth": 1,
+              "text": "AAAMust meet a ratio of 4.5:1",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.cc-summary-row",
+              "nth": 0,
+              "text": "Large text",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button.cc-summary-label",
+              "nth": 2,
+              "text": "Large textRefers to 18pt and above for regular font-weight,\nor 14pt and above for bold font-weight",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.cc-summary-row",
+              "nth": 1,
+              "text": "Small text",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button.cc-summary-label",
+              "nth": 3,
+              "text": "Small textRefers to 17pt and below for regular font-weight,\nor 13pt and below for bold font-weight",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "div.cc-summary-row",
+              "nth": 2,
+              "text": "Graphics and UI",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button.cc-summary-label",
+              "nth": 4,
+              "text": "Graphics and UIRefers to graphical objects or user interface components.",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button.cc-summary-label",
+              "nth": 5,
+              "text": "N/AAAA standards default to AA compliance for graphics and UI",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.action-menu-link.palette-link.color-action-button",
+              "nth": 0,
+              "text": "",
+              "href": "/express/create/color-wheel",
+              "ariaLabel": "Color palette",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "span.action-menu-link.contrast-link.color-action-button.active",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "link",
+              "selector": "a.action-menu-link.color-blindness-link.color-action-button",
+              "nth": 0,
+              "text": "",
+              "href": "/express/create/color-accessibility",
+              "ariaLabel": "Color blindness",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.undo-btn.color-action-button",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Undo",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "button.redo-btn.color-action-button",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Redo",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button",
+              "nth": 9,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Share this color palette",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button",
+              "nth": 10,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Download this color palette",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-action-button",
+              "nth": 11,
+              "text": "",
+              "href": null,
+              "ariaLabel": "Save this palette to your Library",
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "input",
+              "selector": "input.ax-palette-name-input",
+              "nth": 0,
+              "text": "",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            },
+            {
+              "type": "button",
+              "selector": "sp-button",
+              "nth": 0,
+              "text": "Create with my color palette",
+              "href": null,
+              "ariaLabel": null,
+              "rel": null,
+              "title": null,
+              "target": null
+            }
+          ]
+        }
+      },
+      "tags": [
+        "@color-contrast-checker",
+        "@default",
+        "@express"
+      ]
+    }
+  ]
+}

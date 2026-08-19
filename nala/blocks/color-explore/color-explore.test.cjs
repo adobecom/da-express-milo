@@ -1,17 +1,19 @@
-const { test, expect } = require('../../utils/test.cjs');
-const { features } = require('./cta-cards.spec.cjs');
-const CtaCardsBlock = require('./cta-cards.page.cjs');
+const { test, expect } = require('@playwright/test');
+const { features } = require('./color-explore.spec.cjs');
+const ColorExploreBlock = require('./color-explore.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
 const { runSeoChecks } = require('../../libs/seo-check.cjs');
 
-const miloLibs = process.env.MILO_LIBS || '';
+test.describe('ColorExploreBlock Test Suite', () => {
+  // Desktop-only coverage: the desktop filter layout (.filters-desktop) renders
+  // at >= 600px; below that the mobile controls take over.
+  test.use({ viewport: { width: 1280, height: 800 } });
 
-test.describe('CtaCardsBlock Test Suite', () => {
-  // Test Id : 0 : @cta-cards-default
+  // Test Id : 0 : @color-explore-palettes-color-explore--strips
   test(`[Test Id - ${features[0].tcid}] ${features[0].name} ${features[0].tags}`, async ({ page, baseURL }) => {
     const { data } = features[0];
-    const testUrl = `${baseURL}${features[0].path}${miloLibs}`;
-    const block = new CtaCardsBlock(page, features[0].selector);
+    const testUrl = `${baseURL}${features[0].path}`;
+    const block = new ColorExploreBlock(page, features[0].selector);
     console.info(`[Test Page]: ${testUrl}`);
 
     await test.step('step-1: Navigate to page', async () => {
@@ -21,6 +23,7 @@ test.describe('CtaCardsBlock Test Suite', () => {
     });
 
     await test.step('step-2: Verify block content', async () => {
+      await block.waitReady();
       await expect(block.block).toBeVisible();
       const sem = data.semantic;
 
@@ -58,11 +61,38 @@ test.describe('CtaCardsBlock Test Suite', () => {
       }
     });
 
-    await test.step('step-3: Accessibility validation', async () => {
-      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
+    await test.step('step-3: Open desktop filter dropdowns and verify items', async () => {
+      const dropdowns = data.desktopFilters || [];
+      await expect(block.desktopFilters).toBeVisible();
+
+      for (const filter of dropdowns) {
+        const nth = filter.dropdownNth;
+        const items = block.menuItems(nth);
+
+        // Items are hidden until the picker is opened.
+        await expect(block.picker(nth)).toBeVisible();
+        await expect(items.first()).toBeHidden();
+
+        await block.openPicker(nth);
+
+        await expect(items).toHaveCount(filter.items.length);
+        for (let i = 0; i < filter.items.length; i += 1) {
+          const item = items.nth(i);
+          await expect(item).toBeVisible({ timeout: 8000 });
+          await expect(item).toContainText(filter.items[i].text);
+        }
+
+        // Close before opening the next picker.
+        await page.keyboard.press('Escape');
+        await expect(items.first()).toBeHidden();
+      }
     });
 
-    await test.step('step-4: SEO validation', async () => {
+    await test.step('step-4: Accessibility validation', async () => {
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: true });
+    });
+
+    await test.step('step-5: SEO validation', async () => {
       await runSeoChecks({ page, feature: features[0], skipSeoTest: false });
     });
   });

@@ -6,6 +6,11 @@ const USER_AGENT_DESKTOP = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKi
 const USER_AGENT_MOBILE_CHROME = 'Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Mobile Safari/537.36 NALA-Acom';
 const USER_AGENT_MOBILE_SAFARI = 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/14.1.1 Mobile/15E148 Safari/604.1 NALA-Acom';
 
+function getRetries() {
+  if (process.env.NALA_RETRIES !== undefined) return Number(process.env.NALA_RETRIES);
+  return process.env.CI ? 2 : 1;
+}
+
 /**
  * @see https://playwright.dev/docs/test-configuration
  * @type {import('@playwright/test').PlaywrightTestConfig}
@@ -14,24 +19,36 @@ const config = {
   testDir: './nala',
   outputDir: './test-results',
   globalSetup: './nala/utils/global.setup.cjs',
-  /* Maximum time one test can run for. */
-  timeout: 45 * 1000,
+  /* Maximum time one test can run for. Headroom for a slow navigation + a
+   * long first assertion while a block decorates. Override with NALA_TEST_TIMEOUT. */
+  timeout: Number(process.env.NALA_TEST_TIMEOUT) || 60 * 1000,
   expect: {
     /**
      * Maximum time expect() should wait for the condition to be met.
      * For example in `await expect(locator).toHaveText();`
+     *
+     * Blocks assert visibility right after `domcontentloaded`, before EDS/Milo
+     * finishes decorating them in the lazy phase, so this is effectively the
+     * budget for block decoration. It must cover worst-case CI / cold-CDN load
+     * (locally blocks render in ~1-2.5s; CI runners are several times slower).
+     * Override with NALA_EXPECT_TIMEOUT.
      */
-    timeout: 5000,
+    timeout: Number(process.env.NALA_EXPECT_TIMEOUT) || 15000,
   },
   testMatch: '**/*.test.cjs',
   /* Run tests in files in parallel */
   fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
-  /* Retry on CI only */
-  retries: process.env.CI ? 1 : 0,
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 4 : 3,
+  /* Auto-recover flaky slow-window failures within a single run so a green
+   * result doesn't require a manual re-run. 2 on CI, 1 locally. Override with
+   * NALA_RETRIES. */
+  retries: getRetries(),
+  /* Parallel workers per shard runner. Lowered from CI's 4 to 3 so heavy
+   * canvas/Spectrum blocks don't starve each other for CPU on the shared CI
+   * runners — that contention was causing flaky decoration timeouts that only
+   * passed on re-run. Override with NALA_WORKERS (e.g. 2 for more headroom). */
+  workers: Number(process.env.NALA_WORKERS) || 3,
   /* Reporter to use. */
   reporter: process.env.CI
     ? [['github'], ['list'], ['./nala/utils/base-reporter.cjs']]
@@ -44,6 +61,9 @@ const config = {
   use: {
     /* Maximum time each action such as `click()` can take. Defaults to 0 (no limit). */
     actionTimeout: 60000,
+    /* Fail a stuck page load fast (within the test budget) so a retry can
+     * re-navigate against a now-warm CDN instead of the whole test timing out. */
+    navigationTimeout: 30000,
     screenshot: 'only-on-failure',
     trace: 'on-first-retry',
     baseURL:
