@@ -33,7 +33,7 @@
  *       { type: 'share', onClick: onShare },
  *       { type: 'download', onClick: onDownload },
  *     ],
- *     fontOptions: [...],   // { label, font, italic, weight }
+ *     fontOptions: [...],   // { label, font, italic, weight, stretch }
  *     backgrounds: {        // our fetched card set + quotes
  *       cardSet: [{ card: { id, bg }, quote, author }, ...],
  *       decoCount: 8,
@@ -255,6 +255,7 @@ function buildFontButton(opt, index, onPick) {
     `font-family:${opt.font};`,
     opt.italic ? 'font-style:italic;' : '',
     opt.weight ? `font-weight:${opt.weight};` : '',
+    opt.stretch ? `font-stretch:${opt.stretch};` : '',
   ].join('');
   const btn = createTag('button', {
     type: 'button',
@@ -311,11 +312,13 @@ function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOpti
     root.style.setProperty('--me-quote-font', opt.font);
     root.style.setProperty('--me-quote-font-style', opt.italic ? 'italic' : 'normal');
     root.style.setProperty('--me-quote-font-weight', opt.weight || 'normal');
+    root.style.setProperty('--me-quote-font-stretch', opt.stretch || 'normal');
     pill.textContent = opt.label;
     pill.setAttribute('aria-label', opt.label);
     pill.style.fontFamily = opt.font;
     pill.style.fontStyle = opt.italic ? 'italic' : 'normal';
     pill.style.fontWeight = opt.weight || 'normal';
+    pill.style.fontStretch = opt.stretch || 'normal';
     [panel, sheetGrid].forEach((container) => {
       container.querySelectorAll('.me-font').forEach((f) => {
         const isMatch = f.dataset.font === opt.font;
@@ -676,6 +679,7 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
       family: fontOptions[0]?.font || 'sans-serif',
       style: fontOptions[0]?.italic ? 'italic' : 'normal',
       weight: fontOptions[0]?.weight || 'normal',
+      stretch: fontOptions[0]?.stretch || 'normal',
     },
   };
 
@@ -854,6 +858,7 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
             family: font.font,
             style: font.italic ? 'italic' : 'normal',
             weight: font.weight || 'normal',
+            stretch: font.stretch || 'normal',
           },
         } : {}),
       });
@@ -875,6 +880,7 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
               family: patch.font.font,
               style: patch.font.italic ? 'italic' : 'normal',
               weight: patch.font.weight || 'normal',
+              stretch: patch.font.stretch || 'normal',
             },
           });
         }
@@ -1135,6 +1141,7 @@ function buildArcCard(onActivate, a11y, tabIndex) {
     quoteP.style.fontFamily = entry.font?.font || '';
     quoteP.style.fontStyle = entry.font?.italic ? 'italic' : '';
     quoteP.style.fontWeight = entry.font?.weight || '';
+    quoteP.style.fontStretch = entry.font?.stretch || '';
     authorP.textContent = entry.author || '';
     authorP.style.display = entry.author ? '' : 'none';
     el.classList.add(`${entry.card.mode}-mode`)
@@ -1202,6 +1209,7 @@ function buildArcGhost() {
     quoteP.style.fontFamily = entry.font?.font || '';
     quoteP.style.fontStyle = entry.font?.italic ? 'italic' : '';
     quoteP.style.fontWeight = entry.font?.weight || '';
+    quoteP.style.fontStretch = entry.font?.stretch || '';
     authorP.textContent = entry.author || '';
     authorP.style.display = entry.author ? '' : 'none';
 
@@ -1405,7 +1413,7 @@ function buildArcCarousel(cardSet, useQuote, defaultFont, a11y) {
  * @param {Array} [config.topActions=[]] — top-right hover action bar (Figma
  *   node 1099-5050): `[{ type: 'edit'|'share'|'download', onClick }, ...]`.
  *   Only the types supplied are rendered, in the given order.
- * @param {Array} config.fontOptions — `{ label, font, italic, weight }` list.
+ * @param {Array} config.fontOptions — `{ label, font, italic, weight, stretch }` list.
  * @param {Object} config.backgrounds — `{ cardSet, decoCount }` where cardSet
  *   is `[{ card: { id, bg }, quote, author }, ...]`.
  * @param {Object} config.a11y — shared helpers the widget needs but does not

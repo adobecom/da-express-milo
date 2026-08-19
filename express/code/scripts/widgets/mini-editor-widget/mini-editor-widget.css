@@ -21,6 +21,7 @@
   --me-quote-font: var(--body-font-family);
   --me-quote-font-style: normal;
   --me-quote-font-weight: normal;
+  --me-quote-font-stretch: normal;
 }
 
 .mini-editor-stage {
@@ -159,6 +160,7 @@
   font-family: var(--me-quote-font);
   font-style: var(--me-quote-font-style);
   font-weight: var(--me-quote-font-weight);
+  font-stretch: var(--me-quote-font-stretch);
   font-size: var(--Global-Typography-Size-Label-Label-2XL);
   line-height: var(--Global-Typography-Line-height-Label-Label-2XL);
   text-align: center;
@@ -180,6 +182,7 @@
   font-family: var(--me-quote-font);
   font-style: var(--me-quote-font-style);
   font-weight: var(--me-quote-font-weight);
+  font-stretch: var(--me-quote-font-stretch);
   font-size: var(--Global-Typography-Size-Label-Label-L);
   text-align: center;
   white-space: nowrap;
