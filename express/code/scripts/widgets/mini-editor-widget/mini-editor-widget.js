@@ -752,11 +752,25 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
     quoteWrap.setAttribute('aria-label', `Click to copy quote: ${quote}`);
   };
 
-  const tip = createTag('span', { class: 'me-tip', 'aria-hidden': 'true' }, [
-    createTag('span', { class: 'me-tip-box' }, ['Click to copy quote']),
-  ]);
-  quoteWrap.append(quoteEl, tip);
+  quoteWrap.append(quoteEl);
   renderQuote(first.quote);
+
+  // Same S2 sp-tooltip as the top-right action bar (see
+  // buildMiniEditorActions), replacing the old hand-rolled .me-tip/.me-tip-box.
+  const [{ createExpressTooltip }, { installRegistryGuard }] = await Promise.all([
+    import('../../color-shared/spectrum/components/express-tooltip.js'),
+    import('../../color-shared/spectrum/registry.js'),
+  ]);
+  const quoteTooltipGuard = installRegistryGuard();
+  try {
+    await createExpressTooltip({
+      targetEl: quoteWrap,
+      content: 'Click to copy quote',
+      placement: 'top',
+    });
+  } finally {
+    quoteTooltipGuard.restore();
+  }
 
   // Mirrors the light-mode/dark-mode class the deco/arc cards apply per their
   // own card.mode (see buildDecoCards/buildArcCard's render) so the desktop
@@ -1117,7 +1131,7 @@ function wireDecoTabChain(decorations) {
  */
 const ROLE_CLASSES = ['me-arc-card--prev', 'me-arc-card--center', 'me-arc-card--next', 'me-arc-card--stage-prev', 'me-arc-card--stage-next'];
 
-function buildArcCard(onActivate, a11y, tabIndex) {
+async function buildArcCard(onActivate, a11y, tabIndex) {
   const el = createTag('div', {
     class: 'me-arc-card',
     role: 'option',
@@ -1127,22 +1141,47 @@ function buildArcCard(onActivate, a11y, tabIndex) {
   });
   // quoteP/authorP live inside quoteWrap (not directly in el) purely so the
   // centre role can reuse .me-quote-wrap's existing CSS (frosted
-  // hover/focus background, tip visibility, is-copied state) via a
-  // descendant selector off el's own :hover/:focus-visible — see
-  // .me-arc-card--center:hover .me-quote-wrap in the CSS. quoteWrap itself
-  // has no role/tabindex/listeners of its own: el (role="option", already
-  // the roving-tabindex focus target for prev/centre/next) stays the one
-  // real interactive element, so this never nests two focusable elements.
+  // hover/focus background, is-copied state) via a descendant selector off
+  // el's own :hover/:focus-visible — see .me-arc-card--center:hover
+  // .me-quote-wrap in the CSS. quoteWrap itself has no role/tabindex/
+  // listeners of its own: el (role="option", already the roving-tabindex
+  // focus target for prev/centre/next) stays the one real interactive
+  // element, so this never nests two focusable elements.
   const quoteP = createTag('div', { class: 'me-arc-quote' });
   const authorP = createTag('div', { class: 'me-arc-author' });
   const quoteWrap = createTag('div', { class: 'me-quote-wrap', tabIndex: (tabIndex == -1 ? -1 : 8) });
   const hint = createTag('span', { id: 'me-arc-card-hint', class: 'sr-only' }, ['Copy quote to clipboard']);
-  const tip = createTag('span', { class: 'me-tip', 'aria-hidden': 'true' }, [
-    createTag('span', { class: 'me-tip-box' }, ['Click to copy quote']),
-  ]);
-  quoteWrap.append(quoteP, hint, tip);
+  quoteWrap.append(quoteP, hint);
   el.append(quoteWrap, authorP);
 
+  // Same S2 sp-tooltip as the top-right action bar (see
+  // buildMiniEditorActions) — quoteWrap keeps receiving hover/focus at every
+  // role (it's not pointer-events: none on prev/next), but only the centre
+  // role actually copies on click/Enter (see doCopy below), so the tooltip
+  // must never announce "Click to copy quote" there. createExpressTooltip
+  // has no built-in way to conditionally suppress a show, so a capture-phase
+  // listener intercepts pointerenter/focusin here and stops them before its
+  // own bubble-phase listeners (see express-tooltip.js) ever run, whenever
+  // this card isn't currently centre.
+  const [{ createExpressTooltip }, { installRegistryGuard }] = await Promise.all([
+    import('../../color-shared/spectrum/components/express-tooltip.js'),
+    import('../../color-shared/spectrum/registry.js'),
+  ]);
+  const tooltipGuard = installRegistryGuard();
+  try {
+    await createExpressTooltip({
+      targetEl: quoteWrap,
+      content: 'Click to copy quote',
+      placement: 'top',
+    });
+  } finally {
+    tooltipGuard.restore();
+  }
+  const suppressTipWhenNotCentre = (e) => {
+    if (!el.classList.contains('me-arc-card--center')) e.stopImmediatePropagation();
+  };
+  quoteWrap.addEventListener('pointerenter', suppressTipWhenNotCentre, { capture: true });
+  quoteWrap.addEventListener('focusin', suppressTipWhenNotCentre, { capture: true });
 
   // currentQuote/currentAuthor (not quoteP.textContent) — the full quote,
   // even when the visible text is truncated (see render below), same
@@ -1296,7 +1335,7 @@ function buildArcGhost() {
  * re-entering the deck one step further round; the other two just carry
  * their existing content into their new role.
  */
-function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
+async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
   const root = createTag('div', { class: 'me-arc' });
   // Each .me-arc-card has role="option" (see buildArcCard), which axe
   // requires to sit inside a role="listbox" parent (see
@@ -1330,9 +1369,11 @@ function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
     if (el.classList.contains('me-arc-card--prev')) goPrev(); // eslint-disable-line no-use-before-define
     else if (el.classList.contains('me-arc-card--next')) goNext(); // eslint-disable-line no-use-before-define
   };
-  const cardA = buildArcCard(onActivate, a11y, -1);
-  const cardB = buildArcCard(onActivate, a11y, 2);
-  const cardC = buildArcCard(onActivate, a11y, -1);
+  const [cardA, cardB, cardC] = await Promise.all([
+    buildArcCard(onActivate, a11y, -1),
+    buildArcCard(onActivate, a11y, 2),
+    buildArcCard(onActivate, a11y, -1),
+  ]);
   const ghost = buildArcGhost();
   // roles[i] tracks which role each of cardA/B/C currently occupies, so
   // navigation can rotate them without re-deriving role from DOM classes.
@@ -1566,7 +1607,7 @@ export default async function createMiniEditorWidget(config = {}) {
     // Only meaningful on desktop (see buildSkipQuoteSuggestionsCta) — a
     // no-op call when the CTA wasn't built (small viewport).
     setDecoChainTarget(wireDecoTabChain(decorations));
-    const { root: arcCarousel, updateCentre: updateArcCentre } = buildArcCarousel(
+    const { root: arcCarousel, updateCentre: updateArcCentre } = await buildArcCarousel(
       arcCardSet,
       useQuote,
       fontOptions[0],

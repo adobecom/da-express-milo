@@ -189,38 +189,6 @@
   color: var(--Palette-transparent-white-800);
 }
 
-.me-tip {
-  position: absolute;
-  bottom: calc(100% + 4px);
-  left: 50%;
-  transform: translateX(-50%) translateY(4px);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-  z-index: 2;
-}
-
-.me-card .me-quote-wrap:hover .me-tip,
-.me-card .me-quote-wrap:focus-visible .me-tip,
-.me-arc-card--center .me-quote-wrap:hover .me-tip,
-.me-arc-card--center .me-quote-wrap:focus-visible .me-tip {
-  opacity: 1;
-  transform: translateX(-50%) translateY(0);
-}
-
-.me-tip-box {
-  display: block;
-  max-width: 160px;
-  padding: var(--spacing-75) var(--spacing-200);
-  border-radius: var(--border-radius-8);
-  background: var(--Palette-gray-800);
-  color: var(--color-white);
-  font-size: var(--Global-Typography-Size-Label-Label-S);
-  line-height: var(--Global-Typography-Line-height-Label-Label-M);
-  text-align: center;
-  white-space: nowrap;
-}
-
 .me-controls {
   /* Stays above .me-sheet-overlay (z-index 1200 below) — otherwise, while a
      bottom sheet is open, a tap on the *other* trigger button lands on the
