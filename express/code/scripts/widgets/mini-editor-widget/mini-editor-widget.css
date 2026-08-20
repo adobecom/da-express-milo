@@ -771,10 +771,28 @@
    instead of hidden-until-hover — .me-carousel-mode already encodes this
    file's one definition of "tablet or mobile" (see syncViewportMode in
    mini-editor-widget.js), so this reuses it rather than a second, possibly
-   divergent breakpoint check. */
+   divergent breakpoint check. Per Figma node 54:7883 ("Primary actions",
+   tablet/mobile) the bar itself is smaller/lighter here than the desktop
+   spec (Figma 1099-5050) — different background opacity, thinner border,
+   smaller radius/gap/padding — not just always-visible. */
 .me-carousel-mode .me-actions {
   opacity: 1;
   pointer-events: auto;
+  gap: var(--spacing-80);
+  padding: 2px;
+  border-radius: var(--corner-radius-80);
+  background: rgb(255 255 255 / 51%);
+  border-color: rgb(255 255 255 / 14%);
+}
+
+.me-carousel-mode .me-action {
+  width: 24px;
+  height: 24px;
+  padding: 4.5px;
+}
+
+.me-carousel-mode .me-action-icon {
+  --mod-icon-size: 15px;
 }
 
 /* The widget's own max-width (542px, matching the tablet card size) only
