@@ -168,7 +168,11 @@
     --me-arc-card-h: 270px;
     --me-arc-origin-y: 2544px;
     --me-arc-extra-h: 50px;
-    --me-arc-gap: var(--spacing-100);
+    /* Per feedback: the gap between the carousel card and the font/colour
+       controls below is 16px (spacing-300) on both tablet and mobile, to
+       accommodate the arc carousel — same as the base (tablet) rule above,
+       not the tighter 8px this used to fall back to here. */
+    --me-arc-gap: var(--spacing-300);
   }
 
   /* Mobile header is left-aligned (not centred) per Figma frame 0-18684,
