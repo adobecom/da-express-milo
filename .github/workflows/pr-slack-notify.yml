@@ -1,0 +1,47 @@
+name: PR Slack Notify
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  notify-slack:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Send Slack notification for new PR
+        uses: actions/github-script@v7
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK_URL_PR }}
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+
+            if (pr.draft) {
+              console.log(`PR #${pr.number} opened as draft — skipping Slack notification`);
+              return;
+            }
+
+            if (!process.env.SLACK_WEBHOOK) {
+              console.log('SLACK_WEBHOOK_URL_PR secret not configured — skipping notification');
+              return;
+            }
+
+            console.log(`Sending Slack notification for PR #${pr.number}: "${pr.title}"`);
+
+            let response;
+            try {
+              response = await fetch(process.env.SLACK_WEBHOOK, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  text: `🔔  <${pr.html_url}|${pr.title}> by ${pr.user.login}`,
+                }),
+              });
+            } catch (e) {
+              core.setFailed(`Slack request failed: ${e.message}`);
+              return;
+            }
+
+            if (!response.ok) {
+              core.setFailed(`Slack returned an error: ${response.status} ${response.statusText}`);
+            }
