@@ -233,7 +233,7 @@ async function makeRating(
   const ratingsLabel = `${score} ${starsPlaceholder}, ${cnt}`;
   const ratingsText = createTag('span', {
     class: 'ratings-metric',
-    role: 'group',
+    role: 'img',
     'aria-label': ratingsLabel,
   }, [
     createTag('span', { class: 'rating-visual', 'aria-hidden': 'true' }, [score, star]),
