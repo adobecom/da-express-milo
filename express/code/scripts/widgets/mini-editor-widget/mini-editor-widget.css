@@ -582,7 +582,6 @@
   flex-direction: column;
   align-items: center;
   padding: 11px;
-  border: 0.5px solid var(--Palette-transparent-white-700);
   border-radius: var(--Radius-corner-radius-200);
   background-size: cover;
   background-position: center;
@@ -590,10 +589,19 @@
      — otherwise the background image is sized/positioned inside the 11px
      padding ring, leaving that ring showing through as plain card
      background (the "extra whitespace" from feedback) instead of the image
-     reaching all the way to the border's own outer edge on every side. */
+     reaching all the way to the card's own outer edge on every side. */
   background-origin: border-box;
   background-repeat: no-repeat;
   overflow: hidden;
+  /* Stroke is an outline (not a border) so it draws outside the box rather
+     than eating into it — the image fills the card's full box completely,
+     with the stroke as a pure addition on top of that edge instead of
+     sharing space with it. outline-offset: -0.5px keeps it flush against
+     that edge (default outline-offset: 0 would draw it a hair outside the
+     rounded corner, since outline ordinarily doesn't follow border-radius
+     as tightly as a border does). */
+  outline: 0.5px solid var(--Palette-transparent-white-700);
+  outline-offset: -0.5px;
   /* Default: 4-layer shadow per Figma node 137:4778 ("Quote Hero Card",
      Default). Swaps to the single --Drop-shadow-emphasized-default token on
      hover/focus (same node, Hover state) — see .me-deco:hover below. */
