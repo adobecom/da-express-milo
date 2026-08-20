@@ -1,8 +1,9 @@
 /* ============================================================================
    Mini Editor Modal
    Wraps mini-editor-widget's centre editor card (decorations disabled) in an
-   animated dialog, per Figma node 54:8824. Same experience at every
-   breakpoint — desktop, tablet, mobile.
+   animated dialog, per Figma node 54:8824, on desktop/tablet. On mobile
+   (<=767px), the same overlay/dialog/card is restyled as a bottom sheet
+   instead, per Figma node 124:3660 — see the <=767px override below.
    ============================================================================ */
 
 /* Prevents the modal's scroll-lock (toggling body overflow) from shifting
@@ -98,6 +99,12 @@ html {
   --mod-icon-color: #292929;
 }
 
+/* Desktop/tablet: dismissal is via me-modal-close only — the mobile sheet's
+   drag handle (<=767px override below) replaces it there. */
+.me-modal-handle {
+  display: none;
+}
+
 .me-modal-close:hover {
   background: rgb(255 255 255 / 95%);
 }
@@ -113,16 +120,51 @@ html {
   }
 }
 
+/* Mobile only (<=767px): a bottom sheet instead of a centred dialog, per
+   Figma node 124:3660 — same overlay/dialog/card DOM and open/close JS as
+   desktop/tablet (mini-editor-modal.js), just restyled to slide up from the
+   bottom edge. me-modal-close is replaced by me-modal-handle as the visible
+   dismiss affordance here (outside-tap-to-close still applies either way). */
 @media (width <= 767px) {
-  /* No room beside the card at this width — float it above the card's top
-     edge instead (outside, over the backdrop), rather than the tablet
-     fallback's half-overlapping-the-corner position or insetting inside
-     the card, which the design calls for staying clear of entirely. */
+  .me-modal-overlay {
+    align-items: flex-end;
+    justify-content: stretch;
+    padding: 0;
+  }
+
+  .me-modal {
+    width: 100%;
+    max-height: 85vh;
+  }
+
+  .me-modal-card {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-height: 85vh;
+    border-radius: 24px 24px 0 0;
+    padding: 0 var(--spacing-100) var(--spacing-100);
+    transform: translateY(100%);
+    transition: transform 250ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 250ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .me-modal-overlay--open .me-modal-card {
+    transform: translateY(0);
+  }
+
   .me-modal-close {
-    top: auto;
-    right: var(--spacing-200);
-    bottom: calc(100% + var(--spacing-200));
-    left: auto;
+    display: none;
+  }
+
+  .me-modal-handle {
+    display: block;
+    width: 50px;
+    height: 4px;
+    margin: var(--spacing-100) auto;
+    background: rgb(0 0 0 / 15%);
+    border-radius: 999px;
+    flex-shrink: 0;
   }
 }
 

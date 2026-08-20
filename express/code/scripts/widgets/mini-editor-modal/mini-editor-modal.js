@@ -6,7 +6,10 @@
  * Figma node 54:8824. Opened from collapsible-rows' "Create a design"
  * button (`mini-editor:use-quote`) — the same event the inline mini-editor
  * block previously listened for — so this replaces that scroll-to-and-swap
- * behaviour with a modal, identically across desktop/tablet/mobile.
+ * behaviour with a modal on desktop/tablet, and a bottom sheet on mobile
+ * (<=767px, per Figma node 124:3660 — see mini-editor-modal.css's own
+ * <=767px override for the sheet-chrome styling; the same DOM/JS drives
+ * both, only the CSS presentation differs).
  *
  * Usage:
  *   import createMiniEditorModal from
@@ -64,6 +67,14 @@ export default async function createMiniEditorModal(config = {}) {
     tabindex: '-1',
   });
   const cardWrap = createTag('div', { class: 'me-modal-card' });
+  // Mobile only (<=767px, see mini-editor-modal.css) — the modal becomes a
+  // bottom sheet there, per Figma node 124:3660, and this handle is its only
+  // affordance for dismissal (me-modal-close is hidden at that width; the
+  // overlay's own outside-tap-to-close still works, same as desktop). Lives
+  // inside cardWrap (not dialog) so it sits atop the card's own content
+  // instead of beside it as a separate flex item.
+  const dragHandle = createTag('div', { class: 'me-modal-handle', 'aria-hidden': 'true' });
+  cardWrap.append(dragHandle);
   const closeBtn = createTag('button', {
     type: 'button',
     class: 'me-modal-close',

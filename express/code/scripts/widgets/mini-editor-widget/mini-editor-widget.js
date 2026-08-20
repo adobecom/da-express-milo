@@ -797,7 +797,15 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   } = buildColorControl(
     root,
     cardSet.map((c) => c.card),
-    (bgCard) => onFontOrColourPick({ card: bgCard }),
+    (bgCard) => {
+      // Unconditional (not just via onFontOrColourPick, which only reaches a
+      // listener when decorationsEnabled — see its declaration above): the
+      // desktop .me-card's own light-mode/dark-mode text contrast must
+      // follow every background pick even when there's no arc carousel to
+      // notify, e.g. the "Create a design" modal (decorations: false).
+      setCardMode(bgCard.mode);
+      onFontOrColourPick({ card: bgCard });
+    },
     panelMode,
     // No Skip-quote-suggestions CTA to hand off to on small viewports (see
     // skipCta above — the deco cards it bridges to don't exist there, the
