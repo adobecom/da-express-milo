@@ -638,32 +638,57 @@ const TOP_ACTION_DEFS = {
 async function buildMiniEditorActions(topActions = []) {
   const bar = createTag('div', { class: 'me-actions' });
   const menuApis = [];
+  const tooltips = [];
   const supportedActions = topActions.filter(({ type }) => TOP_ACTION_DEFS[type]);
   const baseTabIndex = 5;
-  for (const [index, { type, onClick, shareMenu }] of supportedActions.entries()) {
-    const def = TOP_ACTION_DEFS[type];
-    const icon = createTag(def.icon, { class: 'me-action-icon', 'aria-hidden': 'true' });
-    const btn = createTag('button', {
-      tabIndex: baseTabIndex + index,
-      type: 'button',
-      class: `me-action me-action--${type}`,
-      'aria-label': def.label,
-      // Native tooltip matches the accessible name exactly, per a11y spec.
-      title: def.label,
-    }, [icon]);
-    if (shareMenu) {
-      const { default: createShareMenuWidget } = await import(
-        '../share-menu-widget/share-menu-widget.js'
-      );
-      const menuApi = await createShareMenuWidget({ trigger: btn, ...shareMenu });
-      menuApis.push(menuApi);
-      bar.append(menuApi.element);
-    } else {
-      btn.addEventListener('click', () => onClick?.());
-      bar.append(btn);
+  // Same S2 sp-tooltip component (with its caret) already used for action
+  // buttons on the Colour experience, per Figma node 1099-5050's feedback
+  // that these tooltips should come from that shared component. Guarded
+  // (see registry.js) because this loader's own icons-workflow.js import
+  // above and the tooltip's overlay/icon bundle both register overlapping
+  // custom elements — without the guard, whichever finishes second throws
+  // "already been used with this registry" and mini-editor.js's catch
+  // removes the whole block.
+  const [{ createExpressTooltip }, { installRegistryGuard }] = await Promise.all([
+    import('../../color-shared/spectrum/components/express-tooltip.js'),
+    import('../../color-shared/spectrum/registry.js'),
+  ]);
+  const tooltipGuard = installRegistryGuard();
+  try {
+    for (const [index, { type, onClick, shareMenu }] of supportedActions.entries()) {
+      const def = TOP_ACTION_DEFS[type];
+      const icon = createTag(def.icon, { class: 'me-action-icon', 'aria-hidden': 'true' });
+      const btn = createTag('button', {
+        tabIndex: baseTabIndex + index,
+        type: 'button',
+        class: `me-action me-action--${type}`,
+        'aria-label': def.label,
+      }, [icon]);
+      tooltips.push(await createExpressTooltip({
+        targetEl: btn,
+        content: def.label,
+        placement: 'top',
+        dismissOnActivate: true,
+      }));
+      if (shareMenu) {
+        const { default: createShareMenuWidget } = await import(
+          '../share-menu-widget/share-menu-widget.js'
+        );
+        const menuApi = await createShareMenuWidget({ trigger: btn, ...shareMenu });
+        menuApis.push(menuApi);
+        bar.append(menuApi.element);
+      } else {
+        btn.addEventListener('click', () => onClick?.());
+        bar.append(btn);
+      }
     }
+  } finally {
+    tooltipGuard.restore();
   }
-  bar.destroy = () => menuApis.forEach((api) => api.destroy());
+  bar.destroy = () => {
+    menuApis.forEach((api) => api.destroy());
+    tooltips.forEach((tip) => tip.destroy());
+  };
   return bar;
 }
 
