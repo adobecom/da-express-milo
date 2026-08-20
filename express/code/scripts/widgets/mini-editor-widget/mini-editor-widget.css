@@ -813,6 +813,19 @@
   --mod-icon-size: 15px;
 }
 
+/* Hides the action bar for the ~1s a carousel navigation is mid-transition
+   (see markMoving in buildArcCarousel, which toggles this class on
+   .mini-editor-widget itself) — it should disappear the moment movement
+   starts and only reappear once the next slide has settled, rather than
+   staying visible (and static) while the cards slide under it. Extra
+   specificity (.mini-editor-widget.me-arc-moving, not just .me-arc-moving)
+   is needed to beat the hover/carousel-mode "always visible" rules above
+   at equal selector weight otherwise. */
+.mini-editor-widget.me-arc-moving .me-actions {
+  opacity: 0;
+  pointer-events: none;
+}
+
 /* The widget's own max-width (542px, matching the tablet card size) only
    happens to equal --me-arc-card-w on tablet — on mobile the card shrinks
    to 327px but the widget didn't, so .me-controls/.me-panel below the

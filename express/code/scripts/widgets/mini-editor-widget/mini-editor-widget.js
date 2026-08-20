@@ -1278,7 +1278,7 @@ function buildArcGhost() {
  * re-entering the deck one step further round; the other two just carry
  * their existing content into their new role.
  */
-function buildArcCarousel(cardSet, useQuote, defaultFont, a11y) {
+function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
   const root = createTag('div', { class: 'me-arc' });
   // Each .me-arc-card has role="option" (see buildArcCard), which axe
   // requires to sit inside a role="listbox" parent (see
@@ -1347,7 +1347,23 @@ function buildArcCarousel(cardSet, useQuote, defaultFont, a11y) {
     a11y.announceToScreenReader(`${activeIndex + 1} of ${total}`);
   }
 
+  // Hides the top-right action bar for the duration of a navigation's 1s
+  // CSS transition (see .me-arc-card's transition-duration) so it's never
+  // visible mid-slide, then restores it once the moved cards have settled —
+  // per design feedback that the bar should disappear the moment movement
+  // starts and reappear only once the next slide finishes animating. Only
+  // ever called from goNext/goPrev, which only exist on the carousel (see
+  // the .mini-editor-widget.me-arc-moving CSS selector) — desktop's
+  // hover-only action bar has no carousel to move.
+  let moveSettleTimer = null;
+  function markMoving() {
+    widget.classList.add('me-arc-moving');
+    clearTimeout(moveSettleTimer);
+    moveSettleTimer = setTimeout(() => widget.classList.remove('me-arc-moving'), 1000);
+  }
+
   function goNext() {
+    markMoving();
     const prevIndexBefore = ((activeIndex - 1) % total + total) % total;
     activeIndex = (activeIndex + 1) % total;
     centreOverride = null;
@@ -1377,6 +1393,7 @@ function buildArcCarousel(cardSet, useQuote, defaultFont, a11y) {
   }
 
   function goPrev() {
+    markMoving();
     const nextIndexBefore = (activeIndex + 1) % total;
     activeIndex = ((activeIndex - 1) % total + total) % total;
     centreOverride = null;
@@ -1536,6 +1553,7 @@ export default async function createMiniEditorWidget(config = {}) {
       useQuote,
       fontOptions[0],
       a11y,
+      widget,
     );
     updateCentre = updateArcCentre;
     onFontOrColourChange(updateCentre);
