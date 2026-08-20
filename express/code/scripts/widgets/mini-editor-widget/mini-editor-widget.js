@@ -339,6 +339,11 @@ function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOpti
   const onPick = (opt) => {
     selectFont(opt);
     onSelect?.(opt);
+    // Mobile bottom sheet dismisses on selection — per Figma node 137:4778's
+    // "Bottom sheet expectation" note — unlike the tablet/desktop inline row,
+    // which stays open after a pick (isMobileSheetWidth is the same check
+    // this file already uses everywhere else to distinguish the two).
+    if (isMobileSheetWidth()) root.setAttribute('data-me-panel', 'none');
   };
   fontOptions.forEach((opt, index) => {
     panel.append(buildFontButton(opt, index, onPick));
@@ -498,6 +503,11 @@ function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
   const onPick = (card) => {
     selectSwatch(card.bg);
     onSelect?.(card);
+    // Mobile bottom sheet dismisses on selection — per Figma node 137:4778's
+    // "Bottom sheet expectation" note — unlike the tablet/desktop inline row,
+    // which stays open after a pick (isMobileSheetWidth is the same check
+    // this file already uses everywhere else to distinguish the two).
+    if (isMobileSheetWidth()) root.setAttribute('data-me-panel', 'none');
   };
   cards.forEach((card, index) => {
     panel.append(buildSwatchButton(card, index, onPick));

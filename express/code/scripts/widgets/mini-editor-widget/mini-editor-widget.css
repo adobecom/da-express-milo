@@ -1020,6 +1020,16 @@
   inset: 0;
   z-index: 1210;
   display: none;
+  /* Backdrop dim, per Figma node 137:4778 ("modal backdrop", #000000 20%) —
+     was previously undefined, so the page behind the sheet had no visible
+     scrim at all. Faded in/out on the same is-open toggle .me-sheet itself
+     already responds to, rather than a separate transition. */
+  background: rgb(0 0 0 / 0%);
+  transition: background-color 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.me-sheet-overlay.is-open {
+  background: rgb(0 0 0 / 20%);
 }
 
 .me-sheet {
