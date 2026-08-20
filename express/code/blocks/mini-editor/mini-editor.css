@@ -84,17 +84,24 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-300);
   max-width: 668px;
   text-align: center;
   position: relative;
   z-index: 1;
 }
 
+/* Per Figma node 137:4532 ("Hero content"): the three gaps in this column
+   aren't uniform — logo-to-heading and subcopy-to-CTA are spacing-300
+   (16px), but heading-to-subcopy is the tighter spacing-80 (6px) — so a
+   single flex `gap` on the column (which spaces every child equally)
+   can't express this; each gap is set individually via margin below
+   instead (logo's margin-bottom, h1/h2's margin-bottom, and the CTA
+   paragraph's margin-top). */
 .mini-editor-logo {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-bottom: var(--spacing-300);
 }
 
 .mini-editor-logo img {
@@ -104,7 +111,7 @@
 
 .mini-editor-header h1,
 .mini-editor-header h2 {
-  margin: 0;
+  margin: 0 0 var(--spacing-80);
   font-size: var(--heading-font-size-l);
   font-weight: var(--heading-font-weight-extra);
   line-height: 32px;
@@ -114,12 +121,18 @@
 
 /* margin: 0 needs !important to beat main .section .content p / main .section p
    in styles.css (3 classes + tag vs. our 1 class + tag) — without it those
-   rules' margin: var(--spacing-500) 0 wins and blows out the header spacing. */
+   rules' margin: var(--spacing-500) 0 wins and blows out the header spacing.
+   The CTA paragraph (p:has(a.button)) needs its own margin-top back on top
+   of that reset, for the spacing-300 gap above it. */
 .mini-editor-header p {
   margin: 0 !important;
   max-width: 437px;
   font-size: var(--body-font-size-m);
   color: var(--Alias-content-typography-Body);
+}
+
+.mini-editor-header p:has(a.button) {
+  margin-top: var(--spacing-300) !important;
 }
 
 /* Matches the "Design with your quote" CTA on the discover page hero
@@ -159,11 +172,13 @@
   }
 
   /* Mobile header is left-aligned (not centred) per Figma frame 0-18684,
-     with a larger logo lockup and a darker, looser-line-height heading. */
+     with a larger logo lockup and a darker, looser-line-height heading.
+     Gap between children now comes from the margins set on .mini-editor-logo/
+     h1/h2/p above (not a uniform flex gap here) — see the base rule's own
+     comment for why. */
   .mini-editor-header {
     align-items: flex-start;
     text-align: left;
-    gap: var(--spacing-300);
   }
 
   .mini-editor-logo {
