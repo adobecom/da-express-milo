@@ -368,6 +368,15 @@
   font-size: var(--Global-Typography-Size-Label-Label-L);
   white-space: nowrap;
   cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+/* No dedicated Hover variant in Figma's "Font Selector" component (node
+   54:8516 only defines Default/Focus/Selected) — matches this row's own
+   .me-control hover treatment for consistency. Not applied to is-selected,
+   whose own white/shadow look (below) already reads as the "active" state. */
+.me-font:not(.is-selected):hover {
+  background: var(--S2AC-Palette-gray-300);
 }
 
 /* Per Figma node 54:8516 ("Font Selector", state=Focus). */
