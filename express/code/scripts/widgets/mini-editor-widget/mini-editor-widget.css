@@ -737,7 +737,7 @@
 
 .me-deco-use:hover,
 .me-deco-copy:hover {
-  background: #dcdcdc;
+  background: var(--color-gray-200);
 }
 
 /* No dedicated focus variant for these two in Figma (the "Quote Hero Card"
@@ -748,10 +748,6 @@
 .me-deco-copy:focus-visible {
   outline: 2px solid var(--color-focus-ring-strong);
   outline-offset: 2px;
-}
-
-.me-deco-copy.is-copied {
-  background: #bfe9cb;
 }
 
 @media (width >= 1200px) {

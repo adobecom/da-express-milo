@@ -991,13 +991,19 @@ function buildDecoCard(a11y, entry, useQuote) {
     'aria-label': `Use this quote: ${attribution}`,
   });
   useBtn.textContent = 'Use this quote';
-  useBtn.addEventListener('click', () => {
+  useBtn.addEventListener('click', (e) => {
     useQuote(entry);
     // Announced here (not inside useQuote itself, shared with the arc
     // carousel's own prev/next navigation) — the arc's centre card gets its
     // own position-based announcement instead (see buildArcCarousel), so
     // this only fires for this specific "Use this quote" action.
     a11y.announceToScreenReader(`Quote changed to: ${attribution}`);
+    // A mouse/touch click (detail > 0) leaves this button focused, which
+    // keeps .me-deco's :focus-within true — and so .me-deco-actions visible
+    // — even after the pointer has moved away, looking like a stuck hover.
+    // Keyboard activation (Enter/Space, detail === 0) leaves focus alone so
+    // this row stays reachable for continued keyboard navigation.
+    if (e.detail > 0) useBtn.blur();
   });
 
   const copyBtn = createTag('button', {
@@ -1005,12 +1011,14 @@ function buildDecoCard(a11y, entry, useQuote) {
     class: 'me-deco-copy',
     'aria-label': `Copy quote: ${attribution}`,
   }, [createTag('sp-icon-copy', { class: 'me-deco-copy-icon', 'aria-hidden': 'true' })]);
-  copyBtn.addEventListener('click', async () => {
+  copyBtn.addEventListener('click', async (e) => {
     const ok = await a11y.copyQuoteToClipboard(quote, author);
     if (ok) {
       copyBtn.classList.add('is-copied');
       setTimeout(() => copyBtn.classList.remove('is-copied'), 1200);
     }
+    // Same stuck-hover fix as useBtn above.
+    if (e.detail > 0) copyBtn.blur();
   });
 
   actions.append(useBtn, copyBtn);
