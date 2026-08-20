@@ -275,12 +275,15 @@
   /* text-overflow: ellipsis has no effect on flex-laid-out content (the
      centering this needs no longer clips with a visible "…", just a hard
      cut on both sides) — block + line-height/text-align gets the same
-     vertical/horizontal centering while keeping ellipsis truncation working. */
+     vertical/horizontal centering while keeping ellipsis truncation working.
+     min-width covers the longest font label ("Geometric", ~115px) so it
+     never truncates — flex-shrink: 0 so .me-control-label (below) gives up
+     space first instead, since the pill is showing the actual selected
+     typeface and is the more important of the two to keep legible. */
   display: block;
-  flex-shrink: 1;
+  flex-shrink: 0;
   box-sizing: border-box;
-  min-width: 46px;
-  max-width: 110px;
+  min-width: 116px;
   height: 46px;
   line-height: 46px;
   padding: 0 var(--spacing-200);
@@ -308,7 +311,13 @@
 }
 
 .me-control-label {
-  flex-shrink: 0;
+  /* Shrinks/truncates (ellipsis) before .me-pill above ever does — at
+     narrow widths this label giving up space matters less than the pill
+     staying legible, since the pill shows the actual selected typeface. */
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
   font-weight: var(--heading-font-weight-medium);
   font-size: var(--Global-Typography-Size-Label-Label-M);
   color: var(--Alias-content-neutral-default);
@@ -1101,6 +1110,37 @@
      width — narrower control column has less room for the full label. */
   .me-control-label-suffix {
     display: none;
+  }
+
+  /* Per Figma node 54:7888 ("Colour"/font control, mobile), both the pill
+     and label are flex: 1 0 0 — an equal split that only works in that
+     frame because its example label ("Serif") is short. The longest real
+     font label ("Geometric") doesn't fit an equal share of a ~155px-wide
+     mobile control even after this, so the pill's own font-size drops to
+     fit it (~100px) and it keeps a min-width floor sized for that — same
+     "shrink text at this breakpoint" pattern already used for
+     .me-quote/.me-arc-quote — freeing enough room for the short "Font"
+     label to stay fully legible alongside it. */
+  .me-pill {
+    flex: 2 0 0;
+    min-width: 100px;
+    font-size: 12px;
+  }
+
+  .me-control-label {
+    flex: 1 0 0;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* Same ~155px-wide control as above, still short by a few px for "Font"
+     next to a full-width "Geometric" pill — the control's shared padding
+     (--spacing-300 right, sized for the wider desktop/tablet row) is more
+     than this label needs to clear the control's own edge at this width. */
+  .me-control--font {
+    padding-right: var(--spacing-200);
+    gap: var(--spacing-80);
   }
 
   .me-quote {

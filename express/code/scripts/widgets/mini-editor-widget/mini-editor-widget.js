@@ -283,8 +283,14 @@ function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOpti
   });
   const pill = createTag('span', { class: 'me-pill', 'aria-label': fontOptions[0].label });
   pill.textContent = fontOptions[0].label;
-  const label = createTag('span', { class: 'me-control-label' });
-  label.textContent = 'Font style';
+  // "style" drops on mobile (label reads "Font" only there, per Figma node
+  // 54:7888) — same pattern as buildColorControl's " colour" suffix below:
+  // a separate span hidden via CSS rather than swapping textContent, so
+  // there's no JS branching on viewport width for what's purely a label fit.
+  const label = createTag('span', { class: 'me-control-label' }, [
+    'Font',
+    createTag('span', { class: 'me-control-label-suffix' }, [' style']),
+  ]);
   control.append(pill, label);
 
   // Accessible name is "Font style" + whichever option is currently
