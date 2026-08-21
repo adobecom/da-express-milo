@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../utils/test.cjs');
 const { features } = require('./embed.spec.cjs');
 const EmbedBlock = require('./embed.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');

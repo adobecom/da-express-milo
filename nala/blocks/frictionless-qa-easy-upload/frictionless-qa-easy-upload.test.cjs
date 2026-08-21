@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../../utils/test.cjs';
 import { runAccessibilityTest } from '../../libs/accessibility.cjs';
 import { features } from './frictionless-qa-easy-upload.spec.cjs';
 import FrictionlessQAEasyUpload from './frictionless-qa-easy-upload.page.cjs';
