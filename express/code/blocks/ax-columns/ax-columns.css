@@ -546,7 +546,7 @@ main .section .ax-columns.enterprise .column h2 {
 .ax-columns .column h4,
 .ax-columns .column h5,
 .ax-columns .column h6 {
-  text-align: left;
+  text-align: start;
 }
 
 .ax-columns.center .column,
@@ -755,8 +755,9 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 .ax-columns a.button.fill:any-link {
-  display: flex;
-  align-items: flex-start;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   padding: var(--Text-top-padding, 10px) var(--Text-right-padding, 20px) var(--Text-bottom-padding, 10px) var(--Text-padding, 20px);
   background-color: var(--Background-Primary-Default);
   border-color: var(--Background-Primary-Default);
