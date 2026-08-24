@@ -754,6 +754,21 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   margin: var(--spacing-300) 0 0 0;
 }
 
+.ax-columns a.button.fill:any-link {
+  display: flex;
+  align-items: flex-start;
+  padding: var(--Text-top-padding, 10px) var(--Text-right-padding, 20px) var(--Text-bottom-padding, 10px) var(--Text-padding, 20px);
+  background-color: var(--Background-Primary-Default);
+  border-color: var(--Background-Primary-Default);
+  color: var(--color-white);
+}
+
+.ax-columns a.button.fill:any-link:hover,
+.ax-columns a.button.fill:any-link:active {
+  background-color: var(--Background-Primary-Hover);
+  border-color: var(--Background-Primary-Hover);
+}
+
 .ax-columns.fullsize .has-brand>div p:first-child {
   margin: 0;
 }
@@ -1198,7 +1213,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .section .ax-columns>div {
     flex-direction: row;
-    text-align: left;
+    text-align: start;
     align-items: center;
   }
 
