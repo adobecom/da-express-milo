@@ -1988,3 +1988,10 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
     margin-top: var(--spacing-500);
   }
 }
+
+main .ax-columns a.button.fill:any-link {
+  background-color: var(--Background-Primary-Default);
+  border-color: var(--Background-Primary-Default);
+  border-radius: 999px;
+  color: var(--color-white);
+}
