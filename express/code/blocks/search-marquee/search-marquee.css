@@ -128,8 +128,12 @@
 .search-marquee .search-dropdown-container .suggestions-container li:hover,
 .search-marquee .search-dropdown-container .suggestions-container li:focus-visible {
     background: var(--color-gray-200);
-    outline: none;
     border-radius: 8px;
+}
+
+.search-marquee .search-dropdown-container .suggestions-container li:focus-visible {
+    outline: 2px solid var(--color-info-accent);
+    outline-offset: -2px;
 }
 
 .search-marquee .search-dropdown-container .trends-container .trends-wrapper {
@@ -138,6 +142,12 @@
 
 .search-marquee .search-dropdown-container .trends-container .trends-wrapper li a {
     color: var(--color-black);
+}
+
+.search-marquee .search-dropdown-container .trends-container .trends-wrapper li a:focus-visible {
+    outline: 2px solid var(--color-info-accent);
+    outline-offset: -2px;
+    border-radius: 4px;
 }
 
 .search-marquee .search-dropdown-container .free-plans-container .free-plan-widget {
