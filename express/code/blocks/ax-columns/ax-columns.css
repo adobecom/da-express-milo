@@ -397,12 +397,15 @@ main .section .ax-columns.enterprise .column h2 {
   font-size: var(--heading-font-size-m);
 }
 
-.section .ax-columns:not(.v2)>div {
+.section .ax-columns>div {
   display: flex;
   flex-direction: column;
   justify-content: center;
+}
+.section .ax-columns:not(.v2)>div {
   padding: var(--spacing-600) 0;
 }
+
 
 .section .ax-columns.marquee>div {
   gap: var(--spacing-500);
