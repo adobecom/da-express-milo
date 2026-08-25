@@ -132,6 +132,17 @@ main .section .ax-columns.enterprise .column h2 {
   padding-top: 0;
 }
 
+/* Authorable variant: equal top & bottom vertical spacing.
+   32px (--spacing-500) on mobile/tablet, 64px (--spacing-800) on desktop (>=1200px).
+   Opt-in via the `v2` block class — self-contained so it does not rely on the
+   section spacing-variant override chain above. */
+.ax-columns.v2 {
+  --ax-columns-v2-spacing: var(--spacing-500);
+
+  padding-top: var(--ax-columns-v2-spacing);
+  padding-bottom: var(--ax-columns-v2-spacing);
+}
+
 .ax-columns.top.center,
 .ax-columns.fullsize.center,
 .ax-columns.light,
@@ -1463,6 +1474,10 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 @media (min-width: 1200px) {
   .section:has(.ax-columns)>.content {
     max-width: var(--block-lg-max-width);
+  }
+
+  .ax-columns.v2 {
+    --ax-columns-v2-spacing: var(--spacing-800);
   }
 
   .ax-columns.marquee .button-container.free-plan-container {
