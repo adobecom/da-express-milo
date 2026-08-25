@@ -158,6 +158,10 @@ main .section .ax-columns.enterprise .column h2 {
   padding-right: 0;
 }
 
+.ax-columns.v2 .column-picture img {
+  border-radius: 16px;
+}
+
 .ax-columns.top.center,
 .ax-columns.fullsize.center,
 .ax-columns.light,
