@@ -138,9 +138,24 @@ main .section .ax-columns.enterprise .column h2 {
    section spacing-variant override chain above. */
 .ax-columns.v2 {
   --ax-columns-v2-spacing: var(--spacing-500);
-
+  max-width: 599px;
   padding-top: var(--ax-columns-v2-spacing);
   padding-bottom: var(--ax-columns-v2-spacing);
+}
+
+.ax-columns.v2 > div {
+   gap : 16px;
+} 
+
+.ax-columns.v2 .column {
+  padding-left: 0;
+  padding-right: 0;
+} 
+
+.ax-columns.v2 .column,
+.ax-columns.v2 .column.column-picture {
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .ax-columns.top.center,
@@ -152,7 +167,7 @@ main .section .ax-columns.enterprise .column h2 {
   padding-right: 0;
 }
 
-.section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color, .v2)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.ax-columns:last-child,
 .section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.content:last-child {
@@ -1481,6 +1496,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .ax-columns.v2 {
     --ax-columns-v2-spacing: var(--spacing-800);
+
   }
 
   .ax-columns.marquee .button-container.free-plan-container {

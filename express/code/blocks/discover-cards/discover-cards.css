@@ -161,17 +161,16 @@ main .section .discover-cards {
     height: 147px;
     margin-top: var(--spacing-80);
 }
-.discover-cards .card .button-container,
-.discover-cards .card .action-area {
+.discover-cards .card .button-container {
     text-align: start;
 }
-.section .discover-cards .card .button-container a,
-.section .discover-cards .card .action-area a {
+
+.section .discover-cards .card .button-container a {
     background-color: var(--color-gray-800-variant);
     color: var(--color-white);
     border: none;
     margin-top: var(--spacing-500);
-    margin-inline-start: 0;
+    margin-left: 0;
 }
 
 .discover-cards .cards-container.gallery {
@@ -222,7 +221,7 @@ main .section .discover-cards {
         scroll-padding-inline-start: 60px;
     }
     .discover-cards .cards-container .card:first-child {
-        margin-inline-start: 60px;
+        margin-inline-start: 16px;
     }
     .discover-cards.flip .center-title {
       font-size: var(--heading-font-size-m);
