@@ -164,6 +164,7 @@ main .section .discover-cards {
 .discover-cards .card .button-container {
     text-align: start;
 }
+
 .section .discover-cards .card .button-container a {
     background-color: var(--color-gray-800-variant);
     color: var(--color-white);
@@ -220,7 +221,7 @@ main .section .discover-cards {
         scroll-padding-inline-start: 60px;
     }
     .discover-cards .cards-container .card:first-child {
-        margin-inline-start: 60px;
+        margin-inline-start: 16px;
     }
     .discover-cards.flip .center-title {
       font-size: var(--heading-font-size-m);
