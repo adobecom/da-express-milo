@@ -32,6 +32,7 @@
   font-family: 'adobe-clean-fallback-ar';
   font-display: swap;
   line-gap-override: 0%;
+  size-adjust: 104%;
   src: local('Arial'), local('Helvetica');
 }
 
