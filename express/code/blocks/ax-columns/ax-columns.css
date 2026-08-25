@@ -1989,9 +1989,15 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
   }
 }
 
-main .ax-columns a.button.fill:any-link {
+main .ax-columns a.button.fill {
   background-color: var(--Background-Primary-Default);
   border-color: var(--Background-Primary-Default);
   border-radius: 999px;
   color: var(--color-white);
+}
+
+main .ax-columns a.button.fill:any-link:hover,
+main .ax-columns a.button.fill:any-link:active {
+     background-color: var(--color-info-accent-hover);
+    border-color: var(--color-info-accent-hover);
 }
