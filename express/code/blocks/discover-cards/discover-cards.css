@@ -161,11 +161,11 @@ main .section .discover-cards {
     height: 147px;
     margin-top: var(--spacing-80);
 }
-.discover-cards .card .action-area {
-    text-align: start;
-}
+  .discover-cards .card :is(.button-container, .action-area) {
+      text-align: start;
+  }
 
-.section .discover-cards .card .action-area a {
+  .section .discover-cards .card :is(.button-container, .action-area) a {
     background-color: var(--color-gray-800-variant);
     color: var(--color-white);
     border: none;
