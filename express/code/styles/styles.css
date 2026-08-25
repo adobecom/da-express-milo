@@ -821,6 +821,12 @@ main .dark a.con-button.outline:any-link:focus {
   color: var(--color-info-accent-hover);
 }
 
+main a.button.wide,
+main a.con-button.wide {
+  display: block;
+}
+
+
 main a.button.gradient:any-link {
   color: var(--color-white);
   border-color: transparent;
