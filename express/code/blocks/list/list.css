@@ -75,7 +75,7 @@ main .list > div > div > :last-child {
 
 main .list {
     list-style: none;
-    text-align: left;
+    text-align: start;
     box-sizing: border-box;
 }
 
