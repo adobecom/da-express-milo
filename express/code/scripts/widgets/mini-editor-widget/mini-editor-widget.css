@@ -314,6 +314,14 @@
   border-radius: var(--Radius-corner-radius-200);
   transform: translateY(96.5px);
   transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+  /* Mouse drag-to-scroll (see wireDragToScroll) — grab/grabbing signals the
+     row itself is draggable, same as the native overflow-x: auto scroll
+     this already has for touch/trackpad. */
+  cursor: grab;
+}
+
+.me-row:active {
+  cursor: grabbing;
 }
 
 .mini-editor[data-me-panel='fonts'] .me-row--fonts,
