@@ -6,10 +6,13 @@
   text-align: center;
 }
 
-/* Anti-FOUC: hide raw authored rows until the block builds .foreground, so the
-   staged decoration (image removed first, video anchor removed a frame later)
-   never paints the raw anchor text beneath the card image. */
-.grid-marquee:not(:has(> .foreground)) > div {
+/* Anti-FOUC: hide only the raw, un-decorated video source authored under each
+   card face (mp4 link, or MEP-inlined <video> if auto-video-decoration ran
+   first) so it never paints before toCard() removes it. Scoped to the element
+   itself, not gated on .foreground existing, so a JS failure can't leave the
+   whole block - including the authored LCP headline - hidden forever. */
+.grid-marquee > div > div:first-child > p > a[href*=".mp4"],
+.grid-marquee > div > div:first-child > p > video {
   visibility: hidden;
 }
 
