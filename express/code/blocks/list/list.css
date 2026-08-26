@@ -52,10 +52,6 @@ main .list p {
   }
 }
 @media (min-width: 1200px) {
-  main .list {
-    max-width: 1024px;
-  }
-
   main .list .item {
     padding: var(--spacing-350);
   }
@@ -111,5 +107,11 @@ main .list ol li::before {
         max-width: unset;
         margin: auto;
         padding: 0px var(--spacing-400) var(--spacing-600) var(--spacing-400);
+    }
+}
+
+@media (min-width: 1200px) {
+    main .list {
+        max-width: 1200px;
     }
 }
