@@ -113,3 +113,21 @@ main .list ol li::before {
         padding: 0px var(--spacing-400) var(--spacing-600) var(--spacing-400);
     }
 }
+
+main .list.edge-aligned {
+    max-width: unset;
+    margin: 0 auto;
+    display: block;
+}
+
+@media (min-width: 768px) {
+    main .list.edge-aligned {
+        padding: 0px var(--spacing-500) var(--spacing-600) var(--spacing-500);
+    }
+}
+
+@media (min-width: 1200px) {
+    main .list.edge-aligned {
+        max-width: 1200px;
+    }
+}
