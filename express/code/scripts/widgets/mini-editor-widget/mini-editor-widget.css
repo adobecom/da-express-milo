@@ -120,10 +120,44 @@
   background: var(--me-action-hover-bg);
 }
 
-/* Modal uses the same action bar, but it should be persistently visible. */
-.me-modal-card-root .me-actions {
-  opacity: 1;
-  pointer-events: auto;
+/* Modal action bar: desktop shows on hover (over card), tablet/mobile always visible.
+   On desktop (>1199px), using me-card:hover selector so the bar stays visible
+   while moving pointer from card to buttons. Tablet/mobile always shows with
+   carousel-mode styling. */
+
+/* Desktop (>1199px): action bar hidden by default, visible on hover over card
+   (same as regular widget) */
+@media (width > 1199px) {
+  .me-modal-card-root .me-card:hover .me-actions,
+  .me-modal-card-root .me-card:focus-within .me-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Tablet/mobile (<=1199px): modal action buttons always visible with same
+   styling as carousel mode, per Figma node 54:7883 ("Primary actions",
+   tablet/mobile) — smaller/lighter than desktop spec. */
+@media (width <= 1199px) {
+  .me-modal-card-root .me-actions {
+    opacity: 1;
+    pointer-events: auto;
+    gap: var(--spacing-80);
+    padding: 2px;
+    border-radius: var(--corner-radius-80);
+    background: rgb(255 255 255 / 51%);
+    border-color: rgb(255 255 255 / 14%);
+  }
+
+  .me-modal-card-root .me-action {
+    width: 24px;
+    height: 24px;
+    padding: 4.5px;
+  }
+
+  .me-modal-card-root .me-action-icon {
+    --mod-icon-size: 15px;
+  }
 }
 
 .me-quote-wrap {

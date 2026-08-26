@@ -57,7 +57,18 @@ export default async function createMiniEditorModal(config = {}) {
   // sp-icon-close is a real Spectrum Web Components custom element (same
   // pattern as topActions' sp-icon-edit/share/download in
   // mini-editor-widget.js) — load its definition before using the tag.
-  await import('../spectrum/dist/icons-workflow.js');
+  // Also load the theme so Spectrum's design-token CSS custom properties
+  // (--spectrum-*) are available for descendants.
+  await Promise.all([
+    import('../spectrum/dist/icons-workflow.js'),
+    import('../spectrum/dist/theme.js'),
+  ]);
+
+  // Wrap the whole modal in sp-theme (same pattern as mini-editor.js)
+  // so design-token CSS custom properties are available for the action icons
+  const themeHost = createTag('sp-theme', {
+    system: 'spectrum-two', color: 'light', scale: 'medium', dir: 'ltr',
+  });
 
   const overlay = createTag('div', { class: 'me-modal-overlay', 'aria-hidden': 'true', inert: '' });
   const dialog = createTag('div', {
@@ -83,6 +94,7 @@ export default async function createMiniEditorModal(config = {}) {
   }, [createTag('sp-icon-close', { class: 'me-modal-close-icon', 'aria-hidden': 'true' })]);
   dialog.append(cardWrap, closeBtn);
   overlay.append(dialog);
+  themeHost.append(overlay);
 
   // The widget needs a root to set --me-* CSS vars / data-me-panel on —
   // cardWrap plays that role here (in the block, it's the block element
@@ -192,14 +204,14 @@ export default async function createMiniEditorModal(config = {}) {
   document.addEventListener('mini-editor:use-quote', onUseQuoteEvent);
 
   return {
-    el: overlay,
+    el: themeHost,
     open,
     close,
     destroy: () => {
       close();
       document.removeEventListener('mini-editor:use-quote', onUseQuoteEvent);
       editor.destroy();
-      overlay.remove();
+      themeHost.remove();
     },
   };
 }
