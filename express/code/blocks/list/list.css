@@ -51,15 +51,6 @@ main .list p {
     width: auto;
   }
 }
-@media (min-width: 1200px) {
-  main .list .item {
-    padding: var(--spacing-350);
-  }
-
-  main .list .item {
-    width: 220px;
-  }
-}
 
 main .list > div > div > :first-child {
   margin-top: 0;
@@ -113,5 +104,10 @@ main .list ol li::before {
 @media (min-width: 1200px) {
     main .list {
         max-width: 1200px;
+    }
+
+    main .list .item {
+        padding: var(--spacing-350);
+        width: 220px;
     }
 }
