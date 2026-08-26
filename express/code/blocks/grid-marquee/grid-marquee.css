@@ -52,6 +52,17 @@ main .section .grid-marquee h1 {
   border-color: var(--color-black);
 }
 
+/* adobe-clean-arabic's ascent/descent metrics differ from the Latin body font,
+   so the line-height-based centering used elsewhere pushes Arabic CTA text
+   above the button's vertical midline. Center on the flex box instead, which
+   is font-metric agnostic. */
+:lang(ar) .grid-marquee .headline a.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: normal;
+}
+
 .grid-marquee .background  {
   width: 100%
 }
@@ -363,6 +374,10 @@ main .section .grid-marquee.pricing-page h1 {
     margin: 0;
   }
 
+  .grid-marquee.cta-align-fix .headline a.button {
+    padding-top: 8px;
+  }
+
   .grid-marquee .cards-container {
     gap: 8px;
   }
@@ -431,6 +446,10 @@ main .section .grid-marquee.pricing-page h1 {
     font-size: var(--body-font-size-l);
     border-radius: 50px;
     line-height: 23.4px;
+  }
+
+  .grid-marquee.cta-align-fix .headline a.button {
+    padding-top: 16px;
   }
   .grid-marquee .cards-container {
     grid-template-columns: repeat(auto-fit, minmax(288px, 1fr));
