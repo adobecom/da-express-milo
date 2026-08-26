@@ -6,7 +6,7 @@ main .section:not([data-padding='none']):not(.xxxl-spacing-static, .xxl-spacing-
 }
 
 main .list {
-    margin: var(--spacing-600) auto;
+    margin: 0 auto;
     padding: 0 var(--spacing-400);
     display: flex;
     flex-wrap: wrap;
