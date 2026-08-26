@@ -914,6 +914,11 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   const setCardMode = (mode) => {
     card.classList.remove('light-mode', 'dark-mode');
     if (mode) card.classList.add(`${mode}-mode`);
+
+    // Keep top-right action contrast in sync with background mode.
+    const isDarkMode = mode === 'dark';
+    root.style.setProperty('--me-action-icon-color', isDarkMode ? 'var(--color-gray-150)' : '#292929');
+    root.style.setProperty('--me-action-hover-bg', isDarkMode ? '#292929' : 'var(--color-gray-150)');
   };
   setCardMode(first.card?.mode);
 

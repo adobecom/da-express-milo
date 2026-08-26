@@ -44,6 +44,7 @@ export default async function createMiniEditorModal(config = {}) {
   const {
     fontOptions,
     backgrounds,
+    topActionsFactory,
     a11y,
     deps,
   } = config;
@@ -93,9 +94,14 @@ export default async function createMiniEditorModal(config = {}) {
   // zig-zag / tablet-mobile arc carousel entirely, per the modal's
   // "centre editor only" design. See mini-editor-widget.css.
   cardWrap.classList.add('me-modal-card-root');
-  const editor = await createMiniEditorWidget({
+  let editor;
+  const topActions = typeof topActionsFactory === 'function'
+    ? topActionsFactory(() => editor)
+    : [];
+
+  editor = await createMiniEditorWidget({
     root: cardWrap,
-    topActions: [],
+    topActions,
     fontOptions,
     backgrounds,
     a11y,

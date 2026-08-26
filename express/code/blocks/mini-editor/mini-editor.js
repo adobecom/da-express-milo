@@ -307,25 +307,24 @@ export default async function init(block) {
     };
     const deps = { createTag, getIconElementDeprecated };
 
-    let editor;
-    const getShareContent = async (action, strings) => {
-      if (action.value === 'whatsapp') {
-        return { data: { whatsappText: `${strings.heading}: ${window.location.href}` } };
-      }
-      const model = editor?.getContentModel();
-      if (!model) throw new Error('Mini-editor content model is unavailable');
-      const blob = await MiniEditorCardExporter.createCardBlob(model);
-      const file = new File([blob], 'quote-card.png', { type: blob.type || 'image/png' });
-      return {
-        share: { title: strings.heading, files: [file] },
-        clipboard: { files: [file] },
+    let editorRef;
+    const buildTopActions = (getEditor) => {
+      const getShareContent = async (action, strings) => {
+        if (action.value === 'whatsapp') {
+          return { data: { whatsappText: `${strings.heading}: ${window.location.href}` } };
+        }
+        const model = getEditor()?.getContentModel();
+        if (!model) throw new Error('Mini-editor content model is unavailable');
+        const blob = await MiniEditorCardExporter.createCardBlob(model);
+        const file = new File([blob], 'quote-card.png', { type: blob.type || 'image/png' });
+        return {
+          share: { title: strings.heading, files: [file] },
+          clipboard: { files: [file] },
+        };
       };
-    };
 
-    editor = await createMiniEditorWidget({
-      root: block,
-      topActions: [
-        { type: 'edit', onClick: () => console.info('mini-editor: edit action not yet implemented') },
+      return [
+        { type: 'edit' },
         {
           type: 'share',
           shareMenu: {
@@ -379,13 +378,21 @@ export default async function init(block) {
             },
           },
         },
-        { type: 'download', onClick: () => downloadCard(block, editor) },
-      ],
+        { type: 'download', onClick: () => downloadCard(block, getEditor()) },
+      ];
+    };
+
+    const topActions = buildTopActions(() => editorRef);
+
+    const editor = await createMiniEditorWidget({
+      root: block,
+      topActions,
       fontOptions,
       backgrounds: { cardSet, decoCount: DECO_CARD_COUNT },
       a11y,
       deps,
     });
+    editorRef = editor;
 
     // Decorations are appended to the header (not the stage) so they can be
     // positioned to span from just below the header down to the editor's
@@ -404,6 +411,7 @@ export default async function init(block) {
     modalPromise ??= createMiniEditorModal({
       fontOptions,
       backgrounds: { cardSet, decoCount: DECO_CARD_COUNT },
+      topActionsFactory: buildTopActions,
       a11y,
       deps,
     }).then((modal) => {

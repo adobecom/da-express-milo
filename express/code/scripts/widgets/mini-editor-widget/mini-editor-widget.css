@@ -22,6 +22,8 @@
   --me-quote-font-style: normal;
   --me-quote-font-weight: normal;
   --me-quote-font-stretch: normal;
+  --me-action-icon-color: #292929;
+  --me-action-hover-bg: var(--color-gray-150);
 }
 
 .mini-editor-stage {
@@ -110,12 +112,18 @@
    tokens required, so a plain 20px/#292929 override here is enough. */
 .me-action-icon {
   --mod-icon-size: 20px;
-  --mod-icon-color: #292929;
+  --mod-icon-color: var(--me-action-icon-color);
 }
 
 .me-action:hover,
 .me-action[aria-expanded='true'] {
-  background: var(--color-gray-150);
+  background: var(--me-action-hover-bg);
+}
+
+/* Modal uses the same action bar, but it should be persistently visible. */
+.me-modal-card-root .me-actions {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .me-quote-wrap {
