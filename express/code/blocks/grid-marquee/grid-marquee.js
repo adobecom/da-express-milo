@@ -183,8 +183,20 @@ function toCard(drawer) {
   const panelsFrag = new DocumentFragment();
   panelsFrag.append(...panels);
   panels.forEach((panel) => panel.classList.add('panel'));
-  const videoAnchor = face.querySelector('a');
-  videoAnchor?.remove();
+  // The drawer video is authored in the face as an <a href="*.mp4">. But if
+  // Express's auto-video decoration ran first (e.g. inside an MEP replacePage
+  // fragment where #_dnb wasn't applied to the link), it arrives as an inlined
+  // <video> instead. Capture the source from whichever form is present and
+  // remove BOTH so the face video can never duplicate the drawer video.
+  const faceAnchor = face.querySelector('a');
+  const faceVideo = face.querySelector('video');
+  const videoSrc = faceAnchor?.href
+    || faceVideo?.querySelector('source')?.src
+    || faceVideo?.currentSrc
+    || faceVideo?.getAttribute('src')
+    || faceVideo?.dataset?.videoSource;
+  faceAnchor?.remove();
+  faceVideo?.remove();
 
   // Use createTag like hero-marquee does (now available)
   const card = createTag('button', {
@@ -195,7 +207,7 @@ function toCard(drawer) {
   }, [face, drawer]);
 
   face.classList.add('face');
-  const lazyCB = () => decorateDrawer(videoAnchor.href, getPosterSrc(face.querySelector('img')), titleText, panels, panelsFrag, drawer);
+  const lazyCB = () => decorateDrawer(videoSrc, getPosterSrc(face.querySelector('img')), titleText, panels, panelsFrag, drawer);
   addCardInteractions(card, drawer, lazyCB);
   drawer.classList.add('drawer', 'hide');
   drawer.id = `drawer-${titleText}`;

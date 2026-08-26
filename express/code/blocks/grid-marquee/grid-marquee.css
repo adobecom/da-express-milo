@@ -6,6 +6,13 @@
   text-align: center;
 }
 
+/* Anti-FOUC: hide raw authored rows until the block builds .foreground, so the
+   staged decoration (image removed first, video anchor removed a frame later)
+   never paints the raw anchor text beneath the card image. */
+.grid-marquee:not(:has(> .foreground)) > div {
+  visibility: hidden;
+}
+
 
 
 .grid-marquee .express-logo {
