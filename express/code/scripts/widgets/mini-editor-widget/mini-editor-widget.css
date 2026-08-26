@@ -675,55 +675,77 @@
   pointer-events: auto;
 }
 
+/* theme.js (the shared, already-built Spectrum bundle every sp-* component
+   here reads its design tokens from) only ever defines
+   --system-button-secondary-background-color-default — the -hover/-down/
+   -focus siblings sp-button's own CSS asks for are never defined anywhere
+   in this codebase, so a plain variant="secondary" button would render
+   with no visible background at all on hover/press/focus. Filled in here
+   (not in theme.js itself, which other already-working components also
+   read from) as a general fallback for any secondary button — .me-deco-use/
+   .me-deco-copy below still set their own exact per-instance colours via
+   --mod-button-* to match Figma pixel-for-pixel, but this keeps every
+   *other* state (e.g. plain browser default rendering before those
+   overrides apply) non-broken too. */
+sp-theme {
+  --system-button-secondary-background-color-hover: var(--spectrum-gray-200);
+  --system-button-secondary-background-color-down: var(--spectrum-gray-300);
+  --system-button-secondary-background-color-focus: var(--spectrum-gray-200);
+}
+
+/* .me-deco-use/.me-deco-copy are sp-button[variant="secondary"], overridden
+   via its --mod-button-* hooks to match Figma node 54:7921 ("Quote Hero
+   Card" actions) exactly — the component's own size="s"/"m" presets don't
+   land on this exact 32px-tall, 8px-radius box. sp-button centres its own
+   label via padding-block on #label (--mod-button-top/bottom-to-text), NOT
+   via flex align-items on the host — #label's own rule always sets
+   align-self: start, so --mod-button-height alone (without also setting
+   these two) leaves the label pinned near the button's top edge instead of
+   vertically centred. 7px top + 7px bottom + 18px line-height = 32px. */
 .me-deco-use,
 .me-deco-copy {
-  height: 32px;
-  box-sizing: border-box;
-  background: var(--Palette-gray-100);
-  border: none;
-  border-radius: var(--Corner-radius-corner-radius-100);
-  color: var(--Alias-content-neutral-default);
-  cursor: pointer;
-  transition: background-color 0.15s ease;
+  padding-block: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  --mod-button-height: 32px;
+  --mod-button-top-to-text: 7px;
+  --mod-button-bottom-to-text: 7px;
+  --mod-button-border-radius: 8px;
+  --mod-button-border-width: 0;
+  --mod-button-font-size: 14px;
+  --mod-button-line-height: 18px;
+  --mod-button-background-color-default: var(--Palette-gray-100);
+  --mod-button-background-color-hover: var(--spectrum-gray-200);
+  --mod-button-background-color-down: var(--spectrum-gray-300);
+  --mod-button-background-color-focus: var(--spectrum-gray-200);
+  --mod-button-content-color-default: var(--Alias-content-neutral-default);
+  --mod-button-content-color-hover: var(--Alias-content-neutral-default);
+  --mod-button-content-color-down: var(--Alias-content-neutral-default);
+  --mod-button-content-color-focus: var(--Alias-content-neutral-default);
+  /* sp-button's label always renders at --mod-bold-font-weight (there's no
+     dedicated font-weight hook on the button itself) — Figma calls for
+     weight 500 here, not bold, so it's overridden directly. Scoped to just
+     these two buttons since --mod-bold-font-weight has exactly one other
+     reader in the whole bundle (nothing else in scope uses it). */
+  --mod-bold-font-weight: 500;
 }
 
 .me-deco-use {
-  display: inline-flex;
-  align-items: center;
-  padding: 7px 12px;
-  font-size: var(--Global-Typography-Size-Label-Label-M);
-  white-space: nowrap;
+  --mod-button-edge-to-text: 12px;
 }
 
 .me-deco-copy {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  padding: 7px;
+  aspect-ratio: 1;
+  --mod-button-edge-to-text: 7px;
+  --mod-button-min-width: 32px;
 }
 
-/* sp-icon-copy (see buildDecoCard) sizes/colours itself via these CSS
-   custom property hooks — same pattern as .me-action-icon above, no
-   Spectrum theme/design tokens required. */
+/* sp-icon-copy (see buildDecoCard) sizes itself via this CSS custom
+   property hook — no Spectrum theme/design tokens required. Colour comes
+   from sp-button's own icon styling (--mod-button-content-color-* above),
+   not set here. */
 .me-deco-copy-icon {
   --mod-icon-size: 18px;
-  --mod-icon-color: var(--Alias-content-neutral-default);
-}
-
-.me-deco-use:hover,
-.me-deco-copy:hover {
-  background: var(--color-gray-200);
-}
-
-/* No dedicated focus variant for these two in Figma (the "Quote Hero Card"
-   component only defines Default/Hover) — added for keyboard-focus
-   visibility, consistent with the ring treatment used on every other
-   interactive element in this file. */
-.me-deco-use:focus-visible,
-.me-deco-copy:focus-visible {
-  outline: 2px solid var(--color-focus-ring-strong);
-  outline-offset: 2px;
 }
 
 @media (width >= 1200px) {

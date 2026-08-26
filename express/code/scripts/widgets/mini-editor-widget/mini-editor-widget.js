@@ -999,8 +999,13 @@ function buildDecoCard(a11y, entry, useQuote) {
 
   const actions = createTag('div', { class: 'me-deco-actions' });
   const attribution = author ? `"${quote}" — ${author}` : `"${quote}"`;
-  const useBtn = createTag('button', {
-    type: 'button',
+  // variant="secondary" so hover/focus/active come entirely from the S2
+  // component's own styling instead of hand-rolled CSS overrides — see
+  // .me-deco-use/.me-deco-copy in the stylesheet, which now only sets
+  // layout (size, gap), not colour/state.
+  const useBtn = createTag('sp-button', {
+    variant: 'secondary',
+    size: 's',
     class: 'me-deco-use',
     'aria-label': `Use this quote: ${attribution}`,
   });
@@ -1020,11 +1025,14 @@ function buildDecoCard(a11y, entry, useQuote) {
     if (e.detail > 0) useBtn.blur();
   });
 
-  const copyBtn = createTag('button', {
-    type: 'button',
+  const copyIcon = createTag('sp-icon-copy', { slot: 'icon', class: 'me-deco-copy-icon', 'aria-hidden': 'true' });
+  const copyBtn = createTag('sp-button', {
+    variant: 'secondary',
+    size: 's',
     class: 'me-deco-copy',
+    label: `Copy quote: ${attribution}`,
     'aria-label': `Copy quote: ${attribution}`,
-  }, [createTag('sp-icon-copy', { class: 'me-deco-copy-icon', 'aria-hidden': 'true' })]);
+  }, [copyIcon]);
   copyBtn.addEventListener('click', async (e) => {
     const ok = await a11y.copyQuoteToClipboard(quote, author);
     if (ok) {
@@ -1573,6 +1581,11 @@ export default async function createMiniEditorWidget(config = {}) {
   // topActions and decorations: false doesn't pay for the Spectrum bundle.
   if (topActions.length || decorationsEnabled) {
     await import('../spectrum/dist/icons-workflow.js');
+  }
+  // "Use this quote"/"Copy" (see buildDecoCard) are sp-button, per the same
+  // reasoning — only loaded when the deco cards that use them exist at all.
+  if (decorationsEnabled) {
+    await import('../spectrum/dist/button.js');
   }
 
   const { cardSet } = backgrounds;

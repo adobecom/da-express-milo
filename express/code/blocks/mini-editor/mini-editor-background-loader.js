@@ -34,6 +34,16 @@ function buildRecipe(props) {
  * @returns {'light' | 'dark'}
  */
 function getImageColorMode(item) {
+  if (item.internalTags?.length > 0) {
+    if (item.internalTags.includes('dark background')) {
+      return 'dark';
+    }
+
+    if (item.internalTags.includes('light background')) {
+      return 'light';
+    }
+  }
+
   const page = item.pages?.[0];
   const colors = page.extractedColors;
   if (!colors?.length) {
@@ -44,18 +54,16 @@ function getImageColorMode(item) {
   let totalCoverage = 0;
 
   for (const color of colors) {
-    if (color.mode !== 'RGB' || !color.value) {
-      continue;
+    if (!(color.mode !== 'RGB' || !color.value)) {
+      const { r, g, b } = color.value;
+      const coverage = color.coverage ?? 0;
+
+      // Perceived brightness (0-255)
+      const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
+
+      weightedBrightness += brightness * coverage;
+      totalCoverage += coverage;
     }
-
-    const { r, g, b } = color.value;
-    const coverage = color.coverage ?? 0;
-
-    // Perceived brightness (0-255)
-    const brightness = 0.299 * r + 0.587 * g + 0.114 * b;
-
-    weightedBrightness += brightness * coverage;
-    totalCoverage += coverage;
   }
 
   if (totalCoverage === 0) {

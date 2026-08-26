@@ -205,6 +205,7 @@ function decorateCta(header) {
   const cta = header.querySelector('a');
   cta?.classList.add('button');
   cta?.classList.add('accent');
+  cta?.parentElement?.classList.add('button-container');
 }
 
 function buildLogo() {
