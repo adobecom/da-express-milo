@@ -138,6 +138,10 @@ function isSmallViewport() {
   return size <= TABLET_BREAKPOINT;
 }
 
+function isReducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
 /**
  * Adds mouse drag-to-scroll to an already-horizontally-scrollable row (the
  * font/colour inline rows — see .me-row--fonts/.me-row--colour's own
@@ -1285,7 +1289,7 @@ function wireDecoTabChain(decorations) {
  * what makes the 1s transform transition on .me-arc-card actually animate
  * a visible slide/rotate between roles instead of an instant content pop.
  */
-const ROLE_CLASSES = ['me-arc-card--prev', 'me-arc-card--center', 'me-arc-card--next', 'me-arc-card--stage-prev', 'me-arc-card--stage-next'];
+const ROLE_CLASSES = ['me-arc-card--prev', 'me-arc-card--center', 'me-arc-card--next', 'me-arc-card--off'];
 
 async function buildArcCard(onActivate, a11y, tabIndex) {
   const el = createTag('div', {
@@ -1305,7 +1309,7 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
   // element, so this never nests two focusable elements.
   const quoteP = createTag('div', { class: 'me-arc-quote' });
   const authorP = createTag('div', { class: 'me-arc-author' });
-  const quoteWrap = createTag('div', { class: 'me-quote-wrap', tabIndex: (tabIndex == -1 ? -1 : 8) });
+  const quoteWrap = createTag('div', { class: 'me-quote-wrap', tabIndex: -1 });
   const hint = createTag('span', { id: 'me-arc-card-hint', class: 'sr-only' }, ['Copy quote to clipboard']);
   quoteWrap.append(quoteP, hint);
   el.append(quoteWrap, authorP);
@@ -1366,6 +1370,14 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
     }
   });
 
+  // Keep the entire card clickable for prev/next navigation while avoiding
+  // duplicate handling when the click originated from quoteWrap itself.
+  el.addEventListener('click', (e) => {
+    if (e.target.closest('.me-quote-wrap')) return;
+    if (el.classList.contains('me-arc-card--center')) doCopy();
+    else onActivate(el);
+  });
+
   function render(entry) {
     el.style.backgroundImage = `url("${entry.card.bg}")`;
     // Display text truncates at EDITOR_QUOTE_CHAR_LIMIT (same limit as the
@@ -1396,7 +1408,7 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
     quoteP.style.fontStretch = entry.font?.stretch || '';
     authorP.textContent = entry.author || '';
     authorP.style.display = entry.author ? '' : 'none';
-    el.classList.add(`${entry.card.mode}-mode`)
+    el.classList.add(`${entry.card.mode}-mode`);
   }
 
   // Every role is now interactive (centre copies its quote on click/Enter,
@@ -1406,255 +1418,436 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
     el.setAttribute('aria-selected', String(role === 'center'));
   }
 
-  // Recycling a card (see goNext/goPrev) is a two-step move so it animates
-  // rotating in from beyond the edge instead of popping straight into its
-  // final prev/next slot: first jump instantly (no transition) to a
-  // further-out "stage" position with the new content, then — once that
-  // jump has committed — hand off to a normal, transitioned setRole() to
-  // the real prev/next class, which now has somewhere real to animate from.
-  function stageAt(stageRole) {
-    el.style.transition = 'none';
-    el.classList.remove(...ROLE_CLASSES);
-    el.classList.add(`me-arc-card--${stageRole}`);
-    el.getBoundingClientRect(); // force reflow so the instant jump commits
-    el.style.transition = '';
-  }
-
   function setRole(role) {
     el.classList.remove(...ROLE_CLASSES);
-    el.classList.add(`me-arc-card--${role}`);
+    if (role !== 'off') {
+      el.classList.add(`me-arc-card--${role}`);
+    } else {
+      el.classList.add('me-arc-card--off');
+    }
     setInteractivity(role);
   }
 
   return {
-    el, render, setRole, stageAt,
+    el, render, setRole,
   };
 }
 
 /**
- * The non-interactive 4th card used purely to show the outgoing card's
- * exit: when a card is recycled from prev to next (or vice versa), its OLD
- * content would otherwise just vanish (the same DOM element is instantly
- * staged off-screen with new content — see stageAt). This ghost briefly
- * takes over that old content and role position, then transitions further
- * outward while fading out, so the exit reads as one continuous circular
- * motion alongside the other two cards' moves instead of a hard cut.
- * aria-hidden + pointer-events: none — it's decorative only, never one of
- * the 3 clickable/tabbable cards.
- */
-function buildArcGhost() {
-  const el = createTag('div', { class: 'me-arc-card me-arc-ghost', 'aria-hidden': 'true' });
-  const quoteP = createTag('p', { class: 'me-arc-quote' });
-  const authorP = createTag('p', { class: 'me-arc-author' });
-  el.append(quoteP, authorP);
-
-  function playExit(entry, fromRole) {
-    el.style.backgroundImage = `url("${entry.card.bg}")`;
-    // Same display truncation as the 3 real cards (see buildArcCard's
-    // render) — purely cosmetic here since this ghost is aria-hidden and
-    // never one of the tabbable/clickable cards, but its fixed-size card
-    // shouldn't overflow with a long quote mid-exit either.
-    quoteP.textContent = truncateQuote(entry.quote, EDITOR_QUOTE_CHAR_LIMIT);
-    // entry.font carries the carousel-wide selected font here too (see
-    // buildArcCarousel's withFont), so the outgoing ghost matches whatever
-    // font the other 3 cards are currently showing.
-    quoteP.style.fontFamily = entry.font?.font || '';
-    quoteP.style.fontStyle = entry.font?.italic ? 'italic' : '';
-    quoteP.style.fontWeight = entry.font?.weight || '';
-    quoteP.style.fontStretch = entry.font?.stretch || '';
-    authorP.textContent = entry.author || '';
-    authorP.style.display = entry.author ? '' : 'none';
-
-    el.style.transition = 'none';
-    el.classList.remove('me-arc-card--exit-prev', 'me-arc-card--exit-next', 'me-arc-ghost--visible');
-    el.classList.add(`me-arc-card--${fromRole}`, 'me-arc-ghost--visible');
-    el.getBoundingClientRect(); // force reflow so the starting position commits
-    el.style.transition = '';
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      el.classList.remove(`me-arc-card--${fromRole}`);
-      el.classList.add(`me-arc-card--exit-${fromRole}`);
-    }));
-  }
-
-  return { el, playExit };
-}
-
-/**
- * Tablet/mobile carousel: exactly 3 cards (prev/centre/next) — never more,
- * so nothing off-screen is ever clickable. Clicking an arrow rotates which
- * *role* (and therefore which fixed CSS position/rotation) each of the 3
- * existing card elements occupies, so every navigation is a real transform
- * change on real elements — driven entirely by the 1s CSS transition on
- * .me-arc-card, not a JS-animated or instantly-popped content swap. Only
- * the card moving furthest (the one leaving `next` on a "next" click, or
- * leaving `prev` on a "prev" click) needs its content replaced, since it's
- * re-entering the deck one step further round; the other two just carry
- * their existing content into their new role.
+ * Tablet/mobile carousel with continuous drag + snapping over an infinite
+ * loop of cards. Arc geometry is recomputed every frame from live position,
+ * so cards fan along the same 14deg-per-step curve while dragging, flicking,
+ * and snapping.
  */
 async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
-  const root = createTag('div', { class: 'me-arc' });
-  // Each .me-arc-card has role="option" (see buildArcCard), which axe
-  // requires to sit inside a role="listbox" parent (see
-  // aria-required-parent) — but that parent may only contain option/group
-  // children (aria-required-children), and .me-arc itself also holds the
-  // prev/next nav buttons as direct children. listboxRole wraps just the
-  // ghost + 3 cards so both rules are satisfied; display: contents keeps it
-  // out of layout so .me-arc-card's `position: absolute` (in CSS) still
-  // resolves against .me-arc, not this wrapper.
-  const listboxRole = createTag('div', { class: 'me-arc-listbox', role: 'listbox', 'aria-label': 'Template' });
-  const total = cardSet.length;
-  let activeIndex = 0;
-  // The centre card can be patched independently of cardSet (e.g. the
-  // widget's own colour control, which applies on top of whichever entry is
-  // currently active) — centreOverride holds that patch and is reset
-  // whenever navigation moves a *different* entry into the centre. Font is
-  // deliberately NOT part of this: once picked, it's a carousel-wide choice
-  // (see selectedFont below), not tied to any one entry/role.
-  let centreOverride = null;
-  // Persists across navigation (unlike centreOverride) and applies to every
-  // card — prev/next/ghost included, not just centre — so picking a font
-  // once keeps showing on whichever entries rotate into view afterwards.
-  // Seeded with the first font option so the carousel renders that font on
-  // load, matching the desktop widget card (which the --me-quote-font CSS
-  // variable already applies to via buildFontControl's initial selectFont).
-  let selectedFont = defaultFont || null;
+  const ARC_STEP_DEG = 14;
+  const ARC_STEP_RAD = ARC_STEP_DEG * (Math.PI / 180);
+  const DRAG_THRESHOLD_PX = 10;
+  const SNAP_BASE_MS = 1000;
+  const SNAP_MAX_MS = 1400;
+  const SNAP_SETTLE_RECHECK_MS = 90;
+  const FLICK_MULTIPLIER = 0.22;
+  const MIN_FLICK_CARDS_PER_SEC = 0.35;
 
+  const root = createTag('div', { class: 'me-arc' });
+  const listboxRole = createTag('div', { class: 'me-arc-listbox', role: 'listbox', 'aria-label': 'Template' });
+
+  const total = cardSet.length;
+  if (!total) {
+    root.append(listboxRole);
+    return { root, updateCentre: () => {} };
+  }
+
+  let cardWidth = 542;
+  let cardGap = 48;
+  let slideWidth = cardWidth + cardGap;
+  let arcRadius = slideWidth / Math.sin(ARC_STEP_RAD);
+
+  const normalizeIndex = (index) => ((index % total) + total) % total;
+  const shortestDistance = (index, pos) => {
+    const wrapped = ((index - pos) % total + total) % total;
+    let delta = wrapped;
+    if (delta > total / 2) delta -= total;
+    return delta;
+  };
+
+  function rebasePositionAroundActive() {
+    const cycles = Math.round((position - activeIndex) / total);
+    if (!Number.isFinite(cycles) || cycles === 0) return;
+    const shift = cycles * total;
+    position -= shift;
+    commandedPosition -= shift;
+  }
+
+  const readCssPx = (name, fallback) => {
+    const raw = getComputedStyle(root).getPropertyValue(name).trim();
+    const parsed = Number.parseFloat(raw);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  };
+
+  function syncGeometry() {
+    cardWidth = readCssPx('--me-arc-card-w', cardWidth);
+    cardGap = readCssPx('--me-arc-track-gap', cardGap);
+    slideWidth = cardWidth + cardGap;
+    arcRadius = slideWidth / Math.sin(ARC_STEP_RAD);
+  }
+
+  let activeIndex = 0;
+  let position = 0;
+  let velocityCardsPerMs = 0;
+  let rafId = null;
+  let moveSettleTimer = null;
+  let moving = false;
+  let pendingIndex = null;
+  let commandedPosition = 0;
+
+  let pointerDown = false;
+  let dragLocked = false;
+  let dragging = false;
+  let suppressClick = false;
+  let pointerId = null;
+  let startX = 0;
+  let startY = 0;
+  let startPosition = 0;
+  let lastMoveTs = 0;
+  let lastMovePosition = 0;
+
+  let centreOverride = null;
+  let selectedFont = defaultFont || null;
   const withFont = (entry) => (selectedFont ? { ...entry, font: selectedFont } : entry);
 
-  const onActivate = (el) => {
-    if (el.classList.contains('me-arc-card--prev')) goPrev(); // eslint-disable-line no-use-before-define
-    else if (el.classList.contains('me-arc-card--next')) goNext(); // eslint-disable-line no-use-before-define
-  };
-  const [cardA, cardB, cardC] = await Promise.all([
-    buildArcCard(onActivate, a11y, -1),
-    buildArcCard(onActivate, a11y, 2),
-    buildArcCard(onActivate, a11y, -1),
-  ]);
-  const ghost = buildArcGhost();
-  // roles[i] tracks which role each of cardA/B/C currently occupies, so
-  // navigation can rotate them without re-deriving role from DOM classes.
-  const cards = [cardA, cardB, cardC];
-  let roles = ['prev', 'center', 'next'];
-
-  function applyRoles() {
-    cards.forEach((card, i) => card.setRole(roles[i]));
+  if (isReducedMotion()) {
+    widget.classList.add('me-arc-reduce-motion');
   }
 
-  function centerEntry() {
-    return withFont({ ...cardSet[activeIndex], ...centreOverride });
-  }
-
-  function renderAll() {
-    const prevIndex = ((activeIndex - 1) % total + total) % total;
-    const nextIndex = (activeIndex + 1) % total;
-    cards[roles.indexOf('prev')].render(withFont(cardSet[prevIndex]));
-    cards[roles.indexOf('center')].render(centerEntry());
-    cards[roles.indexOf('next')].render(withFont(cardSet[nextIndex]));
-  }
-
-  // "X of N" (1-indexed) after every navigation — the carousel is circular
-  // (goNext/goPrev wrap with modulo), so without an explicit position a
-  // screen-reader user has no way to tell they've looped back around to
-  // where they started. Only relevant here (the arc/small-viewport
-  // carousel) — the desktop zig-zag has no notion of a single "current"
-  // position to announce.
   function announcePosition() {
-    a11y.announceToScreenReader(`${activeIndex + 1} of ${total}`);
+    if (typeof a11y.announceToScreenReader === 'function') {
+      a11y.announceToScreenReader(`${activeIndex + 1} of ${total}`);
+    }
   }
 
-  // Hides the top-right action bar for the duration of a navigation's 1s
-  // CSS transition (see .me-arc-card's transition-duration) so it's never
-  // visible mid-slide, then restores it once the moved cards have settled —
-  // per design feedback that the bar should disappear the moment movement
-  // starts and reappear only once the next slide finishes animating. Only
-  // ever called from goNext/goPrev, which only exist on the carousel (see
-  // the .mini-editor-widget.me-arc-moving CSS selector) — desktop's
-  // hover-only action bar has no carousel to move.
-  let moveSettleTimer = null;
-  function markMoving() {
-    widget.classList.add('me-arc-moving');
+  function centerEntryFor(index) {
+    const merged = index === activeIndex && centreOverride
+      ? { ...cardSet[index], ...centreOverride }
+      : cardSet[index];
+    return withFont(merged);
+  }
+
+  let cards = [];
+
+  function renderCardContent() {
+    cards.forEach((card, index) => {
+      card.render(centerEntryFor(index));
+    });
+  }
+
+  function setMoving(nextMoving) {
+    if (moving === nextMoving) return;
+    moving = nextMoving;
+    if (moving) {
+      widget.classList.add('me-arc-moving');
+      return;
+    }
+    widget.classList.remove('me-arc-moving');
+  }
+
+  function scheduleRevealAfterSettle() {
     clearTimeout(moveSettleTimer);
-    moveSettleTimer = setTimeout(() => widget.classList.remove('me-arc-moving'), 1000);
+    if (isReducedMotion()) {
+      setMoving(false);
+      return;
+    }
+    moveSettleTimer = setTimeout(() => {
+      const atSnap = Math.abs(position - Math.round(position)) < 0.001;
+      const stopped = Math.abs(velocityCardsPerMs) < 0.0001;
+      if (atSnap && stopped) {
+        setMoving(false);
+      }
+    }, SNAP_SETTLE_RECHECK_MS);
   }
 
-  function goNext() {
-    markMoving();
-    const prevIndexBefore = ((activeIndex - 1) % total + total) % total;
-    activeIndex = (activeIndex + 1) % total;
+  function applyRoleClasses() {
+    const visualCenter = normalizeIndex(Math.round(position));
+    const roleCenter = pendingIndex ?? visualCenter;
+    const prevIndex = normalizeIndex(roleCenter - 1);
+    const nextIndex = normalizeIndex(roleCenter + 1);
+    cards.forEach((card, index) => {
+      let role = 'off';
+      if (index === roleCenter) role = 'center';
+      else if (index === prevIndex) role = 'prev';
+      else if (index === nextIndex) role = 'next';
+      card.setRole(role);
+      card.el.tabIndex = role === 'center' && !moving ? 2 : -1;
+    });
+  }
+
+  function renderArcFrame() {
+    cards.forEach((card, index) => {
+      const n = shortestDistance(index, position);
+      const theta = n * ARC_STEP_RAD;
+      const arcX = arcRadius * Math.sin(theta);
+      const arcY = arcRadius * (1 - Math.cos(theta));
+      // Cards already conceptually live on a linear track n * slideWidth;
+      // transform is the arc delta from that linear position.
+      const offsetX = arcX - (n * slideWidth);
+      const finalX = (n * slideWidth) + offsetX;
+      const opacity = Math.max(0, 1 - (Math.max(0, Math.abs(n) - 0.2) * 0.55));
+      const zIndex = Math.max(1, 100 - Math.round(Math.abs(n) * 10));
+      const interactive = Math.abs(n) <= 1.15;
+
+      card.el.style.transform = `translate(${finalX.toFixed(3)}px, ${arcY.toFixed(3)}px) rotate(${(n * ARC_STEP_DEG).toFixed(3)}deg)`;
+      card.el.style.opacity = opacity.toFixed(3);
+      card.el.style.zIndex = String(zIndex);
+      card.el.style.pointerEvents = interactive ? 'auto' : 'none';
+    });
+    applyRoleClasses();
+  }
+
+  function commitActive(index, announce = true) {
+    activeIndex = normalizeIndex(index);
     centreOverride = null;
-    // The card that was centre slides to prev; the card that was next
-    // slides into centre (both keep their existing content — that's what
-    // the 1s CSS transition actually animates). The card that was prev is
-    // recycled to become the new next — but its OLD content doesn't just
-    // vanish: the ghost plays a visible exit (continuing further left,
-    // fading out) with that old content, while the real card is silently
-    // restaged with new content to enter from the right. Both read as one
-    // continuous circular motion since they run concurrently.
-    ghost.playExit(withFont(cardSet[prevIndexBefore]), 'prev');
-    const recycled = cards[roles.indexOf('prev')];
-    cards[roles.indexOf('center')].setRole('prev');
-    cards[roles.indexOf('next')].setRole('center');
-    roles = roles.map((role) => ({ center: 'prev', next: 'center', prev: 'next' }[role]));
-    const newNextIndex = (activeIndex + 1) % total;
-    recycled.render(withFont(cardSet[newNextIndex]));
-    recycled.stageAt('stage-next');
-    // Double rAF: the stage jump needs an actual painted frame before the
-    // transitioned move starts, or the browser can coalesce both class
-    // changes into one paint and skip the animation entirely.
-    requestAnimationFrame(() => requestAnimationFrame(() => recycled.setRole('next')));
-    cards[roles.indexOf('center')].render(centerEntry());
+    renderCardContent();
     useQuote(cardSet[activeIndex]);
-    announcePosition();
+    if (announce) {
+      announcePosition();
+    }
+    applyRoleClasses();
   }
 
-  function goPrev() {
-    markMoving();
-    const nextIndexBefore = (activeIndex + 1) % total;
-    activeIndex = ((activeIndex - 1) % total + total) % total;
-    centreOverride = null;
-    // Mirror of goNext: centre slides to next, prev slides into centre,
-    // and the card that was next is recycled — staged further out, then
-    // transitioned in — to become the new prev, while the ghost plays its
-    // old content exiting further right.
-    ghost.playExit(withFont(cardSet[nextIndexBefore]), 'next');
-    const recycled = cards[roles.indexOf('next')];
-    cards[roles.indexOf('center')].setRole('next');
-    cards[roles.indexOf('prev')].setRole('center');
-    roles = roles.map((role) => ({ center: 'next', prev: 'center', next: 'prev' }[role]));
-    const newPrevIndex = ((activeIndex - 1) % total + total) % total;
-    recycled.render(withFont(cardSet[newPrevIndex]));
-    recycled.stageAt('stage-prev');
-    requestAnimationFrame(() => requestAnimationFrame(() => recycled.setRole('prev')));
-    cards[roles.indexOf('center')].render(centerEntry());
-    useQuote(cardSet[activeIndex]);
-    announcePosition();
+  function cancelSnapAnimation() {
+    if (rafId) {
+      cancelAnimationFrame(rafId);
+      rafId = null;
+    }
   }
 
-  // Applied from the widget's font/colour pickers (see buildWidget) so
-  // selecting a font or background there updates the arc carousel exactly
-  // as it already updates the desktop widget's own .me-card. A font patch
-  // is carousel-wide (re-renders all 3 visible cards, see renderFont
-  // below); a colour/quote/author patch stays centre-only via
-  // centreOverride, same as before.
-  function renderFont() {
-    cards[roles.indexOf('prev')].render(withFont(cardSet[((activeIndex - 1) % total + total) % total]));
-    cards[roles.indexOf('center')].render(centerEntry());
-    cards[roles.indexOf('next')].render(withFont(cardSet[(activeIndex + 1) % total]));
+  function animateToPosition(targetPosition, duration, onDone = () => {}) {
+    cancelSnapAnimation();
+
+    if (isReducedMotion()) {
+      position = targetPosition;
+      velocityCardsPerMs = 0;
+      renderArcFrame();
+      onDone();
+      return;
+    }
+
+    const start = position;
+    const distance = targetPosition - start;
+    if (Math.abs(distance) < 0.0001) {
+      velocityCardsPerMs = 0;
+      renderArcFrame();
+      onDone();
+      return;
+    }
+
+    const startTime = performance.now();
+    const easeOut = (t) => 1 - ((1 - t) ** 4);
+    setMoving(true);
+
+    const step = (ts) => {
+      const elapsed = ts - startTime;
+      const t = Math.min(1, elapsed / duration);
+      const eased = easeOut(t);
+      const prevPosition = position;
+      position = start + (distance * eased);
+      velocityCardsPerMs = (position - prevPosition) / Math.max(1, ts - (lastMoveTs || ts));
+      lastMoveTs = ts;
+      renderArcFrame();
+      if (t < 1) {
+        rafId = requestAnimationFrame(step);
+      } else {
+        rafId = null;
+        position = targetPosition;
+        velocityCardsPerMs = 0;
+        renderArcFrame();
+        onDone();
+      }
+    };
+
+    rafId = requestAnimationFrame(step);
+  }
+
+  function snapTo(index, sourceVelocityCardsPerSec = 0) {
+    const snappedIndex = normalizeIndex(index);
+    commitActive(snappedIndex);
+
+    const deltaCards = shortestDistance(snappedIndex, position);
+    const targetPosition = position + deltaCards;
+    commandedPosition = targetPosition;
+
+    if (isReducedMotion()) {
+      setMoving(true);
+      pendingIndex = snappedIndex;
+      applyRoleClasses();
+      position = targetPosition;
+      renderArcFrame();
+      pendingIndex = null;
+      setMoving(false);
+      return;
+    }
+
+    const cardsToTravel = Math.max(1, Math.abs(deltaCards));
+    const velocityExtra = Math.min(220, Math.abs(sourceVelocityCardsPerSec) * 35);
+    const duration = Math.min(SNAP_MAX_MS, SNAP_BASE_MS + ((cardsToTravel - 1) * 180) + velocityExtra);
+    pendingIndex = snappedIndex;
+    setMoving(true);
+    applyRoleClasses();
+    animateToPosition(targetPosition, duration, () => {
+      pendingIndex = null;
+      rebasePositionAroundActive();
+      renderArcFrame();
+      scheduleRevealAfterSettle();
+    });
+  }
+
+  function snapBy(step, sourceVelocityCardsPerSec = 0) {
+    const normalizedStep = step >= 0 ? Math.max(1, Math.round(step)) : Math.min(-1, Math.round(step));
+    const snappedIndex = normalizeIndex(activeIndex + normalizedStep);
+    commitActive(snappedIndex);
+
+    commandedPosition = moving ? (commandedPosition + normalizedStep) : (position + normalizedStep);
+    const targetPosition = commandedPosition;
+
+    if (isReducedMotion()) {
+      setMoving(true);
+      pendingIndex = snappedIndex;
+      applyRoleClasses();
+      position = targetPosition;
+      renderArcFrame();
+      pendingIndex = null;
+      setMoving(false);
+      return;
+    }
+
+    const cardsToTravel = Math.max(1, Math.abs(normalizedStep));
+    const velocityExtra = Math.min(220, Math.abs(sourceVelocityCardsPerSec) * 35);
+    const duration = Math.min(SNAP_MAX_MS, SNAP_BASE_MS + ((cardsToTravel - 1) * 180) + velocityExtra);
+    pendingIndex = snappedIndex;
+    setMoving(true);
+    applyRoleClasses();
+    animateToPosition(targetPosition, duration, () => {
+      pendingIndex = null;
+      rebasePositionAroundActive();
+      renderArcFrame();
+      scheduleRevealAfterSettle();
+    });
+  }
+
+  const onActivate = (el) => {
+    if (el.classList.contains('me-arc-card--prev')) {
+      snapBy(-1);
+    } else if (el.classList.contains('me-arc-card--next')) {
+      snapBy(1);
+    }
+  };
+
+  cards = await Promise.all(cardSet.map(() => buildArcCard(onActivate, a11y, -1)));
+
+  function onPointerDown(e) {
+    if (e.button !== 0) return;
+    if (e.target.closest('.me-arc-nav')) return;
+    pointerDown = true;
+    dragLocked = false;
+    dragging = false;
+    suppressClick = false;
+    pointerId = e.pointerId;
+    startX = e.clientX;
+    startY = e.clientY;
+    startPosition = position;
+    lastMoveTs = performance.now();
+    lastMovePosition = position;
+    velocityCardsPerMs = 0;
+  }
+
+  function onPointerMove(e) {
+    if (!pointerDown || e.pointerId !== pointerId) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    if (!dragLocked) {
+      const movedEnough = Math.abs(dx) > DRAG_THRESHOLD_PX || Math.abs(dy) > DRAG_THRESHOLD_PX;
+      if (!movedEnough) {
+        return;
+      }
+      dragLocked = true;
+      if (Math.abs(dy) >= Math.abs(dx)) {
+        pointerDown = false;
+        return;
+      }
+      dragging = true;
+      suppressClick = true;
+      setMoving(true);
+      try {
+        root.setPointerCapture(pointerId);
+      } catch (err) {
+        // Continue without pointer capture if unavailable.
+      }
+    }
+
+    if (!dragging) return;
+    e.preventDefault();
+
+    const now = performance.now();
+    const nextPosition = startPosition - (dx / Math.max(1, slideWidth));
+    const deltaPosition = nextPosition - lastMovePosition;
+    const deltaTime = Math.max(1, now - lastMoveTs);
+    velocityCardsPerMs = deltaPosition / deltaTime;
+    lastMovePosition = nextPosition;
+    lastMoveTs = now;
+    position = nextPosition;
+    renderArcFrame();
+  }
+
+  function releaseDrag() {
+    if (!dragging) {
+      setMoving(false);
+      return;
+    }
+
+    const velocityCardsPerSec = velocityCardsPerMs * 1000;
+    const nearest = Math.round(position);
+    let step = 0;
+    if (Math.abs(velocityCardsPerSec) >= MIN_FLICK_CARDS_PER_SEC) {
+      step = Math.round(velocityCardsPerSec * FLICK_MULTIPLIER);
+      if (step === 0) {
+        step = velocityCardsPerSec > 0 ? 1 : -1;
+      }
+      step = Math.max(-4, Math.min(4, step));
+    }
+
+    const target = nearest + step;
+    snapTo(target, velocityCardsPerSec);
+  }
+
+  function onPointerUpOrCancel(e) {
+    if (e.pointerId !== pointerId) return;
+    pointerDown = false;
+    pointerId = null;
+    if (dragging) {
+      releaseDrag();
+    }
+    dragging = false;
+    dragLocked = false;
   }
 
   function updateCentre(patch) {
     if (patch.font) {
       selectedFont = patch.font;
-      renderFont();
+      renderCardContent();
+      renderArcFrame();
       return;
     }
     centreOverride = { ...centreOverride, ...patch };
-    cards[roles.indexOf('center')].render(centerEntry());
+    cards[activeIndex].render(centerEntryFor(activeIndex));
+    renderArcFrame();
   }
 
-  applyRoles();
-  renderAll();
-  listboxRole.append(ghost.el, cardA.el, cardB.el, cardC.el);
+  syncGeometry();
+  renderCardContent();
+  renderArcFrame();
+
+  listboxRole.append(...cards.map((card) => card.el));
   root.append(listboxRole);
 
   const prevBtn = createTag('button', {
@@ -1671,10 +1864,44 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
   }, [getIconElementDeprecated('arc-nav-right')]);
   root.append(prevBtn, nextBtn);
 
-  prevBtn.addEventListener('click', goPrev);
-  nextBtn.addEventListener('click', goNext);
+  prevBtn.addEventListener('click', () => {
+    snapBy(-1);
+  });
+  nextBtn.addEventListener('click', () => {
+    snapBy(1);
+  });
 
-  return { root, updateCentre };
+  root.addEventListener('pointerdown', onPointerDown);
+  root.addEventListener('pointermove', onPointerMove);
+  root.addEventListener('pointerup', onPointerUpOrCancel);
+  root.addEventListener('pointercancel', onPointerUpOrCancel);
+  root.addEventListener('click', (e) => {
+    if (!suppressClick) return;
+    suppressClick = false;
+    if (e.target.closest('.me-arc-nav')) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  const onResize = () => {
+    syncGeometry();
+    renderArcFrame();
+  };
+  window.addEventListener('resize', onResize);
+
+  return {
+    root,
+    updateCentre,
+    destroy: () => {
+      cancelSnapAnimation();
+      clearTimeout(moveSettleTimer);
+      window.removeEventListener('resize', onResize);
+      root.removeEventListener('pointerdown', onPointerDown);
+      root.removeEventListener('pointermove', onPointerMove);
+      root.removeEventListener('pointerup', onPointerUpOrCancel);
+      root.removeEventListener('pointercancel', onPointerUpOrCancel);
+    },
+  };
 }
 
 /**
@@ -1758,23 +1985,28 @@ export default async function createMiniEditorWidget(config = {}) {
   let updateCentre = () => {};
   let syncViewportMode = () => {};
   let removeResizeListener = () => {};
+  let destroyArcCarousel = () => {};
 
   if (decorationsEnabled) {
-    // Same entries (the widget's own + the desktop decorations) power the
-    // tablet/mobile arc carousel, so it cycles through the identical set of
-    // quote/background/font combinations as the desktop zig-zag.
-    const arcCardSet = [cardSet[0], ...cardSet.slice(1, 1 + decoCount)];
+    // Use the full fetched card set for the tablet/mobile arc carousel,
+    // independent of how many desktop deco cards are rendered.
+    const arcCardSet = [...cardSet];
     decorations = buildDecoCards(a11y, cardSet, useQuote);
     // Only meaningful on desktop (see buildSkipQuoteSuggestionsCta) — a
     // no-op call when the CTA wasn't built (small viewport).
     setDecoChainTarget(wireDecoTabChain(decorations));
-    const { root: arcCarousel, updateCentre: updateArcCentre } = await buildArcCarousel(
+    const {
+      root: arcCarousel,
+      updateCentre: updateArcCentre,
+      destroy: destroyArc,
+    } = await buildArcCarousel(
       arcCardSet,
       useQuote,
       fontOptions[0],
       a11y,
       widget,
     );
+    destroyArcCarousel = destroyArc || (() => {});
     updateCentre = updateArcCentre;
     onFontOrColourChange(updateCentre);
 
@@ -1835,7 +2067,6 @@ export default async function createMiniEditorWidget(config = {}) {
     };
     useQuote(patch);
     updateCentre(patch);
-    root.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
   document.addEventListener('mini-editor:use-quote', onUseQuoteEvent);
 
@@ -1848,6 +2079,7 @@ export default async function createMiniEditorWidget(config = {}) {
     syncViewportMode,
     destroy: () => {
       destroyWidget();
+      destroyArcCarousel();
       removeResizeListener();
       document.removeEventListener('mini-editor:use-quote', onUseQuoteEvent);
     },

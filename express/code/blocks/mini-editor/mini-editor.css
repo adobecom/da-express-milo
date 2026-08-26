@@ -30,6 +30,7 @@
      mobile media query below for the per-breakpoint overrides. */
   --me-arc-card-w: 542px;
   --me-arc-card-h: 350px;
+  --me-arc-track-gap: 48px;
   /* Extra height below the centre card's own box: the side cards pivot
      around --me-arc-origin-y (a point on the shared carousel circle, far
      below the card — see .me-arc-card's transform-origin), so their
@@ -166,6 +167,7 @@
        --me-arc-card-w — see .me-carousel-mode .mini-editor-widget. */
     --me-arc-card-w: 327px;
     --me-arc-card-h: 270px;
+    --me-arc-track-gap: 24px;
     --me-arc-origin-y: 2544px;
     --me-arc-extra-h: 50px;
     /* Per feedback: the gap between the carousel card and the font/colour

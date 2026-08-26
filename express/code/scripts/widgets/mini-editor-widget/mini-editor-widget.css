@@ -84,7 +84,7 @@
   backdrop-filter: blur(2.5px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.22s ease;
 }
 
 .mini-editor-widget:hover .me-actions,
@@ -826,6 +826,7 @@ sp-theme {
   margin: 0 calc(50% - 50vw) var(--me-arc-gap);
   height: var(--me-arc-card-h);
   clip-path: inset(calc(-1 * var(--me-arc-extra-h)) 0);
+  touch-action: pan-y;
 }
 
 /* ARIA-only grouping for the 3 option cards + ghost (see buildArcCarousel) —
@@ -887,6 +888,11 @@ sp-theme {
 .mini-editor-widget.me-arc-moving .me-actions {
   opacity: 0;
   pointer-events: none;
+  transition-duration: 0s;
+}
+
+.mini-editor-widget.me-arc-reduce-motion .me-actions {
+  transition: none;
 }
 
 /* The widget's own max-width (542px, matching the tablet card size) only
@@ -917,15 +923,9 @@ sp-theme {
   justify-content: center;
   overflow: hidden;
   box-shadow: 0 5px 6px rgb(0 0 0 / 12%), 0 16px 16px rgb(0 0 0 / 8%);
-  /* transform-origin sits far below the card, on the shared carousel
-     circle's own centre (--me-arc-origin-y below this card's vertical
-     centre) — fixed for every role, never changing between roles, so each
-     role's transform is a single rotate() with nothing else to interpolate.
-     Rotating about that one distant point is what keeps every card's
-     bottom edge on the circle throughout a transition, not just at rest —
-     see --me-arc-origin-y in mini-editor.css. */
-  transform-origin: 50% calc(50% + var(--me-arc-origin-y));
-  transition: transform 1s ease-in-out, opacity 1s ease-in-out;
+  transform-origin: 50% 50%;
+  transition: opacity 0.22s linear;
+  will-change: transform, opacity;
   -webkit-user-select: none;
   user-select: none;
 }
@@ -933,71 +933,26 @@ sp-theme {
 .me-arc-card--center {
   z-index: 3;
   cursor: pointer;
-  transition: transform 1s ease-in-out, opacity 1s ease-in-out,
-    background-color 0.18s ease, border-color 0.18s ease;
+  transition: opacity 0.22s linear, background-color 0.18s ease, border-color 0.18s ease;
 }
 
 .me-arc-card--prev,
 .me-arc-card--next {
-  z-index: 1;
   cursor: pointer;
 }
 
-.me-arc-card--prev {
-  transform: rotate(-8deg);
-}
-
-.me-arc-card--next {
-  transform: rotate(8deg);
-}
-
-/* Off-screen staging position for a recycled card (see mini-editor-widget.js
-   setRole's `instant` path) — parked further out than the resting
-   prev/next spot, same rotation direction but twice the swing, so the very
-   next transition (turning off `instant`) animates it rotating in from
-   beyond the edge instead of popping directly into its final slot. Since
-   every role rotates about the same distant --me-arc-origin-y point (see
-   .me-arc-card), doubling the *centre-point* displacement to 2x the
-   resting prev/next distance means doubling sin(angle), not the angle
-   itself: asin(2 * sin(8deg)) ≈ 16.1615deg. */
-.me-arc-card--stage-prev {
-  transform: rotate(-16.1615deg);
-}
-
-.me-arc-card--stage-next {
-  transform: rotate(16.1615deg);
-}
-
-/* Ghost: a 4th, non-interactive card (see buildArcGhost in
-   mini-editor-widget.js) that plays the outgoing card's visible exit —
-   continuing further out on its own side while fading — so the recycled real
-   card's old content doesn't just vanish when it's silently restaged to enter
-   from the opposite side. Sits behind the 3 real cards (z-index 0) and starts
-   invisible; JS toggles it to the plain --prev/--next resting class first
-   (so it appears exactly where the real card just was) then immediately
-   to --exit-prev/--exit-next, which is what's actually transitioned. */
-.me-arc-ghost {
-  z-index: 0;
+.me-arc-card--off {
+  opacity: 0;
   pointer-events: none;
-  opacity: 0;
-  cursor: default;
 }
 
-.me-arc-ghost.me-arc-ghost--visible {
-  opacity: 1;
-}
-
-.me-arc-card--exit-prev {
-  transform: rotate(-16.1615deg);
-}
-
-.me-arc-card--exit-next {
-  transform: rotate(16.1615deg);
-}
-
-.me-arc-ghost.me-arc-ghost--visible.me-arc-card--exit-prev,
-.me-arc-ghost.me-arc-ghost--visible.me-arc-card--exit-next {
-  opacity: 0;
+@media (prefers-reduced-motion: reduce) {
+  .me-arc-card,
+  .me-arc-card--center,
+  .me-actions,
+  .mini-editor-widget.me-arc-moving .me-actions {
+    transition: none;
+  }
 }
 
 .me-arc-quote {
@@ -1025,7 +980,7 @@ sp-theme {
 .me-arc-nav {
   position: absolute;
   top: 50%;
-  z-index: 3;
+  z-index: 220;
   display: flex;
   align-items: center;
   justify-content: center;
