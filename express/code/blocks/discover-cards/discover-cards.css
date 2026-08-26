@@ -135,6 +135,7 @@ main .section .discover-cards {
     justify-content: flex-end;
     gap: var(--spacing-100);
     align-items: center;
+    max-width: 1700px;
 }
 .discover-cards.flip .gallery-control {
   padding-top: var(--spacing-600);
@@ -250,6 +251,9 @@ main .section .discover-cards {
 @media (min-width: 1680px) {
     .discover-cards .cards-container {
         margin: auto;
+    }
+    .discover-cards .gallery-control {
+        margin: 0 auto;
     }
     .discover-cards .cards-container.gallery {
         scroll-padding-inline-start: 100px;
