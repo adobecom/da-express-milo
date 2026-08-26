@@ -64,6 +64,47 @@ function truncateQuote(quote, limit) {
   return `${trimmed}…`;
 }
 
+// cubic-bezier equivalents of the GSAP eases named in the design spec —
+// power1.in ≈ cubic-bezier(0.55, 0.055, 0.675, 0.19),
+// power2.out ≈ cubic-bezier(0.215, 0.61, 0.355, 1) — there's no GSAP
+// dependency in this codebase, so the Web Animations API stands in for it.
+const QUOTE_CHANGE_EASE_IN = 'cubic-bezier(0.55, 0.055, 0.675, 0.19)';
+const QUOTE_CHANGE_EASE_OUT = 'cubic-bezier(0.215, 0.61, 0.355, 1)';
+
+/**
+ * Applies a font or quote-text change to `el` — via `applyChange`, run
+ * synchronously and immediately, same as any other state update — wrapped in
+ * a purely cosmetic fade-out/fade-in "soft swap": a quick fade+slide down
+ * (0.12s, ease-in) covers the swap, then a fade+slide back in from 10px below
+ * (0.28s, ease-out) reveals the result. Any in-flight run on the same element
+ * is cancelled first so rapid clicks restart cleanly instead of stacking.
+ * Skipped entirely under prefers-reduced-motion: reduce, where only
+ * `applyChange` runs, with no animation.
+ */
+function animateQuoteChange(el, applyChange) {
+  el.getAnimations().forEach((anim) => anim.cancel());
+
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
+    applyChange();
+    return;
+  }
+
+  // A single 0.4s timeline standing in for the two-step spec (fade-out then
+  // fade-in): each keyframe's own `easing` governs the segment starting at
+  // it, so the first 0.12s (0 → 0.3 offset) eases in and the remaining 0.28s
+  // (0.3 → 1) eases out, matching the spec's two durations exactly.
+  el.animate(
+    [
+      { opacity: 1, transform: 'translateY(0)', easing: QUOTE_CHANGE_EASE_IN },
+      { opacity: 0, transform: 'translateY(6px)', offset: 0.3, easing: QUOTE_CHANGE_EASE_OUT },
+      { opacity: 0, transform: 'translateY(10px)', offset: 0.3 },
+      { opacity: 1, transform: 'translateY(0)' },
+    ],
+    { duration: 400, fill: 'forwards' },
+  );
+  applyChange();
+}
+
 /**
  * True at the same <=767px width mini-editor-widget.css switches the inline
  * font/colour row for the mobile bottom sheet. Checked live (not cached) at
@@ -358,7 +399,7 @@ function buildFontButton(opt, index, onPick) {
   return btn;
 }
 
-function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOptions) {
+function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOptions, wrapPick) {
   const control = createTag('button', {
     type: 'button',
     tabIndex: 9,
@@ -421,8 +462,13 @@ function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOpti
   }
 
   const onPick = (opt) => {
-    selectFont(opt);
-    onSelect?.(opt);
+    // wrapPick lets buildWidget run the fade-out/apply/fade-in "soft swap"
+    // around the actual selectFont + onSelect notification — defaults to
+    // calling straight through for any caller that doesn't need it.
+    (wrapPick || ((apply) => apply()))(() => {
+      selectFont(opt);
+      onSelect?.(opt);
+    });
     // Mobile bottom sheet dismisses on selection — per Figma node 137:4778's
     // "Bottom sheet expectation" note — unlike the tablet/desktop inline row,
     // which stays open after a pick (isMobileSheetWidth is the same check
@@ -933,6 +979,7 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
     (font) => onFontOrColourPick({ font }),
     panelMode,
     () => colourControl.focus(),
+    (apply) => animateQuoteChange(quoteEl, apply),
   );
   const {
     control: colourControl,
@@ -1015,14 +1062,16 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
           },
         } : {}),
       });
-      renderQuote(quote);
+      animateQuoteChange(quoteEl, () => {
+        renderQuote(quote);
+        if (font) selectFont(font);
+      });
       authorEl.textContent = author || '';
       authorEl.style.display = author ? '' : 'none';
       if (bgCard) {
         selectSwatch(bgCard.bg);
         setCardMode(bgCard.mode);
       }
-      if (font) selectFont(font);
     },
     getContentModel: () => ({ ...contentModel, font: { ...contentModel.font } }),
     onFontOrColourChange: (listener) => {
@@ -1202,8 +1251,12 @@ const DECO_TAB_CHAIN_ORDER = [2, 4, 6, 8, 1, 3, 5, 7];
  * button instead of consistently re-entering where intended.
  */
 function wireDecoTabChain(decorations) {
+  // A card can be absent — e.g. fewer templates fetched than DECO_CARD_COUNT
+  // leaves the last slot(s) unbuilt (see buildDecoCards) — so each lookup is
+  // skipped rather than assumed to exist.
   const buttons = DECO_TAB_CHAIN_ORDER.flatMap((cardNum) => {
     const card = decorations.querySelector(`.me-deco--${cardNum}`);
+    if (!card) return [];
     return [card.querySelector('.me-deco-use'), card.querySelector('.me-deco-copy')];
   });
   buttons.forEach((btn, i) => {
@@ -1763,6 +1816,24 @@ export default async function createMiniEditorWidget(config = {}) {
     removeResizeListener = () => window.removeEventListener('resize', syncViewportMode);
   }
 
+  // Decouples this widget from the block(s) that offer their own "use this
+  // quote" entry points (e.g. collapsible-rows' "Create a design" button) —
+  // they dispatch this CustomEvent on document rather than needing a direct
+  // reference to this editor instance. See mini-editor-widget.md.
+  const onUseQuoteEvent = (e) => {
+    const { quote, author, card, font } = e.detail;
+    const patch = {
+      quote,
+      author,
+      ...(card ? { card } : {}),
+      ...(font ? { font } : {}),
+    };
+    useQuote(patch);
+    updateCentre(patch);
+    root.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+  document.addEventListener('mini-editor:use-quote', onUseQuoteEvent);
+
   return {
     stage,
     decorations,
@@ -1773,6 +1844,7 @@ export default async function createMiniEditorWidget(config = {}) {
     destroy: () => {
       destroyWidget();
       removeResizeListener();
+      document.removeEventListener('mini-editor:use-quote', onUseQuoteEvent);
     },
   };
 }
