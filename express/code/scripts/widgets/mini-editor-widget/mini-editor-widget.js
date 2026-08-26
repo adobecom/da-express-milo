@@ -98,6 +98,90 @@ function isSmallViewport() {
 }
 
 /**
+ * Adds mouse drag-to-scroll to an already-horizontally-scrollable row (the
+ * font/colour inline rows — see .me-row--fonts/.me-row--colour's own
+ * overflow-x: auto, which already gives touch/trackpad scroll for free,
+ * just not a mouse-drag gesture on desktop). A plain `mousedown` + `scrollLeft`
+ * approach would also fire as a "click" on whichever option the pointer
+ * lands on, since a drag and a click both start with the same pointerdown —
+ * so a real drag (movement past DRAG_THRESHOLD) marks the row and swallows
+ * the *next* click via a one-shot capturing listener, letting an
+ * option's own click handler run normally for an actual (non-dragged) tap.
+ *
+ * setPointerCapture is deliberately NOT called on pointerdown, only once a
+ * real drag has started (past DRAG_THRESHOLD): capturing the pointer
+ * immediately retargets that pointer's *own* pointerup/click to the
+ * capturing element (the panel) per the Pointer Events spec, even for a
+ * plain stationary press — which was silently breaking every option's own
+ * click handler (the click still fired, just on the panel, never reaching
+ * the button under the cursor).
+ */
+const DRAG_THRESHOLD = 5;
+
+function wireDragToScroll(panel) {
+  let startX = 0;
+  let startScrollLeft = 0;
+  let dragging = false;
+  let moved = false;
+  let activePointerId = null;
+
+  const suppressNextClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    panel.removeEventListener('click', suppressNextClick, true);
+  };
+
+  const onPointerMove = (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    if (!moved && Math.abs(dx) > DRAG_THRESHOLD) {
+      moved = true;
+      // Only swallow a click once a real drag has actually happened —
+      // a press-and-release with no movement (a normal click) never adds
+      // this listener, so it reaches the option's own handler untouched.
+      panel.addEventListener('click', suppressNextClick, true);
+      // Captured only now (see function-level comment) — pointerup/click
+      // being retargeted to the panel from here on is fine, since a real
+      // drag has already committed to not being a click.
+      try {
+        panel.setPointerCapture?.(activePointerId);
+      } catch {
+        // Drag still works without capture; it just won't keep tracking
+        // the pointer once it leaves the panel's own bounds.
+      }
+    }
+    if (moved) panel.scrollLeft = startScrollLeft - dx;
+  };
+
+  const onPointerUp = (e) => {
+    dragging = false;
+    moved = false;
+    try {
+      panel.releasePointerCapture?.(e.pointerId);
+    } catch {
+      // Nothing to release if setPointerCapture above never ran/succeeded.
+    }
+    panel.removeEventListener('pointermove', onPointerMove);
+    panel.removeEventListener('pointerup', onPointerUp);
+    panel.removeEventListener('pointercancel', onPointerUp);
+  };
+
+  panel.addEventListener('pointerdown', (e) => {
+    // Only the primary mouse button / a single touch/pen point — modifier-
+    // clicks, right-clicks, and multi-touch gestures are left alone.
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    dragging = true;
+    moved = false;
+    startX = e.clientX;
+    startScrollLeft = panel.scrollLeft;
+    activePointerId = e.pointerId;
+    panel.addEventListener('pointermove', onPointerMove);
+    panel.addEventListener('pointerup', onPointerUp);
+    panel.addEventListener('pointercancel', onPointerUp);
+  });
+}
+
+/**
  * Wires roving-tabindex keyboard navigation across a row of `role="option"`
  * buttons (the font row's .me-font buttons, the colour row's .me-swatch-btn
  * buttons) — only one option is ever a real Tab stop at a time (tabindex 0,
@@ -360,6 +444,10 @@ function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOpti
   // Desktop inline row only (see wireOptionRowRoving) — the mobile bottom
   // sheet's own grid keeps native default tab order, out of scope here.
   roving = wireOptionRowRoving(panel, '.me-font', () => onTabOutOfOptions?.());
+  // Mouse drag-to-scroll — same inline row only, same rationale as the
+  // roving-tabindex wiring above (the mobile sheet's grid doesn't scroll
+  // horizontally at all).
+  wireDragToScroll(panel);
 
   control.addEventListener('click', () => {
     const isOpen = root.getAttribute('data-me-panel') === 'fonts';
@@ -528,6 +616,8 @@ function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
   // desktop widths — only the narrower <=767px bottom sheet replaces it
   // (see isMobileSheetWidth), so this wiring applies at both.
   roving = wireOptionRowRoving(panel, '.me-swatch-btn', () => onTabOut?.());
+  // Mouse drag-to-scroll — same rationale as buildFontControl's own wiring.
+  wireDragToScroll(panel);
 
   control.addEventListener('click', () => {
     const isOpen = root.getAttribute('data-me-panel') === 'colour';
