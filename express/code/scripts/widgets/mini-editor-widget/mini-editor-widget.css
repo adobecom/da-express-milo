@@ -121,7 +121,7 @@
 .me-quote-wrap {
   position: relative;
   box-sizing: border-box;
-  max-width: 322px;
+  max-width: 380px;
   padding: var(--spacing-75);
   cursor: pointer;
   border: 1px solid transparent;
