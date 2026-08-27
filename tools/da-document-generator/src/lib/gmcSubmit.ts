@@ -1,5 +1,6 @@
 import { lookupProductFromTemplate, fetchProductPricing } from '../api/zazzleApi';
 import { GMC_LOCALES, DEFAULT_GMC_LOCALE } from '../api/gmcLocales';
+import { daPathToProdUrl } from '../api/daApi';
 import { runBatch, DEFAULT_CONCURRENCY } from './concurrency';
 import {
   syncProducts,
@@ -55,10 +56,12 @@ const UNKNOWN_TYPE = '(unknown type)';
  *
  * Price (and sale_price, when active) is fetched fresh here and never cached/persisted (the v1
  * invariant holds); the value shown in the dialog IS the value submitted (WYSIWYG) rather than being
- * re-fetched at submit time. `link` here is always the real `doc.liveUrl` regardless of env — the
- * TEST-env `store.example.com` host swap is applied later, only to the payload actually sent over
- * the wire (see `toTestEnvLink` in `submitAssembledRows`), so this preview and its cached `row` stay
- * valid across an env-toggle flip without re-assembling.
+ * re-fetched at submit time. `link` here is the production PDP URL (`daPathToProdUrl(doc.path)` →
+ * `www.adobe.com/...`), submitted as-is for prod — the TEST-env `store.example.com` host swap is
+ * applied later, only to the payload actually sent over the wire (see `toTestEnvLink` in
+ * `submitAssembledRows`), so this preview and its cached `row` stay valid across an env-toggle flip
+ * without re-assembling. (The dialog's clickable "Page" link is a separate field, `doc.liveUrl`,
+ * rendered in `GmcPreviewRow` — not this `row.link`.)
  */
 export async function assembleGmcPreview(doc: ManagedDoc): Promise<GmcRowPreview> {
   const base: GmcRowPreview = { path: doc.path, doc, productType: doc.identity.productType || UNKNOWN_TYPE };
@@ -84,7 +87,7 @@ export async function assembleGmcPreview(doc: ManagedDoc): Promise<GmcRowPreview
     product_id: productId,
     title: doc.title || product.rootRawTitle,
     description: doc.description || product.description,
-    link: doc.liveUrl,
+    link: daPathToProdUrl(doc.path),
     image_link: image,
     price: pricing.unitPrice,
     ...(pricing.salePrice != null ? { sale_price: pricing.salePrice, sale_price_end_date: pricing.saleEndDate } : {}),
@@ -111,9 +114,9 @@ export async function assembleGmcPreview(doc: ManagedDoc): Promise<GmcRowPreview
 /**
  * TEST-env-only substitution applied right before the wire call: pdp-gmc-sync's `pdpAllowedHosts`
  * allowlist (`config/defaults.json`) already carries a bare `store.example.com` placeholder host for
- * the test Merchant Center account. Swap only the scheme+host of the real aem.live link — keep the
- * doc's actual path so each row still submits a distinct URL — never the doc-facing preview link
- * (that stays the real aem.live URL everywhere in the dialog, see `assembleGmcPreview`).
+ * the test Merchant Center account. Swap only the scheme+host of the row's prod link — keep the
+ * doc's actual path so each row still submits a distinct URL. (The doc-facing preview "Page" link is
+ * a separate field, `doc.liveUrl`, rendered in `GmcPreviewRow` — untouched here.)
  */
 function toTestEnvLink(liveUrl: string): string {
   const url = new URL(liveUrl);
