@@ -2,7 +2,7 @@ main .section:not([data-padding='none']):not(.xxxl-spacing-static, .xxl-spacing-
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .list-wrapper:first-child,
 main .section:not([data-padding='none']):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .section-metadata:first-child + .list-wrapper {
-    padding-top: var(--spacing-785);
+    padding-top: var(--spacing-600);
 }
 
 main .list {
@@ -15,7 +15,7 @@ main .list {
 }
 
 .section .banner + .list-wrapper {
-    padding-top: var(--spacing-785);
+    padding-top: var(--spacing-600);
 }
 
 main .list .item {
@@ -75,7 +75,7 @@ main .list > div > div > :last-child {
 
 main .list {
     list-style: none;
-    text-align: left;
+    text-align: start;
     box-sizing: border-box;
 }
 
@@ -111,5 +111,23 @@ main .list ol li::before {
         max-width: unset;
         margin: auto;
         padding: 0px var(--spacing-400) var(--spacing-600) var(--spacing-400);
+    }
+}
+
+main .list.edge-aligned {
+    max-width: unset;
+    margin: 0 auto;
+    display: block;
+}
+
+@media (min-width: 768px) {
+    main .list.edge-aligned {
+        padding: 0px var(--spacing-500) var(--spacing-600) var(--spacing-500);
+    }
+}
+
+@media (min-width: 1200px) {
+    main .list.edge-aligned {
+        max-width: 1200px;
     }
 }

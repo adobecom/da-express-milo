@@ -44,8 +44,11 @@ const config = {
    * result doesn't require a manual re-run. 2 on CI, 1 locally. Override with
    * NALA_RETRIES. */
   retries: getRetries(),
-  /* Opt out of parallel tests on CI. */
-  workers: process.env.CI ? 4 : 3,
+  /* Parallel workers per shard runner. Lowered from CI's 4 to 3 so heavy
+   * canvas/Spectrum blocks don't starve each other for CPU on the shared CI
+   * runners — that contention was causing flaky decoration timeouts that only
+   * passed on re-run. Override with NALA_WORKERS (e.g. 2 for more headroom). */
+  workers: Number(process.env.NALA_WORKERS) || 3,
   /* Reporter to use. */
   reporter: process.env.CI
     ? [['github'], ['list'], ['./nala/utils/base-reporter.cjs']]

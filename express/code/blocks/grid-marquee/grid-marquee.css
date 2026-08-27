@@ -6,6 +6,16 @@
   text-align: center;
 }
 
+/* Anti-FOUC: hide only the raw, un-decorated video source authored under each
+   card face (mp4 link, or MEP-inlined <video> if auto-video-decoration ran
+   first) so it never paints before toCard() removes it. Scoped to the element
+   itself, not gated on .foreground existing, so a JS failure can't leave the
+   whole block - including the authored LCP headline - hidden forever. */
+.grid-marquee > div > div:first-child > p > a[href*=".mp4"],
+.grid-marquee > div > div:first-child > p > video {
+  visibility: hidden;
+}
+
 
 
 .grid-marquee .express-logo {
@@ -59,6 +69,7 @@ main .section .grid-marquee h1 {
 .grid-marquee .background img {
   position: absolute;
   top: 50%;
+  left: 50%;
   object-fit: fill;
   width: 250%;
   transform: translate(-50%, -35%);
@@ -94,7 +105,7 @@ main .section .grid-marquee h1 {
   border-radius: var(--spacing-100);
   border: 1px solid #fff;
   background: linear-gradient(170.96deg, rgba(255, 255, 255, 0.6) 18.95%, rgba(255, 255, 255, 0.2) 99.73%);
-  text-align: left;
+  text-align: start;
   display: flex;
   color: initial;
 }
@@ -247,7 +258,7 @@ main .section .grid-marquee h1 {
 }
 
 .grid-marquee .drawer [role='tablist'] {
-  padding: 0 0 var(--spacing-100) var(--spacing-300);
+  padding: 0 var(--spacing-300) var(--spacing-100);
 }
 
 .grid-marquee .drawer [role='tab'] {
@@ -277,7 +288,7 @@ main .section .grid-marquee h1 {
   font-size: 1rem;
   border: initial;
   padding: initial;
-  text-align: left;
+  text-align: start;
   margin: initial;
 }
 
@@ -306,7 +317,8 @@ main .section .grid-marquee h1 {
 
 .grid-marquee .ratings img {
   height: 35px;
-  padding-left: var(--spacing-200);
+  width: auto;
+  padding-inline-start: var(--spacing-200);
   margin: 0;
 }
 
@@ -340,8 +352,7 @@ main .section .grid-marquee.pricing-page h1 {
   }
   .grid-marquee .headline {
     max-width: 1200px;
-    padding-left: var(--spacing-500);
-    padding-right: var(--spacing-500);
+    padding-inline: var(--spacing-500);
   }
   .grid-marquee .headline .ctas {
     display: flex;
@@ -458,6 +469,7 @@ main .section .grid-marquee.pricing-page h1 {
 
   .grid-marquee .drawer .content {
     display: block;
+    overflow: visible;
   }
 
   .grid-marquee .drawer.hide {
@@ -481,7 +493,7 @@ main .section .grid-marquee.pricing-page h1 {
   }
 
   .grid-marquee .drawer div[role='tablist'] {
-    padding: 0 0 16px 16px;
+    padding: 0 16px 16px;
     display: block;
   }
 

@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../utils/test.cjs');
 const { features } = require('./cta-cards.spec.cjs');
 const CtaCardsBlock = require('./cta-cards.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');
