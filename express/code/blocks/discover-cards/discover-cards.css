@@ -183,6 +183,7 @@ main .section .discover-cards {
 
 @media (min-width: 600px) {
   .discover-cards .center-title {
+    
         padding-bottom: var(--spacing-500);
         font-size: var(--heading-font-size-l);
     }
