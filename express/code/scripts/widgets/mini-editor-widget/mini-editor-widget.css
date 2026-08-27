@@ -1018,7 +1018,6 @@ sp-theme {
 .me-arc-author {
   position: absolute;
   left: 50%;
-  bottom: var(--spacing-200);
   transform: translateX(-50%);
   margin: 0;
   font-size: 16px;

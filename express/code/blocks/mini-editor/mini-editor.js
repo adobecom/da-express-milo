@@ -173,21 +173,27 @@ const DECO_QUOTE_CHAR_LIMIT = 216;
 function buildCardSet(cards, quotes) {
   const decoSlotCount = Math.max(0, cards.length - 1);
   const [firstQuote] = quotes;
-  const shortQuotes = quotes.filter((q) => q.quote.length <= DECO_QUOTE_CHAR_LIMIT);
-  const longQuotes = quotes.filter((q) => q.quote.length > DECO_QUOTE_CHAR_LIMIT);
+  const remainingQuotes = quotes.slice(1);
+  const shortQuotes = remainingQuotes.filter((q) => q.quote.length <= DECO_QUOTE_CHAR_LIMIT);
+  const longQuotes = remainingQuotes.filter((q) => q.quote.length > DECO_QUOTE_CHAR_LIMIT);
 
   // Round-robins `pool` to exactly `count` entries — used to fill deco
   // slots with short quotes first, reusing each one only after every other
   // short quote already has a slot, then the same for long quotes.
-  const takeRoundRobin = (pool, count) => Array.from(
-    { length: Math.min(count, pool.length ? count : 0) },
-    (_, i) => pool[i % pool.length],
-  );
+  const takeRoundRobin = (pool, count) => {
+    if (!pool.length || count <= 0) return [];
+    return Array.from({ length: count }, (_, i) => pool[i % pool.length]);
+  };
+
+  const initialShortQuotes = shortQuotes.slice(0, Math.min(shortQuotes.length, decoSlotCount));
+  const remainingSlotCount = Math.max(0, decoSlotCount - initialShortQuotes.length);
+  let overflowPool = quotes;
+  if (shortQuotes.length) overflowPool = shortQuotes;
+  if (longQuotes.length) overflowPool = longQuotes;
 
   const decoQuotes = shortQuotes.length >= decoSlotCount
     ? takeRoundRobin(shortQuotes, decoSlotCount)
-    : [...takeRoundRobin(shortQuotes, shortQuotes.length),
-      ...takeRoundRobin(longQuotes, decoSlotCount - shortQuotes.length)];
+    : [...initialShortQuotes, ...takeRoundRobin(overflowPool, remainingSlotCount)];
 
   return cards.map((card, i) => {
     const { quote, author } = i === 0 ? firstQuote : decoQuotes[i - 1];
@@ -247,7 +253,7 @@ function wireLandmark(block, header) {
   // recomputed. sr-only (not aria-hidden) since this text IS part of the
   // landmark's name, just never meant to render visibly for sighted users.
   const suffix = createTag('span', { id: `${uid}-suffix`, class: 'sr-only' });
-  heading.append(suffix);
+  header.append(suffix);
   block.setAttribute('role', 'region');
   block.setAttribute('aria-labelledby', `${heading.id} ${suffix.id}`);
 
@@ -427,6 +433,5 @@ export default async function init(block) {
     block.closest('.section')?.remove();
   }
 
-  const miniEditor = document.querySelector('.mini-editor');
-  miniEditor.querySelector('.mini-editor-header a.quick-link').tabIndex = 1;
+  block.querySelector('.mini-editor-header a.quick-link')?.setAttribute('tabindex', '1');
 }

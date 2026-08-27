@@ -5,9 +5,11 @@
  * collection the mini-editor renders, by fetching live templates from the
  * template service for the block's authored `collectionId`.
  *
- * Every card has the same shape: `{ id, bg }`, where `id` is a template urn
- * (used later for todo/CTA actions that need to reference the exact source
- * asset) and `bg` is the image URL to paint.
+ * Every card has the same shape: `{ id, bg, title?, mode }`, where `id` is a
+ * template urn (used later for todo/CTA actions that need to reference the
+ * exact source asset), `bg` is the image URL to paint, `title` is the
+ * template name when available, and `mode` is the background contrast hint
+ * the widget uses for light/dark controls.
  */
 
 import {
@@ -90,6 +92,10 @@ export function getImageSrc(item) {
   }
 
   const preview = extractImagePreview(page);
+  if (!preview || !renditionHref.includes('{&page,size,type,fragment}')) {
+    return renditionHref;
+  }
+
   const {
     mediaType,
     componentId,
@@ -104,8 +110,8 @@ export function getImageSrc(item) {
 }
 
 /**
- * Returns the mini-editor's background-card collection as `[{ id, bg }, ...]`,
- * fetched live from the template service.
+ * Returns the mini-editor's background-card collection as
+ * `[{ id, bg, title?, mode }, ...]`, fetched live from the template service.
  *
  * @param {Object} props
  * @param {string} [props.collectionId] — template collection to fetch from.

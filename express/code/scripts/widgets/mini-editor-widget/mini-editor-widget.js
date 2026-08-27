@@ -301,9 +301,7 @@ function findNextFocusableAfter(root) {
   const candidates = [...document.querySelectorAll(FOCUSABLE_SELECTOR)];
   return candidates.find((el) => {
     if (root.contains(el)) return false;
-    // DOCUMENT_POSITION_FOLLOWING (4): true only when el comes after root in
-    // the document, filtering out anything before .mini-editor on the page.
-    return !!(root.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
+    return root.compareDocumentPosition(el) === Node.DOCUMENT_POSITION_FOLLOWING;
   });
 }
 
@@ -718,9 +716,7 @@ function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
  * breakpoint, so there's no JS branching on viewport width here.
  */
 function buildBottomSheet(root, a11y, kind, title, contentEl) {
-  const {
-    trapFocus, handleEscapeClose, disableBackgroundScroll, restoreBackgroundScroll,
-  } = a11y;
+  const { disableBackgroundScroll, restoreBackgroundScroll } = a11y;
   const overlay = createTag('div', { class: 'me-sheet-overlay', 'aria-hidden': 'true', inert: '' });
   const sheet = createTag('div', {
     class: 'me-sheet',
@@ -837,7 +833,15 @@ async function buildMiniEditorActions(topActions = []) {
   return bar;
 }
 
-async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode, decorationsEnabled) {
+async function buildWidget(
+  root,
+  a11y,
+  cardSet,
+  fontOptions,
+  topActions,
+  panelMode,
+  decorationsEnabled,
+) {
   const widget = createTag('div', { class: 'mini-editor-widget' });
   const card = createTag('div', { class: 'me-card' });
   const first = cardSet[0] || { quote: '', author: '' };
@@ -963,9 +967,12 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   // never built at all when those don't exist: on small viewports (the arc
   // carousel replaces them, see .me-carousel-mode) or when a host opted out
   // of decorations entirely (e.g. the "Create a design" modal).
-  const skipCta = (!decorationsEnabled || isSmallViewport()) ? null : buildSkipQuoteSuggestionsCta(root);
+  const skipCta = (!decorationsEnabled || isSmallViewport())
+    ? null
+    : buildSkipQuoteSuggestionsCta(root);
 
   const controls = createTag('div', { class: 'me-controls' });
+  let focusColourControl = () => {};
   const {
     control: fontControl,
     panel: fontPanel,
@@ -976,15 +983,10 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
     fontOptions,
     (font) => onFontOrColourPick({ font }),
     panelMode,
-    () => colourControl.focus(),
+    () => focusColourControl(),
     (apply) => animateQuoteChange(quoteEl, apply),
   );
-  const {
-    control: colourControl,
-    panel: colourPanel,
-    sheetGrid: colourSheetGrid,
-    selectSwatch,
-  } = buildColorControl(
+  const colourControlConfig = buildColorControl(
     root,
     cardSet.map((c) => c.card),
     (bgCard) => {
@@ -1004,6 +1006,13 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
     // destination the CTA's own Enter/Space would otherwise land on.
     () => (skipCta ? skipCta.show() : findNextFocusableAfter(root)?.focus()),
   );
+  const {
+    control: colourControl,
+    panel: colourPanel,
+    sheetGrid: colourSheetGrid,
+    selectSwatch,
+  } = colourControlConfig;
+  focusColourControl = () => colourControl.focus();
   controls.append(fontControl, colourControl);
 
   const panelWrap = createTag('div', { class: 'me-panel' });
@@ -1024,7 +1033,6 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
     colourControl.setAttribute('aria-expanded', String(openPanel === 'colour'));
     fontSheet.onPanelChange();
     colourSheet.onPanelChange();
-
   });
   panelObserver.observe(root, { attributes: true, attributeFilter: ['data-me-panel'] });
 
@@ -1447,6 +1455,29 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
     return { root, updateCentre: () => {} };
   }
 
+  let activeIndex = 0;
+  let position = 0;
+  let velocityCardsPerMs = 0;
+  let rafHandle = null;
+  let moveSettleTimer = null;
+  let moving = false;
+  let pendingIndex = null;
+  let commandedPosition = 0;
+
+  let pointerDown = false;
+  let dragLocked = false;
+  let dragging = false;
+  let suppressClick = false;
+  let pointerId = null;
+  let startX = 0;
+  let startY = 0;
+  let startPosition = 0;
+  let lastMoveTs = 0;
+  let lastMovePosition = 0;
+
+  let centreOverride = null;
+  let selectedFont = defaultFont || null;
+
   let cardWidth = 542;
   let cardGap = 48;
   let slideWidth = cardWidth + cardGap;
@@ -1454,7 +1485,8 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
 
   const normalizeIndex = (index) => ((index % total) + total) % total;
   const shortestDistance = (index, pos) => {
-    const wrapped = ((index - pos) % total + total) % total;
+    const offset = (index - pos) % total;
+    const wrapped = (offset + total) % total;
     let delta = wrapped;
     if (delta > total / 2) delta -= total;
     return delta;
@@ -1481,28 +1513,6 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
     arcRadius = slideWidth / Math.sin(ARC_STEP_RAD);
   }
 
-  let activeIndex = 0;
-  let position = 0;
-  let velocityCardsPerMs = 0;
-  let rafId = null;
-  let moveSettleTimer = null;
-  let moving = false;
-  let pendingIndex = null;
-  let commandedPosition = 0;
-
-  let pointerDown = false;
-  let dragLocked = false;
-  let dragging = false;
-  let suppressClick = false;
-  let pointerId = null;
-  let startX = 0;
-  let startY = 0;
-  let startPosition = 0;
-  let lastMoveTs = 0;
-  let lastMovePosition = 0;
-
-  let centreOverride = null;
-  let selectedFont = defaultFont || null;
   const withFont = (entry) => (selectedFont ? { ...entry, font: selectedFont } : entry);
 
   if (isReducedMotion()) {
@@ -1603,10 +1613,21 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
     applyRoleClasses();
   }
 
+  const requestAsyncAnimationFrame = (callback) => {
+    const handle = { cancelled: false, id: 0 };
+    handle.id = requestAnimationFrame((ts) => {
+      Promise.resolve().then(() => {
+        if (!handle.cancelled) callback(ts);
+      });
+    });
+    return handle;
+  };
+
   function cancelSnapAnimation() {
-    if (rafId) {
-      cancelAnimationFrame(rafId);
-      rafId = null;
+    if (rafHandle) {
+      rafHandle.cancelled = true;
+      cancelAnimationFrame(rafHandle.id);
+      rafHandle = null;
     }
   }
 
@@ -1644,9 +1665,9 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
       lastMoveTs = ts;
       renderArcFrame();
       if (t < 1) {
-        rafId = requestAnimationFrame(step);
+        rafHandle = requestAsyncAnimationFrame(step);
       } else {
-        rafId = null;
+        rafHandle = null;
         position = targetPosition;
         velocityCardsPerMs = 0;
         renderArcFrame();
@@ -1654,7 +1675,7 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
       }
     };
 
-    rafId = requestAnimationFrame(step);
+    rafHandle = requestAsyncAnimationFrame(step);
   }
 
   function snapTo(index, sourceVelocityCardsPerSec = 0) {
@@ -1678,7 +1699,10 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
 
     const cardsToTravel = Math.max(1, Math.abs(deltaCards));
     const velocityExtra = Math.min(220, Math.abs(sourceVelocityCardsPerSec) * 35);
-    const duration = Math.min(SNAP_MAX_MS, SNAP_BASE_MS + ((cardsToTravel - 1) * 180) + velocityExtra);
+    const duration = Math.min(
+      SNAP_MAX_MS,
+      SNAP_BASE_MS + ((cardsToTravel - 1) * 180) + velocityExtra,
+    );
     pendingIndex = snappedIndex;
     setMoving(true);
     applyRoleClasses();
@@ -1691,7 +1715,9 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
   }
 
   function snapBy(step, sourceVelocityCardsPerSec = 0) {
-    const normalizedStep = step >= 0 ? Math.max(1, Math.round(step)) : Math.min(-1, Math.round(step));
+    const normalizedStep = step >= 0
+      ? Math.max(1, Math.round(step))
+      : Math.min(-1, Math.round(step));
     const snappedIndex = normalizeIndex(activeIndex + normalizedStep);
     commitActive(snappedIndex);
 
@@ -1711,7 +1737,10 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
 
     const cardsToTravel = Math.max(1, Math.abs(normalizedStep));
     const velocityExtra = Math.min(220, Math.abs(sourceVelocityCardsPerSec) * 35);
-    const duration = Math.min(SNAP_MAX_MS, SNAP_BASE_MS + ((cardsToTravel - 1) * 180) + velocityExtra);
+    const duration = Math.min(
+      SNAP_MAX_MS,
+      SNAP_BASE_MS + ((cardsToTravel - 1) * 180) + velocityExtra,
+    );
     pendingIndex = snappedIndex;
     setMoving(true);
     applyRoleClasses();
@@ -1962,7 +1991,6 @@ export default async function createMiniEditorWidget(config = {}) {
   }
 
   const { cardSet } = backgrounds;
-  const decoCount = backgrounds.decoCount ?? DECO_CARD_COUNT;
 
   // always-open-inline (the modal) starts with the font panel open and
   // keeps one of font/colour open at all times — see buildFontControl /
@@ -1976,7 +2004,15 @@ export default async function createMiniEditorWidget(config = {}) {
   const {
     widget, useQuote, getContentModel, onFontOrColourChange, setDecoChainTarget,
     destroy: destroyWidget,
-  } = await buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode, decorationsEnabled);
+  } = await buildWidget(
+    root,
+    a11y,
+    cardSet,
+    fontOptions,
+    topActions,
+    panelMode,
+    decorationsEnabled,
+  );
   stage.append(widget);
 
   let decorations;
@@ -2038,7 +2074,6 @@ export default async function createMiniEditorWidget(config = {}) {
         decoCard3.classList.remove('hidden');
         decoCard5.classList.remove('hidden');
         decoCard7.classList.remove('hidden');
-
       }
     };
 

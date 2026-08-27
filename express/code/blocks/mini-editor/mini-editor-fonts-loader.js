@@ -91,20 +91,26 @@ function familyToLabel(family) {
   return FAMILY_TO_STYLE_TAG[family] || familySlugToLabel(family);
 }
 
+function getTypekitEntries() {
+  const configEntries = window.Typekit?.config?.fc;
+  if (Array.isArray(configEntries) && configEntries.length) {
+    return configEntries;
+  }
+
+  return [];
+}
+
 /**
  * Reads the fonts the loaded Typekit kit actually exposes and turns them
  * into option entries, instead of a hand-authored list that can silently
  * drift from whatever the kit (ADOBE_FONTS_KIT_ID) actually contains.
  *
  * The font list lives at `window.Typekit.config.fc` — verified live against
- * ADOBE_FONTS_KIT_ID (kit `bxg0yug`) in a real browser: `window.Typekit.fonts`
- * is just an array of numeric font ids, and `window.Typekit.fonts.fonts`
- * (what this used to read) doesn't exist at all, so it always silently fell
- * through to FALLBACK_FONT_OPTIONS. `config.fc` is the array that actually
- * has one entry per loaded font, each `{ family, descriptors: { weight,
- * style, stretch, display, variable, ... } }` — family is both the slug and
- * the exact CSS font-family name Typekit registered (confirmed via
- * document.fonts).
+ * ADOBE_FONTS_KIT_ID (kit `bxg0yug`) in a real browser. `config.fc` is the
+ * array that actually has one entry per loaded font, each `{ family,
+ * descriptors: { weight, style, stretch, display, variable, ... } }` —
+ * family is both the slug and the exact CSS font-family name Typekit
+ * registered (confirmed via document.fonts).
  *
  * Variants of the same family (weight/style/stretch) collapse into one
  * option that offers italic/bold/non-normal-stretch if any variant of that
@@ -112,8 +118,8 @@ function familyToLabel(family) {
  * load or exposes nothing, so the UI still has font choices to show.
  */
 function buildFontOptions() {
-  const entries = window.Typekit?.config?.fc;
-  if (!Array.isArray(entries) || !entries.length) return FALLBACK_FONT_OPTIONS;
+  const entries = getTypekitEntries();
+  if (!entries.length) return FALLBACK_FONT_OPTIONS;
 
   const byFamily = new Map();
   entries.forEach(({ family, descriptors }) => {
