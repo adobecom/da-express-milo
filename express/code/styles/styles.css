@@ -27,6 +27,21 @@
   src: local('Trebuchet MS'), local('TrebuchetMS'), local('Arial'), local('Helvetica');
 }
 
+/* 600-weight fallback: browsers resolve local Trebuchet MS/Arial to their bold face at this
+   weight, so size-adjust is recalculated against that wider glyph set to match Adobe Clean
+   600's own metrics; ascent/descent stay the same since Adobe Clean's vertical metrics don't
+   change across weights */
+@font-face {
+  font-family: 'adobe-clean-fallback';
+  font-display: swap;
+  size-adjust: 89.1%;
+  font-weight: 600;
+  ascent-override: 95%;
+  descent-override: 25%;
+  line-gap-override: 0%;
+  src: local('Trebuchet MS Bold'), local('TrebuchetMS Bold'), local('Arial Bold'), local('Helvetica Bold');
+}
+
 /* Arabic fallback chain: Trebuchet MS has no Arabic glyph coverage, so use Arial first */
 @font-face {
   font-family: 'adobe-clean-fallback-ar';
@@ -35,7 +50,8 @@
   ascent-override: 88.67%;
   descent-override: 51.75%;
   line-gap-override: 0%;
-  src: local('Arial'), local('Helvetica');
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  src: local('Arial Bold'), local('Helvetica Bold');
 }
 
 @font-face {
@@ -46,7 +62,8 @@
   ascent-override: 88.67%;
   descent-override: 51.75%;
   line-gap-override: 0%;
-  src: local('Arial'), local('Helvetica');
+  unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF;
+  src: local('Arial Bold'), local('Helvetica Bold');
 }
 
 :root {
@@ -514,7 +531,7 @@ body[data-device="mobile"] {
 }
 
 :root:lang(ar) {
-  --body-font-family: adobe-clean-arabic, 'Adobe Clean', adobe-clean, adobe-arabic, myriad-arabic, 'adobe-clean-fallback-ar', 'Arial', sans-serif
+  --body-font-family: adobe-clean-arabic, 'Adobe Clean', adobe-clean, adobe-arabic, myriad-arabic, 'adobe-clean-fallback-ar', 'adobe-clean-fallback', 'Arial', sans-serif
 }
 
 :is(p):lang(ja) {
