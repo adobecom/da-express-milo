@@ -1104,7 +1104,10 @@ sp-theme {
 .me-sheet-grid--colour {
   grid-auto-flow: column;
   grid-template-rows: repeat(2, 46px);
-  grid-auto-columns: 46px;
+  /* Let sparse swatch sets expand across the available width, while still
+     preserving a minimum tap-target column and horizontal scroll for larger
+     sets. */
+  grid-auto-columns: minmax(46px, 1fr);
   overflow-x: auto;
   padding-bottom: var(--spacing-100);
   scrollbar-width: none;
