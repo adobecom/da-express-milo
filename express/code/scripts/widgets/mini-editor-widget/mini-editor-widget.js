@@ -1872,6 +1872,15 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
     e.stopPropagation();
   }, true);
 
+  // buildArcCarousel computes geometry once before this root is inserted into
+  // the live DOM. Re-sync on the next frame (after insertion) so CSS custom
+  // properties inherited from the host (.mini-editor) are actually resolved —
+  // especially the mobile --me-arc-card-w/--me-arc-track-gap tokens.
+  requestAnimationFrame(() => {
+    syncGeometry();
+    renderArcFrame();
+  });
+
   const onResize = () => {
     syncGeometry();
     renderArcFrame();

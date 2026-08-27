@@ -167,7 +167,7 @@
        --me-arc-card-w — see .me-carousel-mode .mini-editor-widget. */
     --me-arc-card-w: 327px;
     --me-arc-card-h: 270px;
-    --me-arc-track-gap: 24px;
+    --me-arc-track-gap: 32px;
     --me-arc-origin-y: 2544px;
     --me-arc-extra-h: 50px;
     /* Per feedback: the gap between the carousel card and the font/colour
