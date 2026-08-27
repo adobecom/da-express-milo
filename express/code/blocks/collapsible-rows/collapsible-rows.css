@@ -14,6 +14,11 @@
     width: 92%;
 }
 
+.collapsible-row-wrapper--mini-editor {
+    box-shadow: none;
+    background: transparent;
+}
+
 .collapsible-rows {
     display: flex;
     flex-direction: column;
@@ -33,6 +38,16 @@
     justify-content: center;
 }
 
+.collapsible-row-accordion--mini-editor {
+    gap: var(--spacing-300);
+    padding: var(--spacing-300, 16px);
+    border: 1px solid rgb(0 0 0 / 5%);
+    border-left: 1px solid rgb(0 0 0 / 5%);
+    border-radius: var(--spacing-300, 16px);
+    background: #f8f8f8;
+    justify-content: flex-start;
+}
+
 .collapsible-row-accordion:focus-visible {
     outline: none;
     box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-info-accent);
@@ -43,6 +58,7 @@
     text-align: left;
     color: var(--color-gray-900);
 }
+
 .collapsible-row-header:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) {
     font-size: var(--body-font-size-m);
     font-weight: 400;
@@ -54,6 +70,11 @@
     text-align: left;
     color: var(--color-gray-700-variant);
 }
+
+.collapsible-row-sub-header.collapsible-row-sub-header--mini-editor {
+    padding-top: 0;
+}
+
 .collapsible-row-sub-header:not([class*='heading-']):not([class*='body-']):not([class*='detail-']),
 main .collapsible-row-sub-header:not([class*='heading-']):not([class*='body-']):not([class*='detail-']) p {
     font-size: var(--body-font-size-m);
@@ -81,27 +102,33 @@ main .section .collapsible-row-sub-header p:last-of-type {
   margin-top: var(--spacing-300);
 }
 
+.collapsible-row-actions--mini-editor {
+    margin-top: 0;
+}
+
 .collapsible-row-action {
   display: inline-flex;
   align-items: center;
+    justify-content: center;
   gap: var(--spacing-80);
   box-sizing: border-box;
   height: 32px;
+    min-width: 72px;
   padding: 7px 16px 7px 14px;
   border: none;
   border-radius: 24px;
-  font-family: var(--body-font-family);
-  font-size: 14px;
-  font-weight: var(--heading-font-weight-medium, 700);
-  line-height: 1;
+    font-family: var(--heading-font-family);
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 20px;
   white-space: nowrap;
   cursor: pointer;
   transition: background-color 0.15s ease;
 }
 
 .collapsible-row-action img {
-  width: 16px;
-  height: 16px;
+    width: 16px;
+    height: 16px;
 }
 
 .collapsible-row-action--copy {
@@ -132,6 +159,14 @@ main .section .collapsible-row-sub-header p:last-of-type {
    accessible name still comes from the (now sr-only) label text, so this
    is a visual change only — see buildQuoteActions in collapsible-rows.js. */
 @media (max-width: 767px) {
+    .collapsible-row-accordion--mini-editor {
+        gap: var(--spacing-200);
+    }
+
+    .collapsible-row-actions--mini-editor {
+        flex-wrap: wrap;
+    }
+
   .collapsible-row-action--copy span {
     position: absolute;
     width: 1px;
@@ -313,6 +348,9 @@ main .section .collapsible-row-sub-header p:last-of-type {
         margin-left: 0;
         margin-right: 0;
         padding: var(--spacing-400) var(--spacing-300);
+    }
+    .collapsible-rows .collapsible-row-accordion.collapsible-row-accordion--mini-editor {
+        padding: var(--spacing-300, 16px);
     }
     .collapsible-rows .collapsible-row-toggle-btn {
         width: fit-content;

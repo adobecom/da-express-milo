@@ -24,6 +24,10 @@ describe('collapsible-rows quote actions ("Copy quote" / "Create a design")', ()
     const block = document.querySelector('.collapsible-rows');
     await decorate(block);
     expect(block.querySelector('.collapsible-row-actions')).to.not.exist;
+    expect(block.querySelector('.collapsible-row-actions--mini-editor')).to.not.exist;
+    expect(block.querySelector('.collapsible-row-accordion--mini-editor')).to.not.exist;
+    expect(block.querySelector('.collapsible-row-header--mini-editor')).to.not.exist;
+    expect(block.querySelector('.collapsible-row-sub-header--mini-editor')).to.not.exist;
   });
 
   describe('with a mini-editor block present', () => {
@@ -38,12 +42,22 @@ describe('collapsible-rows quote actions ("Copy quote" / "Create a design")', ()
       await decorate(block);
     });
 
-    it('renders a Copy quote and Create a design button per row', () => {
+    it('renders a Copy quote and Create a design button per row with mini-editor modifiers', () => {
       const rows = block.querySelectorAll('.collapsible-row-actions');
       expect(rows).to.have.length(3);
+      expect(block.querySelectorAll('.collapsible-row-actions--mini-editor')).to.have.length(3);
+      expect(block.querySelectorAll('.collapsible-row-accordion--mini-editor')).to.have.length(3);
+      expect(block.querySelectorAll('.collapsible-row-header--mini-editor')).to.have.length(3);
+      expect(block.querySelectorAll('.collapsible-row-sub-header--mini-editor')).to.have.length(3);
+
       rows.forEach((actions) => {
+        expect(actions.classList.contains('collapsible-row-actions--mini-editor')).to.be.true;
         expect(actions.querySelector('.collapsible-row-action--copy')).to.exist;
         expect(actions.querySelector('.collapsible-row-action--design')).to.exist;
+        const accordion = actions.closest('.collapsible-row-accordion');
+        expect(accordion?.classList.contains('collapsible-row-accordion--mini-editor')).to.be.true;
+        expect(accordion?.querySelector('.collapsible-row-header')?.classList.contains('collapsible-row-header--mini-editor')).to.be.true;
+        expect(accordion?.querySelector('.collapsible-row-sub-header')?.classList.contains('collapsible-row-sub-header--mini-editor')).to.be.true;
       });
     });
 

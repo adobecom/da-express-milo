@@ -26,7 +26,7 @@ const USE_QUOTE_EVENT = 'mini-editor:use-quote';
 function buildQuoteActions(quote, author, hasMiniEditor) {
   if (!hasMiniEditor) return null;
 
-  const actions = createTag('div', { class: 'collapsible-row-actions' });
+  const actions = createTag('div', { class: 'collapsible-row-actions collapsible-row-actions--mini-editor' });
 
   const copyBtn = createTag('button', { type: 'button', class: 'collapsible-row-action collapsible-row-action--copy' }, [
     getIconElementDeprecated('copy-quote'),
@@ -163,7 +163,13 @@ function buildTableLayout(block, typographyClasses = {}, hasMiniEditor = false) 
       subHeaderEl.textContent.trim(),
       hasMiniEditor,
     );
-    if (quoteActions) subHeaderAccordion.append(quoteActions);
+    if (quoteActions) {
+      rowWrapper.classList.add('collapsible-row-wrapper--mini-editor');
+      subHeaderAccordion.classList.add('collapsible-row-accordion--mini-editor');
+      headerEl.classList.add('collapsible-row-header--mini-editor');
+      subHeaderEl.classList.add('collapsible-row-sub-header--mini-editor');
+      subHeaderAccordion.append(quoteActions);
+    }
 
     headerEl.addEventListener('click', () => {
       headerAccordion.classList.toggle('rounded-corners');
@@ -235,7 +241,12 @@ function buildOriginalLayout(
       subHeaderEl.textContent.trim(),
       hasMiniEditor,
     );
-    if (quoteActions) accordion.append(quoteActions);
+    if (quoteActions) {
+      accordion.classList.add('collapsible-row-accordion--mini-editor');
+      headerEl.classList.add('collapsible-row-header--mini-editor');
+      subHeaderEl.classList.add('collapsible-row-sub-header--mini-editor');
+      accordion.append(quoteActions);
+    }
   });
 
   const toggleButton = createTag('a', { class: 'collapsible-row-toggle-btn button' });
