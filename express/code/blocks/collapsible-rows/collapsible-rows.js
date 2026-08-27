@@ -1,6 +1,7 @@
 import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { isExpressTypographyClass, isMiloTypographyClass } from '../../scripts/typography-utils.js';
 import showCopyToast from '../../scripts/utils/copy-toast.js';
+import trackMiniEditorExport from '../../scripts/utils/mini-editor-analytics.js';
 
 let createTag;
 let getConfig;
@@ -36,6 +37,10 @@ function buildQuoteActions(quote, author, hasMiniEditor) {
     const text = author ? `${quote} — ${author}` : quote;
     try {
       await navigator.clipboard.writeText(text);
+      trackMiniEditorExport({
+        exportMethod: 'copy-clipboard',
+        uiLocation: 'seo-discover-page-collapsible-row',
+      });
       showCopyToast('Quote copied to clipboard');
     } catch {
       // Clipboard write failed (e.g. permissions) — no toast, nothing else to do.
@@ -46,6 +51,7 @@ function buildQuoteActions(quote, author, hasMiniEditor) {
     getIconElementDeprecated('create-design'),
     createTag('span', {}, ['Create a design']),
   ]);
+  designBtn.setAttribute('daa-ll', 'Create a design');
   designBtn.addEventListener('click', () => {
     document.dispatchEvent(new CustomEvent(USE_QUOTE_EVENT, { detail: { quote, author } }));
   });

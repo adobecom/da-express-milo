@@ -386,6 +386,7 @@ function buildFontButton(opt, index, onPick) {
     'aria-label': opt.label,
   });
   btn.textContent = opt.label;
+  btn.setAttribute('daa-ll', `Select font style`);
   btn.addEventListener('click', () => onPick(opt));
   return btn;
 }
@@ -396,6 +397,7 @@ function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOpti
     tabIndex: 9,
     class: 'me-control me-control--font',
     'aria-expanded': 'false',
+    'daa-ll': 'Font Control',
   });
   const pill = createTag('span', { class: 'me-pill', 'aria-label': fontOptions[0].label });
   pill.textContent = fontOptions[0].label;
@@ -559,6 +561,7 @@ function buildSwatchButton(card, index, onPick) {
     style: `background-image:url("${card.bg}")`,
   });
   btn.append(fill);
+  btn.setAttribute('daa-ll', `Select background color`);
   btn.addEventListener('click', () => onPick(card));
   return btn;
 }
@@ -569,6 +572,7 @@ function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
     class: 'me-control me-control--colour',
     'aria-expanded': 'false',
     tabIndex: 10,
+    'daa-ll': 'Background control',
   });
   const swatch = createTag('span', { class: 'me-swatch' });
   // "colour" drops on mobile (label reads "Background" only there) — kept
@@ -936,7 +940,11 @@ async function buildWidget(
   const doCopy = async () => {
     // currentQuote (not quoteEl.textContent) — the full quote, even when
     // the visible text is truncated (see renderQuote).
-    const ok = await a11y.copyQuoteToClipboard(currentQuote, authorEl.textContent);
+    const ok = await a11y.copyQuoteToClipboard(
+      currentQuote,
+      authorEl.textContent,
+      'seo-discover-page-center-quote',
+    );
     if (ok) {
       quoteWrap.classList.add('is-copied');
       setTimeout(() => quoteWrap.classList.remove('is-copied'), 1200);
@@ -1154,6 +1162,7 @@ function buildDecoCard(a11y, entry, useQuote) {
     class: 'me-deco-use',
     'aria-label': `Use this quote: ${attribution}`,
   });
+  useBtn.setAttribute('daa-ll', 'Use this quote');
   useBtn.textContent = 'Use this quote';
   useBtn.addEventListener('click', (e) => {
     useQuote(entry);
@@ -1179,7 +1188,11 @@ function buildDecoCard(a11y, entry, useQuote) {
     'aria-label': `Copy quote: ${attribution}`,
   }, [copyIcon]);
   copyBtn.addEventListener('click', async (e) => {
-    const ok = await a11y.copyQuoteToClipboard(quote, author);
+    const ok = await a11y.copyQuoteToClipboard(
+      quote,
+      author,
+      'seo-discover-page-decoration-card',
+    );
     if (ok) {
       copyBtn.classList.add('is-copied');
       setTimeout(() => copyBtn.classList.remove('is-copied'), 1200);
@@ -1346,7 +1359,11 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
   let currentQuote = '';
   let currentAuthor = '';
   const doCopy = async () => {
-    const ok = await a11y.copyQuoteToClipboard(currentQuote, currentAuthor);
+    const ok = await a11y.copyQuoteToClipboard(
+      currentQuote,
+      currentAuthor,
+      'seo-discover-page-center-quote',
+    );
     if (ok) {
       quoteWrap.classList.add('is-copied');
       setTimeout(() => quoteWrap.classList.remove('is-copied'), 1200);

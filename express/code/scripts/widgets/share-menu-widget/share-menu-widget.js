@@ -64,6 +64,7 @@ export default async function createShareMenuWidget({
   feedback,
   getContent,
   notify,
+  onActionSelect,
 } = {}) {
   if (!trigger || !heading || !actions.length || typeof getContent !== 'function') {
     throw new Error('Share menu requires a trigger, heading, actions, and getContent');
@@ -196,6 +197,7 @@ export default async function createShareMenuWidget({
     const action = actions.find(({ value }) => value === item.getAttribute('value'));
     if (!action) return;
     event.stopPropagation();
+    onActionSelect?.({ action, event });
     const dismissOnSelect = typeof action.dismissOnSelect === 'function'
       ? action.dismissOnSelect()
       : action.dismissOnSelect !== false;

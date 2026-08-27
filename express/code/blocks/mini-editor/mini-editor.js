@@ -8,6 +8,7 @@ import {
 } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import showCopyToast from '../../scripts/utils/copy-toast.js';
 import MiniEditorCardExporter from '../../scripts/utils/mini-editor-card-export.js';
+import trackMiniEditorExport from '../../scripts/utils/mini-editor-analytics.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 import createMiniEditorWidget from '../../scripts/widgets/mini-editor-widget/mini-editor-widget.js';
 import createMiniEditorModal from '../../scripts/widgets/mini-editor-modal/mini-editor-modal.js';
@@ -33,10 +34,14 @@ let modalPromise = null;
  * the shared bottom toast on success, per Figma node 0-19315 — every copy
  * action on the page uses this same toast, not just the mini-editor's own.
  */
-async function copyQuoteToClipboard(quote, author) {
+async function copyQuoteToClipboard(quote, author, uiLocation = 'seo-discover-page') {
   const text = author ? `${quote} — ${author}` : quote;
   try {
     await navigator.clipboard.writeText(text);
+    trackMiniEditorExport({
+      exportMethod: 'copy-clipboard',
+      uiLocation,
+    });
     showCopyToast('Quote copied to clipboard');
     return true;
   } catch {
@@ -57,6 +62,10 @@ async function downloadCard(block, editor) {
     const model = editor?.getContentModel();
     if (!model) throw new Error('Mini-editor content model is unavailable');
     await MiniEditorCardExporter.download(model);
+    trackMiniEditorExport({
+      exportMethod: 'download',
+      uiLocation: 'seo-discover-page',
+    });
   } catch (error) {
     window.lana?.log(`Mini-editor download failed: ${error?.message || error}`, {
       tags: 'mini-editor,download',
@@ -212,6 +221,7 @@ function decorateCta(header) {
   cta?.classList.add('button');
   cta?.classList.add('accent');
   cta?.parentElement?.classList.add('button-container');
+  cta.setAttribute('daa-ll', cta.text);
 }
 
 function buildLogo() {
@@ -368,6 +378,27 @@ export default async function init(block) {
                 dismissOnSelect: () => window.matchMedia('(pointer: coarse)').matches,
               },
             ],
+            onActionSelect: ({ action }) => {
+              if (action?.value === 'copy') {
+                trackMiniEditorExport({
+                  exportMethod: 'copy-clipboard',
+                  uiLocation: 'seo-discover-page-share-menu-copy-image',
+                });
+                return;
+              }
+
+              const exportMethodByAction = {
+                whatsapp: 'direct-to-whatsapp',
+                more: 'more-options',
+              };
+              const exportMethod = exportMethodByAction[action?.value];
+              if (!exportMethod) return;
+
+              trackMiniEditorExport({
+                exportMethod,
+                uiLocation: 'seo-discover-page',
+              });
+            },
             feedback: {
               failed: {
                 key: 'mini-editor-share-failed',
