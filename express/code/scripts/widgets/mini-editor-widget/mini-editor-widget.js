@@ -116,26 +116,15 @@ function isMobileSheetWidth() {
   return window.matchMedia('(width <= 767px)').matches;
 }
 
-// On a touch/coarse-pointer device (tablet, phone), use the shorter of
-// width/height rather than window.innerWidth alone — a physical device's
-// short axis is orientation-independent, so this keeps the same tablet from
-// flipping into the desktop zig-zag layout just because rotating to
-// landscape made innerWidth exceed the breakpoint. Plain mouse/desktop
-// windows don't have a fixed physical "short side" (resizing changes both
-// dimensions independently), so they keep the simple width-only check —
-// otherwise a short-but-wide desktop browser window would wrongly be
-// treated as a tablet. Checked live (not cached), same rationale as
-// isMobileSheetWidth above — this also gates whether the keyboard-only
-// "Skip quote suggestions" CTA (only meaningful for reaching the desktop
-// zig-zag deco cards, which don't exist in arc/carousel mode) is built at
-// all, so it must react to the same breakpoint the carousel mode itself does.
-const TABLET_BREAKPOINT = 1199;
+// Carousel mode now follows a strict width breakpoint for every device type:
+// <=1200 shows arc carousel, >1200 shows the desktop card/decorations view.
+// Checked live (not cached), same rationale as isMobileSheetWidth above —
+// this also gates whether the keyboard-only "Skip quote suggestions" CTA
+// (only meaningful for reaching the desktop zig-zag deco cards, which don't
+// exist in arc/carousel mode) is built at all.
+const TABLET_BREAKPOINT = 1200;
 function isSmallViewport() {
-  const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
-  const size = isTouchDevice
-    ? Math.min(window.innerWidth, window.innerHeight)
-    : window.innerWidth;
-  return size <= TABLET_BREAKPOINT;
+  return window.innerWidth <= TABLET_BREAKPOINT;
 }
 
 function isReducedMotion() {
@@ -2024,7 +2013,7 @@ export default async function createMiniEditorWidget(config = {}) {
     // still in the tab order. Hide (not just visually clip) any card whose
     // box no longer fits so it also drops out of the tab order, re-checked
     // on first load and on every resize since it depends on viewport width,
-    // not just the >=1200px/<=1199px carousel-mode switch below.
+    // not just the >1200px/<=1200px carousel-mode switch below.
     const decoCard1 = decorations.querySelector('.me-deco--1');
     const decoCard3 = decorations.querySelector('.me-deco--3');
     const decoCard5 = decorations.querySelector('.me-deco--5');

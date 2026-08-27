@@ -72,7 +72,12 @@ describe('mini-editor-widget', () => {
       quote: 'Quote number 0',
       author: 'Author 0',
       backgroundUrl: '/img/image0.jpg',
-      font: { family: fontOptions[0].font, style: 'normal', weight: 'normal' },
+      font: {
+        family: fontOptions[0].font,
+        style: 'normal',
+        weight: 'normal',
+        stretch: 'normal',
+      },
     });
 
     model.quote = 'Changed outside';
@@ -122,6 +127,7 @@ describe('mini-editor-widget', () => {
       family: fontOptions[1].font,
       style: 'italic',
       weight: 'normal',
+      stretch: 'normal',
     });
   });
 
@@ -307,6 +313,27 @@ describe('mini-editor-widget', () => {
       editor.syncViewportMode();
       expect(root.classList.contains('me-carousel-mode')).to.be.true;
       Object.defineProperty(window, 'innerWidth', { value: original, configurable: true });
+      editor.syncViewportMode();
+    });
+
+    it('uses carousel mode at exactly 1200px and desktop mode above it', async () => {
+      const { root, editor } = await mount();
+      const original = window.innerWidth;
+      const originalHeight = window.innerHeight;
+
+      Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
+      editor.syncViewportMode();
+      expect(root.classList.contains('me-carousel-mode')).to.be.true;
+
+      // Touch-tablet-like landscape dimensions should still switch to
+      // desktop mode once width exceeds 1200.
+      Object.defineProperty(window, 'innerHeight', { value: 700, configurable: true });
+      Object.defineProperty(window, 'innerWidth', { value: 1201, configurable: true });
+      editor.syncViewportMode();
+      expect(root.classList.contains('me-carousel-mode')).to.be.false;
+
+      Object.defineProperty(window, 'innerWidth', { value: original, configurable: true });
+      Object.defineProperty(window, 'innerHeight', { value: originalHeight, configurable: true });
       editor.syncViewportMode();
     });
 

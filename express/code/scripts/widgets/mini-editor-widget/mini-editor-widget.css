@@ -93,6 +93,16 @@
   pointer-events: auto;
 }
 
+/* Tablet card view (coarse pointer) keeps actions visible even above 1200px;
+   desktop/fine pointer stays hover-only via the rule above. */
+@media (width > 1200px) and (pointer: coarse) {
+  .mini-editor-widget .me-actions,
+  .me-modal-card-root .me-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
 .me-action {
   display: flex;
   align-items: center;
@@ -121,13 +131,13 @@
 }
 
 /* Modal action bar: desktop shows on hover (over card), tablet/mobile always visible.
-   On desktop (>1199px), using me-card:hover selector so the bar stays visible
+  On desktop (>1200px), using me-card:hover selector so the bar stays visible
    while moving pointer from card to buttons. Tablet/mobile always shows with
    carousel-mode styling. */
 
-/* Desktop (>1199px): action bar hidden by default, visible on hover over card
+/* Desktop (>1200px): action bar hidden by default, visible on hover over card
    (same as regular widget) */
-@media (width > 1199px) {
+@media (width > 1200px) {
   .me-modal-card-root .me-card:hover .me-actions,
   .me-modal-card-root .me-card:focus-within .me-actions {
     opacity: 1;
@@ -135,10 +145,10 @@
   }
 }
 
-/* Tablet/mobile (<=1199px): modal action buttons always visible with same
+/* Tablet/mobile (<=1200px): modal action buttons always visible with same
    styling as carousel mode, per Figma node 54:7883 ("Primary actions",
    tablet/mobile) — smaller/lighter than desktop spec. */
-@media (width <= 1199px) {
+@media (width <= 1200px) {
   .me-modal-card-root .me-actions {
     opacity: 1;
     pointer-events: auto;
@@ -837,16 +847,18 @@ sp-theme {
   display: contents;
 }
 
-.me-carousel-mode .mini-editor-decorations {
-  display: none;
-}
+@media (max-width: 1200px) {
+  .me-carousel-mode .mini-editor-decorations {
+    display: none;
+  }
 
-.me-carousel-mode .me-card {
-  display: none;
-}
+  .me-carousel-mode .me-card {
+    display: none;
+  }
 
-.me-carousel-mode .me-arc {
-  display: flex;
+  .me-carousel-mode .me-arc {
+    display: flex;
+  }
 }
 
 /* Touch devices have no hover, so the action bar stays always-visible here
@@ -857,24 +869,26 @@ sp-theme {
    tablet/mobile) the bar itself is smaller/lighter here than the desktop
    spec (Figma 1099-5050) — different background opacity, thinner border,
    smaller radius/gap/padding — not just always-visible. */
-.me-carousel-mode .me-actions {
-  opacity: 1;
-  pointer-events: auto;
-  gap: var(--spacing-80);
-  padding: 2px;
-  border-radius: var(--corner-radius-80);
-  background: rgb(255 255 255 / 51%);
-  border-color: rgb(255 255 255 / 14%);
-}
+@media (max-width: 1200px) {
+  .me-carousel-mode .me-actions {
+    opacity: 1;
+    pointer-events: auto;
+    gap: var(--spacing-80);
+    padding: 2px;
+    border-radius: var(--corner-radius-80);
+    background: rgb(255 255 255 / 51%);
+    border-color: rgb(255 255 255 / 14%);
+  }
 
-.me-carousel-mode .me-action {
-  width: 24px;
-  height: 24px;
-  padding: 4.5px;
-}
+  .me-carousel-mode .me-action {
+    width: 24px;
+    height: 24px;
+    padding: 4.5px;
+  }
 
-.me-carousel-mode .me-action-icon {
-  --mod-icon-size: 15px;
+  .me-carousel-mode .me-action-icon {
+    --mod-icon-size: 15px;
+  }
 }
 
 /* Hides the action bar for the ~1s a carousel navigation is mid-transition
@@ -901,8 +915,45 @@ sp-theme {
    carousel were rendering wider than the visible editor card above them.
    Tying the widget's width to the same variable keeps them in lockstep at
    every breakpoint instead of matching by coincidence at just one. */
-.me-carousel-mode .mini-editor-widget {
-  max-width: var(--me-arc-card-w, 542px);
+@media (max-width: 1200px) {
+  .me-carousel-mode .mini-editor-widget {
+    max-width: var(--me-arc-card-w, 542px);
+  }
+}
+
+/* Defensive desktop guard: if .me-carousel-mode ever lingers on a wide
+   viewport (e.g. after a stale class/state mismatch), force the desktop
+   card+deco view back on for >1200px. */
+@media (width > 1200px) {
+  .me-carousel-mode .mini-editor-decorations {
+    display: block;
+  }
+
+  .me-carousel-mode .me-card {
+    display: flex;
+  }
+
+  .me-carousel-mode .me-arc {
+    display: none;
+  }
+
+  .me-carousel-mode .me-actions {
+    gap: var(--spacing-80);
+    padding: var(--spacing-80);
+    border-radius: 16px;
+    background: var(--transparent-white-400);
+    border-color: var(--transparent-white-500);
+  }
+
+  .me-carousel-mode .me-action {
+    width: 32px;
+    height: 32px;
+    padding: var(--spacing-80);
+  }
+
+  .me-carousel-mode .me-action-icon {
+    --mod-icon-size: 20px;
+  }
 }
 
 .me-arc-card {
