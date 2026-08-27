@@ -27,6 +27,15 @@
   src: local('Trebuchet MS'), local('TrebuchetMS'), local('Arial'), local('Helvetica');
 }
 
+/* Arabic fallback chain: Trebuchet MS has no Arabic glyph coverage, so use Arial first */
+@font-face {
+  font-family: 'adobe-clean-fallback-ar';
+  font-display: swap;
+  size-adjust: 104%;
+  line-gap-override: 0%;
+  src: local('Arial'), local('Helvetica');
+}
+
 :root {
   --color-white: #fff;
 
@@ -137,7 +146,7 @@
 
   --heading-font-size-ml : 2rem;
   /* 32px */
- 
+
   --block-sm-max-width: 375px;
   --block-md-max-width: 830px;
   --block-lg-max-width: 1024px;
@@ -167,7 +176,7 @@
   --SN-Radius-corner-radius-full: 2000px;
 
   --S2-Buttons-Gen-AI: linear-gradient(96deg, #D73220 0%, #D92361 33%, #7155FA 100%);
- 
+
   --S2-Buttons-Premium: linear-gradient(95.85deg, #b539c8, #7155fa 66%, #3b63fb);
   --S2-Buttons-Premium-Hover: linear-gradient(96deg, #9C28AF 0%, #6338EE 66%, #274DEA 100%);
   --S2-Buttons-Premium-Down: linear-gradient(96deg, #871B9A 0%, #5424DB 66%, #1D3ECF 100%);
@@ -203,7 +212,7 @@
 
   /* ===== EXPRESS TYPOGRAPHY SYSTEM (ax- namespace) ===== */
   /* Based on Figma design system values */
-  
+
   /* Express Heading Typography Variables */
   --ax-heading-xxxl-size: 44px;
   --ax-heading-xxxl-lh: 55px;
@@ -402,7 +411,7 @@
   --Grid-container-padding-side: var(--spacing-300);
   --Grid-grid-gutter: var(--spacing-100);
   --section-padding-xl: var(--spacing-600);
-  
+
 }
 
 @media (min-width: 600px) {
@@ -421,7 +430,7 @@
   :root {
     --ax-grid-margin: var(--spacing-600);
     --ax-grid-gutter: var(--Grid-grid-gutter);
-    
+
     /* Express Typography Desktop Overrides */
     --ax-heading-xxxl-size: 80px;
     --ax-heading-xxxl-lh: 88px;
@@ -502,6 +511,10 @@ body[data-device="mobile"] {
 :root:lang(ja) {
   --body-font-family: adobe-clean-han-japanese, 'Adobe Clean', adobe-clean,
     'Trebuchet MS', sans-serif;
+}
+
+:root:lang(ar) {
+  --body-font-family: adobe-clean-arabic, 'Adobe Clean', adobe-clean, adobe-arabic, myriad-arabic, 'adobe-clean-fallback-ar', 'Arial', sans-serif
 }
 
 :is(p):lang(ja) {
@@ -871,7 +884,7 @@ main a.button.gradient.disabled:any-link {
   background: var(--color-gray-200);
   pointer-events: none;
 }
- 
+
 main a.button>svg {
   float: left;
   display: inline;
@@ -921,7 +934,7 @@ main h5 {
 
 main p, main ul, main ol {
   font-size: var(--body-font-size-xl);
-  line-height: var(--body-line-height); 
+  line-height: var(--body-line-height);
 }
 
 main a:any-link {
@@ -1030,7 +1043,7 @@ main .section.secondary {
 
 
 main .section.panel {
-  margin: 0 var(--spacing-600) var(--spacing-900) var(--spacing-600); 
+  margin: 0 var(--spacing-600) var(--spacing-900) var(--spacing-600);
   padding: var(--spacing-600) var(--spacing-500);
   border-radius: 16px;
   border: 2px solid var(--color-white);
@@ -1071,7 +1084,7 @@ main .section.max-width-900 {
     max-width: 900px;
     margin-inline: auto;
   }
-  
+
 }
 
 /* Align link-list with template container when in modular-search */
