@@ -102,7 +102,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: var(--spacing-300);
+  /* margin-bottom: var(--spacing-300); */
 }
 
 .mini-editor-logo img {
@@ -133,7 +133,7 @@
 }
 
 .mini-editor-header p:has(a.button) {
-  margin-top: var(--spacing-300) !important;
+  margin-top: 6px !important;
 }
 
 /* Matches the "Design with your quote" CTA on the discover page hero
