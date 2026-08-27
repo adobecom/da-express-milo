@@ -374,7 +374,7 @@ main .section .grid-marquee.pricing-page h1 {
     margin: 0;
   }
 
-  .grid-marquee.cta-align-fix .headline a.button {
+  .grid-marquee.cta-alignment .headline a.button {
     padding-top: var(--spacing-100);
   }
 
@@ -448,7 +448,7 @@ main .section .grid-marquee.pricing-page h1 {
     line-height: 23.4px;
   }
 
-  .grid-marquee.cta-align-fix .headline a.button {
+  .grid-marquee.cta-alignment .headline a.button {
     padding-top: var(--spacing-300);
   }
   .grid-marquee .cards-container {
