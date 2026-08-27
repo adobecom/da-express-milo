@@ -834,6 +834,7 @@ main.with-holiday-templates-banner {
 
 .template-x .load-more {
   position: absolute;
+  /* hidden until masonry draws the grid, else it paints over an empty block and shifts */
   display: none;
   flex-direction: column;
   justify-content: flex-end;
