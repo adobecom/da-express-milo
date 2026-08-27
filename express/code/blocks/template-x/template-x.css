@@ -834,10 +834,6 @@ main.with-holiday-templates-banner {
 
 .template-x .load-more {
   position: absolute;
-  /* masonry only distributes cells once the wrapper has a width, which happens
-     after the section is revealed. until then the block has no grid height, so a
-     painted load-more sits pinned mid-viewport and is flung to the bottom when
-     the cells land. keep it out of paint until the grid exists. */
   display: none;
   flex-direction: column;
   justify-content: flex-end;
