@@ -181,23 +181,23 @@
          * `ara`, an Express-only locale that is absent from Milo's libs/utils/locales.js, so
          * this page rendered with an empty header and no footer at all.
          *
-         * Point them at sources that do exist and are Arabic/RTL:
-         *  - the same thin gnav the live /ara/express/ homepage uses
-         *  - mena_ar's federal footer, which is how all six *_ar 404 pages get theirs
+         * Point them at the exact sources the live /ara/express/ homepage already resolves
+         * to, so the 404 page wears the same chrome as the rest of the Arabic site.
          *
          * Set in a classic (parse-time) script so the metas exist before scripts.js — a
          * deferred module — reaches its `getMetadata(...)` checks and fills in the defaults.
          *
-         * The gnav value is deliberately root-relative and the footer value absolute.
-         * decorateMeta() only rewrites metas whose content contains `.hlx.`, `.aem.` or
-         * `/federal/`: the footer needs that rewrite to reach the federal origin, while the
-         * gnav must avoid it (localizeLink would prefix `/express/...` to `/ara/express/...`,
-         * which does not exist).
+         * Both values are root-relative on purpose. decorateMeta() only rewrites metas whose
+         * content contains `.hlx.`, `.aem.` or `/federal/`, so root-relative paths are left
+         * exactly as authored and fetched from the page origin. Do NOT reach for a federal
+         * footer here: `/<locale>/federal/footer/footer` nests ~27 further fragments that get
+         * locale-prefixed to `/ara/federal/footer/fragments/...`, none of which exist, which
+         * renders a footer with every column missing.
          */
         const LOCALE_SHELL_SOURCES = {
           ara: {
-            'gnav-source': { path: '/express/acom-gnav-thin', absolute: false },
-            'footer-source': { path: '/mena_ar/federal/footer/footer', absolute: true },
+            'gnav-source': '/ara/express/acom-gnav-thin',
+            'footer-source': '/ara/express/footer-thin',
           },
         };
 
@@ -205,11 +205,11 @@
           const [, pathLocale] = win.location.pathname.split('/');
           const sources = LOCALE_SHELL_SOURCES[pathLocale];
           if (!sources) return;
-          Object.entries(sources).forEach(([name, { path, absolute }]) => {
+          Object.entries(sources).forEach(([name, path]) => {
             if (document.querySelector(`meta[name="${name}"]`)) return;
             const meta = document.createElement('meta');
             meta.setAttribute('name', name);
-            meta.setAttribute('content', absolute ? `${win.location.origin}${path}` : path);
+            meta.setAttribute('content', path);
             document.head.appendChild(meta);
           });
         }(window));
