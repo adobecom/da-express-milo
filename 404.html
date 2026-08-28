@@ -217,7 +217,14 @@
          *
          * Self-retiring: the probe below succeeds the moment Milo authors the locale's
          * own fragment, after which this is a no-op and the entry can be deleted.
-         * Tracked on MWPW-204684 ("No redirect for ara. Will stay on 404 page.").
+         * Spec reference: MWPW-204684 ("No redirect for ara. Will stay on 404 page.").
+         *
+         * We borrow `fragments/404-body` (the copy) rather than `fragments/404` (a thin
+         * wrapper that adds a background image and nests 404-body). The wrapper's nested
+         * link is authored absolute to www.adobe.com, which `stageDomainsMap` rewrites to
+         * `origin` on branch previews — so the wrapper renders empty everywhere except
+         * stage/prod. 404-body nests nothing, so it renders identically in every
+         * environment and is therefore verifiable on a preview URL before merge.
          */
         const FALLBACK_404_LOCALES = { ara: 'mena_ar' };
 
@@ -232,11 +239,13 @@
 
           const main = document.querySelector('main');
           if (!main) return;
-          const href = `${libs}/${fallbackLocale}/fragments/404#_dnt`;
-          main.append(createTag('div', null, createTag('p', {}, createTag('a', { href }, href))));
 
+          // Resolve loadArea *before* appending: an await between the two would let Milo's
+          // own 404 template append its section first, and loadArea needs `main` intact.
           const { loadArea } = await import(`${libs}/utils/utils.js`);
-          await loadArea(main.lastElementChild);
+          const href = `${libs}/${fallbackLocale}/fragments/404-body#_dnt`;
+          main.append(createTag('div', null, createTag('p', {}, createTag('a', { href }, href))));
+          await loadArea(main);
         };
 
         if (fallbackLocale) {
