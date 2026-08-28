@@ -6,10 +6,13 @@
   text-align: center;
 }
 
-/* Anti-FOUC: hide raw authored rows until the block builds .foreground, so the
-   staged decoration (image removed first, video anchor removed a frame later)
-   never paints the raw anchor text beneath the card image. */
-.grid-marquee:not(:has(> .foreground)) > div {
+/* Anti-FOUC: hide only the raw, un-decorated video source authored under each
+   card face (mp4 link, or MEP-inlined <video> if auto-video-decoration ran
+   first) so it never paints before toCard() removes it. Scoped to the element
+   itself, not gated on .foreground existing, so a JS failure can't leave the
+   whole block - including the authored LCP headline - hidden forever. */
+.grid-marquee > div > div:first-child > p > a[href*=".mp4"],
+.grid-marquee > div > div:first-child > p > video {
   visibility: hidden;
 }
 
@@ -50,6 +53,17 @@ main .section .grid-marquee h1 {
 .grid-marquee .headline a:not(.primaryCTA) {
   background-color: var(--color-black);
   border-color: var(--color-black);
+}
+
+/* adobe-clean-arabic's ascent/descent metrics differ from the Latin body font,
+   so the line-height-based centering used elsewhere pushes Arabic CTA text
+   above the button's vertical midline. Center on the flex box instead, which
+   is font-metric agnostic. */
+:lang(ar) .grid-marquee .headline a.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: normal;
 }
 
 .grid-marquee .background  {
@@ -364,6 +378,10 @@ main .section .grid-marquee.pricing-page h1 {
     margin: 0;
   }
 
+  .grid-marquee.cta-alignment .headline a.button {
+    padding-top: var(--spacing-100);
+  }
+
   .grid-marquee .cards-container {
     gap: 8px;
   }
@@ -433,6 +451,10 @@ main .section .grid-marquee.pricing-page h1 {
     font-size: var(--body-font-size-l);
     border-radius: 50px;
     line-height: 23.4px;
+  }
+
+  .grid-marquee.cta-alignment .headline a.button {
+    padding-top: var(--spacing-300);
   }
   .grid-marquee .cards-container {
     grid-template-columns: repeat(auto-fit, minmax(288px, 1fr));
