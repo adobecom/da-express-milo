@@ -30,7 +30,7 @@
       if (localeMatch) {
         sitemapPath = `/${localeMatch}/express/sitemap.xml`;
       }
-      
+
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -44,7 +44,7 @@
           console.warn('Failed to fetch sitemap:', response.status);
           return;
         }
-        
+
         const xmlText = await response.text();
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
@@ -52,12 +52,12 @@
         if (parseError) {
           return;
         }
-        
+
         const urlElements = xmlDoc.querySelectorAll('url');
         let currentUrlElement = null;
-   
+
         const isLocalRoot = `${sitemapOrigin}/${localeMatch}/` === `${sitemapOrigin}${pathname}`;
-        const rootPage = isLocalRoot ? `${sitemapOrigin}/${localeMatch}/` : `${sitemapOrigin}/`; 
+        const rootPage = isLocalRoot ? `${sitemapOrigin}/${localeMatch}/` : `${sitemapOrigin}/`;
         const currentPageUrl = pathname !== '/' && pathname !== `/${localeMatch}/` ? `${sitemapOrigin}${pathname}` : `${rootPage}`;
 
         for (const urlElement of urlElements) {
@@ -67,24 +67,24 @@
             break;
           }
         }
-        
+
         if (!currentUrlElement) {
           console.warn('Current page not found in sitemap');
           return;
         }
-        
+
         const alternateLinks = currentUrlElement.querySelectorAll('link[rel="alternate"]');
         const linkElements = [];
 
         alternateLinks.forEach(altLink => {
           const hreflang = altLink.getAttribute('hreflang');
           const href = altLink.getAttribute('href');
-          
+
           if (hreflang && href) {
             linkElements.push(buildLink(hreflang, href));
           }
         });
-        
+
         const titleElement = document.head.querySelector('title');
         if (linkElements.length > 0 && titleElement) {
           titleElement.after(...linkElements);
@@ -92,7 +92,7 @@
       } catch (error) {
         console.error('Error fetching or parsing sitemap:', error);
       }
-    } 
+    }
 
     if (isAllowedAgent && !headAlreadyLoaded) {
       fetchAndParseSitemap();
@@ -105,3 +105,20 @@
 <script src="/express/code/scripts/scripts.js" type="module"></script>
 <style>body { display: none; }</style>
 <link rel="icon" href="data:,">
+<style>
+  :root:lang(ar) .profile-comp.secondary-button {
+    visibility: hidden;
+  }
+</style>
+<script>
+    const AR_SIGN_IN = 'تسجيل الدخول';
+    const observer = new MutationObserver(() => {
+      const button = document.querySelector(':root:lang(ar) .profile-comp.secondary-button');
+      if (button) {
+        button.textContent = AR_SIGN_IN;
+        observer.disconnect();
+        button.style.visibility = 'visible';
+      }
+    });
+    observer.observe(document.documentElement, { childList: true, subtree: true });
+</script>
