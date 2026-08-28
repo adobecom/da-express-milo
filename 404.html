@@ -171,6 +171,49 @@
 
 
       </script>
+      <script type="text/javascript">
+        /*
+         * Header + footer sources for locales whose Milo/federal defaults were never authored.
+         *
+         * scripts.js defaults gnav-source to `${locale.prefix}/express/localnav-express` and
+         * footer-source to `${origin}/federal/footer/footer` — which Milo's decorateMeta()
+         * then locale-prefixes to `/ara/federal/footer/footer`. Neither path exists for
+         * `ara`, an Express-only locale that is absent from Milo's libs/utils/locales.js, so
+         * this page rendered with an empty header and no footer at all.
+         *
+         * Point them at sources that do exist and are Arabic/RTL:
+         *  - the same thin gnav the live /ara/express/ homepage uses
+         *  - mena_ar's federal footer, which is how all six *_ar 404 pages get theirs
+         *
+         * Set in a classic (parse-time) script so the metas exist before scripts.js — a
+         * deferred module — reaches its `getMetadata(...)` checks and fills in the defaults.
+         *
+         * The gnav value is deliberately root-relative and the footer value absolute.
+         * decorateMeta() only rewrites metas whose content contains `.hlx.`, `.aem.` or
+         * `/federal/`: the footer needs that rewrite to reach the federal origin, while the
+         * gnav must avoid it (localizeLink would prefix `/express/...` to `/ara/express/...`,
+         * which does not exist).
+         */
+        const LOCALE_SHELL_SOURCES = {
+          ara: {
+            'gnav-source': { path: '/express/acom-gnav-thin', absolute: false },
+            'footer-source': { path: '/mena_ar/federal/footer/footer', absolute: true },
+          },
+        };
+
+        (function (win) {
+          const [, pathLocale] = win.location.pathname.split('/');
+          const sources = LOCALE_SHELL_SOURCES[pathLocale];
+          if (!sources) return;
+          Object.entries(sources).forEach(([name, { path, absolute }]) => {
+            if (document.querySelector(`meta[name="${name}"]`)) return;
+            const meta = document.createElement('meta');
+            meta.setAttribute('name', name);
+            meta.setAttribute('content', absolute ? `${win.location.origin}${path}` : path);
+            document.head.appendChild(meta);
+          });
+        }(window));
+      </script>
       <style>
 
       .error-404 main {
