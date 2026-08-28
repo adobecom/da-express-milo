@@ -191,7 +191,8 @@ main .section .grid-marquee h1 {
   background: none;
 }
 
-.grid-marquee .drawer video {
+.grid-marquee .drawer video,
+.grid-marquee .drawer .video-container img {
   border-radius: var(--spacing-100);
   width: 328px;
   z-index: 0;
@@ -383,7 +384,8 @@ main .section .grid-marquee.pricing-page h1 {
   .grid-marquee .drawer .title-row {
     width: 480px;
   }
-  .grid-marquee .drawer video {
+  .grid-marquee .drawer video,
+  .grid-marquee .drawer .video-container img {
     width: 480px;
   }
   .grid-marquee .drawer [role='tablist'] {
@@ -484,7 +486,8 @@ main .section .grid-marquee.pricing-page h1 {
     padding: 0 0 12px 0;
   }
 
-  .grid-marquee .drawer video {
+  .grid-marquee .drawer video,
+  .grid-marquee .drawer .video-container img {
     width: var(--d-img-w);
     height: initial;
   }

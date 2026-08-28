@@ -81,15 +81,17 @@ async function decorateDrawer(videoSrc, poster, titleText, panels, panelsFrag, d
     }
   });
 
-  const video = createTag('video', {
-    playsinline: '',
-    muted: '',
-    loop: '',
-    preload: 'metadata',
-    title: titleText,
-    poster,
-  }, `<source src="${videoSrc}" type="video/mp4">`);
-  const videoWrapper = createTag('button', { class: 'video-container' }, video);
+  const media = videoSrc
+    ? createTag('video', {
+      playsinline: '',
+      muted: '',
+      loop: '',
+      preload: 'metadata',
+      title: titleText,
+      poster,
+    }, `<source src="${videoSrc}" type="video/mp4">`)
+    : createTag('img', { src: poster, alt: '', loading: 'lazy' });
+  const videoWrapper = createTag('button', { class: 'video-container' }, media);
   // link video to first anchor
   videoWrapper.addEventListener('click', () => anchors[0]?.click());
   videoWrapper.setAttribute('title', anchors[0]?.title);
