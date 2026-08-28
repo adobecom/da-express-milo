@@ -13,7 +13,6 @@
 
       const redirectMap = new Map(
         [
-          ['ara' ,'/' ],
           ['ae_ar', '/ara/'],
           ['ae_en', '/'],
           ['africa', '/'],
@@ -204,6 +203,49 @@
       <script type="module">
         import { sampleRUM } from '/express/code/scripts/utils.js';
         sampleRUM('404', { source: document.referrer });
+      </script>
+      <script type="module">
+        /*
+         * Locale-specific 404 fallback.
+         *
+         * Milo's 404 template (meta name="404" content="feds") renders the fragment at
+         * `${miloLibs}/<locale>/fragments/404`. Express registers locales that Milo does
+         * not: there is no `/libs/ara/fragments/404`, so every `/ara/*` 404 renders an
+         * empty <main>. Until that fragment exists on the Milo side, borrow a
+         * language-appropriate one so Arabic visitors get an Arabic, RTL 404 page rather
+         * than a blank page or a redirect to the English one.
+         *
+         * Self-retiring: the probe below succeeds the moment Milo authors the locale's
+         * own fragment, after which this is a no-op and the entry can be deleted.
+         * Tracked on MWPW-204684 ("No redirect for ara. Will stay on 404 page.").
+         */
+        const FALLBACK_404_LOCALES = { ara: 'mena_ar' };
+
+        const [, pathLocale] = window.location.pathname.split('/');
+        const fallbackLocale = FALLBACK_404_LOCALES[pathLocale];
+
+        const renderFallback404 = async () => {
+          const { getLibs, createTag } = await import('/express/code/scripts/utils.js');
+          const libs = getLibs();
+          const own = await fetch(`${libs}/${pathLocale}/fragments/404.plain.html`, { method: 'HEAD' }).catch(() => null);
+          if (own?.ok) return;
+
+          const main = document.querySelector('main');
+          if (!main) return;
+          const href = `${libs}/${fallbackLocale}/fragments/404#_dnt`;
+          main.append(createTag('div', null, createTag('p', {}, createTag('a', { href }, href))));
+
+          const { loadArea } = await import(`${libs}/utils/utils.js`);
+          await loadArea(main.lastElementChild);
+        };
+
+        if (fallbackLocale) {
+          if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', renderFallback404, { once: true });
+          } else {
+            renderFallback404();
+          }
+        }
       </script>
     </head>
   <body class="error-404">
