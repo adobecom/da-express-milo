@@ -1,9 +1,58 @@
-import { getLibs } from '../../scripts/utils.js';
+import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { isExpressTypographyClass, isMiloTypographyClass } from '../../scripts/typography-utils.js';
+import showCopyToast from '../../scripts/utils/copy-toast.js';
 
 let createTag;
 let getConfig;
 let replaceKey;
+
+/**
+ * Name of the custom event a mini-editor block on the same page listens
+ * for (see mini-editor.js) to jump its editor to this exact quote/author
+ * and scroll it into view — the two blocks are otherwise unrelated, so a
+ * DOM event keeps them decoupled instead of importing one into the other.
+ */
+const USE_QUOTE_EVENT = 'mini-editor:use-quote';
+
+/**
+ * Builds the "Copy quote" / "Create a design" action pair added below each
+ * quote row's text, per Figma node 0-19592. Copy uses the same "quote —
+ * author" format and shared bottom toast as mini-editor's own copy
+ * actions, so every copy affordance on the page behaves identically.
+ * "Create a design" only makes sense when a mini-editor block is present
+ * on the page to receive the USE_QUOTE_EVENT it dispatches, so the whole
+ * action pair is skipped otherwise.
+ */
+function buildQuoteActions(quote, author, hasMiniEditor) {
+  if (!hasMiniEditor) return null;
+
+  const actions = createTag('div', { class: 'collapsible-row-actions' });
+
+  const copyBtn = createTag('button', { type: 'button', class: 'collapsible-row-action collapsible-row-action--copy' }, [
+    getIconElementDeprecated('copy-quote'),
+    createTag('span', {}, ['Copy quote']),
+  ]);
+  copyBtn.addEventListener('click', async () => {
+    const text = author ? `${quote} — ${author}` : quote;
+    try {
+      await navigator.clipboard.writeText(text);
+      showCopyToast('Quote copied to clipboard');
+    } catch {
+      // Clipboard write failed (e.g. permissions) — no toast, nothing else to do.
+    }
+  });
+
+  const designBtn = createTag('button', { type: 'button', class: 'collapsible-row-action collapsible-row-action--design' }, [
+    getIconElementDeprecated('create-design'),
+    createTag('span', {}, ['Create a design']),
+  ]);
+  designBtn.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent(USE_QUOTE_EVENT, { detail: { quote, author } }));
+  });
+
+  actions.append(copyBtn, designBtn);
+  return actions;
+}
 
 function shouldReuseSingleElement(tempContainer) {
   const childElements = Array.from(tempContainer.children);
@@ -42,7 +91,7 @@ function createContentElement(html, baseClass, options = {}) {
   return element;
 }
 
-function buildTableLayout(block, typographyClasses = {}) {
+function buildTableLayout(block, typographyClasses = {}, hasMiniEditor = false) {
   const parentDiv = block.closest('.section');
   parentDiv?.classList.add('collapsible-rows-grey-bg', 'collapsible-section-padding');
 
@@ -109,6 +158,12 @@ function buildTableLayout(block, typographyClasses = {}) {
       subHeaderEl.classList.add(...typographyClasses.body);
     }
     subHeaderAccordion.append(subHeaderEl);
+    const quoteActions = buildQuoteActions(
+      headerEl.textContent.trim(),
+      subHeaderEl.textContent.trim(),
+      hasMiniEditor,
+    );
+    if (quoteActions) subHeaderAccordion.append(quoteActions);
 
     headerEl.addEventListener('click', () => {
       headerAccordion.classList.toggle('rounded-corners');
@@ -121,7 +176,13 @@ function buildTableLayout(block, typographyClasses = {}) {
   });
 }
 
-function buildOriginalLayout(block, typographyClasses = {}, viewMoreText = 'View more', viewLessText = 'View less') {
+function buildOriginalLayout(
+  block,
+  typographyClasses = {},
+  viewMoreText = 'View more',
+  viewLessText = 'View less',
+  hasMiniEditor = false,
+) {
   const collapsibleRows = [];
   const rows = Array.from(block.children);
 
@@ -169,6 +230,12 @@ function buildOriginalLayout(block, typographyClasses = {}, viewMoreText = 'View
       subHeaderEl.classList.add(...typographyClasses.body);
     }
     accordion.append(subHeaderEl);
+    const quoteActions = buildQuoteActions(
+      headerEl.textContent.trim(),
+      subHeaderEl.textContent.trim(),
+      hasMiniEditor,
+    );
+    if (quoteActions) accordion.append(quoteActions);
   });
 
   const toggleButton = createTag('a', { class: 'collapsible-row-toggle-btn button' });
@@ -242,14 +309,19 @@ export default async function decorate(block) {
   const typographyClasses = extractTypographyClasses(block);
 
   const isExpandableVariant = block.classList.contains('expandable');
+  // "Create a design" only does something when a mini-editor block exists
+  // on the page to receive its event — checked against the raw authored
+  // DOM (not decorated state), since block decoration order across blocks
+  // on a page isn't guaranteed.
+  const hasMiniEditor = !!document.querySelector('.mini-editor');
 
   if (isExpandableVariant) {
-    buildTableLayout(block, typographyClasses);
+    buildTableLayout(block, typographyClasses, hasMiniEditor);
   } else {
     const [viewMoreText, viewLessText] = await Promise.all([
       replaceKey('view-more', getConfig()),
       replaceKey('view-less', getConfig()),
     ]);
-    buildOriginalLayout(block, typographyClasses, viewMoreText || 'View more', viewLessText || 'View less');
+    buildOriginalLayout(block, typographyClasses, viewMoreText || 'View more', viewLessText || 'View less', hasMiniEditor);
   }
 }
