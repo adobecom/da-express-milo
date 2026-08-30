@@ -1,0 +1,359 @@
+.color-seo-hero {
+  overflow: hidden;
+  padding: var(--spacing-600);
+  position: relative;
+}
+
+.color-seo-hero.is-ready {
+  background: radial-gradient(120% 100% at var(--gradient-x, 85%) var(--gradient-y, 60%), color-mix(in srgb, var(--color-seo-hero-primary) 45%, white) 0%, #fff 70%);
+}
+
+.color-seo-hero-layout {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: var(--spacing-700);
+  max-width: 1440px;
+  margin: 0 auto;
+}
+
+.color-seo-hero-content {
+  width: 100%;
+  max-width: 656px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  gap: var(--Spacing-spacing-300);
+}
+
+.color-seo-hero-content h1 {
+  font-size: var(--heading-font-size-xl);
+  line-height: 104%;
+}
+
+.color-seo-hero-text {
+  font-size: var(--body-font-size-m);
+  line-height: 140%;
+  margin: 1em 0 !important;
+}
+
+.color-seo-hero-cta {
+  margin: 0 !important;
+}
+
+.color-seo-hero-logo {
+  height: var(--spacing-400);
+  width: auto;
+}
+
+.color-seo-hero-preview {
+  background: #FFFFFF;
+  border-radius: var(--spacing-350);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-100);
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 656px;
+  min-width: 564px;
+  padding: var(--spacing-300);
+  box-sizing: border-box;
+}
+
+.color-seo-hero-canvas {
+  aspect-ratio: 624 / 521;
+  position: relative;
+}
+
+.color-seo-hero-canvas-clip {
+  border-radius: var(--spacing-300);
+  inset: 0;
+  overflow: hidden;
+  position: absolute;
+}
+
+.color-seo-hero-canvas-host {
+  display: block;
+  inset: 0;
+  position: absolute;
+  z-index: 0;
+}
+
+.color-seo-hero-canvas-rail {
+  --figma-strip-radius: var(--spacing-300);
+  --swatch-column-flex: 1;
+  --swatch-column-width: 100%;
+  --swatch-column-min-width: 0;
+  --swatch-column-last-radius: var(--spacing-300);
+  --swatch-rail-horizontal-height: 100%;
+  --swatch-rail-horizontal-padding: 0;
+  --swatch-column-horizontal-padding: var(--spacing-300);
+  --bottom-info-horizontal-height: var(--spacing-500);
+  --bottom-info-horizontal-padding: 0;
+  --bottom-info-horizontal-gap: 0 7px;
+  --bottom-info-horizontal-radius: 9px;
+
+  display: block;
+  height: 100%;
+  width: 100%;
+}
+
+.color-seo-hero-editor-popover {
+  left: 75px;
+  position: absolute;
+  bottom: 50px;
+  z-index: 10;
+}
+
+.color-seo-hero-editor-popover[hidden] {
+  display: none;
+}
+
+.color-seo-hero-editor-popover color-edit {
+  border-radius: var(--spacing-200);
+  box-shadow: 0 var(--spacing-200) var(--spacing-500) rgb(0 0 0 / 18%);
+  display: block;
+  overflow: hidden;
+  width: 280px;
+}
+
+.color-seo-hero-strip-host {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.color-seo-hero-swatch-strip {
+  --swatch-rail-gap: var(--spacing-50);
+  --swatch-column-flex: 1;
+  --swatch-column-first-radius: var(--spacing-300) 0 0 var(--spacing-300);
+  --swatch-column-last-radius: 0 var(--spacing-300) var(--spacing-300) 0;
+  --bottom-info-horizontal-height: var(--spacing-500);
+  --bottom-info-horizontal-padding: 0 var(--spacing-100) 0 var(--spacing-80);
+  --bottom-info-horizontal-radius: 9px;
+
+  --swatch-column-horizontal-padding: var(--spacing-80) var(--spacing-75) var(--spacing-75) var(--spacing-200);
+  --swatch-column-horizontal-radius: var(--spacing-100) 0 0 var(--spacing-100);
+
+  --swatch-column-horizontal-gap: 10px;
+  --swatch-rail-horizontal-height: 60px;
+  --swatch-rail-horizontal-padding: 0;
+
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.color-seo-hero-actions-row {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--spacing-200);
+  height: var(--spacing-500);
+  justify-content: space-between;
+}
+
+.color-seo-hero-dropdown-group {
+  align-items: center;
+  display: flex;
+  gap: var(--spacing-200);
+}
+
+.color-seo-hero-pick-label {
+  color: #505050;
+  font-size: var(--body-font-size-s);
+  white-space: nowrap;
+}
+
+.color-seo-hero-actions-group {
+  align-items: center;
+  display: flex;
+  gap: var(--spacing-200);
+}
+
+.color-seo-hero-icons {
+  align-items: center;
+  display: flex;
+  gap: var(--spacing-80);
+}
+
+.color-seo-hero-build-link {
+  margin: 0 !important;
+}
+
+.color-seo-hero-toolbar-mount {
+  margin-top: var(--spacing-400);
+  position: relative;
+  z-index: 1;
+}
+
+/* The shared floating-toolbar's "sticky-on-scroll" variant renders inline
+   at its natural position until the scroll-past trigger, then flips fixed
+   (see createFloatingToolbar.js). This hero wants it hidden entirely until
+   that trigger — never a visible inline copy — so hide everything except
+   the actual sticky/fixed state. Scoped to this hero's own mount point,
+   so color-wheel/color-extract's own toolbar usage is unaffected. */
+.color-seo-hero-toolbar-mount .color-floating-toolbar-container:not(.ax-toolbar-sticky-wrapper) {
+  display: none;
+}
+
+.color-seo-hero-floating-editor-popover[hidden] {
+  display: none;
+}
+
+.color-seo-hero-floating-editor-popover {
+  z-index: 30;
+}
+
+.color-seo-hero-floating-editor-popover color-edit {
+  border-radius: var(--spacing-200);
+  box-shadow: 0 var(--spacing-200) var(--spacing-500) rgb(0 0 0 / 18%);
+  display: block;
+  overflow: hidden;
+  width: 280px;
+}
+
+/* ==========================================================================
+   Responsive
+   Breakpoints match this codebase's mobile (<600) / tablet (600-899) /
+   desktop (>=900, >=1200) scale — see color-shade-swatches.css,
+   template-list.css, etc. Base rules above are the desktop layout; each
+   query below only overrides what changes at that breakpoint.
+   ========================================================================== */
+
+@media (min-width: 1200px) {
+  main .section h1 {
+    font-size: var(--heading-font-size-xl);
+    line-height: 104%;
+  }
+  .color-seo-hero {
+    max-height: 765px;
+  }
+}
+
+@media (min-width: 900px) {
+  .color-seo-hero-preview {
+    margin: 0 0 0 auto;
+  }
+
+  .color-seo-hero-swatch-strip {
+    --swatch-column-horizontal-padding: var(--spacing-200);
+    --swatch-column-horizontal-radius: 0;
+    --swatch-column-horizontal-gap: 0;
+    --swatch-rail-horizontal-height: 84px;
+  }
+}
+
+@media (max-width: 1199px) {
+  .color-seo-hero-cta.button.xlarge:any-link {
+    padding: 6px 14px 8px 16px;
+    font-size: var(--body-font-size-s);
+    border-radius: 999px;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 1199px) {
+  .color-seo-hero {
+    min-height: auto;
+    padding: var(--spacing-600) var(--spacing-500);
+  }
+
+  .color-seo-hero-layout {
+    flex-direction: column;
+    align-items: center;
+    max-width: 835px;
+    gap: var(--spacing-200);
+  }
+
+  .color-seo-hero-content {
+    max-width: 720px;
+    align-items: center;
+    text-align: center;
+    gap: 0;
+  }
+
+  .color-seo-hero-preview {
+    max-width: 100%;
+    max-height: 704px;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .color-seo-hero-canvas {
+    max-height: 540px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 599px) {
+  .color-seo-hero {
+    min-height: auto;
+    padding: var(--spacing-300);
+  }
+
+  .color-seo-hero-layout {
+    flex-direction: column;
+    gap: var(--spacing-200);
+  }
+
+  .color-seo-hero-content {
+    max-width: 100%;
+    align-items: flex-start;
+    text-align: left;
+    gap: 0;
+  }
+
+  .color-seo-hero-content h1 {
+    font-size: var(--heading-font-size-l);
+  }
+
+  .color-seo-hero-cta-row {
+    align-self: stretch;
+    width: 100%;
+  }
+
+  .color-seo-hero-cta {
+    box-sizing: border-box;
+    text-align: center;
+    width: 100%;
+  }
+
+  .color-seo-hero-preview {
+    max-width: 100%;
+    min-width: 0;
+    padding: var(--spacing-200);
+  }
+
+  .color-seo-hero-actions-row {
+    height: auto;
+  }
+
+  .color-seo-hero-dropdown-group {
+    flex: 1 1 100%;
+  }
+
+
+  .color-seo-hero-dropdown-group > sp-theme {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .color-seo-hero-pick-label {
+    white-space: normal;
+  }
+
+  .color-seo-hero-actions-group {
+    flex: 1 1 100%;
+    justify-content: space-between;
+  }
+
+  .color-seo-hero-build-link {
+    flex: 1;
+    box-sizing: border-box;
+    width: 50%;
+  }
+}

@@ -45,6 +45,7 @@ const DEFAULT_FEATURES = {
   addLeft: false,
   addRight: false,
   editTint: false,
+  editTintInline: false,
   colorBlindness: false,
   baseColor: false,
   baseColorReadOnly: false,
@@ -64,6 +65,7 @@ const ALL_FEATURES = {
   addLeft: true,
   addRight: true,
   editTint: true,
+  editTintInline: false,
   colorBlindness: true,
   baseColor: true,
   baseColorReadOnly: false,
@@ -87,11 +89,13 @@ function normalizeFeatures(features) {
       addLeft: set.has('addLeft'),
       addRight: set.has('addRight'),
       editTint: set.has('editTint'),
+      editTintInline: set.has('editTintInline'),
       colorBlindness: set.has('colorBlindness'),
       baseColor: set.has('baseColor'),
       baseColorReadOnly: set.has('baseColorReadOnly'),
       emptyStrip: set.has('emptyStrip'),
       editColorDisabled: set.has('editColorDisabled'),
+      hexCopyHoverOnly: set.has('hexCopyHoverOnly'),
     };
   }
   return { ...DEFAULT_FEATURES, ...features };
@@ -110,6 +114,9 @@ const ICON_MAP = {
   copy: () => (hasIcon('sp-icon-copy')
     ? html`<sp-icon-copy size="m" aria-hidden="true"></sp-icon-copy>`
     : iconFallback('m11.75,18h-7.5c-1.24023,0-2.25-1.00977-2.25-2.25v-7.5c0-1.24023,1.00977-2.25,2.25-2.25.41406,0,.75.33594.75.75s-.33594.75-.75.75c-.41309,0-.75.33691-.75.75v7.5c0,.41309.33691.75.75.75h7.5c.41309,0,.75-.33691.75-.75,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,1.24023-1.00977,2.25-2.25,2.25Zm-5-13c-.41406,0-.75-.33594-.75-.75,0-1.24023,1.00977-2.25,2.25-2.25.41406,0,.75.33594.75.75s-.33594.75-.75.75c-.41309,0-.75.33691-.75.75,0,.41406-.33594.75-.75.75Zm6.25-1.5h-2c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h2c.41406,0,.75.33594.75.75s-.33594.75-.75.75Zm0,10.5h-2c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h2c.41406,0,.75.33594.75.75s-.33594.75-.75.75Zm2.75,0c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75c.41309,0,.75-.33691.75-.75,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,1.24023-1.00977,2.25-2.25,2.25Zm1.5-9c-.41406,0-.75-.33594-.75-.75,0-.41309-.33691-.75-.75-.75-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75c1.24023,0,2.25,1.00977,2.25,2.25,0,.41406-.33594.75-.75.75Zm0,4.75c-.41406,0-.75-.33594-.75-.75v-2c0-.41406.33594-.75.75-.75s.75.33594.75.75v2c0,.41406-.33594.75-.75.75Zm-10.5,0c-.41406,0-.75-.33594-.75-.75v-2c0-.41406.33594-.75.75-.75s.75.33594.75.75v2c0,.41406-.33594.75-.75.75Zm1.5,4.25c-1.24023,0-2.25-1.00977-2.25-2.25,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,.41309.33691.75.75.75.41406,0,.75.33594.75.75s-.33594.75-.75.75Z')),
+  edit: () => (hasIcon('sp-icon-edit')
+    ? html`<sp-icon-edit size="m" aria-hidden="true"></sp-icon-edit>`
+    : iconFallback('m4,15.4497l9.02-9.02,1.55,1.55L5.55,17l-1.55-1.55Zm11.06-11.06l1.5-1.5,1.55,1.55-1.5,1.5-1.55-1.55Zm-13,12.06l-.5,2.5,2.5-.5,10.5-10.5-1.5-1.5L2.06,16.45Z')),
   editTint: () => html`<svg class="icon-tint" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="M9.99999 12.7764C12.4228 12.7764 14.25 11.0645 14.25 8.79493C14.25 7.09473 12.8633 5.27149 11.6401 3.66407C11.2656 3.17188 10.9092 2.70411 10.624 2.27637C10.3457 1.8584 9.65429 1.8584 9.37597 2.27637C9.09081 2.7041 8.73437 3.17188 8.35986 3.66407C7.13672 5.27149 5.75 7.09473 5.75 8.79493C5.75 11.0645 7.57714 12.7764 9.99999 12.7764ZM9.5537 4.57228C9.70653 4.37111 9.85643 4.17384 9.99999 3.98146C10.1435 4.17384 10.2934 4.37111 10.4463 4.57228C11.4727 5.92091 12.75 7.59962 12.75 8.79494C12.75 10.2324 11.5933 11.2764 9.99999 11.2764C8.40673 11.2764 7.24999 10.2324 7.24999 8.79494C7.24999 7.59963 8.52733 5.92092 9.5537 4.57228Z" fill="currentColor"/><path d="M18.25 5.80176C17.8359 5.80176 17.5 6.1377 17.5 6.55176V8.48731H16.2827C15.8686 8.48731 15.5327 8.82325 15.5327 9.23731C15.5327 9.65137 15.8686 9.98731 16.2827 9.98731H17.5V15.8018C17.5 16.2148 17.1636 16.5518 16.75 16.5518H3.25C2.83643 16.5518 2.5 16.2148 2.5 15.8018V9.98731H3.71729C4.13135 9.98731 4.46729 9.65137 4.46729 9.23731C4.46729 8.82325 4.13135 8.48731 3.71729 8.48731H2.5V6.55176C2.5 6.1377 2.16406 5.80176 1.75 5.80176C1.33594 5.80176 1 6.1377 1 6.55176V15.8018C1 17.042 2.00928 18.0518 3.25 18.0518H16.75C17.9907 18.0518 19 17.042 19 15.8018V6.55176C19 6.1377 18.6641 5.80176 18.25 5.80176Z" fill="currentColor"/></svg>`,
   trash: () => (hasIcon('sp-icon-delete')
     ? html`<sp-icon-delete size="m" aria-hidden="true"></sp-icon-delete>`
@@ -183,6 +190,7 @@ export class ColorSwatchRail extends LitElement {
       hideBaseColorBadge: { type: Boolean, attribute: 'hide-base-color-badge' },
       hideLock: { type: Boolean, attribute: 'hide-lock' },
       strings: { attribute: false },
+      onCopyHex: { attribute: false },
     };
   }
 
@@ -201,6 +209,7 @@ export class ColorSwatchRail extends LitElement {
     this.hideBaseColorBadge = false;
     this.hideLock = false;
     this.strings = SWATCH_RAIL_DEFAULTS;
+    this.onCopyHex = null;
     this._controllerUnsubscribe = null;
     this.swatches = [];
     this.baseColorIndex = 0;
@@ -498,8 +507,16 @@ export class ColorSwatchRail extends LitElement {
     try {
       const copied = await this._copyText(hex);
       if (!copied) throw new Error('clipboard_copy_failed');
-      showExpressToast({ message: s.copiedToast || SWATCH_RAIL_DEFAULTS.copiedToast, variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
-      announceToScreenReader(s.copiedToast || SWATCH_RAIL_DEFAULTS.copiedToast);
+      // Opt-in only: lets a consumer show its own richer toast (e.g. with a
+      // "create a palette from this color" action button) instead of the
+      // default plain one. No existing consumer sets this, so this has zero
+      // effect unless explicitly requested.
+      if (this.onCopyHex) {
+        this.onCopyHex(hex);
+      } else {
+        showExpressToast({ message: s.copiedToast || SWATCH_RAIL_DEFAULTS.copiedToast, variant: 'positive', timeout: 2000, anchor: this.closest('.strip-container') || undefined });
+        announceToScreenReader(s.copiedToast || SWATCH_RAIL_DEFAULTS.copiedToast);
+      }
     } catch (error) {
       showExpressToast({ message: s.copyFailedToast || SWATCH_RAIL_DEFAULTS.copyFailedToast, variant: 'negative', timeout: 2000 });
     }
@@ -1301,7 +1318,7 @@ export class ColorSwatchRail extends LitElement {
       const resolvedTintIndex = this._resolveTintIndex();
       const isTintSelected = tintMode && resolvedTintIndex != null && index === resolvedTintIndex;
       const tintBands = isTintSelected ? this._buildTintBands(swatch.hex) : [];
-      const showEdit = (f.colorPicker || f.editTint) && !editDisabled;
+      const showEdit = (f.colorPicker || f.editTint || f.editTintInline) && !editDisabled;
       const atMinSwatches = f.minSwatches != null && swatches.length <= f.minSwatches;
       
       
@@ -1402,6 +1419,7 @@ export class ColorSwatchRail extends LitElement {
         f.drag && 'swatch-column--draggable',
         superLight && 'swatch-column--super-light',
         f.rightActionsHoverOnly && 'swatch-column--right-actions-hover-only',
+        f.hexCopyHoverOnly && 'swatch-column--hex-copy-hover-only',
         opts.cornerClass || ''
       ].filter(Boolean).join(' ');
 
@@ -1460,9 +1478,14 @@ export class ColorSwatchRail extends LitElement {
           ${!isStacked ? html`<div class="bottom-info" part="bottom-info">
             ${showEdit && showHexCopyForThisSwatch ? html`<input type="color" id="edit-input-${index}" class="edit-input-native" tabindex="-1" aria-hidden="true" value=${swatch.hex} @input=${(ev) => this._onNativePickerChange(index, ev)} @change=${() => this._markNativePickerClosedSoon(50)} @blur=${() => this._markNativePickerClosedSoon(50)} />` : ''}
             ${f.hexCode && showHexCopyForThisSwatch ? (
-              showEdit || f.copyFromHex
-                ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>`
-                : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`
+              f.editTintInline && showEdit
+                ? html`<div class="hex-code-group">
+                    <span class="hex-code hex-code--static">${swatch.hex}</span>
+                    <button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="${labelEditColor}" title=${labelEditColor}>${icon('edit')}</button>
+                  </div>`
+                : (showEdit || f.copyFromHex
+                    ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>`
+                    : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`)
             ) : ''}
             <div class="bottom-info__actions">
               ${f.copy && showHexCopyForThisSwatch ? html`<button type="button" class="icon-button icon-button--copy swatch-column-focusable" tabindex="-1" @click=${(e) => this._handleCopy(swatch.hex, e.currentTarget)} aria-label="${labelCopyHex}" title="${labelCopyHex}">${icon('copy')}</button>` : ''}
