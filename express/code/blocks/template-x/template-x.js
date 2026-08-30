@@ -488,6 +488,29 @@ function updateLoadMoreButton(props, loadMore) {
   }
 }
 
+const rowClampObservers = new WeakMap();
+
+function applyRowClamp(block, visibleRows) {
+  if (!block.classList.contains('row-clamp-2') || !visibleRows) return;
+  block.querySelectorAll('.masonry-col').forEach((col) => {
+    Array.from(col.children).forEach((child, index) => {
+      if (index < visibleRows) {
+        child.style.removeProperty('display');
+      } else {
+        child.style.display = 'none';
+      }
+    });
+  });
+}
+
+function observeRowClamp(block, props, innerWrapper) {
+  if (!block.classList.contains('row-clamp-2') || rowClampObservers.has(block)) return;
+  const observer = new MutationObserver(() => applyRowClamp(block, props.visibleRows));
+  observer.observe(innerWrapper, { childList: true, subtree: true });
+  rowClampObservers.set(block, observer);
+  applyRowClamp(block, props.visibleRows);
+}
+
 function chunkPairs(arr) {
   return Array.from(
     { length: Math.ceil(arr.length / 2) },
@@ -562,6 +585,7 @@ async function decorateLoadMoreButton(block, props) {
 
   loadMoreButton.addEventListener('click', async () => {
     trackSearch('select-load-more', BlockMediator.get('templateSearchSpecs').search_id);
+    props.visibleRows = (props.visibleRows || 2) + 2;
     loadMoreButton.classList.add('disabled');
     const scrollPosition = window.scrollY;
     await decorateNewTemplates(block, props);
@@ -1665,6 +1689,8 @@ async function decorateTemplates(block, props) {
         block.remove();
       }
 
+      props.visibleRows = props.visibleRows || 2;
+      observeRowClamp(block, props, innerWrapper);
       props.masonry.draw();
       window.addEventListener('resize', () => {
         props.masonry.draw();
