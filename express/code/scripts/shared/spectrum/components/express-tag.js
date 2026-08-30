@@ -18,9 +18,9 @@
 import { loadTag } from '../load-spectrum.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
-import { createIconSlot } from '../../utils/utilities.js';
+import { createIconSlot } from '../../../color-shared/utils/utilities.js';
 
-const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/tag.css';
+const STYLES_PATH = '/express/code/scripts/shared/spectrum/styles/tag.css';
 
 /**
  * Create an Express tag.

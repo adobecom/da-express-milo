@@ -2,7 +2,7 @@ import { createTag } from '../../utils.js';
 import loadMiloStyle from '../utils/loadMiloStyle.js';
 import { createSwatchRailAdapter } from '../adapters/litComponentAdapters.js';
 import { initFloatingToolbar } from '../toolbar/createFloatingToolbar.js';
-import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
+import { createExpressTooltip } from '../../shared/spectrum/components/express-tooltip.js';
 import { decorateAnalyticsAttributes } from '../utils/utilities.js';
 
 const DEFAULT_CREATOR_NAME = 'nicolagilroy';

@@ -9,7 +9,7 @@ import {
   rgbToLab,
   labToRGB,
 } from '../../../../libs/color-components/utils/ColorConversions.js';
-import { loadMenu, loadButton, loadColorArea, loadColorSlider, loadTextfield } from '../../spectrum/load-spectrum.js';
+import { loadMenu, loadButton, loadColorArea, loadColorSlider, loadTextfield } from '../../../shared/spectrum/load-spectrum.js';
 import { DEFAULT_PLACEHOLDERS as BASE_COLOR_DEFAULTS } from '../../i18n/loadBaseColorPlaceholders.js';
 import '../color-channel-slider/index.js';
 

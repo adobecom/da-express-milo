@@ -1,5 +1,5 @@
 import BlockMediator from '../../block-mediator.min.js';
-import { announceToScreenReader } from '../spectrum/utils/a11y.js';
+import { announceToScreenReader } from '../../shared/spectrum/utils/a11y.js';
 
 export function createActionMenuState(stateKey = 'action-menu', { transformPalette } = {}) {
   const eventNamespace = stateKey;

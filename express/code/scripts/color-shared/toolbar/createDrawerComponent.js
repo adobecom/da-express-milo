@@ -18,12 +18,12 @@ import {
   decorateAnalyticsAttributes,
   getNextOverlayZIndex,
 } from '../utils/utilities.js';
-import { announceToScreenReader, trapFocus, handleEscapeClose } from '../spectrum/index.js';
+import { announceToScreenReader, trapFocus, handleEscapeClose } from '../../shared/spectrum/index.js';
 import { createTag } from '../../utils.js';
 import loadMiloStyle from '../utils/loadMiloStyle.js';
-import { loadButton, loadMenu } from '../spectrum/load-spectrum.js';
-import { createThemeWrapper } from '../spectrum/utils/theme.js';
-import { showExpressToast } from '../spectrum/components/express-toast.js';
+import { loadButton, loadMenu } from '../../shared/spectrum/load-spectrum.js';
+import { createThemeWrapper } from '../../shared/spectrum/utils/theme.js';
+import { showExpressToast } from '../../shared/spectrum/components/express-toast.js';
 import { triggerSignInFlow, ensureIms } from '../../../libs/services/middlewares/auth.middleware.js';
 import {
   THEME_ELEMENT_TYPE,

@@ -4,8 +4,8 @@ import {
   createSearchAdapter,
 } from '../adapters/litComponentAdapters.js';
 import { createPaletteVariant, PALETTE_VARIANT } from '../palettes/createPaletteVariantFactory.js';
-import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
-import { loadIconsRail } from '../spectrum/load-spectrum.js';
+import { createExpressTooltip } from '../../shared/spectrum/components/express-tooltip.js';
+import { loadIconsRail } from '../../shared/spectrum/load-spectrum.js';
 import { decorateAnalyticsAttributes } from '../utils/utilities.js';
 import { createColorFiltersPlaceholders } from '../i18n/loadColorFiltersPlaceholders.js';
 

@@ -68,7 +68,7 @@ If other components should treat the new bundle as external (shared), add a mapp
 
 5. **Create a wrapper:**
 
-Add `express/code/scripts/color-shared/spectrum/components/express-<name>.js` following the pattern of existing wrappers.
+Add `express/code/scripts/shared/spectrum/components/express-<name>.js` following the pattern of existing wrappers.
 
 6. **Add a loader:**
 
@@ -76,7 +76,7 @@ Add a `load<Name>()` function to `load-spectrum.js`.
 
 7. **Add override CSS:**
 
-Create `express/code/scripts/color-shared/spectrum/styles/<name>.css`.
+Create `express/code/scripts/shared/spectrum/styles/<name>.css`.
 
 8. **Export from `index.js`:**
 

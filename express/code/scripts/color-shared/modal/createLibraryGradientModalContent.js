@@ -10,8 +10,8 @@ import {
   getTagValues,
   addTagFromInput as addTagFromInputHelper,
 } from '../toolbar/createTagField.js';
-import { showExpressToast } from '../spectrum/components/express-toast.js';
-import { announceToScreenReader } from '../spectrum/index.js';
+import { showExpressToast } from '../../shared/spectrum/components/express-toast.js';
+import { announceToScreenReader } from '../../shared/spectrum/index.js';
 
 function interpolate(template, vars = {}) {
   return String(template || '').replace(/\{(\w+)\}/g, (_, key) => (vars[key] != null ? vars[key] : ''));

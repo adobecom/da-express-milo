@@ -1,8 +1,8 @@
 import { createTag } from '../../../../scripts/utils.js';
 import { createContrastCheckerPlaceholders } from '../../utils/placeholders.js';
-import { createThemeWrapper } from '../../../../scripts/color-shared/spectrum/utils/theme.js';
-import { trapFocus } from '../../../../scripts/color-shared/spectrum/utils/a11y.js';
-import { loadPicker } from '../../../../scripts/color-shared/spectrum/load-spectrum.js';
+import { createThemeWrapper } from '../../../../scripts/shared/spectrum/utils/theme.js';
+import { trapFocus } from '../../../../scripts/shared/spectrum/utils/a11y.js';
+import { loadPicker } from '../../../../scripts/shared/spectrum/load-spectrum.js';
 import {
   isMobileOrTabletViewport,
   isMobileViewport,

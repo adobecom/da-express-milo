@@ -8,8 +8,8 @@ import {
   getConflictingIndices,
   simulateHex,
 } from '../services/createColorBlindnessService.js';
-import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
-import { announceToScreenReader } from '../spectrum/utils/a11y.js';
+import { createExpressTooltip } from '../../shared/spectrum/components/express-tooltip.js';
+import { announceToScreenReader } from '../../shared/spectrum/utils/a11y.js';
 import { DEFAULT_SHARED_PLACEHOLDERS as CB_DEFAULTS } from '../i18n/loadColorBlindnessPlaceholders.js';
 
 function resolveCBLabels(cbStrings) {

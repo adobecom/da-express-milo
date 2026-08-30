@@ -1,8 +1,8 @@
 /** Gradient editor — contract, API, a11y: see README.md (same folder). */
 import { createTag } from '../../../utils.js';
 import loadMiloStyle from '../../utils/loadMiloStyle.js';
-import { announceToScreenReader } from '../../spectrum/utils/a11y.js';
-import { showExpressToast } from '../../spectrum/components/express-toast.js';
+import { announceToScreenReader } from '../../../shared/spectrum/utils/a11y.js';
+import { showExpressToast } from '../../../shared/spectrum/components/express-toast.js';
 import { createGradientEditorPlaceholders } from '../../i18n/loadGradientEditorPlaceholders.js';
 import { interpolate } from '../../utils/utilities.js';
 
@@ -291,7 +291,7 @@ export function createGradientEditor(initialGradient, options = {}) {
 
   async function ensureExpressTooltipFactory() {
     if (!expressTooltipFactoryPromise) {
-      expressTooltipFactoryPromise = import('../../spectrum/components/express-tooltip.js')
+      expressTooltipFactoryPromise = import('../../../shared/spectrum/components/express-tooltip.js')
         .then((m) => m.createExpressTooltip)
         .catch(() => null);
     }

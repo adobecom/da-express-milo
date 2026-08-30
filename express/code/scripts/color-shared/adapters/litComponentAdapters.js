@@ -1,6 +1,6 @@
 import { createGradientEditor } from '../components/gradients/gradient-editor.js';
-import { wrapInTheme } from '../spectrum/utils/theme.js';
-import { loadIconsRail } from '../spectrum/load-spectrum.js';
+import { wrapInTheme } from '../../shared/spectrum/utils/theme.js';
+import { loadIconsRail } from '../../shared/spectrum/load-spectrum.js';
 import {
   getPreferredColorMode,
   setPreferredColorMode,

@@ -20,7 +20,7 @@ function isImageFile(file) {
 }
 
 async function showLoadError(message) {
-  const { showExpressToast } = await import('../../spectrum/components/express-toast.js');
+  const { showExpressToast } = await import('../../../shared/spectrum/components/express-toast.js');
   showExpressToast({
     message: message || IMAGE_UPLOAD_DEFAULTS.loadError,
     variant: 'negative',

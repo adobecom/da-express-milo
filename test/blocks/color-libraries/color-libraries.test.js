@@ -200,7 +200,7 @@ describe('Color Libraries — search (signed-in)', () => {
   // confirms the block listens on document so modal-originated deletes are handled.
   it('handles a delete event dispatched on document (modal path)', async () => {
     const { loadAlertDialog } = await import(
-      '../../../express/code/scripts/color-shared/spectrum/load-spectrum.js'
+      '../../../express/code/scripts/shared/spectrum/load-spectrum.js'
     );
     await loadAlertDialog();
 

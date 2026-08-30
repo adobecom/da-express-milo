@@ -54,7 +54,7 @@ const heavyModulesPromise1 = Promise.all([
 // Layout shell + tabs: register the outer Spectrum chrome first
 const heavyModulesPromise2a = Promise.all([
   import('../../scripts/color-shared/shell/layouts/createColorToolLayout.js'),
-  import('../../scripts/color-shared/spectrum/components/express-tabs.js'),
+  import('../../scripts/shared/spectrum/components/express-tabs.js'),
 ]);
 // Color adapters + strip renderer: the core interaction layer
 const heavyModulesPromise2b = Promise.all([
@@ -65,7 +65,7 @@ const heavyModulesPromise2b = Promise.all([
 // Image extract + tooltip: used only when switching tabs or on desktop hover
 const heavyModulesPromise2c = Promise.all([
   import('./createImageExtractComponent.js'),
-  import('../../scripts/color-shared/spectrum/components/express-tooltip.js'),
+  import('../../scripts/shared/spectrum/components/express-tooltip.js'),
 ]);
 
 // Always yields to a new task — uses scheduler.yield() when available,

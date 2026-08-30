@@ -19,7 +19,7 @@ import { loadSwatch } from '../load-spectrum.js';
 import { createThemeWrapper } from '../utils/theme.js';
 import { loadOverrideStyles } from './style-loader.js';
 
-const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/swatch.css';
+const STYLES_PATH = '/express/code/scripts/shared/spectrum/styles/swatch.css';
 
 /**
  * Create an Express swatch group.

@@ -19,7 +19,7 @@ import { createThemeWrapper } from '../utils/theme.js';
 import { announceToScreenReader } from '../utils/a11y.js';
 import { loadOverrideStyles } from './style-loader.js';
 
-const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/toast.css';
+const STYLES_PATH = '/express/code/scripts/shared/spectrum/styles/toast.css';
 
 // ── Toast Stack Management ──────────────────────────────────────────
 let toastContainer = null;

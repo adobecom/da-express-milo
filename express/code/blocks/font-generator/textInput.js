@@ -1,6 +1,6 @@
 import { getState, setState } from './state.js';
 import { DEFAULT_PLACEHOLDERS } from './placeholders.js';
-import { attachRovingTabIndex } from '../../scripts/color-shared/spectrum/utils/a11y.js';
+import { attachRovingTabIndex } from '../../scripts/shared/spectrum/utils/a11y.js';
 
 const BASE_PATH = '/express/code/blocks/font-generator';
 const STYLESHEET_HREF = `${BASE_PATH}/textInput.css`;

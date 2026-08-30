@@ -6,8 +6,8 @@ import {
   hsbToRGB,
   hsbToHEX,
 } from '../../../../libs/color-components/utils/ColorConversions.js';
-import { loadSwatch, loadMenu, loadTextfield } from '../../spectrum/load-spectrum.js';
-import { trapFocus, disableBackgroundScroll, restoreBackgroundScroll } from '../../spectrum/utils/a11y.js';
+import { loadSwatch, loadMenu, loadTextfield } from '../../../shared/spectrum/load-spectrum.js';
+import { trapFocus, disableBackgroundScroll, restoreBackgroundScroll } from '../../../shared/spectrum/utils/a11y.js';
 import { DEFAULT_PLACEHOLDERS as COLOR_EDIT_DEFAULTS } from '../../i18n/loadColorEditPlaceholders.js';
 import '../base-color/index.js';
 

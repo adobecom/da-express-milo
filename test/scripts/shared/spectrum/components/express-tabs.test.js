@@ -2,7 +2,7 @@
 
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import { createExpressTabs } from '../../../../../express/code/scripts/color-shared/spectrum/components/express-tabs.js';
+import { createExpressTabs } from '../../../../../express/code/scripts/shared/spectrum/components/express-tabs.js';
 
 describe('createExpressTabs: onSelectionChange', () => {
   afterEach(() => {

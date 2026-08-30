@@ -1,0 +1,224 @@
+/* ============================================================================
+   Mini Editor Widget
+   Layout + visual styling. Spectrum CSS variables with Express token fallbacks.
+   Per-component Spectrum overrides ship with the shared wrapper's styles/*.css;
+   the overrides below are widget-scoped to match the mini-editor spec.
+   ============================================================================ */
+
+/* sp-theme wrappers are layout-transparent so the buttons/swatches are the
+   real flex participants, while the Spectrum custom properties still cascade. */
+.mini-editor-theme,
+.mini-editor sp-theme {
+  display: contents;
+}
+
+.mini-editor {
+  --mini-editor-radius: var(--spectrum-corner-radius-200, 16px);
+  --mini-editor-bar-bg: var(--spectrum-gray-75, #f3f3f3);
+  --mini-editor-divider: rgb(0 0 0 / 12%);
+  --mini-editor-accent: var(--spectrum-blue-800, #3b63fb);
+  --mini-editor-tile-shadow:
+    0 0 0.5px rgb(0 0 0 / 8%), 0 1px 2px rgb(0 0 0 / 4%), 0 2px 4px rgb(0 0 0 / 8%);
+
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spectrum-spacing-100, 8px);
+  padding: var(--spectrum-spacing-100, 8px);
+  background: var(--spectrum-gray-25, #fff);
+  border-radius: var(--mini-editor-radius);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 8%), 0 1px 4px rgb(0 0 0 / 4%), 0 0 1px rgb(0 0 0 / 8%);
+  font-family: var(--body-font-family, adobe-clean, sans-serif);
+}
+
+.mini-editor *,
+.mini-editor *::before,
+.mini-editor *::after {
+  box-sizing: border-box;
+}
+
+/* ── Top action bar ─────────────────────────────────────────────────────── */
+.mini-editor-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spectrum-spacing-75, 6px);
+  min-height: 40px;
+}
+
+.mini-editor-actions:empty {
+  display: none;
+}
+
+/* Share (and any labeled top action) — outlined pill. */
+.mini-editor-actions sp-button {
+  --spectrum-button-border-radius: 24px;
+  --mod-button-background-color-default: transparent;
+  --mod-button-background-color-hover: rgb(0 0 0 / 4%);
+  --mod-button-border-width: 2px;
+  --mod-button-border-color-default: var(--spectrum-gray-200, #e9e9e9);
+  --mod-button-border-color-hover: var(--spectrum-gray-300, #dadada);
+  --mod-button-content-color-default: var(--spectrum-gray-800, #292929);
+  --mod-button-content-color-hover: var(--spectrum-gray-900, #131313);
+
+  font-weight: 700;
+}
+
+/* Icon-only top actions (edit/download) — 40px quiet buttons. */
+.mini-editor-actions sp-action-button {
+  --mod-actionbutton-background-color-default: transparent;
+  --mod-actionbutton-border-radius: 9px;
+
+  min-block-size: 40px;
+  min-inline-size: 40px;
+}
+
+/* Uniform icon sizing across the action bar — slotted <img> icons have
+   varying intrinsic sizes, so pin them to the Spectrum icon size. */
+.mini-editor [slot="icon"] {
+  display: inline-flex;
+  align-items: center;
+}
+
+.mini-editor [slot="icon"] img,
+.mini-editor [slot="icon"] svg {
+  inline-size: 20px;
+  block-size: 20px;
+  object-fit: contain;
+  display: block;
+}
+
+/* ── Center canvas ──────────────────────────────────────────────────────── */
+.mini-editor-canvas {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--mini-editor-radius);
+  overflow: hidden;
+}
+
+.mini-editor-content {
+  inline-size: 100%;
+  block-size: 100%;
+}
+
+.mini-editor-content > * {
+  display: block;
+  inline-size: 100%;
+}
+
+/* Prev/next navigation pills over the canvas edges. */
+.mini-editor .mini-editor-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
+.mini-editor .mini-editor-nav.is-prev {
+  inset-inline-start: 8px;
+}
+
+.mini-editor .mini-editor-nav.is-next {
+  inset-inline-end: 8px;
+}
+
+/* ── Bottom control bar ─────────────────────────────────────────────────── */
+.mini-editor-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--spectrum-spacing-75, 6px);
+  padding: var(--spectrum-spacing-75, 6px);
+  background: var(--mini-editor-bar-bg);
+  border: 1px solid rgb(0 0 0 / 3%);
+  border-radius: var(--mini-editor-radius);
+  overflow: hidden;
+}
+
+/* ── Font toggle tiles ──────────────────────────────────────────────────── */
+.mini-editor-fonts {
+  display: flex;
+  align-items: center;
+  gap: var(--spectrum-spacing-75, 6px);
+  flex: 0 0 auto;
+}
+
+.mini-editor-fonts sp-action-button {
+  --mod-actionbutton-background-color-default: transparent;
+  --mod-actionbutton-background-color-hover: rgb(0 0 0 / 4%);
+  --mod-actionbutton-content-color-default: var(--spectrum-gray-900, #131313);
+  --mod-actionbutton-content-color-hover: var(--spectrum-gray-900, #131313);
+  --mod-actionbutton-border-radius: 6px;
+
+  min-block-size: 46px;
+  min-inline-size: 46px;
+}
+
+/* Selected font tile — elevated white pill with dark glyph. */
+.mini-editor-fonts sp-action-button[selected] {
+  --mod-actionbutton-background-color-default-selected: var(--spectrum-gray-25, #fff);
+  --mod-actionbutton-background-color-hover-selected: var(--spectrum-gray-25, #fff);
+  --mod-actionbutton-content-color-default-selected: var(--spectrum-gray-900, #131313);
+  --mod-actionbutton-content-color-hover-selected: var(--spectrum-gray-900, #131313);
+  --mod-actionbutton-border-radius: 10px;
+
+  box-shadow: var(--mini-editor-tile-shadow);
+}
+
+.mini-editor-font-glyph {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--spectrum-font-size-100, 16px);
+  line-height: 1;
+}
+
+/* ── Divider ────────────────────────────────────────────────────────────── */
+.mini-editor-divider {
+  flex: 0 0 auto;
+  inline-size: 1px;
+  block-size: 28px;
+  background: var(--mini-editor-divider);
+  margin-inline: var(--spectrum-spacing-100, 8px);
+}
+
+/* ── Background swatches (circular) ─────────────────────────────────────── */
+.mini-editor-backgrounds {
+  flex: 1 1 auto;
+  min-inline-size: 0;
+  display: flex;
+  align-items: center;
+  padding-inline: 10px;
+}
+
+.mini-editor-backgrounds sp-swatch-group {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spectrum-spacing-100, 8px);
+  inline-size: 100%;
+}
+
+.mini-editor-backgrounds sp-swatch {
+  --spectrum-swatch-size: 28px;
+  --spectrum-picked-color-border-color: var(--mini-editor-accent);
+
+  inline-size: 28px;
+  block-size: 28px;
+  border-radius: 999px;
+  box-shadow: 0 0 1px rgb(0 0 0 / 8%), 0 1px 1px rgb(0 0 0 / 4%), 0 2px 8px rgb(0 0 0 / 8%);
+}
+
+/* Selected swatch — 2px accent ring. */
+.mini-editor-backgrounds sp-swatch[selected] {
+  outline: 2px solid var(--mini-editor-accent);
+  outline-offset: 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mini-editor * {
+    transition: none !important;
+  }
+}

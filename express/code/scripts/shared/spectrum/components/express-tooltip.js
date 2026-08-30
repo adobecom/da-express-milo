@@ -20,7 +20,7 @@ import { createThemeWrapper } from '../utils/theme.js';
 import { ariaDescribedBy } from '../utils/a11y.js';
 import { loadOverrideStyles } from './style-loader.js';
 
-const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/tooltip.css';
+const STYLES_PATH = '/express/code/scripts/shared/spectrum/styles/tooltip.css';
 
 /**
  * Create an Express tooltip attached to a target element.

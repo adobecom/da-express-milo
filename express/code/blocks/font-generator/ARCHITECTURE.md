@@ -158,7 +158,7 @@ On desktop, Filters renders inline alongside the CTA Banner. On mobile/tablet, i
 
 ### Font size slider
 
-`createExpressSlider` already exists in `scripts/color-shared/spectrum/components/express-slider.js` and is exported from the barrel (`spectrum/index.js`). Font generator is its first consumer. Wire it in `toolbar.js`:
+`createExpressSlider` already exists in `scripts/shared/spectrum/components/express-slider.js` and is exported from the barrel (`spectrum/index.js`). Font generator is its first consumer. Wire it in `toolbar.js`:
 
 - `onInput` → `setState({ fontSize: value })` for live card updates
 - Subscribe to store → `slider.setValue()` to sync on URL init
@@ -177,7 +177,7 @@ Follow the same shape as `loadSlider()` or `loadButton()` — call `loadCoreDeps
 
 **3. Create `express-accordion.js`**
 
-Add `scripts/color-shared/spectrum/components/express-accordion.js` and export it from `spectrum/index.js`. Model it on `express-slider.js`: call `loadAccordion()` and `loadOverrideStyles`, create the `sp-accordion` / `sp-accordion-item` elements inside a theme wrapper, wire the `toggle` event, and return `{ element, destroy }`.
+Add `scripts/shared/spectrum/components/express-accordion.js` and export it from `spectrum/index.js`. Model it on `express-slider.js`: call `loadAccordion()` and `loadOverrideStyles`, create the `sp-accordion` / `sp-accordion-item` elements inside a theme wrapper, wire the `toggle` event, and return `{ element, destroy }`.
 
 The accordion's open/closed state stays out of the store — it's transient UI, same as `panelOpen`.
 

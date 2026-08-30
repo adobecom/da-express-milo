@@ -12,7 +12,7 @@ import { buildPaletteEditUrl, decorateAnalyticsAttributes } from '../../scripts/
 import { createFiltersComponent } from '../../scripts/color-shared/components/createFiltersComponent.js';
 import { createLoadingScreenComponent } from '../../scripts/color-shared/components/createLoadingScreenComponent.js';
 import loadMiloStyle from '../../scripts/color-shared/utils/loadMiloStyle.js';
-import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
+import { loadIconsRail } from '../../scripts/shared/spectrum/load-spectrum.js';
 import loadColorExplorePlaceholders from '../../scripts/color-shared/i18n/loadColorExplorePlaceholders.js';
 import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
 import loadColorFiltersPlaceholders from '../../scripts/color-shared/i18n/loadColorFiltersPlaceholders.js';

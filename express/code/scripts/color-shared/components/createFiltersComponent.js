@@ -18,10 +18,10 @@
  */
 
 import { createTag } from '../../utils.js';
-import { createExpressPicker } from '../spectrum/components/express-picker.js';
-import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
-import { loadIconsRail, loadPicker } from '../spectrum/load-spectrum.js';
-import { createThemeWrapper } from '../spectrum/utils/theme.js';
+import { createExpressPicker } from '../../shared/spectrum/components/express-picker.js';
+import { createExpressTooltip } from '../../shared/spectrum/components/express-tooltip.js';
+import { loadIconsRail, loadPicker } from '../../shared/spectrum/load-spectrum.js';
+import { createThemeWrapper } from '../../shared/spectrum/utils/theme.js';
 import { decorateAnalyticsAttributes, interpolate } from '../utils/utilities.js';
 import { createColorFiltersPlaceholders } from '../i18n/loadColorFiltersPlaceholders.js';
 
