@@ -1301,6 +1301,14 @@ sp-theme {
     height: 40px;
   }
 
+  .me-arc-nav--prev {
+    left: max(0px, calc(50% - (var(--me-arc-card-w) / 2) - 20px));
+  }
+
+  .me-arc-nav--next {
+    right: max(0px, calc(50% - (var(--me-arc-card-w) / 2) - 20px));
+  }
+
   .me-controls {
     gap: var(--spacing-250);
   }

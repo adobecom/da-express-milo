@@ -127,6 +127,73 @@ function isSmallViewport() {
   return window.innerWidth <= TABLET_BREAKPOINT;
 }
 
+const MOBILE_ARC_BREAKPOINT = 767;
+const MOBILE_ARC_MAX_W = 600;
+const MOBILE_ARC_BASE_W = 327;
+const MOBILE_ARC_BASE_H = 270;
+const MOBILE_ARC_BASE_GAP = 17;
+const MOBILE_ARC_MIN_GAP = 24;
+const MOBILE_ARC_MAX_GAP = 54;
+const MOBILE_ARC_BASE_ORIGIN_Y = 2544;
+const MOBILE_ARC_BASE_EXTRA_H = 50;
+const MOBILE_ARC_BORDER_BUFFER = 2;
+const MOBILE_ARC_MIN_SIDE_INSET = 20;
+const MOBILE_ARC_SIDE_INSET_BUFFER = 4;
+const MOBILE_ARC_SIDE_INSET_SCALE = 0.5;
+const MOBILE_ARC_ROTATION_GAP_FACTOR = 0.06;
+
+function readTokenPx(el, name, fallback) {
+  const raw = getComputedStyle(el).getPropertyValue(name).trim();
+  const parsed = Number.parseFloat(raw);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+/**
+ * Resolve mobile arc tokens to concrete pixel values at runtime so the
+ * carousel geometry reader can consume numbers instead of calc()/min()/clamp().
+ */
+function applyRuntimeArcTokens(root) {
+  if (!root) return;
+
+  if (window.innerWidth <= MOBILE_ARC_BREAKPOINT) {
+    const spacing300 = readTokenPx(root, '--spacing-300', 16);
+    const viewportW = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    const sideInset = Math.max(
+      MOBILE_ARC_MIN_SIDE_INSET,
+      spacing300 + MOBILE_ARC_SIDE_INSET_BUFFER,
+      Math.round(spacing300 * MOBILE_ARC_SIDE_INSET_SCALE),
+    );
+    const cardW = Math.min(
+      MOBILE_ARC_MAX_W,
+      Math.max(0, viewportW - (2 * sideInset) - MOBILE_ARC_BORDER_BUFFER),
+    );
+    const cardH = (cardW * MOBILE_ARC_BASE_H) / MOBILE_ARC_BASE_W;
+    const rotationGapBoost = cardH * MOBILE_ARC_ROTATION_GAP_FACTOR;
+    const cardGap = Math.min(
+      MOBILE_ARC_MAX_GAP,
+      Math.max(
+        MOBILE_ARC_MIN_GAP,
+        ((cardW * MOBILE_ARC_BASE_GAP) / MOBILE_ARC_BASE_W) + rotationGapBoost,
+      ),
+    );
+    const originY = (cardW * MOBILE_ARC_BASE_ORIGIN_Y) / MOBILE_ARC_BASE_W;
+    const extraH = (cardW * MOBILE_ARC_BASE_EXTRA_H) / MOBILE_ARC_BASE_W;
+
+    root.style.setProperty('--me-arc-card-w', `${cardW}px`);
+    root.style.setProperty('--me-arc-card-h', `${cardH}px`);
+    root.style.setProperty('--me-arc-track-gap', `${cardGap}px`);
+    root.style.setProperty('--me-arc-origin-y', `${originY}px`);
+    root.style.setProperty('--me-arc-extra-h', `${extraH}px`);
+    return;
+  }
+
+  root.style.removeProperty('--me-arc-card-w');
+  root.style.removeProperty('--me-arc-card-h');
+  root.style.removeProperty('--me-arc-track-gap');
+  root.style.removeProperty('--me-arc-origin-y');
+  root.style.removeProperty('--me-arc-extra-h');
+}
+
 function isReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
@@ -2040,6 +2107,7 @@ export default async function createMiniEditorWidget(config = {}) {
   // tapped), same as everywhere else this flag doesn't apply.
   const startsOpen = panelMode === 'always-open-inline' && !isMobileSheetWidth();
   root.setAttribute('data-me-panel', startsOpen ? 'fonts' : 'none');
+  applyRuntimeArcTokens(root);
 
   const stage = createTag('div', { class: 'mini-editor-stage' });
   const {
@@ -2119,6 +2187,7 @@ export default async function createMiniEditorWidget(config = {}) {
     };
 
     syncViewportMode = () => {
+      applyRuntimeArcTokens(root);
       syncDecoClipping();
       root.classList.toggle('me-carousel-mode', isSmallViewport());
     };
