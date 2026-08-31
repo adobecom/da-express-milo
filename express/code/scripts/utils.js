@@ -309,7 +309,7 @@ export async function decorateButtonsDeprecated(el, size) {
   const { decorateButtons } = await import(`${getLibs()}/utils/decorate.js`);
   // eslint-disable-next-line max-len
   // DO NOT add any more exceptions here. Authors must learn to author buttons the new milo way, even with old blocks
-  if (!el.closest('.ax-columns') && !el.closest('.banner') && !el.closest('.fullscreen-marquee') && !el.closest('.link-list')) decorateButtons(el, size);
+  if (!el.closest('.banner') && !el.closest('.fullscreen-marquee') && !el.closest('.link-list')) decorateButtons(el, size);
   // DO NOT add any more exceptions above. We should be removing the exceptions and not adding more.
   el.querySelectorAll(':scope a:not(.con-button, .social-link)').forEach(($a) => {
     // Mirrors decorateButtons' own #_button-<name> handling (milo's utils/decorate.js)
