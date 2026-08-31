@@ -1,0 +1,77 @@
+.copy-toast-container {
+  position: fixed;
+  bottom: var(--spacing-400);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-100);
+  pointer-events: none;
+}
+
+.copy-toast {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+  box-sizing: border-box;
+  padding: var(--spacing-200) var(--spacing-100) var(--spacing-200) var(--spacing-300);
+  background: var(--color-green-900);
+  border-radius: 10px;
+  color: var(--color-white);
+  font-family: var(--body-font-family);
+  font-size: var(--Global-Typography-Size-Label-Label-M);
+  line-height: var(--Global-Typography-Line-height-Label-Label-M);
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 20%);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  /* .copy-toast-container is pointer-events: none so it never blocks clicks
+     on whatever's behind it — this re-enables just the toast pill itself,
+     which now has an actually-clickable close button. */
+  pointer-events: auto;
+}
+
+.copy-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* sp-icon-checkmark-circle sizes/colours itself via these CSS custom
+   property hooks — same pattern as mini-editor-widget.css's
+   .me-action-icon, no Spectrum theme/design tokens required. */
+.copy-toast-icon {
+  flex-shrink: 0;
+  --mod-icon-size: 18px;
+  --mod-icon-color: var(--color-white);
+}
+
+.copy-toast-close {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  margin: 0;
+  background: none;
+  border: none;
+  border-radius: 16px;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.copy-toast-close:hover,
+.copy-toast-close:focus-visible {
+  background: rgb(255 255 255 / 15%);
+}
+
+/* sp-icon-close sizes/colours itself via these CSS custom property hooks —
+   same pattern as .copy-toast-icon above. */
+.copy-toast-close-icon {
+  --mod-icon-size: 12px;
+  --mod-icon-color: var(--color-white);
+}
