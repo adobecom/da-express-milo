@@ -183,8 +183,8 @@ export const style = css`
 
   
   .swatch-rail[data-orientation="horizontal"] {
-    height: 48px;
-    padding: 8px 12px;
+    height: var(--swatch-rail-horizontal-height, 48px);
+    padding: var(--swatch-rail-horizontal-padding, 8px 12px);
     gap: var(--swatch-rail-gap, var(--spacing-50));
     border-radius: var(--figma-strip-radius) var(--figma-strip-radius) 0 0;
   }
@@ -193,7 +193,9 @@ export const style = css`
     flex: 1 1 0;
     width: auto;
     min-width: 0;
-    padding: 0;
+    padding: var(--swatch-column-horizontal-padding, 0);
+    gap: var(--swatch-column-horizontal-gap, 0);
+    border-radius: var(--swatch-column-horizontal-radius, 0);
   }
 
   .swatch-rail[data-orientation="horizontal"] .swatch-column:first-child {
@@ -472,7 +474,11 @@ export const style = css`
     width: 100%;
     justify-content: space-between;
     flex-direction: row;
-    padding: 0 8px;
+    height: var(--bottom-info-horizontal-height, auto);
+    padding: var(--bottom-info-horizontal-padding, 0 var(--spacing-100));
+    gap: var(--bottom-info-horizontal-gap, 8px);
+    border-radius: var(--bottom-info-horizontal-radius, 0);
+    box-sizing: border-box;
   }
 
   .swatch-rail[data-orientation="horizontal"] .hex-code {
@@ -486,6 +492,20 @@ export const style = css`
   .swatch-rail[data-orientation="horizontal"] .bottom-info__actions {
     flex-shrink: 0;
     margin-left: 0;
+  }
+
+  .hex-code-group {
+    display: flex;
+    align-items: center;
+    gap: var(--hex-code-group-gap, 6px);
+    min-width: 0;
+  }
+
+  .hex-code-group .icon-button--edit-tint {
+    background: var(--hex-code-edit-tint-background, rgba(0, 0, 0, 0.15));
+    border-radius: var(--hex-code-edit-tint-radius, 6px);
+    width: var(--hex-code-edit-tint-size, 24px);
+    height: var(--hex-code-edit-tint-size, 24px);
   }
 
   
@@ -650,6 +670,20 @@ export const style = css`
   .swatch-column--right-actions-hover-only.locked:not(:hover):not(:focus-visible):not(:has(.swatch-column-focusable:focus-visible)) .top-actions--right > :not(.icon-button--lock) {
     opacity: 0;
     pointer-events: none;
+  }
+
+  @media (hover: hover) {
+    .swatch-column--hex-copy-hover-only .bottom-info {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.15s ease;
+    }
+
+    .swatch-column--hex-copy-hover-only:hover .bottom-info,
+    .swatch-column--hex-copy-hover-only:focus-within .bottom-info {
+      opacity: 1;
+      pointer-events: auto;
+    }
   }
 
 
