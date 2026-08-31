@@ -1513,7 +1513,12 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
     quoteP.style.fontStretch = entry.font?.stretch || '';
     authorP.textContent = entry.author || '';
     authorP.style.display = entry.author ? '' : 'none';
-    el.classList.add(`${entry.card.mode}-mode`);
+    // Replacing (not stacking) mode classes keeps text contrast in sync
+    // when the same card node is re-rendered across background picks.
+    el.classList.remove('light-mode', 'dark-mode');
+    if (entry.card.mode === 'light' || entry.card.mode === 'dark') {
+      el.classList.add(`${entry.card.mode}-mode`);
+    }
   }
 
   // Every role is now interactive (centre copies its quote on click/Enter,
