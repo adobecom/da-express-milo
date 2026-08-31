@@ -34,7 +34,11 @@ export default async function showCopyToast(message) {
     await import(`${getConfig().codeRoot}/scripts/widgets/spectrum/dist/icons-workflow.js`);
   }
   if (!container) {
-    container = createTag('div', { class: 'copy-toast-container' });
+    container = createTag('div', {
+      class: 'copy-toast-container',
+      role: 'status',
+      'aria-live': 'polite',
+    });
     document.body.append(container);
   }
 

@@ -74,7 +74,12 @@ describe('mini-editor-widget', () => {
       backgroundUrl: '/img/image0.jpg',
       backgroundUrn: 'urn:0',
       mode: '',
-      font: { family: fontOptions[0].font, style: 'normal', weight: 'normal', stretch: 'normal' },
+      font: {
+        family: fontOptions[0].font,
+        style: 'normal',
+        weight: 'normal',
+        stretch: 'normal',
+      },
     });
 
     model.quote = 'Changed outside';
@@ -205,25 +210,21 @@ describe('mini-editor-widget', () => {
     expect(quoteWrap.classList.contains('is-copied')).to.be.false;
   });
 
-  it('dispatching mini-editor:use-quote updates the widget and scrolls it into view', async () => {
+  it('dispatching mini-editor:use-quote updates the widget', async () => {
     const { root } = await mount();
-    root.scrollIntoView = sinon.spy();
     document.dispatchEvent(new CustomEvent('mini-editor:use-quote', {
       detail: { quote: 'From collapsible-rows', author: 'Some Author' },
     }));
     expect(root.querySelector('.me-quote').textContent).to.equal('From collapsible-rows');
-    expect(root.scrollIntoView.calledOnce).to.be.true;
   });
 
   it('destroy removes the outside-click and use-quote listeners', async () => {
     const { root, editor } = await mount();
     editor.destroy();
-    root.scrollIntoView = sinon.spy();
     document.dispatchEvent(new CustomEvent('mini-editor:use-quote', {
       detail: { quote: 'Should not apply', author: '' },
     }));
     expect(root.querySelector('.me-quote').textContent).to.not.equal('Should not apply');
-    expect(root.scrollIntoView.called).to.be.false;
   });
 
   describe('arc carousel (tablet/mobile)', () => {
@@ -338,6 +339,27 @@ describe('mini-editor-widget', () => {
       editor.syncViewportMode();
       expect(root.classList.contains('me-carousel-mode')).to.be.true;
       Object.defineProperty(window, 'innerWidth', { value: original, configurable: true });
+      editor.syncViewportMode();
+    });
+
+    it('uses carousel mode at exactly 1200px and desktop mode above it', async () => {
+      const { root, editor } = await mount();
+      const original = window.innerWidth;
+      const originalHeight = window.innerHeight;
+
+      Object.defineProperty(window, 'innerWidth', { value: 1200, configurable: true });
+      editor.syncViewportMode();
+      expect(root.classList.contains('me-carousel-mode')).to.be.true;
+
+      // Touch-tablet-like landscape dimensions should still switch to
+      // desktop mode once width exceeds 1200.
+      Object.defineProperty(window, 'innerHeight', { value: 700, configurable: true });
+      Object.defineProperty(window, 'innerWidth', { value: 1201, configurable: true });
+      editor.syncViewportMode();
+      expect(root.classList.contains('me-carousel-mode')).to.be.false;
+
+      Object.defineProperty(window, 'innerWidth', { value: original, configurable: true });
+      Object.defineProperty(window, 'innerHeight', { value: originalHeight, configurable: true });
       editor.syncViewportMode();
     });
 

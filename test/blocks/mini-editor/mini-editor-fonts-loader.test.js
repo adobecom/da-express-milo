@@ -30,10 +30,10 @@ describe('mini-editor-fonts-loader', () => {
   it('builds options from the fonts Typekit actually exposes, humanizing the slug', async () => {
     window.Typekit = {
       load: ({ active }) => active?.(),
-      fonts: {
-        fonts: [
-          { family: 'gothic-a1', weight: '400', style: 'normal' },
-          { family: 'source-han-sans-japanese', weight: '700', style: 'normal' },
+      config: {
+        fc: [
+          { family: 'gothic-a1', descriptors: { weight: '400', style: 'normal' } },
+          { family: 'source-han-sans-japanese', descriptors: { weight: '700', style: 'normal' } },
         ],
       },
     };
@@ -51,11 +51,11 @@ describe('mini-editor-fonts-loader', () => {
   it('collapses multiple variants of the same family into one option with italic/bold flags', async () => {
     window.Typekit = {
       load: ({ active }) => active?.(),
-      fonts: {
-        fonts: [
-          { family: 'noto-sans', weight: '400', style: 'normal' },
-          { family: 'noto-sans', weight: '400', style: 'italic' },
-          { family: 'noto-sans', weight: '700', style: 'normal' },
+      config: {
+        fc: [
+          { family: 'noto-sans', descriptors: { weight: '400', style: 'normal' } },
+          { family: 'noto-sans', descriptors: { weight: '400', style: 'italic' } },
+          { family: 'noto-sans', descriptors: { weight: '700', style: 'normal' } },
         ],
       },
     };
@@ -69,8 +69,8 @@ describe('mini-editor-fonts-loader', () => {
     });
   });
 
-  it('falls back when Typekit.fonts.fonts is present but empty', async () => {
-    window.Typekit = { load: ({ active }) => active?.(), fonts: { fonts: [] } };
+  it('falls back when Typekit.config.fc is present but empty', async () => {
+    window.Typekit = { load: ({ active }) => active?.(), config: { fc: [] } };
     const options = await getFontOptions();
     expect(options.map((o) => o.label)).to.deep.equal(FALLBACK_LABELS);
   });
@@ -78,7 +78,12 @@ describe('mini-editor-fonts-loader', () => {
   it('skips entries with no family', async () => {
     window.Typekit = {
       load: ({ active }) => active?.(),
-      fonts: { fonts: [{ family: '', weight: '400' }, { family: 'gothic-a1', weight: '400' }] },
+      config: {
+        fc: [
+          { family: '', descriptors: { weight: '400' } },
+          { family: 'gothic-a1', descriptors: { weight: '400' } },
+        ],
+      },
     };
     const options = await getFontOptions();
     expect(options).to.deep.equal([

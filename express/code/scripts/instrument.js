@@ -340,7 +340,8 @@ function trackColorPageLoad() {
 
 function trackExpressFeaturePageLoad() {
   try {
-    if (getMetadata('pagetype') !== 'font-generator') return;
+    const pageType = getMetadata('pagetype');
+    if (pageType !== 'font-generator' && pageType !== 'mini-editor') return;
 
     const eventName = 'view-acom-express-features';
     let refDomain = '';
@@ -381,7 +382,7 @@ function trackExpressFeaturePageLoad() {
                 },
                 link: {
                   page_url: loc.href,
-                  page_type: 'fonts',
+                  page_type: pageType === 'mini-editor' ? 'mini-editor' : 'fonts',
                 },
                 ui: {
                   location: pathname,

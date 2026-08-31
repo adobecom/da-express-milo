@@ -64,6 +64,7 @@ export default async function createShareMenuWidget({
   feedback,
   getContent,
   notify,
+  onActionSelect,
 } = {}) {
   if (!trigger || !heading || !actions.length || typeof getContent !== 'function') {
     throw new Error('Share menu requires a trigger, heading, actions, and getContent');
@@ -95,7 +96,7 @@ export default async function createShareMenuWidget({
   sectionHeader.textContent = strings.heading;
   group.append(sectionHeader);
 
-  actions.forEach((action, index) => {
+  actions.forEach((action) => {
     const label = strings[`action:${action.value}`];
     const item = createTag('sp-menu-item', {
       value: action.value,
@@ -196,6 +197,7 @@ export default async function createShareMenuWidget({
     const action = actions.find(({ value }) => value === item.getAttribute('value'));
     if (!action) return;
     event.stopPropagation();
+    onActionSelect?.({ action, event });
     const dismissOnSelect = typeof action.dismissOnSelect === 'function'
       ? action.dismissOnSelect()
       : action.dismissOnSelect !== false;

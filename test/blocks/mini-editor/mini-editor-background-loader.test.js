@@ -34,8 +34,8 @@ describe('mini-editor-background-loader', () => {
     const [calledUrl] = fetchStub.firstCall.args;
     expect(calledUrl).to.contain('collectionId=urn:collection:1');
     expect(cards).to.deep.equal([
-      { id: 'urn:1', bg: 'https://cdn/rendition/1' },
-      { id: 'urn:2', bg: 'https://cdn/rendition/2' },
+      { id: 'urn:1', bg: 'https://cdn/rendition/1', title: '', mode: 'light' },
+      { id: 'urn:2', bg: 'https://cdn/rendition/2', title: '', mode: 'light' },
     ]);
   });
 

@@ -1,6 +1,7 @@
 import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import { isExpressTypographyClass, isMiloTypographyClass } from '../../scripts/typography-utils.js';
 import showCopyToast from '../../scripts/utils/copy-toast.js';
+import trackMiniEditorExport from '../../scripts/utils/mini-editor-analytics.js';
 
 let createTag;
 let getConfig;
@@ -26,7 +27,7 @@ const USE_QUOTE_EVENT = 'mini-editor:use-quote';
 function buildQuoteActions(quote, author, hasMiniEditor) {
   if (!hasMiniEditor) return null;
 
-  const actions = createTag('div', { class: 'collapsible-row-actions' });
+  const actions = createTag('div', { class: 'collapsible-row-actions collapsible-row-actions--mini-editor' });
 
   const copyBtn = createTag('button', { type: 'button', class: 'collapsible-row-action collapsible-row-action--copy' }, [
     getIconElementDeprecated('copy-quote'),
@@ -36,6 +37,10 @@ function buildQuoteActions(quote, author, hasMiniEditor) {
     const text = author ? `${quote} — ${author}` : quote;
     try {
       await navigator.clipboard.writeText(text);
+      trackMiniEditorExport({
+        exportMethod: 'copy-clipboard',
+        uiLocation: 'seo-discover-page-collapsible-row',
+      });
       showCopyToast('Quote copied to clipboard');
     } catch {
       // Clipboard write failed (e.g. permissions) — no toast, nothing else to do.
@@ -46,6 +51,7 @@ function buildQuoteActions(quote, author, hasMiniEditor) {
     getIconElementDeprecated('create-design'),
     createTag('span', {}, ['Create a design']),
   ]);
+  designBtn.setAttribute('daa-ll', 'Create a design');
   designBtn.addEventListener('click', () => {
     document.dispatchEvent(new CustomEvent(USE_QUOTE_EVENT, { detail: { quote, author } }));
   });
@@ -163,7 +169,13 @@ function buildTableLayout(block, typographyClasses = {}, hasMiniEditor = false) 
       subHeaderEl.textContent.trim(),
       hasMiniEditor,
     );
-    if (quoteActions) subHeaderAccordion.append(quoteActions);
+    if (quoteActions) {
+      rowWrapper.classList.add('collapsible-row-wrapper--mini-editor');
+      subHeaderAccordion.classList.add('collapsible-row-accordion--mini-editor');
+      headerEl.classList.add('collapsible-row-header--mini-editor');
+      subHeaderEl.classList.add('collapsible-row-sub-header--mini-editor');
+      subHeaderAccordion.append(quoteActions);
+    }
 
     headerEl.addEventListener('click', () => {
       headerAccordion.classList.toggle('rounded-corners');
@@ -235,7 +247,12 @@ function buildOriginalLayout(
       subHeaderEl.textContent.trim(),
       hasMiniEditor,
     );
-    if (quoteActions) accordion.append(quoteActions);
+    if (quoteActions) {
+      accordion.classList.add('collapsible-row-accordion--mini-editor');
+      headerEl.classList.add('collapsible-row-header--mini-editor');
+      subHeaderEl.classList.add('collapsible-row-sub-header--mini-editor');
+      accordion.append(quoteActions);
+    }
   });
 
   const toggleButton = createTag('a', { class: 'collapsible-row-toggle-btn button' });

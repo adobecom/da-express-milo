@@ -30,6 +30,7 @@
      mobile media query below for the per-breakpoint overrides. */
   --me-arc-card-w: 542px;
   --me-arc-card-h: 350px;
+  --me-arc-track-gap: 48px;
   /* Extra height below the centre card's own box: the side cards pivot
      around --me-arc-origin-y (a point on the shared carousel circle, far
      below the card — see .me-arc-card's transform-origin), so their
@@ -101,7 +102,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: var(--spacing-300);
+  /* margin-bottom: var(--spacing-300); */
 }
 
 .mini-editor-logo img {
@@ -132,7 +133,7 @@
 }
 
 .mini-editor-header p:has(a.button) {
-  margin-top: var(--spacing-300) !important;
+  margin-top: 6px !important;
 }
 
 /* Matches the "Design with your quote" CTA on the discover page hero
@@ -166,6 +167,7 @@
        --me-arc-card-w — see .me-carousel-mode .mini-editor-widget. */
     --me-arc-card-w: 327px;
     --me-arc-card-h: 270px;
+    --me-arc-track-gap: 32px;
     --me-arc-origin-y: 2544px;
     --me-arc-extra-h: 50px;
     /* Per feedback: the gap between the carousel card and the font/colour

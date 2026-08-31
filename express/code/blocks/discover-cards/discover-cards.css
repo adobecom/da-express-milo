@@ -135,6 +135,7 @@ main .section .discover-cards {
     justify-content: flex-end;
     gap: var(--spacing-100);
     align-items: center;
+    max-width: 1700px;
 }
 .discover-cards.flip .gallery-control {
   padding-top: var(--spacing-600);
@@ -143,10 +144,10 @@ main .section .discover-cards {
     display: none;
 }
 .discover-cards .cards-container .card .text-content {
-    text-align: left;
+    text-align: start;
 }
 .discover-cards .cards-container .card .text-content .header {
-    text-align: left;
+    text-align: start;
     font-size: var(--ax-heading-l-size);
     font-weight: var(--heading-font-weight);
     margin-top: 17px;
@@ -161,22 +162,23 @@ main .section .discover-cards {
     height: 147px;
     margin-top: var(--spacing-80);
 }
-.discover-cards .card .button-container {
-    text-align: left;
-}
-.section .discover-cards .card .button-container a {
+  .discover-cards .card :is(.button-container, .action-area) {
+      text-align: start;
+  }
+
+  .section .discover-cards .card :is(.button-container, .action-area) a {
     background-color: var(--color-gray-800-variant);
     color: var(--color-white);
     border: none;
     margin-top: var(--spacing-500);
-    margin-left: 0;
+    margin-inline-start: 0;
 }
 
 .discover-cards .cards-container.gallery {
-    scroll-padding-left: var(--spacing-350);
+    scroll-padding-inline-start: var(--spacing-350);
 }
 .discover-cards .cards-container .card:first-child {
-    margin-left: var(--spacing-350);
+    margin-inline-start: var(--spacing-350);
 }
 
 @media (min-width: 600px) {
@@ -204,7 +206,7 @@ main .section .discover-cards {
         width: auto;
     }
     .discover-cards .cards-container .card .text-content {
-        text-align: left;
+        text-align: start;
         width: 351px;
         margin-left: auto;
         margin-right: auto;
@@ -217,10 +219,10 @@ main .section .discover-cards {
         height: 198px;
     }
     .discover-cards .cards-container.gallery {
-        scroll-padding-left: 60px;
+        scroll-padding-inline-start: 60px;
     }
     .discover-cards .cards-container .card:first-child {
-        margin-left: 60px;
+        margin-inline-start: var(--spacing-300);
     }
     .discover-cards.flip .center-title {
       font-size: var(--heading-font-size-m);
@@ -230,10 +232,8 @@ main .section .discover-cards {
       padding-bottom: var(--spacing-800);
     }
     .discover-cards.flip .cards-container.gallery {
-      padding-left: var(--spacing-500);
-      padding-right: var(--spacing-500);
-      scroll-padding-left: var(--spacing-500);
-      scroll-padding-right: var(--spacing-500);
+      padding-inline: var(--spacing-500);
+      scroll-padding-inline: var(--spacing-500);
       justify-content: center;
     }
     .section:has(.discover-cards.v2) {
@@ -252,11 +252,14 @@ main .section .discover-cards {
     .discover-cards .cards-container {
         margin: auto;
     }
+    .discover-cards .gallery-control {
+        margin: 0 auto;
+    }
     .discover-cards .cards-container.gallery {
-        scroll-padding-left: 100px;
+        scroll-padding-inline-start: 100px;
     }
     .discover-cards .cards-container .card:first-child {
-        margin-left: 100px;
+        margin-inline-start: 100px;
     }
 }
 
@@ -337,6 +340,10 @@ main .section .discover-cards {
 
 .discover-cards .gallery-control button:disabled path {
     stroke: var(--color-gray-300);
+}
+
+html[dir="rtl"] .discover-cards .gallery-control button {
+  transform: scaleX(-1);
 }
 
 .discover-cards.flip .flip-card-inner {

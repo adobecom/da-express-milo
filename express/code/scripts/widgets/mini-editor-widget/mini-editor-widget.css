@@ -22,6 +22,8 @@
   --me-quote-font-style: normal;
   --me-quote-font-weight: normal;
   --me-quote-font-stretch: normal;
+  --me-action-icon-color: #292929;
+  --me-action-hover-bg: var(--color-gray-150);
 }
 
 .mini-editor-stage {
@@ -82,13 +84,23 @@
   backdrop-filter: blur(2.5px);
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.15s ease;
+  transition: opacity 0.22s ease;
 }
 
 .mini-editor-widget:hover .me-actions,
 .mini-editor-widget:focus-within .me-actions {
   opacity: 1;
   pointer-events: auto;
+}
+
+/* Tablet card view (coarse pointer) keeps actions visible even above 1200px;
+   desktop/fine pointer stays hover-only via the rule above. */
+@media (width > 1200px) and (pointer: coarse) {
+  .mini-editor-widget .me-actions,
+  .me-modal-card-root .me-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
 }
 
 .me-action {
@@ -110,18 +122,58 @@
    tokens required, so a plain 20px/#292929 override here is enough. */
 .me-action-icon {
   --mod-icon-size: 20px;
-  --mod-icon-color: #292929;
+  --mod-icon-color: var(--me-action-icon-color);
 }
 
 .me-action:hover,
 .me-action[aria-expanded='true'] {
-  background: var(--color-gray-150);
+  background: var(--me-action-hover-bg);
+}
+
+/* Modal action bar: desktop shows on hover (over card), tablet/mobile always visible.
+  On desktop (>1200px), using me-card:hover selector so the bar stays visible
+   while moving pointer from card to buttons. Tablet/mobile always shows with
+   carousel-mode styling. */
+
+/* Desktop (>1200px): action bar hidden by default, visible on hover over card
+   (same as regular widget) */
+@media (width > 1200px) {
+  .me-modal-card-root .me-card:hover .me-actions,
+  .me-modal-card-root .me-card:focus-within .me-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Tablet/mobile (<=1200px): modal action buttons always visible with same
+   styling as carousel mode, per Figma node 54:7883 ("Primary actions",
+   tablet/mobile) — smaller/lighter than desktop spec. */
+@media (width <= 1200px) {
+  .me-modal-card-root .me-actions {
+    opacity: 1;
+    pointer-events: auto;
+    gap: var(--spacing-80);
+    padding: 2px;
+    border-radius: var(--corner-radius-80);
+    background: rgb(255 255 255 / 51%);
+    border-color: rgb(255 255 255 / 14%);
+  }
+
+  .me-modal-card-root .me-action {
+    width: 24px;
+    height: 24px;
+    padding: 4.5px;
+  }
+
+  .me-modal-card-root .me-action-icon {
+    --mod-icon-size: 15px;
+  }
 }
 
 .me-quote-wrap {
   position: relative;
   box-sizing: border-box;
-  max-width: 322px;
+  max-width: 380px;
   padding: var(--spacing-75);
   cursor: pointer;
   border: 1px solid transparent;
@@ -314,6 +366,14 @@
   border-radius: var(--Radius-corner-radius-200);
   transform: translateY(96.5px);
   transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+  /* Mouse drag-to-scroll (see wireDragToScroll) — grab/grabbing signals the
+     row itself is draggable, same as the native overflow-x: auto scroll
+     this already has for touch/trackpad. */
+  cursor: grab;
+}
+
+.me-row:active {
+  cursor: grabbing;
 }
 
 .mini-editor[data-me-panel='fonts'] .me-row--fonts,
@@ -675,55 +735,77 @@
   pointer-events: auto;
 }
 
+/* theme.js (the shared, already-built Spectrum bundle every sp-* component
+   here reads its design tokens from) only ever defines
+   --system-button-secondary-background-color-default — the -hover/-down/
+   -focus siblings sp-button's own CSS asks for are never defined anywhere
+   in this codebase, so a plain variant="secondary" button would render
+   with no visible background at all on hover/press/focus. Filled in here
+   (not in theme.js itself, which other already-working components also
+   read from) as a general fallback for any secondary button — .me-deco-use/
+   .me-deco-copy below still set their own exact per-instance colours via
+   --mod-button-* to match Figma pixel-for-pixel, but this keeps every
+   *other* state (e.g. plain browser default rendering before those
+   overrides apply) non-broken too. */
+sp-theme {
+  --system-button-secondary-background-color-hover: var(--spectrum-gray-200);
+  --system-button-secondary-background-color-down: var(--spectrum-gray-300);
+  --system-button-secondary-background-color-focus: var(--spectrum-gray-200);
+}
+
+/* .me-deco-use/.me-deco-copy are sp-button[variant="secondary"], overridden
+   via its --mod-button-* hooks to match Figma node 54:7921 ("Quote Hero
+   Card" actions) exactly — the component's own size="s"/"m" presets don't
+   land on this exact 32px-tall, 8px-radius box. sp-button centres its own
+   label via padding-block on #label (--mod-button-top/bottom-to-text), NOT
+   via flex align-items on the host — #label's own rule always sets
+   align-self: start, so --mod-button-height alone (without also setting
+   these two) leaves the label pinned near the button's top edge instead of
+   vertically centred. 7px top + 7px bottom + 18px line-height = 32px. */
 .me-deco-use,
 .me-deco-copy {
-  height: 32px;
-  box-sizing: border-box;
-  background: var(--Palette-gray-100);
-  border: none;
-  border-radius: var(--Corner-radius-corner-radius-100);
-  color: var(--Alias-content-neutral-default);
-  cursor: pointer;
-  transition: background-color 0.15s ease;
+  padding-block: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  --mod-button-height: 32px;
+  --mod-button-top-to-text: 7px;
+  --mod-button-bottom-to-text: 7px;
+  --mod-button-border-radius: 8px;
+  --mod-button-border-width: 0;
+  --mod-button-font-size: 14px;
+  --mod-button-line-height: 18px;
+  --mod-button-background-color-default: var(--Palette-gray-100);
+  --mod-button-background-color-hover: var(--spectrum-gray-200);
+  --mod-button-background-color-down: var(--spectrum-gray-300);
+  --mod-button-background-color-focus: var(--spectrum-gray-200);
+  --mod-button-content-color-default: var(--Alias-content-neutral-default);
+  --mod-button-content-color-hover: var(--Alias-content-neutral-default);
+  --mod-button-content-color-down: var(--Alias-content-neutral-default);
+  --mod-button-content-color-focus: var(--Alias-content-neutral-default);
+  /* sp-button's label always renders at --mod-bold-font-weight (there's no
+     dedicated font-weight hook on the button itself) — Figma calls for
+     weight 500 here, not bold, so it's overridden directly. Scoped to just
+     these two buttons since --mod-bold-font-weight has exactly one other
+     reader in the whole bundle (nothing else in scope uses it). */
+  --mod-bold-font-weight: 500;
 }
 
 .me-deco-use {
-  display: inline-flex;
-  align-items: center;
-  padding: 7px 12px;
-  font-size: var(--Global-Typography-Size-Label-Label-M);
-  white-space: nowrap;
+  --mod-button-edge-to-text: 12px;
 }
 
 .me-deco-copy {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  padding: 7px;
+  aspect-ratio: 1;
+  --mod-button-edge-to-text: 7px;
+  --mod-button-min-width: 32px;
 }
 
-/* sp-icon-copy (see buildDecoCard) sizes/colours itself via these CSS
-   custom property hooks — same pattern as .me-action-icon above, no
-   Spectrum theme/design tokens required. */
+/* sp-icon-copy (see buildDecoCard) sizes itself via this CSS custom
+   property hook — no Spectrum theme/design tokens required. Colour comes
+   from sp-button's own icon styling (--mod-button-content-color-* above),
+   not set here. */
 .me-deco-copy-icon {
   --mod-icon-size: 18px;
-  --mod-icon-color: var(--Alias-content-neutral-default);
-}
-
-.me-deco-use:hover,
-.me-deco-copy:hover {
-  background: var(--color-gray-200);
-}
-
-/* No dedicated focus variant for these two in Figma (the "Quote Hero Card"
-   component only defines Default/Hover) — added for keyboard-focus
-   visibility, consistent with the ring treatment used on every other
-   interactive element in this file. */
-.me-deco-use:focus-visible,
-.me-deco-copy:focus-visible {
-  outline: 2px solid var(--color-focus-ring-strong);
-  outline-offset: 2px;
 }
 
 @media (width >= 1200px) {
@@ -754,6 +836,7 @@
   margin: 0 calc(50% - 50vw) var(--me-arc-gap);
   height: var(--me-arc-card-h);
   clip-path: inset(calc(-1 * var(--me-arc-extra-h)) 0);
+  touch-action: pan-y;
 }
 
 /* ARIA-only grouping for the 3 option cards + ghost (see buildArcCarousel) —
@@ -764,16 +847,18 @@
   display: contents;
 }
 
-.me-carousel-mode .mini-editor-decorations {
-  display: none;
-}
+@media (max-width: 1200px) {
+  .me-carousel-mode .mini-editor-decorations {
+    display: none;
+  }
 
-.me-carousel-mode .me-card {
-  display: none;
-}
+  .me-carousel-mode .me-card {
+    display: none;
+  }
 
-.me-carousel-mode .me-arc {
-  display: flex;
+  .me-carousel-mode .me-arc {
+    display: flex;
+  }
 }
 
 /* Touch devices have no hover, so the action bar stays always-visible here
@@ -784,24 +869,26 @@
    tablet/mobile) the bar itself is smaller/lighter here than the desktop
    spec (Figma 1099-5050) — different background opacity, thinner border,
    smaller radius/gap/padding — not just always-visible. */
-.me-carousel-mode .me-actions {
-  opacity: 1;
-  pointer-events: auto;
-  gap: var(--spacing-80);
-  padding: 2px;
-  border-radius: var(--corner-radius-80);
-  background: rgb(255 255 255 / 51%);
-  border-color: rgb(255 255 255 / 14%);
-}
+@media (max-width: 1200px) {
+  .me-carousel-mode .me-actions {
+    opacity: 1;
+    pointer-events: auto;
+    gap: var(--spacing-80);
+    padding: 2px;
+    border-radius: var(--corner-radius-80);
+    background: rgb(255 255 255 / 51%);
+    border-color: rgb(255 255 255 / 14%);
+  }
 
-.me-carousel-mode .me-action {
-  width: 24px;
-  height: 24px;
-  padding: 4.5px;
-}
+  .me-carousel-mode .me-action {
+    width: 24px;
+    height: 24px;
+    padding: 4.5px;
+  }
 
-.me-carousel-mode .me-action-icon {
-  --mod-icon-size: 15px;
+  .me-carousel-mode .me-action-icon {
+    --mod-icon-size: 15px;
+  }
 }
 
 /* Hides the action bar for the ~1s a carousel navigation is mid-transition
@@ -815,6 +902,11 @@
 .mini-editor-widget.me-arc-moving .me-actions {
   opacity: 0;
   pointer-events: none;
+  transition-duration: 0s;
+}
+
+.mini-editor-widget.me-arc-reduce-motion .me-actions {
+  transition: none;
 }
 
 /* The widget's own max-width (542px, matching the tablet card size) only
@@ -823,8 +915,45 @@
    carousel were rendering wider than the visible editor card above them.
    Tying the widget's width to the same variable keeps them in lockstep at
    every breakpoint instead of matching by coincidence at just one. */
-.me-carousel-mode .mini-editor-widget {
-  max-width: var(--me-arc-card-w, 542px);
+@media (max-width: 1200px) {
+  .me-carousel-mode .mini-editor-widget {
+    max-width: var(--me-arc-card-w, 542px);
+  }
+}
+
+/* Defensive desktop guard: if .me-carousel-mode ever lingers on a wide
+   viewport (e.g. after a stale class/state mismatch), force the desktop
+   card+deco view back on for >1200px. */
+@media (width > 1200px) {
+  .me-carousel-mode .mini-editor-decorations {
+    display: block;
+  }
+
+  .me-carousel-mode .me-card {
+    display: flex;
+  }
+
+  .me-carousel-mode .me-arc {
+    display: none;
+  }
+
+  .me-carousel-mode .me-actions {
+    gap: var(--spacing-80);
+    padding: var(--spacing-80);
+    border-radius: 16px;
+    background: var(--transparent-white-400);
+    border-color: var(--transparent-white-500);
+  }
+
+  .me-carousel-mode .me-action {
+    width: 32px;
+    height: 32px;
+    padding: var(--spacing-80);
+  }
+
+  .me-carousel-mode .me-action-icon {
+    --mod-icon-size: 20px;
+  }
 }
 
 .me-arc-card {
@@ -845,15 +974,9 @@
   justify-content: center;
   overflow: hidden;
   box-shadow: 0 5px 6px rgb(0 0 0 / 12%), 0 16px 16px rgb(0 0 0 / 8%);
-  /* transform-origin sits far below the card, on the shared carousel
-     circle's own centre (--me-arc-origin-y below this card's vertical
-     centre) — fixed for every role, never changing between roles, so each
-     role's transform is a single rotate() with nothing else to interpolate.
-     Rotating about that one distant point is what keeps every card's
-     bottom edge on the circle throughout a transition, not just at rest —
-     see --me-arc-origin-y in mini-editor.css. */
-  transform-origin: 50% calc(50% + var(--me-arc-origin-y));
-  transition: transform 1s ease-in-out, opacity 1s ease-in-out;
+  transform-origin: 50% 50%;
+  transition: opacity 0.22s linear;
+  will-change: transform, opacity;
   -webkit-user-select: none;
   user-select: none;
 }
@@ -861,71 +984,26 @@
 .me-arc-card--center {
   z-index: 3;
   cursor: pointer;
-  transition: transform 1s ease-in-out, opacity 1s ease-in-out,
-    background-color 0.18s ease, border-color 0.18s ease;
+  transition: opacity 0.22s linear, background-color 0.18s ease, border-color 0.18s ease;
 }
 
 .me-arc-card--prev,
 .me-arc-card--next {
-  z-index: 1;
   cursor: pointer;
 }
 
-.me-arc-card--prev {
-  transform: rotate(-8deg);
-}
-
-.me-arc-card--next {
-  transform: rotate(8deg);
-}
-
-/* Off-screen staging position for a recycled card (see mini-editor-widget.js
-   setRole's `instant` path) — parked further out than the resting
-   prev/next spot, same rotation direction but twice the swing, so the very
-   next transition (turning off `instant`) animates it rotating in from
-   beyond the edge instead of popping directly into its final slot. Since
-   every role rotates about the same distant --me-arc-origin-y point (see
-   .me-arc-card), doubling the *centre-point* displacement to 2x the
-   resting prev/next distance means doubling sin(angle), not the angle
-   itself: asin(2 * sin(8deg)) ≈ 16.1615deg. */
-.me-arc-card--stage-prev {
-  transform: rotate(-16.1615deg);
-}
-
-.me-arc-card--stage-next {
-  transform: rotate(16.1615deg);
-}
-
-/* Ghost: a 4th, non-interactive card (see buildArcGhost in
-   mini-editor-widget.js) that plays the outgoing card's visible exit —
-   continuing further out on its own side while fading — so the recycled real
-   card's old content doesn't just vanish when it's silently restaged to enter
-   from the opposite side. Sits behind the 3 real cards (z-index 0) and starts
-   invisible; JS toggles it to the plain --prev/--next resting class first
-   (so it appears exactly where the real card just was) then immediately
-   to --exit-prev/--exit-next, which is what's actually transitioned. */
-.me-arc-ghost {
-  z-index: 0;
+.me-arc-card--off {
+  opacity: 0;
   pointer-events: none;
-  opacity: 0;
-  cursor: default;
 }
 
-.me-arc-ghost.me-arc-ghost--visible {
-  opacity: 1;
-}
-
-.me-arc-card--exit-prev {
-  transform: rotate(-16.1615deg);
-}
-
-.me-arc-card--exit-next {
-  transform: rotate(16.1615deg);
-}
-
-.me-arc-ghost.me-arc-ghost--visible.me-arc-card--exit-prev,
-.me-arc-ghost.me-arc-ghost--visible.me-arc-card--exit-next {
-  opacity: 0;
+@media (prefers-reduced-motion: reduce) {
+  .me-arc-card,
+  .me-arc-card--center,
+  .me-actions,
+  .mini-editor-widget.me-arc-moving .me-actions {
+    transition: none;
+  }
 }
 
 .me-arc-quote {
@@ -940,7 +1018,6 @@
 .me-arc-author {
   position: absolute;
   left: 50%;
-  bottom: var(--spacing-200);
   transform: translateX(-50%);
   margin: 0;
   font-size: 16px;
@@ -953,7 +1030,7 @@
 .me-arc-nav {
   position: absolute;
   top: 50%;
-  z-index: 3;
+  z-index: 220;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1077,7 +1154,10 @@
 .me-sheet-grid--colour {
   grid-auto-flow: column;
   grid-template-rows: repeat(2, 46px);
-  grid-auto-columns: 46px;
+  /* Let sparse swatch sets expand across the available width, while still
+     preserving a minimum tap-target column and horizontal scroll for larger
+     sets. */
+  grid-auto-columns: minmax(46px, 1fr);
   overflow-x: auto;
   padding-bottom: var(--spacing-100);
   scrollbar-width: none;

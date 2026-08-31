@@ -8,6 +8,7 @@ import {
 } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import showCopyToast from '../../scripts/utils/copy-toast.js';
 import MiniEditorCardExporter from '../../scripts/utils/mini-editor-card-export.js';
+import trackMiniEditorExport from '../../scripts/utils/mini-editor-analytics.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 import createMiniEditorWidget from '../../scripts/widgets/mini-editor-widget/mini-editor-widget.js';
 import createMiniEditorModal from '../../scripts/widgets/mini-editor-modal/mini-editor-modal.js';
@@ -33,10 +34,14 @@ let modalPromise = null;
  * the shared bottom toast on success, per Figma node 0-19315 — every copy
  * action on the page uses this same toast, not just the mini-editor's own.
  */
-async function copyQuoteToClipboard(quote, author) {
+async function copyQuoteToClipboard(quote, author, uiLocation = 'seo-discover-page') {
   const text = author ? `${quote} — ${author}` : quote;
   try {
     await navigator.clipboard.writeText(text);
+    trackMiniEditorExport({
+      exportMethod: 'copy-clipboard',
+      uiLocation,
+    });
     showCopyToast('Quote copied to clipboard');
     return true;
   } catch {
@@ -57,6 +62,10 @@ async function downloadCard(block, editor) {
     const model = editor?.getContentModel();
     if (!model) throw new Error('Mini-editor content model is unavailable');
     await MiniEditorCardExporter.download(model);
+    trackMiniEditorExport({
+      exportMethod: 'download',
+      uiLocation: 'seo-discover-page',
+    });
   } catch (error) {
     window.lana?.log(`Mini-editor download failed: ${error?.message || error}`, {
       tags: 'mini-editor,download',
@@ -173,21 +182,27 @@ const DECO_QUOTE_CHAR_LIMIT = 216;
 function buildCardSet(cards, quotes) {
   const decoSlotCount = Math.max(0, cards.length - 1);
   const [firstQuote] = quotes;
-  const shortQuotes = quotes.filter((q) => q.quote.length <= DECO_QUOTE_CHAR_LIMIT);
-  const longQuotes = quotes.filter((q) => q.quote.length > DECO_QUOTE_CHAR_LIMIT);
+  const remainingQuotes = quotes.slice(1);
+  const shortQuotes = remainingQuotes.filter((q) => q.quote.length <= DECO_QUOTE_CHAR_LIMIT);
+  const longQuotes = remainingQuotes.filter((q) => q.quote.length > DECO_QUOTE_CHAR_LIMIT);
 
   // Round-robins `pool` to exactly `count` entries — used to fill deco
   // slots with short quotes first, reusing each one only after every other
   // short quote already has a slot, then the same for long quotes.
-  const takeRoundRobin = (pool, count) => Array.from(
-    { length: Math.min(count, pool.length ? count : 0) },
-    (_, i) => pool[i % pool.length],
-  );
+  const takeRoundRobin = (pool, count) => {
+    if (!pool.length || count <= 0) return [];
+    return Array.from({ length: count }, (_, i) => pool[i % pool.length]);
+  };
+
+  const initialShortQuotes = shortQuotes.slice(0, Math.min(shortQuotes.length, decoSlotCount));
+  const remainingSlotCount = Math.max(0, decoSlotCount - initialShortQuotes.length);
+  let overflowPool = quotes;
+  if (shortQuotes.length) overflowPool = shortQuotes;
+  if (longQuotes.length) overflowPool = longQuotes;
 
   const decoQuotes = shortQuotes.length >= decoSlotCount
     ? takeRoundRobin(shortQuotes, decoSlotCount)
-    : [...takeRoundRobin(shortQuotes, shortQuotes.length),
-      ...takeRoundRobin(longQuotes, decoSlotCount - shortQuotes.length)];
+    : [...initialShortQuotes, ...takeRoundRobin(overflowPool, remainingSlotCount)];
 
   return cards.map((card, i) => {
     const { quote, author } = i === 0 ? firstQuote : decoQuotes[i - 1];
@@ -205,6 +220,8 @@ function decorateCta(header) {
   const cta = header.querySelector('a');
   cta?.classList.add('button');
   cta?.classList.add('accent');
+  cta?.parentElement?.classList.add('button-container');
+  cta.setAttribute('daa-ll', cta.text);
 }
 
 function buildLogo() {
@@ -246,7 +263,7 @@ function wireLandmark(block, header) {
   // recomputed. sr-only (not aria-hidden) since this text IS part of the
   // landmark's name, just never meant to render visibly for sighted users.
   const suffix = createTag('span', { id: `${uid}-suffix`, class: 'sr-only' });
-  heading.append(suffix);
+  header.append(suffix);
   block.setAttribute('role', 'region');
   block.setAttribute('aria-labelledby', `${heading.id} ${suffix.id}`);
 
@@ -306,20 +323,21 @@ export default async function init(block) {
     };
     const deps = { createTag, getIconElementDeprecated };
 
-    let editor;
-    const getShareContent = async (action, strings) => {
-      if (action.value === 'whatsapp') {
-        return { data: { whatsappText: `${strings.heading}: ${window.location.href}` } };
-      }
-      const model = editor?.getContentModel();
-      if (!model) throw new Error('Mini-editor content model is unavailable');
-      const blob = await MiniEditorCardExporter.createCardBlob(model);
-      const file = new File([blob], 'quote-card.png', { type: blob.type || 'image/png' });
-      return {
-        share: { title: strings.heading, files: [file] },
-        clipboard: { files: [file] },
+    let editorRef;
+    const buildTopActions = (getEditor) => {
+      const getShareContent = async (action, strings) => {
+        if (action.value === 'whatsapp') {
+          return { data: { whatsappText: `${strings.heading}: ${window.location.href}` } };
+        }
+        const model = getEditor()?.getContentModel();
+        if (!model) throw new Error('Mini-editor content model is unavailable');
+        const blob = await MiniEditorCardExporter.createCardBlob(model);
+        const file = new File([blob], 'quote-card.png', { type: blob.type || 'image/png' });
+        return {
+          share: { title: strings.heading, files: [file] },
+          clipboard: { files: [file] },
+        };
       };
-    };
 
     // Opens the active quote card in the Adobe Express web app (project-x). The
     // Express-side entry (@hz/x-acom-mini-editor-entry) rebuilds the card from
@@ -344,9 +362,7 @@ export default async function init(block) {
       }
     };
 
-    editor = await createMiniEditorWidget({
-      root: block,
-      topActions: [
+    return [
         { type: 'edit', onClick: handleOpenInExpress },
         {
           type: 'share',
@@ -385,6 +401,27 @@ export default async function init(block) {
                 dismissOnSelect: () => window.matchMedia('(pointer: coarse)').matches,
               },
             ],
+            onActionSelect: ({ action }) => {
+              if (action?.value === 'copy') {
+                trackMiniEditorExport({
+                  exportMethod: 'copy-clipboard',
+                  uiLocation: 'seo-discover-page-share-menu-copy-image',
+                });
+                return;
+              }
+
+              const exportMethodByAction = {
+                whatsapp: 'direct-to-whatsapp',
+                more: 'more-options',
+              };
+              const exportMethod = exportMethodByAction[action?.value];
+              if (!exportMethod) return;
+
+              trackMiniEditorExport({
+                exportMethod,
+                uiLocation: 'seo-discover-page',
+              });
+            },
             feedback: {
               failed: {
                 key: 'mini-editor-share-failed',
@@ -401,13 +438,21 @@ export default async function init(block) {
             },
           },
         },
-        { type: 'download', onClick: () => downloadCard(block, editor) },
-      ],
+        { type: 'download', onClick: () => downloadCard(block, getEditor()) },
+      ];
+    };
+
+    const topActions = buildTopActions(() => editorRef);
+
+    const editor = await createMiniEditorWidget({
+      root: block,
+      topActions,
       fontOptions,
       backgrounds: { cardSet, decoCount: DECO_CARD_COUNT },
       a11y,
       deps,
     });
+    editorRef = editor;
 
     // Decorations are appended to the header (not the stage) so they can be
     // positioned to span from just below the header down to the editor's
@@ -426,6 +471,7 @@ export default async function init(block) {
     modalPromise ??= createMiniEditorModal({
       fontOptions,
       backgrounds: { cardSet, decoCount: DECO_CARD_COUNT },
+      topActionsFactory: buildTopActions,
       a11y,
       deps,
     }).then((modal) => {
@@ -441,6 +487,5 @@ export default async function init(block) {
     block.closest('.section')?.remove();
   }
 
-  const miniEditor = document.querySelector('.mini-editor');
-  miniEditor.querySelector('.mini-editor-header a.quick-link').tabIndex = 1;
+  block.querySelector('.mini-editor-header a.quick-link')?.setAttribute('tabindex', '1');
 }

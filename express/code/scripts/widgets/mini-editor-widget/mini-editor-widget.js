@@ -64,6 +64,47 @@ function truncateQuote(quote, limit) {
   return `${trimmed}…`;
 }
 
+// cubic-bezier equivalents of the GSAP eases named in the design spec —
+// power1.in ≈ cubic-bezier(0.55, 0.055, 0.675, 0.19),
+// power2.out ≈ cubic-bezier(0.215, 0.61, 0.355, 1) — there's no GSAP
+// dependency in this codebase, so the Web Animations API stands in for it.
+const QUOTE_CHANGE_EASE_IN = 'cubic-bezier(0.55, 0.055, 0.675, 0.19)';
+const QUOTE_CHANGE_EASE_OUT = 'cubic-bezier(0.215, 0.61, 0.355, 1)';
+
+/**
+ * Applies a font or quote-text change to `el` — via `applyChange`, run
+ * synchronously and immediately, same as any other state update — wrapped in
+ * a purely cosmetic fade-out/fade-in "soft swap": a quick fade+slide down
+ * (0.12s, ease-in) covers the swap, then a fade+slide back in from 10px below
+ * (0.28s, ease-out) reveals the result. Any in-flight run on the same element
+ * is cancelled first so rapid clicks restart cleanly instead of stacking.
+ * Skipped entirely under prefers-reduced-motion: reduce, where only
+ * `applyChange` runs, with no animation.
+ */
+function animateQuoteChange(el, applyChange) {
+  el.getAnimations().forEach((anim) => anim.cancel());
+
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches) {
+    applyChange();
+    return;
+  }
+
+  // A single 0.4s timeline standing in for the two-step spec (fade-out then
+  // fade-in): each keyframe's own `easing` governs the segment starting at
+  // it, so the first 0.12s (0 → 0.3 offset) eases in and the remaining 0.28s
+  // (0.3 → 1) eases out, matching the spec's two durations exactly.
+  el.animate(
+    [
+      { opacity: 1, transform: 'translateY(0)', easing: QUOTE_CHANGE_EASE_IN },
+      { opacity: 0, transform: 'translateY(6px)', offset: 0.3, easing: QUOTE_CHANGE_EASE_OUT },
+      { opacity: 0, transform: 'translateY(10px)', offset: 0.3 },
+      { opacity: 1, transform: 'translateY(0)' },
+    ],
+    { duration: 400, fill: 'forwards' },
+  );
+  applyChange();
+}
+
 /**
  * True at the same <=767px width mini-editor-widget.css switches the inline
  * font/colour row for the mobile bottom sheet. Checked live (not cached) at
@@ -75,26 +116,103 @@ function isMobileSheetWidth() {
   return window.matchMedia('(width <= 767px)').matches;
 }
 
-// On a touch/coarse-pointer device (tablet, phone), use the shorter of
-// width/height rather than window.innerWidth alone — a physical device's
-// short axis is orientation-independent, so this keeps the same tablet from
-// flipping into the desktop zig-zag layout just because rotating to
-// landscape made innerWidth exceed the breakpoint. Plain mouse/desktop
-// windows don't have a fixed physical "short side" (resizing changes both
-// dimensions independently), so they keep the simple width-only check —
-// otherwise a short-but-wide desktop browser window would wrongly be
-// treated as a tablet. Checked live (not cached), same rationale as
-// isMobileSheetWidth above — this also gates whether the keyboard-only
-// "Skip quote suggestions" CTA (only meaningful for reaching the desktop
-// zig-zag deco cards, which don't exist in arc/carousel mode) is built at
-// all, so it must react to the same breakpoint the carousel mode itself does.
-const TABLET_BREAKPOINT = 1199;
+// Carousel mode now follows a strict width breakpoint for every device type:
+// <=1200 shows arc carousel, >1200 shows the desktop card/decorations view.
+// Checked live (not cached), same rationale as isMobileSheetWidth above —
+// this also gates whether the keyboard-only "Skip quote suggestions" CTA
+// (only meaningful for reaching the desktop zig-zag deco cards, which don't
+// exist in arc/carousel mode) is built at all.
+const TABLET_BREAKPOINT = 1200;
 function isSmallViewport() {
-  const isTouchDevice = window.matchMedia('(pointer: coarse)').matches;
-  const size = isTouchDevice
-    ? Math.min(window.innerWidth, window.innerHeight)
-    : window.innerWidth;
-  return size <= TABLET_BREAKPOINT;
+  return window.innerWidth <= TABLET_BREAKPOINT;
+}
+
+function isReducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/**
+ * Adds mouse drag-to-scroll to an already-horizontally-scrollable row (the
+ * font/colour inline rows — see .me-row--fonts/.me-row--colour's own
+ * overflow-x: auto, which already gives touch/trackpad scroll for free,
+ * just not a mouse-drag gesture on desktop). A plain `mousedown` + `scrollLeft`
+ * approach would also fire as a "click" on whichever option the pointer
+ * lands on, since a drag and a click both start with the same pointerdown —
+ * so a real drag (movement past DRAG_THRESHOLD) marks the row and swallows
+ * the *next* click via a one-shot capturing listener, letting an
+ * option's own click handler run normally for an actual (non-dragged) tap.
+ *
+ * setPointerCapture is deliberately NOT called on pointerdown, only once a
+ * real drag has started (past DRAG_THRESHOLD): capturing the pointer
+ * immediately retargets that pointer's *own* pointerup/click to the
+ * capturing element (the panel) per the Pointer Events spec, even for a
+ * plain stationary press — which was silently breaking every option's own
+ * click handler (the click still fired, just on the panel, never reaching
+ * the button under the cursor).
+ */
+const DRAG_THRESHOLD = 5;
+
+function wireDragToScroll(panel) {
+  let startX = 0;
+  let startScrollLeft = 0;
+  let dragging = false;
+  let moved = false;
+  let activePointerId = null;
+
+  const suppressNextClick = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    panel.removeEventListener('click', suppressNextClick, true);
+  };
+
+  const onPointerMove = (e) => {
+    if (!dragging) return;
+    const dx = e.clientX - startX;
+    if (!moved && Math.abs(dx) > DRAG_THRESHOLD) {
+      moved = true;
+      // Only swallow a click once a real drag has actually happened —
+      // a press-and-release with no movement (a normal click) never adds
+      // this listener, so it reaches the option's own handler untouched.
+      panel.addEventListener('click', suppressNextClick, true);
+      // Captured only now (see function-level comment) — pointerup/click
+      // being retargeted to the panel from here on is fine, since a real
+      // drag has already committed to not being a click.
+      try {
+        panel.setPointerCapture?.(activePointerId);
+      } catch {
+        // Drag still works without capture; it just won't keep tracking
+        // the pointer once it leaves the panel's own bounds.
+      }
+    }
+    if (moved) panel.scrollLeft = startScrollLeft - dx;
+  };
+
+  const onPointerUp = (e) => {
+    dragging = false;
+    moved = false;
+    try {
+      panel.releasePointerCapture?.(e.pointerId);
+    } catch {
+      // Nothing to release if setPointerCapture above never ran/succeeded.
+    }
+    panel.removeEventListener('pointermove', onPointerMove);
+    panel.removeEventListener('pointerup', onPointerUp);
+    panel.removeEventListener('pointercancel', onPointerUp);
+  };
+
+  panel.addEventListener('pointerdown', (e) => {
+    // Only the primary mouse button / a single touch/pen point — modifier-
+    // clicks, right-clicks, and multi-touch gestures are left alone.
+    if (e.pointerType === 'mouse' && e.button !== 0) return;
+    dragging = true;
+    moved = false;
+    startX = e.clientX;
+    startScrollLeft = panel.scrollLeft;
+    activePointerId = e.pointerId;
+    panel.addEventListener('pointermove', onPointerMove);
+    panel.addEventListener('pointerup', onPointerUp);
+    panel.addEventListener('pointercancel', onPointerUp);
+  });
 }
 
 /**
@@ -183,9 +301,7 @@ function findNextFocusableAfter(root) {
   const candidates = [...document.querySelectorAll(FOCUSABLE_SELECTOR)];
   return candidates.find((el) => {
     if (root.contains(el)) return false;
-    // DOCUMENT_POSITION_FOLLOWING (4): true only when el comes after root in
-    // the document, filtering out anything before .mini-editor on the page.
-    return !!(root.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_FOLLOWING);
+    return root.compareDocumentPosition(el) === Node.DOCUMENT_POSITION_FOLLOWING;
   });
 }
 
@@ -270,16 +386,18 @@ function buildFontButton(opt, index, onPick) {
     'aria-label': opt.label,
   });
   btn.textContent = opt.label;
+  btn.setAttribute('daa-ll', `Select font style`);
   btn.addEventListener('click', () => onPick(opt));
   return btn;
 }
 
-function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOptions) {
+function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOptions, wrapPick) {
   const control = createTag('button', {
     type: 'button',
     tabIndex: 9,
     class: 'me-control me-control--font',
     'aria-expanded': 'false',
+    'daa-ll': 'Font Control',
   });
   const pill = createTag('span', { class: 'me-pill', 'aria-label': fontOptions[0].label });
   pill.textContent = fontOptions[0].label;
@@ -337,8 +455,13 @@ function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOpti
   }
 
   const onPick = (opt) => {
-    selectFont(opt);
-    onSelect?.(opt);
+    // wrapPick lets buildWidget run the fade-out/apply/fade-in "soft swap"
+    // around the actual selectFont + onSelect notification — defaults to
+    // calling straight through for any caller that doesn't need it.
+    (wrapPick || ((apply) => apply()))(() => {
+      selectFont(opt);
+      onSelect?.(opt);
+    });
     // Mobile bottom sheet dismisses on selection — per Figma node 137:4778's
     // "Bottom sheet expectation" note — unlike the tablet/desktop inline row,
     // which stays open after a pick (isMobileSheetWidth is the same check
@@ -360,6 +483,10 @@ function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOpti
   // Desktop inline row only (see wireOptionRowRoving) — the mobile bottom
   // sheet's own grid keeps native default tab order, out of scope here.
   roving = wireOptionRowRoving(panel, '.me-font', () => onTabOutOfOptions?.());
+  // Mouse drag-to-scroll — same inline row only, same rationale as the
+  // roving-tabindex wiring above (the mobile sheet's grid doesn't scroll
+  // horizontally at all).
+  wireDragToScroll(panel);
 
   control.addEventListener('click', () => {
     const isOpen = root.getAttribute('data-me-panel') === 'fonts';
@@ -434,6 +561,7 @@ function buildSwatchButton(card, index, onPick) {
     style: `background-image:url("${card.bg}")`,
   });
   btn.append(fill);
+  btn.setAttribute('daa-ll', `Select background color`);
   btn.addEventListener('click', () => onPick(card));
   return btn;
 }
@@ -444,6 +572,7 @@ function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
     class: 'me-control me-control--colour',
     'aria-expanded': 'false',
     tabIndex: 10,
+    'daa-ll': 'Background control',
   });
   const swatch = createTag('span', { class: 'me-swatch' });
   // "colour" drops on mobile (label reads "Background" only there) — kept
@@ -528,6 +657,8 @@ function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
   // desktop widths — only the narrower <=767px bottom sheet replaces it
   // (see isMobileSheetWidth), so this wiring applies at both.
   roving = wireOptionRowRoving(panel, '.me-swatch-btn', () => onTabOut?.());
+  // Mouse drag-to-scroll — same rationale as buildFontControl's own wiring.
+  wireDragToScroll(panel);
 
   control.addEventListener('click', () => {
     const isOpen = root.getAttribute('data-me-panel') === 'colour';
@@ -589,9 +720,7 @@ function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
  * breakpoint, so there's no JS branching on viewport width here.
  */
 function buildBottomSheet(root, a11y, kind, title, contentEl) {
-  const {
-    trapFocus, handleEscapeClose, disableBackgroundScroll, restoreBackgroundScroll,
-  } = a11y;
+  const { disableBackgroundScroll, restoreBackgroundScroll } = a11y;
   const overlay = createTag('div', { class: 'me-sheet-overlay', 'aria-hidden': 'true', inert: '' });
   const sheet = createTag('div', {
     class: 'me-sheet',
@@ -708,7 +837,15 @@ async function buildMiniEditorActions(topActions = []) {
   return bar;
 }
 
-async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode, decorationsEnabled) {
+async function buildWidget(
+  root,
+  a11y,
+  cardSet,
+  fontOptions,
+  topActions,
+  panelMode,
+  decorationsEnabled,
+) {
   const widget = createTag('div', { class: 'mini-editor-widget' });
   const card = createTag('div', { class: 'me-card' });
   const first = cardSet[0] || { quote: '', author: '' };
@@ -784,6 +921,11 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   const setCardMode = (mode) => {
     card.classList.remove('light-mode', 'dark-mode');
     if (mode) card.classList.add(`${mode}-mode`);
+
+    // Keep top-right action contrast in sync with background mode.
+    const isDarkMode = mode === 'dark';
+    root.style.setProperty('--me-action-icon-color', isDarkMode ? 'var(--color-gray-150)' : '#292929');
+    root.style.setProperty('--me-action-hover-bg', isDarkMode ? '#292929' : 'var(--color-gray-150)');
   };
   setCardMode(first.card?.mode);
 
@@ -804,7 +946,11 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   const doCopy = async () => {
     // currentQuote (not quoteEl.textContent) — the full quote, even when
     // the visible text is truncated (see renderQuote).
-    const ok = await a11y.copyQuoteToClipboard(currentQuote, authorEl.textContent);
+    const ok = await a11y.copyQuoteToClipboard(
+      currentQuote,
+      authorEl.textContent,
+      'seo-discover-page-center-quote',
+    );
     if (ok) {
       quoteWrap.classList.add('is-copied');
       setTimeout(() => quoteWrap.classList.remove('is-copied'), 1200);
@@ -849,9 +995,12 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   // never built at all when those don't exist: on small viewports (the arc
   // carousel replaces them, see .me-carousel-mode) or when a host opted out
   // of decorations entirely (e.g. the "Create a design" modal).
-  const skipCta = (!decorationsEnabled || isSmallViewport()) ? null : buildSkipQuoteSuggestionsCta(root);
+  const skipCta = (!decorationsEnabled || isSmallViewport())
+    ? null
+    : buildSkipQuoteSuggestionsCta(root);
 
   const controls = createTag('div', { class: 'me-controls' });
+  let focusColourControl = () => {};
   const {
     control: fontControl,
     panel: fontPanel,
@@ -865,14 +1014,10 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
       onFontOrColourPick({ font });
     },
     panelMode,
-    () => colourControl.focus(),
+    () => focusColourControl(),
+    (apply) => animateQuoteChange(quoteEl, apply),
   );
-  const {
-    control: colourControl,
-    panel: colourPanel,
-    sheetGrid: colourSheetGrid,
-    selectSwatch,
-  } = buildColorControl(
+  const colourControlConfig = buildColorControl(
     root,
     cardSet.map((c) => c.card),
     (bgCard) => {
@@ -891,6 +1036,13 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
     // destination the CTA's own Enter/Space would otherwise land on.
     () => (skipCta ? skipCta.show() : findNextFocusableAfter(root)?.focus()),
   );
+  const {
+    control: colourControl,
+    panel: colourPanel,
+    sheetGrid: colourSheetGrid,
+    selectSwatch,
+  } = colourControlConfig;
+  focusColourControl = () => colourControl.focus();
   controls.append(fontControl, colourControl);
 
   const panelWrap = createTag('div', { class: 'me-panel' });
@@ -911,7 +1063,6 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
     colourControl.setAttribute('aria-expanded', String(openPanel === 'colour'));
     fontSheet.onPanelChange();
     colourSheet.onPanelChange();
-
   });
   panelObserver.observe(root, { attributes: true, attributeFilter: ['data-me-panel'] });
 
@@ -947,14 +1098,16 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
           },
         } : {}),
       });
-      renderQuote(quote);
+      animateQuoteChange(quoteEl, () => {
+        renderQuote(quote);
+        if (font) selectFont(font);
+      });
       authorEl.textContent = author || '';
       authorEl.style.display = author ? '' : 'none';
       if (bgCard) {
         selectSwatch(bgCard.bg);
         setCardMode(bgCard.mode);
       }
-      if (font) selectFont(font);
     },
     getContentModel: () => ({ ...contentModel, font: { ...contentModel.font } }),
     // The content model + desktop card contrast are updated in the font/colour control callbacks
@@ -1008,11 +1161,17 @@ function buildDecoCard(a11y, entry, useQuote) {
 
   const actions = createTag('div', { class: 'me-deco-actions' });
   const attribution = author ? `"${quote}" — ${author}` : `"${quote}"`;
-  const useBtn = createTag('button', {
-    type: 'button',
+  // variant="secondary" so hover/focus/active come entirely from the S2
+  // component's own styling instead of hand-rolled CSS overrides — see
+  // .me-deco-use/.me-deco-copy in the stylesheet, which now only sets
+  // layout (size, gap), not colour/state.
+  const useBtn = createTag('sp-button', {
+    variant: 'secondary',
+    size: 's',
     class: 'me-deco-use',
     'aria-label': `Use this quote: ${attribution}`,
   });
+  useBtn.setAttribute('daa-ll', 'Use this quote');
   useBtn.textContent = 'Use this quote';
   useBtn.addEventListener('click', (e) => {
     useQuote(entry);
@@ -1029,13 +1188,20 @@ function buildDecoCard(a11y, entry, useQuote) {
     if (e.detail > 0) useBtn.blur();
   });
 
-  const copyBtn = createTag('button', {
-    type: 'button',
+  const copyIcon = createTag('sp-icon-copy', { slot: 'icon', class: 'me-deco-copy-icon', 'aria-hidden': 'true' });
+  const copyBtn = createTag('sp-button', {
+    variant: 'secondary',
+    size: 's',
     class: 'me-deco-copy',
+    label: `Copy quote: ${attribution}`,
     'aria-label': `Copy quote: ${attribution}`,
-  }, [createTag('sp-icon-copy', { class: 'me-deco-copy-icon', 'aria-hidden': 'true' })]);
+  }, [copyIcon]);
   copyBtn.addEventListener('click', async (e) => {
-    const ok = await a11y.copyQuoteToClipboard(quote, author);
+    const ok = await a11y.copyQuoteToClipboard(
+      quote,
+      author,
+      'seo-discover-page-decoration-card',
+    );
     if (ok) {
       copyBtn.classList.add('is-copied');
       setTimeout(() => copyBtn.classList.remove('is-copied'), 1200);
@@ -1113,8 +1279,12 @@ const DECO_TAB_CHAIN_ORDER = [2, 4, 6, 8, 1, 3, 5, 7];
  * button instead of consistently re-entering where intended.
  */
 function wireDecoTabChain(decorations) {
+  // A card can be absent — e.g. fewer templates fetched than DECO_CARD_COUNT
+  // leaves the last slot(s) unbuilt (see buildDecoCards) — so each lookup is
+  // skipped rather than assumed to exist.
   const buttons = DECO_TAB_CHAIN_ORDER.flatMap((cardNum) => {
     const card = decorations.querySelector(`.me-deco--${cardNum}`);
+    if (!card) return [];
     return [card.querySelector('.me-deco-use'), card.querySelector('.me-deco-copy')];
   });
   buttons.forEach((btn, i) => {
@@ -1138,7 +1308,7 @@ function wireDecoTabChain(decorations) {
  * what makes the 1s transform transition on .me-arc-card actually animate
  * a visible slide/rotate between roles instead of an instant content pop.
  */
-const ROLE_CLASSES = ['me-arc-card--prev', 'me-arc-card--center', 'me-arc-card--next', 'me-arc-card--stage-prev', 'me-arc-card--stage-next'];
+const ROLE_CLASSES = ['me-arc-card--prev', 'me-arc-card--center', 'me-arc-card--next', 'me-arc-card--off'];
 
 async function buildArcCard(onActivate, a11y, tabIndex) {
   const el = createTag('div', {
@@ -1158,7 +1328,7 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
   // element, so this never nests two focusable elements.
   const quoteP = createTag('div', { class: 'me-arc-quote' });
   const authorP = createTag('div', { class: 'me-arc-author' });
-  const quoteWrap = createTag('div', { class: 'me-quote-wrap', tabIndex: (tabIndex == -1 ? -1 : 8) });
+  const quoteWrap = createTag('div', { class: 'me-quote-wrap', tabIndex: -1 });
   const hint = createTag('span', { id: 'me-arc-card-hint', class: 'sr-only' }, ['Copy quote to clipboard']);
   quoteWrap.append(quoteP, hint);
   el.append(quoteWrap, authorP);
@@ -1198,7 +1368,11 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
   let currentQuote = '';
   let currentAuthor = '';
   const doCopy = async () => {
-    const ok = await a11y.copyQuoteToClipboard(currentQuote, currentAuthor);
+    const ok = await a11y.copyQuoteToClipboard(
+      currentQuote,
+      currentAuthor,
+      'seo-discover-page-center-quote',
+    );
     if (ok) {
       quoteWrap.classList.add('is-copied');
       setTimeout(() => quoteWrap.classList.remove('is-copied'), 1200);
@@ -1217,6 +1391,14 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
       e.preventDefault();
       doCopy();
     }
+  });
+
+  // Keep the entire card clickable for prev/next navigation while avoiding
+  // duplicate handling when the click originated from quoteWrap itself.
+  el.addEventListener('click', (e) => {
+    if (e.target.closest('.me-quote-wrap')) return;
+    if (el.classList.contains('me-arc-card--center')) doCopy();
+    else onActivate(el);
   });
 
   function render(entry) {
@@ -1249,7 +1431,7 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
     quoteP.style.fontStretch = entry.font?.stretch || '';
     authorP.textContent = entry.author || '';
     authorP.style.display = entry.author ? '' : 'none';
-    el.classList.add(`${entry.card.mode}-mode`)
+    el.classList.add(`${entry.card.mode}-mode`);
   }
 
   // Every role is now interactive (centre copies its quote on click/Enter,
@@ -1259,255 +1441,457 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
     el.setAttribute('aria-selected', String(role === 'center'));
   }
 
-  // Recycling a card (see goNext/goPrev) is a two-step move so it animates
-  // rotating in from beyond the edge instead of popping straight into its
-  // final prev/next slot: first jump instantly (no transition) to a
-  // further-out "stage" position with the new content, then — once that
-  // jump has committed — hand off to a normal, transitioned setRole() to
-  // the real prev/next class, which now has somewhere real to animate from.
-  function stageAt(stageRole) {
-    el.style.transition = 'none';
-    el.classList.remove(...ROLE_CLASSES);
-    el.classList.add(`me-arc-card--${stageRole}`);
-    el.getBoundingClientRect(); // force reflow so the instant jump commits
-    el.style.transition = '';
-  }
-
   function setRole(role) {
     el.classList.remove(...ROLE_CLASSES);
-    el.classList.add(`me-arc-card--${role}`);
+    if (role !== 'off') {
+      el.classList.add(`me-arc-card--${role}`);
+    } else {
+      el.classList.add('me-arc-card--off');
+    }
     setInteractivity(role);
   }
 
   return {
-    el, render, setRole, stageAt,
+    el, render, setRole,
   };
 }
 
 /**
- * The non-interactive 4th card used purely to show the outgoing card's
- * exit: when a card is recycled from prev to next (or vice versa), its OLD
- * content would otherwise just vanish (the same DOM element is instantly
- * staged off-screen with new content — see stageAt). This ghost briefly
- * takes over that old content and role position, then transitions further
- * outward while fading out, so the exit reads as one continuous circular
- * motion alongside the other two cards' moves instead of a hard cut.
- * aria-hidden + pointer-events: none — it's decorative only, never one of
- * the 3 clickable/tabbable cards.
- */
-function buildArcGhost() {
-  const el = createTag('div', { class: 'me-arc-card me-arc-ghost', 'aria-hidden': 'true' });
-  const quoteP = createTag('p', { class: 'me-arc-quote' });
-  const authorP = createTag('p', { class: 'me-arc-author' });
-  el.append(quoteP, authorP);
-
-  function playExit(entry, fromRole) {
-    el.style.backgroundImage = `url("${entry.card.bg}")`;
-    // Same display truncation as the 3 real cards (see buildArcCard's
-    // render) — purely cosmetic here since this ghost is aria-hidden and
-    // never one of the tabbable/clickable cards, but its fixed-size card
-    // shouldn't overflow with a long quote mid-exit either.
-    quoteP.textContent = truncateQuote(entry.quote, EDITOR_QUOTE_CHAR_LIMIT);
-    // entry.font carries the carousel-wide selected font here too (see
-    // buildArcCarousel's withFont), so the outgoing ghost matches whatever
-    // font the other 3 cards are currently showing.
-    quoteP.style.fontFamily = entry.font?.font || '';
-    quoteP.style.fontStyle = entry.font?.italic ? 'italic' : '';
-    quoteP.style.fontWeight = entry.font?.weight || '';
-    quoteP.style.fontStretch = entry.font?.stretch || '';
-    authorP.textContent = entry.author || '';
-    authorP.style.display = entry.author ? '' : 'none';
-
-    el.style.transition = 'none';
-    el.classList.remove('me-arc-card--exit-prev', 'me-arc-card--exit-next', 'me-arc-ghost--visible');
-    el.classList.add(`me-arc-card--${fromRole}`, 'me-arc-ghost--visible');
-    el.getBoundingClientRect(); // force reflow so the starting position commits
-    el.style.transition = '';
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      el.classList.remove(`me-arc-card--${fromRole}`);
-      el.classList.add(`me-arc-card--exit-${fromRole}`);
-    }));
-  }
-
-  return { el, playExit };
-}
-
-/**
- * Tablet/mobile carousel: exactly 3 cards (prev/centre/next) — never more,
- * so nothing off-screen is ever clickable. Clicking an arrow rotates which
- * *role* (and therefore which fixed CSS position/rotation) each of the 3
- * existing card elements occupies, so every navigation is a real transform
- * change on real elements — driven entirely by the 1s CSS transition on
- * .me-arc-card, not a JS-animated or instantly-popped content swap. Only
- * the card moving furthest (the one leaving `next` on a "next" click, or
- * leaving `prev` on a "prev" click) needs its content replaced, since it's
- * re-entering the deck one step further round; the other two just carry
- * their existing content into their new role.
+ * Tablet/mobile carousel with continuous drag + snapping over an infinite
+ * loop of cards. Arc geometry is recomputed every frame from live position,
+ * so cards fan along the same 14deg-per-step curve while dragging, flicking,
+ * and snapping.
  */
 async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
+  const ARC_STEP_DEG = 14;
+  const ARC_STEP_RAD = ARC_STEP_DEG * (Math.PI / 180);
+  const DRAG_THRESHOLD_PX = 10;
+  const SNAP_BASE_MS = 1000;
+  const SNAP_MAX_MS = 1400;
+  const SNAP_SETTLE_RECHECK_MS = 90;
+  const FLICK_MULTIPLIER = 0.22;
+  const MIN_FLICK_CARDS_PER_SEC = 0.35;
+
   const root = createTag('div', { class: 'me-arc' });
-  // Each .me-arc-card has role="option" (see buildArcCard), which axe
-  // requires to sit inside a role="listbox" parent (see
-  // aria-required-parent) — but that parent may only contain option/group
-  // children (aria-required-children), and .me-arc itself also holds the
-  // prev/next nav buttons as direct children. listboxRole wraps just the
-  // ghost + 3 cards so both rules are satisfied; display: contents keeps it
-  // out of layout so .me-arc-card's `position: absolute` (in CSS) still
-  // resolves against .me-arc, not this wrapper.
   const listboxRole = createTag('div', { class: 'me-arc-listbox', role: 'listbox', 'aria-label': 'Template' });
+
   const total = cardSet.length;
+  if (!total) {
+    root.append(listboxRole);
+    return { root, updateCentre: () => {} };
+  }
+
   let activeIndex = 0;
-  // The centre card can be patched independently of cardSet (e.g. the
-  // widget's own colour control, which applies on top of whichever entry is
-  // currently active) — centreOverride holds that patch and is reset
-  // whenever navigation moves a *different* entry into the centre. Font is
-  // deliberately NOT part of this: once picked, it's a carousel-wide choice
-  // (see selectedFont below), not tied to any one entry/role.
+  let position = 0;
+  let velocityCardsPerMs = 0;
+  let rafHandle = null;
+  let moveSettleTimer = null;
+  let moving = false;
+  let pendingIndex = null;
+  let commandedPosition = 0;
+
+  let pointerDown = false;
+  let dragLocked = false;
+  let dragging = false;
+  let suppressClick = false;
+  let pointerId = null;
+  let startX = 0;
+  let startY = 0;
+  let startPosition = 0;
+  let lastMoveTs = 0;
+  let lastMovePosition = 0;
+
   let centreOverride = null;
-  // Persists across navigation (unlike centreOverride) and applies to every
-  // card — prev/next/ghost included, not just centre — so picking a font
-  // once keeps showing on whichever entries rotate into view afterwards.
-  // Seeded with the first font option so the carousel renders that font on
-  // load, matching the desktop widget card (which the --me-quote-font CSS
-  // variable already applies to via buildFontControl's initial selectFont).
   let selectedFont = defaultFont || null;
+
+  let cardWidth = 542;
+  let cardGap = 48;
+  let slideWidth = cardWidth + cardGap;
+  let arcRadius = slideWidth / Math.sin(ARC_STEP_RAD);
+
+  const normalizeIndex = (index) => ((index % total) + total) % total;
+  const shortestDistance = (index, pos) => {
+    const offset = (index - pos) % total;
+    const wrapped = (offset + total) % total;
+    let delta = wrapped;
+    if (delta > total / 2) delta -= total;
+    return delta;
+  };
+
+  function rebasePositionAroundActive() {
+    const cycles = Math.round((position - activeIndex) / total);
+    if (!Number.isFinite(cycles) || cycles === 0) return;
+    const shift = cycles * total;
+    position -= shift;
+    commandedPosition -= shift;
+  }
+
+  const readCssPx = (name, fallback) => {
+    const raw = getComputedStyle(root).getPropertyValue(name).trim();
+    const parsed = Number.parseFloat(raw);
+    return Number.isFinite(parsed) ? parsed : fallback;
+  };
+
+  function syncGeometry() {
+    cardWidth = readCssPx('--me-arc-card-w', cardWidth);
+    cardGap = readCssPx('--me-arc-track-gap', cardGap);
+    slideWidth = cardWidth + cardGap;
+    arcRadius = slideWidth / Math.sin(ARC_STEP_RAD);
+  }
 
   const withFont = (entry) => (selectedFont ? { ...entry, font: selectedFont } : entry);
 
-  const onActivate = (el) => {
-    if (el.classList.contains('me-arc-card--prev')) goPrev(); // eslint-disable-line no-use-before-define
-    else if (el.classList.contains('me-arc-card--next')) goNext(); // eslint-disable-line no-use-before-define
-  };
-  const [cardA, cardB, cardC] = await Promise.all([
-    buildArcCard(onActivate, a11y, -1),
-    buildArcCard(onActivate, a11y, 2),
-    buildArcCard(onActivate, a11y, -1),
-  ]);
-  const ghost = buildArcGhost();
-  // roles[i] tracks which role each of cardA/B/C currently occupies, so
-  // navigation can rotate them without re-deriving role from DOM classes.
-  const cards = [cardA, cardB, cardC];
-  let roles = ['prev', 'center', 'next'];
-
-  function applyRoles() {
-    cards.forEach((card, i) => card.setRole(roles[i]));
+  if (isReducedMotion()) {
+    widget.classList.add('me-arc-reduce-motion');
   }
 
-  function centerEntry() {
-    return withFont({ ...cardSet[activeIndex], ...centreOverride });
-  }
-
-  function renderAll() {
-    const prevIndex = ((activeIndex - 1) % total + total) % total;
-    const nextIndex = (activeIndex + 1) % total;
-    cards[roles.indexOf('prev')].render(withFont(cardSet[prevIndex]));
-    cards[roles.indexOf('center')].render(centerEntry());
-    cards[roles.indexOf('next')].render(withFont(cardSet[nextIndex]));
-  }
-
-  // "X of N" (1-indexed) after every navigation — the carousel is circular
-  // (goNext/goPrev wrap with modulo), so without an explicit position a
-  // screen-reader user has no way to tell they've looped back around to
-  // where they started. Only relevant here (the arc/small-viewport
-  // carousel) — the desktop zig-zag has no notion of a single "current"
-  // position to announce.
   function announcePosition() {
-    a11y.announceToScreenReader(`${activeIndex + 1} of ${total}`);
+    if (typeof a11y.announceToScreenReader === 'function') {
+      a11y.announceToScreenReader(`${activeIndex + 1} of ${total}`);
+    }
   }
 
-  // Hides the top-right action bar for the duration of a navigation's 1s
-  // CSS transition (see .me-arc-card's transition-duration) so it's never
-  // visible mid-slide, then restores it once the moved cards have settled —
-  // per design feedback that the bar should disappear the moment movement
-  // starts and reappear only once the next slide finishes animating. Only
-  // ever called from goNext/goPrev, which only exist on the carousel (see
-  // the .mini-editor-widget.me-arc-moving CSS selector) — desktop's
-  // hover-only action bar has no carousel to move.
-  let moveSettleTimer = null;
-  function markMoving() {
-    widget.classList.add('me-arc-moving');
+  function centerEntryFor(index) {
+    const merged = index === activeIndex && centreOverride
+      ? { ...cardSet[index], ...centreOverride }
+      : cardSet[index];
+    return withFont(merged);
+  }
+
+  let cards = [];
+
+  function renderCardContent() {
+    cards.forEach((card, index) => {
+      card.render(centerEntryFor(index));
+    });
+  }
+
+  function setMoving(nextMoving) {
+    if (moving === nextMoving) return;
+    moving = nextMoving;
+    if (moving) {
+      widget.classList.add('me-arc-moving');
+      return;
+    }
+    widget.classList.remove('me-arc-moving');
+  }
+
+  function scheduleRevealAfterSettle() {
     clearTimeout(moveSettleTimer);
-    moveSettleTimer = setTimeout(() => widget.classList.remove('me-arc-moving'), 1000);
+    if (isReducedMotion()) {
+      setMoving(false);
+      return;
+    }
+    moveSettleTimer = setTimeout(() => {
+      const atSnap = Math.abs(position - Math.round(position)) < 0.001;
+      const stopped = Math.abs(velocityCardsPerMs) < 0.0001;
+      if (atSnap && stopped) {
+        setMoving(false);
+      }
+    }, SNAP_SETTLE_RECHECK_MS);
   }
 
-  function goNext() {
-    markMoving();
-    const prevIndexBefore = ((activeIndex - 1) % total + total) % total;
-    activeIndex = (activeIndex + 1) % total;
+  function applyRoleClasses() {
+    const visualCenter = normalizeIndex(Math.round(position));
+    const roleCenter = pendingIndex ?? visualCenter;
+    const prevIndex = normalizeIndex(roleCenter - 1);
+    const nextIndex = normalizeIndex(roleCenter + 1);
+    cards.forEach((card, index) => {
+      let role = 'off';
+      if (index === roleCenter) role = 'center';
+      else if (index === prevIndex) role = 'prev';
+      else if (index === nextIndex) role = 'next';
+      card.setRole(role);
+      card.el.tabIndex = role === 'center' && !moving ? 2 : -1;
+    });
+  }
+
+  function renderArcFrame() {
+    cards.forEach((card, index) => {
+      const n = shortestDistance(index, position);
+      const theta = n * ARC_STEP_RAD;
+      const arcX = arcRadius * Math.sin(theta);
+      const arcY = arcRadius * (1 - Math.cos(theta));
+      // Cards already conceptually live on a linear track n * slideWidth;
+      // transform is the arc delta from that linear position.
+      const offsetX = arcX - (n * slideWidth);
+      const finalX = (n * slideWidth) + offsetX;
+      const opacity = Math.max(0, 1 - (Math.max(0, Math.abs(n) - 0.2) * 0.55));
+      const zIndex = Math.max(1, 100 - Math.round(Math.abs(n) * 10));
+      const interactive = Math.abs(n) <= 1.15;
+
+      card.el.style.transform = `translate(${finalX.toFixed(3)}px, ${arcY.toFixed(3)}px) rotate(${(n * ARC_STEP_DEG).toFixed(3)}deg)`;
+      card.el.style.opacity = opacity.toFixed(3);
+      card.el.style.zIndex = String(zIndex);
+      card.el.style.pointerEvents = interactive ? 'auto' : 'none';
+    });
+    applyRoleClasses();
+  }
+
+  function commitActive(index, announce = true) {
+    activeIndex = normalizeIndex(index);
     centreOverride = null;
-    // The card that was centre slides to prev; the card that was next
-    // slides into centre (both keep their existing content — that's what
-    // the 1s CSS transition actually animates). The card that was prev is
-    // recycled to become the new next — but its OLD content doesn't just
-    // vanish: the ghost plays a visible exit (continuing further left,
-    // fading out) with that old content, while the real card is silently
-    // restaged with new content to enter from the right. Both read as one
-    // continuous circular motion since they run concurrently.
-    ghost.playExit(withFont(cardSet[prevIndexBefore]), 'prev');
-    const recycled = cards[roles.indexOf('prev')];
-    cards[roles.indexOf('center')].setRole('prev');
-    cards[roles.indexOf('next')].setRole('center');
-    roles = roles.map((role) => ({ center: 'prev', next: 'center', prev: 'next' }[role]));
-    const newNextIndex = (activeIndex + 1) % total;
-    recycled.render(withFont(cardSet[newNextIndex]));
-    recycled.stageAt('stage-next');
-    // Double rAF: the stage jump needs an actual painted frame before the
-    // transitioned move starts, or the browser can coalesce both class
-    // changes into one paint and skip the animation entirely.
-    requestAnimationFrame(() => requestAnimationFrame(() => recycled.setRole('next')));
-    cards[roles.indexOf('center')].render(centerEntry());
+    renderCardContent();
     useQuote(cardSet[activeIndex]);
-    announcePosition();
+    if (announce) {
+      announcePosition();
+    }
+    applyRoleClasses();
   }
 
-  function goPrev() {
-    markMoving();
-    const nextIndexBefore = (activeIndex + 1) % total;
-    activeIndex = ((activeIndex - 1) % total + total) % total;
-    centreOverride = null;
-    // Mirror of goNext: centre slides to next, prev slides into centre,
-    // and the card that was next is recycled — staged further out, then
-    // transitioned in — to become the new prev, while the ghost plays its
-    // old content exiting further right.
-    ghost.playExit(withFont(cardSet[nextIndexBefore]), 'next');
-    const recycled = cards[roles.indexOf('next')];
-    cards[roles.indexOf('center')].setRole('next');
-    cards[roles.indexOf('prev')].setRole('center');
-    roles = roles.map((role) => ({ center: 'next', prev: 'center', next: 'prev' }[role]));
-    const newPrevIndex = ((activeIndex - 1) % total + total) % total;
-    recycled.render(withFont(cardSet[newPrevIndex]));
-    recycled.stageAt('stage-prev');
-    requestAnimationFrame(() => requestAnimationFrame(() => recycled.setRole('prev')));
-    cards[roles.indexOf('center')].render(centerEntry());
-    useQuote(cardSet[activeIndex]);
-    announcePosition();
+  const requestAsyncAnimationFrame = (callback) => {
+    const handle = { cancelled: false, id: 0 };
+    handle.id = requestAnimationFrame((ts) => {
+      Promise.resolve().then(() => {
+        if (!handle.cancelled) callback(ts);
+      });
+    });
+    return handle;
+  };
+
+  function cancelSnapAnimation() {
+    if (rafHandle) {
+      rafHandle.cancelled = true;
+      cancelAnimationFrame(rafHandle.id);
+      rafHandle = null;
+    }
   }
 
-  // Applied from the widget's font/colour pickers (see buildWidget) so
-  // selecting a font or background there updates the arc carousel exactly
-  // as it already updates the desktop widget's own .me-card. A font patch
-  // is carousel-wide (re-renders all 3 visible cards, see renderFont
-  // below); a colour/quote/author patch stays centre-only via
-  // centreOverride, same as before.
-  function renderFont() {
-    cards[roles.indexOf('prev')].render(withFont(cardSet[((activeIndex - 1) % total + total) % total]));
-    cards[roles.indexOf('center')].render(centerEntry());
-    cards[roles.indexOf('next')].render(withFont(cardSet[(activeIndex + 1) % total]));
+  function animateToPosition(targetPosition, duration, onDone = () => {}) {
+    cancelSnapAnimation();
+
+    if (isReducedMotion()) {
+      position = targetPosition;
+      velocityCardsPerMs = 0;
+      renderArcFrame();
+      onDone();
+      return;
+    }
+
+    const start = position;
+    const distance = targetPosition - start;
+    if (Math.abs(distance) < 0.0001) {
+      velocityCardsPerMs = 0;
+      renderArcFrame();
+      onDone();
+      return;
+    }
+
+    const startTime = performance.now();
+    const easeOut = (t) => 1 - ((1 - t) ** 4);
+    setMoving(true);
+
+    const step = (ts) => {
+      const elapsed = ts - startTime;
+      const t = Math.min(1, elapsed / duration);
+      const eased = easeOut(t);
+      const prevPosition = position;
+      position = start + (distance * eased);
+      velocityCardsPerMs = (position - prevPosition) / Math.max(1, ts - (lastMoveTs || ts));
+      lastMoveTs = ts;
+      renderArcFrame();
+      if (t < 1) {
+        rafHandle = requestAsyncAnimationFrame(step);
+      } else {
+        rafHandle = null;
+        position = targetPosition;
+        velocityCardsPerMs = 0;
+        renderArcFrame();
+        onDone();
+      }
+    };
+
+    rafHandle = requestAsyncAnimationFrame(step);
+  }
+
+  function snapTo(index, sourceVelocityCardsPerSec = 0) {
+    const snappedIndex = normalizeIndex(index);
+    commitActive(snappedIndex);
+
+    const deltaCards = shortestDistance(snappedIndex, position);
+    const targetPosition = position + deltaCards;
+    commandedPosition = targetPosition;
+
+    if (isReducedMotion()) {
+      setMoving(true);
+      pendingIndex = snappedIndex;
+      applyRoleClasses();
+      position = targetPosition;
+      renderArcFrame();
+      pendingIndex = null;
+      setMoving(false);
+      return;
+    }
+
+    const cardsToTravel = Math.max(1, Math.abs(deltaCards));
+    const velocityExtra = Math.min(220, Math.abs(sourceVelocityCardsPerSec) * 35);
+    const duration = Math.min(
+      SNAP_MAX_MS,
+      SNAP_BASE_MS + ((cardsToTravel - 1) * 180) + velocityExtra,
+    );
+    pendingIndex = snappedIndex;
+    setMoving(true);
+    applyRoleClasses();
+    animateToPosition(targetPosition, duration, () => {
+      pendingIndex = null;
+      rebasePositionAroundActive();
+      renderArcFrame();
+      scheduleRevealAfterSettle();
+    });
+  }
+
+  function snapBy(step, sourceVelocityCardsPerSec = 0) {
+    const normalizedStep = step >= 0
+      ? Math.max(1, Math.round(step))
+      : Math.min(-1, Math.round(step));
+    const snappedIndex = normalizeIndex(activeIndex + normalizedStep);
+    commitActive(snappedIndex);
+
+    commandedPosition = moving ? (commandedPosition + normalizedStep) : (position + normalizedStep);
+    const targetPosition = commandedPosition;
+
+    if (isReducedMotion()) {
+      setMoving(true);
+      pendingIndex = snappedIndex;
+      applyRoleClasses();
+      position = targetPosition;
+      renderArcFrame();
+      pendingIndex = null;
+      setMoving(false);
+      return;
+    }
+
+    const cardsToTravel = Math.max(1, Math.abs(normalizedStep));
+    const velocityExtra = Math.min(220, Math.abs(sourceVelocityCardsPerSec) * 35);
+    const duration = Math.min(
+      SNAP_MAX_MS,
+      SNAP_BASE_MS + ((cardsToTravel - 1) * 180) + velocityExtra,
+    );
+    pendingIndex = snappedIndex;
+    setMoving(true);
+    applyRoleClasses();
+    animateToPosition(targetPosition, duration, () => {
+      pendingIndex = null;
+      rebasePositionAroundActive();
+      renderArcFrame();
+      scheduleRevealAfterSettle();
+    });
+  }
+
+  const onActivate = (el) => {
+    if (el.classList.contains('me-arc-card--prev')) {
+      snapBy(-1);
+    } else if (el.classList.contains('me-arc-card--next')) {
+      snapBy(1);
+    }
+  };
+
+  cards = await Promise.all(cardSet.map(() => buildArcCard(onActivate, a11y, -1)));
+
+  function onPointerDown(e) {
+    if (e.button !== 0) return;
+    if (e.target.closest('.me-arc-nav')) return;
+    pointerDown = true;
+    dragLocked = false;
+    dragging = false;
+    suppressClick = false;
+    pointerId = e.pointerId;
+    startX = e.clientX;
+    startY = e.clientY;
+    startPosition = position;
+    lastMoveTs = performance.now();
+    lastMovePosition = position;
+    velocityCardsPerMs = 0;
+  }
+
+  function onPointerMove(e) {
+    if (!pointerDown || e.pointerId !== pointerId) return;
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+
+    if (!dragLocked) {
+      const movedEnough = Math.abs(dx) > DRAG_THRESHOLD_PX || Math.abs(dy) > DRAG_THRESHOLD_PX;
+      if (!movedEnough) {
+        return;
+      }
+      dragLocked = true;
+      if (Math.abs(dy) >= Math.abs(dx)) {
+        pointerDown = false;
+        return;
+      }
+      dragging = true;
+      suppressClick = true;
+      setMoving(true);
+      try {
+        root.setPointerCapture(pointerId);
+      } catch (err) {
+        // Continue without pointer capture if unavailable.
+      }
+    }
+
+    if (!dragging) return;
+    e.preventDefault();
+
+    const now = performance.now();
+    const nextPosition = startPosition - (dx / Math.max(1, slideWidth));
+    const deltaPosition = nextPosition - lastMovePosition;
+    const deltaTime = Math.max(1, now - lastMoveTs);
+    velocityCardsPerMs = deltaPosition / deltaTime;
+    lastMovePosition = nextPosition;
+    lastMoveTs = now;
+    position = nextPosition;
+    renderArcFrame();
+  }
+
+  function releaseDrag() {
+    if (!dragging) {
+      setMoving(false);
+      return;
+    }
+
+    const velocityCardsPerSec = velocityCardsPerMs * 1000;
+    const nearest = Math.round(position);
+    let step = 0;
+    if (Math.abs(velocityCardsPerSec) >= MIN_FLICK_CARDS_PER_SEC) {
+      step = Math.round(velocityCardsPerSec * FLICK_MULTIPLIER);
+      if (step === 0) {
+        step = velocityCardsPerSec > 0 ? 1 : -1;
+      }
+      step = Math.max(-4, Math.min(4, step));
+    }
+
+    const target = nearest + step;
+    snapTo(target, velocityCardsPerSec);
+  }
+
+  function onPointerUpOrCancel(e) {
+    if (e.pointerId !== pointerId) return;
+    pointerDown = false;
+    pointerId = null;
+    if (dragging) {
+      releaseDrag();
+    }
+    dragging = false;
+    dragLocked = false;
   }
 
   function updateCentre(patch) {
     if (patch.font) {
       selectedFont = patch.font;
-      renderFont();
+      renderCardContent();
+      renderArcFrame();
       return;
     }
     centreOverride = { ...centreOverride, ...patch };
-    cards[roles.indexOf('center')].render(centerEntry());
+    cards[activeIndex].render(centerEntryFor(activeIndex));
+    renderArcFrame();
   }
 
-  applyRoles();
-  renderAll();
-  listboxRole.append(ghost.el, cardA.el, cardB.el, cardC.el);
+  syncGeometry();
+  renderCardContent();
+  renderArcFrame();
+
+  listboxRole.append(...cards.map((card) => card.el));
   root.append(listboxRole);
 
   const prevBtn = createTag('button', {
@@ -1524,10 +1908,53 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
   }, [getIconElementDeprecated('arc-nav-right')]);
   root.append(prevBtn, nextBtn);
 
-  prevBtn.addEventListener('click', goPrev);
-  nextBtn.addEventListener('click', goNext);
+  prevBtn.addEventListener('click', () => {
+    snapBy(-1);
+  });
+  nextBtn.addEventListener('click', () => {
+    snapBy(1);
+  });
 
-  return { root, updateCentre };
+  root.addEventListener('pointerdown', onPointerDown);
+  root.addEventListener('pointermove', onPointerMove);
+  root.addEventListener('pointerup', onPointerUpOrCancel);
+  root.addEventListener('pointercancel', onPointerUpOrCancel);
+  root.addEventListener('click', (e) => {
+    if (!suppressClick) return;
+    suppressClick = false;
+    if (e.target.closest('.me-arc-nav')) return;
+    e.preventDefault();
+    e.stopPropagation();
+  }, true);
+
+  // buildArcCarousel computes geometry once before this root is inserted into
+  // the live DOM. Re-sync on the next frame (after insertion) so CSS custom
+  // properties inherited from the host (.mini-editor) are actually resolved —
+  // especially the mobile --me-arc-card-w/--me-arc-track-gap tokens.
+  requestAnimationFrame(() => {
+    syncGeometry();
+    renderArcFrame();
+  });
+
+  const onResize = () => {
+    syncGeometry();
+    renderArcFrame();
+  };
+  window.addEventListener('resize', onResize);
+
+  return {
+    root,
+    updateCentre,
+    destroy: () => {
+      cancelSnapAnimation();
+      clearTimeout(moveSettleTimer);
+      window.removeEventListener('resize', onResize);
+      root.removeEventListener('pointerdown', onPointerDown);
+      root.removeEventListener('pointermove', onPointerMove);
+      root.removeEventListener('pointerup', onPointerUpOrCancel);
+      root.removeEventListener('pointercancel', onPointerUpOrCancel);
+    },
+  };
 }
 
 /**
@@ -1583,9 +2010,13 @@ export default async function createMiniEditorWidget(config = {}) {
   if (topActions.length || decorationsEnabled) {
     await import('../spectrum/dist/icons-workflow.js');
   }
+  // "Use this quote"/"Copy" (see buildDecoCard) are sp-button, per the same
+  // reasoning — only loaded when the deco cards that use them exist at all.
+  if (decorationsEnabled) {
+    await import('../spectrum/dist/button.js');
+  }
 
   const { cardSet } = backgrounds;
-  const decoCount = backgrounds.decoCount ?? DECO_CARD_COUNT;
 
   // always-open-inline (the modal) starts with the font panel open and
   // keeps one of font/colour open at all times — see buildFontControl /
@@ -1599,30 +2030,43 @@ export default async function createMiniEditorWidget(config = {}) {
   const {
     widget, useQuote, getContentModel, onFontOrColourChange, setDecoChainTarget,
     destroy: destroyWidget,
-  } = await buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMode, decorationsEnabled);
+  } = await buildWidget(
+    root,
+    a11y,
+    cardSet,
+    fontOptions,
+    topActions,
+    panelMode,
+    decorationsEnabled,
+  );
   stage.append(widget);
 
   let decorations;
   let updateCentre = () => {};
   let syncViewportMode = () => {};
   let removeResizeListener = () => {};
+  let destroyArcCarousel = () => {};
 
   if (decorationsEnabled) {
-    // Same entries (the widget's own + the desktop decorations) power the
-    // tablet/mobile arc carousel, so it cycles through the identical set of
-    // quote/background/font combinations as the desktop zig-zag.
-    const arcCardSet = [cardSet[0], ...cardSet.slice(1, 1 + decoCount)];
+    // Use the full fetched card set for the tablet/mobile arc carousel,
+    // independent of how many desktop deco cards are rendered.
+    const arcCardSet = [...cardSet];
     decorations = buildDecoCards(a11y, cardSet, useQuote);
     // Only meaningful on desktop (see buildSkipQuoteSuggestionsCta) — a
     // no-op call when the CTA wasn't built (small viewport).
     setDecoChainTarget(wireDecoTabChain(decorations));
-    const { root: arcCarousel, updateCentre: updateArcCentre } = await buildArcCarousel(
+    const {
+      root: arcCarousel,
+      updateCentre: updateArcCentre,
+      destroy: destroyArc,
+    } = await buildArcCarousel(
       arcCardSet,
       useQuote,
       fontOptions[0],
       a11y,
       widget,
     );
+    destroyArcCarousel = destroyArc || (() => {});
     updateCentre = updateArcCentre;
     onFontOrColourChange(updateCentre);
 
@@ -1640,7 +2084,7 @@ export default async function createMiniEditorWidget(config = {}) {
     // still in the tab order. Hide (not just visually clip) any card whose
     // box no longer fits so it also drops out of the tab order, re-checked
     // on first load and on every resize since it depends on viewport width,
-    // not just the >=1200px/<=1199px carousel-mode switch below.
+    // not just the >1200px/<=1200px carousel-mode switch below.
     const decoCard1 = decorations.querySelector('.me-deco--1');
     const decoCard3 = decorations.querySelector('.me-deco--3');
     const decoCard5 = decorations.querySelector('.me-deco--5');
@@ -1656,7 +2100,6 @@ export default async function createMiniEditorWidget(config = {}) {
         decoCard3.classList.remove('hidden');
         decoCard5.classList.remove('hidden');
         decoCard7.classList.remove('hidden');
-
       }
     };
 
@@ -1669,6 +2112,23 @@ export default async function createMiniEditorWidget(config = {}) {
     removeResizeListener = () => window.removeEventListener('resize', syncViewportMode);
   }
 
+  // Decouples this widget from the block(s) that offer their own "use this
+  // quote" entry points (e.g. collapsible-rows' "Create a design" button) —
+  // they dispatch this CustomEvent on document rather than needing a direct
+  // reference to this editor instance. See mini-editor-widget.md.
+  const onUseQuoteEvent = (e) => {
+    const { quote, author, card, font } = e.detail;
+    const patch = {
+      quote,
+      author,
+      ...(card ? { card } : {}),
+      ...(font ? { font } : {}),
+    };
+    useQuote(patch);
+    updateCentre(patch);
+  };
+  document.addEventListener('mini-editor:use-quote', onUseQuoteEvent);
+
   return {
     stage,
     decorations,
@@ -1678,7 +2138,9 @@ export default async function createMiniEditorWidget(config = {}) {
     syncViewportMode,
     destroy: () => {
       destroyWidget();
+      destroyArcCarousel();
       removeResizeListener();
+      document.removeEventListener('mini-editor:use-quote', onUseQuoteEvent);
     },
   };
 }
