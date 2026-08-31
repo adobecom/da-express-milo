@@ -1553,6 +1553,7 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
   const ARC_STEP_DEG = 14;
   const ARC_STEP_RAD = ARC_STEP_DEG * (Math.PI / 180);
   const DRAG_THRESHOLD_PX = 10;
+  const FLICK_DIRECTION_GUARD_CARDS = 0.18;
   const SNAP_BASE_MS = 1000;
   const SNAP_MAX_MS = 1400;
   const SNAP_SETTLE_RECHECK_MS = 90;
@@ -1878,6 +1879,12 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
   function onPointerDown(e) {
     if (e.button !== 0) return;
     if (e.target.closest('.me-arc-nav')) return;
+    // If a snap animation is still running, stop it before taking drag input;
+    // otherwise RAF and drag both write `position`, causing jumpy/reverse motion.
+    cancelSnapAnimation();
+    clearTimeout(moveSettleTimer);
+    pendingIndex = null;
+
     pointerDown = true;
     dragLocked = false;
     dragging = false;
@@ -1936,6 +1943,7 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
       return;
     }
 
+    const dragDeltaCards = position - startPosition;
     const velocityCardsPerSec = velocityCardsPerMs * 1000;
     const nearest = Math.round(position);
     let step = 0;
@@ -1945,6 +1953,16 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
         step = velocityCardsPerSec > 0 ? 1 : -1;
       }
       step = Math.max(-4, Math.min(4, step));
+
+      // Guard against release jitter: if the final velocity sample points
+      // opposite to the net drag direction, honor displacement direction.
+      if (Math.abs(dragDeltaCards) >= FLICK_DIRECTION_GUARD_CARDS) {
+        const dragDir = Math.sign(dragDeltaCards);
+        const flickDir = Math.sign(step);
+        if (dragDir && flickDir && dragDir !== flickDir) {
+          step = dragDir;
+        }
+      }
     }
 
     const target = nearest + step;
@@ -2024,6 +2042,9 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
   });
 
   const onResize = () => {
+    // Avoid geometry/slideWidth changes mid-drag, which can produce sudden
+    // direction/velocity spikes if browser chrome changes viewport height.
+    if (pointerDown || dragging) return;
     syncGeometry();
     renderArcFrame();
   };
