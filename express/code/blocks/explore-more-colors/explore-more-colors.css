@@ -28,6 +28,7 @@
   max-width: 1232px;
   margin: 0 auto;
   text-align: center;
+  overflow-x: auto;
 }
 
 .explore-more-colors-row .carousel-platform {

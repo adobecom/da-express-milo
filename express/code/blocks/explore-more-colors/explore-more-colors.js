@@ -7,6 +7,16 @@ function getText(cell) {
   return cell?.textContent.trim() || '';
 }
 
+async function waitForOwnStylesheet() {
+  const link = [...document.querySelectorAll('link[rel="stylesheet"]')]
+    .find((l) => l.href?.endsWith('/blocks/explore-more-colors/explore-more-colors.css'));
+  if (!link || link.sheet) return;
+  await new Promise((resolve) => {
+    link.addEventListener('load', resolve, { once: true });
+    link.addEventListener('error', resolve, { once: true });
+  });
+}
+
 let createTag;
 let getConfig;
 let replaceKey;
@@ -66,6 +76,7 @@ export default async function decorate(block) {
   section.append(header, row);
   block.replaceChildren(section);
 
+  await waitForOwnStylesheet();
   if (row.scrollWidth > row.clientWidth) {
     await buildCarousel('', row, { centerAlign: true, infinityScrollEnabled: true });
 
