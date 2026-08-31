@@ -16,6 +16,8 @@ async function prepBlock(filePath) {
   document.body.innerHTML = await readFile({ path: filePath });
   const block = document.querySelector('.explore-more-colors');
   await decorate(block);
+  await new Promise((resolve) => { requestAnimationFrame(() => requestAnimationFrame(resolve)); });
+  await new Promise((resolve) => { setTimeout(resolve, 100); });
   return block;
 }
 

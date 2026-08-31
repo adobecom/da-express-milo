@@ -7,13 +7,16 @@ function getText(cell) {
   return cell?.textContent.trim() || '';
 }
 
-async function waitForOwnStylesheet() {
-  const link = [...document.querySelectorAll('link[rel="stylesheet"]')]
-    .find((l) => l.href?.endsWith('/blocks/explore-more-colors/explore-more-colors.css'));
-  if (!link || link.sheet) return;
-  await new Promise((resolve) => {
-    link.addEventListener('load', resolve, { once: true });
-    link.addEventListener('error', resolve, { once: true });
+function waitForVisibleLayout(row) {
+  return new Promise((resolve) => {
+    const check = () => {
+      if (row.clientWidth > 0) {
+        resolve();
+        return;
+      }
+      requestAnimationFrame(check);
+    };
+    requestAnimationFrame(check);
   });
 }
 
@@ -76,11 +79,10 @@ export default async function decorate(block) {
   section.append(header, row);
   block.replaceChildren(section);
 
-  await waitForOwnStylesheet();
-  if (row.scrollWidth > row.clientWidth) {
+  waitForVisibleLayout(row).then(async () => {
+    if (row.scrollWidth <= row.clientWidth) return;
     await buildCarousel('', row, { centerAlign: true, infinityScrollEnabled: true });
-
     row.querySelector('.carousel-arrow-left')?.setAttribute('aria-label', prevLabel || 'Previous slide');
     row.querySelector('.carousel-arrow-right')?.setAttribute('aria-label', nextLabel || 'Next slide');
-  }
+  });
 }
