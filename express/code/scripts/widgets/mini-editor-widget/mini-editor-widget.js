@@ -1249,27 +1249,31 @@ function buildDecoCards(a11y, cardSet, useQuote) {
 }
 
 // Keyboard traversal order for the deco cards' actions once reached via the
-// Skip-quote-suggestions CTA — deliberately not DOM/visual order (which is
-// 1,3,2,4,5,7,6,8, see DECO_COLUMNS): this is the order design specified for
-// this guided chain specifically.
-const DECO_TAB_CHAIN_ORDER = [2, 4, 6, 8, 1, 3, 5, 7];
+// Skip-quote-suggestions CTA — left-to-right visual order: far-left (1,3),
+// near-left (2,4), near-right (6,8), far-right (5,7). See DECO_COLUMNS for
+// the column/card-number mapping.
+const DECO_TAB_CHAIN_ORDER = [1, 3, 2, 4, 6, 8, 5, 7];
 
 /**
  * Chains Tab across every .me-deco-use/.me-deco-copy pair, in
- * DECO_TAB_CHAIN_ORDER rather than DOM order, and returns a function that
- * focuses the very first button in that chain (deco-2's "Use this quote") —
- * the entry point wired to the Skip-quote-suggestions CTA's Tab handler (see
- * createMiniEditorWidget). Every button in the chain gets an explicit
- * tabindex=-1: like the font/colour rows' roving options (see
- * wireOptionRowRoving), these buttons default to tabindex=0, which the
- * browser visits only after every explicit positive-tabindex element on the
- * page (see this widget's 1-10+ sequence) — left at the default, a plain Tab
- * off the last button in the chain would jump to whatever tabindex=0/default
- * element is next in the document instead of anywhere in this chain, and a
- * shift+Tab back into the chain from outside would land on an arbitrary
- * button instead of consistently re-entering where intended.
+ * DECO_TAB_CHAIN_ORDER (left-to-right visual order), and returns a function
+ * that focuses the first visible button in that chain — the entry point wired
+ * to the Skip-quote-suggestions CTA's Tab handler (see createMiniEditorWidget).
+ * Every button in the chain gets an explicit tabindex=-1: like the font/colour
+ * rows' roving options (see wireOptionRowRoving), these buttons default to
+ * tabindex=0, which the browser visits only after every explicit
+ * positive-tabindex element on the page (see this widget's 1-10+ sequence) —
+ * left at the default, a plain Tab off the last button in the chain would
+ * cycle back into the widget's own controls instead of exiting to the rest of
+ * the page. Far-column cards (.me-deco--1/3/5/7) can be hidden below 1625px
+ * (see syncDecoClipping) — those are skipped when finding the next button and
+ * the first entry point so focus never lands on an invisible element.
+ *
+ * @param {HTMLElement} decorations — the .mini-editor-decorations wrapper
+ * @param {HTMLElement} root — the .mini-editor block root, used to find the
+ *   next focusable element outside the widget after the last card in the chain
  */
-function wireDecoTabChain(decorations) {
+function wireDecoTabChain(decorations, root) {
   // A card can be absent — e.g. fewer templates fetched than DECO_CARD_COUNT
   // leaves the last slot(s) unbuilt (see buildDecoCards) — so each lookup is
   // skipped rather than assumed to exist.
@@ -1278,17 +1282,37 @@ function wireDecoTabChain(decorations) {
     if (!card) return [];
     return [card.querySelector('.me-deco-use'), card.querySelector('.me-deco-copy')];
   });
+  // Far-column cards get the .hidden class at 1200–1625px viewport widths
+  // (see syncDecoClipping). Buttons from hidden cards are excluded from
+  // keyboard focus so focus never lands on an invisible element.
+  const isHidden = (btn) => !!btn.closest('.hidden');
   buttons.forEach((btn, i) => {
     btn.tabIndex = -1;
     btn.addEventListener('keydown', (e) => {
       if (e.key !== 'Tab' || e.shiftKey) return;
-      const next = buttons[i + 1];
-      if (!next) return;
       e.preventDefault();
-      next.focus();
+      // Find the next button that isn't inside a hidden card.
+      let next = null;
+      for (let j = i + 1; j < buttons.length; j++) {
+        if (!isHidden(buttons[j])) { next = buttons[j]; break; }
+      }
+      if (next) {
+        next.focus();
+      } else {
+        // Last visible card in the chain: move on to the rest of the page
+        // rather than letting the browser cycle back to the widget's own
+        // positive-tabindex controls (which live in mini-editor-stage, after
+        // mini-editor-decorations in the DOM but before everything else in
+        // the positive-tabindex sequence).
+        findNextFocusableAfter(root)?.focus();
+      }
     });
   });
-  return () => buttons[0]?.focus();
+  // Entry point: first visible button in chain (used by Skip CTA's Tab handler).
+  return () => {
+    const first = buttons.find((btn) => !isHidden(btn));
+    first?.focus();
+  };
 }
 
 /**
@@ -2045,7 +2069,7 @@ export default async function createMiniEditorWidget(config = {}) {
     decorations = buildDecoCards(a11y, cardSet, useQuote);
     // Only meaningful on desktop (see buildSkipQuoteSuggestionsCta) — a
     // no-op call when the CTA wasn't built (small viewport).
-    setDecoChainTarget(wireDecoTabChain(decorations));
+    setDecoChainTarget(wireDecoTabChain(decorations, root));
     const {
       root: arcCarousel,
       updateCentre: updateArcCentre,
