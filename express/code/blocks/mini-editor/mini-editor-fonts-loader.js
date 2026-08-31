@@ -41,6 +41,22 @@ const FAMILY_TO_STYLE_TAG = {
   'permanent-marker': 'Marker',
 };
 
+// Desired display order for the font picker — matches the attachment's
+// "Style tag" table. Only families present BOTH here and in the loaded kit
+// are shown, in this order; the first entry is the default selection.
+// Any family the kit exposes that isn't listed here is excluded.
+const FONT_ORDER = [
+  'rubik',
+  'kaffeesatz',
+  'anton',
+  'orbitron',
+  'montara',
+  'kanit',
+  'lobster',
+  'old-standard',
+  'permanent-marker',
+];
+
 // Adobe Fonts (Typekit) kit id — same lazy-load approach as font-generator.js:
 // load the JS embed kit (works cross-domain) instead of the CSS endpoint
 // (which 412s off non-allow-listed domains), and resolve on active/inactive
@@ -133,13 +149,20 @@ function buildFontOptions() {
   });
   if (!byFamily.size) return FALLBACK_FONT_OPTIONS;
 
-  return Array.from(byFamily, ([family, { italic, bold, stretch }]) => {
-    const option = { label: familyToLabel(family), font: `"${family}", var(--body-font-family, sans-serif)` };
-    if (italic) option.italic = true;
-    if (bold) option.weight = '700';
-    if (stretch) option.stretch = stretch;
-    return option;
-  });
+  // Only include families from FONT_ORDER that the kit actually loaded,
+  // in the specified order — first entry is the default selection.
+  // Families the kit exposes outside FONT_ORDER are excluded.
+  const options = FONT_ORDER
+    .filter((family) => byFamily.has(family))
+    .map((family) => {
+      const { italic, bold, stretch } = byFamily.get(family);
+      const option = { label: familyToLabel(family), font: `"${family}", var(--body-font-family, sans-serif)` };
+      if (italic) option.italic = true;
+      if (bold) option.weight = '700';
+      if (stretch) option.stretch = stretch;
+      return option;
+    });
+  return options.length ? options : FALLBACK_FONT_OPTIONS;
 }
 
 /**
