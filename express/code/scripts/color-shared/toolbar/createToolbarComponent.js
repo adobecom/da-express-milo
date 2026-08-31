@@ -337,9 +337,15 @@ function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t, edit
 
 function buildCustomActionButtons(actionButtons) {
   const actions = createTag('div', { class: 'ax-toolbar-actions' });
-  actionButtons.forEach(({
-    icon, label, tooltip, onClick, analyticsLabel, dismissOnActivate = false,
-  }) => {
+  actionButtons.forEach((entry) => {
+    // A pre-built element (e.g. a dropdown menu action) is appended as-is.
+    if (entry.element) {
+      actions.appendChild(entry.element);
+      return;
+    }
+    const {
+      icon, label, tooltip, onClick, analyticsLabel, dismissOnActivate = false,
+    } = entry;
     const btn = createIconButton({ icon, label, size: 'm', onClick });
     if (analyticsLabel) decorateAnalyticsAttributes(btn, { linkLabel: analyticsLabel });
     if (tooltip) attachTooltip(btn, tooltip, { dismissOnActivate });

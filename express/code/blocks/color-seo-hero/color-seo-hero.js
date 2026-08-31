@@ -1,6 +1,5 @@
 import { getLibs, getIconElementDeprecated, createTag } from '../../scripts/utils.js';
-import { buildPaletteEditUrl } from '../../scripts/color-shared/utils/utilities.js';
-import { createSpectrumIcon } from '../../scripts/color-shared/utils/icons.js';
+import { createColorPaletteParamApi } from '../../scripts/color-shared/utils/utilities.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
@@ -8,10 +7,13 @@ import { announceToScreenReader } from '../../scripts/color-shared/spectrum/util
 import createExpressActionButton from '../../scripts/color-shared/spectrum/components/express-action-button.js';
 import { createExpressPicker } from '../../scripts/color-shared/spectrum/components/express-picker.js';
 import ColorThemeExpressController from '../../scripts/color-shared/controllers/ColorThemeExpressController.js';
-import { createColorSwatchRailPlaceholders } from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
+import loadColorSwatchRailPlaceholders from '../../scripts/color-shared/i18n/loadColorSwatchRailPlaceholders.js';
 import { createSwatchRailAdapter } from '../../scripts/color-shared/adapters/litComponentAdapters.js';
+import { createSpectrumIcon } from '../../scripts/color-shared/utils/icons.js';
+import { createCopyCodeAction, createDownloadAction } from '../../scripts/color-shared/toolbar/colorActionMenus.js';
 
 const HEX_PATTERN = /^#[0-9a-f]{6}$/i;
+const COLOR_WHEEL_ORIGIN = 'https://color.adobe.com';
 const COLOR_WHEEL_PATH = '/create/color-wheel';
 
 const HARMONY_RULES = ['SHADES', 'COMPLEMENTARY', 'ANALOGOUS', 'TRIAD', 'DOUBLE_SPLIT_COMPLEMENTARY'];
@@ -29,9 +31,10 @@ function getText(cell) {
 }
 
 async function loadStrings() {
-  const [{ getConfig }, { replaceKeyArray }] = await Promise.all([
+  const [{ getConfig }, { replaceKeyArray }, railStrings] = await Promise.all([
     import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
+    loadColorSwatchRailPlaceholders(),
   ]);
 
   const KEYS = [
@@ -40,6 +43,9 @@ async function loadStrings() {
     'build-a-palette', 'color-code-copied', 'link-copied-to-clipboard',
     'unable-to-copy-color', 'unable-to-share-color', 'pick-a-color-palette', 'copy-hex',
     'create-a-color-palette', 'color-copied-to-clipboard',
+    'copy-as-css', 'copy-as-sass', 'copy-as-less', 'copy-as-xml',
+    'download-as-jpeg', 'download-as-ase', 'code-copied-to-clipboard',
+    'unable-to-download-color', 'palette-download-started',
   ];
   const config = getConfig();
   const values = await replaceKeyArray(KEYS, config);
@@ -50,6 +56,7 @@ async function loadStrings() {
 
   return {
     localePrefix: config.locale?.prefix || '',
+    railStrings,
     ruleLabels: {
       SHADES: v(0, 'Shades'),
       COMPLEMENTARY: v(1, 'Complementary'),
@@ -70,26 +77,31 @@ async function loadStrings() {
     copyHex: v(15, 'Copy hex'),
     createAPalette: v(16, 'Create a color palette'),
     colorCopiedToClipboard: v(17, 'Color copied to clipboard'),
+    codeFormatLabels: {
+      CSS: v(18, 'Copy as CSS'),
+      SASS: v(19, 'Copy as SASS'),
+      LESS: v(20, 'Copy as LESS'),
+      XML: v(21, 'Copy as XML'),
+    },
+    downloadFormatLabels: {
+      JPEG: v(22, 'Download as JPEG'),
+      ASE: v(23, 'Download as ASE'),
+    },
+    codeCopied: v(24, 'Code copied to clipboard'),
+    downloadFailed: v(25, 'Unable to download. Please try again.'),
+    downloadStarted: v(26, 'Download started'),
   };
 }
 
-async function copyHex(context) {
-  const { strings, hex } = context;
-  try {
-    await navigator.clipboard.writeText(hex);
-    const message = strings.colorCodeCopied.replace('{hex}', hex);
-    showExpressToast({ message, variant: 'positive', timeout: 2000 });
-    announceToScreenReader(message);
-  } catch {
-    showExpressToast({ message: strings.copyFailed, variant: 'negative', timeout: 2000 });
-  }
+function allContainerColors(context) {
+  return [context.hex, ...context.swatches];
 }
 
 function colorWheelUrl(context, colors) {
-  return new URL(
-    buildPaletteEditUrl(`${context.strings.localePrefix}${COLOR_WHEEL_PATH}`, colors, context.colorName),
-    window.location.origin,
-  ).toString();
+  const url = new URL(`${context.strings.localePrefix}${COLOR_WHEEL_PATH}`, COLOR_WHEEL_ORIGIN);
+  url.searchParams.set('tab', 'primary-color');
+  createColorPaletteParamApi().setOnUrl(url, colors);
+  return url.toString();
 }
 
 function showColorCopiedToast(context, hex) {
@@ -124,25 +136,50 @@ async function shareColor(context) {
     await navigator.clipboard.writeText(shareUrl);
     showExpressToast({ message: strings.linkCopied, variant: 'positive', timeout: 2000 });
     announceToScreenReader(strings.linkCopied);
-  } catch {
+  } catch (err) {
+    window.lana?.log(`Share/clipboard failed: ${err.message}`, {
+      tags: 'color-seo-hero,share',
+      severity: 'error',
+    });
     showExpressToast({ message: strings.shareFailed, variant: 'negative', timeout: 2000 });
   }
 }
 
-function downloadSwatches(context) {
-  const swatchSize = 120;
-  const canvas = createTag('canvas');
-  canvas.width = swatchSize * context.swatches.length;
-  canvas.height = swatchSize;
-  const ctx = canvas.getContext('2d');
-  context.swatches.forEach((hex, index) => {
-    ctx.fillStyle = hex;
-    ctx.fillRect(index * swatchSize, 0, swatchSize, swatchSize);
+function buildCopyCodeMenu(context) {
+  const { strings } = context;
+  return createCopyCodeAction({
+    triggerLabel: strings.copyColorCode,
+    getColors: () => allContainerColors(context),
+    getName: () => context.colorName,
+    formatLabels: strings.codeFormatLabels,
+    onCopied: () => {
+      showExpressToast({ message: strings.codeCopied, variant: 'positive', timeout: 2000 });
+      announceToScreenReader(strings.codeCopied);
+    },
+    onError: () => {
+      showExpressToast({ message: strings.copyFailed, variant: 'negative', timeout: 2000 });
+    },
   });
+}
 
-  const fileName = `${context.colorName.toLowerCase().replace(/\s+/g, '-')}-palette.png`;
-  const link = createTag('a', { href: canvas.toDataURL('image/png'), download: fileName });
-  link.click();
+function buildDownloadMenu(context) {
+  const { strings } = context;
+  return createDownloadAction({
+    triggerLabel: strings.downloadThisPalette,
+    getColors: () => allContainerColors(context),
+    getName: () => context.colorName,
+    formatLabels: strings.downloadFormatLabels,
+    onDownloaded: () => {
+      announceToScreenReader(strings.downloadStarted);
+    },
+    onError: (err) => {
+      window.lana?.log(`Download failed: ${err.message}`, {
+        tags: 'color-seo-hero,download',
+        severity: 'error',
+      });
+      showExpressToast({ message: strings.downloadFailed, variant: 'negative', timeout: 2000 });
+    },
+  });
 }
 
 function applyHarmony(context) {
@@ -301,10 +338,11 @@ async function buildCanvas(context) {
   const adapter = createSwatchRailAdapter({ colors: [context.hex], baseColorIndex: 0 }, {
     orientation: 'horizontal',
     swatchFeatures: ['hexCode', 'copy', 'editTintInline'],
-    strings: createColorSwatchRailPlaceholders({
+    strings: {
+      ...context.strings.railStrings,
       copyHex: context.strings.copyHex,
       editColor: context.strings.editColor,
-    }),
+    },
   });
   adapter.element.classList.add('color-seo-hero-canvas-host');
   adapter.rail.classList.add('color-seo-hero-canvas-rail');
@@ -358,7 +396,7 @@ async function buildStrip(context) {
   const adapter = createSwatchRailAdapter(stripController, {
     orientation: 'horizontal',
     swatchFeatures: ['copy', 'hexCode', 'hexCopyHoverOnly'],
-    strings: createColorSwatchRailPlaceholders({ copyHex: context.strings.copyHex }),
+    strings: { ...context.strings.railStrings, copyHex: context.strings.copyHex },
   });
   adapter.element.classList.add('color-seo-hero-strip-host');
   adapter.rail.classList.add('color-seo-hero-swatch-strip');
@@ -398,11 +436,11 @@ async function buildPreview(context) {
   const actionsGroup = createTag('div', { class: 'color-seo-hero-actions-group' });
 
   const icons = createTag('div', { class: 'color-seo-hero-icons' });
-  icons.append(...await Promise.all([
-    buildActionButton({ spectrumIcon: 'Code', label: strings.copyColorCode, onClick: () => copyHex(context) }),
-    buildActionButton({ spectrumIcon: 'ShareAndroid', label: strings.shareThisColor, onClick: () => shareColor(context) }),
-    buildActionButton({ spectrumIcon: 'Download', label: strings.downloadThisPalette, onClick: () => downloadSwatches(context) }),
-  ]));
+  icons.append(
+    buildCopyCodeMenu(context).element,
+    await buildActionButton({ spectrumIcon: 'ShareAndroid', label: strings.shareThisColor, onClick: () => shareColor(context) }),
+    buildDownloadMenu(context).element,
+  );
 
   const buildLink = createTag('a', { class: 'color-seo-hero-build-link primary button' }, strings.buildAPalette);
   context.buildLink = buildLink;
@@ -440,17 +478,12 @@ async function buildFloatingToolbar(context) {
     mobileCTAText: strings.createAPalette,
     i18nOverrides: { edit: strings.editColor },
     onCTA: () => {
-      window.location.href = colorWheelUrl(context, context.swatches);
+      window.location.href = colorWheelUrl(context, allContainerColors(context));
     },
     onEditClick: () => toggleColorEditor(context, context.floatingEditButtonEl, 'floating'),
+    deps: { initServices: () => Promise.resolve() },
     actionButtons: [
-      {
-        icon: 'Code',
-        label: strings.copyColorCode,
-        tooltip: strings.copyColorCode,
-        analyticsLabel: 'Copy code',
-        onClick: () => copyHex(context),
-      },
+      { element: buildCopyCodeMenu(context).element },
       {
         icon: 'ShareAndroid',
         label: strings.shareThisColor,
@@ -458,13 +491,7 @@ async function buildFloatingToolbar(context) {
         analyticsLabel: 'Share',
         onClick: () => shareColor(context),
       },
-      {
-        icon: 'Download',
-        label: strings.downloadThisPalette,
-        tooltip: strings.downloadThisPalette,
-        analyticsLabel: 'Download',
-        onClick: () => downloadSwatches(context),
-      },
+      { element: buildDownloadMenu(context).element },
     ],
   });
   if (!toolbarHandle) return mount;
@@ -543,7 +570,7 @@ export default async function decorate(block) {
     context.swatches = derived.map((s) => s.hex);
     context.stripController?.setState({ swatches: derived, baseColorIndex: null });
     if (context.buildLink) {
-      context.buildLink.href = colorWheelUrl(context, context.swatches);
+      context.buildLink.href = colorWheelUrl(context, allContainerColors(context));
     }
   });
 

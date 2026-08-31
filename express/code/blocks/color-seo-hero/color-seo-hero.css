@@ -181,6 +181,84 @@
   gap: var(--spacing-80);
 }
 
+/* Copy-as-code / Download dropdown menus (shared library-card action menu) */
+.color-seo-hero .ax-lib-card__action-menu {
+  position: relative;
+  --ax-lib-bg: var(--color-white);
+}
+
+.color-seo-hero .ax-lib-card__action-menu-popover {
+  position: absolute;
+  top: calc(100% + var(--spacing-100));
+  left: 0;
+  right: auto;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  width: max-content;
+  min-width: 0;
+  padding: var(--spacing-100);
+  background: var(--ax-lib-bg);
+  border-radius: var(--Corner-radius-corner-radius-100);
+  box-shadow: var(--Alias-drop-shadow-ambient), var(--Alias-drop-shadow-elevated-key);
+}
+
+.color-seo-hero .ax-lib-card__action-menu-popover--align-right {
+  left: auto;
+  right: 0;
+}
+
+.color-seo-hero .ax-lib-card__action-menu-popover--align-up {
+  top: auto;
+  bottom: calc(100% + var(--spacing-100));
+}
+
+.color-seo-hero .ax-lib-card__action-menu-popover[hidden] {
+  display: none;
+}
+
+.color-seo-hero .ax-lib-card__action-menu-list {
+  display: block;
+  inline-size: max-content;
+  width: max-content;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.color-seo-hero .ax-lib-card__action-menu-list sp-menu-item {
+  background: transparent;
+  white-space: nowrap;
+}
+
+.color-seo-hero .ax-lib-card__action-menu-list sp-menu-item:hover {
+  background: var(--color-gray-150);
+}
+
+.color-seo-hero .ax-lib-card__action-menu-list sp-menu-item:focus,
+.color-seo-hero .ax-lib-card__action-menu-list sp-menu-item:focus-visible,
+.color-seo-hero .ax-lib-card__action-menu-list sp-menu-item[focused],
+.color-seo-hero .ax-lib-card__action-menu-list sp-menu-item[aria-selected="true"] {
+  background: transparent;
+  font-weight: 400;
+}
+
+.color-seo-hero .ax-lib-card__action {
+  --mod-actionbutton-border-radius: var(--Corner-radius-corner-radius-100);
+  --mod-actionbutton-background-color-hover: var(--color-light-gray-2);
+  --mod-actionbutton-background-color-down: var(--color-gray-300-variant);
+  --mod-actionbutton-background-color-focus: var(--color-light-gray-2);
+  --mod-actionbutton-content-color-hover: var(--color-default-font);
+  --mod-actionbutton-content-color-down: var(--color-default-font);
+  --mod-actionbutton-content-color-focus: var(--color-default-font);
+  cursor: pointer;
+}
+
+.color-seo-hero .ax-lib-card__action-menu sp-action-button.ax-lib-card__action[aria-expanded="true"] {
+  --mod-actionbutton-background-color-default: var(--color-light-gray-2);
+}
+
 .color-seo-hero-build-link {
   margin: 0 !important;
 }

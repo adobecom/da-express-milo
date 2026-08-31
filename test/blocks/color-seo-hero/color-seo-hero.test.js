@@ -111,15 +111,28 @@ describe('Color SEO Hero', () => {
     expect(floatingEditButton.getAttribute('aria-expanded')).to.equal('true');
   });
 
-  it('copies the hex code when the floating toolbar code action is clicked', async () => {
+  it('copies a code snippet for all container colors when a copy-as-code format is selected', async () => {
     const writeText = sinon.stub().resolves();
     sinon.stub(navigator.clipboard, 'writeText').callsFake(writeText);
 
-    const [codeBtn] = block.querySelectorAll('.ax-toolbar-actions sp-action-button');
-    codeBtn.click();
+    const [codeMenu] = block.querySelectorAll('.ax-toolbar-actions .ax-lib-card__action-menu');
+    codeMenu.querySelector('.ax-lib-card__action').click();
+    const cssItem = [...codeMenu.querySelectorAll('sp-menu-item')]
+      .find((item) => item.getAttribute('value') === 'CSS');
+    cssItem.click();
     await new Promise((resolve) => { setTimeout(resolve, 50); });
 
-    expect(writeText.calledWith('#1EA774')).to.be.true;
+    expect(writeText.called).to.be.true;
+    expect(writeText.firstCall.args[0]).to.include('#1EA774');
     navigator.clipboard.writeText.restore();
+  });
+
+  it('offers JPEG and ASE options in the download menu', () => {
+    const menus = block.querySelectorAll('.ax-toolbar-actions .ax-lib-card__action-menu');
+    const downloadMenu = menus[menus.length - 1];
+    const values = [...downloadMenu.querySelectorAll('sp-menu-item')]
+      .map((item) => item.getAttribute('value'));
+
+    expect(values).to.include.members(['JPEG', 'ASE']);
   });
 });
