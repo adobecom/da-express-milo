@@ -311,7 +311,8 @@ function createSwatchBand(colors, type, angle) {
 
 /* ── Toolbar Builders ────────────────────────────────────────── */
 
-function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t) {
+function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t, editOptions = {}) {
+  const { showEditLabel = false } = editOptions;
   const paletteSummary = createTag('div', { class: 'ax-palette-summary' });
   paletteSummary.appendChild(createColorStrip(colors, type, angle, t));
   if (showEdit) {
@@ -323,10 +324,34 @@ function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t) {
     });
     editBtn.classList.add('ax-edit-btn');
     decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit palette' });
-    attachTooltip(editBtn, t.edit, { dismissOnActivate: true });
+    if (showEditLabel) {
+      editBtn.classList.add('ax-edit-btn--labeled');
+      editBtn.appendChild(createTag('span', { class: 'ax-edit-btn-label' }, t.edit));
+    } else {
+      attachTooltip(editBtn, t.edit, { dismissOnActivate: true });
+    }
     paletteSummary.appendChild(editBtn);
   }
   return paletteSummary;
+}
+
+function buildCustomActionButtons(actionButtons) {
+  const actions = createTag('div', { class: 'ax-toolbar-actions' });
+  actionButtons.forEach((entry) => {
+    // A pre-built element (e.g. a dropdown menu action) is appended as-is.
+    if (entry.element) {
+      actions.appendChild(entry.element);
+      return;
+    }
+    const {
+      icon, label, tooltip, onClick, analyticsLabel, dismissOnActivate = false,
+    } = entry;
+    const btn = createIconButton({ icon, label, size: 'm', onClick });
+    if (analyticsLabel) decorateAnalyticsAttributes(btn, { linkLabel: analyticsLabel });
+    if (tooltip) attachTooltip(btn, tooltip, { dismissOnActivate });
+    actions.appendChild(btn);
+  });
+  return { actions, ccLibBtn: null };
 }
 
 function buildActionButtons(handlers, t) {
@@ -709,6 +734,9 @@ export function createToolbar(options) {
     editPaletteLink = null,
     getLibraryContext,
     onCTA,
+    onEditClick: customOnEditClick,
+    showEditLabel = false,
+    actionButtons: customActionButtons,
     i18n = {},
     drawerI18n = {},
     deps = {},
@@ -776,6 +804,10 @@ export function createToolbar(options) {
     async () => {
       const currentPalette = getPaletteWithName();
       emit('edit', { palette: currentPalette });
+      if (customOnEditClick) {
+        customOnEditClick(currentPalette);
+        return;
+      }
       if (window.isTestEnv) return;
       if (editPaletteLink) {
         window.location.href = editPaletteLink;
@@ -792,38 +824,41 @@ export function createToolbar(options) {
       }
     },
     t,
+    { showEditLabel },
   );
 
-  const { actions, ccLibBtn } = buildActionButtons({
-    onShare: async () => {
-      const currentPalette = getPaletteWithName();
-      await handleShare({ name: currentPalette.name, colors: currentPalette.colors }, t);
-      emit('share', { palette: currentPalette });
-    },
-    onDownload: async () => {
-      const currentPalette = getPaletteWithName();
-      if (type === 'gradient') {
-        await handleGradientDownload(currentPalette, t);
-      } else {
-        await handleDownload(currentPalette, t);
-      }
-      emit('download', { palette: currentPalette });
-    },
-    onSave: async () => {
-      const ctx = await fetchLibCtxOnce();
-      const { libraries, provider: ccLibraryProvider } = ctx;
-      await handleSave(
-        getPaletteWithName(),
-        type,
-        ccLibBtn,
-        libraries,
-        ccLibraryProvider,
-        libCtxCache,
-        drawerI18n,
-      );
-      emit('save', { palette: getPaletteWithName() });
-    },
-  }, t);
+  const { actions, ccLibBtn } = customActionButtons
+    ? buildCustomActionButtons(customActionButtons)
+    : buildActionButtons({
+      onShare: async () => {
+        const currentPalette = getPaletteWithName();
+        await handleShare({ name: currentPalette.name, colors: currentPalette.colors }, t);
+        emit('share', { palette: currentPalette });
+      },
+      onDownload: async () => {
+        const currentPalette = getPaletteWithName();
+        if (type === 'gradient') {
+          await handleGradientDownload(currentPalette, t);
+        } else {
+          await handleDownload(currentPalette, t);
+        }
+        emit('download', { palette: currentPalette });
+      },
+      onSave: async () => {
+        const ctx = await fetchLibCtxOnce();
+        const { libraries, provider: ccLibraryProvider } = ctx;
+        await handleSave(
+          getPaletteWithName(),
+          type,
+          ccLibBtn,
+          libraries,
+          ccLibraryProvider,
+          libCtxCache,
+          drawerI18n,
+        );
+        emit('save', { palette: getPaletteWithName() });
+      },
+    }, t);
 
   const actionContainer = createTag('div', { class: 'ax-action-container' });
   actionContainer.appendChild(paletteSummary);
