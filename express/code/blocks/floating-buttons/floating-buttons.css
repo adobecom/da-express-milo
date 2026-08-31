@@ -10,7 +10,7 @@ div[class='section floating-buttons-container'] {
   left: 0;
   padding-bottom: var(--spacing-400);
   transition: bottom 0.4s;
-  z-index: 99;
+  z-index: 2;
   max-width: none;
 }
 
