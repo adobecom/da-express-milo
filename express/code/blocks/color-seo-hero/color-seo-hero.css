@@ -191,12 +191,6 @@
   z-index: 1;
 }
 
-/* The shared floating-toolbar's "sticky-on-scroll" variant renders inline
-   at its natural position until the scroll-past trigger, then flips fixed
-   (see createFloatingToolbar.js). This hero wants it hidden entirely until
-   that trigger — never a visible inline copy — so hide everything except
-   the actual sticky/fixed state. Scoped to this hero's own mount point,
-   so color-wheel/color-extract's own toolbar usage is unaffected. */
 .color-seo-hero-toolbar-mount .color-floating-toolbar-container:not(.ax-toolbar-sticky-wrapper) {
   display: none;
 }
@@ -219,10 +213,6 @@
 
 /* ==========================================================================
    Responsive
-   Breakpoints match this codebase's mobile (<600) / tablet (600-899) /
-   desktop (>=900, >=1200) scale — see color-shade-swatches.css,
-   template-list.css, etc. Base rules above are the desktop layout; each
-   query below only overrides what changes at that breakpoint.
    ========================================================================== */
 
 @media (min-width: 1200px) {

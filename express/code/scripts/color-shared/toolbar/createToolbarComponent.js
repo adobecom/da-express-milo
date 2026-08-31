@@ -324,8 +324,6 @@ function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t, edit
     });
     editBtn.classList.add('ax-edit-btn');
     decorateAnalyticsAttributes(editBtn, { linkLabel: 'Edit palette' });
-    // Opt-in only: some consumers (e.g. a single-color toolbar) want a
-    // persistent visible label next to the icon instead of tooltip-only.
     if (showEditLabel) {
       editBtn.classList.add('ax-edit-btn--labeled');
       editBtn.appendChild(createTag('span', { class: 'ax-edit-btn-label' }, t.edit));
@@ -337,10 +335,6 @@ function buildPaletteSummary(colors, type, angle, showEdit, onEditClick, t, edit
   return paletteSummary;
 }
 
-// Opt-in only: lets a consumer supply its own set of action icons instead of
-// the default Share / Download / Save-to-library trio (e.g. a toolbar with
-// no library-save concept). No existing consumer passes `actionButtons`, so
-// this has zero effect unless explicitly requested.
 function buildCustomActionButtons(actionButtons) {
   const actions = createTag('div', { class: 'ax-toolbar-actions' });
   actionButtons.forEach(({

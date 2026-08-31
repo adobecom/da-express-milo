@@ -494,11 +494,6 @@ export const style = css`
     margin-left: 0;
   }
 
-  /* Opt-in only: rendered by index.js when swatchFeatures includes
-     'editTintInline' (see showEdit / bottom-info render branch) — groups the
-     hex-code text with an inline edit-tint icon-button instead of the
-     default top-right overlay placement. No existing consumer sets this
-     feature, so this rule has zero effect unless explicitly requested. */
   .hex-code-group {
     display: flex;
     align-items: center;
@@ -677,9 +672,6 @@ export const style = css`
     pointer-events: none;
   }
 
-  /* Opt-in only: hides the hex-code/copy bottom-info group until the column
-     is hovered or focused. Gated to real desktop hover so touch (mobile,
-     iPad) keeps the always-visible behavior it already has. */
   @media (hover: hover) {
     .swatch-column--hex-copy-hover-only .bottom-info {
       opacity: 0;

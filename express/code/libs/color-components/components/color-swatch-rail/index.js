@@ -507,10 +507,7 @@ export class ColorSwatchRail extends LitElement {
     try {
       const copied = await this._copyText(hex);
       if (!copied) throw new Error('clipboard_copy_failed');
-      // Opt-in only: lets a consumer show its own richer toast (e.g. with a
-      // "create a palette from this color" action button) instead of the
-      // default plain one. No existing consumer sets this, so this has zero
-      // effect unless explicitly requested.
+      // Opt-in only: lets a consumer show its own richer toast
       if (this.onCopyHex) {
         this.onCopyHex(hex);
       } else {

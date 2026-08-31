@@ -92,10 +92,6 @@ function colorWheelUrl(context, colors) {
   ).toString();
 }
 
-// Richer copy toast for the swatch/strip copy buttons (color-swatch-rail's
-// own default toast is a plain message with no action) — includes a button
-// that opens the color-wheel editor with the copied swatch as the primary
-// color, same destination the hero's other "create a palette" CTAs use.
 function showColorCopiedToast(context, hex) {
   const { strings } = context;
   showExpressToast({
@@ -154,13 +150,6 @@ function applyHarmony(context) {
   const seed = Array.from({ length: DISPLAY_COUNTS[rule] + 1 }, () => hex);
   controller.replaceSwatchesFromHexes(seed, { baseIndex: 0, harmonyRule: 'CUSTOM' });
   controller.setHarmonyRule(rule);
-  // setHarmonyRule() alone is a no-op past the very first call: HarmonyEngineExpress
-  // only re-derives its internal base point (hue/angle) from the theme when its
-  // private rule tracker transitions out of null, which only happens once. On every
-  // later edit the base point silently goes stale, so the mini swatches/CTA link
-  // stop tracking new colors entirely. setBaseColor() re-triggers that recompute
-  // from the *current* base swatch unconditionally, keeping this hex locked in as
-  // the harmony base without touching the shared controller/engine files themselves.
   controller.setBaseColor(hex);
 }
 
@@ -177,10 +166,6 @@ function selectRule(context, rule) {
   updateColor(context, context.hex);
 }
 
-// The inline edit-tint button lives inside color-swatch-rail's shadow root
-// (rendered by the 'editTintInline' feature), so it has to be looked up at
-// use time rather than cached — Lit may re-render the swatch on every
-// controller update.
 function getCanvasEditButtonEl(context) {
   return context.canvasAdapter.rail.shadowRoot?.querySelector('.hex-code-group .icon-button--edit-tint') || null;
 }
@@ -191,9 +176,6 @@ function isMobileEditorViewport() {
   return window.matchMedia?.(MOBILE_EDITOR_QUERY)?.matches === true;
 }
 
-// Two independent triggers (canvas swatch, floating toolbar) can each open
-// the single-hex editor. Keep their aria-expanded state in sync with
-// whichever one (if any) is actually open.
 function setEditorTriggerState(context, activeTriggerEl) {
   [getCanvasEditButtonEl(context), context.floatingEditButtonEl].filter(Boolean).forEach((el) => {
     el.setAttribute('aria-haspopup', 'dialog');
@@ -236,10 +218,6 @@ async function openMobileColorEditor(context, triggerEl) {
   });
 }
 
-// The floating toolbar's popover isn't nested inside a positioned ancestor
-// (the toolbar itself flips between inline and position:fixed as it goes
-// sticky), so it's appended to <body> and positioned from the trigger
-// button's live rect each time it opens, rather than anchored via CSS.
 function positionPopoverAboveAnchor(popoverEl, anchorEl) {
   const anchorRect = anchorEl.getBoundingClientRect();
   const popoverWidth = popoverEl.getBoundingClientRect().width || 280;
@@ -249,9 +227,6 @@ function positionPopoverAboveAnchor(popoverEl, anchorEl) {
   popoverEl.style.left = `${left}px`;
 }
 
-// Builds a small open/close controller around a single anchored popover, so
-// the canvas swatch and the floating toolbar can each own their own
-// <color-edit> instance/popover without duplicating this open/close logic.
 function createDesktopColorEditorController(context, popoverEl, { anchorEl } = {}) {
   let colorEdit = null;
   return {
@@ -441,13 +416,6 @@ async function buildPreview(context) {
   return preview;
 }
 
-// Reuses the same shared floating-toolbar component color-wheel/color-extract
-// use (sticky-on-scroll positioning, slide-in/out, footer-hide behavior) —
-// see createFloatingToolbar.js/createToolbarComponent.js. Everything specific
-// to this single-color use case (Code/Share/Download icons instead of
-// Share/Download/Save-to-library, a persistent "Edit color" label, and the
-// edit/CTA click targets) is passed in via the optional params those files
-// added for this; no existing consumer of that shared component is affected.
 async function buildFloatingToolbar(context) {
   const { strings } = context;
   const { initFloatingToolbar } = await import('../../scripts/color-shared/toolbar/createFloatingToolbar.js');
@@ -508,9 +476,6 @@ async function buildFloatingToolbar(context) {
     anchorEl: context.floatingEditButtonEl,
   });
 
-  // Below the desktop/tablet breakpoint, drop the "appears once you scroll
-  // past the hero" behavior in favor of always-sticky — matching how
-  // color-extract's own floating toolbar behaves on small viewports.
   const alwaysStickyQuery = window.matchMedia('(max-width: 1199px)');
   alwaysStickyQuery.addEventListener('change', (e) => {
     closeColorEditor(context);
@@ -523,11 +488,6 @@ async function buildFloatingToolbar(context) {
   return mount;
 }
 
-// Makes the background glow (.color-seo-hero.is-ready's radial-gradient)
-// follow the cursor, but only across the blank background — not while over
-// the palette panel itself (--gradient-x/--gradient-y just stay frozen at
-// wherever they last were while the pointer is inside it). CSS-side defaults
-// cover the pointer-hasn't-moved-yet case (or touch, where mousemove never fires).
 function attachGradientPointerTracking(block) {
   block.addEventListener('mousemove', (e) => {
     if (e.target.closest('.color-seo-hero-preview')) return;
