@@ -1322,6 +1322,73 @@ sp-theme {
   }
 }
 
+/* Extra-small phones: exact match to Figma QA node 178:4216 (btm):
+   wrapper 272x88, two controls 129x88, gap 14, inner gap/padding 8. */
+@media (width < 368px) {
+  .me-controls {
+    width: min(100%, 272px);
+    margin-inline: auto;
+    gap: 14px;
+  }
+
+  .me-control {
+    height: 88px;
+    padding: 8px;
+    background: var(--color-gray-150);
+    border: 1px solid var(--S2AC-Palette-transparent-black-50);
+    border-radius: 16px;
+    box-shadow: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .me-control--colour {
+    padding: 8px;
+  }
+
+  .me-control--font {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .me-control-label {
+    order: 1;
+    flex: 0 0 auto;
+    min-width: max-content;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+  }
+
+  .me-pill {
+    order: 2;
+    flex: 0 0 auto;
+    width: calc(100% + 2px);
+    max-width: 113px;
+    min-width: 0;
+    height: 46px;
+    line-height: 46px;
+    padding: 0 12px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .me-swatch {
+    order: 2;
+    box-sizing: border-box;
+    width: calc(100% + 2px);
+    max-width: 113px;
+    height: 46px;
+    min-height: 46px;
+    border-radius: 10px;
+    border: 1px solid var(--Palette-transparent-white-800);
+  }
+}
+
 .hidden {
   display: none;
 }
