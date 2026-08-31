@@ -31,7 +31,20 @@
 @font-face {
   font-family: 'adobe-clean-fallback-ar';
   font-display: swap;
-  size-adjust: 104%;
+  size-adjust: 92.1%;
+  ascent-override: 88.67%;
+  descent-override: 51.75%;
+  line-gap-override: 0%;
+  src: local('Arial'), local('Helvetica');
+}
+
+@font-face {
+  font-family: 'adobe-clean-fallback-ar';
+  font-display: swap;
+  size-adjust: 103.5%;
+  font-weight: 900;
+  ascent-override: 88.67%;
+  descent-override: 51.75%;
   line-gap-override: 0%;
   src: local('Arial'), local('Helvetica');
 }

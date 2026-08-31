@@ -152,7 +152,7 @@
   font-size: var(--body-font-size-l);
   line-height: 1;
   padding: 13px var(--spacing-400);
-  border-radius: var(--spacing-400);
+  border-radius: var(--border-radius-max);
   background-color: var(--color-content-neutral);
   border: var(--border-width-2) solid var(--color-content-neutral);
   color: var(--color-white);
