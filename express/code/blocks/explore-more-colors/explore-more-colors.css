@@ -1,0 +1,109 @@
+.explore-more-colors {
+  padding: var(--spacing-600) 0;
+  box-sizing: border-box;
+}
+
+.explore-more-colors-header {
+  max-width: 1232px;
+  margin: 0 auto var(--spacing-500);
+  text-align: center;
+}
+
+.explore-more-colors-header h1,
+.explore-more-colors-header h2,
+.explore-more-colors-header h3,
+.explore-more-colors-header h4 {
+  font-size: var(--heading-font-size-l);
+  font-weight: 900;
+  line-height: 104%;
+  margin: 0;
+  color: var(--color-content-neutral);
+}
+
+.explore-more-colors-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: var(--spacing-300);
+  max-width: 1232px;
+  margin: 0 auto;
+  text-align: center;
+  overflow-x: auto;
+}
+
+.explore-more-colors-row .carousel-platform {
+  gap: var(--spacing-300);
+}
+
+.explore-more-colors-chip {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+  width: 192px;
+  background: var(--color-white);
+  border: 1px solid var(--color-gray-250, #e1e1e1);
+  border-radius: var(--spacing-300);
+  overflow: hidden;
+}
+
+a.explore-more-colors-chip {
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  transition: box-shadow 150ms ease-out, transform 150ms ease-out;
+}
+
+a.explore-more-colors-chip:hover {
+  box-shadow:
+    0 0 2px rgba(0, 0, 0, 0.12),
+    0 2px 6px rgba(0, 0, 0, 0.04),
+    0 4px 12px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
+}
+
+a.explore-more-colors-chip:focus-visible {
+  outline: 2px solid var(--color-background-accent-default);
+  outline-offset: 2px;
+}
+
+.explore-more-colors-chip-swatch {
+  width: 100%;
+  height: 174px;
+  border-radius: var(--spacing-200) var(--spacing-200) 0 0;
+  flex-shrink: 0;
+}
+
+.explore-more-colors-chip-info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-80);
+  padding: var(--spacing-300);
+}
+
+.explore-more-colors-chip-info p {
+  margin: 0 !important;
+}
+
+.explore-more-colors-chip-name {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 92%;
+  margin: 0;
+  color: var(--color-default-font);
+}
+
+.explore-more-colors-chip-hex {
+  font-size: var(--body-font-size-s);
+  line-height: 130%;
+  margin: 0;
+  color: var(--color-dark-gray);
+  font-weight: 400;
+}
+
+/* ── Desktop (L) ≥ 1200px ───────────────────────────────────────── */
+@media (min-width: 1200px) {
+  .explore-more-colors {
+    padding: var(--spacing-900) 0;
+  }
+}
