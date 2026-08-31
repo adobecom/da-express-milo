@@ -1,6 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import {
   calculateCoverCrop,
+  drawMiniEditorText,
   drawMiniEditorCard,
   MINI_EDITOR_EXPORT_HEIGHT,
   MINI_EDITOR_EXPORT_WIDTH,
@@ -47,5 +48,43 @@ describe('mini-editor card renderer', () => {
     expect(canvas.height).to.equal(700);
     expect(Array.from(context.getImageData(0, 0, 1, 1).data)).to.deep.equal([255, 0, 0, 255]);
     expect(Array.from(context.getImageData(1083, 699, 1, 1).data)).to.deep.equal([255, 0, 0, 255]);
+  });
+
+  it('uses light text on dark backgrounds and dark text on light backgrounds', () => {
+    const fillStyleChanges = [];
+    const context = {
+      save: () => {},
+      restore: () => {},
+      measureText: () => ({ width: 100 }),
+      fillText: () => {},
+      set fillStyle(value) {
+        fillStyleChanges.push(value);
+      },
+      get fillStyle() {
+        return fillStyleChanges[fillStyleChanges.length - 1];
+      },
+      font: '',
+      textAlign: 'left',
+      textBaseline: 'alphabetic',
+    };
+
+    drawMiniEditorText(context, {
+      quote: 'Dark bg quote',
+      author: 'Author',
+      backgroundMode: 'dark',
+      font: { family: 'sans-serif', style: 'normal', weight: 'normal' },
+    });
+    expect(fillStyleChanges).to.include('#ffffff');
+    expect(fillStyleChanges).to.include('rgba(255, 255, 255, 0.8)');
+
+    fillStyleChanges.length = 0;
+    drawMiniEditorText(context, {
+      quote: 'Light bg quote',
+      author: 'Author',
+      backgroundMode: 'light',
+      font: { family: 'sans-serif', style: 'normal', weight: 'normal' },
+    });
+    expect(fillStyleChanges).to.include('#131313');
+    expect(fillStyleChanges).to.include('#505050');
   });
 });

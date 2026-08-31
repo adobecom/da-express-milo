@@ -920,6 +920,7 @@ async function buildWidget(
     quote: first.quote,
     author: first.author || '',
     backgroundUrl: first.card?.bg || '',
+    backgroundMode: first.card?.mode || 'dark',
     font: {
       family: fontOptions[0]?.font || 'sans-serif',
       style: fontOptions[0]?.italic ? 'italic' : 'normal',
@@ -1133,7 +1134,7 @@ async function buildWidget(
       updateContentModel({
         quote,
         author: author || '',
-        ...(bgCard ? { backgroundUrl: bgCard.bg } : {}),
+        ...(bgCard ? { backgroundUrl: bgCard.bg, backgroundMode: bgCard.mode || 'dark' } : {}),
         ...(font ? {
           font: {
             family: font.font,
@@ -1168,7 +1169,10 @@ async function buildWidget(
           });
         }
         if (patch.card) {
-          updateContentModel({ backgroundUrl: patch.card.bg });
+          updateContentModel({
+            backgroundUrl: patch.card.bg,
+            backgroundMode: patch.card.mode || 'dark',
+          });
           setCardMode(patch.card.mode);
         }
         listener(patch);

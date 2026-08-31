@@ -7,6 +7,17 @@ const QUOTE_LINE_HEIGHT = 52;
 const AUTHOR_FONT_SIZE = 32;
 const AUTHOR_BOTTOM = 24;
 
+const EXPORT_TEXT_COLORS = {
+  light: {
+    quote: '#131313',
+    author: '#505050',
+  },
+  dark: {
+    quote: '#ffffff',
+    author: 'rgba(255, 255, 255, 0.8)',
+  },
+};
+
 export function calculateCoverCrop(sourceWidth, sourceHeight, targetWidth, targetHeight) {
   const scale = Math.max(targetWidth / sourceWidth, targetHeight / sourceHeight);
   const width = targetWidth / scale;
@@ -89,8 +100,10 @@ function buildCanvasFont(font, size) {
 }
 
 export function drawMiniEditorText(context, model) {
+  const mode = model.backgroundMode === 'light' ? 'light' : 'dark';
+  const colors = EXPORT_TEXT_COLORS[mode];
   context.save();
-  context.fillStyle = '#131313';
+  context.fillStyle = colors.quote;
   context.font = buildCanvasFont(model.font, QUOTE_FONT_SIZE);
   context.textAlign = 'center';
   context.textBaseline = 'middle';
@@ -103,7 +116,7 @@ export function drawMiniEditorText(context, model) {
   });
 
   if (model.author) {
-    context.fillStyle = '#505050';
+    context.fillStyle = colors.author;
     context.font = buildCanvasFont(model.font, AUTHOR_FONT_SIZE);
     context.textBaseline = 'bottom';
     context.fillText(

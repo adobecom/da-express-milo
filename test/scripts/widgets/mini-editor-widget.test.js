@@ -72,6 +72,7 @@ describe('mini-editor-widget', () => {
       quote: 'Quote number 0',
       author: 'Author 0',
       backgroundUrl: '/img/image0.jpg',
+      backgroundMode: 'dark',
       font: {
         family: fontOptions[0].font,
         style: 'normal',
@@ -135,6 +136,7 @@ describe('mini-editor-widget', () => {
     const { root, editor } = await mount();
     root.querySelectorAll('.me-row--colour .me-swatch-btn')[2].click();
     expect(editor.getContentModel().backgroundUrl).to.equal('/img/image2.jpg');
+    expect(editor.getContentModel().backgroundMode).to.equal('dark');
   });
 
   it('replaces light/dark mode classes when switching background from light to dark', async () => {
