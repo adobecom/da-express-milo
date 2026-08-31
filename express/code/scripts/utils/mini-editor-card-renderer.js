@@ -1,11 +1,11 @@
 export const MINI_EDITOR_EXPORT_WIDTH = 1084;
 export const MINI_EDITOR_EXPORT_HEIGHT = 700;
 
-const QUOTE_MAX_WIDTH = 624;
-const QUOTE_FONT_SIZE = 40;
-const QUOTE_LINE_HEIGHT = 52;
-const AUTHOR_FONT_SIZE = 32;
-const AUTHOR_BOTTOM = 24;
+export const QUOTE_MAX_WIDTH = 624;
+export const QUOTE_FONT_SIZE = 40;
+export const QUOTE_LINE_HEIGHT = 52;
+export const AUTHOR_FONT_SIZE = 32;
+export const AUTHOR_BOTTOM = 24;
 
 export function calculateCoverCrop(sourceWidth, sourceHeight, targetWidth, targetHeight) {
   const scale = Math.max(targetWidth / sourceWidth, targetHeight / sourceHeight);

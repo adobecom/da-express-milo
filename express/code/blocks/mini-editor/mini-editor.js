@@ -321,10 +321,33 @@ export default async function init(block) {
       };
     };
 
+    // Opens the active quote card in the Adobe Express web app (project-x). The
+    // Express-side entry (@hz/x-acom-mini-editor-entry) rebuilds the card from
+    // the URL args this produces. Dynamically imported so the URL/branch code
+    // only loads when the user actually clicks Edit.
+    const handleOpenInExpress = async () => {
+      try {
+        const model = editor?.getContentModel();
+        if (!model) throw new Error('Mini-editor content model is unavailable');
+        const { openInExpress } = await import('../../scripts/widgets/mini-editor-widget/open-in-express.js');
+        let prodBaseUrl;
+        try {
+          const authored = await replaceKey('mini-editor-cta-base-url', getConfig());
+          if (authored && /^https?:\/\//.test(authored)) prodBaseUrl = authored;
+        } catch { /* not authored — helper falls back to its default prod base */ }
+        await openInExpress(model, prodBaseUrl);
+      } catch (err) {
+        window.lana?.log(`Mini-editor open in Express failed: ${err.message}`, {
+          tags: 'mini-editor,edit',
+          severity: 'error',
+        });
+      }
+    };
+
     editor = await createMiniEditorWidget({
       root: block,
       topActions: [
-        { type: 'edit', onClick: () => console.info('mini-editor: edit action not yet implemented') },
+        { type: 'edit', onClick: handleOpenInExpress },
         {
           type: 'share',
           shareMenu: {

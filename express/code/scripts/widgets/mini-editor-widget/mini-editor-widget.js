@@ -716,6 +716,12 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
     quote: first.quote,
     author: first.author || '',
     backgroundUrl: first.card?.bg || '',
+    // The active card's template URN (card.id) — carried alongside backgroundUrl
+    // so the Edit action can hand Express the exact source asset to fetch.
+    backgroundUrn: first.card?.id || '',
+    // 'light' | 'dark' brightness of the background — drives the text colour the
+    // Edit action reproduces in Express (dark bg → light text, and vice versa).
+    mode: first.card?.mode || '',
     font: {
       family: fontOptions[0]?.font || 'sans-serif',
       style: fontOptions[0]?.italic ? 'italic' : 'normal',
@@ -816,11 +822,25 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
     root.style.setProperty('--me-card-bg', `url("${first.card.bg}")`);
   }
 
-  // Set by the widget factory once the arc carousel exists, so picking a
-  // font/colour here also updates the carousel's centre card on tablet/mobile
-  // — not just the desktop widget's own .me-card (which the CSS vars above
-  // already cover regardless of listener wiring).
+  // Notifies the arc carousel (tablet/mobile) so it mirrors a font/colour pick on its centre card.
+  // Wired by the widget factory via onFontOrColourChange, but ONLY when the carousel exists
+  // (decorationsEnabled) — so the content model is updated directly in the control callbacks below,
+  // not in this listener, otherwise font/background picks wouldn't sync without decorations.
   let onFontOrColourPick = () => {};
+
+  const applyFontToModel = (font) => updateContentModel({
+    font: {
+      family: font.font,
+      style: font.italic ? 'italic' : 'normal',
+      weight: font.weight || 'normal',
+      stretch: font.stretch || 'normal',
+    },
+  });
+  const applyCardToModel = (card) => updateContentModel({
+    backgroundUrl: card.bg,
+    backgroundUrn: card.id || '',
+    mode: card.mode || '',
+  });
 
   // Keyboard-only "Skip quote suggestions" CTA, per Figma node 54:11762 — see
   // buildSkipQuoteSuggestionsCta below. Its only purpose is to bridge Tab
@@ -840,7 +860,10 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
   } = buildFontControl(
     root,
     fontOptions,
-    (font) => onFontOrColourPick({ font }),
+    (font) => {
+      applyFontToModel(font);
+      onFontOrColourPick({ font });
+    },
     panelMode,
     () => colourControl.focus(),
   );
@@ -853,12 +876,11 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
     root,
     cardSet.map((c) => c.card),
     (bgCard) => {
-      // Unconditional (not just via onFontOrColourPick, which only reaches a
-      // listener when decorationsEnabled — see its declaration above): the
-      // desktop .me-card's own light-mode/dark-mode text contrast must
-      // follow every background pick even when there's no arc carousel to
-      // notify, e.g. the "Create a design" modal (decorations: false).
+      // Unconditional (not via onFontOrColourPick, which only reaches a listener when
+      // decorationsEnabled): update the content model + the desktop .me-card's light/dark
+      // contrast on every pick, even with no arc carousel to notify (e.g. decorations: false).
       setCardMode(bgCard.mode);
+      applyCardToModel(bgCard);
       onFontOrColourPick({ card: bgCard });
     },
     panelMode,
@@ -915,7 +937,7 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
       updateContentModel({
         quote,
         author: author || '',
-        ...(bgCard ? { backgroundUrl: bgCard.bg } : {}),
+        ...(bgCard ? { backgroundUrl: bgCard.bg, backgroundUrn: bgCard.id || '', mode: bgCard.mode || '' } : {}),
         ...(font ? {
           font: {
             family: font.font,
@@ -935,24 +957,11 @@ async function buildWidget(root, a11y, cardSet, fontOptions, topActions, panelMo
       if (font) selectFont(font);
     },
     getContentModel: () => ({ ...contentModel, font: { ...contentModel.font } }),
+    // The content model + desktop card contrast are updated in the font/colour control callbacks
+    // above (so every pick syncs, with or without decorations); this only forwards picks to the
+    // arc carousel listener when one is wired.
     onFontOrColourChange: (listener) => {
-      onFontOrColourPick = (patch) => {
-        if (patch.font) {
-          updateContentModel({
-            font: {
-              family: patch.font.font,
-              style: patch.font.italic ? 'italic' : 'normal',
-              weight: patch.font.weight || 'normal',
-              stretch: patch.font.stretch || 'normal',
-            },
-          });
-        }
-        if (patch.card) {
-          updateContentModel({ backgroundUrl: patch.card.bg });
-          setCardMode(patch.card.mode);
-        }
-        listener(patch);
-      };
+      onFontOrColourPick = listener;
     },
     // Wired by createMiniEditorWidget once the deco cards exist (buildWidget
     // itself has no knowledge of them — see buildSkipQuoteSuggestionsCta).
