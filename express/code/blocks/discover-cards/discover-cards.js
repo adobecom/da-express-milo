@@ -205,7 +205,7 @@ export default async function decorate(block) {
     } else {
       cardDivs.forEach((element) => {
         const img = element.querySelector('picture img');
-        const textHeader = element.querySelector('h4');
+        const textHeader = element.querySelector('h1, h2, h3, h4, h5, h6');
         const textBody = element.querySelector('p');
         if (textHeader && textBody) {
           textHeader.classList.add('header');
