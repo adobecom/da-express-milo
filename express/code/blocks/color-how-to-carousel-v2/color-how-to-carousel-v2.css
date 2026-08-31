@@ -193,10 +193,9 @@
     user-select: none;
 }
 
-.color-how-to-carousel-v2 .chtc-specs-copy .icon-fallback {
+.color-how-to-carousel-v2 .chtc-specs-copy sp-icon-copy {
     width: 20px;
     height: 20px;
-    fill: currentColor;
 }
 
 @media (hover: hover) {

@@ -1,12 +1,9 @@
 import { getLibs, fixIcons, addTempWrapperDeprecated } from '../../scripts/utils.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
+import { createSpectrumIcon } from '../../scripts/color-shared/utils/icons.js';
+import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 
 const GRAPH_SYMBOLS = ['hero-marquee', 'hero-marquee-localized', 'hands-and-heart', 'color-how-to-graph'];
-// Same copy glyph as the hero's swatch-rail icon-button (ICON_MAP.copy fallback in
-// color-swatch-rail/index.js), reused directly since this block skips the sp-icon-copy bundle.
-const COPY_ICON = `<svg class="icon-fallback" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
-  <path d="m11.75,18h-7.5c-1.24023,0-2.25-1.00977-2.25-2.25v-7.5c0-1.24023,1.00977-2.25,2.25-2.25.41406,0,.75.33594.75.75s-.33594.75-.75.75c-.41309,0-.75.33691-.75.75v7.5c0,.41309.33691.75.75.75h7.5c.41309,0,.75-.33691.75-.75,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,1.24023-1.00977,2.25-2.25,2.25Zm-5-13c-.41406,0-.75-.33594-.75-.75,0-1.24023,1.00977-2.25,2.25-2.25.41406,0,.75.33594.75.75s-.33594.75-.75.75c-.41309,0-.75.33691-.75.75,0,.41406-.33594.75-.75.75Zm6.25-1.5h-2c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h2c.41406,0,.75.33594.75.75s-.33594.75-.75.75Zm0,10.5h-2c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75h2c.41406,0,.75.33594.75.75s-.33594.75-.75.75Zm2.75,0c-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75c.41309,0,.75-.33691.75-.75,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,1.24023-1.00977,2.25-2.25,2.25Zm1.5-9c-.41406,0-.75-.33594-.75-.75,0-.41309-.33691-.75-.75-.75-.41406,0-.75-.33594-.75-.75s.33594-.75.75-.75c1.24023,0,2.25,1.00977,2.25,2.25,0,.41406-.33594.75-.75.75Zm0,4.75c-.41406,0-.75-.33594-.75-.75v-2c0-.41406.33594-.75.75-.75s.75.33594.75.75v2c0,.41406-.33594.75-.75.75Zm-10.5,0c-.41406,0-.75-.33594-.75-.75v-2c0-.41406.33594-.75.75-.75s.75.33594.75.75v2c0,.41406-.33594.75-.75.75Zm1.5,4.25c-1.24023,0-2.25-1.00977-2.25-2.25,0-.41406.33594-.75.75-.75s.75.33594.75.75c0,.41309.33691.75.75.75.41406,0,.75.33594.75.75s-.33594.75-.75.75Z"></path>
-</svg>`;
 
 let createTag;
 let getConfig;
@@ -154,7 +151,9 @@ async function buildSpecsCard(payload) {
       class: 'chtc-specs-copy',
       'aria-label': copyLabel.replace('{label}', label),
     });
-    copyBtn.innerHTML = COPY_ICON;
+    const copyIcon = createSpectrumIcon('copy');
+    copyIcon.setAttribute('aria-hidden', 'true');
+    copyBtn.append(copyIcon);
     copyBtn.addEventListener('click', () => copySpecsValue(value, label, strings));
 
     const valueGroup = createTag('span', { class: 'chtc-specs-value-group' });
@@ -238,6 +237,7 @@ export default async function decorate(block) {
       ({ createTag, getConfig } = utils);
     }),
     fixIcons(block),
+    loadIconsRail(),
   ]);
   ({ replaceKey } = await import(`${getLibs()}/features/placeholders.js`));
 
