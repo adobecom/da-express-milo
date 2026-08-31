@@ -72,6 +72,7 @@ describe('mini-editor-widget', () => {
       quote: 'Quote number 0',
       author: 'Author 0',
       backgroundUrl: '/img/image0.jpg',
+      backgroundUrn: 'urn:0',
       backgroundMode: 'dark',
       font: {
         family: fontOptions[0].font,
@@ -153,6 +154,30 @@ describe('mini-editor-widget', () => {
     centerCard = root.querySelector('.me-arc-card--center');
     expect(centerCard.classList.contains('dark-mode')).to.be.true;
     expect(centerCard.classList.contains('light-mode')).to.be.false;
+  });
+
+  // Regression: the content model must sync on every pick, even when decorations (and thus the
+  // arc-carousel listener that used to carry the update) are disabled — otherwise the edit action
+  // hands Express a stale font/background.
+  it('syncs a font pick to the content model with decorations disabled', async () => {
+    const { root, editor } = await mount({ decorations: false });
+    const serifBtn = Array.from(root.querySelectorAll('.me-row--fonts .me-font'))
+      .find((b) => b.textContent === 'Serif');
+    serifBtn.click();
+    expect(editor.getContentModel().font).to.deep.equal({
+      family: fontOptions[1].font,
+      style: 'italic',
+      weight: 'normal',
+      stretch: 'normal',
+    });
+  });
+
+  it('syncs a background pick to the content model with decorations disabled', async () => {
+    const { root, editor } = await mount({ decorations: false });
+    root.querySelectorAll('.me-row--colour .me-swatch-btn')[2].click();
+    const model = editor.getContentModel();
+    expect(model.backgroundUrl).to.equal('/img/image2.jpg');
+    expect(model.backgroundUrn).to.equal('urn:2');
   });
 
   it('opens the matching panel and toggles aria-expanded when a control is clicked', async () => {
