@@ -815,6 +815,53 @@ sp-theme {
 }
 
 /*
+ * Entrance animation for the deco cards — desktop only, fires once on load.
+ * Sits on .me-deco-card-wrap (not on .me-deco itself) so it composes cleanly
+ * with the per-card rotation: each card rises and scales at its final tilt
+ * angle, with no rotation component in the animation at all.
+ * Stagger sweeps left → right across the four columns:
+ *   far-left (0 / 80 ms) → near-left (160 / 240 ms)
+ *   → near-right (320 / 400 ms) → far-right (480 / 560 ms)
+ * Last card starts at 560 ms + 550 ms duration ≈ 1.11 s to fully settled.
+ */
+@media (width >= 1200px) {
+  @keyframes me-deco-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.96);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .me-deco-card-wrap {
+    animation: me-deco-in 550ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--me-deco-delay, 0ms);
+  }
+
+  /* Per-card delays, assigned by column position left → right.
+     Two cards share each column, top card leads by 80 ms. */
+  .me-deco--1 .me-deco-card-wrap { --me-deco-delay:   0ms; }
+  .me-deco--3 .me-deco-card-wrap { --me-deco-delay:  80ms; }
+  .me-deco--2 .me-deco-card-wrap { --me-deco-delay: 160ms; }
+  .me-deco--4 .me-deco-card-wrap { --me-deco-delay: 240ms; }
+  .me-deco--6 .me-deco-card-wrap { --me-deco-delay: 320ms; }
+  .me-deco--8 .me-deco-card-wrap { --me-deco-delay: 400ms; }
+  .me-deco--5 .me-deco-card-wrap { --me-deco-delay: 480ms; }
+  .me-deco--7 .me-deco-card-wrap { --me-deco-delay: 560ms; }
+}
+
+/* Reduced motion: skip animation entirely — all cards appear instantly. */
+@media (width >= 1200px) and (prefers-reduced-motion: reduce) {
+  .me-deco-card-wrap {
+    animation: none;
+  }
+}
+
+/*
  * Tablet/mobile carousel --------------------------------------------------
  * Below 1200px the desktop decorative cards and the fixed widget give way
  * to exactly 3 slots: prev / centre / next (buildArcCarousel in
