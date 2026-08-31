@@ -2,6 +2,7 @@ import { getLibs, fixIcons, addTempWrapperDeprecated } from '../../scripts/utils
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 import { createSpectrumIcon } from '../../scripts/color-shared/utils/icons.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
+import { wrapInTheme } from '../../scripts/color-shared/spectrum/utils/theme.js';
 
 const GRAPH_SYMBOLS = ['hero-marquee', 'hero-marquee-localized', 'hands-and-heart', 'color-how-to-graph'];
 
@@ -153,7 +154,11 @@ async function buildSpecsCard(payload) {
     });
     const copyIcon = createSpectrumIcon('copy');
     copyIcon.setAttribute('aria-hidden', 'true');
-    copyBtn.append(copyIcon);
+    // sp-icon-copy renders the legacy Spectrum-1 glyph unless it resolves a
+    // spectrum-two system context from an <sp-theme> ancestor (see hero's
+    // wrapInTheme() usage for its swatch rail/action buttons) — without this,
+    // the icon looks nothing like the same "copy" icon used elsewhere.
+    copyBtn.append(wrapInTheme(copyIcon));
     copyBtn.addEventListener('click', () => copySpecsValue(value, label, strings));
 
     const valueGroup = createTag('span', { class: 'chtc-specs-value-group' });

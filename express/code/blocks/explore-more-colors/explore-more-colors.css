@@ -21,6 +21,10 @@
 }
 
 .explore-more-colors-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: var(--spacing-300);
   max-width: 1232px;
   margin: 0 auto;
   text-align: center;
