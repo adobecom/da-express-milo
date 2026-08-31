@@ -19,10 +19,6 @@ async function prepBlock(filePath) {
   return block;
 }
 
-// No block stylesheet is loaded in this harness (same limitation noted in
-// icon-carousel's own tests), so .explore-more-colors-row never naturally
-// overflows here — decorate()'s real scrollWidth/clientWidth check needs
-// forcing to exercise the carousel branch at all.
 const originalScrollWidth = Object.getOwnPropertyDescriptor(Element.prototype, 'scrollWidth');
 const originalClientWidth = Object.getOwnPropertyDescriptor(Element.prototype, 'clientWidth');
 
@@ -144,9 +140,6 @@ describe('Explore More Colors / overflowing (infinite carousel)', () => {
   it('loops the chips (infinity scroll duplicates content) instead of stopping at the end', async () => {
     const block = await prepBlock('./mocks/basic.html');
     const chips = block.querySelectorAll('.explore-more-colors-chip');
-    // buildCarousel's infinity mode clones the original set several times;
-    // asserting an exact multiplier would couple this test to that widget's
-    // internal duplication count, so just confirm real looping happened.
     expect(chips.length).to.be.greaterThan(AUTHORED_COLOR_COUNT);
     expect(chips.length % AUTHORED_COLOR_COUNT).to.equal(0);
   });
