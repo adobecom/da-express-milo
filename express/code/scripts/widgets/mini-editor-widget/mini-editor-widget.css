@@ -815,6 +815,53 @@ sp-theme {
 }
 
 /*
+ * Entrance animation for the deco cards — desktop only, fires once on load.
+ * Sits on .me-deco-card-wrap (not on .me-deco itself) so it composes cleanly
+ * with the per-card rotation: each card rises and scales at its final tilt
+ * angle, with no rotation component in the animation at all.
+ * Stagger sweeps left → right across the four columns:
+ *   far-left (0 / 80 ms) → near-left (160 / 240 ms)
+ *   → near-right (320 / 400 ms) → far-right (480 / 560 ms)
+ * Last card starts at 560 ms + 550 ms duration ≈ 1.11 s to fully settled.
+ */
+@media (width >= 1200px) {
+  @keyframes me-deco-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.96);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .me-deco-card-wrap {
+    animation: me-deco-in 550ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--me-deco-delay, 0ms);
+  }
+
+  /* Per-card delays, assigned by column position left → right.
+     Two cards share each column, top card leads by 80 ms. */
+  .me-deco--1 .me-deco-card-wrap { --me-deco-delay:   0ms; }
+  .me-deco--3 .me-deco-card-wrap { --me-deco-delay:  80ms; }
+  .me-deco--2 .me-deco-card-wrap { --me-deco-delay: 160ms; }
+  .me-deco--4 .me-deco-card-wrap { --me-deco-delay: 240ms; }
+  .me-deco--6 .me-deco-card-wrap { --me-deco-delay: 320ms; }
+  .me-deco--8 .me-deco-card-wrap { --me-deco-delay: 400ms; }
+  .me-deco--5 .me-deco-card-wrap { --me-deco-delay: 480ms; }
+  .me-deco--7 .me-deco-card-wrap { --me-deco-delay: 560ms; }
+}
+
+/* Reduced motion: skip animation entirely — all cards appear instantly. */
+@media (width >= 1200px) and (prefers-reduced-motion: reduce) {
+  .me-deco-card-wrap {
+    animation: none;
+  }
+}
+
+/*
  * Tablet/mobile carousel --------------------------------------------------
  * Below 1200px the desktop decorative cards and the fixed widget give way
  * to exactly 3 slots: prev / centre / next (buildArcCarousel in
@@ -1200,7 +1247,7 @@ sp-theme {
 
 
 @media (width <= 767px) {
-  /* "Background colour" control label reads "Background" only at this
+  /* "Background color" control label reads "Background" only at this
      width — narrower control column has less room for the full label. */
   .me-control-label-suffix {
     display: none;
@@ -1254,6 +1301,14 @@ sp-theme {
     height: 40px;
   }
 
+  .me-arc-nav--prev {
+    left: max(0px, calc(50% - (var(--me-arc-card-w) / 2) - 20px));
+  }
+
+  .me-arc-nav--next {
+    right: max(0px, calc(50% - (var(--me-arc-card-w) / 2) - 20px));
+  }
+
   .me-controls {
     gap: var(--spacing-250);
   }
@@ -1264,6 +1319,73 @@ sp-theme {
 
   .me-sheet-overlay {
     display: block;
+  }
+}
+
+/* Extra-small phones: exact match to Figma QA node 178:4216 (btm):
+   wrapper 272x88, two controls 129x88, gap 14, inner gap/padding 8. */
+@media (width < 368px) {
+  .me-controls {
+    width: min(100%, 272px);
+    margin-inline: auto;
+    gap: 14px;
+  }
+
+  .me-control {
+    height: 88px;
+    padding: 8px;
+    background: var(--color-gray-150);
+    border: 1px solid var(--S2AC-Palette-transparent-black-50);
+    border-radius: 16px;
+    box-shadow: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .me-control--colour {
+    padding: 8px;
+  }
+
+  .me-control--font {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .me-control-label {
+    order: 1;
+    flex: 0 0 auto;
+    min-width: max-content;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+  }
+
+  .me-pill {
+    order: 2;
+    flex: 0 0 auto;
+    width: calc(100% + 2px);
+    max-width: 113px;
+    min-width: 0;
+    height: 46px;
+    line-height: 46px;
+    padding: 0 12px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .me-swatch {
+    order: 2;
+    box-sizing: border-box;
+    width: calc(100% + 2px);
+    max-width: 113px;
+    height: 46px;
+    min-height: 46px;
+    border-radius: 10px;
+    border: 1px solid var(--Palette-transparent-white-800);
   }
 }
 

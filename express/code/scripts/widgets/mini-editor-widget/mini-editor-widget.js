@@ -127,6 +127,73 @@ function isSmallViewport() {
   return window.innerWidth <= TABLET_BREAKPOINT;
 }
 
+const MOBILE_ARC_BREAKPOINT = 767;
+const MOBILE_ARC_MAX_W = 600;
+const MOBILE_ARC_BASE_W = 327;
+const MOBILE_ARC_BASE_H = 270;
+const MOBILE_ARC_BASE_GAP = 17;
+const MOBILE_ARC_MIN_GAP = 24;
+const MOBILE_ARC_MAX_GAP = 54;
+const MOBILE_ARC_BASE_ORIGIN_Y = 2544;
+const MOBILE_ARC_BASE_EXTRA_H = 50;
+const MOBILE_ARC_BORDER_BUFFER = 2;
+const MOBILE_ARC_MIN_SIDE_INSET = 20;
+const MOBILE_ARC_SIDE_INSET_BUFFER = 4;
+const MOBILE_ARC_SIDE_INSET_SCALE = 0.5;
+const MOBILE_ARC_ROTATION_GAP_FACTOR = 0.06;
+
+function readTokenPx(el, name, fallback) {
+  const raw = getComputedStyle(el).getPropertyValue(name).trim();
+  const parsed = Number.parseFloat(raw);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+/**
+ * Resolve mobile arc tokens to concrete pixel values at runtime so the
+ * carousel geometry reader can consume numbers instead of calc()/min()/clamp().
+ */
+function applyRuntimeArcTokens(root) {
+  if (!root) return;
+
+  if (window.innerWidth <= MOBILE_ARC_BREAKPOINT) {
+    const spacing300 = readTokenPx(root, '--spacing-300', 16);
+    const viewportW = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    const sideInset = Math.max(
+      MOBILE_ARC_MIN_SIDE_INSET,
+      spacing300 + MOBILE_ARC_SIDE_INSET_BUFFER,
+      Math.round(spacing300 * MOBILE_ARC_SIDE_INSET_SCALE),
+    );
+    const cardW = Math.min(
+      MOBILE_ARC_MAX_W,
+      Math.max(0, viewportW - (2 * sideInset) - MOBILE_ARC_BORDER_BUFFER),
+    );
+    const cardH = (cardW * MOBILE_ARC_BASE_H) / MOBILE_ARC_BASE_W;
+    const rotationGapBoost = cardH * MOBILE_ARC_ROTATION_GAP_FACTOR;
+    const cardGap = Math.min(
+      MOBILE_ARC_MAX_GAP,
+      Math.max(
+        MOBILE_ARC_MIN_GAP,
+        ((cardW * MOBILE_ARC_BASE_GAP) / MOBILE_ARC_BASE_W) + rotationGapBoost,
+      ),
+    );
+    const originY = (cardW * MOBILE_ARC_BASE_ORIGIN_Y) / MOBILE_ARC_BASE_W;
+    const extraH = (cardW * MOBILE_ARC_BASE_EXTRA_H) / MOBILE_ARC_BASE_W;
+
+    root.style.setProperty('--me-arc-card-w', `${cardW}px`);
+    root.style.setProperty('--me-arc-card-h', `${cardH}px`);
+    root.style.setProperty('--me-arc-track-gap', `${cardGap}px`);
+    root.style.setProperty('--me-arc-origin-y', `${originY}px`);
+    root.style.setProperty('--me-arc-extra-h', `${extraH}px`);
+    return;
+  }
+
+  root.style.removeProperty('--me-arc-card-w');
+  root.style.removeProperty('--me-arc-card-h');
+  root.style.removeProperty('--me-arc-track-gap');
+  root.style.removeProperty('--me-arc-origin-y');
+  root.style.removeProperty('--me-arc-extra-h');
+}
+
 function isReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
@@ -580,11 +647,11 @@ function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
   // there's no JS branching on viewport width for what's purely a label fit.
   const label = createTag('span', { class: 'me-control-label' }, [
     'Background',
-    createTag('span', { class: 'me-control-label-suffix' }, [' colour']),
+    createTag('span', { class: 'me-control-label-suffix' }, [' color']),
   ]);
   control.append(swatch, label);
 
-  // Accessible name is "Background colour" + whichever swatch is currently
+  // Accessible name is "Background color" + whichever swatch is currently
   // selected (see updateAccessibleName below, called from selectSwatch) —
   // read back off that swatch's own aria-label (see buildSwatchButton) so
   // the two always agree, rather than duplicating card.title's fallback
@@ -592,7 +659,7 @@ function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
   // since it overrides visible text content for the accessible name;
   // title mirrors it so the native tooltip matches exactly.
   function updateAccessibleName(swatchName) {
-    const name = `Background colour${swatchName ? ` ${swatchName}` : ''}`;
+    const name = `Background color${swatchName ? ` ${swatchName}` : ''}`;
     control.setAttribute('aria-label', name);
     control.title = name;
   }
@@ -600,14 +667,14 @@ function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
   const panel = createTag('div', {
     class: 'me-row me-row--colour',
     role: 'listbox',
-    'aria-label': 'Background colour',
+    'aria-label': 'Background color',
   });
   // All fetched backgrounds (not just the desktop decoration subset), same
   // as the desktop inline row — the sheet's grid scrolls to fit them all.
   const sheetGrid = createTag('div', {
     class: 'me-sheet-grid me-sheet-grid--colour',
     role: 'listbox',
-    'aria-label': 'Background colour',
+    'aria-label': 'Background color',
   });
 
   let roving;
@@ -856,9 +923,8 @@ async function buildWidget(
     // The active card's template URN (card.id) — carried alongside backgroundUrl
     // so the Edit action can hand Express the exact source asset to fetch.
     backgroundUrn: first.card?.id || '',
-    // 'light' | 'dark' brightness of the background — drives the text colour the
-    // Edit action reproduces in Express (dark bg → light text, and vice versa).
-    mode: first.card?.mode || '',
+    // 'light' | 'dark' brightness of the background — drives the text colour
+    backgroundMode: first.card?.mode || 'dark',
     font: {
       family: fontOptions[0]?.font || 'sans-serif',
       style: fontOptions[0]?.italic ? 'italic' : 'normal',
@@ -1049,7 +1115,7 @@ async function buildWidget(
   panelWrap.append(fontPanel, colourPanel);
 
   const fontSheet = buildBottomSheet(root, a11y, 'fonts', 'Choose a font style', fontSheetGrid);
-  const colourSheet = buildBottomSheet(root, a11y, 'colour', 'Choose a background colour', colourSheetGrid);
+  const colourSheet = buildBottomSheet(root, a11y, 'colour', 'Choose a background color', colourSheetGrid);
 
   widget.append(controls, panelWrap, fontSheet.overlay, colourSheet.overlay);
   if (skipCta) widget.append(skipCta.element);
@@ -1088,7 +1154,11 @@ async function buildWidget(
       updateContentModel({
         quote,
         author: author || '',
-        ...(bgCard ? { backgroundUrl: bgCard.bg, backgroundUrn: bgCard.id || '', mode: bgCard.mode || '' } : {}),
+        ...(bgCard ? {
+          backgroundUrl: bgCard.bg,
+          backgroundUrn: bgCard.id || '',
+          backgroundMode: bgCard.mode || 'dark'
+        } : {}),
         ...(font ? {
           font: {
             family: font.font,
@@ -1114,7 +1184,26 @@ async function buildWidget(
     // above (so every pick syncs, with or without decorations); this only forwards picks to the
     // arc carousel listener when one is wired.
     onFontOrColourChange: (listener) => {
-      onFontOrColourPick = listener;
+      onFontOrColourPick = (patch) => {
+        if (patch.font) {
+          updateContentModel({
+            font: {
+              family: patch.font.font,
+              style: patch.font.italic ? 'italic' : 'normal',
+              weight: patch.font.weight || 'normal',
+              stretch: patch.font.stretch || 'normal',
+            },
+          });
+        }
+        if (patch.card) {
+          updateContentModel({
+            backgroundUrl: patch.card.bg,
+            backgroundMode: patch.card.mode || 'dark',
+          });
+          setCardMode(patch.card.mode);
+        }
+        listener(patch);
+      };
     },
     // Wired by createMiniEditorWidget once the deco cards exist (buildWidget
     // itself has no knowledge of them — see buildSkipQuoteSuggestionsCta).
@@ -1258,27 +1347,31 @@ function buildDecoCards(a11y, cardSet, useQuote) {
 }
 
 // Keyboard traversal order for the deco cards' actions once reached via the
-// Skip-quote-suggestions CTA — deliberately not DOM/visual order (which is
-// 1,3,2,4,5,7,6,8, see DECO_COLUMNS): this is the order design specified for
-// this guided chain specifically.
-const DECO_TAB_CHAIN_ORDER = [2, 4, 6, 8, 1, 3, 5, 7];
+// Skip-quote-suggestions CTA — left-to-right visual order: far-left (1,3),
+// near-left (2,4), near-right (6,8), far-right (5,7). See DECO_COLUMNS for
+// the column/card-number mapping.
+const DECO_TAB_CHAIN_ORDER = [1, 3, 2, 4, 6, 8, 5, 7];
 
 /**
  * Chains Tab across every .me-deco-use/.me-deco-copy pair, in
- * DECO_TAB_CHAIN_ORDER rather than DOM order, and returns a function that
- * focuses the very first button in that chain (deco-2's "Use this quote") —
- * the entry point wired to the Skip-quote-suggestions CTA's Tab handler (see
- * createMiniEditorWidget). Every button in the chain gets an explicit
- * tabindex=-1: like the font/colour rows' roving options (see
- * wireOptionRowRoving), these buttons default to tabindex=0, which the
- * browser visits only after every explicit positive-tabindex element on the
- * page (see this widget's 1-10+ sequence) — left at the default, a plain Tab
- * off the last button in the chain would jump to whatever tabindex=0/default
- * element is next in the document instead of anywhere in this chain, and a
- * shift+Tab back into the chain from outside would land on an arbitrary
- * button instead of consistently re-entering where intended.
+ * DECO_TAB_CHAIN_ORDER (left-to-right visual order), and returns a function
+ * that focuses the first visible button in that chain — the entry point wired
+ * to the Skip-quote-suggestions CTA's Tab handler (see createMiniEditorWidget).
+ * Every button in the chain gets an explicit tabindex=-1: like the font/colour
+ * rows' roving options (see wireOptionRowRoving), these buttons default to
+ * tabindex=0, which the browser visits only after every explicit
+ * positive-tabindex element on the page (see this widget's 1-10+ sequence) —
+ * left at the default, a plain Tab off the last button in the chain would
+ * cycle back into the widget's own controls instead of exiting to the rest of
+ * the page. Far-column cards (.me-deco--1/3/5/7) can be hidden below 1625px
+ * (see syncDecoClipping) — those are skipped when finding the next button and
+ * the first entry point so focus never lands on an invisible element.
+ *
+ * @param {HTMLElement} decorations — the .mini-editor-decorations wrapper
+ * @param {HTMLElement} root — the .mini-editor block root, used to find the
+ *   next focusable element outside the widget after the last card in the chain
  */
-function wireDecoTabChain(decorations) {
+function wireDecoTabChain(decorations, root) {
   // A card can be absent — e.g. fewer templates fetched than DECO_CARD_COUNT
   // leaves the last slot(s) unbuilt (see buildDecoCards) — so each lookup is
   // skipped rather than assumed to exist.
@@ -1287,17 +1380,37 @@ function wireDecoTabChain(decorations) {
     if (!card) return [];
     return [card.querySelector('.me-deco-use'), card.querySelector('.me-deco-copy')];
   });
+  // Far-column cards get the .hidden class at 1200–1625px viewport widths
+  // (see syncDecoClipping). Buttons from hidden cards are excluded from
+  // keyboard focus so focus never lands on an invisible element.
+  const isHidden = (btn) => !!btn.closest('.hidden');
   buttons.forEach((btn, i) => {
     btn.tabIndex = -1;
     btn.addEventListener('keydown', (e) => {
       if (e.key !== 'Tab' || e.shiftKey) return;
-      const next = buttons[i + 1];
-      if (!next) return;
       e.preventDefault();
-      next.focus();
+      // Find the next button that isn't inside a hidden card.
+      let next = null;
+      for (let j = i + 1; j < buttons.length; j++) {
+        if (!isHidden(buttons[j])) { next = buttons[j]; break; }
+      }
+      if (next) {
+        next.focus();
+      } else {
+        // Last visible card in the chain: move on to the rest of the page
+        // rather than letting the browser cycle back to the widget's own
+        // positive-tabindex controls (which live in mini-editor-stage, after
+        // mini-editor-decorations in the DOM but before everything else in
+        // the positive-tabindex sequence).
+        findNextFocusableAfter(root)?.focus();
+      }
     });
   });
-  return () => buttons[0]?.focus();
+  // Entry point: first visible button in chain (used by Skip CTA's Tab handler).
+  return () => {
+    const first = buttons.find((btn) => !isHidden(btn));
+    first?.focus();
+  };
 }
 
 /**
@@ -1431,7 +1544,12 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
     quoteP.style.fontStretch = entry.font?.stretch || '';
     authorP.textContent = entry.author || '';
     authorP.style.display = entry.author ? '' : 'none';
-    el.classList.add(`${entry.card.mode}-mode`);
+    // Replacing (not stacking) mode classes keeps text contrast in sync
+    // when the same card node is re-rendered across background picks.
+    el.classList.remove('light-mode', 'dark-mode');
+    if (entry.card.mode === 'light' || entry.card.mode === 'dark') {
+      el.classList.add(`${entry.card.mode}-mode`);
+    }
   }
 
   // Every role is now interactive (centre copies its quote on click/Enter,
@@ -1466,6 +1584,7 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
   const ARC_STEP_DEG = 14;
   const ARC_STEP_RAD = ARC_STEP_DEG * (Math.PI / 180);
   const DRAG_THRESHOLD_PX = 10;
+  const FLICK_DIRECTION_GUARD_CARDS = 0.18;
   const SNAP_BASE_MS = 1000;
   const SNAP_MAX_MS = 1400;
   const SNAP_SETTLE_RECHECK_MS = 90;
@@ -1791,6 +1910,12 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
   function onPointerDown(e) {
     if (e.button !== 0) return;
     if (e.target.closest('.me-arc-nav')) return;
+    // If a snap animation is still running, stop it before taking drag input;
+    // otherwise RAF and drag both write `position`, causing jumpy/reverse motion.
+    cancelSnapAnimation();
+    clearTimeout(moveSettleTimer);
+    pendingIndex = null;
+
     pointerDown = true;
     dragLocked = false;
     dragging = false;
@@ -1849,6 +1974,7 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
       return;
     }
 
+    const dragDeltaCards = position - startPosition;
     const velocityCardsPerSec = velocityCardsPerMs * 1000;
     const nearest = Math.round(position);
     let step = 0;
@@ -1858,6 +1984,16 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
         step = velocityCardsPerSec > 0 ? 1 : -1;
       }
       step = Math.max(-4, Math.min(4, step));
+
+      // Guard against release jitter: if the final velocity sample points
+      // opposite to the net drag direction, honor displacement direction.
+      if (Math.abs(dragDeltaCards) >= FLICK_DIRECTION_GUARD_CARDS) {
+        const dragDir = Math.sign(dragDeltaCards);
+        const flickDir = Math.sign(step);
+        if (dragDir && flickDir && dragDir !== flickDir) {
+          step = dragDir;
+        }
+      }
     }
 
     const target = nearest + step;
@@ -1937,6 +2073,9 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
   });
 
   const onResize = () => {
+    // Avoid geometry/slideWidth changes mid-drag, which can produce sudden
+    // direction/velocity spikes if browser chrome changes viewport height.
+    if (pointerDown || dragging) return;
     syncGeometry();
     renderArcFrame();
   };
@@ -2025,6 +2164,7 @@ export default async function createMiniEditorWidget(config = {}) {
   // tapped), same as everywhere else this flag doesn't apply.
   const startsOpen = panelMode === 'always-open-inline' && !isMobileSheetWidth();
   root.setAttribute('data-me-panel', startsOpen ? 'fonts' : 'none');
+  applyRuntimeArcTokens(root);
 
   const stage = createTag('div', { class: 'mini-editor-stage' });
   const {
@@ -2054,7 +2194,7 @@ export default async function createMiniEditorWidget(config = {}) {
     decorations = buildDecoCards(a11y, cardSet, useQuote);
     // Only meaningful on desktop (see buildSkipQuoteSuggestionsCta) — a
     // no-op call when the CTA wasn't built (small viewport).
-    setDecoChainTarget(wireDecoTabChain(decorations));
+    setDecoChainTarget(wireDecoTabChain(decorations, root));
     const {
       root: arcCarousel,
       updateCentre: updateArcCentre,
@@ -2104,6 +2244,7 @@ export default async function createMiniEditorWidget(config = {}) {
     };
 
     syncViewportMode = () => {
+      applyRuntimeArcTokens(root);
       syncDecoClipping();
       root.classList.toggle('me-carousel-mode', isSmallViewport());
     };

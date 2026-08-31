@@ -27,24 +27,23 @@ describe('mini-editor-fonts-loader', () => {
     expect(options.map((o) => o.label)).to.deep.equal(FALLBACK_LABELS);
   });
 
-  it('builds options from the fonts Typekit actually exposes, humanizing the slug', async () => {
+  it('includes only FONT_ORDER families in their specified order, excluding unknown fonts', async () => {
     window.Typekit = {
       load: ({ active }) => active?.(),
       config: {
         fc: [
+          // unknown family — should be excluded
           { family: 'gothic-a1', descriptors: { weight: '400', style: 'normal' } },
-          { family: 'source-han-sans-japanese', descriptors: { weight: '700', style: 'normal' } },
+          // known families supplied in reverse order — output should follow FONT_ORDER
+          { family: 'kanit', descriptors: { weight: '400', style: 'normal' } },
+          { family: 'rubik', descriptors: { weight: '400', style: 'normal' } },
         ],
       },
     };
     const options = await getFontOptions();
     expect(options).to.deep.equal([
-      { label: 'Gothic A1', font: '"gothic-a1", var(--body-font-family, sans-serif)' },
-      {
-        label: 'Source Han Sans Japanese',
-        font: '"source-han-sans-japanese", var(--body-font-family, sans-serif)',
-        weight: '700',
-      },
+      { label: 'Clean', font: '"rubik", var(--body-font-family, sans-serif)' },
+      { label: 'Futuristic', font: '"kanit", var(--body-font-family, sans-serif)' },
     ]);
   });
 
@@ -53,17 +52,17 @@ describe('mini-editor-fonts-loader', () => {
       load: ({ active }) => active?.(),
       config: {
         fc: [
-          { family: 'noto-sans', descriptors: { weight: '400', style: 'normal' } },
-          { family: 'noto-sans', descriptors: { weight: '400', style: 'italic' } },
-          { family: 'noto-sans', descriptors: { weight: '700', style: 'normal' } },
+          { family: 'rubik', descriptors: { weight: '400', style: 'normal' } },
+          { family: 'rubik', descriptors: { weight: '400', style: 'italic' } },
+          { family: 'rubik', descriptors: { weight: '700', style: 'normal' } },
         ],
       },
     };
     const options = await getFontOptions();
     expect(options).to.have.length(1);
     expect(options[0]).to.deep.equal({
-      label: 'Noto Sans',
-      font: '"noto-sans", var(--body-font-family, sans-serif)',
+      label: 'Clean',
+      font: '"rubik", var(--body-font-family, sans-serif)',
       italic: true,
       weight: '700',
     });
@@ -75,19 +74,33 @@ describe('mini-editor-fonts-loader', () => {
     expect(options.map((o) => o.label)).to.deep.equal(FALLBACK_LABELS);
   });
 
+  it('falls back when the kit exposes only unknown families (not in FONT_ORDER)', async () => {
+    window.Typekit = {
+      load: ({ active }) => active?.(),
+      config: {
+        fc: [
+          { family: 'gothic-a1', descriptors: { weight: '400', style: 'normal' } },
+          { family: 'source-han-sans-japanese', descriptors: { weight: '700', style: 'normal' } },
+        ],
+      },
+    };
+    const options = await getFontOptions();
+    expect(options.map((o) => o.label)).to.deep.equal(FALLBACK_LABELS);
+  });
+
   it('skips entries with no family', async () => {
     window.Typekit = {
       load: ({ active }) => active?.(),
       config: {
         fc: [
           { family: '', descriptors: { weight: '400' } },
-          { family: 'gothic-a1', descriptors: { weight: '400' } },
+          { family: 'rubik', descriptors: { weight: '400' } },
         ],
       },
     };
     const options = await getFontOptions();
     expect(options).to.deep.equal([
-      { label: 'Gothic A1', font: '"gothic-a1", var(--body-font-family, sans-serif)' },
+      { label: 'Clean', font: '"rubik", var(--body-font-family, sans-serif)' },
     ]);
   });
 });

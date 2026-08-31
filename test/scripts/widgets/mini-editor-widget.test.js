@@ -19,7 +19,7 @@ const fontOptions = [
 
 function buildCardSet(count = 9) {
   return Array.from({ length: count }, (_, i) => ({
-    card: { id: `urn:${i}`, bg: `/img/image${i}.jpg` },
+    card: { id: `urn:${i}`, bg: `/img/image${i}.jpg`, mode: i % 2 === 0 ? 'dark' : 'light' },
     quote: `Quote number ${i}`,
     author: i % 2 === 0 ? `Author ${i}` : '',
   }));
@@ -73,7 +73,7 @@ describe('mini-editor-widget', () => {
       author: 'Author 0',
       backgroundUrl: '/img/image0.jpg',
       backgroundUrn: 'urn:0',
-      mode: '',
+      backgroundMode: 'dark',
       font: {
         family: fontOptions[0].font,
         style: 'normal',
@@ -137,6 +137,23 @@ describe('mini-editor-widget', () => {
     const { root, editor } = await mount();
     root.querySelectorAll('.me-row--colour .me-swatch-btn')[2].click();
     expect(editor.getContentModel().backgroundUrl).to.equal('/img/image2.jpg');
+    expect(editor.getContentModel().backgroundMode).to.equal('dark');
+  });
+
+  it('replaces light/dark mode classes when switching background from light to dark', async () => {
+    const { root } = await mount();
+    const swatches = root.querySelectorAll('.me-row--colour .me-swatch-btn');
+
+    // index 1 => light mode, index 2 => dark mode (see buildCardSet above)
+    swatches[1].click();
+    let centerCard = root.querySelector('.me-arc-card--center');
+    expect(centerCard.classList.contains('light-mode')).to.be.true;
+    expect(centerCard.classList.contains('dark-mode')).to.be.false;
+
+    swatches[2].click();
+    centerCard = root.querySelector('.me-arc-card--center');
+    expect(centerCard.classList.contains('dark-mode')).to.be.true;
+    expect(centerCard.classList.contains('light-mode')).to.be.false;
   });
 
   // Regression: the content model must sync on every pick, even when decorations (and thus the
