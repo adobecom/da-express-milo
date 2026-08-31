@@ -154,6 +154,14 @@ function applyHarmony(context) {
   const seed = Array.from({ length: DISPLAY_COUNTS[rule] + 1 }, () => hex);
   controller.replaceSwatchesFromHexes(seed, { baseIndex: 0, harmonyRule: 'CUSTOM' });
   controller.setHarmonyRule(rule);
+  // setHarmonyRule() alone is a no-op past the very first call: HarmonyEngineExpress
+  // only re-derives its internal base point (hue/angle) from the theme when its
+  // private rule tracker transitions out of null, which only happens once. On every
+  // later edit the base point silently goes stale, so the mini swatches/CTA link
+  // stop tracking new colors entirely. setBaseColor() re-triggers that recompute
+  // from the *current* base swatch unconditionally, keeping this hex locked in as
+  // the harmony base without touching the shared controller/engine files themselves.
+  controller.setBaseColor(hex);
 }
 
 function updateColor(context, hex) {
