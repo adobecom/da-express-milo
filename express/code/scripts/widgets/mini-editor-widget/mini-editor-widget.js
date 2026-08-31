@@ -647,11 +647,11 @@ function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
   // there's no JS branching on viewport width for what's purely a label fit.
   const label = createTag('span', { class: 'me-control-label' }, [
     'Background',
-    createTag('span', { class: 'me-control-label-suffix' }, [' colour']),
+    createTag('span', { class: 'me-control-label-suffix' }, [' color']),
   ]);
   control.append(swatch, label);
 
-  // Accessible name is "Background colour" + whichever swatch is currently
+  // Accessible name is "Background color" + whichever swatch is currently
   // selected (see updateAccessibleName below, called from selectSwatch) —
   // read back off that swatch's own aria-label (see buildSwatchButton) so
   // the two always agree, rather than duplicating card.title's fallback
@@ -659,7 +659,7 @@ function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
   // since it overrides visible text content for the accessible name;
   // title mirrors it so the native tooltip matches exactly.
   function updateAccessibleName(swatchName) {
-    const name = `Background colour${swatchName ? ` ${swatchName}` : ''}`;
+    const name = `Background color${swatchName ? ` ${swatchName}` : ''}`;
     control.setAttribute('aria-label', name);
     control.title = name;
   }
@@ -667,14 +667,14 @@ function buildColorControl(root, cards, onSelect, panelMode, onTabOut) {
   const panel = createTag('div', {
     class: 'me-row me-row--colour',
     role: 'listbox',
-    'aria-label': 'Background colour',
+    'aria-label': 'Background color',
   });
   // All fetched backgrounds (not just the desktop decoration subset), same
   // as the desktop inline row — the sheet's grid scrolls to fit them all.
   const sheetGrid = createTag('div', {
     class: 'me-sheet-grid me-sheet-grid--colour',
     role: 'listbox',
-    'aria-label': 'Background colour',
+    'aria-label': 'Background color',
   });
 
   let roving;
@@ -1094,7 +1094,7 @@ async function buildWidget(
   panelWrap.append(fontPanel, colourPanel);
 
   const fontSheet = buildBottomSheet(root, a11y, 'fonts', 'Choose a font style', fontSheetGrid);
-  const colourSheet = buildBottomSheet(root, a11y, 'colour', 'Choose a background colour', colourSheetGrid);
+  const colourSheet = buildBottomSheet(root, a11y, 'colour', 'Choose a background color', colourSheetGrid);
 
   widget.append(controls, panelWrap, fontSheet.overlay, colourSheet.overlay);
   if (skipCta) widget.append(skipCta.element);

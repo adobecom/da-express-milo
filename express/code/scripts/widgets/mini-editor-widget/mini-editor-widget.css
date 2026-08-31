@@ -1247,7 +1247,7 @@ sp-theme {
 
 
 @media (width <= 767px) {
-  /* "Background colour" control label reads "Background" only at this
+  /* "Background color" control label reads "Background" only at this
      width — narrower control column has less room for the full label. */
   .me-control-label-suffix {
     display: none;
