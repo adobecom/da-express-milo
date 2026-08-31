@@ -7,17 +7,15 @@ function getText(cell) {
   return cell?.textContent.trim() || '';
 }
 
-function waitForVisibleLayout(row) {
-  return new Promise((resolve) => {
-    const check = () => {
-      if (row.clientWidth > 0) {
-        resolve();
-        return;
-      }
-      requestAnimationFrame(check);
-    };
-    requestAnimationFrame(check);
+function watchForOverflow(row, onOverflow) {
+  const observer = new ResizeObserver(() => {
+    if (row.clientWidth === 0) return;
+    if (row.scrollWidth > row.clientWidth) {
+      observer.disconnect();
+      onOverflow();
+    }
   });
+  observer.observe(row);
 }
 
 let createTag;
@@ -79,8 +77,7 @@ export default async function decorate(block) {
   section.append(header, row);
   block.replaceChildren(section);
 
-  waitForVisibleLayout(row).then(async () => {
-    if (row.scrollWidth <= row.clientWidth) return;
+  watchForOverflow(row, async () => {
     await buildCarousel('', row, { centerAlign: true, infinityScrollEnabled: true });
     row.querySelector('.carousel-arrow-left')?.setAttribute('aria-label', prevLabel || 'Previous slide');
     row.querySelector('.carousel-arrow-right')?.setAttribute('aria-label', nextLabel || 'Next slide');
