@@ -583,7 +583,10 @@ function trackVideoAnalytics(parameters) {
   set('video.videoInfo.videoMediaType', videoMediaType);
 }
 
-function decorateAnalyticsEvents() {
+// Attached early (before block decoration) so it doesn't miss events like
+// 'linkspopulated' that blocks (e.g. floating-button) dispatch synchronously
+// while decorating, well before the rest of martech has loaded.
+export function decorateAnalyticsEvents() {
   // for tracking all of the links
   d.addEventListener('click', (event) => {
     if (event.target.tagName === 'A' || event.target.dataset.ll?.length) {
@@ -634,7 +637,6 @@ function decorateAnalyticsEvents() {
 export default async function martechLoadedCB() {
   ({ loadScript, getConfig } = await import(`${getLibs()}/utils/utils.js`));
   setDataAnalyticsAttributesForMartech();
-  decorateAnalyticsEvents();
   trackTemplatePageLoad();
   trackColorPageLoad();
   trackExpressFeaturePageLoad();
