@@ -15,7 +15,6 @@ Based on [AEM's performance guidelines](https://www.aem.live/developer/keeping-i
 
 <!-- ✅ REQUIRED - Single origin, under 100kb total -->
 <script src="/express/code/scripts/scripts.js" type="module"></script>
-<script src="/express/code/scripts/fallback.js" nomodule></script>
 
 <!-- ✅ REQUIRED - Viewport meta for responsive design -->
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
