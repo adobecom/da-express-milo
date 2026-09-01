@@ -1,7 +1,6 @@
 /* global _satellite __satelliteLoadedCallback alloy */
 
 import { getLibs, getMetadata } from './utils.js';
-import trackBranchParameters from './branchlinks.js';
 
 let loadScript; let getConfig;
 
@@ -612,6 +611,7 @@ function decorateAnalyticsEvents() {
 
   // Tracking any link or links that is added after page loaded.
   d.addEventListener('linkspopulated', async (e) => {
+    const { default: trackBranchParameters } = await import('./branchlinks.js');
     await trackBranchParameters(e.detail);
     e.detail.forEach(($link) => {
       $link.addEventListener('click', () => {
