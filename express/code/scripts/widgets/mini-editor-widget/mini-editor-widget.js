@@ -1065,10 +1065,13 @@ async function buildWidget(
       stretch: font.stretch || 'normal',
     },
   });
-  const applyCardToModel = (card) => updateContentModel({
-    backgroundUrl: card.bg,
-    backgroundUrn: card.id || '',
-    mode: card.mode || '',
+  const applyCardToModel = (bgCard) => updateContentModel({
+    backgroundUrl: bgCard.bg,
+    backgroundUrn: bgCard.id || '',
+    // `backgroundMode` drives the download renderer's text contrast (synced here as useQuote does);
+    // `mode` is kept for open-in-express.js, which reads it for the Express hand-off.
+    backgroundMode: bgCard.mode || 'dark',
+    mode: bgCard.mode || '',
   });
 
   // Keyboard-only "Skip quote suggestions" CTA, per Figma node 54:11762 — see

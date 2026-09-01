@@ -4,6 +4,7 @@ import {
   MINI_EDITOR_EXPORT_HEIGHT,
   MINI_EDITOR_EXPORT_WIDTH,
 } from './mini-editor-card-renderer.js';
+import measureQuoteExportWidth from './mini-editor-quote-width.js';
 
 const WORKER_TIMEOUT_MS = 10000;
 const MiniEditorCardExporter = {};
@@ -109,7 +110,9 @@ function supportsWorkerRendering() {
 }
 
 async function createCardBlob(inputModel) {
-  const model = normalizeModel(inputModel);
+  // Measure the live card's quote box (same width logic as the Express hand-off) so the image
+  // wraps the quote at the card's current width, not a stale hardcoded column.
+  const model = { ...normalizeModel(inputModel), quoteWidth: measureQuoteExportWidth() };
   const canvas = document.createElement('canvas');
   canvas.width = MINI_EDITOR_EXPORT_WIDTH;
   canvas.height = MINI_EDITOR_EXPORT_HEIGHT;

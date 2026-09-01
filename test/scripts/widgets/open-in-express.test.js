@@ -34,7 +34,7 @@ describe('mini-editor open-in-express', () => {
 
   describe('base URL selection', () => {
     it('uses the prod base by default', async () => {
-      expect(await buildExpressUrl(MODEL)).to.include('new.express.adobe.com');
+      expect(await buildExpressUrl(MODEL)).to.include('adobesparkpost.app.link');
     });
 
     it('uses the local base when hzenv=local', async () => {
@@ -71,7 +71,7 @@ describe('mini-editor open-in-express', () => {
 
     it('ignores hzenv values other than local/stage (stays on prod)', async () => {
       window.history.pushState({}, '', '?hzenv=whatever');
-      expect(await buildExpressUrl(MODEL)).to.include('new.express.adobe.com');
+      expect(await buildExpressUrl(MODEL)).to.include('adobesparkpost.app.link');
     });
 
     it('honors an explicit prodBaseUrl argument on the default env', async () => {
@@ -104,7 +104,8 @@ describe('mini-editor open-in-express', () => {
         font: {
           family: 'Georgia', style: 'italic', weight: 'bold', stretch: 'normal',
         },
-        // renderer 1084x700 design coords; hz scales this to the actual canvas (identity at 1084)
+        // renderer 1084x700 design coords; hz scales this to the actual canvas (identity at 1084).
+        // No card is rendered in this test, so the quote width falls back to QUOTE_MAX_WIDTH (624).
         layout: {
           width: 1084,
           height: 700,
@@ -112,10 +113,51 @@ describe('mini-editor open-in-express', () => {
             x: 230, y: 298, width: 624, height: 104, fontSize: 40,
           },
           author: {
-            x: 230, y: 644, width: 624, height: 40, fontSize: 32,
+            x: 230, y: 638, width: 624, height: 40, fontSize: 32,
           },
         },
       });
+    });
+
+    it('measures the desktop quote box, scaled by its font size to export space', async () => {
+      // 300px box at 20px font -> 300 * (40 / 20) = 600 export px.
+      const wrap = document.createElement('div');
+      wrap.className = 'me-quote-wrap';
+      wrap.style.cssText = 'display: block; width: 300px;';
+      const quote = document.createElement('div');
+      quote.className = 'me-quote';
+      quote.style.fontSize = '20px';
+      wrap.append(quote);
+      document.body.append(wrap);
+      try {
+        const decoded = decodeMiniEditor(new URL(await buildExpressUrl(MODEL)).searchParams.get('miniEditor'));
+        expect(decoded.layout.quote.width).to.equal(600);
+        // x re-derives from the measured width so the column stays centred: (1084 - 600) / 2
+        expect(decoded.layout.quote.x).to.equal(242);
+      } finally {
+        wrap.remove();
+      }
+    });
+
+    it('measures the arc-carousel centre quote by its 18px font on mobile/tablet', async () => {
+      // 270px box at 18px arc font -> 270 * (40 / 18) = 600 export px (matching the desktop wrap).
+      const centre = document.createElement('div');
+      centre.className = 'me-arc-card--center';
+      const wrap = document.createElement('div');
+      wrap.className = 'me-quote-wrap';
+      wrap.style.cssText = 'display: block; width: 270px;';
+      const quote = document.createElement('div');
+      quote.className = 'me-arc-quote';
+      quote.style.fontSize = '18px';
+      wrap.append(quote);
+      centre.append(wrap);
+      document.body.append(centre);
+      try {
+        const decoded = decodeMiniEditor(new URL(await buildExpressUrl(MODEL)).searchParams.get('miniEditor'));
+        expect(decoded.layout.quote.width).to.equal(600);
+      } finally {
+        centre.remove();
+      }
     });
 
     it('reduces a CSS font stack to the bare family name (no quotes or var())', async () => {
@@ -175,7 +217,7 @@ describe('mini-editor open-in-express', () => {
       const openStub = sinon.stub(window, 'open');
       await openInExpress(MODEL);
       expect(openStub.calledOnce).to.be.true;
-      expect(openStub.firstCall.args[0]).to.include('new.express.adobe.com');
+      expect(openStub.firstCall.args[0]).to.include('adobesparkpost.app.link');
       expect(openStub.firstCall.args[1]).to.equal('_blank');
       expect(openStub.firstCall.args[2]).to.equal('noopener,noreferrer');
     });

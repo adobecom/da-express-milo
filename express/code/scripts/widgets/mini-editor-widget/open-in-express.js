@@ -24,36 +24,43 @@ import {
   QUOTE_LINE_HEIGHT,
   AUTHOR_FONT_SIZE,
   AUTHOR_BOTTOM,
+  AUTHOR_LINE_HEIGHT,
 } from '../../utils/mini-editor-card-renderer.js';
+import measureQuoteExportWidth from '../../utils/mini-editor-quote-width.js';
 
 // The card layout in the renderer's 1084x700 design coordinates (the download's space). Express
-// makes the canvas that size and scales this layout to whatever canvas it gets. Font size + column
-// width are the download's own values, so a 40px quote in a 624 column reproduces the download's
-// wrap. Boxes are top-left based: the quote column is centred vertically, the author near the
-// bottom. `height` is nominal (Express uses auto-height) — it's here so the payload is a full rect.
-const TEXT_COLUMN_X = (MINI_EDITOR_EXPORT_WIDTH - QUOTE_MAX_WIDTH) / 2;
-const CARD_LAYOUT = {
-  width: MINI_EDITOR_EXPORT_WIDTH,
-  height: MINI_EDITOR_EXPORT_HEIGHT,
-  quote: {
-    x: TEXT_COLUMN_X,
-    y: Math.round(MINI_EDITOR_EXPORT_HEIGHT / 2 - QUOTE_LINE_HEIGHT),
-    width: QUOTE_MAX_WIDTH,
-    height: QUOTE_LINE_HEIGHT * 2,
-    fontSize: QUOTE_FONT_SIZE,
-  },
-  author: {
-    x: TEXT_COLUMN_X,
-    y: MINI_EDITOR_EXPORT_HEIGHT - AUTHOR_BOTTOM - AUTHOR_FONT_SIZE,
-    width: QUOTE_MAX_WIDTH,
-    height: AUTHOR_FONT_SIZE + 8,
-    fontSize: AUTHOR_FONT_SIZE,
-  },
-};
+// makes the canvas that size and scales this layout to whatever canvas it gets. Font sizes are the
+// renderer's own values; the quote column width is measured from the live card (see above). Boxes
+// are top-left based: the quote column is centred vertically, the author near the bottom. `height`
+// is nominal (Express uses auto-height) — it's here so the payload is a full rect.
+function buildCardLayout(quoteWidth) {
+  return {
+    width: MINI_EDITOR_EXPORT_WIDTH,
+    height: MINI_EDITOR_EXPORT_HEIGHT,
+    quote: {
+      x: (MINI_EDITOR_EXPORT_WIDTH - quoteWidth) / 2,
+      y: Math.round(MINI_EDITOR_EXPORT_HEIGHT / 2 - QUOTE_LINE_HEIGHT),
+      width: quoteWidth,
+      height: QUOTE_LINE_HEIGHT * 2,
+      fontSize: QUOTE_FONT_SIZE,
+    },
+    author: {
+      x: (MINI_EDITOR_EXPORT_WIDTH - QUOTE_MAX_WIDTH) / 2,
+      // hz sets this as the auto-height frame's TOP. That frame is line-height (not font-size) tall
+      // and centres the glyph, so anchor by the glyph centre — its visual bottom then sits
+      // AUTHOR_BOTTOM from the canvas edge like the download. Using AUTHOR_FONT_SIZE alone left the
+      // taller frame (and text) sitting too low on hz.
+      y: MINI_EDITOR_EXPORT_HEIGHT - AUTHOR_BOTTOM - (AUTHOR_LINE_HEIGHT + AUTHOR_FONT_SIZE) / 2,
+      width: QUOTE_MAX_WIDTH,
+      height: AUTHOR_FONT_SIZE + 8,
+      fontSize: AUTHOR_FONT_SIZE,
+    },
+  };
+}
 
 const LOCAL_BASE_URL = 'https://localhost.adobe.com:8080/new';
 const STAGE_BASE_URL = 'https://stage.projectx.corp.adobe.com/new';
-const PROD_BASE_URL = 'https://new.express.adobe.com/new';
+const PROD_BASE_URL = 'https://adobesparkpost.app.link/JpBOBeJz35b';
 const REFERRER = 'express-mini-editor';
 const FEATURE_FLAG = 'acom-mini-editor-entry';
 const CANVAS_UNIT = 'px';
@@ -140,8 +147,9 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
       weight: model.font?.weight || 'normal',
       stretch: model.font?.stretch || 'normal',
     },
-    // Card-space layout; Express scales it to the canvas it creates (see CARD_LAYOUT).
-    layout: CARD_LAYOUT,
+    // Card-space layout; Express scales it to the canvas it creates. The quote column width is
+    // measured from the live card so the reproduction matches this quote's actual box.
+    layout: buildCardLayout(measureQuoteExportWidth()),
   };
 
   url.searchParams.set('referrer', REFERRER);
