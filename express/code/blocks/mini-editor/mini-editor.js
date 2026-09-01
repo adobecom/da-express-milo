@@ -1,4 +1,4 @@
-import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { getLibs, getIconElementDeprecated, readBlockConfig } from '../../scripts/utils.js';
 import {
   trapFocus,
   handleEscapeClose,
@@ -104,40 +104,49 @@ async function downloadCard(block, editor) {
  * block(s). Works whether collapsible-rows has already decorated
  * (`.collapsible-row-header` / `.collapsible-row-sub-header`) or not yet
  * (raw authored two-column `<div>` rows), since decoration order across
- * blocks on a page isn't guaranteed. Author is optional per row.
+ * blocks on a page isn't guaranteed. Author is optional per row. Only
+ * collapsible-rows sections opted in with section-metadata
+ * `sectiontype=quotes` are considered quote sources.
  */
-function getPageQuotes() {
-  const main = document.querySelector('main');
-  if (!main) return [];
+function isQuotesSection(section) {
+  if (!section) return false;
+  const metadataBlock = section.querySelector(':scope > .section-metadata');
+  const sectionType = section.dataset.sectiontype
+    || (metadataBlock ? readBlockConfig(metadataBlock)?.sectiontype : '');
+  return sectionType?.trim().toLowerCase() === 'quotes';
+}
 
-  const decoratedRowSelector = [
-    '.collapsible-rows .collapsible-row-wrapper',
-    '.collapsible-rows .collapsible-row-accordion',
-  ].join(', ');
-  const decoratedRows = main.querySelectorAll(decoratedRowSelector);
+function getQuotesForBlock(block) {
+  const decoratedRows = block.querySelectorAll([
+    '.collapsible-row-wrapper',
+    '.collapsible-row-accordion',
+  ].join(', '));
   if (decoratedRows.length) {
     return Array.from(decoratedRows, (row) => {
       const quote = row.querySelector('.collapsible-row-header')?.textContent.trim() || '';
-      const authorEl = row.querySelector('.collapsible-row-sub-header');
-      const author = authorEl?.textContent.trim() || '';
+      const author = row.querySelector('.collapsible-row-sub-header')?.textContent.trim() || '';
       return { quote, author };
     }).filter((q) => !!q.quote);
   }
 
-  // The .expandable (table-layout) variant reserves its first two raw rows
-  // for a background image and a section title (see collapsible-rows.js
-  // buildTableLayout's rows.shift() calls) — those aren't quotes, and this
-  // raw fallback has no way to tell them apart from real quote rows before
-  // collapsible-rows decorates. Skip it there; the decorated-row path above
-  // already handles that variant correctly once it has decorated.
-  const rawRows = main.querySelectorAll('.collapsible-rows:not(.expandable) > div');
-  return Array.from(rawRows, (row) => {
+  if (block.classList.contains('expandable')) return [];
+
+  return Array.from(block.querySelectorAll(':scope > div'), (row) => {
     const cols = row.querySelectorAll(':scope > div');
     return {
       quote: cols[0]?.textContent.trim() || '',
       author: cols[1]?.textContent.trim() || '',
     };
   }).filter((q) => !!q.quote);
+}
+
+function getPageQuotes() {
+  const main = document.querySelector('main');
+  if (!main) return [];
+
+  return Array.from(main.querySelectorAll('.collapsible-rows'))
+    .filter((quoteBlock) => isQuotesSection(quoteBlock.closest('.section')))
+    .flatMap((quoteBlock) => getQuotesForBlock(quoteBlock));
 }
 
 function constructProps(block) {

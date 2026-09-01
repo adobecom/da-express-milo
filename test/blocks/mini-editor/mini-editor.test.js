@@ -89,6 +89,14 @@ describe('mini-editor', () => {
     expect(block.querySelector('.me-author').textContent).to.equal('Jean-Jacques Rousseau');
   });
 
+  it('ignores collapsible-rows sections that are not marked as quotes', async () => {
+    const block = await decorateWithBody();
+    await waitFor(() => !!block.querySelector('.me-quote'));
+
+    expect(block.querySelector('.me-quote').textContent).to.not.equal('What is Adobe Express?');
+    expect(block.querySelector('.me-author').textContent).to.not.equal('Adobe Express is an all-in-one design app.');
+  });
+
   it('downloads the content model once after rapid clicks', async () => {
     const block = await decorateWithBody();
     const downloadStub = sinon.stub(MiniEditorCardExporter, 'download').resolves();
@@ -188,7 +196,7 @@ describe('mini-editor', () => {
 
   it('removes the whole section when no quotes are authored on the page', async () => {
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
-    document.querySelector('.collapsible-rows').remove();
+    document.querySelectorAll('.collapsible-rows').forEach((quoteBlock) => quoteBlock.remove());
     const section = document.createElement('div');
     section.className = 'section';
     const block = document.querySelector('.mini-editor');
