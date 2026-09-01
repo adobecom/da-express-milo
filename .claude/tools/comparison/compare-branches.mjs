@@ -44,11 +44,13 @@
  *     stats: { total, identical, minor, major, baselineOnly404, branchOnly404,
  *              bothErrored, missing },
  *     pages: [{
- *       path, baseStatus, branchStatus,
+ *       path, baseUrl, branchUrl, baseStatus, branchStatus,
  *       fullPage?: { mismatchPct, diffImage, heightDeltaPx } | { skipped: reason },
  *       element?: { mismatchPct, diffImage, heightDeltaPx } | { skipped: reason },
  *     }],
- *     narrative: "<human-readable summary>"
+ *     narrative: "<human-readable summary, including base/branch URLs for
+ *                  every major diff and the top minor diffs, so a reviewer
+ *                  can open both sides directly>"
  *   }
  */
 
@@ -238,6 +240,8 @@ async function main() {
     stats.total += 1;
     const record = {
       path: baseShot.path,
+      baseUrl: `${baseResult.contentUrl}${baseShot.path}`,
+      branchUrl: `${branchResult.contentUrl}${baseShot.path}`,
       baseStatus: baseShot.status,
       branchStatus: branchShot ? branchShot.status : 'missing',
     };
@@ -318,10 +322,21 @@ async function main() {
   }
 
   const primary = wantsFullPage ? 'fullPage' : 'element';
-  const worst = pages
-    .filter((p) => p[primary] && typeof p[primary].mismatchPct === 'number')
+  const diffed = pages.filter((p) => p[primary] && typeof p[primary].mismatchPct === 'number');
+  const majorPages = diffed.filter((p) => bucket(p[primary].mismatchPct) === 'major')
+    .sort((a, b) => b[primary].mismatchPct - a[primary].mismatchPct);
+  const minorPages = diffed.filter((p) => bucket(p[primary].mismatchPct) === 'minor')
     .sort((a, b) => b[primary].mismatchPct - a[primary].mismatchPct);
 
+  function describe(p) {
+    const d = p[primary];
+    const heightNote = d.heightDeltaPx > 50
+      ? ` [${primary === 'fullPage' ? 'page' : 'element'} height differs by ${d.heightDeltaPx}px between ${base} and ${branch} — may just be a content-length/personalization difference, not a rendering bug; check the diff image]`
+      : '';
+    return `  - ${p.path}: ${d.mismatchPct}%${heightNote}\n      ${base}: ${p.baseUrl}\n      ${branch}: ${p.branchUrl}`;
+  }
+
+  const MINOR_CAP = 15;
   const narrativeLines = [];
   narrativeLines.push(`Compared "${block}" on ${base} vs ${branch} across ${stats.total} page(s) (mode=${mode}${selector ? `, selector="${selector}"` : ''}).`);
   if (stats.identical) narrativeLines.push(`${stats.identical} page(s) render identically (< 0.5% mismatch).`);
@@ -331,18 +346,21 @@ async function main() {
   if (stats.baselineOnly404) narrativeLines.push(`${stats.baselineOnly404} page(s) were already broken/404 on ${base} (not a regression from ${branch}).`);
   if (stats.bothErrored) narrativeLines.push(`${stats.bothErrored} page(s) failed to render on both sides.`);
   if (stats.missing) narrativeLines.push(`${stats.missing} page(s) from ${base}'s capture were missing from ${branch}'s.`);
-  if (worst.length && worst[0][primary].mismatchPct > 0) {
-    const top = worst.slice(0, 5).filter((p) => p[primary].mismatchPct > 0);
-    if (top.length) {
-      narrativeLines.push('Largest diffs:');
-      for (const p of top) {
-        const heightNote = p[primary].heightDeltaPx > 50
-          ? ` (${primary === 'fullPage' ? 'page' : 'element'} height differs by ${p[primary].heightDeltaPx}px between ${base} and ${branch} — may just be a content-length/personalization difference, not a rendering bug; check the diff image)`
-          : '';
-        narrativeLines.push(`  - ${p.path}: ${p[primary].mismatchPct}%${heightNote}`);
-      }
+
+  if (majorPages.length) {
+    narrativeLines.push(`\nMajor diffs (${majorPages.length}) — open both URLs side by side:`);
+    for (const p of majorPages) narrativeLines.push(describe(p));
+  }
+
+  if (minorPages.length) {
+    const shown = minorPages.slice(0, MINOR_CAP);
+    narrativeLines.push(`\nMinor diffs (${minorPages.length}${minorPages.length > MINOR_CAP ? `, showing top ${MINOR_CAP}` : ''}):`);
+    for (const p of shown) narrativeLines.push(describe(p));
+    if (minorPages.length > MINOR_CAP) {
+      narrativeLines.push(`  ...and ${minorPages.length - MINOR_CAP} more — see the "pages" array in the JSON log for the full list with URLs.`);
     }
   }
+
   if (stats.total > 0 && stats.identical === stats.total) {
     narrativeLines.push('No visual differences detected anywhere — safe to treat as a no-op change for this block.');
   }

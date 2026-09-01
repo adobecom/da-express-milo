@@ -71,14 +71,25 @@ results.
    - `stats` — counts by bucket: `identical` (<0.5% mismatch), `minor`
      (0.5–3%), `major` (>3%), `baselineOnly404`, `branchOnly404`,
      `bothErrored`, `missing`.
-   - `pages[]` — per-page detail. Has `fullPage` when mode is `full`/`both`,
-     and/or `element` when mode is `element`/`both`: each is either
+   - `pages[]` — per-page detail. Every entry has `baseUrl`/`branchUrl` (the
+     live `<ref>--da-express-milo--adobecom.aem.live<path>` URL for each
+     side, so a human can open both and look for themselves). Has `fullPage`
+     when mode is `full`/`both`, and/or `element` when mode is
+     `element`/`both`: each is either
      `{ mismatchPct, diffImage, heightDeltaPx }` or `{ skipped: "<reason>" }`.
 
 5. **Report to the user:**
-   - Start with the `narrative` text.
+   - Start with the `narrative` text — it already lists `baseUrl`/`branchUrl`
+     for every major diff and the top minor diffs (capped at 15; the rest are
+     in the JSON's `pages[]` array if needed), so you don't have to hand-build
+     these lists.
    - Call out `branchOnly404`/`bothErrored` pages explicitly — these are
      regressions the branch introduced, not just visual drift.
+   - **Minor diffs are still worth surfacing, not just major ones** — a real,
+     consistent design change (e.g. a button restyle) can register as a small
+     percentage when it's a small fraction of the diffed element/page, even
+     though it's the actual finding the user cares about. Don't dismiss the
+     minor bucket as noise by default.
    - For pages flagged with a large `heightDeltaPx` alongside a high
      `mismatchPct`: **don't take the percentage at face value.** The diff
      canvas is padded (not stretched) to the taller image's height, so a
@@ -87,8 +98,8 @@ results.
      nothing is actually broken. Open the `diffImage` before calling
      something a regression — solid blocks confined to the bottom/edges
      usually mean "different length," not "different content."
-   - Offer to open specific `diffImage` files (via Read) rather than dumping
-     all of them unprompted.
+   - Offer to open specific `diffImage` files (via Read) or the `baseUrl`/
+     `branchUrl` pair rather than dumping every image unprompted.
 
 ## Notes
 
