@@ -161,6 +161,39 @@ describe('standalone-search-bar', () => {
       expect(focusSpy.getCalls().some((call) => call.thisValue === trendLinks[0])).to.be.true;
     });
 
+    it('focuses the first suggestion (not a trend link) on ArrowDown when suggestions are visible', () => {
+      const searchInput = block.querySelector('input.search-bar');
+      const trendsContainer = block.querySelector('.trends-container');
+      const suggestionsContainer = block.querySelector('.suggestions-container');
+      const suggestionsList = block.querySelector('.suggestions-list');
+
+      const suggestionLi = document.createElement('li');
+      suggestionLi.tabIndex = -1;
+      suggestionsList.appendChild(suggestionLi);
+      trendsContainer.classList.add('hidden');
+      suggestionsContainer.classList.remove('hidden');
+
+      searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+      expect(focusSpy.getCalls().some((call) => call.thisValue === suggestionLi)).to.be.true;
+
+      suggestionLi.remove();
+      trendsContainer.classList.remove('hidden');
+      suggestionsContainer.classList.add('hidden');
+    });
+
+    it('keeps only the focused trend link in the tab sequence (roving tabindex)', () => {
+      const trendLinks = block.querySelectorAll('.trend-link');
+
+      trendLinks[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+      expect(trendLinks[0].tabIndex).to.equal(-1);
+      expect(trendLinks[1].tabIndex).to.equal(0);
+
+      // Reset back to the initial roving state for subsequent tests
+      trendLinks[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+    });
+
     it('focuses the next trend link on ArrowDown from a trend link', () => {
       const trendLinks = block.querySelectorAll('.trend-link');
 
