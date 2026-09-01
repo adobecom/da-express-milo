@@ -40,12 +40,9 @@ describe('collapsible-rows quote actions ("Copy quote" / "Create a design")', ()
     expect(block.querySelector('.collapsible-row-sub-header--mini-editor')).to.not.exist;
   });
 
-  it('does not render quote actions for collapsible-rows sections not marked as quotes', async () => {
+  it('does not render quote actions when pagetype is not mini-editor', async () => {
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
-    setPageType('mini-editor');
-    const section = document.querySelector('.section');
-    section.removeAttribute('data-sectiontype');
-    section.querySelector('.section-metadata').remove();
+    setPageType('faq');
 
     const block = document.querySelector('.collapsible-rows');
     await decorate(block);
@@ -53,7 +50,7 @@ describe('collapsible-rows quote actions ("Copy quote" / "Create a design")', ()
     expect(block.querySelector('.collapsible-row-actions')).to.not.exist;
   });
 
-  describe('with a mini-editor block present', () => {
+  describe('with pagetype mini-editor', () => {
     let block;
 
     beforeEach(async () => {

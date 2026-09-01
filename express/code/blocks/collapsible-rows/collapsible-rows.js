@@ -1,7 +1,6 @@
 import {
   getLibs,
   getIconElementDeprecated,
-  readBlockConfig,
   getMetadata,
 } from '../../scripts/utils.js';
 import { isExpressTypographyClass, isMiloTypographyClass } from '../../scripts/typography-utils.js';
@@ -20,14 +19,6 @@ let quoteActionDepsPromise;
  * DOM event keeps them decoupled instead of importing one into the other.
  */
 const USE_QUOTE_EVENT = 'mini-editor:use-quote';
-
-function isQuotesSection(section) {
-  if (!section) return false;
-  const metadataBlock = section.querySelector(':scope > .section-metadata');
-  const sectionType = section.dataset.sectiontype
-    || (metadataBlock ? readBlockConfig(metadataBlock)?.sectiontype : '');
-  return sectionType?.trim().toLowerCase() === 'quotes';
-}
 
 async function loadQuoteActionDeps() {
   if (showCopyToast && trackMiniEditorExport) return;
@@ -358,11 +349,8 @@ export default async function decorate(block) {
   const typographyClasses = extractTypographyClasses(block);
 
   const isExpandableVariant = block.classList.contains('expandable');
-  const section = block.closest('.section');
-  // Quote actions are opt-in via section-metadata (sectiontype=quotes) and
-  // require page metadata to explicitly opt into the mini-editor page type.
-  // This keeps FAQ/other collapsible-rows blocks inert.
-  const hasMiniEditor = isQuotesSection(section) && getMetadata('pagetype')?.toLowerCase() === 'mini-editor';
+  // Quote actions are enabled only on mini-editor page types.
+  const hasMiniEditor = getMetadata('pagetype')?.toLowerCase() === 'mini-editor';
   if (hasMiniEditor) await loadQuoteActionDeps();
 
   if (isExpandableVariant) {

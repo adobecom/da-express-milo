@@ -89,14 +89,6 @@ describe('mini-editor', () => {
     expect(block.querySelector('.me-author').textContent).to.equal('Jean-Jacques Rousseau');
   });
 
-  it('ignores collapsible-rows sections that are not marked as quotes', async () => {
-    const block = await decorateWithBody();
-    await waitFor(() => !!block.querySelector('.me-quote'));
-
-    expect(block.querySelector('.me-quote').textContent).to.not.equal('What is Adobe Express?');
-    expect(block.querySelector('.me-author').textContent).to.not.equal('Adobe Express is an all-in-one design app.');
-  });
-
   it('downloads the content model once after rapid clicks', async () => {
     const block = await decorateWithBody();
     const downloadStub = sinon.stub(MiniEditorCardExporter, 'download').resolves();

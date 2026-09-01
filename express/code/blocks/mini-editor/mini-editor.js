@@ -1,4 +1,4 @@
-import { getLibs, getIconElementDeprecated, readBlockConfig } from '../../scripts/utils.js';
+import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
 import {
   trapFocus,
   handleEscapeClose,
@@ -104,18 +104,8 @@ async function downloadCard(block, editor) {
  * block(s). Works whether collapsible-rows has already decorated
  * (`.collapsible-row-header` / `.collapsible-row-sub-header`) or not yet
  * (raw authored two-column `<div>` rows), since decoration order across
- * blocks on a page isn't guaranteed. Author is optional per row. Only
- * collapsible-rows sections opted in with section-metadata
- * `sectiontype=quotes` are considered quote sources.
+ * blocks on a page isn't guaranteed. Author is optional per row.
  */
-function isQuotesSection(section) {
-  if (!section) return false;
-  const metadataBlock = section.querySelector(':scope > .section-metadata');
-  const sectionType = section.dataset.sectiontype
-    || (metadataBlock ? readBlockConfig(metadataBlock)?.sectiontype : '');
-  return sectionType?.trim().toLowerCase() === 'quotes';
-}
-
 function getQuotesForBlock(block) {
   const decoratedRows = block.querySelectorAll([
     '.collapsible-row-wrapper',
@@ -145,7 +135,6 @@ function getPageQuotes() {
   if (!main) return [];
 
   return Array.from(main.querySelectorAll('.collapsible-rows'))
-    .filter((quoteBlock) => isQuotesSection(quoteBlock.closest('.section')))
     .flatMap((quoteBlock) => getQuotesForBlock(quoteBlock));
 }
 
