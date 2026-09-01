@@ -188,7 +188,7 @@ describe('mini-editor', () => {
 
   it('removes the whole section when no quotes are authored on the page', async () => {
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
-    document.querySelector('.collapsible-rows').remove();
+    document.querySelectorAll('.collapsible-rows').forEach((quoteBlock) => quoteBlock.remove());
     const section = document.createElement('div');
     section.className = 'section';
     const block = document.querySelector('.mini-editor');

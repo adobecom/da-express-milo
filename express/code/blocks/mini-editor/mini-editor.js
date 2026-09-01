@@ -19,6 +19,7 @@ let createTag;
 let loadStyle;
 let getConfig;
 let replaceKey;
+let uidCounter = 0;
 
 const TEMPLATE_LIMIT = 8;
 const DECO_CARD_COUNT = 8;
@@ -27,6 +28,23 @@ const DECO_CARD_COUNT = 8;
 // concurrently on the same page can't both pass an empty check before either
 // has appended its modal — only the first init() call builds one.
 let modalPromise = null;
+
+function createSecureUid(prefix = 'mini-editor') {
+  const cryptoObj = window.crypto;
+  if (cryptoObj?.randomUUID) {
+    return `${prefix}-${cryptoObj.randomUUID().replace(/-/g, '').slice(0, 12)}`;
+  }
+  if (cryptoObj?.getRandomValues) {
+    const bytes = new Uint8Array(8);
+    cryptoObj.getRandomValues(bytes);
+    const token = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+    return `${prefix}-${token.slice(0, 12)}`;
+  }
+
+  // Last-resort fallback for unusual runtimes that do not expose Web Crypto.
+  uidCounter += 1;
+  return `${prefix}-${Date.now().toString(36)}${uidCounter.toString(36)}`;
+}
 
 /**
  * Copies the quote and, when present, its author (as "quote — author") so
@@ -88,38 +106,36 @@ async function downloadCard(block, editor) {
  * (raw authored two-column `<div>` rows), since decoration order across
  * blocks on a page isn't guaranteed. Author is optional per row.
  */
-function getPageQuotes() {
-  const main = document.querySelector('main');
-  if (!main) return [];
-
-  const decoratedRowSelector = [
-    '.collapsible-rows .collapsible-row-wrapper',
-    '.collapsible-rows .collapsible-row-accordion',
-  ].join(', ');
-  const decoratedRows = main.querySelectorAll(decoratedRowSelector);
+function getQuotesForBlock(block) {
+  const decoratedRows = block.querySelectorAll([
+    '.collapsible-row-wrapper',
+    '.collapsible-row-accordion',
+  ].join(', '));
   if (decoratedRows.length) {
     return Array.from(decoratedRows, (row) => {
       const quote = row.querySelector('.collapsible-row-header')?.textContent.trim() || '';
-      const authorEl = row.querySelector('.collapsible-row-sub-header');
-      const author = authorEl?.textContent.trim() || '';
+      const author = row.querySelector('.collapsible-row-sub-header')?.textContent.trim() || '';
       return { quote, author };
     }).filter((q) => !!q.quote);
   }
 
-  // The .expandable (table-layout) variant reserves its first two raw rows
-  // for a background image and a section title (see collapsible-rows.js
-  // buildTableLayout's rows.shift() calls) — those aren't quotes, and this
-  // raw fallback has no way to tell them apart from real quote rows before
-  // collapsible-rows decorates. Skip it there; the decorated-row path above
-  // already handles that variant correctly once it has decorated.
-  const rawRows = main.querySelectorAll('.collapsible-rows:not(.expandable) > div');
-  return Array.from(rawRows, (row) => {
+  if (block.classList.contains('expandable')) return [];
+
+  return Array.from(block.querySelectorAll(':scope > div'), (row) => {
     const cols = row.querySelectorAll(':scope > div');
     return {
       quote: cols[0]?.textContent.trim() || '',
       author: cols[1]?.textContent.trim() || '',
     };
   }).filter((q) => !!q.quote);
+}
+
+function getPageQuotes() {
+  const main = document.querySelector('main');
+  if (!main) return [];
+
+  return Array.from(main.querySelectorAll('.collapsible-rows'))
+    .flatMap((quoteBlock) => getQuotesForBlock(quoteBlock));
 }
 
 function constructProps(block) {
@@ -254,7 +270,7 @@ function buildContentHeader(props) {
 function wireLandmark(block, header) {
   const heading = header.querySelector('h1, h2');
   if (!heading) return;
-  const uid = `mini-editor-${Math.random().toString(36).slice(2, 8)}`;
+  const uid = createSecureUid();
   if (!heading.id) heading.id = `${uid}-heading`;
 
   // aria-labelledby concatenates the text content of every referenced id in
