@@ -74,6 +74,7 @@ import { dirname, join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
+import { slugify } from '../lib/slugify.mjs';
 
 const execFileAsync = promisify(execFile);
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -136,13 +137,6 @@ async function findRoot(startDir) {
     dir = parent;
   }
   return null;
-}
-
-function slugify(name) {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
 }
 
 function sleep(ms) {

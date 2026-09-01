@@ -37,6 +37,7 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import { join, relative, dirname, sep } from 'node:path';
 import { parseArgs } from 'node:util';
+import { toPagePath as toPagePathPure } from './lib/page-path.mjs';
 
 function fail(message) {
   process.stdout.write(`${JSON.stringify({ error: message })}\n`);
@@ -109,11 +110,7 @@ async function collectHtmlFiles(dir) {
 }
 
 function toPagePath(file) {
-  const rel = relative(root, file).split(sep).join('/');
-  let p = rel.replace(/^content\//, '');
-  p = p.replace(/\.html$/, '');
-  p = p.replace(/(^|\/)index$/, '');
-  return `/${p}`.replace(/\/{2,}/g, '/').replace(/\/$/, '') || '/';
+  return toPagePathPure(relative(root, file).split(sep).join('/'));
 }
 
 function buildMatcher() {

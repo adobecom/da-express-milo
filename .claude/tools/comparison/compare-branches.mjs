@@ -55,16 +55,14 @@
  */
 
 import { execFile, execFileSync } from 'node:child_process';
-import {
-  mkdir, stat, writeFile, readFile,
-} from 'node:fs/promises';
+import { mkdir, stat, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
-import { PNG } from 'pngjs';
-import pixelmatch from 'pixelmatch';
-import { Jimp } from 'jimp';
+import { slugify } from '../lib/slugify.mjs';
+import { groupBySimilarity } from '../lib/group-diffs.mjs';
+import { diffImages, bucket } from './diff.mjs';
 
 const execFileAsync = promisify(execFile);
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -127,13 +125,6 @@ async function findRoot(startDir) {
   return null;
 }
 
-function slugify(name) {
-  return name
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '');
-}
-
 const root = values.root || (await findRoot(process.cwd()));
 if (!root) fail('Could not locate the da-express-milo repo root (looked for content/express + .git). Pass --root explicitly.');
 
@@ -161,49 +152,6 @@ async function runCapture(ref, refPort) {
   const result = JSON.parse(stdout);
   if (result.error) throw new Error(`qa-worktree failed for ref "${ref}": ${result.error}`);
   return result;
-}
-
-async function diffImages(pathA, pathB, outPath) {
-  const [bufA, bufB] = await Promise.all([readFile(pathA), readFile(pathB)]);
-  const [imgA, imgB] = await Promise.all([Jimp.read(bufA), Jimp.read(bufB)]);
-
-  // Pad both to a shared canvas (top-left aligned) instead of resizing either
-  // one to match the other's dimensions. Full-page screenshots routinely
-  // differ in height (dynamic/personalized content, accordion state, etc.);
-  // stretching a shorter capture to a taller one's height shears every row
-  // below the first divergence and produces a huge, meaningless mismatch %
-  // (a diagonal "ghosting" artifact). Padding instead just marks the extra
-  // rows/columns as mismatched, which is the honest result of a length
-  // difference rather than an invented distortion.
-  const width = Math.max(imgA.bitmap.width, imgB.bitmap.width);
-  const height = Math.max(imgA.bitmap.height, imgB.bitmap.height);
-  const heightDelta = Math.abs(imgA.bitmap.height - imgB.bitmap.height);
-
-  const canvasA = new Jimp({ width, height, color: 0xffffffff });
-  const canvasB = new Jimp({ width, height, color: 0xffffffff });
-  canvasA.composite(imgA, 0, 0);
-  canvasB.composite(imgB, 0, 0);
-
-  const diff = new PNG({ width, height });
-  const mismatched = pixelmatch(
-    canvasA.bitmap.data,
-    canvasB.bitmap.data,
-    diff.data,
-    width,
-    height,
-    { threshold, includeAA: false },
-  );
-  await mkdir(dirname(outPath), { recursive: true });
-  await writeFile(outPath, PNG.sync.write(diff));
-  return {
-    mismatchPct: (100 * mismatched) / (width * height), width, height, heightDelta,
-  };
-}
-
-function bucket(pct) {
-  if (pct < 0.5) return 'identical';
-  if (pct <= 3) return 'minor';
-  return 'major';
 }
 
 async function main() {
@@ -279,6 +227,7 @@ async function main() {
           join(baseResult.outDir, baseShot.file),
           join(branchResult.outDir, branchShot.file),
           diffPath,
+          threshold,
         );
         record.fullPage = {
           mismatchPct: Number(diff.mismatchPct.toFixed(2)),
@@ -303,6 +252,7 @@ async function main() {
             join(baseResult.outDir, baseShot.elementFile),
             join(branchResult.outDir, branchShot.elementFile),
             elDiffPath,
+            threshold,
           );
           record.element = {
             mismatchPct: Number(elDiff.mismatchPct.toFixed(2)),
@@ -328,15 +278,54 @@ async function main() {
   const minorPages = diffed.filter((p) => bucket(p[primary].mismatchPct) === 'minor')
     .sort((a, b) => b[primary].mismatchPct - a[primary].mismatchPct);
 
-  function describe(p) {
-    const d = p[primary];
-    const heightNote = d.heightDeltaPx > 50
+  function heightNoteFor(d) {
+    return d.heightDeltaPx > 50
       ? ` [${primary === 'fullPage' ? 'page' : 'element'} height differs by ${d.heightDeltaPx}px between ${base} and ${branch} — may just be a content-length/personalization difference, not a rendering bug; check the diff image]`
       : '';
-    return `  - ${p.path}: ${d.mismatchPct}%${heightNote}\n      ${base}: ${p.baseUrl}\n      ${branch}: ${p.branchUrl}`;
   }
 
-  const MINOR_CAP = 15;
+  function describePage(p) {
+    const d = p[primary];
+    return `  - ${p.path}: ${d.mismatchPct}%${heightNoteFor(d)}\n      ${base}: ${p.baseUrl}\n      ${branch}: ${p.branchUrl}`;
+  }
+
+  // Group near-identical mismatch %s together: a shared change (e.g. one
+  // restyled button) rendered on every page that uses a block routinely
+  // produces dozens of pages at ~the same %, which reads as noise/spam if
+  // listed one-by-one. GROUP_TOLERANCE is in percentage points.
+  const GROUP_TOLERANCE = 0.05;
+  const EXAMPLES_PER_GROUP = 3;
+  const MAX_GROUPS_SHOWN = 15;
+
+  function describeGroup(group) {
+    if (group.items.length === 1) return describePage(group.items[0]);
+    const pctLabel = group.minValue === group.maxValue
+      ? `~${group.maxValue}%`
+      : `~${group.minValue}-${group.maxValue}%`;
+    const lines = [`  - ${group.items.length} pages show the same ${pctLabel} diff (likely one shared change):`];
+    for (const p of group.items.slice(0, EXAMPLES_PER_GROUP)) {
+      const d = p[primary];
+      lines.push(`      ${p.path}${heightNoteFor(d)}\n        ${base}: ${p.baseUrl}\n        ${branch}: ${p.branchUrl}`);
+    }
+    if (group.items.length > EXAMPLES_PER_GROUP) {
+      lines.push(`      ...and ${group.items.length - EXAMPLES_PER_GROUP} more with this same diff — see the "pages" array in the JSON log.`);
+    }
+    return lines.join('\n');
+  }
+
+  function describeGroups(groupList) {
+    const shown = groupList.slice(0, MAX_GROUPS_SHOWN);
+    const lines = shown.map(describeGroup);
+    if (groupList.length > MAX_GROUPS_SHOWN) {
+      const remainingPages = groupList.slice(MAX_GROUPS_SHOWN).reduce((n, g) => n + g.items.length, 0);
+      lines.push(`  ...and ${remainingPages} more page(s) across ${groupList.length - MAX_GROUPS_SHOWN} more diff group(s) — see the "pages" array in the JSON log.`);
+    }
+    return lines;
+  }
+
+  const majorGroups = groupBySimilarity(majorPages, (p) => p[primary].mismatchPct, GROUP_TOLERANCE);
+  const minorGroups = groupBySimilarity(minorPages, (p) => p[primary].mismatchPct, GROUP_TOLERANCE);
+
   const narrativeLines = [];
   narrativeLines.push(`Compared "${block}" on ${base} vs ${branch} across ${stats.total} page(s) (mode=${mode}${selector ? `, selector="${selector}"` : ''}).`);
   if (stats.identical) narrativeLines.push(`${stats.identical} page(s) render identically (< 0.5% mismatch).`);
@@ -347,18 +336,14 @@ async function main() {
   if (stats.bothErrored) narrativeLines.push(`${stats.bothErrored} page(s) failed to render on both sides.`);
   if (stats.missing) narrativeLines.push(`${stats.missing} page(s) from ${base}'s capture were missing from ${branch}'s.`);
 
-  if (majorPages.length) {
-    narrativeLines.push(`\nMajor diffs (${majorPages.length}) — open both URLs side by side:`);
-    for (const p of majorPages) narrativeLines.push(describe(p));
+  if (majorGroups.length) {
+    narrativeLines.push(`\nMajor diffs (${majorPages.length} page(s), ${majorGroups.length} distinct group(s)) — open both URLs side by side:`);
+    narrativeLines.push(...describeGroups(majorGroups));
   }
 
-  if (minorPages.length) {
-    const shown = minorPages.slice(0, MINOR_CAP);
-    narrativeLines.push(`\nMinor diffs (${minorPages.length}${minorPages.length > MINOR_CAP ? `, showing top ${MINOR_CAP}` : ''}):`);
-    for (const p of shown) narrativeLines.push(describe(p));
-    if (minorPages.length > MINOR_CAP) {
-      narrativeLines.push(`  ...and ${minorPages.length - MINOR_CAP} more — see the "pages" array in the JSON log for the full list with URLs.`);
-    }
+  if (minorGroups.length) {
+    narrativeLines.push(`\nMinor diffs (${minorPages.length} page(s), ${minorGroups.length} distinct group(s)):`);
+    narrativeLines.push(...describeGroups(minorGroups));
   }
 
   if (stats.total > 0 && stats.identical === stats.total) {

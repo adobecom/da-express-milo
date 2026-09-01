@@ -85,3 +85,7 @@ not globally), which is independently invokable by any skill/agent.
 - This tool is checked out from this repo, so a sibling checkout (e.g.
   `da-express-milo-mwpw-200020`) won't have it unless these `.claude/`
   changes have been synced/merged there too.
+- `.qa-screendiff/` output accumulates across runs with no automatic cleanup.
+  Prune it with `node .claude/tools/clean-screendiffs.mjs --older-than=<days>`
+  (or `--block=<name>` to scope to one block, `--all` to wipe everything,
+  `--dry-run` to preview first).

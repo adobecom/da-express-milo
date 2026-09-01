@@ -80,9 +80,12 @@ results.
 
 5. **Report to the user:**
    - Start with the `narrative` text — it already lists `baseUrl`/`branchUrl`
-     for every major diff and the top minor diffs (capped at 15; the rest are
-     in the JSON's `pages[]` array if needed), so you don't have to hand-build
-     these lists.
+     for every major/minor diff (grouped: pages within 0.05 percentage points
+     of each other are reported as one group — "N pages show the same ~X%
+     diff" — instead of N near-duplicate lines, since a single shared change
+     rippling across every page that uses a block is the common case, not
+     N unrelated issues), capped at 15 groups with the rest pointed at the
+     JSON's `pages[]` array, so you don't have to hand-build these lists.
    - Call out `branchOnly404`/`bothErrored` pages explicitly — these are
      regressions the branch introduced, not just visual drift.
    - **Minor diffs are still worth surfacing, not just major ones** — a real,
@@ -118,3 +121,7 @@ results.
 - This tool is checked out from this repo, so a sibling checkout (e.g.
   `da-express-milo-mwpw-200020`) won't have it unless these `.claude/`
   changes have been synced/merged there too.
+- `.qa-screendiff/` output accumulates across runs with no automatic cleanup.
+  Prune it with `node .claude/tools/clean-screendiffs.mjs --older-than=<days>`
+  (or `--block=<name>` to scope to one block, `--all` to wipe everything,
+  `--dry-run` to preview first).
