@@ -1,11 +1,17 @@
-import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import {
+  getLibs,
+  getIconElementDeprecated,
+  readBlockConfig,
+  getMetadata,
+} from '../../scripts/utils.js';
 import { isExpressTypographyClass, isMiloTypographyClass } from '../../scripts/typography-utils.js';
-import showCopyToast from '../../scripts/utils/copy-toast.js';
-import trackMiniEditorExport from '../../scripts/utils/mini-editor-analytics.js';
 
 let createTag;
 let getConfig;
 let replaceKey;
+let showCopyToast;
+let trackMiniEditorExport;
+let quoteActionDepsPromise;
 
 /**
  * Name of the custom event a mini-editor block on the same page listens
@@ -14,6 +20,27 @@ let replaceKey;
  * DOM event keeps them decoupled instead of importing one into the other.
  */
 const USE_QUOTE_EVENT = 'mini-editor:use-quote';
+
+function isQuotesSection(section) {
+  if (!section) return false;
+  const metadataBlock = section.querySelector(':scope > .section-metadata');
+  const sectionType = section.dataset.sectiontype
+    || (metadataBlock ? readBlockConfig(metadataBlock)?.sectiontype : '');
+  return sectionType?.trim().toLowerCase() === 'quotes';
+}
+
+async function loadQuoteActionDeps() {
+  if (showCopyToast && trackMiniEditorExport) return;
+  quoteActionDepsPromise ??= Promise.all([
+    import('../../scripts/utils/copy-toast.js'),
+    import('../../scripts/utils/mini-editor-analytics.js'),
+  ]).then(([copyToastModule, analyticsModule]) => {
+    showCopyToast = copyToastModule.default;
+    trackMiniEditorExport = analyticsModule.default;
+  });
+
+  await quoteActionDepsPromise;
+}
 
 /**
  * Builds the "Copy quote" / "Create a design" action pair added below each
@@ -326,11 +353,12 @@ export default async function decorate(block) {
   const typographyClasses = extractTypographyClasses(block);
 
   const isExpandableVariant = block.classList.contains('expandable');
-  // "Create a design" only does something when a mini-editor block exists
-  // on the page to receive its event — checked against the raw authored
-  // DOM (not decorated state), since block decoration order across blocks
-  // on a page isn't guaranteed.
-  const hasMiniEditor = !!document.querySelector('.mini-editor');
+  const section = block.closest('.section');
+  // Quote actions are opt-in via section-metadata (sectiontype=quotes) and
+  // require page metadata to explicitly opt into the mini-editor page type.
+  // This keeps FAQ/other collapsible-rows blocks inert.
+  const hasMiniEditor = isQuotesSection(section) && getMetadata('pagetype')?.toLowerCase() === 'mini-editor';
+  if (hasMiniEditor) await loadQuoteActionDeps();
 
   if (isExpandableVariant) {
     buildTableLayout(block, typographyClasses, hasMiniEditor);
