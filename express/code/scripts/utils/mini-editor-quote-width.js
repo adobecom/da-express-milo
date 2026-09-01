@@ -9,19 +9,14 @@
 // download/copy image). Lives outside mini-editor-card-renderer.js so that file stays DOM-free and
 // worker-safe (the export worker imports the renderer).
 
-import { MINI_EDITOR_EXPORT_WIDTH, QUOTE_MAX_WIDTH } from './mini-editor-card-renderer.js';
+import { QUOTE_FONT_SIZE, QUOTE_MAX_WIDTH } from './mini-editor-card-renderer.js';
 
-// The card is designed at CARD_DESIGN_WIDTH (`.mini-editor-widget` max-width in
-// mini-editor-widget.css); the export canvas is 2x that (MINI_EDITOR_EXPORT_WIDTH).
-const CARD_DESIGN_WIDTH = 542;
-
-// The quote box hugs its text up to a fixed max-width with a fixed-px font (`.me-quote-wrap` in
-// mini-editor-widget.css), so its width is in the card's design px and varies per quote. Locate the
-// visible quote text (desktop `.me-quote`; mobile/tablet the arc-carousel centre's `.me-arc-quote`)
-// and measure its wrapping BOX (`.me-quote-wrap`) — not the tight text — so the box's padding gives
-// the render slack; otherwise a line that just fits on the card overflows when it's re-wrapped with
-// slightly different font metrics. Scale by the fixed export/design factor. Falls back to
-// QUOTE_MAX_WIDTH when nothing is measurable (e.g. before render, or in tests without a DOM card).
+// The quote box (`.me-quote-wrap`) hugs its text up to a fixed max-width, and the card renders at
+// different sizes per breakpoint (~20px font/~322px box on desktop, ~18px/narrower on the arc
+// carousel). Read the visible quote's box and rendered font size (desktop `.me-quote`; mobile the
+// arc `.me-arc-quote`) and scale the box to keep the same chars per line at the export font size:
+// box * (QUOTE_FONT_SIZE / displayFontSize). A fixed design-width factor only held on desktop.
+// Falls back to QUOTE_MAX_WIDTH when nothing is measurable (before render or in tests).
 export default function measureQuoteExportWidth() {
   const arcQuote = document
     .getElementsByClassName('me-arc-card--center')[0]
@@ -30,9 +25,13 @@ export default function measureQuoteExportWidth() {
     ? arcQuote
     : document.getElementsByClassName('me-quote')[0];
   const box = quoteEl?.closest('.me-quote-wrap');
-  const boxWidth = box ? box.getBoundingClientRect().width : 0;
-  if (boxWidth > 0) {
-    return Math.round((boxWidth * MINI_EDITOR_EXPORT_WIDTH) / CARD_DESIGN_WIDTH);
+  if (!box) {
+    return QUOTE_MAX_WIDTH;
+  }
+  const fontSize = parseFloat(getComputedStyle(quoteEl).fontSize);
+  const boxWidth = box.offsetWidth;
+  if (boxWidth > 0 && fontSize > 0) {
+    return Math.round((boxWidth * QUOTE_FONT_SIZE) / fontSize);
   }
   return QUOTE_MAX_WIDTH;
 }

@@ -119,13 +119,14 @@ describe('mini-editor open-in-express', () => {
       });
     });
 
-    it('measures the desktop quote box width, scaled to export space', async () => {
-      // box width 300 in card design px -> 300 * (1084 / 542) = 600 export px.
+    it('measures the desktop quote box, scaled by its font size to export space', async () => {
+      // 300px box at 20px font -> 300 * (40 / 20) = 600 export px.
       const wrap = document.createElement('div');
       wrap.className = 'me-quote-wrap';
       wrap.style.cssText = 'display: block; width: 300px;';
       const quote = document.createElement('div');
       quote.className = 'me-quote';
+      quote.style.fontSize = '20px';
       wrap.append(quote);
       document.body.append(wrap);
       try {
@@ -138,20 +139,22 @@ describe('mini-editor open-in-express', () => {
       }
     });
 
-    it('measures the arc-carousel centre quote box on mobile/tablet', async () => {
+    it('measures the arc-carousel centre quote by its 18px font on mobile/tablet', async () => {
+      // 270px box at 18px arc font -> 270 * (40 / 18) = 600 export px (matching the desktop wrap).
       const centre = document.createElement('div');
       centre.className = 'me-arc-card--center';
       const wrap = document.createElement('div');
       wrap.className = 'me-quote-wrap';
-      wrap.style.cssText = 'display: block; width: 271px;';
+      wrap.style.cssText = 'display: block; width: 270px;';
       const quote = document.createElement('div');
       quote.className = 'me-arc-quote';
+      quote.style.fontSize = '18px';
       wrap.append(quote);
       centre.append(wrap);
       document.body.append(centre);
       try {
         const decoded = decodeMiniEditor(new URL(await buildExpressUrl(MODEL)).searchParams.get('miniEditor'));
-        expect(decoded.layout.quote.width).to.equal(542); // 271 * (1084 / 542)
+        expect(decoded.layout.quote.width).to.equal(600);
       } finally {
         centre.remove();
       }
