@@ -34,7 +34,7 @@ describe('mini-editor open-in-express', () => {
 
   describe('base URL selection', () => {
     it('uses the prod base by default', async () => {
-      expect(await buildExpressUrl(MODEL)).to.include('new.express.adobe.com');
+      expect(await buildExpressUrl(MODEL)).to.include('adobesparkpost.app.link');
     });
 
     it('uses the local base when hzenv=local', async () => {
@@ -71,7 +71,7 @@ describe('mini-editor open-in-express', () => {
 
     it('ignores hzenv values other than local/stage (stays on prod)', async () => {
       window.history.pushState({}, '', '?hzenv=whatever');
-      expect(await buildExpressUrl(MODEL)).to.include('new.express.adobe.com');
+      expect(await buildExpressUrl(MODEL)).to.include('adobesparkpost.app.link');
     });
 
     it('honors an explicit prodBaseUrl argument on the default env', async () => {
@@ -214,7 +214,7 @@ describe('mini-editor open-in-express', () => {
       const openStub = sinon.stub(window, 'open');
       await openInExpress(MODEL);
       expect(openStub.calledOnce).to.be.true;
-      expect(openStub.firstCall.args[0]).to.include('new.express.adobe.com');
+      expect(openStub.firstCall.args[0]).to.include('adobesparkpost.app.link');
       expect(openStub.firstCall.args[1]).to.equal('_blank');
       expect(openStub.firstCall.args[2]).to.equal('noopener,noreferrer');
     });

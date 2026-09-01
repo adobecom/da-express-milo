@@ -60,7 +60,7 @@ function buildCardLayout(quoteWidth) {
 
 const LOCAL_BASE_URL = 'https://localhost.adobe.com:8080/new';
 const STAGE_BASE_URL = 'https://stage.projectx.corp.adobe.com/new';
-const PROD_BASE_URL = 'https://new.express.adobe.com/new';
+const PROD_BASE_URL = 'https://adobesparkpost.app.link/JpBOBeJz35b';
 const REFERRER = 'express-mini-editor';
 const FEATURE_FLAG = 'acom-mini-editor-entry';
 const CANVAS_UNIT = 'px';
