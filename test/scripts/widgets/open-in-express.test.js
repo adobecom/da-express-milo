@@ -104,7 +104,8 @@ describe('mini-editor open-in-express', () => {
         font: {
           family: 'Georgia', style: 'italic', weight: 'bold', stretch: 'normal',
         },
-        // renderer 1084x700 design coords; hz scales this to the actual canvas (identity at 1084)
+        // renderer 1084x700 design coords; hz scales this to the actual canvas (identity at 1084).
+        // No card is rendered in this test, so the quote width falls back to QUOTE_MAX_WIDTH (624).
         layout: {
           width: 1084,
           height: 700,
@@ -112,10 +113,48 @@ describe('mini-editor open-in-express', () => {
             x: 230, y: 298, width: 624, height: 104, fontSize: 40,
           },
           author: {
-            x: 230, y: 644, width: 624, height: 40, fontSize: 32,
+            x: 230, y: 638, width: 624, height: 40, fontSize: 32,
           },
         },
       });
+    });
+
+    it('measures the desktop quote box width, scaled to export space', async () => {
+      // box width 300 in card design px -> 300 * (1084 / 542) = 600 export px.
+      const wrap = document.createElement('div');
+      wrap.className = 'me-quote-wrap';
+      wrap.style.cssText = 'display: block; width: 300px;';
+      const quote = document.createElement('div');
+      quote.className = 'me-quote';
+      wrap.append(quote);
+      document.body.append(wrap);
+      try {
+        const decoded = decodeMiniEditor(new URL(await buildExpressUrl(MODEL)).searchParams.get('miniEditor'));
+        expect(decoded.layout.quote.width).to.equal(600);
+        // x re-derives from the measured width so the column stays centred: (1084 - 600) / 2
+        expect(decoded.layout.quote.x).to.equal(242);
+      } finally {
+        wrap.remove();
+      }
+    });
+
+    it('measures the arc-carousel centre quote box on mobile/tablet', async () => {
+      const centre = document.createElement('div');
+      centre.className = 'me-arc-card--center';
+      const wrap = document.createElement('div');
+      wrap.className = 'me-quote-wrap';
+      wrap.style.cssText = 'display: block; width: 271px;';
+      const quote = document.createElement('div');
+      quote.className = 'me-arc-quote';
+      wrap.append(quote);
+      centre.append(wrap);
+      document.body.append(centre);
+      try {
+        const decoded = decodeMiniEditor(new URL(await buildExpressUrl(MODEL)).searchParams.get('miniEditor'));
+        expect(decoded.layout.quote.width).to.equal(542); // 271 * (1084 / 542)
+      } finally {
+        centre.remove();
+      }
     });
 
     it('reduces a CSS font stack to the bare family name (no quotes or var())', async () => {

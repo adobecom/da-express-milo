@@ -6,6 +6,9 @@ export const QUOTE_FONT_SIZE = 40;
 export const QUOTE_LINE_HEIGHT = 52;
 export const AUTHOR_FONT_SIZE = 32;
 export const AUTHOR_BOTTOM = 24;
+// Author design line-height (Label-L, 22px) doubled to export space, like QUOTE_LINE_HEIGHT. Used
+// to place the author on hz, whose auto-height text frame is line-height (not font-size) tall.
+export const AUTHOR_LINE_HEIGHT = 44;
 
 const EXPORT_TEXT_COLORS = {
   light: {
@@ -108,7 +111,9 @@ export function drawMiniEditorText(context, model) {
   context.textAlign = 'center';
   context.textBaseline = 'middle';
 
-  const lines = wrapCanvasText(context, model.quote, QUOTE_MAX_WIDTH);
+  // Width measured from the live card (see mini-editor-quote-width.js); QUOTE_MAX_WIDTH is the
+  // fallback when the model carries no measurement.
+  const lines = wrapCanvasText(context, model.quote, model.quoteWidth || QUOTE_MAX_WIDTH);
   const firstLineY = (MINI_EDITOR_EXPORT_HEIGHT / 2)
     - (((lines.length - 1) * QUOTE_LINE_HEIGHT) / 2);
   lines.forEach((line, index) => {
