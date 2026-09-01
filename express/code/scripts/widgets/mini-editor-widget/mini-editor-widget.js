@@ -45,8 +45,25 @@
 
 let createTag;
 let getIconElementDeprecated;
+let uidCounter = 0;
 
 const DECO_CARD_COUNT = 8;
+
+function createSecureUid(prefix = 'mini-editor') {
+  const cryptoObj = window.crypto;
+  if (cryptoObj?.randomUUID) {
+    return `${prefix}-${cryptoObj.randomUUID().replace(/-/g, '').slice(0, 12)}`;
+  }
+  if (cryptoObj?.getRandomValues) {
+    const bytes = new Uint8Array(8);
+    cryptoObj.getRandomValues(bytes);
+    const token = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+    return `${prefix}-${token.slice(0, 12)}`;
+  }
+
+  uidCounter += 1;
+  return `${prefix}-${Date.now().toString(36)}${uidCounter.toString(36)}`;
+}
 const DECO_QUOTE_CHAR_LIMIT = 216;
 const EDITOR_QUOTE_CHAR_LIMIT = 248;
 
@@ -1427,12 +1444,13 @@ function wireDecoTabChain(decorations, root) {
 const ROLE_CLASSES = ['me-arc-card--prev', 'me-arc-card--center', 'me-arc-card--next', 'me-arc-card--off'];
 
 async function buildArcCard(onActivate, a11y, tabIndex) {
+  const hintId = createSecureUid('me-arc-card-hint');
   const el = createTag('div', {
     class: 'me-arc-card',
     role: 'option',
     'aria-selected': 'false',
     tabindex: tabIndex,
-    'aria-describedby': 'me-arc-card-hint',
+    'aria-describedby': hintId,
   });
   // quoteP/authorP live inside quoteWrap (not directly in el) purely so the
   // centre role can reuse .me-quote-wrap's existing CSS (frosted
@@ -1445,7 +1463,7 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
   const quoteP = createTag('div', { class: 'me-arc-quote' });
   const authorP = createTag('div', { class: 'me-arc-author' });
   const quoteWrap = createTag('div', { class: 'me-quote-wrap', tabIndex: -1 });
-  const hint = createTag('span', { id: 'me-arc-card-hint', class: 'sr-only' }, ['Copy quote to clipboard']);
+  const hint = createTag('span', { id: hintId, class: 'sr-only' }, ['Copy quote to clipboard']);
   quoteWrap.append(quoteP, hint);
   el.append(quoteWrap, authorP);
 

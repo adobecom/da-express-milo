@@ -1,11 +1,16 @@
-import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import {
+  getLibs,
+  getIconElementDeprecated,
+  getMetadata,
+} from '../../scripts/utils.js';
 import { isExpressTypographyClass, isMiloTypographyClass } from '../../scripts/typography-utils.js';
-import showCopyToast from '../../scripts/utils/copy-toast.js';
-import trackMiniEditorExport from '../../scripts/utils/mini-editor-analytics.js';
 
 let createTag;
 let getConfig;
 let replaceKey;
+let showCopyToast;
+let trackMiniEditorExport;
+let quoteActionDepsPromise;
 
 /**
  * Name of the custom event a mini-editor block on the same page listens
@@ -14,6 +19,19 @@ let replaceKey;
  * DOM event keeps them decoupled instead of importing one into the other.
  */
 const USE_QUOTE_EVENT = 'mini-editor:use-quote';
+
+async function loadQuoteActionDeps() {
+  if (showCopyToast && trackMiniEditorExport) return;
+  quoteActionDepsPromise ??= Promise.all([
+    import('../../scripts/utils/copy-toast.js'),
+    import('../../scripts/utils/mini-editor-analytics.js'),
+  ]).then(([copyToastModule, analyticsModule]) => {
+    showCopyToast = copyToastModule.default;
+    trackMiniEditorExport = analyticsModule.default;
+  });
+
+  await quoteActionDepsPromise;
+}
 
 /**
  * Builds the "Copy quote" / "Create a design" action pair added below each
@@ -28,9 +46,11 @@ function buildQuoteActions(quote, author, hasMiniEditor) {
   if (!hasMiniEditor) return null;
 
   const actions = createTag('div', { class: 'collapsible-row-actions collapsible-row-actions--mini-editor' });
+  const copyIcon = getIconElementDeprecated('copy-quote');
+  copyIcon.classList.add('collapsible-row-action-icon', 'collapsible-row-action-icon--copy');
 
   const copyBtn = createTag('button', { type: 'button', class: 'collapsible-row-action collapsible-row-action--copy' }, [
-    getIconElementDeprecated('copy-quote'),
+    copyIcon,
     createTag('span', {}, ['Copy quote']),
   ]);
   copyBtn.addEventListener('click', async () => {
@@ -47,8 +67,11 @@ function buildQuoteActions(quote, author, hasMiniEditor) {
     }
   });
 
+  const designIcon = getIconElementDeprecated('create-design');
+  designIcon.classList.add('collapsible-row-action-icon', 'collapsible-row-action-icon--design');
+
   const designBtn = createTag('button', { type: 'button', class: 'collapsible-row-action collapsible-row-action--design' }, [
-    getIconElementDeprecated('create-design'),
+    designIcon,
     createTag('span', {}, ['Create a design']),
   ]);
   designBtn.setAttribute('daa-ll', 'Create a design');
@@ -326,11 +349,9 @@ export default async function decorate(block) {
   const typographyClasses = extractTypographyClasses(block);
 
   const isExpandableVariant = block.classList.contains('expandable');
-  // "Create a design" only does something when a mini-editor block exists
-  // on the page to receive its event — checked against the raw authored
-  // DOM (not decorated state), since block decoration order across blocks
-  // on a page isn't guaranteed.
-  const hasMiniEditor = !!document.querySelector('.mini-editor');
+  // Quote actions are enabled only on mini-editor page types.
+  const hasMiniEditor = getMetadata('pagetype')?.toLowerCase() === 'mini-editor';
+  if (hasMiniEditor) await loadQuoteActionDeps();
 
   if (isExpandableVariant) {
     buildTableLayout(block, typographyClasses, hasMiniEditor);
