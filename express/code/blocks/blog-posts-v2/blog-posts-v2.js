@@ -334,6 +334,23 @@ async function getReadMoreString() {
   return readMoreString;
 }
 
+function sanitizeTag(value) {
+  if (typeof value !== 'string') return '';
+  const trimmed = value.trim();
+  const lower = trimmed.toLowerCase();
+  if (!trimmed || lower === 'null' || lower === 'undefined') return '';
+  return trimmed;
+}
+
+function escapeHtml(value) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function getCardParameters(post, dateFormatter) {
   const path = post.path.split('.')[0];
   const { title, teaser, image } = post;
@@ -351,28 +368,31 @@ function getCardParameters(post, dateFormatter) {
   const filteredTitle = title.replace(/(\s?)(｜|\|)(\s?Adobe\sExpress\s?)$/g, '');
   const imagePath = image.split('?')[0].split('_')[1];
   return {
-    path, title, teaser, dateString, filteredTitle, imagePath,
+    path, title, teaser, dateString, filteredTitle, imagePath, category: post.category,
   };
 }
 
-async function getHeroCard(post, dateFormatter, blogTag) {
+async function getHeroCard(post, dateFormatter, blogTagOverride) {
   const readMoreString = await getReadMoreString();
   const {
-    path, title, teaser, dateString, filteredTitle, imagePath,
+    path, title, teaser, dateString, filteredTitle, imagePath, category,
   } = getCardParameters(post, dateFormatter);
+  const sanitizedCategory = sanitizeTag(category);
+  const tagValue = blogTagOverride || sanitizedCategory;
   const heroPicture = createOptimizedPicture(`./media_${imagePath}?format=webply&optimize=medium&width=750`, title, false);
 
   const card = createTag('a', {
     class: 'blog-hero-card',
     href: path,
   });
+  card.dataset.tagCategory = sanitizedCategory;
 
   const imageWrapper = createTag('div', { class: 'image-wrapper' });
   imageWrapper.appendChild(heroPicture);
 
   const pictureTag = imageWrapper.outerHTML;
   const dateMarkup = dateString ? `<p class="blog-card-date">${dateString}</p>` : '';
-  const tagMarkup = blogTag ? `<span class="blog-tag">${blogTag}</span>` : '';
+  const tagMarkup = tagValue ? `<span class="blog-tag">${escapeHtml(tagValue)}</span>` : '';
   card.innerHTML = `<div class="blog-card-image">
     ${pictureTag}
     ${tagMarkup}
@@ -386,22 +406,25 @@ async function getHeroCard(post, dateFormatter, blogTag) {
     </div>`;
   return card;
 }
-function getCard(post, dateFormatter, blogTag) {
+function getCard(post, dateFormatter, blogTagOverride) {
   const {
-    path, title, teaser, dateString, filteredTitle, imagePath,
+    path, title, teaser, dateString, filteredTitle, imagePath, category,
   } = getCardParameters(post, dateFormatter);
+  const sanitizedCategory = sanitizeTag(category);
+  const tagValue = blogTagOverride || sanitizedCategory;
   const cardPicture = createOptimizedPicture(`./media_${imagePath}?format=webply&optimize=medium&width=750`, title, false, [{ width: '750' }]);
   const card = createTag('a', {
     class: 'blog-card',
     href: path,
   });
+  card.dataset.tagCategory = sanitizedCategory;
 
   const imageWrapper = createTag('div', { class: 'image-wrapper' });
   imageWrapper.appendChild(cardPicture);
 
   const pictureTag = imageWrapper.outerHTML;
   const dateMarkup = dateString ? `<p class="blog-card-date">${dateString}</p>` : '';
-  const tagMarkup = blogTag ? `<span class="blog-tag">${blogTag}</span>` : '';
+  const tagMarkup = tagValue ? `<span class="blog-tag">${escapeHtml(tagValue)}</span>` : '';
   card.innerHTML = `<div class="blog-card-image">
         ${pictureTag}
         ${tagMarkup}
@@ -438,18 +461,27 @@ function addRightChevronToViewAll(blockElement) {
   link.innerHTML = `${link.innerHTML} ${rightChevronSVGHTML}`;
 }
 
-function getBlogTag(block, post) {
+function getBlogTagOverride(block) {
   const activeSection = block.closest('.section.content-toggle-active');
-  if (activeSection?.dataset.toggle?.trim()) {
-    return activeSection.dataset.toggle.trim();
-  }
-  return post?.category?.trim() || '';
+  return sanitizeTag(activeSection?.dataset.toggle);
 }
 
 function updateBlogTags(block, tagValue) {
-  const blogTags = block.querySelectorAll('.blog-tag');
-  blogTags.forEach((tag) => {
-    tag.textContent = tagValue;
+  const cards = block.querySelectorAll('.blog-card, .blog-hero-card');
+  cards.forEach((card) => {
+    const imageContainer = card.querySelector('.blog-card-image');
+    if (!imageContainer) return;
+    const value = tagValue || card.dataset.tagCategory || '';
+    let tag = imageContainer.querySelector('.blog-tag');
+    if (!value) {
+      tag?.remove();
+      return;
+    }
+    if (!tag) {
+      tag = createTag('span', { class: 'blog-tag' });
+      imageContainer.appendChild(tag);
+    }
+    tag.textContent = value;
   });
 }
 
@@ -461,8 +493,7 @@ function observeContentToggleChanges(block) {
     mutations.forEach((mutation) => {
       if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
         if (section.classList.contains('content-toggle-active')) {
-          const tagValue = section.dataset.toggle || 'Social Media';
-          updateBlogTags(block, tagValue);
+          updateBlogTags(block, sanitizeTag(section.dataset.toggle));
         }
       }
     });
@@ -497,16 +528,17 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0, gridModu
     getDateFormatter(newLanguage);
   }
 
+  const blogTagOverride = getBlogTagOverride(blogPostsElements);
+
   if (isHero) {
-    const heroTag = getBlogTag(blogPostsElements, posts[0]);
-    const card = await getHeroCard(posts[0], dateFormatter, heroTag);
+    const card = await getHeroCard(posts[0], dateFormatter, blogTagOverride);
     blogPostsElements.prepend(card);
     images.push(card.querySelector('img'));
     count = 1;
   } else {
     for (let i = offset; i < posts.length && count < limit; i += 1) {
       const post = posts[i];
-      const card = getCard(post, dateFormatter, getBlogTag(blogPostsElements, post));
+      const card = getCard(post, dateFormatter, blogTagOverride);
       cards.append(card);
       images.push(card.querySelector('img'));
       count += 1;
