@@ -126,9 +126,15 @@ main .section .collapsible-row-sub-header p:last-of-type {
   transition: background-color 0.15s ease;
 }
 
-.collapsible-row-action img {
+.collapsible-row-actions--mini-editor .collapsible-row-action img.collapsible-row-action-icon--copy {
     width: 16px;
     height: 16px;
+}
+
+.collapsible-row-actions--mini-editor .collapsible-row-action img.collapsible-row-action-icon--design {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1);
 }
 
 .collapsible-row-action--copy {
@@ -147,10 +153,6 @@ main .section .collapsible-row-sub-header p:last-of-type {
 
 .collapsible-row-action--design:hover {
   background: #2d4fd6;
-}
-
-.collapsible-row-action--design img {
-  filter: brightness(0) invert(1);
 }
 
 /* Icon-only on mobile — "Copy quote" needs the label at tablet/desktop

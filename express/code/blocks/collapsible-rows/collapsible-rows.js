@@ -55,9 +55,11 @@ function buildQuoteActions(quote, author, hasMiniEditor) {
   if (!hasMiniEditor) return null;
 
   const actions = createTag('div', { class: 'collapsible-row-actions collapsible-row-actions--mini-editor' });
+  const copyIcon = getIconElementDeprecated('copy-quote');
+  copyIcon.classList.add('collapsible-row-action-icon', 'collapsible-row-action-icon--copy');
 
   const copyBtn = createTag('button', { type: 'button', class: 'collapsible-row-action collapsible-row-action--copy' }, [
-    getIconElementDeprecated('copy-quote'),
+    copyIcon,
     createTag('span', {}, ['Copy quote']),
   ]);
   copyBtn.addEventListener('click', async () => {
@@ -74,8 +76,11 @@ function buildQuoteActions(quote, author, hasMiniEditor) {
     }
   });
 
+  const designIcon = getIconElementDeprecated('create-design');
+  designIcon.classList.add('collapsible-row-action-icon', 'collapsible-row-action-icon--design');
+
   const designBtn = createTag('button', { type: 'button', class: 'collapsible-row-action collapsible-row-action--design' }, [
-    getIconElementDeprecated('create-design'),
+    designIcon,
     createTag('span', {}, ['Create a design']),
   ]);
   designBtn.setAttribute('daa-ll', 'Create a design');
