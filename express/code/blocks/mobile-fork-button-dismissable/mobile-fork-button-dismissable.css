@@ -36,10 +36,15 @@ main .mobile-fork-button a.mweb-close {
   box-shadow: 0px 0px 12px 0px #00000029;
 }
 
+html[dir="rtl"] main .mobile-fork-button a.mweb-close {
+  right: unset;
+  left: -8px;
+}
+
 main .mobile-gating-text {
   height: fit-content;
   margin: auto;
-  text-align: left;
+  text-align: start;
   flex-grow: 1;
   font-weight: 400;
   font-size: var(--mfb-font-size);
