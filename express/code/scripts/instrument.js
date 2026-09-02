@@ -544,20 +544,20 @@ export function trackButtonClick(a) {
       adobeEventName = appendLinkText(adobeEventName, a);
     }
 
-    // clicks using [data-lh/data-ll] or [daa-lh/daa-ll]
-    let trackingHeader = a.closest('[data-lh], [daa-lh]');
+    // clicks using [daa-lh/daa-ll]
+    let trackingHeader = a.closest('[daa-lh]');
     const daaLl = a.getAttribute('daa-ll');
-    if (trackingHeader || a.dataset.lh) {
+    if (trackingHeader) {
       adobeEventName = 'adobe.com:express';
       let headerString = '';
       while (trackingHeader) {
-        const headerLabel = trackingHeader.dataset.lh || trackingHeader.getAttribute('daa-lh');
+        const headerLabel = trackingHeader.getAttribute('daa-lh');
         headerString = `:${textToName(headerLabel.trim())}${headerString}`;
-        trackingHeader = trackingHeader.parentNode.closest('[data-lh], [daa-lh]');
+        trackingHeader = trackingHeader.parentNode.closest('[daa-lh]');
       }
       adobeEventName += headerString;
-      if (a.dataset.ll || daaLl) {
-        adobeEventName += `:${textToName((a.dataset.ll || daaLl).trim())}`;
+      if (daaLl) {
+        adobeEventName += `:${textToName(daaLl.trim())}`;
       } else {
         adobeEventName += `:${textToName(a.innerText.trim())}`;
       }
@@ -607,7 +607,7 @@ function trackVideoAnalytics(parameters) {
 function decorateAnalyticsEvents() {
   // for tracking all of the links
   d.addEventListener('click', (event) => {
-    const target = event.target.closest?.('a, [data-ll], [daa-ll]');
+    const target = event.target.closest?.('a, [daa-ll]');
     if (target) {
       trackButtonClick(target);
     }
