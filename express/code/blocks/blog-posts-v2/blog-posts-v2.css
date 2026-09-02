@@ -85,7 +85,7 @@ main .blog-posts-v2 .blog-posts-header {
 }
 
 main .blog-posts-v2 .blog-posts-header :is(h1, h2, h3, h4, h5, h6) {
-  font-size: var(--ax-heading-xl-size);
+  font-size: var(--ax-heading-l-size);
   margin: 0;
 }
 
@@ -249,7 +249,7 @@ main .blog-posts-v2 .blog-hero-card .blog-card-image img {
 }
 
 main .blog-posts-v2 .blog-card h3.blog-card-title {
-  font-size: var(--ax-heading-l-size);
+  font-size: var(--ax-heading-s-size);
   font-weight: var(--subheading-font-weight);
   line-height: var(--heading-line-height);
   text-align: left;
@@ -547,7 +547,7 @@ main .section:has(.blog-posts-v2)>.content>h3 {
   }
 
   main .blog-posts-v2 .blog-posts-header :is(h1, h2, h3, h4, h5, h6) {
-    font-size: var(--ax-heading-xl-size);
+    font-size: var(--ax-heading-l-size);
   }
 
   .section:has(.blog-posts-v2.v2) {
