@@ -1,5 +1,6 @@
 import { getLibs, fixIcons, addTempWrapperDeprecated } from '../../scripts/utils.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
+import { createExpressTooltip } from '../../scripts/color-shared/spectrum/components/express-tooltip.js';
 import { createSpectrumIcon } from '../../scripts/color-shared/utils/icons.js';
 import { loadIconsRail } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import { wrapInTheme } from '../../scripts/color-shared/spectrum/utils/theme.js';
@@ -156,6 +157,7 @@ async function buildSpecsCard(payload) {
     copyIcon.setAttribute('aria-hidden', 'true');
     copyBtn.append(wrapInTheme(copyIcon));
     copyBtn.addEventListener('click', () => copySpecsValue(value, label, strings));
+    createExpressTooltip({ targetEl: copyBtn, content: `Copy ${label}` }).catch(() => {});
 
     const valueGroup = createTag('span', { class: 'chtc-specs-value-group' });
     valueGroup.append(createTag('span', { class: 'chtc-specs-value' }, value), copyBtn);
