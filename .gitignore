@@ -23,3 +23,9 @@ actionlint
 .playwright-mcp/
 !.eslintrc-code-compatibility.js
 !.browserslistrc
+
+content
+
+# Design QA screenshot/diff output (qa-worktree, comparison, figma-page-diff)
+.qa-screendiff/
+.dr-screendiff/
