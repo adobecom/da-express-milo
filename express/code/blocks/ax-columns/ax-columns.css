@@ -1332,8 +1332,7 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     width: 137px;
     height: 48px;
     font-size: var(--body-font-size-l);
-    padding-bottom: 10px;
-    border-radius: 24px;
+    border-radius: 999px;
     display: inline-block;
   }
 
