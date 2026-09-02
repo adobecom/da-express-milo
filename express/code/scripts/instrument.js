@@ -365,6 +365,21 @@ function trackExpressFeaturePageLoad() {
             },
           },
           _adobe_corpnew: {
+            custom: [
+              { propertyName: 'event.pagename', propertyValue: eventName },
+              { propertyName: 'event.url', propertyValue: loc.href },
+              { propertyName: 'event.subcategory', propertyValue: 'operations' },
+              { propertyName: 'event.type', propertyValue: 'render' },
+              { propertyName: 'event.subtype', propertyValue: 'acom' },
+              { propertyName: 'event.workflow', propertyValue: 'lifecycle' },
+              { propertyName: 'custom.aa.page_name', propertyValue: getPageName() },
+              { propertyName: 'custom.aa.ref_domain', propertyValue: refDomain },
+              { propertyName: 'custom.aa.previous_pagename', propertyValue: previousPagename },
+              { propertyName: 'custom.link.page_url', propertyValue: loc.href },
+              { propertyName: 'custom.link.page_type', propertyValue: pageType === 'mini-editor' ? 'mini-editor' : 'fonts' },
+              { propertyName: 'custom.ui.location', propertyValue: pathname },
+
+            ],
             sdm: {
               event: {
                 pagename: eventName,
