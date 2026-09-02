@@ -28,32 +28,34 @@ import {
 } from '../../utils/mini-editor-card-renderer.js';
 import measureQuoteExportWidth from '../../utils/mini-editor-quote-width.js';
 
-// The card layout in the renderer's 1084x700 design coordinates (the download's space). Express
-// makes the canvas that size and scales this layout to whatever canvas it gets. Font sizes are the
-// renderer's own values; the quote column width is measured from the live card (see above). Boxes
-// are top-left based: the quote column is centred vertically, the author near the bottom. `height`
-// is nominal (Express uses auto-height) — it's here so the payload is a full rect.
-function buildCardLayout(quoteWidth) {
+// The card layout in the full-res canvas's coordinates (canvasW x canvasH = the background's native
+// size). Express creates a canvas that size and scales the layout to it 1:1. Text scales uniformly
+// with canvas height (the renderer constants are the 1084x700 design basis); `quoteWidth` is the
+// live card's measured column, already scaled to this canvas. Boxes are top-left based: quote
+// column centred vertically, author near the bottom. `height` is nominal (Express auto-heights).
+function buildCardLayout(quoteWidth, canvasWidth, canvasHeight) {
+  const scale = canvasHeight / MINI_EDITOR_EXPORT_HEIGHT;
+  const authorWidth = QUOTE_MAX_WIDTH * scale;
   return {
-    width: MINI_EDITOR_EXPORT_WIDTH,
-    height: MINI_EDITOR_EXPORT_HEIGHT,
+    width: canvasWidth,
+    height: canvasHeight,
     quote: {
-      x: (MINI_EDITOR_EXPORT_WIDTH - quoteWidth) / 2,
-      y: Math.round(MINI_EDITOR_EXPORT_HEIGHT / 2 - QUOTE_LINE_HEIGHT),
+      x: (canvasWidth - quoteWidth) / 2,
+      y: Math.round(canvasHeight / 2 - QUOTE_LINE_HEIGHT * scale),
       width: quoteWidth,
-      height: QUOTE_LINE_HEIGHT * 2,
-      fontSize: QUOTE_FONT_SIZE,
+      height: QUOTE_LINE_HEIGHT * 2 * scale,
+      fontSize: QUOTE_FONT_SIZE * scale,
     },
     author: {
-      x: (MINI_EDITOR_EXPORT_WIDTH - QUOTE_MAX_WIDTH) / 2,
+      x: (canvasWidth - authorWidth) / 2,
       // hz sets this as the auto-height frame's TOP. That frame is line-height (not font-size) tall
       // and centres the glyph, so anchor by the glyph centre — its visual bottom then sits
       // AUTHOR_BOTTOM from the canvas edge like the download. Using AUTHOR_FONT_SIZE alone left the
       // taller frame (and text) sitting too low on hz.
-      y: MINI_EDITOR_EXPORT_HEIGHT - AUTHOR_BOTTOM - (AUTHOR_LINE_HEIGHT + AUTHOR_FONT_SIZE) / 2,
-      width: QUOTE_MAX_WIDTH,
-      height: AUTHOR_FONT_SIZE + 8,
-      fontSize: AUTHOR_FONT_SIZE,
+      y: canvasHeight - (AUTHOR_BOTTOM + (AUTHOR_LINE_HEIGHT + AUTHOR_FONT_SIZE) / 2) * scale,
+      width: authorWidth,
+      height: (AUTHOR_FONT_SIZE + 8) * scale,
+      fontSize: AUTHOR_FONT_SIZE * scale,
     },
   };
 }
@@ -132,11 +134,18 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
   const quoteColor = isLight ? '#131313' : '#FFFFFF';
   const authorColor = isLight ? '#505050' : '#E6E6E6';
 
+  // Express creates the canvas at the background's native full-res size; the layout scales to it.
+  // The measured quote column is in the design (40px-font) basis, so scale it by the height factor.
+  const canvasWidth = model.backgroundWidth || MINI_EDITOR_EXPORT_WIDTH;
+  const canvasHeight = model.backgroundHeight || MINI_EDITOR_EXPORT_HEIGHT;
+  const scale = canvasHeight / MINI_EDITOR_EXPORT_HEIGHT;
+  const quoteWidth = Math.round(measureQuoteExportWidth() * scale);
+
   const payload = {
-    // URN is carried for provenance/analytics; backgroundUrl is what Express fetches
-    // (the template rendition — a bare public template URN isn't dereferenceable on the hz side).
+    // URN is carried for provenance/analytics; backgroundUrl is what Express fetches — the full-res
+    // rendition (a bare public template URN isn't dereferenceable on the hz side).
     backgroundUrn: model.backgroundUrn || '',
-    backgroundUrl: model.backgroundUrl || '',
+    backgroundUrl: model.backgroundFullUrl || model.backgroundUrl || '',
     quote: model.quote || '',
     author: model.author || '',
     quoteColor,
@@ -147,16 +156,16 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
       weight: model.font?.weight || 'normal',
       stretch: model.font?.stretch || 'normal',
     },
-    // Card-space layout; Express scales it to the canvas it creates. The quote column width is
+    // Full-res-canvas layout; Express scales it to the canvas it creates (1:1). The quote column is
     // measured from the live card so the reproduction matches this quote's actual box.
-    layout: buildCardLayout(measureQuoteExportWidth()),
+    layout: buildCardLayout(quoteWidth, canvasWidth, canvasHeight),
   };
 
   url.searchParams.set('referrer', REFERRER);
   url.searchParams.set('feature-enable', FEATURE_FLAG);
   url.searchParams.set('miniEditor', encodePayload(payload));
-  url.searchParams.set('width', String(MINI_EDITOR_EXPORT_WIDTH));
-  url.searchParams.set('height', String(MINI_EDITOR_EXPORT_HEIGHT));
+  url.searchParams.set('width', String(canvasWidth));
+  url.searchParams.set('height', String(canvasHeight));
   url.searchParams.set('unit', CANVAS_UNIT);
 
   return url.toString();
