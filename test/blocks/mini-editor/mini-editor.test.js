@@ -82,11 +82,19 @@ describe('mini-editor', () => {
     expect(block.querySelector('.mini-editor-header .mini-editor-decorations')).to.exist;
   });
 
-  it('seeds the widget with quotes read from the page\'s collapsible-rows block', async () => {
+  it('seeds the widget with quotes read from the page\'s mini-editor-quotes block', async () => {
     const block = await decorateWithBody();
     await waitFor(() => !!block.querySelector('.me-quote'));
     expect(block.querySelector('.me-quote').textContent).to.equal('"Patience is bitter, but its fruit is sweet."');
     expect(block.querySelector('.me-author').textContent).to.equal('Jean-Jacques Rousseau');
+  });
+
+  it('does not use non-mini-editor-quotes blocks as quote sources', async () => {
+    const block = await decorateWithBody();
+    await waitFor(() => !!block.querySelector('.me-quote'));
+
+    expect(block.querySelector('.me-quote').textContent).to.not.equal('What is Adobe Express?');
+    expect(block.querySelector('.me-author').textContent).to.not.equal('Adobe Express is an all-in-one design app.');
   });
 
   it('downloads the content model once after rapid clicks', async () => {
@@ -188,7 +196,7 @@ describe('mini-editor', () => {
 
   it('removes the whole section when no quotes are authored on the page', async () => {
     document.body.innerHTML = await readFile({ path: './mocks/body.html' });
-    document.querySelectorAll('.collapsible-rows').forEach((quoteBlock) => quoteBlock.remove());
+    document.querySelectorAll('.mini-editor-quotes').forEach((quoteBlock) => quoteBlock.remove());
     const section = document.createElement('div');
     section.className = 'section';
     const block = document.querySelector('.mini-editor');

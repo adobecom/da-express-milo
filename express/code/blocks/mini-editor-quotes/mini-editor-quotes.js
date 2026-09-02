@@ -1,9 +1,69 @@
-import { getLibs } from '../../scripts/utils.js';
+import {
+  getLibs,
+  getIconElementDeprecated,
+} from '../../scripts/utils.js';
 import { isExpressTypographyClass, isMiloTypographyClass } from '../../scripts/typography-utils.js';
 
 let createTag;
 let getConfig;
 let replaceKey;
+let showCopyToast;
+let trackMiniEditorExport;
+let quoteActionDepsPromise;
+
+const USE_QUOTE_EVENT = 'mini-editor:use-quote';
+
+async function loadQuoteActionDeps() {
+  if (showCopyToast && trackMiniEditorExport) return;
+  quoteActionDepsPromise ??= Promise.all([
+    import('../../scripts/utils/copy-toast.js'),
+    import('../../scripts/utils/mini-editor-analytics.js'),
+  ]).then(([copyToastModule, analyticsModule]) => {
+    showCopyToast = copyToastModule.default;
+    trackMiniEditorExport = analyticsModule.default;
+  });
+
+  await quoteActionDepsPromise;
+}
+
+function buildQuoteActions(quote, author) {
+  const actions = createTag('div', { class: 'collapsible-row-actions collapsible-row-actions--mini-editor' });
+  const copyIcon = getIconElementDeprecated('copy-quote');
+  copyIcon.classList.add('collapsible-row-action-icon', 'collapsible-row-action-icon--copy');
+
+  const copyBtn = createTag('button', { type: 'button', class: 'collapsible-row-action collapsible-row-action--copy' }, [
+    copyIcon,
+    createTag('span', {}, ['Copy quote']),
+  ]);
+  copyBtn.addEventListener('click', async () => {
+    const text = author ? `${quote} — ${author}` : quote;
+    try {
+      await navigator.clipboard.writeText(text);
+      trackMiniEditorExport({
+        exportMethod: 'copy-clipboard',
+        uiLocation: 'seo-discover-page-collapsible-row',
+      });
+      showCopyToast('Quote copied to clipboard');
+    } catch {
+      // Clipboard write failed (e.g. permissions) — no toast, nothing else to do.
+    }
+  });
+
+  const designIcon = getIconElementDeprecated('create-design');
+  designIcon.classList.add('collapsible-row-action-icon', 'collapsible-row-action-icon--design');
+
+  const designBtn = createTag('button', { type: 'button', class: 'collapsible-row-action collapsible-row-action--design' }, [
+    designIcon,
+    createTag('span', {}, ['Create a design']),
+  ]);
+  designBtn.setAttribute('daa-ll', 'Create a design');
+  designBtn.addEventListener('click', () => {
+    document.dispatchEvent(new CustomEvent(USE_QUOTE_EVENT, { detail: { quote, author } }));
+  });
+
+  actions.append(copyBtn, designBtn);
+  return actions;
+}
 
 function shouldReuseSingleElement(tempContainer) {
   const childElements = Array.from(tempContainer.children);
@@ -43,14 +103,11 @@ function createContentElement(html, baseClass, options = {}) {
 }
 
 function buildTableLayout(block, typographyClasses = {}) {
-  const parentDiv = block.closest('.section');
-  parentDiv?.classList.add('collapsible-rows-grey-bg', 'collapsible-section-padding');
-
   const rows = Array.from(block.children);
   block.innerHTML = '';
   const background = rows.shift();
   background.classList.add('collapsible-rows-background');
-  parentDiv.prepend(background);
+  block.prepend(background);
   const headerText = rows.shift()?.innerText.trim();
 
   if (headerText) {
@@ -73,17 +130,16 @@ function buildTableLayout(block, typographyClasses = {}) {
   collapsibleRows.forEach((row) => {
     const { header, subHeader } = row;
 
-    const rowWrapper = createTag('div', { class: 'collapsible-row-wrapper' }); // New wrapper
+    const rowWrapper = createTag('div', { class: 'collapsible-row-wrapper collapsible-row-wrapper--mini-editor' });
     const headerAccordion = createTag('div', { class: 'collapsible-row-accordion expandable header-accordion' });
 
     rowWrapper.append(headerAccordion);
     block.append(rowWrapper);
 
     const headerEl = createContentElement(header, 'collapsible-row-header', {
-      extraClasses: ['expandable'],
+      extraClasses: ['expandable', 'collapsible-row-header--mini-editor'],
       allowSingleChildReuse: true,
     });
-    // Apply typography classes to header
     if (typographyClasses.header && typographyClasses.header.length > 0) {
       headerEl.classList.add(...typographyClasses.header);
     }
@@ -97,18 +153,21 @@ function buildTableLayout(block, typographyClasses = {}) {
 
     headerEl.appendChild(iconElement);
 
-    const subHeaderAccordion = createTag('div', { class: 'collapsible-row-accordion expandable sub-header-accordion' });
+    const subHeaderAccordion = createTag('div', { class: 'collapsible-row-accordion expandable sub-header-accordion collapsible-row-accordion--mini-editor' });
     rowWrapper.append(subHeaderAccordion);
 
     const subHeaderEl = createContentElement(subHeader, 'collapsible-row-sub-header', {
-      extraClasses: ['expandable'],
+      extraClasses: ['expandable', 'collapsible-row-sub-header--mini-editor'],
       allowSingleChildReuse: true,
     });
-    // Apply typography classes to sub-header
     if (typographyClasses.body && typographyClasses.body.length > 0) {
       subHeaderEl.classList.add(...typographyClasses.body);
     }
     subHeaderAccordion.append(subHeaderEl);
+    subHeaderAccordion.append(buildQuoteActions(
+      headerEl.textContent.trim(),
+      subHeaderEl.textContent.trim(),
+    ));
 
     headerEl.addEventListener('click', () => {
       headerAccordion.classList.toggle('rounded-corners');
@@ -121,7 +180,12 @@ function buildTableLayout(block, typographyClasses = {}) {
   });
 }
 
-function buildOriginalLayout(block, typographyClasses = {}, viewMoreText = 'View more', viewLessText = 'View less') {
+function buildOriginalLayout(
+  block,
+  typographyClasses = {},
+  viewMoreText = 'View more',
+  viewLessText = 'View less',
+) {
   const collapsibleRows = [];
   const rows = Array.from(block.children);
 
@@ -143,7 +207,7 @@ function buildOriginalLayout(block, typographyClasses = {}, viewMoreText = 'View
   collapsibleRows.forEach((row, index) => {
     const { header, subHeader } = row;
 
-    const accordion = createTag('div', { class: 'collapsible-row-accordion', tabIndex: 0 });
+    const accordion = createTag('div', { class: 'collapsible-row-accordion collapsible-row-accordion--mini-editor', tabIndex: 0 });
 
     if (index >= visibleCount) {
       accordion.classList.add('collapsed');
@@ -154,21 +218,25 @@ function buildOriginalLayout(block, typographyClasses = {}, viewMoreText = 'View
 
     const headerEl = createContentElement(header, 'collapsible-row-header', {
       allowSingleChildReuse: true,
+      extraClasses: ['collapsible-row-header--mini-editor'],
     });
     accordion.append(headerEl);
-    // Apply typography classes to header
     if (typographyClasses.header && typographyClasses.header.length > 0) {
       headerEl.classList.add(...typographyClasses.header);
     }
 
     const subHeaderEl = createContentElement(subHeader, 'collapsible-row-sub-header', {
       allowSingleChildReuse: true,
+      extraClasses: ['collapsible-row-sub-header--mini-editor'],
     });
-    // Apply typography classes to sub-header
     if (typographyClasses.body && typographyClasses.body.length > 0) {
       subHeaderEl.classList.add(...typographyClasses.body);
     }
     accordion.append(subHeaderEl);
+    accordion.append(buildQuoteActions(
+      headerEl.textContent.trim(),
+      subHeaderEl.textContent.trim(),
+    ));
   });
 
   const toggleButton = createTag('a', { class: 'collapsible-row-toggle-btn button' });
@@ -193,11 +261,6 @@ function buildOriginalLayout(block, typographyClasses = {}, viewMoreText = 'View
   });
 }
 
-/**
- * Convert <strong> tags to <span class="collapsible-row-bold"> for accessibility
- * This handles content from Word editor while maintaining bold styling
- * @param {HTMLElement} element - The element to process
- */
 function convertStrongToSpan(element) {
   const strongTags = element.querySelectorAll('strong');
   strongTags.forEach((strong) => {
@@ -207,40 +270,31 @@ function convertStrongToSpan(element) {
   });
 }
 
-/**
- * Extract typography classes from block classes
- * @param {HTMLElement} block - The block element
- * @returns {Object} - Object with header and body typography classes
- */
 function extractTypographyClasses(block) {
   const typographyClasses = Array
     .from(block.classList)
     .filter((cls) => isMiloTypographyClass(cls) || isExpressTypographyClass(cls));
 
-  // Separate heading and body classes
   const headerClasses = typographyClasses.filter((cls) => cls.includes('heading'));
   const bodyClasses = typographyClasses.filter((cls) => cls.includes('body'));
 
   return {
     header: headerClasses,
     body: bodyClasses,
-    all: typographyClasses,
   };
 }
 
 export default async function decorate(block) {
-  block.parentElement.classList.add('ax-collapsible-rows');
+  block.classList.add('ax-mini-editor-quotes');
   [{ createTag, getConfig }, { replaceKey }] = await Promise.all([
     import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
   ]);
 
-  // Convert <strong> tags to <span> for accessibility before any processing
+  await loadQuoteActionDeps();
   convertStrongToSpan(block);
 
-  // Extract typography classes before DOM rebuild
   const typographyClasses = extractTypographyClasses(block);
-
   const isExpandableVariant = block.classList.contains('expandable');
 
   if (isExpandableVariant) {

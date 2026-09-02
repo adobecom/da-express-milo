@@ -100,8 +100,8 @@ async function downloadCard(block, editor) {
 }
 
 /**
- * Reads quote + author pairs authored in this same page's collapsible-rows
- * block(s). Works whether collapsible-rows has already decorated
+ * Reads quote + author pairs authored in this same page's quote block(s).
+ * Works whether the block has already decorated
  * (`.collapsible-row-header` / `.collapsible-row-sub-header`) or not yet
  * (raw authored two-column `<div>` rows), since decoration order across
  * blocks on a page isn't guaranteed. Author is optional per row.
@@ -133,8 +133,9 @@ function getQuotesForBlock(block) {
 function getPageQuotes() {
   const main = document.querySelector('main');
   if (!main) return [];
+  const miniEditorQuotes = Array.from(main.querySelectorAll('.mini-editor-quotes'));
 
-  return Array.from(main.querySelectorAll('.collapsible-rows'))
+  return [...miniEditorQuotes]
     .flatMap((quoteBlock) => getQuotesForBlock(quoteBlock));
 }
 
@@ -477,7 +478,7 @@ export default async function init(block) {
     themeHost.append(editor.stage);
     wireLandmark(block, header);
 
-    // "Create a design" on collapsible-rows' quotes (see collapsible-rows.js)
+    // "Create a design" on mini-editor-quotes (and any legacy quote source)
     // opens this modal — showing just the centre editor card, identically
     // across desktop/tablet/mobile — instead of scrolling to this inline
     // block. One modal per page regardless of how many mini-editor blocks
