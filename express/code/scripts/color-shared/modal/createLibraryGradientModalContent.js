@@ -148,7 +148,7 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
   let tagObserver = null;
 
   const root = createTag('main', { class: 'modal-content modal-library-gradient', 'daa-lh': 'library-gradient-modal' });
-  const contentScroll = createTag('div', { class: 'modal-lib-scroll' });
+  const contentScroll = createTag('div', { class: 'modal-content-scroll' });
 
   /* ── Gradient preview (read-only, copyable handles) ── */
   const previewSection = createTag('section', { class: 'modal-palette-container' });
@@ -188,7 +188,11 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
     { name: item?.name ?? 'Gradient', colors: stopColors, colorStops },
     {
       type: 'gradient',
-      strings,
+      strings: {
+        ...strings,
+        colorModeLabel: strings.librariesColorModeLabel,
+        codesToggleLabel: strings.librariesCodesToggleLabel,
+      },
       onModeChange: (mode) => {
         railAdapter.rail.colorMode = mode;
         gradientEditor.setColorMode(mode);

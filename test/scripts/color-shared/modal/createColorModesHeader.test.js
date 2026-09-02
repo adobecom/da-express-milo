@@ -116,12 +116,16 @@ describe('createColorModesHeader', () => {
     ]);
   });
 
-  it('renders only "Copy as CSS" for gradients — LESS/SASS/XML have no gradient-aware export', async () => {
+  it('renders LESS/CSS/SASS (not XML) for gradients — XML has no gradient-aware export', async () => {
     await mount(palette, { type: 'gradient' });
     codesTrigger(header).click();
     const items = codesItems(header);
-    expect(items.map((i) => i.getAttribute('value'))).to.deep.equal(['css']);
-    expect(items.map((i) => i.textContent)).to.deep.equal(['Copy as CSS']);
+    expect(items.map((i) => i.getAttribute('value'))).to.deep.equal(['less', 'css', 'scss']);
+    expect(items.map((i) => i.textContent)).to.deep.equal([
+      'Copy as LESS',
+      'Copy as CSS',
+      'Copy as SASS',
+    ]);
   });
 
   it('renders the real sp-icon-code Spectrum icon', async () => {

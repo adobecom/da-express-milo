@@ -409,6 +409,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
 
   const colorCount = normalizedPalette.colors.length;
   const root = createTag('main', { class: 'modal-content', 'daa-lh': 'color-palette-modal' });
+  const contentScroll = createTag('div', { class: 'modal-content-scroll' });
 
   const railSection = createTag('section', {
     class: 'modal-palette-container modal-palette-container--color-rail',
@@ -432,7 +433,7 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
       onModeChange: (mode) => { railAdapter.rail.colorMode = mode; },
     },
   );
-  root.appendChild(colorModesHeader.element);
+  contentScroll.appendChild(colorModesHeader.element);
 
   // Mobile/tablet-only condensed strip above the full swatch list (Figma:
   // "Add palette summary above color strips on color palettes"). Hidden at
@@ -440,11 +441,11 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
   // need it.
   const paletteSummaryStrip = createTag('div', { class: 'modal-palette-summary-strip', 'aria-hidden': 'true' });
   paletteSummaryStrip.appendChild(createColorStrip(normalizedPalette.colors, 'palette', null, STRIP_DEFAULTS));
-  root.appendChild(paletteSummaryStrip);
+  contentScroll.appendChild(paletteSummaryStrip);
 
   railWrap.appendChild(railAdapter.element);
   railSection.appendChild(railWrap);
-  root.appendChild(railSection);
+  contentScroll.appendChild(railSection);
 
   if (colorCountRange === 'large') {
     const updateFade = () => {
@@ -477,7 +478,8 @@ export function createPaletteSwatchesModalContent(palette, options = {}) {
 
   const { initTabIndexes } = setupSwatchColumnNav(railWrap);
 
-  root.appendChild(createPaletteMetaSection(normalizedPalette, options));
+  contentScroll.appendChild(createPaletteMetaSection(normalizedPalette, options));
+  root.appendChild(contentScroll);
 
   const toolbarMount = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': 'Palette actions' });
   root.appendChild(toolbarMount);

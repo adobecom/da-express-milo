@@ -27,7 +27,18 @@ const STYLES_PATH = '/express/code/scripts/color-shared/spectrum/styles/picker.c
 
 const DEFAULT_MENU_TOKENS = {
   '--mod-menu-item-label-inline-edge-to-content': '12px',
-  '--mod-menu-item-selectable-edge-to-text-not-selected': '12px',
+  /* Spectrum only renders the checkmark icon element for [selected] items —
+     there's no CSS-hidden placeholder for it to reserve space on the rest —
+     so an unselected item's label sits flush at the edge token above (12px)
+     while a selected item's label is pushed out to edge + checkmark width +
+     icon-to-label gap (12 + 10 + 10 = 32px), a real ~20px jump between
+     selected and unselected rows. Reserving that same total here for every
+     row (not just selected ones) keeps every label's x-position identical
+     regardless of selection state. Shared by every sp-picker built through
+     this file (Color Mode picker, Explore/Library filter dropdowns), so this
+     one change fixes the indentation everywhere at once. */
+  '--mod-menu-item-selectable-edge-to-text-not-selected':
+    'calc(var(--mod-menu-item-label-inline-edge-to-content) + var(--mod-menu-item-checkmark-width) + var(--mod-menu-item-text-to-control))',
   '--mod-menu-item-checkmark-width': '10px',
   '--mod-menu-item-text-to-control': '10px',
   '--mod-menu-item-corner-radius': '8px',

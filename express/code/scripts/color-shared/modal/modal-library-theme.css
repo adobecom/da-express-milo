@@ -21,13 +21,25 @@
   display: flex;
   flex-direction: column;
   align-items: stretch;
-  gap: var(--spacing-300);
+  gap: 0;
   inline-size: 100%;
 }
 
 .ax-color-modal-container:has(.modal-library-theme) {
   max-height: 95vh;
   max-height: 95dvh;
+}
+
+/* Tablet doesn't use the flat 95vh/95dvh cap above (unlike mobile/desktop) —
+   the unconditional rule still applies at every breakpoint including this
+   one, so it needs overriding here. Matches modal-styles.css's own tablet
+   .ax-color-modal-container rule: sized against the viewport minus a
+   guaranteed var(--spacing-500) gap on every side, not an arbitrary fixed
+   cap. */
+@media (min-width: 600px) and (max-width: 1199px) {
+  .ax-color-modal-container:has(.modal-library-theme) {
+    max-height: calc(100vh - 2 * var(--spacing-500));
+  }
 }
 
 /* Only the content above the toolbar scrolls; the toolbar is a fixed footer so it
@@ -43,16 +55,10 @@
   min-height: 0;
 }
 
-.ax-color-modal-content .modal-library-theme .modal-lib-scroll {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-200);
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow-y: auto;
-  /* overflow-y:auto promotes overflow-x to auto; clip x so nested rail/handle
-     overflow never triggers a stray horizontal scrollbar. */
-  overflow-x: hidden;
+/* overflow-y:auto promotes overflow-x to auto; the shared rule
+   (modal-styles.css) already clips x so nested rail/handle overflow never
+   triggers a stray horizontal scrollbar. */
+.ax-color-modal-content .modal-library-theme .modal-content-scroll {
   inline-size: 100%;
 }
 
@@ -124,14 +130,6 @@
   inline-size: 100%;
 }
 
-/* Fixed toolbar footer; the content above it scrolls. */
-.ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
-  flex: 0 0 auto;
-  inline-size: 100%;
-  box-sizing: border-box;
-  background: var(--color-white);
-}
-
 .ax-color-modal-content .modal-library-theme .ax-lib-card__action-menu {
   z-index: 5;
 }
@@ -141,51 +139,26 @@
   inline-size: 100%;
 }
 
-/* ── Full-bleed footer divider (mobile + tablet; desktop unchanged) ── */
-@media (max-width: 1199px) {
-  .ax-color-modal-content .modal-library-theme {
-    gap: 0;
-  }
-
-  .ax-color-modal-content .modal-library-theme .modal-lib-scroll {
-    padding-block-end: var(--spacing-200);
-  }
-
-  .ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
-    border-block-start: 1px solid var(--color-gray-150);
-    padding-block-start: var(--spacing-300);
-  }
-
-  .ax-color-modal-content .modal-library-theme .ax-toolbar.ax-toolbar-library {
-    border-block-start: none;
-    padding-block-start: 0;
-  }
-}
-
-@media (max-width: 599px) {
-  .ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
-    width: calc(100% + 2 * var(--spacing-300));
-    margin-inline: calc(-1 * var(--spacing-300));
-    padding-inline: var(--spacing-300);
-    padding-block-end: var(--spacing-300);
-  }
-}
-
-@media (min-width: 600px) and (max-width: 1199px) {
-  .ax-color-modal-content .modal-library-theme .modal-palette-toolbar {
-    width: calc(100% + 2 * var(--spacing-400));
-    /* Without this, modal-palette-content.css's "min-width:600px { max-width:100% }"
-       rule (unconditionally loaded by this modal too) clamps this overflow
-       straight back down to 100%. */
-    max-width: none;
-    margin-inline: calc(-1 * var(--spacing-400));
-    padding-inline: var(--spacing-500);
-    padding-block-end: var(--spacing-400);
-  }
+.ax-color-modal-content .modal-library-theme .ax-toolbar.ax-toolbar-library {
+  border-block-start: none;
+  padding-block-start: 0;
 }
 
 /* modal-palette-content.css inflates accent buttons to 48px below 1200px; keep
    the Edit theme + Save changes buttons at 40px across all breakpoints. */
 .ax-color-modal-content .ax-toolbar-lib-buttons sp-button[variant] {
   --spectrum-button-height: 40px;
+}
+
+@media (min-width: 1200px) {
+  /* This modal has no rail sizing of its own — it inherits modal-palette-content.css's
+   shared desktop rule (aspect-ratio: 834/400, max-height: min(400px, 50vh)),
+   which was tuned for the Explore palette modal's own wider preview area, not
+   this one. Cap it at 320px here instead. Scoped with the extra
+   .modal-library-theme class (not just a higher-specificity guess) so this
+   reliably wins over the shared rule regardless of which stylesheet's <link>
+   the page happens to load last. */
+  .ax-color-modal-content .modal-library-theme .modal-palette-container--color-rail .modal-color-rail-wrap {
+    max-height: 320px;
+  }
 }

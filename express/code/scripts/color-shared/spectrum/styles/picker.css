@@ -154,16 +154,10 @@ sp-menu {
 }
 
 /* Universal sp-menu-item treatment, shared regardless of which picker it's
-   in — font-size/line-height/padding are deliberately NOT set here (see the
-   .modal-color-mode-picker-scoped block below): the Color Modes picker's
-   items are Spectrum "S" size (12px font, 4px/9px padding) while Explore/
-   Library/contrast-checker items are "M" (14px, 7px/12px) — trying to drive
-   that off sp-picker's own [size] attribute instead of scoped CSS breaks the
-   picker's trigger button too (verified empirically: setting size="s" on
-   sp-picker to get 12px items also shrinks the visible trigger to 24px,
-   since the trigger and its internal popover menu share the one attribute),
-   so each picker's items keep Spectrum's untouched default (14px/M) unless
-   explicitly scoped up. */
+   in. Every picker's items — including the Color Modes picker — use
+   Spectrum's untouched default "M" size (14px), matching the trigger's own
+   size="m", per design: the dropdown field and its menu items should read
+   at the same text size. */
 sp-menu-item {
   --mod-menu-item-label-content-color-default: var(--Alias-content-neutral-default);
   --mod-menu-item-label-content-color-hover: var(--Alias-content-neutral-default);
@@ -205,50 +199,6 @@ sp-menu-item {
    filling a gap. */
 sp-picker sp-menu-item {
   margin-inline: 8px;
-}
-
-/* Color Modes picker menu items only (Spectrum "S" size): 12px/16px label,
-   4px/9px padding, 9px icon-to-label gap. Scoped rather than global — see
-   the note above the base sp-menu-item rule for why. */
-.modal-color-mode-picker sp-menu-item {
-  --mod-menu-item-label-font-size: 12px;
-  --mod-menu-item-label-line-height: 16px;
-  --mod-menu-item-label-text-to-visual: 9px;
-  --mod-menu-item-min-height: 24px;
-  /* padding-inline-start is set inside sp-menu's shadow tree via ::slotted()
-     (not overridable directly), using one token for the selected item and a
-     different one for the rest. The two can't just be set equal the way
-     .ax-lib-card__action-menu-list does it (its Codes menu has no persistent
-     "checked" state, so both its edge-to-content tokens share one value):
-     here the checkmark icon isn't a CSS-hidden element on unselected items,
-     it's conditionally absent from the DOM entirely (sp-menu-item's Lit
-     template only renders it when [selected]), so there's no element for any
-     "always reserve checkmark space" token to size. Instead the not-selected
-     inset is the same base edge token plus the checkmark's own rendered
-     width (10px) and its icon-to-label gap (9px) so the label lands at the
-     same x position either way — the base value is real (Spectrum's own
-     --spectrum-component-edge-to-visual-only-200, 9px at this app's medium
-     scale), but the +19px compensation is tuned against the live rendered
-     popover rather than derived purely on paper. */
-  --mod-menu-item-label-inline-edge-to-content: var(--spectrum-component-edge-to-visual-only-200);
-  --mod-menu-item-selectable-edge-to-text-not-selected: calc(var(--spectrum-component-edge-to-visual-only-200) + 19px);
-  /* Checkmark icon is align-self:start with its own margin-block-start token,
-     not centered via the grid's align-items — tuned so it lands centered in
-     the (now single-row, see grid-template-rows above) content row. */
-  --mod-menu-item-top-to-checkmark: 9px;
-  padding-block: 4px;
-  padding-inline-end: 9px;
-  margin-block: 2px;
-  /* sp-picker's internal popover/menu wrapper is shadow-encapsulated with its
-     own overflow:auto and no reserved padding (no exposed --mod- token
-     controls this), so an outward-drawn ring on the first/last item gets
-     clipped at the menu's own edge. --spectrum-menu-item-focus-indicator-offset
-     isn't part of the public --mod- override surface, but it's still a plain
-     inheritable custom property — drawing the ring inward (inside the item's
-     own padding box) keeps it clear of that clip regardless of container
-     overflow. Matches this rule's own padding-block so the ring sits flush
-     with the padding edge. */
-  --spectrum-menu-item-focus-indicator-offset: -4px;
 }
 
 sp-menu-item[selected],

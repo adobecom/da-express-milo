@@ -98,6 +98,7 @@ export function createGradientModalContent(gradient, opts = {}) {
   const description = opts.description ?? gradient?.description ?? '';
 
   const main = createTag('main', { class: 'modal-content', 'daa-lh': 'color-gradient-modal' });
+  const contentScroll = createTag('div', { class: 'modal-content-scroll' });
 
   const containerSection = createTag('section', {
     class: 'modal-palette-container',
@@ -123,7 +124,7 @@ export function createGradientModalContent(gradient, opts = {}) {
   });
   previewWrap.appendChild(gradientEditor.element);
   containerSection.appendChild(previewWrap);
-  main.appendChild(containerSection);
+  contentScroll.appendChild(containerSection);
 
   // Palette-container: a read-only swatch strip of the gradient's stop colors,
   // below the draggable preview bar (Figma: "Palette-container" under the
@@ -150,7 +151,7 @@ export function createGradientModalContent(gradient, opts = {}) {
   railAdapter.rail.colorMode = getPreferredColorMode();
   railWrap.appendChild(railAdapter.element);
   railSection.appendChild(railWrap);
-  main.appendChild(railSection);
+  contentScroll.appendChild(railSection);
 
   const colorModesHeader = createColorModesHeader(
     { name: gradient?.name ?? 'Gradient', colors: stopColors, colorStops },
@@ -164,7 +165,7 @@ export function createGradientModalContent(gradient, opts = {}) {
       onDestroy: () => railAdapter.destroy?.(),
     },
   );
-  main.insertBefore(colorModesHeader.element, containerSection);
+  contentScroll.insertBefore(colorModesHeader.element, containerSection);
 
   const nameTagsSection = createTag('section', { class: 'modal-palette-name-tags' });
   const h1 = createTag('h1', { class: 'modal-palette-name' });
@@ -204,7 +205,8 @@ export function createGradientModalContent(gradient, opts = {}) {
     thumbTags.appendChild(descriptionEl);
   }
   nameTagsSection.appendChild(thumbTags);
-  main.appendChild(nameTagsSection);
+  contentScroll.appendChild(nameTagsSection);
+  main.appendChild(contentScroll);
 
   const toolbarMount = createTag('nav', { class: 'modal-palette-toolbar', 'aria-label': strings.gradientActionsAria });
   main.appendChild(toolbarMount);

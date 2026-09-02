@@ -287,8 +287,6 @@
 
   max-inline-size: none;
   margin-inline: 0;
-  border-block-start: 1px solid var(--color-gray-150);
-  padding-block-start: var(--spacing-300);
   box-shadow: none;
 }
 

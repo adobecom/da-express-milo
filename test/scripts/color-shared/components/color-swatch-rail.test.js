@@ -319,6 +319,17 @@ describe('color-swatch-rail color modes', () => {
     expect(column.getAttribute('aria-label')).to.equal('Color 1, R 255, G 0, B 0');
   });
 
+  it('RGB mode: each channel value button includes the actual number in its tooltip, e.g. "Copy R value (255)"', async () => {
+    await renderRail('RGB');
+    const rows = [...rail.shadowRoot.querySelectorAll('.hex-code-row')];
+    const labels = rows.map((row) => row.querySelector('.hex-code-row__value').getAttribute('aria-label'));
+    expect(labels).to.deep.equal([
+      'Copy R value (255)',
+      'Copy G value (0)',
+      'Copy B value (0)',
+    ]);
+  });
+
   it('RGB mode: renders one row per channel with correct values', async () => {
     await renderRail('RGB');
     const rows = [...rail.shadowRoot.querySelectorAll('.hex-code-row')];

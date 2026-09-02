@@ -9,6 +9,7 @@ const THEME_DOWNLOAD_ACTIONS = {
 };
 
 const GRADIENT_DOWNLOAD_ACTIONS = {
+  jpeg: 'downloadJPEG',
   png: 'downloadPNG',
   svg: 'downloadSVG',
 };
@@ -18,6 +19,7 @@ function buildDownloadItems(item, strings) {
 
   if (isGradient) {
     return [
+      { value: 'jpeg', label: strings.librariesDownloadAsJPEG },
       { value: 'png', label: strings.librariesDownloadAsPNG },
       { value: 'svg', label: strings.librariesDownloadAsSVG },
     ].filter((entry) => entry.label);

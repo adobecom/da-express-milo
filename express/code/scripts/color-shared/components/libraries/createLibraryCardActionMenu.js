@@ -133,7 +133,7 @@ export function createLibraryCardActionMenu({
   const menu = createTag('sp-menu', {
     id: menuId,
     class: 'ax-lib-card__action-menu-list',
-    size: 's',
+    size: 'm',
     role: 'menu',
     label,
   });

@@ -466,6 +466,34 @@ export function getLinearGradientColorStops(stops) {
 }
 
 /**
+ * Full-bleed linear-gradient raster (canvas), shared by PNG and JPEG gradient
+ * downloads — same fill, just encoded to whichever MIME type is requested.
+ * No labels/branding footer (unlike the palette JPEG's renderThemeJPEG) since
+ * a gradient download is just the gradient image itself.
+ * @param {ThemeData} themeData
+ * @param {string} mimeType
+ * @returns {string} data URL
+ */
+export function renderGradientImage(themeData, mimeType) {
+  const { width, height } = ASSET_IMAGE_DOWNLOAD_SIZE;
+  const colorStops = getLinearGradientColorStops(themeData.swatches);
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = width;
+  canvas.height = height;
+
+  const linearGradient = ctx.createLinearGradient(0, 0, width, 0);
+  colorStops.forEach((stop) => {
+    linearGradient.addColorStop(stop.offset, `rgb(${stop.R}, ${stop.G}, ${stop.B})`);
+  });
+
+  ctx.fillStyle = linearGradient;
+  ctx.fillRect(0, 0, width, height);
+
+  return canvas.toDataURL(mimeType);
+}
+
+/**
  * Builds the linear-gradient() stop lists for every display mode in one
  * pass (they all share the same midpoint/color-hint math). HSB itself has no
  * valid CSS gradient-stop syntax (no hsb()/hsv() function, and hsl()'s third
@@ -508,6 +536,27 @@ export function getLinearGradientCSS(stops) {
   return {
     linearGradientDataRGBA, linearGradientDataHEX, linearGradientDataLAB, linearGradientDataHSL,
   };
+}
+
+/**
+ * The `linear-gradient(to right, ...)` value for a gradient's Copy-as-Code
+ * output, shared by CSS/SCSS/LESS (all three are CSS supersets, so the same
+ * function-value syntax is valid in a plain CSS rule, a SCSS `$var`, or a
+ * LESS `@var`). HSB has no gradient-stop syntax (see getLinearGradientCSS),
+ * so it falls back to RGB's stop list, same as the RGB-mode default below.
+ * @param {Swatch[]} swatches
+ * @param {'HEX'|'RGB'|'HSB'|'Lab'} mode
+ * @returns {string}
+ */
+export function buildGradientCSSValue(swatches, mode) {
+  const gradientCSS = getLinearGradientCSS(swatches);
+  const dataByMode = {
+    HEX: gradientCSS.linearGradientDataHEX,
+    RGB: gradientCSS.linearGradientDataRGBA,
+    Lab: gradientCSS.linearGradientDataLAB,
+    HSB: gradientCSS.linearGradientDataHSL,
+  };
+  return `linear-gradient(to right, ${dataByMode[mode] ?? dataByMode.RGB})`;
 }
 
 /**

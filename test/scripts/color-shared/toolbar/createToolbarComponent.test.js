@@ -352,13 +352,13 @@ describe('createToolbar', () => {
       expect(items).to.deep.equal(['ase', 'jpeg']);
     });
 
-    it('download menu exposes PNG/SVG for gradients', async () => {
+    it('download menu exposes JPEG/PNG/SVG for gradients', async () => {
       const toolbar = createToolbar(defaultOptions({ type: 'gradient', palette: MOCK_GRADIENT }));
       document.body.appendChild(toolbar.element);
 
       const items = [...toolbar.element.querySelectorAll('.ax-download-menu sp-menu-item')]
         .map((i) => i.getAttribute('value'));
-      expect(items).to.deep.equal(['png', 'svg']);
+      expect(items).to.deep.equal(['jpeg', 'png', 'svg']);
     });
 
     it('on("download", cb) fires with the selected format when a download item is clicked', async () => {

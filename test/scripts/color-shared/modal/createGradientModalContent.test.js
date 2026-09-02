@@ -39,11 +39,11 @@ describe('createGradientModalContent', () => {
       .to.be.above(0);
   });
 
-  it('exposes only "Copy as CSS" — Figma\'s gradient Codes menu omits LESS/SASS/XML, which have no gradient-aware export', () => {
+  it('exposes LESS/CSS/SASS (not XML) — XML has no gradient-aware export', () => {
     const main = createGradientModalContent(gradient);
     const items = [...main.querySelectorAll('.modal-codes-menu sp-menu-item')]
       .map((i) => i.getAttribute('value'));
-    expect(items).to.deep.equal(['css']);
+    expect(items).to.deep.equal(['less', 'css', 'scss']);
   });
 
   it('renders a swatch strip (Palette-container) below the gradient preview', () => {

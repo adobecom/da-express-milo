@@ -1,5 +1,6 @@
 import { createTag } from '../../utils.js';
 import { showExpressToast } from '../spectrum/components/express-toast.js';
+import { createExpressTooltip } from '../spectrum/components/express-tooltip.js';
 import { serviceManager } from '../../../libs/services/core/ServiceManager.js';
 import { paletteToThemeData } from '../../../libs/services/providers/transforms.js';
 import { createLibraryCardActionMenu } from '../components/libraries/createLibraryCardActionMenu.js';
@@ -27,14 +28,17 @@ const EXPORT_FORMATS = [
   { value: 'xml', label: 'Copy as XML', method: 'exportXML' },
 ];
 
-// Figma's gradient Codes menu shows only "Copy as CSS" — LESS/SASS/XML have no
-// gradient-aware branch in DownloadActions.js (exportAsSCSS/exportAsLESS
-// always call buildVariableSwatches, exportAsXML always writes a <palette>),
-// so for a gradient they'd emit each stop as an independent named color/
-// variable with no offset — losing the one thing that makes it a gradient
-// instead of a palette. Only exportAsCSS has real gradient handling
-// (linear-gradient()), matching what the design intentionally exposes here.
-const GRADIENT_EXPORT_FORMATS = EXPORT_FORMATS.filter((f) => f.value === 'css');
+// XML has no gradient-aware branch in DownloadActions.js — its <palette>/
+// <color> schema is a flat list of named swatches with no position/offset
+// attribute, so a gradient could only be forced in as discrete stop colors
+// with the offset information (the one thing that makes it a gradient
+// instead of a palette) necessarily lost. LESS and SCSS don't have that
+// problem: both are CSS supersets, so they can hold a real linear-gradient()
+// value in a variable exactly like exportAsCSS does (see
+// buildGradientCSSValue in helpers.js) — same reasoning Figma's own palette
+// Codes menu already applies per-format, just with XML as the one gradient
+// can't represent.
+const GRADIENT_EXPORT_FORMATS = EXPORT_FORMATS.filter((f) => f.value !== 'xml');
 
 // exportAsXML is RGB/hex-only (see the copyAsCode comment below) — hide it
 // whenever the selected mode has no XML representation.
@@ -148,6 +152,7 @@ export function createColorModesHeader(palette, options = {}) {
         size: 'm',
         class: 'ax-lib-card__action',
         label: t.codesToggleLabel,
+        'data-tooltip-content': t.codesToggleLabel,
       });
       const iconEl = createCodesIcon();
       iconEl.setAttribute('slot', 'icon');
@@ -162,6 +167,22 @@ export function createColorModesHeader(palette, options = {}) {
   });
   codesMenu.element.classList.add('modal-codes-menu');
   header.appendChild(codesMenu.element);
+
+  // createLibraryCardActionMenu's own trigger button is nested inside a
+  // theme-wrapper div (codesMenu.element), not returned directly, so the
+  // tooltip has to be attached to the actual trigger found inside it —
+  // same pattern createToolbarComponent.js uses for its own Codes/Download
+  // menu triggers (attachMenuTooltip). Setting data-tooltip-content alone
+  // (above) isn't enough; nothing renders a tooltip from it without this.
+  const codesTriggerEl = codesMenu.element.querySelector('.ax-lib-card__action');
+  if (codesTriggerEl) {
+    createExpressTooltip({
+      targetEl: codesTriggerEl,
+      content: t.codesToggleLabel,
+      placement: 'top',
+      dismissOnActivate: true,
+    }).catch(() => {});
+  }
 
   // sp-picker/sp-menu-item give us Spectrum's real checkmark-on-selected,
   // typography, and popover sizing "for free" instead of a bespoke popover
