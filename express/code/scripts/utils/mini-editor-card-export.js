@@ -7,6 +7,7 @@ import {
 import measureQuoteExportWidth from './mini-editor-quote-width.js';
 
 const WORKER_TIMEOUT_MS = 10000;
+const DEFAULT_DOWNLOAD_FILENAME = 'download.png';
 const MiniEditorCardExporter = {};
 
 function resolveFontFamily(family) {
@@ -140,7 +141,7 @@ async function createCardBlob(inputModel) {
 
 async function download(model) {
   const blob = await createCardBlob(model);
-  const filename = `screenshot-${Date.now()}.png`;
+  const filename = DEFAULT_DOWNLOAD_FILENAME;
   triggerDownload(blob, filename);
   return { blob, filename };
 }
