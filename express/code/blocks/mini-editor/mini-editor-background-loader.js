@@ -5,11 +5,12 @@
  * collection the mini-editor renders, by fetching live templates from the
  * template service for the block's authored `collectionId`.
  *
- * Every card has the same shape: `{ id, bg, title?, mode }`, where `id` is a
- * template urn (used later for todo/CTA actions that need to reference the
- * exact source asset), `bg` is the image URL to paint, `title` is the
- * template name when available, and `mode` is the background contrast hint
- * the widget uses for light/dark controls.
+ * Every card has the same shape: `{ id, bg, branchUrl?, title?, mode }`, where
+ * `id` is a template urn (used later for todo/CTA actions that need to reference
+ * the exact source asset), `bg` is the image URL to paint, `branchUrl` is the
+ * template's Branch deep link (opens it as an Express project) when available,
+ * `title` is the template name when available, and `mode` is the background
+ * contrast hint the widget uses for light/dark controls.
  */
 
 import {
@@ -130,7 +131,16 @@ export default async function getCardBackgrounds(props) {
     .map((item) => {
       /* eslint-enable no-underscore-dangle */
       const bg = getImageSrc(item);
-      return { id: item.id, bg, title: getTemplateTitle(item), mode: getImageColorMode(item) };
+      return {
+        id: item.id,
+        bg,
+        // Branch deep link that opens this template as an Express project (background already
+        // applied). On prod the Edit CTA opens this instead of the generic base and hands off text
+        // only — see open-in-express.js. Absent on templates without a branch link.
+        branchUrl: item.customLinks?.branchUrl,
+        title: getTemplateTitle(item),
+        mode: getImageColorMode(item),
+      };
     })
     .filter((card) => !!card.bg);
 }

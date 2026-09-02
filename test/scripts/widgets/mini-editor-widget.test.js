@@ -19,7 +19,12 @@ const fontOptions = [
 
 function buildCardSet(count = 9) {
   return Array.from({ length: count }, (_, i) => ({
-    card: { id: `urn:${i}`, bg: `/img/image${i}.jpg`, mode: i % 2 === 0 ? 'dark' : 'light' },
+    card: {
+      id: `urn:${i}`,
+      bg: `/img/image${i}.jpg`,
+      branchUrl: `https://branch/${i}`,
+      mode: i % 2 === 0 ? 'dark' : 'light',
+    },
     quote: `Quote number ${i}`,
     author: i % 2 === 0 ? `Author ${i}` : '',
   }));
@@ -73,6 +78,7 @@ describe('mini-editor-widget', () => {
       author: 'Author 0',
       backgroundUrl: '/img/image0.jpg',
       backgroundUrn: 'urn:0',
+      backgroundBranchUrl: 'https://branch/0',
       backgroundMode: 'dark',
       font: {
         family: fontOptions[0].font,
