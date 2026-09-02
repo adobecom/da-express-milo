@@ -22,6 +22,7 @@ function buildCardSet(count = 9) {
     card: {
       id: `urn:${i}`,
       bg: `/img/image${i}.jpg`,
+      branchUrl: `https://branch/${i}`,
       fullBg: `/img/image${i}-full.jpg`,
       width: 1920,
       height: 1080,
@@ -83,6 +84,7 @@ describe('mini-editor-widget', () => {
       backgroundWidth: 1920,
       backgroundHeight: 1080,
       backgroundUrn: 'urn:0',
+      backgroundBranchUrl: 'https://branch/0',
       backgroundMode: 'dark',
       font: {
         family: fontOptions[0].family,
