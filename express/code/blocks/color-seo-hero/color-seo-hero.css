@@ -5,7 +5,7 @@
 }
 
 .color-seo-hero.is-ready {
-  --gradient-size: clamp(150px, 42vw, 720px);
+  --gradient-size: clamp(150px, 100vw, 680px);
   background: radial-gradient(circle var(--gradient-size) at var(--gradient-x, 58%) var(--gradient-y, 50%), color-mix(in srgb, var(--color-seo-hero-primary) 45%, white) 0%, #fff 70%);
 }
 
@@ -310,7 +310,7 @@
 
 @media (min-width: 600px) and (max-width: 1199px) {
   .color-seo-hero.is-ready {
-    --gradient-size: clamp(150px, 60vw, 720px);
+    --gradient-size: clamp(150px, 100vw, 720px);
   }
 
   .color-seo-hero {
@@ -346,6 +346,10 @@
 
 /* Mobile */
 @media (max-width: 599px) {
+  .color-seo-hero.is-ready {
+    --gradient-size: clamp(150px, 100vw, 720px);
+  }
+
   .color-seo-hero {
     min-height: auto;
     padding: var(--spacing-300);
