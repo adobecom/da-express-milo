@@ -490,7 +490,7 @@ export class ColorSwatchRail extends LitElement {
     const s = this.strings || SWATCH_RAIL_DEFAULTS;
     const channelTemplate = s.copyChannelValue || SWATCH_RAIL_DEFAULTS.copyChannelValue;
     const rowsMarkup = rows.map((row) => {
-      const label = channelTemplate.replace('{channel}', row.label);
+      const label = channelTemplate.replace('{channel}', row.label).replace('{value}', row.value);
       return html`
         <div class="hex-code-row">
           <span class="hex-code-row__label" aria-hidden="true">${row.label}</span>

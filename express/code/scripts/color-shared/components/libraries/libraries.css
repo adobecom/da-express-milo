@@ -626,24 +626,22 @@
   gap: 2px;
 }
 
-/* Same "S" size padding as .modal-color-mode-picker sp-menu-item
-   (picker.css), minus that one's +19px not-selected compensation — this
-   menu has no persistent checked state, so there's no checkmark ever
-   reserving space to compensate for on either edge. Margin also matches
-   that picker's sp-picker sp-menu-item rule (8px) — overriding sp-menu-item's
-   own native :host margin (4px, sized for its focus ring), same as that
-   rule already does. */
+/* Uses Spectrum's untouched default "M" size padding (no padding-block/
+   padding-inline-end override) — matches every other picker/menu in the app
+   (see picker.css's own base sp-menu-item rule), per design: the Codes/
+   Download menu's item text should read at the same size as its trigger.
+   Margin matches sp-picker's own sp-menu-item rule (8px, picker.css) —
+   overriding sp-menu-item's native :host margin (4px, sized for its focus
+   ring); this menu isn't a sp-picker so it doesn't inherit that rule and
+   needs its own copy. */
 .ax-lib-card__action-menu-list sp-menu-item {
   background: transparent;
   white-space: nowrap;
-  padding-block: 4px;
-  padding-inline-end: 9px;
   margin-inline: 8px;
   /* This sp-menu-item list sits inside this sp-menu's own overflow:auto with
-     no reserved padding (see picker.css's identical fix on
-     .modal-color-mode-picker sp-menu-item for the full explanation) — an
-     outward-drawn ring on the first/last item gets clipped at that boundary.
-     Draw it inward instead. */
+     no reserved padding (see picker.css's identical fix on its own
+     sp-picker sp-menu-item rule) — an outward-drawn ring on the first/last
+     item gets clipped at that boundary. Draw it inward instead. */
   --spectrum-menu-item-focus-indicator-offset: -4px;
 }
 

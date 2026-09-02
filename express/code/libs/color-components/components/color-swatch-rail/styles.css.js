@@ -1063,21 +1063,20 @@ export const style = css`
   }
   /* Stacked layout (mobile/tablet): channels in a single row, no per-swatch
      copy-all button — stacked-row__icons already has one copy icon that
-     copies the joined code in this mode instead of the hex. Figma spacing
-     between channel groups is 2px (same token as the row-to-row gap in the
-     stacked/desktop layout above), not the 12px this used before. */
+     copies the joined code in this mode instead of the hex. */
   .hex-code-multi--inline {
     flex-direction: row;
     align-items: center;
     width: auto;
     min-width: 0;
-    gap: 2px;
+    gap: var(--spacing-200);
     overflow: hidden;
     padding-left: var(--spacing-80);
   }
   .hex-code-multi--inline .hex-code-row {
     flex-shrink: 0;
     padding-left: 0;
+    gap: 0;
   }
   .hex-code-row {
     display: flex;

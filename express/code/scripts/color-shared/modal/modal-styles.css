@@ -58,6 +58,14 @@
 }
 
 .ax-color-modal-container {
+  /* Drives every content file's full-bleed toolbar formula (width/margin-inline/
+     padding-inline) — was defined identically in all 4 content CSS files
+     (modal-palette-content.css, modal-gradient-content.css,
+     modal-library-theme.css, modal-library-gradient.css) at this exact value
+     and the same two breakpoint overrides below; consolidated here since it's
+     the same value for every modal type, not something any one of them tunes
+     on its own. */
+  --modal-container-inline-spacing: var(--spacing-300);
   left: 50%;
   transform: translateX(-50%) translateY(100%);
   width: 100%;
@@ -71,7 +79,11 @@
   gap: var(--spacing-200);
   transition: transform 0.3s ease-out;
   height: auto;
-  max-height: min(764px, 100vh);
+  /* 95vh (not 100vh) so a bottom-sheet modal tall enough to hit this cap
+     still leaves a small gap above it, instead of touching the top of the
+     screen — matches the Library modal's own 95vh cap (modal-library-theme.css
+     / modal-library-gradient.css), which already got this right. */
+  max-height: min(764px, 95vh);
 }
 
 .ax-color-modal-container.ax-color-modal-open {
@@ -182,10 +194,43 @@
 
 /* Reclaimed as the sticky toolbar's own padding-block-end (see
    modal-palette-content.css / modal-gradient-content.css). */
-@media (max-width: 1199px) {
-  .ax-color-modal-content:has(.modal-palette-toolbar) {
-    padding-bottom: 0;
-  }
+.ax-color-modal-content:has(.modal-palette-toolbar) {
+  padding-bottom: 0;
+}
+
+/* .modal-content-scroll wraps everything except the toolbar in all 4 content
+   builders (createPaletteModalContent.js, createGradientModalContent.js,
+   createLibraryThemeModalContent.js, createLibraryGradientModalContent.js) —
+   the toolbar lives outside this scroll region as a plain sibling, so its
+   own divider/gap never scrolls behind it. This is the shared subset of that
+   rule (was declared identically in all 4 content CSS files); each file
+   still adds its own align-items/width-vs-inline-size wording and any
+   modal-specific extras (e.g. modal-library-gradient.css's inline gutter for
+   the gradient editor's edge-handle focus rings). */
+.ax-color-modal-content .modal-content-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-block-end: var(--spacing-200);
+}
+
+/* Full-bleed escape from the container's own inline padding, driven by
+   --modal-container-inline-spacing (above) so it tracks that value at every
+   breakpoint automatically. Was declared identically in all 4 content CSS
+   files (modal-palette-content.css, modal-gradient-content.css,
+   modal-library-theme.css, modal-library-gradient.css); each file's own
+   .modal-palette-toolbar rule still supplies its own position/gap/border
+   treatment (those genuinely differ — e.g. the Explore modals are
+   position:sticky, the Library ones aren't), just not this part. */
+.ax-color-modal-content .modal-palette-toolbar {
+  max-width: none;
+  width: calc(100% + 2 * var(--modal-container-inline-spacing));
+  margin-inline: calc(-1 * var(--modal-container-inline-spacing));
+  padding-inline: var(--modal-container-inline-spacing);
 }
 
 .ax-color-modal-content-fallback {
@@ -239,15 +284,21 @@ body.ax-color-modal-open {
   }
 
   .ax-color-modal-container {
+    --modal-container-inline-spacing: var(--spacing-400);
     position: fixed;
     top: 50%;
     left: 50%;
     bottom: auto;
     transform: translate(-50%, -50%);
     border-radius: 20px;
-    width: min(536px, 95vw);
+    /* Sized against the viewport minus a guaranteed var(--spacing-500) gap on
+       every side (not a fixed vh/px cap like mobile's own max-height, and not
+       just a vw percentage that only approximates a real gap at some widths)
+       — this is the "spacer between the window and the modal" itself, not an
+       arbitrary height/width limit. */
+    width: min(536px, calc(100vw - 2 * var(--spacing-500)));
     max-width: 536px;
-    max-height: 90vh;
+    max-height: calc(100vh - 2 * var(--spacing-500));
     height: auto;
     overflow: visible;
     transition: none;
@@ -278,19 +329,23 @@ body.ax-color-modal-open {
     padding: var(--spacing-400);
     flex: 0 1 auto;
     min-height: 0;
-    max-height: min(764px, calc(90vh - 48px));
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
+  }
+
+  .ax-color-modal-content .modal-palette-toolbar {
+    border-end-start-radius: 20px;
+    border-end-end-radius: 20px;
   }
 }
 
 @media (min-width: 1200px) {
   .ax-color-modal-container {
+    --modal-container-inline-spacing: var(--spacing-500);
     border-radius: var(--Corner-radius-corner-radius-200);
     box-shadow: var(--Elevation-Dialog);
     transition: none;
-    padding: var(--spacing-500);
     width: clamp(898px, 87.5vw, min(var(--block-wd-grid-max-width), 95vw));
     max-width: 898px;
     height: auto;
@@ -313,7 +368,7 @@ body.ax-color-modal-open {
   }
 
   .ax-color-modal-content {
-    padding: 0;
+    padding: var(--spacing-500);
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -331,22 +386,6 @@ body.ax-color-modal-open {
 
   .ax-color-modal-content::-webkit-scrollbar {
     display: none;
-  }
-
-  /* Palette/gradient modals render the floating toolbar and the color-modes
-     header (Copy as code button) flush to the content edge, and this scroll
-     container clips (overflow-x: hidden / overflow-y: auto). Reserve a small
-     gutter so :focus-visible rings aren't clipped on any edge — including
-     top (the Codes menu trigger sits flush against the top of this same
-     scroll container); the negative margin keeps the content visually flush
-     (no layout shift). */
-  .ax-color-modal-content:has(.modal-palette-toolbar) {
-    width: auto;
-    box-sizing: border-box;
-    padding-inline: var(--spacing-100);
-    margin-inline: calc(-1 * var(--spacing-100));
-    padding-block: var(--spacing-100);
-    margin-block: calc(-1 * var(--spacing-100));
   }
 
   .ax-color-modal-actions {

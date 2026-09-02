@@ -154,7 +154,7 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
   let tagObserver = null;
 
   const root = createTag('main', { class: 'modal-content modal-library-theme', 'daa-lh': 'library-theme-modal' });
-  const contentScroll = createTag('div', { class: 'modal-lib-scroll' });
+  const contentScroll = createTag('div', { class: 'modal-content-scroll' });
 
   const colorCount = normalizedPalette.colors.length;
   const { railSection, railWrap, railAdapter, destroyRail } = createRailSection(
@@ -169,7 +169,11 @@ export function createLibraryThemeModalContent(item = {}, options = {}) {
     { name: item?.name ?? 'Palette', colors: normalizedPalette.colors },
     {
       type: 'palette',
-      strings,
+      strings: {
+        ...strings,
+        colorModeLabel: strings.librariesColorModeLabel,
+        codesToggleLabel: strings.librariesCodesToggleLabel,
+      },
       onModeChange: (mode) => { railAdapter.rail.colorMode = mode; },
     },
   );

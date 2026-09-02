@@ -101,6 +101,20 @@ describe('ExportActions — Color mode scoping (Copy as CSS/SCSS/LESS)', () => {
       const hex = await actions.exportAsLESS(themeData, 'HEX');
       expect(hex.output).to.include('-1-hex:');
     });
+
+    it('gradients: SCSS emits a single $var holding a real linear-gradient(), not one variable per stop', async () => {
+      const { output } = await actions.exportAsSCSS(gradientThemeData, 'RGB');
+      expect(output).to.include('$Sunset: linear-gradient(to right, rgba(217, 159, 89, 1)');
+      expect(output).not.to.include('-1-rgba:');
+      expect(output).not.to.include('-2-rgba:');
+    });
+
+    it('gradients: LESS emits a single @var holding a real linear-gradient(), not one variable per stop', async () => {
+      const { output } = await actions.exportAsLESS(gradientThemeData, 'Lab');
+      expect(output).to.include('@Sunset: linear-gradient(to right, lab(');
+      expect(output).not.to.include('-1-lab:');
+      expect(output).not.to.include('-2-lab:');
+    });
   });
 
   describe('exportAsXML', () => {

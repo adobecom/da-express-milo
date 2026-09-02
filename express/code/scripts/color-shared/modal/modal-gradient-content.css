@@ -4,10 +4,33 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--spacing-200);
   width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
+/* .modal-content-scroll wraps everything except the toolbar (see
+   createGradientModalContent.js) — same "toolbar lives outside the scroll
+   region" structure the Library modal already uses (modal-library-theme.css
+   / modal-library-gradient.css), so the sticky toolbar's own divider/gap
+   never gets scrolled behind it. That was a real bug when the toolbar was
+   just a sticky child inside the one scrolling flex column: the flex gap
+   right before it lived inside the scrolling area, so it scrolled out of
+   view the moment the toolbar stuck, leaving content flush against the
+   divider with no visible gap. This container no longer scrolls itself
+   (.modal-content-scroll does), and doesn't supply the gap before the
+   toolbar either — the toolbar's own border + padding-block-start supply
+   all of that, so they sit flush against each other here. */
+.ax-color-modal-content:has(.modal-content-scroll) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.ax-color-modal-content .modal-content-scroll {
+  align-items: flex-start;
+  width: 100%;
+}
 
 .ax-color-modal-content .modal-palette-container {
   width: 100%;
@@ -135,8 +158,38 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-100);
-  padding: 0 0 var(--spacing-200);
-  border-bottom: 1px solid var(--color-gray-150);
+}
+
+/* Creator avatar/name sit on the same row as the title, vertically centered
+   — unlike the palette modal, which stacks its thumb-tags row below the
+   title. Scoped via [daa-lh] (not just the shared class) since
+   modal-palette-content.css's own .modal-palette-name-tags rule (column,
+   loaded on every page regardless of which modal is currently open) targets
+   the exact same class name — attribute + class beats a lone class
+   regardless of stylesheet load order. flex-wrap lets it fall back to the
+   stacked look on narrow widths where title + creator can't both fit on one
+   line, rather than needing a separate breakpoint override.
+   justify-content: space-between (not margin-left: auto on the thumb-tags
+   child) — when there's room for both on one line, space-between pushes
+   them to opposite ends same as the margin would; but when they wrap onto
+   separate lines, a line with only one flex item has nothing to space
+   *between*, so that item sits at the line's start (left) instead of being
+   pushed to the right by its own now-orphaned auto margin. */
+.ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-name-tags {
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-name {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.ax-color-modal-content [daa-lh="color-gradient-modal"] .modal-palette-thumb-tags {
+  width: auto;
+  flex-shrink: 0;
 }
 
 .ax-color-modal-content .modal-palette-name-likes {
@@ -292,13 +345,21 @@
 }
 
 .ax-color-modal-content .modal-palette-toolbar {
-  width: 100%;
   box-sizing: border-box;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   gap: var(--spacing-100);
+  border-block-start: 1px solid var(--color-gray-150);
+  position: sticky;
+  bottom: 0;
+  /* .swatch-column bumps to z-index:1 on :focus-within — without this the
+      toolbar (z-index:auto) loses the stack to a focused column scrolled
+      underneath it. */
+  z-index: 2;
+  background: var(--color-white);
+  padding-block: var(--spacing-300);
 }
 
 .ax-color-modal-content .modal-palette-toolbar .color-floating-toolbar-container {
@@ -575,12 +636,6 @@
     margin-left: auto;
   }
 
-  .ax-color-modal-content .modal-palette-container,
-  .ax-color-modal-content .modal-palette-name-tags,
-  .ax-color-modal-content .modal-palette-toolbar {
-    max-width: 550px;
-  }
-
   .ax-color-modal-content .floating-toolbar.floating-toolbar--in-modal {
     width: 100%;
   }
@@ -629,47 +684,6 @@
   }
 }
 
-@media (max-width: 1199px) {
-  .ax-color-modal-content .modal-palette-name-tags {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-
-  .ax-color-modal-content .modal-palette-toolbar {
-    position: sticky;
-    bottom: 0;
-    /* .swatch-column bumps to z-index:1 on :focus-within — without this the
-       toolbar (z-index:auto) loses the stack to a focused column scrolled
-       underneath it. */
-    z-index: 2;
-    background: var(--color-white);
-    border-block-start: 1px solid var(--color-gray-150);
-    padding-block-start: var(--spacing-300);
-  }
-}
-
-@media (max-width: 599px) {
-  .ax-color-modal-content .modal-palette-toolbar {
-    width: calc(100% + 2 * var(--spacing-300));
-    margin-inline: calc(-1 * var(--spacing-300));
-    padding-inline: var(--spacing-300);
-    padding-block-end: var(--spacing-300);
-  }
-}
-
-@media (min-width: 600px) and (max-width: 1199px) {
-  .ax-color-modal-content .modal-palette-toolbar {
-    width: calc(100% + 2 * var(--spacing-400));
-    /* Without this, the "min-width:600px { max-width:550px }" rule above
-       clamps this overflow straight back down to 550px. */
-    max-width: none;
-    margin-inline: calc(-1 * var(--spacing-400));
-    padding-inline: var(--spacing-500);
-    padding-block-end: var(--spacing-400);
-    border-end-start-radius: 20px;
-    border-end-end-radius: 20px;
-  }
-}
 
 @media (min-width: 1200px) {
   .ax-color-modal-content .modal-content {
@@ -733,21 +747,6 @@
     min-height: 0;
     width: 100%;
     height: 100%;
-  }
-
-  .ax-color-modal-content .modal-palette-name-tags {
-    margin: 0;
-    padding: 0 0 var(--spacing-200) 0;
-  }
-
-  .ax-color-modal-content .modal-palette-toolbar {
-    width: 100%;
-    max-width: 100%;
-    margin-top: 0;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    flex-wrap: nowrap;
   }
 
   .ax-color-modal-content .modal-palette-toolbar .ax-toolbar-main {

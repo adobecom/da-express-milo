@@ -13,7 +13,7 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   baseColorClearedToast: 'Base color cleared',
   // Button aria-label + title
   copyHex: 'Copy hex',
-  copyChannelValue: 'Copy {channel} value',
+  copyChannelValue: 'Copy {channel} value ({value})',
   copyAllValues: 'Copy all values',
   editColor: 'Edit color',
   editTint: 'Edit tint',

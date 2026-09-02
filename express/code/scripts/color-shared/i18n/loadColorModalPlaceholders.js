@@ -15,6 +15,8 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   paletteCta: 'Create with color palette',
   addFavorite: 'Add to favorites',
   removeFavorite: 'Remove from favorites',
+  colorModeLabel: 'Color mode',
+  codesToggleLabel: 'Copy as code',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -32,6 +34,8 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   paletteCta: 'color-modal-palette-cta',
   addFavorite: 'color-modal-add-favorite',
   removeFavorite: 'color-modal-remove-favorite',
+  colorModeLabel: 'color-modal-color-mode-label',
+  codesToggleLabel: 'color-modal-codes-toggle-label',
 });
 
 export function createColorModalPlaceholders(overrides = {}) {

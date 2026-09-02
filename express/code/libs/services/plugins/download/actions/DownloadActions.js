@@ -3,11 +3,11 @@ import BaseActionGroup from '../../../core/BaseActionGroup.js';
 import { ValidationError } from '../../../core/Errors.js';
 import { DownloadTopics } from '../topics.js';
 import {
-  ASSET_IMAGE_DOWNLOAD_SIZE,
   ASSET_SVG_SIZE,
   MIME_TYPES,
 } from '../constants.js';
 import {
+  buildGradientCSSValue,
   buildLinearGradientSVG,
   buildVariableSwatches,
   denormRGB,
@@ -16,9 +16,8 @@ import {
   formatSwatchInMode,
   getClassName,
   getDownloadedImageName,
-  getLinearGradientColorStops,
-  getLinearGradientCSS,
   performDownload,
+  renderGradientImage,
   renderPantoneJPEG,
   renderThemeJPEG,
   safeClipboardWrite,
@@ -75,6 +74,14 @@ export class FileDownloadActions extends BaseActionGroup {
    * @throws {ValidationError}
    */
   async downloadAsJPEG(themeData) {
+    if (themeData.assetType === 'gradient') {
+      return this.#downloadJPEGVariant(
+        themeData,
+        DownloadTopics.FILE.JPEG,
+        (td) => renderGradientImage(td, MIME_TYPES.JPEG),
+        'AdobeColorGradient ',
+      );
+    }
     return this.#downloadJPEGVariant(
       themeData,
       DownloadTopics.FILE.JPEG,
@@ -106,22 +113,7 @@ export class FileDownloadActions extends BaseActionGroup {
   async downloadAsPNG(themeData) {
     validateSwatches(themeData, DownloadTopics.FILE.PNG);
 
-    const { width, height } = ASSET_IMAGE_DOWNLOAD_SIZE;
-    const colorStops = getLinearGradientColorStops(themeData.swatches);
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    canvas.width = width;
-    canvas.height = height;
-
-    const linearGradient = ctx.createLinearGradient(0, 0, width, 0);
-    colorStops.forEach((stop) => {
-      linearGradient.addColorStop(stop.offset, `rgb(${stop.R}, ${stop.G}, ${stop.B})`);
-    });
-
-    ctx.fillStyle = linearGradient;
-    ctx.fillRect(0, 0, width, height);
-
-    const pngDataUrl = canvas.toDataURL(MIME_TYPES.PNG);
+    const pngDataUrl = renderGradientImage(themeData, MIME_TYPES.PNG);
     const fileName = `AdobeColorGradient ${themeData.name}.png`;
     performDownload(pngDataUrl, fileName, MIME_TYPES.PNG);
     return { fileName };
@@ -203,17 +195,7 @@ export class ExportActions extends BaseActionGroup {
     let output = '';
 
     if (themeData.assetType === 'gradient') {
-      const gradientCSS = getLinearGradientCSS(themeData.swatches);
-      // HSB itself has no valid CSS gradient-stop syntax (no hsb()/hsv()
-      // function), so its stops use hsl() instead — same as colorweb's own
-      // "Copy as CSS".
-      const dataByMode = {
-        HEX: gradientCSS.linearGradientDataHEX,
-        RGB: gradientCSS.linearGradientDataRGBA,
-        Lab: gradientCSS.linearGradientDataLAB,
-        HSB: gradientCSS.linearGradientDataHSL,
-      };
-      output += `linear-gradient(to right, ${dataByMode[mode] ?? dataByMode.RGB});\n`;
+      output += `${buildGradientCSSValue(themeData.swatches, mode)};\n`;
     } else {
       const cls = getClassName(themeData.name);
       themeData.swatches.forEach((swatch, i) => {
@@ -235,7 +217,9 @@ export class ExportActions extends BaseActionGroup {
   // eslint-disable-next-line class-methods-use-this
   async exportAsSCSS(themeData, mode = 'RGB') {
     validateSwatches(themeData, DownloadTopics.EXPORT.SCSS);
-    const output = buildVariableSwatches(themeData.swatches, themeData.name, '$', mode);
+    const output = themeData.assetType === 'gradient'
+      ? `$${getClassName(themeData.name)}: ${buildGradientCSSValue(themeData.swatches, mode)};\n`
+      : buildVariableSwatches(themeData.swatches, themeData.name, '$', mode);
     const clipboardSuccess = await safeClipboardWrite(output, 'SCSS');
     return { format: 'SCSS', output, clipboardSuccess };
   }
@@ -249,7 +233,9 @@ export class ExportActions extends BaseActionGroup {
   // eslint-disable-next-line class-methods-use-this
   async exportAsLESS(themeData, mode = 'RGB') {
     validateSwatches(themeData, DownloadTopics.EXPORT.LESS);
-    const output = buildVariableSwatches(themeData.swatches, themeData.name, '@', mode);
+    const output = themeData.assetType === 'gradient'
+      ? `@${getClassName(themeData.name)}: ${buildGradientCSSValue(themeData.swatches, mode)};\n`
+      : buildVariableSwatches(themeData.swatches, themeData.name, '@', mode);
     const clipboardSuccess = await safeClipboardWrite(output, 'LESS');
     return { format: 'LESS', output, clipboardSuccess };
   }

@@ -135,8 +135,8 @@ describe('createLibraryGradientModalContent', () => {
       const preview = element.querySelector('.modal-gradient-preview');
       expect(header).to.exist;
       expect(header.querySelectorAll('.modal-color-mode-picker sp-menu-item')).to.have.length(4);
-      // Only CSS — LESS/SASS/XML have no gradient-aware export (see createColorModesHeader.js).
-      expect(header.querySelectorAll('.modal-codes-menu sp-menu-item')).to.have.length(1);
+      // LESS/CSS/SASS, not XML — XML has no gradient-aware export (see createColorModesHeader.js).
+      expect(header.querySelectorAll('.modal-codes-menu sp-menu-item')).to.have.length(3);
       // eslint-disable-next-line no-bitwise
       expect(header.compareDocumentPosition(preview) & Node.DOCUMENT_POSITION_FOLLOWING)
         .to.be.above(0);

@@ -162,6 +162,7 @@ const PALETTE_DOWNLOAD_FORMATS = [
 ];
 
 const GRADIENT_DOWNLOAD_FORMATS = [
+  { value: 'jpeg', method: 'downloadJPEG', labelKey: 'downloadAsJPEG' },
   { value: 'png', method: 'downloadPNG', labelKey: 'downloadAsPNG' },
   { value: 'svg', method: 'downloadSVG', labelKey: 'downloadAsSVG' },
 ];
