@@ -172,7 +172,7 @@ describe('mini-editor', () => {
 
   it('logs and shows a localized negative toast when download fails', async () => {
     const block = await decorateWithBody();
-    window.placeholders = { 'screenshot-download-failed': 'Unable to download this design.' };
+    window.placeholders = { 'mini-editor-download-failed': 'Download failed' };
     window.lana = { log: sinon.spy() };
     sinon.stub(MiniEditorCardExporter, 'download').rejects(new Error('render failed'));
 
@@ -180,7 +180,7 @@ describe('mini-editor', () => {
     await waitFor(() => !!document.querySelector('sp-toast'));
 
     const toast = document.querySelector('sp-toast');
-    expect(toast.textContent).to.equal('Unable to download this design.');
+    expect(toast.textContent).to.equal('Download failed');
     expect(toast.getAttribute('variant')).to.equal('negative');
     expect(window.lana.log.calledWithMatch('Mini-editor download failed: render failed')).to.be.true;
     expect(document.body.contains(block)).to.be.true;

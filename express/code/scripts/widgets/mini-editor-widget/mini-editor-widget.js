@@ -948,7 +948,7 @@ async function buildWidget(
     // 'light' | 'dark' brightness of the background — drives the text colour
     backgroundMode: first.card?.mode || 'dark',
     font: {
-      family: fontOptions[0]?.font || 'sans-serif',
+      family: fontOptions[0]?.family || 'sans-serif',
       style: fontOptions[0]?.italic ? 'italic' : 'normal',
       weight: fontOptions[0]?.weight || 'normal',
       stretch: fontOptions[0]?.stretch || 'normal',
@@ -1064,7 +1064,7 @@ async function buildWidget(
 
   const applyFontToModel = (font) => updateContentModel({
     font: {
-      family: font.font,
+      family: font.family,
       style: font.italic ? 'italic' : 'normal',
       weight: font.weight || 'normal',
       stretch: font.stretch || 'normal',
@@ -1192,7 +1192,7 @@ async function buildWidget(
         } : {}),
         ...(font ? {
           font: {
-            family: font.font,
+            family: font.family,
             style: font.italic ? 'italic' : 'normal',
             weight: font.weight || 'normal',
             stretch: font.stretch || 'normal',
@@ -1219,7 +1219,7 @@ async function buildWidget(
         if (patch.font) {
           updateContentModel({
             font: {
-              family: patch.font.font,
+              family: patch.font.family,
               style: patch.font.italic ? 'italic' : 'normal',
               weight: patch.font.weight || 'normal',
               stretch: patch.font.stretch || 'normal',
