@@ -549,12 +549,19 @@ async function loadPage() {
   const footerMeta = createTag('meta', { name: 'custom-footer', content: 'on' });
   document.head.append(footerMeta);
 
+  const urlParams = new URLSearchParams(window.location.search);
+  const martechEnabled = urlParams.get('martech') !== 'off' && getMetadata('martech') !== 'off';
+  // Attach analytics event listeners (e.g. linkspopulated) before block
+  // decoration runs, so they don't miss events blocks dispatch synchronously
+  // while decorating. This is a tiny, self-contained module (no static
+  // dependency on instrument.js) so it doesn't reintroduce an early fetch of
+  // the much larger martech file, which stays deferred below.
+  if (martechEnabled) {
+    import('./analytics-events.js').then((mod) => { mod.default(); });
+  }
+
   buildAutoBlocks();
   decorateHeroLCP(loadStyle, config, createTag, getMetadata);
-  const urlParams = new URLSearchParams(window.location.search);
-  if (urlParams.get('martech') !== 'off' && getMetadata('martech') !== 'off') {
-    import('./instrument.js').then((mod) => { mod.default(); });
-  }
 
   /* region based redirect to CN homepage */
   const isAdobeOrigin = /^(www|color)\.(stage\.)?adobe\.com$/.test(window.location.hostname);
@@ -575,6 +582,12 @@ async function loadPage() {
   });
 
   await loadArea();
+
+  // Defer the rest of martech/analytics until after all blocks have loaded,
+  // so it doesn't compete with LCP/block requests on the critical path.
+  if (martechEnabled) {
+    import('./instrument.js').then((mod) => { mod.default(); });
+  }
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));

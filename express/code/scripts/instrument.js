@@ -1,11 +1,9 @@
 /* global _satellite __satelliteLoadedCallback alloy */
 
 import { getLibs, getMetadata } from './utils.js';
-import trackBranchParameters from './branchlinks.js';
 
 let loadScript; let getConfig;
 
-const d = document;
 const loc = window.location;
 const { pathname } = loc;
 let expressLandingPageType;
@@ -562,7 +560,7 @@ export function trackButtonClick(a) {
   safelyFireAnalyticsEvent(fireEvent);
 }
 
-function trackVideoAnalytics(parameters) {
+export function trackVideoAnalytics(parameters) {
   const {
     videoName,
     videoId,
@@ -584,57 +582,9 @@ function trackVideoAnalytics(parameters) {
   set('video.videoInfo.videoMediaType', videoMediaType);
 }
 
-function decorateAnalyticsEvents() {
-  // for tracking all of the links
-  d.addEventListener('click', (event) => {
-    if (event.target.tagName === 'A' || event.target.dataset.ll?.length) {
-      trackButtonClick(event.target);
-    }
-  });
-
-  // for tracking split action block notch and underlay background
-  d.addEventListener('splitactionloaded', () => {
-    const $notch = d.querySelector('main .split-action .notch');
-    const $underlay = d.querySelector('main .split-action .underlay');
-
-    if ($notch) {
-      $notch.addEventListener('click', () => {
-        trackButtonClick($notch);
-      });
-    }
-
-    if ($underlay) {
-      $underlay.addEventListener('click', () => {
-        trackButtonClick($underlay);
-      });
-    }
-  });
-
-  // Tracking any link or links that is added after page loaded.
-  d.addEventListener('linkspopulated', async (e) => {
-    await trackBranchParameters(e.detail);
-    e.detail.forEach(($link) => {
-      $link.addEventListener('click', () => {
-        trackButtonClick($link);
-      });
-    });
-  });
-
-  // tracking videos loaded asynchronously.
-  d.addEventListener('videoloaded', (e) => {
-    trackVideoAnalytics(e.detail.parameters);
-    _satellite.track('videoloaded');
-  });
-
-  d.addEventListener('videoclosed', (e) => {
-    sendEventToAnalytics(`adobe.com:express:cta:learn:columns:${e.detail.parameters.videoId}:videoClosed`);
-  });
-}
-
 export default async function martechLoadedCB() {
   ({ loadScript, getConfig } = await import(`${getLibs()}/utils/utils.js`));
   setDataAnalyticsAttributesForMartech();
-  decorateAnalyticsEvents();
   trackTemplatePageLoad();
   trackColorPageLoad();
   trackExpressFeaturePageLoad();

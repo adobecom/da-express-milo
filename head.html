@@ -1,6 +1,8 @@
 <!-- Modifying this file will impact your performance -->
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
 <meta name="head-loaded" content="false"/>
+<link rel="preconnect" href="https://use.typekit.net" crossorigin>
+<link rel="preconnect" href="https://p.typekit.net" crossorigin>
 <script>
   const userAgentMeta = document.querySelector('meta[name="hreflinksuseragents"]');
   const allowedAgents = userAgentMeta && userAgentMeta.content.split(',');
@@ -95,13 +97,16 @@
     } 
 
     if (isAllowedAgent && !headAlreadyLoaded) {
-      fetchAndParseSitemap();
+      if (window.requestIdleCallback) {
+        window.requestIdleCallback(fetchAndParseSitemap);
+      } else {
+        setTimeout(fetchAndParseSitemap, 0);
+      }
     }
   })();
 
   flagMeta.content = 'true';
 </script>
-<script src="/express/code/scripts/fallback.js" nomodule></script>
 <script src="/express/code/scripts/scripts.js" type="module"></script>
 <style>body { display: none; }</style>
 <link rel="icon" href="data:,">
