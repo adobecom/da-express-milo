@@ -607,8 +607,9 @@ function trackVideoAnalytics(parameters) {
 function decorateAnalyticsEvents() {
   // for tracking all of the links
   d.addEventListener('click', (event) => {
-    if (event.target.tagName === 'A' || event.target.dataset.ll?.length || event.target.getAttribute('daa-ll')?.length) {
-      trackButtonClick(event.target);
+    const target = event.target.closest?.('a, [data-ll], [daa-ll]');
+    if (target) {
+      trackButtonClick(target);
     }
   });
 
