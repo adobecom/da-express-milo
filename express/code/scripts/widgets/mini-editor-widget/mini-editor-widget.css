@@ -1,0 +1,1394 @@
+/* ============================================================================
+   Mini Editor Widget
+   The editing surface: desktop widget card + zig-zag decorative previews, the
+   tablet/mobile arc carousel, the shared font/background controls (inline rows
+   + mobile bottom sheets). Arc-sizing tokens, the block padding/gap, and the
+   header live in the host block's own stylesheet (mini-editor.css); this
+   stylesheet consumes those tokens. UI is intentionally identical to the
+   original in-block implementation — no Spectrum dependency.
+   ============================================================================ */
+
+/* --me-card-bg / --me-quote-font* defaults: shared by every host of this
+   widget (the .mini-editor block AND the "Create a design" modal's own card
+   root, see mini-editor-modal.css) — unlike the arc-sizing tokens and block
+   layout below them in mini-editor.css's own .mini-editor rule, which only
+   apply when decorations are enabled. buildFontControl/buildColorControl set
+   these inline once a font/background is picked; these are just the
+   before-first-paint fallback. */
+.mini-editor,
+.me-modal-card-root {
+  --me-card-bg: none;
+  --me-quote-font: var(--body-font-family);
+  --me-quote-font-style: normal;
+  --me-quote-font-weight: normal;
+  --me-quote-font-stretch: normal;
+  --me-action-icon-color: #292929;
+  --me-action-hover-bg: var(--color-gray-150);
+}
+
+.mini-editor-stage {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.mini-editor-widget {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 542px;
+}
+
+.me-card {
+  position: relative;
+  width: 100%;
+  height: 350px;
+  margin-bottom: var(--spacing-300);
+  box-sizing: border-box;
+  padding: var(--spacing-350);
+  border-radius: var(--Radius-corner-radius-200);
+  background-image: var(--me-card-bg);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: background-image 0.35s ease;
+}
+
+/* Top-right hover action bar (edit/share/download), per Figma node 1099-5050.
+   Anchored to .mini-editor-widget (not .me-card) so the same element/CSS
+   rule works unchanged in both the desktop card layout and the tablet/mobile
+   arc carousel — see the .me-carousel-mode tie-in below for why the
+   top-right corner still lines up with the visible card in both cases. */
+.me-actions {
+  position: absolute;
+  top: var(--spacing-300);
+  right: var(--spacing-300);
+  z-index: 4;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-80);
+  padding: var(--spacing-80);
+  border-radius: 16px;
+  background: var(--transparent-white-400);
+  border: 1px solid var(--transparent-white-500);
+  -webkit-backdrop-filter: blur(2.5px);
+  backdrop-filter: blur(2.5px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+
+.mini-editor-widget:hover .me-actions,
+.mini-editor-widget:focus-within .me-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Tablet card view (coarse pointer) keeps actions visible even above 1200px;
+   desktop/fine pointer stays hover-only via the rule above. */
+@media (width > 1200px) and (pointer: coarse) {
+  .mini-editor-widget .me-actions,
+  .me-modal-card-root .me-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+.me-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: var(--spacing-80);
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  cursor: pointer;
+}
+
+/* sp-icon-* (see TOP_ACTION_DEFS in mini-editor-widget.js) sizes/colours
+   itself via these CSS custom property hooks — no Spectrum theme/design
+   tokens required, so a plain 20px/#292929 override here is enough. */
+.me-action-icon {
+  --mod-icon-size: 20px;
+  --mod-icon-color: var(--me-action-icon-color);
+}
+
+.me-action:hover,
+.me-action[aria-expanded='true'] {
+  background: var(--me-action-hover-bg);
+}
+
+/* Modal action bar: desktop shows on hover (over card), tablet/mobile always visible.
+  On desktop (>1200px), using me-card:hover selector so the bar stays visible
+   while moving pointer from card to buttons. Tablet/mobile always shows with
+   carousel-mode styling. */
+
+/* Desktop (>1200px): action bar hidden by default, visible on hover over card
+   (same as regular widget) */
+@media (width > 1200px) {
+  .me-modal-card-root .me-card:hover .me-actions,
+  .me-modal-card-root .me-card:focus-within .me-actions {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+/* Tablet/mobile (<=1200px): modal action buttons always visible with same
+   styling as carousel mode, per Figma node 54:7883 ("Primary actions",
+   tablet/mobile) — smaller/lighter than desktop spec. */
+@media (width <= 1200px) {
+  .me-modal-card-root .me-actions {
+    opacity: 1;
+    pointer-events: auto;
+    gap: var(--spacing-80);
+    padding: 2px;
+    border-radius: var(--corner-radius-80);
+    background: rgb(255 255 255 / 51%);
+    border-color: rgb(255 255 255 / 14%);
+  }
+
+  .me-modal-card-root .me-action {
+    width: 24px;
+    height: 24px;
+    padding: 4.5px;
+  }
+
+  .me-modal-card-root .me-action-icon {
+    --mod-icon-size: 15px;
+  }
+}
+
+.me-quote-wrap {
+  position: relative;
+  box-sizing: border-box;
+  max-width: 380px;
+  padding: var(--spacing-75);
+  cursor: pointer;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  transition: background-color 0.18s ease, border-color 0.18s ease;
+}
+
+/* .me-arc-card--center:hover/:focus-visible .me-quote-wrap: the arc
+   carousel's quoteWrap (see buildArcCard in mini-editor-widget.js) has no
+   role/tabindex/listeners of its own — el (the card, already role="option")
+   is the one real interactive/focusable element, so this keys off el's own
+   :hover/:focus-visible via a descendant selector rather than a second
+   hoverable/focusable target nested inside it. Scoped to --center only:
+   prev/next keep the same .me-quote-wrap markup for structural/CSS parity
+   but never get this treatment, since hovering/focusing them navigates
+   instead of copying (see onActivate in buildArcCard). */
+.me-card .me-quote-wrap:hover,
+.me-card .me-quote-wrap:focus-visible,
+.me-arc-card--center .me-quote-wrap:hover,
+.me-arc-card--center .me-quote-wrap:focus-visible {
+  background: rgb(255 255 255 / 20%);
+  border-color: rgb(255 255 255 / 30%);
+}
+
+/* Adds the blue keyboard-focus ring on top of the shared hover/focus frosted
+   treatment above, per Figma node 54:8728 ("Quote text", state=Focus) —
+   Focus there is Hover's look plus this ring, not a separate treatment. */
+.me-card .me-quote-wrap:focus-visible,
+.me-arc-card--center .me-quote-wrap:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
+.me-quote {
+  margin: 0;
+  font-family: var(--me-quote-font);
+  font-style: var(--me-quote-font-style);
+  font-weight: var(--me-quote-font-weight);
+  font-stretch: var(--me-quote-font-stretch);
+  font-size: var(--Global-Typography-Size-Label-Label-2XL);
+  line-height: var(--Global-Typography-Line-height-Label-Label-2XL);
+  text-align: center;
+  word-break: break-word;
+  color: var(--color-white)
+}
+
+.me-author {
+  /* Absolutely positioned (not in-flow with margin-top) so it doesn't share
+     .me-card's flex centering group with .me-quote-wrap — otherwise a short
+     quote pulls the author up with it instead of the author staying a
+     fixed offset from the card's bottom edge. Matches .me-arc-author,
+     which already gets this right. */
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  margin: 0;
+  font-family: var(--me-quote-font);
+  font-style: var(--me-quote-font-style);
+  font-weight: var(--me-quote-font-weight);
+  font-stretch: var(--me-quote-font-stretch);
+  font-size: var(--Global-Typography-Size-Label-Label-L);
+  text-align: center;
+  white-space: nowrap;
+  color: var(--Palette-transparent-white-800);
+}
+
+.me-controls {
+  /* Stays above .me-sheet-overlay (z-index 1200 below) — otherwise, while a
+     bottom sheet is open, a tap on the *other* trigger button lands on the
+     open sheet's own full-screen backdrop instead of the button underneath
+     it (same stacking context, sheet painted later), closing that sheet
+     instead of switching straight to the one just tapped. */
+  position: relative;
+  z-index: 1201;
+  display: flex;
+  align-items: stretch;
+  gap: var(--spacing-80);
+  width: 100%;
+}
+
+.me-control {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 58px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-100);
+  box-sizing: border-box;
+  background: var(--color-gray-150);
+  border: 1px solid var(--S2AC-Palette-transparent-black-50);
+  border-radius: var(--Radius-corner-radius-200);
+  cursor: pointer;
+  text-align: left;
+  padding: var(--spacing-80) var(--spacing-300) var(--spacing-80) var(--spacing-80);
+  font: inherit;
+  transition: background-color 0.15s ease;
+}
+
+.me-control--colour {
+  padding: var(--spacing-200);
+}
+
+.me-control:hover,
+.me-control[aria-expanded='true'] {
+  background: var(--S2AC-Palette-gray-300);
+}
+
+/* Per Figma node 54:8489 ("Widget Action Buttons", State=Focus) — the
+   keyboard-focus ring replaces the hover/expanded background change above
+   (focus keeps the Default background) rather than stacking with it. */
+.me-control:focus-visible {
+  background: var(--color-gray-150);
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
+.me-pill {
+  /* text-overflow: ellipsis has no effect on flex-laid-out content (the
+     centering this needs no longer clips with a visible "…", just a hard
+     cut on both sides) — block + line-height/text-align gets the same
+     vertical/horizontal centering while keeping ellipsis truncation working.
+     min-width covers the longest font label ("Geometric", ~115px) so it
+     never truncates — flex-shrink: 0 so .me-control-label (below) gives up
+     space first instead, since the pill is showing the actual selected
+     typeface and is the more important of the two to keep legible. */
+  display: block;
+  flex-shrink: 0;
+  box-sizing: border-box;
+  min-width: 116px;
+  height: 46px;
+  line-height: 46px;
+  padding: 0 var(--spacing-200);
+  background: var(--color-white);
+  border-radius: 10px;
+  box-shadow: var(--Drop-shadow-emphasized-default);
+  font-size: var(--Global-Typography-Size-Label-Label-L);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--cyan-1500);
+}
+
+.me-swatch {
+  align-self: center;
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid var(--Palette-transparent-white-800);
+  background-size: cover;
+  background-position: center;
+  box-shadow: var(--Drop-shadow-emphasized-default);
+}
+
+.me-control-label {
+  /* Shrinks/truncates (ellipsis) before .me-pill above ever does — at
+     narrow widths this label giving up space matters less than the pill
+     staying legible, since the pill shows the actual selected typeface. */
+  flex-shrink: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: var(--heading-font-weight-medium);
+  font-size: var(--Global-Typography-Size-Label-Label-M);
+  color: var(--Alias-content-neutral-default);
+  white-space: nowrap;
+}
+
+.me-panel {
+  position: relative;
+  width: 100%;
+  height: 65px;
+  margin-top: var(--spacing-80);
+  overflow: hidden;
+}
+
+.me-row {
+  position: absolute;
+  top: 4px;
+  left: 0;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 58px;
+  box-sizing: border-box;
+  background: var(--color-gray-150);
+  border: 1px solid var(--S2AC-Palette-transparent-black-50);
+  border-radius: var(--Radius-corner-radius-200);
+  transform: translateY(96.5px);
+  transition: transform 0.3s cubic-bezier(0.65, 0, 0.35, 1);
+  /* Mouse drag-to-scroll (see wireDragToScroll) — grab/grabbing signals the
+     row itself is draggable, same as the native overflow-x: auto scroll
+     this already has for touch/trackpad. */
+  cursor: grab;
+}
+
+.me-row:active {
+  cursor: grabbing;
+}
+
+.mini-editor[data-me-panel='fonts'] .me-row--fonts,
+.mini-editor[data-me-panel='colour'] .me-row--colour,
+.me-modal-card-root[data-me-panel='fonts'] .me-row--fonts,
+.me-modal-card-root[data-me-panel='colour'] .me-row--colour {
+  transform: translateY(0);
+}
+
+.me-row--fonts {
+  gap: var(--spacing-75);
+  padding: var(--spacing-80) var(--spacing-300) var(--spacing-80) var(--spacing-80);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.me-row--fonts::-webkit-scrollbar {
+  display: none;
+}
+
+.me-font {
+  flex: 0 0 auto;
+  min-width: 46px;
+  height: 46px;
+  padding: 0 var(--spacing-200);
+  border: none;
+  background: transparent;
+  border-radius: var(--corner-radius-80);
+  font-size: var(--Global-Typography-Size-Label-Label-L);
+  white-space: nowrap;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+/* No dedicated Hover variant in Figma's "Font Selector" component (node
+   54:8516 only defines Default/Focus/Selected) — matches this row's own
+   .me-control hover treatment for consistency. Not applied to is-selected,
+   whose own white/shadow look (below) already reads as the "active" state. */
+.me-font:not(.is-selected):hover {
+  background: var(--S2AC-Palette-gray-300);
+}
+
+/* Per Figma node 54:8516 ("Font Selector", state=Focus). */
+.me-font:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
+.me-font.is-selected {
+  background: var(--color-white);
+  border-radius: 10px;
+  box-shadow: var(--Drop-shadow-emphasized-default);
+}
+
+.me-row--colour {
+  justify-content: space-between;
+  gap: var(--spacing-100);
+  padding: 0 var(--spacing-250);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.me-row--colour::-webkit-scrollbar {
+  display: none;
+}
+
+.me-swatch-btn {
+  position: relative;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: var(--Corner-radius-corner-radius-500);
+  border: 1px solid var(--S2AC-Palette-transparent-white-100);
+  background: none;
+  cursor: pointer;
+  box-shadow: var(--Drop-shadow-emphasized-default);
+  transition: transform 0.12s ease;
+}
+
+.me-swatch-btn:hover {
+  transform: scale(1.08);
+}
+
+/* Per Figma node 54:8539 ("Colour Selector", property1=Focus) — ring sits
+   flush on the swatch's own edge (no outline-offset), unlike the other
+   controls' offset rings, matching that reference exactly. */
+.me-swatch-btn:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 0;
+}
+
+.me-swatch-btn.is-selected {
+  border: 2px solid var(--S2-Buttons-Accent-Color-Default);
+  box-shadow: var(--Drop-shadow-emphasized-hover);
+}
+
+.me-swatch-fill {
+  position: absolute;
+  inset: 0;
+  border-radius: var(--Corner-radius-corner-radius-500);
+  background-size: cover;
+  background-position: center;
+}
+
+/* Keyboard-only "Skip quote suggestions" CTA, per Figma node 54:11762 — see
+   buildSkipQuoteSuggestionsCta in mini-editor-widget.js. Off-screen (not
+   display: none, which would drop it from the accessibility tree and make
+   .focus() a no-op) until its .is-visible class is added the moment Tab
+   focus actually lands on it; disappears again on blur or Enter, same as
+   any other skip-link pattern. */
+.me-skip-suggestions {
+  position: absolute;
+  top: -9999px;
+  z-index: 5;
+  box-sizing: border-box;
+  padding: 13px var(--spacing-300);
+  border: 2px solid #292929;
+  border-radius: 24px;
+  background: var(--color-white);
+  color: #292929;
+  font-size: 18px;
+  font-weight: bold;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.me-skip-suggestions.is-visible {
+  top: calc(100% + var(--spacing-100));
+}
+
+.me-skip-suggestions:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
+.mini-editor-decorations {
+  /* Anchored to the header (not the stage) so cards can start a little below
+     the header's top edge and extend down to the editor's bottom edge —
+     the stage's own box only covers the editor's height, which isn't tall
+     enough to reach up alongside the header per the Figma reference. The
+     stage height below is the widget's fixed height (350px card + controls);
+     the gap matches the header/stage flex gap on .mini-editor. */
+  position: absolute;
+  top: var(--spacing-700);
+  right: 0;
+  left: 0;
+  bottom: calc(-1 * (var(--spacing-500) + 487px));
+  z-index: 0;
+  pointer-events: none;
+  display: none;
+}
+
+/*
+ * 4 columns of 2 cards each, desktop only (see the >=1200px block below).
+ * Matches the Figma reference's two-column-per-side zig-zag: a "near"
+ * column, whose card's inner (right, for the left side) edge clears the
+ * 271px-wide widget by ~90px, and a "far" column ~90px past the near
+ * column's outer edge. Each column is its own flex container (cards
+ * stacked via `gap`, not fixed pixel positions) so a card's height can vary
+ * with its quote length (see p.me-deco-quote/DECO_QUOTE_CHAR_LIMIT) without
+ * the two cards in a column ever overlapping — the old fixed-height,
+ * fixed-`bottom`-per-card layout couldn't safely do that. Columns anchor
+ * from the bottom (not the top) since .mini-editor-decorations' bottom edge
+ * reliably lines up with the editor's bottom edge regardless of how tall
+ * the header's authored copy is — its top edge doesn't.
+ */
+.me-deco-col {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  width: 180px;
+}
+
+.me-deco-col--far-left { left: calc(50% - 811px); bottom: 160px; gap: 188px; }
+.me-deco-col--near-left { left: calc(50% - 541px); bottom: 0; gap: 212px; }
+.me-deco-col--far-right { left: calc(50% + 631px); bottom: 160px; gap: 188px; }
+.me-deco-col--near-right { left: calc(50% + 361px); bottom: 0; gap: 212px; }
+
+.me-deco {
+  width: 180px;
+  pointer-events: auto;
+}
+
+.me-deco--1 { transform: rotate(1.5deg); }
+.me-deco--2 { transform: rotate(1.5deg); }
+.me-deco--3 { transform: rotate(2deg); }
+.me-deco--4 { transform: rotate(-2deg); }
+.me-deco--5 { transform: rotate(-1.5deg); }
+.me-deco--6 { transform: rotate(-1.5deg); }
+.me-deco--7 { transform: rotate(-2deg); }
+.me-deco--8 { transform: rotate(2deg); }
+
+.me-deco-card-wrap {
+  /* The padding-bottom extends this wrap's own hoverable box down through
+     the gap and the actions row below the card (see .me-deco-card /
+     .me-deco-actions), so moving the pointer from the card down into the
+     buttons never exits the hover target — :hover/:focus-within stays live
+     the whole way down, regardless of how tall the card itself grows. */
+  position: relative;
+  padding-bottom: 54px;
+}
+
+.me-deco:hover,
+.me-deco:focus-within {
+  z-index: 5;
+}
+
+.me-deco-card {
+  /* Outer sizing/rotation box — unclipped (unlike .me-deco-card-inner
+     below) so .me-deco-actions can anchor at `top: 100%` against this
+     element's own actual height without being clipped off. */
+  position: relative;
+  width: 100%;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.me-deco-card-inner {
+  width: 100%;
+  /* Was a fixed height: 148px on the (then-combined) card element — now a
+     minimum only, matching that original look for short quotes, so the
+     card can grow taller (width unchanged) as a quote's length approaches
+     DECO_QUOTE_CHAR_LIMIT instead of ever clipping its own text. Positioned
+     (not static) so p.me-deco-author below can anchor to this element's own
+     box via position: absolute, per Figma node 54:7695/54:7699 — the author
+     sits at a fixed offset from the card's bottom edge regardless of quote
+     length, same pattern as .me-author/.me-arc-author elsewhere in this
+     file. */
+  position: relative;
+  min-height: 148px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 11px;
+  border-radius: var(--Radius-corner-radius-200);
+  background-size: cover;
+  background-position: center;
+  /* Paints from the element's full border-box, not the default padding-box
+     — otherwise the background image is sized/positioned inside the 11px
+     padding ring, leaving that ring showing through as plain card
+     background (the "extra whitespace" from feedback) instead of the image
+     reaching all the way to the card's own outer edge on every side. */
+  background-origin: border-box;
+  background-repeat: no-repeat;
+  overflow: hidden;
+  /* Stroke is an outline (not a border) so it draws outside the box rather
+     than eating into it — the image fills the card's full box completely,
+     with the stroke as a pure addition on top of that edge instead of
+     sharing space with it. outline-offset: -0.5px keeps it flush against
+     that edge (default outline-offset: 0 would draw it a hair outside the
+     rounded corner, since outline ordinarily doesn't follow border-radius
+     as tightly as a border does). */
+  outline: 0.5px solid var(--Palette-transparent-white-700);
+  outline-offset: -0.5px;
+  /* Default: 4-layer shadow per Figma node 137:4778 ("Quote Hero Card",
+     Default). Swaps to the single --Drop-shadow-emphasized-default token on
+     hover/focus (same node, Hover state) — see .me-deco:hover below. */
+  box-shadow:
+    0 5px 11px rgb(0 0 0 / 10%),
+    0 20px 20px rgb(0 0 0 / 9%),
+    0 44px 27px rgb(0 0 0 / 5%),
+    0 79px 32px rgb(0 0 0 / 1%);
+  transition: box-shadow 0.18s ease;
+}
+
+.me-deco:hover .me-deco-card-inner,
+.me-deco:focus-within .me-deco-card-inner {
+  box-shadow: var(--Drop-shadow-emphasized-default);
+}
+
+/*
+ * Fixed, uniform styling for every card regardless of which font/theme the
+ * fetched template itself uses — the editor (not these decorative previews)
+ * is where a different font/colour actually applies. Sizes to its own text
+ * content (no fixed height/line-clamp) since DECO_QUOTE_CHAR_LIMIT already
+ * caps how much text it can ever hold — see truncateQuote in
+ * mini-editor-widget.js — so .me-deco-card-inner (a flex column) simply
+ * grows to fit instead of a second, independent CSS-level clamp fighting
+ * that already-bounded text.
+ */
+/* .me-deco-quote (not just .me-deco-quote): .mini-editor-header p — these
+   cards are descendants of the header, see the block's init comment on why —
+   is otherwise equally or more specific and, being a <p>, matches these too. */
+.me-deco-quote {
+  /* The one flexible item in .me-deco-card-inner — grows/shrinks with the
+     available space and centers its own (possibly multi-line) text within
+     it, so a short quote still sits vertically centered in the card, not
+     glued to the top. padding-bottom reserves room for .me-deco-author,
+     which is absolutely positioned below and so isn't otherwise accounted
+     for in this flex column's own height. */
+  display: flex;
+  flex: 1 0 auto;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin: 0;
+  color: var(--color-white);
+  text-align: center;
+  font-family: var(--body-font-family);
+  font-size: var(--Global-Typography-Size-Label-Label-S);
+  font-style: normal;
+  font-weight: var(--heading-font-weight-regular);
+  line-height: 110%;
+  word-break: break-word;
+}
+
+/* Absolutely positioned at a fixed offset from the card's bottom edge, per
+   Figma node 54:7695/54:7699 (author: bottom: 18.46px on a 149px-tall
+   card) — same pattern as .me-author/.me-arc-author elsewhere in this
+   file. Anchors against .me-deco-card-inner (position: relative above),
+   independent of the quote's own height, so it stays put whether the card
+   grows taller for a longer quote or not. */
+.me-deco-author {
+  position: absolute;
+  left: 50%;
+  bottom: 8px;
+  transform: translateX(-50%);
+  margin: 0;
+  width: 100%;
+  max-width: calc(100% - 22px);
+  overflow: hidden;
+  color: var(--Palette-transparent-white-800);
+  text-align: center;
+  font-family: var(--body-font-family);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  line-height: 12px;
+}
+
+.me-deco-actions {
+  /* A percentage now correctly resolves against .me-deco-card's own actual
+     height — unlike the old fixed px offset this replaced, which only
+     matched the card's previous fixed height and broke as soon as
+     .me-deco-card-inner (and so .me-deco-card, which wraps it at 100%
+     width/auto height) could grow taller for a longer quote. .me-deco-card
+     is a plain unclipped box (no padding/border of its own), so `top: 100%`
+     lands exactly at .me-deco-card-inner's bottom edge with no
+     padding-box double-counting to correct for. */
+  position: absolute;
+  top: calc(100% + var(--spacing-100));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: var(--spacing-100);
+  align-items: flex-start;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.18s ease;
+}
+
+.me-deco:hover .me-deco-actions,
+.me-deco:focus-within .me-deco-actions {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* theme.js (the shared, already-built Spectrum bundle every sp-* component
+   here reads its design tokens from) only ever defines
+   --system-button-secondary-background-color-default — the -hover/-down/
+   -focus siblings sp-button's own CSS asks for are never defined anywhere
+   in this codebase, so a plain variant="secondary" button would render
+   with no visible background at all on hover/press/focus. Filled in here
+   (not in theme.js itself, which other already-working components also
+   read from) as a general fallback for any secondary button — .me-deco-use/
+   .me-deco-copy below still set their own exact per-instance colours via
+   --mod-button-* to match Figma pixel-for-pixel, but this keeps every
+   *other* state (e.g. plain browser default rendering before those
+   overrides apply) non-broken too. */
+sp-theme {
+  --system-button-secondary-background-color-hover: var(--spectrum-gray-200);
+  --system-button-secondary-background-color-down: var(--spectrum-gray-300);
+  --system-button-secondary-background-color-focus: var(--spectrum-gray-200);
+}
+
+/* .me-deco-use/.me-deco-copy are sp-button[variant="secondary"], overridden
+   via its --mod-button-* hooks to match Figma node 54:7921 ("Quote Hero
+   Card" actions) exactly — the component's own size="s"/"m" presets don't
+   land on this exact 32px-tall, 8px-radius box. sp-button centres its own
+   label via padding-block on #label (--mod-button-top/bottom-to-text), NOT
+   via flex align-items on the host — #label's own rule always sets
+   align-self: start, so --mod-button-height alone (without also setting
+   these two) leaves the label pinned near the button's top edge instead of
+   vertically centred. 7px top + 7px bottom + 18px line-height = 32px. */
+.me-deco-use,
+.me-deco-copy {
+  padding-block: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
+  --mod-button-height: 32px;
+  --mod-button-top-to-text: 7px;
+  --mod-button-bottom-to-text: 7px;
+  --mod-button-border-radius: 8px;
+  --mod-button-border-width: 0;
+  --mod-button-font-size: 14px;
+  --mod-button-line-height: 18px;
+  --mod-button-background-color-default: var(--Palette-gray-100);
+  --mod-button-background-color-hover: var(--spectrum-gray-200);
+  --mod-button-background-color-down: var(--spectrum-gray-300);
+  --mod-button-background-color-focus: var(--spectrum-gray-200);
+  --mod-button-content-color-default: var(--Alias-content-neutral-default);
+  --mod-button-content-color-hover: var(--Alias-content-neutral-default);
+  --mod-button-content-color-down: var(--Alias-content-neutral-default);
+  --mod-button-content-color-focus: var(--Alias-content-neutral-default);
+  /* sp-button's label always renders at --mod-bold-font-weight (there's no
+     dedicated font-weight hook on the button itself) — Figma calls for
+     weight 500 here, not bold, so it's overridden directly. Scoped to just
+     these two buttons since --mod-bold-font-weight has exactly one other
+     reader in the whole bundle (nothing else in scope uses it). */
+  --mod-bold-font-weight: 500;
+}
+
+.me-deco-use {
+  --mod-button-edge-to-text: 12px;
+}
+
+.me-deco-copy {
+  aspect-ratio: 1;
+  --mod-button-edge-to-text: 7px;
+  --mod-button-min-width: 32px;
+}
+
+/* sp-icon-copy (see buildDecoCard) sizes itself via this CSS custom
+   property hook — no Spectrum theme/design tokens required. Colour comes
+   from sp-button's own icon styling (--mod-button-content-color-* above),
+   not set here. */
+.me-deco-copy-icon {
+  --mod-icon-size: 18px;
+}
+
+@media (width >= 1200px) {
+  .mini-editor-decorations {
+    display: block;
+  }
+}
+
+/*
+ * Entrance animation for the deco cards — desktop only, fires once on load.
+ * Sits on .me-deco-card-wrap (not on .me-deco itself) so it composes cleanly
+ * with the per-card rotation: each card rises and scales at its final tilt
+ * angle, with no rotation component in the animation at all.
+ * Stagger sweeps left → right across the four columns:
+ *   far-left (0 / 80 ms) → near-left (160 / 240 ms)
+ *   → near-right (320 / 400 ms) → far-right (480 / 560 ms)
+ * Last card starts at 560 ms + 550 ms duration ≈ 1.11 s to fully settled.
+ */
+@media (width >= 1200px) {
+  @keyframes me-deco-in {
+    from {
+      opacity: 0;
+      transform: translateY(16px) scale(0.96);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .me-deco-card-wrap {
+    animation: me-deco-in 550ms cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: var(--me-deco-delay, 0ms);
+  }
+
+  /* Per-card delays, assigned by column position left → right.
+     Two cards share each column, top card leads by 80 ms. */
+  .me-deco--1 .me-deco-card-wrap { --me-deco-delay:   0ms; }
+  .me-deco--3 .me-deco-card-wrap { --me-deco-delay:  80ms; }
+  .me-deco--2 .me-deco-card-wrap { --me-deco-delay: 160ms; }
+  .me-deco--4 .me-deco-card-wrap { --me-deco-delay: 240ms; }
+  .me-deco--6 .me-deco-card-wrap { --me-deco-delay: 320ms; }
+  .me-deco--8 .me-deco-card-wrap { --me-deco-delay: 400ms; }
+  .me-deco--5 .me-deco-card-wrap { --me-deco-delay: 480ms; }
+  .me-deco--7 .me-deco-card-wrap { --me-deco-delay: 560ms; }
+}
+
+/* Reduced motion: skip animation entirely — all cards appear instantly. */
+@media (width >= 1200px) and (prefers-reduced-motion: reduce) {
+  .me-deco-card-wrap {
+    animation: none;
+  }
+}
+
+/*
+ * Tablet/mobile carousel --------------------------------------------------
+ * Below 1200px the desktop decorative cards and the fixed widget give way
+ * to exactly 3 slots: prev / centre / next (buildArcCarousel in
+ * mini-editor-widget.js re-renders each slot's content on every arrow click
+ * — it does not keep the full 8/9-card deck in the DOM, so nothing
+ * off-screen is ever clickable). The container spans the full viewport width
+ * so the side cards can show as much of themselves as possible with no empty
+ * gutter on either edge — how much actually shows is however much fits
+ * outside the centre card within that width, not a fixed reveal amount.
+ */
+.me-arc {
+  /* Sizing variables (--me-arc-card-w etc.) are defined on .mini-editor,
+     not here — see that rule for why. */
+  position: relative;
+  display: none;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100vw;
+  margin: 0 calc(50% - 50vw) var(--me-arc-gap);
+  height: var(--me-arc-card-h);
+  clip-path: inset(calc(-1 * var(--me-arc-extra-h)) 0);
+  touch-action: pan-y;
+}
+
+/* ARIA-only grouping for the 3 option cards + ghost (see buildArcCarousel) —
+   display: contents keeps it out of layout entirely, so each .me-arc-card's
+   position: absolute below still resolves against .me-arc, not this
+   wrapper, exactly as if the wrapper weren't there. */
+.me-arc-listbox {
+  display: contents;
+}
+
+@media (max-width: 1200px) {
+  .me-carousel-mode .mini-editor-decorations {
+    display: none;
+  }
+
+  .me-carousel-mode .me-card {
+    display: none;
+  }
+
+  .me-carousel-mode .me-arc {
+    display: flex;
+  }
+}
+
+/* Touch devices have no hover, so the action bar stays always-visible here
+   instead of hidden-until-hover — .me-carousel-mode already encodes this
+   file's one definition of "tablet or mobile" (see syncViewportMode in
+   mini-editor-widget.js), so this reuses it rather than a second, possibly
+   divergent breakpoint check. Per Figma node 54:7883 ("Primary actions",
+   tablet/mobile) the bar itself is smaller/lighter here than the desktop
+   spec (Figma 1099-5050) — different background opacity, thinner border,
+   smaller radius/gap/padding — not just always-visible. */
+@media (max-width: 1200px) {
+  .me-carousel-mode .me-actions {
+    opacity: 1;
+    pointer-events: auto;
+    gap: var(--spacing-80);
+    padding: 2px;
+    border-radius: var(--corner-radius-80);
+    background: rgb(255 255 255 / 51%);
+    border-color: rgb(255 255 255 / 14%);
+  }
+
+  .me-carousel-mode .me-action {
+    width: 24px;
+    height: 24px;
+    padding: 4.5px;
+  }
+
+  .me-carousel-mode .me-action-icon {
+    --mod-icon-size: 15px;
+  }
+}
+
+/* Hides the action bar for the ~1s a carousel navigation is mid-transition
+   (see markMoving in buildArcCarousel, which toggles this class on
+   .mini-editor-widget itself) — it should disappear the moment movement
+   starts and only reappear once the next slide has settled, rather than
+   staying visible (and static) while the cards slide under it. Extra
+   specificity (.mini-editor-widget.me-arc-moving, not just .me-arc-moving)
+   is needed to beat the hover/carousel-mode "always visible" rules above
+   at equal selector weight otherwise. */
+.mini-editor-widget.me-arc-moving .me-actions {
+  opacity: 0;
+  pointer-events: none;
+  transition-duration: 0s;
+}
+
+.mini-editor-widget.me-arc-reduce-motion .me-actions {
+  transition: none;
+}
+
+/* The widget's own max-width (542px, matching the tablet card size) only
+   happens to equal --me-arc-card-w on tablet — on mobile the card shrinks
+   to 327px but the widget didn't, so .me-controls/.me-panel below the
+   carousel were rendering wider than the visible editor card above them.
+   Tying the widget's width to the same variable keeps them in lockstep at
+   every breakpoint instead of matching by coincidence at just one. */
+@media (max-width: 1200px) {
+  .me-carousel-mode .mini-editor-widget {
+    max-width: var(--me-arc-card-w, 542px);
+  }
+}
+
+/* Defensive desktop guard: if .me-carousel-mode ever lingers on a wide
+   viewport (e.g. after a stale class/state mismatch), force the desktop
+   card+deco view back on for >1200px. */
+@media (width > 1200px) {
+  .me-carousel-mode .mini-editor-decorations {
+    display: block;
+  }
+
+  .me-carousel-mode .me-card {
+    display: flex;
+  }
+
+  .me-carousel-mode .me-arc {
+    display: none;
+  }
+
+  .me-carousel-mode .me-actions {
+    gap: var(--spacing-80);
+    padding: var(--spacing-80);
+    border-radius: 16px;
+    background: var(--transparent-white-400);
+    border-color: var(--transparent-white-500);
+  }
+
+  .me-carousel-mode .me-action {
+    width: 32px;
+    height: 32px;
+    padding: var(--spacing-80);
+  }
+
+  .me-carousel-mode .me-action-icon {
+    --mod-icon-size: 20px;
+  }
+}
+
+.me-arc-card {
+  position: absolute;
+  top: 0;
+  left: calc(50% - (var(--me-arc-card-w) / 2));
+  width: var(--me-arc-card-w);
+  height: var(--me-arc-card-h);
+  box-sizing: border-box;
+  padding: var(--spacing-350);
+  border: 0.5px solid var(--Palette-transparent-white-700);
+  border-radius: var(--Radius-corner-radius-200);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 5px 6px rgb(0 0 0 / 12%), 0 16px 16px rgb(0 0 0 / 8%);
+  transform-origin: 50% 50%;
+  transition: opacity 0.22s linear;
+  will-change: transform, opacity;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.me-arc-card--center {
+  z-index: 3;
+  cursor: pointer;
+  transition: opacity 0.22s linear, background-color 0.18s ease, border-color 0.18s ease;
+}
+
+.me-arc-card--prev,
+.me-arc-card--next {
+  cursor: pointer;
+}
+
+.me-arc-card--off {
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .me-arc-card,
+  .me-arc-card--center,
+  .me-actions,
+  .mini-editor-widget.me-arc-moving .me-actions {
+    transition: none;
+  }
+}
+
+.me-arc-quote {
+  margin: 0;
+  font-size: 18px;
+  line-height: var(--Global-Typography-Line-height-Label-Label-L);
+  text-align: center;
+  word-break: break-word;
+  color: var(--color-white);
+}
+
+.me-arc-author {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  margin: 0;
+  font-size: 16px;
+  line-height: 22px;
+  white-space: nowrap;
+  color: var(--Palette-transparent-white-800);
+  bottom: 24px;
+}
+
+.me-arc-nav {
+  position: absolute;
+  top: 50%;
+  z-index: 220;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  transform: translateY(-50%);
+  background: rgb(0 0 0 / 22%);
+  border: 1px solid rgb(255 255 255 / 20%);
+  border-radius: var(--Corner-radius-corner-radius-500);
+  cursor: pointer;
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  transition: background-color 0.15s ease;
+}
+
+/* No dedicated hover/focus variant in Figma's "drag-arrows" component
+   (Default only, since these primarily serve touch devices) — darkened
+   hover + a focus-visible ring added for mouse/keyboard use, consistent
+   with every other interactive element in this file. */
+.me-arc-nav:hover {
+  background: rgb(0 0 0 / 32%);
+}
+
+.me-arc-nav:focus-visible {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+}
+
+.me-arc-nav img {
+  width: 20px;
+  height: 20px;
+}
+
+/* Nudged past the centre card's edge (not flush on it) per Figma's
+   drag-arrows frame, where each button sits centred slightly outside the
+   card boundary rather than straddling it evenly. */
+.me-arc-nav--prev {
+  left: calc(50% - (var(--me-arc-card-w) / 2) - var(--spacing-400));
+}
+
+.me-arc-nav--next {
+  right: calc(50% - (var(--me-arc-card-w) / 2) - var(--spacing-400));
+}
+
+/*
+ * Mobile bottom sheet -----------------------------------------------------
+ * <=767px only: the font/colour pickers become a slide-up sheet instead of
+ * the inline expanding row above, per Figma frames 0-18589/0-18658. Driven
+ * by the same data-me-panel attribute as the inline row — see .me-row
+ * above for the tablet/desktop behaviour, hidden below at this breakpoint.
+ */
+.me-sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1210;
+  display: none;
+  /* Backdrop dim, per Figma node 137:4778 ("modal backdrop", #000000 20%) —
+     was previously undefined, so the page behind the sheet had no visible
+     scrim at all. Faded in/out on the same is-open toggle .me-sheet itself
+     already responds to, rather than a separate transition. */
+  background: rgb(0 0 0 / 0%);
+  transition: background-color 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.me-sheet-overlay.is-open {
+  background: rgb(0 0 0 / 20%);
+}
+
+.me-sheet {
+  position: absolute;
+  inset-inline: 0;
+  inset-block-end: 0;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-200);
+  background: var(--color-white);
+  border-radius: 24px 24px 0 0;
+  padding: var(--spacing-100) var(--spacing-300) var(--spacing-400);
+  transform: translateY(100%);
+  transition: transform 0.34s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.me-sheet-overlay.is-open .me-sheet {
+  transform: translateY(0);
+}
+
+.me-sheet-handle {
+  width: 50px;
+  height: 4px;
+  margin: var(--spacing-100) auto 0;
+  background: rgb(0 0 0 / 15%);
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.me-sheet-title {
+  margin: 0;
+  font-weight: var(--heading-font-weight-medium);
+  font-size: var(--Global-Typography-Size-Label-Label-L);
+  text-align: center;
+}
+
+.me-sheet-grid {
+  display: grid;
+  gap: var(--spacing-200);
+}
+
+.me-sheet-grid--fonts {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.me-sheet-grid--fonts .me-font {
+  width: 100%;
+  height: 52px;
+}
+
+.me-sheet-grid--colour {
+  grid-auto-flow: column;
+  grid-template-rows: repeat(2, 46px);
+  /* Let sparse swatch sets expand across the available width, while still
+     preserving a minimum tap-target column and horizontal scroll for larger
+     sets. */
+  grid-auto-columns: minmax(46px, 1fr);
+  overflow-x: auto;
+  padding-bottom: var(--spacing-100);
+  scrollbar-width: none;
+}
+
+.me-sheet-grid--colour::-webkit-scrollbar {
+  display: none;
+}
+
+.me-sheet-grid--colour .me-swatch-btn {
+  width: 32px;
+  height: 32px;
+  align-self: center;
+  justify-self: center;
+}
+
+.light-mode .me-deco-quote {
+  color: var(--Alias-content-typography-Heading)
+}
+
+.light-mode .me-arc-quote {
+  color: var(--Alias-content-typography-Heading)
+}
+
+.light-mode .me-deco-author {
+  color: var(--Palette-gray-700);
+}
+
+.light-mode .me-arc-author {
+  color: var(--Palette-gray-700);
+}
+
+.light-mode .me-quote {
+  color: var(--Alias-content-typography-Heading)
+}
+
+.light-mode .me-author {
+  color: var(--Palette-gray-700);
+}
+
+
+@media (width <= 767px) {
+  /* "Background color" control label reads "Background" only at this
+     width — narrower control column has less room for the full label. */
+  .me-control-label-suffix {
+    display: none;
+  }
+
+  /* Per Figma node 54:7888 ("Colour"/font control, mobile), both the pill
+     and label are flex: 1 0 0 — an equal split that only works in that
+     frame because its example label ("Serif") is short. The longest real
+     font label ("Geometric") doesn't fit an equal share of a ~155px-wide
+     mobile control even after this, so the pill's own font-size drops to
+     fit it (~100px) and it keeps a min-width floor sized for that — same
+     "shrink text at this breakpoint" pattern already used for
+     .me-quote/.me-arc-quote — freeing enough room for the short "Font"
+     label to stay fully legible alongside it. */
+  .me-pill {
+    flex: 2 0 0;
+    min-width: 100px;
+    font-size: 12px;
+  }
+
+  .me-control-label {
+    flex: 1 0 0;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* Same ~155px-wide control as above, still short by a few px for "Font"
+     next to a full-width "Geometric" pill — the control's shared padding
+     (--spacing-300 right, sized for the wider desktop/tablet row) is more
+     than this label needs to clear the control's own edge at this width. */
+  .me-control--font {
+    padding-right: var(--spacing-200);
+    gap: var(--spacing-80);
+  }
+
+  .me-quote {
+    font-size: var(--Global-Typography-Size-Label-Label-L);
+  }
+
+  .me-arc-quote {
+    font-size: var(--Global-Typography-Size-Label-Label-M);
+  }
+
+  .me-arc-author {
+    font-size: var(--Global-Typography-Size-Label-Label-S);
+  }
+
+  .me-arc-nav {
+    width: 40px;
+    height: 40px;
+  }
+
+  .me-arc-nav--prev {
+    left: max(0px, calc(50% - (var(--me-arc-card-w) / 2) - 20px));
+  }
+
+  .me-arc-nav--next {
+    right: max(0px, calc(50% - (var(--me-arc-card-w) / 2) - 20px));
+  }
+
+  .me-controls {
+    gap: var(--spacing-250);
+  }
+
+  .me-panel {
+    display: none;
+  }
+
+  .me-sheet-overlay {
+    display: block;
+  }
+}
+
+/* Extra-small phones: exact match to Figma QA node 178:4216 (btm):
+   wrapper 272x88, two controls 129x88, gap 14, inner gap/padding 8. */
+@media (width < 368px) {
+  .me-controls {
+    width: min(100%, 272px);
+    margin-inline: auto;
+    gap: 14px;
+  }
+
+  .me-control {
+    height: 88px;
+    padding: 8px;
+    background: var(--color-gray-150);
+    border: 1px solid var(--S2AC-Palette-transparent-black-50);
+    border-radius: 16px;
+    box-shadow: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+
+  .me-control--colour {
+    padding: 8px;
+  }
+
+  .me-control--font {
+    padding: 8px;
+    gap: 8px;
+  }
+
+  .me-control-label {
+    order: 1;
+    flex: 0 0 auto;
+    min-width: max-content;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 18px;
+    text-align: center;
+  }
+
+  .me-pill {
+    order: 2;
+    flex: 0 0 auto;
+    width: calc(100% + 2px);
+    max-width: 113px;
+    min-width: 0;
+    height: 46px;
+    line-height: 46px;
+    padding: 0 12px;
+    border-radius: 10px;
+    text-align: center;
+    font-size: 14px;
+  }
+
+  .me-swatch {
+    order: 2;
+    box-sizing: border-box;
+    width: calc(100% + 2px);
+    max-width: 113px;
+    height: 46px;
+    min-height: 46px;
+    border-radius: 10px;
+    border: 1px solid var(--Palette-transparent-white-800);
+  }
+}
+
+.hidden {
+  display: none;
+}

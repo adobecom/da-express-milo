@@ -79,6 +79,7 @@
     "eslint-plugin-compat": "^4.0.2",
     "eslint-plugin-ecmalist": "^1.0.8",
     "eslint-plugin-import": "2.25.4",
+    "html2canvas": "^1.4.1",
     "jsdom": "^22.1.0",
     "lit": "^3.3.2",
     "sinon": "13.0.1",

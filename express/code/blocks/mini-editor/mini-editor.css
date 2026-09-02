@@ -1,0 +1,217 @@
+/* Visually hidden but still announced — used for the hint spans in
+   mini-editor-widget.js (e.g. #me-quote-wrap-hint) and the landmark's
+   viewport-suffix span in mini-editor.js (wireLandmark). Scoped to both
+   .mini-editor (the inline block) and .me-modal-card-root (the "Create a
+   design" modal's own root, see mini-editor-modal.js) — every sr-only
+   element in this widget is a descendant of one or the other. */
+.mini-editor .sr-only,
+.me-modal-card-root .sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* --me-card-bg / --me-quote-font* defaults live in mini-editor-widget.css
+   (shared with the "Create a design" modal's card root) — this rule only
+   adds the arc-sizing tokens and block-level layout that only apply here,
+   where decorations are enabled. */
+.mini-editor {
+  /* Arc carousel sizing (tablet/mobile) — defined here, not on .me-arc
+     itself, so .mini-editor-widget (a sibling of .me-arc, not a
+     descendant) can also read --me-arc-card-w to keep its own max-width
+     in lockstep with the carousel's card size at every breakpoint. See
+     .me-carousel-mode .mini-editor-widget in mini-editor-widget.css and the
+     mobile media query below for the per-breakpoint overrides. */
+  --me-arc-card-w: 542px;
+  --me-arc-card-h: 350px;
+  --me-arc-track-gap: 48px;
+  /* Extra height below the centre card's own box: the side cards pivot
+     around --me-arc-origin-y (a point on the shared carousel circle, far
+     below the card — see .me-arc-card's transform-origin), so their
+     outer-bottom corner swings ~76px below the unrotated baseline at rest.
+     The container needs that much extra room beneath the card to avoid
+     clipping it. */
+  --me-arc-extra-h: 80px;
+  /* Distance from the card's own vertical centre down to the shared
+     carousel circle's centre — every role (prev/centre/next, plus the
+     further-out stage/exit positions used mid-transition) rotates about
+     this same point via a single rotate() (see .me-arc-card's
+     transform-origin and the --me-arc-card--* rules below), so the bottom
+     edge of every card stays on that one circle at every point along a
+     transition — not just at the resting prev/centre/next positions.
+     Independent translateX/translateY/rotate interpolation (the previous
+     approach) couldn't guarantee that: each component eases on its own
+     timeline, so the combined path bows off the circle mid-transition.
+     Chosen so the prev/next resting spots land ~574px either side of
+     centre, matching the pre-existing peek amount: 574 / sin(8deg) ≈
+     4124px. */
+  --me-arc-origin-y: 4124px;
+  /* Visible gap between the carousel card and the font/colour controls
+     below — --spacing-200 (12px) on tablet/desktop, matching the gap
+     between the desktop widget's own card and its controls; overridden
+     to --spacing-100 (8px) on mobile per Figma's "Edit widget Stacked"
+     frame (node 0-18697), which uses a tighter gap at that size. */
+  --me-arc-gap: var(--spacing-300);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--spacing-700) var(--spacing-400);
+  gap: var(--spacing-500);
+}
+
+/* sp-theme (see mini-editor.js) is a real element sitting between .mini-editor
+   and its header/stage content, so the flex layout that used to live
+   directly on .mini-editor's children needs to be replicated here — sp-theme
+   has no default block/flex display of its own (per the Spectrum docs at
+   scripts/widgets/spectrum/ADDING-A-COMPONENT.md). Padding/box-sizing stay
+   on .mini-editor itself; only the child layout moves. */
+.mini-editor > sp-theme {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  gap: var(--spacing-500);
+}
+
+.mini-editor-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 668px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+
+/* Per Figma node 137:4532 ("Hero content"): the three gaps in this column
+   aren't uniform — logo-to-heading and subcopy-to-CTA are spacing-300
+   (16px), but heading-to-subcopy is the tighter spacing-80 (6px) — so a
+   single flex `gap` on the column (which spaces every child equally)
+   can't express this; each gap is set individually via margin below
+   instead (logo's margin-bottom, h1/h2's margin-bottom, and the CTA
+   paragraph's margin-top). */
+.mini-editor-logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* margin-bottom: var(--spacing-300); */
+}
+
+.mini-editor-logo img {
+  height: 20px;
+  width: auto;
+}
+
+.mini-editor-header h1,
+.mini-editor-header h2 {
+  margin: 0 0 var(--spacing-80);
+  font-size: var(--heading-font-size-l);
+  font-weight: var(--heading-font-weight-extra);
+  line-height: 32px;
+  letter-spacing: -1px;
+  color: var(--color-content-neutral);
+}
+
+/* margin: 0 needs !important to beat main .section .content p / main .section p
+   in styles.css (3 classes + tag vs. our 1 class + tag) — without it those
+   rules' margin: var(--spacing-500) 0 wins and blows out the header spacing.
+   The CTA paragraph (p:has(a.button)) needs its own margin-top back on top
+   of that reset, for the spacing-300 gap above it. */
+.mini-editor-header p {
+  margin: 0 !important;
+  max-width: 437px;
+  font-size: var(--body-font-size-m);
+  color: var(--Alias-content-typography-Body);
+}
+
+.mini-editor-header p:has(a.button) {
+  margin-top: 6px !important;
+}
+
+/* Matches the "Design with your quote" CTA on the discover page hero
+   (.ax-marquee-dynamic-hero .button-container a.button) so both entry
+   points to the editor use the same button treatment. Selector needs to
+   out-specificity main a.button.accent:any-link in styles.css. */
+.mini-editor-header p a.button.accent:any-link {
+  background-color: var(--color-background-accent-default);
+  padding-top: var(--spacing-200);
+  padding-bottom: var(--spacing-200);
+  border-radius: 24px;
+  font-size: var(--body-font-size-m);
+  font-style: normal;
+  font-weight: var(--subheading-font-weight);
+  line-height: 125%;
+}
+
+@media (width <= 767px) {
+  .mini-editor {
+    padding: var(--spacing-500) var(--spacing-300);
+    /* Smaller card than tablet — per Figma mobile frame 0-18684, only a
+       small edge of the neighbouring templates should be visible. Since
+       the container is now 100vw everywhere (see .me-arc in
+       mini-editor-widget.css), how much of each side card actually shows
+       follows naturally from the smaller mobile viewport, not a separately
+       tuned peek amount. --me-arc-origin-y recalculated for this card size
+       the same way as the base rule (354 / sin(8deg) ≈ 2544px, so the
+       prev/next resting spots still land ~354px either side of centre);
+       --me-arc-extra-h likewise recalculated for 327x270. Defined on
+       .mini-editor (not .me-arc) so .mini-editor-widget can also read
+       --me-arc-card-w — see .me-carousel-mode .mini-editor-widget. */
+    --me-arc-card-w: 327px;
+    --me-arc-card-h: 270px;
+    --me-arc-track-gap: 32px;
+    --me-arc-origin-y: 2544px;
+    --me-arc-extra-h: 50px;
+    /* Per feedback: the gap between the carousel card and the font/colour
+       controls below is 16px (spacing-300) on both tablet and mobile, to
+       accommodate the arc carousel — same as the base (tablet) rule above,
+       not the tighter 8px this used to fall back to here. */
+    --me-arc-gap: var(--spacing-300);
+  }
+
+  /* Mobile header is left-aligned (not centred) per Figma frame 0-18684,
+     with a larger logo lockup and a darker, looser-line-height heading.
+     Gap between children now comes from the margins set on .mini-editor-logo/
+     h1/h2/p above (not a uniform flex gap here) — see the base rule's own
+     comment for why. */
+  .mini-editor-header {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .mini-editor-logo {
+    justify-content: flex-start;
+  }
+
+  .mini-editor-logo img {
+    height: 29px;
+  }
+
+  .mini-editor-header h1,
+  .mini-editor-header h2 {
+    line-height: 1.04;
+    color: var(--Alias-content-typography-Heading);
+  }
+
+  .mini-editor-header p {
+    max-width: none;
+  }
+
+  /* CTA is hidden on mobile — "Button and free messaging" (node 0-18691)
+     is marked hidden in the Hero Mobile frame. */
+  .mini-editor-header p:has(a.button) {
+    display: none;
+  }
+
+  .hidden {
+    display: none;
+  }
+}
