@@ -4,7 +4,6 @@ import { getLibs, getMetadata } from './utils.js';
 
 let loadScript; let getConfig;
 
-const d = document;
 const loc = window.location;
 const { pathname } = loc;
 let expressLandingPageType;
@@ -561,7 +560,7 @@ export function trackButtonClick(a) {
   safelyFireAnalyticsEvent(fireEvent);
 }
 
-function trackVideoAnalytics(parameters) {
+export function trackVideoAnalytics(parameters) {
   const {
     videoName,
     videoId,
@@ -581,57 +580,6 @@ function trackVideoAnalytics(parameters) {
   set('video.videoInfo.videoDescription', videoDescription);
   set('video.videoInfo.videoPlayer', videoPlayer);
   set('video.videoInfo.videoMediaType', videoMediaType);
-}
-
-// Attached early (before block decoration) so it doesn't miss events like
-// 'linkspopulated' that blocks (e.g. floating-button) dispatch synchronously
-// while decorating, well before the rest of martech has loaded.
-export function decorateAnalyticsEvents() {
-  // for tracking all of the links
-  d.addEventListener('click', (event) => {
-    if (event.target.tagName === 'A' || event.target.dataset.ll?.length) {
-      trackButtonClick(event.target);
-    }
-  });
-
-  // for tracking split action block notch and underlay background
-  d.addEventListener('splitactionloaded', () => {
-    const $notch = d.querySelector('main .split-action .notch');
-    const $underlay = d.querySelector('main .split-action .underlay');
-
-    if ($notch) {
-      $notch.addEventListener('click', () => {
-        trackButtonClick($notch);
-      });
-    }
-
-    if ($underlay) {
-      $underlay.addEventListener('click', () => {
-        trackButtonClick($underlay);
-      });
-    }
-  });
-
-  // Tracking any link or links that is added after page loaded.
-  d.addEventListener('linkspopulated', async (e) => {
-    const { default: trackBranchParameters } = await import('./branchlinks.js');
-    await trackBranchParameters(e.detail);
-    e.detail.forEach(($link) => {
-      $link.addEventListener('click', () => {
-        trackButtonClick($link);
-      });
-    });
-  });
-
-  // tracking videos loaded asynchronously.
-  d.addEventListener('videoloaded', (e) => {
-    trackVideoAnalytics(e.detail.parameters);
-    _satellite.track('videoloaded');
-  });
-
-  d.addEventListener('videoclosed', (e) => {
-    sendEventToAnalytics(`adobe.com:express:cta:learn:columns:${e.detail.parameters.videoId}:videoClosed`);
-  });
 }
 
 export default async function martechLoadedCB() {

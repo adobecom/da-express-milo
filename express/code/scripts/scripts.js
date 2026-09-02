@@ -553,9 +553,11 @@ async function loadPage() {
   const martechEnabled = urlParams.get('martech') !== 'off' && getMetadata('martech') !== 'off';
   // Attach analytics event listeners (e.g. linkspopulated) before block
   // decoration runs, so they don't miss events blocks dispatch synchronously
-  // while decorating. The rest of martech stays deferred below.
+  // while decorating. This is a tiny, self-contained module (no static
+  // dependency on instrument.js) so it doesn't reintroduce an early fetch of
+  // the much larger martech file, which stays deferred below.
   if (martechEnabled) {
-    import('./instrument.js').then(({ decorateAnalyticsEvents }) => decorateAnalyticsEvents());
+    import('./analytics-events.js').then((mod) => { mod.default(); });
   }
 
   buildAutoBlocks();
