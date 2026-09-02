@@ -398,8 +398,9 @@ export function decorateAreaWithLCP(area = document, options = {}) {
   decorateArea(area, options);
   // Milo's core loadArea() never calls config.decorateArea for the main
   // document — only its fragment block does, for fragment content (see
-  // libs/blocks/fragment/fragment.js). Blocks authored directly on the page
-  // (the common case) are classed explicitly after loadArea() in loadPage().
+  // libs/blocks/fragment/fragment.js). This covers that fragment case;
+  // directly-authored blocks are classed synchronously in loadPage(), before
+  // loadArea() decorates/paints them (see applyS2ButtonClasses(document) call).
   applyS2ButtonClasses(area);
 }
 CONFIG.decorateArea = decorateAreaWithLCP;
@@ -557,6 +558,11 @@ async function loadPage() {
   }
   // Decorate the page with site specific needs.
   decorateArea();
+  // Runs synchronously, right after decorateArea() (which renames any
+  // milo `columns` blocks to `ax-columns` etc.) and well before `loadArea()`
+  // below decorates/paints blocks — so directly-authored S2_BUTTON_BLOCKS
+  // never render a pre-S2 flash of the old button shade/padding.
+  applyS2ButtonClasses(document);
 
   loadLana({ clientId: 'express' });
 
@@ -595,7 +601,6 @@ async function loadPage() {
   });
 
   await loadArea();
-  applyS2ButtonClasses(document);
 
   const { fixIcons } = await import('./utils.js');
   document.querySelectorAll('.section>.text').forEach((block) => fixIcons(block));
