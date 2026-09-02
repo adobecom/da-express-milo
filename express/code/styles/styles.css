@@ -863,6 +863,17 @@ main .dark a.con-button.outline:any-link:focus {
    the decorateButtonsDeprecated fallback emits, so exception blocks (ax-columns)
    benefit too. `.dark` (on the same block/section or a descendant) flips each
    variant. The black fill is authorable via a `#_button-fill` href hash.
+
+   Blocks verified against this system add their own `s2` class at the top of
+   their `decorate()` (not authored, not applied centrally) — mirrors how every
+   other block-owned concern works, and means fragment-embedded instances pick
+   it up for free via the normal block decoration lifecycle:
+     - ax-columns
+     - transparent-img-marquee
+     - comparison-table-v2
+     - blog-columns
+   Add a block to this list once its buttons are verified; when every
+   consuming block is verified, retire the opt-in and make s2 the default.
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* Reset the legacy 10px all-sides margin from the base con-button/button rule

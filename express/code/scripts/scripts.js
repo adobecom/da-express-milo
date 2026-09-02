@@ -366,20 +366,6 @@ function preloadLCPImage(img) {
 
 let fragmentLcpPreloaded = false;
 
-// Rollout gate for the Spectrum-2 (s2) button system. Blocks listed here get the
-// `s2` class applied centrally — no per-page authoring needed — so they render
-// the proper S2 CTA styling (see the `.s2` rules in styles.css). Add a block
-// name once its buttons are verified; when every block is verified, retire this
-// gate and make s2 the default. Authors can still opt a single block in by
-// adding the `s2` variant in the block's name row.
-const S2_BUTTON_BLOCKS = ['ax-columns', 'transparent-img-marquee', 'comparison-table-v2', 'blog-columns'];
-
-function applyS2ButtonClasses(area) {
-  S2_BUTTON_BLOCKS.forEach((name) => {
-    area.querySelectorAll(`.${name}`).forEach((block) => block.classList.add('s2'));
-  });
-}
-
 // eslint-disable-next-line import/prefer-default-export
 export function decorateAreaWithLCP(area = document, options = {}) {
   const { fragmentLink } = options;
@@ -396,12 +382,6 @@ export function decorateAreaWithLCP(area = document, options = {}) {
     }
   }
   decorateArea(area, options);
-  // Milo's core loadArea() never calls config.decorateArea for the main
-  // document — only its fragment block does, for fragment content (see
-  // libs/blocks/fragment/fragment.js). This covers that fragment case;
-  // directly-authored blocks are classed synchronously in loadPage(), before
-  // loadArea() decorates/paints them (see applyS2ButtonClasses(document) call).
-  applyS2ButtonClasses(area);
 }
 CONFIG.decorateArea = decorateAreaWithLCP;
 
@@ -558,11 +538,6 @@ async function loadPage() {
   }
   // Decorate the page with site specific needs.
   decorateArea();
-  // Runs synchronously, right after decorateArea() (which renames any
-  // milo `columns` blocks to `ax-columns` etc.) and well before `loadArea()`
-  // below decorates/paints blocks — so directly-authored S2_BUTTON_BLOCKS
-  // never render a pre-S2 flash of the old button shade/padding.
-  applyS2ButtonClasses(document);
 
   loadLana({ clientId: 'express' });
 
