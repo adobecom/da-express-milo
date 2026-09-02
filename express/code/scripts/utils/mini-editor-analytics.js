@@ -19,11 +19,30 @@ function safelyTrackEvent(callback) {
   window.addEventListener('alloy_sendEvent', callback, { once: true });
 }
 
+function toAttachedFormat(properties, prefix = '') {
+  return Object.entries(properties).flatMap(([propertyName, propertyValue]) => {
+    if (propertyValue && typeof propertyValue === 'object' && !Array.isArray(propertyValue)) {
+      return toAttachedFormat(propertyValue, `${prefix}${propertyName}.`);
+    }
+
+    return [{
+      propertyName: `${prefix}${propertyName}`,
+      propertyValue,
+      propertyType: typeof propertyValue,
+    }];
+  });
+}
+
 export default function trackMiniEditorExport({ exportMethod, uiLocation = 'seo-discover-page' } = {}) {
   if (!exportMethod) return;
 
   const eventName = isAuthenticatedUser() ? EXPORT_EVENT_NAME_AUTH : EXPORT_EVENT_NAME_UNAUTH;
   const pageUrl = window.location?.href || '';
+  const workflow = 'export';
+  const type = 'success';
+  const subtype = 'export-project';
+  const category = 'WEB';
+  const subcategory = 'document';
 
   const fireEvent = () => {
     // eslint-disable-next-line no-underscore-dangle
@@ -51,6 +70,24 @@ export default function trackMiniEditorExport({ exportMethod, uiLocation = 'seo-
               },
             },
           },
+          custom: toAttachedFormat({
+            event: {
+              pagename: eventName,
+              url: pageUrl,
+              workflow,
+              type,
+              subtype,
+              category,
+              subcategory,
+
+            },
+            custom: {
+              export_method: exportMethod,
+              ui: {
+                location: uiLocation,
+              },
+            },
+          }),
         },
       },
     });

@@ -78,7 +78,7 @@ describe('mini-editor card export', () => {
     expect(await readBlobDimensions(blob)).to.deep.equal({ width: 800, height: 450 });
   });
 
-  it('downloads with a sequential download-N PNG filename', async () => {
+  it('downloads with a stable PNG filename', async () => {
     sinon.stub(MiniEditorCardExporter, 'supportsWorkerRendering').returns(false);
     let filename;
     sinon.stub(HTMLAnchorElement.prototype, 'click').callsFake(function click() {
@@ -86,6 +86,6 @@ describe('mini-editor card export', () => {
     });
     const result = await MiniEditorCardExporter.download(createModel());
     expect(result.filename).to.equal(filename);
-    expect(filename).to.match(/^download-\d+\.png$/);
+    expect(filename).to.equal('download.png');
   });
 });
