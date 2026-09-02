@@ -493,7 +493,6 @@ async function buildFloatingToolbar(context) {
   return mount;
 }
 
-const GRADIENT_SIZE_RATIO = 1.2;
 const GRADIENT_ANCHOR_OFFSET_X_PERCENT = 5;
 const GRADIENT_EASE = 0.15;
 const GRADIENT_SETTLE_THRESHOLD = 0.1;
@@ -555,10 +554,7 @@ function attachGradientPointerTracking(block) {
   let defaultAnchor = GRADIENT_CENTER_ANCHOR;
   let isHovering = false;
 
-  const resizeObserver = new ResizeObserver((entries) => {
-    const { height } = entries[0].contentRect;
-    block.style.setProperty('--gradient-size', `${Math.round(height * GRADIENT_SIZE_RATIO)}px`);
-
+  const resizeObserver = new ResizeObserver(() => {
     const anchor = computeGradientDefaultAnchor(block);
     if (!anchor) return;
     defaultAnchor = anchor;

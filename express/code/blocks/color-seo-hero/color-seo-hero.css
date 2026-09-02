@@ -5,7 +5,8 @@
 }
 
 .color-seo-hero.is-ready {
-  background: radial-gradient(circle var(--gradient-size, 500px) at var(--gradient-x, 58%) var(--gradient-y, 50%), color-mix(in srgb, var(--color-seo-hero-primary) 45%, white) 0%, #fff 70%);
+  --gradient-size: clamp(150px, 42vw, 720px);
+  background: radial-gradient(circle var(--gradient-size) at var(--gradient-x, 58%) var(--gradient-y, 50%), color-mix(in srgb, var(--color-seo-hero-primary) 45%, white) 0%, #fff 70%);
 }
 
 .color-seo-hero-layout {
@@ -308,6 +309,10 @@
 }
 
 @media (min-width: 600px) and (max-width: 1199px) {
+  .color-seo-hero.is-ready {
+    --gradient-size: clamp(150px, 60vw, 720px);
+  }
+
   .color-seo-hero {
     min-height: auto;
     padding: var(--spacing-600) var(--spacing-500);
