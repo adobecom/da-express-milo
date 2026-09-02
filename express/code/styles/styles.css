@@ -907,6 +907,7 @@ main .s2 a.button:any-link {
   font-size: var(--body-font-size-xs); /* 12px — mobile */
   line-height: 16px;
   padding-top: 2px;
+  border-radius: 999px;
   padding-bottom: 2px;
 }
 
