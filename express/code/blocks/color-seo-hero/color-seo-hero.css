@@ -5,7 +5,7 @@
 }
 
 .color-seo-hero.is-ready {
-  background: radial-gradient(120% 100% at var(--gradient-x, 85%) var(--gradient-y, 60%), color-mix(in srgb, var(--color-seo-hero-primary) 45%, white) 0%, #fff 70%);
+  background: radial-gradient(circle var(--gradient-size, 500px) at var(--gradient-x, 58%) var(--gradient-y, 50%), color-mix(in srgb, var(--color-seo-hero-primary) 45%, white) 0%, #fff 70%);
 }
 
 .color-seo-hero-layout {
@@ -137,7 +137,7 @@
   --bottom-info-horizontal-radius: 9px;
 
   --swatch-column-horizontal-padding: var(--spacing-80) var(--spacing-75) var(--spacing-75) var(--spacing-200);
-  --swatch-column-horizontal-radius: var(--spacing-100) 0 0 var(--spacing-100);
+  --swatch-column-horizontal-radius: 0;
 
   --swatch-column-horizontal-gap: 10px;
   --swatch-rail-horizontal-height: 60px;
@@ -273,22 +273,6 @@
   display: none;
 }
 
-.color-seo-hero-floating-editor-popover[hidden] {
-  display: none;
-}
-
-.color-seo-hero-floating-editor-popover {
-  z-index: 30;
-}
-
-.color-seo-hero-floating-editor-popover color-edit {
-  border-radius: var(--spacing-200);
-  box-shadow: 0 var(--spacing-200) var(--spacing-500) rgb(0 0 0 / 18%);
-  display: block;
-  overflow: hidden;
-  width: 280px;
-}
-
 /* ==========================================================================
    Responsive
    ========================================================================== */
@@ -310,7 +294,6 @@
 
   .color-seo-hero-swatch-strip {
     --swatch-column-horizontal-padding: var(--spacing-200);
-    --swatch-column-horizontal-radius: 0;
     --swatch-column-horizontal-gap: 0;
     --swatch-rail-horizontal-height: 84px;
   }

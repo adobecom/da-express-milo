@@ -27,7 +27,8 @@
   gap: var(--spacing-300);
   max-width: 1232px;
   margin: 0 auto;
-  text-align: center;
+  padding-top: var(--spacing-200);
+  padding-bottom: var(--spacing-200);
   overflow-x: auto;
 }
 
@@ -55,10 +56,7 @@ a.explore-more-colors-chip {
 }
 
 a.explore-more-colors-chip:hover {
-  box-shadow:
-    0 0 2px rgba(0, 0, 0, 0.12),
-    0 2px 6px rgba(0, 0, 0, 0.04),
-    0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 0 6px #00000029;
   transform: translateY(-2px);
 }
 
@@ -99,6 +97,17 @@ a.explore-more-colors-chip:focus-visible {
   margin: 0;
   color: var(--color-dark-gray);
   font-weight: 400;
+}
+
+/* ── Mobile / Tablet < 1200px ──────────────────────────────────── */
+@media (max-width: 1199px) {
+  .explore-more-colors-row .carousel-fader-left {
+    padding-left: var(--spacing-300);
+  }
+
+  .explore-more-colors-row .carousel-fader-right {
+    padding-right: var(--spacing-300);
+  }
 }
 
 /* ── Desktop (L) ≥ 1200px ───────────────────────────────────────── */

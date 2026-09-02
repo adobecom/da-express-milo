@@ -207,16 +207,20 @@ function getCanvasEditButtonEl(context) {
   return context.canvasAdapter.rail.shadowRoot?.querySelector('.hex-code-group .icon-button--edit-tint') || null;
 }
 
+function getCanvasHexButtonEl(context) {
+  return context.canvasAdapter.rail.shadowRoot?.querySelector('.hex-code-group .hex-code') || null;
+}
+
 const MOBILE_EDITOR_QUERY = '(max-width: 599px)';
 
 function isMobileEditorViewport() {
   return window.matchMedia?.(MOBILE_EDITOR_QUERY)?.matches === true;
 }
 
-function setEditorTriggerState(context, activeTriggerEl) {
+function setEditorTriggerState(context, isOpen) {
   [getCanvasEditButtonEl(context), context.floatingEditButtonEl].filter(Boolean).forEach((el) => {
     el.setAttribute('aria-haspopup', 'dialog');
-    el.setAttribute('aria-expanded', el === activeTriggerEl ? 'true' : 'false');
+    el.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
   });
 }
 
@@ -226,12 +230,11 @@ function closeColorEditor(context) {
     return;
   }
   context.canvasEditor?.close();
-  context.floatingEditor?.close();
-  setEditorTriggerState(context, null);
+  setEditorTriggerState(context, false);
   document.removeEventListener('click', context.onEditorOutsideClick);
 }
 
-async function openMobileColorEditor(context, triggerEl) {
+async function openMobileColorEditor(context) {
   await import('../../scripts/color-shared/components/color-edit/index.js');
   const colorEdit = createTag('color-edit');
   colorEdit.showPalette = false;
@@ -240,12 +243,12 @@ async function openMobileColorEditor(context, triggerEl) {
   colorEdit.addEventListener('color-change', (e) => updateColor(context, e.detail.hex));
   colorEdit.addEventListener('panel-close', () => {
     context.mobileColorEdit = null;
-    setEditorTriggerState(context, null);
+    setEditorTriggerState(context, false);
     colorEdit.remove();
   });
   context.mobileColorEdit = colorEdit;
   document.body.append(colorEdit);
-  setEditorTriggerState(context, triggerEl);
+  setEditorTriggerState(context, true);
 
   requestAnimationFrame(async () => {
     await customElements.whenDefined('color-edit');
@@ -255,16 +258,7 @@ async function openMobileColorEditor(context, triggerEl) {
   });
 }
 
-function positionPopoverAboveAnchor(popoverEl, anchorEl) {
-  const anchorRect = anchorEl.getBoundingClientRect();
-  const popoverWidth = popoverEl.getBoundingClientRect().width || 280;
-  popoverEl.style.position = 'fixed';
-  popoverEl.style.bottom = `${window.innerHeight - anchorRect.top + 8}px`;
-  const left = Math.max(8, Math.min(anchorRect.left, window.innerWidth - popoverWidth - 8));
-  popoverEl.style.left = `${left}px`;
-}
-
-function createDesktopColorEditorController(context, popoverEl, { anchorEl } = {}) {
+function createDesktopColorEditorController(context, popoverEl) {
   let colorEdit = null;
   return {
     isOpen: () => !popoverEl.hidden,
@@ -278,7 +272,6 @@ function createDesktopColorEditorController(context, popoverEl, { anchorEl } = {
       }
       colorEdit.palette = [context.hex];
       popoverEl.hidden = false;
-      if (anchorEl) positionPopoverAboveAnchor(popoverEl, anchorEl);
     },
     close() {
       popoverEl.hidden = true;
@@ -286,27 +279,24 @@ function createDesktopColorEditorController(context, popoverEl, { anchorEl } = {
   };
 }
 
-async function openColorEditor(context, triggerEl, source) {
+async function openColorEditor(context) {
   if (isMobileEditorViewport()) {
-    await openMobileColorEditor(context, triggerEl);
+    await openMobileColorEditor(context);
     return;
   }
-  const editor = source === 'floating' ? context.floatingEditor : context.canvasEditor;
-  await editor.open();
-  setEditorTriggerState(context, triggerEl);
+  await context.canvasEditor.open();
+  setEditorTriggerState(context, true);
   document.addEventListener('click', context.onEditorOutsideClick);
 }
 
-function toggleColorEditor(context, triggerEl, source = 'canvas') {
+function toggleColorEditor(context) {
   if (context.mobileColorEdit?.open === true) {
     closeColorEditor(context);
     return;
   }
-  let openSource = null;
-  if (context.canvasEditor?.isOpen()) openSource = 'canvas';
-  else if (context.floatingEditor?.isOpen()) openSource = 'floating';
+  const wasOpen = context.canvasEditor?.isOpen();
   closeColorEditor(context);
-  if (openSource !== source) openColorEditor(context, triggerEl, source);
+  if (!wasOpen) openColorEditor(context);
 }
 
 function attachTooltip(targetEl, content) {
@@ -351,7 +341,7 @@ async function buildCanvas(context) {
 
   adapter.rail.addEventListener('color-swatch-rail-edit', (e) => {
     e.preventDefault();
-    toggleColorEditor(context, getCanvasEditButtonEl(context), 'canvas');
+    toggleColorEditor(context);
   });
 
   const canvasClip = createTag('div', { class: 'color-seo-hero-canvas-clip' });
@@ -361,10 +351,11 @@ async function buildCanvas(context) {
   editorPopover.hidden = true;
   context.canvasEditor = createDesktopColorEditorController(context, editorPopover);
   context.onEditorOutsideClick = (e) => {
-    const clickedInside = canvas.contains(e.target)
-      || editorPopover.contains(e.target)
-      || context.floatingToolbar?.contains(e.target)
-      || context.floatingEditorPopoverEl?.contains(e.target);
+    const path = e.composedPath();
+    const canvasTriggers = [getCanvasEditButtonEl(context), getCanvasHexButtonEl(context)];
+    const clickedInside = path.includes(editorPopover)
+      || canvasTriggers.some((el) => el && path.includes(el))
+      || (context.floatingToolbar && path.includes(context.floatingToolbar));
     if (!clickedInside) closeColorEditor(context);
   };
 
@@ -412,6 +403,7 @@ async function buildRuleDropdown(context) {
     value: context.rule,
     options: HARMONY_RULES.map((rule) => ({ value: rule, label: strings.ruleLabels[rule] })),
     onChange: ({ value }) => selectRule(context, value),
+    forcePopover: true,
   });
   await picker.waitForReady();
   context.rulePicker = picker;
@@ -460,14 +452,9 @@ async function buildFloatingToolbar(context) {
 
   const mount = createTag('div', { class: 'color-seo-hero-toolbar-mount' });
 
-  const editorPopover = createTag('div', { class: 'color-seo-hero-floating-editor-popover' });
-  editorPopover.hidden = true;
-  document.body.append(editorPopover);
-  context.floatingEditorPopoverEl = editorPopover;
-
   const toolbarHandle = await initFloatingToolbar(mount, {
     type: 'palette',
-    variant: isMobileEditorViewport() ? 'sticky' : 'sticky-on-scroll',
+    variant: 'sticky-on-scroll',
     standaloneAppearance: 'raised',
     palette: { colors: [context.hex], name: '' },
     showEdit: true,
@@ -480,7 +467,10 @@ async function buildFloatingToolbar(context) {
     onCTA: () => {
       window.location.href = colorWheelUrl(context, allContainerColors(context));
     },
-    onEditClick: () => toggleColorEditor(context, context.floatingEditButtonEl, 'floating'),
+    onEditClick: () => {
+      context.block.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      toggleColorEditor(context);
+    },
     deps: { initServices: () => Promise.resolve() },
     actionButtons: [
       { element: buildCopyCodeMenu(context).element },
@@ -499,32 +489,95 @@ async function buildFloatingToolbar(context) {
   context.floatingToolbarHandle = toolbarHandle;
   context.floatingToolbar = toolbarHandle.wrapper;
   context.floatingEditButtonEl = toolbarHandle.wrapper.querySelector('.ax-edit-btn');
-  context.floatingEditor = createDesktopColorEditorController(context, editorPopover, {
-    anchorEl: context.floatingEditButtonEl,
-  });
-
-  const alwaysStickyQuery = window.matchMedia('(max-width: 1199px)');
-  alwaysStickyQuery.addEventListener('change', (e) => {
-    closeColorEditor(context);
-    toolbarHandle.setVariant(e.matches ? 'sticky' : 'sticky-on-scroll', {
-      reserveContainer: mount,
-      reserveSpace: false,
-    });
-  });
 
   return mount;
 }
 
+const GRADIENT_SIZE_RATIO = 1.2;
+const GRADIENT_ANCHOR_OFFSET_X_PERCENT = 5;
+const GRADIENT_EASE = 0.15;
+const GRADIENT_SETTLE_THRESHOLD = 0.1;
+const GRADIENT_CENTER_ANCHOR = { x: 50, y: 50 };
+
+function createEasedFollow(initial, { ease, settleThreshold }) {
+  const current = { ...initial };
+  const target = { ...initial };
+  const listeners = new Set();
+  let rafId = null;
+
+  function tick() {
+    current.x += (target.x - current.x) * ease;
+    current.y += (target.y - current.y) * ease;
+    listeners.forEach((fn) => fn(current));
+
+    const settled = Math.abs(target.x - current.x) < settleThreshold
+      && Math.abs(target.y - current.y) < settleThreshold;
+    rafId = settled ? null : requestAnimationFrame(tick);
+  }
+
+  return {
+    subscribe(fn) {
+      listeners.add(fn);
+      return () => listeners.delete(fn);
+    },
+    setTarget(next) {
+      target.x = next.x;
+      target.y = next.y;
+      if (!rafId) rafId = requestAnimationFrame(tick);
+    },
+  };
+}
+
+function computeGradientDefaultAnchor(block) {
+  const blockRect = block.getBoundingClientRect();
+  const preview = block.querySelector('.color-seo-hero-preview');
+  if (!preview || !blockRect.width || !blockRect.height) return null;
+
+  const previewRect = preview.getBoundingClientRect();
+  const centerX = previewRect.left + (previewRect.width / 2) - blockRect.left;
+  const centerY = previewRect.top + (previewRect.height / 2) - blockRect.top;
+  return {
+    x: ((centerX / blockRect.width) * 100) + GRADIENT_ANCHOR_OFFSET_X_PERCENT,
+    y: (centerY / blockRect.height) * 100,
+  };
+}
+
 function attachGradientPointerTracking(block) {
+  const follow = createEasedFollow(GRADIENT_CENTER_ANCHOR, {
+    ease: GRADIENT_EASE,
+    settleThreshold: GRADIENT_SETTLE_THRESHOLD,
+  });
+  follow.subscribe(({ x, y }) => {
+    block.style.setProperty('--gradient-x', `${x}%`);
+    block.style.setProperty('--gradient-y', `${y}%`);
+  });
+
+  let defaultAnchor = GRADIENT_CENTER_ANCHOR;
+  let isHovering = false;
+
+  const resizeObserver = new ResizeObserver((entries) => {
+    const { height } = entries[0].contentRect;
+    block.style.setProperty('--gradient-size', `${Math.round(height * GRADIENT_SIZE_RATIO)}px`);
+
+    const anchor = computeGradientDefaultAnchor(block);
+    if (!anchor) return;
+    defaultAnchor = anchor;
+    if (!isHovering) follow.setTarget(anchor);
+  });
+  resizeObserver.observe(block);
+
   block.addEventListener('mousemove', (e) => {
     if (e.target.closest('.color-seo-hero-preview')) return;
+    isHovering = true;
     const rect = block.getBoundingClientRect();
-    block.style.setProperty('--gradient-x', `${((e.clientX - rect.left) / rect.width) * 100}%`);
-    block.style.setProperty('--gradient-y', `${((e.clientY - rect.top) / rect.height) * 100}%`);
+    follow.setTarget({
+      x: ((e.clientX - rect.left) / rect.width) * 100,
+      y: ((e.clientY - rect.top) / rect.height) * 100,
+    });
   });
   block.addEventListener('mouseleave', () => {
-    block.style.removeProperty('--gradient-x');
-    block.style.removeProperty('--gradient-y');
+    isHovering = false;
+    follow.setTarget(defaultAnchor);
   });
 }
 

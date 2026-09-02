@@ -1477,10 +1477,10 @@ export class ColorSwatchRail extends LitElement {
             ${f.hexCode && showHexCopyForThisSwatch ? (
               f.editTintInline && showEdit
                 ? html`<div class="hex-code-group">
-                    <span class="hex-code hex-code--static">${swatch.hex}</span>
+                    <button type="button" class="hex-code hex-code--editable swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="${labelEditColor}" title=${labelEditColor}>${swatch.hex}</button>
                     <button type="button" class="icon-button icon-button--edit-tint swatch-column-focusable" tabindex="-1" @click=${tintMode ? (ev) => this._handleTintSelect(index, ev.currentTarget) : (ev) => this._handleColorPicker(index, ev.currentTarget)} aria-label="${labelEditColor}" title=${labelEditColor}>${icon('edit')}</button>
                   </div>`
-                : (showEdit || f.copyFromHex
+                : (showEdit || (f.copyFromHex && !f.hexCopyHoverOnly)
                     ? html`<button type="button" class="hex-code hex-code--${showEdit ? 'editable' : 'copyable'} swatch-column-focusable${this._activeEditIndex === index ? ' hex-code--editor-open' : ''}" tabindex="-1" @click=${showEdit ? (ev) => this._handleColorPicker(index, ev.currentTarget) : (ev) => this._handleCopy(swatch.hex, ev.currentTarget)} aria-label=${showEdit ? labelEditColor : labelCopyHex} title=${showEdit ? labelEditColor : labelCopyHex}>${swatch.hex}</button>`
                     : html`<span class="hex-code hex-code--static">${swatch.hex}</span>`)
             ) : ''}

@@ -876,6 +876,30 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   font-size: var(--heading-font-size-l);
 }
 
+.section.color-column .ax-columns.color {
+  box-sizing: border-box;
+  max-width: var(--block-lg-max-width);
+  padding: 0 var(--spacing-500);
+}
+
+.section.color-column .ax-columns.color > div {
+  justify-content: space-between;
+}
+
+.section.color-column .ax-columns.color .column.text {
+  max-width: none;
+  flex: 1;
+}
+
+.section.color-column .ax-columns.color h2,
+.section.color-column .ax-columns.color p {
+  text-align: left;
+}
+
+.section.color-column .ax-columns.color p {
+  font-size: var(--body-font-size-l);
+}
+
 .collapsible-card-wrapper+.columns-wrapper .ax-columns>div {
   display: flex;
   flex-direction: column-reverse;

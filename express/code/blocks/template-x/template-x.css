@@ -3456,6 +3456,13 @@ main .template-x.tworow .template-2x2-col .template .still-wrapper img:not(.icon
   }
  }
 
+ @media (min-width: 1200px) {
+   .section.wide-inset .template-x.horizontal>*:not(.template-x.horizontal),
+   .section.wide-inset .template-x.horizontal:not(.holiday)>.template-x.horizontal>*:not(.carousel-container) {
+     padding-left: 40px;
+   }
+ }
+
 .template-x .experimental-ctas.button-container a.button { 
     width: 100%;
     margin: 10px 0 0; 

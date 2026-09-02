@@ -371,6 +371,13 @@
     font-size: var(--body-font-size-s);
 }
 
+@media (min-width: 1200px) {
+    .section.wide-inset .cta-carousel {
+        margin-left: 0;
+        padding-left: 40px;
+    }
+}
+
 @media (min-width: 900px) {
     .cta-carousel .cta-carousel-heading-section {
         flex-direction: row;
