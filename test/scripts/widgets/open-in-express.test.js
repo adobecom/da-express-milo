@@ -160,6 +160,25 @@ describe('mini-editor open-in-express', () => {
       }
     });
 
+    it('sizes the Express canvas + layout to the background native size and full-res URL', async () => {
+      const model = {
+        ...MODEL,
+        backgroundFullUrl: `${MODEL.backgroundUrl}&size=1920&type=image/jpeg`,
+        backgroundWidth: 1920,
+        backgroundHeight: 1080,
+      };
+      const url = new URL(await buildExpressUrl(model));
+      expect(url.searchParams.get('width')).to.equal('1920');
+      expect(url.searchParams.get('height')).to.equal('1080');
+      const decoded = decodeMiniEditor(url.searchParams.get('miniEditor'));
+      expect(decoded.backgroundUrl).to.equal(model.backgroundFullUrl);
+      expect(decoded.layout.width).to.equal(1920);
+      expect(decoded.layout.height).to.equal(1080);
+      // Text scales by the height factor 1080/700.
+      expect(decoded.layout.quote.fontSize).to.be.closeTo(40 * (1080 / 700), 0.01);
+      expect(decoded.layout.author.fontSize).to.be.closeTo(32 * (1080 / 700), 0.01);
+    });
+
     it('reduces a CSS font stack to the bare family name (no quotes or var())', async () => {
       const model = {
         ...MODEL,

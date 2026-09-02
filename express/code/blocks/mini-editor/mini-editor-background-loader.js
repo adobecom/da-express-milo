@@ -82,6 +82,44 @@ function extractImagePreview(page) {
   return page?.rendition?.image?.preview;
 }
 
+/**
+ * The template's native design size, e.g. `pages[0].task.size.name === '1920x1080px'`.
+ * Falls back to the preview rendition's own pixel size, then undefined.
+ */
+export function getTemplateNativeSize(item) {
+  const page = item.pages?.[0];
+  const match = page?.task?.size?.name?.match(/(\d+)\s*x\s*(\d+)/i);
+  if (match) {
+    return { width: Number(match[1]), height: Number(match[2]) };
+  }
+  const preview = extractImagePreview(page);
+  if (preview?.width && preview?.height) {
+    return { width: preview.width, height: preview.height };
+  }
+  return undefined;
+}
+
+/**
+ * Full-resolution rendition URL for download/copy/share/Express — distinct from `getImageSrc`
+ * (the light preview used for the on-page card). The preview `fragment` caps output at ~1200 and
+ * `type=image/webp` dynamic renders fail (406), so this drops the fragment and requests JPEG at the
+ * native size; the endpoint renders the page fresh at that size (capping at the native resolution).
+ */
+export function getFullResImageSrc(item) {
+  const renditionHref = extractRenditionLinkHref(item);
+  if (!renditionHref?.includes('{&page,size,type,fragment}')) {
+    return undefined;
+  }
+  const native = getTemplateNativeSize(item);
+  if (!native) {
+    return undefined;
+  }
+  return renditionHref.replace(
+    '{&page,size,type,fragment}',
+    `&size=${Math.max(native.width, native.height)}&type=image/jpeg`,
+  );
+}
+
 export function getImageSrc(item) {
   const page = item.pages?.[0];
   /* eslint-disable no-underscore-dangle */
@@ -130,7 +168,17 @@ export default async function getCardBackgrounds(props) {
     .map((item) => {
       /* eslint-enable no-underscore-dangle */
       const bg = getImageSrc(item);
-      return { id: item.id, bg, title: getTemplateTitle(item), mode: getImageColorMode(item) };
+      const native = getTemplateNativeSize(item);
+      return {
+        id: item.id,
+        bg,
+        // Full-res JPEG + native dimensions for download/copy/share/Express (bg stays the preview).
+        fullBg: getFullResImageSrc(item),
+        width: native?.width,
+        height: native?.height,
+        title: getTemplateTitle(item),
+        mode: getImageColorMode(item),
+      };
     })
     .filter((card) => !!card.bg);
 }
