@@ -65,6 +65,7 @@ export default async function createShareMenuWidget({
   getContent,
   notify,
   onActionSelect,
+  onOpen,
 } = {}) {
   if (!trigger || !heading || !actions.length || typeof getContent !== 'function') {
     throw new Error('Share menu requires a trigger, heading, actions, and getContent');
@@ -188,8 +189,10 @@ export default async function createShareMenuWidget({
 
   const onTriggerClick = (event) => {
     event.stopPropagation();
-    if (popover.hidden) open({ focusMenu: event.detail === 0 });
-    else close({ restoreFocus: true });
+    if (popover.hidden) {
+      onOpen?.();
+      open({ focusMenu: event.detail === 0 });
+    } else close({ restoreFocus: true });
   };
   const onMenuClick = (event) => {
     const item = event.target.closest('sp-menu-item');

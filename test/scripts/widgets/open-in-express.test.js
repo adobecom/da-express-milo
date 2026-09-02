@@ -79,6 +79,43 @@ describe('mini-editor open-in-express', () => {
     });
   });
 
+  describe('branch-link background (prod)', () => {
+    const BRANCH_URL = 'https://adobesparkpost.app.link/MrDeAD6dB5b';
+    const BRANCH_MODEL = { ...MODEL, backgroundBranchUrl: BRANCH_URL };
+
+    it('opens the template branch link and hands off text only', async () => {
+      const url = new URL(await buildExpressUrl(BRANCH_MODEL));
+      // The template's own branch code (not the generic JpBOBeJz35b default).
+      expect(url.pathname).to.include('MrDeAD6dB5b');
+      const payload = decodeMiniEditor(url.searchParams.get('miniEditor'));
+      // No background URL — the branch-opened template already supplies it — but URN is kept.
+      expect(payload.backgroundUrl).to.equal('');
+      expect(payload.backgroundUrn).to.equal(MODEL.backgroundUrn);
+      // Our activation/feature keys still ride along, appended to the branch link.
+      expect(url.searchParams.get('referrer')).to.equal('express-mini-editor');
+      expect(url.searchParams.get('feature-enable')).to.equal('acom-mini-editor-entry');
+      expect(url.searchParams.get('miniEditor')).to.be.a('string');
+    });
+
+    it('omits the /new canvas-size params in the branch case', async () => {
+      const url = new URL(await buildExpressUrl(BRANCH_MODEL));
+      expect(url.searchParams.has('width')).to.be.false;
+      expect(url.searchParams.has('height')).to.be.false;
+      expect(url.searchParams.has('unit')).to.be.false;
+    });
+
+    it('ignores the branch link under hzenv=stage (test base + background kept)', async () => {
+      window.history.pushState({}, '', '?hzenv=stage');
+      const url = new URL(await buildExpressUrl(BRANCH_MODEL));
+      expect(url.hostname).to.equal('stage.projectx.corp.adobe.com');
+      const payload = decodeMiniEditor(url.searchParams.get('miniEditor'));
+      expect(payload.backgroundUrl).to.equal(MODEL.backgroundUrl);
+      expect(url.searchParams.get('width')).to.equal('1084');
+      expect(url.searchParams.get('height')).to.equal('700');
+      expect(url.searchParams.get('unit')).to.equal('px');
+    });
+  });
+
   describe('appended params', () => {
     it('sets referrer, feature flag, and canvas size', async () => {
       const url = new URL(await buildExpressUrl(MODEL));

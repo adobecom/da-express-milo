@@ -92,9 +92,9 @@ const GENERIC_FONT_FAMILIES = new Set([
   'system-ui', 'ui-sans-serif', 'ui-serif',
 ]);
 
-// The widget stores font.family as a CSS font stack (e.g. `"lobster", var(--body-font-family,
-// sans-serif)`) because it needs that to render the DOM. Express only wants the concrete family
-// name, so send just that — not the quotes, the `var(...)` fallback, or generic keywords.
+// The model stores font.family as the concrete family (e.g. `"lobster"`), but stay tolerant of a
+// full CSS stack too: Express only wants the concrete family name, so strip quotes, any `var(...)`
+// fallback, and generic keywords.
 function primaryFontFamily(cssFamily) {
   return (cssFamily || '')
     .split(',')
@@ -119,9 +119,16 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
 
   const params = new URLSearchParams(window.location.search);
   const hzenv = params.get('hzenv');
-  const baseUrl = hzenv === 'local' || hzenv === 'stage'
-    ? getTestBaseUrl(hzenv, params.get('base'))
-    : prodBaseUrl;
+  const isTestEnv = hzenv === 'local' || hzenv === 'stage';
+
+  // On prod, a template that carries its own Branch deep link opens THAT template as the Express
+  // project (background already applied), so we open the branch link instead of the generic base
+  // and hand off text only — no background URL, no /new canvas-size params. Test envs keep the
+  // /new base + background so the Edit flow stays exercisable against non-prod Express.
+  const branchUrl = model.backgroundBranchUrl;
+  const useBranch = !isTestEnv && !!branchUrl;
+  const prodBase = useBranch ? branchUrl : prodBaseUrl;
+  const baseUrl = isTestEnv ? getTestBaseUrl(hzenv, params.get('base')) : prodBase;
 
   // Attribution params only (placement) — not isSearchOverride, which would
   // inject category=templates and its own width/height. Our params are set
@@ -142,10 +149,11 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
   const quoteWidth = Math.round(measureQuoteExportWidth() * scale);
 
   const payload = {
-    // URN is carried for provenance/analytics; backgroundUrl is what Express fetches — the full-res
-    // rendition (a bare public template URN isn't dereferenceable on the hz side).
+    // URN is carried for provenance/analytics; backgroundUrl is what Express fetches
+    // (the template rendition — a bare public template URN isn't dereferenceable on the hz side).
+    // Empty in the branch case: the branch-opened template already supplies the background.
     backgroundUrn: model.backgroundUrn || '',
-    backgroundUrl: model.backgroundFullUrl || model.backgroundUrl || '',
+    backgroundUrl: useBranch ? '' : (model.backgroundFullUrl || model.backgroundUrl || ''),
     quote: model.quote || '',
     author: model.author || '',
     quoteColor,
@@ -161,12 +169,18 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
     layout: buildCardLayout(quoteWidth, canvasWidth, canvasHeight),
   };
 
+  // referrer/feature-enable/miniEditor are our own keys — `.set` appends them to (never clobbers)
+  // any params the branch link already carries; Branch forwards them to Express on expansion.
   url.searchParams.set('referrer', REFERRER);
   url.searchParams.set('feature-enable', FEATURE_FLAG);
   url.searchParams.set('miniEditor', encodePayload(payload));
-  url.searchParams.set('width', String(canvasWidth));
-  url.searchParams.set('height', String(canvasHeight));
-  url.searchParams.set('unit', CANVAS_UNIT);
+  // width/height/unit are /new-only. The branch link opens an existing template that owns its
+  // canvas (and may carry its own sizing params), so don't send — or override — them there.
+  if (!useBranch) {
+    url.searchParams.set('width', String(canvasWidth));
+    url.searchParams.set('height', String(canvasHeight));
+    url.searchParams.set('unit', CANVAS_UNIT);
+  }
 
   return url.toString();
 }
