@@ -89,7 +89,7 @@ async function downloadCard(block, editor) {
       tags: 'mini-editor,download',
       severity: 'error',
     });
-    const message = await replaceKey('screenshot-download-failed', getConfig());
+    const message = await replaceKey('mini-editor-download-failed', getConfig());
     await showExpressToast({ message, variant: 'negative' });
   } finally {
     if (downloadButton) {
