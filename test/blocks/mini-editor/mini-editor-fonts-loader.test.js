@@ -42,8 +42,8 @@ describe('mini-editor-fonts-loader', () => {
     };
     const options = await getFontOptions();
     expect(options).to.deep.equal([
-      { label: 'Clean', font: '"rubik", var(--body-font-family, sans-serif)' },
-      { label: 'Futuristic', font: '"kanit", var(--body-font-family, sans-serif)' },
+      { label: 'Clean', family: '"rubik"', font: '"rubik", var(--body-font-family, sans-serif)' },
+      { label: 'Futuristic', family: '"kanit"', font: '"kanit", var(--body-font-family, sans-serif)' },
     ]);
   });
 
@@ -62,6 +62,7 @@ describe('mini-editor-fonts-loader', () => {
     expect(options).to.have.length(1);
     expect(options[0]).to.deep.equal({
       label: 'Clean',
+      family: '"rubik"',
       font: '"rubik", var(--body-font-family, sans-serif)',
       italic: true,
       weight: '700',
@@ -100,7 +101,7 @@ describe('mini-editor-fonts-loader', () => {
     };
     const options = await getFontOptions();
     expect(options).to.deep.equal([
-      { label: 'Clean', font: '"rubik", var(--body-font-family, sans-serif)' },
+      { label: 'Clean', family: '"rubik"', font: '"rubik", var(--body-font-family, sans-serif)' },
     ]);
   });
 });

@@ -945,10 +945,14 @@ async function buildWidget(
     // The active card's template URN (card.id) — carried alongside backgroundUrl
     // so the Edit action can hand Express the exact source asset to fetch.
     backgroundUrn: first.card?.id || '',
+    // Branch deep link that opens this template as an Express project (background already applied).
+    // When present, the prod Edit CTA opens it instead of the generic base and skips the background
+    // hand-off — see open-in-express.js. Undefined on templates without a branch link.
+    backgroundBranchUrl: first.card?.branchUrl,
     // 'light' | 'dark' brightness of the background — drives the text colour
     backgroundMode: first.card?.mode || 'dark',
     font: {
-      family: fontOptions[0]?.font || 'sans-serif',
+      family: fontOptions[0]?.family || 'sans-serif',
       style: fontOptions[0]?.italic ? 'italic' : 'normal',
       weight: fontOptions[0]?.weight || 'normal',
       stretch: fontOptions[0]?.stretch || 'normal',
@@ -1064,7 +1068,7 @@ async function buildWidget(
 
   const applyFontToModel = (font) => updateContentModel({
     font: {
-      family: font.font,
+      family: font.family,
       style: font.italic ? 'italic' : 'normal',
       weight: font.weight || 'normal',
       stretch: font.stretch || 'normal',
@@ -1076,6 +1080,7 @@ async function buildWidget(
     backgroundWidth: bgCard.width,
     backgroundHeight: bgCard.height,
     backgroundUrn: bgCard.id || '',
+    backgroundBranchUrl: bgCard.branchUrl,
     // `backgroundMode` drives the download renderer's text contrast (synced here as useQuote does);
     // `mode` is kept for open-in-express.js, which reads it for the Express hand-off.
     backgroundMode: bgCard.mode || 'dark',
@@ -1188,11 +1193,12 @@ async function buildWidget(
           backgroundWidth: bgCard.width,
           backgroundHeight: bgCard.height,
           backgroundUrn: bgCard.id || '',
+          backgroundBranchUrl: bgCard.branchUrl,
           backgroundMode: bgCard.mode || 'dark'
         } : {}),
         ...(font ? {
           font: {
-            family: font.font,
+            family: font.family,
             style: font.italic ? 'italic' : 'normal',
             weight: font.weight || 'normal',
             stretch: font.stretch || 'normal',
@@ -1219,7 +1225,7 @@ async function buildWidget(
         if (patch.font) {
           updateContentModel({
             font: {
-              family: patch.font.font,
+              family: patch.font.family,
               style: patch.font.italic ? 'italic' : 'normal',
               weight: patch.font.weight || 'normal',
               stretch: patch.font.stretch || 'normal',
@@ -1229,6 +1235,7 @@ async function buildWidget(
         if (patch.card) {
           updateContentModel({
             backgroundUrl: patch.card.bg,
+            backgroundBranchUrl: patch.card.branchUrl,
             backgroundFullUrl: patch.card.fullBg || '',
             backgroundWidth: patch.card.width,
             backgroundHeight: patch.card.height,
