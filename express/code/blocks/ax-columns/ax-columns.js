@@ -353,6 +353,8 @@ function markVideoToGifImagesDecorative(scope) {
 }
 
 export default async function decorate(block) {
+  block.classList.add('s2');
+
   await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
     ({ createTag, getMetadata, getConfig } = utils);
   });
