@@ -937,6 +937,11 @@ async function buildWidget(
     quote: first.quote,
     author: first.author || '',
     backgroundUrl: first.card?.bg || '',
+    // Full-res JPEG + native pixel size of the background — used by download/copy/share/Express
+    // (backgroundUrl stays the light preview for the on-page card).
+    backgroundFullUrl: first.card?.fullBg || '',
+    backgroundWidth: first.card?.width,
+    backgroundHeight: first.card?.height,
     // The active card's template URN (card.id) — carried alongside backgroundUrl
     // so the Edit action can hand Express the exact source asset to fetch.
     backgroundUrn: first.card?.id || '',
@@ -1067,6 +1072,9 @@ async function buildWidget(
   });
   const applyCardToModel = (bgCard) => updateContentModel({
     backgroundUrl: bgCard.bg,
+    backgroundFullUrl: bgCard.fullBg || '',
+    backgroundWidth: bgCard.width,
+    backgroundHeight: bgCard.height,
     backgroundUrn: bgCard.id || '',
     // `backgroundMode` drives the download renderer's text contrast (synced here as useQuote does);
     // `mode` is kept for open-in-express.js, which reads it for the Express hand-off.
@@ -1176,6 +1184,9 @@ async function buildWidget(
         author: author || '',
         ...(bgCard ? {
           backgroundUrl: bgCard.bg,
+          backgroundFullUrl: bgCard.fullBg || '',
+          backgroundWidth: bgCard.width,
+          backgroundHeight: bgCard.height,
           backgroundUrn: bgCard.id || '',
           backgroundMode: bgCard.mode || 'dark'
         } : {}),
@@ -1218,6 +1229,9 @@ async function buildWidget(
         if (patch.card) {
           updateContentModel({
             backgroundUrl: patch.card.bg,
+            backgroundFullUrl: patch.card.fullBg || '',
+            backgroundWidth: patch.card.width,
+            backgroundHeight: patch.card.height,
             backgroundMode: patch.card.mode || 'dark',
           });
           setCardMode(patch.card.mode);

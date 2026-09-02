@@ -102,39 +102,49 @@ function buildCanvasFont(font, size) {
   return `${font.style || 'normal'} ${font.weight || 'normal'} ${size}px ${font.family}`;
 }
 
-export function drawMiniEditorText(context, model) {
+export function drawMiniEditorText(
+  context,
+  model,
+  width = MINI_EDITOR_EXPORT_WIDTH,
+  height = MINI_EDITOR_EXPORT_HEIGHT,
+) {
+  // Text scales uniformly with the canvas height (the constants are the 1084x700 design basis), so
+  // font size and the bottom margin stay proportional as the canvas grows to the full-res image.
+  const scale = height / MINI_EDITOR_EXPORT_HEIGHT;
+  const quoteLineHeight = QUOTE_LINE_HEIGHT * scale;
   const mode = model.backgroundMode === 'light' ? 'light' : 'dark';
   const colors = EXPORT_TEXT_COLORS[mode];
   context.save();
   context.fillStyle = colors.quote;
-  context.font = buildCanvasFont(model.font, QUOTE_FONT_SIZE);
+  context.font = buildCanvasFont(model.font, QUOTE_FONT_SIZE * scale);
   context.textAlign = 'center';
   context.textBaseline = 'middle';
 
-  // Width measured from the live card (see mini-editor-quote-width.js); QUOTE_MAX_WIDTH is the
-  // fallback when the model carries no measurement.
-  const lines = wrapCanvasText(context, model.quote, model.quoteWidth || QUOTE_MAX_WIDTH);
-  const firstLineY = (MINI_EDITOR_EXPORT_HEIGHT / 2)
-    - (((lines.length - 1) * QUOTE_LINE_HEIGHT) / 2);
+  // Column width measured from the live card, pre-scaled to this canvas by the caller (see
+  // mini-editor-quote-width.js); QUOTE_MAX_WIDTH * scale is the fallback.
+  const lines = wrapCanvasText(context, model.quote, model.quoteWidth || QUOTE_MAX_WIDTH * scale);
+  const firstLineY = (height / 2) - (((lines.length - 1) * quoteLineHeight) / 2);
   lines.forEach((line, index) => {
-    context.fillText(line, MINI_EDITOR_EXPORT_WIDTH / 2, firstLineY + (index * QUOTE_LINE_HEIGHT));
+    context.fillText(line, width / 2, firstLineY + (index * quoteLineHeight));
   });
 
   if (model.author) {
     context.fillStyle = colors.author;
-    context.font = buildCanvasFont(model.font, AUTHOR_FONT_SIZE);
+    context.font = buildCanvasFont(model.font, AUTHOR_FONT_SIZE * scale);
     context.textBaseline = 'bottom';
-    context.fillText(
-      model.author,
-      MINI_EDITOR_EXPORT_WIDTH / 2,
-      MINI_EDITOR_EXPORT_HEIGHT - AUTHOR_BOTTOM,
-    );
+    context.fillText(model.author, width / 2, height - AUTHOR_BOTTOM * scale);
   }
   context.restore();
 }
 
-export function drawMiniEditorCard(context, background, model) {
-  context.clearRect(0, 0, MINI_EDITOR_EXPORT_WIDTH, MINI_EDITOR_EXPORT_HEIGHT);
-  drawCoverImage(context, background);
-  drawMiniEditorText(context, model);
+export function drawMiniEditorCard(
+  context,
+  background,
+  model,
+  width = MINI_EDITOR_EXPORT_WIDTH,
+  height = MINI_EDITOR_EXPORT_HEIGHT,
+) {
+  context.clearRect(0, 0, width, height);
+  drawCoverImage(context, background, width, height);
+  drawMiniEditorText(context, model, width, height);
 }
