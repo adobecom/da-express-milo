@@ -17,11 +17,11 @@
 // Fallback used only if the Typekit kit fails to load or exposes no fonts
 // (network failure, ad blocker, or API shape change) — see getFontOptions.
 const FALLBACK_FONT_OPTIONS = [
-  { label: 'Sans', font: '"Cal Sans", "Inter", sans-serif' },
-  { label: 'Serif', font: '"Source Serif 4", Georgia, serif', italic: true },
-  { label: 'Script', font: '"Dancing Script", cursive', italic: true },
-  { label: 'Bold', font: '"Poppins", sans-serif', weight: '700' },
-  { label: 'Serious', font: 'Georgia, serif' },
+  { label: 'Sans', family: '"Cal Sans"', font: '"Cal Sans", "Inter", sans-serif' },
+  { label: 'Serif', family: '"Source Serif 4"', font: '"Source Serif 4", Georgia, serif', italic: true },
+  { label: 'Script', family: '"Dancing Script"', font: '"Dancing Script", cursive', italic: true },
+  { label: 'Bold', family: '"Poppins"', font: '"Poppins", sans-serif', weight: '700' },
+  { label: 'Serious', family: 'Georgia', font: 'Georgia, serif' },
 ];
 
 // Display name for each family slug in ADOBE_FONTS_KIT_ID, taken from the
@@ -156,7 +156,9 @@ function buildFontOptions() {
     .filter((family) => byFamily.has(family))
     .map((family) => {
       const { italic, bold, stretch } = byFamily.get(family);
-      const option = { label: familyToLabel(family), font: `"${family}", var(--body-font-family, sans-serif)` };
+      // `family` is the concrete family stored in the content model (canvas export + Express
+      // hand-off want a single family); `font` is the DOM/CSS stack used for on-page rendering.
+      const option = { label: familyToLabel(family), family: `"${family}"`, font: `"${family}", var(--body-font-family, sans-serif)` };
       if (italic) option.italic = true;
       if (bold) option.weight = '700';
       if (stretch) option.stretch = stretch;

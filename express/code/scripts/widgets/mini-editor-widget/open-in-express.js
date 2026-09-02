@@ -92,9 +92,9 @@ const GENERIC_FONT_FAMILIES = new Set([
   'system-ui', 'ui-sans-serif', 'ui-serif',
 ]);
 
-// The widget stores font.family as a CSS font stack (e.g. `"lobster", var(--body-font-family,
-// sans-serif)`) because it needs that to render the DOM. Express only wants the concrete family
-// name, so send just that — not the quotes, the `var(...)` fallback, or generic keywords.
+// The model stores font.family as the concrete family (e.g. `"lobster"`), but stay tolerant of a
+// full CSS stack too: Express only wants the concrete family name, so strip quotes, any `var(...)`
+// fallback, and generic keywords.
 function primaryFontFamily(cssFamily) {
   return (cssFamily || '')
     .split(',')

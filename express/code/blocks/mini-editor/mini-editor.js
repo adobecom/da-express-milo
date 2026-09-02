@@ -89,7 +89,7 @@ async function downloadCard(block, editor) {
       tags: 'mini-editor,download',
       severity: 'error',
     });
-    const message = await replaceKey('screenshot-download-failed', getConfig());
+    const message = await replaceKey('mini-editor-download-failed', getConfig());
     await showExpressToast({ message, variant: 'negative' });
   } finally {
     if (downloadButton) {
@@ -341,17 +341,39 @@ export default async function init(block) {
 
     let editorRef;
     const buildTopActions = (getEditor) => {
-      const getShareContent = async (action, strings) => {
-        if (action.value === 'whatsapp') {
-          return { data: { whatsappText: `${strings.heading}: ${window.location.href}` } };
-        }
+      // Card image generation (worker render + font/background loads + canvas encoding) is slow
+      // enough that starting it on the share-menu-item click burns through the mobile browser's
+      // user-activation window before navigator.share()/clipboard.write() ever run. Starting it
+      // when the share trigger opens (see `onOpen` below) gives it a head start; caching by a
+      // snapshot of the content model means it's rebuilt only when an edit actually changes it.
+      let cachedModelKey;
+      let cachedBlobPromise;
+      const getCardBlobPromise = () => {
         const model = getEditor()?.getContentModel();
-        if (!model) throw new Error('Mini-editor content model is unavailable');
-        const blob = await MiniEditorCardExporter.createCardBlob(model);
-        const file = new File([blob], 'quote-card.png', { type: blob.type || 'image/png' });
+        if (!model) return Promise.reject(new Error('Mini-editor content model is unavailable'));
+        const key = JSON.stringify(model);
+        if (cachedModelKey !== key) {
+          cachedModelKey = key;
+          cachedBlobPromise = MiniEditorCardExporter.createCardBlob(model).catch((error) => {
+            cachedModelKey = undefined;
+            throw error;
+          });
+        }
+        return cachedBlobPromise;
+      };
+
+      const getShareContent = async (action, strings) => {
+        const filePromise = getCardBlobPromise()
+          .then((blob) => new File([blob], 'quote-card.png', { type: blob.type || 'image/png' }));
+
+        if (action.type === 'copy') {
+          return { clipboard: { items: [new window.ClipboardItem({ 'image/png': filePromise })] } };
+        }
+
+        const file = await filePromise;
         return {
           share: { title: strings.heading, files: [file] },
-          clipboard: { files: [file] },
+          clipboard: { items: [new window.ClipboardItem({ 'image/png': file })] },
         };
       };
 
@@ -384,6 +406,7 @@ export default async function init(block) {
           type: 'share',
           shareMenu: {
             heading: { key: 'mini-editor-share-image', fallback: 'Share image' },
+            onOpen: () => { getCardBlobPromise().catch(() => {}); },
             actions: [
               {
                 value: 'whatsapp',
@@ -393,8 +416,16 @@ export default async function init(block) {
                   src: '/express/code/icons/S2_Icon_WhatsApp_20_N.svg',
                   size: 'm',
                 }),
-                onSelect: ({ data }) => {
-                  const text = encodeURIComponent(data.whatsappText);
+                onSelect: async ({ share }, { strings }) => {
+                  if (share?.files?.length && navigator.canShare?.(share)) {
+                    try {
+                      await navigator.share(share);
+                      return;
+                    } catch (error) {
+                      if (error?.name === 'AbortError') return;
+                    }
+                  }
+                  const text = encodeURIComponent(`${strings.heading}: ${window.location.href}`);
                   window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
                 },
               },
