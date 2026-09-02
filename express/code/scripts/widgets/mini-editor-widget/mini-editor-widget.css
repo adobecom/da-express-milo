@@ -1045,6 +1045,7 @@ sp-theme {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .me-card,
   .me-arc-card,
   .me-arc-card--center,
   .me-actions,
