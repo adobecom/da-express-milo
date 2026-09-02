@@ -1,0 +1,14 @@
+{
+  "name": "figma-page-diff",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Clone a page's content locally via the aem CLI, render it in a local dev server at a Figma reference's exact dimensions, and pixel-diff it against that reference.",
+  "bin": {
+    "figma-page-diff": "./figma-page-diff.mjs"
+  },
+  "dependencies": {
+    "jimp": "^1.6.1",
+    "playwright": "^1.49.0"
+  }
+}
