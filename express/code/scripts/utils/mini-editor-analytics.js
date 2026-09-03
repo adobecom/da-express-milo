@@ -1,5 +1,28 @@
+import { generateGuid, getAccessCountry, getDeviceInfo } from './device-info.js';
+
 const EXPORT_EVENT_NAME_AUTH = 'export-project-complete';
 const EXPORT_EVENT_NAME_UNAUTH = 'export-project-complete-unauth';
+const SOURCE_NAME = 'CCEX';
+const SOURCE_CLIENT_ID = 'projectx_webapp';
+
+function getPageNameFromPathname() {
+  const pathSegments = window.location.pathname.replace(/^\//, '').split('/').filter(Boolean);
+  return `adobe.com:${pathSegments.join(':')}`;
+}
+
+function isMobileWeb() {
+  return /android|iphone|ipad|ipod|mobile/i.test(navigator.userAgent || '');
+}
+
+function getLanguage() {
+  return document.documentElement?.lang || 'en';
+}
+
+function addIfDefined(target, key, value) {
+  if (value !== undefined && value !== null && value !== '') {
+    target[key] = value;
+  }
+}
 
 function isAuthenticatedUser() {
   try {
@@ -33,16 +56,116 @@ function toAttachedFormat(properties, prefix = '') {
   });
 }
 
-export default function trackMiniEditorExport({ exportMethod, uiLocation = 'seo-discover-page' } = {}) {
+function toAttachedFormatForMiniEditor(properties) {
+  return toAttachedFormat(properties).map((entry) => {
+    if (entry.propertyName === 'event.event_date') {
+      return {
+        ...entry,
+        propertyName: 'event_date',
+      };
+    }
+
+    return entry;
+  });
+}
+
+export default async function trackMiniEditorExport({ exportMethod, uiLocation = 'seo-discover-page' } = {}) {
+  let userAccountType = 'unknown';
+
   if (!exportMethod) return;
 
-  const eventName = isAuthenticatedUser() ? EXPORT_EVENT_NAME_AUTH : EXPORT_EVENT_NAME_UNAUTH;
+  const isAuthenticated = isAuthenticatedUser();
+  const eventName = isAuthenticated ? EXPORT_EVENT_NAME_AUTH : EXPORT_EVENT_NAME_UNAUTH;
+  const isMobile = isMobileWeb();
   const pageUrl = window.location?.href || '';
+  const dtsStart = new Date().toISOString();
+  const eventDate = dtsStart.slice(0, 10);
+  const language = getLanguage();
+  // eslint-disable-next-line no-underscore-dangle
+  const corpnewData = window.alloy_all?.data?._adobe_corpnew?.digitalData;
+  const pageName = corpnewData?.page?.pageInfo?.pageName
+    || getPageNameFromPathname();
   const workflow = 'export';
   const type = 'success';
   const subtype = 'export-project';
   const category = 'WEB';
   const subcategory = 'document';
+  const sourcePlatform = window.navigator?.userAgentData?.platform
+    || window.navigator?.platform
+    || 'unknown';
+  const mcidGuid = window.ecid || corpnewData?.event?.identifiers?.ECID || corpnewData?.ECID;
+  const guid = generateGuid();
+  const accessCountry = await getAccessCountry();
+  const deviceInfo = await getDeviceInfo();
+  let userGuid = '';
+  if (isAuthenticated && window.adobeIMS?.getProfile) {
+    try {
+      const profile = await window.adobeIMS.getProfile();
+      userGuid = profile?.userId || '';
+    } catch {
+      userGuid = '';
+    }
+  }
+  try {
+    userAccountType = window.adobeIMS?.getAccountType?.();
+  } catch (e) {
+    // eslint-disable-next-line no-console
+    console.log('Error:', e);
+  }
+
+  const sdmPayload = {
+    event: {
+      pagename: eventName,
+      platform_name: isMobile ? 'mobile-web' : 'desktop-web',
+      aa: {
+        page_name: pageName,
+      },
+      url: pageUrl,
+      event_date: eventDate,
+      dts_start: dtsStart,
+      user_agent: navigator.userAgent,
+      guid,
+      user_guid: userGuid,
+      category,
+      subcategory,
+      subtype,
+      type,
+      workflow,
+      is_authenticated: isAuthenticated,
+      mcid_guid: mcidGuid,
+    },
+    user: {
+      aa: {
+        post_page_url: pageUrl,
+      },
+    },
+    source: {
+      name: SOURCE_NAME,
+      client_id: SOURCE_CLIENT_ID,
+      platform: sourcePlatform,
+    },
+    hz: {
+      source_platform_type: isMobile ? 'mobile-web' : 'desktop-web',
+      device_name: deviceInfo.deviceName,
+      user: {
+        access_country: accessCountry,
+        os_name: deviceInfo.osName,
+        os_version: deviceInfo.osVersion,
+      },
+    },
+    custom: {
+      export_method: exportMethod,
+      ui: {
+        location: uiLocation,
+      },
+      displayedLanguage: language,
+      task: {
+        name: 'quote',
+      },
+    },
+  };
+
+  addIfDefined(sdmPayload.hz.user, 'account_type', userAccountType);
 
   const fireEvent = () => {
     // eslint-disable-next-line no-underscore-dangle
@@ -58,36 +181,8 @@ export default function trackMiniEditorExport({ exportMethod, uiLocation = 'seo-
           },
         },
         _adobe_corpnew: {
-          sdm: {
-            event: {
-              pagename: eventName,
-              url: pageUrl,
-            },
-            custom: {
-              export_method: exportMethod,
-              ui: {
-                location: uiLocation,
-              },
-            },
-          },
-          custom: toAttachedFormat({
-            event: {
-              pagename: eventName,
-              url: pageUrl,
-              workflow,
-              type,
-              subtype,
-              category,
-              subcategory,
-
-            },
-            custom: {
-              export_method: exportMethod,
-              ui: {
-                location: uiLocation,
-              },
-            },
-          }),
+          sdm: sdmPayload,
+          custom: toAttachedFormatForMiniEditor(sdmPayload),
         },
       },
     });
