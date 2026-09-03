@@ -649,4 +649,203 @@ describe('Blog Posts V2 Block', () => {
     const links = header.querySelectorAll('a');
     expect(links.length).to.equal(0);
   });
+
+  describe('blog card tags', () => {
+    const postA = {
+      path: '/blog/post-a.html',
+      title: 'Post A',
+      teaser: 'Teaser A',
+      image: 'test_image1.jpg',
+      date: 1640995200,
+      tags: '["design"]',
+      category: 'Design',
+    };
+    const postB = {
+      path: '/blog/post-b.html',
+      title: 'Post B',
+      teaser: 'Teaser B',
+      image: 'test_image2.jpg',
+      date: 1641081600,
+      tags: '["marketing"]',
+      category: 'Marketing',
+    };
+    const postNoCategory = {
+      path: '/blog/post-c.html',
+      title: 'Post C',
+      teaser: 'Teaser C',
+      image: 'test_image3.jpg',
+      date: 1641168000,
+      tags: '[]',
+      category: '',
+    };
+    const postJunkCategory = {
+      path: '/blog/post-d.html',
+      title: 'Post D',
+      teaser: 'Teaser D',
+      image: 'test_image4.jpg',
+      date: 1641254400,
+      tags: '[]',
+      category: 'null',
+    };
+    const postUnsafeCategory = {
+      path: '/blog/post-e.html',
+      title: 'Post E',
+      teaser: 'Teaser E',
+      image: 'test_image5.jpg',
+      date: 1641340800,
+      tags: '[]',
+      category: '<b>Design</b> & "Video"',
+    };
+
+    function stubBlogData(posts) {
+      const byPath = {};
+      posts.forEach((post) => {
+        byPath[post.path.split('.')[0]] = post;
+      });
+      fetchStub.resolves({
+        ok: true,
+        json: () => Promise.resolve({ data: posts, byPath }),
+      });
+    }
+
+    // Two <a> links keeps config.featured.length at 2, which routes decoration
+    // through the non-hero getCard() path and renders plain .blog-card elements.
+    function featuredMarkup(posts, wrapperOpen = '', wrapperClose = '') {
+      const links = posts.map((post) => `<a href="${post.path}">${post.title}</a>`).join('\n');
+      return `${wrapperOpen}<div class="blog-posts-v2"><div><div>${links}</div></div></div>${wrapperClose}`;
+    }
+
+    it('renders each card with its own post category instead of a shared tag', async () => {
+      stubBlogData([postA, postB]);
+      document.body.innerHTML = featuredMarkup([postA, postB]);
+      const tagBlock = document.querySelector('.blog-posts-v2');
+      await decorate(tagBlock);
+
+      const cardA = [...tagBlock.querySelectorAll('.blog-card')].find((c) => c.href.includes('post-a'));
+      const cardB = [...tagBlock.querySelectorAll('.blog-card')].find((c) => c.href.includes('post-b'));
+      expect(cardA.querySelector('.blog-tag').textContent).to.equal('Design');
+      expect(cardB.querySelector('.blog-tag').textContent).to.equal('Marketing');
+    });
+
+    it('shows the section\'s configured tag, not an unrelated post category', async () => {
+      const matchingCategoryPost = {
+        path: '/blog/post-f.html',
+        title: 'Post F',
+        teaser: 'Teaser F',
+        image: 'test_image6.jpg',
+        date: 1641427200,
+        tags: '["design", "inspiration"]',
+        category: 'Design',
+      };
+      const unrelatedCategoryPost = {
+        path: '/blog/post-g.html',
+        title: 'Post G',
+        teaser: 'Teaser G',
+        image: 'test_image7.jpg',
+        date: 1641513600,
+        tags: '["design", "small business"]',
+        category: 'Featured',
+      };
+      stubBlogData([matchingCategoryPost, unrelatedCategoryPost]);
+      document.body.innerHTML = `
+        <div class="blog-posts-v2">
+          <div><div><p>tags</p></div><div><p>design</p></div></div>
+          <div><div><p>page-size</p></div><div><p>3</p></div></div>
+        </div>
+      `;
+      const tagBlock = document.querySelector('.blog-posts-v2');
+      await decorate(tagBlock);
+
+      const tags = [...tagBlock.querySelectorAll('.blog-tag')];
+      expect(tags.length).to.equal(2);
+      tags.forEach((tag) => expect(tag.textContent).to.equal('Design'));
+    });
+
+    it('omits the tag element entirely when a post has no category', async () => {
+      stubBlogData([postNoCategory, postA]);
+      document.body.innerHTML = featuredMarkup([postNoCategory, postA]);
+      const tagBlock = document.querySelector('.blog-posts-v2');
+      await decorate(tagBlock);
+
+      const card = [...tagBlock.querySelectorAll('.blog-card')].find((c) => c.href.includes('post-c'));
+      expect(card.querySelector('.blog-tag')).to.not.exist;
+    });
+
+    it('treats stringy-junk category values ("null") as no tag', async () => {
+      stubBlogData([postJunkCategory, postA]);
+      document.body.innerHTML = featuredMarkup([postJunkCategory, postA]);
+      const tagBlock = document.querySelector('.blog-posts-v2');
+      await decorate(tagBlock);
+
+      const card = [...tagBlock.querySelectorAll('.blog-card')].find((c) => c.href.includes('post-d'));
+      expect(card.querySelector('.blog-tag')).to.not.exist;
+    });
+
+    it('escapes HTML special characters in the category before rendering', async () => {
+      stubBlogData([postUnsafeCategory, postA]);
+      document.body.innerHTML = featuredMarkup([postUnsafeCategory, postA]);
+      const tagBlock = document.querySelector('.blog-posts-v2');
+      await decorate(tagBlock);
+
+      const card = [...tagBlock.querySelectorAll('.blog-card')].find((c) => c.href.includes('post-e'));
+      const tag = card.querySelector('.blog-tag');
+      expect(tag.textContent).to.equal('<b>Design</b> & "Video"');
+      expect(tag.querySelector('b')).to.not.exist;
+    });
+
+    it('uses the active content-toggle section value instead of post category', async () => {
+      stubBlogData([postA, postB]);
+      document.body.innerHTML = featuredMarkup(
+        [postA, postB],
+        '<div class="section content-toggle-active" data-toggle="Trending">',
+        '</div>',
+      );
+      const tagBlock = document.querySelector('.blog-posts-v2');
+      await decorate(tagBlock);
+
+      const tags = [...tagBlock.querySelectorAll('.blog-tag')];
+      expect(tags.length).to.equal(2);
+      tags.forEach((tag) => expect(tag.textContent).to.equal('Trending'));
+    });
+
+    it('restores each card\'s own category when the toggle activates without a value', async () => {
+      stubBlogData([postA, postB]);
+      document.body.innerHTML = featuredMarkup(
+        [postA, postB],
+        '<div class="section" data-toggle="">',
+        '</div>',
+      );
+      const tagBlock = document.querySelector('.blog-posts-v2');
+      await decorate(tagBlock);
+
+      const section = document.querySelector('.section[data-toggle]');
+      section.classList.add('content-toggle-active');
+      await new Promise((resolve) => { setTimeout(resolve, 0); });
+
+      const cardA = [...tagBlock.querySelectorAll('.blog-card')].find((c) => c.href.includes('post-a'));
+      const cardB = [...tagBlock.querySelectorAll('.blog-card')].find((c) => c.href.includes('post-b'));
+      expect(cardA.querySelector('.blog-tag').textContent).to.equal('Design');
+      expect(cardB.querySelector('.blog-tag').textContent).to.equal('Marketing');
+    });
+
+    it('creates a tag element on activation for a card that had no category at render time', async () => {
+      stubBlogData([postNoCategory, postA]);
+      document.body.innerHTML = featuredMarkup(
+        [postNoCategory, postA],
+        '<div class="section" data-toggle="Trending">',
+        '</div>',
+      );
+      const tagBlock = document.querySelector('.blog-posts-v2');
+      await decorate(tagBlock);
+
+      const noCategoryCard = [...tagBlock.querySelectorAll('.blog-card')].find((c) => c.href.includes('post-c'));
+      expect(noCategoryCard.querySelector('.blog-tag')).to.not.exist;
+
+      const section = document.querySelector('.section[data-toggle]');
+      section.classList.add('content-toggle-active');
+      await new Promise((resolve) => { setTimeout(resolve, 0); });
+
+      expect(noCategoryCard.querySelector('.blog-tag').textContent).to.equal('Trending');
+    });
+  });
 });
