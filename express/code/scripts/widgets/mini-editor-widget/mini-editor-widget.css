@@ -125,9 +125,15 @@
   --mod-icon-color: var(--me-action-icon-color);
 }
 
-.me-action:hover,
 .me-action[aria-expanded='true'] {
   background: var(--me-action-hover-bg);
+}
+
+/* Hover highlight on real pointers only — on touch, :hover sticks after a tap. */
+@media (hover: hover) {
+  .me-action:hover {
+    background: var(--me-action-hover-bg);
+  }
 }
 
 /* Modal action bar: desktop shows on hover (over card), tablet/mobile always visible.
@@ -1045,6 +1051,7 @@ sp-theme {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .me-card,
   .me-arc-card,
   .me-arc-card--center,
   .me-actions,

@@ -1,0 +1,77 @@
+/*
+ * MWPW-203933: JP Discover page font styling.
+ * https://www.figma.com/design/7FqFRFff85hPkBNpU2WFrc/Discover-Page (mobile
+ * node 7101-70835, desktop node 7643-98563) gives two confirmed heading
+ * tiers - mobile xs/s/m/l/xl = 16/18/20/24/28, desktop (>=1200px) =
+ * 18/20/24/28/36, both at 900 weight / 125% line-height. That exactly
+ * matches this file's existing --ax-heading-* and --Global-Typography-
+ * Size-Headings and Body-Body-M tokens (native, unmodified, at both
+ * breakpoints) - so those systems are already correct and must NOT be
+ * touched here. The mismatch is isolated to the legacy
+ * --heading/body-font-size-* tokens, which have no responsive tiers at
+ * all; this file gives them the same two-tier treatment.
+ * Breakpoints: the JP spec has only TWO type tiers - mobile (320-599) and
+ * tablet (600-1199) are identical (Figma nodes 7319-154859 == 7868-41979;
+ * they differ only in grid/padding, not type), so the base :root block
+ * covers both and >=1200px (node 7643-98563) is the only step-up. Do not
+ * add a 600-1199 tier - it would just duplicate the base values.
+ * Toggle: page/domain metadata `font-styling: jp` (see scripts.js loadStyles()).
+ */
+:root {
+  --heading-line-height: 125%;
+  --heading-font-size-xs: 16px;
+  --heading-font-size-s: 18px;
+  --heading-font-size-m: 20px;
+  --heading-font-size-ml: 20px;
+  --heading-font-size-l: 24px;
+  --heading-font-size-xl: 28px;
+  --heading-font-size-xxl: 36px;
+  --heading-font-size-xxxl: 44px;
+
+  --body-font-size-xs: 14px;
+}
+
+@media (min-width: 1200px) {
+  :root {
+    --heading-font-size-xs: 18px;
+    --heading-font-size-s: 20px;
+    --heading-font-size-m: 24px;
+    --heading-font-size-ml: 24px;
+    --heading-font-size-l: 28px;
+    --heading-font-size-xl: 36px;
+    --heading-font-size-xxl: 44px;
+    --heading-font-size-xxxl: 80px;
+
+    --body-font-size-s: 16px;
+    --body-font-size-m: 18px;
+    --body-font-size-l: 20px;
+    --body-font-size-xl: 22px;
+  }
+}
+
+/* blog.css sets a hardcoded size/line-height on .section h3 that doesn't
+   read the heading tokens above; :not(#_) matches its specificity without !important. */
+.blog main .section h3:not(#_) {
+  line-height: 125%;
+}
+
+.discover-cards.flip .flip-card-front :is(h1, h2, h3, h4, h5, h6):not(#_) {
+  line-height: 125%;
+}
+
+main .section.long-form:not(.long-form-blog) .content h2 {
+  font-size: var(--heading-font-size-l);
+}
+
+main .section.long-form:not(.long-form-blog) .content h3 {
+  font-size: var(--heading-font-size-m);
+}
+
+/* long-form hardcodes body line-height (130%); JP Body/M is 1.5. */
+main .section.long-form .content :is(p, ul, ol):not(#_) {
+  line-height: 1.5;
+}
+
+.section .ax-marquee-dynamic-hero [class*="heading"]:first-of-type{
+  font-size: var(--heading-font-size-xl);
+}

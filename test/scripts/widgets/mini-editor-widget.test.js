@@ -13,13 +13,21 @@ const a11y = {
 };
 
 const fontOptions = [
-  { label: 'Sans', font: '"Cal Sans", sans-serif' },
-  { label: 'Serif', font: 'Georgia, serif', italic: true },
+  { label: 'Sans', family: '"Cal Sans"', font: '"Cal Sans", sans-serif' },
+  { label: 'Serif', family: 'Georgia', font: 'Georgia, serif', italic: true },
 ];
 
 function buildCardSet(count = 9) {
   return Array.from({ length: count }, (_, i) => ({
-    card: { id: `urn:${i}`, bg: `/img/image${i}.jpg`, mode: i % 2 === 0 ? 'dark' : 'light' },
+    card: {
+      id: `urn:${i}`,
+      bg: `/img/image${i}.jpg`,
+      branchUrl: `https://branch/${i}`,
+      fullBg: `/img/image${i}-full.jpg`,
+      width: 1920,
+      height: 1080,
+      mode: i % 2 === 0 ? 'dark' : 'light',
+    },
     quote: `Quote number ${i}`,
     author: i % 2 === 0 ? `Author ${i}` : '',
   }));
@@ -72,10 +80,14 @@ describe('mini-editor-widget', () => {
       quote: 'Quote number 0',
       author: 'Author 0',
       backgroundUrl: '/img/image0.jpg',
+      backgroundFullUrl: '/img/image0-full.jpg',
+      backgroundWidth: 1920,
+      backgroundHeight: 1080,
       backgroundUrn: 'urn:0',
+      backgroundBranchUrl: 'https://branch/0',
       backgroundMode: 'dark',
       font: {
-        family: fontOptions[0].font,
+        family: fontOptions[0].family,
         style: 'normal',
         weight: 'normal',
         stretch: 'normal',
@@ -85,7 +97,7 @@ describe('mini-editor-widget', () => {
     model.quote = 'Changed outside';
     model.font.family = 'Changed outside';
     expect(editor.getContentModel().quote).to.equal('Quote number 0');
-    expect(editor.getContentModel().font.family).to.equal(fontOptions[0].font);
+    expect(editor.getContentModel().font.family).to.equal(fontOptions[0].family);
   });
 
   it('renders the first card set entry into the main widget card', async () => {
@@ -126,7 +138,7 @@ describe('mini-editor-widget', () => {
     expect(root.style.getPropertyValue('--me-quote-font-style')).to.equal('italic');
     expect(serifBtn.classList.contains('is-selected')).to.be.true;
     expect(editor.getContentModel().font).to.deep.equal({
-      family: fontOptions[1].font,
+      family: fontOptions[1].family,
       style: 'italic',
       weight: 'normal',
       stretch: 'normal',
@@ -165,7 +177,7 @@ describe('mini-editor-widget', () => {
       .find((b) => b.textContent === 'Serif');
     serifBtn.click();
     expect(editor.getContentModel().font).to.deep.equal({
-      family: fontOptions[1].font,
+      family: fontOptions[1].family,
       style: 'italic',
       weight: 'normal',
       stretch: 'normal',

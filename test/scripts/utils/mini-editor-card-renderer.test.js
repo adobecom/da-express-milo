@@ -87,4 +87,31 @@ describe('mini-editor card renderer', () => {
     expect(fillStyleChanges).to.include('#131313');
     expect(fillStyleChanges).to.include('#505050');
   });
+
+  it('wraps the quote at model.quoteWidth, falling back to QUOTE_MAX_WIDTH', () => {
+    const linesFor = (quoteWidth) => {
+      const drawn = [];
+      const context = {
+        save() {},
+        restore() {},
+        measureText: (t) => ({ width: t.length * 10 }),
+        fillText: (text) => { drawn.push(text); },
+        fillStyle: '',
+        font: '',
+        textAlign: 'left',
+        textBaseline: 'alphabetic',
+      };
+      drawMiniEditorText(context, {
+        quote: 'one two three four five',
+        backgroundMode: 'light',
+        font: { family: 'sans-serif', style: 'normal', weight: 'normal' },
+        ...(quoteWidth ? { quoteWidth } : {}),
+      });
+      return drawn;
+    };
+    // Narrow measured column (7 chars/line) forces several lines.
+    expect(linesFor(70)).to.deep.equal(['one two', 'three', 'four', 'five']);
+    // No measurement -> QUOTE_MAX_WIDTH (624 -> 62 chars) keeps it on one line.
+    expect(linesFor(undefined)).to.deep.equal(['one two three four five']);
+  });
 });

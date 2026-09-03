@@ -24,36 +24,45 @@ import {
   QUOTE_LINE_HEIGHT,
   AUTHOR_FONT_SIZE,
   AUTHOR_BOTTOM,
+  AUTHOR_LINE_HEIGHT,
 } from '../../utils/mini-editor-card-renderer.js';
+import measureQuoteExportWidth from '../../utils/mini-editor-quote-width.js';
 
-// The card layout in the renderer's 1084x700 design coordinates (the download's space). Express
-// makes the canvas that size and scales this layout to whatever canvas it gets. Font size + column
-// width are the download's own values, so a 40px quote in a 624 column reproduces the download's
-// wrap. Boxes are top-left based: the quote column is centred vertically, the author near the
-// bottom. `height` is nominal (Express uses auto-height) — it's here so the payload is a full rect.
-const TEXT_COLUMN_X = (MINI_EDITOR_EXPORT_WIDTH - QUOTE_MAX_WIDTH) / 2;
-const CARD_LAYOUT = {
-  width: MINI_EDITOR_EXPORT_WIDTH,
-  height: MINI_EDITOR_EXPORT_HEIGHT,
-  quote: {
-    x: TEXT_COLUMN_X,
-    y: Math.round(MINI_EDITOR_EXPORT_HEIGHT / 2 - QUOTE_LINE_HEIGHT),
-    width: QUOTE_MAX_WIDTH,
-    height: QUOTE_LINE_HEIGHT * 2,
-    fontSize: QUOTE_FONT_SIZE,
-  },
-  author: {
-    x: TEXT_COLUMN_X,
-    y: MINI_EDITOR_EXPORT_HEIGHT - AUTHOR_BOTTOM - AUTHOR_FONT_SIZE,
-    width: QUOTE_MAX_WIDTH,
-    height: AUTHOR_FONT_SIZE + 8,
-    fontSize: AUTHOR_FONT_SIZE,
-  },
-};
+// The card layout in the full-res canvas's coordinates (canvasW x canvasH = the background's native
+// size). Express creates a canvas that size and scales the layout to it 1:1. Text scales uniformly
+// with canvas height (the renderer constants are the 1084x700 design basis); `quoteWidth` is the
+// live card's measured column, already scaled to this canvas. Boxes are top-left based: quote
+// column centred vertically, author near the bottom. `height` is nominal (Express auto-heights).
+function buildCardLayout(quoteWidth, canvasWidth, canvasHeight) {
+  const scale = canvasHeight / MINI_EDITOR_EXPORT_HEIGHT;
+  const authorWidth = QUOTE_MAX_WIDTH * scale;
+  return {
+    width: canvasWidth,
+    height: canvasHeight,
+    quote: {
+      x: (canvasWidth - quoteWidth) / 2,
+      y: Math.round(canvasHeight / 2 - QUOTE_LINE_HEIGHT * scale),
+      width: quoteWidth,
+      height: QUOTE_LINE_HEIGHT * 2 * scale,
+      fontSize: QUOTE_FONT_SIZE * scale,
+    },
+    author: {
+      x: (canvasWidth - authorWidth) / 2,
+      // hz sets this as the auto-height frame's TOP. That frame is line-height (not font-size) tall
+      // and centres the glyph, so anchor by the glyph centre — its visual bottom then sits
+      // AUTHOR_BOTTOM from the canvas edge like the download. Using AUTHOR_FONT_SIZE alone left the
+      // taller frame (and text) sitting too low on hz.
+      y: canvasHeight - (AUTHOR_BOTTOM + (AUTHOR_LINE_HEIGHT + AUTHOR_FONT_SIZE) / 2) * scale,
+      width: authorWidth,
+      height: (AUTHOR_FONT_SIZE + 8) * scale,
+      fontSize: AUTHOR_FONT_SIZE * scale,
+    },
+  };
+}
 
 const LOCAL_BASE_URL = 'https://localhost.adobe.com:8080/new';
 const STAGE_BASE_URL = 'https://stage.projectx.corp.adobe.com/new';
-const PROD_BASE_URL = 'https://new.express.adobe.com/new';
+const PROD_BASE_URL = 'https://adobesparkpost.app.link/JpBOBeJz35b';
 const REFERRER = 'express-mini-editor';
 const FEATURE_FLAG = 'acom-mini-editor-entry';
 const CANVAS_UNIT = 'px';
@@ -83,9 +92,9 @@ const GENERIC_FONT_FAMILIES = new Set([
   'system-ui', 'ui-sans-serif', 'ui-serif',
 ]);
 
-// The widget stores font.family as a CSS font stack (e.g. `"lobster", var(--body-font-family,
-// sans-serif)`) because it needs that to render the DOM. Express only wants the concrete family
-// name, so send just that — not the quotes, the `var(...)` fallback, or generic keywords.
+// The model stores font.family as the concrete family (e.g. `"lobster"`), but stay tolerant of a
+// full CSS stack too: Express only wants the concrete family name, so strip quotes, any `var(...)`
+// fallback, and generic keywords.
 function primaryFontFamily(cssFamily) {
   return (cssFamily || '')
     .split(',')
@@ -110,9 +119,16 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
 
   const params = new URLSearchParams(window.location.search);
   const hzenv = params.get('hzenv');
-  const baseUrl = hzenv === 'local' || hzenv === 'stage'
-    ? getTestBaseUrl(hzenv, params.get('base'))
-    : prodBaseUrl;
+  const isTestEnv = hzenv === 'local' || hzenv === 'stage';
+
+  // On prod, a template that carries its own Branch deep link opens THAT template as the Express
+  // project (background already applied), so we open the branch link instead of the generic base
+  // and hand off text only — no background URL, no /new canvas-size params. Test envs keep the
+  // /new base + background so the Edit flow stays exercisable against non-prod Express.
+  const branchUrl = model.backgroundBranchUrl;
+  const useBranch = !isTestEnv && !!branchUrl;
+  const prodBase = useBranch ? branchUrl : prodBaseUrl;
+  const baseUrl = isTestEnv ? getTestBaseUrl(hzenv, params.get('base')) : prodBase;
 
   // Attribution params only (placement) — not isSearchOverride, which would
   // inject category=templates and its own width/height. Our params are set
@@ -125,11 +141,19 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
   const quoteColor = isLight ? '#131313' : '#FFFFFF';
   const authorColor = isLight ? '#505050' : '#E6E6E6';
 
+  // Express creates the canvas at the background's native full-res size; the layout scales to it.
+  // The measured quote column is in the design (40px-font) basis, so scale it by the height factor.
+  const canvasWidth = model.backgroundWidth || MINI_EDITOR_EXPORT_WIDTH;
+  const canvasHeight = model.backgroundHeight || MINI_EDITOR_EXPORT_HEIGHT;
+  const scale = canvasHeight / MINI_EDITOR_EXPORT_HEIGHT;
+  const quoteWidth = Math.round(measureQuoteExportWidth() * scale);
+
   const payload = {
     // URN is carried for provenance/analytics; backgroundUrl is what Express fetches
     // (the template rendition — a bare public template URN isn't dereferenceable on the hz side).
+    // Empty in the branch case: the branch-opened template already supplies the background.
     backgroundUrn: model.backgroundUrn || '',
-    backgroundUrl: model.backgroundUrl || '',
+    backgroundUrl: useBranch ? '' : (model.backgroundFullUrl || model.backgroundUrl || ''),
     quote: model.quote || '',
     author: model.author || '',
     quoteColor,
@@ -140,16 +164,23 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
       weight: model.font?.weight || 'normal',
       stretch: model.font?.stretch || 'normal',
     },
-    // Card-space layout; Express scales it to the canvas it creates (see CARD_LAYOUT).
-    layout: CARD_LAYOUT,
+    // Full-res-canvas layout; Express scales it to the canvas it creates (1:1). The quote column is
+    // measured from the live card so the reproduction matches this quote's actual box.
+    layout: buildCardLayout(quoteWidth, canvasWidth, canvasHeight),
   };
 
+  // referrer/feature-enable/miniEditor are our own keys — `.set` appends them to (never clobbers)
+  // any params the branch link already carries; Branch forwards them to Express on expansion.
   url.searchParams.set('referrer', REFERRER);
   url.searchParams.set('feature-enable', FEATURE_FLAG);
   url.searchParams.set('miniEditor', encodePayload(payload));
-  url.searchParams.set('width', String(MINI_EDITOR_EXPORT_WIDTH));
-  url.searchParams.set('height', String(MINI_EDITOR_EXPORT_HEIGHT));
-  url.searchParams.set('unit', CANVAS_UNIT);
+  // width/height/unit are /new-only. The branch link opens an existing template that owns its
+  // canvas (and may carry its own sizing params), so don't send — or override — them there.
+  if (!useBranch) {
+    url.searchParams.set('width', String(canvasWidth));
+    url.searchParams.set('height', String(canvasHeight));
+    url.searchParams.set('unit', CANVAS_UNIT);
+  }
 
   return url.toString();
 }
