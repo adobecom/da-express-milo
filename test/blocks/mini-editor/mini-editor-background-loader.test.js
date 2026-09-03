@@ -34,9 +34,60 @@ describe('mini-editor-background-loader', () => {
     const [calledUrl] = fetchStub.firstCall.args;
     expect(calledUrl).to.contain('collectionId=urn:collection:1');
     expect(cards).to.deep.equal([
-      { id: 'urn:1', bg: 'https://cdn/rendition/1', title: '', mode: 'light' },
-      { id: 'urn:2', bg: 'https://cdn/rendition/2', title: '', mode: 'light' },
+      {
+        id: 'urn:1',
+        bg: 'https://cdn/rendition/1',
+        branchUrl: 'https://example.com',
+        fullBg: undefined,
+        width: undefined,
+        height: undefined,
+        title: '',
+        mode: 'light',
+      },
+      {
+        id: 'urn:2',
+        bg: 'https://cdn/rendition/2',
+        branchUrl: 'https://example.com',
+        fullBg: undefined,
+        width: undefined,
+        height: undefined,
+        title: '',
+        mode: 'light',
+      },
     ]);
+  });
+
+  it('derives the full-res JPEG url and native size from a templated rendition + task.size', async () => {
+    const href = 'https://cdn/rendition/1?assetType=TEMPLATE&etag=e1{&page,size,type,fragment}';
+    const items = [{
+      id: 'urn:1',
+      status: 'approved',
+      customLinks: { branchUrl: 'https://example.com' },
+      behaviors: ['still'],
+      pages: [{
+        task: { size: { name: '1920x1080px' } },
+        rendition: {
+          image: {
+            thumbnail: { componentId: 'abc' },
+            preview: {
+              componentId: 'pv', width: 1200, height: 675, mediaType: 'image/webp',
+            },
+          },
+        },
+      }],
+      _links: {
+        'http://ns.adobe.com/adobecloud/rel/rendition': { href },
+        'http://ns.adobe.com/adobecloud/rel/component': { href: 'https://cdn/component/1' },
+      },
+    }];
+    fetchStub = sinon.stub(window, 'fetch').resolves({ json: async () => ({ items }) });
+    const [card] = await getCardBackgrounds({ limit: 8, collectionId: 'urn:collection:1' });
+    // Preview (webp, 1200) stays for the on-page card display.
+    expect(card.bg).to.contain('size=1200').and.to.contain('type=image/webp');
+    // Full-res: native size (1920), JPEG, no fragment.
+    expect(card.fullBg).to.equal('https://cdn/rendition/1?assetType=TEMPLATE&etag=e1&size=1920&type=image/jpeg');
+    expect(card.width).to.equal(1920);
+    expect(card.height).to.equal(1080);
   });
 
   it('filters out templates that fail validity checks', async () => {

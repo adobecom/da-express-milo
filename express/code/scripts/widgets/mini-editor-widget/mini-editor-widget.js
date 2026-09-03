@@ -45,8 +45,25 @@
 
 let createTag;
 let getIconElementDeprecated;
+let uidCounter = 0;
 
 const DECO_CARD_COUNT = 8;
+
+function createSecureUid(prefix = 'mini-editor') {
+  const cryptoObj = window.crypto;
+  if (cryptoObj?.randomUUID) {
+    return `${prefix}-${cryptoObj.randomUUID().replace(/-/g, '').slice(0, 12)}`;
+  }
+  if (cryptoObj?.getRandomValues) {
+    const bytes = new Uint8Array(8);
+    cryptoObj.getRandomValues(bytes);
+    const token = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+    return `${prefix}-${token.slice(0, 12)}`;
+  }
+
+  uidCounter += 1;
+  return `${prefix}-${Date.now().toString(36)}${uidCounter.toString(36)}`;
+}
 const DECO_QUOTE_CHAR_LIMIT = 216;
 const EDITOR_QUOTE_CHAR_LIMIT = 248;
 
@@ -920,13 +937,22 @@ async function buildWidget(
     quote: first.quote,
     author: first.author || '',
     backgroundUrl: first.card?.bg || '',
+    // Full-res JPEG + native pixel size of the background — used by download/copy/share/Express
+    // (backgroundUrl stays the light preview for the on-page card).
+    backgroundFullUrl: first.card?.fullBg || '',
+    backgroundWidth: first.card?.width,
+    backgroundHeight: first.card?.height,
     // The active card's template URN (card.id) — carried alongside backgroundUrl
     // so the Edit action can hand Express the exact source asset to fetch.
     backgroundUrn: first.card?.id || '',
+    // Branch deep link that opens this template as an Express project (background already applied).
+    // When present, the prod Edit CTA opens it instead of the generic base and skips the background
+    // hand-off — see open-in-express.js. Undefined on templates without a branch link.
+    backgroundBranchUrl: first.card?.branchUrl,
     // 'light' | 'dark' brightness of the background — drives the text colour
     backgroundMode: first.card?.mode || 'dark',
     font: {
-      family: fontOptions[0]?.font || 'sans-serif',
+      family: fontOptions[0]?.family || 'sans-serif',
       style: fontOptions[0]?.italic ? 'italic' : 'normal',
       weight: fontOptions[0]?.weight || 'normal',
       stretch: fontOptions[0]?.stretch || 'normal',
@@ -1042,16 +1068,23 @@ async function buildWidget(
 
   const applyFontToModel = (font) => updateContentModel({
     font: {
-      family: font.font,
+      family: font.family,
       style: font.italic ? 'italic' : 'normal',
       weight: font.weight || 'normal',
       stretch: font.stretch || 'normal',
     },
   });
-  const applyCardToModel = (card) => updateContentModel({
-    backgroundUrl: card.bg,
-    backgroundUrn: card.id || '',
-    mode: card.mode || '',
+  const applyCardToModel = (bgCard) => updateContentModel({
+    backgroundUrl: bgCard.bg,
+    backgroundFullUrl: bgCard.fullBg || '',
+    backgroundWidth: bgCard.width,
+    backgroundHeight: bgCard.height,
+    backgroundUrn: bgCard.id || '',
+    backgroundBranchUrl: bgCard.branchUrl,
+    // `backgroundMode` drives the download renderer's text contrast (synced here as useQuote does);
+    // `mode` is kept for open-in-express.js, which reads it for the Express hand-off.
+    backgroundMode: bgCard.mode || 'dark',
+    mode: bgCard.mode || '',
   });
 
   // Keyboard-only "Skip quote suggestions" CTA, per Figma node 54:11762 — see
@@ -1156,12 +1189,16 @@ async function buildWidget(
         author: author || '',
         ...(bgCard ? {
           backgroundUrl: bgCard.bg,
+          backgroundFullUrl: bgCard.fullBg || '',
+          backgroundWidth: bgCard.width,
+          backgroundHeight: bgCard.height,
           backgroundUrn: bgCard.id || '',
+          backgroundBranchUrl: bgCard.branchUrl,
           backgroundMode: bgCard.mode || 'dark'
         } : {}),
         ...(font ? {
           font: {
-            family: font.font,
+            family: font.family,
             style: font.italic ? 'italic' : 'normal',
             weight: font.weight || 'normal',
             stretch: font.stretch || 'normal',
@@ -1188,7 +1225,7 @@ async function buildWidget(
         if (patch.font) {
           updateContentModel({
             font: {
-              family: patch.font.font,
+              family: patch.font.family,
               style: patch.font.italic ? 'italic' : 'normal',
               weight: patch.font.weight || 'normal',
               stretch: patch.font.stretch || 'normal',
@@ -1198,6 +1235,10 @@ async function buildWidget(
         if (patch.card) {
           updateContentModel({
             backgroundUrl: patch.card.bg,
+            backgroundBranchUrl: patch.card.branchUrl,
+            backgroundFullUrl: patch.card.fullBg || '',
+            backgroundWidth: patch.card.width,
+            backgroundHeight: patch.card.height,
             backgroundMode: patch.card.mode || 'dark',
           });
           setCardMode(patch.card.mode);
@@ -1424,12 +1465,13 @@ function wireDecoTabChain(decorations, root) {
 const ROLE_CLASSES = ['me-arc-card--prev', 'me-arc-card--center', 'me-arc-card--next', 'me-arc-card--off'];
 
 async function buildArcCard(onActivate, a11y, tabIndex) {
+  const hintId = createSecureUid('me-arc-card-hint');
   const el = createTag('div', {
     class: 'me-arc-card',
     role: 'option',
     'aria-selected': 'false',
     tabindex: tabIndex,
-    'aria-describedby': 'me-arc-card-hint',
+    'aria-describedby': hintId,
   });
   // quoteP/authorP live inside quoteWrap (not directly in el) purely so the
   // centre role can reuse .me-quote-wrap's existing CSS (frosted
@@ -1442,7 +1484,7 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
   const quoteP = createTag('div', { class: 'me-arc-quote' });
   const authorP = createTag('div', { class: 'me-arc-author' });
   const quoteWrap = createTag('div', { class: 'me-quote-wrap', tabIndex: -1 });
-  const hint = createTag('span', { id: 'me-arc-card-hint', class: 'sr-only' }, ['Copy quote to clipboard']);
+  const hint = createTag('span', { id: hintId, class: 'sr-only' }, ['Copy quote to clipboard']);
   quoteWrap.append(quoteP, hint);
   el.append(quoteWrap, authorP);
 
