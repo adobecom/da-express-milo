@@ -6,18 +6,8 @@
   min-height: unset;
 }
 
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing):first-child .ax-columns:first-child {
-  padding-top: 0;
-}
-
 .section:has(.ax-columns.marquee) {
   padding-top: var(--spacing-600);
-}
-
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing).long-form .ax-columns:last-child {
-  padding-bottom: var(--spacing-600);
 }
 
 .section:has(.ax-columns)>.content {
