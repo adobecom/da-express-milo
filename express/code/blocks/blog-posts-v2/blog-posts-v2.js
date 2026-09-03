@@ -466,6 +466,18 @@ function getBlogTagOverride(block) {
   return sanitizeTag(activeSection?.dataset.toggle);
 }
 
+function titleCase(value) {
+  return value.replace(/\w\S*/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+}
+
+// A post's own category can differ from the tag a section is filtered by (e.g. a
+// "Featured" post can still carry a "design" tag), so the badge must reflect the
+// filter, not the post's unrelated category. Only safe for a single configured tag.
+function getConfigTagOverride(config) {
+  if (!config.tags || Array.isArray(config.tags)) return '';
+  return titleCase(sanitizeTag(config.tags));
+}
+
 function updateBlogTags(block, tagValue) {
   const cards = block.querySelectorAll('.blog-card, .blog-hero-card');
   cards.forEach((card) => {
@@ -528,7 +540,7 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0, gridModu
     getDateFormatter(newLanguage);
   }
 
-  const blogTagOverride = getBlogTagOverride(blogPostsElements);
+  const blogTagOverride = getBlogTagOverride(blogPostsElements) || getConfigTagOverride(config);
 
   if (isHero) {
     const card = await getHeroCard(posts[0], dateFormatter, blogTagOverride);

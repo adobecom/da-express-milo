@@ -727,6 +727,40 @@ describe('Blog Posts V2 Block', () => {
       expect(cardB.querySelector('.blog-tag').textContent).to.equal('Marketing');
     });
 
+    it('shows the section\'s configured tag, not an unrelated post category', async () => {
+      const matchingCategoryPost = {
+        path: '/blog/post-f.html',
+        title: 'Post F',
+        teaser: 'Teaser F',
+        image: 'test_image6.jpg',
+        date: 1641427200,
+        tags: '["design", "inspiration"]',
+        category: 'Design',
+      };
+      const unrelatedCategoryPost = {
+        path: '/blog/post-g.html',
+        title: 'Post G',
+        teaser: 'Teaser G',
+        image: 'test_image7.jpg',
+        date: 1641513600,
+        tags: '["design", "small business"]',
+        category: 'Featured',
+      };
+      stubBlogData([matchingCategoryPost, unrelatedCategoryPost]);
+      document.body.innerHTML = `
+        <div class="blog-posts-v2">
+          <div><div><p>tags</p></div><div><p>design</p></div></div>
+          <div><div><p>page-size</p></div><div><p>3</p></div></div>
+        </div>
+      `;
+      const tagBlock = document.querySelector('.blog-posts-v2');
+      await decorate(tagBlock);
+
+      const tags = [...tagBlock.querySelectorAll('.blog-tag')];
+      expect(tags.length).to.equal(2);
+      tags.forEach((tag) => expect(tag.textContent).to.equal('Design'));
+    });
+
     it('omits the tag element entirely when a post has no category', async () => {
       stubBlogData([postNoCategory, postA]);
       document.body.innerHTML = featuredMarkup([postNoCategory, postA]);
