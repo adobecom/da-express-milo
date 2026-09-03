@@ -177,11 +177,21 @@ function normalizeConfigUrls(config) {
   return normalized;
 }
 
+// filterAllBlogPostsOnPage() computes every block's config up front, in one page-wide
+// pass, before each block has necessarily had its own heading row stripped by
+// extractHeadingContent(). Deriving config from a heading-stripped clone here makes
+// the result identical regardless of when this runs relative to that removal, instead
+// of racing it.
+function getConfigRowsSource(block) {
+  const firstRow = block.children[0];
+  if (!firstRow?.querySelector('h1, h2, h3, h4, h5, h6')) return block;
+  const clone = block.cloneNode(true);
+  clone.children[0].remove();
+  return clone;
+}
+
 function getBlogPostsConfig(block) {
   let config = {};
-
-  const rows = [...block.children];
-  const firstRow = [...rows[0].children];
 
   if (block.classList.contains('spreadsheet-powered')) {
     [...block.querySelectorAll('a')].forEach((a) => {
@@ -194,8 +204,12 @@ function getBlogPostsConfig(block) {
     });
   }
 
+  const configSource = getConfigRowsSource(block);
+  const rows = [...configSource.children];
+  const firstRow = rows[0] ? [...rows[0].children] : [];
+
   if (rows.length === 1 && firstRow.length === 1) {
-    const links = [...block.querySelectorAll('a')].map((a) => {
+    const links = [...configSource.querySelectorAll('a')].map((a) => {
       try {
         return new URL(a.href).pathname;
       } catch {
@@ -207,7 +221,7 @@ function getBlogPostsConfig(block) {
       featuredOnly: true,
     };
   } else {
-    config = readBlockConfig(block);
+    config = readBlockConfig(configSource);
     config = normalizeConfigUrls(config);
   }
 
@@ -334,6 +348,23 @@ async function getReadMoreString() {
   return readMoreString;
 }
 
+function sanitizeTag(value) {
+  if (typeof value !== 'string') return '';
+  const trimmed = value.trim();
+  const lower = trimmed.toLowerCase();
+  if (!trimmed || lower === 'null' || lower === 'undefined') return '';
+  return trimmed;
+}
+
+function escapeHtml(value) {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
 function getCardParameters(post, dateFormatter) {
   const path = post.path.split('.')[0];
   const { title, teaser, image } = post;
@@ -351,30 +382,34 @@ function getCardParameters(post, dateFormatter) {
   const filteredTitle = title.replace(/(\s?)(｜|\|)(\s?Adobe\sExpress\s?)$/g, '');
   const imagePath = image.split('?')[0].split('_')[1];
   return {
-    path, title, teaser, dateString, filteredTitle, imagePath,
+    path, title, teaser, dateString, filteredTitle, imagePath, category: post.category,
   };
 }
 
-async function getHeroCard(post, dateFormatter, blogTag) {
+async function getHeroCard(post, dateFormatter, blogTagOverride) {
   const readMoreString = await getReadMoreString();
   const {
-    path, title, teaser, dateString, filteredTitle, imagePath,
+    path, title, teaser, dateString, filteredTitle, imagePath, category,
   } = getCardParameters(post, dateFormatter);
+  const sanitizedCategory = sanitizeTag(category);
+  const tagValue = blogTagOverride || sanitizedCategory;
   const heroPicture = createOptimizedPicture(`./media_${imagePath}?format=webply&optimize=medium&width=750`, title, false);
 
   const card = createTag('a', {
     class: 'blog-hero-card',
     href: path,
   });
+  card.dataset.tagCategory = sanitizedCategory;
 
   const imageWrapper = createTag('div', { class: 'image-wrapper' });
   imageWrapper.appendChild(heroPicture);
 
   const pictureTag = imageWrapper.outerHTML;
   const dateMarkup = dateString ? `<p class="blog-card-date">${dateString}</p>` : '';
+  const tagMarkup = tagValue ? `<span class="blog-tag">${escapeHtml(tagValue)}</span>` : '';
   card.innerHTML = `<div class="blog-card-image">
     ${pictureTag}
-    <span class="blog-tag">${blogTag}</span>
+    ${tagMarkup}
     </div>
     <div class="blog-hero-card-body">
       <h3 class="blog-card-title">${filteredTitle}</h3>
@@ -385,24 +420,28 @@ async function getHeroCard(post, dateFormatter, blogTag) {
     </div>`;
   return card;
 }
-function getCard(post, dateFormatter, blogTag) {
+function getCard(post, dateFormatter, blogTagOverride) {
   const {
-    path, title, teaser, dateString, filteredTitle, imagePath,
+    path, title, teaser, dateString, filteredTitle, imagePath, category,
   } = getCardParameters(post, dateFormatter);
+  const sanitizedCategory = sanitizeTag(category);
+  const tagValue = blogTagOverride || sanitizedCategory;
   const cardPicture = createOptimizedPicture(`./media_${imagePath}?format=webply&optimize=medium&width=750`, title, false, [{ width: '750' }]);
   const card = createTag('a', {
     class: 'blog-card',
     href: path,
   });
+  card.dataset.tagCategory = sanitizedCategory;
 
   const imageWrapper = createTag('div', { class: 'image-wrapper' });
   imageWrapper.appendChild(cardPicture);
 
   const pictureTag = imageWrapper.outerHTML;
   const dateMarkup = dateString ? `<p class="blog-card-date">${dateString}</p>` : '';
+  const tagMarkup = tagValue ? `<span class="blog-tag">${escapeHtml(tagValue)}</span>` : '';
   card.innerHTML = `<div class="blog-card-image">
         ${pictureTag}
-        <span class="blog-tag">${blogTag}</span>
+        ${tagMarkup}
         </div>
         <section class="blog-card-body">
         <h3 class="blog-card-title">${filteredTitle}</h3>
@@ -430,24 +469,45 @@ function addRightChevronToViewAll(blockElement) {
 
   const rightChevronSVGHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16" fill="none">
       <path fill-rule="evenodd" clip-rule="evenodd" d="M5.46967 2.86029C5.76256 2.5674 6.23744 2.5674 6.53033 2.86029L11.0303 7.3603C11.3232 7.65319 11.3232 8.12806 11.0303 8.42095L6.53033 
-      12.921C6.23744 13.2138 5.76256 13.2138 5.46967 12.921C5.17678 12.6281 5.17678 12.1532 5.46967 11.8603L9.43934 7.89062L5.46967 3.92096C5.17678 3.62806 5.17678 3.15319 5.46967 2.86029Z" fill="#292929"/>
+      12.921C6.23744 13.2138 5.76256 13.2138 5.46967 12.921C5.17678 12.6281 5.17678 12.1532 5.46967 11.8603L9.43934 7.89062L5.46967 3.92096C5.17678 3.62806 5.17678 3.15319 5.46967 2.86029Z" fill="currentColor"/>
     </svg>`;
 
   link.innerHTML = `${link.innerHTML} ${rightChevronSVGHTML}`;
 }
 
-function getBlogTag(block) {
+function getBlogTagOverride(block) {
   const activeSection = block.closest('.section.content-toggle-active');
-  if (activeSection?.dataset.toggle?.trim()) {
-    return activeSection.dataset.toggle.trim();
-  }
-  return 'Social Media';
+  return sanitizeTag(activeSection?.dataset.toggle);
+}
+
+function titleCase(value) {
+  return value.replace(/\w\S*/g, (word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+}
+
+// A post's own category can differ from the tag a section is filtered by (e.g. a
+// "Featured" post can still carry a "design" tag), so the badge must reflect the
+// filter, not the post's unrelated category. Only safe for a single configured tag.
+function getConfigTagOverride(config) {
+  if (!config.tags || Array.isArray(config.tags)) return '';
+  return titleCase(sanitizeTag(config.tags));
 }
 
 function updateBlogTags(block, tagValue) {
-  const blogTags = block.querySelectorAll('.blog-tag');
-  blogTags.forEach((tag) => {
-    tag.textContent = tagValue;
+  const cards = block.querySelectorAll('.blog-card, .blog-hero-card');
+  cards.forEach((card) => {
+    const imageContainer = card.querySelector('.blog-card-image');
+    if (!imageContainer) return;
+    const value = tagValue || card.dataset.tagCategory || '';
+    let tag = imageContainer.querySelector('.blog-tag');
+    if (!value) {
+      tag?.remove();
+      return;
+    }
+    if (!tag) {
+      tag = createTag('span', { class: 'blog-tag' });
+      imageContainer.appendChild(tag);
+    }
+    tag.textContent = value;
   });
 }
 
@@ -459,8 +519,7 @@ function observeContentToggleChanges(block) {
     mutations.forEach((mutation) => {
       if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
         if (section.classList.contains('content-toggle-active')) {
-          const tagValue = section.dataset.toggle || 'Social Media';
-          updateBlogTags(block, tagValue);
+          updateBlogTags(block, sanitizeTag(section.dataset.toggle));
         }
       }
     });
@@ -495,17 +554,17 @@ async function decorateBlogPosts(blogPostsElements, config, offset = 0, gridModu
     getDateFormatter(newLanguage);
   }
 
-  const blogTag = getBlogTag(blogPostsElements);
+  const blogTagOverride = getBlogTagOverride(blogPostsElements) || getConfigTagOverride(config);
 
   if (isHero) {
-    const card = await getHeroCard(posts[0], dateFormatter, blogTag);
+    const card = await getHeroCard(posts[0], dateFormatter, blogTagOverride);
     blogPostsElements.prepend(card);
     images.push(card.querySelector('img'));
     count = 1;
   } else {
     for (let i = offset; i < posts.length && count < limit; i += 1) {
       const post = posts[i];
-      const card = getCard(post, dateFormatter, blogTag);
+      const card = getCard(post, dateFormatter, blogTagOverride);
       cards.append(card);
       images.push(card.querySelector('img'));
       count += 1;
@@ -640,7 +699,7 @@ export default async function decorate(block) {
         if (link) {
           const rightChevronSVGHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="15" height="16" viewBox="0 0 15 16" fill="none">
             <path fill-rule="evenodd" clip-rule="evenodd" d="M5.46967 2.86029C5.76256 2.5674 6.23744 2.5674 6.53033 2.86029L11.0303 7.3603C11.3232 7.65319 11.3232 8.12806 11.0303 8.42095L6.53033 
-            12.921C6.23744 13.2138 5.76256 13.2138 5.46967 12.921C5.17678 12.6281 5.17678 12.1532 5.46967 11.8603L9.43934 7.89062L5.46967 3.92096C5.17678 3.62806 5.17678 3.15319 5.46967 2.86029Z" fill="#292929"/>
+            12.921C6.23744 13.2138 5.76256 13.2138 5.46967 12.921C5.17678 12.6281 5.17678 12.1532 5.46967 11.8603L9.43934 7.89062L5.46967 3.92096C5.17678 3.62806 5.17678 3.15319 5.46967 2.86029Z" fill="currentColor"/>
           </svg>`;
           link.innerHTML = `${link.innerHTML} ${rightChevronSVGHTML}`;
         }
