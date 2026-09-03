@@ -1702,6 +1702,16 @@ function cycleThroughSuggestions(block, targetIndex = 0) {
   if (suggestions.length > 0) suggestions[targetIndex].focus();
 }
 
+function focusTrendLink(trendsContainer, targetIndex) {
+  const trendLinks = trendsContainer.querySelectorAll('.trend-link');
+  if (targetIndex < 0 || targetIndex >= trendLinks.length) return;
+
+  // Roving tabindex: only the focused trend link stays in the tab sequence
+  trendLinks.forEach((link) => { link.tabIndex = -1; });
+  trendLinks[targetIndex].tabIndex = 0;
+  trendLinks[targetIndex].focus();
+}
+
 function importSearchBar(block, blockMediator) {
   const parent = block.querySelector('.api-templates-toolbar .wrapper-content-search');
   const searchWrapper = blockMediator.get('stickySearchBar')?.element;
@@ -1719,6 +1729,32 @@ function importSearchBar(block, blockMediator) {
       const trendsContainer = searchWrapper.querySelector('.trends-container');
       const suggestionsContainer = searchWrapper.querySelector('.suggestions-container');
       const suggestionsList = searchWrapper.querySelector('.suggestions-list');
+
+      // cloneNode drops the trend-link keydown listeners set in search-marquee, so
+      // re-attach the roving-tabindex arrow navigation on the sticky search bar's copy.
+      const trendLinks = trendsContainer.querySelectorAll('.trend-link');
+      trendLinks.forEach((trendLink, index) => {
+        trendLink.tabIndex = index === 0 ? 0 : -1;
+        trendLink.addEventListener('keydown', (event) => {
+          const currentIndex = Array.from(trendLinks).indexOf(event.currentTarget);
+
+          if (event.key === 'ArrowDown' || event.keyCode === 40) {
+            event.preventDefault();
+            focusTrendLink(trendsContainer, currentIndex + 1);
+          } else if (event.key === 'ArrowUp' || event.keyCode === 38) {
+            event.preventDefault();
+            if (currentIndex === 0) {
+              searchBar.focus();
+            } else {
+              focusTrendLink(trendsContainer, currentIndex - 1);
+            }
+          } else if (event.key === 'Escape') {
+            event.preventDefault();
+            searchDropdown.classList.add('hidden');
+            searchBar.focus();
+          }
+        });
+      });
 
       searchBar.addEventListener('click', (event) => {
         event.stopPropagation();
@@ -1748,7 +1784,11 @@ function importSearchBar(block, blockMediator) {
       searchBar.addEventListener('keydown', (event) => {
         if (event.key === 'ArrowDown' || event.keyCode === 40) {
           event.preventDefault();
-          cycleThroughSuggestions(block);
+          if (!suggestionsContainer.classList.contains('hidden')) {
+            cycleThroughSuggestions(block);
+          } else if (!trendsContainer.classList.contains('hidden')) {
+            focusTrendLink(trendsContainer, 0);
+          }
         }
       });
 
