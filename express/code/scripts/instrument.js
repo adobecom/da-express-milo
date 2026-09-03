@@ -340,7 +340,8 @@ function trackColorPageLoad() {
 
 function trackExpressFeaturePageLoad() {
   try {
-    if (getMetadata('pagetype') !== 'font-generator') return;
+    const pageType = getMetadata('pagetype');
+    if (pageType !== 'font-generator' && pageType !== 'mini-editor') return;
 
     const eventName = 'view-acom-express-features';
     let refDomain = '';
@@ -352,6 +353,7 @@ function trackExpressFeaturePageLoad() {
     } catch { /* no referrer or invalid */ }
 
     const fireEvent = () => {
+      const isMiniEditorPage = pageType === 'mini-editor';
       _satellite.track('event', {
         xdm: {},
         data: {
@@ -364,6 +366,23 @@ function trackExpressFeaturePageLoad() {
             },
           },
           _adobe_corpnew: {
+            ...(isMiniEditorPage && {
+              custom: [
+                { propertyName: 'event.pagename', propertyValue: eventName },
+                { propertyName: 'event.url', propertyValue: loc.href },
+                { propertyName: 'event.subcategory', propertyValue: 'operations' },
+                { propertyName: 'event.type', propertyValue: 'render' },
+                { propertyName: 'event.subtype', propertyValue: 'acom' },
+                { propertyName: 'event.workflow', propertyValue: 'lifecycle' },
+                { propertyName: 'custom.aa.page_name', propertyValue: getPageName() },
+                { propertyName: 'custom.aa.ref_domain', propertyValue: refDomain },
+                { propertyName: 'custom.aa.previous_pagename', propertyValue: previousPagename },
+                { propertyName: 'custom.link.page_url', propertyValue: loc.href },
+                { propertyName: 'custom.link.page_type', propertyValue: isMiniEditorPage ? 'mini-editor' : 'fonts' },
+                { propertyName: 'custom.ui.location', propertyValue: pathname },
+
+              ],
+            }),
             sdm: {
               event: {
                 pagename: eventName,
@@ -381,7 +400,7 @@ function trackExpressFeaturePageLoad() {
                 },
                 link: {
                   page_url: loc.href,
-                  page_type: 'fonts',
+                  page_type: isMiniEditorPage ? 'mini-editor' : 'fonts',
                 },
                 ui: {
                   location: pathname,
