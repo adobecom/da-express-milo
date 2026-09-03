@@ -385,13 +385,18 @@ async function buildStrip(context) {
   context.stripController = stripController;
 
   const adapter = createSwatchRailAdapter(stripController, {
-    orientation: 'horizontal',
+    orientation: isMobileEditorViewport() ? 'stacked' : 'horizontal',
     swatchFeatures: ['copy', 'hexCode', 'hexCopyHoverOnly'],
     strings: { ...context.strings.railStrings, copyHex: context.strings.copyHex },
   });
   adapter.element.classList.add('color-seo-hero-strip-host');
   adapter.rail.classList.add('color-seo-hero-swatch-strip');
   adapter.rail.onCopyHex = (hex) => showColorCopiedToast(context, hex);
+
+  window.matchMedia?.(MOBILE_EDITOR_QUERY)?.addEventListener('change', (e) => {
+    adapter.setOrientation(e.matches ? 'stacked' : 'horizontal');
+  });
+
   return adapter.element;
 }
 
@@ -493,88 +498,55 @@ async function buildFloatingToolbar(context) {
   return mount;
 }
 
-const GRADIENT_ANCHOR_OFFSET_X_PERCENT = 5;
+const GRADIENT_MOVEMENT_PX = 200;
 const GRADIENT_EASE = 0.15;
-const GRADIENT_SETTLE_THRESHOLD = 0.1;
-const GRADIENT_CENTER_ANCHOR = { x: 50, y: 50 };
+const GRADIENT_SETTLE_THRESHOLD = 0.05;
 
-function createEasedFollow(initial, { ease, settleThreshold }) {
-  const current = { ...initial };
-  const target = { ...initial };
-  const listeners = new Set();
-  let rafId = null;
-
-  function tick() {
-    current.x += (target.x - current.x) * ease;
-    current.y += (target.y - current.y) * ease;
-    listeners.forEach((fn) => fn(current));
-
-    const settled = Math.abs(target.x - current.x) < settleThreshold
-      && Math.abs(target.y - current.y) < settleThreshold;
-    rafId = settled ? null : requestAnimationFrame(tick);
-  }
-
-  return {
-    subscribe(fn) {
-      listeners.add(fn);
-      return () => listeners.delete(fn);
-    },
-    setTarget(next) {
-      target.x = next.x;
-      target.y = next.y;
-      if (!rafId) rafId = requestAnimationFrame(tick);
-    },
-  };
-}
-
-function computeGradientDefaultAnchor(block) {
-  const blockRect = block.getBoundingClientRect();
-  const preview = block.querySelector('.color-seo-hero-preview');
-  if (!preview || !blockRect.width || !blockRect.height) return null;
-
-  const previewRect = preview.getBoundingClientRect();
-  const centerX = previewRect.left + (previewRect.width / 2) - blockRect.left;
-  const centerY = previewRect.top + (previewRect.height / 2) - blockRect.top;
-  return {
-    x: ((centerX / blockRect.width) * 100) + GRADIENT_ANCHOR_OFFSET_X_PERCENT,
-    y: (centerY / blockRect.height) * 100,
-  };
+function buildMotionBg() {
+  const motionBg = createTag('div', { class: 'color-seo-hero-motion-bg', 'aria-hidden': 'true' });
+  const glows = createTag('div', { class: 'color-seo-hero-glows' });
+  glows.append(
+    createTag('div', { class: 'color-seo-hero-glow color-seo-hero-glow-base' }),
+    createTag('div', { class: 'color-seo-hero-glow color-seo-hero-glow-light' }),
+    createTag('div', { class: 'color-seo-hero-glow color-seo-hero-glow-dark' }),
+  );
+  motionBg.append(glows);
+  return motionBg;
 }
 
 function attachGradientPointerTracking(block) {
-  const follow = createEasedFollow(GRADIENT_CENTER_ANCHOR, {
-    ease: GRADIENT_EASE,
-    settleThreshold: GRADIENT_SETTLE_THRESHOLD,
-  });
-  follow.subscribe(({ x, y }) => {
-    block.style.setProperty('--gradient-x', `${x}%`);
-    block.style.setProperty('--gradient-y', `${y}%`);
-  });
+  const glows = block.querySelector('.color-seo-hero-glows');
+  if (!glows) return;
 
-  let defaultAnchor = GRADIENT_CENTER_ANCHOR;
-  let isHovering = false;
+  const current = { x: 0, y: 0 };
+  const target = { x: 0, y: 0 };
+  let rafId = null;
 
-  const resizeObserver = new ResizeObserver(() => {
-    const anchor = computeGradientDefaultAnchor(block);
-    if (!anchor) return;
-    defaultAnchor = anchor;
-    if (!isHovering) follow.setTarget(anchor);
-  });
-  resizeObserver.observe(block);
+  function tick() {
+    current.x += (target.x - current.x) * GRADIENT_EASE;
+    current.y += (target.y - current.y) * GRADIENT_EASE;
+    glows.style.setProperty('--tx', `${current.x}px`);
+    glows.style.setProperty('--ty', `${current.y}px`);
+
+    const settled = Math.abs(target.x - current.x) < GRADIENT_SETTLE_THRESHOLD
+      && Math.abs(target.y - current.y) < GRADIENT_SETTLE_THRESHOLD;
+    rafId = settled ? null : requestAnimationFrame(tick);
+  }
+
+  function setTarget(next) {
+    target.x = next.x;
+    target.y = next.y;
+    if (!rafId) rafId = requestAnimationFrame(tick);
+  }
 
   block.addEventListener('mousemove', (e) => {
     if (e.target.closest('.color-seo-hero-preview')) return;
-    isHovering = true;
     const rect = block.getBoundingClientRect();
-    follow.setTarget({
-      x: ((e.clientX - rect.left) / rect.width) * 100,
-      y: ((e.clientY - rect.top) / rect.height) * 100,
-    });
+    const px = ((e.clientX - rect.left) / rect.width) - 0.5;
+    const py = ((e.clientY - rect.top) / rect.height) - 0.5;
+    setTarget({ x: px * GRADIENT_MOVEMENT_PX, y: py * GRADIENT_MOVEMENT_PX });
   });
-  block.addEventListener('mouseleave', () => {
-    isHovering = false;
-    follow.setTarget(defaultAnchor);
-  });
+  block.addEventListener('mouseleave', () => setTarget({ x: 0, y: 0 }));
 }
 
 export default async function decorate(block) {
@@ -629,7 +601,7 @@ export default async function decorate(block) {
     buildFloatingToolbar(context),
   ]);
   layout.append(contentRow, preview);
-  block.append(layout, toolbarMount);
+  block.append(buildMotionBg(), layout, toolbarMount);
 
   block.classList.add('is-ready');
   attachGradientPointerTracking(block);

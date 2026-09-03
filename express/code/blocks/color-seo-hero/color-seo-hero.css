@@ -4,9 +4,88 @@
   position: relative;
 }
 
-.color-seo-hero.is-ready {
-  --gradient-size: clamp(150px, 100vw, 680px);
-  background: radial-gradient(circle var(--gradient-size) at var(--gradient-x, 58%) var(--gradient-y, 50%), color-mix(in srgb, var(--color-seo-hero-primary) 45%, white) 0%, #fff 70%);
+.color-seo-hero-motion-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+  container-type: inline-size;
+}
+
+.color-seo-hero-glows {
+  position: absolute;
+  inset: 0;
+  transform: translate3d(var(--tx, 0px), var(--ty, 0px), 0) scale(var(--gscale, 1));
+  transform-origin: 55% 45%;
+  filter: blur(64px);
+  opacity: 0.5;
+  will-change: transform;
+}
+
+.color-seo-hero-glow {
+  position: absolute;
+  border-radius: 50%;
+}
+
+.color-seo-hero-glow-base {
+  left: 14cqw;
+  top: 8cqw;
+  width: 82cqw;
+  height: 82cqw;
+}
+
+.color-seo-hero-glow-dark {
+  left: 56cqw;
+  top: 10cqw;
+  width: 76cqw;
+  height: 76cqw;
+}
+
+.color-seo-hero-glow-light {
+  left: 54cqw;
+  top: -18cqw;
+  width: 56cqw;
+  height: 56cqw;
+}
+
+.color-seo-hero.is-ready .color-seo-hero-glow-base {
+  background: radial-gradient(circle, var(--color-seo-hero-primary) 0%, transparent 72%);
+}
+
+.color-seo-hero.is-ready .color-seo-hero-glow-dark {
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-seo-hero-primary) 62%, #000) 0%, transparent 70%);
+}
+
+.color-seo-hero.is-ready .color-seo-hero-glow-light {
+  background: radial-gradient(circle, color-mix(in srgb, var(--color-seo-hero-primary) 55%, #fff) 0%, transparent 74%);
+}
+
+@media (max-width: 600px) {
+  .color-seo-hero-glows {
+    filter: blur(56px);
+  }
+
+  .color-seo-hero-glow-base {
+    left: 42cqw;
+    top: 92cqw;
+    width: 92cqw;
+    height: 92cqw;
+  }
+
+  .color-seo-hero-glow-dark {
+    left: 62cqw;
+    top: 112cqw;
+    width: 70cqw;
+    height: 70cqw;
+  }
+
+  .color-seo-hero-glow-light {
+    left: 54cqw;
+    top: 70cqw;
+    width: 56cqw;
+    height: 56cqw;
+  }
 }
 
 .color-seo-hero-layout {
@@ -53,6 +132,7 @@
 .color-seo-hero-preview {
   background: #FFFFFF;
   border-radius: var(--spacing-350);
+  box-shadow: 0 2px 8px rgb(0 0 0 / 10%);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-100);
@@ -129,6 +209,7 @@
 }
 
 .color-seo-hero-swatch-strip {
+  --figma-strip-radius: var(--spacing-300);
   --swatch-rail-gap: var(--spacing-50);
   --swatch-column-flex: 1;
   --swatch-column-first-radius: var(--spacing-300) 0 0 var(--spacing-300);
@@ -309,10 +390,6 @@
 }
 
 @media (min-width: 600px) and (max-width: 1199px) {
-  .color-seo-hero.is-ready {
-    --gradient-size: clamp(150px, 100vw, 720px);
-  }
-
   .color-seo-hero {
     min-height: auto;
     padding: var(--spacing-600) var(--spacing-500);
@@ -346,10 +423,6 @@
 
 /* Mobile */
 @media (max-width: 599px) {
-  .color-seo-hero.is-ready {
-    --gradient-size: clamp(150px, 100vw, 720px);
-  }
-
   .color-seo-hero {
     min-height: auto;
     padding: var(--spacing-300);

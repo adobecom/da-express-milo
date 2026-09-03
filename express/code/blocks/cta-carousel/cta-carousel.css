@@ -378,6 +378,12 @@
     }
 }
 
+@media (max-width: 599px) {
+    .section.wide-inset .cta-carousel {
+        padding: 0 15px;
+    }
+}
+
 @media (min-width: 900px) {
     .cta-carousel .cta-carousel-heading-section {
         flex-direction: row;
