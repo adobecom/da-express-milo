@@ -36,10 +36,10 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   paletteCta: 'color-modal-palette-cta',
   addFavorite: 'color-modal-add-favorite',
   removeFavorite: 'color-modal-remove-favorite',
-  colorModeLabel: 'color-modal-color-mode-label',
-  codesToggleLabel: 'color-modal-codes-toggle-label',
-  codesDisabledTooltip: 'color-modal-codes-disabled-tooltip',
-  noTagsText: 'color-modal-no-tags-text',
+  colorModeLabel: 'color-mode',
+  codesToggleLabel: 'copy-as-code',
+  codesDisabledTooltip: 'codes-disabled-tooltip',
+  noTagsText: 'palette-no-tags',
 });
 
 export function createColorModalPlaceholders(overrides = {}) {
