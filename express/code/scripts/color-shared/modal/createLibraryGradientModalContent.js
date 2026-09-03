@@ -192,6 +192,7 @@ export function createLibraryGradientModalContent(item = {}, options = {}) {
         ...strings,
         colorModeLabel: strings.librariesColorModeLabel,
         codesToggleLabel: strings.librariesCodesToggleLabel,
+        codesDisabledTooltip: strings.librariesCodesDisabledTooltip,
       },
       onModeChange: (mode) => {
         railAdapter.rail.colorMode = mode;

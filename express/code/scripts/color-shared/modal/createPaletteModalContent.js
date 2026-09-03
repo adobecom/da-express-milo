@@ -257,6 +257,8 @@ function createPaletteLikeWidget(palette = {}, options = {}) {
 }
 
 function createPaletteMetaSection(palette = {}, options = {}) {
+  const modalStrings = options.modalStrings || {};
+  const noTagsText = modalStrings.noTagsText || 'This color palette has no tags';
   const creatorName = normalizeCreatorName(
     options.creatorName ?? palette?.creator?.name ?? palette?.creatorName,
   );
@@ -266,7 +268,7 @@ function createPaletteMetaSection(palette = {}, options = {}) {
     ?? null;
   const hasOptionTags = Array.isArray(options.tags) && options.tags.length;
   const hasItemTags = Array.isArray(palette?.tags) && palette.tags.length;
-  let tags = ['Color', 'Palette'];
+  let tags = [];
   if (hasOptionTags) tags = options.tags;
   else if (hasItemTags) tags = palette.tags;
 
@@ -300,13 +302,19 @@ function createPaletteMetaSection(palette = {}, options = {}) {
   thumbnailContainer.appendChild(creatorNameEl);
   thumbTagsRow.appendChild(thumbnailContainer);
 
-  const tagsContainer = createTag('div', { class: 'modal-tags-container', 'aria-label': 'Tags', role: 'list' });
-  tags.forEach((tag) => {
-    const tagEl = createTag('span', { class: 'modal-tag', role: 'listitem' });
-    tagEl.textContent = String(tag);
-    tagsContainer.appendChild(tagEl);
-  });
-  thumbTagsRow.appendChild(tagsContainer);
+  if (tags.length) {
+    const tagsContainer = createTag('div', { class: 'modal-tags-container', 'aria-label': 'Tags', role: 'list' });
+    tags.forEach((tag) => {
+      const tagEl = createTag('span', { class: 'modal-tag', role: 'listitem' });
+      tagEl.textContent = String(tag);
+      tagsContainer.appendChild(tagEl);
+    });
+    thumbTagsRow.appendChild(tagsContainer);
+  } else {
+    const noTagsEl = createTag('p', { class: 'modal-no-tags' });
+    noTagsEl.textContent = noTagsText;
+    thumbTagsRow.appendChild(noTagsEl);
+  }
   section.appendChild(thumbTagsRow);
 
   return section;

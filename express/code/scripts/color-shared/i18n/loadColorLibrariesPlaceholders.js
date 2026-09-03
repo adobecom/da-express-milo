@@ -78,6 +78,7 @@ export const DEFAULT_PLACEHOLDERS = Object.freeze({
   librariesModalGradientActionsAria: 'Gradient actions',
   librariesColorModeLabel: 'Color mode',
   librariesCodesToggleLabel: 'Copy as code',
+  librariesCodesDisabledTooltip: 'Copying to code requires RGB, HEX, or Lab',
 });
 
 const PLACEHOLDER_KEY_MAP = Object.freeze({
@@ -158,6 +159,7 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   librariesModalGradientActionsAria: 'color-libraries-modal-gradient-actions-aria',
   librariesColorModeLabel: 'color-libraries-color-mode-label',
   librariesCodesToggleLabel: 'color-libraries-codes-toggle-label',
+  librariesCodesDisabledTooltip: 'color-libraries-codes-disabled-tooltip',
 });
 
 export function createColorLibrariesPlaceholders(overrides = {}) {

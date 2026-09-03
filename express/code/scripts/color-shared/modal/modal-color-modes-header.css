@@ -45,6 +45,14 @@
   flex-shrink: 0;
 }
 
+/* aria-disabled, not the native disabled attribute — see createColorModesHeader.js
+   for why (the tooltip explaining the disabled state needs pointer events to
+   keep working on this same element). */
+.modal-codes-menu .ax-lib-card__action[aria-disabled='true'] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 /* picker.css's own mobile default (<600px) is --body-font-size-m (16px), matching
    Figma's larger pickers elsewhere (e.g. Explore filters) — the Color mode picker
    should stay at the same 14px (--body-font-size-s) it already uses from 600px up. */

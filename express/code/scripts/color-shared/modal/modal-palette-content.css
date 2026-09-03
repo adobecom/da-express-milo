@@ -441,6 +441,13 @@
   padding: 0;
 }
 
+.ax-color-modal-content .modal-no-tags {
+  font-size: 12px;
+  line-height: 130%;
+  color: var(--Alias-content-typography-Body);
+  margin: 0;
+}
+
 .ax-color-modal-content .modal-tag {
   padding: 4px 12px;
   background: var(--color-light-gray);

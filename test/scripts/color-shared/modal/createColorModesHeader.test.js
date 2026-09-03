@@ -154,13 +154,44 @@ describe('createColorModesHeader', () => {
     sinon.stub(serviceManager, 'getProvider').resolves({ exportCSS });
 
     await mount(palette, { type: 'palette' });
-    selectMode(header, 'HSB');
+    selectMode(header, 'Lab');
     codesTrigger(header).click();
     const cssItem = codesItems(header).find((i) => i.getAttribute('value') === 'css');
     cssItem.click();
     await new Promise((r) => { setTimeout(r, 0); });
 
-    expect(exportCSS.firstCall.args[1]).to.equal('HSB');
+    expect(exportCSS.firstCall.args[1]).to.equal('Lab');
+  });
+
+  it('disables the codes trigger in HSB mode, with a tooltip explaining why', async () => {
+    await mount(palette, { type: 'palette' });
+    selectMode(header, 'HSB');
+
+    const trigger = codesTrigger(header);
+    expect(trigger.getAttribute('aria-disabled')).to.equal('true');
+    expect(trigger.hasAttribute('disabled')).to.equal(false);
+  });
+
+  it('clicking the codes trigger in HSB mode does not open the popover', async () => {
+    await mount(palette, { type: 'palette' });
+    selectMode(header, 'HSB');
+
+    const trigger = codesTrigger(header);
+    trigger.click();
+
+    expect(trigger.getAttribute('aria-expanded')).to.equal('false');
+  });
+
+  it('re-enables the codes trigger when switching back to a supported mode', async () => {
+    await mount(palette, { type: 'palette' });
+    selectMode(header, 'HSB');
+    selectMode(header, 'RGB');
+
+    const trigger = codesTrigger(header);
+    expect(trigger.getAttribute('aria-disabled')).to.equal(null);
+
+    trigger.click();
+    expect(trigger.getAttribute('aria-expanded')).to.equal('true');
   });
 
   it('marks themeData as a gradient asset when type is gradient', async () => {
