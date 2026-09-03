@@ -177,11 +177,21 @@ function normalizeConfigUrls(config) {
   return normalized;
 }
 
+// filterAllBlogPostsOnPage() computes every block's config up front, in one page-wide
+// pass, before each block has necessarily had its own heading row stripped by
+// extractHeadingContent(). Deriving config from a heading-stripped clone here makes
+// the result identical regardless of when this runs relative to that removal, instead
+// of racing it.
+function getConfigRowsSource(block) {
+  const firstRow = block.children[0];
+  if (!firstRow?.querySelector('h1, h2, h3, h4, h5, h6')) return block;
+  const clone = block.cloneNode(true);
+  clone.children[0].remove();
+  return clone;
+}
+
 function getBlogPostsConfig(block) {
   let config = {};
-
-  const rows = [...block.children];
-  const firstRow = [...rows[0].children];
 
   if (block.classList.contains('spreadsheet-powered')) {
     [...block.querySelectorAll('a')].forEach((a) => {
@@ -194,8 +204,12 @@ function getBlogPostsConfig(block) {
     });
   }
 
+  const configSource = getConfigRowsSource(block);
+  const rows = [...configSource.children];
+  const firstRow = rows[0] ? [...rows[0].children] : [];
+
   if (rows.length === 1 && firstRow.length === 1) {
-    const links = [...block.querySelectorAll('a')].map((a) => {
+    const links = [...configSource.querySelectorAll('a')].map((a) => {
       try {
         return new URL(a.href).pathname;
       } catch {
@@ -207,7 +221,7 @@ function getBlogPostsConfig(block) {
       featuredOnly: true,
     };
   } else {
-    config = readBlockConfig(block);
+    config = readBlockConfig(configSource);
     config = normalizeConfigUrls(config);
   }
 
