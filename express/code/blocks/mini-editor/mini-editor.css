@@ -115,7 +115,7 @@
   margin: 0 0 var(--spacing-80);
   font-size: var(--heading-font-size-l);
   font-weight: var(--heading-font-weight-extra);
-  line-height: 32px;
+  line-height: 98%;
   letter-spacing: -1px;
   color: var(--color-content-neutral);
 }

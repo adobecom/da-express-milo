@@ -1254,6 +1254,13 @@ sp-theme {
 
 
 @media (width <= 767px) {
+  /* Keep the mobile bottom sheet above global fixed UI like
+     .floating-button-wrapper (z-index: 2). .mini-editor-widget creates its
+     own stacking context, so this host context must be raised on mobile. */
+  .mini-editor-widget {
+    z-index: 3;
+  }
+
   /* "Background color" control label reads "Background" only at this
      width — narrower control column has less room for the full label. */
   .me-control-label-suffix {
