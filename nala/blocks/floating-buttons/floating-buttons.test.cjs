@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+const { test, expect } = require('../../utils/test.cjs');
 const { features } = require('./floating-buttons.spec.cjs');
 const FloatingButtonsBlock = require('./floating-buttons.page.cjs');
 const { runAccessibilityTest } = require('../../libs/accessibility.cjs');

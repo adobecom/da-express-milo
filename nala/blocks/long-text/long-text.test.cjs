@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../../utils/test.cjs';
 import WebUtil from '../../libs/webutil.cjs';
 import { features } from './long-text.spec.cjs';
 import LongText from './long-text.page.cjs';
