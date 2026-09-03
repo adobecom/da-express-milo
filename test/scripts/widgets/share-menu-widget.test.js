@@ -166,4 +166,59 @@ describe('share-menu-widget', () => {
 
     expect(navigator.share.called).to.be.false;
   });
+
+  it('retries with resolved files when the first clipboard write is rejected (Firefox)', async () => {
+    function ClipboardItemMock(data) { this.data = data; }
+    window.ClipboardItem = ClipboardItemMock;
+    const writeStub = sinon.stub();
+    writeStub.onFirstCall().rejects(new Error('Values must be an instance of Blob'));
+    writeStub.onSecondCall().resolves();
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { write: writeStub },
+    });
+    const file = new File(['image'], 'card.png', { type: 'image/png' });
+    const notify = sinon.stub();
+    const { trigger } = await mount({
+      getContent: async () => ({
+        clipboard: {
+          items: [new ClipboardItemMock({ 'image/png': Promise.resolve(file) })],
+          files: [file],
+        },
+      }),
+      notify,
+    });
+
+    trigger.click();
+    document.querySelector('sp-menu-item[value="copy"]').click();
+    await waitFor(() => writeStub.calledTwice);
+
+    expect(writeStub.secondCall.args[0][0].data['image/png']).to.equal(file);
+    expect(notify.calledWithMatch({ variant: 'positive' })).to.be.true;
+  });
+
+  it('surfaces the clipboard error when no resolved fallback is available', async () => {
+    function ClipboardItemMock(data) { this.data = data; }
+    window.ClipboardItem = ClipboardItemMock;
+    const writeStub = sinon.stub().rejects(new Error('Values must be an instance of Blob'));
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { write: writeStub },
+    });
+    const file = new File(['image'], 'card.png', { type: 'image/png' });
+    const notify = sinon.stub();
+    const { trigger } = await mount({
+      getContent: async () => ({
+        clipboard: { items: [new ClipboardItemMock({ 'image/png': Promise.resolve(file) })] },
+      }),
+      notify,
+    });
+
+    trigger.click();
+    document.querySelector('sp-menu-item[value="copy"]').click();
+    await waitFor(() => notify.calledOnce);
+
+    expect(writeStub.calledOnce).to.be.true;
+    expect(notify.calledWithMatch({ variant: 'negative' })).to.be.true;
+  });
 });

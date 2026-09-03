@@ -30,8 +30,19 @@ async function copyContent(content) {
   const clipboard = content?.clipboard;
   const items = getClipboardItems(clipboard);
   if (items && navigator.clipboard?.write) {
-    await navigator.clipboard.write(items);
-    return;
+    try {
+      await navigator.clipboard.write(items);
+      return;
+    } catch (error) {
+      // Firefox rejects a ClipboardItem built from a pending Promise (unlike
+      // Chrome/Safari). A resolved Blob/File is valid input everywhere, so
+      // retrying once with resolved values is a safe universal fallback.
+      if (!clipboard?.files?.length) throw error;
+      const resolvedItems = getClipboardItems({ files: await Promise.all(clipboard.files) });
+      if (!resolvedItems) throw error;
+      await navigator.clipboard.write(resolvedItems);
+      return;
+    }
   }
   if (typeof clipboard?.text === 'string' && navigator.clipboard?.writeText) {
     await navigator.clipboard.writeText(clipboard.text);

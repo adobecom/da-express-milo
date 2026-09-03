@@ -7,6 +7,7 @@ import {
   announceToScreenReader,
 } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import showCopyToast from '../../scripts/utils/copy-toast.js';
+import { triggerBlobDownload } from '../../scripts/utils/download-utils.js';
 import MiniEditorCardExporter from '../../scripts/utils/mini-editor-card-export.js';
 import trackMiniEditorExport from '../../scripts/utils/mini-editor-analytics.js';
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
@@ -367,7 +368,12 @@ export default async function init(block) {
           .then((blob) => new File([blob], 'quote-card.png', { type: blob.type || 'image/png' }));
 
         if (action.type === 'copy') {
-          return { clipboard: { items: [new window.ClipboardItem({ 'image/png': filePromise })] } };
+          return {
+            clipboard: {
+              items: [new window.ClipboardItem({ 'image/png': filePromise })], // fast path
+              files: [filePromise], // resolved-value fallback (see copyContent's retry)
+            },
+          };
         }
 
         const file = await filePromise;
@@ -425,6 +431,8 @@ export default async function init(block) {
                       if (error?.name === 'AbortError') return;
                     }
                   }
+                  const file = share?.files?.[0];
+                  if (file) triggerBlobDownload(file, file.name);
                   const text = encodeURIComponent(`${strings.heading}: ${window.location.href}`);
                   window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
                 },

@@ -172,7 +172,7 @@ export function captureElementAsImage(element, options = {}) {
   return captureValidatedElementAsImage(element, options);
 }
 
-function triggerBlobDownload(blob, filename) {
+export function triggerBlobDownload(blob, filename) {
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;

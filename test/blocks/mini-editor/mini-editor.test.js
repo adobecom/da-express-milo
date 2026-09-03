@@ -170,6 +170,77 @@ describe('mini-editor', () => {
     expect(shareData.files[0].type).to.equal('image/png');
   });
 
+  it('copies the image via retry when the first clipboard write is rejected (Firefox)', async () => {
+    window.placeholders = {
+      'mini-editor-share-image': 'Share image',
+      'share-menu-whatsapp': 'WhatsApp',
+      'mini-editor-copy-image': 'Copy image',
+      'mini-editor-image-copied': 'Image copied to clipboard',
+      'share-menu-more-options': 'More options',
+    };
+    const blob = new Blob(['png'], { type: 'image/png' });
+    sinon.stub(MiniEditorCardExporter, 'createCardBlob').resolves(blob);
+    class ClipboardItemMock {
+      constructor(data) { this.data = data; }
+    }
+    // Scoped to this test (not the shared afterEach) since other tests in
+    // this file rely on the real, native window.ClipboardItem.
+    const OriginalClipboardItem = window.ClipboardItem;
+    window.ClipboardItem = ClipboardItemMock;
+    try {
+      const writeStub = sinon.stub();
+      writeStub.onFirstCall().rejects(new Error('Values must be an instance of Blob'));
+      writeStub.onSecondCall().resolves();
+      Object.defineProperty(navigator, 'clipboard', {
+        configurable: true,
+        value: { write: writeStub },
+      });
+      const block = await decorateWithBody();
+
+      block.querySelector('.me-action--share').click();
+      const menu = block.querySelector('.share-menu-list');
+      menu.querySelector('sp-menu-item[value="copy"]').click();
+      await waitFor(() => writeStub.calledTwice);
+
+      expect(writeStub.secondCall.args[0][0].data['image/png']).to.be.instanceOf(File);
+      await waitFor(() => !!document.querySelector('.copy-toast-message'));
+      expect(document.querySelector('.copy-toast-message').textContent)
+        .to.equal('Image copied to clipboard');
+    } finally {
+      window.ClipboardItem = OriginalClipboardItem;
+    }
+  });
+
+  it('downloads the image when WhatsApp file sharing is unsupported', async () => {
+    window.placeholders = {
+      'mini-editor-share-image': 'Share image',
+      'share-menu-whatsapp': 'WhatsApp',
+      'mini-editor-copy-image': 'Copy image',
+      'share-menu-more-options': 'More options',
+    };
+    const blob = new Blob(['png'], { type: 'image/png' });
+    sinon.stub(MiniEditorCardExporter, 'createCardBlob').resolves(blob);
+    Object.defineProperty(navigator, 'canShare', {
+      configurable: true,
+      value: sinon.stub().returns(false),
+    });
+    const openStub = sinon.stub(window, 'open');
+    const createObjectURLStub = sinon.stub(URL, 'createObjectURL').returns('blob:mock');
+    sinon.stub(URL, 'revokeObjectURL');
+    const clickSpy = sinon.spy(HTMLAnchorElement.prototype, 'click');
+    const block = await decorateWithBody();
+
+    block.querySelector('.me-action--share').click();
+    const menu = block.querySelector('.share-menu-list');
+    menu.querySelector('sp-menu-item[value="whatsapp"]').click();
+    await waitFor(() => openStub.calledOnce);
+
+    expect(createObjectURLStub.calledOnce).to.be.true;
+    expect(createObjectURLStub.firstCall.args[0].name).to.equal('quote-card.png');
+    expect(clickSpy.called).to.be.true;
+    expect(openStub.firstCall.args[0]).to.contain('https://wa.me/?text=');
+  });
+
   it('logs and shows a localized negative toast when download fails', async () => {
     const block = await decorateWithBody();
     window.placeholders = { 'mini-editor-download-failed': 'Download failed' };
