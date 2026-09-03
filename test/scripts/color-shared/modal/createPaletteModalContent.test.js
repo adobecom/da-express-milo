@@ -74,6 +74,33 @@ describe('createPaletteSwatchesModalContent', () => {
     expect(strip.compareDocumentPosition(railSection) & Node.DOCUMENT_POSITION_FOLLOWING)
       .to.be.above(0);
   });
+
+  it('renders real tags from the palette data, not placeholder defaults', () => {
+    content = createPaletteSwatchesModalContent({ ...palette, tags: ['Bright', 'Summer'] });
+    const tagEls = [...content.element.querySelectorAll('.modal-tag')];
+    expect(tagEls.map((el) => el.textContent)).to.deep.equal(['Bright', 'Summer']);
+    expect(content.element.querySelector('.modal-no-tags')).to.equal(null);
+  });
+
+  it('regression: no longer fabricates "Color"/"Palette" tags when the API sends none', () => {
+    content = createPaletteSwatchesModalContent(palette);
+    expect(content.element.querySelectorAll('.modal-tag')).to.have.length(0);
+    expect(content.element.querySelector('.modal-tags-container')).to.equal(null);
+  });
+
+  it('shows "no tags" placeholder text when the palette has no tags', () => {
+    content = createPaletteSwatchesModalContent(palette);
+    const noTags = content.element.querySelector('.modal-no-tags');
+    expect(noTags).to.exist;
+    expect(noTags.textContent).to.equal('This color palette has no tags');
+  });
+
+  it('uses the provided noTagsText placeholder over the default', () => {
+    content = createPaletteSwatchesModalContent(palette, {
+      modalStrings: { noTagsText: 'No tags yet' },
+    });
+    expect(content.element.querySelector('.modal-no-tags').textContent).to.equal('No tags yet');
+  });
 });
 
 describe('getPaletteColors', () => {

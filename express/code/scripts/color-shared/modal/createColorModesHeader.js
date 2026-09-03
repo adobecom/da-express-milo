@@ -15,9 +15,15 @@ import {
 const DEFAULTS = {
   colorModeLabel: 'Color mode',
   codesToggleLabel: 'Copy as code',
+  codesDisabledTooltip: 'Copying to code requires RGB, HEX, or Lab',
   copiedToast: 'Copied to clipboard',
   copyFailedToast: 'Failed to copy',
 };
+
+// Per design, Copy as Code is disabled entirely in HSB mode (unlike XML,
+// which is merely hidden per-format below in MODES_WITHOUT_XML/getExportFormats)
+// rather than just hiding menu items.
+const CODES_ENABLED_MODES = new Set(['HEX', 'RGB', 'Lab']);
 
 // Order + labels match the Figma "Codes" menu exactly (LESS, CSS, SASS, XML —
 // the export produces SCSS-compatible syntax, but Figma's user-facing label is "SASS").
@@ -175,14 +181,49 @@ export function createColorModesHeader(palette, options = {}) {
   // menu triggers (attachMenuTooltip). Setting data-tooltip-content alone
   // (above) isn't enough; nothing renders a tooltip from it without this.
   const codesTriggerEl = codesMenu.element.querySelector('.ax-lib-card__action');
+  let codesTooltip = null;
+  let codesEnabled = true;
+
+  // Native `disabled` sets pointer-events:none on the host itself (see
+  // button-base.css.dev.js), which would also kill the tooltip's own
+  // pointerenter/pointerleave listeners on this same element — leaving no way
+  // to show "why" it's disabled. Use aria-disabled + a capturing click-guard
+  // on the wrapper instead, so the tooltip keeps working.
+  function updateCodesAvailability(mode) {
+    codesEnabled = CODES_ENABLED_MODES.has(mode);
+    if (codesTriggerEl) {
+      codesTriggerEl.classList.toggle('is-codes-disabled', !codesEnabled);
+      if (codesEnabled) codesTriggerEl.removeAttribute('aria-disabled');
+      else codesTriggerEl.setAttribute('aria-disabled', 'true');
+    }
+    codesTooltip?.setContent(codesEnabled ? t.codesToggleLabel : t.codesDisabledTooltip);
+  }
+
   if (codesTriggerEl) {
     createExpressTooltip({
       targetEl: codesTriggerEl,
       content: t.codesToggleLabel,
       placement: 'top',
       dismissOnActivate: true,
+    }).then((tooltip) => {
+      codesTooltip = tooltip;
+      if (!codesEnabled) tooltip.setContent(t.codesDisabledTooltip);
     }).catch(() => {});
+
+    // createLibraryCardActionMenu's own onTriggerClick listener is registered
+    // on the trigger (bubble phase) before this runs, so a same-element,
+    // same-phase listener added here would fire second and be too late to
+    // stop the popover. A capturing-phase listener on the ancestor wrapper
+    // always runs first regardless of that registration order.
+    codesMenu.element.addEventListener('click', (event) => {
+      if (!codesEnabled) {
+        event.stopPropagation();
+        event.preventDefault();
+      }
+    }, { capture: true });
   }
+
+  updateCodesAvailability(currentMode);
 
   // sp-picker/sp-menu-item give us Spectrum's real checkmark-on-selected,
   // typography, and popover sizing "for free" instead of a bespoke popover
@@ -209,6 +250,7 @@ export function createColorModesHeader(palette, options = {}) {
           currentMode = value;
           setPreferredColorMode(value);
           codesMenu.setItems(getExportFormats(type, currentMode));
+          updateCodesAvailability(currentMode);
           onModeChange?.(value);
         },
       });
@@ -233,6 +275,7 @@ export function createColorModesHeader(palette, options = {}) {
             currentMode = value;
             setPreferredColorMode(value);
             codesMenu.setItems(getExportFormats(type, currentMode));
+            updateCodesAvailability(currentMode);
             onModeChange?.(value);
           },
         );
@@ -246,6 +289,7 @@ export function createColorModesHeader(palette, options = {}) {
       currentMode = mode;
       modePicker?.setValue(mode);
       codesMenu.setItems(getExportFormats(type, currentMode));
+      updateCodesAvailability(currentMode);
       onModeChange?.(mode);
     }
   });
