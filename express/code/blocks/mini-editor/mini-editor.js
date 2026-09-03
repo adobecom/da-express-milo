@@ -13,7 +13,7 @@ import { showExpressToast } from '../../scripts/color-shared/spectrum/components
 import createMiniEditorWidget from '../../scripts/widgets/mini-editor-widget/mini-editor-widget.js';
 import createMiniEditorModal from '../../scripts/widgets/mini-editor-modal/mini-editor-modal.js';
 import getCardBackgrounds from './mini-editor-background-loader.js';
-import getFontOptions from './mini-editor-fonts-loader.js';
+import getFontOptions, { loadWebFontOptions } from './mini-editor-fonts-loader.js';
 
 let createTag;
 let loadStyle;
@@ -291,20 +291,44 @@ function wireLandmark(block, header) {
 }
 
 export default async function init(block) {
-  ({ createTag, loadStyle, getConfig } = await import(`${getLibs()}/utils/utils.js`));
-  ({ replaceKey } = await import(`${getLibs()}/features/placeholders.js`));
+  const props = constructProps(block);
+  const quotes = getPageQuotes();
+
+  // Kicked off immediately, independent of the Milo util/placeholder/theme
+  // imports below — getCardBackgrounds' template-service fetch is the real
+  // LCP-critical request (it resolves the .me-arc-card--center background),
+  // so it shouldn't wait behind three sequential dynamic imports it has no
+  // dependency on. getFontOptions() itself resolves immediately with the
+  // bundled fallback fonts — see mini-editor-fonts-loader.js — the live
+  // Adobe Fonts kit loads separately, after the card has already mounted.
+  const dataPromise = Promise.all([
+    getCardBackgrounds(props),
+    getFontOptions(),
+  ]);
+  // A rejection here (e.g. the template-service fetch failing) is still
+  // handled below, where dataPromise is awaited inside the try/catch — this
+  // just keeps the runtime from flagging it as unhandled during the window
+  // before that await, while the imports above are still in flight.
+  dataPromise.catch(() => {});
+
+  [
+    { createTag, loadStyle, getConfig },
+    { replaceKey },
+  ] = await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
+    import(`${getLibs()}/features/placeholders.js`),
+    // Wraps the block's whole rendered output in Spectrum's own theme host
+    // so its design-token CSS custom properties (--spectrum-*) are actually
+    // defined for descendants — without it, the topActions icons (real
+    // Spectrum Web Components, see mini-editor-widget.js) fall back to
+    // unstyled defaults and don't match the intended look.
+    import('../../scripts/widgets/spectrum/dist/theme.js'),
+  ]);
   loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-widget/mini-editor-widget.css`);
   loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-modal/mini-editor-modal.css`);
 
-  const props = constructProps(block);
   block.innerHTML = '';
 
-  // Wraps the block's whole rendered output in Spectrum's own theme host so
-  // its design-token CSS custom properties (--spectrum-*) are actually
-  // defined for descendants — without it, the topActions icons (real
-  // Spectrum Web Components, see mini-editor-widget.js) fall back to
-  // unstyled defaults and don't match the intended look.
-  await import('../../scripts/widgets/spectrum/dist/theme.js');
   const themeHost = createTag('sp-theme', {
     system: 'spectrum-two', color: 'light', scale: 'medium', dir: 'ltr',
   });
@@ -314,16 +338,8 @@ export default async function init(block) {
   themeHost.append(header);
   decorateCta(header);
 
-  const quotes = getPageQuotes();
-
   try {
-    // Backgrounds and fonts load in parallel — the font loader owns its own
-    // source selection (Typekit vs fallback fonts); backgrounds always fetch
-    // from the template service.
-    const [cards, fontOptions] = await Promise.all([
-      getCardBackgrounds(props),
-      getFontOptions(),
-    ]);
+    const [cards, fontOptions] = await dataPromise;
     if (!cards.length || !quotes.length) {
       block.closest('.section')?.remove();
       return;
@@ -508,24 +524,49 @@ export default async function init(block) {
     themeHost.append(editor.stage);
     wireLandmark(block, header);
 
+    // The card above just mounted with the bundled fallback fonts (see
+    // getFontOptions/mini-editor-fonts-loader.js) so first paint never
+    // waited on the Adobe Fonts kit's network round trip. Load the live kit
+    // now, in the background, and swap it into the already-visible font
+    // control once it resolves — a no-op if the user already picked a font.
+    loadWebFontOptions().then((liveFontOptions) => {
+      editor.upgradeFontOptions(liveFontOptions);
+    }).catch(() => {});
+
     // "Create a design" on collapsible-rows' quotes (see collapsible-rows.js)
     // opens this modal — showing just the centre editor card, identically
     // across desktop/tablet/mobile — instead of scrolling to this inline
     // block. One modal per page regardless of how many mini-editor blocks
     // are authored (modalPromise, not a DOM query, so two blocks decorating
     // concurrently can't both build one), reusing this block's own fetched
-    // cards/fonts.
-    modalPromise ??= createMiniEditorModal({
-      fontOptions,
-      backgrounds: { cardSet, decoCount: DECO_CARD_COUNT },
-      topActionsFactory: buildTopActions,
-      a11y,
-      deps,
-    }).then((modal) => {
-      document.body.append(modal.el);
-      return modal;
-    });
-    await modalPromise;
+    // cards/fonts. Deliberately not awaited: this modal isn't needed for
+    // this block's own first paint (or ever, unless a collapsible-rows CTA
+    // on the page is clicked), so it builds in the background instead of
+    // holding up the section reveal — see decorate() below for why that
+    // matters. It awaits the live font kit itself (rather than reusing the
+    // fallback `fontOptions` above) since, unlike the inline card, it isn't
+    // on the critical path and can afford to just wait for the real fonts.
+    if (!modalPromise) {
+      modalPromise = loadWebFontOptions()
+        .catch(() => fontOptions)
+        .then((modalFontOptions) => createMiniEditorModal({
+          fontOptions: modalFontOptions,
+          backgrounds: { cardSet, decoCount: DECO_CARD_COUNT },
+          topActionsFactory: buildTopActions,
+          a11y,
+          deps,
+        }))
+        .then((modal) => {
+          document.body.append(modal.el);
+          return modal;
+        })
+        .catch((error) => {
+          window.lana?.log(`Mini-editor modal init error: ${error?.message || error}`, {
+            tags: 'mini-editor,modal',
+            severity: 'error',
+          });
+        });
+    }
   } catch (error) {
     window.lana?.log(`Error in mini-editor: ${error?.message || error}`, {
       tags: 'mini-editor',

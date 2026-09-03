@@ -615,8 +615,26 @@ function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOpti
     roving.focusFirst();
   });
 
+  // Swaps in a new option list post-mount (see buildWidget's
+  // upgradeFontOptions) — used once when the live Adobe Fonts kit resolves
+  // after the card has already rendered with the bundled fallback options.
+  // Rebuilds the option buttons only; the roving-tabindex/drag-to-scroll
+  // wiring on `panel` itself stays put since both query the DOM live and
+  // don't hold onto the old buttons — re-wiring them here would double up
+  // their event listeners. selectFont's own roving?.syncTabindexes() call
+  // fixes up tabindexes for the freshly-built buttons.
+  function replaceOptions(newOptions) {
+    panel.replaceChildren();
+    sheetGrid.replaceChildren();
+    newOptions.forEach((opt, index) => {
+      panel.append(buildFontButton(opt, index, onPick));
+      sheetGrid.append(buildFontButton(opt, index, onPick));
+    });
+    selectFont(newOptions[0]);
+  }
+
   return {
-    control, panel, sheetGrid, selectFont,
+    control, panel, sheetGrid, selectFont, replaceOptions,
   };
 }
 
@@ -1100,15 +1118,20 @@ async function buildWidget(
 
   const controls = createTag('div', { class: 'me-controls' });
   let focusColourControl = () => {};
+  // Blocks upgradeFontOptions (below) from clobbering a font the user has
+  // already deliberately chosen, once the live Adobe Fonts kit resolves.
+  let userPickedFont = false;
   const {
     control: fontControl,
     panel: fontPanel,
     sheetGrid: fontSheetGrid,
     selectFont,
+    replaceOptions: replaceFontOptions,
   } = buildFontControl(
     root,
     fontOptions,
     (font) => {
+      userPickedFont = true;
       applyFontToModel(font);
       onFontOrColourPick({ font });
     },
@@ -1250,6 +1273,18 @@ async function buildWidget(
     // itself has no knowledge of them — see buildSkipQuoteSuggestionsCta).
     // A no-op when skipCta wasn't built at all (small viewport).
     setDecoChainTarget: (fn) => skipCta?.setTabOutTarget(fn),
+    // Swaps the bundled fallback fonts (see mini-editor-fonts-loader.js) for
+    // the live Adobe Fonts kit list once it loads, post-mount — but only if
+    // the user hasn't already picked a font themselves, so a late-arriving
+    // kit never overrides a deliberate choice. Routes through
+    // onFontOrColourPick (rather than applyFontToModel directly) so the arc
+    // carousel picks up the same change via its existing onFontOrColourChange
+    // wiring — see createMiniEditorWidget.
+    upgradeFontOptions: (newOptions) => {
+      if (userPickedFont || !newOptions?.length) return;
+      replaceFontOptions(newOptions);
+      onFontOrColourPick({ font: newOptions[0] });
+    },
     destroy: () => {
       actions.destroy();
       panelObserver.disconnect();
@@ -2168,7 +2203,7 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
  *   the "Create a design" modal, where the empty space below the card
  *   exists only to host this panel.
  * @returns {Promise<{ stage, decorations, useQuote, updateCentre, getContentModel,
- *   syncViewportMode, destroy }>}
+ *   syncViewportMode, upgradeFontOptions, destroy }>}
  */
 export default async function createMiniEditorWidget(config = {}) {
   const {
@@ -2211,6 +2246,7 @@ export default async function createMiniEditorWidget(config = {}) {
   const stage = createTag('div', { class: 'mini-editor-stage' });
   const {
     widget, useQuote, getContentModel, onFontOrColourChange, setDecoChainTarget,
+    upgradeFontOptions,
     destroy: destroyWidget,
   } = await buildWidget(
     root,
@@ -2319,6 +2355,7 @@ export default async function createMiniEditorWidget(config = {}) {
     updateCentre,
     getContentModel,
     syncViewportMode,
+    upgradeFontOptions,
     destroy: () => {
       destroyWidget();
       destroyArcCarousel();
