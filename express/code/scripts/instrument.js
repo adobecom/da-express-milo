@@ -25,6 +25,10 @@ function getMiniEditorTaskName() {
   return getMetadata('messagetype')?.trim() || 'quote';
 }
 
+function getSourcePlatform() {
+  return window.navigator?.platform || 'unknown';
+}
+
 function addIfDefined(target, key, value) {
   if (value !== undefined && value !== null && value !== '') {
     target[key] = value;
@@ -432,9 +436,7 @@ export async function trackExpressFeaturePageLoad() {
 
     const isMiniEditorPage = pageType === 'mini-editor';
     const isMobile = isMobileWeb();
-    const sourcePlatform = window.navigator?.userAgentData?.platform
-      || window.navigator?.platform
-      || 'unknown';
+    const sourcePlatform = getSourcePlatform();
     const dtsStart = isMiniEditorPage ? new Date().toISOString() : '';
     const eventDate = isMiniEditorPage ? dtsStart.slice(0, 10) : '';
     const guid = isMiniEditorPage ? generateGuid() : '';

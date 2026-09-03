@@ -79,26 +79,6 @@ export async function getDeviceInfo() {
     const { osName, osVersion } = getOsNameAndVersionFromUA(userAgent);
     result.osName = osName;
     result.osVersion = osVersion;
-
-    try {
-      const uaData = navigator?.userAgentData;
-      if (uaData?.getHighEntropyValues) {
-        const hints = await uaData.getHighEntropyValues([
-          'platform',
-          'platformVersion',
-        ]);
-
-        if (hints.platform) {
-          result.osName = hints.platform;
-        }
-
-        if (hints.platformVersion) {
-          result.osVersion = hints.platformVersion;
-        }
-      }
-    } catch {
-      // Client hints unavailable/blocked.
-    }
   } catch {
     // Covers unexpected navigator/runtime failures.
   }

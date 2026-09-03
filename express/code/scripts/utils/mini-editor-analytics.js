@@ -23,6 +23,10 @@ function getMiniEditorTaskName() {
   return getMetadata('messagetype')?.trim() || 'quote';
 }
 
+function getSourcePlatform() {
+  return window.navigator?.platform || 'unknown';
+}
+
 function addIfDefined(target, key, value) {
   if (value !== undefined && value !== null && value !== '') {
     target[key] = value;
@@ -95,9 +99,7 @@ export default async function trackMiniEditorExport({ exportMethod, uiLocation =
   const subtype = 'export-project';
   const category = 'WEB';
   const subcategory = 'document';
-  const sourcePlatform = window.navigator?.userAgentData?.platform
-    || window.navigator?.platform
-    || 'unknown';
+  const sourcePlatform = getSourcePlatform();
   const mcidGuid = window.ecid || corpnewData?.event?.identifiers?.ECID || corpnewData?.ECID;
   const guid = generateGuid();
   const accessCountry = await getAccessCountry();
