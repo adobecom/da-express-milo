@@ -58,6 +58,7 @@ describe('mini-editor-widget', () => {
   });
 
   afterEach(() => {
+    document.head.querySelectorAll('meta[name="messagetype"]').forEach((meta) => meta.remove());
     clock.restore();
     document.body.innerHTML = '';
   });
@@ -227,6 +228,22 @@ describe('mini-editor-widget', () => {
     const { root, editor } = await mount();
     editor.useQuote({ quote: 'No author here' });
     expect(root.querySelector('.me-author').style.display).to.equal('none');
+  });
+
+  it('uses the page messagetype in the main copy and use labels', async () => {
+    const existing = document.head.querySelector('meta[name="messagetype"]');
+    if (existing) existing.remove();
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'messagetype');
+    meta.setAttribute('content', 'social');
+    document.head.append(meta);
+
+    const { root } = await mount();
+    const quoteWrap = root.querySelector('.me-quote-wrap');
+    const decoUse = root.querySelector('.me-deco-use');
+
+    expect(quoteWrap.getAttribute('aria-label')).to.equal('Click to copy social: Quote number 0');
+    expect(decoUse.textContent).to.equal('Use this social');
   });
 
   it('copying the main quote shows the is-copied affordance and then clears it', async () => {

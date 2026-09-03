@@ -1,6 +1,7 @@
 import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
-import trackMiniEditorExport from '../../../express/code/scripts/utils/mini-editor-analytics.js';
+import { setLibs } from '../../express/code/scripts/utils.js';
+import martechLoadedCB from '../../express/code/scripts/instrument.js';
 
 const TEST_USER_AGENT = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15';
 const TEST_PLATFORM = 'MacIntel';
@@ -12,17 +13,17 @@ function setNavigatorValue(key, value) {
   });
 }
 
-function findProperty(custom, propertyName) {
-  return custom.find((entry) => entry.propertyName === propertyName);
-}
-
 function setMeta(name, content) {
-  const existing = document.head.querySelector(`meta[name="${name}"]`);
+  const existing = document.querySelector(`meta[name="${name}"]`);
   if (existing) existing.remove();
   const meta = document.createElement('meta');
   meta.setAttribute('name', name);
   meta.setAttribute('content', content);
   document.head.append(meta);
+}
+
+function findProperty(custom, propertyName) {
+  return custom.find((entry) => entry.propertyName === propertyName);
 }
 
 function getCorpnewPayload(payload) {
@@ -31,7 +32,7 @@ function getCorpnewPayload(payload) {
   return corpnew;
 }
 
-describe('mini-editor analytics', () => {
+describe('instrument mini-editor analytics', () => {
   let trackStub;
   let fetchStub;
   let clock;
@@ -53,6 +54,10 @@ describe('mini-editor analytics', () => {
       configurable: true,
     });
 
+    setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
+
+    setMeta('pagetype', 'mini-editor');
+
     // eslint-disable-next-line no-underscore-dangle
     window._satellite = { track: trackStub };
     fetchStub = sinon.stub(window, 'fetch').resolves({
@@ -60,10 +65,11 @@ describe('mini-editor analytics', () => {
       json: async () => ({ country: 'IN' }),
     });
     window.adobeIMS = {
-      isSignedInUser: sinon.stub().returns(false),
+      isSignedInUser: sinon.stub().returns(true),
       getAccountType: sinon.stub().returns('free'),
+      getProfile: sinon.stub().returns({ userId: 'user-123' }),
     };
-    window.ecid = 'ECID-123';
+    window.ecid = 'ECID-456';
   });
 
   afterEach(() => {
@@ -83,11 +89,26 @@ describe('mini-editor analytics', () => {
     sinon.restore();
   });
 
-  it('sends the export payload and attached-format mirror', async () => {
-    await trackMiniEditorExport({
-      exportMethod: 'copy-clipboard',
-      uiLocation: 'seo-discover-page-collapsible-row',
+  it('uses the page messagetype metadata when provided', async () => {
+    setMeta('messagetype', 'social');
+
+    await martechLoadedCB();
+    await clock.tickAsync(0);
+    await Promise.resolve();
+
+    const [, payload] = trackStub.firstCall.args;
+    const { custom } = getCorpnewPayload(payload);
+    expect(findProperty(custom, 'custom.task.name')).to.deep.equal({
+      propertyName: 'custom.task.name',
+      propertyValue: 'social',
+      propertyType: 'string',
     });
+  });
+
+  it('adds the mini-editor-only analytics fields', async () => {
+    await martechLoadedCB();
+    await clock.tickAsync(0);
+    await Promise.resolve();
 
     expect(trackStub.calledOnce).to.be.true;
     const [eventName, payload] = trackStub.firstCall.args;
@@ -96,20 +117,18 @@ describe('mini-editor analytics', () => {
     const corpnew = getCorpnewPayload(payload);
     const { sdm, custom } = corpnew;
     expect(sdm.event).to.deep.include({
-      pagename: 'export-project-complete-unauth',
+      pagename: 'view-acom-express-features',
       event_date: '2026-09-01',
-      dts_start: '2026-09-01T20:25:45.426Z',
-      user_agent: TEST_USER_AGENT,
       guid: sdm.event.guid,
-      user_guid: '',
-      is_authenticated: false,
-      mcid_guid: 'ECID-123',
-      subtype: 'export-project',
-      type: 'success',
-      workflow: 'export',
+      user_guid: 'user-123',
+      mcid_guid: 'ECID-456',
+      user_agent: TEST_USER_AGENT,
+      is_authenticated: true,
       category: 'WEB',
-      subcategory: 'document',
-      platform_name: 'desktop-web',
+      subcategory: 'operations',
+      type: 'render',
+      subtype: 'acom',
+      workflow: 'lifecycle',
     });
     expect(sdm.source).to.deep.equal({
       name: 'CCEX',
@@ -126,22 +145,8 @@ describe('mini-editor analytics', () => {
         account_type: 'free',
       },
     });
-    expect(sdm.user).to.deep.equal({
-      aa: {
-        post_page_url: window.location.href,
-      },
-    });
-    expect(sdm.custom).to.deep.equal({
-      export_method: 'copy-clipboard',
-      ui: {
-        location: 'seo-discover-page-collapsible-row',
-      },
-      displayedLanguage: 'en',
-      task: {
-        name: 'quote',
-      },
-    });
-
+    expect(sdm.event.aa.page_name).to.equal('adobe.com:');
+    expect(sdm.user.aa.post_page_url).to.equal(window.location.href);
     expect(findProperty(custom, 'event_date')).to.deep.equal({
       propertyName: 'event_date',
       propertyValue: '2026-09-01',
@@ -150,7 +155,7 @@ describe('mini-editor analytics', () => {
     expect(findProperty(custom, 'event.guid')).to.have.property('propertyType', 'string');
     expect(findProperty(custom, 'event.user_guid')).to.deep.equal({
       propertyName: 'event.user_guid',
-      propertyValue: '',
+      propertyValue: 'user-123',
       propertyType: 'string',
     });
     expect(findProperty(custom, 'source.platform')).to.deep.equal({
@@ -173,47 +178,51 @@ describe('mini-editor analytics', () => {
       propertyValue: 'IN',
       propertyType: 'string',
     });
+    expect(findProperty(custom, 'event.mcid_guid')).to.deep.equal({
+      propertyName: 'event.mcid_guid',
+      propertyValue: 'ECID-456',
+      propertyType: 'string',
+    });
     expect(findProperty(custom, 'hz.user.os_version')).to.deep.equal({
       propertyName: 'hz.user.os_version',
       propertyValue: '10.15.7',
       propertyType: 'string',
     });
-    expect(findProperty(custom, 'event.is_authenticated')).to.deep.equal({
-      propertyName: 'event.is_authenticated',
-      propertyValue: false,
-      propertyType: 'boolean',
-    });
-    expect(findProperty(custom, 'custom.export_method')).to.deep.equal({
-      propertyName: 'custom.export_method',
-      propertyValue: 'copy-clipboard',
+    expect(findProperty(custom, 'event.aa.page_name')).to.deep.equal({
+      propertyName: 'event.aa.page_name',
+      propertyValue: 'adobe.com:',
       propertyType: 'string',
     });
-  });
-
-  it('uses the page messagetype metadata when provided', async () => {
-    setMeta('messagetype', 'social');
-
-    await trackMiniEditorExport({ exportMethod: 'copy-clipboard' });
-
-    const [, payload] = trackStub.firstCall.args;
-    const { sdm } = getCorpnewPayload(payload);
-    expect(sdm.custom.task.name).to.equal('social');
-  });
-
-  it('stores the signed-in user id when authenticated', async () => {
-    window.adobeIMS.isSignedInUser.returns(true);
-    window.adobeIMS.getProfile = sinon.stub().returns({ userId: 'user-123' });
-
-    await trackMiniEditorExport({ exportMethod: 'copy-clipboard' });
-
-    const [eventName, payload] = trackStub.firstCall.args;
-    expect(eventName).to.equal('event');
-    const corpnew = getCorpnewPayload(payload);
-    expect(corpnew.sdm.event.user_guid).to.equal('user-123');
-  });
-
-  it('does not track when no export method is provided', async () => {
-    await trackMiniEditorExport();
-    expect(trackStub.called).to.be.false;
+    expect(findProperty(custom, 'user.aa.post_page_url')).to.deep.equal({
+      propertyName: 'user.aa.post_page_url',
+      propertyValue: window.location.href,
+      propertyType: 'string',
+    });
+    expect(findProperty(custom, 'source.name')).to.deep.equal({
+      propertyName: 'source.name',
+      propertyValue: 'CCEX',
+      propertyType: 'string',
+    });
+    expect(findProperty(custom, 'source.client_id')).to.deep.equal({
+      propertyName: 'source.client_id',
+      propertyValue: 'projectx_webapp',
+      propertyType: 'string',
+    });
+    expect(findProperty(custom, 'hz.source_platform_type')).to.deep.equal({
+      propertyName: 'hz.source_platform_type',
+      propertyValue: 'desktop-web',
+      propertyType: 'string',
+    });
+    expect(findProperty(custom, 'custom.displayedLanguage')).to.deep.equal({
+      propertyName: 'custom.displayedLanguage',
+      propertyValue: 'en',
+      propertyType: 'string',
+    });
+    expect(findProperty(custom, 'custom.task.name')).to.deep.equal({
+      propertyName: 'custom.task.name',
+      propertyValue: 'quote',
+      propertyType: 'string',
+    });
+    expect(findProperty(custom, 'custom.ui.location')).to.equal(undefined);
   });
 });
