@@ -157,9 +157,9 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   librariesModalGradientName: 'color-libraries-modal-gradient-name',
   librariesModalGradientAria: 'color-libraries-modal-gradient-aria',
   librariesModalGradientActionsAria: 'color-libraries-modal-gradient-actions-aria',
-  librariesColorModeLabel: 'color-libraries-color-mode-label',
-  librariesCodesToggleLabel: 'color-libraries-codes-toggle-label',
-  librariesCodesDisabledTooltip: 'color-libraries-codes-disabled-tooltip',
+  librariesColorModeLabel: 'color-mode',
+  librariesCodesToggleLabel: 'copy-as-code',
+  librariesCodesDisabledTooltip: 'codes-disabled-tooltip',
 });
 
 export function createColorLibrariesPlaceholders(overrides = {}) {

@@ -30,7 +30,7 @@ const PLACEHOLDER_KEY_MAP = Object.freeze({
   handleAria: 'gradient-editor-handle-aria',
   copyHandleAria: 'gradient-editor-copy-handle-aria',
   copyLabel: 'gradient-editor-copy-label',
-  copyValueAria: 'gradient-editor-copy-value-aria',
+  copyValueAria: 'copy-value',
   stopBetweenAria: 'gradient-editor-stop-between-aria',
   handlePosition: 'gradient-editor-handle-position',
   stopPosition: 'gradient-editor-stop-position',
