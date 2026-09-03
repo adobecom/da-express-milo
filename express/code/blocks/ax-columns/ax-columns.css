@@ -42,13 +42,28 @@ main .section .ax-columns.enterprise .column h2 {
   font-size: var(--heading-font-size-xxl);
 }
 
+/* Base spacing model (formerly opt-in via the `v2` block class): equal top &
+   bottom vertical spacing, self-contained so it does not rely on the section
+   spacing-variant override chain below — 32px (--spacing-500) on
+   mobile/tablet, 64px (--spacing-800) on desktop (>=1200px, see that media
+   query for the override). Variants that manage their own outer spacing
+   (marquee, color) opt out below instead of stacking on top of it. */
 .ax-columns {
+  --ax-columns-v2-spacing: var(--spacing-500);
   padding-left: var(--spacing-300);
   padding-right: var(--spacing-300);
+  padding-top: var(--ax-columns-v2-spacing);
+  padding-bottom: var(--ax-columns-v2-spacing);
   margin: auto;
-  max-width: 350px;
+  max-width: 599px;
   line-height: initial;
   word-wrap: normal;
+}
+
+.ax-columns.marquee,
+.ax-columns.color {
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 .ax-columns.marquee.width-2-columns {
@@ -117,11 +132,6 @@ main .section .ax-columns.enterprise .column h2 {
 }
 
 .section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns:first-child:not(.v2) {
-  padding-top: 60px;
-}
-
-.section:not(:first-child):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
 .l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.has-ribbon-banner:first-child {
   padding-top: 0;
 }
@@ -132,36 +142,6 @@ main .section .ax-columns.enterprise .column h2 {
   padding-top: 0;
 }
 
-/* Authorable variant: equal top & bottom vertical spacing.
-   32px (--spacing-500) on mobile/tablet, 64px (--spacing-800) on desktop (>=1200px).
-   Opt-in via the `v2` block class — self-contained so it does not rely on the
-   section spacing-variant override chain above. */
-.ax-columns.v2 {
-  --ax-columns-v2-spacing: var(--spacing-500);
-  max-width: 599px;
-  padding-top: var(--ax-columns-v2-spacing);
-  padding-bottom: var(--ax-columns-v2-spacing);
-}
-
-.ax-columns.v2 > div {
-   gap : 16px;
-} 
-
-.ax-columns.v2 .column {
-  padding-left: 0;
-  padding-right: 0;
-} 
-
-.ax-columns.v2 .column,
-.ax-columns.v2 .column.column-picture {
-  padding-left: 0;
-  padding-right: 0;
-}
-
-.ax-columns.v2 .column-picture img {
-  border-radius: 16px;
-}
-
 .ax-columns.top.center,
 .ax-columns.fullsize.center,
 .ax-columns.light,
@@ -169,13 +149,6 @@ main .section .ax-columns.enterprise .column h2 {
   max-width: var(--block-sm-max-width);
   padding-left: 0;
   padding-right: 0;
-}
-
-.section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color, .v2)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.ax-columns:last-child,
-.section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.content:last-child {
-  padding-bottom: var(--spacing-600);
 }
 
 .ax-columns h1,
@@ -190,17 +163,6 @@ main .section .ax-columns.enterprise .column h2 {
 .section:has(.ax-columns.highlight:not(.dark)),
 .section:has(.ax-columns.dark:not(.highlight)) {
   color: var(--color-white);
-}
-
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:last-child,
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.dark:last-child,
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.highlight:nth-last-child(2):has(+ .section-metadata),
-.section:not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
-.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing) .ax-columns.dark:nth-last-child(2):has(+ .section-metadata) {
-  padding-bottom: 40px;
 }
 
 .section:has(.ax-columns.highlight) .legal {
@@ -420,9 +382,7 @@ main .section .ax-columns.enterprise .column h2 {
   display: flex;
   flex-direction: column;
   justify-content: center;
-}
-.section .ax-columns:not(.v2)>div {
-  padding: var(--spacing-600) 0;
+  gap: 16px;
 }
 
 
@@ -765,8 +725,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 .ax-columns .column {
-  padding-left: var(--spacing-500);
-  padding-right: var(--spacing-500);
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .ax-columns.fullsize .column-picture,
@@ -798,9 +758,13 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 .ax-columns .column.column-picture {
-  padding-left: var(--spacing-100);
-  padding-right: var(--spacing-100);
+  padding-left: 0;
+  padding-right: 0;
   margin: auto;
+}
+
+.ax-columns .column-picture img {
+  border-radius: 16px;
 }
 
 .section:first-of-type .ax-columns:first-of-type:not(.center):not(.fullsize) .brand.icon {
@@ -1092,8 +1056,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .ax-columns .column {
     margin: 0;
-    padding-left: var(--spacing-500);
-    padding-right: var(--spacing-500);
+    padding-left: 0;
+    padding-right: 0;
   }
 
   .section:has(.ax-columns)>.content {
@@ -1211,11 +1175,9 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     align-items: flex-start;
   }
 
-  .section .ax-columns,
   .ax-columns.top.center,
   .ax-columns.fullsize.center,
-  .ax-columns.light,
-  .ax-columns.fullsize.center {
+  .ax-columns.light {
     max-width: 836px;
     padding-left: var(--spacing-500);
     padding-right: var(--spacing-500);
@@ -1497,9 +1459,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     max-width: var(--block-lg-max-width);
   }
 
-  .ax-columns.v2 {
+  .ax-columns {
     --ax-columns-v2-spacing: var(--spacing-800);
-
   }
 
   .ax-columns.marquee .button-container.free-plan-container {
@@ -1519,7 +1480,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     padding-right: var(--spacing-600);
   }
 
-  .section .ax-columns,
   .ax-columns.top.center,
   .ax-columns.light {
     max-width: var(--block-lg-max-width);
@@ -1939,20 +1899,9 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
 }
 
 /* Temporary styles for the Font Generator SEO page's ax-columns instance.
-   Not a long-term variant — remove once a permanent layout solution lands. */
-.section .ax-columns.temporary-font-generator-styles a.con-button {
-  background-color: var(--Background-Primary-Default);
-  border-color: var(--Background-Primary-Default);
-  border-radius: 999px;
-  color: var(--color-white);
-}
-
-.section .ax-columns.temporary-font-generator-styles a.con-button:hover,
-.section .ax-columns.temporary-font-generator-styles a.con-button:active {
-  background-color: var(--Background-Primary-Hover);
-  border-color: var(--Background-Primary-Hover);
-}
-
+   Not a long-term variant — remove once a permanent layout solution lands.
+   (Button color previously lived here too, but the CTA is authored with
+   #_button-fill, which the global .s2 system now styles — see styles.css.) */
 @media (max-width: 1199px) {
   .section .ax-columns.temporary-font-generator-styles h3 {
     font-size: var(--typography-headings-xl);
@@ -1983,17 +1932,4 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
   .section>.ax-columns.temporary-font-generator-styles .con-button {
     margin-top: var(--spacing-500);
   }
-}
-
-main .ax-columns a.con-button.fill {
-  background-color: var(--Background-Primary-Default);
-  border-color: var(--Background-Primary-Default);
-  border-radius: 999px;
-  color: var(--color-white);
-}
-
-main .ax-columns a.con-button.fill:any-link:hover,
-main .ax-columns a.con-button.fill:any-link:active {
-     background-color: var(--color-info-accent-hover);
-    border-color: var(--color-info-accent-hover);
 }

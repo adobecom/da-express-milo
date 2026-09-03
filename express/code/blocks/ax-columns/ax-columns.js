@@ -695,6 +695,67 @@ export default async function decorate(block) {
     });
   }
 
+  // variant for the colors pages
+  if (block.classList.contains('color')) {
+    const [primaryColor, accentColor] = rows[1]
+      .querySelector(':scope > div')
+      .textContent.trim()
+      .split(',');
+    const [textCol, svgCol] = Array.from(
+      rows[0].querySelectorAll(':scope > div'),
+    );
+    const svgId = svgCol.textContent.trim();
+    const svg = createTag('div', { class: 'img-wrapper' });
+
+    svgCol.remove();
+    rows[1].remove();
+    textCol.classList.add('text');
+    svg.innerHTML = `<svg class='color-svg-img'> <use href='/express/code/icons/color-sprite.svg#${svgId}'></use></svg>`;
+    svg.style.backgroundColor = primaryColor;
+    svg.style.fill = accentColor;
+    rows[0].append(svg);
+
+    const { default: isDarkOverlayReadable } = await import(
+      '../../scripts/utils/color-tools.js'
+    );
+
+    if (isDarkOverlayReadable(primaryColor)) {
+      block.classList.add('shadow');
+    }
+  }
+
+  const phoneNumberTags = block.querySelectorAll(
+    'a[title="{{business-sales-numbers}}"]',
+  );
+  if (phoneNumberTags.length > 0) {
+    try {
+      await formatSalesPhoneNumber(phoneNumberTags);
+    } catch (error) {
+      window.lana?.log(`Error fetching sales phones numbers: ${error.message}`, { tags: 'ax-columns', severity: 'error' });
+    }
+  }
+
+  // Tracking any video column blocks.
+  const columnVideos = block.querySelectorAll('.column-video');
+  if (columnVideos.length) {
+    columnVideos.forEach((columnVideo) => {
+      const parent = columnVideo.closest('.ax-columns');
+      const a = parent.querySelector('a');
+      const adobeEventName = appendLinkText(`adobe.com:express:cta:learn:columns:${getExpressLandingPageType()}:`, a);
+
+      parent.addEventListener('click', (e) => {
+        e.stopPropagation();
+        sendEventToAnalytics(adobeEventName);
+      });
+    });
+  }
+
+  // Audited fullsize+top usage across every page referencing ax-columns: no page
+  // currently authors both classes together, and adding `.s2` above unconditionally
+  // (see the block.classList.add('s2') call near the top of this function) means
+  // block.className can never equal this literal string again regardless. Appears
+  // dead on both counts. Flagging for deletion rather than removing outright pending
+  // team confirmation that nothing off-content relies on it.
   if (block.className === 'columns fullsize top block width-3-columns') {
     const setElementsHeight = (columns) => {
       const elementsMinHeight = {
@@ -751,60 +812,5 @@ export default async function decorate(block) {
     };
 
     setElementsHeight(block.querySelectorAll('.column'));
-  }
-
-  // variant for the colors pages
-  if (block.classList.contains('color')) {
-    const [primaryColor, accentColor] = rows[1]
-      .querySelector(':scope > div')
-      .textContent.trim()
-      .split(',');
-    const [textCol, svgCol] = Array.from(
-      rows[0].querySelectorAll(':scope > div'),
-    );
-    const svgId = svgCol.textContent.trim();
-    const svg = createTag('div', { class: 'img-wrapper' });
-
-    svgCol.remove();
-    rows[1].remove();
-    textCol.classList.add('text');
-    svg.innerHTML = `<svg class='color-svg-img'> <use href='/express/code/icons/color-sprite.svg#${svgId}'></use></svg>`;
-    svg.style.backgroundColor = primaryColor;
-    svg.style.fill = accentColor;
-    rows[0].append(svg);
-
-    const { default: isDarkOverlayReadable } = await import(
-      '../../scripts/utils/color-tools.js'
-    );
-
-    if (isDarkOverlayReadable(primaryColor)) {
-      block.classList.add('shadow');
-    }
-  }
-
-  const phoneNumberTags = block.querySelectorAll(
-    'a[title="{{business-sales-numbers}}"]',
-  );
-  if (phoneNumberTags.length > 0) {
-    try {
-      await formatSalesPhoneNumber(phoneNumberTags);
-    } catch (error) {
-      window.lana?.log(`Error fetching sales phones numbers: ${error.message}`, { tags: 'ax-columns', severity: 'error' });
-    }
-  }
-
-  // Tracking any video column blocks.
-  const columnVideos = block.querySelectorAll('.column-video');
-  if (columnVideos.length) {
-    columnVideos.forEach((columnVideo) => {
-      const parent = columnVideo.closest('.ax-columns');
-      const a = parent.querySelector('a');
-      const adobeEventName = appendLinkText(`adobe.com:express:cta:learn:columns:${getExpressLandingPageType()}:`, a);
-
-      parent.addEventListener('click', (e) => {
-        e.stopPropagation();
-        sendEventToAnalytics(adobeEventName);
-      });
-    });
   }
 }
