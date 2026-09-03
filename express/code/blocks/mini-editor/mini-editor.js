@@ -1,4 +1,4 @@
-import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { getLibs, getIconElementDeprecated, getMobileOperatingSystem } from '../../scripts/utils.js';
 import {
   trapFocus,
   handleEscapeClose,
@@ -398,6 +398,14 @@ export default async function init(block) {
         }
       };
 
+      const platformOS = getMobileOperatingSystem();
+      // Android Firefox doesn't support navigator.share with files and blocks
+      // the wa.me popup fallback, so this share option is hidden there entirely.
+      const isAndroidFirefox = platformOS === 'Android' && /firefox/i.test(navigator.userAgent);
+      const shareLabel = platformOS === 'Android'
+        ? { key: 'share-menu-whatsapp', fallback: 'WhatsApp' }
+        : { key: 'share-menu-message', fallback: 'Message' };
+
       return [
         { type: 'edit', onClick: handleOpenInExpress },
         {
@@ -406,10 +414,10 @@ export default async function init(block) {
             heading: { key: 'mini-editor-share-image', fallback: 'Share image' },
             onOpen: () => { getCardBlobPromise().catch(() => {}); },
             actions: [
-              {
+              ...(isAndroidFirefox ? [] : [{
                 value: 'whatsapp',
                 type: 'custom',
-                label: { key: 'share-menu-whatsapp', fallback: 'WhatsApp' },
+                label: shareLabel,
                 icon: () => createTag('sp-icon', {
                   src: '/express/code/icons/S2_Icon_WhatsApp_20_N.svg',
                   size: 'm',
@@ -426,7 +434,7 @@ export default async function init(block) {
                   const text = encodeURIComponent(`${strings.heading}: ${window.location.href}`);
                   window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
                 },
-              },
+              }]),
               {
                 value: 'copy',
                 type: 'copy',
