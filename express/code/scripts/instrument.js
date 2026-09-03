@@ -21,6 +21,10 @@ function getLanguage() {
   return document.documentElement?.lang || 'en';
 }
 
+function getMiniEditorTaskName() {
+  return getMetadata('messagetype')?.trim() || 'quote';
+}
+
 function addIfDefined(target, key, value) {
   if (value !== undefined && value !== null && value !== '') {
     target[key] = value;
@@ -518,7 +522,7 @@ export async function trackExpressFeaturePageLoad() {
         },
         displayedLanguage: getLanguage(),
         task: {
-          name: 'quote',
+          name: getMiniEditorTaskName(),
         },
       },
     } : null;

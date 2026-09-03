@@ -1,4 +1,5 @@
 import { generateGuid, getAccessCountry, getDeviceInfo } from './device-info.js';
+import { getMetadata } from '../utils.js';
 
 const EXPORT_EVENT_NAME_AUTH = 'export-project-complete';
 const EXPORT_EVENT_NAME_UNAUTH = 'export-project-complete-unauth';
@@ -16,6 +17,10 @@ function isMobileWeb() {
 
 function getLanguage() {
   return document.documentElement?.lang || 'en';
+}
+
+function getMiniEditorTaskName() {
+  return getMetadata('messagetype')?.trim() || 'quote';
 }
 
 function addIfDefined(target, key, value) {
@@ -160,7 +165,7 @@ export default async function trackMiniEditorExport({ exportMethod, uiLocation =
       },
       displayedLanguage: language,
       task: {
-        name: 'quote',
+        name: getMiniEditorTaskName(),
       },
     },
   };

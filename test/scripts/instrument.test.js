@@ -73,6 +73,7 @@ describe('instrument mini-editor analytics', () => {
   });
 
   afterEach(() => {
+    document.head.querySelectorAll('meta[name="messagetype"]').forEach((meta) => meta.remove());
     // eslint-disable-next-line no-underscore-dangle
     delete window._satellite;
     fetchStub.restore();
@@ -86,6 +87,22 @@ describe('instrument mini-editor analytics', () => {
     });
     clock.restore();
     sinon.restore();
+  });
+
+  it('uses the page messagetype metadata when provided', async () => {
+    setMeta('messagetype', 'social');
+
+    await martechLoadedCB();
+    await clock.tickAsync(0);
+    await Promise.resolve();
+
+    const [, payload] = trackStub.firstCall.args;
+    const { custom } = getCorpnewPayload(payload);
+    expect(findProperty(custom, 'custom.task.name')).to.deep.equal({
+      propertyName: 'custom.task.name',
+      propertyValue: 'social',
+      propertyType: 'string',
+    });
   });
 
   it('adds the mini-editor-only analytics fields', async () => {

@@ -1,3 +1,5 @@
+import { getMetadata } from '../../utils.js';
+
 /**
  * Mini Editor Widget
  *
@@ -66,6 +68,10 @@ function createSecureUid(prefix = 'mini-editor') {
 }
 const DECO_QUOTE_CHAR_LIMIT = 216;
 const EDITOR_QUOTE_CHAR_LIMIT = 248;
+
+function getMiniEditorMessageType() {
+  return getMetadata('messagetype')?.trim() || 'quote';
+}
 
 /**
  * Truncates display text at a whole-word boundary within `limit` characters,
@@ -981,10 +987,10 @@ async function buildWidget(
   const renderQuote = (quote) => {
     currentQuote = quote;
     quoteEl.textContent = truncateQuote(quote, EDITOR_QUOTE_CHAR_LIMIT);
-    // Accessible name is always "Click to copy quote: {full quote}" — the
-    // untruncated quote appended, regardless of whether the visible text
+    // Accessible name is always "Click to copy <messagetype>: {full quote}" —
+    // the untruncated quote appended, regardless of whether the visible text
     // itself is truncated.
-    quoteWrap.setAttribute('aria-label', `Click to copy quote: ${quote}`);
+    quoteWrap.setAttribute('aria-label', `Click to copy ${getMiniEditorMessageType()}: ${quote}`);
   };
 
   quoteWrap.append(quoteEl);
@@ -1000,7 +1006,7 @@ async function buildWidget(
   try {
     await createExpressTooltip({
       targetEl: quoteWrap,
-      content: 'Click to copy quote',
+      content: `Click to copy ${getMiniEditorMessageType()}`,
       placement: 'top',
     });
   } finally {
@@ -1295,14 +1301,15 @@ function buildDecoCard(a11y, entry, useQuote) {
   // component's own styling instead of hand-rolled CSS overrides — see
   // .me-deco-use/.me-deco-copy in the stylesheet, which now only sets
   // layout (size, gap), not colour/state.
+  const messageType = getMiniEditorMessageType();
   const useBtn = createTag('sp-button', {
     variant: 'secondary',
     size: 's',
     class: 'me-deco-use',
-    'aria-label': `Use this quote: ${attribution}`,
+    'aria-label': `Use this ${messageType}: ${attribution}`,
   });
-  useBtn.setAttribute('daa-ll', 'Use this quote');
-  useBtn.textContent = 'Use this quote';
+  useBtn.setAttribute('daa-ll', `Use this ${messageType}`);
+  useBtn.textContent = `Use this ${messageType}`;
   useBtn.addEventListener('click', (e) => {
     useQuote(entry);
     // Announced here (not inside useQuote itself, shared with the arc
@@ -1505,7 +1512,7 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
   try {
     await createExpressTooltip({
       targetEl: quoteWrap,
-      content: 'Click to copy quote',
+      content: `Click to copy ${getMiniEditorMessageType()}`,
       placement: 'top',
     });
   } finally {
@@ -1575,7 +1582,7 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
     // meaningful while this card is centre (only centre copies on
     // click/Enter, see doCopy above), but harmless to set on every role
     // since prev/next's quoteWrap isn't a separate Tab stop anyway.
-    quoteWrap.setAttribute('aria-label', `Click to copy quote: ${entry.quote}`);
+    quoteWrap.setAttribute('aria-label', `Click to copy ${getMiniEditorMessageType()}: ${entry.quote}`);
     // entry.font is the carousel-wide selected font (see buildArcCarousel's
     // selectedFont/withFont) when one has been picked — applies to every
     // role (prev/centre/next), not just centre. Falls back to the fixed

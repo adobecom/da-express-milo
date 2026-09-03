@@ -20,6 +20,10 @@ let quoteActionDepsPromise;
  */
 const USE_QUOTE_EVENT = 'mini-editor:use-quote';
 
+function getMiniEditorMessageType() {
+  return getMetadata('messagetype')?.trim() || 'quote';
+}
+
 async function loadQuoteActionDeps() {
   if (showCopyToast && trackMiniEditorExport) return;
   quoteActionDepsPromise ??= Promise.all([
@@ -45,13 +49,19 @@ async function loadQuoteActionDeps() {
 function buildQuoteActions(quote, author, hasMiniEditor) {
   if (!hasMiniEditor) return null;
 
+  const messageType = getMiniEditorMessageType();
+  const copyLabel = `Copy ${messageType}`;
   const actions = createTag('div', { class: 'collapsible-row-actions collapsible-row-actions--mini-editor' });
   const copyIcon = getIconElementDeprecated('copy-quote');
   copyIcon.classList.add('collapsible-row-action-icon', 'collapsible-row-action-icon--copy');
 
-  const copyBtn = createTag('button', { type: 'button', class: 'collapsible-row-action collapsible-row-action--copy' }, [
+  const copyBtn = createTag('button', {
+    type: 'button',
+    class: 'collapsible-row-action collapsible-row-action--copy',
+    'aria-label': copyLabel,
+  }, [
     copyIcon,
-    createTag('span', {}, ['Copy quote']),
+    createTag('span', {}, [copyLabel]),
   ]);
   copyBtn.addEventListener('click', async () => {
     const text = author ? `${quote} — ${author}` : quote;

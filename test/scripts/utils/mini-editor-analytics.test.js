@@ -16,6 +16,15 @@ function findProperty(custom, propertyName) {
   return custom.find((entry) => entry.propertyName === propertyName);
 }
 
+function setMeta(name, content) {
+  const existing = document.head.querySelector(`meta[name="${name}"]`);
+  if (existing) existing.remove();
+  const meta = document.createElement('meta');
+  meta.setAttribute('name', name);
+  meta.setAttribute('content', content);
+  document.head.append(meta);
+}
+
 function getCorpnewPayload(payload) {
   // eslint-disable-next-line no-underscore-dangle
   const { _adobe_corpnew: corpnew } = payload.data;
@@ -58,6 +67,7 @@ describe('mini-editor analytics', () => {
   });
 
   afterEach(() => {
+    document.head.querySelectorAll('meta[name="messagetype"]').forEach((meta) => meta.remove());
     // eslint-disable-next-line no-underscore-dangle
     delete window._satellite;
     fetchStub.restore();
@@ -178,6 +188,16 @@ describe('mini-editor analytics', () => {
       propertyValue: 'copy-clipboard',
       propertyType: 'string',
     });
+  });
+
+  it('uses the page messagetype metadata when provided', async () => {
+    setMeta('messagetype', 'social');
+
+    await trackMiniEditorExport({ exportMethod: 'copy-clipboard' });
+
+    const [, payload] = trackStub.firstCall.args;
+    const { sdm } = getCorpnewPayload(payload);
+    expect(sdm.custom.task.name).to.equal('social');
   });
 
   it('stores the signed-in user id when authenticated', async () => {
