@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@susi-light-default",
       "selector": "div.susi-light",
-      "path": "/drafts/nala/test-gen/susi-light/susi-light",
+      "path": "/drafts/nala/blocks/susi-light/susi-light",
       "data": {
         "semantic": {
           "texts": [],
@@ -23,7 +23,7 @@
       "tcid": "1",
       "name": "@susi-light-tabs",
       "selector": "div.susi-light.tabs",
-      "path": "/drafts/nala/test-gen/susi-light/susi-light-tabs",
+      "path": "/drafts/nala/blocks/susi-light/susi-light-tabs",
       "data": {
         "semantic": {
           "texts": [
@@ -86,7 +86,7 @@
               "selector": "a.quick-link",
               "nth": 0,
               "text": "Continue as a guest",
-              "href": "/GJrBPFUWBBb?url=%2Fdrafts%2Fnala%2Ftest-gen%2Fsusi-light%2Fsusi-light-tabs&placement=susi-light&locale=en-US&contentRegion=us",
+              "href": "/GJrBPFUWBBb?url=%2Fdrafts%2Fnala%2Fblocks%2Fsusi-light%2Fsusi-light-tabs&placement=susi-light&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": null,

@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@text-max-width-8-desktop-center-xxl-spacing-xl-button-l-title-text-block-con-block",
       "selector": "div.text.max-width-8-desktop.center.xxl-spacing.xl-button.l-title.text-block.con-block",
-      "path": "/drafts/nala/test-gen/text/text",
+      "path": "/drafts/nala/blocks/text/text",
       "data": {
         "semantic": {
           "texts": [
@@ -64,7 +64,7 @@
       "tcid": "1",
       "name": "@text-center-xxs-spacing-text-block-con-block",
       "selector": "div.text.center.xxs-spacing.text-block.con-block",
-      "path": "/drafts/nala/test-gen/text/text-center",
+      "path": "/drafts/nala/blocks/text/text-center",
       "data": {
         "semantic": {
           "texts": [
@@ -97,7 +97,7 @@
       "tcid": "2",
       "name": "@text-no-spacing-bottom-text-block-con-block",
       "selector": "div.text.no-spacing-bottom.text-block.con-block",
-      "path": "/drafts/nala/test-gen/text/text-block-2-up",
+      "path": "/drafts/nala/blocks/text/text-block-2-up",
       "data": {
         "semantic": {
           "texts": [
@@ -160,7 +160,7 @@
       "tcid": "3",
       "name": "@text-l-lockup-max-width-8-desktop-center-xxl-spacing-xl-button-l-title-text-block-con-block",
       "selector": "div.text.l-lockup.max-width-8-desktop.center.xxl-spacing.xl-button.l-title.text-block.con-block",
-      "path": "/drafts/nala/test-gen/text/text-lockup",
+      "path": "/drafts/nala/blocks/text/text-lockup",
       "data": {
         "semantic": {
           "texts": [

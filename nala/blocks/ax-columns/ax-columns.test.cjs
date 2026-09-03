@@ -246,4 +246,196 @@ test.describe('AxColumnsBlock Test Suite', () => {
       await runSeoChecks({ page, feature: features[3], skipSeoTest: false });
     });
   });
+
+  // Test Id : 4 : @ax-columns-center
+  test(`[Test Id - ${features[4].tcid}] ${features[4].name} ${features[4].tags}`, async ({ page, baseURL }) => {
+    const { data } = features[4];
+    const testUrl = `${baseURL}${features[4].path}${miloLibs}`;
+    const block = new AxColumnsBlock(page, features[4].selector);
+    console.info(`[Test Page]: ${testUrl}`);
+
+    await test.step('step-1: Navigate to page', async () => {
+      await page.goto(testUrl);
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page).toHaveURL(testUrl);
+    });
+
+    await test.step('step-2: Verify block content', async () => {
+      await expect(block.block).toBeVisible();
+      const sem = data.semantic;
+
+      for (const t of sem.texts) {
+        const locator = block.block.locator(t.selector).nth(t.nth || 0);
+        await expect(locator).toContainText(t.text);
+      }
+
+      for (const m of sem.media) {
+        const locator = block.block.locator(m.selector).nth(m.nth || 0);
+        const isHiddenSelector = m.selector.includes('.isHidden');
+        const isPicture = m.tag === 'picture';
+        const target = isPicture ? locator.locator('img') : locator;
+        if (isHiddenSelector) {
+          await expect(target).toBeHidden();
+        } else {
+          await expect(target).toBeVisible();
+        }
+      }
+
+      for (const iEl of sem.interactives) {
+        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
+        await expect(locator).toBeVisible({ timeout: 8000 });
+        if (iEl.type === 'link' && iEl.href) {
+          const href = await locator.getAttribute('href');
+          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
+            await expect(href).toBe(iEl.href);
+          } else {
+            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
+            const actualPath = new URL(href, 'https://dummy.base').pathname;
+            await expect(actualPath).toBe(expectedPath);
+          }
+        }
+        if (iEl.text) await expect(locator).toContainText(iEl.text);
+      }
+    });
+
+    await test.step('step-3: Accessibility validation', async () => {
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
+    });
+
+    await test.step('step-4: SEO validation', async () => {
+      await runSeoChecks({ page, feature: features[4], skipSeoTest: false });
+    });
+  });
+
+  // Test Id : 5 : @ax-columns-highlight
+  test(`[Test Id - ${features[5].tcid}] ${features[5].name} ${features[5].tags}`, async ({ page, baseURL }) => {
+    const { data } = features[5];
+    const testUrl = `${baseURL}${features[5].path}${miloLibs}`;
+    const block = new AxColumnsBlock(page, features[5].selector);
+    console.info(`[Test Page]: ${testUrl}`);
+
+    await test.step('step-1: Navigate to page', async () => {
+      await page.goto(testUrl);
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page).toHaveURL(testUrl);
+    });
+
+    await test.step('step-2: Verify block content', async () => {
+      await expect(block.block).toBeVisible();
+      const sem = data.semantic;
+
+      for (const t of sem.texts) {
+        const locator = block.block.locator(t.selector).nth(t.nth || 0);
+        await expect(locator).toContainText(t.text);
+      }
+
+      for (const m of sem.media) {
+        const locator = block.block.locator(m.selector).nth(m.nth || 0);
+        const isHiddenSelector = m.selector.includes('.isHidden');
+        const isPicture = m.tag === 'picture';
+        const target = isPicture ? locator.locator('img') : locator;
+        if (isHiddenSelector) {
+          await expect(target).toBeHidden();
+        } else {
+          await expect(target).toBeVisible();
+        }
+      }
+
+      for (const iEl of sem.interactives) {
+        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
+        await expect(locator).toBeVisible({ timeout: 8000 });
+        if (iEl.type === 'link' && iEl.href) {
+          const href = await locator.getAttribute('href');
+          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
+            await expect(href).toBe(iEl.href);
+          } else {
+            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
+            const actualPath = new URL(href, 'https://dummy.base').pathname;
+            await expect(actualPath).toBe(expectedPath);
+          }
+        }
+        if (iEl.text) await expect(locator).toContainText(iEl.text);
+      }
+    });
+
+    await test.step('step-3: Verify video overlay interaction', async () => {
+      const videoLink = data.semantic.interactives.find((i) => i.type === 'video-link');
+      if (videoLink?.title) {
+        await expect(block.videoButton).toHaveAttribute('title', videoLink.title);
+      }
+      await block.videoButton.click();
+      await expect(block.videoOverlay).toBeVisible();
+      await expect(block.videoPlayer).toBeVisible();
+      await block.closeOverlayButton.click();
+      await expect(block.videoOverlay).toBeHidden();
+    });
+
+    await test.step('step-4: Accessibility validation', async () => {
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
+    });
+
+    await test.step('step-5: SEO validation', async () => {
+      await runSeoChecks({ page, feature: features[5], skipSeoTest: false });
+    });
+  });
+
+  // Test Id : 6 : @ax-columns-highlight-width-2-columns
+  test(`[Test Id - ${features[6].tcid}] ${features[6].name} ${features[6].tags}`, async ({ page, baseURL }) => {
+    const { data } = features[6];
+    const testUrl = `${baseURL}${features[6].path}${miloLibs}`;
+    const block = new AxColumnsBlock(page, features[6].selector);
+    console.info(`[Test Page]: ${testUrl}`);
+
+    await test.step('step-1: Navigate to page', async () => {
+      await page.goto(testUrl);
+      await page.waitForLoadState('domcontentloaded');
+      await expect(page).toHaveURL(testUrl);
+    });
+
+    await test.step('step-2: Verify block content', async () => {
+      await expect(block.block).toBeVisible();
+      const sem = data.semantic;
+
+      for (const t of sem.texts) {
+        const locator = block.block.locator(t.selector).nth(t.nth || 0);
+        await expect(locator).toContainText(t.text);
+      }
+
+      for (const m of sem.media) {
+        const locator = block.block.locator(m.selector).nth(m.nth || 0);
+        const isHiddenSelector = m.selector.includes('.isHidden');
+        const isPicture = m.tag === 'picture';
+        const target = isPicture ? locator.locator('img') : locator;
+        if (isHiddenSelector) {
+          await expect(target).toBeHidden();
+        } else {
+          await expect(target).toBeVisible();
+        }
+      }
+
+      for (const iEl of sem.interactives) {
+        const locator = block.block.locator(iEl.selector).nth(iEl.nth || 0);
+        await expect(locator).toBeVisible({ timeout: 8000 });
+        if (iEl.type === 'link' && iEl.href) {
+          const href = await locator.getAttribute('href');
+          if (/^(tel:|mailto:|sms:|ftp:|[+]?[\d])/i.test(iEl.href)) {
+            await expect(href).toBe(iEl.href);
+          } else {
+            const expectedPath = new URL(iEl.href, 'https://dummy.base').pathname;
+            const actualPath = new URL(href, 'https://dummy.base').pathname;
+            await expect(actualPath).toBe(expectedPath);
+          }
+        }
+        if (iEl.text) await expect(locator).toContainText(iEl.text);
+      }
+    });
+
+    await test.step('step-3: Accessibility validation', async () => {
+      await runAccessibilityTest({ page, testScope: block.block, skipA11yTest: false });
+    });
+
+    await test.step('step-4: SEO validation', async () => {
+      await runSeoChecks({ page, feature: features[6], skipSeoTest: false });
+    });
+  });
 });

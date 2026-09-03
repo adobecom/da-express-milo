@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@feature-grid-default",
       "selector": "div.feature-grid",
-      "path": "/drafts/nala/test-gen/ax-feature-grid/4-cards",
+      "path": "/drafts/nala/blocks/ax-feature-grid/4-cards",
       "data": {
         "semantic": {
           "texts": [

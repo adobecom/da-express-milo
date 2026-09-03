@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@banner-default",
       "selector": "div.banner",
-      "path": "/drafts/nala/test-gen/ax-banner/ax-banner-default",
+      "path": "/drafts/nala/blocks/ax-banner/ax-banner-default",
       "data": {
         "semantic": {
           "texts": [
@@ -31,7 +31,7 @@
               "selector": "a.quick-link.button.accent.dark",
               "nth": 0,
               "text": "Start for free",
-              "href": "/KEXVelpNNlb?~placement=blog&~tags=small-business-trends-bereal&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-banner%2Fax-banner-default&placement=banner&locale=en-US&contentRegion=us",
+              "href": "/KEXVelpNNlb?~placement=blog&~tags=small-business-trends-bereal&url=%2Fdrafts%2Fnala%2Fblocks%2Fax-banner%2Fax-banner-default&placement=banner&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "Start for free",
@@ -50,7 +50,7 @@
       "tcid": "1",
       "name": "@banner-light",
       "selector": "div.banner.light",
-      "path": "/drafts/nala/test-gen/ax-banner/ax-banner-light",
+      "path": "/drafts/nala/blocks/ax-banner/ax-banner-light",
       "data": {
         "semantic": {
           "texts": [
@@ -83,7 +83,7 @@
       "tcid": "2",
       "name": "@banner-standout",
       "selector": "div.banner.standout",
-      "path": "/drafts/nala/test-gen/ax-banner/ax-banner-standout",
+      "path": "/drafts/nala/blocks/ax-banner/ax-banner-standout",
       "data": {
         "semantic": {
           "texts": [
@@ -135,7 +135,7 @@
       "tcid": "3",
       "name": "@banner-cool",
       "selector": "div.banner.cool",
-      "path": "/drafts/nala/test-gen/ax-banner/ax-banner-cool",
+      "path": "/drafts/nala/blocks/ax-banner/ax-banner-cool",
       "data": {
         "semantic": {
           "texts": [
@@ -161,7 +161,7 @@
               "selector": "a.quick-link.button.large.primary",
               "nth": 0,
               "text": "Get Adobe Express Free",
-              "href": "/KEXVelpNNlb?~placement=blog&~tags=small-business-trends-bereal&url=%2Fdrafts%2Fnala%2Ftest-gen%2Fax-banner%2Fax-banner-cool&placement=banner&locale=en-US&contentRegion=us",
+              "href": "/KEXVelpNNlb?~placement=blog&~tags=small-business-trends-bereal&url=%2Fdrafts%2Fnala%2Fblocks%2Fax-banner%2Fax-banner-cool&placement=banner&locale=en-US&contentRegion=us",
               "ariaLabel": null,
               "rel": "nofollow",
               "title": "Get Adobe Express Free",

@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@ax-table-of-contents-default",
       "selector": "div.ax-table-of-contents",
-      "path": "/drafts/nala/test-gen/ax-table-of-contents/ax-table-of-contents",
+      "path": "/drafts/nala/blocks/ax-table-of-contents/ax-table-of-contents",
       "data": {
         "semantic": {
           "texts": [],

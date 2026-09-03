@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@link-list-v2-default",
       "selector": "div.link-list-v2",
-      "path": "/drafts/nala/test-gen/link-list-v2/link-list-v2",
+      "path": "/drafts/nala/blocks/link-list-v2/link-list-v2",
       "data": {
         "semantic": {
           "texts": [

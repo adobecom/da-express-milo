@@ -5,7 +5,7 @@
       "tcid": "0",
       "name": "@page-list-appear",
       "selector": "div.page-list.appear",
-      "path": "/drafts/nala/test-gen/page-list/page-list",
+      "path": "/drafts/nala/blocks/page-list/page-list",
       "data": {
         "semantic": {
           "texts": [
