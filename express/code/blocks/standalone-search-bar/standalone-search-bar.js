@@ -19,6 +19,16 @@ function cycleThroughSuggestions(block, targetIndex = 0) {
   }
 }
 
+function focusTrendLink(trendsContainer, targetIndex) {
+  const trendLinks = trendsContainer.querySelectorAll('.trend-link');
+  if (targetIndex < 0 || targetIndex >= trendLinks.length) return;
+
+  // Roving tabindex: only the focused trend link stays in the tab sequence
+  trendLinks.forEach((link) => { link.tabIndex = -1; });
+  trendLinks[targetIndex].tabIndex = 0;
+  trendLinks[targetIndex].focus();
+}
+
 /**
  * Builds configuration object from block HTML structure (Word document approach)
  * @param {HTMLElement} block - The block element
@@ -112,7 +122,11 @@ function initSearchFunction(block, searchBarWrapper) {
   searchBar.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowDown' || e.keyCode === 40) {
       e.preventDefault();
-      cycleThroughSuggestions(block);
+      if (!suggestionsContainer.classList.contains('hidden')) {
+        cycleThroughSuggestions(block);
+      } else if (!trendsContainer.classList.contains('hidden')) {
+        focusTrendLink(trendsContainer, 0);
+      }
     } else if (e.key === 'Tab' && !e.shiftKey) {
       // Check if suggestions are visible and have items
       const suggestions = block.querySelectorAll('.suggestions-list li');
@@ -342,6 +356,7 @@ async function decorateSearchFunctions(block) {
 
 async function buildSearchDropdown(searchBarWrapper) {
   if (!searchBarWrapper) return;
+  const searchBar = searchBarWrapper.querySelector('input.search-bar');
   const dropdownContainer = createTag('div', { class: 'search-dropdown-container hidden' });
   const trendsContainer = createTag('div', { class: 'trends-container' });
   const suggestionsContainer = createTag('div', { class: 'suggestions-container hidden' });
@@ -390,12 +405,40 @@ async function buildSearchDropdown(searchBarWrapper) {
 
   if (trends) {
     const trendsWrapper = createTag('ul', { class: 'trends-wrapper' });
+    let trendIndex = 0;
     for (const [key, value] of Object.entries(trends)) {
       const trendLinkWrapper = createTag('li');
-      const trendLink = createTag('a', { class: 'trend-link', href: `${value}&searchId=${generateSearchId()}` });
+      const trendLink = createTag('a', {
+        class: 'trend-link',
+        href: `${value}&searchId=${generateSearchId()}`,
+        tabindex: trendIndex === 0 ? 0 : -1,
+      });
       trendLink.textContent = key;
+
+      trendLink.addEventListener('keydown', (e) => {
+        const trendLinks = trendsWrapper.querySelectorAll('.trend-link');
+        const currentIndex = Array.from(trendLinks).indexOf(e.currentTarget);
+
+        if (e.key === 'ArrowDown' || e.keyCode === 40) {
+          e.preventDefault();
+          focusTrendLink(trendsContainer, currentIndex + 1);
+        } else if (e.key === 'ArrowUp' || e.keyCode === 38) {
+          e.preventDefault();
+          if (currentIndex === 0) {
+            searchBar.focus();
+          } else {
+            focusTrendLink(trendsContainer, currentIndex - 1);
+          }
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          dropdownContainer.classList.add('hidden');
+          searchBar.focus();
+        }
+      });
+
       trendLinkWrapper.append(trendLink);
       trendsWrapper.append(trendLinkWrapper);
+      trendIndex += 1;
     }
     trendsContainer.append(trendsWrapper);
   }

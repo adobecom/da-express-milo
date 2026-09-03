@@ -9,6 +9,15 @@ setLibs('/test/mocks/libs', { hostname: 'prod.example.com', search: '' });
 
 describe('collapsible-rows quote actions ("Copy quote" / "Create a design")', () => {
   let clipboardStub;
+  const setPageType = (value) => {
+    const existingMeta = document.querySelector('meta[name="pagetype"]');
+    if (existingMeta) existingMeta.remove();
+    if (!value) return;
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'pagetype');
+    meta.setAttribute('content', value);
+    document.head.append(meta);
+  };
 
   beforeEach(() => {
     clipboardStub = sinon.stub(navigator.clipboard, 'writeText').resolves();
@@ -17,6 +26,7 @@ describe('collapsible-rows quote actions ("Copy quote" / "Create a design")', ()
   afterEach(() => {
     clipboardStub.restore();
     document.body.innerHTML = '';
+    setPageType('');
   });
 
   it('does not render quote actions when no mini-editor block is present on the page', async () => {
@@ -30,14 +40,22 @@ describe('collapsible-rows quote actions ("Copy quote" / "Create a design")', ()
     expect(block.querySelector('.collapsible-row-sub-header--mini-editor')).to.not.exist;
   });
 
-  describe('with a mini-editor block present', () => {
+  it('does not render quote actions when pagetype is not mini-editor', async () => {
+    document.body.innerHTML = await readFile({ path: './mocks/body.html' });
+    setPageType('faq');
+
+    const block = document.querySelector('.collapsible-rows');
+    await decorate(block);
+
+    expect(block.querySelector('.collapsible-row-actions')).to.not.exist;
+  });
+
+  describe('with pagetype mini-editor', () => {
     let block;
 
     beforeEach(async () => {
       document.body.innerHTML = await readFile({ path: './mocks/body.html' });
-      const miniEditor = document.createElement('div');
-      miniEditor.className = 'mini-editor';
-      document.body.append(miniEditor);
+      setPageType('mini-editor');
       block = document.querySelector('.collapsible-rows');
       await decorate(block);
     });
