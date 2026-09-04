@@ -1,4 +1,4 @@
-import { getLibs, toClassName, getIconElementDeprecated, decorateButtonsDeprecated } from '../../scripts/utils.js';
+import { getLibs, toClassName, getIconElementDeprecated } from '../../scripts/utils.js';
 
 import {
   addAnimationToggle,
@@ -21,7 +21,7 @@ import {
 } from '../../scripts/instrument.js';
 
 let createTag; let getMetadata;
-let getConfig;
+let getConfig; let decorateButtons;
 
 function replaceHyphensInText(area) {
   [...area.querySelectorAll('h1, h2, h3, h4, h5, h6')]
@@ -36,7 +36,7 @@ function transformToVideoColumn(cell, aTag, block) {
   const title = aTag.textContent.trim();
   // gather video urls from all links in cell
   const vidUrls = [];
-  cell.querySelectorAll(':scope a.button, :scope a.con-button').forEach((button) => {
+  cell.querySelectorAll(':scope a.con-button').forEach((button) => {
     vidUrls.push(button.href);
     if (button !== aTag) {
       const buttonContainer = button.closest('.button-container');
@@ -221,6 +221,16 @@ function injectLogo(block) {
   return logo;
 }
 
+// Prepends the page-injected logo (see injectLogo) to a block's first
+// column, if one applies. Shared by the first-block-on-page case and the
+// ribbon-banner second-section case below.
+function injectPageLogo(block) {
+  const logo = injectLogo(block);
+  if (logo) {
+    block.querySelector('.column')?.prepend(logo);
+  }
+}
+
 const decoratePrimaryCTARow = (rowNum, cellNum, cell) => {
   if (rowNum + cellNum !== 0) return;
   const block = cell.closest('.ax-columns');
@@ -230,11 +240,9 @@ const decoratePrimaryCTARow = (rowNum, cellNum, cell) => {
   // already unwrapped the <em>/<strong> and moved each anchor into its <p>.
   const primaryAnchor = cell.querySelector('a.con-button.blue');
   const secondaryAnchor = cell.querySelector('a.con-button.outline');
-  // Legacy fallback: plain anchors that milo didn't decorate still land as `.button`.
-  const italicAnchor = secondaryAnchor || cell.querySelector('p > em > a');
-  if (!italicAnchor && !primaryAnchor) return;
+  if (!secondaryAnchor && !primaryAnchor) return;
 
-  if (block?.className.includes('fullsize') && primaryAnchor) {
+  if (block?.classList.contains('fullsize') && primaryAnchor) {
     primaryAnchor.classList.add('xlarge', 'primaryCTA');
     BlockMediator.set('primaryCtaUrl', primaryAnchor.href);
     secondaryAnchor?.classList.add('reverse', 'xlarge');
@@ -242,12 +250,12 @@ const decoratePrimaryCTARow = (rowNum, cellNum, cell) => {
     return;
   }
 
-  const links = italicAnchor?.closest('p')?.querySelectorAll('a');
+  const links = secondaryAnchor?.closest('p')?.querySelectorAll('a');
   if (!links || links.length < 2) return;
-  italicAnchor.closest('p')?.classList.add('phone-number-cta-row');
+  secondaryAnchor.closest('p')?.classList.add('phone-number-cta-row');
   links[0].classList.add('con-button', 'xlarge', 'trial-cta');
   links[1].classList.add('phone');
-  italicAnchor.closest('p')?.prepend(links[0]);
+  secondaryAnchor.closest('p')?.prepend(links[0]);
 };
 
 function addHeaderClass(block, size) {
@@ -327,7 +335,9 @@ function addImagePreconnects(imageUrl) {
 
 // A CSS background is only discovered after style recalc, so the browser fetches it late
 // and at low priority. For the marquee variants that background is the LCP element, so
-// preload it explicitly. Same shape as banner-bg.js and search-marquee.js.
+// preload it explicitly. Same shape as banner-bg.js and search-marquee.js — duplicated
+// deliberately rather than shared, so this LCP-critical path never waits on an extra
+// module fetch/eval.
 function preloadBackgroundImage(imageUrl) {
   if (!imageUrl || document.head.querySelector(`link[rel="preload"][href="${imageUrl}"]`)) return;
 
@@ -352,9 +362,362 @@ function markVideoToGifImagesDecorative(scope) {
   });
 }
 
+// Handles the marquee/hero-animation-overlay background row: pulls it off `rows`
+// (mutating in place), turns its image into an optimized CSS background, and
+// preloads/preconnects it as the page's LCP element. Returns whether the
+// preload already happened, so the per-cell picture handling below doesn't
+// redundantly preload the same image again.
+function decorateBackgroundImage(block, rows) {
+  if (!block.classList.contains('marquee') && !block.classList.contains('hero-animation-overlay')) {
+    return false;
+  }
+
+  const background = rows.shift();
+  const bgImg = background?.querySelector('img');
+  block.firstElementChild?.remove();
+  if (!bgImg) return false;
+
+  const url = new URL(bgImg.src, window.location.href);
+  const { pathname } = url;
+  const width = getOptimalImageSize();
+  const optimizedImageUrl = `${pathname}?width=${width}&format=webply&optimize=medium`;
+
+  block.style.setProperty('--bg-image', `url("${optimizedImageUrl}")`);
+  preloadBackgroundImage(optimizedImageUrl);
+  addImagePreconnects(bgImg.src);
+  return true;
+}
+
+// `narrow` variant: prefix every h2 with a gradient-filled running number.
+function decorateNarrowHeadings(rows) {
+  let count = 1;
+  rows.forEach((row) => {
+    row.querySelectorAll('h2').forEach((header) => {
+      const span = document.createElement('span');
+      span.style.background = 'linear-gradient(to top, rgb(201, 101, 214), rgb(239, 133, 120))';
+      span.style.webkitBackgroundClip = 'text';
+      span.style.backgroundClip = 'text';
+      span.style.color = 'transparent';
+      span.textContent = `${count}. `;
+      header.prepend(span);
+      count += 1;
+    });
+  });
+}
+
+// `numbered` variant: the total is normally the row count, but can be
+// overridden by an authored numeric class (landing at classList[3] — see the
+// `.s2` ordering comment in decorate()).
+function computeNumberedListTotal(block, isNumberedList, rowCount) {
+  if (!isNumberedList || block.classList.length <= 4) return rowCount;
+  const i = parseInt(block.classList[3], 10);
+  // eslint-disable-next-line no-restricted-globals
+  return isNaN(i) ? rowCount : i;
+}
+
+function formatNumberedPrefix(rowNum, total) {
+  const num = rowNum + 1;
+  if (total <= 9) return `${num}.`;
+  // stylize with total for 10 or more items, zero-padded below 10
+  const padded = rowNum < 9 ? `0${num}` : `${num}`;
+  return `${padded}/${total} —`;
+}
+
+// Marquee picture cells are always above the fold: apply loading/sizing
+// optimizations to their images and stagger the decorative corner overlays
+// until after the main image loads, so they never compete with it for LCP.
+function optimizeMarqueeCellImages(cell, bgPreloaded, counters) {
+  cell.querySelectorAll('img').forEach((img) => {
+    img.removeAttribute('loading');
+    img.setAttribute('loading', 'eager');
+    img.setAttribute('fetchpriority', 'high');
+
+    const url = new URL(img.src, window.location.href);
+    const { pathname } = url;
+    const optimalWidth = getOptimalImageSize();
+    const newSrc = `${pathname}?width=${optimalWidth}&format=webply&optimize=medium`;
+    if (img.src !== newSrc) {
+      img.src = newSrc;
+    }
+
+    // Update width/height attributes to match downloaded dimensions
+    img.setAttribute('width', optimalWidth);
+    img.setAttribute('height', Math.round(optimalWidth * (352 / 600))); // Maintain aspect ratio
+  });
+
+  const firstImg = cell.querySelector('img');
+  if (firstImg) addImagePreconnects(firstImg.src);
+
+  // Handle preload for first image only. When a background image exists it is the
+  // LCP element and has already been preloaded, so preloading this picture too
+  // would only compete with it for bandwidth.
+  if (counters.pictureCellCount === 1 && !bgPreloaded) {
+    const preloadImg = cell.querySelector('img');
+    if (preloadImg?.src && !document.querySelector(`link[href="${preloadImg.src}"]`)) {
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.fetchPriority = 'high';
+      link.as = 'image';
+      link.href = preloadImg.src;
+      document.head.appendChild(link);
+    }
+  }
+
+  // Delay decorative elements until main image loads to prioritize LCP
+  const mainImg = cell.querySelector('img');
+  if (!mainImg) {
+    createCornerOverlays(cell);
+    return;
+  }
+  let overlaysCreated = false;
+  const createOverlaysDelayed = () => {
+    if (!overlaysCreated) {
+      overlaysCreated = true;
+      createCornerOverlays(cell);
+    }
+  };
+  if (mainImg.complete) {
+    // Image already loaded, delay slightly to avoid blocking
+    setTimeout(createOverlaysDelayed, 100);
+  } else {
+    // Wait for main image load, with fallback timeout
+    mainImg.addEventListener('load', createOverlaysDelayed, { once: true });
+    setTimeout(createOverlaysDelayed, 2000); // Fallback in case load event doesn't fire
+  }
+}
+
+function decorateCell(cell, rowNum, cellNum, ctx) {
+  const {
+    block, colorProperties, isNumberedList, total, bgPreloaded, counters,
+  } = ctx;
+  const aTag = cell.querySelector('a');
+  const pics = cell.querySelectorAll(':scope picture');
+
+  // apply custom gradient and text color to all columns cards
+  const parent = cell.parentElement;
+  if (colorProperties['card-gradient']) {
+    parent.style.background = colorProperties['card-gradient'];
+  }
+  if (colorProperties['card-text-color']) {
+    parent.style.color = colorProperties['card-text-color'];
+  }
+
+  if (cellNum === 0 && isNumberedList) {
+    const numSpan = createTag('span', { class: 'num' }, formatNumberedPrefix(rowNum, total));
+    cell.prepend(numSpan);
+  }
+
+  if (pics.length === 1 && pics[0].parentElement.tagName === 'P') {
+    // unwrap single picture if wrapped in p tag, see https://github.com/adobe/helix-word2md/issues/662
+    const parentDiv = pics[0].closest('div');
+    const parentParagraph = pics[0].parentNode;
+    parentDiv.insertBefore(pics[0], parentParagraph);
+  }
+
+  if (cell.querySelector('img.icon, svg.icon')) {
+    decorateIconList(cell, rowNum, block.classList);
+  }
+  if (isVideoLink(aTag?.href)) {
+    handleVideos(cell, aTag, block, pics[0]);
+  }
+
+  if (aTag?.textContent.trim().startsWith('https://')) {
+    if (aTag.href.endsWith('.mp4')) {
+      transformLinkToAnimation(aTag);
+    } else if (pics[0]) {
+      linkImage(cell);
+    }
+  }
+
+  if (aTag?.classList.contains('con-button')) {
+    if (block.classList.contains('fullsize')) {
+      aTag.classList.add('xlarge');
+      BlockMediator.set('primaryCtaUrl', aTag.href);
+      aTag.classList.add('primaryCTA');
+    } else if (aTag.classList.contains('light')) {
+      aTag.classList.replace('accent', 'primary');
+    }
+    if (!aTag.getAttribute('aria-label')) {
+      const header = cell.querySelector('h1, h2, h3, h4, h5, h6');
+      if (header) {
+        aTag.setAttribute('aria-label', `${aTag.textContent.trim()} ${header.textContent.trim()}`);
+      }
+    }
+  }
+
+  cell.querySelectorAll(':scope p:empty').forEach(($p) => {
+    if ($p.innerHTML.trim() === '') {
+      $p.remove();
+    }
+  });
+
+  cell.classList.add('column');
+  const childEls = [...cell.children];
+  const isPictureColumn = childEls.length > 0
+    && childEls.every((el) => ['BR', 'PICTURE'].includes(el.tagName));
+
+  if (isPictureColumn) {
+    counters.pictureCellCount += 1;
+    cell.classList.add('column-picture');
+
+    // Add mobile class to the second picture cell
+    if (counters.pictureCellCount === 2) {
+      cell.classList.add('column-picture-mobile');
+    }
+
+    if (block.classList.contains('marquee')) {
+      optimizeMarqueeCellImages(cell, bgPreloaded, counters);
+    }
+  }
+
+  const $pars = cell.querySelectorAll('p');
+  for (let i = 0; i < $pars.length; i += 1) {
+    if ($pars[i].innerText.match(/Powered by/)) {
+      $pars[i].classList.add('powered-by');
+    }
+  }
+  decoratePrimaryCTARow(rowNum, cellNum, cell);
+}
+
+function decorateRows(block, rows, { colorProperties, isNumberedList, total, bgPreloaded }) {
+  const counters = { pictureCellCount: 0 };
+  rows.forEach((row, rowNum) => {
+    Array.from(row.children).forEach((cell, cellNum) => {
+      decorateCell(cell, rowNum, cellNum, {
+        block, colorProperties, isNumberedList, total, bgPreloaded, counters,
+      });
+    });
+  });
+}
+
+function decorateOfferVariant(block, rows) {
+  if (!block.classList.contains('offer')) return;
+
+  block.querySelectorAll('a.con-button').forEach((aTag) => aTag.classList.add('large', 'wide'));
+  if (rows.length <= 1) return;
+
+  // move all content into first row
+  rows.forEach((row, rowNum) => {
+    if (rowNum === 0) return;
+    Array.from(row.children).forEach((cell, cellNum) => {
+      rows[0].children[cellNum].append(...cell.children);
+    });
+    row.remove();
+  });
+}
+
+// add free plan widget to the first columns block on every page except blog
+function injectFreePlanWidgetIfFirst(block) {
+  if (document.querySelector('main .ax-columns.marquee') !== block) return;
+  if (!['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) return;
+
+  addFreePlanWidget(
+    block.querySelector('.button-container')
+      || block.querySelector('.con-button')?.parentElement
+      || block.querySelector(':scope .column:not(.hero-animation-overlay,.columns-picture)'),
+  );
+}
+
+function decorateRibbonBannerContext(block) {
+  if (!document.querySelector('main .ribbon-banner')) return;
+
+  // `.has-ribbon-banner` used to be a CSS hook too, but the only rule that
+  // targeted it was dead (no page combines ribbon-banner + ax-columns) and
+  // was removed in the v2-spacing-default migration. Kept as a class add
+  // here since it's a cheap, potentially-useful signal for anything
+  // inspecting this block, but nothing in this codebase reads it anymore.
+  block.classList.add('has-ribbon-banner');
+  const secondSection = document.querySelectorAll('main > div')[1];
+  if (secondSection?.querySelector('.ax-columns') === block) {
+    injectPageLogo(block);
+  }
+}
+
+function decorateHighlightContainer(block, colorProperties) {
+  const sectionContainer = block.closest('.section:has(.ax-columns.highlight)');
+  if (!sectionContainer) return;
+
+  // add custom background color to columns-highlight-container
+  if (colorProperties['background-color']) {
+    sectionContainer.style.background = colorProperties['background-color'];
+  }
+
+  // invert buttons in regular columns inside columns-highlight-container
+  if (!block.classList.contains('highlight')) {
+    block.querySelectorAll('a.con-button').forEach((button) => {
+      button.classList.add('dark');
+    });
+  }
+}
+
+// variant for the colors pages
+async function decorateColorVariant(block, rows) {
+  if (!block.classList.contains('color')) return;
+
+  const [primaryColor, accentColor] = rows[1]
+    .querySelector(':scope > div')
+    .textContent.trim()
+    .split(',');
+  const [textCol, svgCol] = Array.from(
+    rows[0].querySelectorAll(':scope > div'),
+  );
+  const svgId = svgCol.textContent.trim();
+  const svg = createTag('div', { class: 'img-wrapper' });
+
+  svgCol.remove();
+  rows[1].remove();
+  textCol.classList.add('text');
+  svg.innerHTML = `<svg class='color-svg-img'> <use href='/express/code/icons/color-sprite.svg#${svgId}'></use></svg>`;
+  svg.style.backgroundColor = primaryColor;
+  svg.style.fill = accentColor;
+  rows[0].append(svg);
+
+  const { default: isDarkOverlayReadable } = await import(
+    '../../scripts/utils/color-tools.js'
+  );
+
+  if (isDarkOverlayReadable(primaryColor)) {
+    block.classList.add('shadow');
+  }
+}
+
+async function decorateSalesPhoneNumbers(block) {
+  const phoneNumberTags = block.querySelectorAll(
+    'a[title="{{business-sales-numbers}}"]',
+  );
+  if (phoneNumberTags.length === 0) return;
+
+  try {
+    await formatSalesPhoneNumber(phoneNumberTags);
+  } catch (error) {
+    window.lana?.log(`Error fetching sales phones numbers: ${error.message}`, { tags: 'ax-columns', severity: 'error' });
+  }
+}
+
+// Tracking any video column blocks.
+function trackVideoColumns(block) {
+  const columnVideos = block.querySelectorAll('.column-video');
+  if (!columnVideos.length) return;
+
+  columnVideos.forEach((columnVideo) => {
+    const parent = columnVideo.closest('.ax-columns');
+    const a = parent.querySelector('a');
+    const adobeEventName = appendLinkText(`adobe.com:express:cta:learn:columns:${getExpressLandingPageType()}:`, a);
+
+    parent.addEventListener('click', (e) => {
+      e.stopPropagation();
+      sendEventToAnalytics(adobeEventName);
+    });
+  });
+}
+
 export default async function decorate(block) {
-  await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
+  await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
+    import(`${getLibs()}/utils/decorate.js`),
+  ]).then(([utils, decorateUtils]) => {
     ({ createTag, getMetadata, getConfig } = utils);
+    ({ decorateButtons } = decorateUtils);
   });
 
   if (document.body.dataset.device === 'mobile') replaceHyphensInText(block);
@@ -366,451 +729,61 @@ export default async function decorate(block) {
   // numbered-list total-count parsing below relies on (block.classList[3]).
   block.classList.add('s2');
   decorateSocialIcons(block);
-  await decorateButtonsDeprecated(block, 'button-xxl');
+  await decorateButtons(block, 'button-xxl');
 
-  // ax-columns is no longer in decorateButtonsDeprecated's exclusion list, so
-  // its CTAs are now decorated by milo's decorateButtons: strong->`.con-button.blue`,
-  // em->`.con-button.outline`, size `button-xxl`, and the parent <p>/<div> gets
-  // `.action-area`. This block's CSS is written against `.button-container` (39
-  // rules) and its JS/CSS expect `.xlarge`, so bridge milo's output back onto the
-  // existing contract instead of rewriting every rule. Idempotent and scoped to
-  // this block's already-decorated con-buttons.
+  // This block's CSS/JS is written against `.button-container` and `.xlarge`;
+  // bridge milo's output (`.con-button`, `.action-area`) back onto that
+  // existing contract instead of rewriting every rule. Idempotent and scoped
+  // to this block's already-decorated con-buttons.
   block.querySelectorAll('a.con-button').forEach((btn) => {
     btn.classList.add('xlarge');
     btn.closest('p, div')?.classList.add('button-container');
   });
 
-  const rows = Array.from(block.children);
-
-  // Handle background images for marquee and hero-animation-overlay variants
-  let bgPreloaded = false;
-  if (block.classList.contains('marquee') || block.classList.contains('hero-animation-overlay')) {
-    const background = rows.shift();
-    const bgImg = background?.querySelector('img');
-    block.firstElementChild?.remove();
-    if (bgImg) {
-      // Create optimized image URL for CSS background (immediate)
-      const url = new URL(bgImg.src, window.location.href);
-      const { pathname } = url;
-      const width = getOptimalImageSize();
-      const optimizedImageUrl = `${pathname}?width=${width}&format=webply&optimize=medium`;
-
-      // Set CSS variable for the optimized background image
-      block.style.setProperty('--bg-image', `url("${optimizedImageUrl}")`);
-
-      // This background is the LCP element - give it a high priority preload
-      preloadBackgroundImage(optimizedImageUrl);
-      bgPreloaded = true;
-
-      // Add preconnect immediately for background images
-      addImagePreconnects(bgImg.src);
+  // Restores video-modal state on browser back/forward. Registered once per
+  // block instance (not per cell/row — the handler doesn't depend on either).
+  window.addEventListener('popstate', ({ state }) => {
+    hideVideoModal();
+    const { url, title } = state || {};
+    if (url) {
+      displayVideoModal(url, title);
     }
-  }
+  });
+
+  const rows = Array.from(block.children);
+  const bgPreloaded = decorateBackgroundImage(block, rows);
 
   if (block.classList.contains('xl-heading')) {
     addHeaderClass(block, 'xl');
   }
-
   if (block.classList.contains('narrow')) {
-    let count = 1;
-    rows.forEach((ele) => {
-      const headers = ele.querySelectorAll('h2');
-      if (headers.length > 0) {
-        headers.forEach((header) => {
-          const span = document.createElement('span');
-          span.style.background = 'linear-gradient(to top, rgb(201, 101, 214), rgb(239, 133, 120))';
-          span.style.webkitBackgroundClip = 'text';
-          span.style.backgroundClip = 'text';
-          span.style.color = 'transparent';
-          span.textContent = `${count}. `;
-          header.prepend(span);
-          count += 1;
-        });
-      }
-    });
+    decorateNarrowHeadings(rows);
   }
 
-  let numCols = 0;
-  if (rows[0]) numCols = rows[0].children.length;
-
+  const numCols = rows[0]?.children.length || 0;
   if (numCols) block.classList.add(`width-${numCols}-columns`);
 
-  let total = rows.length;
   const isNumberedList = block.classList.contains('numbered');
-  if (isNumberedList && block.classList.length > 4) {
-    const i = parseInt(block.classList[3], 10);
-    // eslint-disable-next-line no-restricted-globals
-    if (!isNaN(i)) {
-      total = i;
-    }
-  }
+  const total = computeNumberedListTotal(block, isNumberedList, rows.length);
 
-  // Track picture cells across all rows
-  let pictureCellCount = 0;
-
-  rows.forEach((row, rowNum) => {
-    const cells = Array.from(row.children);
-
-    cells.forEach((cell, cellNum) => {
-      const aTag = cell.querySelector('a');
-      const pics = cell.querySelectorAll(':scope picture');
-
-      // apply custom gradient and text color to all columns cards
-      const parent = cell.parentElement;
-      if (colorProperties['card-gradient']) {
-        parent.style.background = colorProperties['card-gradient'];
-      }
-      if (colorProperties['card-text-color']) {
-        parent.style.color = colorProperties['card-text-color'];
-      }
-
-      if (cellNum === 0 && isNumberedList) {
-        // add number to first cell
-        let num = rowNum + 1;
-        if (total > 9) {
-          // stylize with total for 10 or more items
-          num = `${num}/${total} —`;
-          if (rowNum < 9) {
-            // pad number with 0
-            num = `0${num}`;
-          }
-        } else {
-          // regular ordered list style for 1 to 9 items
-          num = `${num}.`;
-        }
-        cell.innerHTML = `<span class="num">${num}</span>${cell.innerHTML}`;
-      }
-
-      if (pics.length === 1 && pics[0].parentElement.tagName === 'P') {
-        // unwrap single picture if wrapped in p tag, see https://github.com/adobe/helix-word2md/issues/662
-        const parentDiv = pics[0].closest('div');
-        const parentParagraph = pics[0].parentNode;
-        parentDiv.insertBefore(pics[0], parentParagraph);
-      }
-
-      if (cell.querySelector('img.icon, svg.icon')) {
-        decorateIconList(cell, rowNum, block.classList);
-      }
-      if (isVideoLink(aTag?.href)) {
-        handleVideos(cell, aTag, block, pics[0]);
-      }
-
-      if (aTag?.textContent.trim().startsWith('https://')) {
-        if (aTag.href.endsWith('.mp4')) {
-          transformLinkToAnimation(aTag);
-        } else if (pics[0]) {
-          linkImage(cell);
-        }
-      }
-
-      if (aTag && (aTag.classList.contains('button') || aTag.classList.contains('con-button'))) {
-        if (block.className.includes('fullsize')) {
-          aTag.classList.add('xlarge');
-          BlockMediator.set('primaryCtaUrl', aTag.href);
-          aTag.classList.add('primaryCTA');
-        } else if (aTag.classList.contains('light')) {
-          aTag.classList.replace('accent', 'primary');
-        }
-        if (!aTag.getAttribute('aria-label')) {
-          const header = cell.querySelector('h1, h2, h3, h4, h5, h6');
-          if (header) {
-            aTag.setAttribute('aria-label', `${aTag.textContent.trim()} ${header.textContent.trim()}`);
-          }
-        }
-      }
-
-      // handle history events
-      window.addEventListener('popstate', ({ state }) => {
-        hideVideoModal();
-        const { url, title } = state || {};
-        if (url) {
-          displayVideoModal(url, title);
-        }
-      });
-
-      cell.querySelectorAll(':scope p:empty').forEach(($p) => {
-        if ($p.innerHTML.trim() === '') {
-          $p.remove();
-        }
-      });
-
-      cell.classList.add('column');
-      const childEls = [...cell.children];
-      const isPictureColumn = childEls.every((el) => ['BR', 'PICTURE'].includes(el.tagName))
-        && childEls.length > 0;
-
-      if (isPictureColumn) {
-        pictureCellCount += 1;
-        cell.classList.add('column-picture');
-
-        // Add mobile class to the second picture cell
-        if (pictureCellCount === 2) {
-          cell.classList.add('column-picture-mobile');
-        }
-
-        const isMarquee = block.classList.contains('marquee');
-        if (isMarquee) {
-          // Bg marquee blocks are always above the fold - apply critical optimizations
-          const allImages = cell.querySelectorAll('img');
-          allImages.forEach((img) => {
-            // Essential loading optimizations
-            img.removeAttribute('loading');
-            img.setAttribute('loading', 'eager');
-            img.setAttribute('fetchpriority', 'high');
-
-            // Image sizing optimization
-            const url = new URL(img.src, window.location.href);
-            const { pathname } = url;
-            const optimalWidth = getOptimalImageSize();
-
-            // Update src with better size and format
-            const newSrc = `${pathname}?width=${optimalWidth}&format=webply&optimize=medium`;
-            if (img.src !== newSrc) {
-              img.src = newSrc;
-            }
-
-            // Update width/height attributes to match downloaded dimensions
-            img.setAttribute('width', optimalWidth);
-            img.setAttribute('height', Math.round(optimalWidth * (352 / 600))); // Maintain aspect ratio
-          });
-
-          // Add preconnect for faster CDN connections
-          const firstImg = cell.querySelector('img');
-          if (firstImg) {
-            addImagePreconnects(firstImg.src);
-          }
-
-          // Handle preload for first image only. When a background image exists it is the
-          // LCP element and has already been preloaded above, so preloading this picture
-          // too would only compete with it for bandwidth.
-          if (pictureCellCount === 1 && !bgPreloaded) {
-            const preloadImg = cell.querySelector('img');
-            if (preloadImg?.src && !document.querySelector(`link[href="${preloadImg.src}"]`)) {
-              const link = document.createElement('link');
-              link.rel = 'preload';
-              link.fetchPriority = 'high';
-              link.as = 'image';
-              link.href = preloadImg.src;
-              document.head.appendChild(link);
-            }
-          }
-
-          // Delay decorative elements until main image loads to prioritize LCP
-          const mainImg = cell.querySelector('img');
-          if (mainImg) {
-            let overlaysCreated = false;
-            const createOverlaysDelayed = () => {
-              if (!overlaysCreated) {
-                overlaysCreated = true;
-                createCornerOverlays(cell);
-              }
-            };
-
-            if (mainImg.complete) {
-              // Image already loaded, delay slightly to avoid blocking
-              setTimeout(createOverlaysDelayed, 100);
-            } else {
-              // Wait for main image load, with fallback timeout
-              mainImg.addEventListener('load', createOverlaysDelayed, { once: true });
-              setTimeout(createOverlaysDelayed, 2000); // Fallback in case load event doesn't fire
-            }
-          } else {
-            // No main image, create overlays immediately but with lower priority
-            createCornerOverlays(cell);
-          }
-        }
-      }
-
-      const $pars = cell.querySelectorAll('p');
-      for (let i = 0; i < $pars.length; i += 1) {
-        if ($pars[i].innerText.match(/Powered by/)) {
-          $pars[i].classList.add('powered-by');
-        }
-      }
-      decoratePrimaryCTARow(rowNum, cellNum, cell);
-    });
+  decorateRows(block, rows, {
+    colorProperties, isNumberedList, total, bgPreloaded,
   });
+
   markVideoToGifImagesDecorative(block);
   addAnimationToggle(block);
   addHeaderSizing(block, getConfig, 'columns-heading');
 
-  // decorate offer
-  if (block.classList.contains('offer')) {
-    block
-      .querySelectorAll('a.button, a.con-button')
-      .forEach((aTag) => aTag.classList.add('large', 'wide'));
-    if (rows.length > 1) {
-      // move all content into first row
-      rows.forEach((row, rowNum) => {
-        if (rowNum > 0) {
-          const cells = Array.from(row.children);
-          cells.forEach((cell, cellNum) => {
-            rows[0].children[cellNum].append(...cell.children);
-          });
-          row.remove();
-        }
-      });
-    }
-  }
-
-  // add free plan widget to first columns block on every page except blog
-  if (document.querySelector('main .ax-columns.marquee') === block && ['on', 'yes'].includes(getMetadata('marquee-inject-logo')?.toLowerCase())) {
-    addFreePlanWidget(
-      block.querySelector('.button-container')
-        || block.querySelector('.con-button')?.parentElement
-        || block.querySelector(
-          ':scope .column:not(.hero-animation-overlay,.columns-picture)',
-        ),
-    );
-  }
+  decorateOfferVariant(block, rows);
+  injectFreePlanWidgetIfFirst(block);
 
   if (document.querySelector('main > div > div') === block) {
-    const logo = injectLogo(block);
-    if (logo) {
-      block.querySelector('.column')?.prepend(logo);
-    }
+    injectPageLogo(block);
   }
+  decorateRibbonBannerContext(block);
+  decorateHighlightContainer(block, colorProperties);
 
-  if (document.querySelector('main .ribbon-banner')) {
-    block.classList.add('has-ribbon-banner');
-    const secondSection = document.querySelectorAll('main > div')[1];
-    if (secondSection?.querySelector('.ax-columns') === block) {
-      const logo = injectLogo(block);
-      if (logo) {
-        block.querySelector('.column')?.prepend(logo);
-      }
-    }
-  }
-
-  // add custom background color to columns-highlight-container
-  const sectionContainer = block.closest('.section:has(.ax-columns.highlight)');
-  if (sectionContainer && colorProperties['background-color']) {
-    sectionContainer.style.background = colorProperties['background-color'];
-  }
-
-  // invert buttons in regular columns inside columns-highlight-container
-  if (sectionContainer && !block.classList.contains('highlight')) {
-    block.querySelectorAll('a.button, a.con-button').forEach((button) => {
-      button.classList.add('dark');
-    });
-  }
-
-  // variant for the colors pages
-  if (block.classList.contains('color')) {
-    const [primaryColor, accentColor] = rows[1]
-      .querySelector(':scope > div')
-      .textContent.trim()
-      .split(',');
-    const [textCol, svgCol] = Array.from(
-      rows[0].querySelectorAll(':scope > div'),
-    );
-    const svgId = svgCol.textContent.trim();
-    const svg = createTag('div', { class: 'img-wrapper' });
-
-    svgCol.remove();
-    rows[1].remove();
-    textCol.classList.add('text');
-    svg.innerHTML = `<svg class='color-svg-img'> <use href='/express/code/icons/color-sprite.svg#${svgId}'></use></svg>`;
-    svg.style.backgroundColor = primaryColor;
-    svg.style.fill = accentColor;
-    rows[0].append(svg);
-
-    const { default: isDarkOverlayReadable } = await import(
-      '../../scripts/utils/color-tools.js'
-    );
-
-    if (isDarkOverlayReadable(primaryColor)) {
-      block.classList.add('shadow');
-    }
-  }
-
-  const phoneNumberTags = block.querySelectorAll(
-    'a[title="{{business-sales-numbers}}"]',
-  );
-  if (phoneNumberTags.length > 0) {
-    try {
-      await formatSalesPhoneNumber(phoneNumberTags);
-    } catch (error) {
-      window.lana?.log(`Error fetching sales phones numbers: ${error.message}`, { tags: 'ax-columns', severity: 'error' });
-    }
-  }
-
-  // Tracking any video column blocks.
-  const columnVideos = block.querySelectorAll('.column-video');
-  if (columnVideos.length) {
-    columnVideos.forEach((columnVideo) => {
-      const parent = columnVideo.closest('.ax-columns');
-      const a = parent.querySelector('a');
-      const adobeEventName = appendLinkText(`adobe.com:express:cta:learn:columns:${getExpressLandingPageType()}:`, a);
-
-      parent.addEventListener('click', (e) => {
-        e.stopPropagation();
-        sendEventToAnalytics(adobeEventName);
-      });
-    });
-  }
-
-  // Audited fullsize+top usage across every page referencing ax-columns: no page
-  // currently authors both classes together, and adding `.s2` above unconditionally
-  // (see the block.classList.add('s2') call near the top of this function) means
-  // block.className can never equal this literal string again regardless. Appears
-  // dead on both counts. Flagging for deletion rather than removing outright pending
-  // team confirmation that nothing off-content relies on it.
-  if (block.className === 'columns fullsize top block width-3-columns') {
-    const setElementsHeight = (columns) => {
-      const elementsMinHeight = {
-        PICTURE: 0,
-        H3: 0,
-        'columns-iconlist': 0,
-      };
-
-      const onIntersect = (entries, observer) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && columns.length) {
-            columns.forEach((col) => {
-              const childDivs = col.querySelectorAll(':scope > *');
-              if (!childDivs.length) return;
-
-              childDivs.forEach((div) => {
-                const referrer = div.className || div.tagName;
-                const targetEl = referrer === 'PICTURE' ? div.querySelector('img') : div;
-                elementsMinHeight[referrer] = Math.max(
-                  elementsMinHeight[referrer],
-                  targetEl.offsetHeight,
-                );
-              });
-            });
-
-            columns.forEach((col) => {
-              const childDivs = col.querySelectorAll(':scope > *');
-              if (!childDivs.length) return;
-
-              childDivs.forEach((div) => {
-                const referrer = div.className || div.tagName;
-                if (!elementsMinHeight[referrer]) return;
-
-                if (div.offsetHeight < elementsMinHeight[referrer]) {
-                  if (referrer === 'PICTURE') {
-                    const img = div.querySelector('img');
-                    if (!img) return;
-                    img.style.objectFit = 'contain';
-                    img.style.minHeight = `${elementsMinHeight[referrer]}px`;
-                  } else {
-                    div.style.minHeight = `${elementsMinHeight[referrer]}px`;
-                  }
-                }
-              });
-            });
-
-            observer.unobserve(block);
-          }
-        });
-      };
-
-      const observer = new IntersectionObserver(onIntersect, { threshold: 0 });
-      observer.observe(block);
-    };
-
-    setElementsHeight(block.querySelectorAll('.column'));
-  }
+  await decorateColorVariant(block, rows);
+  await decorateSalesPhoneNumbers(block);
+  trackVideoColumns(block);
 }
