@@ -1,0 +1,26 @@
+{
+  "_comment": "Locales that own a distinct content tree in DA (source of truth: the `locales` map in express/code/scripts/scripts.js — only its top-level keys, not the `languageMap` aliases below them, since aliased locales render base-locale content under their own URL prefix rather than authoring their own pages). Update this file when a new locale launches its own content tree.",
+  "locales": [
+    { "key": "en", "urlPrefix": "", "ietf": "en-US" },
+    { "key": "ara", "urlPrefix": "/ara", "ietf": "ar", "dir": "rtl" },
+    { "key": "br", "urlPrefix": "/br", "ietf": "pt-BR" },
+    { "key": "cn", "urlPrefix": "/cn", "ietf": "zh-CN" },
+    { "key": "de", "urlPrefix": "/de", "ietf": "de-DE" },
+    { "key": "dk", "urlPrefix": "/dk", "ietf": "da-DK" },
+    { "key": "es", "urlPrefix": "/es", "ietf": "es-ES" },
+    { "key": "fi", "urlPrefix": "/fi", "ietf": "fi-FI" },
+    { "key": "fr", "urlPrefix": "/fr", "ietf": "fr-FR" },
+    { "key": "gb", "urlPrefix": "/gb", "ietf": "en-GB" },
+    { "key": "id_id", "urlPrefix": "/id_id", "ietf": "id-ID" },
+    { "key": "in", "urlPrefix": "/in", "ietf": "en-IN" },
+    { "key": "it", "urlPrefix": "/it", "ietf": "it-IT" },
+    { "key": "jp", "urlPrefix": "/jp", "ietf": "ja-JP" },
+    { "key": "kr", "urlPrefix": "/kr", "ietf": "ko-KR" },
+    { "key": "ng", "urlPrefix": "/ng", "ietf": "en-NG" },
+    { "key": "nl", "urlPrefix": "/nl", "ietf": "nl-NL" },
+    { "key": "no", "urlPrefix": "/no", "ietf": "no-NO" },
+    { "key": "se", "urlPrefix": "/se", "ietf": "sv-SE" },
+    { "key": "tw", "urlPrefix": "/tw", "ietf": "zh-TW" },
+    { "key": "uk", "urlPrefix": "/uk", "ietf": "en-GB" }
+  ]
+}
