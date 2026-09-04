@@ -860,6 +860,247 @@ main .dark a.con-button.outline:any-link:focus {
   color: var(--color-info-accent-hover);
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   Spectrum-2 (S2) button system — opt-in namespace.
+
+   The global con-button/button rules above intentionally match the LEGACY look
+   (old #5c5ce0 blue, legacy focus ring). To render the design-reviewed
+   Spectrum-2 CTAs instead, opt a block or section in with the `s2` class
+   (block variant, e.g. `ax-columns s2`, or section-metadata style "s2"). Every
+   rule below is scoped under `.s2`, so nothing outside an opted-in scope
+   changes — no regression to existing buttons.
+
+   Values come from the Figma SoT (Background/Accent, Background/Primary) plus
+   the QA-approved transparent-img-marquee outline ladder and focus ring. Covers
+   milo `.con-button.{blue,outline,fill}` and the legacy `.button.{accent,fill}`
+   the decorateButtonsDeprecated fallback emits, so exception blocks (ax-columns)
+   benefit too. `.dark` (on the same block/section or a descendant) flips each
+   variant. The black fill is authorable via a `#_button-fill` href hash.
+
+   Blocks verified against this system add their own `s2` class at the top of
+   their `decorate()` (not authored, not applied centrally) — mirrors how every
+   other block-owned concern works, and means fragment-embedded instances pick
+   it up for free via the normal block decoration lifecycle:
+     - ax-columns
+     - transparent-img-marquee
+     - comparison-table-v2
+     - blog-columns
+   Add a block to this list once its buttons are verified; when every
+   consuming block is verified, retire the opt-in and make s2 the default.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Reset the legacy 10px all-sides margin from the base con-button/button rule
+   above (main a.con-button/.button:any-link) — S2 blocks manage their own
+   spacing. :where() keeps this at the same specificity as that base rule (so
+   it wins on source order alone) without out-specificity-ing a block's own
+   margin override, e.g. blog-columns' `.blog-columns a.con-button:any-link`. */
+main :where(.s2) a.con-button:any-link,
+main :where(.s2) a.button:any-link {
+  margin: 0;
+}
+
+/* ─── S2 responsive size (Figma SoT) ─────────────────────────────────────────
+   The Figma S2 button scales with the viewport — one button shown under four
+   breakpoint modes (mobile/tablet/desktop/XL), NOT four size variants. Across
+   mobile→tablet→desktop→XL: font-size 12→14→16→18, line-height 16→16→18→20, and
+   the `Text/top-padding` variable 4→7→10→13.
+
+   Figma measures that padding to the border-box edge with the 2px stroke sitting
+   INSIDE it, and Express buttons always carry a 2px solid border
+   (var(--spacing-50)) in content-box — so CSS padding-top/bottom = Figma pad − 2
+   (2→5→8→11), which lands the exact Figma heights 24→30→38→46. The fixed-px
+   line-height is the key fix: it keeps the label vertically centred.
+
+   Scales by viewport only, so authored size classes (small / button-xl /
+   button-xxl …) no longer differentiate S2 button size — this is the single
+   responsive S2 button. Only font-size/line-height/vertical padding are set;
+   horizontal padding and radius stay from the base con-button rules. */
+main .s2 a.con-button:any-link,
+main .s2 a.button:any-link {
+  font-size: var(--body-font-size-xs); /* 12px — mobile */
+  line-height: 16px;
+  padding-top: 2px;
+  border-radius: 999px;
+  padding-bottom: 2px;
+}
+
+@media (min-width: 600px) {
+  main .s2 a.con-button:any-link,
+  main .s2 a.button:any-link {
+    font-size: var(--body-font-size-s); /* 14px — tablet */
+    line-height: 16px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+  }
+}
+
+@media (min-width: 1200px) {
+  main .s2 a.con-button:any-link,
+  main .s2 a.button:any-link {
+    font-size: var(--body-font-size-m); /* 16px — desktop */
+    line-height: 18px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+
+@media (min-width: 1680px) {
+  main .s2 a.con-button:any-link,
+  main .s2 a.button:any-link {
+    font-size: var(--body-font-size-l); /* 18px — XL */
+    line-height: 20px;
+    padding-top: 11px;
+    padding-bottom: 11px;
+  }
+}
+
+/* Accent / primary blue — proper S2 blue (#3b63fb), not the legacy #5c5ce0.
+   Stays blue on dark sections, per the SoT. */
+main .s2 a.con-button.blue:any-link,
+main .s2 a.button.accent:any-link {
+  color: var(--color-white);
+  background-color: var(--S2-Buttons-Accent-Color-Default);
+  border-color: var(--S2-Buttons-Accent-Color-Default);
+}
+
+main .s2 a.con-button.blue:any-link:hover,
+main .s2 a.con-button.blue:any-link:active,
+main .s2 a.button.accent:any-link:hover,
+main .s2 a.button.accent:any-link:active {
+  background-color: var(--S2-Buttons-Accent-Color-Hover);
+  border-color: var(--S2-Buttons-Accent-Color-Hover);
+}
+
+/* Black fill — SoT "Button Primary" (#292929 / #131313 hover-down). */
+main .s2 a.con-button.fill:any-link,
+main .s2 a.button.fill:any-link {
+  color: var(--color-white);
+  background-color: var(--Background-Primary-Default);
+  border-color: var(--Background-Primary-Default);
+}
+
+main .s2 a.con-button.fill:any-link:hover,
+main .s2 a.con-button.fill:any-link:active,
+main .s2 a.button.fill:any-link:hover,
+main .s2 a.button.fill:any-link:active {
+  background-color: var(--Background-Primary-Hover);
+  border-color: var(--Background-Primary-Hover);
+}
+
+/* Fill inverts to a white button on dark sections (SoT "Primary Static White"). */
+main .s2.dark a.con-button.fill:any-link,
+main .s2 .dark a.con-button.fill:any-link,
+main .s2.dark a.button.fill:any-link,
+main .s2 .dark a.button.fill:any-link {
+  color: var(--Background-Primary-Default);
+  background-color: var(--color-white);
+  border-color: var(--color-white);
+}
+
+main .s2.dark a.con-button.fill:any-link:hover,
+main .s2.dark a.con-button.fill:any-link:active,
+main .s2 .dark a.con-button.fill:any-link:hover,
+main .s2 .dark a.con-button.fill:any-link:active,
+main .s2.dark a.button.fill:any-link:hover,
+main .s2.dark a.button.fill:any-link:active,
+main .s2 .dark a.button.fill:any-link:hover,
+main .s2 .dark a.button.fill:any-link:active {
+  color: var(--Background-Primary-Default);
+  background-color: var(--color-gray-100);
+  border-color: var(--color-gray-100);
+}
+
+/* Outline / secondary — design-reviewed ladder from transparent-img-marquee.
+   Authorable via a `#_button-outline` href hash (milo also produces `outline`
+   from an `<em>` link). Covers milo `.con-button.outline` and legacy
+   `.button.outline` (the fallback emits the latter for exception blocks).
+   Light: translucent-black border + fill, 93%-black text.
+   :not(.fill) guards against milo's decorateButtons classifying an
+   <em><strong> or <strong><em>-nested #_button-fill link as outline too
+   (getButtonType keys off the immediate parent, which can be the <em>) — a
+   real authoring trap, not just a hypothetical. Without this, outline and
+   fill would tie on specificity and whichever is later in the file wins,
+   silently overriding the author's explicit fill choice. */
+main .s2 a:is(.con-button, .button).outline:not(.fill):any-link {
+  background-color: transparent;
+  border-color: #00000038;
+  color: #000000ed;
+}
+
+main .s2 a:is(.con-button, .button).outline:not(.fill):any-link:hover,
+main .s2 a:is(.con-button, .button).outline:not(.fill):any-link:active {
+  background-color: #00000017;
+  border-color: #00000026;
+  color: #000000ed;
+}
+
+/* Outline on dark: translucent-white stroke + fill, white text (per QA). */
+main .s2.dark a:is(.con-button, .button).outline:not(.fill):any-link,
+main .s2 .dark a:is(.con-button, .button).outline:not(.fill):any-link {
+  background-color: transparent;
+  border-color: #ffffff38;
+  color: var(--color-white);
+}
+
+main .s2.dark a:is(.con-button, .button).outline:not(.fill):any-link:hover,
+main .s2 .dark a:is(.con-button, .button).outline:not(.fill):any-link:hover,
+main .s2.dark a:is(.con-button, .button).outline:not(.fill):any-link:active,
+main .s2 .dark a:is(.con-button, .button).outline:not(.fill):any-link:active {
+  background-color: #ffffff2b;
+  border-color: #ffffff38;
+  color: var(--color-white);
+}
+
+/* Shared S2 focus ring for every variant (SoT "Focus Ring Background",
+   QA-approved in transparent-img-marquee): a 2px --color-focus-ring-strong
+   (#4b75ff) outline offset 2px, with an 11%-white halo. Per-variant rules below
+   keep each button's pressed fill on focus; dark-outline drops the halo. */
+main .s2 a.con-button:any-link:focus,
+main .s2 a.button:any-link:focus {
+  outline: 2px solid var(--color-focus-ring-strong);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.11);
+}
+
+main .s2 a.con-button.blue:any-link:focus,
+main .s2 a.button.accent:any-link:focus {
+  background-color: var(--S2-Buttons-Accent-Color-Hover);
+  border-color: var(--S2-Buttons-Accent-Color-Hover);
+  color: var(--color-white);
+}
+
+main .s2 a.con-button.fill:any-link:focus,
+main .s2 a.button.fill:any-link:focus {
+  background-color: var(--Background-Primary-Hover);
+  border-color: var(--Background-Primary-Hover);
+  color: var(--color-white);
+}
+
+main .s2.dark a.con-button.fill:any-link:focus,
+main .s2 .dark a.con-button.fill:any-link:focus,
+main .s2.dark a.button.fill:any-link:focus,
+main .s2 .dark a.button.fill:any-link:focus {
+  background-color: var(--color-white);
+  border-color: var(--color-white);
+  color: var(--Background-Primary-Default);
+}
+
+main .s2 a:is(.con-button, .button).outline:not(.fill):any-link:focus {
+  background-color: #0000001f;
+  border-color: #0000001f;
+  color: #000000ed;
+}
+
+/* Outline-on-dark focus: hold the hover stroke/fill and drop the halo per QA
+   ("no fill between the outside of the button and the focus ring"). */
+main .s2.dark a:is(.con-button, .button).outline:not(.fill):any-link:focus,
+main .s2 .dark a:is(.con-button, .button).outline:not(.fill):any-link:focus {
+  background-color: #ffffff2b;
+  border-color: #ffffff38;
+  color: var(--color-white);
+  box-shadow: none;
+}
+
 main a.button.wide,
 main a.con-button.wide {
   display: block;
