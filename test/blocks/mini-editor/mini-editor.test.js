@@ -93,6 +93,9 @@ describe('mini-editor', () => {
     const block = await decorateWithBody();
     const downloadStub = sinon.stub(MiniEditorCardExporter, 'download').resolves();
 
+    // The top-actions bar is populated in the background (see
+    // buildMiniEditorActions) — not part of the card's own first paint.
+    await waitFor(() => !!block.querySelector('.me-action--download'));
     const downloadButton = block.querySelector('.me-action--download');
     downloadButton.click();
     downloadButton.click();
@@ -112,6 +115,7 @@ describe('mini-editor', () => {
     const block = await decorateWithBody();
     const downloadStub = sinon.stub(MiniEditorCardExporter, 'download').resolves();
 
+    await waitFor(() => !!block.querySelector('.me-action--download'));
     block.querySelector('.me-arc-nav--next').click();
     block.querySelector('.me-action--download').click();
     await waitFor(() => downloadStub.calledOnce);
@@ -140,6 +144,7 @@ describe('mini-editor', () => {
     });
     const block = await decorateWithBody();
 
+    await waitFor(() => !!block.querySelector('.me-action--share'));
     block.querySelector('.me-action--share').click();
     const menu = block.querySelector('.share-menu-list');
     expect(menu).to.exist;
@@ -176,6 +181,7 @@ describe('mini-editor', () => {
     window.lana = { log: sinon.spy() };
     sinon.stub(MiniEditorCardExporter, 'download').rejects(new Error('render failed'));
 
+    await waitFor(() => !!block.querySelector('.me-action--download'));
     block.querySelector('.me-action--download').click();
     await waitFor(() => !!document.querySelector('sp-toast'));
 

@@ -12,6 +12,7 @@ import trackMiniEditorExport from '../../scripts/utils/mini-editor-analytics.js'
 import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 import createMiniEditorWidget from '../../scripts/widgets/mini-editor-widget/mini-editor-widget.js';
 import createMiniEditorModal from '../../scripts/widgets/mini-editor-modal/mini-editor-modal.js';
+import { loadButton, loadTooltip } from '../../scripts/color-shared/spectrum/load-spectrum.js';
 import getCardBackgrounds from './mini-editor-background-loader.js';
 import getFontOptions, { loadWebFontOptions } from './mini-editor-fonts-loader.js';
 
@@ -294,13 +295,14 @@ export default async function init(block) {
   const props = constructProps(block);
   const quotes = getPageQuotes();
 
-  // Kicked off immediately, independent of the Milo util/placeholder/theme
+  // Kicked off immediately, independent of the Milo util/placeholder
   // imports below — getCardBackgrounds' template-service fetch is the real
-  // LCP-critical request (it resolves the .me-arc-card--center background),
-  // so it shouldn't wait behind three sequential dynamic imports it has no
-  // dependency on. getFontOptions() itself resolves immediately with the
-  // bundled fallback fonts — see mini-editor-fonts-loader.js — the live
-  // Adobe Fonts kit loads separately, after the card has already mounted.
+  // LCP-critical request (it resolves the .me-arc-card--center background)
+  // and is often the slowest single request on the page, so it shouldn't
+  // wait behind dynamic imports it has no dependency on. getFontOptions()
+  // itself resolves immediately with the bundled fallback fonts — see
+  // mini-editor-fonts-loader.js — the live Adobe Fonts kit loads separately,
+  // after the card has already mounted.
   const dataPromise = Promise.all([
     getCardBackgrounds(props),
     getFontOptions(),
@@ -311,24 +313,38 @@ export default async function init(block) {
   // before that await, while the imports above are still in flight.
   dataPromise.catch(() => {});
 
+  // Also kicked off immediately, in parallel with the (often slow)
+  // template-service fetch above rather than only being requested once it
+  // resolves: the Spectrum bundles the widget needs (theme/base/lit/icons/
+  // button via loadButton, tooltip/overlay via loadTooltip — see
+  // load-spectrum.js, which already loads all of these in parallel with
+  // each other). Purely a prefetch — mini-editor-widget.js calls the same
+  // memoized loaders itself and doesn't await this; it just means those
+  // bundles are already in flight (often already cached) by the time the
+  // widget needs them, instead of only being requested after cards/fonts
+  // resolve.
+  Promise.all([loadButton(), loadTooltip()]).catch(() => {});
+
   [
     { createTag, loadStyle, getConfig },
     { replaceKey },
   ] = await Promise.all([
     import(`${getLibs()}/utils/utils.js`),
     import(`${getLibs()}/features/placeholders.js`),
-    // Wraps the block's whole rendered output in Spectrum's own theme host
-    // so its design-token CSS custom properties (--spectrum-*) are actually
-    // defined for descendants — without it, the topActions icons (real
-    // Spectrum Web Components, see mini-editor-widget.js) fall back to
-    // unstyled defaults and don't match the intended look.
-    import('../../scripts/widgets/spectrum/dist/theme.js'),
   ]);
   loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-widget/mini-editor-widget.css`);
   loadStyle(`${getConfig().codeRoot}/scripts/widgets/mini-editor-modal/mini-editor-modal.css`);
 
   block.innerHTML = '';
 
+  // <sp-theme> is a Spectrum Web Component (see load-spectrum.js's prefetch
+  // above) that self-upgrades whenever its definition finishes registering —
+  // creating it here doesn't need to wait on that, same reasoning as the
+  // Spectrum prefetch itself. Wraps the block's whole rendered output so its
+  // design-token CSS custom properties (--spectrum-*) are actually defined
+  // for descendants — without it, the topActions icons (real Spectrum Web
+  // Components, see mini-editor-widget.js) fall back to unstyled defaults
+  // and don't match the intended look, until the upgrade completes.
   const themeHost = createTag('sp-theme', {
     system: 'spectrum-two', color: 'light', scale: 'medium', dir: 'ltr',
   });
