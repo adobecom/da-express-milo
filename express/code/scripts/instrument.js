@@ -712,18 +712,20 @@ export function trackButtonClick(a) {
       adobeEventName = appendLinkText(adobeEventName, a);
     }
 
-    // clicks using [data-lh and data-ll]
-    let trackingHeader = a.closest('[data-lh]');
+    // clicks using [data-lh/data-ll] or [daa-lh/daa-ll]
+    let trackingHeader = a.closest('[data-lh], [daa-lh]');
+    const daaLl = a.getAttribute('daa-ll');
     if (trackingHeader || a.dataset.lh) {
       adobeEventName = 'adobe.com:express';
       let headerString = '';
       while (trackingHeader) {
-        headerString = `:${textToName(trackingHeader.dataset.lh.trim())}${headerString}`;
-        trackingHeader = trackingHeader.parentNode.closest('[data-lh]');
+        const headerLabel = trackingHeader.dataset.lh || trackingHeader.getAttribute('daa-lh');
+        headerString = `:${textToName(headerLabel.trim())}${headerString}`;
+        trackingHeader = trackingHeader.parentNode.closest('[data-lh], [daa-lh]');
       }
       adobeEventName += headerString;
-      if (a.dataset.ll) {
-        adobeEventName += `:${textToName(a.dataset.ll.trim())}`;
+      if (a.dataset.ll || daaLl) {
+        adobeEventName += `:${textToName((a.dataset.ll || daaLl).trim())}`;
       } else {
         adobeEventName += `:${textToName(a.innerText.trim())}`;
       }
@@ -773,8 +775,9 @@ function trackVideoAnalytics(parameters) {
 function decorateAnalyticsEvents() {
   // for tracking all of the links
   d.addEventListener('click', (event) => {
-    if (event.target.tagName === 'A' || event.target.dataset.ll?.length) {
-      trackButtonClick(event.target);
+    const target = event.target.closest?.('a, [data-ll], [daa-ll]');
+    if (target) {
+      trackButtonClick(target);
     }
   });
 
