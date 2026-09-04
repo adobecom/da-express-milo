@@ -1,5 +1,6 @@
 import { readFile } from '@web/test-runner-commands';
 import { expect } from '@esm-bundle/chai';
+import sinon from 'sinon';
 
 const locales = { '': { ietf: 'en-US', tk: 'hah7vzn.css' } };
 
@@ -270,5 +271,123 @@ describe('Search Marquee - manual links', () => {
 
     const carousel = marqueeBlock.querySelector('.carousel-container.manual-link-list');
     expect(carousel).to.exist;
+  });
+});
+
+describe('Search Marquee - trending searches arrow key navigation', () => {
+  let marqueeBlock;
+  let searchInput;
+  let trendsContainer;
+  let suggestionsContainer;
+  let getConfig;
+  let focusSpy;
+
+  const trendsJson = JSON.stringify({
+    'Term 1': '/express/templates/t1',
+    'Term 2': '/express/templates/t2',
+    'Term 3': '/express/templates/t3',
+  });
+
+  before(async () => {
+    ({ getConfig } = await import(`${getLibs()}/utils/utils.js`));
+    // Seed placeholders on the config so trends render (getPlaceholder short-circuits
+    // on config.placeholders before hitting the network/placeholder cache).
+    getConfig().placeholders = {
+      'search-trends': trendsJson,
+      'search-trends-title': 'Trending searches',
+      'search-suggestions-title': 'Suggestions',
+    };
+
+    document.body.innerHTML = await readFile({ path: './mocks/body.html' });
+    marqueeBlock = document.querySelector('.search-marquee');
+    await decorate(marqueeBlock);
+
+    searchInput = marqueeBlock.querySelector('input.search-bar');
+    trendsContainer = marqueeBlock.querySelector('.trends-container');
+    suggestionsContainer = marqueeBlock.querySelector('.suggestions-container');
+  });
+
+  after(() => {
+    delete getConfig().placeholders;
+  });
+
+  beforeEach(() => {
+    // Reset roving state so each test starts from a known baseline.
+    const trendLinks = marqueeBlock.querySelectorAll('.trend-link');
+    trendLinks.forEach((link, index) => { link.tabIndex = index === 0 ? 0 : -1; });
+    trendsContainer.classList.remove('hidden');
+    suggestionsContainer.classList.add('hidden');
+    focusSpy = sinon.spy(HTMLElement.prototype, 'focus');
+  });
+
+  afterEach(() => {
+    focusSpy.restore();
+  });
+
+  it('renders trend links with a roving tabindex (only the first is tabbable)', () => {
+    const trendLinks = marqueeBlock.querySelectorAll('.trend-link');
+    expect(trendLinks.length).to.equal(3);
+    expect(trendLinks[0].tabIndex).to.equal(0);
+    expect(trendLinks[1].tabIndex).to.equal(-1);
+    expect(trendLinks[2].tabIndex).to.equal(-1);
+  });
+
+  it('focuses the first trend link on ArrowDown from the search bar', () => {
+    const trendLinks = marqueeBlock.querySelectorAll('.trend-link');
+    searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+    expect(focusSpy.getCalls().some((call) => call.thisValue === trendLinks[0])).to.be.true;
+  });
+
+  it('focuses a suggestion (not a trend link) on ArrowDown when suggestions are visible', () => {
+    const suggestionsList = marqueeBlock.querySelector('.suggestions-list');
+    const suggestionLi = document.createElement('li');
+    suggestionLi.tabIndex = -1;
+    suggestionsList.appendChild(suggestionLi);
+    trendsContainer.classList.add('hidden');
+    suggestionsContainer.classList.remove('hidden');
+
+    searchInput.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+    expect(focusSpy.getCalls().some((call) => call.thisValue === suggestionLi)).to.be.true;
+    suggestionLi.remove();
+  });
+
+  it('moves focus to the next trend link on ArrowDown and applies roving tabindex', () => {
+    const trendLinks = marqueeBlock.querySelectorAll('.trend-link');
+    trendLinks[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+
+    expect(focusSpy.getCalls().some((call) => call.thisValue === trendLinks[1])).to.be.true;
+    expect(trendLinks[0].tabIndex).to.equal(-1);
+    expect(trendLinks[1].tabIndex).to.equal(0);
+  });
+
+  it('moves focus to the previous trend link on ArrowUp', () => {
+    const trendLinks = marqueeBlock.querySelectorAll('.trend-link');
+    trendLinks[1].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+    expect(focusSpy.getCalls().some((call) => call.thisValue === trendLinks[0])).to.be.true;
+  });
+
+  it('returns focus to the search bar on ArrowUp from the first trend link', () => {
+    const trendLinks = marqueeBlock.querySelectorAll('.trend-link');
+    trendLinks[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowUp', bubbles: true, cancelable: true }));
+    expect(focusSpy.getCalls().some((call) => call.thisValue === searchInput)).to.be.true;
+  });
+
+  it('does not move focus past the last trend link on ArrowDown', () => {
+    const trendLinks = marqueeBlock.querySelectorAll('.trend-link');
+    const lastTrendLink = trendLinks[trendLinks.length - 1];
+    lastTrendLink.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', bubbles: true, cancelable: true }));
+    expect(focusSpy.called).to.be.false;
+  });
+
+  it('closes the dropdown and focuses the search bar on Escape from a trend link', () => {
+    const dropdown = marqueeBlock.querySelector('.search-dropdown-container');
+    const trendLinks = marqueeBlock.querySelectorAll('.trend-link');
+    dropdown.classList.remove('hidden');
+
+    trendLinks[0].dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
+
+    expect(dropdown.classList.contains('hidden')).to.be.true;
+    expect(focusSpy.getCalls().some((call) => call.thisValue === searchInput)).to.be.true;
   });
 });

@@ -19,6 +19,16 @@ describe('collapsible-rows quote actions ("Copy quote" / "Create a design")', ()
     document.head.append(meta);
   };
 
+  const setMessageType = (value) => {
+    const existingMeta = document.querySelector('meta[name="messagetype"]');
+    if (existingMeta) existingMeta.remove();
+    if (!value) return;
+    const meta = document.createElement('meta');
+    meta.setAttribute('name', 'messagetype');
+    meta.setAttribute('content', value);
+    document.head.append(meta);
+  };
+
   beforeEach(() => {
     clipboardStub = sinon.stub(navigator.clipboard, 'writeText').resolves();
   });
@@ -27,6 +37,7 @@ describe('collapsible-rows quote actions ("Copy quote" / "Create a design")', ()
     clipboardStub.restore();
     document.body.innerHTML = '';
     setPageType('');
+    setMessageType('');
   });
 
   it('does not render quote actions when no mini-editor block is present on the page', async () => {
@@ -106,6 +117,18 @@ describe('collapsible-rows quote actions ("Copy quote" / "Create a design")', ()
         quote: '"Patience is bitter, but its fruit is sweet."',
         author: 'Jean-Jacques Rousseau',
       });
+    });
+
+    it('uses the page messagetype in the copy label when present', async () => {
+      setMessageType('social');
+      document.body.innerHTML = await readFile({ path: './mocks/body.html' });
+      setPageType('mini-editor');
+      block = document.querySelector('.collapsible-rows');
+      await decorate(block);
+
+      const copyBtn = block.querySelector('.collapsible-row-action--copy');
+      expect(copyBtn.textContent.trim()).to.equal('Copy social');
+      expect(copyBtn.getAttribute('aria-label')).to.equal('Copy social');
     });
 
     it('does not throw and shows no toast when the clipboard write is rejected', async () => {
