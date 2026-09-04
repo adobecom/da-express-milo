@@ -431,6 +431,9 @@ function resolveUploadUserId() {
 /* c8 ignore stop */
 
 const VIDEO_UPLOAD_LOG_META = {
+  started: {
+    verb: 'started', tag: 'frictionless-video-upload-started', severity: 'info', errorType: 'i',
+  },
   success: {
     verb: 'successful', tag: 'frictionless-video-upload-success', severity: 'info', errorType: 'i',
   },
@@ -461,7 +464,7 @@ export function logVideoUploadEvent(status, {
     `size:${file.size}`,
     `type:${file.type}`,
     `quickAction:${quickAction}`,
-    `uploadDuration:${uploadDuration}`,
+    uploadDuration != null ? `uploadDuration:${uploadDuration}` : null,
     error ? `errorCode:${error.code}` : null,
     error ? `errorMessage:${sanitizeLogValue(error.message)}` : null,
   ].filter(Boolean);
@@ -507,6 +510,13 @@ async function performStorageUpload(files, block, quickAction) {
   const uploadStartTime = Date.now();
   await resolveUploadUserId();
   uploadInProgress = { file, startTime: uploadStartTime, quickAction };
+
+  // Emit a "started" event so success/failure/cancellation rates have an
+  // accurate denominator (uploads that never settle are otherwise invisible).
+  if (file?.type?.startsWith('video/')) {
+    logVideoUploadEvent('started', { file, quickAction });
+  }
+
   try {
     progressBar = await setupUploadUI(block);
     return await uploadAssetToStorage(file, quickAction, uploadStartTime);

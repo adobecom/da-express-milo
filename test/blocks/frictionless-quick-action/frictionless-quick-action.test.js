@@ -354,6 +354,26 @@ describe('logVideoUploadEvent', () => {
     sinon.restore();
   });
 
+  it('logs a started video upload without duration/asset/error fields', () => {
+    logVideoUploadEvent('started', {
+      file: videoFile(),
+      quickAction: 'video-crop',
+    });
+
+    expect(window.lana.log.calledOnce).to.be.true;
+    const [message, options] = window.lana.log.firstCall.args;
+    expect(message).to.include('Video upload started');
+    expect(message).to.include('userId:');
+    expect(message).to.include('size:1024');
+    expect(message).to.include('type:video/mp4');
+    expect(message).to.include('quickAction:video-crop');
+    expect(message).to.not.include('uploadDuration:'); // omitted until the upload settles
+    expect(message).to.not.include('id:');
+    expect(message).to.not.include('errorCode:');
+    expect(options.tags).to.include('frictionless-video-upload-started');
+    expect(options.severity).to.equal('info');
+  });
+
   it('logs a successful video upload with debugging context', () => {
     logVideoUploadEvent('success', {
       file: videoFile(),
