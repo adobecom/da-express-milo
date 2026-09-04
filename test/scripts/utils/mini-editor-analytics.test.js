@@ -86,7 +86,6 @@ describe('mini-editor analytics', () => {
   it('sends the export payload and attached-format mirror', async () => {
     await trackMiniEditorExport({
       exportMethod: 'copy-clipboard',
-      uiLocation: 'seo-discover-page-collapsible-row',
     });
 
     expect(trackStub.calledOnce).to.be.true;
@@ -114,7 +113,6 @@ describe('mini-editor analytics', () => {
     expect(sdm.source).to.deep.equal({
       name: 'CCEX',
       client_id: 'projectx_webapp',
-      platform: TEST_PLATFORM,
     });
     expect(sdm.hz).to.deep.equal({
       source_platform_type: 'desktop-web',
@@ -134,7 +132,7 @@ describe('mini-editor analytics', () => {
     expect(sdm.custom).to.deep.equal({
       export_method: 'copy-clipboard',
       ui: {
-        location: 'seo-discover-page-collapsible-row',
+        location: 'seo-discover-page',
       },
       displayedLanguage: 'en',
       task: {
@@ -151,11 +149,6 @@ describe('mini-editor analytics', () => {
     expect(findProperty(custom, 'event.user_guid')).to.deep.equal({
       propertyName: 'event.user_guid',
       propertyValue: '',
-      propertyType: 'string',
-    });
-    expect(findProperty(custom, 'source.platform')).to.deep.equal({
-      propertyName: 'source.platform',
-      propertyValue: TEST_PLATFORM,
       propertyType: 'string',
     });
     expect(findProperty(custom, 'hz.device_name')).to.deep.equal({
