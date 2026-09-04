@@ -1,5 +1,5 @@
 ---
-name: lcp-compare
+name: performance-testing
 description: >
   Compares Largest Contentful Paint (LCP) between a test URL and a control URL
   under standardized mobile throttling, then reports whether the test improved
@@ -14,17 +14,33 @@ description: >
   chat with no network.
 ---
 
-# LCP Performance Comparison
+# Performance Testing
 
-This skill automates a manual Chrome DevTools workflow: measure **Largest
-Contentful Paint** for a *test* URL and a *control* URL under identical mobile
-throttling, repeat several times each, average the results, and report the
-difference with a plain verdict (improved / regressed / no meaningful change).
+This skill covers performance testing for Express pages. Today it has one
+mode — **LCP comparison** — with room to grow into others (a single-page
+report, other Core Web Vitals like CLS, network-waterfall analysis with
+improvement suggestions) without becoming a different skill: they'd all share
+the same device/throttling setup and the same kind of trigger phrasing
+("check performance," "is this page fast"), so they belong together rather
+than splintered across skills that duplicate the underlying plumbing.
+
+**LCP comparison** automates a manual Chrome DevTools workflow: measure
+**Largest Contentful Paint** for a *test* URL and a *control* URL under
+identical mobile throttling, repeat several times each, average the results,
+and report the difference with a plain verdict (improved / regressed / no
+meaningful change).
 
 It replaces this hand workflow: undock DevTools → emulate Moto G Power → set CPU
 4× + network throttling in the Performance panel → record a reload 5× per URL →
 average the LCPs → compare. The bundled Playwright script reproduces those
 conditions and does the runs and math for you.
+
+The `scripts/` directory is split so future modes don't duplicate this: `lib/
+measure.mjs` loads one URL under given conditions and returns metrics (this is
+where a future CLS/network capture would extend, not fork), `lib/stats.mjs` is
+the metric-agnostic confidence-interval math, and `compare.mjs` is the thin CLI
+that wires them together for the two-URL comparison. A future `report.mjs`
+(single-page mode) would reuse both lib files rather than duplicate them.
 
 ## When to use it
 
@@ -63,7 +79,7 @@ should isolate code differences, not content differences). Then:
    checked out. If a requested branch matches the *current* worktree, reuse
    this directory for it — don't create a redundant worktree. For any other
    requested branch without an existing worktree, create one:
-   `git worktree add ../lcp-compare-<branch-safe-name> <branch>` (replace `/`
+   `git worktree add ../perf-test-<branch-safe-name> <branch>` (replace `/`
    in the branch name with `-` for the directory name).
 2. Pick two free ports (start at `3001`/`3002`, bump on conflict). For each
    worktree, start the local dev server in the background:
@@ -86,6 +102,14 @@ Both dev servers pull authored content from the same source (the project's
 repo), so this isolates code differences between the two branches — content
 stays constant.
 
+**The test and control branches don't need this skill present on them.** The
+worktrees you create for them only need to run `aem up` to serve their code;
+the `compare.mjs` script itself runs once, from wherever you invoked this
+skill, and just points a browser at the two `localhost` URLs. So a branch like
+`stage` — which may not have this skill committed yet — works fine as a
+comparison target. (The one real constraint: the checkout you're running the
+skill *from* obviously needs it, same as any skill.)
+
 ## Requirements (must run where there's real network + a browser)
 
 This drives a real browser and loads real pages — including `localhost` dev
@@ -94,7 +118,7 @@ Claude Code on a local machine or in CI — **not** in a restricted/sandboxed
 chat with no network. Install dependencies once:
 
 ```bash
-cd .claude/skills/lcp-compare/scripts
+cd .claude/skills/performance-testing/scripts
 npm install playwright && npx playwright install chromium
 ```
 
@@ -130,18 +154,18 @@ postinstall hook, so the second command is usually redundant.)
 From the skill's `scripts/` directory (or anywhere, using the full path):
 
 ```bash
-node .claude/skills/lcp-compare/scripts/lcp-compare.mjs \
+node .claude/skills/performance-testing/scripts/compare.mjs \
   --test "https://my-branch--da-express-milo--adobecom.aem.live/express/some-page" \
   --control "https://main--da-express-milo--adobecom.aem.live/express/some-page"
 ```
 
-Positional form also works: `node lcp-compare.mjs <testUrl> <controlUrl>`.
+Positional form also works: `node compare.mjs <testUrl> <controlUrl>`.
 
 Either URL can be `localhost` — e.g. comparing a local dev server against a
 published page, or two local ports against each other:
 
 ```bash
-node lcp-compare.mjs --test "http://localhost:3000/express/some-page" \
+node compare.mjs --test "http://localhost:3000/express/some-page" \
   --control "https://main--da-express-milo--adobecom.aem.live/express/some-page"
 ```
 
@@ -149,16 +173,16 @@ Common overrides:
 
 ```bash
 # More runs (tighter confidence interval), save a full JSON report
-node lcp-compare.mjs --test <t> --control <c> --runs 20 --json report.json
+node compare.mjs --test <t> --control <c> --runs 20 --json report.json
 
 # Watch it run in a visible browser window
-node lcp-compare.mjs --test <t> --control <c> --headed
+node compare.mjs --test <t> --control <c> --headed
 
 # Use a different network profile
-node lcp-compare.mjs --test <t> --control <c> --network fast-4g
+node compare.mjs --test <t> --control <c> --network fast-4g
 ```
 
-Run `node lcp-compare.mjs --help` for every flag.
+Run `node compare.mjs --help` for every flag.
 
 ## What conditions it reproduces (and why)
 
