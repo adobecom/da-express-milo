@@ -25,10 +25,6 @@ function getMiniEditorTaskName() {
   return getMetadata('messagetype')?.trim() || 'quote';
 }
 
-function getSourcePlatform() {
-  return window.navigator?.platform || 'unknown';
-}
-
 function addIfDefined(target, key, value) {
   if (value !== undefined && value !== null && value !== '') {
     target[key] = value;
@@ -436,7 +432,6 @@ export async function trackExpressFeaturePageLoad() {
 
     const isMiniEditorPage = pageType === 'mini-editor';
     const isMobile = isMobileWeb();
-    const sourcePlatform = getSourcePlatform();
     const dtsStart = isMiniEditorPage ? new Date().toISOString() : '';
     const eventDate = isMiniEditorPage ? dtsStart.slice(0, 10) : '';
     const guid = isMiniEditorPage ? generateGuid() : '';
@@ -502,7 +497,6 @@ export async function trackExpressFeaturePageLoad() {
       source: {
         name: SOURCE_NAME,
         client_id: SOURCE_CLIENT_ID,
-        platform: sourcePlatform,
       },
       hz: {
         source_platform_type: isMobile ? 'mobile-web' : 'desktop-web',
