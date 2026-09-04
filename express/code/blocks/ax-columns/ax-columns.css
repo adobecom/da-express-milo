@@ -1438,7 +1438,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
       align-items: flex-start;
     }
 
-  .ax-columns.top.center,
+  .section .ax-columns,
+    .ax-columns.top.center,
     .ax-columns.fullsize.center,
     .ax-columns.light {
       max-width: 836px;
@@ -1908,7 +1909,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
      Top & Light (shared spacing model, incl. top.center / fullsize.center / light)
      ============================================================ */
 
-  .ax-columns.top.center,
+  .section .ax-columns,
+    .ax-columns.top.center,
     .ax-columns.light {
       max-width: var(--block-lg-max-width);
     }
