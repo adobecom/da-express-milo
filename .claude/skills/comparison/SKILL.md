@@ -144,3 +144,31 @@ results.
   Prune it with `node .claude/tools/clean-screendiffs.mjs --older-than=<days>`
   (or `--block=<name>` to scope to one block, `--all` to wipe everything,
   `--dry-run` to preview first).
+
+## Sharing results with someone who doesn't have this checkout
+
+The JSON log and its `diffImage` paths are only meaningful on the machine
+that ran the comparison. To hand results to someone else (e.g. a QA team,
+who won't have the repo, the `.qa-screendiff/` dir, or a CLI) — use
+`package-report.mjs` to turn the JSON log into a single, portable,
+self-contained HTML file with the diff images embedded as base64 (no
+external files, no CDN scripts, opens in any browser):
+
+```bash
+node .claude/tools/comparison/package-report.mjs \
+  --input=.qa-screendiff/<block-slug>/comparison-<base>-vs-<branch-slug>.json
+```
+
+Writes `report-<base>-vs-<branch-slug>.html` next to the input JSON by
+default (override with `--output`). The report has a per-locale stats
+table up top and a filterable (`--locale`, `--bucket` also work as CLI
+flags to pre-scope what's included), sortable list of pages — major diffs
+first — each expandable to show the diff image and links to both live
+URLs. Images are embedded only for `minor`/`major` rows by default (an
+identical-page diff has nothing useful to show); pass `--all-images` to
+embed everything anyway. For a large comparison (hundreds of pages) the
+resulting file can run tens of MB — share it via a drive link or Slack
+upload rather than email if it's over your mail provider's attachment
+limit; or scope it down first with `--locale`/`--bucket` (e.g.
+`--bucket=major --bucket=branchOnly404` for just the pages worth a human
+look).
