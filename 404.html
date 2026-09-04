@@ -13,7 +13,6 @@
 
       const redirectMap = new Map(
         [
-          ['ara' ,'/' ],
           ['ae_ar', '/ara/'],
           ['ae_en', '/'],
           ['africa', '/'],
@@ -172,6 +171,49 @@
 
 
       </script>
+      <script type="text/javascript">
+        /*
+         * Header + footer sources for locales whose Milo/federal defaults were never authored.
+         *
+         * scripts.js defaults gnav-source to `${locale.prefix}/express/localnav-express` and
+         * footer-source to `${origin}/federal/footer/footer` — which Milo's decorateMeta()
+         * then locale-prefixes to `/ara/federal/footer/footer`. Neither path exists for
+         * `ara`, an Express-only locale that is absent from Milo's libs/utils/locales.js, so
+         * this page rendered with an empty header and no footer at all.
+         *
+         * Point them at the exact sources the live /ara/express/ homepage already resolves
+         * to, so the 404 page wears the same chrome as the rest of the Arabic site.
+         *
+         * Set in a classic (parse-time) script so the metas exist before scripts.js — a
+         * deferred module — reaches its `getMetadata(...)` checks and fills in the defaults.
+         *
+         * Both values are root-relative on purpose. decorateMeta() only rewrites metas whose
+         * content contains `.hlx.`, `.aem.` or `/federal/`, so root-relative paths are left
+         * exactly as authored and fetched from the page origin. Do NOT reach for a federal
+         * footer here: `/<locale>/federal/footer/footer` nests ~27 further fragments that get
+         * locale-prefixed to `/ara/federal/footer/fragments/...`, none of which exist, which
+         * renders a footer with every column missing.
+         */
+        const LOCALE_SHELL_SOURCES = {
+          ara: {
+            'gnav-source': '/ara/express/acom-gnav-thin',
+            'footer-source': '/ara/express/footer-thin',
+          },
+        };
+
+        (function (win) {
+          const [, pathLocale] = win.location.pathname.split('/');
+          const sources = LOCALE_SHELL_SOURCES[pathLocale];
+          if (!sources) return;
+          Object.entries(sources).forEach(([name, path]) => {
+            if (document.querySelector(`meta[name="${name}"]`)) return;
+            const meta = document.createElement('meta');
+            meta.setAttribute('name', name);
+            meta.setAttribute('content', path);
+            document.head.appendChild(meta);
+          });
+        }(window));
+      </script>
       <style>
 
       .error-404 main {
@@ -204,6 +246,58 @@
       <script type="module">
         import { sampleRUM } from '/express/code/scripts/utils.js';
         sampleRUM('404', { source: document.referrer });
+      </script>
+      <script type="module">
+        /*
+         * Locale-specific 404 fallback.
+         *
+         * Milo's 404 template (meta name="404" content="feds") renders the fragment at
+         * `${miloLibs}/<locale>/fragments/404`. Express registers locales that Milo does
+         * not: there is no `/libs/ara/fragments/404`, so every `/ara/*` 404 renders an
+         * empty <main>. Until that fragment exists on the Milo side, borrow a
+         * language-appropriate one so Arabic visitors get an Arabic, RTL 404 page rather
+         * than a blank page or a redirect to the English one.
+         *
+         * Self-retiring: the probe below succeeds the moment Milo authors the locale's
+         * own fragment, after which this is a no-op and the entry can be deleted.
+         * Spec reference: MWPW-204684 ("No redirect for ara. Will stay on 404 page.").
+         *
+         * We borrow `fragments/404-body` (the copy) rather than `fragments/404` (a thin
+         * wrapper that adds a background image and nests 404-body). The wrapper's nested
+         * link is authored absolute to www.adobe.com, which `stageDomainsMap` rewrites to
+         * `origin` on branch previews — so the wrapper renders empty everywhere except
+         * stage/prod. 404-body nests nothing, so it renders identically in every
+         * environment and is therefore verifiable on a preview URL before merge.
+         */
+        const FALLBACK_404_LOCALES = { ara: 'mena_ar' };
+
+        const [, pathLocale] = window.location.pathname.split('/');
+        const fallbackLocale = FALLBACK_404_LOCALES[pathLocale];
+
+        const renderFallback404 = async () => {
+          const { getLibs, createTag } = await import('/express/code/scripts/utils.js');
+          const libs = getLibs();
+          const own = await fetch(`${libs}/${pathLocale}/fragments/404.plain.html`, { method: 'HEAD' }).catch(() => null);
+          if (own?.ok) return;
+
+          const main = document.querySelector('main');
+          if (!main) return;
+
+          // Resolve loadArea *before* appending: an await between the two would let Milo's
+          // own 404 template append its section first, and loadArea needs `main` intact.
+          const { loadArea } = await import(`${libs}/utils/utils.js`);
+          const href = `${libs}/${fallbackLocale}/fragments/404-body#_dnt`;
+          main.append(createTag('div', null, createTag('p', {}, createTag('a', { href }, href))));
+          await loadArea(main);
+        };
+
+        if (fallbackLocale) {
+          if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', renderFallback404, { once: true });
+          } else {
+            renderFallback404();
+          }
+        }
       </script>
     </head>
   <body class="error-404">
