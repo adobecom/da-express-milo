@@ -310,6 +310,7 @@ isn't solvable without knowledge of the page's own internals.
 | `--timeout <ms>` | 90000 | Per-navigation timeout. |
 | `--headed` | off | Show the browser window. |
 | `--json <path>` | — | Also write full per-run results (incl. CI/p-value) as JSON. |
+| `--api-key <key>` | — | Sent as `authorization: token <key>` on every request. Also read from `AEM_API_KEY`. See "`.aem.page` returns 401" below — unconfirmed for page-view auth. |
 
 ## Interpreting the output
 
@@ -379,26 +380,44 @@ box) than by piling on iterations.
   other URL keeps running its full count independently. If either URL fails
   every run, no verdict is produced.
 
-## Authenticating for `.aem.page` (or other IMS/SSO-gated) URLs
+## `.aem.page` returns 401 — this can't be logged into directly
 
-`.aem.page` stage previews are gated behind Adobe SSO/IMS — the same
-interactive login you'd hit opening the URL in your own browser. There's no
-static credential or API key for this, so a fresh Playwright context (which is
-what every measurement run uses, deliberately, for cold-cache testing) 401s on
-these by default.
+**Don't try to authenticate a plain browser session against `.aem.page`.** It
+doesn't work, and it's not a bug in this skill — `.aem.page` stage previews
+have no page-level login at all. Visiting one directly (as this skill's
+Playwright browser does) just returns a static `401 unauthenticated` with
+nothing to click. The actual auth is handled entirely by the **AEM Sidekick
+browser extension**: when it's active in your everyday Chrome, *it* injects
+the "Sign in" button and manages the resulting session. A bare
+`chromium.launch()` has no extensions loaded, so there's no login affordance
+to find — an earlier version of this skill tried a plain interactive-login
+flow here and it was a dead end for exactly this reason. Loading the actual
+Sidekick extension into Playwright was considered and rejected: it isn't
+vendored in this repo or any dependency (verified — nothing to load), and
+fetching/maintaining a copy of a third-party browser extension just for this
+would be a disproportionate amount of fragile machinery for what it buys.
 
-Fix it once with a real, visible browser login:
+Use one of these instead, matching how the rest of this repo already handles
+the same problem:
 
-```bash
-node .claude/skills/performance-testing/scripts/login.mjs "https://stage--da-express-milo--adobecom.aem.page/some/page"
-```
-
-This opens a real browser window, waits for you to log in exactly like you
-normally would, verifies the login actually worked by reloading the URL, then
-saves the resulting cookies/localStorage to `.auth-state.json` (gitignored,
-stays local — never commit or transmit it). Every `compare.mjs` run
-afterward picks that file up automatically — no flag needed — and reuses it to
-seed each fresh context, so cold-cache testing and staying logged in aren't in
-tension. Re-run `login.mjs` whenever a run reports a `401`/`403` again — that
-just means the saved session expired. The tool's own error message names the
-exact `login.mjs` command to run when this happens.
+- **If the content is published:** use the equivalent `.aem.live` URL. Same
+  content, publicly viewable, no auth needed. This is what the other
+  Figma-based skills in this repo (`build-block-from-figma` etc.) do —
+  they explicitly resolve `.aem.page` → `.aem.live` before ever touching
+  Playwright.
+- **If it's on a branch that isn't published yet:** use this skill's
+  **local-branch mode** (see the Interactive workflow above) — it clones the
+  branch and serves it locally via `aem up`, authenticated through a
+  completely different mechanism (the local `.hlx-token` CLI credential, not
+  Sidekick) that already works today.
+- **Worth trying, unconfirmed:** the [AEM Admin API accepts an `authorization:
+  token $API_KEY` header](https://www.aem.live/docs/admin.html#tag/authentication)
+  as an alternative to its own interactive cookie login. It's architecturally
+  plausible Sidekick uses this same mechanism internally, but the docs only
+  explicitly confirm it for calls to `admin.hlx.page`, not for raw page-view
+  requests to `.aem.page` itself — I could not verify this either way. If you
+  provision a site API key (via the Admin API's "Create Site API key"
+  operation, which needs your own interactive login to set up — this skill
+  can't provision one for you), pass it with `--api-key <key>` or set
+  `AEM_API_KEY`, and see whether it actually gets you past the 401. If it
+  works, treat that as new information worth folding back into this doc.

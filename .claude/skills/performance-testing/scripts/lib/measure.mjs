@@ -15,8 +15,6 @@
  * which is what the DevTools Performance panel and web-vitals report.
  */
 
-import { AUTH_STATE_PATH, hasAuthState } from './auth.mjs';
-
 // Network presets. `download`/`upload` are BYTES/second, `latency` is ms.
 // Values are the exact expressions from Chrome DevTools NetworkManager.ts.
 // NOTE ON NAMING: Chrome renamed these presets in May 2024. The profile PSI /
@@ -168,11 +166,15 @@ export async function measureRun(browser, url, opts) {
     hasTouch: DEVICE.hasTouch,
     userAgent: DEVICE.userAgent,
     ignoreHTTPSErrors: true, // branch/preview deploys may use non-trusted certs
-    // Reuse a saved IMS/SSO login (see login.mjs) if one exists, so
-    // .aem.page-style auth-gated URLs don't 401 in every fresh context.
-    // This only seeds cookies/localStorage at creation time — it doesn't
-    // undermine the fresh-context-per-run cold-cache guarantee below.
-    storageState: hasAuthState() ? AUTH_STATE_PATH : undefined,
+    // AEM Admin API auth: an `authorization: token $API_KEY` header is a
+    // documented alternative to the interactive cookie login for the Admin
+    // API (https://www.aem.live/docs/admin.html#tag/authentication). This is
+    // NOT confirmed to also authenticate raw .aem.page/.hlx.page page-view
+    // requests (as opposed to admin.hlx.page API calls) — it's included here
+    // as a testable option, not a guaranteed fix. See SKILL.md for how to
+    // obtain a key and why .aem.page's real auth (the Sidekick browser
+    // extension) can't be driven directly by this tool.
+    extraHTTPHeaders: opts.apiKey ? { authorization: `token ${opts.apiKey}` } : undefined,
   });
   await context.addInitScript(lcpInitScript);
 

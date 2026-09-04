@@ -49,6 +49,7 @@ function parseCli() {
       timeout: { type: 'string', default: '90000' },
       headed: { type: 'boolean', default: false },
       json: { type: 'string' },
+      'api-key': { type: 'string' },
       help: { type: 'boolean', default: false },
     },
   });
@@ -90,6 +91,8 @@ function parseCli() {
     timeout: toInt(values.timeout, 90000),
     headed: values.headed,
     jsonOut: values.json || null,
+    // Env var fallback so a key never has to be typed into shell history.
+    apiKey: values['api-key'] || process.env.AEM_API_KEY || null,
   };
 }
 
@@ -121,6 +124,10 @@ Options (defaults reproduce PSI mobile testing):
   --timeout <ms>        Per-navigation timeout                (default 90000)
   --headed              Show the browser window (default headless)
   --json <path>         Also write full results as JSON
+  --api-key <key>       AEM Admin API key, sent as an "authorization: token"
+                        header (also read from AEM_API_KEY env var). See
+                        SKILL.md — this is unconfirmed for .aem.page
+                        page-view auth, only documented for the Admin API.
   --help                Show this help
 
 Network profiles (Chrome DevTools values; slow-4g == PSI/Lighthouse mobile):
@@ -176,10 +183,19 @@ function printPerUrl(title, url, runs, summary, plannedRuns) {
   }
   const lastRun = runs[runs.length - 1];
   if (plannedRuns && runs.length < plannedRuns && lastRun && lastRun.httpStatus) {
-    const authHint =
-      lastRun.httpStatus === 401 || lastRun.httpStatus === 403
-        ? ` Run 'node login.mjs "${url}"' to authenticate, then retry.`
-        : '';
+    const isAuthWall = lastRun.httpStatus === 401 || lastRun.httpStatus === 403;
+    const isAemPage = /\.(aem|hlx)\.page(\/|$|\?)/i.test(url);
+    let authHint = '';
+    if (isAuthWall && isAemPage) {
+      authHint =
+        ' .aem.page previews are gated by the AEM Sidekick browser extension, which this tool ' +
+        "can't drive (there's no in-page login without it, just this 401). Use the published " +
+        '.aem.live URL instead if this content is live, or this skill\'s local-branch mode ' +
+        '(clones the branch and serves it via `aem up`, which uses a different, working auth ' +
+        'path) if it\'s not. --api-key/AEM_API_KEY is also worth trying but unconfirmed — see SKILL.md.';
+    } else if (isAuthWall) {
+      authHint = ' Pass --api-key <key> (or set AEM_API_KEY) if this endpoint accepts an Admin API token.';
+    }
     console.log(
       red(
         `  ⚠ Stopped after ${runs.length}/${plannedRuns} planned runs — got HTTP ${lastRun.httpStatus}, which won't change on retry.${authHint}`,
