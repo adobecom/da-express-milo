@@ -373,5 +373,32 @@ box) than by piling on iterations.
   entry" and excluded from the average.
 - A non-2xx/3xx response on the main document (auth walls on `.aem.page` stage
   URLs, 404s, 500s) is reported as `FAILED server returned <status>` rather
-  than silently measuring whatever error page rendered. If either URL fails
+  than silently measuring whatever error page rendered. Since an HTTP-status
+  failure like this won't change on retry, the tool **stops after the first
+  one for that URL** instead of burning through all the planned runs — the
+  other URL keeps running its full count independently. If either URL fails
   every run, no verdict is produced.
+
+## Authenticating for `.aem.page` (or other IMS/SSO-gated) URLs
+
+`.aem.page` stage previews are gated behind Adobe SSO/IMS — the same
+interactive login you'd hit opening the URL in your own browser. There's no
+static credential or API key for this, so a fresh Playwright context (which is
+what every measurement run uses, deliberately, for cold-cache testing) 401s on
+these by default.
+
+Fix it once with a real, visible browser login:
+
+```bash
+node .claude/skills/performance-testing/scripts/login.mjs "https://stage--da-express-milo--adobecom.aem.page/some/page"
+```
+
+This opens a real browser window, waits for you to log in exactly like you
+normally would, verifies the login actually worked by reloading the URL, then
+saves the resulting cookies/localStorage to `.auth-state.json` (gitignored,
+stays local — never commit or transmit it). Every `compare.mjs` run
+afterward picks that file up automatically — no flag needed — and reuses it to
+seed each fresh context, so cold-cache testing and staying logged in aren't in
+tension. Re-run `login.mjs` whenever a run reports a `401`/`403` again — that
+just means the saved session expired. The tool's own error message names the
+exact `login.mjs` command to run when this happens.

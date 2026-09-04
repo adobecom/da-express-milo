@@ -15,6 +15,8 @@
  * which is what the DevTools Performance panel and web-vitals report.
  */
 
+import { AUTH_STATE_PATH, hasAuthState } from './auth.mjs';
+
 // Network presets. `download`/`upload` are BYTES/second, `latency` is ms.
 // Values are the exact expressions from Chrome DevTools NetworkManager.ts.
 // NOTE ON NAMING: Chrome renamed these presets in May 2024. The profile PSI /
@@ -166,6 +168,11 @@ export async function measureRun(browser, url, opts) {
     hasTouch: DEVICE.hasTouch,
     userAgent: DEVICE.userAgent,
     ignoreHTTPSErrors: true, // branch/preview deploys may use non-trusted certs
+    // Reuse a saved IMS/SSO login (see login.mjs) if one exists, so
+    // .aem.page-style auth-gated URLs don't 401 in every fresh context.
+    // This only seeds cookies/localStorage at creation time — it doesn't
+    // undermine the fresh-context-per-run cold-cache guarantee below.
+    storageState: hasAuthState() ? AUTH_STATE_PATH : undefined,
   });
   await context.addInitScript(lcpInitScript);
 
@@ -186,6 +193,7 @@ export async function measureRun(browser, url, opts) {
   await client.send('Emulation.setCPUThrottlingRate', { rate: opts.cpu });
 
   let error = null;
+  let httpStatus = null;
   let metrics = { lcp: null, detail: null, fcp: null, ttfb: null };
   let settle = { settled: false, timedOut: false };
 
@@ -195,7 +203,11 @@ export async function measureRun(browser, url, opts) {
     // there's no real page to measure — surface that plainly instead of
     // silently measuring whatever error page happened to render (which can
     // still produce a small, misleadingly "valid-looking" LCP number).
+    // Tagged with the numeric status (not just baked into the message) so
+    // the caller can tell "this will never succeed, stop retrying" apart
+    // from a transient/flaky error worth retrying.
     if (response && !response.ok()) {
+      httpStatus = response.status();
       throw new Error(`server returned ${response.status()} ${response.statusText()}`.trim());
     }
     settle = await waitForPageToSettle(page, tracker, opts.settle, opts.maxWait);
@@ -220,5 +232,5 @@ export async function measureRun(browser, url, opts) {
     await context.close();
   }
 
-  return { ...metrics, error, timedOutWaitingForLcp: settle.timedOut };
+  return { ...metrics, error, httpStatus, timedOutWaitingForLcp: settle.timedOut };
 }

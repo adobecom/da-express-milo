@@ -150,7 +150,7 @@ const green = (s) => `\x1b[32m${s}\x1b[0m`;
 const red = (s) => `\x1b[31m${s}\x1b[0m`;
 const dim = (s) => `\x1b[2m${s}\x1b[0m`;
 
-function printPerUrl(title, url, runs, summary) {
+function printPerUrl(title, url, runs, summary, plannedRuns) {
   console.log(`\n${bold(title)}  ${dim(url)}`);
   runs.forEach((r, i) => {
     if (r.error) {
@@ -171,6 +171,18 @@ function printPerUrl(title, url, runs, summary) {
     console.log(
       red(
         `  ⚠ ${timedOutCount}/${runs.length} run(s) hit --max-wait before the LCP candidate stopped changing — those values may understate the true LCP. Consider raising --max-wait.`,
+      ),
+    );
+  }
+  const lastRun = runs[runs.length - 1];
+  if (plannedRuns && runs.length < plannedRuns && lastRun && lastRun.httpStatus) {
+    const authHint =
+      lastRun.httpStatus === 401 || lastRun.httpStatus === 403
+        ? ` Run 'node login.mjs "${url}"' to authenticate, then retry.`
+        : '';
+    console.log(
+      red(
+        `  ⚠ Stopped after ${runs.length}/${plannedRuns} planned runs — got HTTP ${lastRun.httpStatus}, which won't change on retry.${authHint}`,
       ),
     );
   }
@@ -254,6 +266,14 @@ async function main() {
         const r = await measureRun(browser, t.url, opts);
         runs.push(r);
         process.stdout.write(r.error || r.lcp == null ? red('x') : green('•'));
+        // A real HTTP-status failure (401, 404, 500, ...) won't fix itself on
+        // the next attempt — stop wasting the remaining runs on it. A
+        // transient/timeout error (no httpStatus) is worth retrying, so only
+        // this specific case short-circuits the loop.
+        if (r.httpStatus) {
+          process.stdout.write(dim(` (HTTP ${r.httpStatus} — stopping, retrying won't help)`));
+          break;
+        }
       }
       results[t.key] = { url: t.url, runs, summary: summarize(runs) };
     }
@@ -262,8 +282,8 @@ async function main() {
   }
   console.log('');
 
-  printPerUrl('TEST   ', results.test.url, results.test.runs, results.test.summary);
-  printPerUrl('CONTROL', results.control.url, results.control.runs, results.control.summary);
+  printPerUrl('TEST   ', results.test.url, results.test.runs, results.test.summary, opts.runs);
+  printPerUrl('CONTROL', results.control.url, results.control.runs, results.control.summary, opts.runs);
 
   // Verdict — based on a confidence interval for the difference of means.
   console.log(`\n${bold('─'.repeat(60))}`);
