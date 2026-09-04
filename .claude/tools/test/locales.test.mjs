@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import {
-  rootPathFor, resolveLocaleContentDir, scanDirFor, loadLocales, findLocale,
+  rootPathFor, resolveLocaleProjectDir, resolveLocaleContentDir, scanDirFor, loadLocales, findLocale,
 } from '../lib/locales.mjs';
 
 test('rootPathFor: the default (en) locale has no url prefix', () => {
@@ -14,16 +14,25 @@ test('rootPathFor: a prefixed locale nests express under its prefix', () => {
   assert.equal(rootPathFor({ urlPrefix: '/de' }), '/de/express');
 });
 
-test('resolveLocaleContentDir: en reuses the in-repo content/ checkout', () => {
+test('resolveLocaleProjectDir: en reuses the real repo checkout', () => {
+  assert.equal(resolveLocaleProjectDir('/repo', { key: 'en' }), '/repo');
+});
+
+test('resolveLocaleProjectDir: other locales get their own project dir, under the home dir', () => {
+  const dir = resolveLocaleProjectDir('/repo', { key: 'de' });
+  assert.equal(dir, join(homedir(), '.aem-content-cache', 'da-express-milo', 'de'));
+});
+
+test('resolveLocaleContentDir: en is the repo\'s existing content/ dir', () => {
   assert.equal(
     resolveLocaleContentDir('/repo', { key: 'en' }),
     join('/repo', 'content'),
   );
 });
 
-test('resolveLocaleContentDir: other locales clone outside the repo, under the home dir', () => {
+test('resolveLocaleContentDir: other locales get a content/ dir inside their project dir', () => {
   const dir = resolveLocaleContentDir('/repo', { key: 'de' });
-  assert.equal(dir, join(homedir(), '.aem-content-cache', 'da-express-milo', 'de'));
+  assert.equal(dir, join(homedir(), '.aem-content-cache', 'da-express-milo', 'de', 'content'));
 });
 
 test('scanDirFor: en scans content/express', () => {
@@ -33,9 +42,9 @@ test('scanDirFor: en scans content/express', () => {
   );
 });
 
-test('scanDirFor: a prefixed locale scans <checkout>/<prefix>/express', () => {
+test('scanDirFor: a prefixed locale scans <project dir>/content/<prefix>/express', () => {
   const dir = scanDirFor('/repo', { key: 'de', urlPrefix: '/de' });
-  assert.equal(dir, join(homedir(), '.aem-content-cache', 'da-express-milo', 'de', 'de', 'express'));
+  assert.equal(dir, join(homedir(), '.aem-content-cache', 'da-express-milo', 'de', 'content', 'de', 'express'));
 });
 
 test('loadLocales: the shipped registry includes en and at least one RTL locale', async () => {

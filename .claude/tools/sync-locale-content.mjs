@@ -7,18 +7,22 @@
  * qa-worktree.mjs / compare-branches.mjs can enumerate pages across every
  * locale, not just en.
  *
- * Each locale gets its own checkout — `aem content clone` bakes a single
- * rootPath into `.da-config.json` per checkout, so one checkout can never
- * serve two locales (see lib/locales.mjs). `en` keeps the existing in-repo
- * `content/` checkout; every other locale is cloned OUTSIDE the repo, under
- * `~/.aem-content-cache/da-express-milo/<key>/`, so N locale checkouts
- * (each with their own nested `.git`) never clutter the working tree.
+ * `aem content clone` always writes into `<cwd>/content/`, and resolves
+ * which da.live org/repo to pull from via the ENCLOSING directory's git
+ * `origin` remote — it refuses to run ("No git remote found") anywhere
+ * else. So every locale needs its own "project dir" with a `.git` pointed
+ * at this repo (see lib/locales.mjs for the full explanation). `en` reuses
+ * the real repo checkout, which already qualifies. Every other locale gets
+ * its own minimal project dir OUTSIDE the repo, under
+ * `~/.aem-content-cache/da-express-milo/<key>/` — this script creates it
+ * and runs a bare `git init` + `git remote add origin <this repo's URL>`
+ * there the first time (no fetch/checkout of actual repo code — the clone
+ * tool only reads the remote URL to figure out which org/repo to hit).
  *
- * Requires the `aem` CLI to already be installed and IMS-authenticated
- * (same prerequisite as the original single-locale `content/` checkout —
- * see `aem content clone --help`). This script does not attempt to
- * authenticate, and runs clones SEQUENTIALLY (not in parallel) to avoid
- * hammering IMS auth with 20+ concurrent requests.
+ * Requires the `aem` CLI to already be installed. No IMS auth is needed to
+ * clone this org's content (verified empirically) — this script does not
+ * attempt to authenticate. Clones run SEQUENTIALLY (not in parallel) to
+ * keep load on da.live reasonable across 20+ locales.
  *
  * Usage:
  *   node sync-locale-content.mjs [--locale <key> ...] [--all] [--list] [--dry-run]
@@ -26,22 +30,23 @@
  * Options:
  *      --locale <key>        Sync this locale (repeatable).
  *      --all                 Sync every locale in the registry.
- *      --list                Print the locale registry (key, rootPath, checkout dir, and
- *                              whether it's already cloned) and exit — no cloning.
- *      --dry-run             Report what would run, without invoking `aem`.
+ *      --list                Print the locale registry (key, rootPath, project/content dirs,
+ *                              and whether it's already cloned) and exit — no cloning.
+ *      --dry-run             Report what would run, without invoking `git`/`aem`.
  *      --locales-config <p>  Override path to locales.json.
- *   -r, --root <path>        Repo root (for resolving the `en` locale's in-repo checkout).
- *                              Defaults to walking up from cwd looking for ".git".
+ *   -r, --root <path>        Repo root (for resolving the `en` locale's project dir, and for
+ *                              reading this repo's origin URL for other locales' project
+ *                              dirs). Defaults to walking up from cwd looking for ".git".
  *
  * Output (JSON on stdout):
- *   --list:   { locales: [{ locale, rootPath, contentDir, cloned }] }
- *   otherwise: { results: [{ locale, rootPath, contentDir, action, ok, error? }] }
+ *   --list:   { locales: [{ locale, rootPath, projectDir, contentDir, cloned }] }
+ *   otherwise: { results: [{ locale, rootPath, projectDir, contentDir, action, ok, error? }] }
  *              action is one of "cloned"|"refreshed"|"would-clone"|"would-refresh".
  *
  * Caveat: whether re-running `aem content clone` against an existing
  * checkout updates it in place (vs. needing removal + re-clone) hasn't been
- * verified against the real `aem` CLI from this environment — verify
- * against ONE locale before relying on this for a large sync.
+ * verified against the real `aem` CLI — verify against ONE locale before
+ * relying on this to refresh a large existing sync.
  */
 
 import { execFile } from 'node:child_process';
@@ -50,7 +55,7 @@ import { dirname, join } from 'node:path';
 import { parseArgs } from 'node:util';
 import { promisify } from 'node:util';
 import {
-  loadLocales, resolveLocaleContentDir, rootPathFor,
+  loadLocales, resolveLocaleProjectDir, resolveLocaleContentDir, rootPathFor,
 } from './lib/locales.mjs';
 
 const execFileAsync = promisify(execFile);
@@ -115,7 +120,11 @@ if (list) {
     const contentDir = resolveLocaleContentDir(root, locale);
     const cloned = await exists(join(contentDir, '.da-config.json'));
     return {
-      locale: locale.key, rootPath: rootPathFor(locale), contentDir, cloned,
+      locale: locale.key,
+      rootPath: rootPathFor(locale),
+      projectDir: resolveLocaleProjectDir(root, locale),
+      contentDir,
+      cloned,
     };
   }));
   process.stdout.write(`${JSON.stringify({ locales: rows }, null, 2)}\n`);
@@ -132,29 +141,50 @@ const targets = all ? registry : requestedLocales.map((key) => {
   return found;
 });
 
+let originUrl;
+async function getOriginUrl() {
+  if (!originUrl) {
+    const { stdout } = await execFileAsync('git', ['-C', root, 'remote', 'get-url', 'origin']);
+    originUrl = stdout.trim();
+  }
+  return originUrl;
+}
+
+// Ensures `projectDir` has a `.git` with `origin` pointed at this repo, so
+// `aem content clone` (run with cwd=projectDir) can resolve the org/repo.
+// A no-op for `en`, whose project dir is the real repo checkout.
+async function ensureProjectDir(locale, projectDir) {
+  if (locale.key === 'en') return;
+  await mkdir(projectDir, { recursive: true });
+  if (await exists(join(projectDir, '.git'))) return;
+  await execFileAsync('git', ['init', '-q'], { cwd: projectDir });
+  await execFileAsync('git', ['remote', 'add', 'origin', await getOriginUrl()], { cwd: projectDir });
+}
+
 async function syncOne(locale) {
+  const projectDir = resolveLocaleProjectDir(root, locale);
   const contentDir = resolveLocaleContentDir(root, locale);
   const rootPath = rootPathFor(locale);
   const alreadyCloned = await exists(join(contentDir, '.da-config.json'));
 
   if (dryRun) {
     return {
-      locale: locale.key, rootPath, contentDir, action: alreadyCloned ? 'would-refresh' : 'would-clone', ok: true,
+      locale: locale.key, rootPath, projectDir, contentDir, action: alreadyCloned ? 'would-refresh' : 'would-clone', ok: true,
     };
   }
 
-  await mkdir(contentDir, { recursive: true });
   try {
+    await ensureProjectDir(locale, projectDir);
     await execFileAsync('aem', ['content', 'clone', `--path=${rootPath}`], {
-      cwd: contentDir,
+      cwd: projectDir,
       maxBuffer: 20 * 1024 * 1024,
     });
     return {
-      locale: locale.key, rootPath, contentDir, action: alreadyCloned ? 'refreshed' : 'cloned', ok: true,
+      locale: locale.key, rootPath, projectDir, contentDir, action: alreadyCloned ? 'refreshed' : 'cloned', ok: true,
     };
   } catch (err) {
     return {
-      locale: locale.key, rootPath, contentDir, action: alreadyCloned ? 'refresh' : 'clone', ok: false, error: err.message,
+      locale: locale.key, rootPath, projectDir, contentDir, action: alreadyCloned ? 'refresh' : 'clone', ok: false, error: err.message,
     };
   }
 }

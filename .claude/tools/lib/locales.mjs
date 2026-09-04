@@ -3,13 +3,22 @@
  * sync-locale-content.mjs, and anything else that needs to know which
  * locales exist and where each one's content tree lives on disk.
  *
- * Every locale gets its own `aem content clone` checkout (the clone tool
- * bakes a single `rootPath` into `.da-config.json` per checkout, so one
- * checkout can never serve two locales). The `en` locale keeps its existing
- * in-repo, gitignored `content/` checkout; every other locale is cloned
- * OUTSIDE the repo, under `~/.aem-content-cache/<repo-name>/<locale-key>/`,
- * so N locale checkouts (each with their own nested `.git`) never clutter
- * the working tree or confuse repo-wide tools (find/grep/editor indexing).
+ * `aem content clone` always writes into `<cwd>/content/`, and determines
+ * which da.live org/repo to pull from via the ENCLOSING directory's git
+ * remote (it errors with "No git remote found" otherwise) — it does not
+ * take an arbitrary destination. So each locale needs its own "project
+ * dir": a directory with a `.git` whose `origin` remote points at this
+ * repo (no other repo state is required — a bare `git init` +
+ * `git remote add origin <url>` is enough; no fetch/checkout of actual
+ * repo code, and no IMS auth for this org's public content).
+ *
+ * `en` reuses the real repo checkout as its project dir (it already has
+ * the right remote) — that's the existing, unchanged `content/` dir every
+ * other tool already expects. Every other locale gets its own minimal
+ * project dir OUTSIDE the repo, under
+ * `~/.aem-content-cache/<repo-name>/<locale-key>/`, so N locale checkouts
+ * (each with their own `.git` + `content/`) never clutter the working tree
+ * or confuse repo-wide tools (find/grep/editor indexing).
  */
 
 import { readFile } from 'node:fs/promises';
@@ -31,18 +40,28 @@ export function rootPathFor(locale) {
 }
 
 /**
- * Where this locale's `aem content clone` checkout lives. `en` reuses the
- * existing in-repo `content/` dir; every other locale clones outside the
- * repo (see module docstring).
+ * The directory `aem content clone` should be run FROM for this locale
+ * (needs a `.git` with the right `origin` remote — see module docstring).
+ * `en` reuses the real repo checkout; every other locale gets its own
+ * external project dir.
  */
-export function resolveLocaleContentDir(repoRoot, locale) {
-  if (locale.key === 'en') return join(repoRoot, 'content');
+export function resolveLocaleProjectDir(repoRoot, locale) {
+  if (locale.key === 'en') return repoRoot;
   return join(homedir(), '.aem-content-cache', REPO_NAME, locale.key);
 }
 
 /**
+ * Where this locale's cloned content actually lands: always
+ * `<projectDir>/content` (a fixed folder name the `aem` CLI itself
+ * chooses, not something we control).
+ */
+export function resolveLocaleContentDir(repoRoot, locale) {
+  return join(resolveLocaleProjectDir(repoRoot, locale), 'content');
+}
+
+/**
  * The directory query-content-blocks.mjs should actually scan for this
- * locale: the checkout dir plus its rootPath (e.g.
+ * locale: the content dir plus its rootPath (e.g.
  * ".../content" + "/express" -> ".../content/express").
  */
 export function scanDirFor(repoRoot, locale) {
