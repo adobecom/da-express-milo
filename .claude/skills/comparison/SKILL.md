@@ -55,6 +55,16 @@ results.
      selector, e.g. when the block's root class doesn't match its name.
    - `--concurrency=<n>` — pages captured in parallel, per side. Default 6.
    - `--timeout=<seconds>` — dev-server readiness window per side.
+   - `--locale=<key>` (repeatable) / `--all-locales` — compare other locales
+     too, not just `en` (the default). Passed to both sides so page sets
+     match. A locale requested explicitly via `--locale` that has no local
+     content checkout is an error; `--all-locales` skips it instead (see
+     `localesSkipped`) — sync locales first with
+     `node .claude/tools/sync-locale-content.mjs --locale=<key>` (or `--all`
+     for every locale; `--list` shows what's already synced). Comparing
+     `--all-locales` on a widely-used block is meaningfully slower — it's
+     still one worktree/dev-server pair per side, but N times the page
+     count, so mention that to the user before running it.
 
    Even with element-mode + parallel capture this still takes real time for
    a widely-used block (two dev-server boots plus N page loads on each side).
@@ -70,7 +80,11 @@ results.
    - `mode` — which capture mode was actually used.
    - `stats` — counts by bucket: `identical` (<0.5% mismatch), `minor`
      (0.5–3%), `major` (>3%), `baselineOnly404`, `branchOnly404`,
-     `bothErrored`, `missing`.
+     `bothErrored`, `missing`. `statsByLocale` breaks the same buckets down
+     per locale when more than one was compared — lead with this when it's
+     present rather than just the flattened total, since a regression
+     confined to one locale (e.g. only `ara`) reads very differently from
+     one that shows up everywhere.
    - `pages[]` — per-page detail. Every entry has `baseUrl`/`branchUrl` (the
      live `<ref>--da-express-milo--adobecom.aem.live<path>` URL for each
      side, so a human can open both and look for themselves). Has `fullPage`
@@ -79,6 +93,10 @@ results.
      `{ mismatchPct, diffImage, heightDeltaPx }` or `{ skipped: "<reason>" }`.
 
 5. **Report to the user:**
+   - When multiple locales were compared, the narrative's "Per-locale
+     breakdown" section is annotated for RTL locales (e.g. `ara`) — a diff
+     there may just be the expected mirrored layout, not a bug. Check the
+     diff image before calling it a regression.
    - Start with the `narrative` text — it already lists `baseUrl`/`branchUrl`
      for every major/minor diff (grouped: pages within 0.05 percentage points
      of each other are reported as one group — "N pages show the same ~X%
@@ -106,11 +124,12 @@ results.
 
 ## Notes
 
-- Same page list is queried for both sides from the same local
-  `content/express` mirror, so page sets match between runs by construction
-  — a page missing from the branch capture (`missing` bucket) means the
-  branch run itself failed partway through for that page, not a genuine
-  content difference.
+- Same page list is queried for both sides from the same local content
+  mirror(s), so page sets match between runs by construction — a page
+  missing from the branch capture (`missing` bucket) means the branch run
+  itself failed partway through for that page, not a genuine content
+  difference. This holds per-locale too, since both sides request the same
+  `--locale`/`--all-locales` scope.
 - Threshold for "does a pixel count as different" is `--threshold` (default
   0.1, same default as the `screenshot-diff` skill's Figma-comparison tool —
   raise it if font-rendering antialiasing noise dominates small diffs).

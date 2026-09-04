@@ -43,6 +43,12 @@
  *      --skip-fetch          Skip `git fetch origin <ref>` (caller already
  *                              fetched it — used by compare-branches.mjs to
  *                              fetch both refs once instead of twice).
+ *      --locale <key>        Only QA this locale (repeatable). Passed through to
+ *                              query-content-blocks.mjs. Default (no --locale/--all-locales):
+ *                              en only, matching pre-locale-support behavior.
+ *      --all-locales         QA every locale with a local content checkout (see
+ *                              sync-locale-content.mjs). Locales without one are skipped, not
+ *                              an error. Each screenshot/page record is tagged with its locale.
  *   -t, --type <mode>        Match mode passed to query-content-blocks
  *                              (block|css|regex). Default: block.
  *   -r, --root <path>        Main repo root. Defaults to walking up from cwd
@@ -57,7 +63,7 @@
  *     block, ref, branch, root, worktree, port, contentUrl, mode, selector,
  *     pagesFound, outDir,
  *     screenshots: [{
- *       path, file?, status: "ok"|"not-found-on-stage"|"error",
+ *       path, locale, file?, status: "ok"|"not-found-on-stage"|"error",
  *       httpStatus?, error?, elementFile?, elementStatus?
  *     }],
  *     worktreeKept: boolean
@@ -96,6 +102,8 @@ try {
       selector: { type: 'string' },
       concurrency: { type: 'string', default: '6' },
       'skip-fetch': { type: 'boolean', default: false },
+      locale: { type: 'string', multiple: true },
+      'all-locales': { type: 'boolean', default: false },
       type: { type: 'string', short: 't', default: 'block' },
       root: { type: 'string', short: 'r' },
       port: { type: 'string', short: 'p', default: '3002' },
@@ -109,7 +117,9 @@ try {
 
 const {
   block, ref, type, port, 'keep-worktree': keepWorktree, 'skip-fetch': skipFetch,
+  'all-locales': allLocales,
 } = values;
+const requestedLocales = values.locale || [];
 const readinessTimeoutMs = Number(values.timeout) * 1000;
 const concurrency = Math.max(1, Number(values.concurrency) || 1);
 
@@ -212,7 +222,7 @@ async function removeWorktreeIfOwned() {
 
 async function captureOne(browserPage, baseUrl, p) {
   const base = p.path.replace(/^\//, '').replace(/\//g, '_') || 'home';
-  const record = { path: p.path };
+  const record = { path: p.path, locale: p.locale };
   try {
     const response = await browserPage.goto(`${baseUrl}${p.path}`, { waitUntil: 'networkidle', timeout: 30000 });
     const httpStatus = response ? response.status() : null;
@@ -277,14 +287,21 @@ async function main() {
   if (!skipFetch) git(['fetch', 'origin', ref], root);
   git(['worktree', 'add', worktreePath, '-b', branchName, '--no-track', `origin/${ref}`], root);
 
-  // 2. Find affected pages. content/express is untracked (not part of the
-  // git checkout), so query the MAIN repo's content tree, not the worktree.
-  const { stdout: queryOut } = await execFileAsync('node', [
+  // 2. Find affected pages. content/express (and any other locale's content
+  // checkout) is untracked (not part of the git checkout), so query the
+  // MAIN repo's content tree(s), not the worktree.
+  const queryArgs = [
     QUERY_TOOL,
     `--pattern=${block}`,
     `--type=${type}`,
     `--root=${root}`,
-  ], { maxBuffer: 20 * 1024 * 1024 });
+  ];
+  if (allLocales) {
+    queryArgs.push('--all-locales');
+  } else if (requestedLocales.length > 0) {
+    requestedLocales.forEach((l) => queryArgs.push(`--locale=${l}`));
+  }
+  const { stdout: queryOut } = await execFileAsync('node', queryArgs, { maxBuffer: 20 * 1024 * 1024 });
   const queryResult = JSON.parse(queryOut);
   if (queryResult.error) throw new Error(`query-content-blocks failed: ${queryResult.error}`);
 
@@ -295,6 +312,8 @@ async function main() {
     await removeWorktreeIfOwned();
     const summary = {
       block, ref, branch: branchName, root, worktree: null, port: Number(port), contentUrl, mode, selector: selector || null,
+      locales: queryResult.locales || ['en'],
+      localesSkipped: queryResult.localesSkipped || [],
       pagesFound: 0, outDir, screenshots: [], worktreeKept: false,
       note: 'No pages reference this block/pattern — nothing to screenshot.',
     };
@@ -342,6 +361,8 @@ async function main() {
     contentUrl,
     mode,
     selector: selector || null,
+    locales: queryResult.locales || ['en'],
+    localesSkipped: queryResult.localesSkipped || [],
     pagesFound: pages.length,
     outDir,
     screenshots,

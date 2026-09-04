@@ -50,10 +50,17 @@ not globally), which is independently invokable by any skill/agent.
      the machine can take it; drop it if `aem up` starts choking.
    - `--timeout=<seconds>` — dev-server readiness window. Default 60; raise
      it on a slower machine or a cold first `aem up`.
+   - `--locale=<key>` (repeatable) / `--all-locales` — QA other locales, not
+     just `en` (the default). A locale requested explicitly via `--locale`
+     that has no local content checkout is an error; `--all-locales` skips
+     it instead (see `localesSkipped` in the output) and syncing locales is
+     a separate step — `node sync-locale-content.mjs --list` shows what's
+     synced, `--locale=<key>`/`--all` syncs more.
 
-4. **Parse the JSON.** Key fields: `pagesFound`, `outDir`, `mode`, and
-   `screenshots` (each entry has `path`, and depending on mode: `file` and/or
-   `elementFile`, plus `status`). `status` is one of:
+4. **Parse the JSON.** Key fields: `pagesFound`, `outDir`, `mode`, `locales`
+   (which locales were actually scanned), `localesSkipped`, and
+   `screenshots` (each entry has `path`, `locale`, and depending on mode:
+   `file` and/or `elementFile`, plus `status`). `status` is one of:
    - `ok` — rendered normally.
    - `not-found-on-stage` — the page 404'd (or otherwise ≥400'd) against the
      given ref's live content. **Always call this out** — it means the page
@@ -77,8 +84,10 @@ not globally), which is independently invokable by any skill/agent.
   `--keep-worktree` only if the user explicitly wants to poke around the
   checkout afterward.
 - Content is proxied live from `https://<ref>--da-express-milo--adobecom.aem.live`,
-  not from the local (untracked, gitignored) `content/express` mirror — that
-  local tree is only used to *enumerate* affected pages, not to render them.
+  not from the local content mirror(s) — those are only used to *enumerate*
+  affected pages, not to render them. One live domain serves every locale
+  (locale is a URL path prefix, e.g. `/de/express/...`), so locale support
+  needed no change to how pages are fetched, only to how they're enumerated.
 - Screenshots use `localhost` (not `127.0.0.1`) deliberately — the app's
   milo-libs resolver only switches off production `/libs` paths when the
   hostname contains `"local"`.

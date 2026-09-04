@@ -31,6 +31,13 @@
  *                             through to each qa-worktree call). Default: 6.
  *      --threshold <0..1>   Per-pixel color tolerance for pixelmatch.
  *                             Default: 0.1.
+ *      --locale <key>       Only compare this locale (repeatable). Passed through to both
+ *                             qa-worktree calls so base/branch page sets match. Default (no
+ *                             --locale/--all-locales): en only, matching pre-locale-support
+ *                             behavior.
+ *      --all-locales        Compare every locale with a local content checkout (see
+ *                             sync-locale-content.mjs). Locales without one are skipped, not
+ *                             an error. Adds a per-locale breakdown to `stats`/`narrative`.
  *   -r, --root <path>       Main repo root. Defaults to auto-detect from cwd.
  *   -p, --port <number>     Port for the baseline's dev server (the branch's
  *                             server runs on port+1). Default: 3002.
@@ -41,16 +48,18 @@
  * .qa-screendiff/<block-slug>/comparison-<base>-vs-<branch-slug>.json):
  *   {
  *     block, base, branch, mode, selector, threshold, generatedAt,
+ *     locales, localesSkipped,
  *     stats: { total, identical, minor, major, baselineOnly404, branchOnly404,
  *              bothErrored, missing },
+ *     statsByLocale: { <key>: { ...same shape as stats... } },
  *     pages: [{
- *       path, baseUrl, branchUrl, baseStatus, branchStatus,
+ *       path, locale, baseUrl, branchUrl, baseStatus, branchStatus,
  *       fullPage?: { mismatchPct, diffImage, heightDeltaPx } | { skipped: reason },
  *       element?: { mismatchPct, diffImage, heightDeltaPx } | { skipped: reason },
  *     }],
- *     narrative: "<human-readable summary, including base/branch URLs for
- *                  every major diff and the top minor diffs, so a reviewer
- *                  can open both sides directly>"
+ *     narrative: "<human-readable summary, including a per-locale breakdown when more than
+ *                  one locale was compared, base/branch URLs for every major diff and the
+ *                  top minor diffs, so a reviewer can open both sides directly>"
  *   }
  */
 
@@ -62,6 +71,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { slugify } from '../lib/slugify.mjs';
 import { groupBySimilarity } from '../lib/group-diffs.mjs';
+import { loadLocales } from '../lib/locales.mjs';
 import { diffImages, bucket } from './diff.mjs';
 
 const execFileAsync = promisify(execFile);
@@ -84,6 +94,8 @@ try {
       selector: { type: 'string' },
       concurrency: { type: 'string', default: '6' },
       threshold: { type: 'string', default: '0.1' },
+      locale: { type: 'string', multiple: true },
+      'all-locales': { type: 'boolean', default: false },
       root: { type: 'string', short: 'r' },
       port: { type: 'string', short: 'p', default: '3002' },
       timeout: { type: 'string', default: '60' },
@@ -95,8 +107,9 @@ try {
 }
 
 const {
-  block, branch, base, mode, port, 'keep-worktrees': keepWorktrees,
+  block, branch, base, mode, port, 'keep-worktrees': keepWorktrees, 'all-locales': allLocales,
 } = values;
+const requestedLocales = values.locale || [];
 const threshold = Number(values.threshold);
 
 if (!block) fail('Missing required --block <name>');
@@ -148,6 +161,11 @@ async function runCapture(ref, refPort) {
   ];
   if (selector) args.push(`--selector=${selector}`);
   if (keepWorktrees) args.push('--keep-worktree');
+  if (allLocales) {
+    args.push('--all-locales');
+  } else if (requestedLocales.length > 0) {
+    requestedLocales.forEach((l) => args.push(`--locale=${l}`));
+  }
   const { stdout } = await execFileAsync('node', args, { maxBuffer: 50 * 1024 * 1024 });
   const result = JSON.parse(stdout);
   if (result.error) throw new Error(`qa-worktree failed for ref "${ref}": ${result.error}`);
@@ -165,15 +183,29 @@ async function main() {
     runCapture(branch, Number(port) + 1),
   ]);
 
-  const stats = {
-    total: 0, identical: 0, minor: 0, major: 0, baselineOnly404: 0, branchOnly404: 0, bothErrored: 0, missing: 0,
-  };
+  function emptyStats() {
+    return {
+      total: 0, identical: 0, minor: 0, major: 0, baselineOnly404: 0, branchOnly404: 0, bothErrored: 0, missing: 0,
+    };
+  }
+
+  const stats = emptyStats();
+  const statsByLocale = {};
+  function bump(locale, key) {
+    stats[key] += 1;
+    const loc = locale || 'en';
+    if (!statsByLocale[loc]) statsByLocale[loc] = emptyStats();
+    statsByLocale[loc][key] += 1;
+  }
+
+  const locales = baseResult.locales || ['en'];
+  const localesSkipped = baseResult.localesSkipped || [];
   const pages = [];
 
   if (baseResult.pagesFound === 0 || branchResult.pagesFound === 0) {
     const narrative = `No pages reference "${block}" — nothing to compare between ${base} and ${branch}.`;
     const summary = {
-      block, base, branch, mode, selector: selector || null, threshold, generatedAt: new Date().toISOString(), stats, pages, narrative,
+      block, base, branch, mode, selector: selector || null, threshold, generatedAt: new Date().toISOString(), locales, localesSkipped, stats, statsByLocale, pages, narrative,
     };
     await mkdir(join(root, '.qa-screendiff', slug), { recursive: true });
     await writeFile(join(root, '.qa-screendiff', slug, `comparison-${baseSlug}-vs-${branchSlug}.json`), JSON.stringify(summary, null, 2));
@@ -185,9 +217,10 @@ async function main() {
 
   for (const baseShot of baseResult.screenshots) {
     const branchShot = branchByPath.get(baseShot.path);
-    stats.total += 1;
+    bump(baseShot.locale, 'total');
     const record = {
       path: baseShot.path,
+      locale: baseShot.locale || 'en',
       baseUrl: `${baseResult.contentUrl}${baseShot.path}`,
       branchUrl: `${branchResult.contentUrl}${baseShot.path}`,
       baseStatus: baseShot.status,
@@ -195,7 +228,7 @@ async function main() {
     };
 
     if (!branchShot) {
-      stats.missing += 1;
+      bump(baseShot.locale, 'missing');
       record.fullPage = { skipped: 'page missing from branch capture' };
       pages.push(record);
       continue;
@@ -206,13 +239,13 @@ async function main() {
     let skipReason = null;
 
     if (!baseOk && !branchOk) {
-      stats.bothErrored += 1;
+      bump(baseShot.locale, 'bothErrored');
       skipReason = `both sides failed (base: ${baseShot.status}, branch: ${branchShot.status})`;
     } else if (!baseOk) {
-      stats.baselineOnly404 += 1;
+      bump(baseShot.locale, 'baselineOnly404');
       skipReason = `only exists on ${branch} (base was ${baseShot.status})`;
     } else if (!branchOk) {
-      stats.branchOnly404 += 1;
+      bump(baseShot.locale, 'branchOnly404');
       skipReason = `broken/missing on ${branch} (${branchShot.status})`;
     }
 
@@ -234,7 +267,7 @@ async function main() {
           diffImage: diffPath,
           heightDeltaPx: diff.heightDelta,
         };
-        stats[bucket(diff.mismatchPct)] += 1;
+        bump(baseShot.locale, bucket(diff.mismatchPct));
       } else {
         record.fullPage = { skipped: 'full-page screenshot missing on one or both sides' };
       }
@@ -259,7 +292,7 @@ async function main() {
             diffImage: elDiffPath,
             heightDeltaPx: elDiff.heightDelta,
           };
-          if (!wantsFullPage) stats[bucket(elDiff.mismatchPct)] += 1;
+          if (!wantsFullPage) bump(baseShot.locale, bucket(elDiff.mismatchPct));
         } catch (err) {
           record.element = { skipped: `diff failed: ${err.message}` };
         }
@@ -336,6 +369,36 @@ async function main() {
   if (stats.bothErrored) narrativeLines.push(`${stats.bothErrored} page(s) failed to render on both sides.`);
   if (stats.missing) narrativeLines.push(`${stats.missing} page(s) from ${base}'s capture were missing from ${branch}'s.`);
 
+  if (locales.length > 1) {
+    narrativeLines.push('\nPer-locale breakdown:');
+    let registry = [];
+    try {
+      registry = await loadLocales();
+    } catch {
+      registry = [];
+    }
+    const rtlLocales = new Set(registry.filter((l) => l.dir === 'rtl').map((l) => l.key));
+    Object.keys(statsByLocale).sort().forEach((loc) => {
+      const s = statsByLocale[loc];
+      const parts = [`${s.total} page(s)`];
+      if (s.identical) parts.push(`${s.identical} identical`);
+      if (s.minor) parts.push(`${s.minor} minor`);
+      if (s.major) parts.push(`${s.major} major`);
+      if (s.branchOnly404) parts.push(`${s.branchOnly404} broke on ${branch}`);
+      if (s.baselineOnly404) parts.push(`${s.baselineOnly404} already broken on ${base}`);
+      if (s.bothErrored) parts.push(`${s.bothErrored} errored both sides`);
+      if (s.missing) parts.push(`${s.missing} missing`);
+      let line = `  - ${loc}: ${parts.join(', ')}`;
+      if (rtlLocales.has(loc) && (s.major || s.minor)) {
+        line += ' [RTL locale — a diff here may just be the expected mirrored layout, not a bug; check the diff image before flagging]';
+      }
+      narrativeLines.push(line);
+    });
+    if (localesSkipped.length) {
+      narrativeLines.push(`  (skipped, no local content checkout: ${localesSkipped.map((l) => l.locale).join(', ')} — run sync-locale-content.mjs to include them)`);
+    }
+  }
+
   if (majorGroups.length) {
     narrativeLines.push(`\nMajor diffs (${majorPages.length} page(s), ${majorGroups.length} distinct group(s)) — open both URLs side by side:`);
     narrativeLines.push(...describeGroups(majorGroups));
@@ -359,7 +422,10 @@ async function main() {
     selector: selector || null,
     threshold,
     generatedAt: new Date().toISOString(),
+    locales,
+    localesSkipped,
     stats,
+    statsByLocale,
     pages,
     narrative,
   };

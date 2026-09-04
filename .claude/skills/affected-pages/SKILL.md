@@ -47,10 +47,22 @@ to stdout.
    `--spacing-900`), it must be passed as `--pattern=--spacing-900` (Node's
    arg parser otherwise treats it as a flag).
 
+   By default this only scans the `en` locale's content (`content/express`).
+   To check other locales too, add `--locale=<key>` (repeatable, e.g.
+   `--locale=de --locale=fr`) or `--all-locales` for every locale that has a
+   local checkout — see `sync-locale-content.mjs --list` to check which
+   locales are synced, and `sync-locale-content.mjs --locale=<key>` (or
+   `--all`) to sync ones that aren't. A locale requested explicitly via
+   `--locale` that isn't synced yet is an error; `--all-locales` just skips
+   it and reports it in `localesSkipped`.
+
 4. **Parse the JSON.** If it has an `error` key, surface that to the user
    (usually means the repo root couldn't be found — ask which checkout to
    use). Otherwise you get `{ matchingFiles, totalMatches, pages: [...] }`
-   where `pages` is sorted by path, each with `{ file, path, matches, context }`.
+   where `pages` is sorted by path (multi-locale: sorted by locale, then
+   path), each with `{ file, path, matches, context, locale }`. Multi-locale
+   runs also include `locales` (which ones were actually scanned) and, for
+   `--all-locales`, `localesSkipped` (locales with no local checkout).
 
 5. **Report to the user:**
    - One line: total pages found (e.g. "14 pages reference `grid-marquee`").
@@ -74,8 +86,10 @@ to stdout.
 
 ## Notes
 
-- This is read-only and safe to run anytime — it only reads
-  `content/express/*.html`, never modifies anything.
+- This is read-only and safe to run anytime — it only reads locale content
+  checkouts (`content/express/*.html` for `en`; other locales live outside
+  the repo under `~/.aem-content-cache/da-express-milo/<key>/`, see
+  `lib/locales.mjs`), never modifies anything.
 - Match counts can exceed page count when a block/fragment is reused more
   than once on the same page (e.g. via `.fragment` includes).
 - If the user wants pages affected by a *code* change rather than a block
