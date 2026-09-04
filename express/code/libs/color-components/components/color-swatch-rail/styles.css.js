@@ -525,7 +525,7 @@ export const style = css`
     min-height: 48px;
     width: 100%;
     min-width: 0;
-    padding: 0 12px;
+    padding: var(--swatch-column-stacked-padding, 0 12px);
     border-radius: 0;
     flex-direction: row;
     align-items: center;
@@ -579,6 +579,10 @@ export const style = css`
 
   .swatch-rail[data-orientation="stacked"] .hex-code {
     flex-shrink: 0;
+  }
+
+  .swatch-rail[data-orientation="stacked"] button.hex-code {
+    width: var(--hex-code-stacked-width, 75px);
   }
 
   .swatch-rail[data-orientation="stacked"] .stacked-row__icons {

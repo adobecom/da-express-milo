@@ -70,8 +70,22 @@ main .long-text.plain h2 {
     margin-bottom: var(--spacing-400);
 }
 
-main .section.long-text-heading-l .long-text.plain h2 {
+main .section.color-child .long-text.plain h2 {
     font-size: var(--heading-font-size-l);
+}
+
+@media (min-width: 600px) and (max-width: 1199px) {
+    main .section.color-child .long-text {
+        padding-left: var(--spacing-400);
+        padding-right: var(--spacing-400);
+    }
+}
+
+@media (max-width: 599px) {
+    main .section.color-child .long-text {
+        padding-left: var(--spacing-300);
+        padding-right: var(--spacing-300);
+    }
 }
 
 main .long-text.plain h3 {

@@ -882,6 +882,24 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   padding: 0 var(--spacing-500);
 }
 
+@media (min-width: 600px) and (max-width: 1199px) {
+  .section.color-column .ax-columns.color {
+    padding-left: var(--spacing-400);
+    padding-right: var(--spacing-400);
+  }
+}
+
+@media (max-width: 599px) {
+  .section.color-column .ax-columns.color {
+    padding-left: var(--spacing-300);
+    padding-right: var(--spacing-300);
+  }
+
+  .section.color-column .ax-columns.color .img-wrapper {
+    width: 100%;
+  }
+}
+
 .section.color-column .ax-columns.color > div {
   justify-content: space-between;
 }

@@ -1804,6 +1804,18 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
   box-sizing: border-box;
 }
 
+.section.color-child .template-x.horizontal.fullwidth .carousel-left-trigger+.template:not(.placeholder) {
+  margin-left: 0;
+}
+
+.section.color-child .template-x.horizontal .carousel-platform {
+  padding: 24px 0;
+}
+
+.section.color-child .view-all-link-wrapper {
+  margin-bottom: 0;
+}
+
 .template-x.horizontal.mini .carousel-platform {
   padding: 32px;
 }
@@ -3456,12 +3468,67 @@ main .template-x.tworow .template-2x2-col .template .still-wrapper img:not(.icon
   }
  }
 
- @media (min-width: 1200px) {
-   .section.wide-inset .template-x.horizontal>*:not(.template-x.horizontal),
-   .section.wide-inset .template-x.horizontal:not(.holiday)>.template-x.horizontal>*:not(.carousel-container) {
-     padding-left: 40px;
-   }
- }
+  .section.color-child .template-x.horizontal>*:not(.template-x.horizontal),
+  .section.color-child .template-x.horizontal:not(.holiday)>.template-x.horizontal>*:not(.carousel-container) {
+    padding-left: 40px;
+  }
+
+@media (max-width: 599px) {
+  .section.color-child .template-x.horizontal>*:not(.template-x.horizontal),
+  .section.color-child .template-x.horizontal:not(.holiday)>.template-x.horizontal>*:not(.carousel-container) {
+    padding-left: var(--spacing-300);
+    padding-right: var(--spacing-300);
+  }
+}
+
+
+.section.color-child .template-x .template-title-link::after {
+  display: flex;
+  width: 6px;
+  height: 6px;
+  border-top-width: 0;
+  border-left-width: 0;
+  border-bottom-width: 2px;
+  border-right-width: 2px;
+  border-style: solid;
+  border-color: var(--color-info-accent);
+  transform-origin: 75% 75%;
+  transform: rotate(-45deg);
+  content: "";
+  margin: 7px 2.25px 0 4px;
+}
+
+@media (min-width: 900px) {
+  .section.color-child .template-x .template-title.with-link.horizontal {
+    padding-right: var(--spacing-500);
+  }
+}
+
+@media (min-width: 600px) {
+  .section.color-child .template-x .template-title.with-link.horizontal {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-right: var(--spacing-400);
+  }
+
+  .section.color-child .template-x .template-title.with-link > div {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+
+  .section.color-child .template-x .template-title.with-link.link-only {
+    justify-content: flex-end;
+  }
+
+  .section.color-child .template-x:not(.holiday) .template-title.horizontal .view-all-link-wrapper {
+    margin: 0;
+  }
+
+  .section.color-child .template-x .template-title.horizontal > div > * {
+    text-align: left;
+  }
+}
 
 .template-x .experimental-ctas.button-container a.button { 
     width: 100%;

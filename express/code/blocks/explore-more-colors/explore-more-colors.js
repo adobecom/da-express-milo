@@ -78,7 +78,7 @@ export default async function decorate(block) {
   block.replaceChildren(section);
 
   watchForOverflow(row, async () => {
-    await buildCarousel('', row, { centerAlign: true, infinityScrollEnabled: true });
+    await buildCarousel('', row, { centerAlign: true, infinityScrollEnabled: true, deferLeftArrow: true });
     row.querySelector('.carousel-arrow-left')?.setAttribute('aria-label', prevLabel || 'Previous slide');
     row.querySelector('.carousel-arrow-right')?.setAttribute('aria-label', nextLabel || 'Next slide');
   });

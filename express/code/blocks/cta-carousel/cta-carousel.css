@@ -21,6 +21,14 @@
     margin: auto auto 32px;
 }
 
+ .section.color-child .cta-carousel .cta-carousel-heading-section {
+    margin: auto auto 24px;
+ }
+
+  .section.color-child .cta-carousel {
+      padding: 0 15px 0 40px;
+  }
+
 .cta-carousel .cta-carousel-heading-section h2 {
     text-align: left;
     max-width: 800px;
@@ -372,15 +380,15 @@
 }
 
 @media (min-width: 1200px) {
-    .section.wide-inset .cta-carousel {
+    .section.color-child .cta-carousel {
         margin-left: 0;
         padding-left: 40px;
     }
 }
 
 @media (max-width: 599px) {
-    .section.wide-inset .cta-carousel {
-        padding: 0 15px;
+    .section.color-child .cta-carousel {
+        padding: 0 var(--spacing-300);
     }
 }
 

@@ -75,7 +75,7 @@ async function loadStrings() {
     shareFailed: v(13, 'Unable to share this color.'),
     pickAColorPalette: v(14, 'Pick a color palette'),
     copyHex: v(15, 'Copy hex'),
-    createAPalette: v(16, 'Create a color palette'),
+    createAPalette: v(16, 'Create color palette'),
     colorCopiedToClipboard: v(17, 'Color copied to clipboard'),
     codeFormatLabels: {
       CSS: v(18, 'Copy as CSS'),

@@ -1,5 +1,5 @@
 .explore-more-colors {
-  padding: var(--spacing-600) 0;
+  padding: var(--spacing-600) var(--spacing-400);
   box-sizing: border-box;
 }
 
@@ -101,12 +101,20 @@ a.explore-more-colors-chip:focus-visible {
 
 /* ── Mobile / Tablet < 1200px ──────────────────────────────────── */
 @media (max-width: 1199px) {
-  .explore-more-colors-row .carousel-fader-left {
+  .explore-more-colors-row .carousel-container .carousel-platform > * {
+    scroll-snap-align: center;
+  }
+}
+
+/* ── Mobile < 600px ───────────────────────────────────────────────── */
+@media (max-width: 599px) {
+  .explore-more-colors {
     padding-left: var(--spacing-300);
+    padding-right: var(--spacing-300);
   }
 
-  .explore-more-colors-row .carousel-fader-right {
-    padding-right: var(--spacing-300);
+  .explore-more-colors-header {
+    text-align: left;
   }
 }
 

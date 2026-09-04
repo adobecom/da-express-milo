@@ -294,5 +294,5 @@ export default async function decorate(block) {
     initRotation(block, payload);
     observer.unobserve(block);
   };
-  new IntersectionObserver(onIntersect, { rootMargin: '1000px', threshold: 0 }).observe(block);
+  new IntersectionObserver(onIntersect, { threshold: 0 }).observe(block);
 }

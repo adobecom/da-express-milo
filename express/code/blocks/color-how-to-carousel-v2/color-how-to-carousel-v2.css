@@ -8,6 +8,18 @@
     padding: var(--spacing-900) var(--spacing-400);
 }
 
+@media (max-width: 599px) {
+    .color-how-to-carousel-v2 {
+        padding-left: var(--spacing-300);
+        padding-right: var(--spacing-300);
+    }
+
+    .color-how-to-carousel-v2 .chtc-heading {
+        align-self: flex-start;
+        text-align: left;
+    }
+}
+
 .color-how-to-carousel-v2 .chtc-heading {
     font-size: var(--heading-font-size-xl);
     text-align: center;
@@ -176,6 +188,7 @@
 }
 
 .color-how-to-carousel-v2 .chtc-specs-row:last-child {
+    padding-bottom: 0;
     border-bottom: none;
 }
 
@@ -264,7 +277,7 @@
     }
 
     .color-how-to-carousel-v2 .chtc-graphic {
-        flex: 0 0 45%;
+        flex: 0 0 55%;
     }
 
     .color-how-to-carousel-v2 .chtc-content {
