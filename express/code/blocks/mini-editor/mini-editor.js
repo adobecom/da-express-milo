@@ -52,13 +52,12 @@ function createSecureUid(prefix = 'mini-editor') {
  * the shared bottom toast on success, per Figma node 0-19315 — every copy
  * action on the page uses this same toast, not just the mini-editor's own.
  */
-async function copyQuoteToClipboard(quote, author, uiLocation = 'seo-discover-page') {
+async function copyQuoteToClipboard(quote, author) {
   const text = author ? `${quote} — ${author}` : quote;
   try {
     await navigator.clipboard.writeText(text);
     trackMiniEditorExport({
       exportMethod: 'copy-clipboard',
-      uiLocation,
     });
     showCopyToast('Quote copied to clipboard');
     return true;
@@ -82,7 +81,6 @@ async function downloadCard(block, editor) {
     await MiniEditorCardExporter.download(model);
     trackMiniEditorExport({
       exportMethod: 'download',
-      uiLocation: 'seo-discover-page',
     });
   } catch (error) {
     window.lana?.log(`Mini-editor download failed: ${error?.message || error}`, {
@@ -452,7 +450,6 @@ export default async function init(block) {
               if (action?.value === 'copy') {
                 trackMiniEditorExport({
                   exportMethod: 'copy-clipboard',
-                  uiLocation: 'seo-discover-page-share-menu-copy-image',
                 });
                 return;
               }
@@ -466,7 +463,6 @@ export default async function init(block) {
 
               trackMiniEditorExport({
                 exportMethod,
-                uiLocation: 'seo-discover-page',
               });
             },
             feedback: {
