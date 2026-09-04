@@ -4,6 +4,14 @@
 
 
 /* ============================================================
+   Cascade-order-sensitive overrides (must precede "Shared / base" below to preserve original cascade winners)
+   ============================================================ */
+
+.ax-columns.enterprise>div {
+  gap: var(--spacing-600);
+}
+
+/* ============================================================
    Shared / base
    ============================================================ */
 
@@ -269,12 +277,6 @@
   padding-right: 0;
 }
 
-.ax-columns .column.column-picture {
-  padding-left: 0;
-  padding-right: 0;
-  margin: auto;
-}
-
 .ax-columns .column-picture img {
   border-radius: 16px;
 }
@@ -456,15 +458,6 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
    Enterprise
    ============================================================ */
 
-main .section:has(.ax-columns.enterprise):not([data-padding='none'])>.content {
-  padding-top: 0;
-}
-
-main .section:has(.ax-columns.enterprise):not([data-padding='none'])>.content h2 {
-  font-size: var(--heading-font-size-s);
-  padding-top: var(--heading-font-size-xl);
-}
-
 main .section .ax-columns.enterprise .column h2 {
   font-size: var(--heading-font-size-xxl);
 }
@@ -473,15 +466,6 @@ main .section .ax-columns.enterprise {
   padding-left: 0;
   padding-right: 0;
   max-width: unset;
-}
-
-.section:has(.ax-columns.enterprise) .content h2 {
-  margin-top: 0;
-  padding-top: var(--spacing-900);
-}
-
-.ax-columns.enterprise>div {
-  gap: var(--spacing-600);
 }
 
 .ax-columns.enterprise .column {
@@ -881,42 +865,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 }
 
 /* ============================================================
-   MAX entitled campaign patch
-   ============================================================ */
-
-.section.ax-max-entitled:has(.ax-columns) .column-picture img {
-  max-width: 100%;
-  margin-top: var(--spacing-400);
-  border-radius: 16px;
-}
-
-.section.ax-max-entitled:has(.ax-columns) .column {
-  padding: 0px;
-}
-
-.section.ax-max-entitled:has(.ax-columns) h2 {
-  font-size: var(--heading-font-size-m);
-  font-weight: var(--heading-font-weight-extra);
-  line-height: var(--heading-line-height);
-}
-
-.section:not(:first-child).ax-max-entitled .ax-columns {
-  padding: 0px 28px;
-  margin: auto;
-  max-width: 599px;
-}
-
-.section.ax-max-entitled>.ax-columns p.button-container {
-  margin-top: var(--spacing-500);
-}
-
-.section:not(:first-child).ax-max-entitled .ax-columns p {
-  font-size: var(--body-font-size-m);
-  font-weight: var(--body-font-weight);
-  line-height: var(--heading-line-height);
-}
-
-/* ============================================================
    Shared utility (corner-overlay animation, brand icon, Japanese lang overrides, misc)
    ============================================================ */
 
@@ -1143,17 +1091,53 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   }
 }
 
+/* ============================================================
+   MAX entitled campaign patch
+   ============================================================ */
+
+.section.ax-max-entitled:has(.ax-columns) .column-picture img {
+  max-width: 100%;
+  margin-top: var(--spacing-400);
+  border-radius: 16px;
+}
+
+.section.ax-max-entitled:has(.ax-columns) .column {
+  padding: 0px;
+}
+
+.section.ax-max-entitled:has(.ax-columns) h2 {
+  font-size: var(--heading-font-size-m);
+  font-weight: var(--heading-font-weight-extra);
+  line-height: var(--heading-line-height);
+}
+
+.section:not(:first-child).ax-max-entitled .ax-columns {
+  padding: 0px 28px;
+  margin: auto;
+  max-width: 599px;
+}
+
+.section.ax-max-entitled>.ax-columns p.button-container {
+  margin-top: var(--spacing-500);
+}
+
+.section:not(:first-child).ax-max-entitled .ax-columns p {
+  font-size: var(--body-font-size-m);
+  font-weight: var(--body-font-weight);
+  line-height: var(--heading-line-height);
+}
+
+/* ============================================================
+   Cascade-order-sensitive overrides (must follow every variant section below to preserve original cascade winners)
+   ============================================================ */
+
+.ax-columns .column.column-picture {
+  padding-left: 0;
+  padding-right: 0;
+  margin: auto;
+}
+
 @media (max-width: 600px) {
-
-  /* ============================================================
-     Enterprise
-     ============================================================ */
-
-  .section:has(.ax-columns.enterprise) .content h2 {
-      padding-left: 20px;
-      padding-right: 20px;
-      word-break: auto-phrase;
-    }
 
   /* ============================================================
      Misc small variants (width-2/3-columns, minimum-padding, narrow, slim-button, slim-padding, xl-heading)
@@ -1242,11 +1226,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .ax-columns .column:nth-child(2):not(.column-picture):not(.hero-animation-overlay):not(.text) {
       padding-left: var(--spacing-300);
-    }
-
-  .ax-columns .column.column-picture {
-      padding-left: var(--spacing-100);
-      padding-right: var(--spacing-100);
     }
 
   .ax-columns .column:nth-child(2):not(.column-picture):not(.hero-animation-overlay) {
@@ -1405,11 +1384,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
      Enterprise
      ============================================================ */
 
-  main .section:has(.ax-columns.enterprise):not([data-padding='none'])>.content h2 {
-      font-size: var(--heading-font-size-l);
-      padding-top: var(--spacing-700);
-    }
-
   .ax-columns.enterprise .column h2 {
       font-size: var(--heading-font-size-xxl);
     }
@@ -1546,47 +1520,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     .content.columns-xl-heading h5,
     .content.columns-xl-heading h6 {
       font-size: var(--heading-font-size-m);
-    }
-
-  /* ============================================================
-     MAX entitled campaign patch
-     ============================================================ */
-
-  .section.ax-max-entitled>.ax-columns p.button-container {
-      margin-top: var(--spacing-600);
-    }
-
-  .section:not(:first-child).ax-max-entitled:has(.ax-columns) .column {
-      width: 50%;
-    }
-
-  .section:not(:first-child).ax-max-entitled:has(.ax-columns) .column:not(.column-picture) {
-      height: fit-content;
-      margin: auto;
-    }
-
-  .section:not(:first-child).ax-max-entitled .ax-columns>div {
-      flex-direction: row;
-      gap: var(--spacing-700);
-    }
-
-  .section:not(:first-child).ax-max-entitled .ax-columns .column-picture {
-      order: 0;
-    }
-
-  .section:not(:first-child).ax-max-entitled .ax-columns {
-      display: flex;
-      min-width: 600px;
-      max-width: 1199px;
-      padding: var(--Global-Section-Padding-XL, 40px) var(--Global-Container-container-padding-side, 32px);
-      flex-direction: column;
-      align-items: center;
-      gap: 10px;
-      box-sizing: border-box;
-    }
-
-  .section.ax-max-entitled:has(.ax-columns) .column-picture img {
-      margin-top: 0;
     }
 
   /* ============================================================
@@ -1746,6 +1679,56 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
         right: -30px;
         transform: none;
       }
+    }
+
+  /* ============================================================
+     MAX entitled campaign patch
+     ============================================================ */
+
+  .section.ax-max-entitled>.ax-columns p.button-container {
+      margin-top: var(--spacing-600);
+    }
+
+  .section:not(:first-child).ax-max-entitled:has(.ax-columns) .column {
+      width: 50%;
+    }
+
+  .section:not(:first-child).ax-max-entitled:has(.ax-columns) .column:not(.column-picture) {
+      height: fit-content;
+      margin: auto;
+    }
+
+  .section:not(:first-child).ax-max-entitled .ax-columns>div {
+      flex-direction: row;
+      gap: var(--spacing-700);
+    }
+
+  .section:not(:first-child).ax-max-entitled .ax-columns .column-picture {
+      order: 0;
+    }
+
+  .section:not(:first-child).ax-max-entitled .ax-columns {
+      display: flex;
+      min-width: 600px;
+      max-width: 1199px;
+      padding: var(--Global-Section-Padding-XL, 40px) var(--Global-Container-container-padding-side, 32px);
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      box-sizing: border-box;
+    }
+
+  .section.ax-max-entitled:has(.ax-columns) .column-picture img {
+      margin-top: 0;
+    }
+
+  /* ============================================================
+     Cascade-order-sensitive overrides (must follow every variant section below to preserve original cascade winners)
+     ============================================================ */
+
+  .ax-columns .column.column-picture {
+      padding-left: var(--spacing-100);
+      padding-right: var(--spacing-100);
     }
 
 }
@@ -1981,6 +1964,38 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
     }
 
   /* ============================================================
+     Shared utility (corner-overlay animation, brand icon, Japanese lang overrides, misc)
+     ============================================================ */
+
+  :lang(ja) .section .ax-columns h1 {
+      font-size: var(--heading-font-size-xxl);
+    }
+
+  :lang(ja) .section .ax-columns h1.columns-heading-long {
+      font-size: var(--heading-font-size-xl);
+    }
+
+  :lang(ja) .section .ax-columns h1.columns-heading-very-long {
+      font-size: var(--heading-font-size-xl);
+    }
+
+  :lang(ja) .section .ax-columns h1.columns-heading-x-long {
+      font-size: var(--heading-font-size-l);
+    }
+
+  :lang(ja) .section .ax-columns h2.columns-heading-long {
+      font-size: var(--heading-font-size-xl);
+    }
+
+  :lang(ja) .section .ax-columns h2.columns-heading-very-long {
+      font-size: var(--heading-font-size-l);
+    }
+
+  :lang(ja) .section .ax-columns h2.columns-heading-x-long {
+      font-size: var(--heading-font-size-m);
+    }
+
+  /* ============================================================
      MAX entitled campaign patch
      ============================================================ */
 
@@ -2015,38 +2030,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 
   .section.ax-max-entitled .ax-columns:not(.fullsize):not(.marquee) .column:not(.column-picture):not(.hero-animation-overlay):not(.text) {
       padding: 0px;
-    }
-
-  /* ============================================================
-     Shared utility (corner-overlay animation, brand icon, Japanese lang overrides, misc)
-     ============================================================ */
-
-  :lang(ja) .section .ax-columns h1 {
-      font-size: var(--heading-font-size-xxl);
-    }
-
-  :lang(ja) .section .ax-columns h1.columns-heading-long {
-      font-size: var(--heading-font-size-xl);
-    }
-
-  :lang(ja) .section .ax-columns h1.columns-heading-very-long {
-      font-size: var(--heading-font-size-xl);
-    }
-
-  :lang(ja) .section .ax-columns h1.columns-heading-x-long {
-      font-size: var(--heading-font-size-l);
-    }
-
-  :lang(ja) .section .ax-columns h2.columns-heading-long {
-      font-size: var(--heading-font-size-xl);
-    }
-
-  :lang(ja) .section .ax-columns h2.columns-heading-very-long {
-      font-size: var(--heading-font-size-l);
-    }
-
-  :lang(ja) .section .ax-columns h2.columns-heading-x-long {
-      font-size: var(--heading-font-size-m);
     }
 
 }
