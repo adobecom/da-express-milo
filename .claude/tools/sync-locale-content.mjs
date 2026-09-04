@@ -175,9 +175,17 @@ async function syncOne(locale) {
 
   try {
     await ensureProjectDir(locale, projectDir);
-    await execFileAsync('aem', ['content', 'clone', `--path=${rootPath}`], {
+    // --yes: `aem content clone` prompts for confirmation when a locale has
+    // more than 10,000 files; unanswerable here since this runs
+    // non-interactively. stdio ignores stdin so ANY unexpected prompt gets
+    // an immediate EOF instead of hanging forever (this bit us once: a
+    // large locale's clone sat "running" for 45+ minutes doing nothing,
+    // blocked reading a confirmation that could never arrive).
+    await execFileAsync('aem', ['content', 'clone', `--path=${rootPath}`, '--yes'], {
       cwd: projectDir,
       maxBuffer: 20 * 1024 * 1024,
+      stdio: ['ignore', 'pipe', 'pipe'],
+      timeout: 45 * 60 * 1000, // hard ceiling per locale, even with the fixes above (fr alone took >15min just to enumerate its file list)
     });
     return {
       locale: locale.key, rootPath, projectDir, contentDir, action: alreadyCloned ? 'refreshed' : 'cloned', ok: true,
