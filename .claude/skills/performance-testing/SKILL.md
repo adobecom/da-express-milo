@@ -76,34 +76,68 @@ Then run the script as described in "How to run."
 should isolate code differences, not content differences). Then:
 
 1. `git branch --show-current` and `git worktree list` to see what's already
-   checked out. If a requested branch matches the *current* worktree, reuse
-   this directory for it — don't create a redundant worktree. For any other
-   requested branch without an existing worktree, create one:
-   `git worktree add ../perf-test-<branch-safe-name> <branch>` (replace `/`
-   in the branch name with `-` for the directory name).
-2. Pick two free ports (start at `3001`/`3002`, bump on conflict). For each
-   worktree, start the local dev server in the background:
-   `cd <worktree-dir> && npx aem up --port <port> --stop-other=false --no-open`.
-   Always pass `--stop-other=false` — the default `true` would kill an
-   unrelated dev server the user already has running on that port.
-3. Poll `http://localhost:<port>/` on each until it responds (a few seconds for
-   `aem up` to boot; give it up to ~30s) before moving on — don't race the
-   server startup.
-4. Run the script with
+   checked out. If a requested branch matches the *current* worktree (or any
+   other existing worktree), reuse that directory for it — don't create a
+   redundant checkout. For any other requested branch, **use `git clone`, not
+   `git worktree add`**:
+   `git clone <this-repo-root> ../perf-test-<branch-safe-name> --branch <branch> --single-branch`
+   (replace `/` in the branch name with `-` for the directory name).
+
+   **Why a real clone, not a worktree:** `aem up` fails on a worktree — a
+   worktree's `.git` is a plain pointer file (`gitdir: ...`), which `aem up`'s
+   project detection misreads as "this is a git submodule" and refuses to run
+   (`git submodules are not supported`). A real clone has a genuine `.git`
+   directory and doesn't hit this.
+
+2. **Two follow-up fixes a fresh clone needs before `aem up` will work:**
+   - `git -C <clone-dir> remote set-url origin <the real GitHub remote URL>`
+     — cloning from a local path leaves `origin` pointing at that filesystem
+     path, and `aem up` needs a real GitHub URL to identify the project
+     (otherwise it fails with `Invalid URL`).
+   - If the repo root has an untracked `.hlx/` directory (check
+     `.gitignore` for `.hlx/*` — it holds the local AEM CLI auth session,
+     e.g. `.hlx-token`), copy it into the fresh clone:
+     `cp -r <repo-root>/.hlx <clone-dir>/.hlx`. Without it, any content that
+     needs authentication will 401 in the clone even though it works fine in
+     the checkout you copied it from. This stays entirely local — you're
+     reusing the user's own already-established session for a second local
+     server instance, not transmitting or re-entering a credential anywhere.
+     Mention to the user that you're doing this since it involves a token
+     file, but it doesn't need to block on confirmation — it's the same kind
+     of thing as reusing a cached login across two local dev servers you
+     already control.
+
+3. Pick two free ports (start at `3001`/`3002`, bump on conflict). For each
+   checkout, start the local dev server in the background:
+   `cd <checkout-dir> && npx aem up --port <port> --stop-other=false --no-open --no-livereload`.
+   - Always pass `--stop-other=false` — the default `true` would kill an
+     unrelated dev server the user already has running on that port.
+   - Always pass `--no-livereload` — live-reload keeps a persistent
+     connection open, which defeats this skill's "no in-flight requests"
+     settle detection (see "Avoiding the DevTools cutoff"): every run will
+     hit `--max-wait` and print its warning, even though the LCP values
+     underneath are usually still fine. Skipping live-reload avoids the
+     spurious warning entirely for local runs.
+4. Poll the **actual target page path** (not just `/`) on each until it
+   returns `200` — a few seconds for `aem up` to boot, give it up to ~30s.
+   Don't just check the root path: it can legitimately 404 while the real
+   page still works, and conversely a page needing auth can 401 even once the
+   server itself is up (see step 2's `.hlx` fix if that happens).
+5. Run the script with
    `--test http://localhost:<portA><pagePath> --control http://localhost:<portB><pagePath>`.
-5. Report the results (see "Interpreting the output").
-6. Clean up: stop both background `aem up` processes. **Leave the worktrees on
+6. Report the results (see "Interpreting the output").
+7. Clean up: stop both background `aem up` processes. **Leave the clones on
    disk** (mention their paths) rather than removing them — that's a
    destructive, hard-to-reverse step and re-running the comparison later is
    faster with them already checked out. Only remove one if the user asks.
 
 Both dev servers pull authored content from the same source (the project's
-`fstab.yaml`, which is committed and identical across worktrees of the same
+`fstab.yaml`, which is committed and identical across clones of the same
 repo), so this isolates code differences between the two branches — content
 stays constant.
 
 **The test and control branches don't need this skill present on them.** The
-worktrees you create for them only need to run `aem up` to serve their code;
+checkouts you create for them only need to run `aem up` to serve their code;
 the `compare.mjs` script itself runs once, from wherever you invoked this
 skill, and just points a browser at the two `localhost` URLs. So a branch like
 `stage` — which may not have this skill committed yet — works fine as a
