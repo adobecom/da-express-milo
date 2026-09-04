@@ -11,7 +11,7 @@ interface Props {
 
 /**
  * Inline click-to-edit text cell: shows the value (or a placeholder), swaps to an input on click,
- * commits on blur/Enter, cancels on Escape, and surfaces a save error inline. Shared by the
+ * commits on blur/Enter, cancels on Escape, and surfaces a save error inline. shared by the
  * Document Manager table and the GMC submit dialog's error table so the edit behavior lives once.
  */
 export default function EditableTextCell({

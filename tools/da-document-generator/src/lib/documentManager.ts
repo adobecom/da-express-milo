@@ -1,6 +1,6 @@
 import { crawlDirectory, type CrawlError, type DocFetchError } from '../api/crawl';
-import { checkPageStatus, getToken, daPathToLiveUrl, daPathToPreviewUrl, cat, postDoc } from '../api/daApi';
-import { CRAWL_CONCURRENCY, STATUS_CONCURRENCY, runBatch } from './concurrency';
+import { getToken, daPathToLiveUrl, daPathToPreviewUrl, cat, postDoc, resolveStatuses, type PageStatus } from '../api/daApi';
+import { CRAWL_CONCURRENCY, runBatch } from './concurrency';
 import { lookupProductFromTemplate } from '../api/zazzleApi';
 import { readMetadataBlockFromDoc, upsertMetadataBlockOnDoc, serializeDoc } from './metadata';
 import { tagEditableFieldsOnDoc, type EditableFieldKey } from './generate';
@@ -101,9 +101,6 @@ export interface ScanCallbacks {
 }
 
 const FLUSH_SIZE = 25;
-// If this many status checks fail with zero successes, treat the status endpoint as
-// unreachable (e.g. CORS-blocked) and mark the rest Unknown without more network calls.
-const STATUS_FAILURE_CIRCUIT = 10;
 
 function placeholderDoc(path: string, rootPath: string): ManagedDoc {
   return {
@@ -115,6 +112,30 @@ function placeholderDoc(path: string, rootPath: string): ManagedDoc {
     needsBackfill: false,
     editable: { title: false, shortTitle: false, description: false },
   };
+}
+
+/** Map a resolved PageStatus onto a row update (published / previewed / draft / unknown). */
+function statusToUpdate(path: string, s: PageStatus | undefined): StatusUpdate {
+  if (!s || !s.ok) return { path, statusUnknown: true };
+  if (s.live) return { path, stage: 'published', liveUrl: daPathToLiveUrl(path), statusUnknown: false };
+  if (s.preview) return { path, stage: 'previewed', previewUrl: daPathToPreviewUrl(path), statusUnknown: false };
+  return { path, statusUnknown: false }; // exists in source only → Draft
+}
+
+/** Emit resolved statuses to the caller in FLUSH_SIZE batches (one merge per batch, not per row). */
+function emitStatuses(
+  paths: string[],
+  statuses: Map<string, PageStatus>,
+  onStatuses: (updates: StatusUpdate[]) => void,
+): void {
+  let buf: StatusUpdate[] = [];
+  paths.forEach((path, idx) => {
+    buf.push(statusToUpdate(path, statuses.get(path)));
+    if (buf.length >= FLUSH_SIZE || idx === paths.length - 1) {
+      onStatuses(buf);
+      buf = [];
+    }
+  });
 }
 
 /**
@@ -158,47 +179,42 @@ export async function scanDocs(
   }, CRAWL_CONCURRENCY);
   if (cb.cancelled()) return { errors: [...crawl.errors, ...fetchErrors] };
 
-  // Phase 3 — status (deferred, resilient). Fast-fail per call, plus a circuit breaker so a
-  // wholly-unreachable endpoint marks the rest Unknown instead of probing every doc.
+  // Phase 3 — status. Resolve publish/preview state for the whole set via the bulk status job
+  // (one async job) with an authless CDN-HEAD fallback — no per-doc calls to the rate-limited
+  // admin status API, so a large scan can't trip its throttle and mass-mark rows Unknown.
   const token = getToken();
   if (token && total > 0) {
-    let checked = 0;
-    let failures = 0;
-    let successes = 0;
-    let aborted = false;
-    let statBuf: StatusUpdate[] = [];
     cb.onProgress('checking', 0, total);
-    await runBatch(paths, async (path) => {
-      if (cb.cancelled()) return;
-      let update: StatusUpdate;
-      if (aborted) {
-        update = { path, statusUnknown: true };
-      } else {
-        const s = await checkPageStatus(path, token);
-        if (s.ok) {
-          successes++;
-          update = s.live
-            ? { path, stage: 'published', liveUrl: daPathToLiveUrl(path) }
-            : s.preview
-              ? { path, stage: 'previewed', previewUrl: daPathToPreviewUrl(path) }
-              : { path }; // definitively not published/previewed — stays Draft
-        } else {
-          failures++;
-          update = { path, statusUnknown: true };
-          if (successes === 0 && failures >= STATUS_FAILURE_CIRCUIT) aborted = true;
-        }
-      }
-      statBuf.push(update);
-      checked++;
-      if (statBuf.length >= FLUSH_SIZE || checked === total) {
-        cb.onStatuses(statBuf);
-        statBuf = [];
-        cb.onProgress('checking', checked, total);
-      }
-    }, STATUS_CONCURRENCY);
+    const statuses = await resolveStatuses(paths, token, (done) => {
+      if (!cb.cancelled()) cb.onProgress('checking', done, total);
+    });
+    if (cb.cancelled()) return { errors: [...crawl.errors, ...fetchErrors] };
+    emitStatuses(paths, statuses, cb.onStatuses);
+    cb.onProgress('checking', total, total);
   }
 
   return { errors: [...crawl.errors, ...fetchErrors] };
+}
+
+/**
+ * Re-resolve publish/preview status for a SUBSET of already-listed docs — used by the Document
+ * Manager's "Recheck status" action to retry only the rows that came back Unknown, without
+ * re-crawling the tree or re-fetching any source. Reuses the same bulk-job → HEAD resolver.
+ */
+export async function recheckStatuses(
+  paths: string[],
+  cb: Pick<ScanCallbacks, 'onStatuses' | 'onProgress' | 'cancelled'>,
+): Promise<void> {
+  const token = getToken();
+  if (!token || paths.length === 0) return;
+  const total = paths.length;
+  cb.onProgress('checking', 0, total);
+  const statuses = await resolveStatuses(paths, token, (done) => {
+    if (!cb.cancelled()) cb.onProgress('checking', done, total);
+  });
+  if (cb.cancelled()) return;
+  emitStatuses(paths, statuses, cb.onStatuses);
+  cb.onProgress('checking', total, total);
 }
 
 /**

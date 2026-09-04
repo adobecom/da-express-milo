@@ -1,4 +1,4 @@
-# DA Document Generator
+# PDP Document Generator
 
 A browser-based tool for bulk-generating DA (Document Authoring) pages from product data and one or more DA document templates.
 

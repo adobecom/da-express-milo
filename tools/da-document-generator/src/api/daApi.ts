@@ -304,3 +304,152 @@ export async function batchCheckStatus(
   return results;
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// Scalable status resolution: bulk status job (primary) → authless CDN HEAD (fallback).
+//
+// Replaces per-document GETs to admin.hlx.page/status, which is rate-limited to ~10 req/s per
+// project and so mass-fails a ~6k-doc scan. The bulk job statuses the whole set in one async job;
+// if it's unavailable or returns an unrecognized shape, we fall back to bodyless/authless HEAD
+// probes of the live CDN (200 req/s host limit), which reliably determine "published".
+// ─────────────────────────────────────────────────────────────────────────────
+
+const BULK_STATUS_CHUNK = 1000;   // max paths per bulk status job
+const JOB_POLL_MS = 1000;         // delay between job-status polls
+const JOB_POLL_MAX = 180;         // give up on a job after ~3 min → fall back
+const HEAD_BATCH_SIZE = 20;       // paths probed in parallel per HEAD batch
+const HEAD_BATCH_MS = 300;        // min ms per HEAD batch (paces well under the CDN's 200 req/s)
+
+type StatusProgress = (done: number, total: number) => void;
+
+/**
+ * Resolve publish/preview status for many docs without hammering the rate-limited admin status
+ * API. Tries the AEM bulk status job first; on any failure/unsupported/unrecognized response it
+ * falls back to authless CDN HEAD probes (reliable for "published").
+ */
+export async function resolveStatuses(
+  paths: string[],
+  token: string,
+  onProgress?: StatusProgress,
+): Promise<Map<string, PageStatus>> {
+  if (paths.length === 0) return new Map();
+  try {
+    return await bulkResolveStatus(paths, token, onProgress);
+  } catch {
+    return await headResolveStatus(paths, onProgress);
+  }
+}
+
+/**
+ * Authless, bodyless HEAD probe of the live CDN: live = 200. The preview tier is often
+ * auth-gated, so it isn't probed here — a not-live doc reads as Draft in this fallback.
+ */
+export async function headResolveStatus(
+  paths: string[],
+  onProgress?: StatusProgress,
+): Promise<Map<string, PageStatus>> {
+  const result = new Map<string, PageStatus>();
+  for (let i = 0; i < paths.length; i += HEAD_BATCH_SIZE) {
+    const batchStart = Date.now();
+    const batch = paths.slice(i, i + HEAD_BATCH_SIZE);
+    await Promise.all(batch.map(async (p) => {
+      let live = false;
+      try {
+        const resp = await fetch(daPathToLiveUrl(p), { method: 'HEAD' });
+        live = resp.ok;
+      } catch { /* CDN unreachable → treat as not published */ }
+      result.set(p, { live, preview: false, ok: true });
+    }));
+    if (onProgress) onProgress(Math.min(i + batch.length, paths.length), paths.length);
+    const wait = HEAD_BATCH_MS - (Date.now() - batchStart);
+    if (wait > 0 && i + HEAD_BATCH_SIZE < paths.length) await sleep(wait);
+  }
+  return result;
+}
+
+/** Bulk status via the AEM admin job API: POST the paths, poll the job, read per-path results. */
+export async function bulkResolveStatus(
+  paths: string[],
+  token: string,
+  onProgress?: StatusProgress,
+): Promise<Map<string, PageStatus>> {
+  const { org, repo } = parseDAPath(paths[0]);
+  const result = new Map<string, PageStatus>();
+  let done = 0;
+  for (let i = 0; i < paths.length; i += BULK_STATUS_CHUNK) {
+    const chunk = paths.slice(i, i + BULK_STATUS_CHUNK);
+    const contentToDa = new Map<string, string>();
+    const contentPaths = chunk.map((p) => {
+      const cp = parseDAPath(p).contentPath;
+      contentToDa.set(cp, p);
+      return cp;
+    });
+    const statuses = await runBulkStatusChunk(org, repo, contentPaths, token);
+    for (const [cp, st] of statuses) {
+      const da = contentToDa.get(cp);
+      if (da) result.set(da, st);
+    }
+    done += chunk.length;
+    if (onProgress) onProgress(Math.min(done, paths.length), paths.length);
+  }
+  // Any path the job didn't report on exists in source but not on preview/live → Draft.
+  for (const p of paths) if (!result.has(p)) result.set(p, { live: false, preview: false, ok: true });
+  return result;
+}
+
+type BulkResource = {
+  path?: string; webPath?: string; resourcePath?: string;
+  live?: { status?: number }; preview?: { status?: number };
+};
+
+async function runBulkStatusChunk(
+  org: string,
+  repo: string,
+  contentPaths: string[],
+  token: string,
+): Promise<Map<string, PageStatus>> {
+  // 1. Start the async bulk status job for these paths.
+  const startResp = await fetch(`${HLX_ADMIN}/status/${org}/${repo}/${BRANCH}/*`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({ paths: contentPaths, select: ['preview', 'live'] }),
+  });
+  if (!startResp.ok) throw new Error(`bulk status start: ${startResp.status}`);
+  const startData = await startResp.json() as { job?: { name?: string }; links?: { self?: string } };
+  const jobName = startData.job?.name ?? startData.links?.self?.split('/').pop();
+  if (!jobName) throw new Error('bulk status: missing job name');
+
+  // 2. Poll until the job stops.
+  const jobUrl = `${HLX_ADMIN}/job/${org}/${repo}/${BRANCH}/status/${jobName}`;
+  let stopped = false;
+  for (let attempt = 0; attempt < JOB_POLL_MAX && !stopped; attempt++) {
+    await sleep(JOB_POLL_MS);
+    const jResp = await fetch(jobUrl, { headers: { Authorization: `Bearer ${token}` } });
+    if (!jResp.ok) throw new Error(`bulk status poll: ${jResp.status}`);
+    const jData = await jResp.json() as { state?: string };
+    stopped = jData.state === 'stopped' || jData.state === 'completed';
+  }
+  if (!stopped) throw new Error('bulk status: job did not finish in time');
+
+  // 3. Read per-path results.
+  // NOTE: the exact /details response shape must be confirmed against a live run (see the plan's
+  // feasibility-lock step). We parse the documented `resources` array and THROW on anything else
+  // (incl. a path-key format that doesn't match what we requested) so resolveStatuses() falls back
+  // to the reliable HEAD probe instead of silently reporting everything as Draft.
+  const dResp = await fetch(`${jobUrl}/details`, { headers: { Authorization: `Bearer ${token}` } });
+  if (!dResp.ok) throw new Error(`bulk status details: ${dResp.status}`);
+  const details = await dResp.json() as { data?: { resources?: unknown }; resources?: unknown };
+  const resources = details.data?.resources ?? details.resources;
+  if (!Array.isArray(resources)) throw new Error('bulk status: unrecognized details shape');
+  const out = new Map<string, PageStatus>();
+  for (const item of resources as BulkResource[]) {
+    const path = item.path ?? item.webPath ?? item.resourcePath;
+    if (!path) continue;
+    out.set(path, { live: item.live?.status === 200, preview: item.preview?.status === 200, ok: true });
+  }
+  const matched = contentPaths.filter((cp) => out.has(cp)).length;
+  if (matched < contentPaths.length * 0.5) {
+    throw new Error(`bulk status: path-format mismatch (${matched}/${contentPaths.length})`);
+  }
+  return out;
+}
+

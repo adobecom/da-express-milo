@@ -1,10 +1,10 @@
-# DA Document Generator — Architecture Reference
+# PDP Document Generator — Architecture Reference
 
-This is the technical deep-dive for `da-document-generator`. It documents every module, how data flows between them, and the full feature set as currently implemented. For a quick usage summary see [README.md](./README.md).
+This is the technical deep-dive for `pdp-document-generator`. It documents every module, how data flows between them, and the full feature set as currently implemented. For a quick usage summary see [README.md](./README.md).
 
 ## 1. Overview
 
-DA Document Generator is a browser-only React app for bulk-creating (or updating) DA (Document Authoring) pages from product data. A user supplies a set of Zazzle product IDs (pasted or via CSV/XLSX upload), optionally enriches/validates that data against the Zazzle API, routes each row to an HTML template based on its `product_type` (or overrides routing with a single template for all rows), and generates one DA document per row by substituting `{{placeholder}}` tokens in the template. From there, rows can be previewed, published, unpublished, or deleted — individually or in bulk — with QA checks run both immediately after generation and against the live page after publish.
+PDP Document Generator is a browser-only React app for bulk-creating (or updating) DA (Document Authoring) pages from product data. A user supplies a set of Zazzle product IDs (pasted or via CSV/XLSX upload), optionally enriches/validates that data against the Zazzle API, routes each row to an HTML template based on its `product_type` (or overrides routing with a single template for all rows), and generates one DA document per row by substituting `{{placeholder}}` tokens in the template. From there, rows can be previewed, published, unpublished, or deleted — individually or in bulk — with QA checks run both immediately after generation and against the live page after publish.
 
 Everything runs client-side against three external APIs: the DA Admin API (`admin.da.live`), the AEM Admin API (`admin.hlx.page`), and the Zazzle partner API (`www.zazzle.com/svc/partner/adobeexpress`). There is no backend of its own.
 
@@ -53,7 +53,7 @@ src/
     zazzle_getproduct_sample.json  example raw Zazzle API response (reference only)
 ```
 
-**Build/deploy**: `vite.config.ts` sets `base` to `/` in dev (`vite serve`) and to `/tools/da-document-generator/dist/` for production builds, because the built app is served directly by DA.live from the committed `dist/` folder rather than from a standalone host. `npm run build` runs `tsc -b && vite build`; the output in `dist/` is checked into the repo.
+**Build/deploy**: `vite.config.ts` sets `base` to `/` in dev (`vite serve`) and to `/pdp-document-generator/dist/` for production builds, because the built app is served directly by DA.live from the committed `dist/` folder rather than from a standalone host. `npm run build` runs `tsc -b && vite build`; the output in `dist/` is checked into the repo.
 
 ## 4. Authentication
 

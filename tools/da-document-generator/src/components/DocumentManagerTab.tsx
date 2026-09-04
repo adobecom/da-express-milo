@@ -1,5 +1,5 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
-import { scanDocs, backfillIdentity, writeFieldValue, type ScanPhase } from '../lib/documentManager';
+import { scanDocs, recheckStatuses, backfillIdentity, writeFieldValue, type ScanPhase } from '../lib/documentManager';
 import { checkGmcStatus } from '../lib/gmcSubmit';
 import { getToken } from '../api/daApi';
 import type { CrawlError, DocFetchError } from '../api/crawl';
@@ -138,6 +138,29 @@ export default function DocumentManagerTab() {
     // Abort the in-flight scan when a rescan starts or the component unmounts.
     return () => { stale = true; };
   }, [rootPath, scanNonce]);
+
+  // Retry status for only the rows that came back Unknown — no re-crawl, no re-fetch of source.
+  async function handleRecheckUnknowns() {
+    if (scanning) return;
+    const unknownPaths = docs.filter((d) => d.statusUnknown).map((d) => d.path);
+    if (unknownPaths.length === 0) return;
+    setScanProgress({ phase: 'checking', done: 0, total: unknownPaths.length });
+    try {
+      await recheckStatuses(unknownPaths, {
+        onStatuses: (updates) => {
+          const byPath = new Map(updates.map((u) => [u.path, u]));
+          setDocs((prev) => prev.map((d) => {
+            const u = byPath.get(d.path);
+            return u ? { ...d, ...u } : d;
+          }));
+        },
+        onProgress: (phase, done, total) => setScanProgress({ phase, done, total }),
+        cancelled: () => false,
+      });
+    } finally {
+      setScanProgress(null);
+    }
+  }
 
   const subDirectories = useMemo(
     () => [...new Set(docs.map((d) => d.subDirectory))].sort(),
@@ -393,8 +416,17 @@ export default function DocumentManagerTab() {
         const unknownCount = docs.filter((d) => d.statusUnknown).length;
         if (unknownCount === 0) return null;
         return (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
-            Publish status couldn&apos;t be determined for {unknownCount} document{unknownCount !== 1 ? 's' : ''} (the status service rate-limited or was unreachable). Those rows show <strong>Unknown</strong> — click Rescan to retry.
+          <div className="flex items-start gap-3 bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 text-sm text-amber-800">
+            <p className="flex-1">
+              Publish status couldn&apos;t be determined for {unknownCount} document{unknownCount !== 1 ? 's' : ''} (the status service was unreachable). Those rows show <strong>Unknown</strong>.
+            </p>
+            <button
+              type="button"
+              onClick={handleRecheckUnknowns}
+              className="font-medium text-amber-800 underline hover:text-amber-900 cursor-pointer whitespace-nowrap"
+            >
+              Recheck status
+            </button>
           </div>
         );
       })()}
