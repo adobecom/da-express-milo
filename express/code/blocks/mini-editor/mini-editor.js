@@ -7,9 +7,6 @@ import {
   announceToScreenReader,
 } from '../../scripts/color-shared/spectrum/utils/a11y.js';
 import showCopyToast from '../../scripts/utils/copy-toast.js';
-import MiniEditorCardExporter from '../../scripts/utils/mini-editor-card-export.js';
-import trackMiniEditorExport from '../../scripts/utils/mini-editor-analytics.js';
-import { showExpressToast } from '../../scripts/color-shared/spectrum/components/express-toast.js';
 import createMiniEditorWidget from '../../scripts/widgets/mini-editor-widget/mini-editor-widget.js';
 import createMiniEditorModal from '../../scripts/widgets/mini-editor-modal/mini-editor-modal.js';
 import { loadButton, loadTooltip } from '../../scripts/color-shared/spectrum/load-spectrum.js';
@@ -47,6 +44,30 @@ function createSecureUid(prefix = 'mini-editor') {
   return `${prefix}-${Date.now().toString(36)}${uidCounter.toString(36)}`;
 }
 
+// Analytics, the express-toast component, and the card-export module (which
+// also spawns a canvas-rendering Worker — see mini-editor-card-export.js)
+// are only ever needed once a user actually copies, shares, or downloads
+// something — none of them are part of the card's own first paint. Dynamic
+// imports (rather than static top-level ones) so their JS isn't fetched on
+// every page load, only once one of those interactions actually happens.
+// Each import() is cached by the module system after the first call, so
+// there's no need for our own memoization here.
+
+async function track(props) {
+  const { default: trackMiniEditorExport } = await import('../../scripts/utils/mini-editor-analytics.js');
+  trackMiniEditorExport(props);
+}
+
+async function showToast(props) {
+  const { showExpressToast } = await import('../../scripts/color-shared/spectrum/components/express-toast.js');
+  return showExpressToast(props);
+}
+
+async function getCardExporter() {
+  const { default: MiniEditorCardExporter } = await import('../../scripts/utils/mini-editor-card-export.js');
+  return MiniEditorCardExporter;
+}
+
 /**
  * Copies the quote and, when present, its author (as "quote — author") so
  * pasted text always carries attribution instead of the quote alone. Shows
@@ -57,10 +78,7 @@ async function copyQuoteToClipboard(quote, author, uiLocation = 'seo-discover-pa
   const text = author ? `${quote} — ${author}` : quote;
   try {
     await navigator.clipboard.writeText(text);
-    trackMiniEditorExport({
-      exportMethod: 'copy-clipboard',
-      uiLocation,
-    });
+    track({ exportMethod: 'copy-clipboard', uiLocation }).catch(() => {});
     showCopyToast('Quote copied to clipboard');
     return true;
   } catch {
@@ -80,18 +98,16 @@ async function downloadCard(block, editor) {
     }
     const model = editor?.getContentModel();
     if (!model) throw new Error('Mini-editor content model is unavailable');
-    await MiniEditorCardExporter.download(model);
-    trackMiniEditorExport({
-      exportMethod: 'download',
-      uiLocation: 'seo-discover-page',
-    });
+    const exporter = await getCardExporter();
+    await exporter.download(model);
+    track({ exportMethod: 'download', uiLocation: 'seo-discover-page' }).catch(() => {});
   } catch (error) {
     window.lana?.log(`Mini-editor download failed: ${error?.message || error}`, {
       tags: 'mini-editor,download',
       severity: 'error',
     });
     const message = await replaceKey('mini-editor-download-failed', getConfig());
-    await showExpressToast({ message, variant: 'negative' });
+    await showToast({ message, variant: 'negative' });
   } finally {
     if (downloadButton) {
       downloadButton.disabled = false;
@@ -386,10 +402,16 @@ export default async function init(block) {
         const key = JSON.stringify(model);
         if (cachedModelKey !== key) {
           cachedModelKey = key;
-          cachedBlobPromise = MiniEditorCardExporter.createCardBlob(model).catch((error) => {
-            cachedModelKey = undefined;
-            throw error;
-          });
+          // getCardExporter()'s own dynamic import happens right here, at the
+          // same "share trigger opens" head start described above — not on
+          // page load — since createCardBlob is the slow step this cache
+          // exists to get ahead of.
+          cachedBlobPromise = getCardExporter()
+            .then((exporter) => exporter.createCardBlob(model))
+            .catch((error) => {
+              cachedModelKey = undefined;
+              throw error;
+            });
         }
         return cachedBlobPromise;
       };
@@ -482,10 +504,10 @@ export default async function init(block) {
             ],
             onActionSelect: ({ action }) => {
               if (action?.value === 'copy') {
-                trackMiniEditorExport({
+                track({
                   exportMethod: 'copy-clipboard',
                   uiLocation: 'seo-discover-page-share-menu-copy-image',
-                });
+                }).catch(() => {});
                 return;
               }
 
@@ -496,10 +518,7 @@ export default async function init(block) {
               const exportMethod = exportMethodByAction[action?.value];
               if (!exportMethod) return;
 
-              trackMiniEditorExport({
-                exportMethod,
-                uiLocation: 'seo-discover-page',
-              });
+              track({ exportMethod, uiLocation: 'seo-discover-page' }).catch(() => {});
             },
             feedback: {
               failed: {
@@ -512,7 +531,7 @@ export default async function init(block) {
               if (variant === 'positive' && action.type === 'copy') {
                 await showCopyToast(message);
               } else {
-                await showExpressToast({ message, variant });
+                await showToast({ message, variant });
               }
             },
           },
