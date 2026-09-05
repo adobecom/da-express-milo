@@ -302,7 +302,7 @@ isn't solvable without knowledge of the page's own internals.
 | `--network <profile>` | `slow-4g` | `slow-4g` \| `fast-4g` \| `slow-3g` \| `none`. |
 | `--cpu <rate>` | 4 | CPU slowdown multiplier. |
 | `--settle <ms>` | 2000 | Quiet period (no in-flight requests, no LCP change) required before a value is treated as final. |
-| `--max-wait <ms>` | 20000 | Safety-valve cap on total time spent waiting for that quiet period. Warns if hit. |
+| `--max-wait <ms>` | 8000 | Safety-valve cap on total time spent waiting for that quiet period. Warns if hit. |
 | `--warmup <n>` | 0 | Discarded warm-up runs per URL (not counted in the average). |
 | `--confidence <p>` | 0.95 | Confidence level for the interval on the delta. |
 | `--min-delta-ms <ms>` | 50 | *Practical*-significance floor, absolute (annotation only). |

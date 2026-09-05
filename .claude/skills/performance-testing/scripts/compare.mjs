@@ -41,7 +41,7 @@ function parseCli() {
       network: { type: 'string', default: 'slow-4g' },
       cpu: { type: 'string', default: '4' },
       settle: { type: 'string', default: '2000' },
-      'max-wait': { type: 'string', default: '20000' },
+      'max-wait': { type: 'string', default: '8000' },
       warmup: { type: 'string', default: '0' },
       confidence: { type: 'string', default: '0.95' },
       'min-delta-ms': { type: 'string', default: '50' },
@@ -83,7 +83,7 @@ function parseCli() {
     network,
     cpu: toNum(values.cpu, 4),
     settle: toInt(values.settle, 2000),
-    maxWait: toInt(values['max-wait'], 20000),
+    maxWait: toInt(values['max-wait'], 8000),
     warmup: toInt(values.warmup, 0),
     confidence: clamp(toNum(values.confidence, 0.95), 0.5, 0.999),
     minDeltaMs: toNum(values['min-delta-ms'], 50),
@@ -116,7 +116,7 @@ Options (defaults reproduce PSI mobile testing):
   --settle <ms>         Quiet period with no new LCP candidate
                         before treating it as final           (default 2000)
   --max-wait <ms>       Cap on total time spent waiting for
-                        LCP to settle (safety valve)          (default 20000)
+                        LCP to settle (safety valve)          (default 8000)
   --warmup <n>          Discarded warm-up runs per URL        (default 0)
   --confidence <p>      Confidence level for the delta CI     (default 0.95)
   --min-delta-ms <ms>   Practical-significance floor, ms      (default 50)
