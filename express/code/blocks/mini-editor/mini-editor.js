@@ -317,8 +317,8 @@ export default async function init(block) {
   // and is often the slowest single request on the page, so it shouldn't
   // wait behind dynamic imports it has no dependency on. getFontOptions()
   // itself resolves immediately with the bundled fallback fonts — see
-  // mini-editor-fonts-loader.js — the live Adobe Fonts kit loads separately,
-  // after the card has already mounted.
+  // mini-editor-fonts-loader.js — the card never waits on the live Adobe
+  // Fonts kit before its first render.
   const dataPromise = Promise.all([
     getCardBackgrounds(props),
     getFontOptions(),
@@ -334,12 +334,17 @@ export default async function init(block) {
   // resolves: the Spectrum bundles the widget needs (theme/base/lit/icons/
   // button via loadButton, tooltip/overlay via loadTooltip — see
   // load-spectrum.js, which already loads all of these in parallel with
-  // each other). Purely a prefetch — mini-editor-widget.js calls the same
-  // memoized loaders itself and doesn't await this; it just means those
-  // bundles are already in flight (often already cached) by the time the
-  // widget needs them, instead of only being requested after cards/fonts
-  // resolve.
-  Promise.all([loadButton(), loadTooltip()]).catch(() => {});
+  // each other), plus the live Adobe Fonts kit itself (loadWebFontOptions —
+  // see mini-editor-fonts-loader.js). Purely a prefetch for all three: each
+  // is memoized, and the real call sites below (mini-editor-widget.js for
+  // Spectrum, this file's own loadWebFontOptions() calls for fonts) don't
+  // await this — it just means the kit's network round trip (measured
+  // ~0.5-1.2s against the real Adobe Fonts CDN) runs concurrently with
+  // everything else instead of only starting once the card has already
+  // mounted, which is what was making the fallback-to-live font swap
+  // noticeable: the kit previously didn't even start loading until after
+  // first paint, so the whole round trip happened in full view.
+  Promise.all([loadButton(), loadTooltip(), loadWebFontOptions()]).catch(() => {});
 
   [
     { createTag, loadStyle, getConfig },
