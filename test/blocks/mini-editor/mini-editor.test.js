@@ -126,7 +126,6 @@ describe('mini-editor', () => {
   it('uses the generic menu and shares a fresh PNG from More options', async () => {
     window.placeholders = {
       'mini-editor-share-image': 'Share image',
-      'share-menu-whatsapp': 'WhatsApp',
       'mini-editor-copy-image': 'Copy image',
       'share-menu-more-options': 'More options',
     };
@@ -143,11 +142,9 @@ describe('mini-editor', () => {
     block.querySelector('.me-action--share').click();
     const menu = block.querySelector('.share-menu-list');
     expect(menu).to.exist;
-    expect(menu.querySelectorAll('sp-menu-item')).to.have.length(3);
+    expect(menu.querySelectorAll('sp-menu-item')).to.have.length(2);
     expect(menu.querySelector('sp-menu-group [slot="header"]').textContent).to.equal('Share image');
-    const whatsAppIcon = menu.querySelector('sp-menu-item[value="whatsapp"] sp-icon');
-    expect(whatsAppIcon.src).to.contain('/express/code/icons/S2_Icon_WhatsApp_20_N.svg');
-    expect(whatsAppIcon.size).to.equal('m');
+    expect(menu.querySelector('sp-menu-item[value="whatsapp"]')).to.not.exist;
     expect(menu.querySelector('sp-menu-item[value="copy"] sp-icon-image')).to.exist;
     expect(menu.querySelector('sp-menu-item[value="more"] sp-icon-more')).to.exist;
 
