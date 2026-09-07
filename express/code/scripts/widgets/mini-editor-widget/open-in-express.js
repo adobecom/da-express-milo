@@ -137,7 +137,9 @@ export async function buildExpressUrl(model, prodBaseUrl = PROD_BASE_URL) {
 
   // Reproduce the card's text contrast: a dark background (or unknown) gets light text,
   // a light background gets dark text — matching the widget's light-mode/dark-mode CSS.
-  const isLight = model.mode === 'light';
+  // `backgroundMode` is the canonical field the content model always carries (init, useQuote,
+  // colour pick), unlike the old `mode`, which was only set on a colour-control pick.
+  const isLight = model.backgroundMode === 'light';
   const quoteColor = isLight ? '#131313' : '#FFFFFF';
   const authorColor = isLight ? '#505050' : '#E6E6E6';
 

@@ -249,8 +249,8 @@ describe('mini-editor open-in-express', () => {
   });
 
   describe('text colour by background mode', () => {
-    async function colorsFor(mode) {
-      const url = new URL(await buildExpressUrl(mode ? { ...MODEL, mode } : MODEL));
+    async function colorsFor(backgroundMode) {
+      const url = new URL(await buildExpressUrl(backgroundMode ? { ...MODEL, backgroundMode } : MODEL));
       const payload = decodeMiniEditor(url.searchParams.get('miniEditor'));
       return { quoteColor: payload.quoteColor, authorColor: payload.authorColor };
     }
