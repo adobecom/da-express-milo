@@ -148,16 +148,17 @@ async function buildSpecsCard(payload) {
   const table = createTag('div', { class: 'chtc-specs-table' });
   rowsData.forEach(([label, value]) => {
     const row = createTag('div', { class: 'chtc-specs-row' });
+    const copyText = copyLabel.replace('{label}', label);
     const copyBtn = createTag('button', {
       type: 'button',
       class: 'chtc-specs-copy',
-      'aria-label': copyLabel.replace('{label}', label),
+      'aria-label': copyText,
     });
     const copyIcon = createSpectrumIcon('copy');
     copyIcon.setAttribute('aria-hidden', 'true');
     copyBtn.append(wrapInTheme(copyIcon));
     copyBtn.addEventListener('click', () => copySpecsValue(value, label, strings));
-    createExpressTooltip({ targetEl: copyBtn, content: `Copy ${label}` }).catch(() => {});
+    createExpressTooltip({ targetEl: copyBtn, content: copyText }).catch(() => {});
 
     const valueGroup = createTag('span', { class: 'chtc-specs-value-group' });
     valueGroup.append(createTag('span', { class: 'chtc-specs-value' }, value), copyBtn);
@@ -192,12 +193,11 @@ function buildHowToCard(block, rows, payload) {
 
     const cells = Array.from(row.children);
     const h3 = createTag('h3');
-    h3.innerHTML = cells[0].textContent.trim();
+    h3.textContent = cells[0].textContent.trim();
     const text = createTag('div', { class: 'tip-text' });
     text.append(h3, cells[1]);
 
-    row.innerHTML = '';
-    row.append(text);
+    row.replaceChildren(text);
     tips.append(row);
 
     const number = createTag('div', {
@@ -210,7 +210,7 @@ function buildHowToCard(block, rows, payload) {
     number.setAttribute('data-tip-index', i + 1);
 
     number.addEventListener('click', (e) => {
-      if (payload.rotationInterval) payload.howToWindow.clearTimeout(payload.rotationInterval);
+      if (payload.rotationInterval) payload.howToWindow.clearInterval(payload.rotationInterval);
       const target = e.target.nodeName.toLowerCase() === 'span' ? e.target.parentElement : e.target;
       activate(block, target);
     });
@@ -256,16 +256,19 @@ export default async function decorate(block) {
   if (!contextRow) return;
 
   const colorDataRows = Array.from(contextRow.children);
-  if (colorDataRows.length < 4) return;
+  const hasIcon = !!colorDataRows[0]?.querySelector('img, svg');
+  const minRequiredRows = hasIcon ? 5 : 4;
+  if (colorDataRows.length < minRequiredRows) return;
 
-  const hasIcon = !!colorDataRows[0].querySelector('img, svg');
   let cursor = hasIcon ? 1 : 0;
 
   payload.heading = colorDataRows[cursor];
   cursor += 1;
   payload.colorName = colorDataRows[cursor].textContent.trim();
   cursor += 1;
-  [payload.primaryHex, payload.secondaryHex] = colorDataRows[cursor].textContent.split(',');
+  [payload.primaryHex, payload.secondaryHex] = colorDataRows[cursor].textContent
+    .split(',')
+    .map((hex) => hex.trim());
   cursor += 1;
   payload.colorGraphName = colorDataRows[cursor].textContent.trim();
   cursor += 1;

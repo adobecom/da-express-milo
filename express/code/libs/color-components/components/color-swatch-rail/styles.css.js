@@ -476,9 +476,9 @@ export const style = css`
     flex-direction: row;
     height: var(--bottom-info-horizontal-height, auto);
     padding: var(--bottom-info-horizontal-padding, 0 var(--spacing-100));
-    gap: var(--bottom-info-horizontal-gap, 8px);
+    gap: var(--bottom-info-horizontal-gap, 0);
     border-radius: var(--bottom-info-horizontal-radius, 0);
-    box-sizing: border-box;
+    box-sizing: var(--bottom-info-horizontal-box-sizing, content-box);
   }
 
   .swatch-rail[data-orientation="horizontal"] .hex-code {

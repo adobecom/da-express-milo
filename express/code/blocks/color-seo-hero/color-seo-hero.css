@@ -177,6 +177,7 @@
   --bottom-info-horizontal-padding: 0;
   --bottom-info-horizontal-gap: 0 7px;
   --bottom-info-horizontal-radius: 9px;
+  --bottom-info-horizontal-box-sizing: border-box;
 
   display: block;
   height: 100%;
@@ -216,7 +217,9 @@
   --swatch-column-last-radius: 0 var(--spacing-300) var(--spacing-300) 0;
   --bottom-info-horizontal-height: var(--spacing-500);
   --bottom-info-horizontal-padding: 0 var(--spacing-100) 0 var(--spacing-80);
+  --bottom-info-horizontal-gap: 8px;
   --bottom-info-horizontal-radius: 9px;
+  --bottom-info-horizontal-box-sizing: border-box;
 
   --swatch-column-horizontal-padding: var(--spacing-80) var(--spacing-75) var(--spacing-75) var(--spacing-200);
   --swatch-column-horizontal-radius: 0;

@@ -1,11 +1,9 @@
 import { getLibs } from '../../scripts/utils.js';
 import buildCarousel from '../../scripts/widgets/carousel.js';
+import getData from '../../scripts/utils/browse-api-controller.js';
+import { titleCase } from '../../scripts/utils/string.js';
 
 const HEX_PATTERN = /^#[0-9a-f]{6}$/i;
-
-function getText(cell) {
-  return cell?.textContent.trim() || '';
-}
 
 function watchForOverflow(row, onOverflow) {
   const observer = new ResizeObserver(() => {
@@ -26,23 +24,22 @@ export default async function decorate(block) {
   ({ createTag, getConfig } = await import(`${getLibs()}/utils/utils.js`));
   ({ replaceKey } = await import(`${getLibs()}/features/placeholders.js`));
 
-  const rows = [...block.querySelectorAll(':scope > div')];
-  if (!rows.length) return;
-
-  const [headingRow, ...colorRows] = rows;
+  const [headingRow] = [...block.querySelectorAll(':scope > div')];
   const heading = headingRow?.querySelector('h1, h2, h3, h4, h5, h6');
+  if (!heading) return;
 
-  const colors = colorRows.map((row) => {
-    const cells = [...row.querySelectorAll(':scope > div')];
-    const nameLink = cells[0]?.querySelector('a');
-    return {
-      name: getText(nameLink || cells[0]),
-      hex: getText(cells[1]),
-      href: nameLink?.getAttribute('href') || '',
-    };
-  }).filter((color) => color.name && HEX_PATTERN.test(color.hex));
+  const pills = await getData();
+  if (!pills?.length) return;
 
-  if (!heading || !colors.length) return;
+  const { prefix } = getConfig().locale;
+
+  const colors = pills.map(({ canonicalName, metadata: { link, hexCode } = {} }) => {
+    if (!canonicalName || !link || !hexCode) return null;
+    const href = link.startsWith('/') ? `${prefix}${link}` : link;
+    return { name: titleCase(canonicalName), hex: hexCode, href };
+  }).filter((color) => color && HEX_PATTERN.test(color.hex));
+
+  if (!colors.length) return;
 
   const headingText = heading.textContent.trim();
 

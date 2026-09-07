@@ -917,7 +917,7 @@ export function createToolbar(options) {
         await handleSave(
           getPaletteWithName(),
           type,
-          ccLibBtn,
+          ccLibBtn || actions,
           ctx.libraries,
           ctx.provider,
           libCtxCache,

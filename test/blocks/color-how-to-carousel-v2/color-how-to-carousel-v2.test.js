@@ -63,7 +63,7 @@ describe('Color How To Carousel v2', () => {
     const cta = block.querySelector('.chtc-how-to-card a.chtc-cta');
     expect(cta).to.exist;
     expect(cta.classList.contains('button')).to.be.true;
-    expect(cta.getAttribute('href')).to.equal('https://adobesparkpost.app.link/c4bWARQhWAb');
+    expect(cta.getAttribute('href')).to.equal('https://example.com/create-now');
   });
 
   it('computes RGB/CMYK/HSL specs from the authored primary hex', async () => {
@@ -105,7 +105,7 @@ describe('Color How To Carousel v2', () => {
     expect(block.querySelectorAll('.tip-number')).to.have.lengthOf(5);
     const cta = block.querySelector('.chtc-how-to-card a.chtc-cta');
     expect(cta).to.exist;
-    expect(cta.getAttribute('href')).to.equal('https://adobesparkpost.app.link/c4bWARQhWAb');
+    expect(cta.getAttribute('href')).to.equal('https://example.com/create-now');
     expect(block.querySelector('.chtc-specs-row .chtc-specs-value').textContent.trim())
       .to.equal('#1FA774');
   });
