@@ -45,6 +45,8 @@ import { getMetadata } from '../../utils.js';
  *   headerEl.append(editor.decorations);
  */
 
+import { loadButton, loadCoreDeps } from '../../color-shared/spectrum/load-spectrum.js';
+
 let createTag;
 let getIconElementDeprecated;
 let uidCounter = 0;
@@ -621,8 +623,26 @@ function buildFontControl(root, fontOptions, onSelect, panelMode, onTabOutOfOpti
     roving.focusFirst();
   });
 
+  // Swaps in a new option list post-mount (see buildWidget's
+  // upgradeFontOptions) — used once when the live Adobe Fonts kit resolves
+  // after the card has already rendered with the bundled fallback options.
+  // Rebuilds the option buttons only; the roving-tabindex/drag-to-scroll
+  // wiring on `panel` itself stays put since both query the DOM live and
+  // don't hold onto the old buttons — re-wiring them here would double up
+  // their event listeners. selectFont's own roving?.syncTabindexes() call
+  // fixes up tabindexes for the freshly-built buttons.
+  function replaceOptions(newOptions) {
+    panel.replaceChildren();
+    sheetGrid.replaceChildren();
+    newOptions.forEach((opt, index) => {
+      panel.append(buildFontButton(opt, index, onPick));
+      sheetGrid.append(buildFontButton(opt, index, onPick));
+    });
+    selectFont(newOptions[0]);
+  }
+
   return {
-    control, panel, sheetGrid, selectFont,
+    control, panel, sheetGrid, selectFont, replaceOptions,
   };
 }
 
@@ -866,65 +886,72 @@ const TOP_ACTION_DEFS = {
  * mini-editor:use-quote, which exists only to decouple separate blocks.
  * `topActions` is `[{ type: 'edit'|'share'|'download', onClick }, ...]` —
  * only the types actually supplied are rendered, in the given order.
- * Icon elements must be Spectrum custom elements already registered by the
- * time this runs — see the icons-workflow.js dynamic import in
- * createMiniEditorWidget, which awaits before calling buildWidget.
+ *
+ * Every action's icon, tooltip, and (for the share action) the whole
+ * share-menu-widget are only ever seen on hover/focus/click of this corner
+ * bar — never part of the card's own first paint — so this returns the
+ * (empty) bar synchronously and populates it in the background via `ready`,
+ * instead of making the whole widget's construction wait on the icon/
+ * tooltip/share-menu bundles. Returns `{ bar, ready }`.
  */
-async function buildMiniEditorActions(topActions = []) {
+function buildMiniEditorActions(topActions = []) {
   const bar = createTag('div', { class: 'me-actions' });
   const menuApis = [];
   const tooltips = [];
   const supportedActions = topActions.filter(({ type }) => TOP_ACTION_DEFS[type]);
   const baseTabIndex = 5;
-  // Same S2 sp-tooltip component (with its caret) already used for action
-  // buttons on the Colour experience, per Figma node 1099-5050's feedback
-  // that these tooltips should come from that shared component. Guarded
-  // (see registry.js) because this loader's own icons-workflow.js import
-  // above and the tooltip's overlay/icon bundle both register overlapping
-  // custom elements — without the guard, whichever finishes second throws
-  // "already been used with this registry" and mini-editor.js's catch
-  // removes the whole block.
-  const [{ createExpressTooltip }, { installRegistryGuard }] = await Promise.all([
-    import('../../color-shared/spectrum/components/express-tooltip.js'),
-    import('../../color-shared/spectrum/registry.js'),
-  ]);
-  const tooltipGuard = installRegistryGuard();
-  try {
-    for (const [index, { type, onClick, shareMenu }] of supportedActions.entries()) {
-      const def = TOP_ACTION_DEFS[type];
-      const icon = createTag(def.icon, { class: 'me-action-icon', 'aria-hidden': 'true' });
-      const btn = createTag('button', {
-        tabIndex: baseTabIndex + index,
-        type: 'button',
-        class: `me-action me-action--${type}`,
-        'aria-label': def.label,
-      }, [icon]);
-      tooltips.push(await createExpressTooltip({
-        targetEl: btn,
-        content: def.label,
-        placement: 'top',
-        dismissOnActivate: true,
-      }));
-      if (shareMenu) {
-        const { default: createShareMenuWidget } = await import(
-          '../share-menu-widget/share-menu-widget.js'
-        );
-        const menuApi = await createShareMenuWidget({ trigger: btn, ...shareMenu });
-        menuApis.push(menuApi);
-        bar.append(menuApi.element);
-      } else {
-        btn.addEventListener('click', () => onClick?.());
-        bar.append(btn);
+
+  const ready = (async () => {
+    // Same S2 sp-tooltip component (with its caret) already used for action
+    // buttons on the Colour experience, per Figma node 1099-5050's feedback
+    // that these tooltips should come from that shared component. Guarded
+    // (see registry.js) because this loader's own icons-workflow.js import
+    // and the tooltip's overlay/icon bundle both register overlapping
+    // custom elements — without the guard, whichever finishes second throws
+    // "already been used with this registry".
+    const [{ createExpressTooltip }, { installRegistryGuard }] = await Promise.all([
+      import('../../color-shared/spectrum/components/express-tooltip.js'),
+      import('../../color-shared/spectrum/registry.js'),
+    ]);
+    const tooltipGuard = installRegistryGuard();
+    try {
+      for (const [index, { type, onClick, shareMenu }] of supportedActions.entries()) {
+        const def = TOP_ACTION_DEFS[type];
+        const icon = createTag(def.icon, { class: 'me-action-icon', 'aria-hidden': 'true' });
+        const btn = createTag('button', {
+          tabIndex: baseTabIndex + index,
+          type: 'button',
+          class: `me-action me-action--${type}`,
+          'aria-label': def.label,
+        }, [icon]);
+        tooltips.push(await createExpressTooltip({
+          targetEl: btn,
+          content: def.label,
+          placement: 'top',
+          dismissOnActivate: true,
+        }));
+        if (shareMenu) {
+          const { default: createShareMenuWidget } = await import(
+            '../share-menu-widget/share-menu-widget.js'
+          );
+          const menuApi = await createShareMenuWidget({ trigger: btn, ...shareMenu });
+          menuApis.push(menuApi);
+          bar.append(menuApi.element);
+        } else {
+          btn.addEventListener('click', () => onClick?.());
+          bar.append(btn);
+        }
       }
+    } finally {
+      tooltipGuard.restore();
     }
-  } finally {
-    tooltipGuard.restore();
-  }
+  })();
+
   bar.destroy = () => {
     menuApis.forEach((api) => api.destroy());
     tooltips.forEach((tip) => tip.destroy());
   };
-  return bar;
+  return { bar, ready };
 }
 
 async function buildWidget(
@@ -998,20 +1025,25 @@ async function buildWidget(
 
   // Same S2 sp-tooltip as the top-right action bar (see
   // buildMiniEditorActions), replacing the old hand-rolled .me-tip/.me-tip-box.
-  const [{ createExpressTooltip }, { installRegistryGuard }] = await Promise.all([
-    import('../../color-shared/spectrum/components/express-tooltip.js'),
-    import('../../color-shared/spectrum/registry.js'),
-  ]);
-  const quoteTooltipGuard = installRegistryGuard();
-  try {
-    await createExpressTooltip({
-      targetEl: quoteWrap,
-      content: `Click to copy ${getMiniEditorMessageType()}`,
-      placement: 'top',
-    });
-  } finally {
-    quoteTooltipGuard.restore();
-  }
+  // Only ever shown on hover/focus, so built in the background instead of
+  // blocking this (LCP-critical) card's own construction/DOM append on it —
+  // nothing below reads its return value.
+  (async () => {
+    const [{ createExpressTooltip }, { installRegistryGuard }] = await Promise.all([
+      import('../../color-shared/spectrum/components/express-tooltip.js'),
+      import('../../color-shared/spectrum/registry.js'),
+    ]);
+    const quoteTooltipGuard = installRegistryGuard();
+    try {
+      await createExpressTooltip({
+        targetEl: quoteWrap,
+        content: `Click to copy ${getMiniEditorMessageType()}`,
+        placement: 'top',
+      });
+    } finally {
+      quoteTooltipGuard.restore();
+    }
+  })().catch(() => {});
 
   // Mirrors the light-mode/dark-mode class the deco/arc cards apply per their
   // own card.mode (see buildDecoCards/buildArcCard's render) so the desktop
@@ -1038,8 +1070,14 @@ async function buildWidget(
   // element and top-right CSS anchor (against .mini-editor-widget) work
   // unchanged whether the desktop card or the tablet/mobile arc carousel is
   // the one currently visible.
-  const actions = await buildMiniEditorActions(topActions);
+  const { bar: actions, ready: actionsReady } = buildMiniEditorActions(topActions);
   widget.append(actions);
+  actionsReady.catch((error) => {
+    window.lana?.log(`Mini-editor actions bar init error: ${error?.message || error}`, {
+      tags: 'mini-editor,actions',
+      severity: 'error',
+    });
+  });
 
   const doCopy = async () => {
     // currentQuote (not quoteEl.textContent) — the full quote, even when
@@ -1105,15 +1143,20 @@ async function buildWidget(
 
   const controls = createTag('div', { class: 'me-controls' });
   let focusColourControl = () => {};
+  // Blocks upgradeFontOptions (below) from clobbering a font the user has
+  // already deliberately chosen, once the live Adobe Fonts kit resolves.
+  let userPickedFont = false;
   const {
     control: fontControl,
     panel: fontPanel,
     sheetGrid: fontSheetGrid,
     selectFont,
+    replaceOptions: replaceFontOptions,
   } = buildFontControl(
     root,
     fontOptions,
     (font) => {
+      userPickedFont = true;
       applyFontToModel(font);
       onFontOrColourPick({ font });
     },
@@ -1255,6 +1298,18 @@ async function buildWidget(
     // itself has no knowledge of them — see buildSkipQuoteSuggestionsCta).
     // A no-op when skipCta wasn't built at all (small viewport).
     setDecoChainTarget: (fn) => skipCta?.setTabOutTarget(fn),
+    // Swaps the bundled fallback fonts (see mini-editor-fonts-loader.js) for
+    // the live Adobe Fonts kit list once it loads, post-mount — but only if
+    // the user hasn't already picked a font themselves, so a late-arriving
+    // kit never overrides a deliberate choice. Routes through
+    // onFontOrColourPick (rather than applyFontToModel directly) so the arc
+    // carousel picks up the same change via its existing onFontOrColourChange
+    // wiring — see createMiniEditorWidget.
+    upgradeFontOptions: (newOptions) => {
+      if (userPickedFont || !newOptions?.length) return;
+      replaceFontOptions(newOptions);
+      onFontOrColourPick({ font: newOptions[0] });
+    },
     destroy: () => {
       actions.destroy();
       panelObserver.disconnect();
@@ -1470,7 +1525,7 @@ function wireDecoTabChain(decorations, root) {
  */
 const ROLE_CLASSES = ['me-arc-card--prev', 'me-arc-card--center', 'me-arc-card--next', 'me-arc-card--off'];
 
-async function buildArcCard(onActivate, a11y, tabIndex) {
+function buildArcCard(onActivate, a11y, tabIndex) {
   const hintId = createSecureUid('me-arc-card-hint');
   const el = createTag('div', {
     class: 'me-arc-card',
@@ -1503,25 +1558,34 @@ async function buildArcCard(onActivate, a11y, tabIndex) {
   // listener intercepts pointerenter/focusin here and stops them before its
   // own bubble-phase listeners (see express-tooltip.js) ever run, whenever
   // this card isn't currently centre.
-  const [{ createExpressTooltip }, { installRegistryGuard }] = await Promise.all([
-    import('../../color-shared/spectrum/components/express-tooltip.js'),
-    import('../../color-shared/spectrum/registry.js'),
-  ]);
-  const tooltipGuard = installRegistryGuard();
-  try {
-    await createExpressTooltip({
-      targetEl: quoteWrap,
-      content: `Click to copy ${getMiniEditorMessageType()}`,
-      placement: 'top',
-    });
-  } finally {
-    tooltipGuard.restore();
-  }
-  const suppressTipWhenNotCentre = (e) => {
-    if (!el.classList.contains('me-arc-card--center')) e.stopImmediatePropagation();
-  };
-  quoteWrap.addEventListener('pointerenter', suppressTipWhenNotCentre, { capture: true });
-  quoteWrap.addEventListener('focusin', suppressTipWhenNotCentre, { capture: true });
+  //
+  // Only ever shown on hover/focus, so this whole block (including the
+  // suppressor listeners, which must attach in this same order — after the
+  // tooltip's own — to intercept its show) runs in the background instead of
+  // blocking this card's own construction on it. This card may well be the
+  // centre/LCP role, and this function's own result (el/render/setRole) is
+  // synchronous and doesn't depend on any of this.
+  (async () => {
+    const [{ createExpressTooltip }, { installRegistryGuard }] = await Promise.all([
+      import('../../color-shared/spectrum/components/express-tooltip.js'),
+      import('../../color-shared/spectrum/registry.js'),
+    ]);
+    const tooltipGuard = installRegistryGuard();
+    try {
+      await createExpressTooltip({
+        targetEl: quoteWrap,
+        content: `Click to copy ${getMiniEditorMessageType()}`,
+        placement: 'top',
+      });
+    } finally {
+      tooltipGuard.restore();
+    }
+    const suppressTipWhenNotCentre = (e) => {
+      if (!el.classList.contains('me-arc-card--center')) e.stopImmediatePropagation();
+    };
+    quoteWrap.addEventListener('pointerenter', suppressTipWhenNotCentre, { capture: true });
+    quoteWrap.addEventListener('focusin', suppressTipWhenNotCentre, { capture: true });
+  })().catch(() => {});
 
   // currentQuote/currentAuthor (not quoteP.textContent) — the full quote,
   // even when the visible text is truncated (see render below), same
@@ -1953,7 +2017,7 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
     }
   };
 
-  cards = await Promise.all(cardSet.map(() => buildArcCard(onActivate, a11y, -1)));
+  cards = cardSet.map(() => buildArcCard(onActivate, a11y, -1));
 
   function onPointerDown(e) {
     if (e.button !== 0) return;
@@ -2174,7 +2238,7 @@ async function buildArcCarousel(cardSet, useQuote, defaultFont, a11y, widget) {
  *   the "Create a design" modal, where the empty space below the card
  *   exists only to host this panel.
  * @returns {Promise<{ stage, decorations, useQuote, updateCentre, getContentModel,
- *   syncViewportMode, destroy }>}
+ *   syncViewportMode, upgradeFontOptions, destroy }>}
  */
 export default async function createMiniEditorWidget(config = {}) {
   const {
@@ -2191,16 +2255,18 @@ export default async function createMiniEditorWidget(config = {}) {
   ({ createTag, getIconElementDeprecated } = deps);
 
   // topActions' icons and the decorative cards' "Copy quote" icon
-  // (sp-icon-copy, see buildDecoCard) are real Spectrum Web Components
-  // custom elements — only loaded when actually used, so a caller with no
-  // topActions and decorations: false doesn't pay for the Spectrum bundle.
+  // (sp-icon-copy, see buildDecoCard), plus the deco cards' own sp-button,
+  // are real Spectrum Web Components custom elements — routed through the
+  // shared, memoized loaders (load-spectrum.js) instead of raw dist imports
+  // so this collapses into the same in-flight request as mini-editor.js's
+  // own early prefetch (see its init()) rather than issuing a second one.
+  // Not awaited: none of this widget's own construction or DOM insertion
+  // needs these already registered — an element created before its
+  // custom-element definition registers just self-upgrades once it does —
+  // so there's no reason to block on it. A caller with no topActions and
+  // decorations: false skips the load entirely.
   if (topActions.length || decorationsEnabled) {
-    await import('../spectrum/dist/icons-workflow.js');
-  }
-  // "Use this quote"/"Copy" (see buildDecoCard) are sp-button, per the same
-  // reasoning — only loaded when the deco cards that use them exist at all.
-  if (decorationsEnabled) {
-    await import('../spectrum/dist/button.js');
+    (decorationsEnabled ? loadButton() : loadCoreDeps()).catch(() => {});
   }
 
   const { cardSet } = backgrounds;
@@ -2217,6 +2283,7 @@ export default async function createMiniEditorWidget(config = {}) {
   const stage = createTag('div', { class: 'mini-editor-stage' });
   const {
     widget, useQuote, getContentModel, onFontOrColourChange, setDecoChainTarget,
+    upgradeFontOptions,
     destroy: destroyWidget,
   } = await buildWidget(
     root,
@@ -2325,6 +2392,7 @@ export default async function createMiniEditorWidget(config = {}) {
     updateCentre,
     getContentModel,
     syncViewportMode,
+    upgradeFontOptions,
     destroy: () => {
       destroyWidget();
       destroyArcCarousel();

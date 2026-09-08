@@ -112,7 +112,14 @@ function installErrorSuppression() {
 }
 
 // ── core dependencies (loaded once) ─────────────────────────────────
-function loadCoreDeps() {
+// Exported (not just used internally by the loaders below) so a caller that
+// only needs the shared theme/icon core — no specific component — can kick
+// it off directly, e.g. to prefetch it in parallel with an unrelated slow
+// request instead of waiting to request it until a specific component loader
+// runs. Every component loader below still calls this itself; the shared
+// coreLoadedPromise memoization means an explicit early call and a later
+// loadButton()/loadTooltip() call collapse into the same in-flight request.
+export function loadCoreDeps() {
   if (!coreLoadedPromise) {
     coreLoadedPromise = (async () => {
       installErrorSuppression();

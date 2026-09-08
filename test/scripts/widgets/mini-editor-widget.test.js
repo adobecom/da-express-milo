@@ -2,6 +2,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { createTag, getIconElementDeprecated } from '../../../express/code/scripts/utils.js';
 import createMiniEditorWidget from '../../../express/code/scripts/widgets/mini-editor-widget/mini-editor-widget.js';
+import { waitFor } from '../../helpers/waitfor.js';
 
 const noop = () => {};
 const a11y = {
@@ -331,6 +332,9 @@ describe('mini-editor-widget', () => {
       });
       const bar = root.querySelector('.mini-editor-widget > .me-actions');
       expect(bar).to.exist;
+      // The action bar's icons/tooltips are populated in the background
+      // (not part of the card's own first paint) — see buildMiniEditorActions.
+      await waitFor(() => bar.querySelectorAll('.me-action').length === 3);
       const buttons = bar.querySelectorAll('.me-action');
       expect(buttons.length).to.equal(3);
       expect([...buttons].map((b) => b.className)).to.deep.equal([
@@ -343,6 +347,7 @@ describe('mini-editor-widget', () => {
     it('renders only the types supplied', async () => {
       const { root } = await mount({ topActions: [{ type: 'share', onClick: () => {} }] });
       const bar = root.querySelector('.me-actions');
+      await waitFor(() => bar.querySelectorAll('.me-action').length === 1);
       expect(bar.querySelectorAll('.me-action').length).to.equal(1);
       expect(bar.querySelector('.me-action--share')).to.exist;
       expect(bar.querySelector('.me-action--edit')).to.not.exist;
@@ -360,6 +365,7 @@ describe('mini-editor-widget', () => {
         ],
       });
 
+      await waitFor(() => root.querySelectorAll('.me-action').length === 3);
       root.querySelector('.me-action--edit').click();
       root.querySelector('.me-action--share').click();
       root.querySelector('.me-action--download').click();
