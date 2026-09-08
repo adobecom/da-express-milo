@@ -133,7 +133,7 @@
         const protocol = 'https://';
 
         const { hostname, href, pathname, port, search } = win.location;
-        if (hostname === 'localhost')  return;
+        // if (hostname === 'localhost')  return;
 
         let userLocale, redirectURL, redirectMapping, valueInMap;
         const noop = ()=>{};
@@ -160,13 +160,13 @@
           win.location.replace(redirectURL);
         }
         else {
-          [_, userLocale] = pathname.split('/');
-          valueInMap = redirectMap.get(userLocale);
-          if (isColor) {
-            valueInMap ? win.location.replace( href.replace(`/${userLocale}`, valueInMap)) : noop;
-          } else {
-            valueInMap ? win.location.replace( href.replace(`/${userLocale}/`, valueInMap)) : noop;
-          }
+          // [_, userLocale] = pathname.split('/');
+          // valueInMap = redirectMap.get(userLocale);
+          // if (isColor) {
+          //   valueInMap ? win.location.replace( href.replace(`/${userLocale}`, valueInMap)) : noop;
+          // } else {
+          //   valueInMap ? win.location.replace( href.replace(`/${userLocale}/`, valueInMap)) : noop;
+          // }
         }
       }(window));
 
