@@ -1,4 +1,4 @@
-import { getLibs, toClassName, getIconElementDeprecated, decorateButtonsDeprecated } from '../../scripts/utils.js';
+import { getLibs, toClassName, getIconElementDeprecated } from '../../scripts/utils.js';
 
 import {
   addAnimationToggle,
@@ -21,7 +21,7 @@ import {
 } from '../../scripts/instrument.js';
 
 let createTag; let getMetadata;
-let getConfig;
+let getConfig; let decorateButtons;
 
 function replaceHyphensInText(area) {
   [...area.querySelectorAll('h1, h2, h3, h4, h5, h6')]
@@ -36,7 +36,7 @@ function transformToVideoColumn(cell, aTag, block) {
   const title = aTag.textContent.trim();
   // gather video urls from all links in cell
   const vidUrls = [];
-  cell.querySelectorAll(':scope a.button, :scope a.con-button').forEach((button) => {
+  cell.querySelectorAll(':scope a.con-button').forEach((button) => {
     vidUrls.push(button.href);
     if (button !== aTag) {
       const buttonContainer = button.closest('.button-container');
@@ -230,11 +230,9 @@ const decoratePrimaryCTARow = (rowNum, cellNum, cell) => {
   // already unwrapped the <em>/<strong> and moved each anchor into its <p>.
   const primaryAnchor = cell.querySelector('a.con-button.blue');
   const secondaryAnchor = cell.querySelector('a.con-button.outline');
-  // Legacy fallback: plain anchors that milo didn't decorate still land as `.button`.
-  const italicAnchor = secondaryAnchor || cell.querySelector('p > em > a');
-  if (!italicAnchor && !primaryAnchor) return;
+  if (!secondaryAnchor && !primaryAnchor) return;
 
-  if (block?.className.includes('fullsize') && primaryAnchor) {
+  if (block?.classList.contains('fullsize') && primaryAnchor) {
     primaryAnchor.classList.add('xlarge', 'primaryCTA');
     BlockMediator.set('primaryCtaUrl', primaryAnchor.href);
     secondaryAnchor?.classList.add('reverse', 'xlarge');
@@ -242,12 +240,12 @@ const decoratePrimaryCTARow = (rowNum, cellNum, cell) => {
     return;
   }
 
-  const links = italicAnchor?.closest('p')?.querySelectorAll('a');
+  const links = secondaryAnchor?.closest('p')?.querySelectorAll('a');
   if (!links || links.length < 2) return;
-  italicAnchor.closest('p')?.classList.add('phone-number-cta-row');
+  secondaryAnchor.closest('p')?.classList.add('phone-number-cta-row');
   links[0].classList.add('con-button', 'xlarge', 'trial-cta');
   links[1].classList.add('phone');
-  italicAnchor.closest('p')?.prepend(links[0]);
+  secondaryAnchor.closest('p')?.prepend(links[0]);
 };
 
 function addHeaderClass(block, size) {
@@ -353,8 +351,12 @@ function markVideoToGifImagesDecorative(scope) {
 }
 
 export default async function decorate(block) {
-  await Promise.all([import(`${getLibs()}/utils/utils.js`)]).then(([utils]) => {
+  await Promise.all([
+    import(`${getLibs()}/utils/utils.js`),
+    import(`${getLibs()}/utils/decorate.js`),
+  ]).then(([utils, decorateUtils]) => {
     ({ createTag, getMetadata, getConfig } = utils);
+    ({ decorateButtons } = decorateUtils);
   });
 
   if (document.body.dataset.device === 'mobile') replaceHyphensInText(block);
@@ -366,18 +368,25 @@ export default async function decorate(block) {
   // numbered-list total-count parsing below relies on (block.classList[3]).
   block.classList.add('s2');
   decorateSocialIcons(block);
-  await decorateButtonsDeprecated(block, 'button-xxl');
+  await decorateButtons(block, 'button-xxl');
 
-  // ax-columns is no longer in decorateButtonsDeprecated's exclusion list, so
-  // its CTAs are now decorated by milo's decorateButtons: strong->`.con-button.blue`,
-  // em->`.con-button.outline`, size `button-xxl`, and the parent <p>/<div> gets
-  // `.action-area`. This block's CSS is written against `.button-container` (39
-  // rules) and its JS/CSS expect `.xlarge`, so bridge milo's output back onto the
-  // existing contract instead of rewriting every rule. Idempotent and scoped to
-  // this block's already-decorated con-buttons.
+  // This block's CSS/JS is written against `.button-container` and `.xlarge`;
+  // bridge milo's output (`.con-button`, `.action-area`) back onto that
+  // existing contract instead of rewriting every rule. Idempotent and scoped
+  // to this block's already-decorated con-buttons.
   block.querySelectorAll('a.con-button').forEach((btn) => {
     btn.classList.add('xlarge');
     btn.closest('p, div')?.classList.add('button-container');
+  });
+
+  // Restores video-modal state on browser back/forward. Registered once per
+  // block instance (not per cell/row — the handler doesn't depend on either).
+  window.addEventListener('popstate', ({ state }) => {
+    hideVideoModal();
+    const { url, title } = state || {};
+    if (url) {
+      displayVideoModal(url, title);
+    }
   });
 
   const rows = Array.from(block.children);
@@ -478,7 +487,11 @@ export default async function decorate(block) {
           // regular ordered list style for 1 to 9 items
           num = `${num}.`;
         }
-        cell.innerHTML = `<span class="num">${num}</span>${cell.innerHTML}`;
+        // Was `cell.innerHTML = ...`, which silently detached the aTag/pics
+        // references already captured above for any numbered-list first cell
+        // containing a link.
+        const numSpan = createTag('span', { class: 'num' }, num);
+        cell.prepend(numSpan);
       }
 
       if (pics.length === 1 && pics[0].parentElement.tagName === 'P') {
@@ -503,8 +516,8 @@ export default async function decorate(block) {
         }
       }
 
-      if (aTag && (aTag.classList.contains('button') || aTag.classList.contains('con-button'))) {
-        if (block.className.includes('fullsize')) {
+      if (aTag?.classList.contains('con-button')) {
+        if (block.classList.contains('fullsize')) {
           aTag.classList.add('xlarge');
           BlockMediator.set('primaryCtaUrl', aTag.href);
           aTag.classList.add('primaryCTA');
@@ -518,15 +531,6 @@ export default async function decorate(block) {
           }
         }
       }
-
-      // handle history events
-      window.addEventListener('popstate', ({ state }) => {
-        hideVideoModal();
-        const { url, title } = state || {};
-        if (url) {
-          displayVideoModal(url, title);
-        }
-      });
 
       cell.querySelectorAll(':scope p:empty').forEach(($p) => {
         if ($p.innerHTML.trim() === '') {
@@ -637,7 +641,7 @@ export default async function decorate(block) {
   // decorate offer
   if (block.classList.contains('offer')) {
     block
-      .querySelectorAll('a.button, a.con-button')
+      .querySelectorAll('a.con-button')
       .forEach((aTag) => aTag.classList.add('large', 'wide'));
     if (rows.length > 1) {
       // move all content into first row
@@ -690,7 +694,7 @@ export default async function decorate(block) {
 
   // invert buttons in regular columns inside columns-highlight-container
   if (sectionContainer && !block.classList.contains('highlight')) {
-    block.querySelectorAll('a.button, a.con-button').forEach((button) => {
+    block.querySelectorAll('a.con-button').forEach((button) => {
       button.classList.add('dark');
     });
   }
@@ -748,69 +752,5 @@ export default async function decorate(block) {
         sendEventToAnalytics(adobeEventName);
       });
     });
-  }
-
-  // Audited fullsize+top usage across every page referencing ax-columns: no page
-  // currently authors both classes together, and adding `.s2` above unconditionally
-  // (see the block.classList.add('s2') call near the top of this function) means
-  // block.className can never equal this literal string again regardless. Appears
-  // dead on both counts. Flagging for deletion rather than removing outright pending
-  // team confirmation that nothing off-content relies on it.
-  if (block.className === 'columns fullsize top block width-3-columns') {
-    const setElementsHeight = (columns) => {
-      const elementsMinHeight = {
-        PICTURE: 0,
-        H3: 0,
-        'columns-iconlist': 0,
-      };
-
-      const onIntersect = (entries, observer) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting && columns.length) {
-            columns.forEach((col) => {
-              const childDivs = col.querySelectorAll(':scope > *');
-              if (!childDivs.length) return;
-
-              childDivs.forEach((div) => {
-                const referrer = div.className || div.tagName;
-                const targetEl = referrer === 'PICTURE' ? div.querySelector('img') : div;
-                elementsMinHeight[referrer] = Math.max(
-                  elementsMinHeight[referrer],
-                  targetEl.offsetHeight,
-                );
-              });
-            });
-
-            columns.forEach((col) => {
-              const childDivs = col.querySelectorAll(':scope > *');
-              if (!childDivs.length) return;
-
-              childDivs.forEach((div) => {
-                const referrer = div.className || div.tagName;
-                if (!elementsMinHeight[referrer]) return;
-
-                if (div.offsetHeight < elementsMinHeight[referrer]) {
-                  if (referrer === 'PICTURE') {
-                    const img = div.querySelector('img');
-                    if (!img) return;
-                    img.style.objectFit = 'contain';
-                    img.style.minHeight = `${elementsMinHeight[referrer]}px`;
-                  } else {
-                    div.style.minHeight = `${elementsMinHeight[referrer]}px`;
-                  }
-                }
-              });
-            });
-
-            observer.unobserve(block);
-          }
-        });
-      };
-
-      const observer = new IntersectionObserver(onIntersect, { threshold: 0 });
-      observer.observe(block);
-    };
-
-    setElementsHeight(block.querySelectorAll('.column'));
   }
 }
