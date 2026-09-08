@@ -70,7 +70,7 @@ function addImagePreconnects(imageUrl) {
       });
     }
   } catch (e) {
-    window?.lana?.log('Error adding image preconnect:', e);
+    window?.lana?.log(`Error adding image preconnect: ${e?.message || e}`, { tags: 'blog-columns', severity: 'error' });
   }
 }
 
@@ -89,7 +89,7 @@ function buildOptimizedImageUrl(src, width) {
     const roundedWidth = Math.max(1, Math.round(width));
     return `${url.pathname}?width=${roundedWidth}&format=webp&optimize=medium`;
   } catch (e) {
-    window?.lana?.log('Error building optimized image URL:', e);
+    window?.lana?.log(`Error building optimized image URL: ${e?.message || e}`, { tags: 'blog-columns', severity: 'error' });
     return null;
   }
 }

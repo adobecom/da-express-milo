@@ -1,0 +1,73 @@
+import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+
+const STYLESHEET_HREF = '/express/code/blocks/font-generator/expressAppModal.css';
+
+let stylesInjected = false;
+function injectStyles() {
+  if (stylesInjected || document.querySelector(`link[href="${STYLESHEET_HREF}"]`)) return;
+  stylesInjected = true;
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = STYLESHEET_HREF;
+  document.head.appendChild(link);
+}
+
+/**
+ * Opens the "continue in the app" modal (Milo modal block) with code-built, placeholder-driven
+ * content. The CTA is a Branch link that opens the Express app if installed, else the App Store.
+ *
+ * @param {{ title: string, body: string, ctaLabel: string, appUrl: string }} opts
+ * @returns {Promise<HTMLElement | undefined>}
+ */
+export default async function showAppModal({ title, body, ctaLabel, appUrl }) {
+  injectStyles();
+
+  const [{ getModal }, { createTag }] = await Promise.all([
+    import(`${getLibs()}/blocks/modal/modal.js`),
+    import(`${getLibs()}/utils/utils.js`),
+  ]);
+
+  const wrapper = createTag('div', { class: 'fg-app-modal' });
+
+  const header = createTag('div', { class: 'fg-app-modal-header' });
+  // Decorative next to the title text, so it's hidden from the accessibility tree.
+  header.append(getIconElementDeprecated('adobe-express-icon-stroke', 22, ''));
+
+  const titleEl = createTag('h2', { class: 'fg-app-modal-title' });
+  titleEl.textContent = title;
+  header.append(titleEl);
+
+  const bodyEl = createTag('p', { class: 'fg-app-modal-body' });
+  bodyEl.textContent = body;
+
+  // A real anchor so tapping is a top-level navigation to the Branch link — the reliable way for
+  // Branch to hand off to the app / App Store on iOS. No 'button' class — the dark pill treatment
+  // is fully custom, styled below rather than layered on Milo's default button look.
+  const cta = createTag('a', {
+    class: 'fg-app-modal-cta',
+    href: appUrl,
+    target: '_blank',
+    rel: 'noopener',
+  });
+  cta.textContent = ctaLabel;
+
+  wrapper.append(header, bodyEl, cta);
+
+  // 'curtain-off' is Milo modal.js's built-in switch: it skips the dark page curtain *and*
+  // the body scroll-lock it would otherwise add. The Figma spec shows this as a non-blocking
+  // bottom toast (no dimmed backdrop, page still scrollable behind it), not a full modal.
+  const modal = await getModal(null, {
+    id: 'fg-app-modal',
+    class: 'curtain-off',
+    content: wrapper,
+    closeEvent: 'closeModal',
+  });
+
+  // Milo's modal auto-focuses the first focusable element in the dialog on open — since the CTA
+  // is the only one here, that's the CTA, which reads oddly as a pre-highlighted button the
+  // instant the modal appears. Redirect that initial focus to the close button instead, the
+  // conventional dialog default; the CTA still focuses normally via real Tab navigation.
+  modal?.querySelector('.dialog-close')?.focus({ preventScroll: true });
+
+  return modal;
+}

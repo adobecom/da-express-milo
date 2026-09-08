@@ -12,7 +12,28 @@ function isAtRightmostScroll(element) {
   return element.scrollLeft + element.clientWidth >= element.scrollWidth - 10;
 }
 
-function initToggleTriggers(parent) {
+// scrollLeft's origin (0) is always where the platform's first flex child sits:
+// the physical left edge in ltr, but the physical right edge in rtl (the flex
+// row auto-mirrors). So the "far" end of the scrollable range - the boundary
+// isAtRightmostScroll checks for ltr - is the *most negative* scrollLeft in rtl.
+export function isAtScrollEnd(element, isRTL) {
+  if (isRTL) return element.scrollLeft <= -(element.scrollWidth - element.clientWidth) + 10;
+  return isAtRightmostScroll(element);
+}
+
+// carousel-left-trigger is always the platform's first flex child, so it sits
+// at scrollLeft's origin (0) - the physical left edge in ltr, but the physical
+// right edge in rtl. carousel-fader-left/-right always scroll the same
+// physical direction regardless of dir, so which one the origin trigger
+// governs has to flip under rtl to match where it actually sits.
+export function getFaderRoles(isRTL) {
+  return {
+    origin: isRTL ? 'right' : 'left',
+    end: isRTL ? 'left' : 'right',
+  };
+}
+
+export function initToggleTriggers(parent) {
   if (!parent) return;
 
   const isInHiddenSection = () => {
@@ -35,12 +56,21 @@ function initToggleTriggers(parent) {
   const rightTrigger = parent.querySelector('.carousel-right-trigger');
   const platform = parent.querySelector('.carousel-platform');
 
-  // If flex container has a gap, add negative margins to compensate
+  const isRTL = window.getComputedStyle(platform).direction === 'rtl';
+  const { origin, end } = getFaderRoles(isRTL);
+  const originControl = origin === 'left' ? leftControl : rightControl;
+  const endControl = end === 'left' ? leftControl : rightControl;
+  const originFaderClass = `${origin}-fader`;
+  const endFaderClass = `${end}-fader`;
+
+  // If flex container has a gap, add negative margins to compensate. Logical
+  // properties so this doesn't need its own isRTL branch - the browser maps
+  // inline-end/-start to the correct physical side for either direction.
   const gap = window.getComputedStyle(platform, null).getPropertyValue('gap');
   if (gap !== 'normal') {
     const gapInt = parseInt(gap.replace('px', ''), 10);
-    leftTrigger.style.marginRight = `-${gapInt + 1}px`;
-    rightTrigger.style.marginLeft = `-${gapInt + 1}px`;
+    leftTrigger.style.marginInlineEnd = `-${gapInt + 1}px`;
+    rightTrigger.style.marginInlineStart = `-${gapInt + 1}px`;
   }
 
   // intersection observer to toggle right arrow and gradient
@@ -50,38 +80,38 @@ function initToggleTriggers(parent) {
     entries.forEach((entry) => {
       if (entry.target === leftTrigger) {
         if (entry.isIntersecting) {
-          leftControl.classList.add('arrow-hidden');
-          platform.classList.remove('left-fader');
+          originControl.classList.add('arrow-hidden');
+          platform.classList.remove(originFaderClass);
         } else {
-          leftControl.classList.remove('arrow-hidden');
-          platform.classList.add('left-fader');
+          originControl.classList.remove('arrow-hidden');
+          platform.classList.add(originFaderClass);
         }
       }
 
       if (entry.target === rightTrigger) {
-        if (entry.isIntersecting || isAtRightmostScroll(platform)) {
-          rightControl.classList.add('arrow-hidden');
-          platform.classList.remove('right-fader');
+        if (entry.isIntersecting || isAtScrollEnd(platform, isRTL)) {
+          endControl.classList.add('arrow-hidden');
+          platform.classList.remove(endFaderClass);
         } else {
-          rightControl.classList.remove('arrow-hidden');
-          platform.classList.add('right-fader');
+          endControl.classList.remove('arrow-hidden');
+          platform.classList.add(endFaderClass);
         }
       }
     });
   };
 
   // Also handle scroll events to ensure proper state updates
-  const updateRightArrowState = () => {
-    if (isAtRightmostScroll(platform)) {
-      rightControl.classList.add('arrow-hidden');
-      platform.classList.remove('right-fader');
+  const updateEndArrowState = () => {
+    if (isAtScrollEnd(platform, isRTL)) {
+      endControl.classList.add('arrow-hidden');
+      platform.classList.remove(endFaderClass);
     } else {
-      rightControl.classList.remove('arrow-hidden');
-      platform.classList.add('right-fader');
+      endControl.classList.remove('arrow-hidden');
+      platform.classList.add(endFaderClass);
     }
   };
 
-  platform.addEventListener('scroll', throttle(updateRightArrowState, 100));
+  platform.addEventListener('scroll', throttle(updateEndArrowState, 100));
 
   const options = { threshold: 0, root: parent };
   const slideObserver = new IntersectionObserver(onSlideIntersect, options);

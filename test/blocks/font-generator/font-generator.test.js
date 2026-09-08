@@ -58,6 +58,16 @@ describe('font-generator', () => {
     expect(block.querySelectorAll('.fg-sidebar .tag-pills').length).to.be.greaterThan(0);
   });
 
+  it('splits suggestions on ";" rather than "," so a suggestion may itself contain a comma', async () => {
+    const { DEFAULT_PLACEHOLDERS } = await import('../../../express/code/blocks/font-generator/placeholders.js');
+    const expected = DEFAULT_PLACEHOLDERS.suggestions.split(';').map((s) => s.trim()).filter(Boolean);
+    const pills = [...block.querySelectorAll('.fg-sidebar .tag-pills .div')].map((el) => el.textContent);
+    expect(pills).to.deep.equal(expected);
+    // The last default suggestion contains a comma — confirms it survived
+    // as one pill instead of being split into two.
+    expect(pills[pills.length - 1]).to.contain(',');
+  });
+
   it('main contains the toolbar and the card grid', () => {
     expect(block.querySelector('.fg-main .font-generator-toolbar')).to.exist;
     expect(block.querySelector('.fg-main .font-card-grid')).to.exist;

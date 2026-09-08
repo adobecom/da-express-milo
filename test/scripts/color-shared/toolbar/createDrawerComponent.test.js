@@ -3,7 +3,7 @@ import { expect } from '@esm-bundle/chai';
 import sinon from 'sinon';
 import { setLibs } from '../../../../express/code/scripts/utils.js';
 import {
-  createDrawer, computeIsDirty, refreshBtnRowStacking,
+  createDrawer, computeIsDirty, computeSaveChangesEnabled, refreshBtnRowStacking,
 } from '../../../../express/code/scripts/color-shared/toolbar/createDrawerComponent.js';
 import { MOCK_PALETTE, MOCK_GRADIENT, MOCK_LIBRARIES } from './mocks/palette.js';
 import { createMockCCLibraryProvider } from './mocks/stubs.js';
@@ -1366,6 +1366,38 @@ describe('computeIsDirty', () => {
   it('color comparison is case-insensitive', () => {
     const lower = { ...savedItem, colors: ['#ff0000', '#00ff00'] };
     expect(computeIsDirty(lower, 'Sunset', ['warm', 'bold'])).to.be.false;
+  });
+});
+
+describe('computeSaveChangesEnabled', () => {
+  const savedItem = {
+    name: 'Sunset',
+    colors: ['#FF0000', '#00FF00'],
+    tags: ['warm', 'bold'],
+    savedName: 'Sunset',
+    savedColors: ['#FF0000', '#00FF00'],
+    libraryId: 'lib-1',
+  };
+
+  it('is disabled when nothing changed, even on the original library', () => {
+    expect(computeSaveChangesEnabled(savedItem, 'Sunset', ['warm', 'bold'], 'lib-1')).to.be.false;
+  });
+
+  it('is enabled when dirty and the original library is still selected', () => {
+    expect(computeSaveChangesEnabled(savedItem, 'Sunrise', ['warm', 'bold'], 'lib-1')).to.be.true;
+  });
+
+  it('is disabled when a different library is selected (that is a copy, not an update)', () => {
+    expect(computeSaveChangesEnabled(savedItem, 'Sunrise', ['warm', 'bold'], 'lib-2')).to.be.false;
+  });
+
+  it('is disabled when a different library is selected even if nothing else changed', () => {
+    expect(computeSaveChangesEnabled(savedItem, 'Sunset', ['warm', 'bold'], 'lib-2')).to.be.false;
+  });
+
+  it('re-enables once the original library is reselected (if still dirty)', () => {
+    expect(computeSaveChangesEnabled(savedItem, 'Sunrise', ['warm', 'bold'], 'lib-2')).to.be.false;
+    expect(computeSaveChangesEnabled(savedItem, 'Sunrise', ['warm', 'bold'], 'lib-1')).to.be.true;
   });
 });
 

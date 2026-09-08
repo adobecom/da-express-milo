@@ -91,6 +91,7 @@ const CONFIG = {
   faasCloseModalAfterSubmit: 'on',
   locales: {
     '': { ietf: 'en-US', tk: 'jdq5hay.css' },
+    ara: { ietf: 'ar', tk: 'cbp4pzm.css', dir: 'rtl' },
     br: { ietf: 'pt-BR', tk: 'inq1xob.css' },
     // eslint-disable-next-line max-len
     // TODO check that this ietf is ok to use everywhere. It's different in the old project zh-Hans-CN
@@ -387,6 +388,9 @@ CONFIG.decorateArea = decorateAreaWithLCP;
   const paths = [`${miloLibs}/styles/styles.css`];
   if (getMetadata('theme') !== 'doodlebug') {
     paths.push('/express/code/styles/styles.css');
+  }
+  if (getMetadata('font-styling')?.trim().toLowerCase() === 'jp') {
+    paths.push('/express/code/styles/font-styling-jp.css');
   }
   if (STYLES) { paths.push(STYLES); }
   paths.forEach((path) => {

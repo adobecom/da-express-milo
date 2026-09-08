@@ -4,10 +4,12 @@
     <title>This is a good one.</title>
 </head>
 <body>
-<header></header>
-<main>
+<!-- Intentionally not wrapped in <main>: this is attached to document.body so
+     real scroll/layout works, but must stay outside milo's real page
+     decoration, which the test does not want running against it. -->
+<div>
     <div>
-        <div class="how-to-cards block">
+        <div class="how-to-cards">
             <ol class="cards-container">
                 <li class="card">
                     <div class="number">
@@ -64,7 +66,6 @@
             </ol>
         </div>
     </div>
-</main>
-<footer></footer>
+</div>
 </body>
 </html>

@@ -17,7 +17,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e
         with:
-          node-version: 20
+          node-version: 24
 
       - name: Cache node_modules
         uses: actions/cache@v4
@@ -25,7 +25,7 @@ jobs:
           path: |
             ~/.npm
             **/node_modules
-          key: npm-${{ runner.os }}-20-${{ hashFiles('**/package-lock.json') }}
+          key: npm-${{ runner.os }}-24-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install dependencies
         run: npm ci --no-fund --prefer-offline

@@ -15,10 +15,10 @@ function createCloseSvg() {
 
 export default async function init(block, { onOpenChange, panelId } = {}) {
   const strings = await fetchStrings({
-    'fg-filters': 'Filters',
-    'fg-close-filters': 'Close filters',
-    'fg-promo-title': 'Looking for more fonts?',
-    'fg-promo-cta': 'Go to Adobe Fonts',
+    'font-generator-filters': 'Filters',
+    'font-generator-close-filters': 'Close filters',
+    'font-generator-promo-title': 'Looking for more fonts?',
+    'font-generator-promo-cta': 'Go to Adobe Fonts',
   });
 
   const overlay = createTag('div', { class: 'fg-overlay', 'aria-hidden': 'true', inert: '' });
@@ -27,13 +27,13 @@ export default async function init(block, { onOpenChange, panelId } = {}) {
     class: 'fg-panel',
     role: 'dialog',
     'aria-modal': 'true',
-    'aria-label': strings['fg-filters'],
+    'aria-label': strings['font-generator-filters'],
     tabindex: '-1',
     ...(panelId ? { id: panelId } : {}),
   });
 
   // Close button — tablet panel only (hidden on mobile via CSS)
-  const closeBtn = createTag('button', { class: 'fg-panel-close', 'aria-label': strings['fg-close-filters'] });
+  const closeBtn = createTag('button', { class: 'fg-panel-close', 'aria-label': strings['font-generator-close-filters'] });
   closeBtn.appendChild(createCloseSvg());
 
   // Drag handle — mobile tray only (hidden on tablet via CSS)
@@ -42,8 +42,8 @@ export default async function init(block, { onOpenChange, panelId } = {}) {
   const filtersEl = createTag('div', { class: 'fg-filters' });
 
   panel.append(closeBtn, handle, filtersEl, buildPromo('button primary small fg-promo-btn', {
-    title: strings['fg-promo-title'],
-    cta: strings['fg-promo-cta'],
+    title: strings['font-generator-promo-title'],
+    cta: strings['font-generator-promo-cta'],
   }));
   overlay.appendChild(panel);
   block.appendChild(overlay);

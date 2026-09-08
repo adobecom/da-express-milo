@@ -16,6 +16,10 @@ export const DCTX_ID_MAP = {
     stage: 'v:2,s,bg:EDUExpressPurple,40262910-c9bd-11f0-8359-b30f8fb5b3f5',
     prod: 'v:2,s,bg:EDUExpressPurple,a6588140-c9bf-11f0-a941-d1bc629a24f2',
   },
+  'context-business': {
+    stage: 'v:2,s,bg:CCEX2026,fc1e76f0-9167-11f1-a9b0-29d697c01ae6',
+    prod: 'v:2,s,bg:CCEX2026,ea8e92e0-9166-11f1-a9b9-d34066769dc6',
+  },
 };
 
 const usp = new URLSearchParams(window.location.search);

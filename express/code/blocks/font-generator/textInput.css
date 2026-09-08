@@ -52,9 +52,62 @@
   width: 100%;
   flex: 0 0 auto;
   background-color: var(--color-white);
+  /* Reserved (not `none`) so Hover/Active only swap border-color, rather than
+     adding a border where none existed and shifting the field's content by 1px. */
+  border: 1px solid transparent;
   border-radius: var(--Corner-radius-corner-radius-200);
   overflow: hidden;
   box-shadow: 0px 4px 12px #00000014;
+}
+
+/* ─── States ───────────────────────────────────────────────────────────────
+   Design QA (MWPW-202072) added Hover/Active/Focus/Disabled to the text-field
+   component. The ring is a second box-shadow rather than a bordered
+   pseudo-element, so it isn't clipped by this element's own `overflow: hidden`
+   and automatically follows its border-radius. */
+
+.font-generator-text-input .text-field:hover:not(:has(.label:focus)) {
+  border-color: var(--color-gray-400-variant);
+  box-shadow: 0px 4px 6px #00000014;
+}
+
+/* Focus (ring) and Active (dark border) are mutually exclusive: .is-active is
+   toggled in JS on pointerdown/input/blur (see textInput.js), so keyboard
+   focus gets the ring until the user starts typing. */
+.font-generator-text-input .text-field:has(.label:focus):not(.is-active) {
+  box-shadow: 0 0 0 2px var(--Buttons-Down), 0px 4px 6px #00000014;
+}
+
+.font-generator-text-input .text-field.is-active {
+  border-color: var(--color-gray-950);
+  box-shadow: 0px 4px 6px #00000014;
+}
+
+.font-generator-text-input .text-field:has(.label:disabled) {
+  background-color: var(--color-light-gray);
+  border-color: transparent;
+  box-shadow: 0px 4px 6px #00000014;
+}
+
+.font-generator-text-input .text-field:has(.label:disabled) .preview-text-label,
+.font-generator-text-input .text-field:has(.label:disabled) .label,
+.font-generator-text-input .text-field:has(.label:disabled) .label::placeholder,
+.font-generator-text-input .text-field:has(.label:disabled) .character-count,
+.font-generator-text-input .text-field:has(.label:disabled) .text-wrapper {
+  color: var(--color-gray-400-variant);
+}
+
+.font-generator-text-input .text-field:has(.label:disabled) .suggestions-bar {
+  border-top-color: var(--color-gray-300-variant);
+}
+
+.font-generator-text-input .text-field:has(.label:disabled) .resize-handle,
+.font-generator-text-input .text-field:has(.label:disabled) .tag-pills {
+  pointer-events: none;
+}
+
+.font-generator-text-input .label:disabled {
+  cursor: not-allowed;
 }
 
 .font-generator-text-input .text-area-l-in-line {
@@ -94,16 +147,19 @@
 }
 
 .font-generator-text-input .label {
+  --fg-textinput-height: 62px;
+  --fg-counter-height: 8px;
+
   all: unset;
   box-sizing: border-box;
   display: block;
   width: 100%;
-  min-height: 104px;
+  min-height: var(--fg-textinput-height);
   resize: none;
-  margin: 0 0 28px;
+  margin-block-end: calc(var(--spacing-300) + var(--fg-counter-height));
   font-family: var(--body-font-family);
   font-weight: 400;
-  color: var(--color-dark-gray);
+  color: var(--color-gray-800-variant);
   font-size: 16px;
   line-height: 20px;
   letter-spacing: 0;
@@ -112,7 +168,6 @@
 
 .font-generator-text-input .label::placeholder {
   color: var(--color-dark-gray);
-  opacity: 0.5;
 }
 
 .font-generator-text-input .counter-expander {
@@ -127,12 +182,10 @@
 .font-generator-text-input .character-count {
   color: var(--color-gray-800-variant);
   text-align: right;
-  leading-trim: both;
-  text-edge: cap;
-  font-size: var(--Global-Typography-Size-Label-Label-XS, 12px);
+  font-size: var(--Global-Typography-Size-Label-Label-XS);
   font-style: normal;
   font-weight: 400;
-  line-height: var(--Global-Typography-Line-height-Label-Label-XS, 14px);
+  line-height: var(--fg-counter-height); /* Force 8px height to match figma in place of unknown leading-trim and text-edge properties */
   white-space: nowrap;
 }
 
@@ -185,21 +238,50 @@
   flex-grow: 1;
 }
 
+/* Fades are shown/hidden via .fade-left/.fade-right (toggled in JS based on
+   scroll position), not unconditionally — a fade should only hint at more
+   content on the side where there actually is more to scroll to. z-index
+   lifts them above .tags-wrap regardless of DOM/paint order. */
+.font-generator-text-input .tags-fade::before,
 .font-generator-text-input .tags-fade::after {
   content: '';
   position: absolute;
   top: 0;
-  right: 0;
   width: 62px;
   height: 100%;
-  background: linear-gradient(270deg, var(--color-gray-100) 0%, rgba(248, 248, 248, 0.00) 63.48%);
+  opacity: 0;
+  transition: opacity 0.15s ease;
   pointer-events: none;
+  z-index: 1;
+}
+
+.font-generator-text-input .tags-fade::before {
+  left: 0;
+  background: linear-gradient(90deg, var(--color-gray-100) 0%, rgba(248, 248, 248, 0.00) 63.48%);
+}
+
+.font-generator-text-input .tags-fade::after {
+  right: 0;
+  background: linear-gradient(270deg, var(--color-gray-100) 0%, rgba(248, 248, 248, 0.00) 63.48%);
+}
+
+.font-generator-text-input .tags-fade.fade-left::before,
+.font-generator-text-input .tags-fade.fade-right::after {
+  opacity: 1;
 }
 
 .font-generator-text-input .tags-wrap {
   gap: var(--spacing-75);
   border-radius: 4px;
+  /* Reserve room for the focus ring's -1px bleed (below) on every edge —
+     without it, the ring gets clipped top/bottom, and left/right at the
+     scroll extremes. */
+  padding: 1px;
   overflow-x: scroll;
+  /* Explicit, not left to default: setting overflow-x alone makes the spec
+     compute overflow-y as auto (not visible), which without this would let
+     the 1px ring bleed enable a spurious vertical scrollbar. */
+  overflow-y: hidden;
   display: flex;
   align-items: center;
   position: relative;
@@ -217,6 +299,11 @@
   align-items: flex-start;
   position: relative;
   flex: 0 0 auto;
+  cursor: pointer;
+}
+
+.font-generator-text-input .tag-pills:focus-visible {
+  outline: none;
 }
 
 .font-generator-text-input .tag-m {
@@ -224,6 +311,7 @@
   max-width: 200px;
   min-height: 32px;
   background-color: var(--color-light-gray);
+  border: 1px solid transparent;
   border-radius: 8px;
   display: inline-flex;
   align-items: center;
@@ -232,12 +320,38 @@
   overflow: hidden;
 }
 
-.font-generator-text-input .content {
+/* Hover / active / focus all darken the fill; active adds the pill's own
+   border, and focus adds the offset ring below. The two combine on their
+   own (no separate "focus active" rule needed) when both apply at once —
+   e.g. pressing Enter/Space while the pill has keyboard focus. "Active" here
+   is the selected-pill state tracked in JS (.is-active), not the browser's
+   :active (mouse-down) pseudo-class — the pill stays active until another
+   pill is picked or the preview text is edited. */
+.font-generator-text-input .tag-pills:hover .tag-m,
+.font-generator-text-input .tag-pills.is-active .tag-m,
+.font-generator-text-input .tag-pills:focus-visible .tag-m {
+  background-color: var(--color-gray-300-variant);
+}
+
+.font-generator-text-input .tag-pills.is-active .tag-m {
+  border-color: var(--Buttons-default);
+}
+
+.font-generator-text-input .tag-pills:focus-visible::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border: 1px solid var(--Buttons-Down);
+  border-radius: 9px;
+  pointer-events: none;
+}
+
+.font-generator-text-input .tag-content {
   display: inline-flex;
   height: 32px;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: var(--spacing-80);
   padding: 0 var(--spacing-200);
   border-radius: 8px;
   position: relative;
