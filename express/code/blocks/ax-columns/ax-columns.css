@@ -456,15 +456,6 @@ main .ax-columns .express-logo.icon.marquee-eyebrow-logo-large {
    Enterprise
    ============================================================ */
 
-main .section:has(.ax-columns.enterprise):not([data-padding='none'])>.content {
-  padding-top: 0;
-}
-
-main .section:has(.ax-columns.enterprise):not([data-padding='none'])>.content h2 {
-  font-size: var(--heading-font-size-s);
-  padding-top: var(--heading-font-size-xl);
-}
-
 main .section .ax-columns.enterprise .column h2 {
   font-size: var(--heading-font-size-xxl);
 }
@@ -473,11 +464,6 @@ main .section .ax-columns.enterprise {
   padding-left: 0;
   padding-right: 0;
   max-width: unset;
-}
-
-.section:has(.ax-columns.enterprise) .content h2 {
-  margin-top: 0;
-  padding-top: var(--spacing-900);
 }
 
 .ax-columns.enterprise>div {
@@ -1146,16 +1132,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
 @media (max-width: 600px) {
 
   /* ============================================================
-     Enterprise
-     ============================================================ */
-
-  .section:has(.ax-columns.enterprise) .content h2 {
-      padding-left: 20px;
-      padding-right: 20px;
-      word-break: auto-phrase;
-    }
-
-  /* ============================================================
      Misc small variants (width-2/3-columns, minimum-padding, narrow, slim-button, slim-padding, xl-heading)
      ============================================================ */
 
@@ -1405,11 +1381,6 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
      Enterprise
      ============================================================ */
 
-  main .section:has(.ax-columns.enterprise):not([data-padding='none'])>.content h2 {
-      font-size: var(--heading-font-size-l);
-      padding-top: var(--spacing-700);
-    }
-
   .ax-columns.enterprise .column h2 {
       font-size: var(--heading-font-size-xxl);
     }
@@ -1464,7 +1435,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
       align-items: flex-start;
     }
 
-  .ax-columns.top.center,
+  .section .ax-columns,
+    .ax-columns.top.center,
     .ax-columns.fullsize.center,
     .ax-columns.light {
       max-width: 836px;
@@ -1925,7 +1897,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
      Top & Light (shared spacing model, incl. top.center / fullsize.center / light)
      ============================================================ */
 
-  .ax-columns.top.center,
+  .section .ax-columns,
+    .ax-columns.top.center,
     .ax-columns.light {
       max-width: var(--block-lg-max-width);
     }
