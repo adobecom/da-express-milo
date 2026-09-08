@@ -11,6 +11,22 @@
   min-height: unset;
 }
 
+/* Restores stage's bottom-padding for the last ax-columns (or fragment
+   .content wrapper) in a section, dropped without replacement by the
+   v2-spacing-default migration — found via a live diff against stage on
+   express/create/calendar/august (a bg/marquee block with no other block
+   after it in its section): stage renders 40px padding-bottom there,
+   this branch rendered 0. Excludes the same variants stage did
+   (top.center, fullsize, light, dark, numbered, centered, color, and — for
+   the .ax-columns:last-child half only — an explicitly-authored legacy
+   `.v2` class) since those already manage their own bottom spacing. */
+.section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color, .v2)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.ax-columns:last-child,
+.section:has(.ax-columns:not(.top.center, .fullsize, .light, .dark, .numbered, .centered, .color)):not(.xxxl-spacing-static, .xxl-spacing-static, .xl-spacing-static, .xxxl-spacing, .xxl-spacing, .xl-spacing,
+.l-spacing, .m-spacing, .s-spacing, .xs-spacing, .xxs-spacing)>.content:last-child {
+  padding-bottom: var(--spacing-600);
+}
+
 .section:has(.ax-columns)>.content {
   max-width: 350px;
 }
