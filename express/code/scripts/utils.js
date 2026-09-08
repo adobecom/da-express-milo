@@ -801,6 +801,18 @@ export async function formatDynamicCartLink(a) {
   return a;
 }
 
+export async function getEcid() {
+  if (window.ecid) return window.ecid;
+  if (!window.alloy_getIdentity) return null;
+  try {
+    const { identity } = await window.alloy_getIdentity;
+    window.ecid = identity?.ECID;
+  } catch (error) {
+    window.lana?.log(`Failed to get ECID: ${error}`, { tags: 'utils', severity: 'error' });
+  }
+  return window.ecid;
+}
+
 function decorateCommerceLinks(area) {
   const blocks = getMetadata('ax-commerce-override')?.toLowerCase()?.split(',') || [];
   const selector = blocks.map((block) => `.${block.trim()} a`).join(', ');

@@ -1,5 +1,7 @@
 // eslint-disable-next-line import/no-cycle
-import { getCachedMetadata, getLibs, toClassName } from './utils.js';
+import {
+  getCachedMetadata, getEcid, getLibs, toClassName,
+} from './utils.js';
 
 function toCamelCase(name) {
   return toClassName(name).replace(/-([a-z])/g, (g) => g[1].toUpperCase());
@@ -159,6 +161,7 @@ export async function getTrackingAppendedURL(url, options = {}) {
   setParams('promoid', promoId);
   setParams('trackingid', trackingId);
   setParams('cgen', cgen);
+  setParams('ecid', await getEcid());
   if (placement) setParams('placement', placement);
   const { locale: { ietf, region } } = getConfig();
   setParams('locale', ietf === 'ar' ? 'ar-SA' : ietf);

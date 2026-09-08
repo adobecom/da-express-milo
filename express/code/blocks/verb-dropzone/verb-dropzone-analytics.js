@@ -1,3 +1,5 @@
+import { getEcid } from '../../scripts/utils.js';
+
 const params = new Proxy(
   new URLSearchParams(window.location.search),
   { get: (searchParams, prop) => searchParams.get(prop) },
@@ -197,10 +199,7 @@ export default function init(eventName, verb, metaData, documentUnloading = true
     const event = createEventObject(eventName, verb, metaData, trackingParams, documentUnloading);
     // eslint-disable-next-line no-underscore-dangle
     window._satellite.track('event', event);
-    window.alloy_getIdentity
-      .then((value) => {
-        window.ecid = value.identity.ECID;
-      });
+    getEcid();
   };
 
   // eslint-disable-next-line no-underscore-dangle
