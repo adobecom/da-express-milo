@@ -1,6 +1,13 @@
 /* eslint-disable no-underscore-dangle */
-import { getMobileOperatingSystem } from '../../scripts/utils.js';
+import { getMobileOperatingSystem, getEcid } from '../../scripts/utils.js';
 import showAppModal from './expressAppModal.js';
+
+// Warm the ECID cache as soon as this module loads, so it's already resolved
+// by the time a card CTA is built/clicked. applyFontHandoffParams reads
+// window.ecid synchronously (not via this async call) because
+// handleOpenInExpress must call window.open() synchronously within the click
+// gesture to avoid popup blockers.
+getEcid();
 
 // Pre-configured Branch links. Their Branch-dashboard config owns the
 // platform routing (deep-link into the app on mobile, else the web editor) and
@@ -38,6 +45,7 @@ function applyFontHandoffParams(url, { styleId, text, fontSupported, fontSize })
   url.searchParams.set('fontFamily', FONT_FAMILY_BY_ID[fontSupported] ?? DEFAULT_FONT_FAMILY);
   if (fontSize) url.searchParams.set('fontSize', String(fontSize));
   url.searchParams.set('feature-enable', FEATURE_FLAGS.join(','));
+  if (window.ecid) url.searchParams.set('ecid', window.ecid);
   return url;
 }
 
