@@ -80,6 +80,22 @@
   margin: 0;
 }
 
+/* ax-columns authors every button `xlarge`/`button-xxl` (see ax-columns.js) —
+   the block's own intent is always the Figma S2 "XL" button variant, not the
+   shared `.s2` system's viewport-keyed S/M/L/XL auto-scaling (that scaling
+   models 4 independently-authored Figma sizes as if they were responsive
+   breakpoints, which shrinks this always-XL button down to the "S" spec
+   (24px tall) below 600px). Pin the XL spec unconditionally instead.
+   `:not(.slim-button)` preserves that variant's own smaller padding;
+   `:not(.column-video a)` preserves the compact video-quality pill sizing. */
+.ax-columns.s2:not(.slim-button) a.con-button:not(.column-video a),
+.ax-columns.s2:not(.slim-button) a.button:not(.column-video a) {
+  font-size: var(--body-font-size-l);
+  line-height: 20px;
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+
 .ax-columns:not(.highlight) .column-video .button-container a,
 .ax-columns:not(.highlight) .column-video a.con-button {
   border-radius: var(--spacing-400);
