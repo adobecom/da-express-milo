@@ -167,14 +167,20 @@ describe('mini-editor', () => {
     expect(shareData.files[0].type).to.equal('image/png');
   });
 
-  it('logs and shows a localized negative toast when download fails', async () => {
+  it('logs and shows a localized negative toast when download fails', async function downloadFailsToast() {
+    // Cold-loading the sp-toast web component under coverage/CI can exceed the
+    // default 2s mocha timeout, so give this toast-dependent test more room.
+    this.timeout(10000);
     const block = await decorateWithBody();
     window.placeholders = { 'mini-editor-download-failed': 'Download failed' };
     window.lana = { log: sinon.spy() };
     sinon.stub(MiniEditorCardExporter, 'download').rejects(new Error('render failed'));
 
     block.querySelector('.me-action--download').click();
-    await waitFor(() => !!document.querySelector('sp-toast'));
+    // Generous timeout: the failure path cold-loads the sp-toast web component
+    // (dynamic import + customElements.whenDefined), which can exceed the 1s
+    // waitFor default under coverage/CI load.
+    await waitFor(() => !!document.querySelector('sp-toast'), 5000);
 
     const toast = document.querySelector('sp-toast');
     expect(toast.textContent).to.equal('Download failed');
