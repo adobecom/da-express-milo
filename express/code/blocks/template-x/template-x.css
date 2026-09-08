@@ -1814,7 +1814,7 @@ main .template-x .api-templates-toolbar .search-bar-wrapper.collapsed .search-dr
 
 @media (min-width: 900px) {
   .section.color-child .template-x.horizontal .carousel-platform {
-    padding: 0;
+    padding: 0 0 24px 0;
   }
 }
 
