@@ -1125,10 +1125,9 @@ async function buildWidget(
     backgroundHeight: bgCard.height,
     backgroundUrn: bgCard.id || '',
     backgroundBranchUrl: bgCard.branchUrl,
-    // `backgroundMode` drives the download renderer's text contrast (synced here as useQuote does);
-    // `mode` is kept for open-in-express.js, which reads it for the Express hand-off.
+    // `backgroundMode` drives the download renderer's text contrast AND the open-in-express text
+    // colour (synced here as useQuote does).
     backgroundMode: bgCard.mode || 'dark',
-    mode: bgCard.mode || '',
   });
 
   // Keyboard-only "Skip quote suggestions" CTA, per Figma node 54:11762 — see

@@ -1,4 +1,4 @@
-import { getLibs, getIconElementDeprecated } from '../../scripts/utils.js';
+import { getLibs, getIconElementDeprecated, getMobileOperatingSystem } from '../../scripts/utils.js';
 import {
   trapFocus,
   handleEscapeClose,
@@ -459,35 +459,19 @@ export default async function init(block) {
         }
       };
 
+      const platformOS = getMobileOperatingSystem();
+      // Android Firefox doesn't support navigator.share with files and blocks the
+      // wa.me popup fallback, so the whole Share button is hidden there.
+      const isAndroidFirefox = platformOS === 'Android' && /firefox/i.test(navigator.userAgent);
+
       return [
         { type: 'edit', onClick: handleOpenInExpress },
-        {
+        ...(isAndroidFirefox ? [] : [{
           type: 'share',
           shareMenu: {
             heading: { key: 'mini-editor-share-image', fallback: 'Share image' },
             onOpen: () => { getCardBlobPromise().catch(() => {}); },
             actions: [
-              {
-                value: 'whatsapp',
-                type: 'custom',
-                label: { key: 'share-menu-whatsapp', fallback: 'WhatsApp' },
-                icon: () => createTag('sp-icon', {
-                  src: '/express/code/icons/S2_Icon_WhatsApp_20_N.svg',
-                  size: 'm',
-                }),
-                onSelect: async ({ share }, { strings }) => {
-                  if (share?.files?.length && navigator.canShare?.(share)) {
-                    try {
-                      await navigator.share(share);
-                      return;
-                    } catch (error) {
-                      if (error?.name === 'AbortError') return;
-                    }
-                  }
-                  const text = encodeURIComponent(`${strings.heading}: ${window.location.href}`);
-                  window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
-                },
-              },
               {
                 value: 'copy',
                 type: 'copy',
@@ -516,7 +500,6 @@ export default async function init(block) {
               }
 
               const exportMethodByAction = {
-                whatsapp: 'direct-to-whatsapp',
                 more: 'more-options',
               };
               const exportMethod = exportMethodByAction[action?.value];
@@ -539,7 +522,7 @@ export default async function init(block) {
               }
             },
           },
-        },
+        }]),
         { type: 'download', onClick: () => downloadCard(block, getEditor()) },
       ];
     };

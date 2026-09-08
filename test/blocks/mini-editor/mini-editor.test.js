@@ -137,7 +137,6 @@ describe('mini-editor', () => {
   it('uses the generic menu and shares a fresh PNG from More options', async () => {
     window.placeholders = {
       'mini-editor-share-image': 'Share image',
-      'share-menu-whatsapp': 'WhatsApp',
       'mini-editor-copy-image': 'Copy image',
       'share-menu-more-options': 'More options',
     };
@@ -155,11 +154,9 @@ describe('mini-editor', () => {
     block.querySelector('.me-action--share').click();
     const menu = block.querySelector('.share-menu-list');
     expect(menu).to.exist;
-    expect(menu.querySelectorAll('sp-menu-item')).to.have.length(3);
+    expect(menu.querySelectorAll('sp-menu-item')).to.have.length(2);
     expect(menu.querySelector('sp-menu-group [slot="header"]').textContent).to.equal('Share image');
-    const whatsAppIcon = menu.querySelector('sp-menu-item[value="whatsapp"] sp-icon');
-    expect(whatsAppIcon.src).to.contain('/express/code/icons/S2_Icon_WhatsApp_20_N.svg');
-    expect(whatsAppIcon.size).to.equal('m');
+    expect(menu.querySelector('sp-menu-item[value="whatsapp"]')).to.not.exist;
     expect(menu.querySelector('sp-menu-item[value="copy"] sp-icon-image')).to.exist;
     expect(menu.querySelector('sp-menu-item[value="more"] sp-icon-more')).to.exist;
 
@@ -185,7 +182,10 @@ describe('mini-editor', () => {
     expect(shareData.files[0].type).to.equal('image/png');
   });
 
-  it('logs and shows a localized negative toast when download fails', async () => {
+  it('logs and shows a localized negative toast when download fails', async function downloadFailsToast() {
+    // Cold-loading the sp-toast web component under coverage/CI can exceed the
+    // default 2s mocha timeout, so give this toast-dependent test more room.
+    this.timeout(10000);
     const block = await decorateWithBody();
     window.placeholders = { 'mini-editor-download-failed': 'Download failed' };
     window.lana = { log: sinon.spy() };
@@ -193,7 +193,10 @@ describe('mini-editor', () => {
 
     await waitFor(() => !!block.querySelector('.me-action--download'));
     block.querySelector('.me-action--download').click();
-    await waitFor(() => !!document.querySelector('sp-toast'));
+    // Generous timeout: the failure path cold-loads the sp-toast web component
+    // (dynamic import + customElements.whenDefined), which can exceed the 1s
+    // waitFor default under coverage/CI load.
+    await waitFor(() => !!document.querySelector('sp-toast'), 5000);
 
     const toast = document.querySelector('sp-toast');
     expect(toast.textContent).to.equal('Download failed');
