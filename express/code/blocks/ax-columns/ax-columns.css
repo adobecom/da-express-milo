@@ -871,8 +871,14 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
   font-size: var(--heading-font-size-s);
 }
 
-.ax-columns.width-2-columns .column-picture,
-.ax-columns.width-2-columns .hero-animation-overlay {
+/* :not(.fullsize) so this never ties in specificity with the "Fullsize"
+   section's own `order: -1` above (both are 3-class selectors targeting the
+   same element — a plain source-order tie previously flipped the picture to
+   the bottom on mobile for fullsize+width-2-columns pages, e.g.
+   why-choose-express, whenever this rule happened to land later in the
+   cascade than fullsize's). Fullsize always manages its own order. */
+.ax-columns.width-2-columns:not(.fullsize) .column-picture,
+.ax-columns.width-2-columns:not(.fullsize) .hero-animation-overlay {
   order: 2;
 }
 
@@ -1532,8 +1538,8 @@ main .ax-columns.highlight.dark .columns-video:last-of-type {
       max-width: 850px;
     }
 
-  .ax-columns.width-2-columns .column-picture,
-  .ax-columns.width-2-columns .hero-animation-overlay {
+  .ax-columns.width-2-columns:not(.fullsize) .column-picture,
+  .ax-columns.width-2-columns:not(.fullsize) .hero-animation-overlay {
       order: 0;
     }
 
